@@ -60,7 +60,7 @@ class Index extends Command {
 	protected OutputInterface $output;
 	protected IManager $encryptionManager;
 	protected IDBConnection $connection;
-	protected \OCA\BetterPhotos\Util $util;
+	protected \OCA\BetterPhotos\Db\Util $util;
 
 	public function __construct(IRootFolder $rootFolder,
 								IUserManager $userManager,
@@ -77,7 +77,7 @@ class Index extends Command {
 		$this->config = $config;
 		$this->encryptionManager = $encryptionManager;
 		$this->connection = $connection;
-		$this->util = new \OCA\BetterPhotos\Util($previewGenerator, $connection);
+		$this->util = new \OCA\BetterPhotos\Db\Util($previewGenerator, $connection);
 
 		try {
 			$this->globalService = $container->get(GlobalStoragesService::class);

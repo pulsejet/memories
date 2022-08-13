@@ -1,6 +1,6 @@
 <?php
-script('betterphotos', 'script');
-style('betterphotos', 'style');
+\OCP\Util::addScript('betterphotos', 'script');
+\OCP\Util::addStyle('betterphotos', 'style');
 ?>
 
 <div id="app">

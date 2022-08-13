@@ -1,3 +1,21 @@
 #hello {
 	color: red;
 }
+
+#photos {
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	display: grid;
+	grid-template-columns: auto auto auto auto auto auto;
+	column-gap: 3px;
+	row-gap: 3px;
+}
+
+img.photo {
+	height: 100%;
+	width: 100%;
+	margin: 0 0;
+	object-fit: cover;
+	display: inline-block;
+}

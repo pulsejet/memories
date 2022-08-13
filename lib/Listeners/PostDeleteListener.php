@@ -31,11 +31,11 @@ use OCP\IPreview;
 use OCP\IDBConnection;
 
 class PostDeleteListener implements IEventListener {
-    private \OCA\BetterPhotos\Util $util;
+    private \OCA\BetterPhotos\Db\Util $util;
 
 	public function __construct(IDBConnection $connection,
                                 IPreview $previewGenerator) {
-        $this->util = new \OCA\BetterPhotos\Util($previewGenerator, $connection);
+        $this->util = new \OCA\BetterPhotos\Db\Util($previewGenerator, $connection);
 	}
 
 	public function handle(Event $event): void {

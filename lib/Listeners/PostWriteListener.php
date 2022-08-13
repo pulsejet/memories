@@ -34,13 +34,13 @@ use OCP\IUserManager;
 
 class PostWriteListener implements IEventListener {
 	private IUserManager $userManager;
-    private \OCA\BetterPhotos\Util $util;
+    private \OCA\BetterPhotos\Db\Util $util;
 
 	public function __construct(IDBConnection $connection,
 								IUserManager $userManager,
                                 IPreview $previewGenerator) {
 		$this->userManager = $userManager;
-        $this->util = new \OCA\BetterPhotos\Util($previewGenerator, $connection);
+        $this->util = new \OCA\BetterPhotos\Db\Util($previewGenerator, $connection);
 	}
 
 	public function handle(Event $event): void {
