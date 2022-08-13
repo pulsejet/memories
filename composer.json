@@ -1,0 +1,15 @@
+{
+    "name": "Better Photos",
+    "description": "p",
+    "type": "project",
+    "license": "AGPL",
+    "authors": [
+        {
+            "name": "Varun Patil"
+        }
+    ],
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^5.4"
+    }
+}
