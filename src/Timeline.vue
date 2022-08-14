@@ -10,7 +10,9 @@
             :emit-update="true"
             @update="scrollChange"
         >
-            <h1 v-if="item.head" class="head">Vue is awesome!</h1>
+            <h1 v-if="item.head" class="head">
+                {{ item.name }}
+            </h1>
             <div v-else class="photo">
                 <img v-for="img of item.photos" :src="img.src" :key="img.file_id" />
             </div>
@@ -24,12 +26,13 @@ export default {
         return {
             list: [],
             count: 0,
+            nrows: 0,
             ncols: 5,
         }
     },
 
     mounted() {
-        this.fetchList();
+        this.fetchDays();
     },
 
     methods: {
@@ -49,10 +52,36 @@ export default {
             console.log('scrollChange', startIndex, endIndex);
         },
 
-        async fetchList() {
-            const res = await fetch('/apps/betterphotos/api/list');
+        async fetchDays() {
+            const res = await fetch('/apps/betterphotos/api/days');
             const data = await res.json();
-            const nrows = Math.ceil(data.length / this.ncols) + 5;
+
+            for (const day of data) {
+                if (day.count === 0) {
+                    continue;
+                }
+
+                this.list.push({
+                    id: ++this.nrows,
+                    name: new Date(Number(day.day_id)*86400*1000).toLocaleDateString(
+                        "en-US", { dateStyle: 'full', timeZone: 'UTC' }),
+                    size: 40,
+                    head: true,
+                });
+
+                const nrows = Math.ceil(day.count / this.ncols);
+                for (let i = 0; i < nrows; i++) {
+                    this.list.push({
+                        id: ++this.nrows,
+                        photos: [],
+                        size: 100,
+                    });
+                }
+            }
+
+
+            return;
+            // const nrows = Math.ceil(data.length / this.ncols) + 5;
 
             this.list.push({
                 id: -1,
@@ -122,8 +151,8 @@ export default {
     object-fit: cover;
 }
 .head {
-    height: 64px;
+    height: 40px;
     font-size: 20px;
-    font-weight: bold;
+    font-weight: lighter;
 }
 </style>
