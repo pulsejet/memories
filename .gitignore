@@ -1,1 +1,21 @@
+.DS_Store
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+js
+
+# Editor directories and files
+.idea
 .vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+.marginalia
+
+build/
+coverage/
+.php_cs.cache
+vendor
