@@ -54,19 +54,35 @@ class ApiController extends Controller {
         $this->connection = $connection;
 	}
 
-    /**
+	/**
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 *
 	 * @return JSONResponse
 	 */
-	public function list(): JSONResponse {
+	public function days(): JSONResponse {
         $user = $this->userSession->getUser();
 		if (is_null($user)) {
 			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
 		}
 
-        $list = \OCA\BetterPhotos\Db\Util::getList($this->connection, $user->getUID());
+        $list = \OCA\BetterPhotos\Db\Util::getDays($this->connection, $user->getUID());
+		return new JSONResponse($list, Http::STATUS_OK);
+	}
+
+	/**
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @return JSONResponse
+	 */
+	public function day(string $id): JSONResponse {
+        $user = $this->userSession->getUser();
+		if (is_null($user) || !is_numeric($id)) {
+			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+		}
+
+        $list = \OCA\BetterPhotos\Db\Util::getDay($this->connection, $user->getUID(), intval($id));
 		return new JSONResponse($list, Http::STATUS_OK);
 	}
 

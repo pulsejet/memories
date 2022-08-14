@@ -39,7 +39,7 @@ class Util {
         // Get parameters
         $fileId = $file->getId();
         $dateTaken = $this->getDateTaken($file);
-        $dayId = 0;
+        $dayId = floor($dateTaken / 86400);
 
         // Insert or update file
         // todo: update dateTaken and dayId if needed
@@ -83,24 +83,31 @@ class Util {
         }
     }
 
-    private static function getListQuery(
+    public static function getDays(
         IDBConnection $connection,
         string $user,
-    ) {
+    ): array {
+        $qb = $connection->getQueryBuilder();
+        $qb->select('day_id', 'count')
+            ->from('betterphotos_day')
+            ->where($qb->expr()->eq('user_id', $qb->createNamedParameter($user)))
+            ->orderBy('day_id', 'DESC');
+        $result = $qb->executeQuery();
+        $rows = $result->fetchAll();
+        return $rows;
+    }
+
+    public static function getDay(
+        IDBConnection $connection,
+        string $user,
+        int $dayId,
+    ): array {
         $qb = $connection->getQueryBuilder();
         $qb->select('file_id', 'date_taken')
             ->from('betterphotos')
             ->where($qb->expr()->eq('user_id', $qb->createNamedParameter($user)))
-            ->orderBy('date_taken', 'DESC')
-            ->setMaxResults(100);
-        return $qb;
-    }
-
-    public static function getList(
-        IDBConnection $connection,
-        string $user,
-    ): array {
-        $qb = self::getListQuery($connection, $user);
+            ->andWhere($qb->expr()->eq('day_id', $qb->createNamedParameter($dayId)))
+            ->orderBy('date_taken', 'DESC');
         $result = $qb->executeQuery();
         $rows = $result->fetchAll();
         return $rows;
