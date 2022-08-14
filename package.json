@@ -34,7 +34,8 @@
 	"dependencies": {
 		"@nextcloud/l10n": "^1.6.0",
 		"@nextcloud/vue": "^5.4.0",
-		"vue": "^2.7.8"
+		"vue": "^2.7.8",
+		"vue-virtual-scroller": "^1.0.10"
 	},
 	"browserslist": [
 		"extends @nextcloud/browserslist-config"

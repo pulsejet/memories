@@ -8,16 +8,25 @@
 		</AppNavigation>
 
 		<AppContent>
-			<div>This is the s</div>
+			<div class="outer">
+				<Timeline />
+			</div>
 		</AppContent>
 	</Content>
 </template>
+
+<style scoped>
+.outer {
+    padding: 0px 44px 256px 44px;
+}
+</style>
 
 <script>
 import Content from '@nextcloud/vue/dist/Components/Content'
 import AppContent from '@nextcloud/vue/dist/Components/AppContent'
 import AppNavigation from '@nextcloud/vue/dist/Components/AppNavigation'
 import AppNavigationItem from '@nextcloud/vue/dist/Components/AppNavigationItem'
+import Timeline from './Timeline.vue'
 
 export default {
 	name: 'App',
@@ -26,6 +35,7 @@ export default {
 		AppContent,
 		AppNavigation,
 		AppNavigationItem,
+		Timeline,
 	},
 	data() {
 		return {

@@ -20,6 +20,8 @@
  *
  */
 import Vue from 'vue'
+import VueVirtualScroller from 'vue-virtual-scroller'
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { translate as t, translatePlural as n } from '@nextcloud/l10n'
 
 import App from './App'
@@ -31,6 +33,8 @@ Vue.mixin({
 		n,
 	},
 })
+
+Vue.use(VueVirtualScroller)
 
 export default new Vue({
 	el: '#content',
