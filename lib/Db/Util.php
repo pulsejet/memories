@@ -36,39 +36,51 @@ class Util {
             return;
         }
 
-        $qb = $this->connection->getQueryBuilder();
-        $qb->select('*')
-            ->from('betterphotos')
-            ->where($qb->expr()->eq('user_id', $qb->createNamedParameter($user)))
-            ->andWhere($qb->expr()->eq('file_id', $qb->createNamedParameter($file->getId())))
-            ->setMaxResults(1);;
-        $result = $qb->executeQuery();
-        $row = $result->fetch();
+        // Get parameters
+        $fileId = $file->getId();
+        $dateTaken = $this->getDateTaken($file);
+        $dayId = 0;
 
-        if ($row !== false) {
-            if ($update) {
-                $qb = $this->connection->getQueryBuilder();
-                $qb->update('betterphotos')
-                    ->set('date_taken', $qb->createNamedParameter($this->getDateTaken($file), IQueryBuilder::PARAM_INT))
-                    ->where($qb->expr()->eq('id', $qb->createNamedParameter($row['id'])));
-                $qb->executeStatement();
-            }
+        // Insert or update file
+        // todo: update dateTaken and dayId if needed
+        $sql = 'INSERT IGNORE
+                INTO  oc_betterphotos (user_id, file_id, date_taken, day_id)
+                VALUES  (?, ?, ?, ?)';
+		$res = $this->connection->executeStatement($sql, [
+            $user, $fileId, $dateTaken, $dayId,
+		]);
 
-            return;
+        // Update day table
+        if ($res === 1) {
+            $sql = 'INSERT
+                    INTO  oc_betterphotos_day (user_id, day_id, count)
+                    VALUES  (?, ?, 1)
+                    ON DUPLICATE KEY
+                    UPDATE  count = count + 1';
+            $this->connection->executeStatement($sql, [
+                $user, $dayId,
+            ]);
         }
-
-        $qb->insert('betterphotos')
-            ->setValue('user_id', $qb->createNamedParameter($user))
-            ->setValue('file_id', $qb->createNamedParameter($file->getId()))
-            ->setValue('date_taken', $qb->createNamedParameter($this->getDateTaken($file), IQueryBuilder::PARAM_INT));
-        $qb->executeStatement();
     }
 
     public function deleteFile(File $file) {
-        $qb = $this->connection->getQueryBuilder();
-        $qb->delete('betterphotos')
-            ->where($qb->expr()->eq('file_id', $qb->createNamedParameter($file->getId())));
-        $qb->executeStatement();
+        $sql = 'DELETE
+                FROM oc_betterphotos
+                WHERE file_id = ?
+                RETURNING *';
+        $res = $this->connection->executeQuery($sql, [$file->getId()], [\PDO::PARAM_INT]);
+        $rows = $res->fetchAll();
+
+        foreach ($rows as $row) {
+            $dayId = $row['day_id'];
+            $userId = $row['user_id'];
+            $sql = 'UPDATE oc_betterphotos_day
+                    SET count = count - 1
+                    WHERE user_id = ? AND day_id = ?';
+            $this->connection->executeStatement($sql, [$userId, $dayId], [
+                \PDO::PARAM_STR, \PDO::PARAM_INT,
+            ]);
+        }
     }
 
     private static function getListQuery(
@@ -89,30 +101,6 @@ class Util {
         string $user,
     ): array {
         $qb = self::getListQuery($connection, $user);
-        $result = $qb->executeQuery();
-        $rows = $result->fetchAll();
-        return $rows;
-    }
-
-    public static function getAfter(
-        IDBConnection $connection,
-        string $user,
-        int $time,
-    ): array {
-        $qb = self::getListQuery($connection, $user);
-        $qb->andWhere($qb->expr()->gte('date_taken', $qb->createNamedParameter($time, IQueryBuilder::PARAM_INT)));
-        $result = $qb->executeQuery();
-        $rows = $result->fetchAll();
-        return $rows;
-    }
-
-    public static function getBefore(
-        IDBConnection $connection,
-        string $user,
-        int $time,
-    ): array {
-        $qb = self::getListQuery($connection, $user);
-        $qb->andWhere($qb->expr()->lte('date_taken', $qb->createNamedParameter($time, IQueryBuilder::PARAM_INT)));
         $result = $qb->executeQuery();
         $rows = $result->fetchAll();
         return $rows;

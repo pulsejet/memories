@@ -72,45 +72,6 @@ class ApiController extends Controller {
 
 	/**
 	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @return JSONResponse
-	 */
-	public function listafter(string $time): JSONResponse {
-        $user = $this->userSession->getUser();
-		if (is_null($user)) {
-			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
-		}
-
-		if (!is_numeric($time)) {
-			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
-		}
-
-        $list = \OCA\BetterPhotos\Db\Util::getAfter($this->connection, $user->getUID(), intval($time));
-		return new JSONResponse($list, Http::STATUS_OK);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @return JSONResponse
-	 */
-	public function listbefore(string $time): JSONResponse {
-		$user = $this->userSession->getUser();
-		if (is_null($user)) {
-			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
-		}
-		if (!is_numeric($time)) {
-			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
-		}
-		$list = \OCA\BetterPhotos\Db\Util::getBefore($this->connection, $user->getUID(), intval($time));
-		return new JSONResponse($list, Http::STATUS_OK);
-	}
-
-
-	/**
-	 * @NoAdminRequired
 	 *
 	 * update preferences (user setting)
 	 *
