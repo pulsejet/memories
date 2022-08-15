@@ -25,7 +25,12 @@
 
         <div ref="timelineScroll" class="timeline-scroll"
             @mousemove="timelineHover"
+            @mouseleave="timelineLeave"
             @click="timelineClick">
+            <span class="cursor"
+                  v-bind:style="{ top: timelineCursorY + 'px' }"></span>
+            <span class="cursor"
+                  v-bind:style="{ transform: `translateY(${timelineHoverCursorY}px)` }"></span>
 
             <div v-for="tick of timelineTicks" :key="tick.dayId" class="tick"
                 v-bind:style="{ top: Math.floor(tick.top * timelineHeight / viewHeight) + 'px' }">
@@ -59,6 +64,10 @@ export default {
             timelineHeight: 100,
             /** Computed timeline ticks */
             timelineTicks: [],
+            /** Computed timeline cursor top */
+            timelineCursorY: 0,
+            /** Timeline hover cursor top */
+            timelineHoverCursorY: -5,
 
             /** Current start index */
             currentStart: 0,
@@ -70,6 +79,11 @@ export default {
     mounted() {
         this.handleResize();
         this.fetchDays();
+
+        // Set scrollbar
+        this.$refs.scroller.$el.addEventListener('scroll', (event) => {
+            this.timelineCursorY = event.target.scrollTop * this.timelineHeight / this.viewHeight;
+        }, false);
     },
 
     methods: {
@@ -247,7 +261,12 @@ export default {
 
         /** Handle mouse hover on right timeline */
         timelineHover(event) {
+            this.timelineHoverCursorY = event.offsetY;
+        },
 
+        /** Handle mouse leave on right timeline */
+        timelineLeave() {
+            this.timelineHoverCursorY = -5;
         },
 
         /** Handle mouse click on right timeline */
@@ -320,5 +339,15 @@ export default {
     background-color: grey;
     opacity: 0.8;
     display: block;
+}
+
+.timeline-scroll .cursor {
+    position: absolute;
+    pointer-events: none;
+    right: 5px;
+    height: 3px;
+    background-color: var(--color-primary);
+    border-radius: 4px;
+    width: 100%;
 }
 </style>
