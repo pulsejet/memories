@@ -1,6 +1,7 @@
 <template>
-    <div>
+    <div class="container" ref="container">
         <RecycleScroller
+            ref="scroller"
             class="scroller"
             :items="list"
             size-field="size"
@@ -35,10 +36,16 @@ export default {
     },
 
     mounted() {
+        this.handleResize();
         this.fetchDays();
     },
 
     methods: {
+        handleResize() {
+            let height = this.$refs.container.clientHeight;
+            this.$refs.scroller.$el.style.height = (height - 4) + 'px';
+        },
+
         scrollChange(startIndex, endIndex) {
             if (startIndex === this.currentStart && endIndex === this.currentEnd) {
                 return;
@@ -54,7 +61,6 @@ export default {
         },
 
         loadChanges(startIndex, endIndex) {
-            console.log(startIndex, endIndex);
             for (let i = startIndex; i <= endIndex; i++) {
                 let item = this.list[i];
                 if (!item) {
@@ -74,14 +80,23 @@ export default {
             const data = await res.json();
 
             for (const day of data) {
+                // Nothing here
                 if (day.count === 0) {
                     continue;
                 }
 
+                // Make date string
+                const dateTaken = new Date(Number(day.day_id)*86400*1000);
+                let dateStr = dateTaken.toLocaleDateString("en-US", { dateStyle: 'full', timeZone: 'UTC' });
+                if (dateTaken.getUTCFullYear() === new Date().getUTCFullYear()) {
+                    // hack: remove last 6 characters of date string
+                    dateStr = dateStr.substring(0, dateStr.length - 6);
+                }
+
+                // Add header to list
                 const head = {
                     id: ++this.nrows,
-                    name: new Date(Number(day.day_id)*86400*1000).toLocaleDateString(
-                        "en-US", { dateStyle: 'full', timeZone: 'UTC' }),
+                    name: dateStr,
                     size: 60,
                     head: true,
                     loaded: false,
@@ -90,6 +105,7 @@ export default {
                 this.heads[day.day_id] = head;
                 this.list.push(head);
 
+                // Add rows
                 const nrows = Math.ceil(day.count / this.ncols);
                 for (let i = 0; i < nrows; i++) {
                     this.list.push({
@@ -156,8 +172,12 @@ export default {
 </script>
 
 <style scoped>
+.container {
+    height: 100%;
+}
+
 .scroller {
-    height: 600px;
+    height: 300px;
     width: 100%;
 }
 

@@ -17,7 +17,8 @@
 
 <style scoped>
 .outer {
-    padding: 0 0 20px 44px;
+    padding: 0 0 0 44px;
+	height: 100%;
 }
 </style>
 
