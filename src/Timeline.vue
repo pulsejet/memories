@@ -1,5 +1,7 @@
 <template>
-    <div class="container" ref="container">
+    <div class="container" ref="container"
+        :class="{ 'icon-loading': loading }">
+
         <RecycleScroller
             ref="scroller"
             class="scroller"
@@ -10,16 +12,21 @@
             :emit-update="true"
             @update="scrollChange"
         >
-            <h1 v-if="item.head" class="head">
+            <h1 v-if="item.head" class="head-row">
                 {{ item.name }}
             </h1>
+
             <div v-else
-                class="photo"
+                class="photo-row"
                 v-bind:style="{ height: rowHeight + 'px' }">
 
                 <img v-for="img of item.photos"
                     :src="img.src" :key="img.file_id"
-                    v-bind:style="{ width: rowHeight + 'px', height: rowHeight + 'px' }"/>
+                    @load = "img.l = Math.random()"
+                    v-bind:style="{
+                        width: rowHeight + 'px',
+                        height: rowHeight + 'px',
+                    }"/>
             </div>
         </RecycleScroller>
 
@@ -45,6 +52,8 @@
 export default {
     data() {
         return {
+            /** Loading days response */
+            loading: true,
             /** Main list of rows */
             list: [],
             /** Counter of rows */
@@ -111,6 +120,16 @@ export default {
                 return;
             }
 
+            // Reset image state
+            for (let i = startIndex; i < endIndex; i++) {
+                if ((i < this.currentStart || i > this.currentEnd) && this.list[i].photos) {
+                    this.list[i].photos.forEach(photo => {
+                        photo.l = 0;
+                    });
+                }
+            }
+
+            // Make sure we don't do this too often
             this.currentStart = startIndex;
             this.currentEnd = endIndex;
             setTimeout(() => {
@@ -200,6 +219,7 @@ export default {
 
             // Fix view height variable
             this.handleViewSizeChange();
+            this.loading = false;
         },
 
         /** Fetch image data for one dayId */
@@ -308,12 +328,14 @@ export default {
     width: calc(100% + 20px);
 }
 
-.photo img {
-    object-fit: cover;
+.photo-row img {
+    background-clip: content-box;
+    background-color: #eee;
     padding: 2px;
+    object-fit: cover;
     border-radius: 3%;
 }
-.head {
+.head-row {
     height: 60px;
     padding-top: 25px;
     font-size: 20px;
