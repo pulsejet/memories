@@ -1,6 +1,5 @@
 <template>
     <div>
-        <button @click="genList()">oka.</button><br/>
         <RecycleScroller
             class="scroller"
             :items="list"
@@ -28,6 +27,7 @@ export default {
             count: 0,
             nrows: 0,
             ncols: 5,
+            heads: {},
         }
     },
 
@@ -36,20 +36,18 @@ export default {
     },
 
     methods: {
-        genList() {
-            this.count++;
-            this.list[0].name = 'bloop' + this.count;
-            return;
-            this.list.splice(50, 0, {
-                id: this.count,
-                name: 'bla' + this.count,
-                size: 64,
-                head: true,
-            })
-        },
-
         scrollChange(startIndex, endIndex) {
-            console.log('scrollChange', startIndex, endIndex);
+            for (let i = startIndex; i <= endIndex; i++) {
+                let item = this.list[i];
+                if (!item) {
+                    continue;
+                }
+
+                let head = this.heads[item.dayId];
+                if (head && !head.loaded) {
+                    this.fetchDay(item.dayId);
+                }
+            }
         },
 
         async fetchDays() {
@@ -61,13 +59,17 @@ export default {
                     continue;
                 }
 
-                this.list.push({
+                const head = {
                     id: ++this.nrows,
                     name: new Date(Number(day.day_id)*86400*1000).toLocaleDateString(
                         "en-US", { dateStyle: 'full', timeZone: 'UTC' }),
-                    size: 40,
+                    size: 60,
                     head: true,
-                });
+                    loaded: false,
+                    dayId: day.day_id,
+                };
+                this.heads[day.day_id] = head;
+                this.list.push(head);
 
                 const nrows = Math.ceil(day.count / this.ncols);
                 for (let i = 0; i < nrows; i++) {
@@ -75,30 +77,22 @@ export default {
                         id: ++this.nrows,
                         photos: [],
                         size: 100,
+                        dayId: day.day_id,
                     });
                 }
             }
+        },
 
+        async fetchDay(dayId) {
+            const head = this.heads[dayId];
+            head.loaded = true;
 
-            return;
-            // const nrows = Math.ceil(data.length / this.ncols) + 5;
+            const res = await fetch(`/apps/betterphotos/api/days/${dayId}`);
+            const data = await res.json();
 
-            this.list.push({
-                id: -1,
-                size: 64,
-                head: true,
-            });
+            const nrows = Math.ceil(data.length / this.ncols);
 
-            // Add n rows to the list
-            for (let i = 0; i < nrows; i++) {
-                this.list.push({
-                    id: i,
-                    photos: [],
-                    size: 100,
-                })
-            }
-
-            const headIdx = 0;
+            const headIdx = this.list.findIndex(item => item.id === head.id);
             let rowIdx = headIdx + 1;
 
             // Add all rows
@@ -139,7 +133,7 @@ export default {
 
 <style scoped>
 .scroller {
-    height: 300px;
+    height: 100%;
 }
 
 .photo {
@@ -149,9 +143,11 @@ export default {
     height: 100px;
     width: 100px;
     object-fit: cover;
+    padding: 2px;
 }
 .head {
-    height: 40px;
+    height: 60px;
+    padding-top: 25px;
     font-size: 20px;
     font-weight: lighter;
 }
