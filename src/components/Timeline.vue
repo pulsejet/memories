@@ -25,6 +25,7 @@
                         @click="openFile(img, item)"
                         :src="img.src" :key="img.file_id"
                         @load = "img.l = Math.random()"
+                        @error="(e)=>e.target.src='img/error.svg'"
                         v-bind:style="{
                             width: rowHeight + 'px',
                             height: rowHeight + 'px',
@@ -53,7 +54,7 @@
 
 <script>
 
-import * as dav from "./services/DavRequests";
+import * as dav from "../services/DavRequests";
 
 export default {
     data() {

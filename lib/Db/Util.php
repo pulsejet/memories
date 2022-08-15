@@ -3,31 +3,29 @@ declare(strict_types=1);
 
 namespace OCA\BetterPhotos\Db;
 
+use OCA\BetterPhotos\AppInfo\Application;
 use OCP\Files\File;
-use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
-use OCP\IPreview;
 
 class Util {
-	protected IPreview $previewGenerator;
 	protected IDBConnection $connection;
 
-	public function __construct(IPreview $previewGenerator,
-								IDBConnection $connection) {
-		$this->previewGenerator = $previewGenerator;
+	public function __construct(IDBConnection $connection) {
 		$this->connection = $connection;
 	}
 
     public static function getDateTaken($file) {
         // Attempt to read exif data
-        $exif = exif_read_data($file->fopen('rb'));
-		$dt = $exif['DateTimeOriginal'];
-		if ($dt) {
-			$dt = \DateTime::createFromFormat('Y:m:d H:i:s', $dt);
-			if ($dt) {
-				return $dt->getTimestamp();
-			}
-		}
+        if (in_array($file->getMimeType(), Application::IMAGE_MIMES)) {
+            $exif = exif_read_data($file->fopen('rb'));
+            $dt = $exif['DateTimeOriginal'];
+            if ($dt) {
+                $dt = \DateTime::createFromFormat('Y:m:d H:i:s', $dt);
+                if ($dt) {
+                    return $dt->getTimestamp();
+                }
+            }
+        }
 
         // Fall back to creation time
         $dateTaken = $file->getCreationTime();
@@ -41,11 +39,7 @@ class Util {
 
     public function processFile(string $user, File $file, bool $update): void {
         $mime = $file->getMimeType();
-        if (!str_starts_with($mime, 'image/')) {
-            return;
-        }
-
-        if (!$this->previewGenerator->isMimeSupported($file->getMimeType())) {
+        if (!in_array($mime, Application::IMAGE_MIMES) && !in_array($mime, Application::VIDEO_MIMES)) {
             return;
         }
 
@@ -96,11 +90,10 @@ class Util {
         }
     }
 
-    public static function getDays(
-        IDBConnection $connection,
+    public function getDays(
         string $user,
     ): array {
-        $qb = $connection->getQueryBuilder();
+        $qb = $this->connection->getQueryBuilder();
         $qb->select('day_id', 'count')
             ->from('betterphotos_day')
             ->where($qb->expr()->eq('user_id', $qb->createNamedParameter($user)))
@@ -110,8 +103,7 @@ class Util {
         return $rows;
     }
 
-    public static function getDay(
-        IDBConnection $connection,
+    public function getDay(
         string $user,
         int $dayId,
     ): array {
@@ -121,7 +113,7 @@ class Util {
                 ON oc_filecache.fileid = oc_betterphotos.file_id
                 WHERE user_id = ? AND day_id = ?
                 ORDER BY date_taken DESC';
-		$rows = $connection->executeQuery($sql, [$user, $dayId], [
+		$rows = $this->connection->executeQuery($sql, [$user, $dayId], [
             \PDO::PARAM_STR, \PDO::PARAM_INT,
         ]);
         return $rows->fetchAll();

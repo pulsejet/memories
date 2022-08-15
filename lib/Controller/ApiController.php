@@ -40,6 +40,7 @@ class ApiController extends Controller {
 	private IConfig $config;
 	private IUserSession $userSession;
     private IDBConnection $connection;
+	private \OCA\BetterPhotos\Db\Util $util;
 
 	public function __construct(
 		IRequest $request,
@@ -52,6 +53,7 @@ class ApiController extends Controller {
 		$this->config = $config;
 		$this->userSession = $userSession;
         $this->connection = $connection;
+		$this->util = new \OCA\BetterPhotos\Db\Util($this->connection);
 	}
 
 	/**
@@ -66,7 +68,7 @@ class ApiController extends Controller {
 			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
 		}
 
-        $list = \OCA\BetterPhotos\Db\Util::getDays($this->connection, $user->getUID());
+        $list = $this->util->getDays($user->getUID());
 		return new JSONResponse($list, Http::STATUS_OK);
 	}
 
@@ -82,7 +84,7 @@ class ApiController extends Controller {
 			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
 		}
 
-        $list = \OCA\BetterPhotos\Db\Util::getDay($this->connection, $user->getUID(), intval($id));
+        $list = $this->util->getDay($user->getUID(), intval($id));
 		return new JSONResponse($list, Http::STATUS_OK);
 	}
 

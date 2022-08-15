@@ -77,7 +77,7 @@ class Index extends Command {
 		$this->config = $config;
 		$this->encryptionManager = $encryptionManager;
 		$this->connection = $connection;
-		$this->util = new \OCA\BetterPhotos\Db\Util($previewGenerator, $connection);
+		$this->util = new \OCA\BetterPhotos\Db\Util($connection);
 
 		try {
 			$this->globalService = $container->get(GlobalStoragesService::class);

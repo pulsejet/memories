@@ -27,7 +27,7 @@ import Content from '@nextcloud/vue/dist/Components/Content'
 import AppContent from '@nextcloud/vue/dist/Components/AppContent'
 import AppNavigation from '@nextcloud/vue/dist/Components/AppNavigation'
 import AppNavigationItem from '@nextcloud/vue/dist/Components/AppNavigationItem'
-import Timeline from './Timeline.vue'
+import Timeline from './components/Timeline.vue'
 
 export default {
 	name: 'App',
