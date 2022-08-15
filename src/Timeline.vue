@@ -28,6 +28,9 @@ export default {
             nrows: 0,
             ncols: 5,
             heads: {},
+
+            currentStart: 0,
+            currentEnd: 0,
         }
     },
 
@@ -37,6 +40,21 @@ export default {
 
     methods: {
         scrollChange(startIndex, endIndex) {
+            if (startIndex === this.currentStart && endIndex === this.currentEnd) {
+                return;
+            }
+
+            this.currentStart = startIndex;
+            this.currentEnd = endIndex;
+            setTimeout(() => {
+                if (this.currentStart === startIndex && this.currentEnd === endIndex) {
+                    this.loadChanges(startIndex, endIndex);
+                }
+            }, 300);
+        },
+
+        loadChanges(startIndex, endIndex) {
+            console.log(startIndex, endIndex);
             for (let i = startIndex; i <= endIndex; i++) {
                 let item = this.list[i];
                 if (!item) {
@@ -45,6 +63,7 @@ export default {
 
                 let head = this.heads[item.dayId];
                 if (head && !head.loaded) {
+                    head.loaded = true;
                     this.fetchDay(item.dayId);
                 }
             }
@@ -87,11 +106,16 @@ export default {
             const head = this.heads[dayId];
             head.loaded = true;
 
-            const res = await fetch(`/apps/betterphotos/api/days/${dayId}`);
-            const data = await res.json();
+            let data = [];
+            try {
+                const res = await fetch(`/apps/betterphotos/api/days/${dayId}`);
+                data = await res.json();
+            } catch (e) {
+                console.error(e);
+                head.loaded = false;
+            }
 
-            const nrows = Math.ceil(data.length / this.ncols);
-
+            // Get index of header O(n)
             const headIdx = this.list.findIndex(item => item.id === head.id);
             let rowIdx = headIdx + 1;
 
@@ -133,7 +157,8 @@ export default {
 
 <style scoped>
 .scroller {
-    height: 100%;
+    height: 600px;
+    width: 100%;
 }
 
 .photo {

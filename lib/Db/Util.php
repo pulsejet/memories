@@ -18,8 +18,21 @@ class Util {
 		$this->connection = $connection;
 	}
 
-    private function getDateTaken($file) {
+    public static function getDateTaken($file) {
+        // Attempt to read exif data
+        $exif = exif_read_data($file->fopen('rb'));
+		$dt = $exif['DateTimeOriginal'];
+		if ($dt) {
+			$dt = \DateTime::createFromFormat('Y:m:d H:i:s', $dt);
+			if ($dt) {
+				return $dt->getTimestamp();
+			}
+		}
+
+        // Fall back to creation time
         $dateTaken = $file->getCreationTime();
+
+        // Fall back to modification time
         if ($dateTaken == 0) {
             $dateTaken = $file->getMtime();
         }
