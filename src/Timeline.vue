@@ -199,7 +199,7 @@ export default {
                 const head = {
                     id: ++this.numRows,
                     name: dateStr,
-                    size: 60,
+                    size: 40,
                     head: true,
                     loadedImages: false,
                     dayId: day.day_id,
@@ -336,10 +336,11 @@ export default {
     border-radius: 3%;
 }
 .head-row {
-    height: 60px;
-    padding-top: 25px;
-    font-size: 20px;
-    font-weight: lighter;
+    height: 40px;
+    padding-top: 13px;
+    padding-left: 3px;
+    font-size: 0.9em;
+    font-weight: bold;
 }
 
 .timeline-scroll {
