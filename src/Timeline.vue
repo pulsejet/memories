@@ -262,7 +262,7 @@ export default {
                 // Add the photo to the row
                 this.list[rowIdx].photos.push({
                     id: p.file_id,
-                    src: `/core/preview?fileId=${p.file_id}&x=250&y=250`,
+                    src: `/core/preview?fileId=${p.file_id}&c=${p.etag}&x=250&y=250&forceIcon=0&a=0`,
                 });
             }
 
@@ -432,6 +432,7 @@ export default {
     font-size: 0.8em;
     color: grey;
     right: 5px;
+    transform: translateY(-50%);
 }
 
 .timeline-scroll .tick .dash {

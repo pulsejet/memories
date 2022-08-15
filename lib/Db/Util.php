@@ -115,14 +115,15 @@ class Util {
         string $user,
         int $dayId,
     ): array {
-        $qb = $connection->getQueryBuilder();
-        $qb->select('file_id')
-            ->from('betterphotos')
-            ->where($qb->expr()->eq('user_id', $qb->createNamedParameter($user)))
-            ->andWhere($qb->expr()->eq('day_id', $qb->createNamedParameter($dayId)))
-            ->orderBy('date_taken', 'DESC');
-        $result = $qb->executeQuery();
-        $rows = $result->fetchAll();
-        return $rows;
+        $sql = 'SELECT file_id, oc_filecache.etag
+                FROM oc_betterphotos
+                LEFT JOIN oc_filecache
+                ON oc_filecache.fileid = oc_betterphotos.file_id
+                WHERE user_id = ? AND day_id = ?
+                ORDER BY date_taken DESC';
+		$rows = $connection->executeQuery($sql, [$user, $dayId], [
+            \PDO::PARAM_STR, \PDO::PARAM_INT,
+        ]);
+        return $rows->fetchAll();
     }
 }
