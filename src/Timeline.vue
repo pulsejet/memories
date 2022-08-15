@@ -308,6 +308,7 @@ export default {
 .photo img {
     object-fit: cover;
     padding: 2px;
+    border-radius: 3%;
 }
 .head {
     height: 60px;
