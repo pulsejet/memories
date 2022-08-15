@@ -447,7 +447,7 @@ export default {
     position: absolute;
     pointer-events: none;
     right: 5px;
-    height: 3px;
+    height: 2px;
     background-color: var(--color-primary);
     border-radius: 4px;
     width: 100%;
