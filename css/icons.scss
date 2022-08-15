@@ -1,4 +1,4 @@
- 
+
 /**
  * @copyright Copyright (c) 2019 John Molakvoæ <skjnldsv@protonmail.com>
  *
@@ -21,4 +21,9 @@
  *
  */
 
-@include icon-black-white('vueexample', 'app', 1);
+.icon-folder.icon-dark {
+	@include icon-color('folder', 'filetypes', $color-black, 1, true);
+}
+
+@include icon-black-white('photos', 'photos', 2);
+@include icon-black-white('yourphotos', 'photos', 1);

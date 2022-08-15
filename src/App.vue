@@ -2,7 +2,7 @@
 	<Content :class="{'icon-loading': loading}" app-name="betterphotos">
 		<AppNavigation>
 			<template id="app-betterphotos-navigation" #list>
-				<AppNavigationItem icon="icon-user" title="Timeline">
+				<AppNavigationItem icon="icon-yourphotos" title="Timeline">
 				</AppNavigationItem>
 			</template>
 		</AppNavigation>

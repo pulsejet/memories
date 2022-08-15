@@ -20,13 +20,15 @@
                 class="photo-row"
                 v-bind:style="{ height: rowHeight + 'px' }">
 
-                <img v-for="img of item.photos"
-                    :src="img.src" :key="img.file_id"
-                    @load = "img.l = Math.random()"
-                    v-bind:style="{
-                        width: rowHeight + 'px',
-                        height: rowHeight + 'px',
-                    }"/>
+                <div class="photo" v-for="img of item.photos">
+                    <img
+                        :src="img.src" :key="img.file_id"
+                        @load = "img.l = Math.random()"
+                        v-bind:style="{
+                            width: rowHeight + 'px',
+                            height: rowHeight + 'px',
+                        }"/>
+                </div>
             </div>
         </RecycleScroller>
 
@@ -328,6 +330,12 @@ export default {
     width: calc(100% + 20px);
 }
 
+.photo-row .photo {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+}
+
 .photo-row img {
     background-clip: content-box;
     background-color: #eee;
@@ -335,6 +343,23 @@ export default {
     object-fit: cover;
     border-radius: 3%;
 }
+
+.photo-row .photo::before {
+    content: "";
+    position: absolute;
+    display: block;
+    height: calc(100% - 4px);
+    width: calc(100% - 4px);
+    top: 2px; left: 2px;
+    background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 90%);
+    opacity: 0;
+    border-radius: 3%;
+    transition: opacity .1s ease-in-out;
+}
+.photo-row .photo:hover::before {
+    opacity: 1;
+}
+
 .head-row {
     height: 40px;
     padding-top: 13px;
