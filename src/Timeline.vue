@@ -29,14 +29,21 @@
 export default {
     data() {
         return {
+            /** Main list of rows */
             list: [],
+            /** Counter of rows */
             numRows: 0,
+            /** Computed number of columns */
             numCols: 5,
+            /** Header rows for dayId key */
             heads: {},
 
+            /** Computed row height */
             rowHeight: 100,
 
+            /** Current start index */
             currentStart: 0,
+            /** Current end index */
             currentEnd: 0,
         }
     },
@@ -47,6 +54,7 @@ export default {
     },
 
     methods: {
+        /** Handle window resize and initialization */
         handleResize() {
             let height = this.$refs.container.clientHeight;
             let width = this.$refs.container.clientWidth;
@@ -56,6 +64,7 @@ export default {
             this.rowHeight = Math.floor(width / this.numCols) - 4;
         },
 
+        /** Trigger when recycler view changes */
         scrollChange(startIndex, endIndex) {
             if (startIndex === this.currentStart && endIndex === this.currentEnd) {
                 return;
@@ -65,12 +74,13 @@ export default {
             this.currentEnd = endIndex;
             setTimeout(() => {
                 if (this.currentStart === startIndex && this.currentEnd === endIndex) {
-                    this.loadChanges(startIndex, endIndex);
+                    this.loadScrollChanges(startIndex, endIndex);
                 }
             }, 300);
         },
 
-        loadChanges(startIndex, endIndex) {
+        /** Load image data for given view */
+        loadScrollChanges(startIndex, endIndex) {
             for (let i = startIndex; i <= endIndex; i++) {
                 let item = this.list[i];
                 if (!item) {
@@ -85,6 +95,7 @@ export default {
             }
         },
 
+        /** Fetch timeline main call */
         async fetchDays() {
             const res = await fetch('/apps/betterphotos/api/days');
             const data = await res.json();
@@ -123,6 +134,7 @@ export default {
             }
         },
 
+        /** Fetch image data for one dayId */
         async fetchDay(dayId) {
             const head = this.heads[dayId];
             head.loaded = true;
@@ -169,7 +181,7 @@ export default {
             }
         },
 
-        // Get a new blank row
+        /** Get a new blank row */
         getBlankRow(dayId) {
             return {
                 id: ++this.numRows,
