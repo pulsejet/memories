@@ -14,14 +14,25 @@
                 {{ item.name }}
             </h1>
             <div v-else
-                 class="photo"
-                 v-bind:style="{ height: rowHeight + 'px' }">
+                class="photo"
+                v-bind:style="{ height: rowHeight + 'px' }">
 
                 <img v-for="img of item.photos"
-                     :src="img.src" :key="img.file_id"
-                     v-bind:style="{ width: rowHeight + 'px', height: rowHeight + 'px' }"/>
+                    :src="img.src" :key="img.file_id"
+                    v-bind:style="{ width: rowHeight + 'px', height: rowHeight + 'px' }"/>
             </div>
         </RecycleScroller>
+
+        <div ref="timelineScroll" class="timeline-scroll"
+            @mousemove="timelineHover"
+            @click="timelineClick">
+
+            <div v-for="tick of timelineTicks" :key="tick.dayId" class="tick"
+                v-bind:style="{ top: Math.floor(tick.top * timelineHeight / viewHeight) + 'px' }">
+                <span v-if="tick.text">{{ tick.text }}</span>
+                <span v-else class="dash"></span>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -37,9 +48,17 @@ export default {
             numCols: 5,
             /** Header rows for dayId key */
             heads: {},
+            /** Original days response */
+            days: [],
 
             /** Computed row height */
             rowHeight: 100,
+            /** Total height of recycler */
+            viewHeight: 1000,
+            /** Total height of timeline */
+            timelineHeight: 100,
+            /** Computed timeline ticks */
+            timelineTicks: [],
 
             /** Current start index */
             currentStart: 0,
@@ -57,11 +76,19 @@ export default {
         /** Handle window resize and initialization */
         handleResize() {
             let height = this.$refs.container.clientHeight;
-            let width = this.$refs.container.clientWidth;
+            let width = this.$refs.container.clientWidth - 40;
+            this.timelineHeight = this.$refs.timelineScroll.clientHeight;
             this.$refs.scroller.$el.style.height = (height - 4) + 'px';
 
             this.numCols = Math.max(4, Math.floor(width / 150));
             this.rowHeight = Math.floor(width / this.numCols) - 4;
+        },
+
+        /** Handle change in rows and view size */
+        handleViewSizeChange() {
+            setTimeout(() => {
+                this.viewHeight = this.$refs.scroller.$refs.wrapper.clientHeight;
+            }, 0);
         },
 
         /** Trigger when recycler view changes */
@@ -88,8 +115,8 @@ export default {
                 }
 
                 let head = this.heads[item.dayId];
-                if (head && !head.loaded) {
-                    head.loaded = true;
+                if (head && !head.loadedImages) {
+                    head.loadedImages = true;
                     this.fetchDay(item.dayId);
                 }
             }
@@ -99,8 +126,16 @@ export default {
         async fetchDays() {
             const res = await fetch('/apps/betterphotos/api/days');
             const data = await res.json();
+            this.days = data;
 
-            for (const day of data) {
+            // Ticks
+            let currTop = 0;
+            let prevYear = new Date().getUTCFullYear();
+            let prevMonth = new Date().getUTCMonth();
+
+            for (const [dayIdx, day] of data.entries()) {
+                day.count = Number(day.count);
+
                 // Nothing here
                 if (day.count === 0) {
                     continue;
@@ -114,30 +149,49 @@ export default {
                     dateStr = dateStr.substring(0, dateStr.length - 6);
                 }
 
+                // Create tick if month changed
+                const dtYear = dateTaken.getUTCFullYear();
+                const dtMonth = dateTaken.getUTCMonth()
+                if (dtMonth !== prevMonth || dtYear !== prevYear) {
+                    this.timelineTicks.push({
+                        dayId: day.id,
+                        top: currTop,
+                        text: dtYear === prevYear ? undefined : dtYear,
+                    });
+                    prevMonth = dtMonth;
+                    prevYear = dtYear;
+                }
+
                 // Add header to list
                 const head = {
                     id: ++this.numRows,
                     name: dateStr,
                     size: 60,
                     head: true,
-                    loaded: false,
+                    loadedImages: false,
                     dayId: day.day_id,
                 };
                 this.heads[day.day_id] = head;
                 this.list.push(head);
+                currTop += head.size;
 
                 // Add rows
                 const nrows = Math.ceil(day.count / this.numCols);
                 for (let i = 0; i < nrows; i++) {
-                    this.list.push(this.getBlankRow(day.day_id));
+                    const row = this.getBlankRow(day.day_id);
+                    this.list.push(row);
+                    currTop += row.size;
                 }
             }
+
+            // Fix view height variable
+            this.handleViewSizeChange();
         },
 
         /** Fetch image data for one dayId */
         async fetchDay(dayId) {
             const head = this.heads[dayId];
-            head.loaded = true;
+            head.loadedImages = true;
 
             let data = [];
             try {
@@ -145,7 +199,7 @@ export default {
                 data = await res.json();
             } catch (e) {
                 console.error(e);
-                head.loaded = false;
+                head.loadedImages = false;
             }
 
             // Get index of header O(n)
@@ -189,7 +243,33 @@ export default {
                 size: this.rowHeight,
                 dayId: dayId,
             };
-        }
+        },
+
+        /** Handle mouse hover on right timeline */
+        timelineHover(event) {
+
+        },
+
+        /** Handle mouse click on right timeline */
+        timelineClick(event) {
+            this.$refs.scroller.scrollToPosition(this.getTimelinePosition(event));
+        },
+
+        /** Get scroller equivalent position from event */
+        getTimelinePosition(event) {
+            const tH = this.viewHeight;
+            const maxH = this.timelineHeight;
+            return event.offsetY * tH / maxH;
+        },
+
+        /** Scroll to given day Id */
+        scrollToDay(dayId) {
+            const head = this.heads[dayId];
+            if (!head) {
+                return;
+            }
+            this.$refs.scroller.scrollToPosition(1000);
+        },
     },
 }
 </script>
@@ -197,11 +277,13 @@ export default {
 <style scoped>
 .container {
     height: 100%;
+    width: 100%;
+    overflow: hidden;
 }
 
 .scroller {
     height: 300px;
-    width: 100%;
+    width: calc(100% + 20px);
 }
 
 .photo img {
@@ -213,5 +295,30 @@ export default {
     padding-top: 25px;
     font-size: 20px;
     font-weight: lighter;
+}
+
+.timeline-scroll {
+    position: absolute;
+    height: 100%;
+    width: 40px;
+    top: 0; right: 0;
+    overflow: hidden;
+    cursor: ns-resize;
+}
+
+.timeline-scroll .tick {
+    pointer-events: none;
+    position: absolute;
+    font-size: 0.8em;
+    color: grey;
+    right: 5px;
+}
+
+.timeline-scroll .tick .dash {
+    height: 1px;
+    width: 6px;
+    background-color: grey;
+    opacity: 0.8;
+    display: block;
 }
 </style>
