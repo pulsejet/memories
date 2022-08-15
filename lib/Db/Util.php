@@ -116,7 +116,7 @@ class Util {
         int $dayId,
     ): array {
         $qb = $connection->getQueryBuilder();
-        $qb->select('file_id', 'date_taken')
+        $qb->select('file_id')
             ->from('betterphotos')
             ->where($qb->expr()->eq('user_id', $qb->createNamedParameter($user)))
             ->andWhere($qb->expr()->eq('day_id', $qb->createNamedParameter($dayId)))

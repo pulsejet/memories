@@ -22,6 +22,7 @@
 
                 <div class="photo" v-for="img of item.photos">
                     <img
+                        @click="openFile(img, item)"
                         :src="img.src" :key="img.file_id"
                         @load = "img.l = Math.random()"
                         v-bind:style="{
@@ -51,6 +52,9 @@
 </template>
 
 <script>
+
+import * as dav from "./services/DavRequests";
+
 export default {
     data() {
         return {
@@ -233,6 +237,7 @@ export default {
             try {
                 const res = await fetch(`/apps/betterphotos/api/days/${dayId}`);
                 data = await res.json();
+                this.days.find(d => d.day_id === dayId).detail = data;
             } catch (e) {
                 console.error(e);
                 head.loadedImages = false;
@@ -314,6 +319,47 @@ export default {
             }
             this.$refs.scroller.scrollToPosition(1000);
         },
+
+        /** Open viewer */
+        async openFile(img, row) {
+            const day = this.days.find(d => d.day_id === row.dayId);
+            let fileInfos = day.fileInfos;
+
+            if (!fileInfos) {
+                const ids = day.detail.map(p => p.file_id);
+                try {
+                    this.loading = true;
+                    fileInfos = await dav.getFiles(ids);
+                } finally {
+                    this.loading = false;
+                }
+                if (fileInfos.length === 0) {
+                    return;
+                }
+                day.fileInfos = fileInfos;
+
+                // Fix sorting of the fileInfos
+                const itemPositions = {};
+                for (const [index, id] of ids.entries()) {
+                    itemPositions[id] = index;
+                }
+                fileInfos.sort(function (a, b) {
+                    return itemPositions[a.fileid] - itemPositions[b.fileid];
+                });
+            }
+
+            const photo = fileInfos.find(d => Number(d.fileid) === Number(img.id));
+            if (!photo) {
+                alert('Cannot find this photo anymore!');
+                return;
+            }
+
+            OCA.Viewer.open({
+                path: photo.filename,
+                list: fileInfos,
+                canLoop: false,
+            });
+        }
     },
 }
 </script>
@@ -342,6 +388,7 @@ export default {
     padding: 2px;
     object-fit: cover;
     border-radius: 3%;
+    cursor: pointer;
 }
 
 .photo-row .photo::before {
@@ -351,10 +398,12 @@ export default {
     height: calc(100% - 4px);
     width: calc(100% - 4px);
     top: 2px; left: 2px;
-    background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 90%);
+    background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 95%);
     opacity: 0;
     border-radius: 3%;
     transition: opacity .1s ease-in-out;
+    pointer-events: none;
+    user-select: none;
 }
 .photo-row .photo:hover::before {
     opacity: 1;
