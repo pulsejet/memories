@@ -13,8 +13,13 @@
             <h1 v-if="item.head" class="head">
                 {{ item.name }}
             </h1>
-            <div v-else class="photo">
-                <img v-for="img of item.photos" :src="img.src" :key="img.file_id" />
+            <div v-else
+                 class="photo"
+                 v-bind:style="{ height: rowHeight + 'px' }">
+
+                <img v-for="img of item.photos"
+                     :src="img.src" :key="img.file_id"
+                     v-bind:style="{ width: rowHeight + 'px', height: rowHeight + 'px' }"/>
             </div>
         </RecycleScroller>
     </div>
@@ -25,10 +30,11 @@ export default {
     data() {
         return {
             list: [],
-            count: 0,
-            nrows: 0,
-            ncols: 5,
+            numRows: 0,
+            numCols: 5,
             heads: {},
+
+            rowHeight: 100,
 
             currentStart: 0,
             currentEnd: 0,
@@ -43,7 +49,11 @@ export default {
     methods: {
         handleResize() {
             let height = this.$refs.container.clientHeight;
+            let width = this.$refs.container.clientWidth;
             this.$refs.scroller.$el.style.height = (height - 4) + 'px';
+
+            this.numCols = Math.max(4, Math.floor(width / 150));
+            this.rowHeight = Math.floor(width / this.numCols) - 4;
         },
 
         scrollChange(startIndex, endIndex) {
@@ -95,7 +105,7 @@ export default {
 
                 // Add header to list
                 const head = {
-                    id: ++this.nrows,
+                    id: ++this.numRows,
                     name: dateStr,
                     size: 60,
                     head: true,
@@ -106,14 +116,9 @@ export default {
                 this.list.push(head);
 
                 // Add rows
-                const nrows = Math.ceil(day.count / this.ncols);
+                const nrows = Math.ceil(day.count / this.numCols);
                 for (let i = 0; i < nrows; i++) {
-                    this.list.push({
-                        id: ++this.nrows,
-                        photos: [],
-                        size: 100,
-                        dayId: day.day_id,
-                    });
+                    this.list.push(this.getBlankRow(day.day_id));
                 }
             }
         },
@@ -139,15 +144,11 @@ export default {
             for (const p of data) {
                 // Check if we ran out of rows
                 if (rowIdx >= this.list.length || this.list[rowIdx].head) {
-                    this.list.splice(rowIdx, 0, {
-                        id: rowIdx,
-                        photos: [],
-                        size: 100,
-                    });
+                    this.list.splice(rowIdx, 0, this.getBlankRow(dayId));
                 }
 
                 // Go to the next row
-                if (this.list[rowIdx].photos.length >= this.ncols) {
+                if (this.list[rowIdx].photos.length >= this.numCols) {
                     rowIdx++;
                 }
 
@@ -167,6 +168,16 @@ export default {
                 this.list.splice(rowIdx + 1, spliceCount);
             }
         },
+
+        // Get a new blank row
+        getBlankRow(dayId) {
+            return {
+                id: ++this.numRows,
+                photos: [],
+                size: this.rowHeight,
+                dayId: dayId,
+            };
+        }
     },
 }
 </script>
@@ -181,12 +192,7 @@ export default {
     width: 100%;
 }
 
-.photo {
-    height: 100px;
-}
 .photo img {
-    height: 100px;
-    width: 100px;
     object-fit: cover;
     padding: 2px;
 }
