@@ -26,7 +26,7 @@
         <div ref="timelineScroll" class="timeline-scroll"
             @mousemove="timelineHover"
             @mouseleave="timelineLeave"
-            @click="timelineClick">
+            @mousedown="timelineClick">
             <span class="cursor"
                   v-bind:style="{ top: timelineCursorY + 'px' }"></span>
             <span class="cursor"
@@ -261,6 +261,9 @@ export default {
 
         /** Handle mouse hover on right timeline */
         timelineHover(event) {
+            if (event.buttons) {
+                this.timelineClick(event);
+            }
             this.timelineHoverCursorY = event.offsetY;
         },
 
