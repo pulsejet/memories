@@ -14,7 +14,7 @@ class Util {
 		$this->connection = $connection;
 	}
 
-    public static function getDateTaken($file) {
+    public static function getDateTaken(File $file) {
         // Attempt to read exif data
         if (in_array($file->getMimeType(), Application::IMAGE_MIMES)) {
             $exif = exif_read_data($file->fopen('rb'));
@@ -29,6 +29,11 @@ class Util {
 
         // Fall back to creation time
         $dateTaken = $file->getCreationTime();
+
+        // Fall back to upload time
+        if ($dateTaken == 0) {
+            $dateTaken = $file->getUploadTime();
+        }
 
         // Fall back to modification time
         if ($dateTaken == 0) {
