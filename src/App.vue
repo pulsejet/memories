@@ -1,15 +1,19 @@
 <template>
-	<Content :class="{'icon-loading': loading}" app-name="betterphotos">
+	<Content app-name="betterphotos">
 		<AppNavigation>
 			<template id="app-betterphotos-navigation" #list>
-				<AppNavigationItem icon="icon-yourphotos" title="Timeline">
+				<AppNavigationItem :to="{name: 'timeline'}"
+					class="app-navigation__photos"
+					:title="t('timeline', 'Timeline')"
+					icon="icon-yourphotos"
+					exact>
 				</AppNavigationItem>
 			</template>
 		</AppNavigation>
 
-		<AppContent>
+		<AppContent :class="{ 'icon-loading': loading }">
 			<div class="outer">
-				<Timeline />
+				<router-view v-show="!loading" :loading.sync="loading" />
 			</div>
 		</AppContent>
 	</Content>
@@ -28,6 +32,7 @@ import AppContent from '@nextcloud/vue/dist/Components/AppContent'
 import AppNavigation from '@nextcloud/vue/dist/Components/AppNavigation'
 import AppNavigationItem from '@nextcloud/vue/dist/Components/AppNavigationItem'
 import Timeline from './components/Timeline.vue'
+import { generateUrl } from '@nextcloud/router'
 
 export default {
 	name: 'App',

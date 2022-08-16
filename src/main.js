@@ -25,6 +25,7 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { translate as t, translatePlural as n } from '@nextcloud/l10n'
 
 import App from './App'
+import router from './router'
 
 // Adding translations to the whole app
 Vue.mixin({
@@ -38,5 +39,6 @@ Vue.use(VueVirtualScroller)
 
 export default new Vue({
 	el: '#content',
+	router,
 	render: h => h(App),
 })

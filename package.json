@@ -36,6 +36,7 @@
 		"@nextcloud/vue": "^5.4.0",
 		"path-posix": "^1.0.0",
 		"vue": "^2.7.8",
+		"vue-router": "^3.5.4",
 		"vue-virtual-scroller": "^1.0.10",
 		"webdav": "^4.10.0"
 	},
