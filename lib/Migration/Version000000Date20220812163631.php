@@ -1,6 +1,6 @@
 <?php
 
-  namespace OCA\BetterPhotos\Migration;
+  namespace OCA\Polaroid\Migration;
 
   use Closure;
   use OCP\DB\Types;
@@ -20,8 +20,8 @@
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
 
-        if (!$schema->hasTable('betterphotos')) {
-            $table = $schema->createTable('betterphotos');
+        if (!$schema->hasTable('polaroid')) {
+            $table = $schema->createTable('polaroid');
             $table->addColumn('id', 'integer', [
                 'autoincrement' => true,
                 'notnull' => true,
@@ -46,13 +46,13 @@
 			]);
 
             $table->setPrimaryKey(['id']);
-            $table->addIndex(['user_id'], 'betterphotos_user_id_index');
-            $table->addIndex(['day_id'], 'betterphotos_day_id_index');
-            $table->addUniqueIndex(['user_id', 'file_id'], 'betterphotos_day_uf_ui');
+            $table->addIndex(['user_id'], 'polaroid_user_id_index');
+            $table->addIndex(['day_id'], 'polaroid_day_id_index');
+            $table->addUniqueIndex(['user_id', 'file_id'], 'polaroid_day_uf_ui');
         }
 
-        if (!$schema->hasTable('betterphotos_day')) {
-            $table = $schema->createTable('betterphotos_day');
+        if (!$schema->hasTable('polaroid_day')) {
+            $table = $schema->createTable('polaroid_day');
             $table->addColumn('id', 'integer', [
                 'autoincrement' => true,
                 'notnull' => true,
@@ -70,8 +70,8 @@
 			]);
 
             $table->setPrimaryKey(['id']);
-            $table->addIndex(['user_id'], 'betterphotos_day_user_id_index');
-            $table->addUniqueIndex(['user_id', 'day_id'], 'betterphotos_day_ud_ui');
+            $table->addIndex(['user_id'], 'polaroid_day_user_id_index');
+            $table->addUniqueIndex(['user_id', 'day_id'], 'polaroid_day_ud_ui');
         }
 
         return $schema;

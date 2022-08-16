@@ -21,7 +21,7 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\BetterPhotos\Listeners;
+namespace OCA\Polaroid\Listeners;
 
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
@@ -33,12 +33,12 @@ use OCP\IUserManager;
 
 class PostWriteListener implements IEventListener {
 	private IUserManager $userManager;
-    private \OCA\BetterPhotos\Db\Util $util;
+    private \OCA\Polaroid\Db\Util $util;
 
 	public function __construct(IDBConnection $connection,
 								IUserManager $userManager) {
 		$this->userManager = $userManager;
-        $this->util = new \OCA\BetterPhotos\Db\Util($connection);
+        $this->util = new \OCA\Polaroid\Db\Util($connection);
 	}
 
 	public function handle(Event $event): void {

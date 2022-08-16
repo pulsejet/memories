@@ -163,7 +163,7 @@ export default {
 
         /** Fetch timeline main call */
         async fetchDays() {
-            const res = await fetch('/apps/betterphotos/api/days');
+            const res = await fetch('/apps/polaroid/api/days');
             const data = await res.json();
             this.days = data;
 
@@ -235,7 +235,7 @@ export default {
 
             let data = [];
             try {
-                const res = await fetch(`/apps/betterphotos/api/days/${dayId}`);
+                const res = await fetch(`/apps/polaroid/api/days/${dayId}`);
                 data = await res.json();
                 this.days.find(d => d.day_id === dayId).detail = data;
             } catch (e) {

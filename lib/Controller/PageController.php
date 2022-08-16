@@ -1,5 +1,5 @@
 <?php
-namespace OCA\BetterPhotos\Controller;
+namespace OCA\Polaroid\Controller;
 
 use OCP\IRequest;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -30,7 +30,7 @@ class PageController extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function index() {
-		Util::addScript($this->appName, 'betterphotos-main');
+		Util::addScript($this->appName, 'polaroid-main');
 		Util::addStyle($this->appName, 'icons');
 
 		$this->eventDispatcher->dispatchTyped(new LoadViewer());

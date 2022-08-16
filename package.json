@@ -1,5 +1,5 @@
 {
-	"name": "betterphotos",
+	"name": "polaroid",
 	"description": "A better photos app",
 	"version": "0.0.0",
 	"author": "Varun Patil <radialapps@gmail.com>",
@@ -13,13 +13,13 @@
 		"vuejs"
 	],
 	"bugs": {
-		"url": "https://github.com/pulsejet/betterphotos/issues"
+		"url": "https://github.com/pulsejet/polaroid/issues"
 	},
 	"repository": {
-		"url": "https://github.com/pulsejet/betterphotos.git",
+		"url": "https://github.com/pulsejet/polaroid.git",
 		"type": "git"
 	},
-	"homepage": "https://github.com/pulsejet/betterphotos",
+	"homepage": "https://github.com/pulsejet/polaroid",
 	"license": "agpl",
 	"private": true,
 	"scripts": {

@@ -24,10 +24,10 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\BetterPhotos\AppInfo;
+namespace OCA\Polaroid\AppInfo;
 
-use OCA\BetterPhotos\Listeners\PostWriteListener;
-use OCA\BetterPhotos\Listeners\PostDeleteListener;
+use OCA\Polaroid\Listeners\PostWriteListener;
+use OCA\Polaroid\Listeners\PostDeleteListener;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
@@ -37,7 +37,7 @@ use OCP\Files\Events\Node\NodeDeletedEvent;
 use OCP\Files\Events\Node\NodeTouchedEvent;
 
 class Application extends App implements IBootstrap {
-	public const APPNAME = 'betterphotos';
+	public const APPNAME = 'polaroid';
 
 	public const IMAGE_MIMES = [
 		'image/png',

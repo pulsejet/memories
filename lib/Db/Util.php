@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace OCA\BetterPhotos\Db;
+namespace OCA\Polaroid\Db;
 
-use OCA\BetterPhotos\AppInfo\Application;
+use OCA\Polaroid\AppInfo\Application;
 use OCP\Files\File;
 use OCP\IDBConnection;
 
@@ -56,7 +56,7 @@ class Util {
         $dayId = floor($dateTaken / 86400);
 
         // Get existing entry
-        $sql = 'SELECT * FROM oc_betterphotos WHERE
+        $sql = 'SELECT * FROM oc_polaroid WHERE
                 user_id = ? AND file_id = ?';
         $res = $this->connection->executeQuery($sql, [
             $user, $fileId,
@@ -66,12 +66,12 @@ class Util {
 
         // Insert or update file
         if ($exists) {
-            $sql = 'UPDATE oc_betterphotos SET
+            $sql = 'UPDATE oc_polaroid SET
                     day_id = ?, date_taken = ?, is_video = ?
                     WHERE user_id = ? AND file_id = ?';
         } else {
             $sql = 'INSERT
-                    INTO  oc_betterphotos (day_id, date_taken, is_video, user_id, file_id)
+                    INTO  oc_polaroid (day_id, date_taken, is_video, user_id, file_id)
                     VALUES  (?, ?, ?, ?, ?)';
         }
 		$res = $this->connection->executeStatement($sql, [
@@ -88,7 +88,7 @@ class Util {
         // Update day table
         if (!$exists || $dayChange) {
             $sql = 'INSERT
-                    INTO  oc_betterphotos_day (user_id, day_id, count)
+                    INTO  oc_polaroid_day (user_id, day_id, count)
                     VALUES  (?, ?, 1)
                     ON DUPLICATE KEY
                     UPDATE  count = count + 1';
@@ -97,7 +97,7 @@ class Util {
             ]);
 
             if ($dayChange) {
-                $sql = 'UPDATE oc_betterphotos_day SET
+                $sql = 'UPDATE oc_polaroid_day SET
                         count = count - 1
                         WHERE user_id = ? AND day_id = ?';
                 $this->connection->executeStatement($sql, [
@@ -111,7 +111,7 @@ class Util {
 
     public function deleteFile(File $file) {
         $sql = 'DELETE
-                FROM oc_betterphotos
+                FROM oc_polaroid
                 WHERE file_id = ?
                 RETURNING *';
         $res = $this->connection->executeQuery($sql, [$file->getId()], [\PDO::PARAM_INT]);
@@ -120,7 +120,7 @@ class Util {
         foreach ($rows as $row) {
             $dayId = $row['day_id'];
             $userId = $row['user_id'];
-            $sql = 'UPDATE oc_betterphotos_day
+            $sql = 'UPDATE oc_polaroid_day
                     SET count = count - 1
                     WHERE user_id = ? AND day_id = ?';
             $this->connection->executeStatement($sql, [$userId, $dayId], [
@@ -134,7 +134,7 @@ class Util {
     ): array {
         $qb = $this->connection->getQueryBuilder();
         $qb->select('day_id', 'count')
-            ->from('betterphotos_day')
+            ->from('polaroid_day')
             ->where($qb->expr()->eq('user_id', $qb->createNamedParameter($user)))
             ->orderBy('day_id', 'DESC');
         $result = $qb->executeQuery();
@@ -147,9 +147,9 @@ class Util {
         int $dayId,
     ): array {
         $sql = 'SELECT file_id, oc_filecache.etag, is_video
-                FROM oc_betterphotos
+                FROM oc_polaroid
                 LEFT JOIN oc_filecache
-                ON oc_filecache.fileid = oc_betterphotos.file_id
+                ON oc_filecache.fileid = oc_polaroid.file_id
                 WHERE user_id = ? AND day_id = ?
                 ORDER BY date_taken DESC';
 		$rows = $this->connection->executeQuery($sql, [$user, $dayId], [

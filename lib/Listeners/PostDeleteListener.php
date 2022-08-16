@@ -21,7 +21,7 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\BetterPhotos\Listeners;
+namespace OCA\Polaroid\Listeners;
 
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
@@ -31,11 +31,11 @@ use OCP\IPreview;
 use OCP\IDBConnection;
 
 class PostDeleteListener implements IEventListener {
-    private \OCA\BetterPhotos\Db\Util $util;
+    private \OCA\Polaroid\Db\Util $util;
 
 	public function __construct(IDBConnection $connection,
                                 IPreview $previewGenerator) {
-        $this->util = new \OCA\BetterPhotos\Db\Util($previewGenerator, $connection);
+        $this->util = new \OCA\Polaroid\Db\Util($previewGenerator, $connection);
 	}
 
 	public function handle(Event $event): void {

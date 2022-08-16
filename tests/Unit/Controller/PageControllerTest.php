@@ -1,12 +1,12 @@
 <?php
 
-namespace OCA\BetterPhotos\Tests\Unit\Controller;
+namespace OCA\Polaroid\Tests\Unit\Controller;
 
 use PHPUnit_Framework_TestCase;
 
 use OCP\AppFramework\Http\TemplateResponse;
 
-use OCA\BetterPhotos\Controller\PageController;
+use OCA\Polaroid\Controller\PageController;
 
 
 class PageControllerTest extends PHPUnit_Framework_TestCase {
@@ -17,7 +17,7 @@ class PageControllerTest extends PHPUnit_Framework_TestCase {
 		$request = $this->getMockBuilder('OCP\IRequest')->getMock();
 
 		$this->controller = new PageController(
-			'betterphotos', $request, $this->userId
+			'polaroid', $request, $this->userId
 		);
 	}
 
