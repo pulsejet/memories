@@ -40,6 +40,10 @@
             $table->addColumn('day_id', Types::INTEGER, [
 				'notnull' => true,
 			]);
+            $table->addColumn('is_video', Types::BOOLEAN, [
+				'notnull' => false,
+                'default' => false
+			]);
 
             $table->setPrimaryKey(['id']);
             $table->addIndex(['user_id'], 'betterphotos_user_id_index');

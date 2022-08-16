@@ -21,6 +21,7 @@
                 v-bind:style="{ height: rowHeight + 'px' }">
 
                 <div class="photo" v-for="img of item.photos">
+                    <div v-if="img.is_video" class="icon-video-white"></div>
                     <img
                         @click="openFile(img, item)"
                         :src="img.src" :key="img.file_id"
@@ -264,6 +265,7 @@ export default {
                 this.list[rowIdx].photos.push({
                     id: p.file_id,
                     src: `/core/preview?fileId=${p.file_id}&c=${p.etag}&x=250&y=250&forceIcon=0&a=0`,
+                    is_video: p.is_video || undefined,
                 });
             }
 
@@ -408,6 +410,11 @@ export default {
 }
 .photo-row .photo:hover::before {
     opacity: 1;
+}
+
+.photo-row .photo .icon-video-white {
+    position: absolute;
+    top: 8px; right: 8px;
 }
 
 .head-row {

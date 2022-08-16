@@ -44,7 +44,9 @@ class Util {
 
     public function processFile(string $user, File $file): void {
         $mime = $file->getMimeType();
-        if (!in_array($mime, Application::IMAGE_MIMES) && !in_array($mime, Application::VIDEO_MIMES)) {
+        $is_image = in_array($mime, Application::IMAGE_MIMES);
+        $is_video = in_array($mime, Application::VIDEO_MIMES);
+        if (!$is_image && !$is_video) {
             return;
         }
 
@@ -65,16 +67,20 @@ class Util {
         // Insert or update file
         if ($exists) {
             $sql = 'UPDATE oc_betterphotos SET
-                    day_id = ?, date_taken = ?
+                    day_id = ?, date_taken = ?, is_video = ?
                     WHERE user_id = ? AND file_id = ?';
         } else {
             $sql = 'INSERT
-                    INTO  oc_betterphotos (day_id, date_taken, user_id, file_id)
-                    VALUES  (?, ?, ?, ?)';
+                    INTO  oc_betterphotos (day_id, date_taken, is_video, user_id, file_id)
+                    VALUES  (?, ?, ?, ?, ?)';
         }
 		$res = $this->connection->executeStatement($sql, [
-            $dayId, $dateTaken, $user, $fileId,
-		]);
+            $dayId, $dateTaken, $is_video,
+            $user, $fileId,
+		], [
+            \PDO::PARAM_INT, \PDO::PARAM_INT, \PDO::PARAM_BOOL,
+            \PDO::PARAM_STR, \PDO::PARAM_INT,
+        ]);
 
         // Change of day
         $dayChange = ($exists && intval($erow['day_id']) != $dayId);
@@ -140,7 +146,7 @@ class Util {
         string $user,
         int $dayId,
     ): array {
-        $sql = 'SELECT file_id, oc_filecache.etag
+        $sql = 'SELECT file_id, oc_filecache.etag, is_video
                 FROM oc_betterphotos
                 LEFT JOIN oc_filecache
                 ON oc_filecache.fileid = oc_betterphotos.file_id
@@ -148,7 +154,16 @@ class Util {
                 ORDER BY date_taken DESC';
 		$rows = $this->connection->executeQuery($sql, [$user, $dayId], [
             \PDO::PARAM_STR, \PDO::PARAM_INT,
-        ]);
-        return $rows->fetchAll();
+        ])->fetchAll();
+
+        foreach($rows as &$row) {
+            $row["file_id"] = intval($row["file_id"]);
+            $row["is_video"] = intval($row["is_video"]);
+            if (!$row["is_video"]) {
+                unset($row["is_video"]);
+            }
+        }
+
+        return $rows;
     }
 }
