@@ -56,90 +56,40 @@ class Util {
         $dateTaken = $this->getDateTaken($file);
         $dayId = floor($dateTaken / 86400);
 
-        // Get existing entry
-        $sql = 'SELECT * FROM oc_polaroid WHERE
-                user_id = ? AND file_id = ?';
-        $res = $this->connection->executeQuery($sql, [
-            $user, $fileId,
-		]);
-        $erow = $res->fetch();
-        $exists = (bool)$erow;
-
-        // Insert or update file
-        if ($exists) {
-            $sql = 'UPDATE oc_polaroid SET
-                    day_id = ?, date_taken = ?, is_video = ?
-                    WHERE user_id = ? AND file_id = ?';
-        } else {
-            $sql = 'INSERT
-                    INTO  oc_polaroid (day_id, date_taken, is_video, user_id, file_id)
-                    VALUES  (?, ?, ?, ?, ?)';
-        }
-		$res = $this->connection->executeStatement($sql, [
+        $sql = 'INSERT
+                INTO  oc_polaroid (day_id, date_taken, is_video, user_id, file_id)
+                VALUES  (?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                day_id = ?, date_taken = ?, is_video = ?';
+		$this->connection->executeStatement($sql, [
             $dayId, $dateTaken, $is_video,
             $user, $fileId,
+            $dayId, $dateTaken, $is_video,
 		], [
             \PDO::PARAM_INT, \PDO::PARAM_INT, \PDO::PARAM_BOOL,
             \PDO::PARAM_STR, \PDO::PARAM_INT,
+            \PDO::PARAM_INT, \PDO::PARAM_INT, \PDO::PARAM_BOOL,
         ]);
-
-        // Change of day
-        $dayChange = ($exists && intval($erow['day_id']) != $dayId);
-
-        // Update day table
-        if (!$exists || $dayChange) {
-            $sql = 'INSERT
-                    INTO  oc_polaroid_day (user_id, day_id, count)
-                    VALUES  (?, ?, 1)
-                    ON DUPLICATE KEY
-                    UPDATE  count = count + 1';
-            $this->connection->executeStatement($sql, [
-                $user, $dayId,
-            ]);
-
-            if ($dayChange) {
-                $sql = 'UPDATE oc_polaroid_day SET
-                        count = count - 1
-                        WHERE user_id = ? AND day_id = ?';
-                $this->connection->executeStatement($sql, [
-                    $user, $erow['day_id'],
-                ], [
-                    \PDO::PARAM_STR, \PDO::PARAM_INT,
-                ]);
-            }
-        }
     }
 
     public function deleteFile(File $file) {
         $sql = 'DELETE
                 FROM oc_polaroid
-                WHERE file_id = ?
-                RETURNING *';
-        $res = $this->connection->executeQuery($sql, [$file->getId()], [\PDO::PARAM_INT]);
-        $rows = $res->fetchAll();
-
-        foreach ($rows as $row) {
-            $dayId = $row['day_id'];
-            $userId = $row['user_id'];
-            $sql = 'UPDATE oc_polaroid_day
-                    SET count = count - 1
-                    WHERE user_id = ? AND day_id = ?';
-            $this->connection->executeStatement($sql, [$userId, $dayId], [
-                \PDO::PARAM_STR, \PDO::PARAM_INT,
-            ]);
-        }
+                WHERE file_id = ?';
+        $this->connection->executeStatement($sql, [$file->getId()], [\PDO::PARAM_INT]);
     }
 
     public function getDays(
         string $user,
     ): array {
-        $qb = $this->connection->getQueryBuilder();
-        $qb->select('day_id', 'count')
-            ->from('polaroid_day')
-            ->where($qb->expr()->eq('user_id', $qb->createNamedParameter($user)))
-            ->orderBy('day_id', 'DESC');
-        $result = $qb->executeQuery();
-        $rows = $result->fetchAll();
+        $sql = 'SELECT day_id, COUNT(file_id) AS count
+                FROM `oc_polaroid`
+                WHERE user_id=?
+                GROUP BY day_id
+                ORDER BY day_id DESC';
+        $rows = $this->connection->executeQuery($sql, [$user], [
+            \PDO::PARAM_STR,
+        ])->fetchAll();
         return $rows;
     }
 
