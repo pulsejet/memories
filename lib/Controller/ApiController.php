@@ -94,7 +94,7 @@ class ApiController extends Controller {
 	 *
 	 * @return JSONResponse
 	 */
-	public function shared(string $folder): JSONResponse {
+	public function folder(string $folder): JSONResponse {
         $user = $this->userSession->getUser();
 		if (is_null($user) || !is_numeric($folder)) {
 			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
@@ -110,7 +110,7 @@ class ApiController extends Controller {
 	 *
 	 * @return JSONResponse
 	 */
-	public function sharedDay(string $folder, string $dayId): JSONResponse {
+	public function folderDay(string $folder, string $dayId): JSONResponse {
         $user = $this->userSession->getUser();
 		if (is_null($user) || !is_numeric($folder) || !is_numeric($dayId)) {
 			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
