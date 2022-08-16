@@ -22,7 +22,7 @@
 1. 🎉 Partytime!
 
 ## Why a separate app?
-The approach of this app is fundamentally different from the official Nextcloud Photos app, which is extremely lightweight. This app instead maintains special metadata in a separate table on the backend, and thus can be considered to have different objectives.
+The approach of this app is fundamentally different from the official Nextcloud Photos app, which is very lightweight and works entirely using webdav. This app instead maintains special metadata in a separate table on the backend, and thus can be considered to have different objectives.
 
 ## Special Thanks 🙏🏻
 Nextcloud team. At least one half of the code is based on the work of the [Nextcloud Photos](https://github.com/nextcloud/photos).

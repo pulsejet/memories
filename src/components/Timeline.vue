@@ -420,7 +420,7 @@ export default {
     padding-top: 13px;
     padding-left: 3px;
     font-size: 0.9em;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 .timeline-scroll {
