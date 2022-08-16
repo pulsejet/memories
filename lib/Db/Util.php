@@ -55,6 +55,7 @@ class Util {
         $fileId = $file->getId();
         $dateTaken = $this->getDateTaken($file);
         $dayId = floor($dateTaken / 86400);
+        $dateTaken = gmdate('Y-m-d H:i:s', $dateTaken);
 
         $sql = 'INSERT
                 INTO  oc_polaroid (day_id, date_taken, is_video, user_id, file_id)
@@ -66,9 +67,9 @@ class Util {
             $user, $fileId,
             $dayId, $dateTaken, $is_video,
 		], [
-            \PDO::PARAM_INT, \PDO::PARAM_INT, \PDO::PARAM_BOOL,
+            \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_BOOL,
             \PDO::PARAM_STR, \PDO::PARAM_INT,
-            \PDO::PARAM_INT, \PDO::PARAM_INT, \PDO::PARAM_BOOL,
+            \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_BOOL,
         ]);
     }
 

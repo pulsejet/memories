@@ -30,7 +30,7 @@
                 'notnull' => true,
                 'length' => 200,
             ]);
-            $table->addColumn('date_taken', Types::INTEGER, [
+            $table->addColumn('date_taken', Types::DATETIME, [
                 'notnull' => false,
             ]);
             $table->addColumn('file_id', Types::BIGINT, [
