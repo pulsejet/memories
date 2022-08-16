@@ -47,13 +47,10 @@ class PostWriteListener implements IEventListener {
 		}
 
 		$node = $event->getNode();
-		$absPath = ltrim($node->getPath(), '/');
-		$owner = explode('/', $absPath)[0];
-
-		if ($node instanceof Folder || !$this->userManager->userExists($owner)) {
+		if ($node instanceof Folder) {
 			return;
 		}
 
-		$this->util->processFile($owner, $node);
+		$this->util->processFile($node);
 	}
 }

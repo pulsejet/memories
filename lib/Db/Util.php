@@ -42,7 +42,7 @@ class Util {
         return $dateTaken;
     }
 
-    public function processFile(string $user, File $file): void {
+    public function processFile(File $file): void {
         $mime = $file->getMimeType();
         $is_image = in_array($mime, Application::IMAGE_MIMES);
         $is_video = in_array($mime, Application::VIDEO_MIMES);
@@ -51,6 +51,7 @@ class Util {
         }
 
         // Get parameters
+        $user = $file->getOwner()->getUID();
         $fileId = $file->getId();
         $dateTaken = $this->getDateTaken($file);
         $dayId = floor($dateTaken / 86400);

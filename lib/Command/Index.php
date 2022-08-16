@@ -109,10 +109,10 @@ class Index extends Command {
 		\OC_Util::setupFS($user->getUID());
 
 		$userFolder = $this->rootFolder->getUserFolder($user->getUID());
-		$this->parseFolder($user, $userFolder);
+		$this->parseFolder($userFolder);
 	}
 
-	private function parseFolder(IUser $user, Folder $folder): void {
+	private function parseFolder(Folder $folder): void {
 		try {
 			$folderPath = $folder->getPath();
 
@@ -129,9 +129,9 @@ class Index extends Command {
 
 			foreach ($nodes as $node) {
 				if ($node instanceof Folder) {
-					$this->parseFolder($user, $node);
+					$this->parseFolder($node);
 				} elseif ($node instanceof File) {
-					$this->parseFile($user, $node);
+					$this->parseFile($node);
 				}
 			}
 		} catch (StorageNotAvailableException $e) {
@@ -142,8 +142,8 @@ class Index extends Command {
 		}
 	}
 
-	private function parseFile(IUser $user, File $file): void {
+	private function parseFile(File $file): void {
 		// $this->output->writeln('Generating entry for ' . $file->getPath() . ' ' . $file->getId());
-		$this->util->processFile($user->getUID(), $file);
+		$this->util->processFile($file);
 	}
 }
