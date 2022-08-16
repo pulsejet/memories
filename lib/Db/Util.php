@@ -37,7 +37,7 @@ class Util {
         return $dateTaken;
     }
 
-    public function processFile(string $user, File $file, bool $update): void {
+    public function processFile(string $user, File $file): void {
         $mime = $file->getMimeType();
         if (!in_array($mime, Application::IMAGE_MIMES) && !in_array($mime, Application::VIDEO_MIMES)) {
             return;
@@ -48,17 +48,34 @@ class Util {
         $dateTaken = $this->getDateTaken($file);
         $dayId = floor($dateTaken / 86400);
 
+        // Get existing entry
+        $sql = 'SELECT * FROM oc_betterphotos WHERE
+                user_id = ? AND file_id = ?';
+        $res = $this->connection->executeQuery($sql, [
+            $user, $fileId,
+		]);
+        $erow = $res->fetch();
+        $exists = (bool)$erow;
+
         // Insert or update file
-        // todo: update dateTaken and dayId if needed
-        $sql = 'INSERT IGNORE
-                INTO  oc_betterphotos (user_id, file_id, date_taken, day_id)
-                VALUES  (?, ?, ?, ?)';
+        if ($exists) {
+            $sql = 'UPDATE oc_betterphotos SET
+                    day_id = ?, date_taken = ?
+                    WHERE user_id = ? AND file_id = ?';
+        } else {
+            $sql = 'INSERT
+                    INTO  oc_betterphotos (day_id, date_taken, user_id, file_id)
+                    VALUES  (?, ?, ?, ?)';
+        }
 		$res = $this->connection->executeStatement($sql, [
-            $user, $fileId, $dateTaken, $dayId,
+            $dayId, $dateTaken, $user, $fileId,
 		]);
 
+        // Change of day
+        $dayChange = ($exists && intval($erow['day_id']) != $dayId);
+
         // Update day table
-        if ($res === 1) {
+        if (!$exists || $dayChange) {
             $sql = 'INSERT
                     INTO  oc_betterphotos_day (user_id, day_id, count)
                     VALUES  (?, ?, 1)
@@ -67,6 +84,17 @@ class Util {
             $this->connection->executeStatement($sql, [
                 $user, $dayId,
             ]);
+
+            if ($dayChange) {
+                $sql = 'UPDATE oc_betterphotos_day SET
+                        count = count - 1
+                        WHERE user_id = ? AND day_id = ?';
+                $this->connection->executeStatement($sql, [
+                    $user, $erow['day_id'],
+                ], [
+                    \PDO::PARAM_STR, \PDO::PARAM_INT,
+                ]);
+            }
         }
     }
 

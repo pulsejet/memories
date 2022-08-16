@@ -28,7 +28,6 @@ use OCP\EventDispatcher\IEventListener;
 use OCP\Files\Events\Node\NodeTouchedEvent;
 use OCP\Files\Events\Node\NodeWrittenEvent;
 use OCP\Files\Folder;
-use OCP\IPreview;
 use OCP\IDBConnection;
 use OCP\IUserManager;
 
@@ -37,10 +36,9 @@ class PostWriteListener implements IEventListener {
     private \OCA\BetterPhotos\Db\Util $util;
 
 	public function __construct(IDBConnection $connection,
-								IUserManager $userManager,
-                                IPreview $previewGenerator) {
+								IUserManager $userManager) {
 		$this->userManager = $userManager;
-        $this->util = new \OCA\BetterPhotos\Db\Util($previewGenerator, $connection);
+        $this->util = new \OCA\BetterPhotos\Db\Util($connection);
 	}
 
 	public function handle(Event $event): void {
@@ -56,6 +54,6 @@ class PostWriteListener implements IEventListener {
 			return;
 		}
 
-		$this->util->processFile($owner, $node, true);
+		$this->util->processFile($owner, $node);
 	}
 }

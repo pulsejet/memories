@@ -146,6 +146,6 @@ class Index extends Command {
 
 	private function parseFile(IUser $user, File $file): void {
 		$this->output->writeln('Generating entry for ' . $file->getPath() . ' ' . $file->getId());
-		$this->util->processFile($user->getUID(), $file, false);
+		$this->util->processFile($user->getUID(), $file);
 	}
 }
