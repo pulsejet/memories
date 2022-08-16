@@ -109,7 +109,7 @@ export default {
             this.timelineHeight = this.$refs.timelineScroll.clientHeight;
             this.$refs.scroller.$el.style.height = (height - 4) + 'px';
 
-            this.numCols = Math.max(4, Math.floor(width / 150));
+            this.numCols = Math.max(4, Math.floor(width / 175));
             this.rowHeight = Math.floor(width / this.numCols) - 4;
         },
 
