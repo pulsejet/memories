@@ -26,12 +26,10 @@ declare(strict_types=1);
 
 namespace OCA\BetterPhotos\Command;
 
-use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Encryption\IManager;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
-use OCP\Files\NotFoundException;
 use OCP\Files\StorageNotAvailableException;
 use OCP\IConfig;
 use OCP\IDBConnection;
@@ -145,7 +143,7 @@ class Index extends Command {
 	}
 
 	private function parseFile(IUser $user, File $file): void {
-		$this->output->writeln('Generating entry for ' . $file->getPath() . ' ' . $file->getId());
+		// $this->output->writeln('Generating entry for ' . $file->getPath() . ' ' . $file->getId());
 		$this->util->processFile($user->getUID(), $file);
 	}
 }
