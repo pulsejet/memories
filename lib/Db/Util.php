@@ -79,6 +79,14 @@ class Util {
         $this->connection->executeStatement($sql, [$file->getId()], [\PDO::PARAM_INT]);
     }
 
+    public function processDays(&$days) {
+        foreach($days as &$row) {
+            $row["day_id"] = intval($row["day_id"]);
+            $row["count"] = intval($row["count"]);
+        }
+        return $days;
+    }
+
     public function getDays(
         string $user,
     ): array {
@@ -90,7 +98,32 @@ class Util {
         $rows = $this->connection->executeQuery($sql, [$user], [
             \PDO::PARAM_STR,
         ])->fetchAll();
-        return $rows;
+        return $this->processDays($rows);
+    }
+
+    public function getDaysFolder(int $folderId) {
+        $sql = 'SELECT day_id, COUNT(file_id) AS count
+                FROM `oc_polaroid`
+                INNER JOIN `oc_filecache`
+                ON `oc_polaroid`.`file_id` = `oc_filecache`.`fileid`
+                    AND (`oc_filecache`.`parent`=? OR `oc_filecache`.`fileid`=?)
+                GROUP BY day_id
+                ORDER BY day_id DESC';
+        $rows = $this->connection->executeQuery($sql, [$folderId, $folderId], [
+            \PDO::PARAM_INT, \PDO::PARAM_INT,
+        ])->fetchAll();
+        return $this->processDays($rows);
+    }
+
+    public function processDay(&$day) {
+        foreach($day as &$row) {
+            $row["file_id"] = intval($row["file_id"]);
+            $row["is_video"] = intval($row["is_video"]);
+            if (!$row["is_video"]) {
+                unset($row["is_video"]);
+            }
+        }
+        return $day;
     }
 
     public function getDay(
@@ -106,15 +139,22 @@ class Util {
 		$rows = $this->connection->executeQuery($sql, [$user, $dayId], [
             \PDO::PARAM_STR, \PDO::PARAM_INT,
         ])->fetchAll();
+        return $this->processDay($rows);
+    }
 
-        foreach($rows as &$row) {
-            $row["file_id"] = intval($row["file_id"]);
-            $row["is_video"] = intval($row["is_video"]);
-            if (!$row["is_video"]) {
-                unset($row["is_video"]);
-            }
-        }
-
-        return $rows;
+    public function getDayFolder(
+        int $folderId,
+        int $dayId,
+    ): array {
+        $sql = 'SELECT file_id, oc_filecache.etag, is_video
+                FROM `oc_polaroid`
+                INNER JOIN `oc_filecache`
+                ON  `oc_polaroid`.`day_id`=?
+                AND `oc_polaroid`.`file_id` = `oc_filecache`.`fileid`
+                AND (`oc_filecache`.`parent`=? OR `oc_filecache`.`fileid`=?);';
+		$rows = $this->connection->executeQuery($sql, [$dayId, $folderId, $folderId], [
+            \PDO::PARAM_INT, \PDO::PARAM_INT, \PDO::PARAM_INT,
+        ])->fetchAll();
+        return $this->processDay($rows);
     }
 }

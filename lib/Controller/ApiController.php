@@ -90,6 +90,38 @@ class ApiController extends Controller {
 
 	/**
 	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @return JSONResponse
+	 */
+	public function shared(string $folder): JSONResponse {
+        $user = $this->userSession->getUser();
+		if (is_null($user) || !is_numeric($folder)) {
+			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+		}
+
+        $list = $this->util->getDaysFolder(intval($folder));
+		return new JSONResponse($list, Http::STATUS_OK);
+	}
+
+	/**
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @return JSONResponse
+	 */
+	public function sharedDay(string $folder, string $dayId): JSONResponse {
+        $user = $this->userSession->getUser();
+		if (is_null($user) || !is_numeric($folder) || !is_numeric($dayId)) {
+			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+		}
+
+        $list = $this->util->getDayFolder(intval($folder), intval($dayId));
+		return new JSONResponse($list, Http::STATUS_OK);
+	}
+
+	/**
+	 * @NoAdminRequired
 	 *
 	 * update preferences (user setting)
 	 *
