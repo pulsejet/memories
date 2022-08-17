@@ -29,7 +29,7 @@ class PageController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
-	public function index() {
+	public function main() {
 		Util::addScript($this->appName, 'polaroid-main');
 		Util::addStyle($this->appName, 'icons');
 
@@ -39,4 +39,11 @@ class PageController extends Controller {
 		return $response;
 	}
 
+	/**
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
+	public function album() {
+		return $this->main();
+	}
 }

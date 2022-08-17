@@ -1,13 +1,15 @@
 <?php
 return [
     'routes' => [
-	    ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
-        ['name' => 'page#index', 'url' => '/albums/{path}', 'verb' => 'GET', 'postfix' => 'albums',
+        ['name' => 'page#main', 'url' => '/', 'verb' => 'GET'],
+        ['name' => 'page#album', 'url' => '/albusms/{path}/{path1}', 'verb' => 'GET',
 			'requirements' => [
 				'path' => '.*',
+                'path1' => '.*',
 			],
 			'defaults' => [
 				'path' => '',
+                'path1' => '',
 			]
 	    ],
 

@@ -413,6 +413,8 @@ export default {
                 try {
                     this.loading = true;
                     fileInfos = await dav.getFiles(ids);
+                } catch {
+                    console.error('Failed to load fileInfos');
                 } finally {
                     this.loading = false;
                 }
@@ -431,7 +433,7 @@ export default {
                 });
             }
 
-            const photo = fileInfos.find(d => Number(d.fileid) === Number(img.id));
+            const photo = fileInfos.find(d => Number(d.fileid) === Number(img.file_id));
             if (!photo) {
                 alert('Cannot find this photo anymore!');
                 return;

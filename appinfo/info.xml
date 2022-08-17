@@ -20,7 +20,7 @@
     <navigations>
         <navigation>
             <name>Polaroid</name>
-            <route>polaroid.page.index</route>
+            <route>polaroid.page.main</route>
         </navigation>
     </navigations>
 </info>
