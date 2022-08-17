@@ -81,7 +81,7 @@ class Util {
 
         // Check if need to update
         $sql = 'SELECT COUNT(*) as e
-                FROM oc_polaroid
+                FROM *PREFIX*polaroid
                 WHERE file_id = ? AND user_id = ? AND mtime = ? AND timeline = ?';
         $exists = $this->connection->executeQuery($sql, [
             $fileId, $user, $mtime, $timeline,
@@ -98,7 +98,7 @@ class Util {
         $dateTaken = gmdate('Y-m-d H:i:s', $dateTaken);
 
         $sql = 'INSERT
-                INTO  oc_polaroid (day_id, date_taken, is_video, timeline, mtime, user_id, file_id)
+                INTO  *PREFIX*polaroid (day_id, date_taken, is_video, timeline, mtime, user_id, file_id)
                 VALUES  (?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE
                 day_id = ?, date_taken = ?, is_video = ?, timeline = ?, mtime = ?';
@@ -115,7 +115,7 @@ class Util {
 
     public function deleteFile(File $file) {
         $sql = 'DELETE
-                FROM oc_polaroid
+                FROM *PREFIX*polaroid
                 WHERE file_id = ?';
         $this->connection->executeStatement($sql, [$file->getId()], [\PDO::PARAM_INT]);
     }
@@ -132,7 +132,7 @@ class Util {
         string $user,
     ): array {
         $sql = 'SELECT day_id, COUNT(file_id) AS count
-                FROM `oc_polaroid`
+                FROM `*PREFIX*polaroid`
                 WHERE user_id=?
                 GROUP BY day_id
                 ORDER BY day_id DESC';
@@ -144,10 +144,10 @@ class Util {
 
     public function getDaysFolder(int $folderId) {
         $sql = 'SELECT day_id, COUNT(file_id) AS count
-                FROM `oc_polaroid`
-                INNER JOIN `oc_filecache`
-                ON `oc_polaroid`.`file_id` = `oc_filecache`.`fileid`
-                    AND (`oc_filecache`.`parent`=? OR `oc_filecache`.`fileid`=?)
+                FROM `*PREFIX*polaroid`
+                INNER JOIN `*PREFIX*filecache`
+                ON `*PREFIX*polaroid`.`file_id` = `*PREFIX*filecache`.`fileid`
+                    AND (`*PREFIX*filecache`.`parent`=? OR `*PREFIX*filecache`.`fileid`=?)
                 GROUP BY day_id
                 ORDER BY day_id DESC';
         $rows = $this->connection->executeQuery($sql, [$folderId, $folderId], [
@@ -171,10 +171,10 @@ class Util {
         string $user,
         int $dayId,
     ): array {
-        $sql = 'SELECT file_id, oc_filecache.etag, is_video
-                FROM oc_polaroid
-                LEFT JOIN oc_filecache
-                ON oc_filecache.fileid = oc_polaroid.file_id
+        $sql = 'SELECT file_id, *PREFIX*filecache.etag, is_video
+                FROM *PREFIX*polaroid
+                LEFT JOIN *PREFIX*filecache
+                ON *PREFIX*filecache.fileid = *PREFIX*polaroid.file_id
                 WHERE user_id = ? AND day_id = ?
                 ORDER BY date_taken DESC';
 		$rows = $this->connection->executeQuery($sql, [$user, $dayId], [
@@ -187,12 +187,12 @@ class Util {
         int $folderId,
         int $dayId,
     ): array {
-        $sql = 'SELECT file_id, oc_filecache.etag, is_video
-                FROM `oc_polaroid`
-                INNER JOIN `oc_filecache`
-                ON  `oc_polaroid`.`day_id`=?
-                AND `oc_polaroid`.`file_id` = `oc_filecache`.`fileid`
-                AND (`oc_filecache`.`parent`=? OR `oc_filecache`.`fileid`=?);';
+        $sql = 'SELECT file_id, *PREFIX*filecache.etag, is_video
+                FROM `*PREFIX*polaroid`
+                INNER JOIN `*PREFIX*filecache`
+                ON  `*PREFIX*polaroid`.`day_id`=?
+                AND `*PREFIX*polaroid`.`file_id` = `*PREFIX*filecache`.`fileid`
+                AND (`*PREFIX*filecache`.`parent`=? OR `*PREFIX*filecache`.`fileid`=?);';
 		$rows = $this->connection->executeQuery($sql, [$dayId, $folderId, $folderId], [
             \PDO::PARAM_INT, \PDO::PARAM_INT, \PDO::PARAM_INT,
         ])->fetchAll();
