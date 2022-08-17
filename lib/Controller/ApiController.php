@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace OCA\Polaroid\Controller;
 
+use OC\Files\Search\SearchComparison;
+use OC\Files\Search\SearchQuery;
 use OCA\Polaroid\AppInfo\Application;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
@@ -36,6 +38,8 @@ use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IRequest;
 use OCP\IUserSession;
+use OCP\Files\FileInfo;
+use OCP\Files\Search\ISearchComparison;
 
 class ApiController extends Controller {
 	private IConfig $config;
@@ -139,11 +143,15 @@ class ApiController extends Controller {
         $list = $this->util->getDaysFolder($node->getId());
 
 		// Get subdirectories
-		$sub = array_filter($node->getDirectoryListing(), function ($item) use ($node) {
-			return $item instanceof \OCP\Files\Folder;
+		$sub = $node->search(new SearchQuery(
+			new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'mimetype', FileInfo::MIMETYPE_FOLDER),
+			0, 0, [], $user));
+		$sub = array_filter($sub, function ($item) use ($node) {
+			return $item->getParent()->getId() === $node->getId();
 		});
-		// map sub to array of id
-		$subdir = [
+
+		// Map sub to JSON array
+		$subdirArray = [
 			"day_id" => -0.1,
 			"detail" => array_map(function ($item) {
 				return [
@@ -153,8 +161,8 @@ class ApiController extends Controller {
 				];
 			}, $sub, []),
 		];
-		$subdir["count"] = count($subdir["detail"]);
-		array_unshift($list, $subdir);
+		$subdirArray["count"] = count($subdirArray["detail"]);
+		array_unshift($list, $subdirArray);
 
 		return new JSONResponse($list, Http::STATUS_OK);
 	}
