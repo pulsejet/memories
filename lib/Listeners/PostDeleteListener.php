@@ -27,15 +27,13 @@ use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Files\Events\Node\NodeDeletedEvent;
 use OCP\Files\Folder;
-use OCP\IPreview;
 use OCP\IDBConnection;
 
 class PostDeleteListener implements IEventListener {
     private \OCA\Polaroid\Db\Util $util;
 
-	public function __construct(IDBConnection $connection,
-                                IPreview $previewGenerator) {
-        $this->util = new \OCA\Polaroid\Db\Util($previewGenerator, $connection);
+	public function __construct(IDBConnection $connection) {
+        $this->util = new \OCA\Polaroid\Db\Util($connection);
 	}
 
 	public function handle(Event $event): void {
