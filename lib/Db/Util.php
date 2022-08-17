@@ -14,16 +14,39 @@ class Util {
 		$this->connection = $connection;
 	}
 
+    private static function getExif($data, $field) {
+        $pipes = [];
+        $proc = proc_open('exiftool -b -' . $field . ' -', [
+            0 => array('pipe', 'rb'),
+            1 => array('pipe', 'w'),
+            2 => array('pipe', 'w'),
+        ], $pipes);
+
+        fwrite($pipes[0], $data);
+        fclose($pipes[0]);
+        $stdout = stream_get_contents($pipes[1]);
+        proc_close($proc);
+        return $stdout;
+    }
+
     public static function getDateTaken(File $file) {
         // Attempt to read exif data
-        if (in_array($file->getMimeType(), Application::IMAGE_MIMES)) {
-            $exif = exif_read_data($file->fopen('rb'));
-            $dt = $exif['DateTimeOriginal'];
+        // Assume it exists in the first 256 kb of the file
+        $handle = $file->fopen('rb');
+        $data = stream_get_contents($handle, 256 * 1024);
+        fclose($handle);
+
+        // Try different formats
+        $dt = self::getExif($data, 'DateTimeOriginal');
+        if (empty($dt)) {
+            $dt = self::getExif($data, 'CreateDate');
+        }
+
+        // Check if found something
+        if (!empty($dt)) {
+            $dt = \DateTime::createFromFormat('Y:m:d H:i:s', $dt);
             if ($dt) {
-                $dt = \DateTime::createFromFormat('Y:m:d H:i:s', $dt);
-                if ($dt) {
-                    return $dt->getTimestamp();
-                }
+                return $dt->getTimestamp();
             }
         }
 

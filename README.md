@@ -4,12 +4,15 @@
 
 ## How is this different?
 
-* **📸 Photo and Video Timeline**: Sorts photos by date taken.
+* **📸 Photo and Video Timeline**: Sorts photos by date taken, parsed from Exif data.
 * **🤔 Quick Recap**: Jump to anywhere in the timeline instantly.
+* **🖼️ Albums**: Browse your and shared folders with a similar, efficient timeline.
+* **🎦 Slideshow**: View photos from your timeline and albums easily.
 
 ## 🚀 Installation
 
 1. ☁ Clone this into your `apps` folder of your Nextcloud.
+1. ⚒️ Install `exiftool` (`sudo apt install exiftool`).
 1. Run `php ./occ polaroid:index` to generate metadata indices for existing photos.
 1. Consider installing the [preview generator](https://github.com/rullzer/previewgenerator) for pre-generating thumbnails.
 
