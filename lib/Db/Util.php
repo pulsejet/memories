@@ -74,25 +74,42 @@ class Util {
         }
 
         // Get parameters
+        $mtime = $file->getMtime();
         $user = $file->getOwner()->getUID();
         $fileId = $file->getId();
+        $timeline = (bool)(preg_match('/^files\\/photos/i', $file->getInternalPath()));
+
+        // Check if need to update
+        $sql = 'SELECT COUNT(*) as e
+                FROM oc_polaroid
+                WHERE file_id = ? AND user_id = ? AND mtime = ? AND timeline = ?';
+        $exists = $this->connection->executeQuery($sql, [
+            $fileId, $user, $mtime, $timeline,
+        ], [
+            \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_INT, \PDO::PARAM_BOOL,
+        ])->fetch();
+        if (intval($exists['e']) > 0) {
+            return;
+        }
+
+        // Get more parameters
         $dateTaken = $this->getDateTaken($file);
         $dayId = floor($dateTaken / 86400);
         $dateTaken = gmdate('Y-m-d H:i:s', $dateTaken);
 
         $sql = 'INSERT
-                INTO  oc_polaroid (day_id, date_taken, is_video, user_id, file_id)
-                VALUES  (?, ?, ?, ?, ?)
+                INTO  oc_polaroid (day_id, date_taken, is_video, timeline, mtime, user_id, file_id)
+                VALUES  (?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE
-                day_id = ?, date_taken = ?, is_video = ?';
+                day_id = ?, date_taken = ?, is_video = ?, timeline = ?, mtime = ?';
 		$this->connection->executeStatement($sql, [
-            $dayId, $dateTaken, $is_video,
+            $dayId, $dateTaken, $is_video, $timeline, $mtime,
             $user, $fileId,
-            $dayId, $dateTaken, $is_video,
+            $dayId, $dateTaken, $is_video, $timeline, $mtime,
 		], [
-            \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_BOOL,
+            \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_BOOL, \PDO::PARAM_BOOL, \PDO::PARAM_INT,
             \PDO::PARAM_STR, \PDO::PARAM_INT,
-            \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_BOOL,
+            \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_BOOL, \PDO::PARAM_BOOL, \PDO::PARAM_INT,
         ]);
     }
 

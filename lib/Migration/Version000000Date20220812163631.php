@@ -44,11 +44,18 @@
 				'notnull' => false,
                 'default' => false
 			]);
+            $table->addColumn('mtime', Types::INTEGER, [
+				'notnull' => true,
+			]);
+            $table->addColumn('timeline', Types::BOOLEAN, [
+				'notnull' => false,
+                'default' => false
+			]);
 
             $table->setPrimaryKey(['id']);
             $table->addIndex(['user_id'], 'polaroid_user_id_index');
-            $table->addIndex(['day_id'], 'polaroid_day_id_index');
             $table->addIndex(['user_id', 'day_id'], 'polaroid_ud_index');
+            $table->addIndex(['user_id', 'day_id', 'timeline'], 'polaroid_udt_index');
             $table->addUniqueIndex(['user_id', 'file_id'], 'polaroid_day_uf_ui');
         }
 
