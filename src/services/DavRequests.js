@@ -3,14 +3,14 @@ import { genFileInfo } from './FileUtils'
 import client from './DavClient';
 
 const props = `
-<oc:fileid />
-<d:getlastmodified />
-<d:getetag />
-<d:getcontenttype />
-<d:getcontentlength />
-<nc:has-preview />
-<oc:favorite />
-<d:resourcetype />`;
+	<oc:fileid />
+	<d:getlastmodified />
+	<d:getetag />
+	<d:getcontenttype />
+	<d:getcontentlength />
+	<nc:has-preview />
+	<oc:favorite />
+	<d:resourcetype />`;
 
 export async function getFiles(fileIds) {
     const prefixPath = `/files/${getCurrentUser().uid}`;

@@ -54,5 +54,14 @@
                  rootTitle: t('timeline', 'Timeline'),
              }),
          },
+
+         {
+            path: '/albums/:id*',
+            component: Timeline,
+            name: 'albums',
+            props: route => ({
+                rootTitle: t('albums', 'Albums'),
+            }),
+        },
      ],
  })

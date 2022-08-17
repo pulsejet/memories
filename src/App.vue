@@ -3,10 +3,13 @@
 		<AppNavigation>
 			<template id="app-polaroid-navigation" #list>
 				<AppNavigationItem :to="{name: 'timeline'}"
-					class="app-navigation__photos"
 					:title="t('timeline', 'Timeline')"
 					icon="icon-yourphotos"
 					exact>
+				</AppNavigationItem>
+				<AppNavigationItem :to="{name: 'albums'}"
+					:title="t('albums', 'Albums')"
+					icon="icon-files-dark">
 				</AppNavigationItem>
 			</template>
 		</AppNavigation>
@@ -32,7 +35,6 @@ import AppContent from '@nextcloud/vue/dist/Components/AppContent'
 import AppNavigation from '@nextcloud/vue/dist/Components/AppNavigation'
 import AppNavigationItem from '@nextcloud/vue/dist/Components/AppNavigationItem'
 import Timeline from './components/Timeline.vue'
-import { generateUrl } from '@nextcloud/router'
 
 export default {
 	name: 'App',

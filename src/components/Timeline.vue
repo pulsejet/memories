@@ -19,16 +19,29 @@
                 v-bind:style="{ height: rowHeight + 'px' }">
 
                 <div class="photo" v-for="img of item.photos">
-                    <div v-if="img.is_video" class="icon-video-white"></div>
-                    <img
-                        @click="openFile(img, item)"
-                        :src="img.src" :key="img.file_id"
-                        @load = "img.l = Math.random()"
-                        @error="(e)=>e.target.src='img/error.svg'"
+                    <div v-if="img.is_folder" class="folder"
+                        @click="openFolder(img.file_id)"
                         v-bind:style="{
                             width: rowHeight + 'px',
                             height: rowHeight + 'px',
-                        }"/>
+                        }">
+                        <div class="icon-folder icon-dark"></div>
+                        <div class="name">{{ img.name }}</div>
+                    </div>
+
+                    <div v-else>
+                        <div v-if="img.is_video" class="icon-video-white"></div>
+                        <img
+                            @click="openFile(img, item)"
+                            :src="`/core/preview?fileId=${img.file_id}&c=${img.etag}&x=250&y=250&forceIcon=0&a=0`"
+                            :key="img.file_id"
+                            @load = "img.l = Math.random()"
+                            @error="(e)=>e.target.src='img/error.svg'"
+                            v-bind:style="{
+                                width: rowHeight + 'px',
+                                height: rowHeight + 'px',
+                            }"/>
+                    </div>
                 </div>
             </div>
         </RecycleScroller>
@@ -88,6 +101,9 @@ export default {
             currentStart: 0,
             /** Current end index */
             currentEnd: 0,
+
+            /** State for request cancellations */
+            state: Math.random(),
         }
     },
 
@@ -101,7 +117,32 @@ export default {
         }, false);
     },
 
+    watch: {
+		$route(from, to) {
+			console.log('route changed', from, to)
+			this.resetState();
+            this.fetchDays();
+		},
+	},
+
+    beforeDestroy() {
+        this.resetState();
+	},
+
     methods: {
+        /** Reset all state */
+        resetState() {
+            this.loading = true;
+            this.list = [];
+            this.numRows = 0;
+            this.heads = {};
+            this.days = [];
+            this.currentStart = 0;
+            this.currentEnd = 0;
+            this.timelineTicks = [];
+            this.state = Math.random();
+        },
+
         /** Handle window resize and initialization */
         handleResize() {
             let height = this.$refs.container.clientHeight;
@@ -163,8 +204,18 @@ export default {
 
         /** Fetch timeline main call */
         async fetchDays() {
-            const res = await fetch('/apps/polaroid/api/days');
+            let url = '/apps/polaroid/api/days';
+
+            if (this.$route.name === 'albums') {
+                const id = this.$route.params.id || 0;
+                url = `/apps/polaroid/api/folder/${id}`;
+            }
+
+            const startState = this.state;
+            const res = await fetch(url);
             const data = await res.json();
+            if (this.state !== startState) return;
+
             this.days = data;
 
             // Ticks
@@ -191,14 +242,19 @@ export default {
                 // Create tick if month changed
                 const dtYear = dateTaken.getUTCFullYear();
                 const dtMonth = dateTaken.getUTCMonth()
-                if (dtMonth !== prevMonth || dtYear !== prevYear) {
+                if (Number.isInteger(day.day_id) && (dtMonth !== prevMonth || dtYear !== prevYear)) {
                     this.timelineTicks.push({
                         dayId: day.id,
                         top: currTop,
                         text: dtYear === prevYear ? undefined : dtYear,
                     });
-                    prevMonth = dtMonth;
-                    prevYear = dtYear;
+                }
+                prevMonth = dtMonth;
+                prevYear = dtYear;
+
+                // Special headers
+                if (day.day_id === -0.1) {
+                    dateStr = "Folders";
                 }
 
                 // Add header to list
@@ -223,6 +279,13 @@ export default {
                 }
             }
 
+            // Check preloads
+            for (const day of data) {
+                if (day.count && day.detail) {
+                    this.processDay(day.day_id, day.detail);
+                }
+            }
+
             // Fix view height variable
             this.handleViewSizeChange();
             this.loading = false;
@@ -230,18 +293,36 @@ export default {
 
         /** Fetch image data for one dayId */
         async fetchDay(dayId) {
+            let url = `/apps/polaroid/api/days/${dayId}`;
+
+            if (this.$route.name === 'albums') {
+                const id = this.$route.params.id || 0;
+                url = `/apps/polaroid/api/folder/${id}/${dayId}`;
+            }
+
+            // Do this in advance to prevent duplicate requests
             const head = this.heads[dayId];
             head.loadedImages = true;
 
             let data = [];
             try {
-                const res = await fetch(`/apps/polaroid/api/days/${dayId}`);
+                const startState = this.state;
+                const res = await fetch(url);
                 data = await res.json();
+                if (this.state !== startState) return;
+
                 this.days.find(d => d.day_id === dayId).detail = data;
+                this.processDay(dayId, data);
             } catch (e) {
                 console.error(e);
                 head.loadedImages = false;
             }
+        },
+
+        /** Process items from day response */
+        processDay(dayId, data) {
+            const head = this.heads[dayId];
+            head.loadedImages = true;
 
             // Get index of header O(n)
             const headIdx = this.list.findIndex(item => item.id === head.id);
@@ -260,11 +341,7 @@ export default {
                 }
 
                 // Add the photo to the row
-                this.list[rowIdx].photos.push({
-                    id: p.file_id,
-                    src: `/core/preview?fileId=${p.file_id}&c=${p.etag}&x=250&y=250&forceIcon=0&a=0`,
-                    is_video: p.is_video || undefined,
-                });
+                this.list[rowIdx].photos.push(p);
             }
 
             // Get rid of any extra rows
@@ -319,6 +396,11 @@ export default {
                 return;
             }
             this.$refs.scroller.scrollToPosition(1000);
+        },
+
+        /** Open album folder */
+        openFolder(id) {
+            this.$router.push({ name: 'albums', params: { id } });
         },
 
         /** Open viewer */
@@ -413,6 +495,22 @@ export default {
 .photo-row .photo .icon-video-white {
     position: absolute;
     top: 8px; right: 8px;
+}
+
+.photo-row .photo .folder {
+    cursor: pointer;
+}
+.photo-row .photo .folder .name {
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+}
+.photo-row .photo .icon-folder {
+    cursor: pointer;
+    background-size: 40%;
+    height: 60%; width: 100%;
+    background-position: bottom;
+    opacity: 0.3;
 }
 
 .head-row {

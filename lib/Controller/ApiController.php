@@ -31,6 +31,7 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\StreamResponse;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IRequest;
@@ -41,12 +42,14 @@ class ApiController extends Controller {
 	private IUserSession $userSession;
     private IDBConnection $connection;
 	private \OCA\Polaroid\Db\Util $util;
+	private IRootFolder $rootFolder;
 
 	public function __construct(
 		IRequest $request,
 		IConfig $config,
 		IUserSession $userSession,
-        IDBConnection $connection
+        IDBConnection $connection,
+		IRootFolder $rootFolder,
 	) {
 		parent::__construct(Application::APPNAME, $request);
 
@@ -54,6 +57,7 @@ class ApiController extends Controller {
 		$this->userSession = $userSession;
         $this->connection = $connection;
 		$this->util = new \OCA\Polaroid\Db\Util($this->connection);
+		$this->rootFolder = $rootFolder;
 	}
 
 	/**
@@ -89,6 +93,31 @@ class ApiController extends Controller {
 	}
 
 	/**
+	 * Check if folder is allowed and get it if yes
+	 */
+	private function getAllowedFolder(int $folder, $user) {
+		// Get root if folder not specified
+		$root = $this->rootFolder->getUserFolder($user->getUID());
+		if ($folder === 0) {
+			$folder = $root->getId();
+		}
+
+		// Check access to folder
+		$nodes = $root->getById($folder);
+		if (empty($nodes)) {
+			return NULL;
+		}
+
+		// Check it is a folder
+		$node = $nodes[0];
+		if (!$node instanceof \OCP\Files\Folder) {
+			return NULL;
+		}
+
+		return $node;
+	}
+
+	/**
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 *
@@ -100,7 +129,33 @@ class ApiController extends Controller {
 			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
 		}
 
-        $list = $this->util->getDaysFolder(intval($folder));
+		// Check permissions
+		$node = $this->getAllowedFolder(intval($folder), $user);
+		if (is_null($node)) {
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
+		// Get response from db
+        $list = $this->util->getDaysFolder($node->getId());
+
+		// Get subdirectories
+		$sub = array_filter($node->getDirectoryListing(), function ($item) use ($node) {
+			return $item instanceof \OCP\Files\Folder;
+		});
+		// map sub to array of id
+		$subdir = [
+			"day_id" => -0.1,
+			"detail" => array_map(function ($item) {
+				return [
+					"file_id" => $item->getId(),
+					"name" => $item->getName(),
+					"is_folder" => 1,
+				];
+			}, $sub, []),
+		];
+		$subdir["count"] = count($subdir["detail"]);
+		array_unshift($list, $subdir);
+
 		return new JSONResponse($list, Http::STATUS_OK);
 	}
 
@@ -116,7 +171,12 @@ class ApiController extends Controller {
 			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
 		}
 
-        $list = $this->util->getDayFolder(intval($folder), intval($dayId));
+		$node = $this->getAllowedFolder(intval($folder), $user);
+		if ($node === NULL) {
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
+        $list = $this->util->getDayFolder($node->getId(), intval($dayId));
 		return new JSONResponse($list, Http::STATUS_OK);
 	}
 
