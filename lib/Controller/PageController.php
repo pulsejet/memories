@@ -31,7 +31,7 @@ class PageController extends Controller {
 	 */
 	public function main() {
 		Util::addScript($this->appName, 'memories-main');
-		Util::addStyle($this->appName, 'icons');
+		Util::addStyle($this->appName, 'custom-icons');
 
 		$this->eventDispatcher->dispatchTyped(new LoadViewer());
 

@@ -25,5 +25,4 @@
 	@include icon-color('folder', 'filetypes', $color-black, 1, true);
 }
 
-@include icon-black-white('photos', 'photos', 2);
-@include icon-black-white('yourphotos', 'photos', 1);
+@include icon-black-white('yourmemories', 'memories', 1);

@@ -4,7 +4,7 @@
 			<template id="app-memories-navigation" #list>
 				<AppNavigationItem :to="{name: 'timeline'}"
 					:title="t('timeline', 'Timeline')"
-					icon="icon-yourphotos"
+					icon="icon-yourmemories"
 					exact>
 				</AppNavigationItem>
 				<AppNavigationItem :to="{name: 'albums'}"
