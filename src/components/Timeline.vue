@@ -610,7 +610,7 @@ export default {
 
 .photo-row img {
     background-clip: content-box;
-    background-color: #eee;
+    background-color: var(--color-loading-light);
     padding: 2px;
     object-fit: cover;
     border-radius: 3%;
@@ -682,7 +682,6 @@ export default {
     pointer-events: none;
     position: absolute;
     font-size: 0.8em;
-    color: black;
     right: 5px;
     transform: translateY(-50%);
     z-index: 1;
@@ -692,7 +691,7 @@ export default {
     height: 4px;
     width: 4px;
     border-radius: 50%;
-    background-color: #444;
+    background-color: var(--color-main-text);
     opacity: 0.5;
     display: block;
 }
@@ -714,7 +713,7 @@ export default {
     opacity: 1;
 }
 .timeline-scroll .cursor.hv {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: var(--color-placeholder-light);
     padding: 2px 5px;
     border-top: 2px solid var(--color-primary);
     border-radius: 2px;
