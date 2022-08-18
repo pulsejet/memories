@@ -21,7 +21,7 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\Polaroid\Listeners;
+namespace OCA\Memories\Listeners;
 
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
@@ -34,12 +34,12 @@ use OCP\IUserManager;
 
 class PostWriteListener implements IEventListener {
 	private IUserManager $userManager;
-    private \OCA\Polaroid\Db\Util $util;
+    private \OCA\Memories\Db\Util $util;
 
 	public function __construct(IDBConnection $connection,
 								IUserManager $userManager) {
 		$this->userManager = $userManager;
-        $this->util = new \OCA\Polaroid\Db\Util($connection);
+        $this->util = new \OCA\Memories\Db\Util($connection);
 	}
 
 	public function handle(Event $event): void {

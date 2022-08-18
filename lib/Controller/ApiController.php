@@ -23,11 +23,11 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\Polaroid\Controller;
+namespace OCA\Memories\Controller;
 
 use OC\Files\Search\SearchComparison;
 use OC\Files\Search\SearchQuery;
-use OCA\Polaroid\AppInfo\Application;
+use OCA\Memories\AppInfo\Application;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
@@ -45,7 +45,7 @@ class ApiController extends Controller {
 	private IConfig $config;
 	private IUserSession $userSession;
     private IDBConnection $connection;
-	private \OCA\Polaroid\Db\Util $util;
+	private \OCA\Memories\Db\Util $util;
 	private IRootFolder $rootFolder;
 
 	public function __construct(
@@ -60,7 +60,7 @@ class ApiController extends Controller {
 		$this->config = $config;
 		$this->userSession = $userSession;
         $this->connection = $connection;
-		$this->util = new \OCA\Polaroid\Db\Util($this->connection);
+		$this->util = new \OCA\Memories\Db\Util($this->connection);
 		$this->rootFolder = $rootFolder;
 	}
 

@@ -1,5 +1,5 @@
 <?php
-namespace OCA\Polaroid\Controller;
+namespace OCA\Memories\Controller;
 
 use OCP\IRequest;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -30,7 +30,7 @@ class PageController extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function main() {
-		Util::addScript($this->appName, 'polaroid-main');
+		Util::addScript($this->appName, 'memories-main');
 		Util::addStyle($this->appName, 'icons');
 
 		$this->eventDispatcher->dispatchTyped(new LoadViewer());

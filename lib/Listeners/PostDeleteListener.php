@@ -21,7 +21,7 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\Polaroid\Listeners;
+namespace OCA\Memories\Listeners;
 
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
@@ -30,10 +30,10 @@ use OCP\Files\Folder;
 use OCP\IDBConnection;
 
 class PostDeleteListener implements IEventListener {
-    private \OCA\Polaroid\Db\Util $util;
+    private \OCA\Memories\Db\Util $util;
 
 	public function __construct(IDBConnection $connection) {
-        $this->util = new \OCA\Polaroid\Db\Util($connection);
+        $this->util = new \OCA\Memories\Db\Util($connection);
 	}
 
 	public function handle(Event $event): void {

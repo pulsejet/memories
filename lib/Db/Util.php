@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace OCA\Polaroid\Db;
+namespace OCA\Memories\Db;
 
-use OCA\Polaroid\AppInfo\Application;
+use OCA\Memories\AppInfo\Application;
 use OCP\Files\File;
 use OCP\IDBConnection;
 
@@ -80,7 +80,7 @@ class Util {
 
         // Check if need to update
         $sql = 'SELECT COUNT(*) as e
-                FROM *PREFIX*polaroid
+                FROM *PREFIX*memories
                 WHERE file_id = ? AND user_id = ? AND mtime = ?';
         $exists = $this->connection->executeQuery($sql, [
             $fileId, $user, $mtime,
@@ -97,7 +97,7 @@ class Util {
         $dateTaken = gmdate('Y-m-d H:i:s', $dateTaken);
 
         $sql = 'INSERT
-                INTO  *PREFIX*polaroid (day_id, date_taken, is_video, mtime, user_id, file_id)
+                INTO  *PREFIX*memories (day_id, date_taken, is_video, mtime, user_id, file_id)
                 VALUES  (?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE
                 day_id = ?, date_taken = ?, is_video = ?, mtime = ?';
@@ -114,7 +114,7 @@ class Util {
 
     public function deleteFile(File $file) {
         $sql = 'DELETE
-                FROM *PREFIX*polaroid
+                FROM *PREFIX*memories
                 WHERE file_id = ?';
         $this->connection->executeStatement($sql, [$file->getId()], [\PDO::PARAM_INT]);
     }
@@ -131,9 +131,9 @@ class Util {
         string $user,
     ): array {
         $sql = 'SELECT day_id, COUNT(file_id) AS count
-                FROM `*PREFIX*polaroid`
+                FROM `*PREFIX*memories`
                 INNER JOIN `*PREFIX*filecache`
-                    ON `*PREFIX*filecache`.`fileid` = `*PREFIX*polaroid`.`file_id`
+                    ON `*PREFIX*filecache`.`fileid` = `*PREFIX*memories`.`file_id`
                     AND `*PREFIX*filecache`.`path` LIKE "files/Photos/%"
                 WHERE user_id=?
                 GROUP BY day_id
@@ -146,9 +146,9 @@ class Util {
 
     public function getDaysFolder(int $folderId) {
         $sql = 'SELECT day_id, COUNT(file_id) AS count
-                FROM `*PREFIX*polaroid`
+                FROM `*PREFIX*memories`
                 INNER JOIN `*PREFIX*filecache`
-                    ON `*PREFIX*filecache`.`fileid` = `*PREFIX*polaroid`.`file_id`
+                    ON `*PREFIX*filecache`.`fileid` = `*PREFIX*memories`.`file_id`
                     AND (`*PREFIX*filecache`.`parent`=? OR `*PREFIX*filecache`.`fileid`=?)
                 GROUP BY day_id
                 ORDER BY day_id DESC';
@@ -174,9 +174,9 @@ class Util {
         int $dayId,
     ): array {
         $sql = 'SELECT file_id, *PREFIX*filecache.etag, is_video
-                FROM *PREFIX*polaroid
+                FROM *PREFIX*memories
                 INNER JOIN *PREFIX*filecache
-                    ON *PREFIX*filecache.fileid = *PREFIX*polaroid.file_id
+                    ON *PREFIX*filecache.fileid = *PREFIX*memories.file_id
                     AND `*PREFIX*filecache`.`path` LIKE "files/Photos/%"
                 WHERE user_id = ? AND day_id = ?
                 ORDER BY date_taken DESC';
@@ -191,11 +191,11 @@ class Util {
         int $dayId,
     ): array {
         $sql = 'SELECT file_id, *PREFIX*filecache.etag, is_video
-                FROM `*PREFIX*polaroid`
+                FROM `*PREFIX*memories`
                 INNER JOIN `*PREFIX*filecache`
-                    ON `*PREFIX*filecache`.`fileid` = `*PREFIX*polaroid`.`file_id`
+                    ON `*PREFIX*filecache`.`fileid` = `*PREFIX*memories`.`file_id`
                     AND (`*PREFIX*filecache`.`parent`=? OR `*PREFIX*filecache`.`fileid`=?)
-                WHERE  `*PREFIX*polaroid`.`day_id`=?';
+                WHERE  `*PREFIX*memories`.`day_id`=?';
 		$rows = $this->connection->executeQuery($sql, [$folderId, $folderId, $dayId], [
             \PDO::PARAM_INT, \PDO::PARAM_INT, \PDO::PARAM_INT,
         ])->fetchAll();

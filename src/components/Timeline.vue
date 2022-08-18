@@ -314,11 +314,11 @@ export default {
 
         /** Fetch timeline main call */
         async fetchDays() {
-            let url = '/apps/polaroid/api/days';
+            let url = '/apps/memories/api/days';
 
             if (this.$route.name === 'albums') {
                 const id = this.$route.params.id || 0;
-                url = `/apps/polaroid/api/folder/${id}`;
+                url = `/apps/memories/api/folder/${id}`;
             }
 
             const startState = this.state;
@@ -413,11 +413,11 @@ export default {
 
         /** Fetch image data for one dayId */
         async fetchDay(dayId) {
-            let url = `/apps/polaroid/api/days/${dayId}`;
+            let url = `/apps/memories/api/days/${dayId}`;
 
             if (this.$route.name === 'albums') {
                 const id = this.$route.params.id || 0;
-                url = `/apps/polaroid/api/folder/${id}/${dayId}`;
+                url = `/apps/memories/api/folder/${id}/${dayId}`;
             }
 
             // Do this in advance to prevent duplicate requests

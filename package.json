@@ -1,5 +1,5 @@
 {
-	"name": "polaroid",
+	"name": "memories",
 	"description": "A better photos app",
 	"version": "0.0.0",
 	"author": "Varun Patil <radialapps@gmail.com>",
@@ -13,13 +13,13 @@
 		"vuejs"
 	],
 	"bugs": {
-		"url": "https://github.com/pulsejet/polaroid/issues"
+		"url": "https://github.com/pulsejet/memories/issues"
 	},
 	"repository": {
-		"url": "https://github.com/pulsejet/polaroid.git",
+		"url": "https://github.com/pulsejet/memories.git",
 		"type": "git"
 	},
-	"homepage": "https://github.com/pulsejet/polaroid",
+	"homepage": "https://github.com/pulsejet/memories",
 	"license": "agpl",
 	"private": true,
 	"scripts": {

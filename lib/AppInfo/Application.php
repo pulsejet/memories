@@ -24,10 +24,10 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\Polaroid\AppInfo;
+namespace OCA\Memories\AppInfo;
 
-use OCA\Polaroid\Listeners\PostWriteListener;
-use OCA\Polaroid\Listeners\PostDeleteListener;
+use OCA\Memories\Listeners\PostWriteListener;
+use OCA\Memories\Listeners\PostDeleteListener;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
@@ -38,7 +38,7 @@ use OCP\Files\Events\Node\NodeRenamedEvent;
 use OCP\Files\Events\Node\NodeTouchedEvent;
 
 class Application extends App implements IBootstrap {
-	public const APPNAME = 'polaroid';
+	public const APPNAME = 'memories';
 
 	public const IMAGE_MIMES = [
 		'image/png',

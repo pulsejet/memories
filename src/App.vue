@@ -1,7 +1,7 @@
 <template>
-	<Content app-name="polaroid">
+	<Content app-name="memories">
 		<AppNavigation>
-			<template id="app-polaroid-navigation" #list>
+			<template id="app-memories-navigation" #list>
 				<AppNavigationItem :to="{name: 'timeline'}"
 					:title="t('timeline', 'Timeline')"
 					icon="icon-yourphotos"

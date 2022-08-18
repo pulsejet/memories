@@ -24,7 +24,7 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\Polaroid\Command;
+namespace OCA\Memories\Command;
 
 use OCP\Encryption\IManager;
 use OCP\Files\File;
@@ -58,7 +58,7 @@ class Index extends Command {
 	protected OutputInterface $output;
 	protected IManager $encryptionManager;
 	protected IDBConnection $connection;
-	protected \OCA\Polaroid\Db\Util $util;
+	protected \OCA\Memories\Db\Util $util;
 
 	public function __construct(IRootFolder $rootFolder,
 								IUserManager $userManager,
@@ -75,7 +75,7 @@ class Index extends Command {
 		$this->config = $config;
 		$this->encryptionManager = $encryptionManager;
 		$this->connection = $connection;
-		$this->util = new \OCA\Polaroid\Db\Util($connection);
+		$this->util = new \OCA\Memories\Db\Util($connection);
 
 		try {
 			$this->globalService = $container->get(GlobalStoragesService::class);
@@ -86,7 +86,7 @@ class Index extends Command {
 
 	protected function configure(): void {
 		$this
-			->setName('polaroid:index')
+			->setName('memories:index')
 			->setDescription('Generate entries');
 	}
 

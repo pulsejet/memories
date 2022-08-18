@@ -1,14 +1,38 @@
 <?php
 
-  namespace OCA\Polaroid\Migration;
+declare(strict_types=1);
 
-  use Closure;
-  use OCP\DB\Types;
-  use OCP\DB\ISchemaWrapper;
-  use OCP\Migration\SimpleMigrationStep;
-  use OCP\Migration\IOutput;
+/**
+ * @copyright Copyright (c) 2022 Varun Patil <radialapps@gmail.com>
+ *
+ * @author Varun Patil <radialapps@gmail.com>
+ *
+ * @license GNU AGPL version 3 or any later version
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
-  class Version000000Date20220812163631 extends SimpleMigrationStep {
+namespace OCA\Memories\Migration;
+
+use Closure;
+use OCP\DB\Types;
+use OCP\DB\ISchemaWrapper;
+use OCP\Migration\SimpleMigrationStep;
+use OCP\Migration\IOutput;
+
+class Version000000Date20220812163631 extends SimpleMigrationStep {
 
     /**
     * @param IOutput $output
@@ -20,8 +44,8 @@
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
 
-        if (!$schema->hasTable('polaroid')) {
-            $table = $schema->createTable('polaroid');
+        if (!$schema->hasTable('memories')) {
+            $table = $schema->createTable('memories');
             $table->addColumn('id', 'integer', [
                 'autoincrement' => true,
                 'notnull' => true,
@@ -49,14 +73,14 @@
 			]);
 
             $table->setPrimaryKey(['id']);
-            $table->addIndex(['user_id'], 'polaroid_user_id_index');
-            $table->addIndex(['user_id', 'day_id'], 'polaroid_ud_index');
-            $table->addUniqueIndex(['user_id', 'file_id'], 'polaroid_day_uf_ui');
+            $table->addIndex(['user_id'], 'memories_user_id_index');
+            $table->addIndex(['user_id', 'day_id'], 'memories_ud_index');
+            $table->addUniqueIndex(['user_id', 'file_id'], 'memories_day_uf_ui');
         }
 
         if ($schema->hasTable('filecache')) {
             $table = $schema->getTable('filecache');
-            $table->addIndex(['path'], 'polaroid_path_index');
+            $table->addIndex(['path'], 'memories_path_index');
         }
 
         return $schema;
