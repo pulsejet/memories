@@ -25,6 +25,7 @@ namespace OCA\Polaroid\Listeners;
 
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
+use OCP\Files\Events\Node\NodeRenamedEvent;
 use OCP\Files\Events\Node\NodeTouchedEvent;
 use OCP\Files\Events\Node\NodeWrittenEvent;
 use OCP\Files\Folder;
@@ -42,7 +43,9 @@ class PostWriteListener implements IEventListener {
 	}
 
 	public function handle(Event $event): void {
-		if (!($event instanceof NodeWrittenEvent) && !($event instanceof NodeTouchedEvent)) {
+		if (!($event instanceof NodeWrittenEvent) &&
+		    !($event instanceof NodeTouchedEvent) &&
+			!($event instanceof NodeRenamedEvent)) {
 			return;
 		}
 

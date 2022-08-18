@@ -77,16 +77,15 @@ class Util {
         $mtime = $file->getMtime();
         $user = $file->getOwner()->getUID();
         $fileId = $file->getId();
-        $timeline = (bool)(preg_match('/^files\\/photos/i', $file->getInternalPath()));
 
         // Check if need to update
         $sql = 'SELECT COUNT(*) as e
                 FROM *PREFIX*polaroid
-                WHERE file_id = ? AND user_id = ? AND mtime = ? AND timeline = ?';
+                WHERE file_id = ? AND user_id = ? AND mtime = ?';
         $exists = $this->connection->executeQuery($sql, [
-            $fileId, $user, $mtime, $timeline,
+            $fileId, $user, $mtime,
         ], [
-            \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_INT, \PDO::PARAM_BOOL,
+            \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_INT,
         ])->fetch();
         if (intval($exists['e']) > 0) {
             return;
@@ -98,18 +97,18 @@ class Util {
         $dateTaken = gmdate('Y-m-d H:i:s', $dateTaken);
 
         $sql = 'INSERT
-                INTO  *PREFIX*polaroid (day_id, date_taken, is_video, timeline, mtime, user_id, file_id)
-                VALUES  (?, ?, ?, ?, ?, ?, ?)
+                INTO  *PREFIX*polaroid (day_id, date_taken, is_video, mtime, user_id, file_id)
+                VALUES  (?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE
-                day_id = ?, date_taken = ?, is_video = ?, timeline = ?, mtime = ?';
+                day_id = ?, date_taken = ?, is_video = ?, mtime = ?';
 		$this->connection->executeStatement($sql, [
-            $dayId, $dateTaken, $is_video, $timeline, $mtime,
+            $dayId, $dateTaken, $is_video, $mtime,
             $user, $fileId,
-            $dayId, $dateTaken, $is_video, $timeline, $mtime,
+            $dayId, $dateTaken, $is_video, $mtime,
 		], [
-            \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_BOOL, \PDO::PARAM_BOOL, \PDO::PARAM_INT,
+            \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_BOOL, \PDO::PARAM_INT,
             \PDO::PARAM_STR, \PDO::PARAM_INT,
-            \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_BOOL, \PDO::PARAM_BOOL, \PDO::PARAM_INT,
+            \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_BOOL, \PDO::PARAM_INT,
         ]);
     }
 
@@ -133,7 +132,10 @@ class Util {
     ): array {
         $sql = 'SELECT day_id, COUNT(file_id) AS count
                 FROM `*PREFIX*polaroid`
-                WHERE user_id=?
+                INNER JOIN `*PREFIX*filecache`
+                    ON user_id=?
+                    AND `*PREFIX*polaroid`.`file_id` = `*PREFIX*filecache`.`fileid`
+                    AND `*PREFIX*filecache`.`path` LIKE "files/Photos/%"
                 GROUP BY day_id
                 ORDER BY day_id DESC';
         $rows = $this->connection->executeQuery($sql, [$user], [
@@ -146,7 +148,7 @@ class Util {
         $sql = 'SELECT day_id, COUNT(file_id) AS count
                 FROM `*PREFIX*polaroid`
                 INNER JOIN `*PREFIX*filecache`
-                ON `*PREFIX*polaroid`.`file_id` = `*PREFIX*filecache`.`fileid`
+                    ON `*PREFIX*polaroid`.`file_id` = `*PREFIX*filecache`.`fileid`
                     AND (`*PREFIX*filecache`.`parent`=? OR `*PREFIX*filecache`.`fileid`=?)
                 GROUP BY day_id
                 ORDER BY day_id DESC';
@@ -174,7 +176,8 @@ class Util {
         $sql = 'SELECT file_id, *PREFIX*filecache.etag, is_video
                 FROM *PREFIX*polaroid
                 LEFT JOIN *PREFIX*filecache
-                ON *PREFIX*filecache.fileid = *PREFIX*polaroid.file_id
+                    ON *PREFIX*filecache.fileid = *PREFIX*polaroid.file_id
+                    AND `*PREFIX*filecache`.`path` LIKE "files/Photos/%"
                 WHERE user_id = ? AND day_id = ?
                 ORDER BY date_taken DESC';
 		$rows = $this->connection->executeQuery($sql, [$user, $dayId], [

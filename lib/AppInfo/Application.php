@@ -34,6 +34,7 @@ use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\Files\Events\Node\NodeWrittenEvent;
 use OCP\Files\Events\Node\NodeDeletedEvent;
+use OCP\Files\Events\Node\NodeRenamedEvent;
 use OCP\Files\Events\Node\NodeTouchedEvent;
 
 class Application extends App implements IBootstrap {
@@ -65,6 +66,7 @@ class Application extends App implements IBootstrap {
 
 	public function register(IRegistrationContext $context): void {
 		$context->registerEventListener(NodeWrittenEvent::class, PostWriteListener::class);
+		$context->registerEventListener(NodeRenamedEvent::class, PostWriteListener::class);
         $context->registerEventListener(NodeTouchedEvent::class, PostWriteListener::class);
         $context->registerEventListener(NodeDeletedEvent::class, PostDeleteListener::class);
 	}

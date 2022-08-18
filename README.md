@@ -13,7 +13,7 @@
 
 1. ☁ Clone this into your `apps` folder of your Nextcloud.
 1. ⚒️ Install `exiftool` (`sudo apt install exiftool`).
-1. 📸 Place all photos you want on the timeline in a folder called `Photos` in the root of your home.
+1. 📸 Place all photos you want on the timeline in a folder called `Photos` (case sensitive) in the root of your home.
 1. Run `php ./occ polaroid:index` to generate metadata indices for existing photos.
 1. Consider installing the [preview generator](https://github.com/rullzer/previewgenerator) for pre-generating thumbnails.
 
