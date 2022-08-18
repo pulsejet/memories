@@ -2,6 +2,8 @@
 
 **📸 Yet another photo management app for Nextcloud**
 
+![Screenshot](appinfo/screenshot.jpg)
+
 ## How is this different?
 
 * **📸 Photo and Video Timeline**: Sorts photos by date taken, parsed from Exif data.

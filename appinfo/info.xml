@@ -3,11 +3,22 @@
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
     <id>polaroid</id>
     <name>Polaroid</name>
-    <summary>Polaroid App</summary>
-    <description><![CDATA[p]]></description>
+    <summary>Yet another photo management app</summary>
+<description><![CDATA[
+# Polaroid
+
+* **📸 Photo and Video Timeline**: Sorts photos by date taken, parsed from Exif data.
+* **🤔 Quick Recap**: Jump to anywhere in the timeline instantly.
+* **🖼️ Albums**: Browse your and shared folders with a similar, efficient timeline.
+* **🎦 Slideshow**: View photos from your timeline and albums easily.
+]]></description>
     <version>0.0.1</version>
     <licence>agpl</licence>
     <author mail="radialapps@gmail.com" >Varun Patil</author>
+    <website>https://github.com/pulsejet/polaroid</website>
+    <bugs>https://github.com/pulsejet/polaroid/issues</bugs>
+    <repository>https://github.com/pulsejet/polaroid</repository>
+    <screenshot>https://raw.githubusercontent.com/pulsejet/polaroid/master/appinfo/screenshot.jpg</screenshot>
     <namespace>Polaroid</namespace>
     <category>organization</category>
     <bugs>https://github.com</bugs>
