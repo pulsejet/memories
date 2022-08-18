@@ -9,7 +9,7 @@
             v-slot="{ item }"
             :emit-update="true"
             @update="scrollChange"
-            @resize="handleResize"
+            @resize="handleResizeWithDelay"
         >
             <h1 v-if="item.head" class="head-row">
                 {{ item.name }}
@@ -53,7 +53,7 @@
             @touchmove="timelineTouch"
             @mouseleave="timelineLeave"
             @mousedown="timelineClick">
-            <span class="cursor st"
+            <span class="cursor st" ref="cursorSt"
                   v-bind:style="{ top: timelineCursorY + 'px' }"></span>
             <span class="cursor hv"
                   v-bind:style="{ transform: `translateY(${timelineHoverCursorY}px)` }">
@@ -62,8 +62,10 @@
 
             <div v-for="tick of timelineTicks" :key="tick.dayId" class="tick"
                 v-bind:style="{ top: tick.topC + 'px' }">
-                <span v-if="tick.text">{{ tick.text }}</span>
-                <span v-else class="dash"></span>
+                <template v-if="tick.s">
+                    <span v-if="tick.text">{{ tick.text }}</span>
+                    <span v-else class="dash"></span>
+                </template>
             </div>
         </div>
     </div>
@@ -112,6 +114,8 @@ export default {
             scrolling: false,
             /** Scrolling timer */
             scrollTimer: null,
+            /** Resizing timer */
+            resizeTimer: null,
 
             /** State for request cancellations */
             state: Math.random(),
@@ -153,6 +157,17 @@ export default {
             this.state = Math.random();
         },
 
+        /** Do resize after some time */
+        handleResizeWithDelay() {
+            if (this.resizeTimer) {
+                clearTimeout(this.resizeTimer);
+            }
+            this.resizeTimer = setTimeout(() => {
+                this.handleResize();
+                this.resizeTimer = null;
+            }, 300);
+        },
+
         /** Handle window resize and initialization */
         handleResize() {
             let height = this.$refs.container.clientHeight;
@@ -182,6 +197,48 @@ export default {
                 // Compute timeline tick positions
                 for (const tick of this.timelineTicks) {
                     tick.topC = Math.floor((tick.topS + tick.top * this.rowHeight) * this.timelineHeight / this.viewHeight);
+                }
+
+                // Do another pass to figure out which timeline points are visible
+                // This is not as bad as it looks, it's actually 12*O(n)
+                // because there are only 12 months in a year
+                const minGap = parseFloat(getComputedStyle(this.$refs.cursorSt).fontSize) + 2;
+                let prevShow = -9999;
+                for (const [idx, tick] of this.timelineTicks.entries()) {
+                    // Will overlap with the previous tick. Skip anyway.
+                    if (tick.topC - prevShow < minGap) {
+                        tick.s = false;
+                        continue;
+                    }
+
+                    // This is a labelled tick then show it anyway for the sake of best effort
+                    if (tick.text) {
+                        tick.s = true;
+                        prevShow = tick.topC;
+                        continue;
+                    }
+
+                    // Lookahead for next labelled tick
+                    // If showing this tick would overlap the next one, don't show this one
+                    let i = idx + 1;
+                    while(i < this.timelineTicks.length) {
+                        if (this.timelineTicks[i].text) {
+                            break;
+                        }
+                        i++;
+                    }
+                    if (i < this.timelineTicks.length) {
+                        // A labelled tick was found
+                        const nextLabelledTick = this.timelineTicks[i];
+                        if (tick.topC + minGap > nextLabelledTick.topC) {
+                            tick.s = false;
+                            continue;
+                        }
+                    }
+
+                    // Show this tick
+                    tick.s = true;
+                    prevShow = tick.topC;
                 }
             }, 0);
         },
@@ -602,6 +659,7 @@ export default {
 }
 
 .timeline-scroll {
+    overflow-y: clip;
     position: absolute;
     height: 100%;
     width: 40px;
@@ -643,6 +701,7 @@ export default {
 }
 
 .timeline-scroll .cursor.st {
+    font-size: 0.8em;
     opacity: 0;
 }
 .timeline-scroll:hover .cursor.st {
