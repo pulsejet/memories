@@ -2,7 +2,7 @@
 
 **📸 Yet another photo management app for Nextcloud**
 
-![Screenshot](appinfo/screenshot.jpg)
+![Screenshot](appinfo/screencap.gif)
 
 ## How is this different?
 
