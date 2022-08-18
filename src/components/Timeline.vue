@@ -206,7 +206,7 @@ export default {
                 let prevShow = -9999;
                 for (const [idx, tick] of this.timelineTicks.entries()) {
                     // You can't see these anyway, why bother?
-                    if (tick.topC < minGap) {
+                    if (tick.topC < minGap || tick.topC > this.timelineHeight - minGap) {
                         tick.s = false;
                         continue;
                     }
@@ -236,7 +236,8 @@ export default {
                     if (i < this.timelineTicks.length) {
                         // A labelled tick was found
                         const nextLabelledTick = this.timelineTicks[i];
-                        if (tick.topC + minGap > nextLabelledTick.topC) {
+                        if (tick.topC + minGap > nextLabelledTick.topC &&
+                            nextLabelledTick.topC < this.timelineHeight - minGap) { // make sure this will be shown
                             tick.s = false;
                             continue;
                         }
