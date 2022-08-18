@@ -156,7 +156,7 @@ export default {
         /** Handle window resize and initialization */
         handleResize() {
             let height = this.$refs.container.clientHeight;
-            let width = this.$refs.container.clientWidth;
+            let width = this.$refs.container.clientWidth - 6;
             this.timelineHeight = this.$refs.timelineScroll.clientHeight;
             this.$refs.scroller.$el.style.height = (height - 4) + 'px';
 
@@ -625,9 +625,11 @@ export default {
 }
 
 .timeline-scroll .tick .dash {
-    height: 1px;
-    width: 8px;
-    background-color: black;
+    height: 4px;
+    width: 4px;
+    border-radius: 50%;
+    background-color: #444;
+    opacity: 0.5;
     display: block;
 }
 
@@ -646,7 +648,6 @@ export default {
 .timeline-scroll:hover .cursor.st {
     opacity: 1;
 }
-
 .timeline-scroll .cursor.hv {
     background-color: rgba(255, 255, 255, 0.8);
     padding: 2px 5px;
@@ -655,5 +656,7 @@ export default {
     width: auto;
     white-space: nowrap;
     z-index: 100;
+    font-size: 0.95em;
+    font-weight: 600;
 }
 </style>
