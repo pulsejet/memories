@@ -713,7 +713,7 @@ export default {
     opacity: 1;
 }
 .timeline-scroll .cursor.hv {
-    background-color: var(--color-placeholder-light);
+    background-color: var(--color-main-background);
     padding: 2px 5px;
     border-top: 2px solid var(--color-primary);
     border-radius: 2px;
