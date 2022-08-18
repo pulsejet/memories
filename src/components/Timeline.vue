@@ -48,6 +48,7 @@
         </RecycleScroller>
 
         <div ref="timelineScroll" class="timeline-scroll"
+             v-bind:class="{ scrolling }"
             @mousemove="timelineHover"
             @touchmove="timelineTouch"
             @mouseleave="timelineLeave"
@@ -103,6 +104,10 @@ export default {
             currentStart: 0,
             /** Current end index */
             currentEnd: 0,
+            /** Scrolling currently */
+            scrolling: false,
+            /** Scrolling timer */
+            scrollTimer: null,
 
             /** State for request cancellations */
             state: Math.random(),
@@ -113,10 +118,9 @@ export default {
         this.handleResize();
         this.fetchDays();
 
-        // Set scrollbar
-        this.$refs.scroller.$el.addEventListener('scroll', (event) => {
-            this.timelineCursorY = event.target.scrollTop * this.timelineHeight / this.viewHeight;
-        }, false);
+        // Timeline scroller init
+        this.$refs.scroller.$el.addEventListener('scroll', this.scrollPositionChange, false);
+        this.scrollPositionChange();
     },
 
     watch: {
@@ -148,7 +152,7 @@ export default {
         /** Handle window resize and initialization */
         handleResize() {
             let height = this.$refs.container.clientHeight;
-            let width = this.$refs.container.clientWidth - 40;
+            let width = this.$refs.container.clientWidth;
             this.timelineHeight = this.$refs.timelineScroll.clientHeight;
             this.$refs.scroller.$el.style.height = (height - 4) + 'px';
 
@@ -171,6 +175,26 @@ export default {
             setTimeout(() => {
                 this.viewHeight = this.$refs.scroller.$refs.wrapper.clientHeight;
             }, 0);
+        },
+
+        /**
+         * Triggered when position of scroll change.
+         * This does NOT indicate the items have changed, only that
+         * the pixel position of the scroller has changed.
+         */
+        scrollPositionChange(event) {
+            if (event) {
+                this.timelineCursorY = event.target.scrollTop * this.timelineHeight / this.viewHeight;
+            }
+
+            if (this.scrollTimer) {
+                clearTimeout(this.scrollTimer);
+            }
+            this.scrolling = true;
+            this.scrollTimer = setTimeout(() => {
+                this.scrolling = false;
+                this.scrollTimer = null;
+            }, 1500);
         },
 
         /** Trigger when recycler view changes */
@@ -551,22 +575,26 @@ export default {
     top: 0; right: 0;
     overflow: hidden;
     cursor: ns-resize;
+    opacity: 0;
+    transition: opacity .2s ease-in-out;
+}
+.timeline-scroll:hover, .timeline-scroll.scrolling {
+    opacity: 1;
 }
 
 .timeline-scroll .tick {
     pointer-events: none;
     position: absolute;
     font-size: 0.8em;
-    color: grey;
+    color: black;
     right: 5px;
     transform: translateY(-50%);
 }
 
 .timeline-scroll .tick .dash {
     height: 1px;
-    width: 6px;
-    background-color: grey;
-    opacity: 0.8;
+    width: 8px;
+    background-color: black;
     display: block;
 }
 
