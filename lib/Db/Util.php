@@ -133,9 +133,9 @@ class Util {
         $sql = 'SELECT day_id, COUNT(file_id) AS count
                 FROM `*PREFIX*polaroid`
                 INNER JOIN `*PREFIX*filecache`
-                    ON user_id=?
-                    AND `*PREFIX*polaroid`.`file_id` = `*PREFIX*filecache`.`fileid`
+                    ON `*PREFIX*filecache`.`fileid` = `*PREFIX*polaroid`.`file_id`
                     AND `*PREFIX*filecache`.`path` LIKE "files/Photos/%"
+                WHERE user_id=?
                 GROUP BY day_id
                 ORDER BY day_id DESC';
         $rows = $this->connection->executeQuery($sql, [$user], [
@@ -148,7 +148,7 @@ class Util {
         $sql = 'SELECT day_id, COUNT(file_id) AS count
                 FROM `*PREFIX*polaroid`
                 INNER JOIN `*PREFIX*filecache`
-                    ON `*PREFIX*polaroid`.`file_id` = `*PREFIX*filecache`.`fileid`
+                    ON `*PREFIX*filecache`.`fileid` = `*PREFIX*polaroid`.`file_id`
                     AND (`*PREFIX*filecache`.`parent`=? OR `*PREFIX*filecache`.`fileid`=?)
                 GROUP BY day_id
                 ORDER BY day_id DESC';
@@ -175,7 +175,7 @@ class Util {
     ): array {
         $sql = 'SELECT file_id, *PREFIX*filecache.etag, is_video
                 FROM *PREFIX*polaroid
-                LEFT JOIN *PREFIX*filecache
+                INNER JOIN *PREFIX*filecache
                     ON *PREFIX*filecache.fileid = *PREFIX*polaroid.file_id
                     AND `*PREFIX*filecache`.`path` LIKE "files/Photos/%"
                 WHERE user_id = ? AND day_id = ?
@@ -193,10 +193,10 @@ class Util {
         $sql = 'SELECT file_id, *PREFIX*filecache.etag, is_video
                 FROM `*PREFIX*polaroid`
                 INNER JOIN `*PREFIX*filecache`
-                ON  `*PREFIX*polaroid`.`day_id`=?
-                AND `*PREFIX*polaroid`.`file_id` = `*PREFIX*filecache`.`fileid`
-                AND (`*PREFIX*filecache`.`parent`=? OR `*PREFIX*filecache`.`fileid`=?);';
-		$rows = $this->connection->executeQuery($sql, [$dayId, $folderId, $folderId], [
+                    ON `*PREFIX*filecache`.`fileid` = `*PREFIX*polaroid`.`file_id`
+                    AND (`*PREFIX*filecache`.`parent`=? OR `*PREFIX*filecache`.`fileid`=?)
+                WHERE  `*PREFIX*polaroid`.`day_id`=?';
+		$rows = $this->connection->executeQuery($sql, [$folderId, $folderId, $dayId], [
             \PDO::PARAM_INT, \PDO::PARAM_INT, \PDO::PARAM_INT,
         ])->fetchAll();
         return $this->processDay($rows);
