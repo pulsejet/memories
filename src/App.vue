@@ -14,9 +14,9 @@
 			</template>
 		</AppNavigation>
 
-		<AppContent :class="{ 'icon-loading': loading }">
+		<AppContent>
 			<div class="outer">
-				<router-view v-show="!loading" :loading.sync="loading" />
+				<router-view />
 			</div>
 		</AppContent>
 	</Content>

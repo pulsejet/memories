@@ -1,5 +1,5 @@
 <template>
-    <div class="container" ref="container">
+    <div class="container" ref="container" :class="{ 'icon-loading': loading }">
         <RecycleScroller
             ref="scroller"
             class="scroller"
