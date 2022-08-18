@@ -9,6 +9,7 @@
             v-slot="{ item }"
             :emit-update="true"
             @update="scrollChange"
+            @resize="handleResize"
         >
             <h1 v-if="item.head" class="head-row">
                 {{ item.name }}
@@ -56,7 +57,7 @@
                   v-bind:style="{ transform: `translateY(${timelineHoverCursorY}px)` }"></span>
 
             <div v-for="tick of timelineTicks" :key="tick.dayId" class="tick"
-                v-bind:style="{ top: Math.floor(tick.top * timelineHeight / viewHeight) + 'px' }">
+                v-bind:style="{ top: Math.floor((tick.topS + tick.top * rowHeight) * timelineHeight / viewHeight) + 'px' }">
                 <span v-if="tick.text">{{ tick.text }}</span>
                 <span v-else class="dash"></span>
             </div>
@@ -150,8 +151,18 @@ export default {
             this.timelineHeight = this.$refs.timelineScroll.clientHeight;
             this.$refs.scroller.$el.style.height = (height - 4) + 'px';
 
-            this.numCols = Math.max(4, Math.floor(width / 175));
+            if (this.days.length === 0) {
+                // Don't change cols if already initialized
+                this.numCols = Math.max(4, Math.floor(width / 175));
+            }
+
             this.rowHeight = Math.floor(width / this.numCols) - 4;
+
+            // Set heights of rows
+            this.list.filter(r => !r.head).forEach(row => {
+                row.size = this.rowHeight;
+            });
+            this.handleViewSizeChange();
         },
 
         /** Handle change in rows and view size */
@@ -219,7 +230,8 @@ export default {
             this.days = data;
 
             // Ticks
-            let currTop = 0;
+            let currTopRow = 0;
+            let currTopStatic = 0;
             let prevYear = new Date().getUTCFullYear();
             let prevMonth = new Date().getUTCMonth();
 
@@ -245,7 +257,8 @@ export default {
                 if (Number.isInteger(day.day_id) && (dtMonth !== prevMonth || dtYear !== prevYear)) {
                     this.timelineTicks.push({
                         dayId: day.id,
-                        top: currTop,
+                        top: currTopRow,
+                        topS: currTopStatic,
                         text: dtYear === prevYear ? undefined : dtYear,
                     });
                 }
@@ -268,14 +281,14 @@ export default {
                 };
                 this.heads[day.day_id] = head;
                 this.list.push(head);
-                currTop += head.size;
+                currTopStatic += head.size;
 
                 // Add rows
                 const nrows = Math.ceil(day.count / this.numCols);
                 for (let i = 0; i < nrows; i++) {
                     const row = this.getBlankRow(day.day_id);
                     this.list.push(row);
-                    currTop += row.size;
+                    currTopRow++;
                 }
             }
 
