@@ -205,6 +205,12 @@ export default {
                 const minGap = parseFloat(getComputedStyle(this.$refs.cursorSt).fontSize) + 2;
                 let prevShow = -9999;
                 for (const [idx, tick] of this.timelineTicks.entries()) {
+                    // You can't see these anyway, why bother?
+                    if (tick.topC < minGap) {
+                        tick.s = false;
+                        continue;
+                    }
+
                     // Will overlap with the previous tick. Skip anyway.
                     if (tick.topC - prevShow < minGap) {
                         tick.s = false;
