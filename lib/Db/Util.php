@@ -45,7 +45,7 @@ class Util {
         // Check if found something
         if (!empty($dt)) {
             $dt = \DateTime::createFromFormat('Y:m:d H:i:s', $dt);
-            if ($dt) {
+            if ($dt && $dt->getTimestamp() > -5364662400) { // 1800 A.D.
                 return $dt->getTimestamp();
             }
         }
