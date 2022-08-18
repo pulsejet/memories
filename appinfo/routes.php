@@ -2,14 +2,12 @@
 return [
     'routes' => [
         ['name' => 'page#main', 'url' => '/', 'verb' => 'GET'],
-        ['name' => 'page#album', 'url' => '/albusms/{path}/{path1}', 'verb' => 'GET',
+        ['name' => 'page#album', 'url' => '/albums/{path}', 'verb' => 'GET',
 			'requirements' => [
 				'path' => '.*',
-                'path1' => '.*',
 			],
 			'defaults' => [
 				'path' => '',
-                'path1' => '',
 			]
 	    ],
 
