@@ -14,36 +14,48 @@ class Util {
 		$this->connection = $connection;
 	}
 
-    private static function getExif($data, $field) {
-        $pipes = [];
-        $proc = proc_open('exiftool -b -' . $field . ' -', [
-            0 => array('pipe', 'rb'),
-            1 => array('pipe', 'w'),
-            2 => array('pipe', 'w'),
-        ], $pipes);
-
-        fwrite($pipes[0], $data);
-        fclose($pipes[0]);
-        $stdout = stream_get_contents($pipes[1]);
-        proc_close($proc);
-        return $stdout;
-    }
-
-    public static function getDateTaken(File $file) {
+    private static function getExif(File $file) {
         // Attempt to read exif data
         // Assume it exists in the first 256 kb of the file
-        $handle = $file->fopen('rb');
-        $data = stream_get_contents($handle, 256 * 1024);
-        fclose($handle);
+        try {
+            $handle = $file->fopen('rb');
+            $data = stream_get_contents($handle, 256 * 1024);
+            fclose($handle);
 
-        // Try different formats
-        $dt = self::getExif($data, 'DateTimeOriginal');
-        if (empty($dt)) {
-            $dt = self::getExif($data, 'CreateDate');
+            if (!$data) {
+                throw new \Exception('Could not read file');
+            }
+
+            $pipes = [];
+            $proc = proc_open('exiftool -json -', [
+                0 => array('pipe', 'rb'),
+                1 => array('pipe', 'w'),
+                2 => array('pipe', 'w'),
+            ], $pipes);
+
+            fwrite($pipes[0], $data);
+            fclose($pipes[0]);
+            $stdout = stream_get_contents($pipes[1]);
+            proc_close($proc);
+
+            $json = json_decode($stdout, true);
+            if (empty($json)) {
+                throw new \Exception('Could not read exif data');
+            }
+            return $json[0];
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    public static function getDateTaken(File $file, array $exif) {
+        $dt = $exif['DateTimeOriginal'];
+        if (!isset($dt) || empty($dt)) {
+            $dt = $exif['CreateDate'];
         }
 
         // Check if found something
-        if (!empty($dt)) {
+        if (isset($dt) && !empty($dt)) {
             $dt = \DateTime::createFromFormat('Y:m:d H:i:s', $dt);
             if ($dt && $dt->getTimestamp() > -5364662400) { // 1800 A.D.
                 return $dt->getTimestamp();
@@ -91,8 +103,11 @@ class Util {
             return;
         }
 
+        // Get exif data
+        $exif = self::getExif($file);
+
         // Get more parameters
-        $dateTaken = $this->getDateTaken($file);
+        $dateTaken = $this->getDateTaken($file, $exif);
         $dayId = floor($dateTaken / 86400);
         $dateTaken = gmdate('Y-m-d H:i:s', $dateTaken);
 
