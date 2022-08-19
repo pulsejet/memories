@@ -17,15 +17,6 @@ class Util {
     private static function getExif(File $file) {
         // Attempt to read exif data
         try {
-            // Assume it exists in the first 256 kb of the file
-            $handle = $file->fopen('rb');
-            $data = stream_get_contents($handle, 256 * 1024);
-            fclose($handle);
-
-            if (!$data) {
-                throw new \Exception('Could not read file');
-            }
-
             // Start exiftool and output to json
             $pipes = [];
             $proc = proc_open('exiftool -json -', [
@@ -35,8 +26,13 @@ class Util {
             ], $pipes);
 
             // Write the file to exiftool's stdin
-            fwrite($pipes[0], $data);
+            // Assume exif exists in the first 256 kb of the file
+            $handle = $file->fopen('rb');
+            stream_copy_to_stream($handle, $pipes[0], 256 * 1024);
+            fclose($handle);
             fclose($pipes[0]);
+
+            // Get output from exiftool
             $stdout = stream_get_contents($pipes[1]);
 
             // Clean up
