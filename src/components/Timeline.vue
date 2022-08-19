@@ -74,6 +74,7 @@
 <script>
 
 import * as dav from "../services/DavRequests";
+import axios from '@nextcloud/axios'
 
 export default {
     data() {
@@ -322,8 +323,8 @@ export default {
             }
 
             const startState = this.state;
-            const res = await fetch(url);
-            const data = await res.json();
+            const res = await axios.get(url);
+            const data = res.data;
             if (this.state !== startState) return;
 
             this.days = data;
@@ -427,8 +428,8 @@ export default {
             let data = [];
             try {
                 const startState = this.state;
-                const res = await fetch(url);
-                data = await res.json();
+                const res = await axios.get(url);
+                const data = res.data;
                 if (this.state !== startState) return;
 
                 this.days.find(d => d.day_id === dayId).detail = data;
