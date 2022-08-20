@@ -573,7 +573,7 @@ export default {
     top: 2px; left: 2px;
     background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 95%);
     opacity: 0;
-    border-radius: 3%;
+    border-radius: 3px;
     transition: opacity .1s ease-in-out;
     pointer-events: none;
     user-select: none;
