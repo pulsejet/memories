@@ -82,6 +82,29 @@ class Index extends Command {
 		} catch (ContainerExceptionInterface $e) {
 			$this->globalService = null;
 		}
+
+		// Refuse to run without exiftool
+		if (!$this->testExif()) {
+			error_log('FATAL: exiftool could not be found or test failed');
+			exit(1);
+		}
+	}
+
+	/** Make sure exiftool is available */
+	private function testExif() {
+		$testfile = dirname(__FILE__). '/../../exiftest.jpg';
+		$stream = fopen($testfile, 'rb');
+		if (!$stream) {
+			return false;
+		}
+
+		$exif = \OCA\Memories\Db\Util::getExifFromStream($stream);
+		fclose($stream);
+
+		if (!$exif || $exif["DateTimeOriginal"] !== "2004:08:31 19:52:58") {
+			return false;
+		}
+		return true;
 	}
 
 	protected function configure(): void {
