@@ -34,6 +34,10 @@ class Util {
      */
     public static function getExifFromFile(File &$file) {
         $handle = $file->fopen('rb');
+        if (!$handle) {
+            throw new \Exception('Could not open file');
+        }
+
         $exif = self::getExifFromStream($handle);
         fclose($handle);
         return $exif;
