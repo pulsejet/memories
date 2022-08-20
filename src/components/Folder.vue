@@ -10,7 +10,7 @@
         }">
         <div class="big-icon">
             <div class="icon-folder"></div>
-            <div class="name">{{ data.name }} wer wer wer wer wr wer werw rw wr wr</div>
+            <div class="name">{{ data.name }}</div>
         </div>
 
         <div class="previews">
