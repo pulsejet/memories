@@ -31,8 +31,8 @@
 ## Why a separate app?
 The approach of this app is fundamentally different from the official Nextcloud Photos app, which is very lightweight and works entirely using webdav. This app instead maintains special metadata in a separate table on the backend, and thus can be considered to have different objectives.
 
-## Limitations & Notes
-1. Only works on MySQL/MariaDB for now.
+## Notes
+1. The app has been tested with 100GB worth of ~25k photos.
 1. You may need to configure the Nextcloud preview generator and Imagemagick / ffmpeg to support all types of images and videos (e.g. HEIC).
 
 ## Special Thanks 🙏🏻
