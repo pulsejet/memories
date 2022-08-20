@@ -5,6 +5,7 @@ namespace OCA\Memories\Db;
 
 use OCA\Memories\AppInfo\Application;
 use OCP\Files\File;
+use OCP\IConfig;
 use OCP\IDBConnection;
 
 class Util {
@@ -13,6 +14,14 @@ class Util {
 	public function __construct(IDBConnection $connection) {
 		$this->connection = $connection;
 	}
+
+    public static function getPhotosPath(IConfig $config, string $userId) {
+        $p = $config->getUserValue($userId, Application::APPNAME, 'timelinePath', '');
+        if (empty($p)) {
+            return '/Photos/';
+        }
+        return $p;
+    }
 
     private static function getExif(File $file) {
         // Attempt to read exif data
@@ -146,18 +155,21 @@ class Util {
     }
 
     public function getDays(
+        IConfig $config,
         string $user,
     ): array {
         $sql = 'SELECT day_id, COUNT(file_id) AS count
                 FROM `*PREFIX*memories`
                 INNER JOIN `*PREFIX*filecache`
                     ON `*PREFIX*filecache`.`fileid` = `*PREFIX*memories`.`file_id`
-                    AND `*PREFIX*filecache`.`path` LIKE "files/Photos/%"
+                    AND `*PREFIX*filecache`.`path` LIKE ?
                 WHERE user_id=?
                 GROUP BY day_id
                 ORDER BY day_id DESC';
-        $rows = $this->connection->executeQuery($sql, [$user], [
-            \PDO::PARAM_STR,
+
+        $path = "files" . self::getPhotosPath($config, $user) . "%";
+        $rows = $this->connection->executeQuery($sql, [$path, $user], [
+            \PDO::PARAM_STR, \PDO::PARAM_STR,
         ])->fetchAll();
         return $this->processDays($rows);
     }
@@ -188,6 +200,7 @@ class Util {
     }
 
     public function getDay(
+        IConfig $config,
         string $user,
         int $dayId,
     ): array {
@@ -195,11 +208,13 @@ class Util {
                 FROM *PREFIX*memories
                 INNER JOIN *PREFIX*filecache
                     ON *PREFIX*filecache.fileid = *PREFIX*memories.file_id
-                    AND `*PREFIX*filecache`.`path` LIKE "files/Photos/%"
+                    AND `*PREFIX*filecache`.`path` LIKE ?
                 WHERE user_id = ? AND day_id = ?
                 ORDER BY date_taken DESC';
-		$rows = $this->connection->executeQuery($sql, [$user, $dayId], [
-            \PDO::PARAM_STR, \PDO::PARAM_INT,
+
+        $path = "files" . self::getPhotosPath($config, $user) . "%";
+		$rows = $this->connection->executeQuery($sql, [$path, $user, $dayId], [
+            \PDO::PARAM_STR, \PDO::PARAM_STR, \PDO::PARAM_INT,
         ])->fetchAll();
         return $this->processDay($rows);
     }

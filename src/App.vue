@@ -12,6 +12,11 @@
 					icon="icon-files-dark">
 				</AppNavigationItem>
 			</template>
+			<template #footer>
+				<AppNavigationSettings :title="t('memories', 'Settings')">
+					<Settings />
+				</AppNavigationSettings>
+			</template>
 		</AppNavigation>
 
 		<AppContent>
@@ -34,7 +39,10 @@ import Content from '@nextcloud/vue/dist/Components/Content'
 import AppContent from '@nextcloud/vue/dist/Components/AppContent'
 import AppNavigation from '@nextcloud/vue/dist/Components/AppNavigation'
 import AppNavigationItem from '@nextcloud/vue/dist/Components/AppNavigationItem'
+import AppNavigationSettings from '@nextcloud/vue/dist/Components/AppNavigationSettings'
+
 import Timeline from './components/Timeline.vue'
+import Settings from './components/Settings.vue'
 
 export default {
 	name: 'App',
@@ -43,7 +51,10 @@ export default {
 		AppContent,
 		AppNavigation,
 		AppNavigationItem,
+		AppNavigationSettings,
+
 		Timeline,
+		Settings,
 	},
 	data() {
 		return {

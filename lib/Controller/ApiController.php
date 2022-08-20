@@ -75,7 +75,7 @@ class ApiController extends Controller {
 			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
 		}
 
-        $list = $this->util->getDays($user->getUID());
+        $list = $this->util->getDays($this->config, $user->getUID());
 		return new JSONResponse($list, Http::STATUS_OK);
 	}
 
@@ -90,7 +90,7 @@ class ApiController extends Controller {
 			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
 		}
 
-        $list = $this->util->getDay($user->getUID(), intval($id));
+        $list = $this->util->getDay($this->config, $user->getUID(), intval($id));
 		return new JSONResponse($list, Http::STATUS_OK);
 	}
 

@@ -75,6 +75,7 @@
 
 import * as dav from "../services/DavRequests";
 import axios from '@nextcloud/axios'
+import { generateUrl } from '@nextcloud/router'
 
 export default {
     data() {
@@ -323,7 +324,7 @@ export default {
             }
 
             const startState = this.state;
-            const res = await axios.get(url);
+            const res = await axios.get(generateUrl(url));
             const data = res.data;
             if (this.state !== startState) return;
 
@@ -428,7 +429,7 @@ export default {
             let data = [];
             try {
                 const startState = this.state;
-                const res = await axios.get(url);
+                const res = await axios.get(generateUrl(url));
                 const data = res.data;
                 if (this.state !== startState) return;
 
