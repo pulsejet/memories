@@ -118,7 +118,7 @@ export async function getFolderPreviewFileIds(folderPath, limit) {
 							<d:prop>
 								<d:getlastmodified/>
 							</d:prop>
-							<d:ascending/>
+							<d:descending/>
 						</d:order>
 					</d:orderby>
 					<d:limit>
