@@ -50,21 +50,21 @@ class Version000000Date20220812163631 extends SimpleMigrationStep {
                 'autoincrement' => true,
                 'notnull' => true,
             ]);
-            $table->addColumn('user_id', 'string', [
+            $table->addColumn('uid', 'string', [
                 'notnull' => true,
                 'length' => 200,
             ]);
-            $table->addColumn('date_taken', Types::DATETIME, [
+            $table->addColumn('datetaken', Types::DATETIME, [
                 'notnull' => false,
             ]);
-            $table->addColumn('file_id', Types::BIGINT, [
+            $table->addColumn('fileid', Types::BIGINT, [
 				'notnull' => true,
 				'length' => 20,
 			]);
-            $table->addColumn('day_id', Types::INTEGER, [
+            $table->addColumn('dayid', Types::INTEGER, [
 				'notnull' => true,
 			]);
-            $table->addColumn('is_video', Types::BOOLEAN, [
+            $table->addColumn('isvideo', Types::BOOLEAN, [
 				'notnull' => false,
                 'default' => false
 			]);
@@ -73,9 +73,9 @@ class Version000000Date20220812163631 extends SimpleMigrationStep {
 			]);
 
             $table->setPrimaryKey(['id']);
-            $table->addIndex(['user_id'], 'memories_user_id_index');
-            $table->addIndex(['user_id', 'day_id'], 'memories_ud_index');
-            $table->addUniqueIndex(['user_id', 'file_id'], 'memories_day_uf_ui');
+            $table->addIndex(['uid'], 'memories_uid_index');
+            $table->addIndex(['uid', 'dayid'], 'memories_ud_index');
+            $table->addUniqueIndex(['uid', 'fileid'], 'memories_day_uf_ui');
         }
 
         if ($schema->hasTable('filecache')) {

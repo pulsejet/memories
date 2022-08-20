@@ -344,7 +344,7 @@ export default {
                 }
 
                 // Make date string
-                const dateTaken = new Date(Number(day.day_id)*86400*1000);
+                const dateTaken = new Date(Number(day.dayid)*86400*1000);
                 let dateStr = dateTaken.toLocaleDateString("en-US", { dateStyle: 'full', timeZone: 'UTC' });
                 if (dateTaken.getUTCFullYear() === new Date().getUTCFullYear()) {
                     // hack: remove last 6 characters of date string
@@ -354,7 +354,7 @@ export default {
                 // Create tick if month changed
                 const dtYear = dateTaken.getUTCFullYear();
                 const dtMonth = dateTaken.getUTCMonth()
-                if (Number.isInteger(day.day_id) && (dtMonth !== prevMonth || dtYear !== prevYear)) {
+                if (Number.isInteger(day.dayid) && (dtMonth !== prevMonth || dtYear !== prevYear)) {
                     // Format dateTaken as MM YYYY
                     const dateTimeFormat = new Intl.DateTimeFormat('en-US', { month: 'short' });
                     const monthName = dateTimeFormat.formatToParts(dateTaken)[0].value;
@@ -373,7 +373,7 @@ export default {
                 prevYear = dtYear;
 
                 // Special headers
-                if (day.day_id === -0.1) {
+                if (day.dayid === -0.1) {
                     dateStr = "Folders";
                 }
 
@@ -384,10 +384,10 @@ export default {
                     size: 40,
                     head: true,
                     loadedImages: false,
-                    dayId: day.day_id,
+                    dayId: day.dayid,
                     day: day,
                 };
-                this.heads[day.day_id] = head;
+                this.heads[day.dayid] = head;
                 this.list.push(head);
                 currTopStatic += head.size;
 
@@ -403,7 +403,7 @@ export default {
                     for (let j = 0; j < rowCount; j++) {
                         row.photos.push({
                             ph: true, // placeholder
-                            file_id: `${day.day_id}-${i}-${j}`,
+                            fileid: `${day.dayid}-${i}-${j}`,
                         });
                     }
 
@@ -415,7 +415,7 @@ export default {
             // Check preloads
             for (const day of data) {
                 if (day.count && day.detail) {
-                    this.processDay(day.day_id, day.detail);
+                    this.processDay(day.dayid, day.detail);
                 }
             }
 
@@ -443,7 +443,7 @@ export default {
                 const data = res.data;
                 if (this.state !== startState) return;
 
-                this.days.find(d => d.day_id === dayId).detail = data;
+                this.days.find(d => d.dayid === dayId).detail = data;
                 this.processDay(dayId, data);
             } catch (e) {
                 console.error(e);
@@ -501,7 +501,7 @@ export default {
                 id: ++this.numRows,
                 photos: [],
                 size: this.rowHeight,
-                dayId: day.day_id,
+                dayId: day.dayid,
                 day: day,
             };
         },

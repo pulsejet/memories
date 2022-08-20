@@ -153,10 +153,10 @@ class ApiController extends Controller {
 
 		// Map sub to JSON array
 		$subdirArray = [
-			"day_id" => -0.1,
+			"dayid" => -0.1,
 			"detail" => array_map(function ($node) {
 				return [
-					"file_id" => $node->getId(),
+					"fileid" => $node->getId(),
 					"name" => $node->getName(),
 					"is_folder" => 1,
 					"path" => $node->getPath(),

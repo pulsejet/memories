@@ -3,7 +3,7 @@
         hasPreview: previewFileInfos.length > 0,
         onePreview: previewFileInfos.length === 1,
     }"
-        @click="openFolder(data.file_id)"
+        @click="openFolder(data.fileid)"
         v-bind:style="{
             width: rowHeight + 'px',
             height: rowHeight + 'px',

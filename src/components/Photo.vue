@@ -1,10 +1,10 @@
 <template>
     <div>
-        <div v-if="data.is_video" class="icon-video-white"></div>
+        <div v-if="data.isvideo" class="icon-video-white"></div>
         <img
             @click="openFile()"
-            :src="data.ph ? undefined : getPreviewUrl(data.file_id, data.etag)"
-            :key="data.file_id"
+            :src="data.ph ? undefined : getPreviewUrl(data.fileid, data.etag)"
+            :key="data.fileid"
             @load = "data.l = Math.random()"
             @error="(e) => e.target.src='/apps/memories/img/error.svg'"
             v-bind:style="{
@@ -48,7 +48,7 @@ export default {
             // Check if already loaded fileInfos or load
             let fileInfos = this.day.fileInfos;
             if (!fileInfos) {
-                const ids = this.day.detail.map(p => p.file_id);
+                const ids = this.day.detail.map(p => p.fileid);
                 try {
                     this.loading = true;
                     fileInfos = await dav.getFiles(ids);
@@ -73,7 +73,7 @@ export default {
             }
 
             // Get this photo in the fileInfos
-            const photo = fileInfos.find(d => Number(d.fileid) === Number(this.data.file_id));
+            const photo = fileInfos.find(d => Number(d.fileid) === Number(this.data.fileid));
             if (!photo) {
                 alert('Cannot find this photo anymore!');
                 return;

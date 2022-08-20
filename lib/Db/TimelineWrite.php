@@ -28,8 +28,8 @@ class TimelineWrite {
         // Check if we want to process this file
         $mime = $file->getMimeType();
         $is_image = in_array($mime, Application::IMAGE_MIMES);
-        $is_video = in_array($mime, Application::VIDEO_MIMES);
-        if (!$is_image && !$is_video) {
+        $isvideo = in_array($mime, Application::VIDEO_MIMES);
+        if (!$is_image && !$isvideo) {
             return;
         }
 
@@ -41,7 +41,7 @@ class TimelineWrite {
         // Check if need to update
         $sql = 'SELECT `mtime`
                 FROM *PREFIX*memories
-                WHERE file_id = ? AND user_id = ?';
+                WHERE `fileid` = ? AND `uid` = ?';
         $prevRow = $this->connection->executeQuery($sql, [
             $fileId, $user,
         ], [
@@ -65,10 +65,10 @@ class TimelineWrite {
         if ($prevRow) {
             // Update existing row
             $sql = 'UPDATE *PREFIX*memories
-                    SET day_id = ?, date_taken = ?, is_video = ?, mtime = ?
-                    WHERE user_id = ? AND file_id = ?';
+                    SET `dayid` = ?, `datetaken` = ?, `isvideo` = ?, `mtime` = ?
+                    WHERE `uid` = ? AND `fileid` = ?';
             $this->connection->executeStatement($sql, [
-                $dayId, $dateTaken, $is_video, $mtime,
+                $dayId, $dateTaken, $isvideo, $mtime,
                 $user, $fileId,
             ], [
                 \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_BOOL, \PDO::PARAM_INT,
@@ -77,10 +77,10 @@ class TimelineWrite {
         } else {
             // Create new row
             $sql = 'INSERT
-                    INTO  *PREFIX*memories (day_id, date_taken, is_video, mtime, user_id, file_id)
+                    INTO  *PREFIX*memories (`dayid`, `datetaken`, `isvideo`, `mtime`, `uid`, `fileid`)
                     VALUES  (?, ?, ?, ?, ?, ?)';
             $this->connection->executeStatement($sql, [
-                $dayId, $dateTaken, $is_video, $mtime,
+                $dayId, $dateTaken, $isvideo, $mtime,
                 $user, $fileId,
             ], [
                 \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_BOOL, \PDO::PARAM_INT,
@@ -96,7 +96,7 @@ class TimelineWrite {
     public function deleteFile(File &$file) {
         $sql = 'DELETE
                 FROM *PREFIX*memories
-                WHERE file_id = ?';
+                WHERE `fileid` = ?';
         $this->connection->executeStatement($sql, [$file->getId()], [\PDO::PARAM_INT]);
     }
 }
