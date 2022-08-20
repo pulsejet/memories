@@ -44,6 +44,8 @@ class Application extends App implements IBootstrap {
 		'image/png',
 		'image/jpeg',
 		'image/heic',
+		'image/png',
+		'image/tiff',
 		// 'image/gif',			// too rarely used for photos
 		// 'image/x-xbitmap',	// too rarely used for photos
 		// 'image/bmp',			// too rarely used for photos
@@ -51,13 +53,13 @@ class Application extends App implements IBootstrap {
 	];
 
 	public const VIDEO_MIMES = [
-		// 'video/mpeg',		// too rarely used for photos
+		'video/mpeg',
 		// 'video/ogg',			// too rarely used for photos
 		// 'video/webm',		// too rarely used for photos
 		'video/mp4',
 		// 'video/x-m4v',		// too rarely used for photos
 		'video/quicktime',
-		// 'video/x-matroska'	// too rarely used for photos
+		'video/x-matroska',
 	];
 
 	public function __construct() {
