@@ -146,6 +146,11 @@ class ApiController extends Controller {
 			return $item->getParent()->getId() === $node->getId();
 		});
 
+		// Sort by name
+		usort($sub, function($a, $b) {
+			return strnatcmp($a->getName(), $b->getName());
+		});
+
 		// Map sub to JSON array
 		$subdirArray = [
 			"day_id" => -0.1,
