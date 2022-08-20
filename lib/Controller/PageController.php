@@ -55,7 +55,7 @@ class PageController extends Controller {
 		$this->eventDispatcher->dispatchTyped(new LoadViewer());
 
 
-		$timelinePath = \OCA\Memories\Db\Util::getPhotosPath($this->config, $user->getUid());
+		$timelinePath = \OCA\Memories\Util::getPhotosPath($this->config, $user->getUid());
 		$this->initialState->provideInitialState('timelinePath', $timelinePath);
 
 		$response = new TemplateResponse($this->appName, 'main');

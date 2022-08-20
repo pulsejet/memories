@@ -28,11 +28,10 @@ namespace OCA\Memories\Controller;
 use OC\Files\Search\SearchComparison;
 use OC\Files\Search\SearchQuery;
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\TimelineQuery;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\AppFramework\Http\StreamResponse;
-use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IDBConnection;
@@ -45,8 +44,8 @@ class ApiController extends Controller {
 	private IConfig $config;
 	private IUserSession $userSession;
     private IDBConnection $connection;
-	private \OCA\Memories\Db\Util $util;
 	private IRootFolder $rootFolder;
+	private TimelineQuery $timelineQuery;
 
 	public function __construct(
 		IRequest $request,
@@ -60,7 +59,7 @@ class ApiController extends Controller {
 		$this->config = $config;
 		$this->userSession = $userSession;
         $this->connection = $connection;
-		$this->util = new \OCA\Memories\Db\Util($this->connection);
+		$this->timelineQuery = new TimelineQuery($this->connection);
 		$this->rootFolder = $rootFolder;
 	}
 
@@ -75,7 +74,7 @@ class ApiController extends Controller {
 			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
 		}
 
-        $list = $this->util->getDays($this->config, $user->getUID());
+        $list = $this->timelineQuery->getDays($this->config, $user->getUID());
 		return new JSONResponse($list, Http::STATUS_OK);
 	}
 
@@ -90,7 +89,7 @@ class ApiController extends Controller {
 			return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
 		}
 
-        $list = $this->util->getDay($this->config, $user->getUID(), intval($id));
+        $list = $this->timelineQuery->getDay($this->config, $user->getUID(), intval($id));
 		return new JSONResponse($list, Http::STATUS_OK);
 	}
 
@@ -137,7 +136,7 @@ class ApiController extends Controller {
 		}
 
 		// Get response from db
-        $list = $this->util->getDaysFolder($node->getId());
+        $list = $this->timelineQuery->getDaysFolder($node->getId());
 
 		// Get subdirectories
 		$sub = $node->search(new SearchQuery(
@@ -180,7 +179,7 @@ class ApiController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
-        $list = $this->util->getDayFolder($node->getId(), intval($dayId));
+        $list = $this->timelineQuery->getDayFolder($node->getId(), intval($dayId));
 		return new JSONResponse($list, Http::STATUS_OK);
 	}
 
@@ -203,23 +202,5 @@ class ApiController extends Controller {
 		$userId = $user->getUid();
 		$this->config->setUserValue($userId, Application::APPNAME, $key, $value);
 		return new JSONResponse([], Http::STATUS_OK);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
-	public function serviceWorker(): StreamResponse {
-		$response = new StreamResponse(__DIR__.'/../../js/photos-service-worker.js');
-		$response->setHeaders([
-			'Content-Type' => 'application/javascript',
-			'Service-Worker-Allowed' => '/'
-		]);
-		$policy = new ContentSecurityPolicy();
-		$policy->addAllowedWorkerSrcDomain("'self'");
-		$policy->addAllowedScriptDomain("'self'");
-		$policy->addAllowedConnectDomain("'self'");
-		$response->setContentSecurityPolicy($policy);
-		return $response;
 	}
 }

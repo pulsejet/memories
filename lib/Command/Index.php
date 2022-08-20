@@ -37,6 +37,7 @@ use OCP\IPreview;
 use OCP\IUser;
 use OCP\IUserManager;
 use OCA\Files_External\Service\GlobalStoragesService;
+use OCA\Memories\Db\TimelineWrite;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -58,7 +59,7 @@ class Index extends Command {
 	protected OutputInterface $output;
 	protected IManager $encryptionManager;
 	protected IDBConnection $connection;
-	protected \OCA\Memories\Db\Util $util;
+	protected TimelineWrite $timelineWrite;
 
 	public function __construct(IRootFolder $rootFolder,
 								IUserManager $userManager,
@@ -75,7 +76,7 @@ class Index extends Command {
 		$this->config = $config;
 		$this->encryptionManager = $encryptionManager;
 		$this->connection = $connection;
-		$this->util = new \OCA\Memories\Db\Util($connection);
+		$this->timelineWrite = new TimelineWrite($this->connection);
 
 		try {
 			$this->globalService = $container->get(GlobalStoragesService::class);
@@ -98,7 +99,7 @@ class Index extends Command {
 			return false;
 		}
 
-		$exif = \OCA\Memories\Db\Util::getExifFromStream($stream);
+		$exif = \OCA\Memories\Exif::getExifFromStream($stream);
 		fclose($stream);
 
 		if (!$exif || $exif["DateTimeOriginal"] !== "2004:08:31 19:52:58") {
@@ -159,6 +160,6 @@ class Index extends Command {
 
 	private function parseFile(File &$file): void {
 		// $this->output->writeln('Generating entry for ' . $file->getPath() . ' ' . $file->getId());
-		$this->util->processFile($file);
+		$this->timelineWrite->processFile($file);
 	}
 }

@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Listeners;
 
+use \OCA\Memories\Db\TimelineWrite;
+
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Files\Events\Node\NodeDeletedEvent;
@@ -30,10 +32,10 @@ use OCP\Files\Folder;
 use OCP\IDBConnection;
 
 class PostDeleteListener implements IEventListener {
-    private \OCA\Memories\Db\Util $util;
+    private TimelineWrite $util;
 
 	public function __construct(IDBConnection $connection) {
-        $this->util = new \OCA\Memories\Db\Util($connection);
+        $this->util = new TimelineWrite($connection);
 	}
 
 	public function handle(Event $event): void {
