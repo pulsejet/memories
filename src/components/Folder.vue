@@ -10,11 +10,12 @@
         }">
         <div class="big-icon">
             <div class="icon-folder"></div>
-            <div class="name">{{ data.name }}</div>
+            <div class="name">{{ data.name }} wer wer wer wer wr wer werw rw wr wr</div>
         </div>
 
         <div class="previews">
             <img v-for="info of previewFileInfos"
+                :key="'fpreview-' + info.file_id"
                 :src="`/core/preview?fileId=${info.fileid}&c=${info.etag}&x=250&y=250&forceIcon=0&a=0`" />
         </div>
     </div>
@@ -92,6 +93,7 @@ export default {
     word-wrap: break-word;
     text-overflow: ellipsis;
     max-height: 35%;
+    line-height: 1em;
 }
 .icon-folder {
     cursor: pointer;
