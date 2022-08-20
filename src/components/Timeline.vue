@@ -20,16 +20,7 @@
                 v-bind:style="{ height: rowHeight + 'px' }">
 
                 <div class="photo" v-for="img of item.photos">
-                    <div v-if="img.is_folder" class="folder"
-                        @click="openFolder(img.file_id)"
-                        v-bind:style="{
-                            width: rowHeight + 'px',
-                            height: rowHeight + 'px',
-                        }">
-                        <div class="icon-folder icon-dark"></div>
-                        <div class="name">{{ img.name }}</div>
-                    </div>
-
+                    <Folder v-if="img.is_folder" :data="img" :rowHeight="rowHeight" />
                     <div v-else>
                         <div v-if="img.is_video" class="icon-video-white"></div>
                         <img
@@ -77,12 +68,16 @@
 
 import * as dav from "../services/DavRequests";
 import axios from '@nextcloud/axios'
+import Folder from "./Folder";
 import { generateUrl } from '@nextcloud/router'
 
 const MAX_PHOTO_WIDTH = 175;
 const MIN_COLS = 3;
 
 export default {
+    components: {
+        Folder,
+    },
     data() {
         return {
             /** Loading days response */
@@ -555,11 +550,6 @@ export default {
             this.$refs.scroller.scrollToPosition(1000);
         },
 
-        /** Open album folder */
-        openFolder(id) {
-            this.$router.push({ name: 'albums', params: { id } });
-        },
-
         /** Open viewer */
         async openFile(img, row) {
             const day = this.days.find(d => d.day_id === row.dayId);
@@ -654,22 +644,6 @@ export default {
 .photo-row .photo .icon-video-white {
     position: absolute;
     top: 8px; right: 8px;
-}
-
-.photo-row .photo .folder {
-    cursor: pointer;
-}
-.photo-row .photo .folder .name {
-    cursor: pointer;
-    width: 100%;
-    text-align: center;
-}
-.photo-row .photo .icon-folder {
-    cursor: pointer;
-    background-size: 40%;
-    height: 60%; width: 100%;
-    background-position: bottom;
-    opacity: 0.3;
 }
 
 .head-row {
