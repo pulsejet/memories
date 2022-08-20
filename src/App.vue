@@ -32,6 +32,12 @@
     padding: 0 0 0 44px;
 	height: 100%;
 }
+
+@media (max-width: 768px) {
+	.outer {
+		padding-left: 5px;
+	}
+}
 </style>
 
 <script>

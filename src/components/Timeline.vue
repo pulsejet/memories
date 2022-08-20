@@ -11,7 +11,7 @@
             @update="scrollChange"
             @resize="handleResizeWithDelay"
         >
-            <h1 v-if="item.head" class="head-row">
+            <h1 v-if="item.head" class="head-row" v-bind:class="{ 'first': item.id === 1 }">
                 {{ item.name }}
             </h1>
 
@@ -61,7 +61,9 @@
             </span>
 
             <div v-for="tick of timelineTicks" :key="tick.dayId" class="tick"
+                v-bind:class="{ 'dash': !tick.text }"
                 v-bind:style="{ top: tick.topC + 'px' }">
+
                 <template v-if="tick.s">
                     <span v-if="tick.text">{{ tick.text }}</span>
                     <span v-else class="dash"></span>
@@ -76,6 +78,9 @@
 import * as dav from "../services/DavRequests";
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
+
+const MAX_PHOTO_WIDTH = 175;
+const MIN_COLS = 3;
 
 export default {
     data() {
@@ -173,13 +178,20 @@ export default {
         /** Handle window resize and initialization */
         handleResize() {
             let height = this.$refs.container.clientHeight;
-            let width = this.$refs.container.clientWidth - 6;
+            let width = this.$refs.container.clientWidth;
             this.timelineHeight = this.$refs.timelineScroll.clientHeight;
             this.$refs.scroller.$el.style.height = (height - 4) + 'px';
 
+            // Mobile devices
+            if (width < 768) {
+                width += 10;
+            } else {
+                width -= 12;
+            }
+
             if (this.days.length === 0) {
                 // Don't change cols if already initialized
-                this.numCols = Math.max(4, Math.floor(width / 175));
+                this.numCols = Math.max(MIN_COLS, Math.floor(width / MAX_PHOTO_WIDTH));
             }
 
             this.rowHeight = Math.floor(width / this.numCols) - 4;
@@ -426,7 +438,6 @@ export default {
             const head = this.heads[dayId];
             head.loadedImages = true;
 
-            let data = [];
             try {
                 const startState = this.state;
                 const res = await axios.get(generateUrl(url));
@@ -524,6 +535,8 @@ export default {
             const rect = event.target.getBoundingClientRect();
             const y = event.targetTouches[0].pageY - rect.top;
             this.$refs.scroller.scrollToPosition(this.getTimelinePosition(y));
+            event.preventDefault();
+            event.stopPropagation();
         },
 
         /** Get scroller equivalent position from event */
@@ -661,7 +674,7 @@ export default {
 
 .head-row {
     height: 40px;
-    padding-top: 13px;
+    padding-top: 10px;
     padding-left: 3px;
     font-size: 0.9em;
     font-weight: 600;
@@ -725,5 +738,19 @@ export default {
     z-index: 100;
     font-size: 0.95em;
     font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .timeline-scroll .tick {
+        background-color: var(--color-main-background);
+        padding: 1px 4px;
+        border-radius: 4px;
+    }
+    .timeline-scroll .tick.dash {
+        display: none;
+    }
+    .head-row.first {
+        padding-left: 34px;
+    }
 }
 </style>
