@@ -19,21 +19,11 @@
                 class="photo-row"
                 v-bind:style="{ height: rowHeight + 'px' }">
 
-                <div class="photo" v-for="img of item.photos">
-                    <Folder v-if="img.is_folder" :data="img" :rowHeight="rowHeight" />
-                    <div v-else>
-                        <div v-if="img.is_video" class="icon-video-white"></div>
-                        <img
-                            @click="openFile(img, item)"
-                            :src="`/core/preview?fileId=${img.file_id}&c=${img.etag}&x=250&y=250&forceIcon=0&a=0`"
-                            :key="img.file_id"
-                            @load = "img.l = Math.random()"
-                            @error="(e)=>e.target.src='img/error.svg'"
-                            v-bind:style="{
-                                width: rowHeight + 'px',
-                                height: rowHeight + 'px',
-                            }"/>
-                    </div>
+                <div class="photo" v-for="photo of item.photos">
+                    <Folder v-if="photo.is_folder"
+                            :data="photo" :rowHeight="rowHeight" />
+                    <Photo v-else
+                            :data="photo" :rowHeight="rowHeight" :day="item.day" />
                 </div>
             </div>
         </RecycleScroller>
@@ -66,9 +56,9 @@
 
 <script>
 
-import * as dav from "../services/DavRequests";
 import axios from '@nextcloud/axios'
 import Folder from "./Folder";
+import Photo from "./Photo";
 import { generateUrl } from '@nextcloud/router'
 
 const MAX_PHOTO_WIDTH = 175;
@@ -77,6 +67,7 @@ const MIN_COLS = 3;
 export default {
     components: {
         Folder,
+        Photo,
     },
     data() {
         return {
@@ -394,6 +385,7 @@ export default {
                     head: true,
                     loadedImages: false,
                     dayId: day.day_id,
+                    day: day,
                 };
                 this.heads[day.day_id] = head;
                 this.list.push(head);
@@ -402,7 +394,7 @@ export default {
                 // Add rows
                 const nrows = Math.ceil(day.count / this.numCols);
                 for (let i = 0; i < nrows; i++) {
-                    const row = this.getBlankRow(day.day_id);
+                    const row = this.getBlankRow(day);
                     this.list.push(row);
                     currTopRow++;
                 }
@@ -460,7 +452,7 @@ export default {
             for (const p of data) {
                 // Check if we ran out of rows
                 if (rowIdx >= this.list.length || this.list[rowIdx].head) {
-                    this.list.splice(rowIdx, 0, this.getBlankRow(dayId));
+                    this.list.splice(rowIdx, 0, this.getBlankRow(day));
                 }
 
                 // Go to the next row
@@ -483,12 +475,13 @@ export default {
         },
 
         /** Get a new blank row */
-        getBlankRow(dayId) {
+        getBlankRow(day) {
             return {
                 id: ++this.numRows,
                 photos: [],
                 size: this.rowHeight,
-                dayId: dayId,
+                dayId: day.day_id,
+                day: day,
             };
         },
 
@@ -549,49 +542,6 @@ export default {
             }
             this.$refs.scroller.scrollToPosition(1000);
         },
-
-        /** Open viewer */
-        async openFile(img, row) {
-            const day = this.days.find(d => d.day_id === row.dayId);
-            let fileInfos = day.fileInfos;
-
-            if (!fileInfos) {
-                const ids = day.detail.map(p => p.file_id);
-                try {
-                    this.loading = true;
-                    fileInfos = await dav.getFiles(ids);
-                } catch {
-                    console.error('Failed to load fileInfos');
-                } finally {
-                    this.loading = false;
-                }
-                if (fileInfos.length === 0) {
-                    return;
-                }
-                day.fileInfos = fileInfos;
-
-                // Fix sorting of the fileInfos
-                const itemPositions = {};
-                for (const [index, id] of ids.entries()) {
-                    itemPositions[id] = index;
-                }
-                fileInfos.sort(function (a, b) {
-                    return itemPositions[a.fileid] - itemPositions[b.fileid];
-                });
-            }
-
-            const photo = fileInfos.find(d => Number(d.fileid) === Number(img.file_id));
-            if (!photo) {
-                alert('Cannot find this photo anymore!');
-                return;
-            }
-
-            OCA.Viewer.open({
-                path: photo.filename,
-                list: fileInfos,
-                canLoop: false,
-            });
-        }
     },
 }
 </script>
@@ -614,15 +564,6 @@ export default {
     cursor: pointer;
 }
 
-.photo-row img {
-    background-clip: content-box;
-    background-color: var(--color-loading-light);
-    padding: 2px;
-    object-fit: cover;
-    border-radius: 3%;
-    cursor: pointer;
-}
-
 .photo-row .photo::before {
     content: "";
     position: absolute;
@@ -639,11 +580,6 @@ export default {
 }
 .photo-row .photo:hover::before {
     opacity: 1;
-}
-
-.photo-row .photo .icon-video-white {
-    position: absolute;
-    top: 8px; right: 8px;
 }
 
 .head-row {
