@@ -10,6 +10,7 @@
 * **🤔 Quick Recap**: Jump to anywhere in the timeline instantly.
 * **🖼️ Albums**: Browse your and shared folders with a similar, efficient timeline.
 * **🎦 Slideshow**: View photos from your timeline and albums easily.
+* **📱 Mobile Support**: Relive your memories on devices of any shape and size through the web app.
 
 ## 🚀 Installation
 
