@@ -33,7 +33,7 @@
 	</div>
 </template>
 
-<style>
+<style scoped>
 input[type=text] {
     width: 100%;
 }

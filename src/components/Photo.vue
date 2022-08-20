@@ -79,7 +79,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .icon-video-white {
     position: absolute;
     top: 8px; right: 8px;
