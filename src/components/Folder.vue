@@ -9,7 +9,10 @@
             height: rowHeight + 'px',
         }">
         <div class="big-icon">
-            <div class="icon-folder"></div>
+            <div class="icon-folder" v-bind:class="{
+                'icon-dark': previewFileInfos.length === 0,
+                'icon-white': previewFileInfos.length > 0,
+            }"></div>
             <div class="name">{{ data.name }}</div>
         </div>
 
@@ -101,7 +104,6 @@ export default {
     opacity: 0.3;
     background-size: 40%;
     background-position: bottom;
-    background-image: var(--icon-folder-000);
 }
 .big-icon {
     cursor: pointer;
@@ -113,7 +115,6 @@ export default {
 }
 .folder.hasPreview .big-icon .icon-folder {
     opacity: 1;
-    background-image: var(--icon-folder-fff);
 }
 .folder.hasPreview .big-icon .name {
     color: white;
