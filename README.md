@@ -1,6 +1,6 @@
 # Memories
 
-**📸 Yet another photo management app for Nextcloud**
+**📷 Yet another photo management app for Nextcloud**
 
 ![Screenshot](appinfo/screencap.gif)
 
@@ -15,8 +15,8 @@
 
 1. ☁ Clone this into your `apps` folder of your Nextcloud.
 1. ⚒️ Install `exiftool` (`sudo apt install exiftool`).
-1. 📸 Place all photos you want on the timeline in a folder called `Photos` (case sensitive) in the root of your home.
 1. Run `php ./occ memories:index` to generate metadata indices for existing photos.
+1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos. Photos from this directory will be displayed in the timeline, including any photos in nested subdirectories.
 1. Consider installing the [preview generator](https://github.com/rullzer/previewgenerator) for pre-generating thumbnails.
 
 ## 🏗 Development setup
@@ -30,8 +30,9 @@
 ## Why a separate app?
 The approach of this app is fundamentally different from the official Nextcloud Photos app, which is very lightweight and works entirely using webdav. This app instead maintains special metadata in a separate table on the backend, and thus can be considered to have different objectives.
 
-## Limitations
-Only works on MySQL/MariaDB for now.
+## Limitations & Notes
+1. Only works on MySQL/MariaDB for now.
+1. You may need to configure the Nextcloud preview generator and Imagemagick / ffmpeg to support all types of images and videos (e.g. HEIC).
 
 ## Special Thanks 🙏🏻
 Nextcloud team. At least one half of the code is based on the work of the [Nextcloud Photos](https://github.com/nextcloud/photos).
