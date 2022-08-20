@@ -122,4 +122,8 @@
      return fileInfo
  }
 
- export { encodeFilePath, extractFilePaths, sortCompare, genFileInfo }
+ const getPreviewUrl = function(fileid, etag) {
+    return `/core/preview?fileId=${fileid}&c=${etag}&x=250&y=250&forceIcon=0&a=0`;
+ }
+
+ export { encodeFilePath, extractFilePaths, sortCompare, genFileInfo, getPreviewUrl }

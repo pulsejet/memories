@@ -18,14 +18,15 @@
 
         <div class="previews">
             <img v-for="info of previewFileInfos"
-                :key="'fpreview-' + info.file_id"
-                :src="`/core/preview?fileId=${info.fileid}&c=${info.etag}&x=250&y=250&forceIcon=0&a=0`" />
+                :key="'fpreview-' + info.fileid"
+                :src="getPreviewUrl(info.fileid, info.etag)" />
         </div>
     </div>
 </template>
 
 <script>
 import * as dav from "../services/DavRequests";
+import { getPreviewUrl } from "../services/FileUtils";
 
 export default {
     name: 'Folder',
@@ -55,6 +56,9 @@ export default {
         },
     },
     methods: {
+        /** Passthrough */
+        getPreviewUrl: getPreviewUrl,
+
         /** Refresh previews */
         refreshPreviews() {
             if (!this.data.previewFileInfos) {

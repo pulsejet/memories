@@ -335,7 +335,7 @@ export default {
             let prevMonth = 0;
             const thisYear = new Date().getFullYear();
 
-            for (const [dayIdx, day] of data.entries()) {
+            for (const day of data) {
                 day.count = Number(day.count);
 
                 // Nothing here
@@ -396,6 +396,18 @@ export default {
                 for (let i = 0; i < nrows; i++) {
                     const row = this.getBlankRow(day);
                     this.list.push(row);
+
+                    // Add placeholders
+                    const leftNum = (day.count - i * this.numCols);
+                    const rowCount = leftNum > this.numCols ? this.numCols : leftNum;
+                    for (let j = 0; j < rowCount; j++) {
+                        row.photos.push({
+                            ph: true, // placeholder
+                            file_id: `${day.day_id}-${i}-${j}`,
+                        });
+                    }
+
+                    // Increment timeline scroller top
                     currTopRow++;
                 }
             }
@@ -449,19 +461,28 @@ export default {
             let rowIdx = headIdx + 1;
 
             // Add all rows
-            for (const p of data) {
+            let dataIdx = 0;
+            while (dataIdx < data.length) {
                 // Check if we ran out of rows
                 if (rowIdx >= this.list.length || this.list[rowIdx].head) {
                     this.list.splice(rowIdx, 0, this.getBlankRow(day));
                 }
 
+                const row = this.list[rowIdx];
+                if (row.photos.length > 0 && row.photos[0].ph) {
+                    row.photos = [];
+                    continue;
+                }
+
                 // Go to the next row
-                if (this.list[rowIdx].photos.length >= this.numCols) {
+                if (row.photos.length >= this.numCols) {
                     rowIdx++;
+                    continue;
                 }
 
                 // Add the photo to the row
-                this.list[rowIdx].photos.push(p);
+                this.list[rowIdx].photos.push(data[dataIdx]);
+                dataIdx++;
             }
 
             // Get rid of any extra rows

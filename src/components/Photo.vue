@@ -3,10 +3,10 @@
         <div v-if="data.is_video" class="icon-video-white"></div>
         <img
             @click="openFile()"
-            :src="`/core/preview?fileId=${data.file_id}&c=${data.etag}&x=250&y=250&forceIcon=0&a=0`"
+            :src="data.ph ? undefined : getPreviewUrl(data.file_id, data.etag)"
             :key="data.file_id"
             @load = "data.l = Math.random()"
-            @error="(e) => e.target.src='img/error.svg'"
+            @error="(e) => e.target.src='/apps/memories/img/error.svg'"
             v-bind:style="{
                 width: rowHeight + 'px',
                 height: rowHeight + 'px',
@@ -16,6 +16,7 @@
 
 <script>
 import * as dav from "../services/DavRequests";
+import { getPreviewUrl } from "../services/FileUtils";
 
 export default {
     name: 'Folder',
@@ -34,10 +35,18 @@ export default {
         },
     },
     methods: {
+        /** Passthrough */
+        getPreviewUrl: getPreviewUrl,
+
         /** Open viewer */
         async openFile() {
-            let fileInfos = this.day.fileInfos;
+            // Check if this is a placeholder
+            if (this.data.ph) {
+                return;
+            }
 
+            // Check if already loaded fileInfos or load
+            let fileInfos = this.day.fileInfos;
             if (!fileInfos) {
                 const ids = this.day.detail.map(p => p.file_id);
                 try {
@@ -63,12 +72,14 @@ export default {
                 });
             }
 
+            // Get this photo in the fileInfos
             const photo = fileInfos.find(d => Number(d.fileid) === Number(this.data.file_id));
             if (!photo) {
                 alert('Cannot find this photo anymore!');
                 return;
             }
 
+            // Open viewer
             OCA.Viewer.open({
                 path: photo.filename,
                 list: fileInfos,
