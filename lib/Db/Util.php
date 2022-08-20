@@ -15,6 +15,11 @@ class Util {
 		$this->connection = $connection;
 	}
 
+    /**
+     * Get the path to the user's configured photos directory.
+     * @param IConfig $config
+     * @param string $userId
+     */
     public static function getPhotosPath(IConfig $config, string $userId) {
         $p = $config->getUserValue($userId, Application::APPNAME, 'timelinePath', '');
         if (empty($p)) {
@@ -23,43 +28,56 @@ class Util {
         return $p;
     }
 
-    private static function getExif(File $file) {
-        // Attempt to read exif data
-        try {
-            // Start exiftool and output to json
-            $pipes = [];
-            $proc = proc_open('exiftool -json -', [
-                0 => array('pipe', 'rb'),
-                1 => array('pipe', 'w'),
-                2 => array('pipe', 'w'),
-            ], $pipes);
-
-            // Write the file to exiftool's stdin
-            // Assume exif exists in the first 256 kb of the file
-            $handle = $file->fopen('rb');
-            stream_copy_to_stream($handle, $pipes[0], 256 * 1024);
-            fclose($handle);
-            fclose($pipes[0]);
-
-            // Get output from exiftool
-            $stdout = stream_get_contents($pipes[1]);
-
-            // Clean up
-            fclose($pipes[1]);
-            fclose($pipes[2]);
-            proc_close($proc);
-
-            // Parse the json
-            $json = json_decode($stdout, true);
-            if (empty($json)) {
-                throw new \Exception('Could not read exif data');
-            }
-            return $json[0];
-        } catch (\Exception $e) {
-            return [];
-        }
+    /**
+     * Get exif data as a JSON object from a Nextcloud file.
+     * @param File $file
+     */
+    public static function getExifFromFile(File &$file) {
+        $handle = $file->fopen('rb');
+        $exif = self::getExifFromStream($handle);
+        fclose($handle);
+        return $exif;
     }
 
+    /**
+     * Get exif data as a JSON object from a stream.
+     * @param resource $handle
+     */
+    public static function getExifFromStream(&$handle) {
+        // Start exiftool and output to json
+        $pipes = [];
+        $proc = proc_open('exiftool -json -', [
+            0 => array('pipe', 'rb'),
+            1 => array('pipe', 'w'),
+            2 => array('pipe', 'w'),
+        ], $pipes);
+
+        // Write the file to exiftool's stdin
+        // Assume exif exists in the first 256 kb of the file
+        stream_copy_to_stream($handle, $pipes[0], 256 * 1024);
+        fclose($pipes[0]);
+
+        // Get output from exiftool
+        $stdout = stream_get_contents($pipes[1]);
+
+        // Clean up
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_close($proc);
+
+        // Parse the json
+        $json = json_decode($stdout, true);
+        if (!$json) {
+            throw new \Exception('Could not read exif data');
+        }
+        return $json[0];
+    }
+
+    /**
+     * Get the date taken from either the file or exif data if available.
+     * @param File $file
+     * @param array $exif
+     */
     public static function getDateTaken(File $file, array $exif) {
         $dt = $exif['DateTimeOriginal'];
         if (!isset($dt) || empty($dt)) {
@@ -89,6 +107,10 @@ class Util {
         return $dateTaken;
     }
 
+    /**
+     * Process a file to insert Exif data into the database
+     * @param File $file
+     */
     public function processFile(File $file): void {
         // There is no easy way to UPSERT in a standard SQL way, so just
         // do multiple calls. The worst that can happen is more updates,
@@ -122,7 +144,10 @@ class Util {
         }
 
         // Get exif data
-        $exif = self::getExif($file);
+        $exif = [];
+        try {
+            $exif = self::getExifFromFile($file);
+        } catch (\Exception) {}
 
         // Get more parameters
         $dateTaken = $this->getDateTaken($file, $exif);
@@ -156,6 +181,10 @@ class Util {
         }
     }
 
+    /**
+     * Remove a file from the exif database
+     * @param File $file
+     */
     public function deleteFile(File $file) {
         $sql = 'DELETE
                 FROM *PREFIX*memories
@@ -163,7 +192,11 @@ class Util {
         $this->connection->executeStatement($sql, [$file->getId()], [\PDO::PARAM_INT]);
     }
 
-    public function processDays(&$days) {
+    /**
+     * Process the days response
+     * @param array $days
+     */
+    private function processDays(&$days) {
         foreach($days as &$row) {
             $row["day_id"] = intval($row["day_id"]);
             $row["count"] = intval($row["count"]);
@@ -171,6 +204,11 @@ class Util {
         return $days;
     }
 
+    /**
+     * Get the days response from the database for the timeline
+     * @param IConfig $config
+     * @param string $userId
+     */
     public function getDays(
         IConfig $config,
         string $user,
@@ -191,6 +229,10 @@ class Util {
         return $this->processDays($rows);
     }
 
+    /**
+     * Get the days response from the database for one folder
+     * @param int $folderId
+     */
     public function getDaysFolder(int $folderId) {
         $sql = 'SELECT day_id, COUNT(file_id) AS count
                 FROM `*PREFIX*memories`
@@ -205,7 +247,11 @@ class Util {
         return $this->processDays($rows);
     }
 
-    public function processDay(&$day) {
+    /**
+     * Process the single day response
+     * @param array $day
+     */
+    private function processDay(&$day) {
         foreach($day as &$row) {
             $row["file_id"] = intval($row["file_id"]);
             $row["is_video"] = intval($row["is_video"]);
@@ -216,6 +262,12 @@ class Util {
         return $day;
     }
 
+    /**
+     * Get a day response from the database for the timeline
+     * @param IConfig $config
+     * @param string $userId
+     * @param int $dayId
+     */
     public function getDay(
         IConfig $config,
         string $user,
@@ -236,6 +288,11 @@ class Util {
         return $this->processDay($rows);
     }
 
+    /**
+     * Get a day response from the database for one folder
+     * @param int $folderId
+     * @param int $dayId
+     */
     public function getDayFolder(
         int $folderId,
         int $dayId,
