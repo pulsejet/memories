@@ -41,24 +41,36 @@ export default {
         }
     },
     mounted() {
-        if (!this.data.previewFileInfos) {
-            const folderPath = this.data.path.split('/').slice(3).join('/');
-            dav.getFolderPreviewFileIds(folderPath, 4).then(fileInfos => {
-                fileInfos = fileInfos.filter(f => f.hasPreview);
-                if (fileInfos.length > 0 && fileInfos.length < 4) {
-                    fileInfos = [fileInfos[0]];
-                }
-                this.data.previewFileInfos = fileInfos;
-                this.previewFileInfos = fileInfos;
-            }).catch(() => {
-                this.data.previewFileInfos = [];
-            });
-        } else {
-            this.previewFileInfos = this.data.previewFileInfos;
-        }
+        this.refreshPreviews();
     },
-
+    watch: {
+        data: {
+            handler() {
+                this.refreshPreviews();
+            },
+        },
+    },
     methods: {
+        /** Refresh previews */
+        refreshPreviews() {
+            if (!this.data.previewFileInfos) {
+                const folderPath = this.data.path.split('/').slice(3).join('/');
+                dav.getFolderPreviewFileIds(folderPath, 4).then(fileInfos => {
+                    fileInfos = fileInfos.filter(f => f.hasPreview);
+                    if (fileInfos.length > 0 && fileInfos.length < 4) {
+                        fileInfos = [fileInfos[0]];
+                    }
+                    this.data.previewFileInfos = fileInfos;
+                    this.previewFileInfos = fileInfos;
+                }).catch(() => {
+                    this.data.previewFileInfos = [];
+                    this.previewFileInfos = [];
+                });
+            } else {
+                this.previewFileInfos = this.data.previewFileInfos;
+            }
+        },
+
         /** Open album folder */
         openFolder(id) {
             this.$router.push({ name: 'albums', params: { id } });
