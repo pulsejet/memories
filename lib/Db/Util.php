@@ -20,7 +20,7 @@ class Util {
      * @param IConfig $config
      * @param string $userId
      */
-    public static function getPhotosPath(IConfig $config, string $userId) {
+    public static function getPhotosPath(IConfig &$config, string &$userId) {
         $p = $config->getUserValue($userId, Application::APPNAME, 'timelinePath', '');
         if (empty($p)) {
             return '/Photos/';
@@ -82,7 +82,7 @@ class Util {
      * @param File $file
      * @param array $exif
      */
-    public static function getDateTaken(File $file, array $exif) {
+    public static function getDateTaken(File &$file, array &$exif) {
         $dt = $exif['DateTimeOriginal'];
         if (!isset($dt) || empty($dt)) {
             $dt = $exif['CreateDate'];
@@ -115,7 +115,7 @@ class Util {
      * Process a file to insert Exif data into the database
      * @param File $file
      */
-    public function processFile(File $file): void {
+    public function processFile(File &$file): void {
         // There is no easy way to UPSERT in a standard SQL way, so just
         // do multiple calls. The worst that can happen is more updates,
         // but that's not a big deal.
@@ -189,7 +189,7 @@ class Util {
      * Remove a file from the exif database
      * @param File $file
      */
-    public function deleteFile(File $file) {
+    public function deleteFile(File &$file) {
         $sql = 'DELETE
                 FROM *PREFIX*memories
                 WHERE file_id = ?';
@@ -214,8 +214,8 @@ class Util {
      * @param string $userId
      */
     public function getDays(
-        IConfig $config,
-        string $user,
+        IConfig &$config,
+        string &$user,
     ): array {
         $sql = 'SELECT day_id, COUNT(file_id) AS count
                 FROM `*PREFIX*memories`
@@ -237,7 +237,7 @@ class Util {
      * Get the days response from the database for one folder
      * @param int $folderId
      */
-    public function getDaysFolder(int $folderId) {
+    public function getDaysFolder(int &$folderId) {
         $sql = 'SELECT day_id, COUNT(file_id) AS count
                 FROM `*PREFIX*memories`
                 INNER JOIN `*PREFIX*filecache`
@@ -273,9 +273,9 @@ class Util {
      * @param int $dayId
      */
     public function getDay(
-        IConfig $config,
-        string $user,
-        int $dayId,
+        IConfig &$config,
+        string &$user,
+        int &$dayId,
     ): array {
         $sql = 'SELECT file_id, *PREFIX*filecache.etag, is_video
                 FROM *PREFIX*memories
@@ -298,8 +298,8 @@ class Util {
      * @param int $dayId
      */
     public function getDayFolder(
-        int $folderId,
-        int $dayId,
+        int &$folderId,
+        int &$dayId,
     ): array {
         $sql = 'SELECT file_id, *PREFIX*filecache.etag, is_video
                 FROM `*PREFIX*memories`
