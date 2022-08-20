@@ -104,7 +104,7 @@ class Index extends Command {
 		return 0;
 	}
 
-	private function generateUserEntries(IUser $user): void {
+	private function generateUserEntries(IUser &$user): void {
 		\OC_Util::tearDownFS();
 		\OC_Util::setupFS($user->getUID());
 
@@ -112,14 +112,14 @@ class Index extends Command {
 		$this->parseFolder($userFolder);
 	}
 
-	private function parseFolder(Folder $folder): void {
+	private function parseFolder(Folder &$folder): void {
 		try {
 			$folderPath = $folder->getPath();
 			$this->output->writeln('Scanning folder ' . $folderPath);
 
 			$nodes = $folder->getDirectoryListing();
 
-			foreach ($nodes as $node) {
+			foreach ($nodes as &$node) {
 				if ($node instanceof Folder) {
 					$this->parseFolder($node);
 				} elseif ($node instanceof File) {
@@ -134,7 +134,7 @@ class Index extends Command {
 		}
 	}
 
-	private function parseFile(File $file): void {
+	private function parseFile(File &$file): void {
 		// $this->output->writeln('Generating entry for ' . $file->getPath() . ' ' . $file->getId());
 		$this->util->processFile($file);
 	}
