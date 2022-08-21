@@ -79,12 +79,28 @@ export default {
                 return;
             }
 
+            // Key to store sidebar state
+            const SIDEBAR_KEY = 'memories:sidebar-open';
+
             // Open viewer
             OCA.Viewer.open({
-                path: photo.filename,
-                list: fileInfos,
-                canLoop: false,
+                path: photo.filename,   // path
+                list: fileInfos,        // file list
+                canLoop: false,         // don't loop
+                onClose: () => {        // on viewer close
+                    if (OCA.Files.Sidebar.file) {
+                        localStorage.setItem(SIDEBAR_KEY, '1');
+                    } else {
+                        localStorage.removeItem(SIDEBAR_KEY);
+                    }
+                    OCA.Files.Sidebar.close();
+                },
             });
+
+            // Restore sidebar state
+            if (localStorage.getItem(SIDEBAR_KEY) === '1') {
+                OCA.Files.Sidebar.open(photo.filename);
+            }
         }
     }
 }
