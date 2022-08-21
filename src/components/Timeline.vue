@@ -171,7 +171,7 @@ export default {
             this.$refs.scroller.$el.style.height = (height - 4) + 'px';
 
             // Mobile devices
-            if (width < 768) {
+            if (window.innerWidth <= 768) {
                 width += 10;
                 this.isMobile = true;
             } else {
