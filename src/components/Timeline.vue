@@ -109,6 +109,8 @@ export default {
             scrollTimer: null,
             /** Resizing timer */
             resizeTimer: null,
+            /** Is mobile layout */
+            isMobile: false,
 
             /** State for request cancellations */
             state: Math.random(),
@@ -171,8 +173,10 @@ export default {
             // Mobile devices
             if (width < 768) {
                 width += 10;
+                this.isMobile = true;
             } else {
                 width -= 12;
+                this.isMobile = false;
             }
 
             if (this.days.length === 0) {
@@ -202,7 +206,7 @@ export default {
                 // Do another pass to figure out which timeline points are visible
                 // This is not as bad as it looks, it's actually 12*O(n)
                 // because there are only 12 months in a year
-                const minGap = parseFloat(getComputedStyle(this.$refs.cursorSt).fontSize) + 2;
+                const minGap = parseFloat(getComputedStyle(this.$refs.cursorSt).fontSize) + this.isMobile ? 5 : 2;
                 let prevShow = -9999;
                 for (const [idx, tick] of this.timelineTicks.entries()) {
                     // You can't see these anyway, why bother?
