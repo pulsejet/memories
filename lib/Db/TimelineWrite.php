@@ -39,7 +39,7 @@ class TimelineWrite {
         $fileId = $file->getId();
 
         // Check if need to update
-        $sql = 'SELECT `mtime`
+        $sql = 'SELECT `fileid`, `mtime`
                 FROM *PREFIX*memories
                 WHERE `fileid` = ? AND `uid` = ?';
         $prevRow = $this->connection->executeQuery($sql, [
@@ -75,17 +75,21 @@ class TimelineWrite {
                 \PDO::PARAM_STR, \PDO::PARAM_INT,
             ]);
         } else {
-            // Create new row
-            $sql = 'INSERT
-                    INTO  *PREFIX*memories (`dayid`, `datetaken`, `isvideo`, `mtime`, `uid`, `fileid`)
-                    VALUES  (?, ?, ?, ?, ?, ?)';
-            $this->connection->executeStatement($sql, [
-                $dayId, $dateTaken, $isvideo, $mtime,
-                $user, $fileId,
-            ], [
-                \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_BOOL, \PDO::PARAM_INT,
-                \PDO::PARAM_STR, \PDO::PARAM_INT,
-            ]);
+            // Try to create new row
+            try {
+                $sql = 'INSERT
+                        INTO  *PREFIX*memories (`dayid`, `datetaken`, `isvideo`, `mtime`, `uid`, `fileid`)
+                        VALUES  (?, ?, ?, ?, ?, ?)';
+                $this->connection->executeStatement($sql, [
+                    $dayId, $dateTaken, $isvideo, $mtime,
+                    $user, $fileId,
+                ], [
+                    \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_BOOL, \PDO::PARAM_INT,
+                    \PDO::PARAM_STR, \PDO::PARAM_INT,
+                ]);
+            } catch (\Exception $ex) {
+                error_log("Failed to create memories record: " . $ex->getMessage());
+            }
         }
     }
 
