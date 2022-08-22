@@ -55,7 +55,7 @@ class TimelineWrite {
         $exif = [];
         try {
             $exif = Exif::getExifFromFile($file);
-        } catch (\Exception) {}
+        } catch (\Exception $e) {}
 
         // Get more parameters
         $dateTaken = Exif::getDateTaken($file, $exif);
