@@ -33,8 +33,8 @@ class TimelineQuery {
      */
     public function getDays(
         IConfig &$config,
-        string &$user,
-    ): array {
+        string &$user): array {
+
         $sql = 'SELECT `*PREFIX*memories`.`dayid`, COUNT(`*PREFIX*memories`.`fileid`) AS count
                 FROM `*PREFIX*memories`
                 INNER JOIN `*PREFIX*filecache`
@@ -93,8 +93,8 @@ class TimelineQuery {
     public function getDay(
         IConfig &$config,
         string &$user,
-        int &$dayId,
-    ): array {
+        int &$dayId): array {
+
         $sql = 'SELECT `*PREFIX*memories`.`fileid`, *PREFIX*filecache.etag, `*PREFIX*memories`.`isvideo`
                 FROM *PREFIX*memories
                 INNER JOIN *PREFIX*filecache
@@ -117,8 +117,8 @@ class TimelineQuery {
      */
     public function getDayFolder(
         int &$folderId,
-        int &$dayId,
-    ): array {
+        int &$dayId): array {
+
         $sql = 'SELECT `*PREFIX*memories`.`fileid`, `*PREFIX*filecache`.`etag`, `*PREFIX*memories`.`isvideo`
                 FROM `*PREFIX*memories`
                 INNER JOIN `*PREFIX*filecache`

@@ -52,8 +52,8 @@ class ApiController extends Controller {
 		IConfig $config,
 		IUserSession $userSession,
         IDBConnection $connection,
-		IRootFolder $rootFolder,
-	) {
+		IRootFolder $rootFolder) {
+
 		parent::__construct(Application::APPNAME, $request);
 
 		$this->config = $config;

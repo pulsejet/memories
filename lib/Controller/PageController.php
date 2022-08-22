@@ -27,8 +27,8 @@ class PageController extends Controller {
 		IEventDispatcher $eventDispatcher,
 		IInitialState $initialState,
 		IUserSession $userSession,
-		IConfig $config,
-	){
+		IConfig $config) {
+
 		parent::__construct($AppName, $request);
 		$this->userId = $UserId;
 		$this->appName = $AppName;
