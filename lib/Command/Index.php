@@ -83,12 +83,6 @@ class Index extends Command {
 		} catch (ContainerExceptionInterface $e) {
 			$this->globalService = null;
 		}
-
-		// Refuse to run without exiftool
-		if (!$this->testExif()) {
-			error_log('FATAL: exiftool could not be found or test failed');
-			exit(1);
-		}
 	}
 
 	/** Make sure exiftool is available */
@@ -115,6 +109,13 @@ class Index extends Command {
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
+		// Refuse to run without exiftool
+		\OCA\Memories\Exif::ensureStaticExiftoolProc();
+		if (!$this->testExif()) {
+			error_log('FATAL: exiftool could not be found or test failed');
+			exit(1);
+		}
+
 		if ($this->encryptionManager->isEnabled()) {
 			$output->writeln('Encryption is enabled. Aborted.');
 			return 1;
@@ -124,6 +125,9 @@ class Index extends Command {
         $this->userManager->callForSeenUsers(function (IUser $user) {
             $this->generateUserEntries($user);
         });
+
+		// Close the exiftool process
+		\OCA\Memories\Exif::closeStaticExiftoolProc();
 
 		return 0;
 	}

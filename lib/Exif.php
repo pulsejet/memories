@@ -8,6 +8,53 @@ use OCP\Files\File;
 use OCP\IConfig;
 
 class Exif {
+    /** Opened instance of exiftool when running in command mode */
+    private static $staticProc = null;
+    private static $staticPipes = null;
+    private static $noStaticProc = false;
+
+    /** Initialize static exiftool process for local reads */
+    private static function initializeStaticExiftoolProc() {
+        self::closeStaticExiftoolProc();
+        self::$staticProc = proc_open(['exiftool', '-stay_open', 'true', '-@', '-'], [
+            0 => array('pipe', 'r'),
+            1 => array('pipe', 'w'),
+            2 => array('pipe', 'w'),
+        ], self::$staticPipes);
+    }
+
+    public static function closeStaticExiftoolProc() {
+        try {
+            if (self::$staticProc) {
+                fclose(self::$staticPipes[0]);
+                fclose(self::$staticPipes[1]);
+                fclose(self::$staticPipes[2]);
+                proc_terminate(self::$staticProc);
+            }
+        } catch (\Exception $ex) {}
+    }
+
+    public static function ensureStaticExiftoolProc() {
+        if (self::$noStaticProc) {
+            return;
+        }
+
+        if (!self::$staticProc) {
+            self::initializeStaticExiftoolProc();
+            if (!proc_get_status(self::$staticProc)["running"]) {
+                error_log("Failed to create stay_open exiftool process");
+                self::$noStaticProc = true;
+                self::$staticProc = null;
+            }
+            return;
+        }
+
+        if (!proc_get_status(self::$staticProc)["running"]) {
+            self::$staticProc = null;
+            self::ensureStaticExiftoolProc();
+        }
+    }
+
     /**
      * Get the path to the user's configured photos directory.
      * @param IConfig $config
@@ -47,7 +94,35 @@ class Exif {
     }
 
     /** Get exif data as a JSON object from a local file path */
-    public static function getExifFromLocalPath(string $path) {
+    public static function getExifFromLocalPath(string &$path) {
+        self::ensureStaticExiftoolProc();
+        if (!is_null(self::$staticProc)) {
+            return self::getExifFromLocalPathWithStaticProc($path);
+        } else {
+            return self::getExifFromLocalPathWithSeparateProc($path);
+        }
+    }
+
+    private static function getExifFromLocalPathWithStaticProc(string &$path) {
+        fwrite(self::$staticPipes[0], "$path\n-json\n-execute\n");
+        fflush(self::$staticPipes[0]);
+
+        $buf = "";
+        $readyToken = "\n{ready}\n";
+        while (!str_ends_with($buf, $readyToken)) {
+            $r = fread(self::$staticPipes[1], 1);
+            if ($r === false) {
+                error_log("Something went wrong with static exiftool process");
+                exit(1);
+            }
+            $buf .= $r;
+        }
+
+        $buf = substr($buf, 0, strrpos($buf, $readyToken));
+        return self::processStdout($buf);
+    }
+
+    private static function getExifFromLocalPathWithSeparateProc(string &$path) {
         $pipes = [];
         $proc = proc_open(['exiftool', '-json', $path], [
             1 => array('pipe', 'w'),
@@ -60,12 +135,7 @@ class Exif {
         fclose($pipes[2]);
         proc_close($proc);
 
-        // Parse the json
-        $json = json_decode($stdout, true);
-        if (!$json) {
-            throw new \Exception('Could not read exif data');
-        }
-        return $json[0];
+        return self::processStdout($stdout);
     }
 
     /**
@@ -94,7 +164,11 @@ class Exif {
         fclose($pipes[2]);
         proc_close($proc);
 
-        // Parse the json
+        return self::processStdout($stdout);
+    }
+
+    /** Get json array from stdout of exiftool */
+    private static function processStdout(string &$stdout) {
         $json = json_decode($stdout, true);
         if (!$json) {
             throw new \Exception('Could not read exif data');
