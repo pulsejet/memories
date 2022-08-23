@@ -121,6 +121,9 @@ class Index extends Command {
 			exit(1);
 		}
 
+		// Time measurement
+		$startTime = microtime(true);
+
 		if ($this->encryptionManager->isEnabled()) {
 			$output->writeln('Encryption is enabled. Aborted.');
 			return 1;
@@ -134,6 +137,17 @@ class Index extends Command {
 		// Close the exiftool process
 		\OCA\Memories\Exif::closeStaticExiftoolProc();
 
+		// Show some stats
+		$endTime = microtime(true);
+		$execTime = intval(($endTime - $startTime)*1000)/1000 ;
+		$nTotal = $this->nInvalid + $this->nSkipped + $this->nProcessed;
+		$this->output->writeln("==========================================");
+		$this->output->writeln("Checked $nTotal files in $execTime sec");
+		$this->output->writeln($this->nInvalid . " not valid media items");
+		$this->output->writeln($this->nSkipped . " skipped because unmodified");
+		$this->output->writeln($this->nProcessed . " (re-)processed");
+		$this->output->writeln("==========================================");
+
 		return 0;
 	}
 
@@ -143,14 +157,6 @@ class Index extends Command {
 
 		$userFolder = $this->rootFolder->getUserFolder($user->getUID());
 		$this->parseFolder($userFolder);
-
-		$nTotal = $this->nInvalid + $this->nSkipped + $this->nProcessed;
-		$this->output->writeln("==========================================");
-		$this->output->writeln("Checked $nTotal files");
-		$this->output->writeln($this->nInvalid . " not valid media items");
-		$this->output->writeln($this->nSkipped . " skipped because unmodified");
-		$this->output->writeln($this->nProcessed . " (re-)processed");
-		$this->output->writeln("==========================================");
 	}
 
 	private function parseFolder(Folder &$folder): void {
