@@ -124,11 +124,6 @@ class Exif {
         // Fall back to creation time
         $dateTaken = $file->getCreationTime();
 
-        // Fall back to upload time
-        if ($dateTaken == 0) {
-            $dateTaken = $file->getUploadTime();
-        }
-
         // Fall back to modification time
         if ($dateTaken == 0) {
             $dateTaken = $file->getMtime();
