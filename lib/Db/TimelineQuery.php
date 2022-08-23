@@ -124,7 +124,8 @@ class TimelineQuery {
                 INNER JOIN `*PREFIX*filecache`
                     ON `*PREFIX*filecache`.`fileid` = `*PREFIX*memories`.`fileid`
                     AND (`*PREFIX*filecache`.`parent`=? OR `*PREFIX*filecache`.`fileid`=?)
-                WHERE  `*PREFIX*memories`.`dayid`=?';
+                WHERE  `*PREFIX*memories`.`dayid`=?
+                ORDER BY `*PREFIX*memories`.`datetaken` DESC';
 		$rows = $this->connection->executeQuery($sql, [$folderId, $folderId, $dayId], [
             \PDO::PARAM_INT, \PDO::PARAM_INT, \PDO::PARAM_INT,
         ])->fetchAll();
