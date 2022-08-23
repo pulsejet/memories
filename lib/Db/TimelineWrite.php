@@ -18,8 +18,9 @@ class TimelineWrite {
     /**
      * Process a file to insert Exif data into the database
      * @param File $file
+     * @return int 2 if processed, 1 if skipped, 0 if not valid
      */
-    public function processFile(File &$file): void {
+    public function processFile(File &$file): int {
         // There is no easy way to UPSERT in a standard SQL way, so just
         // do multiple calls. The worst that can happen is more updates,
         // but that's not a big deal.
@@ -30,7 +31,7 @@ class TimelineWrite {
         $is_image = in_array($mime, Application::IMAGE_MIMES);
         $isvideo = in_array($mime, Application::VIDEO_MIMES);
         if (!$is_image && !$isvideo) {
-            return;
+            return 0;
         }
 
         // Get parameters
@@ -48,7 +49,7 @@ class TimelineWrite {
             \PDO::PARAM_INT, \PDO::PARAM_STR,
         ])->fetch();
         if ($prevRow && intval($prevRow['mtime']) === $mtime) {
-            return;
+            return 1;
         }
 
         // Get exif data
@@ -91,6 +92,8 @@ class TimelineWrite {
                 error_log("Failed to create memories record: " . $ex->getMessage());
             }
         }
+
+        return 2;
     }
 
     /**

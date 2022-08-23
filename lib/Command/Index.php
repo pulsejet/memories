@@ -61,6 +61,11 @@ class Index extends Command {
 	protected IDBConnection $connection;
 	protected TimelineWrite $timelineWrite;
 
+	// Stats
+	private int $nProcessed = 0;
+	private int $nSkipped = 0;
+	private int $nInvalid = 0;
+
 	public function __construct(IRootFolder $rootFolder,
 								IUserManager $userManager,
 								IPreview $previewGenerator,
@@ -138,6 +143,14 @@ class Index extends Command {
 
 		$userFolder = $this->rootFolder->getUserFolder($user->getUID());
 		$this->parseFolder($userFolder);
+
+		$nTotal = $this->nInvalid + $this->nSkipped + $this->nProcessed;
+		$this->output->writeln("==========================================");
+		$this->output->writeln("Checked $nTotal files");
+		$this->output->writeln($this->nInvalid . " not valid media items");
+		$this->output->writeln($this->nSkipped . " skipped because unmodified");
+		$this->output->writeln($this->nProcessed . " (re-)processed");
+		$this->output->writeln("==========================================");
 	}
 
 	private function parseFolder(Folder &$folder): void {
@@ -163,7 +176,13 @@ class Index extends Command {
 	}
 
 	private function parseFile(File &$file): void {
-		// $this->output->writeln('Generating entry for ' . $file->getPath() . ' ' . $file->getId());
-		$this->timelineWrite->processFile($file);
+		$res = $this->timelineWrite->processFile($file);
+		if ($res === 2) {
+			$this->nProcessed++;
+		} else if ($res === 1) {
+			$this->nSkipped++;
+		} else {
+			$this->nInvalid++;
+		}
 	}
 }
