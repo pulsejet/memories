@@ -30,9 +30,9 @@ class Exif {
         // https://github.com/nextcloud/server/blob/19f68b3011a3c040899fb84975a28bd746bddb4b/lib/private/Preview/ProviderV2.php
         if (!$file->isEncrypted() && $file->getStorage()->isLocal()) {
             $path = $file->getStorage()->getLocalFile($file->getInternalPath());
-			if (is_string($path)) {
-				return self::getExifFromLocalPath($path);
-			}
+            if (is_string($path)) {
+                return self::getExifFromLocalPath($path);
+            }
         }
 
         // Fallback to reading as a stream
