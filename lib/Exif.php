@@ -95,8 +95,8 @@ class Exif {
 
     /** Get exif data as a JSON object from a local file path */
     public static function getExifFromLocalPath(string &$path) {
-        self::ensureStaticExiftoolProc();
         if (!is_null(self::$staticProc)) {
+            self::ensureStaticExiftoolProc();
             return self::getExifFromLocalPathWithStaticProc($path);
         } else {
             return self::getExifFromLocalPathWithSeparateProc($path);
