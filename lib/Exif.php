@@ -104,7 +104,7 @@ class Exif {
     }
 
     private static function getExifFromLocalPathWithStaticProc(string &$path) {
-        fwrite(self::$staticPipes[0], "$path\n-json\n-execute\n");
+        fwrite(self::$staticPipes[0], "$path\n-json\n-api\nQuickTimeUTC=1\n-execute\n");
         fflush(self::$staticPipes[0]);
 
         $buf = "";
@@ -124,7 +124,7 @@ class Exif {
 
     private static function getExifFromLocalPathWithSeparateProc(string &$path) {
         $pipes = [];
-        $proc = proc_open(['exiftool', '-json', $path], [
+        $proc = proc_open(['exiftool', '-api', 'QuickTimeUTC=1', '-json', $path], [
             1 => array('pipe', 'w'),
             2 => array('pipe', 'w'),
         ], $pipes);
@@ -145,7 +145,7 @@ class Exif {
     public static function getExifFromStream(&$handle) {
         // Start exiftool and output to json
         $pipes = [];
-        $proc = proc_open(['exiftool', '-json', '-fast', '-'], [
+        $proc = proc_open(['exiftool', '-api', 'QuickTimeUTC=1', '-json', '-fast', '-'], [
             0 => array('pipe', 'rb'),
             1 => array('pipe', 'w'),
             2 => array('pipe', 'w'),
@@ -188,7 +188,8 @@ class Exif {
         }
 
         // Check if found something
-        if (isset($dt) && !empty($dt)) {
+        if (isset($dt) && is_string($dt) && !empty($dt)) {
+            $dt = explode('-', explode('+', $dt, 2)[0], 2)[0]; // get rid of timezone if present
             $dt = \DateTime::createFromFormat('Y:m:d H:i:s', $dt, new \DateTimeZone("UTC"));
             if ($dt && $dt->getTimestamp() > -5364662400) { // 1800 A.D.
                 return $dt->getTimestamp();

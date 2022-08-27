@@ -34,6 +34,7 @@ The approach of this app is fundamentally different from the official Nextcloud 
 ## Notes
 1. The app has been tested with 100GB worth of ~25k photos.
 1. You may need to configure the Nextcloud preview generator and Imagemagick / ffmpeg to support all types of images and videos (e.g. HEIC). If using the official docker image, add `OC\Preview\HEIC` to `enabledPreviewProviders` in your `config.php`.
+1. If local time is not found in the photo (especially for videos), the server timezone is used.
 
 ## Special Thanks 🙏🏻
 Nextcloud team. At least one half of the code is based on the work of the [Nextcloud Photos](https://github.com/nextcloud/photos).
