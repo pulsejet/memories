@@ -1,13 +1,15 @@
 <template>
-    <div>
+    <div class="photo-container" :class="{ 'selected': data.selected }">
+        <div class="icon-checkmark select" @click="toggleSelect"></div>
+
         <div v-if="data.isvideo" class="icon-video-white"></div>
         <img
-            @click="openFile()"
+            @click="click"
             :src="data.ph ? undefined : getPreviewUrl(data.fileid, data.etag)"
             :key="data.fileid"
             @load = "data.l = Math.random()"
             @error="(e) => e.target.src='/apps/memories/img/error.svg'"
-            v-bind:style="{
+            :style="{
                 width: rowHeight + 'px',
                 height: rowHeight + 'px',
             }"/>
@@ -37,6 +39,11 @@ export default {
     methods: {
         /** Passthrough */
         getPreviewUrl: getPreviewUrl,
+
+        /** Pass to parent */
+        click() {
+            this.$emit('clickImg', this);
+        },
 
         /** Open viewer */
         async openFile() {
@@ -129,11 +136,37 @@ export default {
             this.day.count = this.day.detail.length;
             this.$emit('reprocess', this.day);
         },
+
+        toggleSelect() {
+            this.$emit('select', this.data);
+            this.$forceUpdate();
+        },
     }
 }
 </script>
 
 <style scoped>
+.photo-container:hover .icon-checkmark {
+    opacity: 0.6;
+}
+.photo-container.selected .icon-checkmark {
+    opacity: 0.9;
+    filter: invert();
+}
+.photo-container.selected img {
+    padding: 8%;
+}
+.icon-checkmark {
+    opacity: 0;
+    position: absolute;
+    top: 8px; left: 8px;
+    background-color: var(--color-main-background);
+    border-radius: 50%;
+    background-size: 80%;
+    padding: 5px;
+    cursor: pointer;
+}
+
 .icon-video-white {
     position: absolute;
     top: 8px; right: 8px;
@@ -145,5 +178,6 @@ img {
     object-fit: cover;
     border-radius: 3%;
     cursor: pointer;
+    transition: padding 0.1s ease-in-out;
 }
 </style>

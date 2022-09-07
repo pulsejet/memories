@@ -1,5 +1,6 @@
 <template>
     <div class="container" ref="container" :class="{ 'icon-loading': loading }">
+        <!-- Main recycler view for rows -->
         <RecycleScroller
             ref="scroller"
             class="scroller"
@@ -24,11 +25,14 @@
                             :data="photo" :rowHeight="rowHeight" />
                     <Photo v-else
                             :data="photo" :rowHeight="rowHeight" :day="item.day"
-                            @reprocess="processDay" />
+                            @select="selectPhoto"
+                            @reprocess="processDay"
+                            @clickImg="clickPhoto" />
                 </div>
             </div>
         </RecycleScroller>
 
+        <!-- Timeline -->
         <div ref="timelineScroll" class="timeline-scroll"
              v-bind:class="{ scrolling }"
             @mousemove="timelineHover"
@@ -51,6 +55,11 @@
                     <span v-else class="dash"></span>
                 </template>
             </div>
+        </div>
+
+        <!-- Top bar for selections etc -->
+        <div v-if="selection.size > 0" class="top-bar">
+            {{ selection.size }} items selected
         </div>
     </div>
 </template>
@@ -112,6 +121,9 @@ export default {
             resizeTimer: null,
             /** Is mobile layout */
             isMobile: false,
+
+            /** List of selected file ids */
+            selection: new Set(),
 
             /** State for request cancellations */
             state: Math.random(),
@@ -621,11 +633,32 @@ export default {
             }
             this.$refs.scroller.scrollToPosition(1000);
         },
+
+        /** Clicking on photo */
+        clickPhoto(photoComponent) {
+            if (this.selection.size > 0) { // selection mode
+                photoComponent.toggleSelect();
+            } else {
+                photoComponent.openFile();
+            }
+        },
+
+        /** Add a photo to selection list */
+        selectPhoto(photo) {
+            photo.selected = !this.selection.has(photo.fileid) || undefined;
+            if (photo.selected) {
+                this.selection.add(photo.fileid);
+            } else {
+                this.selection.delete(photo.fileid);
+            }
+            this.$forceUpdate();
+        },
     },
 }
 </script>
 
 <style scoped>
+/** Main view */
 .container {
     height: 100%;
     width: 100%;
@@ -644,24 +677,6 @@ export default {
     cursor: pointer;
 }
 
-.photo-row .photo::before {
-    content: "";
-    position: absolute;
-    display: block;
-    height: calc(100% - 4px);
-    width: calc(100% - 4px);
-    top: 2px; left: 2px;
-    background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 95%);
-    opacity: 0;
-    border-radius: 3px;
-    transition: opacity .1s ease-in-out;
-    pointer-events: none;
-    user-select: none;
-}
-.photo-row .photo:hover::before {
-    opacity: 1;
-}
-
 .head-row {
     height: 40px;
     padding-top: 10px;
@@ -670,6 +685,7 @@ export default {
     font-weight: 600;
 }
 
+/** Timeline */
 .timeline-scroll {
     overflow-y: clip;
     position: absolute;
@@ -742,5 +758,16 @@ export default {
     .head-row.first {
         padding-left: 34px;
     }
+}
+
+/** Top bar */
+.top-bar {
+    position: absolute;
+    top: 10px; right: 20px;
+    padding: 15px;
+    min-width: 30vw;
+    background-color: var(--color-main-background);
+    box-shadow: 0 0 2px gray;
+    border-radius: 10px;
 }
 </style>
