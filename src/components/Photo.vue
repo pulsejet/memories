@@ -1,18 +1,19 @@
 <template>
     <div class="photo-container" :class="{ 'selected': data.selected }">
-        <div class="icon-checkmark select" @click="toggleSelect"></div>
+        <div class="icon-checkmark select" v-if="!data.ph" @click="toggleSelect"></div>
 
         <div v-if="data.isvideo" class="icon-video-white"></div>
-        <img
-            @click="click"
-            :src="data.ph ? undefined : getPreviewUrl(data.fileid, data.etag)"
-            :key="data.fileid"
-            @load = "data.l = Math.random()"
-            @error="(e) => e.target.src='/apps/memories/img/error.svg'"
-            :style="{
+        <div class="img-outer" :style="{
                 width: rowHeight + 'px',
                 height: rowHeight + 'px',
-            }"/>
+            }">
+            <img
+                @click="click"
+                :src="data.ph ? undefined : getPreviewUrl(data.fileid, data.etag)"
+                :key="data.fileid"
+                @load = "data.l = Math.random()"
+                @error="(e) => e.target.src='/apps/memories/img/error.svg'" />
+        </div>
     </div>
 </template>
 
@@ -138,6 +139,10 @@ export default {
         },
 
         toggleSelect() {
+            if (this.data.ph) {
+                return;
+            }
+
             this.$emit('select', this.data);
             this.$forceUpdate();
         },
@@ -147,14 +152,17 @@ export default {
 
 <style scoped>
 .photo-container:hover .icon-checkmark {
-    opacity: 0.6;
+    opacity: 0.7;
 }
 .photo-container.selected .icon-checkmark {
     opacity: 0.9;
     filter: invert();
 }
+.photo-container.selected .img-outer {
+    padding: 6%;
+}
 .photo-container.selected img {
-    padding: 8%;
+    box-shadow: 0 0 6px 2px var(--color-primary);
 }
 .icon-checkmark {
     opacity: 0;
@@ -171,13 +179,16 @@ export default {
     position: absolute;
     top: 8px; right: 8px;
 }
+.img-outer {
+    padding: 2px;
+    transition: all 0.1s ease-in-out;
+}
 img {
     background-clip: content-box;
     background-color: var(--color-loading-light);
-    padding: 2px;
     object-fit: cover;
     border-radius: 3%;
     cursor: pointer;
-    transition: padding 0.1s ease-in-out;
+    width: 100%; height: 100%;
 }
 </style>

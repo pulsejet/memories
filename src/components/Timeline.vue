@@ -675,6 +675,7 @@ export default {
     display: inline-block;
     position: relative;
     cursor: pointer;
+    vertical-align: top;
 }
 
 .head-row {
