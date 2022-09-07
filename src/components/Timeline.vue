@@ -746,7 +746,24 @@ export default {
     font-weight: 600;
 }
 
+/** Top bar */
+.top-bar {
+    position: absolute;
+    top: 10px; right: 15px;
+    padding: 15px;
+    width: 400px;
+    max-width: calc(100vw - 30px);
+    background-color: var(--color-main-background);
+    box-shadow: 0 0 2px gray;
+    border-radius: 10px;
+    opacity: 0.95;
+}
+
+/* Mobile layout */
 @media (max-width: 768px) {
+    .top-bar {
+        top: 35px;
+    }
     .timeline-scroll .tick {
         background-color: var(--color-main-background);
         padding: 1px 4px;
@@ -758,16 +775,5 @@ export default {
     .head-row.first {
         padding-left: 34px;
     }
-}
-
-/** Top bar */
-.top-bar {
-    position: absolute;
-    top: 10px; right: 20px;
-    padding: 15px;
-    min-width: 30vw;
-    background-color: var(--color-main-background);
-    box-shadow: 0 0 2px gray;
-    border-radius: 10px;
 }
 </style>
