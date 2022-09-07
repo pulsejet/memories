@@ -19,7 +19,7 @@ import * as dav from "../services/DavRequests";
 import { getPreviewUrl } from "../services/FileUtils";
 
 export default {
-    name: 'Folder',
+    name: 'Photo',
     props: {
         data: {
             type: Object,
