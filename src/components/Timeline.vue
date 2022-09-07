@@ -333,15 +333,9 @@ export default {
 
             this.days = data;
 
-            // Ticks
-            let currTopRow = 0;
-            let currTopStatic = 0;
-            let prevYear = 9999;
-            let prevMonth = 0;
-            const thisYear = new Date().getFullYear();
-
             for (const day of data) {
                 day.count = Number(day.count);
+                day.rows = new Set();
 
                 // Nothing here
                 if (day.count === 0) {
@@ -355,27 +349,6 @@ export default {
                     // hack: remove last 6 characters of date string
                     dateStr = dateStr.substring(0, dateStr.length - 6);
                 }
-
-                // Create tick if month changed
-                const dtYear = dateTaken.getUTCFullYear();
-                const dtMonth = dateTaken.getUTCMonth()
-                if (Number.isInteger(day.dayid) && (dtMonth !== prevMonth || dtYear !== prevYear)) {
-                    // Format dateTaken as MM YYYY
-                    const dateTimeFormat = new Intl.DateTimeFormat('en-US', { month: 'short' });
-                    const monthName = dateTimeFormat.formatToParts(dateTaken)[0].value;
-
-                    // Create tick
-                    this.timelineTicks.push({
-                        dayId: day.id,
-                        top: currTopRow,
-                        topS: currTopStatic,
-                        topC: 0,
-                        text: (dtYear === prevYear || dtYear === thisYear) ? undefined : dtYear,
-                        mText: `${monthName} ${dtYear}`,
-                    });
-                }
-                prevMonth = dtMonth;
-                prevYear = dtYear;
 
                 // Special headers
                 if (day.dayid === -0.1) {
@@ -394,13 +367,13 @@ export default {
                 };
                 this.heads[day.dayid] = head;
                 this.list.push(head);
-                currTopStatic += head.size;
 
                 // Add rows
                 const nrows = Math.ceil(day.count / this.numCols);
                 for (let i = 0; i < nrows; i++) {
                     const row = this.getBlankRow(day);
                     this.list.push(row);
+                    day.rows.add(row);
 
                     // Add placeholders
                     const leftNum = (day.count - i * this.numCols);
@@ -411,9 +384,6 @@ export default {
                             fileid: `${day.dayid}-${i}-${j}`,
                         });
                     }
-
-                    // Increment timeline scroller top
-                    currTopRow++;
                 }
             }
 
@@ -425,6 +395,7 @@ export default {
             }
 
             // Fix view height variable
+            this.reflowTimeline();
             this.handleViewSizeChange();
             this.loading = false;
         },
@@ -450,10 +421,62 @@ export default {
 
                 const day = this.days.find(d => d.dayid === dayId);
                 day.detail = data;
+                day.count = data.length;
                 this.processDay(day);
             } catch (e) {
                 console.error(e);
                 head.loadedImages = false;
+            }
+        },
+
+        /** Create timeline tick data */
+        reflowTimeline() {
+            // Clear timeline
+            this.timelineTicks = [];
+
+            // Ticks
+            let currTopRow = 0;
+            let currTopStatic = 0;
+            let prevYear = 9999;
+            let prevMonth = 0;
+            const thisYear = new Date().getFullYear();
+
+            // Itearte over days
+            for (const day of this.days) {
+                if (day.count === 0) {
+                    console.log('skip', day);
+                    continue;
+                }
+
+                // Make date string
+                const dateTaken = new Date(Number(day.dayid)*86400*1000);
+
+                // Create tick if month changed
+                const dtYear = dateTaken.getUTCFullYear();
+                const dtMonth = dateTaken.getUTCMonth()
+                if (Number.isInteger(day.dayid) && (dtMonth !== prevMonth || dtYear !== prevYear)) {
+                    // Format dateTaken as MM YYYY
+                    const dateTimeFormat = new Intl.DateTimeFormat('en-US', {
+                        month: 'short',
+                        timeZone: 'UTC',
+                    });
+                    const monthName = dateTimeFormat.formatToParts(dateTaken)[0].value;
+
+                    // Create tick
+                    this.timelineTicks.push({
+                        dayId: day.id,
+                        top: currTopRow,
+                        topS: currTopStatic,
+                        topC: 0,
+                        text: (dtYear === prevYear || dtYear === thisYear) ? undefined : dtYear,
+                        mText: `${monthName} ${dtYear}`,
+                    });
+                }
+                prevMonth = dtMonth;
+                prevYear = dtYear;
+
+                currTopStatic += this.heads[day.dayid].size;
+                currTopRow += day.rows.size;
             }
         },
 
@@ -465,13 +488,16 @@ export default {
             const head = this.heads[dayId];
             head.loadedImages = true;
 
-            // Reset rows if re-processing
+            // Reset rows including placeholders
             if (head.day?.rows) {
                 for (const row of head.day.rows) {
                     row.photos = [];
                 }
             }
             head.day.rows = new Set();
+
+            // Check if some row was added
+            let addedRow = false;
 
             // Get index of header O(n)
             const headIdx = this.list.findIndex(item => item.id === head.id);
@@ -482,14 +508,11 @@ export default {
             while (dataIdx < data.length) {
                 // Check if we ran out of rows
                 if (rowIdx >= this.list.length || this.list[rowIdx].head) {
+                    addedRow = true;
                     this.list.splice(rowIdx, 0, this.getBlankRow(day));
                 }
 
                 const row = this.list[rowIdx];
-                if (row.photos.length > 0 && row.photos[0].ph) {
-                    row.photos = [];
-                    continue;
-                }
 
                 // Go to the next row
                 if (row.photos.length >= this.numCols) {
@@ -505,6 +528,13 @@ export default {
                 head.day.rows.add(row);
             }
 
+            // No rows, splice everything including the header
+            if (head.day.rows.size === 0) {
+                this.list.splice(headIdx, 1);
+                rowIdx = headIdx - 1;
+                delete this.heads[dayId];
+            }
+
             // Get rid of any extra rows
             let spliceCount = 0;
             for (let i = rowIdx + 1; i < this.list.length && !this.list[i].head; i++) {
@@ -512,6 +542,14 @@ export default {
             }
             if (spliceCount > 0) {
                 this.list.splice(rowIdx + 1, spliceCount);
+            }
+
+            // This will be true even if the head is being spliced
+            // because one row is always removed in that case
+            // So just reflow the timeline here
+            if (addedRow || spliceCount > 0) {
+                this.reflowTimeline();
+                this.handleViewSizeChange();
             }
         },
 

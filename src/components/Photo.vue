@@ -127,6 +127,7 @@ export default {
 
             // Remove deleted files from details
             this.day.detail = this.day.detail.filter(d => !remIds.has(d.fileid));
+            this.day.count = this.day.detail.length;
             this.$emit('reprocess', this.day);
         },
     }
