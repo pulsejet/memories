@@ -98,7 +98,6 @@ export default {
                     }
                     OCA.Files.Sidebar.close();
 
-                    fileInfos.splice(0, 2);
                     // Check for any deleted files and remove them from the main view
                     this.processDeleted();
                 },
@@ -126,7 +125,7 @@ export default {
             this.day.fiOrigIds = newIds;
 
             // Remove deleted files from details
-            this.day.detail = this.day.detail.filter(d => !remIds.has(d.fileid));
+            this.day.detail = this.day.detail.filter(f => !remIds.has(f.fileid));
             this.day.count = this.day.detail.length;
             this.$emit('reprocess', this.day);
         },
