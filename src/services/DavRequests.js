@@ -4,6 +4,7 @@ import client from './DavClient';
 
 const props = `
 	<oc:fileid />
+	<oc:permissions />
 	<d:getlastmodified />
 	<d:getetag />
 	<d:getcontenttype />

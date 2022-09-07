@@ -23,7 +23,8 @@
                     <Folder v-if="photo.is_folder"
                             :data="photo" :rowHeight="rowHeight" />
                     <Photo v-else
-                            :data="photo" :rowHeight="rowHeight" :day="item.day" />
+                            :data="photo" :rowHeight="rowHeight" :day="item.day"
+                            @reprocess="processDay" />
                 </div>
             </div>
         </RecycleScroller>
@@ -419,7 +420,7 @@ export default {
             // Check preloads
             for (const day of data) {
                 if (day.count && day.detail) {
-                    this.processDay(day.dayid, day.detail);
+                    this.processDay(day);
                 }
             }
 
@@ -447,8 +448,9 @@ export default {
                 const data = res.data;
                 if (this.state !== startState) return;
 
-                this.days.find(d => d.dayid === dayId).detail = data;
-                this.processDay(dayId, data);
+                const day = this.days.find(d => d.dayid === dayId);
+                day.detail = data;
+                this.processDay(day);
             } catch (e) {
                 console.error(e);
                 head.loadedImages = false;
@@ -456,9 +458,20 @@ export default {
         },
 
         /** Process items from day response */
-        processDay(dayId, data) {
+        processDay(day) {
+            const dayId = day.dayid;
+            const data = day.detail;
+
             const head = this.heads[dayId];
             head.loadedImages = true;
+
+            // Reset rows if re-processing
+            if (head.day?.rows) {
+                for (const row of head.day.rows) {
+                    row.photos = [];
+                }
+            }
+            head.day.rows = new Set();
 
             // Get index of header O(n)
             const headIdx = this.list.findIndex(item => item.id === head.id);
@@ -487,6 +500,9 @@ export default {
                 // Add the photo to the row
                 this.list[rowIdx].photos.push(data[dataIdx]);
                 dataIdx++;
+
+                // Add row to day
+                head.day.rows.add(row);
             }
 
             // Get rid of any extra rows

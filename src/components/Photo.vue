@@ -60,7 +60,6 @@ export default {
                 if (fileInfos.length === 0) {
                     return;
                 }
-                this.day.fileInfos = fileInfos;
 
                 // Fix sorting of the fileInfos
                 const itemPositions = {};
@@ -70,6 +69,10 @@ export default {
                 fileInfos.sort(function (a, b) {
                     return itemPositions[a.fileid] - itemPositions[b.fileid];
                 });
+
+                // Store in day with a original copy
+                this.day.fileInfos = fileInfos;
+                this.day.fiOrigIds = new Set(fileInfos.map(f => f.fileid));
             }
 
             // Get this photo in the fileInfos
@@ -94,6 +97,10 @@ export default {
                         localStorage.removeItem(SIDEBAR_KEY);
                     }
                     OCA.Files.Sidebar.close();
+
+                    fileInfos.splice(0, 2);
+                    // Check for any deleted files and remove them from the main view
+                    this.processDeleted();
                 },
             });
 
@@ -101,7 +108,27 @@ export default {
             if (localStorage.getItem(SIDEBAR_KEY) === '1') {
                 OCA.Files.Sidebar.open(photo.filename);
             }
-        }
+        },
+
+        /** Remove deleted files from main view */
+        processDeleted() {
+            // This is really an ugly hack, but the viewer
+            // does not provide a way to get the deleted files
+
+            // Compare new and old list of ids
+            const newIds = new Set(this.day.fileInfos.map(f => f.fileid));
+            const remIds = new Set([...this.day.fiOrigIds].filter(x => !newIds.has(x)));
+
+            // Exit if nothing to do
+            if (remIds.size === 0) {
+                return;
+            }
+            this.day.fiOrigIds = newIds;
+
+            // Remove deleted files from details
+            this.day.detail = this.day.detail.filter(d => !remIds.has(d.fileid));
+            this.$emit('reprocess', this.day);
+        },
     }
 }
 </script>
