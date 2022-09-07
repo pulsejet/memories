@@ -20,11 +20,12 @@
                 class="photo-row"
                 v-bind:style="{ height: rowHeight + 'px' }">
 
-                <div class="photo" v-for="photo of item.photos">
+                <div class="photo" v-for="photo of item.photos" :key="photo.fileid">
                     <Folder v-if="photo.is_folder"
                             :data="photo" :rowHeight="rowHeight" />
                     <Photo v-else
                             :data="photo" :rowHeight="rowHeight" :day="item.day"
+                            :selected="photo.s || false"
                             @select="selectPhoto"
                             @reprocess="processDay"
                             @clickImg="clickPhoto" />
@@ -59,7 +60,12 @@
 
         <!-- Top bar for selections etc -->
         <div v-if="selection.size > 0" class="top-bar">
-            {{ selection.size }} items selected
+            <button class="btn icon icon-close" @click="clearSelection"></button>
+            <div class="text">
+                {{ selection.size }} items selected
+            </div>
+            <button class="btn icon icon-download"></button>
+            <button class="btn icon icon-delete"></button>
         </div>
     </div>
 </template>
@@ -154,6 +160,7 @@ export default {
     methods: {
         /** Reset all state */
         resetState() {
+            this.clearSelection();
             this.loading = true;
             this.list = [];
             this.numRows = 0;
@@ -533,7 +540,9 @@ export default {
                 }
 
                 // Add the photo to the row
-                this.list[rowIdx].photos.push(data[dataIdx]);
+                const photo = data[dataIdx];
+                photo.s = false; // selected
+                this.list[rowIdx].photos.push(photo);
                 dataIdx++;
 
                 // Add row to day
@@ -645,14 +654,23 @@ export default {
 
         /** Add a photo to selection list */
         selectPhoto(photo) {
-            photo.selected = !this.selection.has(photo.fileid) || undefined;
-            if (photo.selected) {
-                this.selection.add(photo.fileid);
+            photo.s = !this.selection.has(photo);
+            if (photo.s) {
+                this.selection.add(photo);
             } else {
-                this.selection.delete(photo.fileid);
+                this.selection.delete(photo);
             }
             this.$forceUpdate();
         },
+
+        /** Clear all selected photos */
+        clearSelection() {
+            for (const photo of this.selection) {
+                photo.s = false;
+            }
+            this.selection.clear();
+            this.$forceUpdate();
+        }
     },
 }
 </script>
@@ -750,20 +768,33 @@ export default {
 /** Top bar */
 .top-bar {
     position: absolute;
-    top: 10px; right: 15px;
-    padding: 15px;
+    top: 10px; right: 60px;
+    padding: 8px;
     width: 400px;
     max-width: calc(100vw - 30px);
     background-color: var(--color-main-background);
     box-shadow: 0 0 2px gray;
     border-radius: 10px;
     opacity: 0.95;
+    display: flex;
+    vertical-align: middle;
+}
+.top-bar .text {
+    flex-grow: 1;
+    line-height: 36px;
+    padding-left: 8px;
+}
+.top-bar .btn {
+    display: inline-block;
+    margin-right: 3px;
+    cursor: pointer;
 }
 
 /* Mobile layout */
 @media (max-width: 768px) {
     .top-bar {
         top: 35px;
+        right: 15px;
     }
     .timeline-scroll .tick {
         background-color: var(--color-main-background);

@@ -1,5 +1,5 @@
 <template>
-    <div class="photo-container" :class="{ 'selected': data.selected }">
+    <div class="photo-container" :class="{ 'selected': selected }">
         <div class="icon-checkmark select" v-if="!data.ph" @click="toggleSelect"></div>
 
         <div v-if="data.isvideo" class="icon-video-white"></div>
@@ -34,6 +34,10 @@ export default {
         },
         day: {
             type: Object,
+            required: true,
+        },
+        selected: {
+            type: Boolean,
             required: true,
         },
     },
@@ -142,9 +146,7 @@ export default {
             if (this.data.ph) {
                 return;
             }
-
             this.$emit('select', this.data);
-            this.$forceUpdate();
         },
     }
 }
