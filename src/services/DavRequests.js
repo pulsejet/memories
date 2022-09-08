@@ -113,15 +113,6 @@ export async function getFolderPreviewFileIds(folderPath, limit) {
 							${filter}
 						</d:or>
 					</d:where>
-
-					<d:orderby>
-						<d:order>
-							<d:prop>
-								<d:getlastmodified/>
-							</d:prop>
-							<d:descending/>
-						</d:order>
-					</d:orderby>
 					<d:limit>
 						<d:nresults>${limit}</d:nresults>
 					</d:limit>
