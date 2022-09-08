@@ -2,7 +2,7 @@
 
 **📷 Yet another photo management app for Nextcloud**
 
-![Screenshot](appinfo/screencap.gif)
+![Screenshot](appinfo/screencap.webp)
 
 ## How is this different?
 
@@ -11,6 +11,7 @@
 * **🖼️ Albums**: Browse your and shared folders with a similar, efficient timeline.
 * **🎦 Slideshow**: View photos from your timeline and albums easily.
 * **📱 Mobile Support**: Relive your memories on devices of any shape and size through the web app.
+* **🗑️ Recycle**: Select and delete multiple photos and videos at once.
 
 ## 🚀 Installation
 
