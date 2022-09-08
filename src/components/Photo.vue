@@ -1,6 +1,11 @@
 <template>
     <div class="photo-container"
-        :class="{ 'selected': (data.flag & c.FLAG_SELECTED) }">
+        :class="{
+            'selected': (data.flag & c.FLAG_SELECTED),
+            'leaving': (data.flag & c.FLAG_LEAVING),
+            'exit-left': (data.flag & c.FLAG_EXIT_LEFT),
+            'enter-right': (data.flag & c.FLAG_ENTER_RIGHT),
+        }">
 
         <div class="icon-checkmark select"
              v-if="!(data.flag & c.FLAG_PLACEHOLDER)"
@@ -184,6 +189,31 @@ export default {
 </script>
 
 <style scoped>
+/* Container and selection */
+.photo-container.leaving {
+    transition: all 0.2s ease-in;
+    transform: scale(0.9);
+    opacity: 0;
+}
+.photo-container.exit-left {
+    transition: all 0.2s ease-in;
+    transform: translateX(-20%);
+    opacity: 0.4;
+}
+@keyframes enter-right {
+    from {
+        transform: translateX(20%);
+        opacity: 0.4;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+.photo-container.enter-right {
+    animation: enter-right 0.2s ease-out forwards;
+
+}
 .photo-container:hover .icon-checkmark {
     opacity: 0.7;
 }
@@ -208,10 +238,13 @@ export default {
     cursor: pointer;
 }
 
+/* Extra icons */
 .icon-video-white {
     position: absolute;
     top: 8px; right: 8px;
 }
+
+/* Actual image */
 .img-outer {
     padding: 2px;
     transition: all 0.1s ease-in-out;
