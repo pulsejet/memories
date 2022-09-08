@@ -11,6 +11,7 @@
                 @click="click"
                 @contextmenu="contextmenu"
                 @touchstart="touchstart"
+                @touchmove="touchend"
                 @touchend="touchend"
                 @touchcancel="touchend"
                 :src="data.ph ? undefined : getPreviewUrl(data.fileid, data.etag)"
@@ -162,7 +163,7 @@ export default {
             this.touchTimer = setTimeout(() => {
                 this.toggleSelect();
                 this.touchTimer = 0;
-            }, 400);
+            }, 600);
         },
 
         contextmenu(e) {
@@ -220,5 +221,9 @@ img {
     border-radius: 3%;
     cursor: pointer;
     width: 100%; height: 100%;
+
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
 }
 </style>
