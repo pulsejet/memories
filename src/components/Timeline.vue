@@ -25,7 +25,6 @@
                             :data="photo" :rowHeight="rowHeight" />
                     <Photo v-else
                             :data="photo" :rowHeight="rowHeight" :day="item.day"
-                            :selected="photo.s || false"
                             @select="selectPhoto"
                             @reprocess="processDay"
                             @clickImg="clickPhoto" />
@@ -75,6 +74,7 @@ import * as dav from "../services/DavRequests";
 import axios from '@nextcloud/axios'
 import Folder from "./Folder";
 import Photo from "./Photo";
+import constants from "../mixins/constants";
 import { generateUrl } from '@nextcloud/router'
 
 const MAX_PHOTO_WIDTH = 175;
@@ -133,6 +133,9 @@ export default {
 
             /** State for request cancellations */
             state: Math.random(),
+
+            /** Constants for HTML template */
+            c: constants,
         }
     },
 
@@ -399,7 +402,7 @@ export default {
                     const rowCount = leftNum > this.numCols ? this.numCols : leftNum;
                     for (let j = 0; j < rowCount; j++) {
                         row.photos.push({
-                            ph: true, // placeholder
+                            flag: constants.FLAG_PLACEHOLDER,
                             fileid: `${day.dayid}-${i}-${j}`,
                         });
                     }
@@ -540,7 +543,7 @@ export default {
 
                 // Add the photo to the row
                 const photo = data[dataIdx];
-                photo.s = false; // selected
+                photo.flag = 0; // flags
                 photo.d = day; // backref to day
                 this.list[rowIdx].photos.push(photo);
                 dataIdx++;
@@ -654,10 +657,12 @@ export default {
 
         /** Add a photo to selection list */
         selectPhoto(photo) {
-            photo.s = !this.selection.has(photo);
-            if (photo.s) {
+            const nval = !this.selection.has(photo);
+            if (nval) {
+                photo.flag |= constants.FLAG_SELECTED;
                 this.selection.add(photo);
             } else {
+                photo.flag &= ~constants.FLAG_SELECTED;
                 this.selection.delete(photo);
             }
             this.$forceUpdate();
@@ -666,7 +671,7 @@ export default {
         /** Clear all selected photos */
         clearSelection() {
             for (const photo of this.selection) {
-                photo.s = false;
+                photo.flag &= ~constants.FLAG_SELECTED;
             }
             this.selection.clear();
             this.$forceUpdate();

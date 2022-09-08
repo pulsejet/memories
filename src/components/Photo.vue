@@ -1,6 +1,10 @@
 <template>
-    <div class="photo-container" :class="{ 'selected': selected }">
-        <div class="icon-checkmark select" v-if="!data.ph" @click="toggleSelect"></div>
+    <div class="photo-container"
+        :class="{ 'selected': (data.flag & c.FLAG_SELECTED) }">
+
+        <div class="icon-checkmark select"
+             v-if="!(data.flag & c.FLAG_PLACEHOLDER)"
+             @click="toggleSelect"></div>
 
         <div v-if="data.isvideo" class="icon-video-white"></div>
         <div class="img-outer" :style="{
@@ -14,7 +18,7 @@
                 @touchmove="touchend"
                 @touchend="touchend"
                 @touchcancel="touchend"
-                :src="data.ph ? undefined : getPreviewUrl(data.fileid, data.etag)"
+                :src="(data.flag & c.FLAG_PLACEHOLDER) ? undefined : getPreviewUrl(data.fileid, data.etag)"
                 :key="data.fileid"
                 @load = "data.l = Math.random()"
                 @error="(e) => e.target.src='/apps/memories/img/error.svg'" />
@@ -24,6 +28,7 @@
 
 <script>
 import * as dav from "../services/DavRequests";
+import constants from "../mixins/constants"
 import { getPreviewUrl } from "../services/FileUtils";
 
 export default {
@@ -31,6 +36,7 @@ export default {
     data() {
         return {
             touchTimer: 0,
+            c: constants,
         }
     },
     props: {
@@ -46,10 +52,6 @@ export default {
             type: Object,
             required: true,
         },
-        selected: {
-            type: Boolean,
-            required: true,
-        },
     },
     methods: {
         /** Passthrough */
@@ -63,7 +65,7 @@ export default {
         /** Open viewer */
         async openFile() {
             // Check if this is a placeholder
-            if (this.data.ph) {
+            if (this.data.flag & constants.FLAG_PLACEHOLDER) {
                 return;
             }
 
@@ -153,7 +155,7 @@ export default {
         },
 
         toggleSelect() {
-            if (this.data.ph) {
+            if (this.data.flag & constants.FLAG_PLACEHOLDER) {
                 return;
             }
             this.$emit('select', this.data);
