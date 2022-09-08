@@ -1,9 +1,9 @@
 <?php
 return [
     'routes' => [
-        // Days and album API
+        // Days and folder API
         ['name' => 'page#main', 'url' => '/', 'verb' => 'GET'],
-        ['name' => 'page#album', 'url' => '/albums/{path}', 'verb' => 'GET',
+        ['name' => 'page#folder', 'url' => '/folders/{path}', 'verb' => 'GET',
 			'requirements' => [
 				'path' => '.*',
 			],

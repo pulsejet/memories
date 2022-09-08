@@ -8,8 +8,8 @@
 
 * **📸 Photo and Video Timeline**: Sorts photos by date taken, parsed from Exif data.
 * **🤔 Quick Recap**: Jump to anywhere in the timeline instantly.
-* **🖼️ Albums**: Browse your and shared folders with a similar, efficient timeline.
-* **🎦 Slideshow**: View photos from your timeline and albums easily.
+* **🖼️ Folders**: Browse your and shared folders with a similar, efficient timeline.
+* **🎦 Slideshow**: View photos from your timeline and folders easily.
 * **📱 Mobile Support**: Relive your memories on devices of any shape and size through the web app.
 * **🗑️ Recycle**: Select and delete multiple photos and videos at once.
 

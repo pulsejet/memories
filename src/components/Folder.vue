@@ -79,9 +79,9 @@ export default {
             }
         },
 
-        /** Open album folder */
+        /** Open folder */
         openFolder(id) {
-            this.$router.push({ name: 'albums', params: { id } });
+            this.$router.push({ name: 'folders', params: { id } });
         },
     }
 }

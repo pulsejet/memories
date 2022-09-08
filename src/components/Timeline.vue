@@ -370,7 +370,7 @@ export default {
         async fetchDays() {
             let url = '/apps/memories/api/days';
 
-            if (this.$route.name === 'albums') {
+            if (this.$route.name === 'folders') {
                 const id = this.$route.params.id || 0;
                 url = `/apps/memories/api/folder/${id}`;
             }
@@ -453,7 +453,7 @@ export default {
         async fetchDay(dayId) {
             let url = `/apps/memories/api/days/${dayId}`;
 
-            if (this.$route.name === 'albums') {
+            if (this.$route.name === 'folders') {
                 const id = this.$route.params.id || 0;
                 url = `/apps/memories/api/folder/${id}/${dayId}`;
             }

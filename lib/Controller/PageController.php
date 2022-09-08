@@ -66,7 +66,7 @@ class PageController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
-	public function album() {
+	public function folder() {
 		return $this->main();
 	}
 }

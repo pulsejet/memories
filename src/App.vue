@@ -7,8 +7,8 @@
 					icon="icon-yourmemories"
 					exact>
 				</NcAppNavigationItem>
-				<NcAppNavigationItem :to="{name: 'albums'}"
-					:title="t('albums', 'Albums')"
+				<NcAppNavigationItem :to="{name: 'folders'}"
+					:title="t('folders', 'Folders')"
 					icon="icon-files-dark">
 				</NcAppNavigationItem>
 			</template>

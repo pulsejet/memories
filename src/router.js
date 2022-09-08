@@ -56,11 +56,11 @@
          },
 
          {
-            path: '/albums/:id*',
+            path: '/folders/:id*',
             component: Timeline,
-            name: 'albums',
+            name: 'folders',
             props: route => ({
-                rootTitle: t('albums', 'Albums'),
+                rootTitle: t('folders', 'Folders'),
             }),
         },
      ],
