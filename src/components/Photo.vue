@@ -190,6 +190,10 @@ export default {
 
 <style scoped>
 /* Container and selection */
+.photo-container {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+}
 .photo-container.leaving {
     transition: all 0.2s ease-in;
     transform: scale(0.9);
