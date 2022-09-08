@@ -18,3 +18,4 @@ build/
 coverage/
 .php_cs.cache
 vendor
+memories.tar.gz
