@@ -154,9 +154,7 @@ export default {
             this.day.fiOrigIds = newIds;
 
             // Remove deleted files from details
-            this.day.detail = this.day.detail.filter(f => !remIds.has(f.fileid));
-            this.day.count = this.day.detail.length;
-            this.$emit('reprocess', this.day);
+            this.$emit('reprocess', remIds, new Set([this.day]));
         },
 
         toggleSelect() {
