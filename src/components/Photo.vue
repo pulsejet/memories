@@ -9,6 +9,10 @@
             }">
             <img
                 @click="click"
+                @contextmenu="contextmenu"
+                @touchstart="touchstart"
+                @touchend="touchend"
+                @touchcancel="touchend"
                 :src="data.ph ? undefined : getPreviewUrl(data.fileid, data.etag)"
                 :key="data.fileid"
                 @load = "data.l = Math.random()"
@@ -23,6 +27,11 @@ import { getPreviewUrl } from "../services/FileUtils";
 
 export default {
     name: 'Photo',
+    data() {
+        return {
+            touchTimer: 0,
+        }
+    },
     props: {
         data: {
             type: Object,
@@ -147,6 +156,25 @@ export default {
                 return;
             }
             this.$emit('select', this.data);
+        },
+
+        touchstart() {
+            this.touchTimer = setTimeout(() => {
+                this.toggleSelect();
+                this.touchTimer = 0;
+            }, 400);
+        },
+
+        contextmenu(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        },
+
+        touchend() {
+            if (this.touchTimer) {
+                clearTimeout(this.touchTimer);
+                this.touchTimer = 0;
+            }
         },
     }
 }
