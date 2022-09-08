@@ -64,7 +64,6 @@
             <div class="text">
                 {{ selection.size }} items selected
             </div>
-            <button class="btn icon icon-download"></button>
             <button class="btn icon icon-delete" @click="deleteSelection"></button>
         </div>
     </div>
