@@ -1,4 +1,5 @@
 import { getCurrentUser } from '@nextcloud/auth'
+import { generateUrl } from '@nextcloud/router'
 import { genFileInfo } from './FileUtils'
 import client from './DavClient';
 
@@ -134,4 +135,38 @@ export async function getFolderPreviewFileIds(folderPath, limit) {
 export async function deleteFile(path) {
     const prefixPath = `/files/${getCurrentUser().uid}`;
     return await client.deleteFile(`${prefixPath}${path}`);
+}
+
+/**
+ * Download a file
+ *
+ * @param {string[]} fileNames - The file's names
+ */
+ export async function downloadFiles(fileNames) {
+	const randomToken = Math.random().toString(36).substring(2)
+
+	const params = new URLSearchParams()
+	params.append('files', JSON.stringify(fileNames))
+	params.append('downloadStartSecret', randomToken)
+
+	const downloadURL = generateUrl(`/apps/files/ajax/download.php?${params}`)
+
+	window.location = `${downloadURL}downloadStartSecret=${randomToken}`
+
+	return new Promise((resolve) => {
+		const waitForCookieInterval = setInterval(
+			() => {
+				const cookieIsSet = document.cookie
+					.split(';')
+					.map(cookie => cookie.split('='))
+					.findIndex(([cookieName, cookieValue]) => cookieName === 'ocDownloadStarted' && cookieValue === randomToken)
+
+				if (cookieIsSet) {
+					clearInterval(waitForCookieInterval)
+					resolve(true)
+				}
+			},
+			50
+		)
+	})
 }

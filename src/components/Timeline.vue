@@ -74,6 +74,14 @@
 
             <NcActions>
                 <NcActionButton
+                    :aria-label="t('memories', 'Download selection')"
+                    @click="downloadSelection"
+                    class="icon-download">
+                    {{ t('memories', 'Download') }}
+                </NcActionButton>
+            </NcActions>
+            <NcActions>
+                <NcActionButton
                     :aria-label="t('memories', 'Delete selection')"
                     @click="deleteSelection"
                     class="icon-delete">
@@ -750,6 +758,17 @@ export default {
             this.loading = false;
 
             await this.deleteFromViewWithAnimation(delIds, updatedDays);
+        },
+
+        /** Download the selected files */
+        async downloadSelection() {
+            if (this.selection.size === 0) {
+                return;
+            }
+
+            // Get files to download
+            const fileInfos = await dav.getFiles([...this.selection].map(p => p.fileid));
+            await dav.downloadFiles(fileInfos.map(f => f.filename));
         },
 
         /**
