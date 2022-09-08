@@ -65,7 +65,7 @@
                 {{ selection.size }} items selected
             </div>
             <button class="btn icon icon-download"></button>
-            <button class="btn icon icon-delete"></button>
+            <button class="btn icon icon-delete" @click="deleteSelection"></button>
         </div>
     </div>
 </template>
@@ -542,6 +542,7 @@ export default {
                 // Add the photo to the row
                 const photo = data[dataIdx];
                 photo.s = false; // selected
+                photo.d = day; // backref to day
                 this.list[rowIdx].photos.push(photo);
                 dataIdx++;
 
@@ -670,7 +671,31 @@ export default {
             }
             this.selection.clear();
             this.$forceUpdate();
-        }
+        },
+
+        /** Delete all selected photos */
+        deleteSelection() {
+            const updatedDays = new Set();
+            const delIds = new Set();
+
+            for (const photo of this.selection) {
+                if (!photo.fileid) {
+                    continue;
+                }
+                delIds.add(photo.fileid);
+                updatedDays.add(photo.d);
+            }
+
+            for (const day of updatedDays) {
+                day.detail = day.detail.filter(p => !delIds.has(p.fileid));
+                day.count = day.detail.length;
+                this.processDay(day);
+            }
+
+            this.clearSelection();
+            this.reflowTimeline();
+            this.handleViewSizeChange();
+        },
     },
 }
 </script>
