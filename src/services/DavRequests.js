@@ -135,5 +135,12 @@ export async function getFolderPreviewFileIds(folderPath, limit) {
     let response = await client.getDirectoryContents('', options);
     return response.data
 		.map(data => genFileInfo(data))
-		.map(data => Object.assign({}, data, { filename: data.filename.replace(prefixPath, '') }));
+		.map(data => Object.assign({}, data, {
+			filename: data.filename.replace(prefixPath, '')
+		}));
+}
+
+export async function deleteFile(path) {
+    const prefixPath = `/files/${getCurrentUser().uid}`;
+    return await client.deleteFile(`${prefixPath}${path}`);
 }

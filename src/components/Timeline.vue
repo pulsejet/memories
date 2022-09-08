@@ -72,6 +72,7 @@
 
 <script>
 
+import * as dav from "../services/DavRequests";
 import axios from '@nextcloud/axios'
 import Folder from "./Folder";
 import Photo from "./Photo";
@@ -463,7 +464,6 @@ export default {
             // Itearte over days
             for (const day of this.days) {
                 if (day.count === 0) {
-                    console.log('skip', day);
                     continue;
                 }
 
@@ -674,10 +674,14 @@ export default {
         },
 
         /** Delete all selected photos */
-        deleteSelection() {
+        async deleteSelection() {
+            if (this.selection.size === 0) {
+                return;
+            }
+
+            // Get files to delete
             const updatedDays = new Set();
             const delIds = new Set();
-
             for (const photo of this.selection) {
                 if (!photo.fileid) {
                     continue;
@@ -686,6 +690,37 @@ export default {
                 updatedDays.add(photo.d);
             }
 
+            // Get files data
+            let fileInfos = [];
+            this.loading = true;
+            try {
+                fileInfos = await dav.getFiles([...delIds]);
+            } catch {
+                this.loading = false;
+                alert('Failed to get file info');
+                return;
+            }
+
+            // Run all promises together
+            const promises = [];
+
+            // Delete each file
+            delIds.clear();
+            for (const fileInfo of fileInfos) {
+                promises.push((async () => {
+                    try {
+                        await dav.deleteFile(fileInfo.filename)
+                        delIds.add(fileInfo.fileid);
+                    } catch {
+                        console.warn('Failed to delete', fileInfo.filename)
+                    }
+                })());
+            }
+
+            await Promise.allSettled(promises);
+            this.loading = false;
+
+            // Reflow all touched days
             for (const day of updatedDays) {
                 day.detail = day.detail.filter(p => !delIds.has(p.fileid));
                 day.count = day.detail.length;
