@@ -1,36 +1,37 @@
 <template>
-	<Content app-name="memories">
-		<AppNavigation>
+	<NcContent app-name="memories">
+		<NcAppNavigation>
 			<template id="app-memories-navigation" #list>
-				<AppNavigationItem :to="{name: 'timeline'}"
+				<NcAppNavigationItem :to="{name: 'timeline'}"
 					:title="t('timeline', 'Timeline')"
 					icon="icon-yourmemories"
 					exact>
-				</AppNavigationItem>
-				<AppNavigationItem :to="{name: 'albums'}"
+				</NcAppNavigationItem>
+				<NcAppNavigationItem :to="{name: 'albums'}"
 					:title="t('albums', 'Albums')"
 					icon="icon-files-dark">
-				</AppNavigationItem>
+				</NcAppNavigationItem>
 			</template>
 			<template #footer>
-				<AppNavigationSettings :title="t('memories', 'Settings')">
+				<NcAppNavigationSettings :title="t('memories', 'Settings')">
 					<Settings />
-				</AppNavigationSettings>
+				</NcAppNavigationSettings>
 			</template>
-		</AppNavigation>
+		</NcAppNavigation>
 
-		<AppContent>
+		<NcAppContent>
 			<div class="outer">
 				<router-view />
 			</div>
-		</AppContent>
-	</Content>
+		</NcAppContent>
+	</NcContent>
 </template>
 
 <style scoped>
 .outer {
     padding: 0 0 0 44px;
 	height: 100%;
+	width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -41,11 +42,7 @@
 </style>
 
 <script>
-import Content from '@nextcloud/vue/dist/Components/Content'
-import AppContent from '@nextcloud/vue/dist/Components/AppContent'
-import AppNavigation from '@nextcloud/vue/dist/Components/AppNavigation'
-import AppNavigationItem from '@nextcloud/vue/dist/Components/AppNavigationItem'
-import AppNavigationSettings from '@nextcloud/vue/dist/Components/AppNavigationSettings'
+import { NcContent, NcAppContent, NcAppNavigation, NcAppNavigationItem, NcAppNavigationSettings} from '@nextcloud/vue'
 
 import Timeline from './components/Timeline.vue'
 import Settings from './components/Settings.vue'
@@ -53,11 +50,11 @@ import Settings from './components/Settings.vue'
 export default {
 	name: 'App',
 	components: {
-		Content,
-		AppContent,
-		AppNavigation,
-		AppNavigationItem,
-		AppNavigationSettings,
+		NcContent,
+		NcAppContent,
+		NcAppNavigation,
+		NcAppNavigationItem,
+		NcAppNavigationSettings,
 
 		Timeline,
 		Settings,

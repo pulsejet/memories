@@ -33,12 +33,12 @@
 	},
 	"dependencies": {
 		"@nextcloud/l10n": "^1.6.0",
-		"@nextcloud/vue": "^5.4.0",
+		"@nextcloud/vue": "^6.0.0-beta.6",
 		"path-posix": "^1.0.0",
-		"vue": "^2.7.8",
+		"vue": "^2.7.10",
 		"vue-router": "^3.5.4",
 		"vue-virtual-scroller": "^1.0.10",
-		"webdav": "^4.10.0"
+		"webdav": "^4.11.0"
 	},
 	"browserslist": [
 		"extends @nextcloud/browserslist-config"
