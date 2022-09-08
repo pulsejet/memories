@@ -62,7 +62,7 @@
         <div v-if="selection.size > 0" class="top-bar">
             <button class="btn icon icon-close" @click="clearSelection"></button>
             <div class="text">
-                {{ selection.size }} items selected
+                {{ selection.size }} item(s) selected
             </div>
             <button class="btn icon icon-delete" @click="deleteSelection"></button>
         </div>
