@@ -59,23 +59,39 @@
 
         <!-- Top bar for selections etc -->
         <div v-if="selection.size > 0" class="top-bar">
-            <button class="btn icon icon-close" @click="clearSelection"></button>
+            <NcActions>
+                <NcActionButton
+                    :aria-label="t('memories', 'Cancel selection')"
+                    @click="clearSelection"
+                    class="icon-close">
+                    {{ t('memories', 'Cancel') }}
+                </NcActionButton>
+            </NcActions>
+
             <div class="text">
                 {{ selection.size }} item(s) selected
             </div>
-            <button class="btn icon icon-delete" @click="deleteSelection"></button>
+
+            <NcActions>
+                <NcActionButton
+                    :aria-label="t('memories', 'Delete selection')"
+                    @click="deleteSelection"
+                    class="icon-delete">
+                    {{ t('memories', 'Delete') }}
+                </NcActionButton>
+            </NcActions>
         </div>
     </div>
 </template>
 
 <script>
-
 import * as dav from "../services/DavRequests";
 import axios from '@nextcloud/axios'
 import Folder from "./Folder";
 import Photo from "./Photo";
 import constants from "../mixins/constants";
 import { generateUrl } from '@nextcloud/router'
+import { NcActions, NcActionButton, NcButton } from '@nextcloud/vue'
 
 const MAX_PHOTO_WIDTH = 175;
 const MIN_COLS = 3;
@@ -84,6 +100,9 @@ export default {
     components: {
         Folder,
         Photo,
+        NcActions,
+        NcActionButton,
+        NcButton
     },
     data() {
         return {
@@ -731,7 +750,6 @@ export default {
             this.loading = false;
 
             await this.deleteFromViewWithAnimation(delIds, updatedDays);
-            this.clearSelection();
         },
 
         /**
@@ -801,6 +819,9 @@ export default {
                     }
                 }
             }
+
+            // clear selection at this point
+            this.clearSelection();
 
             // wait for 200ms
             await new Promise(resolve => setTimeout(resolve, 200));
@@ -928,13 +949,8 @@ export default {
 }
 .top-bar .text {
     flex-grow: 1;
-    line-height: 36px;
+    line-height: 40px;
     padding-left: 8px;
-}
-.top-bar .btn {
-    display: inline-block;
-    margin-right: 3px;
-    cursor: pointer;
 }
 
 /* Mobile layout */
@@ -952,7 +968,8 @@ export default {
         display: none;
     }
     .head-row.first {
-        padding-left: 34px;
+        padding-left: 38px;
+        padding-top: 12px;
     }
 }
 </style>
