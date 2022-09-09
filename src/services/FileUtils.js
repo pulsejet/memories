@@ -21,6 +21,7 @@
  */
  import camelcase from 'camelcase'
  import { isNumber } from './NumberUtils'
+ import { generateUrl } from '@nextcloud/router'
 
  /**
   * Get an url encoded path
@@ -123,7 +124,7 @@
  }
 
  const getPreviewUrl = function(fileid, etag) {
-    return `/core/preview?fileId=${fileid}&c=${etag}&x=250&y=250&forceIcon=0&a=0`;
+    return generateUrl(`/core/preview?fileId=${fileid}&c=${etag}&x=250&y=250&forceIcon=0&a=0`);
  }
 
  export { encodeFilePath, extractFilePaths, sortCompare, genFileInfo, getPreviewUrl }
