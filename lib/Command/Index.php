@@ -42,6 +42,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Index extends Command {
@@ -124,10 +125,19 @@ class Index extends Command {
     protected function configure(): void {
         $this
             ->setName('memories:index')
-            ->setDescription('Generate entries');
+            ->setDescription('Generate photo entries')
+            ->addOption(
+                'refresh',
+                'f',
+                InputOption::VALUE_NONE,
+                'Refresh existing entries'
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int {
+        // Get options and arguments
+        $refresh = $input->getOption('refresh') ? true : false;
+
         // Refuse to run without exiftool
         \OCA\Memories\Exif::ensureStaticExiftoolProc();
         if (!$this->testExif()) {
@@ -145,8 +155,8 @@ class Index extends Command {
         }
         $this->output = $output;
 
-        $this->userManager->callForSeenUsers(function (IUser $user) {
-            $this->generateUserEntries($user);
+        $this->userManager->callForSeenUsers(function (IUser &$user) use (&$refresh) {
+            $this->generateUserEntries($user, $refresh);
         });
 
         // Close the exiftool process
@@ -166,15 +176,15 @@ class Index extends Command {
         return 0;
     }
 
-    private function generateUserEntries(IUser &$user): void {
+    private function generateUserEntries(IUser &$user, bool &$refresh): void {
         \OC_Util::tearDownFS();
         \OC_Util::setupFS($user->getUID());
 
         $userFolder = $this->rootFolder->getUserFolder($user->getUID());
-        $this->parseFolder($userFolder);
+        $this->parseFolder($userFolder, $refresh);
     }
 
-    private function parseFolder(Folder &$folder): void {
+    private function parseFolder(Folder &$folder, bool &$refresh): void {
         try {
             $folderPath = $folder->getPath();
             $this->output->writeln('Scanning folder ' . $folderPath);
@@ -183,9 +193,9 @@ class Index extends Command {
 
             foreach ($nodes as &$node) {
                 if ($node instanceof Folder) {
-                    $this->parseFolder($node);
+                    $this->parseFolder($node, $refresh);
                 } elseif ($node instanceof File) {
-                    $this->parseFile($node);
+                    $this->parseFile($node, $refresh);
                 }
             }
         } catch (StorageNotAvailableException $e) {
@@ -196,8 +206,8 @@ class Index extends Command {
         }
     }
 
-    private function parseFile(File &$file): void {
-        $res = $this->timelineWrite->processFile($file);
+    private function parseFile(File &$file, bool &$refresh): void {
+        $res = $this->timelineWrite->processFile($file, $refresh);
         if ($res === 2) {
             $this->nProcessed++;
         } else if ($res === 1) {

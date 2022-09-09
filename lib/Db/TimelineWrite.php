@@ -20,7 +20,7 @@ class TimelineWrite {
      * @param File $file
      * @return int 2 if processed, 1 if skipped, 0 if not valid
      */
-    public function processFile(File &$file): int {
+    public function processFile(File &$file, bool $force=false): int {
         // There is no easy way to UPSERT in a standard SQL way, so just
         // do multiple calls. The worst that can happen is more updates,
         // but that's not a big deal.
@@ -48,7 +48,7 @@ class TimelineWrite {
         ], [
             \PDO::PARAM_INT, \PDO::PARAM_STR,
         ])->fetch();
-        if ($prevRow && intval($prevRow['mtime']) === $mtime) {
+        if ($prevRow && !$force && intval($prevRow['mtime']) === $mtime) {
             return 1;
         }
 
