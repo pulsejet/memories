@@ -15,7 +15,7 @@
 
 ## 🚀 Installation
 
-1. ☁ Clone this into your `apps` folder of your Nextcloud.
+1. Install the app from the Nextcloud app store
 1. ⚒️ Install `exiftool` (`sudo apt install exiftool`).
 1. Run `php ./occ memories:index` to generate metadata indices for existing photos.
 1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos. Photos from this directory will be displayed in the timeline, including any photos in nested subdirectories.
