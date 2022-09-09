@@ -41,8 +41,9 @@ class Exif {
 
         if (!self::$staticProc) {
             self::initializeStaticExiftoolProc();
+            usleep(500000); // wait if error
             if (!proc_get_status(self::$staticProc)["running"]) {
-                error_log("Failed to create stay_open exiftool process");
+                error_log("WARN: Failed to create stay_open exiftool process");
                 self::$noStaticProc = true;
                 self::$staticProc = null;
             }
@@ -112,7 +113,7 @@ class Exif {
         while (!str_ends_with($buf, $readyToken)) {
             $r = fread(self::$staticPipes[1], 1);
             if ($r === false) {
-                error_log("Something went wrong with static exiftool process");
+                error_log("PANIC: Something went wrong with static exiftool process");
                 exit(1);
             }
             $buf .= $r;

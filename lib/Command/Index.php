@@ -138,19 +138,31 @@ class Index extends Command {
         // Get options and arguments
         $refresh = $input->getOption('refresh') ? true : false;
 
+        // Run with the static process
+        try {
+            \OCA\Memories\Exif::ensureStaticExiftoolProc();
+            return $this->executeWithOpts($output, $refresh);
+        } catch (\Exception $e) {
+            error_log("FATAL: " . $e->getMessage());
+            return 1;
+        } finally {
+            \OCA\Memories\Exif::closeStaticExiftoolProc();
+        }
+    }
+
+    protected function executeWithOpts(OutputInterface $output, bool &$refresh): int {
         // Refuse to run without exiftool
-        \OCA\Memories\Exif::ensureStaticExiftoolProc();
         if (!$this->testExif()) {
             error_log('FATAL: exiftool could not be found or test failed');
             error_log('Please install exiftool (at least v12) and make sure it is in the PATH');
-            exit(1);
+            return 1;
         }
 
         // Time measurement
         $startTime = microtime(true);
 
         if ($this->encryptionManager->isEnabled()) {
-            $output->writeln('Encryption is enabled. Aborted.');
+            error_log('FATAL: Encryption is enabled. Aborted.');
             return 1;
         }
         $this->output = $output;
@@ -158,9 +170,6 @@ class Index extends Command {
         $this->userManager->callForSeenUsers(function (IUser &$user) use (&$refresh) {
             $this->generateUserEntries($user, $refresh);
         });
-
-        // Close the exiftool process
-        \OCA\Memories\Exif::closeStaticExiftoolProc();
 
         // Show some stats
         $endTime = microtime(true);
