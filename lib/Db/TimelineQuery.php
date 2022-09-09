@@ -8,11 +8,11 @@ use OCP\IConfig;
 use OCP\IDBConnection;
 
 class TimelineQuery {
-	protected IDBConnection $connection;
+    protected IDBConnection $connection;
 
-	public function __construct(IDBConnection $connection) {
-		$this->connection = $connection;
-	}
+    public function __construct(IDBConnection $connection) {
+        $this->connection = $connection;
+    }
 
     /**
      * Process the days response
@@ -104,7 +104,7 @@ class TimelineQuery {
                 ORDER BY `*PREFIX*memories`.`datetaken` DESC';
 
         $path = "files" . Exif::getPhotosPath($config, $user) . "%";
-		$rows = $this->connection->executeQuery($sql, [$path, $user, $dayId], [
+        $rows = $this->connection->executeQuery($sql, [$path, $user, $dayId], [
             \PDO::PARAM_STR, \PDO::PARAM_STR, \PDO::PARAM_INT,
         ])->fetchAll();
         return $this->processDay($rows);
@@ -126,7 +126,7 @@ class TimelineQuery {
                     AND (`*PREFIX*filecache`.`parent`=? OR `*PREFIX*filecache`.`fileid`=?)
                 WHERE  `*PREFIX*memories`.`dayid`=?
                 ORDER BY `*PREFIX*memories`.`datetaken` DESC';
-		$rows = $this->connection->executeQuery($sql, [$folderId, $folderId, $dayId], [
+        $rows = $this->connection->executeQuery($sql, [$folderId, $folderId, $dayId], [
             \PDO::PARAM_INT, \PDO::PARAM_INT, \PDO::PARAM_INT,
         ])->fetchAll();
         return $this->processDay($rows);

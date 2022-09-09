@@ -22,7 +22,7 @@
  */
 
 .icon-folder.icon-dark {
-	@include icon-color('folder', 'filetypes', $color-black, 1, true);
+    @include icon-color('folder', 'filetypes', $color-black, 1, true);
 }
 
 @include icon-black-white('yourmemories', 'memories', 1);

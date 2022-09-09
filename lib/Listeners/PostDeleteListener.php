@@ -34,20 +34,20 @@ use OCP\IDBConnection;
 class PostDeleteListener implements IEventListener {
     private TimelineWrite $util;
 
-	public function __construct(IDBConnection $connection) {
+    public function __construct(IDBConnection $connection) {
         $this->util = new TimelineWrite($connection);
-	}
+    }
 
-	public function handle(Event $event): void {
-		if (!($event instanceof NodeDeletedEvent)) {
-			return;
-		}
+    public function handle(Event $event): void {
+        if (!($event instanceof NodeDeletedEvent)) {
+            return;
+        }
 
-		$node = $event->getNode();
-		if ($node instanceof Folder) {
-			return;
-		}
+        $node = $event->getNode();
+        if ($node instanceof Folder) {
+            return;
+        }
 
-		$this->util->deleteFile($node);
-	}
+        $this->util->deleteFile($node);
+    }
 }

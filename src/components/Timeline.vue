@@ -176,16 +176,16 @@ export default {
     },
 
     watch: {
-		$route(from, to) {
-			console.log('route changed', from, to)
-			this.resetState();
+        $route(from, to) {
+            console.log('route changed', from, to)
+            this.resetState();
             this.fetchDays();
-		},
-	},
+        },
+    },
 
     beforeDestroy() {
         this.resetState();
-	},
+    },
 
     methods: {
         /** Reset all state */

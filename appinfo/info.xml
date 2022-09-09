@@ -35,8 +35,8 @@
         <nextcloud min-version="22" max-version="24"/>
     </dependencies>
     <commands>
-		<command>OCA\Memories\Command\Index</command>
-	</commands>
+        <command>OCA\Memories\Command\Index</command>
+    </commands>
     <navigations>
         <navigation>
             <name>Memories</name>

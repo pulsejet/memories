@@ -21,7 +21,7 @@
  -->
 
 <template>
-	<div>
+    <div>
         <label for="timeline-path">{{ t('memories', 'Timeline Path') }}</label>
         <input id="timeline-path"
             v-model="timelinePath"
@@ -30,7 +30,7 @@
         <button @click="updateAll()">
             {{ t('memories', 'Update') }}
         </button>
-	</div>
+    </div>
 </template>
 
 <style scoped>
@@ -43,10 +43,10 @@ input[type=text] {
 import UserConfig from '../mixins/UserConfig'
 
 export default {
-	name: 'Settings',
-	mixins: [
-		UserConfig,
-	],
+    name: 'Settings',
+    mixins: [
+        UserConfig,
+    ],
 
     methods: {
         async updateAll() {

@@ -37,40 +37,40 @@ use OCP\Files\Events\Node\NodeDeletedEvent;
 use OCP\Files\Events\Node\NodeTouchedEvent;
 
 class Application extends App implements IBootstrap {
-	public const APPNAME = 'memories';
+    public const APPNAME = 'memories';
 
-	public const IMAGE_MIMES = [
-		'image/png',
-		'image/jpeg',
-		'image/heic',
-		'image/png',
-		'image/tiff',
-		// 'image/gif',			// too rarely used for photos
-		// 'image/x-xbitmap',	// too rarely used for photos
-		// 'image/bmp',			// too rarely used for photos
-		// 'image/svg+xml',		// too rarely used for photos
-	];
+    public const IMAGE_MIMES = [
+        'image/png',
+        'image/jpeg',
+        'image/heic',
+        'image/png',
+        'image/tiff',
+        // 'image/gif',         // too rarely used for photos
+        // 'image/x-xbitmap',   // too rarely used for photos
+        // 'image/bmp',         // too rarely used for photos
+        // 'image/svg+xml',     // too rarely used for photos
+    ];
 
-	public const VIDEO_MIMES = [
-		'video/mpeg',
-		// 'video/ogg',			// too rarely used for photos
-		// 'video/webm',		// too rarely used for photos
-		'video/mp4',
-		// 'video/x-m4v',		// too rarely used for photos
-		'video/quicktime',
-		'video/x-matroska',
-	];
+    public const VIDEO_MIMES = [
+        'video/mpeg',
+        // 'video/ogg',         // too rarely used for photos
+        // 'video/webm',        // too rarely used for photos
+        'video/mp4',
+        // 'video/x-m4v',       // too rarely used for photos
+        'video/quicktime',
+        'video/x-matroska',
+    ];
 
-	public function __construct() {
-		parent::__construct(self::APPNAME);
-	}
+    public function __construct() {
+        parent::__construct(self::APPNAME);
+    }
 
-	public function register(IRegistrationContext $context): void {
-		$context->registerEventListener(NodeWrittenEvent::class, PostWriteListener::class);
+    public function register(IRegistrationContext $context): void {
+        $context->registerEventListener(NodeWrittenEvent::class, PostWriteListener::class);
         $context->registerEventListener(NodeTouchedEvent::class, PostWriteListener::class);
         $context->registerEventListener(NodeDeletedEvent::class, PostDeleteListener::class);
-	}
+    }
 
-	public function boot(IBootContext $context): void {
-	}
+    public function boot(IBootContext $context): void {
+    }
 }

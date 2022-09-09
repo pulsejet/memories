@@ -4,13 +4,13 @@ return [
         // Days and folder API
         ['name' => 'page#main', 'url' => '/', 'verb' => 'GET'],
         ['name' => 'page#folder', 'url' => '/folders/{path}', 'verb' => 'GET',
-			'requirements' => [
-				'path' => '.*',
-			],
-			'defaults' => [
-				'path' => '',
-			]
-	    ],
+            'requirements' => [
+                'path' => '.*',
+            ],
+            'defaults' => [
+                'path' => '',
+            ]
+        ],
 
         // API
         ['name' => 'api#days', 'url' => '/api/days', 'verb' => 'GET'],

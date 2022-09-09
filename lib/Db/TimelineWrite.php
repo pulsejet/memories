@@ -9,11 +9,11 @@ use OCP\Files\File;
 use OCP\IDBConnection;
 
 class TimelineWrite {
-	protected IDBConnection $connection;
+    protected IDBConnection $connection;
 
-	public function __construct(IDBConnection $connection) {
-		$this->connection = $connection;
-	}
+    public function __construct(IDBConnection $connection) {
+        $this->connection = $connection;
+    }
 
     /**
      * Process a file to insert Exif data into the database

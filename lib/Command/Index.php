@@ -46,149 +46,149 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Index extends Command {
 
-	/** @var ?GlobalStoragesService */
-	protected $globalService;
+    /** @var ?GlobalStoragesService */
+    protected $globalService;
 
-	/** @var int[][] */
-	protected array $sizes;
+    /** @var int[][] */
+    protected array $sizes;
 
-	protected IUserManager $userManager;
-	protected IRootFolder $rootFolder;
-	protected IPreview $previewGenerator;
-	protected IConfig $config;
-	protected OutputInterface $output;
-	protected IManager $encryptionManager;
-	protected IDBConnection $connection;
-	protected TimelineWrite $timelineWrite;
+    protected IUserManager $userManager;
+    protected IRootFolder $rootFolder;
+    protected IPreview $previewGenerator;
+    protected IConfig $config;
+    protected OutputInterface $output;
+    protected IManager $encryptionManager;
+    protected IDBConnection $connection;
+    protected TimelineWrite $timelineWrite;
 
-	// Stats
-	private int $nProcessed = 0;
-	private int $nSkipped = 0;
-	private int $nInvalid = 0;
+    // Stats
+    private int $nProcessed = 0;
+    private int $nSkipped = 0;
+    private int $nInvalid = 0;
 
-	public function __construct(IRootFolder $rootFolder,
-								IUserManager $userManager,
-								IPreview $previewGenerator,
-								IConfig $config,
-								IManager $encryptionManager,
-								IDBConnection $connection,
-								ContainerInterface $container) {
-		parent::__construct();
+    public function __construct(IRootFolder $rootFolder,
+                                IUserManager $userManager,
+                                IPreview $previewGenerator,
+                                IConfig $config,
+                                IManager $encryptionManager,
+                                IDBConnection $connection,
+                                ContainerInterface $container) {
+        parent::__construct();
 
-		$this->userManager = $userManager;
-		$this->rootFolder = $rootFolder;
-		$this->previewGenerator = $previewGenerator;
-		$this->config = $config;
-		$this->encryptionManager = $encryptionManager;
-		$this->connection = $connection;
-		$this->timelineWrite = new TimelineWrite($this->connection);
+        $this->userManager = $userManager;
+        $this->rootFolder = $rootFolder;
+        $this->previewGenerator = $previewGenerator;
+        $this->config = $config;
+        $this->encryptionManager = $encryptionManager;
+        $this->connection = $connection;
+        $this->timelineWrite = new TimelineWrite($this->connection);
 
-		try {
-			$this->globalService = $container->get(GlobalStoragesService::class);
-		} catch (ContainerExceptionInterface $e) {
-			$this->globalService = null;
-		}
-	}
+        try {
+            $this->globalService = $container->get(GlobalStoragesService::class);
+        } catch (ContainerExceptionInterface $e) {
+            $this->globalService = null;
+        }
+    }
 
-	/** Make sure exiftool is available */
-	private function testExif() {
-		$testfile = dirname(__FILE__). '/../../exiftest.jpg';
-		$stream = fopen($testfile, 'rb');
-		if (!$stream) {
-			return false;
-		}
+    /** Make sure exiftool is available */
+    private function testExif() {
+        $testfile = dirname(__FILE__). '/../../exiftest.jpg';
+        $stream = fopen($testfile, 'rb');
+        if (!$stream) {
+            return false;
+        }
 
-		$exif = \OCA\Memories\Exif::getExifFromStream($stream);
-		fclose($stream);
+        $exif = \OCA\Memories\Exif::getExifFromStream($stream);
+        fclose($stream);
 
-		if (!$exif || $exif["DateTimeOriginal"] !== "2004:08:31 19:52:58") {
-			return false;
-		}
-		return true;
-	}
+        if (!$exif || $exif["DateTimeOriginal"] !== "2004:08:31 19:52:58") {
+            return false;
+        }
+        return true;
+    }
 
-	protected function configure(): void {
-		$this
-			->setName('memories:index')
-			->setDescription('Generate entries');
-	}
+    protected function configure(): void {
+        $this
+            ->setName('memories:index')
+            ->setDescription('Generate entries');
+    }
 
-	protected function execute(InputInterface $input, OutputInterface $output): int {
-		// Refuse to run without exiftool
-		\OCA\Memories\Exif::ensureStaticExiftoolProc();
-		if (!$this->testExif()) {
-			error_log('FATAL: exiftool could not be found or test failed');
-			exit(1);
-		}
+    protected function execute(InputInterface $input, OutputInterface $output): int {
+        // Refuse to run without exiftool
+        \OCA\Memories\Exif::ensureStaticExiftoolProc();
+        if (!$this->testExif()) {
+            error_log('FATAL: exiftool could not be found or test failed');
+            exit(1);
+        }
 
-		// Time measurement
-		$startTime = microtime(true);
+        // Time measurement
+        $startTime = microtime(true);
 
-		if ($this->encryptionManager->isEnabled()) {
-			$output->writeln('Encryption is enabled. Aborted.');
-			return 1;
-		}
-		$this->output = $output;
+        if ($this->encryptionManager->isEnabled()) {
+            $output->writeln('Encryption is enabled. Aborted.');
+            return 1;
+        }
+        $this->output = $output;
 
         $this->userManager->callForSeenUsers(function (IUser $user) {
             $this->generateUserEntries($user);
         });
 
-		// Close the exiftool process
-		\OCA\Memories\Exif::closeStaticExiftoolProc();
+        // Close the exiftool process
+        \OCA\Memories\Exif::closeStaticExiftoolProc();
 
-		// Show some stats
-		$endTime = microtime(true);
-		$execTime = intval(($endTime - $startTime)*1000)/1000 ;
-		$nTotal = $this->nInvalid + $this->nSkipped + $this->nProcessed;
-		$this->output->writeln("==========================================");
-		$this->output->writeln("Checked $nTotal files in $execTime sec");
-		$this->output->writeln($this->nInvalid . " not valid media items");
-		$this->output->writeln($this->nSkipped . " skipped because unmodified");
-		$this->output->writeln($this->nProcessed . " (re-)processed");
-		$this->output->writeln("==========================================");
+        // Show some stats
+        $endTime = microtime(true);
+        $execTime = intval(($endTime - $startTime)*1000)/1000 ;
+        $nTotal = $this->nInvalid + $this->nSkipped + $this->nProcessed;
+        $this->output->writeln("==========================================");
+        $this->output->writeln("Checked $nTotal files in $execTime sec");
+        $this->output->writeln($this->nInvalid . " not valid media items");
+        $this->output->writeln($this->nSkipped . " skipped because unmodified");
+        $this->output->writeln($this->nProcessed . " (re-)processed");
+        $this->output->writeln("==========================================");
 
-		return 0;
-	}
+        return 0;
+    }
 
-	private function generateUserEntries(IUser &$user): void {
-		\OC_Util::tearDownFS();
-		\OC_Util::setupFS($user->getUID());
+    private function generateUserEntries(IUser &$user): void {
+        \OC_Util::tearDownFS();
+        \OC_Util::setupFS($user->getUID());
 
-		$userFolder = $this->rootFolder->getUserFolder($user->getUID());
-		$this->parseFolder($userFolder);
-	}
+        $userFolder = $this->rootFolder->getUserFolder($user->getUID());
+        $this->parseFolder($userFolder);
+    }
 
-	private function parseFolder(Folder &$folder): void {
-		try {
-			$folderPath = $folder->getPath();
-			$this->output->writeln('Scanning folder ' . $folderPath);
+    private function parseFolder(Folder &$folder): void {
+        try {
+            $folderPath = $folder->getPath();
+            $this->output->writeln('Scanning folder ' . $folderPath);
 
-			$nodes = $folder->getDirectoryListing();
+            $nodes = $folder->getDirectoryListing();
 
-			foreach ($nodes as &$node) {
-				if ($node instanceof Folder) {
-					$this->parseFolder($node);
-				} elseif ($node instanceof File) {
-					$this->parseFile($node);
-				}
-			}
-		} catch (StorageNotAvailableException $e) {
-			$this->output->writeln(sprintf('<error>Storage for folder folder %s is not available: %s</error>',
-				$folder->getPath(),
-				$e->getHint()
-			));
-		}
-	}
+            foreach ($nodes as &$node) {
+                if ($node instanceof Folder) {
+                    $this->parseFolder($node);
+                } elseif ($node instanceof File) {
+                    $this->parseFile($node);
+                }
+            }
+        } catch (StorageNotAvailableException $e) {
+            $this->output->writeln(sprintf('<error>Storage for folder folder %s is not available: %s</error>',
+                $folder->getPath(),
+                $e->getHint()
+            ));
+        }
+    }
 
-	private function parseFile(File &$file): void {
-		$res = $this->timelineWrite->processFile($file);
-		if ($res === 2) {
-			$this->nProcessed++;
-		} else if ($res === 1) {
-			$this->nSkipped++;
-		} else {
-			$this->nInvalid++;
-		}
-	}
+    private function parseFile(File &$file): void {
+        $res = $this->timelineWrite->processFile($file);
+        if ($res === 2) {
+            $this->nProcessed++;
+        } else if ($res === 1) {
+            $this->nSkipped++;
+        } else {
+            $this->nInvalid++;
+        }
+    }
 }

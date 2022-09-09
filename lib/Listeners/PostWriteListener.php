@@ -36,23 +36,23 @@ use OCP\IUserManager;
 class PostWriteListener implements IEventListener {
     private TimelineWrite $util;
 
-	public function __construct(IDBConnection $connection,
-								IUserManager $userManager) {
-		$this->userManager = $userManager;
+    public function __construct(IDBConnection $connection,
+                                IUserManager $userManager) {
+        $this->userManager = $userManager;
         $this->util = new TimelineWrite($connection);
-	}
+    }
 
-	public function handle(Event $event): void {
-		if (!($event instanceof NodeWrittenEvent) &&
-		    !($event instanceof NodeTouchedEvent)) {
-			return;
-		}
+    public function handle(Event $event): void {
+        if (!($event instanceof NodeWrittenEvent) &&
+            !($event instanceof NodeTouchedEvent)) {
+            return;
+        }
 
-		$node = $event->getNode();
-		if ($node instanceof Folder) {
-			return;
-		}
+        $node = $event->getNode();
+        if ($node instanceof Folder) {
+            return;
+        }
 
-		$this->util->processFile($node);
-	}
+        $this->util->processFile($node);
+    }
 }

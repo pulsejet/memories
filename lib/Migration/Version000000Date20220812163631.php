@@ -58,19 +58,19 @@ class Version000000Date20220812163631 extends SimpleMigrationStep {
                 'notnull' => false,
             ]);
             $table->addColumn('fileid', Types::BIGINT, [
-				'notnull' => true,
-				'length' => 20,
-			]);
+                'notnull' => true,
+                'length' => 20,
+            ]);
             $table->addColumn('dayid', Types::INTEGER, [
-				'notnull' => true,
-			]);
+                'notnull' => true,
+            ]);
             $table->addColumn('isvideo', Types::BOOLEAN, [
-				'notnull' => false,
+                'notnull' => false,
                 'default' => false
-			]);
+            ]);
             $table->addColumn('mtime', Types::INTEGER, [
-				'notnull' => true,
-			]);
+                'notnull' => true,
+            ]);
 
             $table->setPrimaryKey(['id']);
             $table->addIndex(['uid'], 'memories_uid_index');
