@@ -95,13 +95,27 @@ class Index extends Command {
         $testfile = dirname(__FILE__). '/../../exiftest.jpg';
         $stream = fopen($testfile, 'rb');
         if (!$stream) {
+            error_log("Couldn't open Exif test file $testfile");
             return false;
         }
 
-        $exif = \OCA\Memories\Exif::getExifFromStream($stream);
-        fclose($stream);
+        $exif = null;
+        try {
+            $exif = \OCA\Memories\Exif::getExifFromStream($stream);
+        } catch (\Exception $e) {
+            error_log("Couldn't read Exif data from test file: " . $e->getMessage());
+            return false;
+        } finally {
+            fclose($stream);
+        }
 
-        if (!$exif || $exif["DateTimeOriginal"] !== "2004:08:31 19:52:58") {
+        if (!$exif) {
+            error_log("Got blank Exif data from test file");
+            return false;
+        }
+
+        if ($exif["DateTimeOriginal"] !== "2004:08:31 19:52:58") {
+            error_log("Got unexpected Exif data from test file");
             return false;
         }
         return true;
