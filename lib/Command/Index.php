@@ -132,6 +132,7 @@ class Index extends Command {
         \OCA\Memories\Exif::ensureStaticExiftoolProc();
         if (!$this->testExif()) {
             error_log('FATAL: exiftool could not be found or test failed');
+            error_log('Please install exiftool (at least v12) and make sure it is in the PATH');
             exit(1);
         }
 
