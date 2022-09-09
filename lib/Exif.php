@@ -183,9 +183,9 @@ class Exif {
      * @param array $exif
      */
     public static function getDateTaken(File &$file, array &$exif) {
-        $dt = $exif['DateTimeOriginal'];
+        $dt = $exif['DateTimeOriginal'] ?? null;
         if (!isset($dt) || empty($dt)) {
-            $dt = $exif['CreateDate'];
+            $dt = $exif['CreateDate'] ?? null;
         }
 
         // Check if found something
