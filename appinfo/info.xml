@@ -18,7 +18,6 @@
     <licence>agpl</licence>
     <author mail="radialapps@gmail.com" >Varun Patil</author>
     <website>https://github.com/pulsejet/memories</website>
-    <bugs>https://github.com/pulsejet/memories/issues</bugs>
     <repository>https://github.com/pulsejet/memories</repository>
     <screenshot>https://raw.githubusercontent.com/pulsejet/memories/master/appinfo/screenshot.jpg</screenshot>
     <namespace>Memories</namespace>
