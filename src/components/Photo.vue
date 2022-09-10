@@ -203,51 +203,33 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 /* Container and selection */
 .p-outer {
     will-change: transform, opacity;
     transform: translateZ(0);
-}
-.p-outer.leaving {
-    transition: all 0.2s ease-in;
-    transform: scale(0.9);
-    opacity: 0;
-}
-.p-outer.exit-left {
-    transition: all 0.2s ease-in;
-    transform: translateX(-20%);
-    opacity: 0.4;
-}
-@keyframes enter-right {
-    from {
-        transform: translateX(20%);
+
+    &.leaving {
+        transition: all 0.2s ease-in;
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    &.exit-left {
+        transition: all 0.2s ease-in;
+        transform: translateX(-20%);
         opacity: 0.4;
     }
-    to {
-        transform: translateX(0);
-        opacity: 1;
+    &.enter-right {
+        animation: enter-right 0.2s ease-out forwards;
     }
 }
-.p-outer.enter-right {
-    animation: enter-right 0.2s ease-out forwards;
 
+@keyframes enter-right {
+    from { transform: translateX(20%); opacity: 0.4; }
+    to { transform: translateX(0); opacity: 1; }
 }
-.p-outer:hover .icon-checkmark {
-    opacity: 0.7;
-}
-.p-outer.selected .icon-checkmark {
-    opacity: 0.9;
-    filter: invert();
-}
-.p-outer.selected .img-outer {
-    padding: 6%;
-}
-.p-outer.selected img {
-    box-shadow: 0 0 6px 2px var(--color-primary);
-}
+
 .icon-checkmark {
-    opacity: 0;
     position: absolute;
     top: 8px; left: 8px;
     background-color: var(--color-main-background);
@@ -255,6 +237,10 @@ export default {
     background-size: 80%;
     padding: 5px;
     cursor: pointer;
+    opacity: 0;
+
+    .p-outer:hover & { opacity: 0.7; }
+    .selected & { opacity: 0.9; filter: invert(1); }
 }
 
 /* Extra icons */
@@ -264,11 +250,14 @@ export default {
 }
 
 /* Actual image */
-.img-outer {
+div.img-outer {
     padding: 2px;
     transition: padding 0.1s ease,              /* selection */
                 background-color 0.3s ease;     /* image fade in */
     background-clip: content-box, padding-box;
+
+    .selected & { padding: 6%; }
+    .p-loading & { background-color: var(--color-loading-light); }
 }
 img {
     background-clip: content-box;
@@ -281,11 +270,8 @@ img {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     user-select: none;
-}
-.p-outer.p-loading img {
-    opacity: 0;
-}
-.p-outer.p-loading .img-outer {
-    background-color: var(--color-loading-light);
+
+    .selected & { box-shadow: 0 0 6px 2px var(--color-primary); }
+    .p-loading & { opacity: 0; }
 }
 </style>

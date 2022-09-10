@@ -87,28 +87,23 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .folder {
     cursor: pointer;
+
+    .name {
+        cursor: pointer;
+        width: 100%;
+        padding: 0 5%;
+        text-align: center;
+        font-size: 1.08em;
+        word-wrap: break-word;
+        text-overflow: ellipsis;
+        max-height: 35%;
+        line-height: 1em;
+    }
 }
-.folder .name {
-    cursor: pointer;
-    width: 100%;
-    padding: 0 5%;
-    text-align: center;
-    font-size: 1.08em;
-    word-wrap: break-word;
-    text-overflow: ellipsis;
-    max-height: 35%;
-    line-height: 1em;
-}
-.icon-folder {
-    cursor: pointer;
-    height: 65%; width: 100%;
-    opacity: 0.3;
-    background-size: 40%;
-    background-position: bottom;
-}
+
 .big-icon {
     cursor: pointer;
     z-index: 100;
@@ -116,19 +111,22 @@ export default {
     top: 0; left: 0;
     width: 100%; height: 100%;
     transition: opacity 0.2s ease-in-out;
+
+    .folder.hasPreview & {
+        .icon-folder { opacity: 1; }
+        .name { color: white; }
+    }
+    .folder.hasPreview:hover & { opacity: 0; }
+
+    .icon-folder {
+        cursor: pointer;
+        height: 65%; width: 100%;
+        opacity: 0.3;
+        background-size: 40%;
+        background-position: bottom;
+    }
 }
-.folder.hasPreview .big-icon .icon-folder {
-    opacity: 1;
-}
-.folder.hasPreview .big-icon .name {
-    color: white;
-}
-.folder.hasPreview:hover .big-icon {
-    opacity: 0;
-}
-.folder:hover .previews img {
-    filter: brightness(100%);
-}
+
 .previews {
     z-index: 3;
     line-height: 0;
@@ -136,19 +134,22 @@ export default {
     height: calc(100% - 4px);
     width: calc(100% - 4px);
     top: 2px; left: 2px;
-}
-.previews img {
-    padding: 0;
-    width: 50%;
-    height: 50%;
-    display: inline-block;
-    filter: brightness(50%);
-    transition: filter 0.2s ease-in-out;
-}
 
-.folder.onePreview .previews img {
-    width: 100%;
-    height: 100%;
-    border-radius: 3px;
+    img {
+        padding: 0;
+        width: 50%;
+        height: 50%;
+        display: inline-block;
+        transition: filter 0.2s ease-in-out;
+        filter: brightness(50%);
+
+        .folder:hover & {
+            filter: brightness(100%);
+        }
+
+        .folder.onePreview & {
+            width: 100%; height: 100%;
+        }
+    }
 }
 </style>
