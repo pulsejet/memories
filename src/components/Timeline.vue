@@ -575,8 +575,10 @@ export default {
 
                 // Add the photo to the row
                 const photo = data[dataIdx];
-                photo.flag = 0; // flags
-                photo.d = day; // backref to day
+                if (typeof photo.flag === "undefined") {
+                    photo.flag = 0; // flags
+                    photo.d = day; // backref to day
+                }
                 this.list[rowIdx].photos.push(photo);
                 dataIdx++;
 
@@ -811,7 +813,7 @@ export default {
                             nextExit = true;
                         } else if (nextExit) {
                             photo.flag |= constants.FLAG_EXIT_LEFT;
-                            exitedLeft.add(photo.fileid);
+                            exitedLeft.add(photo);
                         }
                     }
                 }
@@ -828,15 +830,10 @@ export default {
             }
 
             // Enter from right all photos that exited left
-            for (const day of updatedDays) {
-                for (const row of day.rows) {
-                    for (const photo of row.photos) {
-                        if (exitedLeft.has(photo.fileid)) {
-                            photo.flag |= constants.FLAG_ENTER_RIGHT;
-                        }
-                    }
-                }
-            }
+            exitedLeft.forEach((photo) => {
+                photo.flag &= ~constants.FLAG_EXIT_LEFT;
+                photo.flag |= constants.FLAG_ENTER_RIGHT;
+            });
 
             // clear selection at this point
             this.clearSelection();
@@ -845,13 +842,9 @@ export default {
             await new Promise(resolve => setTimeout(resolve, 200));
 
             // Clear enter right flags
-            for (const day of updatedDays) {
-                for (const row of day.rows) {
-                    for (const photo of row.photos) {
-                        photo.flag &= ~constants.FLAG_ENTER_RIGHT;
-                    }
-                }
-            }
+            exitedLeft.forEach((photo) => {
+                photo.flag &= ~constants.FLAG_ENTER_RIGHT;
+            });
 
             // Reflow timeline
             this.reflowTimeline();
