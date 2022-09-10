@@ -255,7 +255,6 @@ img {
     background-clip: content-box;
     background-color: var(--color-loading-light);
     object-fit: cover;
-    border-radius: 3%;
     cursor: pointer;
     width: 100%; height: 100%;
 

@@ -141,15 +141,10 @@ export default {
     padding: 0;
     width: 50%;
     height: 50%;
-    border-radius: 0;
     display: inline-block;
     filter: brightness(50%);
     transition: filter 0.2s ease-in-out;
 }
-.previews img:nth-of-type(1) { border-top-left-radius: 3px; }
-.previews img:nth-of-type(2) { border-top-right-radius: 3px; }
-.previews img:nth-of-type(3) { border-bottom-left-radius: 3px; }
-.previews img:nth-of-type(4) { border-bottom-right-radius: 3px; }
 
 .folder.onePreview .previews img {
     width: 100%;
