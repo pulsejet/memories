@@ -1,7 +1,8 @@
 <template>
-    <div class="photo-container"
+    <div class="p-outer"
         :class="{
             'selected': (data.flag & c.FLAG_SELECTED),
+            'p-loading': !(data.flag & c.FLAG_LOADED),
             'leaving': (data.flag & c.FLAG_LEAVING),
             'exit-left': (data.flag & c.FLAG_EXIT_LEFT),
             'enter-right': (data.flag & c.FLAG_ENTER_RIGHT),
@@ -17,16 +18,18 @@
                 height: rowHeight + 'px',
             }">
             <img
+                :src="getUrl()"
+                :key="data.fileid"
+
                 @click="click"
+                @error="error"
+                @load = "data.flag |= c.FLAG_LOADED"
+
                 @contextmenu="contextmenu"
                 @touchstart="touchstart"
                 @touchmove="touchend"
                 @touchend="touchend"
-                @touchcancel="touchend"
-                :src="(data.flag & c.FLAG_PLACEHOLDER) ? undefined : getPreviewUrl(data.fileid, data.etag)"
-                :key="data.fileid"
-                @load = "data.l = Math.random()"
-                @error="(e) => e.target.src='/apps/memories/img/error.svg'" />
+                @touchcancel="touchend" />
         </div>
     </div>
 </template>
@@ -35,6 +38,7 @@
 import * as dav from "../services/DavRequests";
 import constants from "../mixins/constants"
 import { getPreviewUrl } from "../services/FileUtils";
+import { generateUrl } from '@nextcloud/router'
 
 export default {
     name: 'Photo',
@@ -59,8 +63,21 @@ export default {
         },
     },
     methods: {
-        /** Passthrough */
-        getPreviewUrl: getPreviewUrl,
+        /** Get URL for image to show */
+        getUrl() {
+            if (this.data.flag & constants.FLAG_PLACEHOLDER) {
+                return undefined;
+            } else if (this.data.flag & constants.FLAG_LOAD_FAIL) {
+                return generateUrl('apps/memories/img/error.svg');
+            } else {
+                return getPreviewUrl(this.data.fileid, this.data.etag);
+            }
+        },
+
+        /** Error in loading image */
+        error(e) {
+            this.data.flag |= (constants.FLAG_LOADED | constants.FLAG_LOAD_FAIL);
+        },
 
         /** Pass to parent */
         click() {
@@ -188,16 +205,16 @@ export default {
 
 <style scoped>
 /* Container and selection */
-.photo-container {
+.p-outer {
     will-change: transform, opacity;
     transform: translateZ(0);
 }
-.photo-container.leaving {
+.p-outer.leaving {
     transition: all 0.2s ease-in;
     transform: scale(0.9);
     opacity: 0;
 }
-.photo-container.exit-left {
+.p-outer.exit-left {
     transition: all 0.2s ease-in;
     transform: translateX(-20%);
     opacity: 0.4;
@@ -212,21 +229,21 @@ export default {
         opacity: 1;
     }
 }
-.photo-container.enter-right {
+.p-outer.enter-right {
     animation: enter-right 0.2s ease-out forwards;
 
 }
-.photo-container:hover .icon-checkmark {
+.p-outer:hover .icon-checkmark {
     opacity: 0.7;
 }
-.photo-container.selected .icon-checkmark {
+.p-outer.selected .icon-checkmark {
     opacity: 0.9;
     filter: invert();
 }
-.photo-container.selected .img-outer {
+.p-outer.selected .img-outer {
     padding: 6%;
 }
-.photo-container.selected img {
+.p-outer.selected img {
     box-shadow: 0 0 6px 2px var(--color-primary);
 }
 .icon-checkmark {
@@ -249,17 +266,26 @@ export default {
 /* Actual image */
 .img-outer {
     padding: 2px;
-    transition: all 0.1s ease-in-out;
+    transition: padding 0.1s ease,              /* selection */
+                background-color 0.3s ease;     /* image fade in */
+    background-clip: content-box, padding-box;
 }
 img {
     background-clip: content-box;
-    background-color: var(--color-loading-light);
     object-fit: cover;
     cursor: pointer;
     width: 100%; height: 100%;
+    opacity: 1;
+    transition: opacity 0.3s ease;
 
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     user-select: none;
+}
+.p-outer.p-loading img {
+    opacity: 0;
+}
+.p-outer.p-loading .img-outer {
+    background-color: var(--color-loading-light);
 }
 </style>
