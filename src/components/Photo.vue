@@ -47,7 +47,6 @@ export default {
         return {
             touchTimer: 0,
             c: constants,
-            prevUrl: undefined,
         }
     },
     props: {
@@ -67,24 +66,13 @@ export default {
     methods: {
         /** Get URL for image to show */
         getUrl() {
-            let url;
             if (this.data.flag & constants.FLAG_PLACEHOLDER) {
-                url = undefined;
+                return undefined;
             } else if (this.data.flag & constants.FLAG_LOAD_FAIL) {
-                url = generateUrl('apps/memories/img/error.svg');
+                return generateUrl('apps/memories/img/error.svg');
             } else {
-                url = getPreviewUrl(this.data.fileid, this.data.etag);
+                return getPreviewUrl(this.data.fileid, this.data.etag);
             }
-
-            // Store the current URL and reset the loaded flag if different
-            // This is useful if the component is recycled and/or if
-            // a cache miss occurs
-            if (url !== this.prevUrl) {
-                this.prevUrl = url;
-                this.data.flag &= ~constants.FLAG_LOADED;
-            }
-
-            return url;
         },
 
         /** Error in loading image */
