@@ -55,7 +55,7 @@ class TimelineQuery {
      * Get the days response from the database for one folder
      * @param int $folderId
      */
-    public function getDaysFolder(int &$folderId) {
+    public function getDaysFolder(int $folderId) {
         $sql = 'SELECT `*PREFIX*memories`.`dayid`, COUNT(`*PREFIX*memories`.`fileid`) AS count
                 FROM `*PREFIX*memories`
                 INNER JOIN `*PREFIX*filecache`
