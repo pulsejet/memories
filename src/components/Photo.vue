@@ -3,6 +3,7 @@
         :class="{
             'selected': (data.flag & c.FLAG_SELECTED),
             'p-loading': !(data.flag & c.FLAG_LOADED),
+            'load-fail': (data.flag & c.FLAG_LOAD_FAIL),
             'leaving': (data.flag & c.FLAG_LEAVING),
             'exit-left': (data.flag & c.FLAG_EXIT_LEFT),
             'enter-right': (data.flag & c.FLAG_ENTER_RIGHT),
@@ -258,6 +259,7 @@ div.img-outer {
 
     .selected & { padding: 6%; }
     .p-loading & { background-color: var(--color-loading-light); }
+    .load-fail & { background-color: var(--color-loading-light); }
 }
 img {
     background-clip: content-box;
