@@ -33,7 +33,7 @@ class TimelineQuery {
      */
     public function getDays(
         IConfig &$config,
-        string &$user): array {
+        string $user): array {
 
         $sql = 'SELECT `*PREFIX*memories`.`dayid`, COUNT(`*PREFIX*memories`.`fileid`) AS count
                 FROM `*PREFIX*memories`
@@ -92,8 +92,8 @@ class TimelineQuery {
      */
     public function getDay(
         IConfig &$config,
-        string &$user,
-        int &$dayId): array {
+        string $user,
+        int $dayId): array {
 
         $sql = 'SELECT `*PREFIX*memories`.`fileid`, *PREFIX*filecache.etag, `*PREFIX*memories`.`isvideo`
                 FROM *PREFIX*memories

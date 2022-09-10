@@ -12,7 +12,7 @@ class Util {
      * @param IConfig $config
      * @param string $userId
      */
-    public static function getPhotosPath(IConfig &$config, string &$userId) {
+    public static function getPhotosPath(IConfig &$config, string $userId) {
         $p = $config->getUserValue($userId, Application::APPNAME, 'timelinePath', '');
         if (empty($p)) {
             return '/Photos/';
