@@ -222,10 +222,10 @@ export default {
 
             // Mobile devices
             if (window.innerWidth <= 768) {
-                width += 10;
+                width -= 4;
                 this.isMobile = true;
             } else {
-                width -= 12;
+                width -= 40;
                 this.isMobile = false;
             }
 
@@ -234,7 +234,7 @@ export default {
                 this.numCols = Math.max(MIN_COLS, Math.floor(width / MAX_PHOTO_WIDTH));
             }
 
-            this.rowHeight = Math.floor(width / this.numCols) - 4;
+            this.rowHeight = Math.floor(width / this.numCols);
 
             // Set heights of rows
             this.list.filter(r => !r.head).forEach(row => {
@@ -896,7 +896,7 @@ export default {
     overflow-y: clip;
     position: absolute;
     height: 100%;
-    width: 40px;
+    width: 36px;
     top: 0; right: 0;
     cursor: ns-resize;
     opacity: 0;
@@ -909,8 +909,10 @@ export default {
 .timeline-scroll .tick {
     pointer-events: none;
     position: absolute;
-    font-size: 0.8em;
-    right: 5px;
+    font-size: 0.75em;
+    font-weight: 600;
+    opacity: 0.95;
+    right: 7px;
     transform: translateY(-50%);
     z-index: 1;
 }
@@ -920,17 +922,17 @@ export default {
     width: 4px;
     border-radius: 50%;
     background-color: var(--color-main-text);
-    opacity: 0.5;
+    opacity: 0.2;
     display: block;
 }
 
 .timeline-scroll .cursor {
     position: absolute;
     pointer-events: none;
-    right: 5px;
+    right: 0;
     background-color: var(--color-primary);
     min-width: 100%;
-    min-height: 2px;
+    min-height: 1.5px;
 }
 
 .timeline-scroll .cursor.st {
@@ -980,7 +982,7 @@ export default {
     }
     .timeline-scroll .tick {
         background-color: var(--color-main-background);
-        padding: 1px 4px;
+        padding: 0px 4px;
         border-radius: 4px;
     }
     .timeline-scroll .tick.dash {
