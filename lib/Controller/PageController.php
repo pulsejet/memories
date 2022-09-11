@@ -13,7 +13,7 @@ use OCP\IUserSession;
 use OCP\Util;
 
 class PageController extends Controller {
-    protected string $userId;
+    protected string | null $userId;
     protected $appName;
     protected IEventDispatcher $eventDispatcher;
     private IInitialState $initialState;
@@ -23,7 +23,7 @@ class PageController extends Controller {
     public function __construct(
         string $AppName,
         IRequest $request,
-        string $UserId,
+        string | null $UserId,
         IEventDispatcher $eventDispatcher,
         IInitialState $initialState,
         IUserSession $userSession,
