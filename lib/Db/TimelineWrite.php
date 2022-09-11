@@ -106,4 +106,13 @@ class TimelineWrite {
                 WHERE `fileid` = ?';
         $this->connection->executeStatement($sql, [$file->getId()], [\PDO::PARAM_INT]);
     }
+
+    /**
+     * Clear the entire index. Does not need confirmation!
+     * @param File $file
+     */
+    public function clear() {
+        $sql = 'TRUNCATE TABLE *PREFIX*memories';
+        $this->connection->executeStatement($sql);
+    }
 }

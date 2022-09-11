@@ -131,12 +131,33 @@ class Index extends Command {
                 'f',
                 InputOption::VALUE_NONE,
                 'Refresh existing entries'
+            )
+            ->addOption(
+                'clear',
+                null,
+                InputOption::VALUE_NONE,
+                'Clear existing index before creating a new one (SLOW)'
             );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int {
         // Get options and arguments
         $refresh = $input->getOption('refresh') ? true : false;
+        $clear = $input->getOption('clear') ? true : false;
+
+        // Clear index if asked for this
+        if ($clear && $input->isInteractive()) {
+            $output->write("Are you sure you want to clear the existing index? (y/N): ");
+            $answer = trim(fgets(STDIN));
+            if ($answer !== 'y') {
+                $output->writeln("Aborting");
+                return 1;
+            }
+        }
+        if ($clear) {
+            $this->timelineWrite->clear();
+            $output->writeln("Cleared existing index");
+        }
 
         // Run with the static process
         try {
