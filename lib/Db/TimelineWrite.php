@@ -7,6 +7,7 @@ use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Exif;
 use OCP\Files\File;
 use OCP\IDBConnection;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 
 class TimelineWrite {
     protected IDBConnection $connection;
@@ -54,14 +55,15 @@ class TimelineWrite {
         $fileId = $file->getId();
 
         // Check if need to update
-        $sql = 'SELECT `fileid`, `mtime`
-                FROM *PREFIX*memories
-                WHERE `fileid` = ? AND `uid` = ?';
-        $prevRow = $this->connection->executeQuery($sql, [
-            $fileId, $user,
-        ], [
-            \PDO::PARAM_INT, \PDO::PARAM_STR,
-        ])->fetch();
+        $query = $this->connection->getQueryBuilder();
+        $query->select('fileid', 'mtime')
+            ->from('memories')
+            ->where(
+                $query->expr()->andX(
+                    $query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)),
+                    $query->expr()->eq('uid', $query->createNamedParameter($user, IQueryBuilder::PARAM_STR)),
+                ));
+        $prevRow = $query->executeQuery()->fetch();
         if ($prevRow && !$force && intval($prevRow['mtime']) === $mtime) {
             return 1;
         }
@@ -79,29 +81,30 @@ class TimelineWrite {
 
         if ($prevRow) {
             // Update existing row
-            $sql = 'UPDATE *PREFIX*memories
-                    SET `dayid` = ?, `datetaken` = ?, `isvideo` = ?, `mtime` = ?
-                    WHERE `uid` = ? AND `fileid` = ?';
-            $this->connection->executeStatement($sql, [
-                $dayId, $dateTaken, $isvideo, $mtime,
-                $user, $fileId,
-            ], [
-                \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_BOOL, \PDO::PARAM_INT,
-                \PDO::PARAM_STR, \PDO::PARAM_INT,
-            ]);
+            $query->update('memories')
+                ->set('dayid', $query->createNamedParameter($dayId, IQueryBuilder::PARAM_INT))
+                ->set('datetaken', $query->createNamedParameter($dateTaken, IQueryBuilder::PARAM_STR))
+                ->set('mtime', $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT))
+                ->set('isvideo', $query->createNamedParameter($isvideo, IQueryBuilder::PARAM_INT))
+                ->where(
+                    $query->expr()->andX(
+                        $query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)),
+                        $query->expr()->eq('uid', $query->createNamedParameter($user, IQueryBuilder::PARAM_STR)),
+                    ));
+            $query->executeStatement();
         } else {
             // Try to create new row
             try {
-                $sql = 'INSERT
-                        INTO  *PREFIX*memories (`dayid`, `datetaken`, `isvideo`, `mtime`, `uid`, `fileid`)
-                        VALUES  (?, ?, ?, ?, ?, ?)';
-                $this->connection->executeStatement($sql, [
-                    $dayId, $dateTaken, $isvideo, $mtime,
-                    $user, $fileId,
-                ], [
-                    \PDO::PARAM_INT, \PDO::PARAM_STR, \PDO::PARAM_BOOL, \PDO::PARAM_INT,
-                    \PDO::PARAM_STR, \PDO::PARAM_INT,
-                ]);
+                $query->insert('memories')
+                    ->values([
+                        'fileid' => $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT),
+                        'uid' => $query->createNamedParameter($user, IQueryBuilder::PARAM_STR),
+                        'dayid' => $query->createNamedParameter($dayId, IQueryBuilder::PARAM_INT),
+                        'datetaken' => $query->createNamedParameter($dateTaken, IQueryBuilder::PARAM_STR),
+                        'mtime' => $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT),
+                        'isvideo' => $query->createNamedParameter($isvideo, IQueryBuilder::PARAM_INT),
+                    ]);
+                $query->executeStatement();
             } catch (\Exception $ex) {
                 error_log("Failed to create memories record: " . $ex->getMessage());
             }
@@ -115,10 +118,10 @@ class TimelineWrite {
      * @param File $file
      */
     public function deleteFile(File &$file) {
-        $sql = 'DELETE
-                FROM *PREFIX*memories
-                WHERE `fileid` = ?';
-        $this->connection->executeStatement($sql, [$file->getId()], [\PDO::PARAM_INT]);
+        $query = $this->connection->getQueryBuilder();
+        $query->delete('memories')
+            ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)));
+        $query->executeStatement();
     }
 
     /**
