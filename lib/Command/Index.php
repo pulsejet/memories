@@ -217,6 +217,13 @@ class Index extends Command {
     private function parseFolder(Folder &$folder, bool &$refresh): void {
         try {
             $folderPath = $folder->getPath();
+
+            // Respect the '.nomedia' file. If present don't traverse the folder
+            if ($folder->nodeExists('.nomedia')) {
+		        $this->output->writeln('Skipping folder ' . $folderPath);
+                return;
+            }
+
             $this->output->writeln('Scanning folder ' . $folderPath);
 
             $nodes = $folder->getDirectoryListing();
