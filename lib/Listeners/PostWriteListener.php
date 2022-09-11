@@ -34,12 +34,12 @@ use OCP\IDBConnection;
 use OCP\IUserManager;
 
 class PostWriteListener implements IEventListener {
-    private TimelineWrite $util;
+    private TimelineWrite $timelineWrite;
 
     public function __construct(IDBConnection $connection,
                                 IUserManager $userManager) {
         $this->userManager = $userManager;
-        $this->util = new TimelineWrite($connection);
+        $this->timelineWrite = new TimelineWrite($connection);
     }
 
     public function handle(Event $event): void {
@@ -53,6 +53,36 @@ class PostWriteListener implements IEventListener {
             return;
         }
 
-        $this->util->processFile($node);
+        // Check the mime type first
+        if (!$this->timelineWrite->getFileType($node)) {
+            return;
+        }
+
+        // Check if a directory at a higher level contains a .nomedia file
+        // Do this by getting all the parent folders first, then checking them
+        // in reverse order from root to leaf. The rationale is that the
+        // .nomedia file is most likely to be in higher level directories.
+        $parents = [];
+        try {
+            $parent = $node->getParent();
+            while ($parent) {
+                $parents[] = $parent;
+                $parent = $parent->getParent();
+            }
+        }
+        catch (\OCP\Files\NotFoundException $e) {
+            // This happens when the parent is in the root directory
+            // and getParent() is called on it.
+        }
+
+        // Traverse the array in reverse order looking for .nomedia
+        $parents = array_reverse($parents);
+        foreach ($parents as &$parent) {
+            if ($parent->nodeExists('.nomedia')) {
+                return;
+            }
+        }
+
+        $this->timelineWrite->processFile($node);
     }
 }

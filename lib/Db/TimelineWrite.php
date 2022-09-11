@@ -16,6 +16,21 @@ class TimelineWrite {
     }
 
     /**
+     * Check if a file has a valid mimetype for processing
+     * @param File $file
+     * @return int 0 for invalid, 1 for image, 2 for video
+     */
+    public function getFileType(File $file): int {
+        $mime = $file->getMimeType();
+        if (in_array($mime, Application::IMAGE_MIMES)) {
+            return 1;
+        } elseif (in_array($mime, Application::VIDEO_MIMES)) {
+            return 2;
+        }
+        return 0;
+    }
+
+    /**
      * Process a file to insert Exif data into the database
      * @param File $file
      * @return int 2 if processed, 1 if skipped, 0 if not valid
@@ -27,10 +42,9 @@ class TimelineWrite {
         // https://stackoverflow.com/questions/15252213/sql-standard-upsert-call
 
         // Check if we want to process this file
-        $mime = $file->getMimeType();
-        $is_image = in_array($mime, Application::IMAGE_MIMES);
-        $isvideo = in_array($mime, Application::VIDEO_MIMES);
-        if (!$is_image && !$isvideo) {
+        $fileType = $this->getFileType($file);
+        $isvideo = ($fileType === 2);
+        if (!$fileType) {
             return 0;
         }
 
