@@ -116,8 +116,8 @@ class TimelineQuery {
      * @param int $dayId
      */
     public function getDayFolder(
-        int &$folderId,
-        int &$dayId): array {
+        int $folderId,
+        int $dayId): array {
 
         $sql = 'SELECT `*PREFIX*memories`.`fileid`, `*PREFIX*filecache`.`etag`, `*PREFIX*memories`.`isvideo`
                 FROM `*PREFIX*memories`
