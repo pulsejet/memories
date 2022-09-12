@@ -27,11 +27,10 @@ trait TimelineQueryDay {
     }
 
     /** Get the base query builder for day */
-    private function makeBaseQueryDay(
+    private function makeQueryDay(
         IQueryBuilder &$query,
-        string | null $user,
-        $whereFilecache,
-        int $dayid
+        int $dayid,
+        $whereFilecache
     ) {
         // Get all entries also present in filecache
         $query->select('m.fileid', 'f.etag', 'm.isvideo')
@@ -41,13 +40,7 @@ trait TimelineQueryDay {
                     $query->expr()->eq('f.fileid', 'm.fileid'),
                     $whereFilecache
                 ))
-            ->where($query->expr()->eq('m.dayid', $query->createNamedParameter($dayid, IQueryBuilder::PARAM_INT)));
-
-        // Filter by user
-        // This won't be used when looking at e.g. a shared folder
-        if (!is_null($user)) {
-            $query->andWhere($query->expr()->eq('uid', $query->createNamedParameter($user)));
-        }
+            ->andWhere($query->expr()->eq('m.dayid', $query->createNamedParameter($dayid, IQueryBuilder::PARAM_INT)));
 
         // Group and sort by date taken
         $query->orderBy('m.datetaken', 'DESC');
@@ -65,10 +58,15 @@ trait TimelineQueryDay {
         string $user,
         int $dayId): array {
 
+        // Filter by path starting with timeline path
         $path = "files" . Exif::getPhotosPath($config, $user) . "%";
         $query = $this->connection->getQueryBuilder();
-        $pathConstraint = $query->expr()->like('f.path', $query->createNamedParameter($path));
-        $this->makeBaseQueryDay($query, $user, $pathConstraint, $dayId);
+        $this->makeQueryDay($query, $dayId, $query->expr()->like(
+            'f.path', $query->createNamedParameter($path)
+        ));
+
+        // Filter by UID
+        $query->andWhere($query->expr()->eq('uid', $query->createNamedParameter($user)));
 
         $rows = $query->executeQuery()->fetchAll();
         return $this->processDay($rows);
@@ -84,11 +82,10 @@ trait TimelineQueryDay {
         int $dayId): array {
 
         $query = $this->connection->getQueryBuilder();
-        $parentConstraint = $query->expr()->orX(
+        $this->makeQueryDay($query, $dayId, $query->expr()->orX(
             $query->expr()->eq('f.parent', $query->createNamedParameter($folderId, IQueryBuilder::PARAM_INT)),
             $query->expr()->eq('f.fileid', $query->createNamedParameter($folderId, IQueryBuilder::PARAM_INT)),
-        );
-        $this->makeBaseQueryDay($query, null, $parentConstraint, $dayId);
+        ));
 
         $rows = $query->executeQuery()->fetchAll();
         return $this->processDay($rows);

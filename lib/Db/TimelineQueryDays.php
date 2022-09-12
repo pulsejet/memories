@@ -24,9 +24,8 @@ trait TimelineQueryDays {
     }
 
     /** Get the base query builder for days */
-    private function makeBaseQueryDays(
+    private function makeQueryDays(
         IQueryBuilder &$query,
-        string | null $user,
         $whereFilecache
     ) {
         // Get all entries also present in filecache
@@ -37,12 +36,6 @@ trait TimelineQueryDays {
                     $query->expr()->eq('f.fileid', 'm.fileid'),
                     $whereFilecache
                 ));
-
-        // Filter by user
-        // This won't be used when looking at e.g. a shared folder
-        if (!is_null($user)) {
-            $query->where($query->expr()->eq('uid', $query->createNamedParameter($user)));
-        }
 
         // Group and sort by dayid
         $query->groupBy('m.dayid')
@@ -59,10 +52,15 @@ trait TimelineQueryDays {
         IConfig &$config,
         string $user): array {
 
+        // Filter by path starting with timeline path
         $path = "files" . Exif::getPhotosPath($config, $user) . "%";
         $query = $this->connection->getQueryBuilder();
-        $pathConstraint = $query->expr()->like('f.path', $query->createNamedParameter($path));
-        $this->makeBaseQueryDays($query, $user, $pathConstraint);
+        $this->makeQueryDays($query, $query->expr()->like(
+            'f.path', $query->createNamedParameter($path)
+        ));
+
+        // Filter by user
+        $query->andWhere($query->expr()->eq('uid', $query->createNamedParameter($user)));
 
         $rows = $query->executeQuery()->fetchAll();
         return $this->processDays($rows);
@@ -74,11 +72,10 @@ trait TimelineQueryDays {
      */
     public function getDaysFolder(int $folderId) {
         $query = $this->connection->getQueryBuilder();
-        $parentConstraint = $query->expr()->orX(
+        $this->makeQueryDays($query, $query->expr()->orX(
             $query->expr()->eq('f.parent', $query->createNamedParameter($folderId, IQueryBuilder::PARAM_INT)),
             $query->expr()->eq('f.fileid', $query->createNamedParameter($folderId, IQueryBuilder::PARAM_INT)),
-        );
-        $this->makeBaseQueryDays($query, null, $parentConstraint);
+        ));
 
         $rows = $query->executeQuery()->fetchAll();
         return $this->processDays($rows);
