@@ -851,15 +851,11 @@ export default {
             await this.deleteFromViewWithAnimation(delIds, updatedDays);
         },
 
-        /** Download the selected files */
-        async downloadSelection() {
-            if (this.selection.size === 0) {
-                return;
-            }
-
-            // Get files to download
-            const fileInfos = await dav.getFiles([...this.selection].map(p => p.fileid));
-            await dav.downloadFiles(fileInfos.map(f => f.filename));
+        /**
+         * Download the currently selected files
+         */
+        downloadSelection() {
+            dav.downloadFilesByIds([...this.selection].map(p => p.fileid));
         },
 
         /**

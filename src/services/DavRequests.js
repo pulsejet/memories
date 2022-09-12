@@ -171,3 +171,17 @@ export async function deleteFile(path) {
         )
     })
 }
+
+/**
+ * Download the files given by the fileIds
+ * @param {number[]} fileIds
+ */
+export async function downloadFilesByIds(fileIds) {
+    if (fileIds.length === 0) {
+        return;
+    }
+
+    // Get files to download
+    const fileInfos = await getFiles(fileIds);
+    await downloadFiles(fileInfos.map(f => f.filename));
+}
