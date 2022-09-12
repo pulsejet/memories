@@ -93,6 +93,7 @@
 
 <script>
 import * as dav from "../services/DavRequests";
+import * as utils from "../services/Utils";
 import axios from '@nextcloud/axios'
 import Folder from "./Folder";
 import Photo from "./Photo";
@@ -382,7 +383,7 @@ export default {
             // Make date string
             // The reason this function is separate from processDays is
             // because this call is terribly slow even on desktop
-            const dateTaken = new Date(Number(head.dayId)*86400*1000);
+            const dateTaken = utils.dayIdToDate(head.dayId);
             let name = dateTaken.toLocaleDateString("en-US", { dateStyle: 'full', timeZone: 'UTC' });
             if (dateTaken.getUTCFullYear() === new Date().getUTCFullYear()) {
                 // hack: remove last 6 characters of date string
@@ -526,27 +527,19 @@ export default {
                 }
 
                 // Make date string
-                const dateTaken = new Date(Number(day.dayid)*86400*1000);
+                const dateTaken = utils.dayIdToDate(day.dayid);
 
                 // Create tick if month changed
                 const dtYear = dateTaken.getUTCFullYear();
                 const dtMonth = dateTaken.getUTCMonth()
                 if (Number.isInteger(day.dayid) && (dtMonth !== prevMonth || dtYear !== prevYear)) {
-                    // Format dateTaken as MM YYYY
-                    const dateTimeFormat = new Intl.DateTimeFormat('en-US', {
-                        month: 'short',
-                        timeZone: 'UTC',
-                    });
-                    const monthName = dateTimeFormat.formatToParts(dateTaken)[0].value;
-
                     // Create tick
                     this.timelineTicks.push({
-                        dayId: day.id,
+                        dayId: day.dayid,
                         top: currTopRow,
                         topS: currTopStatic,
                         topC: 0,
                         text: (dtYear === prevYear || dtYear === thisYear) ? undefined : dtYear,
-                        mText: `${monthName} ${dtYear}`,
                     });
                 }
                 prevMonth = dtMonth;
@@ -729,7 +722,9 @@ export default {
             } else {
                 return;
             }
-            this.timelineHoverCursorText = this.timelineTicks[idx].mText;
+
+            const date = utils.dayIdToDate(this.timelineTicks[idx].dayId);
+            this.timelineHoverCursorText = `${utils.getMonthName(date)} ${date.getUTCFullYear()}`;
         },
 
         /** Handle mouse hover on right timeline */
