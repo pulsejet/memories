@@ -56,7 +56,8 @@ trait TimelineQueryDay {
     public function getDay(
         IConfig &$config,
         string $user,
-        int $dayId
+        int $dayId,
+        array $queryTransforms = []
     ): array {
         // Filter by path starting with timeline path
         $path = "files" . Exif::getPhotosPath($config, $user) . "%";
@@ -67,6 +68,11 @@ trait TimelineQueryDay {
 
         // Filter by UID
         $query->andWhere($query->expr()->eq('uid', $query->createNamedParameter($user)));
+
+        // Apply all transformations
+        foreach ($queryTransforms as &$transform) {
+            $transform($query);
+        }
 
         $rows = $query->executeQuery()->fetchAll();
         return $this->processDay($rows);

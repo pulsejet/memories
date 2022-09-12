@@ -50,7 +50,8 @@ trait TimelineQueryDays {
      */
     public function getDays(
         IConfig &$config,
-        string $user
+        string $user,
+        array $queryTransforms = []
     ): array {
 
         // Filter by path starting with timeline path
@@ -62,6 +63,11 @@ trait TimelineQueryDays {
 
         // Filter by user
         $query->andWhere($query->expr()->eq('uid', $query->createNamedParameter($user)));
+
+        // Apply all transformations
+        foreach ($queryTransforms as &$transform) {
+            $transform($query);
+        }
 
         $rows = $query->executeQuery()->fetchAll();
         return $this->processDays($rows);

@@ -59,8 +59,22 @@ class ApiController extends Controller {
         $this->config = $config;
         $this->userSession = $userSession;
         $this->connection = $connection;
-        $this->timelineQuery = new TimelineQuery($this->connection);
         $this->rootFolder = $rootFolder;
+        $this->timelineQuery = new TimelineQuery($this->connection);
+    }
+
+    /**
+     * Get transformations depending on the request
+     */
+    private function getTransformations() {
+        $transforms = array();
+
+        // Filter only favorites
+        if ($this->request->getParam('fav')) {
+            $transforms[] = array($this->timelineQuery, 'transformFavoriteFilter');
+        }
+
+        return $transforms;
     }
 
     /**
@@ -74,7 +88,11 @@ class ApiController extends Controller {
             return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
         }
 
-        $list = $this->timelineQuery->getDays($this->config, $user->getUID());
+        $list = $this->timelineQuery->getDays(
+            $this->config,
+            $user->getUID(),
+            $this->getTransformations(),
+        );
         return new JSONResponse($list, Http::STATUS_OK);
     }
 
@@ -89,7 +107,12 @@ class ApiController extends Controller {
             return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
         }
 
-        $list = $this->timelineQuery->getDay($this->config, $user->getUID(), intval($id));
+        $list = $this->timelineQuery->getDay(
+            $this->config,
+            $user->getUID(),
+            intval($id),
+            $this->getTransformations(),
+        );
         return new JSONResponse($list, Http::STATUS_OK);
     }
 
