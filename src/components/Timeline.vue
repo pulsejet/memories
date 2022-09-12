@@ -100,8 +100,9 @@ import constants from "../mixins/constants";
 import { generateUrl } from '@nextcloud/router'
 import { NcActions, NcActionButton, NcButton } from '@nextcloud/vue'
 
-const MAX_PHOTO_WIDTH = 175;
-const MIN_COLS = 3;
+const SCROLL_LOAD_DELAY = 100;          // Delay in loading data when scrolling
+const MAX_PHOTO_WIDTH = 175;            // Max width of a photo
+const MIN_COLS = 3;                     // Min number of columns (on phone, e.g.)
 
 // Define API routes
 const API_ROUTES = {
@@ -354,10 +355,16 @@ export default {
             this.currentStart = startIndex;
             this.currentEnd = endIndex;
             setTimeout(() => {
-                if (this.currentStart === startIndex && this.currentEnd === endIndex) {
+                // Get the overlapping range between startIndex and
+                // currentStart and endIndex and currentEnd.
+                // This is the range of rows that we need to update.
+                const start = Math.max(startIndex, this.currentStart);
+                const end = Math.min(endIndex, this.currentEnd);
+
+                if (end - start > 0) {
                     this.loadScrollChanges(startIndex, endIndex);
                 }
-            }, 100);
+            }, SCROLL_LOAD_DELAY);
         },
 
         /** Load image data for given view */
