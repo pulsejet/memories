@@ -208,7 +208,7 @@ class ApiController extends Controller {
             return new JSONResponse([], Http::STATUS_FORBIDDEN);
         }
 
-        $list = $this->timelineQuery->getDayFolder($node->getId(), intval($dayId));
+        $list = $this->timelineQuery->getDayFolder($user->getUID(), $node->getId(), intval($dayId));
         return new JSONResponse($list, Http::STATUS_OK);
     }
 
