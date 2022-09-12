@@ -11,6 +11,7 @@ return [
                 'path' => '',
             ]
         ],
+        ['name' => 'page#main', 'url' => '/favorites', 'verb' => 'GET'],
 
         // API
         ['name' => 'api#days', 'url' => '/api/days', 'verb' => 'GET'],
