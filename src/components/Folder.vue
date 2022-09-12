@@ -153,6 +153,10 @@ export default {
         width: 50%;
         height: 50%;
         display: inline-block;
+
+        .folder.onePreview & {
+            width: 100%; height: 100%;
+        }
     }
 
     img {
@@ -169,10 +173,6 @@ export default {
 
         .folder:hover & {
             filter: brightness(100%);
-        }
-
-        .folder.onePreview & {
-            width: 100%; height: 100%;
         }
     }
 }
