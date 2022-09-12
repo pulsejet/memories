@@ -232,9 +232,10 @@ export default {
     to { transform: translateX(0); opacity: 1; }
 }
 
+/* Extra icons */
 .icon-checkmark {
     position: absolute;
-    top: 10px; left: 10px;
+    top: 5%; left: 5%;
     z-index: 100;
     background-color: var(--color-main-background);
     border-radius: 50%;
@@ -246,20 +247,14 @@ export default {
     .p-outer:hover & { opacity: 0.7; }
     .selected & { opacity: 0.9; filter: invert(1); }
 }
-
-/* Extra icons */
 .icon-video-white {
     position: absolute;
-    background-size: 100%;
-    height: 20px; width: 20px;
-    top: 10px; right: 10px;
+    top: 5%; right: 5%;
     z-index: 100;
 }
 .icon-starred {
     position: absolute;
-    background-size: 100%;
-    height: 24px; width: 24px;
-    bottom: 10px; left: 10px;
+    bottom: 5%; left: 5%;
     z-index: 100;
     pointer-events: none;
 }
