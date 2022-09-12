@@ -21,8 +21,19 @@ const IMAGE_MIME_TYPES = [
     'image/heic',
 ];
 
+/**
+ * Get file infos for list of files given Ids
+ * @param {number[]} fileIds list of file ids
+ * @returns {Promise<any[]>} list of file infos
+ */
 export async function getFiles(fileIds) {
     const prefixPath = `/files/${getCurrentUser().uid}`;
+
+    // IMPORTANT: if this isn't there, then a blank
+    // returns EVERYTHING on the server!
+    if (fileIds.length === 0) {
+        return [];
+    }
 
     const filter = fileIds.map(fileId => `
         <d:eq>
@@ -74,6 +85,12 @@ export async function getFiles(fileIds) {
         .map(data => Object.assign({}, data, { filename: data.filename.replace(prefixPath, '') }));
 }
 
+/**
+ * Get file infos for files in folder path
+ * @param {string} folderPath Path to folder
+ * @param {number} limit Max number of files to return
+ * @returns {Promise<any[]>} list of file infos
+ */
 export async function getFolderPreviewFileIds(folderPath, limit) {
     const prefixPath = `/files/${getCurrentUser().uid}`;
 
@@ -133,15 +150,70 @@ export async function getFolderPreviewFileIds(folderPath, limit) {
         }));
 }
 
+/**
+ * Delete a single file
+ *
+ * @param {string} path path to the file
+ * @returns {Promise<void>}
+ */
 export async function deleteFile(path) {
     const prefixPath = `/files/${getCurrentUser().uid}`;
     return await client.deleteFile(`${prefixPath}${path}`);
 }
 
 /**
+ * Delete all files in a given list of Ids
+ *
+ * @param {number[]} fileIds list of file ids
+ * @returns {Promise<Set<number>>} list of file ids that were deleted
+ */
+export async function deleteFilesByIds(fileIds) {
+    const delIds = new Set();
+    const fileIdsSet = new Set(fileIds);
+
+    if (fileIds.length === 0) {
+        return delIds;
+    }
+
+    // Get files data
+    let fileInfos = [];
+    try {
+        fileInfos = await getFiles(fileIds.filter(f => f));
+    } catch (e) {
+        console.error('Failed to get file info for files to delete', fileIds, e);
+        return delIds;
+    }
+
+    // Run all promises together
+    const promises = [];
+
+    // Delete each file
+    for (const fileInfo of fileInfos) {
+        if (!fileIdsSet.has(fileInfo.fileid)) {
+            continue
+        }
+
+        promises.push((async () => {
+            try {
+                await deleteFile(fileInfo.filename);
+                delIds.add(fileInfo.fileid);
+            } catch {
+                console.error('Failed to delete', fileInfo.filename)
+            }
+        })());
+    }
+
+    await Promise.allSettled(promises);
+
+    return delIds;
+}
+
+
+/**
  * Download a file
  *
  * @param {string[]} fileNames - The file's names
+ * @returns {Promise<void>}
  */
  export async function downloadFiles(fileNames) {
     const randomToken = Math.random().toString(36).substring(2)
@@ -175,6 +247,7 @@ export async function deleteFile(path) {
 /**
  * Download the files given by the fileIds
  * @param {number[]} fileIds
+ * @returns {Promise<void>}
  */
 export async function downloadFilesByIds(fileIds) {
     if (fileIds.length === 0) {

@@ -801,61 +801,24 @@ export default {
             this.$forceUpdate();
         },
 
-        /** Delete all selected photos */
-        async deleteSelection() {
-            if (this.selection.size === 0) {
-                return;
-            }
-
-            // Get files to delete
-            const updatedDays = new Set();
-            const delIds = new Set();
-            for (const photo of this.selection) {
-                if (!photo.fileid) {
-                    continue;
-                }
-                delIds.add(photo.fileid);
-                updatedDays.add(photo.d);
-            }
-
-            // Get files data
-            let fileInfos = [];
-            this.loading = true;
-            try {
-                fileInfos = await dav.getFiles([...delIds]);
-            } catch {
-                this.loading = false;
-                alert('Failed to get file info');
-                return;
-            }
-
-            // Run all promises together
-            const promises = [];
-
-            // Delete each file
-            delIds.clear();
-            for (const fileInfo of fileInfos) {
-                promises.push((async () => {
-                    try {
-                        await dav.deleteFile(fileInfo.filename)
-                        delIds.add(fileInfo.fileid);
-                    } catch {
-                        console.warn('Failed to delete', fileInfo.filename)
-                    }
-                })());
-            }
-
-            await Promise.allSettled(promises);
-            this.loading = false;
-
-            await this.deleteFromViewWithAnimation(delIds, updatedDays);
-        },
-
         /**
          * Download the currently selected files
          */
-        downloadSelection() {
-            dav.downloadFilesByIds([...this.selection].map(p => p.fileid));
+        async downloadSelection() {
+            await dav.downloadFilesByIds([...this.selection].map(p => p.fileid));
+        },
+
+        /**
+         * Delete the currently selected photos
+         */
+        async deleteSelection() {
+            this.loading = true;
+            const list = [...this.selection];
+            const delIds = await dav.deleteFilesByIds(list.map(p => p.fileid));
+            this.loading = false;
+
+            const updatedDays = new Set(list.filter(f => delIds.has(f.fileid)).map(f => f.d));
+            await this.deleteFromViewWithAnimation(delIds, updatedDays);
         },
 
         /**
