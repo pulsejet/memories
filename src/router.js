@@ -63,5 +63,14 @@
                 rootTitle: t('folders', 'Folders'),
             }),
         },
+
+        {
+            path: '/favorites',
+            component: Timeline,
+            name: 'favorites',
+            props: route => ({
+                rootTitle: t('favorites', 'Favorites'),
+            }),
+        },
      ],
  })

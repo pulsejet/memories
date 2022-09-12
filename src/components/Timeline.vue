@@ -377,6 +377,23 @@ export default {
             }
         },
 
+        /** Get query string for API calls */
+        appendQuery(url) {
+            const query = new URLSearchParams();
+
+            // Favorites
+            if (this.$route.name === 'favorites') {
+                query.set('fav', 1);
+            }
+
+            // Create query string and append to URL
+            const queryStr = query.toString();
+            if (queryStr) {
+                url += '?' + queryStr;
+            }
+            return url;
+        },
+
         /** Fetch timeline main call */
         async fetchDays() {
             let url = API_ROUTES.DAYS;
@@ -388,7 +405,7 @@ export default {
             }
 
             const startState = this.state;
-            const res = await axios.get(generateUrl(url, params));
+            const res = await axios.get(generateUrl(this.appendQuery(url), params));
             const data = res.data;
             if (this.state !== startState) return;
             await this.processDays(data);
@@ -481,7 +498,7 @@ export default {
 
             try {
                 const startState = this.state;
-                const res = await axios.get(generateUrl(url, params));
+                const res = await axios.get(generateUrl(this.appendQuery(url), params));
                 const data = res.data;
                 if (this.state !== startState) return;
 
