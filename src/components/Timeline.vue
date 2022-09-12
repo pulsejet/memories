@@ -364,9 +364,12 @@ export default {
                     delete row.pct;
                 }
 
+                // Force reload all loaded images
                 if ((i < this.currentStart || i > this.currentEnd) && row.photos) {
                     for (const photo of row.photos) {
-                        photo.flag = (photo.flag & ~constants.FLAG_LOADED) | constants.FLAG_FORCE_RELOAD;
+                        if (photo.flag & constants.FLAG_LOADED) {
+                            photo.flag = (photo.flag & ~constants.FLAG_LOADED) | constants.FLAG_FORCE_RELOAD;
+                        }
                     }
                 }
             }
