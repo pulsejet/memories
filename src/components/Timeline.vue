@@ -103,6 +103,18 @@ import { NcActions, NcActionButton, NcButton } from '@nextcloud/vue'
 const MAX_PHOTO_WIDTH = 175;
 const MIN_COLS = 3;
 
+// Define API routes
+const API_ROUTES = {
+    DAYS: 'days',
+    DAY: 'days/{dayId}',
+
+    FOLDER_DAYS: 'folder/{folderId}',
+    FOLDER_DAY: 'folder/{folderId}/{dayId}',
+};
+for (const [key, value] of Object.entries(API_ROUTES)) {
+    API_ROUTES[key] = '/apps/memories/api/' + value;
+}
+
 export default {
     components: {
         Folder,
@@ -367,18 +379,23 @@ export default {
 
         /** Fetch timeline main call */
         async fetchDays() {
-            let url = '/apps/memories/api/days';
+            let url = API_ROUTES.DAYS;
+            let params = {};
 
             if (this.$route.name === 'folders') {
-                const id = this.$route.params.id || 0;
-                url = `/apps/memories/api/folder/${id}`;
+                url = API_ROUTES.FOLDER_DAYS;
+                params.folderId = this.$route.params.id || 0;
             }
 
             const startState = this.state;
-            const res = await axios.get(generateUrl(url));
+            const res = await axios.get(generateUrl(url, params));
             const data = res.data;
             if (this.state !== startState) return;
+            await this.processDays(data);
+        },
 
+        /** Process the data for days call including folders */
+        async processDays(data) {
             this.days = data;
 
             for (const day of data) {
@@ -450,11 +467,12 @@ export default {
 
         /** Fetch image data for one dayId */
         async fetchDay(dayId) {
-            let url = `/apps/memories/api/days/${dayId}`;
+            let url = API_ROUTES.DAY;
+            const params = { dayId };
 
             if (this.$route.name === 'folders') {
-                const id = this.$route.params.id || 0;
-                url = `/apps/memories/api/folder/${id}/${dayId}`;
+                url = API_ROUTES.FOLDER_DAY;
+                params.folderId = this.$route.params.id || 0;
             }
 
             // Do this in advance to prevent duplicate requests
@@ -463,7 +481,7 @@ export default {
 
             try {
                 const startState = this.state;
-                const res = await axios.get(generateUrl(url));
+                const res = await axios.get(generateUrl(url, params));
                 const data = res.data;
                 if (this.state !== startState) return;
 
