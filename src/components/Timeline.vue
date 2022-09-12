@@ -357,7 +357,7 @@ export default {
                 if (this.currentStart === startIndex && this.currentEnd === endIndex) {
                     this.loadScrollChanges(startIndex, endIndex);
                 }
-            }, 300);
+            }, 100);
         },
 
         /** Load image data for given view */
