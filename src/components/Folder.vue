@@ -17,15 +17,24 @@
         </div>
 
         <div class="previews">
-            <img v-for="info of previewFileInfos"
-                :key="'fpreview-' + info.fileid"
-                :src="getPreviewUrl(info.fileid, info.etag)" />
+            <div class="img-outer" v-for="info of previewFileInfos">
+                <img
+                    :key="'fpreview-' + info.fileid"
+                    :src="getPreviewUrl(info.fileid, info.etag)"
+                    :class="{
+                        'p-loading': !(info.flag & c.FLAG_LOADED),
+                        'p-load-fail': info.flag & c.FLAG_LOAD_FAIL,
+                    }"
+                    @load="info.flag |= c.FLAG_LOADED"
+                    @error="info.flag |= c.FLAG_LOAD_FAIL" />
+            </div>
         </div>
     </div>
 </template>
 
 <script>
 import * as dav from "../services/DavRequests";
+import constants from "../mixins/constants"
 import { getPreviewUrl } from "../services/FileUtils";
 
 export default {
@@ -42,6 +51,7 @@ export default {
     },
     data() {
         return {
+            c: constants,
             previewFileInfos: [],
         }
     },
@@ -65,6 +75,7 @@ export default {
                 const folderPath = this.data.path.split('/').slice(3).join('/');
                 dav.getFolderPreviewFileIds(folderPath, 4).then(fileInfos => {
                     fileInfos = fileInfos.filter(f => f.hasPreview);
+                    fileInfos.forEach(f => f.flag = 0);
                     if (fileInfos.length > 0 && fileInfos.length < 4) {
                         fileInfos = [fileInfos[0]];
                     }
@@ -135,13 +146,26 @@ export default {
     width: calc(100% - 4px);
     top: 2px; left: 2px;
 
-    img {
+    .img-outer {
+        background-color: var(--color-loading-light);
         padding: 0;
+        margin: 0;
         width: 50%;
         height: 50%;
         display: inline-block;
-        transition: filter 0.2s ease-in-out;
+    }
+
+    img {
+        padding: 0;
+        width: 100%;
+        height: 100%;
         filter: brightness(50%);
+
+        opacity: 1;
+        transition: opacity 0.3s ease, filter 0.2s ease-in-out;
+        will-change: opacity, filter;
+        &.p-loading { opacity: 0; }
+        &.p-load-fail { display: none; }
 
         .folder:hover & {
             filter: brightness(100%);
