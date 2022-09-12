@@ -40,8 +40,8 @@
 <script>
 import * as dav from "../services/DavRequests";
 import constants from "../mixins/constants"
+import errorsvg from "../assets/error.svg";
 import { getPreviewUrl } from "../services/FileUtils";
-import { generateUrl } from '@nextcloud/router'
 
 export default {
     name: 'Photo',
@@ -71,7 +71,7 @@ export default {
             if (this.data.flag & constants.FLAG_PLACEHOLDER) {
                 return undefined;
             } else if (this.data.flag & constants.FLAG_LOAD_FAIL) {
-                return generateUrl('apps/memories/img/error.svg');
+                return errorsvg;
             } else {
                 return getPreviewUrl(this.data.fileid, this.data.etag);
             }
