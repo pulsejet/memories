@@ -8,4 +8,5 @@ export default {
     FLAG_LEAVING:       1 << 6,
     FLAG_EXIT_LEFT:     1 << 7,
     FLAG_ENTER_RIGHT:   1 << 8,
+    FLAG_FORCE_RELOAD:  1 << 9,
 };

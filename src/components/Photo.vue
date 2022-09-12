@@ -71,6 +71,9 @@ export default {
                 return undefined;
             } else if (this.data.flag & constants.FLAG_LOAD_FAIL) {
                 return errorsvg;
+            } else if (this.data.flag & constants.FLAG_FORCE_RELOAD) {
+                this.data.flag &= ~constants.FLAG_FORCE_RELOAD;
+                return undefined;
             } else {
                 return getPreviewUrl(this.data.fileid, this.data.etag);
             }

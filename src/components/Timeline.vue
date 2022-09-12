@@ -347,10 +347,27 @@ export default {
 
             // Reset image state
             for (let i = startIndex; i < endIndex; i++) {
-                if ((i < this.currentStart || i > this.currentEnd) && this.list[i].photos) {
-                    this.list[i].photos.forEach(photo => {
-                        photo.l = 0;
-                    });
+                const row = this.list[i];
+                if (!row) {
+                    continue;
+                }
+
+                // Initialize photos and add placeholders
+                if (row.pct && !row.photos.length) {
+                    row.photos = new Array(row.pct);
+                    for (let j = 0; j < row.pct; j++) {
+                        row.photos[j] = {
+                            flag: constants.FLAG_PLACEHOLDER,
+                            fileid: `${row.dayId}-${i}-${j}`,
+                        };
+                    }
+                    delete row.pct;
+                }
+
+                if ((i < this.currentStart || i > this.currentEnd) && row.photos) {
+                    for (const photo of row.photos) {
+                        photo.flag = (photo.flag & ~constants.FLAG_LOADED) | constants.FLAG_FORCE_RELOAD;
+                    }
                 }
             }
 
@@ -468,16 +485,10 @@ export default {
                     list.push(row);
                     day.rows.add(row);
 
-                    // Add placeholders
+                    // Add placeholder count
                     const leftNum = (day.count - i * this.numCols);
-                    const rowCount = leftNum > this.numCols ? this.numCols : leftNum;
-                    row.photos = new Array(rowCount);
-                    for (let j = 0; j < rowCount; j++) {
-                        row.photos[j] = {
-                            flag: constants.FLAG_PLACEHOLDER,
-                            fileid: `${day.dayid}-${i}-${j}`,
-                        };
-                    }
+                    row.pct = leftNum > this.numCols ? this.numCols : leftNum;
+                    row.photos = [];
                 }
             }
 
