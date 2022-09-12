@@ -25,7 +25,7 @@ trait TimelineQueryDay {
             }
 
             if ($row["category"] === ITags::TAG_FAVORITE) {
-                $row["favorite"] = 1;
+                $row["isfavorite"] = 1;
             }
             unset($row["category"]);
         }

@@ -13,7 +13,7 @@
              v-if="!(data.flag & c.FLAG_PLACEHOLDER)"
              @click="toggleSelect"></div>
 
-        <div v-if="data.isvideo" class="icon-video-white"></div>
+        <div v-if="data.flag & c.FLAG_IS_VIDEO" class="icon-video-white"></div>
         <div v-if="data.flag & c.FLAG_IS_FAVORITE" class="icon-starred"></div>
 
         <div class="img-outer" :style="{

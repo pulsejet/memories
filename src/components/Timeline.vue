@@ -615,7 +615,11 @@ export default {
                 }
 
                 // Flag conversion
-                if (photo.favorite) {
+                if (photo.isvideo) {
+                    photo.flag |= constants.FLAG_IS_VIDEO;
+                    delete photo.isvideo;
+                }
+                if (photo.isfavorite) {
                     photo.flag |= constants.FLAG_IS_FAVORITE;
                     delete photo.favorite;
                 }
