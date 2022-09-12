@@ -165,7 +165,7 @@ export default {
             /** Resizing timer */
             resizeTimer: null,
             /** View size reflow timer */
-            viewSizeChangeTimer: null,
+            reflowTimelineTimer: null,
             /** Is mobile layout */
             isMobile: false,
 
@@ -256,75 +256,7 @@ export default {
             this.list.filter(r => !r.head).forEach(row => {
                 row.size = this.rowHeight;
             });
-            this.handleViewSizeChange();
-        },
-
-        /** Handle change in rows and view size */
-        handleViewSizeChange() {
-            if (this.viewSizeChangeTimer) {
-                return;
-            }
-
-            this.viewSizeChangeTimer = setTimeout(() => {
-                this.viewSizeChangeTimer = null;
-                this.reflowTimeline();
-
-                this.viewHeight = this.$refs.recycler.$refs.wrapper.clientHeight;
-
-                // Compute timeline tick positions
-                for (const tick of this.timelineTicks) {
-                    tick.topC = Math.floor((tick.topS + tick.top * this.rowHeight) * this.timelineHeight / this.viewHeight);
-                }
-
-                // Do another pass to figure out which timeline points are visible
-                // This is not as bad as it looks, it's actually 12*O(n)
-                // because there are only 12 months in a year
-                const minGap = parseFloat(getComputedStyle(this.$refs.cursorSt).fontSize) + (this.isMobile ? 5 : 2);
-                let prevShow = -9999;
-                for (const [idx, tick] of this.timelineTicks.entries()) {
-                    // You can't see these anyway, why bother?
-                    if (tick.topC < minGap || tick.topC > this.timelineHeight - minGap) {
-                        tick.s = false;
-                        continue;
-                    }
-
-                    // Will overlap with the previous tick. Skip anyway.
-                    if (tick.topC - prevShow < minGap) {
-                        tick.s = false;
-                        continue;
-                    }
-
-                    // This is a labelled tick then show it anyway for the sake of best effort
-                    if (tick.text) {
-                        tick.s = true;
-                        prevShow = tick.topC;
-                        continue;
-                    }
-
-                    // Lookahead for next labelled tick
-                    // If showing this tick would overlap the next one, don't show this one
-                    let i = idx + 1;
-                    while(i < this.timelineTicks.length) {
-                        if (this.timelineTicks[i].text) {
-                            break;
-                        }
-                        i++;
-                    }
-                    if (i < this.timelineTicks.length) {
-                        // A labelled tick was found
-                        const nextLabelledTick = this.timelineTicks[i];
-                        if (tick.topC + minGap > nextLabelledTick.topC &&
-                            nextLabelledTick.topC < this.timelineHeight - minGap) { // make sure this will be shown
-                            tick.s = false;
-                            continue;
-                        }
-                    }
-
-                    // Show this tick
-                    tick.s = true;
-                    prevShow = tick.topC;
-                }
-            }, 0);
+            this.reflowTimeline();
         },
 
         /**
@@ -531,7 +463,7 @@ export default {
             }
 
             // Fix view height variable
-            this.handleViewSizeChange();
+            this.reflowTimeline();
             this.loading = false;
         },
 
@@ -563,8 +495,20 @@ export default {
             }
         },
 
-        /** Create timeline tick data */
+        /** Re-create timeline tick data in the next frame */
         reflowTimeline() {
+            if (this.reflowTimelineTimer) {
+                return;
+            }
+
+            this.reflowTimelineTimer = setTimeout(() => {
+                this.reflowTimelineTimer = null;
+                this.reflowTimelineNow();
+            }, 0);
+        },
+
+        /** Re-create timeline tick data */
+        reflowTimelineNow() {
             // Clear timeline
             this.timelineTicks = [];
 
@@ -610,6 +554,62 @@ export default {
 
                 currTopStatic += this.heads[day.dayid].size;
                 currTopRow += day.rows.size;
+            }
+
+            this.viewHeight = this.$refs.recycler.$refs.wrapper.clientHeight;
+
+            // Compute timeline tick positions
+            for (const tick of this.timelineTicks) {
+                tick.topC = Math.floor((tick.topS + tick.top * this.rowHeight) * this.timelineHeight / this.viewHeight);
+            }
+
+            // Do another pass to figure out which timeline points are visible
+            // This is not as bad as it looks, it's actually 12*O(n)
+            // because there are only 12 months in a year
+            const minGap = parseFloat(getComputedStyle(this.$refs.cursorSt).fontSize) + (this.isMobile ? 5 : 2);
+            let prevShow = -9999;
+            for (const [idx, tick] of this.timelineTicks.entries()) {
+                // You can't see these anyway, why bother?
+                if (tick.topC < minGap || tick.topC > this.timelineHeight - minGap) {
+                    tick.s = false;
+                    continue;
+                }
+
+                // Will overlap with the previous tick. Skip anyway.
+                if (tick.topC - prevShow < minGap) {
+                    tick.s = false;
+                    continue;
+                }
+
+                // This is a labelled tick then show it anyway for the sake of best effort
+                if (tick.text) {
+                    tick.s = true;
+                    prevShow = tick.topC;
+                    continue;
+                }
+
+                // Lookahead for next labelled tick
+                // If showing this tick would overlap the next one, don't show this one
+                let i = idx + 1;
+                while(i < this.timelineTicks.length) {
+                    if (this.timelineTicks[i].text) {
+                        break;
+                    }
+                    i++;
+                }
+                if (i < this.timelineTicks.length) {
+                    // A labelled tick was found
+                    const nextLabelledTick = this.timelineTicks[i];
+                    if (tick.topC + minGap > nextLabelledTick.topC &&
+                        nextLabelledTick.topC < this.timelineHeight - minGap) { // make sure this will be shown
+                        tick.s = false;
+                        continue;
+                    }
+                }
+
+                // Show this tick
+                tick.s = true;
+                prevShow = tick.topC;
             }
         },
 
@@ -702,7 +702,7 @@ export default {
             // because one row is always removed in that case
             // So just reflow the timeline here
             if (addedRow || spliceCount > 0) {
-                this.handleViewSizeChange();
+                this.reflowTimeline();
             }
         },
 
@@ -942,7 +942,7 @@ export default {
             });
 
             // Reflow timeline
-            this.handleViewSizeChange();
+            this.reflowTimeline();
         },
     },
 }
