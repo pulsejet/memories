@@ -6,6 +6,7 @@ namespace OCA\Memories\Db;
 use OCA\Memories\Exif;
 use OCP\IConfig;
 use OCP\IDBConnection;
+use OCP\ITags;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
 trait TimelineQueryDay {
@@ -22,6 +23,11 @@ trait TimelineQueryDay {
             if (!$row["isvideo"]) {
                 unset($row["isvideo"]);
             }
+
+            if ($row["category"] === ITags::TAG_FAVORITE) {
+                $row["favorite"] = 1;
+            }
+            unset($row["category"]);
         }
         return $day;
     }
@@ -30,10 +36,11 @@ trait TimelineQueryDay {
     private function makeQueryDay(
         IQueryBuilder &$query,
         int $dayid,
+        string $user,
         $whereFilecache
     ) {
         // Get all entries also present in filecache
-        $query->select('m.fileid', 'f.etag', 'm.isvideo')
+        $query->select('m.fileid', 'f.etag', 'm.isvideo', 'vc.category')
             ->from('memories', 'm')
             ->innerJoin('m', 'filecache', 'f',
                 $query->expr()->andX(
@@ -41,6 +48,9 @@ trait TimelineQueryDay {
                     $whereFilecache
                 ))
             ->andWhere($query->expr()->eq('m.dayid', $query->createNamedParameter($dayid, IQueryBuilder::PARAM_INT)));
+
+        // Add favorite field
+        $this->addFavoriteTag($query, $user);
 
         // Group and sort by date taken
         $query->orderBy('m.datetaken', 'DESC');
@@ -62,7 +72,7 @@ trait TimelineQueryDay {
         // Filter by path starting with timeline path
         $path = "files" . Exif::getPhotosPath($config, $user) . "%";
         $query = $this->connection->getQueryBuilder();
-        $this->makeQueryDay($query, $dayId, $query->expr()->like(
+        $this->makeQueryDay($query, $dayId, $user, $query->expr()->like(
             'f.path', $query->createNamedParameter($path)
         ));
 
@@ -84,11 +94,12 @@ trait TimelineQueryDay {
      * @param int $dayId
      */
     public function getDayFolder(
+        string $user,
         int $folderId,
         int $dayId
     ): array {
         $query = $this->connection->getQueryBuilder();
-        $this->makeQueryDay($query, $dayId, $query->expr()->orX(
+        $this->makeQueryDay($query, $dayId, $user, $query->expr()->orX(
             $query->expr()->eq('f.parent', $query->createNamedParameter($folderId, IQueryBuilder::PARAM_INT)),
             $query->expr()->eq('f.fileid', $query->createNamedParameter($folderId, IQueryBuilder::PARAM_INT)),
         ));

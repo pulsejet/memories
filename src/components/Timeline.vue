@@ -613,6 +613,13 @@ export default {
                     photo.flag = 0; // flags
                     photo.d = day; // backref to day
                 }
+
+                // Flag conversion
+                if (photo.favorite) {
+                    photo.flag |= constants.FLAG_IS_FAVORITE;
+                    delete photo.favorite;
+                }
+
                 this.list[rowIdx].photos.push(photo);
                 dataIdx++;
 

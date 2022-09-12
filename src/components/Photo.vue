@@ -14,6 +14,8 @@
              @click="toggleSelect"></div>
 
         <div v-if="data.isvideo" class="icon-video-white"></div>
+        <div v-if="data.flag & c.FLAG_IS_FAVORITE" class="icon-starred"></div>
+
         <div class="img-outer" :style="{
                 width: rowHeight + 'px',
                 height: rowHeight + 'px',
@@ -232,7 +234,8 @@ export default {
 
 .icon-checkmark {
     position: absolute;
-    top: 8px; left: 8px;
+    top: 10px; left: 10px;
+    z-index: 100;
     background-color: var(--color-main-background);
     border-radius: 50%;
     background-size: 80%;
@@ -247,7 +250,18 @@ export default {
 /* Extra icons */
 .icon-video-white {
     position: absolute;
-    top: 8px; right: 8px;
+    background-size: 100%;
+    height: 20px; width: 20px;
+    top: 10px; right: 10px;
+    z-index: 100;
+}
+.icon-starred {
+    position: absolute;
+    background-size: 100%;
+    height: 24px; width: 24px;
+    bottom: 10px; left: 10px;
+    z-index: 100;
+    pointer-events: none;
 }
 
 /* Actual image */
