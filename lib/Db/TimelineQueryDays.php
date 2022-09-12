@@ -50,7 +50,8 @@ trait TimelineQueryDays {
      */
     public function getDays(
         IConfig &$config,
-        string $user): array {
+        string $user
+    ): array {
 
         // Filter by path starting with timeline path
         $path = "files" . Exif::getPhotosPath($config, $user) . "%";

@@ -56,8 +56,8 @@ trait TimelineQueryDay {
     public function getDay(
         IConfig &$config,
         string $user,
-        int $dayId): array {
-
+        int $dayId
+    ): array {
         // Filter by path starting with timeline path
         $path = "files" . Exif::getPhotosPath($config, $user) . "%";
         $query = $this->connection->getQueryBuilder();
@@ -79,8 +79,8 @@ trait TimelineQueryDay {
      */
     public function getDayFolder(
         int $folderId,
-        int $dayId): array {
-
+        int $dayId
+    ): array {
         $query = $this->connection->getQueryBuilder();
         $this->makeQueryDay($query, $dayId, $query->expr()->orX(
             $query->expr()->eq('f.parent', $query->createNamedParameter($folderId, IQueryBuilder::PARAM_INT)),
