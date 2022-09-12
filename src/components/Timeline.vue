@@ -471,11 +471,12 @@ export default {
                     // Add placeholders
                     const leftNum = (day.count - i * this.numCols);
                     const rowCount = leftNum > this.numCols ? this.numCols : leftNum;
+                    row.photos = new Array(rowCount);
                     for (let j = 0; j < rowCount; j++) {
-                        row.photos.push({
+                        row.photos[j] = {
                             flag: constants.FLAG_PLACEHOLDER,
                             fileid: `${day.dayid}-${i}-${j}`,
-                        });
+                        };
                     }
                 }
             }
