@@ -7,6 +7,8 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 
 trait TimelineQueryFavorites {
     public function transformFavoriteFilter(IQueryBuilder $query) {
+        // TODO: 2 is not guaranteed to be the favorites tag id
+        // use OCP\ITags; instead
         $query->innerJoin('m', 'vcategory_to_object', 'c',
             $query->expr()->andX(
                 $query->expr()->eq('c.objid', 'm.fileid'),
