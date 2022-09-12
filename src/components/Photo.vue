@@ -3,7 +3,6 @@
         :class="{
             'selected': (data.flag & c.FLAG_SELECTED),
             'p-loading': !(data.flag & c.FLAG_LOADED),
-            'load-fail': (data.flag & c.FLAG_LOAD_FAIL),
             'leaving': (data.flag & c.FLAG_LEAVING),
             'exit-left': (data.flag & c.FLAG_EXIT_LEFT),
             'enter-right': (data.flag & c.FLAG_ENTER_RIGHT),
@@ -262,13 +261,12 @@ export default {
 /* Actual image */
 div.img-outer {
     padding: 2px;
-    transition: padding 0.1s ease,              /* selection */
-                background-color 0.3s ease;     /* image fade in */
+    will-change: padding;
+    transition: padding 0.1s ease;
     background-clip: content-box, padding-box;
+    background-color: var(--color-loading-light);
 
     .selected & { padding: 6%; }
-    .p-loading & { background-color: var(--color-loading-light); }
-    .load-fail & { background-color: var(--color-loading-light); }
 }
 img {
     background-clip: content-box;
@@ -277,6 +275,7 @@ img {
     width: 100%; height: 100%;
     opacity: 1;
     transition: opacity 0.3s ease;
+    will-change: opacity;
 
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
