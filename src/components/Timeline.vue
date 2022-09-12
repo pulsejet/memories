@@ -362,13 +362,18 @@ export default {
                 const end = Math.min(endIndex, this.currentEnd);
 
                 if (end - start > 0) {
-                    this.loadScrollChanges(startIndex, endIndex);
+                    this.loadScrollChanges(start, end);
                 }
             }, SCROLL_LOAD_DELAY);
         },
 
         /** Load image data for given view */
         loadScrollChanges(startIndex, endIndex) {
+            // Make sure start and end valid
+            startIndex = Math.max(0, startIndex);
+            endIndex = Math.min(this.list.length - 1, endIndex);
+
+            // Fetch all visible days
             for (let i = startIndex; i <= endIndex; i++) {
                 let item = this.list[i];
                 if (!item) {
