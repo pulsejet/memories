@@ -166,8 +166,9 @@ export default {
         filter: brightness(50%);
 
         opacity: 1;
-        transition: opacity 0.3s ease, filter 0.2s ease-in-out;
+        transition: opacity 0.15s ease, filter 0.2s ease-in-out;
         will-change: opacity, filter;
+        transform: translateZ(0);
         &.p-loading { opacity: 0; }
         &.p-load-fail { display: none; }
 

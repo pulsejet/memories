@@ -277,8 +277,9 @@ img {
     cursor: pointer;
     width: 100%; height: 100%;
     opacity: 1;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.15s ease;
     will-change: opacity;
+    transform: translateZ(0);
 
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
