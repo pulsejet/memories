@@ -424,7 +424,8 @@ export default {
 
         /** Process the data for days call including folders */
         async processDays(data) {
-            this.days = data;
+            const list = [];
+            const heads = {};
 
             for (const day of data) {
                 day.count = Number(day.count);
@@ -457,14 +458,14 @@ export default {
                     dayId: day.dayid,
                     day: day,
                 };
-                this.heads[day.dayid] = head;
-                this.list.push(head);
+                heads[day.dayid] = head;
+                list.push(head);
 
                 // Add rows
                 const nrows = Math.ceil(day.count / this.numCols);
                 for (let i = 0; i < nrows; i++) {
                     const row = this.getBlankRow(day);
-                    this.list.push(row);
+                    list.push(row);
                     day.rows.add(row);
 
                     // Add placeholders
@@ -478,6 +479,11 @@ export default {
                     }
                 }
             }
+
+            // Store globally
+            this.days = data;
+            this.list = list;
+            this.heads = heads;
 
             // Check preloads
             for (const day of data) {
