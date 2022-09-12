@@ -128,7 +128,8 @@ export async function getFolderPreviewFileIds(folderPath, limit) {
     return response.data
         .map(data => genFileInfo(data))
         .map(data => Object.assign({}, data, {
-            filename: data.filename.replace(prefixPath, '')
+            filename: data.filename.replace(prefixPath, ''),
+            etag: data.etag.replace(/&quot;/g, ''), // remove quotes
         }));
 }
 
