@@ -167,7 +167,9 @@ export default {
             /** Is mobile layout */
             isMobile: false,
 
-            /** List of selected file ids */
+            /** Set of dayIds for which images loaded */
+            loadedDays: new Set(),
+            /** Set of selected file ids */
             selection: new Set(),
 
             /** State for request cancellations */
@@ -211,6 +213,7 @@ export default {
             this.currentEnd = 0;
             this.timelineTicks = [];
             this.state = Math.random();
+            this.loadedDays.clear();
         },
 
         /** Do resize after some time */
@@ -376,15 +379,12 @@ export default {
             // Fetch all visible days
             for (let i = startIndex; i <= endIndex; i++) {
                 let item = this.list[i];
-                if (!item) {
+                if (!item || this.loadedDays.has(item.dayId)) {
                     continue;
                 }
 
-                let head = this.heads[item.dayId];
-                if (head && !head.loadedImages) {
-                    head.loadedImages = true;
-                    this.fetchDay(item.dayId);
-                }
+                this.loadedDays.add(item.dayId);
+                this.fetchDay(item.dayId);
             }
         },
 
@@ -454,7 +454,6 @@ export default {
                     name: dateStr,
                     size: 40,
                     head: true,
-                    loadedImages: false,
                     dayId: day.dayid,
                     day: day,
                 };
@@ -504,8 +503,7 @@ export default {
             }
 
             // Do this in advance to prevent duplicate requests
-            const head = this.heads[dayId];
-            head.loadedImages = true;
+            this.loadedDays.add(dayId);
 
             try {
                 const startState = this.state;
@@ -519,7 +517,6 @@ export default {
                 this.processDay(day, true);
             } catch (e) {
                 console.error(e);
-                head.loadedImages = false;
             }
         },
 
@@ -585,7 +582,7 @@ export default {
             const data = day.detail;
 
             const head = this.heads[dayId];
-            head.loadedImages = true;
+            this.loadedDays.add(dayId);
 
             // Reset rows including placeholders
             if (head.day?.rows) {
