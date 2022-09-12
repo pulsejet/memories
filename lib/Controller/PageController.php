@@ -69,4 +69,12 @@ class PageController extends Controller {
     public function folder() {
         return $this->main();
     }
+
+    /**
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function favorites() {
+        return $this->main();
+    }
 }
