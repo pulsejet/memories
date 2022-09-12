@@ -4,16 +4,18 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\ITags;
 
 trait TimelineQueryFavorites {
-    public function transformFavoriteFilter(IQueryBuilder $query) {
-        // TODO: 2 is not guaranteed to be the favorites tag id
-        // use OCP\ITags; instead
-        $query->innerJoin('m', 'vcategory_to_object', 'c',
-            $query->expr()->andX(
-                $query->expr()->eq('c.objid', 'm.fileid'),
-                $query->expr()->eq('c.categoryid', $query->createNamedParameter(2, IQueryBuilder::PARAM_INT)),
-                $query->expr()->eq('c.type', $query->createNamedParameter('files')),
-            ));
+    public function transformFavoriteFilter(IQueryBuilder $query, string $userId) {
+        // Inner join will filter only the favorites
+        $query->innerJoin('m', 'vcategory_to_object', 'vco', $query->expr()->eq('vco.objid', 'm.fileid'));
+
+        // Get the favorites category only
+        $query->innerJoin('vco', 'vcategory', 'vc', $query->expr()->andX(
+            $query->expr()->eq('vc.id', 'vco.categoryid'),
+            $query->expr()->eq('vc.uid', $query->createNamedParameter($userId)),
+            $query->expr()->eq('vc.category', $query->createNamedParameter(ITags::TAG_FAVORITE)),
+        ));
     }
 }

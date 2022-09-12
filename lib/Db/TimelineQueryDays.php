@@ -62,11 +62,11 @@ trait TimelineQueryDays {
         ));
 
         // Filter by user
-        $query->andWhere($query->expr()->eq('uid', $query->createNamedParameter($user)));
+        $query->andWhere($query->expr()->eq('m.uid', $query->createNamedParameter($user)));
 
         // Apply all transformations
         foreach ($queryTransforms as &$transform) {
-            $transform($query);
+            $transform($query, $user);
         }
 
         $rows = $query->executeQuery()->fetchAll();
