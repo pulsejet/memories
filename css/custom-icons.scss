@@ -26,3 +26,7 @@
 }
 
 @include icon-black-white('yourmemories', 'memories', 1);
+
+body {
+    overflow: hidden;
+}

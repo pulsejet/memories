@@ -198,6 +198,14 @@ export default class Timeline extends Mixins(GlobalMixin) {
         this.resetState();
     }
 
+    created() {
+        window.addEventListener("resize", this.handleResizeWithDelay);
+    }
+
+    destroyed() {
+        window.removeEventListener("resize", this.handleResizeWithDelay);
+    }
+
     /** Create new state */
     async createState() {
         // Wait for one tick before doing anything
@@ -270,7 +278,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
         this.list.filter(r => !r.head).forEach(row => {
             row.size = this.rowHeight;
         });
-        this.reflowTimeline();
+        this.reflowTimeline(true);
     }
 
     /**
@@ -529,56 +537,21 @@ export default class Timeline extends Mixins(GlobalMixin) {
     }
 
     /** Re-create timeline tick data in the next frame */
-    async reflowTimeline() {
+    async reflowTimeline(orderOnly = false) {
         if (this.reflowTimelineReq) {
             return;
         }
 
         this.reflowTimelineReq = true;
         await this.$nextTick();
-        this.reflowTimelineNow();
+        this.reflowTimelineNow(orderOnly);
         this.reflowTimelineReq = false;
     }
 
     /** Re-create timeline tick data */
-    reflowTimelineNow() {
-        // Clear timeline
-        this.timelineTicks = [];
-
-        // Ticks
-        let currTopRow = 0;
-        let currTopStatic = 0;
-        let prevYear = 9999;
-        let prevMonth = 0;
-        const thisYear = new Date().getFullYear();
-
-        // Itearte over days
-        for (const day of this.days) {
-            if (day.count === 0) {
-                continue;
-            }
-
-            // Make date string
-            const dateTaken = utils.dayIdToDate(day.dayid);
-
-            // Create tick if month changed
-            const dtYear = dateTaken.getUTCFullYear();
-            const dtMonth = dateTaken.getUTCMonth()
-            if (Number.isInteger(day.dayid) && (dtMonth !== prevMonth || dtYear !== prevYear)) {
-                // Create tick
-                this.timelineTicks.push({
-                    dayId: day.dayid,
-                    top: currTopRow,
-                    topS: currTopStatic,
-                    topC: 0,
-                    text: (dtYear === prevYear || dtYear === thisYear) ? undefined : dtYear,
-                });
-            }
-            prevMonth = dtMonth;
-            prevYear = dtYear;
-
-            currTopStatic += this.heads[day.dayid].size;
-            currTopRow += day.rows.size;
+    reflowTimelineNow(orderOnly = false) {
+        if (!orderOnly) {
+            this.recreateTimeline();
         }
 
         const recycler: any = this.$refs.recycler;
@@ -637,6 +610,50 @@ export default class Timeline extends Mixins(GlobalMixin) {
             // Show this tick
             tick.s = true;
             prevShow = tick.topC;
+        }
+    }
+
+    /**
+     * Recreate the timeline from scratch
+     */
+    recreateTimeline() {
+        // Clear timeline
+        this.timelineTicks = [];
+
+        // Ticks
+        let currTopRow = 0;
+        let currTopStatic = 0;
+        let prevYear = 9999;
+        let prevMonth = 0;
+        const thisYear = new Date().getFullYear();
+
+        // Itearte over days
+        for (const day of this.days) {
+            if (day.count === 0) {
+                continue;
+            }
+
+            // Make date string
+            const dateTaken = utils.dayIdToDate(day.dayid);
+
+            // Create tick if month changed
+            const dtYear = dateTaken.getUTCFullYear();
+            const dtMonth = dateTaken.getUTCMonth()
+            if (Number.isInteger(day.dayid) && (dtMonth !== prevMonth || dtYear !== prevYear)) {
+                // Create tick
+                this.timelineTicks.push({
+                    dayId: day.dayid,
+                    top: currTopRow,
+                    topS: currTopStatic,
+                    topC: 0,
+                    text: (dtYear === prevYear || dtYear === thisYear) ? undefined : dtYear,
+                });
+            }
+            prevMonth = dtMonth;
+            prevYear = dtYear;
+
+            currTopStatic += this.heads[day.dayid].size;
+            currTopRow += day.rows.size;
         }
     }
 
