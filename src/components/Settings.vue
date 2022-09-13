@@ -40,7 +40,7 @@ input[type=text] {
 </style>
 
 <script lang="ts">
-import { Component, Mixins, Vue } from 'vue-property-decorator';
+import { Component, Mixins } from 'vue-property-decorator';
 import UserConfig from '../mixins/UserConfig'
 
 @Component({

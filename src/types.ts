@@ -41,6 +41,8 @@ export interface IFolder extends IPhoto {
     path: string;
     /** FileInfos for preview images */
     previewFileInfos?: IFileInfo[];
+    /** Name of folder */
+    name: string;
 }
 
 export type IRow = {
