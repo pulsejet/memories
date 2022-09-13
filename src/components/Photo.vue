@@ -37,18 +37,17 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
+import { Component, Prop, Emit, Mixins } from 'vue-property-decorator';
 import { IDay, IPhoto } from "../types";
 
 import * as dav from "../services/DavRequests";
-import constants from "../mixins/constants"
 import errorsvg from "../assets/error.svg";
 import { getPreviewUrl } from "../services/FileUtils";
+import GlobalMixin from '../mixins/GlobalMixin';
 
 @Component({})
-export default class Photo extends Vue {
+export default class Photo extends Mixins(GlobalMixin) {
     private touchTimer = 0;
-    private readonly c = constants;
 
     @Prop() data: IPhoto;
     @Prop() rowHeight: number;
@@ -60,12 +59,12 @@ export default class Photo extends Vue {
 
     /** Get URL for image to show */
     getUrl() {
-        if (this.data.flag & constants.FLAG_PLACEHOLDER) {
+        if (this.data.flag & this.c.FLAG_PLACEHOLDER) {
             return undefined;
-        } else if (this.data.flag & constants.FLAG_LOAD_FAIL) {
+        } else if (this.data.flag & this.c.FLAG_LOAD_FAIL) {
             return errorsvg;
-        } else if (this.data.flag & constants.FLAG_FORCE_RELOAD) {
-            this.data.flag &= ~constants.FLAG_FORCE_RELOAD;
+        } else if (this.data.flag & this.c.FLAG_FORCE_RELOAD) {
+            this.data.flag &= ~this.c.FLAG_FORCE_RELOAD;
             return undefined;
         } else {
             return getPreviewUrl(this.data.fileid, this.data.etag);
@@ -74,7 +73,7 @@ export default class Photo extends Vue {
 
     /** Error in loading image */
     error(e: any) {
-        this.data.flag |= (constants.FLAG_LOADED | constants.FLAG_LOAD_FAIL);
+        this.data.flag |= (this.c.FLAG_LOADED | this.c.FLAG_LOAD_FAIL);
     }
 
     /** Pass to parent */
@@ -85,7 +84,7 @@ export default class Photo extends Vue {
     /** Open viewer */
     async openFile() {
         // Check if this is a placeholder
-        if (this.data.flag & constants.FLAG_PLACEHOLDER) {
+        if (this.data.flag & this.c.FLAG_PLACEHOLDER) {
             return;
         }
 
@@ -170,7 +169,7 @@ export default class Photo extends Vue {
     }
 
     toggleSelect() {
-        if (this.data.flag & constants.FLAG_PLACEHOLDER) {
+        if (this.data.flag & this.c.FLAG_PLACEHOLDER) {
             return;
         }
         this.emitSelect(this.data);

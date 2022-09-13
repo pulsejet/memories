@@ -23,18 +23,9 @@ import 'reflect-metadata'
 import Vue from 'vue'
 import VueVirtualScroller from 'vue-virtual-scroller'
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
-import { translate as t, translatePlural as n } from '@nextcloud/l10n'
 
 import App from './App.vue'
 import router from './router'
-
-// Adding translations to the whole app
-Vue.mixin({
-    methods: {
-        t,
-        n,
-    },
-})
 
 Vue.use(VueVirtualScroller)
 

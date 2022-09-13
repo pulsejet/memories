@@ -33,19 +33,19 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
+import { Component, Prop, Watch, Mixins } from 'vue-property-decorator';
 import { IFileInfo, IFolder } from '../types';
+import GlobalMixin from '../mixins/GlobalMixin';
 
 import * as dav from "../services/DavRequests";
-import constants from "../mixins/constants"
 import { getPreviewUrl } from "../services/FileUtils";
 
 @Component({})
-export default class Folder extends Vue {
+export default class Folder extends Mixins(GlobalMixin) {
     @Prop() data: IFolder;
     @Prop() rowHeight: number;
 
-    private readonly c = constants
+    // Separate property because the one on data isn't reactive
     private previewFileInfos: IFileInfo[] = [];
 
     /** Passthrough */
@@ -82,8 +82,10 @@ export default class Folder extends Vue {
     }
 
     /** Open folder */
-    openFolder(id) {
-        this.$router.push({ name: 'folders', params: { id } });
+    openFolder(id: number) {
+        this.$router.push({ name: 'folders', params: {
+            id: id.toString(),
+        }});
     }
 }
 </script>

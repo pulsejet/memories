@@ -91,17 +91,17 @@
 </template>
 
 <script lang="ts">
-import { Component, Watch, Vue } from 'vue-property-decorator';
+import { Component, Watch, Mixins } from 'vue-property-decorator';
 import { IDay, IPhoto, IRow, ITick } from "../types";
 import { NcActions, NcActionButton, NcButton } from '@nextcloud/vue';
 import { generateUrl } from '@nextcloud/router'
+import GlobalMixin from '../mixins/GlobalMixin';
 
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
 import axios from '@nextcloud/axios'
 import Folder from "./Folder.vue";
 import Photo from "./Photo.vue";
-import constants from "../mixins/constants";
 
 const SCROLL_LOAD_DELAY = 100;          // Delay in loading data when scrolling
 const MAX_PHOTO_WIDTH = 175;            // Max width of a photo
@@ -128,7 +128,7 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
         NcButton
     }
 })
-export default class Timeline extends Vue {
+export default class Timeline extends Mixins(GlobalMixin) {
     /** Loading days response */
     private loading = true;
     /** Main list of rows */
@@ -179,9 +179,6 @@ export default class Timeline extends Vue {
 
     /** State for request cancellations */
     private state = Math.random();
-
-    /** Constants for HTML template */
-    private readonly c = constants;
 
     mounted() {
         this.handleResize();
@@ -300,7 +297,7 @@ export default class Timeline extends Vue {
                 row.photos = new Array(row.pct);
                 for (let j = 0; j < row.pct; j++) {
                     row.photos[j] = {
-                        flag: constants.FLAG_PLACEHOLDER,
+                        flag: this.c.FLAG_PLACEHOLDER,
                         fileid: row.dayId * 10000 + i * 1000 + j,
                     };
                 }
@@ -310,8 +307,8 @@ export default class Timeline extends Vue {
             // Force reload all loaded images
             if ((i < this.currentStart || i > this.currentEnd) && row.photos) {
                 for (const photo of row.photos) {
-                    if (photo.flag & constants.FLAG_LOADED) {
-                        photo.flag = (photo.flag & ~constants.FLAG_LOADED) | constants.FLAG_FORCE_RELOAD;
+                    if (photo.flag & this.c.FLAG_LOADED) {
+                        photo.flag = (photo.flag & ~this.c.FLAG_LOADED) | this.c.FLAG_FORCE_RELOAD;
                     }
                 }
             }
@@ -663,11 +660,11 @@ export default class Timeline extends Vue {
 
             // Flag conversion
             if (photo.isvideo) {
-                photo.flag |= constants.FLAG_IS_VIDEO;
+                photo.flag |= this.c.FLAG_IS_VIDEO;
                 delete photo.isvideo;
             }
             if (photo.isfavorite) {
-                photo.flag |= constants.FLAG_IS_FAVORITE;
+                photo.flag |= this.c.FLAG_IS_FAVORITE;
                 delete photo.isfavorite;
             }
 
@@ -784,10 +781,10 @@ export default class Timeline extends Vue {
     selectPhoto(photo: IPhoto) {
         const nval = !this.selection.has(photo);
         if (nval) {
-            photo.flag |= constants.FLAG_SELECTED;
+            photo.flag |= this.c.FLAG_SELECTED;
             this.selection.add(photo);
         } else {
-            photo.flag &= ~constants.FLAG_SELECTED;
+            photo.flag &= ~this.c.FLAG_SELECTED;
             this.selection.delete(photo);
         }
         this.$forceUpdate();
@@ -796,7 +793,7 @@ export default class Timeline extends Vue {
     /** Clear all selected photos */
     clearSelection() {
         for (const photo of this.selection) {
-            photo.flag &= ~constants.FLAG_SELECTED;
+            photo.flag &= ~this.c.FLAG_SELECTED;
         }
         this.selection.clear();
         this.$forceUpdate();
@@ -844,7 +841,7 @@ export default class Timeline extends Vue {
             for (const row of day.rows) {
                 for (const photo of row.photos) {
                     if (delIds.has(photo.fileid)) {
-                        photo.flag |= constants.FLAG_LEAVING;
+                        photo.flag |= this.c.FLAG_LEAVING;
                     }
                 }
             }
@@ -859,10 +856,10 @@ export default class Timeline extends Vue {
             let nextExit = false;
             for (const row of day.rows) {
                 for (const photo of row.photos) {
-                    if (photo.flag & constants.FLAG_LEAVING) {
+                    if (photo.flag & this.c.FLAG_LEAVING) {
                         nextExit = true;
                     } else if (nextExit) {
-                        photo.flag |= constants.FLAG_EXIT_LEFT;
+                        photo.flag |= this.c.FLAG_EXIT_LEFT;
                         exitedLeft.add(photo);
                     }
                 }
@@ -881,8 +878,8 @@ export default class Timeline extends Vue {
 
         // Enter from right all photos that exited left
         exitedLeft.forEach((photo: any) => {
-            photo.flag &= ~constants.FLAG_EXIT_LEFT;
-            photo.flag |= constants.FLAG_ENTER_RIGHT;
+            photo.flag &= ~this.c.FLAG_EXIT_LEFT;
+            photo.flag |= this.c.FLAG_ENTER_RIGHT;
         });
 
         // clear selection at this point
@@ -893,7 +890,7 @@ export default class Timeline extends Vue {
 
         // Clear enter right flags
         exitedLeft.forEach((photo: any) => {
-            photo.flag &= ~constants.FLAG_ENTER_RIGHT;
+            photo.flag &= ~this.c.FLAG_ENTER_RIGHT;
         });
 
         // Reflow timeline

@@ -41,14 +41,11 @@ input[type=text] {
 
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator';
+import GlobalMixin from '../mixins/GlobalMixin';
 import UserConfig from '../mixins/UserConfig'
 
-@Component({
-    mixins: [
-        UserConfig,
-    ],
-})
-export default class Settings extends Mixins(UserConfig) {
+@Component
+export default class Settings extends Mixins(UserConfig, GlobalMixin) {
     async updateAll() {
         const res = await this.updateSetting('timelinePath');
         if (res.status === 200) {

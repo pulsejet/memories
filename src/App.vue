@@ -46,13 +46,14 @@
 </style>
 
 <script lang="ts">
+import { Component, Mixins } from 'vue-property-decorator';
 import { NcContent, NcAppContent, NcAppNavigation, NcAppNavigationItem, NcAppNavigationSettings} from '@nextcloud/vue'
 
 import Timeline from './components/Timeline.vue'
 import Settings from './components/Settings.vue'
+import GlobalMixin from './mixins/GlobalMixin';
 
-export default {
-    name: 'App',
+@Component({
     components: {
         NcContent,
         NcAppContent,
@@ -63,24 +64,8 @@ export default {
         Timeline,
         Settings,
     },
-    data() {
-        return {
-            loading: false,
-            show: true,
-            starred: false,
-        }
-    },
-    methods: {
-        close() {
-            this.show = false
-            console.debug(arguments)
-        },
-        newButtonAction() {
-            console.debug(arguments)
-        },
-        log() {
-            console.debug(arguments)
-        },
-    },
+})
+export default class App extends Mixins(GlobalMixin) {
+    // Outer element
 }
 </script>

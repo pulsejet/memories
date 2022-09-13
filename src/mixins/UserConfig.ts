@@ -29,7 +29,7 @@ import axios from '@nextcloud/axios'
 const eventName = 'memories:user-config-changed'
 
 @Component
-export default class MyMixin extends Vue {
+export default class UserConfig extends Vue {
     timelinePath = loadState('memories', 'timelinePath') || '';
 
     created() {
