@@ -2,8 +2,6 @@
 
 od=`pwd`
 
-make build-js-production
-
 rm -rf /tmp/memories
 cp -R . /tmp/memories
 
@@ -17,7 +15,7 @@ rm -rf *.js .gitignore .npmignore
 cd ..
 
 tar -zvcf memories.tar.gz memories/
-openssl dgst -sha512 -sign ~/.nextcloud/certificates/memories.key memories.tar.gz | openssl base64
+# openssl dgst -sha512 -sign ~/.nextcloud/certificates/memories.key memories.tar.gz | openssl base64
 rm -rf memories
 
 cd $od
