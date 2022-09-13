@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Emit, Mixins } from 'vue-property-decorator';
+import { Component, Prop, Emit, Mixins, Watch } from 'vue-property-decorator';
 import { IDay, IPhoto } from "../types";
 
 import * as dav from "../services/DavRequests";
@@ -53,6 +53,7 @@ export default class Photo extends Mixins(GlobalMixin) {
     @Prop() data: IPhoto;
     @Prop() rowHeight: number;
     @Prop() day: IDay;
+    @Prop() state: number;
 
     @Emit('reprocess') emitReprocess(remIds: Set<number>, updatedDays: Set<IDay>) {}
     @Emit('select') emitSelect(data: IPhoto) {}
@@ -77,7 +78,8 @@ export default class Photo extends Mixins(GlobalMixin) {
         return getPreviewUrl(this.data.fileid, this.data.etag);
     }
 
-    mounted() {
+    @Watch('state')
+    stateChange() {
         // Check if current image already loaded
         if (this.data?.fileid) {
             const img = this.$refs.image as HTMLImageElement;

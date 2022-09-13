@@ -22,9 +22,13 @@
 
                 <div class="photo" v-for="photo of item.photos" :key="photo.fileid">
                     <Folder v-if="photo.isfolder"
-                            :data="photo" :rowHeight="rowHeight" />
+                            :data="photo"
+                            :rowHeight="rowHeight" />
                     <Photo v-else
-                            :data="photo" :rowHeight="rowHeight" :day="item.day"
+                            :data="photo"
+                            :rowHeight="rowHeight"
+                            :day="item.day"
+                            :state="state"
                             @select="selectPhoto"
                             @reprocess="deleteFromViewWithAnimation"
                             @clickImg="clickPhoto" />
