@@ -429,6 +429,11 @@ export default class Timeline extends Mixins(GlobalMixin) {
             // Initialization
             day.rows = new Set();
 
+            // Nothing here
+            if (day.count === 0) {
+                continue;
+            }
+
             // Store the preloads
             if (day.detail) {
                 preloads[day.dayid] = {
@@ -436,11 +441,6 @@ export default class Timeline extends Mixins(GlobalMixin) {
                     detail: day.detail,
                 };
                 delete day.detail;
-            }
-
-            // Nothing here
-            if (day.count === 0) {
-                continue;
             }
 
             // Add header to list
