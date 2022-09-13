@@ -203,7 +203,7 @@ class ApiController extends Controller {
                 return [
                     "fileid" => $node->getId(),
                     "name" => $node->getName(),
-                    "is_folder" => 1,
+                    "isfolder" => 1,
                     "path" => $node->getPath(),
                 ];
             }, $sub, []),

@@ -21,7 +21,7 @@
                 :style="{ height: rowHeight + 'px' }">
 
                 <div class="photo" v-for="photo of item.photos" :key="photo.fileid">
-                    <Folder v-if="photo.is_folder"
+                    <Folder v-if="photo.isfolder"
                             :data="photo" :rowHeight="rowHeight" />
                     <Photo v-else
                             :data="photo" :rowHeight="rowHeight" :day="item.day"

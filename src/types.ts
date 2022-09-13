@@ -34,6 +34,8 @@ export type IPhoto = {
     isvideo?: boolean;
     /** Favorite flag from server */
     isfavorite?: boolean;
+    /** Is this a folder */
+    isfolder?: boolean;
 }
 
 export interface IFolder extends IPhoto {
