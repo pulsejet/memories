@@ -23,7 +23,6 @@
                 :src="getSrc()"
                 :key="data.fileid"
 
-                ref="image"
                 @click="click"
                 @error="error"
                 @load="load"
@@ -53,7 +52,6 @@ export default class Photo extends Mixins(GlobalMixin) {
     @Prop() data: IPhoto;
     @Prop() rowHeight: number;
     @Prop() day: IDay;
-    @Prop() state: number;
 
     @Emit('reprocess') emitReprocess(remIds: Set<number>, updatedDays: Set<IDay>) {}
     @Emit('select') emitSelect(data: IPhoto) {}
@@ -76,13 +74,6 @@ export default class Photo extends Mixins(GlobalMixin) {
     /** Get url of the photo */
     getUrl() {
         return getPreviewUrl(this.data.fileid, this.data.etag);
-    }
-
-    mounted() {
-        // Check if already loaded
-        if ((<HTMLImageElement>this.$refs.image).complete) {
-            this.load();
-        }
     }
 
     /** Image loaded successfully */

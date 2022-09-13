@@ -2,6 +2,7 @@
     <div class="container" ref="container" :class="{ 'icon-loading': loading }">
         <!-- Main recycler view for rows -->
         <RecycleScroller
+            :key="state"
             ref="recycler"
             class="recycler"
             :items="list"
@@ -22,15 +23,12 @@
 
                 <div class="photo" v-for="photo of item.photos" :key="photo.fileid">
                     <Folder v-if="photo.isfolder"
-                            :key="state"
                             :data="photo"
                             :rowHeight="rowHeight" />
                     <Photo v-else
-                            :key="state"
                             :data="photo"
                             :rowHeight="rowHeight"
                             :day="item.day"
-                            :state="state"
                             @select="selectPhoto"
                             @reprocess="deleteFromViewWithAnimation"
                             @clickImg="clickPhoto" />
@@ -187,26 +185,35 @@ export default class Timeline extends Mixins(GlobalMixin) {
     private state = Math.random();
 
     mounted() {
-        this.handleResize();
-        this.fetchDays();
-
-        // Timeline recycler init
-        (this.$refs.recycler as any).$el.addEventListener('scroll', this.scrollPositionChange, false);
-        this.scrollPositionChange();
+        this.createState();
     }
 
     @Watch('$route')
-    routeChange(from: any, to: any) {
-        this.resetState();
-        this.fetchDays();
-    };
+    async routeChange(from: any, to: any) {
+        await this.resetState();
+        await this.createState();
+    }
 
     beforeDestroy() {
         this.resetState();
     }
 
+    /** Create new state */
+    async createState() {
+        // Wait for one tick before doing anything
+        await this.$nextTick();
+
+        // Get data
+        this.fetchDays();
+
+        // Timeline recycler init
+        this.handleResize();
+        (this.$refs.recycler as any).$el.addEventListener('scroll', this.scrollPositionChange, false);
+        this.scrollPositionChange();
+    }
+
     /** Reset all state */
-    resetState() {
+    async resetState() {
         this.clearSelection();
         this.loading = true;
         this.list = [];
