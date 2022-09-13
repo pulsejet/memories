@@ -1,17 +1,20 @@
-name: Releases
+name: Release
 
 on:
-  push:
-    tags:
-    - '*'
+  release:
+    types: [published]
+
+env:
+  APP_NAME: memories
 
 jobs:
-  release:
+  publish:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v3
 
     - name: Use Node.js
       uses: actions/setup-node@v3
@@ -24,6 +27,20 @@ jobs:
         make build-js-production
         ./bundle.sh
 
-    - uses: ncipollo/release-action@v1
-      with:
-        artifacts: "memories.tar.gz"
+    - name: Upload app tarball to release
+        uses: svenstaro/upload-release-action@v2
+        id: attach_to_release
+        with:
+          file: memories.tar.gz
+          asset_name: memories.tar.gz
+          tag: ${{ github.ref }}
+          overwrite: true
+
+    - name: Upload app to Nextcloud appstore
+        uses: R0Wi/nextcloud-appstore-push-action@v1
+        with:
+          app_name: ${{ env.APP_NAME }}
+          appstore_token: ${{ secrets.APPSTORE_TOKEN }}
+          download_url: ${{ steps.attach_to_release.outputs.browser_download_url }}
+          app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+          nightly: ${{ github.event.release.prerelease }}
