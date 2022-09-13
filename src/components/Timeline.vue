@@ -298,7 +298,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
                 for (let j = 0; j < row.pct; j++) {
                     row.photos[j] = {
                         flag: this.c.FLAG_PLACEHOLDER,
-                        fileid: row.dayId * 10000 + i * 1000 + j,
+                        fileid: Math.random(),
                     };
                 }
                 delete row.pct;
@@ -644,7 +644,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
                 row.photos = [];
             }
         }
-        head.day.rows = new Set();
+        head.day.rows.clear();
 
         // Check if some row was added
         let addedRow = false;
