@@ -29,7 +29,8 @@ trait TimelineQueryDays {
         $whereFilecache
     ) {
         // Get all entries also present in filecache
-        $query->select('m.dayid', $query->func()->count('m.fileid', 'count'))
+        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
+        $query->select('m.dayid', $count)
             ->from('memories', 'm')
             ->innerJoin('m', 'filecache', 'f',
                 $query->expr()->andX(

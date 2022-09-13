@@ -51,6 +51,11 @@ trait TimelineQueryDay {
         // Add favorite field
         $this->addFavoriteTag($query, $user);
 
+        // Get distinct fileids only
+        // This is required when browsing a folder in external storage
+        // since the same file can be present for multiple users
+        $query->groupBy('m.fileid');
+
         // Group and sort by date taken
         $query->orderBy('m.datetaken', 'DESC');
         return $query;
