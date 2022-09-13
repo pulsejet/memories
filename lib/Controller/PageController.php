@@ -77,4 +77,12 @@ class PageController extends Controller {
     public function favorites() {
         return $this->main();
     }
+
+    /**
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function videos() {
+        return $this->main();
+    }
 }

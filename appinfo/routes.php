@@ -12,6 +12,7 @@ return [
             ]
         ],
         ['name' => 'page#favorites', 'url' => '/favorites', 'verb' => 'GET'],
+        ['name' => 'page#videos', 'url' => '/videos', 'verb' => 'GET'],
 
         // API
         ['name' => 'api#days', 'url' => '/api/days', 'verb' => 'GET'],

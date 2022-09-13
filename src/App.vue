@@ -15,6 +15,10 @@
                     :title="t('favorites', 'Favorites')"
                     icon="icon-favorite">
                 </NcAppNavigationItem>
+                <NcAppNavigationItem :to="{name: 'videos'}"
+                    :title="t('videos', 'Videos')"
+                    icon="icon-video">
+                </NcAppNavigationItem>
             </template>
             <template #footer>
                 <NcAppNavigationSettings :title="t('memories', 'Settings')">

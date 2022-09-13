@@ -378,6 +378,11 @@ export default class Timeline extends Mixins(GlobalMixin) {
             query.set('fav', '1');
         }
 
+        // Videos
+        if (this.$route.name === 'videos') {
+            query.set('vid', '1');
+        }
+
         // Create query string and append to URL
         const queryStr = query.toString();
         if (queryStr) {

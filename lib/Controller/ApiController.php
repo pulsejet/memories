@@ -74,6 +74,11 @@ class ApiController extends Controller {
             $transforms[] = array($this->timelineQuery, 'transformFavoriteFilter');
         }
 
+        // Filter only videos
+        if ($this->request->getParam('vid')) {
+            $transforms[] = array($this->timelineQuery, 'videoFilter');
+        }
+
         return $transforms;
     }
 
@@ -100,6 +105,7 @@ class ApiController extends Controller {
 
     /**
      * @NoAdminRequired
+     * @NoCSRFRequired
      *
      * @return JSONResponse
      */

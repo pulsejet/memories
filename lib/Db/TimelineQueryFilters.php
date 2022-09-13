@@ -6,7 +6,7 @@ namespace OCA\Memories\Db;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\ITags;
 
-trait TimelineQueryFavorites {
+trait TimelineQueryFilters {
     public function transformFavoriteFilter(IQueryBuilder $query, string $userId) {
         // Inner join will filter only the favorites
         $query->innerJoin('m', 'vcategory_to_object', 'fvco', $query->expr()->eq('fvco.objid', 'm.fileid'));
@@ -31,5 +31,9 @@ trait TimelineQueryFavorites {
             $query->expr()->eq('vc.uid', $query->createNamedParameter($userId)),
             $query->expr()->eq('vc.category', $query->createNamedParameter(ITags::TAG_FAVORITE)),
         ));
+    }
+
+    public function videoFilter(IQueryBuilder $query, string $userId) {
+        $query->andWhere($query->expr()->eq('m.isvideo', $query->createNamedParameter('1')));
     }
 }

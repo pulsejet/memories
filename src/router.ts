@@ -51,7 +51,7 @@
              component: Timeline,
              name: 'timeline',
              props: route => ({
-                 rootTitle: t('timeline', 'Timeline'),
+                 rootTitle: t('memories', 'Timeline'),
              }),
          },
 
@@ -60,7 +60,7 @@
             component: Timeline,
             name: 'folders',
             props: route => ({
-                rootTitle: t('folders', 'Folders'),
+                rootTitle: t('memories', 'Folders'),
             }),
         },
 
@@ -69,7 +69,16 @@
             component: Timeline,
             name: 'favorites',
             props: route => ({
-                rootTitle: t('favorites', 'Favorites'),
+                rootTitle: t('memories', 'Favorites'),
+            }),
+        },
+
+        {
+            path: '/videos',
+            component: Timeline,
+            name: 'videos',
+            props: route => ({
+                rootTitle: t('memories', 'Videos'),
             }),
         },
      ],
