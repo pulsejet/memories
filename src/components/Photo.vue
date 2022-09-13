@@ -20,7 +20,8 @@
                 height: rowHeight + 'px',
             }">
             <img
-                :src="getUrl()"
+                ref="image"
+                :src="getSrc()"
                 :key="data.fileid"
 
                 @click="click"
@@ -57,8 +58,8 @@ export default class Photo extends Mixins(GlobalMixin) {
     @Emit('select') emitSelect(data: IPhoto) {}
     @Emit('clickImg') emitClickImg(component: any) {}
 
-    /** Get URL for image to show */
-    getUrl() {
+    /** Get src for image to show */
+    getSrc() {
         if (this.data.flag & this.c.FLAG_PLACEHOLDER) {
             return undefined;
         } else if (this.data.flag & this.c.FLAG_LOAD_FAIL) {
@@ -67,14 +68,28 @@ export default class Photo extends Mixins(GlobalMixin) {
             this.data.flag &= ~this.c.FLAG_FORCE_RELOAD;
             return undefined;
         } else {
-            return getPreviewUrl(this.data.fileid, this.data.etag);
+            return this.getUrl();
+        }
+    }
+
+    /** Get url of the photo */
+    getUrl() {
+        return getPreviewUrl(this.data.fileid, this.data.etag);
+    }
+
+    mounted() {
+        // Check if current image already loaded
+        if (this.data?.fileid) {
+            const img = this.$refs.image as HTMLImageElement;
+            if (img.complete && img.src === this.getUrl()) {
+                this.load();
+            }
         }
     }
 
     /** Image loaded successfully */
     load() {
         this.data.flag |= this.c.FLAG_LOADED;
-        this.$forceUpdate()
     }
 
     /** Error in loading image */
