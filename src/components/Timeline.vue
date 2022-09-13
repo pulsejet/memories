@@ -172,7 +172,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
     /** Resizing timer */
     private resizeTimer = null as number | null;
     /** View size reflow timer */
-    private reflowTimelineTimer = null as number | null;
+    private reflowTimelineReq = false;
     /** Is mobile layout */
     private isMobile = false;
 
@@ -203,11 +203,13 @@ export default class Timeline extends Mixins(GlobalMixin) {
         // Wait for one tick before doing anything
         await this.$nextTick();
 
+        // Fit to window
+        this.handleResize();
+
         // Get data
-        this.fetchDays();
+        await this.fetchDays();
 
         // Timeline recycler init
-        this.handleResize();
         (this.$refs.recycler as any).$el.addEventListener('scroll', this.scrollPositionChange, false);
         this.scrollPositionChange();
     }
@@ -277,10 +279,8 @@ export default class Timeline extends Mixins(GlobalMixin) {
      * the pixel position of the recycler has changed.
      */
     scrollPositionChange(event?: any) {
-        if (event) {
-            this.timelineCursorY = event.target.scrollTop * this.timelineHeight / this.viewHeight;
-            this.timelineMoveHoverCursor(this.timelineCursorY);
-        }
+        this.timelineCursorY = event ? event.target.scrollTop * this.timelineHeight / this.viewHeight : 0;
+        this.timelineMoveHoverCursor(this.timelineCursorY);
 
         if (this.scrollTimer) {
             window.clearTimeout(this.scrollTimer);
@@ -420,11 +420,11 @@ export default class Timeline extends Mixins(GlobalMixin) {
         const res = await axios.get<IDay[]>(generateUrl(this.appendQuery(url), params));
         const data = res.data;
         if (this.state !== startState) return;
-        this.processDays(data);
+        await this.processDays(data);
     }
 
     /** Process the data for days call including folders */
-    processDays(data: IDay[]) {
+    async processDays(data: IDay[]) {
         const list: IRow[] = [];
         const heads: {[dayId: number]: IRow} = {};
 
@@ -494,9 +494,10 @@ export default class Timeline extends Mixins(GlobalMixin) {
             this.processDay(preload.day);
         }
 
-        // Fix view height variable
-        this.reflowTimeline();
         this.loading = false;
+
+        // Fix view height variable
+        await this.reflowTimeline();
     }
 
     /** Fetch image data for one dayId */
@@ -528,15 +529,15 @@ export default class Timeline extends Mixins(GlobalMixin) {
     }
 
     /** Re-create timeline tick data in the next frame */
-    reflowTimeline() {
-        if (this.reflowTimelineTimer) {
+    async reflowTimeline() {
+        if (this.reflowTimelineReq) {
             return;
         }
 
-        this.reflowTimelineTimer = window.setTimeout(() => {
-            this.reflowTimelineTimer = null;
-            this.reflowTimelineNow();
-        }, 0);
+        this.reflowTimelineReq = true;
+        await this.$nextTick();
+        this.reflowTimelineNow();
+        this.reflowTimelineReq = false;
     }
 
     /** Re-create timeline tick data */
