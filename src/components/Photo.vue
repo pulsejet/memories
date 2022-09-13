@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
 import { IDay, IPhoto } from "../types";
 
 import * as dav from "../services/DavRequests";
@@ -53,6 +53,10 @@ export default class Photo extends Vue {
     @Prop() data: IPhoto;
     @Prop() rowHeight: number;
     @Prop() day: IDay;
+
+    @Emit('reprocess') emitReprocess(remIds: Set<number>, updatedDays: Set<IDay>) {}
+    @Emit('select') emitSelect(data: IPhoto) {}
+    @Emit('clickImg') emitClickImg(component: any) {}
 
     /** Get URL for image to show */
     getUrl() {
@@ -75,7 +79,7 @@ export default class Photo extends Vue {
 
     /** Pass to parent */
     click() {
-        this.$emit('clickImg', this);
+        this.emitClickImg(this);
     }
 
     /** Open viewer */
@@ -162,14 +166,14 @@ export default class Photo extends Vue {
         this.day.origFileIds = newIds;
 
         // Remove deleted files from details
-        this.$emit('reprocess', remIds, new Set([this.day]));
+        this.emitReprocess(remIds, new Set([this.day]));
     }
 
     toggleSelect() {
         if (this.data.flag & constants.FLAG_PLACEHOLDER) {
             return;
         }
-        this.$emit('select', this.data);
+        this.emitSelect(this.data);
     }
 
     touchstart() {

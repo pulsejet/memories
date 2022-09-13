@@ -46,8 +46,7 @@
                   {{ timelineHoverCursorText }}
             </span>
 
-            <div v-for="tick of timelineTicks" :key="tick.dayId"
-                 v-if="tick.s"
+            <div v-for="tick of visibleTimelineTicks" :key="tick.dayId"
                  class="tick"
                 :class="{ 'dash': !tick.text }"
                 :style="{ top: tick.topC + 'px' }">
@@ -712,6 +711,11 @@ export default class Timeline extends Vue {
             dayId: day.dayid,
             day: day,
         };
+    }
+
+    /** Get the visible timeline ticks */
+    get visibleTimelineTicks() {
+        return this.timelineTicks.filter(tick => tick.s);
     }
 
     timelineMoveHoverCursor(y: number) {
