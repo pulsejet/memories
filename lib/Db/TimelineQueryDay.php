@@ -6,7 +6,6 @@ namespace OCA\Memories\Db;
 use OCA\Memories\Exif;
 use OCP\IConfig;
 use OCP\IDBConnection;
-use OCP\ITags;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
 trait TimelineQueryDay {
@@ -24,10 +23,10 @@ trait TimelineQueryDay {
                 unset($row["isvideo"]);
             }
 
-            if ($row["category"] === ITags::TAG_FAVORITE) {
+            if ($row["categoryid"]) {
                 $row["isfavorite"] = 1;
             }
-            unset($row["category"]);
+            unset($row["categoryid"]);
         }
         return $day;
     }
@@ -40,7 +39,7 @@ trait TimelineQueryDay {
         $whereFilecache
     ) {
         // Get all entries also present in filecache
-        $query->select('m.fileid', 'f.etag', 'm.isvideo', 'vc.category')
+        $query->select('m.fileid', 'f.etag', 'm.isvideo', 'vco.categoryid')
             ->from('memories', 'm')
             ->innerJoin('m', 'filecache', 'f',
                 $query->expr()->andX(
