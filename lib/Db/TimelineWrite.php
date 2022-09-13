@@ -141,7 +141,8 @@ class TimelineWrite {
      * @param File $file
      */
     public function clear() {
-        $sql = 'TRUNCATE TABLE *PREFIX*memories';
-        $this->connection->executeStatement($sql);
+        $query = $this->connection->getQueryBuilder();
+        $query->delete('memories');
+        $query->executeStatement();
     }
 }
