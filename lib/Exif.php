@@ -73,23 +73,22 @@ class Exif {
      * Sanitize a path to keep only ASCII characters and special characters.
      * @param string $path
      */
-    public static function sanitizePath(string &$path) {
-        $path = preg_replace('/[^a-zA-Z0-9\/\.\-\_]/', '', $path);
-        return $path;
+    public static function sanitizePath(string $path) {
+        return mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $path);
     }
 
     /**
      * Keep only one slash if multiple repeating
      */
     public static function removeExtraSlash(string $path) {
-        return preg_replace('~/+~', '/', $path);
+        return mb_ereg_replace('~/+~', '/', $path);
     }
 
     /**
      * Remove any leading slash present on the path
      */
     public static function removeLeadingSlash(string $path) {
-        return preg_replace('~^/+~', '', $path);
+        return mb_ereg_replace('~^/+~', '', $path);
     }
 
     /**
