@@ -25,7 +25,7 @@
 
                 @click="click"
                 @error="error"
-                @load="data.flag |= c.FLAG_LOADED"
+                @load="load"
 
                 @contextmenu="contextmenu"
                 @touchstart="touchstart"
@@ -71,9 +71,20 @@ export default class Photo extends Mixins(GlobalMixin) {
         }
     }
 
+    /** Image loaded successfully */
+    load() {
+        this.data.flag |= this.c.FLAG_LOADED;
+        this.$forceUpdate()
+    }
+
     /** Error in loading image */
     error(e: any) {
         this.data.flag |= (this.c.FLAG_LOADED | this.c.FLAG_LOAD_FAIL);
+    }
+
+    /** Clear timers */
+    beforeUnmount() {
+        clearTimeout(this.touchTimer);
     }
 
     /** Pass to parent */
