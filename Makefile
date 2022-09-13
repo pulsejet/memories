@@ -14,7 +14,7 @@ build-js:
 	npm run dev
 
 build-js-production:
-	npm run build
+	rm -f js/* && npm run build
 
 watch-js:
 	npm run watch
