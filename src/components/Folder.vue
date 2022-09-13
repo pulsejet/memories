@@ -17,7 +17,7 @@
         </div>
 
         <div class="previews">
-            <div class="img-outer" v-for="info of previewFileInfos">
+            <div class="img-outer" v-for="info of previewFileInfos" :key="info.fileid">
                 <img
                     :key="'fpreview-' + info.fileid"
                     :src="getPreviewUrl(info.fileid, info.etag)"
@@ -32,68 +32,58 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
+import { IFileInfo, IFolder } from '../types';
+
 import * as dav from "../services/DavRequests";
 import constants from "../mixins/constants"
 import { getPreviewUrl } from "../services/FileUtils";
 
-export default {
-    name: 'Folder',
-    props: {
-        data: {
-            type: Object,
-            required: true
-        },
-        rowHeight: {
-            type: Number,
-            required: true,
-        }
-    },
-    data() {
-        return {
-            c: constants,
-            previewFileInfos: [],
-        }
-    },
+@Component({})
+export default class Folder extends Vue {
+    @Prop() data: IFolder;
+    @Prop() rowHeight: number;
+
+    private readonly c = constants
+    private previewFileInfos: IFileInfo[] = [];
+
+    /** Passthrough */
+    private getPreviewUrl = getPreviewUrl;
+
     mounted() {
         this.refreshPreviews();
-    },
-    watch: {
-        data: {
-            handler() {
-                this.refreshPreviews();
-            },
-        },
-    },
-    methods: {
-        /** Passthrough */
-        getPreviewUrl: getPreviewUrl,
+    }
 
-        /** Refresh previews */
-        refreshPreviews() {
-            if (!this.data.previewFileInfos) {
-                const folderPath = this.data.path.split('/').slice(3).join('/');
-                dav.getFolderPreviewFileIds(folderPath, 4).then(fileInfos => {
-                    fileInfos = fileInfos.filter(f => f.hasPreview);
-                    fileInfos.forEach(f => f.flag = 0);
-                    if (fileInfos.length > 0 && fileInfos.length < 4) {
-                        fileInfos = [fileInfos[0]];
-                    }
-                    this.data.previewFileInfos = fileInfos;
-                    this.previewFileInfos = fileInfos;
-                }).catch(() => {
-                    this.data.previewFileInfos = [];
-                    this.previewFileInfos = [];
-                });
-            } else {
-                this.previewFileInfos = this.data.previewFileInfos;
-            }
-        },
+    @Watch('data')
+    dataChanged() {
+        this.refreshPreviews();
+    }
 
-        /** Open folder */
-        openFolder(id) {
-            this.$router.push({ name: 'folders', params: { id } });
-        },
+    /** Refresh previews */
+    refreshPreviews() {
+        if (!this.data.previewFileInfos) {
+            const folderPath = this.data.path.split('/').slice(3).join('/');
+            dav.getFolderPreviewFileIds(folderPath, 4).then(fileInfos => {
+                fileInfos = fileInfos.filter(f => f.hasPreview);
+                fileInfos.forEach(f => f.flag = 0);
+                if (fileInfos.length > 0 && fileInfos.length < 4) {
+                    fileInfos = [fileInfos[0]];
+                }
+                this.data.previewFileInfos = fileInfos;
+                this.previewFileInfos = fileInfos;
+            }).catch(() => {
+                this.data.previewFileInfos = [];
+                this.previewFileInfos = [];
+            });
+        } else {
+            this.previewFileInfos = this.data.previewFileInfos;
+        }
+    }
+
+    /** Open folder */
+    openFolder(id) {
+        this.$router.push({ name: 'folders', params: { id } });
     }
 }
 </script>

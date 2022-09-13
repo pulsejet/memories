@@ -20,6 +20,7 @@
  *
  */
 
+import { Component, Vue } from 'vue-property-decorator';
 import { emit, subscribe, unsubscribe } from '@nextcloud/event-bus'
 import { generateUrl } from '@nextcloud/router'
 import { loadState } from '@nextcloud/initial-state'
@@ -27,34 +28,30 @@ import axios from '@nextcloud/axios'
 
 const eventName = 'memories:user-config-changed'
 
-export default {
-    data() {
-        return {
-            timelinePath: loadState('memories', 'timelinePath') || '',
-        }
-    },
+@Component
+export default class MyMixin extends Vue {
+    timelinePath = loadState('memories', 'timelinePath') || '';
 
     created() {
         subscribe(eventName, this.updateLocalSetting)
-    },
+    }
 
     beforeDestroy() {
         unsubscribe(eventName, this.updateLocalSetting)
-    },
+    }
 
-    methods: {
-        updateLocalSetting({ setting, value }) {
-            this[setting] = value
-        },
-        async updateSetting(setting) {
-            const value = this[setting]
-            // Long time save setting
-            const res = await axios.put(generateUrl('apps/memories/api/config/' + setting), {
-                value: value.toString(),
-            })
-            // Visible elements update setting
-            emit(eventName, { setting, value })
-            return res;
-        },
-    },
+    updateLocalSetting({ setting, value }) {
+        this[setting] = value
+    }
+
+    async updateSetting(setting: string) {
+        const value = this[setting]
+        // Long time save setting
+        const res = await axios.put(generateUrl('apps/memories/api/config/' + setting), {
+            value: value.toString(),
+        })
+        // Visible elements update setting
+        emit(eventName, { setting, value })
+        return res;
+    }
 }

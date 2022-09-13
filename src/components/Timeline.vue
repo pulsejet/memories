@@ -193,8 +193,8 @@ export default class Timeline extends Vue {
         this.scrollPositionChange();
     }
 
-    @Watch('route')
-    routeChange(from, to) {
+    @Watch('$route')
+    routeChange(from: any, to: any) {
         this.resetState();
         this.fetchDays();
     };

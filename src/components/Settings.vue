@@ -39,24 +39,23 @@ input[type=text] {
 }
 </style>
 
-<script>
+<script lang="ts">
+import { Component, Mixins, Vue } from 'vue-property-decorator';
 import UserConfig from '../mixins/UserConfig'
 
-export default {
-    name: 'Settings',
+@Component({
     mixins: [
         UserConfig,
     ],
-
-    methods: {
-        async updateAll() {
-            const res = await this.updateSetting('timelinePath');
-            if (res.status === 200) {
-                window.location.reload();
-            } else {
-                alert('Error updating settings');
-            }
-        },
-    },
+})
+export default class Settings extends Mixins(UserConfig) {
+    async updateAll() {
+        const res = await this.updateSetting('timelinePath');
+        if (res.status === 200) {
+            window.location.reload();
+        } else {
+            alert('Error updating settings');
+        }
+    }
 }
 </script>

@@ -2,6 +2,8 @@ export type IFileInfo = {
     fileid: number;
     filename: string;
     etag: string;
+    hasPreview: boolean;
+    flag?: number;
 }
 
 export type IDay = {
@@ -32,6 +34,13 @@ export type IPhoto = {
     isvideo?: boolean;
     /** Favorite flag from server */
     isfavorite?: boolean;
+}
+
+export interface IFolder extends IPhoto {
+    /** Path to folder */
+    path: string;
+    /** FileInfos for preview images */
+    previewFileInfos?: IFileInfo[];
 }
 
 export type IRow = {
