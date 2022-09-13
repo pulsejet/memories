@@ -41,6 +41,13 @@ The approach of this app is fundamentally different from the official Nextcloud 
 ## 📝 Notes
 - You may need to configure the Nextcloud preview generator and Imagemagick / ffmpeg to support all types of images and videos (e.g. HEIC). If using the official docker image, add `OC\Preview\HEIC` to `enabledPreviewProviders` in your `config.php`.
 - If local time is not found in the photo (especially for videos), the server timezone is used.
+- The app can work with external storage for photos.
+    - The photos in the external storage needs to be at the same _relative_ path that is configured for the timeline. For example, if your storage is mounted as `/External/` and your photos are in `/External/MyPhotos/`, then you need to configure the timeline to be `MyPhotos/`. This will look for `MyPhotos/` in all external storages as well as your root home directory, and aggregate these photos.
+    - You also need to set up a cron job for the index command if you:
+        - Use the same timeline for multiple users.
+        - Delete and restore files from the external storage.
+    - If you add any photos from outside Nextcloud, you must run the scan and index commands.
+    - This function is experimental and may not work as expected. Please report any issues.
 
 ## Special Thanks
 Nextcloud team. At least one half of the code is based on the work of the [Nextcloud Photos](https://github.com/nextcloud/photos).
