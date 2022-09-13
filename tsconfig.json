@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+      "lib": ["dom", "es2017"],
+      "target": "ESNext",
+      "module": "es2015",
+      "moduleResolution": "node",
+      "sourceMap": true,
+      "allowSyntheticDefaultImports": true,
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "jsx": "preserve"
+    }
+}

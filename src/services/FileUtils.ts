@@ -94,8 +94,8 @@
 
      // finally sort by name
      return asc
-         ? fileInfo1[key]?.toString()?.localeCompare(fileInfo2[key].toString(), OC.getLanguage()) || 1
-         : -fileInfo1[key]?.toString()?.localeCompare(fileInfo2[key].toString(), OC.getLanguage()) || -1
+         ? fileInfo1[key]?.toString()?.localeCompare(fileInfo2[key].toString(), globalThis.OC.getLanguage()) || 1
+         : -fileInfo1[key]?.toString()?.localeCompare(fileInfo2[key].toString(), globalThis.OC.getLanguage()) || -1
  }
 
  const genFileInfo = function(obj) {
@@ -123,7 +123,7 @@
      return fileInfo
  }
 
- const getPreviewUrl = function(fileid, etag) {
+ const getPreviewUrl = function(fileid: number, etag: string): string {
     return generateUrl(`/core/preview?fileId=${fileid}&c=${etag}&x=250&y=250&forceIcon=0&a=0`);
  }
 

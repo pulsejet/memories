@@ -2,6 +2,7 @@ import { getCurrentUser } from '@nextcloud/auth'
 import { generateUrl } from '@nextcloud/router'
 import { genFileInfo } from './FileUtils'
 import client from './DavClient';
+import { IFileInfo } from '../types';
 
 const props = `
     <oc:fileid />
@@ -23,11 +24,11 @@ const IMAGE_MIME_TYPES = [
 
 /**
  * Get file infos for list of files given Ids
- * @param {number[]} fileIds list of file ids
- * @returns {Promise<any[]>} list of file infos
+ * @param fileIds list of file ids
+ * @returns list of file infos
  */
-export async function getFiles(fileIds) {
-    const prefixPath = `/files/${getCurrentUser().uid}`;
+export async function getFiles(fileIds: number[]): Promise<IFileInfo[]> {
+    const prefixPath = `/files/${getCurrentUser()!.uid}`;
 
     // IMPORTANT: if this isn't there, then a blank
     // returns EVERYTHING on the server!
@@ -79,20 +80,19 @@ export async function getFiles(fileIds) {
         responseType: 'text',
     };
 
-    let response = await client.getDirectoryContents('', options);
+    let response: any = await client.getDirectoryContents('', options);
     return response.data
-        .map(data => genFileInfo(data))
-        .map(data => Object.assign({}, data, { filename: data.filename.replace(prefixPath, '') }));
+        .map((data: any) => genFileInfo(data))
+        .map((data: any) => Object.assign({}, data, { filename: data.filename.replace(prefixPath, '') }));
 }
 
 /**
  * Get file infos for files in folder path
- * @param {string} folderPath Path to folder
- * @param {number} limit Max number of files to return
- * @returns {Promise<any[]>} list of file infos
+ * @param folderPath Path to folder
+ * @param limit Max number of files to return
  */
-export async function getFolderPreviewFileIds(folderPath, limit) {
-    const prefixPath = `/files/${getCurrentUser().uid}`;
+export async function getFolderPreviewFileIds(folderPath: string, limit: number): Promise<IFileInfo[]> {
+    const prefixPath = `/files/${getCurrentUser()!.uid}`;
 
     const filter = IMAGE_MIME_TYPES.map(mime => `
         <d:like>
@@ -141,10 +141,10 @@ export async function getFolderPreviewFileIds(folderPath, limit) {
         responseType: 'text',
     };
 
-    let response = await client.getDirectoryContents('', options);
+    let response:any = await client.getDirectoryContents('', options);
     return response.data
-        .map(data => genFileInfo(data))
-        .map(data => Object.assign({}, data, {
+        .map((data: any) => genFileInfo(data))
+        .map((data: any) => Object.assign({}, data, {
             filename: data.filename.replace(prefixPath, ''),
             etag: data.etag.replace(/&quot;/g, ''), // remove quotes
         }));
@@ -153,22 +153,21 @@ export async function getFolderPreviewFileIds(folderPath, limit) {
 /**
  * Delete a single file
  *
- * @param {string} path path to the file
- * @returns {Promise<void>}
+ * @param path path to the file
  */
-export async function deleteFile(path) {
-    const prefixPath = `/files/${getCurrentUser().uid}`;
+export async function deleteFile(path: string) {
+    const prefixPath = `/files/${getCurrentUser()!.uid}`;
     return await client.deleteFile(`${prefixPath}${path}`);
 }
 
 /**
  * Delete all files in a given list of Ids
  *
- * @param {number[]} fileIds list of file ids
- * @returns {Promise<Set<number>>} list of file ids that were deleted
+ * @param fileIds list of file ids
+ * @returns list of file ids that were deleted
  */
-export async function deleteFilesByIds(fileIds) {
-    const delIds = new Set();
+export async function deleteFilesByIds(fileIds: number[]) {
+    const delIds = new Set<number>();
     const fileIdsSet = new Set(fileIds);
 
     if (fileIds.length === 0) {
@@ -176,7 +175,7 @@ export async function deleteFilesByIds(fileIds) {
     }
 
     // Get files data
-    let fileInfos = [];
+    let fileInfos: any[] = [];
     try {
         fileInfos = await getFiles(fileIds.filter(f => f));
     } catch (e) {
@@ -185,7 +184,7 @@ export async function deleteFilesByIds(fileIds) {
     }
 
     // Run all promises together
-    const promises = [];
+    const promises: Promise<void>[] = [];
 
     // Delete each file
     for (const fileInfo of fileInfos) {
@@ -212,10 +211,9 @@ export async function deleteFilesByIds(fileIds) {
 /**
  * Download a file
  *
- * @param {string[]} fileNames - The file's names
- * @returns {Promise<void>}
+ * @param fileNames - The file's names
  */
- export async function downloadFiles(fileNames) {
+ export async function downloadFiles(fileNames: string[]): Promise<boolean> {
     const randomToken = Math.random().toString(36).substring(2)
 
     const params = new URLSearchParams()
@@ -224,7 +222,7 @@ export async function deleteFilesByIds(fileIds) {
 
     const downloadURL = generateUrl(`/apps/files/ajax/download.php?${params}`)
 
-    window.location = `${downloadURL}downloadStartSecret=${randomToken}`
+    window.location.href = `${downloadURL}downloadStartSecret=${randomToken}`
 
     return new Promise((resolve) => {
         const waitForCookieInterval = setInterval(
@@ -246,10 +244,9 @@ export async function deleteFilesByIds(fileIds) {
 
 /**
  * Download the files given by the fileIds
- * @param {number[]} fileIds
- * @returns {Promise<void>}
+ * @param fileIds list of file ids
  */
-export async function downloadFilesByIds(fileIds) {
+export async function downloadFilesByIds(fileIds: number[]) {
     if (fileIds.length === 0) {
         return;
     }

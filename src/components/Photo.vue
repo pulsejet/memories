@@ -36,174 +36,159 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Vue, Prop } from 'vue-property-decorator';
+import { IDay, IPhoto } from "../types";
+
 import * as dav from "../services/DavRequests";
 import constants from "../mixins/constants"
 import errorsvg from "../assets/error.svg";
 import { getPreviewUrl } from "../services/FileUtils";
 
-export default {
-    name: 'Photo',
-    data() {
-        return {
-            touchTimer: 0,
-            c: constants,
+@Component({})
+export default class Photo extends Vue {
+    private touchTimer = 0;
+    private readonly c = constants;
+
+    @Prop() data: IPhoto;
+    @Prop() rowHeight: number;
+    @Prop() day: IDay;
+
+    /** Get URL for image to show */
+    getUrl() {
+        if (this.data.flag & constants.FLAG_PLACEHOLDER) {
+            return undefined;
+        } else if (this.data.flag & constants.FLAG_LOAD_FAIL) {
+            return errorsvg;
+        } else if (this.data.flag & constants.FLAG_FORCE_RELOAD) {
+            this.data.flag &= ~constants.FLAG_FORCE_RELOAD;
+            return undefined;
+        } else {
+            return getPreviewUrl(this.data.fileid, this.data.etag);
         }
-    },
-    props: {
-        data: {
-            type: Object,
-            required: true
-        },
-        rowHeight: {
-            type: Number,
-            required: true,
-        },
-        day: {
-            type: Object,
-            required: true,
-        },
-    },
-    methods: {
-        /** Get URL for image to show */
-        getUrl() {
-            if (this.data.flag & constants.FLAG_PLACEHOLDER) {
-                return undefined;
-            } else if (this.data.flag & constants.FLAG_LOAD_FAIL) {
-                return errorsvg;
-            } else if (this.data.flag & constants.FLAG_FORCE_RELOAD) {
-                this.data.flag &= ~constants.FLAG_FORCE_RELOAD;
-                return undefined;
-            } else {
-                return getPreviewUrl(this.data.fileid, this.data.etag);
+    }
+
+    /** Error in loading image */
+    error(e: any) {
+        this.data.flag |= (constants.FLAG_LOADED | constants.FLAG_LOAD_FAIL);
+    }
+
+    /** Pass to parent */
+    click() {
+        this.$emit('clickImg', this);
+    }
+
+    /** Open viewer */
+    async openFile() {
+        // Check if this is a placeholder
+        if (this.data.flag & constants.FLAG_PLACEHOLDER) {
+            return;
+        }
+
+        // Check if already loaded fileInfos or load
+        let fileInfos = this.day.fileInfos;
+        if (!fileInfos) {
+            const ids = this.day.detail.map(p => p.fileid);
+            try {
+                fileInfos = await dav.getFiles(ids);
+            } catch (e) {
+                console.error('Failed to load fileInfos', e);
             }
-        },
-
-        /** Error in loading image */
-        error(e) {
-            this.data.flag |= (constants.FLAG_LOADED | constants.FLAG_LOAD_FAIL);
-        },
-
-        /** Pass to parent */
-        click() {
-            this.$emit('clickImg', this);
-        },
-
-        /** Open viewer */
-        async openFile() {
-            // Check if this is a placeholder
-            if (this.data.flag & constants.FLAG_PLACEHOLDER) {
+            if (fileInfos.length === 0) {
                 return;
             }
 
-            // Check if already loaded fileInfos or load
-            let fileInfos = this.day.fileInfos;
-            if (!fileInfos) {
-                const ids = this.day.detail.map(p => p.fileid);
-                try {
-                    this.loading = true;
-                    fileInfos = await dav.getFiles(ids);
-                } catch (e) {
-                    console.error('Failed to load fileInfos', e);
-                } finally {
-                    this.loading = false;
-                }
-                if (fileInfos.length === 0) {
-                    return;
-                }
-
-                // Fix sorting of the fileInfos
-                const itemPositions = {};
-                for (const [index, id] of ids.entries()) {
-                    itemPositions[id] = index;
-                }
-                fileInfos.sort(function (a, b) {
-                    return itemPositions[a.fileid] - itemPositions[b.fileid];
-                });
-
-                // Store in day with a original copy
-                this.day.fileInfos = fileInfos;
-                this.day.fiOrigIds = new Set(fileInfos.map(f => f.fileid));
+            // Fix sorting of the fileInfos
+            const itemPositions = {};
+            for (const [index, id] of ids.entries()) {
+                itemPositions[id] = index;
             }
-
-            // Get this photo in the fileInfos
-            const photo = fileInfos.find(d => Number(d.fileid) === Number(this.data.fileid));
-            if (!photo) {
-                alert('Cannot find this photo anymore!');
-                return;
-            }
-
-            // Key to store sidebar state
-            const SIDEBAR_KEY = 'memories:sidebar-open';
-
-            // Open viewer
-            OCA.Viewer.open({
-                path: photo.filename,   // path
-                list: fileInfos,        // file list
-                canLoop: false,         // don't loop
-                onClose: () => {        // on viewer close
-                    if (OCA.Files.Sidebar.file) {
-                        localStorage.setItem(SIDEBAR_KEY, '1');
-                    } else {
-                        localStorage.removeItem(SIDEBAR_KEY);
-                    }
-                    OCA.Files.Sidebar.close();
-
-                    // Check for any deleted files and remove them from the main view
-                    this.processDeleted();
-                },
+            fileInfos.sort(function (a, b) {
+                return itemPositions[a.fileid] - itemPositions[b.fileid];
             });
 
-            // Restore sidebar state
-            if (localStorage.getItem(SIDEBAR_KEY) === '1') {
-                OCA.Files.Sidebar.open(photo.filename);
-            }
-        },
+            // Store in day with a original copy
+            this.day.fileInfos = fileInfos;
+            this.day.origFileIds = new Set(fileInfos.map(f => f.fileid));
+        }
 
-        /** Remove deleted files from main view */
-        processDeleted() {
-            // This is really an ugly hack, but the viewer
-            // does not provide a way to get the deleted files
+        // Get this photo in the fileInfos
+        const photo = fileInfos.find(d => Number(d.fileid) === Number(this.data.fileid));
+        if (!photo) {
+            alert('Cannot find this photo anymore!');
+            return;
+        }
 
-            // Compare new and old list of ids
-            const newIds = new Set(this.day.fileInfos.map(f => f.fileid));
-            const remIds = new Set([...this.day.fiOrigIds].filter(x => !newIds.has(x)));
+        // Key to store sidebar state
+        const SIDEBAR_KEY = 'memories:sidebar-open';
 
-            // Exit if nothing to do
-            if (remIds.size === 0) {
-                return;
-            }
-            this.day.fiOrigIds = newIds;
+        // Open viewer
+        globalThis.OCA.Viewer.open({
+            path: photo.filename,   // path
+            list: fileInfos,        // file list
+            canLoop: false,         // don't loop
+            onClose: () => {        // on viewer close
+                if (globalThis.OCA.Files.Sidebar.file) {
+                    localStorage.setItem(SIDEBAR_KEY, '1');
+                } else {
+                    localStorage.removeItem(SIDEBAR_KEY);
+                }
+                globalThis.OCA.Files.Sidebar.close();
 
-            // Remove deleted files from details
-            this.$emit('reprocess', remIds, new Set([this.day]));
-        },
+                // Check for any deleted files and remove them from the main view
+                this.processDeleted();
+            },
+        });
 
-        toggleSelect() {
-            if (this.data.flag & constants.FLAG_PLACEHOLDER) {
-                return;
-            }
-            this.$emit('select', this.data);
-        },
+        // Restore sidebar state
+        if (localStorage.getItem(SIDEBAR_KEY) === '1') {
+            globalThis.OCA.Files.Sidebar.open(photo.filename);
+        }
+    }
 
-        touchstart() {
-            this.touchTimer = setTimeout(() => {
-                this.toggleSelect();
-                this.touchTimer = 0;
-            }, 600);
-        },
+    /** Remove deleted files from main view */
+    processDeleted() {
+        // This is really an ugly hack, but the viewer
+        // does not provide a way to get the deleted files
 
-        contextmenu(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        },
+        // Compare new and old list of ids
+        const newIds = new Set(this.day.fileInfos.map(f => f.fileid));
+        const remIds = new Set([...this.day.origFileIds].filter(x => !newIds.has(x)));
 
-        touchend() {
-            if (this.touchTimer) {
-                clearTimeout(this.touchTimer);
-                this.touchTimer = 0;
-            }
-        },
+        // Exit if nothing to do
+        if (remIds.size === 0) {
+            return;
+        }
+        this.day.origFileIds = newIds;
+
+        // Remove deleted files from details
+        this.$emit('reprocess', remIds, new Set([this.day]));
+    }
+
+    toggleSelect() {
+        if (this.data.flag & constants.FLAG_PLACEHOLDER) {
+            return;
+        }
+        this.$emit('select', this.data);
+    }
+
+    touchstart() {
+        this.touchTimer = window.setTimeout(() => {
+            this.toggleSelect();
+            this.touchTimer = 0;
+        }, 600);
+    }
+
+    contextmenu(e: Event) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    touchend() {
+        if (this.touchTimer) {
+            clearTimeout(this.touchTimer);
+            this.touchTimer = 0;
+        }
     }
 }
 </script>

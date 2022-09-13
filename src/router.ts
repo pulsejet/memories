@@ -21,10 +21,10 @@
  */
 
  import { generateUrl } from '@nextcloud/router'
+ import { translate as t, translatePlural as n } from '@nextcloud/l10n'
  import Router from 'vue-router'
  import Vue from 'vue'
-
- const Timeline = () => import('./components/Timeline')
+ import Timeline from './components/Timeline.vue';
 
  Vue.use(Router)
 
@@ -43,7 +43,7 @@
      mode: 'history',
      // if index.php is in the url AND we got this far, then it's working:
      // let's keep using index.php in the url
-     base: generateUrl('/apps/memories', ''),
+     base: generateUrl('/apps/memories'),
      linkActiveClass: 'active',
      routes: [
          {

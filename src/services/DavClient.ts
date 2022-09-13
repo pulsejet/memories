@@ -27,8 +27,8 @@
 
  // Monkey business
  import * as rq from 'webdav/dist/node/request';
- rq.prepareRequestOptionsOld = rq.prepareRequestOptions.bind(rq);
- rq.prepareRequestOptions = (function(requestOptions, context, userOptions) {
+ (<any>rq).prepareRequestOptionsOld = rq.prepareRequestOptions.bind(rq);
+ (<any>rq).prepareRequestOptions = (function(requestOptions, context, userOptions) {
     requestOptions.method = userOptions.method || requestOptions.method;
     return this.prepareRequestOptionsOld(requestOptions, context, userOptions);
  }).bind(rq);

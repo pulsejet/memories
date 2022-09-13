@@ -19,12 +19,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
+import 'reflect-metadata'
 import Vue from 'vue'
 import VueVirtualScroller from 'vue-virtual-scroller'
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { translate as t, translatePlural as n } from '@nextcloud/l10n'
 
-import App from './App'
+import App from './App.vue'
 import router from './router'
 
 // Adding translations to the whole app
@@ -42,11 +43,11 @@ Vue.use(VueVirtualScroller)
 // original scripts are loaded from
 // https://github.com/nextcloud/server/blob/5bf3d1bb384da56adbf205752be8f840aac3b0c5/lib/private/legacy/template.php#L120-L122
 window.addEventListener('DOMContentLoaded', () => {
-    if (!window.OCA.Files) {
-        window.OCA.Files = {}
+    if (!globalThis.OCA.Files) {
+        globalThis.OCA.Files = {}
     }
     // register unused client for the sidebar to have access to its parser methods
-    Object.assign(window.OCA.Files, { App: { fileList: { filesClient: OC.Files.getClient() } } }, window.OCA.Files)
+    Object.assign(globalThis.OCA.Files, { App: { fileList: { filesClient: globalThis.OC.Files.getClient() } } }, globalThis.OCA.Files)
 })
 
 export default new Vue({

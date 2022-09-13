@@ -45,7 +45,7 @@
 }
 </style>
 
-<script>
+<script lang="ts">
 import { NcContent, NcAppContent, NcAppNavigation, NcAppNavigationItem, NcAppNavigationSettings} from '@nextcloud/vue'
 
 import Timeline from './components/Timeline.vue'
