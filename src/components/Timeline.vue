@@ -2,6 +2,7 @@
     <div class="container" ref="container" :class="{ 'icon-loading': loading }">
         <!-- Main recycler view for rows -->
         <RecycleScroller
+            v-if="list.length > 0"
             ref="recycler"
             class="recycler"
             :items="list"

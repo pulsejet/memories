@@ -20,7 +20,6 @@
                 height: rowHeight + 'px',
             }">
             <img
-                ref="image"
                 :src="getSrc()"
                 :key="data.fileid"
 
@@ -38,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Emit, Mixins, Watch } from 'vue-property-decorator';
+import { Component, Prop, Emit, Mixins } from 'vue-property-decorator';
 import { IDay, IPhoto } from "../types";
 
 import * as dav from "../services/DavRequests";
@@ -76,17 +75,6 @@ export default class Photo extends Mixins(GlobalMixin) {
     /** Get url of the photo */
     getUrl() {
         return getPreviewUrl(this.data.fileid, this.data.etag);
-    }
-
-    @Watch('state')
-    stateChange() {
-        // Check if current image already loaded
-        if (this.data?.fileid) {
-            const img = this.$refs.image as HTMLImageElement;
-            if (img.complete && img.src === this.getUrl()) {
-                this.load();
-            }
-        }
     }
 
     /** Image loaded successfully */
