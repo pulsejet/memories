@@ -2,7 +2,6 @@
     <div class="container" ref="container" :class="{ 'icon-loading': loading }">
         <!-- Main recycler view for rows -->
         <RecycleScroller
-            v-if="list.length > 0"
             ref="recycler"
             class="recycler"
             :items="list"
@@ -23,9 +22,11 @@
 
                 <div class="photo" v-for="photo of item.photos" :key="photo.fileid">
                     <Folder v-if="photo.isfolder"
+                            :key="state"
                             :data="photo"
                             :rowHeight="rowHeight" />
                     <Photo v-else
+                            :key="state"
                             :data="photo"
                             :rowHeight="rowHeight"
                             :day="item.day"
