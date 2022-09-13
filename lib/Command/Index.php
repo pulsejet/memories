@@ -210,11 +210,12 @@ class Index extends Command {
         \OC_Util::tearDownFS();
         \OC_Util::setupFS($user->getUID());
 
-        $userFolder = $this->rootFolder->getUserFolder($user->getUID());
-        $this->parseFolder($userFolder, $refresh);
+        $uid = $user->getUID();
+        $userFolder = $this->rootFolder->getUserFolder($uid);
+        $this->parseFolder($userFolder, $refresh, $uid);
     }
 
-    private function parseFolder(Folder &$folder, bool &$refresh): void {
+    private function parseFolder(Folder &$folder, bool &$refresh, string $uid): void {
         try {
             $folderPath = $folder->getPath();
 
@@ -230,9 +231,9 @@ class Index extends Command {
 
             foreach ($nodes as &$node) {
                 if ($node instanceof Folder) {
-                    $this->parseFolder($node, $refresh);
+                    $this->parseFolder($node, $refresh, $uid);
                 } elseif ($node instanceof File) {
-                    $this->parseFile($node, $refresh);
+                    $this->parseFile($node, $refresh, $uid);
                 }
             }
         } catch (StorageNotAvailableException $e) {
@@ -243,8 +244,8 @@ class Index extends Command {
         }
     }
 
-    private function parseFile(File &$file, bool &$refresh): void {
-        $res = $this->timelineWrite->processFile($file, $refresh);
+    private function parseFile(File &$file, bool &$refresh, string $uid): void {
+        $res = $this->timelineWrite->processFile($file, $refresh, $uid);
         if ($res === 2) {
             $this->nProcessed++;
         } else if ($res === 1) {

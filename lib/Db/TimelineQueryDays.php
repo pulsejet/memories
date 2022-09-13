@@ -55,10 +55,14 @@ trait TimelineQueryDays {
     ): array {
 
         // Filter by path starting with timeline path
-        $path = "files" . Exif::getPhotosPath($config, $user) . "%";
+        $configPath = Exif::getPhotosPath($config, $user);
+        $likeHome = Exif::removeExtraSlash("files/" . $configPath . "%");
+        $likeExt = Exif::removeLeadingSlash(Exif::removeExtraSlash($configPath . "%"));
+
         $query = $this->connection->getQueryBuilder();
-        $this->makeQueryDays($query, $query->expr()->like(
-            'f.path', $query->createNamedParameter($path)
+        $this->makeQueryDays($query, $query->expr()->orX(
+            $query->expr()->like('f.path', $query->createNamedParameter($likeHome)),
+            $query->expr()->like('f.path', $query->createNamedParameter($likeExt)),
         ));
 
         // Filter by user
