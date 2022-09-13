@@ -77,6 +77,27 @@ class ApiController extends Controller {
         return $transforms;
     }
 
+    /** Preload a few "day" at the start of "days" response */
+    private function preloadDays(array &$days) {
+        $uid = $this->userSession->getUser()->getUID();
+        $transforms = $this->getTransformations();
+        $preloaded = 0;
+        foreach ($days as &$day) {
+            $day["detail"] = $this->timelineQuery->getDay(
+                $this->config,
+                $uid,
+                $day["dayid"],
+                $transforms,
+            );
+            $day["count"] = count($day["detail"]); // make sure count is accurate
+            $preloaded += $day["count"];
+
+            if ($preloaded >= 50) { // should be enough
+                break;
+            }
+        }
+    }
+
     /**
      * @NoAdminRequired
      *
@@ -93,6 +114,7 @@ class ApiController extends Controller {
             $user->getUID(),
             $this->getTransformations(),
         );
+        $this->preloadDays($list);
         return new JSONResponse($list, Http::STATUS_OK);
     }
 

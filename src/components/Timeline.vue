@@ -415,9 +415,28 @@ export default class Timeline extends Mixins(GlobalMixin) {
         const list: IRow[] = [];
         const heads: {[dayId: number]: IRow} = {};
 
+        // Store the preloads in a separate map.
+        // This is required since otherwise the inner detail objects
+        // do not become reactive (which happens only after assignment).
+        const preloads: {
+            [dayId: number]: {
+                day: IDay,
+                detail: IPhoto[],
+            };
+        } = {};
+
         for (const day of data) {
-            day.count = Number(day.count);
+            // Initialization
             day.rows = new Set();
+
+            // Store the preloads
+            if (day.detail) {
+                preloads[day.dayid] = {
+                    day: day,
+                    detail: day.detail,
+                };
+                delete day.detail;
+            }
 
             // Nothing here
             if (day.count === 0) {
@@ -454,11 +473,12 @@ export default class Timeline extends Mixins(GlobalMixin) {
         this.list = list;
         this.heads = heads;
 
-        // Check preloads
-        for (const day of data) {
-            if (day.count && day.detail) {
-                this.processDay(day);
-            }
+        // Iterate the preload map
+        // Now the inner detail objects are reactive
+        for (const dayId in preloads) {
+            const preload = preloads[dayId];
+            preload.day.detail = preload.detail;
+            this.processDay(preload.day);
         }
 
         // Fix view height variable
@@ -608,7 +628,6 @@ export default class Timeline extends Mixins(GlobalMixin) {
 
     /**
      * Process items from day response.
-     * Do not auto reflow if you plan to cal the reflow function later.
      *
      * @param day Day object
      */
@@ -831,7 +850,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
      * @param {Set} delIds Set of file ids to delete
      * @param {Set} updatedDays of days that MAY be affected
      */
-    async deleteFromViewWithAnimation(delIds, updatedDays) {
+    async deleteFromViewWithAnimation(delIds: Set<number>, updatedDays: Set<IDay>) {
         if (delIds.size === 0 || updatedDays.size === 0) {
             return;
         }

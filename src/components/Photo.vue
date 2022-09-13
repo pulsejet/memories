@@ -25,7 +25,7 @@
 
                 @click="click"
                 @error="error"
-                @load = "data.flag |= c.FLAG_LOADED"
+                @load="data.flag |= c.FLAG_LOADED"
 
                 @contextmenu="contextmenu"
                 @touchstart="touchstart"
