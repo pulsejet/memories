@@ -105,7 +105,6 @@ class ApiController extends Controller {
 
     /**
      * @NoAdminRequired
-     * @NoCSRFRequired
      *
      * @return JSONResponse
      */
