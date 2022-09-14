@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         php-versions: ['7.4', '8.1']
-        server-versions: ['24.0.4']
+        server-versions: ['v24.0.4']
         db: ['mysql']
 
     services:
@@ -31,26 +31,39 @@ jobs:
           MYSQL_ROOT_PASSWORD: rootpassword
         options: --health-cmd="mysqladmin ping" --health-interval 5s --health-timeout 2s --health-retries 5
 
-    container:
-      image: nextcloud:${{ matrix.server-versions }}
-
     steps:
+      - name: Checkout server
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          repository: nextcloud/server
+          ref: ${{ matrix.server-versions }}
+
       - name: Checkout the app
         uses: actions/checkout@v3
         with:
-          path: apps/memories
+          path: apps/${{ env.APP_NAME }}
 
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
 
+      - name: Set up php ${{ matrix.php-versions }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          tools: phpunit
+          extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
+          coverage: none
+
       - name: Set up Nextcloud
         env:
           DB_PORT: 4444
         run: |
           mkdir data
-          php occ maintenance:install --verbose --database=mysql --database-name=nextcloud --database-host=mysql --database-port=$DB_PORT --database-user=root --database-pass=rootpassword --admin-user admin --admin-pass password
+          php occ maintenance:install --verbose --database=mysql --database-name=nextcloud --database-host=127.0.0.1 --database-port=$DB_PORT --database-user=root --database-pass=rootpassword --admin-user admin --admin-pass password
+          git clone --depth 1 --branch ${{ matrix.server-versions }} https://github.com/nextcloud/viewer apps/viewer
 
       - name: Run tests
         run: |

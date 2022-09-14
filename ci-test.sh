@@ -6,6 +6,16 @@ make dev-setup
 make build-js-production
 cd ../..
 
+# Speed up loads
+php occ app:disable comments
+php occ app:disable contactsinteraction:
+php occ app:disable dashboard
+php occ app:disable weather_status
+php occ app:disable user_status
+php occ app:disable updatenotification
+php occ app:disable systemtags
+php occ app:disable files_sharing
+
 # Enable apps
 php occ app:enable --force viewer
 php occ app:enable --force memories
