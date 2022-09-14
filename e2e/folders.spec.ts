@@ -11,6 +11,6 @@ test.describe('Open', () => {
   test('Open folder', async ({ page }) => {
     await page.locator('text=Local').click();
     await expect(page).toHaveURL(/http:\/\/localhost:8080\/apps\/memories\/folders\/\.*/);
-    await page.waitForSelector('img[src^="/core/preview"]');
+    await page.waitForSelector('img[src*="core/preview"]');
   });
 });

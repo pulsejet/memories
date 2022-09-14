@@ -11,6 +11,6 @@ export function login(route: string) {
     await page.locator('[placeholder="Password"]').fill('password');
     await page.locator('input:has-text("Log in")').click();
     await expect(page).toHaveURL('http://localhost:8080/index.php/apps/memories' + route);
-    await page.waitForSelector('img[src^="/core/preview"]');
+    await page.waitForSelector('img[src*="core/preview"]');
   }
 }

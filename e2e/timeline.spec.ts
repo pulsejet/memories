@@ -5,7 +5,7 @@ test.beforeEach(login('/'));
 
 test.describe('Open', () => {
   test('Look for Images', async ({ page }) => {
-    expect(await page.locator('img[src^="/core/preview"]').count(), 'Number of previews').toBeGreaterThan(4);
+    expect(await page.locator('img[src*="core/preview"]').count(), 'Number of previews').toBeGreaterThan(4);
     await page.waitForTimeout(1000);
   });
 
@@ -36,7 +36,7 @@ test.describe('Open', () => {
 
     // refresh page
     await page.reload();
-    await page.waitForSelector('img[src^="/core/preview"]');
+    await page.waitForSelector('img[src*="core/preview"]');
     expect(await page.locator(`img[src="${src1}"]`).count()).toBe(0);
     expect(await page.locator(`img[src="${src2}"]`).count()).toBe(0);
   });
