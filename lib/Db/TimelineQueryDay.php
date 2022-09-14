@@ -17,12 +17,15 @@ trait TimelineQueryDay {
      */
     private function processDay(&$day) {
         foreach($day as &$row) {
+            // We don't need date taken (see query builder)
+            unset($row['date_taken']);
+
+            // Convert field types
             $row["fileid"] = intval($row["fileid"]);
             $row["isvideo"] = intval($row["isvideo"]);
             if (!$row["isvideo"]) {
                 unset($row["isvideo"]);
             }
-
             if ($row["categoryid"]) {
                 $row["isfavorite"] = 1;
             }
@@ -40,7 +43,11 @@ trait TimelineQueryDay {
     ) {
         // Get all entries also present in filecache
         $fileid = $query->createFunction('DISTINCT m.fileid');
-        $query->select($fileid, 'f.etag', 'm.isvideo', 'vco.categoryid')
+
+        // We don't actually use m.datetaken here, but postgres
+        // needs that all fields in ORDER BY are also in SELECT
+        // when using DISTINCT on selected fields
+        $query->select($fileid, 'f.etag', 'm.isvideo', 'vco.categoryid', 'm.datetaken')
             ->from('memories', 'm')
             ->innerJoin('m', 'filecache', 'f',
                 $query->expr()->andX(
