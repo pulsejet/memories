@@ -84,10 +84,11 @@ jobs:
       - name: Run indexing
         run: |
           sudo apt-get install libimage-exiftool-perl -y
+          ./occ files:scan
           ./occ memories:index
 
       - name: Run e2e tests
         working-directory: apps/${{ env.APP_NAME }}
         run: |
-          sudo npx playwright install-deps
+          sudo npx playwright install-deps chromium
           npm run e2e
