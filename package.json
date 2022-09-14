@@ -1,63 +1,65 @@
 {
-	"name": "memories",
-	"description": "A better photos app",
-	"version": "1.0.1",
-	"author": "Varun Patil <radialapps@gmail.com>",
-	"contributors": [
-		"Varun Patil <radialapps@gmail.com>"
-	],
-	"keywords": [
-		"nextcloud",
-		"app",
-		"dev",
-		"vuejs"
-	],
-	"bugs": {
-		"url": "https://github.com/pulsejet/memories/issues"
-	},
-	"repository": {
-		"url": "https://github.com/pulsejet/memories.git",
-		"type": "git"
-	},
-	"homepage": "https://github.com/pulsejet/memories",
-	"license": "agpl",
-	"private": true,
-	"scripts": {
-		"build": "NODE_ENV=production webpack --progress --config webpack.js",
-		"dev": "NODE_ENV=development webpack --progress --config webpack.js",
-		"watch": "NODE_ENV=development webpack --progress --watch --config webpack.js",
-		"lint": "eslint --ext .js,.vue src",
-		"lint:fix": "eslint --ext .js,.vue src --fix",
-		"stylelint": "stylelint src",
-		"stylelint:fix": "stylelint src --fix"
-	},
-	"dependencies": {
-		"@nextcloud/l10n": "^1.6.0",
-		"@nextcloud/vue": "^6.0.0-beta.6",
-		"path-posix": "^1.0.0",
-		"reflect-metadata": "^0.1.13",
-		"vue": "^2.7.10",
-		"vue-class-component": "^7.2.6",
-		"vue-property-decorator": "^9.1.2",
-		"vue-router": "^3.5.4",
-		"vue-virtual-scroller": "^1.0.10",
-		"webdav": "^4.11.0"
-	},
-	"browserslist": [
-		"extends @nextcloud/browserslist-config"
-	],
-	"engines": {
-		"node": ">=14.0.0",
-		"npm": ">=7.0.0"
-	},
-	"devDependencies": {
-		"@nextcloud/babel-config": "^1.0.0",
-		"@nextcloud/browserslist-config": "^2.3.0",
-		"@nextcloud/eslint-config": "^8.1.2",
-		"@nextcloud/stylelint-config": "^2.2.0",
-		"@nextcloud/webpack-vue-config": "^5.3.0",
-		"@types/url-parse": "^1.4.8",
-		"ts-loader": "^9.3.1",
-		"typescript": "^4.8.3"
-	}
+  "name": "memories",
+  "description": "A better photos app",
+  "version": "1.0.1",
+  "author": "Varun Patil <radialapps@gmail.com>",
+  "contributors": [
+    "Varun Patil <radialapps@gmail.com>"
+  ],
+  "keywords": [
+    "nextcloud",
+    "app",
+    "dev",
+    "vuejs"
+  ],
+  "bugs": {
+    "url": "https://github.com/pulsejet/memories/issues"
+  },
+  "repository": {
+    "url": "https://github.com/pulsejet/memories.git",
+    "type": "git"
+  },
+  "homepage": "https://github.com/pulsejet/memories",
+  "license": "agpl",
+  "private": true,
+  "scripts": {
+    "build": "NODE_ENV=production webpack --progress --config webpack.js",
+    "dev": "NODE_ENV=development webpack --progress --config webpack.js",
+    "watch": "NODE_ENV=development webpack --progress --watch --config webpack.js",
+    "lint": "eslint --ext .js,.vue src",
+    "lint:fix": "eslint --ext .js,.vue src --fix",
+    "stylelint": "stylelint src",
+    "stylelint:fix": "stylelint src --fix"
+  },
+  "dependencies": {
+    "@nextcloud/l10n": "^1.6.0",
+    "@nextcloud/vue": "^6.0.0-beta.6",
+    "path-posix": "^1.0.0",
+    "reflect-metadata": "^0.1.13",
+    "vue": "^2.7.10",
+    "vue-class-component": "^7.2.6",
+    "vue-property-decorator": "^9.1.2",
+    "vue-router": "^3.5.4",
+    "vue-virtual-scroller": "^1.0.10",
+    "webdav": "^4.11.0"
+  },
+  "browserslist": [
+    "extends @nextcloud/browserslist-config"
+  ],
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=7.0.0"
+  },
+  "devDependencies": {
+    "@nextcloud/babel-config": "^1.0.0",
+    "@nextcloud/browserslist-config": "^2.3.0",
+    "@nextcloud/eslint-config": "^8.1.2",
+    "@nextcloud/stylelint-config": "^2.2.0",
+    "@nextcloud/webpack-vue-config": "^5.3.0",
+    "@playwright/test": "^1.25.2",
+    "@types/url-parse": "^1.4.8",
+    "playwright": "^1.25.2",
+    "ts-loader": "^9.3.1",
+    "typescript": "^4.8.3"
+  }
 }

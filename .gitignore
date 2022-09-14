@@ -19,3 +19,6 @@ coverage/
 .php_cs.cache
 vendor
 memories.tar.gz
+/test-results/
+/playwright-report/
+/playwright/.cache/
