@@ -1,5 +1,11 @@
 name: Tests
 
+on:
+  push:
+    branches:
+      - master
+      - citest
+
 env:
   APP_NAME: memories
 
