@@ -8,7 +8,7 @@ export function login(route: string) {
     await page.locator('[placeholder="Username or email"]').click();
     await page.locator('[placeholder="Username or email"]').fill('admin');
     await page.locator('[placeholder="Username or email"]').press('Tab');
-    await page.locator('[placeholder="Password"]').fill('admin');
+    await page.locator('[placeholder="Password"]').fill('password');
     await page.locator('input:has-text("Log in")').click();
     await expect(page).toHaveURL('http://localhost:8080/apps/memories' + route);
     await page.waitForSelector('img[src^="/core/preview"]');

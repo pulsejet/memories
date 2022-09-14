@@ -72,3 +72,21 @@ jobs:
           ./occ maintenance:install --verbose --database=mysql --database-name=nextcloud --database-host=127.0.0.1 --database-port=$DB_PORT --database-user=root --database-pass=rootpassword --admin-user admin --admin-pass password
           ./occ app:enable --force ${{ env.APP_NAME }}
           php -S localhost:8080 &
+
+      - name: Get test photos
+        working-directory: data/admin/files
+        run: |
+          wget https://github.com/pulsejet/memories-test/raw/main/Files.zip
+          unzip Files.zip
+
+      - name: Run indexing
+        run: |
+          sudo apt-get install libimage-exiftool-perl -y
+          ./occ memories:index
+
+      - name: Run e2e tests
+        working-directory: apps/${{ env.APP_NAME }}
+        run: |
+          npm install
+          sudo npx playwright install-deps
+          npm run e2e
