@@ -39,7 +39,8 @@ trait TimelineQueryDay {
         $whereFilecache
     ) {
         // Get all entries also present in filecache
-        $query->select('m.fileid', 'f.etag', 'm.isvideo', 'vco.categoryid')
+        $fileid = $query->createFunction('DISTINCT m.fileid');
+        $query->select($fileid, 'f.etag', 'm.isvideo', 'vco.categoryid')
             ->from('memories', 'm')
             ->innerJoin('m', 'filecache', 'f',
                 $query->expr()->andX(
@@ -50,11 +51,6 @@ trait TimelineQueryDay {
 
         // Add favorite field
         $this->addFavoriteTag($query, $user);
-
-        // Get distinct fileids only
-        // This is required when browsing a folder in external storage
-        // since the same file can be present for multiple users
-        $query->groupBy('m.fileid');
 
         // Group and sort by date taken
         $query->orderBy('m.datetaken', 'DESC');
