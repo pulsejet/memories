@@ -29,11 +29,11 @@ jobs:
           MYSQL_ROOT_PASSWORD: rootpassword
         options: --health-cmd="mysqladmin ping" --health-interval 5s --health-timeout 2s --health-retries 5
 
-    # steps:
-    #   - name: Enable ONLY_FULL_GROUP_BY MySQL option
-    #     run: |
-    #       echo "SET GLOBAL sql_mode=(SELECT CONCAT(@@sql_mode,',ONLY_FULL_GROUP_BY'));" | mysql -h 127.0.0.1 -P 4444 -u root -prootpassword
-    #       echo "SELECT @@sql_mode;" | mysql -h 127.0.0.1 -P 4444 -u root -prootpassword
+      # steps:
+      #   - name: Enable ONLY_FULL_GROUP_BY MySQL option
+      #     run: |
+      #       echo "SET GLOBAL sql_mode=(SELECT CONCAT(@@sql_mode,',ONLY_FULL_GROUP_BY'));" | mysql -h 127.0.0.1 -P 4444 -u root -prootpassword
+      #       echo "SELECT @@sql_mode;" | mysql -h 127.0.0.1 -P 4444 -u root -prootpassword
 
       - name: Checkout server
         uses: actions/checkout@v3
