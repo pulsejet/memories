@@ -18,7 +18,7 @@ trait TimelineQueryDay {
     private function processDay(&$day) {
         foreach($day as &$row) {
             // We don't need date taken (see query builder)
-            unset($row['date_taken']);
+            unset($row['datetaken']);
 
             // Convert field types
             $row["fileid"] = intval($row["fileid"]);
