@@ -65,6 +65,10 @@ jobs:
           php occ maintenance:install --verbose --database=mysql --database-name=nextcloud --database-host=127.0.0.1 --database-port=$DB_PORT --database-user=root --database-pass=rootpassword --admin-user admin --admin-pass password
           git clone --depth 1 --branch ${{ matrix.server-versions }} https://github.com/nextcloud/viewer apps/viewer
 
+      - name: Run tests
+        run: |
+          ./apps/memories/ci-test.sh
+
       - uses: actions/upload-artifact@v3
         if: always()
         with:
