@@ -96,6 +96,6 @@ jobs:
       - uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.php-versions }}-${{ matrix.server-versions }}
           path: apps/${{ env.APP_NAME }}/playwright-report
 
