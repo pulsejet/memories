@@ -53,8 +53,8 @@ jobs:
           node-version: 18.x
 
       - name: Build Vue
+        working-directory: apps/${{ env.APP_NAME }}
         run: |
-          working-directory: apps/${{ env.APP_NAME }}
           make dev-setup
           make build-js-production
 
