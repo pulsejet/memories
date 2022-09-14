@@ -2,8 +2,8 @@
 
 # Build vue
 cd apps/memories
-make dev-setup
-make build-js-production
+cp ../../vue.zip .
+unzip vue.zip
 cd ../..
 
 # Speed up loads

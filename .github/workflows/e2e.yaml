@@ -11,6 +11,28 @@ env:
   PHP_CLI_SERVER_WORKERS: 8
 
 jobs:
+  vue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: Checkout the app
+        uses: actions/checkout@v3
+
+      - name: Build vue app
+        run: |
+          make dev-setup
+          make build-js-production
+          zip -r vue.zip js/
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: vue.zip
+          path: vue.zip
+
   mysql:
     runs-on: ubuntu-latest
 
@@ -43,10 +65,9 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/download-artifact@v2
         with:
-          node-version: 18.x
+          name: vue.zip
 
       - name: Set up php ${{ matrix.php-versions }}
         uses: shivammathur/setup-php@v2
@@ -111,10 +132,9 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/download-artifact@v2
         with:
-          node-version: 18.x
+          name: vue.zip
 
       - name: Set up php ${{ matrix.php-versions }}
         uses: shivammathur/setup-php@v2
@@ -165,10 +185,9 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/download-artifact@v2
         with:
-          node-version: 18.x
+          name: vue.zip
 
       - name: Set up php ${{ matrix.php-versions }}
         uses: shivammathur/setup-php@v2
