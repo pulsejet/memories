@@ -2,6 +2,7 @@
 
 # Build vue
 cd apps/memories
+npm i
 cp ../../vue.zip .
 unzip vue.zip
 cd ../..
@@ -19,6 +20,8 @@ php occ app:disable files_sharing
 # Enable apps
 php occ app:enable --force viewer
 php occ app:enable --force memories
+
+set -e
 
 # Set debug mode and start dev server
 php occ config:system:set --type bool --value true debug
