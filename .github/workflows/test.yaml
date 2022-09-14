@@ -8,6 +8,7 @@ on:
 
 env:
   APP_NAME: memories
+  PHP_CLI_SERVER_WORKERS: 8
 
 jobs:
   phpunit-mysql:
@@ -71,9 +72,13 @@ jobs:
           DB_PORT: 4444
         run: |
           mkdir data
-          ./occ maintenance:install --verbose --database=mysql --database-name=nextcloud --database-host=127.0.0.1 --database-port=$DB_PORT --database-user=root --database-pass=rootpassword --admin-user admin --admin-pass password
-          ./occ app:enable --force ${{ env.APP_NAME }}
-          ./occ config:system:set --type bool --value true debug
+          php occ maintenance:install --verbose --database=mysql --database-name=nextcloud --database-host=127.0.0.1 --database-port=$DB_PORT --database-user=root --database-pass=rootpassword --admin-user admin --admin-pass password
+          php occ app:enable --force ${{ env.APP_NAME }}
+
+          git clone --depth 1 --branch ${{ matrix.server-versions }} https://github.com/nextcloud/viewer apps/viewer
+          php occ app:enable --force viewer
+
+          php occ config:system:set --type bool --value true debug
           php -S localhost:8080 &
 
       - name: Get test photos
@@ -85,8 +90,8 @@ jobs:
       - name: Run indexing
         run: |
           sudo apt-get install libimage-exiftool-perl -y
-          ./occ files:scan --all
-          ./occ memories:index
+          php occ files:scan --all
+          php occ memories:index
 
       - name: Run e2e tests
         working-directory: apps/${{ env.APP_NAME }}
