@@ -20,6 +20,7 @@ jobs:
       matrix:
         php-versions: ['7.4', '8.1']
         server-versions: ['v24.0.4']
+        db: ['mysql']
 
     services:
       mysql:
@@ -31,11 +32,6 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval 5s --health-timeout 2s --health-retries 5
 
     steps:
-      # - name: Enable ONLY_FULL_GROUP_BY MySQL option
-      #   run: |
-      #     echo "SET GLOBAL sql_mode=(SELECT CONCAT(@@sql_mode,',ONLY_FULL_GROUP_BY'));" | mysql -h 127.0.0.1 -P 4444 -u root -prootpassword
-      #     echo "SELECT @@sql_mode;" | mysql -h 127.0.0.1 -P 4444 -u root -prootpassword
-
       - name: Checkout server
         uses: actions/checkout@v3
         with:
@@ -53,12 +49,6 @@ jobs:
         with:
           node-version: 18.x
 
-      - name: Build Vue
-        working-directory: apps/${{ env.APP_NAME }}
-        run: |
-          make dev-setup
-          make build-js-production
-
       - name: Set up php ${{ matrix.php-versions }}
         uses: shivammathur/setup-php@v2
         with:
@@ -73,35 +63,11 @@ jobs:
         run: |
           mkdir data
           php occ maintenance:install --verbose --database=mysql --database-name=nextcloud --database-host=127.0.0.1 --database-port=$DB_PORT --database-user=root --database-pass=rootpassword --admin-user admin --admin-pass password
-          php occ app:enable --force ${{ env.APP_NAME }}
-
           git clone --depth 1 --branch ${{ matrix.server-versions }} https://github.com/nextcloud/viewer apps/viewer
-          php occ app:enable --force viewer
-
-          php occ config:system:set --type bool --value true debug
-          php -S localhost:8080 &
-
-      - name: Get test photos
-        working-directory: data/admin/files
-        run: |
-          wget https://github.com/pulsejet/memories-test/raw/main/Files.zip
-          unzip Files.zip
-
-      - name: Run indexing
-        run: |
-          sudo apt-get install libimage-exiftool-perl -y
-          php occ files:scan --all
-          php occ memories:index
-
-      - name: Run e2e tests
-        working-directory: apps/${{ env.APP_NAME }}
-        run: |
-          sudo npx playwright install-deps chromium
-          npm run e2e
 
       - uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: playwright-report-${{ matrix.php-versions }}-${{ matrix.server-versions }}
+          name: report-${{ matrix.php-versions }}-${{ matrix.server-versions }}
           path: apps/${{ env.APP_NAME }}/playwright-report
 
