@@ -66,10 +66,6 @@ jobs:
           extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
           coverage: none
 
-      - name: Set up PHPUnit
-        working-directory: apps/${{ env.APP_NAME }}
-        run: composer i
-
       - name: Set up Nextcloud
         env:
           DB_PORT: 4444
@@ -93,6 +89,5 @@ jobs:
       - name: Run e2e tests
         working-directory: apps/${{ env.APP_NAME }}
         run: |
-          npm install
           sudo npx playwright install-deps
           npm run e2e
