@@ -55,7 +55,7 @@ export type IRow = {
     /** Refrence to day object */
     day: IDay;
     /** Whether this is a head row */
-    head?: boolean;
+    type: IRowType;
     /** [Head only] Title of the header */
     name?: string;
     /** Main list of photo items */
@@ -64,6 +64,10 @@ export type IRow = {
     size?: number;
     /** Count of placeholders to create */
     pct?: number;
+}
+export enum IRowType {
+    HEAD = 0,
+    PHOTOS = 1,
 }
 
 export type ITick = {

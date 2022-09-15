@@ -2,27 +2,29 @@
     <div class="container" ref="container" :class="{ 'icon-loading': loading }">
         <!-- Main recycler view for rows -->
         <RecycleScroller
-            :key="state"
             ref="recycler"
             class="recycler"
+            :key="state"
             :items="list"
-            size-field="size"
-            key-field="id"
-            v-slot="{ item }"
             :emit-update="true"
+            key-field="id"
+            size-field="size"
+            type-field="type"
+            v-slot="{ item }"
             @update="scrollChange"
             @resize="handleResizeWithDelay"
         >
-            <h1 v-if="item.head" class="head-row" :class="{ 'first': item.id === 1 }">
-                {{ getHeadName(item) }}
+            <h1 v-if="item.type === 0" class="head-row"
+                :class="{ 'first': item.id === 1 }">
+                {{ item.name || getHeadName(item) }}
             </h1>
 
             <div v-else
                 class="photo-row"
                 :style="{ height: rowHeight + 'px' }">
 
-                <div class="photo" v-for="photo of item.photos" :key="photo.fileid">
-                    <Folder v-if="photo.isfolder"
+                <div class="photo" v-for="(photo, index) in item.photos" :key="index">
+                    <Folder v-if="photo.flag & c.FLAG_IS_FOLDER"
                             :data="photo"
                             :rowHeight="rowHeight" />
                     <Photo v-else
@@ -96,7 +98,7 @@
 
 <script lang="ts">
 import { Component, Watch, Mixins } from 'vue-property-decorator';
-import { IDay, IPhoto, IRow, ITick } from "../types";
+import { IDay, IPhoto, IRow, IRowType, ITick } from "../types";
 import { NcActions, NcActionButton, NcButton } from '@nextcloud/vue';
 import { generateUrl } from '@nextcloud/router'
 import GlobalMixin from '../mixins/GlobalMixin';
@@ -275,7 +277,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
         this.rowHeight = Math.floor(width / this.numCols);
 
         // Set heights of rows
-        this.list.filter(r => !r.head).forEach(row => {
+        this.list.filter(r => r.type === IRowType.PHOTOS).forEach(row => {
             row.size = this.rowHeight;
         });
         this.reflowTimeline(true);
@@ -473,7 +475,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
             const head = {
                 id: ++this.numRows,
                 size: 40,
-                head: true,
+                type: IRowType.HEAD,
                 dayId: day.dayid,
                 day: day,
             };
@@ -693,7 +695,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
         let dataIdx = 0;
         while (dataIdx < data.length) {
             // Check if we ran out of rows
-            if (rowIdx >= this.list.length || this.list[rowIdx].head) {
+            if (rowIdx >= this.list.length || this.list[rowIdx].type === IRowType.HEAD) {
                 addedRow = true;
                 this.list.splice(rowIdx, 0, this.getBlankRow(day));
             }
@@ -722,6 +724,10 @@ export default class Timeline extends Mixins(GlobalMixin) {
                 photo.flag |= this.c.FLAG_IS_FAVORITE;
                 delete photo.isfavorite;
             }
+            if (photo.isfolder) {
+                photo.flag |= this.c.FLAG_IS_FOLDER;
+                delete photo.isfolder;
+            }
 
             this.list[rowIdx].photos.push(photo);
             dataIdx++;
@@ -739,7 +745,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
 
         // Get rid of any extra rows
         let spliceCount = 0;
-        for (let i = rowIdx + 1; i < this.list.length && !this.list[i].head; i++) {
+        for (let i = rowIdx + 1; i < this.list.length && this.list[i].type !== IRowType.HEAD; i++) {
             spliceCount++;
         }
         if (spliceCount > 0) {
@@ -754,11 +760,12 @@ export default class Timeline extends Mixins(GlobalMixin) {
         }
     }
 
-    /** Get a new blank row */
+    /** Get a new blank photos row */
     getBlankRow(day: IDay): IRow {
         return {
             id: ++this.numRows,
             photos: [],
+            type: IRowType.PHOTOS,
             size: this.rowHeight,
             dayId: day.dayid,
             day: day,

@@ -18,20 +18,19 @@
         <div class="img-outer" :style="{
                 width: rowHeight + 'px',
                 height: rowHeight + 'px',
-            }">
+            }"
+            @click="click"
+            @contextmenu="contextmenu"
+            @touchstart="touchstart"
+            @touchmove="touchend"
+            @touchend="touchend"
+            @touchcancel="touchend" >
             <img
-                :src="getSrc()"
+                :src="src()"
                 :key="data.fileid"
 
-                @click="click"
                 @error="error"
-                @load="load"
-
-                @contextmenu="contextmenu"
-                @touchstart="touchstart"
-                @touchmove="touchend"
-                @touchend="touchend"
-                @touchcancel="touchend" />
+                @load="load" />
         </div>
     </div>
 </template>
@@ -58,7 +57,7 @@ export default class Photo extends Mixins(GlobalMixin) {
     @Emit('clickImg') emitClickImg(component: any) {}
 
     /** Get src for image to show */
-    getSrc() {
+    src() {
         if (this.data.flag & this.c.FLAG_PLACEHOLDER) {
             return undefined;
         } else if (this.data.flag & this.c.FLAG_LOAD_FAIL) {
@@ -67,13 +66,13 @@ export default class Photo extends Mixins(GlobalMixin) {
             this.data.flag &= ~this.c.FLAG_FORCE_RELOAD;
             return undefined;
         } else {
-            return this.getUrl();
+            return this.url;
         }
     }
 
     /** Get url of the photo */
-    getUrl() {
-        return getPreviewUrl(this.data.fileid, this.data.etag);
+    get url() {
+        return getPreviewUrl(this.data.fileid, this.data.etag)
     }
 
     /** Image loaded successfully */
