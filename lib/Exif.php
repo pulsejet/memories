@@ -82,14 +82,14 @@ class Exif {
      * @param string $path
      */
     public static function sanitizePath(string $path) {
-        return mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $path);
+        return mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).\/])", '', $path);
     }
 
     /**
      * Keep only one slash if multiple repeating
      */
     public static function removeExtraSlash(string $path) {
-        return mb_ereg_replace('~/+~', '/', $path);
+        return mb_ereg_replace('\/\/+', '/', $path);
     }
 
     /**
