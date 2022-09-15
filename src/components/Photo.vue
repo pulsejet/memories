@@ -287,7 +287,7 @@ div.img-outer {
         -webkit-touch-callout: none;
         user-select: none;
 
-        .selected > & { box-shadow: 0 0 6px 2px var(--color-primary); }
+        .selected > & { box-shadow: 0 0 3px 2px var(--color-primary); }
         .p-loading > & { opacity: 0; }
     }
 }
