@@ -168,7 +168,7 @@ class Exif {
         $readyToken = "\n{ready}\n";
 
         try {
-            $buf = self::readOrTimeout(self::$staticPipes[1], 2000, $readyToken);
+            $buf = self::readOrTimeout(self::$staticPipes[1], 5000, $readyToken);
             $tokPos = strrpos($buf, $readyToken);
             $buf = substr($buf, 0, $tokPos);
             return self::processStdout($buf);
