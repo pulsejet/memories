@@ -21,6 +21,7 @@ class Exif {
             1 => array('pipe', 'w'),
             2 => array('pipe', 'w'),
         ], self::$staticPipes);
+        stream_set_blocking(self::$staticPipes[1], false);
     }
 
     public static function closeStaticExiftoolProc() {
@@ -30,8 +31,15 @@ class Exif {
                 fclose(self::$staticPipes[1]);
                 fclose(self::$staticPipes[2]);
                 proc_terminate(self::$staticProc);
+                self::$staticProc = null;
+                self::$staticPipes = null;
             }
         } catch (\Exception $ex) {}
+    }
+
+    public static function restartStaticExiftoolProc() {
+        self::closeStaticExiftoolProc();
+        self::ensureStaticExiftoolProc();
     }
 
     public static function ensureStaticExiftoolProc() {
@@ -126,23 +134,49 @@ class Exif {
         }
     }
 
-    private static function getExifFromLocalPathWithStaticProc(string &$path) {
-        fwrite(self::$staticPipes[0], "$path\n-json\n-api\nQuickTimeUTC=1\n-execute\n");
-        fflush(self::$staticPipes[0]);
+    /**
+     * Read from non blocking handle or throw timeout
+     * @param resource $handle
+     * @param int $timeout milliseconds
+     * @param string $delimiter null for eof
+     */
+    private static function readOrTimeout($handle, $timeout, $delimiter=null) {
+        $buf = '';
+        $waitedMs = 0;
 
-        $buf = "";
-        $readyToken = "\n{ready}\n";
-        while (!str_ends_with($buf, $readyToken)) {
-            $r = fread(self::$staticPipes[1], 1);
-            if ($r === false) {
-                error_log("PANIC: Something went wrong with static exiftool process");
-                exit(1);
+        while ($waitedMs < $timeout && ($delimiter ? !str_ends_with($buf, $delimiter) : !feof($handle))) {
+            $r = stream_get_contents($handle);
+            if (empty($r)) {
+                $waitedMs++;
+                usleep(1000);
+                continue;
             }
             $buf .= $r;
         }
 
-        $buf = substr($buf, 0, strrpos($buf, $readyToken));
-        return self::processStdout($buf);
+        if ($waitedMs >= $timeout) {
+            throw new \Exception('Timeout');
+        }
+
+        return $buf;
+    }
+
+    private static function getExifFromLocalPathWithStaticProc(string &$path) {
+        fwrite(self::$staticPipes[0], "$path\n-json\n-api\nQuickTimeUTC=1\n-execute\n");
+        fflush(self::$staticPipes[0]);
+
+        $readyToken = "\n{ready}\n";
+
+        try {
+            $buf = self::readOrTimeout(self::$staticPipes[1], 2000, $readyToken);
+            $tokPos = strrpos($buf, $readyToken);
+            $buf = substr($buf, 0, $tokPos);
+            return self::processStdout($buf);
+        } catch (\Exception $ex) {
+            error_log("ERROR: Exiftool may have crashed, restarting process [$path]");
+            self::restartStaticExiftoolProc();
+            throw new \Exception("Nothing to read from Exiftool");
+        }
     }
 
     private static function getExifFromLocalPathWithSeparateProc(string &$path) {
@@ -151,14 +185,19 @@ class Exif {
             1 => array('pipe', 'w'),
             2 => array('pipe', 'w'),
         ], $pipes);
-        $stdout = stream_get_contents($pipes[1]);
+        stream_set_blocking($pipes[1], false);
 
-        // Clean up
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        proc_close($proc);
-
-        return self::processStdout($stdout);
+        try {
+            $stdout = self::readOrTimeout($pipes[1], 5000);
+            return self::processStdout($stdout);
+        } catch (\Exception $ex) {
+            error_log("Exiftool timeout: [$path]");
+            throw new \Exception("Could not read from Exiftool");
+        } finally {
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            proc_terminate($proc);
+        }
     }
 
     /**
@@ -176,18 +215,23 @@ class Exif {
 
         // Write the file to exiftool's stdin
         // Warning: this is slow for big files
-        stream_copy_to_stream($handle, $pipes[0]);
+        // Copy a maximum of 20MB; this may be $$$
+        stream_copy_to_stream($handle, $pipes[0], 20 * 1024 * 1024);
         fclose($pipes[0]);
 
         // Get output from exiftool
-        $stdout = stream_get_contents($pipes[1]);
-
-        // Clean up
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        proc_close($proc);
-
-        return self::processStdout($stdout);
+        stream_set_blocking($pipes[1], false);
+        try {
+            $stdout = self::readOrTimeout($pipes[1], 5000);
+            return self::processStdout($stdout);
+        } catch (\Exception $ex) {
+            error_log("Exiftool timeout for file stream: " . $ex->getMessage());
+            throw new \Exception("Could not read from Exiftool");
+        } finally {
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            proc_terminate($proc);
+        }
     }
 
     /** Get json array from stdout of exiftool */
