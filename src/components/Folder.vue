@@ -93,18 +93,6 @@ export default class Folder extends Mixins(GlobalMixin) {
 <style lang="scss" scoped>
 .folder {
     cursor: pointer;
-
-    .name {
-        cursor: pointer;
-        width: 100%;
-        padding: 0 5%;
-        text-align: center;
-        font-size: 1.08em;
-        word-wrap: break-word;
-        text-overflow: ellipsis;
-        max-height: 35%;
-        line-height: 1em;
-    }
 }
 
 .big-icon {
@@ -115,13 +103,25 @@ export default class Folder extends Mixins(GlobalMixin) {
     width: 100%; height: 100%;
     transition: opacity 0.2s ease-in-out;
 
-    .folder.hasPreview & {
+    > .name {
+        cursor: pointer;
+        width: 100%;
+        padding: 0 5%;
+        text-align: center;
+        font-size: 1.08em;
+        word-wrap: break-word;
+        text-overflow: ellipsis;
+        max-height: 35%;
+        line-height: 1em;
+    }
+
+    .folder.hasPreview > & {
         .icon-folder { opacity: 1; }
         .name { color: white; }
     }
-    .folder.hasPreview:hover & { opacity: 0; }
+    .folder.hasPreview:hover > & { opacity: 0; }
 
-    .icon-folder {
+    > .icon-folder {
         cursor: pointer;
         height: 65%; width: 100%;
         opacity: 0.3;
@@ -138,7 +138,7 @@ export default class Folder extends Mixins(GlobalMixin) {
     width: calc(100% - 4px);
     top: 2px; left: 2px;
 
-    .img-outer {
+    > .img-outer {
         background-color: var(--color-loading-light);
         padding: 0;
         margin: 0;
@@ -146,26 +146,26 @@ export default class Folder extends Mixins(GlobalMixin) {
         height: 50%;
         display: inline-block;
 
-        .folder.onePreview & {
+        .folder.onePreview > & {
             width: 100%; height: 100%;
         }
-    }
 
-    img {
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        filter: brightness(50%);
+        > img {
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            filter: brightness(50%);
 
-        opacity: 1;
-        transition: opacity 0.15s ease, filter 0.2s ease-in-out;
-        will-change: opacity, filter;
-        transform: translateZ(0);
-        &.p-loading { opacity: 0; }
-        &.p-load-fail { display: none; }
+            opacity: 1;
+            transition: opacity 0.15s ease, filter 0.2s ease-in-out;
+            will-change: opacity, filter;
+            transform: translateZ(0);
+            &.p-loading { opacity: 0; }
+            &.p-load-fail { display: none; }
 
-        .folder:hover & {
-            filter: brightness(100%);
+            .folder:hover & {
+                filter: brightness(100%);
+            }
         }
     }
 }

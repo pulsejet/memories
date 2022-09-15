@@ -248,8 +248,8 @@ export default class Photo extends Mixins(GlobalMixin) {
     cursor: pointer;
     opacity: 0;
 
-    .p-outer:hover & { opacity: 0.7; }
-    .selected & { opacity: 0.9; filter: invert(1); }
+    .p-outer:hover > & { opacity: 0.7; }
+    .selected > & { opacity: 0.9; filter: invert(1); }
 }
 .icon-video-white {
     position: absolute;
@@ -271,23 +271,24 @@ div.img-outer {
     background-clip: content-box, padding-box;
     background-color: var(--color-loading-light);
 
-    .selected & { padding: 6%; }
-}
-img {
-    background-clip: content-box;
-    object-fit: cover;
-    cursor: pointer;
-    width: 100%; height: 100%;
-    opacity: 1;
-    transition: opacity 0.15s ease;
-    will-change: opacity;
-    transform: translateZ(0);
+    .selected > & { padding: 6%; }
 
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-    user-select: none;
+    > img {
+        background-clip: content-box;
+        object-fit: cover;
+        cursor: pointer;
+        width: 100%; height: 100%;
+        opacity: 1;
+        transition: opacity 0.15s ease;
+        will-change: opacity;
+        transform: translateZ(0);
 
-    .selected & { box-shadow: 0 0 6px 2px var(--color-primary); }
-    .p-loading & { opacity: 0; }
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        user-select: none;
+
+        .selected > & { box-shadow: 0 0 6px 2px var(--color-primary); }
+        .p-loading > & { opacity: 0; }
+    }
 }
 </style>
