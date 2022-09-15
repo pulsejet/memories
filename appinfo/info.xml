@@ -32,7 +32,7 @@ The exact steps depend on your Nextcloud platform. If you use Docker for your Ne
 - **MacOS**: `brew install exiftool`
 - **FreeBSD**: `sudo pkg install p5-Image-ExifTool`
 ]]></description>
-    <version>1.1.5</version>
+    <version>1.1.6</version>
     <licence>agpl</licence>
     <author mail="radialapps@gmail.com" >Varun Patil</author>
     <website>https://github.com/pulsejet/memories</website>
