@@ -51,7 +51,11 @@
 
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator';
-import { NcContent, NcAppContent, NcAppNavigation, NcAppNavigationItem, NcAppNavigationSettings} from '@nextcloud/vue'
+import NcContent from '@nextcloud/vue/dist/Components/NcContent';
+import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent';
+import NcAppNavigation from '@nextcloud/vue/dist/Components/NcAppNavigation';
+import NcAppNavigationItem from '@nextcloud/vue/dist/Components/NcAppNavigationItem';
+import NcAppNavigationSettings from '@nextcloud/vue/dist/Components/NcAppNavigationSettings';
 
 import Timeline from './components/Timeline.vue'
 import Settings from './components/Settings.vue'

@@ -109,9 +109,11 @@
 <script lang="ts">
 import { Component, Watch, Mixins } from 'vue-property-decorator';
 import { IDay, IHeadRow, IPhoto, IRow, IRowType, ITick } from "../types";
-import { NcActions, NcActionButton, NcButton } from '@nextcloud/vue';
 import { generateUrl } from '@nextcloud/router'
 import GlobalMixin from '../mixins/GlobalMixin';
+import NcActions from '@nextcloud/vue/dist/Components/NcActions';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
