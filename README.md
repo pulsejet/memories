@@ -56,6 +56,7 @@ The approach of this app is fundamentally different from the official Nextcloud 
         - Use the same timeline for multiple users.
         - Delete and restore files from the external storage.
     - If you add any photos from outside Nextcloud, you must run the scan and index commands.
+    - Indexing may be slow, since all files must be downloaded from the storage. The app currently assumes that the Exif data is present with the first 20MB of each file.
     - This function is experimental and may not work as expected. Please report any issues.
 
 ## Special Thanks
