@@ -58,12 +58,18 @@ export type IRow = {
     type: IRowType;
     /** [Head only] Title of the header */
     name?: string;
+    /** [Head only] Boolean if the entire day is selected */
+    selected?: boolean;
     /** Main list of photo items */
     photos?: IPhoto[];
     /** Height in px of the row */
     size?: number;
     /** Count of placeholders to create */
     pct?: number;
+}
+export type IHeadRow = IRow & {
+    type: IRowType.HEAD;
+    selected: boolean;
 }
 export enum IRowType {
     HEAD = 0,

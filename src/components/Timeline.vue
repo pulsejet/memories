@@ -14,10 +14,20 @@
             @update="scrollChange"
             @resize="handleResizeWithDelay"
         >
-            <h1 v-if="item.type === 0" class="head-row"
-                :class="{ 'first': item.id === 1 }">
-                {{ item.name || getHeadName(item) }}
-            </h1>
+            <div v-if="item.type === 0" class="head-row"
+                :class="{
+                    'first': item.id === 1,
+                    'selected': item.selected,
+                }"
+            >
+                <div class="icon-checkmark select"
+                    @click="selectHead(item)">
+                </div>
+                <span class="name"
+                     @click="selectHead(item)">
+                    {{ item.name || getHeadName(item) }}
+                </span>
+            </div>
 
             <div v-else
                 class="photo-row"
@@ -98,7 +108,7 @@
 
 <script lang="ts">
 import { Component, Watch, Mixins } from 'vue-property-decorator';
-import { IDay, IPhoto, IRow, IRowType, ITick } from "../types";
+import { IDay, IHeadRow, IPhoto, IRow, IRowType, ITick } from "../types";
 import { NcActions, NcActionButton, NcButton } from '@nextcloud/vue';
 import { generateUrl } from '@nextcloud/router'
 import GlobalMixin from '../mixins/GlobalMixin';
@@ -144,7 +154,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
     /** Computed number of columns */
     private numCols = 5;
     /** Header rows for dayId key */
-    private heads: { [dayid: number]: IRow } = {};
+    private heads: { [dayid: number]: IHeadRow } = {};
     /** Original days response */
     private days: IDay[] = [];
 
@@ -440,8 +450,8 @@ export default class Timeline extends Mixins(GlobalMixin) {
 
     /** Process the data for days call including folders */
     async processDays(data: IDay[]) {
-        const list: IRow[] = [];
-        const heads: {[dayId: number]: IRow} = {};
+        const list: typeof this.list = [];
+        const heads: typeof this.heads = {};
 
         // Store the preloads in a separate map.
         // This is required since otherwise the inner detail objects
@@ -472,10 +482,11 @@ export default class Timeline extends Mixins(GlobalMixin) {
             }
 
             // Add header to list
-            const head = {
+            const head: IHeadRow = {
                 id: ++this.numRows,
                 size: 40,
                 type: IRowType.HEAD,
+                selected: false,
                 dayId: day.dayid,
                 day: day,
             };
@@ -840,8 +851,8 @@ export default class Timeline extends Mixins(GlobalMixin) {
     }
 
     /** Add a photo to selection list */
-    selectPhoto(photo: IPhoto) {
-        const nval = !this.selection.has(photo);
+    selectPhoto(photo: IPhoto, val?: boolean, noUpdate?: boolean) {
+        const nval = val ?? !this.selection.has(photo);
         if (nval) {
             photo.flag |= this.c.FLAG_SELECTED;
             this.selection.add(photo);
@@ -849,23 +860,60 @@ export default class Timeline extends Mixins(GlobalMixin) {
             photo.flag &= ~this.c.FLAG_SELECTED;
             this.selection.delete(photo);
         }
-        this.$forceUpdate();
+
+        if (!noUpdate) {
+            this.updateHeadSelected(this.heads[photo.d.dayid]);
+            this.$forceUpdate();
+        }
     }
 
     /** Clear all selected photos */
     clearSelection() {
+        const heads = new Set<IHeadRow>();
         for (const photo of this.selection) {
             photo.flag &= ~this.c.FLAG_SELECTED;
+            heads.add(this.heads[photo.d.dayid]);
         }
+
         this.selection.clear();
+        heads.forEach(this.updateHeadSelected);
         this.$forceUpdate();
+    }
+
+    /** Select or deselect all photos in a head */
+    selectHead(head: IHeadRow) {
+        head.selected = !head.selected;
+        for (const row of head.day.rows) {
+            for (const photo of row.photos) {
+                this.selectPhoto(photo, head.selected, true);
+            }
+        }
+        this.$forceUpdate();
+    }
+
+    /** Check if the day for a photo is selected entirely */
+    updateHeadSelected(head: IHeadRow) {
+        let selected = true;
+
+        // Check if all photos are selected
+        for (const row of head.day.rows) {
+            for (const photo of row.photos) {
+                if (!(photo.flag & this.c.FLAG_SELECTED)) {
+                    selected = false;
+                    break;
+                }
+            }
+        }
+
+        // Update head
+        head.selected = selected;
     }
 
     /**
      * Download the currently selected files
      */
     async downloadSelection() {
-        if (this.selection.size >= 5) {
+        if (this.selection.size >= 100) {
             if (!confirm(this.t("memories", "You are about to download a large number of files. Are you sure?"))) {
                 return;
             }
@@ -989,27 +1037,59 @@ export default class Timeline extends Mixins(GlobalMixin) {
 .recycler {
     height: 300px;
     width: calc(100% + 20px);
+}
 
-    .photo-row .photo {
-        display: inline-block;
-        position: relative;
-        cursor: pointer;
-        vertical-align: top;
+.photo-row > .photo {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    vertical-align: top;
+}
+
+.head-row {
+    height: 40px;
+    padding-top: 10px;
+    padding-left: 3px;
+    font-size: 0.9em;
+    font-weight: 600;
+
+    @include phone {
+        &.first {
+            padding-left: 38px;
+            padding-top: 12px;
+        }
     }
 
-    .head-row {
-        height: 40px;
-        padding-top: 10px;
-        padding-left: 3px;
-        font-size: 0.9em;
-        font-weight: 600;
+    > .select {
+        position: absolute;
+        left: 5px; top: 50%;
+        display: none;
+        opacity: 0;
+        transform: translateY(-30%);
+        transition: opacity 0.2s ease;
+        background-color: var(--color-background-darker);
+        border-radius: 50%;
+        height: 12px; width: 12px;
+        background-size: 70%;
+        padding: 5px;
+        cursor: pointer;
+    }
+    > .name {
+        transition: margin 0.2s ease;
+        cursor: pointer;
+    }
 
-        @include phone {
-            &.first {
-                padding-left: 38px;
-                padding-top: 12px;
-            }
+    .hover &, &.selected {
+        > .select {
+            display: inline-block;
+            opacity: 1;
         }
+        > .name {
+            margin-left: 25px;
+        }
+    }
+    &.selected > .select {
+        filter: invert(1);
     }
 }
 
@@ -1028,7 +1108,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
         opacity: 1;
     }
 
-    .tick {
+    > .tick {
         pointer-events: none;
         position: absolute;
         font-size: 0.75em;
@@ -1055,7 +1135,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
         }
     }
 
-    .cursor {
+    > .cursor {
         position: absolute;
         pointer-events: none;
         right: 0;
@@ -1080,7 +1160,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
             font-weight: 600;
         }
     }
-    &:hover .cursor.st {
+    &:hover > .cursor.st {
         opacity: 1;
     }
 }
@@ -1099,7 +1179,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
     display: flex;
     vertical-align: middle;
 
-    .text {
+    > .text {
         flex-grow: 1;
         line-height: 40px;
         padding-left: 8px;
