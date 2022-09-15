@@ -865,6 +865,11 @@ export default class Timeline extends Mixins(GlobalMixin) {
      * Download the currently selected files
      */
     async downloadSelection() {
+        if (this.selection.size >= 5) {
+            if (!confirm(this.t("memories", "You are about to download a large number of files. Are you sure?"))) {
+                return;
+            }
+        }
         await dav.downloadFilesByIds([...this.selection].map(p => p.fileid));
     }
 
@@ -872,6 +877,12 @@ export default class Timeline extends Mixins(GlobalMixin) {
      * Delete the currently selected photos
      */
     async deleteSelection() {
+        if (this.selection.size >= 100) {
+            if (!confirm(this.t("memories", "You are about to delete a large number of files. Are you sure?"))) {
+                return;
+            }
+        }
+
         this.loading = true;
         const list = [...this.selection];
         const delIds = await dav.deleteFilesByIds(list.map(p => p.fileid));
