@@ -1,5 +1,5 @@
 <template>
-    <div class="container" ref="container" :class="{ 'icon-loading': loading }">
+    <div class="container" ref="container" :class="{ 'icon-loading': loading > 0 }">
         <!-- Main recycler view for rows -->
         <RecycleScroller
             ref="recycler"
@@ -110,6 +110,7 @@
 import { Component, Watch, Mixins } from 'vue-property-decorator';
 import { IDay, IHeadRow, IPhoto, IRow, IRowType, ITick } from "../types";
 import { generateUrl } from '@nextcloud/router'
+import { showError } from '@nextcloud/dialogs'
 import GlobalMixin from '../mixins/GlobalMixin';
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
@@ -148,7 +149,7 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
 })
 export default class Timeline extends Mixins(GlobalMixin) {
     /** Loading days response */
-    private loading = true;
+    private loading = 0;
     /** Main list of rows */
     private list: IRow[] = [];
     /** Counter of rows */
@@ -239,7 +240,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
     /** Reset all state */
     async resetState() {
         this.clearSelection();
-        this.loading = true;
+        this.loading = 0;
         this.list = [];
         this.numRows = 0;
         this.heads = {};
@@ -443,11 +444,16 @@ export default class Timeline extends Mixins(GlobalMixin) {
             params.folderId = this.$route.params.id || 0;
         }
 
-        const startState = this.state;
-        const res = await axios.get<IDay[]>(generateUrl(this.appendQuery(url), params));
-        const data = res.data;
-        if (this.state !== startState) return;
-        await this.processDays(data);
+        try {
+            this.loading++;
+            const startState = this.state;
+            const res = await axios.get<IDay[]>(generateUrl(this.appendQuery(url), params));
+            const data = res.data;
+            if (this.state !== startState) return;
+            await this.processDays(data);
+        } finally {
+            this.loading--;
+        }
     }
 
     /** Process the data for days call including folders */
@@ -522,10 +528,13 @@ export default class Timeline extends Mixins(GlobalMixin) {
             this.processDay(preload.day);
         }
 
-        this.loading = false;
-
         // Fix view height variable
         await this.reflowTimeline();
+
+        // Check if we didn't find anything
+        if (this.list.length === 0) {
+            showError(this.t('memories', 'No photos to show here'));
+        }
     }
 
     /** Fetch image data for one dayId */
@@ -552,6 +561,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
             day.count = data.length;
             this.processDay(day);
         } catch (e) {
+            showError(this.t('memories', 'Failed to load some photos'));
             console.error(e);
         }
     }
@@ -932,14 +942,17 @@ export default class Timeline extends Mixins(GlobalMixin) {
             }
         }
 
-        this.loading = true;
-        const list = [...this.selection];
-        for await (const delIds of dav.deleteFilesByIds(list.map(p => p.fileid))) {
-            const delIdsSet = new Set(delIds.filter(i => i));
-            const updatedDays = new Set(list.filter(f => delIdsSet.has(f.fileid)).map(f => f.d));
-            await this.deleteFromViewWithAnimation(delIdsSet, updatedDays);
+        try {
+            const list = [...this.selection];
+            this.loading++;
+            for await (const delIds of dav.deleteFilesByIds(list.map(p => p.fileid))) {
+                const delIdsSet = new Set(delIds.filter(i => i));
+                const updatedDays = new Set(list.filter(f => delIdsSet.has(f.fileid)).map(f => f.d));
+                await this.deleteFromViewWithAnimation(delIdsSet, updatedDays);
+            }
+        } finally {
+            this.loading--;
         }
-        this.loading = false;
     }
 
     /**
