@@ -25,7 +25,7 @@ test.describe('Open', () => {
     expect(await page.locator(`img[src="${src1}"]`).count()).toBe(1);
     expect(await page.locator(`img[src="${src2}"]`).count()).toBe(1);
 
-    await page.locator(`${i1} > .icon-checkmark`).click();
+    await page.locator(`${i1} > .check-icon`).click();
     await page.locator(`${i2}`).click();
     await page.waitForTimeout(1000);
 

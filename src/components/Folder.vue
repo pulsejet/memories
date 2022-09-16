@@ -9,10 +9,10 @@
             height: rowHeight + 'px',
         }">
         <div class="big-icon">
-            <div class="icon-folder" v-bind:class="{
+            <FolderIcon class="memories__big-folder-icon" v-bind:class="{
                 'icon-dark': previewFileInfos.length === 0,
                 'icon-white': previewFileInfos.length > 0,
-            }"></div>
+            }" />
             <div class="name">{{ data.name }}</div>
         </div>
 
@@ -40,7 +40,13 @@ import GlobalMixin from '../mixins/GlobalMixin';
 import * as dav from "../services/DavRequests";
 import { getPreviewUrl } from "../services/FileUtils";
 
-@Component({})
+import FolderIcon from 'vue-material-design-icons/Folder.vue';
+
+@Component({
+    components: {
+        FolderIcon,
+    },
+})
 export default class Folder extends Mixins(GlobalMixin) {
     @Prop() data: IFolder;
     @Prop() rowHeight: number;
@@ -90,6 +96,13 @@ export default class Folder extends Mixins(GlobalMixin) {
 }
 </script>
 
+<style lang="scss">
+/* This cannot be scoped for some reason */
+.memories__big-folder-icon > .material-design-icon__svg {
+    width: 50%; height: 50%;
+}
+</style>
+
 <style lang="scss" scoped>
 .folder {
     cursor: pointer;
@@ -113,20 +126,21 @@ export default class Folder extends Mixins(GlobalMixin) {
         text-overflow: ellipsis;
         max-height: 35%;
         line-height: 1em;
+        position: absolute;
+        top: 65%;
     }
 
     .folder.hasPreview > & {
-        .icon-folder { opacity: 1; }
+        .folder-icon { opacity: 1; }
         .name { color: white; }
     }
     .folder.hasPreview:hover > & { opacity: 0; }
 
-    > .icon-folder {
+    > .folder-icon {
         cursor: pointer;
-        height: 65%; width: 100%;
+        height: 90%; width: 100%;
         opacity: 0.3;
-        background-size: 40%;
-        background-position: bottom;
+        filter: invert(1) brightness(100);
     }
 }
 

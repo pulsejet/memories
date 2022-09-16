@@ -20,9 +20,8 @@
                     'selected': item.selected,
                 }"
             >
-                <div class="icon-checkmark select"
-                    @click="selectHead(item)">
-                </div>
+                <CheckCircle :size="18" class="select" @click="selectHead(item)" />
+
                 <span class="name"
                      @click="selectHead(item)">
                     {{ item.name || getHeadName(item) }}
@@ -76,9 +75,9 @@
             <NcActions>
                 <NcActionButton
                     :aria-label="t('memories', 'Cancel selection')"
-                    @click="clearSelection()"
-                    class="icon-close">
+                    @click="clearSelection()">
                     {{ t('memories', 'Cancel') }}
+                    <template #icon> <Close :size="20" /> </template>
                 </NcActionButton>
             </NcActions>
 
@@ -88,26 +87,24 @@
 
             <NcActions>
                 <NcActionButton
-                    :aria-label="t('memories', 'Download selection')"
-                    @click="downloadSelection"
-                    class="icon-download">
-                    {{ t('memories', 'Download') }}
+                    :aria-label="t('memories', 'Delete selection')"
+                    @click="deleteSelection">
+                    {{ t('memories', 'Delete') }}
+                    <template #icon> <Delete :size="20" /> </template>
                 </NcActionButton>
             </NcActions>
             <NcActions>
                 <NcActionButton
-                    :aria-label="t('memories', 'Delete selection')"
-                    @click="deleteSelection"
-                    class="icon-delete">
-                    {{ t('memories', 'Delete') }}
+                    :aria-label="t('memories', 'Download selection')"
+                    @click="downloadSelection">
+                    {{ t('memories', 'Download') }}
+                    <template #icon> <Download :size="20" /> </template>
                 </NcActionButton>
-            </NcActions>
-            <NcActions>
                 <NcActionButton
                     :aria-label="t('memories', 'Toggle Favorite')"
-                    @click="favoriteSelection"
-                    class="icon-favorite">
+                    @click="favoriteSelection">
                     {{ t('memories', 'Toggle Favorite') }}
+                    <template #icon> <Star :size="20" /> </template>
                 </NcActionButton>
             </NcActions>
         </div>
@@ -129,6 +126,12 @@ import * as utils from "../services/Utils";
 import axios from '@nextcloud/axios'
 import Folder from "./Folder.vue";
 import Photo from "./Photo.vue";
+
+import Star from 'vue-material-design-icons/Star.vue';
+import Download from 'vue-material-design-icons/Download.vue';
+import Delete from 'vue-material-design-icons/Delete.vue';
+import Close from 'vue-material-design-icons/Close.vue';
+import CheckCircle from 'vue-material-design-icons/CheckCircle.vue';
 
 const SCROLL_LOAD_DELAY = 100;          // Delay in loading data when scrolling
 const MAX_PHOTO_WIDTH = 175;            // Max width of a photo
@@ -152,7 +155,13 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
         Photo,
         NcActions,
         NcActionButton,
-        NcButton
+        NcButton,
+
+        Star,
+        Download,
+        Delete,
+        Close,
+        CheckCircle,
     }
 })
 export default class Timeline extends Mixins(GlobalMixin) {
@@ -1121,11 +1130,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
         opacity: 0;
         transform: translateY(-30%);
         transition: opacity 0.2s ease;
-        background-color: var(--color-background-darker);
         border-radius: 50%;
-        height: 12px; width: 12px;
-        background-size: 70%;
-        padding: 5px;
         cursor: pointer;
     }
     > .name {
@@ -1135,15 +1140,15 @@ export default class Timeline extends Mixins(GlobalMixin) {
 
     .hover &, &.selected {
         > .select {
-            display: inline-block;
-            opacity: 1;
+            display: flex;
+            opacity: 0.5;
         }
         > .name {
             margin-left: 25px;
         }
     }
     &.selected > .select {
-        filter: invert(1);
+        opacity: 1;
     }
 }
 

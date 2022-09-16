@@ -8,12 +8,12 @@
             'enter-right': (data.flag & c.FLAG_ENTER_RIGHT),
         }">
 
-        <div class="icon-checkmark select"
+        <Check :size="15" class="select"
              v-if="!(data.flag & c.FLAG_PLACEHOLDER)"
-             @click="toggleSelect"></div>
+             @click="toggleSelect" />
 
-        <div v-if="data.flag & c.FLAG_IS_VIDEO" class="icon-video-white"></div>
-        <div v-if="data.flag & c.FLAG_IS_FAVORITE" class="icon-starred"></div>
+        <Video :size="20" v-if="data.flag & c.FLAG_IS_VIDEO" />
+        <Star :size="20" v-if="data.flag & c.FLAG_IS_FAVORITE" />
 
         <div class="img-outer" :style="{
                 width: rowHeight + 'px',
@@ -45,7 +45,17 @@ import * as dav from "../services/DavRequests";
 import errorsvg from "../assets/error.svg";
 import GlobalMixin from '../mixins/GlobalMixin';
 
-@Component({})
+import Check from 'vue-material-design-icons/Check.vue';
+import Video from 'vue-material-design-icons/Video.vue';
+import Star from 'vue-material-design-icons/Star.vue';
+
+@Component({
+    components: {
+        Check,
+        Video,
+        Star,
+    },
+})
 export default class Photo extends Mixins(GlobalMixin) {
     private touchTimer = 0;
 
@@ -240,30 +250,29 @@ export default class Photo extends Mixins(GlobalMixin) {
 }
 
 /* Extra icons */
-.icon-checkmark {
+.check-icon.select {
     position: absolute;
-    top: 5%; left: 5%;
+    top: 6%; left: 6%;
     z-index: 100;
     background-color: var(--color-main-background);
     border-radius: 50%;
-    background-size: 80%;
-    padding: 5px;
     cursor: pointer;
     opacity: 0;
 
-    .p-outer:hover > & { opacity: 0.7; }
+    .p-outer:hover > & { opacity: 0.9; }
     .selected > & { opacity: 0.9; filter: invert(1); }
 }
-.icon-video-white {
+.video-icon, .star-icon {
     position: absolute;
-    top: 5%; right: 5%;
-    z-index: 100;
-}
-.icon-starred {
-    position: absolute;
-    bottom: 5%; left: 5%;
     z-index: 100;
     pointer-events: none;
+    filter: invert(1) brightness(100);
+}
+.video-icon {
+    top: 6%; right: 6%;
+}
+.star-icon {
+    bottom: 6%; left: 6%;
 }
 
 /* Actual image */
@@ -274,7 +283,7 @@ div.img-outer {
     background-clip: content-box, padding-box;
     background-color: var(--color-loading-light);
 
-    .selected > & { padding: 6%; }
+    .selected > & { padding: 5%; }
 
     > img {
         background-clip: content-box;

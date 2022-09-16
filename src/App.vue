@@ -4,20 +4,20 @@
             <template id="app-memories-navigation" #list>
                 <NcAppNavigationItem :to="{name: 'timeline'}"
                     :title="t('timeline', 'Timeline')"
-                    icon="icon-yourmemories"
                     exact>
+                    <ImageMultiple slot="icon" :size="20" />
                 </NcAppNavigationItem>
                 <NcAppNavigationItem :to="{name: 'folders'}"
-                    :title="t('folders', 'Folders')"
-                    icon="icon-files-dark">
+                    :title="t('folders', 'Folders')">
+                    <FolderIcon slot="icon" :size="20" />
                 </NcAppNavigationItem>
                 <NcAppNavigationItem :to="{name: 'favorites'}"
-                    :title="t('favorites', 'Favorites')"
-                    icon="icon-favorite">
+                    :title="t('favorites', 'Favorites')">
+                    <Star slot="icon" :size="20" />
                 </NcAppNavigationItem>
                 <NcAppNavigationItem :to="{name: 'videos'}"
-                    :title="t('videos', 'Videos')"
-                    icon="icon-video">
+                    :title="t('videos', 'Videos')">
+                    <Video slot="icon" :size="20" />
                 </NcAppNavigationItem>
             </template>
             <template #footer>
@@ -61,6 +61,11 @@ import Timeline from './components/Timeline.vue'
 import Settings from './components/Settings.vue'
 import GlobalMixin from './mixins/GlobalMixin';
 
+import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue'
+import FolderIcon from 'vue-material-design-icons/Folder.vue'
+import Star from 'vue-material-design-icons/Star.vue'
+import Video from 'vue-material-design-icons/Video.vue'
+
 @Component({
     components: {
         NcContent,
@@ -71,6 +76,11 @@ import GlobalMixin from './mixins/GlobalMixin';
 
         Timeline,
         Settings,
+
+        ImageMultiple,
+        FolderIcon,
+        Star,
+        Video,
     },
 })
 export default class App extends Mixins(GlobalMixin) {
