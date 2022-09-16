@@ -983,6 +983,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
                     }
                 });
             }
+            this.clearSelection();
         } finally {
             this.loading--;
         }

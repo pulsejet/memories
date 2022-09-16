@@ -52493,6 +52493,7 @@ let Timeline = class Timeline extends (0,vue_property_decorator__WEBPACK_IMPORTE
                     }
                 });
             }
+            this.clearSelection();
         }
         finally {
             this.loading--;
@@ -82525,4 +82526,4 @@ window.addEventListener('DOMContentLoaded', () => {
 
 /******/ })()
 ;
-//# sourceMappingURL=memories-main.js.map?v=ebb279fbe3365aabfcd9
+//# sourceMappingURL=memories-main.js.map?v=10a4efe366468aea5250
