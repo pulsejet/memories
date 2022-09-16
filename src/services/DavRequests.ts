@@ -196,7 +196,7 @@ export async function* deleteFilesByIds(fileIds: number[]) {
     try {
         fileInfos = await getFiles(fileIds.filter(f => f));
     } catch (e) {
-        showError(t('photos', 'Failed to delete files.'));
+        showError(t('memories', 'Failed to delete files.'));
         console.error('Failed to get file info for files to delete', fileIds, e);
         return;
     }
@@ -208,8 +208,8 @@ export async function* deleteFilesByIds(fileIds: number[]) {
             await deleteFile(fileInfo.filename);
             return fileInfo.fileid as number;
         } catch (error) {
-            console.error(t('photos', 'Failed to delete {fileName}.', fileInfo), error);
-            showError(t('photos', 'Failed to delete {fileName}.', fileInfo));
+            console.error(t('memories', 'Failed to delete {fileName}.', fileInfo), error);
+            showError(t('memories', 'Failed to delete {fileName}.', fileInfo));
             return 0;
         }
     });
