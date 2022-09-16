@@ -80,11 +80,11 @@ export enum IRowType {
 export type ITick = {
     /** Day ID */
     dayId: number;
-    /** Top row at this */
+    /** Number of ROWS above this (dynamic) */
     top: number;
-    /** Static distance from top (for headers) */
+    /** Extra static distance from top (for headers) */
     topS: number;
-    /** Count row distance from top (dynamic) */
+    /** Actual Y position calculated (C) */
     topC: number;
     /** Text if any (e.g. year) */
     text?: string | number;
