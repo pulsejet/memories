@@ -882,6 +882,10 @@ export default class Timeline extends Mixins(GlobalMixin) {
 
     /** Add a photo to selection list */
     selectPhoto(photo: IPhoto, val?: boolean, noUpdate?: boolean) {
+        if (photo.flag & this.c.FLAG_PLACEHOLDER) {
+            return; // ignore placeholders
+        }
+
         const nval = val ?? !this.selection.has(photo.fileid);
         if (nval) {
             photo.flag |= this.c.FLAG_SELECTED;
