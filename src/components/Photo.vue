@@ -53,7 +53,7 @@ export default class Photo extends Mixins(GlobalMixin) {
     @Prop() rowHeight: number;
     @Prop() day: IDay;
 
-    @Emit('reprocess') emitReprocess(remIds: Set<number>, updatedDays: Set<IDay>) {}
+    @Emit('reprocess') emitReprocess(remPhotos: IPhoto[]) {}
     @Emit('select') emitSelect(data: IPhoto) {}
     @Emit('clickImg') emitClickImg(component: any) {}
 
@@ -180,7 +180,9 @@ export default class Photo extends Mixins(GlobalMixin) {
         this.day.origFileIds = newIds;
 
         // Remove deleted files from details
-        this.emitReprocess(remIds, new Set([this.day]));
+        // Get IPhotos of the deleted file Ids
+        const remPhotos = this.day.detail.filter(p => remIds.has(p.fileid));
+        this.emitReprocess(remPhotos);
     }
 
     toggleSelect() {

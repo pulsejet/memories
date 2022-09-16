@@ -194,7 +194,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
     /** Set of dayIds for which images loaded */
     private loadedDays = new Set<number>();
     /** Set of selected file ids */
-    private selection = new Set<IPhoto>();
+    private selection = new Map<number, IPhoto>();
 
     /** State for request cancellations */
     private state = Math.random();
@@ -864,13 +864,13 @@ export default class Timeline extends Mixins(GlobalMixin) {
 
     /** Add a photo to selection list */
     selectPhoto(photo: IPhoto, val?: boolean, noUpdate?: boolean) {
-        const nval = val ?? !this.selection.has(photo);
+        const nval = val ?? !this.selection.has(photo.fileid);
         if (nval) {
             photo.flag |= this.c.FLAG_SELECTED;
-            this.selection.add(photo);
+            this.selection.set(photo.fileid, photo);
         } else {
             photo.flag &= ~this.c.FLAG_SELECTED;
-            this.selection.delete(photo);
+            this.selection.delete(photo.fileid);
         }
 
         if (!noUpdate) {
@@ -880,12 +880,13 @@ export default class Timeline extends Mixins(GlobalMixin) {
     }
 
     /** Clear all selected photos */
-    clearSelection(only?: Set<IPhoto>) {
+    clearSelection(only?: IPhoto[]) {
         const heads = new Set<IHeadRow>();
-        new Set(only || this.selection).forEach((photo: IPhoto) => {
+        const toClear = only || this.selection.values();
+        Array.from(toClear).forEach((photo: IPhoto) => {
             photo.flag &= ~this.c.FLAG_SELECTED;
             heads.add(this.heads[photo.d.dayid]);
-            this.selection.delete(photo);
+            this.selection.delete(photo.fileid);
         });
         heads.forEach(this.updateHeadSelected);
         this.$forceUpdate();
@@ -929,7 +930,8 @@ export default class Timeline extends Mixins(GlobalMixin) {
                 return;
             }
         }
-        await dav.downloadFilesByIds([...this.selection].map(p => p.fileid));
+        await dav.downloadFilesByIds(Array.from(this.selection.keys()));
+    }
     }
 
     /**
@@ -943,13 +945,13 @@ export default class Timeline extends Mixins(GlobalMixin) {
         }
 
         try {
-            const list = [...this.selection];
             this.loading++;
-            for await (const delIds of dav.deleteFilesByIds(list.map(p => p.fileid))) {
-                const delIdsSet = new Set(delIds.filter(i => i));
-                const updatedDays = new Set(list.filter(f => delIdsSet.has(f.fileid)).map(f => f.d));
-                await this.deleteFromViewWithAnimation(delIdsSet, updatedDays);
+            for await (const delIds of dav.deleteFilesByIds(Array.from(this.selection.keys()))) {
+                const delPhotos = delIds.map(id => this.selection.get(id));
+                await this.deleteFromViewWithAnimation(delPhotos);
             }
+        } catch (error) {
+            console.error(error);
         } finally {
             this.loading--;
         }
@@ -964,27 +966,20 @@ export default class Timeline extends Mixins(GlobalMixin) {
      * a call to processDay so just pass it the list of ids to
      * delete and the days that were updated.
      *
-     * @param {Set} delIds Set of file ids to delete
-     * @param {Set} updatedDays of days that MAY be affected
+     * @param delPhotos photos to delete
      */
-    async deleteFromViewWithAnimation(delIds: Set<number>, updatedDays: Set<IDay>) {
-        if (delIds.size === 0 || updatedDays.size === 0) {
+    async deleteFromViewWithAnimation(delPhotos: IPhoto[]) {
+        if (delPhotos.length === 0) {
             return;
         }
 
-        // Set of photos that are being deleted
-        const delPhotos = new Set<IPhoto>();
+        // Get all days that need to be updatd
+        const updatedDays = new Set<IDay>(delPhotos.map(p => p.d));
+        const delPhotosSet = new Set(delPhotos);
 
         // Animate the deletion
-        for (const day of updatedDays) {
-            for (const row of day.rows) {
-                for (const photo of row.photos) {
-                    if (delIds.has(photo.fileid)) {
-                        photo.flag |= this.c.FLAG_LEAVING;
-                        delPhotos.add(photo);
-                    }
-                }
-            }
+        for (const photo of delPhotos) {
+            photo.flag |= this.c.FLAG_LEAVING;
         }
 
         // wait for 200ms
@@ -1014,7 +1009,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
 
         // Reflow all touched days
         for (const day of updatedDays) {
-            day.detail = day.detail.filter(p => !delIds.has(p.fileid));
+            day.detail = day.detail.filter(p => !delPhotosSet.has(p));
             day.count = day.detail.length;
             this.processDay(day);
         }
