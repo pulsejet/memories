@@ -440,11 +440,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         // The reason this function is separate from processDays is
         // because this call is terribly slow even on desktop
         const dateTaken = utils.dayIdToDate(head.dayId);
-        let name = dateTaken.toLocaleDateString("en-US", { dateStyle: 'full', timeZone: 'UTC' });
-        if (dateTaken.getUTCFullYear() === new Date().getUTCFullYear()) {
-            // hack: remove last 6 characters of date string
-            name = name.substring(0, name.length - 6);
-        }
+        const name = utils.getLongDateStr(dateTaken, true);
 
         // Cache and return
         head.name = name;
@@ -864,7 +860,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         }
 
         const date = utils.dayIdToDate(dayId);
-        this.timelineHoverCursorText = `${utils.getMonthName(date)} ${date.getUTCFullYear()}`;
+        this.timelineHoverCursorText = utils.getShortDateStr(date);
     }
 
     /** Handle mouse hover on right timeline */
