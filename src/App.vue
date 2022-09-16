@@ -3,20 +3,20 @@
         <NcAppNavigation>
             <template id="app-memories-navigation" #list>
                 <NcAppNavigationItem :to="{name: 'timeline'}"
-                    :title="t('timeline', 'Timeline')"
+                    :title="t('memories', 'Timeline')"
                     exact>
                     <ImageMultiple slot="icon" :size="20" />
                 </NcAppNavigationItem>
                 <NcAppNavigationItem :to="{name: 'folders'}"
-                    :title="t('folders', 'Folders')">
+                    :title="t('memories', 'Folders')">
                     <FolderIcon slot="icon" :size="20" />
                 </NcAppNavigationItem>
                 <NcAppNavigationItem :to="{name: 'favorites'}"
-                    :title="t('favorites', 'Favorites')">
+                    :title="t('memories', 'Favorites')">
                     <Star slot="icon" :size="20" />
                 </NcAppNavigationItem>
                 <NcAppNavigationItem :to="{name: 'videos'}"
-                    :title="t('videos', 'Videos')">
+                    :title="t('memories', 'Videos')">
                     <Video slot="icon" :size="20" />
                 </NcAppNavigationItem>
             </template>

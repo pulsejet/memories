@@ -143,7 +143,7 @@ export default class Photo extends Mixins(GlobalMixin) {
         // Get this photo in the fileInfos
         const photo = fileInfos.find(d => Number(d.fileid) === Number(this.data.fileid));
         if (!photo) {
-            showError('Cannot find this photo anymore!');
+            showError(this.t('memories', 'Cannot find this photo anymore!'));
             return;
         }
 

@@ -75,7 +75,7 @@
         <div v-if="selection.size > 0" class="top-bar">
             <NcActions>
                 <NcActionButton
-                    :aria-label="t('memories', 'Cancel selection')"
+                    :aria-label="t('memories', 'Cancel')"
                     @click="clearSelection()">
                     {{ t('memories', 'Cancel') }}
                     <template #icon> <Close :size="20" /> </template>
@@ -88,7 +88,7 @@
 
             <NcActions>
                 <NcActionButton
-                    :aria-label="t('memories', 'Delete selection')"
+                    :aria-label="t('memories', 'Delete')"
                     @click="deleteSelection">
                     {{ t('memories', 'Delete') }}
                     <template #icon> <Delete :size="20" /> </template>
@@ -96,13 +96,13 @@
             </NcActions>
             <NcActions>
                 <NcActionButton
-                    :aria-label="t('memories', 'Download selection')"
+                    :aria-label="t('memories', 'Download')"
                     @click="downloadSelection">
                     {{ t('memories', 'Download') }}
                     <template #icon> <Download :size="20" /> </template>
                 </NcActionButton>
                 <NcActionButton
-                    :aria-label="t('memories', 'Mark Favorite')"
+                    :aria-label="t('memories', 'Favorite')"
                     @click="favoriteSelection">
                     {{ t('memories', 'Favorite') }}
                     <template #icon> <Star :size="20" /> </template>

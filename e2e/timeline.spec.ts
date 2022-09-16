@@ -29,7 +29,7 @@ test.describe('Open', () => {
     await page.locator(`${i2}`).click();
     await page.waitForTimeout(1000);
 
-    await page.locator('[aria-label="Delete selection"]').click();
+    await page.locator('[aria-label="Delete"]').click();
     await page.waitForTimeout(4000);
     expect(await page.locator(`img[src="${src1}"]`).count()).toBe(0);
     expect(await page.locator(`img[src="${src2}"]`).count()).toBe(0);

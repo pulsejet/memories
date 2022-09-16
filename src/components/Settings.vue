@@ -65,7 +65,7 @@ export default class Settings extends Mixins(UserConfig, GlobalMixin) {
         if (res.status === 200) {
             window.location.reload();
         } else {
-            showError('Error updating settings');
+            showError(this.t('memories', 'Error updating settings'));
         }
     }
 }

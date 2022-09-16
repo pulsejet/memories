@@ -196,8 +196,8 @@ export async function* deleteFilesByIds(fileIds: number[]) {
     try {
         fileInfos = await getFiles(fileIds.filter(f => f));
     } catch (e) {
-        showError(t('memories', 'Failed to delete files.'));
         console.error('Failed to get file info for files to delete', fileIds, e);
+        showError(t('memories', 'Failed to delete files.'));
         return;
     }
 
@@ -208,7 +208,7 @@ export async function* deleteFilesByIds(fileIds: number[]) {
             await deleteFile(fileInfo.filename);
             return fileInfo.fileid as number;
         } catch (error) {
-            console.error(t('memories', 'Failed to delete {fileName}.', fileInfo), error);
+            console.error('Failed to delete', fileInfo, error);
             showError(t('memories', 'Failed to delete {fileName}.', fileInfo));
             return 0;
         }
@@ -287,7 +287,7 @@ export async function downloadFilesByIds(fileIds: number[]) {
 			},
 		)
 	} catch (error) {
-		console.error(t('memories', 'Failed to favorite {fileName}.', { fileName }), error)
+		console.error('Failed to favorite', fileName, error)
 		showError(t('memories', 'Failed to favorite {fileName}.', { fileName }))
 	}
 }
@@ -311,8 +311,8 @@ export async function downloadFilesByIds(fileIds: number[]) {
     try {
         fileInfos = await getFiles(fileIds.filter(f => f));
     } catch (e) {
+        console.error('Failed to get file info', fileIds, e);
         showError(t('memories', 'Failed to favorite files.'));
-        console.error('Failed to get file info for files to favorite', fileIds, e);
         return;
     }
 
@@ -323,7 +323,7 @@ export async function downloadFilesByIds(fileIds: number[]) {
             await favoriteFile(fileInfo.filename, favoriteState);
             return fileInfo.fileid as number;
         } catch (error) {
-            console.error(t('memories', 'Failed to favorite {fileName}.', fileInfo), error);
+            console.error('Failed to favorite', fileInfo, error);
             showError(t('memories', 'Failed to favorite {fileName}.', fileInfo));
             return 0;
         }
