@@ -4,7 +4,7 @@ od=`pwd`
 
 rm -rf /tmp/memories
 mkdir -p /tmp/memories
-cp -R appinfo css img js lib templates COPYING README.md exiftest* composer* /tmp/memories
+cp -R appinfo img js lib templates COPYING README.md exiftest* composer* /tmp/memories
 
 cd /tmp
 rm -f memories/appinfo/screencap* memories/js/*.map
