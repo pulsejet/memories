@@ -87,3 +87,9 @@ export default class App extends Mixins(GlobalMixin) {
     // Outer element
 }
 </script>
+
+<style>
+body {
+    overflow: hidden;
+}
+</style>
