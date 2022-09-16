@@ -151,6 +151,20 @@ export async function getFolderPreviewFileIds(folderPath: string, limit: number)
 }
 
 /**
+ * Run promises in parallel, but only n at a time
+ * @param promises Array of promise generator funnction (async functions)
+ * @param n Number of promises to run in parallel
+ */
+export async function* runInParallel<T>(promises: (() => Promise<T>)[], n: number) {
+    while (promises.length > 0) {
+        const promisesToRun = promises.splice(0, n);
+        const resultsForThisBatch = await Promise.all(promisesToRun.map(p => p()));
+        yield resultsForThisBatch;
+    }
+    return;
+}
+
+/**
  * Delete a single file
  *
  * @param path path to the file
@@ -166,12 +180,11 @@ export async function deleteFile(path: string) {
  * @param fileIds list of file ids
  * @returns list of file ids that were deleted
  */
-export async function deleteFilesByIds(fileIds: number[]) {
-    const delIds = new Set<number>();
+export async function* deleteFilesByIds(fileIds: number[]) {
     const fileIdsSet = new Set(fileIds);
 
     if (fileIds.length === 0) {
-        return delIds;
+        return;
     }
 
     // Get files data
@@ -180,31 +193,22 @@ export async function deleteFilesByIds(fileIds: number[]) {
         fileInfos = await getFiles(fileIds.filter(f => f));
     } catch (e) {
         console.error('Failed to get file info for files to delete', fileIds, e);
-        return delIds;
+        return;
     }
-
-    // Run all promises together
-    const promises: Promise<void>[] = [];
 
     // Delete each file
-    for (const fileInfo of fileInfos) {
-        if (!fileIdsSet.has(fileInfo.fileid)) {
-            continue
+    fileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid));
+    const calls = fileInfos.map((fileInfo) => async () => {
+        try {
+            await deleteFile(fileInfo.filename);
+            return fileInfo.fileid as number;
+        } catch {
+            console.error('Failed to delete', fileInfo.filename)
+            return 0;
         }
+    });
 
-        promises.push((async () => {
-            try {
-                await deleteFile(fileInfo.filename);
-                delIds.add(fileInfo.fileid);
-            } catch {
-                console.error('Failed to delete', fileInfo.filename)
-            }
-        })());
-    }
-
-    await Promise.allSettled(promises);
-
-    return delIds;
+    yield* runInParallel(calls, 10);
 }
 
 

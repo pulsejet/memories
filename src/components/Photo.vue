@@ -224,7 +224,7 @@ export default class Photo extends Mixins(GlobalMixin) {
     &.exit-left {
         transition: all 0.2s ease-in;
         transform: translateX(-20%);
-        opacity: 0.4;
+        opacity: 0.8;
     }
     &.enter-right {
         animation: enter-right 0.2s ease-out forwards;
@@ -232,7 +232,7 @@ export default class Photo extends Mixins(GlobalMixin) {
 }
 
 @keyframes enter-right {
-    from { transform: translateX(20%); opacity: 0.4; }
+    from { transform: translateX(20%); opacity: 0.8; }
     to { transform: translateX(0); opacity: 1; }
 }
 

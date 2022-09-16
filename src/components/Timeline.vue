@@ -870,14 +870,13 @@ export default class Timeline extends Mixins(GlobalMixin) {
     }
 
     /** Clear all selected photos */
-    clearSelection() {
+    clearSelection(only?: Set<IPhoto>) {
         const heads = new Set<IHeadRow>();
-        for (const photo of this.selection) {
+        new Set(only || this.selection).forEach((photo: IPhoto) => {
             photo.flag &= ~this.c.FLAG_SELECTED;
             heads.add(this.heads[photo.d.dayid]);
-        }
-
-        this.selection.clear();
+            this.selection.delete(photo);
+        });
         heads.forEach(this.updateHeadSelected);
         this.$forceUpdate();
     }
@@ -935,11 +934,12 @@ export default class Timeline extends Mixins(GlobalMixin) {
 
         this.loading = true;
         const list = [...this.selection];
-        const delIds = await dav.deleteFilesByIds(list.map(p => p.fileid));
+        for await (const delIds of dav.deleteFilesByIds(list.map(p => p.fileid))) {
+            const delIdsSet = new Set(delIds.filter(i => i));
+            const updatedDays = new Set(list.filter(f => delIdsSet.has(f.fileid)).map(f => f.d));
+            await this.deleteFromViewWithAnimation(delIdsSet, updatedDays);
+        }
         this.loading = false;
-
-        const updatedDays = new Set(list.filter(f => delIds.has(f.fileid)).map(f => f.d));
-        await this.deleteFromViewWithAnimation(delIds, updatedDays);
     }
 
     /**
@@ -959,12 +959,16 @@ export default class Timeline extends Mixins(GlobalMixin) {
             return;
         }
 
+        // Set of photos that are being deleted
+        const delPhotos = new Set<IPhoto>();
+
         // Animate the deletion
         for (const day of updatedDays) {
             for (const row of day.rows) {
                 for (const photo of row.photos) {
                     if (delIds.has(photo.fileid)) {
                         photo.flag |= this.c.FLAG_LEAVING;
+                        delPhotos.add(photo);
                     }
                 }
             }
@@ -973,8 +977,11 @@ export default class Timeline extends Mixins(GlobalMixin) {
         // wait for 200ms
         await new Promise(resolve => setTimeout(resolve, 200));
 
+        // clear selection at this point
+        this.clearSelection(delPhotos);
+
         // Speculate day reflow for animation
-        const exitedLeft = new Set();
+        const exitedLeft = new Set<IPhoto>();
         for (const day of updatedDays) {
             let nextExit = false;
             for (const row of day.rows) {
@@ -1004,9 +1011,6 @@ export default class Timeline extends Mixins(GlobalMixin) {
             photo.flag &= ~this.c.FLAG_EXIT_LEFT;
             photo.flag |= this.c.FLAG_ENTER_RIGHT;
         });
-
-        // clear selection at this point
-        this.clearSelection();
 
         // wait for 200ms
         await new Promise(resolve => setTimeout(resolve, 200));
