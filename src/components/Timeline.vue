@@ -606,7 +606,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
         // Compute timeline tick positions
         for (const tick of this.timelineTicks) {
-            tick.topC = Math.floor((tick.topS + tick.top * this.rowHeight) * this.timelineHeight / this.viewHeight);
+            tick.topC = (tick.topS + tick.top * this.rowHeight) * this.timelineHeight / this.viewHeight;
         }
 
         // Do another pass to figure out which timeline points are visible
