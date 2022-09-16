@@ -76,7 +76,7 @@
             <NcActions>
                 <NcActionButton
                     :aria-label="t('memories', 'Cancel selection')"
-                    @click="clearSelection"
+                    @click="clearSelection()"
                     class="icon-close">
                     {{ t('memories', 'Cancel') }}
                 </NcActionButton>
