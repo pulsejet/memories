@@ -35,7 +35,8 @@
                 <div class="photo" v-for="(photo, index) in item.photos" :key="index">
                     <Folder v-if="photo.flag & c.FLAG_IS_FOLDER"
                             :data="photo"
-                            :rowHeight="rowHeight" />
+                            :rowHeight="rowHeight"
+                            :key="photo.fileid" />
                     <Photo v-else
                             :data="photo"
                             :rowHeight="rowHeight"
@@ -1141,7 +1142,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
     .hover &, &.selected {
         > .select {
             display: flex;
-            opacity: 0.5;
+            opacity: 0.7;
         }
         > .name {
             margin-left: 25px;

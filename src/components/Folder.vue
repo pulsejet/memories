@@ -131,16 +131,19 @@ export default class Folder extends Mixins(GlobalMixin) {
     }
 
     .folder.hasPreview > & {
-        .folder-icon { opacity: 1; }
+        .folder-icon {
+            opacity: 1;
+            filter: invert(1) brightness(100);
+        }
         .name { color: white; }
     }
+    .folder:hover > & > .folder-icon { opacity: 0.8; }
     .folder.hasPreview:hover > & { opacity: 0; }
 
     > .folder-icon {
         cursor: pointer;
         height: 90%; width: 100%;
         opacity: 0.3;
-        filter: invert(1) brightness(100);
     }
 }
 
