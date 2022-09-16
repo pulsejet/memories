@@ -102,6 +102,14 @@
                     {{ t('memories', 'Delete') }}
                 </NcActionButton>
             </NcActions>
+            <NcActions>
+                <NcActionButton
+                    :aria-label="t('memories', 'Toggle Favorite')"
+                    @click="favoriteSelection"
+                    class="icon-favorite">
+                    {{ t('memories', 'Toggle Favorite') }}
+                </NcActionButton>
+            </NcActions>
         </div>
     </div>
 </template>
@@ -932,6 +940,38 @@ export default class Timeline extends Mixins(GlobalMixin) {
         }
         await dav.downloadFilesByIds(Array.from(this.selection.keys()));
     }
+
+    /**
+     * Check if all files selected currently are favorites
+     */
+    allSelectedFavorites() {
+        return Array.from(this.selection.values()).every(p => p.flag & this.c.FLAG_IS_FAVORITE);
+    }
+
+    /**
+     * Favorite the currently selected photos
+     */
+    async favoriteSelection() {
+        try {
+            const val = !this.allSelectedFavorites();
+            this.loading++;
+            for await (const favIds of dav.favoriteFilesByIds(Array.from(this.selection.keys()), val)) {
+                favIds.forEach(id => {
+                    const photo = this.selection.get(id);
+                    if (!photo) {
+                        return;
+                    }
+
+                    if (val) {
+                        photo.flag |= this.c.FLAG_IS_FAVORITE;
+                    } else {
+                        photo.flag &= ~this.c.FLAG_IS_FAVORITE;
+                    }
+                });
+            }
+        } finally {
+            this.loading--;
+        }
     }
 
     /**
