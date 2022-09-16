@@ -114,7 +114,7 @@
 
 <script lang="ts">
 import { Component, Watch, Mixins } from 'vue-property-decorator';
-import { IDay, IHeadRow, IPhoto, IRow, IRowType, ITick } from "../types";
+import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType, ITick } from "../types";
 import { generateUrl } from '@nextcloud/router'
 import { showError } from '@nextcloud/dialogs'
 import GlobalMixin from '../mixins/GlobalMixin';
@@ -425,7 +425,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
     }
 
     /** Get name of header */
-    getHeadName(head: IRow) {
+    getHeadName(head: IHeadRow) {
         // Check cache
         if (head.name) {
             return head.name;
@@ -675,30 +675,39 @@ export default class Timeline extends Mixins(GlobalMixin) {
         let prevMonth = 0;
         const thisYear = new Date().getFullYear();
 
+        // Get a new tick
+        const getTick = (day: IDay, text?: string | number): ITick => {
+            return {
+                dayId: day.dayid,
+                top: currTopRow,
+                topS: currTopStatic,
+                topC: 0,
+                text: text,
+            };
+        }
+
         // Itearte over days
         for (const day of this.days) {
             if (day.count === 0) {
                 continue;
             }
 
-            // Make date string
-            const dateTaken = utils.dayIdToDate(day.dayid);
+            if (Object.values(this.TagDayID).includes(day.dayid)) {
+                // Blank dash ticks only
+                this.timelineTicks.push(getTick(day));
+            } else {
+                // Make date string
+                const dateTaken = utils.dayIdToDate(day.dayid);
 
-            // Create tick if month changed
-            const dtYear = dateTaken.getUTCFullYear();
-            const dtMonth = dateTaken.getUTCMonth()
-            if (Number.isInteger(day.dayid) && (dtMonth !== prevMonth || dtYear !== prevYear)) {
-                // Create tick
-                this.timelineTicks.push({
-                    dayId: day.dayid,
-                    top: currTopRow,
-                    topS: currTopStatic,
-                    topC: 0,
-                    text: (dtYear === prevYear || dtYear === thisYear) ? undefined : dtYear,
-                });
+                // Create tick if month changed
+                const dtYear = dateTaken.getUTCFullYear();
+                const dtMonth = dateTaken.getUTCMonth()
+                if (Number.isInteger(day.dayid) && (dtMonth !== prevMonth || dtYear !== prevYear)) {
+                    this.timelineTicks.push(getTick(day, (dtYear === prevYear || dtYear === thisYear) ? undefined : dtYear));
+                }
+                prevMonth = dtMonth;
+                prevYear = dtYear;
             }
-            prevMonth = dtMonth;
-            prevYear = dtYear;
 
             currTopStatic += this.heads[day.dayid].size;
             currTopRow += day.rows.size;
@@ -836,7 +845,16 @@ export default class Timeline extends Mixins(GlobalMixin) {
             return;
         }
 
-        const date = utils.dayIdToDate(this.timelineTicks[idx].dayId);
+        // DayId of current hover
+        const dayId = this.timelineTicks[idx].dayId
+
+        // Special days
+        if (Object.values(this.TagDayID).includes(dayId)) {
+            this.timelineHoverCursorText = this.getHeadName(this.heads[dayId]);
+            return;
+        }
+
+        const date = utils.dayIdToDate(dayId);
         this.timelineHoverCursorText = `${utils.getMonthName(date)} ${date.getUTCFullYear()}`;
     }
 
