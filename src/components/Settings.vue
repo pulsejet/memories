@@ -42,6 +42,8 @@ input[type=text] {
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator';
 import GlobalMixin from '../mixins/GlobalMixin';
+
+import { showError } from '@nextcloud/dialogs'
 import UserConfig from '../mixins/UserConfig'
 
 @Component
@@ -51,7 +53,7 @@ export default class Settings extends Mixins(UserConfig, GlobalMixin) {
         if (res.status === 200) {
             window.location.reload();
         } else {
-            alert('Error updating settings');
+            showError('Error updating settings');
         }
     }
 }

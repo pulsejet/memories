@@ -39,9 +39,10 @@
 import { Component, Prop, Emit, Mixins } from 'vue-property-decorator';
 import { IDay, IPhoto } from "../types";
 
+import { showError } from '@nextcloud/dialogs'
+import { getPreviewUrl } from "../services/FileUtils";
 import * as dav from "../services/DavRequests";
 import errorsvg from "../assets/error.svg";
-import { getPreviewUrl } from "../services/FileUtils";
 import GlobalMixin from '../mixins/GlobalMixin';
 
 @Component({})
@@ -132,7 +133,7 @@ export default class Photo extends Mixins(GlobalMixin) {
         // Get this photo in the fileInfos
         const photo = fileInfos.find(d => Number(d.fileid) === Number(this.data.fileid));
         if (!photo) {
-            alert('Cannot find this photo anymore!');
+            showError('Cannot find this photo anymore!');
             return;
         }
 

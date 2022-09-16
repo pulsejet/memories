@@ -1,8 +1,12 @@
 import { getCurrentUser } from '@nextcloud/auth'
 import { generateUrl } from '@nextcloud/router'
+import { encodePath } from '@nextcloud/paths'
+import { showError } from '@nextcloud/dialogs'
+import { translate as t, translatePlural as n } from '@nextcloud/l10n'
 import { genFileInfo } from './FileUtils'
-import client from './DavClient';
 import { IFileInfo } from '../types';
+import axios from '@nextcloud/axios'
+import client from './DavClient';
 
 const props = `
     <oc:fileid />
@@ -192,6 +196,7 @@ export async function* deleteFilesByIds(fileIds: number[]) {
     try {
         fileInfos = await getFiles(fileIds.filter(f => f));
     } catch (e) {
+        showError(t('photos', 'Failed to delete files.'));
         console.error('Failed to get file info for files to delete', fileIds, e);
         return;
     }
@@ -202,8 +207,9 @@ export async function* deleteFilesByIds(fileIds: number[]) {
         try {
             await deleteFile(fileInfo.filename);
             return fileInfo.fileid as number;
-        } catch {
-            console.error('Failed to delete', fileInfo.filename)
+        } catch (error) {
+            console.error(t('photos', 'Failed to delete {fileName}.', fileInfo), error);
+            showError(t('photos', 'Failed to delete {fileName}.', fileInfo));
             return 0;
         }
     });
