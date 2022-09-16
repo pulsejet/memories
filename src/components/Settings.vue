@@ -24,8 +24,13 @@
     <div>
         <label for="timeline-path">{{ t('memories', 'Timeline Path') }}</label>
         <input id="timeline-path"
-            v-model="timelinePath"
+            v-model="config_timelinePath"
             type="text">
+
+        <NcCheckboxRadioSwitch :checked.sync="config_showHidden"
+            type="switch">
+            {{ t('memories', 'Show hidden folders') }}
+        </NcCheckboxRadioSwitch>
 
         <button @click="updateAll()">
             {{ t('memories', 'Update') }}
@@ -46,9 +51,16 @@ import GlobalMixin from '../mixins/GlobalMixin';
 import { showError } from '@nextcloud/dialogs'
 import UserConfig from '../mixins/UserConfig'
 
-@Component
+import { NcCheckboxRadioSwitch } from '@nextcloud/vue'
+
+@Component({
+    components: {
+        NcCheckboxRadioSwitch,
+    },
+})
 export default class Settings extends Mixins(UserConfig, GlobalMixin) {
     async updateAll() {
+        await this.updateSetting('showHidden');
         const res = await this.updateSetting('timelinePath');
         if (res.status === 200) {
             window.location.reload();

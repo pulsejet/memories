@@ -118,15 +118,14 @@ import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType, ITick } from "../types
 import { generateUrl } from '@nextcloud/router'
 import { showError } from '@nextcloud/dialogs'
 import GlobalMixin from '../mixins/GlobalMixin';
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+import { NcActions, NcActionButton, NcButton } from '@nextcloud/vue';
 
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
 import axios from '@nextcloud/axios'
 import Folder from "./Folder.vue";
 import Photo from "./Photo.vue";
+import UserConfig from "../mixins/UserConfig";
 
 import Star from 'vue-material-design-icons/Star.vue';
 import Download from 'vue-material-design-icons/Download.vue';
@@ -165,7 +164,7 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
         CheckCircle,
     }
 })
-export default class Timeline extends Mixins(GlobalMixin) {
+export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     /** Loading days response */
     private loading = 0;
     /** Main list of rows */
@@ -779,8 +778,18 @@ export default class Timeline extends Mixins(GlobalMixin) {
                 delete photo.isfolder;
             }
 
-            this.list[rowIdx].photos.push(photo);
+            // Move to next index of photo
             dataIdx++;
+
+            // Hidden folders
+            if (!this.config_showHidden &&
+                (photo.flag & this.c.FLAG_IS_FOLDER) &&
+                (<IFolder>photo).name.startsWith('.'))
+            {
+                continue;
+            }
+
+            this.list[rowIdx].photos.push(photo);
 
             // Add row to day
             head.day.rows.add(row);

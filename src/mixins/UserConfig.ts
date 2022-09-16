@@ -30,7 +30,8 @@ const eventName = 'memories:user-config-changed'
 
 @Component
 export default class UserConfig extends Vue {
-    timelinePath = loadState('memories', 'timelinePath') || '';
+    config_timelinePath = loadState('memories', 'timelinePath') || '';
+    config_showHidden = loadState('memories', 'showHidden') === "true";
 
     created() {
         subscribe(eventName, this.updateLocalSetting)
@@ -45,7 +46,7 @@ export default class UserConfig extends Vue {
     }
 
     async updateSetting(setting: string) {
-        const value = this[setting]
+        const value = this['config_' + setting]
         // Long time save setting
         const res = await axios.put(generateUrl('apps/memories/api/config/' + setting), {
             value: value.toString(),

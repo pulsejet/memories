@@ -12,6 +12,8 @@ use OCP\IConfig;
 use OCP\IUserSession;
 use OCP\Util;
 
+use OCA\Memories\AppInfo\Application;
+
 class PageController extends Controller {
     protected $userId;
     protected $appName;
@@ -53,9 +55,11 @@ class PageController extends Controller {
         $this->eventDispatcher->dispatchTyped(new LoadSidebar());
         $this->eventDispatcher->dispatchTyped(new LoadViewer());
 
-
-        $timelinePath = \OCA\Memories\Util::getPhotosPath($this->config, $user->getUid());
+        $uid = $user->getUid();
+        $timelinePath = \OCA\Memories\Util::getPhotosPath($this->config, $uid);
         $this->initialState->provideInitialState('timelinePath', $timelinePath);
+        $this->initialState->provideInitialState('showHidden',  $this->config->getUserValue(
+            $uid, Application::APPNAME, 'showHidden', false));
 
         $response = new TemplateResponse($this->appName, 'main');
         return $response;
