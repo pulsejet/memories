@@ -74,6 +74,7 @@ export type IHeadRow = IRow & {
 export enum IRowType {
     HEAD = 0,
     PHOTOS = 1,
+    FOLDERS = 2,
 }
 
 export type ITick = {

@@ -203,7 +203,7 @@ class ApiController extends Controller {
 
         // Map sub to JSON array
         $subdirArray = [
-            "dayid" => -0.1,
+            "dayid" => \OCA\Memories\Util::$TAG_DAYID_FOLDERS,
             "detail" => array_map(function ($node) {
                 return [
                     "fileid" => $node->getId(),

@@ -308,7 +308,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
         this.rowHeight = Math.floor(width / this.numCols);
 
         // Set heights of rows
-        this.list.filter(r => r.type === IRowType.PHOTOS).forEach(row => {
+        this.list.filter(r => r.type !== IRowType.HEAD).forEach(row => {
             row.size = this.rowHeight;
         });
         this.reflowTimeline(true);
@@ -432,8 +432,8 @@ export default class Timeline extends Mixins(GlobalMixin) {
         }
 
         // Special headers
-        if (head.dayId === -0.1) {
-            head.name = "Folders";
+        if (head.dayId === this.TagDayID.FOLDERS) {
+            head.name = this.t("memories", "Folders");
             return head.name;
         }
 
@@ -803,10 +803,15 @@ export default class Timeline extends Mixins(GlobalMixin) {
 
     /** Get a new blank photos row */
     getBlankRow(day: IDay): IRow {
+        let rowType = IRowType.PHOTOS;
+        if (day.dayid === this.TagDayID.FOLDERS) {
+            rowType = IRowType.FOLDERS;
+        }
+
         return {
             id: ++this.numRows,
             photos: [],
-            type: IRowType.PHOTOS,
+            type: rowType,
             size: this.rowHeight,
             dayId: day.dayid,
             day: day,
@@ -882,7 +887,7 @@ export default class Timeline extends Mixins(GlobalMixin) {
 
     /** Add a photo to selection list */
     selectPhoto(photo: IPhoto, val?: boolean, noUpdate?: boolean) {
-        if (photo.flag & this.c.FLAG_PLACEHOLDER) {
+        if (photo.flag & this.c.FLAG_PLACEHOLDER || photo.flag & this.c.FLAG_IS_FOLDER) {
             return; // ignore placeholders
         }
 

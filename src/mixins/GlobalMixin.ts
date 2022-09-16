@@ -19,4 +19,9 @@ export default class GlobalMixin extends Vue {
         FLAG_ENTER_RIGHT:   1 << 9,
         FLAG_FORCE_RELOAD:  1 << 10,
     }
+
+    public readonly TagDayID = {
+        START:          -(1 << 30),
+        FOLDERS:        -(1 << 30) + 1,
+    }
 }
