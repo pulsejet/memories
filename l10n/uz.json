@@ -1,0 +1,11 @@
+{ "translations": {
+    "Favorites" : "Favorites",
+    "Videos" : "Videos",
+    "Settings" : "Sozlamalar",
+    "Update" : "Update",
+    "Cancel" : "Cancel",
+    "Delete" : "Delete",
+    "Download" : "Download",
+    "Favorite" : "Favorite"
+},"pluralForm" :"nplurals=1; plural=0;"
+}

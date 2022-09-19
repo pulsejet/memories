@@ -1,0 +1,10 @@
+{ "translations": {
+    "Favorites" : "Halanýanlar",
+    "Videos" : "Wideo",
+    "Settings" : "Sazlamalar",
+    "Cancel" : "ýatyrmak",
+    "Delete" : "Pozmak",
+    "Download" : "Göçürip almak",
+    "Favorite" : "Halaýan"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

@@ -1,0 +1,13 @@
+{ "translations": {
+    "Timeline" : "Línia de temps",
+    "Folders" : "Carpetes",
+    "Favorites" : "Preferits",
+    "Videos" : "Vídeos",
+    "Settings" : "Paràmetres",
+    "Update" : "Actualitzar",
+    "Cancel" : "Cancel·la",
+    "Delete" : "Suprimeix",
+    "Download" : "Baixa",
+    "Favorite" : "Preferit"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

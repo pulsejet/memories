@@ -1,0 +1,11 @@
+{ "translations": {
+    "Favorites" : "Favorittar",
+    "Videos" : "Video",
+    "Settings" : "Innstillingar",
+    "Update" : "Oppdater",
+    "Cancel" : "Avbryt",
+    "Delete" : "Slett",
+    "Download" : "Last ned",
+    "Favorite" : "Favoritt"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

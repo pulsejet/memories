@@ -1,0 +1,12 @@
+{ "translations": {
+    "Folders" : "დირექტორიები",
+    "Favorites" : "რჩეულები",
+    "Videos" : "ვიდეოები",
+    "Settings" : "პარამეტრები",
+    "Update" : "განახლება",
+    "Cancel" : "უარყოფა",
+    "Delete" : "წაშლა",
+    "Download" : "ჩამოტვირთვა",
+    "Favorite" : "რჩეული"
+},"pluralForm" :"nplurals=2; plural=(n!=1);"
+}

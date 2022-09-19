@@ -1,0 +1,13 @@
+{ "translations": {
+    "Timeline" : "Tijdlijn",
+    "Folders" : "Mappen",
+    "Favorites" : "Favorieten",
+    "Videos" : "Videos",
+    "Settings" : "Instellingen",
+    "Update" : "Update",
+    "Cancel" : "Annuleren",
+    "Delete" : "Verwijder",
+    "Download" : "Download",
+    "Favorite" : "Favoriet"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

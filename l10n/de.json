@@ -1,0 +1,15 @@
+{ "translations": {
+    "Memories" : "Erinnerungen",
+    "Timeline" : "Verlauf",
+    "Folders" : "Ordner",
+    "Favorites" : "Favoriten",
+    "Videos" : "Videos",
+    "Settings" : "Einstellungen",
+    "Update" : "Aktualisieren",
+    "Cancel" : "Abbrechen",
+    "Delete" : "Löschen",
+    "Download" : "Herunterladen",
+    "Favorite" : "Favorit",
+    "{n} selected" : "{n} ausgewählt"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

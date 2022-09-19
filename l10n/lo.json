@@ -1,0 +1,10 @@
+{ "translations": {
+    "Favorites" : "ລາຍການທີ່ມັກ",
+    "Videos" : "ວິດີໂອ",
+    "Settings" : "ການຕັ້ງຄ່າ",
+    "Cancel" : "ຍົກເລີກ",
+    "Delete" : "ລຶບ",
+    "Download" : "ດາວໂຫລດ",
+    "Favorite" : "ລາຍການທີ່ມັກ"
+},"pluralForm" :"nplurals=1; plural=0;"
+}

@@ -1,0 +1,14 @@
+{ "translations": {
+    "Timeline" : "Idővonal",
+    "Folders" : "Mappák",
+    "Favorites" : "Kedvencek",
+    "Videos" : "Videók",
+    "Settings" : "Beállítások",
+    "Update" : "Frissítés",
+    "Cancel" : "Mégse",
+    "Delete" : "Törlés",
+    "Download" : "Letöltés",
+    "Favorite" : "Kedvenc",
+    "Failed to favorite {fileName}." : "A(z) {fileName} kedvencnek jelölése sikertelen."
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

@@ -1,0 +1,10 @@
+{ "translations": {
+    "Favorites" : "Favoriten",
+    "Settings" : "Astellungen",
+    "Update" : "Update",
+    "Cancel" : "Ofbriechen",
+    "Delete" : "Läschen",
+    "Download" : "Eroflueden",
+    "Favorite" : "Favorit"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

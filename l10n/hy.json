@@ -1,0 +1,9 @@
+{ "translations": {
+    "Favorites" : "Սիրվածներ",
+    "Settings" : "կարգավորումներ",
+    "Update" : "Թարմացնել",
+    "Cancel" : "ընդհատել",
+    "Delete" : "հեռացնել",
+    "Download" : "Ներբեռնել"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

@@ -1,0 +1,10 @@
+{ "translations": {
+    "Favorites" : "يىغقۇچ",
+    "Settings" : "تەڭشەكلەر",
+    "Update" : "يېڭىلا",
+    "Cancel" : "ۋاز كەچ",
+    "Delete" : "ئۆچۈر",
+    "Download" : "چۈشۈر",
+    "Favorite" : "يىغقۇچ"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}
