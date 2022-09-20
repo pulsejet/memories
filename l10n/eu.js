@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Memories" : "Memoriak",
     "Timeline" : "Denbora-lerroa",
     "Folders" : "Karpetak",
     "Favorites" : "Gogokoak",

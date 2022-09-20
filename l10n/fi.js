@@ -6,6 +6,8 @@ OC.L10N.register(
     "Favorites" : "Suosikit",
     "Videos" : "Videot",
     "Settings" : "Asetukset",
+    "Cannot find this photo anymore!" : "Kuvaa ei enää löydy!",
+    "Timeline Path" : "Aikajanan polku",
     "Update" : "Päivitä",
     "Cancel" : "Peruuta",
     "Delete" : "Poista",

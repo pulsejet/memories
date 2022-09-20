@@ -1,13 +1,28 @@
 { "translations": {
+    "Memories" : "Спогади",
+    "Yet another photo management app" : "Ще один додаток для керування фотографіями",
     "Timeline" : "Дії",
     "Folders" : "Теки",
     "Favorites" : "Вподобані",
     "Videos" : "Відео",
     "Settings" : "Налаштування",
+    "Cannot find this photo anymore!" : "Більше не можу знайти це фото!",
+    "Timeline Path" : "Шлях шкали часу",
+    "Show hidden folders" : "Показати приховані папки",
     "Update" : "Оновлення",
+    "Error updating settings" : "Помилка оновлення налаштувань",
     "Cancel" : "Скасувати",
     "Delete" : "Вилучити",
     "Download" : "Завантажити",
-    "Favorite" : "Вподобати"
+    "Favorite" : "Вподобати",
+    "No photos to show here" : "Тут немає фотографій для показу",
+    "Failed to load some photos" : "Не вдалося завантажити деякі фотографії",
+    "{n} selected" : "Вибрано {n}",
+    "You are about to download a large number of files. Are you sure?" : "Ви збираєтеся завантажити велику кількість файлів. Ти впевнений?",
+    "You are about to delete a large number of files. Are you sure?" : "Ви збираєтеся видалити велику кількість файлів. Ти впевнений?",
+    "Failed to delete files." : "Не вдалося видалити файли.",
+    "Failed to delete {fileName}." : "Не вдалося видалити {fileName}.",
+    "Failed to favorite {fileName}." : "Не вдалося додати {fileName} до вибраного.",
+    "Failed to favorite files." : "Не вдалося додати файли до вибраного."
 },"pluralForm" :"nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);"
 }

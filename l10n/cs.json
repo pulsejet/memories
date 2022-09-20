@@ -1,15 +1,27 @@
 { "translations": {
+    "Memories" : "Vzpomínky",
+    "Yet another photo management app" : "Další z aplikací pro správu fotek",
     "Timeline" : "Časová osa",
     "Folders" : "Složky",
     "Favorites" : "Oblíbené",
     "Videos" : "Videa",
     "Settings" : "Nastavení",
+    "Cannot find this photo anymore!" : "Tuto fotku už se nedaří nalézt!",
+    "Show hidden folders" : "Zobrazit skryté složky",
     "Update" : "Aktualizovat",
+    "Error updating settings" : "Chyba při aktualizaci nastavení",
     "Cancel" : "Storno",
     "Delete" : "Smazat",
     "Download" : "Stáhnout",
     "Favorite" : "Přidat do oblíbených",
+    "No photos to show here" : "Žádné fotky, které zde zobrazit",
+    "Failed to load some photos" : "Některé fotky se nepodařilo načíst",
+    "{n} selected" : "{n} označeno",
+    "You are about to download a large number of files. Are you sure?" : "Chystáte se stahovat si velký počet souborů. Opravdu to chcete?",
+    "You are about to delete a large number of files. Are you sure?" : "Chystáte se smazat velké množství souborů. Opravdu to chcete?",
+    "Failed to delete files." : "Nepodařilo se smazat soubory.",
     "Failed to delete {fileName}." : "Nepodařilo se smazat {fileName}.",
-    "Failed to favorite {fileName}." : "Nepodařilo se přidat {fileName} do oblíbených."
+    "Failed to favorite {fileName}." : "Nepodařilo se přidat {fileName} do oblíbených.",
+    "Failed to favorite files." : "Nepodařilo se přidat soubory mezi oblíbené."
 },"pluralForm" :"nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;"
 }

@@ -12,6 +12,8 @@ OC.L10N.register(
     "Delete" : "Löschen",
     "Download" : "Herunterladen",
     "Favorite" : "Favorit",
-    "{n} selected" : "{n} ausgewählt"
+    "{n} selected" : "{n} ausgewählt",
+    "You are about to download a large number of files. Are you sure?" : "Du bist dabei, eine große Anzahl von Dateien herunterzuladen. Bist du dir sicher?",
+    "You are about to delete a large number of files. Are you sure?" : "Du bist dabei, eine große Anzahl von Dateien zu löschen. Bist du dir sicher?"
 },
 "nplurals=2; plural=(n != 1);");
