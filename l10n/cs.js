@@ -9,6 +9,7 @@ OC.L10N.register(
     "Videos" : "Videa",
     "Settings" : "Nastavení",
     "Cannot find this photo anymore!" : "Tuto fotku už se nedaří nalézt!",
+    "Timeline Path" : "Popis umístění časové osy",
     "Show hidden folders" : "Zobrazit skryté složky",
     "Update" : "Aktualizovat",
     "Error updating settings" : "Chyba při aktualizaci nastavení",

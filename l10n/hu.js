@@ -10,6 +10,7 @@ OC.L10N.register(
     "Videos" : "Videók",
     "Settings" : "Beállítások",
     "Cannot find this photo anymore!" : "Ez a fénykép már nem található!",
+    "Timeline Path" : "Idővonal elérési út",
     "Show hidden folders" : "Rejtett mappák mutatása",
     "Update" : "Frissítés",
     "Error updating settings" : "Hiba a beállítások mentése közben",
