@@ -20,7 +20,6 @@ OC.L10N.register(
     "Favorite" : "Favorisieren",
     "No photos to show here" : "Keine Fotos zum Anzeigen vorhanden",
     "Failed to load some photos" : "Laden einiger Fotos fehlgeschlagen",
-    "{n} selected" : "{n} ausgewählt",
     "You are about to download a large number of files. Are you sure?" : "Sie sind dabei, eine große Anzahl an Dateien herunterzuladen. Sind Sie sich sicher?",
     "You are about to delete a large number of files. Are you sure?" : "Sie sind dabei, eine große Anzahl an Dateien zu löschen. Sind Sie sich sicher?",
     "Failed to delete files." : "Löschen der Dateien fehlgeschlagen.",

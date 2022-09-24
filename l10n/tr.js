@@ -20,7 +20,6 @@ OC.L10N.register(
     "Favorite" : "Sık kullanılanlara ekle",
     "No photos to show here" : "Burada görüntülenecek bir fotoğraf yok",
     "Failed to load some photos" : "Bazı fotoğraflar yüklenemedi",
-    "{n} selected" : "{n} seçilmiş",
     "You are about to download a large number of files. Are you sure?" : "Çok sayıda dosyayı indirmek üzeresiniz. Bunu yapmak istediğinize emin misiniz?",
     "You are about to delete a large number of files. Are you sure?" : "Çok sayıda dosyayı silmek üzeresiniz. Bunu yapmak istediğinize emin misiniz?",
     "Failed to delete files." : "Dosyalar silinemedi.",

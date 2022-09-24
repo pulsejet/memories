@@ -19,7 +19,6 @@ OC.L10N.register(
     "Favorite" : "Suosikki",
     "No photos to show here" : "Ei kuvia täällä",
     "Failed to load some photos" : "Joidenkin kuvien lataus epäonnistui",
-    "{n} selected" : "{n} valittu",
     "You are about to download a large number of files. Are you sure?" : "Olet lataamassa suurta määrää tiedostoja. Oletko varma?",
     "You are about to delete a large number of files. Are you sure?" : "Olet poistamassa suurta määrää tiedostoja. Oletko varma?",
     "Failed to delete files." : "Tiedostojen poisto epäonnistui.",

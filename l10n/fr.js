@@ -1,7 +1,8 @@
 OC.L10N.register(
     "memories",
     {
-    "Yet another photo management app" : "Encore une autre application de gestion des photos",
+    "Memories" : "Souvenirs",
+    "Yet another photo management app" : "Une nouvelle application de gestion des photos",
     "Timeline" : "Ligne du temps",
     "Folders" : "Dossiers",
     "Favorites" : "Favoris",
@@ -18,7 +19,6 @@ OC.L10N.register(
     "Favorite" : "Favoris",
     "No photos to show here" : "Aucune photo à montrer ici",
     "Failed to load some photos" : "Échec du chargement de certaines photos",
-    "{n} selected" : "{n} sélectionné⋅s",
     "You are about to download a large number of files. Are you sure?" : "Vous êtes sur le point de télécharger un grand nombre de fichiers. Êtes-vous certain de vouloir le faire ?",
     "You are about to delete a large number of files. Are you sure?" : "Vous êtes sur le point de supprimer un grand nombre de fichiers. Êtes-vous certain⋅e de vouloir le faire ?",
     "Failed to delete files." : "Échec de la suppression des fichiers.",

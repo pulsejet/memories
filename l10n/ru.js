@@ -19,7 +19,6 @@ OC.L10N.register(
     "Favorite" : "В избранное",
     "No photos to show here" : "Нет ни одной фотографии для просмотра",
     "Failed to load some photos" : "Не удалось загрузить некоторые фотографии",
-    "{n} selected" : "Выбрано файлов: {n}",
     "You are about to download a large number of files. Are you sure?" : "Подтвердите скачивание большого количества файлов.",
     "You are about to delete a large number of files. Are you sure?" : "Подтвердите удаление большого количества файлов.",
     "Failed to delete files." : "Ошибка удаления файлов.",

@@ -20,7 +20,6 @@ OC.L10N.register(
     "Favorite" : "Favorit",
     "No photos to show here" : "Det finns inga bilder här",
     "Failed to load some photos" : "Misslyckades att läsa in vissa foton",
-    "{n} selected" : "{n} valda",
     "You are about to download a large number of files. Are you sure?" : "Du kommer att ladda ner en stor mängd filer. Är du säker?",
     "You are about to delete a large number of files. Are you sure?" : "Du kommer att ta bort ett stort antal filer. Är du säker?",
     "Failed to delete files." : "Misslyckades att radera filer.",

@@ -1,16 +1,30 @@
 OC.L10N.register(
     "memories",
     {
+    "Memories" : "Memórias",
+    "Yet another photo management app" : "Mais um aplicativo de gerenciamento de fotos",
+    "# Memories\n\n* **📸 Photo and Video Timeline**: Sorts photos by date taken, parsed from Exif data.\n* **🤔 Quick Recap**: Jump to anywhere in the timeline instantly.\n* **🖼️ Folders**: Browse your and shared folders with a similar, efficient timeline.\n* **🎦 Slideshow**: View photos from your timeline and folders easily.\n* **📱 Mobile Support**: Relive your memories on devices of any shape and size through the web app.\n* **🗑️ Recycle**: Select and delete multiple photos and videos at once.\n* **⚡️ Fast**: Memories is extremely fast. Period.\n\n## 🚀 Installation\n\n1. Install the app from the Nextcloud app store\n1. ⚒️ Install `exiftool` (see below).\n1. Run `php ./occ memories:index` to generate metadata indices for existing photos.\n1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos. Photos from this directory will be displayed in the timeline, including any photos in nested subdirectories.\n1. Installing the [preview generator](https://github.com/rullzer/previewgenerator) for pre-generating thumbnails is strongly recommended.\n\n## 🔨 Installing Dependencies\nThe exact steps depend on your Nextcloud platform. If you use Docker for your Nextcloud instance, you can install Exiftool by using a custom docker image.\n- **Ubuntu/Debian**: `sudo apt install libimage-exiftool-perl`\n- **Fedora**: `sudo dnf install perl-Image-ExifTool`\n- **Arch Linux**: `sudo pacman -S perl-image-exiftool`\n- **Alpine**: `apk add --no-cache exiftool`\n- **MacOS**: `brew install exiftool`\n- **FreeBSD**: `sudo pkg install p5-Image-ExifTool`" : "# Memórias\n\n* **📸 Linha do tempo de fotos e vídeos**: classifica as fotos por data em que foram tiradas, analisadas a partir de dados Exif.\n* **🤔 Recapitulação Rápida**: Pule para qualquer lugar na linha do tempo instantaneamente.\n* **🖼️ Pastas**: navegue em suas pastas e pastas compartilhadas com uma linha do tempo semelhante e eficiente.\n* **🎦 Apresentação de slides**: Visualize fotos de sua linha do tempo e pastas facilmente.\n* **📱 Suporte móvel**: reviva suas memórias em dispositivos de qualquer formato e tamanho por meio do aplicativo da web.\n* **🗑️ Reciclar**: selecione e exclua várias fotos e vídeos de uma só vez.\n* **⚡️ Rápido**: As memórias são extremamente rápidas. Período.\n## 🚀 Instalação\n\n1. Instale o aplicativo da loja de aplicativos Nextcloud\n1. ⚒️ Instale o `exiftool` (veja abaixo).\n1. Execute `php ./occ memory:index` para gerar índices de metadados para fotos existentes.\n1. Abra as 📷 Memórias no Nextcloud e defina o diretório que contém suas fotos. As fotos deste diretório serão exibidas na linha do tempo, incluindo todas as fotos em subdiretórios aninhados.\n1. A instalação do [gerador de visualização](https://github.com/rullzer/previewgenerator) para pré-gerar miniaturas é fortemente recomendada.\n\n## 🔨 Instalando Dependências\nAs etapas exatas dependem da sua plataforma Nextcloud. Se você usar o Docker para sua instância do Nextcloud, poderá instalar o Exiftool usando uma imagem do docker personalizada.\n- **Ubuntu/Debian**: `sudo apt install libimage-exiftool-perl`\n- **Fedora**: `sudo dnf install perl-Image-ExifTool`\n- **Arch Linux**: `sudo pacman -S perl-image-exiftool`\n- **Alpine**: `apk add --no-cache exiftool`\n- **MacOS**: `brew install exiftool`\n- **FreeBSD**: `sudo pkg install p5-Image-ExifTool`",
     "Timeline" : "Linha do tempo",
     "Folders" : "Pastas",
     "Favorites" : "Favoritos",
     "Videos" : "Vídeos",
     "Settings" : "Configurações",
+    "Cannot find this photo anymore!" : "Não é mais possível encontrar esta foto!",
+    "Timeline Path" : "Caminho da linha do tempo",
+    "Show hidden folders" : "Mostrar pastas ocultas",
     "Update" : "Atualizar",
+    "Error updating settings" : "Erro ao atualizar as configurações",
     "Cancel" : "Cancelar",
     "Delete" : "Excluir",
     "Download" : "Baixar",
     "Favorite" : "Favorito",
-    "Failed to favorite {fileName}." : "Falha ao favoritar {fileName}"
+    "No photos to show here" : "Não há fotos para mostrar aqui",
+    "Failed to load some photos" : "Falha ao carregar algumas fotos",
+    "You are about to download a large number of files. Are you sure?" : "Você está prestes a baixar um grande número de arquivos. Tem certeza?",
+    "You are about to delete a large number of files. Are you sure?" : "Você está prestes a excluir um grande número de arquivos. Tem certeza?",
+    "Failed to delete files." : "Falha ao excluir arquivos.",
+    "Failed to delete {fileName}." : "Falha ao excluir {fileName}.",
+    "Failed to favorite {fileName}." : "Falha ao favoritar {fileName}",
+    "Failed to favorite files." : "Falha nos arquivos favoritos."
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

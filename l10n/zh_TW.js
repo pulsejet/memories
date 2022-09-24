@@ -20,7 +20,6 @@ OC.L10N.register(
     "Favorite" : "收藏",
     "No photos to show here" : "此處沒有可顯示的照片",
     "Failed to load some photos" : "載入部份照片時失敗",
-    "{n} selected" : "已選取 {n} 個",
     "You are about to download a large number of files. Are you sure?" : "您將要下載大量檔案。您確定嗎？",
     "You are about to delete a large number of files. Are you sure?" : "您將要刪除大量檔案。您確定嗎？",
     "Failed to delete files." : "刪除檔案失敗",
