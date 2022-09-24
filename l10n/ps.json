@@ -1,0 +1,9 @@
+{ "translations": {
+    "Favorites" : "په نښه شوي",
+    "Settings" : "سمونې",
+    "Cancel" : "پرېښول",
+    "Delete" : "ړنګول",
+    "Download" : "ښکته کول",
+    "Favorite" : "په نښه شوی"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

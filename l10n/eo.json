@@ -1,0 +1,13 @@
+{ "translations": {
+    "Timeline" : "Kronologio",
+    "Folders" : "Dosierujoj",
+    "Favorites" : "Plej ŝatataj",
+    "Videos" : "Videaĵoj",
+    "Settings" : "Agordoj",
+    "Update" : "Ĝisdatigi",
+    "Cancel" : "Nuligi",
+    "Delete" : "Forigi",
+    "Download" : "Elŝuti",
+    "Favorite" : "Pliŝatati"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

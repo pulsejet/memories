@@ -1,0 +1,13 @@
+{ "translations": {
+    "Timeline" : "Χρονολόγιο",
+    "Folders" : "Φάκελοι",
+    "Favorites" : "Αγαπημένα",
+    "Videos" : "Βίντεο",
+    "Settings" : "Ρυθμίσεις",
+    "Update" : "Ενημέρωση",
+    "Cancel" : "Ακύρωση",
+    "Delete" : "Διαγραφή",
+    "Download" : "Λήψη",
+    "Favorite" : "Αγαπημένο"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

@@ -1,0 +1,9 @@
+{ "translations": {
+    "Favorites" : "Favorites",
+    "Settings" : "Tetapan",
+    "Update" : "Kemaskini",
+    "Cancel" : "Batal",
+    "Delete" : "Padam",
+    "Download" : "Muat turun"
+},"pluralForm" :"nplurals=1; plural=0;"
+}

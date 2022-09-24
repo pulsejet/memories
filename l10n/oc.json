@@ -1,0 +1,11 @@
+{ "translations": {
+    "Folders" : "Repertòris",
+    "Favorites" : "Favorits",
+    "Settings" : "Paramètres",
+    "Update" : "Actualizar",
+    "Cancel" : "Anullar",
+    "Delete" : "Suprimir",
+    "Download" : "Telecargar",
+    "Favorite" : "Favorit"
+},"pluralForm" :"nplurals=2; plural=(n > 1);"
+}

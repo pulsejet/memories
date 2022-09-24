@@ -1,0 +1,13 @@
+{ "translations": {
+    "Folders" : "Folders",
+    "Favorites" : "Favourites",
+    "Videos" : "Videos",
+    "Settings" : "Settings",
+    "Cannot find this photo anymore!" : "Cannot find this photo any more!",
+    "Update" : "Update",
+    "Cancel" : "Cancel",
+    "Delete" : "Delete",
+    "Download" : "Download",
+    "Favorite" : "Favourite"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

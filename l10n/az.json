@@ -1,0 +1,10 @@
+{ "translations": {
+    "Favorites" : "Sevimlilər",
+    "Settings" : "Quraşdırmalar",
+    "Update" : "Yenilənmə",
+    "Cancel" : "Dayandır",
+    "Delete" : "Sil",
+    "Download" : "Yüklə",
+    "Favorite" : "İstəkli"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

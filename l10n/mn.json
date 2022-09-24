@@ -1,0 +1,12 @@
+{ "translations": {
+    "Folders" : "Хавтсууд",
+    "Favorites" : "Онцолсон",
+    "Videos" : "Бичлэгүүд",
+    "Settings" : "Тохиргоо",
+    "Update" : "Шинэчлэх",
+    "Cancel" : "болиулах",
+    "Delete" : "Устгах",
+    "Download" : "Татах",
+    "Favorite" : "Дуртай"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

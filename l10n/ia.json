@@ -1,0 +1,10 @@
+{ "translations": {
+    "Favorites" : "Favoritos",
+    "Settings" : "Configurationes",
+    "Update" : "Actualisation",
+    "Cancel" : "Cancellar",
+    "Delete" : "Deler",
+    "Download" : "Discargar",
+    "Favorite" : "Favorite"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}
