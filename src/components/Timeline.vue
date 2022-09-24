@@ -83,7 +83,7 @@
             </NcActions>
 
             <div class="text">
-                {{ t("memories", "{n} selected", { n: selection.size }) }}
+                {{ n("memories", "{n} selected", "{n} selected", selection.size, { n: selection.size }) }}
             </div>
 
             <NcActions>
