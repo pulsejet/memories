@@ -1121,6 +1121,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     width: 100%;
     overflow: hidden;
     user-select: none;
+
+    * {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+    }
 }
 
 .recycler {
