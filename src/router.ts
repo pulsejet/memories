@@ -56,7 +56,7 @@
          },
 
          {
-            path: '/folders/:id*',
+            path: '/folders/:path*',
             component: Timeline,
             name: 'folders',
             props: route => ({

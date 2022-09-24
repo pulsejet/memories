@@ -29,6 +29,7 @@ use OC\Files\Search\SearchComparison;
 use OC\Files\Search\SearchQuery;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Exif;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
@@ -38,6 +39,7 @@ use OCP\IDBConnection;
 use OCP\IRequest;
 use OCP\IUserSession;
 use OCP\Files\FileInfo;
+use OCP\Files\Folder;
 use OCP\Files\Search\ISearchComparison;
 
 class ApiController extends Controller {
@@ -83,15 +85,16 @@ class ApiController extends Controller {
     }
 
     /** Preload a few "day" at the start of "days" response */
-    private function preloadDays(array &$days) {
+    private function preloadDays(array &$days, Folder &$folder, bool $recursive) {
         $uid = $this->userSession->getUser()->getUID();
         $transforms = $this->getTransformations();
         $preloaded = 0;
         foreach ($days as &$day) {
             $day["detail"] = $this->timelineQuery->getDay(
-                $this->config,
+                $folder,
                 $uid,
                 $day["dayid"],
+                $recursive,
                 $transforms,
             );
             $day["count"] = count($day["detail"]); // make sure count is accurate
@@ -101,6 +104,30 @@ class ApiController extends Controller {
                 break;
             }
         }
+    }
+
+    /** Get the Folder object relevant to the request */
+    private function getRequestFolder() {
+        $uid = $this->userSession->getUser()->getUID();
+        try {
+            $folder = null;
+            $folderPath = $this->request->getParam('folder');
+            $userFolder = $this->rootFolder->getUserFolder($uid);
+
+            if (!is_null($folderPath)) {
+                $folder = $userFolder->get($folderPath);
+            } else {
+                $configPath = Exif::removeExtraSlash(Exif::getPhotosPath($this->config, $uid));
+                $folder = $userFolder->get($configPath);
+            }
+
+            if (!$folder instanceof Folder) {
+                throw new \Exception("Folder not found");
+            }
+        } catch (\Exception $e) {
+            return null;
+        }
+        return $folder;
     }
 
     /**
@@ -113,13 +140,31 @@ class ApiController extends Controller {
         if (is_null($user)) {
             return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
         }
+        $uid = $user->getUID();
 
+        // Get the folder to show
+        $folder = $this->getRequestFolder();
+        $recursive = is_null($this->request->getParam('folder'));
+        if (is_null($folder)) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
+
+        // Run actual query
         $list = $this->timelineQuery->getDays(
-            $this->config,
-            $user->getUID(),
+            $folder,
+            $uid,
+            $recursive,
             $this->getTransformations(),
         );
-        $this->preloadDays($list);
+
+        // Preload some day responses
+        $this->preloadDays($list, $folder, $recursive);
+
+        // Add subfolder info if querying non-recursively
+        if (!$recursive) {
+            $this->addSubfolders($folder, $list, $user);
+        }
+
         return new JSONResponse($list, Http::STATUS_OK);
     }
 
@@ -130,70 +175,39 @@ class ApiController extends Controller {
      */
     public function day(string $id): JSONResponse {
         $user = $this->userSession->getUser();
-        if (is_null($user) || !is_numeric($id)) {
+        if (is_null($user)) {
             return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
         }
+        $uid = $user->getUID();
 
+        // Get the folder to show
+        $folder = $this->getRequestFolder();
+        $recursive = is_null($this->request->getParam('folder'));
+        if (is_null($folder)) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
+
+        // Run actual query
         $list = $this->timelineQuery->getDay(
-            $this->config,
-            $user->getUID(),
+            $folder,
+            $uid,
             intval($id),
+            $recursive,
             $this->getTransformations(),
         );
         return new JSONResponse($list, Http::STATUS_OK);
     }
 
     /**
-     * Check if folder is allowed and get it if yes
-     */
-    private function getAllowedFolder(int $folder, $user) {
-        // Get root if folder not specified
-        $root = $this->rootFolder->getUserFolder($user->getUID());
-        if ($folder === 0) {
-            $folder = $root->getId();
-        }
-
-        // Check access to folder
-        $nodes = $root->getById($folder);
-        if (empty($nodes)) {
-            return NULL;
-        }
-
-        // Check it is a folder
-        $node = $nodes[0];
-        if (!$node instanceof \OCP\Files\Folder) {
-            return NULL;
-        }
-
-        return $node;
-    }
-
-    /**
      * @NoAdminRequired
-     *
-     * @return JSONResponse
      */
-    public function folder(string $folder): JSONResponse {
-        $user = $this->userSession->getUser();
-        if (is_null($user) || !is_numeric($folder)) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
-        }
-
-        // Check permissions
-        $node = $this->getAllowedFolder(intval($folder), $user);
-        if (is_null($node)) {
-            return new JSONResponse([], Http::STATUS_FORBIDDEN);
-        }
-
-        // Get response from db
-        $list = $this->timelineQuery->getDaysFolder($node->getId());
-
+    public function addSubfolders(Folder &$folder, &$list, &$user) {
         // Get subdirectories
-        $sub = $node->search(new SearchQuery(
+        $sub = $folder->search(new SearchQuery(
             new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'mimetype', FileInfo::MIMETYPE_FOLDER),
             0, 0, [], $user));
-        $sub = array_filter($sub, function ($item) use ($node) {
-            return $item->getParent()->getId() === $node->getId();
+        $sub = array_filter($sub, function ($item) use (&$folder) {
+            return $item->getParent()->getId() === $folder->getId();
         });
 
         // Sort by name
@@ -204,7 +218,7 @@ class ApiController extends Controller {
         // Map sub to JSON array
         $subdirArray = [
             "dayid" => \OCA\Memories\Util::$TAG_DAYID_FOLDERS,
-            "detail" => array_map(function ($node) {
+            "detail" => array_map(function (&$node) {
                 return [
                     "fileid" => $node->getId(),
                     "name" => $node->getName(),
@@ -215,28 +229,6 @@ class ApiController extends Controller {
         ];
         $subdirArray["count"] = count($subdirArray["detail"]);
         array_unshift($list, $subdirArray);
-
-        return new JSONResponse($list, Http::STATUS_OK);
-    }
-
-    /**
-     * @NoAdminRequired
-     *
-     * @return JSONResponse
-     */
-    public function folderDay(string $folder, string $dayId): JSONResponse {
-        $user = $this->userSession->getUser();
-        if (is_null($user) || !is_numeric($folder) || !is_numeric($dayId)) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
-        }
-
-        $node = $this->getAllowedFolder(intval($folder), $user);
-        if ($node === NULL) {
-            return new JSONResponse([], Http::STATUS_FORBIDDEN);
-        }
-
-        $list = $this->timelineQuery->getDayFolder($user->getUID(), $node->getId(), intval($dayId));
-        return new JSONResponse($list, Http::STATUS_OK);
     }
 
     /**

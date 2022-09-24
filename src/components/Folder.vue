@@ -3,7 +3,7 @@
         hasPreview: previewFileInfos.length > 0,
         onePreview: previewFileInfos.length === 1,
     }"
-        @click="openFolder(data.fileid)"
+        @click="openFolder(data)"
         v-bind:style="{
             width: rowHeight + 'px',
             height: rowHeight + 'px',
@@ -88,9 +88,9 @@ export default class Folder extends Mixins(GlobalMixin) {
     }
 
     /** Open folder */
-    openFolder(id: number) {
+    openFolder(folder: IFolder) {
         this.$router.push({ name: 'folders', params: {
-            id: id.toString(),
+            path: folder.path.split('/').slice(3).join('/'),
         }});
     }
 }

@@ -7,7 +7,6 @@ use OCP\IDBConnection;
 
 class TimelineQuery {
     use TimelineQueryDays;
-    use TimelineQueryDay;
     use TimelineQueryFilters;
 
     protected IDBConnection $connection;

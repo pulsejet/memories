@@ -141,9 +141,6 @@ const MIN_COLS = 3;                     // Min number of columns (on phone, e.g.
 const API_ROUTES = {
     DAYS: 'days',
     DAY: 'days/{dayId}',
-
-    FOLDER_DAYS: 'folder/{folderId}',
-    FOLDER_DAY: 'folder/{folderId}/{dayId}',
 };
 for (const [key, value] of Object.entries(API_ROUTES)) {
     API_ROUTES[key] = '/apps/memories/api/' + value;
@@ -415,6 +412,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             query.set('vid', '1');
         }
 
+        // Folder
+        if (this.$route.name === 'folders') {
+            query.set('folder', this.$route.params.path || '/');
+        }
+
         // Create query string and append to URL
         const queryStr = query.toString();
         if (queryStr) {
@@ -451,11 +453,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     async fetchDays() {
         let url = API_ROUTES.DAYS;
         let params: any = {};
-
-        if (this.$route.name === 'folders') {
-            url = API_ROUTES.FOLDER_DAYS;
-            params.folderId = this.$route.params.id || 0;
-        }
 
         try {
             this.loading++;
@@ -554,11 +551,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     async fetchDay(dayId: number) {
         let url = API_ROUTES.DAY;
         const params: any = { dayId };
-
-        if (this.$route.name === 'folders') {
-            url = API_ROUTES.FOLDER_DAY;
-            params.folderId = this.$route.params.id || 0;
-        }
 
         // Do this in advance to prevent duplicate requests
         this.loadedDays.add(dayId);
