@@ -212,10 +212,10 @@ class Index extends Command {
 
         $uid = $user->getUID();
         $userFolder = $this->rootFolder->getUserFolder($uid);
-        $this->parseFolder($userFolder, $refresh, $uid);
+        $this->parseFolder($userFolder, $refresh);
     }
 
-    private function parseFolder(Folder &$folder, bool &$refresh, string $uid): void {
+    private function parseFolder(Folder &$folder, bool &$refresh): void {
         try {
             $folderPath = $folder->getPath();
 
@@ -231,9 +231,9 @@ class Index extends Command {
 
             foreach ($nodes as &$node) {
                 if ($node instanceof Folder) {
-                    $this->parseFolder($node, $refresh, $uid);
+                    $this->parseFolder($node, $refresh);
                 } elseif ($node instanceof File) {
-                    $this->parseFile($node, $refresh, $uid);
+                    $this->parseFile($node, $refresh);
                 }
             }
         } catch (StorageNotAvailableException $e) {
@@ -244,8 +244,8 @@ class Index extends Command {
         }
     }
 
-    private function parseFile(File &$file, bool &$refresh, string $uid): void {
-        $res = $this->timelineWrite->processFile($file, $refresh, $uid);
+    private function parseFile(File &$file, bool &$refresh): void {
+        $res = $this->timelineWrite->processFile($file, $refresh);
         if ($res === 2) {
             $this->nProcessed++;
         } else if ($res === 1) {

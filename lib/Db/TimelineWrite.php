@@ -38,8 +38,7 @@ class TimelineWrite {
      */
     public function processFile(
         File &$file,
-        bool $force=false,
-        string $fallbackUid=null
+        bool $force=false
     ): int {
         // There is no easy way to UPSERT in a standard SQL way, so just
         // do multiple calls. The worst that can happen is more updates,
@@ -57,24 +56,11 @@ class TimelineWrite {
         $mtime = $file->getMtime();
         $fileId = $file->getId();
 
-        $uid = $file->getOwner()->getUID();
-        if (empty($uid)) {
-            // Most likely this is an extrnal mount (that may be shared between users)
-            $uid = $fallbackUid;
-        }
-        if (empty($uid)) {
-            return 0;
-        }
-
         // Check if need to update
         $query = $this->connection->getQueryBuilder();
         $query->select('fileid', 'mtime')
             ->from('memories')
-            ->where(
-                $query->expr()->andX(
-                    $query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)),
-                    $query->expr()->eq('uid', $query->createNamedParameter($uid, IQueryBuilder::PARAM_STR)),
-                ));
+            ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)));
         $prevRow = $query->executeQuery()->fetch();
         if ($prevRow && !$force && intval($prevRow['mtime']) === $mtime) {
             return 1;
@@ -98,11 +84,7 @@ class TimelineWrite {
                 ->set('datetaken', $query->createNamedParameter($dateTaken, IQueryBuilder::PARAM_STR))
                 ->set('mtime', $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT))
                 ->set('isvideo', $query->createNamedParameter($isvideo, IQueryBuilder::PARAM_INT))
-                ->where(
-                    $query->expr()->andX(
-                        $query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)),
-                        $query->expr()->eq('uid', $query->createNamedParameter($uid, IQueryBuilder::PARAM_STR)),
-                    ));
+                ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)));
             $query->executeStatement();
         } else {
             // Try to create new row
@@ -110,7 +92,6 @@ class TimelineWrite {
                 $query->insert('memories')
                     ->values([
                         'fileid' => $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT),
-                        'uid' => $query->createNamedParameter($uid, IQueryBuilder::PARAM_STR),
                         'dayid' => $query->createNamedParameter($dayId, IQueryBuilder::PARAM_INT),
                         'datetaken' => $query->createNamedParameter($dateTaken, IQueryBuilder::PARAM_STR),
                         'mtime' => $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT),
