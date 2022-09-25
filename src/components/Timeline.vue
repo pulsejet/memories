@@ -111,6 +111,25 @@
                     {{ t('memories', 'Favorite') }}
                     <template #icon> <Star :size="20" /> </template>
                 </NcActionButton>
+
+                <template>
+                    <NcActionButton
+                        v-if="!routeIsArchive()"
+                        :aria-label="t('memories', 'Archive')"
+                        @click="archiveSelection" close-after-click>
+                        {{ t('memories', 'Archive') }}
+                        <template #icon> <ArchiveIcon :size="20" /> </template>
+                    </NcActionButton>
+                    <NcActionButton
+                        v-else
+                        :aria-label="t('memories', 'Unarchive')"
+                        @click="archiveSelection" close-after-click>
+                        {{ t('memories', 'Unarchive') }}
+                        <template #icon> <UnarchiveIcon :size="20" /> </template>
+                    </NcActionButton>
+                </template>
+
+
                 <NcActionButton
                     :aria-label="t('memories', 'Edit Date/Time')"
                     @click="editDateSelection" close-after-click>
@@ -147,6 +166,8 @@ import Delete from 'vue-material-design-icons/Delete.vue';
 import Close from 'vue-material-design-icons/Close.vue';
 import CheckCircle from 'vue-material-design-icons/CheckCircle.vue';
 import EditIcon from 'vue-material-design-icons/ClockEdit.vue';
+import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
+import UnarchiveIcon from 'vue-material-design-icons/PackageUp.vue';
 
 const SCROLL_LOAD_DELAY = 100;          // Delay in loading data when scrolling
 const MAX_PHOTO_WIDTH = 175;            // Max width of a photo
@@ -177,6 +198,8 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
         Close,
         CheckCircle,
         EditIcon,
+        ArchiveIcon,
+        UnarchiveIcon,
     }
 })
 export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
@@ -468,12 +491,22 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             query.set('folder', this.$route.params.path || '/');
         }
 
+        // Archive
+        if (this.routeIsArchive()) {
+            query.set('archive', '1');
+        }
+
         // Create query string and append to URL
         const queryStr = query.toString();
         if (queryStr) {
             url += '?' + queryStr;
         }
         return url;
+    }
+
+    /** Is archive route */
+    routeIsArchive() {
+        return this.$route.name === 'archive';
     }
 
     /** Get name of header */
@@ -1088,6 +1121,29 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
      */
     async editDateSelection() {
         (<any>this.$refs.editDate).open(Array.from(this.selection.values()));
+    }
+
+    /**
+     * Archive the currently selected photos
+     */
+    async archiveSelection() {
+        if (this.selection.size >= 100) {
+            if (!confirm(this.t("memories", "You are about to touch a large number of files. Are you sure?"))) {
+                return;
+            }
+        }
+
+        try {
+            this.loading++;
+            for await (const delIds of dav.archiveFilesByIds(Array.from(this.selection.keys()), !this.routeIsArchive())) {
+                const delPhotos = delIds.map(id => this.selection.get(id));
+                await this.deleteFromViewWithAnimation(delPhotos);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            this.loading--;
+        }
     }
 
     /**

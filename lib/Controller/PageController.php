@@ -88,4 +88,12 @@ class PageController extends Controller {
     public function videos() {
         return $this->main();
     }
+
+    /**
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function archive() {
+        return $this->main();
+    }
 }

@@ -46,7 +46,12 @@ trait TimelineQueryDays {
     }
 
     /** Get the query for oc_filecache join */
-    private function getFilecacheJoinQuery(IQueryBuilder &$query, Folder &$folder, bool $recursive) {
+    private function getFilecacheJoinQuery(
+        IQueryBuilder &$query,
+        Folder &$folder,
+        bool $recursive,
+        bool $archive
+    ) {
         // Subquery to get storage and path
         $subQuery = $query->getConnection()->getQueryBuilder();
         $cursor = $subQuery->select('path', 'storage')->from('filecache')->where(
@@ -67,6 +72,19 @@ trait TimelineQueryDays {
             }
             $likePath = $likePath  . '%';
             $pathQuery = $query->expr()->like('f.path', $query->createNamedParameter($likePath));
+
+            // Exclude/show archive folder
+            $archiveLikePath = $finfo["path"] . '/' . \OCA\Memories\Util::$ARCHIVE_FOLDER . '/%';
+            if (!$archive) {
+                // Exclude archive folder
+                $pathQuery = $query->expr()->andX(
+                    $pathQuery,
+                    $query->expr()->notLike('f.path', $query->createNamedParameter($archiveLikePath))
+                );
+            } else {
+                // Show only archive folder
+                $pathQuery = $query->expr()->like('f.path', $query->createNamedParameter($archiveLikePath));
+            }
         } else {
             // If getting non-recursively folder only check for parent
             $pathQuery = $query->expr()->eq('f.parent', $query->createNamedParameter($folder->getId(), IQueryBuilder::PARAM_INT));
@@ -87,6 +105,7 @@ trait TimelineQueryDays {
         Folder &$folder,
         string $uid,
         bool $recursive,
+        bool $archive,
         array $queryTransforms = []
     ): array {
         $query = $this->connection->getQueryBuilder();
@@ -95,7 +114,7 @@ trait TimelineQueryDays {
         $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
         $query->select('m.dayid', $count)
             ->from('memories', 'm')
-            ->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folder, $recursive));
+            ->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folder, $recursive, $archive));
 
         // Group and sort by dayid
         $query->groupBy('m.dayid')
@@ -121,6 +140,7 @@ trait TimelineQueryDays {
         string $uid,
         int $dayid,
         bool $recursive,
+        bool $archive,
         array $queryTransforms = []
     ): array {
         $query = $this->connection->getQueryBuilder();
@@ -133,7 +153,7 @@ trait TimelineQueryDays {
         // when using DISTINCT on selected fields
         $query->select($fileid, 'f.etag', 'm.isvideo', 'vco.categoryid', 'm.datetaken')
             ->from('memories', 'm')
-            ->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folder, $recursive))
+            ->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folder, $recursive, $archive))
             ->andWhere($query->expr()->eq('m.dayid', $query->createNamedParameter($dayid, IQueryBuilder::PARAM_INT)));
 
         // Add favorite field

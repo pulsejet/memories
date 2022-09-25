@@ -81,5 +81,14 @@
                 rootTitle: t('memories', 'Videos'),
             }),
         },
+
+        {
+            path: '/archive',
+            component: Timeline,
+            name: 'archive',
+            props: route => ({
+                rootTitle: t('memories', 'Archive'),
+            }),
+        },
      ],
  })
