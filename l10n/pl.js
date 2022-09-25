@@ -22,6 +22,7 @@ OC.L10N.register(
     "Failed to load some photos" : "Nie udało się załadować niektórych zdjęć",
     "You are about to download a large number of files. Are you sure?" : "Zamierzasz pobrać dużą liczbę plików. Jesteś pewny?",
     "You are about to delete a large number of files. Are you sure?" : "Zamierzasz usunąć dużą liczbę plików. Jesteś pewny?",
+    "_{n} selected_::_{n} selected_" : ["{n} wybrana","{n} wybrane","{n} wybranych","{n} wybranych"],
     "Failed to delete files." : "Nie udało się usunąć plików.",
     "Failed to delete {fileName}." : "Nie udało się usunąć {fileName}.",
     "Failed to favorite {fileName}." : "Nie udało się dodać do ulubionych {fileName}.",

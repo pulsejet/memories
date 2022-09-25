@@ -22,6 +22,7 @@ OC.L10N.register(
     "Failed to load some photos" : "未能加載一些照片",
     "You are about to download a large number of files. Are you sure?" : "您即將下載大量檔案。你確定嗎？",
     "You are about to delete a large number of files. Are you sure?" : "您即將刪除大量檔案。你確定嗎？",
+    "_{n} selected_::_{n} selected_" : ["已選擇 {n} 個"],
     "Failed to delete files." : "刪除檔案失敗。",
     "Failed to delete {fileName}." : "刪除 {fileName} 失敗。",
     "Failed to favorite {fileName}." : "將 {fileName} 加入最愛失敗。",
