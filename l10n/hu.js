@@ -20,7 +20,6 @@ OC.L10N.register(
     "Favorite" : "Kedvenc",
     "No photos to show here" : "Nincs megjeleníthető fénykép",
     "Failed to load some photos" : "Nem sikerült betölteni néhány fényképet",
-    "{n} selected" : "{n} kiválasztva",
     "You are about to download a large number of files. Are you sure?" : "Sok fájl letöltésére készül. Biztos benne?",
     "You are about to delete a large number of files. Are you sure?" : "Sok fájl törlésére készül. Biztos benne?",
     "Failed to delete files." : "A fájlok törlése sikertelen.",

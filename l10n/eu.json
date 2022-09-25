@@ -16,9 +16,9 @@
     "Favorite" : "Egin gogoko",
     "No photos to show here" : "Ez dago argazkirik erakusteko hemen",
     "Failed to load some photos" : "Argazki batzuk kargatzeak huts egin du",
-    "{n} selected" : "{n} hautatuta",
     "Failed to delete files." : "Fitxategiak ezabatzeak huts egin du.",
     "Failed to delete {fileName}." : "{fileName} ezabatzeak huts egin du.",
-    "Failed to favorite {fileName}." : "Ezin izan da {fileName} gogoko egin."
+    "Failed to favorite {fileName}." : "Ezin izan da {fileName} gogoko egin.",
+    "Failed to favorite files." : "Fitxategiak gogoko egiteak huts egin du."
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

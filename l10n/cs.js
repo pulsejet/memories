@@ -19,7 +19,6 @@ OC.L10N.register(
     "Favorite" : "Přidat do oblíbených",
     "No photos to show here" : "Žádné fotky, které zde zobrazit",
     "Failed to load some photos" : "Některé fotky se nepodařilo načíst",
-    "{n} selected" : "{n} označeno",
     "You are about to download a large number of files. Are you sure?" : "Chystáte se stahovat si velký počet souborů. Opravdu to chcete?",
     "You are about to delete a large number of files. Are you sure?" : "Chystáte se smazat velké množství souborů. Opravdu to chcete?",
     "Failed to delete files." : "Nepodařilo se smazat soubory.",
