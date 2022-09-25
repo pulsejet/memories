@@ -12,6 +12,7 @@
 * **🎦 Slideshow**: View photos from your timeline and folders easily.
 * **📱 Mobile Support**: Relive your memories on devices of any shape and size through the web app.
 * **🗑️ Recycle**: Select and delete multiple photos and videos at once.
+* **✏️ Edit Metadata**: Edit Exif dates on photos quickly and easily.
 * **⚡️ Fast**: Memories is extremely fast. Period. More details below.
 
 ## 🚀 Installation

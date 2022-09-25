@@ -77,16 +77,21 @@
                     </div>
                 </div>
 
-                <div v-if="processing">
+                <div v-if="processing" class="info-pad">
                     {{ t('memories', 'Processing ... {n}/{m}', {
                         n: photosDone,
                         m: photos.length,
                     }) }}
                 </div>
 
+                <div class="info-pad warn">
+                    This feature modifies files in your storage to update Exif data.
+                    Exercise caution and make sure you have backups.
+                </div>
+
                 <div class="buttons">
-                    <NcButton @click="save" class="button" type="primary">
-                        {{ t('memories', 'Save') }}
+                    <NcButton @click="save" class="button" type="error">
+                        {{ t('memories', 'Update Exif') }}
                     </NcButton>
                 </div>
             </div>
@@ -371,6 +376,17 @@ export default class EditDate extends Mixins(GlobalMixin) {
 
     button {
         display: inline-block;
+    }
+}
+
+.info-pad {
+    margin-top: 6px;
+    margin-bottom: 2px;
+
+    &.warn {
+        color: #f44336;
+        font-size: 0.8em;
+        line-height: 1em;
     }
 }
 </style>
