@@ -112,7 +112,7 @@
                     <template #icon> <Star :size="20" /> </template>
                 </NcActionButton>
 
-                <template>
+                <template v-if="allowArchive()">
                     <NcActionButton
                         v-if="!routeIsArchive()"
                         :aria-label="t('memories', 'Archive')"
@@ -501,7 +501,13 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         if (queryStr) {
             url += '?' + queryStr;
         }
+        console.log(this.$route.name, url);
         return url;
+    }
+
+    /** Archive is allowed only on timeline routes */
+    allowArchive() {
+        return this.$route.name === 'timeline' || this.$route.name === 'favorites' || this.$route.name === 'videos';
     }
 
     /** Is archive route */
