@@ -507,7 +507,10 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     /** Archive is allowed only on timeline routes */
     allowArchive() {
-        return this.$route.name === 'timeline' || this.$route.name === 'favorites' || this.$route.name === 'videos';
+        return this.$route.name === 'timeline'  ||
+               this.$route.name === 'favorites' ||
+               this.$route.name === 'videos'    ||
+               this.$route.name === 'archive';
     }
 
     /** Is archive route */
