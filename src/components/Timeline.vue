@@ -101,13 +101,13 @@
             <NcActions>
                 <NcActionButton
                     :aria-label="t('memories', 'Download')"
-                    @click="downloadSelection">
+                    @click="downloadSelection" close-after-click>
                     {{ t('memories', 'Download') }}
                     <template #icon> <Download :size="20" /> </template>
                 </NcActionButton>
                 <NcActionButton
                     :aria-label="t('memories', 'Favorite')"
-                    @click="favoriteSelection">
+                    @click="favoriteSelection" close-after-click>
                     {{ t('memories', 'Favorite') }}
                     <template #icon> <Star :size="20" /> </template>
                 </NcActionButton>
