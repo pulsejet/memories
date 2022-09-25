@@ -120,7 +120,7 @@
             </NcActions>
         </div>
 
-        <EditDate ref="editDate" />
+        <EditDate ref="editDate" @refresh="refresh" />
     </div>
 </template>
 
@@ -240,8 +240,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     @Watch('$route')
     async routeChange(from: any, to: any) {
-        await this.resetState();
-        await this.createState();
+        await this.refresh();
     }
 
     beforeDestroy() {
@@ -299,6 +298,21 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             default:
                 this.topMatterType = TopMatterType.NONE;
                 break;
+        }
+    }
+
+    /** Recreate everything */
+    async refresh(preservePosition = false) {
+        // Get current scroll position
+        const origScroll = (<any>this.$refs.recycler).$el.scrollTop;
+
+        // Reset state
+        await this.resetState();
+        await this.createState();
+
+        // Restore scroll position
+        if (preservePosition) {
+            (<any>this.$refs.recycler).scrollToPosition(origScroll);
         }
     }
 

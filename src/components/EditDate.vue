@@ -237,6 +237,7 @@ export default class EditDate extends Mixins(GlobalMixin) {
             const res = await axios.patch<any>(generateUrl(EDIT_API_URL, { id: this.photos[0].fileid }), {
                 date: this.getExifFormat(this.getDate()),
             });
+            this.$emit('refresh', true);
             this.close();
         } catch (e) {
             if (e.response?.data?.message) {
@@ -294,6 +295,7 @@ export default class EditDate extends Mixins(GlobalMixin) {
             // nothing to do
         }
         this.processing = false;
+        this.$emit('refresh', true);
         this.close();
     }
 
