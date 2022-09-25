@@ -49,9 +49,11 @@ trait TimelineQueryDays {
     private function getFilecacheJoinQuery(IQueryBuilder &$query, Folder &$folder, bool $recursive) {
         // Subquery to get storage and path
         $subQuery = $query->getConnection()->getQueryBuilder();
-        $finfo = $subQuery->select('path', 'storage')->from('filecache')->where(
+        $cursor = $subQuery->select('path', 'storage')->from('filecache')->where(
             $subQuery->expr()->eq('fileid', $subQuery->createNamedParameter($folder->getId())),
-        )->executeQuery()->fetch();
+        )->executeQuery();
+        $finfo = $cursor->fetch();
+        $cursor->closeCursor();
         if (empty($finfo)) {
             throw new \Exception("Folder not found");
         }
@@ -104,7 +106,9 @@ trait TimelineQueryDays {
             $transform($query, $uid);
         }
 
-        $rows = $query->executeQuery()->fetchAll();
+        $cursor = $query->executeQuery();
+        $rows = $cursor->fetchAll();
+        $cursor->closeCursor();
         return $this->processDays($rows);
     }
 
@@ -143,7 +147,9 @@ trait TimelineQueryDays {
             $transform($query, $uid);
         }
 
-        $rows = $query->executeQuery()->fetchAll();
+        $cursor = $query->executeQuery();
+        $rows = $cursor->fetchAll();
+        $cursor->closeCursor();
         return $this->processDay($rows);
     }
 }

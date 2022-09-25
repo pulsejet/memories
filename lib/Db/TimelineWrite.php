@@ -61,7 +61,9 @@ class TimelineWrite {
         $query->select('fileid', 'mtime')
             ->from('memories')
             ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)));
-        $prevRow = $query->executeQuery()->fetch();
+        $cursor = $query->executeQuery();
+        $prevRow = $cursor->fetch();
+        $cursor->closeCursor();
         if ($prevRow && !$force && intval($prevRow['mtime']) === $mtime) {
             return 1;
         }
