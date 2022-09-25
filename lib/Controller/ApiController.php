@@ -260,7 +260,6 @@ class ApiController extends Controller {
 
     /**
      * @NoAdminRequired
-     * @NoCSRFRequired
      *
      * Change exif data for one file
      * @param string fileid
@@ -279,7 +278,10 @@ class ApiController extends Controller {
         }
         $file = $file[0];
 
-        // TODO: check permissions
+        // Check if user has permissions
+        if (!$file->isUpdateable()) {
+            return new JSONResponse([], Http::STATUS_FORBIDDEN);
+        }
 
         // Get new date from body
         $body = $this->request->getParams();
