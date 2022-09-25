@@ -162,7 +162,7 @@ class ApiController extends Controller {
 
         // Add subfolder info if querying non-recursively
         if (!$recursive) {
-            $this->addSubfolders($folder, $list, $user);
+            array_unshift($list, $this->getSubfoldersEntry($folder));
         }
 
         return new JSONResponse($list, Http::STATUS_OK);
@@ -199,25 +199,28 @@ class ApiController extends Controller {
     }
 
     /**
-     * @NoAdminRequired
+     * Get subfolders entry for days response
      */
-    public function addSubfolders(Folder &$folder, &$list, &$user) {
-        // Get subdirectories
-        $sub = $folder->search(new SearchQuery(
-            new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'mimetype', FileInfo::MIMETYPE_FOLDER),
-            0, 0, [], $user));
-        $sub = array_filter($sub, function ($item) use (&$folder) {
-            return $item->getParent()->getId() === $folder->getId();
-        });
+    public function getSubfoldersEntry(Folder &$folder) {
+        // Ugly: get the view of the folder with reflection
+        // This is unfortunately the only way to get the contents of a folder
+        // matching a MIME type without using SEARCH, which is deep
+        $rp = new \ReflectionProperty('\OC\Files\Node\Node', 'view');
+        $rp->setAccessible(true);
+        $view = $rp->getValue($folder);
+
+        // Get the subfolders
+        $folders = $view->getDirectoryContent($folder->getPath(), FileInfo::MIMETYPE_FOLDER, $folder);
 
         // Sort by name
-        usort($sub, function($a, $b) {
+        usort($folders, function($a, $b) {
             return strnatcmp($a->getName(), $b->getName());
         });
 
-        // Map sub to JSON array
-        $subdirArray = [
+        // Process to response type
+        return [
             "dayid" => \OCA\Memories\Util::$TAG_DAYID_FOLDERS,
+            "count" => count($folders),
             "detail" => array_map(function (&$node) {
                 return [
                     "fileid" => $node->getId(),
@@ -225,10 +228,8 @@ class ApiController extends Controller {
                     "isfolder" => 1,
                     "path" => $node->getPath(),
                 ];
-            }, $sub, []),
+            }, $folders, []),
         ];
-        $subdirArray["count"] = count($subdirArray["detail"]);
-        array_unshift($list, $subdirArray);
     }
 
     /**
