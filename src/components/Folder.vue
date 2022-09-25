@@ -2,6 +2,7 @@
     <div class="folder" v-bind:class="{
         hasPreview: previewFileInfos.length > 0,
         onePreview: previewFileInfos.length === 1,
+        hasError: error,
     }"
         @click="openFolder(data)"
         v-bind:style="{
@@ -9,10 +10,7 @@
             height: rowHeight + 'px',
         }">
         <div class="big-icon">
-            <FolderIcon class="memories__big-folder-icon" v-bind:class="{
-                'icon-dark': previewFileInfos.length === 0,
-                'icon-white': previewFileInfos.length > 0,
-            }" />
+            <FolderIcon class="memories__big-folder-icon" />
             <div class="name">{{ data.name }}</div>
         </div>
 
@@ -54,6 +52,9 @@ export default class Folder extends Mixins(GlobalMixin) {
     // Separate property because the one on data isn't reactive
     private previewFileInfos: IFileInfo[] = [];
 
+    // Error occured fetching thumbs
+    private error = false;
+
     /** Passthrough */
     private getPreviewUrl = getPreviewUrl;
 
@@ -68,6 +69,10 @@ export default class Folder extends Mixins(GlobalMixin) {
 
     /** Refresh previews */
     refreshPreviews() {
+        // Reset state
+        this.error = false;
+
+        // Get preview infos
         if (!this.data.previewFileInfos) {
             const folderPath = this.data.path.split('/').slice(3).join('/');
             dav.getFolderPreviewFileIds(folderPath, 4).then(fileInfos => {
@@ -81,6 +86,10 @@ export default class Folder extends Mixins(GlobalMixin) {
             }).catch(() => {
                 this.data.previewFileInfos = [];
                 this.previewFileInfos = [];
+
+                // Something is wrong with the folder
+                // e.g. external storage not available
+                this.error = true;
             });
         } else {
             this.previewFileInfos = this.data.previewFileInfos;
@@ -129,6 +138,7 @@ export default class Folder extends Mixins(GlobalMixin) {
         top: 65%;
     }
 
+    // Make it white if there is a preview
     .folder.hasPreview > & {
         .folder-icon {
             opacity: 1;
@@ -136,8 +146,18 @@ export default class Folder extends Mixins(GlobalMixin) {
         }
         .name { color: white; }
     }
+
+    // Show it on hover if not a preview
     .folder:hover > & > .folder-icon { opacity: 0.8; }
     .folder.hasPreview:hover > & { opacity: 0; }
+
+    // Make it red if has an error
+    .folder.hasError > & {
+        .folder-icon {
+            filter: invert(12%) sepia(62%) saturate(5862%) hue-rotate(8deg) brightness(103%) contrast(128%);
+        }
+        .name { color: #bb0000; }
+    }
 
     > .folder-icon {
         cursor: pointer;
