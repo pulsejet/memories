@@ -10,7 +10,6 @@ test.describe('Open', () => {
 
   test('Open folder', async ({ page }) => {
     await page.locator('text=Local').click();
-    await expect(page).toHaveURL(/\/apps\/memories\/folders\/[0-9]*/);
     await page.waitForSelector('img[src*="core/preview"]');
   });
 });
