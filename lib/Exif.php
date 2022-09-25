@@ -244,6 +244,30 @@ class Exif {
     }
 
     /**
+     * Parse date from exif format and throw error if invalid
+     *
+     * @param string $dt
+     * @return int unix timestamp
+     */
+    public static function parseExifDate($date) {
+        $dt = $date;
+        if (isset($dt) && is_string($dt) && !empty($dt)) {
+            $dt = explode('-', explode('+', $dt, 2)[0], 2)[0]; // get rid of timezone if present
+            $dt = \DateTime::createFromFormat('Y:m:d H:i:s', $dt);
+            if (!$dt) {
+                throw new \Exception("Invalid date: $date");
+            }
+            if ($dt && $dt->getTimestamp() > -5364662400) { // 1800 A.D.
+                return $dt->getTimestamp();
+            } else {
+                throw new \Exception("Date too old: $date");
+            }
+        } else {
+            throw new \Exception("No date provided");
+        }
+    }
+
+    /**
      * Get the date taken from either the file or exif data if available.
      * @param File $file
      * @param array $exif
@@ -255,13 +279,9 @@ class Exif {
         }
 
         // Check if found something
-        if (isset($dt) && is_string($dt) && !empty($dt)) {
-            $dt = explode('-', explode('+', $dt, 2)[0], 2)[0]; // get rid of timezone if present
-            $dt = \DateTime::createFromFormat('Y:m:d H:i:s', $dt, new \DateTimeZone("UTC"));
-            if ($dt && $dt->getTimestamp() > -5364662400) { // 1800 A.D.
-                return $dt->getTimestamp();
-            }
-        }
+        try {
+            return self::parseExifDate($dt);
+        } catch (\Exception $ex) {}
 
         // Fall back to creation time
         $dateTaken = $file->getCreationTime();
@@ -271,5 +291,142 @@ class Exif {
             $dateTaken = $file->getMtime();
         }
         return $dateTaken;
+    }
+
+    /**
+     * Update exif date using exiftool
+     *
+     * @param File $file
+     * @param string $newDate formatted in standard Exif format (YYYY:MM:DD HH:MM:SS)
+     */
+    public static function updateExifDate(File &$file, string $newDate) {
+        // Check for local files -- this is easier
+        if (!$file->isEncrypted() && $file->getStorage()->isLocal()) {
+            $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+            if (is_string($path)) {
+                return self::updateExifDateForLocalFile($path, $newDate);
+            }
+        }
+
+        // Use a stream
+        return self::updateExifDateForStreamFile($file, $newDate);
+    }
+
+    /**
+     * Update exif date using exiftool for a local file
+     *
+     * @param string $path
+     * @param string $newDate formatted in standard Exif format (YYYY:MM:DD HH:MM:SS)
+     * @return bool
+     */
+    private static function updateExifDateForLocalFile(string $path, string $newDate) {
+        $cmd = ['exiftool', '-api', 'QuickTimeUTC=1', '-overwrite_original', '-DateTimeOriginal=' . $newDate, $path];
+        $proc = proc_open($cmd, [
+            1 => array('pipe', 'w'),
+            2 => array('pipe', 'w'),
+        ], $pipes);
+        $stdout = self::readOrTimeout($pipes[1], 300000);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_terminate($proc);
+        if (strpos($stdout, 'error') !== false) {
+            error_log("Exiftool error: $stdout");
+            throw new \Exception("Could not update exif date: " . $stdout);
+        }
+        return true;
+    }
+
+    /**
+     * Update exif date for stream
+     *
+     * @param File $file
+     * @param string $newDate formatted in standard Exif format (YYYY:MM:DD HH:MM:SS)
+     */
+    public static function updateExifDateForStreamFile(File &$file, string $newDate) {
+        // Temp file for output, so we can compare sizes before writing to the actual file
+        $tmpfile = tmpfile();
+
+        try {
+            // Start exiftool and output to json
+            $pipes = [];
+            $proc = proc_open([
+                'exiftool', '-api', 'QuickTimeUTC=1',
+                '-overwrite_original', '-DateTimeOriginal=' . $newDate, '-'
+            ], [
+                0 => array('pipe', 'rb'),
+                1 => array('pipe', 'w'),
+                2 => array('pipe', 'w'),
+            ], $pipes);
+
+            // Write the file to exiftool's stdin
+            // Warning: this is slow for big files
+            $in = $file->fopen('rb');
+            if (!$in) {
+                throw new \Exception('Could not open file');
+            }
+            $origLen = stream_copy_to_stream($in, $pipes[0]);
+            fclose($in);
+            fclose($pipes[0]);
+
+            // Get output from exiftool
+            stream_set_blocking($pipes[1], false);
+            $newLen = 0;
+
+            try {
+                // Read and copy stdout of exiftool to the temp file
+                $waitedMs = 0;
+                $timeout = 300000;
+                while ($waitedMs < $timeout && !feof($pipes[1])) {
+                    $r = stream_copy_to_stream($pipes[1], $tmpfile, 1024 * 1024);
+                    $newLen += $r;
+                    if ($r === 0) {
+                        $waitedMs++;
+                        usleep(1000);
+                        continue;
+                    }
+                }
+                if ($waitedMs >= $timeout) {
+                    throw new \Exception('Timeout');
+                }
+            } catch (\Exception $ex) {
+                error_log("Exiftool timeout for file stream: " . $ex->getMessage());
+                throw new \Exception("Could not read from Exiftool");
+            } finally {
+                // Close the pipes
+                fclose($pipes[1]);
+                fclose($pipes[2]);
+                proc_terminate($proc);
+            }
+
+            // Check the new length of the file
+            // If the new length and old length are more different than 1KB, abort
+            if (abs($newLen - $origLen) > 1024) {
+                error_log("Exiftool error: new length $newLen, old length $origLen");
+                throw new \Exception("Exiftool error: new length $newLen, old length $origLen");
+            }
+
+            // Write the temp file to the actual file
+            fseek($tmpfile, 0);
+            $out = $file->fopen('wb');
+            if (!$out) {
+                throw new \Exception('Could not open file for writing');
+            }
+            $wroteBytes = 0;
+            try {
+                $wroteBytes = stream_copy_to_stream($tmpfile, $out);
+            } finally {
+                fclose($out);
+            }
+            if ($wroteBytes !== $newLen) {
+                error_log("Exiftool error: wrote $r bytes, expected $newLen");
+                throw new \Exception("Could not write to file");
+            }
+
+            // All done at this point
+            return true;
+        } finally {
+            // Close the temp file
+            fclose($tmpfile);
+        }
     }
 }

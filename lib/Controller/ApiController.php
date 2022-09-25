@@ -25,10 +25,9 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
-use OC\Files\Search\SearchComparison;
-use OC\Files\Search\SearchQuery;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Exif;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
@@ -40,7 +39,6 @@ use OCP\IRequest;
 use OCP\IUserSession;
 use OCP\Files\FileInfo;
 use OCP\Files\Folder;
-use OCP\Files\Search\ISearchComparison;
 
 class ApiController extends Controller {
     private IConfig $config;
@@ -48,6 +46,7 @@ class ApiController extends Controller {
     private IDBConnection $connection;
     private IRootFolder $rootFolder;
     private TimelineQuery $timelineQuery;
+    private TimelineWrite $timelineWrite;
 
     public function __construct(
         IRequest $request,
@@ -63,6 +62,7 @@ class ApiController extends Controller {
         $this->connection = $connection;
         $this->rootFolder = $rootFolder;
         $this->timelineQuery = new TimelineQuery($this->connection);
+        $this->timelineWrite = new TimelineWrite($connection);
     }
 
     /**
@@ -230,6 +230,84 @@ class ApiController extends Controller {
                 ];
             }, $folders, []),
         ];
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * Get image info for one file
+     * @param string fileid
+     */
+    public function imageInfo(string $id): JSONResponse {
+        $user = $this->userSession->getUser();
+        if (is_null($user)) {
+            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+        $userFolder = $this->rootFolder->getUserFolder($user->getUID());
+
+        // Check for permissions and get numeric Id
+        $file = $userFolder->getById(intval($id));
+        if (count($file) === 0) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
+        $file = $file[0];
+
+        // Get the image info
+        $info = $this->timelineQuery->getInfoById($file->getId());
+
+        return new JSONResponse($info, Http::STATUS_OK);
+    }
+
+    /**
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     *
+     * Change exif data for one file
+     * @param string fileid
+     */
+    public function imageEdit(string $id): JSONResponse {
+        $user = $this->userSession->getUser();
+        if (is_null($user)) {
+            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+        $userFolder = $this->rootFolder->getUserFolder($user->getUID());
+
+        // Check for permissions and get numeric Id
+        $file = $userFolder->getById(intval($id));
+        if (count($file) === 0) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
+        $file = $file[0];
+
+        // TODO: check permissions
+
+        // Get new date from body
+        $body = $this->request->getParams();
+        if (!isset($body['date'])) {
+            return new JSONResponse(["message" => "Missing date"], Http::STATUS_BAD_REQUEST);
+        }
+
+        // Make sure the date is valid
+        try {
+            Exif::parseExifDate($body['date']);
+        } catch (\Exception $e) {
+            return new JSONResponse(["message" => $e->getMessage()], Http::STATUS_BAD_REQUEST);
+        }
+
+        // Update date
+        try {
+            $res = Exif::updateExifDate($file, $body['date']);
+            if ($res === false) {
+                return new JSONResponse([], Http::STATUS_INTERNAL_SERVER_ERROR);
+            }
+        } catch (\Exception $e) {
+            return new JSONResponse(["message" => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);
+        }
+
+        // Reprocess the file
+        $this->timelineWrite->processFile($file, true);
+
+        return $this->imageInfo($id);
     }
 
     /**

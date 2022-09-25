@@ -17,6 +17,8 @@ return [
         // API
         ['name' => 'api#days', 'url' => '/api/days', 'verb' => 'GET'],
         ['name' => 'api#day', 'url' => '/api/days/{id}', 'verb' => 'GET'],
+        ['name' => 'api#imageInfo', 'url' => '/api/info/{id}', 'verb' => 'GET'],
+        ['name' => 'api#imageEdit', 'url' => '/api/edit/{id}', 'verb' => 'PATCH'],
 
         // Config API
         ['name' => 'api#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],

@@ -14,4 +14,21 @@ class TimelineQuery {
     public function __construct(IDBConnection $connection) {
         $this->connection = $connection;
     }
+
+    public function getInfoById(int $id): array {
+        $qb = $this->connection->getQueryBuilder();
+        $qb->select('*')
+            ->from('memories')
+            ->where($qb->expr()->eq('fileid', $qb->createNamedParameter($id, \PDO::PARAM_INT)));
+
+        $result = $qb->executeQuery();
+        $row = $result->fetch();
+        $result->closeCursor();
+
+        return [
+            'fileid' => intval($row['fileid']),
+            'dayid' => intval($row['dayid']),
+            'datetaken' => $row['datetaken'],
+        ];
+    }
 }

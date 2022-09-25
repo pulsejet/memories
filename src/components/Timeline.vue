@@ -111,8 +111,16 @@
                     {{ t('memories', 'Favorite') }}
                     <template #icon> <Star :size="20" /> </template>
                 </NcActionButton>
+                <NcActionButton
+                    :aria-label="t('memories', 'Edit Date/Time')"
+                    @click="editDateSelection" close-after-click>
+                    {{ t('memories', 'Edit Date/Time') }}
+                    <template #icon> <EditIcon :size="20" /> </template>
+                </NcActionButton>
             </NcActions>
         </div>
+
+        <EditDate ref="editDate" />
     </div>
 </template>
 
@@ -129,6 +137,7 @@ import * as utils from "../services/Utils";
 import axios from '@nextcloud/axios'
 import Folder from "./Folder.vue";
 import Photo from "./Photo.vue";
+import EditDate from "./EditDate.vue";
 import FolderTopMatter from "./FolderTopMatter.vue";
 import UserConfig from "../mixins/UserConfig";
 
@@ -137,6 +146,7 @@ import Download from 'vue-material-design-icons/Download.vue';
 import Delete from 'vue-material-design-icons/Delete.vue';
 import Close from 'vue-material-design-icons/Close.vue';
 import CheckCircle from 'vue-material-design-icons/CheckCircle.vue';
+import EditIcon from 'vue-material-design-icons/ClockEdit.vue';
 
 const SCROLL_LOAD_DELAY = 100;          // Delay in loading data when scrolling
 const MAX_PHOTO_WIDTH = 175;            // Max width of a photo
@@ -155,6 +165,7 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
     components: {
         Folder,
         Photo,
+        EditDate,
         FolderTopMatter,
         NcActions,
         NcActionButton,
@@ -165,6 +176,7 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
         Delete,
         Close,
         CheckCircle,
+        EditIcon,
     }
 })
 export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
@@ -1055,6 +1067,13 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         } finally {
             this.loading--;
         }
+    }
+
+    /**
+     * Open the edit date dialog
+     */
+    async editDateSelection() {
+        (<any>this.$refs.editDate).open(Array.from(this.selection.values()));
     }
 
     /**
