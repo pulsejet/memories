@@ -36,6 +36,8 @@ export type IPhoto = {
     isfavorite?: boolean;
     /** Is this a folder */
     isfolder?: boolean;
+    /** Optional datetaken epoch */
+    datetaken?: number;
 }
 
 export interface IFolder extends IPhoto {
