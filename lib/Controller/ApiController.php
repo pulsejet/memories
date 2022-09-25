@@ -221,7 +221,7 @@ class ApiController extends Controller {
         return [
             "dayid" => \OCA\Memories\Util::$TAG_DAYID_FOLDERS,
             "count" => count($folders),
-            "detail" => array_map(function (&$node) {
+            "detail" => array_map(function ($node) {
                 return [
                     "fileid" => $node->getId(),
                     "name" => $node->getName(),
