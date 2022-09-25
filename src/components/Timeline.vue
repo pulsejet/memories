@@ -1,5 +1,9 @@
 <template>
     <div class="container" ref="container" :class="{ 'icon-loading': loading > 0 }">
+        <div ref="topmatter" class="top-matter" v-if="topMatterType">
+            <FolderTopMatter v-if="topMatterType === 1" />
+        </div>
+
         <!-- Main recycler view for rows -->
         <RecycleScroller
             ref="recycler"
@@ -16,7 +20,7 @@
         >
             <div v-if="item.type === 0" class="head-row"
                 :class="{
-                    'first': item.id === 1,
+                    'first': item.id === 1 && !topMatterType,
                     'selected': item.selected,
                 }"
             >
@@ -114,7 +118,7 @@
 
 <script lang="ts">
 import { Component, Watch, Mixins } from 'vue-property-decorator';
-import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType, ITick } from "../types";
+import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType, ITick, TopMatterType } from "../types";
 import { generateUrl } from '@nextcloud/router'
 import { showError } from '@nextcloud/dialogs'
 import GlobalMixin from '../mixins/GlobalMixin';
@@ -125,6 +129,7 @@ import * as utils from "../services/Utils";
 import axios from '@nextcloud/axios'
 import Folder from "./Folder.vue";
 import Photo from "./Photo.vue";
+import FolderTopMatter from "./FolderTopMatter.vue";
 import UserConfig from "../mixins/UserConfig";
 
 import Star from 'vue-material-design-icons/Star.vue';
@@ -150,6 +155,7 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
     components: {
         Folder,
         Photo,
+        FolderTopMatter,
         NcActions,
         NcActionButton,
         NcButton,
@@ -210,6 +216,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     /** Set of selected file ids */
     private selection = new Map<number, IPhoto>();
 
+    /** Static top matter type for current page */
+    private topMatterType: TopMatterType = TopMatterType.NONE;
+
     /** State for request cancellations */
     private state = Math.random();
 
@@ -237,6 +246,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     /** Create new state */
     async createState() {
+        // Initializations in this tick cycle
+        this.setTopMatter();
+
         // Wait for one tick before doing anything
         await this.$nextTick();
 
@@ -266,6 +278,18 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         this.loadedDays.clear();
     }
 
+    /** Create top matter */
+    setTopMatter() {
+        switch (this.$route.name) {
+            case 'folders':
+                this.topMatterType = TopMatterType.FOLDER;
+                break;
+            default:
+                this.topMatterType = TopMatterType.NONE;
+                break;
+        }
+    }
+
     /** Do resize after some time */
     handleResizeWithDelay() {
         if (this.resizeTimer) {
@@ -280,9 +304,10 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     /** Handle window resize and initialization */
     handleResize() {
         const e = this.$refs.container as Element;
-        let height = e.clientHeight;
+        const tm = this.$refs.topmatter as Element;
+        let height = e.clientHeight - (tm?.clientHeight || 0);
         let width = e.clientWidth;
-        this.timelineHeight = e.clientHeight;
+        this.timelineHeight = height;
 
         const recycler = this.$refs.recycler as any;
         recycler.$el.style.height = (height - 4) + 'px';
@@ -1255,7 +1280,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     }
 }
 
-/** Top bar */
+/** Top bar for selected items */
 .top-bar {
     position: absolute;
     top: 10px; right: 60px;
@@ -1277,6 +1302,14 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     @include phone {
         top: 35px; right: 15px;
+    }
+}
+
+/** Static top matter */
+.top-matter {
+    padding-top: 4px;
+    @include phone {
+        padding-left: 38px;
     }
 }
 </style>

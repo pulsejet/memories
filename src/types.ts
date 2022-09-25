@@ -91,3 +91,18 @@ export type ITick = {
     /** Whether this tick should be shown */
     s?: boolean;
 }
+
+export type TopMatter = {
+    type: TopMatterType;
+}
+export enum TopMatterType {
+    NONE = 0,
+    FOLDER = 1,
+}
+export type TopMatterFolder = TopMatter & {
+    type: TopMatterType.FOLDER;
+    list: {
+        text: string;
+        path: string;
+    }[];
+}
