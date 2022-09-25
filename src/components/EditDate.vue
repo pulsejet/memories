@@ -85,8 +85,8 @@
                 </div>
 
                 <div class="info-pad warn">
-                    This feature modifies files in your storage to update Exif data.
-                    Exercise caution and make sure you have backups.
+                    {{ t('memories', 'This feature modifies files in your storage to update Exif data.') }}
+                    {{ t('memories', 'Exercise caution and make sure you have backups.') }}
                 </div>
 
                 <div class="buttons">
