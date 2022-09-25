@@ -1135,7 +1135,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
         try {
             this.loading++;
-            for await (const delIds of dav.archiveFilesByIds(Array.from(this.selection.keys()), !this.routeIsArchive())) {
+            for await (let delIds of dav.archiveFilesByIds(Array.from(this.selection.keys()), !this.routeIsArchive())) {
+                delIds = delIds.filter(x => x);
+                if (delIds.length === 0) {
+                    continue
+                }
                 const delPhotos = delIds.map(id => this.selection.get(id));
                 await this.deleteFromViewWithAnimation(delPhotos);
             }

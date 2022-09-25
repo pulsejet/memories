@@ -245,8 +245,9 @@ export async function archiveFile(fileid: number, archive: boolean) {
             await archiveFile(id, archive);
             return id as number;
         } catch (error) {
-            console.error('Failed to archive', id, error);
-            showError(t('memories', 'Failed to archive some files.'));
+            console.error('Failed to (un)archive', id, error);
+            const msg = error?.response?.data?.message || t('memories', 'General Failure');
+            showError(t('memories', 'Error: {msg}', { msg }));
             return 0;
         }
     });
