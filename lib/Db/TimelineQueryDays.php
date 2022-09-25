@@ -70,11 +70,10 @@ trait TimelineQueryDays {
             if (!empty($likePath)) {
                 $likePath .= '/';
             }
-            $likePath = $likePath  . '%';
-            $pathQuery = $query->expr()->like('f.path', $query->createNamedParameter($likePath));
+            $pathQuery = $query->expr()->like('f.path', $query->createNamedParameter($likePath . '%'));
 
             // Exclude/show archive folder
-            $archiveLikePath = $finfo["path"] . '/' . \OCA\Memories\Util::$ARCHIVE_FOLDER . '/%';
+            $archiveLikePath = $likePath . \OCA\Memories\Util::$ARCHIVE_FOLDER . '/%';
             if (!$archive) {
                 // Exclude archive folder
                 $pathQuery = $query->expr()->andX(
