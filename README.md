@@ -57,6 +57,7 @@ The approach of this app is fundamentally different from the official Nextcloud 
     - If you add any photos from outside Nextcloud, you must run the scan and index commands.
     - Indexing may be slow, since all files must be downloaded from the storage. The app currently assumes that the Exif data is present with the first 20MB of each file.
     - This function is experimental and may not work as expected. Please report any issues.
+- The archive feature moves photos to a separate folder called `.archive` at the root of your timeline. You can use this, for example, to move these photos to a cold storage.
 
 ## Special Thanks
 Nextcloud team. At least one half of the code is based on the work of the [Nextcloud Photos](https://github.com/nextcloud/photos).
