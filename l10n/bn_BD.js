@@ -3,6 +3,10 @@ OC.L10N.register(
     {
     "Favorites" : "প্রিয়জন",
     "Settings" : "সেটিংস",
+    "Month" : "মাস",
+    "Day" : "দিবস",
+    "Time" : "সময়",
+    "Hour" : "ঘন্টা",
     "Update" : "পরিবর্ধন",
     "Cancel" : "বাতির",
     "Delete" : "মুছে",

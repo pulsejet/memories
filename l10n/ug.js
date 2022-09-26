@@ -3,6 +3,8 @@ OC.L10N.register(
     {
     "Favorites" : "يىغقۇچ",
     "Settings" : "تەڭشەكلەر",
+    "Month" : "ئاي",
+    "Time" : "ۋاقىت",
     "Update" : "يېڭىلا",
     "Cancel" : "ۋاز كەچ",
     "Delete" : "ئۆچۈر",

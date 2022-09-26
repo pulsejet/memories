@@ -3,6 +3,8 @@ OC.L10N.register(
     {
     "Favorites" : "Favoriten",
     "Settings" : "Astellungen",
+    "Day" : "Dag",
+    "Hour" : "Stonn",
     "Update" : "Update",
     "Cancel" : "Ofbriechen",
     "Delete" : "Läschen",

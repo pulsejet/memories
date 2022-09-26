@@ -3,6 +3,8 @@ OC.L10N.register(
     {
     "Favorites" : "Favoriti",
     "Settings" : "Podešavanje",
+    "Month" : "Mjesec",
+    "Day" : "Dan",
     "Update" : "Ažuriraj",
     "Cancel" : "Otkaži",
     "Delete" : "Obriši",

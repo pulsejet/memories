@@ -5,6 +5,8 @@ OC.L10N.register(
     "Favorites" : "Favoritos",
     "Videos" : "Videos",
     "Settings" : "Configuraciones ",
+    "Day" : "Día",
+    "Hour" : "Hora",
     "Update" : "Actualizar",
     "Cancel" : "Cancelar",
     "Delete" : "Borrar",

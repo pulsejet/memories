@@ -3,6 +3,9 @@ OC.L10N.register(
     {
     "Favorites" : "Սիրվածներ",
     "Settings" : "կարգավորումներ",
+    "Month" : "Ամիս",
+    "Day" : "Օր",
+    "Time" : "Ժամ",
     "Update" : "Թարմացնել",
     "Cancel" : "ընդհատել",
     "Delete" : "հեռացնել",

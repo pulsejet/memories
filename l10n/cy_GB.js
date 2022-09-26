@@ -4,6 +4,8 @@ OC.L10N.register(
     "Favorites" : "Ffefrynnau",
     "Videos" : "Fideos",
     "Settings" : "Gosodiadau",
+    "Day" : "Diwrnod",
+    "Time" : "Amser",
     "Update" : "Diweddaru",
     "Cancel" : "Diddymu",
     "Delete" : "Dileu",

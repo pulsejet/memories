@@ -8,6 +8,7 @@ OC.L10N.register(
     "Favorites" : "Suosikit",
     "Videos" : "Videot",
     "Settings" : "Asetukset",
+    "Hour" : "Tunti",
     "Cannot find this photo anymore!" : "Kuvaa ei enää löydy!",
     "Timeline Path" : "Aikajanan polku",
     "Show hidden folders" : "Näytä piilotetut kansiot",

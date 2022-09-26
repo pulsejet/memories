@@ -3,6 +3,8 @@ OC.L10N.register(
     {
     "Favorites" : "Favorites",
     "Settings" : "Tetapan",
+    "Month" : "Bulan",
+    "Day" : "Hari",
     "Update" : "Kemaskini",
     "Cancel" : "Batal",
     "Delete" : "Padam",

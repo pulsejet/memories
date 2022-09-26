@@ -4,6 +4,8 @@ OC.L10N.register(
     "Favorites" : "Pennrolloù",
     "Videos" : "Videoioù",
     "Settings" : "Arventennoù",
+    "Month" : "Miz",
+    "Day" : "Deiz",
     "Update" : "Hizivaat",
     "Cancel" : "Arrest",
     "Delete" : "Lemel",
