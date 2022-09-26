@@ -281,7 +281,7 @@ div.img-outer {
     will-change: padding;
     transition: padding 0.1s ease;
     background-clip: content-box, padding-box;
-    background-color: var(--color-loading-light);
+    background-color: var(--color-background-dark);
 
     .selected > & { padding: 5%; }
 
@@ -290,9 +290,6 @@ div.img-outer {
         object-fit: cover;
         cursor: pointer;
         width: 100%; height: 100%;
-        opacity: 1;
-        transition: opacity 0.15s ease;
-        will-change: opacity;
         transform: translateZ(0);
 
         -webkit-tap-highlight-color: transparent;
@@ -300,7 +297,7 @@ div.img-outer {
         user-select: none;
 
         .selected > & { box-shadow: 0 0 3px 2px var(--color-primary); }
-        .p-loading > & { opacity: 0; }
+        .p-loading > & { display: none; }
     }
 }
 </style>

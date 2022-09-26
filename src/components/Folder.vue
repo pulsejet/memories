@@ -175,7 +175,7 @@ export default class Folder extends Mixins(GlobalMixin) {
     top: 2px; left: 2px;
 
     > .img-outer {
-        background-color: var(--color-loading-light);
+        background-color: var(--color-background-dark);
         padding: 0;
         margin: 0;
         width: 50%;
@@ -192,12 +192,13 @@ export default class Folder extends Mixins(GlobalMixin) {
             height: 100%;
             filter: brightness(50%);
 
-            opacity: 1;
-            transition: opacity 0.15s ease, filter 0.2s ease-in-out;
-            will-change: opacity, filter;
+            transition: filter 0.2s ease-in-out;
+            will-change: filter;
             transform: translateZ(0);
-            &.p-loading { opacity: 0; }
-            &.p-load-fail { display: none; }
+
+            &.p-loading, &.p-load-fail {
+                display: none;
+            }
 
             .folder:hover & {
                 filter: brightness(100%);
