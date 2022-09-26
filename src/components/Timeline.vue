@@ -91,15 +91,13 @@
                 {{ n("memories", "{n} selected", "{n} selected", selection.size, { n: selection.size }) }}
             </div>
 
-            <NcActions>
+            <NcActions :inline="1">
                 <NcActionButton
                     :aria-label="t('memories', 'Delete')"
                     @click="deleteSelection">
                     {{ t('memories', 'Delete') }}
                     <template #icon> <Delete :size="20" /> </template>
                 </NcActionButton>
-            </NcActions>
-            <NcActions>
                 <NcActionButton
                     :aria-label="t('memories', 'Download')"
                     @click="downloadSelection" close-after-click>
