@@ -502,7 +502,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         if (queryStr) {
             url += '?' + queryStr;
         }
-        console.log(this.$route.name, url);
         return url;
     }
 
