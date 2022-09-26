@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Favorites" : "Favorites",
     "Settings" : "سیٹینگز",
+    "Month" : "ماہ",
     "Cancel" : "منسوخ کریں",
     "Delete" : "حذف کریں",
     "Download" : "ڈاؤن لوڈ"

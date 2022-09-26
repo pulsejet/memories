@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Favorites" : "விருப்பங்கள்",
     "Settings" : "அமைப்புகள்",
+    "Month" : "மாதம்",
     "Update" : "இற்றைப்படுத்தல்",
     "Cancel" : "இரத்து செய்க",
     "Delete" : "நீக்குக",

@@ -6,6 +6,8 @@ OC.L10N.register(
     "Favorites" : "Eftirlæti",
     "Videos" : "Myndskeið",
     "Settings" : "Stillingar",
+    "Day" : "Dagur",
+    "Hour" : "Klukkustund",
     "Update" : "Uppfæra",
     "Cancel" : "Hætta við",
     "Delete" : "Eyða",

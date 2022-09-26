@@ -3,11 +3,18 @@
     "Folders" : "폴더",
     "Favorites" : "즐겨찾기",
     "Videos" : "동영상",
+    "Archive" : "보관",
     "Settings" : "설정",
+    "Year" : "년",
+    "Month" : "달",
+    "Day" : "일",
+    "Time" : "시간",
+    "Hour" : "시간",
     "Update" : "업데이트",
     "Cancel" : "취소",
     "Delete" : "삭제",
     "Download" : "다운로드",
-    "Favorite" : "즐겨찾기"
+    "Favorite" : "즐겨찾기",
+    "Unarchive" : "보관 해제"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

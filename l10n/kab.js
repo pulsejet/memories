@@ -4,6 +4,7 @@ OC.L10N.register(
     "Favorites" : "Imenyafen",
     "Videos" : "Tividyutin",
     "Settings" : "Iɣewwaṛen",
+    "Hour" : "Asrag",
     "Cancel" : "Sefsex",
     "Delete" : "Kkes",
     "Download" : "Sider",

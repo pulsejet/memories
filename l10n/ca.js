@@ -5,11 +5,19 @@ OC.L10N.register(
     "Folders" : "Carpetes",
     "Favorites" : "Preferits",
     "Videos" : "Vídeos",
+    "Archive" : "Arxiu",
     "Settings" : "Paràmetres",
+    "Year" : "Any",
+    "Month" : "Mes",
+    "Day" : "Dia",
+    "Time" : "Hora",
+    "Hour" : "Hora",
+    "Minute" : "Minut",
     "Update" : "Actualitzar",
     "Cancel" : "Cancel·la",
     "Delete" : "Suprimeix",
     "Download" : "Baixa",
-    "Favorite" : "Preferit"
+    "Favorite" : "Preferit",
+    "Unarchive" : "Desbloquejar"
 },
 "nplurals=2; plural=(n != 1);");

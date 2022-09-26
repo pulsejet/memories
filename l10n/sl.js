@@ -6,6 +6,8 @@ OC.L10N.register(
     "Favorites" : "Priljubljeno",
     "Videos" : "Video posnetki",
     "Settings" : "Nastavitve",
+    "Day" : "Dan",
+    "Hour" : "Ura",
     "Update" : "Posodobi",
     "Cancel" : "Prekliči",
     "Delete" : "Izbriši",
