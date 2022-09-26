@@ -11,6 +11,7 @@
             :key="state"
             :items="list"
             :emit-update="true"
+            :buffer="800"
             key-field="id"
             size-field="size"
             type-field="type"
