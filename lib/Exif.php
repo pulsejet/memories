@@ -268,9 +268,27 @@ class Exif {
     }
 
     /**
+     * Forget the timezone for an epoch timestamp and get the same
+     * time epoch for UTC.
+     *
+     * @param int $epoch
+     */
+    public static function forgetTimezone($epoch) {
+        $dt = new \DateTime();
+        $dt->setTimestamp($epoch);
+        $tz = getenv('TZ'); // at least works on debian ...
+        if ($tz) {
+            $dt->setTimezone(new \DateTimeZone($tz));
+        }
+        $utc = new \DateTime($dt->format('Y-m-d H:i:s'), new \DateTimeZone('UTC'));
+        return $utc->getTimestamp();
+    }
+
+    /**
      * Get the date taken from either the file or exif data if available.
      * @param File $file
      * @param array $exif
+     * @return int unix timestamp
      */
     public static function getDateTaken(File &$file, array &$exif) {
         $dt = $exif['DateTimeOriginal'] ?? null;
@@ -290,7 +308,7 @@ class Exif {
         if ($dateTaken == 0) {
             $dateTaken = $file->getMtime();
         }
-        return $dateTaken;
+        return self::forgetTimezone($dateTaken);
     }
 
     /**
