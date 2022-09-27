@@ -160,11 +160,11 @@ export default class EditDate extends Mixins(GlobalMixin) {
         const calls = photos.map((p) => async () => {
             try {
                 const res = await axios.get<any>(generateUrl(INFO_API_URL, { id: p.fileid }));
-                if (typeof res.data.datetaken !== "string") {
+                if (typeof res.data.datetaken !== "number") {
                     console.error("Invalid date for", p.fileid);
                     return;
                 }
-                p.datetaken = Date.parse(res.data.datetaken + " UTC");
+                p.datetaken = res.data.datetaken * 1000;
             } catch (error) {
                 console.error('Failed to get date info for', p.fileid, error);
             } finally {
@@ -247,6 +247,8 @@ export default class EditDate extends Mixins(GlobalMixin) {
         } catch (e) {
             if (e.response?.data?.message) {
                 showError(e.response.data.message);
+            } else {
+                showError(e);
             }
         } finally {
             this.processing = false;
@@ -264,9 +266,18 @@ export default class EditDate extends Mixins(GlobalMixin) {
         const diff = date.getTime() - dateLast.getTime();
 
         // Get new difference between newest and oldest date
-        const dateNew = this.getDate();
-        const dateLastNew = this.getDateLast();
-        const diffNew = dateNew.getTime() - dateLastNew.getTime();
+        let dateNew: Date;
+        let dateLastNew: Date;
+        let diffNew: number;
+
+        try {
+            dateNew = this.getDate();
+            dateLastNew = this.getDateLast();
+            diffNew = dateNew.getTime() - dateLastNew.getTime();
+        } catch (e) {
+            showError(e);
+            return;
+        }
 
         // Validate if the old is still old
         if (diffNew < 0) {
@@ -290,6 +301,8 @@ export default class EditDate extends Mixins(GlobalMixin) {
             } catch (e) {
                 if (e.response?.data?.message) {
                     showError(e.response.data.message);
+                } else {
+                    showError(e);
                 }
             } finally {
                 this.photosDone++;
@@ -328,24 +341,52 @@ export default class EditDate extends Mixins(GlobalMixin) {
 
     public getDate() {
         const dateNew = new Date();
-        dateNew.setUTCFullYear(parseInt(this.year));
-        dateNew.setUTCMonth(parseInt(this.month) - 1);
-        dateNew.setUTCDate(parseInt(this.day));
-        dateNew.setUTCHours(parseInt(this.hour));
-        dateNew.setUTCMinutes(parseInt(this.minute));
-        dateNew.setUTCSeconds(parseInt(this.second));
+        const year = parseInt(this.year, 10);
+        const month = parseInt(this.month, 10) - 1;
+        const day = parseInt(this.day, 10);
+        const hour = parseInt(this.hour, 10);
+        const minute = parseInt(this.minute, 10);
+        const second = parseInt(this.second, 10) || 0;
+
+        if (isNaN(year)) throw new Error("Invalid year");
+        if (isNaN(month)) throw new Error("Invalid month");
+        if (isNaN(day)) throw new Error("Invalid day");
+        if (isNaN(hour)) throw new Error("Invalid hour");
+        if (isNaN(minute)) throw new Error("Invalid minute");
+        if (isNaN(second)) throw new Error("Invalid second");
+
+        dateNew.setUTCFullYear(year);
+        dateNew.setUTCMonth(month);
+        dateNew.setUTCDate(day);
+        dateNew.setUTCHours(hour);
+        dateNew.setUTCMinutes(minute);
+        dateNew.setUTCSeconds(second);
         return dateNew;
     }
 
     public getDateLast() {
-        const dateLast = new Date();
-        dateLast.setUTCFullYear(parseInt(this.yearLast));
-        dateLast.setUTCMonth(parseInt(this.monthLast) - 1);
-        dateLast.setUTCDate(parseInt(this.dayLast));
-        dateLast.setUTCHours(parseInt(this.hourLast));
-        dateLast.setUTCMinutes(parseInt(this.minuteLast));
-        dateLast.setUTCSeconds(parseInt(this.secondLast));
-        return dateLast;
+        const dateNew = new Date();
+        const year = parseInt(this.yearLast, 10);
+        const month = parseInt(this.monthLast, 10) - 1;
+        const day = parseInt(this.dayLast, 10);
+        const hour = parseInt(this.hourLast, 10);
+        const minute = parseInt(this.minuteLast, 10);
+        const second = parseInt(this.secondLast, 10) || 0;
+
+        if (isNaN(year)) throw new Error("Invalid last year");
+        if (isNaN(month)) throw new Error("Invalid last month");
+        if (isNaN(day)) throw new Error("Invalid last day");
+        if (isNaN(hour)) throw new Error("Invalid last hour");
+        if (isNaN(minute)) throw new Error("Invalid last minute");
+        if (isNaN(second)) throw new Error("Invalid last second");
+
+        dateNew.setUTCFullYear(year);
+        dateNew.setUTCMonth(month);
+        dateNew.setUTCDate(day);
+        dateNew.setUTCHours(hour);
+        dateNew.setUTCMinutes(minute);
+        dateNew.setUTCSeconds(second);
+        return dateNew;
     }
 }
 </script>

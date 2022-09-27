@@ -17,7 +17,7 @@ class TimelineQuery {
 
     public function getInfoById(int $id): array {
         $qb = $this->connection->getQueryBuilder();
-        $qb->select('*')
+        $qb->select('fileid', 'dayid', 'datetaken')
             ->from('memories')
             ->where($qb->expr()->eq('fileid', $qb->createNamedParameter($id, \PDO::PARAM_INT)));
 
@@ -25,10 +25,16 @@ class TimelineQuery {
         $row = $result->fetch();
         $result->closeCursor();
 
+        $utcTs = 0;
+        try {
+            $utcDate = new \DateTime($row['datetaken'], new \DateTimeZone('UTC'));
+            $utcTs = $utcDate->getTimestamp();
+        } catch (\Throwable $e) {}
+
         return [
             'fileid' => intval($row['fileid']),
             'dayid' => intval($row['dayid']),
-            'datetaken' => $row['datetaken'],
+            'datetaken' => $utcTs,
         ];
     }
 }
