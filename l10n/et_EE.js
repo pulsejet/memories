@@ -6,6 +6,7 @@ OC.L10N.register(
     "Videos" : "Videod",
     "Archive" : "Arhiiv",
     "Settings" : "Seaded",
+    "Month" : "Kuu",
     "Day" : "Päev",
     "Time" : "Aeg",
     "Hour" : "Tund",

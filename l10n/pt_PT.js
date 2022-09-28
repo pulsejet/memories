@@ -9,6 +9,7 @@ OC.L10N.register(
     "Videos" : "Vídeos",
     "Archive" : "Arquivar",
     "Settings" : "Definições",
+    "Month" : "Mês",
     "Day" : "Dia",
     "Time" : "Tempo",
     "Hour" : "Hora",

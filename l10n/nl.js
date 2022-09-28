@@ -5,7 +5,10 @@ OC.L10N.register(
     "Folders" : "Mappen",
     "Favorites" : "Favorieten",
     "Videos" : "Videos",
+    "Archive" : "Archiveren",
     "Settings" : "Instellingen",
+    "Year" : "Jaar",
+    "Month" : "Maand",
     "Day" : "Dag",
     "Time" : "Tijd",
     "Hour" : "Uur",
@@ -14,6 +17,7 @@ OC.L10N.register(
     "Cancel" : "Annuleren",
     "Delete" : "Verwijder",
     "Download" : "Download",
-    "Favorite" : "Favoriet"
+    "Favorite" : "Favoriet",
+    "Unarchive" : "Terugzetten uit archief"
 },
 "nplurals=2; plural=(n != 1);");

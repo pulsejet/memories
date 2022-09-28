@@ -4,6 +4,7 @@
     "Videos" : "Videos",
     "Archive" : "Archivar",
     "Settings" : "Configuraciones ",
+    "Month" : "Mes",
     "Day" : "Día",
     "Time" : "Hora",
     "Hour" : "Hora",
@@ -11,6 +12,7 @@
     "Cancel" : "Cancelar",
     "Delete" : "Borrar",
     "Download" : "Descargar",
-    "Favorite" : "Hacer favorito"
+    "Favorite" : "Hacer favorito",
+    "Unarchive" : "Desarchivar"
 },"pluralForm" :"nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }

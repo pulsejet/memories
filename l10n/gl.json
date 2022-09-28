@@ -3,7 +3,10 @@
     "Folders" : "Cartafoles",
     "Favorites" : "Favoritos",
     "Videos" : "Vídeos",
+    "Archive" : "Aquivar",
     "Settings" : "Axustes",
+    "Year" : "Ano",
+    "Month" : "Mes",
     "Day" : "Día",
     "Time" : "Hora",
     "Hour" : "Hora",
@@ -12,6 +15,7 @@
     "Cancel" : "Cancelar",
     "Delete" : "Eliminar",
     "Download" : "Descargar",
-    "Favorite" : "Favorito"
+    "Favorite" : "Favorito",
+    "Unarchive" : "Desarquivar"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

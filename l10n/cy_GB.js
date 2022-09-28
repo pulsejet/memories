@@ -3,7 +3,10 @@ OC.L10N.register(
     {
     "Favorites" : "Ffefrynnau",
     "Videos" : "Fideos",
+    "Archive" : "Archif",
     "Settings" : "Gosodiadau",
+    "Year" : "Blwyddyn",
+    "Month" : "Mis",
     "Day" : "Diwrnod",
     "Time" : "Amser",
     "Update" : "Diweddaru",
