@@ -6,6 +6,7 @@ OC.L10N.register(
     "Videos" : "Videos",
     "Archive" : "Archivar",
     "Settings" : "Configuraciones ",
+    "Month" : "Mes",
     "Day" : "Día",
     "Time" : "Hora",
     "Hour" : "Hora",
@@ -13,6 +14,7 @@ OC.L10N.register(
     "Cancel" : "Cancelar",
     "Delete" : "Borrar",
     "Download" : "Descargar",
-    "Favorite" : "Hacer favorito"
+    "Favorite" : "Hacer favorito",
+    "Unarchive" : "Desarchivar"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

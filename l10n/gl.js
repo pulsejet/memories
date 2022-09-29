@@ -5,7 +5,10 @@ OC.L10N.register(
     "Folders" : "Cartafoles",
     "Favorites" : "Favoritos",
     "Videos" : "Vídeos",
+    "Archive" : "Aquivar",
     "Settings" : "Axustes",
+    "Year" : "Ano",
+    "Month" : "Mes",
     "Day" : "Día",
     "Time" : "Hora",
     "Hour" : "Hora",
@@ -14,6 +17,7 @@ OC.L10N.register(
     "Cancel" : "Cancelar",
     "Delete" : "Eliminar",
     "Download" : "Descargar",
-    "Favorite" : "Favorito"
+    "Favorite" : "Favorito",
+    "Unarchive" : "Desarquivar"
 },
 "nplurals=2; plural=(n != 1);");
