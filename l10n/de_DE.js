@@ -38,7 +38,7 @@ OC.L10N.register(
     "Failed to load some photos" : "Laden einiger Fotos fehlgeschlagen",
     "You are about to download a large number of files. Are you sure?" : "Sie sind dabei, eine große Anzahl an Dateien herunterzuladen. Sind Sie sich sicher?",
     "You are about to delete a large number of files. Are you sure?" : "Sie sind dabei, eine große Anzahl an Dateien zu löschen. Sind Sie sich sicher?",
-    "You are about to touch a large number of files. Are you sure?" : "Sie sind im Begriff, eine große Anzahl von Dateien anzufassen. Sind Sie sich sicher?",
+    "You are about to touch a large number of files. Are you sure?" : "Sie sind im Begriff, eine große Anzahl von Dateien zu ändern. Sind Sie sich sicher?",
     "_{n} selected_::_{n} selected_" : ["{n} ausgewählt","{n} ausgewählt"],
     "Failed to delete files." : "Löschen der Dateien fehlgeschlagen.",
     "Failed to delete {fileName}." : "{fileName} konnte nicht gelöscht werden.",
