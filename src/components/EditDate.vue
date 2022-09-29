@@ -292,7 +292,13 @@ export default class EditDate extends Mixins(GlobalMixin) {
         // Create PATCH requests
         const calls = this.photos.map((p) => async () => {
             try {
-                const pDate = new Date(p.datetaken);
+                let pDate = new Date(p.datetaken);
+
+                // Fallback to start date if invalid date
+                if (isNaN(pDate.getTime())) {
+                    pDate = date;
+                }
+
                 const offset = date.getTime() - pDate.getTime();
                 const pDateNew = new Date(dateNew.getTime() - offset * (diffNew / diff));
                 const res = await axios.patch<any>(generateUrl(EDIT_API_URL, { id: p.fileid }), {
