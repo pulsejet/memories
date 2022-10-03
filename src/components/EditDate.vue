@@ -97,7 +97,7 @@
             </div>
 
             <div v-else>
-                {{ t('memories', 'Loading data ... {n}/{m}', {
+                {{ t('memories', 'Loading data … {n}/{m}', {
                     n: photosDone,
                     m: photos.length,
                 }) }}
