@@ -78,7 +78,7 @@
                 </div>
 
                 <div v-if="processing" class="info-pad">
-                    {{ t('memories', 'Processing ... {n}/{m}', {
+                    {{ t('memories', 'Processing … {n}/{m}', {
                         n: photosDone,
                         m: photos.length,
                     }) }}
