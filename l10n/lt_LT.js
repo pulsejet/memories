@@ -14,8 +14,6 @@ OC.L10N.register(
     "Time" : "Laikas",
     "Hour" : "Valanda",
     "Minute" : "Minutė",
-    "Processing ... {n}/{m}" : "Apdorojama... {n}/{m}",
-    "Loading data ... {n}/{m}" : "Įkeliami duomenys... {n}/{m}",
     "Cannot find this photo anymore!" : "Daugiau nebepavyksta rasti šios nuotraukos!",
     "Show hidden folders" : "Rodyti paslėptus aplankus",
     "Update" : "Atnaujinti",
