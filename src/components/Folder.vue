@@ -72,6 +72,12 @@ export default class Folder extends Mixins(GlobalMixin) {
         // Reset state
         this.error = false;
 
+        // Check if valid path present
+        if (!this.data.path) {
+            this.error = true;
+            return;
+        }
+
         // Get preview infos
         if (!this.data.previewFileInfos) {
             const folderPath = this.data.path.split('/').slice(3).join('/');
