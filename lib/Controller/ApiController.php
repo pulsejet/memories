@@ -183,6 +183,14 @@ class ApiController extends Controller {
         }
         $uid = $user->getUID();
 
+        // Check if post request
+        if ($this->request->getMethod() === 'POST') {
+            $id = $this->request->getParam('body_ids');
+            if (is_null($id)) {
+                return new JSONResponse([], Http::STATUS_BAD_REQUEST);
+            }
+        }
+
         // Split at commas and convert all parts to int
         $day_ids = array_map(function ($part) {
             return intval($part);

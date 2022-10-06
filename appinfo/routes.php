@@ -18,6 +18,7 @@ return [
         // API
         ['name' => 'api#days', 'url' => '/api/days', 'verb' => 'GET'],
         ['name' => 'api#day', 'url' => '/api/days/{id}', 'verb' => 'GET'],
+        ['name' => 'api#day', 'url' => '/api/days/{id}', 'verb' => 'POST'],
         ['name' => 'api#imageInfo', 'url' => '/api/info/{id}', 'verb' => 'GET'],
         ['name' => 'api#imageEdit', 'url' => '/api/edit/{id}', 'verb' => 'PATCH'],
         ['name' => 'api#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
