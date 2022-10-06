@@ -37,6 +37,8 @@ export type IPhoto = {
     etag?: string;
     /** Bit flags */
     flag: number;
+    /** DayID from server */
+    dayid?: number;
     /** Reference to day object */
     d?: IDay;
     /** Video flag from server */

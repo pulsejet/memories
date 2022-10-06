@@ -93,7 +93,7 @@ class ApiController extends Controller {
             $day["detail"] = $this->timelineQuery->getDay(
                 $folder,
                 $uid,
-                $day["dayid"],
+                [$day["dayid"]],
                 $recursive,
                 $archive,
                 $transforms,
@@ -183,6 +183,11 @@ class ApiController extends Controller {
         }
         $uid = $user->getUID();
 
+        // Split at commas and convert all parts to int
+        $day_ids = array_map(function ($part) {
+            return intval($part);
+        }, explode(",", $id));
+
         // Get the folder to show
         $folder = $this->getRequestFolder();
         $recursive = is_null($this->request->getParam('folder'));
@@ -195,7 +200,7 @@ class ApiController extends Controller {
         $list = $this->timelineQuery->getDay(
             $folder,
             $uid,
-            intval($id),
+            $day_ids,
             $recursive,
             $archive,
             $this->getTransformations(),

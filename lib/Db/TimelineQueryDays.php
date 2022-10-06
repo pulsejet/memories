@@ -34,6 +34,7 @@ trait TimelineQueryDays {
             // Convert field types
             $row["fileid"] = intval($row["fileid"]);
             $row["isvideo"] = intval($row["isvideo"]);
+            $row["dayid"] = intval($row["dayid"]);
             if (!$row["isvideo"]) {
                 unset($row["isvideo"]);
             }
@@ -98,7 +99,12 @@ trait TimelineQueryDays {
 
     /**
      * Get the days response from the database for the timeline
-     * @param string $userId
+     *
+     * @param Folder $folder The folder to get the days from
+     * @param bool $recursive Whether to get the days recursively
+     * @param bool $archive Whether to get the days only from the archive folder
+     * @param array $queryTransforms An array of query transforms to apply to the query
+     * @return array The days response
      */
     public function getDays(
         Folder &$folder,
@@ -130,14 +136,20 @@ trait TimelineQueryDays {
         return $this->processDays($rows);
     }
 
-        /**
-     * Get the days response from the database for the timeline
-     * @param string $userId
+    /**
+     * Get the day response from the database for the timeline
+     * @param Folder $folder The folder to get the day from
+     * @param string $uid The user id
+     * @param int[] $dayid The day id
+     * @param bool $recursive If the query should be recursive
+     * @param bool $archive If the query should include only the archive folder
+     * @param array $queryTransforms The query transformations to apply
+     * @return array An array of day responses
      */
     public function getDay(
         Folder &$folder,
         string $uid,
-        int $dayid,
+        array $day_ids,
         bool $recursive,
         bool $archive,
         array $queryTransforms = []
@@ -150,10 +162,10 @@ trait TimelineQueryDays {
         // We don't actually use m.datetaken here, but postgres
         // needs that all fields in ORDER BY are also in SELECT
         // when using DISTINCT on selected fields
-        $query->select($fileid, 'f.etag', 'm.isvideo', 'vco.categoryid', 'm.datetaken')
+        $query->select($fileid, 'f.etag', 'm.isvideo', 'vco.categoryid', 'm.datetaken', 'm.dayid')
             ->from('memories', 'm')
             ->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folder, $recursive, $archive))
-            ->andWhere($query->expr()->eq('m.dayid', $query->createNamedParameter($dayid, IQueryBuilder::PARAM_INT)));
+            ->andWhere($query->expr()->in('m.dayid', $query->createNamedParameter($day_ids, IQueryBuilder::PARAM_INT_ARRAY)));
 
         // Add favorite field
         $this->addFavoriteTag($query, $uid);
