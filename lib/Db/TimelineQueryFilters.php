@@ -44,4 +44,8 @@ trait TimelineQueryFilters {
     public function transformVideoFilter(IQueryBuilder &$query, string $userId) {
         $query->andWhere($query->expr()->eq('m.isvideo', $query->createNamedParameter('1')));
     }
+
+    public function transformLimitDay(IQueryBuilder &$query, string $userId, int $limit) {
+        $query->setMaxResults($limit);
+    }
 }

@@ -87,6 +87,12 @@ class ApiController extends Controller {
             $transforms[] = array($this->timelineQuery, 'transformTagFilter', $tagName);
         }
 
+        // Limit number of responses for day query
+        $limit = $this->request->getParam('limit');
+        if ($limit) {
+            $transforms[] = array($this->timelineQuery, 'transformLimitDay', intval($limit));
+        }
+
         return $transforms;
     }
 
