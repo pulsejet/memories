@@ -264,6 +264,31 @@ class ApiController extends Controller {
     /**
      * @NoAdminRequired
      *
+     * Get list of tags with counts of images
+     * @return JSONResponse
+     */
+    public function tags(): JSONResponse {
+        $user = $this->userSession->getUser();
+        if (is_null($user)) {
+            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // If this isn't the timeline folder then things aren't going to work
+        $folder = $this->getRequestFolder();
+        if (is_null($folder)) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
+
+        // Run actual query
+        $list = $this->timelineQuery->getTags(
+            $folder,
+        );
+        return new JSONResponse($list, Http::STATUS_OK);
+    }
+
+    /**
+     * @NoAdminRequired
+     *
      * Get image info for one file
      * @param string fileid
      */

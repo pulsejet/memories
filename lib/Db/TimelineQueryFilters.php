@@ -44,26 +44,4 @@ trait TimelineQueryFilters {
     public function transformVideoFilter(IQueryBuilder &$query, string $userId) {
         $query->andWhere($query->expr()->eq('m.isvideo', $query->createNamedParameter('1')));
     }
-
-    public function getSystemTagId(IQueryBuilder &$query, string $tagName) {
-        $sqb = $query->getConnection()->getQueryBuilder();
-        return $sqb->select('id')->from('systemtag')->where(
-            $sqb->expr()->andX(
-                $sqb->expr()->eq('name', $sqb->createNamedParameter($tagName)),
-                $sqb->expr()->eq('visibility', $sqb->createNamedParameter(1)),
-            ))->executeQuery()->fetchOne();
-    }
-
-    public function transformTagFilter(IQueryBuilder &$query, string $userId, string $tagName) {
-        $tagId = $this->getSystemTagId($query, $tagName);
-        if ($tagId === FALSE) {
-            $tagId = 0; // cannot abort here; that will show up everything in the response
-        }
-
-        $query->innerJoin('m', 'systemtag_object_mapping', 'stom', $query->expr()->andX(
-            $query->expr()->eq('stom.objecttype', $query->createNamedParameter("files")),
-            $query->expr()->eq('stom.objectid', 'm.fileid'),
-            $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tagId)),
-        ));
-    }
 }
