@@ -208,10 +208,21 @@ class ApiController extends Controller {
         }
         $uid = $user->getUID();
 
-        // Split at commas and convert all parts to int
-        $day_ids = array_map(function ($part) {
-            return intval($part);
-        }, explode(",", $id));
+        // Check for wildcard
+        $day_ids = [];
+        if ($id === "*") {
+            $day_ids = null;
+        } else {
+            // Split at commas and convert all parts to int
+            $day_ids = array_map(function ($part) {
+                return intval($part);
+            }, explode(",", $id));
+        }
+
+        // Check if $day_ids is empty
+        if (!is_null($day_ids) && count($day_ids) === 0) {
+            return new JSONResponse([], Http::STATUS_OK);
+        }
 
         // Get the folder to show
         $folder = $this->getRequestFolder();

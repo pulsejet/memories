@@ -147,7 +147,7 @@ trait TimelineQueryDays {
     public function getDay(
         Folder &$folder,
         string $uid,
-        array $day_ids,
+        $day_ids,
         bool $recursive,
         bool $archive,
         array $queryTransforms = []
@@ -162,8 +162,15 @@ trait TimelineQueryDays {
         // when using DISTINCT on selected fields
         $query->select($fileid, 'f.etag', 'm.isvideo', 'vco.categoryid', 'm.datetaken', 'm.dayid')
             ->from('memories', 'm')
-            ->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folder, $recursive, $archive))
-            ->andWhere($query->expr()->in('m.dayid', $query->createNamedParameter($day_ids, IQueryBuilder::PARAM_INT_ARRAY)));
+            ->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folder, $recursive, $archive));
+
+        // Filter by dayid unless wildcard
+        if (!is_null($day_ids)) {
+            $query->andWhere($query->expr()->in('m.dayid', $query->createNamedParameter($day_ids, IQueryBuilder::PARAM_INT_ARRAY)));
+        } else {
+            // Limit wildcard to 100 results
+            $query->setMaxResults(100);
+        }
 
         // Add favorite field
         $this->addFavoriteTag($query, $uid);

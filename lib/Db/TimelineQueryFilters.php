@@ -46,6 +46,10 @@ trait TimelineQueryFilters {
     }
 
     public function transformLimitDay(IQueryBuilder &$query, string $userId, int $limit) {
+        // The valid range for limit is 1 - 100; otherwise abort
+        if ($limit < 1 || $limit > 100) {
+            return;
+        }
         $query->setMaxResults($limit);
     }
 }
