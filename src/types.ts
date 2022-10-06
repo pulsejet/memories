@@ -1,8 +1,17 @@
 export type IFileInfo = {
+    /** Database file ID */
     fileid: number;
+    /** Full file name, e.g. /pi/test/Qx0dq7dvEXA.jpg */
     filename: string;
+    /** Base name of file e.g. Qx0dq7dvEXA.jpg */
+    basename: string;
+    /** Etag identifier */
     etag: string;
+    /** File has preview available */
     hasPreview: boolean;
+    /** File is marked favorite */
+    favorite: boolean;
+    /** Vue flags */
     flag?: number;
 }
 
