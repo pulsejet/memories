@@ -108,10 +108,9 @@ export default class Tag extends Mixins(GlobalMixin) {
     width: 100%;
     padding: 0 5%;
     text-align: center;
-    font-size: 1.08em;
+    font-size: 1.2em;
     word-wrap: break-word;
     text-overflow: ellipsis;
-    max-height: 35%;
     line-height: 1em;
 }
 
