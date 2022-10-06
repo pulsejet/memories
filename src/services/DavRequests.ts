@@ -4,7 +4,8 @@ import { encodePath } from '@nextcloud/paths'
 import { showError } from '@nextcloud/dialogs'
 import { translate as t, translatePlural as n } from '@nextcloud/l10n'
 import { genFileInfo } from './FileUtils'
-import { IDay, IFileInfo, IPhoto } from '../types';
+import { IDay, IFileInfo, IPhoto, ITag } from '../types';
+import { constants, hashCode } from './Utils';
 import axios from '@nextcloud/axios'
 import client from './DavClient';
 
@@ -374,7 +375,7 @@ export async function downloadFilesByIds(fileIds: number[]) {
  * Get the onThisDay data
  * Query for last 120 years; should be enough
  */
-export async function getOnThisDayData() {
+export async function getOnThisDayData(): Promise<IDay[]> {
     const diffs: { [dayId: number]: number } = {};
     const now = new Date();
     const nowUTC = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
@@ -424,4 +425,34 @@ export async function getOnThisDayData() {
     }
 
     return ans;
+}
+
+/**
+ * Get list of tags and convert to Days response
+ */
+ export async function getTagsData(): Promise<IDay[]> {
+    // Query for photos
+    let data: {
+        count: number;
+        name: string;
+    }[] = [];
+    try {
+        const res = await axios.get<typeof data>(generateUrl('/apps/memories/api/tags'));
+        data = res.data;
+    } catch (e) {
+        throw e;
+    }
+
+    // Convert to days response
+    return [{
+        dayid: constants.TagDayID.TAGS,
+        count: data.length,
+        detail: data.map((tag) => ({
+            name: tag.name,
+            count: tag.count,
+            fileid: hashCode(tag.name),
+            flag: constants.c.FLAG_IS_TAG,
+            istag: true,
+        } as ITag)),
+    }]
 }

@@ -27,6 +27,10 @@
                     :title="t('memories', 'On this day')">
                     <CalendarIcon slot="icon" :size="20" />
                 </NcAppNavigationItem>
+                <NcAppNavigationItem :to="{name: 'tags'}"
+                    :title="t('memories', 'Tags')">
+                    <TagsIcon slot="icon" :size="20" />
+                </NcAppNavigationItem>
             </template>
             <template #footer>
                 <NcAppNavigationSettings :title="t('memories', 'Settings')">
@@ -74,6 +78,7 @@ import Star from 'vue-material-design-icons/Star.vue'
 import Video from 'vue-material-design-icons/Video.vue'
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
+import TagsIcon from 'vue-material-design-icons/Tag.vue';
 
 @Component({
     components: {
@@ -92,6 +97,7 @@ import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
         Video,
         ArchiveIcon,
         CalendarIcon,
+        TagsIcon,
     },
 })
 export default class App extends Mixins(GlobalMixin) {

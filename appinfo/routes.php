@@ -15,6 +15,14 @@ return [
         ['name' => 'page#videos', 'url' => '/videos', 'verb' => 'GET'],
         ['name' => 'page#archive', 'url' => '/archive', 'verb' => 'GET'],
         ['name' => 'page#thisday', 'url' => '/thisday', 'verb' => 'GET'],
+        ['name' => 'page#tags', 'url' => '/tags/{name}', 'verb' => 'GET',
+            'requirements' => [
+                'name' => '.*',
+            ],
+            'defaults' => [
+                'name' => '',
+            ]
+        ],
 
         // API
         ['name' => 'api#days', 'url' => '/api/days', 'verb' => 'GET'],

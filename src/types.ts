@@ -47,6 +47,8 @@ export type IPhoto = {
     isfavorite?: boolean;
     /** Is this a folder */
     isfolder?: boolean;
+    /** Is this a tag */
+    istag?: boolean;
     /** Optional datetaken epoch */
     datetaken?: number;
 }
@@ -58,6 +60,13 @@ export interface IFolder extends IPhoto {
     previewFileInfos?: IFileInfo[];
     /** Name of folder */
     name: string;
+}
+
+export interface ITag extends IPhoto {
+    /** Name of tag */
+    name: string;
+    /** Number of images in this tag */
+    count: number;
 }
 
 export type IRow = {

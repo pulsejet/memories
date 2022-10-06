@@ -42,6 +42,12 @@
                             :data="photo"
                             :rowHeight="rowHeight"
                             :key="photo.fileid" />
+
+                    <Tag v-else-if="photo.flag & c.FLAG_IS_TAG"
+                            :data="photo"
+                            :rowHeight="rowHeight"
+                            :key="photo.fileid" />
+
                     <Photo v-else
                             :data="photo"
                             :rowHeight="rowHeight"
@@ -163,6 +169,7 @@ import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
 import axios from '@nextcloud/axios'
 import Folder from "./Folder.vue";
+import Tag from "./Tag.vue";
 import Photo from "./Photo.vue";
 import EditDate from "./EditDate.vue";
 import FolderTopMatter from "./FolderTopMatter.vue";
@@ -194,6 +201,7 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
 @Component({
     components: {
         Folder,
+        Tag,
         Photo,
         EditDate,
         FolderTopMatter,
@@ -506,6 +514,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             query.set('archive', '1');
         }
 
+        // Tags
+        if (this.$route.name === 'tags' && this.$route.params.name) {
+            query.set('tag', this.$route.params.name);
+        }
+
         // Create query string and append to URL
         const queryStr = query.toString();
         if (queryStr) {
@@ -539,6 +552,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         if (head.dayId === this.TagDayID.FOLDERS) {
             head.name = this.t("memories", "Folders");
             return head.name;
+        } else if (head.dayId === this.TagDayID.TAGS) {
+            head.name = this.t("memories", "Tags");
+            return head.name;
         }
 
         // Make date string
@@ -564,6 +580,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             let data: IDay[] = [];
             if (this.$route.name === 'thisday') {
                 data = await dav.getOnThisDayData();
+            } else if (this.$route.name === 'tags' && !this.$route.params.name) {
+                data = await dav.getTagsData();
             } else {
                 data = (await axios.get<IDay[]>(generateUrl(this.appendQuery(url), params))).data;
             }
@@ -873,9 +891,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 photo.flag |= this.c.FLAG_IS_FAVORITE;
                 delete photo.isfavorite;
             }
-            if (photo.isfolder) {
-                photo.flag |= this.c.FLAG_IS_FOLDER;
-                delete photo.isfolder;
+            if (photo.istag) {
+                photo.flag |= this.c.FLAG_IS_TAG;
+                delete photo.istag;
             }
 
             // Move to next index of photo

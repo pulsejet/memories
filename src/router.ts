@@ -46,16 +46,16 @@
      base: generateUrl('/apps/memories'),
      linkActiveClass: 'active',
      routes: [
-         {
-             path: '/',
-             component: Timeline,
-             name: 'timeline',
-             props: route => ({
-                 rootTitle: t('memories', 'Timeline'),
-             }),
-         },
+        {
+            path: '/',
+            component: Timeline,
+            name: 'timeline',
+            props: route => ({
+                rootTitle: t('memories', 'Timeline'),
+            }),
+        },
 
-         {
+        {
             path: '/folders/:path*',
             component: Timeline,
             name: 'folders',
@@ -97,6 +97,15 @@
             name: 'thisday',
             props: route => ({
                 rootTitle: t('memories', 'On this day'),
+            }),
+        },
+
+        {
+            path: '/tags/:name*',
+            component: Timeline,
+            name: 'tags',
+            props: route => ({
+                rootTitle: t('memories', 'Tags'),
             }),
         },
      ],
