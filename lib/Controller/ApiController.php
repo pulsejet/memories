@@ -148,7 +148,7 @@ class ApiController extends Controller {
         $recursive = is_null($this->request->getParam('folder'));
         $archive = !is_null($this->request->getParam('archive'));
         if (is_null($folder)) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return new JSONResponse(["message" => "Timeline folder not found"], Http::STATUS_NOT_FOUND);
         }
 
         // Run actual query

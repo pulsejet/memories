@@ -563,6 +563,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             const data = res.data;
             if (this.state !== startState) return;
             await this.processDays(data);
+        } catch (err) {
+            console.error(err);
+            showError(err?.response?.data?.message || err.message);
         } finally {
             this.loading--;
         }
