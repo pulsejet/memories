@@ -394,7 +394,7 @@ export async function getOnThisDayData() {
     // Query for photos
     let data: IPhoto[] = [];
     try {
-        const res = await axios.post<IPhoto[]>(generateUrl('/apps/memories/api/days/BODY'), {
+        const res = await axios.post<IPhoto[]>(generateUrl('/apps/memories/api/days'), {
             body_ids: Object.keys(diffs).join(','),
         });
         data = res.data;

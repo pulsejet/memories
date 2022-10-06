@@ -176,20 +176,25 @@ class ApiController extends Controller {
      *
      * @return JSONResponse
      */
+    public function dayPost(): JSONResponse {
+        $id = $this->request->getParam('body_ids');
+        if (is_null($id)) {
+            return new JSONResponse([], Http::STATUS_BAD_REQUEST);
+        }
+        return $this->day($id);
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @return JSONResponse
+     */
     public function day(string $id): JSONResponse {
         $user = $this->userSession->getUser();
         if (is_null($user)) {
             return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
         }
         $uid = $user->getUID();
-
-        // Check if post request
-        if ($this->request->getMethod() === 'POST') {
-            $id = $this->request->getParam('body_ids');
-            if (is_null($id)) {
-                return new JSONResponse([], Http::STATUS_BAD_REQUEST);
-            }
-        }
 
         // Split at commas and convert all parts to int
         $day_ids = array_map(function ($part) {
