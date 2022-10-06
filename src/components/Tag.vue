@@ -9,9 +9,9 @@
             width: rowHeight + 'px',
             height: rowHeight + 'px',
         }">
-        <div class="big-icon">
-            <div class="name">{{ data.name }}</div>
-        </div>
+
+        <div class="bbl"> <NcCounterBubble> {{ data.count }} </NcCounterBubble> </div>
+        <div class="name"> {{ data.name }} </div>
 
         <div class="previews">
             <div class="img-outer" v-for="info of previews" :key="info.fileid">
@@ -35,10 +35,16 @@ import { IPhoto, ITag } from '../types';
 import { generateUrl } from '@nextcloud/router'
 import { getPreviewUrl } from "../services/FileUtils";
 
+import NcCounterBubble from '@nextcloud/vue/dist/Components/NcCounterBubble'
+
 import axios from '@nextcloud/axios'
 import GlobalMixin from '../mixins/GlobalMixin';
 
-@Component({})
+@Component({
+    components: {
+        NcCounterBubble,
+    },
+})
 export default class Tag extends Mixins(GlobalMixin) {
     @Prop() data: ITag;
     @Prop() rowHeight: number;
@@ -89,30 +95,30 @@ export default class Tag extends Mixins(GlobalMixin) {
 </script>
 
 <style lang="scss" scoped>
-.tag {
+.tag, .name, .bubble, img {
     cursor: pointer;
 }
 
-.big-icon {
-    cursor: pointer;
+.name {
     z-index: 100;
     position: absolute;
-    top: 45%; width: 100%;
+    top: 50%; width: 100%;
     transform: translateY(-50%);
+    color: white;
+    width: 100%;
+    padding: 0 5%;
+    text-align: center;
+    font-size: 1.08em;
+    word-wrap: break-word;
+    text-overflow: ellipsis;
+    max-height: 35%;
+    line-height: 1em;
+}
 
-    > .name {
-        cursor: pointer;
-        color: white;
-        width: 100%;
-        padding: 0 5%;
-        text-align: center;
-        font-size: 1.08em;
-        word-wrap: break-word;
-        text-overflow: ellipsis;
-        max-height: 35%;
-        line-height: 1em;
-        position: absolute;
-    }
+.bbl {
+    z-index: 100;
+    position: absolute;
+    top: 6px; right: 5px;
 }
 
 .previews {
