@@ -126,9 +126,7 @@ trait TimelineQueryDays {
               ->orderBy('m.dayid', 'DESC');
 
         // Apply all transformations
-        foreach ($queryTransforms as &$transform) {
-            $transform($query, $uid);
-        }
+        $this->applyAllTransforms($queryTransforms, $query, $uid);
 
         $cursor = $query->executeQuery();
         $rows = $cursor->fetchAll();
@@ -174,9 +172,7 @@ trait TimelineQueryDays {
         $query->orderBy('m.datetaken', 'DESC');
 
         // Apply all transformations
-        foreach ($queryTransforms as &$transform) {
-            $transform($query, $uid);
-        }
+        $this->applyAllTransforms($queryTransforms, $query, $uid);
 
         $cursor = $query->executeQuery();
         $rows = $cursor->fetchAll();

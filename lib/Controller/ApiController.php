@@ -78,7 +78,13 @@ class ApiController extends Controller {
 
         // Filter only videos
         if ($this->request->getParam('vid')) {
-            $transforms[] = array($this->timelineQuery, 'videoFilter');
+            $transforms[] = array($this->timelineQuery, 'transformVideoFilter');
+        }
+
+        // Filter only for one tag
+        $tagName = $this->request->getParam('tag');
+        if ($tagName) {
+            $transforms[] = array($this->timelineQuery, 'transformTagFilter', $tagName);
         }
 
         return $transforms;
