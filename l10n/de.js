@@ -7,7 +7,6 @@ OC.L10N.register(
     "Folders" : "Ordner",
     "Favorites" : "Favoriten",
     "Videos" : "Videos",
-    "Archive" : "Benötigt keine Übersetzung. Hier wird nur die formelle Übersetzung verwendet (de_DE).",
     "Settings" : "Einstellungen",
     "Year" : "Jahr",
     "Month" : "Monat",
