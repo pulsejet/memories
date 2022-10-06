@@ -135,6 +135,15 @@
                     {{ t('memories', 'Edit Date/Time') }}
                     <template #icon> <EditIcon :size="20" /> </template>
                 </NcActionButton>
+
+                <template v-if="selection.size === 1">
+                    <NcActionButton
+                        :aria-label="t('memories', 'View in folder')"
+                        @click="viewInFolder" close-after-click>
+                        {{ t('memories', 'View in folder') }}
+                        <template #icon> <OpenInNewIcon :size="20" /> </template>
+                    </NcActionButton>
+                </template>
             </NcActions>
         </div>
 
@@ -167,6 +176,7 @@ import CheckCircle from 'vue-material-design-icons/CheckCircle.vue';
 import EditIcon from 'vue-material-design-icons/ClockEdit.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import UnarchiveIcon from 'vue-material-design-icons/PackageUp.vue';
+import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue';
 
 const SCROLL_LOAD_DELAY = 100;          // Delay in loading data when scrolling
 const MAX_PHOTO_WIDTH = 175;            // Max width of a photo
@@ -199,6 +209,7 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
         EditIcon,
         ArchiveIcon,
         UnarchiveIcon,
+        OpenInNewIcon,
     }
 })
 export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
@@ -1128,6 +1139,23 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
      */
     async editDateSelection() {
         (<any>this.$refs.editDate).open(Array.from(this.selection.values()));
+    }
+
+    /**
+     * Open the files app with the selected file (one)
+     * Opens a new window.
+     */
+    async viewInFolder() {
+        if (this.selection.size !== 1) return;
+
+        const photo: IPhoto = this.selection.values().next().value;
+        const f = await dav.getFiles([photo.fileid]);
+        if (f.length === 0) return;
+
+        const file = f[0];
+        const dirPath = file.filename.split('/').slice(0, -1).join('/')
+        const url = generateUrl(`/apps/files/?dir=${dirPath}&scrollto=${file.fileid}&openfile=${file.fileid}`);
+        window.open(url, '_blank');
     }
 
     /**
