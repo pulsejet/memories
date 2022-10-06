@@ -90,5 +90,14 @@
                 rootTitle: t('memories', 'Archive'),
             }),
         },
+
+        {
+            path: '/thisday',
+            component: Timeline,
+            name: 'thisday',
+            props: route => ({
+                rootTitle: t('memories', 'On this day'),
+            }),
+        },
      ],
  })

@@ -519,6 +519,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         return this.$route.name === 'timeline'  ||
                this.$route.name === 'favorites' ||
                this.$route.name === 'videos'    ||
+               this.$route.name === 'thisday'   ||
                this.$route.name === 'archive';
     }
 
@@ -559,8 +560,14 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         try {
             this.loading++;
             const startState = this.state;
-            const res = await axios.get<IDay[]>(generateUrl(this.appendQuery(url), params));
-            const data = res.data;
+
+            let data: IDay[] = [];
+            if (this.$route.name === 'thisday') {
+                data = await dav.getOnThisDayData();
+            } else {
+                data = (await axios.get<IDay[]>(generateUrl(this.appendQuery(url), params))).data;
+            }
+
             if (this.state !== startState) return;
             await this.processDays(data);
         } catch (err) {

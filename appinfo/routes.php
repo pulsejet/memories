@@ -14,6 +14,7 @@ return [
         ['name' => 'page#favorites', 'url' => '/favorites', 'verb' => 'GET'],
         ['name' => 'page#videos', 'url' => '/videos', 'verb' => 'GET'],
         ['name' => 'page#archive', 'url' => '/archive', 'verb' => 'GET'],
+        ['name' => 'page#thisday', 'url' => '/thisday', 'verb' => 'GET'],
 
         // API
         ['name' => 'api#days', 'url' => '/api/days', 'verb' => 'GET'],

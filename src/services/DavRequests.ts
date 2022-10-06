@@ -4,7 +4,7 @@ import { encodePath } from '@nextcloud/paths'
 import { showError } from '@nextcloud/dialogs'
 import { translate as t, translatePlural as n } from '@nextcloud/l10n'
 import { genFileInfo } from './FileUtils'
-import { IFileInfo } from '../types';
+import { IDay, IFileInfo, IPhoto } from '../types';
 import axios from '@nextcloud/axios'
 import client from './DavClient';
 
@@ -368,4 +368,60 @@ export async function downloadFilesByIds(fileIds: number[]) {
     });
 
     yield* runInParallel(calls, 10);
+}
+
+/**
+ * Get the onThisDay data
+ * Query for last 120 years; should be enough
+ */
+export async function getOnThisDayData() {
+    const diffs: { [dayId: number]: number } = {};
+    const now = new Date();
+    const nowUTC = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+
+    // Populate dayIds
+    for (let i = 1; i <= 120; i++) {
+        // +- 3 days from this day
+        for (let j = -3; j <= 3; j++) {
+            const d = new Date(nowUTC);
+            d.setFullYear(d.getFullYear() - i);
+            d.setDate(d.getDate() + j);
+            const dayId = Math.floor(d.getTime() / 1000 / 86400)
+            diffs[dayId] = i;
+        }
+    }
+
+    // Query for photos
+    let data: IPhoto[] = [];
+    try {
+        const res = await axios.post<IPhoto[]>(generateUrl('/apps/memories/api/days/BODY'), {
+            body_ids: Object.keys(diffs).join(','),
+        });
+        data = res.data;
+    } catch (e) {
+        throw e;
+    }
+
+    // Group photos by day
+    const ans: IDay[] = [];
+    const prevDayId = Number.MIN_SAFE_INTEGER;
+    for (const photo of data) {
+        if (!photo.dayid) continue;
+
+        // This works because the response is sorted by date taken
+        if (photo.dayid !== prevDayId) {
+            ans.push({
+                dayid: photo.dayid,
+                count: 0,
+                detail: [],
+            });
+        }
+
+        // Add to last day
+        const day = ans[ans.length - 1];
+        day.detail.push(photo);
+        day.count++;
+    }
+
+    return ans;
 }

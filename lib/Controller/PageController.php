@@ -96,4 +96,12 @@ class PageController extends Controller {
     public function archive() {
         return $this->main();
     }
+
+    /**
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function thisday() {
+        return $this->main();
+    }
 }

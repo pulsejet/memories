@@ -23,6 +23,10 @@
                     :title="t('memories', 'Archive')">
                     <ArchiveIcon slot="icon" :size="20" />
                 </NcAppNavigationItem>
+                <NcAppNavigationItem :to="{name: 'thisday'}"
+                    :title="t('memories', 'On this day')">
+                    <CalendarIcon slot="icon" :size="20" />
+                </NcAppNavigationItem>
             </template>
             <template #footer>
                 <NcAppNavigationSettings :title="t('memories', 'Settings')">
@@ -69,6 +73,7 @@ import FolderIcon from 'vue-material-design-icons/Folder.vue'
 import Star from 'vue-material-design-icons/Star.vue'
 import Video from 'vue-material-design-icons/Video.vue'
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
+import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
 
 @Component({
     components: {
@@ -86,6 +91,7 @@ import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
         Star,
         Video,
         ArchiveIcon,
+        CalendarIcon,
     },
 })
 export default class App extends Mixins(GlobalMixin) {
