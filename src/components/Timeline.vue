@@ -1319,8 +1319,16 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     opacity: 0;
     transition: opacity .2s ease-in-out;
 
+    // Show ticks on hover or scroll of main window
     &:hover, &.scrolling {
         opacity: 1;
+    }
+
+    // Hide ticks on mobile unless hovering
+    @include phone {
+        &:not(:hover) > .tick {
+            opacity: 0;
+        }
     }
 
     > .tick {
