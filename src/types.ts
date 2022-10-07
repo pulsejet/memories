@@ -124,6 +124,7 @@ export type TopMatter = {
 export enum TopMatterType {
     NONE = 0,
     FOLDER = 1,
+    TAG = 2,
 }
 export type TopMatterFolder = TopMatter & {
     type: TopMatterType.FOLDER;
