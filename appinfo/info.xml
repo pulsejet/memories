@@ -10,9 +10,9 @@
 * **📸 Photo and Video Timeline**: Sorts photos by date taken, parsed from Exif data.
 * **🤔 Quick Recap**: Jump to anywhere in the timeline instantly.
 * **🖼️ Folders**: Browse your and shared folders with a similar, efficient timeline.
+* **🤖 AI Tagging**: Group photos by people and objects using AI, powered by the [recognize](https://github.com/nextcloud/recognize) app.
 * **🎦 Slideshow**: View photos from your timeline and folders easily.
 * **📱 Mobile Support**: Relive your memories on devices of any shape and size through the web app.
-* **🗑️ Recycle**: Select and delete multiple photos and videos at once.
 * **✏️ Edit Metadata**: Edit Exif dates on photos quickly and easily.
 * **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.
 * **⚡️ Fast**: Memories is extremely fast. Period.
