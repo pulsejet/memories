@@ -23,7 +23,7 @@
                         'p-loading': !(info.flag & c.FLAG_LOADED),
                         'p-load-fail': info.flag & c.FLAG_LOAD_FAIL,
                     }"
-                    :style="extraStyles"
+                    :style="getCoverStyle(info)"
                     @load="info.flag |= c.FLAG_LOADED"
                     @error="info.flag |= c.FLAG_LOAD_FAIL" />
             </div>
@@ -65,9 +65,6 @@ export default class Tag extends Mixins(GlobalMixin) {
     // Error occured fetching thumbs
     private error = false;
 
-    /** Extra styles to apply on image */
-    private extraStyles = {};
-
     mounted() {
         this.refreshPreviews();
     }
@@ -91,7 +88,6 @@ export default class Tag extends Mixins(GlobalMixin) {
     async refreshPreviews() {
         // Reset state
         this.error = false;
-        this.extraStyles = {};
 
         if (this.isFace) {
             await this.refreshPreviewsFace();
@@ -124,7 +120,6 @@ export default class Tag extends Mixins(GlobalMixin) {
             res.data.forEach((p) => p.flag = 0);
             const face = this.chooseFaceDetection(res.data);
             this.previews = [face];
-            this.extraStyles = this.getCoverStyle(face);
         } catch (e) {
             this.error = true;
             console.error(e);
@@ -159,10 +154,15 @@ export default class Tag extends Mixins(GlobalMixin) {
     /**
      * This will produce an inline style to apply to images
      * to zoom toward the detected face
-     *
-     * @return {{}|{transform: string, width: string, transformOrigin: string}}
      */
-    getCoverStyle(detection: IFaceDetection) {
+    getCoverStyle(photo: IPhoto) {
+        if (!this.isFace) {
+            return {};
+        }
+
+        // Pass the same thing
+        const detection = photo as IFaceDetection;
+
         // Zoom into the picture so that the face fills the --photos-face-width box nicely
         // if the face is larger than the image, we don't zoom out (reason for the Math.max)
         const zoom = Math.max(1, (1 / detection.width) * 0.4)
