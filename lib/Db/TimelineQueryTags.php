@@ -53,8 +53,9 @@ trait TimelineQueryTags {
         // WHERE these photos are in the user's requested folder recursively
         $query->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folder, true, false));
 
-        // GROUP by tag name
+        // GROUP and ORDER by tag name
         $query->groupBy('st.name');
+        $query->orderBy('st.name', 'ASC');
 
         // FETCH all tags
         $tags = $query->executeQuery()->fetchAll();
