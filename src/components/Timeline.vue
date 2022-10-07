@@ -1047,7 +1047,10 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     /** Add a photo to selection list */
     selectPhoto(photo: IPhoto, val?: boolean, noUpdate?: boolean) {
-        if (photo.flag & this.c.FLAG_PLACEHOLDER || photo.flag & this.c.FLAG_IS_FOLDER) {
+        if (photo.flag & this.c.FLAG_PLACEHOLDER ||
+            photo.flag & this.c.FLAG_IS_FOLDER ||
+            photo.flag & this.c.FLAG_IS_TAG
+        ) {
             return; // ignore placeholders
         }
 
