@@ -58,6 +58,12 @@ trait TimelineQueryTags {
 
         // FETCH all tags
         $tags = $query->executeQuery()->fetchAll();
+
+        // Post process
+        foreach($tags as &$row) {
+            $row["count"] = intval($row["count"]);
+        }
+
         return $tags;
     }
 }
