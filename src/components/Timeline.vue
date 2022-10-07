@@ -891,6 +891,10 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 photo.flag |= this.c.FLAG_IS_FAVORITE;
                 delete photo.isfavorite;
             }
+            if (photo.isfolder) {
+                photo.flag |= this.c.FLAG_IS_FOLDER;
+                delete photo.isfolder;
+            }
             if (photo.istag) {
                 photo.flag |= this.c.FLAG_IS_TAG;
                 delete photo.istag;
