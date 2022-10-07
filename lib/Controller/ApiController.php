@@ -29,6 +29,7 @@ use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Exif;
+use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
@@ -45,6 +46,7 @@ class ApiController extends Controller {
     private IUserSession $userSession;
     private IDBConnection $connection;
     private IRootFolder $rootFolder;
+    private IAppManager $appManager;
     private TimelineQuery $timelineQuery;
     private TimelineWrite $timelineWrite;
 
@@ -53,7 +55,8 @@ class ApiController extends Controller {
         IConfig $config,
         IUserSession $userSession,
         IDBConnection $connection,
-        IRootFolder $rootFolder) {
+        IRootFolder $rootFolder,
+        IAppManager $appManager) {
 
         parent::__construct(Application::APPNAME, $request);
 
@@ -61,6 +64,7 @@ class ApiController extends Controller {
         $this->userSession = $userSession;
         $this->connection = $connection;
         $this->rootFolder = $rootFolder;
+        $this->appManager = $appManager;
         $this->timelineQuery = new TimelineQuery($this->connection);
         $this->timelineWrite = new TimelineWrite($connection);
     }
@@ -82,15 +86,19 @@ class ApiController extends Controller {
         }
 
         // Filter only for one face
-        $faceId = $this->request->getParam('face');
-        if ($faceId) {
-            $transforms[] = array($this->timelineQuery, 'transformFaceFilter', intval($faceId));
+        if ($this->recognizeIsEnabled()) {
+            $faceId = $this->request->getParam('face');
+            if ($faceId) {
+                $transforms[] = array($this->timelineQuery, 'transformFaceFilter', intval($faceId));
+            }
         }
 
         // Filter only for one tag
-        $tagName = $this->request->getParam('tag');
-        if ($tagName) {
-            $transforms[] = array($this->timelineQuery, 'transformTagFilter', $tagName);
+        if ($this->tagsIsEnabled()) {
+            $tagName = $this->request->getParam('tag');
+            if ($tagName) {
+                $transforms[] = array($this->timelineQuery, 'transformTagFilter', $tagName);
+            }
         }
 
         // Limit number of responses for day query
@@ -296,6 +304,11 @@ class ApiController extends Controller {
             return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
         }
 
+        // Check tags enabled for this user
+        if (!$this->tagsIsEnabled()) {
+            return new JSONResponse(["message" => "Tags not enabled for user"], Http::STATUS_PRECONDITION_FAILED);
+        }
+
         // If this isn't the timeline folder then things aren't going to work
         $folder = $this->getRequestFolder();
         if (is_null($folder)) {
@@ -319,6 +332,11 @@ class ApiController extends Controller {
         $user = $this->userSession->getUser();
         if (is_null($user)) {
             return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // Check faces enabled for this user
+        if (!$this->recognizeIsEnabled()) {
+            return new JSONResponse(["message" => "Recognize app not enabled or not v3+"], Http::STATUS_PRECONDITION_FAILED);
         }
 
         // If this isn't the timeline folder then things aren't going to work
@@ -345,6 +363,11 @@ class ApiController extends Controller {
         $user = $this->userSession->getUser();
         if (is_null($user)) {
             return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // Check faces enabled for this user
+        if (!$this->recognizeIsEnabled()) {
+            return new JSONResponse(["message" => "Recognize app not enabled"], Http::STATUS_PRECONDITION_FAILED);
         }
 
         // If this isn't the timeline folder then things aren't going to work
@@ -546,6 +569,25 @@ class ApiController extends Controller {
         }
 
         return new JSONResponse([], Http::STATUS_OK);
+    }
+
+    /**
+     * Check if tags is enabled for this user
+     */
+    private function tagsIsEnabled(): bool {
+        return $this->appManager->isEnabledForUser('systemtags');
+    }
+
+    /**
+     * Check if recognize is enabled for this user
+     */
+    private function recognizeIsEnabled(): bool {
+        if (!$this->appManager->isEnabledForUser('recognize')) {
+            return false;
+        }
+
+        $v = $this->appManager->getAppInfo('recognize')["version"];
+        return version_compare($v, "3.0.0-alpha", ">=");
     }
 
     /**
