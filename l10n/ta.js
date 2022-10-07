@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Favorites" : "விருப்பங்கள்",
+    "Tags" : "சீட்டுகள்",
     "Settings" : "அமைப்புகள்",
     "Month" : "மாதம்",
     "Update" : "இற்றைப்படுத்தல்",

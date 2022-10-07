@@ -5,6 +5,7 @@ OC.L10N.register(
     "Favorites" : "Онцолсон",
     "Videos" : "Бичлэгүүд",
     "Archive" : "архив",
+    "Tags" : "Tag-үүд",
     "Settings" : "Тохиргоо",
     "Month" : "Сар",
     "Day" : "Өдөр",
@@ -14,6 +15,7 @@ OC.L10N.register(
     "Delete" : "Устгах",
     "Download" : "Татах",
     "Favorite" : "Дуртай",
-    "Unarchive" : "Архиваас гаргах"
+    "Unarchive" : "Архиваас гаргах",
+    "View in folder" : "Хавтасыг нээх"
 },
 "nplurals=2; plural=(n != 1);");

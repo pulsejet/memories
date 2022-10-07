@@ -5,6 +5,7 @@ OC.L10N.register(
     "Favorites" : "Favorites",
     "Videos" : "Videot",
     "Archive" : "Arkiva",
+    "Tags" : "Etiketat",
     "Settings" : "Rregullimet",
     "Month" : "Muaj",
     "Day" : "Ditë",
@@ -15,6 +16,7 @@ OC.L10N.register(
     "Delete" : "Fshi",
     "Download" : "Shkarko",
     "Favorite" : "I/E Preferuar",
-    "Unarchive" : "Hiq nga arkivi"
+    "Unarchive" : "Hiq nga arkivi",
+    "View in folder" : "Shikoje në dosje"
 },
 "nplurals=2; plural=(n != 1);");

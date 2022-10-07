@@ -3,10 +3,12 @@ OC.L10N.register(
     {
     "Favorites" : "ລາຍການທີ່ມັກ",
     "Videos" : "ວິດີໂອ",
+    "Tags" : "ປ້າຍກຳກັບ",
     "Settings" : "ການຕັ້ງຄ່າ",
     "Cancel" : "ຍົກເລີກ",
     "Delete" : "ລຶບ",
     "Download" : "ດາວໂຫລດ",
-    "Favorite" : "ລາຍການທີ່ມັກ"
+    "Favorite" : "ລາຍການທີ່ມັກ",
+    "View in folder" : "ເບິ່ງໃນໂຟນເດີ"
 },
 "nplurals=1; plural=0;");

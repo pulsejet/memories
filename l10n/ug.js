@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Favorites" : "يىغقۇچ",
+    "Tags" : "بەلگەلەر",
     "Settings" : "تەڭشەكلەر",
     "Month" : "ئاي",
     "Time" : "ۋاقىت",

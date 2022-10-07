@@ -6,6 +6,7 @@ OC.L10N.register(
     "Favorites" : "Plej ŝatataj",
     "Videos" : "Videaĵoj",
     "Archive" : "Arĥivujo",
+    "Tags" : "Etikedoj",
     "Settings" : "Agordoj",
     "Month" : "Monato",
     "Day" : "Tago",
@@ -15,6 +16,7 @@ OC.L10N.register(
     "Cancel" : "Nuligi",
     "Delete" : "Forigi",
     "Download" : "Elŝuti",
-    "Favorite" : "Pliŝatati"
+    "Favorite" : "Pliŝatati",
+    "View in folder" : "Vidi en dosierujo"
 },
 "nplurals=2; plural=(n != 1);");

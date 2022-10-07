@@ -4,6 +4,7 @@
     "Favorites" : "Disukai",
     "Videos" : "Video",
     "Archive" : "Arsip",
+    "Tags" : "Tag",
     "Settings" : "Setelan",
     "Month" : "Bulan",
     "Day" : "Hari",
@@ -13,6 +14,7 @@
     "Cancel" : "Membatalkan",
     "Delete" : "Hapus",
     "Download" : "Unduh",
-    "Favorite" : "Favorit"
+    "Favorite" : "Favorit",
+    "View in folder" : "Lihat dalam folder"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

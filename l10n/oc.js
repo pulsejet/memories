@@ -4,6 +4,7 @@ OC.L10N.register(
     "Folders" : "Repertòris",
     "Favorites" : "Favorits",
     "Archive" : "Archiu",
+    "Tags" : "Etiquetas",
     "Settings" : "Paramètres",
     "Year" : "Annada",
     "Month" : "Mes",

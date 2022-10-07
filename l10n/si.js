@@ -11,6 +11,7 @@ OC.L10N.register(
     "Update" : "යාවත්කාල",
     "Cancel" : "අවලංගු කරන්න",
     "Download" : "බාගන්න",
-    "Favorite" : "ප්‍රියතම"
+    "Favorite" : "ප්‍රියතම",
+    "View in folder" : "බහාලුමේ බලන්න"
 },
 "nplurals=2; plural=(n != 1);");

@@ -8,6 +8,7 @@ OC.L10N.register(
     "Favorites" : "Favoritter",
     "Videos" : "Videoer",
     "Archive" : "Arkivér",
+    "On this day" : "På denne dag",
     "Settings" : "Indstillinger",
     "Year" : "År",
     "Month" : "Måned",

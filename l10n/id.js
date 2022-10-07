@@ -6,6 +6,7 @@ OC.L10N.register(
     "Favorites" : "Disukai",
     "Videos" : "Video",
     "Archive" : "Arsip",
+    "Tags" : "Tag",
     "Settings" : "Setelan",
     "Month" : "Bulan",
     "Day" : "Hari",
@@ -15,6 +16,7 @@ OC.L10N.register(
     "Cancel" : "Membatalkan",
     "Delete" : "Hapus",
     "Download" : "Unduh",
-    "Favorite" : "Favorit"
+    "Favorite" : "Favorit",
+    "View in folder" : "Lihat dalam folder"
 },
 "nplurals=1; plural=0;");

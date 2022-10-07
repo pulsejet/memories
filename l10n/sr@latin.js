@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Favorites" : "Omiljene",
     "Videos" : "Video",
+    "Tags" : "Oznake",
     "Settings" : "Поставке",
     "Update" : "Ažuriraj",
     "Cancel" : "Otkaži",

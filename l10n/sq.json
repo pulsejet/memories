@@ -3,6 +3,7 @@
     "Favorites" : "Favorites",
     "Videos" : "Videot",
     "Archive" : "Arkiva",
+    "Tags" : "Etiketat",
     "Settings" : "Rregullimet",
     "Month" : "Muaj",
     "Day" : "Ditë",
@@ -13,6 +14,7 @@
     "Delete" : "Fshi",
     "Download" : "Shkarko",
     "Favorite" : "I/E Preferuar",
-    "Unarchive" : "Hiq nga arkivi"
+    "Unarchive" : "Hiq nga arkivi",
+    "View in folder" : "Shikoje në dosje"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -3,6 +3,7 @@
     "Favorites" : "Lemmikud",
     "Videos" : "Videod",
     "Archive" : "Arhiiv",
+    "Tags" : "Sildid",
     "Settings" : "Seaded",
     "Month" : "Kuu",
     "Day" : "Päev",
@@ -12,6 +13,7 @@
     "Cancel" : "Loobu",
     "Delete" : "Kustuta",
     "Download" : "Lae alla",
-    "Favorite" : "Lemmik"
+    "Favorite" : "Lemmik",
+    "View in folder" : "Vaata kaustas"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

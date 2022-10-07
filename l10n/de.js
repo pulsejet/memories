@@ -7,6 +7,7 @@ OC.L10N.register(
     "Folders" : "Ordner",
     "Favorites" : "Favoriten",
     "Videos" : "Videos",
+    "On this day" : "An diesem Tag",
     "Settings" : "Einstellungen",
     "Year" : "Jahr",
     "Month" : "Monat",

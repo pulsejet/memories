@@ -5,6 +5,7 @@ OC.L10N.register(
     "Favorites" : "Ưa thích",
     "Videos" : "Phim",
     "Archive" : "Lưu trữ",
+    "Tags" : "Nhãn",
     "Settings" : "Cài đặt",
     "Year" : "Năm",
     "Month" : "Tháng",
@@ -15,6 +16,7 @@ OC.L10N.register(
     "Delete" : "Xóa",
     "Download" : "Tải xuống",
     "Favorite" : "Ưa thích",
-    "Unarchive" : "Bỏ lưu trữ"
+    "Unarchive" : "Bỏ lưu trữ",
+    "View in folder" : "Xem trong thư mục"
 },
 "nplurals=1; plural=0;");

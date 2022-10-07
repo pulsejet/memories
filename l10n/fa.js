@@ -6,6 +6,7 @@ OC.L10N.register(
     "Favorites" : "مورد علاقه‌ها",
     "Videos" : "فیلم ها ",
     "Archive" : "بایگانی",
+    "Tags" : "برچسب ها",
     "Settings" : "تنظیمات",
     "Year" : "سال",
     "Month" : "ماه",
@@ -15,6 +16,7 @@ OC.L10N.register(
     "Cancel" : "لغو",
     "Delete" : "حذف",
     "Download" : "بارگیری",
-    "Favorite" : "مورد‌ ‌علاقه‌"
+    "Favorite" : "مورد‌ ‌علاقه‌",
+    "View in folder" : "مشاهده در پوشه"
 },
 "nplurals=2; plural=(n > 1);");

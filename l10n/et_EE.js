@@ -5,6 +5,7 @@ OC.L10N.register(
     "Favorites" : "Lemmikud",
     "Videos" : "Videod",
     "Archive" : "Arhiiv",
+    "Tags" : "Sildid",
     "Settings" : "Seaded",
     "Month" : "Kuu",
     "Day" : "Päev",
@@ -14,6 +15,7 @@ OC.L10N.register(
     "Cancel" : "Loobu",
     "Delete" : "Kustuta",
     "Download" : "Lae alla",
-    "Favorite" : "Lemmik"
+    "Favorite" : "Lemmik",
+    "View in folder" : "Vaata kaustas"
 },
 "nplurals=2; plural=(n != 1);");

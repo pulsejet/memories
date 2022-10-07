@@ -1,5 +1,6 @@
 { "translations": {
     "Favorites" : "Favoritos",
+    "Tags" : "Etiquettas",
     "Settings" : "Configurationes",
     "Month" : "Mense",
     "Day" : "Die",
@@ -8,6 +9,7 @@
     "Cancel" : "Cancellar",
     "Delete" : "Deler",
     "Download" : "Discargar",
-    "Favorite" : "Favorite"
+    "Favorite" : "Favorite",
+    "View in folder" : "Vider in dossier"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

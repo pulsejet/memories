@@ -5,6 +5,7 @@ OC.L10N.register(
     "Favorites" : "Favorite",
     "Videos" : "Fișiere video",
     "Archive" : "Arhivă",
+    "Tags" : "Etichete",
     "Settings" : "Setări",
     "Year" : "An",
     "Month" : "Luna",
@@ -14,6 +15,7 @@ OC.L10N.register(
     "Cancel" : "Anulare",
     "Delete" : "Șterge",
     "Download" : "Descărcare",
-    "Favorite" : "Favorite"
+    "Favorite" : "Favorite",
+    "View in folder" : "Vizualizează în director"
 },
 "nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));");

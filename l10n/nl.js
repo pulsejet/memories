@@ -6,6 +6,8 @@ OC.L10N.register(
     "Favorites" : "Favorieten",
     "Videos" : "Videos",
     "Archive" : "Archiveren",
+    "On this day" : "Vandaag",
+    "Tags" : "Tags",
     "Settings" : "Instellingen",
     "Year" : "Jaar",
     "Month" : "Maand",
@@ -18,6 +20,7 @@ OC.L10N.register(
     "Delete" : "Verwijder",
     "Download" : "Download",
     "Favorite" : "Favoriet",
-    "Unarchive" : "Terugzetten uit archief"
+    "Unarchive" : "Terugzetten uit archief",
+    "View in folder" : "Bekijken in map"
 },
 "nplurals=2; plural=(n != 1);");

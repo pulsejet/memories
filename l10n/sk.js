@@ -6,6 +6,8 @@ OC.L10N.register(
     "Favorites" : "Obľúbené",
     "Videos" : "Videá",
     "Archive" : "Archív",
+    "On this day" : "V tento deň",
+    "Tags" : "Štítky",
     "Settings" : "Nastavenia",
     "Year" : "Rok",
     "Month" : "Mesiac",
@@ -18,6 +20,7 @@ OC.L10N.register(
     "Delete" : "Vymazať",
     "Download" : "Sťahovanie",
     "Favorite" : "Obľúbené",
-    "Unarchive" : "Vybrať z archívu"
+    "Unarchive" : "Vybrať z archívu",
+    "View in folder" : "Zobraziť v priečinku"
 },
 "nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);");

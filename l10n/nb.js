@@ -6,6 +6,8 @@ OC.L10N.register(
     "Favorites" : "Favoritter",
     "Videos" : "Filmer",
     "Archive" : "Arkiv",
+    "On this day" : "På denne dagen",
+    "Tags" : "Merkelapper",
     "Settings" : "Innstillinger",
     "Year" : "År",
     "Month" : "Måned",
@@ -17,6 +19,7 @@ OC.L10N.register(
     "Delete" : "Slett",
     "Download" : "Last ned",
     "Favorite" : "Favoritt",
-    "Unarchive" : "Dearkivere"
+    "Unarchive" : "Dearkivere",
+    "View in folder" : "Vis i mappe"
 },
 "nplurals=2; plural=(n != 1);");

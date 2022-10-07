@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Favorites" : "Favorites",
     "Videos" : "Videos",
+    "Tags" : "Tags",
     "Settings" : "Sozlamalar",
     "Update" : "Update",
     "Cancel" : "Cancel",
