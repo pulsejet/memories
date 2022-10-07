@@ -37,7 +37,7 @@ import { IPhoto, ITag } from '../types';
 import { generateUrl } from '@nextcloud/router'
 import { getPreviewUrl } from "../services/FileUtils";
 
-import NcCounterBubble from '@nextcloud/vue/dist/Components/NcCounterBubble'
+import { NcCounterBubble } from '@nextcloud/vue'
 
 import axios from '@nextcloud/axios'
 import GlobalMixin from '../mixins/GlobalMixin';
