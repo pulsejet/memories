@@ -81,6 +81,12 @@ class ApiController extends Controller {
             $transforms[] = array($this->timelineQuery, 'transformVideoFilter');
         }
 
+        // Filter only for one face
+        $faceId = $this->request->getParam('face');
+        if ($faceId) {
+            $transforms[] = array($this->timelineQuery, 'transformFaceFilter', intval($faceId));
+        }
+
         // Filter only for one tag
         $tagName = $this->request->getParam('tag');
         if ($tagName) {
@@ -299,6 +305,57 @@ class ApiController extends Controller {
         // Run actual query
         $list = $this->timelineQuery->getTags(
             $folder,
+        );
+        return new JSONResponse($list, Http::STATUS_OK);
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * Get list of faces with counts of images
+     * @return JSONResponse
+     */
+    public function faces(): JSONResponse {
+        $user = $this->userSession->getUser();
+        if (is_null($user)) {
+            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // If this isn't the timeline folder then things aren't going to work
+        $folder = $this->getRequestFolder();
+        if (is_null($folder)) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
+
+        // Run actual query
+        $list = $this->timelineQuery->getFaces(
+            $folder,
+        );
+        return new JSONResponse($list, Http::STATUS_OK);
+    }
+
+    /**
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     *
+     * Get preview objects for a face ID
+     * @return JSONResponse
+     */
+    public function facePreviews(string $id): JSONResponse {
+        $user = $this->userSession->getUser();
+        if (is_null($user)) {
+            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // If this isn't the timeline folder then things aren't going to work
+        $folder = $this->getRequestFolder();
+        if (is_null($folder)) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
+
+        // Run actual query
+        $list = $this->timelineQuery->getFacePreviews(
+            $folder, intval($id),
         );
         return new JSONResponse($list, Http::STATUS_OK);
     }

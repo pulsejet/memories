@@ -101,6 +101,15 @@
         },
 
         {
+            path: '/people/:name*',
+            component: Timeline,
+            name: 'people',
+            props: route => ({
+                rootTitle: t('memories', 'People'),
+            }),
+        },
+
+        {
             path: '/tags/:name*',
             component: Timeline,
             name: 'tags',

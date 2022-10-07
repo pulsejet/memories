@@ -9,6 +9,7 @@ class TimelineQuery {
     use TimelineQueryDays;
     use TimelineQueryFilters;
     use TimelineQueryTags;
+    use TimelineQueryFaces;
 
     protected IDBConnection $connection;
 

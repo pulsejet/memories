@@ -514,6 +514,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             query.set('archive', '1');
         }
 
+        // People
+        if (this.$route.name === 'people' && this.$route.params.name) {
+            query.set('face', this.$route.params.name);
+        }
+
         // Tags
         if (this.$route.name === 'tags' && this.$route.params.name) {
             query.set('tag', this.$route.params.name);
@@ -550,11 +555,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
         // Special headers
         if (head.dayId === this.TagDayID.FOLDERS) {
-            head.name = this.t("memories", "Folders");
-            return head.name;
+            return (head.name = this.t("memories", "Folders"));
         } else if (head.dayId === this.TagDayID.TAGS) {
-            head.name = this.t("memories", "Tags");
-            return head.name;
+            return (head.name = this.t("memories", "Tags"));
+        } else if (head.dayId === this.TagDayID.FACES) {
+            return (head.name = this.t("memories", "People"));
         }
 
         // Make date string
@@ -582,6 +587,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 data = await dav.getOnThisDayData();
             } else if (this.$route.name === 'tags' && !this.$route.params.name) {
                 data = await dav.getTagsData();
+            } else if (this.$route.name === 'people' && !this.$route.params.name) {
+                data = await dav.getPeopleData();
             } else {
                 data = (await axios.get<IDay[]>(generateUrl(this.appendQuery(url), params))).data;
             }
@@ -894,6 +901,10 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             if (photo.isfolder) {
                 photo.flag |= this.c.FLAG_IS_FOLDER;
                 delete photo.isfolder;
+            }
+            if (photo.isface) {
+                photo.flag |= this.c.FLAG_IS_FACE;
+                delete photo.isface;
             }
             if (photo.istag) {
                 photo.flag |= this.c.FLAG_IS_TAG;

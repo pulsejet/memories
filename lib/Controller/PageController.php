@@ -68,6 +68,7 @@ class PageController extends Controller {
 
         // Apps enabled
         $this->initialState->provideInitialState('systemtags', $this->appManager->isEnabledForUser('systemtags') === true);
+        $this->initialState->provideInitialState('recognize', $this->appManager->isEnabledForUser('recognize') === true);
 
         $response = new TemplateResponse($this->appName, 'main');
         return $response;
@@ -110,6 +111,14 @@ class PageController extends Controller {
      * @NoCSRFRequired
      */
     public function thisday() {
+        return $this->main();
+    }
+
+    /**
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function people() {
         return $this->main();
     }
 

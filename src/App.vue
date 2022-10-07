@@ -19,6 +19,10 @@
                     :title="t('memories', 'Videos')">
                     <Video slot="icon" :size="20" />
                 </NcAppNavigationItem>
+                <NcAppNavigationItem :to="{name: 'people'}"
+                    :title="t('memories', 'People')">
+                    <PeopleIcon slot="icon" :size="20" />
+                </NcAppNavigationItem>
                 <NcAppNavigationItem :to="{name: 'archive'}"
                     :title="t('memories', 'Archive')">
                     <ArchiveIcon slot="icon" :size="20" />
@@ -79,6 +83,7 @@ import Star from 'vue-material-design-icons/Star.vue'
 import Video from 'vue-material-design-icons/Video.vue'
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
+import PeopleIcon from 'vue-material-design-icons/AccountBoxMultiple.vue';
 import TagsIcon from 'vue-material-design-icons/Tag.vue';
 
 @Component({
@@ -98,6 +103,7 @@ import TagsIcon from 'vue-material-design-icons/Tag.vue';
         Video,
         ArchiveIcon,
         CalendarIcon,
+        PeopleIcon,
         TagsIcon,
     },
 })

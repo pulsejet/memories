@@ -430,7 +430,7 @@ export async function getOnThisDayData(): Promise<IDay[]> {
 /**
  * Get list of tags and convert to Days response
  */
- export async function getTagsData(): Promise<IDay[]> {
+export async function getTagsData(): Promise<IDay[]> {
     // Query for photos
     let data: {
         count: number;
@@ -454,5 +454,37 @@ export async function getOnThisDayData(): Promise<IDay[]> {
             flag: constants.c.FLAG_IS_TAG,
             istag: true,
         } as ITag)),
+    }]
+}
+
+/**
+ * Get list of tags and convert to Days response
+ */
+ export async function getPeopleData(): Promise<IDay[]> {
+    // Query for photos
+    let data: {
+        id: number;
+        count: number;
+        name: string;
+    }[] = [];
+    try {
+        const res = await axios.get<typeof data>(generateUrl('/apps/memories/api/faces'));
+        data = res.data;
+    } catch (e) {
+        throw e;
+    }
+
+    // Convert to days response
+    return [{
+        dayid: constants.TagDayID.FACES,
+        count: data.length,
+        detail: data.map((face) => ({
+            name: face.name,
+            count: face.count,
+            fileid: hashCode(face.name),
+            faceid: face.id,
+            istag: true,
+            isface: true,
+        } as any)),
     }]
 }

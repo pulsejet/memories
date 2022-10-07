@@ -3,8 +3,9 @@
         hasPreview: previews.length > 0,
         onePreview: previews.length === 1,
         hasError: error,
+        isFace: isFace,
     }"
-        @click="openTag(data)"
+        @click="openTag()"
         v-bind:style="{
             width: rowHeight + 'px',
             height: rowHeight + 'px',
@@ -22,6 +23,7 @@
                         'p-loading': !(info.flag & c.FLAG_LOADED),
                         'p-load-fail': info.flag & c.FLAG_LOAD_FAIL,
                     }"
+                    :style="extraStyles"
                     @load="info.flag |= c.FLAG_LOADED"
                     @error="info.flag |= c.FLAG_LOAD_FAIL" />
             </div>
@@ -39,6 +41,14 @@ import NcCounterBubble from '@nextcloud/vue/dist/Components/NcCounterBubble'
 
 import axios from '@nextcloud/axios'
 import GlobalMixin from '../mixins/GlobalMixin';
+import { constants } from '../services/Utils';
+
+interface IFaceDetection extends IPhoto {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
 
 @Component({
     components: {
@@ -55,8 +65,8 @@ export default class Tag extends Mixins(GlobalMixin) {
     // Error occured fetching thumbs
     private error = false;
 
-    /** Passthrough */
-    private getPreviewUrl = getPreviewUrl;
+    /** Extra styles to apply on image */
+    private extraStyles = {};
 
     mounted() {
         this.refreshPreviews();
@@ -67,12 +77,31 @@ export default class Tag extends Mixins(GlobalMixin) {
         this.refreshPreviews();
     }
 
-    /** Refresh previews */
+    getPreviewUrl(fileid: number, etag: string) {
+        if (this.isFace) {
+            return generateUrl(`/core/preview?fileId=${fileid}&c=${etag}&x=2048&y=2048&forceIcon=0&a=1`);
+        }
+        return getPreviewUrl(fileid, etag);
+    }
+
+    get isFace() {
+        return this.data.flag & constants.c.FLAG_IS_FACE;
+    }
+
     async refreshPreviews() {
         // Reset state
         this.error = false;
+        this.extraStyles = {};
 
-        // Get previews
+        if (this.isFace) {
+            await this.refreshPreviewsFace();
+        } else {
+            await this.refreshPreviewsTag();
+        }
+    }
+
+    /** Refresh previews for tag */
+    async refreshPreviewsTag() {
         const url = `/apps/memories/api/days/*?limit=4&tag=${this.data.name}`;
         try {
             const res = await axios.get<IPhoto[]>(generateUrl(url));
@@ -87,9 +116,66 @@ export default class Tag extends Mixins(GlobalMixin) {
         }
     }
 
+    /** Refresh previews for face */
+    async refreshPreviewsFace() {
+        const url = `/apps/memories/api/face-previews/${this.data.faceid}`;
+        try {
+            const res = await axios.get<IFaceDetection[]>(generateUrl(url));
+            res.data.forEach((p) => p.flag = 0);
+            const face = this.chooseFaceDetection(res.data);
+            this.previews = [face];
+            this.extraStyles = this.getCoverStyle(face);
+        } catch (e) {
+            this.error = true;
+            console.error(e);
+        }
+    }
+
     /** Open tag */
-    openTag(tag: ITag) {
-        this.$router.push({ name: 'tags', params: { name: tag.name }});
+    openTag() {
+        if (this.isFace) {
+            this.$router.push({ name: 'people', params: { name: this.data.faceid.toString() }});
+        } else {
+            this.$router.push({ name: 'tags', params: { name: this.data.name }});
+        }
+    }
+
+    /** Choose the most appropriate face detection */
+    private chooseFaceDetection(detections: IFaceDetection[]) {
+        const scoreFacePosition = (faceDetection: IFaceDetection) => {
+            return Math.max(0, -1 * (faceDetection.x - faceDetection.width * 0.5))
+            + Math.max(0, -1 * (faceDetection.y - faceDetection.height * 0.5))
+            + Math.max(0, -1 * (1 - (faceDetection.x + faceDetection.width) - faceDetection.width * 0.5))
+            + Math.max(0, -1 * (1 - (faceDetection.y + faceDetection.height) - faceDetection.height * 0.5))
+        }
+
+        return detections.sort((a, b) =>
+                scoreFacePosition(a)
+                - scoreFacePosition(b)
+        )[0];
+    }
+
+    /**
+     * This will produce an inline style to apply to images
+     * to zoom toward the detected face
+     *
+     * @return {{}|{transform: string, width: string, transformOrigin: string}}
+     */
+    getCoverStyle(detection: IFaceDetection) {
+        // Zoom into the picture so that the face fills the --photos-face-width box nicely
+        // if the face is larger than the image, we don't zoom out (reason for the Math.max)
+        const zoom = Math.max(1, (1 / detection.width) * 0.4)
+
+        const horizontalCenterOfFace = (detection.x + detection.width / 2) * 100
+        const verticalCenterOfFace = (detection.y + detection.height / 2) * 100
+
+        return {
+            // we translate the image so that the center of the detected face is in the center
+            // and add the zoom
+            transform: `translate(calc(${this.rowHeight}px/2 - ${horizontalCenterOfFace}% ), calc(${this.rowHeight}px/2 - ${verticalCenterOfFace}% )) scale(${zoom})`,
+            // this is necessary for the zoom to zoom toward the center of the face
+            transformOrigin: `${horizontalCenterOfFace}% ${verticalCenterOfFace}%`,
+        }
     }
 }
 </script>
@@ -112,6 +198,12 @@ export default class Tag extends Mixins(GlobalMixin) {
     word-wrap: break-word;
     text-overflow: ellipsis;
     line-height: 1em;
+
+    .isFace > & {
+        top: unset;
+        bottom: 10%;
+        transform: unset;
+    }
 }
 
 .bbl {
@@ -134,6 +226,7 @@ export default class Tag extends Mixins(GlobalMixin) {
         margin: 0;
         width: 50%;
         height: 50%;
+        overflow: hidden;
         display: inline-block;
 
         .tag.onePreview > & {
@@ -143,7 +236,6 @@ export default class Tag extends Mixins(GlobalMixin) {
         > img {
             padding: 0;
             width: 100%;
-            height: 100%;
             filter: brightness(50%);
             cursor: pointer;
 

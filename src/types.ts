@@ -49,6 +49,8 @@ export type IPhoto = {
     isfolder?: boolean;
     /** Is this a tag */
     istag?: boolean;
+    /** Is this a face */
+    isface?: boolean;
     /** Optional datetaken epoch */
     datetaken?: number;
 }
@@ -67,6 +69,8 @@ export interface ITag extends IPhoto {
     name: string;
     /** Number of images in this tag */
     count: number;
+    /** ID of face if this is a face */
+    faceid?: number;
 }
 
 export type IRow = {
