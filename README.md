@@ -16,6 +16,11 @@
 * **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.
 * **⚡️ Fast**: Memories is extremely fast. Period. More details below.
 
+## How to support development
+* **🌟 Star this repository**: This is the easiest way to support the project and costs nothing.
+* **🪲 Report bugs**: If you find a bug, please report it on the issue tracker.
+* **📝 Contribute**: If you want to contribute, please read file / comment on an issue and ask for guidance.
+
 ## 🚀 Installation
 
 1. Install the app from the Nextcloud app store
