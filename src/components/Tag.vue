@@ -149,10 +149,11 @@ export default class Tag extends Mixins(GlobalMixin) {
             + Math.max(0, -1 * (1 - (faceDetection.y + faceDetection.height) - faceDetection.height * 0.5))
         }
 
-        return detections.sort((a, b) =>
-                scoreFacePosition(a)
-                - scoreFacePosition(b)
-        )[0];
+        const scoreFace = (faceDetection: IFaceDetection) => {
+            return (1 - faceDetection.width * faceDetection.height) + scoreFacePosition(faceDetection);
+        }
+
+        return detections.sort((a, b) => scoreFace(a) - scoreFace(b))[0];
     }
 
     /**
@@ -236,7 +237,7 @@ export default class Tag extends Mixins(GlobalMixin) {
         > img {
             padding: 0;
             width: 100%;
-            filter: brightness(50%);
+            filter: brightness(60%);
             cursor: pointer;
 
             transition: filter 0.2s ease-in-out;
