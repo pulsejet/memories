@@ -6,6 +6,7 @@ OC.L10N.register(
     "Favorites" : "Preferits",
     "Videos" : "Vídeos",
     "Archive" : "Arxiu",
+    "On this day" : "Aquest mateix dia",
     "Settings" : "Paràmetres",
     "Year" : "Any",
     "Month" : "Mes",

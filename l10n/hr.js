@@ -6,6 +6,7 @@ OC.L10N.register(
     "Favorites" : "Favoriti",
     "Videos" : "Videozapisi",
     "Archive" : "Arhiva",
+    "Tags" : "Oznake",
     "Settings" : "Postavke",
     "Year" : "Godina",
     "Month" : "Mjesec",
@@ -18,6 +19,7 @@ OC.L10N.register(
     "Delete" : "Izbriši",
     "Download" : "Preuzmi",
     "Favorite" : "Favorit",
-    "Unarchive" : "Dearhiviraj"
+    "Unarchive" : "Dearhiviraj",
+    "View in folder" : "Prikaži u mapi"
 },
 "nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;");

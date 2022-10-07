@@ -6,6 +6,8 @@ OC.L10N.register(
     "Favorites" : "收藏",
     "Videos" : "视频",
     "Archive" : "归档",
+    "On this day" : "当年今日",
+    "Tags" : "标签",
     "Settings" : "设置",
     "Year" : "年",
     "Month" : "月",
@@ -18,6 +20,7 @@ OC.L10N.register(
     "Delete" : "删除",
     "Download" : "下载",
     "Favorite" : "收藏",
-    "Unarchive" : "取消归档"
+    "Unarchive" : "取消归档",
+    "View in folder" : "在文件夹中查看"
 },
 "nplurals=1; plural=0;");

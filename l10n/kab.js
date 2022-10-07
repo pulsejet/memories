@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Favorites" : "Imenyafen",
     "Videos" : "Tividyutin",
+    "Tags" : "Tibzimin",
     "Settings" : "Iɣewwaṛen",
     "Hour" : "Asrag",
     "Cancel" : "Sefsex",

@@ -6,6 +6,7 @@ OC.L10N.register(
     "Favorites" : "Preferidos",
     "Videos" : "Vìdeos",
     "Archive" : "Cartella",
+    "Tags" : "Etichetas",
     "Settings" : "Impostatziones",
     "Year" : "Annu",
     "Month" : "Mese",
@@ -17,6 +18,7 @@ OC.L10N.register(
     "Cancel" : "Annulla",
     "Delete" : "Cantzella",
     "Download" : "Iscàrriga",
-    "Favorite" : "Preferidu"
+    "Favorite" : "Preferidu",
+    "View in folder" : "Càstia in sa cartella"
 },
 "nplurals=2; plural=(n != 1);");

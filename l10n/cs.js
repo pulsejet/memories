@@ -9,6 +9,7 @@ OC.L10N.register(
     "Favorites" : "Oblíbené",
     "Videos" : "Videa",
     "Archive" : "Archiv",
+    "On this day" : "V tento den",
     "Settings" : "Nastavení",
     "Edit Date/Time" : "Upravit datum/čas",
     "Newest" : "Nejnovější",

@@ -3,6 +3,7 @@
     "Favorites" : "Favourites",
     "Videos" : "Videos",
     "Archive" : "Archive",
+    "Tags" : "Tags",
     "Settings" : "Settings",
     "Month" : "Month",
     "Day" : "Day",
@@ -14,6 +15,7 @@
     "Delete" : "Delete",
     "Download" : "Download",
     "Favorite" : "Favourite",
-    "Unarchive" : "Unarchive"
+    "Unarchive" : "Unarchive",
+    "View in folder" : "View in folder"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

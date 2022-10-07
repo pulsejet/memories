@@ -4,6 +4,7 @@
     "Favorites" : "Preferidos",
     "Videos" : "Vìdeos",
     "Archive" : "Cartella",
+    "Tags" : "Etichetas",
     "Settings" : "Impostatziones",
     "Year" : "Annu",
     "Month" : "Mese",
@@ -15,6 +16,7 @@
     "Cancel" : "Annulla",
     "Delete" : "Cantzella",
     "Download" : "Iscàrriga",
-    "Favorite" : "Preferidu"
+    "Favorite" : "Preferidu",
+    "View in folder" : "Càstia in sa cartella"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

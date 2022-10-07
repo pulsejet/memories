@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Favorites" : "Halanýanlar",
     "Videos" : "Wideo",
+    "Tags" : "Bellikler",
     "Settings" : "Sazlamalar",
     "Cancel" : "ýatyrmak",
     "Delete" : "Pozmak",

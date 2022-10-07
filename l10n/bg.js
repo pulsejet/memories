@@ -9,6 +9,7 @@ OC.L10N.register(
     "Favorites" : "Любими",
     "Videos" : "Видеа",
     "Archive" : "Архив",
+    "On this day" : "На този ден",
     "Settings" : "Настройки",
     "Edit Date/Time" : "Редактиране на Дата/Час",
     "Newest" : "Най-новият",

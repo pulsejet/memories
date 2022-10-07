@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Favorites" : "Favoriten",
+    "Tags" : "Tags",
     "Settings" : "Astellungen",
     "Month" : "Mount",
     "Day" : "Dag",
@@ -11,6 +12,7 @@ OC.L10N.register(
     "Cancel" : "Ofbriechen",
     "Delete" : "Läschen",
     "Download" : "Eroflueden",
-    "Favorite" : "Favorit"
+    "Favorite" : "Favorit",
+    "View in folder" : "Kuk am Dossier "
 },
 "nplurals=2; plural=(n != 1);");

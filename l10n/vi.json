@@ -3,6 +3,7 @@
     "Favorites" : "Ưa thích",
     "Videos" : "Phim",
     "Archive" : "Lưu trữ",
+    "Tags" : "Nhãn",
     "Settings" : "Cài đặt",
     "Year" : "Năm",
     "Month" : "Tháng",
@@ -13,6 +14,7 @@
     "Delete" : "Xóa",
     "Download" : "Tải xuống",
     "Favorite" : "Ưa thích",
-    "Unarchive" : "Bỏ lưu trữ"
+    "Unarchive" : "Bỏ lưu trữ",
+    "View in folder" : "Xem trong thư mục"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

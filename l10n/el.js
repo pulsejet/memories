@@ -6,6 +6,8 @@ OC.L10N.register(
     "Favorites" : "Αγαπημένα",
     "Videos" : "Βίντεο",
     "Archive" : "Αρχειοθέτηση",
+    "On this day" : "Αυτή τη μέρα",
+    "Tags" : "Ετικέτες",
     "Settings" : "Ρυθμίσεις",
     "Year" : "Έτος",
     "Month" : "Μήνας",
@@ -18,6 +20,7 @@ OC.L10N.register(
     "Delete" : "Διαγραφή",
     "Download" : "Λήψη",
     "Favorite" : "Αγαπημένο",
-    "Unarchive" : "Αναίρεση αρχειοθέτησης"
+    "Unarchive" : "Αναίρεση αρχειοθέτησης",
+    "View in folder" : "Προβολή στον φάκελο"
 },
 "nplurals=2; plural=(n != 1);");

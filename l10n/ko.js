@@ -6,6 +6,7 @@ OC.L10N.register(
     "Favorites" : "즐겨찾기",
     "Videos" : "동영상",
     "Archive" : "보관",
+    "Tags" : "태그",
     "Settings" : "설정",
     "Year" : "년",
     "Month" : "달",
@@ -17,6 +18,7 @@ OC.L10N.register(
     "Delete" : "삭제",
     "Download" : "다운로드",
     "Favorite" : "즐겨찾기",
-    "Unarchive" : "보관 해제"
+    "Unarchive" : "보관 해제",
+    "View in folder" : "폴더에서 보기"
 },
 "nplurals=1; plural=0;");

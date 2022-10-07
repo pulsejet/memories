@@ -6,6 +6,8 @@ OC.L10N.register(
     "Favorites" : "Preferiti",
     "Videos" : "Video",
     "Archive" : "Archivio",
+    "On this day" : "In questo giorno",
+    "Tags" : "Etichette",
     "Settings" : "Impostazioni",
     "Year" : "Anno",
     "Month" : "Mese",
@@ -18,6 +20,7 @@ OC.L10N.register(
     "Delete" : "Elimina",
     "Download" : "Scarica",
     "Favorite" : "Preferito",
-    "Unarchive" : "Togli dall'archivio"
+    "Unarchive" : "Togli dall'archivio",
+    "View in folder" : "Visualizza nella cartella"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

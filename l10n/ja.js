@@ -6,6 +6,8 @@ OC.L10N.register(
     "Favorites" : "お気に入り",
     "Videos" : "動画",
     "Archive" : "アーカイブ",
+    "On this day" : "この日",
+    "Tags" : "タグ",
     "Settings" : "設定",
     "Year" : "年",
     "Month" : "月",
@@ -18,6 +20,7 @@ OC.L10N.register(
     "Delete" : "削除",
     "Download" : "ダウンロード",
     "Favorite" : "お気に入り",
-    "Unarchive" : "アーカイブを解除"
+    "Unarchive" : "アーカイブを解除",
+    "View in folder" : "フォルダー内で表示"
 },
 "nplurals=1; plural=0;");

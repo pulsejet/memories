@@ -6,6 +6,7 @@ OC.L10N.register(
     "Favorites" : "Favoritos",
     "Videos" : "Vídeos",
     "Archive" : "Aquivar",
+    "Tags" : "Etiquetas",
     "Settings" : "Axustes",
     "Year" : "Ano",
     "Month" : "Mes",
@@ -18,6 +19,7 @@ OC.L10N.register(
     "Delete" : "Eliminar",
     "Download" : "Descargar",
     "Favorite" : "Favorito",
-    "Unarchive" : "Desarquivar"
+    "Unarchive" : "Desarquivar",
+    "View in folder" : "Ver no cartafol"
 },
 "nplurals=2; plural=(n != 1);");

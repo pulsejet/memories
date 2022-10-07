@@ -6,6 +6,7 @@ OC.L10N.register(
     "Favorites" : "מועדפים",
     "Videos" : "סרטונים",
     "Archive" : "לארכיון",
+    "Tags" : "תגיות",
     "Settings" : "הגדרות",
     "Year" : "שנה",
     "Month" : "חודש",
@@ -18,6 +19,7 @@ OC.L10N.register(
     "Delete" : "מחיקה",
     "Download" : "הורדה",
     "Favorite" : "סימון כמועדף",
-    "Unarchive" : "הוצאה מהארכיון"
+    "Unarchive" : "הוצאה מהארכיון",
+    "View in folder" : "הצג בתיקייה"
 },
 "nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: (n % 10 == 0 && n % 1 == 0 && n > 10) ? 2 : 3;");

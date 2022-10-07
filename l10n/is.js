@@ -6,6 +6,8 @@ OC.L10N.register(
     "Favorites" : "Eftirlæti",
     "Videos" : "Myndskeið",
     "Archive" : "Safn",
+    "On this day" : "Á þessum degi",
+    "Tags" : "Merki",
     "Settings" : "Stillingar",
     "Year" : "Ár",
     "Month" : "Mánuður",
@@ -18,6 +20,7 @@ OC.L10N.register(
     "Delete" : "Eyða",
     "Download" : "Sækja",
     "Favorite" : "Eftirlæti",
-    "Unarchive" : "Taka úr geymslu"
+    "Unarchive" : "Taka úr geymslu",
+    "View in folder" : "Skoða í möppu"
 },
 "nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);");

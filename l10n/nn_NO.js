@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Favorites" : "Favorittar",
     "Videos" : "Video",
+    "Tags" : "Emneord",
     "Settings" : "Innstillingar",
     "Year" : "År",
     "Month" : "Månad",

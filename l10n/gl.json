@@ -4,6 +4,7 @@
     "Favorites" : "Favoritos",
     "Videos" : "Vídeos",
     "Archive" : "Aquivar",
+    "Tags" : "Etiquetas",
     "Settings" : "Axustes",
     "Year" : "Ano",
     "Month" : "Mes",
@@ -16,6 +17,7 @@
     "Delete" : "Eliminar",
     "Download" : "Descargar",
     "Favorite" : "Favorito",
-    "Unarchive" : "Desarquivar"
+    "Unarchive" : "Desarquivar",
+    "View in folder" : "Ver no cartafol"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

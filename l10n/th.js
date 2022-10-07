@@ -5,6 +5,7 @@ OC.L10N.register(
     "Favorites" : "รายการโปรด",
     "Videos" : "วิดีโอ",
     "Archive" : "เก็บถาวร",
+    "Tags" : "แท็ก",
     "Settings" : "การตั้งค่า",
     "Month" : "เดือน",
     "Day" : "วัน",
@@ -13,6 +14,7 @@ OC.L10N.register(
     "Cancel" : "ยกเลิก",
     "Delete" : "ลบ",
     "Download" : "ดาวน์โหลด",
-    "Favorite" : "รายการโปรด"
+    "Favorite" : "รายการโปรด",
+    "View in folder" : "ดูในโฟลเดอร์"
 },
 "nplurals=1; plural=0;");

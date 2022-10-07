@@ -5,6 +5,7 @@ OC.L10N.register(
     "Favorites" : "Favourites",
     "Videos" : "Videos",
     "Archive" : "Archive",
+    "Tags" : "Tags",
     "Settings" : "Settings",
     "Month" : "Month",
     "Day" : "Day",
@@ -16,6 +17,7 @@ OC.L10N.register(
     "Delete" : "Delete",
     "Download" : "Download",
     "Favorite" : "Favourite",
-    "Unarchive" : "Unarchive"
+    "Unarchive" : "Unarchive",
+    "View in folder" : "View in folder"
 },
 "nplurals=2; plural=(n != 1);");

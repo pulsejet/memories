@@ -3,6 +3,7 @@
     "Favorites" : "რჩეულები",
     "Videos" : "ვიდეოები",
     "Archive" : "არქივი",
+    "Tags" : "ტეგები",
     "Settings" : "პარამეტრები",
     "Month" : "თვე",
     "Day" : "დღე",
@@ -13,6 +14,7 @@
     "Delete" : "წაშლა",
     "Download" : "ჩამოტვირთვა",
     "Favorite" : "რჩეული",
-    "Unarchive" : "ამოღება"
+    "Unarchive" : "ამოღება",
+    "View in folder" : "ჩვენება დირექტორიაში"
 },"pluralForm" :"nplurals=2; plural=(n!=1);"
 }

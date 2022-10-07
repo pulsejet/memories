@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Favorites" : "Annsachdan",
     "Videos" : "Videothan",
+    "Tags" : "Tagaichean",
     "Settings" : "Roghainnean",
     "Cancel" : "Sguir dheth",
     "Delete" : "Sguab às",
