@@ -27,7 +27,7 @@
                     :title="t('memories', 'On this day')">
                     <CalendarIcon slot="icon" :size="20" />
                 </NcAppNavigationItem>
-                <NcAppNavigationItem :to="{name: 'tags'}"
+                <NcAppNavigationItem :to="{name: 'tags'}" v-if="config_tagsEnabled"
                     :title="t('memories', 'Tags')">
                     <TagsIcon slot="icon" :size="20" />
                 </NcAppNavigationItem>
@@ -71,6 +71,7 @@ import {
 import Timeline from './components/Timeline.vue'
 import Settings from './components/Settings.vue'
 import GlobalMixin from './mixins/GlobalMixin';
+import UserConfig from './mixins/UserConfig';
 
 import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue'
 import FolderIcon from 'vue-material-design-icons/Folder.vue'
@@ -100,7 +101,7 @@ import TagsIcon from 'vue-material-design-icons/Tag.vue';
         TagsIcon,
     },
 })
-export default class App extends Mixins(GlobalMixin) {
+export default class App extends Mixins(GlobalMixin, UserConfig) {
     // Outer element
 }
 </script>

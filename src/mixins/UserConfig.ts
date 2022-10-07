@@ -32,6 +32,7 @@ const eventName = 'memories:user-config-changed'
 export default class UserConfig extends Vue {
     config_timelinePath = loadState('memories', 'timelinePath') || '';
     config_showHidden = loadState('memories', 'showHidden') === "true";
+    config_tagsEnabled = loadState('memories', 'systemtags');
 
     created() {
         subscribe(eventName, this.updateLocalSetting)

@@ -7,6 +7,7 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCA\Viewer\Event\LoadViewer;
 use OCA\Files\Event\LoadSidebar;
 use OCP\AppFramework\Controller;
+use OCP\App\IAppManager;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IConfig;
 use OCP\IUserSession;
@@ -17,6 +18,7 @@ use OCA\Memories\AppInfo\Application;
 class PageController extends Controller {
     protected $userId;
     protected $appName;
+    private IAppManager $appManager;
     protected IEventDispatcher $eventDispatcher;
     private IInitialState $initialState;
     private IUserSession $userSession;
@@ -26,6 +28,7 @@ class PageController extends Controller {
         string $AppName,
         IRequest $request,
         $UserId,
+        IAppManager $appManager,
         IEventDispatcher $eventDispatcher,
         IInitialState $initialState,
         IUserSession $userSession,
@@ -34,6 +37,7 @@ class PageController extends Controller {
         parent::__construct($AppName, $request);
         $this->userId = $UserId;
         $this->appName = $AppName;
+        $this->appManager = $appManager;
         $this->eventDispatcher = $eventDispatcher;
         $this->initialState = $initialState;
         $this->userSession = $userSession;
@@ -50,16 +54,20 @@ class PageController extends Controller {
             return null;
         }
 
+        // Scripts
         Util::addScript($this->appName, 'memories-main');
-
         $this->eventDispatcher->dispatchTyped(new LoadSidebar());
         $this->eventDispatcher->dispatchTyped(new LoadViewer());
 
+        // Configuration
         $uid = $user->getUid();
         $timelinePath = \OCA\Memories\Util::getPhotosPath($this->config, $uid);
         $this->initialState->provideInitialState('timelinePath', $timelinePath);
         $this->initialState->provideInitialState('showHidden',  $this->config->getUserValue(
             $uid, Application::APPNAME, 'showHidden', false));
+
+        // Apps enabled
+        $this->initialState->provideInitialState('systemtags', $this->appManager->isEnabledForUser('systemtags') === true);
 
         $response = new TemplateResponse($this->appName, 'main');
         return $response;
