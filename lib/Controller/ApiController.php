@@ -319,6 +319,14 @@ class ApiController extends Controller {
         $list = $this->timelineQuery->getTags(
             $folder,
         );
+
+        // Preload all tag previews
+        foreach ($list as &$tag) {
+            $tag["previews"] = $this->timelineQuery->getTagPreviews(
+                $folder, $tag["id"],
+            );
+        }
+
         return new JSONResponse($list, Http::STATUS_OK);
     }
 
@@ -349,12 +357,19 @@ class ApiController extends Controller {
         $list = $this->timelineQuery->getFaces(
             $folder,
         );
+
+        // Preload all face previews
+        foreach ($list as &$face) {
+            $face["previews"] = $this->timelineQuery->getFacePreviews(
+                $folder, $face["id"],
+            );
+        }
+
         return new JSONResponse($list, Http::STATUS_OK);
     }
 
     /**
      * @NoAdminRequired
-     * @NoCSRFRequired
      *
      * Get preview objects for a face ID
      * @return JSONResponse

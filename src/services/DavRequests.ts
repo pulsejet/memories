@@ -433,8 +433,10 @@ export async function getOnThisDayData(): Promise<IDay[]> {
 export async function getTagsData(): Promise<IDay[]> {
     // Query for photos
     let data: {
+        id: number;
         count: number;
         name: string;
+        previews: IPhoto[];
     }[] = [];
     try {
         const res = await axios.get<typeof data>(generateUrl('/apps/memories/api/tags'));
@@ -443,13 +445,15 @@ export async function getTagsData(): Promise<IDay[]> {
         throw e;
     }
 
+    // Add flag to previews
+    data.forEach(t => t.previews?.forEach((preview) => preview.flag = 0));
+
     // Convert to days response
     return [{
         dayid: constants.TagDayID.TAGS,
         count: data.length,
         detail: data.map((tag) => ({
-            name: tag.name,
-            count: tag.count,
+            ...tag,
             fileid: hashCode(tag.name),
             flag: constants.c.FLAG_IS_TAG,
             istag: true,
@@ -466,6 +470,7 @@ export async function getTagsData(): Promise<IDay[]> {
         id: number;
         count: number;
         name: string;
+        previews: IPhoto[];
     }[] = [];
     try {
         const res = await axios.get<typeof data>(generateUrl('/apps/memories/api/faces'));
@@ -474,13 +479,15 @@ export async function getTagsData(): Promise<IDay[]> {
         throw e;
     }
 
+    // Add flag to previews
+    data.forEach(t => t.previews?.forEach((preview) => preview.flag = 0));
+
     // Convert to days response
     return [{
         dayid: constants.TagDayID.FACES,
         count: data.length,
         detail: data.map((face) => ({
-            name: face.name,
-            count: face.count,
+            ...face,
             fileid: hashCode(face.name),
             faceid: face.id,
             istag: true,

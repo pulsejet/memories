@@ -91,46 +91,53 @@ export default class Tag extends Mixins(GlobalMixin) {
 
         // Look for cache
         if (this.data.previews) {
-            this.previews = this.data.previews;
-            this.error = this.previews.length === 0;
+            this.processPreviews();
             return;
         }
 
-        if (this.isFace) {
-            await this.refreshPreviewsFace();
-        } else {
-            await this.refreshPreviewsTag();
+        try {
+            if (this.isFace) {
+                await this.refreshPreviewsFace();
+            } else {
+                await this.refreshPreviewsTag();
+            }
+            this.processPreviews();
+        } catch (e) {
+            console.error(e);
+            this.error = true;
         }
     }
 
     /** Refresh previews for tag */
     async refreshPreviewsTag() {
         const url = `/apps/memories/api/days/*?limit=4&tag=${this.data.name}`;
-        try {
-            const res = await axios.get<IPhoto[]>(generateUrl(url));
-            if (res.data.length < 4) {
-                res.data = res.data.slice(0, 1);
-            }
-            res.data.forEach((p) => p.flag = 0);
-            this.previews = this.data.previews = res.data;
-        } catch (e) {
-            this.error = true;
-            console.error(e);
-        }
+        const res = await axios.get<IPhoto[]>(generateUrl(url));
+        this.data.previews = res.data;
     }
 
     /** Refresh previews for face */
     async refreshPreviewsFace() {
         const url = `/apps/memories/api/face-previews/${this.data.faceid}`;
-        try {
-            const res = await axios.get<IFaceDetection[]>(generateUrl(url));
-            res.data.forEach((p) => p.flag = 0);
-            const face = this.chooseFaceDetection(res.data);
-            this.previews = this.data.previews = [face];
-        } catch (e) {
-            this.error = true;
-            console.error(e);
+        const res = await axios.get<IFaceDetection[]>(generateUrl(url));
+        this.data.previews = res.data;
+    }
+
+    /** Process previews */
+    processPreviews() {
+        this.data.previews.forEach((p) => p.flag = 0);
+
+        if (this.isFace) {
+            const face = this.chooseFaceDetection(this.data.previews as IFaceDetection[]);
+            this.previews = [face];
+        } else {
+            let data = this.data.previews;
+            if (data.length < 4) {
+                data = data.slice(0, 1);
+            }
+            this.previews = data;
         }
+
+        this.error = this.previews.length === 0;
     }
 
     /** Open tag */

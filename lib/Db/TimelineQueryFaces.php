@@ -44,6 +44,7 @@ trait TimelineQueryFaces {
 
         // Post process
         foreach($faces as &$row) {
+            $row['id'] = intval($row['id']);
             $row["name"] = $row["title"];
             unset($row["title"]);
             $row["count"] = intval($row["count"]);
