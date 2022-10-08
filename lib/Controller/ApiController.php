@@ -359,42 +359,29 @@ class ApiController extends Controller {
         );
 
         // Preload all face previews
+        $previews = $this->timelineQuery->getFacePreviews($folder);
+
+        // Convert to map with key as cluster_id
+        $previews_map = [];
+        foreach ($previews as &$preview) {
+            $key = $preview["cluster_id"];
+            if (!array_key_exists($key, $previews_map)) {
+                $previews_map[$key] = [];
+            }
+            unset($preview["cluster_id"]);
+            $previews_map[$key][] = $preview;
+        }
+
+        // Add all previews to list
         foreach ($list as &$face) {
-            $face["previews"] = $this->timelineQuery->getFacePreviews(
-                $folder, $face["id"],
-            );
+            $key = $face["id"];
+            if (array_key_exists($key, $previews_map)) {
+                $face["previews"] = $previews_map[$key];
+            } else {
+                $face["previews"] = [];
+            }
         }
 
-        return new JSONResponse($list, Http::STATUS_OK);
-    }
-
-    /**
-     * @NoAdminRequired
-     *
-     * Get preview objects for a face ID
-     * @return JSONResponse
-     */
-    public function facePreviews(string $id): JSONResponse {
-        $user = $this->userSession->getUser();
-        if (is_null($user)) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
-        }
-
-        // Check faces enabled for this user
-        if (!$this->recognizeIsEnabled()) {
-            return new JSONResponse(["message" => "Recognize app not enabled"], Http::STATUS_PRECONDITION_FAILED);
-        }
-
-        // If this isn't the timeline folder then things aren't going to work
-        $folder = $this->getRequestFolder();
-        if (is_null($folder)) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
-        }
-
-        // Run actual query
-        $list = $this->timelineQuery->getFacePreviews(
-            $folder, intval($id),
-        );
         return new JSONResponse($list, Http::STATUS_OK);
     }
 

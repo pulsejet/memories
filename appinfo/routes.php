@@ -26,7 +26,6 @@ return [
         ['name' => 'api#day', 'url' => '/api/days/{id}', 'verb' => 'GET'],
         ['name' => 'api#tags', 'url' => '/api/tags', 'verb' => 'GET'],
         ['name' => 'api#faces', 'url' => '/api/faces', 'verb' => 'GET'],
-        ['name' => 'api#facePreviews', 'url' => '/api/face-previews/{id}', 'verb' => 'GET'],
         ['name' => 'api#imageInfo', 'url' => '/api/info/{id}', 'verb' => 'GET'],
         ['name' => 'api#imageEdit', 'url' => '/api/edit/{id}', 'verb' => 'PATCH'],
         ['name' => 'api#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
