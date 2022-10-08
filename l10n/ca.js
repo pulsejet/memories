@@ -5,8 +5,10 @@ OC.L10N.register(
     "Folders" : "Carpetes",
     "Favorites" : "Preferits",
     "Videos" : "Vídeos",
+    "People" : "Gent",
     "Archive" : "Arxiu",
     "On this day" : "Aquest mateix dia",
+    "Tags" : "Etiquetes",
     "Settings" : "Paràmetres",
     "Year" : "Any",
     "Month" : "Mes",
@@ -19,6 +21,7 @@ OC.L10N.register(
     "Delete" : "Suprimeix",
     "Download" : "Baixa",
     "Favorite" : "Preferit",
-    "Unarchive" : "Desbloquejar"
+    "Unarchive" : "Desbloquejar",
+    "View in folder" : "Visualitza-ho a la carpeta"
 },
 "nplurals=2; plural=(n != 1);");

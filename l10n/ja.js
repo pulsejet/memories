@@ -16,6 +16,7 @@ OC.L10N.register(
     "Hour" : "時",
     "Minute" : "分",
     "Update" : "更新",
+    "Back" : "戻る",
     "Cancel" : "キャンセル",
     "Delete" : "削除",
     "Download" : "ダウンロード",

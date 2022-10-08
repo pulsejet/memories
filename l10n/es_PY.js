@@ -12,6 +12,7 @@ OC.L10N.register(
     "Time" : "Hora",
     "Hour" : "Hora",
     "Update" : "Actualizar",
+    "Back" : "Atrás",
     "Cancel" : "Cancelar",
     "Delete" : "Borrar",
     "Download" : "Descargar",

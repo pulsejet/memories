@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Folders" : "Repertòris",
     "Favorites" : "Favorits",
+    "People" : "Gent",
     "Archive" : "Archiu",
     "Tags" : "Etiquetas",
     "Settings" : "Paramètres",
@@ -13,6 +14,7 @@ OC.L10N.register(
     "Hour" : "Ora",
     "Minute" : "Minuta",
     "Update" : "Actualizar",
+    "Back" : "Retorn",
     "Cancel" : "Anullar",
     "Delete" : "Suprimir",
     "Download" : "Telecargar",

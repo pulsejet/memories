@@ -12,6 +12,7 @@ OC.L10N.register(
     "Time" : "Aeg",
     "Hour" : "Tund",
     "Update" : "Uuenda",
+    "Back" : "Tagasi",
     "Cancel" : "Loobu",
     "Delete" : "Kustuta",
     "Download" : "Lae alla",

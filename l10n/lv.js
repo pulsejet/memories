@@ -12,6 +12,7 @@ OC.L10N.register(
     "Time" : "Laiks",
     "Hour" : "Stunda",
     "Update" : "Atjaunināt",
+    "Back" : "Atpakaļ",
     "Cancel" : "Atcelt",
     "Delete" : "Dzēst",
     "Download" : "Lejupielādēt",

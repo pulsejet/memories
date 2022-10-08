@@ -5,6 +5,7 @@ OC.L10N.register(
     "Favorites" : "Gunstelinge",
     "Videos" : "Video's ",
     "Archive" : "Argief",
+    "Tags" : "Etikette",
     "Settings" : "Instellings",
     "Month" : "Maand",
     "Day" : "Dag",
@@ -14,6 +15,7 @@ OC.L10N.register(
     "Cancel" : "Kanselleer",
     "Delete" : "Skrap",
     "Download" : "Laai af",
-    "Favorite" : "Gunsteling"
+    "Favorite" : "Gunsteling",
+    "View in folder" : "Vertoon in gids"
 },
 "nplurals=2; plural=(n != 1);");

@@ -15,6 +15,7 @@ OC.L10N.register(
     "Time" : "Tid",
     "Hour" : "Time",
     "Update" : "Oppdater",
+    "Back" : "Tilbake",
     "Cancel" : "Avbryt",
     "Delete" : "Slett",
     "Download" : "Last ned",

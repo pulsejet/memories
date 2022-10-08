@@ -11,6 +11,7 @@ OC.L10N.register(
     "Day" : "วัน",
     "Time" : "เวลา",
     "Update" : "อัปเดต",
+    "Back" : "ย้อนกลับ",
     "Cancel" : "ยกเลิก",
     "Delete" : "ลบ",
     "Download" : "ดาวน์โหลด",

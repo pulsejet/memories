@@ -12,6 +12,7 @@ OC.L10N.register(
     "Day" : "Zi",
     "Time" : "Timp",
     "Update" : "Actualizare",
+    "Back" : "Înapoi",
     "Cancel" : "Anulare",
     "Delete" : "Șterge",
     "Download" : "Descărcare",

@@ -9,6 +9,7 @@ OC.L10N.register(
     "Day" : "දිනය",
     "Time" : "වේලාව",
     "Update" : "යාවත්කාල",
+    "Back" : "ආපසු",
     "Cancel" : "අවලංගු කරන්න",
     "Download" : "බාගන්න",
     "Favorite" : "ප්‍රියතම",

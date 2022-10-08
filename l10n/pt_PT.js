@@ -19,6 +19,7 @@ OC.L10N.register(
     "Show hidden folders" : "Mostrar pastas ocultas",
     "Update" : "Atualizar",
     "Error updating settings" : "Erro ao atualizar as definições",
+    "Back" : "Anterior",
     "Cancel" : "Cancelar",
     "Delete" : "Eliminar",
     "Download" : "Transferir",
