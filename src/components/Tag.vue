@@ -89,32 +89,12 @@ export default class Tag extends Mixins(GlobalMixin) {
         // Reset state
         this.error = false;
 
-        // Look for cache
-        if (this.data.previews) {
-            this.processPreviews();
+        // Look for previews
+        if (!this.data.previews) {
             return;
         }
 
-        try {
-            if (!this.isFace) {
-                await this.refreshPreviewsTag();
-            }
-            this.processPreviews();
-        } catch (e) {
-            console.error(e);
-            this.error = true;
-        }
-    }
-
-    /** Refresh previews for tag */
-    async refreshPreviewsTag() {
-        const url = `/apps/memories/api/days/*?limit=4&tag=${this.data.name}`;
-        const res = await axios.get<IPhoto[]>(generateUrl(url));
-        this.data.previews = res.data;
-    }
-
-    /** Process previews */
-    processPreviews() {
+        // Reset flag
         this.data.previews.forEach((p) => p.flag = 0);
 
         if (this.isFace) {
