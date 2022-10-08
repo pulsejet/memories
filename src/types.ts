@@ -69,8 +69,8 @@ export interface ITag extends IPhoto {
     name: string;
     /** Number of images in this tag */
     count: number;
-    /** ID of face if this is a face */
-    faceid?: number;
+    /** User for face if face */
+    user_id?: string;
     /** Cache of previews */
     previews?: IPhoto[];
 }

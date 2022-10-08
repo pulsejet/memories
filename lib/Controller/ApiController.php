@@ -87,9 +87,9 @@ class ApiController extends Controller {
 
         // Filter only for one face
         if ($this->recognizeIsEnabled()) {
-            $faceId = $this->request->getParam('face');
-            if ($faceId) {
-                $transforms[] = array($this->timelineQuery, 'transformFaceFilter', intval($faceId));
+            $face = $this->request->getParam('face');
+            if ($face) {
+                $transforms[] = array($this->timelineQuery, 'transformFaceFilter', $face);
             }
         }
 

@@ -521,8 +521,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         }
 
         // People
-        if (this.$route.name === 'people' && this.$route.params.name) {
-            query.set('face', this.$route.params.name);
+        if (this.$route.name === 'people' && this.$route.params.user && this.$route.params.name) {
+            query.set('face', `${this.$route.params.user}/${this.$route.params.name}`);
         }
 
         // Tags

@@ -101,7 +101,7 @@
         },
 
         {
-            path: '/people/:name*',
+            path: '/people/:user?/:name?',
             component: Timeline,
             name: 'people',
             props: route => ({

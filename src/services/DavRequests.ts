@@ -489,7 +489,6 @@ export async function getTagsData(): Promise<IDay[]> {
         detail: data.map((face) => ({
             ...face,
             fileid: hashCode(face.name),
-            faceid: face.id,
             istag: true,
             isface: true,
         } as any)),

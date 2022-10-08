@@ -10,10 +10,25 @@ use OCP\Files\Folder;
 trait TimelineQueryFaces {
     protected IDBConnection $connection;
 
-    public function transformFaceFilter(IQueryBuilder &$query, string $userId, int $faceId) {
+    public function transformFaceFilter(IQueryBuilder &$query, string $userId, string $faceName) {
+        // Get title and uid of face user
+        $faceNames = explode('/', $faceName);
+        if (count($faceNames) !== 2) return;
+        $faceUid = $faceNames[0];
+        $faceName = $faceNames[1];
+
+        // Get cluster ID
+        $sq = $query->getConnection()->getQueryBuilder();
+        $id = $sq->select('id')->from('recognize_face_clusters')
+            ->where($query->expr()->eq('user_id', $sq->createNamedParameter($faceUid)))
+            ->andWhere($query->expr()->eq('title', $sq->createNamedParameter($faceName)))
+            ->executeQuery()->fetchOne();
+        if (!$id) return;
+
+        // Join with cluster
         $query->innerJoin('m', 'recognize_face_detections', 'rfd', $query->expr()->andX(
             $query->expr()->eq('rfd.file_id', 'm.fileid'),
-            $query->expr()->eq('rfd.cluster_id', $query->createNamedParameter($faceId)),
+            $query->expr()->eq('rfd.cluster_id', $query->createNamedParameter($id)),
         ));
     }
 
@@ -22,7 +37,7 @@ trait TimelineQueryFaces {
 
         // SELECT all face clusters
         $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
-        $query->select('rfc.id', 'rfc.title', $count)->from('recognize_face_clusters', 'rfc');
+        $query->select('rfc.id', 'rfc.user_id', 'rfc.title', $count)->from('recognize_face_clusters', 'rfc');
 
         // WHERE there are faces with this cluster
         $query->innerJoin('rfc', 'recognize_face_detections', 'rfd', $query->expr()->eq('rfc.id', 'rfd.cluster_id'));

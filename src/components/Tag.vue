@@ -114,7 +114,9 @@ export default class Tag extends Mixins(GlobalMixin) {
     /** Open tag */
     openTag() {
         if (this.isFace) {
-            this.$router.push({ name: 'people', params: { name: this.data.faceid.toString() }});
+            const name = this.data.name;
+            const user = this.data.user_id;
+            this.$router.push({ name: 'people', params: { name, user  }});
         } else {
             this.$router.push({ name: 'tags', params: { name: this.data.name }});
         }
