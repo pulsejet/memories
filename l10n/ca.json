@@ -3,8 +3,10 @@
     "Folders" : "Carpetes",
     "Favorites" : "Preferits",
     "Videos" : "Vídeos",
+    "People" : "Gent",
     "Archive" : "Arxiu",
     "On this day" : "Aquest mateix dia",
+    "Tags" : "Etiquetes",
     "Settings" : "Paràmetres",
     "Year" : "Any",
     "Month" : "Mes",
@@ -17,6 +19,7 @@
     "Delete" : "Suprimeix",
     "Download" : "Baixa",
     "Favorite" : "Preferit",
-    "Unarchive" : "Desbloquejar"
+    "Unarchive" : "Desbloquejar",
+    "View in folder" : "Visualitza-ho a la carpeta"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

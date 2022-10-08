@@ -5,6 +5,7 @@ OC.L10N.register(
     "Videos" : "Videothan",
     "Tags" : "Tagaichean",
     "Settings" : "Roghainnean",
+    "Back" : "Air ais",
     "Cancel" : "Sguir dheth",
     "Delete" : "Sguab às",
     "Download" : "Luchdaich a-nuas",

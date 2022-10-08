@@ -9,6 +9,7 @@ OC.L10N.register(
     "Time" : "Zäit",
     "Hour" : "Stonn",
     "Update" : "Update",
+    "Back" : "Zeréck",
     "Cancel" : "Ofbriechen",
     "Delete" : "Läschen",
     "Download" : "Eroflueden",

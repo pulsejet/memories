@@ -12,6 +12,7 @@ OC.L10N.register(
     "Day" : "Ngày",
     "Time" : "Thời gian",
     "Update" : "Cập nhật",
+    "Back" : "Quay lại",
     "Cancel" : "Hủy",
     "Delete" : "Xóa",
     "Download" : "Tải xuống",

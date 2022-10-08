@@ -8,6 +8,7 @@ OC.L10N.register(
     "Day" : "Die",
     "Time" : "Tempore",
     "Update" : "Actualisation",
+    "Back" : "Retro",
     "Cancel" : "Cancellar",
     "Delete" : "Deler",
     "Download" : "Discargar",

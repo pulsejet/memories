@@ -6,6 +6,7 @@ OC.L10N.register(
     "Tags" : "Oznake",
     "Settings" : "Поставке",
     "Update" : "Ažuriraj",
+    "Back" : "Nazad",
     "Cancel" : "Otkaži",
     "Delete" : "Obriši",
     "Download" : "Preuzmi",

@@ -9,6 +9,7 @@ OC.L10N.register(
     "Day" : "ថ្ងៃ",
     "Time" : "ម៉ោង",
     "Update" : "ធ្វើ​បច្ចុប្បន្នភាព",
+    "Back" : "ត្រឡប់ក្រោយ",
     "Cancel" : "បោះបង់",
     "Delete" : "លុប",
     "Download" : "ទាញយក"

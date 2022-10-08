@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Favorites" : "প্রিয়জন",
+    "Tags" : "ট্যাগ",
     "Settings" : "সেটিংস",
     "Month" : "মাস",
     "Day" : "দিবস",

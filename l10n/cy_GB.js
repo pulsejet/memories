@@ -4,6 +4,7 @@ OC.L10N.register(
     "Favorites" : "Ffefrynnau",
     "Videos" : "Fideos",
     "Archive" : "Archif",
+    "Tags" : "Tagiau",
     "Settings" : "Gosodiadau",
     "Year" : "Blwyddyn",
     "Month" : "Mis",

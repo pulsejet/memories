@@ -12,6 +12,7 @@ OC.L10N.register(
     "Time" : "Kohë",
     "Hour" : "Orë",
     "Update" : "Përditëso",
+    "Back" : "Prapa",
     "Cancel" : "Anullo",
     "Delete" : "Fshi",
     "Download" : "Shkarko",

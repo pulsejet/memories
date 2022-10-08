@@ -1,6 +1,7 @@
 { "translations": {
     "Folders" : "Repertòris",
     "Favorites" : "Favorits",
+    "People" : "Gent",
     "Archive" : "Archiu",
     "Tags" : "Etiquetas",
     "Settings" : "Paramètres",
@@ -11,6 +12,7 @@
     "Hour" : "Ora",
     "Minute" : "Minuta",
     "Update" : "Actualizar",
+    "Back" : "Retorn",
     "Cancel" : "Anullar",
     "Delete" : "Suprimir",
     "Download" : "Telecargar",

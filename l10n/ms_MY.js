@@ -6,6 +6,7 @@ OC.L10N.register(
     "Month" : "Bulan",
     "Day" : "Hari",
     "Update" : "Kemaskini",
+    "Back" : "Kembali",
     "Cancel" : "Batal",
     "Delete" : "Padam",
     "Download" : "Muat turun"

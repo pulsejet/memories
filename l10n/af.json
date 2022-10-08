@@ -3,6 +3,7 @@
     "Favorites" : "Gunstelinge",
     "Videos" : "Video's ",
     "Archive" : "Argief",
+    "Tags" : "Etikette",
     "Settings" : "Instellings",
     "Month" : "Maand",
     "Day" : "Dag",
@@ -12,6 +13,7 @@
     "Cancel" : "Kanselleer",
     "Delete" : "Skrap",
     "Download" : "Laai af",
-    "Favorite" : "Gunsteling"
+    "Favorite" : "Gunsteling",
+    "View in folder" : "Vertoon in gids"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

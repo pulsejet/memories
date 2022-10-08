@@ -13,6 +13,7 @@ OC.L10N.register(
     "Time" : "Waktu",
     "Hour" : "Jam",
     "Update" : "Perbarui",
+    "Back" : "Kembali",
     "Cancel" : "Membatalkan",
     "Delete" : "Hapus",
     "Download" : "Unduh",

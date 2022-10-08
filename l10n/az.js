@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Favorites" : "Sevimlilər",
     "Archive" : "Arxiv",
+    "Tags" : "Işarələr",
     "Settings" : "Quraşdırmalar",
     "Month" : "Ay",
     "Day" : "Gün",

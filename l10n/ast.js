@@ -5,6 +5,7 @@ OC.L10N.register(
     "Favorites" : "Favorites",
     "Videos" : "Vídeos",
     "Archive" : "Archivu",
+    "Tags" : "Etiquetes",
     "Settings" : "Settings",
     "Month" : "Mes",
     "Day" : "Día",
@@ -14,6 +15,7 @@ OC.L10N.register(
     "Cancel" : "Encaboxar",
     "Delete" : "Desaniciar",
     "Download" : "Baxar",
-    "Favorite" : "Marcar como favoritu"
+    "Favorite" : "Marcar como favoritu",
+    "View in folder" : "Ver na carpeta"
 },
 "nplurals=2; plural=(n != 1);");

@@ -11,6 +11,7 @@ OC.L10N.register(
     "Day" : "Өдөр",
     "Time" : "Цаг",
     "Update" : "Шинэчлэх",
+    "Back" : "буцах",
     "Cancel" : "болиулах",
     "Delete" : "Устгах",
     "Download" : "Татах",

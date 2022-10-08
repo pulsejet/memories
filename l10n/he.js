@@ -15,6 +15,7 @@ OC.L10N.register(
     "Hour" : "שעה",
     "Minute" : "דקה",
     "Update" : "עדכון",
+    "Back" : "חזרה",
     "Cancel" : "ביטול",
     "Delete" : "מחיקה",
     "Download" : "הורדה",
