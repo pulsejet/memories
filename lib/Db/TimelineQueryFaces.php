@@ -10,10 +10,10 @@ use OCP\Files\Folder;
 trait TimelineQueryFaces {
     protected IDBConnection $connection;
 
-    public function transformFaceFilter(IQueryBuilder &$query, string $userId, string $faceName) {
+    public function transformFaceFilter(IQueryBuilder &$query, string $userId, string $faceStr) {
         // Get title and uid of face user
-        $faceNames = explode('/', $faceName);
-        if (count($faceNames) !== 2) return;
+        $faceNames = explode('/', $faceStr);
+        if (count($faceNames) !== 2) throw new \Exception("Invalid face query");
         $faceUid = $faceNames[0];
         $faceName = $faceNames[1];
 
@@ -23,7 +23,7 @@ trait TimelineQueryFaces {
             ->where($query->expr()->eq('user_id', $sq->createNamedParameter($faceUid)))
             ->andWhere($query->expr()->eq('title', $sq->createNamedParameter($faceName)))
             ->executeQuery()->fetchOne();
-        if (!$id) return;
+        if (!$id) throw new \Exception("Unknown person: $faceStr");
 
         // Join with cluster
         $query->innerJoin('m', 'recognize_face_detections', 'rfd', $query->expr()->andX(

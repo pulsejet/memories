@@ -22,7 +22,7 @@ trait TimelineQueryTags {
     public function transformTagFilter(IQueryBuilder &$query, string $userId, string $tagName) {
         $tagId = $this->getSystemTagId($query, $tagName);
         if ($tagId === FALSE) {
-            $tagId = 0; // cannot abort here; that will show up everything in the response
+            throw new \Exception("Tag $tagName not found");
         }
 
         $query->innerJoin('m', 'systemtag_object_mapping', 'stom', $query->expr()->andX(

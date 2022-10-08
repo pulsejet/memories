@@ -178,23 +178,27 @@ class ApiController extends Controller {
         }
 
         // Run actual query
-        $list = $this->timelineQuery->getDays(
-            $folder,
-            $uid,
-            $recursive,
-            $archive,
-            $this->getTransformations(),
-        );
+        try {
+            $list = $this->timelineQuery->getDays(
+                $folder,
+                $uid,
+                $recursive,
+                $archive,
+                $this->getTransformations(),
+            );
 
-        // Preload some day responses
-        $this->preloadDays($list, $folder, $recursive, $archive);
+            // Preload some day responses
+            $this->preloadDays($list, $folder, $recursive, $archive);
 
-        // Add subfolder info if querying non-recursively
-        if (!$recursive) {
-            array_unshift($list, $this->getSubfoldersEntry($folder));
+            // Add subfolder info if querying non-recursively
+            if (!$recursive) {
+                array_unshift($list, $this->getSubfoldersEntry($folder));
+            }
+
+            return new JSONResponse($list, Http::STATUS_OK);
+        } catch (\Exception $e) {
+            return new JSONResponse(["message" => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
-
-        return new JSONResponse($list, Http::STATUS_OK);
     }
 
     /**
@@ -247,15 +251,19 @@ class ApiController extends Controller {
         }
 
         // Run actual query
-        $list = $this->timelineQuery->getDay(
-            $folder,
-            $uid,
-            $day_ids,
-            $recursive,
-            $archive,
-            $this->getTransformations(),
-        );
-        return new JSONResponse($list, Http::STATUS_OK);
+        try {
+            $list = $this->timelineQuery->getDay(
+                $folder,
+                $uid,
+                $day_ids,
+                $recursive,
+                $archive,
+                $this->getTransformations(),
+            );
+            return new JSONResponse($list, Http::STATUS_OK);
+        } catch (\Exception $e) {
+            return new JSONResponse(["message" => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
