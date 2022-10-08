@@ -2,7 +2,8 @@
     <div class="container" ref="container" :class="{ 'icon-loading': loading > 0 }">
         <div ref="topmatter" class="top-matter" v-if="topMatterType">
             <FolderTopMatter v-if="topMatterType === 1" />
-            <TagTopMatter v-if="topMatterType === 2" />
+            <TagTopMatter v-else-if="topMatterType === 2" />
+            <FaceTopMatter v-else-if="topMatterType === 3" />
         </div>
 
         <!-- Main recycler view for rows -->
@@ -175,6 +176,7 @@ import Photo from "./Photo.vue";
 import EditDate from "./EditDate.vue";
 import FolderTopMatter from "./FolderTopMatter.vue";
 import TagTopMatter from "./TagTopMatter.vue";
+import FaceTopMatter from "./FaceTopMatter.vue";
 import UserConfig from "../mixins/UserConfig";
 
 import Star from 'vue-material-design-icons/Star.vue';
@@ -208,6 +210,7 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
         EditDate,
         FolderTopMatter,
         TagTopMatter,
+        FaceTopMatter,
         NcActions,
         NcActionButton,
         NcButton,
@@ -341,6 +344,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 break;
             case 'tags':
                 this.topMatterType = this.$route.params.name ? TopMatterType.TAG : TopMatterType.NONE;
+                break;
+            case 'people':
+                this.topMatterType = this.$route.params.name ? TopMatterType.FACE : TopMatterType.NONE;
                 break;
             default:
                 this.topMatterType = TopMatterType.NONE;

@@ -1,5 +1,5 @@
 <template>
-    <div v-if="name" class="tag-top-matter">
+    <div v-if="name" class="face-top-matter">
         <NcActions>
 			<NcActionButton :aria-label="t('memories', 'Back')" @click="back()">
 				{{ t('memories', 'Back') }}
@@ -24,7 +24,7 @@ import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
         BackIcon,
     },
 })
-export default class TagTopMatter extends Mixins(GlobalMixin) {
+export default class FaceTopMatter extends Mixins(GlobalMixin) {
     private name: string = '';
 
     @Watch('$route')
@@ -41,13 +41,13 @@ export default class TagTopMatter extends Mixins(GlobalMixin) {
     }
 
     back() {
-        this.$router.push({ name: 'tags' });
+        this.$router.push({ name: 'people' });
     }
 }
 </script>
 
 <style lang="scss" scoped>
-.tag-top-matter {
+.face-top-matter {
     .name {
         font-size: 1.3em;
         font-weight: 400;
