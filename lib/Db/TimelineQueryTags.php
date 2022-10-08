@@ -69,14 +69,17 @@ trait TimelineQueryTags {
         return $tags;
     }
 
-    public function getTagPreviews(Folder $folder, int $tagId) {
+    public function getTagPreviews(Folder $folder) {
         $query = $this->connection->getQueryBuilder();
 
+        // Windowing
+        $rowNumber = $query->createFunction('ROW_NUMBER() OVER (PARTITION BY stom.systemtagid) as n');
+
         // SELECT all photos with this tag
-        $query->select('f.fileid', 'f.etag')->from('systemtag_object_mapping', 'stom')->where($query->expr()->andX(
-            $query->expr()->eq('stom.objecttype', $query->createNamedParameter("files")),
-            $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tagId, IQueryBuilder::PARAM_INT)),
-        ));
+        $query->select('f.fileid', 'f.etag', 'stom.systemtagid', $rowNumber)->from(
+            'systemtag_object_mapping', 'stom')->where(
+                $query->expr()->eq('stom.objecttype', $query->createNamedParameter("files")),
+            );
 
         // WHERE these items are memories indexed photos
         $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.fileid', 'stom.objectid'));
@@ -84,15 +87,24 @@ trait TimelineQueryTags {
         // WHERE these photos are in the user's requested folder recursively
         $query->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folder, true, false));
 
-        // MAX 4 results
-        $query->setMaxResults(4);
+        // Make this a sub query
+        $fun = $query->createFunction('(' . $query->getSQL() . ')');
 
-        // FETCH all previews
-        $previews = $query->executeQuery()->fetchAll();
+        // Create outer query
+        $outerQuery = $this->connection->getQueryBuilder();
+        $outerQuery->setParameters($query->getParameters());
+        $outerQuery->select('*')->from($fun, 't');
+        $outerQuery->where($query->expr()->lte('t.n', $outerQuery->createParameter('nc')));
+        $outerQuery->setParameter('nc', 4, IQueryBuilder::PARAM_INT);
+
+        // FETCH all tag previews
+        $previews = $outerQuery->executeQuery()->fetchAll();
 
         // Post-process
         foreach($previews as &$row) {
             $row["fileid"] = intval($row["fileid"]);
+            $row["systemtagid"] = intval($row["systemtagid"]);
+            unset($row["n"]);
         }
 
         return $previews;

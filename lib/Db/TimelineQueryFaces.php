@@ -56,6 +56,7 @@ trait TimelineQueryFaces {
     public function getFacePreviews(Folder $folder) {
         $query = $this->connection->getQueryBuilder();
 
+        // Windowing
         $rowNumber = $query->createFunction('ROW_NUMBER() OVER (PARTITION BY rfd.cluster_id) as n');
 
         // SELECT face detections for ID
