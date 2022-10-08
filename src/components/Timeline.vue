@@ -1426,7 +1426,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         line-height: 0.75em;
         font-weight: 600;
         opacity: 0.95;
-        right: 7px;
+        right: 9px;
         transform: translateY(-50%);
         z-index: 1;
 
@@ -1435,7 +1435,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             width: 4px;
             border-radius: 50%;
             background-color: var(--color-main-text);
-            opacity: 0.2;
+            opacity: 0.15;
             display: block;
             @include phone { display: none; }
         }
