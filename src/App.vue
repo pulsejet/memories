@@ -109,11 +109,29 @@ import TagsIcon from 'vue-material-design-icons/Tag.vue';
 })
 export default class App extends Mixins(GlobalMixin, UserConfig) {
     // Outer element
+
+    public mounted() {
+        // Get the content-vue element and add nextcloud version as a class to it
+        const contentVue = document.querySelector('#content-vue');
+        if (contentVue) {
+            const version = (<any>window.OC).config.version.split('.');
+            contentVue.classList.add('nextcloud-major-' + version[0]);
+        }
+    }
 }
 </script>
 
-<style>
+<style lang="scss">
 body {
     overflow: hidden;
+}
+
+// Nextcloud 25: get rid of gap and border radius at right
+#content-vue.nextcloud-major-25 {
+    // was var(--body-container-radius)
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+
+    width: calc(100% - var(--body-container-margin)*1); // was *2
 }
 </style>
