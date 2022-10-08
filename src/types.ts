@@ -71,6 +71,8 @@ export interface ITag extends IPhoto {
     count: number;
     /** ID of face if this is a face */
     faceid?: number;
+    /** Cache of previews */
+    previews?: IPhoto[];
 }
 
 export type IRow = {

@@ -89,6 +89,13 @@ export default class Tag extends Mixins(GlobalMixin) {
         // Reset state
         this.error = false;
 
+        // Look for cache
+        if (this.data.previews) {
+            this.previews = this.data.previews;
+            this.error = this.previews.length === 0;
+            return;
+        }
+
         if (this.isFace) {
             await this.refreshPreviewsFace();
         } else {
@@ -105,7 +112,7 @@ export default class Tag extends Mixins(GlobalMixin) {
                 res.data = res.data.slice(0, 1);
             }
             res.data.forEach((p) => p.flag = 0);
-            this.previews = res.data;
+            this.previews = this.data.previews = res.data;
         } catch (e) {
             this.error = true;
             console.error(e);
@@ -119,7 +126,7 @@ export default class Tag extends Mixins(GlobalMixin) {
             const res = await axios.get<IFaceDetection[]>(generateUrl(url));
             res.data.forEach((p) => p.flag = 0);
             const face = this.chooseFaceDetection(res.data);
-            this.previews = [face];
+            this.previews = this.data.previews = [face];
         } catch (e) {
             this.error = true;
             console.error(e);
