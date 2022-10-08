@@ -38,9 +38,14 @@ export default class FolderTopMatter extends Mixins(GlobalMixin) {
 
     createMatter() {
         if (this.$route.name === 'folders') {
+            let path: any = this.$route.params.path || '';
+            if (typeof path === 'string') {
+                path = path.split('/');
+            }
+
             this.topMatter = {
                 type: TopMatterType.FOLDER,
-                list: (this.$route.params.path || '').split('/').filter(x => x).map((x, idx, arr) => {
+                list: path.filter(x => x).map((x, idx, arr) => {
                     return {
                         text: x,
                         path: arr.slice(0, idx + 1).join('/'),

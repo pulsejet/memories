@@ -512,7 +512,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
         // Folder
         if (this.$route.name === 'folders') {
-            query.set('folder', this.$route.params.path || '/');
+            let path: any = this.$route.params.path || '/';
+            path = typeof path === 'string' ? path : path.join('/');
+            query.set('folder', path);
         }
 
         // Archive

@@ -104,7 +104,7 @@ export default class Folder extends Mixins(GlobalMixin) {
 
     /** Open folder */
     openFolder(folder: IFolder) {
-        const path = folder.path.split('/').filter(x => x).slice(2).join('/');
+        const path = folder.path.split('/').filter(x => x).slice(2) as any;
         this.$router.push({ name: 'folders', params: { path }});
     }
 }
