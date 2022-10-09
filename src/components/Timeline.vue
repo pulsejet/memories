@@ -1,5 +1,15 @@
 <template>
     <div class="container" ref="container" :class="{ 'icon-loading': loading > 0 }">
+        <!-- No content found and nothing is loading -->
+        <NcEmptyContent title="Nothing to show here" v-if="loading === 0 && list.length === 0">
+            <template #icon>
+                <PeopleIcon v-if="$route.name === 'people'" />
+                <ArchiveIcon v-else-if="$route.name === 'archive'" />
+                <ImageMultipleIcon v-else />
+            </template>
+        </NcEmptyContent>
+
+        <!-- Static top matter -->
         <div ref="topmatter" class="top-matter" v-if="topMatterType">
             <FolderTopMatter v-if="topMatterType === 1" />
             <TagTopMatter v-else-if="topMatterType === 2" />
@@ -61,7 +71,7 @@
             </div>
         </RecycleScroller>
 
-        <!-- Timeline -->
+        <!-- Timeline scroller -->
         <div ref="timelineScroll" class="timeline-scroll"
              v-bind:class="{ scrolling }"
             @mousemove="timelineHover"
@@ -165,7 +175,7 @@ import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType, ITick, TopMatterType }
 import { generateUrl } from '@nextcloud/router'
 import { showError } from '@nextcloud/dialogs'
 import GlobalMixin from '../mixins/GlobalMixin';
-import { NcActions, NcActionButton, NcButton } from '@nextcloud/vue';
+import { NcActions, NcActionButton, NcButton, NcEmptyContent } from '@nextcloud/vue';
 
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
@@ -188,6 +198,8 @@ import EditIcon from 'vue-material-design-icons/ClockEdit.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import UnarchiveIcon from 'vue-material-design-icons/PackageUp.vue';
 import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue';
+import PeopleIcon from 'vue-material-design-icons/AccountMultiple.vue';
+import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue'
 
 const SCROLL_LOAD_DELAY = 100;          // Delay in loading data when scrolling
 const MAX_PHOTO_WIDTH = 175;            // Max width of a photo
@@ -214,6 +226,7 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
         NcActions,
         NcActionButton,
         NcButton,
+        NcEmptyContent,
 
         Star,
         Download,
@@ -224,6 +237,8 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
         ArchiveIcon,
         UnarchiveIcon,
         OpenInNewIcon,
+        PeopleIcon,
+        ImageMultipleIcon,
     }
 })
 export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
@@ -691,11 +706,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
         // Fix view height variable
         await this.reflowTimeline();
-
-        // Check if we didn't find anything
-        if (this.list.length === 0) {
-            showError(this.t('memories', 'No photos to show here'));
-        }
     }
 
     /** Fetch image data for one dayId */
