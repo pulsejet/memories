@@ -11,6 +11,7 @@ OC.L10N.register(
     "Day" : "Day",
     "Time" : "Time",
     "Hour" : "Hour",
+    "Back" : "Back",
     "Cannot find this photo anymore!" : "Cannot find this photo any more!",
     "Update" : "Update",
     "Cancel" : "Cancel",

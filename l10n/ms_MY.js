@@ -5,8 +5,8 @@ OC.L10N.register(
     "Settings" : "Tetapan",
     "Month" : "Bulan",
     "Day" : "Hari",
-    "Update" : "Kemaskini",
     "Back" : "Kembali",
+    "Update" : "Kemaskini",
     "Cancel" : "Batal",
     "Delete" : "Padam",
     "Download" : "Muat turun"

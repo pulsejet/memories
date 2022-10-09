@@ -10,6 +10,7 @@ OC.L10N.register(
     "Month" : "Mis",
     "Day" : "Diwrnod",
     "Time" : "Amser",
+    "Back" : "Nôl",
     "Update" : "Diweddaru",
     "Cancel" : "Diddymu",
     "Delete" : "Dileu",
