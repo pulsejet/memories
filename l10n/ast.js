@@ -11,6 +11,7 @@ OC.L10N.register(
     "Day" : "Día",
     "Time" : "Hora",
     "Hour" : "Hora",
+    "Back" : "Atrás",
     "Update" : "Anovar",
     "Cancel" : "Encaboxar",
     "Delete" : "Desaniciar",
