@@ -79,7 +79,7 @@
             @mouseleave="timelineLeave"
             @mousedown="timelineClick">
             <span class="cursor st" ref="cursorSt"
-                  :style="{ top: timelineCursorY + 'px' }"></span>
+                  :style="{ transform: `translateY(${timelineCursorY}px)` }"></span>
             <span class="cursor hv"
                   :style="{ transform: `translateY(${timelineHoverCursorY}px)` }">
                   {{ timelineHoverCursorText }}
