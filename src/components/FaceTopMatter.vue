@@ -55,5 +55,9 @@ export default class FaceTopMatter extends Mixins(GlobalMixin) {
         display: inline-block;
         vertical-align: top;
     }
+
+    button {
+        display: inline-block;
+    }
 }
 </style>
