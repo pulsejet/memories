@@ -257,10 +257,10 @@ export default class Photo extends Mixins(GlobalMixin) {
     background-color: var(--color-main-background);
     border-radius: 50%;
     cursor: pointer;
-    opacity: 0;
+    display: none;
 
-    .p-outer:hover > & { opacity: 0.9; }
-    .selected > & { opacity: 0.9; filter: invert(1); }
+    .p-outer:hover > & { display: flex; }
+    .selected > & { display: flex; filter: invert(1); }
 }
 .video-icon, .star-icon {
     position: absolute;
