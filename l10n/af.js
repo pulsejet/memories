@@ -11,6 +11,7 @@ OC.L10N.register(
     "Day" : "Dag",
     "Time" : "Tyd",
     "Hour" : "Uur",
+    "Back" : "Terug",
     "Update" : "Werk by",
     "Cancel" : "Kanselleer",
     "Delete" : "Skrap",

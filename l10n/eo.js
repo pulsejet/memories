@@ -12,6 +12,7 @@ OC.L10N.register(
     "Day" : "Tago",
     "Time" : "Dato",
     "Hour" : "Horo",
+    "Back" : "Antaŭen",
     "Update" : "Ĝisdatigi",
     "Cancel" : "Nuligi",
     "Delete" : "Forigi",

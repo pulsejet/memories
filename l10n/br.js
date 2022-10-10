@@ -7,6 +7,7 @@ OC.L10N.register(
     "Settings" : "Arventennoù",
     "Month" : "Miz",
     "Day" : "Deiz",
+    "Back" : "Distro",
     "Update" : "Hizivaat",
     "Cancel" : "Arrest",
     "Delete" : "Lemel",
