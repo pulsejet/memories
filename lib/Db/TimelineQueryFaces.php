@@ -19,10 +19,14 @@ trait TimelineQueryFaces {
 
         // Get cluster ID
         $sq = $query->getConnection()->getQueryBuilder();
-        $id = $sq->select('id')->from('recognize_face_clusters')
-            ->where($query->expr()->eq('user_id', $sq->createNamedParameter($faceUid)))
-            ->andWhere($query->expr()->eq('title', $sq->createNamedParameter($faceName)))
-            ->executeQuery()->fetchOne();
+        $idQuery = $sq->select('id')->from('recognize_face_clusters')
+            ->where($query->expr()->eq('user_id', $sq->createNamedParameter($faceUid)));
+
+        // If name is a number then it is an ID
+        $nameField = is_numeric($faceName) ? 'id' : 'title';
+        $idQuery->andWhere($query->expr()->eq($nameField, $sq->createNamedParameter($faceName)));
+
+        $id = $idQuery->executeQuery()->fetchOne();
         if (!$id) throw new \Exception("Unknown person: $faceStr");
 
         // Join with cluster
