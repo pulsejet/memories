@@ -1500,6 +1500,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     opacity: 0.95;
     display: flex;
     vertical-align: middle;
+    z-index: 100;
 
     > .text {
         flex-grow: 1;
