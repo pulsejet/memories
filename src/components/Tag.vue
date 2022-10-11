@@ -39,7 +39,6 @@ import { getPreviewUrl } from "../services/FileUtils";
 
 import { NcCounterBubble } from '@nextcloud/vue'
 
-import axios from '@nextcloud/axios'
 import GlobalMixin from '../mixins/GlobalMixin';
 import { constants } from '../services/Utils';
 
@@ -114,7 +113,7 @@ export default class Tag extends Mixins(GlobalMixin) {
     /** Open tag */
     openTag() {
         if (this.isFace) {
-            const name = this.data.name;
+            const name = this.data.name || this.data.fileid.toString();
             const user = this.data.user_id;
             this.$router.push({ name: 'people', params: { name, user  }});
         } else {
