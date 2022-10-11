@@ -1,5 +1,12 @@
 <template>
     <div class="container" ref="container" :class="{ 'icon-loading': loading > 0 }">
+        <!-- Static top matter -->
+        <div ref="topmatter" class="top-matter" v-if="topMatterType">
+            <FolderTopMatter v-if="topMatterType === 1" />
+            <TagTopMatter v-else-if="topMatterType === 2" />
+            <FaceTopMatter v-else-if="topMatterType === 3" />
+        </div>
+
         <!-- No content found and nothing is loading -->
         <NcEmptyContent title="Nothing to show here" v-if="loading === 0 && list.length === 0">
             <template #icon>
@@ -8,13 +15,6 @@
                 <ImageMultipleIcon v-else />
             </template>
         </NcEmptyContent>
-
-        <!-- Static top matter -->
-        <div ref="topmatter" class="top-matter" v-if="topMatterType">
-            <FolderTopMatter v-if="topMatterType === 1" />
-            <TagTopMatter v-else-if="topMatterType === 2" />
-            <FaceTopMatter v-else-if="topMatterType === 3" />
-        </div>
 
         <!-- Main recycler view for rows -->
         <RecycleScroller
