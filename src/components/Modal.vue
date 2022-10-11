@@ -1,7 +1,7 @@
 <template>
     <NcModal
         :size="size"
-        @close="$emit('close')"
+        @close="close"
         :outTransition="true">
         <div class="container">
             <div class="head">
@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator';
 import { NcModal } from '@nextcloud/vue';
 
 @Component({
@@ -28,6 +28,9 @@ import { NcModal } from '@nextcloud/vue';
 })
 export default class Modal extends Vue {
     @Prop({default: 'small'}) private size?: string;
+
+    @Emit('close')
+    public close() {}
 }
 </script>
 
