@@ -405,7 +405,7 @@ export async function getOnThisDayData(): Promise<IDay[]> {
 
     // Group photos by day
     const ans: IDay[] = [];
-    const prevDayId = Number.MIN_SAFE_INTEGER;
+    let prevDayId = Number.MIN_SAFE_INTEGER;
     for (const photo of data) {
         if (!photo.dayid) continue;
 
@@ -416,6 +416,7 @@ export async function getOnThisDayData(): Promise<IDay[]> {
                 count: 0,
                 detail: [],
             });
+            prevDayId = photo.dayid;
         }
 
         // Add to last day
