@@ -57,6 +57,7 @@ interface IFaceDetection extends IPhoto {
 export default class Tag extends Mixins(GlobalMixin) {
     @Prop() data: ITag;
     @Prop() rowHeight: number;
+    @Prop() noNavigate: boolean;
 
     // Separate property because the one on data isn't reactive
     private previews: IPhoto[] = [];
@@ -112,6 +113,11 @@ export default class Tag extends Mixins(GlobalMixin) {
 
     /** Open tag */
     openTag() {
+        this.$emit('open', this.data);
+        if (this.noNavigate) {
+            return;
+        }
+
         if (this.isFace) {
             const name = this.data.name || this.data.fileid.toString();
             const user = this.data.user_id;
@@ -178,7 +184,7 @@ export default class Tag extends Mixins(GlobalMixin) {
     top: 50%; width: 100%;
     transform: translateY(-50%);
     color: white;
-    width: 100%;
+    width: 90%;
     padding: 0 5%;
     text-align: center;
     font-size: 1.2em;
