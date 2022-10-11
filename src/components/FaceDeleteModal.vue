@@ -6,20 +6,14 @@
 
         <div class="container">
             <div class="head">
-                <span>{{ t('memories', 'Rename person') }}</span>
+                <span>{{ t('memories', 'Remove person') }}</span>
             </div>
 
-            <div class="fields memories__editdate__fields">
-                <NcTextField :value.sync="name"
-                    class="field"
-                    :label="t('memories', 'Name')" :label-visible="true"
-                    :placeholder="t('memories', 'Name')"
-                    @keypress.enter="save()" />
-            </div>
+            <span>{{ t('memories', 'Are you sure you want to remove {name}', { name }) }}</span>
 
             <div class="buttons">
-                <NcButton @click="save" class="button" type="primary">
-                    {{ t('memories', 'Update') }}
+                <NcButton @click="save" class="button" type="error">
+                    {{ t('memories', 'Delete') }}
                 </NcButton>
             </div>
         </div>
@@ -40,10 +34,9 @@ import client from '../services/DavClient';
         NcTextField,
     }
 })
-export default class FaceEditModal extends Mixins(GlobalMixin) {
+export default class FaceDeleteModal extends Mixins(GlobalMixin) {
     private user: string = "";
     private name: string = "";
-    private oldName: string = "";
 
     @Watch('$route')
     async routeChange(from: any, to: any) {
@@ -57,21 +50,16 @@ export default class FaceEditModal extends Mixins(GlobalMixin) {
     public refreshParams() {
         this.user = this.$route.params.user || '';
         this.name = this.$route.params.name || '';
-        this.oldName = this.$route.params.name || '';
     }
 
     public async save() {
 		try {
-			await client.moveFile(
-				`/recognize/${this.user}/faces/${this.oldName}`,
-				`/recognize/${this.user}/faces/${this.name}`,
-			);
-            this.$router.push({ name: 'people', params: { user: this.user, name: this.name } });
+			await client.deleteFile(`/recognize/${this.user}/faces/${this.name}`)
+            this.$router.push({ name: 'people' });
             this.close();
 		} catch (error) {
             console.log(error);
-			showError(this.t('photos', 'Failed to rename {oldName} to {name}.', {
-                oldName: this.oldName,
+			showError(this.t('photos', 'Failed to delete {name}.', {
                 name: this.name,
             }));
 		}
