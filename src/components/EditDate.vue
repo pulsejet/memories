@@ -1,109 +1,102 @@
 <template>
-    <NcModal
+    <Modal
         v-if="photos.length > 0"
-        size="small"
-        @close="close"
-        :outTransition="true"
-        :hasNext="false"
-        :hasPrevious="false">
+        @close="close">
 
-        <div class="container">
-            <div class="head">
-                <span>{{ t('memories', 'Edit Date/Time') }}</span>
+        <template #title>
+            {{ t('memories', 'Edit Date/Time') }}
+        </template>
+
+        <template #buttons>
+            <NcButton @click="save" class="button" type="error" v-if="longDateStr">
+                {{ t('memories', 'Update Exif') }}
+            </NcButton>
+        </template>
+
+        <div v-if="longDateStr">
+            <span v-if="photos.length > 1">
+                [{{ t('memories', 'Newest') }}]
+            </span>
+            {{ longDateStr }}
+
+            <div class="fields memories__editdate__fields">
+                <NcTextField :value.sync="year"
+                    class="field"
+                    @input="newestChange()"
+                    :label="t('memories', 'Year')" :label-visible="true"
+                    :placeholder="t('memories', 'Year')" />
+                <NcTextField :value.sync="month"
+                    class="field"
+                    @input="newestChange()"
+                    :label="t('memories', 'Month')" :label-visible="true"
+                    :placeholder="t('memories', 'Month')" />
+                <NcTextField :value.sync="day"
+                    class="field"
+                    @input="newestChange()"
+                    :label="t('memories', 'Day')" :label-visible="true"
+                    :placeholder="t('memories', 'Day')" />
+                <NcTextField :value.sync="hour"
+                    class="field"
+                    @input="newestChange(true)"
+                    :label="t('memories', 'Time')" :label-visible="true"
+                    :placeholder="t('memories', 'Hour')" />
+                <NcTextField :value.sync="minute"
+                    class="field"
+                    @input="newestChange(true)"
+                    :label="t('memories', 'Minute')"
+                    :placeholder="t('memories', 'Minute')" />
             </div>
 
-            <div v-if="longDateStr">
-
-                <span v-if="photos.length > 1">
-                    [{{ t('memories', 'Newest') }}]
+            <div v-if="photos.length > 1" class="oldest">
+                <span>
+                    [{{ t('memories', 'Oldest') }}]
                 </span>
-                {{ longDateStr }}
+                {{ longDateStrLast }}
 
                 <div class="fields memories__editdate__fields">
-                    <NcTextField :value.sync="year"
+                    <NcTextField :value.sync="yearLast"
                         class="field"
-                        @input="newestChange()"
                         :label="t('memories', 'Year')" :label-visible="true"
                         :placeholder="t('memories', 'Year')" />
-                    <NcTextField :value.sync="month"
+                    <NcTextField :value.sync="monthLast"
                         class="field"
-                        @input="newestChange()"
                         :label="t('memories', 'Month')" :label-visible="true"
                         :placeholder="t('memories', 'Month')" />
-                    <NcTextField :value.sync="day"
+                    <NcTextField :value.sync="dayLast"
                         class="field"
-                        @input="newestChange()"
                         :label="t('memories', 'Day')" :label-visible="true"
                         :placeholder="t('memories', 'Day')" />
-                    <NcTextField :value.sync="hour"
+                    <NcTextField :value.sync="hourLast"
                         class="field"
-                        @input="newestChange(true)"
                         :label="t('memories', 'Time')" :label-visible="true"
                         :placeholder="t('memories', 'Hour')" />
-                    <NcTextField :value.sync="minute"
+                    <NcTextField :value.sync="minuteLast"
                         class="field"
-                        @input="newestChange(true)"
                         :label="t('memories', 'Minute')"
                         :placeholder="t('memories', 'Minute')" />
                 </div>
-
-                <div v-if="photos.length > 1" class="oldest">
-                    <span>
-                        [{{ t('memories', 'Oldest') }}]
-                    </span>
-                    {{ longDateStrLast }}
-
-                    <div class="fields memories__editdate__fields">
-                        <NcTextField :value.sync="yearLast"
-                            class="field"
-                            :label="t('memories', 'Year')" :label-visible="true"
-                            :placeholder="t('memories', 'Year')" />
-                        <NcTextField :value.sync="monthLast"
-                            class="field"
-                            :label="t('memories', 'Month')" :label-visible="true"
-                            :placeholder="t('memories', 'Month')" />
-                        <NcTextField :value.sync="dayLast"
-                            class="field"
-                            :label="t('memories', 'Day')" :label-visible="true"
-                            :placeholder="t('memories', 'Day')" />
-                        <NcTextField :value.sync="hourLast"
-                            class="field"
-                            :label="t('memories', 'Time')" :label-visible="true"
-                            :placeholder="t('memories', 'Hour')" />
-                        <NcTextField :value.sync="minuteLast"
-                            class="field"
-                            :label="t('memories', 'Minute')"
-                            :placeholder="t('memories', 'Minute')" />
-                    </div>
-                </div>
-
-                <div v-if="processing" class="info-pad">
-                    {{ t('memories', 'Processing … {n}/{m}', {
-                        n: photosDone,
-                        m: photos.length,
-                    }) }}
-                </div>
-
-                <div class="info-pad warn">
-                    {{ t('memories', 'This feature modifies files in your storage to update Exif data.') }}
-                    {{ t('memories', 'Exercise caution and make sure you have backups.') }}
-                </div>
-
-                <div class="buttons">
-                    <NcButton @click="save" class="button" type="error">
-                        {{ t('memories', 'Update Exif') }}
-                    </NcButton>
-                </div>
             </div>
 
-            <div v-else>
-                {{ t('memories', 'Loading data … {n}/{m}', {
+            <div v-if="processing" class="info-pad">
+                {{ t('memories', 'Processing … {n}/{m}', {
                     n: photosDone,
                     m: photos.length,
                 }) }}
             </div>
+
+            <div class="info-pad warn">
+                {{ t('memories', 'This feature modifies files in your storage to update Exif data.') }}
+                {{ t('memories', 'Exercise caution and make sure you have backups.') }}
+            </div>
         </div>
-    </NcModal>
+
+        <div v-else>
+            {{ t('memories', 'Loading data … {n}/{m}', {
+                n: photosDone,
+                m: photos.length,
+            }) }}
+        </div>
+    </Modal>
 </template>
 
 <script lang="ts">
@@ -111,9 +104,10 @@ import { Component, Mixins } from 'vue-property-decorator';
 import GlobalMixin from '../mixins/GlobalMixin';
 import { IPhoto } from '../types';
 
-import { NcButton, NcModal, NcTextField } from '@nextcloud/vue';
+import { NcButton, NcTextField } from '@nextcloud/vue';
 import { showError } from '@nextcloud/dialogs'
 import { generateUrl } from '@nextcloud/router'
+import Modal from './Modal.vue';
 import axios from '@nextcloud/axios'
 import * as utils from '../services/Utils';
 import * as dav from "../services/DavRequests";
@@ -124,8 +118,8 @@ const EDIT_API_URL = '/apps/memories/api/edit/{id}';
 @Component({
     components: {
         NcButton,
-        NcModal,
         NcTextField,
+        Modal,
     }
 })
 export default class EditDate extends Mixins(GlobalMixin) {
@@ -399,14 +393,6 @@ export default class EditDate extends Mixins(GlobalMixin) {
 </script>
 
 <style scoped lang="scss">
-.container {
-	margin: 20px;
-
-    .head {
-        font-weight: 500;
-    }
-}
-
 .fields {
     .field {
         width: 4.1em;
@@ -416,15 +402,6 @@ export default class EditDate extends Mixins(GlobalMixin) {
 
 .oldest {
     margin-top: 10px;
-}
-
-.buttons {
-    margin-top: 10px;
-    text-align: right;
-
-    button {
-        display: inline-block;
-    }
 }
 
 .info-pad {

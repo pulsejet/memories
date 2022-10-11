@@ -1,37 +1,32 @@
 <template>
-    <NcModal
-        size="small"
-        @close="close"
-        :outTransition="true">
+    <Modal @close="close">
+        <template #title>
+            {{ t('memories', 'Remove person') }}
+        </template>
 
-        <div class="container">
-            <div class="head">
-                <span>{{ t('memories', 'Remove person') }}</span>
-            </div>
+        <span>{{ t('memories', 'Are you sure you want to remove {name}', { name }) }}</span>
 
-            <span>{{ t('memories', 'Are you sure you want to remove {name}', { name }) }}</span>
-
-            <div class="buttons">
-                <NcButton @click="save" class="button" type="error">
-                    {{ t('memories', 'Delete') }}
-                </NcButton>
-            </div>
-        </div>
-    </NcModal>
+        <template #buttons>
+            <NcButton @click="save" class="button" type="error">
+                {{ t('memories', 'Delete') }}
+            </NcButton>
+        </template>
+    </Modal>
 </template>
 
 <script lang="ts">
 import { Component, Mixins, Watch } from 'vue-property-decorator';
-import { NcButton, NcModal, NcTextField } from '@nextcloud/vue';
+import { NcButton, NcTextField } from '@nextcloud/vue';
 import { showError } from '@nextcloud/dialogs'
+import Modal from './Modal.vue';
 import GlobalMixin from '../mixins/GlobalMixin';
 import client from '../services/DavClient';
 
 @Component({
     components: {
         NcButton,
-        NcModal,
         NcTextField,
+        Modal,
     }
 })
 export default class FaceDeleteModal extends Mixins(GlobalMixin) {
@@ -70,22 +65,3 @@ export default class FaceDeleteModal extends Mixins(GlobalMixin) {
     }
 }
 </script>
-
-<style scoped lang="scss">
-.container {
-	margin: 20px;
-
-    .head {
-        font-weight: 500;
-    }
-}
-
-.buttons {
-    margin-top: 10px;
-    text-align: right;
-
-    button {
-        display: inline-block;
-    }
-}
-</style>
