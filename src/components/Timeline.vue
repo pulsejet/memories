@@ -101,7 +101,7 @@
                     :aria-label="t('memories', 'Cancel')"
                     @click="clearSelection()">
                     {{ t('memories', 'Cancel') }}
-                    <template #icon> <Close :size="20" /> </template>
+                    <template #icon> <CloseIcon :size="20" /> </template>
                 </NcActionButton>
             </NcActions>
 
@@ -146,7 +146,6 @@
                     </NcActionButton>
                 </template>
 
-
                 <NcActionButton
                     :aria-label="t('memories', 'Edit Date/Time')"
                     @click="editDateSelection" close-after-click>
@@ -162,6 +161,14 @@
                         <template #icon> <OpenInNewIcon :size="20" /> </template>
                     </NcActionButton>
                 </template>
+
+                <NcActionButton
+                    v-if="$route.name === 'people'"
+                    :aria-label="t('memories', 'Remove from person')"
+                    @click="removeSelectionFromPerson" close-after-click>
+                    {{ t('memories', 'Remove from person') }}
+                    <template #icon> <CloseIcon :size="20" /> </template>
+                </NcActionButton>
             </NcActions>
         </div>
 
@@ -192,14 +199,14 @@ import UserConfig from "../mixins/UserConfig";
 import Star from 'vue-material-design-icons/Star.vue';
 import Download from 'vue-material-design-icons/Download.vue';
 import Delete from 'vue-material-design-icons/Delete.vue';
-import Close from 'vue-material-design-icons/Close.vue';
 import CheckCircle from 'vue-material-design-icons/CheckCircle.vue';
 import EditIcon from 'vue-material-design-icons/ClockEdit.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import UnarchiveIcon from 'vue-material-design-icons/PackageUp.vue';
 import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue';
 import PeopleIcon from 'vue-material-design-icons/AccountMultiple.vue';
-import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue'
+import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
+import CloseIcon from 'vue-material-design-icons/Close.vue';
 
 const SCROLL_LOAD_DELAY = 100;          // Delay in loading data when scrolling
 const MAX_PHOTO_WIDTH = 175;            // Max width of a photo
@@ -231,7 +238,6 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
         Star,
         Download,
         Delete,
-        Close,
         CheckCircle,
         EditIcon,
         ArchiveIcon,
@@ -239,6 +245,7 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
         OpenInNewIcon,
         PeopleIcon,
         ImageMultipleIcon,
+        CloseIcon,
     }
 })
 export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
@@ -1246,6 +1253,30 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                     continue
                 }
                 const delPhotos = delIds.map(id => this.selection.get(id));
+                await this.deleteFromViewWithAnimation(delPhotos);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            this.loading--;
+        }
+    }
+
+    /**
+     * Remove currently selected photos from person
+     */
+    async removeSelectionFromPerson() {
+        // Make sure route is valid
+        const { user, name } = this.$route.params;
+        if (this.$route.name !== "people" || !user || !name) {
+            return;
+        }
+
+        // Run query
+        try {
+            this.loading++;
+            for await (let delIds of dav.removeFaceImages(user, name, Array.from(this.selection.keys()))) {
+                const delPhotos = delIds.filter(x => x).map(id => this.selection.get(id));
                 await this.deleteFromViewWithAnimation(delPhotos);
             }
         } catch (error) {

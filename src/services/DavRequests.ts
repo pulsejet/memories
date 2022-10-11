@@ -494,3 +494,32 @@ export async function getTagsData(): Promise<IDay[]> {
         } as any)),
     }]
 }
+
+/**
+ * Remove images from a face.
+ *
+ * @param user User ID of face
+ * @param name Name of face (or ID)
+ * @param fileIds List of file IDs to remove
+ * @returns Generator
+ */
+export async function* removeFaceImages(user: string, name: string, fileIds: number[]) {
+    // Get files data
+    let fileInfos = await getFiles(fileIds.filter(f => f));
+
+    // Remove each file
+    const calls = fileInfos.map((f) => async () => {
+        try {
+            await client.deleteFile(`/recognize/${user}/faces/${name}/${f.fileid}-${f.basename}`)
+            return f.fileid;
+        } catch (e) {
+            console.error(e)
+            showError(t('memories', 'Failed to remove {filename} from face.', {
+                filename: f.filename,
+            }));
+            return 0;
+        }
+    });
+
+    yield* runInParallel(calls, 10);
+}
