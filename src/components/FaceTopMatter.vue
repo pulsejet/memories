@@ -11,11 +11,15 @@
 
         <div class="right-actions">
             <NcActions :inline="1">
-                <NcActionButton :aria-label="t('memories', 'Rename person')" @click="showEditModal=true">
+                <NcActionButton :aria-label="t('memories', 'Rename person')" @click="showEditModal=true" close-after-click>
                     {{ t('memories', 'Rename person') }}
                     <template #icon> <EditIcon :size="20" /> </template>
                 </NcActionButton>
-                <NcActionButton :aria-label="t('memories', 'Remove person')" @click="showDeleteModal=true">
+                <NcActionButton :aria-label="t('memories', 'Merge with different person')" @click="showMergeModal=true" close-after-click>
+                    {{ t('memories', 'Merge with different person') }}
+                    <template #icon> <MergeIcon :size="20" /> </template>
+                </NcActionButton>
+                <NcActionButton :aria-label="t('memories', 'Remove person')" @click="showDeleteModal=true" close-after-click>
                     {{ t('memories', 'Remove person') }}
                     <template #icon> <DeleteIcon :size="20" /> </template>
                 </NcActionButton>
@@ -24,6 +28,7 @@
 
         <FaceEditModal v-if="showEditModal" @close="showEditModal=false" />
         <FaceDeleteModal v-if="showDeleteModal" @close="showDeleteModal=false" />
+        <FaceMergeModal v-if="showMergeModal" @close="showMergeModal=false" />
     </div>
 </template>
 
@@ -34,9 +39,11 @@ import GlobalMixin from '../mixins/GlobalMixin';
 import { NcActions, NcActionButton } from '@nextcloud/vue';
 import FaceEditModal from './FaceEditModal.vue';
 import FaceDeleteModal from './FaceDeleteModal.vue';
+import FaceMergeModal from './FaceMergeModal.vue';
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
 import DeleteIcon from 'vue-material-design-icons/Close.vue';
+import MergeIcon from 'vue-material-design-icons/Merge.vue';
 
 @Component({
     components: {
@@ -44,15 +51,18 @@ import DeleteIcon from 'vue-material-design-icons/Close.vue';
         NcActionButton,
         FaceEditModal,
         FaceDeleteModal,
+        FaceMergeModal,
         BackIcon,
         EditIcon,
         DeleteIcon,
+        MergeIcon,
     },
 })
 export default class FaceTopMatter extends Mixins(GlobalMixin) {
     private name: string = '';
     private showEditModal: boolean = false;
     private showDeleteModal: boolean = false;
+    private showMergeModal: boolean = false;
 
     @Watch('$route')
     async routeChange(from: any, to: any) {
