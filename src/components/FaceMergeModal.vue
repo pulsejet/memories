@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Watch } from 'vue-property-decorator';
+import { Component, Emit, Mixins, Watch } from 'vue-property-decorator';
 import { NcButton, NcTextField } from '@nextcloud/vue';
 import { showError } from '@nextcloud/dialogs'
 import { IFileInfo, IPhoto, ITag } from '../types';
@@ -51,6 +51,9 @@ export default class FaceMergeModal extends Mixins(GlobalMixin) {
     private detail: IPhoto[] = [];
     private processing = 0;
     private procesingTotal = 0;
+
+    @Emit('close')
+    public close() {}
 
     @Watch('$route')
     async routeChange(from: any, to: any) {
@@ -136,10 +139,6 @@ export default class FaceMergeModal extends Mixins(GlobalMixin) {
                 name: this.name,
             }));
 		}
-    }
-
-    public close() {
-        this.$emit('close');
     }
 }
 </script>

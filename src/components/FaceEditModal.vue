@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Watch } from 'vue-property-decorator';
+import { Component, Emit, Mixins, Watch } from 'vue-property-decorator';
 import { NcButton, NcTextField } from '@nextcloud/vue';
 import { showError } from '@nextcloud/dialogs'
 import Modal from './Modal.vue';
@@ -39,6 +39,9 @@ export default class FaceEditModal extends Mixins(GlobalMixin) {
     private user: string = "";
     private name: string = "";
     private oldName: string = "";
+
+    @Emit('close')
+    public close() {}
 
     @Watch('$route')
     async routeChange(from: any, to: any) {
@@ -70,10 +73,6 @@ export default class FaceEditModal extends Mixins(GlobalMixin) {
                 name: this.name,
             }));
 		}
-    }
-
-    public close() {
-        this.$emit('close');
     }
 }
 </script>

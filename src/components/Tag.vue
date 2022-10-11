@@ -5,7 +5,7 @@
         hasError: error,
         isFace: isFace,
     }"
-        @click="openTag()"
+        @click="openTag(data)"
         v-bind:style="{
             width: rowHeight + 'px',
             height: rowHeight + 'px',
@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Watch, Mixins } from 'vue-property-decorator';
+import { Component, Prop, Watch, Mixins, Emit } from 'vue-property-decorator';
 import { IPhoto, ITag } from '../types';
 import { generateUrl } from '@nextcloud/router'
 import { getPreviewUrl } from "../services/FileUtils";
@@ -112,8 +112,8 @@ export default class Tag extends Mixins(GlobalMixin) {
     }
 
     /** Open tag */
-    openTag() {
-        this.$emit('open', this.data);
+    @Emit('open')
+    openTag(tag: ITag) {
         if (this.noNavigate) {
             return;
         }

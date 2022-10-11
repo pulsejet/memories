@@ -100,7 +100,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins } from 'vue-property-decorator';
+import { Component, Emit, Mixins } from 'vue-property-decorator';
 import GlobalMixin from '../mixins/GlobalMixin';
 import { IPhoto } from '../types';
 
@@ -123,6 +123,8 @@ const EDIT_API_URL = '/apps/memories/api/edit/{id}';
     }
 })
 export default class EditDate extends Mixins(GlobalMixin) {
+    @Emit('refresh') emitRefresh(val: boolean) {}
+
     private photos: IPhoto[] = [];
     private photosDone: number = 0;
     private processing: boolean = false;
@@ -236,7 +238,7 @@ export default class EditDate extends Mixins(GlobalMixin) {
             const res = await axios.patch<any>(generateUrl(EDIT_API_URL, { id: this.photos[0].fileid }), {
                 date: this.getExifFormat(this.getDate()),
             });
-            this.$emit('refresh', true);
+            this.emitRefresh(true);
             this.close();
         } catch (e) {
             if (e.response?.data?.message) {
@@ -314,7 +316,7 @@ export default class EditDate extends Mixins(GlobalMixin) {
             // nothing to do
         }
         this.processing = false;
-        this.$emit('refresh', true);
+        this.emitRefresh(true);
         this.close();
     }
 
