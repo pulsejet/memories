@@ -299,7 +299,9 @@ class Exif {
         // Check if found something
         try {
             return self::parseExifDate($dt);
-        } catch (\Exception $ex) {}
+        } catch (\Exception $ex) {
+        } catch (\ValueError $ex) {
+        }
 
         // Fall back to creation time
         $dateTaken = $file->getCreationTime();
