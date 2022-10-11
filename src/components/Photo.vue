@@ -38,6 +38,7 @@
 <script lang="ts">
 import { Component, Prop, Emit, Mixins } from 'vue-property-decorator';
 import { IDay, IPhoto } from "../types";
+import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 
 import { showError } from '@nextcloud/dialogs'
 import { getPreviewUrl } from "../services/FileUtils";
@@ -63,7 +64,7 @@ export default class Photo extends Mixins(GlobalMixin) {
     @Prop() rowHeight: number;
     @Prop() day: IDay;
 
-    @Emit('reprocess') emitReprocess(remPhotos: IPhoto[]) {}
+    @Emit('delete') emitDelete(remPhotos: IPhoto[]) {}
     @Emit('select') emitSelect(data: IPhoto) {}
     @Emit('clickImg') emitClickImg(component: any) {}
 
@@ -150,6 +151,13 @@ export default class Photo extends Mixins(GlobalMixin) {
         // Key to store sidebar state
         const SIDEBAR_KEY = 'memories:sidebar-open';
 
+        // Subscribe to delete events
+        const deleteHandler = ({ fileid }) => {
+            const photo = this.day.detail.find(p => p.fileid === fileid);
+            this.emitDelete([photo]);
+        };
+        subscribe('files:file:deleted', deleteHandler);
+
         // Open viewer
         globalThis.OCA.Viewer.open({
             path: photo.filename,   // path
@@ -162,9 +170,7 @@ export default class Photo extends Mixins(GlobalMixin) {
                     localStorage.removeItem(SIDEBAR_KEY);
                 }
                 globalThis.OCA.Files.Sidebar.close();
-
-                // Check for any deleted files and remove them from the main view
-                this.processDeleted();
+                unsubscribe('files:file:deleted', deleteHandler);
             },
         });
 
@@ -172,27 +178,6 @@ export default class Photo extends Mixins(GlobalMixin) {
         if (localStorage.getItem(SIDEBAR_KEY) === '1') {
             globalThis.OCA.Files.Sidebar.open(photo.filename);
         }
-    }
-
-    /** Remove deleted files from main view */
-    processDeleted() {
-        // This is really an ugly hack, but the viewer
-        // does not provide a way to get the deleted files
-
-        // Compare new and old list of ids
-        const newIds = new Set(this.day.fileInfos.map(f => f.fileid));
-        const remIds = new Set([...this.day.origFileIds].filter(x => !newIds.has(x)));
-
-        // Exit if nothing to do
-        if (remIds.size === 0) {
-            return;
-        }
-        this.day.origFileIds = newIds;
-
-        // Remove deleted files from details
-        // Get IPhotos of the deleted file Ids
-        const remPhotos = this.day.detail.filter(p => remIds.has(p.fileid));
-        this.emitReprocess(remPhotos);
     }
 
     toggleSelect() {

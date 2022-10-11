@@ -65,7 +65,7 @@
                             :rowHeight="rowHeight"
                             :day="item.day"
                             @select="selectPhoto"
-                            @reprocess="deleteFromViewWithAnimation"
+                            @delete="deleteFromViewWithAnimation"
                             @clickImg="clickPhoto" />
                 </div>
             </div>
