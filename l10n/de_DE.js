@@ -11,7 +11,7 @@ OC.L10N.register(
     "People" : "Personen",
     "Archive" : "Archiv",
     "On this day" : "An diesem Tag",
-    "Tags" : "Schlagwörter",
+    "Tags" : "Schlagworte",
     "Settings" : "Einstellungen",
     "Edit Date/Time" : "Datum/Uhrzeit bearbeiten",
     "Newest" : "Neueste",
