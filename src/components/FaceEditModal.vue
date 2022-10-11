@@ -1,43 +1,38 @@
 <template>
-    <NcModal
-        size="small"
-        @close="close"
-        :outTransition="true">
+    <Modal @close="close">
+        <template #title>
+            {{ t('memories', 'Rename person') }}
+        </template>
 
-        <div class="container">
-            <div class="head">
-                <span>{{ t('memories', 'Rename person') }}</span>
-            </div>
-
-            <div class="fields memories__editdate__fields">
-                <NcTextField :value.sync="name"
-                    class="field"
-                    :label="t('memories', 'Name')" :label-visible="true"
-                    :placeholder="t('memories', 'Name')"
-                    @keypress.enter="save()" />
-            </div>
-
-            <div class="buttons">
-                <NcButton @click="save" class="button" type="primary">
-                    {{ t('memories', 'Update') }}
-                </NcButton>
-            </div>
+        <div class="fields">
+            <NcTextField :value.sync="name"
+                class="field"
+                :label="t('memories', 'Name')" :label-visible="false"
+                :placeholder="t('memories', 'Name')"
+                @keypress.enter="save()" />
         </div>
-    </NcModal>
+
+        <template #buttons>
+            <NcButton @click="save" class="button" type="primary">
+                {{ t('memories', 'Update') }}
+            </NcButton>
+        </template>
+    </Modal>
 </template>
 
 <script lang="ts">
 import { Component, Mixins, Watch } from 'vue-property-decorator';
-import { NcButton, NcModal, NcTextField } from '@nextcloud/vue';
+import { NcButton, NcTextField } from '@nextcloud/vue';
 import { showError } from '@nextcloud/dialogs'
+import Modal from './Modal.vue';
 import GlobalMixin from '../mixins/GlobalMixin';
 import client from '../services/DavClient';
 
 @Component({
     components: {
         NcButton,
-        NcModal,
         NcTextField,
+        Modal,
     }
 })
 export default class FaceEditModal extends Mixins(GlobalMixin) {
@@ -83,21 +78,8 @@ export default class FaceEditModal extends Mixins(GlobalMixin) {
 }
 </script>
 
-<style scoped lang="scss">
-.container {
-	margin: 20px;
-
-    .head {
-        font-weight: 500;
-    }
-}
-
-.buttons {
-    margin-top: 10px;
-    text-align: right;
-
-    button {
-        display: inline-block;
-    }
+<style lang="scss" scoped>
+.fields {
+    margin-top: 8px;
 }
 </style>
