@@ -86,7 +86,7 @@
             <span class="cursor hv"
                   :style="{ transform: `translateY(${timelineHoverCursorY}px)` }">
                   <div class="text"> {{ timelineHoverCursorText }} </div>
-                  <div class="icon"> <ScrollIcon :size="18" /> </div>
+                  <div class="icon"> <ScrollIcon :size="20" /> </div>
             </span>
 
             <div v-for="tick of visibleTimelineTicks" :key="tick.dayId"
@@ -1477,9 +1477,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     @include phone {
         &:not(.scrolling-timeline) {
             .cursor.hv {
-                left: 15px;
-                border: 2px solid var(--color-primary);
-                border-radius: 10px;
+                left: 12px;
+                border: none;
+                box-shadow: 0 0 5px -3px #000;
+                height: 30px;
+                border-radius: 15px;
                 > .text { display: none; }
                 > .icon { display: block; }
             }
@@ -1543,7 +1545,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
             > .icon {
                 display: none;
-                transform: translateX(-5px);
+                transform: translate(-4px, 2px);
             }
         }
     }
