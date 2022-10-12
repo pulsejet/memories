@@ -115,7 +115,13 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
 }
 
 @media (max-width: 768px) {
-    .outer { padding: 0px; }
+    .outer {
+        padding: 0px;
+
+        // Get rid of padding on img-outer (1px on mobile)
+        margin-left: -1px;
+        width: calc(100% + 3px); // 1px extra here because ... reasons
+    }
 }
 </style>
 

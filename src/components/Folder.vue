@@ -176,9 +176,9 @@ export default class Folder extends Mixins(GlobalMixin) {
     z-index: 3;
     line-height: 0;
     position: absolute;
-    height: calc(100% - 4px);
-    width: calc(100% - 4px);
-    top: 2px; left: 2px;
+    height: 100%; width: 100%;
+    padding: 2px;
+    @media (max-width: 768px) { padding: 1px; }
 
     > .img-outer {
         background-color: var(--color-background-dark);
