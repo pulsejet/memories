@@ -11,10 +11,10 @@ OC.L10N.register(
     "Day" : "Día",
     "Time" : "Hora",
     "Hour" : "Hora",
-    "Back" : "Atrás",
+    "Delete" : "Desaniciar",
     "Update" : "Anovar",
     "Cancel" : "Encaboxar",
-    "Delete" : "Desaniciar",
+    "Back" : "Atrás",
     "Download" : "Baxar",
     "Favorite" : "Marcar como favoritu",
     "View in folder" : "Ver na carpeta"

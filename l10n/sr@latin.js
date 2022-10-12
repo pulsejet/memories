@@ -5,10 +5,11 @@ OC.L10N.register(
     "Videos" : "Video",
     "Tags" : "Oznake",
     "Settings" : "Поставке",
-    "Back" : "Nazad",
+    "Delete" : "Obriši",
+    "Name" : "Ime",
     "Update" : "Ažuriraj",
     "Cancel" : "Otkaži",
-    "Delete" : "Obriši",
+    "Back" : "Nazad",
     "Download" : "Preuzmi",
     "Favorite" : "Omiljene"
 },

@@ -6,9 +6,10 @@ OC.L10N.register(
     "Settings" : "تەڭشەكلەر",
     "Month" : "ئاي",
     "Time" : "ۋاقىت",
+    "Delete" : "ئۆچۈر",
+    "Name" : "ئاتى",
     "Update" : "يېڭىلا",
     "Cancel" : "ۋاز كەچ",
-    "Delete" : "ئۆچۈر",
     "Download" : "چۈشۈر",
     "Favorite" : "يىغقۇچ"
 },

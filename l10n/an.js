@@ -4,9 +4,9 @@ OC.L10N.register(
     "Favorites" : "Favoritos",
     "Tags" : "Etiquetas",
     "Settings" : "Configurazión",
-    "Back" : "Ta zaga",
-    "Cancel" : "Canzelar",
     "Delete" : "Borrar",
+    "Cancel" : "Canzelar",
+    "Back" : "Ta zaga",
     "Download" : "Escargar",
     "Favorite" : "Favorito"
 },

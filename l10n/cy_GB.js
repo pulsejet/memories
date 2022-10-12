@@ -10,10 +10,10 @@ OC.L10N.register(
     "Month" : "Mis",
     "Day" : "Diwrnod",
     "Time" : "Amser",
-    "Back" : "Nôl",
+    "Delete" : "Dileu",
     "Update" : "Diweddaru",
     "Cancel" : "Diddymu",
-    "Delete" : "Dileu",
+    "Back" : "Nôl",
     "Download" : "Llwytho i lawr",
     "Favorite" : "Ffefryn"
 },

@@ -8,10 +8,11 @@ OC.L10N.register(
     "Month" : "ខែ",
     "Day" : "ថ្ងៃ",
     "Time" : "ម៉ោង",
-    "Back" : "ត្រឡប់ក្រោយ",
+    "Delete" : "លុប",
+    "Name" : "ឈ្មោះ",
     "Update" : "ធ្វើ​បច្ចុប្បន្នភាព",
     "Cancel" : "បោះបង់",
-    "Delete" : "លុប",
+    "Back" : "ត្រឡប់ក្រោយ",
     "Download" : "ទាញយក"
 },
 "nplurals=1; plural=0;");

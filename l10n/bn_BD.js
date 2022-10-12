@@ -8,10 +8,10 @@ OC.L10N.register(
     "Day" : "দিবস",
     "Time" : "সময়",
     "Hour" : "ঘন্টা",
-    "Back" : "পেছনে যাও",
+    "Delete" : "মুছে",
     "Update" : "পরিবর্ধন",
     "Cancel" : "বাতির",
-    "Delete" : "মুছে",
+    "Back" : "পেছনে যাও",
     "Download" : "ডাউনলোড",
     "Favorite" : "প্রিয়জন"
 },

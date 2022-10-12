@@ -7,10 +7,11 @@ OC.L10N.register(
     "Month" : "Mense",
     "Day" : "Die",
     "Time" : "Tempore",
-    "Back" : "Retro",
+    "Delete" : "Deler",
+    "Name" : "Nomine",
     "Update" : "Actualisation",
     "Cancel" : "Cancellar",
-    "Delete" : "Deler",
+    "Back" : "Retro",
     "Download" : "Discargar",
     "Favorite" : "Favorite",
     "View in folder" : "Vider in dossier"

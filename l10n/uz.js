@@ -5,9 +5,10 @@ OC.L10N.register(
     "Videos" : "Videos",
     "Tags" : "Tags",
     "Settings" : "Sozlamalar",
+    "Delete" : "Delete",
+    "Name" : "Name",
     "Update" : "Update",
     "Cancel" : "Cancel",
-    "Delete" : "Delete",
     "Download" : "Download",
     "Favorite" : "Favorite"
 },
