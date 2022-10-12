@@ -221,6 +221,7 @@ export default class Tag extends Mixins(GlobalMixin) {
         height: 50%;
         overflow: hidden;
         display: inline-block;
+        cursor: pointer;
 
         .tag.onePreview > & {
             width: 100%; height: 100%;
