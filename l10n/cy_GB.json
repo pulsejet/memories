@@ -8,10 +8,10 @@
     "Month" : "Mis",
     "Day" : "Diwrnod",
     "Time" : "Amser",
-    "Back" : "Nôl",
+    "Delete" : "Dileu",
     "Update" : "Diweddaru",
     "Cancel" : "Diddymu",
-    "Delete" : "Dileu",
+    "Back" : "Nôl",
     "Download" : "Llwytho i lawr",
     "Favorite" : "Ffefryn"
 },"pluralForm" :"nplurals=4; plural=(n==1) ? 0 : (n==2) ? 1 : (n != 8 && n != 11) ? 2 : 3;"

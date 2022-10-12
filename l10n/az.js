@@ -8,9 +8,9 @@ OC.L10N.register(
     "Month" : "Ay",
     "Day" : "Gün",
     "Time" : "Vaxt",
+    "Delete" : "Sil",
     "Update" : "Yenilənmə",
     "Cancel" : "Dayandır",
-    "Delete" : "Sil",
     "Download" : "Yüklə",
     "Favorite" : "İstəkli"
 },

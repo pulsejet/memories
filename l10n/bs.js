@@ -5,9 +5,9 @@ OC.L10N.register(
     "Settings" : "Podešavanje",
     "Month" : "Mjesec",
     "Day" : "Dan",
+    "Delete" : "Obriši",
     "Update" : "Ažuriraj",
     "Cancel" : "Otkaži",
-    "Delete" : "Obriši",
     "Download" : "Preuzmi",
     "Favorite" : "Favorit"
 },

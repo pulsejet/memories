@@ -4,8 +4,9 @@ OC.L10N.register(
     "Favorites" : "په نښه شوي",
     "Tags" : "نښکې",
     "Settings" : "سمونې",
-    "Cancel" : "پرېښول",
     "Delete" : "ړنګول",
+    "Name" : "نوم",
+    "Cancel" : "پرېښول",
     "Download" : "ښکته کول",
     "Favorite" : "په نښه شوی",
     "View in folder" : "په فولډر کې کتل"

@@ -10,10 +10,11 @@ OC.L10N.register(
     "Month" : "เดือน",
     "Day" : "วัน",
     "Time" : "เวลา",
-    "Back" : "ย้อนกลับ",
+    "Delete" : "ลบ",
+    "Name" : "ชื่อ",
     "Update" : "อัปเดต",
     "Cancel" : "ยกเลิก",
-    "Delete" : "ลบ",
+    "Back" : "ย้อนกลับ",
     "Download" : "ดาวน์โหลด",
     "Favorite" : "รายการโปรด",
     "View in folder" : "ดูในโฟลเดอร์"

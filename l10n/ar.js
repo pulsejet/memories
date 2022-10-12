@@ -12,10 +12,10 @@ OC.L10N.register(
     "Day" : "اليوم",
     "Time" : "إلى وقت",
     "Hour" : "الساعة",
-    "Back" : "العودة",
+    "Delete" : "إزالة",
     "Update" : "تحديث",
     "Cancel" : "إلغاء",
-    "Delete" : "إزالة",
+    "Back" : "العودة",
     "Download" : "تنزيل",
     "Favorite" : "المفضلة",
     "View in folder" : "اعرض في المجلد"

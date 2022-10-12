@@ -4,8 +4,9 @@ OC.L10N.register(
     "Favorites" : "Favorites",
     "Settings" : "سیٹینگز",
     "Month" : "ماہ",
-    "Cancel" : "منسوخ کریں",
     "Delete" : "حذف کریں",
+    "Name" : "اسم",
+    "Cancel" : "منسوخ کریں",
     "Download" : "ڈاؤن لوڈ"
 },
 "nplurals=2; plural=(n != 1);");

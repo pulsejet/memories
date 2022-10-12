@@ -8,9 +8,10 @@ OC.L10N.register(
     "Month" : "මාසය",
     "Day" : "දිනය",
     "Time" : "වේලාව",
-    "Back" : "ආපසු",
+    "Name" : "නම",
     "Update" : "යාවත්කාල",
     "Cancel" : "අවලංගු කරන්න",
+    "Back" : "ආපසු",
     "Download" : "බාගන්න",
     "Favorite" : "ප්‍රියතම",
     "View in folder" : "බහාලුමේ බලන්න"

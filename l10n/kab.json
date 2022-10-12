@@ -4,9 +4,10 @@
     "Tags" : "Tibzimin",
     "Settings" : "Iɣewwaṛen",
     "Hour" : "Asrag",
-    "Back" : "Retour",
-    "Cancel" : "Sefsex",
     "Delete" : "Kkes",
+    "Name" : "Nom",
+    "Cancel" : "Sefsex",
+    "Back" : "Retour",
     "Download" : "Sider",
     "Favorite" : "Menyif"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

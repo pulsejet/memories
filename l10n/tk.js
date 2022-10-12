@@ -5,9 +5,10 @@ OC.L10N.register(
     "Videos" : "Wideo",
     "Tags" : "Bellikler",
     "Settings" : "Sazlamalar",
-    "Back" : "Yzyna",
-    "Cancel" : "ýatyrmak",
     "Delete" : "Pozmak",
+    "Name" : "Ady",
+    "Cancel" : "ýatyrmak",
+    "Back" : "Yzyna",
     "Download" : "Göçürip almak",
     "Favorite" : "Halaýan"
 },

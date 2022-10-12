@@ -2,8 +2,9 @@
     "Favorites" : "Favorites",
     "Settings" : "سیٹینگز",
     "Month" : "ماہ",
-    "Cancel" : "منسوخ کریں",
     "Delete" : "حذف کریں",
+    "Name" : "اسم",
+    "Cancel" : "منسوخ کریں",
     "Download" : "ڈاؤن لوڈ"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

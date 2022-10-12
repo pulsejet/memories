@@ -15,10 +15,11 @@ OC.L10N.register(
     "Time" : "Ora",
     "Hour" : "Ora",
     "Minute" : "Minutu",
-    "Back" : "In segus",
+    "Delete" : "Cantzella",
+    "Name" : "Nùmene",
     "Update" : "Agiorna",
     "Cancel" : "Annulla",
-    "Delete" : "Cantzella",
+    "Back" : "In segus",
     "Download" : "Iscàrriga",
     "Favorite" : "Preferidu",
     "View in folder" : "Càstia in sa cartella"
