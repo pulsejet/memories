@@ -3,9 +3,10 @@
     "Videos" : "Videothan",
     "Tags" : "Tagaichean",
     "Settings" : "Roghainnean",
-    "Back" : "Air ais",
-    "Cancel" : "Sguir dheth",
     "Delete" : "Sguab às",
+    "Name" : "Ainm",
+    "Cancel" : "Sguir dheth",
+    "Back" : "Air ais",
     "Download" : "Luchdaich a-nuas",
     "Favorite" : "Annsachd"
 },"pluralForm" :"nplurals=4; plural=(n==1 || n==11) ? 0 : (n==2 || n==12) ? 1 : (n > 2 && n < 20) ? 2 : 3;"

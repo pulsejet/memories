@@ -5,9 +5,10 @@ OC.L10N.register(
     "Videos" : "ວິດີໂອ",
     "Tags" : "ປ້າຍກຳກັບ",
     "Settings" : "ການຕັ້ງຄ່າ",
-    "Back" : "ຫຼັງ",
-    "Cancel" : "ຍົກເລີກ",
     "Delete" : "ລຶບ",
+    "Name" : "ຊື່",
+    "Cancel" : "ຍົກເລີກ",
+    "Back" : "ຫຼັງ",
     "Download" : "ດາວໂຫລດ",
     "Favorite" : "ລາຍການທີ່ມັກ",
     "View in folder" : "ເບິ່ງໃນໂຟນເດີ"

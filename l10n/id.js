@@ -12,10 +12,11 @@ OC.L10N.register(
     "Day" : "Hari",
     "Time" : "Waktu",
     "Hour" : "Jam",
-    "Back" : "Kembali",
+    "Delete" : "Hapus",
+    "Name" : "Nama",
     "Update" : "Perbarui",
     "Cancel" : "Membatalkan",
-    "Delete" : "Hapus",
+    "Back" : "Kembali",
     "Download" : "Unduh",
     "Favorite" : "Favorit",
     "View in folder" : "Lihat dalam folder"

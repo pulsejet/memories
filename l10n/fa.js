@@ -13,10 +13,11 @@ OC.L10N.register(
     "Month" : "ماه",
     "Day" : "روز",
     "Time" : "زمان",
-    "Back" : "بازگشت",
+    "Delete" : "حذف",
+    "Name" : "نام",
     "Update" : "یه‌روزرسانی",
     "Cancel" : "لغو",
-    "Delete" : "حذف",
+    "Back" : "بازگشت",
     "Download" : "بارگیری",
     "Favorite" : "مورد‌ ‌علاقه‌",
     "View in folder" : "مشاهده در پوشه"

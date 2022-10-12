@@ -12,10 +12,11 @@ OC.L10N.register(
     "Day" : "Tago",
     "Time" : "Dato",
     "Hour" : "Horo",
-    "Back" : "Antaŭen",
+    "Delete" : "Forigi",
+    "Name" : "Nomo",
     "Update" : "Ĝisdatigi",
     "Cancel" : "Nuligi",
-    "Delete" : "Forigi",
+    "Back" : "Antaŭen",
     "Download" : "Elŝuti",
     "Favorite" : "Pliŝatati",
     "View in folder" : "Vidi en dosierujo"

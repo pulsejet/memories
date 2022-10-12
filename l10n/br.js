@@ -7,10 +7,10 @@ OC.L10N.register(
     "Settings" : "Arventennoù",
     "Month" : "Miz",
     "Day" : "Deiz",
-    "Back" : "Distro",
+    "Delete" : "Lemel",
     "Update" : "Hizivaat",
     "Cancel" : "Arrest",
-    "Delete" : "Lemel",
+    "Back" : "Distro",
     "Download" : "Pellgargañ",
     "Favorite" : "Pennrollañ",
     "View in folder" : "Diskwel en teuliad"

@@ -10,10 +10,11 @@ OC.L10N.register(
     "Day" : "Dag",
     "Time" : "Tid",
     "Minute" : "Minutt",
-    "Back" : "Tilbake",
+    "Delete" : "Slett",
+    "Name" : "Namn",
     "Update" : "Oppdater",
     "Cancel" : "Avbryt",
-    "Delete" : "Slett",
+    "Back" : "Tilbake",
     "Download" : "Last ned",
     "Favorite" : "Favoritt"
 },

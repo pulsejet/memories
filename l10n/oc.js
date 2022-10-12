@@ -13,10 +13,11 @@ OC.L10N.register(
     "Time" : "Ora",
     "Hour" : "Ora",
     "Minute" : "Minuta",
-    "Back" : "Retorn",
+    "Delete" : "Suprimir",
+    "Name" : "Nom",
     "Update" : "Actualizar",
     "Cancel" : "Anullar",
-    "Delete" : "Suprimir",
+    "Back" : "Retorn",
     "Download" : "Telecargar",
     "Favorite" : "Favorit"
 },

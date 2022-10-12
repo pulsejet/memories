@@ -11,10 +11,11 @@ OC.L10N.register(
     "Day" : "Diena",
     "Time" : "Laiks",
     "Hour" : "Stunda",
-    "Back" : "Atpakaļ",
+    "Delete" : "Dzēst",
+    "Name" : "Vārds",
     "Update" : "Atjaunināt",
     "Cancel" : "Atcelt",
-    "Delete" : "Dzēst",
+    "Back" : "Atpakaļ",
     "Download" : "Lejupielādēt",
     "Favorite" : "Favorīts",
     "View in folder" : "Skatīt mapē"

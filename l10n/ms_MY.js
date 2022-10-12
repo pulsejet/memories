@@ -5,10 +5,11 @@ OC.L10N.register(
     "Settings" : "Tetapan",
     "Month" : "Bulan",
     "Day" : "Hari",
-    "Back" : "Kembali",
+    "Delete" : "Padam",
+    "Name" : "Nama",
     "Update" : "Kemaskini",
     "Cancel" : "Batal",
-    "Delete" : "Padam",
+    "Back" : "Kembali",
     "Download" : "Muat turun"
 },
 "nplurals=1; plural=0;");

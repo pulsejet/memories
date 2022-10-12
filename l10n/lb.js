@@ -8,10 +8,11 @@ OC.L10N.register(
     "Day" : "Dag",
     "Time" : "Zäit",
     "Hour" : "Stonn",
-    "Back" : "Zeréck",
+    "Delete" : "Läschen",
+    "Name" : "Numm",
     "Update" : "Update",
     "Cancel" : "Ofbriechen",
-    "Delete" : "Läschen",
+    "Back" : "Zeréck",
     "Download" : "Eroflueden",
     "Favorite" : "Favorit",
     "View in folder" : "Kuk am Dossier "

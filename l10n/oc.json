@@ -11,10 +11,11 @@
     "Time" : "Ora",
     "Hour" : "Ora",
     "Minute" : "Minuta",
-    "Back" : "Retorn",
+    "Delete" : "Suprimir",
+    "Name" : "Nom",
     "Update" : "Actualizar",
     "Cancel" : "Anullar",
-    "Delete" : "Suprimir",
+    "Back" : "Retorn",
     "Download" : "Telecargar",
     "Favorite" : "Favorit"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"

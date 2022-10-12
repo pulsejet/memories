@@ -11,10 +11,11 @@ OC.L10N.register(
     "Day" : "Päev",
     "Time" : "Aeg",
     "Hour" : "Tund",
-    "Back" : "Tagasi",
+    "Delete" : "Kustuta",
+    "Name" : "Nimi",
     "Update" : "Uuenda",
     "Cancel" : "Loobu",
-    "Delete" : "Kustuta",
+    "Back" : "Tagasi",
     "Download" : "Lae alla",
     "Favorite" : "Lemmik",
     "View in folder" : "Vaata kaustas"

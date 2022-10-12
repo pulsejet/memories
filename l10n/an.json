@@ -2,9 +2,9 @@
     "Favorites" : "Favoritos",
     "Tags" : "Etiquetas",
     "Settings" : "Configurazión",
-    "Back" : "Ta zaga",
-    "Cancel" : "Canzelar",
     "Delete" : "Borrar",
+    "Cancel" : "Canzelar",
+    "Back" : "Ta zaga",
     "Download" : "Escargar",
     "Favorite" : "Favorito"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
