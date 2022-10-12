@@ -211,9 +211,6 @@ export default class Photo extends Mixins(GlobalMixin) {
 <style lang="scss" scoped>
 /* Container and selection */
 .p-outer {
-    will-change: transform, opacity;
-    transform: translateZ(0);
-
     &.leaving {
         transition: all 0.2s ease-in;
         transform: scale(0.9);
@@ -263,12 +260,11 @@ export default class Photo extends Mixins(GlobalMixin) {
 /* Actual image */
 div.img-outer {
     padding: 2px;
-    will-change: padding;
-    transition: padding 0.1s ease;
+    transition: transform 0.1s ease;
     background-clip: content-box, padding-box;
     background-color: var(--color-background-dark);
 
-    .selected > & { padding: 5%; }
+    .selected > & { transform: scale(0.9); }
 
     > img {
         background-clip: content-box;
