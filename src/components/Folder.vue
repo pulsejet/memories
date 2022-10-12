@@ -197,10 +197,7 @@ export default class Folder extends Mixins(GlobalMixin) {
             width: 100%;
             height: 100%;
             filter: brightness(50%);
-
             transition: filter 0.2s ease-in-out;
-            will-change: filter;
-            transform: translateZ(0);
 
             &.p-loading, &.p-load-fail {
                 display: none;

@@ -231,10 +231,7 @@ export default class Tag extends Mixins(GlobalMixin) {
             width: 100%;
             filter: brightness(60%);
             cursor: pointer;
-
             transition: filter 0.2s ease-in-out;
-            will-change: filter;
-            transform: translateZ(0);
 
             &.p-loading, &.p-load-fail {
                 display: none;
