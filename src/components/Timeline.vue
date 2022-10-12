@@ -73,7 +73,10 @@
 
         <!-- Timeline scroller -->
         <div ref="timelineScroll" class="timeline-scroll"
-             v-bind:class="{ scrolling }"
+             v-bind:class="{
+                'scrolling-recycler': scrollingRecycler,
+                'scrolling-timeline': scrollingTimeline,
+            }"
             @mousemove="timelineHover"
             @touchmove="timelineTouch"
             @mouseleave="timelineLeave"
@@ -82,7 +85,8 @@
                   :style="{ transform: `translateY(${timelineCursorY}px)` }"></span>
             <span class="cursor hv"
                   :style="{ transform: `translateY(${timelineHoverCursorY}px)` }">
-                  {{ timelineHoverCursorText }}
+                  <div class="text"> {{ timelineHoverCursorText }} </div>
+                  <div class="icon"> <ScrollIcon :size="18" /> </div>
             </span>
 
             <div v-for="tick of visibleTimelineTicks" :key="tick.dayId"
@@ -207,6 +211,7 @@ import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue';
 import PeopleIcon from 'vue-material-design-icons/AccountMultiple.vue';
 import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import CloseIcon from 'vue-material-design-icons/Close.vue';
+import ScrollIcon from 'vue-material-design-icons/UnfoldMoreHorizontal.vue';
 
 const SCROLL_LOAD_DELAY = 100;          // Delay in loading data when scrolling
 const MAX_PHOTO_WIDTH = 175;            // Max width of a photo
@@ -246,6 +251,7 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
         PeopleIcon,
         ImageMultipleIcon,
         CloseIcon,
+        ScrollIcon,
     }
 })
 export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
@@ -281,10 +287,14 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     private currentStart = 0;
     /** Current end index */
     private currentEnd = 0;
-    /** Scrolling currently */
-    private scrolling = false;
-    /** Scrolling timer */
-    private scrollTimer = null as number | null;
+    /** Scrolling recycler currently */
+    private scrollingRecycler = false;
+    /** Scrolling recycler timer */
+    private scrollingRecyclerTimer = null as number | null;
+    /** Scrolling using the timeline currently */
+    private scrollingTimeline = false;
+    /** Scrolling timeline timer */
+    private scrollingTimelineTimer = null as number | null;
     /** Resizing timer */
     private resizeTimer = null as number | null;
     /** View size reflow timer */
@@ -445,13 +455,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         this.timelineCursorY = event ? event.target.scrollTop * this.timelineHeight / this.viewHeight : 0;
         this.timelineMoveHoverCursor(this.timelineCursorY);
 
-        if (this.scrollTimer) {
-            window.clearTimeout(this.scrollTimer);
-        }
-        this.scrolling = true;
-        this.scrollTimer = window.setTimeout(() => {
-            this.scrolling = false;
-            this.scrollTimer = null;
+        if (this.scrollingRecyclerTimer) window.clearTimeout(this.scrollingRecyclerTimer);
+        this.scrollingRecycler = true;
+        this.scrollingRecyclerTimer = window.setTimeout(() => {
+            this.scrollingRecycler = false;
+            this.scrollingRecyclerTimer = null;
         }, 1500);
     }
 
@@ -1048,6 +1056,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     timelineClick(event: MouseEvent) {
         const recycler: any = this.$refs.recycler;
         recycler.scrollToPosition(this.getTimelinePosition(event.offsetY));
+        this.handleTimelineScroll();
     }
 
     /** Handle touch on right timeline */
@@ -1058,6 +1067,17 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         recycler.scrollToPosition(this.getTimelinePosition(y));
         event.preventDefault();
         event.stopPropagation();
+        this.handleTimelineScroll();
+    }
+
+    /** Update that timeline is being used to scroll recycler */
+    handleTimelineScroll() {
+        if (this.scrollingTimelineTimer) window.clearTimeout(this.scrollingTimelineTimer);
+        this.scrollingTimeline = true;
+        this.scrollingTimelineTimer = window.setTimeout(() => {
+            this.scrollingTimeline = false;
+            this.scrollingTimelineTimer = null;
+        }, 1500);
     }
 
     /** Get recycler equivalent position from event */
@@ -1448,16 +1468,24 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     opacity: 0;
     transition: opacity .2s ease-in-out;
 
-    // Show ticks on hover or scroll of main window
-    &:hover, &.scrolling {
+    // Show timeline on hover or scroll of main window
+    &:hover, &.scrolling-recycler {
         opacity: 1;
     }
 
     // Hide ticks on mobile unless hovering
     @include phone {
-        &:not(:hover) > .tick {
-            opacity: 0;
+        &:not(.scrolling-timeline) {
+            .cursor.hv {
+                left: 15px;
+                border: 2px solid var(--color-primary);
+                border-radius: 10px;
+                > .text { display: none; }
+                > .icon { display: block; }
+            }
+            > .tick { opacity: 0; }
         }
+        .cursor.st { display: none; }
     }
 
     > .tick {
@@ -1511,6 +1539,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             z-index: 100;
             font-size: 0.95em;
             font-weight: 600;
+
+            > .icon {
+                display: none;
+                transform: translateX(-5px);
+            }
         }
     }
     &:hover > .cursor.st {
