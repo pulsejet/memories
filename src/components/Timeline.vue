@@ -27,48 +27,53 @@
             key-field="id"
             size-field="size"
             type-field="type"
-            v-slot="{ item }"
             @update="scrollChange"
             @resize="handleResizeWithDelay"
         >
-            <div v-if="item.type === 0" class="head-row"
-                :class="{
-                    'first': item.id === 1 && !topMatterType,
-                    'selected': item.selected,
-                }"
-            >
-                <CheckCircle :size="18" class="select" @click="selectHead(item)" />
-
-                <span class="name"
-                     @click="selectHead(item)">
-                    {{ item.name || getHeadName(item) }}
-                </span>
-            </div>
-
-            <div v-else
-                class="photo-row"
-                :style="{ height: rowHeight + 'px' }">
-
-                <div class="photo" v-for="(photo, index) in item.photos" :key="index">
-                    <Folder v-if="photo.flag & c.FLAG_IS_FOLDER"
-                            :data="photo"
-                            :rowHeight="rowHeight"
-                            :key="photo.fileid" />
-
-                    <Tag v-else-if="photo.flag & c.FLAG_IS_TAG"
-                            :data="photo"
-                            :rowHeight="rowHeight"
-                            :key="photo.fileid" />
-
-                    <Photo v-else
-                            :data="photo"
-                            :rowHeight="rowHeight"
-                            :day="item.day"
-                            @select="selectPhoto"
-                            @delete="deleteFromViewWithAnimation"
-                            @clickImg="clickPhoto" />
+            <template #before>
+                <!-- Show dynamic top matter, name of the view -->
+                <div class="recycler-before" ref="recyclerbefore" v-if="!topMatterType && list.length > 0">
+                    {{ getViewName() }}
                 </div>
-            </div>
+            </template>
+
+            <template v-slot="{ item }">
+                <div v-if="item.type === 0" class="head-row"
+                    :class="{ 'selected': item.selected}"
+                >
+                    <CheckCircle :size="18" class="select" @click="selectHead(item)" />
+
+                    <span class="name"
+                        @click="selectHead(item)">
+                        {{ item.name || getHeadName(item) }}
+                    </span>
+                </div>
+
+                <div v-else
+                    class="photo-row"
+                    :style="{ height: rowHeight + 'px' }">
+
+                    <div class="photo" v-for="(photo, index) in item.photos" :key="index">
+                        <Folder v-if="photo.flag & c.FLAG_IS_FOLDER"
+                                :data="photo"
+                                :rowHeight="rowHeight"
+                                :key="photo.fileid" />
+
+                        <Tag v-else-if="photo.flag & c.FLAG_IS_TAG"
+                                :data="photo"
+                                :rowHeight="rowHeight"
+                                :key="photo.fileid" />
+
+                        <Photo v-else
+                                :data="photo"
+                                :rowHeight="rowHeight"
+                                :day="item.day"
+                                @select="selectPhoto"
+                                @delete="deleteFromViewWithAnimation"
+                                @clickImg="clickPhoto" />
+                    </div>
+                </div>
+            </template>
         </RecycleScroller>
 
         <!-- Timeline scroller -->
@@ -370,19 +375,27 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     /** Create top matter */
     setTopMatter() {
+        this.topMatterType = (() => {
+            switch (this.$route.name) {
+                case 'folders': return TopMatterType.FOLDER;
+                case 'tags': return this.$route.params.name ? TopMatterType.TAG : TopMatterType.NONE;
+                case 'people': return this.$route.params.name ? TopMatterType.FACE : TopMatterType.NONE;
+                default: return TopMatterType.NONE;
+            }
+        })();
+    }
+
+    /** Get view name for dynamic top matter */
+    getViewName() {
         switch (this.$route.name) {
-            case 'folders':
-                this.topMatterType = TopMatterType.FOLDER;
-                break;
-            case 'tags':
-                this.topMatterType = this.$route.params.name ? TopMatterType.TAG : TopMatterType.NONE;
-                break;
-            case 'people':
-                this.topMatterType = this.$route.params.name ? TopMatterType.FACE : TopMatterType.NONE;
-                break;
-            default:
-                this.topMatterType = TopMatterType.NONE;
-                break;
+            case 'timeline': return 'Your Photos';
+            case 'favorites': return 'Favorites';
+            case 'people': return 'People';
+            case 'videos': return 'Videos';
+            case 'archive': return 'Archive';
+            case 'thisday': return 'On this day';
+            case 'tags': return 'Tags';
+            default: return '';
         }
     }
 
@@ -425,7 +438,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
         // Mobile devices
         if (window.innerWidth <= 768) {
-            width -= 4;
             this.isMobile = true;
         } else {
             width -= 40;
@@ -768,9 +780,13 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         const recycler: any = this.$refs.recycler;
         this.viewHeight = recycler.$refs.wrapper.clientHeight;
 
+        // Static extra height at top
+        const rb = this.$refs.recyclerbefore as Element;
+        const extraHeight = rb?.clientHeight || 0;
+
         // Compute timeline tick positions
         for (const tick of this.timelineTicks) {
-            tick.topC = (tick.topS + tick.top * this.rowHeight) * this.timelineHeight / this.viewHeight;
+            tick.topC = (extraHeight + tick.topS + tick.top * this.rowHeight) * this.timelineHeight / this.viewHeight;
         }
 
         // Do another pass to figure out which timeline points are visible
@@ -1421,13 +1437,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     font-size: 0.9em;
     font-weight: 600;
 
-    @include phone {
-        &.first {
-            padding-left: 38px;
-            padding-top: 12px;
-        }
-    }
-
     > .select {
         position: absolute;
         left: 5px; top: 50%;
@@ -1580,11 +1589,15 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     }
 }
 
-/** Static top matter */
+/** Static and dynamic top matter */
 .top-matter {
     padding-top: 4px;
-    @include phone {
-        padding-left: 38px;
-    }
+    @include phone { padding-left: 40px; }
+}
+.recycler-before {
+    font-size: 1.2em;
+    padding-top: 13px;
+    padding-left: 8px;
+    @include phone { padding-left: 48px; }
 }
 </style>
