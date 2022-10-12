@@ -51,20 +51,6 @@
     </NcContent>
 </template>
 
-<style scoped>
-.outer {
-    padding: 0 0 0 44px;
-    height: 100%;
-    width: 100%;
-}
-
-@media (max-width: 768px) {
-    .outer {
-        padding-left: 5px;
-    }
-}
-</style>
-
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator';
 import {
@@ -120,6 +106,18 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
     }
 }
 </script>
+
+<style scoped lang="scss">
+.outer {
+    padding: 0 0 0 44px;
+    height: 100%;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .outer { padding: 0px; }
+}
+</style>
 
 <style lang="scss">
 body {
