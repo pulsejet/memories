@@ -4,8 +4,9 @@ OC.L10N.register(
     "Favorites" : "ಅಚ್ಚುಮೆಚ್ಚಿನ",
     "Settings" : "ಆಯ್ಕೆ",
     "Time" : "ಸಮಯ",
-    "Cancel" : "﻿ರದ್ದು",
     "Delete" : "﻿ಅಳಿಸಿ",
+    "Name" : "﻿ಹೆಸರು",
+    "Cancel" : "﻿ರದ್ದು",
     "Download" : "ಪ್ರತಿಯನ್ನು ಸ್ಥಳೀಯವಾಗಿ ಉಳಿಸಿಕೊಳ್ಳಿ",
     "Favorite" : "ಅಚ್ಚುಮೆಚ್ಚಿನ"
 },

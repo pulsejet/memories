@@ -6,9 +6,10 @@ OC.L10N.register(
     "Tags" : "Tibzimin",
     "Settings" : "Iɣewwaṛen",
     "Hour" : "Asrag",
-    "Back" : "Retour",
-    "Cancel" : "Sefsex",
     "Delete" : "Kkes",
+    "Name" : "Nom",
+    "Cancel" : "Sefsex",
+    "Back" : "Retour",
     "Download" : "Sider",
     "Favorite" : "Menyif"
 },

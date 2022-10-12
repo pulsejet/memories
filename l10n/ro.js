@@ -11,10 +11,11 @@ OC.L10N.register(
     "Month" : "Luna",
     "Day" : "Zi",
     "Time" : "Timp",
-    "Back" : "Înapoi",
+    "Delete" : "Șterge",
+    "Name" : "Nume",
     "Update" : "Actualizare",
     "Cancel" : "Anulare",
-    "Delete" : "Șterge",
+    "Back" : "Înapoi",
     "Download" : "Descărcare",
     "Favorite" : "Favorite",
     "View in folder" : "Vizualizează în director"

@@ -11,10 +11,10 @@ OC.L10N.register(
     "Day" : "Dag",
     "Time" : "Tyd",
     "Hour" : "Uur",
-    "Back" : "Terug",
+    "Delete" : "Skrap",
     "Update" : "Werk by",
     "Cancel" : "Kanselleer",
-    "Delete" : "Skrap",
+    "Back" : "Terug",
     "Download" : "Laai af",
     "Favorite" : "Gunsteling",
     "View in folder" : "Vertoon in gids"
