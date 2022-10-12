@@ -612,10 +612,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         // Special headers
         if (head.dayId === this.TagDayID.FOLDERS) {
             return (head.name = this.t("memories", "Folders"));
-        } else if (head.dayId === this.TagDayID.TAGS) {
-            return (head.name = this.t("memories", "Tags"));
-        } else if (head.dayId === this.TagDayID.FACES) {
-            return (head.name = this.t("memories", "People"));
+        } else if (head.dayId === this.TagDayID.TAGS || head.dayId === this.TagDayID.FACES) {
+            return (head.name = "");
         }
 
         // Make date string
@@ -692,10 +690,17 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 delete day.detail;
             }
 
+            // Special headers that we should be tiny
+            let headerSize = 40;
+            if (day.dayid === this.TagDayID.TAGS    ||
+                day.dayid === this.TagDayID.FACES) {
+                headerSize = 10;
+            }
+
             // Add header to list
             const head: IHeadRow = {
                 id: ++this.numRows,
-                size: 40,
+                size: headerSize,
                 type: IRowType.HEAD,
                 selected: false,
                 dayId: day.dayid,
@@ -1448,7 +1453,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         cursor: pointer;
     }
     > .name {
-        transition: margin 0.2s ease;
+        display: block;
+        transition: transform 0.2s ease;
         cursor: pointer;
     }
 
@@ -1458,12 +1464,14 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             opacity: 0.7;
         }
         > .name {
-            margin-left: 25px;
+            transform: translateX(25px);
         }
     }
     &.selected > .select {
         opacity: 1;
     }
+
+    @include phone { transform: translateX(8px); }
 }
 
 /** Timeline */

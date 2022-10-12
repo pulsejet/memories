@@ -17,8 +17,8 @@ export function getShortDateStr(date: Date) {
 /** Get long date string with optional year if same as current */
 export function getLongDateStr(date: Date, skipYear=false, time=false) {
     return date.toLocaleDateString(getCanonicalLocale(), {
-        weekday: 'long',
-        month: 'long',
+        weekday: 'short',
+        month: 'short',
         day: 'numeric',
         year: (skipYear && date.getUTCFullYear() === new Date().getUTCFullYear()) ? undefined : 'numeric',
         timeZone: 'UTC',
