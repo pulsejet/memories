@@ -260,6 +260,8 @@ export default class Photo extends Mixins(GlobalMixin) {
 /* Actual image */
 div.img-outer {
     padding: 2px;
+    @media (max-width: 768px) { padding: 1px; }
+
     transition: transform 0.1s ease;
     background-clip: content-box, padding-box;
     background-color: var(--color-background-dark);
