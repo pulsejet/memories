@@ -41,12 +41,17 @@
                 <div v-if="item.type === 0" class="head-row"
                     :class="{ 'selected': item.selected}"
                 >
-                    <CheckCircle :size="18" class="select" @click="selectHead(item)" />
+                    <div class="super" v-if="item.super !== undefined">
+                        {{ item.super }}
+                    </div>
+                    <div class="main">
+                        <CheckCircle :size="18" class="select" @click="selectHead(item)" />
 
-                    <span class="name"
-                        @click="selectHead(item)">
-                        {{ item.name || getHeadName(item) }}
-                    </span>
+                        <span class="name"
+                            @click="selectHead(item)">
+                            {{ item.name || getHeadName(item) }}
+                        </span>
+                    </div>
                 </div>
 
                 <div v-else
@@ -190,8 +195,10 @@ import { Component, Watch, Mixins } from 'vue-property-decorator';
 import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType, ITick, TopMatterType } from "../types";
 import { generateUrl } from '@nextcloud/router'
 import { showError } from '@nextcloud/dialogs'
-import GlobalMixin from '../mixins/GlobalMixin';
+import { getCanonicalLocale } from '@nextcloud/l10n';
 import { NcActions, NcActionButton, NcButton, NcEmptyContent } from '@nextcloud/vue';
+import GlobalMixin from '../mixins/GlobalMixin';
+import moment from 'moment';
 
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
@@ -672,6 +679,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             };
         } = {};
 
+        let prevDay: IDay | null = null;
         for (const day of data) {
             // Initialization
             day.rows = new Set();
@@ -690,22 +698,29 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 delete day.detail;
             }
 
-            // Special headers that we should be tiny
-            let headerSize = 40;
-            if (day.dayid === this.TagDayID.TAGS    ||
-                day.dayid === this.TagDayID.FACES) {
-                headerSize = 10;
-            }
-
-            // Add header to list
+            // Create header for this day
             const head: IHeadRow = {
                 id: ++this.numRows,
-                size: headerSize,
+                size: 40,
                 type: IRowType.HEAD,
                 selected: false,
                 dayId: day.dayid,
                 day: day,
             };
+
+            // Special headers
+            if (day.dayid === this.TagDayID.TAGS    ||
+                day.dayid === this.TagDayID.FACES) {
+                head.size = 10;
+            } else if (this.$route.name === 'thisday' && (!prevDay || Math.abs(prevDay.dayid - day.dayid) > 30)) {
+                // thisday view with new year title
+                head.size = 67;
+                const dateTaken = moment(utils.dayIdToDate(day.dayid));
+                const text = dateTaken.locale(getCanonicalLocale()).fromNow();
+                head.super = text.charAt(0).toUpperCase() + text.slice(1);
+            }
+
+            // Add header to list
             heads[day.dayid] = head;
             list.push(head);
 
@@ -721,6 +736,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 row.pct = leftNum > this.numCols ? this.numCols : leftNum;
                 row.photos = [];
             }
+
+            // Continue processing
+            prevDay = day;
         }
 
         // Store globally
@@ -1436,40 +1454,46 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 }
 
 .head-row {
-    height: 40px;
     padding-top: 10px;
     padding-left: 3px;
     font-size: 0.9em;
-    font-weight: 600;
 
-    > .select {
+    > div {
+        position: relative;
+        &.super {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        &.main { font-weight: 600; }
+    }
+
+    .select {
         position: absolute;
-        left: 5px; top: 50%;
+        left: 0; top: 50%;
         display: none;
         opacity: 0;
-        transform: translateY(-30%);
+        transform: translateY(-45%);
         transition: opacity 0.2s ease;
         border-radius: 50%;
         cursor: pointer;
     }
-    > .name {
+    .name {
         display: block;
         transition: transform 0.2s ease;
         cursor: pointer;
     }
 
     .hover &, &.selected {
-        > .select {
+        .select {
             display: flex;
             opacity: 0.7;
         }
-        > .name {
-            transform: translateX(25px);
+        .name {
+            transform: translateX(22px);
         }
     }
-    &.selected > .select {
-        opacity: 1;
-    }
+    &.selected .select { opacity: 1; }
 
     @include phone { transform: translateX(8px); }
 }
