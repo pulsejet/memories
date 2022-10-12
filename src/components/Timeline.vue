@@ -388,13 +388,13 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     /** Get view name for dynamic top matter */
     getViewName() {
         switch (this.$route.name) {
-            case 'timeline': return 'Your Photos';
-            case 'favorites': return 'Favorites';
-            case 'people': return 'People';
-            case 'videos': return 'Videos';
-            case 'archive': return 'Archive';
-            case 'thisday': return 'On this day';
-            case 'tags': return 'Tags';
+            case 'timeline': return this.t('memories', 'Your Timeline');
+            case 'favorites': return this.t('memories', 'Favorites');
+            case 'people': return this.t('memories', 'People');
+            case 'videos': return this.t('memories', 'Videos');
+            case 'archive': return this.t('memories', 'Archive');
+            case 'thisday': return this.t('memories', 'On this day');
+            case 'tags': return this.t('memories', 'Tags');
             default: return '';
         }
     }
