@@ -9,6 +9,7 @@ OC.L10N.register(
     "Time" : "সময়",
     "Hour" : "ঘন্টা",
     "Delete" : "মুছে",
+    "Name" : "নাম",
     "Update" : "পরিবর্ধন",
     "Cancel" : "বাতির",
     "Back" : "পেছনে যাও",

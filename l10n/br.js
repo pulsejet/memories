@@ -8,6 +8,7 @@ OC.L10N.register(
     "Month" : "Miz",
     "Day" : "Deiz",
     "Delete" : "Lemel",
+    "Name" : "Anv",
     "Update" : "Hizivaat",
     "Cancel" : "Arrest",
     "Back" : "Distro",
