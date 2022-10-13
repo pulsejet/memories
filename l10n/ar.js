@@ -13,6 +13,7 @@ OC.L10N.register(
     "Time" : "إلى وقت",
     "Hour" : "الساعة",
     "Delete" : "إزالة",
+    "Name" : "الاسم",
     "Update" : "تحديث",
     "Cancel" : "إلغاء",
     "Back" : "العودة",

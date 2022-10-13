@@ -6,6 +6,7 @@ OC.L10N.register(
     "Month" : "Mjesec",
     "Day" : "Dan",
     "Delete" : "Obriši",
+    "Name" : "Ime",
     "Update" : "Ažuriraj",
     "Cancel" : "Otkaži",
     "Download" : "Preuzmi",

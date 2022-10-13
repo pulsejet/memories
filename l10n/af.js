@@ -12,6 +12,7 @@ OC.L10N.register(
     "Time" : "Tyd",
     "Hour" : "Uur",
     "Delete" : "Skrap",
+    "Name" : "Naam",
     "Update" : "Werk by",
     "Cancel" : "Kanselleer",
     "Back" : "Terug",

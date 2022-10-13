@@ -18,6 +18,7 @@ OC.L10N.register(
     "Time" : "Tid",
     "Hour" : "Time",
     "Delete" : "Slet",
+    "Name" : "Navn",
     "Update" : "Opdater",
     "Cancel" : "Annuller",
     "Back" : "Tilbage",
