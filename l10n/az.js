@@ -9,6 +9,7 @@ OC.L10N.register(
     "Day" : "Gün",
     "Time" : "Vaxt",
     "Delete" : "Sil",
+    "Name" : "Ad",
     "Update" : "Yenilənmə",
     "Cancel" : "Dayandır",
     "Download" : "Yüklə",
