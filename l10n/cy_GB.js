@@ -11,6 +11,7 @@ OC.L10N.register(
     "Day" : "Diwrnod",
     "Time" : "Amser",
     "Delete" : "Dileu",
+    "Name" : "Enw",
     "Update" : "Diweddaru",
     "Cancel" : "Diddymu",
     "Back" : "Nôl",

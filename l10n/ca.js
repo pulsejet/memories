@@ -17,6 +17,7 @@ OC.L10N.register(
     "Hour" : "Hora",
     "Minute" : "Minut",
     "Delete" : "Suprimeix",
+    "Name" : "Cognom",
     "Update" : "Actualitzar",
     "Cancel" : "Cancel·la",
     "Back" : "Torna",

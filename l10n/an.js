@@ -5,6 +5,7 @@ OC.L10N.register(
     "Tags" : "Etiquetas",
     "Settings" : "Configurazión",
     "Delete" : "Borrar",
+    "Name" : "Nombre",
     "Cancel" : "Canzelar",
     "Back" : "Ta zaga",
     "Download" : "Escargar",
