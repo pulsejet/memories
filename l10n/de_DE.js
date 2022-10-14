@@ -52,6 +52,7 @@ OC.L10N.register(
     "Unarchive" : "Dearchivieren",
     "View in folder" : "In Ordner anzeigen",
     "Remove from person" : "Von der Person entfernen",
+    "Your Timeline" : "Ihre Zeitleiste",
     "Failed to load some photos" : "Laden einiger Fotos fehlgeschlagen",
     "You are about to download a large number of files. Are you sure?" : "Sie sind dabei, eine große Anzahl an Dateien herunterzuladen. Sind Sie sich sicher?",
     "You are about to delete a large number of files. Are you sure?" : "Sie sind dabei, eine große Anzahl an Dateien zu löschen. Sind Sie sich sicher?",

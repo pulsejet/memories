@@ -52,6 +52,7 @@ OC.L10N.register(
     "Unarchive" : "Zrušit archivování",
     "View in folder" : "Zobrazit ve složce",
     "Remove from person" : "Odebrat z osoby",
+    "Your Timeline" : "Vaše časová osa",
     "Failed to load some photos" : "Některé fotky se nepodařilo načíst",
     "You are about to download a large number of files. Are you sure?" : "Chystáte se stahovat si velký počet souborů. Opravdu to chcete?",
     "You are about to delete a large number of files. Are you sure?" : "Chystáte se smazat velké množství souborů. Opravdu to chcete?",

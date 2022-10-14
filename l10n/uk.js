@@ -5,7 +5,7 @@ OC.L10N.register(
     "Yet another photo management app" : "Іще один застосунок для роботи зі світлинами",
     "Timeline" : "Дії",
     "Folders" : "Каталоги",
-    "Favorites" : "Вподобані",
+    "Favorites" : "Із зірочкою",
     "Videos" : "Відео",
     "People" : "Люди",
     "Archive" : "Архів",
