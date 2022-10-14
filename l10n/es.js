@@ -16,14 +16,18 @@ OC.L10N.register(
     "Time" : "Fecha",
     "Hour" : "Hora",
     "Minute" : "Minuto",
+    "Remove person" : "Eliminar persona",
     "Delete" : "Eliminar",
+    "Rename person" : "Renombrar persona",
     "Name" : "Nombre",
     "Update" : "Actualizar",
     "Cancel" : "Cancelar",
     "Back" : "Atrás",
+    "Merge with different person" : "Unir con una persona diferente",
     "Download" : "Descargar",
     "Favorite" : "Marcar como favorito",
     "Unarchive" : "Desarchivar",
-    "View in folder" : "Ver en carpeta"
+    "View in folder" : "Ver en carpeta",
+    "Failed to delete {fileName}." : "Fallo al borrar {fileName}."
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

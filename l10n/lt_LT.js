@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Yet another photo management app" : "Dar viena nuotraukų tvarkymo programėlė",
     "Timeline" : "Laiko juosta",
     "Folders" : "Aplankai",
     "Favorites" : "Mėgstami",
@@ -11,6 +12,7 @@ OC.L10N.register(
     "Tags" : "Žymės",
     "Settings" : "Nustatymai",
     "Edit Date/Time" : "Taisyti datą/laiką",
+    "Update Exif" : "Atnaujinti EXIF",
     "Year" : "Metai",
     "Month" : "Mėnuo",
     "Day" : "Diena",
@@ -25,6 +27,7 @@ OC.L10N.register(
     "Name" : "Pavadinimas",
     "Update" : "Atnaujinti",
     "Cancel" : "Atsisakyti",
+    "Too many failures, aborting" : "Per daug nesėkmių, nutraukiama",
     "Back" : "Atgal",
     "Merge with different person" : "Sulieti su kitu žmogumi",
     "Cannot find this photo anymore!" : "Daugiau nebepavyksta rasti šios nuotraukos!",
@@ -34,6 +37,7 @@ OC.L10N.register(
     "Favorite" : "Mėgstamas",
     "Unarchive" : "Išskleisti",
     "View in folder" : "Rodyti aplanke",
+    "Your Timeline" : "Jūsų laiko juostą",
     "Failed to load some photos" : "Nepavyko įkelti kai kurių nuotraukų",
     "You are about to download a large number of files. Are you sure?" : "Jūs ketinate atsisiųsti didelį failų skaičių. Ar esate tikri?",
     "You are about to delete a large number of files. Are you sure?" : "Jūs ketinate ištrinti didelį failų skaičių. Ar esate tikri?",

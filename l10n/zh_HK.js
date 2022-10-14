@@ -52,6 +52,7 @@ OC.L10N.register(
     "Unarchive" : "取消封存",
     "View in folder" : "在資料夾中檢視",
     "Remove from person" : "從人中刪除",
+    "Your Timeline" : "您的時間線",
     "Failed to load some photos" : "未能加載一些照片",
     "You are about to download a large number of files. Are you sure?" : "您即將下載大量檔案。你確定嗎？",
     "You are about to delete a large number of files. Are you sure?" : "您即將刪除大量檔案。你確定嗎？",
