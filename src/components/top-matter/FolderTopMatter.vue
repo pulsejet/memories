@@ -12,9 +12,9 @@
 
 <script lang="ts">
 import { Component, Mixins, Watch } from 'vue-property-decorator';
-import { TopMatterFolder, TopMatterType } from "../types";
+import { TopMatterFolder, TopMatterType } from "../../types";
 import { NcBreadcrumbs, NcBreadcrumb } from '@nextcloud/vue';
-import GlobalMixin from '../mixins/GlobalMixin';
+import GlobalMixin from '../../mixins/GlobalMixin';
 import HomeIcon from 'vue-material-design-icons/Home.vue';
 
 @Component({

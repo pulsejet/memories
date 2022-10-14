@@ -33,14 +33,14 @@
 
 <script lang="ts">
 import { Component, Prop, Watch, Mixins, Emit } from 'vue-property-decorator';
-import { IPhoto, ITag } from '../types';
+import { IPhoto, ITag } from '../../types';
 import { generateUrl } from '@nextcloud/router'
-import { getPreviewUrl } from "../services/FileUtils";
+import { getPreviewUrl } from "../../services/FileUtils";
 
 import { NcCounterBubble } from '@nextcloud/vue'
 
-import GlobalMixin from '../mixins/GlobalMixin';
-import { constants } from '../services/Utils';
+import GlobalMixin from '../../mixins/GlobalMixin';
+import { constants } from '../../services/Utils';
 
 interface IFaceDetection extends IPhoto {
     x: number;

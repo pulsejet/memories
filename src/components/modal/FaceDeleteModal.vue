@@ -19,8 +19,8 @@ import { Component, Emit, Mixins, Watch } from 'vue-property-decorator';
 import { NcButton, NcTextField } from '@nextcloud/vue';
 import { showError } from '@nextcloud/dialogs'
 import Modal from './Modal.vue';
-import GlobalMixin from '../mixins/GlobalMixin';
-import client from '../services/DavClient';
+import GlobalMixin from '../../mixins/GlobalMixin';
+import client from '../../services/DavClient';
 
 @Component({
     components: {

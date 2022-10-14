@@ -87,7 +87,7 @@ import { IHeadRow, IPhoto } from '../types';
 import { generateUrl } from '@nextcloud/router'
 import { NcActions, NcActionButton } from '@nextcloud/vue';
 
-import EditDate from "./EditDate.vue"
+import EditDate from "./modal/EditDate.vue"
 
 import Star from 'vue-material-design-icons/Star.vue';
 import Download from 'vue-material-design-icons/Download.vue';

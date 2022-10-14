@@ -101,16 +101,16 @@
 
 <script lang="ts">
 import { Component, Emit, Mixins } from 'vue-property-decorator';
-import GlobalMixin from '../mixins/GlobalMixin';
-import { IPhoto } from '../types';
+import GlobalMixin from '../../mixins/GlobalMixin';
+import { IPhoto } from '../../types';
 
 import { NcButton, NcTextField } from '@nextcloud/vue';
 import { showError } from '@nextcloud/dialogs'
 import { generateUrl } from '@nextcloud/router'
 import Modal from './Modal.vue';
 import axios from '@nextcloud/axios'
-import * as utils from '../services/Utils';
-import * as dav from "../services/DavRequests";
+import * as utils from '../../services/Utils';
+import * as dav from "../../services/DavRequests";
 
 const INFO_API_URL = '/apps/memories/api/info/{id}';
 const EDIT_API_URL = '/apps/memories/api/edit/{id}';

@@ -32,11 +32,11 @@
 
 <script lang="ts">
 import { Component, Prop, Watch, Mixins } from 'vue-property-decorator';
-import { IFileInfo, IFolder } from '../types';
-import GlobalMixin from '../mixins/GlobalMixin';
+import { IFileInfo, IFolder } from '../../types';
+import GlobalMixin from '../../mixins/GlobalMixin';
 
-import * as dav from "../services/DavRequests";
-import { getPreviewUrl } from "../services/FileUtils";
+import * as dav from "../../services/DavRequests";
+import { getPreviewUrl } from "../../services/FileUtils";
 
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
 

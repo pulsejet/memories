@@ -126,10 +126,10 @@ import moment from 'moment';
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
 import axios from '@nextcloud/axios'
-import Folder from "./Folder.vue";
-import Tag from "./Tag.vue";
-import Photo from "./Photo.vue";
-import TopMatter from "./TopMatter.vue";
+import Folder from "./frame/Folder.vue";
+import Tag from "./frame/Tag.vue";
+import Photo from "./frame/Photo.vue";
+import TopMatter from "./top-matter/TopMatter.vue";
 import SelectionManager from './SelectionManager.vue';
 import UserConfig from "../mixins/UserConfig";
 
