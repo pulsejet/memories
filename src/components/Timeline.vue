@@ -28,7 +28,8 @@
         >
             <template #before>
                 <!-- Show dynamic top matter, name of the view -->
-                <div class="recycler-before" ref="recyclerbefore" v-if="!$refs.topmatter.type && list.length > 0">
+                <div class="recycler-before" ref="recyclerBefore"
+                     v-show="!$refs.topmatter.type && list.length > 0">
                     {{ getViewName() }}
                 </div>
             </template>
@@ -40,13 +41,9 @@
                     <div class="super" v-if="item.super !== undefined">
                         {{ item.super }}
                     </div>
-                    <div class="main">
-                        <CheckCircle :size="18" class="select" @click="selectionManager.selectHead(item)" />
-
-                        <span class="name"
-                            @click="selectionManager.selectHead(item)">
-                            {{ item.name || getHeadName(item) }}
-                        </span>
+                    <div class="main" @click="selectionManager.selectHead(item)">
+                        <CheckCircle :size="18" class="select" />
+                        <span class="name" > {{ item.name || getHeadName(item) }} </span>
                     </div>
                 </div>
 
@@ -77,34 +74,14 @@
             </template>
         </RecycleScroller>
 
-        <!-- Timeline scroller -->
-        <div ref="timelineScroll" class="timeline-scroll"
-             v-bind:class="{
-                'scrolling-recycler': scrollingRecycler,
-                'scrolling-timeline': scrollingTimeline,
-            }"
-            @mousemove="timelineHover"
-            @touchmove="timelineTouch"
-            @mouseleave="timelineLeave"
-            @mousedown="timelineClick">
-            <span class="cursor st" ref="cursorSt"
-                  :style="{ transform: `translateY(${timelineCursorY}px)` }"></span>
-            <span class="cursor hv"
-                  :style="{ transform: `translateY(${timelineHoverCursorY}px)` }">
-                  <div class="text"> {{ timelineHoverCursorText }} </div>
-                  <div class="icon"> <ScrollIcon :size="20" /> </div>
-            </span>
-
-            <div v-for="tick of visibleTimelineTicks" :key="tick.dayId"
-                 class="tick"
-                :class="{ 'dash': !tick.text }"
-                :style="{ top: tick.topC + 'px' }">
-
-                <span v-if="tick.text">{{ tick.text }}</span>
-            </div>
-        </div>
-
         <!-- Managers -->
+        <ScrollerManager ref="scrollerManager"
+            :days="days" :heads="heads"
+            :height="scrollerHeight"
+            :rowHeight="rowHeight"
+            :recycler="$refs.recycler"
+            :recyclerBefore="$refs.recyclerBefore" />
+
         <SelectionManager ref="selectionManager"
             :selection="selection" :heads="heads"
             @refresh="refresh"
@@ -131,27 +108,17 @@ import Tag from "./frame/Tag.vue";
 import Photo from "./frame/Photo.vue";
 import TopMatter from "./top-matter/TopMatter.vue";
 import SelectionManager from './SelectionManager.vue';
+import ScrollerManager from './ScrollerManager.vue';
 import UserConfig from "../mixins/UserConfig";
 
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import CheckCircle from 'vue-material-design-icons/CheckCircle.vue';
 import PeopleIcon from 'vue-material-design-icons/AccountMultiple.vue';
 import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
-import CloseIcon from 'vue-material-design-icons/Close.vue';
-import ScrollIcon from 'vue-material-design-icons/UnfoldMoreHorizontal.vue';
 
 const SCROLL_LOAD_DELAY = 100;          // Delay in loading data when scrolling
 const MAX_PHOTO_WIDTH = 175;            // Max width of a photo
 const MIN_COLS = 3;                     // Min number of columns (on phone, e.g.)
-
-// Define API routes
-const API_ROUTES = {
-    DAYS: 'days',
-    DAY: 'days/{dayId}',
-};
-for (const [key, value] of Object.entries(API_ROUTES)) {
-    API_ROUTES[key] = '/apps/memories/api/' + value;
-}
 
 @Component({
     components: {
@@ -160,14 +127,13 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
         Photo,
         TopMatter,
         SelectionManager,
+        ScrollerManager,
         NcEmptyContent,
 
         CheckCircle,
         ArchiveIcon,
         PeopleIcon,
         ImageMultipleIcon,
-        CloseIcon,
-        ScrollIcon,
     }
 })
 export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
@@ -186,37 +152,15 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     /** Computed row height */
     private rowHeight = 100;
-    /** Total height of recycler */
-    private viewHeight = 1000;
-    /** Total height of timeline */
-    private timelineHeight = 100;
-    /** Computed timeline ticks */
-    private timelineTicks: ITick[] = [];
-    /** Computed timeline cursor top */
-    private timelineCursorY = 0;
-    /** Timeline hover cursor top */
-    private timelineHoverCursorY = -5;
-    /** Timeline hover cursor text */
-    private timelineHoverCursorText = "";
 
     /** Current start index */
     private currentStart = 0;
     /** Current end index */
     private currentEnd = 0;
-    /** Scrolling recycler currently */
-    private scrollingRecycler = false;
-    /** Scrolling recycler timer */
-    private scrollingRecyclerTimer = null as number | null;
-    /** Scrolling using the timeline currently */
-    private scrollingTimeline = false;
-    /** Scrolling timeline timer */
-    private scrollingTimelineTimer = null as number | null;
     /** Resizing timer */
     private resizeTimer = null as number | null;
-    /** View size reflow timer */
-    private reflowTimelineReq = false;
-    /** Is mobile layout */
-    private isMobile = false;
+    /** Height of the scroller */
+    private scrollerHeight = 100;
 
     /** Set of dayIds for which images loaded */
     private loadedDays = new Set<number>();
@@ -227,10 +171,13 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     private state = Math.random();
 
     /** Selection manager component */
-    private selectionManager!: SelectionManager;
+    private selectionManager!: SelectionManager & any;
+    /** Scroller manager component */
+    private scrollerManager!: ScrollerManager & any;
 
     mounted() {
-        this.selectionManager = this.$refs.selectionManager as SelectionManager;
+        this.selectionManager = this.$refs.selectionManager;
+        this.scrollerManager = this.$refs.scrollerManager;
         this.createState();
     }
 
@@ -273,7 +220,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     /** Reset all state */
     async resetState() {
-        (this.selectionManager as any).clearSelection();
+        this.selectionManager.clearSelection();
         this.loading = 0;
         this.list = [];
         this.numRows = 0;
@@ -281,23 +228,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         this.days = [];
         this.currentStart = 0;
         this.currentEnd = 0;
-        this.timelineTicks = [];
+        this.scrollerManager.reset();
         this.state = Math.random();
         this.loadedDays.clear();
-    }
-
-    /** Get view name for dynamic top matter */
-    getViewName() {
-        switch (this.$route.name) {
-            case 'timeline': return this.t('memories', 'Your Timeline');
-            case 'favorites': return this.t('memories', 'Favorites');
-            case 'people': return this.t('memories', 'People');
-            case 'videos': return this.t('memories', 'Videos');
-            case 'archive': return this.t('memories', 'Archive');
-            case 'thisday': return this.t('memories', 'On this day');
-            case 'tags': return this.t('memories', 'Tags');
-            default: return '';
-        }
     }
 
     /** Recreate everything */
@@ -331,17 +264,14 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         const e = this.$refs.container as Element;
         let height = e.clientHeight;
         let width = e.clientWidth;
-        this.timelineHeight = height;
+        this.scrollerHeight = height;
 
         const recycler = this.$refs.recycler as any;
         recycler.$el.style.height = (height - 4) + 'px';
 
-        // Mobile devices
-        if (window.innerWidth <= 768) {
-            this.isMobile = true;
-        } else {
+        // Desktop scroller width
+        if (window.innerWidth > 768) {
             width -= 40;
-            this.isMobile = false;
         }
 
         if (this.days.length === 0) {
@@ -355,7 +285,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         this.list.filter(r => r.type !== IRowType.HEAD).forEach(row => {
             row.size = this.rowHeight;
         });
-        this.reflowTimeline(true);
+        this.scrollerManager.reflow(true);
     }
 
     /**
@@ -364,15 +294,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
      * the pixel position of the recycler has changed.
      */
     scrollPositionChange(event?: any) {
-        this.timelineCursorY = event ? event.target.scrollTop * this.timelineHeight / this.viewHeight : 0;
-        this.timelineMoveHoverCursor(this.timelineCursorY);
-
-        if (this.scrollingRecyclerTimer) window.clearTimeout(this.scrollingRecyclerTimer);
-        this.scrollingRecycler = true;
-        this.scrollingRecyclerTimer = window.setTimeout(() => {
-            this.scrollingRecycler = false;
-            this.scrollingRecyclerTimer = null;
-        }, 1500);
+        this.scrollerManager.recyclerScrolled(event)
     }
 
     /** Trigger when recycler view changes */
@@ -488,6 +410,20 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         return url;
     }
 
+    /** Get view name for dynamic top matter */
+    getViewName() {
+        switch (this.$route.name) {
+            case 'timeline': return this.t('memories', 'Your Timeline');
+            case 'favorites': return this.t('memories', 'Favorites');
+            case 'people': return this.t('memories', 'People');
+            case 'videos': return this.t('memories', 'Videos');
+            case 'archive': return this.t('memories', 'Archive');
+            case 'thisday': return this.t('memories', 'On this day');
+            case 'tags': return this.t('memories', 'Tags');
+            default: return '';
+        }
+    }
+
     /** Get name of header */
     getHeadName(head: IHeadRow) {
         // Check cache
@@ -515,7 +451,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     /** Fetch timeline main call */
     async fetchDays() {
-        let url = API_ROUTES.DAYS;
+        let url = '/apps/memories/api/days';
         let params: any = {};
 
         try {
@@ -634,12 +570,12 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         }
 
         // Fix view height variable
-        await this.reflowTimeline();
+        await this.scrollerManager.reflow();
     }
 
     /** Fetch image data for one dayId */
     async fetchDay(dayId: number) {
-        let url = API_ROUTES.DAY;
+        let url = '/apps/memories/api/days/{dayId}';
         const params: any = { dayId };
 
         // Do this in advance to prevent duplicate requests
@@ -658,140 +594,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         } catch (e) {
             showError(this.t('memories', 'Failed to load some photos'));
             console.error(e);
-        }
-    }
-
-    /** Re-create timeline tick data in the next frame */
-    async reflowTimeline(orderOnly = false) {
-        if (this.reflowTimelineReq) {
-            return;
-        }
-
-        this.reflowTimelineReq = true;
-        await this.$nextTick();
-        this.reflowTimelineNow(orderOnly);
-        this.reflowTimelineReq = false;
-    }
-
-    /** Re-create timeline tick data */
-    reflowTimelineNow(orderOnly = false) {
-        if (!orderOnly) {
-            this.recreateTimeline();
-        }
-
-        const recycler: any = this.$refs.recycler;
-        this.viewHeight = recycler.$refs.wrapper.clientHeight;
-
-        // Static extra height at top
-        const rb = this.$refs.recyclerbefore as Element;
-        const extraHeight = rb?.clientHeight || 0;
-
-        // Compute timeline tick positions
-        for (const tick of this.timelineTicks) {
-            tick.topC = (extraHeight + tick.topS + tick.top * this.rowHeight) * this.timelineHeight / this.viewHeight;
-        }
-
-        // Do another pass to figure out which timeline points are visible
-        // This is not as bad as it looks, it's actually 12*O(n)
-        // because there are only 12 months in a year
-        const fontSizePx = parseFloat(getComputedStyle(this.$refs.cursorSt as any).fontSize);
-        const minGap = fontSizePx + (this.isMobile ? 5 : 2);
-        let prevShow = -9999;
-        for (const [idx, tick] of this.timelineTicks.entries()) {
-            // You can't see these anyway, why bother?
-            if (tick.topC < minGap || tick.topC > this.timelineHeight - minGap) {
-                tick.s = false;
-                continue;
-            }
-
-            // Will overlap with the previous tick. Skip anyway.
-            if (tick.topC - prevShow < minGap) {
-                tick.s = false;
-                continue;
-            }
-
-            // This is a labelled tick then show it anyway for the sake of best effort
-            if (tick.text) {
-                tick.s = true;
-                prevShow = tick.topC;
-                continue;
-            }
-
-            // Lookahead for next labelled tick
-            // If showing this tick would overlap the next one, don't show this one
-            let i = idx + 1;
-            while(i < this.timelineTicks.length) {
-                if (this.timelineTicks[i].text) {
-                    break;
-                }
-                i++;
-            }
-            if (i < this.timelineTicks.length) {
-                // A labelled tick was found
-                const nextLabelledTick = this.timelineTicks[i];
-                if (tick.topC + minGap > nextLabelledTick.topC &&
-                    nextLabelledTick.topC < this.timelineHeight - minGap) { // make sure this will be shown
-                    tick.s = false;
-                    continue;
-                }
-            }
-
-            // Show this tick
-            tick.s = true;
-            prevShow = tick.topC;
-        }
-    }
-
-    /**
-     * Recreate the timeline from scratch
-     */
-    recreateTimeline() {
-        // Clear timeline
-        this.timelineTicks = [];
-
-        // Ticks
-        let currTopRow = 0;
-        let currTopStatic = 0;
-        let prevYear = 9999;
-        let prevMonth = 0;
-        const thisYear = new Date().getFullYear();
-
-        // Get a new tick
-        const getTick = (day: IDay, text?: string | number): ITick => {
-            return {
-                dayId: day.dayid,
-                top: currTopRow,
-                topS: currTopStatic,
-                topC: 0,
-                text: text,
-            };
-        }
-
-        // Itearte over days
-        for (const day of this.days) {
-            if (day.count === 0) {
-                continue;
-            }
-
-            if (Object.values(this.TagDayID).includes(day.dayid)) {
-                // Blank dash ticks only
-                this.timelineTicks.push(getTick(day));
-            } else {
-                // Make date string
-                const dateTaken = utils.dayIdToDate(day.dayid);
-
-                // Create tick if month changed
-                const dtYear = dateTaken.getUTCFullYear();
-                const dtMonth = dateTaken.getUTCMonth()
-                if (Number.isInteger(day.dayid) && (dtMonth !== prevMonth || dtYear !== prevYear)) {
-                    this.timelineTicks.push(getTick(day, (dtYear === prevYear || dtYear === thisYear) ? undefined : dtYear));
-                }
-                prevMonth = dtMonth;
-                prevYear = dtYear;
-            }
-
-            currTopStatic += this.heads[day.dayid].size;
-            currTopRow += day.rows.size;
         }
     }
 
@@ -905,7 +707,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         // because one row is always removed in that case
         // So just reflow the timeline here
         if (addedRow || spliceCount > 0) {
-            this.reflowTimeline();
+            this.scrollerManager.reflow();
         }
     }
 
@@ -926,85 +728,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         };
     }
 
-    /** Get the visible timeline ticks */
-    get visibleTimelineTicks() {
-        return this.timelineTicks.filter(tick => tick.s);
-    }
-
-    timelineMoveHoverCursor(y: number) {
-        this.timelineHoverCursorY = y;
-
-        // Get index of previous tick
-        let idx = this.timelineTicks.findIndex(t => t.topC > y);
-        if (idx >= 1) {
-            idx = idx - 1;
-        } else if (idx === -1 && this.timelineTicks.length > 0) {
-            idx = this.timelineTicks.length - 1;
-        } else {
-            return;
-        }
-
-        // DayId of current hover
-        const dayId = this.timelineTicks[idx].dayId
-
-        // Special days
-        if (Object.values(this.TagDayID).includes(dayId)) {
-            this.timelineHoverCursorText = this.getHeadName(this.heads[dayId]);
-            return;
-        }
-
-        const date = utils.dayIdToDate(dayId);
-        this.timelineHoverCursorText = utils.getShortDateStr(date);
-    }
-
-    /** Handle mouse hover on right timeline */
-    timelineHover(event: MouseEvent) {
-        if (event.buttons) {
-            this.timelineClick(event);
-        }
-        this.timelineMoveHoverCursor(event.offsetY);
-    }
-
-    /** Handle mouse leave on right timeline */
-    timelineLeave() {
-        this.timelineMoveHoverCursor(this.timelineCursorY);
-    }
-
-    /** Handle mouse click on right timeline */
-    timelineClick(event: MouseEvent) {
-        const recycler: any = this.$refs.recycler;
-        recycler.scrollToPosition(this.getTimelinePosition(event.offsetY));
-        this.handleTimelineScroll();
-    }
-
-    /** Handle touch on right timeline */
-    timelineTouch(event: any) {
-        const rect = event.target.getBoundingClientRect();
-        const y = event.targetTouches[0].pageY - rect.top;
-        const recycler: any = this.$refs.recycler;
-        recycler.scrollToPosition(this.getTimelinePosition(y));
-        event.preventDefault();
-        event.stopPropagation();
-        this.handleTimelineScroll();
-    }
-
-    /** Update that timeline is being used to scroll recycler */
-    handleTimelineScroll() {
-        if (this.scrollingTimelineTimer) window.clearTimeout(this.scrollingTimelineTimer);
-        this.scrollingTimeline = true;
-        this.scrollingTimelineTimer = window.setTimeout(() => {
-            this.scrollingTimeline = false;
-            this.scrollingTimelineTimer = null;
-        }, 1500);
-    }
-
-    /** Get recycler equivalent position from event */
-    getTimelinePosition(y: number) {
-        const tH = this.viewHeight;
-        const maxH = this.timelineHeight;
-        return y * tH / maxH;
-    }
-
     /** Clicking on photo */
     clickPhoto(photoComponent: any) {
         if (this.selection.size > 0) { // selection mode
@@ -1013,8 +736,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             photoComponent.openFile();
         }
     }
-
-
 
     /**
      * Delete elements from main view with some animation
@@ -1045,7 +766,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         await new Promise(resolve => setTimeout(resolve, 200));
 
         // clear selection at this point
-        (this.selectionManager as any).clearSelection(delPhotos);
+        this.selectionManager.clearSelection(delPhotos);
 
         // Speculate day reflow for animation
         const exitedLeft = new Set<IPhoto>();
@@ -1088,13 +809,12 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         });
 
         // Reflow timeline
-        this.reflowTimeline();
+        this.scrollerManager.reflow();
     }
 }
 </script>
 
 <style lang="scss" scoped>
-
 @mixin phone {
   @media (max-width: 768px) { @content; }
 }
@@ -1167,103 +887,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     &.selected .select { opacity: 1; }
 
     @include phone { transform: translateX(8px); }
-}
-
-/** Timeline */
-.timeline-scroll {
-    overflow-y: clip;
-    position: absolute;
-    height: 100%;
-    width: 36px;
-    top: 0; right: 0;
-    cursor: ns-resize;
-    opacity: 0;
-    transition: opacity .2s ease-in-out;
-
-    // Show timeline on hover or scroll of main window
-    &:hover, &.scrolling-recycler {
-        opacity: 1;
-    }
-
-    // Hide ticks on mobile unless hovering
-    @include phone {
-        &:not(.scrolling-timeline) {
-            .cursor.hv {
-                left: 12px;
-                border: none;
-                box-shadow: 0 0 5px -3px #000;
-                height: 30px;
-                border-radius: 15px;
-                > .text { display: none; }
-                > .icon { display: block; }
-            }
-            > .tick { opacity: 0; }
-        }
-        .cursor.st { display: none; }
-    }
-
-    > .tick {
-        pointer-events: none;
-        position: absolute;
-        font-size: 0.75em;
-        line-height: 0.75em;
-        font-weight: 600;
-        opacity: 0.95;
-        right: 9px;
-        transform: translateY(-50%);
-        z-index: 1;
-
-        &.dash {
-            height: 4px;
-            width: 4px;
-            border-radius: 50%;
-            background-color: var(--color-main-text);
-            opacity: 0.15;
-            display: block;
-            @include phone { display: none; }
-        }
-
-        @include phone {
-            background-color: var(--color-main-background);
-            padding: 4px;
-            border-radius: 4px;
-        }
-    }
-
-    > .cursor {
-        position: absolute;
-        pointer-events: none;
-        right: 0;
-        background-color: var(--color-primary);
-        min-width: 100%;
-        min-height: 1.5px;
-        will-change: transform;
-
-        &.st {
-            font-size: 0.75em;
-            opacity: 0;
-        }
-
-        &.hv {
-            background-color: var(--color-main-background);
-            padding: 2px 5px;
-            border-top: 2px solid var(--color-primary);
-            border-radius: 2px;
-            width: auto;
-            white-space: nowrap;
-            z-index: 100;
-            font-size: 0.95em;
-            font-weight: 600;
-
-            > .icon {
-                display: none;
-                transform: translate(-4px, 2px);
-            }
-        }
-    }
-    &:hover > .cursor.st {
-        opacity: 1;
-    }
 }
 
 /** Static and dynamic top matter */
