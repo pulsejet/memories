@@ -37,14 +37,14 @@
 
 <script lang="ts">
 import { Component, Prop, Emit, Mixins } from 'vue-property-decorator';
-import { IDay, IPhoto } from "../types";
+import { IDay, IPhoto } from "../../types";
 import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 
 import { showError } from '@nextcloud/dialogs'
-import { getPreviewUrl } from "../services/FileUtils";
-import * as dav from "../services/DavRequests";
-import errorsvg from "../assets/error.svg";
-import GlobalMixin from '../mixins/GlobalMixin';
+import { getPreviewUrl } from "../../services/FileUtils";
+import * as dav from "../../services/DavRequests";
+import errorsvg from "../../assets/error.svg";
+import GlobalMixin from '../../mixins/GlobalMixin';
 
 import Check from 'vue-material-design-icons/Check.vue';
 import Video from 'vue-material-design-icons/Video.vue';

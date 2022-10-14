@@ -34,12 +34,12 @@
 
 <script lang="ts">
 import { Component, Mixins, Watch } from 'vue-property-decorator';
-import GlobalMixin from '../mixins/GlobalMixin';
+import GlobalMixin from '../../mixins/GlobalMixin';
 
 import { NcActions, NcActionButton } from '@nextcloud/vue';
-import FaceEditModal from './FaceEditModal.vue';
-import FaceDeleteModal from './FaceDeleteModal.vue';
-import FaceMergeModal from './FaceMergeModal.vue';
+import FaceEditModal from '../modal/FaceEditModal.vue';
+import FaceDeleteModal from '../modal/FaceDeleteModal.vue';
+import FaceMergeModal from '../modal/FaceMergeModal.vue';
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
 import DeleteIcon from 'vue-material-design-icons/Close.vue';

@@ -29,13 +29,13 @@
 import { Component, Emit, Mixins, Watch } from 'vue-property-decorator';
 import { NcButton, NcTextField } from '@nextcloud/vue';
 import { showError } from '@nextcloud/dialogs'
-import { IFileInfo, IPhoto, ITag } from '../types';
-import Tag from './Tag.vue';
+import { IFileInfo, IPhoto, ITag } from '../../types';
+import Tag from '../frame/Tag.vue';
 
 import Modal from './Modal.vue';
-import GlobalMixin from '../mixins/GlobalMixin';
-import * as dav from '../services/DavRequests';
-import client from '../services/DavClient';
+import GlobalMixin from '../../mixins/GlobalMixin';
+import client from '../../services/DavClient';
+import * as dav from '../../services/DavRequests';
 
 @Component({
     components: {

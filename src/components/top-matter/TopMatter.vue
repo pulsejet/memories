@@ -12,8 +12,8 @@ import FolderTopMatter from "./FolderTopMatter.vue";
 import TagTopMatter from "./TagTopMatter.vue";
 import FaceTopMatter from "./FaceTopMatter.vue";
 
-import GlobalMixin from '../mixins/GlobalMixin';
-import { TopMatterType } from '../types';
+import GlobalMixin from '../../mixins/GlobalMixin';
+import { TopMatterType } from '../../types';
 
 @Component({
     components: {
