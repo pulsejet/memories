@@ -124,14 +124,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
             this.recreate();
         }
 
-        // Height of recycler view
-        const oldRecyclerHeight = this.recyclerHeight;
         this.recyclerHeight = this.recycler.$refs.wrapper.clientHeight;
-
-        // Check if nothing changed
-        if (orderOnly && oldRecyclerHeight === this.recyclerHeight) {
-            return;
-        }
 
         // Static extra height at top
         const rb = this.recyclerBefore as Element;
