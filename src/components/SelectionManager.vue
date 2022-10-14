@@ -143,8 +143,8 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
         this.$forceUpdate();
     }
 
-        /** Check if the day for a photo is selected entirely */
-    updateHeadSelected(head: IHeadRow) {
+    /** Check if the day for a photo is selected entirely */
+    private updateHeadSelected(head: IHeadRow) {
         let selected = true;
 
         // Check if all photos are selected
@@ -162,7 +162,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
     }
 
     /** Add a photo to selection list */
-    selectPhoto(photo: IPhoto, val?: boolean, noUpdate?: boolean) {
+    public selectPhoto(photo: IPhoto, val?: boolean, noUpdate?: boolean) {
         if (photo.flag & this.c.FLAG_PLACEHOLDER ||
             photo.flag & this.c.FLAG_IS_FOLDER ||
             photo.flag & this.c.FLAG_IS_TAG
@@ -186,7 +186,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
     }
 
     /** Select or deselect all photos in a head */
-    selectHead(head: IHeadRow) {
+    public selectHead(head: IHeadRow) {
         head.selected = !head.selected;
         for (const row of head.day.rows) {
             for (const photo of row.photos) {
@@ -199,7 +199,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
     /**
      * Download the currently selected files
      */
-    async downloadSelection() {
+    private async downloadSelection() {
         if (this.selection.size >= 100) {
             if (!confirm(this.t("memories", "You are about to download a large number of files. Are you sure?"))) {
                 return;
@@ -211,14 +211,14 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
     /**
      * Check if all files selected currently are favorites
      */
-    allSelectedFavorites() {
+    private allSelectedFavorites() {
         return Array.from(this.selection.values()).every(p => p.flag & this.c.FLAG_IS_FAVORITE);
     }
 
     /**
      * Favorite the currently selected photos
      */
-    async favoriteSelection() {
+    private async favoriteSelection() {
         try {
             const val = !this.allSelectedFavorites();
             this.updateLoading(1);
@@ -245,7 +245,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
     /**
      * Delete the currently selected photos
      */
-    async deleteSelection() {
+    private async deleteSelection() {
         if (this.selection.size >= 100) {
             if (!confirm(this.t("memories", "You are about to delete a large number of files. Are you sure?"))) {
                 return;
@@ -268,7 +268,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
     /**
      * Open the edit date dialog
      */
-    async editDateSelection() {
+    private async editDateSelection() {
         (<any>this.$refs.editDate).open(Array.from(this.selection.values()));
     }
 
@@ -276,7 +276,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
      * Open the files app with the selected file (one)
      * Opens a new window.
      */
-    async viewInFolder() {
+    private async viewInFolder() {
         if (this.selection.size !== 1) return;
 
         const photo: IPhoto = this.selection.values().next().value;
@@ -292,7 +292,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
     /**
      * Archive the currently selected photos
      */
-    async archiveSelection() {
+    private async archiveSelection() {
         if (this.selection.size >= 100) {
             if (!confirm(this.t("memories", "You are about to touch a large number of files. Are you sure?"))) {
                 return;
@@ -317,7 +317,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
     }
 
     /** Archive is allowed only on timeline routes */
-    allowArchive() {
+    private allowArchive() {
         return this.$route.name === 'timeline'  ||
                this.$route.name === 'favorites' ||
                this.$route.name === 'videos'    ||
@@ -326,14 +326,14 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
     }
 
     /** Is archive route */
-    routeIsArchive() {
+    private routeIsArchive() {
         return this.$route.name === 'archive';
     }
 
     /**
      * Remove currently selected photos from person
      */
-    async removeSelectionFromPerson() {
+    private async removeSelectionFromPerson() {
         // Make sure route is valid
         const { user, name } = this.$route.params;
         if (this.$route.name !== "people" || !user || !name) {
