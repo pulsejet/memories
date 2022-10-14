@@ -1,11 +1,7 @@
 <template>
     <div class="container" ref="container" :class="{ 'icon-loading': loading > 0 }">
         <!-- Static top matter -->
-        <div ref="topmatter" class="top-matter" v-if="topMatterType">
-            <FolderTopMatter v-if="topMatterType === 1" />
-            <TagTopMatter v-else-if="topMatterType === 2" />
-            <FaceTopMatter v-else-if="topMatterType === 3" />
-        </div>
+        <TopMatter ref="topmatter" />
 
         <!-- No content found and nothing is loading -->
         <NcEmptyContent title="Nothing to show here" v-if="loading === 0 && list.length === 0">
@@ -32,7 +28,7 @@
         >
             <template #before>
                 <!-- Show dynamic top matter, name of the view -->
-                <div class="recycler-before" ref="recyclerbefore" v-if="!topMatterType && list.length > 0">
+                <div class="recycler-before" ref="recyclerbefore" v-if="!$refs.topmatter.type && list.length > 0">
                     {{ getViewName() }}
                 </div>
             </template>
@@ -119,7 +115,7 @@
 
 <script lang="ts">
 import { Component, Watch, Mixins } from 'vue-property-decorator';
-import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType, ITick, TopMatterType } from "../types";
+import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType, ITick } from "../types";
 import { generateUrl } from '@nextcloud/router'
 import { showError } from '@nextcloud/dialogs'
 import { getCanonicalLocale } from '@nextcloud/l10n';
@@ -133,10 +129,8 @@ import axios from '@nextcloud/axios'
 import Folder from "./Folder.vue";
 import Tag from "./Tag.vue";
 import Photo from "./Photo.vue";
+import TopMatter from "./TopMatter.vue";
 import SelectionManager from './SelectionManager.vue';
-import FolderTopMatter from "./FolderTopMatter.vue";
-import TagTopMatter from "./TagTopMatter.vue";
-import FaceTopMatter from "./FaceTopMatter.vue";
 import UserConfig from "../mixins/UserConfig";
 
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
@@ -164,10 +158,8 @@ for (const [key, value] of Object.entries(API_ROUTES)) {
         Folder,
         Tag,
         Photo,
+        TopMatter,
         SelectionManager,
-        FolderTopMatter,
-        TagTopMatter,
-        FaceTopMatter,
         NcEmptyContent,
 
         CheckCircle,
@@ -231,9 +223,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     /** Set of selected file ids */
     private selection = new Map<number, IPhoto>();
 
-    /** Static top matter type for current page */
-    private topMatterType: TopMatterType = TopMatterType.NONE;
-
     /** State for request cancellations */
     private state = Math.random();
 
@@ -268,9 +257,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     /** Create new state */
     async createState() {
-        // Initializations in this tick cycle
-        this.setTopMatter();
-
         // Wait for one tick before doing anything
         await this.$nextTick();
 
@@ -298,18 +284,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         this.timelineTicks = [];
         this.state = Math.random();
         this.loadedDays.clear();
-    }
-
-    /** Create top matter */
-    setTopMatter() {
-        this.topMatterType = (() => {
-            switch (this.$route.name) {
-                case 'folders': return TopMatterType.FOLDER;
-                case 'tags': return this.$route.params.name ? TopMatterType.TAG : TopMatterType.NONE;
-                case 'people': return this.$route.params.name ? TopMatterType.FACE : TopMatterType.NONE;
-                default: return TopMatterType.NONE;
-            }
-        })();
     }
 
     /** Get view name for dynamic top matter */
@@ -355,8 +329,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     /** Handle window resize and initialization */
     handleResize() {
         const e = this.$refs.container as Element;
-        const tm = this.$refs.topmatter as Element;
-        let height = e.clientHeight - (tm?.clientHeight || 0);
+        let height = e.clientHeight;
         let width = e.clientWidth;
         this.timelineHeight = height;
 
