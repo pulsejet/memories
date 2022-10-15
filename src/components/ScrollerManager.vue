@@ -206,7 +206,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
         // Itearte over rows
         for (const row of this.rows) {
             if (row.type === IRowType.HEAD) {
-                if (Object.values(this.TagDayID).includes(row.dayId)) {
+                if (this.TagDayIDValueSet.has(row.dayId)) {
                     // Blank tick
                     this.ticks.push(getTick(row.dayId));
                 } else {
@@ -234,22 +234,20 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
         this.hoverCursorY = y;
 
         // Get index of previous tick
-        let idx = this.ticks.findIndex(t => t.top >= y);
+        let idx = utils.binarySearch(this.ticks, y, 'top');
         if (idx === 0) {
             // use this tick
-        } else if (idx >= 1) {
+        } else if (idx >= 1 && idx <= this.ticks.length) {
             idx = idx - 1;
-        } else if (idx === -1 && this.ticks.length > 0) {
-            idx = this.ticks.length - 1;
         } else {
             return;
         }
 
         // DayId of current hover
-        const dayId = this.ticks[idx].dayId
+        const dayId = this.ticks[idx]?.dayId
 
         // Special days
-        if (Object.values(this.TagDayID).includes(dayId)) {
+        if (dayId === undefined || this.TagDayIDValueSet.has(dayId)) {
             this.hoverCursorText = "";
             return;
         }

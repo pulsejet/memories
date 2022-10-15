@@ -33,7 +33,7 @@ export function getLongDateStr(date: Date, skipYear=false, time=false) {
  * @return {Number}    A 32bit integer
  * @see http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
  */
- export function hashCode(str: string): number {
+export function hashCode(str: string): number {
     let hash = 0;
     for (let i = 0, len = str.length; i < len; i++) {
         let chr = str.charCodeAt(i);
@@ -43,6 +43,39 @@ export function getLongDateStr(date: Date, skipYear=false, time=false) {
     return hash;
 }
 
+/**
+ * Search for elem in a sorted array of objects
+ * If the object is not found, return the index where it should be inserted
+ *
+ * @param arr Array of objects to search
+ * @param elem Element to search for
+ * @param key Key to use for comparison
+ */
+export function binarySearch(arr: any, elem: any, key?: string) {
+    let minIndex = 0;
+    let maxIndex = arr.length - 1;
+    let currentIndex: number;
+    let currentElement: any;
+
+    while (minIndex <= maxIndex) {
+        currentIndex = (minIndex + maxIndex) / 2 | 0;
+        currentElement = key ? arr[currentIndex][key] : arr[currentIndex];
+
+        if (currentElement < elem) {
+            minIndex = currentIndex + 1;
+        }
+        else if (currentElement > elem) {
+            maxIndex = currentIndex - 1;
+        }
+        else {
+            return currentIndex;
+        }
+    }
+
+    return minIndex;
+}
+
+/** Global constants */
 export const constants = {
     c: {
         FLAG_PLACEHOLDER:   1 << 0,
