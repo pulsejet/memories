@@ -78,6 +78,7 @@ class TimelineWrite {
         $dateTaken = Exif::getDateTaken($file, $exif);
         $dayId = floor($dateTaken / 86400);
         $dateTaken = gmdate('Y-m-d H:i:s', $dateTaken);
+        [$w, $h] = Exif::getDimensions($exif);
 
         if ($prevRow) {
             // Update existing row
@@ -86,6 +87,8 @@ class TimelineWrite {
                 ->set('datetaken', $query->createNamedParameter($dateTaken, IQueryBuilder::PARAM_STR))
                 ->set('mtime', $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT))
                 ->set('isvideo', $query->createNamedParameter($isvideo, IQueryBuilder::PARAM_INT))
+                ->set('w', $query->createNamedParameter($w, IQueryBuilder::PARAM_INT))
+                ->set('h', $query->createNamedParameter($h, IQueryBuilder::PARAM_INT))
                 ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)));
             $query->executeStatement();
         } else {
@@ -98,6 +101,8 @@ class TimelineWrite {
                         'datetaken' => $query->createNamedParameter($dateTaken, IQueryBuilder::PARAM_STR),
                         'mtime' => $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT),
                         'isvideo' => $query->createNamedParameter($isvideo, IQueryBuilder::PARAM_INT),
+                        'w' => $query->createNamedParameter($w, IQueryBuilder::PARAM_INT),
+                        'h' => $query->createNamedParameter($h, IQueryBuilder::PARAM_INT),
                     ]);
                 $query->executeStatement();
             } catch (\Exception $ex) {
