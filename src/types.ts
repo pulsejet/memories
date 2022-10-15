@@ -39,6 +39,10 @@ export type IPhoto = {
     flag: number;
     /** DayID from server */
     dayid?: number;
+    /** Width of full image */
+    w?: number;
+    /** Height of full image */
+    h?: number;
     /** Reference to day object */
     d?: IDay;
     /** Video flag from server */

@@ -35,6 +35,8 @@ trait TimelineQueryDays {
             $row["fileid"] = intval($row["fileid"]);
             $row["isvideo"] = intval($row["isvideo"]);
             $row["dayid"] = intval($row["dayid"]);
+            $row["w"] = intval($row["w"]);
+            $row["h"] = intval($row["h"]);
             if (!$row["isvideo"]) {
                 unset($row["isvideo"]);
             }
@@ -160,7 +162,7 @@ trait TimelineQueryDays {
         // We don't actually use m.datetaken here, but postgres
         // needs that all fields in ORDER BY are also in SELECT
         // when using DISTINCT on selected fields
-        $query->select($fileid, 'f.etag', 'm.isvideo', 'vco.categoryid', 'm.datetaken', 'm.dayid')
+        $query->select($fileid, 'f.etag', 'm.isvideo', 'vco.categoryid', 'm.datetaken', 'm.dayid', 'm.w', 'm.h')
             ->from('memories', 'm')
             ->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folder, $recursive, $archive));
 
