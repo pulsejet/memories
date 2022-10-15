@@ -138,4 +138,11 @@ body {
 
     width: calc(100% - var(--body-container-margin)*1); // was *2
 }
+
+// Fill all available space
+.fill-block {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
 </style>

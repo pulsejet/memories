@@ -1,5 +1,5 @@
 <template>
-    <div class="p-outer"
+    <div class="p-outer fill-block"
         :class="{
             'selected': (data.flag & c.FLAG_SELECTED),
             'p-loading': !(data.flag & c.FLAG_LOADED),
@@ -15,10 +15,7 @@
         <Video :size="20" v-if="data.flag & c.FLAG_IS_VIDEO" />
         <Star :size="20" v-if="data.flag & c.FLAG_IS_FAVORITE" />
 
-        <div class="img-outer" :style="{
-                width: rowHeight + 'px',
-                height: rowHeight + 'px',
-            }"
+        <div class="img-outer fill-block"
             @click="click"
             @contextmenu="contextmenu"
             @touchstart="touchstart"
@@ -26,6 +23,7 @@
             @touchend="touchend"
             @touchcancel="touchend" >
             <img
+                class="fill-block"
                 :src="src()"
                 :key="data.fileid"
 
@@ -61,7 +59,6 @@ export default class Photo extends Mixins(GlobalMixin) {
     private touchTimer = 0;
 
     @Prop() data: IPhoto;
-    @Prop() rowHeight: number;
     @Prop() day: IDay;
 
     @Emit('delete') emitDelete(remPhotos: IPhoto[]) {}
@@ -272,7 +269,6 @@ div.img-outer {
         background-clip: content-box;
         object-fit: cover;
         cursor: pointer;
-        width: 100%; height: 100%;
         transform: translateZ(0);
 
         -webkit-tap-highlight-color: transparent;

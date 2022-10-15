@@ -1,28 +1,25 @@
 <template>
-    <div class="tag" v-bind:class="{
+    <div class="tag fill-block" :class="{
         hasPreview: previews.length > 0,
         onePreview: previews.length === 1,
         hasError: error,
         isFace: isFace,
     }"
-        @click="openTag(data)"
-        v-bind:style="{
-            width: rowHeight + 'px',
-            height: rowHeight + 'px',
-        }">
+    @click="openTag(data)">
 
         <div class="bbl"> <NcCounterBubble> {{ data.count }} </NcCounterBubble> </div>
         <div class="name"> {{ data.name }} </div>
 
-        <div class="previews">
+        <div class="previews fill-block" ref="previews">
             <div class="img-outer" v-for="info of previews" :key="info.fileid">
                 <img
-                    :key="'fpreview-' + info.fileid"
-                    :src="getPreviewUrl(info.fileid, info.etag)"
+                    class="fill-block"
                     :class="{
                         'p-loading': !(info.flag & c.FLAG_LOADED),
                         'p-load-fail': info.flag & c.FLAG_LOAD_FAIL,
                     }"
+                    :key="'fpreview-' + info.fileid"
+                    :src="getPreviewUrl(info.fileid, info.etag)"
                     :style="getCoverStyle(info)"
                     @load="info.flag |= c.FLAG_LOADED"
                     @error="info.flag |= c.FLAG_LOAD_FAIL" />
@@ -56,7 +53,6 @@ interface IFaceDetection extends IPhoto {
 })
 export default class Tag extends Mixins(GlobalMixin) {
     @Prop() data: ITag;
-    @Prop() rowHeight: number;
     @Prop() noNavigate: boolean;
 
     // Separate property because the one on data isn't reactive
@@ -159,13 +155,19 @@ export default class Tag extends Mixins(GlobalMixin) {
         // if the face is larger than the image, we don't zoom out (reason for the Math.max)
         const zoom = Math.max(1, (1 / detection.width) * 0.4)
 
+        // Get center coordinate in percent
         const horizontalCenterOfFace = (detection.x + detection.width / 2) * 100
         const verticalCenterOfFace = (detection.y + detection.height / 2) * 100
+
+        // Get preview element dimensions
+        const elem = this.$refs.previews as HTMLElement;
+        const elemWidth = elem.clientWidth;
+        const elemHeight = elem.clientHeight;
 
         return {
             // we translate the image so that the center of the detected face is in the center
             // and add the zoom
-            transform: `translate(calc(${this.rowHeight}px/2 - ${horizontalCenterOfFace}% ), calc(${this.rowHeight}px/2 - ${verticalCenterOfFace}% )) scale(${zoom})`,
+            transform: `translate(calc(${elemWidth}px/2 - ${horizontalCenterOfFace}% ), calc(${elemHeight}px/2 - ${verticalCenterOfFace}% )) scale(${zoom})`,
             // this is necessary for the zoom to zoom toward the center of the face
             transformOrigin: `${horizontalCenterOfFace}% ${verticalCenterOfFace}%`,
         }
@@ -209,7 +211,6 @@ export default class Tag extends Mixins(GlobalMixin) {
     z-index: 3;
     line-height: 0;
     position: absolute;
-    height: 100%; width: 100%;
     padding: 2px;
     @media (max-width: 768px) { padding: 1px; }
 
@@ -229,7 +230,6 @@ export default class Tag extends Mixins(GlobalMixin) {
 
         > img {
             padding: 0;
-            width: 100%;
             filter: brightness(60%);
             cursor: pointer;
             transition: filter 0.2s ease-in-out;
