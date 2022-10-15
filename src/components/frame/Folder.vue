@@ -1,28 +1,25 @@
 <template>
-    <div class="folder" v-bind:class="{
+    <div class="folder fill-block" :class="{
         hasPreview: previewFileInfos.length > 0,
         onePreview: previewFileInfos.length === 1,
         hasError: error,
     }"
-        @click="openFolder(data)"
-        v-bind:style="{
-            width: rowHeight + 'px',
-            height: rowHeight + 'px',
-        }">
-        <div class="big-icon">
+    @click="openFolder(data)">
+        <div class="big-icon fill-block">
             <FolderIcon class="memories__big-folder-icon" />
             <div class="name">{{ data.name }}</div>
         </div>
 
-        <div class="previews">
+        <div class="previews fill-block">
             <div class="img-outer" v-for="info of previewFileInfos" :key="info.fileid">
                 <img
-                    :key="'fpreview-' + info.fileid"
-                    :src="getPreviewUrl(info.fileid, info.etag)"
+                    class="fill-block"
                     :class="{
                         'p-loading': !(info.flag & c.FLAG_LOADED),
                         'p-load-fail': info.flag & c.FLAG_LOAD_FAIL,
                     }"
+                    :key="'fpreview-' + info.fileid"
+                    :src="getPreviewUrl(info.fileid, info.etag)"
                     @load="info.flag |= c.FLAG_LOADED"
                     @error="info.flag |= c.FLAG_LOAD_FAIL" />
             </div>
@@ -47,7 +44,6 @@ import FolderIcon from 'vue-material-design-icons/Folder.vue';
 })
 export default class Folder extends Mixins(GlobalMixin) {
     @Prop() data: IFolder;
-    @Prop() rowHeight: number;
 
     // Separate property because the one on data isn't reactive
     private previewFileInfos: IFileInfo[] = [];
@@ -127,7 +123,6 @@ export default class Folder extends Mixins(GlobalMixin) {
     z-index: 100;
     position: absolute;
     top: 0; left: 0;
-    width: 100%; height: 100%;
     transition: opacity 0.2s ease-in-out;
 
     > .name {
@@ -176,7 +171,6 @@ export default class Folder extends Mixins(GlobalMixin) {
     z-index: 3;
     line-height: 0;
     position: absolute;
-    height: 100%; width: 100%;
     padding: 2px;
     @media (max-width: 768px) { padding: 1px; }
 
@@ -194,8 +188,6 @@ export default class Folder extends Mixins(GlobalMixin) {
 
         > img {
             padding: 0;
-            width: 100%;
-            height: 100%;
             filter: brightness(50%);
             transition: filter 0.2s ease-in-out;
 

@@ -51,20 +51,18 @@
                     class="photo-row"
                     :style="{ height: rowHeight + 'px' }">
 
-                    <div class="photo" v-for="(photo, index) in item.photos" :key="index">
+                    <div class="photo" v-for="(photo, index) in item.photos" :key="index"
+                         :style="{ width: rowHeight + 'px' }">
                         <Folder v-if="photo.flag & c.FLAG_IS_FOLDER"
                                 :data="photo"
-                                :rowHeight="rowHeight"
                                 :key="photo.fileid" />
 
                         <Tag v-else-if="photo.flag & c.FLAG_IS_TAG"
                                 :data="photo"
-                                :rowHeight="rowHeight"
                                 :key="photo.fileid" />
 
                         <Photo v-else
                                 :data="photo"
-                                :rowHeight="rowHeight"
                                 :day="item.day"
                                 @select="selectionManager.selectPhoto"
                                 @delete="deleteFromViewWithAnimation"
@@ -841,6 +839,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     position: relative;
     cursor: pointer;
     vertical-align: top;
+    height: 100%;
 }
 
 .head-row {
