@@ -258,13 +258,21 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     /** Handle window resize and initialization */
     handleResize() {
+        // Size of outer container
         const e = this.$refs.container as Element;
         let height = e.clientHeight;
         let width = e.clientWidth;
+
+        // Scroller spans the container height
         this.scrollerHeight = height;
 
+        // Static top matter to exclude from recycler height
+        const topmatter = this.$refs.topmatter as any;
+        const tmHeight = topmatter.$el?.clientHeight || 0;
+
+        // Recycler height
         const recycler = this.$refs.recycler as any;
-        recycler.$el.style.height = (height - 4) + 'px';
+        recycler.$el.style.height = (height - tmHeight - 4) + 'px';
 
         // Desktop scroller width
         if (window.innerWidth > 768) {
