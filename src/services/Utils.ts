@@ -1,17 +1,32 @@
 import { getCanonicalLocale } from "@nextcloud/l10n";
 
+// Memoize the result of short date conversions
+// These operations are surprisingly expensive
+// and we do them a lot because of scroller hover
+const shortDateStrMemo = new Map<number, string>();
+
 /** Get JS date object from dayId */
 export function dayIdToDate(dayId: number){
     return new Date(dayId*86400*1000);
 }
 
+/** Get Day ID from JS date */
+export function dateToDayId(date: Date){
+    return Math.floor(date.getTime() / (86400*1000));
+}
+
 /** Get month name from number */
 export function getShortDateStr(date: Date) {
-    return date.toLocaleDateString(getCanonicalLocale(), {
-        month: 'short',
-        year: 'numeric',
-        timeZone: 'UTC',
-    });
+    const dayId = dateToDayId(date);
+    if (!shortDateStrMemo.has(dayId)) {
+        shortDateStrMemo.set(dayId,
+            date.toLocaleDateString(getCanonicalLocale(), {
+                month: 'short',
+                year: 'numeric',
+                timeZone: 'UTC',
+            }));
+    }
+    return shortDateStrMemo.get(dayId);
 }
 
 /** Get long date string with optional year if same as current */
