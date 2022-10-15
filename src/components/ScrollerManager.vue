@@ -31,7 +31,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator';
-import { IDay, IHeadRow, IRow, IRowType, ITick } from '../types';
+import { IRow, IRowType, ITick } from '../types';
 import GlobalMixin from '../mixins/GlobalMixin';
 import ScrollIcon from 'vue-material-design-icons/UnfoldMoreHorizontal.vue';
 
