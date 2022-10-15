@@ -314,6 +314,17 @@ class Exif {
     }
 
     /**
+     * Get image dimensions from Exif data
+     * @param array $exif
+     * @return array [width, height]
+     */
+    public static function getDimensions(array &$exif) {
+        $width = $exif['ImageWidth'] ?? 0;
+        $height = $exif['ImageHeight'] ?? 0;
+        return [$width, $height];
+    }
+
+    /**
      * Update exif date using exiftool
      *
      * @param File $file
