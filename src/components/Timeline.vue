@@ -76,9 +76,8 @@
 
         <!-- Managers -->
         <ScrollerManager ref="scrollerManager"
-            :days="days" :heads="heads"
+            :rows="list"
             :height="scrollerHeight"
-            :rowHeight="rowHeight"
             :recycler="$refs.recycler"
             :recyclerBefore="$refs.recyclerBefore" />
 
@@ -92,7 +91,7 @@
 
 <script lang="ts">
 import { Component, Watch, Mixins } from 'vue-property-decorator';
-import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType, ITick } from "../types";
+import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";
 import { generateUrl } from '@nextcloud/router'
 import { showError } from '@nextcloud/dialogs'
 import { getCanonicalLocale } from '@nextcloud/l10n';
@@ -285,7 +284,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         this.list.filter(r => r.type !== IRowType.HEAD).forEach(row => {
             row.size = this.rowHeight;
         });
-        this.scrollerManager.reflow(true);
+        this.scrollerManager.reflow();
     }
 
     /**
