@@ -16,4 +16,9 @@ webpackConfig.resolve.alias = {
 webpackConfig.entry.main = path.resolve(path.join('src', 'main'));
 delete webpackConfig.optimization.splitChunks;
 
+webpackConfig.watchOptions = {
+    ignored: /node_modules/,
+    aggregateTimeout: 300,
+};
+
 module.exports = webpackConfig
