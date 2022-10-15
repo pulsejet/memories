@@ -9,4 +9,5 @@ export default class GlobalMixin extends Vue {
 
     public readonly c = constants.c;
     public readonly TagDayID = constants.TagDayID;
+    public readonly TagDayIDValueSet = new Set(Object.values(this.TagDayID));
 }
