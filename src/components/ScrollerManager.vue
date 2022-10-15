@@ -22,7 +22,7 @@
         <div v-for="tick of visibleTicks" :key="tick.dayId"
              class="tick"
             :class="{ 'dash': !tick.text }"
-            :style="{ top: tick.topC + 'px' }">
+            :style="{ top: tick.top + 'px' }">
 
             <span v-if="tick.text">{{ tick.text }}</span>
         </div>
@@ -31,7 +31,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator';
-import { IDay, IHeadRow, ITick } from '../types';
+import { IDay, IHeadRow, IRow, IRowType, ITick } from '../types';
 import GlobalMixin from '../mixins/GlobalMixin';
 import ScrollIcon from 'vue-material-design-icons/UnfoldMoreHorizontal.vue';
 
@@ -43,14 +43,10 @@ import * as utils from "../services/Utils";
     },
 })
 export default class ScrollerManager extends Mixins(GlobalMixin) {
-    /** Days from Timeline */
-    @Prop() days!: IDay[];
-    /** Heads from Timeline */
-    @Prop() heads!: { [dayid: number]: IHeadRow };
+    /** Rows from Timeline */
+    @Prop() rows!: IRow[];
     /** Total height */
     @Prop() height!: number;
-    /** Height of a row */
-    @Prop() rowHeight!: number;
     /** Actual recycler component */
     @Prop() recycler!: any;
     /** Recycler before slot component */
@@ -107,32 +103,31 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
     }
 
     /** Re-create tick data in the next frame */
-    public async reflow(orderOnly = false) {
+    public async reflow() {
         if (this.reflowRequest) {
             return;
         }
 
         this.reflowRequest = true;
         await this.$nextTick();
-        this.reflowNow(orderOnly);
+        this.reflowNow();
         this.reflowRequest = false;
     }
 
     /** Re-create tick data */
-    private reflowNow(orderOnly = false) {
-        if (!orderOnly) {
-            this.recreate();
-        }
+    private reflowNow() {
+        // Recreate ticks data
+        this.recreate();
 
+        // Get height of recycler
         this.recyclerHeight = this.recycler.$refs.wrapper.clientHeight;
 
-        // Static extra height at top
-        const rb = this.recyclerBefore as Element;
-        const extraHeight = rb?.clientHeight || 0;
+        // Static extra height at top (before slot)
+        const extraY = this.recyclerBefore?.clientHeight || 0;
 
         // Compute tick positions
         for (const tick of this.ticks) {
-            tick.topC = (extraHeight + tick.topS + tick.top * this.rowHeight) * this.height / this.recyclerHeight;
+            tick.top = (extraY + tick.y) * (this.height / this.recyclerHeight);
         }
 
         // Do another pass to figure out which points are visible
@@ -143,13 +138,13 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
         let prevShow = -9999;
         for (const [idx, tick] of this.ticks.entries()) {
             // You can't see these anyway, why bother?
-            if (tick.topC < minGap || tick.topC > this.height - minGap) {
+            if (tick.top < minGap || tick.top > this.height - minGap) {
                 tick.s = false;
                 continue;
             }
 
             // Will overlap with the previous tick. Skip anyway.
-            if (tick.topC - prevShow < minGap) {
+            if (tick.top - prevShow < minGap) {
                 tick.s = false;
                 continue;
             }
@@ -157,7 +152,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
             // This is a labelled tick then show it anyway for the sake of best effort
             if (tick.text) {
                 tick.s = true;
-                prevShow = tick.topC;
+                prevShow = tick.top;
                 continue;
             }
 
@@ -173,8 +168,8 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
             if (i < this.ticks.length) {
                 // A labelled tick was found
                 const nextLabelledTick = this.ticks[i];
-                if (tick.topC + minGap > nextLabelledTick.topC &&
-                    nextLabelledTick.topC < this.height - minGap) { // make sure this will be shown
+                if (tick.top + minGap > nextLabelledTick.top &&
+                    nextLabelledTick.top < this.height - minGap) { // make sure this will be shown
                     tick.s = false;
                     continue;
                 }
@@ -182,7 +177,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
             // Show this tick
             tick.s = true;
-            prevShow = tick.topC;
+            prevShow = tick.top;
         }
     }
 
@@ -192,48 +187,45 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
         this.ticks = [];
 
         // Ticks
-        let currTopRow = 0;
-        let currTopStatic = 0;
+        let y = 0;
         let prevYear = 9999;
         let prevMonth = 0;
         const thisYear = new Date().getFullYear();
 
         // Get a new tick
-        const getTick = (day: IDay, text?: string | number): ITick => {
+        const getTick = (dayId: number, text?: string | number): ITick => {
             return {
-                dayId: day.dayid,
-                top: currTopRow,
-                topS: currTopStatic,
-                topC: 0,
-                text: text,
+                dayId,
+                y: y,
+                text,
+                top: 0,
+                s: false,
             };
         }
 
-        // Itearte over days
-        for (const day of this.days) {
-            if (day.count === 0) {
-                continue;
-            }
+        // Itearte over rows
+        for (const row of this.rows) {
+            if (row.type === IRowType.HEAD) {
+                if (Object.values(this.TagDayID).includes(row.dayId)) {
+                    // Blank tick
+                    this.ticks.push(getTick(row.dayId));
+                } else {
+                    // Make date string
+                    const dateTaken = utils.dayIdToDate(row.dayId);
 
-            if (Object.values(this.TagDayID).includes(day.dayid)) {
-                // Blank dash ticks only
-                this.ticks.push(getTick(day));
-            } else {
-                // Make date string
-                const dateTaken = utils.dayIdToDate(day.dayid);
-
-                // Create tick if month changed
-                const dtYear = dateTaken.getUTCFullYear();
-                const dtMonth = dateTaken.getUTCMonth()
-                if (Number.isInteger(day.dayid) && (dtMonth !== prevMonth || dtYear !== prevYear)) {
-                    this.ticks.push(getTick(day, (dtYear === prevYear || dtYear === thisYear) ? undefined : dtYear));
+                    // Create tick if month changed
+                    const dtYear = dateTaken.getUTCFullYear();
+                    const dtMonth = dateTaken.getUTCMonth()
+                    if (Number.isInteger(row.dayId) && (dtMonth !== prevMonth || dtYear !== prevYear)) {
+                        const text = (dtYear === prevYear || dtYear === thisYear) ? undefined : dtYear;
+                        this.ticks.push(getTick(row.dayId, text));
+                    }
+                    prevMonth = dtMonth;
+                    prevYear = dtYear;
                 }
-                prevMonth = dtMonth;
-                prevYear = dtYear;
             }
 
-            currTopStatic += this.heads[day.dayid].size;
-            currTopRow += day.rows.size;
+            y += row.size;
         }
     }
 
@@ -242,8 +234,10 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
         this.hoverCursorY = y;
 
         // Get index of previous tick
-        let idx = this.ticks.findIndex(t => t.topC > y);
-        if (idx >= 1) {
+        let idx = this.ticks.findIndex(t => t.top >= y);
+        if (idx === 0) {
+            // use this tick
+        } else if (idx >= 1) {
             idx = idx - 1;
         } else if (idx === -1 && this.ticks.length > 0) {
             idx = this.ticks.length - 1;

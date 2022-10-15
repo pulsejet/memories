@@ -109,12 +109,10 @@ export enum IRowType {
 export type ITick = {
     /** Day ID */
     dayId: number;
-    /** Number of ROWS above this (dynamic) */
+    /** Display top position */
     top: number;
-    /** Extra static distance from top (for headers) */
-    topS: number;
-    /** Actual Y position calculated (C) */
-    topC: number;
+    /** Y coordinate on recycler */
+    y: number;
     /** Text if any (e.g. year) */
     text?: string | number;
     /** Whether this tick should be shown */
