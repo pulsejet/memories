@@ -35,9 +35,11 @@
             </template>
 
             <template v-slot="{ item }">
-                <div v-if="item.type === 0" class="head-row"
-                    :class="{ 'selected': item.selected}"
-                >
+                <div v-if="item.type === 0"
+                     class="head-row"
+                    :class="{ 'selected': item.selected }"
+                    :style="{ height: item.size + 'px' }">
+
                     <div class="super" v-if="item.super !== undefined">
                         {{ item.super }}
                     </div>
@@ -48,11 +50,12 @@
                 </div>
 
                 <div v-else
-                    class="photo-row"
-                    :style="{ height: rowHeight + 'px' }">
+                     class="photo-row"
+                    :style="{ height: item.size + 'px' }">
 
                     <div class="photo" v-for="(photo, index) in item.photos" :key="index"
                          :style="{ width: rowHeight + 'px' }">
+
                         <Folder v-if="photo.flag & c.FLAG_IS_FOLDER"
                                 :data="photo"
                                 :key="photo.fileid" />
