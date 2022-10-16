@@ -32,6 +32,11 @@
             {{ t('memories', 'Show hidden folders') }}
         </NcCheckboxRadioSwitch>
 
+        <NcCheckboxRadioSwitch :checked.sync="config_squareThumbs"
+            type="switch">
+            {{ t('memories', 'Square photos') }}
+        </NcCheckboxRadioSwitch>
+
         <button @click="updateAll()">
             {{ t('memories', 'Update') }}
         </button>
@@ -60,6 +65,10 @@ import { NcCheckboxRadioSwitch } from '@nextcloud/vue'
 })
 export default class Settings extends Mixins(UserConfig, GlobalMixin) {
     async updateAll() {
+        // Update localStorage
+        localStorage.setItem('memories_squareThumbs', this.config_squareThumbs ? '1' : '0');
+
+        // Update remote
         await this.updateSetting('showHidden');
         const res = await this.updateSetting('timelinePath');
         if (res.status === 200) {
