@@ -15,7 +15,7 @@
                 <img
                     :class="{ 'error': info.flag & c.FLAG_LOAD_FAIL }"
                     :key="'fpreview-' + info.fileid"
-                    :src="getPreviewUrl(info.fileid, info.etag, true, 256)"
+                    :src="getPreviewUrl(info.fileid, info.etag)"
                     :style="getCoverStyle(info)"
                     @error="info.flag |= c.FLAG_LOAD_FAIL" />
             </div>
