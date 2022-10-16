@@ -166,21 +166,27 @@ export const constants = {
 }
 
 /** Cache store */
-let cacheStorage: Cache | null = null;
+let staticCache: Cache | null = null;
 const cacheName = `memories-${loadState('memories', 'version')}-${getCurrentUser()!.uid}`;
-caches.open(cacheName).then((cache) => { cacheStorage = cache });
+openCache().then((cache) => { staticCache = cache });
+
+/** Open the cache */
+export async function openCache() {
+    return await caches.open(cacheName);
+}
 
 /** Get data from the cache */
 export async function getCachedData(url: string) {
-    if (!cacheStorage) return;
-    const cachedResponse = await cacheStorage.match(url);
+    const cache = staticCache || await openCache();
+    const cachedResponse = await cache.match(url);
     if (!cachedResponse || !cachedResponse.ok) return false;
     return await cachedResponse.json();
 }
 
 /** Store data in the cache */
 export async function cacheData(url: string, data: Object) {
+    const cache = staticCache || await openCache();
     const response = new Response(JSON.stringify(data));
     response.headers.set('Content-Type', 'application/json');
-    await cacheStorage.put(url, response);
+    await cache.put(url, response);
 }
