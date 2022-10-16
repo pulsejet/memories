@@ -299,7 +299,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             } else {
                 // As a heuristic, assume all images are 4:3 landscape
                 this.rowHeight = DESKTOP_ROW_HEIGHT;
-                this.numCols = Math.floor(this.rowWidth / (this.rowHeight * 4 / 3));
+                this.numCols = Math.ceil(this.rowWidth / (this.rowHeight * 4 / 3));
             }
         }
 
@@ -777,6 +777,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             } else {
                 // Otherwise just adjust the ticks
                 this.scrollerManager.adjust();
+                console.log('adjust', rowSizeDelta, addedRows.length + removedRows.length, day);
             }
 
             // Scroll to the same actual position if the added rows
