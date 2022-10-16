@@ -13,14 +13,10 @@
         <div class="previews fill-block" ref="previews">
             <div class="img-outer" v-for="info of previews" :key="info.fileid">
                 <img
-                    :class="{
-                        'p-loading': !(info.flag & c.FLAG_LOADED),
-                        'p-load-fail': info.flag & c.FLAG_LOAD_FAIL,
-                    }"
+                    :class="{ 'error': info.flag & c.FLAG_LOAD_FAIL }"
                     :key="'fpreview-' + info.fileid"
                     :src="getPreviewUrl(info.fileid, info.etag, true, 256)"
                     :style="getCoverStyle(info)"
-                    @load="info.flag |= c.FLAG_LOADED"
                     @error="info.flag |= c.FLAG_LOAD_FAIL" />
             </div>
         </div>
@@ -234,13 +230,8 @@ export default class Tag extends Mixins(GlobalMixin) {
             cursor: pointer;
             transition: filter 0.2s ease-in-out;
 
-            &.p-loading, &.p-load-fail {
-                display: none;
-            }
-
-            .tag:hover & {
-                filter: brightness(100%);
-            }
+            &.error { display: none; }
+            .tag:hover & { filter: brightness(100%); }
         }
     }
 }

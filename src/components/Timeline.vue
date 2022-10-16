@@ -53,7 +53,7 @@
                      class="photo-row"
                     :style="{ height: item.size + 'px', width: rowWidth + 'px' }">
 
-                    <div class="photo" v-for="(photo, index) in item.photos" :key="photo.fileid"
+                    <div class="photo" v-for="photo in item.photos" :key="photo.fileid"
                         :style="{ width: photo.dispWp + '%' }">
 
                         <Folder v-if="photo.flag & c.FLAG_IS_FOLDER"
@@ -338,15 +338,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                     };
                 }
                 delete row.pct;
-            }
-
-            // Force reload all loaded images
-            if ((i < this.currentStart || i > this.currentEnd) && row.photos) {
-                for (const photo of row.photos) {
-                    if (photo.flag & this.c.FLAG_LOADED) {
-                        photo.flag = (photo.flag & ~this.c.FLAG_LOADED) | this.c.FLAG_FORCE_RELOAD;
-                    }
-                }
             }
         }
 

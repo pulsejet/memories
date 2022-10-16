@@ -14,13 +14,9 @@
             <div class="img-outer" v-for="info of previewFileInfos" :key="info.fileid">
                 <img
                     class="fill-block"
-                    :class="{
-                        'p-loading': !(info.flag & c.FLAG_LOADED),
-                        'p-load-fail': info.flag & c.FLAG_LOAD_FAIL,
-                    }"
+                    :class="{ 'error': info.flag & c.FLAG_LOAD_FAIL }"
                     :key="'fpreview-' + info.fileid"
                     :src="getPreviewUrl(info.fileid, info.etag, true, 256)"
-                    @load="info.flag |= c.FLAG_LOADED"
                     @error="info.flag |= c.FLAG_LOAD_FAIL" />
             </div>
         </div>
@@ -191,13 +187,8 @@ export default class Folder extends Mixins(GlobalMixin) {
             filter: brightness(50%);
             transition: filter 0.2s ease-in-out;
 
-            &.p-loading, &.p-load-fail {
-                display: none;
-            }
-
-            .folder:hover & {
-                filter: brightness(100%);
-            }
+            &.error { display: none; }
+            .folder:hover & { filter: brightness(100%); }
         }
     }
 }
