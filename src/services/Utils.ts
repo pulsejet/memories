@@ -90,6 +90,24 @@ export function binarySearch(arr: any, elem: any, key?: string) {
     return minIndex;
 }
 
+/**
+ * Round a number to N decimal places
+ * @param num Number to round
+ * @param places Number of decimal places
+ */
+export function round(num: number, places: number) {
+    const pow = Math.pow(10, places);
+    return Math.round(num * pow) / pow;
+}
+
+/**
+ * Round to nearest 0.5. Useful for pixels.
+ * @param num Number to round
+ */
+export function roundHalf(num: number) {
+    return Math.round(num * 2) / 2;
+}
+
 /** Global constants */
 export const constants = {
     c: {

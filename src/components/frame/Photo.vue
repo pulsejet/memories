@@ -6,6 +6,7 @@
             'leaving': (data.flag & c.FLAG_LEAVING),
             'exit-left': (data.flag & c.FLAG_EXIT_LEFT),
             'enter-right': (data.flag & c.FLAG_ENTER_RIGHT),
+            'error': (data.flag & c.FLAG_LOAD_FAIL),
         }">
 
         <Check :size="15" class="select"
@@ -81,7 +82,7 @@ export default class Photo extends Mixins(GlobalMixin) {
 
     /** Get url of the photo */
     get url() {
-        return getPreviewUrl(this.data.fileid, this.data.etag)
+        return getPreviewUrl(this.data.fileid, this.data.etag, false, 512)
     }
 
     /** Image loaded successfully */
@@ -276,7 +277,8 @@ div.img-outer {
         user-select: none;
 
         .selected > & { box-shadow: 0 0 3px 2px var(--color-primary); }
-        .p-loading > & { display: none; }
+        .p-outer.p-loading > & { display: none; }
+        .p-outer.error & { object-fit: contain; }
     }
 }
 </style>

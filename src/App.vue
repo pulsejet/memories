@@ -119,6 +119,7 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
         padding: 0px;
 
         // Get rid of padding on img-outer (1px on mobile)
+        // Also need to make sure we don't end up with a scrollbar -- see below
         margin-left: -1px;
         width: calc(100% + 3px); // 1px extra here because ... reasons
     }
@@ -137,6 +138,12 @@ body {
     border-bottom-right-radius: 0;
 
     width: calc(100% - var(--body-container-margin)*1); // was *2
+}
+
+// Hide horizontal scrollbar on mobile
+// For the padding removal above
+#app-content-vue {
+    overflow-x: hidden;
 }
 
 // Fill all available space

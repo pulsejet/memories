@@ -43,6 +43,8 @@ export type IPhoto = {
     w?: number;
     /** Height of full image */
     h?: number;
+    /** Grid display width percentage */
+    dispWp?: number;
     /** Reference to day object */
     d?: IDay;
     /** Video flag from server */
@@ -114,6 +116,8 @@ export type ITick = {
     /** Day ID */
     dayId: number;
     /** Display top position */
+    topF: number;
+    /** Display top position (truncated to 1 decimal pt) */
     top: number;
     /** Y coordinate on recycler */
     y: number;
