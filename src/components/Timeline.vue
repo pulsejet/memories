@@ -142,8 +142,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     private loading = 0;
     /** Main list of rows */
     private list: IRow[] = [];
-    /** Counter of rows */
-    private numRows = 0;
     /** Computed number of columns */
     private numCols = 0;
     /** Keep all images square */
@@ -226,7 +224,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         this.selectionManager.clearSelection();
         this.loading = 0;
         this.list = [];
-        this.numRows = 0;
         this.heads = {};
         this.currentStart = 0;
         this.currentEnd = 0;
@@ -518,7 +515,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         let prevDay: IDay | null = null;
         for (const day of data) {
             // Initialization
-            day.rows = new Set();
+            day.rows = [];
 
             // Nothing here
             if (day.count === 0) {
@@ -536,7 +533,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
             // Create header for this day
             const head: IHeadRow = {
-                id: ++this.numRows,
+                id: `${day.dayid}-head`,
                 size: 40,
                 type: IRowType.HEAD,
                 selected: false,
@@ -563,9 +560,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             // Add rows
             const nrows = Math.ceil(day.count / this.numCols);
             for (let i = 0; i < nrows; i++) {
-                const row = this.getBlankRow(day);
+                const row = this.addRow(day);
                 list.push(row);
-                day.rows.add(row);
 
                 // Add placeholder count
                 const leftNum = (day.count - i * this.numCols);
@@ -584,9 +580,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         // Iterate the preload map
         // Now the inner detail objects are reactive
         for (const dayId in preloads) {
-            const preload = preloads[dayId];
-            preload.day.detail = preload.detail;
-            this.processDay(preload.day);
+            this.processDay(Number(dayId), preloads[dayId].detail);
         }
 
         // Fix view height variable
@@ -605,18 +599,10 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         this.loadedDays.add(dayId);
 
         // Construct URL
-        const url = generateUrl(this.appendQuery(baseUrl), params)
-
-        // Attach response to head and process it
-        const processResponse = (response: IPhoto[]) => {
-            if (!response) return;
-            head.day.detail = response;
-            head.day.count = response.length;
-            this.processDay(head.day);
-        }
+        const url = generateUrl(this.appendQuery(baseUrl), params);
 
         // Look for cache
-        processResponse(await utils.getCachedData(url));
+        this.processDay(dayId, await utils.getCachedData(url));
 
         try {
             const startState = this.state;
@@ -641,10 +627,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 }
             }
 
-            const day = this.heads[dayId].day;
-            day.detail = data;
-            day.count = data.length;
-            this.processDay(day);
+            this.processDay(dayId, data);
         } catch (e) {
             showError(this.t('memories', 'Failed to load some photos'));
             console.error(e);
@@ -654,11 +637,24 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     /**
      * Process items from day response.
      *
-     * @param day Day object
+     * @param dayId id of day
+     * @param data photos
      */
-    processDay(day: IDay) {
-        const dayId = day.dayid;
-        const data = day.detail;
+    processDay(dayId: number, data: IPhoto[]) {
+        const head = this.heads[dayId];
+        const day = head.day;
+        this.loadedDays.add(dayId);
+
+        // Filter out items we don't want to show at all
+        // Note: flags are not converted yet
+        if (!this.config_showHidden) {
+            // Hidden folders
+            data = data.filter((p) => !(p.isfolder && (<IFolder>p).name.startsWith('.')));
+        }
+
+        // Set and make reactive
+        day.count = data.length;
+        day.detail = data;
 
         // Create justified layout with correct params
         const justify = justifiedLayout(day.detail.map(p => {
@@ -674,16 +670,12 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             targetRowHeightTolerance: 0.1,
         });
 
-        const head = this.heads[dayId];
-        this.loadedDays.add(dayId);
-
         // Reset rows including placeholders
         if (head.day?.rows) {
             for (const row of head.day.rows) {
                 row.photos = [];
             }
         }
-        head.day.rows.clear();
 
         // Check if some rows were added
         let addedRows: IRow[] = [];
@@ -706,7 +698,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         while (dataIdx < data.length) {
             // Check if we ran out of rows
             if (rowIdx >= this.list.length || this.list[rowIdx].type === IRowType.HEAD) {
-                const newRow = this.getBlankRow(day);
+                const newRow = this.addRow(day);
                 addedRows.push(newRow);
                 rowSizeDelta += newRow.size;
                 this.list.splice(rowIdx, 0, newRow);
@@ -747,18 +739,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             // Move to next index of photo
             dataIdx++;
 
-            // Hidden folders
-            if (!this.config_showHidden &&
-                (photo.flag & this.c.FLAG_IS_FOLDER) &&
-                (<IFolder>photo).name.startsWith('.'))
-            {
-                continue;
-            }
-
-            this.list[rowIdx].photos.push(photo);
-
-            // Add row to day
-            head.day.rows.add(row);
+            // Add photo to row
+            row.photos.push(photo);
         }
 
         // Rows that were removed
@@ -766,7 +748,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         let headRemoved = false;
 
         // No rows, splice everything including the header
-        if (head.day.rows.size === 0) {
+        if (data.length === 0) {
             removedRows.push(...this.list.splice(headIdx, 1));
             rowIdx = headIdx - 1;
             headRemoved = true;
@@ -782,9 +764,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             removedRows.push(...this.list.splice(rowIdx + 1, spliceCount));
         }
 
-        // Update size delta for removed rows
+        // Update size delta for removed rows and remove from day
         for (const row of removedRows) {
             rowSizeDelta -= row.size;
+            const idx = head.day.rows.indexOf(row);
+            if (idx >= 0) head.day.rows.splice(idx, 1);
         }
 
         // This will be true even if the head is being spliced
@@ -810,21 +794,27 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         }
     }
 
-    /** Get a new blank photos row */
-    getBlankRow(day: IDay): IRow {
+    /** Add and get a new blank photos row */
+    addRow(day: IDay): IRow {
         let rowType = IRowType.PHOTOS;
         if (day.dayid === this.TagDayID.FOLDERS) {
             rowType = IRowType.FOLDERS;
         }
 
-        return {
-            id: ++this.numRows,
+        // Create new row
+        const row = {
+            id: `${day.dayid}-${day.rows.length}`,
             photos: [],
             type: rowType,
             size: this.rowHeight,
             dayId: day.dayid,
             day: day,
-        };
+        }
+
+        // Add to day
+        day.rows.push(row);
+
+        return row;
     }
 
     /** Clicking on photo */
@@ -888,9 +878,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
         // Reflow all touched days
         for (const day of updatedDays) {
-            day.detail = day.detail.filter(p => !delPhotosSet.has(p));
-            day.count = day.detail.length;
-            this.processDay(day);
+            this.processDay(day.dayid, day.detail.filter(p => !delPhotosSet.has(p)));
         }
 
         // Enter from right all photos that exited left
