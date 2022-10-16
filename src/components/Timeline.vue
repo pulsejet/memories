@@ -777,7 +777,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             } else {
                 // Otherwise just adjust the ticks
                 this.scrollerManager.adjust();
-                console.log('adjust', rowSizeDelta, addedRows.length + removedRows.length, day);
             }
 
             // Scroll to the same actual position if the added rows
