@@ -701,8 +701,14 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
             // Set row height
             const row = this.list[rowIdx];
-            rowSizeDelta += jbox.height - row.size;
-            row.size = jbox.height;
+            const jH = Math.round(jbox.height);
+            const delta = jH - row.size;
+            // If the difference is too small, it's not worth risking an adjustment
+            // especially on square layouts on mobile
+            if (Math.abs(delta) > 5) {
+                rowSizeDelta += delta;
+                row.size = jH;
+            }
 
             // Add the photo to the row
             const photo = data[dataIdx];
