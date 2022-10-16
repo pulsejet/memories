@@ -54,7 +54,7 @@
                     :style="{ height: item.size + 'px', width: rowWidth + 'px' }">
 
                     <div class="photo" v-for="(photo, index) in item.photos" :key="photo.fileid"
-                        :style="{ width: (photo.dispWp * 100) + '%' }">
+                        :style="{ width: photo.dispWp + '%' }">
 
                         <Folder v-if="photo.flag & c.FLAG_IS_FOLDER"
                                 :data="photo"
@@ -337,7 +337,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                     row.photos[j] = {
                         flag: this.c.FLAG_PLACEHOLDER,
                         fileid: Math.random(),
-                        dispWp: 1 / this.numCols,
+                        dispWp: utils.round(100 / this.numCols, 2),
                     };
                 }
                 delete row.pct;
@@ -740,7 +740,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             }
 
             // Get aspect ratio
-            photo.dispWp = jbox.width / this.rowWidth;
+            photo.dispWp = utils.round(100 * jbox.width / this.rowWidth, 2);
 
             // Move to next index of photo
             dataIdx++;
