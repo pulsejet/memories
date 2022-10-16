@@ -82,7 +82,11 @@ export default class Photo extends Mixins(GlobalMixin) {
 
     /** Get url of the photo */
     get url() {
-        return getPreviewUrl(this.data.fileid, this.data.etag, false, 512)
+        let size = 256;
+        if (this.data.w && this.data.h) {
+            size = Math.floor(size * Math.max(this.data.w, this.data.h) / Math.min(this.data.w, this.data.h));
+        }
+        return getPreviewUrl(this.data.fileid, this.data.etag, false, size)
     }
 
     /** Image loaded successfully */
