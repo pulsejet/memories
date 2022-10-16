@@ -229,10 +229,13 @@ export default class Photo extends Mixins(GlobalMixin) {
     to { transform: translateX(0); opacity: 1; }
 }
 
+// Distance of icon from border
+$icon-dist: min(10px, 6%);
+
 /* Extra icons */
 .check-icon.select {
     position: absolute;
-    top: 6%; left: 6%;
+    top: $icon-dist; left: $icon-dist;
     z-index: 100;
     background-color: var(--color-main-background);
     border-radius: 50%;
@@ -249,10 +252,10 @@ export default class Photo extends Mixins(GlobalMixin) {
     filter: invert(1) brightness(100);
 }
 .video-icon {
-    top: 6%; right: 6%;
+    top: $icon-dist; right: $icon-dist;
 }
 .star-icon {
-    bottom: 6%; left: 6%;
+    bottom: $icon-dist; left: $icon-dist;
 }
 
 /* Actual image */
@@ -260,23 +263,23 @@ div.img-outer {
     padding: 2px;
     @media (max-width: 768px) { padding: 1px; }
 
-    transition: transform 0.1s ease;
+    transition: padding 0.1s ease;
     background-clip: content-box, padding-box;
     background-color: var(--color-background-dark);
 
-    .selected > & { transform: scale(0.9); }
+    .selected > & { padding: calc($icon-dist - 2px); }
 
     > img {
         background-clip: content-box;
         object-fit: cover;
         cursor: pointer;
-        transform: translateZ(0);
 
         -webkit-tap-highlight-color: transparent;
         -webkit-touch-callout: none;
         user-select: none;
+        transition: box-shadow 0.1s ease;
 
-        .selected > & { box-shadow: 0 0 3px 2px var(--color-primary); }
+        .selected > & { box-shadow: 0 0 4px 2px var(--color-primary); }
         .p-outer.p-loading > & { display: none; }
         .p-outer.error & { object-fit: contain; }
     }
