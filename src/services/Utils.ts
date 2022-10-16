@@ -95,10 +95,12 @@ export function binarySearch(arr: any, elem: any, key?: string) {
  * Round a number to N decimal places
  * @param num Number to round
  * @param places Number of decimal places
+ * @param floor If true, round down instead of to nearest
  */
-export function round(num: number, places: number) {
+export function round(num: number, places: number, floor=false) {
     const pow = Math.pow(10, places);
-    return Math.round(num * pow) / pow;
+    const int = num * pow;
+    return (floor ? Math.floor : Math.round)(int) / pow;
 }
 
 /**

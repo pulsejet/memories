@@ -337,7 +337,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                     row.photos[j] = {
                         flag: this.c.FLAG_PLACEHOLDER,
                         fileid: Math.random(),
-                        dispWp: utils.round(100 / this.numCols, 2),
+                        dispWp: utils.round(100 / this.numCols, 2, true),
                     };
                 }
                 delete row.pct;
@@ -721,7 +721,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             utils.convertFlags(photo);
 
             // Get aspect ratio
-            photo.dispWp = utils.round(100 * jbox.width / this.rowWidth, 2);
+            photo.dispWp = utils.round(100 * jbox.width / this.rowWidth, 2, true);
 
             // Move to next index of photo
             dataIdx++;
