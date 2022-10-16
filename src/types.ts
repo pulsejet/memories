@@ -45,6 +45,14 @@ export type IPhoto = {
     h?: number;
     /** Grid display width percentage */
     dispWp?: number;
+    /** Grid display height (forced) */
+    dispH?: number;
+    /** Grid display X percentage */
+    dispXp?: number;
+    /** Grid display Y px */
+    dispY?: number;
+    /** Grid display row id (relative to head) */
+    dispRowNum?: number;
     /** Reference to day object */
     d?: IDay;
     /** Video flag from server */
@@ -84,6 +92,8 @@ export interface ITag extends IPhoto {
 export type IRow = {
     /** Vue Recycler identifier */
     id?: string;
+    /** Row ID from head */
+    num: number;
     /** Day ID */
     dayId: number;
     /** Refrence to day object */

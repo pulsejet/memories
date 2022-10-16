@@ -4,8 +4,6 @@
             'selected': (data.flag & c.FLAG_SELECTED),
             'placeholder': (data.flag & c.FLAG_PLACEHOLDER),
             'leaving': (data.flag & c.FLAG_LEAVING),
-            'exit-left': (data.flag & c.FLAG_EXIT_LEFT),
-            'enter-right': (data.flag & c.FLAG_ENTER_RIGHT),
             'error': (data.flag & c.FLAG_LOAD_FAIL),
         }">
 
@@ -70,9 +68,6 @@ export default class Photo extends Mixins(GlobalMixin) {
             return undefined;
         } else if (this.data.flag & this.c.FLAG_LOAD_FAIL) {
             return errorsvg;
-        } else if (this.data.flag & this.c.FLAG_FORCE_RELOAD) {
-            this.data.flag &= ~this.c.FLAG_FORCE_RELOAD;
-            return undefined;
         } else {
             return this.url;
         }
@@ -211,19 +206,6 @@ export default class Photo extends Mixins(GlobalMixin) {
         transform: scale(0.9);
         opacity: 0;
     }
-    &.exit-left {
-        transition: all 0.2s ease-in;
-        transform: translateX(-20%);
-        opacity: 0.8;
-    }
-    &.enter-right {
-        animation: enter-right 0.2s ease-out forwards;
-    }
-}
-
-@keyframes enter-right {
-    from { transform: translateX(20%); opacity: 0.8; }
-    to { transform: translateX(0); opacity: 1; }
 }
 
 // Distance of icon from border
