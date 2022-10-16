@@ -38,7 +38,8 @@
                 <div v-if="item.type === 0"
                      class="head-row"
                     :class="{ 'selected': item.selected }"
-                    :style="{ height: item.size + 'px' }">
+                    :style="{ height: item.size + 'px' }"
+                    :key="item.id">
 
                     <div class="super" v-if="item.super !== undefined">
                         {{ item.super }}
@@ -49,13 +50,10 @@
                     </div>
                 </div>
 
-                <div v-else
-                     class="photo-row"
-                    :style="{ height: item.size + 'px', width: rowWidth + 'px' }">
-
+                <template v-else>
                     <div class="photo" v-for="photo of item.photos" :key="photo.fileid"
                         :style="{
-                            height: photo.dispH ? photo.dispH + 'px' : undefined,
+                            height: (photo.dispH || item.size) + 'px',
                             width: photo.dispWp * rowWidth + 'px',
                             transform: 'translateX(' + photo.dispXp * rowWidth + 'px) translateY(' + photo.dispY + 'px)',
                         }">
@@ -76,7 +74,7 @@
                                 @delete="deleteFromViewWithAnimation"
                                 @clickImg="clickPhoto" />
                     </div>
-                </div>
+                </template>
             </template>
         </RecycleScroller>
 
@@ -216,12 +214,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         // Fit to window
         this.handleResize();
 
-        // Get data
-        await this.fetchDays();
-
         // Timeline recycler init
         (this.$refs.recycler as any).$el.addEventListener('scroll', this.scrollPositionChange, false);
-        this.scrollPositionChange();
+
+        // Get data
+        await this.fetchDays();
     }
 
     /** Reset all state */
@@ -479,6 +476,10 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         let url = '/apps/memories/api/days';
         let params: any = {};
 
+        // Try cache first
+        let cache: IDay[];
+        const cacheUrl = window.location.pathname + 'api/days';
+
         try {
             this.loading++;
             const startState = this.state;
@@ -491,16 +492,28 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             } else if (this.$route.name === 'people' && !this.$route.params.name) {
                 data = await dav.getPeopleData();
             } else {
+                // Try the cache
+                cache = await utils.getCachedData(cacheUrl);
+                if (cache) {
+                    await this.processDays(cache);
+                    this.loading--;
+                }
+
+                // Get from network
                 data = (await axios.get<IDay[]>(generateUrl(this.appendQuery(url), params))).data;
             }
 
+            // Put back into cache
+            utils.cacheData(cacheUrl, data);
+
+            // Make sure we're still on the same page
             if (this.state !== startState) return;
             await this.processDays(data);
         } catch (err) {
             console.error(err);
             showError(err?.response?.data?.message || err.message);
         } finally {
-            this.loading--;
+            if (!cache) this.loading--;
         }
     }
 
@@ -584,6 +597,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         // Store globally
         this.list = list;
         this.heads = heads;
+        this.loadedDays.clear();
 
         // Iterate the preload map
         // Now the inner detail objects are reactive
@@ -593,6 +607,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
         // Fix view height variable
         await this.scrollerManager.reflow();
+        this.scrollPositionChange();
     }
 
     /** Fetch image data for one dayId */
@@ -925,7 +940,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     width: calc(100% + 20px);
 }
 
-.photo-row > .photo {
+.recycler .photo {
     display: block;
     position: absolute;
     top: 0; left: 0;
