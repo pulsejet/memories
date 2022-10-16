@@ -69,6 +69,7 @@ class PageController extends Controller {
         // Apps enabled
         $this->initialState->provideInitialState('systemtags', $this->appManager->isEnabledForUser('systemtags') === true);
         $this->initialState->provideInitialState('recognize', $this->appManager->isEnabledForUser('recognize') === true);
+        $this->initialState->provideInitialState('version', $this->appManager->getAppInfo('memories')["version"]);
 
         $response = new TemplateResponse($this->appName, 'main');
         return $response;

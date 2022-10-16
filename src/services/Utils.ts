@@ -1,5 +1,6 @@
 import { getCanonicalLocale } from "@nextcloud/l10n";
 import { getCurrentUser } from '@nextcloud/auth'
+import { loadState } from '@nextcloud/initial-state'
 import { IPhoto } from "../types";
 
 // Memoize the result of short date conversions
@@ -166,7 +167,8 @@ export const constants = {
 
 /** Cache store */
 let cacheStorage: Cache | null = null;
-caches.open(`memories-${getCurrentUser()!.uid}`).then((cache) => { cacheStorage = cache });
+const cacheName = `memories-${loadState('memories', 'version')}-${getCurrentUser()!.uid}`;
+caches.open(cacheName).then((cache) => { cacheStorage = cache });
 
 /** Get data from the cache */
 export async function getCachedData(url: string) {
