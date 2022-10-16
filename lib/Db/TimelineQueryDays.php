@@ -179,6 +179,7 @@ trait TimelineQueryDays {
 
         // Group and sort by date taken
         $query->orderBy('m.datetaken', 'DESC');
+        $query->addOrderBy('m.fileid', 'DESC'); // tie-breaker
 
         // Apply all transformations
         $this->applyAllTransforms($queryTransforms, $query, $uid);
