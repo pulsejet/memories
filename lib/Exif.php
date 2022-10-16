@@ -321,6 +321,13 @@ class Exif {
     public static function getDimensions(array &$exif) {
         $width = $exif['ImageWidth'] ?? 0;
         $height = $exif['ImageHeight'] ?? 0;
+
+        // Check if image is rotated and we need to swap width and height
+        $rotation = $exif['Rotation'] ?? 0;
+        if ($rotation == 90 || $rotation == 270) {
+            return [$height, $width];
+        }
+
         return [$width, $height];
     }
 
