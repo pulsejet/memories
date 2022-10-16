@@ -56,6 +56,7 @@ trait TimelineQueryTags {
         // GROUP and ORDER by tag name
         $query->groupBy('st.name');
         $query->orderBy('st.name', 'ASC');
+        $query->addOrderBy('st.id'); // tie-breaker
 
         // FETCH all tags
         $tags = $query->executeQuery()->fetchAll();
