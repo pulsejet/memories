@@ -2,7 +2,7 @@
     <div class="p-outer fill-block"
         :class="{
             'selected': (data.flag & c.FLAG_SELECTED),
-            'p-loading': !(data.flag & c.FLAG_LOADED),
+            'placeholder': (data.flag & c.FLAG_PLACEHOLDER),
             'leaving': (data.flag & c.FLAG_LEAVING),
             'exit-left': (data.flag & c.FLAG_EXIT_LEFT),
             'enter-right': (data.flag & c.FLAG_ENTER_RIGHT),
@@ -27,9 +27,7 @@
                 class="fill-block"
                 :src="src()"
                 :key="data.fileid"
-
-                @error="error"
-                @load="load" />
+                @error="error" />
         </div>
     </div>
 </template>
@@ -89,14 +87,9 @@ export default class Photo extends Mixins(GlobalMixin) {
         return getPreviewUrl(this.data.fileid, this.data.etag, false, size)
     }
 
-    /** Image loaded successfully */
-    load() {
-        this.data.flag |= this.c.FLAG_LOADED;
-    }
-
     /** Error in loading image */
     error(e: any) {
-        this.data.flag |= (this.c.FLAG_LOADED | this.c.FLAG_LOAD_FAIL);
+        this.data.flag |= this.c.FLAG_LOAD_FAIL;
     }
 
     /** Clear timers */
@@ -284,7 +277,7 @@ div.img-outer {
         transition: box-shadow 0.1s ease;
 
         .selected > & { box-shadow: 0 0 4px 2px var(--color-primary); }
-        .p-outer.p-loading > & { display: none; }
+        .p-outer.placeholder > & { display: none; }
         .p-outer.error & { object-fit: contain; }
     }
 }
