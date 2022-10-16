@@ -18,7 +18,7 @@
                         'p-load-fail': info.flag & c.FLAG_LOAD_FAIL,
                     }"
                     :key="'fpreview-' + info.fileid"
-                    :src="getPreviewUrl(info.fileid, info.etag)"
+                    :src="getPreviewUrl(info.fileid, info.etag, true, 256)"
                     :style="getCoverStyle(info)"
                     @load="info.flag |= c.FLAG_LOADED"
                     @error="info.flag |= c.FLAG_LOAD_FAIL" />
@@ -71,9 +71,9 @@ export default class Tag extends Mixins(GlobalMixin) {
 
     getPreviewUrl(fileid: number, etag: string) {
         if (this.isFace) {
-            return generateUrl(`/core/preview?fileId=${fileid}&c=${etag}&x=2048&y=2048&forceIcon=0&a=1`);
+            return getPreviewUrl(fileid, etag, false, 2048);
         }
-        return getPreviewUrl(fileid, etag);
+        return getPreviewUrl(fileid, etag, true, 256);
     }
 
     get isFace() {

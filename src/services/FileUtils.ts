@@ -123,8 +123,9 @@
      return fileInfo
  }
 
- const getPreviewUrl = function(fileid: number, etag: string): string {
-    return generateUrl(`/core/preview?fileId=${fileid}&c=${etag}&x=250&y=250&forceIcon=0&a=0`);
+ const getPreviewUrl = function(fileid: number, etag: string, square: boolean, size: number): string {
+    const a = square ? '0' : '1'
+    return generateUrl(`/core/preview?fileId=${fileid}&c=${etag}&x=${size}&y=${size}&forceIcon=0&a=${a}`);
  }
 
  export { encodeFilePath, extractFilePaths, sortCompare, genFileInfo, getPreviewUrl }

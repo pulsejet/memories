@@ -19,7 +19,7 @@
                         'p-load-fail': info.flag & c.FLAG_LOAD_FAIL,
                     }"
                     :key="'fpreview-' + info.fileid"
-                    :src="getPreviewUrl(info.fileid, info.etag)"
+                    :src="getPreviewUrl(info.fileid, info.etag, true, 256)"
                     @load="info.flag |= c.FLAG_LOADED"
                     @error="info.flag |= c.FLAG_LOAD_FAIL" />
             </div>
