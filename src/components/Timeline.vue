@@ -639,8 +639,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
      *
      * @param dayId id of day
      * @param data photos
+     * @param isAnimating prevents glitches due to height changes
      */
-    processDay(dayId: number, data: IPhoto[]) {
+    processDay(dayId: number, data: IPhoto[], isAnimating=false) {
         const head = this.heads[dayId];
         const day = head.day;
         this.loadedDays.add(dayId);
@@ -717,8 +718,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             const jH = Math.round(jbox.height);
             const delta = jH - row.size;
             // If the difference is too small, it's not worth risking an adjustment
-            // especially on square layouts on mobile
-            if (Math.abs(delta) > 5) {
+            // especially on square layouts on mobile. Also don't do this if animating.
+            if (Math.abs(delta) > 5 && !isAnimating) {
                 rowSizeDelta += delta;
                 row.size = jH;
             }
@@ -785,11 +786,13 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             }
 
             // Scroll to the same actual position if the added rows
-            // were above the current scroll position
-            const recycler: any = this.$refs.recycler;
-            const midIndex = (recycler.$_startIndex + recycler.$_endIndex) / 2;
-            if (midIndex > headIdx) {
-                this.setScrollY(scrollY + rowSizeDelta);
+            // were above the current scroll position, unless animating
+            if (!isAnimating) {
+                const recycler: any = this.$refs.recycler;
+                const midIndex = (recycler.$_startIndex + recycler.$_endIndex) / 2;
+                if (midIndex > headIdx) {
+                    this.setScrollY(scrollY + rowSizeDelta);
+                }
             }
         }
     }
@@ -878,7 +881,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
         // Reflow all touched days
         for (const day of updatedDays) {
-            this.processDay(day.dayid, day.detail.filter(p => !delPhotosSet.has(p)));
+            const newDetail = day.detail.filter(p => !delPhotosSet.has(p));
+            this.processDay(day.dayid, newDetail, true);
         }
 
         // Enter from right all photos that exited left
@@ -927,6 +931,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     cursor: pointer;
     vertical-align: top;
     height: 100%;
+    transition: width 0.2s ease-in-out; // reflow justification
 }
 
 .head-row {
