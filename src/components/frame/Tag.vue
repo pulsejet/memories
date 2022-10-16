@@ -13,7 +13,6 @@
         <div class="previews fill-block" ref="previews">
             <div class="img-outer" v-for="info of previews" :key="info.fileid">
                 <img
-                    class="fill-block"
                     :class="{
                         'p-loading': !(info.flag & c.FLAG_LOADED),
                         'p-load-fail': info.flag & c.FLAG_LOAD_FAIL,
@@ -229,6 +228,7 @@ export default class Tag extends Mixins(GlobalMixin) {
         }
 
         > img {
+            width: 100%;
             padding: 0;
             filter: brightness(60%);
             cursor: pointer;
