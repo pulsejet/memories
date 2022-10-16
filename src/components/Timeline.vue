@@ -595,17 +595,51 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     /** Fetch image data for one dayId */
     async fetchDay(dayId: number) {
-        let url = '/apps/memories/api/days/{dayId}';
+        const head = this.heads[dayId];
+        if (!head) return;
+
+        let baseUrl = '/apps/memories/api/days/{dayId}';
         const params: any = { dayId };
 
         // Do this in advance to prevent duplicate requests
         this.loadedDays.add(dayId);
 
+        // Construct URL
+        const url = generateUrl(this.appendQuery(baseUrl), params)
+
+        // Attach response to head and process it
+        const processResponse = (response: IPhoto[]) => {
+            if (!response) return;
+            head.day.detail = response;
+            head.day.count = response.length;
+            this.processDay(head.day);
+        }
+
+        // Look for cache
+        processResponse(await utils.getCachedData(url));
+
         try {
             const startState = this.state;
-            const res = await axios.get<IPhoto[]>(generateUrl(this.appendQuery(url), params));
+            const res = await axios.get<IPhoto[]>(url);
             const data = res.data;
             if (this.state !== startState) return;
+
+            // Store cache asynchronously
+            // Do this regardless of whether the state has
+            // changed just to be sure
+            utils.cacheData(url, data);
+
+            // Check if the response has any delta whatsoever
+            // Comparing the set of fileid+etag is good enough
+            if (head.day.detail?.length) {
+                const tags = new Set<string>(data.map((photo) => photo.etag + photo.fileid));
+                if (head.day.detail &&
+                    tags.size === head.day.count &&
+                    head.day.detail.every((p) => tags.has(p.etag + p.fileid))
+                ) {
+                    return;
+                }
+            }
 
             const day = this.heads[dayId].day;
             day.detail = data;
