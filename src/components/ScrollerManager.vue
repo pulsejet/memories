@@ -257,8 +257,8 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
         // Start with the first tick. Walk over all rows counting the
         // y position. When you hit a row with the tick, update y and
-        // top values and move to the next visible tick.
-        let tickId = 0; // regardless of whether it's visible or not
+        // top values and move to the next tick.
+        let tickId = 0;
         let y = 0;
 
         for (const row of this.rows) {
@@ -272,12 +272,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
             if (tick.dayId === row.dayId) {
                 tick.y = y;
                 this.setTickTop(tick);
-
-                // Get the next visible tick
                 tickId++;
-                while (tickId < this.ticks.length && !this.ticks[tickId].s) {
-                    tickId++;
-                }
             }
 
             y += row.size;

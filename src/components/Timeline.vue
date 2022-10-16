@@ -771,11 +771,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         // So just reflow the timeline here
         if (rowSizeDelta !== 0) {
             if (headRemoved) {
-                // If the head was removed, that warrants a reflow
-                // since months or years might disappear!
+                // If the head was removed, we need a reflow,
+                // or adjust isn't going to work right
                 this.scrollerManager.reflow();
             } else {
-                // Otherwise just adjust the visible ticks
+                // Otherwise just adjust the ticks
                 this.scrollerManager.adjust();
             }
 
