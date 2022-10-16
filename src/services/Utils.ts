@@ -1,4 +1,5 @@
 import { getCanonicalLocale } from "@nextcloud/l10n";
+import { IPhoto } from "../types";
 
 // Memoize the result of short date conversions
 // These operations are surprisingly expensive
@@ -106,6 +107,33 @@ export function round(num: number, places: number) {
  */
 export function roundHalf(num: number) {
     return Math.round(num * 2) / 2;
+}
+
+/**
+ * Convert server-side flags to bitmask
+ * @param photo Photo to process
+ */
+export function convertFlags(photo: IPhoto) {
+    if (photo.isvideo) {
+        photo.flag |= constants.c.FLAG_IS_VIDEO;
+        delete photo.isvideo;
+    }
+    if (photo.isfavorite) {
+        photo.flag |= constants.c.FLAG_IS_FAVORITE;
+        delete photo.isfavorite;
+    }
+    if (photo.isfolder) {
+        photo.flag |= constants.c.FLAG_IS_FOLDER;
+        delete photo.isfolder;
+    }
+    if (photo.isface) {
+        photo.flag |= constants.c.FLAG_IS_FACE;
+        delete photo.isface;
+    }
+    if (photo.istag) {
+        photo.flag |= constants.c.FLAG_IS_TAG;
+        delete photo.istag;
+    }
 }
 
 /** Global constants */

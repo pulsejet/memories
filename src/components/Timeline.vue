@@ -718,26 +718,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             }
 
             // Flag conversion
-            if (photo.isvideo) {
-                photo.flag |= this.c.FLAG_IS_VIDEO;
-                delete photo.isvideo;
-            }
-            if (photo.isfavorite) {
-                photo.flag |= this.c.FLAG_IS_FAVORITE;
-                delete photo.isfavorite;
-            }
-            if (photo.isfolder) {
-                photo.flag |= this.c.FLAG_IS_FOLDER;
-                delete photo.isfolder;
-            }
-            if (photo.isface) {
-                photo.flag |= this.c.FLAG_IS_FACE;
-                delete photo.isface;
-            }
-            if (photo.istag) {
-                photo.flag |= this.c.FLAG_IS_TAG;
-                delete photo.istag;
-            }
+            utils.convertFlags(photo);
 
             // Get aspect ratio
             photo.dispWp = utils.round(100 * jbox.width / this.rowWidth, 2);
