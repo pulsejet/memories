@@ -150,8 +150,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     private squareMode = false;
     /** Header rows for dayId key */
     private heads: { [dayid: number]: IHeadRow } = {};
-    /** Original days response */
-    private days: IDay[] = [];
 
     /** Computed row height */
     private rowHeight = 100;
@@ -230,7 +228,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         this.list = [];
         this.numRows = 0;
         this.heads = {};
-        this.days = [];
         this.currentStart = 0;
         this.currentEnd = 0;
         this.scrollerManager.reset();
@@ -590,7 +587,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         }
 
         // Store globally
-        this.days = data;
         this.list = list;
         this.heads = heads;
 
@@ -620,7 +616,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             const data = res.data;
             if (this.state !== startState) return;
 
-            const day = this.days.find(d => d.dayid === dayId);
+            const day = this.heads[dayId].day;
             day.detail = data;
             day.count = data.length;
             this.processDay(day);
