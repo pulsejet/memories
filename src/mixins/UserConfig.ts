@@ -34,6 +34,7 @@ export default class UserConfig extends Vue {
     config_showHidden = loadState('memories', 'showHidden') === "true";
     config_tagsEnabled = loadState('memories', 'systemtags');
     config_recognizeEnabled = loadState('memories', 'recognize');
+    config_squareThumbs = localStorage.getItem('memories_squareThumbs') === '1';
 
     created() {
         subscribe(eventName, this.updateLocalSetting)
