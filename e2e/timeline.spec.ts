@@ -16,8 +16,8 @@ test.describe('Open', () => {
   });
 
   test('Select two images and delete', async ({ page }) => {
-    const i1 = "div:nth-child(2) > .photo-row > div:nth-child(1) > .p-outer";
-    const i2 = "div:nth-child(2) > .photo-row > div:nth-child(2) > .p-outer";
+    const i1 = "div:nth-child(2) > div:nth-child(1) > .p-outer";
+    const i2 = "div:nth-child(2) > div:nth-child(2) > .p-outer";
 
     const src1 = await page.locator(`${i1} > .img-outer > img`).first().getAttribute('src');
     const src2 = await page.locator(`${i2} > .img-outer > img`).first().getAttribute('src');
