@@ -31,9 +31,10 @@ export function getLayout(
     }
 
     // Binary flags
-    const FLAG_USE = 1;
-    const FLAG_USED = 2;
-    const FLAG_USE4 = 4;
+    const FLAG_USE = 1 << 0;
+    const FLAG_USED = 1 << 1;
+    const FLAG_USE4 = 1 << 2;
+    const FLAG_USE6 = 1 << 3;
 
     // Create 2d matrix to work in
     const origRowLen = Math.ceil(input.length / opts.numCols);
@@ -59,31 +60,51 @@ export function getLayout(
 
         // Use this slot
         matrix[row][col] |= FLAG_USE;
-        photoId++;
 
         // Check if previous row has something used
         // or something beside this is used
         // We don't do these one after another
         if ((row > 0 && matrix[row-1].some(v => v & FLAG_USED)) ||
-            (col > 0 && matrix[row][col-1] & FLAG_USED) ||
-            (col < opts.numCols-1 && matrix[row][col+1] & FLAG_USED)
+            (col > 0 && matrix[row][col-1] & FLAG_USED)
         ) {
-            col++; continue;
+            photoId++; col++; continue;
         }
+
+        // Number of photos left
+        const numLeft = input.length-photoId-1;
+        // Number of photos needed for perfect fill after using n
+        const needFill = (n: number) => ((opts.numCols-col-2) + (n/2-1)*(opts.numCols-2));
 
         // Check if we can use 4 blocks
         let canUse4 =
             // We have enough space
             (row + 1 < matrix.length && col+1 < opts.numCols) &&
-            // Nothing used in vicinity (redundant check)
-            !(matrix[row+1][col] & FLAG_USED) &&
-            !(matrix[row][col+1] & FLAG_USED) &&
-            !(matrix[row+1][col+1] & FLAG_USED) &&
             // This cannot end up being a widow (conservative)
-            (input.length-photoId-1 >= ((opts.numCols-col-2) + (opts.numCols-2)));
+            // Also make sure the next row gets fully filled, otherwise looks weird
+            (numLeft === needFill(4) || numLeft >= needFill(4)+opts.numCols);
+
+        let canUse6 =
+            // Image is portrait
+            input[photoId].height > input[photoId].width &&
+            // We have enough space
+            (row + 2 < matrix.length && col+1 < opts.numCols) &&
+            // This cannot end up being a widow (conservative)
+            // Also make sure the next row gets fully filled, otherwise looks weird
+            (numLeft === needFill(6) || numLeft >= needFill(6)+2*opts.numCols);
+
+        if (canUse6 && Math.random() < 0.2) {
+            // Use 6
+            matrix[row][col] |= FLAG_USE6;
+            matrix[row+1][col] |= FLAG_USED;
+            matrix[row+2][col] |= FLAG_USED;
+            matrix[row][col+1] |= FLAG_USED;
+            matrix[row+1][col+1] |= FLAG_USED;
+            matrix[row+2][col+1] |= FLAG_USED;
+        }
 
         // Use four with 60% probability
-        if (canUse4 && Math.random() < 0.6) {
+        else if (canUse4 && Math.random() < 0.5) {
+            // Use 4
             matrix[row][col] |= FLAG_USE4;
             matrix[row+1][col] |= FLAG_USED;
             matrix[row][col+1] |= FLAG_USED;
@@ -91,12 +112,8 @@ export function getLayout(
         }
 
         // Go ahead
-        col++;
+        photoId++; col++;
     }
-
-    // REMOVE BEFORE PUSH
-    if (input.length == 10)
-        console.log(flagMatrixStr(matrix, 3));
 
     // Square layout matrix
     const absMatrix: {
@@ -131,9 +148,14 @@ export function getLayout(
         }
 
         // Use twice the space
-        if (matrix[row][col] & FLAG_USE4) {
+        const v = matrix[row][col];
+        if (v & FLAG_USE4) {
             p.width *= 2;
             p.height *= 2;
+            col += 2;
+        } else if (v & FLAG_USE6) {
+            p.width *= 2;
+            p.height *= 3;
             col += 2;
         } else {
             col += 1;
