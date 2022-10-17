@@ -54,8 +54,8 @@
                     <div class="photo" v-for="photo of item.photos" :key="photo.fileid"
                         :style="{
                             height: (photo.dispH || item.size) + 'px',
-                            width: photo.dispWp * rowWidth + 'px',
-                            transform: 'translateX(' + photo.dispXp * rowWidth + 'px) translateY(' + photo.dispY + 'px)',
+                            width: (photo.dispWp * rowWidth) + 'px',
+                            transform: `translate(${photo.dispXp*rowWidth}px, ${photo.dispY}px`,
                         }">
 
                         <Folder v-if="photo.flag & c.FLAG_IS_FOLDER"
