@@ -764,7 +764,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
             // Set row height
             const row = this.list[rowIdx];
-            const jH = this.squareMode ? this.rowHeight : Math.round(jbox.height);
+            const jH = Math.round(jbox.rowHeight || jbox.height);
             const delta = jH - row.size;
             // If the difference is too small, it's not worth risking an adjustment
             // especially on square layouts on mobile. Also don't do this if animating.

@@ -19,6 +19,7 @@ export function getLayout(
     left: number,
     width: number,
     height: number,
+    rowHeight?: number,
 }[] {
     if (!opts.squareMode) {
         return justifiedLayout((input), {
@@ -31,17 +32,14 @@ export function getLayout(
     }
 
     // Binary flags
-    const FLAG_USE = 1 << 0;
-    const FLAG_USED = 1 << 1;
-    const FLAG_USE4 = 1 << 2;
-    const FLAG_USE6 = 1 << 3;
+    const FLAG_USE          = 1 << 0;
+    const FLAG_USED         = 1 << 1;
+    const FLAG_USE4         = 1 << 2;
+    const FLAG_USE6         = 1 << 3;
+    const FLAG_BREAKOUT     = 1 << 4;
 
     // Create 2d matrix to work in
-    const origRowLen = Math.ceil(input.length / opts.numCols);
-    const matrix: number[][] = new Array(origRowLen * 3); // todo: dynamic length
-    for (let i = 0; i < matrix.length; i++) {
-        matrix[i] = new Array(opts.numCols).fill(0);
-    }
+    const matrix: number[][] = [];
 
     // Fill in the matrix
     let row = 0;
@@ -51,6 +49,11 @@ export function getLayout(
         // Check if we reached the end of row
         if (col >= opts.numCols) {
             row++; col = 0;
+        }
+
+        // Make sure we have this and the next few rows
+        while (row + 3 >= matrix.length) {
+            matrix.push(new Array(opts.numCols).fill(0));
         }
 
         // Check if already used
@@ -75,7 +78,6 @@ export function getLayout(
         // Number of photos needed for perfect fill after using n
         const needFill = (n: number) => ((opts.numCols-col-2) + (n/2-1)*(opts.numCols-2));
 
-        // Check if we can use 4 blocks
         let canUse4 =
             // We have enough space
             (row + 1 < matrix.length && col+1 < opts.numCols) &&
@@ -92,8 +94,24 @@ export function getLayout(
             // Also make sure the next row gets fully filled, otherwise looks weird
             (numLeft === needFill(6) || numLeft >= needFill(6)+2*opts.numCols);
 
-        if (canUse6 && Math.random() < 0.2) {
-            // Use 6
+        let canBreakout =
+            // First column only
+            col === 0 &&
+            // Image is landscape
+            input[photoId].width > input[photoId].height &&
+            // The next row gets filled
+            (numLeft === 0 || numLeft >= opts.numCols);
+
+        // Full width breakout
+        if (canBreakout && Math.random() < (input.length > 0 ? 0.2 : 0.1)) {
+            matrix[row][col] |= FLAG_BREAKOUT;
+            for (let i = 1; i < opts.numCols; i++) {
+                matrix[row][i] |= FLAG_USED;
+            }
+        }
+
+        // Use 6 vertically
+        else if (canUse6 && Math.random() < 0.2) {
             matrix[row][col] |= FLAG_USE6;
             matrix[row+1][col] |= FLAG_USED;
             matrix[row+2][col] |= FLAG_USED;
@@ -102,9 +120,8 @@ export function getLayout(
             matrix[row+2][col+1] |= FLAG_USED;
         }
 
-        // Use four with 60% probability
-        else if (canUse4 && Math.random() < 0.5) {
-            // Use 4
+        // Use 4 box
+        else if (canUse4 && Math.random() < ((col % 2) ? 0.67 : 0.4)) {
             matrix[row][col] |= FLAG_USE4;
             matrix[row+1][col] |= FLAG_USED;
             matrix[row][col+1] |= FLAG_USED;
@@ -145,6 +162,7 @@ export function getLayout(
             left: col * sqsize,
             width: sqsize,
             height: sqsize,
+            rowHeight: opts.rowHeight,
         }
 
         // Use twice the space
@@ -157,8 +175,13 @@ export function getLayout(
             p.width *= 2;
             p.height *= 3;
             col += 2;
+        } else if (v & FLAG_BREAKOUT) {
+            p.width *= opts.numCols;
+            p.height = input[photoId].height * p.width / input[photoId].width;
+            p.rowHeight = p.height;
+            col += opts.numCols;
         } else {
-            col += 1;
+            col++;
         }
 
         absMatrix.push(p);
