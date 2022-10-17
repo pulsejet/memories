@@ -5,12 +5,12 @@ OC.L10N.register(
     "Videos" : "Tividyutin",
     "Tags" : "Tibzimin",
     "Settings" : "Iɣewwaṛen",
-    "Hour" : "Asrag",
-    "Delete" : "Kkes",
-    "Name" : "Nom",
     "Cancel" : "Sefsex",
-    "Back" : "Retour",
+    "Delete" : "Kkes",
     "Download" : "Sider",
-    "Favorite" : "Menyif"
+    "Favorite" : "Menyif",
+    "Hour" : "Asrag",
+    "Name" : "Nom",
+    "Back" : "Retour"
 },
 "nplurals=2; plural=(n != 1);");

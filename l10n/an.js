@@ -4,11 +4,11 @@ OC.L10N.register(
     "Favorites" : "Favoritos",
     "Tags" : "Etiquetas",
     "Settings" : "Configurazión",
-    "Delete" : "Borrar",
-    "Name" : "Nombre",
     "Cancel" : "Canzelar",
-    "Back" : "Ta zaga",
+    "Delete" : "Borrar",
     "Download" : "Escargar",
-    "Favorite" : "Favorito"
+    "Favorite" : "Favorito",
+    "Name" : "Nombre",
+    "Back" : "Ta zaga"
 },
 "nplurals=2; plural=(n != 1);");

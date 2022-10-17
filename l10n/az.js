@@ -5,14 +5,14 @@ OC.L10N.register(
     "Archive" : "Arxiv",
     "Tags" : "Işarələr",
     "Settings" : "Quraşdırmalar",
+    "Cancel" : "Dayandır",
+    "Delete" : "Sil",
+    "Download" : "Yüklə",
+    "Favorite" : "İstəkli",
+    "Update" : "Yenilənmə",
     "Month" : "Ay",
     "Day" : "Gün",
     "Time" : "Vaxt",
-    "Delete" : "Sil",
-    "Name" : "Ad",
-    "Update" : "Yenilənmə",
-    "Cancel" : "Dayandır",
-    "Download" : "Yüklə",
-    "Favorite" : "İstəkli"
+    "Name" : "Ad"
 },
 "nplurals=2; plural=(n != 1);");

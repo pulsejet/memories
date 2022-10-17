@@ -3,13 +3,13 @@ OC.L10N.register(
     {
     "Favorites" : "Սիրվածներ",
     "Settings" : "կարգավորումներ",
+    "Cancel" : "ընդհատել",
+    "Delete" : "հեռացնել",
+    "Download" : "Ներբեռնել",
+    "Update" : "Թարմացնել",
     "Month" : "Ամիս",
     "Day" : "Օր",
     "Time" : "Ժամ",
-    "Delete" : "հեռացնել",
-    "Name" : "Անուն",
-    "Update" : "Թարմացնել",
-    "Cancel" : "ընդհատել",
-    "Download" : "Ներբեռնել"
+    "Name" : "Անուն"
 },
 "nplurals=2; plural=(n != 1);");

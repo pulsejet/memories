@@ -4,16 +4,16 @@ OC.L10N.register(
     "Favorites" : "Favoritos",
     "Tags" : "Etiquettas",
     "Settings" : "Configurationes",
+    "Cancel" : "Cancellar",
+    "Delete" : "Deler",
+    "Download" : "Discargar",
+    "Favorite" : "Favorite",
+    "View in folder" : "Vider in dossier",
+    "Update" : "Actualisation",
     "Month" : "Mense",
     "Day" : "Die",
     "Time" : "Tempore",
-    "Delete" : "Deler",
     "Name" : "Nomine",
-    "Update" : "Actualisation",
-    "Cancel" : "Cancellar",
-    "Back" : "Retro",
-    "Download" : "Discargar",
-    "Favorite" : "Favorite",
-    "View in folder" : "Vider in dossier"
+    "Back" : "Retro"
 },
 "nplurals=2; plural=(n != 1);");
