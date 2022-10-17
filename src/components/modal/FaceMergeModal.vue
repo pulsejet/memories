@@ -4,9 +4,9 @@
             {{ t('memories', 'Merge {name} with person', { name }) }}
         </template>
 
-        <div class="outer">
+        <div class="outer" v-if="detail">
             <div class="photo" v-for="photo of detail" :key="photo.fileid" >
-                <Tag :data="photo" :rowHeight="115" :noNavigate="true" @open="clickFace" />
+                <Tag :data="photo" :noNavigate="true" @open="clickFace" />
             </div>
 
             <div v-if="procesingTotal > 0" class="info-pad">
@@ -15,6 +15,10 @@
                     m: procesingTotal,
                 }) }}
             </div>
+        </div>
+
+        <div v-else>
+            {{ t('memories', 'Loading …') }}
         </div>
 
         <template #buttons>
@@ -48,7 +52,7 @@ import * as dav from '../../services/DavRequests';
 export default class FaceMergeModal extends Mixins(GlobalMixin) {
     private user: string = "";
     private name: string = "";
-    private detail: IPhoto[] = [];
+    private detail: IPhoto[] | null = null;
     private processing = 0;
     private procesingTotal = 0;
 
@@ -67,7 +71,7 @@ export default class FaceMergeModal extends Mixins(GlobalMixin) {
     public async refreshParams() {
         this.user = this.$route.params.user || '';
         this.name = this.$route.params.name || '';
-        this.detail = [];
+        this.detail = null;
         this.processing = 0;
         this.procesingTotal = 0;
 
@@ -153,6 +157,11 @@ export default class FaceMergeModal extends Mixins(GlobalMixin) {
     cursor: pointer;
     vertical-align: top;
     font-size: 0.8em;
+
+    max-width: 120px;
+    width: calc(33.33% - 2px);
+    aspect-ratio: 1/1;
+    margin: 1px;
 }
 .info-pad {
     margin-top: 6px;
