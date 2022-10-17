@@ -73,21 +73,17 @@ trait TimelineQueryFaces {
         return $faces;
     }
 
-    public function getFacePreviews(Folder $folder) {
+    public function getFacePreviewDetection(Folder &$folder, int $id) {
         $query = $this->connection->getQueryBuilder();
-
-        // Windowing
-        $rowNumber = $query->createFunction('ROW_NUMBER() OVER (PARTITION BY rfd.cluster_id) as n');
 
         // SELECT face detections for ID
         $query->select(
-            'rfd.cluster_id',
-            'rfd.file_id',
-            'rfd.x', 'rfd.y', 'rfd.width', 'rfd.height',
-            'f.etag',
-            $rowNumber,
+            'rfd.file_id',                                  // Needed to get the actual file
+            'rfd.x', 'rfd.y', 'rfd.width', 'rfd.height',    // Image cropping
+            'm.w as image_width', 'm.h as image_height',    // Scoring
+            'm.fileid', 'm.datetaken',                      // Just in case, for postgres
         )->from('recognize_face_detections', 'rfd');
-        $query->where($query->expr()->isNotNull('rfd.cluster_id'));
+        $query->where($query->expr()->eq('rfd.cluster_id', $query->createNamedParameter($id)));
 
         // WHERE these photos are memories indexed
         $query->innerJoin('rfd', 'memories', 'm', $query->expr()->eq('m.fileid', 'rfd.file_id'));
@@ -95,32 +91,46 @@ trait TimelineQueryFaces {
         // WHERE these photos are in the user's requested folder recursively
         $query->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folder, true, false));
 
-        // Make this a sub query
-        $fun = $query->createFunction('(' . $query->getSQL() . ')');
+        // LIMIT results
+        $query->setMaxResults(15);
 
-        // Create outer query
-        $outerQuery = $this->connection->getQueryBuilder();
-        $outerQuery->setParameters($query->getParameters());
-        $outerQuery->select('*')->from($fun, 't');
-        $outerQuery->where($query->expr()->lte('t.n', $outerQuery->createParameter('nc')));
-        $outerQuery->setParameter('nc', 4, IQueryBuilder::PARAM_INT);
+        // Sort by date taken so we get recent photos
+        $query->orderBy('m.datetaken', 'DESC');
+        $query->addOrderBy('m.fileid', 'DESC'); // tie-breaker
 
-        // FETCH all face detections
-        $previews = $outerQuery->executeQuery()->fetchAll();
-
-        // Post-process, everthing is a number
-        foreach($previews as &$row) {
-            $row["cluster_id"] = intval($row["cluster_id"]);
-            $row["fileid"] = intval($row["file_id"]);
-            $row["x"] = floatval($row["x"]);
-            $row["y"] = floatval($row["y"]);
-            $row["width"] = floatval($row["width"]);
-            $row["height"] = floatval($row["height"]);
-
-            // remove stale
-            unset($row["file_id"]);
-            unset($row["n"]);
+        // FETCH face detections
+        $previews = $query->executeQuery()->fetchAll();
+        if (empty($previews)) {
+            return null;
         }
+
+        // Score the face detections
+        foreach ($previews as &$p) {
+            // Get actual pixel size of face
+            $iw = min(intval($p["image_width"] ?: 512), 2048);
+            $ih = min(intval($p["image_height"] ?: 512), 2048);
+            $w = floatval($p["width"]) * $iw;
+            $h = floatval($p["height"]) * $ih;
+
+            // Get center of face
+            $x = floatval($p["x"]) + floatval($p["width"]) / 2;
+            $y = floatval($p["y"]) + floatval($p["height"]) / 2;
+
+            // 3D normal distribution - if the face is closer to the center, it's better
+            $positionScore = exp(-pow($x - 0.5, 2) * 4) * exp(-pow($y - 0.5, 2) * 4);
+
+            // Root size distribution - if the face is bigger, it's better,
+            // but it doesn't matter beyond a certain point, especially 256px ;)
+            $sizeScore = pow($w * 100, 1/4) * pow($h * 100, 1/4);
+
+            // Combine scores
+            $p["score"] = $positionScore * $sizeScore;
+        }
+
+        // Sort previews by score descending
+        usort($previews, function($a, $b) {
+            return $b["score"] <=> $a["score"];
+        });
 
         return $previews;
     }

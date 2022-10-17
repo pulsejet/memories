@@ -16,7 +16,6 @@
                     :class="{ 'error': info.flag & c.FLAG_LOAD_FAIL }"
                     :key="'fpreview-' + info.fileid"
                     :src="getPreviewUrl(info.fileid, info.etag)"
-                    :style="getCoverStyle(info)"
                     @error="info.flag |= c.FLAG_LOAD_FAIL" />
             </div>
         </div>
@@ -33,13 +32,6 @@ import { NcCounterBubble } from '@nextcloud/vue'
 
 import GlobalMixin from '../../mixins/GlobalMixin';
 import { constants } from '../../services/Utils';
-
-interface IFaceDetection extends IPhoto {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-}
 
 @Component({
     components: {
@@ -67,7 +59,7 @@ export default class Tag extends Mixins(GlobalMixin) {
 
     getPreviewUrl(fileid: number, etag: string) {
         if (this.isFace) {
-            return getPreviewUrl(fileid, etag, false, 2048);
+            return generateUrl('/apps/memories/api/faces/preview/' + this.data.fileid);
         }
         return getPreviewUrl(fileid, etag, true, 256);
     }
@@ -80,24 +72,24 @@ export default class Tag extends Mixins(GlobalMixin) {
         // Reset state
         this.error = false;
 
-        // Look for previews
-        if (!this.data.previews) {
+        // Add dummy preview if face
+        if (this.isFace) {
+            this.previews = [{ fileid: 0, etag: '', flag: 0 }];
             return;
         }
+
+        // Look for previews
+        if (!this.data.previews) return;
 
         // Reset flag
         this.data.previews.forEach((p) => p.flag = 0);
 
-        if (this.isFace) {
-            const face = this.chooseFaceDetection(this.data.previews as IFaceDetection[]);
-            this.previews = [face];
-        } else {
-            let data = this.data.previews;
-            if (data.length < 4) {
-                data = data.slice(0, 1);
-            }
-            this.previews = data;
+        // Get 4 or 1 preview(s)
+        let data = this.data.previews;
+        if (data.length < 4) {
+            data = data.slice(0, 1);
         }
+        this.previews = data;
 
         this.error = this.previews.length === 0;
     }
@@ -115,56 +107,6 @@ export default class Tag extends Mixins(GlobalMixin) {
             this.$router.push({ name: 'people', params: { name, user  }});
         } else {
             this.$router.push({ name: 'tags', params: { name: this.data.name }});
-        }
-    }
-
-    /** Choose the most appropriate face detection */
-    private chooseFaceDetection(detections: IFaceDetection[]) {
-        const scoreFacePosition = (faceDetection: IFaceDetection) => {
-            return Math.max(0, -1 * (faceDetection.x - faceDetection.width * 0.5))
-            + Math.max(0, -1 * (faceDetection.y - faceDetection.height * 0.5))
-            + Math.max(0, -1 * (1 - (faceDetection.x + faceDetection.width) - faceDetection.width * 0.5))
-            + Math.max(0, -1 * (1 - (faceDetection.y + faceDetection.height) - faceDetection.height * 0.5))
-        }
-
-        const scoreFace = (faceDetection: IFaceDetection) => {
-            return (1 - faceDetection.width * faceDetection.height) + scoreFacePosition(faceDetection);
-        }
-
-        return detections.sort((a, b) => scoreFace(a) - scoreFace(b))[0];
-    }
-
-    /**
-     * This will produce an inline style to apply to images
-     * to zoom toward the detected face
-     */
-    getCoverStyle(photo: IPhoto) {
-        if (!this.isFace) {
-            return {};
-        }
-
-        // Pass the same thing
-        const detection = photo as IFaceDetection;
-
-        // Zoom into the picture so that the face fills the --photos-face-width box nicely
-        // if the face is larger than the image, we don't zoom out (reason for the Math.max)
-        const zoom = Math.max(1, (1 / detection.width) * 0.4)
-
-        // Get center coordinate in percent
-        const horizontalCenterOfFace = (detection.x + detection.width / 2) * 100
-        const verticalCenterOfFace = (detection.y + detection.height / 2) * 100
-
-        // Get preview element dimensions
-        const elem = this.$refs.previews as HTMLElement;
-        const elemWidth = elem.clientWidth;
-        const elemHeight = elem.clientHeight;
-
-        return {
-            // we translate the image so that the center of the detected face is in the center
-            // and add the zoom
-            transform: `translate(calc(${elemWidth}px/2 - ${horizontalCenterOfFace}% ), calc(${elemHeight}px/2 - ${verticalCenterOfFace}% )) scale(${zoom})`,
-            // this is necessary for the zoom to zoom toward the center of the face
-            transformOrigin: `${horizontalCenterOfFace}% ${verticalCenterOfFace}%`,
         }
     }
 }
