@@ -35,13 +35,16 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\StreamResponse;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\AppFramework\Http\DataResponse;
+use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\Files\IRootFolder;
+use OCP\Files\FileInfo;
+use OCP\Files\Folder;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IRequest;
 use OCP\IUserSession;
-use OCP\Files\FileInfo;
-use OCP\Files\Folder;
+use OCP\IPreview;
 
 class ApiController extends Controller {
     private IConfig $config;
@@ -51,6 +54,7 @@ class ApiController extends Controller {
     private IAppManager $appManager;
     private TimelineQuery $timelineQuery;
     private TimelineWrite $timelineWrite;
+    private IPreview $previewManager;
 
     public function __construct(
         IRequest $request,
@@ -58,7 +62,8 @@ class ApiController extends Controller {
         IUserSession $userSession,
         IDBConnection $connection,
         IRootFolder $rootFolder,
-        IAppManager $appManager) {
+        IAppManager $appManager,
+        IPreview $previewManager) {
 
         parent::__construct(Application::APPNAME, $request);
 
@@ -67,6 +72,7 @@ class ApiController extends Controller {
         $this->connection = $connection;
         $this->rootFolder = $rootFolder;
         $this->appManager = $appManager;
+        $this->previewManager = $previewManager;
         $this->timelineQuery = new TimelineQuery($this->connection);
         $this->timelineWrite = new TimelineWrite($connection);
     }
@@ -385,31 +391,89 @@ class ApiController extends Controller {
             $folder,
         );
 
-        // Preload all face previews
-        $previews = $this->timelineQuery->getFacePreviews($folder);
-
-        // Convert to map with key as cluster_id
-        $previews_map = [];
-        foreach ($previews as &$preview) {
-            $key = $preview["cluster_id"];
-            if (!array_key_exists($key, $previews_map)) {
-                $previews_map[$key] = [];
-            }
-            unset($preview["cluster_id"]);
-            $previews_map[$key][] = $preview;
-        }
-
-        // Add all previews to list
-        foreach ($list as &$face) {
-            $key = $face["id"];
-            if (array_key_exists($key, $previews_map)) {
-                $face["previews"] = $previews_map[$key];
-            } else {
-                $face["previews"] = [];
-            }
-        }
-
         return new JSONResponse($list, Http::STATUS_OK);
+    }
+
+    /**
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     *
+     * Get face preview image cropped with imagick
+     * @return DataResponse
+     */
+    public function facePreview(string $id): Http\Response {
+        $user = $this->userSession->getUser();
+        if (is_null($user)) {
+            return new DataResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // Check faces enabled for this user
+        if (!$this->recognizeIsEnabled()) {
+            return new DataResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // Get folder to search for
+        $folder = $this->getRequestFolder();
+        if (is_null($folder)) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
+
+        // Run actual query
+        $detections = $this->timelineQuery->getFacePreviewDetection($folder, intval($id));
+        if (is_null($detections) || count($detections) == 0) {
+            return new DataResponse([], Http::STATUS_NOT_FOUND);
+        }
+
+        // Find the first detection that has a preview
+        $preview = null;
+        foreach ($detections as &$detection) {
+            // Get the file (also checks permissions)
+            $files = $folder->getById($detection["file_id"]);
+            if (count($files) == 0 || $files[0]->getType() != FileInfo::TYPE_FILE) {
+                continue;
+            }
+
+            // Get (hopefully cached) preview image
+            try {
+                $preview = $this->previewManager->getPreview($files[0], 2048, 2048, false);
+            } catch (\Exception $e) {
+                continue;
+            }
+
+            // Got the preview
+            break;
+        }
+
+        // Make sure the preview is valid
+        if (is_null($preview)) {
+            return new DataResponse([], Http::STATUS_NOT_FOUND);
+        }
+
+        // Crop image
+        $image = new \Imagick();
+        $image->readImageBlob($preview->getContent());
+        $iw = $image->getImageWidth();
+        $ih = $image->getImageHeight();
+        $dw = floatval($detection["width"]);
+        $dh = floatval($detection["height"]);
+        $dcx = floatval($detection["x"]) + floatval($detection["width"]) / 2;
+        $dcy = floatval($detection["y"]) + floatval($detection["height"]) / 2;
+        $faceDim = max($dw * $iw, $dh * $ih) * 1.5;
+        $image->cropImage(
+            intval($faceDim),
+            intval($faceDim),
+            intval($dcx * $iw - $faceDim / 2),
+            intval($dcy * $ih - $faceDim / 2),
+        );
+        $image->resizeImage(256, 256, \Imagick::FILTER_LANCZOS, 1);
+        $blob = $image->getImageBlob();
+
+        // Create and send response
+        $response = new DataDisplayResponse($blob, Http::STATUS_OK, [
+            'Content-Type' => $image->getImageMimeType(),
+        ]);
+        $response->cacheFor(3600 * 24, false, false);
+        return $response;
     }
 
     /**
