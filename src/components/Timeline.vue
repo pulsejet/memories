@@ -725,6 +725,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             rowHeight: this.rowHeight,
             squareMode: this.squareMode,
             numCols: this.numCols,
+            allowBreakout: (window.innerWidth < 768) && !this.config_squareThumbs,
             seed: dayId,
         });
 

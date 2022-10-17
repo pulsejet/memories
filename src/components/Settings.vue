@@ -34,7 +34,7 @@
 
         <NcCheckboxRadioSwitch :checked.sync="config_squareThumbs"
             type="switch">
-            {{ t('memories', 'Square photos') }}
+            {{ t('memories', 'Square grid mode') }}
         </NcCheckboxRadioSwitch>
 
         <button @click="updateAll()">
