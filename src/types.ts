@@ -24,10 +24,6 @@ export type IDay = {
     rows?: IRow[];
     /** List of photos for this day */
     detail?: IPhoto[];
-    /** WebDAV fileInfos, fetched before viewer open */
-    fileInfos?: IFileInfo[];
-    /** Original fileIds from fileInfos */
-    origFileIds?: Set<number>;
 }
 
 export type IPhoto = {
