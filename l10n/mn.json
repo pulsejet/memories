@@ -5,17 +5,17 @@
     "Archive" : "архив",
     "Tags" : "Tag-үүд",
     "Settings" : "Тохиргоо",
-    "Month" : "Сар",
-    "Day" : "Өдөр",
-    "Time" : "Цаг",
-    "Delete" : "Устгах",
-    "Name" : "Нэр",
-    "Update" : "Шинэчлэх",
     "Cancel" : "болиулах",
-    "Back" : "буцах",
+    "Delete" : "Устгах",
     "Download" : "Татах",
     "Favorite" : "Дуртай",
     "Unarchive" : "Архиваас гаргах",
-    "View in folder" : "Хавтасыг нээх"
+    "View in folder" : "Хавтасыг нээх",
+    "Update" : "Шинэчлэх",
+    "Month" : "Сар",
+    "Day" : "Өдөр",
+    "Time" : "Цаг",
+    "Name" : "Нэр",
+    "Back" : "буцах"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

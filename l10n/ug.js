@@ -4,13 +4,13 @@ OC.L10N.register(
     "Favorites" : "يىغقۇچ",
     "Tags" : "بەلگەلەر",
     "Settings" : "تەڭشەكلەر",
+    "Cancel" : "ۋاز كەچ",
+    "Delete" : "ئۆچۈر",
+    "Download" : "چۈشۈر",
+    "Favorite" : "يىغقۇچ",
+    "Update" : "يېڭىلا",
     "Month" : "ئاي",
     "Time" : "ۋاقىت",
-    "Delete" : "ئۆچۈر",
-    "Name" : "ئاتى",
-    "Update" : "يېڭىلا",
-    "Cancel" : "ۋاز كەچ",
-    "Download" : "چۈشۈر",
-    "Favorite" : "يىغقۇچ"
+    "Name" : "ئاتى"
 },
 "nplurals=2; plural=(n != 1);");

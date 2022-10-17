@@ -8,20 +8,20 @@
     "On this day" : "Vandaag",
     "Tags" : "Tags",
     "Settings" : "Instellingen",
+    "Cancel" : "Annuleren",
+    "Delete" : "Verwijder",
+    "Download" : "Download",
+    "Favorite" : "Favoriet",
+    "Unarchive" : "Terugzetten uit archief",
+    "View in folder" : "Bekijken in map",
+    "Update" : "Update",
     "Year" : "Jaar",
     "Month" : "Maand",
     "Day" : "Dag",
     "Time" : "Tijd",
     "Hour" : "Uur",
     "Minute" : "Minuut",
-    "Delete" : "Verwijder",
     "Name" : "Naam",
-    "Update" : "Update",
-    "Cancel" : "Annuleren",
-    "Back" : "Terug",
-    "Download" : "Download",
-    "Favorite" : "Favoriet",
-    "Unarchive" : "Terugzetten uit archief",
-    "View in folder" : "Bekijken in map"
+    "Back" : "Terug"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

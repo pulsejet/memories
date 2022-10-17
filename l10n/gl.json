@@ -7,20 +7,20 @@
     "Archive" : "Aquivar",
     "Tags" : "Etiquetas",
     "Settings" : "Axustes",
+    "Cancel" : "Cancelar",
+    "Delete" : "Eliminar",
+    "Download" : "Descargar",
+    "Favorite" : "Favorito",
+    "Unarchive" : "Desarquivar",
+    "View in folder" : "Ver no cartafol",
+    "Update" : "Actualizar",
     "Year" : "Ano",
     "Month" : "Mes",
     "Day" : "Día",
     "Time" : "Hora",
     "Hour" : "Hora",
     "Minute" : "Minuto",
-    "Delete" : "Eliminar",
     "Name" : "Nome",
-    "Update" : "Actualizar",
-    "Cancel" : "Cancelar",
-    "Back" : "Atrás",
-    "Download" : "Descargar",
-    "Favorite" : "Favorito",
-    "Unarchive" : "Desarquivar",
-    "View in folder" : "Ver no cartafol"
+    "Back" : "Atrás"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

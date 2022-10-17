@@ -7,17 +7,17 @@
     "Archive" : "بایگانی",
     "Tags" : "برچسب ها",
     "Settings" : "تنظیمات",
+    "Cancel" : "لغو",
+    "Delete" : "حذف",
+    "Download" : "بارگیری",
+    "Favorite" : "مورد‌ ‌علاقه‌",
+    "View in folder" : "مشاهده در پوشه",
+    "Update" : "یه‌روزرسانی",
     "Year" : "سال",
     "Month" : "ماه",
     "Day" : "روز",
     "Time" : "زمان",
-    "Delete" : "حذف",
     "Name" : "نام",
-    "Update" : "یه‌روزرسانی",
-    "Cancel" : "لغو",
-    "Back" : "بازگشت",
-    "Download" : "بارگیری",
-    "Favorite" : "مورد‌ ‌علاقه‌",
-    "View in folder" : "مشاهده در پوشه"
+    "Back" : "بازگشت"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }
