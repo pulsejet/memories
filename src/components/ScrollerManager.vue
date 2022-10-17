@@ -53,7 +53,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
     @Prop() recyclerBefore!: any;
 
     /** Height of the entire photo view */
-    private recyclerHeight!: number;
+    private recyclerHeight: number = 100;
     /** Computed ticks */
     private ticks: ITick[] = [];
     /** Computed cursor top */
@@ -96,8 +96,11 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
         // Ignore if not initialized
         if (!this.ticks.length) return;
 
+        // Get the scroll position
+        const scroll = this.recycler?.$el?.scrollTop || 0;
+
         // Move hover cursor to px position
-        this.cursorY = utils.roundHalf(event ? event.target.scrollTop * this.height / this.recyclerHeight : 0);
+        this.cursorY = utils.roundHalf(scroll * this.height / this.recyclerHeight);
         this.moveHoverCursor(this.cursorY);
 
         // Show the scroller for some time
