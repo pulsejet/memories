@@ -8,20 +8,20 @@
     "On this day" : "Aquest mateix dia",
     "Tags" : "Etiquetes",
     "Settings" : "Paràmetres",
+    "Cancel" : "Cancel·la",
+    "Delete" : "Suprimeix",
+    "Download" : "Baixa",
+    "Favorite" : "Preferit",
+    "Unarchive" : "Desbloquejar",
+    "View in folder" : "Visualitza-ho a la carpeta",
+    "Update" : "Actualitzar",
     "Year" : "Any",
     "Month" : "Mes",
     "Day" : "Dia",
     "Time" : "Hora",
     "Hour" : "Hora",
     "Minute" : "Minut",
-    "Delete" : "Suprimeix",
     "Name" : "Cognom",
-    "Update" : "Actualitzar",
-    "Cancel" : "Cancel·la",
-    "Back" : "Torna",
-    "Download" : "Baixa",
-    "Favorite" : "Preferit",
-    "Unarchive" : "Desbloquejar",
-    "View in folder" : "Visualitza-ho a la carpeta"
+    "Back" : "Torna"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -6,17 +6,17 @@
     "Archive" : "Arsip",
     "Tags" : "Tag",
     "Settings" : "Setelan",
+    "Cancel" : "Membatalkan",
+    "Delete" : "Hapus",
+    "Download" : "Unduh",
+    "Favorite" : "Favorit",
+    "View in folder" : "Lihat dalam folder",
+    "Update" : "Perbarui",
     "Month" : "Bulan",
     "Day" : "Hari",
     "Time" : "Waktu",
     "Hour" : "Jam",
-    "Delete" : "Hapus",
     "Name" : "Nama",
-    "Update" : "Perbarui",
-    "Cancel" : "Membatalkan",
-    "Back" : "Kembali",
-    "Download" : "Unduh",
-    "Favorite" : "Favorit",
-    "View in folder" : "Lihat dalam folder"
+    "Back" : "Kembali"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

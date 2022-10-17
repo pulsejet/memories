@@ -5,17 +5,17 @@
     "Archive" : "Archivu",
     "Tags" : "Etiquetes",
     "Settings" : "Settings",
+    "Cancel" : "Encaboxar",
+    "Delete" : "Desaniciar",
+    "Download" : "Baxar",
+    "Favorite" : "Marcar como favoritu",
+    "View in folder" : "Ver na carpeta",
+    "Update" : "Anovar",
     "Month" : "Mes",
     "Day" : "Día",
     "Time" : "Hora",
     "Hour" : "Hora",
-    "Delete" : "Desaniciar",
     "Name" : "Nome",
-    "Update" : "Anovar",
-    "Cancel" : "Encaboxar",
-    "Back" : "Atrás",
-    "Download" : "Baxar",
-    "Favorite" : "Marcar como favoritu",
-    "View in folder" : "Ver na carpeta"
+    "Back" : "Atrás"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

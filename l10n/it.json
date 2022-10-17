@@ -8,6 +8,13 @@
     "On this day" : "In questo giorno",
     "Tags" : "Etichette",
     "Settings" : "Impostazioni",
+    "Cancel" : "Annulla",
+    "Delete" : "Elimina",
+    "Download" : "Scarica",
+    "Favorite" : "Preferito",
+    "Unarchive" : "Togli dall'archivio",
+    "View in folder" : "Visualizza nella cartella",
+    "Update" : "Aggiorna",
     "Year" : "Anno",
     "Month" : "Mese",
     "Day" : "Giorno",
@@ -15,16 +22,9 @@
     "Hour" : "Ora",
     "Minute" : "Minuto",
     "Remove person" : "Rimuovi persona",
-    "Delete" : "Elimina",
     "Rename person" : "Rinomina persona",
     "Name" : "Nome",
-    "Update" : "Aggiorna",
-    "Cancel" : "Annulla",
     "Back" : "Indietro",
-    "Merge with different person" : "Unisci ad un'altra persona",
-    "Download" : "Scarica",
-    "Favorite" : "Preferito",
-    "Unarchive" : "Togli dall'archivio",
-    "View in folder" : "Visualizza nella cartella"
+    "Merge with different person" : "Unisci ad un'altra persona"
 },"pluralForm" :"nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }
