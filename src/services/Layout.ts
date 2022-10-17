@@ -23,6 +23,8 @@ export function getLayout(
     height: number,
     rowHeight?: number,
 }[] {
+    if (input.length === 0) return [];
+
     if (!opts.squareMode) {
         return justifiedLayout((input), {
             containerPadding: 0,
