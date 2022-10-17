@@ -13,6 +13,7 @@ export function getLayout(
         rowHeight: number,
         squareMode: boolean,
         numCols: number,
+        allowBreakout: boolean,
         seed: number,
     }
 ): {
@@ -71,7 +72,8 @@ export function getLayout(
         // Check if previous row has something used
         // or something beside this is used
         // We don't do these one after another
-        if ((row > 0 && matrix[row-1].some(v => v & FLAG_USED)) ||
+        if (!opts.allowBreakout ||
+            (row > 0 && matrix[row-1].some(v => v & FLAG_USED)) ||
             (col > 0 && matrix[row][col-1] & FLAG_USED)
         ) {
             photoId++; col++; continue;
