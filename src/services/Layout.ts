@@ -13,6 +13,7 @@ export function getLayout(
         rowHeight: number,
         squareMode: boolean,
         numCols: number,
+        seed: number,
     }
 ): {
     top: number,
@@ -30,6 +31,9 @@ export function getLayout(
             targetRowHeightTolerance: 0.1,
         }).boxes;
     }
+
+    // RNG
+    const rand = mulberry32(opts.seed);
 
     // Binary flags
     const FLAG_USE          = 1 << 0;
@@ -103,7 +107,7 @@ export function getLayout(
             (numLeft === 0 || numLeft >= opts.numCols);
 
         // Full width breakout
-        if (canBreakout && Math.random() < (input.length > 0 ? 0.2 : 0.1)) {
+        if (canBreakout && rand() < (input.length > 0 ? 0.2 : 0.1)) {
             matrix[row][col] |= FLAG_BREAKOUT;
             for (let i = 1; i < opts.numCols; i++) {
                 matrix[row][i] |= FLAG_USED;
@@ -111,7 +115,7 @@ export function getLayout(
         }
 
         // Use 6 vertically
-        else if (canUse6 && Math.random() < 0.2) {
+        else if (canUse6 && rand() < 0.2) {
             matrix[row][col] |= FLAG_USE6;
             matrix[row+1][col] |= FLAG_USED;
             matrix[row+2][col] |= FLAG_USED;
@@ -121,7 +125,7 @@ export function getLayout(
         }
 
         // Use 4 box
-        else if (canUse4 && Math.random() < ((col % 2) ? 0.67 : 0.4)) {
+        else if (canUse4 && rand() < ((col % 2) ? 0.67 : 0.4)) {
             matrix[row][col] |= FLAG_USE4;
             matrix[row+1][col] |= FLAG_USED;
             matrix[row][col+1] |= FLAG_USED;
@@ -198,4 +202,13 @@ function flagMatrixStr(matrix: number[][], numFlag: number) {
         str += i.toString().padStart(2) + ' | ' + rstr + '\n';
     }
     return str;
+}
+
+function mulberry32(a: number) {
+    return function() {
+      var t = a += 0x6D2B79F5;
+      t = Math.imul(t ^ t >>> 15, t | 1);
+      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    }
 }
