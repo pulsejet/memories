@@ -9,6 +9,7 @@ use OCA\Files\Event\LoadSidebar;
 use OCP\AppFramework\Controller;
 use OCP\App\IAppManager;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\IConfig;
 use OCP\IUserSession;
 use OCP\Util;
@@ -71,7 +72,12 @@ class PageController extends Controller {
         $this->initialState->provideInitialState('recognize', $this->appManager->isEnabledForUser('recognize') === true);
         $this->initialState->provideInitialState('version', $this->appManager->getAppInfo('memories')["version"]);
 
+        $policy = new ContentSecurityPolicy();
+		$policy->addAllowedWorkerSrcDomain("'self'");
+		$policy->addAllowedScriptDomain("'self'");
+
         $response = new TemplateResponse($this->appName, 'main');
+        $response->setContentSecurityPolicy($policy);
         return $response;
     }
 
