@@ -638,13 +638,10 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             // changed just to be sure
             utils.cacheData(url, data);
 
-            // Check if the response has any delta whatsoever
-            // Comparing the set of fileid+etag is good enough
+            // Check if the response has any delta
             if (head.day.detail?.length) {
-                const tags = new Set<string>(data.map((photo) => photo.etag + photo.fileid));
-                if (head.day.detail &&
-                    tags.size === head.day.count &&
-                    head.day.detail.every((p) => tags.has(p.etag + p.fileid))
+                if (head.day.detail.length === data.length &&
+                    head.day.detail.every((p, i) => p.fileid === data[i].fileid && p.etag === data[i].etag)
                 ) {
                     return;
                 }
