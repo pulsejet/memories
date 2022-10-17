@@ -7,19 +7,19 @@
     "On this day" : "På denne dagen",
     "Tags" : "Merkelapper",
     "Settings" : "Innstillinger",
+    "Cancel" : "Avbryt",
+    "Delete" : "Slett",
+    "Download" : "Last ned",
+    "Favorite" : "Favoritt",
+    "Unarchive" : "Dearkivere",
+    "View in folder" : "Vis i mappe",
+    "Update" : "Oppdater",
     "Year" : "År",
     "Month" : "Måned",
     "Day" : "Dag",
     "Time" : "Tid",
     "Hour" : "Time",
-    "Delete" : "Slett",
     "Name" : "Navn",
-    "Update" : "Oppdater",
-    "Cancel" : "Avbryt",
-    "Back" : "Tilbake",
-    "Download" : "Last ned",
-    "Favorite" : "Favoritt",
-    "Unarchive" : "Dearkivere",
-    "View in folder" : "Vis i mappe"
+    "Back" : "Tilbake"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -4,11 +4,11 @@ OC.L10N.register(
     "Favorites" : "په نښه شوي",
     "Tags" : "نښکې",
     "Settings" : "سمونې",
-    "Delete" : "ړنګول",
-    "Name" : "نوم",
     "Cancel" : "پرېښول",
+    "Delete" : "ړنګول",
     "Download" : "ښکته کول",
     "Favorite" : "په نښه شوی",
-    "View in folder" : "په فولډر کې کتل"
+    "View in folder" : "په فولډر کې کتل",
+    "Name" : "نوم"
 },
 "nplurals=2; plural=(n != 1);");

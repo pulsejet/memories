@@ -5,18 +5,18 @@
     "Archive" : "Archiu",
     "Tags" : "Etiquetas",
     "Settings" : "Paramètres",
+    "Cancel" : "Anullar",
+    "Delete" : "Suprimir",
+    "Download" : "Telecargar",
+    "Favorite" : "Favorit",
+    "Update" : "Actualizar",
     "Year" : "Annada",
     "Month" : "Mes",
     "Day" : "Jorn",
     "Time" : "Ora",
     "Hour" : "Ora",
     "Minute" : "Minuta",
-    "Delete" : "Suprimir",
     "Name" : "Nom",
-    "Update" : "Actualizar",
-    "Cancel" : "Anullar",
-    "Back" : "Retorn",
-    "Download" : "Telecargar",
-    "Favorite" : "Favorit"
+    "Back" : "Retorn"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }

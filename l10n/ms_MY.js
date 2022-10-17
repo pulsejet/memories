@@ -3,13 +3,13 @@ OC.L10N.register(
     {
     "Favorites" : "Favorites",
     "Settings" : "Tetapan",
+    "Cancel" : "Batal",
+    "Delete" : "Padam",
+    "Download" : "Muat turun",
+    "Update" : "Kemaskini",
     "Month" : "Bulan",
     "Day" : "Hari",
-    "Delete" : "Padam",
     "Name" : "Nama",
-    "Update" : "Kemaskini",
-    "Cancel" : "Batal",
-    "Back" : "Kembali",
-    "Download" : "Muat turun"
+    "Back" : "Kembali"
 },
 "nplurals=1; plural=0;");

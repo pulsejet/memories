@@ -5,11 +5,11 @@ OC.L10N.register(
     "Videos" : "Wideo",
     "Tags" : "Bellikler",
     "Settings" : "Sazlamalar",
-    "Delete" : "Pozmak",
-    "Name" : "Ady",
     "Cancel" : "ýatyrmak",
-    "Back" : "Yzyna",
+    "Delete" : "Pozmak",
     "Download" : "Göçürip almak",
-    "Favorite" : "Halaýan"
+    "Favorite" : "Halaýan",
+    "Name" : "Ady",
+    "Back" : "Yzyna"
 },
 "nplurals=2; plural=(n != 1);");

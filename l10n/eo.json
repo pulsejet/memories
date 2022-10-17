@@ -6,17 +6,17 @@
     "Archive" : "Arĥivujo",
     "Tags" : "Etikedoj",
     "Settings" : "Agordoj",
+    "Cancel" : "Nuligi",
+    "Delete" : "Forigi",
+    "Download" : "Elŝuti",
+    "Favorite" : "Pliŝatati",
+    "View in folder" : "Vidi en dosierujo",
+    "Update" : "Ĝisdatigi",
     "Month" : "Monato",
     "Day" : "Tago",
     "Time" : "Dato",
     "Hour" : "Horo",
-    "Delete" : "Forigi",
     "Name" : "Nomo",
-    "Update" : "Ĝisdatigi",
-    "Cancel" : "Nuligi",
-    "Back" : "Antaŭen",
-    "Download" : "Elŝuti",
-    "Favorite" : "Pliŝatati",
-    "View in folder" : "Vidi en dosierujo"
+    "Back" : "Antaŭen"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
