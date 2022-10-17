@@ -87,7 +87,7 @@
 
         <SelectionManager ref="selectionManager"
             :selection="selection" :heads="heads"
-            @refresh="refresh"
+            @refresh="softRefresh"
             @delete="deleteFromViewWithAnimation"
             @updateLoading="updateLoading" />
     </div>
@@ -235,18 +235,15 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     }
 
     /** Recreate everything */
-    async refresh(preservePosition = false) {
-        // Get current scroll position
-        const origScroll = (<any>this.$refs.recycler).$el.scrollTop;
-
-        // Reset state
+    async refresh() {
         await this.resetState();
         await this.createState();
+    }
 
-        // Restore scroll position
-        if (preservePosition) {
-            (<any>this.$refs.recycler).scrollToPosition(origScroll);
-        }
+    /** Re-process days */
+    async softRefresh() {
+        this.selectionManager.clearSelection();
+        await this.fetchDays(true);
     }
 
     /** Do resize after some time */
@@ -342,9 +339,19 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             }
         }
 
+        // Check if this was requested by a refresh
+        const force = this.currentEnd === -1;
+
         // Make sure we don't do this too often
         this.currentStart = startIndex;
         this.currentEnd = endIndex;
+
+        // Check if this was requested specifically
+        if (force) {
+            this.loadScrollChanges(startIndex, endIndex);
+            return;
+        }
+
         setTimeout(() => {
             // Get the overlapping range between startIndex and
             // currentStart and endIndex and currentEnd.
@@ -472,13 +479,16 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     }
 
     /** Fetch timeline main call */
-    async fetchDays() {
+    async fetchDays(noCache=false) {
         let url = '/apps/memories/api/days';
         let params: any = {};
 
         // Try cache first
         let cache: IDay[];
         const cacheUrl = window.location.pathname + 'api/days';
+
+        // Make sure to refresh scroll later
+        this.currentEnd = -1;
 
         try {
             this.loading++;
@@ -493,7 +503,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 data = await dav.getPeopleData();
             } else {
                 // Try the cache
-                cache = await utils.getCachedData(cacheUrl);
+                cache = noCache ? null : (await utils.getCachedData(cacheUrl));
                 if (cache) {
                     await this.processDays(cache);
                     this.loading--;
@@ -578,8 +588,17 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             heads[day.dayid] = head;
             list.push(head);
 
+            // Dummy rows for placeholders
+            let nrows = Math.ceil(day.count / this.numCols);
+
+            // Check if already loaded - we can learn
+            let prevRows: IRow[] | null = null;
+            if (this.loadedDays.has(day.dayid)) {
+                prevRows = this.heads[day.dayid]?.day.rows;
+                nrows = prevRows?.length || nrows;
+            }
+
             // Add rows
-            const nrows = Math.ceil(day.count / this.numCols);
             for (let i = 0; i < nrows; i++) {
                 const row = this.addRow(day);
                 list.push(row);
@@ -588,6 +607,12 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 const leftNum = (day.count - i * this.numCols);
                 row.pct = leftNum > this.numCols ? this.numCols : leftNum;
                 row.photos = [];
+
+                // Learn from existing row
+                if (prevRows && i < prevRows.length) {
+                    row.size = prevRows[i].size;
+                    row.photos = prevRows[i].photos;
+                }
             }
 
             // Continue processing
