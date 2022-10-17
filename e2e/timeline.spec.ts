@@ -37,6 +37,7 @@ test.describe('Open', () => {
 
     // refresh page
     await page.reload();
+    await page.waitForTimeout(4000); // cache
     await page.waitForSelector('img[src*="core/preview"]');
     expect(await page.locator(`img[src="${src1}"]`).count()).toBe(0);
     expect(await page.locator(`img[src="${src2}"]`).count()).toBe(0);
