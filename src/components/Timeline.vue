@@ -725,6 +725,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             rowHeight: this.rowHeight,
             squareMode: this.squareMode,
             numCols: this.numCols,
+            seed: dayId,
         });
 
         // Check if some rows were added
