@@ -5,9 +5,10 @@ This file is manually updated. Please file an issue if something is missing.
 ## v4.3.0, v3.3.0
 * **Note:** you must run `occ memories:index -f` after updating to take advantage of new features.
 * **Brand new tiled layout for photos**
-* Improved performance with caching
-* Improve scroller performance
+* Improve overall performance with caching
 * Basic offline support with cache
+* Improve scroller performance
+* Improve faces view performance
 
 ## v4.2.2, v3.2.2 (2022-10-12)
 * Update to mobile layout with improved performance
