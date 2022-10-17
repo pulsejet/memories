@@ -103,9 +103,9 @@ import GlobalMixin from '../mixins/GlobalMixin';
 import moment from 'moment';
 
 import { ViewerManager } from "../services/Viewer";
+import { getLayout } from "../services/Layout";
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
-import justifiedLayout from "justified-layout";
 import axios from '@nextcloud/axios'
 import Folder from "./frame/Folder.vue";
 import Tag from "./frame/Tag.vue";
@@ -715,17 +715,16 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         }
 
         // Create justified layout with correct params
-        const justify = justifiedLayout(day.detail.map(p => {
+        const justify = getLayout(day.detail.map(p => {
             return {
-                width: (this.squareMode ? null : p.w) || this.rowHeight,
-                height: (this.squareMode ? null : p.h) || this.rowHeight,
+                width: p.w || this.rowHeight,
+                height: p.h || this.rowHeight,
             };
         }), {
-            containerWidth: this.rowWidth,
-            containerPadding: 0,
-            boxSpacing: 0,
-            targetRowHeight: this.rowHeight,
-            targetRowHeightTolerance: 0.1,
+            rowWidth: this.rowWidth,
+            rowHeight: this.rowHeight,
+            squareMode: this.squareMode,
+            numCols: this.numCols,
         });
 
         // Check if some rows were added
@@ -742,7 +741,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         const scrollY = this.getScrollY();
 
         // Previous justified row
-        let prevJustifyTop = justify.boxes[0]?.top || 0;
+        let prevJustifyTop = justify[0]?.top || 0;
 
         // Add all rows
         let dataIdx = 0;
@@ -756,7 +755,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             }
 
             // Go to the next row
-            const jbox = justify.boxes[dataIdx];
+            const jbox = justify[dataIdx];
             if (jbox.top !== prevJustifyTop) {
                 prevJustifyTop = jbox.top;
                 rowIdx++;
@@ -765,11 +764,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
             // Set row height
             const row = this.list[rowIdx];
-            const jH = Math.round(jbox.height);
+            const jH = this.squareMode ? this.rowHeight : Math.round(jbox.height);
             const delta = jH - row.size;
             // If the difference is too small, it's not worth risking an adjustment
             // especially on square layouts on mobile. Also don't do this if animating.
-            if (Math.abs(delta) > 5 && !isAnimating) {
+            if (!isAnimating && Math.abs(delta) > 5) {
                 rowSizeDelta += delta;
                 row.size = jH;
             }
@@ -788,8 +787,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             const setPos = () => {
                 photo.dispWp = utils.round(jbox.width / this.rowWidth, 4, true);
                 photo.dispXp = utils.round(jbox.left / this.rowWidth, 4, true);
+                photo.dispH = this.squareMode ? utils.roundHalf(jbox.height) : 0;
                 photo.dispY = 0;
-                photo.dispH = 0;
                 photo.dispRowNum = row.num;
             };
             if (photo.dispWp !== undefined) { // photo already displayed: animate
