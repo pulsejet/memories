@@ -42,16 +42,6 @@ export function getLayout(
         matrix[i] = new Array(opts.numCols).fill(0);
     }
 
-    // Useful for debugging
-    const printMatrix = () => {
-        let str = '';
-        for (let i = 0; i < matrix.length; i++) {
-            const rstr = matrix[i].map(v => v.toString(2).padStart(4, '0')).join(' ');
-            str += i.toString().padStart(2) + ' | ' + rstr + '\n';
-        }
-        console.log(str);
-    }
-
     // Fill in the matrix
     let row = 0;
     let col = 0;
@@ -106,7 +96,7 @@ export function getLayout(
 
     // REMOVE BEFORE PUSH
     if (input.length == 10)
-        printMatrix();
+        console.log(flagMatrixStr(matrix, 3));
 
     // Square layout matrix
     const absMatrix: {
@@ -154,4 +144,13 @@ export function getLayout(
     }
 
     return absMatrix;
+}
+
+function flagMatrixStr(matrix: number[][], numFlag: number) {
+    let str = '';
+    for (let i = 0; i < matrix.length; i++) {
+        const rstr = matrix[i].map(v => v.toString(2).padStart(numFlag, '0')).join(' ');
+        str += i.toString().padStart(2) + ' | ' + rstr + '\n';
+    }
+    return str;
 }
