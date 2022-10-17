@@ -170,6 +170,13 @@ let staticCache: Cache | null = null;
 const cacheName = `memories-${loadState('memories', 'version')}-${getCurrentUser()!.uid}`;
 openCache().then((cache) => { staticCache = cache });
 
+// Clear all caches except the current one
+caches.keys().then((keys) => {
+    keys.filter((key) => key.startsWith('memories-') && key !== cacheName).forEach((key) => {
+        caches.delete(key);
+    });
+});;
+
 /** Open the cache */
 export async function openCache() {
     return await caches.open(cacheName);
