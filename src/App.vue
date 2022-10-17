@@ -57,6 +57,7 @@ import {
     NcContent, NcAppContent, NcAppNavigation,
     NcAppNavigationItem, NcAppNavigationSettings,
 } from '@nextcloud/vue';
+import { generateUrl } from '@nextcloud/router'
 
 import Timeline from './components/Timeline.vue'
 import Settings from './components/Settings.vue'
@@ -104,6 +105,23 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
             contentVue.classList.add('nextcloud-major-' + version[0]);
         }
     }
+
+    async beforeMount() {
+		if ('serviceWorker' in navigator) {
+			// Use the window load event to keep the page load performant
+			window.addEventListener('load', async () => {
+				try {
+					const url = generateUrl('/apps/memories/service-worker.js');
+					const registration = await navigator.serviceWorker.register(url, { scope: generateUrl('/apps/memories') });
+					console.log('SW registered: ', registration);
+				} catch (error) {
+					console.error('SW registration failed: ', error);
+				}
+			})
+		} else {
+			console.debug('Service Worker is not enabled on this browser.')
+		}
+	}
 }
 </script>
 

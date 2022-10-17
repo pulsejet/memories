@@ -32,5 +32,8 @@ return [
 
         // Config API
         ['name' => 'api#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],
+
+        // Service worker
+        ['name' => 'api#serviceWorker', 'url' => '/service-worker.js', 'verb' => 'GET'],
     ]
 ];

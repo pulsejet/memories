@@ -33,6 +33,8 @@ use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\AppFramework\Http\StreamResponse;
+use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IDBConnection;
@@ -637,4 +639,22 @@ class ApiController extends Controller {
         $this->config->setUserValue($userId, Application::APPNAME, $key, $value);
         return new JSONResponse([], Http::STATUS_OK);
     }
+
+    /**
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
+	public function serviceWorker(): StreamResponse {
+		$response = new StreamResponse(__DIR__.'/../../js/memories-service-worker.js');
+		$response->setHeaders([
+			'Content-Type' => 'application/javascript',
+			'Service-Worker-Allowed' => '/'
+		]);
+		$policy = new ContentSecurityPolicy();
+		$policy->addAllowedWorkerSrcDomain("'self'");
+		$policy->addAllowedScriptDomain("'self'");
+		$policy->addAllowedConnectDomain("'self'");
+		$response->setContentSecurityPolicy($policy);
+		return $response;
+	}
 }
