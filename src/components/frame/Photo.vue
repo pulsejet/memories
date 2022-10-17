@@ -15,7 +15,7 @@
         <Star :size="20" v-if="data.flag & c.FLAG_IS_FAVORITE" />
 
         <div class="img-outer fill-block"
-            @click="click"
+            @click="emitClick"
             @contextmenu="contextmenu"
             @touchstart="touchstart"
             @touchmove="touchend"
@@ -33,11 +33,8 @@
 <script lang="ts">
 import { Component, Prop, Emit, Mixins } from 'vue-property-decorator';
 import { IDay, IPhoto } from "../../types";
-import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 
-import { showError } from '@nextcloud/dialogs'
 import { getPreviewUrl } from "../../services/FileUtils";
-import * as dav from "../../services/DavRequests";
 import errorsvg from "../../assets/error.svg";
 import GlobalMixin from '../../mixins/GlobalMixin';
 
@@ -58,9 +55,8 @@ export default class Photo extends Mixins(GlobalMixin) {
     @Prop() data: IPhoto;
     @Prop() day: IDay;
 
-    @Emit('delete') emitDelete(remPhotos: IPhoto[]) {}
     @Emit('select') emitSelect(data: IPhoto) {}
-    @Emit('clickImg') emitClickImg(component: any) {}
+    @Emit('click') emitClick() {}
 
     /** Get src for image to show */
     src() {
@@ -92,88 +88,8 @@ export default class Photo extends Mixins(GlobalMixin) {
         clearTimeout(this.touchTimer);
     }
 
-    /** Pass to parent */
-    click() {
-        this.emitClickImg(this);
-    }
-
-    /** Open viewer */
-    async openFile() {
-        // Check if this is a placeholder
-        if (this.data.flag & this.c.FLAG_PLACEHOLDER) {
-            return;
-        }
-
-        // Check if already loaded fileInfos or load
-        let fileInfos = this.day.fileInfos;
-        if (!fileInfos) {
-            const ids = this.day.detail.map(p => p.fileid);
-            try {
-                fileInfos = await dav.getFiles(ids);
-            } catch (e) {
-                console.error('Failed to load fileInfos', e);
-            }
-            if (fileInfos.length === 0) {
-                return;
-            }
-
-            // Fix sorting of the fileInfos
-            const itemPositions = {};
-            for (const [index, id] of ids.entries()) {
-                itemPositions[id] = index;
-            }
-            fileInfos.sort(function (a, b) {
-                return itemPositions[a.fileid] - itemPositions[b.fileid];
-            });
-
-            // Store in day with a original copy
-            this.day.fileInfos = fileInfos;
-            this.day.origFileIds = new Set(fileInfos.map(f => f.fileid));
-        }
-
-        // Get this photo in the fileInfos
-        const photo = fileInfos.find(d => Number(d.fileid) === Number(this.data.fileid));
-        if (!photo) {
-            showError(this.t('memories', 'Cannot find this photo anymore!'));
-            return;
-        }
-
-        // Key to store sidebar state
-        const SIDEBAR_KEY = 'memories:sidebar-open';
-
-        // Subscribe to delete events
-        const deleteHandler = ({ fileid }) => {
-            const photo = this.day.detail.find(p => p.fileid === fileid);
-            this.emitDelete([photo]);
-        };
-        subscribe('files:file:deleted', deleteHandler);
-
-        // Open viewer
-        globalThis.OCA.Viewer.open({
-            path: photo.filename,   // path
-            list: fileInfos,        // file list
-            canLoop: false,         // don't loop
-            onClose: () => {        // on viewer close
-                if (globalThis.OCA.Files.Sidebar.file) {
-                    localStorage.setItem(SIDEBAR_KEY, '1');
-                } else {
-                    localStorage.removeItem(SIDEBAR_KEY);
-                }
-                globalThis.OCA.Files.Sidebar.close();
-                unsubscribe('files:file:deleted', deleteHandler);
-            },
-        });
-
-        // Restore sidebar state
-        if (localStorage.getItem(SIDEBAR_KEY) === '1') {
-            globalThis.OCA.Files.Sidebar.open(photo.filename);
-        }
-    }
-
     toggleSelect() {
-        if (this.data.flag & this.c.FLAG_PLACEHOLDER) {
-            return;
-        }
+        if (this.data.flag & this.c.FLAG_PLACEHOLDER) return;
         this.emitSelect(this.data);
     }
 

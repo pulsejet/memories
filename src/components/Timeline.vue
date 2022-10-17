@@ -71,8 +71,7 @@
                                 :day="item.day"
                                 :key="photo.fileid"
                                 @select="selectionManager.selectPhoto"
-                                @delete="deleteFromViewWithAnimation"
-                                @clickImg="clickPhoto" />
+                                @click="clickPhoto(photo)" />
                     </div>
                 </template>
             </template>
@@ -103,6 +102,7 @@ import { NcEmptyContent } from '@nextcloud/vue';
 import GlobalMixin from '../mixins/GlobalMixin';
 import moment from 'moment';
 
+import { ViewerManager } from "../services/Viewer";
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
 import justifiedLayout from "justified-layout";
@@ -178,6 +178,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     private selectionManager!: SelectionManager & any;
     /** Scroller manager component */
     private scrollerManager!: ScrollerManager & any;
+
+    /** Nextcloud viewer proxy */
+    private viewerManager = new ViewerManager(
+        this.deleteFromViewWithAnimation.bind(this),
+        this.updateLoading.bind(this));
 
     mounted() {
         this.selectionManager = this.$refs.selectionManager;
@@ -893,11 +898,13 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     }
 
     /** Clicking on photo */
-    clickPhoto(photoComponent: any) {
+    clickPhoto(photo: IPhoto) {
+        if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
+
         if (this.selection.size > 0) { // selection mode
-            photoComponent.toggleSelect();
+            this.selectionManager.selectPhoto(photo);
         } else {
-            photoComponent.openFile();
+            this.viewerManager.open(photo);
         }
     }
 
