@@ -21,7 +21,6 @@
                 </NcActionButton>
                 <NcActionCheckbox :aria-label="t('memories', 'Mark person in preview')" :checked.sync="config_showFaceRect" @change="changeShowFaceRect">
                     {{ t('memories', 'Mark person in preview') }}
-                    <template #icon> <MergeIcon :size="20" /> </template>
                 </NcActionCheckbox>
                 <NcActionButton :aria-label="t('memories', 'Remove person')" @click="showDeleteModal=true" close-after-click>
                     {{ t('memories', 'Remove person') }}
