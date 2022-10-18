@@ -123,6 +123,27 @@ export function roundHalf(num: number) {
     return Math.round(num * 2) / 2;
 }
 
+/** Choose a random element from an array */
+export function randomChoice(arr: any[]) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+/**
+ * Choose a random sub array from an array
+ * https://stackoverflow.com/a/11935263/4745239
+ */
+export function randomSubarray(arr: any[], size: number) {
+    if (arr.length <= size) return arr;
+    var shuffled = arr.slice(0), i = arr.length, min = i - size, temp, index;
+    while (i-- > min) {
+        index = Math.floor((i + 1) * Math.random());
+        temp = shuffled[index];
+        shuffled[index] = shuffled[i];
+        shuffled[i] = temp;
+    }
+    return shuffled.slice(min);
+}
+
 /**
  * Convert server-side flags to bitmask
  * @param photo Photo to process

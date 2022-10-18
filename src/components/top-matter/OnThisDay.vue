@@ -115,10 +115,16 @@ export default class OnThisDay extends Mixins(GlobalMixin) {
             yearObj.photos.push(photo);
         }
 
-        // Randomly choose preview photo
+        // For each year, randomly choose 10 photos to display
         for (const year of this.years) {
-            const index = Math.floor(Math.random() * year.photos.length);
-            year.preview = year.photos[index];
+            year.photos = utils.randomSubarray(year.photos, 10);
+        }
+
+        // Choose preview photo
+        for (const year of this.years) {
+            // Try to prioritize landscape photos
+            const landscape = year.photos.filter(p => p.w > p.h);
+            year.preview =  utils.randomChoice(landscape) || utils.randomChoice(year.photos);
             year.url = getPreviewUrl(year.preview.fileid, year.preview.etag, false, 512);
         }
 
