@@ -267,7 +267,7 @@ $mobHeight: 150px;
 <style lang="scss">
 .memories__onthisday__btn button {
     transform: scale(0.6);
-    box-shadow: black 0 0 3px 0 !important;
+    box-shadow: var(--color-main-text) 0 0 3px 0 !important;
     background-color: var(--color-main-background) !important;
 }
 </style>
