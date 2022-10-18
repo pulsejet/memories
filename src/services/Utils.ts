@@ -183,9 +183,6 @@ export const constants = {
         FLAG_IS_FACE:       1 << 6,
         FLAG_SELECTED:      1 << 7,
         FLAG_LEAVING:       1 << 8,
-        FLAG_EXIT_LEFT:     1 << 9,
-        FLAG_ENTER_RIGHT:   1 << 10,
-        FLAG_FORCE_RELOAD:  1 << 11,
     },
 
     TagDayID: {
