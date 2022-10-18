@@ -499,6 +499,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     async fetchDays(noCache=false) {
         let params: any = {};
         let url = generateUrl(this.appendQuery('/apps/memories/api/days'), params);
+        const cacheUrl = this.$route.name + url;
 
         // Try cache first
         let cache: IDay[];
@@ -519,7 +520,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 data = await dav.getPeopleData();
             } else {
                 // Try the cache
-                cache = noCache ? null : (await utils.getCachedData(url));
+                cache = noCache ? null : (await utils.getCachedData(cacheUrl));
                 if (cache) {
                     await this.processDays(cache);
                     this.loading--;
@@ -530,7 +531,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             }
 
             // Put back into cache
-            utils.cacheData(url, data);
+            utils.cacheData(cacheUrl, data);
 
             // Make sure we're still on the same page
             if (this.state !== startState) return;
