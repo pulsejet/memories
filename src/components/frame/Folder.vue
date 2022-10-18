@@ -183,6 +183,7 @@ export default class Folder extends Mixins(GlobalMixin) {
         }
 
         > img {
+            object-fit: cover;
             padding: 0;
             filter: brightness(50%);
             transition: filter 0.2s ease-in-out;

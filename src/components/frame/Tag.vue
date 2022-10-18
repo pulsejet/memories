@@ -13,6 +13,7 @@
         <div class="previews fill-block" ref="previews">
             <div class="img-outer" v-for="info of previews" :key="info.fileid">
                 <img
+                    class="fill-block"
                     :class="{ 'error': info.flag & c.FLAG_LOAD_FAIL }"
                     :key="'fpreview-' + info.fileid"
                     :src="getPreviewUrl(info.fileid, info.etag)"
@@ -166,7 +167,7 @@ export default class Tag extends Mixins(GlobalMixin) {
         }
 
         > img {
-            width: 100%;
+            object-fit: cover;
             padding: 0;
             filter: brightness(60%);
             cursor: pointer;
