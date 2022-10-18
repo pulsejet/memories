@@ -39,6 +39,7 @@ export type IPhoto = {
     w?: number;
     /** Height of full image */
     h?: number;
+
     /** Grid display width percentage */
     dispWp?: number;
     /** Grid display height (forced) */
@@ -49,8 +50,13 @@ export type IPhoto = {
     dispY?: number;
     /** Grid display row id (relative to head) */
     dispRowNum?: number;
+
     /** Reference to day object */
     d?: IDay;
+
+    /** Face dimensions */
+    facerect?: IFaceRect;
+
     /** Video flag from server */
     isvideo?: boolean;
     /** Favorite flag from server */
@@ -83,6 +89,13 @@ export interface ITag extends IPhoto {
     user_id?: string;
     /** Cache of previews */
     previews?: IPhoto[];
+}
+
+export interface IFaceRect {
+    w: number;
+    h: number;
+    x: number;
+    y: number;
 }
 
 export type IRow = {
