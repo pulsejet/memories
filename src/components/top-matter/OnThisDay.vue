@@ -1,0 +1,253 @@
+<template>
+    <div class="outer" v-show="years.length > 0">
+        <div class="inner" ref="inner">
+            <div v-for="year of years" class="group" :key="year.year" @click="click(year)">
+                <img class="fill-block"
+                    :src="year.url" />
+
+                <div class="overlay">
+                    {{ year.text }}
+                </div>
+            </div>
+        </div>
+
+        <div class="left-btn dir-btn memories__onthisday__btn" v-if="hasLeft">
+            <NcActions>
+                <NcActionButton
+                    :aria-label="t('memories', 'Move left')"
+                    @click="moveLeft">
+                    {{ t('memories', 'Move left') }}
+                    <template #icon> <LeftMoveIcon :size="28" /> </template>
+                </NcActionButton>
+            </NcActions>
+        </div>
+        <div class="right-btn dir-btn memories__onthisday__btn" v-if="hasRight">
+            <NcActions>
+                <NcActionButton
+                    :aria-label="t('memories', 'Move right')"
+                    @click="moveRight">
+                    {{ t('memories', 'Move right') }}
+                    <template #icon> <RightMoveIcon :size="28" /> </template>
+                </NcActionButton>
+            </NcActions>
+        </div>
+    </div>
+</template>
+
+<script lang="ts">
+import { Component, Emit, Mixins, Prop } from 'vue-property-decorator';
+import GlobalMixin from '../../mixins/GlobalMixin';
+import { NcActions, NcActionButton } from '@nextcloud/vue';
+
+import * as utils from "../../services/Utils";
+import * as dav from '../../services/DavRequests';
+import { ViewerManager } from "../../services/Viewer";
+import { IPhoto } from '../../types';
+import { getPreviewUrl } from "../../services/FileUtils";
+
+import LeftMoveIcon from 'vue-material-design-icons/ChevronLeft.vue';
+import RightMoveIcon from 'vue-material-design-icons/ChevronRight.vue';
+
+interface IYear {
+    year: number;
+    url: string;
+    preview: IPhoto;
+    photos: IPhoto[];
+    text: string;
+};
+
+@Component({
+    name: 'OnThisDay',
+    components: {
+        NcActions,
+        NcActionButton,
+        LeftMoveIcon,
+        RightMoveIcon,
+    }
+})
+export default class OnThisDay extends Mixins(GlobalMixin) {
+    private getPreviewUrl = getPreviewUrl;
+
+    @Emit('load')
+    onload() {}
+
+    private years: IYear[] = []
+
+    private hasRight = false;
+    private hasLeft = false;
+    private scrollStack: number[] = [];
+
+    /**
+     * Nextcloud viewer proxy
+     * Can't use the timeline instance because these photos
+     * might not be in view, so can't delete them
+     */
+    @Prop()
+    private viewerManager!: ViewerManager;
+
+    mounted() {
+        const inner = this.$refs.inner as HTMLElement;
+        inner.addEventListener('scroll', this.onScroll.bind(this));
+
+        this.refresh();
+    }
+
+    async refresh() {
+        const photos = await dav.getOnThisDayRaw();
+        let currentYear = 9999;
+
+        for (const photo of photos) {
+            const dateTaken = utils.dayIdToDate(photo.dayid);
+            const year = dateTaken.getUTCFullYear();
+
+            if (year !== currentYear) {
+                this.years.push({
+                    year,
+                    url: '',
+                    preview: photo,
+                    photos: [],
+                    text: utils.getFromNowStr(dateTaken),
+                });
+                currentYear = year;
+            }
+
+            const yearObj = this.years[this.years.length - 1];
+            yearObj.photos.push(photo);
+        }
+
+        // Randomly choose preview photo
+        for (const year of this.years) {
+            const index = Math.floor(Math.random() * year.photos.length);
+            year.preview = year.photos[index];
+            year.url = getPreviewUrl(year.preview.fileid, year.preview.etag, false, 512);
+        }
+
+        await this.$nextTick();
+        this.onScroll();
+        this.onload();
+    }
+
+    moveLeft() {
+        const inner = this.$refs.inner as HTMLElement;
+        inner.scrollBy(-(this.scrollStack.pop() || inner.clientWidth), 0);
+    }
+
+    moveRight() {
+        const inner = this.$refs.inner as HTMLElement;
+        const innerRect = inner.getBoundingClientRect();
+        const nextChild = Array.from(inner.children).map(c => c.getBoundingClientRect()).find((rect) =>
+            rect.right > innerRect.right
+        );
+
+        let scroll = nextChild ? (nextChild.left - innerRect.left) : inner.clientWidth;
+        scroll = Math.min(inner.scrollWidth - inner.scrollLeft - inner.clientWidth, scroll);
+        this.scrollStack.push(scroll);
+        inner.scrollBy(scroll, 0);
+    }
+
+    onScroll() {
+        const inner = this.$refs.inner as HTMLElement;
+        if (!inner) return;
+        this.hasLeft = inner.scrollLeft > 0;
+        this.hasRight = (inner.clientWidth + inner.scrollLeft < inner.scrollWidth - 20);
+    }
+
+    click(year: IYear) {
+        const allPhotos = this.years.flatMap(y => y.photos);
+        this.viewerManager.open(year.preview, allPhotos);
+    }
+}
+</script>
+
+<style lang="scss" scoped>
+$height: 200px;
+
+.outer {
+    width: calc(100% - 50px);
+    height: $height;
+    overflow: hidden;
+    position: relative;
+    padding: 0 calc(28px * 0.6);
+
+    // Sloppy: ideally this should be done in Timeline
+    // to put a gap between the title and this
+    margin-top: 8px;
+
+    .inner {
+        height: calc(100% + 20px);
+        white-space: nowrap;
+        overflow-x: scroll;
+        scroll-behavior: smooth;
+        border-radius: 10px;
+    }
+
+    .left-btn {
+        position: absolute;
+        top: 50%; left: 0;
+        transform: translate(-10%, -50%);
+    }
+
+    .right-btn {
+        position: absolute;
+        top: 50%; right: 0;
+        transform: translate(10%, -50%);
+    }
+
+    @media (max-width: 768px) {
+        width: 98%;
+        padding: 0;
+        .inner { padding: 0 8px; }
+        .dir-btn { display: none; }
+    }
+}
+
+.group {
+    height: $height;
+    aspect-ratio: 4/3;
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+
+    &:not(:last-of-type) { margin-right: 6px; }
+
+    img {
+        cursor: inherit;
+        object-fit: cover;
+        border-radius: 10px;
+        background-color: var(--color-background-dark);
+        background-clip: padding-box, content-box;
+    }
+
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        display: flex;
+        align-items: end;
+        justify-content: center;
+        color: white;
+        font-size: 1.2em;
+        font-weight: bold;
+        padding-bottom: 5%;
+        text-shadow: 0 0 2px black;
+        cursor: inherit;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    &:hover .overlay {
+        background-color: transparent;
+    }
+}
+</style>
+
+<style lang="scss">
+.memories__onthisday__btn button {
+    transform: scale(0.6);
+    box-shadow: black 0 0 3px 0 !important;
+    background-color: var(--color-main-background) !important;
+}
+</style>

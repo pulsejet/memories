@@ -391,11 +391,10 @@ export async function downloadFilesByIds(fileIds: number[]) {
 }
 
 /**
- * Get the onThisDay data
- * Query for last 120 years; should be enough
+ * Get original onThisDay response.
  */
-export async function getOnThisDayData(): Promise<IDay[]> {
-    const diffs: { [dayId: number]: number } = {};
+export async function getOnThisDayRaw() {
+    const dayIds: number[] = [];
     const now = new Date();
     const nowUTC = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
 
@@ -407,20 +406,22 @@ export async function getOnThisDayData(): Promise<IDay[]> {
             d.setFullYear(d.getFullYear() - i);
             d.setDate(d.getDate() + j);
             const dayId = Math.floor(d.getTime() / 1000 / 86400)
-            diffs[dayId] = i;
+            dayIds.push(dayId);
         }
     }
 
+    return (await axios.post<IPhoto[]>(generateUrl('/apps/memories/api/days'), {
+        body_ids: dayIds.join(','),
+    })).data;
+}
+
+/**
+ * Get the onThisDay data
+ * Query for last 120 years; should be enough
+ */
+export async function getOnThisDayData(): Promise<IDay[]> {
     // Query for photos
-    let data: IPhoto[] = [];
-    try {
-        const res = await axios.post<IPhoto[]>(generateUrl('/apps/memories/api/days'), {
-            body_ids: Object.keys(diffs).join(','),
-        });
-        data = res.data;
-    } catch (e) {
-        throw e;
-    }
+    let data = await getOnThisDayRaw();
 
     // Group photos by day
     const ans: IDay[] = [];

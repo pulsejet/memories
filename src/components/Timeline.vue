@@ -32,6 +32,11 @@
                      v-show="!$refs.topmatter.type && list.length > 0">
                     {{ getViewName() }}
                 </div>
+
+                <OnThisDay v-if="$route.name === 'timeline'"
+                           :viewerManager="viewerManager"
+                           @load="scrollerManager.adjust()">
+                </OnThisDay>
             </template>
 
             <template v-slot="{ item }">
@@ -109,6 +114,7 @@ import Folder from "./frame/Folder.vue";
 import Tag from "./frame/Tag.vue";
 import Photo from "./frame/Photo.vue";
 import TopMatter from "./top-matter/TopMatter.vue";
+import OnThisDay from "./top-matter/OnThisDay.vue";
 import SelectionManager from './SelectionManager.vue';
 import ScrollerManager from './ScrollerManager.vue';
 import UserConfig from "../mixins/UserConfig";
@@ -128,6 +134,7 @@ const MOBILE_NUM_COLS = 3;              // Number of columns on phone
         Tag,
         Photo,
         TopMatter,
+        OnThisDay,
         SelectionManager,
         ScrollerManager,
         NcEmptyContent,
@@ -915,9 +922,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
      * @param delPhotos photos to delete
      */
     async deleteFromViewWithAnimation(delPhotos: IPhoto[]) {
-        if (delPhotos.length === 0) {
-            return;
-        }
+        // Only keep photos with day
+        delPhotos = delPhotos.filter(p => p.d);
+        if (delPhotos.length === 0) return;
 
         // Get all days that need to be updatd
         const updatedDays = new Set<IDay>(delPhotos.map(p => p.d));
