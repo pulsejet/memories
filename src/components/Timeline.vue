@@ -100,7 +100,6 @@ import { showError } from '@nextcloud/dialogs'
 import { getCanonicalLocale } from '@nextcloud/l10n';
 import { NcEmptyContent } from '@nextcloud/vue';
 import GlobalMixin from '../mixins/GlobalMixin';
-import moment from 'moment';
 
 import { ViewerManager } from "../services/Viewer";
 import { getLayout } from "../services/Layout";
@@ -584,9 +583,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             } else if (this.$route.name === 'thisday' && (!prevDay || Math.abs(prevDay.dayid - day.dayid) > 30)) {
                 // thisday view with new year title
                 head.size = 67;
-                const dateTaken = moment(utils.dayIdToDate(day.dayid));
-                const text = dateTaken.locale(getCanonicalLocale()).fromNow();
-                head.super = text.charAt(0).toUpperCase() + text.slice(1);
+                head.super = utils.getFromNowStr(utils.dayIdToDate(day.dayid));
             }
 
             // Add header to list

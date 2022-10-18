@@ -2,6 +2,7 @@ import { getCanonicalLocale } from "@nextcloud/l10n";
 import { getCurrentUser } from '@nextcloud/auth'
 import { loadState } from '@nextcloud/initial-state'
 import { IPhoto } from "../types";
+import moment from 'moment';
 
 // Memoize the result of short date conversions
 // These operations are surprisingly expensive
@@ -43,6 +44,15 @@ export function getLongDateStr(date: Date, skipYear=false, time=false) {
         hour: time ? 'numeric' : undefined,
         minute: time ? 'numeric' : undefined,
     });
+}
+
+/** Get text like "5 years ago" from a date */
+export function getFromNowStr(date: Date) {
+    // Get fromNow in correct locale
+    const text = moment(date).locale(getCanonicalLocale()).fromNow();
+
+    // Title case
+    return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 /**
