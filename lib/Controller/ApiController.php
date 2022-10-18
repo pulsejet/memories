@@ -465,7 +465,7 @@ class ApiController extends Controller {
             intval($dcx * $iw - $faceDim / 2),
             intval($dcy * $ih - $faceDim / 2),
         );
-        $image->resizeImage(256, 256, \Imagick::FILTER_LANCZOS, 1);
+        $image->scaleImage(256, 256, true);
         $blob = $image->getImageBlob();
 
         // Create and send response
