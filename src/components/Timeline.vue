@@ -28,15 +28,16 @@
         >
             <template #before>
                 <!-- Show dynamic top matter, name of the view -->
-                <div class="recycler-before" ref="recyclerBefore"
-                     v-show="!$refs.topmatter.type && list.length > 0">
-                    {{ getViewName() }}
-                </div>
+                <div class="recycler-before" ref="recyclerBefore">
+                    <div class="text" v-show="!$refs.topmatter.type && list.length > 0">
+                        {{ getViewName() }}
+                    </div>
 
-                <OnThisDay v-if="$route.name === 'timeline'"
+                    <OnThisDay v-if="$route.name === 'timeline'"
                            :viewerManager="viewerManager"
                            @load="scrollerManager.adjust()">
-                </OnThisDay>
+                    </OnThisDay>
+                </div>
             </template>
 
             <template v-slot="{ item }">
@@ -1035,9 +1036,12 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     @include phone { padding-left: 40px; }
 }
 .recycler-before {
-    font-size: 1.2em;
-    padding-top: 13px;
-    padding-left: 8px;
-    @include phone { padding-left: 48px; }
+    width: 100%;
+    > .text {
+        font-size: 1.2em;
+        padding-top: 13px;
+        padding-left: 8px;
+        @include phone { padding-left: 48px; }
+    }
 }
 </style>
