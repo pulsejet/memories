@@ -323,8 +323,9 @@ class Exif {
         $height = $exif['ImageHeight'] ?? 0;
 
         // Check if image is rotated and we need to swap width and height
-        $rotation = $exif['Orientation'] ?? 0;
-        if (in_array($rotation, [5, 6, 7, 8])) {
+        $rotation = $exif['Rotation'] ?? 0;
+        $orientation = $exif['Orientation'] ?? 0;
+        if (in_array($orientation, [5, 6, 7, 8]) || in_array($rotation, [90, 270])) {
             return [$height, $width];
         }
 
