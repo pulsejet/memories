@@ -15,64 +15,11 @@
             </div>
 
             <NcActions :inline="1">
-                <NcActionButton
-                    :aria-label="t('memories', 'Delete')"
-                    @click="deleteSelection">
-                    {{ t('memories', 'Delete') }}
-                    <template #icon> <Delete :size="20" /> </template>
-                </NcActionButton>
-                <NcActionButton
-                    :aria-label="t('memories', 'Download')"
-                    @click="downloadSelection" close-after-click>
-                    {{ t('memories', 'Download') }}
-                    <template #icon> <Download :size="20" /> </template>
-                </NcActionButton>
-                <NcActionButton
-                    :aria-label="t('memories', 'Favorite')"
-                    @click="favoriteSelection" close-after-click>
-                    {{ t('memories', 'Favorite') }}
-                    <template #icon> <Star :size="20" /> </template>
-                </NcActionButton>
-
-                <template v-if="allowArchive()">
-                    <NcActionButton
-                        v-if="!routeIsArchive()"
-                        :aria-label="t('memories', 'Archive')"
-                        @click="archiveSelection" close-after-click>
-                        {{ t('memories', 'Archive') }}
-                        <template #icon> <ArchiveIcon :size="20" /> </template>
-                    </NcActionButton>
-                    <NcActionButton
-                        v-else
-                        :aria-label="t('memories', 'Unarchive')"
-                        @click="archiveSelection" close-after-click>
-                        {{ t('memories', 'Unarchive') }}
-                        <template #icon> <UnarchiveIcon :size="20" /> </template>
-                    </NcActionButton>
-                </template>
-
-                <NcActionButton
-                    :aria-label="t('memories', 'Edit Date/Time')"
-                    @click="editDateSelection" close-after-click>
-                    {{ t('memories', 'Edit Date/Time') }}
-                    <template #icon> <EditIcon :size="20" /> </template>
-                </NcActionButton>
-
-                <template v-if="selection.size === 1">
-                    <NcActionButton
-                        :aria-label="t('memories', 'View in folder')"
-                        @click="viewInFolder" close-after-click>
-                        {{ t('memories', 'View in folder') }}
-                        <template #icon> <OpenInNewIcon :size="20" /> </template>
-                    </NcActionButton>
-                </template>
-
-                <NcActionButton
-                    v-if="$route.name === 'people'"
-                    :aria-label="t('memories', 'Remove from person')"
-                    @click="removeSelectionFromPerson" close-after-click>
-                    {{ t('memories', 'Remove from person') }}
-                    <template #icon> <CloseIcon :size="20" /> </template>
+                <NcActionButton v-for="action of getActions()" :key="action.name"
+                    :aria-label="action.name"
+                    @click="action.callback(selection)">
+                    {{ action.name }}
+                    <template #icon> <component :is="action.icon" :size="20" /> </template>
                 </NcActionButton>
             </NcActions>
         </div>
@@ -83,23 +30,26 @@
 
 <script lang="ts">
 import { Component, Emit, Mixins, Prop } from 'vue-property-decorator';
-import { IHeadRow, IPhoto } from '../types';
+import GlobalMixin from '../mixins/GlobalMixin';
+
 import { generateUrl } from '@nextcloud/router'
 import { NcActions, NcActionButton } from '@nextcloud/vue';
+import { translate as t, translatePlural as n } from '@nextcloud/l10n'
+import { IHeadRow, IPhoto, ISelectionAction } from '../types';
 
+import * as dav from "../services/DavRequests";
 import EditDate from "./modal/EditDate.vue"
 
-import Star from 'vue-material-design-icons/Star.vue';
-import Download from 'vue-material-design-icons/Download.vue';
-import Delete from 'vue-material-design-icons/Delete.vue';
+import StarIcon from 'vue-material-design-icons/Star.vue';
+import DownloadIcon from 'vue-material-design-icons/Download.vue';
+import DeleteIcon from 'vue-material-design-icons/Delete.vue';
 import EditIcon from 'vue-material-design-icons/ClockEdit.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import UnarchiveIcon from 'vue-material-design-icons/PackageUp.vue';
 import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue';
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 
-import GlobalMixin from '../mixins/GlobalMixin';
-import * as dav from "../services/DavRequests";
+type Selection = Map<number, IPhoto>;
 
 @Component({
     components: {
@@ -107,19 +57,14 @@ import * as dav from "../services/DavRequests";
         NcActionButton,
         EditDate,
 
-        Star,
-        Download,
-        Delete,
-        EditIcon,
-        ArchiveIcon,
-        UnarchiveIcon,
-        OpenInNewIcon,
         CloseIcon,
     },
 })
 export default class SelectionHandler extends Mixins(GlobalMixin) {
-    @Prop() public selection: Map<number, IPhoto>;
+    @Prop() public selection: Selection;
     @Prop() public heads: { [dayid: number]: IHeadRow };
+
+    private readonly defaultActions: ISelectionAction[];
 
     @Emit('refresh')
     refresh() {}
@@ -129,6 +74,63 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
 
     @Emit('updateLoading')
     updateLoading(delta: number) {}
+
+    constructor() {
+        super();
+
+        // Make default actions
+        this.defaultActions = [
+            {
+                name: t('memories', 'Delete'),
+                icon: DeleteIcon,
+                callback: this.deleteSelection.bind(this),
+            },
+            {
+                name: t('memories', 'Download'),
+                icon: DownloadIcon,
+                callback: this.downloadSelection.bind(this),
+            },
+            {
+                name: t('memories', 'Favorite'),
+                icon: StarIcon,
+                callback: this.favoriteSelection.bind(this),
+            },
+            {
+                name: t('memories', 'Archive'),
+                icon: ArchiveIcon,
+                callback: this.archiveSelection.bind(this),
+                if: () => this.allowArchive() && !this.routeIsArchive(),
+            },
+            {
+                name: t('memories', 'Unarchive'),
+                icon: UnarchiveIcon,
+                callback: this.archiveSelection.bind(this),
+                if: () => this.allowArchive() && this.routeIsArchive(),
+            },
+            {
+                name: t('memories', 'Edit Date/Time'),
+                icon: EditIcon,
+                callback: this.editDateSelection.bind(this),
+            },
+            {
+                name: t('memories', 'View in folder'),
+                icon: OpenInNewIcon,
+                callback: this.viewInFolder.bind(this),
+                if: () => this.selection.size === 1,
+            },
+            {
+                name: t('memories', 'Remove from person'),
+                icon: CloseIcon,
+                callback: this.removeSelectionFromPerson.bind(this),
+                if: () => this.$route.name === 'people',
+            },
+        ];
+    }
+
+    /** Get the actions list */
+    private getActions(): ISelectionAction[] {
+        return this.defaultActions.filter(a => !a.if || a.if());
+    }
 
     /** Clear all selected photos */
     public clearSelection(only?: IPhoto[]) {
@@ -199,32 +201,32 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
     /**
      * Download the currently selected files
      */
-    private async downloadSelection() {
-        if (this.selection.size >= 100) {
+    private async downloadSelection(selection: Selection) {
+        if (selection.size >= 100) {
             if (!confirm(this.t("memories", "You are about to download a large number of files. Are you sure?"))) {
                 return;
             }
         }
-        await dav.downloadFilesByIds(Array.from(this.selection.keys()));
+        await dav.downloadFilesByIds(Array.from(selection.keys()));
     }
 
     /**
      * Check if all files selected currently are favorites
      */
-    private allSelectedFavorites() {
-        return Array.from(this.selection.values()).every(p => p.flag & this.c.FLAG_IS_FAVORITE);
+    private allSelectedFavorites(selection: Selection) {
+        return Array.from(selection.values()).every(p => p.flag & this.c.FLAG_IS_FAVORITE);
     }
 
     /**
      * Favorite the currently selected photos
      */
-    private async favoriteSelection() {
+    private async favoriteSelection(selection: Selection) {
         try {
-            const val = !this.allSelectedFavorites();
+            const val = !this.allSelectedFavorites(selection);
             this.updateLoading(1);
-            for await (const favIds of dav.favoriteFilesByIds(Array.from(this.selection.keys()), val)) {
+            for await (const favIds of dav.favoriteFilesByIds(Array.from(selection.keys()), val)) {
                 favIds.forEach(id => {
-                    const photo = this.selection.get(id);
+                    const photo = selection.get(id);
                     if (!photo) {
                         return;
                     }
@@ -245,8 +247,8 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
     /**
      * Delete the currently selected photos
      */
-    private async deleteSelection() {
-        if (this.selection.size >= 100) {
+    private async deleteSelection(selection: Selection) {
+        if (selection.size >= 100) {
             if (!confirm(this.t("memories", "You are about to delete a large number of files. Are you sure?"))) {
                 return;
             }
@@ -254,9 +256,9 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
 
         try {
             this.updateLoading(1);
-            for await (const delIds of dav.deleteFilesByIds(Array.from(this.selection.keys()))) {
-                const delPhotos = delIds.map(id => this.selection.get(id));
-                await this.delete(delPhotos);
+            for await (const delIds of dav.deleteFilesByIds(Array.from(selection.keys()))) {
+                const delPhotos = delIds.map(id => selection.get(id));
+                this.delete(delPhotos);
             }
         } catch (error) {
             console.error(error);
@@ -268,18 +270,18 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
     /**
      * Open the edit date dialog
      */
-    private async editDateSelection() {
-        (<any>this.$refs.editDate).open(Array.from(this.selection.values()));
+    private async editDateSelection(selection: Selection) {
+        (<any>this.$refs.editDate).open(Array.from(selection.values()));
     }
 
     /**
      * Open the files app with the selected file (one)
      * Opens a new window.
      */
-    private async viewInFolder() {
-        if (this.selection.size !== 1) return;
+    private async viewInFolder(selection: Selection) {
+        if (selection.size !== 1) return;
 
-        const photo: IPhoto = this.selection.values().next().value;
+        const photo: IPhoto = selection.values().next().value;
         const f = await dav.getFiles([photo.fileid]);
         if (f.length === 0) return;
 
@@ -292,8 +294,8 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
     /**
      * Archive the currently selected photos
      */
-    private async archiveSelection() {
-        if (this.selection.size >= 100) {
+    private async archiveSelection(selection: Selection) {
+        if (selection.size >= 100) {
             if (!confirm(this.t("memories", "You are about to touch a large number of files. Are you sure?"))) {
                 return;
             }
@@ -301,13 +303,13 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
 
         try {
             this.updateLoading(1);
-            for await (let delIds of dav.archiveFilesByIds(Array.from(this.selection.keys()), !this.routeIsArchive())) {
+            for await (let delIds of dav.archiveFilesByIds(Array.from(selection.keys()), !this.routeIsArchive())) {
                 delIds = delIds.filter(x => x);
                 if (delIds.length === 0) {
                     continue
                 }
-                const delPhotos = delIds.map(id => this.selection.get(id));
-                await this.delete(delPhotos);
+                const delPhotos = delIds.map(id => selection.get(id));
+                this.delete(delPhotos);
             }
         } catch (error) {
             console.error(error);
@@ -316,13 +318,9 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
         }
     }
 
-    /** Archive is allowed only on timeline routes */
+    /** Archive is not allowed only on folder routes */
     private allowArchive() {
-        return this.$route.name === 'timeline'  ||
-               this.$route.name === 'favorites' ||
-               this.$route.name === 'videos'    ||
-               this.$route.name === 'thisday'   ||
-               this.$route.name === 'archive';
+        return this.$route.name !== 'folders';
     }
 
     /** Is archive route */
@@ -333,7 +331,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
     /**
      * Remove currently selected photos from person
      */
-    private async removeSelectionFromPerson() {
+    private async removeSelectionFromPerson(selection: Selection) {
         // Make sure route is valid
         const { user, name } = this.$route.params;
         if (this.$route.name !== "people" || !user || !name) {
@@ -343,8 +341,8 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
         // Run query
         try {
             this.updateLoading(1);
-            for await (let delIds of dav.removeFaceImages(user, name, Array.from(this.selection.keys()))) {
-                const delPhotos = delIds.filter(x => x).map(id => this.selection.get(id));
+            for await (let delIds of dav.removeFaceImages(user, name, Array.from(selection.keys()))) {
+                const delPhotos = delIds.filter(x => x).map(id => selection.get(id));
                 this.delete(delPhotos);
             }
         } catch (error) {
