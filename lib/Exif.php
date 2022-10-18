@@ -162,7 +162,7 @@ class Exif {
     }
 
     private static function getExifFromLocalPathWithStaticProc(string &$path) {
-        fwrite(self::$staticPipes[0], "$path\n-json\n-api\nQuickTimeUTC=1\n-execute\n");
+        fwrite(self::$staticPipes[0], "$path\n-json\n-api\nQuickTimeUTC=1\n-n\n-execute\n");
         fflush(self::$staticPipes[0]);
 
         $readyToken = "\n{ready}\n";
@@ -181,7 +181,7 @@ class Exif {
 
     private static function getExifFromLocalPathWithSeparateProc(string &$path) {
         $pipes = [];
-        $proc = proc_open(['exiftool', '-api', 'QuickTimeUTC=1', '-json', $path], [
+        $proc = proc_open(['exiftool', '-api', 'QuickTimeUTC=1', '-n', '-json', $path], [
             1 => array('pipe', 'w'),
             2 => array('pipe', 'w'),
         ], $pipes);
@@ -207,7 +207,7 @@ class Exif {
     public static function getExifFromStream(&$handle) {
         // Start exiftool and output to json
         $pipes = [];
-        $proc = proc_open(['exiftool', '-api', 'QuickTimeUTC=1', '-json', '-fast', '-'], [
+        $proc = proc_open(['exiftool', '-api', 'QuickTimeUTC=1', '-n', '-json', '-fast', '-'], [
             0 => array('pipe', 'rb'),
             1 => array('pipe', 'w'),
             2 => array('pipe', 'w'),
@@ -323,8 +323,8 @@ class Exif {
         $height = $exif['ImageHeight'] ?? 0;
 
         // Check if image is rotated and we need to swap width and height
-        $rotation = $exif['Rotation'] ?? 0;
-        if ($rotation == 90 || $rotation == 270) {
+        $rotation = $exif['Orientation'] ?? 0;
+        if (in_array($rotation, [5, 6, 7, 8])) {
             return [$height, $width];
         }
 
