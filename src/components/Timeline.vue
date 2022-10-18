@@ -16,6 +16,7 @@
         <RecycleScroller
             ref="recycler"
             class="recycler"
+            :class="{ 'empty': list.length === 0 }"
             :key="state"
             :items="list"
             :emit-update="true"
@@ -972,6 +973,12 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 .recycler {
     height: 300px;
     width: calc(100% + 20px);
+    transition: opacity 0.2s ease-in-out;
+
+    &.empty {
+        opacity: 0;
+        transition: none;
+    }
 }
 
 .recycler .photo {
