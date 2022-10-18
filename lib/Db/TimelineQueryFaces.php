@@ -17,23 +17,47 @@ trait TimelineQueryFaces {
         $faceUid = $faceNames[0];
         $faceName = $faceNames[1];
 
-        // Get cluster ID
-        $sq = $query->getConnection()->getQueryBuilder();
-        $idQuery = $sq->select('id')->from('recognize_face_clusters')
-            ->where($query->expr()->eq('user_id', $sq->createNamedParameter($faceUid)));
-
-        // If name is a number then it is an ID
-        $nameField = is_numeric($faceName) ? 'id' : 'title';
-        $idQuery->andWhere($query->expr()->eq($nameField, $sq->createNamedParameter($faceName)));
-
-        $id = $idQuery->executeQuery()->fetchOne();
-        if (!$id) throw new \Exception("Unknown person: $faceStr");
-
         // Join with cluster
+        $nameField = is_numeric($faceName) ? 'rfc.id' : 'rfc.title';
+        $query->innerJoin('m', 'recognize_face_clusters', 'rfc', $query->expr()->andX(
+            $query->expr()->eq('user_id', $query->createNamedParameter($faceUid)),
+            $query->expr()->eq($nameField, $query->createNamedParameter($faceName)),
+        ));
+
+        // Join with detections
         $query->innerJoin('m', 'recognize_face_detections', 'rfd', $query->expr()->andX(
             $query->expr()->eq('rfd.file_id', 'm.fileid'),
-            $query->expr()->eq('rfd.cluster_id', $query->createNamedParameter($id)),
+            $query->expr()->eq('rfd.cluster_id', 'rfc.id'),
         ));
+    }
+
+    public function transformFaceRect(IQueryBuilder &$query, string $userId) {
+        // Include detection params in response
+        $query->addSelect(
+            'rfd.width AS face_w',
+            'rfd.height AS face_h',
+            'rfd.x AS face_x',
+            'rfd.y AS face_y',
+        );
+    }
+
+    /** Convert face fields to object */
+    private function processFace(&$row, $days=false) {
+        if (!isset($row) || !isset($row['face_w'])) return;
+
+        if (!$days) {
+            $row["facerect"] = [
+                "w" => floatval($row["face_w"]),
+                "h" => floatval($row["face_h"]),
+                "x" => floatval($row["face_x"]),
+                "y" => floatval($row["face_y"]),
+            ];
+        }
+
+        unset($row["face_w"]);
+        unset($row["face_h"]);
+        unset($row["face_x"]);
+        unset($row["face_y"]);
     }
 
     public function getFaces(Folder $folder) {

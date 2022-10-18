@@ -19,6 +19,10 @@
                     {{ t('memories', 'Merge with different person') }}
                     <template #icon> <MergeIcon :size="20" /> </template>
                 </NcActionButton>
+                <NcActionCheckbox :aria-label="t('memories', 'Mark person in preview')" :checked.sync="config_showFaceRect" @change="changeShowFaceRect">
+                    {{ t('memories', 'Mark person in preview') }}
+                    <template #icon> <MergeIcon :size="20" /> </template>
+                </NcActionCheckbox>
                 <NcActionButton :aria-label="t('memories', 'Remove person')" @click="showDeleteModal=true" close-after-click>
                     {{ t('memories', 'Remove person') }}
                     <template #icon> <DeleteIcon :size="20" /> </template>
@@ -35,8 +39,9 @@
 <script lang="ts">
 import { Component, Mixins, Watch } from 'vue-property-decorator';
 import GlobalMixin from '../../mixins/GlobalMixin';
+import UserConfig from "../../mixins/UserConfig";
 
-import { NcActions, NcActionButton } from '@nextcloud/vue';
+import { NcActions, NcActionButton, NcActionCheckbox } from '@nextcloud/vue';
 import FaceEditModal from '../modal/FaceEditModal.vue';
 import FaceDeleteModal from '../modal/FaceDeleteModal.vue';
 import FaceMergeModal from '../modal/FaceMergeModal.vue';
@@ -49,6 +54,7 @@ import MergeIcon from 'vue-material-design-icons/Merge.vue';
     components: {
         NcActions,
         NcActionButton,
+        NcActionCheckbox,
         FaceEditModal,
         FaceDeleteModal,
         FaceMergeModal,
@@ -58,7 +64,7 @@ import MergeIcon from 'vue-material-design-icons/Merge.vue';
         MergeIcon,
     },
 })
-export default class FaceTopMatter extends Mixins(GlobalMixin) {
+export default class FaceTopMatter extends Mixins(GlobalMixin, UserConfig) {
     private name: string = '';
     private showEditModal: boolean = false;
     private showDeleteModal: boolean = false;
@@ -79,6 +85,13 @@ export default class FaceTopMatter extends Mixins(GlobalMixin) {
 
     back() {
         this.$router.push({ name: 'people' });
+    }
+
+    changeShowFaceRect() {
+        localStorage.setItem('memories_showFaceRect', this.config_showFaceRect ? '1' : '0');
+        setTimeout(() => {
+            this.$router.go(0); // refresh page
+        }, 500);
     }
 }
 </script>

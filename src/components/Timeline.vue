@@ -106,6 +106,7 @@ import { generateUrl } from '@nextcloud/router'
 import { showError } from '@nextcloud/dialogs'
 import { NcEmptyContent } from '@nextcloud/vue';
 import GlobalMixin from '../mixins/GlobalMixin';
+import UserConfig from "../mixins/UserConfig";
 
 import { ViewerManager } from "../services/Viewer";
 import { getLayout } from "../services/Layout";
@@ -119,7 +120,6 @@ import TopMatter from "./top-matter/TopMatter.vue";
 import OnThisDay from "./top-matter/OnThisDay.vue";
 import SelectionManager from './SelectionManager.vue';
 import ScrollerManager from './ScrollerManager.vue';
-import UserConfig from "../mixins/UserConfig";
 
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import CheckCircle from 'vue-material-design-icons/CheckCircle.vue';
@@ -436,6 +436,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         // People
         if (this.$route.name === 'people' && this.$route.params.user && this.$route.params.name) {
             query.set('face', `${this.$route.params.user}/${this.$route.params.name}`);
+
+            // Face rect
+            if (this.config_showFaceRect) {
+                query.set('facerect', '1');
+            }
         }
 
         // Tags
@@ -492,12 +497,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     /** Fetch timeline main call */
     async fetchDays(noCache=false) {
-        let url = '/apps/memories/api/days';
         let params: any = {};
+        let url = generateUrl(this.appendQuery('/apps/memories/api/days'), params);
 
         // Try cache first
         let cache: IDay[];
-        const cacheUrl = window.location.pathname + 'api/days';
 
         // Make sure to refresh scroll later
         this.currentEnd = -1;
@@ -515,18 +519,18 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 data = await dav.getPeopleData();
             } else {
                 // Try the cache
-                cache = noCache ? null : (await utils.getCachedData(cacheUrl));
+                cache = noCache ? null : (await utils.getCachedData(url));
                 if (cache) {
                     await this.processDays(cache);
                     this.loading--;
                 }
 
                 // Get from network
-                data = (await axios.get<IDay[]>(generateUrl(this.appendQuery(url), params))).data;
+                data = (await axios.get<IDay[]>(url)).data;
             }
 
             // Put back into cache
-            utils.cacheData(cacheUrl, data);
+            utils.cacheData(url, data);
 
             // Make sure we're still on the same page
             if (this.state !== startState) return;

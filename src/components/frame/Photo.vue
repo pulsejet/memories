@@ -22,16 +22,18 @@
             @touchend="touchend"
             @touchcancel="touchend" >
             <img
+                ref="img"
                 class="fill-block"
-                :src="src()"
+                :src="src"
                 :key="data.fileid"
+                @load="load"
                 @error="error" />
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Emit, Mixins } from 'vue-property-decorator';
+import { Component, Prop, Emit, Mixins, Watch } from 'vue-property-decorator';
 import { IDay, IPhoto } from "../../types";
 
 import { getPreviewUrl } from "../../services/FileUtils";
@@ -51,6 +53,8 @@ import Star from 'vue-material-design-icons/Star.vue';
 })
 export default class Photo extends Mixins(GlobalMixin) {
     private touchTimer = 0;
+    private src = null;
+    private hasFaceRect = false;
 
     @Prop() data: IPhoto;
     @Prop() day: IDay;
@@ -58,10 +62,27 @@ export default class Photo extends Mixins(GlobalMixin) {
     @Emit('select') emitSelect(data: IPhoto) {}
     @Emit('click') emitClick() {}
 
+    @Watch('data')
+    onDataChange(newData: IPhoto, oldData: IPhoto) {
+        // Copy flags relevant to this component
+        if (oldData && newData) {
+            newData.flag |= oldData.flag & (this.c.FLAG_SELECTED | this.c.FLAG_LOAD_FAIL);
+        }
+    }
+
+    mounted() {
+        this.hasFaceRect = false;
+        this.refresh();
+    }
+
+    async refresh() {
+        this.src = await this.getSrc();
+    }
+
     /** Get src for image to show */
-    src() {
+    async getSrc() {
         if (this.data.flag & this.c.FLAG_PLACEHOLDER) {
-            return undefined;
+            return null;
         } else if (this.data.flag & this.c.FLAG_LOAD_FAIL) {
             return errorsvg;
         } else {
@@ -78,9 +99,41 @@ export default class Photo extends Mixins(GlobalMixin) {
         return getPreviewUrl(this.data.fileid, this.data.etag, false, size)
     }
 
+    /** Set src with overlay face rect */
+    async addFaceRect() {
+        if (!this.data.facerect || this.hasFaceRect) return;
+        this.hasFaceRect = true;
+
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        const img = this.$refs.img as HTMLImageElement;
+
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        context.drawImage(img, 0, 0);
+        context.strokeStyle = '#00ff00';
+        context.lineWidth = 2;
+        context.strokeRect(
+            this.data.facerect.x * img.naturalWidth,
+            this.data.facerect.y * img.naturalHeight,
+            this.data.facerect.w * img.naturalWidth,
+            this.data.facerect.h * img.naturalHeight,
+        );
+
+        canvas.toBlob((blob) => {
+            this.src = URL.createObjectURL(blob);
+        }, 'image/jpeg', 0.95)
+    }
+
+    /** Post load tasks */
+    load() {
+        this.addFaceRect();
+    }
+
     /** Error in loading image */
     error(e: any) {
         this.data.flag |= this.c.FLAG_LOAD_FAIL;
+        this.refresh();
     }
 
     /** Clear timers */

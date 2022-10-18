@@ -99,6 +99,11 @@ class ApiController extends Controller {
             if ($face) {
                 $transforms[] = array($this->timelineQuery, 'transformFaceFilter', $face);
             }
+
+            $faceRect = $this->request->getParam('facerect');
+            if ($faceRect) {
+                $transforms[] = array($this->timelineQuery, 'transformFaceRect', $face);
+            }
         }
 
         // Filter only for one tag

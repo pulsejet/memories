@@ -18,6 +18,9 @@ trait TimelineQueryDays {
         foreach($days as &$row) {
             $row["dayid"] = intval($row["dayid"]);
             $row["count"] = intval($row["count"]);
+
+            // All transform processing
+            $this->processFace($row, true);
         }
         return $days;
     }
@@ -44,6 +47,9 @@ trait TimelineQueryDays {
                 $row["isfavorite"] = 1;
             }
             unset($row["categoryid"]);
+
+            // All transform processing
+            $this->processFace($row);
         }
         return $day;
     }
