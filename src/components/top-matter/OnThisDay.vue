@@ -104,7 +104,7 @@ export default class OnThisDay extends Mixins(GlobalMixin) {
                 this.years.push({
                     year,
                     url: '',
-                    preview: photo,
+                    preview: null,
                     photos: [],
                     text: utils.getFromNowStr(dateTaken),
                 });
@@ -122,9 +122,14 @@ export default class OnThisDay extends Mixins(GlobalMixin) {
 
         // Choose preview photo
         for (const year of this.years) {
-            // Try to prioritize landscape photos
-            const landscape = year.photos.filter(p => p.w > p.h);
-            year.preview =  utils.randomChoice(landscape) || utils.randomChoice(year.photos);
+            // Try to prioritize landscape photos on desktop
+            if (window.innerWidth <= 600) {
+                const landscape = year.photos.filter(p => p.w > p.h);
+                year.preview = utils.randomChoice(landscape)
+            }
+
+            // Get random photo
+            year.preview ||= utils.randomChoice(year.photos);
             year.url = getPreviewUrl(year.preview.fileid, year.preview.etag, false, 512);
         }
 
@@ -167,6 +172,7 @@ export default class OnThisDay extends Mixins(GlobalMixin) {
 
 <style lang="scss" scoped>
 $height: 200px;
+$mobHeight: 150px;
 
 .outer {
     width: calc(100% - 50px);
@@ -177,7 +183,7 @@ $height: 200px;
 
     // Sloppy: ideally this should be done in Timeline
     // to put a gap between the title and this
-    margin-top: 8px;
+    margin-top: 10px;
 
     .inner {
         height: calc(100% + 20px);
@@ -205,6 +211,9 @@ $height: 200px;
         .inner { padding: 0 8px; }
         .dir-btn { display: none; }
     }
+    @media (max-width: 600px) {
+        height: $mobHeight;
+    }
 }
 
 .group {
@@ -214,7 +223,7 @@ $height: 200px;
     position: relative;
     cursor: pointer;
 
-    &:not(:last-of-type) { margin-right: 6px; }
+    &:not(:last-of-type) { margin-right: 8px; }
 
     img {
         cursor: inherit;
@@ -237,15 +246,20 @@ $height: 200px;
         justify-content: center;
         color: white;
         font-size: 1.2em;
-        font-weight: bold;
-        padding-bottom: 5%;
-        text-shadow: 0 0 2px black;
+        padding: 5%;
+        white-space: normal;
         cursor: inherit;
         transition: background-color 0.2s ease-in-out;
     }
 
     &:hover .overlay {
         background-color: transparent;
+    }
+
+    @media (max-width: 600px) {
+        aspect-ratio: 3/4;
+        height: $mobHeight;
+        .overlay { font-size: 1.1em; }
     }
 }
 </style>
