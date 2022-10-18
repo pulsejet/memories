@@ -56,7 +56,8 @@ trait TimelineQueryFaces {
         $query->groupBy('rfc.id');
 
         // ORDER by number of faces in cluster
-        $query->orderBy('count', 'DESC');
+        $query->orderBy($query->createFunction("rfc.title <> ''"), 'DESC');
+        $query->addOrderBy('count', 'DESC');
         $query->addOrderBy('rfc.id'); // tie-breaker
 
         // FETCH all faces
