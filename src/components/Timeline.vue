@@ -97,7 +97,6 @@ import { Component, Watch, Mixins } from 'vue-property-decorator';
 import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";
 import { generateUrl } from '@nextcloud/router'
 import { showError } from '@nextcloud/dialogs'
-import { getCanonicalLocale } from '@nextcloud/l10n';
 import { NcEmptyContent } from '@nextcloud/vue';
 import GlobalMixin from '../mixins/GlobalMixin';
 
