@@ -214,10 +214,10 @@ export async function openCache() {
 }
 
 /** Get data from the cache */
-export async function getCachedData(url: string) {
+export async function getCachedData<T>(url: string): Promise<T> {
     const cache = staticCache || await openCache();
     const cachedResponse = await cache.match(url);
-    if (!cachedResponse || !cachedResponse.ok) return false;
+    if (!cachedResponse || !cachedResponse.ok) return undefined;
     return await cachedResponse.json();
 }
 

@@ -93,7 +93,23 @@ export default class OnThisDay extends Mixins(GlobalMixin) {
     }
 
     async refresh() {
+        // Look for cache
+        const dayIdToday = utils.dateToDayId(new Date());
+        const cacheUrl = `/onthisday/${dayIdToday}`;
+        const cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
+        if (cache) this.process(cache);
+
+        // Network request
         const photos = await dav.getOnThisDayRaw();
+        utils.cacheData(cacheUrl, photos);
+
+        // Check if exactly same as cache
+        if (cache?.length === photos.length &&
+            cache.every((p, i) => p.fileid === photos[i].fileid)) return;
+        this.process(photos);
+    }
+
+    async process(photos: IPhoto[]) {
         let currentYear = 9999;
 
         for (const photo of photos) {
