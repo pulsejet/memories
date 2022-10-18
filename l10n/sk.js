@@ -31,7 +31,6 @@ OC.L10N.register(
     "Error updating settings" : "Chyba pri aktualizácii nastavení",
     "Your Timeline" : "Vaša časová os",
     "Failed to load some photos" : "Načítanie akýchkoľvek fotiek zlyhalo",
-    "Cannot find this photo anymore!" : "Túto fotografiu už nemožno nájsť!",
     "Update Exif" : "Aktualizovať Exif",
     "Newest" : "Najnovšie",
     "Year" : "Rok",
@@ -52,6 +51,7 @@ OC.L10N.register(
     "Name" : "Meno",
     "Failed to rename {oldName} to {name}." : "Nepodarilo sa premenovať {oldName} na {name}.",
     "Merge {name} with person" : "Zlúčiť {name} s osobou",
+    "Loading …" : "Načítavam …",
     "Are you sure you want to merge {name} with {newName}?" : "Naozaj chcete zlúčiť {name} s {newName}?",
     "Too many failures, aborting" : "Príliš veľa zlyhaní, prerušujem",
     "Error while moving {basename}" : "Chyba pri presúvaní {basename}",
@@ -63,6 +63,7 @@ OC.L10N.register(
     "General Failure" : "Všeobecné zlyhanie",
     "Error: {msg}" : "Chyba: {msg}",
     "Failed to favorite {fileName}." : "Nepodarilo sa pridať súbor {fileName} medzi obľúbené.",
-    "Failed to favorite files." : "Nepodarilo sa pridať súbory medzi obľúbené."
+    "Failed to favorite files." : "Nepodarilo sa pridať súbory medzi obľúbené.",
+    "Cannot find this photo anymore!" : "Túto fotografiu už nemožno nájsť!"
 },
 "nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);");

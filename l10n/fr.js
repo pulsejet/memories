@@ -29,7 +29,6 @@ OC.L10N.register(
     "Update" : "Mise à jour",
     "Error updating settings" : "Erreur lors de la mise à jour des paramètres",
     "Failed to load some photos" : "Échec du chargement de certaines photos",
-    "Cannot find this photo anymore!" : "Impossible de trouver cette photo !",
     "Update Exif" : "Mettre à jour l'Exif",
     "Newest" : "Plus récent",
     "Year" : "Année",
@@ -48,6 +47,7 @@ OC.L10N.register(
     "Rename person" : "Renommer la personne",
     "Name" : "Nom",
     "Failed to rename {oldName} to {name}." : "Échec du renommage de {oldName} en {name}.",
+    "Loading …" : "Chargement …",
     "Back" : "Retour",
     "Merge with different person" : "Fusionner avec une différente personne",
     "Failed to delete files." : "Échec de la suppression des fichiers.",
@@ -55,6 +55,7 @@ OC.L10N.register(
     "General Failure" : "Échec général",
     "Error: {msg}" : "Erreur : {msg}",
     "Failed to favorite {fileName}." : "Échec de l'ajout aux favoris de {fileName}.",
-    "Failed to favorite files." : "Échec de la mise en favoris des fichiers."
+    "Failed to favorite files." : "Échec de la mise en favoris des fichiers.",
+    "Cannot find this photo anymore!" : "Impossible de trouver cette photo !"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

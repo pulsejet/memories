@@ -19,6 +19,7 @@ OC.L10N.register(
     "Time" : "Dato",
     "Hour" : "Horo",
     "Name" : "Nomo",
+    "Loading …" : "Ŝargas …",
     "Back" : "Antaŭen"
 },
 "nplurals=2; plural=(n != 1);");

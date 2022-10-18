@@ -18,6 +18,7 @@ OC.L10N.register(
     "Day" : "Өдөр",
     "Time" : "Цаг",
     "Name" : "Нэр",
+    "Loading …" : "Уншиж байна...",
     "Back" : "буцах"
 },
 "nplurals=2; plural=(n != 1);");

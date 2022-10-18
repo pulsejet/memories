@@ -31,7 +31,6 @@ OC.L10N.register(
     "Error updating settings" : "Errorea ezarpenak eguneratzen",
     "Your Timeline" : "Zure denbora-lerroa",
     "Failed to load some photos" : "Argazki batzuk kargatzeak huts egin du",
-    "Cannot find this photo anymore!" : "Ezin da argazki hau dagoeneko aurkitu!",
     "Update Exif" : "Eguneratu Exif",
     "Newest" : "Berrienak",
     "Year" : "Urtea",
@@ -49,6 +48,7 @@ OC.L10N.register(
     "Failed to delete {name}." : "{name} ezabatzeak huts egin du.",
     "Rename person" : "Berridatzi pertsonaren izena",
     "Name" : "Izena",
+    "Loading …" : "Kargatzen …",
     "Failed to move {name}." : "{name} mugitzeak huts egin du.",
     "Back" : "Atzera",
     "Merge with different person" : "Bateratu beste pertsona batekin",
@@ -57,6 +57,7 @@ OC.L10N.register(
     "General Failure" : "Hutsegite orokorra",
     "Error: {msg}" : "Errorea: {msg}",
     "Failed to favorite {fileName}." : "Ezin izan da {fileName} gogoko egin.",
-    "Failed to favorite files." : "Fitxategiak gogoko egiteak huts egin du."
+    "Failed to favorite files." : "Fitxategiak gogoko egiteak huts egin du.",
+    "Cannot find this photo anymore!" : "Ezin da argazki hau dagoeneko aurkitu!"
 },
 "nplurals=2; plural=(n != 1);");

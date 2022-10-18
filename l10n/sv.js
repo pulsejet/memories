@@ -25,17 +25,18 @@ OC.L10N.register(
     "Update" : "Uppdatera",
     "Error updating settings" : "Fel när inställningar sparas",
     "Failed to load some photos" : "Misslyckades att läsa in vissa foton",
-    "Cannot find this photo anymore!" : "Kan inte längre hitta detta foto!",
     "Year" : "År",
     "Month" : "Månad",
     "Day" : "Dag",
     "Time" : "Tid",
     "Hour" : "Timme",
     "Name" : "Namn",
+    "Loading …" : "Läser in …",
     "Back" : "Tillbaka",
     "Failed to delete files." : "Misslyckades att radera filer.",
     "Failed to delete {fileName}." : "Misslyckades att radera {fileName}.",
     "Failed to favorite {fileName}." : "Misslyckades att favorisera {fileName}.",
-    "Failed to favorite files." : "Misslyckades att favorisera filer."
+    "Failed to favorite files." : "Misslyckades att favorisera filer.",
+    "Cannot find this photo anymore!" : "Kan inte längre hitta detta foto!"
 },
 "nplurals=2; plural=(n != 1);");

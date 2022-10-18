@@ -22,6 +22,7 @@ OC.L10N.register(
     "Hour" : "Ora",
     "Minute" : "Minutu",
     "Name" : "Nùmene",
+    "Loading …" : "Carrigamentu …",
     "Back" : "In segus"
 },
 "nplurals=2; plural=(n != 1);");

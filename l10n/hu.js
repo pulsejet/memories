@@ -25,7 +25,6 @@ OC.L10N.register(
     "Update" : "Frissítés",
     "Error updating settings" : "Hiba a beállítások mentése során",
     "Failed to load some photos" : "Nem sikerült betölteni néhány fényképet",
-    "Cannot find this photo anymore!" : "Ez a fénykép már nem található!",
     "Year" : "Év",
     "Month" : "Hónap",
     "Day" : "Nap",
@@ -35,11 +34,13 @@ OC.L10N.register(
     "Remove person" : "Személy eltávolítása",
     "Rename person" : "Személy átnevezése",
     "Name" : "Név",
+    "Loading …" : "Betöltés…",
     "Back" : "Vissza",
     "Merge with different person" : "Összevonás egy másik személlyel",
     "Failed to delete files." : "A fájlok törlése sikertelen.",
     "Failed to delete {fileName}." : "A(z) {fileName} törlése sikertelen.",
     "Failed to favorite {fileName}." : "A(z) {fileName} kedvencnek jelölése sikertelen.",
-    "Failed to favorite files." : "A fájlok kedvencnek jelölése sikertelen."
+    "Failed to favorite files." : "A fájlok kedvencnek jelölése sikertelen.",
+    "Cannot find this photo anymore!" : "Ez a fénykép már nem található!"
 },
 "nplurals=2; plural=(n != 1);");

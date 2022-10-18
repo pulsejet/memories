@@ -31,7 +31,6 @@ OC.L10N.register(
     "Error updating settings" : "Ayarlar güncellenirken sorun çıktı",
     "Your Timeline" : "Zaman tüneliniz",
     "Failed to load some photos" : "Bazı fotoğraflar yüklenemedi",
-    "Cannot find this photo anymore!" : "Bu fotoğraf artık bulunmuyor!",
     "Update Exif" : "EXIF verilerini güncelle",
     "Newest" : "En yeni",
     "Year" : "Yıl",
@@ -52,6 +51,7 @@ OC.L10N.register(
     "Name" : "Ad",
     "Failed to rename {oldName} to {name}." : "{oldName} adı {name} olarak değiştirilemedi.",
     "Merge {name} with person" : "{name} kişisini kişi ile birleştir",
+    "Loading …" : "Yükleniyor…",
     "Are you sure you want to merge {name} with {newName}?" : "{name} kişisini {newName} kişisi ile birleştirmek istediğinize emin misiniz?",
     "Too many failures, aborting" : "Çok sayıda sorun çıktı, vazgeçiliyor",
     "Error while moving {basename}" : "{basename} taşınırken sorun çıktı",
@@ -63,6 +63,7 @@ OC.L10N.register(
     "General Failure" : "Genel sorun",
     "Error: {msg}" : "Hata: {msg}",
     "Failed to favorite {fileName}." : "{fileName} sık kullanılanlara eklenemedi.",
-    "Failed to favorite files." : "Dosyalar sık kullanılanlara eklenemedi."
+    "Failed to favorite files." : "Dosyalar sık kullanılanlara eklenemedi.",
+    "Cannot find this photo anymore!" : "Bu fotoğraf artık bulunmuyor!"
 },
 "nplurals=2; plural=(n > 1);");

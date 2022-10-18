@@ -29,7 +29,6 @@ OC.L10N.register(
     "Error updating settings" : "Fehler bei der Aktualisierung der Einstellungen",
     "Your Timeline" : "Deine Zeitleiste",
     "Failed to load some photos" : "Laden einiger Fotos fehlgeschlagen",
-    "Cannot find this photo anymore!" : "Kann dieses Foto nicht mehr finden!",
     "Update Exif" : "Exif aktualisieren",
     "Newest" : "Neueste",
     "Year" : "Jahr",
@@ -50,6 +49,7 @@ OC.L10N.register(
     "Name" : "Name",
     "Failed to rename {oldName} to {name}." : "{oldName} konnte nicht in {name} umbenannt werden.",
     "Merge {name} with person" : "{name} mit Person zusammenführen",
+    "Loading …" : "Lade …",
     "Are you sure you want to merge {name} with {newName}?" : "Bist du sicher, dass du {name} mit {newName} zusammenführen möchtest?",
     "Too many failures, aborting" : "Zu viele Fehler, Abbruch",
     "Error while moving {basename}" : "Fehler beim Verschieben von {basename}",
@@ -61,6 +61,7 @@ OC.L10N.register(
     "General Failure" : "Allgemeiner Fehler",
     "Error: {msg}" : "Fehler: {msg}",
     "Failed to favorite {fileName}." : "{fileName} konnte nicht zu den Favoriten hinzugefügt werden.",
-    "Failed to favorite files." : "Favorisieren von Dateien fehlgeschlagen"
+    "Failed to favorite files." : "Favorisieren von Dateien fehlgeschlagen",
+    "Cannot find this photo anymore!" : "Kann dieses Foto nicht mehr finden!"
 },
 "nplurals=2; plural=(n != 1);");

@@ -23,6 +23,7 @@ OC.L10N.register(
     "Remove person" : "Отстрани личност",
     "Rename person" : "Преименувај личност",
     "Name" : "Име",
+    "Loading …" : "Се вчитува…",
     "Back" : "Назад",
     "Merge with different person" : "Спој со друга личност",
     "Failed to favorite {fileName}." : "Неуспешно додавање во омилени {fileName}."

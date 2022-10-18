@@ -24,6 +24,7 @@ OC.L10N.register(
     "Hour" : "Klukkustund",
     "Minute" : "Mínúta",
     "Name" : "Heiti",
+    "Loading …" : "Hleð inn …",
     "Back" : "Til baka"
 },
 "nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);");
