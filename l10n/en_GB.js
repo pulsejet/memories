@@ -14,12 +14,13 @@ OC.L10N.register(
     "Unarchive" : "Unarchive",
     "View in folder" : "View in folder",
     "Update" : "Update",
-    "Cannot find this photo anymore!" : "Cannot find this photo any more!",
     "Month" : "Month",
     "Day" : "Day",
     "Time" : "Time",
     "Hour" : "Hour",
     "Name" : "Surname",
-    "Back" : "Back"
+    "Loading …" : "Loading …",
+    "Back" : "Back",
+    "Cannot find this photo anymore!" : "Cannot find this photo any more!"
 },
 "nplurals=2; plural=(n != 1);");

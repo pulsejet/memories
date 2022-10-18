@@ -24,6 +24,7 @@ OC.L10N.register(
     "Hour" : "Ώρα",
     "Minute" : "Λεπτά",
     "Name" : "Όνομα",
+    "Loading …" : "Φόρτωση …",
     "Back" : "Πίσω"
 },
 "nplurals=2; plural=(n != 1);");

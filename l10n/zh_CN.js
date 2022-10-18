@@ -24,6 +24,7 @@ OC.L10N.register(
     "Hour" : "小时",
     "Minute" : "分钟",
     "Name" : "名称",
+    "Loading …" : "正在加载 …",
     "Back" : "返回"
 },
 "nplurals=1; plural=0;");

@@ -26,6 +26,7 @@ OC.L10N.register(
     "Remove person" : "Rimuovi persona",
     "Rename person" : "Rinomina persona",
     "Name" : "Nome",
+    "Loading …" : "Caricamento …",
     "Back" : "Indietro",
     "Merge with different person" : "Unisci ad un'altra persona"
 },

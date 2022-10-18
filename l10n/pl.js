@@ -28,7 +28,6 @@ OC.L10N.register(
     "Update" : "Aktualizuj",
     "Error updating settings" : "Błąd podczas aktualizacji ustawień",
     "Failed to load some photos" : "Nie udało się załadować niektórych zdjęć",
-    "Cannot find this photo anymore!" : "Nie można już znaleźć tego zdjęcia!",
     "Update Exif" : "Zaktualizuj Exif",
     "Newest" : "Najnowsza",
     "Year" : "Rok",
@@ -43,6 +42,7 @@ OC.L10N.register(
     "Remove person" : "Usuń osobę",
     "Rename person" : "Zmień nazwę osoby",
     "Name" : "Nazwa",
+    "Loading …" : "Wczytywanie…",
     "Back" : "Poprzednia",
     "Merge with different person" : "Połącz z inną osobą",
     "Failed to delete files." : "Nie udało się usunąć plików.",
@@ -50,6 +50,7 @@ OC.L10N.register(
     "General Failure" : "Ogólna awaria",
     "Error: {msg}" : "Błąd: {msg}",
     "Failed to favorite {fileName}." : "Nie udało się dodać do ulubionych {fileName}.",
-    "Failed to favorite files." : "Nie udało się znaleźć ulubionych plików."
+    "Failed to favorite files." : "Nie udało się znaleźć ulubionych plików.",
+    "Cannot find this photo anymore!" : "Nie można już znaleźć tego zdjęcia!"
 },
 "nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);");

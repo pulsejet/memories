@@ -20,6 +20,7 @@ OC.L10N.register(
     "Day" : "روز",
     "Time" : "زمان",
     "Name" : "نام",
+    "Loading …" : "بارگذاری …",
     "Back" : "بازگشت"
 },
 "nplurals=2; plural=(n > 1);");

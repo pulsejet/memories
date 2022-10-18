@@ -24,6 +24,7 @@ OC.L10N.register(
     "Hour" : "Hora",
     "Minute" : "Minut",
     "Name" : "Cognom",
+    "Loading …" : "Carregant …",
     "Back" : "Torna"
 },
 "nplurals=2; plural=(n != 1);");

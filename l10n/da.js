@@ -25,17 +25,18 @@ OC.L10N.register(
     "Update" : "Opdater",
     "Error updating settings" : "Fejl under opdatering af indstillinger",
     "Failed to load some photos" : "Kunne ikke indlæse nogle billeder",
-    "Cannot find this photo anymore!" : "Kan ikke finde dette billede længere!",
     "Year" : "År",
     "Month" : "Måned",
     "Day" : "Dag",
     "Time" : "Tid",
     "Hour" : "Time",
     "Name" : "Navn",
+    "Loading …" : "Loading …",
     "Back" : "Tilbage",
     "Failed to delete files." : "Kunne ikke slette filer.",
     "Failed to delete {fileName}." : "Kunne ikke slette {fileName}.",
     "Failed to favorite {fileName}." : "Kunne ikke vælge favorit {fileName}",
-    "Failed to favorite files." : "Kunne ikke vælge favorit filer."
+    "Failed to favorite files." : "Kunne ikke vælge favorit filer.",
+    "Cannot find this photo anymore!" : "Kan ikke finde dette billede længere!"
 },
 "nplurals=2; plural=(n != 1);");

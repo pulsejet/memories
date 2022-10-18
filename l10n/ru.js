@@ -25,7 +25,6 @@ OC.L10N.register(
     "Update" : "Обновить",
     "Error updating settings" : "Не удалось сохранить параметры",
     "Failed to load some photos" : "Не удалось загрузить некоторые фотографии",
-    "Cannot find this photo anymore!" : "Это фотография более недоступна.",
     "Year" : "Год",
     "Month" : "Месяц",
     "Day" : "День",
@@ -33,10 +32,12 @@ OC.L10N.register(
     "Hour" : "Час",
     "Minute" : "Минута",
     "Name" : "Имя",
+    "Loading …" : "Загрузка …",
     "Back" : "Назад",
     "Failed to delete files." : "Ошибка удаления файлов.",
     "Failed to delete {fileName}." : "Ошибка удаления файла «{fileName}».",
     "Failed to favorite {fileName}." : "Не удалось добавить файл «{fileName}» в избранное.",
-    "Failed to favorite files." : "Не удалось добавить файлы в избранное."
+    "Failed to favorite files." : "Не удалось добавить файлы в избранное.",
+    "Cannot find this photo anymore!" : "Это фотография более недоступна."
 },
 "nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);");

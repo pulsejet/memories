@@ -23,6 +23,7 @@ OC.L10N.register(
     "Hour" : "Hora",
     "Minute" : "Minuto",
     "Name" : "Nome",
+    "Loading …" : "Cargando…",
     "Back" : "Atrás"
 },
 "nplurals=2; plural=(n != 1);");

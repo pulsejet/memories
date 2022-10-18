@@ -22,6 +22,7 @@
     "Hour" : "Hora",
     "Minute" : "Minut",
     "Name" : "Cognom",
+    "Loading …" : "Carregant …",
     "Back" : "Torna"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

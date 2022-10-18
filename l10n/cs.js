@@ -31,7 +31,6 @@ OC.L10N.register(
     "Error updating settings" : "Chyba při aktualizaci nastavení",
     "Your Timeline" : "Vaše časová osa",
     "Failed to load some photos" : "Některé fotky se nepodařilo načíst",
-    "Cannot find this photo anymore!" : "Tuto fotku už se nedaří nalézt!",
     "Update Exif" : "Aktualizovat Exif",
     "Newest" : "Nejnovější",
     "Year" : "Rok",
@@ -52,6 +51,7 @@ OC.L10N.register(
     "Name" : "Název",
     "Failed to rename {oldName} to {name}." : "Nepodařilo se přejmenovat {oldName} na {name}.",
     "Merge {name} with person" : "Sloučit {name} s osobou",
+    "Loading …" : "Načítání…",
     "Are you sure you want to merge {name} with {newName}?" : "Opravdu chcete sloučit {name} s {newName}?",
     "Too many failures, aborting" : "Příliš mnoho nezdarů – přerušuje se",
     "Error while moving {basename}" : "Chyba při přesouvání {basename}",
@@ -63,6 +63,7 @@ OC.L10N.register(
     "General Failure" : "Obecný nezdar",
     "Error: {msg}" : "Chyba: {msg}",
     "Failed to favorite {fileName}." : "Nepodařilo se přidat {fileName} do oblíbených.",
-    "Failed to favorite files." : "Nepodařilo se přidat soubory mezi oblíbené."
+    "Failed to favorite files." : "Nepodařilo se přidat soubory mezi oblíbené.",
+    "Cannot find this photo anymore!" : "Tuto fotku už se nedaří nalézt!"
 },
 "nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;");

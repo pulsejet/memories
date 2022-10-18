@@ -21,6 +21,7 @@ OC.L10N.register(
     "Time" : "시간",
     "Hour" : "시간",
     "Name" : "이름",
+    "Loading …" : "불러오는 중 …",
     "Back" : "뒤로"
 },
 "nplurals=1; plural=0;");
