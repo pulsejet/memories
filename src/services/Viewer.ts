@@ -21,19 +21,19 @@ export class ViewerManager {
         });
     }
 
-    public async open(photo: IPhoto) {
-        const day = photo.d;
-        if (!day) return;
+    public async open(photo: IPhoto, list?: IPhoto[]) {
+        list = list || photo.d?.detail;
+        if (!list) return;
 
         // Repopulate map
         this.photoMap.clear();
-        for (const p of day.detail) {
+        for (const p of list) {
             this.photoMap.set(p.fileid, p);
         }
 
         // Get file infos
         let fileInfos: IFileInfo[];
-        const ids = day.detail.map(p => p.fileid);
+        const ids = list.map(p => p.fileid);
         try {
             this.updateLoading(1);
             fileInfos = await dav.getFiles(ids);
