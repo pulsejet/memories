@@ -1,3 +1,5 @@
+import { VueConstructor } from "vue";
+
 export type IFileInfo = {
     /** Database file ID */
     fileid: number;
@@ -161,4 +163,15 @@ export type TopMatterFolder = TopMatter & {
         text: string;
         path: string;
     }[];
+}
+
+export type ISelectionAction = {
+    /** Display text */
+    name: string;
+    /** Icon component */
+    icon: VueConstructor;
+    /** Action to perform */
+    callback: (selection: Map<number, IPhoto>) => void;
+    /** Condition to check for including */
+    if?: () => boolean;
 }
