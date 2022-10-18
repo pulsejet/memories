@@ -21,6 +21,7 @@
     "Hour" : "Hora",
     "Minute" : "Minuto",
     "Name" : "Nome",
+    "Loading …" : "Cargando…",
     "Back" : "Atrás"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

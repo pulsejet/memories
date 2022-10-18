@@ -22,16 +22,17 @@ OC.L10N.register(
     "Update" : "Atualizar",
     "Error updating settings" : "Erro ao atualizar as definições",
     "Failed to load some photos" : "Não foi possível carregar algumas fotografias",
-    "Cannot find this photo anymore!" : "Já não é possível encontrar esta fotografia!",
     "Month" : "Mês",
     "Day" : "Dia",
     "Time" : "Tempo",
     "Hour" : "Hora",
     "Name" : "Nome",
+    "Loading …" : "A carregar...",
     "Back" : "Anterior",
     "Failed to delete files." : "Não foi possível eliminar os ficheiros.",
     "Failed to delete {fileName}." : "Não foi possível eliminar {fileName}.",
     "Failed to favorite {fileName}." : "Não foi possível colocar {fileName} nos favoritos.",
-    "Failed to favorite files." : "Não foi possível colocar os ficheiros nos favoritos."
+    "Failed to favorite files." : "Não foi possível colocar os ficheiros nos favoritos.",
+    "Cannot find this photo anymore!" : "Já não é possível encontrar esta fotografia!"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

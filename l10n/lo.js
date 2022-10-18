@@ -11,6 +11,7 @@ OC.L10N.register(
     "Favorite" : "ລາຍການທີ່ມັກ",
     "View in folder" : "ເບິ່ງໃນໂຟນເດີ",
     "Name" : "ຊື່",
+    "Loading …" : "ກຳລັງໂຫຼດ",
     "Back" : "ຫຼັງ"
 },
 "nplurals=1; plural=0;");

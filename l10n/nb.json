@@ -20,6 +20,7 @@
     "Time" : "Tid",
     "Hour" : "Time",
     "Name" : "Navn",
+    "Loading …" : "Laster ...",
     "Back" : "Tilbake"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

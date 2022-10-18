@@ -31,7 +31,6 @@ OC.L10N.register(
     "Error updating settings" : "更新設定時發生錯誤",
     "Your Timeline" : "您的時間線",
     "Failed to load some photos" : "未能加載一些照片",
-    "Cannot find this photo anymore!" : "再也找不到這張照片了！",
     "Update Exif" : "更新 Exif",
     "Newest" : "最新",
     "Year" : "年",
@@ -52,6 +51,7 @@ OC.L10N.register(
     "Name" : "名字",
     "Failed to rename {oldName} to {name}." : "重新命名 {oldName} 為 {name} 失敗。",
     "Merge {name} with person" : "將 {name} 與人合併",
+    "Loading …" : "加載中 …",
     "Are you sure you want to merge {name} with {newName}?" : "您確定要將 {name} 與 {newName} 合併嗎？",
     "Too many failures, aborting" : "失敗次數過多，中止",
     "Error while moving {basename}" : "移動 {basename} 時出錯",
@@ -63,6 +63,7 @@ OC.L10N.register(
     "General Failure" : "一般故障",
     "Error: {msg}" : "錯誤：{msg}",
     "Failed to favorite {fileName}." : "將 {fileName} 加入最愛失敗。",
-    "Failed to favorite files." : "加入最愛失敗。"
+    "Failed to favorite files." : "加入最愛失敗。",
+    "Cannot find this photo anymore!" : "再也找不到這張照片了！"
 },
 "nplurals=1; plural=0;");

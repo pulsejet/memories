@@ -28,7 +28,6 @@ OC.L10N.register(
     "Update" : "Päivitä",
     "Error updating settings" : "Virhe asetuksia päivittäessä",
     "Failed to load some photos" : "Joidenkin kuvien lataus epäonnistui",
-    "Cannot find this photo anymore!" : "Kuvaa ei enää löydy!",
     "Update Exif" : "Päivitä exif",
     "Newest" : "Uusimmat",
     "Year" : "Vuosi",
@@ -45,12 +44,14 @@ OC.L10N.register(
     "Remove person" : "Poista henkilö",
     "Rename person" : "Nimeä henkilö uudelleen",
     "Name" : "Nimi",
+    "Loading …" : "Ladataan…",
     "Back" : "Takaisin",
     "Merge with different person" : "Yhdistä toisen henkilön kanssa",
     "Failed to delete files." : "Tiedostojen poisto epäonnistui.",
     "Failed to delete {fileName}." : "Tiedoston {fileName} poisto epäonnistui.",
     "Error: {msg}" : "Virhe: {msg}",
     "Failed to favorite {fileName}." : "Tiedoston {fileName} asettaminen suosikiksi epäonnistui.",
-    "Failed to favorite files." : "Tiedostojen asettaminen suosikeiksi epäonnistui."
+    "Failed to favorite files." : "Tiedostojen asettaminen suosikeiksi epäonnistui.",
+    "Cannot find this photo anymore!" : "Kuvaa ei enää löydy!"
 },
 "nplurals=2; plural=(n != 1);");

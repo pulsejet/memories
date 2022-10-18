@@ -14,6 +14,7 @@ OC.L10N.register(
     "Day" : "දිනය",
     "Time" : "වේලාව",
     "Name" : "නම",
+    "Loading …" : "පූරණය වෙමින් …",
     "Back" : "ආපසු"
 },
 "nplurals=2; plural=(n != 1);");
