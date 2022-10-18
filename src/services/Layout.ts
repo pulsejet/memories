@@ -111,7 +111,7 @@ export function getLayout(
             (numLeft === 0 || numLeft >= opts.numCols);
 
         // Full width breakout
-        if (canBreakout && rand() < (input.length > 0 ? 0.2 : 0.1)) {
+        if (canBreakout && rand() < (input.length > 0 ? 0.25 : 0.1)) {
             matrix[row][col] |= FLAG_BREAKOUT;
             for (let i = 1; i < opts.numCols; i++) {
                 matrix[row][i] |= FLAG_USED;
@@ -129,7 +129,7 @@ export function getLayout(
         }
 
         // Use 4 box
-        else if (canUse4 && rand() < ((col % 2) ? 0.67 : 0.4)) {
+        else if (canUse4 && rand() < 0.35) {
             matrix[row][col] |= FLAG_USE4;
             matrix[row+1][col] |= FLAG_USED;
             matrix[row][col+1] |= FLAG_USED;
