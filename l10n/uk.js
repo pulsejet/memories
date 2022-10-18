@@ -25,7 +25,6 @@ OC.L10N.register(
     "Update" : "Оновлення",
     "Error updating settings" : "Помилка оновлення налаштувань",
     "Failed to load some photos" : "Не вдалося завантажити деякі фотографії",
-    "Cannot find this photo anymore!" : "Більше не можу знайти це фото!",
     "Year" : "Рік",
     "Month" : "Місяць",
     "Day" : "День",
@@ -34,11 +33,13 @@ OC.L10N.register(
     "Remove person" : "Видалити особу",
     "Rename person" : "Перейменувати особу",
     "Name" : "Назва",
+    "Loading …" : "Завантаження …",
     "Back" : "Назад",
     "Merge with different person" : "Злитися з іншою людиною",
     "Failed to delete files." : "Не вдалося видалити файли.",
     "Failed to delete {fileName}." : "Не вдалося видалити {fileName}.",
     "Failed to favorite {fileName}." : "Не вдалося додати {fileName} до вибраного.",
-    "Failed to favorite files." : "Не вдалося додати файли до вибраного."
+    "Failed to favorite files." : "Не вдалося додати файли до вибраного.",
+    "Cannot find this photo anymore!" : "Більше не можу знайти це фото!"
 },
 "nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);");

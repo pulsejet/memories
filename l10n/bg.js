@@ -31,7 +31,6 @@ OC.L10N.register(
     "Error updating settings" : "Грешка при актуализиране на настройки",
     "Your Timeline" : "Вашата времева линия",
     "Failed to load some photos" : "Неуспешно зареждане на някои снимки",
-    "Cannot find this photo anymore!" : "Вече не мога да открия тази снимка!",
     "Update Exif" : "Актуализиране на Exif",
     "Newest" : "Най-новият",
     "Year" : "Година",
@@ -63,6 +62,7 @@ OC.L10N.register(
     "General Failure" : "Грешка от общ характер",
     "Error: {msg}" : "Грешка: {msg}",
     "Failed to favorite {fileName}." : "Неуспешно добавяне на {fileName} в любими.",
-    "Failed to favorite files." : "Неуспешно добавяне на файлове в любими."
+    "Failed to favorite files." : "Неуспешно добавяне на файлове в любими.",
+    "Cannot find this photo anymore!" : "Вече не мога да открия тази снимка!"
 },
 "nplurals=2; plural=(n != 1);");

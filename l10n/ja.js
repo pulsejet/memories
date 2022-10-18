@@ -23,6 +23,7 @@ OC.L10N.register(
     "Hour" : "時",
     "Minute" : "分",
     "Name" : "名前",
+    "Loading …" : "読み込み中…",
     "Back" : "戻る"
 },
 "nplurals=1; plural=0;");

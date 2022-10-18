@@ -19,6 +19,7 @@ OC.L10N.register(
     "Day" : "Ngày",
     "Time" : "Thời gian",
     "Name" : "Tên",
+    "Loading …" : "Đang tải …",
     "Back" : "Quay lại"
 },
 "nplurals=1; plural=0;");
