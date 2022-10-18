@@ -27,12 +27,31 @@ const IMAGE_MIME_TYPES = [
     'image/heic',
 ];
 
+const GET_FILE_CHUNK_SIZE = 50;
+
 /**
  * Get file infos for list of files given Ids
  * @param fileIds list of file ids
  * @returns list of file infos
  */
-export async function getFiles(fileIds: number[]): Promise<IFileInfo[]> {
+ export async function getFiles(fileIds: number[]): Promise<IFileInfo[]> {
+    // Divide fileIds into chunks of GET_FILE_CHUNK_SIZE
+    const chunks = [];
+    for (let i = 0; i < fileIds.length; i += GET_FILE_CHUNK_SIZE) {
+        chunks.push(fileIds.slice(i, i + GET_FILE_CHUNK_SIZE));
+    }
+
+    // Get file infos for each chunk
+    const fileInfos = await Promise.all(chunks.map(getFilesInternal));
+    return fileInfos.flat();
+ }
+
+/**
+ * Get file infos for list of files given Ids
+ * @param fileIds list of file ids (smaller than 100)
+ * @returns list of file infos
+ */
+async function getFilesInternal(fileIds: number[]): Promise<IFileInfo[]> {
     const prefixPath = `/files/${getCurrentUser()!.uid}`;
 
     // IMPORTANT: if this isn't there, then a blank
