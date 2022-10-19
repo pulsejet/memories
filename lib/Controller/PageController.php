@@ -1,26 +1,27 @@
 <?php
+
 namespace OCA\Memories\Controller;
 
-use OCP\IRequest;
-use OCP\AppFramework\Services\IInitialState;
-use OCP\AppFramework\Http\TemplateResponse;
-use OCA\Viewer\Event\LoadViewer;
 use OCA\Files\Event\LoadSidebar;
-use OCP\AppFramework\Controller;
+use OCA\Memories\AppInfo\Application;
+use OCA\Viewer\Event\LoadViewer;
 use OCP\App\IAppManager;
-use OCP\EventDispatcher\IEventDispatcher;
+use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\AppFramework\Http\TemplateResponse;
+use OCP\AppFramework\Services\IInitialState;
+use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IConfig;
+use OCP\IRequest;
 use OCP\IUserSession;
 use OCP\Util;
 
-use OCA\Memories\AppInfo\Application;
-
-class PageController extends Controller {
+class PageController extends Controller
+{
     protected $userId;
     protected $appName;
-    private IAppManager $appManager;
     protected IEventDispatcher $eventDispatcher;
+    private IAppManager $appManager;
     private IInitialState $initialState;
     private IUserSession $userSession;
     private IConfig $config;
@@ -33,8 +34,9 @@ class PageController extends Controller {
         IEventDispatcher $eventDispatcher,
         IInitialState $initialState,
         IUserSession $userSession,
-        IConfig $config) {
-
+        IConfig $config
+    )
+    {
         parent::__construct($AppName, $request);
         $this->userId = $UserId;
         $this->appName = $AppName;
@@ -47,11 +49,13 @@ class PageController extends Controller {
 
     /**
      * @NoAdminRequired
+     *
      * @NoCSRFRequired
      */
-    public function main() {
+    public function main()
+    {
         $user = $this->userSession->getUser();
-        if (is_null($user)) {
+        if (null === $user) {
             return null;
         }
 
@@ -64,76 +68,95 @@ class PageController extends Controller {
         $uid = $user->getUid();
         $timelinePath = \OCA\Memories\Util::getPhotosPath($this->config, $uid);
         $this->initialState->provideInitialState('timelinePath', $timelinePath);
-        $this->initialState->provideInitialState('showHidden',  $this->config->getUserValue(
-            $uid, Application::APPNAME, 'showHidden', false));
+        $this->initialState->provideInitialState('showHidden', $this->config->getUserValue(
+            $uid,
+            Application::APPNAME,
+            'showHidden',
+            false
+        ));
 
         // Apps enabled
-        $this->initialState->provideInitialState('systemtags', $this->appManager->isEnabledForUser('systemtags') === true);
-        $this->initialState->provideInitialState('recognize', $this->appManager->isEnabledForUser('recognize') === true);
-        $this->initialState->provideInitialState('version', $this->appManager->getAppInfo('memories')["version"]);
+        $this->initialState->provideInitialState('systemtags', true === $this->appManager->isEnabledForUser('systemtags'));
+        $this->initialState->provideInitialState('recognize', true === $this->appManager->isEnabledForUser('recognize'));
+        $this->initialState->provideInitialState('version', $this->appManager->getAppInfo('memories')['version']);
 
         $policy = new ContentSecurityPolicy();
-		$policy->addAllowedWorkerSrcDomain("'self'");
-		$policy->addAllowedScriptDomain("'self'");
+        $policy->addAllowedWorkerSrcDomain("'self'");
+        $policy->addAllowedScriptDomain("'self'");
 
         $response = new TemplateResponse($this->appName, 'main');
         $response->setContentSecurityPolicy($policy);
+
         return $response;
     }
 
     /**
      * @NoAdminRequired
+     *
      * @NoCSRFRequired
      */
-    public function folder() {
+    public function folder()
+    {
         return $this->main();
     }
 
     /**
      * @NoAdminRequired
+     *
      * @NoCSRFRequired
      */
-    public function favorites() {
+    public function favorites()
+    {
         return $this->main();
     }
 
     /**
      * @NoAdminRequired
+     *
      * @NoCSRFRequired
      */
-    public function videos() {
+    public function videos()
+    {
         return $this->main();
     }
 
     /**
      * @NoAdminRequired
+     *
      * @NoCSRFRequired
      */
-    public function archive() {
+    public function archive()
+    {
         return $this->main();
     }
 
     /**
      * @NoAdminRequired
+     *
      * @NoCSRFRequired
      */
-    public function thisday() {
+    public function thisday()
+    {
         return $this->main();
     }
 
     /**
      * @NoAdminRequired
+     *
      * @NoCSRFRequired
      */
-    public function people() {
+    public function people()
+    {
         return $this->main();
     }
 
     /**
      * @NoAdminRequired
+     *
      * @NoCSRFRequired
      */
-    public function tags() {
+    public function tags()
+    {
         return $this->main();
     }
 }

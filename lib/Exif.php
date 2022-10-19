@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace OCA\Memories;
@@ -7,24 +8,15 @@ use OCA\Memories\AppInfo\Application;
 use OCP\Files\File;
 use OCP\IConfig;
 
-class Exif {
+class Exif
+{
     /** Opened instance of exiftool when running in command mode */
-    private static $staticProc = null;
-    private static $staticPipes = null;
+    private static $staticProc;
+    private static $staticPipes;
     private static $noStaticProc = false;
 
-    /** Initialize static exiftool process for local reads */
-    private static function initializeStaticExiftoolProc() {
-        self::closeStaticExiftoolProc();
-        self::$staticProc = proc_open(['exiftool', '-stay_open', 'true', '-@', '-'], [
-            0 => array('pipe', 'r'),
-            1 => array('pipe', 'w'),
-            2 => array('pipe', 'w'),
-        ], self::$staticPipes);
-        stream_set_blocking(self::$staticPipes[1], false);
-    }
-
-    public static function closeStaticExiftoolProc() {
+    public static function closeStaticExiftoolProc()
+    {
         try {
             if (self::$staticProc) {
                 fclose(self::$staticPipes[0]);
@@ -34,15 +26,18 @@ class Exif {
                 self::$staticProc = null;
                 self::$staticPipes = null;
             }
-        } catch (\Exception $ex) {}
+        } catch (\Exception $ex) {
+        }
     }
 
-    public static function restartStaticExiftoolProc() {
+    public static function restartStaticExiftoolProc()
+    {
         self::closeStaticExiftoolProc();
         self::ensureStaticExiftoolProc();
     }
 
-    public static function ensureStaticExiftoolProc() {
+    public static function ensureStaticExiftoolProc()
+    {
         if (self::$noStaticProc) {
             return;
         }
@@ -50,15 +45,16 @@ class Exif {
         if (!self::$staticProc) {
             self::initializeStaticExiftoolProc();
             usleep(500000); // wait if error
-            if (!proc_get_status(self::$staticProc)["running"]) {
-                error_log("WARN: Failed to create stay_open exiftool process");
+            if (!proc_get_status(self::$staticProc)['running']) {
+                error_log('WARN: Failed to create stay_open exiftool process');
                 self::$noStaticProc = true;
                 self::$staticProc = null;
             }
+
             return;
         }
 
-        if (!proc_get_status(self::$staticProc)["running"]) {
+        if (!proc_get_status(self::$staticProc)['running']) {
             self::$staticProc = null;
             self::ensureStaticExiftoolProc();
         }
@@ -66,49 +62,51 @@ class Exif {
 
     /**
      * Get the path to the user's configured photos directory.
-     * @param IConfig $config
-     * @param string $userId
      */
-    public static function getPhotosPath(IConfig &$config, string &$userId) {
+    public static function getPhotosPath(IConfig &$config, string &$userId)
+    {
         $p = $config->getUserValue($userId, Application::APPNAME, 'timelinePath', '');
         if (empty($p)) {
             return 'Photos/';
         }
+
         return self::sanitizePath($p);
     }
 
     /**
      * Sanitize a path to keep only ASCII characters and special characters.
-     * @param string $path
      */
-    public static function sanitizePath(string $path) {
-        return mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).\/])", '', $path);
+    public static function sanitizePath(string $path)
+    {
+        return mb_ereg_replace('([^\\w\\s\\d\\-_~,;\\[\\]\\(\\).\\/])', '', $path);
     }
 
     /**
-     * Keep only one slash if multiple repeating
+     * Keep only one slash if multiple repeating.
      */
-    public static function removeExtraSlash(string $path) {
+    public static function removeExtraSlash(string $path)
+    {
         return mb_ereg_replace('\/\/+', '/', $path);
     }
 
     /**
-     * Remove any leading slash present on the path
+     * Remove any leading slash present on the path.
      */
-    public static function removeLeadingSlash(string $path) {
+    public static function removeLeadingSlash(string $path)
+    {
         return mb_ereg_replace('~^/+~', '', $path);
     }
 
     /**
      * Get exif data as a JSON object from a Nextcloud file.
-     * @param File $file
      */
-    public static function getExifFromFile(File &$file) {
+    public static function getExifFromFile(File &$file)
+    {
         // Borrowed from previews
         // https://github.com/nextcloud/server/blob/19f68b3011a3c040899fb84975a28bd746bddb4b/lib/private/Preview/ProviderV2.php
         if (!$file->isEncrypted() && $file->getStorage()->isLocal()) {
             $path = $file->getStorage()->getLocalFile($file->getInternalPath());
-            if (is_string($path)) {
+            if (\is_string($path)) {
                 return self::getExifFromLocalPath($path);
             }
         }
@@ -121,96 +119,35 @@ class Exif {
 
         $exif = self::getExifFromStream($handle);
         fclose($handle);
+
         return $exif;
     }
 
     /** Get exif data as a JSON object from a local file path */
-    public static function getExifFromLocalPath(string &$path) {
-        if (!is_null(self::$staticProc)) {
+    public static function getExifFromLocalPath(string &$path)
+    {
+        if (null !== self::$staticProc) {
             self::ensureStaticExiftoolProc();
+
             return self::getExifFromLocalPathWithStaticProc($path);
-        } else {
-            return self::getExifFromLocalPathWithSeparateProc($path);
-        }
-    }
-
-    /**
-     * Read from non blocking handle or throw timeout
-     * @param resource $handle
-     * @param int $timeout milliseconds
-     * @param string $delimiter null for eof
-     */
-    private static function readOrTimeout($handle, $timeout, $delimiter=null) {
-        $buf = '';
-        $waitedMs = 0;
-
-        while ($waitedMs < $timeout && ($delimiter ? !str_ends_with($buf, $delimiter) : !feof($handle))) {
-            $r = stream_get_contents($handle);
-            if (empty($r)) {
-                $waitedMs++;
-                usleep(1000);
-                continue;
-            }
-            $buf .= $r;
         }
 
-        if ($waitedMs >= $timeout) {
-            throw new \Exception('Timeout');
-        }
-
-        return $buf;
-    }
-
-    private static function getExifFromLocalPathWithStaticProc(string &$path) {
-        fwrite(self::$staticPipes[0], "$path\n-json\n-api\nQuickTimeUTC=1\n-n\n-execute\n");
-        fflush(self::$staticPipes[0]);
-
-        $readyToken = "\n{ready}\n";
-
-        try {
-            $buf = self::readOrTimeout(self::$staticPipes[1], 5000, $readyToken);
-            $tokPos = strrpos($buf, $readyToken);
-            $buf = substr($buf, 0, $tokPos);
-            return self::processStdout($buf);
-        } catch (\Exception $ex) {
-            error_log("ERROR: Exiftool may have crashed, restarting process [$path]");
-            self::restartStaticExiftoolProc();
-            throw new \Exception("Nothing to read from Exiftool");
-        }
-    }
-
-    private static function getExifFromLocalPathWithSeparateProc(string &$path) {
-        $pipes = [];
-        $proc = proc_open(['exiftool', '-api', 'QuickTimeUTC=1', '-n', '-json', $path], [
-            1 => array('pipe', 'w'),
-            2 => array('pipe', 'w'),
-        ], $pipes);
-        stream_set_blocking($pipes[1], false);
-
-        try {
-            $stdout = self::readOrTimeout($pipes[1], 5000);
-            return self::processStdout($stdout);
-        } catch (\Exception $ex) {
-            error_log("Exiftool timeout: [$path]");
-            throw new \Exception("Could not read from Exiftool");
-        } finally {
-            fclose($pipes[1]);
-            fclose($pipes[2]);
-            proc_terminate($proc);
-        }
+        return self::getExifFromLocalPathWithSeparateProc($path);
     }
 
     /**
      * Get exif data as a JSON object from a stream.
+     *
      * @param resource $handle
      */
-    public static function getExifFromStream(&$handle) {
+    public static function getExifFromStream(&$handle)
+    {
         // Start exiftool and output to json
         $pipes = [];
         $proc = proc_open(['exiftool', '-api', 'QuickTimeUTC=1', '-n', '-json', '-fast', '-'], [
-            0 => array('pipe', 'rb'),
-            1 => array('pipe', 'w'),
-            2 => array('pipe', 'w'),
+            0 => ['pipe', 'rb'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
         ], $pipes);
 
         // Write the file to exiftool's stdin
@@ -221,12 +158,15 @@ class Exif {
 
         // Get output from exiftool
         stream_set_blocking($pipes[1], false);
+
         try {
             $stdout = self::readOrTimeout($pipes[1], 5000);
+
             return self::processStdout($stdout);
         } catch (\Exception $ex) {
-            error_log("Exiftool timeout for file stream: " . $ex->getMessage());
-            throw new \Exception("Could not read from Exiftool");
+            error_log('Exiftool timeout for file stream: '.$ex->getMessage());
+
+            throw new \Exception('Could not read from Exiftool');
         } finally {
             fclose($pipes[1]);
             fclose($pipes[2]);
@@ -234,36 +174,30 @@ class Exif {
         }
     }
 
-    /** Get json array from stdout of exiftool */
-    private static function processStdout(string &$stdout) {
-        $json = json_decode($stdout, true);
-        if (!$json) {
-            throw new \Exception('Could not read exif data');
-        }
-        return $json[0];
-    }
-
     /**
-     * Parse date from exif format and throw error if invalid
+     * Parse date from exif format and throw error if invalid.
      *
      * @param string $dt
+     * @param mixed  $date
+     *
      * @return int unix timestamp
      */
-    public static function parseExifDate($date) {
+    public static function parseExifDate($date)
+    {
         $dt = $date;
-        if (isset($dt) && is_string($dt) && !empty($dt)) {
+        if (isset($dt) && \is_string($dt) && !empty($dt)) {
             $dt = explode('-', explode('+', $dt, 2)[0], 2)[0]; // get rid of timezone if present
             $dt = \DateTime::createFromFormat('Y:m:d H:i:s', $dt);
             if (!$dt) {
-                throw new \Exception("Invalid date: $date");
+                throw new \Exception("Invalid date: {$date}");
             }
             if ($dt && $dt->getTimestamp() > -5364662400) { // 1800 A.D.
                 return $dt->getTimestamp();
-            } else {
-                throw new \Exception("Date too old: $date");
             }
+
+            throw new \Exception("Date too old: {$date}");
         } else {
-            throw new \Exception("No date provided");
+            throw new \Exception('No date provided');
         }
     }
 
@@ -273,7 +207,8 @@ class Exif {
      *
      * @param int $epoch
      */
-    public static function forgetTimezone($epoch) {
+    public static function forgetTimezone($epoch)
+    {
         $dt = new \DateTime();
         $dt->setTimestamp($epoch);
         $tz = getenv('TZ'); // at least works on debian ...
@@ -281,16 +216,17 @@ class Exif {
             $dt->setTimezone(new \DateTimeZone($tz));
         }
         $utc = new \DateTime($dt->format('Y-m-d H:i:s'), new \DateTimeZone('UTC'));
+
         return $utc->getTimestamp();
     }
 
     /**
      * Get the date taken from either the file or exif data if available.
-     * @param File $file
-     * @param array $exif
+     *
      * @return int unix timestamp
      */
-    public static function getDateTaken(File &$file, array &$exif) {
+    public static function getDateTaken(File &$file, array &$exif)
+    {
         $dt = $exif['DateTimeOriginal'] ?? null;
         if (!isset($dt) || empty($dt)) {
             $dt = $exif['CreateDate'] ?? null;
@@ -307,25 +243,27 @@ class Exif {
         $dateTaken = $file->getCreationTime();
 
         // Fall back to modification time
-        if ($dateTaken == 0) {
+        if (0 === $dateTaken) {
             $dateTaken = $file->getMtime();
         }
+
         return self::forgetTimezone($dateTaken);
     }
 
     /**
-     * Get image dimensions from Exif data
-     * @param array $exif
+     * Get image dimensions from Exif data.
+     *
      * @return array [width, height]
      */
-    public static function getDimensions(array &$exif) {
+    public static function getDimensions(array &$exif)
+    {
         $width = $exif['ImageWidth'] ?? 0;
         $height = $exif['ImageHeight'] ?? 0;
 
         // Check if image is rotated and we need to swap width and height
         $rotation = $exif['Rotation'] ?? 0;
         $orientation = $exif['Orientation'] ?? 0;
-        if (in_array($orientation, [5, 6, 7, 8]) || in_array($rotation, [90, 270])) {
+        if (\in_array($orientation, [5, 6, 7, 8], true) || \in_array($rotation, [90, 270], true)) {
             return [$height, $width];
         }
 
@@ -333,16 +271,16 @@ class Exif {
     }
 
     /**
-     * Update exif date using exiftool
+     * Update exif date using exiftool.
      *
-     * @param File $file
      * @param string $newDate formatted in standard Exif format (YYYY:MM:DD HH:MM:SS)
      */
-    public static function updateExifDate(File &$file, string $newDate) {
+    public static function updateExifDate(File &$file, string $newDate)
+    {
         // Check for local files -- this is easier
         if (!$file->isEncrypted() && $file->getStorage()->isLocal()) {
             $path = $file->getStorage()->getLocalFile($file->getInternalPath());
-            if (is_string($path)) {
+            if (\is_string($path)) {
                 return self::updateExifDateForLocalFile($path, $newDate);
             }
         }
@@ -352,36 +290,12 @@ class Exif {
     }
 
     /**
-     * Update exif date using exiftool for a local file
+     * Update exif date for stream.
      *
-     * @param string $path
-     * @param string $newDate formatted in standard Exif format (YYYY:MM:DD HH:MM:SS)
-     * @return bool
-     */
-    private static function updateExifDateForLocalFile(string $path, string $newDate) {
-        $cmd = ['exiftool', '-api', 'QuickTimeUTC=1', '-overwrite_original', '-DateTimeOriginal=' . $newDate, $path];
-        $proc = proc_open($cmd, [
-            1 => array('pipe', 'w'),
-            2 => array('pipe', 'w'),
-        ], $pipes);
-        $stdout = self::readOrTimeout($pipes[1], 300000);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        proc_terminate($proc);
-        if (strpos($stdout, 'error') !== false) {
-            error_log("Exiftool error: $stdout");
-            throw new \Exception("Could not update exif date: " . $stdout);
-        }
-        return true;
-    }
-
-    /**
-     * Update exif date for stream
-     *
-     * @param File $file
      * @param string $newDate formatted in standard Exif format (YYYY:MM:DD HH:MM:SS)
      */
-    public static function updateExifDateForStreamFile(File &$file, string $newDate) {
+    public static function updateExifDateForStreamFile(File &$file, string $newDate)
+    {
         // Temp file for output, so we can compare sizes before writing to the actual file
         $tmpfile = tmpfile();
 
@@ -390,11 +304,11 @@ class Exif {
             $pipes = [];
             $proc = proc_open([
                 'exiftool', '-api', 'QuickTimeUTC=1',
-                '-overwrite_original', '-DateTimeOriginal=' . $newDate, '-'
+                '-overwrite_original', '-DateTimeOriginal='.$newDate, '-',
             ], [
-                0 => array('pipe', 'rb'),
-                1 => array('pipe', 'w'),
-                2 => array('pipe', 'w'),
+                0 => ['pipe', 'rb'],
+                1 => ['pipe', 'w'],
+                2 => ['pipe', 'w'],
             ], $pipes);
 
             // Write the file to exiftool's stdin
@@ -418,9 +332,10 @@ class Exif {
                 while ($waitedMs < $timeout && !feof($pipes[1])) {
                     $r = stream_copy_to_stream($pipes[1], $tmpfile, 1024 * 1024);
                     $newLen += $r;
-                    if ($r === 0) {
-                        $waitedMs++;
+                    if (0 === $r) {
+                        ++$waitedMs;
                         usleep(1000);
+
                         continue;
                     }
                 }
@@ -428,8 +343,9 @@ class Exif {
                     throw new \Exception('Timeout');
                 }
             } catch (\Exception $ex) {
-                error_log("Exiftool timeout for file stream: " . $ex->getMessage());
-                throw new \Exception("Could not read from Exiftool");
+                error_log('Exiftool timeout for file stream: '.$ex->getMessage());
+
+                throw new \Exception('Could not read from Exiftool');
             } finally {
                 // Close the pipes
                 fclose($pipes[1]);
@@ -440,8 +356,9 @@ class Exif {
             // Check the new length of the file
             // If the new length and old length are more different than 1KB, abort
             if (abs($newLen - $origLen) > 1024) {
-                error_log("Exiftool error: new length $newLen, old length $origLen");
-                throw new \Exception("Exiftool error: new length $newLen, old length $origLen");
+                error_log("Exiftool error: new length {$newLen}, old length {$origLen}");
+
+                throw new \Exception("Exiftool error: new length {$newLen}, old length {$origLen}");
             }
 
             // Write the temp file to the actual file
@@ -451,14 +368,16 @@ class Exif {
                 throw new \Exception('Could not open file for writing');
             }
             $wroteBytes = 0;
+
             try {
                 $wroteBytes = stream_copy_to_stream($tmpfile, $out);
             } finally {
                 fclose($out);
             }
             if ($wroteBytes !== $newLen) {
-                error_log("Exiftool error: wrote $r bytes, expected $newLen");
-                throw new \Exception("Could not write to file");
+                error_log("Exiftool error: wrote {$r} bytes, expected {$newLen}");
+
+                throw new \Exception('Could not write to file');
             }
 
             // All done at this point
@@ -467,5 +386,130 @@ class Exif {
             // Close the temp file
             fclose($tmpfile);
         }
+    }
+
+    /** Initialize static exiftool process for local reads */
+    private static function initializeStaticExiftoolProc()
+    {
+        self::closeStaticExiftoolProc();
+        self::$staticProc = proc_open(['exiftool', '-stay_open', 'true', '-@', '-'], [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ], self::$staticPipes);
+        stream_set_blocking(self::$staticPipes[1], false);
+    }
+
+    /**
+     * Read from non blocking handle or throw timeout.
+     *
+     * @param resource $handle
+     * @param int      $timeout   milliseconds
+     * @param string   $delimiter null for eof
+     */
+    private static function readOrTimeout($handle, $timeout, $delimiter = null)
+    {
+        $buf = '';
+        $waitedMs = 0;
+
+        while ($waitedMs < $timeout && ($delimiter ? !str_ends_with($buf, $delimiter) : !feof($handle))) {
+            $r = stream_get_contents($handle);
+            if (empty($r)) {
+                ++$waitedMs;
+                usleep(1000);
+
+                continue;
+            }
+            $buf .= $r;
+        }
+
+        if ($waitedMs >= $timeout) {
+            throw new \Exception('Timeout');
+        }
+
+        return $buf;
+    }
+
+    private static function getExifFromLocalPathWithStaticProc(string &$path)
+    {
+        fwrite(self::$staticPipes[0], "{$path}\n-json\n-api\nQuickTimeUTC=1\n-n\n-execute\n");
+        fflush(self::$staticPipes[0]);
+
+        $readyToken = "\n{ready}\n";
+
+        try {
+            $buf = self::readOrTimeout(self::$staticPipes[1], 5000, $readyToken);
+            $tokPos = strrpos($buf, $readyToken);
+            $buf = substr($buf, 0, $tokPos);
+
+            return self::processStdout($buf);
+        } catch (\Exception $ex) {
+            error_log("ERROR: Exiftool may have crashed, restarting process [{$path}]");
+            self::restartStaticExiftoolProc();
+
+            throw new \Exception('Nothing to read from Exiftool');
+        }
+    }
+
+    private static function getExifFromLocalPathWithSeparateProc(string &$path)
+    {
+        $pipes = [];
+        $proc = proc_open(['exiftool', '-api', 'QuickTimeUTC=1', '-n', '-json', $path], [
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ], $pipes);
+        stream_set_blocking($pipes[1], false);
+
+        try {
+            $stdout = self::readOrTimeout($pipes[1], 5000);
+
+            return self::processStdout($stdout);
+        } catch (\Exception $ex) {
+            error_log("Exiftool timeout: [{$path}]");
+
+            throw new \Exception('Could not read from Exiftool');
+        } finally {
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            proc_terminate($proc);
+        }
+    }
+
+    /** Get json array from stdout of exiftool */
+    private static function processStdout(string &$stdout)
+    {
+        $json = json_decode($stdout, true);
+        if (!$json) {
+            throw new \Exception('Could not read exif data');
+        }
+
+        return $json[0];
+    }
+
+    /**
+     * Update exif date using exiftool for a local file.
+     *
+     * @param string $newDate formatted in standard Exif format (YYYY:MM:DD HH:MM:SS)
+     *
+     * @return bool
+     */
+    private static function updateExifDateForLocalFile(string $path, string $newDate)
+    {
+        $cmd = ['exiftool', '-api', 'QuickTimeUTC=1', '-overwrite_original', '-DateTimeOriginal='.$newDate, $path];
+        $proc = proc_open($cmd, [
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ], $pipes);
+        $stdout = self::readOrTimeout($pipes[1], 300000);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_terminate($proc);
+        if (false !== strpos($stdout, 'error')) {
+            error_log("Exiftool error: {$stdout}");
+
+            throw new \Exception('Could not update exif date: '.$stdout);
+        }
+
+        return true;
     }
 }

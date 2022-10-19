@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 /**
- *
  * @license AGPL-3.0-or-later
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,28 +17,29 @@ declare(strict_types=1);
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 namespace OCA\Memories\Listeners;
 
-use \OCA\Memories\Db\TimelineWrite;
-
+use OCA\Memories\Db\TimelineWrite;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Files\Events\Node\NodeDeletedEvent;
 use OCP\Files\Folder;
 use OCP\IDBConnection;
 
-class PostDeleteListener implements IEventListener {
+class PostDeleteListener implements IEventListener
+{
     private TimelineWrite $util;
 
-    public function __construct(IDBConnection $connection) {
+    public function __construct(IDBConnection $connection)
+    {
         $this->util = new TimelineWrite($connection);
     }
 
-    public function handle(Event $event): void {
-        if (!($event instanceof NodeDeletedEvent)) {
+    public function handle(Event $event): void
+    {
+        if (!$event instanceof NodeDeletedEvent) {
             return;
         }
 

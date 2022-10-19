@@ -1,38 +1,45 @@
 <?php
+
 declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCP\IDBConnection;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\Folder;
+use OCP\IDBConnection;
 
-trait TimelineQueryTags {
+trait TimelineQueryTags
+{
     protected IDBConnection $connection;
 
-    public function getSystemTagId(IQueryBuilder &$query, string $tagName) {
+    public function getSystemTagId(IQueryBuilder &$query, string $tagName)
+    {
         $sqb = $query->getConnection()->getQueryBuilder();
+
         return $sqb->select('id')->from('systemtag')->where(
             $sqb->expr()->andX(
                 $sqb->expr()->eq('name', $sqb->createNamedParameter($tagName)),
                 $sqb->expr()->eq('visibility', $sqb->createNamedParameter(1)),
-            ))->executeQuery()->fetchOne();
+            )
+        )->executeQuery()->fetchOne();
     }
 
-    public function transformTagFilter(IQueryBuilder &$query, string $userId, string $tagName) {
+    public function transformTagFilter(IQueryBuilder &$query, string $userId, string $tagName)
+    {
         $tagId = $this->getSystemTagId($query, $tagName);
-        if ($tagId === FALSE) {
-            throw new \Exception("Tag $tagName not found");
+        if (false === $tagId) {
+            throw new \Exception("Tag {$tagName} not found");
         }
 
         $query->innerJoin('m', 'systemtag_object_mapping', 'stom', $query->expr()->andX(
-            $query->expr()->eq('stom.objecttype', $query->createNamedParameter("files")),
+            $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
             $query->expr()->eq('stom.objectid', 'm.fileid'),
             $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tagId)),
         ));
     }
 
-    public function getTags(Folder $folder) {
+    public function getTags(Folder $folder)
+    {
         $query = $this->connection->getQueryBuilder();
 
         // SELECT visible tag name and count of photos
@@ -44,7 +51,7 @@ trait TimelineQueryTags {
         // WHERE there are items with this tag
         $query->innerJoin('st', 'systemtag_object_mapping', 'stom', $query->expr()->andX(
             $query->expr()->eq('stom.systemtagid', 'st.id'),
-            $query->expr()->eq('stom.objecttype', $query->createNamedParameter("files")),
+            $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
         ));
 
         // WHERE these items are memories indexed photos
@@ -62,15 +69,16 @@ trait TimelineQueryTags {
         $tags = $query->executeQuery()->fetchAll();
 
         // Post process
-        foreach($tags as &$row) {
-            $row["id"] = intval($row["id"]);
-            $row["count"] = intval($row["count"]);
+        foreach ($tags as &$row) {
+            $row['id'] = (int) ($row['id']);
+            $row['count'] = (int) ($row['count']);
         }
 
         return $tags;
     }
 
-    public function getTagPreviews(Folder $folder) {
+    public function getTagPreviews(Folder $folder)
+    {
         $query = $this->connection->getQueryBuilder();
 
         // Windowing
@@ -78,8 +86,10 @@ trait TimelineQueryTags {
 
         // SELECT all photos with this tag
         $query->select('f.fileid', 'f.etag', 'stom.systemtagid', $rowNumber)->from(
-            'systemtag_object_mapping', 'stom')->where(
-                $query->expr()->eq('stom.objecttype', $query->createNamedParameter("files")),
+            'systemtag_object_mapping',
+            'stom'
+        )->where(
+                $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
             );
 
         // WHERE these items are memories indexed photos
@@ -89,7 +99,7 @@ trait TimelineQueryTags {
         $query->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folder, true, false));
 
         // Make this a sub query
-        $fun = $query->createFunction('(' . $query->getSQL() . ')');
+        $fun = $query->createFunction('('.$query->getSQL().')');
 
         // Create outer query
         $outerQuery = $this->connection->getQueryBuilder();
@@ -102,10 +112,10 @@ trait TimelineQueryTags {
         $previews = $outerQuery->executeQuery()->fetchAll();
 
         // Post-process
-        foreach($previews as &$row) {
-            $row["fileid"] = intval($row["fileid"]);
-            $row["systemtagid"] = intval($row["systemtagid"]);
-            unset($row["n"]);
+        foreach ($previews as &$row) {
+            $row['fileid'] = (int) ($row['fileid']);
+            $row['systemtagid'] = (int) ($row['systemtagid']);
+            unset($row['n']);
         }
 
         return $previews;

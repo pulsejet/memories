@@ -1,19 +1,24 @@
 <?php
+
 declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCP\IDBConnection;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\Folder;
+use OCP\IDBConnection;
 
-trait TimelineQueryFaces {
+trait TimelineQueryFaces
+{
     protected IDBConnection $connection;
 
-    public function transformFaceFilter(IQueryBuilder &$query, string $userId, string $faceStr) {
+    public function transformFaceFilter(IQueryBuilder &$query, string $userId, string $faceStr)
+    {
         // Get title and uid of face user
         $faceNames = explode('/', $faceStr);
-        if (count($faceNames) !== 2) throw new \Exception("Invalid face query");
+        if (2 !== \count($faceNames)) {
+            throw new \Exception('Invalid face query');
+        }
         $faceUid = $faceNames[0];
         $faceName = $faceNames[1];
 
@@ -31,7 +36,8 @@ trait TimelineQueryFaces {
         ));
     }
 
-    public function transformFaceRect(IQueryBuilder &$query, string $userId) {
+    public function transformFaceRect(IQueryBuilder &$query, string $userId)
+    {
         // Include detection params in response
         $query->addSelect(
             'rfd.width AS face_w',
@@ -41,26 +47,8 @@ trait TimelineQueryFaces {
         );
     }
 
-    /** Convert face fields to object */
-    private function processFace(&$row, $days=false) {
-        if (!isset($row) || !isset($row['face_w'])) return;
-
-        if (!$days) {
-            $row["facerect"] = [
-                "w" => floatval($row["face_w"]),
-                "h" => floatval($row["face_h"]),
-                "x" => floatval($row["face_x"]),
-                "y" => floatval($row["face_y"]),
-            ];
-        }
-
-        unset($row["face_w"]);
-        unset($row["face_h"]);
-        unset($row["face_x"]);
-        unset($row["face_y"]);
-    }
-
-    public function getFaces(Folder $folder) {
+    public function getFaces(Folder $folder)
+    {
         $query = $this->connection->getQueryBuilder();
 
         // SELECT all face clusters
@@ -88,25 +76,31 @@ trait TimelineQueryFaces {
         $faces = $query->executeQuery()->fetchAll();
 
         // Post process
-        foreach($faces as &$row) {
-            $row['id'] = intval($row['id']);
-            $row["name"] = $row["title"];
-            unset($row["title"]);
-            $row["count"] = intval($row["count"]);
+        foreach ($faces as &$row) {
+            $row['id'] = (int) ($row['id']);
+            $row['name'] = $row['title'];
+            unset($row['title']);
+            $row['count'] = (int) ($row['count']);
         }
 
         return $faces;
     }
 
-    public function getFacePreviewDetection(Folder &$folder, int $id) {
+    public function getFacePreviewDetection(Folder &$folder, int $id)
+    {
         $query = $this->connection->getQueryBuilder();
 
         // SELECT face detections for ID
         $query->select(
-            'rfd.file_id',                                  // Needed to get the actual file
-            'rfd.x', 'rfd.y', 'rfd.width', 'rfd.height',    // Image cropping
-            'm.w as image_width', 'm.h as image_height',    // Scoring
-            'm.fileid', 'm.datetaken',                      // Just in case, for postgres
+            'rfd.file_id',              // Get actual file
+            'rfd.x',                    // Image cropping
+            'rfd.y',
+            'rfd.width',
+            'rfd.height',
+            'm.w as image_width',       // Scoring
+            'm.h as image_height',
+            'm.fileid',
+            'm.datetaken',              // Just in case, for postgres
         )->from('recognize_face_detections', 'rfd');
         $query->where($query->expr()->eq('rfd.cluster_id', $query->createNamedParameter($id)));
 
@@ -132,31 +126,50 @@ trait TimelineQueryFaces {
         // Score the face detections
         foreach ($previews as &$p) {
             // Get actual pixel size of face
-            $iw = min(intval($p["image_width"] ?: 512), 2048);
-            $ih = min(intval($p["image_height"] ?: 512), 2048);
-            $w = floatval($p["width"]) * $iw;
-            $h = floatval($p["height"]) * $ih;
+            $iw = min((int) ($p['image_width'] ?: 512), 2048);
+            $ih = min((int) ($p['image_height'] ?: 512), 2048);
+            $w = (float) ($p['width']) * $iw;
+            $h = (float) ($p['height']) * $ih;
 
             // Get center of face
-            $x = floatval($p["x"]) + floatval($p["width"]) / 2;
-            $y = floatval($p["y"]) + floatval($p["height"]) / 2;
+            $x = (float) ($p['x']) + (float) ($p['width']) / 2;
+            $y = (float) ($p['y']) + (float) ($p['height']) / 2;
 
             // 3D normal distribution - if the face is closer to the center, it's better
-            $positionScore = exp(-pow($x - 0.5, 2) * 4) * exp(-pow($y - 0.5, 2) * 4);
+            $positionScore = exp(-($x - 0.5) ** 2 * 4) * exp(-($y - 0.5) ** 2 * 4);
 
             // Root size distribution - if the face is bigger, it's better,
             // but it doesn't matter beyond a certain point, especially 256px ;)
-            $sizeScore = pow($w * 100, 1/4) * pow($h * 100, 1/4);
+            $sizeScore = ($w * 100) ** (1 / 4) * ($h * 100) ** (1 / 4);
 
             // Combine scores
-            $p["score"] = $positionScore * $sizeScore;
+            $p['score'] = $positionScore * $sizeScore;
         }
 
         // Sort previews by score descending
-        usort($previews, function($a, $b) {
-            return $b["score"] <=> $a["score"];
+        usort($previews, function ($a, $b) {
+            return $b['score'] <=> $a['score'];
         });
 
         return $previews;
+    }
+
+    /** Convert face fields to object */
+    private function processFace(&$row, $days = false)
+    {
+        if (!isset($row) || !isset($row['face_w'])) {
+            return;
+        }
+
+        if (!$days) {
+            $row['facerect'] = [
+                'w' => (float) ($row['face_w']),
+                'h' => (float) ($row['face_h']),
+                'x' => (float) ($row['face_x']),
+                'y' => (float) ($row['face_y']),
+            ];
+        }
+
+        unset($row['face_w'], $row['face_h'], $row['face_x'], $row['face_y']);
     }
 }

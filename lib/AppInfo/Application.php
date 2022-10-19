@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 /**
  * @copyright Copyright (c) 2022, Varun Patil <radialapps@gmail.com>
- *
  * @author Varun Patil <radialapps@gmail.com>
- *
  * @license AGPL-3.0-or-later
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,22 +19,22 @@ declare(strict_types=1);
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 namespace OCA\Memories\AppInfo;
 
-use OCA\Memories\Listeners\PostWriteListener;
 use OCA\Memories\Listeners\PostDeleteListener;
+use OCA\Memories\Listeners\PostWriteListener;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
-use OCP\Files\Events\Node\NodeWrittenEvent;
 use OCP\Files\Events\Node\NodeDeletedEvent;
 use OCP\Files\Events\Node\NodeTouchedEvent;
+use OCP\Files\Events\Node\NodeWrittenEvent;
 
-class Application extends App implements IBootstrap {
+class Application extends App implements IBootstrap
+{
     public const APPNAME = 'memories';
 
     public const IMAGE_MIMES = [
@@ -61,16 +59,19 @@ class Application extends App implements IBootstrap {
         'video/x-matroska',
     ];
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct(self::APPNAME);
     }
 
-    public function register(IRegistrationContext $context): void {
+    public function register(IRegistrationContext $context): void
+    {
         $context->registerEventListener(NodeWrittenEvent::class, PostWriteListener::class);
         $context->registerEventListener(NodeTouchedEvent::class, PostWriteListener::class);
         $context->registerEventListener(NodeDeletedEvent::class, PostDeleteListener::class);
     }
 
-    public function boot(IBootContext $context): void {
+    public function boot(IBootContext $context): void
+    {
     }
 }
