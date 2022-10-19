@@ -18,6 +18,7 @@ js/
 build/
 coverage/
 .php_cs.cache
+.php-cs-fixer.cache
 vendor
 memories.tar.gz
 /test-results/
