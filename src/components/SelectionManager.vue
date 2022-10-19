@@ -16,7 +16,7 @@
 
             <NcActions :inline="1">
                 <NcActionButton v-for="action of getActions()" :key="action.name"
-                    :aria-label="action.name"
+                    :aria-label="action.name" close-after-click
                     @click="click(action)">
                     {{ action.name }}
                     <template #icon> <component :is="action.icon" :size="20" /> </template>
