@@ -258,6 +258,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
         this.adjustTimer = window.setTimeout(() => {
             this.adjustTimer = null;
             this.adjustNow();
+            this.computeVisibleTicks();
         }, 300);
     }
 
