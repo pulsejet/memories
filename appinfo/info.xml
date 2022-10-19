@@ -37,12 +37,12 @@ The exact steps depend on your Nextcloud platform. If you use Docker for your Ne
     <version>4.3.0-beta.1</version>
     <licence>agpl</licence>
     <author mail="radialapps@gmail.com" >Varun Patil</author>
-    <website>https://github.com/pulsejet/memories</website>
-    <repository>https://github.com/pulsejet/memories</repository>
-    <screenshot>https://raw.githubusercontent.com/pulsejet/memories/master/appinfo/screenshot.jpg</screenshot>
     <namespace>Memories</namespace>
     <category>multimedia</category>
-    <bugs>https://github.com</bugs>
+    <website>https://github.com/pulsejet/memories</website>
+    <bugs>https://github.com/pulsejet/memories/issues</bugs>
+    <repository>https://github.com/pulsejet/memories</repository>
+    <screenshot>https://raw.githubusercontent.com/pulsejet/memories/master/appinfo/screenshot.jpg</screenshot>
     <dependencies>
         <nextcloud min-version="25" max-version="25"/>
     </dependencies>
