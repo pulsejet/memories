@@ -33,7 +33,9 @@
 <script lang="ts">
 import { Component, Emit, Mixins, Prop } from 'vue-property-decorator';
 import GlobalMixin from '../mixins/GlobalMixin';
+import UserConfig from '../mixins/UserConfig';
 
+import { showError } from '@nextcloud/dialogs'
 import { generateUrl } from '@nextcloud/router'
 import { NcActions, NcActionButton } from '@nextcloud/vue';
 import { translate as t, translatePlural as n } from '@nextcloud/l10n'
@@ -65,7 +67,7 @@ type Selection = Map<number, IPhoto>;
         CloseIcon,
     },
 })
-export default class SelectionHandler extends Mixins(GlobalMixin) {
+export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
     @Prop() public selection: Selection;
     @Prop() public heads: { [dayid: number]: IHeadRow };
 
@@ -336,6 +338,10 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
      * Move selected photos to another person
      */
     private async moveSelectionToPerson(selection: Selection) {
+        if (!this.config_showFaceRect) {
+            showError(this.t('memories', 'You must enable "Mark person in preview" to use this feature'));
+            return;
+        }
         (<any>this.$refs.faceMoveModal).open(Array.from(selection.values()));
     }
 
