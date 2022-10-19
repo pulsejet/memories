@@ -17,7 +17,7 @@
             <NcActions :inline="1">
                 <NcActionButton v-for="action of getActions()" :key="action.name"
                     :aria-label="action.name"
-                    @click="action.callback(selection)">
+                    @click="click(action)">
                     {{ action.name }}
                     <template #icon> <component :is="action.icon" :size="20" /> </template>
                 </NcActionButton>
@@ -127,6 +127,18 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
         ];
     }
 
+    /** Click on an action */
+    private async click(action: ISelectionAction) {
+        try {
+            this.updateLoading(1);
+            await action.callback(this.selection);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            this.updateLoading(-1);
+        }
+    }
+
     /** Get the actions list */
     private getActions(): ISelectionAction[] {
         return this.defaultActions.filter(a => !a.if || a.if());
@@ -221,27 +233,22 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
      * Favorite the currently selected photos
      */
     private async favoriteSelection(selection: Selection) {
-        try {
-            const val = !this.allSelectedFavorites(selection);
-            this.updateLoading(1);
-            for await (const favIds of dav.favoriteFilesByIds(Array.from(selection.keys()), val)) {
-                favIds.forEach(id => {
-                    const photo = selection.get(id);
-                    if (!photo) {
-                        return;
-                    }
+        const val = !this.allSelectedFavorites(selection);
+        for await (const favIds of dav.favoriteFilesByIds(Array.from(selection.keys()), val)) {
+            favIds.forEach(id => {
+                const photo = selection.get(id);
+                if (!photo) {
+                    return;
+                }
 
-                    if (val) {
-                        photo.flag |= this.c.FLAG_IS_FAVORITE;
-                    } else {
-                        photo.flag &= ~this.c.FLAG_IS_FAVORITE;
-                    }
-                });
-            }
-            this.clearSelection();
-        } finally {
-            this.updateLoading(-1);
+                if (val) {
+                    photo.flag |= this.c.FLAG_IS_FAVORITE;
+                } else {
+                    photo.flag &= ~this.c.FLAG_IS_FAVORITE;
+                }
+            });
         }
+        this.clearSelection();
     }
 
     /**
@@ -254,16 +261,9 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
             }
         }
 
-        try {
-            this.updateLoading(1);
-            for await (const delIds of dav.deleteFilesByIds(Array.from(selection.keys()))) {
-                const delPhotos = delIds.map(id => selection.get(id));
-                this.delete(delPhotos);
-            }
-        } catch (error) {
-            console.error(error);
-        } finally {
-            this.updateLoading(-1);
+        for await (const delIds of dav.deleteFilesByIds(Array.from(selection.keys()))) {
+            const delPhotos = delIds.map(id => selection.get(id));
+            this.delete(delPhotos);
         }
     }
 
@@ -301,20 +301,13 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
             }
         }
 
-        try {
-            this.updateLoading(1);
-            for await (let delIds of dav.archiveFilesByIds(Array.from(selection.keys()), !this.routeIsArchive())) {
-                delIds = delIds.filter(x => x);
-                if (delIds.length === 0) {
-                    continue
-                }
-                const delPhotos = delIds.map(id => selection.get(id));
-                this.delete(delPhotos);
+        for await (let delIds of dav.archiveFilesByIds(Array.from(selection.keys()), !this.routeIsArchive())) {
+            delIds = delIds.filter(x => x);
+            if (delIds.length === 0) {
+                continue
             }
-        } catch (error) {
-            console.error(error);
-        } finally {
-            this.updateLoading(-1);
+            const delPhotos = delIds.map(id => selection.get(id));
+            this.delete(delPhotos);
         }
     }
 
@@ -339,16 +332,9 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
         }
 
         // Run query
-        try {
-            this.updateLoading(1);
-            for await (let delIds of dav.removeFaceImages(user, name, Array.from(selection.keys()))) {
-                const delPhotos = delIds.filter(x => x).map(id => selection.get(id));
-                this.delete(delPhotos);
-            }
-        } catch (error) {
-            console.error(error);
-        } finally {
-            this.updateLoading(-1);
+        for await (let delIds of dav.removeFaceImages(user, name, Array.from(selection.keys()))) {
+            const delPhotos = delIds.filter(x => x).map(id => selection.get(id));
+            this.delete(delPhotos);
         }
     }
 }
