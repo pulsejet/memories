@@ -18,6 +18,7 @@ OC.L10N.register(
     "Time" : "Tyd",
     "Hour" : "Uur",
     "Name" : "Naam",
+    "Loading …" : "Laai …",
     "Back" : "Terug"
 },
 "nplurals=2; plural=(n != 1);");
