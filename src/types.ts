@@ -171,7 +171,7 @@ export type ISelectionAction = {
     /** Icon component */
     icon: VueConstructor;
     /** Action to perform */
-    callback: (selection: Map<number, IPhoto>) => void;
+    callback: (selection: Map<number, IPhoto>) => Promise<void>;
     /** Condition to check for including */
     if?: () => boolean;
 }
