@@ -43,20 +43,20 @@ class Application extends App implements IBootstrap
         'image/heic',
         'image/png',
         'image/tiff',
-        // 'image/gif',         // too rarely used for photos
+        'image/gif',
+        'image/bmp',
         // 'image/x-xbitmap',   // too rarely used for photos
-        // 'image/bmp',         // too rarely used for photos
         // 'image/svg+xml',     // too rarely used for photos
     ];
 
     public const VIDEO_MIMES = [
         'video/mpeg',
-        // 'video/ogg',         // too rarely used for photos
-        // 'video/webm',        // too rarely used for photos
+        'video/webm',
         'video/mp4',
-        // 'video/x-m4v',       // too rarely used for photos
         'video/quicktime',
         'video/x-matroska',
+        // 'video/x-m4v',       // too rarely used for photos
+        // 'video/ogg',         // too rarely used for photos
     ];
 
     public function __construct()
