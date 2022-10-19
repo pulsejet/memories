@@ -110,6 +110,8 @@ export default class OnThisDay extends Mixins(GlobalMixin) {
     }
 
     async process(photos: IPhoto[]) {
+        this.years = [];
+
         let currentYear = 9999;
 
         for (const photo of photos) {
