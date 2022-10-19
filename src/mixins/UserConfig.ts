@@ -30,10 +30,11 @@ const eventName = 'memories:user-config-changed'
 
 @Component
 export default class UserConfig extends Vue {
-    config_timelinePath = loadState('memories', 'timelinePath') || '';
+    config_timelinePath: string = loadState('memories', 'timelinePath') || '';
+    config_foldersPath: string = loadState('memories', 'foldersPath') || '/';
     config_showHidden = loadState('memories', 'showHidden') === "true";
-    config_tagsEnabled = loadState('memories', 'systemtags');
-    config_recognizeEnabled = loadState('memories', 'recognize');
+    config_tagsEnabled = Boolean(loadState('memories', 'systemtags'));
+    config_recognizeEnabled = Boolean(loadState('memories', 'recognize'));
 
     config_squareThumbs = localStorage.getItem('memories_squareThumbs') === '1';
     config_showFaceRect = localStorage.getItem('memories_showFaceRect') === '1';
