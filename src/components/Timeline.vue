@@ -175,6 +175,10 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     /** Set of dayIds for which images loaded */
     private loadedDays = new Set<number>();
+    /** Days to load in the next call */
+    private fetchDayQueue = [] as number[];
+    /** Timer to load day call */
+    private fetchDayTimer = null as number | null;
     /** Set of selected file ids */
     private selection = new Map<number, IPhoto>();
 
@@ -244,6 +248,10 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         this.scrollerManager.reset();
         this.state = Math.random();
         this.loadedDays.clear();
+        this.fetchDayQueue = [];
+        window.clearTimeout(this.fetchDayTimer);
+        window.clearTimeout(this.resizeTimer);
+
     }
 
     /** Recreate everything */
@@ -650,22 +658,40 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         this.scrollPositionChange();
     }
 
+    /** API url for Day call */
+    private getDayUrl(dayId: number|string) {
+        let baseUrl = '/apps/memories/api/days/{dayId}';
+        const params: any = { dayId };
+        return generateUrl(this.appendQuery(baseUrl), params);
+    }
+
     /** Fetch image data for one dayId */
     async fetchDay(dayId: number) {
         const head = this.heads[dayId];
         if (!head) return;
 
-        let baseUrl = '/apps/memories/api/days/{dayId}';
-        const params: any = { dayId };
-
         // Do this in advance to prevent duplicate requests
         this.loadedDays.add(dayId);
 
-        // Construct URL
-        const url = generateUrl(this.appendQuery(baseUrl), params);
-
         // Look for cache
-        this.processDay(dayId, await utils.getCachedData(url));
+        this.processDay(dayId, await utils.getCachedData(this.getDayUrl(dayId)));
+
+        // Aggregate fetch requests
+        this.fetchDayQueue.push(dayId);
+        if (!this.fetchDayTimer) {
+            this.fetchDayTimer = window.setTimeout(() => {
+                this.fetchDayTimer = null;
+                this.fetchDayExpire();
+            }, 150);
+        }
+    }
+
+    async fetchDayExpire() {
+        if (this.fetchDayQueue.length === 0) return;
+
+        // Construct URL
+        const url = this.getDayUrl(this.fetchDayQueue.join(','));
+        this.fetchDayQueue = [];
 
         try {
             const startState = this.state;
@@ -673,21 +699,39 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             const data = res.data;
             if (this.state !== startState) return;
 
-            // Store cache asynchronously
-            // Do this regardless of whether the state has
-            // changed just to be sure
-            utils.cacheData(url, data);
-
-            // Check if the response has any delta
-            if (head.day.detail?.length) {
-                if (head.day.detail.length === data.length &&
-                    head.day.detail.every((p, i) => p.fileid === data[i].fileid && p.etag === data[i].etag)
-                ) {
-                    return;
-                }
+            // Bin the data into separate days
+            // It is already sorted in dayid DESC
+            const dayMap = new Map<number, IPhoto[]>();
+            for (const photo of data) {
+                if (!dayMap.get(photo.dayid)) dayMap.set(photo.dayid, []);
+                dayMap.get(photo.dayid).push(photo);
             }
 
-            this.processDay(dayId, data);
+            // Store cache asynchronously
+            // Do this regardless of whether the state has
+            // changed since the data is already fetched
+            //
+            // These loops cannot be combined because processDay
+            // creates circular references which cannot be stringified
+            for (const [dayId, photos] of dayMap) {
+                utils.cacheData(this.getDayUrl(dayId), photos);
+            }
+
+            // Process each day as needed
+            for (const [dayId, photos] of dayMap) {
+                // Check if the response has any delta
+                const head = this.heads[dayId];
+                if (head.day.detail?.length) {
+                    if (head.day.detail.length === photos.length &&
+                        head.day.detail.every((p, i) => p.fileid === photos[i].fileid && p.etag === photos[i].etag)
+                    ) {
+                        continue;
+                    }
+                }
+
+                // Pass ahead
+                this.processDay(dayId, photos);
+            }
         } catch (e) {
             showError(this.t('memories', 'Failed to load some photos'));
             console.error(e);
