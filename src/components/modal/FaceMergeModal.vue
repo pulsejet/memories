@@ -1,13 +1,11 @@
 <template>
     <Modal @close="close" size="large">
         <template #title>
-            {{ t('memories', 'Merge {name} with person', { name }) }}
+            {{ t('memories', 'Merge {name} with person', { name: $route.params.name }) }}
         </template>
 
-        <div class="outer" v-if="detail">
-            <div class="photo" v-for="photo of detail" :key="photo.fileid" >
-                <Tag :data="photo" :noNavigate="true" @open="clickFace" />
-            </div>
+        <div class="outer">
+            <FaceList @select="clickFace" />
 
             <div v-if="procesingTotal > 0" class="info-pad">
                 {{ t('memories', 'Processing … {n}/{m}', {
@@ -15,10 +13,6 @@
                     m: procesingTotal,
                 }) }}
             </div>
-        </div>
-
-        <div v-else>
-            {{ t('memories', 'Loading …') }}
         </div>
 
         <template #buttons>
@@ -30,11 +24,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Watch } from 'vue-property-decorator';
+import { Component, Emit, Mixins } from 'vue-property-decorator';
 import { NcButton, NcTextField } from '@nextcloud/vue';
 import { showError } from '@nextcloud/dialogs'
-import { IFileInfo, IPhoto, ITag } from '../../types';
+import { IFileInfo, ITag } from '../../types';
 import Tag from '../frame/Tag.vue';
+import FaceList from './FaceList.vue';
 
 import Modal from './Modal.vue';
 import GlobalMixin from '../../mixins/GlobalMixin';
@@ -47,57 +42,29 @@ import * as dav from '../../services/DavRequests';
         NcTextField,
         Modal,
         Tag,
+        FaceList,
     }
 })
 export default class FaceMergeModal extends Mixins(GlobalMixin) {
-    private user: string = "";
-    private name: string = "";
-    private detail: IPhoto[] | null = null;
     private processing = 0;
     private procesingTotal = 0;
 
     @Emit('close')
     public close() {}
 
-    @Watch('$route')
-    async routeChange(from: any, to: any) {
-        this.refreshParams();
-    }
-
-    mounted() {
-        this.refreshParams();
-    }
-
-    public async refreshParams() {
-        this.user = this.$route.params.user || '';
-        this.name = this.$route.params.name || '';
-        this.detail = null;
-        this.processing = 0;
-        this.procesingTotal = 0;
-
-        const data = await dav.getPeopleData();
-        let detail = data[0].detail;
-        detail.forEach((photo: IPhoto) => {
-            photo.flag = this.c.FLAG_IS_FACE | this.c.FLAG_IS_TAG;
-        });
-        detail = detail.filter((photo: ITag) => {
-            const pname = photo.name || photo.fileid.toString();
-            return photo.user_id !== this.user || pname !== this.name;
-        });
-
-        this.detail = detail;
-    }
-
     public async clickFace(face: ITag) {
+        const user = this.$route.params.user || '';
+        const name = this.$route.params.name || '';
+
         const newName = face.name || face.fileid.toString();
-        if (!confirm(this.t('memories', 'Are you sure you want to merge {name} with {newName}?', { name: this.name, newName}))) {
+        if (!confirm(this.t('memories', 'Are you sure you want to merge {name} with {newName}?', { name, newName}))) {
             return;
         }
 
 		try {
             // Get all files for current face
             let res = await client.getDirectoryContents(
-                `/recognize/${this.user}/faces/${this.name}`, { details: true }
+                `/recognize/${user}/faces/${name}`, { details: true }
             ) as any;
             let data: IFileInfo[] = res.data;
             this.procesingTotal = data.length;
@@ -117,7 +84,7 @@ export default class FaceMergeModal extends Mixins(GlobalMixin) {
                 // Move to new face with webdav
                 try {
                     await client.moveFile(
-                        `/recognize/${this.user}/faces/${this.name}/${p.basename}`,
+                        `/recognize/${user}/faces/${name}/${p.basename}`,
                         `/recognize/${face.user_id}/faces/${newName}/${p.basename}`
                     )
                 } catch (e) {
@@ -139,9 +106,7 @@ export default class FaceMergeModal extends Mixins(GlobalMixin) {
             }
 		} catch (error) {
             console.error(error);
-			showError(this.t('photos', 'Failed to move {name}.', {
-                name: this.name,
-            }));
+			showError(this.t('photos', 'Failed to move {name}.', { name }));
 		}
     }
 }
@@ -150,18 +115,6 @@ export default class FaceMergeModal extends Mixins(GlobalMixin) {
 <style lang="scss" scoped>
 .outer {
     margin-top: 15px;
-}
-.photo {
-    display: inline-block;
-    position: relative;
-    cursor: pointer;
-    vertical-align: top;
-    font-size: 0.8em;
-
-    max-width: 120px;
-    width: calc(33.33% - 2px);
-    aspect-ratio: 1/1;
-    margin: 1px;
 }
 .info-pad {
     margin-top: 6px;
