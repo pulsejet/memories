@@ -219,9 +219,12 @@ export async function getCachedData<T>(url: string): Promise<T> {
 }
 
 /** Store data in the cache */
-export async function cacheData(url: string, data: Object) {
-    const cache = staticCache || await openCache();
-    const response = new Response(JSON.stringify(data));
-    response.headers.set('Content-Type', 'application/json');
-    await cache.put(url, response);
+export function cacheData(url: string, data: Object) {
+    const str = JSON.stringify(data);
+    (async () => {
+        const cache = staticCache || await openCache();
+        const response = new Response(str);
+        response.headers.set('Content-Type', 'application/json');
+        await cache.put(url, response);
+    })();
 }
