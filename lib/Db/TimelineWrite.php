@@ -71,7 +71,7 @@ class TimelineWrite
         $cursor = $query->executeQuery();
         $prevRow = $cursor->fetch();
         $cursor->closeCursor();
-        if ($prevRow && !$force && (int) ($prevRow['mtime']) === $mtime) {
+        if ($prevRow && !$force && (int) $prevRow['mtime'] === $mtime) {
             return 1;
         }
 
