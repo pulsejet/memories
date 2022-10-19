@@ -50,6 +50,7 @@ OC.L10N.register(
     "Rename person" : "Преименуване на лице",
     "Name" : "Име",
     "Failed to rename {oldName} to {name}." : "Неуспешно преименуване от {oldName} на {name}.",
+    "Loading …" : "Зареждане …",
     "Merge {name} with person" : "Обединяване на {name} с лице",
     "Are you sure you want to merge {name} with {newName}?" : "Сигурни ли сте, че искате да обедините {name} с {newName}?",
     "Too many failures, aborting" : "Твърде много грешки от общ характер, прекъсване",
