@@ -27,6 +27,7 @@
 import { Component, Prop, Watch, Mixins } from 'vue-property-decorator';
 import { IFileInfo, IFolder } from '../../types';
 import GlobalMixin from '../../mixins/GlobalMixin';
+import UserConfig from '../../mixins/UserConfig';
 
 import * as dav from "../../services/DavRequests";
 import { getPreviewUrl } from "../../services/FileUtils";
@@ -38,7 +39,7 @@ import FolderIcon from 'vue-material-design-icons/Folder.vue';
         FolderIcon,
     },
 })
-export default class Folder extends Mixins(GlobalMixin) {
+export default class Folder extends Mixins(GlobalMixin, UserConfig) {
     @Prop() data: IFolder;
 
     // Separate property because the one on data isn't reactive
@@ -96,8 +97,15 @@ export default class Folder extends Mixins(GlobalMixin) {
 
     /** Open folder */
     openFolder(folder: IFolder) {
-        const path = folder.path.split('/').filter(x => x).slice(2) as any;
-        this.$router.push({ name: 'folders', params: { path }});
+        const path = folder.path.split('/').filter(x => x).slice(2) as string[];
+
+        // Remove base path if present
+        const basePath = this.config_foldersPath.split('/').filter(x => x);
+        if (path.length >= basePath.length && path.slice(0, basePath.length).every((x, i) => x === basePath[i])) {
+            path.splice(0, basePath.length);
+        }
+
+        this.$router.push({ name: 'folders', params: { path: path as any }});
     }
 }
 </script>

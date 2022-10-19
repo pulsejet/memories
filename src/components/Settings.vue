@@ -27,6 +27,11 @@
             v-model="config_timelinePath"
             type="text">
 
+        <label for="folders-path">{{ t('memories', 'Folders Path') }}</label>
+        <input id="folders-path"
+            v-model="config_foldersPath"
+            type="text">
+
         <NcCheckboxRadioSwitch :checked.sync="config_showHidden"
             type="switch">
             {{ t('memories', 'Show hidden folders') }}
@@ -68,13 +73,16 @@ export default class Settings extends Mixins(UserConfig, GlobalMixin) {
         // Update localStorage
         localStorage.setItem('memories_squareThumbs', this.config_squareThumbs ? '1' : '0');
 
-        // Update remote
-        await this.updateSetting('showHidden');
-        const res = await this.updateSetting('timelinePath');
-        if (res.status === 200) {
-            window.location.reload();
-        } else {
+        // Settings list
+        const settings = ['showHidden', 'timelinePath', 'foldersPath'];
+
+        // Update all
+        const p = await Promise.all(settings.map(async (setting) => this.updateSetting(setting)));
+
+        if (p.some((r) => !r || r.status !== 200)) {
             showError(this.t('memories', 'Error updating settings'));
+        } else {
+            window.location.reload();
         }
     }
 }

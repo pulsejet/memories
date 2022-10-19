@@ -67,6 +67,12 @@ class PageController extends Controller
         $uid = $user->getUid();
         $timelinePath = \OCA\Memories\Util::getPhotosPath($this->config, $uid);
         $this->initialState->provideInitialState('timelinePath', $timelinePath);
+        $this->initialState->provideInitialState('foldersPath', $this->config->getUserValue(
+            $uid,
+            Application::APPNAME,
+            'foldersPath',
+            '/'
+        ));
         $this->initialState->provideInitialState('showHidden', $this->config->getUserValue(
             $uid,
             Application::APPNAME,
