@@ -19,7 +19,7 @@
                 <div class="icon"> <ScrollIcon :size="20" /> </div>
         </span>
 
-        <div v-for="tick of visibleTicks" :key="tick.dayId"
+        <div v-for="tick of visibleTicks" :key="tick.key"
              class="tick"
             :class="{ 'dash': !tick.text }"
             :style="{ transform: `translateY(${tick.top}px)` }">
@@ -77,7 +77,15 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
     /** Get the visible ticks */
     get visibleTicks() {
-        return this.ticks.filter(tick => tick.s);
+        let key = 999900;
+        return this.ticks.filter(tick => tick.s).map(tick => {
+            if (tick.text) {
+                tick.key = key = tick.dayId * 100;
+            } else {
+                tick.key = ++key; // days are sorted descending
+            }
+            return tick;
+        });
     }
 
     /** Reset state */

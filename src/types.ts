@@ -146,6 +146,8 @@ export type ITick = {
     text?: string | number;
     /** Whether this tick should be shown */
     s?: boolean;
+    /** Key for vue component */
+    key?: number
 }
 
 export type TopMatter = {
