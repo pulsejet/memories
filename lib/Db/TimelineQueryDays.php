@@ -120,8 +120,8 @@ trait TimelineQueryDays
     private function processDays(&$days)
     {
         foreach ($days as &$row) {
-            $row['dayid'] = (int) ($row['dayid']);
-            $row['count'] = (int) ($row['count']);
+            $row['dayid'] = (int) $row['dayid'];
+            $row['count'] = (int) $row['count'];
 
             // All transform processing
             $this->processFace($row, true);
@@ -142,11 +142,11 @@ trait TimelineQueryDays
             unset($row['datetaken']);
 
             // Convert field types
-            $row['fileid'] = (int) ($row['fileid']);
-            $row['isvideo'] = (int) ($row['isvideo']);
-            $row['dayid'] = (int) ($row['dayid']);
-            $row['w'] = (int) ($row['w']);
-            $row['h'] = (int) ($row['h']);
+            $row['fileid'] = (int) $row['fileid'];
+            $row['isvideo'] = (int) $row['isvideo'];
+            $row['dayid'] = (int) $row['dayid'];
+            $row['w'] = (int) $row['w'];
+            $row['h'] = (int) $row['h'];
             if (!$row['isvideo']) {
                 unset($row['isvideo']);
             }

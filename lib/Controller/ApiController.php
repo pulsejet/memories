@@ -63,8 +63,7 @@ class ApiController extends Controller
         IRootFolder $rootFolder,
         IAppManager $appManager,
         IPreview $previewManager
-    )
-    {
+    ) {
         parent::__construct(Application::APPNAME, $request);
 
         $this->config = $config;
@@ -369,10 +368,10 @@ class ApiController extends Controller
         $image->readImageBlob($preview->getContent());
         $iw = $image->getImageWidth();
         $ih = $image->getImageHeight();
-        $dw = (float) ($detection['width']);
-        $dh = (float) ($detection['height']);
-        $dcx = (float) ($detection['x']) + (float) ($detection['width']) / 2;
-        $dcy = (float) ($detection['y']) + (float) ($detection['height']) / 2;
+        $dw = (float) $detection['width'];
+        $dh = (float) $detection['height'];
+        $dcx = (float) $detection['x'] + (float) $detection['width'] / 2;
+        $dcy = (float) $detection['y'] + (float) $detection['height'] / 2;
         $faceDim = max($dw * $iw, $dh * $ih) * 1.5;
         $image->cropImage(
             (int) $faceDim,

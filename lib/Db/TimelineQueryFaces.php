@@ -77,10 +77,10 @@ trait TimelineQueryFaces
 
         // Post process
         foreach ($faces as &$row) {
-            $row['id'] = (int) ($row['id']);
+            $row['id'] = (int) $row['id'];
             $row['name'] = $row['title'];
             unset($row['title']);
-            $row['count'] = (int) ($row['count']);
+            $row['count'] = (int) $row['count'];
         }
 
         return $faces;
@@ -128,12 +128,12 @@ trait TimelineQueryFaces
             // Get actual pixel size of face
             $iw = min((int) ($p['image_width'] ?: 512), 2048);
             $ih = min((int) ($p['image_height'] ?: 512), 2048);
-            $w = (float) ($p['width']) * $iw;
-            $h = (float) ($p['height']) * $ih;
+            $w = (float) $p['width'] * $iw;
+            $h = (float) $p['height'] * $ih;
 
             // Get center of face
-            $x = (float) ($p['x']) + (float) ($p['width']) / 2;
-            $y = (float) ($p['y']) + (float) ($p['height']) / 2;
+            $x = (float) $p['x'] + (float) $p['width'] / 2;
+            $y = (float) $p['y'] + (float) $p['height'] / 2;
 
             // 3D normal distribution - if the face is closer to the center, it's better
             $positionScore = exp(-($x - 0.5) ** 2 * 4) * exp(-($y - 0.5) ** 2 * 4);
@@ -163,10 +163,10 @@ trait TimelineQueryFaces
 
         if (!$days) {
             $row['facerect'] = [
-                'w' => (float) ($row['face_w']),
-                'h' => (float) ($row['face_h']),
-                'x' => (float) ($row['face_x']),
-                'y' => (float) ($row['face_y']),
+                'w' => (float) $row['face_w'],
+                'h' => (float) $row['face_h'],
+                'x' => (float) $row['face_x'],
+                'y' => (float) $row['face_y'],
             ];
         }
 

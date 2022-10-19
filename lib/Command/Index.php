@@ -72,8 +72,7 @@ class Index extends Command
         IManager $encryptionManager,
         IDBConnection $connection,
         ContainerInterface $container
-    )
-    {
+    ) {
         parent::__construct();
 
         $this->userManager = $userManager;

@@ -37,8 +37,7 @@ class PostWriteListener implements IEventListener
     public function __construct(
         IDBConnection $connection,
         IUserManager $userManager
-    )
-    {
+    ) {
         $this->userManager = $userManager;
         $this->timelineWrite = new TimelineWrite($connection);
     }

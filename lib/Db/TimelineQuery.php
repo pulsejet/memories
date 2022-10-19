@@ -41,8 +41,8 @@ class TimelineQuery
         }
 
         return [
-            'fileid' => (int) ($row['fileid']),
-            'dayid' => (int) ($row['dayid']),
+            'fileid' => (int) $row['fileid'],
+            'dayid' => (int) $row['dayid'],
             'datetaken' => $utcTs,
         ];
     }

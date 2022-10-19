@@ -35,8 +35,7 @@ class PageController extends Controller
         IInitialState $initialState,
         IUserSession $userSession,
         IConfig $config
-    )
-    {
+    ) {
         parent::__construct($AppName, $request);
         $this->userId = $UserId;
         $this->appName = $AppName;

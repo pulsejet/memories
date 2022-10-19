@@ -70,8 +70,8 @@ trait TimelineQueryTags
 
         // Post process
         foreach ($tags as &$row) {
-            $row['id'] = (int) ($row['id']);
-            $row['count'] = (int) ($row['count']);
+            $row['id'] = (int) $row['id'];
+            $row['count'] = (int) $row['count'];
         }
 
         return $tags;
@@ -89,8 +89,8 @@ trait TimelineQueryTags
             'systemtag_object_mapping',
             'stom'
         )->where(
-                $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
-            );
+            $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
+        );
 
         // WHERE these items are memories indexed photos
         $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.fileid', 'stom.objectid'));
@@ -113,8 +113,8 @@ trait TimelineQueryTags
 
         // Post-process
         foreach ($previews as &$row) {
-            $row['fileid'] = (int) ($row['fileid']);
-            $row['systemtagid'] = (int) ($row['systemtagid']);
+            $row['fileid'] = (int) $row['fileid'];
+            $row['systemtagid'] = (int) $row['systemtagid'];
             unset($row['n']);
         }
 
