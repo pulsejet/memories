@@ -22,7 +22,7 @@
         <div v-for="tick of visibleTicks" :key="tick.dayId"
              class="tick"
             :class="{ 'dash': !tick.text }"
-            :style="{ top: tick.top + 'px' }">
+            :style="{ transform: `translateY(${tick.top}px)` }">
 
             <span v-if="tick.text">{{ tick.text }}</span>
         </div>
@@ -411,6 +411,8 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
         font-weight: 600;
         opacity: 0.95;
         right: 9px;
+        top: 0;
+        transition: transform 0.2s linear;
         transform: translateY(-50%);
         z-index: 1;
 
