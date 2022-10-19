@@ -24,7 +24,9 @@
             </NcActions>
         </div>
 
+        <!-- Selection Modals -->
         <EditDate ref="editDate" @refresh="refresh" />
+        <FaceMoveModal ref="faceMoveModal" @moved="deletePhotos" :updateLoading="updateLoading" />
     </div>
 </template>
 
@@ -39,6 +41,7 @@ import { IHeadRow, IPhoto, ISelectionAction } from '../types';
 
 import * as dav from "../services/DavRequests";
 import EditDate from "./modal/EditDate.vue"
+import FaceMoveModal from "./modal/FaceMoveModal.vue"
 
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
@@ -48,6 +51,7 @@ import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import UnarchiveIcon from 'vue-material-design-icons/PackageUp.vue';
 import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue';
 import CloseIcon from 'vue-material-design-icons/Close.vue';
+import MoveIcon from 'vue-material-design-icons/ImageMove.vue';
 
 type Selection = Map<number, IPhoto>;
 
@@ -56,6 +60,7 @@ type Selection = Map<number, IPhoto>;
         NcActions,
         NcActionButton,
         EditDate,
+        FaceMoveModal,
 
         CloseIcon,
     },
@@ -70,7 +75,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
     refresh() {}
 
     @Emit('delete')
-    delete(photos: IPhoto[]) {}
+    deletePhotos(photos: IPhoto[]) {}
 
     @Emit('updateLoading')
     updateLoading(delta: number) {}
@@ -117,6 +122,12 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
                 icon: OpenInNewIcon,
                 callback: this.viewInFolder.bind(this),
                 if: () => this.selection.size === 1,
+            },
+            {
+                name: t('memories', 'Move to another person'),
+                icon: MoveIcon,
+                callback: this.moveSelectionToPerson.bind(this),
+                if: () => this.$route.name === 'people',
             },
             {
                 name: t('memories', 'Remove from person'),
@@ -263,7 +274,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
 
         for await (const delIds of dav.deleteFilesByIds(Array.from(selection.keys()))) {
             const delPhotos = delIds.map(id => selection.get(id));
-            this.delete(delPhotos);
+            this.deletePhotos(delPhotos);
         }
     }
 
@@ -307,7 +318,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
                 continue
             }
             const delPhotos = delIds.map(id => selection.get(id));
-            this.delete(delPhotos);
+            this.deletePhotos(delPhotos);
         }
     }
 
@@ -319,6 +330,13 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
     /** Is archive route */
     private routeIsArchive() {
         return this.$route.name === 'archive';
+    }
+
+    /**
+     * Move selected photos to another person
+     */
+    private async moveSelectionToPerson(selection: Selection) {
+        (<any>this.$refs.faceMoveModal).open(Array.from(selection.values()));
     }
 
     /**
@@ -334,7 +352,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin) {
         // Run query
         for await (let delIds of dav.removeFaceImages(user, name, Array.from(selection.keys()))) {
             const delPhotos = delIds.filter(x => x).map(id => selection.get(id));
-            this.delete(delPhotos);
+            this.deletePhotos(delPhotos);
         }
     }
 }
