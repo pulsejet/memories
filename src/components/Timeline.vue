@@ -403,18 +403,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         }
     }
 
-    /** Store the current scroll position to restore later */
-    private getScrollY() {
-        const recycler = this.$refs.recycler as any;
-        return recycler.$el.scrollTop
-    }
-
-    /** Restore the stored scroll position */
-    private setScrollY(y: number) {
-        const recycler = this.$refs.recycler as any;
-        recycler.scrollToPosition(y);
-    }
-
     /** Get query string for API calls */
     appendQuery(url: string) {
         const query = new URLSearchParams();
@@ -793,9 +781,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         const headIdx = this.list.findIndex(item => item.id === head.id);
         let rowIdx = headIdx + 1;
 
-        // Store the scroll position in case we change any rows
-        const scrollY = this.getScrollY();
-
         // Previous justified row
         let prevJustifyTop = justify[0]?.top || 0;
 
@@ -922,7 +907,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 const recycler: any = this.$refs.recycler;
                 const midIndex = (recycler.$_startIndex + recycler.$_endIndex) / 2;
                 if (midIndex > headIdx) {
-                    this.setScrollY(scrollY + rowSizeDelta);
+                    recycler.$el.scrollTop += rowSizeDelta;
                 }
             }
         }
