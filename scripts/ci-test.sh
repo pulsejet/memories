@@ -34,7 +34,6 @@ unzip Files.zip
 cd ../../..
 
 # Index
-sudo apt-get install libimage-exiftool-perl -y
 php occ files:scan --all
 php occ memories:index
 
