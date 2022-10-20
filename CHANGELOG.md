@@ -4,7 +4,12 @@ This file is manually updated. Please file an issue if something is missing.
 
 ## v4.3.0, v3.3.0
 * **Note:** you must run `occ memories:index -f` after updating to take advantage of new features.
-* **Brand new tiled layout for photos**
+* **Feature**: **Brand new tiled layout for photos**
+* **Feature**: Photos from "On this day" are now shown at the top of the timeline
+* **Feature**: Move selected photos from one person to another ([#78](https://github.com/pulsejet/memories/issues/78))
+* **Feature**: Highlight faces in People view ([#79](https://github.com/pulsejet/memories/issues/79))
+* **Feature**: Choose root folder for Folders view ([#85](https://github.com/pulsejet/memories/issues/85))
+* **No longer need to install exiftool**. It will be bundled with the app.
 * Improve overall performance with caching
 * Basic offline support with cache
 * Improve scroller performance
