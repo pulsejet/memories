@@ -1,17 +1,15 @@
-# Memories
-
-**📷 Yet another photo management app for Nextcloud**
-
 ![Screenshot](appinfo/screenshot.jpg)
 
-## How is this different?
+## Photo Viewer and Manager
 
-* **📸 Photo and Video Timeline**: Sorts photos by date taken, parsed from Exif data.
-* **🤔 Quick Recap**: Jump to anywhere in the timeline instantly.
-* **🖼️ Folders**: Browse your and shared folders with a similar, efficient timeline.
+Memories is a photo management app for Nextcloud with advanced features including:
+
+* **📸 Timeline**: Sort photos and videos by date taken, parsed from Exif data.
+* **🤔 Recap**: Jump to any time in the past instantly and relive your memories.
 * **🤖 AI Tagging**: Group photos by people and objects using AI, powered by the [recognize](https://github.com/nextcloud/recognize) app.
+* **🖼️ Folders**: Browse your own and shared folders with a similar, efficient timeline.
 * **🎦 Slideshow**: View photos from your timeline and folders easily.
-* **📱 Mobile Support**: Relive your memories on devices of any shape and size through the web app.
+* **📱 Mobile Support**: Works on devices of any shape and size through the web app.
 * **✏️ Edit Metadata**: Edit Exif dates on photos quickly and easily.
 * **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.
 * **⚡️ Fast**: Memories is extremely fast. Period. More details below.
