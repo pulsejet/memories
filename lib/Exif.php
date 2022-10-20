@@ -399,7 +399,9 @@ class Exif
         $noLocal = $config->getSystemValue($configKey.'_no_local', false);
 
         // We know already where it is
-        if (!empty($configPath)) return $configPath;
+        if (!empty($configPath) && \file_exists($configPath)) {
+            return $configPath;
+        }
 
         // Detect architecture
         $arch = null;
@@ -426,9 +428,6 @@ class Exif
 
             // check if file exists
             if (file_exists($path)) {
-                // make executable
-                chmod($path, 0755);
-
                 // check if the version prints correctly
                 $ver = self::EXIFTOOL_VER;
                 $vero = shell_exec("$path -ver");
@@ -445,6 +444,14 @@ class Exif
                 error_log("Exiftool not found: $path");
             }
         }
+
+        // Fallback to perl script
+        $path = dirname(__FILE__) . "/../exiftool-bin/exiftool/exiftool";
+        if (file_exists($path)) {
+            return $path;
+        }
+
+        error_log("Exiftool not found: $path");
 
         // Fallback to system binary
         return 'exiftool';

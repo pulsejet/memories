@@ -149,8 +149,8 @@ class Index extends Command
     {
         // Refuse to run without exiftool
         if (!$this->testExif()) {
-            error_log('FATAL: exiftool could not be found or test failed');
-            error_log('Please install exiftool (at least v12) and make sure it is in the PATH');
+            error_log('FATAL: exiftool could not be executed or test failed');
+            error_log('Make sure you have perl 5 installed in PATH');
 
             return 1;
         }
