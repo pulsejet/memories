@@ -39,13 +39,6 @@ lint:
 lint-fix:
 	npm run lint:fix
 
-# Style linting
-stylelint:
-	npm run stylelint
-
-stylelint-fix:
-	npm run stylelint:fix
-
 # Cleaning
 clean:
 	rm -f js/*
