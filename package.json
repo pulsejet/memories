@@ -28,9 +28,7 @@
     "watch": "NODE_ENV=development webpack --progress --watch --config webpack.js",
     "e2e": "playwright test",
     "lint": "eslint --ext .js,.vue src",
-    "lint:fix": "eslint --ext .js,.vue src --fix",
-    "stylelint": "stylelint src",
-    "stylelint:fix": "stylelint src --fix"
+    "lint:fix": "eslint --ext .js,.vue src --fix"
   },
   "dependencies": {
     "@nextcloud/l10n": "^1.6.0",
@@ -59,7 +57,6 @@
     "@nextcloud/babel-config": "^1.0.0",
     "@nextcloud/browserslist-config": "^2.3.0",
     "@nextcloud/eslint-config": "^8.1.2",
-    "@nextcloud/stylelint-config": "^2.3.0",
     "@nextcloud/webpack-vue-config": "^5.3.0",
     "@playwright/test": "^1.27.1",
     "@types/url-parse": "^1.4.8",
