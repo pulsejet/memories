@@ -26,3 +26,4 @@ memories.tar.gz
 /playwright/.cache/
 
 exiftool-bin/
+tools/
