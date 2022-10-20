@@ -30,12 +30,9 @@ Memories is a photo management app for Nextcloud with advanced features includin
 
 1. ☁ Clone this into your `apps` folder of your Nextcloud.
 1. 👩‍💻 In a terminal, run the command `make dev-setup` to install the dependencies.
-1. 🏗 Then to build the Typescript whenever you make changes, run `make build-js`. Watch changes with: `make watch-js`.
+1. 🏗 To build the Typescript, run `make build-js`. Watch changes with: `make watch-js`.
 1. ✅ Enable the app through the app management of your Nextcloud.
 1. 🎉 Partytime!
-
-## 🤔 Why a separate app?
-The approach of this app is fundamentally different from the official Nextcloud Photos app, which is very lightweight and works entirely using webdav. This app instead maintains special metadata in a separate table on the backend, and thus can be considered to have different objectives.
 
 ## ⚡ Performance
 - Once properly configured, Memories is **extremely fast**, possibly one of the fastest web photo viewers.
@@ -49,8 +46,7 @@ The approach of this app is fundamentally different from the official Nextcloud 
 - The app can work with external storage for photos. Just set the mountpoint as the timeline directory.
     - If you add any photos from outside Nextcloud, you must run the scan and index commands.
     - Indexing may be slow, since all files must be downloaded from the storage. The app currently assumes that the Exif data is present with the first 20MB of each file.
-    - This function is experimental and may not work as expected. Please report any issues.
 - The archive feature moves photos to a separate folder called `.archive` at the root of your timeline. You can use this, for example, to move these photos to a cold storage.
 
 ## Special Thanks
-Nextcloud team. At least one half of the code is based on the work of the [Nextcloud Photos](https://github.com/nextcloud/photos).
+Nextcloud team. A lot of this work is based on [Photos](https://github.com/nextcloud/photos).
