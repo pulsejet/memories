@@ -1,7 +1,10 @@
 all: dev-setup lint build-js-production test
 
 # Dev env management
-dev-setup: clean clean-dev npm-init
+dev-setup: clean clean-dev npm-init get-exiftool
+
+get-exiftool:
+	./get-exiftool.sh
 
 npm-init:
 	npm ci
