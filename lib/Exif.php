@@ -10,12 +10,12 @@ use OCP\IConfig;
 
 class Exif
 {
+    private const EXIFTOOL_VER = '12.49';
+
     /** Opened instance of exiftool when running in command mode */
     private static $staticProc;
     private static $staticPipes;
     private static $noStaticProc = false;
-
-    private const EXIFTOOL_VER = '12.49';
 
     public static function closeStaticExiftoolProc()
     {
@@ -399,59 +399,59 @@ class Exif
         $noLocal = $config->getSystemValue($configKey.'_no_local', false);
 
         // We know already where it is
-        if (!empty($configPath) && \file_exists($configPath)) {
+        if (!empty($configPath) && file_exists($configPath)) {
             return $configPath;
         }
 
         // Detect architecture
         $arch = null;
-        $uname = php_uname("m");
-        if (false !== stripos($uname, "aarch64") || false !== stripos($uname,"arm64")) {
-            $arch = "aarch64";
-        } else if (false !== stripos($uname, "x86_64") || false !== stripos($uname, "amd64")) {
-            $arch = "amd64";
+        $uname = php_uname('m');
+        if (false !== stripos($uname, 'aarch64') || false !== stripos($uname, 'arm64')) {
+            $arch = 'aarch64';
+        } elseif (false !== stripos($uname, 'x86_64') || false !== stripos($uname, 'amd64')) {
+            $arch = 'amd64';
         }
 
         // Detect glibc or musl
         $libc = null;
-        $ldd = shell_exec("ldd --version");
-        if (false !== stripos($ldd, "musl")) {
-            $libc = "musl";
-        } else if (false !== stripos($ldd, "glibc")) {
-            $libc = "glibc";
+        $ldd = shell_exec('ldd --version');
+        if (false !== stripos($ldd, 'musl')) {
+            $libc = 'musl';
+        } elseif (false !== stripos($ldd, 'glibc')) {
+            $libc = 'glibc';
         }
 
         // Get static binary if available
         if ($arch && $libc && !$noLocal) {
             // get target file path
-            $path = dirname(__FILE__) . "/../exiftool-bin/exiftool-$arch-$libc";
+            $path = __DIR__."/../exiftool-bin/exiftool-{$arch}-{$libc}";
 
             // check if file exists
             if (file_exists($path)) {
                 // check if the version prints correctly
                 $ver = self::EXIFTOOL_VER;
-                $vero = shell_exec("$path -ver");
+                $vero = shell_exec("{$path} -ver");
                 if ($vero && false !== stripos(trim($vero), $ver)) {
                     $out = trim($vero);
-                    print("Exiftool binary version check passed $out <==> $ver\n");
+                    echo "Exiftool binary version check passed {$out} <==> {$ver}\n";
                     $config->setSystemValue($configKey, $path);
+
                     return $path;
-                } else {
-                    error_log("Exiftool version check failed $vero <==> $ver");
-                    $config->setSystemValue($configKey.'_no_local', true);
                 }
+                error_log("Exiftool version check failed {$vero} <==> {$ver}");
+                $config->setSystemValue($configKey.'_no_local', true);
             } else {
-                error_log("Exiftool not found: $path");
+                error_log("Exiftool not found: {$path}");
             }
         }
 
         // Fallback to perl script
-        $path = dirname(__FILE__) . "/../exiftool-bin/exiftool/exiftool";
+        $path = __DIR__.'/../exiftool-bin/exiftool/exiftool';
         if (file_exists($path)) {
             return $path;
         }
 
-        error_log("Exiftool not found: $path");
+        error_log("Exiftool not found: {$path}");
 
         // Fallback to system binary
         return 'exiftool';
