@@ -1,5 +1,5 @@
 <template>
-    <div class="scroller"
+    <div class="scroller" ref="scroller"
         v-bind:class="{
             'scrolling-recycler': scrollingRecycler,
             'scrolling': scrolling,
@@ -10,13 +10,14 @@
         @mousedown="mousedown">
 
         <span class="cursor st" ref="cursorSt"
-                :style="{ transform: `translateY(${cursorY}px)` }">
+              :style="{ transform: `translateY(${cursorY}px)` }">
         </span>
 
         <span class="cursor hv"
-                :style="{ transform: `translateY(${hoverCursorY}px)` }">
-                <div class="text"> {{ hoverCursorText }} </div>
-                <div class="icon"> <ScrollIcon :size="22" /> </div>
+             :style="{ transform: `translateY(${hoverCursorY}px)` }"
+             @touchmove="touchmove">
+            <div class="text"> {{ hoverCursorText }} </div>
+            <div class="icon"> <ScrollIcon :size="22" /> </div>
         </span>
 
         <div v-for="tick of visibleTicks" :key="tick.key"
@@ -347,7 +348,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
     /** Handle touch */
     private touchmove(event: any) {
-        const rect = event.target.getBoundingClientRect();
+        const rect = (this.$refs.scroller as HTMLElement).getBoundingClientRect();
         const y = event.targetTouches[0].pageY - rect.top;
         this.recycler.scrollToPosition(this.getRecyclerY(y));
         event.preventDefault();
@@ -396,6 +397,10 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
     // Hide ticks on mobile unless hovering
     @include phone {
+        // Shift pointer events to hover cursor
+        pointer-events: none;
+        .cursor.hv { pointer-events: all; }
+
         &:not(.scrolling) {
             .cursor.hv {
                 left: 5px;
