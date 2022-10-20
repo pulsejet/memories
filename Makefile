@@ -4,7 +4,7 @@ all: dev-setup lint build-js-production test
 dev-setup: clean clean-dev npm-init get-exiftool
 
 get-exiftool:
-	./get-exiftool.sh
+	sh scripts/get-exiftool.sh
 
 npm-init:
 	npm ci

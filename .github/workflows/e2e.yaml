@@ -92,7 +92,7 @@ jobs:
 
       - name: Run tests
         run: |
-          ./apps/memories/ci-test.sh
+          ./apps/memories/scripts/ci-test.sh
 
       - uses: actions/upload-artifact@v3
         if: always()
@@ -165,7 +165,7 @@ jobs:
 
       - name: Run tests
         run: |
-          ./apps/memories/ci-test.sh
+          ./apps/memories/scripts/ci-test.sh
 
       - uses: actions/upload-artifact@v3
         if: always()
@@ -224,7 +224,7 @@ jobs:
 
       - name: Run tests
         run: |
-          ./apps/memories/ci-test.sh
+          ./apps/memories/scripts/ci-test.sh
 
       - uses: actions/upload-artifact@v3
         if: always()

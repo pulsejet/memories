@@ -25,7 +25,7 @@ jobs:
       run: |
         make dev-setup
         make build-js-production
-        ./bundle.sh
+        ./scripts/bundle.sh
 
     - name: Upload app tarball to release
       uses: svenstaro/upload-release-action@v2
