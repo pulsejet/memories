@@ -23,26 +23,16 @@
 
 ## 🚀 Installation
 
-1. Install the app from the Nextcloud app store
-1. ⚒️ Install `exiftool` (see below).
+1. Install the app from the Nextcloud app store.
 1. Run `php ./occ memories:index` to generate metadata indices for existing photos.
 1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos. Photos from this directory will be displayed in the timeline, including any photos in nested subdirectories.
 1. Installing the [preview generator](https://github.com/rullzer/previewgenerator) for pre-generating thumbnails is strongly recommended.
-
-## 🔨 Installing Dependencies
-The exact steps depend on your Nextcloud platform. If you use Docker for your Nextcloud instance, you can install Exiftool by using a custom docker image.
-- **Ubuntu/Debian**: `sudo apt install libimage-exiftool-perl`
-- **Fedora**: `sudo dnf install perl-Image-ExifTool`
-- **Arch Linux**: `sudo pacman -S perl-image-exiftool`
-- **Alpine**: `apk add --no-cache exiftool`
-- **MacOS**: `brew install exiftool`
-- **FreeBSD**: `sudo pkg install p5-Image-ExifTool`
 
 ## 🏗 Development setup
 
 1. ☁ Clone this into your `apps` folder of your Nextcloud.
 1. 👩‍💻 In a terminal, run the command `make dev-setup` to install the dependencies.
-1. 🏗 Then to build the Javascript whenever you make changes, run `make build-js`. To create a pull request use `make build-js-production`. Watch changes with: `make watch-js`.
+1. 🏗 Then to build the Typescript whenever you make changes, run `make build-js`. Watch changes with: `make watch-js`.
 1. ✅ Enable the app through the app management of your Nextcloud.
 1. 🎉 Partytime!
 
