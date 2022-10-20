@@ -222,6 +222,14 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         this.loading += delta;
     }
 
+    isMobile() {
+        return window.innerWidth <= 768;
+    }
+
+    allowBreakout() {
+        return this.isMobile() && !this.config_squareThumbs;
+    }
+
     /** Create new state */
     async createState() {
         // Wait for one tick before doing anything
@@ -295,7 +303,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         const recycler = this.$refs.recycler as any;
         recycler.$el.style.height = (height - tmHeight - 4) + 'px';
 
-        if (window.innerWidth <= 768) {
+        if (this.isMobile()) {
             // Mobile
             this.numCols = MOBILE_NUM_COLS;
             this.rowHeight = Math.floor(this.rowWidth / this.numCols);
@@ -767,7 +775,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             rowHeight: this.rowHeight,
             squareMode: this.squareMode,
             numCols: this.numCols,
-            allowBreakout: (window.innerWidth < 768) && !this.config_squareThumbs,
+            allowBreakout: this.allowBreakout(),
             seed: dayId,
         });
 
