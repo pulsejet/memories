@@ -150,6 +150,7 @@ export default class Tag extends Mixins(GlobalMixin) {
     line-height: 0;
     position: absolute;
     padding: 2px;
+    box-sizing: border-box;
     @media (max-width: 768px) { padding: 1px; }
 
     > .img-outer {
