@@ -65,6 +65,9 @@ export default class FaceMergeModal extends Mixins(GlobalMixin) {
 <style lang="scss" scoped>
 .outer {
     width: 100%;
+    max-height: calc(90vh - 80px - 4em);
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 .photo {
     display: inline-block;
