@@ -33,6 +33,11 @@ wget https://github.com/pulsejet/memories-test/raw/main/Files.zip
 unzip Files.zip
 cd ../../..
 
+# Setup
+cd apps/memories
+make exiftool
+cd ../..
+
 # Index
 php occ files:scan --all
 php occ memories:index
