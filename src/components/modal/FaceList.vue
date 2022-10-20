@@ -77,8 +77,7 @@ export default class FaceMergeModal extends Mixins(GlobalMixin) {
     font-size: 0.8em;
 
     max-width: 120px;
-    width: calc(33.33% - 2px);
+    width: calc(33.33%);
     aspect-ratio: 1/1;
-    margin: 1px;
 }
 </style>

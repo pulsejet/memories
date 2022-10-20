@@ -176,6 +176,7 @@ export default class Folder extends Mixins(GlobalMixin, UserConfig) {
     line-height: 0;
     position: absolute;
     padding: 2px;
+    box-sizing: border-box;
     @media (max-width: 768px) { padding: 1px; }
 
     > .img-outer {

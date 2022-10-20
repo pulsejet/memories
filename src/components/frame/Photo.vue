@@ -209,6 +209,7 @@ $icon-dist: min(10px, 6%);
 /* Actual image */
 div.img-outer {
     padding: 2px;
+    box-sizing: border-box;
     @media (max-width: 768px) { padding: 1px; }
 
     transition: padding 0.1s ease;
