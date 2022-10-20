@@ -16,7 +16,7 @@
         <span class="cursor hv"
                 :style="{ transform: `translateY(${hoverCursorY}px)` }">
                 <div class="text"> {{ hoverCursorText }} </div>
-                <div class="icon"> <ScrollIcon :size="20" /> </div>
+                <div class="icon"> <ScrollIcon :size="22" /> </div>
         </span>
 
         <div v-for="tick of visibleTicks" :key="tick.key"
@@ -398,11 +398,11 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
     @include phone {
         &:not(.scrolling) {
             .cursor.hv {
-                left: 12px;
+                left: 5px;
                 border: none;
                 box-shadow: 0 0 5px -3px #000;
-                height: 30px;
-                border-radius: 15px;
+                height: 40px; width: 70px;
+                border-radius: 20px;
                 > .text { display: none; }
                 > .icon { display: block; }
             }
@@ -468,7 +468,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
             > .icon {
                 display: none;
-                transform: translate(-4px, 2px);
+                transform: translate(-16px, 6px);
             }
         }
     }
