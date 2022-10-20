@@ -1,10 +1,17 @@
 all: dev-setup lint build-js-production test
 
 # Dev env management
-dev-setup: clean clean-dev npm-init get-exiftool
+dev-setup: clean clean-dev npm-init exiftool php-cs-fixer
 
-get-exiftool:
+exiftool:
 	sh scripts/get-exiftool.sh
+
+php-cs-fixer:
+	mkdir --parents tools/php-cs-fixer
+	composer require --working-dir=tools/php-cs-fixer friendsofphp/php-cs-fixer
+
+php-lint:
+	tools/php-cs-fixer/vendor/bin/php-cs-fixer fix lib
 
 npm-init:
 	npm ci
