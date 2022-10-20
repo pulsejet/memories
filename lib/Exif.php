@@ -15,6 +15,8 @@ class Exif
     private static $staticPipes;
     private static $noStaticProc = false;
 
+    private const EXIFTOOL_VER = '12.49';
+
     public static function closeStaticExiftoolProc()
     {
         try {
@@ -144,7 +146,7 @@ class Exif
     {
         // Start exiftool and output to json
         $pipes = [];
-        $proc = proc_open(['exiftool', '-api', 'QuickTimeUTC=1', '-n', '-json', '-fast', '-'], [
+        $proc = proc_open([self::getExiftool(), '-api', 'QuickTimeUTC=1', '-n', '-json', '-fast', '-'], [
             0 => ['pipe', 'rb'],
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
@@ -303,7 +305,7 @@ class Exif
             // Start exiftool and output to json
             $pipes = [];
             $proc = proc_open([
-                'exiftool', '-api', 'QuickTimeUTC=1',
+                self::getExiftool(), '-api', 'QuickTimeUTC=1',
                 '-overwrite_original', '-DateTimeOriginal='.$newDate, '-',
             ], [
                 0 => ['pipe', 'rb'],
@@ -388,11 +390,71 @@ class Exif
         }
     }
 
+    /** Get path to exiftool binary */
+    private static function getExiftool()
+    {
+        $configKey = 'memories_exiftool';
+        $config = \OC::$server->getConfig();
+        $configPath = $config->getSystemValue($configKey);
+        $noLocal = $config->getSystemValue($configKey.'_no_local', false);
+
+        // We know already where it is
+        if (!empty($configPath)) return $configPath;
+
+        // Detect architecture
+        $arch = null;
+        $uname = php_uname("m");
+        if (false !== stripos($uname, "aarch64") || false !== stripos($uname,"arm64")) {
+            $arch = "aarch64";
+        } else if (false !== stripos($uname, "x86_64") || false !== stripos($uname, "amd64")) {
+            $arch = "amd64";
+        }
+
+        // Detect glibc or musl
+        $libc = null;
+        $ldd = shell_exec("ldd --version");
+        if (false !== stripos($ldd, "musl")) {
+            $libc = "musl";
+        } else if (false !== stripos($ldd, "glibc")) {
+            $libc = "glibc";
+        }
+
+        // Get static binary if available
+        if ($arch && $libc && !$noLocal) {
+            // get target file path
+            $path = dirname(__FILE__) . "/../exiftool-bin/exiftool-$arch-$libc";
+
+            // check if file exists
+            if (file_exists($path)) {
+                // make executable
+                chmod($path, 0755);
+
+                // check if the version prints correctly
+                $ver = self::EXIFTOOL_VER;
+                $vero = shell_exec("$path -ver");
+                if ($vero && false !== stripos(trim($vero), $ver)) {
+                    $out = trim($vero);
+                    print("Exiftool binary version check passed $out <==> $ver\n");
+                    $config->setSystemValue($configKey, $path);
+                    return $path;
+                } else {
+                    error_log("Exiftool version check failed $vero <==> $ver");
+                    $config->setSystemValue($configKey.'_no_local', true);
+                }
+            } else {
+                error_log("Exiftool not found: $path");
+            }
+        }
+
+        // Fallback to system binary
+        return 'exiftool';
+    }
+
     /** Initialize static exiftool process for local reads */
     private static function initializeStaticExiftoolProc()
     {
         self::closeStaticExiftoolProc();
-        self::$staticProc = proc_open(['exiftool', '-stay_open', 'true', '-@', '-'], [
+        self::$staticProc = proc_open([self::getExiftool(), '-stay_open', 'true', '-@', '-'], [
             0 => ['pipe', 'r'],
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
@@ -454,7 +516,7 @@ class Exif
     private static function getExifFromLocalPathWithSeparateProc(string &$path)
     {
         $pipes = [];
-        $proc = proc_open(['exiftool', '-api', 'QuickTimeUTC=1', '-n', '-json', $path], [
+        $proc = proc_open([self::getExiftool(), '-api', 'QuickTimeUTC=1', '-n', '-json', $path], [
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
         ], $pipes);
@@ -495,7 +557,7 @@ class Exif
      */
     private static function updateExifDateForLocalFile(string $path, string $newDate)
     {
-        $cmd = ['exiftool', '-api', 'QuickTimeUTC=1', '-overwrite_original', '-DateTimeOriginal='.$newDate, $path];
+        $cmd = [self::getExiftool(), '-api', 'QuickTimeUTC=1', '-overwrite_original', '-DateTimeOriginal='.$newDate, $path];
         $proc = proc_open($cmd, [
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],

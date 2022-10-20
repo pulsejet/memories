@@ -10,6 +10,10 @@ cd /tmp
 rm -f memories/appinfo/screencap* memories/js/*.map
 rm -rf memories.tar.gz
 
+cd memories
+sh "$od/get-exiftool.sh"
+cd ..
+
 tar -zvcf memories.tar.gz memories/
 rm -rf memories
 
