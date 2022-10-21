@@ -342,20 +342,24 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
         this.moveHoverCursor(this.cursorY);
     }
 
+    /** Move to given scroller Y */
+    private moveto(y: number) {
+        this.recycler.scrollToPosition(this.getRecyclerY(y));
+        this.handleScroll();
+    }
+
     /** Handle mouse click */
     private mousedown(event: MouseEvent) {
-        this.recycler.scrollToPosition(this.getRecyclerY(event.offsetY));
-        this.handleScroll();
+        this.moveto(event.offsetY);
     }
 
     /** Handle touch */
     private touchmove(event: any) {
         const rect = (this.$refs.scroller as HTMLElement).getBoundingClientRect();
         const y = event.targetTouches[0].pageY - rect.top;
-        this.recycler.scrollToPosition(this.getRecyclerY(y));
         event.preventDefault();
         event.stopPropagation();
-        this.handleScroll();
+        this.moveto(y);
     }
 
     /** Update this is being used to scroll recycler */
