@@ -199,19 +199,20 @@ const cacheName = `memories-${loadState('memories', 'version')}-${getCurrentUser
 openCache().then((cache) => { staticCache = cache });
 
 // Clear all caches except the current one
-caches.keys().then((keys) => {
+window.caches?.keys().then((keys) => {
     keys.filter((key) => key.startsWith('memories-') && key !== cacheName).forEach((key) => {
-        caches.delete(key);
+        window.caches.delete(key);
     });
 });;
 
 /** Open the cache */
 export async function openCache() {
-    return await caches.open(cacheName);
+    return await window.caches?.open(cacheName);
 }
 
 /** Get data from the cache */
 export async function getCachedData<T>(url: string): Promise<T> {
+    if (!window.caches) return null;
     const cache = staticCache || await openCache();
     const cachedResponse = await cache.match(url);
     if (!cachedResponse || !cachedResponse.ok) return undefined;
@@ -220,6 +221,7 @@ export async function getCachedData<T>(url: string): Promise<T> {
 
 /** Store data in the cache */
 export function cacheData(url: string, data: Object) {
+    if (!window.caches) return;
     const str = JSON.stringify(data);
     (async () => {
         const cache = staticCache || await openCache();
