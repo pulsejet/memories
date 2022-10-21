@@ -817,12 +817,20 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         // Check if some rows were added
         let addedRows: IRow[] = [];
 
-        // Check if row height changed
-        let rowSizeDelta = 0;
+        // Recycler scroll top
+        let scrollTop = (<any>this.$refs.recycler).$el.scrollTop;
+        let needAdjust = false;
 
-        // Get index of header O(n)
-        const headIdx = this.list.findIndex(item => item.id === head.id);
+        // Get index and Y position of header in O(n)
+        let headIdx = 0;
+        let headY = 0;
+        for (const row of this.list) {
+            if (row === head) break;
+            headIdx++;
+            headY += row.size;
+        }
         let rowIdx = headIdx + 1;
+        let rowY = headY + head.size;
 
         // Previous justified row
         let prevJustifyTop = justify[0]?.top || 0;
@@ -834,26 +842,37 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             if (rowIdx >= this.list.length || this.list[rowIdx].type === IRowType.HEAD) {
                 const newRow = this.addRow(day);
                 addedRows.push(newRow);
-                rowSizeDelta += newRow.size;
                 this.list.splice(rowIdx, 0, newRow);
+
+                // Scroll down if new row is above the current visible position
+                if (rowY < scrollTop) {
+                    scrollTop += newRow.size;
+                }
+                needAdjust = true;
             }
+
+            // Get row
+            const row = this.list[rowIdx];
 
             // Go to the next row
             const jbox = justify[dataIdx];
             if (jbox.top !== prevJustifyTop) {
                 prevJustifyTop = jbox.top;
                 rowIdx++;
+                rowY += row.size;
                 continue;
             }
 
             // Set row height
-            const row = this.list[rowIdx];
             const jH = Math.round(jbox.rowHeight || jbox.height);
             const delta = jH - row.size;
             // If the difference is too small, it's not worth risking an adjustment
             // especially on square layouts on mobile. Also don't do this if animating.
             if (!isAnimating && Math.abs(delta) > 5) {
-                rowSizeDelta += delta;
+                if (rowY < scrollTop) {
+                    scrollTop += delta;
+                }
+                needAdjust = true;
                 row.size = jH;
             }
 
@@ -926,15 +945,20 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
         // Update size delta for removed rows and remove from day
         for (const row of removedRows) {
-            rowSizeDelta -= row.size;
+            // Scroll up if if above visible range
+            if (rowY < scrollTop) {
+                scrollTop -= row.size;
+            }
+            needAdjust = true;
+
+            // Remove from day
             const idx = head.day.rows.indexOf(row);
             if (idx >= 0) head.day.rows.splice(idx, 1);
         }
 
         // This will be true even if the head is being spliced
         // because one row is always removed in that case
-        // So just reflow the timeline here
-        if (rowSizeDelta !== 0) {
+        if (needAdjust) {
             if (headRemoved) {
                 // If the head was removed, we need a reflow,
                 // or adjust isn't going to work right
@@ -944,15 +968,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 this.scrollerManager.adjust();
             }
 
-            // Scroll to the same actual position if the added rows
-            // were above the current scroll position, unless animating
-            if (!isAnimating) {
-                const recycler: any = this.$refs.recycler;
-                const midIndex = (recycler.$_startIndex + recycler.$_endIndex) / 2;
-                if (midIndex > headIdx) {
-                    recycler.$el.scrollTop += rowSizeDelta;
-                }
-            }
+            // Scroll to new position
+            (<any>this.$refs.recycler).$el.scrollTop = scrollTop;
         }
     }
 
