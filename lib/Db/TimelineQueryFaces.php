@@ -143,7 +143,7 @@ trait TimelineQueryFaces
             $imgSizeScore = ($iw * 100) ** (1 / 2) * ($ih * 100) ** (1 / 2);
 
             // Faces occupying too much of the image don't look particularly good
-            $faceSizeScore = (-pow($w, 2) + $w) * (-pow($h, 2) + $h);
+            $faceSizeScore = (-$w ** 2 + $w) * (-$h ** 2 + $h);
 
             // Combine scores
             $p['score'] = $positionScore * $imgSizeScore * $faceSizeScore;
