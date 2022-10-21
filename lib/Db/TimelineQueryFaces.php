@@ -128,8 +128,8 @@ trait TimelineQueryFaces
             // Get actual pixel size of face
             $iw = min((int) ($p['image_width'] ?: 512), 2048);
             $ih = min((int) ($p['image_height'] ?: 512), 2048);
-            $w = (float) $p['width'] * $iw;
-            $h = (float) $p['height'] * $ih;
+            $w = (float) $p['width'];
+            $h = (float) $p['height'];
 
             // Get center of face
             $x = (float) $p['x'] + (float) $p['width'] / 2;
@@ -138,12 +138,15 @@ trait TimelineQueryFaces
             // 3D normal distribution - if the face is closer to the center, it's better
             $positionScore = exp(-($x - 0.5) ** 2 * 4) * exp(-($y - 0.5) ** 2 * 4);
 
-            // Root size distribution - if the face is bigger, it's better,
-            // but it doesn't matter beyond a certain point, especially 256px ;)
-            $sizeScore = ($w * 100) ** (1 / 4) * ($h * 100) ** (1 / 4);
+            // Root size distribution - if the image is bigger, it's better,
+            // but it doesn't matter beyond a certain point
+            $imgSizeScore = ($iw * 100) ** (1 / 2) * ($ih * 100) ** (1 / 2);
+
+            // Faces occupying too much of the image don't look particularly good
+            $faceSizeScore = (-pow($w, 2) + $w) * (-pow($h, 2) + $h);
 
             // Combine scores
-            $p['score'] = $positionScore * $sizeScore;
+            $p['score'] = $positionScore * $imgSizeScore * $faceSizeScore;
         }
 
         // Sort previews by score descending
