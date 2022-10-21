@@ -236,7 +236,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         await this.$nextTick();
 
         // Fit to window
-        this.handleResize();
+        this.recomputeSizes();
 
         // Timeline recycler init
         (this.$refs.recycler as any).$el.addEventListener('scroll', this.scrollPositionChange, false);
@@ -280,13 +280,13 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             clearTimeout(this.resizeTimer);
         }
         this.resizeTimer = window.setTimeout(() => {
-            this.handleResize();
+            this.recomputeSizes();
             this.resizeTimer = null;
         }, 300);
     }
 
-    /** Handle window resize and initialization */
-    handleResize() {
+    /** Recompute static sizes of containers */
+    recomputeSizes() {
         // Size of outer container
         const e = this.$refs.container as Element;
         let height = e.clientHeight;
@@ -324,7 +324,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             }
         }
 
-        this.scrollerManager.reflow();
+        this.scrollerManager.adjust();
     }
 
     /**
