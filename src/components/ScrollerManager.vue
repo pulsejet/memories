@@ -156,8 +156,10 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
     /** Recreate from scratch */
     private recreate() {
-        // Clear
+        // Clear and override any adjust timer
         this.ticks = [];
+        window.clearTimeout(this.adjustTimer || 0);
+        this.adjustTimer = null;
 
         // Ticks
         let y = 0;
