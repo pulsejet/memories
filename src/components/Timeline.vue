@@ -284,7 +284,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         this.resizeTimer = window.setTimeout(() => {
             this.recomputeSizes();
             this.resizeTimer = null;
-        }, 300);
+        }, 100);
     }
 
     /** Recompute static sizes of containers */
