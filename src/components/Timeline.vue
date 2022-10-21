@@ -17,7 +17,6 @@
             ref="recycler"
             class="recycler"
             :class="{ 'empty': list.length === 0 }"
-            :key="state"
             :items="list"
             :emit-update="true"
             :buffer="400"
@@ -290,7 +289,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         // Size of outer container
         const e = this.$refs.container as Element;
         let height = e.clientHeight;
-        this.rowWidth = e.clientWidth;
+        const width = e.clientWidth;
 
         // Scroller spans the container height
         this.scrollerHeight = height;
@@ -301,7 +300,24 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
         // Recycler height
         const recycler = this.$refs.recycler as any;
-        recycler.$el.style.height = (height - tmHeight - 4) + 'px';
+        const targetHeight = (height - tmHeight - 4);
+        const targetWidth = this.isMobile() ? width : width - 40;
+        const heightChanged = recycler.$el.clientHeight !== targetHeight;
+        const widthChanged = this.rowWidth !== targetWidth;
+
+        if (heightChanged) {
+            recycler.$el.style.height = targetHeight + 'px';
+        }
+
+        if (widthChanged) {
+            this.rowWidth = targetWidth;
+        }
+
+        if (!heightChanged && !widthChanged) {
+            // If the target size is the same, nothing else could have
+            // possibly changed either, so just skip
+            return;
+        }
 
         if (this.isMobile()) {
             // Mobile
@@ -310,7 +326,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             this.squareMode = true;
         } else {
             // Desktop
-            this.rowWidth -= 40;
             this.squareMode = this.config_squareThumbs;
 
             if (this.squareMode) {
@@ -324,7 +339,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             }
         }
 
-        this.scrollerManager.adjust();
+        // Reflow if there are elements (this isn't an init call)
+        // An init call reaches here when the top matter size changes
+        if (this.list.length > 0) {
+            this.scrollerManager.adjust();
+        }
     }
 
     /**
