@@ -42,12 +42,12 @@ export type IPhoto = {
     /** Height of full image */
     h?: number;
 
-    /** Grid display width percentage */
-    dispWp?: number;
-    /** Grid display height (forced) */
+    /** Grid display width px */
+    dispW?: number;
+    /** Grid display height px */
     dispH?: number;
-    /** Grid display X percentage */
-    dispXp?: number;
+    /** Grid display X px */
+    dispX?: number;
     /** Grid display Y px */
     dispY?: number;
     /** Grid display row id (relative to head) */

@@ -60,8 +60,8 @@
                     <div class="photo" v-for="photo of item.photos" :key="photo.fileid"
                         :style="{
                             height: (photo.dispH || item.size) + 'px',
-                            width: (photo.dispWp * rowWidth) + 'px',
-                            transform: `translate(${photo.dispXp*rowWidth}px, ${photo.dispY}px`,
+                            width: photo.dispW + 'px',
+                            transform: `translate(${photo.dispX}px, ${photo.dispY}px`,
                         }">
 
                         <Folder v-if="photo.flag & c.FLAG_IS_FOLDER"
@@ -174,6 +174,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     /** Set of dayIds for which images loaded */
     private loadedDays = new Set<number>();
+    /** Set of dayIds for which image size is calculated */
+    private sizedDays = new Set<number>();
     /** Days to load in the next call */
     private fetchDayQueue = [] as number[];
     /** Timer to load day call */
@@ -255,6 +257,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         this.scrollerManager.reset();
         this.state = Math.random();
         this.loadedDays.clear();
+        this.sizedDays.clear();
         this.fetchDayQueue = [];
         window.clearTimeout(this.fetchDayTimer);
         window.clearTimeout(this.resizeTimer);
@@ -342,7 +345,13 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         // Reflow if there are elements (this isn't an init call)
         // An init call reaches here when the top matter size changes
         if (this.list.length > 0) {
+            // At this point we're sure the size has changed, so we need
+            // to invalidate everything related to sizes
+            this.sizedDays.clear();
             this.scrollerManager.adjust();
+
+            // Explicitly request a scroll event
+            this.loadScrollChanges(this.currentStart, this.currentEnd);
         }
     }
 
@@ -377,8 +386,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                     row.photos[j] = {
                         flag: this.c.FLAG_PLACEHOLDER,
                         fileid: Math.random(),
-                        dispWp: utils.round(1 / this.numCols, 4, true),
-                        dispXp: utils.round(j / this.numCols, 4, true),
+                        dispW: utils.roundHalf(this.rowWidth / this.numCols),
+                        dispX: utils.roundHalf(j * this.rowWidth / this.numCols) ,
                         dispY: 0,
                     };
                 }
@@ -421,11 +430,15 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         // Fetch all visible days
         for (let i = startIndex; i <= endIndex; i++) {
             let item = this.list[i];
-            if (!item || this.loadedDays.has(item.dayId)) {
+            if (!item) continue;
+            if (this.loadedDays.has(item.dayId)) {
+                if (!this.sizedDays.has(item.dayId)) {
+                    // Just quietly reflow without refetching
+                    this.processDay(item.dayId, item.day.detail);
+                }
                 continue;
             }
 
-            this.loadedDays.add(item.dayId);
             this.fetchDay(item.dayId);
         }
     }
@@ -661,6 +674,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         this.list = list;
         this.heads = heads;
         this.loadedDays.clear();
+        this.sizedDays.clear();
 
         // Iterate the preload map
         // Now the inner detail objects are reactive
@@ -687,6 +701,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
         // Do this in advance to prevent duplicate requests
         this.loadedDays.add(dayId);
+        this.sizedDays.add(dayId);
 
         // Look for cache
         this.processDay(dayId, await utils.getCachedData(this.getDayUrl(dayId)));
@@ -766,6 +781,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         const head = this.heads[dayId];
         const day = head.day;
         this.loadedDays.add(dayId);
+        this.sizedDays.add(dayId);
 
         // Filter out items we don't want to show at all
         // Note: flags are not converted yet
@@ -853,13 +869,13 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
             // Get aspect ratio
             const setPos = () => {
-                photo.dispWp = utils.round(jbox.width / this.rowWidth, 4, true);
-                photo.dispXp = utils.round(jbox.left / this.rowWidth, 4, true);
+                photo.dispW = utils.roundHalf(jbox.width);
+                photo.dispX = utils.roundHalf(jbox.left);
                 photo.dispH = this.squareMode ? utils.roundHalf(jbox.height) : 0;
                 photo.dispY = 0;
                 photo.dispRowNum = row.num;
             };
-            if (photo.dispWp !== undefined) { // photo already displayed: animate
+            if (photo.dispW !== undefined) { // photo already displayed: animate
                 window.setTimeout(setPos, 50);
 
                 if (photo.dispRowNum !== undefined &&
