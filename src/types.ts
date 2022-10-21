@@ -142,6 +142,10 @@ export type ITick = {
     top: number;
     /** Y coordinate on recycler */
     y: number;
+    /** Cumulative number of photos before this tick */
+    count: number;
+    /** Is a new month */
+    isMonth: boolean;
     /** Text if any (e.g. year) */
     text?: string | number;
     /** Whether this tick should be shown */
