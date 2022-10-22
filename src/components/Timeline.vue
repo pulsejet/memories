@@ -773,9 +773,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
      *
      * @param dayId id of day
      * @param data photos
-     * @param isAnimating prevents glitches due to height changes
      */
-    processDay(dayId: number, data: IPhoto[], isAnimating=false) {
+    processDay(dayId: number, data: IPhoto[]) {
         if (!data) return;
 
         const head = this.heads[dayId];
@@ -864,11 +863,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             }
 
             // Set row height
-            const jH = Math.round(jbox.rowHeight || jbox.height);
+            const jH = utils.roundHalf(jbox.rowHeight || jbox.height);
             const delta = jH - row.size;
             // If the difference is too small, it's not worth risking an adjustment
             // especially on square layouts on mobile. Also don't do this if animating.
-            if (!isAnimating && Math.abs(delta) > 5) {
+            if (Math.abs(delta) > 0) {
                 if (rowY < scrollTop) {
                     scrollTop += delta;
                 }
@@ -1040,7 +1039,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         // Reflow all touched days
         for (const day of updatedDays) {
             const newDetail = day.detail.filter(p => !delPhotosSet.has(p));
-            this.processDay(day.dayid, newDetail, true);
+            this.processDay(day.dayid, newDetail);
         }
     }
 }
