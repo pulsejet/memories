@@ -415,11 +415,12 @@ class Exif
 
         // Detect glibc or musl
         $libc = null;
-        $ldd = shell_exec('ldd --version');
-        if (false !== stripos($ldd, 'musl')) {
-            $libc = 'musl';
-        } elseif (false !== stripos($ldd, 'glibc')) {
-            $libc = 'glibc';
+        if ($ldd = shell_exec('ldd --version 2>&1')) {
+            if (false !== stripos($ldd, 'musl')) {
+                $libc = 'musl';
+            } elseif (false !== stripos($ldd, 'glibc')) {
+                $libc = 'glibc';
+            }
         }
 
         // Get static binary if available
