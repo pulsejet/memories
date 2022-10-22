@@ -1098,7 +1098,10 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             font-weight: bold;
             margin-bottom: 4px;
         }
-        &.main { font-weight: 600; }
+        &.main {
+            display: inline-block;
+            font-weight: 600;
+        }
     }
 
     .select {
