@@ -400,6 +400,7 @@ class Exif
 
         // We know already where it is
         if (!empty($configPath) && file_exists($configPath)) {
+            chmod($configPath, 0755);
             return $configPath;
         }
 
@@ -428,6 +429,9 @@ class Exif
 
             // check if file exists
             if (file_exists($path)) {
+                // make executable before version check
+                chmod($path, 0755);
+
                 // check if the version prints correctly
                 $ver = self::EXIFTOOL_VER;
                 $vero = shell_exec("{$path} -ver");
@@ -448,6 +452,7 @@ class Exif
         // Fallback to perl script
         $path = __DIR__.'/../exiftool-bin/exiftool/exiftool';
         if (file_exists($path)) {
+            chmod($path, 0755);
             return $path;
         }
 
