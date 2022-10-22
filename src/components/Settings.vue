@@ -77,12 +77,15 @@ export default class Settings extends Mixins(UserConfig, GlobalMixin) {
         const settings = ['showHidden', 'timelinePath', 'foldersPath'];
 
         // Update all
-        const p = await Promise.all(settings.map(async (setting) => this.updateSetting(setting)));
-
-        if (p.some((r) => !r || r.status !== 200)) {
-            showError(this.t('memories', 'Error updating settings'));
-        } else {
-            window.location.reload();
+        try {
+            const p = await Promise.all(settings.map(async (setting) => this.updateSetting(setting)));
+            if (p.some((r) => !r || r.status !== 200)) {
+                showError(this.t('memories', 'Error updating settings'));
+            } else {
+                window.location.reload();
+            }
+        } catch (e) {
+            showError(e?.response?.data?.message || this.t('memories', 'Error updating settings'));
         }
     }
 }
