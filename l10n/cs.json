@@ -25,6 +25,7 @@
     "You are about to touch a large number of files. Are you sure?" : "Chystáte se změnit velké množství souborů. Opravdu to chcete?",
     "_{n} selected_::_{n} selected_" : ["{n} vybráno","{n} vybrány","{n} vybráno","{n} vybrány"],
     "Timeline Path" : "Popis umístění časové osy",
+    "Folders Path" : "Popis umístění složek",
     "Show hidden folders" : "Zobrazit skryté složky",
     "Square grid mode" : "Režim se čtvercovou mřížkou",
     "Update" : "Aktualizovat",
