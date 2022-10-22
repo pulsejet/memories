@@ -108,13 +108,21 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
         // Get the scroll position
         const scroll = this.recycler?.$el?.scrollTop || 0;
 
-        // Move hover cursor to px position
+        // Get cursor px position
         const {top1, top2, y1, y2} = this.getCoords(scroll, 'y');
         const topfrac = (scroll - y1) / (y2 - y1);
         const rtop = top1 + (top2 - top1) * topfrac;
 
+        // Always move static cursor to right position
         this.cursorY = utils.roundHalf(rtop);
-        this.moveHoverCursor(this.cursorY);
+
+        // Move hover cursor to same position unless hovering
+        // Regardless, we need this call because the internal mapping might have changed
+        if ((<HTMLElement>this.$refs.scroller).matches(':hover')) {
+            this.moveHoverCursor(this.hoverCursorY);
+        } else {
+            this.moveHoverCursor(this.cursorY);
+        }
 
         // Show the scroller for some time
         if (this.scrollingRecyclerTimer) window.clearTimeout(this.scrollingRecyclerTimer);
