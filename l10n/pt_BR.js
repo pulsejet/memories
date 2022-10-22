@@ -26,6 +26,7 @@ OC.L10N.register(
     "_{n} selected_::_{n} selected_" : ["{n} selecionado","{n} selecionado","{n} selecionados"],
     "Timeline Path" : "Caminho da linha do tempo",
     "Show hidden folders" : "Mostrar pastas ocultas",
+    "Square grid mode" : "Modo de grade quadrada",
     "Update" : "Atualizar",
     "Error updating settings" : "Erro ao atualizar as configurações",
     "Your Timeline" : "Sua Linha-do-Tempo",
