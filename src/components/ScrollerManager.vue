@@ -53,6 +53,8 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
     /** Recycler before slot component */
     @Prop() recyclerBefore!: any;
 
+    /** Last known height at adjustment */
+    private lastAdjustHeight = 0;
     /** Height of the entire photo view */
     private recyclerHeight: number = 100;
     /** Computed ticks */
@@ -228,6 +230,12 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
         // We only need to recompute top and visible ticks if count
         // of some tick has changed.
         let needRecomputeTop = false;
+
+        // Check if height changed
+        if (this.lastAdjustHeight !== this.height) {
+            needRecomputeTop = true;
+            this.lastAdjustHeight = this.height;
+        }
 
         for (const row of this.rows) {
             // Check if tick is valid
