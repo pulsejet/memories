@@ -603,6 +603,11 @@ class ApiController extends Controller
             return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
         }
 
+        // Make sure not running in read-only mode
+        if ($this->config->getSystemValue('memories_readonly', false)) {
+            return new JSONResponse(["message" => "Cannot change settings in readonly mode"], Http::STATUS_FORBIDDEN);
+        }
+
         $userId = $user->getUid();
         $this->config->setUserValue($userId, Application::APPNAME, $key, $value);
 
