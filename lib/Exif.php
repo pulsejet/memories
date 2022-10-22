@@ -393,7 +393,7 @@ class Exif
     /** Get path to exiftool binary */
     private static function getExiftool()
     {
-        $configKey = 'memories_exiftool';
+        $configKey = 'memories.exiftool';
         $config = \OC::$server->getConfig();
         $configPath = $config->getSystemValue($configKey);
         $noLocal = $config->getSystemValue($configKey.'_no_local', false);
