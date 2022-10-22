@@ -605,7 +605,7 @@ class ApiController extends Controller
 
         // Make sure not running in read-only mode
         if ($this->config->getSystemValue('memories.readonly', false)) {
-            return new JSONResponse(["message" => "Cannot change settings in readonly mode"], Http::STATUS_FORBIDDEN);
+            return new JSONResponse(['message' => 'Cannot change settings in readonly mode'], Http::STATUS_FORBIDDEN);
         }
 
         $userId = $user->getUid();
