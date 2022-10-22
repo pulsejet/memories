@@ -2,7 +2,7 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
-## v4.3.0, v3.3.0
+## v4.3.0, v3.3.0 (2022-10-22)
 * **Note:** you must run `occ memories:index -f` after updating to take advantage of new features.
 * **Feature**: **Brand new tiled layout for photos**
 * **Feature**: Photos from "On this day" are now shown at the top of the timeline
