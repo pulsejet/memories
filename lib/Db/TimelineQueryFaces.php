@@ -25,7 +25,7 @@ trait TimelineQueryFaces
         // Join with cluster
         $nameField = is_numeric($faceName) ? 'rfc.id' : 'rfc.title';
         $query->innerJoin('m', 'recognize_face_clusters', 'rfc', $query->expr()->andX(
-            $query->expr()->eq('user_id', $query->createNamedParameter($faceUid)),
+            $query->expr()->eq('rfc.user_id', $query->createNamedParameter($faceUid)),
             $query->expr()->eq($nameField, $query->createNamedParameter($faceName)),
         ));
 
