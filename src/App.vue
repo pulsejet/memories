@@ -158,6 +158,10 @@ body {
     width: calc(100% - var(--body-container-margin)*1); // was *2
 }
 
+#content-vue {
+    max-height: 100vh;
+}
+
 // Hide horizontal scrollbar on mobile
 // For the padding removal above
 #app-content-vue {
