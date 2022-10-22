@@ -124,7 +124,6 @@ export default class Tag extends Mixins(GlobalMixin) {
     top: 50%; width: 100%;
     transform: translateY(-50%);
     color: white;
-    width: 90%;
     padding: 0 5%;
     text-align: center;
     font-size: 1.2em;
