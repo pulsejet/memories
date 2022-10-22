@@ -27,6 +27,7 @@ OC.L10N.register(
     "Rename person" : "Renombrar persona",
     "Name" : "Nombre",
     "Loading …" : "Cargando …",
+    "Too many failures, aborting" : "Demasiados fallos, abortando",
     "Back" : "Atrás",
     "Merge with different person" : "Unir con una persona diferente",
     "Failed to delete {fileName}." : "Fallo al borrar {fileName}."
