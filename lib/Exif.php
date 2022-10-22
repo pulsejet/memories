@@ -401,6 +401,7 @@ class Exif
         // We know already where it is
         if (!empty($configPath) && file_exists($configPath)) {
             chmod($configPath, 0755);
+
             return $configPath;
         }
 
@@ -454,6 +455,7 @@ class Exif
         $path = __DIR__.'/../exiftool-bin/exiftool/exiftool';
         if (file_exists($path)) {
             chmod($path, 0755);
+
             return $path;
         }
 
