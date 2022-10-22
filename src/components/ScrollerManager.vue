@@ -372,16 +372,16 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
         // Get index of previous tick
         let idx = utils.binarySearch(this.ticks, y, field);
         if (idx <= 0) {
-            top1 = 0; top2 = this.ticks[0].top;
+            top1 = 0; top2 = this.ticks[0].topF;
             y1 = 0; y2 = this.ticks[0].y;
         } else if (idx >= this.ticks.length) {
             const t = this.ticks[this.ticks.length - 1];
-            top1 = t.top; top2 = this.height;
+            top1 = t.topF; top2 = this.height;
             y1 = t.y; y2 = this.recyclerHeight;
         } else {
             const t1 = this.ticks[idx - 1];
             const t2 = this.ticks[idx];
-            top1 = t1.top; top2 = t2.top;
+            top1 = t1.topF; top2 = t2.topF;
             y1 = t1.y; y2 = t2.y;
         }
 
