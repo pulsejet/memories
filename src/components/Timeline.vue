@@ -556,14 +556,21 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 data = await dav.getPeopleData();
             } else {
                 // Try the cache
-                cache = noCache ? null : (await utils.getCachedData(cacheUrl));
-                if (cache) {
-                    await this.processDays(cache);
-                    this.loading--;
+                try {
+                    cache = noCache ? null : (await utils.getCachedData(cacheUrl));
+                    if (cache) {
+                        await this.processDays(cache);
+                        this.loading--;
+                    }
+                } catch {
+                    console.warn(`Failed to process days cache: ${cacheUrl}`);
+                    cache = null;
                 }
 
                 // Get from network
-                data = (await axios.get<IDay[]>(url)).data;
+                const res = await axios.get<IDay[]>(url);
+                if (res.status !== 200) throw res; // don't cache this
+                data = res.data;
             }
 
             // Put back into cache
@@ -704,7 +711,12 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         this.sizedDays.add(dayId);
 
         // Look for cache
-        this.processDay(dayId, await utils.getCachedData(this.getDayUrl(dayId)));
+        const cacheUrl = this.getDayUrl(dayId);
+        try {
+            this.processDay(dayId, await utils.getCachedData(cacheUrl));
+        } catch {
+            console.warn(`Failed to process day cache: ${cacheUrl}`);
+        }
 
         // Aggregate fetch requests
         this.fetchDayQueue.push(dayId);
@@ -726,6 +738,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         try {
             const startState = this.state;
             const res = await axios.get<IPhoto[]>(url);
+            if (res.status !== 200) throw res;
             const data = res.data;
             if (this.state !== startState) return;
 
