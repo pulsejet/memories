@@ -796,15 +796,14 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         this.loadedDays.add(dayId);
         this.sizedDays.add(dayId);
 
-        // Filter out items we don't want to show at all
-        // Note: flags are not converted yet
-        if (!this.config_showHidden) {
-            // Hidden folders
-            data = data.filter((p) => !(p.isfolder && (<IFolder>p).name.startsWith('.')));
-        }
-
         // Convert server flags to bitflags
         data.forEach(utils.convertFlags);
+
+        // Filter out items we don't want to show at all
+        if (!this.config_showHidden) {
+            // Hidden folders
+            data = data.filter((p) => !((p.flag & this.c.FLAG_IS_FOLDER) && (<IFolder>p).name.startsWith('.')));
+        }
 
         // Set and make reactive
         day.count = data.length;
@@ -895,10 +894,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
             // Add the photo to the row
             const photo = data[dataIdx];
-            if (typeof photo.flag === "undefined") {
-                photo.flag = 0; // flags
-                photo.d = day; // backref to day
-            }
+            photo.d = day; // backref to day
 
             // Get aspect ratio
             const setPos = () => {

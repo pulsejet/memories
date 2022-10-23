@@ -149,6 +149,10 @@ export function randomSubarray(arr: any[], size: number) {
  * @param photo Photo to process
  */
 export function convertFlags(photo: IPhoto) {
+    if (typeof photo.flag === "undefined") {
+        photo.flag = 0; // flags
+    }
+
     if (photo.isvideo) {
         photo.flag |= constants.c.FLAG_IS_VIDEO;
         delete photo.isvideo;
