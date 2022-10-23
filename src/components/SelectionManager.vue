@@ -40,6 +40,7 @@ import { generateUrl } from '@nextcloud/router'
 import { NcActions, NcActionButton } from '@nextcloud/vue';
 import { translate as t, translatePlural as n } from '@nextcloud/l10n'
 import { IHeadRow, IPhoto, ISelectionAction } from '../types';
+import { getCurrentUser } from '@nextcloud/auth';
 
 import * as dav from "../services/DavRequests";
 import EditDate from "./modal/EditDate.vue"
@@ -352,6 +353,12 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
         // Make sure route is valid
         const { user, name } = this.$route.params;
         if (this.$route.name !== "people" || !user || !name) {
+            return;
+        }
+
+        // Check photo ownership
+        if (this.$route.params.user !== getCurrentUser().uid) {
+            showError(this.t('memories', 'Only user "{user}" can update this person', { user }));
             return;
         }
 

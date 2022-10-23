@@ -11,27 +11,27 @@
 
         <div class="right-actions">
             <NcActions :inline="1">
-                <NcActionButton :aria-label="t('memories', 'Rename person')" @click="showEditModal=true" close-after-click>
+                <NcActionButton :aria-label="t('memories', 'Rename person')" @click="$refs.editModal.open()" close-after-click>
                     {{ t('memories', 'Rename person') }}
                     <template #icon> <EditIcon :size="20" /> </template>
                 </NcActionButton>
-                <NcActionButton :aria-label="t('memories', 'Merge with different person')" @click="showMergeModal=true" close-after-click>
+                <NcActionButton :aria-label="t('memories', 'Merge with different person')" @click="$refs.mergeModal.open()" close-after-click>
                     {{ t('memories', 'Merge with different person') }}
                     <template #icon> <MergeIcon :size="20" /> </template>
                 </NcActionButton>
                 <NcActionCheckbox :aria-label="t('memories', 'Mark person in preview')" :checked.sync="config_showFaceRect" @change="changeShowFaceRect">
                     {{ t('memories', 'Mark person in preview') }}
                 </NcActionCheckbox>
-                <NcActionButton :aria-label="t('memories', 'Remove person')" @click="showDeleteModal=true" close-after-click>
+                <NcActionButton :aria-label="t('memories', 'Remove person')" @click="$refs.deleteModal.open()" close-after-click>
                     {{ t('memories', 'Remove person') }}
                     <template #icon> <DeleteIcon :size="20" /> </template>
                 </NcActionButton>
             </NcActions>
         </div>
 
-        <FaceEditModal v-if="showEditModal" @close="showEditModal=false" />
-        <FaceDeleteModal v-if="showDeleteModal" @close="showDeleteModal=false" />
-        <FaceMergeModal v-if="showMergeModal" @close="showMergeModal=false" />
+        <FaceEditModal ref="editModal" />
+        <FaceDeleteModal ref="deleteModal" />
+        <FaceMergeModal ref="mergeModal" />
     </div>
 </template>
 
@@ -65,9 +65,6 @@ import MergeIcon from 'vue-material-design-icons/Merge.vue';
 })
 export default class FaceTopMatter extends Mixins(GlobalMixin, UserConfig) {
     private name: string = '';
-    private showEditModal: boolean = false;
-    private showDeleteModal: boolean = false;
-    private showMergeModal: boolean = false;
 
     @Watch('$route')
     async routeChange(from: any, to: any) {

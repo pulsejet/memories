@@ -1,5 +1,5 @@
 <template>
-    <Modal @close="close">
+    <Modal @close="close" v-if="show">
         <template #title>
             {{ t('memories', 'Rename person') }}
         </template>
@@ -23,7 +23,8 @@
 <script lang="ts">
 import { Component, Emit, Mixins, Watch } from 'vue-property-decorator';
 import { NcButton, NcTextField } from '@nextcloud/vue';
-import { showError } from '@nextcloud/dialogs'
+import { showError } from '@nextcloud/dialogs';
+import { getCurrentUser } from '@nextcloud/auth';
 import Modal from './Modal.vue';
 import GlobalMixin from '../../mixins/GlobalMixin';
 import client from '../../services/DavClient';
@@ -39,9 +40,21 @@ export default class FaceEditModal extends Mixins(GlobalMixin) {
     private user: string = "";
     private name: string = "";
     private oldName: string = "";
+    private show = false;
 
     @Emit('close')
-    public close() {}
+    public close() {
+        this.show = false;
+    }
+
+    public open() {
+        const user = this.$route.params.user || '';
+        if (this.$route.params.user !== getCurrentUser().uid) {
+            showError(this.t('memories', 'Only user "{user}" can update this person', { user }));
+            return;
+        }
+        this.show = true;
+    }
 
     @Watch('$route')
     async routeChange(from: any, to: any) {
