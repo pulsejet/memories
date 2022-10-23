@@ -23,8 +23,12 @@ OC.L10N.register(
     "Time" : "时间",
     "Hour" : "小时",
     "Minute" : "分钟",
+    "Remove person" : "移除这个人",
+    "Rename person" : "重命名用户",
     "Name" : "名称",
     "Loading …" : "正在加载 …",
-    "Back" : "返回"
+    "Back" : "返回",
+    "Merge with different person" : "与另一个人合并为同一人",
+    "Failed to delete {fileName}." : "删除 {fileName} 失败"
 },
 "nplurals=1; plural=0;");
