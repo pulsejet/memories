@@ -7,7 +7,11 @@ import justifiedLayout from "justified-layout";
  * Otherwise, use flickr/justified-layout (at least for now).
  */
 export function getLayout(
-    input: { width: number, height: number }[],
+    input: {
+        width: number,
+        height: number,
+        forceSquare: boolean,
+    }[],
     opts: {
         rowWidth: number,
         rowHeight: number,
@@ -110,8 +114,13 @@ export function getLayout(
             // The next row gets filled
             (numLeft === 0 || numLeft >= opts.numCols);
 
+        // Probably folders or tags or faces
+        if (input[photoId].forceSquare) {
+            // We are square already. Everything below is else-if.
+        }
+
         // Full width breakout
-        if (canBreakout && rand() < (input.length > 0 ? 0.25 : 0.1)) {
+        else if (canBreakout && rand() < (input.length > 0 ? 0.25 : 0.1)) {
             matrix[row][col] |= FLAG_BREAKOUT;
             for (let i = 1; i < opts.numCols; i++) {
                 matrix[row][i] |= FLAG_USED;

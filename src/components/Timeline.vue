@@ -803,6 +803,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             data = data.filter((p) => !(p.isfolder && (<IFolder>p).name.startsWith('.')));
         }
 
+        // Convert server flags to bitflags
+        data.forEach(utils.convertFlags);
+
         // Set and make reactive
         day.count = data.length;
         day.detail = data;
@@ -817,6 +820,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             return {
                 width: p.w || this.rowHeight,
                 height: p.h || this.rowHeight,
+                forceSquare: Boolean((p.flag & this.c.FLAG_IS_FOLDER) | (p.flag & this.c.FLAG_IS_TAG)),
             };
         }), {
             rowWidth: this.rowWidth,
@@ -895,9 +899,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 photo.flag = 0; // flags
                 photo.d = day; // backref to day
             }
-
-            // Flag conversion
-            utils.convertFlags(photo);
 
             // Get aspect ratio
             const setPos = () => {
