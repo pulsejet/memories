@@ -203,17 +203,24 @@ window.caches?.keys().then((keys) => {
     keys.filter((key) => key.startsWith('memories-') && key !== cacheName).forEach((key) => {
         window.caches.delete(key);
     });
-});;
+});
 
 /** Open the cache */
 export async function openCache() {
-    return await window.caches?.open(cacheName);
+    try {
+        return await window.caches?.open(cacheName);
+    } catch {
+        console.warn('Failed to get cache', cacheName);
+        return null;
+    }
 }
 
 /** Get data from the cache */
 export async function getCachedData<T>(url: string): Promise<T> {
     if (!window.caches) return null;
     const cache = staticCache || await openCache();
+    if (!cache) return null;
+
     const cachedResponse = await cache.match(url);
     if (!cachedResponse || !cachedResponse.ok) return undefined;
     return await cachedResponse.json();
@@ -223,8 +230,11 @@ export async function getCachedData<T>(url: string): Promise<T> {
 export function cacheData(url: string, data: Object) {
     if (!window.caches) return;
     const str = JSON.stringify(data);
+
     (async () => {
         const cache = staticCache || await openCache();
+        if (!cache) return;
+
         const response = new Response(str);
         response.headers.set('Content-Type', 'application/json');
         await cache.put(url, response);
