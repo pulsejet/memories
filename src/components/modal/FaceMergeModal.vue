@@ -1,5 +1,5 @@
 <template>
-    <Modal @close="close" size="large">
+    <Modal @close="close" size="large" v-if="show">
         <template #title>
             {{ t('memories', 'Merge {name} with person', { name: $route.params.name }) }}
         </template>
@@ -26,7 +26,8 @@
 <script lang="ts">
 import { Component, Emit, Mixins } from 'vue-property-decorator';
 import { NcButton, NcTextField } from '@nextcloud/vue';
-import { showError } from '@nextcloud/dialogs'
+import { showError } from '@nextcloud/dialogs';
+import { getCurrentUser } from '@nextcloud/auth';
 import { IFileInfo, ITag } from '../../types';
 import Tag from '../frame/Tag.vue';
 import FaceList from './FaceList.vue';
@@ -48,9 +49,21 @@ import * as dav from '../../services/DavRequests';
 export default class FaceMergeModal extends Mixins(GlobalMixin) {
     private processing = 0;
     private procesingTotal = 0;
+    private show = false;
 
     @Emit('close')
-    public close() {}
+    public close() {
+        this.show = false;
+    }
+
+    public open() {
+        const user = this.$route.params.user || '';
+        if (this.$route.params.user !== getCurrentUser().uid) {
+            showError(this.t('memories', 'Only user "{user}" can update this person', { user }));
+            return;
+        }
+        this.show = true;
+    }
 
     public async clickFace(face: ITag) {
         const user = this.$route.params.user || '';

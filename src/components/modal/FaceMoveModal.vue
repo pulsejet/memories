@@ -1,5 +1,5 @@
 <template>
-    <Modal @close="close" size="large" v-if="isOpen">
+    <Modal @close="close" size="large" v-if="show">
         <template #title>
             {{ t('memories', 'Move selected photos to person') }}
         </template>
@@ -19,7 +19,8 @@
 <script lang="ts">
 import { Component, Emit, Mixins, Prop } from 'vue-property-decorator';
 import { NcButton, NcTextField } from '@nextcloud/vue';
-import { showError } from '@nextcloud/dialogs'
+import { showError } from '@nextcloud/dialogs';
+import { getCurrentUser } from '@nextcloud/auth';
 import { IPhoto, ITag } from '../../types';
 import Tag from '../frame/Tag.vue';
 import FaceList from './FaceList.vue';
@@ -39,7 +40,7 @@ import * as dav from '../../services/DavRequests';
     }
 })
 export default class FaceMoveModal extends Mixins(GlobalMixin) {
-    private isOpen = false;
+    private show = false;
     private photos: IPhoto[] = [];
 
     @Prop()
@@ -51,14 +52,21 @@ export default class FaceMoveModal extends Mixins(GlobalMixin) {
             return;
         }
 
-        this.isOpen = true;
+        // check ownership
+        const user = this.$route.params.user || '';
+        if (this.$route.params.user !== getCurrentUser().uid) {
+            showError(this.t('memories', 'Only user "{user}" can update this person', { user }));
+            return;
+        }
+
+        this.show = true;
         this.photos = photos;
     }
 
     @Emit('close')
     public close() {
         this.photos = [];
-        this.isOpen = false;
+        this.show = false;
     }
 
     @Emit('moved')
@@ -71,7 +79,7 @@ export default class FaceMoveModal extends Mixins(GlobalMixin) {
         const newName = face.name || face.fileid.toString();
 
 		try {
-            this.isOpen = false;
+            this.show = false;
             this.updateLoading(1);
 
             // Create map to return IPhoto later
