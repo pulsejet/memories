@@ -20,7 +20,7 @@
                     <Video slot="icon" :size="20" />
                 </NcAppNavigationItem>
                 <NcAppNavigationItem :to="{name: 'people'}"
-                    :title="t('memories', 'People')">
+                    :title="t('memories', 'People')" v-if="showPeople">
                     <PeopleIcon slot="icon" :size="20" />
                 </NcAppNavigationItem>
                 <NcAppNavigationItem :to="{name: 'archive'}"
@@ -57,7 +57,8 @@ import {
     NcContent, NcAppContent, NcAppNavigation,
     NcAppNavigationItem, NcAppNavigationSettings,
 } from '@nextcloud/vue';
-import { generateUrl } from '@nextcloud/router'
+import { generateUrl } from '@nextcloud/router';
+import { getCurrentUser } from '@nextcloud/auth';
 
 import Timeline from './components/Timeline.vue'
 import Settings from './components/Settings.vue'
@@ -96,6 +97,10 @@ import TagsIcon from 'vue-material-design-icons/Tag.vue';
 })
 export default class App extends Mixins(GlobalMixin, UserConfig) {
     // Outer element
+
+    get showPeople() {
+        return this.config_recognizeEnabled || getCurrentUser()?.isAdmin;
+    }
 
     public mounted() {
         // Get the content-vue element and add nextcloud version as a class to it
