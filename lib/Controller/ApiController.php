@@ -102,7 +102,7 @@ class ApiController extends Controller
                 $uid,
                 $recursive,
                 $archive,
-                $this->getTransformations(),
+                $this->getTransformations(true),
             );
 
             // Preload some day responses
@@ -175,7 +175,7 @@ class ApiController extends Controller
                 $day_ids,
                 $recursive,
                 $archive,
-                $this->getTransformations(),
+                $this->getTransformations(false),
             );
 
             return new JSONResponse($list, Http::STATUS_OK);
@@ -637,8 +637,10 @@ class ApiController extends Controller
 
     /**
      * Get transformations depending on the request.
+     *
+     * @param bool $aggregateOnly Only apply transformations for aggregation (days call)
      */
-    private function getTransformations()
+    private function getTransformations(bool $aggregateOnly)
     {
         $transforms = [];
 
@@ -660,7 +662,7 @@ class ApiController extends Controller
             }
 
             $faceRect = $this->request->getParam('facerect');
-            if ($faceRect) {
+            if ($faceRect && !$aggregateOnly) {
                 $transforms[] = [$this->timelineQuery, 'transformFaceRect', $face];
             }
         }
@@ -686,7 +688,7 @@ class ApiController extends Controller
     private function preloadDays(array &$days, Folder &$folder, bool $recursive, bool $archive)
     {
         $uid = $this->userSession->getUser()->getUID();
-        $transforms = $this->getTransformations();
+        $transforms = $this->getTransformations(false);
         $preloaded = 0;
         foreach ($days as &$day) {
             $day['detail'] = $this->timelineQuery->getDay(

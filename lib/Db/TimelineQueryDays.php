@@ -122,9 +122,6 @@ trait TimelineQueryDays
         foreach ($days as &$row) {
             $row['dayid'] = (int) $row['dayid'];
             $row['count'] = (int) $row['count'];
-
-            // All transform processing
-            $this->processFace($row, true);
         }
 
         return $days;
