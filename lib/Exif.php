@@ -80,7 +80,7 @@ class Exif
      */
     public static function sanitizePath(string $path)
     {
-        return mb_ereg_replace('([^\\w\\s\\d\\-_~,;\\[\\]\\(\\).\\/])', '', $path);
+        return mb_ereg_replace('([^\\w\\s\\d\\-_~,;:!@#$&*{}\[\]\'\\[\\]\\(\\).\\\/])', '', $path);
     }
 
     /**
