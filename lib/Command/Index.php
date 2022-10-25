@@ -115,12 +115,20 @@ class Index extends Command
     {
         // Print mime type support information
         $output->writeln('MIME Type support:');
-        foreach (Application::IMAGE_MIMES as $mimeType) {
+        $mimes = array_merge(Application::IMAGE_MIMES, Application::VIDEO_MIMES);
+        $someUnsupported = false;
+        foreach ($mimes as &$mimeType) {
             if ($this->preview->isMimeSupported($mimeType)) {
                 $output->writeln("  {$mimeType}: supported");
             } else {
-                $output->writeln("  {$mimeType}: <error>not supported by preview generator</error>");
+                $output->writeln("  {$mimeType}: <error>not supported</error>");
+                $someUnsupported = true;
             }
+        }
+
+        // Print file type support info
+        if ($someUnsupported) {
+            $output->writeln("\nSome file types are not supported by your preview provider.\nPlease see https://github.com/pulsejet/memories/wiki/File-Type-Support\n");
         }
 
         // Get options and arguments
