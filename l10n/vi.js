@@ -13,12 +13,12 @@ OC.L10N.register(
     "Favorite" : "Ưa thích",
     "Unarchive" : "Bỏ lưu trữ",
     "View in folder" : "Xem trong thư mục",
-    "Update" : "Cập nhật",
     "Year" : "Năm",
     "Month" : "Tháng",
     "Day" : "Ngày",
     "Time" : "Thời gian",
     "Name" : "Tên",
+    "Update" : "Cập nhật",
     "Loading …" : "Đang tải …",
     "Back" : "Quay lại"
 },

@@ -8,12 +8,12 @@ OC.L10N.register(
     "Delete" : "মুছে",
     "Download" : "ডাউনলোড",
     "Favorite" : "প্রিয়জন",
-    "Update" : "পরিবর্ধন",
     "Month" : "মাস",
     "Day" : "দিবস",
     "Time" : "সময়",
     "Hour" : "ঘন্টা",
     "Name" : "নাম",
+    "Update" : "পরিবর্ধন",
     "Back" : "পেছনে যাও"
 },
 "nplurals=2; plural=(n != 1);");

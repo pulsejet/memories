@@ -13,11 +13,11 @@ OC.L10N.register(
     "Favorite" : "Дуртай",
     "Unarchive" : "Архиваас гаргах",
     "View in folder" : "Хавтасыг нээх",
-    "Update" : "Шинэчлэх",
     "Month" : "Сар",
     "Day" : "Өдөр",
     "Time" : "Цаг",
     "Name" : "Нэр",
+    "Update" : "Шинэчлэх",
     "Loading …" : "Уншиж байна...",
     "Back" : "буцах"
 },

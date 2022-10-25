@@ -9,11 +9,11 @@ OC.L10N.register(
     "Download" : "Discargar",
     "Favorite" : "Favorite",
     "View in folder" : "Vider in dossier",
-    "Update" : "Actualisation",
     "Month" : "Mense",
     "Day" : "Die",
     "Time" : "Tempore",
     "Name" : "Nomine",
+    "Update" : "Actualisation",
     "Back" : "Retro"
 },
 "nplurals=2; plural=(n != 1);");

@@ -12,12 +12,12 @@ OC.L10N.register(
     "Download" : "Baxar",
     "Favorite" : "Marcar como favoritu",
     "View in folder" : "Ver na carpeta",
-    "Update" : "Anovar",
     "Month" : "Mes",
     "Day" : "Día",
     "Time" : "Hora",
     "Hour" : "Hora",
     "Name" : "Nome",
+    "Update" : "Anovar",
     "Loading …" : "Cargando...",
     "Back" : "Atrás"
 },

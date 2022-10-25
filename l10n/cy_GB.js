@@ -10,12 +10,12 @@ OC.L10N.register(
     "Delete" : "Dileu",
     "Download" : "Llwytho i lawr",
     "Favorite" : "Ffefryn",
-    "Update" : "Diweddaru",
     "Year" : "Blwyddyn",
     "Month" : "Mis",
     "Day" : "Diwrnod",
     "Time" : "Amser",
     "Name" : "Enw",
+    "Update" : "Diweddaru",
     "Loading …" : "Yn llwytho …",
     "Back" : "Nôl"
 },

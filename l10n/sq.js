@@ -13,12 +13,12 @@ OC.L10N.register(
     "Favorite" : "I/E Preferuar",
     "Unarchive" : "Hiq nga arkivi",
     "View in folder" : "Shikoje në dosje",
-    "Update" : "Përditëso",
     "Month" : "Muaj",
     "Day" : "Ditë",
     "Time" : "Kohë",
     "Hour" : "Orë",
     "Name" : "Emri",
+    "Update" : "Përditëso",
     "Back" : "Prapa"
 },
 "nplurals=2; plural=(n != 1);");

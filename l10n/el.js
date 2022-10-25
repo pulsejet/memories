@@ -16,7 +16,6 @@ OC.L10N.register(
     "Favorite" : "Αγαπημένο",
     "Unarchive" : "Αναίρεση αρχειοθέτησης",
     "View in folder" : "Προβολή στον φάκελο",
-    "Update" : "Ενημέρωση",
     "Year" : "Έτος",
     "Month" : "Μήνας",
     "Day" : "Ημέρα",
@@ -24,6 +23,7 @@ OC.L10N.register(
     "Hour" : "Ώρα",
     "Minute" : "Λεπτά",
     "Name" : "Όνομα",
+    "Update" : "Ενημέρωση",
     "Loading …" : "Φόρτωση …",
     "Back" : "Πίσω"
 },

@@ -15,7 +15,6 @@ OC.L10N.register(
     "Favorite" : "Favorito",
     "Unarchive" : "Desarquivar",
     "View in folder" : "Ver no cartafol",
-    "Update" : "Actualizar",
     "Year" : "Ano",
     "Month" : "Mes",
     "Day" : "Día",
@@ -23,6 +22,7 @@ OC.L10N.register(
     "Hour" : "Hora",
     "Minute" : "Minuto",
     "Name" : "Nome",
+    "Update" : "Actualizar",
     "Loading …" : "Cargando…",
     "Back" : "Atrás"
 },

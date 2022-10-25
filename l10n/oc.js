@@ -11,7 +11,6 @@ OC.L10N.register(
     "Delete" : "Suprimir",
     "Download" : "Telecargar",
     "Favorite" : "Favorit",
-    "Update" : "Actualizar",
     "Year" : "Annada",
     "Month" : "Mes",
     "Day" : "Jorn",
@@ -19,6 +18,7 @@ OC.L10N.register(
     "Hour" : "Ora",
     "Minute" : "Minuta",
     "Name" : "Nom",
+    "Update" : "Actualizar",
     "Loading …" : "Cargament…",
     "Back" : "Retorn"
 },

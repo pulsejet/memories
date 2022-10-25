@@ -9,7 +9,7 @@ OC.L10N.register(
     "Delete" : "Delete",
     "Download" : "Download",
     "Favorite" : "Favorite",
-    "Update" : "Update",
-    "Name" : "Name"
+    "Name" : "Name",
+    "Update" : "Update"
 },
 "nplurals=1; plural=0;");
