@@ -35,6 +35,7 @@
 
                     <OnThisDay v-if="$route.name === 'timeline'"
                            :viewerManager="viewerManager"
+                           :key="config_timelinePath"
                            @load="scrollerManager.adjust()">
                     </OnThisDay>
                 </div>
@@ -207,12 +208,12 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     }
 
     beforeDestroy() {
-        unsubscribe(this.config_eventName, this.refresh);
+        unsubscribe(this.config_eventName, this.softRefresh);
         this.resetState();
     }
 
     created() {
-        subscribe(this.config_eventName, this.refresh);
+        subscribe(this.config_eventName, this.softRefresh);
         window.addEventListener("resize", this.handleResizeWithDelay);
     }
 

@@ -99,7 +99,6 @@ export default class Settings extends Mixins(UserConfig, GlobalMixin) {
     }
 
     async updateSquareThumbs() {
-        console.error('updateSquareThumbs', this.config_squareThumbs);
         await this.updateSetting('squareThumbs');
     }
 
