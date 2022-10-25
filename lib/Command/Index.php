@@ -65,6 +65,9 @@ class Index extends Command
     private int $nSkipped = 0;
     private int $nInvalid = 0;
 
+    // Helper for the progress bar
+    private int $previousLineLength = 0;
+
     public function __construct(
         IRootFolder $rootFolder,
         IUserManager $userManager,
@@ -194,7 +197,7 @@ class Index extends Command
         $endTime = microtime(true);
         $execTime = (int) (($endTime - $startTime) * 1000) / 1000;
         $nTotal = $this->nInvalid + $this->nSkipped + $this->nProcessed;
-        $this->output->writeln("\n==========================================");
+        $this->output->writeln("==========================================");
         $this->output->writeln("Checked {$nTotal} files in {$execTime} sec");
         $this->output->writeln($this->nInvalid.' not valid media items');
         $this->output->writeln($this->nSkipped.' skipped because unmodified');
@@ -250,6 +253,9 @@ class Index extends Command
         $uid = $user->getUID();
         $userFolder = $this->rootFolder->getUserFolder($uid);
         $this->parseFolder($userFolder, $refresh);
+        if ($this->previousLineLength) {
+            $this->output->write("\r".str_repeat(' ', $this->previousLineLength)."\r");
+        }
     }
 
     private function parseFolder(Folder &$folder, bool &$refresh): void
@@ -260,11 +266,17 @@ class Index extends Command
             // Respect the '.nomedia' file. If present don't traverse the folder
             if ($folder->nodeExists('.nomedia')) {
                 $this->output->writeln('Skipping folder '.$folderPath." because of .nomedia file");
-
+                $this->previousLineLength = 0;
                 return;
             }
 
-            $this->output->write('Scanning folder '.$folderPath."\r");
+            // Clear previous line and write new one
+            $line = 'Scanning folder '.$folderPath;
+            if ($this->previousLineLength) {
+                $this->output->write("\r".str_repeat(' ', $this->previousLineLength)."\r");
+            }
+            $this->output->write($line."\r");
+            $this->previousLineLength = strlen($line);
 
             $nodes = $folder->getDirectoryListing();
 
