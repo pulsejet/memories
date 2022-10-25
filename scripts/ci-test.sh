@@ -43,7 +43,7 @@ php occ files:scan --all
 php occ memories:index
 
 # Set admin timeline path
-php occ user:setting admin memories timelinePath /
+php occ user:setting admin memories timelinePath "/Photos"
 
 # Run e2e tests
 cd apps/memories
