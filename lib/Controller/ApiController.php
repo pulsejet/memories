@@ -716,10 +716,13 @@ class ApiController extends Controller
         try {
             $folder = null;
             $folderPath = $this->request->getParam('folder');
+            $forcedTimelinePath = $this->request->getParam('timelinePath');
             $userFolder = $this->rootFolder->getUserFolder($uid);
 
             if (null !== $folderPath) {
                 $folder = $userFolder->get($folderPath);
+            } elseif (null !== $forcedTimelinePath) {
+                $folder = $userFolder->get($forcedTimelinePath);
             } else {
                 $configPath = Exif::removeExtraSlash(Exif::getPhotosPath($this->config, $uid));
                 $folder = $userFolder->get($configPath);
