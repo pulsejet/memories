@@ -60,7 +60,7 @@
                 <template v-else>
                     <div class="photo" v-for="photo of item.photos" :key="photo.fileid"
                         :style="{
-                            height: (photo.dispH || item.size) + 'px',
+                            height: photo.dispH + 'px',
                             width: photo.dispW + 'px',
                             transform: `translate(${photo.dispX}px, ${photo.dispY}px`,
                         }">
@@ -902,7 +902,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             const setPos = () => {
                 photo.dispW = utils.roundHalf(jbox.width);
                 photo.dispX = utils.roundHalf(jbox.left);
-                photo.dispH = squareMode ? utils.roundHalf(jbox.height) : 0;
+                photo.dispH = utils.roundHalf(jbox.height);
                 photo.dispY = 0;
                 photo.dispRowNum = row.num;
             };

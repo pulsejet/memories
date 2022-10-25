@@ -86,16 +86,30 @@ export default class Photo extends Mixins(GlobalMixin) {
         } else if (this.data.flag & this.c.FLAG_LOAD_FAIL) {
             return errorsvg;
         } else {
-            return this.url;
+            return this.url();
         }
     }
 
     /** Get url of the photo */
-    get url() {
-        let size = 256;
-        if (this.data.w && this.data.h) {
-            size = Math.floor(size * Math.max(this.data.w, this.data.h) / Math.min(this.data.w, this.data.h));
+    url() {
+        let base = 256;
+
+        // Check if displayed size is larger than the image
+        if (this.data.dispH > base && this.data.dispW > base) {
+            // Get a bigger image
+            // 1. No trickery here, just get one size bigger. This is to
+            //    ensure that the images can be cached even after reflow.
+            // 2. Nextcloud only allows 4**x sized images, so technically
+            //    this ends up being equivalent to 1024x1024.
+            base = 512;
         }
+
+        // Make the shorter dimension equal to base
+        let size = base;
+        if (this.data.w && this.data.h) {
+            size = Math.floor(base * Math.max(this.data.w, this.data.h) / Math.min(this.data.w, this.data.h));
+        }
+
         return getPreviewUrl(this.data.fileid, this.data.etag, false, size)
     }
 
