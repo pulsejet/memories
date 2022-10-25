@@ -129,6 +129,8 @@ class Index extends Command
         // Print file type support info
         if ($someUnsupported) {
             $output->writeln("\nSome file types are not supported by your preview provider.\nPlease see https://github.com/pulsejet/memories/wiki/File-Type-Support\n");
+        } else {
+            $output->writeln("\nAll file types are supported by your preview provider.\n");
         }
 
         // Get options and arguments
@@ -257,12 +259,12 @@ class Index extends Command
 
             // Respect the '.nomedia' file. If present don't traverse the folder
             if ($folder->nodeExists('.nomedia')) {
-                $this->output->writeln('Skipping folder '.$folderPath);
+                $this->output->write('Skipping folder '.$folderPath." because of .nomedia file\r");
 
                 return;
             }
 
-            $this->output->writeln('Scanning folder '.$folderPath);
+            $this->output->write('Scanning folder '.$folderPath."\r");
 
             $nodes = $folder->getDirectoryListing();
 
