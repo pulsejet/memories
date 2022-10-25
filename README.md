@@ -14,6 +14,7 @@
 * **📱 Mobile Support**: Relive your memories on devices of any shape and size through the web app.
 * **✏️ Edit Metadata**: Edit Exif dates on photos quickly and easily.
 * **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.
+* **📷 RAW Support**: View RAW photos from your camera with the [Camera RAW Previews](https://apps.nextcloud.com/apps/camerarawpreviews) app.
 * **⚡️ Fast**: Memories is extremely fast. Period. More details below.
 
 ## How to support development

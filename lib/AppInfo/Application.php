@@ -45,6 +45,7 @@ class Application extends App implements IBootstrap
         'image/tiff',
         'image/gif',
         'image/bmp',
+        'image/x-dcraw',        // RAW
         // 'image/x-xbitmap',   // too rarely used for photos
         // 'image/svg+xml',     // too rarely used for photos
     ];
