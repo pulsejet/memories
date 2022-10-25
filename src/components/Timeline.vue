@@ -104,6 +104,7 @@ import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";
 import { generateUrl } from '@nextcloud/router'
 import { showError } from '@nextcloud/dialogs'
 import { NcEmptyContent } from '@nextcloud/vue';
+import { subscribe, unsubscribe } from '@nextcloud/event-bus'
 import GlobalMixin from '../mixins/GlobalMixin';
 import UserConfig from "../mixins/UserConfig";
 
@@ -153,8 +154,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     private list: IRow[] = [];
     /** Computed number of columns */
     private numCols = 0;
-    /** Keep all images square */
-    private squareMode = false;
     /** Header rows for dayId key */
     private heads: { [dayid: number]: IHeadRow } = {};
 
@@ -208,10 +207,12 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     }
 
     beforeDestroy() {
+        unsubscribe(this.config_eventName, this.refresh);
         this.resetState();
     }
 
     created() {
+        subscribe(this.config_eventName, this.refresh);
         window.addEventListener("resize", this.handleResizeWithDelay);
     }
 
@@ -326,12 +327,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             // Mobile
             this.numCols = MOBILE_NUM_COLS;
             this.rowHeight = Math.floor(this.rowWidth / this.numCols);
-            this.squareMode = true;
         } else {
             // Desktop
-            this.squareMode = this.config_squareThumbs;
-
-            if (this.squareMode) {
+            if (this.config_squareThumbs) {
                 // Set columns first, then height
                 this.numCols = Math.max(3, Math.floor(this.rowWidth / DESKTOP_ROW_HEIGHT));
                 this.rowHeight = Math.floor(this.rowWidth / this.numCols);
@@ -814,6 +812,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             row.photos = [];
         }
 
+        // Force all to square
+        const squareMode = this.isMobile() || this.config_squareThumbs;
+
         // Create justified layout with correct params
         const justify = getLayout(day.detail.map(p => {
             return {
@@ -824,7 +825,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         }), {
             rowWidth: this.rowWidth,
             rowHeight: this.rowHeight,
-            squareMode: this.squareMode,
+            squareMode: squareMode,
             numCols: this.numCols,
             allowBreakout: this.allowBreakout(),
             seed: dayId,
@@ -900,7 +901,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             const setPos = () => {
                 photo.dispW = utils.roundHalf(jbox.width);
                 photo.dispX = utils.roundHalf(jbox.left);
-                photo.dispH = this.squareMode ? utils.roundHalf(jbox.height) : 0;
+                photo.dispH = squareMode ? utils.roundHalf(jbox.height) : 0;
                 photo.dispY = 0;
                 photo.dispRowNum = row.num;
             };
