@@ -31,6 +31,11 @@ class TimelineWrite
     {
         $mime = $file->getMimeType();
         if (\in_array($mime, Application::IMAGE_MIMES, true)) {
+            // Make sure preview generator supports the mime type
+            if (!$this->preview->isMimeSupported($mime)) {
+                return 0;
+            }
+
             return 1;
         }
         if (\in_array($mime, Application::VIDEO_MIMES, true)) {
@@ -58,11 +63,6 @@ class TimelineWrite
         $fileType = $this->getFileType($file);
         $isvideo = (2 === $fileType);
         if (!$fileType) {
-            return 0;
-        }
-
-        // Make sure preview generator supports the mime type
-        if (!$this->preview->isMimeSupported($file->getMimeType())) {
             return 0;
         }
 
