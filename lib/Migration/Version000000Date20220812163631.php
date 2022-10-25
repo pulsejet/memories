@@ -73,11 +73,6 @@ class Version000000Date20220812163631 extends SimpleMigrationStep
             $table->addIndex(['uid'], 'memories_uid_index');
             $table->addIndex(['uid', 'dayid'], 'memories_ud_index');
             $table->addUniqueIndex(['uid', 'fileid'], 'memories_day_uf_ui');
-
-            if ($schema->hasTable('filecache')) {
-                $table = $schema->getTable('filecache');
-                $table->addIndex(['path'], 'memories_path_index');
-            }
         }
 
         return $schema;
