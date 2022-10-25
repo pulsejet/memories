@@ -175,6 +175,14 @@ export function convertFlags(photo: IPhoto) {
     }
 }
 
+// Outside for set
+const TagDayID = {
+    START:          -(1 << 30),
+    FOLDERS:        -(1 << 30) + 1,
+    TAGS:           -(1 << 30) + 2,
+    FACES:          -(1 << 30) + 3,
+}
+
 /** Global constants */
 export const constants = {
     c: {
@@ -189,12 +197,8 @@ export const constants = {
         FLAG_LEAVING:       1 << 8,
     },
 
-    TagDayID: {
-        START:          -(1 << 30),
-        FOLDERS:        -(1 << 30) + 1,
-        TAGS:           -(1 << 30) + 2,
-        FACES:          -(1 << 30) + 3,
-    },
+    TagDayID: TagDayID,
+    TagDayIDValueSet: new Set(Object.values(TagDayID)),
 }
 
 /** Cache store */
