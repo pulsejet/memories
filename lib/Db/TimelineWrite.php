@@ -9,14 +9,17 @@ use OCA\Memories\Exif;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
+use OCP\IPreview;
 
 class TimelineWrite
 {
     protected IDBConnection $connection;
+    protected IPreview $preview;
 
-    public function __construct(IDBConnection $connection)
+    public function __construct(IDBConnection $connection, IPreview &$preview)
     {
         $this->connection = $connection;
+        $this->preview = $preview;
     }
 
     /**
@@ -55,6 +58,11 @@ class TimelineWrite
         $fileType = $this->getFileType($file);
         $isvideo = (2 === $fileType);
         if (!$fileType) {
+            return 0;
+        }
+
+        // Make sure preview generator supports the mime type
+        if (!$this->preview->isMimeSupported($file->getMimeType())) {
             return 0;
         }
 
