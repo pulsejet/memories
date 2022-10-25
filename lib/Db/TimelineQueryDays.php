@@ -166,38 +166,62 @@ trait TimelineQueryDays
         bool $recursive,
         bool $archive
     ) {
-        // Subquery to get storage and path
-        $subQuery = $query->getConnection()->getQueryBuilder();
-        $cursor = $subQuery->select('path', 'storage')->from('filecache')->where(
-            $subQuery->expr()->eq('fileid', $subQuery->createNamedParameter($folder->getId())),
-        )->executeQuery();
-        $finfo = $cursor->fetch();
-        $cursor->closeCursor();
-        if (empty($finfo)) {
-            throw new \Exception('Folder not found');
-        }
-
         $pathQuery = null;
         if ($recursive) {
-            // Filter by path for recursive query
-            $likePath = $finfo['path'];
-            if (!empty($likePath)) {
-                $likePath .= '/';
-            }
-            $pathQuery = $query->expr()->like('f.path', $query->createNamedParameter($likePath.'%'));
+            // CTE to get all folders recursively in the given top folder
+            $cte =
+                'WITH RECURSIVE cte_folders(fileid) AS (
+                    SELECT
+                        f.fileid
+                    FROM
+                        *PREFIX*filecache f
+                    WHERE
+                        f.fileid = :topFolderId
+                    UNION ALL
+                    SELECT
+                        f.fileid
+                    FROM
+                        *PREFIX*filecache f
+                    INNER JOIN cte_folders c
+                        ON (f.parent = c.fileid
+                            AND f.mimetype = 2
+                            AND f.fileid NOT IN (:excludedFolderIds)
+                        )
+                )
+                SELECT
+                    fileid
+                FROM
+                    cte_folders
+                ';
 
-            // Exclude/show archive folder
-            $archiveLikePath = $likePath.\OCA\Memories\Util::$ARCHIVE_FOLDER.'/%';
+            // Query parameters, set at the end
+            $topFolderId = $folder->getId();
+            $excludedFolderIds = [-1]; // cannot be empty
+
+            /** @var Folder Archive folder if it exists */
+            $archiveFolder = null;
+
+            try {
+                $archiveFolder = $folder->get('.archive/');
+            } catch (\OCP\Files\NotFoundException $e) {
+            }
+
             if (!$archive) {
                 // Exclude archive folder
-                $pathQuery = $query->expr()->andX(
-                    $pathQuery,
-                    $query->expr()->notLike('f.path', $query->createNamedParameter($archiveLikePath))
-                );
+                if ($archiveFolder) {
+                    $excludedFolderIds[] = $archiveFolder->getId();
+                }
             } else {
-                // Show only archive folder
-                $pathQuery = $query->expr()->like('f.path', $query->createNamedParameter($archiveLikePath));
+                // Only include archive folder
+                $topFolderId = $archiveFolder ? $archiveFolder->getId() : -1;
             }
+
+            // Join with CTE
+            $pathQuery = $query->expr()->in('f.parent', $query->createFunction($cte));
+
+            // Set query parameters
+            $query->setParameter('topFolderId', $topFolderId, IQueryBuilder::PARAM_INT);
+            $query->setParameter('excludedFolderIds', $excludedFolderIds, IQueryBuilder::PARAM_INT_ARRAY);
         } else {
             // If getting non-recursively folder only check for parent
             $pathQuery = $query->expr()->eq('f.parent', $query->createNamedParameter($folder->getId(), IQueryBuilder::PARAM_INT));
@@ -205,7 +229,6 @@ trait TimelineQueryDays
 
         return $query->expr()->andX(
             $query->expr()->eq('f.fileid', 'm.fileid'),
-            $query->expr()->in('f.storage', $query->createNamedParameter($finfo['storage'])),
             $pathQuery,
         );
     }
