@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Command;
 
 use OCA\Files_External\Service\GlobalStoragesService;
+use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineWrite;
 use OCP\Encryption\IManager;
 use OCP\Files\File;
@@ -52,7 +53,7 @@ class Index extends Command
 
     protected IUserManager $userManager;
     protected IRootFolder $rootFolder;
-    protected IPreview $previewGenerator;
+    protected IPreview $preview;
     protected IConfig $config;
     protected OutputInterface $output;
     protected IManager $encryptionManager;
@@ -67,7 +68,7 @@ class Index extends Command
     public function __construct(
         IRootFolder $rootFolder,
         IUserManager $userManager,
-        IPreview $previewGenerator,
+        IPreview $preview,
         IConfig $config,
         IManager $encryptionManager,
         IDBConnection $connection,
@@ -77,11 +78,11 @@ class Index extends Command
 
         $this->userManager = $userManager;
         $this->rootFolder = $rootFolder;
-        $this->previewGenerator = $previewGenerator;
+        $this->preview = $preview;
         $this->config = $config;
         $this->encryptionManager = $encryptionManager;
         $this->connection = $connection;
-        $this->timelineWrite = new TimelineWrite($this->connection);
+        $this->timelineWrite = new TimelineWrite($connection, $preview);
 
         try {
             $this->globalService = $container->get(GlobalStoragesService::class);
@@ -112,6 +113,16 @@ class Index extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        // Print mime type support information
+        $output->writeln('MIME Type support:');
+        foreach (Application::IMAGE_MIMES as $mimeType) {
+            if ($this->preview->isMimeSupported($mimeType)) {
+                $output->writeln("  {$mimeType}: supported");
+            } else {
+                $output->writeln("  {$mimeType}: <error>not supported by preview generator</error>");
+            }
+        }
+
         // Get options and arguments
         $refresh = $input->getOption('refresh') ? true : false;
         $clear = $input->getOption('clear') ? true : false;

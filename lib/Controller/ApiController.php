@@ -53,7 +53,7 @@ class ApiController extends Controller
     private IAppManager $appManager;
     private TimelineQuery $timelineQuery;
     private TimelineWrite $timelineWrite;
-    private IPreview $previewManager;
+    private IPreview $preview;
 
     public function __construct(
         IRequest $request,
@@ -62,7 +62,7 @@ class ApiController extends Controller
         IDBConnection $connection,
         IRootFolder $rootFolder,
         IAppManager $appManager,
-        IPreview $previewManager
+        IPreview $preview
     ) {
         parent::__construct(Application::APPNAME, $request);
 
@@ -71,9 +71,9 @@ class ApiController extends Controller
         $this->connection = $connection;
         $this->rootFolder = $rootFolder;
         $this->appManager = $appManager;
-        $this->previewManager = $previewManager;
+        $this->previewManager = $preview;
         $this->timelineQuery = new TimelineQuery($this->connection);
-        $this->timelineWrite = new TimelineWrite($connection);
+        $this->timelineWrite = new TimelineWrite($connection, $preview);
     }
 
     /**
