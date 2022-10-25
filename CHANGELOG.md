@@ -4,6 +4,7 @@ This file is manually updated. Please file an issue if something is missing.
 
 ## v4.3.7, v3.3.7
 * **Feature**: Support for RAW (must run `occ memories:index` after upgrade) ([#107](https://github.com/pulsejet/memories/issues/107))
+* **Feature**: Better settings experience.
 * Bug fixes for postgresql and mysql
 
 
