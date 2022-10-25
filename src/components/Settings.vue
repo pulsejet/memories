@@ -24,27 +24,27 @@
     <div>
         <label for="timeline-path">{{ t('memories', 'Timeline Path') }}</label>
         <input id="timeline-path"
+            @click="chooseTimelinePath"
             v-model="config_timelinePath"
             type="text">
 
         <label for="folders-path">{{ t('memories', 'Folders Path') }}</label>
         <input id="folders-path"
+            @click="chooseFoldersPath"
             v-model="config_foldersPath"
             type="text">
 
         <NcCheckboxRadioSwitch :checked.sync="config_showHidden"
+            @update:checked="updateShowHidden"
             type="switch">
             {{ t('memories', 'Show hidden folders') }}
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch :checked.sync="config_squareThumbs"
+            @update:checked="updateSquareThumbs"
             type="switch">
             {{ t('memories', 'Square grid mode') }}
         </NcCheckboxRadioSwitch>
-
-        <button @click="updateAll()">
-            {{ t('memories', 'Update') }}
-        </button>
     </div>
 </template>
 
@@ -58,7 +58,7 @@ input[type=text] {
 import { Component, Mixins } from 'vue-property-decorator';
 import GlobalMixin from '../mixins/GlobalMixin';
 
-import { showError } from '@nextcloud/dialogs'
+import { getFilePickerBuilder } from '@nextcloud/dialogs'
 import UserConfig from '../mixins/UserConfig'
 
 import { NcCheckboxRadioSwitch } from '@nextcloud/vue'
@@ -69,24 +69,42 @@ import { NcCheckboxRadioSwitch } from '@nextcloud/vue'
     },
 })
 export default class Settings extends Mixins(UserConfig, GlobalMixin) {
-    async updateAll() {
-        // Update localStorage
-        localStorage.setItem('memories_squareThumbs', this.config_squareThumbs ? '1' : '0');
+    async chooseFolder(title: string, initial: string) {
+        const picker = getFilePickerBuilder(title)
+				.setMultiSelect(false)
+				.setModal(true)
+				.setType(1)
+				.addMimeTypeFilter('httpd/unix-directory')
+				.allowDirectories()
+				.startAt(initial)
+				.build()
 
-        // Settings list
-        const settings = ['showHidden', 'timelinePath', 'foldersPath'];
+        return await picker.pick();
+    }
 
-        // Update all
-        try {
-            const p = await Promise.all(settings.map(async (setting) => this.updateSetting(setting)));
-            if (p.some((r) => !r || r.status !== 200)) {
-                showError(this.t('memories', 'Error updating settings'));
-            } else {
-                window.location.reload();
-            }
-        } catch (e) {
-            showError(e?.response?.data?.message || this.t('memories', 'Error updating settings'));
+    async chooseTimelinePath() {
+        const newPath = await this.chooseFolder(this.t('memories', 'Choose the root of your timeline'), this.config_timelinePath);
+        if (newPath !== this.config_timelinePath) {
+            this.config_timelinePath = newPath;
+            await this.updateSetting('timelinePath');
         }
+    }
+
+    async chooseFoldersPath() {
+        const newPath = await this.chooseFolder(this.t('memories', 'Choose the root for the folders view'), this.config_foldersPath);
+        if (newPath !== this.config_foldersPath) {
+            this.config_foldersPath = newPath;
+            await this.updateSetting('foldersPath');
+        }
+    }
+
+    async updateSquareThumbs() {
+        console.error('updateSquareThumbs', this.config_squareThumbs);
+        await this.updateSetting('squareThumbs');
+    }
+
+    async updateShowHidden() {
+        await this.updateSetting('showHidden');
     }
 }
 </script>
