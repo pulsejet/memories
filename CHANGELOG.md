@@ -2,6 +2,11 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## v4.3.7, v3.3.7
+* **Feature**: Support for RAW (must run `occ memories:index` after upgrade) ([#107](https://github.com/pulsejet/memories/issues/107))
+* Bug fixes for postgresql and mysql
+
+
 ## v4.3.0, v3.3.0 (2022-10-22)
 * **Note:** you must run `occ memories:index -f` after updating to take advantage of new features.
 * **Feature**: **Brand new tiled layout for photos**
