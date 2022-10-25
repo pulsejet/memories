@@ -13,12 +13,12 @@ OC.L10N.register(
     "Download" : "Elŝuti",
     "Favorite" : "Pliŝatati",
     "View in folder" : "Vidi en dosierujo",
-    "Update" : "Ĝisdatigi",
     "Month" : "Monato",
     "Day" : "Tago",
     "Time" : "Dato",
     "Hour" : "Horo",
     "Name" : "Nomo",
+    "Update" : "Ĝisdatigi",
     "Loading …" : "Ŝargas …",
     "Back" : "Antaŭen"
 },

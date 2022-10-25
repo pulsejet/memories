@@ -13,13 +13,13 @@
     "Favorite" : "Favoritt",
     "Unarchive" : "Dearkivere",
     "View in folder" : "Vis i mappe",
-    "Update" : "Oppdater",
     "Year" : "År",
     "Month" : "Måned",
     "Day" : "Dag",
     "Time" : "Tid",
     "Hour" : "Time",
     "Name" : "Navn",
+    "Update" : "Oppdater",
     "Loading …" : "Laster ...",
     "Back" : "Tilbake"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

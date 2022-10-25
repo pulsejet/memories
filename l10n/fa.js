@@ -14,12 +14,12 @@ OC.L10N.register(
     "Download" : "بارگیری",
     "Favorite" : "مورد‌ ‌علاقه‌",
     "View in folder" : "مشاهده در پوشه",
-    "Update" : "یه‌روزرسانی",
     "Year" : "سال",
     "Month" : "ماه",
     "Day" : "روز",
     "Time" : "زمان",
     "Name" : "نام",
+    "Update" : "یه‌روزرسانی",
     "Loading …" : "بارگذاری …",
     "Back" : "بازگشت"
 },

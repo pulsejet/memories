@@ -14,7 +14,6 @@ OC.L10N.register(
     "Download" : "Iscàrriga",
     "Favorite" : "Preferidu",
     "View in folder" : "Càstia in sa cartella",
-    "Update" : "Agiorna",
     "Year" : "Annu",
     "Month" : "Mese",
     "Day" : "Die",
@@ -22,6 +21,7 @@ OC.L10N.register(
     "Hour" : "Ora",
     "Minute" : "Minutu",
     "Name" : "Nùmene",
+    "Update" : "Agiorna",
     "Loading …" : "Carrigamentu …",
     "Back" : "In segus"
 },

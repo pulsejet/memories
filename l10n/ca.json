@@ -14,7 +14,6 @@
     "Favorite" : "Preferit",
     "Unarchive" : "Desbloquejar",
     "View in folder" : "Visualitza-ho a la carpeta",
-    "Update" : "Actualitzar",
     "Year" : "Any",
     "Month" : "Mes",
     "Day" : "Dia",
@@ -22,6 +21,7 @@
     "Hour" : "Hora",
     "Minute" : "Minut",
     "Name" : "Cognom",
+    "Update" : "Actualitzar",
     "Loading …" : "Carregant …",
     "Back" : "Torna"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

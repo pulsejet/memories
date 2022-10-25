@@ -12,12 +12,12 @@ OC.L10N.register(
     "Download" : "Lae alla",
     "Favorite" : "Lemmik",
     "View in folder" : "Vaata kaustas",
-    "Update" : "Uuenda",
     "Month" : "Kuu",
     "Day" : "Päev",
     "Time" : "Aeg",
     "Hour" : "Tund",
     "Name" : "Nimi",
+    "Update" : "Uuenda",
     "Back" : "Tagasi"
 },
 "nplurals=2; plural=(n != 1);");

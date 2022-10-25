@@ -9,10 +9,10 @@ OC.L10N.register(
     "Delete" : "Sil",
     "Download" : "Yüklə",
     "Favorite" : "İstəkli",
-    "Update" : "Yenilənmə",
     "Month" : "Ay",
     "Day" : "Gün",
     "Time" : "Vaxt",
-    "Name" : "Ad"
+    "Name" : "Ad",
+    "Update" : "Yenilənmə"
 },
 "nplurals=2; plural=(n != 1);");

@@ -6,10 +6,10 @@ OC.L10N.register(
     "Cancel" : "ընդհատել",
     "Delete" : "հեռացնել",
     "Download" : "Ներբեռնել",
-    "Update" : "Թարմացնել",
     "Month" : "Ամիս",
     "Day" : "Օր",
     "Time" : "Ժամ",
-    "Name" : "Անուն"
+    "Name" : "Անուն",
+    "Update" : "Թարմացնել"
 },
 "nplurals=2; plural=(n != 1);");

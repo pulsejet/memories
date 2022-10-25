@@ -12,12 +12,12 @@ OC.L10N.register(
     "Download" : "Descărcare",
     "Favorite" : "Favorite",
     "View in folder" : "Vizualizează în director",
-    "Update" : "Actualizare",
     "Year" : "An",
     "Month" : "Luna",
     "Day" : "Zi",
     "Time" : "Timp",
     "Name" : "Nume",
+    "Update" : "Actualizare",
     "Loading …" : "Se încarcă…",
     "Back" : "Înapoi"
 },

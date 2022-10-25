@@ -15,7 +15,6 @@ OC.L10N.register(
     "Favorite" : "Favorit",
     "Unarchive" : "Dearhiviraj",
     "View in folder" : "Prikaži u mapi",
-    "Update" : "Ažuriraj",
     "Year" : "Godina",
     "Month" : "Mjesec",
     "Day" : "Dan",
@@ -23,6 +22,7 @@ OC.L10N.register(
     "Hour" : "Sat",
     "Minute" : "Minuta",
     "Name" : "Naziv",
+    "Update" : "Ažuriraj",
     "Loading …" : "Učitavanje…",
     "Back" : "Natrag"
 },
