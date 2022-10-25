@@ -65,8 +65,12 @@ class PageController extends Controller
 
         // Configuration
         $uid = $user->getUid();
-        $timelinePath = \OCA\Memories\Util::getPhotosPath($this->config, $uid);
-        $this->initialState->provideInitialState('timelinePath', $timelinePath);
+        $this->initialState->provideInitialState('timelinePath', $this->config->getUserValue(
+            $uid,
+            Application::APPNAME,
+            'timelinePath',
+            'EMPTY'
+        ));
         $this->initialState->provideInitialState('foldersPath', $this->config->getUserValue(
             $uid,
             Application::APPNAME,

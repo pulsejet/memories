@@ -1,5 +1,9 @@
 <template>
-    <NcContent app-name="memories">
+    <FirstStart v-if="isFirstStart" />
+
+    <NcContent app-name="memories" v-else :class="{
+        'remove-gap': removeOuterGap,
+    }">
         <NcAppNavigation>
             <template id="app-memories-navigation" #list>
                 <NcAppNavigationItem :to="{name: 'timeline'}"
@@ -62,6 +66,7 @@ import { getCurrentUser } from '@nextcloud/auth';
 
 import Timeline from './components/Timeline.vue'
 import Settings from './components/Settings.vue'
+import FirstStart from './components/FirstStart.vue'
 import GlobalMixin from './mixins/GlobalMixin';
 import UserConfig from './mixins/UserConfig';
 
@@ -84,6 +89,7 @@ import TagsIcon from 'vue-material-design-icons/Tag.vue';
 
         Timeline,
         Settings,
+        FirstStart,
 
         ImageMultiple,
         FolderIcon,
@@ -102,13 +108,13 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
         return this.config_recognizeEnabled || getCurrentUser()?.isAdmin;
     }
 
-    public mounted() {
-        // Get the content-vue element and add nextcloud version as a class to it
-        const contentVue = document.querySelector('#content-vue');
-        if (contentVue) {
-            const version = (<any>window.OC).config.version.split('.');
-            contentVue.classList.add('nextcloud-major-' + version[0]);
-        }
+    get isFirstStart() {
+        return this.config_timelinePath === 'EMPTY';
+    }
+
+    get removeOuterGap() {
+        const version = (<any>window.OC).config.version.split('.');
+        return (Number(version[0]) >= 25);
     }
 
     async beforeMount() {
@@ -154,8 +160,8 @@ body {
     overflow: hidden;
 }
 
-// Nextcloud 25: get rid of gap and border radius at right
-#content-vue.nextcloud-major-25 {
+// Nextcloud 25+: get rid of gap and border radius at right
+#content-vue.remove-gap {
     // was var(--body-container-radius)
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
