@@ -194,7 +194,7 @@ class Index extends Command
         $endTime = microtime(true);
         $execTime = (int) (($endTime - $startTime) * 1000) / 1000;
         $nTotal = $this->nInvalid + $this->nSkipped + $this->nProcessed;
-        $this->output->writeln('==========================================');
+        $this->output->writeln("\n==========================================");
         $this->output->writeln("Checked {$nTotal} files in {$execTime} sec");
         $this->output->writeln($this->nInvalid.' not valid media items');
         $this->output->writeln($this->nSkipped.' skipped because unmodified');
@@ -259,7 +259,7 @@ class Index extends Command
 
             // Respect the '.nomedia' file. If present don't traverse the folder
             if ($folder->nodeExists('.nomedia')) {
-                $this->output->write('Skipping folder '.$folderPath." because of .nomedia file\r");
+                $this->output->writeln('Skipping folder '.$folderPath." because of .nomedia file");
 
                 return;
             }
