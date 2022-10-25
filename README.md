@@ -12,6 +12,7 @@ Memories is a photo management app for Nextcloud with advanced features includin
 * **📱 Mobile Support**: Works on devices of any shape and size through the web app.
 * **✏️ Edit Metadata**: Edit Exif dates on photos quickly and easily.
 * **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.
+* **📷 RAW Support**: View RAW photos from your camera with the [Camera RAW Previews](https://apps.nextcloud.com/apps/camerarawpreviews) app.
 * **⚡️ Fast**: Memories is extremely fast. Period. More details below.
 
 To get an idea of what memories looks and feels like, check out the [public demo](https://memories-demo.radialapps.com/apps/memories/). Note that the demo is read-only and may be slow since it runs in a low-end free tier VM provided by [Oracle Cloud](https://www.oracle.com/cloud/free/). Photo credits go to [Unsplash](https://unsplash.com/) (for individual credits, refer to each folder).
