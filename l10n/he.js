@@ -14,7 +14,6 @@ OC.L10N.register(
     "Favorite" : "סימון כמועדף",
     "Unarchive" : "הוצאה מהארכיון",
     "View in folder" : "הצג בתיקייה",
-    "Update" : "עדכון",
     "Year" : "שנה",
     "Month" : "חודש",
     "Day" : "יום",
@@ -22,6 +21,7 @@ OC.L10N.register(
     "Hour" : "שעה",
     "Minute" : "דקה",
     "Name" : "שם",
+    "Update" : "עדכון",
     "Loading …" : "בטעינה…",
     "Back" : "חזרה"
 },

@@ -13,12 +13,12 @@ OC.L10N.register(
     "Favorite" : "რჩეული",
     "Unarchive" : "ამოღება",
     "View in folder" : "ჩვენება დირექტორიაში",
-    "Update" : "განახლება",
     "Month" : "თვე",
     "Day" : "დღე",
     "Time" : "დრო",
     "Hour" : "საათი",
     "Name" : "სახელი",
+    "Update" : "განახლება",
     "Back" : "უკან"
 },
 "nplurals=2; plural=(n!=1);");

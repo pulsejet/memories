@@ -12,7 +12,6 @@
     "Download" : "Iscàrriga",
     "Favorite" : "Preferidu",
     "View in folder" : "Càstia in sa cartella",
-    "Update" : "Agiorna",
     "Year" : "Annu",
     "Month" : "Mese",
     "Day" : "Die",
@@ -20,6 +19,7 @@
     "Hour" : "Ora",
     "Minute" : "Minutu",
     "Name" : "Nùmene",
+    "Update" : "Agiorna",
     "Loading …" : "Carrigamentu …",
     "Back" : "In segus"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

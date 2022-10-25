@@ -10,10 +10,10 @@ OC.L10N.register(
     "Download" : "Pellgargañ",
     "Favorite" : "Pennrollañ",
     "View in folder" : "Diskwel en teuliad",
-    "Update" : "Hizivaat",
     "Month" : "Miz",
     "Day" : "Deiz",
     "Name" : "Anv",
+    "Update" : "Hizivaat",
     "Loading …" : "O Kargañ ...",
     "Back" : "Distro"
 },

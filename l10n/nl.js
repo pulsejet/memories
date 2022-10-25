@@ -16,7 +16,6 @@ OC.L10N.register(
     "Favorite" : "Favoriet",
     "Unarchive" : "Terugzetten uit archief",
     "View in folder" : "Bekijken in map",
-    "Update" : "Update",
     "Year" : "Jaar",
     "Month" : "Maand",
     "Day" : "Dag",
@@ -24,6 +23,7 @@ OC.L10N.register(
     "Hour" : "Uur",
     "Minute" : "Minuut",
     "Name" : "Naam",
+    "Update" : "Update",
     "Loading …" : "Laden …",
     "Back" : "Terug"
 },

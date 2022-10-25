@@ -15,7 +15,6 @@ OC.L10N.register(
     "Favorite" : "Омиљени",
     "Unarchive" : "Врати из архиве",
     "View in folder" : "Види у фасцикли",
-    "Update" : "Ажурирај",
     "Year" : "Година",
     "Month" : "Месец",
     "Day" : "Дан",
@@ -23,6 +22,7 @@ OC.L10N.register(
     "Hour" : "Сат",
     "Minute" : "Минут",
     "Name" : "Име",
+    "Update" : "Ажурирај",
     "Loading …" : "Учитавање…",
     "Back" : "Назад"
 },

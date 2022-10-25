@@ -16,7 +16,6 @@ OC.L10N.register(
     "Favorite" : "Preferit",
     "Unarchive" : "Desbloquejar",
     "View in folder" : "Visualitza-ho a la carpeta",
-    "Update" : "Actualitzar",
     "Year" : "Any",
     "Month" : "Mes",
     "Day" : "Dia",
@@ -24,6 +23,7 @@ OC.L10N.register(
     "Hour" : "Hora",
     "Minute" : "Minut",
     "Name" : "Cognom",
+    "Update" : "Actualitzar",
     "Loading …" : "Carregant …",
     "Back" : "Torna"
 },
