@@ -13,7 +13,6 @@
     "Favorite" : "Favorito",
     "Unarchive" : "Desarquivar",
     "View in folder" : "Ver no cartafol",
-    "Update" : "Actualizar",
     "Year" : "Ano",
     "Month" : "Mes",
     "Day" : "Día",
@@ -21,6 +20,7 @@
     "Hour" : "Hora",
     "Minute" : "Minuto",
     "Name" : "Nome",
+    "Update" : "Actualizar",
     "Loading …" : "Cargando…",
     "Back" : "Atrás"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

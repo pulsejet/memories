@@ -16,7 +16,6 @@ OC.L10N.register(
     "Favorite" : "Preferito",
     "Unarchive" : "Togli dall'archivio",
     "View in folder" : "Visualizza nella cartella",
-    "Update" : "Aggiorna",
     "Year" : "Anno",
     "Month" : "Mese",
     "Day" : "Giorno",
@@ -26,6 +25,7 @@ OC.L10N.register(
     "Remove person" : "Rimuovi persona",
     "Rename person" : "Rinomina persona",
     "Name" : "Nome",
+    "Update" : "Aggiorna",
     "Loading …" : "Caricamento …",
     "Back" : "Indietro",
     "Merge with different person" : "Unisci ad un'altra persona"

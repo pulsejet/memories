@@ -7,10 +7,10 @@
     "Delete" : "Sil",
     "Download" : "Yüklə",
     "Favorite" : "İstəkli",
-    "Update" : "Yenilənmə",
     "Month" : "Ay",
     "Day" : "Gün",
     "Time" : "Vaxt",
-    "Name" : "Ad"
+    "Name" : "Ad",
+    "Update" : "Yenilənmə"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

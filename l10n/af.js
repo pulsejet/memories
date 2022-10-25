@@ -12,12 +12,12 @@ OC.L10N.register(
     "Download" : "Laai af",
     "Favorite" : "Gunsteling",
     "View in folder" : "Vertoon in gids",
-    "Update" : "Werk by",
     "Month" : "Maand",
     "Day" : "Dag",
     "Time" : "Tyd",
     "Hour" : "Uur",
     "Name" : "Naam",
+    "Update" : "Werk by",
     "Loading …" : "Laai …",
     "Back" : "Terug"
 },

@@ -8,9 +8,9 @@ OC.L10N.register(
     "Delete" : "ئۆچۈر",
     "Download" : "چۈشۈر",
     "Favorite" : "يىغقۇچ",
-    "Update" : "يېڭىلا",
     "Month" : "ئاي",
     "Time" : "ۋاقىت",
-    "Name" : "ئاتى"
+    "Name" : "ئاتى",
+    "Update" : "يېڭىلا"
 },
 "nplurals=2; plural=(n != 1);");

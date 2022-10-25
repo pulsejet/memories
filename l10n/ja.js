@@ -15,7 +15,6 @@ OC.L10N.register(
     "Favorite" : "お気に入り",
     "Unarchive" : "アーカイブを解除",
     "View in folder" : "フォルダー内で表示",
-    "Update" : "更新",
     "Year" : "年",
     "Month" : "月",
     "Day" : "日",
@@ -23,6 +22,7 @@ OC.L10N.register(
     "Hour" : "時",
     "Minute" : "分",
     "Name" : "名前",
+    "Update" : "更新",
     "Loading …" : "読み込み中…",
     "Back" : "戻る"
 },

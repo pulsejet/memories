@@ -4,10 +4,10 @@
     "Cancel" : "ընդհատել",
     "Delete" : "հեռացնել",
     "Download" : "Ներբեռնել",
-    "Update" : "Թարմացնել",
     "Month" : "Ամիս",
     "Day" : "Օր",
     "Time" : "Ժամ",
-    "Name" : "Անուն"
+    "Name" : "Անուն",
+    "Update" : "Թարմացնել"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

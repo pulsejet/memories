@@ -12,11 +12,11 @@ OC.L10N.register(
     "Download" : "ดาวน์โหลด",
     "Favorite" : "รายการโปรด",
     "View in folder" : "ดูในโฟลเดอร์",
-    "Update" : "อัปเดต",
     "Month" : "เดือน",
     "Day" : "วัน",
     "Time" : "เวลา",
     "Name" : "ชื่อ",
+    "Update" : "อัปเดต",
     "Back" : "ย้อนกลับ"
 },
 "nplurals=1; plural=0;");

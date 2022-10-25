@@ -13,12 +13,12 @@ OC.L10N.register(
     "Favorite" : "Favourite",
     "Unarchive" : "Unarchive",
     "View in folder" : "View in folder",
-    "Update" : "Update",
     "Month" : "Month",
     "Day" : "Day",
     "Time" : "Time",
     "Hour" : "Hour",
     "Name" : "Surname",
+    "Update" : "Update",
     "Loading …" : "Loading …",
     "Back" : "Back",
     "Cannot find this photo anymore!" : "Cannot find this photo any more!"

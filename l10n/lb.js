@@ -9,12 +9,12 @@ OC.L10N.register(
     "Download" : "Eroflueden",
     "Favorite" : "Favorit",
     "View in folder" : "Kuk am Dossier ",
-    "Update" : "Update",
     "Month" : "Mount",
     "Day" : "Dag",
     "Time" : "Zäit",
     "Hour" : "Stonn",
     "Name" : "Numm",
+    "Update" : "Update",
     "Back" : "Zeréck"
 },
 "nplurals=2; plural=(n != 1);");

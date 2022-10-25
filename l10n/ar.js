@@ -13,12 +13,12 @@ OC.L10N.register(
     "Download" : "تنزيل",
     "Favorite" : "المفضلة",
     "View in folder" : "اعرض في المجلد",
-    "Update" : "تحديث",
     "Month" : "شهر",
     "Day" : "اليوم",
     "Time" : "إلى وقت",
     "Hour" : "الساعة",
     "Name" : "الاسم",
+    "Update" : "تحديث",
     "Loading …" : "جاري التحميل …",
     "Back" : "العودة"
 },

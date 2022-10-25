@@ -16,7 +16,6 @@ OC.L10N.register(
     "Favorite" : "Eftirlæti",
     "Unarchive" : "Taka úr geymslu",
     "View in folder" : "Skoða í möppu",
-    "Update" : "Uppfæra",
     "Year" : "Ár",
     "Month" : "Mánuður",
     "Day" : "Dagur",
@@ -24,6 +23,7 @@ OC.L10N.register(
     "Hour" : "Klukkustund",
     "Minute" : "Mínúta",
     "Name" : "Heiti",
+    "Update" : "Uppfæra",
     "Loading …" : "Hleð inn …",
     "Back" : "Til baka"
 },
