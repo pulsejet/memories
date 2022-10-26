@@ -386,7 +386,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                         flag: this.c.FLAG_PLACEHOLDER,
                         fileid: Math.random(),
                         dispW: utils.roundHalf(this.rowWidth / this.numCols),
-                        dispX: utils.roundHalf(j * this.rowWidth / this.numCols) ,
+                        dispX: utils.roundHalf(j * this.rowWidth / this.numCols),
+                        dispH: this.rowHeight,
                         dispY: 0,
                     };
                 }
