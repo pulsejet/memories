@@ -95,7 +95,7 @@ export default class Photo extends Mixins(GlobalMixin) {
         let base = 256;
 
         // Check if displayed size is larger than the image
-        if (this.data.dispH > base && this.data.dispW > base) {
+        if (this.data.dispH > base * 0.9 && this.data.dispW > base * 0.9) {
             // Get a bigger image
             // 1. No trickery here, just get one size bigger. This is to
             //    ensure that the images can be cached even after reflow.
