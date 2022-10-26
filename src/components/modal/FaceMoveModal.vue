@@ -78,6 +78,10 @@ export default class FaceMoveModal extends Mixins(GlobalMixin) {
 
         const newName = face.name || face.fileid.toString();
 
+        if (!confirm(this.t('memories', 'Are you sure you want to move the selected photos from {name} to {newName}?', { name, newName}))) {
+            return;
+        }
+
 		try {
             this.show = false;
             this.updateLoading(1);
