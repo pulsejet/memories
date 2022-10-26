@@ -77,47 +77,39 @@ trait TimelineQueryTags
         return $tags;
     }
 
-    public function getTagPreviews(Folder $folder)
+    public function getTagPreviews(array &$tags, Folder &$folder)
     {
-        $query = $this->connection->getQueryBuilder();
+        // Cache subfolder ids to prevent duplicate requests
+        $folderIds = $this->getSubfolderIdsRecursive($this->connection, $folder, false);
 
-        // Windowing
-        $rowNumber = $query->createFunction('ROW_NUMBER() OVER (PARTITION BY stom.systemtagid) as n');
+        foreach ($tags as &$tag) {
+            $query = $this->connection->getQueryBuilder();
 
-        // SELECT all photos with this tag
-        $query->select('f.fileid', 'f.etag', 'stom.systemtagid', $rowNumber)->from(
-            'systemtag_object_mapping',
-            'stom'
-        )->where(
-            $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
-        );
+            // SELECT all photos with this tag
+            $query->select('f.fileid', 'f.etag')->from(
+                'systemtag_object_mapping',
+                'stom'
+            )->where(
+                $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
+                $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tag['id'])),
+            );
 
-        // WHERE these items are memories indexed photos
-        $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.fileid', 'stom.objectid'));
+            // WHERE these items are memories indexed photos
+            $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.fileid', 'stom.objectid'));
 
-        // WHERE these photos are in the user's requested folder recursively
-        $query->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folder, true, false));
+            // WHERE these photos are in the user's requested folder recursively
+            $query->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folderIds, true, false));
 
-        // Make this a sub query
-        $fun = $query->createFunction('('.$query->getSQL().')');
+            // MAX 4
+            $query->setMaxResults(4);
 
-        // Create outer query
-        $outerQuery = $this->connection->getQueryBuilder();
-        $outerQuery->setParameters($query->getParameters());
-        $outerQuery->select('*')->from($fun, 't');
-        $outerQuery->where($query->expr()->lte('t.n', $outerQuery->createParameter('nc')));
-        $outerQuery->setParameter('nc', 4, IQueryBuilder::PARAM_INT);
+            // FETCH tag previews
+            $tag['previews'] = $query->executeQuery()->fetchAll();
 
-        // FETCH all tag previews
-        $previews = $outerQuery->executeQuery()->fetchAll();
-
-        // Post-process
-        foreach ($previews as &$row) {
-            $row['fileid'] = (int) $row['fileid'];
-            $row['systemtagid'] = (int) $row['systemtagid'];
-            unset($row['n']);
+            // Post-process
+            foreach ($tag['previews'] as &$row) {
+                $row['fileid'] = (int) $row['fileid'];
+            }
         }
-
-        return $previews;
     }
 }

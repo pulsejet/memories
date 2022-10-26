@@ -159,34 +159,33 @@ trait TimelineQueryDays
         return $day;
     }
 
-    /** Get the query for oc_filecache join */
-    private function getFilecacheJoinQuery(
-        IQueryBuilder &$query,
+    /**
+     * Get all folders inside a top folder
+     */
+    private function getSubfolderIdsRecursive(
+        IDBConnection &$conn,
         Folder &$folder,
-        bool $recursive,
         bool $archive
     ) {
-        $pathQuery = null;
-        if ($recursive) {
-            // CTE to get all folders recursively in the given top folder
-            $cte =
-                'WITH RECURSIVE cte_folders(fileid) AS (
-                    SELECT
-                        f.fileid
-                    FROM
-                        *PREFIX*filecache f
-                    WHERE
-                        f.fileid = :topFolderId
-                    UNION ALL
-                    SELECT
-                        f.fileid
-                    FROM
-                        *PREFIX*filecache f
-                    INNER JOIN cte_folders c
-                        ON (f.parent = c.fileid
-                            AND f.mimetype = 2
-                            AND f.fileid NOT IN (:excludedFolderIds)
-                        )
+        // CTE to get all folders recursively in the given top folder
+        $cte =
+            'WITH RECURSIVE cte_folders(fileid) AS (
+                SELECT
+                    f.fileid
+                FROM
+                    *PREFIX*filecache f
+                WHERE
+                    f.fileid = :topFolderId
+                UNION ALL
+                SELECT
+                    f.fileid
+                FROM
+                    *PREFIX*filecache f
+                INNER JOIN cte_folders c
+                    ON (f.parent = c.fileid
+                        AND f.mimetype = 2
+                        AND f.fileid NOT IN (:excludedFolderIds)
+                    )
                 )
                 SELECT
                     fileid
@@ -194,34 +193,60 @@ trait TimelineQueryDays
                     cte_folders
                 ';
 
-            // Query parameters, set at the end
-            $topFolderId = $folder->getId();
-            $excludedFolderIds = [-1]; // cannot be empty
+        // Query parameters, set at the end
+        $topFolderId = $folder->getId();
+        $excludedFolderIds = [-1]; // cannot be empty
 
-            /** @var Folder Archive folder if it exists */
-            $archiveFolder = null;
+        /** @var Folder Archive folder if it exists */
+        $archiveFolder = null;
 
-            try {
-                $archiveFolder = $folder->get('.archive/');
-            } catch (\OCP\Files\NotFoundException $e) {
+        try {
+            $archiveFolder = $folder->get('.archive/');
+        } catch (\OCP\Files\NotFoundException $e) {
+        }
+
+        if (!$archive) {
+            // Exclude archive folder
+            if ($archiveFolder) {
+                $excludedFolderIds[] = $archiveFolder->getId();
             }
+        } else {
+            // Only include archive folder
+            $topFolderId = $archiveFolder ? $archiveFolder->getId() : -1;
+        }
 
-            if (!$archive) {
-                // Exclude archive folder
-                if ($archiveFolder) {
-                    $excludedFolderIds[] = $archiveFolder->getId();
-                }
+        return array_column($conn->executeQuery($cte, [
+            'topFolderId' => $topFolderId,
+            'excludedFolderIds' => $excludedFolderIds,
+        ])->fetchAll(), 'fileid');
+    }
+
+    /**
+     * Get the query for oc_filecache join
+     *
+     * @param IQueryBuilder $query Query builder
+     * @param Folder|array $folder Either the top folder or array of folder Ids
+     * @param bool $recursive Whether to get the days recursively
+     * @param bool $archive Whether to get the days only from the archive folder
+     */
+    private function getFilecacheJoinQuery(
+        IQueryBuilder &$query,
+        &$folder,
+        bool $recursive,
+        bool $archive
+    ) {
+        $pathQuery = null;
+        if ($recursive) {
+            // Get all subfolder Ids recursively
+            $folderIds = [];
+            if ($folder instanceof Folder) {
+                $folderIds = $this->getSubfolderIdsRecursive($query->getConnection(), $folder, $archive);
             } else {
-                // Only include archive folder
-                $topFolderId = $archiveFolder ? $archiveFolder->getId() : -1;
+                $folderIds = $folder;
             }
 
-            // Join with CTE
-            $pathQuery = $query->expr()->in('f.parent', $query->createFunction($cte));
-
-            // Set query parameters
-            $query->setParameter('topFolderId', $topFolderId, IQueryBuilder::PARAM_INT);
-            $query->setParameter('excludedFolderIds', $excludedFolderIds, IQueryBuilder::PARAM_INT_ARRAY);
+            // Join with folder IDs
+            $pathQuery = $query->expr()->in('f.parent', $query->createNamedParameter($folderIds, IQueryBuilder::PARAM_INT_ARRAY));
         } else {
             // If getting non-recursively folder only check for parent
             $pathQuery = $query->expr()->eq('f.parent', $query->createNamedParameter($folder->getId(), IQueryBuilder::PARAM_INT));

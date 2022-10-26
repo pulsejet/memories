@@ -248,28 +248,7 @@ class ApiController extends Controller
         );
 
         // Preload all tag previews
-        $previews = $this->timelineQuery->getTagPreviews($folder);
-
-        // Convert to map with key as systemtagid
-        $previews_map = [];
-        foreach ($previews as &$preview) {
-            $key = $preview['systemtagid'];
-            if (!\array_key_exists($key, $previews_map)) {
-                $previews_map[$key] = [];
-            }
-            unset($preview['systemtagid']);
-            $previews_map[$key][] = $preview;
-        }
-
-        // Add previews to list
-        foreach ($list as &$tag) {
-            $key = $tag['id'];
-            if (\array_key_exists($key, $previews_map)) {
-                $tag['previews'] = $previews_map[$key];
-            } else {
-                $tag['previews'] = [];
-            }
-        }
+        $this->timelineQuery->getTagPreviews($list, $folder);
 
         return new JSONResponse($list, Http::STATUS_OK);
     }
