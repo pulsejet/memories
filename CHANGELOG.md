@@ -2,12 +2,17 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## v4.3.8, v3.3.8 (2022-10-26)
+* **Feature**: Full screen viewer on desktop
+* **Feature**: Allow opening people and tags in new tab
+* Bugfix: Fix regression in performance with large number of files
+* Bugfix: Improve image quality on mobile
+
 ## v4.3.7, v3.3.7 (2022-10-24)
 * **Feature**: Support for RAW (must run `occ memories:index` after upgrade) with camera raw previews app ([#107](https://github.com/pulsejet/memories/issues/107))
 * **Feature**: Better settings experience.
 * **Feature**: Better first start experience.
 * Bug fixes for postgresql and mysql
-
 
 ## v4.3.0, v3.3.0 (2022-10-22)
 * **Note:** you must run `occ memories:index -f` after updating to take advantage of new features.
