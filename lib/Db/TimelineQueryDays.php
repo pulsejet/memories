@@ -160,7 +160,7 @@ trait TimelineQueryDays
     }
 
     /**
-     * Get all folders inside a top folder
+     * Get all folders inside a top folder.
      */
     private function getSubfolderIdsRecursive(
         IDBConnection &$conn,
@@ -222,12 +222,12 @@ trait TimelineQueryDays
     }
 
     /**
-     * Get the query for oc_filecache join
+     * Get the query for oc_filecache join.
      *
-     * @param IQueryBuilder $query Query builder
-     * @param Folder|array $folder Either the top folder or array of folder Ids
-     * @param bool $recursive Whether to get the days recursively
-     * @param bool $archive Whether to get the days only from the archive folder
+     * @param IQueryBuilder $query     Query builder
+     * @param array|Folder  $folder    Either the top folder or array of folder Ids
+     * @param bool          $recursive Whether to get the days recursively
+     * @param bool          $archive   Whether to get the days only from the archive folder
      */
     private function getFilecacheJoinQuery(
         IQueryBuilder &$query,

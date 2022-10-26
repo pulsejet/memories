@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Command;
 
+use OC\DB\Connection;
+use OC\DB\SchemaWrapper;
 use OCA\Files_External\Service\GlobalStoragesService;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineWrite;
@@ -58,6 +60,7 @@ class Index extends Command
     protected OutputInterface $output;
     protected IManager $encryptionManager;
     protected IDBConnection $connection;
+    protected Connection $connectionForSchema;
     protected TimelineWrite $timelineWrite;
 
     // Stats
@@ -75,6 +78,7 @@ class Index extends Command
         IConfig $config,
         IManager $encryptionManager,
         IDBConnection $connection,
+        Connection $connectionForSchema,
         ContainerInterface $container
     ) {
         parent::__construct();
@@ -85,6 +89,7 @@ class Index extends Command
         $this->config = $config;
         $this->encryptionManager = $encryptionManager;
         $this->connection = $connection;
+        $this->connectionForSchema = $connectionForSchema;
         $this->timelineWrite = new TimelineWrite($connection, $preview);
 
         try {
@@ -116,8 +121,12 @@ class Index extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        // Add missing indices
+        $output->writeln('Checking database indices');
+        \OCA\Memories\Db\AddMissingIndices::run(new SchemaWrapper($this->connectionForSchema), $this->connectionForSchema);
+
         // Print mime type support information
-        $output->writeln('MIME Type support:');
+        $output->writeln("\nMIME Type support:");
         $mimes = array_merge(Application::IMAGE_MIMES, Application::VIDEO_MIMES);
         $someUnsupported = false;
         foreach ($mimes as &$mimeType) {
