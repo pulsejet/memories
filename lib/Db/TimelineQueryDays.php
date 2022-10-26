@@ -247,6 +247,7 @@ trait TimelineQueryDays
             }
 
             // Join with folder IDs
+            $folderIds = array_map('intval', $folderIds);
             $pathQuery = $query->expr()->in('f.parent', $query->createNamedParameter($folderIds, IQueryBuilder::PARAM_INT_ARRAY));
         } else {
             // If getting non-recursively folder only check for parent
