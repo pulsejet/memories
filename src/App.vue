@@ -39,6 +39,10 @@
                     :title="t('memories', 'Tags')">
                     <TagsIcon slot="icon" :size="20" />
                 </NcAppNavigationItem>
+                <NcAppNavigationItem :to="{name: 'maps'}" v-if="config_mapsEnabled"
+                    :title="t('memories', 'Maps')">
+                    <MapIcon slot="icon" :size="20" />
+                </NcAppNavigationItem>
             </template>
             <template #footer>
                 <NcAppNavigationSettings :title="t('memories', 'Settings')">
@@ -78,6 +82,7 @@ import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
 import PeopleIcon from 'vue-material-design-icons/AccountBoxMultiple.vue';
 import TagsIcon from 'vue-material-design-icons/Tag.vue';
+import MapIcon from 'vue-material-design-icons/Map.vue';
 
 @Component({
     components: {
@@ -99,6 +104,7 @@ import TagsIcon from 'vue-material-design-icons/Tag.vue';
         CalendarIcon,
         PeopleIcon,
         TagsIcon,
+        MapIcon,
     },
 })
 export default class App extends Mixins(GlobalMixin, UserConfig) {

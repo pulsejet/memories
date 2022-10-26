@@ -34,8 +34,10 @@ export default class UserConfig extends Vue {
     config_timelinePath: string = loadState('memories', 'timelinePath') || '';
     config_foldersPath: string = loadState('memories', 'foldersPath') || '/';
     config_showHidden = loadState('memories', 'showHidden') === "true";
+
     config_tagsEnabled = Boolean(loadState('memories', 'systemtags'));
     config_recognizeEnabled = Boolean(loadState('memories', 'recognize'));
+    config_mapsEnabled = Boolean(loadState('memories', 'maps'));
 
     config_squareThumbs = localStorage.getItem('memories_squareThumbs') === '1';
     config_showFaceRect = localStorage.getItem('memories_showFaceRect') === '1';
