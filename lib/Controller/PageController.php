@@ -125,6 +125,16 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
+    public function albums()
+    {
+        return $this->main();
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     */
     public function videos()
     {
         return $this->main();

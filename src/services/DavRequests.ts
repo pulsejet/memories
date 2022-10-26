@@ -552,3 +552,10 @@ export async function* removeFaceImages(user: string, name: string, fileIds: num
 
     yield* runInParallel(calls, 10);
 }
+
+/**
+ * Get list of albums and convert to Days response
+ */
+ export async function getAlbumsData(): Promise<IDay[]> {
+    return [];
+ }

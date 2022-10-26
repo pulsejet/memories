@@ -255,6 +255,30 @@ class ApiController extends Controller
 
     /**
      * @NoAdminRequired
+     * @NoCSRFRequired
+     *
+     * Get list of albums with counts of images
+     */
+    public function albums(): JSONResponse
+    {
+        $user = $this->userSession->getUser();
+        if (null === $user) {
+            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // Check tags enabled for this user
+        if (!$this->albumsIsEnabled()) {
+            return new JSONResponse(['message' => 'Albums not enabled for user'], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // Run actual query
+        $list = $this->timelineQuery->getAlbums($user->getUID());
+
+        return new JSONResponse($list, Http::STATUS_OK);
+    }
+
+    /**
+     * @NoAdminRequired
      *
      * Get list of faces with counts of images
      */
@@ -735,6 +759,14 @@ class ApiController extends Controller
         }
 
         return $folder;
+    }
+
+    /**
+     * Check if albums are enabled for this user.
+     */
+    private function albumsIsEnabled(): bool
+    {
+        return $this->appManager->isEnabledForUser('photos');
     }
 
     /**

@@ -500,6 +500,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             case 'favorites': return this.t('memories', 'Favorites');
             case 'people': return this.t('memories', 'People');
             case 'videos': return this.t('memories', 'Videos');
+            case 'albums': return this.t('memories', 'Albums');
             case 'archive': return this.t('memories', 'Archive');
             case 'thisday': return this.t('memories', 'On this day');
             case 'tags': return this.t('memories', 'Tags');
@@ -555,6 +556,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 data = await dav.getTagsData();
             } else if (this.$route.name === 'people' && !this.$route.params.name) {
                 data = await dav.getPeopleData();
+            } else if (this.$route.name === 'albums') {
+                data = await dav.getAlbumsData();
             } else {
                 // Try the cache
                 try {

@@ -23,6 +23,10 @@
                     :title="t('memories', 'Videos')">
                     <Video slot="icon" :size="20" />
                 </NcAppNavigationItem>
+                <NcAppNavigationItem :to="{name: 'albums'}"
+                    :title="t('memories', 'Albums')" v-if="showAlbums">
+                    <AlbumIcon slot="icon" :size="20" />
+                </NcAppNavigationItem>
                 <NcAppNavigationItem :to="{name: 'people'}"
                     :title="t('memories', 'People')" v-if="showPeople">
                     <PeopleIcon slot="icon" :size="20" />
@@ -78,6 +82,7 @@ import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue'
 import FolderIcon from 'vue-material-design-icons/Folder.vue'
 import Star from 'vue-material-design-icons/Star.vue'
 import Video from 'vue-material-design-icons/Video.vue'
+import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
 import PeopleIcon from 'vue-material-design-icons/AccountBoxMultiple.vue';
@@ -100,6 +105,7 @@ import MapIcon from 'vue-material-design-icons/Map.vue';
         FolderIcon,
         Star,
         Video,
+        AlbumIcon,
         ArchiveIcon,
         CalendarIcon,
         PeopleIcon,
@@ -110,6 +116,11 @@ import MapIcon from 'vue-material-design-icons/Map.vue';
 export default class App extends Mixins(GlobalMixin, UserConfig) {
     // Outer element
 
+    get ncVersion() {
+        const version = (<any>window.OC).config.version.split('.');
+        return Number(version[0]);
+    }
+
     get showPeople() {
         return this.config_recognizeEnabled || getCurrentUser()?.isAdmin;
     }
@@ -118,9 +129,12 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
         return this.config_timelinePath === 'EMPTY';
     }
 
+    get showAlbums() {
+        return this.ncVersion >= 25; // todo: and photos enabled
+    }
+
     get removeOuterGap() {
-        const version = (<any>window.OC).config.version.split('.');
-        return (Number(version[0]) >= 25);
+        return this.ncVersion >= 25;
     }
 
     async beforeMount() {
