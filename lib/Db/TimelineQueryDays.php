@@ -240,7 +240,8 @@ trait TimelineQueryDays
             // Get all subfolder Ids recursively
             $folderIds = [];
             if ($folder instanceof Folder) {
-                $folderIds = $this->getSubfolderIdsRecursive($query->getConnection(), $folder, $archive);
+                $conn = $query->getConnection();
+                $folderIds = $this->getSubfolderIdsRecursive($conn, $folder, $archive);
             } else {
                 $folderIds = $folder;
             }
