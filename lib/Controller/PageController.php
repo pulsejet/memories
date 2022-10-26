@@ -87,6 +87,7 @@ class PageController extends Controller
         // Apps enabled
         $this->initialState->provideInitialState('systemtags', true === $this->appManager->isEnabledForUser('systemtags'));
         $this->initialState->provideInitialState('recognize', true === $this->appManager->isEnabledForUser('recognize'));
+        $this->initialState->provideInitialState('maps', true === $this->appManager->isEnabledForUser('maps'));
         $this->initialState->provideInitialState('version', $this->appManager->getAppInfo('memories')['version']);
 
         $policy = new ContentSecurityPolicy();
