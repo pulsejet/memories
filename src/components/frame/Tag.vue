@@ -1,10 +1,11 @@
 <template>
-    <div class="tag fill-block" :class="{
+    <router-link class="tag fill-block" :class="{
         hasPreview: previews.length > 0,
         onePreview: previews.length === 1,
         hasError: error,
         isFace: isFace,
     }"
+    :to="target"
     @click="openTag(data)">
 
         <div class="bbl"> <NcCounterBubble> {{ data.count }} </NcCounterBubble> </div>
@@ -20,7 +21,7 @@
                     @error="info.flag |= c.FLAG_LOAD_FAIL" />
             </div>
         </div>
-    </div>
+    </router-link>
 </template>
 
 <script lang="ts">
@@ -48,6 +49,13 @@ export default class Tag extends Mixins(GlobalMixin) {
 
     // Error occured fetching thumbs
     private error = false;
+
+    /**
+     * Open tag event
+     * Unless noNavigate is set, the tag will be opened
+     */
+    @Emit('open')
+    openTag(tag: ITag) {}
 
     mounted() {
         this.refreshPreviews();
@@ -95,19 +103,16 @@ export default class Tag extends Mixins(GlobalMixin) {
         this.error = this.previews.length === 0;
     }
 
-    /** Open tag */
-    @Emit('open')
-    openTag(tag: ITag) {
-        if (this.noNavigate) {
-            return;
-        }
+    /** Target URL to navigate to */
+    get target() {
+        if (this.noNavigate) return {};
 
         if (this.isFace) {
             const name = this.data.name || this.data.fileid.toString();
             const user = this.data.user_id;
-            this.$router.push({ name: 'people', params: { name, user  }});
+            return { name: 'people', params: { name, user  }};
         } else {
-            this.$router.push({ name: 'tags', params: { name: this.data.name }});
+            return { name: 'tags', params: { name: this.data.name }};
         }
     }
 }
