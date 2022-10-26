@@ -134,6 +134,13 @@ export default class Tag extends Mixins(GlobalMixin) {
 }
 </script>
 
+<style lang="scss">
+// Get rid of color of the bubble
+.tag .bbl .counter-bubble__counter {
+    color: unset !important;
+}
+</style>
+
 <style lang="scss" scoped>
 .tag, .name, .bubble, img {
     cursor: pointer;
