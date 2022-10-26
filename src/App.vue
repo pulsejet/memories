@@ -169,8 +169,21 @@ body {
     width: calc(100% - var(--body-container-margin)*1); // was *2
 }
 
+// Prevent content overflow on NC <25
 #content-vue {
     max-height: 100vh;
+}
+
+// Patch viewer to remove the title and
+// make the image fill the entire screen
+.viewer {
+    .modal-title {
+        display: none;
+    }
+    .modal-wrapper .modal-container {
+        top: 0 !important;
+        bottom: 0 !important;
+    }
 }
 
 // Hide horizontal scrollbar on mobile
