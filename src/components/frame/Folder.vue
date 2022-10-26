@@ -1,10 +1,10 @@
 <template>
-    <div class="folder fill-block" :class="{
+    <router-link class="folder fill-block" :class="{
         hasPreview: previewFileInfos.length > 0,
         onePreview: previewFileInfos.length === 1,
         hasError: error,
     }"
-    @click="openFolder(data)">
+    :to="target">
         <div class="big-icon fill-block">
             <FolderIcon class="memories__big-folder-icon" />
             <div class="name">{{ data.name }}</div>
@@ -20,7 +20,7 @@
                     @error="info.flag |= c.FLAG_LOAD_FAIL" />
             </div>
         </div>
-    </div>
+    </router-link>
 </template>
 
 <script lang="ts">
@@ -96,8 +96,8 @@ export default class Folder extends Mixins(GlobalMixin, UserConfig) {
     }
 
     /** Open folder */
-    openFolder(folder: IFolder) {
-        const path = folder.path.split('/').filter(x => x).slice(2) as string[];
+    get target() {
+        const path = this.data.path.split('/').filter(x => x).slice(2) as string[];
 
         // Remove base path if present
         const basePath = this.config_foldersPath.split('/').filter(x => x);
@@ -105,7 +105,7 @@ export default class Folder extends Mixins(GlobalMixin, UserConfig) {
             path.splice(0, basePath.length);
         }
 
-        this.$router.push({ name: 'folders', params: { path: path as any }});
+        return { name: 'folders', params: { path: path as any }};
     }
 }
 </script>
