@@ -215,10 +215,13 @@ trait TimelineQueryDays
             $topFolderId = $archiveFolder ? $archiveFolder->getId() : -1;
         }
 
-        return array_column($conn->executeQuery($cte, [
+        return array_map('intval', array_column($conn->executeQuery($cte, [
             'topFolderId' => $topFolderId,
             'excludedFolderIds' => $excludedFolderIds,
-        ])->fetchAll(), 'fileid');
+        ], [
+            'topFolderId' => IQueryBuilder::PARAM_INT,
+            'excludedFolderIds' => IQueryBuilder::PARAM_INT_ARRAY,
+        ])->fetchAll(), 'fileid'));
     }
 
     /**
@@ -247,7 +250,6 @@ trait TimelineQueryDays
             }
 
             // Join with folder IDs
-            $folderIds = array_map('intval', $folderIds);
             $pathQuery = $query->expr()->in('f.parent', $query->createNamedParameter($folderIds, IQueryBuilder::PARAM_INT_ARRAY));
         } else {
             // If getting non-recursively folder only check for parent
