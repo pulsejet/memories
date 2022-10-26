@@ -485,6 +485,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             query.set('tag', this.$route.params.name);
         }
 
+        // Albums
+        if (this.$route.name === 'albums' && this.$route.params.id) {
+            query.set('album', this.$route.params.id);
+        }
+
         // Create query string and append to URL
         const queryStr = query.toString();
         if (queryStr) {
@@ -554,7 +559,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 data = await dav.getTagsData();
             } else if (this.$route.name === 'people' && !this.$route.params.name) {
                 data = await dav.getPeopleData();
-            } else if (this.$route.name === 'albums') {
+            } else if (this.$route.name === 'albums' && !this.$route.params.id) {
                 data = await dav.getAlbumsData();
             } else {
                 // Try the cache

@@ -83,7 +83,7 @@
         },
 
         {
-			path: '/albums',
+			path: '/albums/:id*',
             component: Timeline,
 			name: 'albums',
             props: route => ({

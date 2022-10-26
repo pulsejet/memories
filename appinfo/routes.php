@@ -9,7 +9,10 @@ return [
         ],
         ['name' => 'page#favorites', 'url' => '/favorites', 'verb' => 'GET'],
         ['name' => 'page#videos', 'url' => '/videos', 'verb' => 'GET'],
-        ['name' => 'page#albums', 'url' => '/albums', 'verb' => 'GET'],
+        ['name' => 'page#albums', 'url' => '/albums/{id}', 'verb' => 'GET',
+            'requirements' => [ 'id' => '.*' ],
+            'defaults' => [ 'id' => '' ]
+        ],
         ['name' => 'page#archive', 'url' => '/archive', 'verb' => 'GET'],
         ['name' => 'page#thisday', 'url' => '/thisday', 'verb' => 'GET'],
         ['name' => 'page#people', 'url' => '/people/{name}', 'verb' => 'GET',

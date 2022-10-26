@@ -122,9 +122,14 @@ export default class Tag extends Mixins(GlobalMixin) {
             const name = this.data.name || this.data.fileid.toString();
             const user = this.data.user_id;
             return { name: 'people', params: { name, user  }};
-        } else {
-            return { name: 'tags', params: { name: this.data.name }};
         }
+
+        if (this.isAlbum) {
+            const id = this.data.fileid;
+            return { name: 'albums', params: { id }};
+        }
+
+        return { name: 'tags', params: { name: this.data.name }};
     }
 }
 </script>
