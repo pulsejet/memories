@@ -173,6 +173,10 @@ export function convertFlags(photo: IPhoto) {
         photo.flag |= constants.c.FLAG_IS_TAG;
         delete photo.istag;
     }
+    if (photo.isalbum) {
+        photo.flag |= constants.c.FLAG_IS_ALBUM;
+        delete photo.isalbum;
+    }
 }
 
 // Outside for set
@@ -181,6 +185,7 @@ const TagDayID = {
     FOLDERS:        -(1 << 30) + 1,
     TAGS:           -(1 << 30) + 2,
     FACES:          -(1 << 30) + 3,
+    ALBUMS:         -(1 << 30) + 4,
 }
 
 /** Global constants */
@@ -193,8 +198,9 @@ export const constants = {
         FLAG_IS_FOLDER:     1 << 4,
         FLAG_IS_TAG:        1 << 5,
         FLAG_IS_FACE:       1 << 6,
-        FLAG_SELECTED:      1 << 7,
-        FLAG_LEAVING:       1 << 8,
+        FLAG_IS_ALBUM:      1 << 7,
+        FLAG_SELECTED:      1 << 8,
+        FLAG_LEAVING:       1 << 9,
     },
 
     TagDayID: TagDayID,

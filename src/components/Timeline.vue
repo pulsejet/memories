@@ -52,7 +52,7 @@
                         {{ item.super }}
                     </div>
                     <div class="main" @click="selectionManager.selectHead(item)">
-                        <CheckCircle :size="18" class="select" />
+                        <CheckCircle :size="18" class="select" v-if="item.name" />
                         <span class="name" > {{ item.name || getHeadName(item) }} </span>
                     </div>
                 </div>
@@ -516,9 +516,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         }
 
         // Special headers
-        if (head.dayId === this.TagDayID.FOLDERS) {
-            return (head.name = this.t("memories", "Folders"));
-        } else if (head.dayId === this.TagDayID.TAGS || head.dayId === this.TagDayID.FACES) {
+        if (this.TagDayIDValueSet.has(head.dayId)) {
             return (head.name = "");
         }
 
@@ -637,8 +635,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             };
 
             // Special headers
-            if (day.dayid === this.TagDayID.TAGS    ||
-                day.dayid === this.TagDayID.FACES) {
+            if (this.TagDayIDValueSet.has(day.dayid)) {
                 head.size = 10;
             } else if (this.$route.name === 'thisday' && (!prevDay || Math.abs(prevDay.dayid - day.dayid) > 30)) {
                 // thisday view with new year title

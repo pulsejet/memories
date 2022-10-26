@@ -26,7 +26,7 @@
 
 <script lang="ts">
 import { Component, Prop, Watch, Mixins, Emit } from 'vue-property-decorator';
-import { IPhoto, ITag } from '../../types';
+import { IAlbum, IPhoto, ITag } from '../../types';
 import { generateUrl } from '@nextcloud/router'
 import { getPreviewUrl } from "../../services/FileUtils";
 
@@ -77,6 +77,10 @@ export default class Tag extends Mixins(GlobalMixin) {
         return this.data.flag & constants.c.FLAG_IS_FACE;
     }
 
+    get isAlbum() {
+        return this.data.flag & constants.c.FLAG_IS_ALBUM;
+    }
+
     async refreshPreviews() {
         // Reset state
         this.error = false;
@@ -84,6 +88,13 @@ export default class Tag extends Mixins(GlobalMixin) {
         // Add dummy preview if face
         if (this.isFace) {
             this.previews = [{ fileid: 0, etag: '', flag: 0 }];
+            return;
+        }
+
+        // Add preview from last photo if album
+        if (this.isAlbum) {
+            const album = this.data as IAlbum;
+            this.previews = [{ fileid: album.last_added_photo, etag: '', flag: 0 }];
             return;
         }
 

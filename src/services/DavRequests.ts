@@ -4,7 +4,7 @@ import { encodePath } from '@nextcloud/paths'
 import { showError } from '@nextcloud/dialogs'
 import { translate as t, translatePlural as n } from '@nextcloud/l10n'
 import { genFileInfo } from './FileUtils'
-import { IDay, IFileInfo, IPhoto, ITag } from '../types';
+import { IAlbum, IDay, IFileInfo, IPhoto, ITag } from '../types';
 import { constants, hashCode } from './Utils';
 import axios from '@nextcloud/axios'
 import client from './DavClient';
@@ -557,5 +557,24 @@ export async function* removeFaceImages(user: string, name: string, fileIds: num
  * Get list of albums and convert to Days response
  */
  export async function getAlbumsData(): Promise<IDay[]> {
-    return [];
+    let data: IAlbum[] = [];
+    try {
+        const res = await axios.get<typeof data>(generateUrl('/apps/memories/api/albums'));
+        data = res.data;
+    } catch (e) {
+        throw e;
+    }
+
+    // Convert to days response
+    return [{
+        dayid: constants.TagDayID.ALBUMS,
+        count: data.length,
+        detail: data.map((album) => ({
+            ...album,
+            fileid: album.album_id,
+            flag: constants.c.FLAG_IS_TAG & constants.c.FLAG_IS_ALBUM,
+            istag: true,
+            isalbum: true,
+        } as ITag)),
+    }]
  }

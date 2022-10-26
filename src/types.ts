@@ -67,6 +67,8 @@ export type IPhoto = {
     isfolder?: boolean;
     /** Is this a tag */
     istag?: boolean;
+    /** Is this an album */
+    isalbum?: boolean;
     /** Is this a face */
     isface?: boolean;
     /** Optional datetaken epoch */
@@ -91,6 +93,19 @@ export interface ITag extends IPhoto {
     user_id?: string;
     /** Cache of previews */
     previews?: IPhoto[];
+}
+
+export interface IAlbum extends ITag {
+    /** ID of album */
+    album_id: number;
+    /** Owner of album */
+    user: string;
+    /** Created timestamp */
+    created: number;
+    /** Location string */
+    location: string;
+    /** File ID of last added photo */
+    last_added_photo: number;
 }
 
 export interface IFaceRect {
