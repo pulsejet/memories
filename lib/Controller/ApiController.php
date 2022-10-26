@@ -669,20 +669,38 @@ class ApiController extends Controller
         $uid = $this->userSession->getUser()->getUID();
         $transforms = $this->getTransformations(false);
         $preloaded = 0;
+        $preloadDayIds = [];
+        $preloadDays = [];
         foreach ($days as &$day) {
-            $day['detail'] = $this->timelineQuery->getDay(
+            $preloaded += $day['count'];
+            $preloadDayIds[] = $day['dayid'];
+            $preloadDays[] = &$day;
+
+            if ($preloaded >= 50) { // should be enough
+                break;
+            }
+        }
+
+        if (\count($preloadDayIds) > 0) {
+            $allDetails = $this->timelineQuery->getDay(
                 $folder,
                 $uid,
-                [$day['dayid']],
+                $preloadDayIds,
                 $recursive,
                 $archive,
                 $transforms,
             );
-            $day['count'] = \count($day['detail']); // make sure count is accurate
-            $preloaded += $day['count'];
 
-            if ($preloaded >= 50) { // should be enough
-                break;
+            // Group into dayid
+            $detailMap = [];
+            foreach ($allDetails as &$detail) {
+                $detailMap[$detail['dayid']][] = &$detail;
+            }
+            foreach ($preloadDays as &$day) {
+                $m = $detailMap[$day['dayid']];
+                if (isset($m) && null !== $m && \count($m) > 0) {
+                    $day['detail'] = $m;
+                }
             }
         }
     }
