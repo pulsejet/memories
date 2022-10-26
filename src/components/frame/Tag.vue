@@ -6,7 +6,7 @@
         isFace: isFace,
     }"
     :to="target"
-    @click="openTag(data)">
+    @click.native="openTag(data)">
 
         <div class="bbl"> <NcCounterBubble> {{ data.count }} </NcCounterBubble> </div>
         <div class="name"> {{ data.name }} </div>
