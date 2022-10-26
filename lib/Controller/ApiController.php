@@ -672,11 +672,13 @@ class ApiController extends Controller
         $preloadDayIds = [];
         $preloadDays = [];
         foreach ($days as &$day) {
+            if ($day['count'] <= 0) continue;
+
             $preloaded += $day['count'];
             $preloadDayIds[] = $day['dayid'];
             $preloadDays[] = &$day;
 
-            if ($preloaded >= 50) { // should be enough
+            if ($preloaded >= 50 || count($preloadDayIds) > 5) { // should be enough
                 break;
             }
         }
