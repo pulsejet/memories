@@ -107,7 +107,7 @@ export default class Photo extends Mixins(GlobalMixin) {
         // Make the shorter dimension equal to base
         let size = base;
         if (this.data.w && this.data.h) {
-            size = Math.floor(base * Math.max(this.data.w, this.data.h) / Math.min(this.data.w, this.data.h));
+            size = Math.floor(base * Math.max(this.data.w, this.data.h) / Math.min(this.data.w, this.data.h)) - 1;
         }
 
         return getPreviewUrl(this.data.fileid, this.data.etag, false, size)
@@ -233,6 +233,7 @@ div.img-outer {
     .selected > & { padding: calc($icon-dist - 2px); }
 
     > img {
+        filter: contrast(1.05); // most real world images are a bit overexposed
         background-clip: content-box;
         object-fit: cover;
         cursor: pointer;
