@@ -15,15 +15,15 @@ trait TimelineQueryDays
     /**
      * Get the days response from the database for the timeline.
      *
-     * @param Folder $folder          The folder to get the days from
-     * @param bool   $recursive       Whether to get the days recursively
-     * @param bool   $archive         Whether to get the days only from the archive folder
-     * @param array  $queryTransforms An array of query transforms to apply to the query
+     * @param null|Folder $folder          The folder to get the days from
+     * @param bool        $recursive       Whether to get the days recursively
+     * @param bool        $archive         Whether to get the days only from the archive folder
+     * @param array       $queryTransforms An array of query transforms to apply to the query
      *
      * @return array The days response
      */
     public function getDays(
-        Folder &$folder,
+        &$folder,
         string $uid,
         bool $recursive,
         bool $archive,
@@ -56,18 +56,18 @@ trait TimelineQueryDays
     /**
      * Get the day response from the database for the timeline.
      *
-     * @param Folder $folder          The folder to get the day from
-     * @param string $uid             The user id
-     * @param int[]  $dayid           The day id
-     * @param bool   $recursive       If the query should be recursive
-     * @param bool   $archive         If the query should include only the archive folder
-     * @param array  $queryTransforms The query transformations to apply
-     * @param mixed  $day_ids
+     * @param null|Folder $folder          The folder to get the day from
+     * @param string      $uid             The user id
+     * @param int[]       $dayid           The day id
+     * @param bool        $recursive       If the query should be recursive
+     * @param bool        $archive         If the query should include only the archive folder
+     * @param array       $queryTransforms The query transformations to apply
+     * @param mixed       $day_ids
      *
      * @return array An array of day responses
      */
     public function getDay(
-        Folder &$folder,
+        &$folder,
         string $uid,
         $day_ids,
         bool $recursive,
@@ -227,10 +227,10 @@ trait TimelineQueryDays
     /**
      * Get the query for oc_filecache join.
      *
-     * @param IQueryBuilder $query     Query builder
-     * @param array|Folder  $folder    Either the top folder or array of folder Ids
-     * @param bool          $recursive Whether to get the days recursively
-     * @param bool          $archive   Whether to get the days only from the archive folder
+     * @param IQueryBuilder     $query     Query builder
+     * @param null|array|Folder $folder    Either the top folder or array of folder Ids
+     * @param bool              $recursive Whether to get the days recursively
+     * @param bool              $archive   Whether to get the days only from the archive folder
      */
     private function getFilecacheJoinQuery(
         IQueryBuilder &$query,
@@ -238,7 +238,14 @@ trait TimelineQueryDays
         bool $recursive,
         bool $archive
     ) {
-        $pathQuery = null;
+        // Join with memories
+        $baseOp = $query->expr()->eq('f.fileid', 'm.fileid');
+        if (null === $folder) {
+            return $baseOp; // No folder, get all
+        }
+
+        // Filter by folder (recursive or otherwise)
+        $pathOp = null;
         if ($recursive) {
             // Get all subfolder Ids recursively
             $folderIds = [];
@@ -250,15 +257,15 @@ trait TimelineQueryDays
             }
 
             // Join with folder IDs
-            $pathQuery = $query->expr()->in('f.parent', $query->createNamedParameter($folderIds, IQueryBuilder::PARAM_INT_ARRAY));
+            $pathOp = $query->expr()->in('f.parent', $query->createNamedParameter($folderIds, IQueryBuilder::PARAM_INT_ARRAY));
         } else {
             // If getting non-recursively folder only check for parent
-            $pathQuery = $query->expr()->eq('f.parent', $query->createNamedParameter($folder->getId(), IQueryBuilder::PARAM_INT));
+            $pathOp = $query->expr()->eq('f.parent', $query->createNamedParameter($folder->getId(), IQueryBuilder::PARAM_INT));
         }
 
         return $query->expr()->andX(
-            $query->expr()->eq('f.fileid', 'm.fileid'),
-            $pathQuery,
+            $baseOp,
+            $pathOp,
         );
     }
 }

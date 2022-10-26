@@ -95,6 +95,12 @@ class ApiController extends Controller
             return new JSONResponse(['message' => 'Folder not found'], Http::STATUS_NOT_FOUND);
         }
 
+        // Remove folder if album
+        // Permissions will be checked during the transform
+        if ($this->request->getParam('album')) {
+            $folder = null;
+        }
+
         // Run actual query
         try {
             $list = $this->timelineQuery->getDays(
@@ -255,7 +261,6 @@ class ApiController extends Controller
 
     /**
      * @NoAdminRequired
-     * @NoCSRFRequired
      *
      * Get list of albums with counts of images
      */
@@ -672,9 +677,15 @@ class ApiController extends Controller
 
         // Filter only for one tag
         if ($this->tagsIsEnabled()) {
-            $tagName = $this->request->getParam('tag');
-            if ($tagName) {
+            if ($tagName = $this->request->getParam('tag')) {
                 $transforms[] = [$this->timelineQuery, 'transformTagFilter', $tagName];
+            }
+        }
+
+        // Filter for one album
+        if ($this->albumsIsEnabled()) {
+            if ($albumId = $this->request->getParam('album')) {
+                $transforms[] = [$this->timelineQuery, 'transformAlbumFilter', $albumId];
             }
         }
 
@@ -687,8 +698,15 @@ class ApiController extends Controller
         return $transforms;
     }
 
-    /** Preload a few "day" at the start of "days" response */
-    private function preloadDays(array &$days, Folder &$folder, bool $recursive, bool $archive)
+    /**
+     * Preload a few "day" at the start of "days" response.
+     *
+     * @param array       $days      the days array
+     * @param null|Folder $folder    the folder to search in
+     * @param bool        $recursive search in subfolders
+     * @param bool        $archive   search in archive folder only
+     */
+    private function preloadDays(array &$days, &$folder, bool $recursive, bool $archive)
     {
         $uid = $this->userSession->getUser()->getUID();
         $transforms = $this->getTransformations(false);
@@ -696,13 +714,15 @@ class ApiController extends Controller
         $preloadDayIds = [];
         $preloadDays = [];
         foreach ($days as &$day) {
-            if ($day['count'] <= 0) continue;
+            if ($day['count'] <= 0) {
+                continue;
+            }
 
             $preloaded += $day['count'];
             $preloadDayIds[] = $day['dayid'];
             $preloadDays[] = &$day;
 
-            if ($preloaded >= 50 || count($preloadDayIds) > 5) { // should be enough
+            if ($preloaded >= 50 || \count($preloadDayIds) > 5) { // should be enough
                 break;
             }
         }
