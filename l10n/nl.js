@@ -9,6 +9,7 @@ OC.L10N.register(
     "Archive" : "Archiveren",
     "On this day" : "Vandaag",
     "Tags" : "Tags",
+    "Maps" : "Kaarten",
     "Settings" : "Instellingen",
     "Cancel" : "Annuleren",
     "Delete" : "Verwijder",

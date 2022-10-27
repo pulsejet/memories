@@ -11,6 +11,7 @@ OC.L10N.register(
     "Archive" : "Arkisto",
     "On this day" : "Tänä päivänä",
     "Tags" : "Tunnisteet",
+    "Maps" : "Kartat",
     "Settings" : "Asetukset",
     "Cancel" : "Peruuta",
     "Delete" : "Poista",

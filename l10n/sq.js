@@ -6,6 +6,7 @@ OC.L10N.register(
     "Videos" : "Videot",
     "Archive" : "Arkiva",
     "Tags" : "Etiketat",
+    "Maps" : "Harta",
     "Settings" : "Rregullimet",
     "Cancel" : "Anullo",
     "Delete" : "Fshi",

@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Favorites" : "Favoriten",
     "Tags" : "Tags",
+    "Maps" : "Kaarten",
     "Settings" : "Astellungen",
     "Cancel" : "Ofbriechen",
     "Delete" : "Läschen",

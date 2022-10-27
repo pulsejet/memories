@@ -9,6 +9,7 @@ OC.L10N.register(
     "Archive" : "归档",
     "On this day" : "当年今日",
     "Tags" : "标签",
+    "Maps" : "地图",
     "Settings" : "设置",
     "Cancel" : "取消",
     "Delete" : "删除",

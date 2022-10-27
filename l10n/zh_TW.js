@@ -12,6 +12,7 @@ OC.L10N.register(
     "Archive" : "壓縮檔",
     "On this day" : "在這天",
     "Tags" : "標籤",
+    "Maps" : "地圖",
     "Settings" : "設定",
     "Cancel" : "取消",
     "Delete" : "刪除",
