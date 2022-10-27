@@ -30,6 +30,7 @@ return [
         ['name' => 'api#day', 'url' => '/api/days/{id}', 'verb' => 'GET'],
 
         ['name' => 'api#tags', 'url' => '/api/tags', 'verb' => 'GET'],
+        ['name' => 'api#tagPreviews', 'url' => '/api/tag-previews', 'verb' => 'GET'],
 
         ['name' => 'api#albums', 'url' => '/api/albums', 'verb' => 'GET'],
 

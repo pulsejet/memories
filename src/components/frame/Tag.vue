@@ -34,7 +34,9 @@ import { generateUrl } from '@nextcloud/router'
 import { getPreviewUrl } from "../../services/FileUtils";
 import { getCurrentUser } from '@nextcloud/auth';
 
-import { NcCounterBubble } from '@nextcloud/vue'
+import { NcCounterBubble } from '@nextcloud/vue';
+import axios from '@nextcloud/axios';
+import * as utils from "../../services/Utils";
 
 import GlobalMixin from '../../mixins/GlobalMixin';
 import { constants } from '../../services/Utils';
@@ -112,7 +114,28 @@ export default class Tag extends Mixins(GlobalMixin) {
         }
 
         // Look for previews
-        if (!this.data.previews) return;
+        if (!this.data.previews) {
+            try {
+                const todayDayId = utils.dateToDayId(new Date());
+                const url = generateUrl(`/apps/memories/api/tag-previews?tag=${this.data.name}`);
+                const cacheUrl = `${url}&today=${Math.floor(todayDayId / 10)}`;
+                const cache = await utils.getCachedData(cacheUrl);
+                if (cache) {
+                    this.data.previews = cache as any;
+                } else {
+                    const res = await axios.get(url);
+                    this.data.previews = res.data;
+
+                    // Cache only if >= 4 previews
+                    if (this.data.previews.length >= 4) {
+                        utils.cacheData(cacheUrl, res.data);
+                    }
+                }
+            } catch (e) {
+                this.error = true;
+                return;
+            }
+        }
 
         // Reset flag
         this.data.previews.forEach((p) => p.flag = 0);

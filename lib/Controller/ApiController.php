@@ -253,8 +253,40 @@ class ApiController extends Controller
             $folder,
         );
 
-        // Preload all tag previews
-        $this->timelineQuery->getTagPreviews($list, $folder);
+        return new JSONResponse($list, Http::STATUS_OK);
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * Get previews for a tag
+     */
+    public function tagPreviews(): JSONResponse
+    {
+        $user = $this->userSession->getUser();
+        if (null === $user) {
+            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // Check tags enabled for this user
+        if (!$this->tagsIsEnabled()) {
+            return new JSONResponse(['message' => 'Tags not enabled for user'], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // If this isn't the timeline folder then things aren't going to work
+        $folder = $this->getRequestFolder();
+        if (null === $folder) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
+
+        // Get the tag
+        $tagName = $this->request->getParam('tag');
+
+        // Run actual query
+        $list = $this->timelineQuery->getTagPreviews(
+            $tagName,
+            $folder,
+        );
 
         return new JSONResponse($list, Http::STATUS_OK);
     }

@@ -88,66 +88,46 @@ trait TimelineQueryTags
         return $tags;
     }
 
-    public function getTagPreviews(array &$tags, Folder &$folder)
+    public function getTagPreviews(string $tagName, Folder &$folder)
     {
-        // This is really horrible but will have to do for now
-        $sql = '';
-        foreach ($tags as &$tag) {
-            if (!empty($sql)) {
-                $sql .= ' UNION ALL ';
-            }
-
-            $query = $this->connection->getQueryBuilder();
-
-            // SELECT all photos with this tag
-            $query->select('f.fileid', 'f.etag', 'stom.systemtagid')->from(
-                'systemtag_object_mapping',
-                'stom'
-            )->where(
-                $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
-                $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tag['id'])),
-            );
-
-            // WHERE these items are memories indexed photos
-            $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.fileid', 'stom.objectid'));
-
-            // WHERE these photos are in the user's requested folder recursively
-            // See the function above for an explanation of this hack
-            $this->addSubfolderJoinParams($query, $folder, false);
-            $query->innerJoin('m', 'filecache', 'f', $query->expr()->andX(
-                $query->expr()->eq('f.fileid', 'm.fileid'),
-                $query->createFunction('EXISTS (SELECT 1 from *PREFIX*cte_folders WHERE *PREFIX*cte_folders.fileid = `f`.parent)')
-            ));
-
-            // MAX 4
-            $query->setMaxResults(4);
-
-            // Replace parameters
-            $thisSql = self::replaceQueryParams($query, $query->getSQL());
-
-            // Add clause
-            $sql .= "({$thisSql})";
+        $query = $this->connection->getQueryBuilder();
+        $tagId = $this->getSystemTagId($query, $tagName);
+        if (false === $tagId) {
+            return [];
         }
 
+        // SELECT all photos with this tag
+        $query->select('f.fileid', 'f.etag', 'stom.systemtagid')->from(
+            'systemtag_object_mapping',
+            'stom'
+        )->where(
+            $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
+            $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tagId)),
+        );
+
+        // WHERE these items are memories indexed photos
+        $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.fileid', 'stom.objectid'));
+
+        // WHERE these photos are in the user's requested folder recursively
+        // See the function above for an explanation of this hack
+        $this->addSubfolderJoinParams($query, $folder, false);
+        $query->innerJoin('m', 'filecache', 'f', $query->expr()->andX(
+            $query->expr()->eq('f.fileid', 'm.fileid'),
+            $query->createFunction('EXISTS (SELECT 1 from *PREFIX*cte_folders WHERE *PREFIX*cte_folders.fileid = `f`.parent)')
+        ));
+
+        // MAX 4
+        $query->setMaxResults(4);
+
         // FETCH tag previews
-        $cursor = $this->executeQueryWithCTEs($query, $sql);
+        $cursor = $this->executeQueryWithCTEs($query);
         $ans = $cursor->fetchAll();
 
         // Post-process
-        $previewMap = [];
         foreach ($ans as &$row) {
             $row['fileid'] = (int) $row['fileid'];
-            $key = (int) $row['systemtagid'];
-            unset($row['systemtagid']);
-            if (!isset($previewMap[$key])) {
-                $previewMap[$key] = [];
-            }
-            $previewMap[$key][] = $row;
         }
 
-        // Add previews to tags
-        foreach ($tags as &$tag) {
-            $tag['previews'] = $previewMap[$tag['id']] ?? [];
-        }
+        return $ans;
     }
 }
