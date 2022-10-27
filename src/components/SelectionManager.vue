@@ -136,6 +136,12 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
                 callback: this.addToAlbum.bind(this),
             },
             {
+                name: t('memories', 'Remove from album'),
+                icon: CloseIcon,
+                callback: this.removeFromAlbum.bind(this),
+                if: () => this.$route.name === 'albums',
+            },
+            {
                 name: t('memories', 'Move to another person'),
                 icon: MoveIcon,
                 callback: this.moveSelectionToPerson.bind(this),
@@ -349,6 +355,26 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
      */
     private async addToAlbum(selection: Selection) {
         (<any>this.$refs.addToAlbumModal).open(Array.from(selection.values()));
+    }
+
+    /**
+     * Remove selected photos from album
+     */
+    private async removeFromAlbum(selection: Selection) {
+        try {
+            this.updateLoading(1);
+            const albumId = Number(this.$route.params.id);
+            const gen = dav.removeFromAlbum(albumId, Array.from(selection.keys()));
+            for await (const delIds of gen) {
+                const delPhotos = delIds.filter(p => p).map(id => selection.get(id));
+                this.deletePhotos(delPhotos);
+            }
+        } catch (e) {
+            console.error(e);
+            showError(e?.message || this.t("memories", "Could not remove photos from album"));
+        } finally {
+            this.updateLoading(-1);
+        }
     }
 
     /**
