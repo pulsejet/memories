@@ -29,6 +29,8 @@ class Util
 
     /**
      * Check if albums are enabled for this user.
+     *
+     * @param mixed $appManager
      */
     public static function albumsIsEnabled(&$appManager): bool
     {
@@ -43,6 +45,8 @@ class Util
 
     /**
      * Check if tags is enabled for this user.
+     *
+     * @param mixed $appManager
      */
     public static function tagsIsEnabled(&$appManager): bool
     {
@@ -51,6 +55,8 @@ class Util
 
     /**
      * Check if recognize is enabled for this user.
+     *
+     * @param mixed $appManager
      */
     public static function recognizeIsEnabled(&$appManager): bool
     {
