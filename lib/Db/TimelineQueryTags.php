@@ -50,15 +50,15 @@ trait TimelineQueryTags
 
         // WHERE there are items with this tag
         $query->innerJoin('st', 'systemtag_object_mapping', 'stom', $query->expr()->andX(
-            $query->expr()->eq('stom.systemtagid', 'st.id'),
             $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
+            $query->expr()->eq('stom.systemtagid', 'st.id'),
         ));
 
         // WHERE these items are memories indexed photos
         $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.fileid', 'stom.objectid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folder, true, false));
+        $query = $this->joinFilecache($query, $folder, true, false);
 
         // GROUP and ORDER by tag name
         $query->groupBy('st.name');
@@ -66,7 +66,8 @@ trait TimelineQueryTags
         $query->addOrderBy('st.id'); // tie-breaker
 
         // FETCH all tags
-        $tags = $query->executeQuery()->fetchAll();
+        $cursor = $this->executeQueryWithCTEs($query);
+        $tags = $cursor->fetchAll();
 
         // Post process
         foreach ($tags as &$row) {
@@ -79,9 +80,6 @@ trait TimelineQueryTags
 
     public function getTagPreviews(array &$tags, Folder &$folder)
     {
-        // Cache subfolder ids to prevent duplicate requests
-        $folderIds = $this->getSubfolderIdsRecursive($this->connection, $folder, false);
-
         foreach ($tags as &$tag) {
             $query = $this->connection->getQueryBuilder();
 
@@ -98,13 +96,14 @@ trait TimelineQueryTags
             $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.fileid', 'stom.objectid'));
 
             // WHERE these photos are in the user's requested folder recursively
-            $query->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folderIds, true, false));
+            $query = $this->joinFilecache($query, $folder, true, false);
 
             // MAX 4
             $query->setMaxResults(4);
 
             // FETCH tag previews
-            $tag['previews'] = $query->executeQuery()->fetchAll();
+            $cursor = $this->executeQueryWithCTEs($query);
+            $tag['previews'] = $cursor->fetchAll();
 
             // Post-process
             foreach ($tag['previews'] as &$row) {

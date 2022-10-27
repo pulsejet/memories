@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 class TimelineQuery
@@ -19,6 +20,20 @@ class TimelineQuery
     public function __construct(IDBConnection $connection)
     {
         $this->connection = $connection;
+    }
+
+    public static function debugQuery(IQueryBuilder $query, string $sql = '')
+    {
+        // Print the query and exit
+        $sql = empty($sql) ? $query->getSQL() : $sql;
+        $params = $query->getParameters();
+        $sql = str_replace('*PREFIX*', 'oc_', $sql);
+        foreach ($params as $key => $value) {
+            $sql = str_replace(':'.$key, $query->getConnection()->getDatabasePlatform()->quoteStringLiteral($value), $sql);
+        }
+        echo "{$sql}";
+
+        exit;
     }
 
     public function getInfoById(int $id): array

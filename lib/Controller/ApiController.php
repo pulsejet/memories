@@ -278,7 +278,7 @@ class ApiController extends Controller
 
         // Run actual query
         $list = [];
-        $t = intval($this->request->getParam('t'));
+        $t = (int) ($this->request->getParam('t'));
         if ($t & 1) { // personal
             $list = array_merge($list, $this->timelineQuery->getAlbums($user->getUID()));
         }
