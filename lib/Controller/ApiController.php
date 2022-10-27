@@ -793,7 +793,13 @@ class ApiController extends Controller
      */
     private function albumsIsEnabled(): bool
     {
-        return $this->appManager->isEnabledForUser('photos');
+        if (!$this->appManager->isEnabledForUser('photos')) {
+            return false;
+        }
+
+        $v = $this->appManager->getAppInfo('photos')['version'];
+
+        return version_compare($v, '1.7.0', '>=');
     }
 
     /**
