@@ -9,6 +9,10 @@ return [
         ],
         ['name' => 'page#favorites', 'url' => '/favorites', 'verb' => 'GET'],
         ['name' => 'page#videos', 'url' => '/videos', 'verb' => 'GET'],
+        ['name' => 'page#albums', 'url' => '/albums/{id}', 'verb' => 'GET',
+            'requirements' => [ 'id' => '.*' ],
+            'defaults' => [ 'id' => '' ]
+        ],
         ['name' => 'page#archive', 'url' => '/archive', 'verb' => 'GET'],
         ['name' => 'page#thisday', 'url' => '/thisday', 'verb' => 'GET'],
         ['name' => 'page#people', 'url' => '/people/{name}', 'verb' => 'GET',
@@ -24,11 +28,17 @@ return [
         ['name' => 'api#days', 'url' => '/api/days', 'verb' => 'GET'],
         ['name' => 'api#dayPost', 'url' => '/api/days', 'verb' => 'POST'],
         ['name' => 'api#day', 'url' => '/api/days/{id}', 'verb' => 'GET'],
+
         ['name' => 'api#tags', 'url' => '/api/tags', 'verb' => 'GET'],
+        ['name' => 'api#tagPreviews', 'url' => '/api/tag-previews', 'verb' => 'GET'],
+
+        ['name' => 'api#albums', 'url' => '/api/albums', 'verb' => 'GET'],
+
         ['name' => 'api#faces', 'url' => '/api/faces', 'verb' => 'GET'],
         ['name' => 'api#facePreview', 'url' => '/api/faces/preview/{id}', 'verb' => 'GET'],
         ['name' => 'api#imageInfo', 'url' => '/api/info/{id}', 'verb' => 'GET'],
         ['name' => 'api#imageEdit', 'url' => '/api/edit/{id}', 'verb' => 'PATCH'],
+
         ['name' => 'api#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
 
         // Config API

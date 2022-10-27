@@ -12,7 +12,7 @@ test.describe('Open', () => {
   test('Open one image', async ({ page }) => {
     await page.locator('div:nth-child(2) > .p-outer > .img-outer > img').first().click();
     await page.waitForTimeout(1000);
-    await page.locator('button:has-text("Close")').first().click();
+    await page.locator('button.header-close').first().click();
   });
 
   test('Select two images and delete', async ({ page }) => {

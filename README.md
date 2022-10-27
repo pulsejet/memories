@@ -1,21 +1,21 @@
-# Memories
+![Screenshot](appinfo/screenshot.jpg)
 
-**📷 Yet another photo management app for Nextcloud**
+## Photo Viewer and Manager
 
-![Screenshot](appinfo/screencap.webp)
+Memories is a photo management app for Nextcloud with advanced features including:
 
-## How is this different?
-
-* **📸 Photo and Video Timeline**: Sorts photos by date taken, parsed from Exif data.
-* **🤔 Quick Recap**: Jump to anywhere in the timeline instantly.
-* **🖼️ Folders**: Browse your and shared folders with a similar, efficient timeline.
+* **📸 Timeline**: Sort photos and videos by date taken, parsed from Exif data.
+* **⏪ Rewind**: Jump to any time in the past instantly and relive your memories.
 * **🤖 AI Tagging**: Group photos by people and objects using AI, powered by the [recognize](https://github.com/nextcloud/recognize) app.
+* **🖼️ Folders**: Browse your own and shared folders with a similar, efficient timeline.
 * **🎦 Slideshow**: View photos from your timeline and folders easily.
-* **📱 Mobile Support**: Relive your memories on devices of any shape and size through the web app.
+* **📱 Mobile Support**: Works on devices of any shape and size through the web app.
 * **✏️ Edit Metadata**: Edit Exif dates on photos quickly and easily.
 * **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.
 * **📷 RAW Support**: View RAW photos from your camera with the [Camera RAW Previews](https://apps.nextcloud.com/apps/camerarawpreviews) app.
 * **⚡️ Fast**: Memories is extremely fast. Period. More details below.
+
+To get an idea of what memories looks and feels like, check out the [public demo](https://memories-demo.radialapps.com/apps/memories/). Note that the demo is read-only and may be slow since it runs in a low-end free tier VM provided by [Oracle Cloud](https://www.oracle.com/cloud/free/). Photo credits go to [Unsplash](https://unsplash.com/) (for individual credits, refer to each folder).
 
 ## How to support development
 * **🌟 Star this repository**: This is the easiest way to support the project and costs nothing.
@@ -37,9 +37,6 @@
 1. ✅ Enable the app through the app management of your Nextcloud.
 1. 🎉 Partytime!
 
-## 🤔 Why a separate app?
-The approach of this app is fundamentally different from the official Nextcloud Photos app, which is very lightweight and works entirely using webdav. This app instead maintains special metadata in a separate table on the backend, and thus can be considered to have different objectives.
-
 ## ⚡ Performance
 - Once properly configured, Memories is **extremely fast**, possibly one of the fastest web photo viewers.
 - On a server with relatively cheap hardware (`Intel Pentium G6400 / 8GB RAM / SSD`), loading the timeline takes only `~400ms` without cache on a laptop (`Intel Core i5-1035G1 / Windows 11 / Chrome`) for a library of `~17000 photos` totaling `100GB`. The test was performed on Nextcloud 24 with `nginx`, `php-fpm` and `mariadb` running in Docker.
@@ -52,8 +49,7 @@ The approach of this app is fundamentally different from the official Nextcloud 
 - The app can work with external storage for photos. Just set the mountpoint as the timeline directory.
     - If you add any photos from outside Nextcloud, you must run the scan and index commands.
     - Indexing may be slow, since all files must be downloaded from the storage. The app currently assumes that the Exif data is present with the first 20MB of each file.
-    - This function is experimental and may not work as expected. Please report any issues.
 - The archive feature moves photos to a separate folder called `.archive` at the root of your timeline. You can use this, for example, to move these photos to a cold storage.
 
 ## Special Thanks
-Nextcloud team. At least one half of the code is based on the work of the [Nextcloud Photos](https://github.com/nextcloud/photos).
+Nextcloud team. A lot of this work is based on [Photos](https://github.com/nextcloud/photos).

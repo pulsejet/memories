@@ -31,6 +31,7 @@
   "dependencies": {
     "@nextcloud/l10n": "^1.6.0",
     "@nextcloud/paths": "^2.1.0",
+    "@nextcloud/sharing": "^0.1.0",
     "@nextcloud/vue": "^6.0.0",
     "camelcase": "^7.0.0",
     "justified-layout": "^4.1.0",

@@ -50,15 +50,25 @@ trait TimelineQueryTags
 
         // WHERE there are items with this tag
         $query->innerJoin('st', 'systemtag_object_mapping', 'stom', $query->expr()->andX(
-            $query->expr()->eq('stom.systemtagid', 'st.id'),
             $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
+            $query->expr()->eq('stom.systemtagid', 'st.id'),
         ));
 
         // WHERE these items are memories indexed photos
         $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.fileid', 'stom.objectid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folder, true, false));
+        // This is a hack to speed up the query instead of using joinFilecache
+        // The problem is objectid is VARCHAR(64) and fileid is BIGINT(20), so a
+        // join is extremely slow. Instead, we use a subquery to check existence.
+        //
+        // https://blog.sqlauthority.com/2010/06/05/sql-server-convert-in-to-exists-performance-talk/
+
+        $this->addSubfolderJoinParams($query, $folder, false);
+        $query->innerJoin('m', 'filecache', 'f', $query->expr()->andX(
+            $query->expr()->eq('f.fileid', 'm.fileid'),
+            $query->createFunction('EXISTS (SELECT 1 from *PREFIX*cte_folders WHERE *PREFIX*cte_folders.fileid = `f`.parent)')
+        ));
 
         // GROUP and ORDER by tag name
         $query->groupBy('st.name');
@@ -66,7 +76,8 @@ trait TimelineQueryTags
         $query->addOrderBy('st.id'); // tie-breaker
 
         // FETCH all tags
-        $tags = $query->executeQuery()->fetchAll();
+        $cursor = $this->executeQueryWithCTEs($query);
+        $tags = $cursor->fetchAll();
 
         // Post process
         foreach ($tags as &$row) {
@@ -77,39 +88,46 @@ trait TimelineQueryTags
         return $tags;
     }
 
-    public function getTagPreviews(array &$tags, Folder &$folder)
+    public function getTagPreviews(string $tagName, Folder &$folder)
     {
-        // Cache subfolder ids to prevent duplicate requests
-        $folderIds = $this->getSubfolderIdsRecursive($this->connection, $folder, false);
-
-        foreach ($tags as &$tag) {
-            $query = $this->connection->getQueryBuilder();
-
-            // SELECT all photos with this tag
-            $query->select('f.fileid', 'f.etag')->from(
-                'systemtag_object_mapping',
-                'stom'
-            )->where(
-                $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
-                $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tag['id'])),
-            );
-
-            // WHERE these items are memories indexed photos
-            $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.fileid', 'stom.objectid'));
-
-            // WHERE these photos are in the user's requested folder recursively
-            $query->innerJoin('m', 'filecache', 'f', $this->getFilecacheJoinQuery($query, $folderIds, true, false));
-
-            // MAX 4
-            $query->setMaxResults(4);
-
-            // FETCH tag previews
-            $tag['previews'] = $query->executeQuery()->fetchAll();
-
-            // Post-process
-            foreach ($tag['previews'] as &$row) {
-                $row['fileid'] = (int) $row['fileid'];
-            }
+        $query = $this->connection->getQueryBuilder();
+        $tagId = $this->getSystemTagId($query, $tagName);
+        if (false === $tagId) {
+            return [];
         }
+
+        // SELECT all photos with this tag
+        $query->select('f.fileid', 'f.etag', 'stom.systemtagid')->from(
+            'systemtag_object_mapping',
+            'stom'
+        )->where(
+            $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
+            $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tagId)),
+        );
+
+        // WHERE these items are memories indexed photos
+        $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.fileid', 'stom.objectid'));
+
+        // WHERE these photos are in the user's requested folder recursively
+        // See the function above for an explanation of this hack
+        $this->addSubfolderJoinParams($query, $folder, false);
+        $query->innerJoin('m', 'filecache', 'f', $query->expr()->andX(
+            $query->expr()->eq('f.fileid', 'm.fileid'),
+            $query->createFunction('EXISTS (SELECT 1 from *PREFIX*cte_folders WHERE *PREFIX*cte_folders.fileid = `f`.parent)')
+        ));
+
+        // MAX 4
+        $query->setMaxResults(4);
+
+        // FETCH tag previews
+        $cursor = $this->executeQueryWithCTEs($query);
+        $ans = $cursor->fetchAll();
+
+        // Post-process
+        foreach ($ans as &$row) {
+            $row['fileid'] = (int) $row['fileid'];
+        }
+
+        return $ans;
     }
 }

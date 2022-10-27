@@ -86,8 +86,11 @@ class PageController extends Controller
 
         // Apps enabled
         $this->initialState->provideInitialState('systemtags', true === $this->appManager->isEnabledForUser('systemtags'));
-        $this->initialState->provideInitialState('recognize', true === $this->appManager->isEnabledForUser('recognize'));
         $this->initialState->provideInitialState('maps', true === $this->appManager->isEnabledForUser('maps'));
+        $this->initialState->provideInitialState('recognize', \OCA\Memories\Util::recognizeIsEnabled($this->appManager));
+        $this->initialState->provideInitialState('albums', \OCA\Memories\Util::albumsIsEnabled($this->appManager));
+
+        // App version
         $this->initialState->provideInitialState('version', $this->appManager->getAppInfo('memories')['version']);
 
         $policy = new ContentSecurityPolicy();
@@ -116,6 +119,16 @@ class PageController extends Controller
      * @NoCSRFRequired
      */
     public function favorites()
+    {
+        return $this->main();
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     */
+    public function albums()
     {
         return $this->main();
     }

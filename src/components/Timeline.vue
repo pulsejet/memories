@@ -52,7 +52,7 @@
                         {{ item.super }}
                     </div>
                     <div class="main" @click="selectionManager.selectHead(item)">
-                        <CheckCircle :size="18" class="select" />
+                        <CheckCircle :size="18" class="select" v-if="item.name" />
                         <span class="name" > {{ item.name || getHeadName(item) }} </span>
                     </div>
                 </div>
@@ -485,6 +485,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             query.set('tag', this.$route.params.name);
         }
 
+        // Albums
+        if (this.$route.name === 'albums' && this.$route.params.name) {
+            query.set('album', `${this.$route.params.user}/${this.$route.params.name}`);
+        }
+
         // Create query string and append to URL
         const queryStr = query.toString();
         if (queryStr) {
@@ -500,6 +505,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             case 'favorites': return this.t('memories', 'Favorites');
             case 'people': return this.t('memories', 'People');
             case 'videos': return this.t('memories', 'Videos');
+            case 'albums': return this.t('memories', 'Albums');
             case 'archive': return this.t('memories', 'Archive');
             case 'thisday': return this.t('memories', 'On this day');
             case 'tags': return this.t('memories', 'Tags');
@@ -515,9 +521,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         }
 
         // Special headers
-        if (head.dayId === this.TagDayID.FOLDERS) {
-            return (head.name = this.t("memories", "Folders"));
-        } else if (head.dayId === this.TagDayID.TAGS || head.dayId === this.TagDayID.FACES) {
+        if (this.TagDayIDValueSet.has(head.dayId)) {
             return (head.name = "");
         }
 
@@ -555,6 +559,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
                 data = await dav.getTagsData();
             } else if (this.$route.name === 'people' && !this.$route.params.name) {
                 data = await dav.getPeopleData();
+            } else if (this.$route.name === 'albums' && !this.$route.params.name) {
+                data = await dav.getAlbumsData('3');
             } else {
                 // Try the cache
                 try {
@@ -634,8 +640,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             };
 
             // Special headers
-            if (day.dayid === this.TagDayID.TAGS    ||
-                day.dayid === this.TagDayID.FACES) {
+            if (this.TagDayIDValueSet.has(day.dayid)) {
                 head.size = 10;
             } else if (this.$route.name === 'thisday' && (!prevDay || Math.abs(prevDay.dayid - day.dayid) > 30)) {
                 // thisday view with new year title

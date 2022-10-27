@@ -95,6 +95,12 @@ class ApiController extends Controller
             return new JSONResponse(['message' => 'Folder not found'], Http::STATUS_NOT_FOUND);
         }
 
+        // Remove folder if album
+        // Permissions will be checked during the transform
+        if ($this->request->getParam('album')) {
+            $folder = null;
+        }
+
         // Run actual query
         try {
             $list = $this->timelineQuery->getDays(
@@ -247,8 +253,70 @@ class ApiController extends Controller
             $folder,
         );
 
-        // Preload all tag previews
-        $this->timelineQuery->getTagPreviews($list, $folder);
+        return new JSONResponse($list, Http::STATUS_OK);
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * Get previews for a tag
+     */
+    public function tagPreviews(): JSONResponse
+    {
+        $user = $this->userSession->getUser();
+        if (null === $user) {
+            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // Check tags enabled for this user
+        if (!$this->tagsIsEnabled()) {
+            return new JSONResponse(['message' => 'Tags not enabled for user'], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // If this isn't the timeline folder then things aren't going to work
+        $folder = $this->getRequestFolder();
+        if (null === $folder) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
+
+        // Get the tag
+        $tagName = $this->request->getParam('tag');
+
+        // Run actual query
+        $list = $this->timelineQuery->getTagPreviews(
+            $tagName,
+            $folder,
+        );
+
+        return new JSONResponse($list, Http::STATUS_OK);
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * Get list of albums with counts of images
+     */
+    public function albums(): JSONResponse
+    {
+        $user = $this->userSession->getUser();
+        if (null === $user) {
+            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // Check tags enabled for this user
+        if (!$this->albumsIsEnabled()) {
+            return new JSONResponse(['message' => 'Albums not enabled for user'], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // Run actual query
+        $list = [];
+        $t = (int) $this->request->getParam('t');
+        if ($t & 1) { // personal
+            $list = array_merge($list, $this->timelineQuery->getAlbums($user->getUID()));
+        }
+        if ($t & 2) { // shared
+            $list = array_merge($list, $this->timelineQuery->getAlbums($user->getUID(), true));
+        }
 
         return new JSONResponse($list, Http::STATUS_OK);
     }
@@ -648,9 +716,15 @@ class ApiController extends Controller
 
         // Filter only for one tag
         if ($this->tagsIsEnabled()) {
-            $tagName = $this->request->getParam('tag');
-            if ($tagName) {
+            if ($tagName = $this->request->getParam('tag')) {
                 $transforms[] = [$this->timelineQuery, 'transformTagFilter', $tagName];
+            }
+        }
+
+        // Filter for one album
+        if ($this->albumsIsEnabled()) {
+            if ($albumId = $this->request->getParam('album')) {
+                $transforms[] = [$this->timelineQuery, 'transformAlbumFilter', $albumId];
             }
         }
 
@@ -663,8 +737,15 @@ class ApiController extends Controller
         return $transforms;
     }
 
-    /** Preload a few "day" at the start of "days" response */
-    private function preloadDays(array &$days, Folder &$folder, bool $recursive, bool $archive)
+    /**
+     * Preload a few "day" at the start of "days" response.
+     *
+     * @param array       $days      the days array
+     * @param null|Folder $folder    the folder to search in
+     * @param bool        $recursive search in subfolders
+     * @param bool        $archive   search in archive folder only
+     */
+    private function preloadDays(array &$days, &$folder, bool $recursive, bool $archive)
     {
         $uid = $this->userSession->getUser()->getUID();
         $transforms = $this->getTransformations(false);
@@ -672,13 +753,15 @@ class ApiController extends Controller
         $preloadDayIds = [];
         $preloadDays = [];
         foreach ($days as &$day) {
-            if ($day['count'] <= 0) continue;
+            if ($day['count'] <= 0) {
+                continue;
+            }
 
             $preloaded += $day['count'];
             $preloadDayIds[] = $day['dayid'];
             $preloadDays[] = &$day;
 
-            if ($preloaded >= 50 || count($preloadDayIds) > 5) { // should be enough
+            if ($preloaded >= 50 || \count($preloadDayIds) > 5) { // should be enough
                 break;
             }
         }
@@ -738,11 +821,19 @@ class ApiController extends Controller
     }
 
     /**
+     * Check if albums are enabled for this user.
+     */
+    private function albumsIsEnabled(): bool
+    {
+        return \OCA\Memories\Util::albumsIsEnabled($this->appManager);
+    }
+
+    /**
      * Check if tags is enabled for this user.
      */
     private function tagsIsEnabled(): bool
     {
-        return $this->appManager->isEnabledForUser('systemtags');
+        return \OCA\Memories\Util::tagsIsEnabled($this->appManager);
     }
 
     /**
@@ -750,12 +841,6 @@ class ApiController extends Controller
      */
     private function recognizeIsEnabled(): bool
     {
-        if (!$this->appManager->isEnabledForUser('recognize')) {
-            return false;
-        }
-
-        $v = $this->appManager->getAppInfo('recognize')['version'];
-
-        return version_compare($v, '3.0.0-alpha', '>=');
+        return \OCA\Memories\Util::recognizeIsEnabled($this->appManager);
     }
 }

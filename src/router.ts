@@ -83,6 +83,15 @@
         },
 
         {
+			path: '/albums/:user?/:name?',
+            component: Timeline,
+			name: 'albums',
+            props: route => ({
+                rootTitle: t('memories', 'Albums'),
+            }),
+		},
+
+        {
             path: '/archive',
             component: Timeline,
             name: 'archive',

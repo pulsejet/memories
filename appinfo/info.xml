@@ -37,7 +37,7 @@ To get an idea of what memories looks and feels like, check out the [public demo
     <repository>https://github.com/pulsejet/memories</repository>
     <screenshot>https://raw.githubusercontent.com/pulsejet/memories/master/appinfo/screenshot.jpg</screenshot>
     <dependencies>
-        <nextcloud min-version="22" max-version="24"/>
+        <nextcloud min-version="23" max-version="24"/>
     </dependencies>
     <commands>
         <command>OCA\Memories\Command\Index</command>

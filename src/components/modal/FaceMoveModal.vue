@@ -18,6 +18,8 @@
 
 <script lang="ts">
 import { Component, Emit, Mixins, Prop } from 'vue-property-decorator';
+import GlobalMixin from '../../mixins/GlobalMixin';
+
 import { NcButton, NcTextField } from '@nextcloud/vue';
 import { showError } from '@nextcloud/dialogs';
 import { getCurrentUser } from '@nextcloud/auth';
@@ -26,7 +28,6 @@ import Tag from '../frame/Tag.vue';
 import FaceList from './FaceList.vue';
 
 import Modal from './Modal.vue';
-import GlobalMixin from '../../mixins/GlobalMixin';
 import client from '../../services/DavClient';
 import * as dav from '../../services/DavRequests';
 

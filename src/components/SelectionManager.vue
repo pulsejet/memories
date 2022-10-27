@@ -27,6 +27,7 @@
         <!-- Selection Modals -->
         <EditDate ref="editDate" @refresh="refresh" />
         <FaceMoveModal ref="faceMoveModal" @moved="deletePhotos" :updateLoading="updateLoading" />
+        <AddToAlbumModal ref="addToAlbumModal" @added="clearSelection" />
     </div>
 </template>
 
@@ -45,6 +46,7 @@ import { getCurrentUser } from '@nextcloud/auth';
 import * as dav from "../services/DavRequests";
 import EditDate from "./modal/EditDate.vue"
 import FaceMoveModal from "./modal/FaceMoveModal.vue"
+import AddToAlbumModal from "./modal/AddToAlbumModal.vue"
 
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
@@ -55,6 +57,8 @@ import UnarchiveIcon from 'vue-material-design-icons/PackageUp.vue';
 import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue';
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 import MoveIcon from 'vue-material-design-icons/ImageMove.vue';
+import AlbumsIcon from 'vue-material-design-icons/ImageAlbum.vue';
+import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
 
 type Selection = Map<number, IPhoto>;
 
@@ -64,6 +68,7 @@ type Selection = Map<number, IPhoto>;
         NcActionButton,
         EditDate,
         FaceMoveModal,
+        AddToAlbumModal,
 
         CloseIcon,
     },
@@ -88,6 +93,12 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
 
         // Make default actions
         this.defaultActions = [
+            { // This is at the top because otherwise it is confusing
+                name: t('memories', 'Remove from album'),
+                icon: AlbumRemoveIcon,
+                callback: this.removeFromAlbum.bind(this),
+                if: () => this.$route.name === 'albums',
+            },
             {
                 name: t('memories', 'Delete'),
                 icon: DeleteIcon,
@@ -127,6 +138,12 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
                 if: () => this.selection.size === 1,
             },
             {
+                name: t('memories', 'Add to album'),
+                icon: AlbumsIcon,
+                callback: this.addToAlbum.bind(this),
+                if: (self: any) => self.config_albumsEnabled,
+            },
+            {
                 name: t('memories', 'Move to another person'),
                 icon: MoveIcon,
                 callback: this.moveSelectionToPerson.bind(this),
@@ -155,7 +172,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
 
     /** Get the actions list */
     private getActions(): ISelectionAction[] {
-        return this.defaultActions.filter(a => !a.if || a.if());
+        return this.defaultActions.filter(a => !a.if || a.if(this));
     }
 
     /** Clear all selected photos */
@@ -333,6 +350,34 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
     /** Is archive route */
     private routeIsArchive() {
         return this.$route.name === 'archive';
+    }
+
+    /**
+     * Move selected photos to album
+     */
+    private async addToAlbum(selection: Selection) {
+        (<any>this.$refs.addToAlbumModal).open(Array.from(selection.values()));
+    }
+
+    /**
+     * Remove selected photos from album
+     */
+    private async removeFromAlbum(selection: Selection) {
+        try {
+            this.updateLoading(1);
+            const user = this.$route.params.user;
+            const name = this.$route.params.name;
+            const gen = dav.removeFromAlbum(user, name, Array.from(selection.keys()));
+            for await (const delIds of gen) {
+                const delPhotos = delIds.filter(p => p).map(id => selection.get(id));
+                this.deletePhotos(delPhotos);
+            }
+        } catch (e) {
+            console.error(e);
+            showError(e?.message || this.t("memories", "Could not remove photos from album"));
+        } finally {
+            this.updateLoading(-1);
+        }
     }
 
     /**

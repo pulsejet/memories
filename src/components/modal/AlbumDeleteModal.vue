@@ -1,10 +1,12 @@
 <template>
     <Modal @close="close" v-if="show">
         <template #title>
-            {{ t('memories', 'Remove person') }}
+            {{ t('memories', 'Remove Album') }}
         </template>
 
-        <span>{{ t('memories', 'Are you sure you want to remove {name}?', { name }) }}</span>
+        <span>
+            {{ t('memories', 'Are you sure you want to permanently remove album "{name}"?', { name }) }}
+        </span>
 
         <template #buttons>
             <NcButton @click="save" class="button" type="error">
@@ -30,7 +32,7 @@ import client from '../../services/DavClient';
         Modal,
     }
 })
-export default class FaceDeleteModal extends Mixins(GlobalMixin) {
+export default class AlbumDeleteModal extends Mixins(GlobalMixin) {
     private user: string = "";
     private name: string = "";
     private show = false;
@@ -43,7 +45,7 @@ export default class FaceDeleteModal extends Mixins(GlobalMixin) {
     public open() {
         const user = this.$route.params.user || '';
         if (this.$route.params.user !== getCurrentUser().uid) {
-            showError(this.t('memories', 'Only user "{user}" can delete this person', { user }));
+            showError(this.t('memories', 'Only user "{user}" can delete this album', { user }));
             return;
         }
         this.show = true;
@@ -65,8 +67,8 @@ export default class FaceDeleteModal extends Mixins(GlobalMixin) {
 
     public async save() {
 		try {
-			await client.deleteFile(`/recognize/${this.user}/faces/${this.name}`)
-            this.$router.push({ name: 'people' });
+			await client.deleteFile(`/photos/${this.user}/albums/${this.name}`)
+            this.$router.push({ name: 'albums' });
             this.close();
 		} catch (error) {
             console.log(error);

@@ -5,11 +5,11 @@ export function login(route: string) {
     await page.setViewportSize({ width: 800, height: 600 })
     await page.goto('http://localhost:8080/index.php/apps/memories' + route)
 
-    await page.locator('[placeholder="Username or email"]').click();
-    await page.locator('[placeholder="Username or email"]').fill('admin');
-    await page.locator('[placeholder="Username or email"]').press('Tab');
-    await page.locator('[placeholder="Password"]').fill('password');
-    await page.locator('input:has-text("Log in")').click();
+    await page.locator('#user').click();
+    await page.locator('#user').fill('admin');
+    await page.locator('#user').press('Tab');
+    await page.locator('#password').fill('password');
+    await page.locator('button[type="submit"]').click();
     await expect(page).toHaveURL('http://localhost:8080/index.php/apps/memories' + route);
     await page.waitForSelector('img[src*="core/preview"]');
   }

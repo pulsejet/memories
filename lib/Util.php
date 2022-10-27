@@ -26,4 +26,40 @@ class Util
 
         return $p;
     }
+
+    /**
+     * Check if albums are enabled for this user.
+     */
+    public static function albumsIsEnabled(&$appManager): bool
+    {
+        if (!$appManager->isEnabledForUser('photos')) {
+            return false;
+        }
+
+        $v = $appManager->getAppInfo('photos')['version'];
+
+        return version_compare($v, '1.7.0', '>=');
+    }
+
+    /**
+     * Check if tags is enabled for this user.
+     */
+    public static function tagsIsEnabled(&$appManager): bool
+    {
+        return $appManager->isEnabledForUser('systemtags');
+    }
+
+    /**
+     * Check if recognize is enabled for this user.
+     */
+    public static function recognizeIsEnabled(&$appManager): bool
+    {
+        if (!$appManager->isEnabledForUser('recognize')) {
+            return false;
+        }
+
+        $v = $appManager->getAppInfo('recognize')['version'];
+
+        return version_compare($v, '3.0.0-alpha', '>=');
+    }
 }

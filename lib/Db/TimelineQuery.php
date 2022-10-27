@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 class TimelineQuery
 {
+    use TimelineQueryAlbums;
     use TimelineQueryDays;
     use TimelineQueryFaces;
     use TimelineQueryFilters;
@@ -18,6 +20,27 @@ class TimelineQuery
     public function __construct(IDBConnection $connection)
     {
         $this->connection = $connection;
+    }
+
+    public static function debugQuery(IQueryBuilder &$query, string $sql = '')
+    {
+        // Print the query and exit
+        $sql = empty($sql) ? $query->getSQL() : $sql;
+        $sql = str_replace('*PREFIX*', 'oc_', $sql);
+        $sql = self::replaceQueryParams($query, $sql);
+        echo "{$sql}";
+
+        exit;
+    }
+
+    public static function replaceQueryParams(IQueryBuilder &$query, string $sql)
+    {
+        $params = $query->getParameters();
+        foreach ($params as $key => $value) {
+            $sql = str_replace(':'.$key, $query->getConnection()->getDatabasePlatform()->quoteStringLiteral($value), $sql);
+        }
+
+        return $sql;
     }
 
     public function getInfoById(int $id): array
