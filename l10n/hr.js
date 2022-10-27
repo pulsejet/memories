@@ -8,6 +8,7 @@ OC.L10N.register(
     "People" : "Ljudi",
     "Archive" : "Arhiva",
     "Tags" : "Oznake",
+    "Maps" : "Karte",
     "Settings" : "Postavke",
     "Cancel" : "Odustani",
     "Delete" : "Izbriši",

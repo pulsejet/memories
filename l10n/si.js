@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Favorites" : "ප්‍රියතම",
     "Archive" : "සංරක්ෂණය",
+    "Maps" : "සිතියම්",
     "Settings" : "සැකසුම්",
     "Cancel" : "අවලංගු කරන්න",
     "Download" : "බාගන්න",

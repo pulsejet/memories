@@ -7,6 +7,7 @@ OC.L10N.register(
     "Videos" : "Video",
     "Archive" : "Arsip",
     "Tags" : "Tag",
+    "Maps" : "Peta",
     "Settings" : "Setelan",
     "Cancel" : "Membatalkan",
     "Delete" : "Hapus",

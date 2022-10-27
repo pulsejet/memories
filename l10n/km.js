@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Favorites" : "Favorites",
     "Tags" : "ស្លាក",
+    "Maps" : "ផែនទី",
     "Settings" : "ការកំណត់",
     "Cancel" : "បោះបង់",
     "Delete" : "លុប",

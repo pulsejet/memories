@@ -8,6 +8,7 @@ OC.L10N.register(
     "People" : "Људи",
     "Archive" : "Архива",
     "Tags" : "Ознаке",
+    "Maps" : "Мапе",
     "Settings" : "Поставке",
     "Cancel" : "Поништи",
     "Delete" : "Избриши",

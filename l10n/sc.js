@@ -8,6 +8,7 @@ OC.L10N.register(
     "People" : "Gente",
     "Archive" : "Cartella",
     "Tags" : "Etichetas",
+    "Maps" : "Mapas",
     "Settings" : "Impostatziones",
     "Cancel" : "Annulla",
     "Delete" : "Cantzella",

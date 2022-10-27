@@ -8,6 +8,7 @@ OC.L10N.register(
     "People" : "Xente",
     "Archive" : "Aquivar",
     "Tags" : "Etiquetas",
+    "Maps" : "Mapas",
     "Settings" : "Axustes",
     "Cancel" : "Cancelar",
     "Delete" : "Eliminar",

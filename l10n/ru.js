@@ -11,6 +11,7 @@ OC.L10N.register(
     "Archive" : "Архив",
     "On this day" : "В этот день",
     "Tags" : "Метки",
+    "Maps" : "Карты",
     "Settings" : "Настройки",
     "Cancel" : "Отменить",
     "Delete" : "Удалить",

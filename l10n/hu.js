@@ -11,6 +11,7 @@ OC.L10N.register(
     "Archive" : "Archívum",
     "On this day" : "A mai napon",
     "Tags" : "Címkék",
+    "Maps" : "Térképek",
     "Settings" : "Beállítások",
     "Cancel" : "Mégse",
     "Delete" : "Törlés",

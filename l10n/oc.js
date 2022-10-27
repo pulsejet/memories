@@ -6,6 +6,7 @@ OC.L10N.register(
     "People" : "Gent",
     "Archive" : "Archiu",
     "Tags" : "Etiquetas",
+    "Maps" : "Mapas",
     "Settings" : "Paramètres",
     "Cancel" : "Anullar",
     "Delete" : "Suprimir",
