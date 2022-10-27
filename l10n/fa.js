@@ -8,6 +8,7 @@ OC.L10N.register(
     "People" : "مردم",
     "Archive" : "بایگانی",
     "Tags" : "برچسب ها",
+    "Maps" : "نقشه‌ها",
     "Settings" : "تنظیمات",
     "Cancel" : "لغو",
     "Delete" : "حذف",

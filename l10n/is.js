@@ -9,6 +9,7 @@ OC.L10N.register(
     "Archive" : "Safn",
     "On this day" : "Á þessum degi",
     "Tags" : "Merki",
+    "Maps" : "Landakort",
     "Settings" : "Stillingar",
     "Cancel" : "Hætta við",
     "Delete" : "Eyða",

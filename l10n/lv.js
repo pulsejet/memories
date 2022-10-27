@@ -6,6 +6,7 @@ OC.L10N.register(
     "Videos" : "Video",
     "Archive" : "Arhīvi",
     "Tags" : "Birkas",
+    "Maps" : "Karte",
     "Settings" : "Iestatījumi",
     "Cancel" : "Atcelt",
     "Delete" : "Dzēst",

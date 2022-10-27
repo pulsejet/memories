@@ -8,6 +8,7 @@ OC.L10N.register(
     "Archive" : "アーカイブ",
     "On this day" : "この日",
     "Tags" : "タグ",
+    "Maps" : "地図",
     "Settings" : "設定",
     "Cancel" : "キャンセル",
     "Delete" : "削除",

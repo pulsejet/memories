@@ -11,6 +11,7 @@ OC.L10N.register(
     "Archive" : "Arkivér",
     "On this day" : "På denne dag",
     "Tags" : "Mærker",
+    "Maps" : "Kort",
     "Settings" : "Indstillinger",
     "Cancel" : "Annuller",
     "Delete" : "Slet",

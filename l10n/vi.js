@@ -6,6 +6,7 @@ OC.L10N.register(
     "Videos" : "Phim",
     "Archive" : "Lưu trữ",
     "Tags" : "Nhãn",
+    "Maps" : "Bản đồ",
     "Settings" : "Cài đặt",
     "Cancel" : "Hủy",
     "Delete" : "Xóa",

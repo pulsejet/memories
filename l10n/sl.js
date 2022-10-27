@@ -9,6 +9,7 @@ OC.L10N.register(
     "Archive" : "Arhiv",
     "On this day" : "Na današnji dan",
     "Tags" : "Oznake",
+    "Maps" : "Zemljevidi",
     "Settings" : "Nastavitve",
     "Cancel" : "Prekliči",
     "Delete" : "Izbriši",

@@ -11,6 +11,7 @@ OC.L10N.register(
     "Archive" : "Arşiv",
     "On this day" : "Bugün",
     "Tags" : "Etiketler",
+    "Maps" : "Haritalar",
     "Settings" : "Ayarlar",
     "Choose the root of your timeline" : "Zaman tünelinizin kökünü seçin",
     "Cancel" : "İptal",
