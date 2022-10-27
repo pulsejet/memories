@@ -58,6 +58,7 @@ import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue';
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 import MoveIcon from 'vue-material-design-icons/ImageMove.vue';
 import AlbumsIcon from 'vue-material-design-icons/ImageAlbum.vue';
+import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
 
 type Selection = Map<number, IPhoto>;
 
@@ -92,6 +93,12 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
 
         // Make default actions
         this.defaultActions = [
+            { // This is at the top because otherwise it is confusing
+                name: t('memories', 'Remove from album'),
+                icon: AlbumRemoveIcon,
+                callback: this.removeFromAlbum.bind(this),
+                if: () => this.$route.name === 'albums',
+            },
             {
                 name: t('memories', 'Delete'),
                 icon: DeleteIcon,
@@ -134,12 +141,6 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
                 name: t('memories', 'Add to album'),
                 icon: AlbumsIcon,
                 callback: this.addToAlbum.bind(this),
-            },
-            {
-                name: t('memories', 'Remove from album'),
-                icon: CloseIcon,
-                callback: this.removeFromAlbum.bind(this),
-                if: () => this.$route.name === 'albums',
             },
             {
                 name: t('memories', 'Move to another person'),
