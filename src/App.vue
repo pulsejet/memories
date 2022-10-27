@@ -130,7 +130,7 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
     }
 
     get showAlbums() {
-        return this.ncVersion >= 25; // todo: and photos enabled
+        return this.config_albumsEnabled;
     }
 
     get removeOuterGap() {

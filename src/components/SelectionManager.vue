@@ -141,6 +141,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
                 name: t('memories', 'Add to album'),
                 icon: AlbumsIcon,
                 callback: this.addToAlbum.bind(this),
+                if: (self: any) => self.config_albumsEnabled,
             },
             {
                 name: t('memories', 'Move to another person'),
@@ -171,7 +172,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
 
     /** Get the actions list */
     private getActions(): ISelectionAction[] {
-        return this.defaultActions.filter(a => !a.if || a.if());
+        return this.defaultActions.filter(a => !a.if || a.if(this));
     }
 
     /** Clear all selected photos */

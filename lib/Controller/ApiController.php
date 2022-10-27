@@ -825,13 +825,7 @@ class ApiController extends Controller
      */
     private function albumsIsEnabled(): bool
     {
-        if (!$this->appManager->isEnabledForUser('photos')) {
-            return false;
-        }
-
-        $v = $this->appManager->getAppInfo('photos')['version'];
-
-        return version_compare($v, '1.7.0', '>=');
+        return \OCA\Memories\Util::albumsIsEnabled($this->appManager);
     }
 
     /**
@@ -839,7 +833,7 @@ class ApiController extends Controller
      */
     private function tagsIsEnabled(): bool
     {
-        return $this->appManager->isEnabledForUser('systemtags');
+        return \OCA\Memories\Util::tagsIsEnabled($this->appManager);
     }
 
     /**
@@ -847,12 +841,6 @@ class ApiController extends Controller
      */
     private function recognizeIsEnabled(): bool
     {
-        if (!$this->appManager->isEnabledForUser('recognize')) {
-            return false;
-        }
-
-        $v = $this->appManager->getAppInfo('recognize')['version'];
-
-        return version_compare($v, '3.0.0-alpha', '>=');
+        return \OCA\Memories\Util::recognizeIsEnabled($this->appManager);
     }
 }
