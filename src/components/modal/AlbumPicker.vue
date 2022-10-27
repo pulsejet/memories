@@ -56,17 +56,18 @@
 		</NcButton>
 	</div>
 
-	<!-- <AlbumForm v-else
+	<AlbumForm v-else
 		:display-back-button="true"
 		:title="t('photos', 'New album')"
 		@back="showAlbumCreationForm = false"
-		@done="albumCreatedHandler" /> -->
+		@done="albumCreatedHandler" />
 </template>
 
 <script lang="ts">
 import { Component, Emit, Mixins } from 'vue-property-decorator';
 import GlobalMixin from '../../mixins/GlobalMixin';
 
+import AlbumForm from './AlbumForm.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue'
 
@@ -75,16 +76,14 @@ import { generateUrl } from '@nextcloud/router'
 import { IAlbum } from '../../types';
 import axios from '@nextcloud/axios'
 
-// import AlbumForm from './AlbumForm.vue'
-
 @Component({
     components: {
+		AlbumForm,
         Plus,
 		ImageMultiple,
 		NcButton,
 		NcListItem,
 		NcLoadingIcon,
-		// AlbumForm,
     },
     filters: {
         toCoverUrl(fileId: string) {

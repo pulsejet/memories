@@ -655,3 +655,65 @@ export async function* removeFromAlbum(id: number, fileIds: number[]) {
 
     yield* runInParallel(calls, 10);
 }
+
+/**
+ * Create an album.
+ */
+export async function createAlbum(albumName: string) {
+    try {
+        await client.createDirectory(`/photos/${getCurrentUser()?.uid}/albums/${albumName}`)
+    } catch (error) {
+        console.error(error);
+        showError(t('photos', 'Failed to create {albumName}.', { albumName }))
+    }
+}
+
+/**
+ * Update an album's properties.
+ *
+ * @param {object} album Album to update
+ * @param {object} data destructuring object
+ * @param {string} data.albumName - The name of the album.
+ * @param {object} data.properties - The properties to update.
+ */
+export async function updateAlbum(album: any, { albumName, properties }: any) {
+    const stringifiedProperties = Object
+        .entries(properties)
+        .map(([name, value]) => {
+            switch (typeof value) {
+            case 'string':
+                return `<nc:${name}>${value}</nc:${name}>`
+            case 'object':
+                return `<nc:${name}>${JSON.stringify(value)}</nc:${name}>`
+            default:
+                return ''
+            }
+        })
+        .join()
+
+    try {
+        await client.customRequest(
+            album.filename,
+            {
+                method: 'PROPPATCH',
+                data: `<?xml version="1.0"?>
+                        <d:propertyupdate xmlns:d="DAV:"
+                            xmlns:oc="http://owncloud.org/ns"
+                            xmlns:nc="http://nextcloud.org/ns"
+                            xmlns:ocs="http://open-collaboration-services.org/ns">
+                        <d:set>
+                            <d:prop>
+                                ${stringifiedProperties}
+                            </d:prop>
+                        </d:set>
+                        </d:propertyupdate>`,
+            }
+        );
+
+        return album;
+    } catch (error) {
+        console.error(error);
+        showError(t('photos', 'Failed to update properties of {albumName} with {properties}.', { albumName, properties: JSON.stringify(properties) }))
+        return album
+    }
+};

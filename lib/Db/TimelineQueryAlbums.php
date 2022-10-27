@@ -37,15 +37,15 @@ trait TimelineQueryAlbums
         );
 
         // WHERE these are items with this album
-        $query->innerJoin('pa', 'photos_albums_files', 'paf', $query->expr()->andX(
+        $query->leftJoin('pa', 'photos_albums_files', 'paf', $query->expr()->andX(
             $query->expr()->eq('paf.album_id', 'pa.album_id'),
         ));
 
         // WHERE these items are memories indexed photos
-        $query->innerJoin('paf', 'memories', 'm', $query->expr()->eq('m.fileid', 'paf.file_id'));
+        $query->leftJoin('paf', 'memories', 'm', $query->expr()->eq('m.fileid', 'paf.file_id'));
 
         // WHERE these photos are in the filecache
-        $query->innerJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'));
+        $query->leftJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'));
 
         // GROUP and ORDER by
         $query->groupBy('pa.album_id');
