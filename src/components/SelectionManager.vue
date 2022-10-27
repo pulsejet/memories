@@ -27,6 +27,7 @@
         <!-- Selection Modals -->
         <EditDate ref="editDate" @refresh="refresh" />
         <FaceMoveModal ref="faceMoveModal" @moved="deletePhotos" :updateLoading="updateLoading" />
+        <AddToAlbumModal ref="addToAlbumModal" />
     </div>
 </template>
 
@@ -45,6 +46,7 @@ import { getCurrentUser } from '@nextcloud/auth';
 import * as dav from "../services/DavRequests";
 import EditDate from "./modal/EditDate.vue"
 import FaceMoveModal from "./modal/FaceMoveModal.vue"
+import AddToAlbumModal from "./modal/AddToAlbumModal.vue"
 
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
@@ -55,6 +57,7 @@ import UnarchiveIcon from 'vue-material-design-icons/PackageUp.vue';
 import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue';
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 import MoveIcon from 'vue-material-design-icons/ImageMove.vue';
+import AlbumsIcon from 'vue-material-design-icons/ImageAlbum.vue';
 
 type Selection = Map<number, IPhoto>;
 
@@ -64,6 +67,7 @@ type Selection = Map<number, IPhoto>;
         NcActionButton,
         EditDate,
         FaceMoveModal,
+        AddToAlbumModal,
 
         CloseIcon,
     },
@@ -125,6 +129,11 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
                 icon: OpenInNewIcon,
                 callback: this.viewInFolder.bind(this),
                 if: () => this.selection.size === 1,
+            },
+            {
+                name: t('memories', 'Add to album'),
+                icon: AlbumsIcon,
+                callback: this.addToAlbum.bind(this),
             },
             {
                 name: t('memories', 'Move to another person'),
@@ -333,6 +342,13 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
     /** Is archive route */
     private routeIsArchive() {
         return this.$route.name === 'archive';
+    }
+
+    /**
+     * Move selected photos to album
+     */
+    private async addToAlbum(selection: Selection) {
+        (<any>this.$refs.addToAlbumModal).open(Array.from(selection.values()));
     }
 
     /**
