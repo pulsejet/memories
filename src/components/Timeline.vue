@@ -560,7 +560,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             } else if (this.$route.name === 'people' && !this.$route.params.name) {
                 data = await dav.getPeopleData();
             } else if (this.$route.name === 'albums' && !this.$route.params.name) {
-                data = await dav.getAlbumsData();
+                data = await dav.getAlbumsData('3');
             } else {
                 // Try the cache
                 try {

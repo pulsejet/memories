@@ -107,7 +107,7 @@ export default class AlbumPicker extends Mixins(GlobalMixin) {
 
     async loadAlbums() {
         try {
-            const res = await axios.get<IAlbum[]>(generateUrl('/apps/memories/api/albums'));
+            const res = await axios.get<IAlbum[]>(generateUrl('/apps/memories/api/albums?t=3'));
             this.albums = res.data;
         } catch (e) {
             console.error(e);

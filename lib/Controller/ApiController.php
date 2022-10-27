@@ -277,7 +277,14 @@ class ApiController extends Controller
         }
 
         // Run actual query
-        $list = $this->timelineQuery->getAlbums($user->getUID());
+        $list = [];
+        $t = intval($this->request->getParam('t'));
+        if ($t & 1) { // personal
+            $list = array_merge($list, $this->timelineQuery->getAlbums($user->getUID()));
+        }
+        if ($t & 2) { // shared
+            $list = array_merge($list, $this->timelineQuery->getAlbums($user->getUID(), true));
+        }
 
         return new JSONResponse($list, Http::STATUS_OK);
     }

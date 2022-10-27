@@ -558,11 +558,12 @@ export async function* removeFaceImages(user: string, name: string, fileIds: num
 
 /**
  * Get list of albums and convert to Days response
+ * @param type Type of albums to get; 1 = personal, 2 = shared, 3 = all
  */
-export async function getAlbumsData(): Promise<IDay[]> {
+export async function getAlbumsData(type: '1' | '2' | '3'): Promise<IDay[]> {
     let data: IAlbum[] = [];
     try {
-        const res = await axios.get<typeof data>(generateUrl('/apps/memories/api/albums'));
+        const res = await axios.get<typeof data>(generateUrl(`/apps/memories/api/albums?t=${type}`));
         data = res.data;
     } catch (e) {
         throw e;

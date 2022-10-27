@@ -9,7 +9,10 @@
     @click.native="openTag(data)">
 
         <div class="bbl"> <NcCounterBubble> {{ data.count }} </NcCounterBubble> </div>
-        <div class="name"> {{ data.name }} </div>
+        <div class="name">
+            {{ data.name }}
+            <span class="subtitle" v-if="subtitle"> {{ subtitle }} </span>
+        </div>
 
         <div class="previews fill-block" ref="previews">
             <div class="img-outer" v-for="info of previews" :key="info.fileid">
@@ -29,6 +32,7 @@ import { Component, Prop, Watch, Mixins, Emit } from 'vue-property-decorator';
 import { IAlbum, IPhoto, ITag } from '../../types';
 import { generateUrl } from '@nextcloud/router'
 import { getPreviewUrl } from "../../services/FileUtils";
+import { getCurrentUser } from '@nextcloud/auth';
 
 import { NcCounterBubble } from '@nextcloud/vue'
 
@@ -49,6 +53,9 @@ export default class Tag extends Mixins(GlobalMixin) {
 
     // Error occured fetching thumbs
     private error = false;
+
+    // Smaller subtitle
+    private subtitle = '';
 
     /**
      * Open tag event
@@ -84,6 +91,7 @@ export default class Tag extends Mixins(GlobalMixin) {
     async refreshPreviews() {
         // Reset state
         this.error = false;
+        this.subtitle = '';
 
         // Add dummy preview if face
         if (this.isFace) {
@@ -96,6 +104,9 @@ export default class Tag extends Mixins(GlobalMixin) {
             const album = this.data as IAlbum;
             if (album.last_added_photo > 0) {
                 this.previews = [{ fileid: album.last_added_photo, etag: '', flag: 0 }];
+            }
+            if (album.user !== getCurrentUser()?.uid) {
+                this.subtitle = `(${album.user})`;
             }
             return;
         }
@@ -159,6 +170,12 @@ export default class Tag extends Mixins(GlobalMixin) {
     word-wrap: break-word;
     text-overflow: ellipsis;
     line-height: 1em;
+
+    > .subtitle {
+        font-size: 0.7em;
+        margin-top: 2px;
+        display: block;
+    }
 
     .isFace > & {
         top: unset;

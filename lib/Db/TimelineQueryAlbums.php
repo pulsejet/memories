@@ -30,15 +30,24 @@ trait TimelineQueryAlbums
     }
 
     /** Get list of albums */
-    public function getAlbums(string $uid)
+    public function getAlbums(string $uid, $shared=false)
     {
         $query = $this->connection->getQueryBuilder();
 
         // SELECT everything from albums
         $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
-        $query->select('pa.*', $count)->from('photos_albums', 'pa')->where(
-            $query->expr()->eq('user', $query->createNamedParameter($uid)),
-        );
+        $query->select('pa.*', $count)->from('photos_albums', 'pa');
+
+        if ($shared) {
+            $query->innerJoin('pa', 'photos_collaborators', 'pc', $query->expr()->andX(
+                $query->expr()->eq('pa.album_id', 'pc.album_id'),
+                $query->expr()->eq('pc.collaborator_id', $query->createNamedParameter($uid)),
+            ));
+        } else {
+            $query->where(
+                $query->expr()->eq('user', $query->createNamedParameter($uid)),
+            );
+        }
 
         // WHERE these are items with this album
         $query->leftJoin('pa', 'photos_albums_files', 'paf', $query->expr()->andX(
