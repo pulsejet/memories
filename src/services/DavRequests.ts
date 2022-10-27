@@ -115,7 +115,10 @@ async function getFilesInternal(fileIds: number[]): Promise<IFileInfo[]> {
     let response: any = await client.getDirectoryContents('', options);
     return response.data
         .map((data: any) => genFileInfo(data))
-        .map((data: any) => Object.assign({}, data, { filename: data.filename.replace(prefixPath, '') }));
+        .map((data: any) => Object.assign({}, data, {
+            originalFilename: data.filename,
+            filename: data.filename.replace(prefixPath, '')
+        }));
 }
 
 /**
@@ -556,7 +559,7 @@ export async function* removeFaceImages(user: string, name: string, fileIds: num
 /**
  * Get list of albums and convert to Days response
  */
- export async function getAlbumsData(): Promise<IDay[]> {
+export async function getAlbumsData(): Promise<IDay[]> {
     let data: IAlbum[] = [];
     try {
         const res = await axios.get<typeof data>(generateUrl('/apps/memories/api/albums'));
@@ -577,4 +580,40 @@ export async function* removeFaceImages(user: string, name: string, fileIds: num
             isalbum: true,
         } as ITag)),
     }]
- }
+}
+
+/**
+ * Remove images from a face.
+ *
+ * @param user User ID of album
+ * @param name Name of album (or ID)
+ * @param fileIds List of file IDs to add
+ * @returns Generator
+ */
+export async function* addToAlbum(user: string, name: string, fileIds: number[]) {
+    // Get files data
+    let fileInfos = await getFiles(fileIds.filter(f => f));
+
+    // Add each file
+    const calls = fileInfos.map((f) => async () => {
+        try {
+            await client.copyFile(
+                f.originalFilename,
+                `/photos/${user}/albums/${name}/${f.basename}`,
+            )
+            return f.fileid;
+        } catch (e) {
+            if (e.response?.status === 409) {
+                // File already exists, all good
+                return f.fileid;
+            }
+
+            showError(t('memories', 'Failed to add {filename} to album.', {
+                filename: f.filename,
+            }));
+            return 0;
+        }
+    });
+
+    yield* runInParallel(calls, 10);
+}

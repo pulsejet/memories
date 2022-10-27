@@ -27,7 +27,7 @@
         <!-- Selection Modals -->
         <EditDate ref="editDate" @refresh="refresh" />
         <FaceMoveModal ref="faceMoveModal" @moved="deletePhotos" :updateLoading="updateLoading" />
-        <AddToAlbumModal ref="addToAlbumModal" />
+        <AddToAlbumModal ref="addToAlbumModal" @added="clearSelection" />
     </div>
 </template>
 

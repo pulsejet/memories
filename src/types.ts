@@ -5,6 +5,8 @@ export type IFileInfo = {
     fileid: number;
     /** Full file name, e.g. /pi/test/Qx0dq7dvEXA.jpg */
     filename: string;
+    /** Original file name, e.g. /files/admin/pi/test/Qx0dq7dvEXA.jpg */
+    originalFilename: string;
     /** Base name of file e.g. Qx0dq7dvEXA.jpg */
     basename: string;
     /** Etag identifier */

@@ -6,19 +6,25 @@
 
         <div class="outer">
             <AlbumPicker @select="selectAlbum" />
+
+            <div v-if="processing" class="info-pad">
+                {{ t('memories', 'Processing … {n}/{m}', {
+                    n: photosDone,
+                    m: photos.length,
+                }) }}
+            </div>
         </div>
     </Modal>
 </template>
 
 <script lang="ts">
 import { Component, Emit, Mixins, Prop } from 'vue-property-decorator';
-import { showError } from '@nextcloud/dialogs';
-import { IAlbum, IPhoto, ITag } from '../../types';
+import { showInfo } from '@nextcloud/dialogs';
+import { IAlbum, IPhoto } from '../../types';
 import AlbumPicker from './AlbumPicker.vue';
 
 import Modal from './Modal.vue';
 import GlobalMixin from '../../mixins/GlobalMixin';
-import client from '../../services/DavClient';
 import * as dav from '../../services/DavRequests';
 
 @Component({
@@ -30,28 +36,38 @@ import * as dav from '../../services/DavRequests';
 export default class AddToAlbumModal extends Mixins(GlobalMixin) {
     private show = false;
     private photos: IPhoto[] = [];
-
-    @Prop()
-    private updateLoading: (delta: number) => void;
+    private photosDone: number = 0;
+    private processing: boolean = false;
 
     public open(photos: IPhoto[]) {
-        if (this.photos.length) {
-            // is processing
-            return;
-        }
-
+        this.photosDone = 0;
+        this.processing = false;
         this.show = true;
         this.photos = photos;
     }
 
+    @Emit('added')
+    public added(photos: IPhoto[]) {}
+
     @Emit('close')
     public close() {
         this.photos = [];
+        this.processing = false;
         this.show = false;
     }
 
     public async selectAlbum(album: IAlbum) {
-        console.log('selectAlbum', album);
+        const name = album.name || album.album_id.toString();
+        const gen = dav.addToAlbum(album.user, name, this.photos.map(p => p.fileid));
+        this.processing = true;
+
+        for await (const fids of gen) {
+            this.photosDone += fids.filter(f => f).length;
+            this.added(this.photos.filter(p => fids.includes(p.fileid)));
+        }
+
+        showInfo(this.t('memories', '{n} photos added to album', { n: this.photosDone }));
+        this.close();
     }
 }
 </script>
@@ -59,5 +75,9 @@ export default class AddToAlbumModal extends Mixins(GlobalMixin) {
 <style lang="scss" scoped>
 .outer {
     margin-top: 15px;
+}
+
+.info-pad {
+    margin-top: 6px;
 }
 </style>
