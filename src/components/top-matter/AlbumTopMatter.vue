@@ -30,6 +30,7 @@
         </div>
 
         <AlbumCreateModal ref="createModal" />
+        <AlbumDeleteModal ref="deleteModal" />
     </div>
 </template>
 
@@ -39,6 +40,7 @@ import GlobalMixin from '../../mixins/GlobalMixin';
 import UserConfig from "../../mixins/UserConfig";
 
 import AlbumCreateModal from '../modal/AlbumCreateModal.vue';
+import AlbumDeleteModal from '../modal/AlbumDeleteModal.vue';
 
 import { NcActions, NcActionButton, NcActionCheckbox } from '@nextcloud/vue';
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
@@ -53,6 +55,7 @@ import PlusIcon from 'vue-material-design-icons/Plus.vue';
         NcActionCheckbox,
 
         AlbumCreateModal,
+        AlbumDeleteModal,
 
         BackIcon,
         EditIcon,
