@@ -179,9 +179,9 @@ trait TimelineQueryDays
         return $day;
     }
 
-    private function executeQueryWithCTEs(IQueryBuilder &$query)
+    private function executeQueryWithCTEs(IQueryBuilder &$query, string $psql = '')
     {
-        $sql = $query->getSQL();
+        $sql = empty($psql) ? $query->getSQL() : $psql;
         $params = $query->getParameters();
         $types = $query->getParameterTypes();
 
@@ -196,7 +196,7 @@ trait TimelineQueryDays
     /**
      * Get all folders inside a top folder.
      */
-    private function joinSubfoldersRecursive(
+    private function addSubfolderJoinParams(
         IQueryBuilder &$query,
         Folder &$folder,
         bool $archive
@@ -226,7 +226,6 @@ trait TimelineQueryDays
         // Add query parameters
         $query->setParameter('topFolderId', $topFolderId, IQueryBuilder::PARAM_INT);
         $query->setParameter('excludedFolderId', $excludedFolderId, IQueryBuilder::PARAM_INT);
-        $query->innerJoin('f', 'cte_folders', 'cte_f', $query->expr()->eq('f.parent', 'cte_f.fileid'));
     }
 
     /**
@@ -253,7 +252,8 @@ trait TimelineQueryDays
         $pathOp = null;
         if ($recursive) {
             // Join with folders CTE
-            $this->joinSubfoldersRecursive($query, $folder, $archive);
+            $this->addSubfolderJoinParams($query, $folder, $archive);
+            $query->innerJoin('f', 'cte_folders', 'cte_f', $query->expr()->eq('f.parent', 'cte_f.fileid'));
         } else {
             // If getting non-recursively folder only check for parent
             $pathOp = $query->expr()->eq('f.parent', $query->createNamedParameter($folder->getId(), IQueryBuilder::PARAM_INT));

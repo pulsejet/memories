@@ -58,7 +58,17 @@ trait TimelineQueryTags
         $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.fileid', 'stom.objectid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $folder, true, false);
+        // This is a hack to speed up the query instead of using joinFilecache
+        // The problem is objectid is VARCHAR(64) and fileid is BIGINT(20), so a
+        // join is extremely slow. Instead, we use a subquery to check existence.
+        //
+        // https://blog.sqlauthority.com/2010/06/05/sql-server-convert-in-to-exists-performance-talk/
+
+        $this->addSubfolderJoinParams($query, $folder, false);
+        $query->innerJoin('m', 'filecache', 'f', $query->expr()->andX(
+            $query->expr()->eq('f.fileid', 'm.fileid'),
+            $query->createFunction('EXISTS (SELECT 1 from *PREFIX*cte_folders WHERE *PREFIX*cte_folders.fileid = `f`.parent)')
+        ));
 
         // GROUP and ORDER by tag name
         $query->groupBy('st.name');
@@ -80,11 +90,17 @@ trait TimelineQueryTags
 
     public function getTagPreviews(array &$tags, Folder &$folder)
     {
+        // This is really horrible but will have to do for now
+        $sql = '';
         foreach ($tags as &$tag) {
+            if (!empty($sql)) {
+                $sql .= ' UNION ALL ';
+            }
+
             $query = $this->connection->getQueryBuilder();
 
             // SELECT all photos with this tag
-            $query->select('f.fileid', 'f.etag')->from(
+            $query->select('f.fileid', 'f.etag', 'stom.systemtagid')->from(
                 'systemtag_object_mapping',
                 'stom'
             )->where(
@@ -96,19 +112,42 @@ trait TimelineQueryTags
             $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.fileid', 'stom.objectid'));
 
             // WHERE these photos are in the user's requested folder recursively
-            $query = $this->joinFilecache($query, $folder, true, false);
+            // See the function above for an explanation of this hack
+            $this->addSubfolderJoinParams($query, $folder, false);
+            $query->innerJoin('m', 'filecache', 'f', $query->expr()->andX(
+                $query->expr()->eq('f.fileid', 'm.fileid'),
+                $query->createFunction('EXISTS (SELECT 1 from *PREFIX*cte_folders WHERE *PREFIX*cte_folders.fileid = `f`.parent)')
+            ));
 
             // MAX 4
             $query->setMaxResults(4);
 
-            // FETCH tag previews
-            $cursor = $this->executeQueryWithCTEs($query);
-            $tag['previews'] = $cursor->fetchAll();
+            // Replace parameters
+            $thisSql = self::replaceQueryParams($query, $query->getSQL());
 
-            // Post-process
-            foreach ($tag['previews'] as &$row) {
-                $row['fileid'] = (int) $row['fileid'];
+            // Add clause
+            $sql .= "({$thisSql})";
+        }
+
+        // FETCH tag previews
+        $cursor = $this->executeQueryWithCTEs($query, $sql);
+        $ans = $cursor->fetchAll();
+
+        // Post-process
+        $previewMap = [];
+        foreach ($ans as &$row) {
+            $row['fileid'] = (int) $row['fileid'];
+            $key = (int) $row['systemtagid'];
+            unset($row['systemtagid']);
+            if (!isset($previewMap[$key])) {
+                $previewMap[$key] = [];
             }
+            $previewMap[$key][] = $row;
+        }
+
+        // Add previews to tags
+        foreach ($tags as &$tag) {
+            $tag['previews'] = $previewMap[$tag['id']] ?? [];
         }
     }
 }
