@@ -1,11 +1,17 @@
 <template>
     <Modal @close="close" size="normal" v-if="show">
         <template #title>
-            {{ t('memories', 'Create new album') }}
+            <template v-if="!album">
+                {{ t('memories', 'Create new album') }}
+            </template>
+            <template v-else>
+                {{ t('memories', 'Edit album details') }}
+            </template>
         </template>
 
         <div class="outer">
             <AlbumForm
+                :album="album"
                 :display-back-button="false"
                 :title="t('photos', 'New album')"
                 @done="done" />
@@ -15,10 +21,13 @@
 
 <script lang="ts">
 import { Component, Emit, Mixins } from 'vue-property-decorator';
-import AlbumForm from './AlbumForm.vue';
+import GlobalMixin from '../../mixins/GlobalMixin';
+
+import { showError } from '@nextcloud/dialogs'
+import * as dav from '../../services/DavRequests';
 
 import Modal from './Modal.vue';
-import GlobalMixin from '../../mixins/GlobalMixin';
+import AlbumForm from './AlbumForm.vue';
 
 @Component({
     components: {
@@ -28,9 +37,31 @@ import GlobalMixin from '../../mixins/GlobalMixin';
 })
 export default class AlbumCreateModal extends Mixins(GlobalMixin) {
     private show = false;
+    private album: any = null;
 
-    public open() {
+    /**
+     * Open the modal
+     * @param edit If true, the modal will be opened in edit mode
+     */
+    public async open(edit: boolean) {
+        if (edit) {
+            try {
+                const album: any = await dav.getAlbum(this.$route.params.user, this.$route.params.name);
+                this.album = {
+                    ...album.data,
+                    ...album.data.props,
+                };
+            } catch (e) {
+                console.error(e);
+                showError(this.t('photos', 'Could not load the selected album'));
+                return;
+            }
+        } else {
+            this.album = null;
+        }
+
         this.show = true;
+
     }
 
     @Emit('close')
@@ -39,9 +70,11 @@ export default class AlbumCreateModal extends Mixins(GlobalMixin) {
     }
 
     public done({ album }: any) {
-        const user = album.filename.split('/')[2];
-        const name = album.basename;
-        this.$router.push({ name: 'albums', params: { user, name } });
+        if (!this.album || album.basename !== this.album.basename) {
+            const user = album.filename.split('/')[2];
+            const name = album.basename;
+            this.$router.push({ name: 'albums', params: { user, name } });
+        }
         this.close();
     }
 }

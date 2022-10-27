@@ -11,12 +11,12 @@
 
         <div class="right-actions">
             <NcActions :inline="1">
-                <NcActionButton :aria-label="t('memories', 'Create new album')" @click="$refs.createModal.open()" close-after-click
+                <NcActionButton :aria-label="t('memories', 'Create new album')" @click="$refs.createModal.open(false)" close-after-click
                     v-if="isAlbumList">
                     {{ t('memories', 'Create new album') }}
                     <template #icon> <PlusIcon :size="20" /> </template>
                 </NcActionButton>
-                <NcActionButton :aria-label="t('memories', 'Edit album details')" @click="$refs.editModal.open()" close-after-click
+                <NcActionButton :aria-label="t('memories', 'Edit album details')" @click="$refs.createModal.open(true)" close-after-click
                     v-if="!isAlbumList">
                     {{ t('memories', 'Edit album details') }}
                     <template #icon> <EditIcon :size="20" /> </template>

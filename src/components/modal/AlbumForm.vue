@@ -124,7 +124,7 @@ import AccountMultiplePlus from 'vue-material-design-icons/AccountMultiplePlus.v
     },
 })
 export default class AlbumForm extends Mixins(GlobalMixin) {
-    @Prop() private album: IAlbum;
+    @Prop() private album: any;
     @Prop() private displayBackButton: boolean;
 
     private showCollaboratorView = false;
@@ -148,7 +148,7 @@ export default class AlbumForm extends Mixins(GlobalMixin) {
 
 	mounted() {
 		if (this.editMode) {
-			this.albumName = this.album.name
+			this.albumName = this.album.basename
 			this.albumLocation = this.album.location
 		}
 		this.$nextTick(() => {
@@ -201,11 +201,11 @@ export default class AlbumForm extends Mixins(GlobalMixin) {
         try {
             this.loading = true
             let album = { ...this.album }
-            if (this.album.name !== this.albumName) {
-                album = await this.renameAlbum({ currentAlbumName: this.album.name, newAlbumName: this.albumName })
+            if (this.album.basename !== this.albumName) {
+                album = await dav.renameAlbum(this.album, { currentAlbumName: this.album.basename, newAlbumName: this.albumName })
             }
             if (this.album.location !== this.albumLocation) {
-                album.location = await this.updateAlbum({ albumName: this.albumName, properties: { location: this.albumLocation } })
+                album.location = await dav.updateAlbum(this.album, { albumName: this.albumName, properties: { location: this.albumLocation } })
             }
             this.$emit('done', { album })
         } finally {

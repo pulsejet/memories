@@ -708,4 +708,46 @@ export async function updateAlbum(album: any, { albumName, properties }: any) {
         showError(t('photos', 'Failed to update properties of {albumName} with {properties}.', { albumName, properties: JSON.stringify(properties) }))
         return album
     }
-};
+}
+
+/**
+ * Get one album from DAV collection
+ * @param user Owner of album
+ * @param name Name of album (or ID)
+ */
+export async function getAlbum(user: string, name: string, extraProps = {}) {
+    const req = `<?xml version="1.0"?>
+        <d:propfind xmlns:d="DAV:"
+            xmlns:oc="http://owncloud.org/ns"
+            xmlns:nc="http://nextcloud.org/ns"
+            xmlns:ocs="http://open-collaboration-services.org/ns">
+            <d:prop>
+                <nc:last-photo />
+                <nc:nbItems />
+                <nc:location />
+                <nc:dateRange />
+                <nc:collaborators />
+                ${extraProps}
+            </d:prop>
+        </d:propfind>`;
+    return await client.stat(`/photos/${user}/albums/${name}`, {
+        data: req,
+        details: true,
+    })
+}
+
+/** Rename an album */
+export async function renameAlbum(album: any, { currentAlbumName, newAlbumName }) {
+    const newAlbum = { ...album, basename: newAlbumName }
+    try {
+        await client.moveFile(
+            `/photos/${getCurrentUser()?.uid}/albums/${currentAlbumName}`,
+            `/photos/${getCurrentUser()?.uid}/albums/${newAlbumName}`,
+        )
+        return newAlbum
+    } catch (error) {
+        console.error(error);
+        showError(t('photos', 'Failed to rename {currentAlbumName} to {newAlbumName}.', { currentAlbumName, newAlbumName }))
+        return album
+    }
+}
