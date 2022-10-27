@@ -363,8 +363,9 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
     private async removeFromAlbum(selection: Selection) {
         try {
             this.updateLoading(1);
-            const albumId = Number(this.$route.params.id);
-            const gen = dav.removeFromAlbum(albumId, Array.from(selection.keys()));
+            const user = this.$route.params.user;
+            const name = this.$route.params.name;
+            const gen = dav.removeFromAlbum(user, name, Array.from(selection.keys()));
             for await (const delIds of gen) {
                 const delPhotos = delIds.filter(p => p).map(id => selection.get(id));
                 this.deletePhotos(delPhotos);

@@ -621,20 +621,12 @@ export async function* addToAlbum(user: string, name: string, fileIds: number[])
 /**
  * Remove photos from an album.
  *
- * @param id ID of the album
+ * @param user Owner of album
+ * @param name Name of album (or ID)
  * @param fileIds List of file IDs to remove
  * @returns Generator
  */
-export async function* removeFromAlbum(id: number, fileIds: number[]) {
-    // Unfortunately the webdav API doesn't seem to expose the ID of the album
-    // so we have to get the list of albums first to get the ID
-    const albums = (await getAlbumsData())[0].detail as IAlbum[];
-    const album = albums.find((a: IAlbum) => a.album_id === id);
-    if (!album) {
-        throw new Error(t('memories', 'Album not found.'));
-    }
-    const albumName = album.name || id.toString();
-
+export async function* removeFromAlbum(user: string, name: string, fileIds: number[]) {
     // Get files data
     let fileInfos = await getFiles(fileIds.filter(f => f));
 
@@ -642,7 +634,7 @@ export async function* removeFromAlbum(id: number, fileIds: number[]) {
     const calls = fileInfos.map((f) => async () => {
         try {
             await client.deleteFile(
-                `/photos/${album.user}/albums/${albumName}/${f.fileid}-${f.basename}`,
+                `/photos/${user}/albums/${name}/${f.fileid}-${f.basename}`,
             )
             return f.fileid;
         } catch (e) {

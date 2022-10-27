@@ -14,13 +14,17 @@ trait TimelineQueryAlbums
     /** Transform only for album */
     public function transformAlbumFilter(IQueryBuilder &$query, string $uid, string $albumId)
     {
-        if (!$this->hasAlbumPermission($query->getConnection(), $uid, (int) $albumId)) {
+        // Get album object
+        $album = $this->getAlbumIfAllowed($query->getConnection(), $uid, $albumId);
+
+        // Check permission
+        if ($album === null) {
             throw new \Exception("Album {$albumId} not found");
         }
 
         // WHERE these are items with this album
         $query->innerJoin('m', 'photos_albums_files', 'paf', $query->expr()->andX(
-            $query->expr()->eq('paf.album_id', $query->createNamedParameter($albumId)),
+            $query->expr()->eq('paf.album_id', $query->createNamedParameter($album['album_id'])),
             $query->expr()->eq('paf.file_id', 'm.fileid'),
         ));
     }
@@ -65,29 +69,52 @@ trait TimelineQueryAlbums
         return $albums;
     }
 
-    private function hasAlbumPermission(IDBConnection $conn, string $uid, int $albumId)
+    /**
+     * Get album if allowed. Also check if album is shared with user.
+     *
+     * @param IDBConnection $connection
+     * @param string $uid UID of CURRENT user
+     * @param string $albumId $user/$name where $user is the OWNER of the album
+     */
+    private function getAlbumIfAllowed(IDBConnection $conn, string $uid, string $albumId)
     {
+        // Split name and uid
+        $parts = explode('/', $albumId);
+        if (count($parts) !== 2) {
+            return null;
+        }
+        $albumUid = $parts[0];
+        $albumName = $parts[1];
+
         // Check if owner
         $query = $conn->getQueryBuilder();
-        $query->select('album_id')->from('photos_albums')->where(
+        $query->select('*')->from('photos_albums')->where(
             $query->expr()->andX(
-                $query->expr()->eq('album_id', $query->createNamedParameter($albumId, IQueryBuilder::PARAM_INT)),
-                $query->expr()->eq('user', $query->createNamedParameter($uid)),
+                $query->expr()->eq('name', $query->createNamedParameter($albumName)),
+                $query->expr()->eq('user', $query->createNamedParameter($albumUid)),
             )
         );
-        if (false !== $query->executeQuery()->fetchOne()) {
-            return true;
+        $album = $query->executeQuery()->fetch();
+        if (!$album) {
+            return null;
         }
 
-        // Check in collaborators
+        // Check if user is owner
+        if ($albumUid === $uid) {
+            return $album;
+        }
+
+        // Check in collaborators instead
         $query = $conn->getQueryBuilder();
         $query->select('album_id')->from('photos_collaborators')->where(
             $query->expr()->andX(
-                $query->expr()->eq('album_id', $query->createNamedParameter($albumId, IQueryBuilder::PARAM_INT)),
+                $query->expr()->eq('album_id', $query->createNamedParameter($album['album_id'])),
                 $query->expr()->eq('collaborator_id', $query->createNamedParameter($uid)),
             )
         );
 
-        return false !== $query->executeQuery()->fetchOne();
+        if (false !== $query->executeQuery()->fetchOne()) {
+            return $album;
+        }
     }
 }

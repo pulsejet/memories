@@ -125,8 +125,9 @@ export default class Tag extends Mixins(GlobalMixin) {
         }
 
         if (this.isAlbum) {
-            const id = this.data.fileid;
-            return { name: 'albums', params: { id }};
+            const user = (<IAlbum>this.data).user;
+            const name = this.data.name;
+            return { name: 'albums', params: { user, name }};
         }
 
         return { name: 'tags', params: { name: this.data.name }};

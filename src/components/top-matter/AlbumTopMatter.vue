@@ -1,6 +1,6 @@
 <template>
-    <div v-if="name" class="face-top-matter">
-        <NcActions>
+    <div class="album-top-matter">
+        <NcActions v-if="!isAlbumList">
 			<NcActionButton :aria-label="t('memories', 'Back')" @click="back()">
 				{{ t('memories', 'Back') }}
                 <template #icon> <BackIcon :size="20" /> </template>
@@ -11,27 +11,25 @@
 
         <div class="right-actions">
             <NcActions :inline="1">
-                <NcActionButton :aria-label="t('memories', 'Rename person')" @click="$refs.editModal.open()" close-after-click>
-                    {{ t('memories', 'Rename person') }}
+                <NcActionButton :aria-label="t('memories', 'Create new album')" @click="$refs.createModal.open()" close-after-click
+                    v-if="isAlbumList">
+                    {{ t('memories', 'Create new album') }}
+                    <template #icon> <PlusIcon :size="20" /> </template>
+                </NcActionButton>
+                <NcActionButton :aria-label="t('memories', 'Edit album details')" @click="$refs.editModal.open()" close-after-click
+                    v-if="!isAlbumList">
+                    {{ t('memories', 'Edit album details') }}
                     <template #icon> <EditIcon :size="20" /> </template>
                 </NcActionButton>
-                <NcActionButton :aria-label="t('memories', 'Merge with different person')" @click="$refs.mergeModal.open()" close-after-click>
-                    {{ t('memories', 'Merge with different person') }}
-                    <template #icon> <MergeIcon :size="20" /> </template>
-                </NcActionButton>
-                <NcActionCheckbox :aria-label="t('memories', 'Mark person in preview')" :checked.sync="config_showFaceRect" @change="changeShowFaceRect">
-                    {{ t('memories', 'Mark person in preview') }}
-                </NcActionCheckbox>
-                <NcActionButton :aria-label="t('memories', 'Remove person')" @click="$refs.deleteModal.open()" close-after-click>
-                    {{ t('memories', 'Remove person') }}
+                <NcActionButton :aria-label="t('memories', 'Delete album')" @click="$refs.deleteModal.open()" close-after-click
+                    v-if="!isAlbumList">
+                    {{ t('memories', 'Delete album') }}
                     <template #icon> <DeleteIcon :size="20" /> </template>
                 </NcActionButton>
             </NcActions>
         </div>
 
-        <FaceEditModal ref="editModal" />
-        <FaceDeleteModal ref="deleteModal" />
-        <FaceMergeModal ref="mergeModal" />
+        <AlbumCreateModal ref="createModal" />
     </div>
 </template>
 
@@ -40,31 +38,34 @@ import { Component, Mixins, Watch } from 'vue-property-decorator';
 import GlobalMixin from '../../mixins/GlobalMixin';
 import UserConfig from "../../mixins/UserConfig";
 
+import AlbumCreateModal from '../modal/AlbumCreateModal.vue';
+
 import { NcActions, NcActionButton, NcActionCheckbox } from '@nextcloud/vue';
-import FaceEditModal from '../modal/FaceEditModal.vue';
-import FaceDeleteModal from '../modal/FaceDeleteModal.vue';
-import FaceMergeModal from '../modal/FaceMergeModal.vue';
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
 import DeleteIcon from 'vue-material-design-icons/Close.vue';
-import MergeIcon from 'vue-material-design-icons/Merge.vue';
+import PlusIcon from 'vue-material-design-icons/Plus.vue';
 
 @Component({
     components: {
         NcActions,
         NcActionButton,
         NcActionCheckbox,
-        FaceEditModal,
-        FaceDeleteModal,
-        FaceMergeModal,
+
+        AlbumCreateModal,
+
         BackIcon,
         EditIcon,
         DeleteIcon,
-        MergeIcon,
+        PlusIcon,
     },
 })
-export default class FaceTopMatter extends Mixins(GlobalMixin, UserConfig) {
+export default class AlbumTopMatter extends Mixins(GlobalMixin, UserConfig) {
     private name: string = '';
+
+    get isAlbumList() {
+        return !Boolean(this.$route.params.name);
+    }
 
     @Watch('$route')
     async routeChange(from: any, to: any) {
@@ -76,24 +77,17 @@ export default class FaceTopMatter extends Mixins(GlobalMixin, UserConfig) {
     }
 
     createMatter() {
-        this.name = this.$route.params.name || '';
+        this.name = this.$route.params.id || this.t('memories', 'Albums');
     }
 
     back() {
-        this.$router.push({ name: 'people' });
-    }
-
-    changeShowFaceRect() {
-        localStorage.setItem('memories_showFaceRect', this.config_showFaceRect ? '1' : '0');
-        setTimeout(() => {
-            this.$router.go(0); // refresh page
-        }, 500);
+        this.$router.push({ name: 'albums' });
     }
 }
 </script>
 
 <style lang="scss" scoped>
-.face-top-matter {
+.album-top-matter {
     display: flex;
     vertical-align: middle;
 
