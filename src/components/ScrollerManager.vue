@@ -116,14 +116,14 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
         const rtop = top1 + (top2 - top1) * topfrac;
 
         // Always move static cursor to right position
-        this.cursorY = utils.roundHalf(rtop);
+        this.cursorY = rtop;
 
         // Move hover cursor to same position unless hovering
         // Regardless, we need this call because the internal mapping might have changed
         if ((<HTMLElement>this.$refs.scroller).matches(':hover')) {
             this.moveHoverCursor(this.hoverCursorY);
         } else {
-            this.moveHoverCursor(this.cursorY);
+            this.moveHoverCursor(rtop);
         }
 
         // Show the scroller for some time
@@ -326,7 +326,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
     /** Change actual position of the hover cursor */
     private moveHoverCursor(y: number) {
-        this.hoverCursorY = utils.roundHalf(y);
+        this.hoverCursorY = y;
 
         // Get index of previous tick
         let idx = utils.binarySearch(this.ticks, y, 'topF');
