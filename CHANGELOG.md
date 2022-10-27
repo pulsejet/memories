@@ -2,6 +2,10 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## v4.4.0, v3.4.0
+* **Feature** Albums support for Nextcloud 25 (alpha)
+* Performance improvements and bug fixes
+
 ## v4.3.8, v3.3.8 (2022-10-26)
 * **Feature**: Full screen viewer on desktop
 * **Feature**: Allow opening people and tags in new tab
