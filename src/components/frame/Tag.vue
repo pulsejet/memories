@@ -94,7 +94,9 @@ export default class Tag extends Mixins(GlobalMixin) {
         // Add preview from last photo if album
         if (this.isAlbum) {
             const album = this.data as IAlbum;
-            this.previews = [{ fileid: album.last_added_photo, etag: '', flag: 0 }];
+            if (album.last_added_photo > 0) {
+                this.previews = [{ fileid: album.last_added_photo, etag: '', flag: 0 }];
+            }
             return;
         }
 
@@ -135,16 +137,14 @@ export default class Tag extends Mixins(GlobalMixin) {
 }
 </script>
 
-<style lang="scss">
-// Get rid of color of the bubble
-.tag .bbl .counter-bubble__counter {
-    color: unset !important;
-}
-</style>
-
 <style lang="scss" scoped>
 .tag, .name, .bubble, img {
     cursor: pointer;
+}
+
+// Get rid of color of the bubble
+.tag .bbl :deep .counter-bubble__counter {
+    color: unset !important;
 }
 
 .name {
@@ -180,6 +180,11 @@ export default class Tag extends Mixins(GlobalMixin) {
     padding: 2px;
     box-sizing: border-box;
     @media (max-width: 768px) { padding: 1px; }
+
+    .tag:not(.hasPreview) & {
+        background-color: #444;
+        background-clip: content-box;
+    }
 
     > .img-outer {
         background-color: var(--color-background-dark);
