@@ -18,14 +18,15 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Prop } from 'vue-property-decorator';
+import { Component, Emit, Mixins } from 'vue-property-decorator';
+import GlobalMixin from '../../mixins/GlobalMixin';
+
+import * as dav from '../../services/DavRequests';
 import { showInfo } from '@nextcloud/dialogs';
 import { IAlbum, IPhoto } from '../../types';
-import AlbumPicker from './AlbumPicker.vue';
 
+import AlbumPicker from './AlbumPicker.vue';
 import Modal from './Modal.vue';
-import GlobalMixin from '../../mixins/GlobalMixin';
-import * as dav from '../../services/DavRequests';
 
 @Component({
     components: {

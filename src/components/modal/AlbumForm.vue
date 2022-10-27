@@ -46,7 +46,7 @@
                 </NcButton>
             </span>
             <span class="right-buttons">
-                <NcButton v-if="sharingEnabled && !editMode"
+                <NcButton v-if="sharingEnabled"
                     :aria-label="t('photos', 'Go to the add collaborators view.')"
                     type="secondary"
                     :disabled="albumName.trim() === '' || loading"
@@ -69,9 +69,10 @@
             </span>
         </div>
     </form>
-    <!-- <CollaboratorsSelectionForm v-else
+    <AlbumCollaborators v-else
         :album-name="albumName"
-        :allow-public-link="false">
+        :allow-public-link="false"
+        :collaborators="[]">
         <template slot-scope="{collaborators}">
             <span class="left-buttons">
                 <NcButton :aria-label="t('photos', 'Back to the new album form.')"
@@ -93,7 +94,7 @@
                 </NcButton>
             </span>
         </template>
-    </CollaboratorsSelectionForm> -->
+    </AlbumCollaborators>
 </template>
 
 <script lang="ts">
@@ -102,11 +103,10 @@ import GlobalMixin from '../../mixins/GlobalMixin';
 
 import { getCurrentUser } from '@nextcloud/auth'
 import { NcButton, NcLoadingIcon, NcTextField } from '@nextcloud/vue'
-import { IAlbum } from '../../types';
 import moment from 'moment';
 import * as dav from '../../services/DavRequests';
 
-// import CollaboratorsSelectionForm from './CollaboratorsSelectionForm.vue'
+import AlbumCollaborators from './AlbumCollaborators.vue'
 
 import Send from 'vue-material-design-icons/Send.vue'
 import AccountMultiplePlus from 'vue-material-design-icons/AccountMultiplePlus.vue'
@@ -117,7 +117,7 @@ import AccountMultiplePlus from 'vue-material-design-icons/AccountMultiplePlus.v
 		NcButton,
 		NcLoadingIcon,
 		NcTextField,
-		// CollaboratorsSelectionForm,
+		AlbumCollaborators,
 
         Send,
         AccountMultiplePlus,
