@@ -27,7 +27,7 @@ class TimelineQuery
         // Print the query and exit
         $sql = empty($sql) ? $query->getSQL() : $sql;
         $sql = str_replace('*PREFIX*', 'oc_', $sql);
-        self::replaceQueryParams($query, $sql);
+        $sql = self::replaceQueryParams($query, $sql);
         echo "{$sql}";
 
         exit;
