@@ -10,7 +10,7 @@
 
             <slot></slot>
 
-            <div class="memories__modal__buttons">
+            <div class="buttons">
                 <slot name="buttons"></slot>
             </div>
         </div>
@@ -41,16 +41,14 @@ export default class Modal extends Vue {
     .head {
         font-weight: 500;
     }
-}
-</style>
 
-<style lang="scss">
-.memories__modal__buttons {
-    margin-top: 10px;
-    text-align: right;
+    :deep .buttons {
+        margin-top: 10px;
+        text-align: right;
 
-    > button {
-        display: inline-block !important;
+        > button {
+            display: inline-block !important;
+        }
     }
 }
 </style>

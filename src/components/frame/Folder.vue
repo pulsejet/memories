@@ -6,7 +6,7 @@
     }"
     :to="target">
         <div class="big-icon fill-block">
-            <FolderIcon class="memories__big-folder-icon" />
+            <FolderIcon class="icon" />
             <div class="name">{{ data.name }}</div>
         </div>
 
@@ -110,13 +110,6 @@ export default class Folder extends Mixins(GlobalMixin, UserConfig) {
 }
 </script>
 
-<style lang="scss">
-/* This cannot be scoped for some reason */
-.memories__big-folder-icon > .material-design-icon__svg {
-    width: 50%; height: 50%;
-}
-</style>
-
 <style lang="scss" scoped>
 .folder {
     cursor: pointer;
@@ -128,6 +121,10 @@ export default class Folder extends Mixins(GlobalMixin, UserConfig) {
     position: absolute;
     top: 0; left: 0;
     transition: opacity 0.2s ease-in-out;
+
+    :deep .material-design-icon__svg {
+        width: 50%; height: 50%;
+    }
 
     > .name {
         cursor: pointer;

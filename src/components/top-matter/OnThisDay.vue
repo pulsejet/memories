@@ -11,7 +11,7 @@
             </div>
         </div>
 
-        <div class="left-btn dir-btn memories__onthisday__btn" v-if="hasLeft">
+        <div class="left-btn dir-btn" v-if="hasLeft">
             <NcActions>
                 <NcActionButton
                     :aria-label="t('memories', 'Move left')"
@@ -21,7 +21,7 @@
                 </NcActionButton>
             </NcActions>
         </div>
-        <div class="right-btn dir-btn memories__onthisday__btn" v-if="hasRight">
+        <div class="right-btn dir-btn" v-if="hasRight">
             <NcActions>
                 <NcActionButton
                     :aria-label="t('memories', 'Move right')"
@@ -211,6 +211,12 @@ $mobHeight: 150px;
         border-radius: 10px;
     }
 
+    :deep .dir-btn button {
+        transform: scale(0.6);
+        box-shadow: var(--color-main-text) 0 0 3px 0 !important;
+        background-color: var(--color-main-background) !important;
+    }
+
     .left-btn {
         position: absolute;
         top: 50%; left: 0;
@@ -279,13 +285,5 @@ $mobHeight: 150px;
         height: $mobHeight;
         .overlay { font-size: 1.1em; }
     }
-}
-</style>
-
-<style lang="scss">
-.memories__onthisday__btn button {
-    transform: scale(0.6);
-    box-shadow: var(--color-main-text) 0 0 3px 0 !important;
-    background-color: var(--color-main-background) !important;
 }
 </style>

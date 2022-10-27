@@ -19,7 +19,7 @@
             </span>
             {{ longDateStr }}
 
-            <div class="fields memories__editdate__fields">
+            <div class="fields">
                 <NcTextField :value.sync="year"
                     class="field"
                     @input="newestChange()"
@@ -53,7 +53,7 @@
                 </span>
                 {{ longDateStrLast }}
 
-                <div class="fields memories__editdate__fields">
+                <div class="fields">
                     <NcTextField :value.sync="yearLast"
                         class="field"
                         :label="t('memories', 'Year')" :label-visible="true"
@@ -400,6 +400,12 @@ export default class EditDate extends Mixins(GlobalMixin) {
         width: 4.1em;
         display: inline-block;
     }
+
+    :deep label {
+        font-size: 0.8em;
+        padding: 0 !important;
+        padding-left: 3px !important;
+    }
 }
 
 .oldest {
@@ -415,13 +421,5 @@ export default class EditDate extends Mixins(GlobalMixin) {
         font-size: 0.8em;
         line-height: 1em;
     }
-}
-</style>
-
-<style lang="scss">
-.memories__editdate__fields label {
-    font-size: 0.8em;
-    padding: 0 !important;
-    padding-left: 3px !important;
 }
 </style>
