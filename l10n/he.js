@@ -7,6 +7,7 @@ OC.L10N.register(
     "Videos" : "סרטונים",
     "Archive" : "לארכיון",
     "Tags" : "תגיות",
+    "Maps" : "מפות",
     "Settings" : "הגדרות",
     "Cancel" : "ביטול",
     "Delete" : "מחיקה",

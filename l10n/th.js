@@ -6,6 +6,7 @@ OC.L10N.register(
     "Videos" : "วิดีโอ",
     "Archive" : "เก็บถาวร",
     "Tags" : "แท็ก",
+    "Maps" : "แผนที่",
     "Settings" : "การตั้งค่า",
     "Cancel" : "ยกเลิก",
     "Delete" : "ลบ",

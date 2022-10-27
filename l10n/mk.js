@@ -9,6 +9,7 @@ OC.L10N.register(
     "Archive" : "Архива",
     "On this day" : "На денешен ден",
     "Tags" : "Ознаки",
+    "Maps" : "Мапи",
     "Settings" : "Параметри",
     "Cancel" : "Откажи",
     "Delete" : "Избриши",

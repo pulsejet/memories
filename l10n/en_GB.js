@@ -6,6 +6,7 @@ OC.L10N.register(
     "Videos" : "Videos",
     "Archive" : "Archive",
     "Tags" : "Tags",
+    "Maps" : "Maps",
     "Settings" : "Settings",
     "Cancel" : "Cancel",
     "Delete" : "Delete",

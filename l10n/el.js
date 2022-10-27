@@ -9,6 +9,7 @@ OC.L10N.register(
     "Archive" : "Αρχειοθέτηση",
     "On this day" : "Αυτή τη μέρα",
     "Tags" : "Ετικέτες",
+    "Maps" : "Χάρτες",
     "Settings" : "Ρυθμίσεις",
     "Cancel" : "Ακύρωση",
     "Delete" : "Διαγραφή",

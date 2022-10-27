@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Favorites" : "Favoritos",
     "Tags" : "Etiquettas",
+    "Maps" : "Mappas",
     "Settings" : "Configurationes",
     "Cancel" : "Cancellar",
     "Delete" : "Deler",

@@ -4,6 +4,7 @@ OC.L10N.register(
     "Favorites" : "Favorites",
     "Videos" : "Videos",
     "Tags" : "Tags",
+    "Maps" : "Maps",
     "Settings" : "Sozlamalar",
     "Cancel" : "Cancel",
     "Delete" : "Delete",

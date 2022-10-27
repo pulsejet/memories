@@ -11,6 +11,7 @@ OC.L10N.register(
     "Archive" : "Artxibatu",
     "On this day" : "Egun honetan",
     "Tags" : "Etiketak",
+    "Maps" : "Mapak",
     "Settings" : "Ezarpenak",
     "Cancel" : "Utzi",
     "Delete" : "Ezabatu",
