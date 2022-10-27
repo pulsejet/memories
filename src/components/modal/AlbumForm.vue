@@ -46,7 +46,7 @@
                 </NcButton>
             </span>
             <span class="right-buttons">
-                <NcButton v-if="sharingEnabled"
+                <NcButton v-if="sharingEnabled && !editMode"
                     :aria-label="t('photos', 'Go to the add collaborators view.')"
                     type="secondary"
                     :disabled="albumName.trim() === '' || loading"

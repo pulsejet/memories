@@ -53,7 +53,6 @@
 							:user="availableCollaborators[collaboratorKey].id"
 							:display-name="availableCollaborators[collaboratorKey].label"
 							:aria-label="t('photos', 'Add {collaboratorLabel} to the collaborators list', {collaboratorLabel: availableCollaborators[collaboratorKey].label})"
-							tabindex="0"
 							@click="selectEntity(collaboratorKey)" />
 					</li>
 				</ul>

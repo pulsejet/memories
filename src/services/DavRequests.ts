@@ -730,10 +730,19 @@ export async function getAlbum(user: string, name: string, extraProps = {}) {
                 ${extraProps}
             </d:prop>
         </d:propfind>`;
-    return await client.stat(`/photos/${user}/albums/${name}`, {
+    let album = await client.stat(`/photos/${user}/albums/${name}`, {
         data: req,
         details: true,
-    })
+    }) as any;
+
+    // Post processing
+    album = {
+        ...album.data,
+        ...album.data.props,
+    };
+    const c = album?.collaborators?.collaborator;
+    album.collaborators = c ? (Array.isArray(c) ? c : [c]) : [];
+    return album;
 }
 
 /** Rename an album */

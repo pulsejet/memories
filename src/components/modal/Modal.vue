@@ -40,6 +40,8 @@ export default class Modal extends Vue {
 
     .head {
         font-weight: 500;
+        font-size: 1.15em;
+        margin-bottom: 5px;
     }
 
     :deep .buttons {

@@ -46,11 +46,7 @@ export default class AlbumCreateModal extends Mixins(GlobalMixin) {
     public async open(edit: boolean) {
         if (edit) {
             try {
-                const album: any = await dav.getAlbum(this.$route.params.user, this.$route.params.name);
-                this.album = {
-                    ...album.data,
-                    ...album.data.props,
-                };
+                this.album = await dav.getAlbum(this.$route.params.user, this.$route.params.name);
             } catch (e) {
                 console.error(e);
                 showError(this.t('photos', 'Could not load the selected album'));
