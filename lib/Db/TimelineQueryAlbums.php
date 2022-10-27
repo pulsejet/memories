@@ -18,7 +18,7 @@ trait TimelineQueryAlbums
         $album = $this->getAlbumIfAllowed($query->getConnection(), $uid, $albumId);
 
         // Check permission
-        if ($album === null) {
+        if (null === $album) {
             throw new \Exception("Album {$albumId} not found");
         }
 
@@ -73,14 +73,14 @@ trait TimelineQueryAlbums
      * Get album if allowed. Also check if album is shared with user.
      *
      * @param IDBConnection $connection
-     * @param string $uid UID of CURRENT user
-     * @param string $albumId $user/$name where $user is the OWNER of the album
+     * @param string        $uid        UID of CURRENT user
+     * @param string        $albumId    $user/$name where $user is the OWNER of the album
      */
     private function getAlbumIfAllowed(IDBConnection $conn, string $uid, string $albumId)
     {
         // Split name and uid
         $parts = explode('/', $albumId);
-        if (count($parts) !== 2) {
+        if (2 !== \count($parts)) {
             return null;
         }
         $albumUid = $parts[0];
