@@ -77,7 +77,7 @@ export default class AlbumTopMatter extends Mixins(GlobalMixin, UserConfig) {
     }
 
     createMatter() {
-        this.name = this.$route.params.id || this.t('memories', 'Albums');
+        this.name = this.$route.params.name || this.t('memories', 'Albums');
     }
 
     back() {
