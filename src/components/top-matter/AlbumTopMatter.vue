@@ -24,7 +24,7 @@
           :aria-label="t('memories', 'Share album')"
           @click="$refs.shareModal.open(false)"
           close-after-click
-          v-if="!isAlbumList"
+          v-if="canEditAlbum"
         >
           {{ t("memories", "Share album") }}
           <template #icon> <ShareIcon :size="20" /> </template>
@@ -33,7 +33,7 @@
           :aria-label="t('memories', 'Edit album details')"
           @click="$refs.createModal.open(true)"
           close-after-click
-          v-if="!isAlbumList"
+          v-if="canEditAlbum"
         >
           {{ t("memories", "Edit album details") }}
           <template #icon> <EditIcon :size="20" /> </template>
@@ -42,7 +42,7 @@
           :aria-label="t('memories', 'Delete album')"
           @click="$refs.deleteModal.open()"
           close-after-click
-          v-if="!isAlbumList"
+          v-if="canEditAlbum"
         >
           {{ t("memories", "Delete album") }}
           <template #icon> <DeleteIcon :size="20" /> </template>
@@ -61,11 +61,13 @@ import { Component, Mixins, Watch } from "vue-property-decorator";
 import GlobalMixin from "../../mixins/GlobalMixin";
 import UserConfig from "../../mixins/UserConfig";
 
+import { NcActions, NcActionButton, NcActionCheckbox } from "@nextcloud/vue";
+import { getCurrentUser } from "@nextcloud/auth";
+
 import AlbumCreateModal from "../modal/AlbumCreateModal.vue";
 import AlbumDeleteModal from "../modal/AlbumDeleteModal.vue";
 import AlbumShareModal from "../modal/AlbumShareModal.vue";
 
-import { NcActions, NcActionButton, NcActionCheckbox } from "@nextcloud/vue";
 import BackIcon from "vue-material-design-icons/ArrowLeft.vue";
 import EditIcon from "vue-material-design-icons/Pencil.vue";
 import DeleteIcon from "vue-material-design-icons/Close.vue";
@@ -94,6 +96,12 @@ export default class AlbumTopMatter extends Mixins(GlobalMixin, UserConfig) {
 
   get isAlbumList() {
     return !Boolean(this.$route.params.name);
+  }
+
+  get canEditAlbum() {
+    return (
+      !this.isAlbumList && this.$route.params.user === getCurrentUser()?.uid
+    );
   }
 
   @Watch("$route")
