@@ -3,7 +3,14 @@ import { getCurrentUser } from "@nextcloud/auth";
 import { generateUrl } from "@nextcloud/router";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t, translatePlural as n } from "@nextcloud/l10n";
-import { IAlbum, IDay, IFileInfo, IPhoto, ITag } from "../../types";
+import {
+  IAlbum,
+  IDay,
+  IExtendedPhoto,
+  IFileInfo,
+  IPhoto,
+  ITag,
+} from "../../types";
 import { constants } from "../Utils";
 import axios from "@nextcloud/axios";
 import client from "../DavClient";
@@ -60,16 +67,16 @@ export async function getAlbumsData(type: "1" | "2" | "3"): Promise<IDay[]> {
  *
  * @param user User ID of album
  * @param name Name of album (or ID)
- * @param fileIds List of file IDs to add
+ * @param photos List of photos to add
  * @returns Generator
  */
 export async function* addToAlbum(
   user: string,
   name: string,
-  fileIds: number[]
+  photos: IPhoto[]
 ) {
   // Get files data
-  let fileInfos = await base.getFiles(fileIds.filter((f) => f));
+  let fileInfos = await base.getFiles(photos);
 
   const albumPath = getAlbumPath(user, name);
 
@@ -101,16 +108,16 @@ export async function* addToAlbum(
  *
  * @param user Owner of album
  * @param name Name of album (or ID)
- * @param fileIds List of file IDs to remove
+ * @param photos List of photos to remove
  * @returns Generator
  */
 export async function* removeFromAlbum(
   user: string,
   name: string,
-  fileIds: number[]
+  photos: IPhoto[]
 ) {
   // Get files data
-  let fileInfos = await base.getFiles(fileIds.filter((f) => f));
+  let fileInfos = await base.getFiles(photos);
 
   // Add each file
   const calls = fileInfos.map((f) => async () => {
@@ -263,25 +270,27 @@ export function getAlbumFileInfos(
   albumUser: string,
   albumName: string
 ): IFileInfo[] {
+  const ephotos = photos as IExtendedPhoto[];
+
   const uid = getCurrentUser()?.uid;
   const collection =
     albumUser === uid
       ? `/photos/${uid}/albums/${albumName}`
       : `/photos/${uid}/sharedalbums/${albumName} (${albumUser})`;
 
-  return photos.map((photo) => {
+  return ephotos.map((photo) => {
     const basename =
       albumUser === uid
-        ? `${photo.fileid}-${(<any>photo).basename}`
+        ? `${photo.fileid}-${photo.basename}`
         : `${photo.fileid}-${albumName} (${albumUser})`;
 
     return {
       fileid: photo.fileid,
       filename: `${collection}/${basename}`,
       basename: basename,
-      mime: (<any>photo).mimetype,
+      mime: photo.mimetype,
       hasPreview: true,
       etag: photo.etag,
-    };
+    } as IFileInfo;
   });
 }

@@ -276,7 +276,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
         return;
       }
     }
-    await dav.downloadFilesByIds(Array.from(selection.keys()));
+    await dav.downloadFilesByIds(Array.from(selection.values()));
   }
 
   /**
@@ -294,7 +294,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
   private async favoriteSelection(selection: Selection) {
     const val = !this.allSelectedFavorites(selection);
     for await (const favIds of dav.favoriteFilesByIds(
-      Array.from(selection.keys()),
+      Array.from(selection.values()),
       val
     )) {
       favIds.forEach((id) => {
@@ -330,8 +330,8 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
       }
     }
 
-    for await (const delIds of dav.deleteFilesByIds(
-      Array.from(selection.keys())
+    for await (const delIds of dav.deletePhotos(
+      Array.from(selection.values())
     )) {
       const delPhotos = delIds.map((id) => selection.get(id));
       this.deletePhotos(delPhotos);
@@ -353,7 +353,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
     if (selection.size !== 1) return;
 
     const photo: IPhoto = selection.values().next().value;
-    const f = await dav.getFiles([photo.fileid]);
+    const f = await dav.getFiles([photo]);
     if (f.length === 0) return;
 
     const file = f[0];
@@ -424,7 +424,11 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
       this.updateLoading(1);
       const user = this.$route.params.user;
       const name = this.$route.params.name;
-      const gen = dav.removeFromAlbum(user, name, Array.from(selection.keys()));
+      const gen = dav.removeFromAlbum(
+        user,
+        name,
+        Array.from(selection.values())
+      );
       for await (const delIds of gen) {
         const delPhotos = delIds
           .filter((p) => p)
@@ -481,7 +485,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
     for await (let delIds of dav.removeFaceImages(
       user,
       name,
-      Array.from(selection.keys())
+      Array.from(selection.values())
     )) {
       const delPhotos = delIds.filter((x) => x).map((id) => selection.get(id));
       this.deletePhotos(delPhotos);

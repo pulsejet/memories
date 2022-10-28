@@ -4,6 +4,7 @@ import { encodePath } from "@nextcloud/paths";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t, translatePlural as n } from "@nextcloud/l10n";
 import axios from "@nextcloud/axios";
+import { IPhoto } from "../../types";
 
 /**
  * Favorite a file
@@ -34,32 +35,33 @@ export async function favoriteFile(fileName: string, favoriteState: boolean) {
 /**
  * Favorite all files in a given list of Ids
  *
- * @param fileIds list of file ids
+ * @param photos list of photos
  * @param favoriteState the new favorite state
  * @returns generator of lists of file ids that were state-changed
  */
 export async function* favoriteFilesByIds(
-  fileIds: number[],
+  photos: IPhoto[],
   favoriteState: boolean
 ) {
-  const fileIdsSet = new Set(fileIds);
-
-  if (fileIds.length === 0) {
+  if (photos.length === 0) {
     return;
   }
 
   // Get files data
   let fileInfos: any[] = [];
   try {
-    fileInfos = await base.getFiles(fileIds.filter((f) => f));
+    fileInfos = await base.getFiles(photos);
   } catch (e) {
-    console.error("Failed to get file info", fileIds, e);
+    console.error("Failed to get file info", photos, e);
     showError(t("memories", "Failed to favorite files."));
     return;
   }
 
+  if (fileInfos.length !== photos.length) {
+    showError(t("memories", "Failed to favorite some files."));
+  }
+
   // Favorite each file
-  fileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid));
   const calls = fileInfos.map((fileInfo) => async () => {
     try {
       await favoriteFile(fileInfo.filename, favoriteState);

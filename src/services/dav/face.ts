@@ -53,16 +53,16 @@ export async function getPeopleData(): Promise<IDay[]> {
  *
  * @param user User ID of face
  * @param name Name of face (or ID)
- * @param fileIds List of file IDs to remove
+ * @param photos List of photos to remove
  * @returns Generator
  */
 export async function* removeFaceImages(
   user: string,
   name: string,
-  fileIds: number[]
+  photos: IPhoto[]
 ) {
   // Get files data
-  let fileInfos = await base.getFiles(fileIds.filter((f) => f));
+  let fileInfos = await base.getFiles(photos);
 
   // Remove each file
   const calls = fileInfos.map((f) => async () => {

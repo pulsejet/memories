@@ -61,11 +61,7 @@ export default class AddToAlbumModal extends Mixins(GlobalMixin) {
 
   public async selectAlbum(album: IAlbum) {
     const name = album.name || album.album_id.toString();
-    const gen = dav.addToAlbum(
-      album.user,
-      name,
-      this.photos.map((p) => p.fileid)
-    );
+    const gen = dav.addToAlbum(album.user, name, this.photos);
     this.processing = true;
 
     for await (const fids of gen) {

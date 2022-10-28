@@ -17,6 +17,8 @@ export type IFileInfo = {
   favorite?: boolean;
   /** Vue flags */
   flag?: number;
+  /** MIME type of file */
+  mime?: string;
 };
 
 export type IDay = {
@@ -76,6 +78,13 @@ export type IPhoto = {
   /** Optional datetaken epoch */
   datetaken?: number;
 };
+
+export interface IExtendedPhoto extends IPhoto {
+  /** Base name of file */
+  basename: string;
+  /** Mime type of file */
+  mimetype: string;
+}
 
 export interface IFolder extends IPhoto {
   /** Path to folder */

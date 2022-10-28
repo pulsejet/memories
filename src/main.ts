@@ -27,6 +27,12 @@ import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 import App from "./App.vue";
 import router from "./router";
 
+// Global exposed variables
+declare global {
+  var vuerouter: typeof router;
+}
+globalThis.vuerouter = router;
+
 Vue.use(VueVirtualScroller);
 
 // https://github.com/nextcloud/photos/blob/156f280c0476c483cb9ce81769ccb0c1c6500a4e/src/main.js

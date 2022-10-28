@@ -125,32 +125,30 @@
 </template>
 
 <script lang="ts">
-import { Component, Watch, Mixins } from "vue-property-decorator";
-import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";
-import { generateUrl } from "@nextcloud/router";
+import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
-import { NcEmptyContent } from "@nextcloud/vue";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
+import { generateUrl } from "@nextcloud/router";
+import { NcEmptyContent } from "@nextcloud/vue";
+import PeopleIcon from "vue-material-design-icons/AccountMultiple.vue";
+import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
+import ImageMultipleIcon from "vue-material-design-icons/ImageMultiple.vue";
+import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
+import { Component, Mixins, Watch } from "vue-property-decorator";
 import GlobalMixin from "../mixins/GlobalMixin";
 import UserConfig from "../mixins/UserConfig";
-
-import { ViewerManager } from "../services/Viewer";
-import { getLayout } from "../services/Layout";
 import * as dav from "../services/DavRequests";
+import { getLayout } from "../services/Layout";
 import * as utils from "../services/Utils";
-import axios from "@nextcloud/axios";
+import { ViewerManager } from "../services/Viewer";
+import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";
 import Folder from "./frame/Folder.vue";
-import Tag from "./frame/Tag.vue";
 import Photo from "./frame/Photo.vue";
-import TopMatter from "./top-matter/TopMatter.vue";
-import OnThisDay from "./top-matter/OnThisDay.vue";
-import SelectionManager from "./SelectionManager.vue";
+import Tag from "./frame/Tag.vue";
 import ScrollerManager from "./ScrollerManager.vue";
-
-import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
-import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
-import PeopleIcon from "vue-material-design-icons/AccountMultiple.vue";
-import ImageMultipleIcon from "vue-material-design-icons/ImageMultiple.vue";
+import SelectionManager from "./SelectionManager.vue";
+import OnThisDay from "./top-matter/OnThisDay.vue";
+import TopMatter from "./top-matter/TopMatter.vue";
 
 const SCROLL_LOAD_DELAY = 100; // Delay in loading data when scrolling
 const DESKTOP_ROW_HEIGHT = 200; // Height of row on desktop

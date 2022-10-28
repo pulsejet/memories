@@ -35,17 +35,9 @@ export class ViewerManager {
 
     // Get file infos
     let fileInfos: IFileInfo[];
-    const ids = list.map((p) => p.fileid);
     try {
       this.updateLoading(1);
-
-      if (this.$route.name === "albums") {
-        const user = this.$route.params.user;
-        const name = this.$route.params.name;
-        fileInfos = dav.getAlbumFileInfos(list, user, name);
-      } else {
-        fileInfos = await dav.getFiles(ids);
-      }
+      fileInfos = await dav.getFiles(list);
     } catch (e) {
       console.error("Failed to load fileInfos", e);
       showError("Failed to load fileInfos");
@@ -59,8 +51,8 @@ export class ViewerManager {
 
     // Fix sorting of the fileInfos
     const itemPositions = {};
-    for (const [index, id] of ids.entries()) {
-      itemPositions[id] = index;
+    for (const [index, p] of list.entries()) {
+      itemPositions[p.fileid] = index;
     }
     fileInfos.sort(function (a, b) {
       return itemPositions[a.fileid] - itemPositions[b.fileid];

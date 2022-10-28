@@ -2,6 +2,7 @@ import * as base from "./base";
 import { generateUrl } from "@nextcloud/router";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
+import { IPhoto } from "../../types";
 
 /**
  * Download a file
@@ -39,16 +40,16 @@ export async function downloadFiles(fileNames: string[]): Promise<boolean> {
 
 /**
  * Download the files given by the fileIds
- * @param fileIds list of file ids
+ * @param photos list of photos
  */
-export async function downloadFilesByIds(fileIds: number[]) {
-  if (fileIds.length === 0) {
+export async function downloadFilesByIds(photos: IPhoto[]) {
+  if (photos.length === 0) {
     return;
   }
 
   // Get files to download
-  const fileInfos = await base.getFiles(fileIds);
-  if (fileInfos.length !== fileIds.length) {
+  const fileInfos = await base.getFiles(photos);
+  if (fileInfos.length !== photos.length) {
     showError(t("memories", "Failed to download some files."));
   }
   if (fileInfos.length === 0) {

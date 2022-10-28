@@ -1,9 +1,10 @@
 import { getCurrentUser } from "@nextcloud/auth";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
-import { IFileInfo } from "../../types";
+import { IFileInfo, IPhoto } from "../../types";
 import client from "../DavClient";
 import { genFileInfo } from "../FileUtils";
+import { getAlbumFileInfos } from "./albums";
 
 export const props = `
     <oc:fileid />
@@ -35,10 +36,19 @@ const GET_FILE_CHUNK_SIZE = 50;
 
 /**
  * Get file infos for list of files given Ids
- * @param fileIds list of file ids
+ * @param photos list of photos
  * @returns list of file infos
  */
-export async function getFiles(fileIds: number[]): Promise<IFileInfo[]> {
+export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
+  // Check if albums
+  const route = vuerouter.currentRoute;
+  if (route.name === "albums") {
+    return getAlbumFileInfos(photos, route.params.user, route.params.name);
+  }
+
+  // Get file IDs array
+  const fileIds = photos.map((photo) => photo.fileid);
+
   // Divide fileIds into chunks of GET_FILE_CHUNK_SIZE
   const chunks = [];
   for (let i = 0; i < fileIds.length; i += GET_FILE_CHUNK_SIZE) {
@@ -155,22 +165,22 @@ export async function deleteFile(path: string) {
 /**
  * Delete all files in a given list of Ids
  *
- * @param fileIds list of file ids
+ * @param photos list of photos to delete
  * @returns list of file ids that were deleted
  */
-export async function* deleteFilesByIds(fileIds: number[]) {
-  const fileIdsSet = new Set(fileIds);
-
-  if (fileIds.length === 0) {
+export async function* deletePhotos(photos: IPhoto[]) {
+  if (photos.length === 0) {
     return;
   }
 
+  const fileIdsSet = new Set(photos.map((p) => p.fileid));
+
   // Get files data
-  let fileInfos: any[] = [];
+  let fileInfos: IFileInfo[] = [];
   try {
-    fileInfos = await getFiles(fileIds.filter((f) => f));
+    fileInfos = await getFiles(photos);
   } catch (e) {
-    console.error("Failed to get file info for files to delete", fileIds, e);
+    console.error("Failed to get file info for files to delete", photos, e);
     showError(t("memories", "Failed to delete files."));
     return;
   }
@@ -180,7 +190,7 @@ export async function* deleteFilesByIds(fileIds: number[]) {
   const calls = fileInfos.map((fileInfo) => async () => {
     try {
       await deleteFile(fileInfo.filename);
-      return fileInfo.fileid as number;
+      return fileInfo.fileid;
     } catch (error) {
       console.error("Failed to delete", fileInfo, error);
       showError(t("memories", "Failed to delete {fileName}.", fileInfo));

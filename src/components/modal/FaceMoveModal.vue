@@ -105,7 +105,7 @@ export default class FaceMoveModal extends Mixins(GlobalMixin) {
         photoMap.set(photo.fileid, photo);
       }
 
-      let data = await dav.getFiles(this.photos.map((p) => p.fileid));
+      let data = await dav.getFiles(this.photos);
 
       // Create move calls
       const calls = data.map((p) => async () => {
