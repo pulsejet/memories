@@ -43,7 +43,7 @@
 import { Component, Prop, Emit, Mixins, Watch } from "vue-property-decorator";
 import { IDay, IPhoto } from "../../types";
 
-import { getPreviewUrl } from "../../services/FileUtils";
+import { getPhotosPreviewUrl, getPreviewUrl } from "../../services/FileUtils";
 import errorsvg from "../../assets/error.svg";
 import GlobalMixin from "../../mixins/GlobalMixin";
 
@@ -122,7 +122,9 @@ export default class Photo extends Mixins(GlobalMixin) {
         ) - 1;
     }
 
-    return getPreviewUrl(this.data.fileid, this.data.etag, false, size);
+    const fun =
+      this.$route.name === "albums" ? getPhotosPreviewUrl : getPreviewUrl;
+    return fun(this.data.fileid, this.data.etag, false, size);
   }
 
   /** Set src with overlay face rect */

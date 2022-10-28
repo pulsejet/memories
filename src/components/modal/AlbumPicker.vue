@@ -88,6 +88,7 @@ import ImageMultiple from "vue-material-design-icons/ImageMultiple.vue";
 
 import { NcButton, NcListItem, NcLoadingIcon } from "@nextcloud/vue";
 import { generateUrl } from "@nextcloud/router";
+import { getPhotosPreviewUrl } from "../../services/FileUtils";
 import { IAlbum } from "../../types";
 import axios from "@nextcloud/axios";
 
@@ -102,9 +103,7 @@ import axios from "@nextcloud/axios";
   },
   filters: {
     toCoverUrl(fileId: string) {
-      return generateUrl(
-        `/apps/photos/api/v1/preview/${fileId}?x=${256}&y=${256}`
-      );
+      return getPhotosPreviewUrl(Number(fileId), "unknown", true, 256);
     },
   },
 })

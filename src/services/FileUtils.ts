@@ -133,6 +133,7 @@ const genFileInfo = function (obj) {
   return fileInfo;
 };
 
+/** Get preview URL from Nextcloud core */
 const getPreviewUrl = function (
   fileid: number,
   etag: string,
@@ -145,10 +146,24 @@ const getPreviewUrl = function (
   );
 };
 
+/** Get the preview URL from the photos app */
+const getPhotosPreviewUrl = function (
+  fileid: number,
+  etag: string,
+  square: boolean,
+  size: number
+): string {
+  const a = square ? "0" : "1";
+  return generateUrl(
+    `/apps/photos/api/v1/preview/${fileid}?c=${etag}&x=${size}&y=${size}&forceIcon=0&a=${a}`
+  );
+};
+
 export {
   encodeFilePath,
   extractFilePaths,
   sortCompare,
   genFileInfo,
   getPreviewUrl,
+  getPhotosPreviewUrl,
 };
