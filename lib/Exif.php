@@ -269,6 +269,10 @@ class Exif
             return [$height, $width];
         }
 
+        if ($width <= 0 || $height <= 0 || $width > 10000 || $height > 10000) {
+            return [0, 0];
+        }
+
         return [$width, $height];
     }
 
