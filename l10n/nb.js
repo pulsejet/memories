@@ -16,6 +16,9 @@ OC.L10N.register(
     "Favorite" : "Favoritt",
     "Unarchive" : "Dearkivere",
     "View in folder" : "Vis i mappe",
+    "Copy public link" : "Kopier offentlig lenke",
+    "Public link" : "Offentlig lenke",
+    "Back" : "Tilbake",
     "Year" : "År",
     "Month" : "Måned",
     "Day" : "Dag",
@@ -23,7 +26,6 @@ OC.L10N.register(
     "Hour" : "Time",
     "Name" : "Navn",
     "Update" : "Oppdater",
-    "Loading …" : "Laster ...",
-    "Back" : "Tilbake"
+    "Loading …" : "Laster ..."
 },
 "nplurals=2; plural=(n != 1);");

@@ -8,12 +8,12 @@ OC.L10N.register(
     "Cancel" : "បោះបង់",
     "Delete" : "លុប",
     "Download" : "ទាញយក",
+    "Back" : "ត្រឡប់ក្រោយ",
     "Year" : "ឆ្នាំ",
     "Month" : "ខែ",
     "Day" : "ថ្ងៃ",
     "Time" : "ម៉ោង",
     "Name" : "ឈ្មោះ",
-    "Update" : "ធ្វើ​បច្ចុប្បន្នភាព",
-    "Back" : "ត្រឡប់ក្រោយ"
+    "Update" : "ធ្វើ​បច្ចុប្បន្នភាព"
 },
 "nplurals=1; plural=0;");

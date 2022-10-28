@@ -15,13 +15,14 @@ OC.L10N.register(
     "Download" : "بارگیری",
     "Favorite" : "مورد‌ ‌علاقه‌",
     "View in folder" : "مشاهده در پوشه",
+    "Public link" : "پیوند عمومی",
+    "Back" : "بازگشت",
     "Year" : "سال",
     "Month" : "ماه",
     "Day" : "روز",
     "Time" : "زمان",
     "Name" : "نام",
     "Update" : "یه‌روزرسانی",
-    "Loading …" : "بارگذاری …",
-    "Back" : "بازگشت"
+    "Loading …" : "بارگذاری …"
 },
 "nplurals=2; plural=(n > 1);");

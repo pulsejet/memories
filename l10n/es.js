@@ -17,6 +17,13 @@ OC.L10N.register(
     "Favorite" : "Marcar como favorito",
     "Unarchive" : "Desarchivar",
     "View in folder" : "Ver en carpeta",
+    "No collaborators available" : "No hay colaboradores disponibles",
+    "Public link copied!" : "¡Se copió el enlace público!",
+    "Failed to fetch collaborators list." : "Fallo al recuperar la lista de colaboradores.",
+    "Edit album details" : "Editar los detalles del álbum",
+    "Go back to the previous view." : "Regresar a la vista anterior.",
+    "Back" : "Atrás",
+    "Add collaborators" : "Añadir colaboradores",
     "Year" : "Año",
     "Month" : "Mes",
     "Day" : "Día",
@@ -29,8 +36,9 @@ OC.L10N.register(
     "Update" : "Actualizar",
     "Loading …" : "Cargando …",
     "Too many failures, aborting" : "Demasiados fallos, abortando",
-    "Back" : "Atrás",
+    "Delete album" : "Eliminar álbum",
     "Merge with different person" : "Unir con una persona diferente",
-    "Failed to delete {fileName}." : "Fallo al borrar {fileName}."
+    "Failed to delete {fileName}." : "Fallo al borrar {fileName}.",
+    "Failed to create {albumName}." : "Fallo al crear {albumName}"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

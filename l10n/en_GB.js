@@ -14,6 +14,7 @@ OC.L10N.register(
     "Favorite" : "Favourite",
     "Unarchive" : "Unarchive",
     "View in folder" : "View in folder",
+    "Back" : "Back",
     "Month" : "Month",
     "Day" : "Day",
     "Time" : "Time",
@@ -21,7 +22,6 @@ OC.L10N.register(
     "Name" : "Surname",
     "Update" : "Update",
     "Loading …" : "Loading …",
-    "Back" : "Back",
     "Cannot find this photo anymore!" : "Cannot find this photo any more!"
 },
 "nplurals=2; plural=(n != 1);");

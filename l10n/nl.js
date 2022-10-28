@@ -5,6 +5,7 @@ OC.L10N.register(
     "Folders" : "Mappen",
     "Favorites" : "Favorieten",
     "Videos" : "Videos",
+    "Albums" : "Albums",
     "People" : "Mensen",
     "Archive" : "Archiveren",
     "On this day" : "Vandaag",
@@ -17,6 +18,9 @@ OC.L10N.register(
     "Favorite" : "Favoriet",
     "Unarchive" : "Terugzetten uit archief",
     "View in folder" : "Bekijken in map",
+    "Copy public link" : "Kopieer openbare link",
+    "Public link" : "Openbare Link",
+    "Back" : "Terug",
     "Year" : "Jaar",
     "Month" : "Maand",
     "Day" : "Dag",
@@ -25,7 +29,6 @@ OC.L10N.register(
     "Minute" : "Minuut",
     "Name" : "Naam",
     "Update" : "Update",
-    "Loading …" : "Laden …",
-    "Back" : "Terug"
+    "Loading …" : "Laden …"
 },
 "nplurals=2; plural=(n != 1);");

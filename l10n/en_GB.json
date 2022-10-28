@@ -12,6 +12,7 @@
     "Favorite" : "Favourite",
     "Unarchive" : "Unarchive",
     "View in folder" : "View in folder",
+    "Back" : "Back",
     "Month" : "Month",
     "Day" : "Day",
     "Time" : "Time",
@@ -19,7 +20,6 @@
     "Name" : "Surname",
     "Update" : "Update",
     "Loading …" : "Loading …",
-    "Back" : "Back",
     "Cannot find this photo anymore!" : "Cannot find this photo any more!"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

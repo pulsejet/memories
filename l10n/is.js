@@ -17,6 +17,9 @@ OC.L10N.register(
     "Favorite" : "Eftirlæti",
     "Unarchive" : "Taka úr geymslu",
     "View in folder" : "Skoða í möppu",
+    "Copy public link" : "Afrita opinberan tengil",
+    "Public link" : "Opinber tengill",
+    "Back" : "Til baka",
     "Year" : "Ár",
     "Month" : "Mánuður",
     "Day" : "Dagur",
@@ -25,7 +28,6 @@ OC.L10N.register(
     "Minute" : "Mínúta",
     "Name" : "Heiti",
     "Update" : "Uppfæra",
-    "Loading …" : "Hleð inn …",
-    "Back" : "Til baka"
+    "Loading …" : "Hleð inn …"
 },
 "nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);");

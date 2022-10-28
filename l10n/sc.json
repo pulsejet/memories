@@ -3,6 +3,7 @@
     "Folders" : "Cartellas",
     "Favorites" : "Preferidos",
     "Videos" : "Vìdeos",
+    "Albums" : "Album",
     "People" : "Gente",
     "Archive" : "Cartella",
     "Tags" : "Etichetas",
@@ -13,6 +14,9 @@
     "Download" : "Iscàrriga",
     "Favorite" : "Preferidu",
     "View in folder" : "Càstia in sa cartella",
+    "Copy public link" : "Còpia ligòngiu pùblicu",
+    "Public link" : "Ligòngiu pùblicu",
+    "Back" : "In segus",
     "Year" : "Annu",
     "Month" : "Mese",
     "Day" : "Die",
@@ -21,7 +25,6 @@
     "Minute" : "Minutu",
     "Name" : "Nùmene",
     "Update" : "Agiorna",
-    "Loading …" : "Carrigamentu …",
-    "Back" : "In segus"
+    "Loading …" : "Carrigamentu …"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

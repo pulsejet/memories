@@ -14,13 +14,13 @@ OC.L10N.register(
     "Download" : "Elŝuti",
     "Favorite" : "Pliŝatati",
     "View in folder" : "Vidi en dosierujo",
+    "Back" : "Antaŭen",
     "Month" : "Monato",
     "Day" : "Tago",
     "Time" : "Dato",
     "Hour" : "Horo",
     "Name" : "Nomo",
     "Update" : "Ĝisdatigi",
-    "Loading …" : "Ŝargas …",
-    "Back" : "Antaŭen"
+    "Loading …" : "Ŝargas …"
 },
 "nplurals=2; plural=(n != 1);");

@@ -9,13 +9,13 @@ OC.L10N.register(
     "Delete" : "Slett",
     "Download" : "Last ned",
     "Favorite" : "Favoritt",
+    "Back" : "Tilbake",
     "Year" : "År",
     "Month" : "Månad",
     "Day" : "Dag",
     "Time" : "Tid",
     "Minute" : "Minutt",
     "Name" : "Namn",
-    "Update" : "Oppdater",
-    "Back" : "Tilbake"
+    "Update" : "Oppdater"
 },
 "nplurals=2; plural=(n != 1);");

@@ -6,19 +6,20 @@ OC.L10N.register(
     "Videos" : "Video's ",
     "Archive" : "Argief",
     "Tags" : "Etikette",
+    "Maps" : "Kaarte",
     "Settings" : "Instellings",
     "Cancel" : "Kanselleer",
     "Delete" : "Skrap",
     "Download" : "Laai af",
     "Favorite" : "Gunsteling",
     "View in folder" : "Vertoon in gids",
+    "Back" : "Terug",
     "Month" : "Maand",
     "Day" : "Dag",
     "Time" : "Tyd",
     "Hour" : "Uur",
     "Name" : "Naam",
     "Update" : "Werk by",
-    "Loading …" : "Laai …",
-    "Back" : "Terug"
+    "Loading …" : "Laai …"
 },
 "nplurals=2; plural=(n != 1);");

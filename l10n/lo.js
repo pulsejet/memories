@@ -10,8 +10,8 @@ OC.L10N.register(
     "Download" : "ດາວໂຫລດ",
     "Favorite" : "ລາຍການທີ່ມັກ",
     "View in folder" : "ເບິ່ງໃນໂຟນເດີ",
+    "Back" : "ຫຼັງ",
     "Name" : "ຊື່",
-    "Loading …" : "ກຳລັງໂຫຼດ",
-    "Back" : "ຫຼັງ"
+    "Loading …" : "ກຳລັງໂຫຼດ"
 },
 "nplurals=1; plural=0;");

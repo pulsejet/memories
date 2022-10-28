@@ -8,7 +8,7 @@ OC.L10N.register(
     "Delete" : "Borrar",
     "Download" : "Escargar",
     "Favorite" : "Favorito",
-    "Name" : "Nombre",
-    "Back" : "Ta zaga"
+    "Back" : "Ta zaga",
+    "Name" : "Nombre"
 },
 "nplurals=2; plural=(n != 1);");
