@@ -25,10 +25,10 @@
 
 		<ul class="albums-container">
 			<NcListItem v-for="album in albums"
-				:key="album.name"
+				:key="album.album_id"
 				class="album"
-				:title="album.name"
-				:aria-label="t('photos', 'Add selection to album {albumName}', {albumName: album.name})"
+				:title="getAlbumName(album)"
+				:aria-label="t('photos', 'Add selection to album {albumName}', {albumName: getAlbumName(album)})"
 				@click="pickAlbum(album)">
 				<template slot="icon">
 					<img v-if="album.last_added_photo !== -1" class="album__image" :src="album.last_added_photo | toCoverUrl">
@@ -66,6 +66,7 @@
 <script lang="ts">
 import { Component, Emit, Mixins } from 'vue-property-decorator';
 import GlobalMixin from '../../mixins/GlobalMixin';
+import { getCurrentUser } from '@nextcloud/auth';
 
 import AlbumForm from './AlbumForm.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
@@ -104,6 +105,13 @@ export default class AlbumPicker extends Mixins(GlobalMixin) {
         this.showAlbumCreationForm = false
         this.loadAlbums();
     }
+
+	getAlbumName(album: IAlbum) {
+		if (album.user === getCurrentUser()?.uid) {
+			return album.name
+		}
+		return `${album.name} (${album.user})`
+	}
 
     async loadAlbums() {
         try {
