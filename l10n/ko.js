@@ -15,6 +15,9 @@ OC.L10N.register(
     "Favorite" : "즐겨찾기",
     "Unarchive" : "보관 해제",
     "View in folder" : "폴더에서 보기",
+    "Copy public link" : "공용 링크 복사",
+    "Public link" : "공개 링크",
+    "Back" : "뒤로",
     "Year" : "년",
     "Month" : "달",
     "Day" : "일",
@@ -22,7 +25,6 @@ OC.L10N.register(
     "Hour" : "시간",
     "Name" : "이름",
     "Update" : "업데이트",
-    "Loading …" : "불러오는 중 …",
-    "Back" : "뒤로"
+    "Loading …" : "불러오는 중 …"
 },
 "nplurals=1; plural=0;");

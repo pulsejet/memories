@@ -13,12 +13,12 @@ OC.L10N.register(
     "Download" : "Lejupielādēt",
     "Favorite" : "Favorīts",
     "View in folder" : "Skatīt mapē",
+    "Back" : "Atpakaļ",
     "Month" : "Mēnesis",
     "Day" : "Diena",
     "Time" : "Laiks",
     "Hour" : "Stunda",
     "Name" : "Vārds",
-    "Update" : "Atjaunināt",
-    "Back" : "Atpakaļ"
+    "Update" : "Atjaunināt"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");

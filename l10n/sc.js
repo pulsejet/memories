@@ -5,6 +5,7 @@ OC.L10N.register(
     "Folders" : "Cartellas",
     "Favorites" : "Preferidos",
     "Videos" : "Vìdeos",
+    "Albums" : "Album",
     "People" : "Gente",
     "Archive" : "Cartella",
     "Tags" : "Etichetas",
@@ -15,6 +16,9 @@ OC.L10N.register(
     "Download" : "Iscàrriga",
     "Favorite" : "Preferidu",
     "View in folder" : "Càstia in sa cartella",
+    "Copy public link" : "Còpia ligòngiu pùblicu",
+    "Public link" : "Ligòngiu pùblicu",
+    "Back" : "In segus",
     "Year" : "Annu",
     "Month" : "Mese",
     "Day" : "Die",
@@ -23,7 +27,6 @@ OC.L10N.register(
     "Minute" : "Minutu",
     "Name" : "Nùmene",
     "Update" : "Agiorna",
-    "Loading …" : "Carrigamentu …",
-    "Back" : "In segus"
+    "Loading …" : "Carrigamentu …"
 },
 "nplurals=2; plural=(n != 1);");

@@ -14,6 +14,9 @@
     "Favorite" : "Favoritt",
     "Unarchive" : "Dearkivere",
     "View in folder" : "Vis i mappe",
+    "Copy public link" : "Kopier offentlig lenke",
+    "Public link" : "Offentlig lenke",
+    "Back" : "Tilbake",
     "Year" : "År",
     "Month" : "Måned",
     "Day" : "Dag",
@@ -21,7 +24,6 @@
     "Hour" : "Time",
     "Name" : "Navn",
     "Update" : "Oppdater",
-    "Loading …" : "Laster ...",
-    "Back" : "Tilbake"
+    "Loading …" : "Laster ..."
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

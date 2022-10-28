@@ -6,10 +6,10 @@ OC.L10N.register(
     "Cancel" : "Batal",
     "Delete" : "Padam",
     "Download" : "Muat turun",
+    "Back" : "Kembali",
     "Month" : "Bulan",
     "Day" : "Hari",
     "Name" : "Nama",
-    "Update" : "Kemaskini",
-    "Back" : "Kembali"
+    "Update" : "Kemaskini"
 },
 "nplurals=1; plural=0;");

@@ -14,13 +14,14 @@ OC.L10N.register(
     "Favorite" : "Ưa thích",
     "Unarchive" : "Bỏ lưu trữ",
     "View in folder" : "Xem trong thư mục",
+    "Copy public link" : "Sao chép liên kết công khai",
+    "Back" : "Quay lại",
     "Year" : "Năm",
     "Month" : "Tháng",
     "Day" : "Ngày",
     "Time" : "Thời gian",
     "Name" : "Tên",
     "Update" : "Cập nhật",
-    "Loading …" : "Đang tải …",
-    "Back" : "Quay lại"
+    "Loading …" : "Đang tải …"
 },
 "nplurals=1; plural=0;");

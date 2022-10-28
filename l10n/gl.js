@@ -16,6 +16,9 @@ OC.L10N.register(
     "Favorite" : "Favorito",
     "Unarchive" : "Desarquivar",
     "View in folder" : "Ver no cartafol",
+    "Copy public link" : "Copiar a ligazón pública",
+    "Public link" : "Ligazón pública",
+    "Back" : "Atrás",
     "Year" : "Ano",
     "Month" : "Mes",
     "Day" : "Día",
@@ -24,7 +27,6 @@ OC.L10N.register(
     "Minute" : "Minuto",
     "Name" : "Nome",
     "Update" : "Actualizar",
-    "Loading …" : "Cargando…",
-    "Back" : "Atrás"
+    "Loading …" : "Cargando…"
 },
 "nplurals=2; plural=(n != 1);");

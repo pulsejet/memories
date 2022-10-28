@@ -9,8 +9,8 @@ OC.L10N.register(
     "Delete" : "Kkes",
     "Download" : "Sider",
     "Favorite" : "Menyif",
+    "Back" : "Retour",
     "Hour" : "Asrag",
-    "Name" : "Nom",
-    "Back" : "Retour"
+    "Name" : "Nom"
 },
 "nplurals=2; plural=(n != 1);");

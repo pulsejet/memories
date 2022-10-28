@@ -9,13 +9,13 @@ OC.L10N.register(
     "Download" : "බාගන්න",
     "Favorite" : "ප්‍රියතම",
     "View in folder" : "බහාලුමේ බලන්න",
+    "Back" : "ආපසු",
     "Year" : "වර්ෂය",
     "Month" : "මාසය",
     "Day" : "දිනය",
     "Time" : "වේලාව",
     "Name" : "නම",
     "Update" : "යාවත්කාල",
-    "Loading …" : "පූරණය වෙමින් …",
-    "Back" : "ආපසු"
+    "Loading …" : "පූරණය වෙමින් …"
 },
 "nplurals=2; plural=(n != 1);");

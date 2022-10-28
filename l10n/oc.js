@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Folders" : "Repertòris",
     "Favorites" : "Favorits",
+    "Albums" : "Albums",
     "People" : "Gent",
     "Archive" : "Archiu",
     "Tags" : "Etiquetas",
@@ -12,6 +13,9 @@ OC.L10N.register(
     "Delete" : "Suprimir",
     "Download" : "Telecargar",
     "Favorite" : "Favorit",
+    "Copy public link" : "Copiar lo ligam public",
+    "Public link" : "Ligam public",
+    "Back" : "Retorn",
     "Year" : "Annada",
     "Month" : "Mes",
     "Day" : "Jorn",
@@ -20,7 +24,6 @@ OC.L10N.register(
     "Minute" : "Minuta",
     "Name" : "Nom",
     "Update" : "Actualizar",
-    "Loading …" : "Cargament…",
-    "Back" : "Retorn"
+    "Loading …" : "Cargament…"
 },
 "nplurals=2; plural=(n > 1);");

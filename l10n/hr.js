@@ -16,6 +16,9 @@ OC.L10N.register(
     "Favorite" : "Favorit",
     "Unarchive" : "Dearhiviraj",
     "View in folder" : "Prikaži u mapi",
+    "Copy public link" : "Kopiraj javnu poveznicu",
+    "Public link" : "Javna poveznica",
+    "Back" : "Natrag",
     "Year" : "Godina",
     "Month" : "Mjesec",
     "Day" : "Dan",
@@ -24,7 +27,6 @@ OC.L10N.register(
     "Minute" : "Minuta",
     "Name" : "Naziv",
     "Update" : "Ažuriraj",
-    "Loading …" : "Učitavanje…",
-    "Back" : "Natrag"
+    "Loading …" : "Učitavanje…"
 },
 "nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;");

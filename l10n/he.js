@@ -15,6 +15,9 @@ OC.L10N.register(
     "Favorite" : "סימון כמועדף",
     "Unarchive" : "הוצאה מהארכיון",
     "View in folder" : "הצג בתיקייה",
+    "Copy public link" : "העתקת הקישור הציבורי",
+    "Public link" : "קישור ציבורי",
+    "Back" : "חזרה",
     "Year" : "שנה",
     "Month" : "חודש",
     "Day" : "יום",
@@ -23,7 +26,6 @@ OC.L10N.register(
     "Minute" : "דקה",
     "Name" : "שם",
     "Update" : "עדכון",
-    "Loading …" : "בטעינה…",
-    "Back" : "חזרה"
+    "Loading …" : "בטעינה…"
 },
 "nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: (n % 10 == 0 && n % 1 == 0 && n > 10) ? 2 : 3;");

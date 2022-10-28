@@ -15,6 +15,7 @@
     "Favorite" : "Αγαπημένο",
     "Unarchive" : "Αναίρεση αρχειοθέτησης",
     "View in folder" : "Προβολή στον φάκελο",
+    "Back" : "Πίσω",
     "Year" : "Έτος",
     "Month" : "Μήνας",
     "Day" : "Ημέρα",
@@ -23,7 +24,6 @@
     "Minute" : "Λεπτά",
     "Name" : "Όνομα",
     "Update" : "Ενημέρωση",
-    "Loading …" : "Φόρτωση …",
-    "Back" : "Πίσω"
+    "Loading …" : "Φόρτωση …"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

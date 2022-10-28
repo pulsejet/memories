@@ -7,6 +7,7 @@
     "Archive" : "Arxiu",
     "On this day" : "Aquest mateix dia",
     "Tags" : "Etiquetes",
+    "Maps" : "Mapes",
     "Settings" : "Paràmetres",
     "Cancel" : "Cancel·la",
     "Delete" : "Suprimeix",
@@ -14,6 +15,7 @@
     "Favorite" : "Preferit",
     "Unarchive" : "Desbloquejar",
     "View in folder" : "Visualitza-ho a la carpeta",
+    "Back" : "Torna",
     "Year" : "Any",
     "Month" : "Mes",
     "Day" : "Dia",
@@ -22,7 +24,6 @@
     "Minute" : "Minut",
     "Name" : "Cognom",
     "Update" : "Actualitzar",
-    "Loading …" : "Carregant …",
-    "Back" : "Torna"
+    "Loading …" : "Carregant …"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

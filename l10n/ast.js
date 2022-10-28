@@ -6,19 +6,20 @@ OC.L10N.register(
     "Videos" : "Vídeos",
     "Archive" : "Archivu",
     "Tags" : "Etiquetes",
+    "Maps" : "Mapes",
     "Settings" : "Settings",
     "Cancel" : "Encaboxar",
     "Delete" : "Desaniciar",
     "Download" : "Baxar",
     "Favorite" : "Marcar como favoritu",
     "View in folder" : "Ver na carpeta",
+    "Back" : "Atrás",
     "Month" : "Mes",
     "Day" : "Día",
     "Time" : "Hora",
     "Hour" : "Hora",
     "Name" : "Nome",
     "Update" : "Anovar",
-    "Loading …" : "Cargando...",
-    "Back" : "Atrás"
+    "Loading …" : "Cargando..."
 },
 "nplurals=2; plural=(n != 1);");

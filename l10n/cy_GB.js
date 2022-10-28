@@ -10,13 +10,13 @@ OC.L10N.register(
     "Delete" : "Dileu",
     "Download" : "Llwytho i lawr",
     "Favorite" : "Ffefryn",
+    "Back" : "Nôl",
     "Year" : "Blwyddyn",
     "Month" : "Mis",
     "Day" : "Diwrnod",
     "Time" : "Amser",
     "Name" : "Enw",
     "Update" : "Diweddaru",
-    "Loading …" : "Yn llwytho …",
-    "Back" : "Nôl"
+    "Loading …" : "Yn llwytho …"
 },
 "nplurals=4; plural=(n==1) ? 0 : (n==2) ? 1 : (n != 8 && n != 11) ? 2 : 3;");

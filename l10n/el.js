@@ -17,6 +17,7 @@ OC.L10N.register(
     "Favorite" : "Αγαπημένο",
     "Unarchive" : "Αναίρεση αρχειοθέτησης",
     "View in folder" : "Προβολή στον φάκελο",
+    "Back" : "Πίσω",
     "Year" : "Έτος",
     "Month" : "Μήνας",
     "Day" : "Ημέρα",
@@ -25,7 +26,6 @@ OC.L10N.register(
     "Minute" : "Λεπτά",
     "Name" : "Όνομα",
     "Update" : "Ενημέρωση",
-    "Loading …" : "Φόρτωση …",
-    "Back" : "Πίσω"
+    "Loading …" : "Φόρτωση …"
 },
 "nplurals=2; plural=(n != 1);");

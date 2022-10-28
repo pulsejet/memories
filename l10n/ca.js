@@ -9,6 +9,7 @@ OC.L10N.register(
     "Archive" : "Arxiu",
     "On this day" : "Aquest mateix dia",
     "Tags" : "Etiquetes",
+    "Maps" : "Mapes",
     "Settings" : "Paràmetres",
     "Cancel" : "Cancel·la",
     "Delete" : "Suprimeix",
@@ -16,6 +17,7 @@ OC.L10N.register(
     "Favorite" : "Preferit",
     "Unarchive" : "Desbloquejar",
     "View in folder" : "Visualitza-ho a la carpeta",
+    "Back" : "Torna",
     "Year" : "Any",
     "Month" : "Mes",
     "Day" : "Dia",
@@ -24,7 +26,6 @@ OC.L10N.register(
     "Minute" : "Minut",
     "Name" : "Cognom",
     "Update" : "Actualitzar",
-    "Loading …" : "Carregant …",
-    "Back" : "Torna"
+    "Loading …" : "Carregant …"
 },
 "nplurals=2; plural=(n != 1);");

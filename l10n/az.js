@@ -4,6 +4,7 @@ OC.L10N.register(
     "Favorites" : "Sevimlilər",
     "Archive" : "Arxiv",
     "Tags" : "Işarələr",
+    "Maps" : "Xəritələr",
     "Settings" : "Quraşdırmalar",
     "Cancel" : "Dayandır",
     "Delete" : "Sil",

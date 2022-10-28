@@ -15,13 +15,13 @@ OC.L10N.register(
     "Favorite" : "Favorito",
     "Unarchive" : "Desarchivar",
     "View in folder" : "Ver en la carpeta",
+    "Back" : "Atrás",
     "Month" : "Mes",
     "Day" : "Día",
     "Time" : "Hora",
     "Hour" : "Hora",
     "Name" : "Nombre",
     "Update" : "Actualizar",
-    "Loading …" : "Cargando …",
-    "Back" : "Atrás"
+    "Loading …" : "Cargando …"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

@@ -8,9 +8,9 @@ OC.L10N.register(
     "Delete" : "நீக்குக",
     "Download" : "பதிவிறக்குக",
     "Favorite" : "விருப்பமான",
+    "Back" : "பின்னுக்கு",
     "Month" : "மாதம்",
     "Name" : "பெயர்",
-    "Update" : "இற்றைப்படுத்தல்",
-    "Back" : "பின்னுக்கு"
+    "Update" : "இற்றைப்படுத்தல்"
 },
 "nplurals=2; plural=(n != 1);");

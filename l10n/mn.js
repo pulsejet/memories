@@ -14,12 +14,12 @@ OC.L10N.register(
     "Favorite" : "Дуртай",
     "Unarchive" : "Архиваас гаргах",
     "View in folder" : "Хавтасыг нээх",
+    "Back" : "буцах",
     "Month" : "Сар",
     "Day" : "Өдөр",
     "Time" : "Цаг",
     "Name" : "Нэр",
     "Update" : "Шинэчлэх",
-    "Loading …" : "Уншиж байна...",
-    "Back" : "буцах"
+    "Loading …" : "Уншиж байна..."
 },
 "nplurals=2; plural=(n != 1);");
