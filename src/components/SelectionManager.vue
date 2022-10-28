@@ -109,16 +109,16 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
     // Make default actions
     this.defaultActions = [
       {
-        // This is at the top because otherwise it is confusing
-        name: t("memories", "Remove from album"),
-        icon: AlbumRemoveIcon,
-        callback: this.removeFromAlbum.bind(this),
-        if: () => this.$route.name === "albums",
-      },
-      {
         name: t("memories", "Delete"),
         icon: DeleteIcon,
         callback: this.deleteSelection.bind(this),
+        if: () => !this.routeIsAlbum(),
+      },
+      {
+        name: t("memories", "Remove from album"),
+        icon: AlbumRemoveIcon,
+        callback: this.removeFromAlbum.bind(this),
+        if: () => this.routeIsAlbum(),
       },
       {
         name: t("memories", "Download"),
@@ -134,7 +134,8 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
         name: t("memories", "Archive"),
         icon: ArchiveIcon,
         callback: this.archiveSelection.bind(this),
-        if: () => this.allowArchive() && !this.routeIsArchive(),
+        if: () =>
+          this.allowArchive() && !this.routeIsArchive() && !this.routeIsAlbum(),
       },
       {
         name: t("memories", "Unarchive"),
@@ -151,13 +152,14 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
         name: t("memories", "View in folder"),
         icon: OpenInNewIcon,
         callback: this.viewInFolder.bind(this),
-        if: () => this.selection.size === 1,
+        if: () => this.selection.size === 1 && !this.routeIsAlbum(),
       },
       {
         name: t("memories", "Add to album"),
         icon: AlbumsIcon,
         callback: this.addToAlbum.bind(this),
-        if: (self: any) => self.config_albumsEnabled,
+        if: (self: typeof this) =>
+          self.config_albumsEnabled && !self.routeIsAlbum(),
       },
       {
         name: t("memories", "Move to another person"),
@@ -400,6 +402,11 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
   /** Is archive route */
   private routeIsArchive() {
     return this.$route.name === "archive";
+  }
+
+  /** Is album route */
+  private routeIsAlbum() {
+    return this.config_albumsEnabled && this.$route.name === "albums";
   }
 
   /**

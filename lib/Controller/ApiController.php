@@ -691,6 +691,12 @@ class ApiController extends Controller
     {
         $transforms = [];
 
+        // Add extra information, basename and mimetype
+        if (!$aggregateOnly && ($fields = $this->request->getParam('fields'))) {
+            $fields = explode(',', $fields);
+            $transforms[] = [$this->timelineQuery, 'transformExtraFields', $fields];
+        }
+
         // Filter only favorites
         if ($this->request->getParam('fav')) {
             $transforms[] = [$this->timelineQuery, 'transformFavoriteFilter'];

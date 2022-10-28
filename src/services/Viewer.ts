@@ -2,6 +2,7 @@ import { IFileInfo, IPhoto } from "../types";
 import { showError } from "@nextcloud/dialogs";
 import { subscribe } from "@nextcloud/event-bus";
 import { translate as t, translatePlural as n } from "@nextcloud/l10n";
+import { Route } from "vue-router";
 import * as dav from "./DavRequests";
 
 // Key to store sidebar state
@@ -13,7 +14,8 @@ export class ViewerManager {
 
   constructor(
     ondelete: (photos: IPhoto[]) => void,
-    private updateLoading: (delta: number) => void
+    private updateLoading: (delta: number) => void,
+    private $route: Route
   ) {
     subscribe("files:file:deleted", ({ fileid }: { fileid: number }) => {
       const photo = this.photoMap.get(fileid);
@@ -23,7 +25,7 @@ export class ViewerManager {
 
   public async open(photo: IPhoto, list?: IPhoto[]) {
     list = list || photo.d?.detail;
-    if (!list) return;
+    if (!list?.length) return;
 
     // Repopulate map
     this.photoMap.clear();
@@ -36,7 +38,14 @@ export class ViewerManager {
     const ids = list.map((p) => p.fileid);
     try {
       this.updateLoading(1);
-      fileInfos = await dav.getFiles(ids);
+
+      if (this.$route.name === "albums") {
+        const user = this.$route.params.user;
+        const name = this.$route.params.name;
+        fileInfos = dav.getAlbumFileInfos(list, user, name);
+      } else {
+        fileInfos = await dav.getFiles(ids);
+      }
     } catch (e) {
       console.error("Failed to load fileInfos", e);
       showError("Failed to load fileInfos");
@@ -66,7 +75,7 @@ export class ViewerManager {
 
     // Open Nextcloud viewer
     globalThis.OCA.Viewer.open({
-      path: fInfo.filename, // path
+      fileInfo: fInfo,
       list: fileInfos, // file list
       canLoop: false, // don't loop
       onClose: () => {

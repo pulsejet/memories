@@ -6,7 +6,7 @@ export type IFileInfo = {
   /** Full file name, e.g. /pi/test/Qx0dq7dvEXA.jpg */
   filename: string;
   /** Original file name, e.g. /files/admin/pi/test/Qx0dq7dvEXA.jpg */
-  originalFilename: string;
+  originalFilename?: string;
   /** Base name of file e.g. Qx0dq7dvEXA.jpg */
   basename: string;
   /** Etag identifier */
@@ -14,7 +14,7 @@ export type IFileInfo = {
   /** File has preview available */
   hasPreview: boolean;
   /** File is marked favorite */
-  favorite: boolean;
+  favorite?: boolean;
   /** Vue flags */
   flag?: number;
 };

@@ -3,7 +3,7 @@ import { getCurrentUser } from "@nextcloud/auth";
 import { generateUrl } from "@nextcloud/router";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t, translatePlural as n } from "@nextcloud/l10n";
-import { IAlbum, IDay, ITag } from "../../types";
+import { IAlbum, IDay, IFileInfo, IPhoto, ITag } from "../../types";
 import { constants } from "../Utils";
 import axios from "@nextcloud/axios";
 import client from "../DavClient";
@@ -255,4 +255,33 @@ export async function renameAlbum(
     );
     return album;
   }
+}
+
+/** Get fileinfo objects from album photos */
+export function getAlbumFileInfos(
+  photos: IPhoto[],
+  albumUser: string,
+  albumName: string
+): IFileInfo[] {
+  const uid = getCurrentUser()?.uid;
+  const collection =
+    albumUser === uid
+      ? `/photos/${uid}/albums/${albumName}`
+      : `/photos/${uid}/sharedalbums/${albumName} (${albumUser})`;
+
+  return photos.map((photo) => {
+    const basename =
+      albumUser === uid
+        ? `${photo.fileid}-${(<any>photo).basename}`
+        : `${photo.fileid}-${albumName} (${albumUser})`;
+
+    return {
+      fileid: photo.fileid,
+      filename: `${collection}/${basename}`,
+      basename: basename,
+      mime: (<any>photo).mimetype,
+      hasPreview: true,
+      etag: photo.etag,
+    };
+  });
 }
