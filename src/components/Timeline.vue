@@ -30,7 +30,7 @@
                 <!-- Show dynamic top matter, name of the view -->
                 <div class="recycler-before" ref="recyclerBefore">
                     <div class="text" v-show="!$refs.topmatter.type && list.length > 0">
-                        {{ getViewName() }}
+                        {{ viewName }}
                     </div>
 
                     <OnThisDay v-if="$route.name === 'timeline'"
@@ -499,7 +499,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     }
 
     /** Get view name for dynamic top matter */
-    getViewName() {
+    get viewName() {
         switch (this.$route.name) {
             case 'timeline': return this.t('memories', 'Your Timeline');
             case 'favorites': return this.t('memories', 'Favorites');
