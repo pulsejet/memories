@@ -62,7 +62,7 @@ export default class FaceMergeModal extends Mixins(GlobalMixin) {
 
   public open() {
     const user = this.$route.params.user || "";
-    if (this.$route.params.user !== getCurrentUser().uid) {
+    if (this.$route.params.user !== getCurrentUser()?.uid) {
       showError(
         this.t("memories", 'Only user "{user}" can update this person', {
           user,

@@ -195,7 +195,7 @@ export default class AlbumForm extends Mixins(GlobalMixin) {
       this.loading = true;
       let album = {
         basename: this.albumName,
-        filename: `/photos/${getCurrentUser().uid}/albums/${this.albumName}`,
+        filename: `/photos/${getCurrentUser()?.uid}/albums/${this.albumName}`,
         nbItems: 0,
         location: this.albumLocation,
         lastPhoto: -1,

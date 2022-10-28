@@ -217,7 +217,7 @@ export const constants = {
 /** Cache store */
 let staticCache: Cache | null = null;
 const cacheName = `memories-${loadState("memories", "version")}-${
-  getCurrentUser()!.uid
+  getCurrentUser()?.uid
 }`;
 openCache().then((cache) => {
   staticCache = cache;

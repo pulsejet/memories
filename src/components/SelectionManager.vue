@@ -472,7 +472,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
     }
 
     // Check photo ownership
-    if (this.$route.params.user !== getCurrentUser().uid) {
+    if (this.$route.params.user !== getCurrentUser()?.uid) {
       showError(
         this.t("memories", 'Only user "{user}" can update this person', {
           user,

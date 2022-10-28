@@ -231,7 +231,7 @@ export default class AddToAlbumModal extends Mixins(GlobalMixin) {
 
   get searchResults(): string[] {
     return this.currentSearchResults
-      .filter(({ id }) => id !== getCurrentUser().uid)
+      .filter(({ id }) => id !== getCurrentUser()?.uid)
       .map(({ type, id }) => `${type}:${id}`)
       .filter(
         (collaboratorKey) =>

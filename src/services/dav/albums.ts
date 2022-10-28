@@ -20,7 +20,7 @@ import client from "../DavClient";
  */
 export function getAlbumPath(user: string, name: string) {
   // Folder in the dav collection for user
-  const cuid = getCurrentUser().uid;
+  const cuid = getCurrentUser()?.uid;
   if (user === cuid) {
     return `/photos/${cuid}/albums/${name}`;
   } else {

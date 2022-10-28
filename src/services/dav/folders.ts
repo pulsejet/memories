@@ -13,7 +13,7 @@ export async function getFolderPreviewFileIds(
   folderPath: string,
   limit: number
 ): Promise<IFileInfo[]> {
-  const prefixPath = `/files/${getCurrentUser()!.uid}`;
+  const prefixPath = `/files/${getCurrentUser()?.uid}`;
 
   const filter = base.IMAGE_MIME_TYPES.map(
     (mime) => `

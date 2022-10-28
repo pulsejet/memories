@@ -66,7 +66,7 @@ export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
  * @returns list of file infos
  */
 async function getFilesInternal(fileIds: number[]): Promise<IFileInfo[]> {
-  const prefixPath = `/files/${getCurrentUser()!.uid}`;
+  const prefixPath = `/files/${getCurrentUser()?.uid}`;
 
   // IMPORTANT: if this isn't there, then a blank
   // returns EVERYTHING on the server!
@@ -158,7 +158,7 @@ export async function* runInParallel<T>(
  * @param path path to the file
  */
 export async function deleteFile(path: string) {
-  const prefixPath = `/files/${getCurrentUser()!.uid}`;
+  const prefixPath = `/files/${getCurrentUser()?.uid}`;
   return await client.deleteFile(`${prefixPath}${path}`);
 }
 

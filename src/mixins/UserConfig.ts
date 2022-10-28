@@ -31,14 +31,25 @@ const localSettings = ["squareThumbs", "showFaceRect"];
 
 @Component
 export default class UserConfig extends Vue {
-  config_timelinePath: string = loadState("memories", "timelinePath") || "";
-  config_foldersPath: string = loadState("memories", "foldersPath") || "/";
-  config_showHidden = loadState("memories", "showHidden") === "true";
+  config_timelinePath: string = loadState(
+    "memories",
+    "timelinePath",
+    <string>""
+  );
+  config_foldersPath: string = loadState(
+    "memories",
+    "foldersPath",
+    <string>"/"
+  );
+  config_showHidden =
+    loadState("memories", "showHidden", <string>"false") === "true";
 
-  config_tagsEnabled = Boolean(loadState("memories", "systemtags"));
-  config_recognizeEnabled = Boolean(loadState("memories", "recognize"));
-  config_mapsEnabled = Boolean(loadState("memories", "maps"));
-  config_albumsEnabled = Boolean(loadState("memories", "albums"));
+  config_tagsEnabled = Boolean(loadState("memories", "systemtags", <string>""));
+  config_recognizeEnabled = Boolean(
+    loadState("memories", "recognize", <string>"")
+  );
+  config_mapsEnabled = Boolean(loadState("memories", "maps", <string>""));
+  config_albumsEnabled = Boolean(loadState("memories", "albums", <string>""));
 
   config_squareThumbs = localStorage.getItem("memories_squareThumbs") === "1";
   config_showFaceRect = localStorage.getItem("memories_showFaceRect") === "1";
