@@ -293,7 +293,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
    */
   private async favoriteSelection(selection: Selection) {
     const val = !this.allSelectedFavorites(selection);
-    for await (const favIds of dav.favoriteFilesByIds(
+    for await (const favIds of dav.favoritePhotos(
       Array.from(selection.values()),
       val
     )) {

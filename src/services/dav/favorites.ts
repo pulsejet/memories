@@ -1,45 +1,41 @@
-import * as base from "./base";
-import { generateUrl } from "@nextcloud/router";
-import { encodePath } from "@nextcloud/paths";
 import { showError } from "@nextcloud/dialogs";
-import { translate as t, translatePlural as n } from "@nextcloud/l10n";
-import axios from "@nextcloud/axios";
+import { translate as t } from "@nextcloud/l10n";
 import { IPhoto } from "../../types";
+import client from "../DavClient";
+import * as base from "./base";
 
 /**
  * Favorite a file
- * https://github.com/nextcloud/photos/blob/7687e214f9b0f71a2cc73778b8b22ab781490a3b/src/services/FileActions.js
+ * https://github.com/nextcloud/photos/blob/4c3f62ceb0ef2a0007f4a8117d9655f1303fde6e/src/store/files.js
  *
  * @param fileName - The file's name
  * @param favoriteState - The new favorite state
  */
-export async function favoriteFile(fileName: string, favoriteState: boolean) {
-  let encodedPath = encodePath(fileName);
-  while (encodedPath[0] === "/") {
-    encodedPath = encodedPath.substring(1);
-  }
-
-  try {
-    return axios.post(
-      `${generateUrl("/apps/files/api/v1/files/")}${encodedPath}`,
-      {
-        tags: favoriteState ? ["_$!<Favorite>!$_"] : [],
-      }
-    );
-  } catch (error) {
-    console.error("Failed to favorite", fileName, error);
-    showError(t("memories", "Failed to favorite {fileName}.", { fileName }));
-  }
+export function favoriteFile(fileName: string, favoriteState: boolean) {
+  return client.customRequest(fileName, {
+    method: "PROPPATCH",
+    data: `<?xml version="1.0"?>
+            <d:propertyupdate xmlns:d="DAV:"
+              xmlns:oc="http://owncloud.org/ns"
+              xmlns:nc="http://nextcloud.org/ns"
+              xmlns:ocs="http://open-collaboration-services.org/ns">
+            <d:set>
+              <d:prop>
+                <oc:favorite>${favoriteState ? "1" : "0"}</oc:favorite>
+              </d:prop>
+            </d:set>
+            </d:propertyupdate>`,
+  });
 }
 
 /**
- * Favorite all files in a given list of Ids
+ * Favorite all files in a given list of photos
  *
  * @param photos list of photos
  * @param favoriteState the new favorite state
  * @returns generator of lists of file ids that were state-changed
  */
-export async function* favoriteFilesByIds(
+export async function* favoritePhotos(
   photos: IPhoto[],
   favoriteState: boolean
 ) {
@@ -64,11 +60,15 @@ export async function* favoriteFilesByIds(
   // Favorite each file
   const calls = fileInfos.map((fileInfo) => async () => {
     try {
-      await favoriteFile(fileInfo.filename, favoriteState);
+      await favoriteFile(fileInfo.originalFilename, favoriteState);
       return fileInfo.fileid as number;
     } catch (error) {
       console.error("Failed to favorite", fileInfo, error);
-      showError(t("memories", "Failed to favorite {fileName}.", fileInfo));
+      showError(
+        t("memories", "Failed to favorite {fileName}.", {
+          fileName: fileInfo.originalFilename,
+        })
+      );
       return 0;
     }
   });

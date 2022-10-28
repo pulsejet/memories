@@ -287,6 +287,7 @@ export function getAlbumFileInfos(
     return {
       fileid: photo.fileid,
       filename: `${collection}/${basename}`,
+      originalFilename: `${collection}/${basename}`,
       basename: basename,
       mime: photo.mimetype,
       hasPreview: true,
