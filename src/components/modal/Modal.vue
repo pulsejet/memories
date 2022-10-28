@@ -1,56 +1,53 @@
 <template>
-    <NcModal
-        :size="size"
-        @close="close"
-        :outTransition="true">
-        <div class="container">
-            <div class="head">
-                <span> <slot name="title"></slot> </span>
-            </div>
+  <NcModal :size="size" @close="close" :outTransition="true">
+    <div class="container">
+      <div class="head">
+        <span> <slot name="title"></slot> </span>
+      </div>
 
-            <slot></slot>
+      <slot></slot>
 
-            <div class="buttons">
-                <slot name="buttons"></slot>
-            </div>
-        </div>
-    </NcModal>
+      <div class="buttons">
+        <slot name="buttons"></slot>
+      </div>
+    </div>
+  </NcModal>
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator';
-import { NcModal } from '@nextcloud/vue';
+import { Component, Emit, Prop, Vue } from "vue-property-decorator";
+import { NcModal } from "@nextcloud/vue";
 
 @Component({
-    components: {
-        NcModal,
-    }
+  components: {
+    NcModal,
+  },
 })
 export default class Modal extends Vue {
-    @Prop({default: 'small'}) private size?: string;
+  @Prop({ default: "small" }) private size?: string;
 
-    @Emit('close')
-    public close() {}
+  @Emit("close")
+  public close() {}
 }
 </script>
 
 <style lang="scss" scoped>
 .container {
-	margin: 20px;
+  margin: 20px;
 
-    .head {
-        font-weight: 500;
-        font-size: 1.15em;
-        margin-bottom: 5px;
+  .head {
+    font-weight: 500;
+    font-size: 1.15em;
+    margin-bottom: 5px;
+  }
+
+  :deep .buttons {
+    margin-top: 10px;
+    text-align: right;
+
+    > button {
+      display: inline-block !important;
     }
-
-    :deep .buttons {
-        margin-top: 10px;
-        text-align: right;
-
-        > button {
-            display: inline-block !important;
-        }
-    }
+  }
 }
 </style>

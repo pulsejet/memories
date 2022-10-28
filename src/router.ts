@@ -20,120 +20,120 @@
  *
  */
 
- import { generateUrl } from '@nextcloud/router'
- import { translate as t, translatePlural as n } from '@nextcloud/l10n'
- import Router from 'vue-router'
- import Vue from 'vue'
- import Timeline from './components/Timeline.vue';
+import { generateUrl } from "@nextcloud/router";
+import { translate as t, translatePlural as n } from "@nextcloud/l10n";
+import Router from "vue-router";
+import Vue from "vue";
+import Timeline from "./components/Timeline.vue";
 
- Vue.use(Router)
+Vue.use(Router);
 
- /**
-  * Parse the path of a route : join the elements of the array and return a single string with slashes
-  * + always lead current path with a slash
-  *
-  * @param {string | Array} path path arguments to parse
-  * @return {string}
-  */
- const parsePathParams = (path) => {
-     return `/${Array.isArray(path) ? path.join('/') : path || ''}`
- }
+/**
+ * Parse the path of a route : join the elements of the array and return a single string with slashes
+ * + always lead current path with a slash
+ *
+ * @param {string | Array} path path arguments to parse
+ * @return {string}
+ */
+const parsePathParams = (path) => {
+  return `/${Array.isArray(path) ? path.join("/") : path || ""}`;
+};
 
- export default new Router({
-     mode: 'history',
-     // if index.php is in the url AND we got this far, then it's working:
-     // let's keep using index.php in the url
-     base: generateUrl('/apps/memories'),
-     linkActiveClass: 'active',
-     routes: [
-        {
-            path: '/',
-            component: Timeline,
-            name: 'timeline',
-            props: route => ({
-                rootTitle: t('memories', 'Timeline'),
-            }),
-        },
+export default new Router({
+  mode: "history",
+  // if index.php is in the url AND we got this far, then it's working:
+  // let's keep using index.php in the url
+  base: generateUrl("/apps/memories"),
+  linkActiveClass: "active",
+  routes: [
+    {
+      path: "/",
+      component: Timeline,
+      name: "timeline",
+      props: (route) => ({
+        rootTitle: t("memories", "Timeline"),
+      }),
+    },
 
-        {
-            path: '/folders/:path*',
-            component: Timeline,
-            name: 'folders',
-            props: route => ({
-                rootTitle: t('memories', 'Folders'),
-            }),
-        },
+    {
+      path: "/folders/:path*",
+      component: Timeline,
+      name: "folders",
+      props: (route) => ({
+        rootTitle: t("memories", "Folders"),
+      }),
+    },
 
-        {
-            path: '/favorites',
-            component: Timeline,
-            name: 'favorites',
-            props: route => ({
-                rootTitle: t('memories', 'Favorites'),
-            }),
-        },
+    {
+      path: "/favorites",
+      component: Timeline,
+      name: "favorites",
+      props: (route) => ({
+        rootTitle: t("memories", "Favorites"),
+      }),
+    },
 
-        {
-            path: '/videos',
-            component: Timeline,
-            name: 'videos',
-            props: route => ({
-                rootTitle: t('memories', 'Videos'),
-            }),
-        },
+    {
+      path: "/videos",
+      component: Timeline,
+      name: "videos",
+      props: (route) => ({
+        rootTitle: t("memories", "Videos"),
+      }),
+    },
 
-        {
-			path: '/albums/:user?/:name?',
-            component: Timeline,
-			name: 'albums',
-            props: route => ({
-                rootTitle: t('memories', 'Albums'),
-            }),
-		},
+    {
+      path: "/albums/:user?/:name?",
+      component: Timeline,
+      name: "albums",
+      props: (route) => ({
+        rootTitle: t("memories", "Albums"),
+      }),
+    },
 
-        {
-            path: '/archive',
-            component: Timeline,
-            name: 'archive',
-            props: route => ({
-                rootTitle: t('memories', 'Archive'),
-            }),
-        },
+    {
+      path: "/archive",
+      component: Timeline,
+      name: "archive",
+      props: (route) => ({
+        rootTitle: t("memories", "Archive"),
+      }),
+    },
 
-        {
-            path: '/thisday',
-            component: Timeline,
-            name: 'thisday',
-            props: route => ({
-                rootTitle: t('memories', 'On this day'),
-            }),
-        },
+    {
+      path: "/thisday",
+      component: Timeline,
+      name: "thisday",
+      props: (route) => ({
+        rootTitle: t("memories", "On this day"),
+      }),
+    },
 
-        {
-            path: '/people/:user?/:name?',
-            component: Timeline,
-            name: 'people',
-            props: route => ({
-                rootTitle: t('memories', 'People'),
-            }),
-        },
+    {
+      path: "/people/:user?/:name?",
+      component: Timeline,
+      name: "people",
+      props: (route) => ({
+        rootTitle: t("memories", "People"),
+      }),
+    },
 
-        {
-            path: '/tags/:name*',
-            component: Timeline,
-            name: 'tags',
-            props: route => ({
-                rootTitle: t('memories', 'Tags'),
-            }),
-        },
+    {
+      path: "/tags/:name*",
+      component: Timeline,
+      name: "tags",
+      props: (route) => ({
+        rootTitle: t("memories", "Tags"),
+      }),
+    },
 
-        {
-			path: '/maps',
-			name: 'maps',
-			// router-link doesn't support external url, let's force the redirect
-			beforeEnter() {
-				window.open(generateUrl('/apps/maps'), '_blank')
-			},
-		},
-     ],
- })
+    {
+      path: "/maps",
+      name: "maps",
+      // router-link doesn't support external url, let's force the redirect
+      beforeEnter() {
+        window.open(generateUrl("/apps/maps"), "_blank");
+      },
+    },
+  ],
+});

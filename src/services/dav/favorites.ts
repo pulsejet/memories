@@ -1,9 +1,9 @@
-import * as base from './base';
-import { generateUrl } from '@nextcloud/router'
-import { encodePath } from '@nextcloud/paths'
-import { showError } from '@nextcloud/dialogs'
-import { translate as t, translatePlural as n } from '@nextcloud/l10n'
-import axios from '@nextcloud/axios'
+import * as base from "./base";
+import { generateUrl } from "@nextcloud/router";
+import { encodePath } from "@nextcloud/paths";
+import { showError } from "@nextcloud/dialogs";
+import { translate as t, translatePlural as n } from "@nextcloud/l10n";
+import axios from "@nextcloud/axios";
 
 /**
  * Favorite a file
@@ -13,22 +13,22 @@ import axios from '@nextcloud/axios'
  * @param favoriteState - The new favorite state
  */
 export async function favoriteFile(fileName: string, favoriteState: boolean) {
-	let encodedPath = encodePath(fileName)
-	while (encodedPath[0] === '/') {
-		encodedPath = encodedPath.substring(1)
-	}
+  let encodedPath = encodePath(fileName);
+  while (encodedPath[0] === "/") {
+    encodedPath = encodedPath.substring(1);
+  }
 
-	try {
-		return axios.post(
-			`${generateUrl('/apps/files/api/v1/files/')}${encodedPath}`,
-			{
-				tags: favoriteState ? ['_$!<Favorite>!$_'] : [],
-			},
-		)
-	} catch (error) {
-		console.error('Failed to favorite', fileName, error)
-		showError(t('memories', 'Failed to favorite {fileName}.', { fileName }))
-	}
+  try {
+    return axios.post(
+      `${generateUrl("/apps/files/api/v1/files/")}${encodedPath}`,
+      {
+        tags: favoriteState ? ["_$!<Favorite>!$_"] : [],
+      }
+    );
+  } catch (error) {
+    console.error("Failed to favorite", fileName, error);
+    showError(t("memories", "Failed to favorite {fileName}.", { fileName }));
+  }
 }
 
 /**
@@ -38,35 +38,38 @@ export async function favoriteFile(fileName: string, favoriteState: boolean) {
  * @param favoriteState the new favorite state
  * @returns generator of lists of file ids that were state-changed
  */
-export async function* favoriteFilesByIds(fileIds: number[], favoriteState: boolean) {
-    const fileIdsSet = new Set(fileIds);
+export async function* favoriteFilesByIds(
+  fileIds: number[],
+  favoriteState: boolean
+) {
+  const fileIdsSet = new Set(fileIds);
 
-    if (fileIds.length === 0) {
-        return;
-    }
+  if (fileIds.length === 0) {
+    return;
+  }
 
-    // Get files data
-    let fileInfos: any[] = [];
+  // Get files data
+  let fileInfos: any[] = [];
+  try {
+    fileInfos = await base.getFiles(fileIds.filter((f) => f));
+  } catch (e) {
+    console.error("Failed to get file info", fileIds, e);
+    showError(t("memories", "Failed to favorite files."));
+    return;
+  }
+
+  // Favorite each file
+  fileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid));
+  const calls = fileInfos.map((fileInfo) => async () => {
     try {
-        fileInfos = await base.getFiles(fileIds.filter(f => f));
-    } catch (e) {
-        console.error('Failed to get file info', fileIds, e);
-        showError(t('memories', 'Failed to favorite files.'));
-        return;
+      await favoriteFile(fileInfo.filename, favoriteState);
+      return fileInfo.fileid as number;
+    } catch (error) {
+      console.error("Failed to favorite", fileInfo, error);
+      showError(t("memories", "Failed to favorite {fileName}.", fileInfo));
+      return 0;
     }
+  });
 
-    // Favorite each file
-    fileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid));
-    const calls = fileInfos.map((fileInfo) => async () => {
-        try {
-            await favoriteFile(fileInfo.filename, favoriteState);
-            return fileInfo.fileid as number;
-        } catch (error) {
-            console.error('Failed to favorite', fileInfo, error);
-            showError(t('memories', 'Failed to favorite {fileName}.', fileInfo));
-            return 0;
-        }
-    });
-
-    yield* base.runInParallel(calls, 10);
+  yield* base.runInParallel(calls, 10);
 }

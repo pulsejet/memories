@@ -21,89 +21,103 @@
  -->
 
 <template>
-    <div>
-        <label for="timeline-path">{{ t('memories', 'Timeline Path') }}</label>
-        <input id="timeline-path"
-            @click="chooseTimelinePath"
-            v-model="config_timelinePath"
-            type="text">
+  <div>
+    <label for="timeline-path">{{ t("memories", "Timeline Path") }}</label>
+    <input
+      id="timeline-path"
+      @click="chooseTimelinePath"
+      v-model="config_timelinePath"
+      type="text"
+    />
 
-        <label for="folders-path">{{ t('memories', 'Folders Path') }}</label>
-        <input id="folders-path"
-            @click="chooseFoldersPath"
-            v-model="config_foldersPath"
-            type="text">
+    <label for="folders-path">{{ t("memories", "Folders Path") }}</label>
+    <input
+      id="folders-path"
+      @click="chooseFoldersPath"
+      v-model="config_foldersPath"
+      type="text"
+    />
 
-        <NcCheckboxRadioSwitch :checked.sync="config_showHidden"
-            @update:checked="updateShowHidden"
-            type="switch">
-            {{ t('memories', 'Show hidden folders') }}
-        </NcCheckboxRadioSwitch>
+    <NcCheckboxRadioSwitch
+      :checked.sync="config_showHidden"
+      @update:checked="updateShowHidden"
+      type="switch"
+    >
+      {{ t("memories", "Show hidden folders") }}
+    </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch :checked.sync="config_squareThumbs"
-            @update:checked="updateSquareThumbs"
-            type="switch">
-            {{ t('memories', 'Square grid mode') }}
-        </NcCheckboxRadioSwitch>
-    </div>
+    <NcCheckboxRadioSwitch
+      :checked.sync="config_squareThumbs"
+      @update:checked="updateSquareThumbs"
+      type="switch"
+    >
+      {{ t("memories", "Square grid mode") }}
+    </NcCheckboxRadioSwitch>
+  </div>
 </template>
 
 <style scoped>
-input[type=text] {
-    width: 100%;
+input[type="text"] {
+  width: 100%;
 }
 </style>
 
 <script lang="ts">
-import { Component, Mixins } from 'vue-property-decorator';
-import GlobalMixin from '../mixins/GlobalMixin';
+import { Component, Mixins } from "vue-property-decorator";
+import GlobalMixin from "../mixins/GlobalMixin";
 
-import { getFilePickerBuilder } from '@nextcloud/dialogs'
-import UserConfig from '../mixins/UserConfig'
+import { getFilePickerBuilder } from "@nextcloud/dialogs";
+import UserConfig from "../mixins/UserConfig";
 
-import { NcCheckboxRadioSwitch } from '@nextcloud/vue'
+import { NcCheckboxRadioSwitch } from "@nextcloud/vue";
 
 @Component({
-    components: {
-        NcCheckboxRadioSwitch,
-    },
+  components: {
+    NcCheckboxRadioSwitch,
+  },
 })
 export default class Settings extends Mixins(UserConfig, GlobalMixin) {
-    async chooseFolder(title: string, initial: string) {
-        const picker = getFilePickerBuilder(title)
-				.setMultiSelect(false)
-				.setModal(true)
-				.setType(1)
-				.addMimeTypeFilter('httpd/unix-directory')
-				.allowDirectories()
-				.startAt(initial)
-				.build()
+  async chooseFolder(title: string, initial: string) {
+    const picker = getFilePickerBuilder(title)
+      .setMultiSelect(false)
+      .setModal(true)
+      .setType(1)
+      .addMimeTypeFilter("httpd/unix-directory")
+      .allowDirectories()
+      .startAt(initial)
+      .build();
 
-        return await picker.pick();
-    }
+    return await picker.pick();
+  }
 
-    async chooseTimelinePath() {
-        const newPath = await this.chooseFolder(this.t('memories', 'Choose the root of your timeline'), this.config_timelinePath);
-        if (newPath !== this.config_timelinePath) {
-            this.config_timelinePath = newPath;
-            await this.updateSetting('timelinePath');
-        }
+  async chooseTimelinePath() {
+    const newPath = await this.chooseFolder(
+      this.t("memories", "Choose the root of your timeline"),
+      this.config_timelinePath
+    );
+    if (newPath !== this.config_timelinePath) {
+      this.config_timelinePath = newPath;
+      await this.updateSetting("timelinePath");
     }
+  }
 
-    async chooseFoldersPath() {
-        const newPath = await this.chooseFolder(this.t('memories', 'Choose the root for the folders view'), this.config_foldersPath);
-        if (newPath !== this.config_foldersPath) {
-            this.config_foldersPath = newPath;
-            await this.updateSetting('foldersPath');
-        }
+  async chooseFoldersPath() {
+    const newPath = await this.chooseFolder(
+      this.t("memories", "Choose the root for the folders view"),
+      this.config_foldersPath
+    );
+    if (newPath !== this.config_foldersPath) {
+      this.config_foldersPath = newPath;
+      await this.updateSetting("foldersPath");
     }
+  }
 
-    async updateSquareThumbs() {
-        await this.updateSetting('squareThumbs');
-    }
+  async updateSquareThumbs() {
+    await this.updateSetting("squareThumbs");
+  }
 
-    async updateShowHidden() {
-        await this.updateSetting('showHidden');
-    }
+  async updateShowHidden() {
+    await this.updateSetting("showHidden");
+  }
 }
 </script>

@@ -1,32 +1,37 @@
-import * as base from './base';
-import { getCurrentUser } from '@nextcloud/auth'
-import { genFileInfo } from '../FileUtils'
-import { IFileInfo } from '../../types';
-import client from '../DavClient';
+import * as base from "./base";
+import { getCurrentUser } from "@nextcloud/auth";
+import { genFileInfo } from "../FileUtils";
+import { IFileInfo } from "../../types";
+import client from "../DavClient";
 
 /**
  * Get file infos for files in folder path
  * @param folderPath Path to folder
  * @param limit Max number of files to return
  */
-export async function getFolderPreviewFileIds(folderPath: string, limit: number): Promise<IFileInfo[]> {
-    const prefixPath = `/files/${getCurrentUser()!.uid}`;
+export async function getFolderPreviewFileIds(
+  folderPath: string,
+  limit: number
+): Promise<IFileInfo[]> {
+  const prefixPath = `/files/${getCurrentUser()!.uid}`;
 
-    const filter = base.IMAGE_MIME_TYPES.map(mime => `
+  const filter = base.IMAGE_MIME_TYPES.map(
+    (mime) => `
         <d:like>
             <d:prop>
                 <d:getcontenttype/>
             </d:prop>
             <d:literal>${mime}</d:literal>
         </d:like>
-    `).join('');
+    `
+  ).join("");
 
-    const options = {
-        method: 'SEARCH',
-        headers: {
-            'content-Type': 'text/xml',
-        },
-        data: `<?xml version="1.0" encoding="UTF-8"?>
+  const options = {
+    method: "SEARCH",
+    headers: {
+      "content-Type": "text/xml",
+    },
+    data: `<?xml version="1.0" encoding="UTF-8"?>
             <d:searchrequest xmlns:d="DAV:"
                 xmlns:oc="http://owncloud.org/ns"
                 xmlns:nc="http://nextcloud.org/ns"
@@ -54,16 +59,18 @@ export async function getFolderPreviewFileIds(folderPath: string, limit: number)
                     </d:limit>
                 </d:basicsearch>
             </d:searchrequest>`,
-        deep: true,
-        details: true,
-        responseType: 'text',
-    };
+    deep: true,
+    details: true,
+    responseType: "text",
+  };
 
-    let response:any = await client.getDirectoryContents('', options);
-    return response.data
-        .map((data: any) => genFileInfo(data))
-        .map((data: any) => Object.assign({}, data, {
-            filename: data.filename.replace(prefixPath, ''),
-            etag: data.etag.replace(/&quot;/g, ''), // remove quotes
-        }));
+  let response: any = await client.getDirectoryContents("", options);
+  return response.data
+    .map((data: any) => genFileInfo(data))
+    .map((data: any) =>
+      Object.assign({}, data, {
+        filename: data.filename.replace(prefixPath, ""),
+        etag: data.etag.replace(/&quot;/g, ""), // remove quotes
+      })
+    );
 }

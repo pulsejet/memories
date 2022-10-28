@@ -20,11 +20,11 @@
  *
  */
 
- const isNumber = function(num: any) {
-    if (!num) {
-        return false
-    }
-    return Number(num).toString() === num.toString()
-}
+const isNumber = function (num: any) {
+  if (!num) {
+    return false;
+  }
+  return Number(num).toString() === num.toString();
+};
 
-export { isNumber }
+export { isNumber };
