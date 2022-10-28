@@ -557,6 +557,19 @@ export async function* removeFaceImages(user: string, name: string, fileIds: num
 }
 
 /**
+ * Get DAV path for album
+ */
+export function getAlbumPath(user: string, name: string) {
+    // Folder in the dav collection for user
+    const cuid = getCurrentUser().uid;
+    if (user === cuid) {
+        return `/photos/${cuid}/albums/${name}`;
+    } else {
+        return `/photos/${cuid}/sharedalbums/${name} (${user})`;
+    }
+}
+
+/**
  * Get list of albums and convert to Days response
  * @param type Type of albums to get; 1 = personal, 2 = shared, 3 = all
  */
@@ -595,12 +608,14 @@ export async function* addToAlbum(user: string, name: string, fileIds: number[])
     // Get files data
     let fileInfos = await getFiles(fileIds.filter(f => f));
 
+    const albumPath = getAlbumPath(user, name);
+
     // Add each file
     const calls = fileInfos.map((f) => async () => {
         try {
             await client.copyFile(
                 f.originalFilename,
-                `/photos/${user}/albums/${name}/${f.basename}`,
+                `${albumPath}/${f.basename}`,
             )
             return f.fileid;
         } catch (e) {
