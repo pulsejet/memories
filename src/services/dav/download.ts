@@ -1,5 +1,7 @@
 import * as base from "./base";
 import { generateUrl } from "@nextcloud/router";
+import { showError } from "@nextcloud/dialogs";
+import { translate as t } from "@nextcloud/l10n";
 
 /**
  * Download a file
@@ -46,5 +48,12 @@ export async function downloadFilesByIds(fileIds: number[]) {
 
   // Get files to download
   const fileInfos = await base.getFiles(fileIds);
+  if (fileInfos.length !== fileIds.length) {
+    showError(t("memories", "Failed to download some files."));
+  }
+  if (fileInfos.length === 0) {
+    return;
+  }
+
   await downloadFiles(fileInfos.map((f) => f.filename));
 }
