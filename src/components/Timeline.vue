@@ -20,6 +20,7 @@
             :items="list"
             :emit-update="true"
             :buffer="400"
+            :skipHover="true"
             key-field="id"
             size-field="size"
             type-field="type"
@@ -1138,7 +1139,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         cursor: pointer;
     }
 
-    .hover &, &.selected {
+    :hover, &.selected {
         .select {
             display: flex;
             opacity: 0.7;
