@@ -7,18 +7,24 @@ function getWildcard($param) {
     ];
 }
 
+function w($base, $param) {
+    return array_merge($base, getWildcard($param));
+}
+
 return [
     'routes' => [
         // Vue routes for deep links
         ['name' => 'page#main', 'url' => '/', 'verb' => 'GET'],
-        ['name' => 'page#folder', 'url' => '/folders/{path}', 'verb' => 'GET', ...getWildcard('path')],
         ['name' => 'page#favorites', 'url' => '/favorites', 'verb' => 'GET'],
         ['name' => 'page#videos', 'url' => '/videos', 'verb' => 'GET'],
-        ['name' => 'page#albums', 'url' => '/albums/{id}', 'verb' => 'GET', ...getWildcard('id')],
         ['name' => 'page#archive', 'url' => '/archive', 'verb' => 'GET'],
         ['name' => 'page#thisday', 'url' => '/thisday', 'verb' => 'GET'],
-        ['name' => 'page#people', 'url' => '/people/{name}', 'verb' => 'GET', ...getWildcard('name')],
-        ['name' => 'page#tags', 'url' => '/tags/{name}', 'verb' => 'GET', ...getWildcard('name')],
+
+        // Routes with params
+        w(['name' => 'page#folder', 'url' => '/folders/{path}', 'verb' => 'GET'], 'path'),
+        w(['name' => 'page#albums', 'url' => '/albums/{id}', 'verb' => 'GET'], 'id'),
+        w(['name' => 'page#people', 'url' => '/people/{name}', 'verb' => 'GET'], 'name'),
+        w(['name' => 'page#tags', 'url' => '/tags/{name}', 'verb' => 'GET'], 'name'),
 
         // Public pages
         ['name' => 'page#sharedfolder', 'url' => '/s/{token}', 'verb' => 'GET'],
