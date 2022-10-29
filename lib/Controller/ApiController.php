@@ -89,6 +89,8 @@ class ApiController extends Controller
     {
         // Get the folder to show
         $uid = $this->getUid();
+
+        // Get the folder to show
         $folder = null;
 
         try {
@@ -97,14 +99,9 @@ class ApiController extends Controller
             return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
         }
 
+        // Params
         $recursive = null === $this->request->getParam('folder');
         $archive = null !== $this->request->getParam('archive');
-
-        // Remove folder if album
-        // Permissions will be checked during the transform
-        if ($this->request->getParam('album')) {
-            $folder = null;
-        }
 
         // Run actual query
         try {
@@ -172,12 +169,17 @@ class ApiController extends Controller
         }
 
         // Get the folder to show
-        $folder = $this->getRequestFolder();
+        $folder = null;
+
+        try {
+            $folder = $this->getRequestFolder();
+        } catch (\Exception $e) {
+            return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
+        }
+
+        // Params
         $recursive = null === $this->request->getParam('folder');
         $archive = null !== $this->request->getParam('archive');
-        if (null === $folder) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
-        }
 
         // Run actual query
         try {
@@ -825,6 +827,11 @@ class ApiController extends Controller
     /** Get the Folder object relevant to the request */
     private function getRequestFolder()
     {
+        // Albums have no folder
+        if ($this->request->getParam('album')) {
+            return null;
+        }
+
         // Public shared folder
         if ($token = $this->getShareToken()) {
             $share = $this->shareManager->getShareByToken($token)->getNode(); // throws exception if not found

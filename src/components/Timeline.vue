@@ -526,7 +526,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         "album",
         `${this.$route.params.user}/${this.$route.params.name}`
       );
-      query.set("fields", "basename,mimetype");
     }
 
     // Favorites
