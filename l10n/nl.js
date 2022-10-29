@@ -21,6 +21,7 @@ OC.L10N.register(
     "Copy public link" : "Kopieer openbare link",
     "Public link" : "Openbare Link",
     "Back" : "Terug",
+    "Save" : "Opslaan",
     "Year" : "Jaar",
     "Month" : "Maand",
     "Day" : "Dag",

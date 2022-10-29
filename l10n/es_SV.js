@@ -16,6 +16,7 @@ OC.L10N.register(
     "View in folder" : "Ver en la carpeta",
     "Public link" : "Liga pública",
     "Back" : "Atrás",
+    "Save" : "Guardar",
     "Month" : "Mes",
     "Day" : "Día",
     "Time" : "Hora",

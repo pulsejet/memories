@@ -6,6 +6,7 @@ OC.L10N.register(
     "Cancel" : "منسوخ کریں",
     "Delete" : "حذف کریں",
     "Download" : "ڈاؤن لوڈ",
+    "Save" : "حفظ",
     "Month" : "ماہ",
     "Name" : "اسم"
 },

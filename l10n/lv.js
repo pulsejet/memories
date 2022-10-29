@@ -14,6 +14,7 @@ OC.L10N.register(
     "Favorite" : "Favorīts",
     "View in folder" : "Skatīt mapē",
     "Back" : "Atpakaļ",
+    "Save" : "Saglabāt",
     "Month" : "Mēnesis",
     "Day" : "Diena",
     "Time" : "Laiks",

@@ -10,6 +10,7 @@ OC.L10N.register(
     "Favorite" : "ප්‍රියතම",
     "View in folder" : "බහාලුමේ බලන්න",
     "Back" : "ආපසු",
+    "Save" : "සුරකින්න",
     "Year" : "වර්ෂය",
     "Month" : "මාසය",
     "Day" : "දිනය",

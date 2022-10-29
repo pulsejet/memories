@@ -15,6 +15,7 @@ OC.L10N.register(
     "Unarchive" : "Desarchivar",
     "View in folder" : "Ver en la carpeta",
     "Back" : "Atrás",
+    "Save" : "Guardar",
     "Month" : "Mes",
     "Day" : "Día",
     "Time" : "Hora",

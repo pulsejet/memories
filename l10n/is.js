@@ -20,6 +20,7 @@ OC.L10N.register(
     "Copy public link" : "Afrita opinberan tengil",
     "Public link" : "Opinber tengill",
     "Back" : "Til baka",
+    "Save" : "Vista",
     "Year" : "Ár",
     "Month" : "Mánuður",
     "Day" : "Dagur",

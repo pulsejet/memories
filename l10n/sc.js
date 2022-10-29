@@ -19,6 +19,7 @@ OC.L10N.register(
     "Copy public link" : "Còpia ligòngiu pùblicu",
     "Public link" : "Ligòngiu pùblicu",
     "Back" : "In segus",
+    "Save" : "Sarva",
     "Year" : "Annu",
     "Month" : "Mese",
     "Day" : "Die",

@@ -15,6 +15,7 @@ OC.L10N.register(
     "Unarchive" : "ამოღება",
     "View in folder" : "ჩვენება დირექტორიაში",
     "Back" : "უკან",
+    "Save" : "შენახვა",
     "Month" : "თვე",
     "Day" : "დღე",
     "Time" : "დრო",

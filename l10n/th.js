@@ -15,6 +15,7 @@ OC.L10N.register(
     "View in folder" : "ดูในโฟลเดอร์",
     "Public link" : "ลิงค์สาธารณะ",
     "Back" : "ย้อนกลับ",
+    "Save" : "บันทึก",
     "Month" : "เดือน",
     "Day" : "วัน",
     "Time" : "เวลา",

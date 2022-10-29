@@ -27,6 +27,7 @@ OC.L10N.register(
     "Copy public link" : "Kopiera publik länk",
     "Public link" : "Publik länk",
     "Back" : "Tillbaka",
+    "Save" : "Spara",
     "Year" : "År",
     "Month" : "Månad",
     "Day" : "Dag",
@@ -36,10 +37,10 @@ OC.L10N.register(
     "Name" : "Namn",
     "Update" : "Uppdatera",
     "Loading …" : "Läser in …",
+    "Cannot find this photo anymore!" : "Kan inte längre hitta detta foto!",
     "Failed to delete files." : "Misslyckades att radera filer.",
     "Failed to delete {fileName}." : "Misslyckades att radera {fileName}.",
-    "Failed to favorite {fileName}." : "Misslyckades att favorisera {fileName}.",
     "Failed to favorite files." : "Misslyckades att favorisera filer.",
-    "Cannot find this photo anymore!" : "Kan inte längre hitta detta foto!"
+    "Failed to favorite {fileName}." : "Misslyckades att favorisera {fileName}."
 },
 "nplurals=2; plural=(n != 1);");

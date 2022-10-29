@@ -16,6 +16,7 @@ OC.L10N.register(
     "View in folder" : "Xem trong thư mục",
     "Copy public link" : "Sao chép liên kết công khai",
     "Back" : "Quay lại",
+    "Save" : "Lưu",
     "Year" : "Năm",
     "Month" : "Tháng",
     "Day" : "Ngày",

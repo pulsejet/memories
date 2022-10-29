@@ -19,6 +19,7 @@ OC.L10N.register(
     "Copy public link" : "Copiar a ligazón pública",
     "Public link" : "Ligazón pública",
     "Back" : "Atrás",
+    "Save" : "Gardar",
     "Year" : "Ano",
     "Month" : "Mes",
     "Day" : "Día",

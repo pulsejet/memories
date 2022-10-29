@@ -16,6 +16,7 @@ OC.L10N.register(
     "Copy public link" : "Copiză link-ul public",
     "Public link" : "Link public",
     "Back" : "Înapoi",
+    "Save" : "Salvează",
     "Year" : "An",
     "Month" : "Luna",
     "Day" : "Zi",

@@ -16,6 +16,7 @@ OC.L10N.register(
     "View in folder" : "Lihat dalam folder",
     "Copy public link" : "Salin tautan publik",
     "Back" : "Kembali",
+    "Save" : "Simpan",
     "Month" : "Bulan",
     "Day" : "Hari",
     "Time" : "Waktu",

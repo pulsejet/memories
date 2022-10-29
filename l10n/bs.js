@@ -7,6 +7,7 @@ OC.L10N.register(
     "Delete" : "Obriši",
     "Download" : "Preuzmi",
     "Favorite" : "Favorit",
+    "Save" : "Spremi",
     "Month" : "Mjesec",
     "Day" : "Dan",
     "Name" : "Ime",

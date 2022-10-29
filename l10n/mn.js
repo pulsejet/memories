@@ -15,6 +15,7 @@ OC.L10N.register(
     "Unarchive" : "Архиваас гаргах",
     "View in folder" : "Хавтасыг нээх",
     "Back" : "буцах",
+    "Save" : "Хадгалах",
     "Month" : "Сар",
     "Day" : "Өдөр",
     "Time" : "Цаг",

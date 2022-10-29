@@ -10,6 +10,7 @@ OC.L10N.register(
     "Download" : "Last ned",
     "Favorite" : "Favoritt",
     "Back" : "Tilbake",
+    "Save" : "Lagre",
     "Year" : "År",
     "Month" : "Månad",
     "Day" : "Dag",

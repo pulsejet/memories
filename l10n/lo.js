@@ -11,6 +11,7 @@ OC.L10N.register(
     "Favorite" : "ລາຍການທີ່ມັກ",
     "View in folder" : "ເບິ່ງໃນໂຟນເດີ",
     "Back" : "ຫຼັງ",
+    "Save" : "ບັນທຶກ",
     "Name" : "ຊື່",
     "Loading …" : "ກຳລັງໂຫຼດ"
 },
