@@ -3,7 +3,8 @@
     class="scroller"
     ref="scroller"
     v-bind:class="{
-      'scrolling-recycler': scrollingRecycler,
+      'scrolling-recycler': scrollingRecyclerTimer,
+      'scrolling-recycler-now': scrollingRecyclerNowTimer,
       scrolling: scrolling,
     }"
     @mousemove="mousemove"
@@ -78,16 +79,16 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
   private scrolling = false;
   /** Scrolling timer */
   private scrollingTimer = null as number | null;
-  /** Scrolling recycler currently */
-  private scrollingRecycler = false;
   /** Scrolling recycler timer */
-  private scrollingRecyclerTimer = null as number | null;
+  private scrollingRecyclerTimer = 0;
+  /** Scrolling recycler timer */
+  private scrollingRecyclerNowTimer = 0;
+  /** Recycler scrolling throttle */
+  private scrollingRecyclerUpdateTimer = 0;
   /** View size reflow timer */
   private reflowRequest = false;
   /** Tick adjust timer */
   private adjustRequest = false;
-  /** Recycler scrolling throttle */
-  private recyclerScrollDirty = false;
 
   /** Get the visible ticks */
   get visibleTicks() {
@@ -117,13 +118,11 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
   /** Recycler scroll event, must be called by timeline */
   public recyclerScrolled() {
-    if (!this.recyclerScrollDirty) {
-      this.recyclerScrollDirty = true;
-      window.setTimeout(() => {
-        this.recyclerScrollDirty = false;
-        requestAnimationFrame(this.updateFromRecyclerScroll);
-      }, 100);
-    }
+    if (this.scrollingRecyclerUpdateTimer) return;
+    this.scrollingRecyclerUpdateTimer = window.setTimeout(() => {
+      this.scrollingRecyclerUpdateTimer = 0;
+      requestAnimationFrame(this.updateFromRecyclerScroll);
+    }, 100);
   }
 
   /** Update cursor position from recycler scroll position */
@@ -150,13 +149,18 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
       this.moveHoverCursor(rtop);
     }
 
+    // Animate the cursor
+    if (this.scrollingRecyclerNowTimer)
+      window.clearTimeout(this.scrollingRecyclerNowTimer);
+    this.scrollingRecyclerNowTimer = window.setTimeout(() => {
+      this.scrollingRecyclerNowTimer = 0;
+    }, 200);
+
     // Show the scroller for some time
     if (this.scrollingRecyclerTimer)
       window.clearTimeout(this.scrollingRecyclerTimer);
-    this.scrollingRecycler = true;
     this.scrollingRecyclerTimer = window.setTimeout(() => {
-      this.scrollingRecycler = false;
-      this.scrollingRecyclerTimer = null;
+      this.scrollingRecyclerTimer = 0;
     }, 1500);
   }
 
@@ -569,7 +573,6 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
     min-width: 100%;
     min-height: 1.5px;
     will-change: transform;
-    transition: transform 0.1s linear;
 
     &.st {
       font-size: 0.75em;
@@ -592,6 +595,9 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
         transform: translate(-16px, 6px);
       }
     }
+  }
+  &.scrolling-recycler-now > .cursor {
+    transition: transform 0.1s linear;
   }
   &:hover > .cursor {
     transition: none;
