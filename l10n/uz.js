@@ -10,6 +10,7 @@ OC.L10N.register(
     "Delete" : "Delete",
     "Download" : "Download",
     "Favorite" : "Favorite",
+    "Save" : "Save",
     "Name" : "Name",
     "Update" : "Update"
 },

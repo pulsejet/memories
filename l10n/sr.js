@@ -18,6 +18,7 @@ OC.L10N.register(
     "View in folder" : "Види у фасцикли",
     "Public link" : "Јавна веза",
     "Back" : "Назад",
+    "Save" : "Сачувај",
     "Year" : "Година",
     "Month" : "Месец",
     "Day" : "Дан",

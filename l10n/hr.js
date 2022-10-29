@@ -19,6 +19,7 @@ OC.L10N.register(
     "Copy public link" : "Kopiraj javnu poveznicu",
     "Public link" : "Javna poveznica",
     "Back" : "Natrag",
+    "Save" : "Spremi",
     "Year" : "Godina",
     "Month" : "Mjesec",
     "Day" : "Dan",

@@ -6,6 +6,7 @@ OC.L10N.register(
     "Cancel" : "ընդհատել",
     "Delete" : "հեռացնել",
     "Download" : "Ներբեռնել",
+    "Save" : "Պահպանել",
     "Month" : "Ամիս",
     "Day" : "Օր",
     "Time" : "Ժամ",

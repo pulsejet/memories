@@ -18,6 +18,7 @@ OC.L10N.register(
     "Copy public link" : "העתקת הקישור הציבורי",
     "Public link" : "קישור ציבורי",
     "Back" : "חזרה",
+    "Save" : "שמירה",
     "Year" : "שנה",
     "Month" : "חודש",
     "Day" : "יום",

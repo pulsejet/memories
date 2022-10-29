@@ -11,6 +11,7 @@ OC.L10N.register(
     "Favorite" : "Favorit",
     "View in folder" : "Kuk am Dossier ",
     "Back" : "Zeréck",
+    "Save" : "Späicheren",
     "Month" : "Mount",
     "Day" : "Dag",
     "Time" : "Zäit",

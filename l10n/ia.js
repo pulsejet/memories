@@ -11,6 +11,7 @@ OC.L10N.register(
     "Favorite" : "Favorite",
     "View in folder" : "Vider in dossier",
     "Back" : "Retro",
+    "Save" : "Salveguardar",
     "Month" : "Mense",
     "Day" : "Die",
     "Time" : "Tempore",

@@ -10,6 +10,7 @@ OC.L10N.register(
     "Download" : "Sider",
     "Favorite" : "Menyif",
     "Back" : "Retour",
+    "Save" : "Sekles",
     "Hour" : "Asrag",
     "Name" : "Nom"
 },

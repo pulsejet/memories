@@ -10,6 +10,7 @@ OC.L10N.register(
     "Download" : "Göçürip almak",
     "Favorite" : "Halaýan",
     "Back" : "Yzyna",
+    "Save" : "Saklamak",
     "Name" : "Ady"
 },
 "nplurals=2; plural=(n != 1);");

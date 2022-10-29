@@ -7,6 +7,7 @@ OC.L10N.register(
     "Delete" : "Padam",
     "Download" : "Muat turun",
     "Back" : "Kembali",
+    "Save" : "Simpan",
     "Month" : "Bulan",
     "Day" : "Hari",
     "Name" : "Nama",

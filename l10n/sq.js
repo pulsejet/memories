@@ -15,6 +15,7 @@ OC.L10N.register(
     "Unarchive" : "Hiq nga arkivi",
     "View in folder" : "Shikoje në dosje",
     "Back" : "Prapa",
+    "Save" : "Ruaj",
     "Month" : "Muaj",
     "Day" : "Ditë",
     "Time" : "Kohë",

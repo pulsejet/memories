@@ -10,6 +10,7 @@ OC.L10N.register(
     "Download" : "ডাউনলোড",
     "Favorite" : "প্রিয়জন",
     "Back" : "পেছনে যাও",
+    "Save" : "সংরক্ষণ",
     "Month" : "মাস",
     "Day" : "দিবস",
     "Time" : "সময়",

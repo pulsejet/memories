@@ -10,6 +10,7 @@ OC.L10N.register(
     "Delete" : "Sil",
     "Download" : "Yüklə",
     "Favorite" : "İstəkli",
+    "Save" : "Saxla",
     "Month" : "Ay",
     "Day" : "Gün",
     "Time" : "Vaxt",

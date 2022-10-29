@@ -9,6 +9,7 @@ OC.L10N.register(
     "Delete" : "លុប",
     "Download" : "ទាញយក",
     "Back" : "ត្រឡប់ក្រោយ",
+    "Save" : "រក្សាទុក",
     "Year" : "ឆ្នាំ",
     "Month" : "ខែ",
     "Day" : "ថ្ងៃ",

@@ -18,6 +18,7 @@ OC.L10N.register(
     "Copy public link" : "공용 링크 복사",
     "Public link" : "공개 링크",
     "Back" : "뒤로",
+    "Save" : "저장",
     "Year" : "년",
     "Month" : "달",
     "Day" : "일",

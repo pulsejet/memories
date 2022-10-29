@@ -16,6 +16,7 @@ OC.L10N.register(
     "Copy public link" : "Copiar lo ligam public",
     "Public link" : "Ligam public",
     "Back" : "Retorn",
+    "Save" : "Enregistrar",
     "Year" : "Annada",
     "Month" : "Mes",
     "Day" : "Jorn",

@@ -24,6 +24,7 @@ OC.L10N.register(
     "Location of the album" : "Mesto albuma",
     "Go back to the previous view." : "Vrnitev na prejšnji pogled.",
     "Back" : "Nazaj",
+    "Save" : "Shrani",
     "Year" : "Leto",
     "Month" : "Mesec",
     "Day" : "Dan",

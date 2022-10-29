@@ -19,6 +19,7 @@ OC.L10N.register(
     "Copy public link" : "Kopier offentlig lenke",
     "Public link" : "Offentlig lenke",
     "Back" : "Tilbake",
+    "Save" : "Lagre",
     "Year" : "År",
     "Month" : "Måned",
     "Day" : "Dag",

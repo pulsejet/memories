@@ -14,6 +14,7 @@ OC.L10N.register(
     "Favorite" : "Marcar como favoritu",
     "View in folder" : "Ver na carpeta",
     "Back" : "Atrás",
+    "Save" : "Guardar",
     "Month" : "Mes",
     "Day" : "Día",
     "Time" : "Hora",
