@@ -25,30 +25,31 @@ return [
         ],
 
         // Public pages
-        ['name' => 'page#sharedFolder', 'url' => '/s/{token}', 'verb' => 'GET'],
+        ['name' => 'page#sharedfolder', 'url' => '/s/{token}', 'verb' => 'GET'],
 
-        // API
-        ['name' => 'api#days', 'url' => '/api/days', 'verb' => 'GET'],
-        ['name' => 'api#dayPost', 'url' => '/api/days', 'verb' => 'POST'],
-        ['name' => 'api#day', 'url' => '/api/days/{id}', 'verb' => 'GET'],
+        // API Routes
 
-        ['name' => 'api#tags', 'url' => '/api/tags', 'verb' => 'GET'],
-        ['name' => 'api#tagPreviews', 'url' => '/api/tag-previews', 'verb' => 'GET'],
+        ['name' => 'days#days', 'url' => '/api/days', 'verb' => 'GET'],
+        ['name' => 'days#dayPost', 'url' => '/api/days', 'verb' => 'POST'],
+        ['name' => 'days#day', 'url' => '/api/days/{id}', 'verb' => 'GET'],
 
-        ['name' => 'api#albums', 'url' => '/api/albums', 'verb' => 'GET'],
+        ['name' => 'tags#tags', 'url' => '/api/tags', 'verb' => 'GET'],
+        ['name' => 'tags#previews', 'url' => '/api/tag-previews', 'verb' => 'GET'],
 
-        ['name' => 'api#faces', 'url' => '/api/faces', 'verb' => 'GET'],
-        ['name' => 'api#facePreview', 'url' => '/api/faces/preview/{id}', 'verb' => 'GET'],
+        ['name' => 'albums#albums', 'url' => '/api/albums', 'verb' => 'GET'],
 
-        ['name' => 'api#imageInfo', 'url' => '/api/info/{id}', 'verb' => 'GET'],
-        ['name' => 'api#imageEdit', 'url' => '/api/edit/{id}', 'verb' => 'PATCH'],
+        ['name' => 'faces#faces', 'url' => '/api/faces', 'verb' => 'GET'],
+        ['name' => 'faces#preview', 'url' => '/api/faces/preview/{id}', 'verb' => 'GET'],
 
-        ['name' => 'api#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
+        ['name' => 'image#info', 'url' => '/api/info/{id}', 'verb' => 'GET'],
+        ['name' => 'image#edit', 'url' => '/api/edit/{id}', 'verb' => 'PATCH'],
+
+        ['name' => 'archive#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
 
         // Config API
-        ['name' => 'api#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],
+        ['name' => 'other#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],
 
         // Service worker
-        ['name' => 'api#serviceWorker', 'url' => '/service-worker.js', 'verb' => 'GET'],
+        ['name' => 'other#serviceWorker', 'url' => '/service-worker.js', 'verb' => 'GET'],
     ]
 ];
