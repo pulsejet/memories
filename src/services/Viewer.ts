@@ -65,9 +65,14 @@ export class ViewerManager {
       return;
     }
 
+    // Check viewer > 2.0.0
+    const viewerVersion: string = globalThis.OCA.Viewer.version;
+    const viewerMajor = Number(viewerVersion.split(".")[0]);
+
     // Open Nextcloud viewer
     globalThis.OCA.Viewer.open({
       fileInfo: fInfo,
+      path: viewerMajor < 2 ? fInfo.filename : undefined, // Only specify path upto Nextcloud 24
       list: fileInfos, // file list
       canLoop: false, // don't loop
       onClose: () => {
