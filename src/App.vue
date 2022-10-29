@@ -92,7 +92,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins, Watch } from "vue-property-decorator";
 import {
   NcContent,
   NcAppContent,
@@ -172,6 +172,15 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
     return this.$route.name !== "folder-share";
   }
 
+  @Watch("$route")
+  routeChanged() {
+    this.doRouteChecks();
+  }
+
+  mounted() {
+    this.doRouteChecks();
+  }
+
   async beforeMount() {
     if ("serviceWorker" in navigator) {
       // Use the window load event to keep the page load performant
@@ -189,6 +198,30 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
     } else {
       console.debug("Service Worker is not enabled on this browser.");
     }
+  }
+
+  doRouteChecks() {
+    if (this.$route.name === "folder-share") {
+      this.putFolderShareToken(this.$route.params.token);
+    }
+  }
+
+  putFolderShareToken(token: string) {
+    // Viewer looks for an input with ID sharingToken with the value as the token
+    // Create this element or update it otherwise files not gonna open
+    // https://github.com/nextcloud/viewer/blob/a8c46050fb687dcbb48a022a15a5d1275bf54a8e/src/utils/davUtils.js#L61
+    let tokenInput = document.getElementById(
+      "sharingToken"
+    ) as HTMLInputElement;
+    if (!tokenInput) {
+      tokenInput = document.createElement("input");
+      tokenInput.id = "sharingToken";
+      tokenInput.type = "hidden";
+      tokenInput.style.display = "none";
+      document.body.appendChild(tokenInput);
+    }
+
+    tokenInput.value = token;
   }
 }
 </script>
