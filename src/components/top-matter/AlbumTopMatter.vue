@@ -1,5 +1,5 @@
 <template>
-  <div class="album-top-matter">
+  <div class="top-matter">
     <NcActions v-if="!isAlbumList">
       <NcActionButton :aria-label="t('memories', 'Back')" @click="back()">
         {{ t("memories", "Back") }}
@@ -124,7 +124,7 @@ export default class AlbumTopMatter extends Mixins(GlobalMixin, UserConfig) {
 </script>
 
 <style lang="scss" scoped>
-.album-top-matter {
+.top-matter {
   display: flex;
   vertical-align: middle;
 

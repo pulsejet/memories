@@ -1,31 +1,61 @@
 <template>
-  <NcBreadcrumbs v-if="topMatter">
-    <NcBreadcrumb title="Home" :to="{ name: 'folders' }">
-      <template #icon>
-        <HomeIcon :size="20" />
-      </template>
-    </NcBreadcrumb>
-    <NcBreadcrumb
-      v-for="folder in topMatter.list"
-      :key="folder.path"
-      :title="folder.text"
-      :to="{ name: 'folders', params: { path: folder.path } }"
-    />
-  </NcBreadcrumbs>
+  <div class="top-matter">
+    <NcBreadcrumbs v-if="topMatter">
+      <NcBreadcrumb title="Home" :to="{ name: 'folders' }">
+        <template #icon>
+          <HomeIcon :size="20" />
+        </template>
+      </NcBreadcrumb>
+      <NcBreadcrumb
+        v-for="folder in topMatter.list"
+        :key="folder.path"
+        :title="folder.text"
+        :to="{ name: 'folders', params: { path: folder.path } }"
+      />
+    </NcBreadcrumbs>
+
+    <div class="right-actions">
+      <NcActions :inline="1">
+        <NcActionButton
+          :aria-label="t('memories', 'Share folder')"
+          @click="$refs.shareModal.open(false)"
+          close-after-click
+        >
+          {{ t("memories", "Share folder") }}
+          <template #icon> <ShareIcon :size="20" /> </template>
+        </NcActionButton>
+      </NcActions>
+    </div>
+
+    <FolderShareModal ref="shareModal" />
+  </div>
 </template>
 
 <script lang="ts">
 import { Component, Mixins, Watch } from "vue-property-decorator";
 import { TopMatterFolder, TopMatterType } from "../../types";
-import { NcBreadcrumbs, NcBreadcrumb } from "@nextcloud/vue";
+import {
+  NcBreadcrumbs,
+  NcBreadcrumb,
+  NcActions,
+  NcActionButton,
+} from "@nextcloud/vue";
 import GlobalMixin from "../../mixins/GlobalMixin";
+
+import FolderShareModal from "../modal/FolderShareModal.vue";
+
 import HomeIcon from "vue-material-design-icons/Home.vue";
+import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
 
 @Component({
   components: {
     NcBreadcrumbs,
     NcBreadcrumb,
+    NcActions,
+    NcActionButton,
+    FolderShareModal,
     HomeIcon,
+    ShareIcon,
   },
 })
 export default class FolderTopMatter extends Mixins(GlobalMixin) {
@@ -64,3 +94,18 @@ export default class FolderTopMatter extends Mixins(GlobalMixin) {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.top-matter {
+  display: flex;
+  vertical-align: middle;
+
+  .right-actions {
+    margin-right: 40px;
+    z-index: 50;
+    @media (max-width: 768px) {
+      margin-right: 10px;
+    }
+  }
+}
+</style>

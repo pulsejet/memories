@@ -186,6 +186,18 @@ export function convertFlags(photo: IPhoto) {
   }
 }
 
+/**
+ * Get the path of the folder on folders route
+ * This function does not check if this is the folder route
+ */
+export function getFolderRoutePath(basePath: string) {
+  let path: any = vuerouter.currentRoute.params.path || "/";
+  path = typeof path === "string" ? path : path.join("/");
+  path = basePath + "/" + path;
+  path = path.replace(/\/\/+/, "/"); // Remove double slashes
+  return path;
+}
+
 // Outside for set
 const TagDayID = {
   START: -(1 << 30),
