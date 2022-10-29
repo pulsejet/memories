@@ -30,7 +30,7 @@ To get an idea of what memories looks and feels like, check out the [public demo
 1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos. Photos from this directory will be displayed in the timeline, including any photos in nested subdirectories.
 1. Installing the [preview generator](https://github.com/rullzer/previewgenerator) for pre-generating thumbnails is strongly recommended.
 ]]></description>
-    <version>4.5.0</version>
+    <version>3.5.0</version>
     <licence>agpl</licence>
     <author mail="radialapps@gmail.com" >Varun Patil</author>
     <namespace>Memories</namespace>
@@ -40,7 +40,7 @@ To get an idea of what memories looks and feels like, check out the [public demo
     <repository>https://github.com/pulsejet/memories</repository>
     <screenshot>https://raw.githubusercontent.com/pulsejet/memories/master/appinfo/screenshot.jpg</screenshot>
     <dependencies>
-        <nextcloud min-version="25" max-version="25"/>
+        <nextcloud min-version="23" max-version="24"/>
     </dependencies>
     <commands>
         <command>OCA\Memories\Command\Index</command>
