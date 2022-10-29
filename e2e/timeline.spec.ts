@@ -1,26 +1,38 @@
-import { test, expect } from '@playwright/test';
-import { login } from './login';
+import { test, expect } from "@playwright/test";
+import { login } from "./login";
 
-test.beforeEach(login('/'));
+test.beforeEach(login("/"));
 
-test.describe('Open', () => {
-  test('Look for Images', async ({ page }) => {
-    expect(await page.locator('img[src*="core/preview"]').count(), 'Number of previews').toBeGreaterThan(4);
+test.describe("Open", () => {
+  test("Look for Images", async ({ page }) => {
+    expect(
+      await page.locator('img[src*="core/preview"]').count(),
+      "Number of previews"
+    ).toBeGreaterThan(4);
     await page.waitForTimeout(1000);
   });
 
-  test('Open one image', async ({ page }) => {
-    await page.locator('div:nth-child(2) > .p-outer > .img-outer > img').first().click();
+  test("Open one image", async ({ page }) => {
+    await page
+      .locator("div:nth-child(2) > .p-outer > .img-outer > img")
+      .first()
+      .click();
     await page.waitForTimeout(1000);
-    await page.locator('button.header-close').first().click();
+    await page.locator("button.header-close").first().click();
   });
 
-  test('Select two images and delete', async ({ page }) => {
+  test("Select two images and delete", async ({ page }) => {
     const i1 = "div:nth-child(2) > div:nth-child(1) > .p-outer";
     const i2 = "div:nth-child(2) > div:nth-child(2) > .p-outer";
 
-    const src1 = await page.locator(`${i1} > .img-outer > img`).first().getAttribute('src');
-    const src2 = await page.locator(`${i2} > .img-outer > img`).first().getAttribute('src');
+    const src1 = await page
+      .locator(`${i1} > .img-outer > img`)
+      .first()
+      .getAttribute("src");
+    const src2 = await page
+      .locator(`${i2} > .img-outer > img`)
+      .first()
+      .getAttribute("src");
 
     expect(await page.locator(`img[src="${src1}"]`).count()).toBe(1);
     expect(await page.locator(`img[src="${src2}"]`).count()).toBe(1);
@@ -37,7 +49,7 @@ test.describe('Open', () => {
 
     // refresh page
     await page.reload();
-    await page.waitForTimeout(4000); // cache
+    await page.waitForTimeout(15000); // cache
     await page.waitForSelector('img[src*="core/preview"]');
     expect(await page.locator(`img[src="${src1}"]`).count()).toBe(0);
     expect(await page.locator(`img[src="${src2}"]`).count()).toBe(0);
