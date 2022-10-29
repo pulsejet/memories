@@ -2,7 +2,7 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
-## v4.4.2, v3.4.2 (2022-10-28)
+## v4.5.0, v3.5.0 (2022-10-28)
 
 - **Feature**: Album sharing to other Nextcloud users
 - **Feature**: Folder sharing with public link [#74](https://github.com/pulsejet/memories/issues/74)
