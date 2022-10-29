@@ -124,6 +124,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
         name: t("memories", "Download"),
         icon: DownloadIcon,
         callback: this.downloadSelection.bind(this),
+        allowPublic: true,
       },
       {
         name: t("memories", "Favorite"),
@@ -190,7 +191,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
 
   /** Get the actions list */
   private getActions(): ISelectionAction[] {
-    return this.defaultActions.filter((a) => !a.if || a.if(this));
+    return this.defaultActions.filter((a) => (!a.if || a.if(this)) && (!this.routeIsPublic() || a.allowPublic));
   }
 
   /** Clear all selected photos */
@@ -409,6 +410,11 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
   /** Is album route */
   private routeIsAlbum() {
     return this.config_albumsEnabled && this.$route.name === "albums";
+  }
+
+  /** Public route that can't modify anything */
+  private routeIsPublic() {
+    return this.$route.name === "folder-share";
   }
 
   /**

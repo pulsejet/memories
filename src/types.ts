@@ -206,4 +206,6 @@ export type ISelectionAction = {
   callback: (selection: Map<number, IPhoto>) => Promise<void>;
   /** Condition to check for including */
   if?: (self?: any) => boolean;
+  /** Allow for public routes (default false) */
+  allowPublic?: boolean;
 };
