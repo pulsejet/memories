@@ -333,7 +333,9 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
     for await (const delIds of dav.deletePhotos(
       Array.from(selection.values())
     )) {
-      const delPhotos = delIds.map((id) => selection.get(id));
+      const delPhotos = delIds
+        .filter((id) => id)
+        .map((id) => selection.get(id));
       this.deletePhotos(delPhotos);
     }
   }
