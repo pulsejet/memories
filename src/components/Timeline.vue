@@ -31,6 +31,7 @@
       key-field="id"
       size-field="size"
       type-field="type"
+      :updateInterval="100"
       @update="scrollChange"
       @resize="handleResizeWithDelay"
     >

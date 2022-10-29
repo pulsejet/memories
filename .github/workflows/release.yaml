@@ -24,6 +24,7 @@ jobs:
       - name: Build
         run: |
           make dev-setup
+          make patch-external
           make build-js-production
           ./scripts/bundle.sh
 

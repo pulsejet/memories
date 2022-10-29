@@ -24,6 +24,7 @@ jobs:
       - name: Build vue app
         run: |
           make dev-setup
+          make patch-external
           make build-js-production
           zip -r vue.zip js/
 

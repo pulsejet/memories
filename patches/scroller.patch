@@ -1,0 +1,54 @@
+--- ./node_modules/vue-virtual-scroller/dist/vue-virtual-scroller.esm.js	2022-10-29 15:40:12.517184534 -0700
++++ ./node_modules/vue-virtual-scroller/dist/vue-virtual-scroller.esm.js	2022-10-29 15:40:42.814432774 -0700
+@@ -99,6 +99,10 @@
+       type: Boolean,
+       default: false
+     },
++    updateInterval: {
++      type: Number,
++      default: 0,
++    },
+     skipHover: {
+       type: Boolean,
+       default: false
+@@ -262,7 +266,9 @@
+     handleScroll(event) {
+       if (!this.$_scrollDirty) {
+         this.$_scrollDirty = true;
+-        requestAnimationFrame(() => {
++        if (this.$_updateTimeout) return
++
++        const requestUpdate = () => requestAnimationFrame(() => {
+           this.$_scrollDirty = false;
+           const {
+             continuous
+@@ -272,9 +278,19 @@
+           // When non continous scrolling is ending, we force a refresh
+           if (!continuous) {
+             clearTimeout(this.$_refreshTimout);
+-            this.$_refreshTimout = setTimeout(this.handleScroll, 100);
++            this.$_refreshTimout = setTimeout(this.handleScroll, this.updateInterval + 100);
+           }
+         });
++
++        requestUpdate()
++
++        // Schedule the next update with throttling
++        if (this.updateInterval) {
++          this.$_updateTimeout = setTimeout(() => {
++            this.$_updateTimeout = 0
++            if (this.$_scrollDirty) requestUpdate();
++          }, this.updateInterval)
++        }
+       }
+     },
+     handleVisibilityChange(isVisible, entry) {
+@@ -505,7 +521,7 @@
+       // After the user has finished scrolling
+       // Sort views so text selection is correct
+       clearTimeout(this.$_sortTimer);
+-      this.$_sortTimer = setTimeout(this.sortViews, 300);
++      this.$_sortTimer = setTimeout(this.sortViews, this.updateInterval + 300);
+       return {
+         continuous
+       };
