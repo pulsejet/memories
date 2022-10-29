@@ -23,6 +23,7 @@ trait TimelineQueryFilters
             $query->expr()->eq('vco.objid', 'm.fileid'),
             $query->expr()->in('vco.categoryid', $this->getFavoriteVCategoryFun($query, $userId)),
         ));
+        $query->addSelect('vco.categoryid');
     }
 
     public function transformVideoFilter(IQueryBuilder &$query, string $userId)

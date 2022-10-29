@@ -39,6 +39,10 @@ export type IPhoto = {
   etag?: string;
   /** Path to file */
   filename?: string;
+  /** Base name of file */
+  basename?: string;
+  /** Mime type of file */
+  mimetype?: string;
   /** Bit flags */
   flag: number;
   /** DayID from server */
@@ -80,13 +84,6 @@ export type IPhoto = {
   /** Optional datetaken epoch */
   datetaken?: number;
 };
-
-export interface IExtendedPhoto extends IPhoto {
-  /** Base name of file */
-  basename: string;
-  /** Mime type of file */
-  mimetype: string;
-}
 
 export interface IFolder extends IPhoto {
   /** Path to folder */

@@ -21,7 +21,7 @@
  */
 import { generateUrl } from "@nextcloud/router";
 import camelcase from "camelcase";
-import { IExtendedPhoto, IFileInfo, IPhoto } from "../types";
+import { IFileInfo, IPhoto } from "../types";
 import { isNumber } from "./NumberUtils";
 
 /**

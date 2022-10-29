@@ -45,14 +45,6 @@ class TimelineQuery
 
     public function transformExtraFields(IQueryBuilder &$query, string $uid, array &$fields)
     {
-        if (\in_array('basename', $fields, true)) {
-            $query->addSelect('f.name AS basename');
-        }
-
-        if (\in_array('mimetype', $fields, true)) {
-            $query->join('f', 'mimetypes', 'mimetypes', $query->expr()->eq('f.mimetype', 'mimetypes.id'));
-            $query->addSelect('mimetypes.mimetype');
-        }
     }
 
     public function getInfoById(int $id): array

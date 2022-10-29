@@ -3,14 +3,7 @@ import { getCurrentUser } from "@nextcloud/auth";
 import { generateUrl } from "@nextcloud/router";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t, translatePlural as n } from "@nextcloud/l10n";
-import {
-  IAlbum,
-  IDay,
-  IExtendedPhoto,
-  IFileInfo,
-  IPhoto,
-  ITag,
-} from "../../types";
+import { IAlbum, IDay, IFileInfo, IPhoto, ITag } from "../../types";
 import { constants } from "../Utils";
 import axios from "@nextcloud/axios";
 import client from "../DavClient";
@@ -270,15 +263,13 @@ export function getAlbumFileInfos(
   albumUser: string,
   albumName: string
 ): IFileInfo[] {
-  const ephotos = photos as IExtendedPhoto[];
-
   const uid = getCurrentUser()?.uid;
   const collection =
     albumUser === uid
       ? `/photos/${uid}/albums/${albumName}`
       : `/photos/${uid}/sharedalbums/${albumName} (${albumUser})`;
 
-  return ephotos.map((photo) => {
+  return photos.map((photo) => {
     const basename =
       albumUser === uid
         ? `${photo.fileid}-${photo.basename}`

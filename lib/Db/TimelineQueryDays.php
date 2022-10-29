@@ -102,10 +102,17 @@ trait TimelineQueryDays
         // We don't actually use m.datetaken here, but postgres
         // needs that all fields in ORDER BY are also in SELECT
         // when using DISTINCT on selected fields
-        $query->select($fileid, 'f.etag', 'f.path', 'm.isvideo', 'vco.categoryid', 'm.datetaken', 'm.dayid', 'm.w', 'm.h')
+        $query->select($fileid, 'm.isvideo', 'm.datetaken', 'm.dayid', 'm.w', 'm.h')
             ->from('memories', 'm')
         ;
+
+        // JOIN with filecache for existing files
         $query = $this->joinFilecache($query, $folder, $recursive, $archive);
+        $query->addSelect('f.etag', 'f.path', 'f.name AS basename');
+
+        // JOIN with mimetypes to get the mimetype
+        $query->join('f', 'mimetypes', 'mimetypes', $query->expr()->eq('f.mimetype', 'mimetypes.id'));
+        $query->addSelect('mimetypes.mimetype');
 
         // Filter by dayid unless wildcard
         if (null !== $day_ids) {
@@ -155,7 +162,30 @@ trait TimelineQueryDays
      */
     private function processDay(&$day, $folder)
     {
-        $basePath = null !== $folder ? $folder->getInternalPath() : '#__#__#';
+        $basePath = '#__#__#';
+        $davPath = '/';
+        if (null !== $folder) {
+            // No way to get the internal path from the folder
+            $query = $this->connection->getQueryBuilder();
+            $query->select('path')
+                ->from('filecache')
+                ->where($query->expr()->eq('fileid', $query->createNamedParameter($folder->getId(), IQueryBuilder::PARAM_INT)))
+            ;
+            $path = $query->executeQuery()->fetchOne();
+            $basePath = $path ?: $basePath;
+
+            // Get user facing path
+            // getPath looks like /user/files/... but we want /files/user/...
+            // Split at / and swap these
+            $actualPath = $folder->getPath();
+            $actualPath = explode('/', $actualPath);
+            if (\count($actualPath) >= 3) {
+                $tmp = $actualPath[1];
+                $actualPath[1] = $actualPath[2];
+                $actualPath[2] = $tmp;
+                $davPath = implode('/', $actualPath);
+            }
+        }
 
         foreach ($day as &$row) {
             // We don't need date taken (see query builder)
@@ -178,7 +208,7 @@ trait TimelineQueryDays
             // Check if path exists and starts with basePath and remove
             if (isset($row['path']) && !empty($row['path'])) {
                 if (0 === strpos($row['path'], $basePath)) {
-                    $row['filename'] = substr($row['path'], \strlen($basePath));
+                    $row['filename'] = $davPath.substr($row['path'], \strlen($basePath));
                 }
                 unset($row['path']);
             }

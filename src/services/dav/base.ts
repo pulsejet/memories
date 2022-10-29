@@ -46,8 +46,33 @@ export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
     return getAlbumFileInfos(photos, route.params.user, route.params.name);
   }
 
+  // Get file infos
+  let fileInfos: IFileInfo[] = [];
+
+  // Get all photos that already have and don't have a filename
+  const photosWithFilename = photos.filter((photo) => photo.filename);
+  fileInfos = fileInfos.concat(
+    photosWithFilename.map((photo) => {
+      return {
+        fileid: photo.fileid,
+        filename: photo.filename.split("/").slice(3).join("/"),
+        originalFilename: photo.filename,
+        basename: photo.basename,
+        mime: photo.mimetype,
+        hasPreview: true,
+        etag: photo.etag,
+      } as IFileInfo;
+    })
+  );
+
+  // Next: get all photos that have no filename using ID
+  if (photosWithFilename.length === photos.length) {
+    return fileInfos;
+  }
+  const photosWithoutFilename = photos.filter((photo) => !photo.filename);
+
   // Get file IDs array
-  const fileIds = photos.map((photo) => photo.fileid);
+  const fileIds = photosWithoutFilename.map((photo) => photo.fileid);
 
   // Divide fileIds into chunks of GET_FILE_CHUNK_SIZE
   const chunks = [];
@@ -56,8 +81,10 @@ export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
   }
 
   // Get file infos for each chunk
-  const fileInfos = await Promise.all(chunks.map(getFilesInternal));
-  return fileInfos.flat();
+  const ef = await Promise.all(chunks.map(getFilesInternal));
+  fileInfos = fileInfos.concat(ef.flat());
+
+  return fileInfos;
 }
 
 /**
@@ -153,16 +180,6 @@ export async function* runInParallel<T>(
 }
 
 /**
- * Delete a single file
- *
- * @param path path to the file
- */
-export async function deleteFile(path: string) {
-  const prefixPath = `/files/${getCurrentUser()?.uid}`;
-  return await client.deleteFile(`${prefixPath}${path}`);
-}
-
-/**
  * Delete all files in a given list of Ids
  *
  * @param photos list of photos to delete
@@ -189,11 +206,15 @@ export async function* deletePhotos(photos: IPhoto[]) {
   fileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid));
   const calls = fileInfos.map((fileInfo) => async () => {
     try {
-      await deleteFile(fileInfo.filename);
+      await client.deleteFile(fileInfo.originalFilename);
       return fileInfo.fileid;
     } catch (error) {
       console.error("Failed to delete", fileInfo, error);
-      showError(t("memories", "Failed to delete {fileName}.", fileInfo));
+      showError(
+        t("memories", "Failed to delete {fileName}.", {
+          fileName: fileInfo.filename,
+        })
+      );
       return 0;
     }
   });
