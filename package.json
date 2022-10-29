@@ -43,7 +43,7 @@
     "vue-material-design-icons": "^5.1.2",
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^3.5.4",
-    "vue-virtual-scroller": "1.1.2",
+    "vue-virtual-scroller": "^1.1.2",
     "webdav": "^4.11.0"
   },
   "browserslist": [

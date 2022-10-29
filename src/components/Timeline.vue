@@ -26,12 +26,11 @@
       :class="{ empty: list.length === 0 }"
       :items="list"
       :emit-update="true"
-      :buffer="800"
+      :buffer="400"
       :skipHover="true"
       key-field="id"
       size-field="size"
       type-field="type"
-      :updateInterval="100"
       @update="scrollChange"
       @resize="handleResizeWithDelay"
     >

@@ -26,9 +26,6 @@ build-js:
 build-js-production:
 	rm -f js/* && npm run build
 
-patch-external:
-	patch -p1 < patches/scroller.patch
-
 watch-js:
 	npm run watch
 
