@@ -102,7 +102,7 @@ trait TimelineQueryDays
         // We don't actually use m.datetaken here, but postgres
         // needs that all fields in ORDER BY are also in SELECT
         // when using DISTINCT on selected fields
-        $query->select($fileid, 'f.etag', 'm.isvideo', 'vco.categoryid', 'm.datetaken', 'm.dayid', 'm.w', 'm.h')
+        $query->select($fileid, 'f.etag', 'f.path', 'm.isvideo', 'vco.categoryid', 'm.datetaken', 'm.dayid', 'm.w', 'm.h')
             ->from('memories', 'm')
         ;
         $query = $this->joinFilecache($query, $folder, $recursive, $archive);
@@ -129,7 +129,7 @@ trait TimelineQueryDays
         $rows = $cursor->fetchAll();
         $cursor->closeCursor();
 
-        return $this->processDay($rows);
+        return $this->processDay($rows, $folder);
     }
 
     /**
@@ -150,10 +150,13 @@ trait TimelineQueryDays
     /**
      * Process the single day response.
      *
-     * @param array $day
+     * @param array       $day
+     * @param null|Folder $folder
      */
-    private function processDay(&$day)
+    private function processDay(&$day, $folder)
     {
+        $basePath = null !== $folder ? $folder->getInternalPath() : '#__#__#';
+
         foreach ($day as &$row) {
             // We don't need date taken (see query builder)
             unset($row['datetaken']);
@@ -171,6 +174,14 @@ trait TimelineQueryDays
                 $row['isfavorite'] = 1;
             }
             unset($row['categoryid']);
+
+            // Check if path exists and starts with basePath and remove
+            if (isset($row['path']) && !empty($row['path'])) {
+                if (0 === strpos($row['path'], $basePath)) {
+                    $row['filename'] = substr($row['path'], \strlen($basePath));
+                }
+                unset($row['path']);
+            }
 
             // All transform processing
             $this->processFace($row);

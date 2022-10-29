@@ -157,12 +157,7 @@ export default class OnThisDay extends Mixins(GlobalMixin) {
 
       // Get random photo
       year.preview ||= utils.randomChoice(year.photos);
-      year.url = getPreviewUrl(
-        year.preview.fileid,
-        year.preview.etag,
-        false,
-        512
-      );
+      year.url = getPreviewUrl(year.preview, false, 512);
     }
 
     await this.$nextTick();

@@ -43,6 +43,7 @@ use OCP\IDBConnection;
 use OCP\IPreview;
 use OCP\IRequest;
 use OCP\IUserSession;
+use OCP\Share\IManager as IShareManager;
 
 class ApiController extends Controller
 {
@@ -53,6 +54,7 @@ class ApiController extends Controller
     private IAppManager $appManager;
     private TimelineQuery $timelineQuery;
     private TimelineWrite $timelineWrite;
+    private IShareManager $shareManager;
     private IPreview $preview;
 
     public function __construct(
@@ -62,6 +64,7 @@ class ApiController extends Controller
         IDBConnection $connection,
         IRootFolder $rootFolder,
         IAppManager $appManager,
+        IShareManager $shareManager,
         IPreview $preview
     ) {
         parent::__construct(Application::APPNAME, $request);
@@ -71,6 +74,7 @@ class ApiController extends Controller
         $this->connection = $connection;
         $this->rootFolder = $rootFolder;
         $this->appManager = $appManager;
+        $this->shareManager = $shareManager;
         $this->previewManager = $preview;
         $this->timelineQuery = new TimelineQuery($this->connection);
         $this->timelineWrite = new TimelineWrite($connection, $preview);
@@ -78,22 +82,28 @@ class ApiController extends Controller
 
     /**
      * @NoAdminRequired
+     *
+     * @PublicPage
      */
     public function days(): JSONResponse
     {
         $user = $this->userSession->getUser();
-        if (null === $user) {
+        if (null === $user && !$this->getShareToken()) {
             return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
         }
-        $uid = $user->getUID();
+        $uid = $user ? $user->getUID() : '';
 
         // Get the folder to show
-        $folder = $this->getRequestFolder();
+        $folder = null;
+
+        try {
+            $folder = $this->getRequestFolder();
+        } catch (\Exception $e) {
+            return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
+        }
+
         $recursive = null === $this->request->getParam('folder');
         $archive = null !== $this->request->getParam('archive');
-        if (null === $folder) {
-            return new JSONResponse(['message' => 'Folder not found'], Http::STATUS_NOT_FOUND);
-        }
 
         // Remove folder if album
         // Permissions will be checked during the transform
@@ -127,6 +137,8 @@ class ApiController extends Controller
 
     /**
      * @NoAdminRequired
+     *
+     * @PublicPage
      */
     public function dayPost(): JSONResponse
     {
@@ -140,14 +152,16 @@ class ApiController extends Controller
 
     /**
      * @NoAdminRequired
+     *
+     * @PublicPage
      */
     public function day(string $id): JSONResponse
     {
         $user = $this->userSession->getUser();
-        if (null === $user) {
+        if (null === $user && !$this->getShareToken()) {
             return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
         }
-        $uid = $user->getUID();
+        $uid = $user ? $user->getUID() : '';
 
         // Check for wildcard
         $day_ids = [];
@@ -664,6 +678,8 @@ class ApiController extends Controller
     /**
      * @NoAdminRequired
      *
+     * @PublicPage
+     *
      * @NoCSRFRequired
      */
     public function serviceWorker(): StreamResponse
@@ -695,6 +711,11 @@ class ApiController extends Controller
         if (!$aggregateOnly && ($fields = $this->request->getParam('fields'))) {
             $fields = explode(',', $fields);
             $transforms[] = [$this->timelineQuery, 'transformExtraFields', $fields];
+        }
+
+        // Other transforms not allowed for public shares
+        if (null === $this->userSession->getUser()) {
+            return $transforms;
         }
 
         // Filter only favorites
@@ -753,7 +774,9 @@ class ApiController extends Controller
      */
     private function preloadDays(array &$days, &$folder, bool $recursive, bool $archive)
     {
-        $uid = $this->userSession->getUser()->getUID();
+        $user = $this->userSession->getUser();
+        $uid = $user ? $user->getUID() : '';
+
         $transforms = $this->getTransformations(false);
         $preloaded = 0;
         $preloadDayIds = [];
@@ -799,31 +822,47 @@ class ApiController extends Controller
     /** Get the Folder object relevant to the request */
     private function getRequestFolder()
     {
-        $uid = $this->userSession->getUser()->getUID();
+        $user = $this->userSession->getUser();
+        if (null === $user) {
+            // Public shares only
+            if ($token = $this->getShareToken()) {
+                $share = $this->shareManager->getShareByToken($token)->getNode(); // throws exception if not found
+                if (!$share instanceof Folder) {
+                    throw new \Exception('Share not found or invalid');
+                }
 
-        try {
-            $folder = null;
-            $folderPath = $this->request->getParam('folder');
-            $forcedTimelinePath = $this->request->getParam('timelinePath');
-            $userFolder = $this->rootFolder->getUserFolder($uid);
-
-            if (null !== $folderPath) {
-                $folder = $userFolder->get($folderPath);
-            } elseif (null !== $forcedTimelinePath) {
-                $folder = $userFolder->get($forcedTimelinePath);
-            } else {
-                $configPath = Exif::removeExtraSlash(Exif::getPhotosPath($this->config, $uid));
-                $folder = $userFolder->get($configPath);
+                return $share;
             }
 
-            if (!$folder instanceof Folder) {
-                throw new \Exception('Folder not found');
-            }
-        } catch (\Exception $e) {
             return null;
         }
 
+        $uid = $user->getUID();
+
+        $folder = null;
+        $folderPath = $this->request->getParam('folder');
+        $forcedTimelinePath = $this->request->getParam('timelinePath');
+        $userFolder = $this->rootFolder->getUserFolder($uid);
+
+        if (null !== $folderPath) {
+            $folder = $userFolder->get($folderPath);
+        } elseif (null !== $forcedTimelinePath) {
+            $folder = $userFolder->get($forcedTimelinePath);
+        } else {
+            $configPath = Exif::removeExtraSlash(Exif::getPhotosPath($this->config, $uid));
+            $folder = $userFolder->get($configPath);
+        }
+
+        if (!$folder instanceof Folder) {
+            throw new \Exception('Folder not found');
+        }
+
         return $folder;
+    }
+
+    private function getShareToken()
+    {
+        return $this->request->getParam('folder_share');
     }
 
     /**

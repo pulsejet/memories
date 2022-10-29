@@ -24,7 +24,7 @@
           class="fill-block"
           :class="{ error: info.flag & c.FLAG_LOAD_FAIL }"
           :key="'fpreview-' + info.fileid"
-          :src="getPreviewUrl(info.fileid, info.etag)"
+          :src="getPreviewUrl(info)"
           @error="info.flag |= c.FLAG_LOAD_FAIL"
         />
       </div>
@@ -80,7 +80,7 @@ export default class Tag extends Mixins(GlobalMixin) {
     this.refreshPreviews();
   }
 
-  getPreviewUrl(fileid: number, etag: string) {
+  getPreviewUrl(photo: IPhoto) {
     if (this.isFace) {
       return generateUrl(
         "/apps/memories/api/faces/preview/" + this.data.fileid
@@ -88,10 +88,10 @@ export default class Tag extends Mixins(GlobalMixin) {
     }
 
     if (this.isAlbum) {
-      return getPhotosPreviewUrl(fileid, etag, true, 256);
+      return getPhotosPreviewUrl(photo, true, 256);
     }
 
-    return getPreviewUrl(fileid, etag, true, 256);
+    return getPreviewUrl(photo, true, 256);
   }
 
   get isFace() {

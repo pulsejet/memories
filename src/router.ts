@@ -135,5 +135,14 @@ export default new Router({
         window.open(generateUrl("/apps/maps"), "_blank");
       },
     },
+
+    {
+      path: "/s/:token",
+      component: Timeline,
+      name: "folder-share",
+      props: (route) => ({
+        rootTitle: t("memories", "Shared Folder"),
+      }),
+    },
   ],
 });

@@ -532,6 +532,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       query.set("fields", "basename,mimetype");
     }
 
+    // Favorites
+    if (this.$route.name === "folder-share") {
+      query.set("folder_share", this.$route.params.token);
+    }
+
     // Create query string and append to URL
     const queryStr = query.toString();
     if (queryStr) {

@@ -24,6 +24,9 @@ return [
             'defaults' => [ 'name' => '' ]
         ],
 
+        // Public pages
+        ['name' => 'page#sharedFolder', 'url' => '/s/{token}', 'verb' => 'GET'],
+
         // API
         ['name' => 'api#days', 'url' => '/api/days', 'verb' => 'GET'],
         ['name' => 'api#dayPost', 'url' => '/api/days', 'verb' => 'POST'],

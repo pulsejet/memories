@@ -89,7 +89,7 @@ import ImageMultiple from "vue-material-design-icons/ImageMultiple.vue";
 import { NcButton, NcListItem, NcLoadingIcon } from "@nextcloud/vue";
 import { generateUrl } from "@nextcloud/router";
 import { getPhotosPreviewUrl } from "../../services/FileUtils";
-import { IAlbum } from "../../types";
+import { IAlbum, IPhoto } from "../../types";
 import axios from "@nextcloud/axios";
 
 @Component({
@@ -103,7 +103,13 @@ import axios from "@nextcloud/axios";
   },
   filters: {
     toCoverUrl(fileId: string) {
-      return getPhotosPreviewUrl(Number(fileId), "unknown", true, 256);
+      return getPhotosPreviewUrl(
+        {
+          fileid: Number(fileId),
+        } as IPhoto,
+        true,
+        256
+      );
     },
   },
 })

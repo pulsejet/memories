@@ -40,16 +40,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Emit, Mixins, Watch } from "vue-property-decorator";
-import { IDay, IPhoto } from "../../types";
-
-import { getPhotosPreviewUrl, getPreviewUrl } from "../../services/FileUtils";
+import Check from "vue-material-design-icons/Check.vue";
+import Star from "vue-material-design-icons/Star.vue";
+import Video from "vue-material-design-icons/Video.vue";
+import { Component, Emit, Mixins, Prop, Watch } from "vue-property-decorator";
 import errorsvg from "../../assets/error.svg";
 import GlobalMixin from "../../mixins/GlobalMixin";
-
-import Check from "vue-material-design-icons/Check.vue";
-import Video from "vue-material-design-icons/Video.vue";
-import Star from "vue-material-design-icons/Star.vue";
+import { getPreviewUrl } from "../../services/FileUtils";
+import { IDay, IPhoto } from "../../types";
 
 @Component({
   components: {
@@ -122,9 +120,7 @@ export default class Photo extends Mixins(GlobalMixin) {
         ) - 1;
     }
 
-    const fun =
-      this.$route.name === "albums" ? getPhotosPreviewUrl : getPreviewUrl;
-    return fun(this.data.fileid, this.data.etag, false, size);
+    return getPreviewUrl(this.data, false, size);
   }
 
   /** Set src with overlay face rect */

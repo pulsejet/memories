@@ -37,6 +37,8 @@ export type IPhoto = {
   fileid: number;
   /** Etag from server */
   etag?: string;
+  /** Path to file */
+  filename?: string;
   /** Bit flags */
   flag: number;
   /** DayID from server */
