@@ -13,7 +13,7 @@ class AddMissingIndices
      * @param SchemaWrapper   $schema     Schema wrapper
      * @param null|Connection $connection Connection to db
      */
-    public static function run(SchemaWrapper &$schema, $connection)
+    public static function run(SchemaWrapper $schema, $connection)
     {
         // Should migrate at end
         $shouldMigrate = false;
