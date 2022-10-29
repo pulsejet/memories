@@ -1163,6 +1163,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 }
 
 .recycler {
+  contain: strict;
   height: 300px;
   width: calc(100% + 20px);
   transition: opacity 0.2s ease-in-out;
@@ -1174,6 +1175,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 }
 
 .recycler .photo {
+  contain: strict;
   display: block;
   position: absolute;
   top: 0;
@@ -1185,6 +1187,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 }
 
 .head-row {
+  contain: strict;
   padding-top: 10px;
   padding-left: 3px;
   font-size: 0.9em;
