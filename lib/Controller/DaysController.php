@@ -82,21 +82,6 @@ class DaysController extends ApiBase
      *
      * @PublicPage
      */
-    public function dayPost(): JSONResponse
-    {
-        $id = $this->request->getParam('body_ids');
-        if (null === $id) {
-            return new JSONResponse([], Http::STATUS_BAD_REQUEST);
-        }
-
-        return $this->day($id);
-    }
-
-    /**
-     * @NoAdminRequired
-     *
-     * @PublicPage
-     */
     public function day(string $id): JSONResponse
     {
         // Get user
@@ -146,6 +131,21 @@ class DaysController extends ApiBase
         } catch (\Exception $e) {
             return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @PublicPage
+     */
+    public function dayPost(): JSONResponse
+    {
+        $id = $this->request->getParam('body_ids');
+        if (null === $id) {
+            return new JSONResponse([], Http::STATUS_BAD_REQUEST);
+        }
+
+        return $this->day($id);
     }
 
     /**

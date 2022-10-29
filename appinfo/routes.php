@@ -1,28 +1,24 @@
 <?php
+
+function getWildcard($param) {
+    return [
+        'requirements' => [ $param => '.*' ],
+        'defaults' => [ $param => '' ]
+    ];
+}
+
 return [
     'routes' => [
-        // Days and folder API
+        // Vue routes for deep links
         ['name' => 'page#main', 'url' => '/', 'verb' => 'GET'],
-        ['name' => 'page#folder', 'url' => '/folders/{path}', 'verb' => 'GET',
-            'requirements' => [ 'path' => '.*' ],
-            'defaults' => [ 'path' => '' ]
-        ],
+        ['name' => 'page#folder', 'url' => '/folders/{path}', 'verb' => 'GET', ...getWildcard('path')],
         ['name' => 'page#favorites', 'url' => '/favorites', 'verb' => 'GET'],
         ['name' => 'page#videos', 'url' => '/videos', 'verb' => 'GET'],
-        ['name' => 'page#albums', 'url' => '/albums/{id}', 'verb' => 'GET',
-            'requirements' => [ 'id' => '.*' ],
-            'defaults' => [ 'id' => '' ]
-        ],
+        ['name' => 'page#albums', 'url' => '/albums/{id}', 'verb' => 'GET', ...getWildcard('id')],
         ['name' => 'page#archive', 'url' => '/archive', 'verb' => 'GET'],
         ['name' => 'page#thisday', 'url' => '/thisday', 'verb' => 'GET'],
-        ['name' => 'page#people', 'url' => '/people/{name}', 'verb' => 'GET',
-            'requirements' => [ 'name' => '.*' ],
-            'defaults' => [ 'name' => '' ]
-        ],
-        ['name' => 'page#tags', 'url' => '/tags/{name}', 'verb' => 'GET',
-            'requirements' => [ 'name' => '.*' ],
-            'defaults' => [ 'name' => '' ]
-        ],
+        ['name' => 'page#people', 'url' => '/people/{name}', 'verb' => 'GET', ...getWildcard('name')],
+        ['name' => 'page#tags', 'url' => '/tags/{name}', 'verb' => 'GET', ...getWildcard('name')],
 
         // Public pages
         ['name' => 'page#sharedfolder', 'url' => '/s/{token}', 'verb' => 'GET'],
@@ -30,8 +26,8 @@ return [
         // API Routes
 
         ['name' => 'days#days', 'url' => '/api/days', 'verb' => 'GET'],
-        ['name' => 'days#dayPost', 'url' => '/api/days', 'verb' => 'POST'],
         ['name' => 'days#day', 'url' => '/api/days/{id}', 'verb' => 'GET'],
+        ['name' => 'days#dayPost', 'url' => '/api/days', 'verb' => 'POST'],
 
         ['name' => 'tags#tags', 'url' => '/api/tags', 'verb' => 'GET'],
         ['name' => 'tags#previews', 'url' => '/api/tag-previews', 'verb' => 'GET'],
