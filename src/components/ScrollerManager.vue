@@ -86,6 +86,8 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
   private reflowRequest = false;
   /** Tick adjust timer */
   private adjustRequest = false;
+  /** Recycler scrolling throttle */
+  private recyclerScrollDirty = false;
 
   /** Get the visible ticks */
   get visibleTicks() {
@@ -115,6 +117,17 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
   /** Recycler scroll event, must be called by timeline */
   public recyclerScrolled() {
+    if (!this.recyclerScrollDirty) {
+      this.recyclerScrollDirty = true;
+      window.setTimeout(() => {
+        this.recyclerScrollDirty = false;
+        requestAnimationFrame(this.updateFromRecyclerScroll);
+      }, 100);
+    }
+  }
+
+  /** Update cursor position from recycler scroll position */
+  public updateFromRecyclerScroll() {
     // Ignore if not initialized
     if (!this.ticks.length) return;
 
@@ -556,6 +569,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
     min-width: 100%;
     min-height: 1.5px;
     will-change: transform;
+    transition: transform 0.1s linear;
 
     &.st {
       font-size: 0.75em;
@@ -579,8 +593,11 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
       }
     }
   }
-  &:hover > .cursor.st {
-    opacity: 1;
+  &:hover > .cursor {
+    transition: none;
+    &.st {
+      opacity: 1;
+    }
   }
 }
 </style>
