@@ -87,13 +87,8 @@ class ApiController extends Controller
      */
     public function days(): JSONResponse
     {
-        $user = $this->userSession->getUser();
-        if (null === $user && !$this->getShareToken()) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
-        }
-        $uid = $user ? $user->getUID() : '';
-
         // Get the folder to show
+        $uid = $this->getUid();
         $folder = null;
 
         try {
@@ -122,7 +117,7 @@ class ApiController extends Controller
             );
 
             // Preload some day responses
-            $this->preloadDays($list, $folder, $recursive, $archive);
+            $this->preloadDays($list, $uid, $folder, $recursive, $archive);
 
             // Add subfolder info if querying non-recursively
             if (!$recursive) {
@@ -157,11 +152,8 @@ class ApiController extends Controller
      */
     public function day(string $id): JSONResponse
     {
-        $user = $this->userSession->getUser();
-        if (null === $user && !$this->getShareToken()) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
-        }
-        $uid = $user ? $user->getUID() : '';
+        // Get user
+        $uid = $this->getUid();
 
         // Check for wildcard
         $day_ids = [];
@@ -698,6 +690,19 @@ class ApiController extends Controller
         return $response;
     }
 
+    /** Get logged in user's UID or throw HTTP error */
+    private function getUid(): string
+    {
+        $user = $this->userSession->getUser();
+        if ($this->getShareToken()) {
+            $user = null;
+        } elseif (null === $user) {
+            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        return $user ? $user->getUID() : '';
+    }
+
     /**
      * Get transformations depending on the request.
      *
@@ -768,15 +773,13 @@ class ApiController extends Controller
      * Preload a few "day" at the start of "days" response.
      *
      * @param array       $days      the days array
+     * @param string      $uid       User ID or blank for public shares
      * @param null|Folder $folder    the folder to search in
      * @param bool        $recursive search in subfolders
      * @param bool        $archive   search in archive folder only
      */
-    private function preloadDays(array &$days, &$folder, bool $recursive, bool $archive)
+    private function preloadDays(array &$days, string $uid, &$folder, bool $recursive, bool $archive)
     {
-        $user = $this->userSession->getUser();
-        $uid = $user ? $user->getUID() : '';
-
         $transforms = $this->getTransformations(false);
         $preloaded = 0;
         $preloadDayIds = [];
@@ -822,21 +825,21 @@ class ApiController extends Controller
     /** Get the Folder object relevant to the request */
     private function getRequestFolder()
     {
-        $user = $this->userSession->getUser();
-        if (null === $user) {
-            // Public shares only
-            if ($token = $this->getShareToken()) {
-                $share = $this->shareManager->getShareByToken($token)->getNode(); // throws exception if not found
-                if (!$share instanceof Folder) {
-                    throw new \Exception('Share not found or invalid');
-                }
-
-                return $share;
+        // Public shared folder
+        if ($token = $this->getShareToken()) {
+            $share = $this->shareManager->getShareByToken($token)->getNode(); // throws exception if not found
+            if (!$share instanceof Folder) {
+                throw new \Exception('Share not found or invalid');
             }
 
-            return null;
+            return $share;
         }
 
+        // Anything else needs a user
+        $user = $this->userSession->getUser();
+        if (null === $user) {
+            return null;
+        }
         $uid = $user->getUID();
 
         $folder = null;

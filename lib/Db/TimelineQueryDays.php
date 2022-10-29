@@ -136,7 +136,7 @@ trait TimelineQueryDays
         $rows = $cursor->fetchAll();
         $cursor->closeCursor();
 
-        return $this->processDay($rows, $folder);
+        return $this->processDay($rows, $uid, $folder);
     }
 
     /**
@@ -158,12 +158,13 @@ trait TimelineQueryDays
      * Process the single day response.
      *
      * @param array       $day
+     * @param string      $uid    User or blank if not logged in
      * @param null|Folder $folder
      */
-    private function processDay(&$day, $folder)
+    private function processDay(&$day, $uid, $folder)
     {
         $basePath = '#__#__#';
-        $davPath = '/';
+        $davPath = '';
         if (null !== $folder) {
             // No way to get the internal path from the folder
             $query = $this->connection->getQueryBuilder();
@@ -177,13 +178,16 @@ trait TimelineQueryDays
             // Get user facing path
             // getPath looks like /user/files/... but we want /files/user/...
             // Split at / and swap these
-            $actualPath = $folder->getPath();
-            $actualPath = explode('/', $actualPath);
-            if (\count($actualPath) >= 3) {
-                $tmp = $actualPath[1];
-                $actualPath[1] = $actualPath[2];
-                $actualPath[2] = $tmp;
-                $davPath = implode('/', $actualPath);
+            // For public shares, we just give the relative path
+            if (!empty($uid)) {
+                $actualPath = $folder->getPath();
+                $actualPath = explode('/', $actualPath);
+                if (\count($actualPath) >= 3) {
+                    $tmp = $actualPath[1];
+                    $actualPath[1] = $actualPath[2];
+                    $actualPath[2] = $tmp;
+                    $davPath = implode('/', $actualPath);
+                }
             }
         }
 
