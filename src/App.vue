@@ -8,7 +8,7 @@
       'remove-gap': removeOuterGap,
     }"
   >
-    <NcAppNavigation>
+    <NcAppNavigation v-if="showNavigation">
       <template id="app-memories-navigation" #list>
         <NcAppNavigationItem
           :to="{ name: 'timeline' }"
@@ -166,6 +166,10 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
 
   get removeOuterGap() {
     return this.ncVersion >= 25;
+  }
+
+  get showNavigation() {
+    return this.$route.name !== "folder-share";
   }
 
   async beforeMount() {
