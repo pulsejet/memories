@@ -51,7 +51,11 @@ window.addEventListener("DOMContentLoaded", () => {
   // register unused client for the sidebar to have access to its parser methods
   Object.assign(
     globalThis.OCA.Files,
-    { App: { fileList: { filesClient: globalThis.OC.Files.getClient() } } },
+    {
+      App: {
+        fileList: { filesClient: (<any>globalThis.OC.Files).getClient() },
+      },
+    },
     globalThis.OCA.Files
   );
 });
