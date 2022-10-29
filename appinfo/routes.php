@@ -24,7 +24,6 @@ return [
         ['name' => 'page#sharedfolder', 'url' => '/s/{token}', 'verb' => 'GET'],
 
         // API Routes
-
         ['name' => 'days#days', 'url' => '/api/days', 'verb' => 'GET'],
         ['name' => 'days#day', 'url' => '/api/days/{id}', 'verb' => 'GET'],
         ['name' => 'days#dayPost', 'url' => '/api/days', 'verb' => 'POST'],
