@@ -19,6 +19,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
+/// <reference types="@nextcloud/typings" />
+
 import "reflect-metadata";
 import Vue from "vue";
 import VueVirtualScroller from "vue-virtual-scroller";
@@ -30,6 +33,8 @@ import router from "./router";
 // Global exposed variables
 declare global {
   var vuerouter: typeof router;
+  var OC: Nextcloud.v24.OC;
+  var OCP: Nextcloud.v24.OCP;
 }
 globalThis.vuerouter = router;
 
