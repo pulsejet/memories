@@ -198,15 +198,29 @@ export default class Photo extends Mixins(GlobalMixin) {
 <style lang="scss" scoped>
 /* Container and selection */
 .p-outer {
+  padding: 2px;
+  @media (max-width: 768px) {
+    padding: 1px;
+  }
+
+  transition: background-color 0.15s ease, opacity 0.2s ease-in,
+    transform 0.2s ease-in;
+
   &.leaving {
-    transition: all 0.2s ease-in;
     transform: scale(0.9);
     opacity: 0;
+  }
+
+  &.selected {
+    background-color: var(--color-primary-select-light);
+    background-clip: content-box;
   }
 }
 
 // Distance of icon from border
-$icon-dist: min(10px, 6%);
+$icon-dist: 8px;
+$icon-half-size: 4px;
+$icon-size: $icon-half-size * 2;
 
 /* Extra icons */
 .check-icon.select {
@@ -222,7 +236,7 @@ $icon-dist: min(10px, 6%);
   .p-outer:hover > & {
     display: flex;
   }
-  .selected > & {
+  .p-outer.selected > & {
     display: flex;
     filter: invert(1);
   }
@@ -232,31 +246,37 @@ $icon-dist: min(10px, 6%);
   position: absolute;
   z-index: 100;
   pointer-events: none;
+  transition: transform 0.15s ease;
   filter: invert(1) brightness(100);
 }
 .video-icon {
   top: $icon-dist;
   right: $icon-dist;
+  .p-outer.selected > & {
+    transform: translate(-$icon-size, $icon-size);
+  }
 }
 .star-icon {
   bottom: $icon-dist;
   left: $icon-dist;
+  .p-outer.selected > & {
+    transform: translate($icon-size, -$icon-size);
+  }
 }
 
 /* Actual image */
 div.img-outer {
-  padding: 2px;
   box-sizing: border-box;
-  @media (max-width: 768px) {
-    padding: 1px;
+  padding: 0;
+
+  transition: padding 0.15s ease;
+  .p-outer.selected > & {
+    padding: $icon-dist + $icon-half-size;
   }
 
-  transition: padding 0.1s ease;
-  background-clip: content-box, padding-box;
-  background-color: var(--color-background-dark);
-
-  .selected > & {
-    padding: calc($icon-dist - 2px);
+  .p-outer.placeholder > & {
+    background-color: var(--color-background-dark);
+    background-clip: content-box, padding-box;
   }
 
   > img {
@@ -264,20 +284,24 @@ div.img-outer {
     background-clip: content-box;
     object-fit: cover;
     cursor: pointer;
+    background-color: var(--color-background-dark);
 
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     user-select: none;
     transition: box-shadow 0.1s ease;
 
-    .selected > & {
-      box-shadow: 0 0 4px 2px var(--color-primary);
-    }
     .p-outer.placeholder > & {
       display: none;
     }
     .p-outer.error & {
       object-fit: contain;
+    }
+
+    @media (max-width: 768px) {
+      .selected > & {
+        border-radius: $icon-size;
+      }
     }
   }
 }

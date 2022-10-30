@@ -179,6 +179,12 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
 
   mounted() {
     this.doRouteChecks();
+
+    // Store CSS variables modified
+    const root = document.documentElement;
+    const colorPrimary =
+      getComputedStyle(root).getPropertyValue("--color-primary");
+    root.style.setProperty("--color-primary-select-light", `${colorPrimary}40`);
   }
 
   async beforeMount() {
