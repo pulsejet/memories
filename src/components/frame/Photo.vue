@@ -221,18 +221,22 @@ export default class Photo extends Mixins(GlobalMixin) {
     background-color: var(--color-primary-select-light);
     background-clip: content-box;
   }
+
+  --icon-dist: 8px;
+  @media (max-width: 768px) {
+    --icon-dist: 4px;
+  }
 }
 
 // Distance of icon from border
-$icon-dist: min(4%, 8px);
-$icon-half-size: 5px;
+$icon-half-size: 6px;
 $icon-size: $icon-half-size * 2;
 
 /* Extra icons */
 .check-circle-icon.select {
   position: absolute;
-  top: $icon-dist;
-  left: $icon-dist;
+  top: calc(var(--icon-dist) + 2px);
+  left: calc(var(--icon-dist) + 2px);
   z-index: 100;
   border-radius: 50%;
   cursor: pointer;
@@ -251,7 +255,7 @@ $icon-size: $icon-half-size * 2;
   // Extremely ugly way to fill up the space
   // If this isn't done, bg has a border
   :deep path {
-    transform: scale(1.215) translate(-2px, -2px);
+    transform: scale(1.2) translate(-1.8px, -1.8px);
   }
 
   filter: invert(1) brightness(100);
@@ -271,15 +275,15 @@ $icon-size: $icon-half-size * 2;
   filter: invert(1) brightness(100);
 }
 .play-circle-outline-icon {
-  top: $icon-dist;
-  right: $icon-dist;
+  top: var(--icon-dist);
+  right: var(--icon-dist);
   .p-outer.selected > & {
     transform: translate(-$icon-size, $icon-size);
   }
 }
 .star-icon {
-  bottom: $icon-dist;
-  left: $icon-dist;
+  bottom: var(--icon-dist);
+  left: var(--icon-dist);
   .p-outer.selected > & {
     transform: translate($icon-size, -$icon-size);
   }
@@ -292,7 +296,7 @@ div.img-outer {
 
   transition: padding 0.15s ease;
   .p-outer.selected > & {
-    padding: calc($icon-dist + $icon-half-size);
+    padding: calc(var(--icon-dist) + $icon-half-size);
   }
 
   .p-outer.placeholder > & {
