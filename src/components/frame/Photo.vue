@@ -9,14 +9,14 @@
     }"
   >
     <Check
-      :size="15"
+      :size="16"
       class="select"
       v-if="!(data.flag & c.FLAG_PLACEHOLDER)"
       @click="toggleSelect"
     />
 
-    <Video :size="20" v-if="data.flag & c.FLAG_IS_VIDEO" />
-    <Star :size="20" v-if="data.flag & c.FLAG_IS_FAVORITE" />
+    <Video :size="22" v-if="data.flag & c.FLAG_IS_VIDEO" />
+    <Star :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
 
     <div
       class="img-outer fill-block"
@@ -225,7 +225,7 @@ export default class Photo extends Mixins(GlobalMixin) {
 
 // Distance of icon from border
 $icon-dist: 8px;
-$icon-half-size: 4px;
+$icon-half-size: 5px;
 $icon-size: $icon-half-size * 2;
 
 /* Extra icons */
@@ -295,7 +295,7 @@ div.img-outer {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     user-select: none;
-    transition: box-shadow 0.1s ease;
+    transition: border-radius 0.1s ease-in;
 
     .p-outer.placeholder > & {
       display: none;
@@ -313,7 +313,7 @@ div.img-outer {
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, transparent 30%);
 
     opacity: 0;
-    transition: opacity 0.1s ease-in;
+    transition: opacity 0.1s ease-in border-radius 0.1s ease-in;
     .p-outer:not(.selected):hover > & {
       opacity: 1;
     }
