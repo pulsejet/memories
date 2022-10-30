@@ -198,6 +198,20 @@ export function getFolderRoutePath(basePath: string) {
   return path;
 }
 
+/** Set a timer that renews if existing */
+export function setRenewingTimeout(
+  ctx: any,
+  name: string,
+  callback: () => void | null,
+  delay: number
+) {
+  if (ctx[name]) window.clearTimeout(ctx[name]);
+  ctx[name] = window.setTimeout(() => {
+    ctx[name] = 0;
+    callback?.();
+  }, delay);
+}
+
 // Outside for set
 const TagDayID = {
   START: -(1 << 30),
