@@ -35,6 +35,7 @@
         @load="load"
         @error="error"
       />
+      <div class="overlay" />
     </div>
   </div>
 </template>
@@ -60,6 +61,7 @@ export default class Photo extends Mixins(GlobalMixin) {
   private touchTimer = 0;
   private src = null;
   private hasFaceRect = false;
+  private hasTouch = false;
 
   @Prop() data: IPhoto;
   @Prop() day: IDay;
@@ -175,6 +177,7 @@ export default class Photo extends Mixins(GlobalMixin) {
   }
 
   touchstart() {
+    this.hasTouch = true;
     this.touchTimer = window.setTimeout(() => {
       this.toggleSelect();
       this.touchTimer = 0;
@@ -182,8 +185,11 @@ export default class Photo extends Mixins(GlobalMixin) {
   }
 
   contextmenu(e: Event) {
-    e.preventDefault();
-    e.stopPropagation();
+    // on mobile only
+    if (this.hasTouch) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   }
 
   touchend() {
@@ -297,10 +303,27 @@ div.img-outer {
     .p-outer.error & {
       object-fit: contain;
     }
+  }
 
+  & > .overlay {
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    transform: translateY(-100%); // very weird stuff
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, transparent 30%);
+
+    opacity: 0;
+    transition: opacity 0.1s ease-in;
+    .p-outer:not(.selected):hover > & {
+      opacity: 1;
+    }
+  }
+
+  > * {
     @media (max-width: 768px) {
       .selected > & {
         border-radius: $icon-size;
+        border-top-left-radius: 0;
       }
     }
   }
