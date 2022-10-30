@@ -1235,6 +1235,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
   }
   &.selected .select {
     opacity: 1;
+    color: var(--color-primary);
   }
 
   @include phone {

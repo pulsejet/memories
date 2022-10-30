@@ -236,10 +236,16 @@ $icon-size: $icon-half-size * 2;
   z-index: 100;
   border-radius: 50%;
   cursor: pointer;
-  display: none;
 
+  display: none;
   .p-outer:hover > & {
     display: flex;
+  }
+
+  opacity: 0.7;
+  &:hover,
+  .p-outer.selected & {
+    opacity: 1;
   }
 
   filter: invert(1) brightness(100);
@@ -247,6 +253,7 @@ $icon-size: $icon-half-size * 2;
     display: flex;
     filter: invert(0);
     background-color: white;
+    color: var(--color-primary);
   }
 }
 .play-circle-outline-icon,
