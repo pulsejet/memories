@@ -9,7 +9,7 @@
     }"
   >
     <CheckCircle
-      :size="20"
+      :size="18"
       class="select"
       v-if="!(data.flag & c.FLAG_PLACEHOLDER)"
       @click="toggleSelect"
@@ -246,6 +246,12 @@ $icon-size: $icon-half-size * 2;
   &:hover,
   .p-outer.selected & {
     opacity: 1;
+  }
+
+  // Extremely ugly way to fill up the space
+  // If this isn't done, bg has a border
+  :deep path {
+    transform: scale(1.215) translate(-2px, -2px);
   }
 
   filter: invert(1) brightness(100);
