@@ -17,6 +17,7 @@ OC.L10N.register(
     "Time" : "Zäit",
     "Hour" : "Stonn",
     "Name" : "Numm",
-    "Update" : "Update"
+    "Update" : "Update",
+    "Refresh" : "Opfrëschen"
 },
 "nplurals=2; plural=(n != 1);");

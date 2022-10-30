@@ -16,6 +16,7 @@ OC.L10N.register(
     "Day" : "Die",
     "Time" : "Tempore",
     "Name" : "Nomine",
-    "Update" : "Actualisation"
+    "Update" : "Actualisation",
+    "Refresh" : "Refrescar"
 },
 "nplurals=2; plural=(n != 1);");

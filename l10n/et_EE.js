@@ -22,6 +22,7 @@ OC.L10N.register(
     "Time" : "Aeg",
     "Hour" : "Tund",
     "Name" : "Nimi",
-    "Update" : "Uuenda"
+    "Update" : "Uuenda",
+    "Refresh" : "Värskenda"
 },
 "nplurals=2; plural=(n != 1);");

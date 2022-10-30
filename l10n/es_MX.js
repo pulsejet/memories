@@ -23,6 +23,7 @@ OC.L10N.register(
     "Time" : "Hora",
     "Hour" : "Hora",
     "Name" : "Nombre",
-    "Update" : "Actualizar"
+    "Update" : "Actualizar",
+    "Refresh" : "Actualizar"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

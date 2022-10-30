@@ -38,6 +38,8 @@ OC.L10N.register(
     "Name" : "Имя",
     "Update" : "Обновить",
     "Loading …" : "Загрузка …",
+    "Refresh" : "Обновить",
+    "Share folder" : "Поделиться папкой",
     "Cannot find this photo anymore!" : "Это фотография более недоступна.",
     "Failed to delete files." : "Ошибка удаления файлов.",
     "Failed to delete {fileName}." : "Ошибка удаления файла «{fileName}».",

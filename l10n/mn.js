@@ -21,6 +21,7 @@ OC.L10N.register(
     "Time" : "Цаг",
     "Name" : "Нэр",
     "Update" : "Шинэчлэх",
-    "Loading …" : "Уншиж байна..."
+    "Loading …" : "Уншиж байна...",
+    "Refresh" : "Сэргээх"
 },
 "nplurals=2; plural=(n != 1);");

@@ -29,6 +29,8 @@ OC.L10N.register(
     "Minute" : "分",
     "Name" : "名前",
     "Update" : "更新",
-    "Loading …" : "読み込み中…"
+    "Loading …" : "読み込み中…",
+    "Refresh" : "更新",
+    "Share folder" : "フォルダーを共有"
 },
 "nplurals=1; plural=0;");

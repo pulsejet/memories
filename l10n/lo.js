@@ -13,6 +13,7 @@ OC.L10N.register(
     "Back" : "ຫຼັງ",
     "Save" : "ບັນທຶກ",
     "Name" : "ຊື່",
-    "Loading …" : "ກຳລັງໂຫຼດ"
+    "Loading …" : "ກຳລັງໂຫຼດ",
+    "Refresh" : "Refresh"
 },
 "nplurals=1; plural=0;");

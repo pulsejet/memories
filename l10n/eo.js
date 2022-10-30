@@ -23,6 +23,7 @@ OC.L10N.register(
     "Hour" : "Horo",
     "Name" : "Nomo",
     "Update" : "Ĝisdatigi",
-    "Loading …" : "Ŝargas …"
+    "Loading …" : "Ŝargas …",
+    "Refresh" : "Aktualigi"
 },
 "nplurals=2; plural=(n != 1);");

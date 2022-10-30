@@ -27,6 +27,8 @@ OC.L10N.register(
     "Hour" : "Time",
     "Name" : "Navn",
     "Update" : "Oppdater",
-    "Loading …" : "Laster ..."
+    "Loading …" : "Laster ...",
+    "Refresh" : "Oppdater",
+    "Share folder" : "Del mappe"
 },
 "nplurals=2; plural=(n != 1);");

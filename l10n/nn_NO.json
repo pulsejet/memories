@@ -15,6 +15,7 @@
     "Time" : "Tid",
     "Minute" : "Minutt",
     "Name" : "Namn",
-    "Update" : "Oppdater"
+    "Update" : "Oppdater",
+    "Refresh" : "Last inn på nytt"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

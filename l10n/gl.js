@@ -28,6 +28,7 @@ OC.L10N.register(
     "Minute" : "Minuto",
     "Name" : "Nome",
     "Update" : "Actualizar",
-    "Loading …" : "Cargando…"
+    "Loading …" : "Cargando…",
+    "Refresh" : "Actualizar"
 },
 "nplurals=2; plural=(n != 1);");

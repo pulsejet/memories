@@ -22,6 +22,7 @@ OC.L10N.register(
     "Time" : "Waktu",
     "Hour" : "Jam",
     "Name" : "Nama",
-    "Update" : "Perbarui"
+    "Update" : "Perbarui",
+    "Refresh" : "Muat ulang"
 },
 "nplurals=1; plural=0;");

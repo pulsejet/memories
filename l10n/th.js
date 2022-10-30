@@ -20,6 +20,8 @@ OC.L10N.register(
     "Day" : "วัน",
     "Time" : "เวลา",
     "Name" : "ชื่อ",
-    "Update" : "อัปเดต"
+    "Update" : "อัปเดต",
+    "Refresh" : "รีเฟรช",
+    "Share folder" : "แชร์โฟลเดอร์"
 },
 "nplurals=1; plural=0;");

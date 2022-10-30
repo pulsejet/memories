@@ -39,8 +39,10 @@
     "Rename person" : "Преименувај личност",
     "Update" : "Ажурирај",
     "Loading …" : "Се вчитува…",
+    "Refresh" : "Освежи",
     "Delete album" : "Избриши албум",
     "Merge with different person" : "Спој со друга личност",
+    "Share folder" : "Сподели папка",
     "Failed to create {albumName}." : "Неуспешно креирање {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Неуспешно преименување на {currentAlbumName} во {newAlbumName}.",
     "Failed to favorite {fileName}." : "Неуспешно додавање во омилени {fileName}."

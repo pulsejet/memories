@@ -12,6 +12,7 @@ OC.L10N.register(
     "Favorite" : "Favorite",
     "Save" : "Save",
     "Name" : "Name",
-    "Update" : "Update"
+    "Update" : "Update",
+    "Refresh" : "Refresh"
 },
 "nplurals=1; plural=0;");

@@ -23,6 +23,8 @@ OC.L10N.register(
     "Time" : "Timp",
     "Name" : "Nume",
     "Update" : "Actualizare",
-    "Loading …" : "Se încarcă…"
+    "Loading …" : "Se încarcă…",
+    "Refresh" : "Reîmprospătează",
+    "Share folder" : "Distribuie dosar"
 },
 "nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));");
