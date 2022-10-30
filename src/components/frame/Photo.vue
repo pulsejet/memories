@@ -8,8 +8,8 @@
       error: data.flag & c.FLAG_LOAD_FAIL,
     }"
   >
-    <Check
-      :size="16"
+    <CheckCircle
+      :size="20"
       class="select"
       v-if="!(data.flag & c.FLAG_PLACEHOLDER)"
       @click="toggleSelect"
@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts">
-import Check from "vue-material-design-icons/Check.vue";
+import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
 import Star from "vue-material-design-icons/Star.vue";
 import Video from "vue-material-design-icons/PlayCircleOutline.vue";
 import { Component, Emit, Mixins, Prop, Watch } from "vue-property-decorator";
@@ -52,7 +52,7 @@ import { IDay, IPhoto } from "../../types";
 
 @Component({
   components: {
-    Check,
+    CheckCircle,
     Video,
     Star,
   },
@@ -229,12 +229,11 @@ $icon-half-size: 5px;
 $icon-size: $icon-half-size * 2;
 
 /* Extra icons */
-.check-icon.select {
+.check-circle-icon.select {
   position: absolute;
-  top: calc($icon-dist + 2px);
-  left: calc($icon-dist + 2px);
+  top: $icon-dist;
+  left: $icon-dist;
   z-index: 100;
-  background-color: var(--color-main-background);
   border-radius: 50%;
   cursor: pointer;
   display: none;
@@ -242,9 +241,12 @@ $icon-size: $icon-half-size * 2;
   .p-outer:hover > & {
     display: flex;
   }
+
+  filter: invert(1) brightness(100);
   .p-outer.selected > & {
     display: flex;
-    filter: invert(1);
+    filter: invert(0);
+    background-color: white;
   }
 }
 .play-circle-outline-icon,
@@ -312,10 +314,10 @@ div.img-outer {
     transform: translateY(-100%); // very weird stuff
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, transparent 30%);
 
-    opacity: 0;
-    transition: opacity 0.1s ease-in border-radius 0.1s ease-in;
+    display: none;
+    transition: border-radius 0.1s ease-in;
     .p-outer:not(.selected):hover > & {
-      opacity: 1;
+      display: block;
     }
   }
 
