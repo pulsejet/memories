@@ -43,7 +43,7 @@
 <script lang="ts">
 import Check from "vue-material-design-icons/Check.vue";
 import Star from "vue-material-design-icons/Star.vue";
-import Video from "vue-material-design-icons/Video.vue";
+import Video from "vue-material-design-icons/PlayCircleOutline.vue";
 import { Component, Emit, Mixins, Prop, Watch } from "vue-property-decorator";
 import errorsvg from "../../assets/error.svg";
 import GlobalMixin from "../../mixins/GlobalMixin";
@@ -231,8 +231,8 @@ $icon-size: $icon-half-size * 2;
 /* Extra icons */
 .check-icon.select {
   position: absolute;
-  top: $icon-dist;
-  left: $icon-dist;
+  top: $icon-dist + 2px;
+  left: $icon-dist + 2px;
   z-index: 100;
   background-color: var(--color-main-background);
   border-radius: 50%;
@@ -247,7 +247,7 @@ $icon-size: $icon-half-size * 2;
     filter: invert(1);
   }
 }
-.video-icon,
+.play-circle-outline-icon,
 .star-icon {
   position: absolute;
   z-index: 100;
@@ -255,7 +255,7 @@ $icon-size: $icon-half-size * 2;
   transition: transform 0.15s ease;
   filter: invert(1) brightness(100);
 }
-.video-icon {
+.play-circle-outline-icon {
   top: $icon-dist;
   right: $icon-dist;
   .p-outer.selected > & {
