@@ -135,7 +135,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
     if (this.scrollingRecyclerUpdateTimer) return;
     this.scrollingRecyclerUpdateTimer = window.setTimeout(() => {
       this.scrollingRecyclerUpdateTimer = 0;
-      requestAnimationFrame(this.updateFromRecyclerScroll);
+      this.updateFromRecyclerScroll();
     }, 100);
 
     // Update that we're scrolling with the recycler
