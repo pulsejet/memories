@@ -21,6 +21,7 @@ OC.L10N.register(
     "Time" : "დრო",
     "Hour" : "საათი",
     "Name" : "სახელი",
-    "Update" : "განახლება"
+    "Update" : "განახლება",
+    "Refresh" : "განახლება"
 },
 "nplurals=2; plural=(n!=1);");

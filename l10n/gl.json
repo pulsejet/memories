@@ -26,6 +26,7 @@
     "Minute" : "Minuto",
     "Name" : "Nome",
     "Update" : "Actualizar",
-    "Loading …" : "Cargando…"
+    "Loading …" : "Cargando…",
+    "Refresh" : "Actualizar"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

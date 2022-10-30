@@ -11,6 +11,7 @@ OC.L10N.register(
     "Month" : "Bulan",
     "Day" : "Hari",
     "Name" : "Nama",
-    "Update" : "Kemaskini"
+    "Update" : "Kemaskini",
+    "Refresh" : "Refresh"
 },
 "nplurals=1; plural=0;");

@@ -14,6 +14,7 @@
     "Day" : "Die",
     "Time" : "Tempore",
     "Name" : "Nomine",
-    "Update" : "Actualisation"
+    "Update" : "Actualisation",
+    "Refresh" : "Refrescar"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

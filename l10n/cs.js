@@ -79,6 +79,7 @@ OC.L10N.register(
     "Back to the new album form." : "Zpět na formulář pro nové album.",
     "Back" : "Zpět",
     "Add collaborators" : "Přidat spolupracující",
+    "Save\") : t(\"photos\", \"Create album" : "uložit„) : t(„fotky“, „Vytvořit album",
     "Add selection to album {albumName}" : "Přidat výběr do alba {albumName}",
     "Create a new album." : "Vytvořit nové album.",
     "_Share with %n user_::_Share with %n users_" : ["Nasdílet %n uživateli","Nasdílet %n uživatelům","Nasdílet %n uživatelům","Nasdílet %n uživatelům"],
@@ -118,6 +119,7 @@ OC.L10N.register(
     "Mark person in preview" : "Označovat osobu v náhledu",
     "Move left" : "Přesunout doleva",
     "Move right" : "Přesunout doprava",
+    "Shared Folder" : "Sdílená složka",
     "Cannot find this photo anymore!" : "Tuto fotku už se nedaří nalézt!",
     "Failed to create {albumName}." : "Nepodařilo se vytvořit {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Nepodařilo přejmenovat {currentAlbumName} to {newAlbumName}.",
@@ -125,7 +127,9 @@ OC.L10N.register(
     "Error: {msg}" : "Chyba: {msg}",
     "Failed to delete files." : "Nepodařilo se smazat soubory.",
     "Failed to delete {fileName}." : "Nepodařilo se smazat {fileName}.",
+    "Failed to download some files." : "Některé soubory se nepodařilo stáhnout.",
     "Failed to favorite files." : "Nepodařilo se přidat soubory mezi oblíbené.",
+    "Failed to favorite some files." : "Některé soubory se nepodařilo označit jako oblíbené",
     "Failed to favorite {fileName}." : "Nepodařilo se přidat {fileName} do oblíbených."
 },
 "nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;");

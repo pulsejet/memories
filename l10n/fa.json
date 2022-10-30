@@ -23,6 +23,8 @@
     "Time" : "زمان",
     "Name" : "نام",
     "Update" : "یه‌روزرسانی",
-    "Loading …" : "بارگذاری …"
+    "Loading …" : "بارگذاری …",
+    "Refresh" : "تازه‌سازی",
+    "Share folder" : "اشتراک‌گذاری پوشه"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }

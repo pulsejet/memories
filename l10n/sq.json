@@ -19,6 +19,7 @@
     "Time" : "Kohë",
     "Hour" : "Orë",
     "Name" : "Emri",
-    "Update" : "Përditëso"
+    "Update" : "Përditëso",
+    "Refresh" : "Rifresko"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

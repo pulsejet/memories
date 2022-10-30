@@ -23,6 +23,7 @@ OC.L10N.register(
     "Time" : "Thời gian",
     "Name" : "Tên",
     "Update" : "Cập nhật",
-    "Loading …" : "Đang tải …"
+    "Loading …" : "Đang tải …",
+    "Refresh" : "Tải mới"
 },
 "nplurals=1; plural=0;");

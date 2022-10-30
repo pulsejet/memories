@@ -30,6 +30,7 @@ OC.L10N.register(
     "Minute" : "Λεπτά",
     "Name" : "Όνομα",
     "Update" : "Ενημέρωση",
-    "Loading …" : "Φόρτωση …"
+    "Loading …" : "Φόρτωση …",
+    "Share folder" : "Διαμοιρασμός φακέλου"
 },
 "nplurals=2; plural=(n != 1);");

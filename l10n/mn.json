@@ -19,6 +19,7 @@
     "Time" : "Цаг",
     "Name" : "Нэр",
     "Update" : "Шинэчлэх",
-    "Loading …" : "Уншиж байна..."
+    "Loading …" : "Уншиж байна...",
+    "Refresh" : "Сэргээх"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

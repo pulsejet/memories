@@ -12,6 +12,7 @@ OC.L10N.register(
     "Month" : "ئاي",
     "Time" : "ۋاقىت",
     "Name" : "ئاتى",
-    "Update" : "يېڭىلا"
+    "Update" : "يېڭىلا",
+    "Refresh" : "يېڭىلا"
 },
 "nplurals=2; plural=(n != 1);");

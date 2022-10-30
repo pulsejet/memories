@@ -17,6 +17,7 @@ OC.L10N.register(
     "Time" : "Tid",
     "Minute" : "Minutt",
     "Name" : "Namn",
-    "Update" : "Oppdater"
+    "Update" : "Oppdater",
+    "Refresh" : "Last inn på nytt"
 },
 "nplurals=2; plural=(n != 1);");

@@ -25,6 +25,8 @@ OC.L10N.register(
     "Time" : "زمان",
     "Name" : "نام",
     "Update" : "یه‌روزرسانی",
-    "Loading …" : "بارگذاری …"
+    "Loading …" : "بارگذاری …",
+    "Refresh" : "تازه‌سازی",
+    "Share folder" : "اشتراک‌گذاری پوشه"
 },
 "nplurals=2; plural=(n > 1);");

@@ -19,6 +19,7 @@
     "Time" : "დრო",
     "Hour" : "საათი",
     "Name" : "სახელი",
-    "Update" : "განახლება"
+    "Update" : "განახლება",
+    "Refresh" : "განახლება"
 },"pluralForm" :"nplurals=2; plural=(n!=1);"
 }

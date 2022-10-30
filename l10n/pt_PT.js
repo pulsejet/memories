@@ -32,6 +32,8 @@ OC.L10N.register(
     "Name" : "Nome",
     "Update" : "Atualizar",
     "Loading …" : "A carregar...",
+    "Refresh" : "Atualizar",
+    "Share folder" : "Partilhar pasta",
     "Cannot find this photo anymore!" : "Já não é possível encontrar esta fotografia!",
     "Failed to delete files." : "Não foi possível eliminar os ficheiros.",
     "Failed to delete {fileName}." : "Não foi possível eliminar {fileName}.",

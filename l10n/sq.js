@@ -21,6 +21,7 @@ OC.L10N.register(
     "Time" : "Kohë",
     "Hour" : "Orë",
     "Name" : "Emri",
-    "Update" : "Përditëso"
+    "Update" : "Përditëso",
+    "Refresh" : "Rifresko"
 },
 "nplurals=2; plural=(n != 1);");

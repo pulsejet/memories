@@ -28,6 +28,8 @@
     "Minute" : "Minuut",
     "Name" : "Naam",
     "Update" : "Update",
-    "Loading …" : "Laden …"
+    "Loading …" : "Laden …",
+    "Refresh" : "Verversen",
+    "Share folder" : "Map delen"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -30,6 +30,8 @@ OC.L10N.register(
     "Minute" : "Minuut",
     "Name" : "Naam",
     "Update" : "Update",
-    "Loading …" : "Laden …"
+    "Loading …" : "Laden …",
+    "Refresh" : "Verversen",
+    "Share folder" : "Map delen"
 },
 "nplurals=2; plural=(n != 1);");
