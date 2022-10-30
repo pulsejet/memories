@@ -3,9 +3,10 @@
     class="scroller"
     ref="scroller"
     v-bind:class="{
-      'scrolling-recycler': scrollingRecyclerTimer,
       'scrolling-recycler-now': scrollingRecyclerNowTimer,
-      scrolling: scrolling,
+      'scrolling-recycler': scrollingRecyclerTimer,
+      'scrolling-now': scrollingNowTimer,
+      scrolling: scrollingTimer,
     }"
     @mousemove="mousemove"
     @touchmove="touchmove"
@@ -41,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 import { IRow, IRowType, ITick } from "../types";
 import GlobalMixin from "../mixins/GlobalMixin";
 import ScrollIcon from "vue-material-design-icons/UnfoldMoreHorizontal.vue";
@@ -67,6 +68,8 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
   private lastAdjustHeight = 0;
   /** Height of the entire photo view */
   private recyclerHeight: number = 100;
+  /** Rect of scroller */
+  private scrollerRect: DOMRect = null;
   /** Computed ticks */
   private ticks: ITick[] = [];
   /** Computed cursor top */
@@ -75,13 +78,13 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
   private hoverCursorY = -5;
   /** Hover cursor text */
   private hoverCursorText = "";
-  /** Scrolling currently */
-  private scrolling = false;
-  /** Scrolling timer */
-  private scrollingTimer = null as number | null;
-  /** Scrolling recycler timer */
+  /** Scrolling using the scroller */
+  private scrollingTimer = 0;
+  /** Scrolling now using the scroller */
+  private scrollingNowTimer = 0;
+  /** Scrolling recycler */
   private scrollingRecyclerTimer = 0;
-  /** Scrolling recycler timer */
+  /** Scrolling recycler now */
   private scrollingRecyclerNowTimer = 0;
   /** Recycler scrolling throttle */
   private scrollingRecyclerUpdateTimer = 0;
@@ -111,18 +114,33 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
     this.cursorY = 0;
     this.hoverCursorY = -5;
     this.hoverCursorText = "";
-    this.scrolling = false;
-    this.scrollingTimer = null;
     this.reflowRequest = false;
+
+    // Clear all timers
+    clearTimeout(this.scrollingTimer);
+    clearTimeout(this.scrollingNowTimer);
+    clearTimeout(this.scrollingRecyclerTimer);
+    clearTimeout(this.scrollingRecyclerNowTimer);
+    clearTimeout(this.scrollingRecyclerUpdateTimer);
+    this.scrollingTimer = 0;
+    this.scrollingNowTimer = 0;
+    this.scrollingRecyclerTimer = 0;
+    this.scrollingRecyclerNowTimer = 0;
+    this.scrollingRecyclerUpdateTimer = 0;
   }
 
   /** Recycler scroll event, must be called by timeline */
   public recyclerScrolled() {
+    // This isn't a renewing timer, it's a scheduled task
     if (this.scrollingRecyclerUpdateTimer) return;
     this.scrollingRecyclerUpdateTimer = window.setTimeout(() => {
       this.scrollingRecyclerUpdateTimer = 0;
       requestAnimationFrame(this.updateFromRecyclerScroll);
     }, 100);
+
+    // Update that we're scrolling with the recycler
+    utils.setRenewingTimeout(this, "scrollingRecyclerNowTimer", null, 200);
+    utils.setRenewingTimeout(this, "scrollingRecyclerTimer", null, 1500);
   }
 
   /** Update cursor position from recycler scroll position */
@@ -148,20 +166,6 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
     } else {
       this.moveHoverCursor(rtop);
     }
-
-    // Animate the cursor
-    if (this.scrollingRecyclerNowTimer)
-      window.clearTimeout(this.scrollingRecyclerNowTimer);
-    this.scrollingRecyclerNowTimer = window.setTimeout(() => {
-      this.scrollingRecyclerNowTimer = 0;
-    }, 200);
-
-    // Show the scroller for some time
-    if (this.scrollingRecyclerTimer)
-      window.clearTimeout(this.scrollingRecyclerTimer);
-    this.scrollingRecyclerTimer = window.setTimeout(() => {
-      this.scrollingRecyclerTimer = 0;
-    }, 1500);
   }
 
   /** Re-create tick data in the next frame */
@@ -307,6 +311,11 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
   /** Mark ticks as visible or invisible */
   private computeVisibleTicks() {
+    // Kind of unrelated here, but refresh rect
+    this.scrollerRect = (
+      this.$refs.scroller as HTMLElement
+    ).getBoundingClientRect();
+
     // Do another pass to figure out which points are visible
     // This is not as bad as it looks, it's actually 12*O(n)
     // because there are only 12 months in a year
@@ -444,6 +453,10 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
   /** Move to given scroller Y */
   private moveto(y: number) {
+    // Move cursor immediately to prevent jank
+    this.cursorY = y;
+    this.hoverCursorY = y;
+
     const { top1, top2, y1, y2 } = this.getCoords(y, "topF");
     const yfrac = (y - top1) / (top2 - top1);
     const ry = y1 + (y2 - y1) * yfrac;
@@ -459,21 +472,15 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
   /** Handle touch */
   private touchmove(event: any) {
-    const rect = (this.$refs.scroller as HTMLElement).getBoundingClientRect();
-    const y = event.targetTouches[0].pageY - rect.top;
-    event.preventDefault();
+    const y = event.targetTouches[0].pageY - this.scrollerRect.top;
     event.stopPropagation();
     this.moveto(y);
   }
 
-  /** Update this is being used to scroll recycler */
+  /** Update scroller is being used to scroll recycler */
   private handleScroll() {
-    if (this.scrollingTimer) window.clearTimeout(this.scrollingTimer);
-    this.scrolling = true;
-    this.scrollingTimer = window.setTimeout(() => {
-      this.scrolling = false;
-      this.scrollingTimer = null;
-    }, 1500);
+    utils.setRenewingTimeout(this, "scrollingNowTimer", null, 200);
+    utils.setRenewingTimeout(this, "scrollingTimer", null, 1500);
   }
 }
 </script>
@@ -596,11 +603,11 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
       }
     }
   }
-  &.scrolling-recycler-now > .cursor {
+  &.scrolling-recycler-now:not(.scrolling-now) > .cursor {
     transition: transform 0.1s linear;
   }
   &:hover > .cursor {
-    transition: none;
+    transition: none !important;
     &.st {
       opacity: 1;
     }
