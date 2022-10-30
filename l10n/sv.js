@@ -37,6 +37,8 @@ OC.L10N.register(
     "Name" : "Namn",
     "Update" : "Uppdatera",
     "Loading …" : "Läser in …",
+    "Refresh" : "Uppdatera",
+    "Share folder" : "Dela mapp",
     "Cannot find this photo anymore!" : "Kan inte längre hitta detta foto!",
     "Failed to delete files." : "Misslyckades att radera filer.",
     "Failed to delete {fileName}." : "Misslyckades att radera {fileName}.",

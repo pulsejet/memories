@@ -9,6 +9,7 @@
     "Day" : "Օր",
     "Time" : "Ժամ",
     "Name" : "Անուն",
-    "Update" : "Թարմացնել"
+    "Update" : "Թարմացնել",
+    "Refresh" : "Թարմացնել"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

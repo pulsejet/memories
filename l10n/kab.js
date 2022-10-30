@@ -12,6 +12,7 @@ OC.L10N.register(
     "Back" : "Retour",
     "Save" : "Sekles",
     "Hour" : "Asrag",
-    "Name" : "Nom"
+    "Name" : "Nom",
+    "Refresh" : "Sismeḍ"
 },
 "nplurals=2; plural=(n != 1);");

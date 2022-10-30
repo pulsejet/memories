@@ -11,6 +11,7 @@ OC.L10N.register(
     "Favorite" : "Halaýan",
     "Back" : "Yzyna",
     "Save" : "Saklamak",
-    "Name" : "Ady"
+    "Name" : "Ady",
+    "Refresh" : "Täzelemek"
 },
 "nplurals=2; plural=(n != 1);");

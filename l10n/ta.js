@@ -12,6 +12,7 @@ OC.L10N.register(
     "Save" : "சேமிக்க ",
     "Month" : "மாதம்",
     "Name" : "பெயர்",
-    "Update" : "இற்றைப்படுத்தல்"
+    "Update" : "இற்றைப்படுத்தல்",
+    "Refresh" : "மீள் ஏற்றுக"
 },
 "nplurals=2; plural=(n != 1);");

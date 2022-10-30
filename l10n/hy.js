@@ -11,6 +11,7 @@ OC.L10N.register(
     "Day" : "Օր",
     "Time" : "Ժամ",
     "Name" : "Անուն",
-    "Update" : "Թարմացնել"
+    "Update" : "Թարմացնել",
+    "Refresh" : "Թարմացնել"
 },
 "nplurals=2; plural=(n != 1);");

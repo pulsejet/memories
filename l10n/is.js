@@ -29,6 +29,7 @@ OC.L10N.register(
     "Minute" : "Mínúta",
     "Name" : "Heiti",
     "Update" : "Uppfæra",
-    "Loading …" : "Hleð inn …"
+    "Loading …" : "Hleð inn …",
+    "Refresh" : "Endurnýja"
 },
 "nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);");

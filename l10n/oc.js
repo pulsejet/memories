@@ -25,6 +25,7 @@ OC.L10N.register(
     "Minute" : "Minuta",
     "Name" : "Nom",
     "Update" : "Actualizar",
-    "Loading …" : "Cargament…"
+    "Loading …" : "Cargament…",
+    "Refresh" : "Actualizar"
 },
 "nplurals=2; plural=(n > 1);");

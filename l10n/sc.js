@@ -28,6 +28,8 @@ OC.L10N.register(
     "Minute" : "Minutu",
     "Name" : "Nùmene",
     "Update" : "Agiorna",
-    "Loading …" : "Carrigamentu …"
+    "Loading …" : "Carrigamentu …",
+    "Refresh" : "Agiorna",
+    "Share folder" : "Cumpartzi cartella"
 },
 "nplurals=2; plural=(n != 1);");
