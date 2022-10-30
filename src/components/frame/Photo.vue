@@ -224,15 +224,15 @@ export default class Photo extends Mixins(GlobalMixin) {
 }
 
 // Distance of icon from border
-$icon-dist: 8px;
+$icon-dist: min(4%, 8px);
 $icon-half-size: 5px;
 $icon-size: $icon-half-size * 2;
 
 /* Extra icons */
 .check-icon.select {
   position: absolute;
-  top: $icon-dist + 2px;
-  left: $icon-dist + 2px;
+  top: calc($icon-dist + 2px);
+  left: calc($icon-dist + 2px);
   z-index: 100;
   background-color: var(--color-main-background);
   border-radius: 50%;
@@ -277,7 +277,7 @@ div.img-outer {
 
   transition: padding 0.15s ease;
   .p-outer.selected > & {
-    padding: $icon-dist + $icon-half-size;
+    padding: calc($icon-dist + $icon-half-size);
   }
 
   .p-outer.placeholder > & {
