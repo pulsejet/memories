@@ -132,7 +132,7 @@ export default class Tag extends Mixins(GlobalMixin) {
         const url = generateUrl(
           `/apps/memories/api/tag-previews?tag=${this.data.name}`
         );
-        const cacheUrl = `${url}&today=${Math.floor(todayDayId / 10)}`;
+        const cacheUrl = `${url}&today=${todayDayId}`;
         const cache = await utils.getCachedData(cacheUrl);
         if (cache) {
           this.data.previews = cache as any;
