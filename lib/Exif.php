@@ -146,7 +146,7 @@ class Exif
     {
         // Start exiftool and output to json
         $pipes = [];
-        $proc = proc_open([self::getExiftool(), '-api', 'QuickTimeUTC=1', '-n', '-json', '-fast', '-'], [
+        $proc = proc_open(array_merge(self::getExiftool(), ['-api', 'QuickTimeUTC=1', '-n', '-json', '-fast', '-']), [
             0 => ['pipe', 'rb'],
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
@@ -308,10 +308,10 @@ class Exif
         try {
             // Start exiftool and output to json
             $pipes = [];
-            $proc = proc_open([
-                self::getExiftool(), '-api', 'QuickTimeUTC=1',
+            $proc = proc_open(array_merge(self::getExiftool(), [
+                '-api', 'QuickTimeUTC=1',
                 '-overwrite_original', '-DateTimeOriginal='.$newDate, '-',
-            ], [
+            ]), [
                 0 => ['pipe', 'rb'],
                 1 => ['pipe', 'w'],
                 2 => ['pipe', 'w'],
@@ -404,9 +404,11 @@ class Exif
 
         // We know already where it is
         if (!empty($configPath) && file_exists($configPath)) {
-            chmod($configPath, 0755);
+            if (!is_executable($configPath)) {
+                chmod($configPath, 0755);
+            }
 
-            return $configPath;
+            return explode(' ', $configPath);
         }
 
         // Detect architecture
@@ -436,7 +438,9 @@ class Exif
             // check if file exists
             if (file_exists($path)) {
                 // make executable before version check
-                chmod($path, 0755);
+                if (!is_executable($path)) {
+                    chmod($path, 0755);
+                }
 
                 // check if the version prints correctly
                 $ver = self::EXIFTOOL_VER;
@@ -446,7 +450,7 @@ class Exif
                     echo "Exiftool binary version check passed {$out} <==> {$ver}\n";
                     $config->setSystemValue($configKey, $path);
 
-                    return $path;
+                    return [$path];
                 }
                 error_log("Exiftool version check failed {$vero} <==> {$ver}");
                 $config->setSystemValue($configKey.'_no_local', true);
@@ -458,22 +462,20 @@ class Exif
         // Fallback to perl script
         $path = __DIR__.'/../exiftool-bin/exiftool/exiftool';
         if (file_exists($path)) {
-            chmod($path, 0755);
-
-            return $path;
+            return ['perl', $path];
         }
 
         error_log("Exiftool not found: {$path}");
 
         // Fallback to system binary
-        return 'exiftool';
+        return ['exiftool'];
     }
 
     /** Initialize static exiftool process for local reads */
     private static function initializeStaticExiftoolProc()
     {
         self::closeStaticExiftoolProc();
-        self::$staticProc = proc_open([self::getExiftool(), '-stay_open', 'true', '-@', '-'], [
+        self::$staticProc = proc_open(array_merge(self::getExiftool(), ['-stay_open', 'true', '-@', '-']), [
             0 => ['pipe', 'r'],
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
@@ -535,7 +537,7 @@ class Exif
     private static function getExifFromLocalPathWithSeparateProc(string &$path)
     {
         $pipes = [];
-        $proc = proc_open([self::getExiftool(), '-api', 'QuickTimeUTC=1', '-n', '-json', $path], [
+        $proc = proc_open(array_merge(self::getExiftool(), ['-api', 'QuickTimeUTC=1', '-n', '-json', $path]), [
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
         ], $pipes);
@@ -576,7 +578,7 @@ class Exif
      */
     private static function updateExifDateForLocalFile(string $path, string $newDate)
     {
-        $cmd = [self::getExiftool(), '-api', 'QuickTimeUTC=1', '-overwrite_original', '-DateTimeOriginal='.$newDate, $path];
+        $cmd = array_merge(self::getExiftool(), ['-api', 'QuickTimeUTC=1', '-overwrite_original', '-DateTimeOriginal='.$newDate, $path]);
         $proc = proc_open($cmd, [
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
