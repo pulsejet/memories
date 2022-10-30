@@ -8,10 +8,10 @@
       'scrolling-now': scrollingNowTimer,
       scrolling: scrollingTimer,
     }"
-    @mousemove="mousemove"
-    @touchmove="touchmove"
-    @mouseleave="mouseleave"
-    @mousedown="mousedown"
+    @mousemove.passive="mousemove"
+    @touchmove.passive="touchmove"
+    @mouseleave.passive="mouseleave"
+    @mousedown.passive="mousedown"
   >
     <span
       class="cursor st"
@@ -23,7 +23,7 @@
     <span
       class="cursor hv"
       :style="{ transform: `translateY(${hoverCursorY}px)` }"
-      @touchmove="touchmove"
+      @touchmove.passive="touchmove"
     >
       <div class="text">{{ hoverCursorText }}</div>
       <div class="icon"><ScrollIcon :size="22" /></div>

@@ -271,7 +271,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     (this.$refs.recycler as any).$el.addEventListener(
       "scroll",
       this.scrollPositionChange,
-      false
+      { passive: true }
     );
 
     // Get data

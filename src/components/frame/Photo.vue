@@ -22,10 +22,10 @@
       class="img-outer fill-block"
       @click="emitClick"
       @contextmenu="contextmenu"
-      @touchstart="touchstart"
-      @touchmove="touchend"
-      @touchend="touchend"
-      @touchcancel="touchend"
+      @touchstart.passive="touchstart"
+      @touchmove.passive="touchend"
+      @touchend.passive="touchend"
+      @touchcancel.passive="touchend"
     >
       <img
         ref="img"
