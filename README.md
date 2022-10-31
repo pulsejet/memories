@@ -1,6 +1,6 @@
 ![Screenshot](appinfo/screenshot.jpg)
 
-# Memories: Photo Viewer and Manager for Nextcloud
+# Memories: Photo Management for Nextcloud
 
 ![GitHub](https://img.shields.io/github/license/pulsejet/memories)
 [![e2e](https://github.com/pulsejet/memories/actions/workflows/e2e.yaml/badge.svg)](https://github.com/pulsejet/memories/actions/workflows/e2e.yaml)
