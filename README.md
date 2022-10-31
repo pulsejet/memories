@@ -53,7 +53,7 @@ To get an idea of what memories looks and feels like, check out the [public demo
 - All photos in the timeline _must_ be on a single storage. For example, you cannot have a mounted directory inside your photos directory.
 - The app can work with external storage for photos. Just set the mountpoint as the timeline directory.
   - If you add any photos from outside Nextcloud, you must run the scan and index commands.
-  - Indexing may be slow, since all files must be downloaded from the storage. The app currently assumes that the Exif data is present with the first 20MB of each file.
+  - Indexing may be slow, since all files must be downloaded from the storage.
 - The archive feature moves photos to a separate folder called `.archive` at the root of your timeline. You can use this, for example, to move these photos to a cold storage.
 
 ## Special Thanks

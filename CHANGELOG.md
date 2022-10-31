@@ -2,6 +2,12 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## v4.5.2, v3.5.2 (2022-10-30)
+
+- Improved scroller performance
+- Improved support for external storage and FreeBSD
+- Improved selection of photos
+
 ## v4.5.0, v3.5.0 (2022-10-28)
 
 - **Feature**: Album sharing to other Nextcloud users
