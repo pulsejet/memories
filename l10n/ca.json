@@ -28,6 +28,8 @@
     "Minute" : "Minut",
     "Name" : "Cognom",
     "Update" : "Actualitzar",
-    "Loading …" : "Carregant …"
+    "Loading …" : "Carregant …",
+    "Refresh" : "Actualitza",
+    "Share folder" : "Comparteix la carpeta"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

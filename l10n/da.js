@@ -48,6 +48,8 @@ OC.L10N.register(
     "Name" : "Navn",
     "Update" : "Opdater",
     "Loading …" : "Loading …",
+    "Refresh" : "Opdater",
+    "Share folder" : "Del mappe",
     "Cannot find this photo anymore!" : "Kan ikke finde dette billede længere!",
     "Failed to delete files." : "Kunne ikke slette filer.",
     "Failed to delete {fileName}." : "Kunne ikke slette {fileName}.",

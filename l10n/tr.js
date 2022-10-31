@@ -65,6 +65,7 @@ OC.L10N.register(
     "Back to the new album form." : "Albüm ekleme formuna geri döner.",
     "Back" : "Geri",
     "Add collaborators" : "Katılımcı ekle",
+    "Add selection to album {albumName}" : "Seçilmişleri {albumName} albümüne ekle",
     "Create a new album." : "Yeni bir albüm ekler.",
     "Save collaborators for this album." : "Bu albümün katılımcılarını kaydet.",
     "Save" : "Kaydet",

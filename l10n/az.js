@@ -15,6 +15,7 @@ OC.L10N.register(
     "Day" : "Gün",
     "Time" : "Vaxt",
     "Name" : "Ad",
-    "Update" : "Yenilənmə"
+    "Update" : "Yenilənmə",
+    "Refresh" : "Yenilə"
 },
 "nplurals=2; plural=(n != 1);");
