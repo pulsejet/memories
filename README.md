@@ -12,7 +12,7 @@ Memories is a photo management app for Nextcloud with advanced features includin
 - **📱 Mobile Support**: Works on devices of any shape and size through the web app.
 - **✏️ Edit Metadata**: Edit dates on photos quickly and easily.
 - **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.
-- **⚡️ Fast**: Memories is extremely fast. More details below.
+- **⚡️ Performance**: Memories is extremely fast.
 
 To get an idea of what memories looks and feels like, check out the [public demo](https://memories-demo.radialapps.com/apps/memories/). Note that the demo is read-only and may be slow since it runs in a low-end free tier VM provided by [Oracle Cloud](https://www.oracle.com/cloud/free/). Photo credits go to [Unsplash](https://unsplash.com/) (for individual credits, refer to each folder).
 
@@ -36,10 +36,6 @@ To get an idea of what memories looks and feels like, check out the [public demo
 1. 🏗 To build the Typescript, run `make build-js`. Watch changes with: `make watch-js`.
 1. ✅ Enable the app through the app management of your Nextcloud.
 1. ⚒️ (Strongly recommended) use VS Code and install Vetur and Prettier.
-
-## ⚡ Performance
-
-Once properly configured, Memories is **extremely fast**, possibly one of the fastest web photo viewers. On a server with relatively cheap hardware (`Intel Pentium G6400 / 8GB RAM / SSD`), loading the timeline takes only `~400ms` without cache on a laptop (`Intel Core i5-1035G1 / Windows 11 / Chrome`) for a library of `~17000 photos` totaling `100GB`. The test was performed on Nextcloud 24 with `nginx`, `php-fpm` and `mariadb` running in Docker.
 
 ## Special Thanks
 
