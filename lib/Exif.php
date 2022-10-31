@@ -104,25 +104,12 @@ class Exif
      */
     public static function getExifFromFile(File &$file)
     {
-        // Borrowed from previews
-        // https://github.com/nextcloud/server/blob/19f68b3011a3c040899fb84975a28bd746bddb4b/lib/private/Preview/ProviderV2.php
-        if (!$file->isEncrypted() && $file->getStorage()->isLocal()) {
-            $path = $file->getStorage()->getLocalFile($file->getInternalPath());
-            if (\is_string($path)) {
-                return self::getExifFromLocalPath($path);
-            }
+        $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+        if (!\is_string($path)) {
+            throw new \Exception('Failed to get local file path');
         }
 
-        // Fallback to reading as a stream
-        $handle = $file->fopen('rb');
-        if (!$handle) {
-            throw new \Exception('Could not open file');
-        }
-
-        $exif = self::getExifFromStream($handle);
-        fclose($handle);
-
-        return $exif;
+        return self::getExifFromLocalPath($path);
     }
 
     /** Get exif data as a JSON object from a local file path */
@@ -135,45 +122,6 @@ class Exif
         }
 
         return self::getExifFromLocalPathWithSeparateProc($path);
-    }
-
-    /**
-     * Get exif data as a JSON object from a stream.
-     *
-     * @param resource $handle
-     */
-    public static function getExifFromStream(&$handle)
-    {
-        // Start exiftool and output to json
-        $pipes = [];
-        $proc = proc_open(array_merge(self::getExiftool(), ['-api', 'QuickTimeUTC=1', '-n', '-json', '-fast', '-']), [
-            0 => ['pipe', 'rb'],
-            1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
-        ], $pipes);
-
-        // Write the file to exiftool's stdin
-        // Warning: this is slow for big files
-        // Copy a maximum of 20MB; this may be $$$
-        stream_copy_to_stream($handle, $pipes[0], 20 * 1024 * 1024);
-        fclose($pipes[0]);
-
-        // Get output from exiftool
-        stream_set_blocking($pipes[1], false);
-
-        try {
-            $stdout = self::readOrTimeout($pipes[1], 5000);
-
-            return self::processStdout($stdout);
-        } catch (\Exception $ex) {
-            error_log('Exiftool timeout for file stream: '.$ex->getMessage());
-
-            throw new \Exception('Could not read from Exiftool');
-        } finally {
-            fclose($pipes[1]);
-            fclose($pipes[2]);
-            proc_terminate($proc);
-        }
     }
 
     /**
@@ -283,114 +231,23 @@ class Exif
      */
     public static function updateExifDate(File &$file, string $newDate)
     {
-        // Check for local files -- this is easier
-        if (!$file->isEncrypted() && $file->getStorage()->isLocal()) {
-            $path = $file->getStorage()->getLocalFile($file->getInternalPath());
-            if (\is_string($path)) {
-                return self::updateExifDateForLocalFile($path, $newDate);
-            }
+        // Don't want to mess these up, definitely
+        if ($file->isEncrypted()) {
+            throw new \Exception('Cannot update exif date on encrypted files');
         }
 
-        // Use a stream
-        return self::updateExifDateForStreamFile($file, $newDate);
-    }
+        // Get path to local (copy) of the file
+        $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+        if (!\is_string($path)) {
+            throw new \Exception('Failed to get local file path');
+        }
 
-    /**
-     * Update exif date for stream.
-     *
-     * @param string $newDate formatted in standard Exif format (YYYY:MM:DD HH:MM:SS)
-     */
-    public static function updateExifDateForStreamFile(File &$file, string $newDate)
-    {
-        // Temp file for output, so we can compare sizes before writing to the actual file
-        $tmpfile = tmpfile();
+        // Update exif data
+        self::updateExifDateForLocalFile($path, $newDate);
 
-        try {
-            // Start exiftool and output to json
-            $pipes = [];
-            $proc = proc_open(array_merge(self::getExiftool(), [
-                '-api', 'QuickTimeUTC=1',
-                '-overwrite_original', '-DateTimeOriginal='.$newDate, '-',
-            ]), [
-                0 => ['pipe', 'rb'],
-                1 => ['pipe', 'w'],
-                2 => ['pipe', 'w'],
-            ], $pipes);
-
-            // Write the file to exiftool's stdin
-            // Warning: this is slow for big files
-            $in = $file->fopen('rb');
-            if (!$in) {
-                throw new \Exception('Could not open file');
-            }
-            $origLen = stream_copy_to_stream($in, $pipes[0]);
-            fclose($in);
-            fclose($pipes[0]);
-
-            // Get output from exiftool
-            stream_set_blocking($pipes[1], false);
-            $newLen = 0;
-
-            try {
-                // Read and copy stdout of exiftool to the temp file
-                $waitedMs = 0;
-                $timeout = 300000;
-                while ($waitedMs < $timeout && !feof($pipes[1])) {
-                    $r = stream_copy_to_stream($pipes[1], $tmpfile, 1024 * 1024);
-                    $newLen += $r;
-                    if (0 === $r) {
-                        ++$waitedMs;
-                        usleep(1000);
-
-                        continue;
-                    }
-                }
-                if ($waitedMs >= $timeout) {
-                    throw new \Exception('Timeout');
-                }
-            } catch (\Exception $ex) {
-                error_log('Exiftool timeout for file stream: '.$ex->getMessage());
-
-                throw new \Exception('Could not read from Exiftool');
-            } finally {
-                // Close the pipes
-                fclose($pipes[1]);
-                fclose($pipes[2]);
-                proc_terminate($proc);
-            }
-
-            // Check the new length of the file
-            // If the new length and old length are more different than 1KB, abort
-            if (abs($newLen - $origLen) > 1024) {
-                error_log("Exiftool error: new length {$newLen}, old length {$origLen}");
-
-                throw new \Exception("Exiftool error: new length {$newLen}, old length {$origLen}");
-            }
-
-            // Write the temp file to the actual file
-            fseek($tmpfile, 0);
-            $out = $file->fopen('wb');
-            if (!$out) {
-                throw new \Exception('Could not open file for writing');
-            }
-            $wroteBytes = 0;
-
-            try {
-                $wroteBytes = stream_copy_to_stream($tmpfile, $out);
-            } finally {
-                fclose($out);
-            }
-            if ($wroteBytes !== $newLen) {
-                error_log("Exiftool error: wrote {$r} bytes, expected {$newLen}");
-
-                throw new \Exception('Could not write to file');
-            }
-
-            // All done at this point
-            return true;
-        } finally {
-            // Close the temp file
-            fclose($tmpfile);
+        // Update remote file if not local
+        if (!$file->getStorage()->isLocal()) {
+            $file->putContent(fopen($path, 'r')); // closes the handler
         }
     }
 
@@ -574,7 +431,7 @@ class Exif
      *
      * @param string $newDate formatted in standard Exif format (YYYY:MM:DD HH:MM:SS)
      *
-     * @return bool
+     * @throws \Exception on failure
      */
     private static function updateExifDateForLocalFile(string $path, string $newDate)
     {
@@ -592,7 +449,5 @@ class Exif
 
             throw new \Exception('Could not update exif date: '.$stdout);
         }
-
-        return true;
     }
 }

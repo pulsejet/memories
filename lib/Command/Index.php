@@ -220,9 +220,8 @@ class Index extends Command
     private function testExif()
     {
         $testfile = __DIR__.'/../../exiftest.jpg';
-        $stream = fopen($testfile, 'r');
-        if (!$stream) {
-            error_log("Couldn't open Exif test file {$testfile}");
+        if (!file_exists($testfile)) {
+            error_log("Couldn't find Exif test file {$testfile}");
 
             return false;
         }
@@ -230,13 +229,11 @@ class Index extends Command
         $exif = null;
 
         try {
-            $exif = \OCA\Memories\Exif::getExifFromStream($stream);
+            $exif = \OCA\Memories\Exif::getExifFromLocalPath($testfile);
         } catch (\Exception $e) {
             error_log("Couldn't read Exif data from test file: ".$e->getMessage());
 
             return false;
-        } finally {
-            fclose($stream);
         }
 
         if (!$exif) {
