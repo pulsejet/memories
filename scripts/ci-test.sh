@@ -4,7 +4,7 @@
 cd apps/memories
 npm i
 cp ../../vue.zip .
-unzip vue.zip
+unzip -qq vue.zip
 cd ../..
 
 # Speed up loads

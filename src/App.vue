@@ -112,7 +112,7 @@ import UserConfig from "./mixins/UserConfig";
 import ImageMultiple from "vue-material-design-icons/ImageMultiple.vue";
 import FolderIcon from "vue-material-design-icons/Folder.vue";
 import Star from "vue-material-design-icons/Star.vue";
-import Video from "vue-material-design-icons/Video.vue";
+import Video from "vue-material-design-icons/PlayCircle.vue";
 import AlbumIcon from "vue-material-design-icons/ImageAlbum.vue";
 import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
 import CalendarIcon from "vue-material-design-icons/Calendar.vue";
@@ -179,6 +179,12 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
 
   mounted() {
     this.doRouteChecks();
+
+    // Store CSS variables modified
+    const root = document.documentElement;
+    const colorPrimary =
+      getComputedStyle(root).getPropertyValue("--color-primary");
+    root.style.setProperty("--color-primary-select-light", `${colorPrimary}40`);
   }
 
   async beforeMount() {

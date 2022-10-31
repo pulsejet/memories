@@ -151,8 +151,7 @@ class TimelineWrite
      */
     public function clear()
     {
-        $query = $this->connection->getQueryBuilder();
-        $query->delete('memories');
-        $query->executeStatement();
+        $sql = $this->connection->getDatabasePlatform()->getTruncateTableSQL('`*PREFIX*memories`', false);
+        $this->connection->executeStatement($sql);
     }
 }

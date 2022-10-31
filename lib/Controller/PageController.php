@@ -109,7 +109,7 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function sharedFolder(string $token)
+    public function sharedfolder(string $token)
     {
         // Scripts
         Util::addScript($this->appName, 'memories-main');

@@ -8,24 +8,24 @@
       error: data.flag & c.FLAG_LOAD_FAIL,
     }"
   >
-    <Check
-      :size="15"
+    <CheckCircle
+      :size="18"
       class="select"
       v-if="!(data.flag & c.FLAG_PLACEHOLDER)"
       @click="toggleSelect"
     />
 
-    <Video :size="20" v-if="data.flag & c.FLAG_IS_VIDEO" />
-    <Star :size="20" v-if="data.flag & c.FLAG_IS_FAVORITE" />
+    <Video :size="22" v-if="data.flag & c.FLAG_IS_VIDEO" />
+    <Star :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
 
     <div
       class="img-outer fill-block"
       @click="emitClick"
       @contextmenu="contextmenu"
-      @touchstart="touchstart"
-      @touchmove="touchend"
-      @touchend="touchend"
-      @touchcancel="touchend"
+      @touchstart.passive="touchstart"
+      @touchmove.passive="touchend"
+      @touchend.passive="touchend"
+      @touchcancel.passive="touchend"
     >
       <img
         ref="img"
@@ -35,14 +35,15 @@
         @load="load"
         @error="error"
       />
+      <div class="overlay" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import Check from "vue-material-design-icons/Check.vue";
+import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
 import Star from "vue-material-design-icons/Star.vue";
-import Video from "vue-material-design-icons/Video.vue";
+import Video from "vue-material-design-icons/PlayCircleOutline.vue";
 import { Component, Emit, Mixins, Prop, Watch } from "vue-property-decorator";
 import errorsvg from "../../assets/error.svg";
 import GlobalMixin from "../../mixins/GlobalMixin";
@@ -51,7 +52,7 @@ import { IDay, IPhoto } from "../../types";
 
 @Component({
   components: {
-    Check,
+    CheckCircle,
     Video,
     Star,
   },
@@ -60,6 +61,7 @@ export default class Photo extends Mixins(GlobalMixin) {
   private touchTimer = 0;
   private src = null;
   private hasFaceRect = false;
+  private hasTouch = false;
 
   @Prop() data: IPhoto;
   @Prop() day: IDay;
@@ -175,6 +177,7 @@ export default class Photo extends Mixins(GlobalMixin) {
   }
 
   touchstart() {
+    this.hasTouch = true;
     this.touchTimer = window.setTimeout(() => {
       this.toggleSelect();
       this.touchTimer = 0;
@@ -182,8 +185,11 @@ export default class Photo extends Mixins(GlobalMixin) {
   }
 
   contextmenu(e: Event) {
-    e.preventDefault();
-    e.stopPropagation();
+    // on mobile only
+    if (this.hasTouch) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   }
 
   touchend() {
@@ -198,65 +204,104 @@ export default class Photo extends Mixins(GlobalMixin) {
 <style lang="scss" scoped>
 /* Container and selection */
 .p-outer {
-  &.leaving {
-    transition: all 0.2s ease-in;
-    transform: scale(0.9);
-    opacity: 0;
-  }
-}
-
-// Distance of icon from border
-$icon-dist: min(10px, 6%);
-
-/* Extra icons */
-.check-icon.select {
-  position: absolute;
-  top: $icon-dist;
-  left: $icon-dist;
-  z-index: 100;
-  background-color: var(--color-main-background);
-  border-radius: 50%;
-  cursor: pointer;
-  display: none;
-
-  .p-outer:hover > & {
-    display: flex;
-  }
-  .selected > & {
-    display: flex;
-    filter: invert(1);
-  }
-}
-.video-icon,
-.star-icon {
-  position: absolute;
-  z-index: 100;
-  pointer-events: none;
-  filter: invert(1) brightness(100);
-}
-.video-icon {
-  top: $icon-dist;
-  right: $icon-dist;
-}
-.star-icon {
-  bottom: $icon-dist;
-  left: $icon-dist;
-}
-
-/* Actual image */
-div.img-outer {
   padding: 2px;
-  box-sizing: border-box;
   @media (max-width: 768px) {
     padding: 1px;
   }
 
-  transition: padding 0.1s ease;
-  background-clip: content-box, padding-box;
-  background-color: var(--color-background-dark);
+  transition: background-color 0.15s ease, opacity 0.2s ease-in,
+    transform 0.2s ease-in;
 
-  .selected > & {
-    padding: calc($icon-dist - 2px);
+  &.leaving {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  &.selected {
+    background-color: var(--color-primary-select-light);
+    background-clip: content-box;
+  }
+
+  --icon-dist: 8px;
+  @media (max-width: 768px) {
+    --icon-dist: 4px;
+  }
+}
+
+// Distance of icon from border
+$icon-half-size: 6px;
+$icon-size: $icon-half-size * 2;
+
+/* Extra icons */
+.check-circle-icon.select {
+  position: absolute;
+  top: calc(var(--icon-dist) + 2px);
+  left: calc(var(--icon-dist) + 2px);
+  z-index: 100;
+  border-radius: 50%;
+  cursor: pointer;
+
+  display: none;
+  .p-outer:hover > & {
+    display: flex;
+  }
+
+  opacity: 0.7;
+  &:hover,
+  .p-outer.selected & {
+    opacity: 1;
+  }
+
+  // Extremely ugly way to fill up the space
+  // If this isn't done, bg has a border
+  :deep path {
+    transform: scale(1.19) translate(-1.85px, -1.85px);
+  }
+
+  filter: invert(1) brightness(100);
+  .p-outer.selected > & {
+    display: flex;
+    filter: invert(0);
+    background-color: white;
+    color: var(--color-primary);
+  }
+}
+.play-circle-outline-icon,
+.star-icon {
+  position: absolute;
+  z-index: 100;
+  pointer-events: none;
+  transition: transform 0.15s ease;
+  filter: invert(1) brightness(100);
+}
+.play-circle-outline-icon {
+  top: var(--icon-dist);
+  right: var(--icon-dist);
+  .p-outer.selected > & {
+    transform: translate(-$icon-size, $icon-size);
+  }
+}
+.star-icon {
+  bottom: var(--icon-dist);
+  left: var(--icon-dist);
+  .p-outer.selected > & {
+    transform: translate($icon-size, -$icon-size);
+  }
+}
+
+/* Actual image */
+div.img-outer {
+  box-sizing: border-box;
+  padding: 0;
+
+  transition: padding 0.15s ease;
+  .p-outer.selected > & {
+    padding: calc(var(--icon-dist) + $icon-half-size);
+  }
+
+  .p-outer.placeholder > & {
+    background-color: var(--color-background-dark);
+    background-clip: content-box, padding-box;
   }
 
   > img {
@@ -264,20 +309,41 @@ div.img-outer {
     background-clip: content-box;
     object-fit: cover;
     cursor: pointer;
+    background-color: var(--color-background-dark);
 
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     user-select: none;
-    transition: box-shadow 0.1s ease;
+    transition: border-radius 0.1s ease-in;
 
-    .selected > & {
-      box-shadow: 0 0 4px 2px var(--color-primary);
-    }
     .p-outer.placeholder > & {
       display: none;
     }
     .p-outer.error & {
       object-fit: contain;
+    }
+  }
+
+  & > .overlay {
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    transform: translateY(-100%); // very weird stuff
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, transparent 30%);
+
+    display: none;
+    transition: border-radius 0.1s ease-in;
+    .p-outer:not(.selected):hover > & {
+      display: block;
+    }
+  }
+
+  > * {
+    @media (max-width: 768px) {
+      .selected > & {
+        border-radius: $icon-size;
+        border-top-left-radius: 0;
+      }
     }
   }
 }

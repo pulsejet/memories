@@ -93,7 +93,9 @@ export default class OnThisDay extends Mixins(GlobalMixin) {
 
   mounted() {
     const inner = this.$refs.inner as HTMLElement;
-    inner.addEventListener("scroll", this.onScroll.bind(this));
+    inner.addEventListener("scroll", this.onScroll.bind(this), {
+      passive: true,
+    });
 
     this.refresh();
   }

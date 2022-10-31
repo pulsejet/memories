@@ -1,54 +1,56 @@
 <?php
+
+function getWildcard($param) {
+    return [
+        'requirements' => [ $param => '.*' ],
+        'defaults' => [ $param => '' ]
+    ];
+}
+
+function w($base, $param) {
+    return array_merge($base, getWildcard($param));
+}
+
 return [
     'routes' => [
-        // Days and folder API
+        // Vue routes for deep links
         ['name' => 'page#main', 'url' => '/', 'verb' => 'GET'],
-        ['name' => 'page#folder', 'url' => '/folders/{path}', 'verb' => 'GET',
-            'requirements' => [ 'path' => '.*' ],
-            'defaults' => [ 'path' => '' ]
-        ],
         ['name' => 'page#favorites', 'url' => '/favorites', 'verb' => 'GET'],
         ['name' => 'page#videos', 'url' => '/videos', 'verb' => 'GET'],
-        ['name' => 'page#albums', 'url' => '/albums/{id}', 'verb' => 'GET',
-            'requirements' => [ 'id' => '.*' ],
-            'defaults' => [ 'id' => '' ]
-        ],
         ['name' => 'page#archive', 'url' => '/archive', 'verb' => 'GET'],
         ['name' => 'page#thisday', 'url' => '/thisday', 'verb' => 'GET'],
-        ['name' => 'page#people', 'url' => '/people/{name}', 'verb' => 'GET',
-            'requirements' => [ 'name' => '.*' ],
-            'defaults' => [ 'name' => '' ]
-        ],
-        ['name' => 'page#tags', 'url' => '/tags/{name}', 'verb' => 'GET',
-            'requirements' => [ 'name' => '.*' ],
-            'defaults' => [ 'name' => '' ]
-        ],
+
+        // Routes with params
+        w(['name' => 'page#folder', 'url' => '/folders/{path}', 'verb' => 'GET'], 'path'),
+        w(['name' => 'page#albums', 'url' => '/albums/{id}', 'verb' => 'GET'], 'id'),
+        w(['name' => 'page#people', 'url' => '/people/{name}', 'verb' => 'GET'], 'name'),
+        w(['name' => 'page#tags', 'url' => '/tags/{name}', 'verb' => 'GET'], 'name'),
 
         // Public pages
-        ['name' => 'page#sharedFolder', 'url' => '/s/{token}', 'verb' => 'GET'],
+        ['name' => 'page#sharedfolder', 'url' => '/s/{token}', 'verb' => 'GET'],
 
-        // API
-        ['name' => 'api#days', 'url' => '/api/days', 'verb' => 'GET'],
-        ['name' => 'api#dayPost', 'url' => '/api/days', 'verb' => 'POST'],
-        ['name' => 'api#day', 'url' => '/api/days/{id}', 'verb' => 'GET'],
+        // API Routes
+        ['name' => 'days#days', 'url' => '/api/days', 'verb' => 'GET'],
+        ['name' => 'days#day', 'url' => '/api/days/{id}', 'verb' => 'GET'],
+        ['name' => 'days#dayPost', 'url' => '/api/days', 'verb' => 'POST'],
 
-        ['name' => 'api#tags', 'url' => '/api/tags', 'verb' => 'GET'],
-        ['name' => 'api#tagPreviews', 'url' => '/api/tag-previews', 'verb' => 'GET'],
+        ['name' => 'tags#tags', 'url' => '/api/tags', 'verb' => 'GET'],
+        ['name' => 'tags#previews', 'url' => '/api/tag-previews', 'verb' => 'GET'],
 
-        ['name' => 'api#albums', 'url' => '/api/albums', 'verb' => 'GET'],
+        ['name' => 'albums#albums', 'url' => '/api/albums', 'verb' => 'GET'],
 
-        ['name' => 'api#faces', 'url' => '/api/faces', 'verb' => 'GET'],
-        ['name' => 'api#facePreview', 'url' => '/api/faces/preview/{id}', 'verb' => 'GET'],
+        ['name' => 'faces#faces', 'url' => '/api/faces', 'verb' => 'GET'],
+        ['name' => 'faces#preview', 'url' => '/api/faces/preview/{id}', 'verb' => 'GET'],
 
-        ['name' => 'api#imageInfo', 'url' => '/api/info/{id}', 'verb' => 'GET'],
-        ['name' => 'api#imageEdit', 'url' => '/api/edit/{id}', 'verb' => 'PATCH'],
+        ['name' => 'image#info', 'url' => '/api/info/{id}', 'verb' => 'GET'],
+        ['name' => 'image#edit', 'url' => '/api/edit/{id}', 'verb' => 'PATCH'],
 
-        ['name' => 'api#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
+        ['name' => 'archive#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
 
         // Config API
-        ['name' => 'api#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],
+        ['name' => 'other#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],
 
         // Service worker
-        ['name' => 'api#serviceWorker', 'url' => '/service-worker.js', 'verb' => 'GET'],
+        ['name' => 'other#serviceWorker', 'url' => '/service-worker.js', 'verb' => 'GET'],
     ]
 ];
