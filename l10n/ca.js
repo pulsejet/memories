@@ -30,6 +30,8 @@ OC.L10N.register(
     "Minute" : "Minut",
     "Name" : "Cognom",
     "Update" : "Actualitzar",
-    "Loading …" : "Carregant …"
+    "Loading …" : "Carregant …",
+    "Refresh" : "Actualitza",
+    "Share folder" : "Comparteix la carpeta"
 },
 "nplurals=2; plural=(n != 1);");

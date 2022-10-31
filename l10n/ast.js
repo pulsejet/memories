@@ -21,6 +21,7 @@ OC.L10N.register(
     "Hour" : "Hora",
     "Name" : "Nome",
     "Update" : "Anovar",
-    "Loading …" : "Cargando..."
+    "Loading …" : "Cargando...",
+    "Refresh" : "Refrescar"
 },
 "nplurals=2; plural=(n != 1);");

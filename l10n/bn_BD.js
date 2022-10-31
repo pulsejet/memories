@@ -16,6 +16,7 @@ OC.L10N.register(
     "Time" : "সময়",
     "Hour" : "ঘন্টা",
     "Name" : "নাম",
-    "Update" : "পরিবর্ধন"
+    "Update" : "পরিবর্ধন",
+    "Refresh" : "নবোদ্যম"
 },
 "nplurals=2; plural=(n != 1);");

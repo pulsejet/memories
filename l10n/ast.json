@@ -19,6 +19,7 @@
     "Hour" : "Hora",
     "Name" : "Nome",
     "Update" : "Anovar",
-    "Loading …" : "Cargando..."
+    "Loading …" : "Cargando...",
+    "Refresh" : "Refrescar"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
