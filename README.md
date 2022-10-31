@@ -1,6 +1,12 @@
 ![Screenshot](appinfo/screenshot.jpg)
 
-## Photo Viewer and Manager
+# Memories: Photo Viewer and Manager for Nextcloud
+
+![GitHub](https://img.shields.io/github/license/pulsejet/memories)
+[![e2e](https://github.com/pulsejet/memories/actions/workflows/e2e.yaml/badge.svg)](https://github.com/pulsejet/memories/actions/workflows/e2e.yaml)
+[![Demo](https://img.shields.io/badge/demo-online-blue)](https://memories-demo.radialapps.com/apps/memories/)
+[![Gitter](https://img.shields.io/gitter/room/pulsejet/memories)](https://gitter.im/pulsejet/memories)
+[![GitHub issues](https://img.shields.io/github/issues/pulsejet/memories)](https://github.com/pulsejet/memories/issues)
 
 Memories is a photo management app for Nextcloud with advanced features including:
 
@@ -14,13 +20,11 @@ Memories is a photo management app for Nextcloud with advanced features includin
 - **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.
 - **⚡️ Performance**: Memories is extremely fast.
 
-To get an idea of what memories looks and feels like, check out the [public demo](https://memories-demo.radialapps.com/apps/memories/). Note that the demo is read-only and may be slow since it runs in a low-end free tier VM provided by [Oracle Cloud](https://www.oracle.com/cloud/free/). Photo credits go to [Unsplash](https://unsplash.com/) (for individual credits, refer to each folder).
+## 🌐 Online Demo
 
-## How to support development
-
-- **🌟 Star this repository**: This is the easiest way to support the project and costs nothing.
-- **🪲 Report bugs**: If you find a bug, please report it on the issue tracker.
-- **📝 Contribute**: If you want to contribute, please read file / comment on an issue and ask for guidance.
+- To get an idea of what memories looks and feels like, check out the [public demo](https://memories-demo.radialapps.com/apps/memories/).
+- Note that the demo is read-only and may be slow since it runs in a low-end free tier VM provided by [Oracle Cloud](https://www.oracle.com/cloud/free/).
+- Photo credits go to [Unsplash](https://unsplash.com/) (for individual credits, refer to each folder).
 
 ## 🚀 Installation
 
@@ -36,6 +40,12 @@ To get an idea of what memories looks and feels like, check out the [public demo
 1. 🏗 To build the Typescript, run `make build-js`. Watch changes with: `make watch-js`.
 1. ✅ Enable the app through the app management of your Nextcloud.
 1. ⚒️ (Strongly recommended) use VS Code and install Vetur and Prettier.
+
+## How to support development
+
+1. **🌟 Star this repository**: This is the easiest way to support the project and costs nothing.
+1. **🪲 Report bugs**: If you find a bug, please report it on the issue tracker.
+1. **📝 Contribute**: If you want to contribute, please read file / comment on an issue and ask for guidance.
 
 ## Special Thanks
 
