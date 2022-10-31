@@ -23,7 +23,7 @@ Memories is a photo management app for Nextcloud with advanced features includin
 ## 🌐 Online Demo
 
 - To get an idea of what memories looks and feels like, check out the [public demo](https://memories-demo.radialapps.com/apps/memories/).
-- Note that the demo is read-only and may be slow since it runs in a low-end free tier VM provided by [Oracle Cloud](https://www.oracle.com/cloud/free/).
+- The demo is read-only and may be slow (free tier VM from [Oracle Cloud](https://www.oracle.com/cloud/free/)).
 - Photo credits go to [Unsplash](https://unsplash.com/) (for individual credits, refer to each folder).
 
 ## 🚀 Installation
