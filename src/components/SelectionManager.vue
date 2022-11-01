@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="selection.size > 0" class="top-bar">
-      <NcActions>
+      <NcActions :inline="1">
         <NcActionButton
           :aria-label="t('memories', 'Cancel')"
           @click="clearSelection()"
@@ -88,7 +88,7 @@ type Selection = Map<number, IPhoto>;
     CloseIcon,
   },
 })
-export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
+export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
   @Prop() public selection: Selection;
   @Prop() public heads: { [dayid: number]: IHeadRow };
 
@@ -509,11 +509,11 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
   right: 60px;
   padding: 8px;
   width: 400px;
-  max-width: calc(100vw - 30px);
+  max-width: 100vw;
   background-color: var(--color-main-background);
   box-shadow: 0 0 2px gray;
   border-radius: 10px;
-  opacity: 0.95;
+  opacity: 0.97;
   display: flex;
   vertical-align: middle;
   z-index: 100;
@@ -524,9 +524,16 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
     padding-left: 8px;
   }
 
-  @media (max-width: 768px) {
-    top: 35px;
-    right: 15px;
+  @media (max-width: 1024px) { // sidebar is hidden below this point
+    top: 0;
+    left: 0;
+    right: unset;
+    position: fixed;
+    width: 100vw;
+    border-radius: 0px;
+    opacity: 1;
+    padding-top: 3px;
+    padding-bottom: 3px;
   }
 }
 </style>

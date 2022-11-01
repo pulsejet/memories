@@ -268,6 +268,7 @@ body {
 // Prevent content overflow on NC <25
 #content-vue {
   max-height: 100vh;
+  z-index: 3000; // above header
 }
 
 // Patch viewer to remove the title and
