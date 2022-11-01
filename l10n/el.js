@@ -31,6 +31,7 @@ OC.L10N.register(
     "Name" : "Όνομα",
     "Update" : "Ενημέρωση",
     "Loading …" : "Φόρτωση …",
+    "Refresh" : "Ανανέωση",
     "Share folder" : "Διαμοιρασμός φακέλου"
 },
 "nplurals=2; plural=(n != 1);");
