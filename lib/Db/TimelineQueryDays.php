@@ -23,7 +23,7 @@ const CTE_FOLDERS = // CTE to get all folders recursively in the given top folde
             *PREFIX*filecache f
         INNER JOIN *PREFIX*cte_folders c
             ON (f.parent = c.fileid
-                AND f.mimetype = 2
+                AND f.mimetype = (SELECT `id` FROM `*PREFIX*mimetypes` WHERE `mimetype` = "httpd/unix-directory")
                 AND f.fileid <> :excludedFolderId
             )
     )';
