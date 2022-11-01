@@ -33,7 +33,7 @@ trait TimelineQueryTags
 
         $query->innerJoin('m', 'systemtag_object_mapping', 'stom', $query->expr()->andX(
             $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
-            $query->expr()->eq('stom.objectid', 'm.fileid'),
+            $query->expr()->eq('stom.objectid', 'm.objectid'),
             $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tagId)),
         ));
     }
@@ -55,20 +55,10 @@ trait TimelineQueryTags
         ));
 
         // WHERE these items are memories indexed photos
-        $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.fileid', 'stom.objectid'));
+        $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.objectid', 'stom.objectid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        // This is a hack to speed up the query instead of using joinFilecache
-        // The problem is objectid is VARCHAR(64) and fileid is BIGINT(20), so a
-        // join is extremely slow. Instead, we use a subquery to check existence.
-        //
-        // https://blog.sqlauthority.com/2010/06/05/sql-server-convert-in-to-exists-performance-talk/
-
-        $this->addSubfolderJoinParams($query, $folder, false);
-        $query->innerJoin('m', 'filecache', 'f', $query->expr()->andX(
-            $query->expr()->eq('f.fileid', 'm.fileid'),
-            $query->createFunction('EXISTS (SELECT 1 from *PREFIX*cte_folders WHERE *PREFIX*cte_folders.fileid = `f`.parent)')
-        ));
+        $query = $this->joinFilecache($query, $folder, true, false);
 
         // GROUP and ORDER by tag name
         $query->groupBy('st.name');
@@ -106,15 +96,10 @@ trait TimelineQueryTags
         );
 
         // WHERE these items are memories indexed photos
-        $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.fileid', 'stom.objectid'));
+        $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.objectid', 'stom.objectid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        // See the function above for an explanation of this hack
-        $this->addSubfolderJoinParams($query, $folder, false);
-        $query->innerJoin('m', 'filecache', 'f', $query->expr()->andX(
-            $query->expr()->eq('f.fileid', 'm.fileid'),
-            $query->createFunction('EXISTS (SELECT 1 from *PREFIX*cte_folders WHERE *PREFIX*cte_folders.fileid = `f`.parent)')
-        ));
+        $query = $this->joinFilecache($query, $folder, true, false);
 
         // MAX 4
         $query->setMaxResults(4);

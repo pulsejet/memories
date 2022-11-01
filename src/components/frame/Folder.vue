@@ -1,5 +1,6 @@
 <template>
   <router-link
+    draggable="false"
     class="folder fill-block"
     :class="{
       hasPreview: previewFileInfos.length > 0,
