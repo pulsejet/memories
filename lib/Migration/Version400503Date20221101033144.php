@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Migration;
 
-use Closure;
 use OCP\DB\ISchemaWrapper;
 use OCP\IDBConnection;
 use OCP\Migration\IOutput;
@@ -43,16 +42,16 @@ class Version400503Date20221101033144 extends SimpleMigrationStep
     }
 
     /**
-     * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
+     * @param \Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
      */
-    public function preSchemaChange(IOutput $output, Closure $schemaClosure, array $options): void
+    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void
     {
     }
 
     /**
-     * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
+     * @param \Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
      */
-    public function changeSchema(IOutput $output, Closure $schemaClosure, array $options): ?ISchemaWrapper
+    public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper
     {
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
@@ -76,9 +75,9 @@ class Version400503Date20221101033144 extends SimpleMigrationStep
     }
 
     /**
-     * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
+     * @param \Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
      */
-    public function postSchemaChange(IOutput $output, Closure $schemaClosure, array $options): void
+    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void
     {
         // Update oc_memories to set objectid equal to fileid for all rows
         $this->dbc->executeQuery('UPDATE *PREFIX*memories SET objectid = CAST(fileid AS CHAR(64))');
