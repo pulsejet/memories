@@ -153,7 +153,7 @@ import TopMatter from "./top-matter/TopMatter.vue";
 
 const SCROLL_LOAD_DELAY = 100; // Delay in loading data when scrolling
 const DESKTOP_ROW_HEIGHT = 200; // Height of row on desktop
-const MOBILE_NUM_COLS = 3; // Number of columns on phone
+const MOBILE_ROW_HEIGHT = 120; // Approx row height on mobile
 
 @Component({
   components: {
@@ -255,8 +255,12 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     return window.innerWidth <= 768;
   }
 
+  isMobileLayout() {
+    return window.innerWidth <= 600;
+  }
+
   allowBreakout() {
-    return this.isMobile() && !this.config_squareThumbs;
+    return this.isMobileLayout() && !this.config_squareThumbs;
   }
 
   /** Create new state */
@@ -353,14 +357,16 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       return;
     }
 
-    if (this.isMobile()) {
+    if (this.isMobileLayout()) {
       // Mobile
-      this.numCols = MOBILE_NUM_COLS;
+      this.numCols = Math.max(
+          3,
+          Math.floor(this.rowWidth / MOBILE_ROW_HEIGHT)
+        );
       this.rowHeight = Math.floor(this.rowWidth / this.numCols);
     } else {
       // Desktop
       if (this.config_squareThumbs) {
-        // Set columns first, then height
         this.numCols = Math.max(
           3,
           Math.floor(this.rowWidth / DESKTOP_ROW_HEIGHT)
@@ -883,7 +889,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     }
 
     // Force all to square
-    const squareMode = this.isMobile() || this.config_squareThumbs;
+    const squareMode = this.isMobileLayout() || this.config_squareThumbs;
 
     // Create justified layout with correct params
     const justify = getLayout(
