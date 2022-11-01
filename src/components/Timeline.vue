@@ -116,7 +116,6 @@
 
     <SelectionManager
       ref="selectionManager"
-      :selection="selection"
       :heads="heads"
       @refresh="softRefresh"
       @delete="deleteFromViewWithAnimation"
