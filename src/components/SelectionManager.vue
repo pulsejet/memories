@@ -241,7 +241,13 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
       this.selection.set(photo.fileid, photo);
     } else {
       photo.flag &= ~this.c.FLAG_SELECTED;
-      this.selection.delete(photo.fileid);
+
+      // Only do this if the photo in the selection set is this one.
+      // The problem arises when there are duplicates (e.g. face rect)
+      // in the list, which creates an inconsistent state if we do this.
+      if (this.selection.get(photo.fileid) === photo) {
+        this.selection.delete(photo.fileid);
+      }
     }
 
     if (!noUpdate) {

@@ -73,7 +73,7 @@
           <div
             class="photo"
             v-for="photo of item.photos"
-            :key="photo.fileid"
+            :key="photo.key || photo.fileid"
             :style="{
               height: photo.dispH + 'px',
               width: photo.dispW + 'px',
@@ -930,6 +930,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     let rowIdx = headIdx + 1;
     let rowY = headY + head.size;
 
+    // Duplicate detection, e.g. for face rects
+    const seen = new Map<number, number>();
+
     // Previous justified row
     let prevJustifyTop = justify[0]?.top || 0;
 
@@ -1015,6 +1018,18 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
       // Move to next index of photo
       dataIdx++;
+
+      // Duplicate detection.
+      // These may be valid, e.g. in face rects. All we need to have
+      // is a unique Vue key for the v-for loop.
+      if (seen.has(photo.fileid)) {
+        const val = seen.get(photo.fileid);
+        photo.key = `${photo.fileid}-${val}`;
+        seen.set(photo.fileid, val + 1);
+      } else {
+        photo.key = null;
+        seen.set(photo.fileid, 1);
+      }
 
       // Add photo to row
       row.photos.push(photo);

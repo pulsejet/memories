@@ -35,6 +35,8 @@ export type IDay = {
 export type IPhoto = {
   /** Nextcloud ID of file */
   fileid: number;
+  /** Vue key if duplicates present (otherwise use fileid) */
+  key?: string;
   /** Etag from server */
   etag?: string;
   /** Path to file */
