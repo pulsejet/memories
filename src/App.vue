@@ -268,7 +268,13 @@ body {
 // Prevent content overflow on NC <25
 #content-vue {
   max-height: 100vh;
-  z-index: 3000; // above header
+}
+
+// Top bar is above everything else on mobile
+#content-vue.has-top-bar {
+  @media (max-width: 1024px) {
+    z-index: 3000;
+  }
 }
 
 // Patch viewer to remove the title and

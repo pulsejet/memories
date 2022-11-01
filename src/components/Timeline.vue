@@ -204,8 +204,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
   private fetchDayQueue = [] as number[];
   /** Timer to load day call */
   private fetchDayTimer = null as number | null;
-  /** Set of selected file ids */
-  private selection = new Map<number, IPhoto>();
 
   /** State for request cancellations */
   private state = Math.random();
@@ -359,10 +357,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     if (this.isMobileLayout()) {
       // Mobile
-      this.numCols = Math.max(
-          3,
-          Math.floor(this.rowWidth / MOBILE_ROW_HEIGHT)
-        );
+      this.numCols = Math.max(3, Math.floor(this.rowWidth / MOBILE_ROW_HEIGHT));
       this.rowHeight = Math.floor(this.rowWidth / this.numCols);
     } else {
       // Desktop
@@ -1118,7 +1113,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
   clickPhoto(photo: IPhoto) {
     if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
 
-    if (this.selection.size > 0) {
+    if (this.selectionManager.has()) {
       // selection mode
       this.selectionManager.selectPhoto(photo);
     } else {
