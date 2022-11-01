@@ -99,6 +99,7 @@ class TimelineWrite
 
         if ($prevRow) {
             // Update existing row
+            // No need to set objectid again
             $query->update('memories')
                 ->set('dayid', $query->createNamedParameter($dayId, IQueryBuilder::PARAM_INT))
                 ->set('datetaken', $query->createNamedParameter($dateTaken, IQueryBuilder::PARAM_STR))
@@ -115,6 +116,7 @@ class TimelineWrite
                 $query->insert('memories')
                     ->values([
                         'fileid' => $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT),
+                        'objectid' => $query->createNamedParameter((string) $fileId, IQueryBuilder::PARAM_STR),
                         'dayid' => $query->createNamedParameter($dayId, IQueryBuilder::PARAM_INT),
                         'datetaken' => $query->createNamedParameter($dateTaken, IQueryBuilder::PARAM_STR),
                         'mtime' => $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT),
