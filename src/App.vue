@@ -270,6 +270,13 @@ body {
   max-height: 100vh;
 }
 
+// Top bar is above everything else on mobile
+#content-vue.has-top-bar {
+  @media (max-width: 1024px) {
+    z-index: 3000;
+  }
+}
+
 // Patch viewer to remove the title and
 // make the image fill the entire screen
 .viewer {

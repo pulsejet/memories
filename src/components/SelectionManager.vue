@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div v-if="selection.size > 0" class="top-bar">
-      <NcActions>
+    <div v-if="show" class="top-bar">
+      <NcActions :inline="1">
         <NcActionButton
           :aria-label="t('memories', 'Cancel')"
           @click="clearSelection()"
@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Prop } from "vue-property-decorator";
+import { Component, Emit, Mixins, Prop, Watch } from "vue-property-decorator";
 import GlobalMixin from "../mixins/GlobalMixin";
 import UserConfig from "../mixins/UserConfig";
 
@@ -88,10 +88,11 @@ type Selection = Map<number, IPhoto>;
     CloseIcon,
   },
 })
-export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
-  @Prop() public selection: Selection;
+export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
   @Prop() public heads: { [dayid: number]: IHeadRow };
 
+  private show = false;
+  private readonly selection!: Selection;
   private readonly defaultActions: ISelectionAction[];
 
   @Emit("refresh")
@@ -105,6 +106,8 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
 
   constructor() {
     super();
+
+    this.selection = new Map<number, IPhoto>();
 
     // Make default actions
     this.defaultActions = [
@@ -177,6 +180,29 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
     ];
   }
 
+  @Watch("show")
+  onShowChange() {
+    const elem = document.getElementById("content-vue");
+    const klass = "has-top-bar";
+    if (this.show) {
+      elem.classList.add(klass);
+    } else {
+      elem.classList.remove(klass);
+    }
+  }
+
+  private selectionChanged() {
+    this.show = this.selection.size > 0;
+  }
+
+  /** Is this fileid (or anything if not specified) selected */
+  public has(fileid?: number) {
+    if (fileid === undefined) {
+      return this.selection.size > 0;
+    }
+    return this.selection.has(fileid);
+  }
+
   /** Click on an action */
   private async click(action: ISelectionAction) {
     try {
@@ -191,7 +217,9 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
 
   /** Get the actions list */
   private getActions(): ISelectionAction[] {
-    return this.defaultActions.filter((a) => (!a.if || a.if(this)) && (!this.routeIsPublic() || a.allowPublic));
+    return this.defaultActions.filter(
+      (a) => (!a.if || a.if(this)) && (!this.routeIsPublic() || a.allowPublic)
+    );
   }
 
   /** Clear all selected photos */
@@ -202,6 +230,7 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
       photo.flag &= ~this.c.FLAG_SELECTED;
       heads.add(this.heads[photo.d.dayid]);
       this.selection.delete(photo.fileid);
+      this.selectionChanged();
     });
     heads.forEach(this.updateHeadSelected);
     this.$forceUpdate();
@@ -239,9 +268,17 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
     if (nval) {
       photo.flag |= this.c.FLAG_SELECTED;
       this.selection.set(photo.fileid, photo);
+      this.selectionChanged();
     } else {
       photo.flag &= ~this.c.FLAG_SELECTED;
-      this.selection.delete(photo.fileid);
+
+      // Only do this if the photo in the selection set is this one.
+      // The problem arises when there are duplicates (e.g. face rect)
+      // in the list, which creates an inconsistent state if we do this.
+      if (this.selection.get(photo.fileid) === photo) {
+        this.selection.delete(photo.fileid);
+        this.selectionChanged();
+      }
     }
 
     if (!noUpdate) {
@@ -509,11 +546,11 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
   right: 60px;
   padding: 8px;
   width: 400px;
-  max-width: calc(100vw - 30px);
+  max-width: 100vw;
   background-color: var(--color-main-background);
   box-shadow: 0 0 2px gray;
   border-radius: 10px;
-  opacity: 0.95;
+  opacity: 0.97;
   display: flex;
   vertical-align: middle;
   z-index: 100;
@@ -524,9 +561,17 @@ export default class SelectionHandler extends Mixins(GlobalMixin, UserConfig) {
     padding-left: 8px;
   }
 
-  @media (max-width: 768px) {
-    top: 35px;
-    right: 15px;
+  @media (max-width: 1024px) {
+    // sidebar is hidden below this point
+    top: 0;
+    left: 0;
+    right: unset;
+    position: fixed;
+    width: 100vw;
+    border-radius: 0px;
+    opacity: 1;
+    padding-top: 3px;
+    padding-bottom: 3px;
   }
 }
 </style>

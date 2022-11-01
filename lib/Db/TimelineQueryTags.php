@@ -61,7 +61,7 @@ trait TimelineQueryTags
         $query = $this->joinFilecache($query, $folder, true, false);
 
         // GROUP and ORDER by tag name
-        $query->groupBy('st.name');
+        $query->groupBy('st.id');
         $query->orderBy('st.name', 'ASC');
         $query->addOrderBy('st.id'); // tie-breaker
 

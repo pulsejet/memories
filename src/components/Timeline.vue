@@ -73,7 +73,7 @@
           <div
             class="photo"
             v-for="photo of item.photos"
-            :key="photo.fileid"
+            :key="photo.key || photo.fileid"
             :style="{
               height: photo.dispH + 'px',
               width: photo.dispW + 'px',
@@ -116,7 +116,6 @@
 
     <SelectionManager
       ref="selectionManager"
-      :selection="selection"
       :heads="heads"
       @refresh="softRefresh"
       @delete="deleteFromViewWithAnimation"
@@ -153,7 +152,7 @@ import TopMatter from "./top-matter/TopMatter.vue";
 
 const SCROLL_LOAD_DELAY = 100; // Delay in loading data when scrolling
 const DESKTOP_ROW_HEIGHT = 200; // Height of row on desktop
-const MOBILE_NUM_COLS = 3; // Number of columns on phone
+const MOBILE_ROW_HEIGHT = 120; // Approx row height on mobile
 
 @Component({
   components: {
@@ -204,8 +203,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
   private fetchDayQueue = [] as number[];
   /** Timer to load day call */
   private fetchDayTimer = null as number | null;
-  /** Set of selected file ids */
-  private selection = new Map<number, IPhoto>();
 
   /** State for request cancellations */
   private state = Math.random();
@@ -255,8 +252,12 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     return window.innerWidth <= 768;
   }
 
+  isMobileLayout() {
+    return window.innerWidth <= 600;
+  }
+
   allowBreakout() {
-    return this.isMobile() && !this.config_squareThumbs;
+    return this.isMobileLayout() && !this.config_squareThumbs;
   }
 
   /** Create new state */
@@ -353,14 +354,13 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       return;
     }
 
-    if (this.isMobile()) {
+    if (this.isMobileLayout()) {
       // Mobile
-      this.numCols = MOBILE_NUM_COLS;
+      this.numCols = Math.max(3, Math.floor(this.rowWidth / MOBILE_ROW_HEIGHT));
       this.rowHeight = Math.floor(this.rowWidth / this.numCols);
     } else {
       // Desktop
       if (this.config_squareThumbs) {
-        // Set columns first, then height
         this.numCols = Math.max(
           3,
           Math.floor(this.rowWidth / DESKTOP_ROW_HEIGHT)
@@ -883,7 +883,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     }
 
     // Force all to square
-    const squareMode = this.isMobile() || this.config_squareThumbs;
+    const squareMode = this.isMobileLayout() || this.config_squareThumbs;
 
     // Create justified layout with correct params
     const justify = getLayout(
@@ -923,6 +923,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     }
     let rowIdx = headIdx + 1;
     let rowY = headY + head.size;
+
+    // Duplicate detection, e.g. for face rects
+    const seen = new Map<number, number>();
 
     // Previous justified row
     let prevJustifyTop = justify[0]?.top || 0;
@@ -1009,6 +1012,18 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
       // Move to next index of photo
       dataIdx++;
+
+      // Duplicate detection.
+      // These may be valid, e.g. in face rects. All we need to have
+      // is a unique Vue key for the v-for loop.
+      if (seen.has(photo.fileid)) {
+        const val = seen.get(photo.fileid);
+        photo.key = `${photo.fileid}-${val}`;
+        seen.set(photo.fileid, val + 1);
+      } else {
+        photo.key = null;
+        seen.set(photo.fileid, 1);
+      }
 
       // Add photo to row
       row.photos.push(photo);
@@ -1097,7 +1112,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
   clickPhoto(photo: IPhoto) {
     if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
 
-    if (this.selection.size > 0) {
+    if (this.selectionManager.has()) {
       // selection mode
       this.selectionManager.selectPhoto(photo);
     } else {

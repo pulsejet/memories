@@ -81,6 +81,6 @@ class Version400503Date20221101033144 extends SimpleMigrationStep
     public function postSchemaChange(IOutput $output, Closure $schemaClosure, array $options): void
     {
         // Update oc_memories to set objectid equal to fileid for all rows
-        $this->dbc->executeQuery('UPDATE *PREFIX*memories SET objectid = CAST(fileid AS CHAR)');
+        $this->dbc->executeQuery('UPDATE *PREFIX*memories SET objectid = CAST(fileid AS CHAR(64))');
     }
 }
