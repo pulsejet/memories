@@ -1,5 +1,6 @@
 <template>
   <router-link
+    draggable="false"
     class="tag fill-block"
     :class="{
       hasPreview: previews.length > 0,
@@ -21,6 +22,7 @@
     <div class="previews fill-block" ref="previews">
       <div class="img-outer" v-for="info of previews" :key="info.fileid">
         <img
+          draggable="false"
           class="fill-block"
           :class="{ error: info.flag & c.FLAG_LOAD_FAIL }"
           :key="'fpreview-' + info.fileid"

@@ -20,8 +20,8 @@
 
     <div
       class="img-outer fill-block"
-      @click="emitClick"
       @contextmenu="contextmenu"
+      @mousedown.passive="emitClick"
       @touchstart.passive="touchstart"
       @touchmove.passive="touchend"
       @touchend.passive="touchend"
@@ -30,6 +30,7 @@
       <img
         ref="img"
         class="fill-block"
+        draggable="false"
         :src="src"
         :key="data.fileid"
         @load="load"
