@@ -63,6 +63,11 @@ class FacesController extends ApiBase
             $list = $this->timelineQuery->getPersons(
                 $root,
             );
+            // Just append unnamed clusters to the end.
+            $list = array_merge($list, $this->timelineQuery->getPersons(
+                $folder,
+                true
+            ));
         }
 
         return new JSONResponse($list, Http::STATUS_OK);

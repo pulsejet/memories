@@ -55,14 +55,13 @@ trait TimelineQueryPersons
         );
     }
 
-    public function getPersons(Folder $folder)
+    public function getPersons(Folder $folder, bool $show_clusters = false, bool $show_hidden = false)
     {
         $query = $this->connection->getQueryBuilder();
 
         // SELECT all face clusters
         $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
-        $query->select('frf.id', 'frp.user as user_id', 'frp.name', $count)->from('facerecog_persons', 'frp');
-        $query->where($query->expr()->isNotNull('frp.name'));
+        $query->select('frp.id', 'frp.user as user_id', 'frp.name', $count)->from('facerecog_persons', 'frp');
 
         // WHERE there are faces with this cluster
         $query->innerJoin('frp', 'facerecog_faces', 'frf', $query->expr()->eq('frp.id', 'frf.person'));
@@ -76,8 +75,20 @@ trait TimelineQueryPersons
         // WHERE these photos are in the user's requested folder recursively
         $query = $this->joinFilecache($query, $folder, true, false);
 
-        // GROUP by ID of face cluster
-        $query->groupBy('frp.name');
+        if ($show_clusters) {
+            // GROUP by ID of face cluster
+            $query->groupBy('frp.id');
+            $query->where($query->expr()->isNull('frp.name'));
+        } else {
+            // GROUP by name of face clusters
+            $query->groupBy('frp.name');
+            $query->where($query->expr()->isNotNull('frp.name'));
+        }
+
+        // By default it shows the people who were not hidden
+        if (!$show_hidden) {
+            $query->where($query->expr()->eq('frp.is_visible', $query->createNamedParameter(true)));
+        }
 
         // ORDER by number of faces in cluster
         $query->orderBy('name', 'ASC');
@@ -121,10 +132,12 @@ trait TimelineQueryPersons
         // WHERE these photos are memories indexed
         $query->innerJoin('fri', 'memories', 'm', $query->expr()->eq('m.fileid', 'fri.file'));
 
-        // WHERE faces are from id on person.
         if (is_numeric($previewId)) {
-            $query->where($query->expr()->eq('frf.id', $query->createNamedParameter($previewId)));
+            // WHERE faces are from id persons (a cluster).
+            $query->innerJoin('frf', 'facerecog_persons', 'frp', $query->expr()->eq('frp.id', 'frf.person'));
+            $query->where($query->expr()->eq('frp.id', $query->createNamedParameter($previewId)));
         } else {
+            // WHERE faces are from name on persons.
             $query->innerJoin('frf', 'facerecog_persons', 'frp', $query->expr()->eq('frp.id', 'frf.person'));
             $query->where($query->expr()->eq('frp.name', $query->createNamedParameter($previewId)));
         }
