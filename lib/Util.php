@@ -87,6 +87,32 @@ class Util
     }
 
     /**
+     * Check if Face Recognition is enabled for this user.
+     *
+     * @param mixed $appManager
+     */
+    public static function facerecognitionIsEnabled(&$appManager): bool
+    {
+        return $appManager->isEnabledForUser('facerecognition');
+    }
+
+    /**
+     * Check if Face Recognition is installed and enabled for this user.
+     *
+     * @param mixed $appManager
+     */
+    public static function facerecognitionIsInstalled(&$appManager): bool
+    {
+        if (!$appManager->isEnabledForUser('facerecognition')) {
+            return false;
+        }
+
+        $v = $appManager->getAppInfo('facerecognition')['version'];
+
+        return version_compare($v, '0.9.10-beta.2', '>=');
+    }
+
+    /**
      * Check if link sharing is allowed.
      *
      * @param mixed $config

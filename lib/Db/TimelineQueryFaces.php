@@ -14,7 +14,7 @@ trait TimelineQueryFaces
 
     public function transformFaceFilter(IQueryBuilder &$query, string $userId, string $faceStr)
     {
-        // Get title and uid of face user
+        // Get name and uid of face user
         $faceNames = explode('/', $faceStr);
         if (2 !== \count($faceNames)) {
             throw new \Exception('Invalid face query');

@@ -44,8 +44,8 @@ class FacesController extends ApiBase
         }
 
         // Check faces enabled for this user
-        if (!$this->recognizeIsEnabled()) {
-            return new JSONResponse(['message' => 'Recognize app not enabled or not v3+'], Http::STATUS_PRECONDITION_FAILED);
+        if (!$this->recognizeIsEnabled() && !$this->facerecognitionIsEnabled()) {
+            return new JSONResponse(['message' => 'Recognize app not enabled or not v3+. Face recognition app is also not enabled.'], Http::STATUS_PRECONDITION_FAILED);
         }
 
         // If this isn't the timeline folder then things aren't going to work
@@ -55,9 +55,15 @@ class FacesController extends ApiBase
         }
 
         // Run actual query
-        $list = $this->timelineQuery->getFaces(
-            $root,
-        );
+        if ($this->recognizeIsEnabled()) {
+            $list = $this->timelineQuery->getFaces(
+                $root,
+            );
+        } else {
+            $list = $this->timelineQuery->getPersons(
+                $root,
+            );
+        }
 
         return new JSONResponse($list, Http::STATUS_OK);
     }
@@ -90,7 +96,12 @@ class FacesController extends ApiBase
         }
 
         // Run actual query
-        $detections = $this->timelineQuery->getFacePreviewDetection($root, (int) $id);
+        if ($this->recognizeIsEnabled()) {
+            $detections = $this->timelineQuery->getFacePreviewDetection($root, (int) $id);
+        } else {
+            $detections = $this->timelineQuery->getPersonPreviewDetection($root, $id);
+        }
+
         if (null === $detections || 0 === \count($detections)) {
             return new DataResponse([], Http::STATUS_NOT_FOUND);
         }

@@ -303,6 +303,7 @@ trait TimelineQueryDays
 
             // All transform processing
             $this->processFace($row);
+            $this->processPerson($row);
         }
 
         return $day;

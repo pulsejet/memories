@@ -233,4 +233,12 @@ class ApiBase extends Controller
     {
         return \OCA\Memories\Util::recognizeIsEnabled($this->appManager);
     }
+
+    /**
+     * Check if facerecognition is enabled for this user.
+     */
+    protected function facerecognitionIsEnabled(): bool
+    {
+        return \OCA\Memories\Util::facerecognitionIsEnabled($this->appManager);
+    }
 }

@@ -48,6 +48,9 @@ export default class UserConfig extends Vue {
   config_recognizeEnabled = Boolean(
     loadState("memories", "recognize", <string>"")
   );
+  config_facerecognitionEnabled = Boolean(
+    loadState("memories", "facerecognition", <string>"")
+  );
   config_mapsEnabled = Boolean(loadState("memories", "maps", <string>""));
   config_albumsEnabled = Boolean(loadState("memories", "albums", <string>""));
 

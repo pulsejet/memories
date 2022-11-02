@@ -86,6 +86,7 @@ class PageController extends Controller
         $this->initialState->provideInitialState('systemtags', true === $this->appManager->isEnabledForUser('systemtags'));
         $this->initialState->provideInitialState('maps', true === $this->appManager->isEnabledForUser('maps'));
         $this->initialState->provideInitialState('recognize', \OCA\Memories\Util::recognizeIsEnabled($this->appManager));
+        $this->initialState->provideInitialState('facerecognition', \OCA\Memories\Util::facerecognitionIsEnabled($this->appManager));
         $this->initialState->provideInitialState('albums', \OCA\Memories\Util::albumsIsEnabled($this->appManager));
 
         // App version
