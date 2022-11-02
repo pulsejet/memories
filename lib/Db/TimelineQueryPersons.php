@@ -87,7 +87,7 @@ trait TimelineQueryPersons
 
         // By default it shows the people who were not hidden
         if (!$show_hidden) {
-            $query->where($query->expr()->eq('frp.is_visible', $query->createNamedParameter(true)));
+            $query->andWhere($query->expr()->eq('frp.is_visible', $query->createNamedParameter(true)));
         }
 
         // ORDER by number of faces in cluster
