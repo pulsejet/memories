@@ -85,7 +85,7 @@ class FacesController extends ApiBase
         }
 
         // Check faces enabled for this user
-        if (!$this->recognizeIsEnabled()) {
+        if (!$this->recognizeIsEnabled() && !$this->facerecognitionIsEnabled()) {
             return new DataResponse([], Http::STATUS_PRECONDITION_FAILED);
         }
 
