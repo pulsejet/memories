@@ -286,6 +286,11 @@ body {
   .modal-wrapper .modal-container {
     top: 0 !important;
     bottom: 0 !important;
+
+    .viewer__image-editor {
+      top: 0 !important;
+      bottom: 0 !important;
+    }
   }
 }
 
