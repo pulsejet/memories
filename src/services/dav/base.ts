@@ -62,6 +62,7 @@ export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
         mime: photo.mimetype,
         hasPreview: true,
         etag: photo.etag,
+        permissions: "RWD",
       } as IFileInfo;
     })
   );

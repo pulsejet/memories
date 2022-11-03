@@ -19,6 +19,8 @@ export type IFileInfo = {
   flag?: number;
   /** MIME type of file */
   mime?: string;
+  /** WebDAV permissions string */
+  permissions?: string;
 };
 
 export type IDay = {
