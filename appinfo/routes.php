@@ -49,8 +49,11 @@ return [
 
         ['name' => 'Albums#albums', 'url' => '/api/albums', 'verb' => 'GET'],
 
-        ['name' => 'Faces#faces', 'url' => '/api/faces', 'verb' => 'GET'],
-        ['name' => 'Faces#preview', 'url' => '/api/faces/preview/{id}', 'verb' => 'GET'],
+        ['name' => 'People#recognizePeople', 'url' => '/api/recognize/people', 'verb' => 'GET'],
+        ['name' => 'People#recognizePeoplePreview', 'url' => '/api/recognize/people/preview/{id}', 'verb' => 'GET'],
+
+        ['name' => 'People#facerecognitionPeople', 'url' => '/api/facerecognition/people', 'verb' => 'GET'],
+        ['name' => 'People#facerecognitionPeoplePreview', 'url' => '/api/facerecognition/people/preview/{id}', 'verb' => 'GET'],
 
         ['name' => 'Image#info', 'url' => '/api/image/info/{id}', 'verb' => 'GET'],
         ['name' => 'Image#setExif', 'url' => '/api/image/set-exif/{id}', 'verb' => 'PATCH'],

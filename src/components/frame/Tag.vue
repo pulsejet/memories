@@ -85,7 +85,7 @@ export default class Tag extends Mixins(GlobalMixin) {
   getPreviewUrl(photo: IPhoto) {
     if (this.isFace) {
       return generateUrl(
-        "/apps/memories/api/faces/preview/" + this.data.fileid
+        "/apps/memories/api/recognize/people/preview/" + this.data.fileid
       );
     }
 

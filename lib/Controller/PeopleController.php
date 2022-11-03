@@ -29,14 +29,14 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\FileInfo;
 
-class FacesController extends ApiBase
+class PeopleController extends ApiBase
 {
     /**
      * @NoAdminRequired
      *
      * Get list of faces with counts of images
      */
-    public function faces(): JSONResponse
+    public function recognizePeople(): JSONResponse
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
@@ -44,8 +44,8 @@ class FacesController extends ApiBase
         }
 
         // Check faces enabled for this user
-        if (!$this->recognizeIsEnabled() && !$this->facerecognitionIsEnabled()) {
-            return new JSONResponse(['message' => 'Recognize app not enabled or not v3+. Face recognition app is also not enabled.'], Http::STATUS_PRECONDITION_FAILED);
+        if (!$this->recognizeIsEnabled()) {
+            return new JSONResponse(['message' => 'Recognize app not enabled or not v3+.'], Http::STATUS_PRECONDITION_FAILED);
         }
 
         // If this isn't the timeline folder then things aren't going to work
@@ -82,7 +82,7 @@ class FacesController extends ApiBase
      *
      * @return DataResponse
      */
-    public function preview(string $id): Http\Response
+    public function recognizePeoplePreview(string $id): Http\Response
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
@@ -90,7 +90,7 @@ class FacesController extends ApiBase
         }
 
         // Check faces enabled for this user
-        if (!$this->recognizeIsEnabled() && !$this->facerecognitionIsEnabled()) {
+        if (!$this->recognizeIsEnabled()) {
             return new DataResponse([], Http::STATUS_PRECONDITION_FAILED);
         }
 
@@ -111,6 +111,89 @@ class FacesController extends ApiBase
             return new DataResponse([], Http::STATUS_NOT_FOUND);
         }
 
+        return $this->getPeoplePreviewResponse ($folder, $detections);
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * Get list of faces with counts of images
+     */
+    public function facerecognitionPeople(): JSONResponse
+    {
+        $user = $this->userSession->getUser();
+        if (null === $user) {
+            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // Check faces enabled for this user
+        if (!$this->facerecognitionIsEnabled()) {
+            return new JSONResponse(['message' => 'Recognize app not enabled or not v3+'], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // If this isn't the timeline folder then things aren't going to work
+        $folder = $this->getRequestFolder();
+        if (null === $folder) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
+
+        // Run actual query
+        $list = $this->timelineQuery->getPersons(
+            $folder
+        );
+        // Just append unnamed clusters to the end.
+        $list = array_merge($list, $this->timelineQuery->getPersons(
+            $folder,
+            true
+        ));
+
+        return new JSONResponse($list, Http::STATUS_OK);
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     *
+     * Get face preview image cropped with imagick
+     *
+     * @return DataResponse
+     */
+    public function facerecognitionPeoplePreview(string $id): Http\Response
+    {
+        $user = $this->userSession->getUser();
+        if (null === $user) {
+            return new DataResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // Check faces enabled for this user
+        if (!$this->facerecognitionIsEnabled()) {
+            return new DataResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // Get folder to search for
+        $folder = $this->getRequestFolder();
+        if (null === $folder) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
+
+        // Run actual query
+        $detections = $this->timelineQuery->getPersonPreviewDetection($folder, $id);
+
+        if (null === $detections || 0 === \count($detections)) {
+            return new DataResponse([], Http::STATUS_NOT_FOUND);
+        }
+
+        return $this->getPeoplePreviewResponse ($folder, $detections);
+    }
+
+    /**
+     * Get face preview image cropped with imagick
+     *
+     * @return DataResponse
+     */
+    private function getPeoplePreviewResponse($folder, $detections): Http\Response
+    {
         // Find the first detection that has a preview
         /** @var \Imagick */
         $image = null;

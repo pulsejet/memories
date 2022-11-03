@@ -20,7 +20,7 @@ export async function getPeopleData(): Promise<IDay[]> {
   }[] = [];
   try {
     const res = await axios.get<typeof data>(
-      generateUrl("/apps/memories/api/faces")
+      generateUrl("/apps/memories/api/recognize/people")
     );
     data = res.data;
   } catch (e) {
