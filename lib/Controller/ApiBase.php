@@ -148,6 +148,11 @@ class ApiBase extends Controller
         return null !== $this->request->getParam('monthView');
     }
 
+    protected function isReverse()
+    {
+        return null !== $this->request->getParam('reverse');
+    }
+
     protected function getShareToken()
     {
         return $this->request->getParam('folder_share');

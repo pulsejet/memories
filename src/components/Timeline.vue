@@ -541,6 +541,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     // Month view
     if (this.isMonthView()) {
       query.set("monthView", "1");
+      query.set("reverse", "1");
     }
 
     // Create query string and append to URL

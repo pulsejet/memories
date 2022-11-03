@@ -67,6 +67,11 @@ class DaysController extends ApiBase
                 $this->preloadDays($list, $uid, $folder);
             }
 
+            // Reverse response if requested. Folders still stay at top.
+            if ($this->isReverse()) {
+                $list = array_reverse($list);
+            }
+
             // Add subfolder info if querying non-recursively
             if (!$this->isRecursive()) {
                 array_unshift($list, $this->getSubfoldersEntry($folder));
@@ -134,6 +139,11 @@ class DaysController extends ApiBase
                 foreach ($list as &$photo) {
                     $photo['dayid'] = (int) $dayIds[0];
                 }
+            }
+
+            // Reverse response if requested.
+            if ($this->isReverse()) {
+                $list = array_reverse($list);
             }
 
             return new JSONResponse($list, Http::STATUS_OK);
