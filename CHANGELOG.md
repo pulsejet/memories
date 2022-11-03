@@ -2,6 +2,11 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## v4.5.4, v3.5.4
+
+- New Albums view (date ascending, grouped by month)
+- Re-enable viewer editing and deletion
+
 ## v4.5.2, v3.5.2 (2022-10-30)
 
 - Improved scroller performance
