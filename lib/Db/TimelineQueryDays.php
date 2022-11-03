@@ -302,8 +302,8 @@ trait TimelineQueryDays
             }
 
             // All transform processing
-            $this->processFace($row);
-            $this->processPerson($row);
+            $this->processRecognizeDetection($row);
+            $this->processFaceRecognitionDetection($row);
         }
 
         return $day;

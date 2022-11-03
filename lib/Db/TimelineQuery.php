@@ -11,8 +11,8 @@ class TimelineQuery
 {
     use TimelineQueryAlbums;
     use TimelineQueryDays;
-    use TimelineQueryFaces;
-    use TimelineQueryPersons;
+    use TimelineQueryFaceRecognition;
+    use TimelineQueryRecognizePeople;
     use TimelineQueryFilters;
     use TimelineQueryFolders;
     use TimelineQueryLivePhoto;

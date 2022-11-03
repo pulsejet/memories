@@ -138,11 +138,11 @@ class PeopleController extends ApiBase
         }
 
         // Run actual query
-        $list = $this->timelineQuery->getPersons(
+        $list = $this->timelineQuery->getFaceRecognitionPeople(
             $folder
         );
         // Just append unnamed clusters to the end.
-        $list = array_merge($list, $this->timelineQuery->getPersons(
+        $list = array_merge($list, $this->timelineQuery->getFaceRecognitionPeople(
             $folder,
             true
         ));
@@ -178,7 +178,7 @@ class PeopleController extends ApiBase
         }
 
         // Run actual query
-        $detections = $this->timelineQuery->getPersonPreviewDetection($folder, $id);
+        $detections = $this->timelineQuery->getFaceRecognitionPreview($folder, $id);
 
         if (null === $detections || 0 === \count($detections)) {
             return new DataResponse([], Http::STATUS_NOT_FOUND);

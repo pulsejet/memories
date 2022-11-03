@@ -8,11 +8,11 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\Folder;
 use OCP\IDBConnection;
 
-trait TimelineQueryPersons
+trait TimelineQueryFaceRecognition
 {
     protected IDBConnection $connection;
 
-    public function transformPersonFilter(IQueryBuilder &$query, string $userId, string $personStr)
+    public function transformFaceRecognitionFilter(IQueryBuilder &$query, string $userId, string $personStr)
     {
         // Get title and uid of face user
         $personNames = explode('/', $personStr);
@@ -42,7 +42,7 @@ trait TimelineQueryPersons
         ));
     }
 
-    public function transformPersonRect(IQueryBuilder &$query, string $userId)
+    public function transformFaceRecognitionRect(IQueryBuilder &$query, string $userId)
     {
         // Include detection params in response
         $query->addSelect(
@@ -55,7 +55,7 @@ trait TimelineQueryPersons
         );
     }
 
-    public function getPersons(Folder $folder, bool $show_clusters = false, bool $show_hidden = false)
+    public function getFaceRecognitionPeople(Folder $folder, bool $show_clusters = false, bool $show_hidden = false)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -108,7 +108,7 @@ trait TimelineQueryPersons
         return $faces;
     }
 
-    public function getPersonPreviewDetection(Folder &$folder, $previewId)
+    public function getFaceRecognitionPreview(Folder &$folder, $previewId)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -201,7 +201,7 @@ trait TimelineQueryPersons
     }
 
     /** Convert face fields to object */
-    private function processPerson(&$row, $days = false)
+    private function processFaceRecognitionDetection(&$row, $days = false)
     {
         if (!isset($row) || !isset($row['image_width'])) {
             return;
