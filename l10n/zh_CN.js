@@ -46,6 +46,7 @@ OC.L10N.register(
     "Back to the new album form." : "回到创建新相册表单。",
     "Back" : "返回",
     "Add collaborators" : "添加协作者",
+    "Add selection to album {albumName}" : "将所选项加入相册 {ablumName}",
     "Create a new album." : "创建新相册。",
     "Save collaborators for this album." : "保存此相册的协作者。",
     "Save" : "保存",
