@@ -5,6 +5,7 @@ OC.L10N.register(
     "Folders" : "Mapper",
     "Favorites" : "Favoritter",
     "Videos" : "Filmer",
+    "Albums" : "Album",
     "Archive" : "Arkiv",
     "On this day" : "På denne dagen",
     "Tags" : "Merkelapper",
