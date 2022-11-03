@@ -13,8 +13,8 @@
 
       <div class="text">
         {{
-          n("memories", "{n} selected", "{n} selected", selection.size, {
-            n: selection.size,
+          n("memories", "{n} selected", "{n} selected", size, {
+            n: size,
           })
         }}
       </div>
@@ -55,7 +55,7 @@ import { showError } from "@nextcloud/dialogs";
 import { generateUrl } from "@nextcloud/router";
 import { NcActions, NcActionButton } from "@nextcloud/vue";
 import { translate as t, translatePlural as n } from "@nextcloud/l10n";
-import { IHeadRow, IPhoto, ISelectionAction } from "../types";
+import { IDay, IHeadRow, IPhoto, ISelectionAction } from "../types";
 import { getCurrentUser } from "@nextcloud/auth";
 
 import * as dav from "../services/DavRequests";
@@ -92,6 +92,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
   @Prop() public heads: { [dayid: number]: IHeadRow };
 
   private show = false;
+  private size = 0;
   private readonly selection!: Selection;
   private readonly defaultActions: ISelectionAction[];
 
@@ -193,6 +194,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
 
   private selectionChanged() {
     this.show = this.selection.size > 0;
+    this.size = this.selection.size;
   }
 
   /** Is this fileid (or anything if not specified) selected */
@@ -201,6 +203,39 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
       return this.selection.size > 0;
     }
     return this.selection.has(fileid);
+  }
+
+  /** Restore selections from new day object */
+  public restoreDay(day: IDay) {
+    if (!this.has()) {
+      return;
+    }
+
+    // FileID => Photo for new day
+    const dayMap = new Map<number, IPhoto>();
+    day.detail.forEach((photo) => {
+      dayMap.set(photo.fileid, photo);
+    });
+
+    this.selection.forEach((photo, fileid) => {
+      // Process this day only
+      if (photo.dayid !== day.dayid) {
+        return;
+      }
+
+      // Remove all selections that are not in the new day
+      if (!dayMap.has(fileid)) {
+        this.selection.delete(fileid);
+        return;
+      }
+
+      // Update the photo object
+      const newPhoto = dayMap.get(fileid);
+      this.selection.set(fileid, newPhoto);
+      newPhoto.flag |= this.c.FLAG_SELECTED;
+    });
+
+    this.selectionChanged();
   }
 
   /** Click on an action */

@@ -1029,6 +1029,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       row.photos.push(photo);
     }
 
+    // Restore selection day
+    this.selectionManager.restoreDay(day);
+
     // Rows that were removed
     const removedRows: IRow[] = [];
     let headRemoved = false;
