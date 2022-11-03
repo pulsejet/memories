@@ -256,6 +256,10 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     return window.innerWidth <= 600;
   }
 
+  isMonthView() {
+    return this.$route.name === "albums";
+  }
+
   allowBreakout() {
     return this.isMobileLayout() && !this.config_squareThumbs;
   }
@@ -534,6 +538,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       query.set("folder_share", this.$route.params.token);
     }
 
+    // Month view
+    if (this.isMonthView()) {
+      query.set("monthView", "1");
+    }
+
     // Create query string and append to URL
     const queryStr = query.toString();
     if (queryStr) {
@@ -582,7 +591,12 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     // The reason this function is separate from processDays is
     // because this call is terribly slow even on desktop
     const dateTaken = utils.dayIdToDate(head.dayId);
-    const name = utils.getLongDateStr(dateTaken, true);
+    let name: string;
+    if (this.isMonthView()) {
+      name = utils.getMonthDateStr(dateTaken);
+    } else {
+      name = utils.getLongDateStr(dateTaken, true);
+    }
 
     // Cache and return
     head.name = name;
@@ -782,6 +796,13 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     // Aggregate fetch requests
     this.fetchDayQueue.push(dayId);
+
+    // Only single queries allowed for month vie
+    if (this.isMonthView()) {
+      return this.fetchDayExpire();
+    }
+
+    // Defer for aggregation
     if (!this.fetchDayTimer) {
       this.fetchDayTimer = window.setTimeout(() => {
         this.fetchDayTimer = null;

@@ -79,6 +79,44 @@ trait TimelineQueryAlbums
     }
 
     /**
+     * Convert days response to months response.
+     * The dayId is used to group the days into months.
+     */
+    public function daysToMonths(array &$days)
+    {
+        $months = [];
+        foreach ($days as &$day) {
+            $dayId = $day['dayid'];
+            $time = $dayId * 86400;
+            $monthid = strtotime(date('Ym', $time).'01') / 86400;
+
+            if (empty($months) || $months[\count($months) - 1]['dayid'] !== $monthid) {
+                $months[] = [
+                    'dayid' => $monthid,
+                    'count' => 0,
+                ];
+            }
+
+            $months[\count($months) - 1]['count'] += $day['count'];
+        }
+
+        return $months;
+    }
+
+    /** Convert list of month IDs to list of dayIds */
+    public function monthIdToDayIds(int $monthId)
+    {
+        $dayIds = [];
+        $firstDay = (int) $monthId;
+        $lastDay = strtotime(date('Ymt', $firstDay * 86400)) / 86400;
+        for ($i = $firstDay; $i <= $lastDay; ++$i) {
+            $dayIds[] = (string) $i;
+        }
+
+        return $dayIds;
+    }
+
+    /**
      * Get album if allowed. Also check if album is shared with user.
      *
      * @param IDBConnection $connection

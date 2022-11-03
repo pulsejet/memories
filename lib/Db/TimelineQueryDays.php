@@ -78,7 +78,7 @@ trait TimelineQueryDays
      *
      * @param null|Folder $folder          The folder to get the day from
      * @param string      $uid             The user id
-     * @param int[]       $dayid           The day id
+     * @param int[]       $day_ids         The day ids to fetch
      * @param bool        $recursive       If the query should be recursive
      * @param bool        $archive         If the query should include only the archive folder
      * @param array       $queryTransforms The query transformations to apply

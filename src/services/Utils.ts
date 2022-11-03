@@ -51,6 +51,15 @@ export function getLongDateStr(date: Date, skipYear = false, time = false) {
   });
 }
 
+/** Get month and year string */
+export function getMonthDateStr(date: Date) {
+  return date.toLocaleDateString(getCanonicalLocale(), {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 /** Get text like "5 years ago" from a date */
 export function getFromNowStr(date: Date) {
   // Get fromNow in correct locale

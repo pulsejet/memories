@@ -49,25 +49,26 @@ class DaysController extends ApiBase
             return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
         }
 
-        // Params
-        $recursive = null === $this->request->getParam('folder');
-        $archive = null !== $this->request->getParam('archive');
-
         // Run actual query
         try {
             $list = $this->timelineQuery->getDays(
                 $folder,
                 $uid,
-                $recursive,
-                $archive,
+                $this->isRecursive(),
+                $this->isArchive(),
                 $this->getTransformations(true),
             );
 
-            // Preload some day responses
-            $this->preloadDays($list, $uid, $folder, $recursive, $archive);
+            if ($this->isMonthView()) {
+                // Group days together into months
+                $list = $this->timelineQuery->daysToMonths($list);
+            } else {
+                // Preload some day responses
+                $this->preloadDays($list, $uid, $folder);
+            }
 
             // Add subfolder info if querying non-recursively
-            if (!$recursive) {
+            if (!$this->isRecursive()) {
                 array_unshift($list, $this->getSubfoldersEntry($folder));
             }
 
@@ -88,18 +89,18 @@ class DaysController extends ApiBase
         $uid = $this->getUid();
 
         // Check for wildcard
-        $day_ids = [];
+        $dayIds = [];
         if ('*' === $id) {
-            $day_ids = null;
+            $dayIds = null;
         } else {
             // Split at commas and convert all parts to int
-            $day_ids = array_map(function ($part) {
+            $dayIds = array_map(function ($part) {
                 return (int) $part;
             }, explode(',', $id));
         }
 
-        // Check if $day_ids is empty
-        if (null !== $day_ids && 0 === \count($day_ids)) {
+        // Check if $dayIds is empty
+        if (null !== $dayIds && 0 === \count($dayIds)) {
             return new JSONResponse([], Http::STATUS_OK);
         }
 
@@ -112,20 +113,28 @@ class DaysController extends ApiBase
             return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
         }
 
-        // Params
-        $recursive = null === $this->request->getParam('folder');
-        $archive = null !== $this->request->getParam('archive');
+        // Convert to actual dayIds if month view
+        if ($this->isMonthView()) {
+            $dayIds = $this->timelineQuery->monthIdToDayIds($dayIds[0]);
+        }
 
         // Run actual query
         try {
             $list = $this->timelineQuery->getDay(
                 $folder,
                 $uid,
-                $day_ids,
-                $recursive,
-                $archive,
+                $dayIds,
+                $this->isRecursive(),
+                $this->isArchive(),
                 $this->getTransformations(false),
             );
+
+            // Force month id for dayId for month view
+            if ($this->isMonthView()) {
+                foreach ($list as &$photo) {
+                    $photo['dayid'] = (int) $dayIds[0];
+                }
+            }
 
             return new JSONResponse($list, Http::STATUS_OK);
         } catch (\Exception $e) {
@@ -252,13 +261,11 @@ class DaysController extends ApiBase
     /**
      * Preload a few "day" at the start of "days" response.
      *
-     * @param array       $days      the days array
-     * @param string      $uid       User ID or blank for public shares
-     * @param null|Folder $folder    the folder to search in
-     * @param bool        $recursive search in subfolders
-     * @param bool        $archive   search in archive folder only
+     * @param array       $days   the days array
+     * @param string      $uid    User ID or blank for public shares
+     * @param null|Folder $folder the folder to search in
      */
-    private function preloadDays(array &$days, string $uid, &$folder, bool $recursive, bool $archive)
+    private function preloadDays(array &$days, string $uid, &$folder)
     {
         $transforms = $this->getTransformations(false);
         $preloaded = 0;
@@ -283,8 +290,8 @@ class DaysController extends ApiBase
                 $folder,
                 $uid,
                 $preloadDayIds,
-                $recursive,
-                $archive,
+                $this->isRecursive(),
+                $this->isArchive(),
                 $transforms,
             );
 
