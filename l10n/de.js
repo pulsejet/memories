@@ -72,6 +72,7 @@ OC.L10N.register(
     "Back to the new album form." : "Zurück zur neuen Albumform",
     "Back" : "Zurück",
     "Add collaborators" : "Mitbearbeitende hinzufügen",
+    "Add selection to album {albumName}" : "Auswahl zum Album {albumName} hinzufügen",
     "Create a new album." : "Ein neues Album erstellen",
     "Save collaborators for this album." : "Mitbearbeitende für dieses Album speichern.",
     "Save" : "Speichern",
