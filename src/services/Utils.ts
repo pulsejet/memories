@@ -94,6 +94,10 @@ export function hashCode(str: string): number {
  * @param key Key to use for comparison
  */
 export function binarySearch(arr: any, elem: any, key?: string) {
+  const desc = key
+    ? arr[0][key] > arr[arr.length - 1][key]
+    : arr[0] > arr[arr.length - 1];
+
   let minIndex = 0;
   let maxIndex = arr.length - 1;
   let currentIndex: number;
@@ -103,9 +107,12 @@ export function binarySearch(arr: any, elem: any, key?: string) {
     currentIndex = ((minIndex + maxIndex) / 2) | 0;
     currentElement = key ? arr[currentIndex][key] : arr[currentIndex];
 
-    if (currentElement < elem) {
+    const e1 = desc ? elem : currentElement;
+    const e2 = desc ? currentElement : elem;
+
+    if (e1 < e2) {
       minIndex = currentIndex + 1;
-    } else if (currentElement > elem) {
+    } else if (e1 > e2) {
       maxIndex = currentIndex - 1;
     } else {
       return currentIndex;

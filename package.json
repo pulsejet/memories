@@ -37,6 +37,7 @@
     "justified-layout": "^4.1.0",
     "moment": "^2.29.4",
     "path-posix": "^1.0.0",
+    "photoswipe": "^5.3.3",
     "reflect-metadata": "^0.1.13",
     "vue": "^2.7.10",
     "vue-class-component": "^7.2.6",

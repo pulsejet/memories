@@ -200,7 +200,7 @@ export default class OnThisDay extends Mixins(GlobalMixin) {
 
   click(year: IYear) {
     const allPhotos = this.years.flatMap((y) => y.photos);
-    this.viewerManager.open(year.preview, allPhotos);
+    // this.viewerManager.open(year.preview, allPhotos);
   }
 }
 </script>
