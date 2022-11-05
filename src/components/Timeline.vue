@@ -213,11 +213,10 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
   private scrollerManager!: ScrollerManager & any;
 
   /** Nextcloud viewer proxy */
-  private viewerManager = new ViewerManager(
-    this.deleteFromViewWithAnimation.bind(this),
-    this.updateLoading.bind(this),
-    this.$route
-  );
+  private viewerManager = new ViewerManager({
+    ondelete: this.deleteFromViewWithAnimation,
+    fetchDay: this.fetchDay,
+  });
 
   mounted() {
     this.selectionManager = this.$refs.selectionManager;
@@ -1141,7 +1140,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       // selection mode
       this.selectionManager.selectPhoto(photo);
     } else {
-      this.viewerManager.open(photo);
+      this.viewerManager.open(photo, this.list);
     }
   }
 
