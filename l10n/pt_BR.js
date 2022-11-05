@@ -26,6 +26,7 @@ OC.L10N.register(
     "Found {total} photos in {path}" : "Encontrou {total} fotos em {path}",
     "Cancel" : "Cancelar",
     "Delete" : "Excluir",
+    "Remove from album" : "Remover do album",
     "Download" : "Baixar",
     "Favorite" : "Favorito",
     "Unarchive" : "Desarquivar",
