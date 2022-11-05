@@ -1,13 +1,17 @@
+import Vue from "vue";
 import { IDay, IFileInfo, IPhoto, IRow, IRowType } from "../types";
 import { showError } from "@nextcloud/dialogs";
 import { subscribe } from "@nextcloud/event-bus";
 import { translate as t, translatePlural as n } from "@nextcloud/l10n";
 import { Route } from "vue-router";
-import * as dav from "./DavRequests";
-import PhotoSwipe from "photoswipe";
-import "photoswipe/style.css";
 import { getPreviewUrl } from "./FileUtils";
+import * as dav from "./DavRequests";
 import * as utils from "./Utils";
+
+import PhotoSwipe, { PhotoSwipeOptions } from "photoswipe";
+import "photoswipe/style.css";
+
+import DeleteIcon from "vue-material-design-icons/Delete.vue";
 
 // Key to store sidebar state
 const SIDEBAR_KEY = "memories:sidebar-open";
@@ -19,14 +23,48 @@ type opts_t = {
 };
 
 export class ViewerManager {
-  /** Map from fileid to Photo */
-  private photoMap = new Map<number, IPhoto>();
+  /** Delete click callback */
+  private deleteClick!: () => void;
 
-  constructor(private opts: opts_t) {
-    subscribe("files:file:deleted", ({ fileid }: { fileid: number }) => {
-      const photo = this.photoMap.get(fileid);
-      opts.ondelete([photo]);
+  constructor(private opts: opts_t) {}
+
+  private getVueBtn(typ: any) {
+    const btn = new (Vue.extend(typ))({
+      propsData: {
+        size: 24,
+      },
     });
+    btn.$mount();
+    return btn.$el;
+  }
+
+  private getBaseBox(args: PhotoSwipeOptions) {
+    const photoswipe = new PhotoSwipe({
+      counter: true,
+      loop: false,
+      ...args,
+    });
+
+    photoswipe.addFilter("uiElement", (element, data) => {
+      // add button-vue class if button
+      if (element.classList.contains("pswp__button")) {
+        element.classList.add("button-vue");
+      }
+      return element;
+    });
+
+    photoswipe.on("uiRegister", () => {
+      photoswipe.ui.registerElement({
+        name: "delete-button",
+        ariaLabel: "Delete",
+        order: 9,
+        isButton: true,
+        html: this.getVueBtn(DeleteIcon).outerHTML,
+        onClick: () => this.deleteClick(),
+      });
+    });
+
+    return photoswipe;
   }
 
   public async open(anchorPhoto: IPhoto, rows?: IRow[]) {
@@ -96,15 +134,15 @@ export class ViewerManager {
 
     let globalCount = 0;
     let globalAnchor = -1;
-    let localAnchor = -1;
+    let startIndex = -1;
 
     for (const r of rows) {
       if (r.type === IRowType.HEAD) {
         if (r.day.dayid == anchorPhoto.d.dayid) {
-          localAnchor = r.day.detail.findIndex(
+          startIndex = r.day.detail.findIndex(
             (p) => p.fileid === anchorPhoto.fileid
           );
-          globalAnchor = globalCount + localAnchor;
+          globalAnchor = globalCount;
         }
 
         globalCount += r.day.count;
@@ -113,33 +151,17 @@ export class ViewerManager {
       }
     }
 
-    const lightbox = new PhotoSwipe({
-      // arrowPrev: false,
-      // arrowNext: false,
-      // zoom: false,
-      // close: false,
-      counter: true,
-      loop: false,
-      index: globalAnchor,
+    const photoswipe = this.getBaseBox({
+      index: globalAnchor + startIndex,
     });
 
-    lightbox.addFilter("uiElement", (element, data) => {
-      // add button-vue class if button
-      if (element.classList.contains("pswp__button")) {
-        element.classList.add("button-vue");
-      }
-      return element;
-    });
-
-    lightbox.addFilter("numItems", (numItems) => {
+    photoswipe.addFilter("numItems", (numItems) => {
       return globalCount;
     });
 
-    lightbox.addFilter("itemData", (itemData, index) => {
-      console.log(index);
-
+    photoswipe.addFilter("itemData", (itemData, index) => {
       // Get photo object from list
-      let idx = index - globalAnchor + localAnchor;
+      let idx = index - globalAnchor;
       if (idx < 0) {
         // Load previous day
         const firstDayId = list[0].d.dayid;
@@ -155,7 +177,7 @@ export class ViewerManager {
           return {};
         }
         list.unshift(...prevDay.detail);
-        localAnchor += prevDay.count;
+        globalAnchor -= prevDay.count;
       } else if (idx >= list.length) {
         // Load next day
         const lastDayId = list[list.length - 1].d.dayid;
@@ -173,7 +195,7 @@ export class ViewerManager {
         list.push(...nextDay.detail);
       }
 
-      idx = index - globalAnchor + localAnchor;
+      idx = index - globalAnchor;
       const photo = list[idx];
 
       // Something went really wrong
@@ -186,7 +208,6 @@ export class ViewerManager {
       const preload = (idx: number) => {
         if (idx > 0 && idx < dayIds.length && !days.get(dayIds[idx]).detail) {
           this.opts.fetchDay(dayIds[idx]);
-          console.log("Preload", dayIds[idx]);
         }
       };
       preload(dayIdx - 1);
@@ -211,12 +232,22 @@ export class ViewerManager {
       };
     });
 
-    lightbox.addFilter("thumbEl", (thumbEl, data, index) => {
-      const photo = list[index - globalAnchor + localAnchor];
+    photoswipe.addFilter("thumbEl", (thumbEl, data, index) => {
+      const photo = list[index - globalAnchor];
       return this.thumbElem(photo) || thumbEl;
     });
 
-    lightbox.init();
+    this.deleteClick = () => {
+      const idx = photoswipe.currIndex - globalAnchor;
+      const spliced = list.splice(idx, 1);
+      globalCount--;
+      for (let i = idx - 3; i <= idx + 3; i++) {
+        photoswipe.refreshSlideContent(i + globalAnchor);
+      }
+      this.opts.ondelete(spliced);
+    };
+
+    photoswipe.init();
   }
 
   private thumbElem(photo: IPhoto) {
