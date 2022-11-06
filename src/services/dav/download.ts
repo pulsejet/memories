@@ -16,7 +16,7 @@ export async function downloadFiles(fileNames: string[]): Promise<boolean> {
   params.append("files", JSON.stringify(fileNames));
   params.append("downloadStartSecret", randomToken);
 
-  const downloadURL = generateUrl(`/apps/files/ajax/download.php?${params}`);
+  let downloadURL = generateUrl(`/apps/files/ajax/download.php?${params}`);
 
   window.location.href = `${downloadURL}downloadStartSecret=${randomToken}`;
 
@@ -39,11 +39,40 @@ export async function downloadFiles(fileNames: string[]): Promise<boolean> {
 }
 
 /**
+ * Download public photo
+ * @param photo - The photo to download
+ */
+export async function downloadPublicPhoto(photo: IPhoto) {
+  // Public share download
+
+  const token = window.vuerouter.currentRoute.params.token;
+  // TODO: allow proper dav access without the need of basic auth
+  // https://github.com/nextcloud/server/issues/19700
+  const downloadURL = generateUrl(
+    `/s/${token}/download?path={dirname}&files={basename}`,
+    {
+      dirname: photo.filename.split("/").slice(0, -1).join("/"),
+      basename: photo.basename,
+    }
+  );
+
+  window.location.href = downloadURL;
+}
+
+/**
  * Download the files given by the fileIds
  * @param photos list of photos
  */
 export async function downloadFilesByIds(photos: IPhoto[]) {
   if (photos.length === 0) {
+    return;
+  }
+
+  // Public files
+  if (vuerouter.currentRoute.name === "folder-share") {
+    for (const photo of photos) {
+      await downloadPublicPhoto(photo);
+    }
     return;
   }
 
