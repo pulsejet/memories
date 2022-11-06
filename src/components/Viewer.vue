@@ -66,6 +66,7 @@ import { generateUrl } from "@nextcloud/router";
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
 import { getPreviewUrl } from "../services/FileUtils";
+import { getAlbumFileInfos } from "../services/DavRequests";
 
 import PhotoSwipe, { PhotoSwipeOptions } from "photoswipe";
 import "photoswipe/style.css";
@@ -248,11 +249,24 @@ export default class Viewer extends Mixins(GlobalMixin) {
         content.videoElement = document.createElement("video") as any;
         content.videoElement.classList.add("video-js");
 
+        // Get DAV URL for video
+        let url = `remote.php/dav/${content.data.photo.filename}`; // normal route
+        // Check if albums
+        const route = vuerouter.currentRoute;
+        if (route.name === "albums") {
+          const fInfos = getAlbumFileInfos(
+            [content.data.photo],
+            route.params.user,
+            route.params.name
+          );
+          if (fInfos.length) {
+            url = `remote.php/dav/${fInfos[0].originalFilename}`;
+          }
+        }
+
         // Add child with source element
         const source = document.createElement("source");
-        source.src = generateUrl(
-          `remote.php/dav/${content.data.photo.filename}`
-        );
+        source.src = generateUrl(url);
         source.type = content.data.photo.mimetype;
         content.videoElement.appendChild(source);
 
