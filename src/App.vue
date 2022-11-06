@@ -297,19 +297,6 @@ body {
   }
 }
 
-// PhotoSwipe styles
-.pswp__button {
-  color: white;
-
-  &,
-  * {
-    cursor: pointer;
-  }
-}
-.pswp__icn-shadow {
-  display: none;
-}
-
 // Hide horizontal scrollbar on mobile
 // For the padding removal above
 #app-content-vue {
