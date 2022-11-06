@@ -7,3 +7,4 @@ export * from "./dav/favorites";
 export * from "./dav/folders";
 export * from "./dav/onthisday";
 export * from "./dav/tags";
+export * from "./dav/other";

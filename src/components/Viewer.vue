@@ -7,7 +7,7 @@
   >
     <div class="inner" ref="inner">
       <div class="top-bar" v-if="photoswipe" :class="{ opened }">
-        <NcActions :inline="4" container=".memories_viewer .pswp">
+        <NcActions :inline="3" container=".memories_viewer .pswp">
           <NcActionButton
             :aria-label="t('memories', 'Delete')"
             @click="deleteCurrent"
@@ -47,6 +47,16 @@
               <DownloadIcon :size="24" />
             </template>
           </NcActionButton>
+          <NcActionButton
+            :aria-label="t('memories', 'View in folder')"
+            @click="viewInFolder"
+            :close-after-click="true"
+          >
+            {{ t("memories", "View in folder") }}
+            <template #icon>
+              <OpenInNewIcon :size="24" />
+            </template>
+          </NcActionButton>
         </NcActions>
       </div>
     </div>
@@ -79,6 +89,7 @@ import StarIcon from "vue-material-design-icons/Star.vue";
 import StarOutlineIcon from "vue-material-design-icons/StarOutline.vue";
 import DownloadIcon from "vue-material-design-icons/Download.vue";
 import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
+import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
 
 @Component({
   components: {
@@ -89,6 +100,7 @@ import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
     StarOutlineIcon,
     DownloadIcon,
     InfoIcon,
+    OpenInNewIcon,
   },
 })
 export default class Viewer extends Mixins(GlobalMixin) {
@@ -543,6 +555,14 @@ export default class Viewer extends Mixins(GlobalMixin) {
     } else {
       this.openSidebar();
     }
+  }
+
+  /**
+   * Open the files app with the current file.
+   */
+  private async viewInFolder() {
+    const photo = this.getCurrentPhoto();
+    if (photo) dav.viewInFolder(photo);
   }
 }
 </script>

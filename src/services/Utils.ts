@@ -94,6 +94,8 @@ export function hashCode(str: string): number {
  * @param key Key to use for comparison
  */
 export function binarySearch(arr: any, elem: any, key?: string) {
+  if (arr.length === 0) return 0;
+
   const desc = key
     ? arr[0][key] > arr[arr.length - 1][key]
     : arr[0] > arr[arr.length - 1];
