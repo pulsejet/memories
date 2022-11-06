@@ -47,7 +47,6 @@ import { NcActions, NcActionButton } from "@nextcloud/vue";
 
 import * as utils from "../../services/Utils";
 import * as dav from "../../services/DavRequests";
-import { ViewerManager } from "../../services/Viewer";
 import { IPhoto } from "../../types";
 import { getPreviewUrl } from "../../services/FileUtils";
 
@@ -82,14 +81,6 @@ export default class OnThisDay extends Mixins(GlobalMixin) {
   private hasRight = false;
   private hasLeft = false;
   private scrollStack: number[] = [];
-
-  /**
-   * Nextcloud viewer proxy
-   * Can't use the timeline instance because these photos
-   * might not be in view, so can't delete them
-   */
-  @Prop()
-  private viewerManager!: ViewerManager;
 
   mounted() {
     const inner = this.$refs.inner as HTMLElement;
