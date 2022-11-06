@@ -45,6 +45,7 @@
           <OnThisDay
             v-if="$route.name === 'timeline'"
             :key="config_timelinePath"
+            :viewer="$refs.viewer"
             @load="scrollerManager.adjust()"
           >
           </OnThisDay>

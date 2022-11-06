@@ -73,6 +73,9 @@ interface IYear {
 export default class OnThisDay extends Mixins(GlobalMixin) {
   private getPreviewUrl = getPreviewUrl;
 
+  @Prop()
+  private viewer: any;
+
   @Emit("load")
   onload() {}
 
@@ -191,7 +194,7 @@ export default class OnThisDay extends Mixins(GlobalMixin) {
 
   click(year: IYear) {
     const allPhotos = this.years.flatMap((y) => y.photos);
-    // this.viewerManager.open(year.preview, allPhotos);
+    this.viewer.openStatic(year.preview, allPhotos);
   }
 }
 </script>
