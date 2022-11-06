@@ -2,7 +2,7 @@
   <div class="memories_viewer outer" v-if="show">
     <div class="inner" ref="inner">
       <div class="top-bar" v-if="photoswipe" :class="{ opened }">
-        <NcActions :inline="2" container=".memories_viewer .pswp">
+        <NcActions :inline="3" container=".memories_viewer .pswp">
           <NcActionButton
             :aria-label="t('memories', 'Delete')"
             @click="deleteCurrent"
@@ -20,6 +20,16 @@
             <template #icon>
               <StarIcon v-if="isFavorite()" :size="24" />
               <StarOutlineIcon v-else :size="24" />
+            </template>
+          </NcActionButton>
+          <NcActionButton
+            :aria-label="t('memories', 'Download')"
+            @click="downloadCurrent"
+            :close-after-click="true"
+          >
+            {{ t("memories", "Download") }}
+            <template #icon>
+              <DownloadIcon :size="24" />
             </template>
           </NcActionButton>
         </NcActions>
@@ -46,6 +56,7 @@ import "photoswipe/style.css";
 import DeleteIcon from "vue-material-design-icons/Delete.vue";
 import StarIcon from "vue-material-design-icons/Star.vue";
 import StarOutlineIcon from "vue-material-design-icons/StarOutline.vue";
+import DownloadIcon from "vue-material-design-icons/Download.vue";
 
 @Component({
   components: {
@@ -54,6 +65,7 @@ import StarOutlineIcon from "vue-material-design-icons/StarOutline.vue";
     DeleteIcon,
     StarIcon,
     StarOutlineIcon,
+    DownloadIcon,
   },
 })
 export default class Viewer extends Mixins(GlobalMixin) {
@@ -371,6 +383,13 @@ export default class Viewer extends Mixins(GlobalMixin) {
     } else {
       photo.flag &= ~this.c.FLAG_IS_FAVORITE;
     }
+  }
+
+  /** Download the current photo */
+  private async downloadCurrent() {
+    const photo = this.getCurrentPhoto();
+    if (!photo) return;
+    dav.downloadFilesByIds([photo]);
   }
 }
 </script>
