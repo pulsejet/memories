@@ -320,6 +320,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
     for (const r of rows) {
       if (r.type === IRowType.HEAD) {
+        if (this.TagDayIDValueSet.has(r.dayId)) continue;
+
         if (r.day.dayid == anchorPhoto.d.dayid) {
           startIndex = r.day.detail.findIndex(
             (p) => p.fileid === anchorPhoto.fileid
