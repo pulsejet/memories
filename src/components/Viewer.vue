@@ -1,5 +1,5 @@
 <template>
-  <div class="memories_viewer outer" v-if="show">
+  <div class="memories_viewer outer" v-if="show" :class="{ fullyOpened }">
     <div class="inner" ref="inner">
       <div class="top-bar" v-if="photoswipe" :class="{ opened }">
         <NcActions :inline="3" container=".memories_viewer .pswp">
@@ -75,6 +75,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   private show = false;
   private opened = false;
+  private fullyOpened = false;
 
   /** Base dialog */
   private photoswipe: PhotoSwipe | null = null;
@@ -135,9 +136,14 @@ export default class Viewer extends Mixins(GlobalMixin) {
       navElem.style.zIndex = "0";
     });
     this.photoswipe.on("openingAnimationStart", () => {
+      this.fullyOpened = false;
       this.opened = true;
     });
+    this.photoswipe.on("openingAnimationEnd", () => {
+      this.fullyOpened = true;
+    });
     this.photoswipe.on("close", () => {
+      this.fullyOpened = false;
       this.opened = false;
     });
     this.photoswipe.on("destroy", () => {
@@ -147,6 +153,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
       // reset everything
       this.show = false;
       this.opened = false;
+      this.fullyOpened = false;
       this.photoswipe = null;
       this.list = [];
       this.days.clear();
@@ -421,6 +428,24 @@ export default class Viewer extends Mixins(GlobalMixin) {
   opacity: 0;
   &.opened {
     opacity: 1;
+  }
+}
+
+.fullyOpened :deep .pswp__container {
+  transition: transform var(--pswp-transition-duration) ease !important;
+}
+
+:deep .pswp {
+  .pswp__button {
+    color: white;
+
+    &,
+    * {
+      cursor: pointer;
+    }
+  }
+  .pswp__icn-shadow {
+    display: none;
   }
 }
 </style>
