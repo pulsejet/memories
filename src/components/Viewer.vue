@@ -61,6 +61,7 @@ import { IDay, IPhoto, IRow, IRowType } from "../types";
 
 import { NcActions, NcActionButton } from "@nextcloud/vue";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
+import { generateUrl } from "@nextcloud/router";
 
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
@@ -249,7 +250,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
         // Add child with source element
         const source = document.createElement("source");
-        source.src = `http://localhost:8025/remote.php/dav/${content.data.photo.filename}`;
+        source.src = generateUrl(
+          `remote.php/dav/${content.data.photo.filename}`
+        );
         source.type = content.data.photo.mimetype;
         content.videoElement.appendChild(source);
 
@@ -264,6 +267,11 @@ export default class Viewer extends Mixins(GlobalMixin) {
           controls: true,
           preload: "metadata",
           muted: true,
+          html5: {
+            vhs: {
+              withCredentials: true,
+            },
+          },
         });
       }
     });
@@ -377,8 +385,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
       // Get thumb image
       const thumbSrc: string =
-        this.thumbElem(photo)?.querySelector("img")?.getAttribute("src") ||
-        getPreviewUrl(photo, false, 256);
+        photo.flag & this.c.FLAG_IS_VIDEO
+          ? undefined
+          : this.thumbElem(photo)?.querySelector("img")?.getAttribute("src") ||
+            getPreviewUrl(photo, false, 256);
 
       // Get full image
       return {
@@ -393,6 +403,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
     this.photoswipe.addFilter("thumbEl", (thumbEl, data, index) => {
       const photo = this.list[index - this.globalAnchor];
+      if (photo.flag & this.c.FLAG_IS_VIDEO) return thumbEl;
       return this.thumbElem(photo) || thumbEl;
     });
 
@@ -561,6 +572,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
 .inner,
 .inner :deep .pswp {
   width: inherit;
+}
+
+:deep .video-js .vjs-big-play-button {
+  display: none;
 }
 
 :deep .pswp {
