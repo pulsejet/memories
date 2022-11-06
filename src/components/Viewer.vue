@@ -212,6 +212,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
       this.opened = false;
       this.hideSidebar();
     });
+    this.photoswipe.on("tapAction", () => {
+      this.opened = !this.opened; // toggle-controls
+    });
     this.photoswipe.on("destroy", () => {
       document.body.classList.remove(klass);
       navElem.style.zIndex = "";
@@ -486,7 +489,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
     background-color: transparent !important;
   }
 
-  transition: opacity 0.12s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
   opacity: 0;
   &.opened {
     opacity: 1;
@@ -494,7 +497,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
 }
 
 .fullyOpened :deep .pswp__container {
-  transition: transform var(--pswp-transition-duration) ease !important;
+  @media (min-width: 1024px) {
+    transition: transform var(--pswp-transition-duration) ease !important;
+  }
 }
 
 .inner,
