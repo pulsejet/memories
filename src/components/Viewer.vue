@@ -418,12 +418,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
       // Get full image
       return {
-        src: getPreviewUrl(photo, false, 256),
+        ...this.getItemData(photo),
         msrc: thumbSrc,
-        width: photo.w || undefined,
-        height: photo.h || undefined,
-        thumbCropped: true,
-        photo: photo,
       };
     });
 
@@ -434,6 +430,34 @@ export default class Viewer extends Mixins(GlobalMixin) {
     });
 
     this.photoswipe.init();
+  }
+
+  /** Open with a static list of photos */
+  public async openStatic(photo: IPhoto, list: IPhoto[]) {
+    this.list = list;
+    await this.createBase({
+      index: list.findIndex((p) => p.fileid === photo.fileid),
+    });
+
+    this.globalCount = list.length;
+    this.globalAnchor = 0;
+
+    this.photoswipe.addFilter("itemData", (itemData, index) => {
+      return this.getItemData(this.list[index]);
+    });
+
+    this.photoswipe.init();
+  }
+
+  /** Get base data object */
+  private getItemData(photo: IPhoto) {
+    return {
+      src: getPreviewUrl(photo, false, 256),
+      width: photo.w || undefined,
+      height: photo.h || undefined,
+      thumbCropped: true,
+      photo: photo,
+    };
   }
 
   /** Get element for thumbnail if it exists */
@@ -481,6 +505,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
       this.updateLoading(1);
       for await (const p of dav.favoritePhotos([photo], val)) {
         if (!p[0]) return;
+        this.$forceUpdate();
       }
     } finally {
       this.updateLoading(-1);
