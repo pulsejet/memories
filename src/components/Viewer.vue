@@ -318,6 +318,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
     this.list = [...anchorPhoto.d.detail];
     let startIndex = -1;
 
+    // Get days list and map
     for (const r of rows) {
       if (r.type === IRowType.HEAD) {
         if (this.TagDayIDValueSet.has(r.dayId)) continue;
@@ -335,10 +336,13 @@ export default class Viewer extends Mixins(GlobalMixin) {
       }
     }
 
+    // Create basic viewer
     await this.createBase({
       index: this.globalAnchor + startIndex,
     });
 
+    // Lazy-generate item data.
+    // Load the next two days in the timeline.
     this.photoswipe.addFilter("itemData", (itemData, index) => {
       // Get photo object from list
       let idx = index - this.globalAnchor;
@@ -415,10 +419,24 @@ export default class Viewer extends Mixins(GlobalMixin) {
       };
     });
 
+    // Get the thumbnail image
     this.photoswipe.addFilter("thumbEl", (thumbEl, data, index) => {
       const photo = this.list[index - this.globalAnchor];
       if (photo.flag & this.c.FLAG_IS_VIDEO) return thumbEl;
       return this.thumbElem(photo) || thumbEl;
+    });
+
+    // Scroll to keep the thumbnail in view
+    this.photoswipe.on("slideActivate", (e) => {
+      const thumb = this.thumbElem(e.slide.data.photo);
+      if (thumb) {
+        const rect = thumb.getBoundingClientRect();
+        if (rect.top < 0 || rect.bottom > window.innerHeight) {
+          thumb.scrollIntoView({
+            block: "center",
+          });
+        }
+      }
     });
 
     this.photoswipe.init();
