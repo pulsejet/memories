@@ -1,8 +1,13 @@
 <template>
-  <div class="memories_viewer outer" v-if="show" :class="{ fullyOpened }">
+  <div
+    class="memories_viewer outer"
+    v-if="show"
+    :class="{ fullyOpened }"
+    :style="{ width: outerWidth }"
+  >
     <div class="inner" ref="inner">
       <div class="top-bar" v-if="photoswipe" :class="{ opened }">
-        <NcActions :inline="3" container=".memories_viewer .pswp">
+        <NcActions :inline="4" container=".memories_viewer .pswp">
           <NcActionButton
             :aria-label="t('memories', 'Delete')"
             @click="deleteCurrent"
@@ -20,6 +25,16 @@
             <template #icon>
               <StarIcon v-if="isFavorite()" :size="24" />
               <StarOutlineIcon v-else :size="24" />
+            </template>
+          </NcActionButton>
+          <NcActionButton
+            :aria-label="t('memories', 'Sidebar')"
+            @click="toggleSidebar"
+            :close-after-click="true"
+          >
+            {{ t("memories", "Sidebar") }}
+            <template #icon>
+              <InfoIcon :size="24" />
             </template>
           </NcActionButton>
           <NcActionButton
@@ -45,6 +60,7 @@ import GlobalMixin from "../mixins/GlobalMixin";
 import { IDay, IPhoto, IRow, IRowType } from "../types";
 
 import { NcActions, NcActionButton } from "@nextcloud/vue";
+import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
@@ -57,6 +73,7 @@ import DeleteIcon from "vue-material-design-icons/Delete.vue";
 import StarIcon from "vue-material-design-icons/Star.vue";
 import StarOutlineIcon from "vue-material-design-icons/StarOutline.vue";
 import DownloadIcon from "vue-material-design-icons/Download.vue";
+import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
 
 @Component({
   components: {
@@ -66,6 +83,7 @@ import DownloadIcon from "vue-material-design-icons/Download.vue";
     StarIcon,
     StarOutlineIcon,
     DownloadIcon,
+    InfoIcon,
   },
 })
 export default class Viewer extends Mixins(GlobalMixin) {
@@ -76,6 +94,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
   private show = false;
   private opened = false;
   private fullyOpened = false;
+  private sidebarOpen = false;
+  private sidebarWidth = 400;
+  private outerWidth = "100vw";
 
   /** Base dialog */
   private photoswipe: PhotoSwipe | null = null;
@@ -86,6 +107,16 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   private globalCount = 0;
   private globalAnchor = -1;
+
+  mounted() {
+    subscribe("files:sidebar:opened", this.handleAppSidebarOpen);
+    subscribe("files:sidebar:closed", this.handleAppSidebarClose);
+  }
+
+  beforeDestroy() {
+    unsubscribe("files:sidebar:opened", this.handleAppSidebarOpen);
+    unsubscribe("files:sidebar:closed", this.handleAppSidebarClose);
+  }
 
   /** Get the currently open photo */
   private getCurrentPhoto() {
@@ -110,7 +141,39 @@ export default class Viewer extends Mixins(GlobalMixin) {
       loop: false,
       bgOpacity: 1,
       appendToEl: this.$refs.inner as HTMLElement,
+      getViewportSizeFn: () => {
+        const sidebarWidth = this.sidebarOpen ? this.sidebarWidth : 0;
+        this.outerWidth = `calc(100vw - ${sidebarWidth}px)`;
+        return {
+          x: window.innerWidth - sidebarWidth,
+          y: window.innerHeight,
+        };
+      },
       ...args,
+    });
+
+    // Debugging only
+    globalThis.photoswipe = this.photoswipe;
+
+    // Monkey patch for focus trapping in sidebar
+    const _onFocusIn = this.photoswipe.keyboard._onFocusIn;
+    this.photoswipe.keyboard._onFocusIn = (e: FocusEvent) => {
+      if (e.target instanceof HTMLElement) {
+        if (
+          e.target.closest("aside.app-sidebar") ||
+          e.target.closest(".v-popper__popper")
+        ) {
+          return;
+        }
+      }
+      _onFocusIn.call(this.photoswipe.keyboard, e);
+    };
+
+    // Refresh sidebar on change
+    this.photoswipe.on("change", () => {
+      if (this.sidebarOpen) {
+        this.openSidebar();
+      }
     });
 
     // Make sure buttons are styled properly
@@ -128,16 +191,18 @@ export default class Viewer extends Mixins(GlobalMixin) {
     });
 
     // Put viewer over everything else
-    const contentElem = document.getElementById("content-vue");
     const navElem = document.getElementById("app-navigation-vue");
     const klass = "has-viewer";
     this.photoswipe.on("beforeOpen", () => {
-      contentElem.classList.add(klass);
+      document.body.classList.add(klass);
       navElem.style.zIndex = "0";
     });
     this.photoswipe.on("openingAnimationStart", () => {
       this.fullyOpened = false;
       this.opened = true;
+      if (this.sidebarOpen) {
+        this.openSidebar();
+      }
     });
     this.photoswipe.on("openingAnimationEnd", () => {
       this.fullyOpened = true;
@@ -145,9 +210,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
     this.photoswipe.on("close", () => {
       this.fullyOpened = false;
       this.opened = false;
+      this.hideSidebar();
     });
     this.photoswipe.on("destroy", () => {
-      contentElem.classList.remove(klass);
+      document.body.classList.remove(klass);
       navElem.style.zIndex = "";
 
       // reset everything
@@ -398,6 +464,62 @@ export default class Viewer extends Mixins(GlobalMixin) {
     if (!photo) return;
     dav.downloadFilesByIds([photo]);
   }
+
+  /** Open the sidebar */
+  private async openSidebar(photo?: IPhoto) {
+    const fInfo = await dav.getFiles([photo || this.getCurrentPhoto()]);
+    globalThis.OCA?.Files?.Sidebar?.setFullScreenMode?.(true);
+    globalThis.OCA.Files.Sidebar.open(fInfo[0].filename);
+  }
+
+  private async updateSizeWithoutAnim() {
+    const wasFullyOpened = this.fullyOpened;
+    this.fullyOpened = false;
+    this.photoswipe.updateSize();
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    this.fullyOpened = wasFullyOpened;
+  }
+
+  private handleAppSidebarOpen() {
+    if (this.show && this.photoswipe) {
+      const sidebar: HTMLElement = document.querySelector("aside.app-sidebar");
+      if (sidebar) {
+        this.sidebarWidth = sidebar.offsetWidth - 2;
+      }
+
+      this.sidebarOpen = true;
+      this.updateSizeWithoutAnim();
+    }
+  }
+
+  private handleAppSidebarClose() {
+    if (this.show && this.photoswipe && this.fullyOpened) {
+      this.sidebarOpen = false;
+      this.updateSizeWithoutAnim();
+    }
+  }
+
+  /** Hide the sidebar, without marking it as closed */
+  private hideSidebar() {
+    globalThis.OCA?.Files?.Sidebar?.close();
+    globalThis.OCA?.Files?.Sidebar?.setFullScreenMode?.(false);
+  }
+
+  /** Close the sidebar */
+  private closeSidebar() {
+    this.hideSidebar();
+    this.sidebarOpen = false;
+    this.photoswipe.updateSize();
+  }
+
+  /** Toggle the sidebar visibility */
+  private toggleSidebar() {
+    if (this.sidebarOpen) {
+      this.closeSidebar();
+    } else {
+      this.openSidebar();
+    }
+  }
 }
 </script>
 
@@ -405,8 +527,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
 .outer {
   z-index: 3000;
   width: 100vw;
-  height: 30vh;
-  position: absolute;
+  height: 100vh;
+  position: fixed;
   top: 0;
   left: 0;
   overflow: hidden;
@@ -415,7 +537,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
 .top-bar {
   z-index: 100001;
-  position: fixed;
+  position: absolute;
   top: 8px;
   right: 50px;
 
@@ -433,6 +555,11 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
 .fullyOpened :deep .pswp__container {
   transition: transform var(--pswp-transition-duration) ease !important;
+}
+
+.inner,
+.inner :deep .pswp {
+  width: inherit;
 }
 
 :deep .pswp {

@@ -183,12 +183,11 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
 
   @Watch("show")
   onShowChange() {
-    const elem = document.getElementById("content-vue");
     const klass = "has-top-bar";
     if (this.show) {
-      elem.classList.add(klass);
+      document.body.classList.add(klass);
     } else {
-      elem.classList.remove(klass);
+      document.body.classList.remove(klass);
     }
   }
 
