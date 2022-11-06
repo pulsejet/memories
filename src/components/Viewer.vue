@@ -1,7 +1,7 @@
 <template>
-  <div class="memories_viewer outer">
+  <div class="memories_viewer outer" v-if="show">
     <div class="inner" ref="inner">
-      <div class="top-bar" v-if="photoswipe">
+      <div class="top-bar" v-if="photoswipe" :class="{ opened }">
         <NcActions :inline="2" container=".memories_viewer .pswp">
           <NcActionButton
             :aria-label="t('memories', 'Delete')"
@@ -61,6 +61,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
   @Emit("fetchDay") fetchDay(dayId: number) {}
   @Emit("updateLoading") updateLoading(delta: number) {}
 
+  private show = false;
+  private opened = false;
+
   /** Base dialog */
   private photoswipe: PhotoSwipe | null = null;
 
@@ -71,7 +74,23 @@ export default class Viewer extends Mixins(GlobalMixin) {
   private globalCount = 0;
   private globalAnchor = -1;
 
-  private getBaseBox(args: PhotoSwipeOptions) {
+  /** Get the currently open photo */
+  private getCurrentPhoto() {
+    if (!this.list.length || !this.photoswipe) {
+      return null;
+    }
+    const idx = this.photoswipe.currIndex - this.globalAnchor;
+    if (idx < 0 || idx >= this.list.length) {
+      return null;
+    }
+    return this.list[idx];
+  }
+
+  /** Create the base photoswipe object */
+  private async createBase(args: PhotoSwipeOptions) {
+    this.show = true;
+    await this.$nextTick();
+
     this.photoswipe = new PhotoSwipe({
       counter: true,
       zoom: false,
@@ -103,11 +122,19 @@ export default class Viewer extends Mixins(GlobalMixin) {
       contentElem.classList.add(klass);
       navElem.style.zIndex = "0";
     });
+    this.photoswipe.on("openingAnimationStart", () => {
+      this.opened = true;
+    });
+    this.photoswipe.on("close", () => {
+      this.opened = false;
+    });
     this.photoswipe.on("destroy", () => {
       contentElem.classList.remove(klass);
       navElem.style.zIndex = "";
 
       // reset everything
+      this.show = false;
+      this.opened = false;
       this.photoswipe = null;
       this.list = [];
       this.days.clear();
@@ -119,6 +146,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
     return this.photoswipe;
   }
 
+  /** Open using start photo and rows list */
   public async open(anchorPhoto: IPhoto, rows?: IRow[]) {
     //   list = list || photo.d?.detail;
     //   if (!list?.length) return;
@@ -198,7 +226,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
       }
     }
 
-    this.getBaseBox({
+    await this.createBase({
       index: this.globalAnchor + startIndex,
     });
 
@@ -287,6 +315,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
     this.photoswipe.init();
   }
 
+  /** Get element for thumbnail if it exists */
   private thumbElem(photo: IPhoto) {
     if (!photo) return;
     return document.getElementById(
@@ -294,6 +323,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
     );
   }
 
+  /** Delete this photo and refresh */
   private async deleteCurrent() {
     const idx = this.photoswipe.currIndex - this.globalAnchor;
 
@@ -315,14 +345,16 @@ export default class Viewer extends Mixins(GlobalMixin) {
     this.deleted(spliced);
   }
 
+  /** Is the current photo a favorite */
   private isFavorite() {
-    const idx = this.photoswipe.currIndex - this.globalAnchor;
-    return Boolean(this.list[idx].flag & this.c.FLAG_IS_FAVORITE);
+    const p = this.getCurrentPhoto();
+    if (!p) return false;
+    return Boolean(p.flag & this.c.FLAG_IS_FAVORITE);
   }
 
+  /** Favorite the current photo */
   private async favoriteCurrent() {
-    const idx = this.photoswipe.currIndex - this.globalAnchor;
-    const photo = this.list[idx];
+    const photo = this.getCurrentPhoto();
     const val = !this.isFavorite();
     try {
       this.updateLoading(1);
@@ -364,6 +396,12 @@ export default class Viewer extends Mixins(GlobalMixin) {
   :deep .button-vue--icon-only {
     color: white;
     background-color: transparent !important;
+  }
+
+  transition: opacity 0.12s ease-in-out;
+  opacity: 0;
+  &.opened {
+    opacity: 1;
   }
 }
 </style>
