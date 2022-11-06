@@ -413,17 +413,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
    */
   private async viewInFolder(selection: Selection) {
     if (selection.size !== 1) return;
-
-    const photo: IPhoto = selection.values().next().value;
-    const f = await dav.getFiles([photo]);
-    if (f.length === 0) return;
-
-    const file = f[0];
-    const dirPath = file.filename.split("/").slice(0, -1).join("/");
-    const url = generateUrl(
-      `/apps/files/?dir=${dirPath}&scrollto=${file.fileid}&openfile=${file.fileid}`
-    );
-    window.open(url, "_blank");
+    dav.viewInFolder(selection.values().next().value);
   }
 
   /**
