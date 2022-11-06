@@ -4,7 +4,6 @@ namespace OCA\Memories\Controller;
 
 use OCA\Files\Event\LoadSidebar;
 use OCA\Memories\AppInfo\Application;
-use OCA\Viewer\Event\LoadViewer;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
@@ -62,7 +61,6 @@ class PageController extends Controller
         // Scripts
         Util::addScript($this->appName, 'memories-main');
         $this->eventDispatcher->dispatchTyped(new LoadSidebar());
-        $this->eventDispatcher->dispatchTyped(new LoadViewer());
 
         // Configuration
         $uid = $user->getUid();
@@ -114,7 +112,6 @@ class PageController extends Controller
         // Scripts
         Util::addScript($this->appName, 'memories-main');
         $this->eventDispatcher->dispatchTyped(new LoadSidebar());
-        $this->eventDispatcher->dispatchTyped(new LoadViewer());
 
         // App version
         $this->initialState->provideInitialState('version', $this->appManager->getAppInfo('memories')['version']);
