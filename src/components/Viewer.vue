@@ -254,7 +254,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
     // Video support
     this.photoswipe.on("contentLoad", (e) => {
       const { content, isLazy } = e;
-      if (content.data.photo.flag & this.c.FLAG_IS_VIDEO) {
+      if ((content.data?.photo?.flag || 0) & this.c.FLAG_IS_VIDEO) {
         e.preventDefault();
 
         content.type = "video";
@@ -295,7 +295,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
     // Play video on open slide
     this.photoswipe.on("slideActivate", (e) => {
       const { slide } = e;
-      if (slide.data.photo.flag & this.c.FLAG_IS_VIDEO) {
+      if ((slide.data?.photo?.flag || 0) & this.c.FLAG_IS_VIDEO) {
         setTimeout(() => {
           slide.content.element.querySelector("video")?.play();
         }, 500);
@@ -305,7 +305,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
     // Pause video on close slide
     this.photoswipe.on("slideDeactivate", (e) => {
       const { slide } = e;
-      if (slide.data.photo.flag & this.c.FLAG_IS_VIDEO) {
+      if ((slide.data?.photo?.flag || 0) & this.c.FLAG_IS_VIDEO) {
         slide.content.element.querySelector("video")?.pause();
       }
     });
@@ -428,7 +428,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
     // Scroll to keep the thumbnail in view
     this.photoswipe.on("slideActivate", (e) => {
-      const thumb = this.thumbElem(e.slide.data.photo);
+      const thumb = this.thumbElem(e.slide.data?.photo);
       if (thumb) {
         const rect = thumb.getBoundingClientRect();
         if (rect.top < 0 || rect.bottom > window.innerHeight) {
