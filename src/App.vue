@@ -276,6 +276,9 @@ body {
     z-index: 3000;
   }
 }
+#content-vue.has-viewer {
+  z-index: 3000;
+}
 
 // Patch viewer to remove the title and
 // make the image fill the entire screen
