@@ -133,6 +133,26 @@ class ApiBase extends Controller
         return $folder;
     }
 
+    protected function isRecursive()
+    {
+        return null === $this->request->getParam('folder');
+    }
+
+    protected function isArchive()
+    {
+        return null !== $this->request->getParam('archive');
+    }
+
+    protected function isMonthView()
+    {
+        return null !== $this->request->getParam('monthView');
+    }
+
+    protected function isReverse()
+    {
+        return null !== $this->request->getParam('reverse');
+    }
+
     protected function getShareToken()
     {
         return $this->request->getParam('folder_share');

@@ -271,10 +271,13 @@ body {
 }
 
 // Top bar is above everything else on mobile
-#content-vue.has-top-bar {
+body.has-top-bar header {
   @media (max-width: 1024px) {
-    z-index: 3000;
+    z-index: 0 !important;
   }
+}
+body.has-viewer header {
+  z-index: 0 !important;
 }
 
 // Patch viewer to remove the title and
@@ -286,6 +289,11 @@ body {
   .modal-wrapper .modal-container {
     top: 0 !important;
     bottom: 0 !important;
+
+    .viewer__image-editor {
+      top: 0 !important;
+      bottom: 0 !important;
+    }
   }
 }
 

@@ -44,8 +44,8 @@
 
           <OnThisDay
             v-if="$route.name === 'timeline'"
-            :viewerManager="viewerManager"
             :key="config_timelinePath"
+            :viewer="$refs.viewer"
             @load="scrollerManager.adjust()"
           >
           </OnThisDay>
@@ -121,34 +121,45 @@
       @delete="deleteFromViewWithAnimation"
       @updateLoading="updateLoading"
     />
+
+    <Viewer
+      ref="viewer"
+      @deleted="deleteFromViewWithAnimation"
+      @fetchDay="fetchDay"
+      @updateLoading="updateLoading"
+    />
   </div>
 </template>
 
 <script lang="ts">
+import { Component, Mixins, Watch } from "vue-property-decorator";
+import GlobalMixin from "../mixins/GlobalMixin";
+import UserConfig from "../mixins/UserConfig";
+
 import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import { generateUrl } from "@nextcloud/router";
 import { NcEmptyContent } from "@nextcloud/vue";
-import PeopleIcon from "vue-material-design-icons/AccountMultiple.vue";
-import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
-import ImageMultipleIcon from "vue-material-design-icons/ImageMultiple.vue";
-import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
-import { Component, Mixins, Watch } from "vue-property-decorator";
-import GlobalMixin from "../mixins/GlobalMixin";
-import UserConfig from "../mixins/UserConfig";
-import * as dav from "../services/DavRequests";
+
 import { getLayout } from "../services/Layout";
-import * as utils from "../services/Utils";
-import { ViewerManager } from "../services/Viewer";
 import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";
 import Folder from "./frame/Folder.vue";
 import Photo from "./frame/Photo.vue";
 import Tag from "./frame/Tag.vue";
 import ScrollerManager from "./ScrollerManager.vue";
 import SelectionManager from "./SelectionManager.vue";
+import Viewer from "./Viewer.vue";
 import OnThisDay from "./top-matter/OnThisDay.vue";
 import TopMatter from "./top-matter/TopMatter.vue";
+
+import * as dav from "../services/DavRequests";
+import * as utils from "../services/Utils";
+
+import PeopleIcon from "vue-material-design-icons/AccountMultiple.vue";
+import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
+import ImageMultipleIcon from "vue-material-design-icons/ImageMultiple.vue";
+import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
 
 const SCROLL_LOAD_DELAY = 100; // Delay in loading data when scrolling
 const DESKTOP_ROW_HEIGHT = 200; // Height of row on desktop
@@ -163,6 +174,7 @@ const MOBILE_ROW_HEIGHT = 120; // Approx row height on mobile
     OnThisDay,
     SelectionManager,
     ScrollerManager,
+    Viewer,
     NcEmptyContent,
 
     CheckCircle,
@@ -212,13 +224,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
   /** Scroller manager component */
   private scrollerManager!: ScrollerManager & any;
 
-  /** Nextcloud viewer proxy */
-  private viewerManager = new ViewerManager(
-    this.deleteFromViewWithAnimation.bind(this),
-    this.updateLoading.bind(this),
-    this.$route
-  );
-
   mounted() {
     this.selectionManager = this.$refs.selectionManager;
     this.scrollerManager = this.$refs.scrollerManager;
@@ -254,6 +259,10 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
   isMobileLayout() {
     return window.innerWidth <= 600;
+  }
+
+  isMonthView() {
+    return this.$route.name === "albums";
   }
 
   allowBreakout() {
@@ -534,6 +543,12 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       query.set("folder_share", this.$route.params.token);
     }
 
+    // Month view
+    if (this.isMonthView()) {
+      query.set("monthView", "1");
+      query.set("reverse", "1");
+    }
+
     // Create query string and append to URL
     const queryStr = query.toString();
     if (queryStr) {
@@ -582,7 +597,12 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     // The reason this function is separate from processDays is
     // because this call is terribly slow even on desktop
     const dateTaken = utils.dayIdToDate(head.dayId);
-    const name = utils.getLongDateStr(dateTaken, true);
+    let name: string;
+    if (this.isMonthView()) {
+      name = utils.getMonthDateStr(dateTaken);
+    } else {
+      name = utils.getLongDateStr(dateTaken, true);
+    }
 
     // Cache and return
     head.name = name;
@@ -782,6 +802,13 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     // Aggregate fetch requests
     this.fetchDayQueue.push(dayId);
+
+    // Only single queries allowed for month vie
+    if (this.isMonthView()) {
+      return this.fetchDayExpire();
+    }
+
+    // Defer for aggregation
     if (!this.fetchDayTimer) {
       this.fetchDayTimer = window.setTimeout(() => {
         this.fetchDayTimer = null;
@@ -1029,6 +1056,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       row.photos.push(photo);
     }
 
+    // Restore selection day
+    this.selectionManager.restoreDay(day);
+
     // Rows that were removed
     const removedRows: IRow[] = [];
     let headRemoved = false;
@@ -1116,7 +1146,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       // selection mode
       this.selectionManager.selectPhoto(photo);
     } else {
-      this.viewerManager.open(photo);
+      (<any>this.$refs.viewer).open(photo, this.list);
     }
   }
 

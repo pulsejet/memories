@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Migration;
 
-use Closure;
 use OCP\DB\ISchemaWrapper;
 use OCP\DB\Types;
 use OCP\Migration\IOutput;
@@ -32,11 +31,11 @@ use OCP\Migration\SimpleMigrationStep;
 class Version000000Date20220812163631 extends SimpleMigrationStep
 {
     /**
-     * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
+     * @param \Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
      *
      * @return null|ISchemaWrapper
      */
-    public function changeSchema(IOutput $output, Closure $schemaClosure, array $options)
+    public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options)
     {
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();

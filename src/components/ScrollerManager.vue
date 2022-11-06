@@ -154,7 +154,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
     // Get cursor px position
     const { top1, top2, y1, y2 } = this.getCoords(scroll, "y");
     const topfrac = (scroll - y1) / (y2 - y1);
-    const rtop = top1 + (top2 - top1) * topfrac;
+    const rtop = top1 + (top2 - top1) * (topfrac || 0);
 
     // Always move static cursor to right position
     this.cursorY = rtop;
@@ -200,7 +200,6 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
     // Ticks
     let prevYear = 9999;
     let prevMonth = 0;
-    const thisYear = new Date().getFullYear();
 
     // Get a new tick
     const getTick = (
@@ -235,8 +234,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
           const dtYear = dateTaken.getUTCFullYear();
           const dtMonth = dateTaken.getUTCMonth();
           const isMonth = dtMonth !== prevMonth || dtYear !== prevYear;
-          const text =
-            dtYear === prevYear || dtYear === thisYear ? undefined : dtYear;
+          const text = dtYear === prevYear ? undefined : dtYear;
           this.ticks.push(getTick(row.dayId, isMonth, text));
 
           prevMonth = dtMonth;
@@ -459,7 +457,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
     const { top1, top2, y1, y2 } = this.getCoords(y, "topF");
     const yfrac = (y - top1) / (top2 - top1);
-    const ry = y1 + (y2 - y1) * yfrac;
+    const ry = y1 + (y2 - y1) * (yfrac || 0);
     this.recycler.scrollToPosition(ry);
 
     this.handleScroll();

@@ -47,7 +47,6 @@ import { NcActions, NcActionButton } from "@nextcloud/vue";
 
 import * as utils from "../../services/Utils";
 import * as dav from "../../services/DavRequests";
-import { ViewerManager } from "../../services/Viewer";
 import { IPhoto } from "../../types";
 import { getPreviewUrl } from "../../services/FileUtils";
 
@@ -74,6 +73,9 @@ interface IYear {
 export default class OnThisDay extends Mixins(GlobalMixin) {
   private getPreviewUrl = getPreviewUrl;
 
+  @Prop()
+  private viewer: any;
+
   @Emit("load")
   onload() {}
 
@@ -82,14 +84,6 @@ export default class OnThisDay extends Mixins(GlobalMixin) {
   private hasRight = false;
   private hasLeft = false;
   private scrollStack: number[] = [];
-
-  /**
-   * Nextcloud viewer proxy
-   * Can't use the timeline instance because these photos
-   * might not be in view, so can't delete them
-   */
-  @Prop()
-  private viewerManager!: ViewerManager;
 
   mounted() {
     const inner = this.$refs.inner as HTMLElement;
@@ -200,7 +194,7 @@ export default class OnThisDay extends Mixins(GlobalMixin) {
 
   click(year: IYear) {
     const allPhotos = this.years.flatMap((y) => y.photos);
-    this.viewerManager.open(year.preview, allPhotos);
+    this.viewer.openStatic(year.preview, allPhotos);
   }
 }
 </script>
