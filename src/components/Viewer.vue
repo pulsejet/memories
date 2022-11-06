@@ -213,7 +213,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
     const klass = "has-viewer";
     this.photoswipe.on("beforeOpen", () => {
       document.body.classList.add(klass);
-      navElem.style.zIndex = "0";
+      if (navElem) navElem.style.zIndex = "0";
     });
     this.photoswipe.on("openingAnimationStart", () => {
       this.fullyOpened = false;
@@ -230,12 +230,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
       this.opened = false;
       this.hideSidebar();
     });
-    this.photoswipe.on("tapAction", () => {
-      this.opened = !this.opened; // toggle-controls
-    });
     this.photoswipe.on("destroy", () => {
       document.body.classList.remove(klass);
-      navElem.style.zIndex = "";
+      if (navElem) navElem.style.zIndex = "";
 
       // reset everything
       this.show = false;
@@ -247,6 +244,11 @@ export default class Viewer extends Mixins(GlobalMixin) {
       this.dayIds = [];
       this.globalCount = 0;
       this.globalAnchor = -1;
+    });
+
+    // toggle-controls
+    this.photoswipe.on("tapAction", () => {
+      this.opened = !this.opened;
     });
 
     // Video support
