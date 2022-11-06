@@ -452,7 +452,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
   /** Get base data object */
   private getItemData(photo: IPhoto) {
     return {
-      src: getPreviewUrl(photo, false, 256),
+      src: getPreviewUrl(photo, false, 2048),
       width: photo.w || undefined,
       height: photo.h || undefined,
       thumbCropped: true,
