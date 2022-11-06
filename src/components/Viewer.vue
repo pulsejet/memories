@@ -76,7 +76,7 @@ import { generateUrl } from "@nextcloud/router";
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
 import { getPreviewUrl } from "../services/FileUtils";
-import { getAlbumFileInfos } from "../services/DavRequests";
+import { getDownloadLink } from "../services/DavRequests";
 
 import PhotoSwipe, { PhotoSwipeOptions } from "photoswipe";
 import "photoswipe/style.css";
@@ -213,7 +213,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
     const klass = "has-viewer";
     this.photoswipe.on("beforeOpen", () => {
       document.body.classList.add(klass);
-      navElem.style.zIndex = "0";
+      if (navElem) navElem.style.zIndex = "0";
     });
     this.photoswipe.on("openingAnimationStart", () => {
       this.fullyOpened = false;
@@ -230,12 +230,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
       this.opened = false;
       this.hideSidebar();
     });
-    this.photoswipe.on("tapAction", () => {
-      this.opened = !this.opened; // toggle-controls
-    });
     this.photoswipe.on("destroy", () => {
       document.body.classList.remove(klass);
-      navElem.style.zIndex = "";
+      if (navElem) navElem.style.zIndex = "";
 
       // reset everything
       this.show = false;
@@ -247,6 +244,11 @@ export default class Viewer extends Mixins(GlobalMixin) {
       this.dayIds = [];
       this.globalCount = 0;
       this.globalAnchor = -1;
+    });
+
+    // toggle-controls
+    this.photoswipe.on("tapAction", () => {
+      this.opened = !this.opened;
     });
 
     // Video support
@@ -262,19 +264,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
         content.videoElement.classList.add("video-js");
 
         // Get DAV URL for video
-        let url = `remote.php/dav/${content.data.photo.filename}`; // normal route
-        // Check if albums
-        const route = vuerouter.currentRoute;
-        if (route.name === "albums") {
-          const fInfos = getAlbumFileInfos(
-            [content.data.photo],
-            route.params.user,
-            route.params.name
-          );
-          if (fInfos.length) {
-            url = `remote.php/dav/${fInfos[0].originalFilename}`;
-          }
-        }
+        const url = getDownloadLink(content.data.photo);
 
         // Add child with source element
         const source = document.createElement("source");
@@ -330,6 +320,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
     for (const r of rows) {
       if (r.type === IRowType.HEAD) {
+        if (this.TagDayIDValueSet.has(r.dayId)) continue;
+
         if (r.day.dayid == anchorPhoto.d.dayid) {
           startIndex = r.day.detail.findIndex(
             (p) => p.fileid === anchorPhoto.fileid
@@ -523,7 +515,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
   private async downloadCurrent() {
     const photo = this.getCurrentPhoto();
     if (!photo) return;
-    dav.downloadFilesByIds([photo]);
+    dav.downloadFilesByPhotos([photo]);
   }
 
   /** Open the sidebar */

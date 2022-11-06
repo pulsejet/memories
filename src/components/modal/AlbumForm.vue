@@ -69,9 +69,7 @@
           {{ t("photos", "Add collaborators") }}
         </NcButton>
         <NcButton
-          :aria-label="
-            editMode ? t('photos', 'Save.') : t('photos', 'Create the album.')
-          "
+          :aria-label="saveText"
           type="primary"
           :disabled="albumName === '' || loading"
           @click="submit()"
@@ -80,7 +78,7 @@
             <NcLoadingIcon v-if="loading" />
             <Send v-else />
           </template>
-          {{ editMode ? t("photos", "Save") : t("photos", "Create album") }}
+          {{ saveText }}
         </NcButton>
       </span>
     </div>
@@ -103,9 +101,7 @@
       </span>
       <span class="right-buttons">
         <NcButton
-          :aria-label="
-            editMode ? t('photos', 'Save.') : t('photos', 'Create the album.')
-          "
+          :aria-label="saveText"
           type="primary"
           :disabled="albumName.trim() === '' || loading"
           @click="submit(collaborators)"
@@ -114,7 +110,7 @@
             <NcLoadingIcon v-if="loading" />
             <Send v-else />
           </template>
-          {{ editMode ? t("photos", "Save") : t("photos", "Create album") }}
+          {{ saveText }}
         </NcButton>
       </span>
     </template>
@@ -160,6 +156,12 @@ export default class AlbumForm extends Mixins(GlobalMixin) {
    */
   get editMode(): boolean {
     return Boolean(this.album);
+  }
+
+  get saveText(): string {
+    return this.editMode
+      ? this.t("photos", "Save")
+      : this.t("photos", "Create album");
   }
 
   /**

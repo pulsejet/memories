@@ -28,7 +28,7 @@ jobs:
           make build-js-production
           zip -r vue.zip js/
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: vue.zip
           path: vue.zip
