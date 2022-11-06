@@ -645,5 +645,12 @@ export default class Viewer extends Mixins(GlobalMixin) {
   .pswp__icn-shadow {
     display: none;
   }
+
+  // Hide arrows on mobile
+  @media (max-width: 768px) {
+    .pswp__button--arrow {
+      opacity: 0 !important;
+    }
+  }
 }
 </style>
