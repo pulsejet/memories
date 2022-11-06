@@ -348,7 +348,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
         return;
       }
     }
-    await dav.downloadFilesByIds(Array.from(selection.values()));
+    await dav.downloadFilesByPhotos(Array.from(selection.values()));
   }
 
   /**

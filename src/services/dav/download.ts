@@ -3,6 +3,7 @@ import { generateUrl } from "@nextcloud/router";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
 import { IPhoto } from "../../types";
+import { getAlbumFileInfos } from "./albums";
 
 /**
  * Download a file
@@ -43,27 +44,14 @@ export async function downloadFiles(fileNames: string[]): Promise<boolean> {
  * @param photo - The photo to download
  */
 export async function downloadPublicPhoto(photo: IPhoto) {
-  // Public share download
-
-  const token = window.vuerouter.currentRoute.params.token;
-  // TODO: allow proper dav access without the need of basic auth
-  // https://github.com/nextcloud/server/issues/19700
-  const downloadURL = generateUrl(
-    `/s/${token}/download?path={dirname}&files={basename}`,
-    {
-      dirname: photo.filename.split("/").slice(0, -1).join("/"),
-      basename: photo.basename,
-    }
-  );
-
-  window.location.href = downloadURL;
+  window.location.href = getDownloadLink(photo);
 }
 
 /**
  * Download the files given by the fileIds
  * @param photos list of photos
  */
-export async function downloadFilesByIds(photos: IPhoto[]) {
+export async function downloadFilesByPhotos(photos: IPhoto[]) {
   if (photos.length === 0) {
     return;
   }
@@ -86,4 +74,33 @@ export async function downloadFilesByIds(photos: IPhoto[]) {
   }
 
   await downloadFiles(fileInfos.map((f) => f.filename));
+}
+
+/** Get URL to download one file (e.g. for video streaming) */
+export function getDownloadLink(photo: IPhoto) {
+  // Check if public
+  if (vuerouter.currentRoute.name === "folder-share") {
+    const token = window.vuerouter.currentRoute.params.token;
+    // TODO: allow proper dav access without the need of basic auth
+    // https://github.com/nextcloud/server/issues/19700
+    return generateUrl(`/s/${token}/download?path={dirname}&files={basename}`, {
+      dirname: photo.filename.split("/").slice(0, -1).join("/"),
+      basename: photo.basename,
+    });
+  }
+
+  // Check if albums
+  const route = vuerouter.currentRoute;
+  if (route.name === "albums") {
+    const fInfos = getAlbumFileInfos(
+      [photo],
+      route.params.user,
+      route.params.name
+    );
+    if (fInfos.length) {
+      return `remote.php/dav/${fInfos[0].originalFilename}`;
+    }
+  }
+
+  return `remote.php/dav/${photo.filename}`; // normal route
 }
