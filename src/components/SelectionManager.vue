@@ -370,18 +370,6 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
       Array.from(selection.values()),
       val
     )) {
-      favIds.forEach((id) => {
-        const photo = selection.get(id);
-        if (!photo) {
-          return;
-        }
-
-        if (val) {
-          photo.flag |= this.c.FLAG_IS_FAVORITE;
-        } else {
-          photo.flag &= ~this.c.FLAG_IS_FAVORITE;
-        }
-      });
     }
     this.clearSelection();
   }

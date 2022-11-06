@@ -3,6 +3,7 @@ import { translate as t } from "@nextcloud/l10n";
 import { IPhoto } from "../../types";
 import client from "../DavClient";
 import * as base from "./base";
+import * as utils from "../Utils";
 
 /**
  * Favorite a file
@@ -61,6 +62,12 @@ export async function* favoritePhotos(
   const calls = fileInfos.map((fileInfo) => async () => {
     try {
       await favoriteFile(fileInfo.originalFilename, favoriteState);
+      const photo = photos.find((p) => p.fileid === fileInfo.fileid);
+      if (favoriteState) {
+        photo.flag |= utils.constants.c.FLAG_IS_FAVORITE;
+      } else {
+        photo.flag &= ~utils.constants.c.FLAG_IS_FAVORITE;
+      }
       return fileInfo.fileid as number;
     } catch (error) {
       console.error("Failed to favorite", fileInfo, error);
