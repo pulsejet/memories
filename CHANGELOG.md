@@ -2,9 +2,15 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
-## v4.5.4, v3.5.4
+## v4.6.0, v3.6.0 (2022-11-06)
 
-- New Albums view (date ascending, grouped by month)
+- **Brand new photo viewer** with improved touch interface and UX
+- Improvements from v4.5.4 below
+- Known regressions: Photo Editor and Slideshow are not implemented yet
+
+## v4.5.4, v3.5.4 (skipped)
+
+- New layout for Albums view (date ascending, grouped by month)
 - Re-enable viewer editing and deletion
 
 ## v4.5.2, v3.5.2 (2022-10-30)
