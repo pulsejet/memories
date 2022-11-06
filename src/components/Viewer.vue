@@ -69,6 +69,9 @@ import { getPreviewUrl } from "../services/FileUtils";
 import PhotoSwipe, { PhotoSwipeOptions } from "photoswipe";
 import "photoswipe/style.css";
 
+import videojs from "video.js";
+import "video.js/dist/video-js.css";
+
 import DeleteIcon from "vue-material-design-icons/Delete.vue";
 import StarIcon from "vue-material-design-icons/Star.vue";
 import StarOutlineIcon from "vue-material-design-icons/StarOutline.vue";
@@ -141,6 +144,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
       loop: false,
       bgOpacity: 1,
       appendToEl: this.$refs.inner as HTMLElement,
+      preload: [2, 2],
       getViewportSizeFn: () => {
         const sidebarWidth = this.sidebarOpen ? this.sidebarWidth : 0;
         this.outerWidth = `calc(100vw - ${sidebarWidth}px)`;
@@ -229,6 +233,57 @@ export default class Viewer extends Mixins(GlobalMixin) {
       this.dayIds = [];
       this.globalCount = 0;
       this.globalAnchor = -1;
+    });
+
+    // Video support
+    this.photoswipe.on("contentLoad", (e) => {
+      const { content, isLazy } = e;
+      if (content.data.photo.flag & this.c.FLAG_IS_VIDEO) {
+        e.preventDefault();
+
+        content.type = "video";
+
+        // Create video element
+        content.videoElement = document.createElement("video") as any;
+        content.videoElement.classList.add("video-js");
+
+        // Add child with source element
+        const source = document.createElement("source");
+        source.src = `http://localhost:8025/remote.php/dav/${content.data.photo.filename}`;
+        source.type = content.data.photo.mimetype;
+        content.videoElement.appendChild(source);
+
+        // Create container div
+        content.element = document.createElement("div");
+        content.element.appendChild(content.videoElement);
+
+        // Init videojs
+        videojs(content.videoElement, {
+          fluid: true,
+          autoplay: content.data.playvideo,
+          controls: true,
+          preload: "metadata",
+          muted: true,
+        });
+      }
+    });
+
+    // Play video on open slide
+    this.photoswipe.on("slideActivate", (e) => {
+      const { slide } = e;
+      if (slide.data.photo.flag & this.c.FLAG_IS_VIDEO) {
+        setTimeout(() => {
+          slide.content.element.querySelector("video")?.play();
+        }, 500);
+      }
+    });
+
+    // Pause video on close slide
+    this.photoswipe.on("slideDeactivate", (e) => {
+      const { slide } = e;
+      if (slide.data.photo.flag & this.c.FLAG_IS_VIDEO) {
+        slide.content.element.querySelector("video")?.pause();
+      }
     });
 
     return this.photoswipe;
@@ -332,6 +387,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
         width: photo.w || undefined,
         height: photo.h || undefined,
         thumbCropped: true,
+        photo: photo,
       };
     });
 
@@ -508,6 +564,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
 }
 
 :deep .pswp {
+  .pswp__zoom-wrap {
+    width: 100%;
+  }
+
   .pswp__button {
     color: white;
 
