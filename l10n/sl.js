@@ -18,6 +18,7 @@ OC.L10N.register(
     "Favorite" : "Priljubljeno",
     "Unarchive" : "Odarhiviraj",
     "View in folder" : "Pokaži v mapi",
+    "Sidebar" : "Bočno okno",
     "Copy public link" : "Kopiraj javno povezavo",
     "Public link" : "Javna povezava",
     "Name of the album" : "Ime albuma",
