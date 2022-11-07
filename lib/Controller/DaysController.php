@@ -33,8 +33,8 @@ class DaysController extends ApiBase
 
     /**
      * @NoAdminRequired
-     * @NoCSRFRequired
      *
+     * @NoCSRFRequired
      *
      * @PublicPage
      */

@@ -2,20 +2,13 @@
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\Db\TimelineQuery;
 use OCP\Files\FileInfo;
 use OCP\Files\Folder;
-use OCA\Memories\Db\TimelineQuery;
 
-trait FoldersTrait {
+trait FoldersTrait
+{
     protected TimelineQuery $timelineQuery;
-
-    private function getFolderPreviews(Folder &$parent, FileInfo &$fileInfo) {
-        $folder = $parent->getById($fileInfo->getId());
-        if (count($folder) === 0) {
-            return [];
-        }
-        return $this->timelineQuery->getFolderPreviews($folder[0]);
-    }
 
     /**
      * Get subfolders entry for days response.
@@ -51,5 +44,15 @@ trait FoldersTrait {
                 ];
             }, $folders, []),
         ];
+    }
+
+    private function getFolderPreviews(Folder &$parent, FileInfo &$fileInfo)
+    {
+        $folder = $parent->getById($fileInfo->getId());
+        if (0 === \count($folder)) {
+            return [];
+        }
+
+        return $this->timelineQuery->getFolderPreviews($folder[0]);
     }
 }
