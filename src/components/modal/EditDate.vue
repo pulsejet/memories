@@ -186,7 +186,7 @@ export default class EditDate extends Mixins(GlobalMixin) {
     const calls = photos.map((p) => async () => {
       try {
         const res = await axios.get<any>(
-          generateUrl(INFO_API_URL, { id: p.fileid })
+          generateUrl(INFO_API_URL, { id: p.fileid }) + "?basic=1"
         );
         if (typeof res.data.datetaken !== "number") {
           console.error("Invalid date for", p.fileid);

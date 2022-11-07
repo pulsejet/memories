@@ -99,20 +99,12 @@ class TimelineWrite
 
         // Store raw metadata in the database
         // We need to remove blacklisted fields to prevent leaking info
-        unset($exif['SourceFile']);
-        unset($exif['FileName']);
-        unset($exif['ExifToolVersion']);
-        unset($exif['Directory']);
-        unset($exif['FileSize']);
-        unset($exif['FileModifyDate']);
-        unset($exif['FileAccessDate']);
-        unset($exif['FileInodeChangeDate']);
-        unset($exif['FilePermissions']);
+        unset($exif['SourceFile'], $exif['FileName'], $exif['ExifToolVersion'], $exif['Directory'], $exif['FileSize'], $exif['FileModifyDate'], $exif['FileAccessDate'], $exif['FileInodeChangeDate'], $exif['FilePermissions']);
 
         // Truncate any fields >2048 chars
         foreach ($exif as $key => &$value) {
             if (\is_string($value) && \strlen($value) > 2048) {
-                $exif[$key] = \substr($value, 0, 2048);
+                $exif[$key] = substr($value, 0, 2048);
             }
         }
 

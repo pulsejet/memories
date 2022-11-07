@@ -52,7 +52,8 @@ class ImageController extends ApiBase
         $file = $file[0];
 
         // Get the image info
-        $info = $this->timelineQuery->getInfoById($file->getId());
+        $basic = false !== $this->request->getParam('basic', false);
+        $info = $this->timelineQuery->getInfoById($file->getId(), $basic);
 
         return new JSONResponse($info, Http::STATUS_OK);
     }

@@ -48,13 +48,17 @@ class TimelineQuery
     {
     }
 
-    public function getInfoById(int $id): array
+    public function getInfoById(int $id, bool $basic): array
     {
         $qb = $this->connection->getQueryBuilder();
-        $qb->select('fileid', 'dayid', 'datetaken')
+        $qb->select('fileid', 'dayid', 'datetaken', 'w', 'h')
             ->from('memories')
             ->where($qb->expr()->eq('fileid', $qb->createNamedParameter($id, \PDO::PARAM_INT)))
         ;
+
+        if (!$basic) {
+            $qb->addSelect('exif');
+        }
 
         $result = $qb->executeQuery();
         $row = $result->fetch();
@@ -72,6 +76,9 @@ class TimelineQuery
             'fileid' => (int) $row['fileid'],
             'dayid' => (int) $row['dayid'],
             'datetaken' => $utcTs,
+            'w' => (int) $row['w'],
+            'h' => (int) $row['h'],
+            'exif' => $basic ? [] : json_decode($row['exif'], true),
         ];
     }
 }

@@ -44,18 +44,18 @@ class Version400604Date20221107205439 extends SimpleMigrationStep
      */
     public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper
     {
-		/** @var ISchemaWrapper $schema */
-		$schema = $schemaClosure();
+        /** @var ISchemaWrapper $schema */
+        $schema = $schemaClosure();
 
-		$table = $schema->getTable('memories');
+        $table = $schema->getTable('memories');
 
-		$table->addColumn('exif', 'text', [
-			'notnull' => false,
-			'length' => 65535,
-			'default' => '',
-		]);
+        $table->addColumn('exif', 'text', [
+            'notnull' => false,
+            'length' => 65535,
+            'default' => '',
+        ]);
 
-		return $schema;
+        return $schema;
     }
 
     /**
