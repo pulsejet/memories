@@ -124,6 +124,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
   @Emit("updateLoading") updateLoading(delta: number) {}
 
   public isOpen = false;
+  private originalTitle = null;
 
   private show = false;
   private showControls = false;
@@ -158,6 +159,22 @@ export default class Viewer extends Mixins(GlobalMixin) {
       return 3;
     } else {
       return 4;
+    }
+  }
+
+  /** Update the document title */
+  private updateTitle(photo: IPhoto | undefined) {
+    const oc_defaults: any = globalThis.oc_defaults;
+    if (!this.originalTitle) {
+      this.originalTitle = document.title;
+    }
+    if (photo) {
+      document.title = `${photo.basename} - ${
+        globalThis.OCA.Theming?.name ?? oc_defaults.name
+      }`;
+    } else {
+      document.title = this.originalTitle;
+      this.originalTitle = null;
     }
   }
 
@@ -258,6 +275,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
       this.showControls = false;
       this.hideSidebar();
       this.setRouteHash(undefined);
+      this.updateTitle(undefined);
     });
     this.photoswipe.on("destroy", () => {
       document.body.classList.remove(klass);
@@ -284,6 +302,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
     // Update vue route for deep linking
     this.photoswipe.on("slideActivate", (e) => {
       this.setRouteHash(e.slide?.data?.photo);
+      this.updateTitle(e.slide?.data?.photo);
     });
 
     // Video support
