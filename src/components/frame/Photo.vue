@@ -79,6 +79,12 @@ export default class Photo extends Mixins(GlobalMixin) {
     }
   }
 
+  @Watch("data.etag")
+  onEtagChange() {
+    this.hasFaceRect = false;
+    this.refresh();
+  }
+
   mounted() {
     this.hasFaceRect = false;
     this.refresh();

@@ -172,11 +172,15 @@ export default class Viewer extends Mixins(GlobalMixin) {
   mounted() {
     subscribe("files:sidebar:opened", this.handleAppSidebarOpen);
     subscribe("files:sidebar:closed", this.handleAppSidebarClose);
+    subscribe("files:file:created", this.handleFileUpdated);
+    subscribe("files:file:updated", this.handleFileUpdated);
   }
 
   beforeDestroy() {
     unsubscribe("files:sidebar:opened", this.handleAppSidebarOpen);
     unsubscribe("files:sidebar:closed", this.handleAppSidebarClose);
+    unsubscribe("files:file:created", this.handleFileUpdated);
+    unsubscribe("files:file:updated", this.handleFileUpdated);
   }
 
   /** Number of buttons to show inline */
@@ -222,6 +226,15 @@ export default class Viewer extends Mixins(GlobalMixin) {
     return this.currentPhoto
       ? window.location.origin + getDownloadLink(this.currentPhoto)
       : null;
+  }
+
+  /** Event on file changed */
+  handleFileUpdated({ fileid }: { fileid: number }) {
+    console.log("file updated", fileid);
+    if (this.currentPhoto && this.currentPhoto.fileid === fileid) {
+      this.currentPhoto.etag += "_";
+      this.photoswipe.refreshSlideContent(this.currIndex);
+    }
   }
 
   /** Create the base photoswipe object */

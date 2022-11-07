@@ -178,6 +178,7 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
       } else {
         emit("files:file:updated", { fileid: this.fileid });
       }
+      this.onClose(undefined, false);
     } catch (error) {
       showError(this.t("viewer", "Error saving image"));
     }
