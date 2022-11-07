@@ -209,7 +209,7 @@ img {
   color: white;
   padding: 0 5%;
   text-align: center;
-  font-size: 1.2em;
+  font-size: 1.1em;
   word-wrap: break-word;
   text-overflow: ellipsis;
   line-height: 1em;
@@ -224,6 +224,10 @@ img {
     top: unset;
     bottom: 10%;
     transform: unset;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.95em;
   }
 }
 
