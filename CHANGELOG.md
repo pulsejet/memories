@@ -5,8 +5,9 @@ This file is manually updated. Please file an issue if something is missing.
 ## v4.6.1, v3.6.1
 
 - **Feature**: Native sharing from the viewer (images only)
-- **Feature**: Deep linking to photos
+- **Feature**: Deep linking to photos on opening viewer
 - **Feature**: Password protected folder shares ([#165](https://github.com/pulsejet/memories/issues/165))
+- **Feature**: Folders view will now show only folders with photos ([#163](https://github.com/pulsejet/memories/issues/163))
 - Improvements to viewer UX
 
 ## v4.6.0, v3.6.0 (2022-11-06)

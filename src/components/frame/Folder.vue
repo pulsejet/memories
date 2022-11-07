@@ -3,8 +3,8 @@
     draggable="false"
     class="folder fill-block"
     :class="{
-      hasPreview: previewFileInfos.length > 0,
-      onePreview: previewFileInfos.length === 1,
+      hasPreview: previews.length > 0,
+      onePreview: previews.length === 1,
       hasError: error,
     }"
     :to="target"
@@ -15,17 +15,11 @@
     </div>
 
     <div class="previews fill-block">
-      <div
-        class="img-outer"
-        v-for="info of previewFileInfos"
-        :key="info.fileid"
-      >
+      <div class="img-outer" v-for="info of previews" :key="info.fileid">
         <img
           class="fill-block"
-          :class="{ error: info.flag & c.FLAG_LOAD_FAIL }"
-          :key="'fpreview-' + info.fileid"
           :src="getPreviewUrl(info, true, 256)"
-          @error="info.flag |= c.FLAG_LOAD_FAIL"
+          @error="$event.target.classList.add('error')"
         />
       </div>
     </div>
@@ -34,11 +28,10 @@
 
 <script lang="ts">
 import { Component, Prop, Watch, Mixins } from "vue-property-decorator";
-import { IFileInfo, IFolder } from "../../types";
+import { IFolder, IPhoto } from "../../types";
 import GlobalMixin from "../../mixins/GlobalMixin";
 import UserConfig from "../../mixins/UserConfig";
 
-import * as dav from "../../services/DavRequests";
 import { getPreviewUrl } from "../../services/FileUtils";
 
 import FolderIcon from "vue-material-design-icons/Folder.vue";
@@ -52,7 +45,7 @@ export default class Folder extends Mixins(GlobalMixin, UserConfig) {
   @Prop() data: IFolder;
 
   // Separate property because the one on data isn't reactive
-  private previewFileInfos: IFileInfo[] = [];
+  private previews: IPhoto[] = [];
 
   // Error occured fetching thumbs
   private error = false;
@@ -81,29 +74,13 @@ export default class Folder extends Mixins(GlobalMixin, UserConfig) {
     }
 
     // Get preview infos
-    if (!this.data.previewFileInfos) {
-      const folderPath = this.data.path.split("/").slice(3).join("/");
-      dav
-        .getFolderPreviewFileIds(folderPath, 4)
-        .then((fileInfos) => {
-          fileInfos = fileInfos.filter((f) => f.hasPreview);
-          fileInfos.forEach((f) => (f.flag = 0));
-          if (fileInfos.length > 0 && fileInfos.length < 4) {
-            fileInfos = [fileInfos[0]];
-          }
-          this.data.previewFileInfos = fileInfos;
-          this.previewFileInfos = fileInfos;
-        })
-        .catch(() => {
-          this.data.previewFileInfos = [];
-          this.previewFileInfos = [];
-
-          // Something is wrong with the folder
-          // e.g. external storage not available
-          this.error = true;
-        });
-    } else {
-      this.previewFileInfos = this.data.previewFileInfos;
+    const previews = this.data.previews;
+    if (previews) {
+      if (previews.length > 0 && previews.length < 4) {
+        this.previews = [previews[0]];
+      } else {
+        this.previews = previews.slice(0, 4);
+      }
     }
   }
 

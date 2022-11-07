@@ -92,8 +92,8 @@ export type IPhoto = {
 export interface IFolder extends IPhoto {
   /** Path to folder */
   path: string;
-  /** FileInfos for preview images */
-  previewFileInfos?: IFileInfo[];
+  /** Photos for preview images */
+  previews?: IPhoto[];
   /** Name of folder */
   name: string;
 }

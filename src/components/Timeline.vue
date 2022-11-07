@@ -938,11 +938,14 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     data.forEach(utils.convertFlags);
 
     // Filter out items we don't want to show at all
-    if (!this.config_showHidden) {
-      // Hidden folders
+    if (!this.config_showHidden && dayId === this.TagDayID.FOLDERS) {
+      // Hidden folders and folders without previews
       data = data.filter(
         (p) =>
-          !(p.flag & this.c.FLAG_IS_FOLDER && (<IFolder>p).name.startsWith("."))
+          !(
+            p.flag & this.c.FLAG_IS_FOLDER &&
+            ((<IFolder>p).name.startsWith(".") || !(<IFolder>p).previews.length)
+          )
       );
     }
 
