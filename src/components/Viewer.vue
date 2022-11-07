@@ -335,9 +335,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
         if (this.TagDayIDValueSet.has(r.dayId)) continue;
 
         if (r.day.dayid == anchorPhoto.d.dayid) {
-          startIndex = r.day.detail.findIndex(
-            (p) => p.fileid === anchorPhoto.fileid
-          );
+          startIndex = r.day.detail.indexOf(anchorPhoto);
           this.globalAnchor = this.globalCount;
         }
 
@@ -433,7 +431,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
     // Get the thumbnail image
     this.photoswipe.addFilter("thumbEl", (thumbEl, data, index) => {
       const photo = this.list[index - this.globalAnchor];
-      if (photo.flag & this.c.FLAG_IS_VIDEO) return thumbEl;
+      if (!photo || photo.flag & this.c.FLAG_IS_VIDEO) return thumbEl;
       return this.thumbElem(photo) || thumbEl;
     });
 
@@ -489,9 +487,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
   /** Get element for thumbnail if it exists */
   private thumbElem(photo: IPhoto): HTMLImageElement | undefined {
     if (!photo) return;
-    const elems = document.querySelectorAll(
-      `.memories-thumb-${photo.key || photo.fileid}`
-    );
+    const elems = document.querySelectorAll(`.memories-thumb-${photo.key}`);
 
     if (elems.length === 0) return;
     if (elems.length === 1) return elems[0] as HTMLImageElement;

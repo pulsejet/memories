@@ -29,7 +29,7 @@
     >
       <img
         ref="img"
-        :class="['fill-block', `memories-thumb-${data.key || data.fileid}`]"
+        :class="['fill-block', `memories-thumb-${data.key}`]"
         draggable="false"
         :src="src"
         :key="data.fileid"

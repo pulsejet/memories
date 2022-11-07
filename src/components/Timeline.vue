@@ -73,7 +73,7 @@
           <div
             class="photo"
             v-for="photo of item.photos"
-            :key="photo.key || photo.fileid"
+            :key="photo.key"
             :style="{
               height: photo.dispH + 'px',
               width: photo.dispW + 'px',
@@ -245,8 +245,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
       // Get params
       const dayid = parseInt(parts[1]);
-      const fileid = parseInt(parts[2]);
-      if (isNaN(dayid) || isNaN(fileid)) return;
+      const key = parts[2];
+      if (isNaN(dayid) || !key) return;
 
       // Get day
       const day = this.heads[dayid]?.day;
@@ -257,14 +257,13 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       }
 
       // Find photo
-      const photo = day?.detail?.find((p) => p.fileid === fileid);
+      const photo = day?.detail?.find((p) => p.key === key);
       if (!photo) return;
 
       // Scroll to photo if initializing
       if (!from) {
         const index = this.list.findIndex(
-          (r) =>
-            r.day.dayid === dayid && r.photos?.find((p) => p.fileid === fileid)
+          (r) => r.day.dayid === dayid && r.photos?.includes(photo)
         );
         if (index !== -1) {
           (this.$refs.recycler as any).scrollToItem(index);
@@ -1095,7 +1094,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         photo.key = `${photo.fileid}-${val}`;
         seen.set(photo.fileid, val + 1);
       } else {
-        photo.key = null;
+        photo.key = `${photo.fileid}`;
         seen.set(photo.fileid, 1);
       }
 
