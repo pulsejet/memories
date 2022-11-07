@@ -7,7 +7,6 @@ use OCA\Memories\AppInfo\Application;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
-use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\EventDispatcher\IEventDispatcher;
@@ -97,30 +96,6 @@ class PageController extends Controller
         $policy->addAllowedScriptDomain("'self'");
 
         $response = new TemplateResponse($this->appName, 'main');
-        $response->setContentSecurityPolicy($policy);
-
-        return $response;
-    }
-
-    /**
-     * @PublicPage
-     *
-     * @NoCSRFRequired
-     */
-    public function sharedfolder(string $token)
-    {
-        // Scripts
-        Util::addScript($this->appName, 'memories-main');
-        $this->eventDispatcher->dispatchTyped(new LoadSidebar());
-
-        // App version
-        $this->initialState->provideInitialState('version', $this->appManager->getAppInfo('memories')['version']);
-
-        $policy = new ContentSecurityPolicy();
-        $policy->addAllowedWorkerSrcDomain("'self'");
-        $policy->addAllowedScriptDomain("'self'");
-
-        $response = new PublicTemplateResponse($this->appName, 'main');
         $response->setContentSecurityPolicy($policy);
 
         return $response;

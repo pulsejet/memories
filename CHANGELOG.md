@@ -6,6 +6,7 @@ This file is manually updated. Please file an issue if something is missing.
 
 - **Feature**: Native sharing from the viewer (images only)
 - **Feature**: Deep linking to photos
+- **Feature**: Password protected folder shares ([#165](https://github.com/pulsejet/memories/issues/165))
 - Improvements to viewer UX
 
 ## v4.6.0, v3.6.0 (2022-11-06)
