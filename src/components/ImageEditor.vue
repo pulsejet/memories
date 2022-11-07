@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Emit, Mixins } from "vue-property-decorator";
+import { Component, Prop, Mixins } from "vue-property-decorator";
 import GlobalMixin from "../mixins/GlobalMixin";
 
 import { basename, dirname, extname, join } from "path";
@@ -11,6 +11,7 @@ import { emit } from "@nextcloud/event-bus";
 import { showError, showSuccess } from "@nextcloud/dialogs";
 import axios from "@nextcloud/axios";
 import FilerobotImageEditor from "filerobot-image-editor";
+import { FilerobotImageEditorConfig } from "react-filerobot-image-editor";
 
 import translations from "./ImageEditorTranslations";
 
@@ -26,7 +27,7 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
 
   private imageEditor: FilerobotImageEditor = null;
 
-  get config() {
+  get config(): FilerobotImageEditorConfig & { theme: any } {
     return {
       source: this.src,
 
@@ -45,12 +46,17 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
       // Displayed tabs, disabling watermark
       tabsIds: Object.values(TABS)
         .filter((tab) => tab !== TABS.WATERMARK)
-        .sort((a: string, b: string) => a.localeCompare(b)),
+        .sort((a: string, b: string) => a.localeCompare(b)) as any[],
 
       // onBeforeSave: this.onBeforeSave,
       onClose: this.onClose,
       // onModify: this.onModify,
       onSave: this.onSave,
+
+      Rotate: {
+        angle: 90,
+        componentType: "buttons",
+      },
 
       // Translations
       translations,
@@ -87,8 +93,12 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
     return basename(this.src, extname(this.src));
   }
 
-  get defaultSavedImageType() {
-    return extname(this.src).slice(1) || "jpeg";
+  get defaultSavedImageType(): "jpeg" | "png" | "webp" {
+    const mime = extname(this.src).slice(1);
+    if (["jpeg", "png", "webp"].includes(mime)) {
+      return mime as any;
+    }
+    return "jpeg";
   }
 
   get hasHighContrastEnabled() {
@@ -149,10 +159,10 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
     mimeType,
     quality,
   }: {
-    fullName: string;
-    imageCanvas: HTMLCanvasElement;
-    mimeType: string;
-    quality: number;
+    fullName?: string;
+    imageCanvas?: HTMLCanvasElement;
+    mimeType?: string;
+    quality?: number;
   }): Promise<void> {
     const { origin, pathname } = new URL(this.src);
     const putUrl = origin + join(dirname(pathname), fullName);
