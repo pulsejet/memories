@@ -625,7 +625,11 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Does the browser support native share API */
   get canShare() {
-    return "share" in navigator;
+    return (
+      "share" in navigator &&
+      this.currentPhoto &&
+      !(this.currentPhoto.flag & this.c.FLAG_IS_VIDEO)
+    );
   }
 
   /** Share the current photo externally */
