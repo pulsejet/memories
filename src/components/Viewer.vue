@@ -661,7 +661,14 @@ export default class Viewer extends Mixins(GlobalMixin) {
       if (!(<any>navigator).canShare(data)) {
         throw new Error(this.t("memories", "Cannot share this type of data"));
       }
-      await navigator.share(data);
+
+      try {
+        await navigator.share(data);
+      } catch (e) {
+        // Don't show this error because it's silly stuff
+        // like "share canceled"
+        console.error(e);
+      }
     } catch (err) {
       console.error(err.name, err.message);
       showError(err.message);
