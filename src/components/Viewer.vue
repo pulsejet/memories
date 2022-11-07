@@ -607,16 +607,21 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Set the route hash to the given photo */
   private setRouteHash(photo: IPhoto | undefined) {
-    if (!photo && !this.isOpen) {
+    if (!photo && !this.isOpen && this.$route.hash?.startsWith("#v")) {
       return this.$router.back();
     }
 
     const hash = photo ? utils.getViewerHash(photo) : "";
+    const route = {
+      ...this.$route,
+      hash,
+    };
     if (hash !== this.$route.hash) {
-      this.$router.replace({
-        ...this.$route,
-        hash,
-      });
+      if (this.$route.hash) {
+        this.$router.replace(route);
+      } else {
+        this.$router.push(route);
+      }
     }
   }
 
