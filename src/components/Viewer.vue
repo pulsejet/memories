@@ -648,9 +648,24 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
       // Get image blob
       const blob = await (await fetch(img.src)).blob();
+
+      // Fix basename extension
+      let basename = photo.basename;
+      let targetExts = [];
+      if (photo.mimetype === "image/png") {
+        targetExts = ["png"];
+      } else {
+        targetExts = ["jpg", "jpeg"];
+      }
+
+      // Append extension if not found
+      if (!targetExts.includes(basename.split(".").pop().toLowerCase())) {
+        basename += "." + targetExts[0];
+      }
+
       const data = {
         files: [
-          new File([blob], photo.basename, {
+          new File([blob], basename, {
             type: blob.type,
           }),
         ],
