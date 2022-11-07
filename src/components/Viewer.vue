@@ -569,8 +569,15 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Get base data object */
   private getItemData(photo: IPhoto) {
+    let previewUrl = getPreviewUrl(photo, false, 2048);
+
+    // Preview aren't animated
+    if (photo.mimetype === "image/gif") {
+      previewUrl = getDownloadLink(photo);
+    }
+
     return {
-      src: getPreviewUrl(photo, false, 2048),
+      src: previewUrl,
       width: photo.w || undefined,
       height: photo.h || undefined,
       thumbCropped: true,
