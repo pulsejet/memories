@@ -610,7 +610,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
   }
 
   get canEdit() {
-    return this.currentPhoto?.mimetype === "image/jpeg";
+    return ["image/jpeg", "image/png"].includes(this.currentPhoto?.mimetype);
   }
 
   private openEditor() {
