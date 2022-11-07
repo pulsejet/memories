@@ -32,7 +32,7 @@ Memories is a photo management app for Nextcloud with advanced features includin
 1. Run `php ./occ memories:index` to generate metadata indices for existing photos.
 1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos.
 ]]></description>
-    <version>3.6.0</version>
+    <version>3.6.1</version>
     <licence>agpl</licence>
     <author mail="radialapps@gmail.com" >Varun Patil</author>
     <namespace>Memories</namespace>
