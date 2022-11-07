@@ -24,7 +24,6 @@ OC.L10N.register(
     "Name" : "Surname",
     "Update" : "Update",
     "Loading …" : "Loading …",
-    "Refresh" : "Refresh",
-    "Cannot find this photo anymore!" : "Cannot find this photo any more!"
+    "Refresh" : "Refresh"
 },
 "nplurals=2; plural=(n != 1);");
