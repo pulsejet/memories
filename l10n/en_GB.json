@@ -22,7 +22,6 @@
     "Name" : "Surname",
     "Update" : "Update",
     "Loading …" : "Loading …",
-    "Refresh" : "Refresh",
-    "Cannot find this photo anymore!" : "Cannot find this photo any more!"
+    "Refresh" : "Refresh"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
