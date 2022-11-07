@@ -68,4 +68,24 @@ class Util
 
         return version_compare($v, '3.0.0-alpha', '>=');
     }
+
+    /**
+     * Check if link sharing is allowed.
+     *
+     * @param mixed $config
+     */
+    public static function isLinkSharingEnabled(&$config): bool
+    {
+        // Check if the shareAPI is enabled
+        if ('yes' !== $config->getAppValue('core', 'shareapi_enabled', 'yes')) {
+            return false;
+        }
+
+        // Check whether public sharing is enabled
+        if ('yes' !== $config->getAppValue('core', 'shareapi_allow_links', 'yes')) {
+            return false;
+        }
+
+        return true;
+    }
 }

@@ -216,6 +216,13 @@ export function getFolderRoutePath(basePath: string) {
   return path;
 }
 
+/**
+ * Get route hash for viewer for photo
+ */
+export function getViewerHash(photo: IPhoto) {
+  return `#v/${photo.dayid}/${photo.key}`;
+}
+
 /** Set a timer that renews if existing */
 export function setRenewingTimeout(
   ctx: any,

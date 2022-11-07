@@ -16,6 +16,7 @@ OC.L10N.register(
     "Favorite" : "Омиљени",
     "Unarchive" : "Врати из архиве",
     "View in folder" : "Види у фасцикли",
+    "Sidebar" : "Бочна трака",
     "Public link" : "Јавна веза",
     "Back" : "Назад",
     "Save" : "Сачувај",

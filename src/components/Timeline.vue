@@ -73,7 +73,7 @@
           <div
             class="photo"
             v-for="photo of item.photos"
-            :key="photo.key || photo.fileid"
+            :key="photo.key"
             :style="{
               height: photo.dispH + 'px',
               width: photo.dispW + 'px',
@@ -227,12 +227,58 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
   mounted() {
     this.selectionManager = this.$refs.selectionManager;
     this.scrollerManager = this.$refs.scrollerManager;
-    this.createState();
+    this.routeChange(this.$route);
   }
 
   @Watch("$route")
-  async routeChange(from: any, to: any) {
-    await this.refresh();
+  async routeChange(to: any, from?: any) {
+    if (from?.path !== to.path) {
+      await this.refresh();
+    }
+
+    // Check if hash has changed
+    const viewerIsOpen = (this.$refs.viewer as any).isOpen;
+    if (from?.hash !== to.hash && to.hash?.startsWith("#v") && !viewerIsOpen) {
+      // Open viewer
+      const parts = to.hash.split("/");
+      if (parts.length !== 3) return;
+
+      // Get params
+      const dayid = parseInt(parts[1]);
+      const key = parts[2];
+      if (isNaN(dayid) || !key) return;
+
+      // Get day
+      const day = this.heads[dayid]?.day;
+      if (day && !day.detail) {
+        const state = this.state;
+        await this.fetchDay(dayid, true);
+        if (state !== this.state) return;
+      }
+
+      // Find photo
+      const photo = day?.detail?.find((p) => p.key === key);
+      if (!photo) return;
+
+      // Scroll to photo if initializing
+      if (!from) {
+        const index = this.list.findIndex(
+          (r) => r.day.dayid === dayid && r.photos?.includes(photo)
+        );
+        if (index !== -1) {
+          (this.$refs.recycler as any).scrollToItem(index);
+        }
+      }
+
+      (this.$refs.viewer as any).open(photo, this.list);
+    } else if (
+      from?.hash?.startsWith("#v") &&
+      !to.hash?.startsWith("#v") &&
+      viewerIsOpen
+    ) {
+      // Close viewer
+      (this.$refs.viewer as any).close();
+    }
   }
 
   beforeDestroy() {
@@ -784,7 +830,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
   }
 
   /** Fetch image data for one dayId */
-  async fetchDay(dayId: number) {
+  async fetchDay(dayId: number, now = false) {
     const head = this.heads[dayId];
     if (!head) return;
 
@@ -804,7 +850,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     this.fetchDayQueue.push(dayId);
 
     // Only single queries allowed for month vie
-    if (this.isMonthView()) {
+    if (now || this.isMonthView()) {
       return this.fetchDayExpire();
     }
 
@@ -892,11 +938,14 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     data.forEach(utils.convertFlags);
 
     // Filter out items we don't want to show at all
-    if (!this.config_showHidden) {
-      // Hidden folders
+    if (!this.config_showHidden && dayId === this.TagDayID.FOLDERS) {
+      // Hidden folders and folders without previews
       data = data.filter(
         (p) =>
-          !(p.flag & this.c.FLAG_IS_FOLDER && (<IFolder>p).name.startsWith("."))
+          !(
+            p.flag & this.c.FLAG_IS_FOLDER &&
+            ((<IFolder>p).name.startsWith(".") || !(<IFolder>p).previews.length)
+          )
       );
     }
 
@@ -1048,7 +1097,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         photo.key = `${photo.fileid}-${val}`;
         seen.set(photo.fileid, val + 1);
       } else {
-        photo.key = null;
+        photo.key = `${photo.fileid}`;
         seen.set(photo.fileid, 1);
       }
 
@@ -1146,7 +1195,10 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       // selection mode
       this.selectionManager.selectPhoto(photo);
     } else {
-      (<any>this.$refs.viewer).open(photo, this.list);
+      this.$router.push({
+        ...this.$route,
+        hash: utils.getViewerHash(photo),
+      });
     }
   }
 

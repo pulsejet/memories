@@ -122,6 +122,7 @@ export default class OnThisDay extends Mixins(GlobalMixin) {
     for (const photo of photos) {
       const dateTaken = utils.dayIdToDate(photo.dayid);
       const year = dateTaken.getUTCFullYear();
+      photo.key = `${photo.fileid}`;
 
       if (year !== currentYear) {
         this.years.push({
@@ -194,7 +195,7 @@ export default class OnThisDay extends Mixins(GlobalMixin) {
 
   click(year: IYear) {
     const allPhotos = this.years.flatMap((y) => y.photos);
-    this.viewer.openStatic(year.preview, allPhotos);
+    this.viewer.openStatic(year.preview, allPhotos, 512);
   }
 }
 </script>

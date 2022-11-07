@@ -1,6 +1,5 @@
 <template>
   <div
-    :id="`memories-photo-${data.key || data.fileid}`"
     class="p-outer fill-block"
     :class="{
       selected: data.flag & c.FLAG_SELECTED,
@@ -30,7 +29,7 @@
     >
       <img
         ref="img"
-        class="fill-block"
+        :class="['fill-block', `memories-thumb-${data.key}`]"
         draggable="false"
         :src="src"
         :key="data.fileid"
@@ -78,6 +77,12 @@ export default class Photo extends Mixins(GlobalMixin) {
       newData.flag |=
         oldData.flag & (this.c.FLAG_SELECTED | this.c.FLAG_LOAD_FAIL);
     }
+  }
+
+  @Watch("data.etag")
+  onEtagChange() {
+    this.hasFaceRect = false;
+    this.refresh();
   }
 
   mounted() {

@@ -5,9 +5,29 @@
     :class="{ fullyOpened }"
     :style="{ width: outerWidth }"
   >
-    <div class="inner" ref="inner">
-      <div class="top-bar" v-if="photoswipe" :class="{ opened }">
-        <NcActions :inline="3" container=".memories_viewer .pswp">
+    <ImageEditor
+      v-if="editorOpen"
+      :mime="currentPhoto.mimetype"
+      :src="currentDownloadLink"
+      :fileid="currentPhoto.fileid"
+      @close="editorOpen = false"
+    />
+
+    <div class="inner" ref="inner" v-show="!editorOpen">
+      <div class="top-bar" v-if="photoswipe" :class="{ showControls }">
+        <NcActions
+          :inline="numInlineActions"
+          container=".memories_viewer .pswp"
+        >
+          <NcActionButton
+            :aria-label="t('memories', 'Share')"
+            @click="shareCurrent"
+            :close-after-click="true"
+            v-if="canShare"
+          >
+            {{ t("memories", "Share") }}
+            <template #icon> <ShareIcon :size="24" /> </template>
+          </NcActionButton>
           <NcActionButton
             :aria-label="t('memories', 'Delete')"
             @click="deleteCurrent"
@@ -38,6 +58,17 @@
             </template>
           </NcActionButton>
           <NcActionButton
+            :aria-label="t('memories', 'Edit')"
+            v-if="canEdit"
+            @click="openEditor"
+            :close-after-click="true"
+          >
+            {{ t("memories", "Edit") }}
+            <template #icon>
+              <TuneIcon :size="24" />
+            </template>
+          </NcActionButton>
+          <NcActionButton
             :aria-label="t('memories', 'Download')"
             @click="downloadCurrent"
             :close-after-click="true"
@@ -65,13 +96,16 @@
 
 <script lang="ts">
 import { Component, Emit, Mixins } from "vue-property-decorator";
-
 import GlobalMixin from "../mixins/GlobalMixin";
+
 import { IDay, IPhoto, IRow, IRowType } from "../types";
 
 import { NcActions, NcActionButton } from "@nextcloud/vue";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import { generateUrl } from "@nextcloud/router";
+import { showError } from "@nextcloud/dialogs";
+
+import ImageEditor from "./ImageEditor.vue";
 
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
@@ -84,23 +118,28 @@ import "photoswipe/style.css";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 
+import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
 import DeleteIcon from "vue-material-design-icons/Delete.vue";
 import StarIcon from "vue-material-design-icons/Star.vue";
 import StarOutlineIcon from "vue-material-design-icons/StarOutline.vue";
 import DownloadIcon from "vue-material-design-icons/Download.vue";
 import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
 import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
+import TuneIcon from "vue-material-design-icons/Tune.vue";
 
 @Component({
   components: {
     NcActions,
     NcActionButton,
+    ImageEditor,
+    ShareIcon,
     DeleteIcon,
     StarIcon,
     StarOutlineIcon,
     DownloadIcon,
     InfoIcon,
     OpenInNewIcon,
+    TuneIcon,
   },
 })
 export default class Viewer extends Mixins(GlobalMixin) {
@@ -108,8 +147,12 @@ export default class Viewer extends Mixins(GlobalMixin) {
   @Emit("fetchDay") fetchDay(dayId: number) {}
   @Emit("updateLoading") updateLoading(delta: number) {}
 
+  public isOpen = false;
+  private originalTitle = null;
+  public editorOpen = false;
+
   private show = false;
-  private opened = false;
+  private showControls = false;
   private fullyOpened = false;
   private sidebarOpen = false;
   private sidebarWidth = 400;
@@ -124,27 +167,74 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   private globalCount = 0;
   private globalAnchor = -1;
+  private currIndex = -1;
 
   mounted() {
     subscribe("files:sidebar:opened", this.handleAppSidebarOpen);
     subscribe("files:sidebar:closed", this.handleAppSidebarClose);
+    subscribe("files:file:created", this.handleFileUpdated);
+    subscribe("files:file:updated", this.handleFileUpdated);
   }
 
   beforeDestroy() {
     unsubscribe("files:sidebar:opened", this.handleAppSidebarOpen);
     unsubscribe("files:sidebar:closed", this.handleAppSidebarClose);
+    unsubscribe("files:file:created", this.handleFileUpdated);
+    unsubscribe("files:file:updated", this.handleFileUpdated);
+  }
+
+  /** Number of buttons to show inline */
+  get numInlineActions() {
+    let base = 3;
+    if (this.canShare) base++;
+    if (this.canEdit) base++;
+
+    if (window.innerWidth < 768) {
+      return Math.min(base, 3);
+    } else {
+      return Math.min(base, 5);
+    }
+  }
+
+  /** Update the document title */
+  private updateTitle(photo: IPhoto | undefined) {
+    if (!this.originalTitle) {
+      this.originalTitle = document.title;
+    }
+    if (photo) {
+      document.title = `${photo.basename} - ${globalThis.OCA.Theming?.name}`;
+    } else {
+      document.title = this.originalTitle;
+      this.originalTitle = null;
+    }
   }
 
   /** Get the currently open photo */
-  private getCurrentPhoto() {
+  get currentPhoto() {
     if (!this.list.length || !this.photoswipe) {
       return null;
     }
-    const idx = this.photoswipe.currIndex - this.globalAnchor;
+    const idx = this.currIndex - this.globalAnchor;
     if (idx < 0 || idx >= this.list.length) {
       return null;
     }
     return this.list[idx];
+  }
+
+  /** Get download link for current photo */
+  get currentDownloadLink() {
+    return this.currentPhoto
+      ? window.location.origin + getDownloadLink(this.currentPhoto)
+      : null;
+  }
+
+  /** Event on file changed */
+  handleFileUpdated({ fileid }: { fileid: number }) {
+    console.log("file updated", fileid);
+    if (this.currentPhoto && this.currentPhoto.fileid === fileid) {
+      this.currentPhoto.etag += "_";
+      this.photoswipe.refreshSlideContent(this.currIndex);
+    }
   }
 
   /** Create the base photoswipe object */
@@ -216,8 +306,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
       if (navElem) navElem.style.zIndex = "0";
     });
     this.photoswipe.on("openingAnimationStart", () => {
+      this.isOpen = true;
       this.fullyOpened = false;
-      this.opened = true;
+      this.showControls = true;
       if (this.sidebarOpen) {
         this.openSidebar();
       }
@@ -226,9 +317,12 @@ export default class Viewer extends Mixins(GlobalMixin) {
       this.fullyOpened = true;
     });
     this.photoswipe.on("close", () => {
+      this.isOpen = false;
       this.fullyOpened = false;
-      this.opened = false;
+      this.showControls = false;
       this.hideSidebar();
+      this.setRouteHash(undefined);
+      this.updateTitle(undefined);
     });
     this.photoswipe.on("destroy", () => {
       document.body.classList.remove(klass);
@@ -236,8 +330,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
       // reset everything
       this.show = false;
-      this.opened = false;
+      this.isOpen = false;
       this.fullyOpened = false;
+      this.showControls = false;
       this.photoswipe = null;
       this.list = [];
       this.days.clear();
@@ -248,19 +343,27 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
     // toggle-controls
     this.photoswipe.on("tapAction", () => {
-      this.opened = !this.opened;
+      this.showControls = !this.showControls;
+    });
+
+    // Update vue route for deep linking
+    this.photoswipe.on("slideActivate", (e) => {
+      this.currIndex = this.photoswipe.currIndex;
+      this.setRouteHash(e.slide?.data?.photo);
+      this.updateTitle(e.slide?.data?.photo);
     });
 
     // Video support
     this.photoswipe.on("contentLoad", (e) => {
       const { content, isLazy } = e;
-      if (content.data.photo.flag & this.c.FLAG_IS_VIDEO) {
+      if ((content.data?.photo?.flag || 0) & this.c.FLAG_IS_VIDEO) {
         e.preventDefault();
 
         content.type = "video";
 
         // Create video element
         content.videoElement = document.createElement("video") as any;
+        content.videoElement.setAttribute("preload", "none");
         content.videoElement.classList.add("video-js");
 
         // Get DAV URL for video
@@ -281,7 +384,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
           fluid: true,
           autoplay: content.data.playvideo,
           controls: true,
-          preload: "metadata",
+          preload: "none",
           muted: true,
           html5: {
             vhs: {
@@ -295,7 +398,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
     // Play video on open slide
     this.photoswipe.on("slideActivate", (e) => {
       const { slide } = e;
-      if (slide.data.photo.flag & this.c.FLAG_IS_VIDEO) {
+      if ((slide.data?.photo?.flag || 0) & this.c.FLAG_IS_VIDEO) {
         setTimeout(() => {
           slide.content.element.querySelector("video")?.play();
         }, 500);
@@ -305,7 +408,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
     // Pause video on close slide
     this.photoswipe.on("slideDeactivate", (e) => {
       const { slide } = e;
-      if (slide.data.photo.flag & this.c.FLAG_IS_VIDEO) {
+      if ((slide.data?.photo?.flag || 0) & this.c.FLAG_IS_VIDEO) {
         slide.content.element.querySelector("video")?.pause();
       }
     });
@@ -318,14 +421,13 @@ export default class Viewer extends Mixins(GlobalMixin) {
     this.list = [...anchorPhoto.d.detail];
     let startIndex = -1;
 
+    // Get days list and map
     for (const r of rows) {
       if (r.type === IRowType.HEAD) {
         if (this.TagDayIDValueSet.has(r.dayId)) continue;
 
         if (r.day.dayid == anchorPhoto.d.dayid) {
-          startIndex = r.day.detail.findIndex(
-            (p) => p.fileid === anchorPhoto.fileid
-          );
+          startIndex = r.day.detail.indexOf(anchorPhoto);
           this.globalAnchor = this.globalCount;
         }
 
@@ -335,10 +437,13 @@ export default class Viewer extends Mixins(GlobalMixin) {
       }
     }
 
+    // Create basic viewer
     await this.createBase({
       index: this.globalAnchor + startIndex,
     });
 
+    // Lazy-generate item data.
+    // Load the next two days in the timeline.
     this.photoswipe.addFilter("itemData", (itemData, index) => {
       // Get photo object from list
       let idx = index - this.globalAnchor;
@@ -405,7 +510,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
       const thumbSrc: string =
         photo.flag & this.c.FLAG_IS_VIDEO
           ? undefined
-          : this.thumbElem(photo)?.querySelector("img")?.getAttribute("src") ||
+          : this.thumbElem(photo)?.getAttribute("src") ||
             getPreviewUrl(photo, false, 256);
 
       // Get full image
@@ -415,17 +520,36 @@ export default class Viewer extends Mixins(GlobalMixin) {
       };
     });
 
+    // Get the thumbnail image
     this.photoswipe.addFilter("thumbEl", (thumbEl, data, index) => {
       const photo = this.list[index - this.globalAnchor];
-      if (photo.flag & this.c.FLAG_IS_VIDEO) return thumbEl;
+      if (!photo || photo.flag & this.c.FLAG_IS_VIDEO) return thumbEl;
       return this.thumbElem(photo) || thumbEl;
+    });
+
+    // Scroll to keep the thumbnail in view
+    this.photoswipe.on("slideActivate", (e) => {
+      const thumb = this.thumbElem(e.slide.data?.photo);
+      if (thumb && this.fullyOpened) {
+        const rect = thumb.getBoundingClientRect();
+        if (rect.bottom < 50 || rect.top > window.innerHeight - 50) {
+          thumb.scrollIntoView({
+            block: "center",
+          });
+        }
+      }
     });
 
     this.photoswipe.init();
   }
 
+  /** Close the viewer */
+  public close() {
+    this.photoswipe?.close();
+  }
+
   /** Open with a static list of photos */
-  public async openStatic(photo: IPhoto, list: IPhoto[]) {
+  public async openStatic(photo: IPhoto, list: IPhoto[], thumbSize?: number) {
     this.list = list;
     await this.createBase({
       index: list.findIndex((p) => p.fileid === photo.fileid),
@@ -434,10 +558,12 @@ export default class Viewer extends Mixins(GlobalMixin) {
     this.globalCount = list.length;
     this.globalAnchor = 0;
 
-    this.photoswipe.addFilter("itemData", (itemData, index) => {
-      return this.getItemData(this.list[index]);
-    });
+    this.photoswipe.addFilter("itemData", (itemData, index) => ({
+      ...this.getItemData(this.list[index]),
+      msrc: thumbSize ? getPreviewUrl(photo, false, thumbSize) : undefined,
+    }));
 
+    this.isOpen = true;
     this.photoswipe.init();
   }
 
@@ -453,11 +579,89 @@ export default class Viewer extends Mixins(GlobalMixin) {
   }
 
   /** Get element for thumbnail if it exists */
-  private thumbElem(photo: IPhoto) {
+  private thumbElem(photo: IPhoto): HTMLImageElement | undefined {
     if (!photo) return;
-    return document.getElementById(
-      `memories-photo-${photo.key || photo.fileid}`
-    );
+    const elems = document.querySelectorAll(`.memories-thumb-${photo.key}`);
+
+    if (elems.length === 0) return;
+    if (elems.length === 1) return elems[0] as HTMLImageElement;
+
+    // Find element within 500px of the screen top
+    let elem: HTMLImageElement;
+    elems.forEach((e) => {
+      const rect = e.getBoundingClientRect();
+      if (rect.top > -500) {
+        elem = e as HTMLImageElement;
+      }
+    });
+
+    return elem;
+  }
+
+  /** Set the route hash to the given photo */
+  private setRouteHash(photo: IPhoto | undefined) {
+    const hash = photo ? utils.getViewerHash(photo) : "";
+    if (hash !== this.$route.hash) {
+      this.$router.replace({
+        ...this.$route,
+        hash,
+      });
+    }
+  }
+
+  get canEdit() {
+    return ["image/jpeg", "image/png"].includes(this.currentPhoto?.mimetype);
+  }
+
+  private openEditor() {
+    // Only for JPEG for now
+    if (!this.canEdit) return;
+    this.editorOpen = true;
+  }
+
+  /** Does the browser support native share API */
+  get canShare() {
+    return "share" in navigator;
+  }
+
+  /** Share the current photo externally */
+  private async shareCurrent() {
+    try {
+      // Check navigator support
+      if (!this.canShare) throw new Error("Share not supported");
+
+      // Get image data from "img.pswp__img"
+      const img = document.querySelector("img.pswp__img") as HTMLImageElement;
+      if (!img?.src) return;
+
+      // Shre image data using navigator api
+      const photo = this.currentPhoto;
+      if (!photo) return;
+
+      // No videos yet
+      if (photo.flag & this.c.FLAG_IS_VIDEO)
+        throw new Error(this.t("memories", "Video sharing not supported yet"));
+
+      // Get image blob
+      const blob = await (await fetch(img.src)).blob();
+      const data = {
+        files: [
+          new File([blob], photo.basename, {
+            type: blob.type,
+          }),
+        ],
+        title: photo.basename,
+        text: photo.basename,
+      };
+
+      if (!(<any>navigator).canShare(data)) {
+        throw new Error(this.t("memories", "Cannot share this type of data"));
+      }
+      await navigator.share(data);
+    } catch (err) {
+      console.error(err.name, err.message);
+      showError(err.message);
+    }
   }
 
   /** Delete this photo and refresh */
@@ -484,14 +688,14 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Is the current photo a favorite */
   private isFavorite() {
-    const p = this.getCurrentPhoto();
+    const p = this.currentPhoto;
     if (!p) return false;
     return Boolean(p.flag & this.c.FLAG_IS_FAVORITE);
   }
 
   /** Favorite the current photo */
   private async favoriteCurrent() {
-    const photo = this.getCurrentPhoto();
+    const photo = this.currentPhoto;
     const val = !this.isFavorite();
     try {
       this.updateLoading(1);
@@ -513,14 +717,14 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Download the current photo */
   private async downloadCurrent() {
-    const photo = this.getCurrentPhoto();
+    const photo = this.currentPhoto;
     if (!photo) return;
     dav.downloadFilesByPhotos([photo]);
   }
 
   /** Open the sidebar */
   private async openSidebar(photo?: IPhoto) {
-    const fInfo = await dav.getFiles([photo || this.getCurrentPhoto()]);
+    const fInfo = await dav.getFiles([photo || this.currentPhoto]);
     globalThis.OCA?.Files?.Sidebar?.setFullScreenMode?.(true);
     globalThis.OCA.Files.Sidebar.open(fInfo[0].filename);
   }
@@ -578,8 +782,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
    * Open the files app with the current file.
    */
   private async viewInFolder() {
-    const photo = this.getCurrentPhoto();
-    if (photo) dav.viewInFolder(photo);
+    if (this.currentPhoto) dav.viewInFolder(this.currentPhoto);
   }
 }
 </script>
@@ -609,7 +812,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
-  &.opened {
+  &.showControls {
     opacity: 1;
   }
 }
@@ -644,6 +847,13 @@ export default class Viewer extends Mixins(GlobalMixin) {
   }
   .pswp__icn-shadow {
     display: none;
+  }
+
+  // Hide arrows on mobile
+  @media (max-width: 768px) {
+    .pswp__button--arrow {
+      opacity: 0 !important;
+    }
   }
 }
 </style>

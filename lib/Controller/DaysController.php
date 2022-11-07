@@ -25,11 +25,12 @@ namespace OCA\Memories\Controller;
 
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\Files\FileInfo;
 use OCP\Files\Folder;
 
 class DaysController extends ApiBase
 {
+    use FoldersTrait;
+
     /**
      * @NoAdminRequired
      *
@@ -165,41 +166,6 @@ class DaysController extends ApiBase
         }
 
         return $this->day($id);
-    }
-
-    /**
-     * Get subfolders entry for days response.
-     */
-    public function getSubfoldersEntry(Folder &$folder)
-    {
-        // Ugly: get the view of the folder with reflection
-        // This is unfortunately the only way to get the contents of a folder
-        // matching a MIME type without using SEARCH, which is deep
-        $rp = new \ReflectionProperty('\OC\Files\Node\Node', 'view');
-        $rp->setAccessible(true);
-        $view = $rp->getValue($folder);
-
-        // Get the subfolders
-        $folders = $view->getDirectoryContent($folder->getPath(), FileInfo::MIMETYPE_FOLDER, $folder);
-
-        // Sort by name
-        usort($folders, function ($a, $b) {
-            return strnatcmp($a->getName(), $b->getName());
-        });
-
-        // Process to response type
-        return [
-            'dayid' => \OCA\Memories\Util::$TAG_DAYID_FOLDERS,
-            'count' => \count($folders),
-            'detail' => array_map(function ($node) {
-                return [
-                    'fileid' => $node->getId(),
-                    'name' => $node->getName(),
-                    'isfolder' => 1,
-                    'path' => $node->getPath(),
-                ];
-            }, $folders, []),
-        ];
     }
 
     /**

@@ -13,6 +13,7 @@ class TimelineQuery
     use TimelineQueryDays;
     use TimelineQueryFaces;
     use TimelineQueryFilters;
+    use TimelineQueryFolders;
     use TimelineQueryTags;
 
     protected IDBConnection $connection;

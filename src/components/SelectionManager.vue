@@ -569,7 +569,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
 
   > .text {
     flex-grow: 1;
-    line-height: 40px;
+    line-height: 42px;
     padding-left: 8px;
   }
 
