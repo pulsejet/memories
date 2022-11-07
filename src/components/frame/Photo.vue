@@ -6,6 +6,7 @@
       placeholder: data.flag & c.FLAG_PLACEHOLDER,
       leaving: data.flag & c.FLAG_LEAVING,
       error: data.flag & c.FLAG_LOAD_FAIL,
+      hasTouch: hasTouch,
     }"
   >
     <CheckCircle
@@ -249,7 +250,7 @@ $icon-size: $icon-half-size * 2;
   cursor: pointer;
 
   display: none;
-  .p-outer:hover > & {
+  .p-outer:not(.hasTouch):hover > & {
     display: flex;
   }
 
@@ -340,7 +341,7 @@ div.img-outer {
 
     display: none;
     transition: border-radius 0.1s ease-in;
-    .p-outer:not(.selected):hover > & {
+    .p-outer:not(.hasTouch):not(.selected):hover > & {
       display: block;
     }
   }
