@@ -25,23 +25,28 @@ import axios from "@nextcloud/axios";
 import moment from "moment";
 import * as utils from "../services/Utils";
 
-import CalendarIcon from "vue-material-design-icons/Calendar.vue";
-import CameraIrisIcon from "vue-material-design-icons/CameraIris.vue";
-
 import { IFileInfo } from "../types";
 import { getCanonicalLocale } from "@nextcloud/l10n";
+
+import CalendarIcon from "vue-material-design-icons/Calendar.vue";
+import CameraIrisIcon from "vue-material-design-icons/CameraIris.vue";
+import ImageIcon from "vue-material-design-icons/Image.vue";
 
 @Component({
   components: {},
 })
 export default class Metadata extends Mixins(GlobalMixin) {
+  private fileInfo: IFileInfo = null;
   private exif: { [prop: string]: any } = {};
+  private baseInfo: any = {};
 
   public async update(fileInfo: IFileInfo) {
+    this.fileInfo = fileInfo;
     this.exif = {};
     const res = await axios.get<any>(
       generateUrl("/apps/memories/api/info/{id}", { id: fileInfo.id })
     );
+    this.baseInfo = res.data;
     this.exif = res.data.exif || {};
   }
 
@@ -68,9 +73,18 @@ export default class Metadata extends Mixins(GlobalMixin) {
       });
     }
 
+    if (this.imageInfo) {
+      list.push({
+        title: this.imageInfo,
+        subtitle: this.imageInfoSub,
+        icon: ImageIcon,
+      });
+    }
+
     return list;
   }
 
+  /** Date taken info */
   get dateOriginal() {
     const dt = this.exif["DateTimeOriginal"] || this.exif["CreateDate"];
     if (!dt) return null;
@@ -100,6 +114,7 @@ export default class Metadata extends Mixins(GlobalMixin) {
     return parts;
   }
 
+  /** Camera make and model info */
   get camera() {
     const make = this.exif["Make"];
     const model = this.exif["Model"];
@@ -136,6 +151,30 @@ export default class Metadata extends Mixins(GlobalMixin) {
       return `${Math.round(speed * 10) / 10}`;
     }
   }
+
+  /** Image info */
+  get imageInfo() {
+    return this.fileInfo.basename || (<any>this.fileInfo).name;
+  }
+
+  get imageInfoSub() {
+    let parts = [];
+    let mp = Number(this.exif["Megapixels"]);
+
+    if (this.baseInfo.w && this.baseInfo.h) {
+      parts.push(`${this.baseInfo.w}x${this.baseInfo.h}`);
+
+      if (!mp) {
+        mp = (this.baseInfo.w * this.baseInfo.h) / 1000000;
+      }
+    }
+
+    if (mp) {
+      parts.unshift(`${mp.toFixed(1)}MP`);
+    }
+
+    return parts;
+  }
 }
 </script>
 
@@ -156,6 +195,9 @@ export default class Metadata extends Mixins(GlobalMixin) {
 
     .subtitle {
       font-size: 0.95em;
+      .part {
+        margin-right: 5px;
+      }
     }
   }
 }
