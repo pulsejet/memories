@@ -6,7 +6,7 @@
     :style="{ width: outerWidth }"
   >
     <div class="inner" ref="inner">
-      <div class="top-bar" v-if="photoswipe" :class="{ opened }">
+      <div class="top-bar" v-if="photoswipe" :class="{ showControls }">
         <NcActions :inline="3" container=".memories_viewer .pswp">
           <NcActionButton
             :aria-label="t('memories', 'Delete')"
@@ -108,8 +108,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
   @Emit("fetchDay") fetchDay(dayId: number) {}
   @Emit("updateLoading") updateLoading(delta: number) {}
 
+  public isOpen = false;
+
   private show = false;
-  private opened = false;
+  private showControls = false;
   private fullyOpened = false;
   private sidebarOpen = false;
   private sidebarWidth = 400;
@@ -216,8 +218,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
       if (navElem) navElem.style.zIndex = "0";
     });
     this.photoswipe.on("openingAnimationStart", () => {
+      this.isOpen = true;
       this.fullyOpened = false;
-      this.opened = true;
+      this.showControls = true;
       if (this.sidebarOpen) {
         this.openSidebar();
       }
@@ -226,9 +229,11 @@ export default class Viewer extends Mixins(GlobalMixin) {
       this.fullyOpened = true;
     });
     this.photoswipe.on("close", () => {
+      this.isOpen = false;
       this.fullyOpened = false;
-      this.opened = false;
+      this.showControls = false;
       this.hideSidebar();
+      this.setRouteHash(undefined);
     });
     this.photoswipe.on("destroy", () => {
       document.body.classList.remove(klass);
@@ -236,8 +241,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
       // reset everything
       this.show = false;
-      this.opened = false;
+      this.isOpen = false;
       this.fullyOpened = false;
+      this.showControls = false;
       this.photoswipe = null;
       this.list = [];
       this.days.clear();
@@ -248,7 +254,12 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
     // toggle-controls
     this.photoswipe.on("tapAction", () => {
-      this.opened = !this.opened;
+      this.showControls = !this.showControls;
+    });
+
+    // Update vue route for deep linking
+    this.photoswipe.on("slideActivate", (e) => {
+      this.setRouteHash(e.slide?.data?.photo);
     });
 
     // Video support
@@ -442,6 +453,11 @@ export default class Viewer extends Mixins(GlobalMixin) {
     this.photoswipe.init();
   }
 
+  /** Close the viewer */
+  public close() {
+    this.photoswipe?.close();
+  }
+
   /** Open with a static list of photos */
   public async openStatic(photo: IPhoto, list: IPhoto[]) {
     this.list = list;
@@ -490,6 +506,17 @@ export default class Viewer extends Mixins(GlobalMixin) {
     });
 
     return elem;
+  }
+
+  /** Set the route hash to the given photo */
+  private setRouteHash(photo: IPhoto | undefined) {
+    const hash = photo ? utils.getViewerHash(photo) : "";
+    if (hash !== this.$route.hash) {
+      this.$router.replace({
+        ...this.$route,
+        hash,
+      });
+    }
   }
 
   /** Delete this photo and refresh */
@@ -641,7 +668,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
-  &.opened {
+  &.showControls {
     opacity: 1;
   }
 }

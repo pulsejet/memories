@@ -227,12 +227,45 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
   mounted() {
     this.selectionManager = this.$refs.selectionManager;
     this.scrollerManager = this.$refs.scrollerManager;
-    this.createState();
+    this.routeChange(this.$route);
   }
 
   @Watch("$route")
-  async routeChange(from: any, to: any) {
-    await this.refresh();
+  async routeChange(to: any, from?: any) {
+    if (from?.path !== to.path) {
+      await this.refresh();
+    }
+
+    // Check if hash has changed
+    const viewerIsOpen = (this.$refs.viewer as any).isOpen;
+    if (from?.hash !== to.hash && to.hash?.startsWith("#v") && !viewerIsOpen) {
+      // Open viewer
+      const parts = to.hash.split("/");
+      if (parts.length !== 3) return;
+
+      const dayid = parseInt(parts[1]);
+      const fileid = parseInt(parts[2]);
+      if (isNaN(dayid) || isNaN(fileid)) return;
+
+      const day = this.heads[dayid]?.day;
+      if (day && !day.detail) {
+        const state = this.state;
+        await this.fetchDay(dayid, true);
+        if (state !== this.state) return;
+      }
+
+      const photo = day?.detail?.find((p) => p.fileid === fileid);
+      if (!photo) return;
+
+      (this.$refs.viewer as any).open(photo, this.list);
+    } else if (
+      from?.hash?.startsWith("#v") &&
+      !to.hash?.startsWith("#v") &&
+      viewerIsOpen
+    ) {
+      // Close viewer
+      (this.$refs.viewer as any).close();
+    }
   }
 
   beforeDestroy() {
@@ -784,7 +817,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
   }
 
   /** Fetch image data for one dayId */
-  async fetchDay(dayId: number) {
+  async fetchDay(dayId: number, now = false) {
     const head = this.heads[dayId];
     if (!head) return;
 
@@ -804,7 +837,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     this.fetchDayQueue.push(dayId);
 
     // Only single queries allowed for month vie
-    if (this.isMonthView()) {
+    if (now || this.isMonthView()) {
       return this.fetchDayExpire();
     }
 
@@ -1146,7 +1179,10 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       // selection mode
       this.selectionManager.selectPhoto(photo);
     } else {
-      (<any>this.$refs.viewer).open(photo, this.list);
+      this.$router.push({
+        ...this.$route,
+        hash: utils.getViewerHash(photo),
+      });
     }
   }
 
