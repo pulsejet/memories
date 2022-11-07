@@ -243,10 +243,12 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       const parts = to.hash.split("/");
       if (parts.length !== 3) return;
 
+      // Get params
       const dayid = parseInt(parts[1]);
       const fileid = parseInt(parts[2]);
       if (isNaN(dayid) || isNaN(fileid)) return;
 
+      // Get day
       const day = this.heads[dayid]?.day;
       if (day && !day.detail) {
         const state = this.state;
@@ -254,8 +256,20 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         if (state !== this.state) return;
       }
 
+      // Find photo
       const photo = day?.detail?.find((p) => p.fileid === fileid);
       if (!photo) return;
+
+      // Scroll to photo if initializing
+      if (!from) {
+        const index = this.list.findIndex(
+          (r) =>
+            r.day.dayid === dayid && r.photos?.find((p) => p.fileid === fileid)
+        );
+        if (index !== -1) {
+          (this.$refs.recycler as any).scrollToItem(index);
+        }
+      }
 
       (this.$refs.viewer as any).open(photo, this.list);
     } else if (
