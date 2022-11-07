@@ -164,14 +164,11 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Update the document title */
   private updateTitle(photo: IPhoto | undefined) {
-    const oc_defaults: any = globalThis.oc_defaults;
     if (!this.originalTitle) {
       this.originalTitle = document.title;
     }
     if (photo) {
-      document.title = `${photo.basename} - ${
-        globalThis.OCA.Theming?.name ?? oc_defaults.name
-      }`;
+      document.title = `${photo.basename} - ${globalThis.OCA.Theming?.name}`;
     } else {
       document.title = this.originalTitle;
       this.originalTitle = null;
@@ -500,7 +497,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
   }
 
   /** Open with a static list of photos */
-  public async openStatic(photo: IPhoto, list: IPhoto[]) {
+  public async openStatic(photo: IPhoto, list: IPhoto[], thumbSize?: number) {
     this.list = list;
     await this.createBase({
       index: list.findIndex((p) => p.fileid === photo.fileid),
@@ -509,10 +506,12 @@ export default class Viewer extends Mixins(GlobalMixin) {
     this.globalCount = list.length;
     this.globalAnchor = 0;
 
-    this.photoswipe.addFilter("itemData", (itemData, index) => {
-      return this.getItemData(this.list[index]);
-    });
+    this.photoswipe.addFilter("itemData", (itemData, index) => ({
+      ...this.getItemData(this.list[index]),
+      msrc: thumbSize ? getPreviewUrl(photo, false, thumbSize) : undefined,
+    }));
 
+    this.isOpen = true;
     this.photoswipe.init();
   }
 
