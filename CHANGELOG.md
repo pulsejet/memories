@@ -2,6 +2,12 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## v4.6.1, v3.6.1
+
+- **Feature**: Native sharing from the viewer (images only)
+- **Feature**: Deep linking to photos
+- Improvements to viewer UX
+
 ## v4.6.0, v3.6.0 (2022-11-06)
 
 - **Brand new photo viewer** with improved touch interface and UX
