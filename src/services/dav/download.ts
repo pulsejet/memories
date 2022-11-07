@@ -98,9 +98,9 @@ export function getDownloadLink(photo: IPhoto) {
       route.params.name
     );
     if (fInfos.length) {
-      return `remote.php/dav/${fInfos[0].originalFilename}`;
+      return `/remote.php/dav/${fInfos[0].originalFilename}`;
     }
   }
 
-  return `remote.php/dav/${photo.filename}`; // normal route
+  return `/remote.php/dav/${photo.filename}`; // normal route
 }

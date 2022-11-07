@@ -5,7 +5,15 @@
     :class="{ fullyOpened }"
     :style="{ width: outerWidth }"
   >
-    <div class="inner" ref="inner">
+    <ImageEditor
+      v-if="editorOpen"
+      :mime="currentPhoto.mimetype"
+      :src="currentDownloadLink"
+      :fileid="currentPhoto.fileid"
+      @close="editorOpen = false"
+    />
+
+    <div class="inner" ref="inner" v-show="!editorOpen">
       <div class="top-bar" v-if="photoswipe" :class="{ showControls }">
         <NcActions
           :inline="numInlineActions"
@@ -50,6 +58,17 @@
             </template>
           </NcActionButton>
           <NcActionButton
+            :aria-label="t('memories', 'Edit')"
+            v-if="canEdit"
+            @click="openEditor"
+            :close-after-click="true"
+          >
+            {{ t("memories", "Edit") }}
+            <template #icon>
+              <TuneIcon :size="24" />
+            </template>
+          </NcActionButton>
+          <NcActionButton
             :aria-label="t('memories', 'Download')"
             @click="downloadCurrent"
             :close-after-click="true"
@@ -77,14 +96,16 @@
 
 <script lang="ts">
 import { Component, Emit, Mixins } from "vue-property-decorator";
-
 import GlobalMixin from "../mixins/GlobalMixin";
+
 import { IDay, IPhoto, IRow, IRowType } from "../types";
 
 import { NcActions, NcActionButton } from "@nextcloud/vue";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import { generateUrl } from "@nextcloud/router";
 import { showError } from "@nextcloud/dialogs";
+
+import ImageEditor from "./ImageEditor.vue";
 
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
@@ -104,11 +125,13 @@ import StarOutlineIcon from "vue-material-design-icons/StarOutline.vue";
 import DownloadIcon from "vue-material-design-icons/Download.vue";
 import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
 import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
+import TuneIcon from "vue-material-design-icons/Tune.vue";
 
 @Component({
   components: {
     NcActions,
     NcActionButton,
+    ImageEditor,
     ShareIcon,
     DeleteIcon,
     StarIcon,
@@ -116,6 +139,7 @@ import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
     DownloadIcon,
     InfoIcon,
     OpenInNewIcon,
+    TuneIcon,
   },
 })
 export default class Viewer extends Mixins(GlobalMixin) {
@@ -125,6 +149,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   public isOpen = false;
   private originalTitle = null;
+  public editorOpen = false;
 
   private show = false;
   private showControls = false;
@@ -142,6 +167,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   private globalCount = 0;
   private globalAnchor = -1;
+  private currIndex = -1;
 
   mounted() {
     subscribe("files:sidebar:opened", this.handleAppSidebarOpen);
@@ -155,10 +181,14 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Number of buttons to show inline */
   get numInlineActions() {
+    let base = 3;
+    if (this.canShare) base++;
+    if (this.canEdit) base++;
+
     if (window.innerWidth < 768) {
-      return 3;
+      return Math.min(base, 3);
     } else {
-      return 4;
+      return Math.min(base, 5);
     }
   }
 
@@ -176,15 +206,22 @@ export default class Viewer extends Mixins(GlobalMixin) {
   }
 
   /** Get the currently open photo */
-  private getCurrentPhoto() {
+  get currentPhoto() {
     if (!this.list.length || !this.photoswipe) {
       return null;
     }
-    const idx = this.photoswipe.currIndex - this.globalAnchor;
+    const idx = this.currIndex - this.globalAnchor;
     if (idx < 0 || idx >= this.list.length) {
       return null;
     }
     return this.list[idx];
+  }
+
+  /** Get download link for current photo */
+  get currentDownloadLink() {
+    return this.currentPhoto
+      ? window.location.origin + getDownloadLink(this.currentPhoto)
+      : null;
   }
 
   /** Create the base photoswipe object */
@@ -298,6 +335,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
     // Update vue route for deep linking
     this.photoswipe.on("slideActivate", (e) => {
+      this.currIndex = this.photoswipe.currIndex;
       this.setRouteHash(e.slide?.data?.photo);
       this.updateTitle(e.slide?.data?.photo);
     });
@@ -312,6 +350,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
         // Create video element
         content.videoElement = document.createElement("video") as any;
+        content.videoElement.setAttribute("preload", "none");
         content.videoElement.classList.add("video-js");
 
         // Get DAV URL for video
@@ -332,7 +371,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
           fluid: true,
           autoplay: content.data.playvideo,
           controls: true,
-          preload: "metadata",
+          preload: "none",
           muted: true,
           html5: {
             vhs: {
@@ -557,6 +596,16 @@ export default class Viewer extends Mixins(GlobalMixin) {
     }
   }
 
+  get canEdit() {
+    return this.currentPhoto?.mimetype === "image/jpeg";
+  }
+
+  private openEditor() {
+    // Only for JPEG for now
+    if (!this.canEdit) return;
+    this.editorOpen = true;
+  }
+
   /** Does the browser support native share API */
   get canShare() {
     return "share" in navigator;
@@ -573,7 +622,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
       if (!img?.src) return;
 
       // Shre image data using navigator api
-      const photo = this.getCurrentPhoto();
+      const photo = this.currentPhoto;
       if (!photo) return;
 
       // No videos yet
@@ -626,14 +675,14 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Is the current photo a favorite */
   private isFavorite() {
-    const p = this.getCurrentPhoto();
+    const p = this.currentPhoto;
     if (!p) return false;
     return Boolean(p.flag & this.c.FLAG_IS_FAVORITE);
   }
 
   /** Favorite the current photo */
   private async favoriteCurrent() {
-    const photo = this.getCurrentPhoto();
+    const photo = this.currentPhoto;
     const val = !this.isFavorite();
     try {
       this.updateLoading(1);
@@ -655,14 +704,14 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Download the current photo */
   private async downloadCurrent() {
-    const photo = this.getCurrentPhoto();
+    const photo = this.currentPhoto;
     if (!photo) return;
     dav.downloadFilesByPhotos([photo]);
   }
 
   /** Open the sidebar */
   private async openSidebar(photo?: IPhoto) {
-    const fInfo = await dav.getFiles([photo || this.getCurrentPhoto()]);
+    const fInfo = await dav.getFiles([photo || this.currentPhoto]);
     globalThis.OCA?.Files?.Sidebar?.setFullScreenMode?.(true);
     globalThis.OCA.Files.Sidebar.open(fInfo[0].filename);
   }
@@ -720,8 +769,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
    * Open the files app with the current file.
    */
   private async viewInFolder() {
-    const photo = this.getCurrentPhoto();
-    if (photo) dav.viewInFolder(photo);
+    if (this.currentPhoto) dav.viewInFolder(this.currentPhoto);
   }
 }
 </script>

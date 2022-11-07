@@ -34,6 +34,7 @@
     "@nextcloud/sharing": "^0.1.0",
     "@nextcloud/vue": "7.0.0",
     "camelcase": "^7.0.0",
+    "filerobot-image-editor": "^4.3.7",
     "justified-layout": "^4.1.0",
     "moment": "^2.29.4",
     "path-posix": "^1.0.0",
