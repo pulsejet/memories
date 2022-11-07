@@ -31,6 +31,7 @@ import { getCanonicalLocale } from "@nextcloud/l10n";
 import CalendarIcon from "vue-material-design-icons/Calendar.vue";
 import CameraIrisIcon from "vue-material-design-icons/CameraIris.vue";
 import ImageIcon from "vue-material-design-icons/Image.vue";
+import LocationIcon from "vue-material-design-icons/MapMarker.vue";
 
 @Component({
   components: {},
@@ -39,15 +40,25 @@ export default class Metadata extends Mixins(GlobalMixin) {
   private fileInfo: IFileInfo = null;
   private exif: { [prop: string]: any } = {};
   private baseInfo: any = {};
+  private nominatim: any = null;
+  private state = 0;
 
   public async update(fileInfo: IFileInfo) {
+    this.state = Math.random();
     this.fileInfo = fileInfo;
     this.exif = {};
+
+    let state = this.state;
     const res = await axios.get<any>(
       generateUrl("/apps/memories/api/info/{id}", { id: fileInfo.id })
     );
+    if (state !== this.state) return;
+
     this.baseInfo = res.data;
     this.exif = res.data.exif || {};
+
+    // Lazy loading
+    this.getNominatim().catch();
   }
 
   get topFields() {
@@ -78,6 +89,14 @@ export default class Metadata extends Mixins(GlobalMixin) {
         title: this.imageInfo,
         subtitle: this.imageInfoSub,
         icon: ImageIcon,
+      });
+    }
+
+    if (this.nominatim) {
+      list.push({
+        title: this.address,
+        subtitle: [],
+        icon: LocationIcon,
       });
     }
 
@@ -148,7 +167,7 @@ export default class Metadata extends Mixins(GlobalMixin) {
     if (speed < 1) {
       return `1/${Math.round(1 / speed)}`;
     } else {
-      return `${Math.round(speed * 10) / 10}`;
+      return `${Math.round(speed * 10) / 10}s`;
     }
   }
 
@@ -174,6 +193,35 @@ export default class Metadata extends Mixins(GlobalMixin) {
     }
 
     return parts;
+  }
+
+  get address() {
+    if (!this.nominatim) return null;
+    const n = this.nominatim;
+    const country = n.address.country_code?.toUpperCase();
+
+    if (n.address?.city && n.address.state) {
+      return `${n.address.city}, ${n.address.state}, ${country}`;
+    } else if (n.address?.state) {
+      return `${n.address.state}, ${country}`;
+    } else if (n.address?.country) {
+      return n.address.country;
+    } else {
+      return n.display_name;
+    }
+  }
+
+  async getNominatim() {
+    const lat = this.exif["GPSLatitude"];
+    const lon = this.exif["GPSLongitude"];
+    if (!lat || !lon) return null;
+
+    const state = this.state;
+    const n = await axios.get(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+    );
+    if (state !== this.state) return;
+    this.nominatim = n.data;
   }
 }
 </script>
