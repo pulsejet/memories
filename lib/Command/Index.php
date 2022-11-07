@@ -277,14 +277,6 @@ class Index extends Command
                 return;
             }
 
-            // Clear previous line and write new one
-            $line = 'Scanning folder '.$folderPath;
-            if ($this->previousLineLength) {
-                $this->output->write("\r".str_repeat(' ', $this->previousLineLength)."\r");
-            }
-            $this->output->write($line."\r");
-            $this->previousLineLength = \strlen($line);
-
             $nodes = $folder->getDirectoryListing();
 
             foreach ($nodes as &$node) {
@@ -305,6 +297,15 @@ class Index extends Command
 
     private function parseFile(File &$file, bool &$refresh): void
     {
+        // Clear previous line and write new one
+        $line = 'Scanning file '.$file->getPath();
+        if ($this->previousLineLength) {
+            $this->output->write("\r".str_repeat(' ', $this->previousLineLength)."\r");
+        }
+        $this->output->write($line."\r");
+        $this->previousLineLength = \strlen($line);
+
+        // Process the file
         $res = $this->timelineWrite->processFile($file, $refresh);
         if (2 === $res) {
             ++$this->nProcessed;
