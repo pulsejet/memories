@@ -429,9 +429,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
     // Scroll to keep the thumbnail in view
     this.photoswipe.on("slideActivate", (e) => {
       const thumb = this.thumbElem(e.slide.data?.photo);
-      if (thumb) {
+      if (thumb && this.fullyOpened) {
         const rect = thumb.getBoundingClientRect();
-        if (rect.top < 0 || rect.bottom > window.innerHeight) {
+        if (rect.bottom < 50 || rect.top > window.innerHeight - 50) {
           thumb.scrollIntoView({
             block: "center",
           });
