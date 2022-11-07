@@ -179,7 +179,7 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
       );
       const response = await axios.put(putUrl, new File([blob], fullName));
 
-      showSuccess(this.t("viewer", "Image saved successfully"));
+      showSuccess(this.t("memories", "Image saved successfully"));
       if (putUrl !== this.src) {
         emit("files:file:created", {
           fileid:
@@ -190,7 +190,7 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
       }
       this.onClose(undefined, false);
     } catch (error) {
-      showError(this.t("viewer", "Error saving image"));
+      showError(this.t("memories", "Error saving image"));
     }
   }
 
@@ -202,10 +202,10 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
       translations.changesLoseConfirmation +
         "\n\n" +
         translations.changesLoseConfirmationHint,
-      this.t("viewer", "Unsaved changes"),
+      this.t("memories", "Unsaved changes"),
       {
         type: (<any>OC.dialogs).YES_NO_BUTTONS,
-        confirm: this.t("viewer", "Drop changes"),
+        confirm: this.t("memories", "Drop changes"),
         confirmClasses: "error",
         cancel: translations.cancel,
       },
