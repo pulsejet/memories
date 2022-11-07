@@ -34,8 +34,6 @@ class DaysController extends ApiBase
     /**
      * @NoAdminRequired
      *
-     * @NoCSRFRequired
-     *
      * @PublicPage
      */
     public function days(): JSONResponse
