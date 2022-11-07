@@ -409,7 +409,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
       const thumbSrc: string =
         photo.flag & this.c.FLAG_IS_VIDEO
           ? undefined
-          : this.thumbElem(photo)?.querySelector("img")?.getAttribute("src") ||
+          : this.thumbElem(photo)?.getAttribute("src") ||
             getPreviewUrl(photo, false, 256);
 
       // Get full image
@@ -471,11 +471,25 @@ export default class Viewer extends Mixins(GlobalMixin) {
   }
 
   /** Get element for thumbnail if it exists */
-  private thumbElem(photo: IPhoto) {
+  private thumbElem(photo: IPhoto): HTMLImageElement | undefined {
     if (!photo) return;
-    return document.getElementById(
-      `memories-photo-${photo.key || photo.fileid}`
+    const elems = document.querySelectorAll(
+      `.memories-thumb-${photo.key || photo.fileid}`
     );
+
+    if (elems.length === 0) return;
+    if (elems.length === 1) return elems[0] as HTMLImageElement;
+
+    // Find element within 500px of the screen top
+    let elem: HTMLImageElement;
+    elems.forEach((e) => {
+      const rect = e.getBoundingClientRect();
+      if (rect.top > -500) {
+        elem = e as HTMLImageElement;
+      }
+    });
+
+    return elem;
   }
 
   /** Delete this photo and refresh */

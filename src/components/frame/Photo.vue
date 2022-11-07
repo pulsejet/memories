@@ -1,6 +1,5 @@
 <template>
   <div
-    :id="`memories-photo-${data.key || data.fileid}`"
     class="p-outer fill-block"
     :class="{
       selected: data.flag & c.FLAG_SELECTED,
@@ -30,7 +29,7 @@
     >
       <img
         ref="img"
-        class="fill-block"
+        :class="['fill-block', `memories-thumb-${data.key || data.fileid}`]"
         draggable="false"
         :src="src"
         :key="data.fileid"
