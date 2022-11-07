@@ -7,7 +7,19 @@
   >
     <div class="inner" ref="inner">
       <div class="top-bar" v-if="photoswipe" :class="{ showControls }">
-        <NcActions :inline="3" container=".memories_viewer .pswp">
+        <NcActions
+          :inline="numInlineActions"
+          container=".memories_viewer .pswp"
+        >
+          <NcActionButton
+            :aria-label="t('memories', 'Share')"
+            @click="shareCurrent"
+            :close-after-click="true"
+            v-if="canShare"
+          >
+            {{ t("memories", "Share") }}
+            <template #icon> <ShareIcon :size="24" /> </template>
+          </NcActionButton>
           <NcActionButton
             :aria-label="t('memories', 'Delete')"
             @click="deleteCurrent"
@@ -72,6 +84,7 @@ import { IDay, IPhoto, IRow, IRowType } from "../types";
 import { NcActions, NcActionButton } from "@nextcloud/vue";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import { generateUrl } from "@nextcloud/router";
+import { showError } from "@nextcloud/dialogs";
 
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
@@ -84,6 +97,7 @@ import "photoswipe/style.css";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 
+import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
 import DeleteIcon from "vue-material-design-icons/Delete.vue";
 import StarIcon from "vue-material-design-icons/Star.vue";
 import StarOutlineIcon from "vue-material-design-icons/StarOutline.vue";
@@ -95,6 +109,7 @@ import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
   components: {
     NcActions,
     NcActionButton,
+    ShareIcon,
     DeleteIcon,
     StarIcon,
     StarOutlineIcon,
@@ -135,6 +150,15 @@ export default class Viewer extends Mixins(GlobalMixin) {
   beforeDestroy() {
     unsubscribe("files:sidebar:opened", this.handleAppSidebarOpen);
     unsubscribe("files:sidebar:closed", this.handleAppSidebarClose);
+  }
+
+  /** Number of buttons to show inline */
+  get numInlineActions() {
+    if (window.innerWidth < 768) {
+      return 3;
+    } else {
+      return 4;
+    }
   }
 
   /** Get the currently open photo */
@@ -512,6 +536,51 @@ export default class Viewer extends Mixins(GlobalMixin) {
         ...this.$route,
         hash,
       });
+    }
+  }
+
+  /** Does the browser support native share API */
+  get canShare() {
+    return "share" in navigator;
+  }
+
+  /** Share the current photo externally */
+  private async shareCurrent() {
+    try {
+      // Check navigator support
+      if (!this.canShare) throw new Error("Share not supported");
+
+      // Get image data from "img.pswp__img"
+      const img = document.querySelector("img.pswp__img") as HTMLImageElement;
+      if (!img?.src) return;
+
+      // Shre image data using navigator api
+      const photo = this.getCurrentPhoto();
+      if (!photo) return;
+
+      // No videos yet
+      if (photo.flag & this.c.FLAG_IS_VIDEO)
+        throw new Error(this.t("memories", "Video sharing not supported yet"));
+
+      // Get image blob
+      const blob = await (await fetch(img.src)).blob();
+      const data = {
+        files: [
+          new File([blob], photo.basename, {
+            type: blob.type,
+          }),
+        ],
+        title: photo.basename,
+        text: photo.basename,
+      };
+
+      if (!(<any>navigator).canShare(data)) {
+        throw new Error(this.t("memories", "Cannot share this type of data"));
+      }
+      await navigator.share(data);
+    } catch (err) {
+      console.error(err.name, err.message);
+      showError(err.message);
     }
   }
 
