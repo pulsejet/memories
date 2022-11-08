@@ -9,6 +9,7 @@ OC.L10N.register(
     "Tags" : "Etikedoj",
     "Maps" : "Mapoj",
     "Settings" : "Agordoj",
+    "Loading …" : "Ŝargas …",
     "Cancel" : "Nuligi",
     "Delete" : "Forigi",
     "Download" : "Elŝuti",
@@ -23,7 +24,6 @@ OC.L10N.register(
     "Hour" : "Horo",
     "Name" : "Nomo",
     "Update" : "Ĝisdatigi",
-    "Loading …" : "Ŝargas …",
     "Refresh" : "Aktualigi"
 },
 "nplurals=2; plural=(n != 1);");

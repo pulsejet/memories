@@ -12,6 +12,7 @@ OC.L10N.register(
     "Tags" : "Ετικέτες",
     "Maps" : "Χάρτες",
     "Settings" : "Ρυθμίσεις",
+    "Loading …" : "Φόρτωση …",
     "Cancel" : "Ακύρωση",
     "Delete" : "Διαγραφή",
     "Download" : "Λήψη",
@@ -30,7 +31,6 @@ OC.L10N.register(
     "Minute" : "Λεπτά",
     "Name" : "Όνομα",
     "Update" : "Ενημέρωση",
-    "Loading …" : "Φόρτωση …",
     "Refresh" : "Ανανέωση",
     "Share folder" : "Διαμοιρασμός φακέλου"
 },

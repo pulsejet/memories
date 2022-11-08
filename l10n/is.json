@@ -9,6 +9,8 @@
     "Tags" : "Merki",
     "Maps" : "Landakort",
     "Settings" : "Stillingar",
+    "Edit" : "Breyta",
+    "Loading …" : "Hleð inn …",
     "Cancel" : "Hætta við",
     "Delete" : "Eyða",
     "Download" : "Sækja",
@@ -27,7 +29,8 @@
     "Minute" : "Mínúta",
     "Name" : "Heiti",
     "Update" : "Uppfæra",
-    "Loading …" : "Hleð inn …",
-    "Refresh" : "Endurnýja"
+    "Refresh" : "Endurnýja",
+    "Image" : "Mynd",
+    "Position" : "Staða"
 },"pluralForm" :"nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);"
 }

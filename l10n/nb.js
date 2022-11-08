@@ -11,6 +11,8 @@ OC.L10N.register(
     "Tags" : "Merkelapper",
     "Maps" : "Kart",
     "Settings" : "Innstillinger",
+    "Edit" : "Rediger",
+    "Loading …" : "Laster ...",
     "Cancel" : "Avbryt",
     "Delete" : "Slett",
     "Download" : "Last ned",
@@ -28,8 +30,17 @@ OC.L10N.register(
     "Hour" : "Time",
     "Name" : "Navn",
     "Update" : "Oppdater",
-    "Loading …" : "Laster ...",
     "Refresh" : "Oppdater",
-    "Share folder" : "Del mappe"
+    "Share folder" : "Del mappe",
+    "Are you sure you want to continue?" : "Er du sikker på at du vil fortsette?",
+    "Undo" : "Angre",
+    "Show original image" : "Vis originalbilde",
+    "Zoom out" : "Zoom ut",
+    "Resize" : "Endre størrelse",
+    "Image" : "Bilde",
+    "Choose watermark type" : "Velg vannmerke-type",
+    "Horizontal" : "Horisontal",
+    "Position" : "Posisjon",
+    "Name is required." : "Navn er påkrevd."
 },
 "nplurals=2; plural=(n != 1);");

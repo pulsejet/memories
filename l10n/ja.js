@@ -11,6 +11,8 @@ OC.L10N.register(
     "Tags" : "タグ",
     "Maps" : "地図",
     "Settings" : "設定",
+    "Edit" : "編集",
+    "Loading …" : "読み込み中…",
     "Cancel" : "キャンセル",
     "Delete" : "削除",
     "Download" : "ダウンロード",
@@ -36,8 +38,14 @@ OC.L10N.register(
     "Minute" : "分",
     "Name" : "名前",
     "Update" : "更新",
-    "Loading …" : "読み込み中…",
     "Refresh" : "更新",
-    "Share folder" : "フォルダーを共有"
+    "Share folder" : "フォルダーを共有",
+    "Are you sure you want to continue?" : "本当に続けてよろしいですか？",
+    "Show original image" : "オリジナル画像を表示する",
+    "Zoom out" : "縮小",
+    "Resize" : "リサイズ",
+    "is not an image" : "画像ではありません",
+    "Image" : "画像",
+    "Position" : "位置"
 },
 "nplurals=1; plural=0;");

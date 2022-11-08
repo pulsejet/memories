@@ -10,12 +10,15 @@ OC.L10N.register(
     "Tags" : "Ознаке",
     "Maps" : "Мапе",
     "Settings" : "Поставке",
+    "Edit" : "Измени",
+    "Loading …" : "Учитавање…",
     "Cancel" : "Поништи",
     "Delete" : "Избриши",
     "Download" : "Преузми",
     "Favorite" : "Омиљени",
     "Unarchive" : "Врати из архиве",
     "View in folder" : "Види у фасцикли",
+    "Share" : "Подели",
     "Sidebar" : "Бочна трака",
     "Public link" : "Јавна веза",
     "Back" : "Назад",
@@ -28,7 +31,10 @@ OC.L10N.register(
     "Minute" : "Минут",
     "Name" : "Име",
     "Update" : "Ажурирај",
-    "Loading …" : "Учитавање…",
-    "Refresh" : "Освежи"
+    "Refresh" : "Освежи",
+    "Reset" : "Ресетуј",
+    "Undo" : "Опозови",
+    "Image" : "Слика",
+    "Position" : "Позиција"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);");

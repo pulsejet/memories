@@ -12,6 +12,8 @@ OC.L10N.register(
     "Tags" : "Etichette",
     "Maps" : "Mappe",
     "Settings" : "Impostazioni",
+    "Edit" : "Modifica",
+    "Loading …" : "Caricamento …",
     "Cancel" : "Annulla",
     "Delete" : "Elimina",
     "Download" : "Scarica",
@@ -49,10 +51,11 @@ OC.L10N.register(
     "Name" : "Nome",
     "Rename person" : "Rinomina persona",
     "Update" : "Aggiorna",
-    "Loading …" : "Caricamento …",
     "Refresh" : "Aggiorna",
     "Delete album" : "Elimina album",
     "Merge with different person" : "Unisci ad un'altra persona",
-    "Share folder" : "Condividi cartella"
+    "Share folder" : "Condividi cartella",
+    "Image" : "Immagine",
+    "Position" : "Posizione"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

@@ -8,12 +8,14 @@ OC.L10N.register(
     "Tags" : "Etiketat",
     "Maps" : "Harta",
     "Settings" : "Rregullimet",
+    "Edit" : "Përpuno",
     "Cancel" : "Anullo",
     "Delete" : "Fshi",
     "Download" : "Shkarko",
     "Favorite" : "I/E Preferuar",
     "Unarchive" : "Hiq nga arkivi",
     "View in folder" : "Shikoje në dosje",
+    "Share" : "Shpërndaje",
     "Back" : "Prapa",
     "Save" : "Ruaj",
     "Month" : "Muaj",
@@ -22,6 +24,10 @@ OC.L10N.register(
     "Hour" : "Orë",
     "Name" : "Emri",
     "Update" : "Përditëso",
-    "Refresh" : "Rifresko"
+    "Refresh" : "Rifresko",
+    "Reset" : "Rivendos",
+    "Undo" : "Ktheje pas",
+    "Position" : "Pozicion",
+    "Name is required." : "Emri është i domosdoshëm"
 },
 "nplurals=2; plural=(n != 1);");

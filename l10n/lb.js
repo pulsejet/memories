@@ -5,6 +5,7 @@ OC.L10N.register(
     "Tags" : "Tags",
     "Maps" : "Kaarten",
     "Settings" : "Astellungen",
+    "Edit" : "Änneren",
     "Cancel" : "Ofbriechen",
     "Delete" : "Läschen",
     "Download" : "Eroflueden",

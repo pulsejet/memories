@@ -10,6 +10,7 @@
     "Tags" : "Etiquetes",
     "Maps" : "Mapes",
     "Settings" : "Paràmetres",
+    "Loading …" : "Carregant …",
     "Cancel" : "Cancel·la",
     "Delete" : "Suprimeix",
     "Download" : "Baixa",
@@ -28,7 +29,6 @@
     "Minute" : "Minut",
     "Name" : "Cognom",
     "Update" : "Actualitzar",
-    "Loading …" : "Carregant …",
     "Refresh" : "Actualitza",
     "Share folder" : "Comparteix la carpeta"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

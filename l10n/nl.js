@@ -12,6 +12,8 @@ OC.L10N.register(
     "Tags" : "Tags",
     "Maps" : "Kaarten",
     "Settings" : "Instellingen",
+    "Edit" : "Bewerk",
+    "Loading …" : "Laden …",
     "Cancel" : "Annuleren",
     "Delete" : "Verwijder",
     "Download" : "Download",
@@ -30,8 +32,11 @@ OC.L10N.register(
     "Minute" : "Minuut",
     "Name" : "Naam",
     "Update" : "Update",
-    "Loading …" : "Laden …",
     "Refresh" : "Verversen",
-    "Share folder" : "Map delen"
+    "Share folder" : "Map delen",
+    "Undo" : "Ongedaan maken",
+    "Image" : "Afbeelding",
+    "Position" : "Positie",
+    "Name is required." : "Naam is verplicht."
 },
 "nplurals=2; plural=(n != 1);");

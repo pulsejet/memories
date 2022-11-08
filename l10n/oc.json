@@ -7,6 +7,8 @@
     "Tags" : "Etiquetas",
     "Maps" : "Mapas",
     "Settings" : "Paramètres",
+    "Edit" : "Modificar",
+    "Loading …" : "Cargament…",
     "Cancel" : "Anullar",
     "Delete" : "Suprimir",
     "Download" : "Telecargar",
@@ -23,7 +25,8 @@
     "Minute" : "Minuta",
     "Name" : "Nom",
     "Update" : "Actualizar",
-    "Loading …" : "Cargament…",
-    "Refresh" : "Actualizar"
+    "Refresh" : "Actualizar",
+    "Undo" : "Desfar",
+    "Position" : "Posicion"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }

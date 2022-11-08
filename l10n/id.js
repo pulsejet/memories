@@ -9,6 +9,7 @@ OC.L10N.register(
     "Tags" : "Tag",
     "Maps" : "Peta",
     "Settings" : "Setelan",
+    "Edit" : "Sunting",
     "Cancel" : "Membatalkan",
     "Delete" : "Hapus",
     "Download" : "Unduh",
