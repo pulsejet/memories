@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Favorites" : "Favorites",
     "Settings" : "Tetapan",
+    "Edit" : "Sunting",
     "Cancel" : "Batal",
     "Delete" : "Padam",
     "Download" : "Muat turun",

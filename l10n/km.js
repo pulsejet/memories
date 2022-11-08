@@ -5,6 +5,7 @@ OC.L10N.register(
     "Tags" : "ស្លាក",
     "Maps" : "ផែនទី",
     "Settings" : "ការកំណត់",
+    "Edit" : "កែប្រែ",
     "Cancel" : "បោះបង់",
     "Delete" : "លុប",
     "Download" : "ទាញយក",

@@ -10,6 +10,7 @@ OC.L10N.register(
     "Tags" : "برچسب ها",
     "Maps" : "نقشه‌ها",
     "Settings" : "تنظیمات",
+    "Loading …" : "بارگذاری …",
     "Cancel" : "لغو",
     "Delete" : "حذف",
     "Download" : "بارگیری",
@@ -25,7 +26,6 @@ OC.L10N.register(
     "Time" : "زمان",
     "Name" : "نام",
     "Update" : "یه‌روزرسانی",
-    "Loading …" : "بارگذاری …",
     "Refresh" : "تازه‌سازی",
     "Share folder" : "اشتراک‌گذاری پوشه"
 },

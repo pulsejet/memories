@@ -3,6 +3,8 @@
     "Videos" : "ວິດີໂອ",
     "Tags" : "ປ້າຍກຳກັບ",
     "Settings" : "ການຕັ້ງຄ່າ",
+    "Edit" : "ແກ້ໄຂ",
+    "Loading …" : "ກຳລັງໂຫຼດ",
     "Cancel" : "ຍົກເລີກ",
     "Delete" : "ລຶບ",
     "Download" : "ດາວໂຫລດ",
@@ -11,7 +13,6 @@
     "Back" : "ຫຼັງ",
     "Save" : "ບັນທຶກ",
     "Name" : "ຊື່",
-    "Loading …" : "ກຳລັງໂຫຼດ",
     "Refresh" : "Refresh"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

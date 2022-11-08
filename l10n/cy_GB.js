@@ -6,6 +6,7 @@ OC.L10N.register(
     "Archive" : "Archif",
     "Tags" : "Tagiau",
     "Settings" : "Gosodiadau",
+    "Loading …" : "Yn llwytho …",
     "Cancel" : "Diddymu",
     "Delete" : "Dileu",
     "Download" : "Llwytho i lawr",
@@ -19,7 +20,6 @@ OC.L10N.register(
     "Time" : "Amser",
     "Name" : "Enw",
     "Update" : "Diweddaru",
-    "Loading …" : "Yn llwytho …",
     "Refresh" : "Ail-lwytho"
 },
 "nplurals=4; plural=(n==1) ? 0 : (n==2) ? 1 : (n != 8 && n != 11) ? 2 : 3;");

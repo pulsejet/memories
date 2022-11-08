@@ -11,6 +11,8 @@ OC.L10N.register(
     "Tags" : "Merki",
     "Maps" : "Landakort",
     "Settings" : "Stillingar",
+    "Edit" : "Breyta",
+    "Loading …" : "Hleð inn …",
     "Cancel" : "Hætta við",
     "Delete" : "Eyða",
     "Download" : "Sækja",
@@ -29,7 +31,8 @@ OC.L10N.register(
     "Minute" : "Mínúta",
     "Name" : "Heiti",
     "Update" : "Uppfæra",
-    "Loading …" : "Hleð inn …",
-    "Refresh" : "Endurnýja"
+    "Refresh" : "Endurnýja",
+    "Image" : "Mynd",
+    "Position" : "Staða"
 },
 "nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);");

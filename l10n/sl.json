@@ -10,12 +10,15 @@
     "Tags" : "Oznake",
     "Maps" : "Zemljevidi",
     "Settings" : "Nastavitve",
+    "Edit" : "Uredi",
+    "Loading …" : "Poteka nalaganje …",
     "Cancel" : "Prekliči",
     "Delete" : "Izbriši",
     "Download" : "Prejmi",
     "Favorite" : "Priljubljeno",
     "Unarchive" : "Odarhiviraj",
     "View in folder" : "Pokaži v mapi",
+    "Share" : "Souporaba",
     "Sidebar" : "Bočno okno",
     "Copy public link" : "Kopiraj javno povezavo",
     "Public link" : "Javna povezava",
@@ -32,8 +35,12 @@
     "Minute" : "Minuta",
     "Name" : "Ime",
     "Update" : "Posodobi",
-    "Loading …" : "Poteka nalaganje …",
     "Refresh" : "Osveži",
-    "Share folder" : "Omogoči souporabo mape"
+    "Share folder" : "Omogoči souporabo mape",
+    "Reset" : "Ponastavi",
+    "Undo" : "Razveljavi",
+    "Image" : "Slika",
+    "Position" : "Položaj",
+    "Name is required." : "Ime mora biti vpisano."
 },"pluralForm" :"nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);"
 }

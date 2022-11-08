@@ -8,6 +8,8 @@ OC.L10N.register(
     "Tags" : "Etichete",
     "Maps" : "Hărți",
     "Settings" : "Setări",
+    "Edit" : "Editează",
+    "Loading …" : "Se încarcă…",
     "Cancel" : "Anulare",
     "Delete" : "Șterge",
     "Download" : "Descărcare",
@@ -23,8 +25,10 @@ OC.L10N.register(
     "Time" : "Timp",
     "Name" : "Nume",
     "Update" : "Actualizare",
-    "Loading …" : "Se încarcă…",
     "Refresh" : "Reîmprospătează",
-    "Share folder" : "Distribuie dosar"
+    "Share folder" : "Distribuie dosar",
+    "Reset" : "Resetare",
+    "Undo" : "Anulează ultima acțiune",
+    "Position" : "Poziție"
 },
 "nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));");

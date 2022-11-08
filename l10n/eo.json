@@ -7,6 +7,7 @@
     "Tags" : "Etikedoj",
     "Maps" : "Mapoj",
     "Settings" : "Agordoj",
+    "Loading …" : "Ŝargas …",
     "Cancel" : "Nuligi",
     "Delete" : "Forigi",
     "Download" : "Elŝuti",
@@ -21,7 +22,6 @@
     "Hour" : "Horo",
     "Name" : "Nomo",
     "Update" : "Ĝisdatigi",
-    "Loading …" : "Ŝargas …",
     "Refresh" : "Aktualigi"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

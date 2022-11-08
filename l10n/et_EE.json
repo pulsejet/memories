@@ -21,6 +21,7 @@
     "Hour" : "Tund",
     "Name" : "Nimi",
     "Update" : "Uuenda",
-    "Refresh" : "Värskenda"
+    "Refresh" : "Värskenda",
+    "Position" : "Asukoht"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

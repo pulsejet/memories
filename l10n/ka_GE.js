@@ -8,6 +8,7 @@ OC.L10N.register(
     "Tags" : "ტეგები",
     "Maps" : "რუკები",
     "Settings" : "პარამეტრები",
+    "Edit" : "შეცვლა",
     "Cancel" : "უარყოფა",
     "Delete" : "წაშლა",
     "Download" : "ჩამოტვირთვა",
@@ -22,6 +23,7 @@ OC.L10N.register(
     "Hour" : "საათი",
     "Name" : "სახელი",
     "Update" : "განახლება",
-    "Refresh" : "განახლება"
+    "Refresh" : "განახლება",
+    "Position" : "პოზიცია"
 },
 "nplurals=2; plural=(n!=1);");

@@ -8,6 +8,7 @@ OC.L10N.register(
     "Tags" : "Etikette",
     "Maps" : "Kaarte",
     "Settings" : "Instellings",
+    "Loading …" : "Laai …",
     "Cancel" : "Kanselleer",
     "Delete" : "Skrap",
     "Download" : "Laai af",
@@ -22,7 +23,6 @@ OC.L10N.register(
     "Hour" : "Uur",
     "Name" : "Naam",
     "Update" : "Werk by",
-    "Loading …" : "Laai …",
     "Refresh" : "Verfris"
 },
 "nplurals=2; plural=(n != 1);");

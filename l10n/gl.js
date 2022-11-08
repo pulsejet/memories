@@ -10,6 +10,8 @@ OC.L10N.register(
     "Tags" : "Etiquetas",
     "Maps" : "Mapas",
     "Settings" : "Axustes",
+    "Edit" : "Editar",
+    "Loading …" : "Cargando…",
     "Cancel" : "Cancelar",
     "Delete" : "Eliminar",
     "Download" : "Descargar",
@@ -28,7 +30,8 @@ OC.L10N.register(
     "Minute" : "Minuto",
     "Name" : "Nome",
     "Update" : "Actualizar",
-    "Loading …" : "Cargando…",
-    "Refresh" : "Actualizar"
+    "Refresh" : "Actualizar",
+    "Image" : "Imaxe",
+    "Position" : "Posicion"
 },
 "nplurals=2; plural=(n != 1);");
