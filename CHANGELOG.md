@@ -2,6 +2,11 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## v4.7.0, v3.7.0
+
+- **Note**: you must run `occ memories:index -f` to take advantage of new features.
+- **Feature**: show EXIF metadata in sidebar ([#68](https://github.com/pulsejet/memories/issues/68))
+
 ## v4.6.1, v3.6.1 (2022-11-07)
 
 - **Feature**: Native sharing from the viewer (images only)
