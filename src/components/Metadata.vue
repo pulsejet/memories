@@ -241,7 +241,7 @@ export default class Metadata extends Mixins(GlobalMixin) {
   }
 
   get mapUrl() {
-    const boxSize = 0.007;
+    const boxSize = 0.0075;
     const bbox = [
       this.lon - boxSize,
       this.lat - boxSize,
