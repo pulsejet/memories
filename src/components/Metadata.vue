@@ -218,7 +218,7 @@ export default class Metadata extends Mixins(GlobalMixin) {
 
     const state = this.state;
     const n = await axios.get(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=18`
     );
     if (state !== this.state) return;
     this.nominatim = n.data;
