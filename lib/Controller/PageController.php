@@ -97,6 +97,7 @@ class PageController extends Controller
 
         // Allow nominatim for metadata
         $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
+        $policy->addAllowedFrameDomain('www.openstreetmap.org');
 
         $response = new TemplateResponse($this->appName, 'main');
         $response->setContentSecurityPolicy($policy);

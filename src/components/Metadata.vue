@@ -5,13 +5,28 @@
         <component :is="field.icon" :size="24" />
       </div>
       <div class="text">
-        {{ field.title }} <br />
-        <span class="subtitle">
-          <span class="part" v-for="part in field.subtitle" :key="part">
-            {{ part }}
+        <template v-if="field.href">
+          <a :href="field.href" target="_blank" rel="noopener noreferrer">
+            {{ field.title }}
+          </a>
+        </template>
+        <template v-else>
+          {{ field.title }}
+        </template>
+
+        <template v-if="field.subtitle.length">
+          <br />
+          <span class="subtitle">
+            <span class="part" v-for="part in field.subtitle" :key="part">
+              {{ part }}
+            </span>
           </span>
-        </span>
+        </template>
       </div>
+    </div>
+
+    <div v-if="lat && lon" class="map">
+      <iframe class="fill-block" :src="mapUrl" />
     </div>
   </div>
 </template>
@@ -47,6 +62,7 @@ export default class Metadata extends Mixins(GlobalMixin) {
     this.state = Math.random();
     this.fileInfo = fileInfo;
     this.exif = {};
+    this.nominatim = null;
 
     let state = this.state;
     const res = await axios.get<any>(
@@ -66,6 +82,7 @@ export default class Metadata extends Mixins(GlobalMixin) {
       title: string;
       subtitle: string[];
       icon: any;
+      href?: string;
     }[] = [];
 
     if (this.dateOriginal) {
@@ -92,11 +109,12 @@ export default class Metadata extends Mixins(GlobalMixin) {
       });
     }
 
-    if (this.nominatim) {
+    if (this.address) {
       list.push({
         title: this.address,
         subtitle: [],
         icon: LocationIcon,
+        href: this.mapFullUrl,
       });
     }
 
@@ -196,7 +214,10 @@ export default class Metadata extends Mixins(GlobalMixin) {
   }
 
   get address() {
-    if (!this.nominatim) return null;
+    if (!this.lat || !this.lon) return null;
+
+    if (!this.nominatim) return this.t("memories", "Loading …");
+
     const n = this.nominatim;
     const country = n.address.country_code?.toUpperCase();
 
@@ -211,9 +232,33 @@ export default class Metadata extends Mixins(GlobalMixin) {
     }
   }
 
+  get lat() {
+    return this.exif["GPSLatitude"];
+  }
+
+  get lon() {
+    return this.exif["GPSLongitude"];
+  }
+
+  get mapUrl() {
+    const boxSize = 0.007;
+    const bbox = [
+      this.lon - boxSize,
+      this.lat - boxSize,
+      this.lon + boxSize,
+      this.lat + boxSize,
+    ];
+    const m = `${this.lat},${this.lon}`;
+    return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox.join()}&marker=${m}`;
+  }
+
+  get mapFullUrl() {
+    return `https://www.openstreetmap.org/?mlat=${this.lat}&mlon=${this.lon}#map=18/${this.lat}/${this.lon}`;
+  }
+
   async getNominatim() {
-    const lat = this.exif["GPSLatitude"];
-    const lon = this.exif["GPSLongitude"];
+    const lat = this.lat;
+    const lon = this.lon;
     if (!lat || !lon) return null;
 
     const state = this.state;
@@ -248,5 +293,10 @@ export default class Metadata extends Mixins(GlobalMixin) {
       }
     }
   }
+}
+
+.map {
+  width: 100%;
+  height: 200px;
 }
 </style>
