@@ -572,7 +572,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Get base data object */
   private getItemData(photo: IPhoto) {
-    let previewUrl = getPreviewUrl(photo, false, 2048);
+    let previewUrl = getPreviewUrl(photo, false, 1024);
 
     // Preview aren't animated
     if (photo.mimetype === "image/gif") {
