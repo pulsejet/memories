@@ -195,7 +195,7 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
       OCA.Files.Sidebar.registerTab(
         new OCA.Files.Sidebar.Tab({
           id: "memories-metadata",
-          name: this.t("memories", "Metadata"),
+          name: this.t("memories", "EXIF"),
           icon: "icon-details",
 
           async mount(el, fileInfo, context) {
