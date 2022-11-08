@@ -1,4 +1,6 @@
 import PhotoSwipe from "photoswipe";
+import videojs from "video.js";
+import "video.js/dist/video-js.min.css";
 
 /**
  * Check if slide has video content
@@ -64,8 +66,25 @@ class VideoContentSetup {
 
     // do not append video on nearby slides
     pswp.on("appendHeavy", (e) => {
-      if (isVideoContent(e.slide) && !e.slide.isActive) {
-        e.preventDefault();
+      if (isVideoContent(e.slide)) {
+        if (!e.slide.isActive) {
+          e.preventDefault();
+        } else {
+          const content = <any>e.slide.content;
+          content.videojs = videojs(content.videoElement, {
+            fluid: true,
+            autoplay: true,
+            controls: true,
+            sources: [{ src: e.slide.data.src }],
+            preload: "metadata",
+            inactivityTimeout: 0,
+            html5: {
+              vhs: {
+                withCredentials: true,
+              },
+            },
+          });
+        }
       }
     });
 
@@ -169,28 +188,31 @@ class VideoContentSetup {
     content.state = "loading";
     content.type = "video"; // TODO: move this to pswp core?
 
-    content.element = document.createElement("video");
+    content.videoElement = document.createElement("video");
+    content.videoElement.className = "video-js";
+    content.videoElement.setAttribute("controls", "true");
 
     if (this.options.videoAttributes) {
       for (let key in this.options.videoAttributes) {
-        content.element.setAttribute(
+        content.videoElement.setAttribute(
           key,
           this.options.videoAttributes[key] || ""
         );
       }
     }
 
-    content.element.setAttribute("poster", content.data.msrc);
-
-    this.preloadVideoPoster(content, content.data.msrc);
-
+    content.element = document.createElement("div");
     content.element.style.position = "absolute";
     content.element.style.left = 0;
     content.element.style.top = 0;
+    content.element.style.width = "100%";
+    content.element.style.height = "100%";
 
-    if (content.data.src) {
-      content.element.src = content.data.src;
-    }
+    // content.videoElement.setAttribute("poster", content.data.msrc);
+    // this.preloadVideoPoster(content, content.data.msrc);
+    content.onLoaded();
+
+    content.element.appendChild(content.videoElement);
   }
 
   preloadVideoPoster(content, src) {
@@ -209,15 +231,11 @@ class VideoContentSetup {
   }
 
   playVideo(content) {
-    if (content.element) {
-      content.element.play();
-    }
+    content.videojs?.play();
   }
 
   pauseVideo(content) {
-    if (content.element) {
-      content.element.pause();
-    }
+    content.videojs?.pause();
   }
 
   useContentPlaceholder(usePlaceholder, content) {

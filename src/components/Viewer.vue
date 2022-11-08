@@ -831,6 +831,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
   width: inherit;
 }
 
+:deep .video-js .vjs-big-play-button {
+  display: none;
+}
+
 :deep .pswp {
   .pswp__zoom-wrap {
     width: 100%;
