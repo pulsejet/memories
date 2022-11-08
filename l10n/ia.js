@@ -5,6 +5,7 @@ OC.L10N.register(
     "Tags" : "Etiquettas",
     "Maps" : "Mappas",
     "Settings" : "Configurationes",
+    "Edit" : "Modificar",
     "Cancel" : "Cancellar",
     "Delete" : "Deler",
     "Download" : "Discargar",

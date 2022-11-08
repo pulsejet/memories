@@ -9,6 +9,8 @@ OC.L10N.register(
     "Tags" : "태그",
     "Maps" : "지도",
     "Settings" : "설정",
+    "Edit" : "편집",
+    "Loading …" : "불러오는 중 …",
     "Cancel" : "취소",
     "Delete" : "삭제",
     "Download" : "다운로드",
@@ -26,7 +28,7 @@ OC.L10N.register(
     "Hour" : "시간",
     "Name" : "이름",
     "Update" : "업데이트",
-    "Loading …" : "불러오는 중 …",
-    "Refresh" : "새로 고침"
+    "Refresh" : "새로 고침",
+    "Position" : "위치"
 },
 "nplurals=1; plural=0;");

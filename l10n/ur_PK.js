@@ -3,11 +3,14 @@ OC.L10N.register(
     {
     "Favorites" : "Favorites",
     "Settings" : "سیٹینگز",
+    "Edit" : "تدوین کریں",
     "Cancel" : "منسوخ کریں",
     "Delete" : "حذف کریں",
     "Download" : "ڈاؤن لوڈ",
+    "Share" : "تقسیم",
     "Save" : "حفظ",
     "Month" : "ماہ",
-    "Name" : "اسم"
+    "Name" : "اسم",
+    "Reset" : "ری سیٹ"
 },
 "nplurals=2; plural=(n != 1);");

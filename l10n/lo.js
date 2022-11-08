@@ -5,6 +5,8 @@ OC.L10N.register(
     "Videos" : "ວິດີໂອ",
     "Tags" : "ປ້າຍກຳກັບ",
     "Settings" : "ການຕັ້ງຄ່າ",
+    "Edit" : "ແກ້ໄຂ",
+    "Loading …" : "ກຳລັງໂຫຼດ",
     "Cancel" : "ຍົກເລີກ",
     "Delete" : "ລຶບ",
     "Download" : "ດາວໂຫລດ",
@@ -13,7 +15,6 @@ OC.L10N.register(
     "Back" : "ຫຼັງ",
     "Save" : "ບັນທຶກ",
     "Name" : "ຊື່",
-    "Loading …" : "ກຳລັງໂຫຼດ",
     "Refresh" : "Refresh"
 },
 "nplurals=1; plural=0;");

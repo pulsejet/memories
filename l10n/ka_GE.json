@@ -6,6 +6,7 @@
     "Tags" : "ტეგები",
     "Maps" : "რუკები",
     "Settings" : "პარამეტრები",
+    "Edit" : "შეცვლა",
     "Cancel" : "უარყოფა",
     "Delete" : "წაშლა",
     "Download" : "ჩამოტვირთვა",
@@ -20,6 +21,7 @@
     "Hour" : "საათი",
     "Name" : "სახელი",
     "Update" : "განახლება",
-    "Refresh" : "განახლება"
+    "Refresh" : "განახლება",
+    "Position" : "პოზიცია"
 },"pluralForm" :"nplurals=2; plural=(n!=1);"
 }

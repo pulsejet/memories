@@ -8,6 +8,8 @@ OC.L10N.register(
     "Tags" : "Tag-үүд",
     "Maps" : "Газрын зураг",
     "Settings" : "Тохиргоо",
+    "Edit" : "засварлах",
+    "Loading …" : "Уншиж байна...",
     "Cancel" : "болиулах",
     "Delete" : "Устгах",
     "Download" : "Татах",
@@ -21,7 +23,8 @@ OC.L10N.register(
     "Time" : "Цаг",
     "Name" : "Нэр",
     "Update" : "Шинэчлэх",
-    "Loading …" : "Уншиж байна...",
-    "Refresh" : "Сэргээх"
+    "Refresh" : "Сэргээх",
+    "Undo" : "буцах",
+    "Position" : "Байр"
 },
 "nplurals=2; plural=(n != 1);");

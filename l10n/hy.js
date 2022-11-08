@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Favorites" : "Սիրվածներ",
     "Settings" : "կարգավորումներ",
+    "Edit" : "մշակել",
     "Cancel" : "ընդհատել",
     "Delete" : "հեռացնել",
     "Download" : "Ներբեռնել",

@@ -6,6 +6,7 @@
     "Tags" : "Etiquetes",
     "Maps" : "Mapes",
     "Settings" : "Settings",
+    "Loading …" : "Cargando...",
     "Cancel" : "Encaboxar",
     "Delete" : "Desaniciar",
     "Download" : "Baxar",
@@ -19,7 +20,6 @@
     "Hour" : "Hora",
     "Name" : "Nome",
     "Update" : "Anovar",
-    "Loading …" : "Cargando...",
     "Refresh" : "Refrescar"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

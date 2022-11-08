@@ -23,6 +23,7 @@ OC.L10N.register(
     "Hour" : "Tund",
     "Name" : "Nimi",
     "Update" : "Uuenda",
-    "Refresh" : "Värskenda"
+    "Refresh" : "Värskenda",
+    "Position" : "Asukoht"
 },
 "nplurals=2; plural=(n != 1);");

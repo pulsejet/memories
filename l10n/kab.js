@@ -5,6 +5,7 @@ OC.L10N.register(
     "Videos" : "Tividyutin",
     "Tags" : "Tibzimin",
     "Settings" : "Iɣewwaṛen",
+    "Edit" : "Ẓreg",
     "Cancel" : "Sefsex",
     "Delete" : "Kkes",
     "Download" : "Sider",

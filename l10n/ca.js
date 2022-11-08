@@ -12,6 +12,7 @@ OC.L10N.register(
     "Tags" : "Etiquetes",
     "Maps" : "Mapes",
     "Settings" : "Paràmetres",
+    "Loading …" : "Carregant …",
     "Cancel" : "Cancel·la",
     "Delete" : "Suprimeix",
     "Download" : "Baixa",
@@ -30,7 +31,6 @@ OC.L10N.register(
     "Minute" : "Minut",
     "Name" : "Cognom",
     "Update" : "Actualitzar",
-    "Loading …" : "Carregant …",
     "Refresh" : "Actualitza",
     "Share folder" : "Comparteix la carpeta"
 },

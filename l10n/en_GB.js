@@ -8,6 +8,7 @@ OC.L10N.register(
     "Tags" : "Tags",
     "Maps" : "Maps",
     "Settings" : "Settings",
+    "Loading …" : "Loading …",
     "Cancel" : "Cancel",
     "Delete" : "Delete",
     "Download" : "Download",
@@ -23,7 +24,7 @@ OC.L10N.register(
     "Hour" : "Hour",
     "Name" : "Surname",
     "Update" : "Update",
-    "Loading …" : "Loading …",
-    "Refresh" : "Refresh"
+    "Refresh" : "Refresh",
+    "Image" : "Image"
 },
 "nplurals=2; plural=(n != 1);");
