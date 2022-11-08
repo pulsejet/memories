@@ -4,6 +4,7 @@
       <div class="icon">
         <component :is="field.icon" :size="24" />
       </div>
+
       <div class="text">
         <template v-if="field.href">
           <a :href="field.href" target="_blank" rel="noopener noreferrer">
@@ -23,6 +24,18 @@
           </span>
         </template>
       </div>
+
+      <div class="edit" v-if="field.edit">
+        <NcActions :inline="1">
+          <NcActionButton
+            :aria-label="t('memories', 'Edit')"
+            @click="field.edit()"
+          >
+            {{ t("memories", "Edit") }}
+            <template #icon> <EditIcon :size="20" /> </template>
+          </NcActionButton>
+        </NcActions>
+      </div>
     </div>
 
     <div v-if="lat && lon" class="map">
@@ -35,21 +48,29 @@
 import { Component, Mixins } from "vue-property-decorator";
 import GlobalMixin from "../mixins/GlobalMixin";
 
+import { NcActions, NcActionButton } from "@nextcloud/vue";
 import { generateUrl } from "@nextcloud/router";
 import axios from "@nextcloud/axios";
+import { subscribe, unsubscribe } from "@nextcloud/event-bus";
+import { getCanonicalLocale } from "@nextcloud/l10n";
 import moment from "moment";
+
 import * as utils from "../services/Utils";
 
 import { IFileInfo } from "../types";
-import { getCanonicalLocale } from "@nextcloud/l10n";
 
+import EditIcon from "vue-material-design-icons/Pencil.vue";
 import CalendarIcon from "vue-material-design-icons/Calendar.vue";
 import CameraIrisIcon from "vue-material-design-icons/CameraIris.vue";
 import ImageIcon from "vue-material-design-icons/Image.vue";
 import LocationIcon from "vue-material-design-icons/MapMarker.vue";
 
 @Component({
-  components: {},
+  components: {
+    NcActions,
+    NcActionButton,
+    EditIcon,
+  },
 })
 export default class Metadata extends Mixins(GlobalMixin) {
   private fileInfo: IFileInfo = null;
@@ -77,12 +98,27 @@ export default class Metadata extends Mixins(GlobalMixin) {
     this.getNominatim().catch();
   }
 
+  mounted() {
+    subscribe("files:file:updated", this.handleFileUpdated);
+  }
+
+  beforeDestroy() {
+    unsubscribe("files:file:updated", this.handleFileUpdated);
+  }
+
+  private handleFileUpdated({ fileid }) {
+    if (fileid && this.fileInfo?.id === fileid) {
+      this.update(this.fileInfo);
+    }
+  }
+
   get topFields() {
     let list: {
       title: string;
       subtitle: string[];
       icon: any;
       href?: string;
+      edit?: () => void;
     }[] = [];
 
     if (this.dateOriginal) {
@@ -90,6 +126,7 @@ export default class Metadata extends Mixins(GlobalMixin) {
         title: this.dateOriginalStr,
         subtitle: this.dateOriginalTime,
         icon: CalendarIcon,
+        edit: () => globalThis.editDate(globalThis.currentViewerPhoto),
       });
     }
 
@@ -275,16 +312,24 @@ export default class Metadata extends Mixins(GlobalMixin) {
 .top-field {
   margin: 10px;
   margin-bottom: 25px;
+  display: flex;
+  align-items: center;
 
-  .icon {
+  .icon,
+  .edit {
     display: inline-block;
-    vertical-align: middle;
     margin-right: 10px;
-    color: var(--color-text-lighter);
+
+    :deep .material-design-icon {
+      color: var(--color-text-lighter);
+    }
+  }
+  .edit {
+    transform: translateX(10px);
   }
   .text {
     display: inline-block;
-    vertical-align: middle;
+    flex: 1;
 
     .subtitle {
       font-size: 0.95em;

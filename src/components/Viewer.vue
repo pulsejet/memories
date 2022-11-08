@@ -269,7 +269,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
       if (e.target instanceof HTMLElement) {
         if (
           e.target.closest("aside.app-sidebar") ||
-          e.target.closest(".v-popper__popper")
+          e.target.closest(".v-popper__popper") ||
+          e.target.closest(".modal-mask")
         ) {
           return;
         }
@@ -349,8 +350,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
     // Update vue route for deep linking
     this.photoswipe.on("slideActivate", (e) => {
       this.currIndex = this.photoswipe.currIndex;
-      this.setRouteHash(e.slide?.data?.photo);
-      this.updateTitle(e.slide?.data?.photo);
+      const photo = e.slide?.data?.photo;
+      this.setRouteHash(photo);
+      this.updateTitle(photo);
+      globalThis.currentViewerPhoto = photo;
     });
 
     // Video support
@@ -607,10 +610,19 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Set the route hash to the given photo */
   private setRouteHash(photo: IPhoto | undefined) {
-    if (!photo && !this.isOpen && this.$route.hash?.startsWith("#v")) {
-      return this.$router.back();
-    }
+    if (!photo) {
+      if (!this.isOpen && this.$route.hash?.startsWith("#v")) {
+        this.$router.back();
 
+        // Ensure this does not have the hash, otherwise replace it
+        if (this.$route.hash?.startsWith("#v")) {
+          this.$router.replace({
+            hash: "",
+          });
+        }
+      }
+      return;
+    }
     const hash = photo ? utils.getViewerHash(photo) : "";
     const route = {
       ...this.$route,

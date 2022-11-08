@@ -236,6 +236,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       await this.refresh();
     }
 
+    // The viewer might change the route immediately again
+    await this.$nextTick();
+
     // Check if hash has changed
     const viewerIsOpen = (this.$refs.viewer as any).isOpen;
     if (from?.hash !== to.hash && to.hash?.startsWith("#v") && !viewerIsOpen) {
