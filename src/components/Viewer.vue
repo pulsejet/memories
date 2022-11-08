@@ -115,8 +115,7 @@ import { getDownloadLink } from "../services/DavRequests";
 import PhotoSwipe, { PhotoSwipeOptions } from "photoswipe";
 import "photoswipe/style.css";
 
-import videojs from "video.js";
-import "video.js/dist/video-js.css";
+import PsVideo from "./PsVideo";
 
 import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
 import DeleteIcon from "vue-material-design-icons/Delete.vue";
@@ -357,63 +356,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
     });
 
     // Video support
-    this.photoswipe.on("contentLoad", (e) => {
-      const { content, isLazy } = e;
-      if ((content.data?.photo?.flag || 0) & this.c.FLAG_IS_VIDEO) {
-        e.preventDefault();
-
-        content.type = "video";
-
-        // Create video element
-        content.videoElement = document.createElement("video") as any;
-        content.videoElement.setAttribute("preload", "none");
-        content.videoElement.classList.add("video-js");
-
-        // Get DAV URL for video
-        const url = getDownloadLink(content.data.photo);
-
-        // Add child with source element
-        const source = document.createElement("source");
-        source.src = generateUrl(url);
-        source.type = content.data.photo.mimetype;
-        content.videoElement.appendChild(source);
-
-        // Create container div
-        content.element = document.createElement("div");
-        content.element.appendChild(content.videoElement);
-
-        // Init videojs
-        videojs(content.videoElement, {
-          fluid: true,
-          autoplay: content.data.playvideo,
-          controls: true,
-          preload: "none",
-          muted: true,
-          html5: {
-            vhs: {
-              withCredentials: true,
-            },
-          },
-        });
-      }
-    });
-
-    // Play video on open slide
-    this.photoswipe.on("slideActivate", (e) => {
-      const { slide } = e;
-      if ((slide.data?.photo?.flag || 0) & this.c.FLAG_IS_VIDEO) {
-        setTimeout(() => {
-          slide.content.element.querySelector("video")?.play();
-        }, 500);
-      }
-    });
-
-    // Pause video on close slide
-    this.photoswipe.on("slideDeactivate", (e) => {
-      const { slide } = e;
-      if ((slide.data?.photo?.flag || 0) & this.c.FLAG_IS_VIDEO) {
-        slide.content.element.querySelector("video")?.pause();
-      }
+    new PsVideo(this.photoswipe, {
+      videoAttributes: { controls: "", playsinline: "", preload: "none" },
+      autoplay: true,
+      preventDragOffset: 40,
     });
 
     return this.photoswipe;
@@ -511,10 +457,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
       // Get thumb image
       const thumbSrc: string =
-        photo.flag & this.c.FLAG_IS_VIDEO
-          ? undefined
-          : this.thumbElem(photo)?.getAttribute("src") ||
-            getPreviewUrl(photo, false, 256);
+        this.thumbElem(photo)?.getAttribute("src") ||
+        getPreviewUrl(photo, false, 256);
 
       // Get full image
       return {
@@ -573,10 +517,13 @@ export default class Viewer extends Mixins(GlobalMixin) {
   /** Get base data object */
   private getItemData(photo: IPhoto) {
     let previewUrl = getPreviewUrl(photo, false, 1024);
+    const isvideo = photo.flag & this.c.FLAG_IS_VIDEO;
 
     // Preview aren't animated
     if (photo.mimetype === "image/gif") {
       previewUrl = getDownloadLink(photo);
+    } else if (isvideo) {
+      previewUrl = generateUrl(getDownloadLink(photo));
     }
 
     return {
@@ -585,6 +532,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
       height: photo.h || undefined,
       thumbCropped: true,
       photo: photo,
+      type: isvideo ? "video" : "image",
     };
   }
 
@@ -881,10 +829,6 @@ export default class Viewer extends Mixins(GlobalMixin) {
 .inner,
 .inner :deep .pswp {
   width: inherit;
-}
-
-:deep .video-js .vjs-big-play-button {
-  display: none;
 }
 
 :deep .pswp {
