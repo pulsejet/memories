@@ -8,7 +8,7 @@
 [![Gitter](https://img.shields.io/gitter/room/pulsejet/memories)](https://gitter.im/pulsejet/memories)
 [![GitHub issues](https://img.shields.io/github/issues/pulsejet/memories)](https://github.com/pulsejet/memories/issues)
 
-Memories is a photo management app for Nextcloud with advanced features including:
+Memories is a batteries-included photo management solution for Nextcloud with advanced features including:
 
 - **📸 Timeline**: Sort photos and videos by date taken, parsed from Exif data.
 - **⏪ Rewind**: Jump to any time in the past instantly and relive your memories.
