@@ -89,11 +89,18 @@ class VideoController extends ApiBase
                 return new JSONResponse(['message' => 'Transcoder not configured'], Http::STATUS_INTERNAL_SERVER_ERROR);
             }
 
+            // Check for environment variables
+            $vaapi = $this->config->getSystemValue('memories.qsv', false);
+            $env = '';
+            if ($vaapi) {
+                $env .= 'VAAPI=1 ';
+            }
+
             // Check if already running
             exec('ps a | grep go-transcode | grep -v grep', $procs);
             if (0 === \count($procs)) {
                 shell_exec("mkdir -p {$tmpDir}/transcoder"); // php func has some weird problems
-                shell_exec("nohup {$transcoder} serve --config {$tConfig} > {$tmpDir}/transcoder/run.log 2>&1 & > /dev/null");
+                shell_exec("{$env} nohup {$transcoder} serve --config {$tConfig} > {$tmpDir}/transcoder/run.log 2>&1 & > /dev/null");
             }
 
             // wait for 2s and try again
