@@ -192,6 +192,16 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
+    public function facerecognition()
+    {
+        return $this->main();
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     */
     public function tags()
     {
         return $this->main();
