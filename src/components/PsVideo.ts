@@ -95,7 +95,6 @@ class VideoContentSetup {
               ...hlsSources,
               {
                 src: e.slide.data.src,
-                label: "Original",
               },
             ],
             preload: "metadata",
@@ -106,6 +105,18 @@ class VideoContentSetup {
                 withCredentials: false,
               },
             },
+          });
+
+          content.videojs.on("error", function () {
+            if (this.error().code === 4) {
+              if (this.src().includes("m3u8")) {
+                // HLS could not be streamed
+                console.error("Video.js: HLS stream could not be opened.");
+                this.src({
+                  src: e.slide.data.src,
+                });
+              }
+            }
           });
 
           content.videojs.qualityLevels();
