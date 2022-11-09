@@ -13,7 +13,7 @@
       v-if="loading === 0 && list.length === 0"
     >
       <template #icon>
-        <PeopleIcon v-if="$route.name === 'people'" />
+        <PeopleIcon v-if="$route.name === 'people' || $route.name === 'facerecognition'" />
         <ArchiveIcon v-else-if="$route.name === 'archive'" />
         <ImageMultipleIcon v-else />
       </template>
@@ -572,14 +572,31 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       query.set("archive", "1");
     }
 
-    // People
+    // Recognize People
     if (
       this.$route.name === "people" &&
       this.$route.params.user &&
       this.$route.params.name
     ) {
       query.set(
-        "face",
+        "people",
+        `${this.$route.params.user}/${this.$route.params.name}`
+      );
+
+      // Face rect
+      if (this.config_showFaceRect) {
+        query.set("facerect", "1");
+      }
+    }
+
+    // Face Recognition People
+    if (
+      this.$route.name === "facerecognition" &&
+      this.$route.params.user &&
+      this.$route.params.name
+    ) {
+      query.set(
+        "facerecognition",
         `${this.$route.params.user}/${this.$route.params.name}`
       );
 
@@ -629,6 +646,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       case "favorites":
         return this.t("memories", "Favorites");
       case "people":
+      case "facerecognition":
         return this.t("memories", "People");
       case "videos":
         return this.t("memories", "Videos");
@@ -695,7 +713,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       } else if (this.$route.name === "tags" && !this.$route.params.name) {
         data = await dav.getTagsData();
       } else if (this.$route.name === "people" && !this.$route.params.name) {
-        data = await dav.getPeopleData();
+        data = await dav.getPeopleRecognizeData();
+      } else if (this.$route.name === "facerecognition" && !this.$route.params.name) {
+        data = await dav.getPeopleFacerecognionData();
       } else if (this.$route.name === "albums" && !this.$route.params.name) {
         data = await dav.getAlbumsData("3");
       } else {

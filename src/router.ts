@@ -119,6 +119,15 @@ export default new Router({
     },
 
     {
+      path: "/facerecognition/:user?/:name?",
+      component: Timeline,
+      name: "facerecognition",
+      props: (route) => ({
+        rootTitle: t("memories", "People"),
+      }),
+    },
+
+    {
       path: "/tags/:name*",
       component: Timeline,
       name: "tags",

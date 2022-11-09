@@ -130,7 +130,13 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
       name: "people",
       icon: PeopleIcon,
       title: t("memories", "People"),
-      if: (self: any) => self.showPeople,
+      if: (self: any) => self.showRecognizePeople,
+    },
+    {
+      name: "facerecognition",
+      icon: PeopleIcon,
+      title: t("memories", "Face Recognition"),
+      if: (self: any) => self.showFaceRecognition,
     },
     {
       name: "archive",
@@ -163,8 +169,12 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
     return Number(version[0]);
   }
 
-  get showPeople() {
-    return this.config_recognizeEnabled || this.config_facerecognitionEnabled || getCurrentUser()?.isAdmin;
+  get showRecognizePeople() {
+    return this.config_recognizeEnabled || getCurrentUser()?.isAdmin;
+  }
+
+  get showFaceRecognition() {
+    return this.config_facerecognitionEnabled || getCurrentUser()?.isAdmin;
   }
 
   get isFirstStart() {

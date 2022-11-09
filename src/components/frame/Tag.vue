@@ -6,7 +6,8 @@
       hasPreview: previews.length > 0,
       onePreview: previews.length === 1,
       hasError: error,
-      isFace: isFace,
+      isFaceRecognize: isFaceRecognize,
+      isFaceRecognition: isFaceRecognition,
     }"
     :to="target"
     @click.native="openTag(data)"
@@ -83,9 +84,14 @@ export default class Tag extends Mixins(GlobalMixin) {
   }
 
   getPreviewUrl(photo: IPhoto) {
-    if (this.isFace) {
+    if (this.isFaceRecognize) {
       return generateUrl(
         "/apps/memories/api/recognize/people/preview/" + this.data.fileid
+      );
+    }
+    if (this.isFaceRecognition) {
+      return generateUrl(
+        "/apps/memories/api/facerecognition/people/preview/" + this.data.fileid
       );
     }
 
@@ -96,8 +102,12 @@ export default class Tag extends Mixins(GlobalMixin) {
     return getPreviewUrl(photo, true, 256);
   }
 
-  get isFace() {
-    return this.data.flag & constants.c.FLAG_IS_FACE;
+  get isFaceRecognize() {
+    return this.data.flag & constants.c.FLAG_IS_FACE_RECOGNIZE;
+  }
+
+  get isFaceRecognition() {
+    return this.data.flag & constants.c.FLAG_IS_FACE_RECOGNITION;
   }
 
   get isAlbum() {
@@ -110,7 +120,7 @@ export default class Tag extends Mixins(GlobalMixin) {
     this.subtitle = "";
 
     // Add dummy preview if face
-    if (this.isFace) {
+    if (this.isFaceRecognize || this.isFaceRecognition) {
       this.previews = [{ fileid: 0, etag: "", flag: 0 }];
       return;
     }
@@ -170,10 +180,16 @@ export default class Tag extends Mixins(GlobalMixin) {
   get target() {
     if (this.noNavigate) return {};
 
-    if (this.isFace) {
+    if (this.isFaceRecognize) {
       const name = this.data.name || this.data.fileid.toString();
       const user = this.data.user_id;
       return { name: "people", params: { name, user } };
+    }
+
+    if (this.isFaceRecognition) {
+      const name = this.data.name || this.data.fileid.toString();
+      const user = this.data.user_id;
+      return { name: "facerecognition", params: { name, user } };
     }
 
     if (this.isAlbum) {

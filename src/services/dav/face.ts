@@ -10,7 +10,7 @@ import * as base from "./base";
 /**
  * Get list of tags and convert to Days response
  */
-export async function getPeopleData(): Promise<IDay[]> {
+export async function getPeopleData(app: string): Promise<IDay[]> {
   // Query for photos
   let data: {
     id: number;
@@ -20,7 +20,7 @@ export async function getPeopleData(): Promise<IDay[]> {
   }[] = [];
   try {
     const res = await axios.get<typeof data>(
-      generateUrl("/apps/memories/api/recognize/people")
+      generateUrl("/apps/memories/api/" + app + "/people")
     );
     data = res.data;
   } catch (e) {
@@ -41,11 +41,20 @@ export async function getPeopleData(): Promise<IDay[]> {
             ...face,
             fileid: face.id,
             istag: true,
-            isface: true,
+            isfacerecognize: (app === 'recognize'),
+            isfacerecognition: (app === 'facerecognition'),
           } as any)
       ),
     },
   ];
+}
+
+export async function getPeopleFacerecognionData(): Promise<IDay[]> {
+  return await getPeopleData('facerecognition');
+}
+
+export async function getPeopleRecognizeData(): Promise<IDay[]> {
+  return await getPeopleData('recognize');
 }
 
 /**
