@@ -125,7 +125,7 @@ class VideoController extends ApiBase
     private function getUpstream($path, $profile)
     {
         $path = rawurlencode($path);
-        $ch = curl_init("http://localhost:47788/vod/{$path}/{$profile}");
+        $ch = curl_init("http://127.0.0.1:47788/vod/{$path}/{$profile}");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($ch, CURLOPT_HEADER, 0);
