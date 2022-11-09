@@ -5,10 +5,12 @@ OC.L10N.register(
     "Videos" : "Video",
     "Tags" : "Emneord",
     "Settings" : "Innstillingar",
+    "Edit" : "Rediger",
     "Cancel" : "Avbryt",
     "Delete" : "Slett",
     "Download" : "Last ned",
     "Favorite" : "Favoritt",
+    "Share" : "Del",
     "Back" : "Tilbake",
     "Save" : "Lagre",
     "Year" : "År",
@@ -18,6 +20,9 @@ OC.L10N.register(
     "Minute" : "Minutt",
     "Name" : "Namn",
     "Update" : "Oppdater",
-    "Refresh" : "Last inn på nytt"
+    "Refresh" : "Last inn på nytt",
+    "Continue" : "Gå vidare",
+    "Value" : "Verdi",
+    "Size" : "Storleik"
 },
 "nplurals=2; plural=(n != 1);");

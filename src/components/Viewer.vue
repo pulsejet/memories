@@ -115,8 +115,7 @@ import { getDownloadLink } from "../services/DavRequests";
 import PhotoSwipe, { PhotoSwipeOptions } from "photoswipe";
 import "photoswipe/style.css";
 
-import videojs from "video.js";
-import "video.js/dist/video-js.css";
+import PsVideo from "./PsVideo";
 
 import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
 import DeleteIcon from "vue-material-design-icons/Delete.vue";
@@ -269,7 +268,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
       if (e.target instanceof HTMLElement) {
         if (
           e.target.closest("aside.app-sidebar") ||
-          e.target.closest(".v-popper__popper")
+          e.target.closest(".v-popper__popper") ||
+          e.target.closest(".modal-mask")
         ) {
           return;
         }
@@ -349,68 +349,17 @@ export default class Viewer extends Mixins(GlobalMixin) {
     // Update vue route for deep linking
     this.photoswipe.on("slideActivate", (e) => {
       this.currIndex = this.photoswipe.currIndex;
-      this.setRouteHash(e.slide?.data?.photo);
-      this.updateTitle(e.slide?.data?.photo);
+      const photo = e.slide?.data?.photo;
+      this.setRouteHash(photo);
+      this.updateTitle(photo);
+      globalThis.currentViewerPhoto = photo;
     });
 
     // Video support
-    this.photoswipe.on("contentLoad", (e) => {
-      const { content, isLazy } = e;
-      if ((content.data?.photo?.flag || 0) & this.c.FLAG_IS_VIDEO) {
-        e.preventDefault();
-
-        content.type = "video";
-
-        // Create video element
-        content.videoElement = document.createElement("video") as any;
-        content.videoElement.setAttribute("preload", "none");
-        content.videoElement.classList.add("video-js");
-
-        // Get DAV URL for video
-        const url = getDownloadLink(content.data.photo);
-
-        // Add child with source element
-        const source = document.createElement("source");
-        source.src = generateUrl(url);
-        source.type = content.data.photo.mimetype;
-        content.videoElement.appendChild(source);
-
-        // Create container div
-        content.element = document.createElement("div");
-        content.element.appendChild(content.videoElement);
-
-        // Init videojs
-        videojs(content.videoElement, {
-          fluid: true,
-          autoplay: content.data.playvideo,
-          controls: true,
-          preload: "none",
-          muted: true,
-          html5: {
-            vhs: {
-              withCredentials: true,
-            },
-          },
-        });
-      }
-    });
-
-    // Play video on open slide
-    this.photoswipe.on("slideActivate", (e) => {
-      const { slide } = e;
-      if ((slide.data?.photo?.flag || 0) & this.c.FLAG_IS_VIDEO) {
-        setTimeout(() => {
-          slide.content.element.querySelector("video")?.play();
-        }, 500);
-      }
-    });
-
-    // Pause video on close slide
-    this.photoswipe.on("slideDeactivate", (e) => {
-      const { slide } = e;
-      if ((slide.data?.photo?.flag || 0) & this.c.FLAG_IS_VIDEO) {
-        slide.content.element.querySelector("video")?.pause();
-      }
+    new PsVideo(this.photoswipe, {
+      videoAttributes: { controls: "", playsinline: "", preload: "none" },
+      autoplay: true,
+      preventDragOffset: 40,
     });
 
     return this.photoswipe;
@@ -508,10 +457,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
       // Get thumb image
       const thumbSrc: string =
-        photo.flag & this.c.FLAG_IS_VIDEO
-          ? undefined
-          : this.thumbElem(photo)?.getAttribute("src") ||
-            getPreviewUrl(photo, false, 256);
+        this.thumbElem(photo)?.getAttribute("src") ||
+        getPreviewUrl(photo, false, 256);
 
       // Get full image
       return {
@@ -569,12 +516,23 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Get base data object */
   private getItemData(photo: IPhoto) {
+    let previewUrl = getPreviewUrl(photo, false, 1024);
+    const isvideo = photo.flag & this.c.FLAG_IS_VIDEO;
+
+    // Preview aren't animated
+    if (photo.mimetype === "image/gif") {
+      previewUrl = getDownloadLink(photo);
+    } else if (isvideo) {
+      previewUrl = generateUrl(getDownloadLink(photo));
+    }
+
     return {
-      src: getPreviewUrl(photo, false, 2048),
+      src: previewUrl,
       width: photo.w || undefined,
       height: photo.h || undefined,
       thumbCropped: true,
       photo: photo,
+      type: isvideo ? "video" : "image",
     };
   }
 
@@ -600,12 +558,30 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Set the route hash to the given photo */
   private setRouteHash(photo: IPhoto | undefined) {
+    if (!photo) {
+      if (!this.isOpen && this.$route.hash?.startsWith("#v")) {
+        this.$router.back();
+
+        // Ensure this does not have the hash, otherwise replace it
+        if (this.$route.hash?.startsWith("#v")) {
+          this.$router.replace({
+            hash: "",
+          });
+        }
+      }
+      return;
+    }
     const hash = photo ? utils.getViewerHash(photo) : "";
+    const route = {
+      ...this.$route,
+      hash,
+    };
     if (hash !== this.$route.hash) {
-      this.$router.replace({
-        ...this.$route,
-        hash,
-      });
+      if (this.$route.hash) {
+        this.$router.replace(route);
+      } else {
+        this.$router.push(route);
+      }
     }
   }
 
@@ -621,7 +597,11 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Does the browser support native share API */
   get canShare() {
-    return "share" in navigator;
+    return (
+      "share" in navigator &&
+      this.currentPhoto &&
+      !(this.currentPhoto.flag & this.c.FLAG_IS_VIDEO)
+    );
   }
 
   /** Share the current photo externally */
@@ -644,9 +624,24 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
       // Get image blob
       const blob = await (await fetch(img.src)).blob();
+
+      // Fix basename extension
+      let basename = photo.basename;
+      let targetExts = [];
+      if (photo.mimetype === "image/png") {
+        targetExts = ["png"];
+      } else {
+        targetExts = ["jpg", "jpeg"];
+      }
+
+      // Append extension if not found
+      if (!targetExts.includes(basename.split(".").pop().toLowerCase())) {
+        basename += "." + targetExts[0];
+      }
+
       const data = {
         files: [
-          new File([blob], photo.basename, {
+          new File([blob], basename, {
             type: blob.type,
           }),
         ],
@@ -657,7 +652,14 @@ export default class Viewer extends Mixins(GlobalMixin) {
       if (!(<any>navigator).canShare(data)) {
         throw new Error(this.t("memories", "Cannot share this type of data"));
       }
-      await navigator.share(data);
+
+      try {
+        await navigator.share(data);
+      } catch (e) {
+        // Don't show this error because it's silly stuff
+        // like "share canceled"
+        console.error(e);
+      }
     } catch (err) {
       console.error(err.name, err.message);
       showError(err.message);
@@ -726,6 +728,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
   private async openSidebar(photo?: IPhoto) {
     const fInfo = await dav.getFiles([photo || this.currentPhoto]);
     globalThis.OCA?.Files?.Sidebar?.setFullScreenMode?.(true);
+    globalThis.OCA.Files.Sidebar.setActiveTab("memories-metadata");
     globalThis.OCA.Files.Sidebar.open(fInfo[0].filename);
   }
 

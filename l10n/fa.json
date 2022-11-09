@@ -8,11 +8,14 @@
     "Tags" : "برچسب ها",
     "Maps" : "نقشه‌ها",
     "Settings" : "تنظیمات",
+    "Edit" : "ویرایش",
+    "Loading …" : "بارگذاری …",
     "Cancel" : "لغو",
     "Delete" : "حذف",
     "Download" : "بارگیری",
     "Favorite" : "مورد‌ ‌علاقه‌",
     "View in folder" : "مشاهده در پوشه",
+    "Share" : "هم‌رسانی",
     "Copy public link" : "پیوند عمومی را کپی کنید",
     "Public link" : "پیوند عمومی",
     "Back" : "بازگشت",
@@ -23,8 +26,15 @@
     "Time" : "زمان",
     "Name" : "نام",
     "Update" : "یه‌روزرسانی",
-    "Loading …" : "بارگذاری …",
     "Refresh" : "تازه‌سازی",
-    "Share folder" : "اشتراک‌گذاری پوشه"
+    "Share folder" : "اشتراک‌گذاری پوشه",
+    "Reset" : "بازنشاندن",
+    "Continue" : "ادامه دادن",
+    "Undo" : "برگرداندن",
+    "Original" : "اصلی",
+    "Value" : "مقدار",
+    "Text" : "متن",
+    "Size" : "اندازه",
+    "Extension" : "گسترش"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }

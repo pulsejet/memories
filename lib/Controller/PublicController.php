@@ -105,9 +105,21 @@ class PublicController extends AuthPublicShareController
         // App version
         $this->initialState->provideInitialState('version', $this->appManager->getAppInfo('memories')['version']);
 
+        // Video configuration
+        $this->initialState->provideInitialState('notranscode', $this->config->getSystemValue('memories.no_transcode', 'UNSET'));
+
         $policy = new ContentSecurityPolicy();
         $policy->addAllowedWorkerSrcDomain("'self'");
         $policy->addAllowedScriptDomain("'self'");
+
+        // Video player
+        $policy->addAllowedWorkerSrcDomain('blob:');
+        $policy->addAllowedScriptDomain('blob:');
+        $policy->addAllowedMediaDomain('blob:');
+
+        // Allow nominatim for metadata
+        $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
+        $policy->addAllowedFrameDomain('www.openstreetmap.org');
 
         $response = new TemplateResponse($this->appName, 'main');
         $response->setContentSecurityPolicy($policy);

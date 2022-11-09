@@ -5,15 +5,20 @@ OC.L10N.register(
     "Videos" : "ວິດີໂອ",
     "Tags" : "ປ້າຍກຳກັບ",
     "Settings" : "ການຕັ້ງຄ່າ",
+    "Edit" : "ແກ້ໄຂ",
+    "Loading …" : "ກຳລັງໂຫຼດ",
     "Cancel" : "ຍົກເລີກ",
     "Delete" : "ລຶບ",
     "Download" : "ດາວໂຫລດ",
     "Favorite" : "ລາຍການທີ່ມັກ",
     "View in folder" : "ເບິ່ງໃນໂຟນເດີ",
+    "Share" : "ແບ່ງປັນ",
     "Back" : "ຫຼັງ",
     "Save" : "ບັນທຶກ",
     "Name" : "ຊື່",
-    "Loading …" : "ກຳລັງໂຫຼດ",
-    "Refresh" : "Refresh"
+    "Refresh" : "Refresh",
+    "Continue" : "ສືບຕໍ່",
+    "Original" : "ຕົ້ນສະບັບ",
+    "Size" : "ຂະຫນາດ"
 },
 "nplurals=1; plural=0;");

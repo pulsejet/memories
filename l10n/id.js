@@ -9,11 +9,13 @@ OC.L10N.register(
     "Tags" : "Tag",
     "Maps" : "Peta",
     "Settings" : "Setelan",
+    "Edit" : "Sunting",
     "Cancel" : "Membatalkan",
     "Delete" : "Hapus",
     "Download" : "Unduh",
     "Favorite" : "Favorit",
     "View in folder" : "Lihat dalam folder",
+    "Share" : "Bagikan",
     "Copy public link" : "Salin tautan publik",
     "Back" : "Kembali",
     "Save" : "Simpan",
@@ -23,6 +25,10 @@ OC.L10N.register(
     "Hour" : "Jam",
     "Name" : "Nama",
     "Update" : "Perbarui",
-    "Refresh" : "Muat ulang"
+    "Refresh" : "Muat ulang",
+    "Reset" : "Setel ulang",
+    "Continue" : "Lanjutkan",
+    "Undo" : "Undo",
+    "Size" : "Ukuran"
 },
 "nplurals=1; plural=0;");

@@ -106,6 +106,7 @@ import { getCurrentUser } from "@nextcloud/auth";
 import Timeline from "./components/Timeline.vue";
 import Settings from "./components/Settings.vue";
 import FirstStart from "./components/FirstStart.vue";
+import Metadata from "./components/Metadata.vue";
 import GlobalMixin from "./mixins/GlobalMixin";
 import UserConfig from "./mixins/UserConfig";
 
@@ -147,6 +148,8 @@ import MapIcon from "vue-material-design-icons/Map.vue";
 export default class App extends Mixins(GlobalMixin, UserConfig) {
   // Outer element
 
+  private metadataComponent!: Metadata;
+
   get ncVersion() {
     const version = (<any>window.OC).config.version.split(".");
     return Number(version[0]);
@@ -185,6 +188,38 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
     const colorPrimary =
       getComputedStyle(root).getPropertyValue("--color-primary");
     root.style.setProperty("--color-primary-select-light", `${colorPrimary}40`);
+
+    // Register sidebar metadata tab
+    const OCA = globalThis.OCA;
+    if (OCA.Files && OCA.Files.Sidebar) {
+      OCA.Files.Sidebar.registerTab(
+        new OCA.Files.Sidebar.Tab({
+          id: "memories-metadata",
+          name: this.t("memories", "EXIF"),
+          icon: "icon-details",
+
+          async mount(el, fileInfo, context) {
+            if (this.metadataComponent) {
+              this.metadataComponent.$destroy();
+            }
+            this.metadataComponent = new Metadata({
+              // Better integration with vue parent component
+              parent: context,
+            });
+            // Only mount after we have all the info we need
+            await this.metadataComponent.update(fileInfo);
+            this.metadataComponent.$mount(el);
+          },
+          update(fileInfo) {
+            this.metadataComponent.update(fileInfo);
+          },
+          destroy() {
+            this.metadataComponent.$destroy();
+            this.metadataComponent = null;
+          },
+        })
+      );
+    }
   }
 
   async beforeMount() {

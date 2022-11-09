@@ -1,0 +1,59 @@
+# allow debug outputs
+debug: false
+
+# mount debug pprof endpoint at /debug/pprof/
+pprof: false
+
+# bind server to IP:PORT (use :47788 for all connections)
+# DO NOT expose this port to the world
+bind: localhost:47788
+
+# X-Forwarded-For headers will be used to determine the client IP
+proxy: true
+
+# For static files
+vod:
+  # Root directory for media
+  media-dir: /
+
+  # Temporary transcode output directory, if empty, default tmp folder will be used
+  transcode-dir: /tmp/transcoder/data
+
+  # Available video profiles
+  # Do not change these
+  video-profiles:
+    360p:
+      width: 640 # px
+      height: 360 # px
+      bitrate: 800 # kbps
+    480p:
+      width: 640
+      height: 480
+      bitrate: 1200
+    720p:
+      width: 1280
+      height: 720
+      bitrate: 2800
+    1080p:
+      width: 1920
+      height: 1080
+      bitrate: 5000
+
+  # Use video keyframes as existing reference for chunks split
+  # Using this might cause long probing times in order to get
+  # all keyframes - therefore they should be cached
+  video-keyframes: false
+
+  # Single audio profile used
+  audio-profile:
+    bitrate: 192 # kbps
+
+  # If cache is enabled
+  cache: true
+  # If dir is empty, cache will be stored in the same directory as media source
+  # If not empty, cache files will be saved to specified directory
+  cache-dir: /tmp/transcoder/cache
+
+  # OPTIONAL: Use custom ffmpeg & ffprobe binary paths
+  ffmpeg-binary: ffmpeg
+  ffprobe-binary: ffprobe

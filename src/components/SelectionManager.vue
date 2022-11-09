@@ -179,6 +179,13 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
         if: () => this.$route.name === "people",
       },
     ];
+
+    // Ugly: globally exposed functions
+    globalThis.editDate = (photo: IPhoto) => {
+      const sel = new Map<number, IPhoto>();
+      sel.set(photo.fileid, photo);
+      this.editDateSelection(sel);
+    };
   }
 
   @Watch("show")

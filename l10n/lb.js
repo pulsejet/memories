@@ -5,11 +5,13 @@ OC.L10N.register(
     "Tags" : "Tags",
     "Maps" : "Kaarten",
     "Settings" : "Astellungen",
+    "Edit" : "Änneren",
     "Cancel" : "Ofbriechen",
     "Delete" : "Läschen",
     "Download" : "Eroflueden",
     "Favorite" : "Favorit",
     "View in folder" : "Kuk am Dossier ",
+    "Share" : "Deelen",
     "Back" : "Zeréck",
     "Save" : "Späicheren",
     "Month" : "Mount",
@@ -18,6 +20,10 @@ OC.L10N.register(
     "Hour" : "Stonn",
     "Name" : "Numm",
     "Update" : "Update",
-    "Refresh" : "Opfrëschen"
+    "Refresh" : "Opfrëschen",
+    "Reset" : "Zeréck setzen",
+    "Continue" : "Weider",
+    "Custom" : "Individualiséier",
+    "Size" : "Gréisst"
 },
 "nplurals=2; plural=(n != 1);");

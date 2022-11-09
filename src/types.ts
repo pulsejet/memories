@@ -1,6 +1,8 @@
 import { VueConstructor } from "vue";
 
 export type IFileInfo = {
+  /** Same as fileid */
+  id: number;
   /** Database file ID */
   fileid: number;
   /** Full file name, e.g. /pi/test/Qx0dq7dvEXA.jpg */

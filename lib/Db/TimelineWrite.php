@@ -97,6 +97,25 @@ class TimelineWrite
         $dateTaken = gmdate('Y-m-d H:i:s', $dateTaken);
         [$w, $h] = Exif::getDimensions($exif);
 
+        // Store raw metadata in the database
+        // We need to remove blacklisted fields to prevent leaking info
+        unset($exif['SourceFile'], $exif['FileName'], $exif['ExifToolVersion'], $exif['Directory'], $exif['FileSize'], $exif['FileModifyDate'], $exif['FileAccessDate'], $exif['FileInodeChangeDate'], $exif['FilePermissions']);
+
+        // Truncate any fields >2048 chars
+        foreach ($exif as $key => &$value) {
+            if (\is_string($value) && \strlen($value) > 2048) {
+                $exif[$key] = substr($value, 0, 2048);
+            }
+        }
+
+        // Store JSON string
+        $exifJson = json_encode($exif);
+
+        // Store error if data > 64kb
+        if (\strlen($exifJson) > 65535) {
+            $exifJson = json_encode(['error' => 'Exif data too large']);
+        }
+
         if ($prevRow) {
             // Update existing row
             // No need to set objectid again
@@ -107,6 +126,7 @@ class TimelineWrite
                 ->set('isvideo', $query->createNamedParameter($isvideo, IQueryBuilder::PARAM_INT))
                 ->set('w', $query->createNamedParameter($w, IQueryBuilder::PARAM_INT))
                 ->set('h', $query->createNamedParameter($h, IQueryBuilder::PARAM_INT))
+                ->set('exif', $query->createNamedParameter($exifJson, IQueryBuilder::PARAM_STR))
                 ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
             ;
             $query->executeStatement();
@@ -123,6 +143,7 @@ class TimelineWrite
                         'isvideo' => $query->createNamedParameter($isvideo, IQueryBuilder::PARAM_INT),
                         'w' => $query->createNamedParameter($w, IQueryBuilder::PARAM_INT),
                         'h' => $query->createNamedParameter($h, IQueryBuilder::PARAM_INT),
+                        'exif' => $query->createNamedParameter($exifJson, IQueryBuilder::PARAM_STR),
                     ])
                 ;
                 $query->executeStatement();

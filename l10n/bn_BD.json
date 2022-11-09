@@ -3,10 +3,12 @@
     "Tags" : "ট্যাগ",
     "Maps" : "মানচিত্র",
     "Settings" : "সেটিংস",
+    "Edit" : "সম্পাদনা",
     "Cancel" : "বাতির",
     "Delete" : "মুছে",
     "Download" : "ডাউনলোড",
     "Favorite" : "প্রিয়জন",
+    "Share" : "ভাগাভাগি কর",
     "Back" : "পেছনে যাও",
     "Save" : "সংরক্ষণ",
     "Month" : "মাস",
@@ -15,6 +17,9 @@
     "Hour" : "ঘন্টা",
     "Name" : "নাম",
     "Update" : "পরিবর্ধন",
-    "Refresh" : "নবোদ্যম"
+    "Refresh" : "নবোদ্যম",
+    "Reset" : "পূণঃনির্ধানণ",
+    "Continue" : "চালিয়ে যাও",
+    "Size" : "আকার"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
