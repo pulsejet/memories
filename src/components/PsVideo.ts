@@ -150,6 +150,11 @@ class VideoContentSetup {
         content._videoPosterImg.onload = content._videoPosterImg.onerror = null;
         content._videoPosterImg = null;
       }
+
+      if (content.videojs) {
+        content.videojs.dispose();
+        content.videojs = null;
+      }
     }
   }
 
