@@ -12,7 +12,7 @@ trait TimelineQueryPeopleFaceRecognition
 {
     protected IDBConnection $connection;
 
-    public function transformPeopleFaceRecognitionFilter(IQueryBuilder &$query, string $userId, string $personStr)
+    public function transformPeopleFaceRecognitionFilter(IQueryBuilder &$query, string $userId, int $currentModel, string $personStr)
     {
         // Get title and uid of face user
         $personNames = explode('/', $personStr);
@@ -24,12 +24,10 @@ trait TimelineQueryPeopleFaceRecognition
         $personName = $personNames[1];
 
         // Join with images
-        $query->innerJoin(
-            'm',
-            'facerecog_images',
-            'fri',
-            $query->expr()->eq('fri.file', 'm.fileid')
-        );
+        $query->innerJoin('m', 'facerecog_images', 'fri', $query->expr()->andX(
+            $query->expr()->eq('fri.file', 'm.fileid'),
+            $query->expr()->eq('fri.model', $query->createNamedParameter($currentModel)),
+        ));
 
         // Join with faces
         $query->innerJoin(
@@ -61,7 +59,7 @@ trait TimelineQueryPeopleFaceRecognition
         );
     }
 
-    public function getPeopleFaceRecognition(Folder $folder, bool $show_clusters = false, bool $show_hidden = false)
+    public function getPeopleFaceRecognition(Folder $folder, int $currentModel, bool $show_clusters = false, bool $show_hidden = false)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -76,7 +74,10 @@ trait TimelineQueryPeopleFaceRecognition
         $query->innerJoin('frf', 'facerecog_images', 'fri', $query->expr()->eq('fri.id', 'frf.image'));
 
         // WHERE these items are memories indexed photos
-        $query->innerJoin('fri', 'memories', 'm', $query->expr()->eq('m.fileid', 'fri.file'));
+        $query->innerJoin('fri', 'memories', 'm', $query->expr()->andX(
+            $query->expr()->eq('fri.file', 'm.fileid'),
+            $query->expr()->eq('fri.model', $query->createNamedParameter($currentModel)),
+        ));
 
         // WHERE these photos are in the user's requested folder recursively
         $query = $this->joinFilecache($query, $folder, true, false);
@@ -114,7 +115,7 @@ trait TimelineQueryPeopleFaceRecognition
         return $faces;
     }
 
-    public function getFaceRecognitionPreview(Folder &$folder, $previewId)
+    public function getFaceRecognitionPreview(Folder &$folder, $currentModel, $previewId)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -132,8 +133,11 @@ trait TimelineQueryPeopleFaceRecognition
             'm.datetaken',              // Just in case, for postgres
         )->from('facerecog_faces', 'frf');
 
-        // WHERE faces are from images.
-        $query->innerJoin('frf', 'facerecog_images', 'fri', $query->expr()->eq('fri.id', 'frf.image'));
+        // WHERE faces are from images and current model.
+        $query->innerJoin('frf', 'facerecog_images', 'fri', $query->expr()->andX(
+            $query->expr()->eq('fri.id', 'frf.image'),
+            $query->expr()->eq('fri.model', $query->createNamedParameter($currentModel)),
+        ));
 
         // WHERE these photos are memories indexed
         $query->innerJoin('fri', 'memories', 'm', $query->expr()->eq('m.fileid', 'fri.file'));

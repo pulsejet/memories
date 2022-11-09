@@ -112,8 +112,9 @@ class PeopleController extends ApiBase
         }
 
         // Check faces enabled for this user
-        if (!$this->facerecognitionIsEnabled()) {
-            return new JSONResponse(['message' => 'Recognize app not enabled or not v3+'], Http::STATUS_PRECONDITION_FAILED);
+        $currentModel = (int) ($this->config->getAppValue('facerecognition', 'model', -1));
+        if (!$this->facerecognitionIsEnabled() || $currentModel <= 0) {
+            return new JSONResponse(['message' => 'Face Recgonition app not enabled'], Http::STATUS_PRECONDITION_FAILED);
         }
 
         // If this isn't the timeline folder then things aren't going to work
@@ -124,11 +125,13 @@ class PeopleController extends ApiBase
 
         // Run actual query
         $list = $this->timelineQuery->getPeopleFaceRecognition(
-            $folder
+            $folder,
+            $currentModel,
         );
         // Just append unnamed clusters to the end.
         $list = array_merge($list, $this->timelineQuery->getPeopleFaceRecognition(
             $folder,
+            $currentModel,
             true
         ));
 
@@ -152,7 +155,8 @@ class PeopleController extends ApiBase
         }
 
         // Check faces enabled for this user
-        if (!$this->facerecognitionIsEnabled()) {
+        $currentModel = (int) ($this->config->getAppValue('facerecognition', 'model', -1));
+        if (!$this->facerecognitionIsEnabled() || $currentModel <= 0) {
             return new DataResponse([], Http::STATUS_PRECONDITION_FAILED);
         }
 
@@ -163,7 +167,7 @@ class PeopleController extends ApiBase
         }
 
         // Run actual query
-        $detections = $this->timelineQuery->getFaceRecognitionPreview($folder, $id);
+        $detections = $this->timelineQuery->getFaceRecognitionPreview($folder, $currentModel, $id);
 
         if (null === $detections || 0 === \count($detections)) {
             return new DataResponse([], Http::STATUS_NOT_FOUND);
