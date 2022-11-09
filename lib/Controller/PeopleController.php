@@ -55,20 +55,9 @@ class PeopleController extends ApiBase
         }
 
         // Run actual query
-        if ($this->recognizeIsEnabled()) {
-            $list = $this->timelineQuery->getFaces(
-                $root,
-            );
-        } else {
-            $list = $this->timelineQuery->getPersons(
-                $root,
-            );
-            // Just append unnamed clusters to the end.
-            $list = array_merge($list, $this->timelineQuery->getPersons(
-                $folder,
-                true
-            ));
-        }
+        $list = $this->timelineQuery->getPeopleRecognize(
+            $root,
+        );
 
         return new JSONResponse($list, Http::STATUS_OK);
     }
@@ -101,11 +90,7 @@ class PeopleController extends ApiBase
         }
 
         // Run actual query
-        if ($this->recognizeIsEnabled()) {
-            $detections = $this->timelineQuery->getFacePreviewDetection($root, (int) $id);
-        } else {
-            $detections = $this->timelineQuery->getPersonPreviewDetection($root, $id);
-        }
+        $detections = $this->timelineQuery->getPeopleRecognizePreview($root, (int) $id);
 
         if (null === $detections || 0 === \count($detections)) {
             return new DataResponse([], Http::STATUS_NOT_FOUND);
@@ -138,11 +123,11 @@ class PeopleController extends ApiBase
         }
 
         // Run actual query
-        $list = $this->timelineQuery->getFaceRecognitionPeople(
+        $list = $this->timelineQuery->getPeopleFaceRecognition(
             $folder
         );
         // Just append unnamed clusters to the end.
-        $list = array_merge($list, $this->timelineQuery->getFaceRecognitionPeople(
+        $list = array_merge($list, $this->timelineQuery->getPeopleFaceRecognition(
             $folder,
             true
         ));

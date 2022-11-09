@@ -8,11 +8,11 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\Folder;
 use OCP\IDBConnection;
 
-trait TimelineQueryRecognizePeople
+trait TimelineQueryPeopleRecognize
 {
     protected IDBConnection $connection;
 
-    public function transformRecognizePeopleFilter(IQueryBuilder &$query, string $userId, string $faceStr)
+    public function transformPeopleRecognitionFilter(IQueryBuilder &$query, string $userId, string $faceStr)
     {
         // Get name and uid of face user
         $faceNames = explode('/', $faceStr);
@@ -36,7 +36,7 @@ trait TimelineQueryRecognizePeople
         ));
     }
 
-    public function transformRecognizePeopleRect(IQueryBuilder &$query, string $userId)
+    public function transformPeopleRecognizeRect(IQueryBuilder &$query, string $userId)
     {
         // Include detection params in response
         $query->addSelect(
@@ -160,7 +160,7 @@ trait TimelineQueryRecognizePeople
     }
 
     /** Convert face fields to object */
-    private function processRecognizeDetection(&$row, $days = false)
+    private function processPeopleRecognizeDetection(&$row, $days = false)
     {
         if (!isset($row) || !isset($row['face_w'])) {
             return;

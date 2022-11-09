@@ -8,11 +8,11 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\Folder;
 use OCP\IDBConnection;
 
-trait TimelineQueryFaceRecognition
+trait TimelineQueryPeopleFaceRecognition
 {
     protected IDBConnection $connection;
 
-    public function transformFaceRecognitionFilter(IQueryBuilder &$query, string $userId, string $personStr)
+    public function transformPeopleFaceRecognitionFilter(IQueryBuilder &$query, string $userId, string $personStr)
     {
         // Get title and uid of face user
         $personNames = explode('/', $personStr);
@@ -48,7 +48,7 @@ trait TimelineQueryFaceRecognition
         ));
     }
 
-    public function transformFaceRecognitionRect(IQueryBuilder &$query, string $userId)
+    public function transformPeopleFaceRecognitionRect(IQueryBuilder &$query, string $userId)
     {
         // Include detection params in response
         $query->addSelect(
@@ -61,7 +61,7 @@ trait TimelineQueryFaceRecognition
         );
     }
 
-    public function getFaceRecognitionPeople(Folder $folder, bool $show_clusters = false, bool $show_hidden = false)
+    public function getPeopleFaceRecognition(Folder $folder, bool $show_clusters = false, bool $show_hidden = false)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -97,8 +97,8 @@ trait TimelineQueryFaceRecognition
         }
 
         // ORDER by number of faces in cluster
-        $query->orderBy('name', 'ASC');
-        $query->addOrderBy('count', 'DESC');
+        $query->orderBy('count', 'DESC');
+        $query->addOrderBy('name', 'ASC');
         $query->addOrderBy('frp.id'); // tie-breaker
 
         // FETCH all faces
