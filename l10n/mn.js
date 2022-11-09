@@ -16,6 +16,7 @@ OC.L10N.register(
     "Favorite" : "Дуртай",
     "Unarchive" : "Архиваас гаргах",
     "View in folder" : "Хавтасыг нээх",
+    "Share" : "Түгээх",
     "Back" : "буцах",
     "Save" : "Хадгалах",
     "Month" : "Сар",
@@ -24,7 +25,12 @@ OC.L10N.register(
     "Name" : "Нэр",
     "Update" : "Шинэчлэх",
     "Refresh" : "Сэргээх",
+    "Reset" : "тохируулах",
+    "Continue" : "үргэлжлүүлэх",
     "Undo" : "буцах",
+    "Custom" : "Дурын",
+    "Value" : "Үнийн дүн",
+    "Size" : "Хэмжээ",
     "Position" : "Байр"
 },
 "nplurals=2; plural=(n != 1);");

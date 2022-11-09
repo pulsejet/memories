@@ -6,11 +6,14 @@
     "Tags" : "Sildid",
     "Maps" : "Kaardid",
     "Settings" : "Seaded",
+    "Unsaved changes" : "Salvestamata muutused",
+    "Edit" : "Redigeeri",
     "Cancel" : "Loobu",
     "Delete" : "Kustuta",
     "Download" : "Lae alla",
     "Favorite" : "Lemmik",
     "View in folder" : "Vaata kaustas",
+    "Share" : "Jaga",
     "Copy public link" : "Kopeeri avalik link",
     "Public link" : "Avalik link",
     "Back" : "Tagasi",
@@ -22,6 +25,10 @@
     "Name" : "Nimi",
     "Update" : "Uuenda",
     "Refresh" : "Värskenda",
+    "Reset" : "Lähtesta",
+    "Continue" : "Jätka",
+    "Custom" : "Kohandatud",
+    "Size" : "Suurus",
     "Position" : "Asukoht"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

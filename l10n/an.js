@@ -8,7 +8,10 @@ OC.L10N.register(
     "Delete" : "Borrar",
     "Download" : "Escargar",
     "Favorite" : "Favorito",
+    "Share" : "Compartir",
     "Back" : "Ta zaga",
-    "Name" : "Nombre"
+    "Name" : "Nombre",
+    "Continue" : "Continar",
+    "Size" : "Grandaria"
 },
 "nplurals=2; plural=(n != 1);");

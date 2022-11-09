@@ -7,6 +7,7 @@
     "Tags" : "תגיות",
     "Maps" : "מפות",
     "Settings" : "הגדרות",
+    "Unsaved changes" : "שינויים שלא נשמרו",
     "Edit" : "עריכה",
     "Loading …" : "בטעינה…",
     "Cancel" : "ביטול",
@@ -15,6 +16,7 @@
     "Favorite" : "סימון כמועדף",
     "Unarchive" : "הוצאה מהארכיון",
     "View in folder" : "הצג בתיקייה",
+    "Share" : "שתף",
     "Copy public link" : "העתקת הקישור הציבורי",
     "Public link" : "קישור ציבורי",
     "Back" : "חזרה",
@@ -28,7 +30,19 @@
     "Name" : "שם",
     "Update" : "עדכון",
     "Refresh" : "רענון",
+    "Reset" : "איפוס",
+    "Continue" : "להמשך",
+    "Undo" : "ביטול",
+    "Redo" : "שחזור",
+    "Zoom in" : "התקרבות",
+    "Custom" : "מותאם אישית",
+    "Value" : "ערך",
     "Image" : "תמונה",
-    "Position" : "מיקום"
+    "Text" : "טקסט",
+    "Size" : "גודל",
+    "Position" : "מיקום",
+    "Extension" : "הרחבה",
+    "Name is required." : "נדרש שם.",
+    "Quality" : "איכות"
 },"pluralForm" :"nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: (n % 10 == 0 && n % 1 == 0 && n > 10) ? 2 : 3;"
 }

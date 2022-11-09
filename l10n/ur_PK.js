@@ -11,6 +11,7 @@ OC.L10N.register(
     "Save" : "حفظ",
     "Month" : "ماہ",
     "Name" : "اسم",
-    "Reset" : "ری سیٹ"
+    "Reset" : "ری سیٹ",
+    "Continue" : "جاری"
 },
 "nplurals=2; plural=(n != 1);");

@@ -8,6 +8,7 @@
     "Tags" : "Etiquetas",
     "Maps" : "Mapas",
     "Settings" : "Axustes",
+    "Unsaved changes" : "Cambios sen gardar",
     "Edit" : "Editar",
     "Loading …" : "Cargando…",
     "Cancel" : "Cancelar",
@@ -16,6 +17,7 @@
     "Favorite" : "Favorito",
     "Unarchive" : "Desarquivar",
     "View in folder" : "Ver no cartafol",
+    "Share" : "Compartir",
     "Copy public link" : "Copiar a ligazón pública",
     "Public link" : "Ligazón pública",
     "Back" : "Atrás",
@@ -29,7 +31,21 @@
     "Name" : "Nome",
     "Update" : "Actualizar",
     "Refresh" : "Actualizar",
+    "Reset" : "Restabelecer",
+    "Continue" : "Continuar",
+    "Undo" : "Desfacer",
+    "Redo" : "Refacer",
+    "Zoom in" : "Achegar",
+    "Original" : "Orixinal",
+    "Custom" : "Personalizado",
+    "Value" : "Valor",
     "Image" : "Imaxe",
-    "Position" : "Posicion"
+    "Line" : "Liña",
+    "Text" : "Texto",
+    "Size" : "Tamaño",
+    "Position" : "Posicion",
+    "Extension" : "Extensión",
+    "Name is required." : "É obrigatorio  o nome.",
+    "Quality" : "Calidade"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -6,6 +6,7 @@
     "Tags" : "Etiketat",
     "Maps" : "Harta",
     "Settings" : "Rregullimet",
+    "Unsaved changes" : "Ndryshime të paruajtura",
     "Edit" : "Përpuno",
     "Cancel" : "Anullo",
     "Delete" : "Fshi",
@@ -24,7 +25,13 @@
     "Update" : "Përditëso",
     "Refresh" : "Rifresko",
     "Reset" : "Rivendos",
+    "Continue" : "Vazhdo",
     "Undo" : "Ktheje pas",
+    "Redo" : "Ribëj",
+    "Custom" : "E përshtatur",
+    "Value" : "Vlerë",
+    "Text" : "Tekst",
+    "Size" : "Madhësi",
     "Position" : "Pozicion",
     "Name is required." : "Emri është i domosdoshëm"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

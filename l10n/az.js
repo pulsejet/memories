@@ -6,16 +6,20 @@ OC.L10N.register(
     "Tags" : "Işarələr",
     "Maps" : "Xəritələr",
     "Settings" : "Quraşdırmalar",
+    "Edit" : "Dəyişiklik et",
     "Cancel" : "Dayandır",
     "Delete" : "Sil",
     "Download" : "Yüklə",
     "Favorite" : "İstəkli",
+    "Share" : "Paylaş",
     "Save" : "Saxla",
     "Month" : "Ay",
     "Day" : "Gün",
     "Time" : "Vaxt",
     "Name" : "Ad",
     "Update" : "Yenilənmə",
-    "Refresh" : "Yenilə"
+    "Refresh" : "Yenilə",
+    "Reset" : "Sıfırla",
+    "Size" : "Həcm"
 },
 "nplurals=2; plural=(n != 1);");

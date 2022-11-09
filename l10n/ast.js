@@ -8,12 +8,14 @@ OC.L10N.register(
     "Tags" : "Etiquetes",
     "Maps" : "Mapes",
     "Settings" : "Settings",
+    "Edit" : "Editar",
     "Loading …" : "Cargando...",
     "Cancel" : "Encaboxar",
     "Delete" : "Desaniciar",
     "Download" : "Baxar",
     "Favorite" : "Marcar como favoritu",
     "View in folder" : "Ver na carpeta",
+    "Share" : "Share",
     "Back" : "Atrás",
     "Save" : "Guardar",
     "Month" : "Mes",
@@ -22,6 +24,12 @@ OC.L10N.register(
     "Hour" : "Hora",
     "Name" : "Nome",
     "Update" : "Anovar",
-    "Refresh" : "Refrescar"
+    "Refresh" : "Refrescar",
+    "Continue" : "Siguir",
+    "Undo" : "Desfacer",
+    "Custom" : "Personalizáu",
+    "Text" : "Testu",
+    "Size" : "Tamañu",
+    "Position" : "Posición"
 },
 "nplurals=2; plural=(n != 1);");
