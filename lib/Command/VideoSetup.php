@@ -98,6 +98,7 @@ class VideoSetup extends Command
 
         $goTranscodePath = realpath(__DIR__."/../../exiftool-bin/go-transcode-{$arch}-{$libc}");
         $output->writeln("Trying go-transcode from {$goTranscodePath}");
+        chmod($goTranscodePath, 0755);
 
         $goTranscode = shell_exec($goTranscodePath.' --help');
         if (!$goTranscode || false === strpos($goTranscode, 'Available Commands')) {
