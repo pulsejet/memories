@@ -24,8 +24,8 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\DataDisplayResponse;
+use OCP\AppFramework\Http\JSONResponse;
 
 class VideoController extends ApiBase
 {
@@ -55,7 +55,7 @@ class VideoController extends ApiBase
 
         // Get file
         $files = $this->rootFolder->getUserFolder($user->getUID())->getById($fileid);
-        if (count($files) === 0) {
+        if (0 === \count($files)) {
             return new JSONResponse(['message' => 'File not found'], Http::STATUS_NOT_FOUND);
         }
         $file = $files[0];
@@ -72,13 +72,13 @@ class VideoController extends ApiBase
         }
 
         // Make upstream request
-        $ch = curl_init("http://localhost:9999/vod/$path/$profile");
+        $ch = curl_init("http://localhost:9999/vod/{$path}/{$profile}");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         $data = curl_exec($ch);
         $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-        $returnCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $returnCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         // Check data was received
