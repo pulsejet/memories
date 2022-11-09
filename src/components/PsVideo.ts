@@ -87,6 +87,7 @@ class VideoContentSetup {
             type: "application/x-mpegURL",
           });
 
+          const overrideNative = !videojs.browser.IS_SAFARI;
           content.videojs = videojs(content.videoElement, {
             fluid: true,
             autoplay: true,
@@ -98,12 +99,15 @@ class VideoContentSetup {
               },
             ],
             preload: "metadata",
-            inactivityTimeout: 0,
+            playbackRates: [0.5, 1, 1.5, 2],
+            responsive: true,
             html5: {
               vhs: {
-                overrideNative: !videojs.browser.IS_SAFARI,
+                overrideNative: overrideNative,
                 withCredentials: false,
               },
+              nativeAudioTracks: !overrideNative,
+              nativeVideoTracks: !overrideNative,
             },
           });
 
@@ -115,6 +119,8 @@ class VideoContentSetup {
                 this.src({
                   src: e.slide.data.src,
                 });
+                this.options().html5.nativeAudioTracks = true;
+                this.options().html5.nativeVideoTracks = true;
               }
             }
           });
