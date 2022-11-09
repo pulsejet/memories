@@ -1,6 +1,7 @@
 import PhotoSwipe from "photoswipe";
 import { generateUrl } from "@nextcloud/router";
 import { loadState } from "@nextcloud/initial-state";
+import axios from "@nextcloud/axios";
 
 import videojs from "video.js";
 import "video.js/dist/video-js.min.css";
@@ -86,29 +87,28 @@ class VideoContentSetup {
           const fileid = content.data.photo.fileid;
 
           // Create hls sources if enabled
-          let hlsSources = [];
+          let sources: any[] = [];
           const baseUrl = generateUrl(
             `/apps/memories/api/video/transcode/${fileid}`
           );
 
           if (!config_noTranscode) {
-            hlsSources.push({
+            sources.push({
               src: `${baseUrl}/index.m3u8`,
               type: "application/x-mpegURL",
             });
           }
 
+          sources.push({
+            src: e.slide.data.src,
+          });
+
           const overrideNative = !videojs.browser.IS_SAFARI;
           content.videojs = videojs(content.videoElement, {
-            fluid: true,
+            fill: true,
             autoplay: true,
             controls: true,
-            sources: [
-              ...hlsSources,
-              {
-                src: e.slide.data.src,
-              },
-            ],
+            sources: sources,
             preload: "metadata",
             playbackRates: [0.5, 1, 1.5, 2],
             responsive: true,
@@ -122,16 +122,15 @@ class VideoContentSetup {
             },
           });
 
-          content.videojs.on("error", function () {
-            if (this.error().code === 4) {
-              if (this.src().includes("m3u8")) {
+          content.videojs.on("error", () => {
+            if (content.videojs.error().code === 4) {
+              if (content.videojs.src().includes("m3u8")) {
                 // HLS could not be streamed
                 console.error("Video.js: HLS stream could not be opened.");
-                this.src({
+                content.videojs.src({
                   src: e.slide.data.src,
                 });
-                this.options().html5.nativeAudioTracks = true;
-                this.options().html5.nativeVideoTracks = true;
+                this.updateRotation(content, 0);
               }
             }
           });
@@ -150,7 +149,17 @@ class VideoContentSetup {
               });
           }, 500);
 
-          globalThis.videojs = content.videojs;
+          // Get correct orientation
+          axios
+            .get<any>(
+              generateUrl("/apps/memories/api/info/{id}", {
+                id: content.data.photo.fileid,
+              })
+            )
+            .then((response) => {
+              content.data.exif = response.data?.exif;
+              this.updateRotation(content);
+            });
         }
       }
     });
@@ -170,6 +179,29 @@ class VideoContentSetup {
         this.pauseVideo(pswp.currSlide.content);
       }
     });
+  }
+
+  updateRotation(content, val?: number) {
+    const rotation = val ?? Number(content.data.exif?.Rotation);
+    const shouldRotate = content.videojs?.src().includes("m3u8");
+    console.log("Video.js: Rotation", rotation, shouldRotate);
+    if (rotation && shouldRotate) {
+      let transform = `rotate(${rotation}deg)`;
+
+      if (rotation === 90 || rotation === 270) {
+        content.videoElement.style.width = content.element.style.height;
+        content.videoElement.style.height = content.element.style.width;
+
+        transform = `translateY(-${content.element.style.width}) ${transform}`;
+        content.videoElement.style.transformOrigin = "bottom left";
+      }
+
+      content.videoElement.style.transform = transform;
+    } else {
+      content.videoElement.style.transform = "none";
+      content.videoElement.style.width = "100%";
+      content.videoElement.style.height = "100%";
+    }
   }
 
   onContentDestroy({ content }) {
@@ -206,6 +238,8 @@ class VideoContentSetup {
         placeholderElStyle.width = width + "px";
         placeholderElStyle.height = height + "px";
       }
+
+      this.updateRotation(content);
     }
   }
 
