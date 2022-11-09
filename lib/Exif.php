@@ -269,28 +269,13 @@ class Exif
         }
 
         // Detect architecture
-        $arch = null;
-        $uname = php_uname('m');
-        if (false !== stripos($uname, 'aarch64') || false !== stripos($uname, 'arm64')) {
-            $arch = 'aarch64';
-        } elseif (false !== stripos($uname, 'x86_64') || false !== stripos($uname, 'amd64')) {
-            $arch = 'amd64';
-        }
-
-        // Detect glibc or musl
-        $libc = null;
-        if ($ldd = shell_exec('ldd --version 2>&1')) {
-            if (false !== stripos($ldd, 'musl')) {
-                $libc = 'musl';
-            } elseif (false !== stripos($ldd, 'glibc')) {
-                $libc = 'glibc';
-            }
-        }
+        $arch = $noLocal ? null : \OCA\Memories\Util::getArch();
+        $libc = $noLocal ? null : \OCA\Memories\Util::getLibc();
 
         // Get static binary if available
         if ($arch && $libc && !$noLocal) {
             // get target file path
-            $path = __DIR__."/../exiftool-bin/exiftool-{$arch}-{$libc}";
+            $path = realpath(__DIR__."/../exiftool-bin/exiftool-{$arch}-{$libc}");
 
             // check if file exists
             if (file_exists($path)) {

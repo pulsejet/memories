@@ -25,7 +25,6 @@ namespace OCA\Memories\Command;
 
 use OC\DB\Connection;
 use OC\DB\SchemaWrapper;
-use OCA\Files_External\Service\GlobalStoragesService;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineWrite;
 use OCP\Encryption\IManager;
@@ -38,8 +37,6 @@ use OCP\IDBConnection;
 use OCP\IPreview;
 use OCP\IUser;
 use OCP\IUserManager;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -47,9 +44,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Index extends Command
 {
-    /** @var ?GlobalStoragesService */
-    protected $globalService;
-
     /** @var int[][] */
     protected array $sizes;
 
@@ -78,8 +72,7 @@ class Index extends Command
         IConfig $config,
         IManager $encryptionManager,
         IDBConnection $connection,
-        Connection $connectionForSchema,
-        ContainerInterface $container
+        Connection $connectionForSchema
     ) {
         parent::__construct();
 
@@ -91,12 +84,6 @@ class Index extends Command
         $this->connection = $connection;
         $this->connectionForSchema = $connectionForSchema;
         $this->timelineWrite = new TimelineWrite($connection, $preview);
-
-        try {
-            $this->globalService = $container->get(GlobalStoragesService::class);
-        } catch (ContainerExceptionInterface $e) {
-            $this->globalService = null;
-        }
     }
 
     protected function configure(): void
