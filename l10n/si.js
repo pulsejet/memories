@@ -20,6 +20,8 @@ OC.L10N.register(
     "Time" : "වේලාව",
     "Name" : "නම",
     "Update" : "යාවත්කාල",
-    "Undo" : "පෙරසේ"
+    "Undo" : "පෙරසේ",
+    "Value" : "අගය",
+    "Size" : "ප්‍රමාණය"
 },
 "nplurals=2; plural=(n != 1);");

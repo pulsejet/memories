@@ -12,9 +12,13 @@ OC.L10N.register(
     "Download" : "ດາວໂຫລດ",
     "Favorite" : "ລາຍການທີ່ມັກ",
     "View in folder" : "ເບິ່ງໃນໂຟນເດີ",
+    "Share" : "ແບ່ງປັນ",
     "Back" : "ຫຼັງ",
     "Save" : "ບັນທຶກ",
     "Name" : "ຊື່",
-    "Refresh" : "Refresh"
+    "Refresh" : "Refresh",
+    "Continue" : "ສືບຕໍ່",
+    "Original" : "ຕົ້ນສະບັບ",
+    "Size" : "ຂະຫນາດ"
 },
 "nplurals=1; plural=0;");

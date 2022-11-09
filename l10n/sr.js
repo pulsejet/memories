@@ -10,6 +10,7 @@ OC.L10N.register(
     "Tags" : "Ознаке",
     "Maps" : "Мапе",
     "Settings" : "Поставке",
+    "Unsaved changes" : "Несачуване измене",
     "Edit" : "Измени",
     "Loading …" : "Учитавање…",
     "Cancel" : "Поништи",
@@ -33,8 +34,17 @@ OC.L10N.register(
     "Update" : "Ажурирај",
     "Refresh" : "Освежи",
     "Reset" : "Ресетуј",
+    "Continue" : "Настави",
     "Undo" : "Опозови",
+    "Redo" : "Понови",
+    "Zoom in" : "Увеличај",
+    "Original" : "Оригинал",
+    "Custom" : "Прилагођено",
+    "Value" : "Вредност",
     "Image" : "Слика",
-    "Position" : "Позиција"
+    "Text" : "Текст",
+    "Size" : "величина",
+    "Position" : "Позиција",
+    "Extension" : "Екстензија"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);");

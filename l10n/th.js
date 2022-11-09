@@ -26,7 +26,11 @@ OC.L10N.register(
     "Refresh" : "รีเฟรช",
     "Share folder" : "แชร์โฟลเดอร์",
     "Reset" : "ตั้งค่าใหม่",
+    "Continue" : "ดำเนินการต่อ",
     "Undo" : "เลิกทำ",
+    "Custom" : "กำหนดเอง",
+    "Text" : "ข้อความ",
+    "Size" : "ขนาด",
     "Position" : "ตำแหน่ง"
 },
 "nplurals=1; plural=0;");

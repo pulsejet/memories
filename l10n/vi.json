@@ -6,6 +6,7 @@
     "Tags" : "Nhãn",
     "Maps" : "Bản đồ",
     "Settings" : "Cài đặt",
+    "Unsaved changes" : "Thay đổi chưa được lưu",
     "Edit" : "Chỉnh sửa",
     "Loading …" : "Đang tải …",
     "Cancel" : "Hủy",
@@ -26,8 +27,13 @@
     "Update" : "Cập nhật",
     "Refresh" : "Tải mới",
     "Reset" : "Đặt lại",
+    "Continue" : "Tiếp tục",
     "Undo" : "Hoàn tác",
+    "Redo" : "Làm lại",
+    "Custom" : "Tùy chỉnh",
     "Image" : "Hình ảnh",
+    "Text" : "Văn bản",
+    "Size" : "Kích cỡ",
     "Name is required." : "Tên là bắt buộc."
 },"pluralForm" :"nplurals=1; plural=0;"
 }

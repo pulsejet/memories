@@ -8,6 +8,7 @@ OC.L10N.register(
     "Tags" : "Nhãn",
     "Maps" : "Bản đồ",
     "Settings" : "Cài đặt",
+    "Unsaved changes" : "Thay đổi chưa được lưu",
     "Edit" : "Chỉnh sửa",
     "Loading …" : "Đang tải …",
     "Cancel" : "Hủy",
@@ -28,8 +29,13 @@ OC.L10N.register(
     "Update" : "Cập nhật",
     "Refresh" : "Tải mới",
     "Reset" : "Đặt lại",
+    "Continue" : "Tiếp tục",
     "Undo" : "Hoàn tác",
+    "Redo" : "Làm lại",
+    "Custom" : "Tùy chỉnh",
     "Image" : "Hình ảnh",
+    "Text" : "Văn bản",
+    "Size" : "Kích cỡ",
     "Name is required." : "Tên là bắt buộc."
 },
 "nplurals=1; plural=0;");

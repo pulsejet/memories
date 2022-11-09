@@ -10,6 +10,7 @@
     "Tags" : "Oznake",
     "Maps" : "Zemljevidi",
     "Settings" : "Nastavitve",
+    "Unsaved changes" : "Neshranjene spremembe",
     "Edit" : "Uredi",
     "Loading …" : "Poteka nalaganje …",
     "Cancel" : "Prekliči",
@@ -38,9 +39,23 @@
     "Refresh" : "Osveži",
     "Share folder" : "Omogoči souporabo mape",
     "Reset" : "Ponastavi",
+    "Continue" : "Nadaljuj",
     "Undo" : "Razveljavi",
+    "Redo" : "Ponovno uveljavi",
+    "Zoom in" : "Približaj",
+    "Draw" : "Risba",
+    "Original" : "Izvorno",
+    "Custom" : "Po meri",
+    "Landscape" : "Pokrajina",
+    "Portrait" : "Portret",
+    "Value" : "Vrednost",
     "Image" : "Slika",
+    "Line" : "Črtni diagram",
+    "Text" : "Besedilo",
+    "Size" : "Višina",
     "Position" : "Položaj",
-    "Name is required." : "Ime mora biti vpisano."
+    "Extension" : "Pripona",
+    "Name is required." : "Ime mora biti vpisano.",
+    "Quality" : "Kakovost"
 },"pluralForm" :"nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);"
 }

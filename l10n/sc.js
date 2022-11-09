@@ -11,6 +11,7 @@ OC.L10N.register(
     "Tags" : "Etichetas",
     "Maps" : "Mapas",
     "Settings" : "Impostatziones",
+    "Unsaved changes" : "Mudas non sarvadas",
     "Edit" : "Modìfica",
     "Loading …" : "Carrigamentu …",
     "Cancel" : "Annulla",
@@ -34,9 +35,19 @@ OC.L10N.register(
     "Refresh" : "Agiorna",
     "Share folder" : "Cumpartzi cartella",
     "Reset" : "Torra a impostare",
+    "Continue" : "Sighi",
     "Undo" : "Annulla",
+    "Redo" : "Torra a fàghere",
+    "Zoom in" : "Ammània",
+    "Original" : "Originale",
+    "Custom" : "Personaliza",
+    "Value" : "Balore",
     "Image" : "Imàgine",
+    "Text" : "Testu",
+    "Size" : "Mannària",
     "Position" : "Positzione",
-    "Name is required." : "Su nùmene est rechertu: "
+    "Extension" : "Estensione",
+    "Name is required." : "Su nùmene est rechertu: ",
+    "Quality" : "Calidade"
 },
 "nplurals=2; plural=(n != 1);");

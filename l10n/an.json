@@ -6,7 +6,10 @@
     "Delete" : "Borrar",
     "Download" : "Escargar",
     "Favorite" : "Favorito",
+    "Share" : "Compartir",
     "Back" : "Ta zaga",
-    "Name" : "Nombre"
+    "Name" : "Nombre",
+    "Continue" : "Continar",
+    "Size" : "Grandaria"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

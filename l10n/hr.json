@@ -8,6 +8,7 @@
     "Tags" : "Oznake",
     "Maps" : "Karte",
     "Settings" : "Postavke",
+    "Unsaved changes" : "Nespremljene promjene",
     "Edit" : "Uredi",
     "Loading …" : "Učitavanje…",
     "Cancel" : "Odustani",
@@ -16,6 +17,7 @@
     "Favorite" : "Favorit",
     "Unarchive" : "Dearhiviraj",
     "View in folder" : "Prikaži u mapi",
+    "Share" : "Dijeli",
     "Copy public link" : "Kopiraj javnu poveznicu",
     "Public link" : "Javna poveznica",
     "Back" : "Natrag",
@@ -30,7 +32,20 @@
     "Update" : "Ažuriraj",
     "Refresh" : "Osvježi",
     "Share folder" : "Dijeli mapu",
+    "Reset" : "Resetiraj",
+    "Continue" : "Nastavi",
+    "Undo" : "Poništi",
+    "Redo" : "Ponovno",
+    "Zoom in" : "Uvećaj",
+    "Original" : "Izvornik",
+    "Custom" : "Prilagođeno",
+    "Value" : "Vrijednost",
     "Image" : "Slika",
-    "Position" : "Položaj"
+    "Text" : "Tekst",
+    "Size" : "Veličina",
+    "Position" : "Položaj",
+    "Extension" : "Proširenje",
+    "Name is required." : "Ime je obavezno.",
+    "Quality" : "Kvaliteta"
 },"pluralForm" :"nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;"
 }

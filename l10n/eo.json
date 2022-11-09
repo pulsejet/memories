@@ -7,12 +7,15 @@
     "Tags" : "Etikedoj",
     "Maps" : "Mapoj",
     "Settings" : "Agordoj",
+    "Unsaved changes" : "Nekonservitaj ŝanĝoj",
+    "Edit" : "Modifi",
     "Loading …" : "Ŝargas …",
     "Cancel" : "Nuligi",
     "Delete" : "Forigi",
     "Download" : "Elŝuti",
     "Favorite" : "Pliŝatati",
     "View in folder" : "Vidi en dosierujo",
+    "Share" : "Kunhavigi",
     "Public link" : "Publika ligilo",
     "Back" : "Antaŭen",
     "Save" : "Konservi",
@@ -22,6 +25,15 @@
     "Hour" : "Horo",
     "Name" : "Nomo",
     "Update" : "Ĝisdatigi",
-    "Refresh" : "Aktualigi"
+    "Refresh" : "Aktualigi",
+    "Reset" : "Restarigi",
+    "Continue" : "Daŭrigi",
+    "Undo" : "Malfari",
+    "Redo" : "Refari",
+    "Custom" : "Propra",
+    "Text" : "Teksto",
+    "Size" : "Grando",
+    "Position" : "Loko",
+    "Extension" : "Dosiersufikso"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
