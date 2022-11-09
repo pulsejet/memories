@@ -17,7 +17,7 @@ mv "exiftool-$exifver" exiftool
 rm -rf *.zip exiftool/t exiftool/html
 chmod 755 exiftool/exiftool
 
-gotranscode="v0.0.2"
+gotranscode="v0.0.3"
 wget -q "https://github.com/pulsejet/go-transcode/releases/download/$gotranscode/go-transcode-amd64-musl"
 wget -q "https://github.com/pulsejet/go-transcode/releases/download/$gotranscode/go-transcode-amd64-glibc"
 wget -q "https://github.com/pulsejet/go-transcode/releases/download/$gotranscode/go-transcode-aarch64-musl"
