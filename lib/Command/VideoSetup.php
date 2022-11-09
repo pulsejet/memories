@@ -120,9 +120,7 @@ class VideoSetup extends Command
         $output->writeln('');
         $output->writeln('Do you want to enable transcoding and HLS? [Y/n]');
 
-        $handle = fopen('php://stdin', 'r');
-        $line = fgets($handle);
-        if ('n' === trim($line)) {
+        if ('n' === trim(fgets(fopen('php://stdin', 'r')))) {
             $this->config->setSystemValue('memories.no_transcode', true);
             $output->writeln('<error>Transcoding and HLS are now disabled</error>');
 
@@ -135,6 +133,22 @@ class VideoSetup extends Command
         $this->config->setSystemValue('memories.transcoder_config', $tConfig);
         $this->config->setSystemValue('memories.no_transcode', false);
         $output->writeln('Transcoding and HLS are now enabled!');
+
+        // Check for VAAPI
+        $output->writeln("\nChecking for QSV (/dev/dri/renderD128)");
+        if (file_exists('/dev/dri/renderD128')) {
+            $output->writeln('QSV is available. Do you want to enable it? [Y/n]');
+
+            if ('n' === trim(fgets(fopen('php://stdin', 'r')))) {
+                $this->config->setSystemValue('memories.qsv', false);
+                $output->writeln('QSV is now disabled');
+            } else {
+                $this->config->setSystemValue('memories.qsv', true);
+            }
+        } else {
+            $output->writeln('QSV is not available');
+            $this->config->setSystemValue('memories.qsv', false);
+        }
 
         return 0;
     }
@@ -150,9 +164,7 @@ class VideoSetup extends Command
     {
         $output->writeln('Without transcoding, video playback may be slow and limited');
         $output->writeln('Do you want to disable transcoding and HLS streaming? [y/N]');
-        $handle = fopen('php://stdin', 'r');
-        $line = fgets($handle);
-        if ('y' !== trim($line)) {
+        if ('y' !== trim(fgets(fopen('php://stdin', 'r')))) {
             $output->writeln('Aborting');
 
             return 1;
