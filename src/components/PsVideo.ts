@@ -3,9 +3,8 @@ import { generateUrl } from "@nextcloud/router";
 
 import videojs from "video.js";
 import "video.js/dist/video-js.min.css";
-import qualitySelector from "@silvermine/videojs-quality-selector";
-import "@silvermine/videojs-quality-selector/dist/css/quality-selector.css";
-qualitySelector(videojs);
+import "videojs-contrib-quality-levels";
+import "videojs-hls-quality-selector";
 
 /**
  * Check if slide has video content
@@ -83,14 +82,10 @@ class VideoContentSetup {
           const baseUrl = generateUrl(
             `/apps/memories/api/video/transcode/${fileid}`
           );
-          for (const q of ["360p", "480p", "720p", "1080p"]) {
-            hlsSources.push({
-              src: `${baseUrl}/${q}.m3u8`,
-              label: q,
-              type: "application/x-mpegURL",
-              selected: q === "480p" ? true : undefined,
-            });
-          }
+          hlsSources.push({
+            src: `${baseUrl}/index.m3u8`,
+            type: "application/x-mpegURL",
+          });
 
           content.videojs = videojs(content.videoElement, {
             fluid: true,
@@ -111,16 +106,21 @@ class VideoContentSetup {
                 withCredentials: false,
               },
             },
-            controlBar: {
-              children: [
-                "playToggle",
-                "progressControl",
-                "volumePanel",
-                "qualitySelector",
-                "fullscreenToggle",
-              ],
-            },
           });
+
+          content.videojs.qualityLevels();
+          content.videojs.hlsQualitySelector({
+            displayCurrentQuality: true,
+          });
+
+          setTimeout(() => {
+            content.videojs
+              .contentEl()
+              .querySelectorAll("button")
+              .forEach((b: HTMLButtonElement) => {
+                b.classList.add("button-vue");
+              });
+          }, 500);
 
           globalThis.videojs = content.videojs;
         }
