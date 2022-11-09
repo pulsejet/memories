@@ -49,7 +49,7 @@ class VideoController extends ApiBase
         }
 
         // Make sure not running in read-only mode
-        if ($this->config->getSystemValue('memories.no_transcode', false)) {
+        if ($this->config->getSystemValue('memories.no_transcode', 'UNSET') !== false) {
             return new JSONResponse(['message' => 'Transcoding disabled'], Http::STATUS_FORBIDDEN);
         }
 
@@ -71,15 +71,35 @@ class VideoController extends ApiBase
             return new JSONResponse(['message' => 'File not found'], Http::STATUS_NOT_FOUND);
         }
 
+        // Check if file starts with temp dir
+        $tmpDir = sys_get_temp_dir();
+        if (0 === strpos($path, $tmpDir)) {
+            return new JSONResponse(['message' => 'File is in temp dir!'], Http::STATUS_NOT_FOUND);
+        }
+
         // Make upstream request
-        $ch = curl_init("http://localhost:9999/vod/{$path}/{$profile}");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        $data = curl_exec($ch);
-        $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-        $returnCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        [$data, $contentType, $returnCode] = $this->getUpstream($path, $profile);
+
+        // If status code was 0, it's likely the server is down
+        // Make one attempt to start if we can't find the process
+        if (0 === $returnCode) {
+            $transcoder = $this->config->getSystemValue('memories.transcoder', false);
+            $tConfig = $this->config->getSystemValue('memories.transcoder_config', false);
+            if (!$transcoder || !$tConfig) {
+                return new JSONResponse(['message' => 'Transcoder not configured'], Http::STATUS_INTERNAL_SERVER_ERROR);
+            }
+
+            // Check if already running
+            exec('ps a | grep go-transcode | grep -v grep', $procs);
+            if (0 === \count($procs)) {
+                shell_exec("mkdir -p $tmpDir/transcoder"); // php func has some weird problems
+                shell_exec("nohup $transcoder serve --config $tConfig > $tmpDir/transcoder/run.log 2>&1 & > /dev/null");
+            }
+
+            // wait for 2s and try again
+            sleep(2);
+            [$data, $contentType, $returnCode] = $this->getUpstream($path, $profile);
+        }
 
         // Check data was received
         if ($returnCode >= 400 || false === $data) {
@@ -93,5 +113,17 @@ class VideoController extends ApiBase
         $response->cacheFor(3600 * 24, false, false);
 
         return $response;
+    }
+
+    private function getUpstream($path, $profile) {
+        $ch = curl_init("http://localhost:47788/vod/{$path}/{$profile}");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        $data = curl_exec($ch);
+        $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+        $returnCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        return [$data, $contentType, $returnCode];
     }
 }

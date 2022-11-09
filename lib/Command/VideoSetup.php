@@ -50,8 +50,14 @@ class VideoSetup extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        // Check nohup binary
+        $nohup = shell_exec('nohup --version');
+        if (!$nohup || strpos($nohup, 'nohup') === false) {
+            $output->writeln('<error>nohup binary not found. Please install nohup.</error>');
+            return $this->suggestDisable($output);
+        }
+
         // Get ffmpeg version
-        $output->writeln('Checking for ffmpeg binary');
         $ffmpeg = shell_exec('ffmpeg -version');
         if (false === strpos($ffmpeg, 'ffmpeg version')) {
             $ffmpeg = null;
@@ -61,7 +67,6 @@ class VideoSetup extends Command
         }
 
         // Get ffprobe version
-        $output->writeln('Checking for ffprobe binary');
         $ffprobe = shell_exec('ffprobe -version');
         if (false === strpos($ffprobe, 'ffprobe version')) {
             $ffprobe = null;
@@ -102,8 +107,11 @@ class VideoSetup extends Command
         $output->writeln('go-transcode is installed!');
         $output->writeln('');
         $output->writeln('You can use transcoding and HLS streaming');
-        $output->writeln('This is recommended for better performance, but not for very slow systems');
-        $output->writeln('For more details see: https://github.com/pulsejet/memories/wiki/Configuration');
+        $output->writeln('This is recommended for better performance, but has implications if');
+        $output->writeln('you are using external storage or run Nextcloud on a slow system.');
+        $output->writeln('');
+        $output->writeln('Read the following documentation carefully before continuing:');
+        $output->writeln('https://github.com/pulsejet/memories/wiki/Configuration');
         $output->writeln('');
         $output->writeln('Do you want to enable transcoding and HLS? [Y/n]');
 
@@ -115,7 +123,10 @@ class VideoSetup extends Command
             return 0;
         }
 
+        $tConfig = realpath(__DIR__."/../../transcoder.yaml");
+
         $this->config->setSystemValue('memories.transcoder', $goTranscodePath);
+        $this->config->setSystemValue('memories.transcoder_config', $tConfig);
         $this->config->setSystemValue('memories.no_transcode', false);
         $output->writeln('Transcoding and HLS are now enabled!');
 
