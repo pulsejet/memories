@@ -24,12 +24,18 @@ trait TimelineQueryFaceRecognition
         $personName = $personNames[1];
 
         // Join with images
-        $query->innerJoin('m', 'facerecog_images', 'fri',
+        $query->innerJoin(
+            'm',
+            'facerecog_images',
+            'fri',
             $query->expr()->eq('fri.file', 'm.fileid')
         );
 
         // Join with faces
-        $query->innerJoin('fri', 'facerecog_faces', 'frf',
+        $query->innerJoin(
+            'fri',
+            'facerecog_faces',
+            'frf',
             $query->expr()->eq('frf.image', 'fri.id')
         );
 
@@ -101,7 +107,7 @@ trait TimelineQueryFaceRecognition
 
         // Post process
         foreach ($faces as &$row) {
-            $row['id'] = $row['name'] ? $row['name'] : (int) $row['id'];
+            $row['id'] = $row['name'] ?: (int) $row['id'];
             $row['count'] = (int) $row['count'];
         }
 
@@ -132,13 +138,12 @@ trait TimelineQueryFaceRecognition
         // WHERE these photos are memories indexed
         $query->innerJoin('fri', 'memories', 'm', $query->expr()->eq('m.fileid', 'fri.file'));
 
+        $query->innerJoin('frf', 'facerecog_persons', 'frp', $query->expr()->eq('frp.id', 'frf.person'));
         if (is_numeric($previewId)) {
             // WHERE faces are from id persons (a cluster).
-            $query->innerJoin('frf', 'facerecog_persons', 'frp', $query->expr()->eq('frp.id', 'frf.person'));
             $query->where($query->expr()->eq('frp.id', $query->createNamedParameter($previewId)));
         } else {
             // WHERE faces are from name on persons.
-            $query->innerJoin('frf', 'facerecog_persons', 'frp', $query->expr()->eq('frp.id', 'frf.person'));
             $query->where($query->expr()->eq('frp.name', $query->createNamedParameter($previewId)));
         }
 

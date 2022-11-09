@@ -111,7 +111,7 @@ class PeopleController extends ApiBase
             return new DataResponse([], Http::STATUS_NOT_FOUND);
         }
 
-        return $this->getPeoplePreviewResponse ($folder, $detections);
+        return $this->getPeoplePreviewResponse($folder, $detections);
     }
 
     /**
@@ -184,11 +184,14 @@ class PeopleController extends ApiBase
             return new DataResponse([], Http::STATUS_NOT_FOUND);
         }
 
-        return $this->getPeoplePreviewResponse ($folder, $detections);
+        return $this->getPeoplePreviewResponse($folder, $detections);
     }
 
     /**
-     * Get face preview image cropped with imagick
+     * Get face preview image cropped with imagick.
+     *
+     * @param mixed $folder
+     * @param mixed $detections
      *
      * @return DataResponse
      */
