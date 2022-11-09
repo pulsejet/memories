@@ -9,7 +9,10 @@ OC.L10N.register(
     "Download" : "ښکته کول",
     "Favorite" : "په نښه شوی",
     "View in folder" : "په فولډر کې کتل",
+    "Share" : "شریکول",
     "Save" : "ساتل",
-    "Name" : "نوم"
+    "Name" : "نوم",
+    "Continue" : "وړاندې تګ",
+    "Size" : "کچه"
 },
 "nplurals=2; plural=(n != 1);");

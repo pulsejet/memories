@@ -9,6 +9,7 @@ OC.L10N.register(
     "Tags" : "Etiquetas",
     "Maps" : "Mapas",
     "Settings" : "Ajustes",
+    "Edit" : "Editar",
     "Loading …" : "Cargando …",
     "Cancel" : "Cancelar",
     "Delete" : "Eliminar",
@@ -16,6 +17,7 @@ OC.L10N.register(
     "Favorite" : "Favorito",
     "Unarchive" : "Desarchivar",
     "View in folder" : "Ver en la carpeta",
+    "Share" : "Compartir",
     "Copy public link" : "Copiar link publico",
     "Back" : "Atrás",
     "Save" : "Guardar",
@@ -25,6 +27,14 @@ OC.L10N.register(
     "Hour" : "Hora",
     "Name" : "Nombre",
     "Update" : "Actualizar",
-    "Refresh" : "Recargar"
+    "Refresh" : "Recargar",
+    "Reset" : "Restablecer",
+    "Continue" : "Continuar",
+    "Undo" : "Deshacer",
+    "Custom" : "Personalizado",
+    "Value" : "Valor",
+    "Text" : "Texto",
+    "Size" : "Tamaño",
+    "Position" : "Posición"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

@@ -8,6 +8,8 @@ OC.L10N.register(
     "Tags" : "Tags",
     "Maps" : "Maps",
     "Settings" : "Settings",
+    "Unsaved changes" : "Unsaved changes",
+    "Edit" : "Edit",
     "Loading …" : "Loading …",
     "Cancel" : "Cancel",
     "Delete" : "Delete",
@@ -15,6 +17,7 @@ OC.L10N.register(
     "Favorite" : "Favourite",
     "Unarchive" : "Unarchive",
     "View in folder" : "View in folder",
+    "Share" : "Share",
     "Public link" : "Public link",
     "Back" : "Back",
     "Save" : "Save",
@@ -25,6 +28,15 @@ OC.L10N.register(
     "Name" : "Surname",
     "Update" : "Update",
     "Refresh" : "Refresh",
-    "Image" : "Image"
+    "Reset" : "Reset",
+    "Continue" : "Continue",
+    "Undo" : "Undo",
+    "Original" : "Original",
+    "Custom" : "Custom",
+    "Value" : "Value",
+    "Image" : "Image",
+    "Text" : "Text",
+    "Size" : "Size",
+    "Position" : "Position"
 },
 "nplurals=2; plural=(n != 1);");

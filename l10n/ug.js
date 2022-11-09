@@ -15,6 +15,7 @@ OC.L10N.register(
     "Time" : "ۋاقىت",
     "Name" : "ئاتى",
     "Update" : "يېڭىلا",
-    "Refresh" : "يېڭىلا"
+    "Refresh" : "يېڭىلا",
+    "Size" : "چوڭلۇقى"
 },
 "nplurals=2; plural=(n != 1);");

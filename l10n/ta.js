@@ -15,6 +15,9 @@ OC.L10N.register(
     "Month" : "மாதம்",
     "Name" : "பெயர்",
     "Update" : "இற்றைப்படுத்தல்",
-    "Refresh" : "மீள் ஏற்றுக"
+    "Refresh" : "மீள் ஏற்றுக",
+    "Continue" : "Continue",
+    "Value" : "Value",
+    "Size" : "அளவு"
 },
 "nplurals=2; plural=(n != 1);");

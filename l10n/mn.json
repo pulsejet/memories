@@ -14,6 +14,7 @@
     "Favorite" : "Дуртай",
     "Unarchive" : "Архиваас гаргах",
     "View in folder" : "Хавтасыг нээх",
+    "Share" : "Түгээх",
     "Back" : "буцах",
     "Save" : "Хадгалах",
     "Month" : "Сар",
@@ -22,7 +23,12 @@
     "Name" : "Нэр",
     "Update" : "Шинэчлэх",
     "Refresh" : "Сэргээх",
+    "Reset" : "тохируулах",
+    "Continue" : "үргэлжлүүлэх",
     "Undo" : "буцах",
+    "Custom" : "Дурын",
+    "Value" : "Үнийн дүн",
+    "Size" : "Хэмжээ",
     "Position" : "Байр"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

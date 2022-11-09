@@ -18,6 +18,8 @@
     "Time" : "වේලාව",
     "Name" : "නම",
     "Update" : "යාවත්කාල",
-    "Undo" : "පෙරසේ"
+    "Undo" : "පෙරසේ",
+    "Value" : "අගය",
+    "Size" : "ප්‍රමාණය"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
