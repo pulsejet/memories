@@ -18,7 +18,8 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 - **📱 Mobile Support**: Works on devices of any shape and size through the web app.
 - **✏️ Edit Metadata**: Edit dates on photos quickly and easily.
 - **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.
-- **⚡️ Performance**: Memories is extremely fast.
+- **📹 Video Transcoding**: Memories transcodes videos and uses HLS for maximal performance.
+- **⚡️ Performance**: In general, Memories is extremely fast.
 
 ## 🌐 Online Demo
 

@@ -5,6 +5,9 @@ This file is manually updated. Please file an issue if something is missing.
 ## v4.7.0, v3.7.0
 
 - **Note**: you must run `occ memories:index -f` to take advantage of new features.
+- **Massively improved video performance**
+  - Memories now comes with a dedicated transcoding server with HLS support.
+  - Read the documentation [here](https://github.com/pulsejet/memories/wiki/Configuration#video-transcoding) carefully for more details.
 - **Feature**: show EXIF metadata in sidebar ([#68](https://github.com/pulsejet/memories/issues/68))
 
 ## v4.6.1, v3.6.1 (2022-11-07)
