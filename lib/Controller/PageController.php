@@ -91,6 +91,9 @@ class PageController extends Controller
         // App version
         $this->initialState->provideInitialState('version', $this->appManager->getAppInfo('memories')['version']);
 
+        // Video configuration
+        $this->initialState->provideInitialState('notranscode', $this->config->getSystemValue('memories.no_transcode', 'UNSET'));
+
         $policy = new ContentSecurityPolicy();
         $policy->addAllowedWorkerSrcDomain("'self'");
         $policy->addAllowedScriptDomain("'self'");

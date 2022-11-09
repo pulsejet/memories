@@ -1,10 +1,17 @@
 import PhotoSwipe from "photoswipe";
 import { generateUrl } from "@nextcloud/router";
+import { loadState } from "@nextcloud/initial-state";
 
 import videojs from "video.js";
 import "video.js/dist/video-js.min.css";
 import "videojs-contrib-quality-levels";
 import "videojs-hls-quality-selector";
+
+const config_noTranscode = loadState(
+  "memories",
+  "notranscode",
+  <string>"UNSET"
+) as boolean | string;
 
 /**
  * Check if slide has video content
@@ -71,10 +78,11 @@ class VideoContentSetup {
     // do not append video on nearby slides
     pswp.on("appendHeavy", (e) => {
       if (isVideoContent(e.slide)) {
+        const content = <any>e.slide.content;
+
         if (!e.slide.isActive) {
           e.preventDefault();
-        } else {
-          const content = <any>e.slide.content;
+        } else if (content.videoElement) {
           const fileid = content.data.photo.fileid;
 
           // Create hls sources if enabled
@@ -82,10 +90,13 @@ class VideoContentSetup {
           const baseUrl = generateUrl(
             `/apps/memories/api/video/transcode/${fileid}`
           );
-          hlsSources.push({
-            src: `${baseUrl}/index.m3u8`,
-            type: "application/x-mpegURL",
-          });
+
+          if (!config_noTranscode) {
+            hlsSources.push({
+              src: `${baseUrl}/index.m3u8`,
+              type: "application/x-mpegURL",
+            });
+          }
 
           const overrideNative = !videojs.browser.IS_SAFARI;
           content.videojs = videojs(content.videoElement, {
@@ -243,6 +254,18 @@ class VideoContentSetup {
     e.preventDefault();
 
     if (content.element) {
+      return;
+    }
+
+    if (config_noTranscode === "UNSET") {
+      content.element = document.createElement("div");
+      content.element.innerHTML =
+        "Video not configured. Run occ memories:video-setup";
+      content.element.style.color = "red";
+      content.element.style.display = "flex";
+      content.element.style.alignItems = "center";
+      content.element.style.justifyContent = "center";
+      content.onLoaded();
       return;
     }
 

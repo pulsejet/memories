@@ -52,8 +52,9 @@ class VideoSetup extends Command
     {
         // Check nohup binary
         $nohup = shell_exec('nohup --version');
-        if (!$nohup || strpos($nohup, 'nohup') === false) {
+        if (!$nohup || false === strpos($nohup, 'nohup')) {
             $output->writeln('<error>nohup binary not found. Please install nohup.</error>');
+
             return $this->suggestDisable($output);
         }
 
@@ -77,6 +78,7 @@ class VideoSetup extends Command
 
         if (null === $ffmpeg || null === $ffprobe) {
             $output->writeln('ffmpeg and ffprobe are required for video transcoding');
+
             return $this->suggestDisable($output);
         }
 
@@ -90,16 +92,18 @@ class VideoSetup extends Command
         if (!$arch || !$libc) {
             $output->writeln('<error>Compatible go-transcode binary not found</error>');
             $this->suggestGoTranscode($output);
+
             return $this->suggestDisable($output);
         }
 
         $goTranscodePath = realpath(__DIR__."/../../exiftool-bin/go-transcode-{$arch}-{$libc}");
-        $output->writeln("Trying go-transcode from $goTranscodePath");
+        $output->writeln("Trying go-transcode from {$goTranscodePath}");
 
-        $goTranscode = shell_exec($goTranscodePath . ' --help');
+        $goTranscode = shell_exec($goTranscodePath.' --help');
         if (!$goTranscode || false === strpos($goTranscode, 'Available Commands')) {
             $output->writeln('<error>go-transcode could not be run</error>');
             $this->suggestGoTranscode($output);
+
             return $this->suggestDisable($output);
         }
 
@@ -120,10 +124,11 @@ class VideoSetup extends Command
         if ('n' === trim($line)) {
             $this->config->setSystemValue('memories.no_transcode', true);
             $output->writeln('<error>Transcoding and HLS are now disabled</error>');
+
             return 0;
         }
 
-        $tConfig = realpath(__DIR__."/../../transcoder.yaml");
+        $tConfig = realpath(__DIR__.'/../../transcoder.yaml');
 
         $this->config->setSystemValue('memories.transcoder', $goTranscodePath);
         $this->config->setSystemValue('memories.transcoder_config', $tConfig);
@@ -140,7 +145,8 @@ class VideoSetup extends Command
         $output->writeln('Once built, point the path to the binary in the config for `memories.transcoder`');
     }
 
-    protected function suggestDisable(OutputInterface $output) {
+    protected function suggestDisable(OutputInterface $output)
+    {
         $output->writeln('Without transcoding, video playback may be slow and limited');
         $output->writeln('Do you want to disable transcoding and HLS streaming? [y/N]');
         $handle = fopen('php://stdin', 'r');

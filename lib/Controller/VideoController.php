@@ -49,7 +49,7 @@ class VideoController extends ApiBase
         }
 
         // Make sure not running in read-only mode
-        if ($this->config->getSystemValue('memories.no_transcode', 'UNSET') !== false) {
+        if (false !== $this->config->getSystemValue('memories.no_transcode', 'UNSET')) {
             return new JSONResponse(['message' => 'Transcoding disabled'], Http::STATUS_FORBIDDEN);
         }
 
@@ -92,8 +92,8 @@ class VideoController extends ApiBase
             // Check if already running
             exec('ps a | grep go-transcode | grep -v grep', $procs);
             if (0 === \count($procs)) {
-                shell_exec("mkdir -p $tmpDir/transcoder"); // php func has some weird problems
-                shell_exec("nohup $transcoder serve --config $tConfig > $tmpDir/transcoder/run.log 2>&1 & > /dev/null");
+                shell_exec("mkdir -p {$tmpDir}/transcoder"); // php func has some weird problems
+                shell_exec("nohup {$transcoder} serve --config {$tConfig} > {$tmpDir}/transcoder/run.log 2>&1 & > /dev/null");
             }
 
             // wait for 2s and try again
@@ -115,7 +115,8 @@ class VideoController extends ApiBase
         return $response;
     }
 
-    private function getUpstream($path, $profile) {
+    private function getUpstream($path, $profile)
+    {
         $ch = curl_init("http://localhost:47788/vod/{$path}/{$profile}");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
@@ -124,6 +125,7 @@ class VideoController extends ApiBase
         $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
         $returnCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+
         return [$data, $contentType, $returnCode];
     }
 }
