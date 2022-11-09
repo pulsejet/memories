@@ -33,6 +33,7 @@
     "@nextcloud/paths": "^2.1.0",
     "@nextcloud/sharing": "^0.1.0",
     "@nextcloud/vue": "7.0.0",
+    "@silvermine/videojs-quality-selector": "^1.2.5",
     "camelcase": "^7.0.0",
     "filerobot-image-editor": "^4.3.7",
     "justified-layout": "^4.1.0",

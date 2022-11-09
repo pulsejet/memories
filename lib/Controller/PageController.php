@@ -95,6 +95,11 @@ class PageController extends Controller
         $policy->addAllowedWorkerSrcDomain("'self'");
         $policy->addAllowedScriptDomain("'self'");
 
+        // Video player
+        $policy->addAllowedWorkerSrcDomain('blob:');
+        $policy->addAllowedScriptDomain('blob:');
+        $policy->addAllowedMediaDomain('blob:');
+
         // Allow nominatim for metadata
         $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
         $policy->addAllowedFrameDomain('www.openstreetmap.org');

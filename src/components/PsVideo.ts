@@ -1,6 +1,11 @@
 import PhotoSwipe from "photoswipe";
+import { generateUrl } from "@nextcloud/router";
+
 import videojs from "video.js";
 import "video.js/dist/video-js.min.css";
+import qualitySelector from "@silvermine/videojs-quality-selector";
+import "@silvermine/videojs-quality-selector/dist/css/quality-selector.css";
+qualitySelector(videojs);
 
 /**
  * Check if slide has video content
@@ -71,19 +76,53 @@ class VideoContentSetup {
           e.preventDefault();
         } else {
           const content = <any>e.slide.content;
+          const fileid = content.data.photo.fileid;
+
+          // Create hls sources if enabled
+          let hlsSources = [];
+          const baseUrl = generateUrl(
+            `/apps/memories/api/video/transcode/${fileid}`
+          );
+          for (const q of ["360p", "480p", "720p", "1080p"]) {
+            hlsSources.push({
+              src: `${baseUrl}/${q}.m3u8`,
+              label: q,
+              type: "application/x-mpegURL",
+              selected: q === "480p" ? true : undefined,
+            });
+          }
+
           content.videojs = videojs(content.videoElement, {
             fluid: true,
             autoplay: true,
             controls: true,
-            sources: [{ src: e.slide.data.src }],
+            sources: [
+              ...hlsSources,
+              {
+                src: e.slide.data.src,
+                label: "Original",
+              },
+            ],
             preload: "metadata",
             inactivityTimeout: 0,
             html5: {
               vhs: {
-                withCredentials: true,
+                overrideNative: !videojs.browser.IS_SAFARI,
+                withCredentials: false,
               },
             },
+            controlBar: {
+              children: [
+                "playToggle",
+                "progressControl",
+                "volumePanel",
+                "qualitySelector",
+                "fullscreenToggle",
+              ],
+            },
           });
+
+          globalThis.videojs = content.videojs;
         }
       }
     });
