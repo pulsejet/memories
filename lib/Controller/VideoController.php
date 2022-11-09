@@ -54,7 +54,7 @@ class VideoController extends ApiBase
         }
 
         // Get file
-        $files = $this->rootFolder->getById($fileid);
+        $files = $this->rootFolder->getUserFolder($user->getUID())->getById($fileid);
         if (count($files) === 0) {
             return new JSONResponse(['message' => 'File not found'], Http::STATUS_NOT_FOUND);
         }
