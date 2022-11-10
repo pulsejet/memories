@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"os/exec"
 	"sort"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -40,17 +42,15 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 		return nil, err
 	}
 
-	log.Println("Video duration:", m.probe)
-
 	m.numChunks = int(math.Ceil(m.probe.Duration.Seconds() / c.chunkSize))
 
 	// Possible streams
-	m.streams["360p.m3u8"] = &Stream{c: c, m: m, quality: "360p", height: 360, width: 640, bitrate: 945000}
-	m.streams["480p.m3u8"] = &Stream{c: c, m: m, quality: "480p", height: 480, width: 640, bitrate: 1365000}
-	m.streams["720p.m3u8"] = &Stream{c: c, m: m, quality: "720p", height: 720, width: 1280, bitrate: 3045000}
-	m.streams["1080p.m3u8"] = &Stream{c: c, m: m, quality: "1080p", height: 1080, width: 1920, bitrate: 6045000}
-	m.streams["1440p.m3u8"] = &Stream{c: c, m: m, quality: "1440p", height: 1440, width: 2560, bitrate: 9045000}
-	m.streams["2160p.m3u8"] = &Stream{c: c, m: m, quality: "2160p", height: 2160, width: 3840, bitrate: 14045000}
+	m.streams["360p"] = &Stream{c: c, m: m, quality: "360p", height: 360, width: 640, bitrate: 945000}
+	m.streams["480p"] = &Stream{c: c, m: m, quality: "480p", height: 480, width: 640, bitrate: 1365000}
+	m.streams["720p"] = &Stream{c: c, m: m, quality: "720p", height: 720, width: 1280, bitrate: 3045000}
+	m.streams["1080p"] = &Stream{c: c, m: m, quality: "1080p", height: 1080, width: 1920, bitrate: 6045000}
+	m.streams["1440p"] = &Stream{c: c, m: m, quality: "1440p", height: 1440, width: 2560, bitrate: 9045000}
+	m.streams["2160p"] = &Stream{c: c, m: m, quality: "2160p", height: 2160, width: 3840, bitrate: 14045000}
 
 	// Only keep streams that are smaller than the video
 	for k, stream := range m.streams {
@@ -59,16 +59,50 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 		}
 	}
 
+	log.Println("New manager", m.id,
+		"with streams:", len(m.streams),
+		"duration:", m.probe.Duration,
+		"resolution:", m.probe.Width, "x", m.probe.Height,
+	)
+
 	return m, nil
 }
 
 func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request, chunk string) error {
+	// Master list
 	if chunk == "index.m3u8" {
 		return m.ServeIndex(w, r)
 	}
 
-	if stream, ok := m.streams[chunk]; ok {
-		return stream.ServeList(w, r)
+	// Stream list
+	m3u8Sfx := ".m3u8"
+	if strings.HasSuffix(chunk, m3u8Sfx) {
+		quality := strings.TrimSuffix(chunk, m3u8Sfx)
+		if stream, ok := m.streams[quality]; ok {
+			return stream.ServeList(w, r)
+		}
+	}
+
+	// Stream chunk
+	tsSfx := ".ts"
+	if strings.HasSuffix(chunk, tsSfx) {
+		parts := strings.Split(chunk, "-")
+		if len(parts) != 2 {
+			w.WriteHeader(http.StatusBadRequest)
+			return nil
+		}
+
+		quality := parts[0]
+		chunkIdStr := strings.TrimSuffix(parts[1], tsSfx)
+		chunkId, err := strconv.Atoi(chunkIdStr)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return nil
+		}
+
+		if stream, ok := m.streams[quality]; ok {
+			return stream.ServeChunk(w, r, chunkId)
+		}
 	}
 
 	w.WriteHeader(http.StatusNotFound)

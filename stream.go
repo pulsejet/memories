@@ -22,12 +22,28 @@ func (s *Stream) ServeList(w http.ResponseWriter, r *http.Request) error {
 	w.Write([]byte("#EXT-X-PLAYLIST-TYPE:VOD\n"))
 	w.Write([]byte(fmt.Sprintf("#EXT-X-TARGETDURATION:%.3f\n", s.c.chunkSize)))
 
-	for i := 0; i < s.m.numChunks; i++ {
-		w.Write([]byte(fmt.Sprintf("#EXTINF:%.3f, nodesc\n", s.c.chunkSize)))
+	duration := s.m.probe.Duration.Seconds()
+	i := 0
+	for duration > 0 {
+		size := s.c.chunkSize
+		if duration < size {
+			size = duration
+		}
+
+		w.Write([]byte(fmt.Sprintf("#EXTINF:%.3f, nodesc\n", size)))
 		w.Write([]byte(fmt.Sprintf("%s-%06d.ts\n", s.quality, i)))
+
+		duration -= s.c.chunkSize
+		i++
 	}
 
 	w.Write([]byte("#EXT-X-ENDLIST\n"))
 
+	return nil
+}
+
+// Bulk
+func (s *Stream) ServeChunk(w http.ResponseWriter, r *http.Request, chunkId int) error {
+	w.Write([]byte("chunk"))
 	return nil
 }
