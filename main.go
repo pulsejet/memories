@@ -70,13 +70,14 @@ func (h *Handler) getManager(streamid string) *Manager {
 }
 
 func (h *Handler) createManager(path string, streamid string) *Manager {
-	h.mutex.Lock()
-	defer h.mutex.Unlock()
 	manager, err := NewManager(h.c, path, streamid, h.close)
 	if err != nil {
 		log.Println("Error creating manager", err)
 		return nil
 	}
+
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
 
 	h.managers[streamid] = manager
 	return manager
@@ -110,7 +111,7 @@ func main() {
 	h := NewHandler(&Config{
 		ffmpeg:    "ffmpeg",
 		ffprobe:   "ffprobe",
-		chunkSize: 4.0,
+		chunkSize: 2.0,
 	})
 
 	http.Handle("/", h)

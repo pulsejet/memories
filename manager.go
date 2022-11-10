@@ -71,7 +71,7 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request, chunk string) error {
 	// Master list
 	if chunk == "index.m3u8" {
-		return m.ServeIndex(w, r)
+		return m.ServeIndex(w)
 	}
 
 	// Stream list
@@ -79,7 +79,7 @@ func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request, chunk string
 	if strings.HasSuffix(chunk, m3u8Sfx) {
 		quality := strings.TrimSuffix(chunk, m3u8Sfx)
 		if stream, ok := m.streams[quality]; ok {
-			return stream.ServeList(w, r)
+			return stream.ServeList(w)
 		}
 	}
 
@@ -101,7 +101,7 @@ func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request, chunk string
 		}
 
 		if stream, ok := m.streams[quality]; ok {
-			return stream.ServeChunk(w, r, chunkId)
+			return stream.ServeChunk(w, chunkId)
 		}
 	}
 
@@ -109,7 +109,7 @@ func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request, chunk string
 	return nil
 }
 
-func (m *Manager) ServeIndex(w http.ResponseWriter, r *http.Request) error {
+func (m *Manager) ServeIndex(w http.ResponseWriter) error {
 	WriteM3U8ContentType(w)
 	w.Write([]byte("#EXTM3U\n"))
 
