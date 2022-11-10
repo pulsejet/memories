@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -35,6 +36,8 @@ type Stream struct {
 	height  int
 	width   int
 	bitrate int
+
+	goal int
 
 	mutex  sync.Mutex
 	chunks map[int]*Chunk
@@ -73,6 +76,8 @@ func (s *Stream) ServeList(w http.ResponseWriter) error {
 func (s *Stream) ServeChunk(w http.ResponseWriter, id int) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
+
+	s.checkGoal(id)
 
 	// Already have this chunk
 	if chunk, ok := s.chunks[id]; ok {
@@ -172,6 +177,7 @@ func (s *Stream) restartAtChunk(w http.ResponseWriter, id int) {
 	if s.coder != nil {
 		s.coder.Process.Kill()
 		s.coder.Wait()
+		s.coder = nil
 	}
 
 	// Clear everything
@@ -180,6 +186,7 @@ func (s *Stream) restartAtChunk(w http.ResponseWriter, id int) {
 	chunk := s.createChunk(id) // create first chunk
 
 	// Start the transcoder
+	s.checkGoal(id)
 	s.transcode(id)
 
 	s.waitForChunk(w, chunk) // this is also a request
@@ -285,6 +292,18 @@ func (s *Stream) transcode(startId int) {
 	go s.monitorStderr(cmdStdErr)
 }
 
+func (s *Stream) checkGoal(id int) {
+	goal := id + 5
+	if goal > s.goal {
+		s.goal = goal
+
+		// resume encoding
+		if s.coder != nil {
+			s.coder.Process.Signal(syscall.SIGCONT)
+		}
+	}
+}
+
 func (s *Stream) getTsPath(id int) string {
 	if id == -1 {
 		return fmt.Sprintf("/tmp/go-vod/%s/%s-%%06d.ts", s.m.id, s.quality)
@@ -321,25 +340,33 @@ func (s *Stream) monitorTranscodeOutput(cmdStdOut io.ReadCloser, startAt float64
 		l := string(line)
 
 		if strings.Contains(l, ".ts") {
-			go func() {
-				// 1080p-000003.ts
-				idx := strings.Split(strings.Split(l, "-")[1], ".")[0]
-				id, err := strconv.Atoi(idx)
-				if err != nil {
-					log.Println("Error parsing chunk id")
-				}
+			// 1080p-000003.ts
+			idx := strings.Split(strings.Split(l, "-")[1], ".")[0]
+			id, err := strconv.Atoi(idx)
+			if err != nil {
+				log.Println("Error parsing chunk id")
+			}
 
+			go func() {
 				s.mutex.Lock()
 				defer s.mutex.Unlock()
 
+				// The coder has changed; do nothing
 				if s.coder != coder {
 					return
 				}
 
+				// Notify everyone
 				chunk := s.createChunk(id)
 				chunk.done = true
 				for _, n := range chunk.notifs {
 					n <- true
+				}
+
+				// Check goal satisfied
+				if id >= s.goal {
+					log.Println("Goal satisfied, pausing encoding")
+					s.coder.Process.Signal(syscall.SIGSTOP)
 				}
 			}()
 		}
