@@ -11,7 +11,8 @@ This file is manually updated. Please file an issue if something is missing.
 - **Feature**: Show EXIF metadata in sidebar ([#68](https://github.com/pulsejet/memories/issues/68))
 - **Feature**: Show duration on video tiles
 - Fix stretched images in viewer ([#176](https://github.com/pulsejet/memories/issues/176))
-- Restore metadata after image edit ([#174](https://github.com/pulsejet/memories/issues/174))
+- Editor: Restore metadata after image edit ([#174](https://github.com/pulsejet/memories/issues/174))
+- Editor: Fix loss of resolution after edit
 
 ## v4.6.1, v3.6.1 (2022-11-07)
 

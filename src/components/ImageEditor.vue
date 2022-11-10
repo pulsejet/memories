@@ -88,8 +88,8 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
         },
       },
 
-      savingPixelRatio: 1,
-      previewPixelRatio: 1,
+      savingPixelRatio: 8,
+      previewPixelRatio: window.devicePixelRatio,
     };
   }
 
