@@ -163,7 +163,7 @@ export default class Metadata extends Mixins(GlobalMixin) {
     const dt = this.exif["DateTimeOriginal"] || this.exif["CreateDate"];
     if (!dt) return null;
 
-    const m = moment(dt, "YYYY:MM:DD HH:mm:ss");
+    const m = moment.utc(dt, "YYYY:MM:DD HH:mm:ss");
     if (!m.isValid()) return null;
     m.locale(getCanonicalLocale());
     return m;
