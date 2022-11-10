@@ -14,6 +14,7 @@ OC.L10N.register(
     "Tags" : "Címkék",
     "Maps" : "Térképek",
     "Settings" : "Beállítások",
+    "EXIF" : "EXIF",
     "Unsaved changes" : "Mentetlen változtatások",
     "Drop changes" : "Változtatások elvetése",
     "Edit" : "Szerkesztés",
