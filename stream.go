@@ -176,7 +176,6 @@ func (s *Stream) restartAtChunk(w http.ResponseWriter, id int) {
 	// Stop current transcoder
 	if s.coder != nil {
 		s.coder.Process.Kill()
-		s.coder.Wait()
 		s.coder = nil
 	}
 
@@ -186,7 +185,7 @@ func (s *Stream) restartAtChunk(w http.ResponseWriter, id int) {
 	chunk := s.createChunk(id) // create first chunk
 
 	// Start the transcoder
-	s.checkGoal(id)
+	s.goal = id + 5
 	s.transcode(id)
 
 	s.waitForChunk(w, chunk) // this is also a request
@@ -299,6 +298,7 @@ func (s *Stream) checkGoal(id int) {
 
 		// resume encoding
 		if s.coder != nil {
+			log.Println("Resuming encoding")
 			s.coder.Process.Signal(syscall.SIGCONT)
 		}
 	}
@@ -375,10 +375,7 @@ func (s *Stream) monitorTranscodeOutput(cmdStdOut io.ReadCloser, startAt float64
 	}
 
 	// Join the process
-	err := s.coder.Wait()
-	if err != nil {
-		log.Println("FFmpeg process wait failed with", err)
-	}
+	coder.Wait()
 }
 
 func (s *Stream) monitorStderr(cmdStdErr io.ReadCloser) {
