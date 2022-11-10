@@ -134,7 +134,14 @@ class ApiBase extends Controller
         return $folder;
     }
 
-    protected function getUserFile(int $id): File
+    /**
+     * Get a file with ID from user's folder
+     *
+     * @param int $fileId
+     *
+     * @return File|null
+     */
+    protected function getUserFile(int $id)
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
@@ -145,6 +152,11 @@ class ApiBase extends Controller
         // Check for permissions and get numeric Id
         $file = $userFolder->getById($id);
         if (0 === \count($file)) {
+            return null;
+        }
+
+        // Check if node is a file
+        if (!($file[0] instanceof File)) {
             return null;
         }
 
