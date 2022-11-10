@@ -470,7 +470,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
     // Get the thumbnail image
     this.photoswipe.addFilter("thumbEl", (thumbEl, data, index) => {
       const photo = this.list[index - this.globalAnchor];
-      if (!photo || photo.flag & this.c.FLAG_IS_VIDEO) return thumbEl;
+      if (!photo || !photo.w || !photo.h || photo.flag & this.c.FLAG_IS_VIDEO)
+        return thumbEl;
       return this.thumbElem(photo) || thumbEl;
     });
 
@@ -838,6 +839,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
 :deep .pswp {
   .pswp__zoom-wrap {
     width: 100%;
+  }
+
+  img.pswp__img {
+    object-fit: contain;
   }
 
   .pswp__button {
