@@ -51,12 +51,12 @@ func (s *Stream) ServeList(w http.ResponseWriter) error {
 	w.Write([]byte("#EXT-X-VERSION:4\n"))
 	w.Write([]byte("#EXT-X-MEDIA-SEQUENCE:0\n"))
 	w.Write([]byte("#EXT-X-PLAYLIST-TYPE:VOD\n"))
-	w.Write([]byte(fmt.Sprintf("#EXT-X-TARGETDURATION:%.3f\n", s.c.chunkSize)))
+	w.Write([]byte(fmt.Sprintf("#EXT-X-TARGETDURATION:%d\n", s.c.chunkSize)))
 
 	duration := s.m.probe.Duration.Seconds()
 	i := 0
 	for duration > 0 {
-		size := s.c.chunkSize
+		size := float64(s.c.chunkSize)
 		if duration < size {
 			size = duration
 		}
@@ -64,7 +64,7 @@ func (s *Stream) ServeList(w http.ResponseWriter) error {
 		w.Write([]byte(fmt.Sprintf("#EXTINF:%.3f, nodesc\n", size)))
 		w.Write([]byte(fmt.Sprintf("%s-%06d.ts\n", s.quality, i)))
 
-		duration -= s.c.chunkSize
+		duration -= float64(s.c.chunkSize)
 		i++
 	}
 
@@ -192,7 +192,7 @@ func (s *Stream) restartAtChunk(w http.ResponseWriter, id int) {
 }
 
 func (s *Stream) transcode(startId int) {
-	startAt := float64(startId) * s.c.chunkSize
+	startAt := float64(startId * s.c.chunkSize)
 
 	args := []string{
 		"-loglevel", "warning",
@@ -238,13 +238,14 @@ func (s *Stream) transcode(startId int) {
 		"-vf", scale,
 		"-c:v", CV,
 		"-profile:v", "high",
-		"-b:v", fmt.Sprintf("%dk", s.bitrate/1000),
+		"-maxrate", fmt.Sprintf("%dk", s.bitrate/1000),
+		"-bufsize", fmt.Sprintf("%dK", s.bitrate/3000),
 	}...)
 
 	// Extra args only for x264
 	if !VAAPI {
 		args = append(args, []string{
-			"-preset", "faster",
+			"-preset", "fast",
 			"-level:v", "4.0",
 		}...)
 	}
@@ -258,11 +259,9 @@ func (s *Stream) transcode(startId int) {
 	// Segmenting specs
 	args = append(args, []string{
 		"-avoid_negative_ts", "disabled",
-		"-max_muxing_queue_size", "2048",
 		"-f", "hls",
-		"-max_delay", "5000000",
-		"-hls_time", fmt.Sprintf("%.6f", s.c.chunkSize),
-		"-g", fmt.Sprintf("%.6f", s.c.chunkSize),
+		"-hls_time", fmt.Sprintf("%d", s.c.chunkSize),
+		"-g", fmt.Sprintf("%d", s.c.chunkSize),
 		"-hls_segment_type", "mpegts",
 		"-start_number", fmt.Sprintf("%d", startId),
 		"-hls_segment_filename", s.getTsPath(-1),
@@ -270,7 +269,7 @@ func (s *Stream) transcode(startId int) {
 	}...)
 
 	s.coder = exec.Command(s.c.ffmpeg, args...)
-	// log.Println("Starting FFmpeg process with args", strings.Join(s.coder.Args[:], " "))
+	log.Println("Starting FFmpeg process with args", strings.Join(s.coder.Args[:], " "))
 
 	cmdStdOut, err := s.coder.StdoutPipe()
 	if err != nil {
@@ -358,6 +357,9 @@ func (s *Stream) monitorTranscodeOutput(cmdStdOut io.ReadCloser, startAt float64
 
 				// Notify everyone
 				chunk := s.createChunk(id)
+				if chunk.done {
+					return
+				}
 				chunk.done = true
 				for _, n := range chunk.notifs {
 					n <- true

@@ -111,7 +111,7 @@ func main() {
 	h := NewHandler(&Config{
 		ffmpeg:    "ffmpeg",
 		ffprobe:   "ffprobe",
-		chunkSize: 2.0,
+		chunkSize: 3,
 	})
 
 	http.Handle("/", h)

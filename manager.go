@@ -42,15 +42,15 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 		return nil, err
 	}
 
-	m.numChunks = int(math.Ceil(m.probe.Duration.Seconds() / c.chunkSize))
+	m.numChunks = int(math.Ceil(m.probe.Duration.Seconds() / float64(c.chunkSize)))
 
 	// Possible streams
-	m.streams["360p"] = &Stream{c: c, m: m, quality: "360p", height: 360, width: 640, bitrate: 945000}
-	m.streams["480p"] = &Stream{c: c, m: m, quality: "480p", height: 480, width: 640, bitrate: 1365000}
-	m.streams["720p"] = &Stream{c: c, m: m, quality: "720p", height: 720, width: 1280, bitrate: 3045000}
-	m.streams["1080p"] = &Stream{c: c, m: m, quality: "1080p", height: 1080, width: 1920, bitrate: 6045000}
-	m.streams["1440p"] = &Stream{c: c, m: m, quality: "1440p", height: 1440, width: 2560, bitrate: 9045000}
-	m.streams["2160p"] = &Stream{c: c, m: m, quality: "2160p", height: 2160, width: 3840, bitrate: 14045000}
+	m.streams["360p"] = &Stream{c: c, m: m, quality: "360p", height: 360, width: 640, bitrate: 800000}
+	m.streams["480p"] = &Stream{c: c, m: m, quality: "480p", height: 480, width: 640, bitrate: 1500000}
+	m.streams["720p"] = &Stream{c: c, m: m, quality: "720p", height: 720, width: 1280, bitrate: 3000000}
+	m.streams["1080p"] = &Stream{c: c, m: m, quality: "1080p", height: 1080, width: 1920, bitrate: 5000000}
+	m.streams["1440p"] = &Stream{c: c, m: m, quality: "1440p", height: 1440, width: 2560, bitrate: 9000000}
+	m.streams["2160p"] = &Stream{c: c, m: m, quality: "2160p", height: 2160, width: 3840, bitrate: 14000000}
 
 	// Only keep streams that are smaller than the video
 	for k, stream := range m.streams {
