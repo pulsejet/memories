@@ -56,7 +56,11 @@ class ImageController extends ApiBase
     }
 
     /**
+     * @NoAdminRequired
+     *
      * Set the exif data for a file.
+     *
+     * @param string fileid
      */
     public function setExif(string $id): JSONResponse
     {
