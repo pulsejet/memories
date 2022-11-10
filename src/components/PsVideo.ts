@@ -184,7 +184,6 @@ class VideoContentSetup {
   updateRotation(content, val?: number) {
     const rotation = val ?? Number(content.data.exif?.Rotation);
     const shouldRotate = content.videojs?.src().includes("m3u8");
-    console.log("Video.js: Rotation", rotation, shouldRotate);
     if (rotation && shouldRotate) {
       let transform = `rotate(${rotation}deg)`;
 

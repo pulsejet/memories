@@ -77,6 +77,8 @@ export type IPhoto = {
 
   /** Video flag from server */
   isvideo?: boolean;
+  /** Video duration from server */
+  video_duration?: number;
   /** Favorite flag from server */
   isfavorite?: boolean;
   /** Is this a folder */
