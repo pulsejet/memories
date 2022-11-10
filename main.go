@@ -29,15 +29,17 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if len(parts) != 3 {
-		log.Println("Invalid URL", url, len(parts))
+	if len(parts) < 3 {
+		log.Println("Invalid URL", url)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	path := parts[0]
-	streamid := parts[1]
-	chunk := parts[2]
+	streamid := parts[0]
+	path := "/" + strings.Join(parts[1:len(parts)-2], "/")
+	chunk := parts[len(parts)-1]
+
+	log.Println("Serving", path, streamid, chunk)
 
 	if streamid == "" || chunk == "" || path == "" {
 		w.WriteHeader(http.StatusBadRequest)
