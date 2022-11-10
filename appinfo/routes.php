@@ -53,8 +53,7 @@ return [
         ['name' => 'Faces#preview', 'url' => '/api/faces/preview/{id}', 'verb' => 'GET'],
 
         ['name' => 'Image#info', 'url' => '/api/image/info/{id}', 'verb' => 'GET'],
-        ['name' => 'Image#edit', 'url' => '/api/image/edit/{id}', 'verb' => 'PATCH'],
-        ['name' => 'Image#setExif', 'url' => '/api/image/set-exif/{id}', 'verb' => 'PUT'],
+        ['name' => 'Image#setExif', 'url' => '/api/image/set-exif/{id}', 'verb' => 'PATCH'],
 
         ['name' => 'Archive#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
 

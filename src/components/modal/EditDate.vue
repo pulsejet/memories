@@ -144,7 +144,7 @@ import * as utils from "../../services/Utils";
 import * as dav from "../../services/DavRequests";
 
 const INFO_API_URL = "/apps/memories/api/image/info/{id}";
-const EDIT_API_URL = "/apps/memories/api/image/edit/{id}";
+const EDIT_API_URL = "/apps/memories/api/image/set-exif/{id}";
 
 @Component({
   components: {
@@ -269,12 +269,11 @@ export default class EditDate extends Mixins(GlobalMixin) {
     try {
       this.processing = true;
       const fileid = this.photos[0].fileid;
-      const res = await axios.patch<any>(
-        generateUrl(EDIT_API_URL, { id: fileid }),
-        {
-          date: this.getExifFormat(this.getDate()),
-        }
-      );
+      await axios.patch<any>(generateUrl(EDIT_API_URL, { id: fileid }), {
+        raw: {
+          DateTimeOriginal: this.getExifFormat(this.getDate()),
+        },
+      });
       emit("files:file:updated", { fileid });
       this.emitRefresh(true);
       this.close();

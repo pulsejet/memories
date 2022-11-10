@@ -230,29 +230,35 @@ class Exif
     }
 
     /**
-     * Update exif date using exiftool.
+     * Set exif data using raw json.
      *
-     * @param string $newDate formatted in standard Exif format (YYYY:MM:DD HH:MM:SS)
+     * @param string $path to local file
+     * @param array  $data exif data
+     *
+     * @throws \Exception on failure
      */
-    public static function updateExifDate(File &$file, string $newDate)
+    public static function setExif(string &$path, array &$data)
     {
-        // Don't want to mess these up, definitely
-        if ($file->isEncrypted()) {
-            throw new \Exception('Cannot update exif date on encrypted files');
-        }
+        $data['SourceFile'] = $path;
+        $raw = json_encode([$data]);
+        $cmd = array_merge(self::getExiftool(), ['-json=-', $path]);
+        $proc = proc_open($cmd, [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ], $pipes);
 
-        // Get path to local (copy) of the file
-        $path = $file->getStorage()->getLocalFile($file->getInternalPath());
-        if (!\is_string($path)) {
-            throw new \Exception('Failed to get local file path');
-        }
+        fwrite($pipes[0], $raw);
+        fclose($pipes[0]);
 
-        // Update exif data
-        self::updateExifDateForLocalFile($path, $newDate);
+        $stdout = self::readOrTimeout($pipes[1], 30000);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_terminate($proc);
+        if (false !== strpos($stdout, 'error')) {
+            error_log("Exiftool error: {$stdout}");
 
-        // Update remote file if not local
-        if (!$file->getStorage()->isLocal()) {
-            $file->putContent(fopen($path, 'r')); // closes the handler
+            throw new \Exception('Could not set exif data: '.$stdout);
         }
     }
 
@@ -414,63 +420,5 @@ class Exif
         }
 
         return $json[0];
-    }
-
-    /**
-     * Update exif date using exiftool for a local file.
-     *
-     * @param string $newDate formatted in standard Exif format (YYYY:MM:DD HH:MM:SS)
-     *
-     * @throws \Exception on failure
-     */
-    private static function updateExifDateForLocalFile(string $path, string $newDate)
-    {
-        $cmd = array_merge(self::getExiftool(), ['-api', 'QuickTimeUTC=1', '-overwrite_original', '-DateTimeOriginal='.$newDate, $path]);
-        $proc = proc_open($cmd, [
-            1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
-        ], $pipes);
-        $stdout = self::readOrTimeout($pipes[1], 300000);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        proc_terminate($proc);
-        if (false !== strpos($stdout, 'error')) {
-            error_log("Exiftool error: {$stdout}");
-
-            throw new \Exception('Could not update exif date: '.$stdout);
-        }
-    }
-
-    /**
-     * Set exif data using raw json.
-     *
-     * @param string $path to local file
-     * @param array $data exif data
-     *
-     * @throws \Exception on failure
-     */
-    public static function setExif(string &$path, array &$data)
-    {
-        $data['SourceFile'] = $path;
-        $raw = json_encode([$data]);
-        $cmd = array_merge(self::getExiftool(), ['-json=-', $path]);
-        $proc = proc_open($cmd, [
-            0 => ['pipe', 'r'],
-            1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
-        ], $pipes);
-
-        fwrite($pipes[0], $raw);
-        fclose($pipes[0]);
-
-        $stdout = self::readOrTimeout($pipes[1], 30000);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        proc_terminate($proc);
-        if (false !== strpos($stdout, 'error')) {
-            error_log("Exiftool error: {$stdout}");
-
-            throw new \Exception('Could not set exif data: '.$stdout);
-        }
     }
 }

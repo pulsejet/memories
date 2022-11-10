@@ -215,7 +215,7 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
       delete exif.ExifImageSize;
 
       // Update exif data
-      await axios.put(
+      await axios.patch(
         generateUrl("/apps/memories/api/image/set-exif/{id}", {
           id: fileid,
         }),

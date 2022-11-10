@@ -203,8 +203,7 @@ trait TimelineQueryDays
             $row['w'] = (int) $row['w'];
             $row['h'] = (int) $row['h'];
             if (!$row['isvideo']) {
-                unset($row['isvideo']);
-                unset($row['video_duration']);
+                unset($row['isvideo'], $row['video_duration']);
             }
             if ($row['categoryid']) {
                 $row['isfavorite'] = 1;
