@@ -1,40 +1,65 @@
 package main
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
 	"fmt"
+	"log"
 	"math"
 	"net/http"
+	"os/exec"
 	"sort"
+	"time"
 )
 
 type Manager struct {
+	c *Config
+
 	path  string
 	id    string
 	close chan string
 
-	duration  float64
+	probe     *ProbeVideoData
 	numChunks int
-	chunkSize float64
 
 	streams map[string]*Stream
 }
 
-func NewManager(path string, id string, close chan string) *Manager {
-	m := &Manager{path: path, id: id, close: close}
+type ProbeVideoData struct {
+	Width    int
+	Height   int
+	Duration time.Duration
+}
+
+func NewManager(c *Config, path string, id string, close chan string) (*Manager, error) {
+	m := &Manager{c: c, path: path, id: id, close: close}
 	m.streams = make(map[string]*Stream)
-	m.chunkSize = 4
 
-	m.duration = 300
+	if err := m.ffprobe(); err != nil {
+		return nil, err
+	}
 
-	m.numChunks = int(math.Ceil(m.duration / m.chunkSize))
+	log.Println("Video duration:", m.probe)
 
-	m.streams["360p.m3u8"] = &Stream{m: m, quality: "360p", height: 360, width: 640, bitrate: 945000}
-	m.streams["480p.m3u8"] = &Stream{m: m, quality: "480p", height: 480, width: 640, bitrate: 1365000}
-	m.streams["720p.m3u8"] = &Stream{m: m, quality: "720p", height: 720, width: 1280, bitrate: 3045000}
-	m.streams["1080p.m3u8"] = &Stream{m: m, quality: "1080p", height: 1080, width: 1920, bitrate: 6045000}
-	m.streams["1440p.m3u8"] = &Stream{m: m, quality: "1440p", height: 1440, width: 2560, bitrate: 9045000}
-	m.streams["2160p.m3u8"] = &Stream{m: m, quality: "2160p", height: 2160, width: 3840, bitrate: 14045000}
-	return m
+	m.numChunks = int(math.Ceil(m.probe.Duration.Seconds() / c.chunkSize))
+
+	// Possible streams
+	m.streams["360p.m3u8"] = &Stream{c: c, m: m, quality: "360p", height: 360, width: 640, bitrate: 945000}
+	m.streams["480p.m3u8"] = &Stream{c: c, m: m, quality: "480p", height: 480, width: 640, bitrate: 1365000}
+	m.streams["720p.m3u8"] = &Stream{c: c, m: m, quality: "720p", height: 720, width: 1280, bitrate: 3045000}
+	m.streams["1080p.m3u8"] = &Stream{c: c, m: m, quality: "1080p", height: 1080, width: 1920, bitrate: 6045000}
+	m.streams["1440p.m3u8"] = &Stream{c: c, m: m, quality: "1440p", height: 1440, width: 2560, bitrate: 9045000}
+	m.streams["2160p.m3u8"] = &Stream{c: c, m: m, quality: "2160p", height: 2160, width: 3840, bitrate: 14045000}
+
+	// Only keep streams that are smaller than the video
+	for k, stream := range m.streams {
+		if stream.height > m.probe.Height || stream.width > m.probe.Width {
+			delete(m.streams, k)
+		}
+	}
+
+	return m, nil
 }
 
 func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request, chunk string) error {
@@ -73,4 +98,69 @@ func (m *Manager) ServeIndex(w http.ResponseWriter, r *http.Request) error {
 
 func WriteM3U8ContentType(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/x-mpegURL")
+}
+
+func (m *Manager) ffprobe() error {
+	args := []string{
+		// Hide debug information
+		"-v", "error",
+
+		// video
+		"-show_entries", "format=duration",
+		"-show_entries", "stream=duration,width,height",
+		"-select_streams", "v", // Video stream only, we're not interested in audio
+
+		"-of", "json",
+		m.path,
+	}
+
+	ctx, _ := context.WithDeadline(context.TODO(), time.Now().Add(5*time.Second))
+	cmd := exec.CommandContext(ctx, m.c.ffprobe, args...)
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	if err != nil {
+		log.Println(stderr.String())
+		return err
+	}
+
+	out := struct {
+		Streams []struct {
+			Width    int    `json:"width"`
+			Height   int    `json:"height"`
+			Duration string `json:"duration"`
+		} `json:"streams"`
+		Format struct {
+			Duration string `json:"duration"`
+		} `json:"format"`
+	}{}
+
+	if err := json.Unmarshal(stdout.Bytes(), &out); err != nil {
+		return err
+	}
+
+	var duration time.Duration
+	if out.Streams[0].Duration != "" {
+		duration, err = time.ParseDuration(out.Streams[0].Duration + "s")
+		if err != nil {
+			return err
+		}
+	}
+	if out.Format.Duration != "" {
+		duration, err = time.ParseDuration(out.Format.Duration + "s")
+		if err != nil {
+			return err
+		}
+	}
+
+	m.probe = &ProbeVideoData{
+		Width:    out.Streams[0].Width,
+		Height:   out.Streams[0].Height,
+		Duration: duration,
+	}
+
+	return nil
 }

@@ -6,6 +6,7 @@ import (
 )
 
 type Stream struct {
+	c       *Config
 	m       *Manager
 	quality string
 	height  int
@@ -19,10 +20,10 @@ func (s *Stream) ServeList(w http.ResponseWriter, r *http.Request) error {
 	w.Write([]byte("#EXT-X-VERSION:4\n"))
 	w.Write([]byte("#EXT-X-MEDIA-SEQUENCE:0\n"))
 	w.Write([]byte("#EXT-X-PLAYLIST-TYPE:VOD\n"))
-	w.Write([]byte(fmt.Sprintf("#EXT-X-TARGETDURATION:%.3f\n", s.m.chunkSize)))
+	w.Write([]byte(fmt.Sprintf("#EXT-X-TARGETDURATION:%.3f\n", s.c.chunkSize)))
 
 	for i := 0; i < s.m.numChunks; i++ {
-		w.Write([]byte(fmt.Sprintf("#EXTINF:%.3f, nodesc\n", s.m.chunkSize)))
+		w.Write([]byte(fmt.Sprintf("#EXTINF:%.3f, nodesc\n", s.c.chunkSize)))
 		w.Write([]byte(fmt.Sprintf("%s-%06d.ts\n", s.quality, i)))
 	}
 

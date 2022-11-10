@@ -8,13 +8,18 @@ import (
 )
 
 type Handler struct {
+	c        *Config
 	managers map[string]*Manager
 	mutex    sync.RWMutex
 	close    chan string
 }
 
-func NewHandler() *Handler {
-	h := &Handler{managers: make(map[string]*Manager), close: make(chan string)}
+func NewHandler(c *Config) *Handler {
+	h := &Handler{
+		c:        c,
+		managers: make(map[string]*Manager),
+		close:    make(chan string),
+	}
 	go h.watchClose()
 	return h
 }
@@ -36,7 +41,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	streamid := parts[0]
-	path := "/" + strings.Join(parts[1:len(parts)-2], "/")
+	path := "/" + strings.Join(parts[1:len(parts)-1], "/")
 	chunk := parts[len(parts)-1]
 
 	log.Println("Serving", path, streamid, chunk)
@@ -50,6 +55,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if manager == nil {
 		manager = h.createManager(path, streamid)
 	}
+
+	if manager == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	manager.ServeHTTP(w, r, chunk)
 }
 
@@ -62,7 +72,12 @@ func (h *Handler) getManager(streamid string) *Manager {
 func (h *Handler) createManager(path string, streamid string) *Manager {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
-	manager := NewManager(path, streamid, h.close)
+	manager, err := NewManager(h.c, path, streamid, h.close)
+	if err != nil {
+		log.Println("Error creating manager", err)
+		return nil
+	}
+
 	h.managers[streamid] = manager
 	return manager
 }
@@ -92,7 +107,11 @@ func (h *Handler) Close() {
 func main() {
 	log.Println("Starting VOD server")
 
-	h := NewHandler()
+	h := NewHandler(&Config{
+		ffmpeg:    "ffmpeg",
+		ffprobe:   "ffprobe",
+		chunkSize: 4.0,
+	})
 
 	http.Handle("/", h)
 	http.ListenAndServe(":47788", nil)
