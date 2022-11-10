@@ -137,7 +137,6 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
     );
     this.imageEditor.render();
     window.addEventListener("keydown", this.handleKeydown, true);
-    window.addEventListener("DOMNodeInserted", this.handleSfxModal);
 
     // Get latest exif data
     try {
@@ -164,7 +163,6 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
       this.imageEditor.terminate();
     }
     window.removeEventListener("keydown", this.handleKeydown, true);
-    window.removeEventListener("DOMNodeInserted", this.handleSfxModal);
   }
 
   onClose(closingReason, haveNotSavedChanges) {
@@ -296,21 +294,6 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
       (
         document.querySelector(".FIE_topbar-undo-button") as HTMLElement
       ).click();
-    }
-  }
-
-  /**
-   * Watch out for Modal inject in document root
-   * That way we can adjust the focusTrap
-   *
-   * @param {Event} event Dom insertion event
-   */
-  handleSfxModal(event) {
-    if (
-      event.target?.classList &&
-      event.target.classList.contains("SfxModal-Wrapper")
-    ) {
-      emit("viewer:trapElements:changed", event.target);
     }
   }
 }
