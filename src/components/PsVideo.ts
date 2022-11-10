@@ -152,7 +152,7 @@ class VideoContentSetup {
           // Get correct orientation
           axios
             .get<any>(
-              generateUrl("/apps/memories/api/info/{id}", {
+              generateUrl("/apps/memories/api/image/info/{id}", {
                 id: content.data.photo.fileid,
               })
             )

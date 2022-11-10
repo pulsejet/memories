@@ -9,7 +9,9 @@ import GlobalMixin from "../mixins/GlobalMixin";
 import { basename, dirname, extname, join } from "path";
 import { emit } from "@nextcloud/event-bus";
 import { showError, showSuccess } from "@nextcloud/dialogs";
+import { generateUrl } from "@nextcloud/router";
 import axios from "@nextcloud/axios";
+
 import FilerobotImageEditor from "filerobot-image-editor";
 import { FilerobotImageEditorConfig } from "react-filerobot-image-editor";
 
@@ -24,6 +26,8 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
   @Prop() fileid: number;
   @Prop() mime: string;
   @Prop() src: string;
+
+  private exif: any = null;
 
   private imageEditor: FilerobotImageEditor = null;
 
@@ -117,7 +121,7 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
     };
   }
 
-  mounted() {
+  async mounted() {
     this.imageEditor = new FilerobotImageEditor(
       <any>this.$refs.editor,
       <any>this.config
@@ -125,6 +129,25 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
     this.imageEditor.render();
     window.addEventListener("keydown", this.handleKeydown, true);
     window.addEventListener("DOMNodeInserted", this.handleSfxModal);
+
+    // Get latest exif data
+    try {
+      const res = await axios.get(
+        generateUrl("/apps/memories/api/image/info/{id}?basic=1&current=1", {
+          id: this.fileid,
+        })
+      );
+
+      this.exif = res.data?.current;
+      if (!this.exif) {
+        throw new Error("No exif data");
+      }
+    } catch (err) {
+      console.error(err);
+      alert(
+        this.t("memories", "Failed to get Exif data. Metadata may be lost!")
+      );
+    }
   }
 
   beforeDestroy() {
@@ -132,6 +155,7 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
       this.imageEditor.terminate();
     }
     window.removeEventListener("keydown", this.handleKeydown, true);
+    window.removeEventListener("DOMNodeInserted", this.handleSfxModal);
   }
 
   onClose(closingReason, haveNotSavedChanges) {
@@ -173,20 +197,51 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
     // Sanity check, 0 < quality < 1
     quality = Math.max(Math.min(quality, 1), 0) || 1;
 
+    if (
+      !this.exif &&
+      !confirm(this.t("memories", "No Exif data found! Continue?"))
+    ) {
+      return;
+    }
+
     try {
       const blob = await new Promise((resolve: BlobCallback) =>
         imageCanvas.toBlob(resolve, mimeType, quality)
       );
       const response = await axios.put(putUrl, new File([blob], fullName));
+      const fileid =
+        parseInt(response?.headers?.["oc-fileid"]?.split("oc")[0]) || null;
+      if (response.status >= 400) {
+        throw new Error("Failed to save image");
+      }
+
+      // Strip old and incorrect exif data
+      const exif = this.exif;
+      delete exif.Orientation;
+      delete exif.Rotation;
+      delete exif.ImageHeight;
+      delete exif.ImageWidth;
+      delete exif.ImageSize;
+      delete exif.ModifyDate;
+      delete exif.ExifImageHeight;
+      delete exif.ExifImageWidth;
+      delete exif.ExifImageSize;
+
+      // Update exif data
+      await axios.put(
+        generateUrl("/apps/memories/api/image/set-exif/{id}", {
+          id: fileid,
+        }),
+        {
+          raw: exif,
+        }
+      );
 
       showSuccess(this.t("memories", "Image saved successfully"));
-      if (putUrl !== this.src) {
-        emit("files:file:created", {
-          fileid:
-            parseInt(response?.headers?.["oc-fileid"]?.split("oc")[0]) || null,
-        });
+      if (fileid !== this.fileid) {
+        emit("files:file:created", { fileid });
       } else {
-        emit("files:file:updated", { fileid: this.fileid });
+        emit("files:file:updated", { fileid });
       }
       this.onClose(undefined, false);
     } catch (error) {

@@ -143,8 +143,8 @@ import axios from "@nextcloud/axios";
 import * as utils from "../../services/Utils";
 import * as dav from "../../services/DavRequests";
 
-const INFO_API_URL = "/apps/memories/api/info/{id}";
-const EDIT_API_URL = "/apps/memories/api/edit/{id}";
+const INFO_API_URL = "/apps/memories/api/image/info/{id}";
+const EDIT_API_URL = "/apps/memories/api/image/edit/{id}";
 
 @Component({
   components: {

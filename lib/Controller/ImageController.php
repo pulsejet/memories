@@ -55,6 +55,11 @@ class ImageController extends ApiBase
         $basic = false !== $this->request->getParam('basic', false);
         $info = $this->timelineQuery->getInfoById($file->getId(), $basic);
 
+        // Get latest exif data if requested
+        if ($this->request->getParam('current', false)) {
+            $info["current"] = Exif::getExifFromFile($file);
+        }
+
         return new JSONResponse($info, Http::STATUS_OK);
     }
 
@@ -112,5 +117,43 @@ class ImageController extends ApiBase
         $this->timelineWrite->processFile($file, true);
 
         return $this->info($id);
+    }
+
+    /**
+     * Set the exif data for a file
+     */
+    public function setExif(string $id): JSONResponse
+    {
+        $user = $this->userSession->getUser();
+        if (null === $user) {
+            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+        $userFolder = $this->rootFolder->getUserFolder($user->getUID());
+
+        // Check for permissions and get numeric Id
+        $file = $userFolder->getById((int) $id);
+        if (0 === \count($file)) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
+        $file = $file[0];
+
+        // Check if user has permissions
+        if (!$file->isUpdateable()) {
+            return new JSONResponse([], Http::STATUS_FORBIDDEN);
+        }
+
+        // Get original file from body
+        $exif = $this->request->getParam('raw');
+        $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+        try {
+            Exif::setExif($path, $exif);
+        } catch (\Exception $e) {
+            return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);
+        }
+
+        // Reprocess the file
+        $this->timelineWrite->processFile($file, true);
+
+        return new JSONResponse([], Http::STATUS_OK);
     }
 }

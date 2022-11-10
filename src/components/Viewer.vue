@@ -229,7 +229,6 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Event on file changed */
   handleFileUpdated({ fileid }: { fileid: number }) {
-    console.log("file updated", fileid);
     if (this.currentPhoto && this.currentPhoto.fileid === fileid) {
       this.currentPhoto.etag += "_";
       this.photoswipe.refreshSlideContent(this.currIndex);

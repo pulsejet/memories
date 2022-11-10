@@ -87,7 +87,7 @@ export default class Metadata extends Mixins(GlobalMixin) {
 
     let state = this.state;
     const res = await axios.get<any>(
-      generateUrl("/apps/memories/api/info/{id}", { id: fileInfo.id })
+      generateUrl("/apps/memories/api/image/info/{id}", { id: fileInfo.id })
     );
     if (state !== this.state) return;
 
@@ -193,6 +193,7 @@ export default class Metadata extends Mixins(GlobalMixin) {
     const make = this.exif["Make"];
     const model = this.exif["Model"];
     if (!make || !model) return null;
+    if (model.startsWith(make)) return model;
     return `${make} ${model}`;
   }
 

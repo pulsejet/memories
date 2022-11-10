@@ -103,10 +103,6 @@ class TimelineWrite
             $videoDuration = round($exif['Duration'] ?? $exif['TrackDuration'] ?? 0);
         }
 
-        // Store raw metadata in the database
-        // We need to remove blacklisted fields to prevent leaking info
-        unset($exif['SourceFile'], $exif['FileName'], $exif['ExifToolVersion'], $exif['Directory'], $exif['FileSize'], $exif['FileModifyDate'], $exif['FileAccessDate'], $exif['FileInodeChangeDate'], $exif['FilePermissions']);
-
         // Truncate any fields >2048 chars
         foreach ($exif as $key => &$value) {
             if (\is_string($value) && \strlen($value) > 2048) {

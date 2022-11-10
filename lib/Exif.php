@@ -109,7 +109,12 @@ class Exif
             throw new \Exception('Failed to get local file path');
         }
 
-        return self::getExifFromLocalPath($path);
+        $exif = self::getExifFromLocalPath($path);
+
+        // We need to remove blacklisted fields to prevent leaking info
+        unset($exif['SourceFile'], $exif['FileName'], $exif['ExifToolVersion'], $exif['Directory'], $exif['FileSize'], $exif['FileModifyDate'], $exif['FileAccessDate'], $exif['FileInodeChangeDate'], $exif['FilePermissions'], $exif['ThumbnailImage']);
+
+        return $exif;
     }
 
     /** Get exif data as a JSON object from a local file path */
@@ -357,7 +362,7 @@ class Exif
 
     private static function getExifFromLocalPathWithStaticProc(string &$path)
     {
-        fwrite(self::$staticPipes[0], "{$path}\n-json\n-api\nQuickTimeUTC=1\n-n\n-execute\n");
+        fwrite(self::$staticPipes[0], "{$path}\n-json\n-b\n-api\nQuickTimeUTC=1\n-n\n-execute\n");
         fflush(self::$staticPipes[0]);
 
         $readyToken = "\n{ready}\n";
@@ -379,7 +384,7 @@ class Exif
     private static function getExifFromLocalPathWithSeparateProc(string &$path)
     {
         $pipes = [];
-        $proc = proc_open(array_merge(self::getExiftool(), ['-api', 'QuickTimeUTC=1', '-n', '-json', $path]), [
+        $proc = proc_open(array_merge(self::getExiftool(), ['-api', 'QuickTimeUTC=1', '-n', '-json', '-b', $path]), [
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
         ], $pipes);
@@ -433,6 +438,39 @@ class Exif
             error_log("Exiftool error: {$stdout}");
 
             throw new \Exception('Could not update exif date: '.$stdout);
+        }
+    }
+
+    /**
+     * Set exif data using raw json.
+     *
+     * @param string $path to local file
+     * @param array $data exif data
+     *
+     * @throws \Exception on failure
+     */
+    public static function setExif(string &$path, array &$data)
+    {
+        $data['SourceFile'] = $path;
+        $raw = json_encode([$data]);
+        $cmd = array_merge(self::getExiftool(), ['-json=-', $path]);
+        $proc = proc_open($cmd, [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ], $pipes);
+
+        fwrite($pipes[0], $raw);
+        fclose($pipes[0]);
+
+        $stdout = self::readOrTimeout($pipes[1], 30000);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_terminate($proc);
+        if (false !== strpos($stdout, 'error')) {
+            error_log("Exiftool error: {$stdout}");
+
+            throw new \Exception('Could not set exif data: '.$stdout);
         }
     }
 }
