@@ -171,31 +171,20 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
    * User saved the image
    *
    * @see https://github.com/scaleflex/filerobot-image-editor#onsave
-   * @param {object} props destructuring object
-   * @param {string} props.fullName the file name
-   * @param {HTMLCanvasElement} props.imageCanvas the image canvas
-   * @param {string} props.mimeType the image mime type
-   * @param {number} props.quality the image saving quality
    */
   async onSave({
     fullName,
-    imageCanvas,
-    mimeType,
-    quality,
+    imageBase64,
   }: {
     fullName?: string;
-    imageCanvas?: HTMLCanvasElement;
-    mimeType?: string;
-    quality?: number;
+    imageBase64?: string;
   }): Promise<void> {
+    if (!imageBase64) {
+      throw new Error("No image data");
+    }
+
     const { origin, pathname } = new URL(this.src);
     const putUrl = origin + join(dirname(pathname), fullName);
-
-    // toBlob is not very smart...
-    mimeType = mimeType.replace("jpg", "jpeg");
-
-    // Sanity check, 0 < quality < 1
-    quality = Math.max(Math.min(quality, 1), 0) || 1;
 
     if (
       !this.exif &&
@@ -205,9 +194,7 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
     }
 
     try {
-      const blob = await new Promise((resolve: BlobCallback) =>
-        imageCanvas.toBlob(resolve, mimeType, quality)
-      );
+      const blob = await fetch(imageBase64).then((res) => res.blob());
       const response = await axios.put(putUrl, new File([blob], fullName));
       const fileid =
         parseInt(response?.headers?.["oc-fileid"]?.split("oc")[0]) || null;
@@ -644,5 +631,10 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
   border-radius: 100%;
 
   filter: var(--background-invert-if-dark);
+}
+
+.FIE_carousel-prev-button,
+.FIE_carousel-next-button {
+  background: none !important;
 }
 </style>
