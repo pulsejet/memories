@@ -32,8 +32,17 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
   private imageEditor: FilerobotImageEditor = null;
 
   get config(): FilerobotImageEditorConfig & { theme: any } {
+    let src: string;
+    if (["image/png", "image/jpeg", "image/webp"].includes(this.mime)) {
+      src = this.src;
+    } else {
+      src = generateUrl("/apps/memories/api/image/jpeg/{fileid}", {
+        fileid: this.fileid,
+      });
+    }
+
     return {
-      source: this.src,
+      source: src,
 
       defaultSavedImageName: this.defaultSavedImageName,
       defaultSavedImageType: this.defaultSavedImageType,

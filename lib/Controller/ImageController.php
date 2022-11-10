@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Exif;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
@@ -96,25 +97,35 @@ class ImageController extends ApiBase
     }
 
     /**
-     * Get a full resolution PNG for editing from a file.
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     *
+     * Get a full resolution JPEG for editing from a file.
      */
-    public function getPNG(string $id)
+    public function jpeg(string $id)
     {
         $file = $this->getUserFile((int) $id);
         if (!$file) {
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }
 
-        // Get the image info
-        $info = $this->timelineQuery->getInfoById($file->getId(), true);
+        // check if valid image
+        $mimetype = $file->getMimeType();
+        if (!\in_array($mimetype, Application::IMAGE_MIMES, true)) {
+            return new JSONResponse([], Http::STATUS_FORBIDDEN);
+        }
 
         // Get the image
         $path = $file->getStorage()->getLocalFile($file->getInternalPath());
-        $image = Exif::getPNG($path, $info['exif']);
+        $image = new \Imagick($path);
+        $image->setImageFormat('jpeg');
+        $image->setImageCompressionQuality(95);
+        $blob = $image->getImageBlob();
 
         // Return the image
-        $response = new Http\DataDisplayResponse($image, Http::STATUS_OK, ['Content-Type' => 'image/png']);
-        $response->cacheFor(0);
+        $response = new Http\DataDisplayResponse($blob, Http::STATUS_OK, ['Content-Type' => $image->getImageMimeType()]);
+        $response->cacheFor(3600 * 24, false, false);
 
         return $response;
     }

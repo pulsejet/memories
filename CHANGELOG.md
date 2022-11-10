@@ -13,6 +13,7 @@ This file is manually updated. Please file an issue if something is missing.
 - Fix stretched images in viewer ([#176](https://github.com/pulsejet/memories/issues/176))
 - Editor: Restore metadata after image edit ([#174](https://github.com/pulsejet/memories/issues/174))
 - Editor: Fix loss of resolution after edit
+- Editor: Allow editing all image formats (HEIC etc.)
 
 ## v4.6.1, v3.6.1 (2022-11-07)
 

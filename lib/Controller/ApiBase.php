@@ -135,11 +135,11 @@ class ApiBase extends Controller
     }
 
     /**
-     * Get a file with ID from user's folder
+     * Get a file with ID from user's folder.
      *
      * @param int $fileId
      *
-     * @return File|null
+     * @return null|File
      */
     protected function getUserFile(int $id)
     {
@@ -156,7 +156,7 @@ class ApiBase extends Controller
         }
 
         // Check if node is a file
-        if (!($file[0] instanceof File)) {
+        if (!$file[0] instanceof File) {
             return null;
         }
 
