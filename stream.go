@@ -94,7 +94,7 @@ func (s *Stream) ServeChunk(w http.ResponseWriter, id int) error {
 
 	// Will have this soon enough
 	foundBehind := false
-	for i := id - 1; i > id-4 && i >= 0; i-- {
+	for i := id - 1; i > id-s.c.lookBehind && i >= 0; i-- {
 		if _, ok := s.chunks[i]; ok {
 			foundBehind = true
 		}
@@ -297,7 +297,7 @@ func (s *Stream) transcode(startId int) {
 }
 
 func (s *Stream) checkGoal(id int) {
-	goal := id + 5
+	goal := id + s.c.goalBuffer
 	if goal > s.goal {
 		s.goal = goal
 

@@ -109,9 +109,11 @@ func main() {
 	log.Println("Starting VOD server")
 
 	h := NewHandler(&Config{
-		ffmpeg:    "ffmpeg",
-		ffprobe:   "ffprobe",
-		chunkSize: 3,
+		ffmpeg:     "ffmpeg",
+		ffprobe:    "ffprobe",
+		chunkSize:  3,
+		lookBehind: 5,
+		goalBuffer: 5,
 	})
 
 	http.Handle("/", h)
