@@ -102,7 +102,7 @@ trait TimelineQueryDays
         // We don't actually use m.datetaken here, but postgres
         // needs that all fields in ORDER BY are also in SELECT
         // when using DISTINCT on selected fields
-        $query->select($fileid, 'm.isvideo', 'm.datetaken', 'm.dayid', 'm.w', 'm.h')
+        $query->select($fileid, 'm.isvideo', 'm.video_duration', 'm.datetaken', 'm.dayid', 'm.w', 'm.h')
             ->from('memories', 'm')
         ;
 
@@ -198,11 +198,12 @@ trait TimelineQueryDays
             // Convert field types
             $row['fileid'] = (int) $row['fileid'];
             $row['isvideo'] = (int) $row['isvideo'];
+            $row['video_duration'] = (int) $row['video_duration'];
             $row['dayid'] = (int) $row['dayid'];
             $row['w'] = (int) $row['w'];
             $row['h'] = (int) $row['h'];
             if (!$row['isvideo']) {
-                unset($row['isvideo']);
+                unset($row['isvideo'], $row['video_duration']);
             }
             if ($row['categoryid']) {
                 $row['isfavorite'] = 1;

@@ -87,7 +87,7 @@ export default class Metadata extends Mixins(GlobalMixin) {
 
     let state = this.state;
     const res = await axios.get<any>(
-      generateUrl("/apps/memories/api/info/{id}", { id: fileInfo.id })
+      generateUrl("/apps/memories/api/image/info/{id}", { id: fileInfo.id })
     );
     if (state !== this.state) return;
 
@@ -163,7 +163,7 @@ export default class Metadata extends Mixins(GlobalMixin) {
     const dt = this.exif["DateTimeOriginal"] || this.exif["CreateDate"];
     if (!dt) return null;
 
-    const m = moment(dt, "YYYY:MM:DD HH:mm:ss");
+    const m = moment.utc(dt, "YYYY:MM:DD HH:mm:ss");
     if (!m.isValid()) return null;
     m.locale(getCanonicalLocale());
     return m;
@@ -193,6 +193,7 @@ export default class Metadata extends Mixins(GlobalMixin) {
     const make = this.exif["Make"];
     const model = this.exif["Model"];
     if (!make || !model) return null;
+    if (model.startsWith(make)) return model;
     return `${make} ${model}`;
   }
 

@@ -229,7 +229,6 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Event on file changed */
   handleFileUpdated({ fileid }: { fileid: number }) {
-    console.log("file updated", fileid);
     if (this.currentPhoto && this.currentPhoto.fileid === fileid) {
       this.currentPhoto.etag += "_";
       this.photoswipe.refreshSlideContent(this.currIndex);
@@ -470,7 +469,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
     // Get the thumbnail image
     this.photoswipe.addFilter("thumbEl", (thumbEl, data, index) => {
       const photo = this.list[index - this.globalAnchor];
-      if (!photo || photo.flag & this.c.FLAG_IS_VIDEO) return thumbEl;
+      if (!photo || !photo.w || !photo.h || photo.flag & this.c.FLAG_IS_VIDEO)
+        return thumbEl;
       return this.thumbElem(photo) || thumbEl;
     });
 
@@ -586,7 +586,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
   }
 
   get canEdit() {
-    return ["image/jpeg", "image/png"].includes(this.currentPhoto?.mimetype);
+    return this.currentPhoto?.mimetype?.startsWith("image/");
   }
 
   private openEditor() {
@@ -838,6 +838,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
 :deep .pswp {
   .pswp__zoom-wrap {
     width: 100%;
+  }
+
+  img.pswp__img {
+    object-fit: contain;
   }
 
   .pswp__button {

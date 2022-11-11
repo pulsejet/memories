@@ -31,6 +31,7 @@ use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
@@ -131,6 +132,35 @@ class ApiBase extends Controller
         }
 
         return $folder;
+    }
+
+    /**
+     * Get a file with ID from user's folder.
+     *
+     * @param int $fileId
+     *
+     * @return null|File
+     */
+    protected function getUserFile(int $id)
+    {
+        $user = $this->userSession->getUser();
+        if (null === $user) {
+            return null;
+        }
+        $userFolder = $this->rootFolder->getUserFolder($user->getUID());
+
+        // Check for permissions and get numeric Id
+        $file = $userFolder->getById($id);
+        if (0 === \count($file)) {
+            return null;
+        }
+
+        // Check if node is a file
+        if (!$file[0] instanceof File) {
+            return null;
+        }
+
+        return $file[0];
     }
 
     protected function isRecursive()

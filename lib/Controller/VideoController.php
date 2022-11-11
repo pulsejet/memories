@@ -36,12 +36,9 @@ class VideoController extends ApiBase
      *
      * Transcode a video to HLS by proxy
      *
-     * @param string fileid
-     * @param string video profile
-     *
      * @return JSONResponse an empty JSONResponse with respective http status code
      */
-    public function transcode(string $fileid, string $profile): Http\Response
+    public function transcode(string $client, string $fileid, string $profile): Http\Response
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
@@ -51,6 +48,11 @@ class VideoController extends ApiBase
         // Make sure not running in read-only mode
         if (false !== $this->config->getSystemValue('memories.no_transcode', 'UNSET')) {
             return new JSONResponse(['message' => 'Transcoding disabled'], Http::STATUS_FORBIDDEN);
+        }
+
+        // Check client identifier is 8 characters or more
+        if (\strlen($client) < 8) {
+            return new JSONResponse(['message' => 'Invalid client identifier'], Http::STATUS_BAD_REQUEST);
         }
 
         // Get file
@@ -78,14 +80,13 @@ class VideoController extends ApiBase
         }
 
         // Make upstream request
-        [$data, $contentType, $returnCode] = $this->getUpstream($path, $profile);
+        [$data, $contentType, $returnCode] = $this->getUpstream($client, $path, $profile);
 
         // If status code was 0, it's likely the server is down
         // Make one attempt to start if we can't find the process
         if (0 === $returnCode) {
             $transcoder = $this->config->getSystemValue('memories.transcoder', false);
-            $tConfig = $this->config->getSystemValue('memories.transcoder_config', false);
-            if (!$transcoder || !$tConfig) {
+            if (!$transcoder) {
                 return new JSONResponse(['message' => 'Transcoder not configured'], Http::STATUS_INTERNAL_SERVER_ERROR);
             }
 
@@ -97,15 +98,12 @@ class VideoController extends ApiBase
             }
 
             // Check if already running
-            exec('ps a | grep go-transcode | grep -v grep', $procs);
-            if (0 === \count($procs)) {
-                shell_exec("mkdir -p {$tmpDir}/transcoder"); // php func has some weird problems
-                shell_exec("{$env} nohup {$transcoder} serve --config {$tConfig} > {$tmpDir}/transcoder/run.log 2>&1 & > /dev/null");
-            }
+            shell_exec("pkill {$transcoder}");
+            shell_exec("{$env} nohup {$transcoder} > {$tmpDir}/go-vod.log 2>&1 & > /dev/null");
 
-            // wait for 2s and try again
-            sleep(2);
-            [$data, $contentType, $returnCode] = $this->getUpstream($path, $profile);
+            // wait for 1s and try again
+            sleep(1);
+            [$data, $contentType, $returnCode] = $this->getUpstream($client, $path, $profile);
         }
 
         // Check data was received
@@ -117,14 +115,15 @@ class VideoController extends ApiBase
         $response = new DataDisplayResponse($data, Http::STATUS_OK, [
             'Content-Type' => $contentType,
         ]);
-        $response->cacheFor(3600 * 24, false, false);
+        $response->cacheFor(0, false, false);
 
         return $response;
     }
 
-    private function getUpstream($path, $profile)
+    private function getUpstream($client, $path, $profile)
     {
-        $ch = curl_init("http://localhost:47788/vod/{$path}/{$profile}");
+        $path = rawurlencode($path);
+        $ch = curl_init("http://127.0.0.1:47788/{$client}{$path}/{$profile}");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($ch, CURLOPT_HEADER, 0);

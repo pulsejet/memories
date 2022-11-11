@@ -16,7 +16,13 @@
       @click="toggleSelect"
     />
 
-    <Video :size="22" v-if="data.flag & c.FLAG_IS_VIDEO" />
+    <div class="video" v-if="data.flag & c.FLAG_IS_VIDEO">
+      <span v-if="data.video_duration" class="time">
+        {{ videoDuration }}
+      </span>
+      <Video :size="22" />
+    </div>
+
     <Star :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
 
     <div
@@ -43,14 +49,17 @@
 </template>
 
 <script lang="ts">
+import { Component, Emit, Mixins, Prop, Watch } from "vue-property-decorator";
+import GlobalMixin from "../../mixins/GlobalMixin";
+
+import { getPreviewUrl } from "../../services/FileUtils";
+import { IDay, IPhoto } from "../../types";
+import * as utils from "../../services/Utils";
+
+import errorsvg from "../../assets/error.svg";
 import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
 import Star from "vue-material-design-icons/Star.vue";
 import Video from "vue-material-design-icons/PlayCircleOutline.vue";
-import { Component, Emit, Mixins, Prop, Watch } from "vue-property-decorator";
-import errorsvg from "../../assets/error.svg";
-import GlobalMixin from "../../mixins/GlobalMixin";
-import { getPreviewUrl } from "../../services/FileUtils";
-import { IDay, IPhoto } from "../../types";
 
 @Component({
   components: {
@@ -89,6 +98,13 @@ export default class Photo extends Mixins(GlobalMixin) {
   mounted() {
     this.hasFaceRect = false;
     this.refresh();
+  }
+
+  get videoDuration() {
+    if (this.data.video_duration) {
+      return utils.getDurationStr(this.data.video_duration);
+    }
+    return null;
   }
 
   async refresh() {
@@ -274,7 +290,7 @@ $icon-size: $icon-half-size * 2;
     color: var(--color-primary);
   }
 }
-.play-circle-outline-icon,
+.video,
 .star-icon {
   position: absolute;
   z-index: 100;
@@ -282,11 +298,22 @@ $icon-size: $icon-half-size * 2;
   transition: transform 0.15s ease;
   filter: invert(1) brightness(100);
 }
-.play-circle-outline-icon {
+.video {
+  position: absolute;
   top: var(--icon-dist);
   right: var(--icon-dist);
   .p-outer.selected > & {
     transform: translate(-$icon-size, $icon-size);
+  }
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .time {
+    font-size: 0.75em;
+    font-weight: bold;
+    margin-right: 3px;
   }
 }
 .star-icon {

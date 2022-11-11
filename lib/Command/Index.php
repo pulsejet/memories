@@ -264,6 +264,14 @@ class Index extends Command
                 return;
             }
 
+            // skip 'IMDB' in path
+            if (false !== strpos($folderPath, 'IMDB')) {
+                $this->output->writeln('Skipping folder '.$folderPath.' because of IMDB');
+                $this->previousLineLength = 0;
+
+                return;
+            }
+
             $nodes = $folder->getDirectoryListing();
 
             foreach ($nodes as &$node) {

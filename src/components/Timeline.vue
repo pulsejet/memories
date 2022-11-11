@@ -286,11 +286,13 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
   beforeDestroy() {
     unsubscribe(this.config_eventName, this.softRefresh);
+    unsubscribe("files:file:created", this.softRefresh);
     this.resetState();
   }
 
   created() {
     subscribe(this.config_eventName, this.softRefresh);
+    subscribe("files:file:created", this.softRefresh);
     window.addEventListener("resize", this.handleResizeWithDelay);
   }
 
