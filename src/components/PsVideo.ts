@@ -138,6 +138,22 @@ class VideoContentSetup {
     }
     content.element.appendChild(content.videoElement);
 
+    // Pause / play on click on mobile
+    let touchAt = 0;
+    content.videoElement.addEventListener("touchstart", (e) => {
+      touchAt = e.timeStamp;
+    });
+    content.videoElement.addEventListener("touchend", (e) => {
+      if (touchAt && e.timeStamp - touchAt < 200) {
+        if (content.videojs.paused()) {
+          content.videojs.play();
+        } else {
+          content.videojs.pause();
+        }
+      }
+      touchAt = 0;
+    });
+
     const fileid = content.data.photo.fileid;
 
     // Create hls sources if enabled
@@ -201,6 +217,9 @@ class VideoContentSetup {
         .forEach((b: HTMLButtonElement) => {
           b.classList.add("button-vue");
         });
+
+      // iOS needs this
+      content.videojs.play();
     }, 500);
 
     // Get correct orientation
