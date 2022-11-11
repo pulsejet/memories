@@ -8,21 +8,24 @@ use OCP\IConfig;
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 
-class Repair implements IRepairStep {
+class Repair implements IRepairStep
+{
+    protected IConfig $config;
 
-	protected IConfig $config;
+    public function __construct(IConfig $config)
+    {
+        $this->config = $config;
+    }
 
-	public function __construct(IConfig $config) {
-		$this->config = $config;
-	}
+    public function getName(): string
+    {
+        return 'Repair steps for Memories';
+    }
 
-	public function getName(): string {
-		return 'Repair steps for Memories';
-	}
-
-	public function run(IOutput $output): void {
-		// kill any instances of go-transcode and go-vod
+    public function run(IOutput $output): void
+    {
+        // kill any instances of go-transcode and go-vod
         shell_exec('pkill go-transcode');
         shell_exec('pkill go-vod');
-	}
+    }
 }
