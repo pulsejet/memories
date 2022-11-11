@@ -72,13 +72,21 @@ class TimelineQuery
         } catch (\Throwable $e) {
         }
 
+        $exif = [];
+        if (!$basic && !empty($row['exif'])) {
+            try {
+                $exif = json_decode($row['exif'], true);
+            } catch (\Throwable $e) {
+            }
+        }
+
         return [
             'fileid' => (int) $row['fileid'],
             'dayid' => (int) $row['dayid'],
             'datetaken' => $utcTs,
             'w' => (int) $row['w'],
             'h' => (int) $row['h'],
-            'exif' => $basic ? [] : json_decode($row['exif'], true),
+            'exif' => $exif,
         ];
     }
 }
