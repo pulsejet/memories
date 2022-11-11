@@ -8,6 +8,7 @@ You need go and ffmpeg/ffprobe installed
 
 ```bash
 CGO_ENABLED=0 go build -ldflags="-s -w"
+./go-vod
 ```
 
 The server exposes all files as HLS streams, at the URL
