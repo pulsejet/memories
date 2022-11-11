@@ -274,6 +274,15 @@ func (s *Stream) transcode(startId int) {
 		}...)
 	}
 
+	// QSV / encoder selection
+	VAAPI := os.Getenv("VAAPI") == "1"
+	CV := "libx264"
+	if VAAPI {
+		CV = "h264_vaapi"
+		extra := "-hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format vaapi"
+		args = append(args, strings.Split(extra, " ")...)
+	}
+
 	// Input specs
 	args = append(args, []string{
 		"-autorotate", "0", // consistent behavior
@@ -281,22 +290,10 @@ func (s *Stream) transcode(startId int) {
 		"-copyts", // So the "-to" refers to the original TS
 	}...)
 
-	// QSV / encoder selection
-	VAAPI := os.Getenv("VAAPI") == "1"
-	CV := "libx264"
-	VF := ""
-	if VAAPI {
-		CV = "h264_vaapi"
-		VF = "scale_vaapi=w=SCALE_WIDTH:h=SCALE_HEIGHT:force_original_aspect_ratio=decrease"
-		extra := strings.Split("-hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format vaapi", " ")
-		args = append(args, extra...)
-	}
-
 	// Scaling for output
 	var scale string
 	if VAAPI {
-		scale = strings.Replace(VF, "SCALE_WIDTH", fmt.Sprintf("%d", s.width), 1)
-		scale = strings.Replace(scale, "SCALE_HEIGHT", fmt.Sprintf("%d", s.height), 1)
+		scale = fmt.Sprintf("scale_vaapi=w=%d:h=%d:force_original_aspect_ratio=decrease", s.width, s.height)
 	} else if s.width >= s.height {
 		scale = fmt.Sprintf("scale=-2:%d", s.height)
 	} else {
