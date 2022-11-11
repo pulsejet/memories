@@ -67,6 +67,16 @@ class VideoContentSetup {
       if (isVideoContent(slide) && this.options.preventDragOffset) {
         const origEvent = e.originalEvent;
         if (origEvent.type === "pointerdown") {
+          // Check if directly over the videojs control bar
+          const elems = document.elementsFromPoint(
+            origEvent.clientX,
+            origEvent.clientY
+          );
+          if (elems.some((el) => el.classList.contains("vjs-control-bar"))) {
+            e.preventDefault();
+            return;
+          }
+
           const videoHeight = Math.ceil(slide.height * slide.currZoomLevel);
           const verticalEnding = videoHeight + slide.bounds.center.y;
           const pointerYPos = origEvent.pageY - pswp.offset.y;
