@@ -14,6 +14,10 @@ const config_noTranscode = loadState(
   <string>"UNSET"
 ) as boolean | string;
 
+// Generate client id for this instance
+// Does not need to be cryptographically secure
+const clientId = Math.random().toString(36).substring(2, 15).padEnd(12, "0");
+
 /**
  * Check if slide has video content
  *
@@ -89,7 +93,7 @@ class VideoContentSetup {
           // Create hls sources if enabled
           let sources: any[] = [];
           const baseUrl = generateUrl(
-            `/apps/memories/api/video/transcode/${fileid}`
+            `/apps/memories/api/video/transcode/${clientId}/${fileid}`
           );
 
           if (!config_noTranscode) {

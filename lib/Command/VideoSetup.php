@@ -82,34 +82,33 @@ class VideoSetup extends Command
             return $this->suggestDisable($output);
         }
 
-        // Check go-transcode binary
-        $output->writeln('Checking for go-transcode binary');
+        // Check go-vod binary
+        $output->writeln('Checking for go-vod binary');
 
         // Detect architecture
         $arch = \OCA\Memories\Util::getArch();
-        $libc = \OCA\Memories\Util::getLibc();
 
-        if (!$arch || !$libc) {
-            $output->writeln('<error>Compatible go-transcode binary not found</error>');
-            $this->suggestGoTranscode($output);
+        if (!$arch) {
+            $output->writeln('<error>Compatible go-vod binary not found</error>');
+            $this->suggestGoVod($output);
 
             return $this->suggestDisable($output);
         }
 
-        $goTranscodePath = realpath(__DIR__."/../../exiftool-bin/go-transcode-{$arch}-{$libc}");
-        $output->writeln("Trying go-transcode from {$goTranscodePath}");
-        chmod($goTranscodePath, 0755);
+        $goVodPath = realpath(__DIR__."/../../exiftool-bin/go-vod-{$arch}");
+        $output->writeln("Trying go-vod from {$goVodPath}");
+        chmod($goVodPath, 0755);
 
-        $goTranscode = shell_exec($goTranscodePath.' --help');
-        if (!$goTranscode || false === strpos($goTranscode, 'Available Commands')) {
-            $output->writeln('<error>go-transcode could not be run</error>');
-            $this->suggestGoTranscode($output);
+        $goVod = shell_exec($goVodPath.' test');
+        if (!$goVod || false === strpos($goVod, 'test successful')) {
+            $output->writeln('<error>go-vod could not be run</error>');
+            $this->suggestGoVod($output);
 
             return $this->suggestDisable($output);
         }
 
         // Go transcode is working. Yay!
-        $output->writeln('go-transcode is installed!');
+        $output->writeln('go-vod is installed!');
         $output->writeln('');
         $output->writeln('You can use transcoding and HLS streaming');
         $output->writeln('This is recommended for better performance, but has implications if');
@@ -127,10 +126,7 @@ class VideoSetup extends Command
             return 0;
         }
 
-        $tConfig = realpath(__DIR__.'/../../transcoder.yaml');
-
-        $this->config->setSystemValue('memories.transcoder', $goTranscodePath);
-        $this->config->setSystemValue('memories.transcoder_config', $tConfig);
+        $this->config->setSystemValue('memories.transcoder', $goVodPath);
         $this->config->setSystemValue('memories.no_transcode', false);
         $output->writeln('Transcoding and HLS are now enabled!');
 
@@ -153,10 +149,10 @@ class VideoSetup extends Command
         return 0;
     }
 
-    protected function suggestGoTranscode(OutputInterface $output): void
+    protected function suggestGoVod(OutputInterface $output): void
     {
-        $output->writeln('You may build go-transcode from source');
-        $output->writeln('It can be downloaded from https://github.com/pulsejet/go-transcode');
+        $output->writeln('You may build go-vod from source');
+        $output->writeln('It can be downloaded from https://github.com/pulsejet/go-vod');
         $output->writeln('Once built, point the path to the binary in the config for `memories.transcoder`');
     }
 

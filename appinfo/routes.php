@@ -58,7 +58,7 @@ return [
 
         ['name' => 'Archive#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
 
-        ['name' => 'Video#transcode', 'url' => '/api/video/transcode/{fileid}/{profile}', 'verb' => 'GET'],
+        ['name' => 'Video#transcode', 'url' => '/api/video/transcode/{client}/{fileid}/{profile}', 'verb' => 'GET'],
 
         // Config API
         ['name' => 'Other#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],
