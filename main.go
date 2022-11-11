@@ -111,8 +111,6 @@ func (h *Handler) watchClose() {
 		if id == "" {
 			return
 		}
-
-		log.Println("Closing stream", id)
 		h.removeManager(id)
 	}
 }

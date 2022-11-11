@@ -94,6 +94,12 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 		defer t.Stop()
 		for {
 			<-t.C
+
+			if m.inactive == -1 {
+				t.Stop()
+				return
+			}
+
 			m.inactive++
 
 			// Check if any stream is active
@@ -105,8 +111,8 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 			}
 
 			// Nothing done for 5 minutes
-			if m.inactive >= 60 {
-				log.Printf("%s: inactive, closing", m.id)
+			if m.inactive >= 4 {
+				t.Stop()
 				m.Destroy()
 				m.close <- m.id
 				return
@@ -119,6 +125,9 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 
 // Destroys streams. DOES NOT emit on the close channel.
 func (m *Manager) Destroy() {
+	log.Printf("%s: destroying manager", m.id)
+	m.inactive = -1
+
 	for _, stream := range m.streams {
 		stream.Stop()
 	}

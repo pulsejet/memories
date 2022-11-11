@@ -69,16 +69,13 @@ func (s *Stream) Run() {
 			s.inactive++
 
 			// Nothing done for 2 minutes
-			if s.inactive >= 24 {
+			if s.inactive >= 3 && s.coder != nil {
 				t.Stop()
 				s.clear()
-				s.mutex.Unlock()
-				return
 			}
 			s.mutex.Unlock()
 
 		case <-s.stop:
-			log.Printf("%s-%s: received stop signal", s.m.id, s.quality)
 			t.Stop()
 			s.mutex.Lock()
 			s.clear()
@@ -106,7 +103,10 @@ func (s *Stream) clear() {
 }
 
 func (s *Stream) Stop() {
-	s.stop <- true
+	select {
+	case s.stop <- true:
+	default:
+	}
 }
 
 func (s *Stream) ServeList(w http.ResponseWriter) error {
