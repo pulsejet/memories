@@ -17,4 +17,4 @@ http://localhost:47788/player-id/path/to/file/index.m3u8
 ```
 
 ## Thanks
-Inspired from [go-transcode](https://github.com/m1k1o/go-transcode)
+Partially inspired from [go-transcode](https://github.com/m1k1o/go-transcode). The projects use different approaches for segmenting the transcodes.
