@@ -45,6 +45,7 @@ type Stream struct {
 	coder *exec.Cmd
 
 	inactive int
+	stop     chan bool
 }
 
 func (s *Stream) Run() {
@@ -52,27 +53,42 @@ func (s *Stream) Run() {
 	t := time.NewTicker(5 * time.Second)
 	defer t.Stop()
 
+	s.stop = make(chan bool)
+
 	for {
-		<-t.C
-		s.mutex.Lock()
-		// Prune chunks
-		for id := range s.chunks {
-			if id < s.goal-s.c.goalBufferMax {
-				s.pruneChunk(id)
+		select {
+		case <-t.C:
+			s.mutex.Lock()
+			// Prune chunks
+			for id := range s.chunks {
+				if id < s.goal-s.c.goalBufferMax {
+					s.pruneChunk(id)
+				}
 			}
-		}
-		s.inactive++
-		if s.inactive >= 4 {
+
+			s.inactive++
+
+			// Nothing done for 2 minutes
+			if s.inactive >= 24 {
+				t.Stop()
+				s.clear()
+				s.mutex.Unlock()
+				return
+			}
+			s.mutex.Unlock()
+
+		case <-s.stop:
+			log.Printf("%s-%s: received stop signal", s.m.id, s.quality)
 			t.Stop()
-			s.Stop()
+			s.mutex.Lock()
+			s.clear()
 			s.mutex.Unlock()
 			return
 		}
-		s.mutex.Unlock()
 	}
 }
 
-func (s *Stream) Stop() {
+func (s *Stream) clear() {
 	log.Printf("%s-%s: stopping stream", s.m.id, s.quality)
 
 	for _, chunk := range s.chunks {
@@ -89,10 +105,8 @@ func (s *Stream) Stop() {
 	}
 }
 
-func (s *Stream) StopWithLock() {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	s.Stop()
+func (s *Stream) Stop() {
+	s.stop <- true
 }
 
 func (s *Stream) ServeList(w http.ResponseWriter) error {
@@ -236,7 +250,7 @@ func (s *Stream) waitForChunk(w http.ResponseWriter, chunk *Chunk) {
 
 func (s *Stream) restartAtChunk(w http.ResponseWriter, id int) {
 	// Stop current transcoder
-	s.Stop()
+	s.clear()
 
 	chunk := s.createChunk(id) // create first chunk
 

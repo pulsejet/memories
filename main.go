@@ -51,7 +51,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	manager := h.getManager(streamid)
+	manager := h.getManager(path, streamid)
 	if manager == nil {
 		manager = h.createManager(path, streamid)
 	}
@@ -63,10 +63,15 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	manager.ServeHTTP(w, r, chunk)
 }
 
-func (h *Handler) getManager(streamid string) *Manager {
+func (h *Handler) getManager(path string, streamid string) *Manager {
 	h.mutex.RLock()
 	defer h.mutex.RUnlock()
-	return h.managers[streamid]
+
+	m := h.managers[streamid]
+	if m == nil || m.path != path {
+		return nil
+	}
+	return m
 }
 
 func (h *Handler) createManager(path string, streamid string) *Manager {
@@ -78,6 +83,11 @@ func (h *Handler) createManager(path string, streamid string) *Manager {
 
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
+
+	old := h.managers[streamid]
+	if old != nil {
+		old.Destroy()
+	}
 
 	h.managers[streamid] = manager
 	return manager

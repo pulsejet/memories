@@ -18,9 +18,10 @@ import (
 type Manager struct {
 	c *Config
 
-	path  string
-	id    string
-	close chan string
+	path     string
+	id       string
+	close    chan string
+	inactive int
 
 	probe     *ProbeVideoData
 	numChunks int
@@ -75,7 +76,40 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 
 	log.Printf("%s: new manager for %s", m.id, m.path)
 
+	// Check for inactivity
+	go func() {
+		t := time.NewTicker(5 * time.Second)
+		defer t.Stop()
+		for {
+			<-t.C
+			m.inactive++
+
+			// Check if any stream is active
+			for _, stream := range m.streams {
+				if stream.coder != nil {
+					m.inactive = 0
+					break
+				}
+			}
+
+			// Nothing done for 5 minutes
+			if m.inactive >= 60 {
+				log.Printf("%s: inactive, closing", m.id)
+				m.Destroy()
+				m.close <- m.id
+				return
+			}
+		}
+	}()
+
 	return m, nil
+}
+
+// Destroys streams. DOES NOT emit on the close channel.
+func (m *Manager) Destroy() {
+	for _, stream := range m.streams {
+		stream.Stop()
+	}
 }
 
 func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request, chunk string) error {
