@@ -1,6 +1,6 @@
 # go-vod
 
-Extremely minimal on-demand video transcoding server in go.
+Extremely minimal on-demand video transcoding server in go. Used by the FOSS photos app, [Memories](https://github.com/pulsejet/memories).
 
 ## Usage
 
