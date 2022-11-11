@@ -8,74 +8,20 @@
       'remove-gap': removeOuterGap,
     }"
   >
-    <NcAppNavigation v-if="showNavigation">
+    <NcAppNavigation v-if="showNavigation" ref="nav">
       <template id="app-memories-navigation" #list>
         <NcAppNavigationItem
-          :to="{ name: 'timeline' }"
-          :title="t('memories', 'Timeline')"
+          v-for="item in navItems"
+          :key="item.name"
+          :to="{ name: item.name }"
+          :title="item.title"
+          @click="linkClick"
           exact
         >
-          <ImageMultiple slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'folders' }"
-          :title="t('memories', 'Folders')"
-        >
-          <FolderIcon slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'favorites' }"
-          :title="t('memories', 'Favorites')"
-        >
-          <Star slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'videos' }"
-          :title="t('memories', 'Videos')"
-        >
-          <Video slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'albums' }"
-          :title="t('memories', 'Albums')"
-          v-if="showAlbums"
-        >
-          <AlbumIcon slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'people' }"
-          :title="t('memories', 'People')"
-          v-if="showPeople"
-        >
-          <PeopleIcon slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'archive' }"
-          :title="t('memories', 'Archive')"
-        >
-          <ArchiveIcon slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'thisday' }"
-          :title="t('memories', 'On this day')"
-        >
-          <CalendarIcon slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'tags' }"
-          v-if="config_tagsEnabled"
-          :title="t('memories', 'Tags')"
-        >
-          <TagsIcon slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'maps' }"
-          v-if="config_mapsEnabled"
-          :title="t('memories', 'Maps')"
-        >
-          <MapIcon slot="icon" :size="20" />
+          <component :is="item.icon" slot="icon" :size="20" />
         </NcAppNavigationItem>
       </template>
+
       <template #footer>
         <NcAppNavigationSettings :title="t('memories', 'Settings')">
           <Settings />
@@ -102,6 +48,7 @@ import {
 } from "@nextcloud/vue";
 import { generateUrl } from "@nextcloud/router";
 import { getCurrentUser } from "@nextcloud/auth";
+import { translate as t } from "@nextcloud/l10n";
 
 import Timeline from "./components/Timeline.vue";
 import Settings from "./components/Settings.vue";
@@ -150,6 +97,65 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
 
   private metadataComponent!: Metadata;
 
+  private readonly navItemsAll = [
+    {
+      name: "timeline",
+      icon: ImageMultiple,
+      title: t("memories", "Timeline"),
+    },
+    {
+      name: "folders",
+      icon: FolderIcon,
+      title: t("memories", "Folders"),
+    },
+    {
+      name: "favorites",
+      icon: Star,
+      title: t("memories", "Favorites"),
+    },
+    {
+      name: "videos",
+      icon: Video,
+      title: t("memories", "Videos"),
+    },
+    {
+      name: "albums",
+      icon: AlbumIcon,
+      title: t("memories", "Albums"),
+      if: (self: any) => self.showAlbums,
+    },
+    {
+      name: "people",
+      icon: PeopleIcon,
+      title: t("memories", "People"),
+      if: (self: any) => self.showPeople,
+    },
+    {
+      name: "archive",
+      icon: ArchiveIcon,
+      title: t("memories", "Archive"),
+    },
+    {
+      name: "thisday",
+      icon: CalendarIcon,
+      title: t("memories", "On this day"),
+    },
+    {
+      name: "tags",
+      icon: TagsIcon,
+      title: t("memories", "Tags"),
+      if: (self: any) => self.config_tagsEnabled,
+    },
+    {
+      name: "maps",
+      icon: MapIcon,
+      title: t("memories", "Maps"),
+      if: (self: any) => self.config_mapsEnabled,
+    },
+  ];
+
+  private navItems = [];
+
   get ncVersion() {
     const version = (<any>window.OC).config.version.split(".");
     return Number(version[0]);
@@ -182,6 +188,11 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
 
   mounted() {
     this.doRouteChecks();
+
+    // Populate navigation
+    this.navItems = this.navItemsAll.filter(
+      (item) => !item.if || item.if(this)
+    );
 
     // Store CSS variables modified
     const root = document.documentElement;
@@ -239,6 +250,11 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
     } else {
       console.debug("Service Worker is not enabled on this browser.");
     }
+  }
+
+  linkClick() {
+    const nav: any = this.$refs.nav;
+    if (window.innerWidth <= 1024) nav?.toggleNavigation(false);
   }
 
   doRouteChecks() {
