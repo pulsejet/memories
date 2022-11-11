@@ -68,6 +68,11 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 		bitrate: int(float64(highest) * 1.5),
 	}
 
+	// Start all streams
+	for _, stream := range m.streams {
+		go stream.Run()
+	}
+
 	log.Printf("%s: new manager for %s", m.id, m.path)
 
 	return m, nil
