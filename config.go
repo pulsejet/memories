@@ -16,4 +16,9 @@ type Config struct {
 	goalBufferMin int
 	// Number of chunks in goal to stop encoding
 	goalBufferMax int
+
+	// Number of seconds to wait before shutting down encoding
+	streamIdleTime int
+	// Number of seconds to wait before shutting down a client
+	managerIdleTime int
 }

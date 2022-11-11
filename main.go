@@ -129,13 +129,15 @@ func main() {
 	log.Println("Starting VOD server")
 
 	h := NewHandler(&Config{
-		ffmpeg:        "ffmpeg",
-		ffprobe:       "ffprobe",
-		tempdir:       "/tmp/go-vod",
-		chunkSize:     3,
-		lookBehind:    5,
-		goalBufferMin: 3,
-		goalBufferMax: 8,
+		ffmpeg:          "ffmpeg",
+		ffprobe:         "ffprobe",
+		tempdir:         "/tmp/go-vod",
+		chunkSize:       3,
+		lookBehind:      5,
+		goalBufferMin:   3,
+		goalBufferMax:   8,
+		streamIdleTime:  120,
+		managerIdleTime: 240,
 	})
 
 	http.Handle("/", h)

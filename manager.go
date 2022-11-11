@@ -111,7 +111,7 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 			}
 
 			// Nothing done for 5 minutes
-			if m.inactive >= 4 {
+			if m.inactive >= m.c.managerIdleTime/5 {
 				t.Stop()
 				m.Destroy()
 				m.close <- m.id

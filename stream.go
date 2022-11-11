@@ -69,7 +69,7 @@ func (s *Stream) Run() {
 			s.inactive++
 
 			// Nothing done for 2 minutes
-			if s.inactive >= 3 && s.coder != nil {
+			if s.inactive >= s.c.streamIdleTime/5 && s.coder != nil {
 				t.Stop()
 				s.clear()
 			}
