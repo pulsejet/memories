@@ -98,82 +98,7 @@ class VideoContentSetup {
         if (!e.slide.isActive) {
           e.preventDefault();
         } else if (content.videoElement) {
-          const fileid = content.data.photo.fileid;
-
-          // Create hls sources if enabled
-          let sources: any[] = [];
-          const baseUrl = generateUrl(
-            `/apps/memories/api/video/transcode/${clientId}/${fileid}`
-          );
-
-          if (!config_noTranscode) {
-            sources.push({
-              src: `${baseUrl}/index.m3u8`,
-              type: "application/x-mpegURL",
-            });
-          }
-
-          sources.push({
-            src: e.slide.data.src,
-          });
-
-          const overrideNative = !videojs.browser.IS_SAFARI;
-          content.videojs = videojs(content.videoElement, {
-            fill: true,
-            autoplay: true,
-            controls: true,
-            sources: sources,
-            preload: "metadata",
-            playbackRates: [0.5, 1, 1.5, 2],
-            responsive: true,
-            html5: {
-              vhs: {
-                overrideNative: overrideNative,
-                withCredentials: false,
-              },
-              nativeAudioTracks: !overrideNative,
-              nativeVideoTracks: !overrideNative,
-            },
-          });
-
-          content.videojs.on("error", () => {
-            if (content.videojs.error().code === 4) {
-              if (content.videojs.src().includes("m3u8")) {
-                // HLS could not be streamed
-                console.error("Video.js: HLS stream could not be opened.");
-                content.videojs.src({
-                  src: e.slide.data.src,
-                });
-                this.updateRotation(content, 0);
-              }
-            }
-          });
-
-          content.videojs.qualityLevels();
-          content.videojs.hlsQualitySelector({
-            displayCurrentQuality: true,
-          });
-
-          setTimeout(() => {
-            content.videojs
-              .contentEl()
-              .querySelectorAll("button")
-              .forEach((b: HTMLButtonElement) => {
-                b.classList.add("button-vue");
-              });
-          }, 500);
-
-          // Get correct orientation
-          axios
-            .get<any>(
-              generateUrl("/apps/memories/api/image/info/{id}", {
-                id: content.data.photo.fileid,
-              })
-            )
-            .then((response) => {
-              content.data.exif = response.data?.exif;
-              this.updateRotation(content);
-            });
+          this.initVideo(content);
         }
       }
     });
@@ -189,15 +114,129 @@ class VideoContentSetup {
           pswp.options.showHideAnimationType = "fade";
         }
 
-        // pause video when closing
-        this.pauseVideo(pswp.currSlide.content);
+        // prevent more requests
+        this.destroyVideo(pswp.currSlide.content);
       }
     });
   }
 
+  initVideo(content: any) {
+    if (!isVideoContent(content) || content.videojs) {
+      return;
+    }
+
+    content.videoElement = document.createElement("video");
+    content.videoElement.className = "video-js";
+    content.videoElement.setAttribute("poster", content.data.msrc);
+    if (this.options.videoAttributes) {
+      for (let key in this.options.videoAttributes) {
+        content.videoElement.setAttribute(
+          key,
+          this.options.videoAttributes[key] || ""
+        );
+      }
+    }
+    content.element.appendChild(content.videoElement);
+
+    const fileid = content.data.photo.fileid;
+
+    // Create hls sources if enabled
+    let sources: any[] = [];
+    const baseUrl = generateUrl(
+      `/apps/memories/api/video/transcode/${clientId}/${fileid}`
+    );
+
+    if (!config_noTranscode) {
+      sources.push({
+        src: `${baseUrl}/index.m3u8`,
+        type: "application/x-mpegURL",
+      });
+    }
+
+    sources.push({
+      src: content.data.src,
+    });
+
+    const overrideNative = !videojs.browser.IS_SAFARI;
+    content.videojs = videojs(content.videoElement, {
+      fill: true,
+      autoplay: true,
+      controls: true,
+      sources: sources,
+      preload: "metadata",
+      playbackRates: [0.5, 1, 1.5, 2],
+      responsive: true,
+      html5: {
+        vhs: {
+          overrideNative: overrideNative,
+          withCredentials: false,
+        },
+        nativeAudioTracks: !overrideNative,
+        nativeVideoTracks: !overrideNative,
+      },
+    });
+
+    content.videojs.on("error", () => {
+      if (content.videojs.error().code === 4) {
+        if (content.videojs.src().includes("m3u8")) {
+          // HLS could not be streamed
+          console.error("Video.js: HLS stream could not be opened.");
+          content.videojs.src({
+            src: content.data.src,
+          });
+          this.updateRotation(content, 0);
+        }
+      }
+    });
+
+    content.videojs.qualityLevels();
+    content.videojs.hlsQualitySelector({
+      displayCurrentQuality: true,
+    });
+
+    setTimeout(() => {
+      content.videojs
+        .contentEl()
+        .querySelectorAll("button")
+        .forEach((b: HTMLButtonElement) => {
+          b.classList.add("button-vue");
+        });
+    }, 500);
+
+    // Get correct orientation
+    axios
+      .get<any>(
+        generateUrl("/apps/memories/api/image/info/{id}", {
+          id: content.data.photo.fileid,
+        })
+      )
+      .then((response) => {
+        content.data.exif = response.data?.exif;
+        this.updateRotation(content);
+      });
+  }
+
+  destroyVideo(content: any) {
+    if (isVideoContent(content) && content.videojs) {
+      content.videojs.dispose();
+      content.videojs = null;
+
+      const elem: HTMLDivElement = content.element;
+      while (elem.lastElementChild) {
+        elem.removeChild(elem.lastElementChild);
+      }
+      content.videoElement = null;
+    }
+  }
+
   updateRotation(content, val?: number) {
+    if (!content.videojs || !content.videoElement) {
+      return;
+    }
+
     const rotation = val ?? Number(content.data.exif?.Rotation);
     const shouldRotate = content.videojs?.src().includes("m3u8");
+
     if (rotation && shouldRotate) {
       let transform = `rotate(${rotation}deg)`;
 
@@ -219,11 +258,6 @@ class VideoContentSetup {
 
   onContentDestroy({ content }) {
     if (isVideoContent(content)) {
-      if (content._videoPosterImg) {
-        content._videoPosterImg.onload = content._videoPosterImg.onerror = null;
-        content._videoPosterImg = null;
-      }
-
       if (content.videojs) {
         content.videojs.dispose();
         content.videojs = null;
@@ -271,15 +305,11 @@ class VideoContentSetup {
   }
 
   onContentActivate({ content }) {
-    if (isVideoContent(content) && this.options.autoplay) {
-      this.playVideo(content);
-    }
+    this.initVideo(content);
   }
 
   onContentDeactivate({ content }) {
-    if (isVideoContent(content)) {
-      this.pauseVideo(content);
-    }
+    this.destroyVideo(content);
   }
 
   onContentAppend(e) {
@@ -319,19 +349,6 @@ class VideoContentSetup {
     content.state = "loading";
     content.type = "video"; // TODO: move this to pswp core?
 
-    content.videoElement = document.createElement("video");
-    content.videoElement.className = "video-js";
-    content.videoElement.setAttribute("controls", "true");
-
-    if (this.options.videoAttributes) {
-      for (let key in this.options.videoAttributes) {
-        content.videoElement.setAttribute(
-          key,
-          this.options.videoAttributes[key] || ""
-        );
-      }
-    }
-
     content.element = document.createElement("div");
     content.element.style.position = "absolute";
     content.element.style.left = 0;
@@ -339,34 +356,7 @@ class VideoContentSetup {
     content.element.style.width = "100%";
     content.element.style.height = "100%";
 
-    // content.videoElement.setAttribute("poster", content.data.msrc);
-    // this.preloadVideoPoster(content, content.data.msrc);
     content.onLoaded();
-
-    content.element.appendChild(content.videoElement);
-  }
-
-  preloadVideoPoster(content, src) {
-    if (!content._videoPosterImg && src) {
-      content._videoPosterImg = new Image();
-      content._videoPosterImg.src = src;
-      if (content._videoPosterImg.complete) {
-        content.onLoaded();
-      } else {
-        content._videoPosterImg.onload = content._videoPosterImg.onerror =
-          () => {
-            content.onLoaded();
-          };
-      }
-    }
-  }
-
-  playVideo(content) {
-    content.videojs?.play();
-  }
-
-  pauseVideo(content) {
-    content.videojs?.pause();
   }
 
   useContentPlaceholder(usePlaceholder, content) {
