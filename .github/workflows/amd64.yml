@@ -1,0 +1,30 @@
+name: amd64
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build-amd64:
+    name: amd64
+    runs-on: ubuntu-latest
+
+    container:
+      image: golang:1.19-bullseye
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build
+        run: CGO_ENABLED=0 go build -ldflags="-s -w"
+
+      - name: Upload to releases
+        uses: svenstaro/upload-release-action@v2
+        id: attach_to_release
+        with:
+          file: go-vod
+          asset_name: go-vod-amd64
+          tag: ${{ github.ref }}
+          overwrite: true

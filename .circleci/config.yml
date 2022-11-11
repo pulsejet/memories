@@ -1,0 +1,48 @@
+version: 2.1
+
+jobs:
+  build:
+    machine:
+      image: ubuntu-2004:current
+    resource_class: arm.medium
+    steps:
+      - checkout
+
+      - run: |
+          docker run -it --rm -v "$PWD":/work -w /work golang:1.19-bullseye bash -c 'CGO_ENABLED=0 go build -ldflags="-s -w"'
+          sudo mv go-vod go-vod-aarch64
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - go-vod-aarch64
+
+  publish-github-release:
+    docker:
+      - image: cimg/go:1.17
+    steps:
+      - attach_workspace:
+          at: ./artifacts
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            go get github.com/tcnksm/ghr
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -replace ${CIRCLE_TAG} ./artifacts/
+
+workflows:
+  aarch64:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^.*/
+      - publish-github-release:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^.*/
