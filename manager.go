@@ -5,9 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"hash/fnv"
 	"log"
 	"math"
 	"net/http"
+	"os"
 	"os/exec"
 	"sort"
 	"strconv"
@@ -19,6 +21,7 @@ type Manager struct {
 	c *Config
 
 	path     string
+	tempDir  string
 	id       string
 	close    chan string
 	inactive int
@@ -38,6 +41,15 @@ type ProbeVideoData struct {
 func NewManager(c *Config, path string, id string, close chan string) (*Manager, error) {
 	m := &Manager{c: c, path: path, id: id, close: close}
 	m.streams = make(map[string]*Stream)
+
+	h := fnv.New32a()
+	h.Write([]byte(path))
+	ph := fmt.Sprint(h.Sum32())
+	m.tempDir = fmt.Sprintf("%s/%s-%s", m.c.tempdir, id, ph)
+
+	// Delete temp dir if exists
+	os.RemoveAll(m.tempDir)
+	os.MkdirAll(m.tempDir, 0755)
 
 	if err := m.ffprobe(); err != nil {
 		return nil, err
@@ -110,6 +122,9 @@ func (m *Manager) Destroy() {
 	for _, stream := range m.streams {
 		stream.Stop()
 	}
+
+	// Delete temp dir
+	os.RemoveAll(m.tempDir)
 }
 
 func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request, chunk string) error {

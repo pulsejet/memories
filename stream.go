@@ -381,9 +381,9 @@ func (s *Stream) checkGoal(id int) {
 
 func (s *Stream) getTsPath(id int) string {
 	if id == -1 {
-		return fmt.Sprintf("/tmp/go-vod/%s/%s-%%06d.ts", s.m.id, s.quality)
+		return fmt.Sprintf("%s/%s-%%06d.ts", s.m.tempDir, s.quality)
 	}
-	return fmt.Sprintf("/tmp/go-vod/%s/%s-%06d.ts", s.m.id, s.quality, id)
+	return fmt.Sprintf("%s/%s-%06d.ts", s.m.tempDir, s.quality, id)
 }
 
 // Separate goroutine

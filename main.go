@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 )
@@ -20,6 +21,11 @@ func NewHandler(c *Config) *Handler {
 		managers: make(map[string]*Manager),
 		close:    make(chan string),
 	}
+
+	// Recreate tempdir
+	os.RemoveAll(c.tempdir)
+	os.MkdirAll(c.tempdir, 0755)
+
 	go h.watchClose()
 	return h
 }
@@ -121,6 +127,7 @@ func main() {
 	h := NewHandler(&Config{
 		ffmpeg:        "ffmpeg",
 		ffprobe:       "ffprobe",
+		tempdir:       "/tmp/go-vod",
 		chunkSize:     3,
 		lookBehind:    5,
 		goalBufferMin: 3,
