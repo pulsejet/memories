@@ -123,6 +123,10 @@ func (s *Stream) createChunk(id int) *Chunk {
 }
 
 func (s *Stream) returnChunk(w http.ResponseWriter, chunk *Chunk) {
+	// This function is called with lock, but we don't need it
+	s.mutex.Unlock()
+	defer s.mutex.Lock()
+
 	// Read file and write to response
 	filename := s.getTsPath(chunk.id)
 	f, err := os.Open(filename)
@@ -132,7 +136,6 @@ func (s *Stream) returnChunk(w http.ResponseWriter, chunk *Chunk) {
 		return
 	}
 	defer f.Close()
-	log.Printf("Served chunk %d", chunk.id)
 	w.Header().Set("Content-Type", "video/MP2T")
 	io.Copy(w, f)
 }
@@ -185,7 +188,7 @@ func (s *Stream) restartAtChunk(w http.ResponseWriter, id int) {
 	chunk := s.createChunk(id) // create first chunk
 
 	// Start the transcoder
-	s.goal = id + 5
+	s.goal = id + s.c.goalBufferMax
 	s.transcode(id)
 
 	s.waitForChunk(w, chunk) // this is also a request
@@ -275,7 +278,7 @@ func (s *Stream) transcode(startId int) {
 	}...)
 
 	s.coder = exec.Command(s.c.ffmpeg, args...)
-	log.Println("Starting FFmpeg process with args", strings.Join(s.coder.Args[:], " "))
+	log.Printf("%s-%s: %s", strings.Join(s.coder.Args[:], " "))
 
 	cmdStdOut, err := s.coder.StdoutPipe()
 	if err != nil {
@@ -297,13 +300,13 @@ func (s *Stream) transcode(startId int) {
 }
 
 func (s *Stream) checkGoal(id int) {
-	goal := id + s.c.goalBuffer
+	goal := id + s.c.goalBufferMin
 	if goal > s.goal {
-		s.goal = goal
+		s.goal = id + s.c.goalBufferMax
 
 		// resume encoding
 		if s.coder != nil {
-			log.Println("Resuming encoding")
+			log.Printf("%s-%s: resuming transcoding", s.m.id, s.quality)
 			s.coder.Process.Signal(syscall.SIGCONT)
 		}
 	}
@@ -345,6 +348,9 @@ func (s *Stream) monitorTranscodeOutput(cmdStdOut io.ReadCloser, startAt float64
 		l := string(line)
 
 		if strings.Contains(l, ".ts") {
+			// Debug
+			log.Printf("%s-%s: recv %s", s.m.id, s.quality, l)
+
 			// 1080p-000003.ts
 			idx := strings.Split(strings.Split(l, "-")[1], ".")[0]
 			id, err := strconv.Atoi(idx)
@@ -352,7 +358,7 @@ func (s *Stream) monitorTranscodeOutput(cmdStdOut io.ReadCloser, startAt float64
 				log.Println("Error parsing chunk id")
 			}
 
-			go func() {
+			func() {
 				s.mutex.Lock()
 				defer s.mutex.Unlock()
 
@@ -373,13 +379,11 @@ func (s *Stream) monitorTranscodeOutput(cmdStdOut io.ReadCloser, startAt float64
 
 				// Check goal satisfied
 				if id >= s.goal {
-					log.Println("Goal satisfied, pausing encoding")
+					log.Printf("%s-%s: goal satisfied: %d", s.m.id, s.quality, s.goal)
 					s.coder.Process.Signal(syscall.SIGSTOP)
 				}
 			}()
 		}
-
-		log.Println("ffmpeg:", l)
 	}
 
 	// Join the process

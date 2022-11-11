@@ -10,6 +10,8 @@ type Config struct {
 	chunkSize int
 	// How many *chunks* to look behind before restarting transcoding
 	lookBehind int
-	// How many chunks to buffer ahead of player position
-	goalBuffer int
+	// Number of chunks in goal to restart encoding
+	goalBufferMin int
+	// Number of chunks in goal to stop encoding
+	goalBufferMax int
 }

@@ -44,7 +44,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := "/" + strings.Join(parts[1:len(parts)-1], "/")
 	chunk := parts[len(parts)-1]
 
-	log.Println("Serving", path, streamid, chunk)
+	// log.Println("Serving", path, streamid, chunk)
 
 	if streamid == "" || chunk == "" || path == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -109,11 +109,12 @@ func main() {
 	log.Println("Starting VOD server")
 
 	h := NewHandler(&Config{
-		ffmpeg:     "ffmpeg",
-		ffprobe:    "ffprobe",
-		chunkSize:  3,
-		lookBehind: 5,
-		goalBuffer: 5,
+		ffmpeg:        "ffmpeg",
+		ffprobe:       "ffprobe",
+		chunkSize:     3,
+		lookBehind:    5,
+		goalBufferMin: 3,
+		goalBufferMax: 8,
 	})
 
 	http.Handle("/", h)

@@ -68,11 +68,7 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 		bitrate: int(float64(highest) * 1.5),
 	}
 
-	log.Println("New manager", m.id,
-		"with streams:", len(m.streams),
-		"duration:", m.probe.Duration,
-		"resolution:", m.probe.Width, "x", m.probe.Height,
-	)
+	log.Printf("%s: new manager for %s", m.id, m.path)
 
 	return m, nil
 }
