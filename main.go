@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -120,6 +121,11 @@ func (h *Handler) Close() {
 }
 
 func main() {
+	if len(os.Args) >= 2 && os.Args[1] == "test" {
+		fmt.Println("test successful")
+		return
+	}
+
 	log.Println("Starting VOD server")
 
 	h := NewHandler(&Config{
