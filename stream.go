@@ -233,19 +233,25 @@ func (s *Stream) transcode(startId int) {
 		scale = fmt.Sprintf("scale=%d:-2", s.width)
 	}
 
+	// not original (max)
+	if s.quality != "max" {
+		args = append(args, []string{
+			"-vf", scale,
+			"-maxrate", fmt.Sprintf("%dk", s.bitrate/1000),
+			"-bufsize", fmt.Sprintf("%dK", s.bitrate/3000),
+		}...)
+	}
+
 	// Output specs
 	args = append(args, []string{
-		"-vf", scale,
 		"-c:v", CV,
 		"-profile:v", "high",
-		"-maxrate", fmt.Sprintf("%dk", s.bitrate/1000),
-		"-bufsize", fmt.Sprintf("%dK", s.bitrate/3000),
 	}...)
 
 	// Extra args only for x264
 	if !VAAPI {
 		args = append(args, []string{
-			"-preset", "fast",
+			"-preset", "faster",
 			"-level:v", "4.0",
 		}...)
 	}

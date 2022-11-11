@@ -53,10 +53,19 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 	m.streams["2160p"] = &Stream{c: c, m: m, quality: "2160p", height: 2160, width: 3840, bitrate: 14000000}
 
 	// Only keep streams that are smaller than the video
+	var highest int
 	for k, stream := range m.streams {
-		if stream.height > m.probe.Height || stream.width > m.probe.Width {
+		if stream.height >= m.probe.Height || stream.width >= m.probe.Width {
 			delete(m.streams, k)
+		} else if stream.bitrate > highest {
+			highest = stream.bitrate
 		}
+	}
+
+	// Original stream
+	m.streams["max"] = &Stream{
+		c: c, m: m, quality: "max", height: m.probe.Height, width: m.probe.Width,
+		bitrate: int(float64(highest) * 1.5),
 	}
 
 	log.Println("New manager", m.id,
@@ -124,7 +133,7 @@ func (m *Manager) ServeIndex(w http.ResponseWriter) error {
 
 	// Write all streams
 	for _, stream := range streams {
-		s := fmt.Sprintf("#EXT-X-STREAM-INF:BANDWIDTH=%d,RESOLUTION=%dx%d,NAME=%s\n%s.m3u8\n", stream.bitrate, stream.width, stream.height, stream.quality, stream.quality)
+		s := fmt.Sprintf("#EXT-X-STREAM-INF:BANDWIDTH=%d,RESOLUTION=%dx%d,NAME=\"%s\"\n%s.m3u8\n", stream.bitrate, stream.width, stream.height, stream.quality, stream.quality)
 		w.Write([]byte(s))
 	}
 	return nil
