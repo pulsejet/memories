@@ -15,3 +15,6 @@ The server exposes all files as HLS streams, at the URL
 ```
 http://localhost:47788/player-id/path/to/file/index.m3u8
 ```
+
+## Thanks
+Inspired from [go-transcode](https://github.com/m1k1o/go-transcode)
