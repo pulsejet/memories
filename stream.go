@@ -39,8 +39,9 @@ type Stream struct {
 
 	goal int
 
-	mutex  sync.Mutex
-	chunks map[int]*Chunk
+	mutex      sync.Mutex
+	chunks     map[int]*Chunk
+	seenChunks map[int]bool // only for stdout reader
 
 	coder *exec.Cmd
 
@@ -94,6 +95,7 @@ func (s *Stream) clear() {
 	}
 
 	s.chunks = make(map[int]*Chunk)
+	s.seenChunks = make(map[int]bool)
 	s.goal = 0
 
 	if s.coder != nil {
@@ -347,7 +349,7 @@ func (s *Stream) transcode(startId int) {
 		"-avoid_negative_ts", "disabled",
 		"-f", "hls",
 		"-hls_time", fmt.Sprintf("%d", s.c.chunkSize),
-		"-g", "64", "-keyint_min", "64",
+		"-force_key_frames", fmt.Sprintf("expr:gte(t,n_forced*%d)", s.c.chunkSize),
 		"-hls_segment_type", "mpegts",
 		"-start_number", fmt.Sprintf("%d", startId),
 		"-hls_segment_filename", s.getTsPath(-1),
@@ -425,15 +427,20 @@ func (s *Stream) monitorTranscodeOutput(cmdStdOut io.ReadCloser, startAt float64
 		l := string(line)
 
 		if strings.Contains(l, ".ts") {
-			// Debug
-			log.Printf("%s-%s: recv %s", s.m.id, s.quality, l)
-
 			// 1080p-000003.ts
 			idx := strings.Split(strings.Split(l, "-")[1], ".")[0]
 			id, err := strconv.Atoi(idx)
 			if err != nil {
 				log.Println("Error parsing chunk id")
 			}
+
+			if s.seenChunks[id] {
+				continue
+			}
+			s.seenChunks[id] = true
+
+			// Debug
+			log.Printf("%s-%s: recv %s", s.m.id, s.quality, l)
 
 			func() {
 				s.mutex.Lock()
