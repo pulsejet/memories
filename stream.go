@@ -317,8 +317,12 @@ func (s *Stream) transcode(startId int) {
 		"-profile:v", "high",
 	}...)
 
-	// Extra args only for x264
-	if !VAAPI {
+	// Device specific output args
+	if VAAPI {
+		args = append(args, []string{
+			"-low_power", "1",
+		}...)
+	} else {
 		args = append(args, []string{
 			"-preset", "faster",
 			"-level:v", "4.0",
@@ -342,7 +346,7 @@ func (s *Stream) transcode(startId int) {
 		"-avoid_negative_ts", "disabled",
 		"-f", "hls",
 		"-hls_time", fmt.Sprintf("%d", s.c.chunkSize),
-		"-g", fmt.Sprintf("%d", s.c.chunkSize),
+		"-g", "64", "-keyint_min", "64",
 		"-hls_segment_type", "mpegts",
 		"-start_number", fmt.Sprintf("%d", startId),
 		"-hls_segment_filename", s.getTsPath(-1),
