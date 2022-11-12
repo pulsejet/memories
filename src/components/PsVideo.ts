@@ -214,6 +214,12 @@ class VideoContentSetup {
       content.videojs.play();
     }, 500);
 
+    let canPlay = false;
+    content.videojs.on("canplay", () => {
+      canPlay = true;
+      this.updateRotation(content);
+    });
+
     // Get correct orientation
     axios
       .get<any>(
@@ -223,7 +229,10 @@ class VideoContentSetup {
       )
       .then((response) => {
         content.data.exif = response.data?.exif;
-        this.updateRotation(content);
+
+        // Update only after video is ready
+        // Otherwise the poster image is rotated
+        if (canPlay) this.updateRotation(content);
       });
   }
 
