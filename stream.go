@@ -245,6 +245,7 @@ func (s *Stream) waitForChunk(w http.ResponseWriter, chunk *Chunk) {
 	// check for success
 	if chunk.done {
 		s.returnChunk(w, chunk)
+		return
 	}
 
 	// Return timeout error
