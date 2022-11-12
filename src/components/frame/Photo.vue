@@ -27,7 +27,7 @@
     <div
       class="img-outer fill-block"
       @contextmenu="contextmenu"
-      @pointerdown="$emit('pointerdown', $event)"
+      @pointerdown.passive="$emit('pointerdown', $event)"
       @touchstart.passive="$emit('touchstart', $event)"
       @touchmove="$emit('touchmove', $event)"
       @touchend.passive="$emit('touchend', $event)"
