@@ -307,8 +307,7 @@ func (s *Stream) transcode(startId int) {
 	if s.quality != "max" {
 		args = append(args, []string{
 			"-vf", scale,
-			"-maxrate", fmt.Sprintf("%dk", s.bitrate/1000),
-			"-bufsize", fmt.Sprintf("%dK", s.bitrate/3000),
+			"-b:v", fmt.Sprintf("%dk", s.bitrate/1000),
 		}...)
 	}
 
@@ -327,9 +326,15 @@ func (s *Stream) transcode(startId int) {
 	}
 
 	// Audio
+	ab := "192k"
+	if s.bitrate < 1000000 {
+		ab = "64k"
+	} else if s.bitrate < 3000000 {
+		ab = "128k"
+	}
 	args = append(args, []string{
 		"-c:a", "aac",
-		"-b:a", "192k",
+		"-b:a", ab,
 	}...)
 
 	// Segmenting specs
