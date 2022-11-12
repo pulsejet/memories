@@ -105,6 +105,9 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
   /** Rows are in ascending order (desc is normal) */
   @Prop() public isreverse: boolean;
 
+  /** Recycler element to scroll during touch multi-select */
+  @Prop() public recycler: any;
+
   private show = false;
   private size = 0;
   private readonly selection!: Selection;
@@ -114,6 +117,9 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
   private touchTimer: number = 0;
   private touchPrevSel!: Selection;
   private prevOver!: IPhoto;
+  private touchScrollInterval: number = 0;
+  private touchScrollDelta: number = 0;
+  private prevTouch: Touch = null;
 
   @Emit("refresh")
   refresh() {}
@@ -286,8 +292,11 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
   }
 
   /** Tap on */
-  public touchstartPhoto(photo: IPhoto, event: any, rowIdx: number) {
+  protected touchstartPhoto(photo: IPhoto, event: any, rowIdx: number) {
     if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
+    this.rows[rowIdx].virtualSticky = true;
+
+    this.resetTouchParams();
 
     this.touchAnchor = photo;
     this.prevOver = photo;
@@ -301,19 +310,29 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
   }
 
   /** Tap off */
-  public touchendPhoto(photo: IPhoto, event: any, rowIdx: number) {
+  protected touchendPhoto(photo: IPhoto, event: any, rowIdx: number) {
     if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
+    delete this.rows[rowIdx].virtualSticky;
+    this.resetTouchParams();
+  }
+
+  private resetTouchParams() {
     window.clearTimeout(this.touchTimer);
     this.touchTimer = 0;
     this.touchAnchor = null;
     this.prevOver = undefined;
+
+    window.cancelAnimationFrame(this.touchScrollInterval);
+    this.touchScrollInterval = 0;
+
+    this.prevTouch = null;
   }
 
   /**
    * Tap over
    * photo and rowIdx are that of the *anchor*
    */
-  public touchmovePhoto(anchor: IPhoto, event: any, rowIdx: number) {
+  protected touchmovePhoto(anchor: IPhoto, event: any, rowIdx: number) {
     if (anchor.flag & this.c.FLAG_PLACEHOLDER) return;
 
     if (this.touchTimer) {
@@ -330,10 +349,42 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
     // Prevent scrolling
     event.preventDefault();
 
-    // Use first touch -- can't do much better yet
+    // Use first touch -- can't do much
     const touch: Touch = event.touches[0];
     if (!touch) return;
+    this.prevTouch = touch;
 
+    // Scroll if at top or bottom
+    const scrollUp = touch.clientY > 50 && touch.clientY < 110; // 50 topbar
+    const scrollDown = touch.clientY > window.innerHeight - 60;
+    if (scrollUp || scrollDown) {
+      if (scrollUp) {
+        this.touchScrollDelta = (-1 * (110 - touch.clientY)) / 3;
+      } else {
+        this.touchScrollDelta = (touch.clientY - window.innerHeight + 60) / 3;
+      }
+
+      if (this.touchAnchor && !this.touchScrollInterval) {
+        const fun = () => {
+          this.recycler.$el.scrollTop += this.touchScrollDelta;
+          this.touchMoveSelect(this.prevTouch, rowIdx);
+
+          if (this.touchScrollInterval) {
+            this.touchScrollInterval = window.requestAnimationFrame(fun);
+          }
+        };
+        this.touchScrollInterval = window.requestAnimationFrame(fun);
+      }
+    } else {
+      window.cancelAnimationFrame(this.touchScrollInterval);
+      this.touchScrollInterval = 0;
+    }
+
+    this.touchMoveSelect(touch, rowIdx);
+  }
+
+  /** Multi-select triggered by touchmove */
+  private touchMoveSelect(touch: Touch, rowIdx: number) {
     // Which photo is the cursor over, if any
     const elems = document.elementsFromPoint(touch.clientX, touch.clientY);
     const photoComp: any = elems.find((e) => e.classList.contains("p-outer"));
@@ -366,17 +417,20 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
       let i = rowIdx;
       let j = this.rows[i].photos.indexOf(this.touchAnchor);
       while (true) {
+        if (j < 0) {
+          while (i > 0 && !this.rows[--i].photos);
+          if (!this.rows[i].photos) break;
+          j = this.rows[i].photos.length - 1;
+          continue;
+        } else if (j >= this.rows[i].photos.length) {
+          while (i < this.rows.length - 1 && !this.rows[++i].photos);
+          if (!this.rows[i].photos) break;
+          j = 0;
+          continue;
+        }
+
         let p = this.rows[i]?.photos?.[j];
         if (!p) break; // shouldn't happen, ever
-
-        j += reverse ? -1 : 1;
-        if (j < 0) {
-          while (!this.rows[--i].photos);
-          j = this.rows[i].photos.length - 1;
-        } else if (j >= this.rows[i].photos.length) {
-          while (!this.rows[++i].photos);
-          j = 0;
-        }
 
         // This is there now
         newSelection.set(p.fileid, p);
@@ -392,6 +446,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
 
         // Check goal
         if (p === overPhoto) break;
+        j += reverse ? -1 : 1;
       }
 
       // Remove unselected

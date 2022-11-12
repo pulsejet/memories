@@ -150,10 +150,13 @@ export type IRow = {
   selected?: boolean;
   /** Main list of photo items */
   photos?: IPhoto[];
+
   /** Height in px of the row */
   size?: number;
   /** Count of placeholders to create */
   pct?: number;
+  /** Don't remove dom element */
+  virtualSticky?: boolean;
 };
 export type IHeadRow = IRow & {
   type: IRowType.HEAD;

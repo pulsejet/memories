@@ -124,6 +124,7 @@
       :heads="heads"
       :rows="list"
       :isreverse="isMonthView"
+      :recycler="$refs.recycler"
       @refresh="softRefresh"
       @delete="deleteFromViewWithAnimation"
       @updateLoading="updateLoading"
