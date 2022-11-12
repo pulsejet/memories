@@ -246,6 +246,9 @@ func (s *Stream) waitForChunk(w http.ResponseWriter, chunk *Chunk) {
 	if chunk.done {
 		s.returnChunk(w, chunk)
 	}
+
+	// Return timeout error
+	w.WriteHeader(http.StatusRequestTimeout)
 }
 
 func (s *Stream) restartAtChunk(w http.ResponseWriter, id int) {
