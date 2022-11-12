@@ -140,7 +140,7 @@ class VideoSetup extends Command
                 $output->writeln('QSV is now disabled');
             } else {
                 $output->writeln("\nQSV is now enabled. You may still need to install the Intel Media Driver");
-                $output->writeln("and ensure proper permissions for /dev/dri/renderD128.");
+                $output->writeln('and ensure proper permissions for /dev/dri/renderD128.');
                 $output->writeln('See the documentation for more details.');
                 $this->config->setSystemValue('memories.qsv', true);
             }
