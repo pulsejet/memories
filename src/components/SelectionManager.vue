@@ -52,10 +52,16 @@ import GlobalMixin from "../mixins/GlobalMixin";
 import UserConfig from "../mixins/UserConfig";
 
 import { showError } from "@nextcloud/dialogs";
-import { generateUrl } from "@nextcloud/router";
 import { NcActions, NcActionButton } from "@nextcloud/vue";
 import { translate as t, translatePlural as n } from "@nextcloud/l10n";
-import { IDay, IHeadRow, IPhoto, ISelectionAction } from "../types";
+import {
+  IDay,
+  IHeadRow,
+  IPhoto,
+  IRow,
+  IRowType,
+  ISelectionAction,
+} from "../types";
 import { getCurrentUser } from "@nextcloud/auth";
 
 import * as dav from "../services/DavRequests";
@@ -90,6 +96,9 @@ type Selection = Map<number, IPhoto>;
 })
 export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
   @Prop() public heads: { [dayid: number]: IHeadRow };
+
+  /** Rows are in ascending order (desc is normal) */
+  @Prop() public isreverse: boolean;
 
   private show = false;
   private size = 0;
@@ -324,6 +333,65 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
 
     if (!noUpdate) {
       this.updateHeadSelected(this.heads[photo.d.dayid]);
+      this.$forceUpdate();
+    }
+  }
+
+  /** Multi-select */
+  public selectMulti(photo: IPhoto, rows: IRow[], rowIdx: number) {
+    console.log("selectMulti", photo, rows, rowIdx);
+    const pRow = rows[rowIdx];
+    const pIdx = pRow.photos.indexOf(photo);
+    if (pIdx === -1) return;
+
+    const updateDaySet = new Set<number>();
+    let behind = [];
+    let behindFound = false;
+
+    // Look behind
+    for (let i = rowIdx; i > rowIdx - 100; i--) {
+      if (i < 0) break;
+      if (rows[i].type !== IRowType.PHOTOS) continue;
+      if (!rows[i].photos?.length) break;
+
+      const sj = i === rowIdx ? pIdx : rows[i].photos.length - 1;
+      for (let j = sj; j >= 0; j--) {
+        const p = rows[i].photos[j];
+        if (p.flag & this.c.FLAG_PLACEHOLDER || !p.fileid) continue;
+        if (p.flag & this.c.FLAG_SELECTED) {
+          behindFound = true;
+          break;
+        }
+        behind.push(p);
+        updateDaySet.add(p.d.dayid);
+      }
+
+      if (behindFound) break;
+    }
+
+    // Select everything behind
+    if (behindFound) {
+      // Clear everything in front in this day
+      const pdIdx = photo.d.detail.indexOf(photo);
+      for (let i = pdIdx + 1; i < photo.d.detail.length; i++) {
+        const p = photo.d.detail[i];
+        if (p.flag & this.c.FLAG_SELECTED) this.selectPhoto(p, false, true);
+      }
+
+      // Clear everything else in front
+      Array.from(this.selection.values())
+        .filter((p) => {
+          return this.isreverse
+            ? p.d.dayid > photo.d.dayid
+            : p.d.dayid < photo.d.dayid;
+        })
+        .forEach((photo: IPhoto) => {
+          this.selectPhoto(photo, false, true);
+          updateDaySet.add(photo.d.dayid);
+        });
+
+      behind.forEach((p) => this.selectPhoto(p, true, true));
+      updateDaySet.forEach((d) => this.updateHeadSelected(this.heads[d]));
       this.$forceUpdate();
     }
   }

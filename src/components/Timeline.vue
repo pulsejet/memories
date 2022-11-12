@@ -52,7 +52,7 @@
         </div>
       </template>
 
-      <template v-slot="{ item }">
+      <template v-slot="{ item, index }">
         <div
           v-if="item.type === 0"
           class="head-row"
@@ -98,7 +98,7 @@
               :day="item.day"
               :key="photo.fileid"
               @select="selectionManager.selectPhoto"
-              @click="clickPhoto(photo)"
+              @click="clickPhoto(photo, $event, index)"
             />
           </div>
         </template>
@@ -117,6 +117,7 @@
     <SelectionManager
       ref="selectionManager"
       :heads="heads"
+      :isreverse="isMonthView"
       @refresh="softRefresh"
       @delete="deleteFromViewWithAnimation"
       @updateLoading="updateLoading"
@@ -312,7 +313,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     return window.innerWidth <= 600;
   }
 
-  isMonthView() {
+  get isMonthView() {
     return this.$route.name === "albums";
   }
 
@@ -595,7 +596,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     }
 
     // Month view
-    if (this.isMonthView()) {
+    if (this.isMonthView) {
       query.set("monthView", "1");
       query.set("reverse", "1");
     }
@@ -649,7 +650,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     // because this call is terribly slow even on desktop
     const dateTaken = utils.dayIdToDate(head.dayId);
     let name: string;
-    if (this.isMonthView()) {
+    if (this.isMonthView) {
       name = utils.getMonthDateStr(dateTaken);
     } else {
       name = utils.getLongDateStr(dateTaken, true);
@@ -855,7 +856,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     this.fetchDayQueue.push(dayId);
 
     // Only single queries allowed for month vie
-    if (now || this.isMonthView()) {
+    if (now || this.isMonthView) {
       return this.fetchDayExpire();
     }
 
@@ -1193,12 +1194,15 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
   }
 
   /** Clicking on photo */
-  clickPhoto(photo: IPhoto) {
+  clickPhoto(photo: IPhoto, event: any, rowIdx: number) {
     if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
 
     if (this.selectionManager.has()) {
-      // selection mode
-      this.selectionManager.selectPhoto(photo);
+      if (event.shiftKey) {
+        this.selectionManager.selectMulti(photo, this.list, rowIdx);
+      } else {
+        this.selectionManager.selectPhoto(photo);
+      }
     } else {
       this.$router.push({
         ...this.$route,
