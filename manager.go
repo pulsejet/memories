@@ -288,7 +288,5 @@ func (m *Manager) ffprobe() error {
 		FrameRate: int(frameRate),
 	}
 
-	fmt.Println(m.probe)
-
 	return nil
 }
