@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Setelan",
     "Timeline" : "Linimasa",
     "Folders" : "Folder-folder",
     "Favorites" : "Disukai",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "Archive" : "Arsip",
     "Tags" : "Tag",
     "Maps" : "Peta",
-    "Settings" : "Setelan",
     "Edit" : "Sunting",
     "Cancel" : "Membatalkan",
     "Delete" : "Hapus",

@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Spomienky",
     "Yet another photo management app" : "Ďalšia aplikácia na správu fotografií",
+    "Settings" : "Nastavenia",
     "Timeline" : "Časová os",
     "Folders" : "Priečinky",
     "Favorites" : "Obľúbené",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "On this day" : "V tento deň",
     "Tags" : "Štítky",
     "Maps" : "Mapy",
-    "Settings" : "Nastavenia",
     "Error saving image" : "Chyba pri ukladaní obrázku",
     "Unsaved changes" : "Neuložené zmeny",
     "Drop changes" : "Zrušiť zmeny",

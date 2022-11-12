@@ -1,10 +1,10 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Configurationes",
     "Favorites" : "Favoritos",
     "Tags" : "Etiquettas",
     "Maps" : "Mappas",
-    "Settings" : "Configurationes",
     "Edit" : "Modificar",
     "Cancel" : "Cancellar",
     "Delete" : "Deler",

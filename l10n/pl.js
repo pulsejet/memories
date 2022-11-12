@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Wspomnienia",
     "Yet another photo management app" : "Kolejna aplikacja do zarządzania zdjęciami",
+    "Settings" : "Ustawienia",
     "Timeline" : "Oś czasu",
     "Folders" : "Katalogi",
     "Favorites" : "Ulubione",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "On this day" : "W tym dniu",
     "Tags" : "Etykiety",
     "Maps" : "Mapy",
-    "Settings" : "Ustawienia",
     "Error saving image" : "Błąd podczas zapisywania obrazu",
     "Unsaved changes" : "Niezapisane zmiany",
     "Drop changes" : "Odrzuć zmiany",

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Stillingar",
     "Timeline" : "Tímalína",
     "Folders" : "Möppur",
     "Favorites" : "Eftirlæti",
@@ -10,7 +11,6 @@ OC.L10N.register(
     "On this day" : "Á þessum degi",
     "Tags" : "Merki",
     "Maps" : "Landakort",
-    "Settings" : "Stillingar",
     "Unsaved changes" : "Óvistaðar breytingar",
     "Edit" : "Breyta",
     "Loading …" : "Hleð inn …",

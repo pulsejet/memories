@@ -1,4 +1,5 @@
 { "translations": {
+    "Settings" : "Impostazioni",
     "Timeline" : "Linea temporale",
     "Folders" : "Cartelle",
     "Favorites" : "Preferiti",
@@ -9,7 +10,6 @@
     "On this day" : "In questo giorno",
     "Tags" : "Etichette",
     "Maps" : "Mappe",
-    "Settings" : "Impostazioni",
     "Unsaved changes" : "Modifiche non salvate",
     "Edit" : "Modifica",
     "Loading …" : "Caricamento …",

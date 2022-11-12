@@ -1,8 +1,8 @@
 OC.L10N.register(
     "memories",
     {
-    "Favorites" : "Favorites",
     "Settings" : "Tetapan",
+    "Favorites" : "Favorites",
     "Edit" : "Sunting",
     "Cancel" : "Batal",
     "Delete" : "Padam",

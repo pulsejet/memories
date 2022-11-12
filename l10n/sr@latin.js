@@ -1,10 +1,10 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Поставке",
     "Favorites" : "Omiljene",
     "Videos" : "Video",
     "Tags" : "Oznake",
-    "Settings" : "Поставке",
     "Edit" : "Izmeni",
     "Cancel" : "Otkaži",
     "Delete" : "Obriši",

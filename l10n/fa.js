@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "تنظیمات",
     "Timeline" : "خط زمانی",
     "Folders" : "پوشه ها",
     "Favorites" : "مورد علاقه‌ها",
@@ -9,7 +10,6 @@ OC.L10N.register(
     "Archive" : "بایگانی",
     "Tags" : "برچسب ها",
     "Maps" : "نقشه‌ها",
-    "Settings" : "تنظیمات",
     "Edit" : "ویرایش",
     "Loading …" : "بارگذاری …",
     "Cancel" : "لغو",

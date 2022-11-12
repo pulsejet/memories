@@ -1,4 +1,5 @@
 { "translations": {
+    "Settings" : "Paramètres",
     "Folders" : "Repertòris",
     "Favorites" : "Favorits",
     "Albums" : "Albums",
@@ -6,7 +7,6 @@
     "Archive" : "Archiu",
     "Tags" : "Etiquetas",
     "Maps" : "Mapas",
-    "Settings" : "Paramètres",
     "Unsaved changes" : "Modificacions pas enregistradas",
     "Edit" : "Modificar",
     "Loading …" : "Cargament…",

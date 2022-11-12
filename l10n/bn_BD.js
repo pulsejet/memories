@@ -1,10 +1,10 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "সেটিংস",
     "Favorites" : "প্রিয়জন",
     "Tags" : "ট্যাগ",
     "Maps" : "মানচিত্র",
-    "Settings" : "সেটিংস",
     "Edit" : "সম্পাদনা",
     "Cancel" : "বাতির",
     "Delete" : "মুছে",

@@ -1,9 +1,9 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "ಆಯ್ಕೆ",
     "Favorites" : "ಅಚ್ಚುಮೆಚ್ಚಿನ",
     "Maps" : "ನಕಾಶೆ",
-    "Settings" : "ಆಯ್ಕೆ",
     "Edit" : "ಸಂಪಾದಿಸು",
     "Cancel" : "﻿ರದ್ದು",
     "Delete" : "﻿ಅಳಿಸಿ",

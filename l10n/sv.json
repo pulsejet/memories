@@ -1,6 +1,7 @@
 { "translations": {
     "Memories" : "Memories",
     "Yet another photo management app" : "Ännu en app för fotohantering",
+    "Settings" : "Inställningar",
     "Timeline" : "Tidslinje",
     "Folders" : "Mappar",
     "Favorites" : "Favoriter",
@@ -11,7 +12,6 @@
     "On this day" : "På den här dagen",
     "Tags" : "Taggar",
     "Maps" : "Kartor",
-    "Settings" : "Inställningar",
     "Unsaved changes" : "Ej sparade ändringar",
     "Edit" : "Ändra",
     "Loading …" : "Läser in …",

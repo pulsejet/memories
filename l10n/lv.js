@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Iestatījumi",
     "Folders" : "Mapes",
     "Favorites" : "Favorīti",
     "Videos" : "Video",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "Archive" : "Arhīvi",
     "Tags" : "Birkas",
     "Maps" : "Karte",
-    "Settings" : "Iestatījumi",
     "EXIF" : "EXIF",
     "Edit" : "Rediģēt",
     "Cancel" : "Atcelt",

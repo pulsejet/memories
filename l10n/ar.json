@@ -1,4 +1,5 @@
 { "translations": {
+    "Settings" : "الإعدادات",
     "Timeline" : "الجدول الزمني",
     "Folders" : "المجلدات",
     "Favorites" : "المفضلات",
@@ -6,7 +7,6 @@
     "Archive" : "الأرشيف",
     "Tags" : "الوسوم",
     "Maps" : "الخرائط",
-    "Settings" : "الإعدادات",
     "Edit" : "تعديل",
     "Loading …" : "جاري التحميل …",
     "Cancel" : "إلغاء",

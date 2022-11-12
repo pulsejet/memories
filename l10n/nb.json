@@ -1,4 +1,5 @@
 { "translations": {
+    "Settings" : "Innstillinger",
     "Timeline" : "Tidslinje",
     "Folders" : "Mapper",
     "Favorites" : "Favoritter",
@@ -8,7 +9,6 @@
     "On this day" : "På denne dagen",
     "Tags" : "Merkelapper",
     "Maps" : "Kart",
-    "Settings" : "Innstillinger",
     "Unsaved changes" : "Ulagrede endringer",
     "Edit" : "Rediger",
     "Loading …" : "Laster ...",

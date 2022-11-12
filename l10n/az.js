@@ -1,11 +1,11 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Quraşdırmalar",
     "Favorites" : "Sevimlilər",
     "Archive" : "Arxiv",
     "Tags" : "Işarələr",
     "Maps" : "Xəritələr",
-    "Settings" : "Quraşdırmalar",
     "Edit" : "Dəyişiklik et",
     "Cancel" : "Dayandır",
     "Delete" : "Sil",

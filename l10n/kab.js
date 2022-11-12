@@ -1,10 +1,10 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Iɣewwaṛen",
     "Favorites" : "Imenyafen",
     "Videos" : "Tividyutin",
     "Tags" : "Tibzimin",
-    "Settings" : "Iɣewwaṛen",
     "Edit" : "Ẓreg",
     "Cancel" : "Sefsex",
     "Delete" : "Kkes",

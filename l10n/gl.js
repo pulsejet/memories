@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Axustes",
     "Timeline" : "Liña temporal",
     "Folders" : "Cartafoles",
     "Favorites" : "Favoritos",
@@ -9,7 +10,6 @@ OC.L10N.register(
     "Archive" : "Aquivar",
     "Tags" : "Etiquetas",
     "Maps" : "Mapas",
-    "Settings" : "Axustes",
     "Unsaved changes" : "Cambios sen gardar",
     "Edit" : "Editar",
     "Loading …" : "Cargando…",
