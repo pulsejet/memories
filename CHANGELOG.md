@@ -9,6 +9,7 @@ This file is manually updated. Please file an issue if something is missing.
   - Memories now comes with a dedicated transcoding server with HLS support.
   - Read the documentation [here](https://github.com/pulsejet/memories/wiki/Configuration#video-transcoding) carefully for more details.
 - **Feature**: Show EXIF metadata in sidebar ([#68](https://github.com/pulsejet/memories/issues/68))
+- **Feature**: Multi-selection with drag (mobile) and shift+click ([#28](https://github.com/pulsejet/memories/issues/28))
 - **Feature**: Show duration on video tiles
 - **Feature**: Allow editing all image formats (HEIC etc.)
 - Fix stretched images in viewer ([#176](https://github.com/pulsejet/memories/issues/176))
