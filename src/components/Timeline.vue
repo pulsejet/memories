@@ -98,7 +98,7 @@
               :day="item.day"
               :key="photo.fileid"
               @select="selectionManager.selectPhoto"
-              @mousedown="selectionManager.clickPhoto(photo, $event, index)"
+              @pointerdown="selectionManager.clickPhoto(photo, $event, index)"
               @touchstart="
                 selectionManager.touchstartPhoto(photo, $event, index)
               "
