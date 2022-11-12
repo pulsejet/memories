@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Параметри",
     "Timeline" : "Времеплов",
     "Folders" : "Папки",
     "Favorites" : "Омилени",
@@ -11,7 +12,6 @@ OC.L10N.register(
     "On this day" : "На денешен ден",
     "Tags" : "Ознаки",
     "Maps" : "Мапи",
-    "Settings" : "Параметри",
     "Unsaved changes" : "Незачувани промени",
     "Edit" : "Уреди",
     "Loading …" : "Се вчитува…",

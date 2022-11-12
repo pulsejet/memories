@@ -1,13 +1,13 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Cài đặt",
     "Folders" : "Thư mục",
     "Favorites" : "Ưa thích",
     "Videos" : "Phim",
     "Archive" : "Lưu trữ",
     "Tags" : "Nhãn",
     "Maps" : "Bản đồ",
-    "Settings" : "Cài đặt",
     "Unsaved changes" : "Thay đổi chưa được lưu",
     "Edit" : "Chỉnh sửa",
     "Loading …" : "Đang tải …",

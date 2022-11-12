@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Спомени",
     "Yet another photo management app" : "Вече е на разположение още едно приложение за управление на снимки",
+    "Settings" : "Настройки",
     "Timeline" : "Времева линия",
     "Folders" : "Папки",
     "Favorites" : "Любими",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "On this day" : "На този ден",
     "Tags" : "Етикети",
     "Maps" : "Карти",
-    "Settings" : "Настройки",
     "EXIF" : "EXIF стандарт",
     "A better photos experience awaits you" : "Очаква ви по-добро изживяване при управлението на снимки",
     "Choose the root folder of your timeline to begin" : "Изберете основната папка на вашата времева линия /хронология/, за да започнете",

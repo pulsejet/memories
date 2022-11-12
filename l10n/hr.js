@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Postavke",
     "Timeline" : "Vremenska crta",
     "Folders" : "Mape",
     "Favorites" : "Favoriti",
@@ -9,7 +10,6 @@ OC.L10N.register(
     "Archive" : "Arhiva",
     "Tags" : "Oznake",
     "Maps" : "Karte",
-    "Settings" : "Postavke",
     "Unsaved changes" : "Nespremljene promjene",
     "Edit" : "Uredi",
     "Loading …" : "Učitavanje…",

@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Prisiminimai",
     "Yet another photo management app" : "Dar viena nuotraukų tvarkymo programėlė",
+    "Settings" : "Nustatymai",
     "Timeline" : "Laiko juosta",
     "Folders" : "Aplankai",
     "Favorites" : "Mėgstami",
@@ -13,8 +14,10 @@ OC.L10N.register(
     "On this day" : "Šią dieną",
     "Tags" : "Žymės",
     "Maps" : "Žemėlapiai",
-    "Settings" : "Nustatymai",
+    "EXIF" : "EXIF",
     "Click here to start" : "Spustelėkite čia, norėdami pradėti",
+    "Image saved successfully" : "Paveikslas sėkmingai įrašytas",
+    "Error saving image" : "Klaida įrašant paveikslą",
     "Unsaved changes" : "Neįrašyti pakeitimai",
     "Edit" : "Taisyti",
     "Loading …" : "Įkeliama…",
@@ -85,6 +88,7 @@ OC.L10N.register(
     "Too many failures, aborting" : "Per daug nesėkmių, nutraukiama",
     "Error while moving {basename}" : "Klaida perkeliant {basename}",
     "Failed to move {name}." : "Nepavyko perkelti {name}.",
+    "Share Folder" : "Bendrinti aplanką",
     "Refresh" : "Įkelti iš naujo",
     "Share album" : "Bendrinti albumą",
     "Delete album" : "Ištrinti albumą",
@@ -100,6 +104,8 @@ OC.L10N.register(
     "Undo" : "Atšaukti",
     "Redo" : "Grąžinti",
     "Zoom in" : "Didinti",
+    "Zoom out" : "Mažinti",
+    "Toggle zoom menu" : "Perjungti mastelio meniu",
     "Resize" : "Keisti dydį",
     "Crop" : "Apkirpti",
     "Custom" : "Tinkinti",
@@ -120,6 +126,7 @@ OC.L10N.register(
     "General Failure" : "Bendrinė nesėkmė",
     "Error: {msg}" : "Klaida: {msg}",
     "Failed to delete files." : "Nepavyko ištrinti failų.",
-    "Failed to delete {fileName}." : "Nepavyko ištrinti {fileName}."
+    "Failed to delete {fileName}." : "Nepavyko ištrinti {fileName}.",
+    "Failed to download some files." : "Nepavyko atsisiųsti kai kurių failų."
 },
 "nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);");

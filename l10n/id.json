@@ -1,4 +1,5 @@
 { "translations": {
+    "Settings" : "Setelan",
     "Timeline" : "Linimasa",
     "Folders" : "Folder-folder",
     "Favorites" : "Disukai",
@@ -6,7 +7,6 @@
     "Archive" : "Arsip",
     "Tags" : "Tag",
     "Maps" : "Peta",
-    "Settings" : "Setelan",
     "Edit" : "Sunting",
     "Cancel" : "Membatalkan",
     "Delete" : "Hapus",

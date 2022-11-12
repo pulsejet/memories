@@ -27,7 +27,8 @@ build-js-production:
 	rm -f js/* && npm run build
 
 patch-external:
-	patch -p1 < patches/scroller.patch
+	patch -p1 < patches/scroller-perf.patch
+	patch -p1 < patches/scroller-sticky.patch
 
 watch-js:
 	npm run watch

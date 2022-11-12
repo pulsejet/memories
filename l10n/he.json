@@ -1,4 +1,5 @@
 { "translations": {
+    "Settings" : "הגדרות",
     "Timeline" : "ציר זמן",
     "Folders" : "תיקייה",
     "Favorites" : "מועדפים",
@@ -6,7 +7,6 @@
     "Archive" : "לארכיון",
     "Tags" : "תגיות",
     "Maps" : "מפות",
-    "Settings" : "הגדרות",
     "Unsaved changes" : "שינויים שלא נשמרו",
     "Edit" : "עריכה",
     "Loading …" : "בטעינה…",

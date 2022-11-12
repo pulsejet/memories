@@ -1,13 +1,13 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Setări",
     "Folders" : "Director",
     "Favorites" : "Favorite",
     "Videos" : "Fișiere video",
     "Archive" : "Arhivă",
     "Tags" : "Etichete",
     "Maps" : "Hărți",
-    "Settings" : "Setări",
     "Unsaved changes" : "Modificări nesalvate",
     "Edit" : "Editează",
     "Loading …" : "Se încarcă…",

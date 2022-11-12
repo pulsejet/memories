@@ -2,6 +2,9 @@ import PhotoSwipe from "photoswipe";
 import { generateUrl } from "@nextcloud/router";
 import { loadState } from "@nextcloud/initial-state";
 import axios from "@nextcloud/axios";
+import { showError } from "@nextcloud/dialogs";
+import { translate as t } from "@nextcloud/l10n";
+import { getCurrentUser } from "@nextcloud/auth";
 
 import videojs from "video.js";
 import "video.js/dist/video-js.min.css";
@@ -197,6 +200,11 @@ class VideoContentSetup {
         if (content.videojs.src().includes("m3u8")) {
           // HLS could not be streamed
           console.error("Video.js: HLS stream could not be opened.");
+
+          if (getCurrentUser()?.isAdmin) {
+            showError(t("memories", "Transcoding failed."));
+          }
+
           content.videojs.src({
             src: content.data.src,
           });

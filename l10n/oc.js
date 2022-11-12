@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Paramètres",
     "Folders" : "Repertòris",
     "Favorites" : "Favorits",
     "Albums" : "Albums",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "Archive" : "Archiu",
     "Tags" : "Etiquetas",
     "Maps" : "Mapas",
-    "Settings" : "Paramètres",
     "Unsaved changes" : "Modificacions pas enregistradas",
     "Edit" : "Modificar",
     "Loading …" : "Cargament…",

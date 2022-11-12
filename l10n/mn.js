@@ -1,13 +1,13 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Тохиргоо",
     "Folders" : "Хавтсууд",
     "Favorites" : "Онцолсон",
     "Videos" : "Бичлэгүүд",
     "Archive" : "архив",
     "Tags" : "Tag-үүд",
     "Maps" : "Газрын зураг",
-    "Settings" : "Тохиргоо",
     "Edit" : "засварлах",
     "Loading …" : "Уншиж байна...",
     "Cancel" : "болиулах",

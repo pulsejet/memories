@@ -1,13 +1,13 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "การตั้งค่า",
     "Folders" : "แฟ้มเอกสาร",
     "Favorites" : "รายการโปรด",
     "Videos" : "วิดีโอ",
     "Archive" : "เก็บถาวร",
     "Tags" : "แท็ก",
     "Maps" : "แผนที่",
-    "Settings" : "การตั้งค่า",
     "Edit" : "แก้ไข",
     "Cancel" : "ยกเลิก",
     "Delete" : "ลบ",

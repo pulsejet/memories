@@ -1,11 +1,11 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Sozlamalar",
     "Favorites" : "Favorites",
     "Videos" : "Videos",
     "Tags" : "Tags",
     "Maps" : "Maps",
-    "Settings" : "Sozlamalar",
     "Cancel" : "Cancel",
     "Delete" : "Delete",
     "Download" : "Download",

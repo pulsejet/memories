@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Innstillinger",
     "Timeline" : "Tidslinje",
     "Folders" : "Mapper",
     "Favorites" : "Favoritter",
@@ -10,7 +11,6 @@ OC.L10N.register(
     "On this day" : "På denne dagen",
     "Tags" : "Merkelapper",
     "Maps" : "Kart",
-    "Settings" : "Innstillinger",
     "Unsaved changes" : "Ulagrede endringer",
     "Edit" : "Rediger",
     "Loading …" : "Laster ...",
