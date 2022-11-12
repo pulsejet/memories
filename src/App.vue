@@ -331,23 +331,6 @@ body.has-viewer header {
   z-index: 0 !important;
 }
 
-// Patch viewer to remove the title and
-// make the image fill the entire screen
-.viewer {
-  .modal-title {
-    display: none;
-  }
-  .modal-wrapper .modal-container {
-    top: 0 !important;
-    bottom: 0 !important;
-
-    .viewer__image-editor {
-      top: 0 !important;
-      bottom: 0 !important;
-    }
-  }
-}
-
 // Hide horizontal scrollbar on mobile
 // For the padding removal above
 #app-content-vue {
