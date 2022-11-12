@@ -310,15 +310,21 @@ body {
 // Nextcloud 25+: get rid of gap and border radius at right
 #content-vue.remove-gap {
   // was var(--body-container-radius)
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-
+  // now set on #app-navigation-vue
+  border-radius: 0;
   width: calc(100% - var(--body-container-margin) * 1); // was *2
 }
 
 // Prevent content overflow on NC <25
 #content-vue {
   max-height: 100vh;
+
+  // https://bugs.webkit.org/show_bug.cgi?id=160953
+  overflow: visible;
+  #app-navigation-vue {
+    border-top-left-radius: var(--body-container-radius);
+    border-bottom-left-radius: var(--body-container-radius);
+  }
 }
 
 // Top bar is above everything else on mobile
