@@ -278,7 +278,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
 
   /** Clicking on photo */
   public clickPhoto(photo: IPhoto, event: any, rowIdx: number) {
-    if (photo.flag & this.c.FLAG_PLACEHOLDER || event?.button !== 0) return;
+    if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
 
     if (this.has()) {
       if (event.shiftKey) {
