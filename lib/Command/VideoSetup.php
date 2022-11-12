@@ -129,6 +129,7 @@ class VideoSetup extends Command
         $this->config->setSystemValue('memories.transcoder', $goVodPath);
         $this->config->setSystemValue('memories.no_transcode', false);
         $output->writeln('Transcoding and HLS are now enabled! Monitor the output at /tmp/go-vod.log for any errors');
+        $output->writeln('Restart the Nextcloud server for changes to take effect');
 
         // Check for VAAPI
         $output->writeln("\nChecking for QSV (/dev/dri/renderD128)");
