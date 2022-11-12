@@ -277,8 +277,9 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
   }
 
   /** Clicking on photo */
-  public clickPhoto(photo: IPhoto, event: any, rowIdx: number) {
+  public clickPhoto(photo: IPhoto, event: PointerEvent, rowIdx: number) {
     if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
+    if (event.pointerType === "touch") return; // let touch events handle this
 
     if (this.has()) {
       if (event.shiftKey) {
@@ -292,7 +293,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
   }
 
   /** Tap on */
-  protected touchstartPhoto(photo: IPhoto, event: any, rowIdx: number) {
+  protected touchstartPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
     if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
     this.rows[rowIdx].virtualSticky = true;
 
@@ -311,9 +312,11 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
   }
 
   /** Tap off */
-  protected touchendPhoto(photo: IPhoto, event: any, rowIdx: number) {
+  protected touchendPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
     if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
     delete this.rows[rowIdx].virtualSticky;
+
+    if (this.touchTimer) this.clickPhoto(photo, {} as any, rowIdx);
     this.resetTouchParams();
 
     window.setTimeout(() => {
@@ -337,7 +340,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
    * Tap over
    * photo and rowIdx are that of the *anchor*
    */
-  protected touchmovePhoto(anchor: IPhoto, event: any, rowIdx: number) {
+  protected touchmovePhoto(anchor: IPhoto, event: TouchEvent, rowIdx: number) {
     if (anchor.flag & this.c.FLAG_PLACEHOLDER) return;
 
     if (this.touchTimer) {
