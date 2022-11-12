@@ -38,6 +38,7 @@ type ProbeVideoData struct {
 	Height    int
 	Duration  time.Duration
 	FrameRate int
+	CodecName string
 }
 
 func NewManager(c *Config, path string, id string, close chan string) (*Manager, error) {
@@ -214,7 +215,7 @@ func (m *Manager) ffprobe() error {
 
 		// video
 		"-show_entries", "format=duration",
-		"-show_entries", "stream=duration,width,height,avg_frame_rate",
+		"-show_entries", "stream=duration,width,height,avg_frame_rate,codec_name",
 		"-select_streams", "v", // Video stream only, we're not interested in audio
 
 		"-of", "json",
@@ -240,6 +241,7 @@ func (m *Manager) ffprobe() error {
 			Height    int    `json:"height"`
 			Duration  string `json:"duration"`
 			FrameRate string `json:"avg_frame_rate"`
+			CodecName string `json:"codec_name"`
 		} `json:"streams"`
 		Format struct {
 			Duration string `json:"duration"`
@@ -286,6 +288,7 @@ func (m *Manager) ffprobe() error {
 		Height:    out.Streams[0].Height,
 		Duration:  duration,
 		FrameRate: int(frameRate),
+		CodecName: out.Streams[0].CodecName,
 	}
 
 	return nil

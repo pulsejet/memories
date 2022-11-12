@@ -280,10 +280,13 @@ func (s *Stream) transcode(startId int) {
 		}...)
 	}
 
-	// QSV / encoder selection
-	VAAPI := os.Getenv("VAAPI") == "1"
+	// encoder selection
 	CV := "libx264"
-	if VAAPI {
+
+	// no need to transcode h264 streams for max quality
+	if s.quality == "max" && s.m.probe.CodecName == "h264" {
+		CV = "copy"
+	} else if os.Getenv("VAAPI") == "1" {
 		CV = "h264_vaapi"
 		extra := "-hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format vaapi"
 		args = append(args, strings.Split(extra, " ")...)
@@ -298,7 +301,7 @@ func (s *Stream) transcode(startId int) {
 
 	// Scaling for output
 	var scale string
-	if VAAPI {
+	if CV == "h264_vaapi" {
 		scale = fmt.Sprintf("scale_vaapi=w=%d:h=%d:force_original_aspect_ratio=decrease", s.width, s.height)
 	} else if s.width >= s.height {
 		scale = fmt.Sprintf("scale=-2:%d", s.height)
@@ -306,26 +309,26 @@ func (s *Stream) transcode(startId int) {
 		scale = fmt.Sprintf("scale=%d:-2", s.width)
 	}
 
-	// not original (max)
+	// do not scale or set bitrate for full quality
 	if s.quality != "max" {
 		args = append(args, []string{
 			"-vf", scale,
 			"-b:v", fmt.Sprintf("%dk", s.bitrate/1000),
+			"-profile:v", "high",
 		}...)
 	}
 
 	// Output specs
 	args = append(args, []string{
 		"-c:v", CV,
-		"-profile:v", "high",
 	}...)
 
 	// Device specific output args
-	if VAAPI {
+	if CV == "h264_vaapi" {
 		args = append(args, []string{
 			"-low_power", "1",
 		}...)
-	} else {
+	} else if CV == "libx264" {
 		args = append(args, []string{
 			"-preset", "faster",
 			"-level:v", "4.0",
