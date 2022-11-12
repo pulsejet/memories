@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"hash/fnv"
 	"log"
@@ -33,9 +34,10 @@ type Manager struct {
 }
 
 type ProbeVideoData struct {
-	Width    int
-	Height   int
-	Duration time.Duration
+	Width     int
+	Height    int
+	Duration  time.Duration
+	FrameRate int
 }
 
 func NewManager(c *Config, path string, id string, close chan string) (*Manager, error) {
@@ -59,8 +61,8 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 
 	// Possible streams
 	m.streams["360p"] = &Stream{c: c, m: m, quality: "360p", height: 360, width: 640, bitrate: 500000}
-	m.streams["480p"] = &Stream{c: c, m: m, quality: "480p", height: 480, width: 640, bitrate: 1000000}
-	m.streams["720p"] = &Stream{c: c, m: m, quality: "720p", height: 720, width: 1280, bitrate: 2000000}
+	m.streams["480p"] = &Stream{c: c, m: m, quality: "480p", height: 480, width: 640, bitrate: 1200000}
+	m.streams["720p"] = &Stream{c: c, m: m, quality: "720p", height: 720, width: 1280, bitrate: 2500000}
 	m.streams["1080p"] = &Stream{c: c, m: m, quality: "1080p", height: 1080, width: 1920, bitrate: 3500000}
 	m.streams["1440p"] = &Stream{c: c, m: m, quality: "1440p", height: 1440, width: 2560, bitrate: 6000000}
 	m.streams["2160p"] = &Stream{c: c, m: m, quality: "2160p", height: 2160, width: 3840, bitrate: 10000000}
@@ -68,6 +70,9 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 	// Only keep streams that are smaller than the video
 	var highest int
 	for k, stream := range m.streams {
+		// scale bitrate by frame rate with reference 30
+		stream.bitrate = int(float64(stream.bitrate) * float64(m.probe.FrameRate) / 30.0)
+
 		if stream.height >= m.probe.Height || stream.width >= m.probe.Width {
 			delete(m.streams, k)
 		} else if stream.bitrate > highest {
@@ -209,7 +214,7 @@ func (m *Manager) ffprobe() error {
 
 		// video
 		"-show_entries", "format=duration",
-		"-show_entries", "stream=duration,width,height",
+		"-show_entries", "stream=duration,width,height,avg_frame_rate",
 		"-select_streams", "v", // Video stream only, we're not interested in audio
 
 		"-of", "json",
@@ -231,9 +236,10 @@ func (m *Manager) ffprobe() error {
 
 	out := struct {
 		Streams []struct {
-			Width    int    `json:"width"`
-			Height   int    `json:"height"`
-			Duration string `json:"duration"`
+			Width     int    `json:"width"`
+			Height    int    `json:"height"`
+			Duration  string `json:"duration"`
+			FrameRate string `json:"avg_frame_rate"`
 		} `json:"streams"`
 		Format struct {
 			Duration string `json:"duration"`
@@ -242,6 +248,10 @@ func (m *Manager) ffprobe() error {
 
 	if err := json.Unmarshal(stdout.Bytes(), &out); err != nil {
 		return err
+	}
+
+	if len(out.Streams) == 0 {
+		return errors.New("no video streams found")
 	}
 
 	var duration time.Duration
@@ -258,11 +268,27 @@ func (m *Manager) ffprobe() error {
 		}
 	}
 
-	m.probe = &ProbeVideoData{
-		Width:    out.Streams[0].Width,
-		Height:   out.Streams[0].Height,
-		Duration: duration,
+	// FrameRate is a fraction string
+	frac := strings.Split(out.Streams[0].FrameRate, "/")
+	if len(frac) != 2 {
+		frac = []string{"30", "1"}
 	}
+	num, e1 := strconv.Atoi(frac[0])
+	den, e2 := strconv.Atoi(frac[1])
+	if e1 != nil || e2 != nil {
+		num = 30
+		den = 1
+	}
+	frameRate := float64(num) / float64(den)
+
+	m.probe = &ProbeVideoData{
+		Width:     out.Streams[0].Width,
+		Height:    out.Streams[0].Height,
+		Duration:  duration,
+		FrameRate: int(frameRate),
+	}
+
+	fmt.Println(m.probe)
 
 	return nil
 }
