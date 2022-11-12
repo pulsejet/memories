@@ -102,5 +102,10 @@ export function getDownloadLink(photo: IPhoto) {
     }
   }
 
-  return `/remote.php/dav${photo.filename}`; // normal route
+  try {
+    const file = "/" + photo.filename.split("/").slice(3).join("/");
+    return `/apps/files/ajax/download.php?files=${file}`; // normal route
+  } catch {
+    return `/remote.php/dav${photo.filename}`; // fallback
+  }
 }
