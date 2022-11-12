@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Воспоминания",
     "Yet another photo management app" : "Приложение для управления фотографиями",
+    "Settings" : "Настройки",
     "Timeline" : "История",
     "Folders" : "Папки",
     "Favorites" : "Избранное",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "On this day" : "В этот день",
     "Tags" : "Метки",
     "Maps" : "Карты",
-    "Settings" : "Настройки",
     "Error saving image" : "Не удалось сохранить изображение",
     "Unsaved changes" : "Несохранённые изменения",
     "Drop changes" : "Отменить изменения",

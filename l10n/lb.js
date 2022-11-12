@@ -1,10 +1,10 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Astellungen",
     "Favorites" : "Favoriten",
     "Tags" : "Tags",
     "Maps" : "Kaarten",
-    "Settings" : "Astellungen",
     "Edit" : "Änneren",
     "Cancel" : "Ofbriechen",
     "Delete" : "Läschen",

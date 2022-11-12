@@ -1,8 +1,8 @@
 OC.L10N.register(
     "memories",
     {
-    "Favorites" : "Սիրվածներ",
     "Settings" : "կարգավորումներ",
+    "Favorites" : "Սիրվածներ",
     "Edit" : "մշակել",
     "Cancel" : "ընդհատել",
     "Delete" : "հեռացնել",

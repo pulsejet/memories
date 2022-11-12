@@ -1,9 +1,9 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Configurazión",
     "Favorites" : "Favoritos",
     "Tags" : "Etiquetas",
-    "Settings" : "Configurazión",
     "Cancel" : "Canzelar",
     "Delete" : "Borrar",
     "Download" : "Escargar",

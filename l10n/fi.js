@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Muistot",
     "Yet another photo management app" : "Vaihtoehtoinen sovellus valokuvien hallintaan",
+    "Settings" : "Asetukset",
     "Timeline" : "Aikajana",
     "Folders" : "Kansiot",
     "Favorites" : "Suosikit",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "On this day" : "Tänä päivänä",
     "Tags" : "Tunnisteet",
     "Maps" : "Kartat",
-    "Settings" : "Asetukset",
     "A better photos experience awaits you" : "Parempi kuvakokemus odottaa sinua",
     "Choose the root folder of your timeline to begin" : "Valitse aikajanan juurihakemisto aloittaaksesi",
     "If you just installed Memories, run:" : "Jos olet juuri asentanut Muistot, suorita:",

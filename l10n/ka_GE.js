@@ -1,13 +1,13 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "პარამეტრები",
     "Folders" : "დირექტორიები",
     "Favorites" : "რჩეულები",
     "Videos" : "ვიდეოები",
     "Archive" : "არქივი",
     "Tags" : "ტეგები",
     "Maps" : "რუკები",
-    "Settings" : "პარამეტრები",
     "Unsaved changes" : "შეუნახავი ცვლილებები",
     "Edit" : "შეცვლა",
     "Cancel" : "უარყოფა",

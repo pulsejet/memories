@@ -1,9 +1,9 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "அமைப்புகள்",
     "Favorites" : "விருப்பங்கள்",
     "Tags" : "சீட்டுகள்",
-    "Settings" : "அமைப்புகள்",
     "Edit" : "தொகுக்க",
     "Cancel" : "இரத்து செய்க",
     "Delete" : "நீக்குக",

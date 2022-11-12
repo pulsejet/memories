@@ -1,8 +1,8 @@
 OC.L10N.register(
     "memories",
     {
-    "Favorites" : "Favorites",
     "Settings" : "سیٹینگز",
+    "Favorites" : "Favorites",
     "Edit" : "تدوین کریں",
     "Cancel" : "منسوخ کریں",
     "Delete" : "حذف کریں",

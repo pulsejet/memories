@@ -1,4 +1,5 @@
 { "translations": {
+    "Settings" : "Instellingen",
     "Timeline" : "Tijdlijn",
     "Folders" : "Mappen",
     "Favorites" : "Favorieten",
@@ -9,7 +10,6 @@
     "On this day" : "Vandaag",
     "Tags" : "Tags",
     "Maps" : "Kaarten",
-    "Settings" : "Instellingen",
     "Unsaved changes" : "Niet opgeslagen veranderingen",
     "Edit" : "Bewerk",
     "Loading …" : "Laden …",

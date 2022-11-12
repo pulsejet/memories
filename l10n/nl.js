@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Instellingen",
     "Timeline" : "Tijdlijn",
     "Folders" : "Mappen",
     "Favorites" : "Favorieten",
@@ -11,7 +12,6 @@ OC.L10N.register(
     "On this day" : "Vandaag",
     "Tags" : "Tags",
     "Maps" : "Kaarten",
-    "Settings" : "Instellingen",
     "Unsaved changes" : "Niet opgeslagen veranderingen",
     "Edit" : "Bewerk",
     "Loading …" : "Laden …",

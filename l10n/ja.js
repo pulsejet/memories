@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "設定",
     "Timeline" : "タイムライン",
     "Folders" : "フォルダー",
     "Favorites" : "お気に入り",
@@ -10,7 +11,6 @@ OC.L10N.register(
     "On this day" : "この日",
     "Tags" : "タグ",
     "Maps" : "地図",
-    "Settings" : "設定",
     "Error saving image" : "画像保存でのエラー",
     "Unsaved changes" : "保存していない変更点",
     "Edit" : "編集",

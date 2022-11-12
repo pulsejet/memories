@@ -1,8 +1,8 @@
 OC.L10N.register(
     "memories",
     {
-    "Favorites" : "Favoriti",
     "Settings" : "Podešavanje",
+    "Favorites" : "Favoriti",
     "Edit" : "Izmjeni",
     "Cancel" : "Otkaži",
     "Delete" : "Obriši",

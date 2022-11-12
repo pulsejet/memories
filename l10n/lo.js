@@ -1,10 +1,10 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "ການຕັ້ງຄ່າ",
     "Favorites" : "ລາຍການທີ່ມັກ",
     "Videos" : "ວິດີໂອ",
     "Tags" : "ປ້າຍກຳກັບ",
-    "Settings" : "ການຕັ້ງຄ່າ",
     "Edit" : "ແກ້ໄຂ",
     "Loading …" : "ກຳລັງໂຫຼດ",
     "Cancel" : "ຍົກເລີກ",

@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Souvenirs",
     "Yet another photo management app" : "Une nouvelle application de gestion des photos",
+    "Settings" : "Paramètres",
     "Timeline" : "Fil chronologique",
     "Folders" : "Dossiers",
     "Favorites" : "Favoris",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "On this day" : "Ce même jour",
     "Tags" : "Étiquettes",
     "Maps" : "Cartes",
-    "Settings" : "Paramètres",
     "Error saving image" : "Erreur lors de l'enregistrement de l'image",
     "Unsaved changes" : "Modifications non enregistrées",
     "Drop changes" : "Abandonner les changements",

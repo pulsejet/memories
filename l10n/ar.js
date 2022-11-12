@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "الإعدادات",
     "Timeline" : "الجدول الزمني",
     "Folders" : "المجلدات",
     "Favorites" : "المفضلات",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "Archive" : "الأرشيف",
     "Tags" : "الوسوم",
     "Maps" : "الخرائط",
-    "Settings" : "الإعدادات",
     "Edit" : "تعديل",
     "Loading …" : "جاري التحميل …",
     "Cancel" : "إلغاء",

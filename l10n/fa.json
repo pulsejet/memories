@@ -1,4 +1,5 @@
 { "translations": {
+    "Settings" : "تنظیمات",
     "Timeline" : "خط زمانی",
     "Folders" : "پوشه ها",
     "Favorites" : "مورد علاقه‌ها",
@@ -7,7 +8,6 @@
     "Archive" : "بایگانی",
     "Tags" : "برچسب ها",
     "Maps" : "نقشه‌ها",
-    "Settings" : "تنظیمات",
     "Edit" : "ویرایش",
     "Loading …" : "بارگذاری …",
     "Cancel" : "لغو",

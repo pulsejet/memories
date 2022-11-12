@@ -1,10 +1,10 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "ការកំណត់",
     "Favorites" : "Favorites",
     "Tags" : "ស្លាក",
     "Maps" : "ផែនទី",
-    "Settings" : "ការកំណត់",
     "Edit" : "កែប្រែ",
     "Cancel" : "បោះបង់",
     "Delete" : "លុប",

@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Anılar",
     "Yet another photo management app" : "Başka bir fotoğraf yönetimi uygulaması daha",
+    "Settings" : "Ayarlar",
     "Timeline" : "Zaman tüneli",
     "Folders" : "Klasörler",
     "Favorites" : "Sık kullanılanlar",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "On this day" : "Bugün",
     "Tags" : "Etiketler",
     "Maps" : "Haritalar",
-    "Settings" : "Ayarlar",
     "A better photos experience awaits you" : "Daha iyi bir fotoğraf deneyimi sizi bekliyor",
     "Choose the root folder of your timeline to begin" : "Zaman tünelinizin başlangıç kök klasörünü seçin",
     "If you just installed Memories, run:" : "Anılar uygulamasını yeni kurduysanız şunu çalıştırın:",

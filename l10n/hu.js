@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Emlékek",
     "Yet another photo management app" : "Még egy fényképkezelő alkalmazás",
+    "Settings" : "Beállítások",
     "Timeline" : "Idővonal",
     "Folders" : "Mappák",
     "Favorites" : "Kedvencek",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "On this day" : "A mai napon",
     "Tags" : "Címkék",
     "Maps" : "Térképek",
-    "Settings" : "Beállítások",
     "EXIF" : "EXIF",
     "Unsaved changes" : "Mentetlen változtatások",
     "Drop changes" : "Változtatások elvetése",
@@ -67,6 +67,7 @@ OC.L10N.register(
     "Add collaborators" : "Közreműködők hozzáadása",
     "Save" : "Mentés",
     "Create album" : "Album létrehozása",
+    "Add selection to album {albumName}" : "Kiválasztás hozzáadása a(z) {albumName} albumhoz",
     "Create a new album." : "Új album létrehozása.",
     "Save collaborators for this album." : "Közreműködők mentése ehhez az albumhoz.",
     "Year" : "Év",

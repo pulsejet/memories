@@ -1,11 +1,11 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Gosodiadau",
     "Favorites" : "Ffefrynnau",
     "Videos" : "Fideos",
     "Archive" : "Archif",
     "Tags" : "Tagiau",
-    "Settings" : "Gosodiadau",
     "Edit" : "Golygu",
     "Loading …" : "Yn llwytho …",
     "Cancel" : "Diddymu",

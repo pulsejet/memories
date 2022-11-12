@@ -1,10 +1,10 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Roghainnean",
     "Favorites" : "Annsachdan",
     "Videos" : "Videothan",
     "Tags" : "Tagaichean",
-    "Settings" : "Roghainnean",
     "Edit" : "Deasaich",
     "Cancel" : "Sguir dheth",
     "Delete" : "Sguab às",

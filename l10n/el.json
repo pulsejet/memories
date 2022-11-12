@@ -1,4 +1,5 @@
 { "translations": {
+    "Settings" : "Ρυθμίσεις",
     "Timeline" : "Χρονολόγιο",
     "Folders" : "Φάκελοι",
     "Favorites" : "Αγαπημένα",
@@ -9,7 +10,6 @@
     "On this day" : "Αυτή τη μέρα",
     "Tags" : "Ετικέτες",
     "Maps" : "Χάρτες",
-    "Settings" : "Ρυθμίσεις",
     "Unsaved changes" : "Μη αποθηκευμένες αλλαγές",
     "Edit" : "Επεξεργασία",
     "Loading …" : "Φόρτωση …",

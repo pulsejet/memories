@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "설정",
     "Timeline" : "타임라인",
     "Folders" : "폴더",
     "Favorites" : "즐겨찾기",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "Archive" : "보관",
     "Tags" : "태그",
     "Maps" : "지도",
-    "Settings" : "설정",
     "Unsaved changes" : "저장하지 않은 변경 사항",
     "Edit" : "편집",
     "Loading …" : "불러오는 중 …",

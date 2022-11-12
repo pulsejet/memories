@@ -1,9 +1,9 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "تەڭشەكلەر",
     "Favorites" : "يىغقۇچ",
     "Tags" : "بەلگەلەر",
-    "Settings" : "تەڭشەكلەر",
     "Edit" : "تەھرىر",
     "Cancel" : "ۋاز كەچ",
     "Delete" : "ئۆچۈر",

@@ -1,10 +1,10 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Arventennoù",
     "Favorites" : "Pennrolloù",
     "Videos" : "Videoioù",
     "Tags" : "Klavioù",
-    "Settings" : "Arventennoù",
     "Unsaved changes" : "Kemmoù n'int ket bet enrollet",
     "Edit" : "Cheñch",
     "Loading …" : "O Kargañ ...",
