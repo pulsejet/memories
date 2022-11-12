@@ -128,7 +128,7 @@ class VideoSetup extends Command
 
         $this->config->setSystemValue('memories.transcoder', $goVodPath);
         $this->config->setSystemValue('memories.no_transcode', false);
-        $output->writeln('Transcoding and HLS are now enabled!');
+        $output->writeln('Transcoding and HLS are now enabled! Monitor the output at /tmp/go-vod.log for any errors');
 
         // Check for VAAPI
         $output->writeln("\nChecking for QSV (/dev/dri/renderD128)");
@@ -139,6 +139,9 @@ class VideoSetup extends Command
                 $this->config->setSystemValue('memories.qsv', false);
                 $output->writeln('QSV is now disabled');
             } else {
+                $output->writeln("\nQSV is now enabled. You may still need to install the Intel Media Driver");
+                $output->writeln("and ensure proper permissions for /dev/dri/renderD128.");
+                $output->writeln('See the documentation for more details.');
                 $this->config->setSystemValue('memories.qsv', true);
             }
         } else {
