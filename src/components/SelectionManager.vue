@@ -297,6 +297,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
     this.rows[rowIdx].virtualSticky = true;
 
     this.resetTouchParams();
+    document.body.classList.add("vue-touching");
 
     this.touchAnchor = photo;
     this.prevOver = photo;
@@ -314,6 +315,10 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
     if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
     delete this.rows[rowIdx].virtualSticky;
     this.resetTouchParams();
+
+    window.setTimeout(() => {
+      if (!this.touchAnchor) document.body.classList.remove("vue-touching");
+    }, 1000);
   }
 
   private resetTouchParams() {

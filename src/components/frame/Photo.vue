@@ -6,7 +6,6 @@
       placeholder: data.flag & c.FLAG_PLACEHOLDER,
       leaving: data.flag & c.FLAG_LEAVING,
       error: data.flag & c.FLAG_LOAD_FAIL,
-      hasTouch: hasTouch,
     }"
   >
     <CheckCircle
@@ -72,7 +71,6 @@ export default class Photo extends Mixins(GlobalMixin) {
   private touchTimer = 0;
   private src = null;
   private hasFaceRect = false;
-  private hasTouch = false;
 
   @Prop() data: IPhoto;
   @Prop() day: IDay;
@@ -199,26 +197,11 @@ export default class Photo extends Mixins(GlobalMixin) {
     this.emitSelect(this.data);
   }
 
-  touchstart() {
-    this.hasTouch = true;
-    this.touchTimer = window.setTimeout(() => {
-      this.toggleSelect();
-      this.touchTimer = 0;
-    }, 600);
-  }
-
   contextmenu(e: Event) {
-    // on mobile only
-    // if (this.hasTouch) {
-    e.preventDefault();
-    e.stopPropagation();
-    // }
-  }
-
-  touchend() {
-    if (this.touchTimer) {
-      clearTimeout(this.touchTimer);
-      this.touchTimer = 0;
+    // user is trying to select the photo
+    if (document.body.classList.contains("vue-touching")) {
+      e.preventDefault();
+      e.stopPropagation();
     }
   }
 }
@@ -265,7 +248,7 @@ $icon-size: $icon-half-size * 2;
   cursor: pointer;
 
   display: none;
-  .p-outer:not(.hasTouch):hover > & {
+  body:not(.vue-touching) .p-outer:hover > & {
     display: flex;
   }
 
@@ -367,7 +350,7 @@ div.img-outer {
 
     display: none;
     transition: border-radius 0.1s ease-in;
-    .p-outer:not(.hasTouch):not(.selected):hover > & {
+    body:not(.vue-touching) .p-outer:not(.selected):hover > & {
       display: block;
     }
   }
