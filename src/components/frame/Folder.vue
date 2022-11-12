@@ -135,6 +135,10 @@ export default class Folder extends Mixins(GlobalMixin, UserConfig) {
     line-height: 1em;
     position: absolute;
     top: 65%;
+
+    @media (max-width: 768px) {
+      font-size: 0.95em;
+    }
   }
 
   // Make it white if there is a preview
