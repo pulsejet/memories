@@ -1,4 +1,5 @@
 { "translations": {
+    "Settings" : "Stillingar",
     "Timeline" : "Tímalína",
     "Folders" : "Möppur",
     "Favorites" : "Eftirlæti",
@@ -8,7 +9,6 @@
     "On this day" : "Á þessum degi",
     "Tags" : "Merki",
     "Maps" : "Landakort",
-    "Settings" : "Stillingar",
     "Unsaved changes" : "Óvistaðar breytingar",
     "Edit" : "Breyta",
     "Loading …" : "Hleð inn …",

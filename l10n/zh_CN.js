@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "设置",
     "Timeline" : "时间线",
     "Folders" : "文件夹",
     "Favorites" : "收藏",
@@ -11,7 +12,6 @@ OC.L10N.register(
     "On this day" : "当年今日",
     "Tags" : "标签",
     "Maps" : "地图",
-    "Settings" : "设置",
     "Unsaved changes" : "未保存的更改",
     "Edit" : "编辑",
     "Loading …" : "正在加载 …",

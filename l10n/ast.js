@@ -1,13 +1,13 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Settings",
     "Folders" : "Carpetes",
     "Favorites" : "Favorites",
     "Videos" : "Vídeos",
     "Archive" : "Archivu",
     "Tags" : "Etiquetes",
     "Maps" : "Mapes",
-    "Settings" : "Settings",
     "Edit" : "Editar",
     "Loading …" : "Cargando...",
     "Cancel" : "Encaboxar",

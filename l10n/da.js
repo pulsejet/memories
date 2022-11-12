@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Minder",
     "Yet another photo management app" : "Endnu en fotostyringsapp",
+    "Settings" : "Indstillinger",
     "Timeline" : "Tidslinje",
     "Folders" : "Mapper",
     "Favorites" : "Favoritter",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "On this day" : "På denne dag",
     "Tags" : "Mærker",
     "Maps" : "Kort",
-    "Settings" : "Indstillinger",
     "Unsaved changes" : "Ikke gemte ændringer",
     "Edit" : "Redigér",
     "Loading …" : "Loading …",

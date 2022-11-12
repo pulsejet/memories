@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Memórias",
     "Yet another photo management app" : "Mais um aplicativo de gerenciamento de fotos",
+    "Settings" : "Configurações",
     "Timeline" : "Linha do tempo",
     "Folders" : "Pastas",
     "Favorites" : "Favoritos",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "On this day" : "Nesse dia",
     "Tags" : "Etiquetas",
     "Maps" : "Mapas",
-    "Settings" : "Configurações",
     "A better photos experience awaits you" : "Uma melhor experiência de fotos espera por você",
     "Choose the root folder of your timeline to begin" : "Escolha a pasta raiz da sua linha do tempo para começar",
     "If you just installed Memories, run:" : "Se você acabou de instalar o Memórias, execute:",

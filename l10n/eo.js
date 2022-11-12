@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Agordoj",
     "Timeline" : "Kronologio",
     "Folders" : "Dosierujoj",
     "Favorites" : "Plej ŝatataj",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "Archive" : "Arĥivujo",
     "Tags" : "Etikedoj",
     "Maps" : "Mapoj",
-    "Settings" : "Agordoj",
     "Unsaved changes" : "Nekonservitaj ŝanĝoj",
     "Edit" : "Modifi",
     "Loading …" : "Ŝargas …",

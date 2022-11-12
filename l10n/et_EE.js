@@ -1,13 +1,13 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Seaded",
     "Folders" : "Kaustad",
     "Favorites" : "Lemmikud",
     "Videos" : "Videod",
     "Archive" : "Arhiiv",
     "Tags" : "Sildid",
     "Maps" : "Kaardid",
-    "Settings" : "Seaded",
     "Unsaved changes" : "Salvestamata muutused",
     "Edit" : "Redigeeri",
     "Cancel" : "Loobu",

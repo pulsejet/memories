@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Ajustes",
     "Folders" : "Carpetas",
     "Favorites" : "Favoritos",
     "Videos" : "Videos",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "On this day" : "En este día",
     "Tags" : "Etiquetas",
     "Maps" : "Mapas",
-    "Settings" : "Ajustes",
     "Edit" : "Editar",
     "Loading …" : "Cargando …",
     "Cancel" : "Cancelar",

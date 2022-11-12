@@ -1,10 +1,10 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "සැකසුම්",
     "Favorites" : "ප්‍රියතම",
     "Archive" : "සංරක්ෂණය",
     "Maps" : "සිතියම්",
-    "Settings" : "සැකසුම්",
     "Edit" : "සංස්කරණය",
     "Loading …" : "පූරණය වෙමින් …",
     "Cancel" : "අවලංගු කරන්න",

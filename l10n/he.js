@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "הגדרות",
     "Timeline" : "ציר זמן",
     "Folders" : "תיקייה",
     "Favorites" : "מועדפים",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "Archive" : "לארכיון",
     "Tags" : "תגיות",
     "Maps" : "מפות",
-    "Settings" : "הגדרות",
     "Unsaved changes" : "שינויים שלא נשמרו",
     "Edit" : "עריכה",
     "Loading …" : "בטעינה…",

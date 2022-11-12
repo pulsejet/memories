@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Paràmetres",
     "Timeline" : "Línia de temps",
     "Folders" : "Carpetes",
     "Favorites" : "Preferits",
@@ -11,7 +12,6 @@ OC.L10N.register(
     "On this day" : "Aquest mateix dia",
     "Tags" : "Etiquetes",
     "Maps" : "Mapes",
-    "Settings" : "Paràmetres",
     "Error saving image" : "S'ha produït un error en desar la imatge",
     "Unsaved changes" : "Canvis sense desar",
     "Drop changes" : "Elimina els canvis",

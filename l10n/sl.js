@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Nastavitve",
     "Timeline" : "Časovnica",
     "Folders" : "Mape",
     "Favorites" : "Priljubljeno",
@@ -11,7 +12,6 @@ OC.L10N.register(
     "On this day" : "Na današnji dan",
     "Tags" : "Oznake",
     "Maps" : "Zemljevidi",
-    "Settings" : "Nastavitve",
     "Unsaved changes" : "Neshranjene spremembe",
     "Edit" : "Uredi",
     "Loading …" : "Poteka nalaganje …",

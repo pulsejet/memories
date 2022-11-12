@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Спогади",
     "Yet another photo management app" : "Іще один застосунок для роботи зі світлинами",
+    "Settings" : "Налаштування",
     "Timeline" : "Дії",
     "Folders" : "Каталоги",
     "Favorites" : "Із зірочкою",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "On this day" : "Цього дня",
     "Tags" : "Мітки",
     "Maps" : "Мапи",
-    "Settings" : "Налаштування",
     "A better photos experience awaits you" : "На вас чекає краща якість фотографій",
     "Choose the root folder of your timeline to begin" : "Виберіть кореневу папку вашої шкали часу для початку ",
     "Error saving image" : "Помилка збереження зображення",

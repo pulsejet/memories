@@ -1,10 +1,10 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Innstillingar",
     "Favorites" : "Favorittar",
     "Videos" : "Video",
     "Tags" : "Emneord",
-    "Settings" : "Innstillingar",
     "Edit" : "Rediger",
     "Cancel" : "Avbryt",
     "Delete" : "Slett",

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Impostatziones",
     "Timeline" : "Lìnia de tempus",
     "Folders" : "Cartellas",
     "Favorites" : "Preferidos",
@@ -10,7 +11,6 @@ OC.L10N.register(
     "Archive" : "Cartella",
     "Tags" : "Etichetas",
     "Maps" : "Mapas",
-    "Settings" : "Impostatziones",
     "Unsaved changes" : "Mudas non sarvadas",
     "Edit" : "Modìfica",
     "Loading …" : "Carrigamentu …",

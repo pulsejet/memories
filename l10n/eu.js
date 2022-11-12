@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Memoriak",
     "Yet another photo management app" : "Beste argazki kudeatze aplikazio bat",
+    "Settings" : "Ezarpenak",
     "Timeline" : "Denbora-lerroa",
     "Folders" : "Karpetak",
     "Favorites" : "Gogokoak",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "On this day" : "Egun honetan",
     "Tags" : "Etiketak",
     "Maps" : "Mapak",
-    "Settings" : "Ezarpenak",
     "Error saving image" : "Errorea irudia gordetzean",
     "Unsaved changes" : "Gorde gabeko aldaketak",
     "Drop changes" : "Jaregin aldaketak",

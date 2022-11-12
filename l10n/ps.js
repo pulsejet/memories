@@ -1,9 +1,9 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "سمونې",
     "Favorites" : "په نښه شوي",
     "Tags" : "نښکې",
-    "Settings" : "سمونې",
     "Cancel" : "پرېښول",
     "Delete" : "ړنګول",
     "Download" : "ښکته کول",

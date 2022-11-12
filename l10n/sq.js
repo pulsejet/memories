@@ -1,13 +1,13 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Rregullimet",
     "Folders" : "Dosjet",
     "Favorites" : "Favorites",
     "Videos" : "Videot",
     "Archive" : "Arkiva",
     "Tags" : "Etiketat",
     "Maps" : "Harta",
-    "Settings" : "Rregullimet",
     "Unsaved changes" : "Ndryshime të paruajtura",
     "Edit" : "Përpuno",
     "Cancel" : "Anullo",
