@@ -98,7 +98,12 @@
               :day="item.day"
               :key="photo.fileid"
               @select="selectionManager.selectPhoto"
-              @click="clickPhoto(photo, $event, index)"
+              @mousedown="selectionManager.clickPhoto(photo, $event, index)"
+              @touchstart="
+                selectionManager.touchstartPhoto(photo, $event, index)
+              "
+              @touchend="selectionManager.touchendPhoto(photo, $event, index)"
+              @touchmove="selectionManager.touchmovePhoto(photo, $event, index)"
             />
           </div>
         </template>
@@ -117,6 +122,7 @@
     <SelectionManager
       ref="selectionManager"
       :heads="heads"
+      :rows="list"
       :isreverse="isMonthView"
       @refresh="softRefresh"
       @delete="deleteFromViewWithAnimation"
@@ -1191,24 +1197,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     day.rows.push(row);
 
     return row;
-  }
-
-  /** Clicking on photo */
-  clickPhoto(photo: IPhoto, event: any, rowIdx: number) {
-    if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
-
-    if (this.selectionManager.has()) {
-      if (event.shiftKey) {
-        this.selectionManager.selectMulti(photo, this.list, rowIdx);
-      } else {
-        this.selectionManager.selectPhoto(photo);
-      }
-    } else {
-      this.$router.push({
-        ...this.$route,
-        hash: utils.getViewerHash(photo),
-      });
-    }
   }
 
   /**

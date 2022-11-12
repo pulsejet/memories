@@ -28,11 +28,11 @@
     <div
       class="img-outer fill-block"
       @contextmenu="contextmenu"
-      @mousedown.passive="emitClick"
-      @touchstart.passive="touchstart"
-      @touchmove.passive="touchend"
-      @touchend.passive="touchend"
-      @touchcancel.passive="touchend"
+      @mousedown="$emit('mousedown', $event)"
+      @touchstart.passive="$emit('touchstart', $event)"
+      @touchmove="$emit('touchmove', $event)"
+      @touchend.passive="$emit('touchend', $event)"
+      @touchcancel.passive="$emit('touchend', $event)"
     >
       <img
         ref="img"
@@ -78,7 +78,6 @@ export default class Photo extends Mixins(GlobalMixin) {
   @Prop() day: IDay;
 
   @Emit("select") emitSelect(data: IPhoto) {}
-  @Emit("click") emitClick() {}
 
   @Watch("data")
   onDataChange(newData: IPhoto, oldData: IPhoto) {
@@ -210,10 +209,10 @@ export default class Photo extends Mixins(GlobalMixin) {
 
   contextmenu(e: Event) {
     // on mobile only
-    if (this.hasTouch) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+    // if (this.hasTouch) {
+    e.preventDefault();
+    e.stopPropagation();
+    // }
   }
 
   touchend() {
