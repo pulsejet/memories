@@ -50,10 +50,10 @@ trait TimelineQueryPeopleFaceRecognition
     {
         // Include detection params in response
         $query->addSelect(
-            'frf.left AS face_l',
-            'frf.top AS face_t',
-            'frf.right AS face_r',
-            'frf.bottom AS face_b',
+            'frf.x AS face_x',
+            'frf.y AS face_y',
+            'frf.width AS face_w',
+            'frf.height AS face_h',
             'm.w AS image_width',
             'm.h AS image_height',
         );
@@ -122,10 +122,10 @@ trait TimelineQueryPeopleFaceRecognition
         // SELECT face detections
         $query->select(
             'fri.file as file_id',      // Get actual file
-            'frf.left',                 // Image cropping
-            'frf.top',
-            'frf.right',
-            'frf.bottom',
+            'frf.x',                    // Image cropping
+            'frf.y',
+            'frf.width',
+            'frf.height',
             'm.w as image_width',       // Scoring
             'm.h as image_height',
             'frf.confidence',
@@ -175,10 +175,10 @@ trait TimelineQueryPeopleFaceRecognition
             $ih = min((int) ($p['image_height'] ?: 512), 2048);
 
             // Get percentage position and size
-            $p['x'] = (float) $p['left'] / $p['image_width'];
-            $p['y'] = (float) $p['top'] / $p['image_height'];
-            $p['width'] = (float) ($p['right'] - $p['left']) / $iw;
-            $p['height'] = (float) ($p['bottom'] - $p['top']) / $ih;
+            $p['x'] = (float) $p['x'] / $p['image_width'];
+            $p['y'] = (float) $p['y'] / $p['image_height'];
+            $p['width'] = (float) $p['width'] / $iw;
+            $p['height'] = (float) ($p['height'] - $p['top']) / $ih;
 
             $w = (float) $p['width'];
             $h = (float) $p['height'];
@@ -219,13 +219,13 @@ trait TimelineQueryPeopleFaceRecognition
         if (!$days) {
             $row['facerect'] = [
                 // Get percentage position and size
-                'w' => (float) ($row['face_r'] - $row['face_l']) / $row['image_width'],
-                'h' => (float) ($row['face_b'] - $row['face_t']) / $row['image_height'],
-                'x' => (float) $row['face_l'] / $row['image_width'],
-                'y' => (float) $row['face_t'] / $row['image_height'],
+                'w' => (float) $row['face_w'] / $row['image_width'],
+                'h' => (float) $row['face_h'] / $row['image_height'],
+                'x' => (float) $row['face_x'] / $row['image_width'],
+                'y' => (float) $row['face_y'] / $row['image_height'],
             ];
         }
 
-        unset($row['face_l'], $row['face_r'], $row['face_t'], $row['face_b'], $row['image_height'], $row['image_width']);
+        unset($row['face_x'], $row['face_y'], $row['face_w'], $row['face_h'], $row['image_height'], $row['image_width']);
     }
 }
