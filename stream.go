@@ -313,7 +313,8 @@ func (s *Stream) transcode(startId int) {
 	if s.quality != "max" {
 		args = append(args, []string{
 			"-vf", scale,
-			"-b:v", fmt.Sprintf("%dk", s.bitrate/1000),
+			"-maxrate", fmt.Sprintf("%dk", s.bitrate/1000),
+			"-bufsize", fmt.Sprintf("%dK", s.bitrate/1000),
 			"-profile:v", "high",
 		}...)
 	}
