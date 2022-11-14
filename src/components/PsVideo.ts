@@ -269,26 +269,10 @@ class VideoContentSetup {
       qualityNums.unshift(0);
     }
 
-    // Create a second container element to append the video
-    // temporarily, so we can put the plyr controls there. This is
-    // required because controls have to fill the entire space
-    const plyr = new Plyr(content.videoElement, {
+    // Create the plyr instance
+    const opts: Plyr.Options = {
       iconUrl: <any>plyrsvg,
-      quality: !qualityNums
-        ? undefined
-        : {
-            default: 0,
-            options: qualityNums,
-            forced: true,
-            onChange: (quality: number) => {
-              if (!qualityList || !content.videojs) return;
-              for (let i = 0; i < qualityList.length; ++i) {
-                const { width, height } = qualityList[i];
-                const pixels = Math.min(width, height);
-                qualityList[i].enabled = pixels === quality || !quality;
-              }
-            },
-          },
+      blankVideo: "",
       i18n: {
         qualityLabel: {
           0: t("memories", "Auto"),
@@ -298,7 +282,25 @@ class VideoContentSetup {
         enabled: true,
         container: ".pswp__item",
       },
-    });
+    };
+
+    if (qualityNums) {
+      opts.quality = {
+        default: 0,
+        options: qualityNums,
+        forced: true,
+        onChange: (quality: number) => {
+          if (!qualityList || !content.videojs) return;
+          for (let i = 0; i < qualityList.length; ++i) {
+            const { width, height } = qualityList[i];
+            const pixels = Math.min(width, height);
+            qualityList[i].enabled = pixels === quality || !quality;
+          }
+        },
+      };
+    }
+
+    const plyr = new Plyr(content.videoElement, opts);
     plyr.elements.container.style.height = "100%";
     plyr.elements.container.style.width = "100%";
     plyr.elements.container
