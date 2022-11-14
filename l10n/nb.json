@@ -72,6 +72,7 @@
     "Save image as" : "Lagre bilde som",
     "Extension" : "Filetternavn",
     "Name is required." : "Navn er påkrevd.",
-    "Quality" : "Kvalitet"
+    "Quality" : "Kvalitet",
+    "Auto" : "Auto"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

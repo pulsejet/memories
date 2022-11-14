@@ -196,6 +196,7 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Beachte, dass der ausgewählte Zuschneidebereich kleiner ist als die angewendete Größenänderung, was zu Qualitätseinbußen führen kann.",
     "Actual size (100%)" : "Tatsächliche Größe (100%)",
     "Fit size" : "Größe anpassen",
+    "Auto" : "Automatisch",
     "Failed to create {albumName}." : "{albumName} konnte nicht erstellt werden.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "{currentAlbumName} konnte nicht in {newAlbumName} umbenannt werden.",
     "General Failure" : "Allgemeiner Fehler",

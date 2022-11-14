@@ -221,6 +221,7 @@ OC.L10N.register(
     "Actual size (100%)" : "實際大小 (100%)",
     "Fit size" : "調整大小",
     "Transcoding failed." : "轉碼失敗。",
+    "Auto" : "自動",
     "Shared Folder" : "分享資料夾",
     "Failed to create {albumName}." : "創建 {albumName} 失敗。",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "重新命名 {currentAlbumName} 為 {newAlbumName} 失敗。",

@@ -34,6 +34,7 @@
     "Text" : "Teksto",
     "Size" : "Grando",
     "Position" : "Loko",
-    "Extension" : "Dosiersufikso"
+    "Extension" : "Dosiersufikso",
+    "Auto" : "Aŭtomate"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

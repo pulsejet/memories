@@ -76,6 +76,7 @@ OC.L10N.register(
     "Extension" : "Расширение",
     "Name is required." : "Необходимо указать имя.",
     "Quality" : "Качество",
+    "Auto" : "Автоматически",
     "Failed to delete files." : "Ошибка удаления файлов.",
     "Failed to delete {fileName}." : "Ошибка удаления файла «{fileName}».",
     "Failed to favorite files." : "Не удалось добавить файлы в избранное.",

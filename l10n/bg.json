@@ -215,6 +215,7 @@
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Обърнете внимание, че избраната област за изрязване е по-ниска от приложеното преоразмеряване, което може да доведе до влошаване на качеството",
     "Actual size (100%)" : "Действителен размер (100%)",
     "Fit size" : "Подходящ размер",
+    "Auto" : "Автоматично",
     "Shared Folder" : "Споделена папка",
     "Failed to create {albumName}." : "Неуспешно създаване на {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Неуспешно преименуване от {currentAlbumName} на {newAlbumName}.",

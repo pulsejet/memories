@@ -53,6 +53,7 @@ OC.L10N.register(
     "Position" : "Positie",
     "Extension" : "Extensie",
     "Name is required." : "Naam is verplicht.",
-    "Quality" : "Kwaliteit"
+    "Quality" : "Kwaliteit",
+    "Auto" : "Automatisch"
 },
 "nplurals=2; plural=(n != 1);");

@@ -73,6 +73,7 @@ OC.L10N.register(
     "Position" : "位置",
     "Extension" : "拡張",
     "Name is required." : "名前は必須です。",
-    "Quality" : "品質"
+    "Quality" : "品質",
+    "Auto" : "自動"
 },
 "nplurals=1; plural=0;");

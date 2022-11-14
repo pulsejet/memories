@@ -49,6 +49,7 @@ OC.L10N.register(
     "Size" : "Altura",
     "Name is required." : "Nome é obrigatório.",
     "Quality" : "Qualidade",
+    "Auto" : "Auto",
     "Failed to delete files." : "Não foi possível eliminar os ficheiros.",
     "Failed to delete {fileName}." : "Não foi possível eliminar {fileName}.",
     "Failed to favorite files." : "Não foi possível colocar os ficheiros nos favoritos.",

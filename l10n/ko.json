@@ -41,6 +41,7 @@
     "Size" : "크기",
     "Position" : "위치",
     "Extension" : "확장자",
-    "Quality" : "품질"
+    "Quality" : "품질",
+    "Auto" : "자동"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

@@ -51,6 +51,7 @@
     "Position" : "Positie",
     "Extension" : "Extensie",
     "Name is required." : "Naam is verplicht.",
-    "Quality" : "Kwaliteit"
+    "Quality" : "Kwaliteit",
+    "Auto" : "Automatisch"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
