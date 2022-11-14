@@ -6,6 +6,7 @@ use OCA\Files\Event\LoadSidebar;
 use OCP\App\IAppManager;
 use OCP\AppFramework\AuthPublicShareController;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\EventDispatcher\IEventDispatcher;
@@ -121,7 +122,7 @@ class PublicController extends AuthPublicShareController
         $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
         $policy->addAllowedFrameDomain('www.openstreetmap.org');
 
-        $response = new TemplateResponse($this->appName, 'main');
+        $response = new PublicTemplateResponse($this->appName, 'main');
         $response->setContentSecurityPolicy($policy);
 
         return $response;
