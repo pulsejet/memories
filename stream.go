@@ -313,11 +313,16 @@ func (s *Stream) transcode(startId int) {
 	}
 
 	// do not scale or set bitrate for full quality
-	if s.quality != "max" {
+	if s.quality == "max" {
+		args = append(args, []string{
+			"-crf", "22",
+		}...)
+	} else {
 		args = append(args, []string{
 			"-vf", scale,
-			"-maxrate", fmt.Sprintf("%dk", s.bitrate/1000),
-			"-bufsize", fmt.Sprintf("%dK", s.bitrate/1000),
+			"-crf", "24",
+			"-maxrate", fmt.Sprintf("%d", s.bitrate),
+			"-bufsize", fmt.Sprintf("%d", s.bitrate*2),
 		}...)
 	}
 
