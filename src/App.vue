@@ -199,6 +199,7 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
     const colorPrimary =
       getComputedStyle(root).getPropertyValue("--color-primary");
     root.style.setProperty("--color-primary-select-light", `${colorPrimary}40`);
+    root.style.setProperty("--plyr-color-main", colorPrimary);
 
     // Register sidebar metadata tab
     const OCA = globalThis.OCA;

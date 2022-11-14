@@ -20,15 +20,16 @@
           container=".memories_viewer .pswp"
         >
           <NcActionButton
+            v-if="canShare"
             :aria-label="t('memories', 'Share')"
             @click="shareCurrent"
             :close-after-click="true"
-            v-if="canShare"
           >
             {{ t("memories", "Share") }}
             <template #icon> <ShareIcon :size="24" /> </template>
           </NcActionButton>
           <NcActionButton
+            v-if="!routeIsPublic"
             :aria-label="t('memories', 'Delete')"
             @click="deleteCurrent"
             :close-after-click="true"
@@ -37,6 +38,7 @@
             <template #icon> <DeleteIcon :size="24" /> </template>
           </NcActionButton>
           <NcActionButton
+            v-if="!routeIsPublic"
             :aria-label="t('memories', 'Favorite')"
             @click="favoriteCurrent"
             :close-after-click="true"
@@ -48,6 +50,7 @@
             </template>
           </NcActionButton>
           <NcActionButton
+            v-if="!routeIsPublic"
             :aria-label="t('memories', 'Sidebar')"
             @click="toggleSidebar"
             :close-after-click="true"
@@ -58,8 +61,8 @@
             </template>
           </NcActionButton>
           <NcActionButton
+            v-if="canEdit && !routeIsPublic"
             :aria-label="t('memories', 'Edit')"
-            v-if="canEdit"
             @click="openEditor"
             :close-after-click="true"
           >
@@ -79,6 +82,7 @@
             </template>
           </NcActionButton>
           <NcActionButton
+            v-if="!routeIsPublic"
             :aria-label="t('memories', 'View in folder')"
             @click="viewInFolder"
             :close-after-click="true"
@@ -193,6 +197,11 @@ export default class Viewer extends Mixins(GlobalMixin) {
     } else {
       return Math.min(base, 5);
     }
+  }
+
+  /** Route is public */
+  get routeIsPublic() {
+    return this.$route.name === "folder-share";
   }
 
   /** Update the document title */
@@ -832,6 +841,13 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
 :deep .video-js .vjs-big-play-button {
   display: none;
+}
+
+:deep .plyr__volume {
+  // Cannot be vertical yet :(
+  @media (max-width: 768px) {
+    display: none;
+  }
 }
 
 :deep .pswp {

@@ -6,10 +6,13 @@ import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
 import { getCurrentUser } from "@nextcloud/auth";
 
+import Plyr from "plyr";
+import "plyr/dist/plyr.css";
+import plyrsvg from "../assets/plyr.svg";
+
 import videojs from "video.js";
 import "video.js/dist/video-js.min.css";
 import "videojs-contrib-quality-levels";
-import "videojs-hls-quality-selector";
 
 const config_noTranscode = loadState(
   "memories",
@@ -75,7 +78,7 @@ class VideoContentSetup {
             origEvent.clientX,
             origEvent.clientY
           );
-          if (elems.some((el) => el.classList.contains("vjs-control-bar"))) {
+          if (elems.some((el) => el.classList.contains("plyr__controls"))) {
             e.preventDefault();
             return;
           }
@@ -139,8 +142,11 @@ class VideoContentSetup {
         );
       }
     }
+
+    // Add the video element to the actual container
     content.element.appendChild(content.videoElement);
 
+    // Get file id
     const fileid = content.data.photo.fileid;
 
     // Create hls sources if enabled
@@ -164,7 +170,7 @@ class VideoContentSetup {
     content.videojs = videojs(content.videoElement, {
       fill: true,
       autoplay: true,
-      controls: true,
+      controls: false,
       sources: sources,
       preload: "metadata",
       playbackRates: [0.5, 1, 1.5, 2],
@@ -198,27 +204,15 @@ class VideoContentSetup {
       }
     });
 
-    content.videojs.qualityLevels();
-    content.videojs.hlsQualitySelector({
-      displayCurrentQuality: true,
-    });
-
     setTimeout(() => {
-      content.videojs
-        .contentEl()
-        .querySelectorAll("button")
-        .forEach((b: HTMLButtonElement) => {
-          b.classList.add("button-vue");
-        });
-
-      // iOS needs this
-      content.videojs.play();
-    }, 500);
+      content.videojs.play(); // iOS needs this
+    }, 200);
 
     let canPlay = false;
-    content.videojs.on("canplay", () => {
+    content.videojs.on("loadedmetadata", () => {
       canPlay = true;
-      this.updateRotation(content);
+      this.updateRotation(content); // also gets the correct video elem as a side effect
+      this.initPlyr(content);
     });
 
     // Get correct orientation
@@ -242,6 +236,10 @@ class VideoContentSetup {
       content.videojs.dispose();
       content.videojs = null;
 
+      content.plyr?.elements?.container?.remove();
+      content.plyr?.destroy();
+      content.plyr = null;
+
       const elem: HTMLDivElement = content.element;
       while (elem.lastElementChild) {
         elem.removeChild(elem.lastElementChild);
@@ -250,10 +248,81 @@ class VideoContentSetup {
     }
   }
 
-  updateRotation(content, val?: number) {
-    if (!content.videojs || !content.videoElement) {
-      return;
+  initPlyr(content: any) {
+    if (content.plyr) return;
+
+    // Retain original parent for video element
+    const origParent = content.videoElement.parentElement;
+
+    // Populate quality list
+    const qualityList = content.videojs?.qualityLevels();
+    let qualityNums: number[];
+    if (qualityList && qualityList.length > 1) {
+      const s = new Set<number>();
+      for (let i = 0; i < qualityList?.length; i++) {
+        const { width, height } = qualityList[i];
+        s.add(Math.min(width, height));
+      }
+      qualityNums = Array.from(s).sort((a, b) => b - a);
+      qualityNums.unshift(0);
     }
+
+    // Create the plyr instance
+    const opts: Plyr.Options = {
+      iconUrl: <any>plyrsvg,
+      blankVideo: "",
+      i18n: {
+        qualityLabel: {
+          0: t("memories", "Auto"),
+        },
+      },
+      fullscreen: {
+        enabled: true,
+        container: ".pswp__item",
+      },
+    };
+
+    if (qualityNums) {
+      opts.quality = {
+        default: 0,
+        options: qualityNums,
+        forced: true,
+        onChange: (quality: number) => {
+          if (!qualityList || !content.videojs) return;
+          for (let i = 0; i < qualityList.length; ++i) {
+            const { width, height } = qualityList[i];
+            const pixels = Math.min(width, height);
+            qualityList[i].enabled = pixels === quality || !quality;
+          }
+        },
+      };
+    }
+
+    const plyr = new Plyr(content.videoElement, opts);
+    plyr.elements.container.style.height = "100%";
+    plyr.elements.container.style.width = "100%";
+    plyr.elements.container
+      .querySelectorAll("button")
+      .forEach((el) => el.classList.add("button-vue"));
+    plyr.elements.container
+      .querySelectorAll("progress")
+      .forEach((el) => el.classList.add("vue"));
+    plyr.elements.container.style.backgroundColor = "transparent";
+    plyr.elements.wrapper.style.backgroundColor = "transparent";
+
+    content.plyr = plyr;
+
+    // Restore original parent of video element
+    origParent.appendChild(content.videoElement);
+    // Move plyr to the slide container
+    content.slide.holderElement.appendChild(plyr.elements.container);
+  }
+
+  updateRotation(content, val?: number) {
+    if (!content.videojs) return;
+
+    content.videoElement = content.videojs.el()?.querySelector("video");
+    if (!content.videoElement) return;
 
     const rotation = val ?? Number(content.data.exif?.Rotation);
     const shouldRotate = content.videojs?.src().includes("m3u8");
