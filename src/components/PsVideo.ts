@@ -205,16 +205,8 @@ class VideoContentSetup {
     });
 
     setTimeout(() => {
-      content.videojs
-        .contentEl()
-        .querySelectorAll("button")
-        .forEach((b: HTMLButtonElement) => {
-          b.classList.add("button-vue");
-        });
-
-      // iOS needs this
-      content.videojs.play();
-    }, 500);
+      content.videojs.play(); // iOS needs this
+    }, 200);
 
     let canPlay = false;
     content.videojs.on("canplay", () => {
@@ -280,8 +272,6 @@ class VideoContentSetup {
     // Create a second container element to append the video
     // temporarily, so we can put the plyr controls there. This is
     // required because controls have to fill the entire space
-    // const pc = document.createElement("div");
-    // pc.appendChild(content.videoElement);
     const plyr = new Plyr(content.videoElement, {
       iconUrl: <any>plyrsvg,
       quality: !qualityNums
@@ -304,6 +294,10 @@ class VideoContentSetup {
           0: t("memories", "Auto"),
         },
       },
+      fullscreen: {
+        enabled: true,
+        container: ".pswp__item",
+      },
     });
     plyr.elements.container.style.height = "100%";
     plyr.elements.container.style.width = "100%";
@@ -317,7 +311,6 @@ class VideoContentSetup {
     plyr.elements.wrapper.style.backgroundColor = "transparent";
 
     content.plyr = plyr;
-    globalThis.plyr = plyr;
 
     // Restore original parent of video element
     origParent.appendChild(content.videoElement);
