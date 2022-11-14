@@ -284,9 +284,7 @@ func (s *Stream) transcode(startId int) {
 	CV := "libx264"
 
 	// no need to transcode h264 streams for max quality
-	if s.quality == "max" && s.m.probe.CodecName == "h264" {
-		CV = "copy"
-	} else if os.Getenv("VAAPI") == "1" {
+	if os.Getenv("VAAPI") == "1" {
 		CV = "h264_vaapi"
 		extra := "-hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format vaapi"
 		args = append(args, strings.Split(extra, " ")...)
@@ -315,13 +313,13 @@ func (s *Stream) transcode(startId int) {
 			"-vf", scale,
 			"-maxrate", fmt.Sprintf("%dk", s.bitrate/1000),
 			"-bufsize", fmt.Sprintf("%dK", s.bitrate/1000),
-			"-profile:v", "high",
 		}...)
 	}
 
 	// Output specs
 	args = append(args, []string{
 		"-c:v", CV,
+		"-profile:v", "high",
 	}...)
 
 	// Device specific output args
