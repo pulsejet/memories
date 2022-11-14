@@ -78,7 +78,7 @@ class VideoContentSetup {
             origEvent.clientX,
             origEvent.clientY
           );
-          if (elems.some((el) => el.classList.contains("vjs-control-bar"))) {
+          if (elems.some((el) => el.classList.contains("plyr__controls"))) {
             e.preventDefault();
             return;
           }
