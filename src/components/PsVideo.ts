@@ -209,11 +209,9 @@ class VideoContentSetup {
     }, 200);
 
     let canPlay = false;
-    content.videojs.on("canplay", () => {
-      canPlay = true;
-      this.updateRotation(content);
-    });
     content.videojs.on("loadedmetadata", () => {
+      canPlay = true;
+      this.updateRotation(content); // also gets the correct video elem as a side effect
       this.initPlyr(content);
     });
 
@@ -238,8 +236,8 @@ class VideoContentSetup {
       content.videojs.dispose();
       content.videojs = null;
 
-      content.plyr.elements.container.remove();
-      content.plyr.destroy();
+      content.plyr?.elements?.container?.remove();
+      content.plyr?.destroy();
       content.plyr = null;
 
       const elem: HTMLDivElement = content.element;
@@ -321,9 +319,10 @@ class VideoContentSetup {
   }
 
   updateRotation(content, val?: number) {
-    if (!content.videojs || !content.videoElement) {
-      return;
-    }
+    if (!content.videojs) return;
+
+    content.videoElement = content.videojs.el()?.querySelector("video");
+    if (!content.videoElement) return;
 
     const rotation = val ?? Number(content.data.exif?.Rotation);
     const shouldRotate = content.videojs?.src().includes("m3u8");
