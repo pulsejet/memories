@@ -54,6 +54,10 @@ A shout out to the current and past financial backers of Memories! See the spons
 
 [<img src="https://github.com/mpodshivalin.png" width="42" />](https://github.com/mpodshivalin)
 
+## Changelog
+
+For the full changelog, see [CHANGELOG.md](CHANGELOG.md).
+
 ## Special Thanks
 
 Nextcloud team. A lot of this work is based on [Photos](https://github.com/nextcloud/photos).
