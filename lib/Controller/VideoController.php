@@ -90,6 +90,11 @@ class VideoController extends ApiBase
                 return new JSONResponse(['message' => 'Transcoder not configured'], Http::STATUS_INTERNAL_SERVER_ERROR);
             }
 
+            // Make transcoder executable
+            if (!is_executable($transcoder)) {
+                chmod($transcoder, 0755);
+            }
+
             // Check for environment variables
             $vaapi = $this->config->getSystemValue('memories.qsv', false);
             $env = '';
