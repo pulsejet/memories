@@ -313,14 +313,9 @@ func (s *Stream) transcode(startId int) {
 	}
 
 	// do not scale or set bitrate for full quality
-	if s.quality == "max" {
-		args = append(args, []string{
-			"-crf", "22",
-		}...)
-	} else {
+	if s.quality != "max" {
 		args = append(args, []string{
 			"-vf", scale,
-			"-crf", "24",
 			"-maxrate", fmt.Sprintf("%d", s.bitrate),
 			"-bufsize", fmt.Sprintf("%d", s.bitrate*2),
 		}...)
@@ -336,11 +331,13 @@ func (s *Stream) transcode(startId int) {
 	if CV == "h264_vaapi" {
 		args = append(args, []string{
 			"-low_power", "1",
+			"-global_quality", "25",
 		}...)
 	} else if CV == "libx264" {
 		args = append(args, []string{
 			"-preset", "faster",
 			"-level:v", "4.0",
+			"-crf", "24",
 		}...)
 	}
 
