@@ -50,6 +50,10 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 1. **📝 Contribute**: Read and file or comment on an issue and ask for guidance.
 1. **🪙 Sponsorship**: You can support the project financially at [GitHub Sponsors](https://github.com/sponsors/pulsejet).
 
+A shout out to the current and past financial backers of Memories! See the sponsors page for a full list.
+
+[<img src="https://github.com/mpodshivalin.png" width="42" />](https://github.com/mpodshivalin)
+
 ## Special Thanks
 
 Nextcloud team. A lot of this work is based on [Photos](https://github.com/nextcloud/photos).
