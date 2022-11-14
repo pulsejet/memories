@@ -843,6 +843,13 @@ export default class Viewer extends Mixins(GlobalMixin) {
   display: none;
 }
 
+:deep .plyr__volume {
+  // Cannot be vertical yet :(
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
 :deep .pswp {
   .pswp__zoom-wrap {
     width: 100%;
