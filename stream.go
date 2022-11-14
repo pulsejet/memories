@@ -268,6 +268,11 @@ func (s *Stream) restartAtChunk(w http.ResponseWriter, id int) {
 }
 
 func (s *Stream) transcode(startId int) {
+	if startId > 0 {
+		// Start one frame before
+		// This ensures that the keyframes are aligned
+		startId--
+	}
 	startAt := float64(startId * s.c.chunkSize)
 
 	args := []string{
