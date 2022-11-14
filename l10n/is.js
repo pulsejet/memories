@@ -48,6 +48,7 @@ OC.L10N.register(
     "Position" : "Staða",
     "Extension" : "Skráarending",
     "Name is required." : "Nafn er nauðsynlegt.",
-    "Quality" : "Quality"
+    "Quality" : "Quality",
+    "Auto" : "Sjálfvirkt"
 },
 "nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);");

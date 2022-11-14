@@ -158,6 +158,7 @@ OC.L10N.register(
     "Quality" : "Laatu",
     "Actual size (100%)" : "Todellinen koko (100 %)",
     "Fit size" : "Sovita koko",
+    "Auto" : "Automaattinen",
     "Shared Folder" : "Jaa kansio",
     "Failed to create {albumName}." : "Albumin {albumName} luominen epäonnistui.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Albumin {currentAlbumName} nimen muuttaminen muotoon {newAlbumName} epäonnistui.",

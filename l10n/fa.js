@@ -37,6 +37,7 @@ OC.L10N.register(
     "Value" : "مقدار",
     "Text" : "متن",
     "Size" : "اندازه",
-    "Extension" : "گسترش"
+    "Extension" : "گسترش",
+    "Auto" : "خودکار"
 },
 "nplurals=2; plural=(n > 1);");

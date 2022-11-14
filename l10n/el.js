@@ -50,6 +50,7 @@ OC.L10N.register(
     "Position" : "Θέση",
     "Extension" : "Επέκταση",
     "Name is required." : "Απαιτείται όνομα.",
-    "Quality" : "Ποιότητα"
+    "Quality" : "Ποιότητα",
+    "Auto" : "Αυτόματα"
 },
 "nplurals=2; plural=(n != 1);");
