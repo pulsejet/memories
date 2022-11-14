@@ -74,6 +74,7 @@ OC.L10N.register(
     "Position" : "Posizione",
     "Extension" : "Estensione",
     "Name is required." : "Il nome è richiesto.",
-    "Quality" : "Qualità"
+    "Quality" : "Qualità",
+    "Auto" : "Automatico"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

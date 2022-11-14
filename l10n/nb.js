@@ -74,6 +74,7 @@ OC.L10N.register(
     "Save image as" : "Lagre bilde som",
     "Extension" : "Filetternavn",
     "Name is required." : "Navn er påkrevd.",
-    "Quality" : "Kvalitet"
+    "Quality" : "Kvalitet",
+    "Auto" : "Auto"
 },
 "nplurals=2; plural=(n != 1);");

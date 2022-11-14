@@ -36,6 +36,7 @@ OC.L10N.register(
     "Image" : "Hình ảnh",
     "Text" : "Văn bản",
     "Size" : "Kích cỡ",
-    "Name is required." : "Tên là bắt buộc."
+    "Name is required." : "Tên là bắt buộc.",
+    "Auto" : "Tự động"
 },
 "nplurals=1; plural=0;");

@@ -180,6 +180,7 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Upozorňujeme, že vybratá oblasť orezania je menšia ako použitá zmena veľkosti, čo môže spôsobiť zníženie kvality",
     "Actual size (100%)" : "Aktuálna veľkosť (100%)",
     "Fit size" : "Prispôsobiť veľlkosť",
+    "Auto" : "Automaticky",
     "Failed to create {albumName}." : "Zlyhalo vytváranie {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Chyba pri premenovávaní {currentAlbumName} na {newAlbumName}.",
     "General Failure" : "Všeobecné zlyhanie",

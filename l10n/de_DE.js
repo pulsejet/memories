@@ -221,6 +221,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Tatsächliche Größe (100%)",
     "Fit size" : "Größe anpassen",
     "Transcoding failed." : "Transkodierung fehlgeschlagen.",
+    "Auto" : "Automatisch",
     "Shared Folder" : "Geteilter Ordner",
     "Failed to create {albumName}." : "{albumName} konnte nicht erstellt werden.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "{currentAlbumName} konnte nicht in {newAlbumName} umbenannt werden.",

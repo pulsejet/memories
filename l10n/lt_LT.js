@@ -121,6 +121,7 @@ OC.L10N.register(
     "Position" : "Vieta",
     "Name is required." : "Vardas yra būtinas.",
     "Quality" : "Kokybė",
+    "Auto" : "Automatiškai",
     "Failed to create {albumName}." : "Nepavyko sukurti {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Nepavyko pervadinti {currentAlbumName} į {newAlbumName}.",
     "General Failure" : "Bendrinė nesėkmė",

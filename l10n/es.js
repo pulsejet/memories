@@ -218,6 +218,7 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Tenga en cuenta que el área a recortar es menor al redimensionamiento aplicado lo que puede causar pérdida de calidad",
     "Actual size (100%)" : "Tamaño actual (100%)",
     "Fit size" : "Ajustar tamaño",
+    "Auto" : "Auto",
     "Shared Folder" : "Carpeta compartida",
     "Failed to create {albumName}." : "Fallo al crear {albumName}",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Fallo al renombrar {currentAlbumName} a {newAlbumName}.",
