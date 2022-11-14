@@ -215,6 +215,12 @@ class VideoContentSetup {
       this.initPlyr(content);
     });
 
+    content.videojs.qualityLevels()?.on("addqualitylevel", (e) => {
+      window.setTimeout(() => {
+        this.initPlyr(content);
+      }, 0);
+    });
+
     // Get correct orientation
     axios
       .get<any>(
@@ -250,6 +256,9 @@ class VideoContentSetup {
 
   initPlyr(content: any) {
     if (content.plyr) return;
+
+    content.videoElement = content.videojs?.el()?.querySelector("video");
+    if (!content.videoElement) return;
 
     // Retain original parent for video element
     const origParent = content.videoElement.parentElement;

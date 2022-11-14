@@ -534,10 +534,21 @@ export default class Viewer extends Mixins(GlobalMixin) {
       previewUrl = generateUrl(getDownloadLink(photo));
     }
 
+    // Get height and width
+    let w = photo.w;
+    let h = photo.h;
+
+    if (isvideo && w && h) {
+      // For videos, make sure the screen is filled up,
+      // by scaling up the video by a maximum of 4x
+      w *= 4;
+      h *= 4;
+    }
+
     return {
       src: previewUrl,
-      width: photo.w || undefined,
-      height: photo.h || undefined,
+      width: w || undefined,
+      height: h || undefined,
       thumbCropped: true,
       photo: photo,
       type: isvideo ? "video" : "image",
