@@ -8,14 +8,14 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\Folder;
 use OCP\IDBConnection;
 
-const CTE_FOLDERS = // CTE to get all folders recursively in the given top folder
+const CTE_FOLDERS = // CTE to get all folders recursively in the given top folders excluding archive
     'WITH RECURSIVE *PREFIX*cte_folders(fileid) AS (
         SELECT
             f.fileid
         FROM
             *PREFIX*filecache f
         WHERE
-            f.fileid = :topFolderId
+            f.fileid IN (:topFolderIds)
         UNION ALL
         SELECT
             f.fileid
@@ -24,8 +24,41 @@ const CTE_FOLDERS = // CTE to get all folders recursively in the given top folde
         INNER JOIN *PREFIX*cte_folders c
             ON (f.parent = c.fileid
                 AND f.mimetype = (SELECT `id` FROM `*PREFIX*mimetypes` WHERE `mimetype` = \'httpd/unix-directory\')
-                AND f.fileid <> :excludedFolderId
+                AND f.name <> \'.archive\'
             )
+    )';
+
+const CTE_FOLDERS_ARCHIVE = // CTE to get all archive folders recursively in the given top folders
+    'WITH RECURSIVE *PREFIX*cte_folders_all(fileid, name) AS (
+        SELECT
+            f.fileid, f.name
+        FROM
+            *PREFIX*filecache f
+        WHERE
+            f.fileid IN (:topFolderIds)
+        UNION ALL
+        SELECT
+            f.fileid, f.name
+        FROM
+            *PREFIX*filecache f
+        INNER JOIN *PREFIX*cte_folders_all c
+            ON (f.parent = c.fileid
+                AND f.mimetype = (SELECT `id` FROM `*PREFIX*mimetypes` WHERE `mimetype` = \'httpd/unix-directory\')
+            )
+    ), *PREFIX*cte_folders(fileid) AS (
+        SELECT
+            f.fileid
+        FROM
+            *PREFIX*cte_folders_all f
+        WHERE
+            f.name = \'.archive\'
+        UNION ALL
+        SELECT
+            f.fileid
+        FROM
+            *PREFIX*filecache f
+        INNER JOIN *PREFIX*cte_folders c
+            ON (f.parent = c.fileid)
     )';
 
 trait TimelineQueryDays
@@ -231,9 +264,12 @@ trait TimelineQueryDays
         $params = $query->getParameters();
         $types = $query->getParameterTypes();
 
+        // Get SQL
+        $CTE_SQL = $params['cteFoldersArchive'] ? CTE_FOLDERS_ARCHIVE : CTE_FOLDERS;
+
         // Add WITH clause if needed
         if (false !== strpos($sql, 'cte_folders')) {
-            $sql = CTE_FOLDERS.' '.$sql;
+            $sql = $CTE_SQL.' '.$sql;
         }
 
         return $this->connection->executeQuery($sql, $params, $types);
@@ -247,31 +283,16 @@ trait TimelineQueryDays
         Folder &$folder,
         bool $archive
     ) {
-        // Query parameters, set at the end
-        $topFolderId = $folder->getId();
-        $excludedFolderId = -1;
-
-        /** @var Folder Archive folder if it exists */
-        $archiveFolder = null;
-
-        try {
-            $archiveFolder = $folder->get('.archive/');
-        } catch (\OCP\Files\NotFoundException $e) {
-        }
-
-        if (!$archive) {
-            // Exclude archive folder
-            if ($archiveFolder) {
-                $excludedFolderId = $archiveFolder->getId();
-            }
-        } else {
-            // Only include archive folder
-            $topFolderId = $archiveFolder ? $archiveFolder->getId() : -1;
+        // Get storages recursively
+        $topFolderIds = [$folder->getId()];
+        $mounts = \OC\Files\Filesystem::getMountManager()->findIn($folder->getPath());
+        foreach ($mounts as &$mount) {
+            $topFolderIds[] = $mount->getStorageRootId();
         }
 
         // Add query parameters
-        $query->setParameter('topFolderId', $topFolderId, IQueryBuilder::PARAM_INT);
-        $query->setParameter('excludedFolderId', $excludedFolderId, IQueryBuilder::PARAM_INT);
+        $query->setParameter('topFolderIds', $topFolderIds, IQueryBuilder::PARAM_INT_ARRAY);
+        $query->setParameter('cteFoldersArchive', $archive, IQueryBuilder::PARAM_BOOL);
     }
 
     /**

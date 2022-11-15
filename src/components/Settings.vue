@@ -91,10 +91,11 @@ export default class Settings extends Mixins(UserConfig, GlobalMixin) {
   }
 
   async chooseTimelinePath() {
-    const newPath = await this.chooseFolder(
+    let newPath = await this.chooseFolder(
       this.t("memories", "Choose the root of your timeline"),
       this.config_timelinePath
     );
+    if (newPath === "") newPath = "/";
     if (newPath !== this.config_timelinePath) {
       this.config_timelinePath = newPath;
       await this.updateSetting("timelinePath");
@@ -102,10 +103,11 @@ export default class Settings extends Mixins(UserConfig, GlobalMixin) {
   }
 
   async chooseFoldersPath() {
-    const newPath = await this.chooseFolder(
+    let newPath = await this.chooseFolder(
       this.t("memories", "Choose the root for the folders view"),
       this.config_foldersPath
     );
+    if (newPath === "") newPath = "/";
     if (newPath !== this.config_foldersPath) {
       this.config_foldersPath = newPath;
       await this.updateSetting("foldersPath");
