@@ -335,12 +335,11 @@ export default class EditDate extends Mixins(GlobalMixin) {
         const offset = date.getTime() - pDate.getTime();
         const scale = diff > 0 ? diffNew / diff : 0;
         const pDateNew = new Date(dateNew.getTime() - offset * scale);
-        const res = await axios.patch<any>(
-          generateUrl(EDIT_API_URL, { id: p.fileid }),
-          {
-            date: this.getExifFormat(pDateNew),
-          }
-        );
+        await axios.patch<any>(generateUrl(EDIT_API_URL, { id: p.fileid }), {
+          raw: {
+            DateTimeOriginal: this.getExifFormat(pDateNew),
+          },
+        });
         emit("files:file:updated", { fileid: p.fileid });
       } catch (e) {
         if (e.response?.data?.message) {
