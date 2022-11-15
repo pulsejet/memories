@@ -55,7 +55,7 @@ class VideoSetup extends Command
         $ffprobePath = $this->config->getSystemValue('memories.ffprobe_path', 'ffprobe');
 
         // Get ffmpeg version
-        $ffmpeg = shell_exec("$ffmpegPath -version");
+        $ffmpeg = shell_exec("{$ffmpegPath} -version");
         if (false === strpos($ffmpeg, 'ffmpeg version')) {
             $ffmpeg = null;
             $output->writeln('<error>ffmpeg is not installed</error>');
@@ -64,7 +64,7 @@ class VideoSetup extends Command
         }
 
         // Get ffprobe version
-        $ffprobe = shell_exec("$ffprobePath -version");
+        $ffprobe = shell_exec("{$ffprobePath} -version");
         if (false === strpos($ffprobe, 'ffprobe version')) {
             $ffprobe = null;
             $output->writeln('<error>ffprobe is not installed</error>');

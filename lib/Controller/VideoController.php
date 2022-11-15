@@ -100,13 +100,15 @@ class VideoController extends ApiBase
 
             // QSV with VAAPI
             $vaapi = $this->config->getSystemValue('memories.qsv', false);
-            if ($vaapi) $env .= 'VAAPI=1 ';
+            if ($vaapi) {
+                $env .= 'VAAPI=1 ';
+            }
 
             // Paths
             $ffmpegPath = $this->config->getSystemValue('memories.ffmpeg_path', 'ffmpeg');
             $ffprobePath = $this->config->getSystemValue('memories.ffprobe_path', 'ffprobe');
             $tmpPath = $this->config->getSystemValue('memories.tmp_path', sys_get_temp_dir());
-            $env .= "FFMPEG='$ffmpegPath' FFPROBE='$ffprobePath' GOVOD_TEMPDIR='$tmpPath/go-vod' ";
+            $env .= "FFMPEG='{$ffmpegPath}' FFPROBE='{$ffprobePath}' GOVOD_TEMPDIR='{$tmpPath}/go-vod' ";
 
             // Check if already running
             exec("pkill {$transcoder}");
