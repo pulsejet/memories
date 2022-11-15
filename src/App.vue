@@ -344,6 +344,11 @@ body.has-viewer header {
   overflow-x: hidden;
 }
 
+// Prevent sidebar from becoming too big
+aside.app-sidebar {
+  max-width: 360px !important;
+}
+
 // Fill all available space
 .fill-block {
   width: 100%;

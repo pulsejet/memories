@@ -161,6 +161,7 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Зауважте, що вибрана область кадрування нижча за застосований розмір, що може спричинити погіршення якості",
     "Actual size (100%)" : "Фактичний розмір (100%)",
     "Fit size" : "Підходить за розміром",
+    "Auto" : "Автоматично",
     "Failed to create {albumName}." : "Не вдалося створити {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Не вдалося перейменувати {currentAlbumName} на {newAlbumName}.",
     "Failed to delete files." : "Не вдалося видалити файли.",

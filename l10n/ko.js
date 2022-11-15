@@ -43,6 +43,7 @@ OC.L10N.register(
     "Size" : "크기",
     "Position" : "위치",
     "Extension" : "확장자",
-    "Quality" : "품질"
+    "Quality" : "품질",
+    "Auto" : "자동"
 },
 "nplurals=1; plural=0;");

@@ -118,6 +118,7 @@ jobs:
         ports:
           - 4444:5432/tcp
         env:
+          POSTGRES_DB: nextcloud
           POSTGRES_PASSWORD: rootpassword
         options: >-
           --health-cmd pg_isready

@@ -46,6 +46,7 @@
     "Position" : "Posicion",
     "Extension" : "Extensión",
     "Name is required." : "É obrigatorio  o nome.",
-    "Quality" : "Calidade"
+    "Quality" : "Calidade",
+    "Auto" : "Automático"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

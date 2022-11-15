@@ -176,6 +176,7 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Kontuan izan hautatutako mozte-eremua aplikatutako tamaina baino txikiagoa dela eta horrek kalitatea gutxitzea eragin dezakeela",
     "Actual size (100%)" : "Benetako tamaina (% 100)",
     "Fit size" : "Egokitu tamaina",
+    "Auto" : "Auto",
     "Failed to create {albumName}." : "Ezin izan da {albumName} sortu.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Ezin izan da {currentAlbumName} berrizendatu {newAlbumName} gisa.",
     "General Failure" : "Hutsegite orokorra",

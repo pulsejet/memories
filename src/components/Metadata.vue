@@ -343,6 +343,8 @@ export default class Metadata extends Mixins(GlobalMixin) {
 
 .map {
   width: 100%;
-  height: 200px;
+  aspect-ratio: 16 / 10;
+  min-height: 200px;
+  max-height: 250px;
 }
 </style>

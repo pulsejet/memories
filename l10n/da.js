@@ -66,6 +66,7 @@ OC.L10N.register(
     "Position" : "Position",
     "Extension" : "Filtype",
     "Name is required." : "Navn er påkrævet.",
+    "Auto" : "Auto",
     "Failed to delete files." : "Kunne ikke slette filer.",
     "Failed to delete {fileName}." : "Kunne ikke slette {fileName}.",
     "Failed to favorite files." : "Kunne ikke vælge favorit filer.",

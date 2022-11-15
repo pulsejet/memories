@@ -2,7 +2,7 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
-## v4.7.0, v3.7.0
+## v4.7.0, v3.7.0 (2022-11-14)
 
 - **Note**: you must run `occ memories:index -f` to take advantage of new features.
 - **Massively improved video performance**
