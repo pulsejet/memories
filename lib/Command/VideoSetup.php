@@ -50,16 +50,12 @@ class VideoSetup extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        // Check nohup binary
-        $nohup = shell_exec('nohup --version');
-        if (!$nohup || false === strpos($nohup, 'nohup')) {
-            $output->writeln('<error>nohup binary not found. Please install nohup.</error>');
-
-            return $this->suggestDisable($output);
-        }
+        // Preset executables
+        $ffmpegPath = $this->config->getSystemValue('memories.ffmpeg_path', 'ffmpeg');
+        $ffprobePath = $this->config->getSystemValue('memories.ffprobe_path', 'ffprobe');
 
         // Get ffmpeg version
-        $ffmpeg = shell_exec('ffmpeg -version');
+        $ffmpeg = shell_exec("$ffmpegPath -version");
         if (false === strpos($ffmpeg, 'ffmpeg version')) {
             $ffmpeg = null;
             $output->writeln('<error>ffmpeg is not installed</error>');
@@ -68,7 +64,7 @@ class VideoSetup extends Command
         }
 
         // Get ffprobe version
-        $ffprobe = shell_exec('ffprobe -version');
+        $ffprobe = shell_exec("$ffprobePath -version");
         if (false === strpos($ffprobe, 'ffprobe version')) {
             $ffprobe = null;
             $output->writeln('<error>ffprobe is not installed</error>');
@@ -129,6 +125,7 @@ class VideoSetup extends Command
         $this->config->setSystemValue('memories.transcoder', $goVodPath);
         $this->config->setSystemValue('memories.no_transcode', false);
         $output->writeln('Transcoding and HLS are now enabled! Monitor the output at /tmp/go-vod.log for any errors');
+        $output->writeln('You should restart the server for changes to take effect');
 
         // Check for VAAPI
         $output->writeln("\nChecking for QSV (/dev/dri/renderD128)");
@@ -171,6 +168,7 @@ class VideoSetup extends Command
 
         $this->config->setSystemValue('memories.no_transcode', true);
         $output->writeln('<error>Transcoding and HLS are now disabled</error>');
+        $output->writeln('You should restart the server for changes to take effect');
 
         return 0;
     }

@@ -17,7 +17,7 @@ mv "exiftool-$exifver" exiftool
 rm -rf *.zip exiftool/t exiftool/html
 chmod 755 exiftool/exiftool
 
-govod="0.0.11"
+govod="0.0.12"
 wget -q "https://github.com/pulsejet/go-vod/releases/download/$govod/go-vod-amd64"
 wget -q "https://github.com/pulsejet/go-vod/releases/download/$govod/go-vod-aarch64"
 chmod 755 go-vod-*
