@@ -128,10 +128,27 @@ func main() {
 
 	log.Println("Starting VOD server")
 
+	// get executable paths
+	ffmpeg := os.Getenv("FFMPEG")
+	if ffmpeg == "" {
+		ffmpeg = "ffmpeg"
+	}
+
+	ffprobe := os.Getenv("FFPROBE")
+	if ffprobe == "" {
+		ffprobe = "ffprobe"
+	}
+
+	// get tempdir
+	tempdir := os.Getenv("GOVOD_TEMPDIR")
+	if tempdir == "" {
+		tempdir = "/tmp/go-vod"
+	}
+
 	h := NewHandler(&Config{
-		ffmpeg:          "ffmpeg",
-		ffprobe:         "ffprobe",
-		tempdir:         "/tmp/go-vod",
+		ffmpeg:          ffmpeg,
+		ffprobe:         ffprobe,
+		tempdir:         tempdir,
 		chunkSize:       3,
 		lookBehind:      5,
 		goalBufferMin:   3,
