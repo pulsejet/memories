@@ -71,7 +71,7 @@ class ImageController extends ApiBase
         }
 
         // Check if user has permissions
-        if (!$file->isUpdateable()) {
+        if (!$file->isUpdateable() || !($file->getPermissions() & \OCP\Constants::PERMISSION_UPDATE)) {
             return new JSONResponse([], Http::STATUS_FORBIDDEN);
         }
 

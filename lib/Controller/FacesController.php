@@ -104,6 +104,11 @@ class FacesController extends ApiBase
                 continue;
             }
 
+            // Check read permission
+            if (!($files[0]->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
+                continue;
+            }
+
             // Get (hopefully cached) preview image
             try {
                 $preview = $this->previewManager->getPreview($files[0], 2048, 2048, false);

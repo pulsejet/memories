@@ -131,6 +131,10 @@ class ApiBase extends Controller
             throw new \Exception('Folder not found');
         }
 
+        if (!($folder->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
+            throw new \Exception('Folder not readable');
+        }
+
         return $folder;
     }
 
@@ -157,6 +161,11 @@ class ApiBase extends Controller
 
         // Check if node is a file
         if (!$file[0] instanceof File) {
+            return null;
+        }
+
+        // Check read permission
+        if (!($file[0]->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
             return null;
         }
 
