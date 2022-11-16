@@ -221,7 +221,7 @@ trait TimelineQueryDays
 
         /**
          * The root folder id for the folder.
-         * We fallback to this if rootid is not found
+         * We fallback to this if rootid is not found.
          */
         $defaultRootId = 0;
 

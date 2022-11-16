@@ -84,6 +84,7 @@ class ArchiveController extends ApiBase
 
             if ($parent->getName() === \OCA\Memories\Util::$ARCHIVE_FOLDER) {
                 $isArchived = true;
+
                 break;
             }
 
@@ -98,7 +99,8 @@ class ArchiveController extends ApiBase
         $unarchive = isset($body['archive']) && false === $body['archive'];
         if ($isArchived && !$unarchive) {
             return new JSONResponse(['message' => 'File already archived'], Http::STATUS_BAD_REQUEST);
-        } else if (!$isArchived && $unarchive) {
+        }
+        if (!$isArchived && $unarchive) {
             return new JSONResponse(['message' => 'File not archived'], Http::STATUS_BAD_REQUEST);
         }
 
