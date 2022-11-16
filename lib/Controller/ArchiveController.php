@@ -59,10 +59,20 @@ class ArchiveController extends ApiBase
         }
 
         // Create archive folder in the root of the user's configured timeline
-        $timelinePath = Exif::removeExtraSlash(Exif::getPhotosPath($this->config, $uid));
-        $timelineFolder = $userFolder->get($timelinePath);
-        if (null === $timelineFolder || !$timelineFolder instanceof Folder) {
-            return new JSONResponse(['message' => 'Cannot get timeline'], Http::STATUS_INTERNAL_SERVER_ERROR);
+        $configPath = Exif::removeExtraSlash(Exif::getPhotosPath($this->config, $uid));
+        $configPaths = \explode(';', $configPath);
+        $timelineFolders = [];
+        $timelinePaths = [];
+
+        // Get all timeline paths
+        foreach ($configPaths as $path) {
+            try {
+                $f = $userFolder->get($path);
+                $timelineFolders[] = $f;
+                $timelinePaths[] = $f->getPath();
+            } catch (\OCP\Files\NotFoundException $e) {
+                return new JSONResponse(['message' => 'Timeline folder not found'], Http::STATUS_NOT_FOUND);
+            }
         }
 
         // Bubble up from file until we reach the correct folder
@@ -74,14 +84,21 @@ class ArchiveController extends ApiBase
                 throw new \Exception('Cannot get correct parent of file');
             }
 
-            if ($parent->getPath() === $timelineFolder->getPath()) {
+            // Hit a timeline folder
+            if (in_array($parent->getPath(), $timelinePaths)) {
                 break;
             }
 
-            if ($parent->getParent()->getStorage()->getId() !== $fileStorageId) {
+            // Hit a storage root
+            try {
+                if ($parent->getParent()->getStorage()->getId() !== $fileStorageId) {
+                    break;
+                }
+            } catch (\OCP\Files\NotFoundException $e) {
                 break;
             }
 
+            // Hit an archive folder root
             if ($parent->getName() === \OCA\Memories\Util::$ARCHIVE_FOLDER) {
                 $isArchived = true;
 

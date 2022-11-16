@@ -48,19 +48,6 @@ class Util
     }
 
     /**
-     * Get the path to the user's configured photos directory.
-     */
-    public static function getPhotosPath(IConfig &$config, string $userId)
-    {
-        $p = $config->getUserValue($userId, Application::APPNAME, 'timelinePath', '');
-        if (empty($p)) {
-            return '/Photos/';
-        }
-
-        return $p;
-    }
-
-    /**
      * Check if albums are enabled for this user.
      *
      * @param mixed $appManager
