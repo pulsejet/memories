@@ -295,7 +295,9 @@ trait TimelineQueryDays
         $types = $query->getParameterTypes();
 
         // Get SQL
-        $CTE_SQL = $params['cteFoldersArchive'] ? CTE_FOLDERS_ARCHIVE : CTE_FOLDERS;
+        $CTE_SQL = \array_key_exists('cteFoldersArchive', $params) && $params['cteFoldersArchive']
+         ? CTE_FOLDERS_ARCHIVE
+         : CTE_FOLDERS;
 
         // Add WITH clause if needed
         if (false !== strpos($sql, 'cte_folders')) {

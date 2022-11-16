@@ -13,7 +13,7 @@ trait FoldersTrait
     /**
      * Get subfolders entry for days response.
      */
-    public function getSubfoldersEntry(Folder &$folder)
+    public function getSubfoldersEntry(Folder $folder)
     {
         // Ugly: get the view of the folder with reflection
         // This is unfortunately the only way to get the contents of a folder
