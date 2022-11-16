@@ -47,7 +47,7 @@ trait TimelineQueryFaces
         );
     }
 
-    public function getFaces(Folder $folder)
+    public function getFaces(TimelineRoot &$root)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -62,7 +62,7 @@ trait TimelineQueryFaces
         $query->innerJoin('rfd', 'memories', 'm', $query->expr()->eq('m.fileid', 'rfd.file_id'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $folder, true, false);
+        $query = $this->joinFilecache($query, $root, true, false);
 
         // GROUP by ID of face cluster
         $query->groupBy('rfc.id');
@@ -87,7 +87,7 @@ trait TimelineQueryFaces
         return $faces;
     }
 
-    public function getFacePreviewDetection(Folder &$folder, int $id)
+    public function getFacePreviewDetection(TimelineRoot &$root, int $id)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -109,7 +109,7 @@ trait TimelineQueryFaces
         $query->innerJoin('rfd', 'memories', 'm', $query->expr()->eq('m.fileid', 'rfd.file_id'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $folder, true, false);
+        $query = $this->joinFilecache($query, $root, true, false);
 
         // LIMIT results
         $query->setMaxResults(15);

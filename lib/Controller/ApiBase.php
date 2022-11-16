@@ -25,6 +25,7 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Exif;
 use OCP\App\IAppManager;
@@ -88,12 +89,14 @@ class ApiBase extends Controller
         return $user ? $user->getUID() : '';
     }
 
-    /** Get the Folder object relevant to the request */
-    protected function getRequestFolder()
+    /** Get the TimelineRoot object relevant to the request */
+    protected function getRequestRoot()
     {
+        $root = new TimelineRoot();
+
         // Albums have no folder
         if ($this->request->getParam('album')) {
-            return null;
+            return $root;
         }
 
         // Public shared folder
@@ -103,7 +106,9 @@ class ApiBase extends Controller
                 throw new \Exception('Share not found or invalid');
             }
 
-            return $share;
+            $root->addFolder($share);
+
+            return $root;
         }
 
         // Anything else needs a user
@@ -135,7 +140,13 @@ class ApiBase extends Controller
             throw new \Exception('Folder not readable');
         }
 
-        return $folder;
+        // Don't add mount points for folder view
+        $root->addFolder($folder);
+        if (null === $folderPath) {
+            $root->addMountPoints();
+        }
+
+        return $root;
     }
 
     /**

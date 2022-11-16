@@ -49,14 +49,14 @@ class FacesController extends ApiBase
         }
 
         // If this isn't the timeline folder then things aren't going to work
-        $folder = $this->getRequestFolder();
-        if (null === $folder) {
+        $root = $this->getRequestRoot();
+        if ($root->isEmpty()) {
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }
 
         // Run actual query
         $list = $this->timelineQuery->getFaces(
-            $folder,
+            $root,
         );
 
         return new JSONResponse($list, Http::STATUS_OK);
@@ -84,22 +84,23 @@ class FacesController extends ApiBase
         }
 
         // Get folder to search for
-        $folder = $this->getRequestFolder();
-        if (null === $folder) {
+        $root = $this->getRequestRoot();
+        if ($root->isEmpty()) {
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }
 
         // Run actual query
-        $detections = $this->timelineQuery->getFacePreviewDetection($folder, (int) $id);
+        $detections = $this->timelineQuery->getFacePreviewDetection($root, (int) $id);
         if (null === $detections || 0 === \count($detections)) {
             return new DataResponse([], Http::STATUS_NOT_FOUND);
         }
 
         // Find the first detection that has a preview
         $preview = null;
+        $userFolder = $this->rootFolder->getUserFolder($user->getUID());
         foreach ($detections as &$detection) {
             // Get the file (also checks permissions)
-            $files = $folder->getById($detection['file_id']);
+            $files = $userFolder->getById($detection['file_id']);
             if (0 === \count($files) || FileInfo::TYPE_FILE !== $files[0]->getType()) {
                 continue;
             }

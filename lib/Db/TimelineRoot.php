@@ -1,0 +1,67 @@
+<?php
+
+declare(strict_types=1);
+
+namespace OCA\Memories\Db;
+
+use OCP\Files\Folder;
+
+class TimelineRoot
+{
+    protected array $folders;
+    protected array $folderPaths;
+
+    /** Initialize */
+    public function __construct()
+    {
+    }
+
+    public function addFolder(Folder &$folder)
+    {
+        // Add top level folder
+        $id = $folder->getId();
+        $folderPath = $folder->getPath();
+        $this->folders[$id] = $folder;
+        $this->folderPaths[$id] = $folderPath;
+    }
+
+    // Add mountpoints recursively
+    public function addMountPoints()
+    {
+        $mp = [];
+        foreach ($this->folderPaths as $id => $folderPath) {
+            $mounts = \OC\Files\Filesystem::getMountManager()->findIn($folderPath);
+            foreach ($mounts as &$mount) {
+                $id = $mount->getStorageRootId();
+                $path = $mount->getMountPoint();
+                $mp[$id] = $path;
+            }
+        }
+        $this->folderPaths += $mp;
+    }
+
+    public function getFolderPath(int $id)
+    {
+        return $this->folderPaths[$id];
+    }
+
+    public function getIds()
+    {
+        return array_keys($this->folderPaths);
+    }
+
+    public function getOneId()
+    {
+        return array_key_first($this->folders);
+    }
+
+    public function getFolder(int $id)
+    {
+        return $this->folders[$id];
+    }
+
+    public function isEmpty()
+    {
+        return empty($this->folderPaths);
+    }
+}
