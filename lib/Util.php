@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories;
 
-use OCA\Memories\AppInfo\Application;
-use OCP\IConfig;
-
 class Util
 {
     public static $TAG_DAYID_START = -(1 << 30); // the world surely didn't exist

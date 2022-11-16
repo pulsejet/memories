@@ -161,7 +161,9 @@ trait TimelineQueryDays
         $query->addSelect('f.etag', 'f.path', 'f.name AS basename');
 
         // SELECT rootid if not a single folder
-        if ($recursive) $query->addSelect('cte_f.rootid');
+        if ($recursive) {
+            $query->addSelect('cte_f.rootid');
+        }
 
         // JOIN with mimetypes to get the mimetype
         $query->join('f', 'mimetypes', 'mimetypes', $query->expr()->eq('f.mimetype', 'mimetypes.id'));

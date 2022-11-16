@@ -60,7 +60,7 @@ class ArchiveController extends ApiBase
 
         // Create archive folder in the root of the user's configured timeline
         $configPath = Exif::removeExtraSlash(Exif::getPhotosPath($this->config, $uid));
-        $configPaths = \explode(';', $configPath);
+        $configPaths = explode(';', $configPath);
         $timelineFolders = [];
         $timelinePaths = [];
 
@@ -85,7 +85,7 @@ class ArchiveController extends ApiBase
             }
 
             // Hit a timeline folder
-            if (in_array($parent->getPath(), $timelinePaths)) {
+            if (\in_array($parent->getPath(), $timelinePaths, true)) {
                 break;
             }
 
