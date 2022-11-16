@@ -350,6 +350,7 @@ func (s *Stream) transcode(startId int) {
 	}
 	args = append(args, []string{
 		"-c:a", "aac",
+		"-ac", "1",
 		"-b:a", ab,
 	}...)
 
