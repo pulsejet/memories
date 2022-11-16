@@ -9,16 +9,18 @@ use OCP\Files\Folder;
 use OCP\IDBConnection;
 
 const CTE_FOLDERS = // CTE to get all folders recursively in the given top folders excluding archive
-    'WITH RECURSIVE *PREFIX*cte_folders(fileid) AS (
+    'WITH RECURSIVE *PREFIX*cte_folders(fileid, rootid) AS (
         SELECT
-            f.fileid
+            f.fileid,
+            f.fileid AS rootid
         FROM
             *PREFIX*filecache f
         WHERE
             f.fileid IN (:topFolderIds)
         UNION ALL
         SELECT
-            f.fileid
+            f.fileid,
+            c.rootid
         FROM
             *PREFIX*filecache f
         INNER JOIN *PREFIX*cte_folders c
@@ -64,6 +66,9 @@ const CTE_FOLDERS_ARCHIVE = // CTE to get all archive folders recursively in the
 trait TimelineQueryDays
 {
     protected IDBConnection $connection;
+
+    /** Map of rootid => mount point */
+    private $topFolderPaths = [];
 
     /**
      * Get the days response from the database for the timeline.
@@ -196,30 +201,51 @@ trait TimelineQueryDays
      */
     private function processDay(&$day, $uid, $folder)
     {
-        $basePath = '#__#__#';
-        $davPath = '';
+        /**
+         * Path entry in database for folder.
+         * We need to splice this from the start of the file path.
+         */
+        $internalPaths = [];
+
+        /**
+         * DAV paths for the folders.
+         * We need to prefix this to the start of the file path.
+         */
+        $davPaths = [];
+
+        /**
+         * The root folder id for the folder.
+         * We fallback to this if rootid is not found
+         */
+        $defaultRootId = 0;
+
         if (null !== $folder) {
+            // Get root id of the top folder
+            $defaultRootId = $folder->getId();
+
             // No way to get the internal path from the folder
             $query = $this->connection->getQueryBuilder();
-            $query->select('path')
+            $query->select('fileid', 'path')
                 ->from('filecache')
-                ->where($query->expr()->eq('fileid', $query->createNamedParameter($folder->getId(), IQueryBuilder::PARAM_INT)))
+                ->where($query->expr()->in('fileid', $query->createNamedParameter(array_keys($this->topFolderPaths), IQueryBuilder::PARAM_INT_ARRAY)))
             ;
-            $path = $query->executeQuery()->fetchOne();
-            $basePath = $path ?: $basePath;
+            $paths = $query->executeQuery()->fetchAll();
+            foreach ($paths as &$path) {
+                $fileid = (int) $path['fileid'];
+                $internalPaths[$fileid] = $path['path'];
 
-            // Get user facing path
-            // getPath looks like /user/files/... but we want /files/user/...
-            // Split at / and swap these
-            // For public shares, we just give the relative path
-            if (!empty($uid)) {
-                $actualPath = $folder->getPath();
-                $actualPath = explode('/', $actualPath);
-                if (\count($actualPath) >= 3) {
-                    $tmp = $actualPath[1];
-                    $actualPath[1] = $actualPath[2];
-                    $actualPath[2] = $tmp;
-                    $davPath = implode('/', $actualPath);
+                // Get DAV path.
+                // getPath looks like /user/files/... but we want /files/user/...
+                // Split at / and swap these
+                // For public shares, we just give the relative path
+                if (!empty($uid) && ($actualPath = $this->topFolderPaths[$fileid])) {
+                    $actualPath = explode('/', $actualPath);
+                    if (\count($actualPath) >= 3) {
+                        $tmp = $actualPath[1];
+                        $actualPath[1] = $actualPath[2];
+                        $actualPath[2] = $tmp;
+                        $davPaths[$fileid] = implode('/', $actualPath);
+                    }
                 }
             }
         }
@@ -245,9 +271,14 @@ trait TimelineQueryDays
 
             // Check if path exists and starts with basePath and remove
             if (isset($row['path']) && !empty($row['path'])) {
+                $rootId = $row['rootid'] ?: $defaultRootId;
+                $basePath = $internalPaths[$rootId] ?: '#__#';
+                $davPath = $davPaths[$rootId] ?: '';
+
                 if (0 === strpos($row['path'], $basePath)) {
                     $row['filename'] = $davPath.substr($row['path'], \strlen($basePath));
                 }
+
                 unset($row['path']);
             }
 
@@ -280,18 +311,10 @@ trait TimelineQueryDays
      */
     private function addSubfolderJoinParams(
         IQueryBuilder &$query,
-        Folder &$folder,
         bool $archive
     ) {
-        // Get storages recursively
-        $topFolderIds = [$folder->getId()];
-        $mounts = \OC\Files\Filesystem::getMountManager()->findIn($folder->getPath());
-        foreach ($mounts as &$mount) {
-            $topFolderIds[] = $mount->getStorageRootId();
-        }
-
         // Add query parameters
-        $query->setParameter('topFolderIds', $topFolderIds, IQueryBuilder::PARAM_INT_ARRAY);
+        $query->setParameter('topFolderIds', array_keys($this->topFolderPaths), IQueryBuilder::PARAM_INT_ARRAY);
         $query->setParameter('cteFoldersArchive', $archive, IQueryBuilder::PARAM_BOOL);
     }
 
@@ -315,12 +338,25 @@ trait TimelineQueryDays
             return $query->innerJoin('m', 'filecache', 'f', $baseOp);
         }
 
+        // Create top folders paths for later processing
+        $this->topFolderPaths = [];
+        $this->topFolderPaths[$folder->getId()] = $folder->getPath();
+
         // Filter by folder (recursive or otherwise)
         $pathOp = null;
         if ($recursive) {
+            // Add mountpoints recursively
+            $this->mounts = \OC\Files\Filesystem::getMountManager()->findIn($folder->getPath());
+            foreach ($this->mounts as &$mount) {
+                $id = $mount->getStorageRootId();
+                $path = $mount->getMountPoint();
+                $this->topFolderPaths[$id] = $path;
+            }
+
             // Join with folders CTE
-            $this->addSubfolderJoinParams($query, $folder, $archive);
+            $this->addSubfolderJoinParams($query, $archive);
             $query->innerJoin('f', 'cte_folders', 'cte_f', $query->expr()->eq('f.parent', 'cte_f.fileid'));
+            $query->addSelect('cte_f.rootid');
         } else {
             // If getting non-recursively folder only check for parent
             $pathOp = $query->expr()->eq('f.parent', $query->createNamedParameter($folder->getId(), IQueryBuilder::PARAM_INT));

@@ -917,7 +917,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             head.day.detail.length === photos.length &&
             head.day.detail.every(
               (p, i) =>
-                p.fileid === photos[i].fileid && p.etag === photos[i].etag
+                p.fileid === photos[i].fileid &&
+                p.etag === photos[i].etag &&
+                p.filename === photos[i].filename
             )
           ) {
             continue;
