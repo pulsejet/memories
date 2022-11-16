@@ -161,7 +161,7 @@ trait TimelineQueryDays
         $query->addSelect('f.etag', 'f.path', 'f.name AS basename');
 
         // SELECT rootid if not a single folder
-        if ($recursive) {
+        if ($recursive && !$root->isEmpty()) {
             $query->addSelect('cte_f.rootid');
         }
 
