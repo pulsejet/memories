@@ -34,7 +34,7 @@ trait FoldersTrait
         return [
             'dayid' => \OCA\Memories\Util::$TAG_DAYID_FOLDERS,
             'count' => \count($folders),
-            'detail' => array_map(function (&$node) use (&$folder) {
+            'detail' => array_map(function ($node) use (&$folder) {
                 return [
                     'fileid' => $node->getId(),
                     'name' => $node->getName(),
