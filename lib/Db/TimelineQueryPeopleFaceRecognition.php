@@ -52,8 +52,8 @@ trait TimelineQueryPeopleFaceRecognition
         $query->addSelect(
             'frf.x AS face_x',
             'frf.y AS face_y',
-            'frf.width AS face_w',
-            'frf.height AS face_h',
+            'frf.width AS face_width',
+            'frf.height AS face_height',
             'm.w AS image_width',
             'm.h AS image_height',
         );
@@ -178,7 +178,7 @@ trait TimelineQueryPeopleFaceRecognition
             $p['x'] = (float) $p['x'] / $p['image_width'];
             $p['y'] = (float) $p['y'] / $p['image_height'];
             $p['width'] = (float) $p['width'] / $iw;
-            $p['height'] = (float) ($p['height'] - $p['top']) / $ih;
+            $p['height'] = (float) $p['height'] / $ih;
 
             $w = (float) $p['width'];
             $h = (float) $p['height'];
@@ -212,15 +212,20 @@ trait TimelineQueryPeopleFaceRecognition
     /** Convert face fields to object */
     private function processFaceRecognitionDetection(&$row, $days = false)
     {
-        if (!isset($row) || !isset($row['image_width'])) {
+        if (!isset($row)) {
+            return;
+        }
+
+        // Differentiate Recognize queries from Face Recognition
+        if (!isset($row['face_width']) || !isset($row['image_width'])) {
             return;
         }
 
         if (!$days) {
             $row['facerect'] = [
                 // Get percentage position and size
-                'w' => (float) $row['face_w'] / $row['image_width'],
-                'h' => (float) $row['face_h'] / $row['image_height'],
+                'w' => (float) $row['face_width'] / $row['image_width'],
+                'h' => (float) $row['face_height'] / $row['image_height'],
                 'x' => (float) $row['face_x'] / $row['image_width'],
                 'y' => (float) $row['face_y'] / $row['image_height'],
             ];

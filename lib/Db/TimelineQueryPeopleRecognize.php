@@ -162,6 +162,7 @@ trait TimelineQueryPeopleRecognize
     /** Convert face fields to object */
     private function processPeopleRecognizeDetection(&$row, $days = false)
     {
+        // Differentiate Recognize queries from Face Recognition
         if (!isset($row) || !isset($row['face_w'])) {
             return;
         }
