@@ -64,52 +64,65 @@ class ArchiveController extends ApiBase
         if (null === $timelineFolder || !$timelineFolder instanceof Folder) {
             return new JSONResponse(['message' => 'Cannot get timeline'], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
-        if (!$timelineFolder->isCreatable()) {
-            return new JSONResponse(['message' => 'Cannot create archive folder'], Http::STATUS_FORBIDDEN);
+
+        // Bubble up from file until we reach the correct folder
+        $fileStorageId = $file->getStorage()->getId();
+        $parent = $file->getParent();
+        $isArchived = false;
+        while (true) {
+            if (null === $parent) {
+                throw new \Exception('Cannot get correct parent of file');
+            }
+
+            if ($parent->getPath() === $timelineFolder->getPath()) {
+                break;
+            }
+
+            if ($parent->getParent()->getStorage()->getId() !== $fileStorageId) {
+                break;
+            }
+
+            if ($parent->getName() === \OCA\Memories\Util::$ARCHIVE_FOLDER) {
+                $isArchived = true;
+                break;
+            }
+
+            $parent = $parent->getParent();
         }
 
-        // Get path of current file relative to the timeline folder
-        // remove timelineFolder path from start of file path
-        $timelinePath = $timelineFolder->getPath(); // no trailing slash
-        if (substr($file->getPath(), 0, \strlen($timelinePath)) !== $timelinePath) {
-            return new JSONResponse(['message' => 'Files outside timeline cannot be archived'], Http::STATUS_INTERNAL_SERVER_ERROR);
-        }
-        $relativePath = substr($file->getPath(), \strlen($timelinePath)); // has a leading slash
-
-        // Final path of the file including the file name
-        $destinationPath = '';
+        // Get path of current file relative to the parent folder
+        $relativeFilePath = $parent->getRelativePath($file->getPath());
 
         // Check if we want to archive or unarchive
         $body = $this->request->getParams();
         $unarchive = isset($body['archive']) && false === $body['archive'];
+        if ($isArchived && !$unarchive) {
+            return new JSONResponse(['message' => 'File already archived'], Http::STATUS_BAD_REQUEST);
+        } else if (!$isArchived && $unarchive) {
+            return new JSONResponse(['message' => 'File not archived'], Http::STATUS_BAD_REQUEST);
+        }
+
+        // Final path of the file including the file name
+        $destinationPath = '';
 
         // Get if the file is already in the archive (relativePath starts with archive)
-        $archiveFolderWithLeadingSlash = '/'.\OCA\Memories\Util::$ARCHIVE_FOLDER;
-        if (substr($relativePath, 0, \strlen($archiveFolderWithLeadingSlash)) === $archiveFolderWithLeadingSlash) {
-            // file already in archive, remove it instead
-            $destinationPath = substr($relativePath, \strlen($archiveFolderWithLeadingSlash));
-            if (!$unarchive) {
-                return new JSONResponse(['message' => 'File already archived'], Http::STATUS_BAD_REQUEST);
-            }
+        if ($isArchived) {
+            // file already in archive, remove it
+            $destinationPath = $relativeFilePath;
+            $parent = $parent->getParent();
         } else {
             // file not in archive, put it in there
-            $destinationPath = Exif::removeExtraSlash(\OCA\Memories\Util::$ARCHIVE_FOLDER.$relativePath);
-            if ($unarchive) {
-                return new JSONResponse(['message' => 'File not archived'], Http::STATUS_BAD_REQUEST);
-            }
+            $af = \OCA\Memories\Util::$ARCHIVE_FOLDER;
+            $destinationPath = Exif::removeExtraSlash($af.$relativeFilePath);
         }
 
         // Remove the filename
-        $destinationFolders = explode('/', $destinationPath);
+        $destinationFolders = array_filter(explode('/', $destinationPath));
         array_pop($destinationFolders);
 
         // Create folder tree
-        $folder = $timelineFolder;
+        $folder = $parent;
         foreach ($destinationFolders as $folderName) {
-            if ('' === $folderName) {
-                continue;
-            }
-
             try {
                 $existingFolder = $folder->get($folderName.'/');
                 if (!$existingFolder instanceof Folder) {
