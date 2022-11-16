@@ -31,32 +31,38 @@ const CTE_FOLDERS = // CTE to get all folders recursively in the given top folde
     )';
 
 const CTE_FOLDERS_ARCHIVE = // CTE to get all archive folders recursively in the given top folders
-    'WITH RECURSIVE *PREFIX*cte_folders_all(fileid, name) AS (
+    'WITH RECURSIVE *PREFIX*cte_folders_all(fileid, name, rootid) AS (
         SELECT
-            f.fileid, f.name
+            f.fileid,
+            f.name,
+            f.fileid AS rootid
         FROM
             *PREFIX*filecache f
         WHERE
             f.fileid IN (:topFolderIds)
         UNION ALL
         SELECT
-            f.fileid, f.name
+            f.fileid,
+            f.name,
+            c.rootid
         FROM
             *PREFIX*filecache f
         INNER JOIN *PREFIX*cte_folders_all c
             ON (f.parent = c.fileid
                 AND f.mimetype = (SELECT `id` FROM `*PREFIX*mimetypes` WHERE `mimetype` = \'httpd/unix-directory\')
             )
-    ), *PREFIX*cte_folders(fileid) AS (
+    ), *PREFIX*cte_folders(fileid, rootid) AS (
         SELECT
-            f.fileid
+            cfa.fileid,
+            cfa.rootid
         FROM
-            *PREFIX*cte_folders_all f
+            *PREFIX*cte_folders_all cfa
         WHERE
-            f.name = \'.archive\'
+            cfa.name = \'.archive\'
         UNION ALL
         SELECT
-            f.fileid
+            f.fileid,
+            c.rootid
         FROM
             *PREFIX*filecache f
         INNER JOIN *PREFIX*cte_folders c
