@@ -270,7 +270,7 @@ trait TimelineQueryDays
 
             // Check if path exists and starts with basePath and remove
             if (isset($row['path']) && !empty($row['path'])) {
-                $rootId = $row['rootid'] ?: $defaultRootId;
+                $rootId = \array_key_exists('rootid', $row) ? $row['rootid'] : $defaultRootId;
                 $basePath = $internalPaths[$rootId] ?? '#__#';
                 $davPath = $davPaths[$rootId] ?: '';
 
