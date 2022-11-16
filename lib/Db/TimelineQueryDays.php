@@ -242,7 +242,8 @@ trait TimelineQueryDays
                         $tmp = $actualPath[1];
                         $actualPath[1] = $actualPath[2];
                         $actualPath[2] = $tmp;
-                        $davPaths[$fileid] = implode('/', $actualPath);
+                        $davPath = implode('/', $actualPath);
+                        $davPaths[$fileid] = \OCA\Memories\Exif::removeExtraSlash('/'.$davPath.'/');
                     }
                 }
             }
@@ -270,7 +271,7 @@ trait TimelineQueryDays
             // Check if path exists and starts with basePath and remove
             if (isset($row['path']) && !empty($row['path'])) {
                 $rootId = $row['rootid'] ?: $defaultRootId;
-                $basePath = $internalPaths[$rootId] ?: '#__#';
+                $basePath = $internalPaths[$rootId] ?? '#__#';
                 $davPath = $davPaths[$rootId] ?: '';
 
                 if (0 === strpos($row['path'], $basePath)) {

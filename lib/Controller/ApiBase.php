@@ -114,36 +114,34 @@ class ApiBase extends Controller
         // Anything else needs a user
         $user = $this->userSession->getUser();
         if (null === $user) {
-            return null;
+            throw new \Exception('User not logged in');
         }
         $uid = $user->getUID();
 
         $folder = null;
         $folderPath = $this->request->getParam('folder');
-        $forcedTimelinePath = $this->request->getParam('timelinePath');
         $userFolder = $this->rootFolder->getUserFolder($uid);
 
-        if (null !== $folderPath) {
-            $folder = $userFolder->get($folderPath);
-        } elseif (null !== $forcedTimelinePath) {
-            $folder = $userFolder->get($forcedTimelinePath);
-        } else {
-            $configPath = Exif::removeExtraSlash(Exif::getPhotosPath($this->config, $uid));
-            $folder = $userFolder->get($configPath);
-        }
+        try {
+            if (null !== $folderPath) {
+                $folder = $userFolder->get(Exif::removeExtraSlash($folderPath));
+                $root->addFolder($folder);
+            } else {
+                $timelinePath = $this->request->getParam('timelinePath', Exif::getPhotosPath($this->config, $uid));
+                $timelinePath = Exif::removeExtraSlash($timelinePath);
 
-        if (!$folder instanceof Folder) {
-            throw new \Exception('Folder not found');
-        }
+                // Multiple timeline path support
+                $paths = explode(';', $timelinePath);
+                foreach ($paths as &$path) {
+                    $folder = $userFolder->get(trim($path));
+                    $root->addFolder($folder);
+                }
+                $root->addMountPoints();
+            }
+        } catch (\OCP\Files\NotFoundException $e) {
+            $msg = $e->getMessage();
 
-        if (!($folder->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
-            throw new \Exception('Folder not readable');
-        }
-
-        // Don't add mount points for folder view
-        $root->addFolder($folder);
-        if (null === $folderPath) {
-            $root->addMountPoints();
+            throw new \Exception("Folder not found: {$msg}");
         }
 
         return $root;

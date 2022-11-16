@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCP\Files\Folder;
+use OCP\Files\Node;
 
 class TimelineRoot
 {
@@ -16,11 +17,27 @@ class TimelineRoot
     {
     }
 
-    public function addFolder(Folder &$folder)
+    /**
+     * Add a folder to the root.
+     *
+     * @param Node $folder Node to add
+     *
+     * @throws \Exception if node is not valid readable folder
+     */
+    public function addFolder(Node &$folder)
     {
+        $folderPath = $folder->getPath();
+
+        if (!$folder instanceof Folder) {
+            throw new \Exception("Not a folder: {$folderPath}");
+        }
+
+        if (!($folder->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
+            throw new \Exception("Folder not readable: {$folderPath}");
+        }
+
         // Add top level folder
         $id = $folder->getId();
-        $folderPath = $folder->getPath();
         $this->folders[$id] = $folder;
         $this->folderPaths[$id] = $folderPath;
     }
