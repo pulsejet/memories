@@ -164,6 +164,7 @@ class VideoContentSetup {
 
     sources.push({
       src: content.data.src,
+      type: "video/mp4",
     });
 
     const overrideNative = !videojs.browser.IS_SAFARI;
@@ -197,6 +198,7 @@ class VideoContentSetup {
 
           content.videojs.src({
             src: content.data.src,
+            type: "video/mp4",
           });
           this.updateRotation(content, 0);
         }
