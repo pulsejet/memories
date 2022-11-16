@@ -150,6 +150,9 @@ trait TimelineQueryDays
         $query = $this->joinFilecache($query, $root, $recursive, $archive);
         $query->addSelect('f.etag', 'f.path', 'f.name AS basename');
 
+        // SELECT rootid if not a single folder
+        if ($recursive) $query->addSelect('cte_f.rootid');
+
         // JOIN with mimetypes to get the mimetype
         $query->join('f', 'mimetypes', 'mimetypes', $query->expr()->eq('f.mimetype', 'mimetypes.id'));
         $query->addSelect('mimetypes.mimetype');
@@ -346,7 +349,6 @@ trait TimelineQueryDays
             // Join with folders CTE
             $this->addSubfolderJoinParams($query, $root, $archive);
             $query->innerJoin('f', 'cte_folders', 'cte_f', $query->expr()->eq('f.parent', 'cte_f.fileid'));
-            $query->addSelect('cte_f.rootid');
         } else {
             // If getting non-recursively folder only check for parent
             $pathOp = $query->expr()->eq('f.parent', $query->createNamedParameter($root->getOneId(), IQueryBuilder::PARAM_INT));
