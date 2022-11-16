@@ -2,6 +2,11 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## v4.8.0, v3.8.0
+
+- **Feature**: Timeline path now scans recursively for mounted volumes / shares inside it.
+- **Feature**: Multiple timeline paths can be specified.
+
 ## v4.7.0, v3.7.0 (2022-11-14)
 
 - **Note**: you must run `occ memories:index -f` to take advantage of new features.
