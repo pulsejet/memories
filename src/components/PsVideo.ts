@@ -197,7 +197,6 @@ class VideoContentSetup {
 
           content.videojs.src({
             src: content.data.src,
-            type: "video/mp4",
           });
           this.updateRotation(content, 0);
         }
