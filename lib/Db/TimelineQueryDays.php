@@ -8,7 +8,7 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 const CTE_FOLDERS = // CTE to get all folders recursively in the given top folders excluding archive
-    'WITH RECURSIVE *PREFIX*cte_folders(fileid, rootid) AS (
+    'WITH RECURSIVE *PREFIX*cte_folders_all(fileid, rootid) AS (
         SELECT
             f.fileid,
             f.fileid AS rootid
@@ -22,11 +22,19 @@ const CTE_FOLDERS = // CTE to get all folders recursively in the given top folde
             c.rootid
         FROM
             *PREFIX*filecache f
-        INNER JOIN *PREFIX*cte_folders c
+        INNER JOIN *PREFIX*cte_folders_all c
             ON (f.parent = c.fileid
                 AND f.mimetype = (SELECT `id` FROM `*PREFIX*mimetypes` WHERE `mimetype` = \'httpd/unix-directory\')
                 AND f.name <> \'.archive\'
             )
+    ), *PREFIX*cte_folders AS (
+        SELECT
+            fileid,
+        	MIN(rootid) AS rootid
+        FROM
+            *PREFIX*cte_folders_all
+        GROUP BY
+        	fileid
     )';
 
 const CTE_FOLDERS_ARCHIVE = // CTE to get all archive folders recursively in the given top folders
@@ -53,11 +61,13 @@ const CTE_FOLDERS_ARCHIVE = // CTE to get all archive folders recursively in the
     ), *PREFIX*cte_folders(fileid, rootid) AS (
         SELECT
             cfa.fileid,
-            cfa.rootid
+            MIN(cfa.rootid) AS rootid
         FROM
             *PREFIX*cte_folders_all cfa
         WHERE
             cfa.name = \'.archive\'
+        GROUP BY
+            cfa.fileid
         UNION ALL
         SELECT
             f.fileid,
