@@ -15,6 +15,7 @@ OC.L10N.register(
     "Name" : "Nama",
     "Update" : "Kemaskini",
     "Refresh" : "Refresh",
+    "Remove" : "Buang",
     "Size" : "Saiz"
 },
 "nplurals=1; plural=0;");

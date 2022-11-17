@@ -28,6 +28,7 @@ OC.L10N.register(
     "Name" : "Nombre",
     "Update" : "Actualizar",
     "Refresh" : "Recargar",
+    "Remove" : "Borrar",
     "Reset" : "Restablecer",
     "Continue" : "Continuar",
     "Undo" : "Deshacer",

@@ -129,6 +129,7 @@ OC.L10N.register(
     "Use the sidebar to share this folder." : "Bu klasörü paylaşmak için yan çubuğu kullanın.",
     "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Herkese açık bir bağlantı paylaşımı oluşturduktan sonra yenile üzerine tıklayın. Anılar için ilgili bağlantı aşağıda görüntülenir.",
     "Refresh" : "Yenlle",
+    "Remove" : "Kaldır",
     "Share album" : "Albümü paylaş",
     "Delete album" : "Albümü sil",
     "Merge with different person" : "Başka bir kişi ile birleştir",

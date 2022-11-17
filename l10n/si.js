@@ -20,6 +20,7 @@ OC.L10N.register(
     "Time" : "වේලාව",
     "Name" : "නම",
     "Update" : "යාවත්කාල",
+    "Remove" : "ඉවත් කරන්න",
     "Undo" : "පෙරසේ",
     "Value" : "අගය",
     "Size" : "ප්‍රමාණය"

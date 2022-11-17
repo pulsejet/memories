@@ -26,6 +26,7 @@ OC.L10N.register(
     "Name" : "Nama",
     "Update" : "Perbarui",
     "Refresh" : "Muat ulang",
+    "Remove" : "Buang",
     "Reset" : "Setel ulang",
     "Continue" : "Lanjutkan",
     "Undo" : "Undo",

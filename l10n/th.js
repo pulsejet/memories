@@ -24,6 +24,7 @@ OC.L10N.register(
     "Name" : "ชื่อ",
     "Update" : "อัปเดต",
     "Refresh" : "รีเฟรช",
+    "Remove" : "ลบออก",
     "Share folder" : "แชร์โฟลเดอร์",
     "Reset" : "ตั้งค่าใหม่",
     "Continue" : "ดำเนินการต่อ",

@@ -16,6 +16,7 @@ OC.L10N.register(
     "Name" : "ئاتى",
     "Update" : "يېڭىلا",
     "Refresh" : "يېڭىلا",
+    "Remove" : "چىقىرىۋەت",
     "Size" : "چوڭلۇقى"
 },
 "nplurals=2; plural=(n != 1);");

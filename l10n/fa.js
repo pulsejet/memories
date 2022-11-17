@@ -29,6 +29,7 @@ OC.L10N.register(
     "Name" : "نام",
     "Update" : "یه‌روزرسانی",
     "Refresh" : "تازه‌سازی",
+    "Remove" : "حذف",
     "Share folder" : "اشتراک‌گذاری پوشه",
     "Reset" : "بازنشاندن",
     "Continue" : "ادامه دادن",

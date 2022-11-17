@@ -16,6 +16,7 @@ OC.L10N.register(
     "Hour" : "Asrag",
     "Name" : "Nom",
     "Refresh" : "Sismeḍ",
+    "Remove" : "Kkes",
     "Continue" : "Continuer",
     "Size" : "Teɣzi"
 },

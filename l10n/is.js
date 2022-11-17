@@ -34,6 +34,7 @@ OC.L10N.register(
     "Name" : "Heiti",
     "Update" : "Uppfæra",
     "Refresh" : "Endurnýja",
+    "Remove" : "Fjarlægja",
     "Reset" : "Endurstilla",
     "Continue" : "Halda áfram",
     "Undo" : "Undo",

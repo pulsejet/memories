@@ -107,6 +107,7 @@ OC.L10N.register(
     "You cannot share the root folder" : "Et voi jakaa juurikansiota",
     "Use the sidebar to share this folder." : "Käytä sivupalkkia jakaaksesi tämän kansion.",
     "Refresh" : "Päivitä",
+    "Remove" : "Poista",
     "Share album" : "Jaa albumi",
     "Delete album" : "Poista albumi",
     "Merge with different person" : "Yhdistä toisen henkilön kanssa",

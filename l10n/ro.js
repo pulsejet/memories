@@ -28,6 +28,7 @@ OC.L10N.register(
     "Name" : "Nume",
     "Update" : "Actualizare",
     "Refresh" : "Reîmprospătează",
+    "Remove" : "Elimină",
     "Share folder" : "Distribuie dosar",
     "Reset" : "Resetare",
     "Continue" : "Continuă",

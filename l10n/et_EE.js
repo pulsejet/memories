@@ -27,6 +27,7 @@ OC.L10N.register(
     "Name" : "Nimi",
     "Update" : "Uuenda",
     "Refresh" : "Värskenda",
+    "Remove" : "Eemalda",
     "Reset" : "Lähtesta",
     "Continue" : "Jätka",
     "Custom" : "Kohandatud",

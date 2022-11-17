@@ -36,6 +36,7 @@ OC.L10N.register(
     "Name" : "Nome",
     "Update" : "Atualizar",
     "Refresh" : "Atualizar",
+    "Remove" : "Remover",
     "Share folder" : "Partilhar pasta",
     "Reset" : "Reiniciar",
     "Continue" : "Continuar",

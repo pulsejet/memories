@@ -93,6 +93,7 @@ OC.L10N.register(
     "Error while moving {basename}" : "Chyba pri presúvaní {basename}",
     "Failed to move {name}." : "Nepodarilo sa presunúť {name}.",
     "Refresh" : "Obnoviť",
+    "Remove" : "Odobrať",
     "Delete album" : "Zmazať album",
     "Merge with different person" : "Spojiť s inou osobou",
     "Share folder" : "Zdieľať priečinok",

@@ -28,6 +28,7 @@ OC.L10N.register(
     "Name" : "Nomo",
     "Update" : "Ĝisdatigi",
     "Refresh" : "Aktualigi",
+    "Remove" : "Forigi",
     "Reset" : "Restarigi",
     "Continue" : "Daŭrigi",
     "Undo" : "Malfari",

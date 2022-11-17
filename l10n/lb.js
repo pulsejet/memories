@@ -21,6 +21,7 @@ OC.L10N.register(
     "Name" : "Numm",
     "Update" : "Update",
     "Refresh" : "Opfrëschen",
+    "Remove" : "Läschen",
     "Reset" : "Zeréck setzen",
     "Continue" : "Weider",
     "Custom" : "Individualiséier",

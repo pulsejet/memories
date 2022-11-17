@@ -16,6 +16,7 @@ OC.L10N.register(
     "Name" : "பெயர்",
     "Update" : "இற்றைப்படுத்தல்",
     "Refresh" : "மீள் ஏற்றுக",
+    "Remove" : "அகற்றுக",
     "Continue" : "Continue",
     "Value" : "Value",
     "Size" : "அளவு"

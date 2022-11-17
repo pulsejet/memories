@@ -85,6 +85,7 @@ OC.L10N.register(
     "Rename person" : "Személy átnevezése",
     "Update" : "Frissítés",
     "Refresh" : "Frissítés",
+    "Remove" : "Eltávolítás",
     "Delete album" : "Album törlése",
     "Merge with different person" : "Összevonás egy másik személlyel",
     "Share folder" : "Mappa megosztása",

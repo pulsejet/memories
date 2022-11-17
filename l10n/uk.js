@@ -74,6 +74,7 @@ OC.L10N.register(
     "Rename person" : "Перейменувати особу",
     "Update" : "Оновлення",
     "Refresh" : "Оновити",
+    "Remove" : "Вилучити",
     "Delete album" : "Видалити альбом",
     "Merge with different person" : "Злитися з іншою людиною",
     "Share folder" : "Спільний доступ для каталогу",

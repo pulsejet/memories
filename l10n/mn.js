@@ -25,6 +25,7 @@ OC.L10N.register(
     "Name" : "Нэр",
     "Update" : "Шинэчлэх",
     "Refresh" : "Сэргээх",
+    "Remove" : "Устгах",
     "Reset" : "тохируулах",
     "Continue" : "үргэлжлүүлэх",
     "Undo" : "буцах",

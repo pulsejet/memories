@@ -52,6 +52,7 @@ OC.L10N.register(
     "Name" : "Namn",
     "Update" : "Uppdatera",
     "Refresh" : "Uppdatera",
+    "Remove" : "Ta bort",
     "Share folder" : "Dela mapp",
     "Reset" : "Återställ",
     "Continue" : "Fortsätt",

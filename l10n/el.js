@@ -35,6 +35,7 @@ OC.L10N.register(
     "Name" : "Όνομα",
     "Update" : "Ενημέρωση",
     "Refresh" : "Ανανέωση",
+    "Remove" : "Αφαίρεση",
     "Share folder" : "Διαμοιρασμός φακέλου",
     "Reset" : "Επαναφορά",
     "Continue" : "Συνεχίστε",

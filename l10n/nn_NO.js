@@ -21,6 +21,7 @@ OC.L10N.register(
     "Name" : "Namn",
     "Update" : "Oppdater",
     "Refresh" : "Last inn på nytt",
+    "Remove" : "Fjern",
     "Continue" : "Gå vidare",
     "Value" : "Verdi",
     "Size" : "Storleik"

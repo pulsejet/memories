@@ -14,6 +14,7 @@ OC.L10N.register(
     "Back" : "Yzyna",
     "Save" : "Saklamak",
     "Name" : "Ady",
-    "Refresh" : "Täzelemek"
+    "Refresh" : "Täzelemek",
+    "Remove" : "Aýyrmak"
 },
 "nplurals=2; plural=(n != 1);");
