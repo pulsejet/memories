@@ -33,6 +33,7 @@ OC.L10N.register(
     "Name" : "Nùmene",
     "Update" : "Agiorna",
     "Refresh" : "Agiorna",
+    "Remove" : "Boga",
     "Share folder" : "Cumpartzi cartella",
     "Reset" : "Torra a impostare",
     "Continue" : "Sighi",

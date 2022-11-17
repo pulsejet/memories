@@ -33,6 +33,7 @@ OC.L10N.register(
     "Name" : "Име",
     "Update" : "Ажурирај",
     "Refresh" : "Освежи",
+    "Remove" : "Уклони",
     "Reset" : "Ресетуј",
     "Continue" : "Настави",
     "Undo" : "Опозови",

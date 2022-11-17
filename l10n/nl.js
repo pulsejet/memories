@@ -35,6 +35,7 @@ OC.L10N.register(
     "Name" : "Naam",
     "Update" : "Update",
     "Refresh" : "Verversen",
+    "Remove" : "Verwijderen",
     "Share folder" : "Map delen",
     "Reset" : "Herstellen",
     "Continue" : "Doorgaan",

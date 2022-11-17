@@ -45,6 +45,7 @@ OC.L10N.register(
     "Rename person" : "Преименувај личност",
     "Update" : "Ажурирај",
     "Refresh" : "Освежи",
+    "Remove" : "Отстрани ",
     "Delete album" : "Избриши албум",
     "Merge with different person" : "Спој со друга личност",
     "Share folder" : "Сподели папка",

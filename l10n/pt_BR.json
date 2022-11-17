@@ -108,6 +108,7 @@
     "Move selected photos to person" : "Mover fotos selecionadas para pessoa",
     "Are you sure you want to move the selected photos from {name} to {newName}?" : "Tem certeza de que deseja mover as fotos selecionadas de {name} para {newName}?",
     "Refresh" : "Atualizar",
+    "Remove" : "Remover",
     "Delete album" : "Remover álbum",
     "Merge with different person" : "Unir com outra pessoa",
     "Mark person in preview" : "Marcar pessoa na visualização",

@@ -35,6 +35,7 @@ OC.L10N.register(
     "Update" : "Atjaunināt",
     "Share Folder" : "Kopīgot mapi",
     "Refresh" : "Atsvaidzināt",
+    "Remove" : "Noņemt",
     "Save as" : "Saglabāt kā",
     "Reset" : "Atiestatīt",
     "Continue" : "Turpināt",

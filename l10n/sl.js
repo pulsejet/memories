@@ -39,6 +39,7 @@ OC.L10N.register(
     "Name" : "Ime",
     "Update" : "Posodobi",
     "Refresh" : "Osveži",
+    "Remove" : "Odstrani",
     "Share folder" : "Omogoči souporabo mape",
     "Reset" : "Ponastavi",
     "Continue" : "Nadaljuj",

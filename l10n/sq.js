@@ -26,6 +26,7 @@ OC.L10N.register(
     "Name" : "Emri",
     "Update" : "Përditëso",
     "Refresh" : "Rifresko",
+    "Remove" : "Hiq",
     "Reset" : "Rivendos",
     "Continue" : "Vazhdo",
     "Undo" : "Ktheje pas",

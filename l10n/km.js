@@ -18,6 +18,7 @@ OC.L10N.register(
     "Time" : "ម៉ោង",
     "Name" : "ឈ្មោះ",
     "Update" : "ធ្វើ​បច្ចុប្បន្នភាព",
+    "Remove" : "ដកចេញ",
     "Continue" : "បន្ត",
     "Value" : "តម្លៃ",
     "Line" : "បន្ទាត់",

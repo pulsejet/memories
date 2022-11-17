@@ -45,6 +45,7 @@ OC.L10N.register(
     "Name" : "Имя",
     "Update" : "Обновить",
     "Refresh" : "Обновить",
+    "Remove" : "Удалить",
     "Share folder" : "Поделиться папкой",
     "Save as" : "Сохранить как",
     "Reset" : "Сброс",

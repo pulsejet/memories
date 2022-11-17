@@ -33,6 +33,7 @@ OC.L10N.register(
     "Name" : "Naziv",
     "Update" : "Ažuriraj",
     "Refresh" : "Osvježi",
+    "Remove" : "Ukloni",
     "Share folder" : "Dijeli mapu",
     "Reset" : "Resetiraj",
     "Continue" : "Nastavi",

@@ -90,6 +90,7 @@ OC.L10N.register(
     "Failed to move {name}." : "Nepavyko perkelti {name}.",
     "Share Folder" : "Bendrinti aplanką",
     "Refresh" : "Įkelti iš naujo",
+    "Remove" : "Šalinti",
     "Share album" : "Bendrinti albumą",
     "Delete album" : "Ištrinti albumą",
     "Merge with different person" : "Sulieti su kitu žmogumi",

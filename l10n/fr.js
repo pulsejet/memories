@@ -105,6 +105,7 @@ OC.L10N.register(
     "Use the sidebar to share this folder." : "Utiliser la barre latérale pour partager ce dossier.",
     "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Si vous créez un partage de lien public, cliquez sur rafraîchir et un lien correspondant à Souvenirs sera visible ci-dessous.",
     "Refresh" : "Actualiser",
+    "Remove" : "Retirer",
     "Delete album" : "Supprimer l'album",
     "Merge with different person" : "Fusionner avec une différente personne",
     "Share folder" : "Partager le dossier",

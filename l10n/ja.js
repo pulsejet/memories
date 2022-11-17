@@ -42,6 +42,7 @@ OC.L10N.register(
     "Name" : "名前",
     "Update" : "更新",
     "Refresh" : "更新",
+    "Remove" : "削除",
     "Share folder" : "フォルダーを共有",
     "Reset" : "リセット",
     "All changes will be lost." : "全ての変更がなくなります",

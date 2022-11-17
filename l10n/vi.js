@@ -28,6 +28,7 @@ OC.L10N.register(
     "Name" : "Tên",
     "Update" : "Cập nhật",
     "Refresh" : "Tải mới",
+    "Remove" : "Xoá",
     "Reset" : "Đặt lại",
     "Continue" : "Tiếp tục",
     "Undo" : "Hoàn tác",

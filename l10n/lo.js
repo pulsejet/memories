@@ -17,6 +17,7 @@ OC.L10N.register(
     "Save" : "ບັນທຶກ",
     "Name" : "ຊື່",
     "Refresh" : "Refresh",
+    "Remove" : "ຍ້າຍອອກ",
     "Continue" : "ສືບຕໍ່",
     "Original" : "ຕົ້ນສະບັບ",
     "Size" : "ຂະຫນາດ"
