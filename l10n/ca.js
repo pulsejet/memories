@@ -37,6 +37,7 @@ OC.L10N.register(
     "Name" : "Cognom",
     "Update" : "Actualitzar",
     "Refresh" : "Actualitza",
+    "Remove" : "Elimina",
     "Share folder" : "Comparteix la carpeta",
     "Save as" : "Anomena i desa",
     "Reset" : "Restableix",

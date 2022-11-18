@@ -23,6 +23,7 @@ OC.L10N.register(
     "Name" : "Enw",
     "Update" : "Diweddaru",
     "Refresh" : "Ail-lwytho",
+    "Remove" : "Gwaredu",
     "Undo" : "Dadwneud",
     "Custom" : "Cyfaddas",
     "Size" : "Maint",

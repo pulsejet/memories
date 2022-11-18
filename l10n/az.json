@@ -17,6 +17,7 @@
     "Name" : "Ad",
     "Update" : "Yenilənmə",
     "Refresh" : "Yenilə",
+    "Remove" : "Sil",
     "Reset" : "Sıfırla",
     "Size" : "Həcm"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

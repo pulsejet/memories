@@ -19,6 +19,7 @@ OC.L10N.register(
     "Name" : "Ad",
     "Update" : "Yenilənmə",
     "Refresh" : "Yenilə",
+    "Remove" : "Sil",
     "Reset" : "Sıfırla",
     "Size" : "Həcm"
 },

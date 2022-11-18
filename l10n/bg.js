@@ -126,6 +126,7 @@ OC.L10N.register(
     "Use the sidebar to share this folder." : "Използвайне на страничната лента, за споделяне на тази папка.",
     "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Ако създадете публично споделяне на връзка, щракнете върху Опресняване и съответна връзка към приложението Спомени ще бъде показана по-долу.",
     "Refresh" : "Опресняване",
+    "Remove" : "Премахване",
     "Share album" : "Споделяне на албум",
     "Delete album" : "Изтриване на албум",
     "Merge with different person" : "Обединяване с различно лице",
