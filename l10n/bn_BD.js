@@ -20,6 +20,7 @@ OC.L10N.register(
     "Name" : "নাম",
     "Update" : "পরিবর্ধন",
     "Refresh" : "নবোদ্যম",
+    "Remove" : "অপসারণ",
     "Reset" : "পূণঃনির্ধানণ",
     "Continue" : "চালিয়ে যাও",
     "Size" : "আকার"

@@ -25,6 +25,7 @@ OC.L10N.register(
     "Name" : "Nome",
     "Update" : "Anovar",
     "Refresh" : "Refrescar",
+    "Remove" : "Desaniciar",
     "Continue" : "Siguir",
     "Undo" : "Desfacer",
     "Custom" : "Personalizáu",

@@ -23,6 +23,7 @@ OC.L10N.register(
     "Name" : "Anv",
     "Update" : "Hizivaat",
     "Refresh" : "Freskaat",
+    "Remove" : "Lemel",
     "Continue" : "Kendec'hel",
     "Original" : "Orin",
     "Size" : "Ment"

@@ -129,6 +129,7 @@ OC.L10N.register(
     "Use the sidebar to share this folder." : "Pokud chcete tuto složku nasdílet, použijte k tomu postranní panel",
     "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Pokud vytváříte odkaz pro veřejné sdílení, klikněte na opětovné načtení a níže se ukáže příslušný odkaz do Vzpomínek.",
     "Refresh" : "Znovu načíst",
+    "Remove" : "Odebrat",
     "Share album" : "Nasdílet album",
     "Delete album" : "Smazat album",
     "Merge with different person" : "Sloučit s jinou osobou",

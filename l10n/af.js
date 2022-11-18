@@ -27,6 +27,7 @@ OC.L10N.register(
     "Name" : "Naam",
     "Update" : "Werk by",
     "Refresh" : "Verfris",
+    "Remove" : "Verwyder",
     "Reset" : "Herstel",
     "Continue" : "Gaan voort",
     "Original" : "Oorspronklik",

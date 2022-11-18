@@ -51,6 +51,7 @@ OC.L10N.register(
     "Name" : "Navn",
     "Update" : "Opdater",
     "Refresh" : "Opdater",
+    "Remove" : "Fjern",
     "Share folder" : "Del mappe",
     "Reset" : "Nulstil",
     "Continue" : "Fortsæt",
