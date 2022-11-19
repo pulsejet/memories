@@ -32,6 +32,7 @@ use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\Encryption\IManager;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
@@ -48,6 +49,7 @@ class ApiBase extends Controller
     protected IUserSession $userSession;
     protected IRootFolder $rootFolder;
     protected IAppManager $appManager;
+    protected IManager $encryptionManager;
     protected TimelineQuery $timelineQuery;
     protected TimelineWrite $timelineWrite;
     protected IShareManager $shareManager;
@@ -60,6 +62,7 @@ class ApiBase extends Controller
         IDBConnection $connection,
         IRootFolder $rootFolder,
         IAppManager $appManager,
+        IManager $encryptionManager,
         IShareManager $shareManager,
         IPreview $preview
     ) {
@@ -70,6 +73,7 @@ class ApiBase extends Controller
         $this->connection = $connection;
         $this->rootFolder = $rootFolder;
         $this->appManager = $appManager;
+        $this->encryptionManager = $encryptionManager;
         $this->shareManager = $shareManager;
         $this->previewManager = $preview;
         $this->timelineQuery = new TimelineQuery($connection);
