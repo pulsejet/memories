@@ -10,6 +10,7 @@
     <!-- No content found and nothing is loading -->
     <NcEmptyContent
       title="Nothing to show here"
+      :description="emptyViewDescription"
       v-if="loading === 0 && list.length === 0"
     >
       <template #icon>
@@ -689,6 +690,27 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     // Cache and return
     head.name = name;
     return head.name;
+  }
+
+  /* Get a friendly description of empty view */
+  get emptyViewDescription() {
+    switch (this.$route.name) {
+      case "facerecognition":
+        if (this.config_facerecognitionEnabled)
+          return this.t('memories', 'You will find your friends soon. Please, be pacient.')
+        else
+          return this.t('memories', 'Face Recognition is disabled. Enabled in settings to find your friends.')
+      case "timeline":
+      case "favorites":
+      case "people":
+      case "videos":
+      case "albums":
+      case "archive":
+      case "thisday":
+      case "tags":
+      default:
+        return "";
+    }
   }
 
   /** Fetch timeline main call */

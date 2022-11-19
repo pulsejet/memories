@@ -174,7 +174,7 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
   }
 
   get showFaceRecognition() {
-    return this.config_facerecognitionEnabled || getCurrentUser()?.isAdmin;
+    return this.config_facerecognitionInstalled || getCurrentUser()?.isAdmin;
   }
 
   get isFirstStart() {

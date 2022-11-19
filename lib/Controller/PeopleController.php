@@ -111,10 +111,9 @@ class PeopleController extends ApiBase
             return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
         }
 
-        // Check faces enabled for this user
-        $currentModel = (int) ($this->config->getAppValue('facerecognition', 'model', -1));
-        if (!$this->facerecognitionIsEnabled() || $currentModel <= 0) {
-            return new JSONResponse(['message' => 'Face Recgonition app not enabled'], Http::STATUS_PRECONDITION_FAILED);
+        // Check if face recognition is installed and enabled for this user
+        if (!$this->facerecognitionIsInstalled()) {
+            return new DataResponse([], Http::STATUS_PRECONDITION_FAILED);
         }
 
         // If this isn't the timeline folder then things aren't going to work
@@ -123,7 +122,13 @@ class PeopleController extends ApiBase
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }
 
+        // If the user has recognition disabled, just returns an empty response.
+        if (!$this->facerecognitionIsEnabled()) {
+            return new JSONResponse([]);
+        }
+
         // Run actual query
+        $currentModel = (int) ($this->config->getAppValue('facerecognition', 'model', -1));
         $list = $this->timelineQuery->getPeopleFaceRecognition(
             $folder,
             $currentModel,
@@ -154,9 +159,8 @@ class PeopleController extends ApiBase
             return new DataResponse([], Http::STATUS_PRECONDITION_FAILED);
         }
 
-        // Check faces enabled for this user
-        $currentModel = (int) ($this->config->getAppValue('facerecognition', 'model', -1));
-        if (!$this->facerecognitionIsEnabled() || $currentModel <= 0) {
+        // Check if face recognition is installed and enabled for this user
+        if (!$this->facerecognitionIsInstalled()) {
             return new DataResponse([], Http::STATUS_PRECONDITION_FAILED);
         }
 
@@ -166,7 +170,13 @@ class PeopleController extends ApiBase
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }
 
+        // If the user has facerecognition disabled, just returns an empty response.
+        if (!$this->facerecognitionIsEnabled()) {
+            return new JSONResponse([]);
+        }
+
         // Run actual query
+        $currentModel = (int) ($this->config->getAppValue('facerecognition', 'model', -1));
         $detections = $this->timelineQuery->getFaceRecognitionPreview($folder, $currentModel, $id);
 
         if (null === $detections || 0 === \count($detections)) {
