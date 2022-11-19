@@ -9,7 +9,9 @@ import GlobalMixin from "../mixins/GlobalMixin";
 import { basename, dirname, extname, join } from "path";
 import { emit } from "@nextcloud/event-bus";
 import { showError, showSuccess } from "@nextcloud/dialogs";
+import { generateUrl } from "@nextcloud/router";
 import axios from "@nextcloud/axios";
+
 import FilerobotImageEditor from "filerobot-image-editor";
 import { FilerobotImageEditorConfig } from "react-filerobot-image-editor";
 
@@ -25,11 +27,22 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
   @Prop() mime: string;
   @Prop() src: string;
 
+  private exif: any = null;
+
   private imageEditor: FilerobotImageEditor = null;
 
   get config(): FilerobotImageEditorConfig & { theme: any } {
+    let src: string;
+    if (["image/png", "image/jpeg", "image/webp"].includes(this.mime)) {
+      src = this.src;
+    } else {
+      src = generateUrl("/apps/memories/api/image/jpeg/{fileid}", {
+        fileid: this.fileid,
+      });
+    }
+
     return {
-      source: this.src,
+      source: src,
 
       defaultSavedImageName: this.defaultSavedImageName,
       defaultSavedImageType: this.defaultSavedImageType,
@@ -84,8 +97,8 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
         },
       },
 
-      savingPixelRatio: 1,
-      previewPixelRatio: 1,
+      savingPixelRatio: 8,
+      previewPixelRatio: window.devicePixelRatio,
     };
   }
 
@@ -117,14 +130,32 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
     };
   }
 
-  mounted() {
+  async mounted() {
     this.imageEditor = new FilerobotImageEditor(
       <any>this.$refs.editor,
       <any>this.config
     );
     this.imageEditor.render();
     window.addEventListener("keydown", this.handleKeydown, true);
-    window.addEventListener("DOMNodeInserted", this.handleSfxModal);
+
+    // Get latest exif data
+    try {
+      const res = await axios.get(
+        generateUrl("/apps/memories/api/image/info/{id}?basic=1&current=1", {
+          id: this.fileid,
+        })
+      );
+
+      this.exif = res.data?.current;
+      if (!this.exif) {
+        throw new Error("No exif data");
+      }
+    } catch (err) {
+      console.error(err);
+      alert(
+        this.t("memories", "Failed to get Exif data. Metadata may be lost!")
+      );
+    }
   }
 
   beforeDestroy() {
@@ -147,46 +178,69 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
    * User saved the image
    *
    * @see https://github.com/scaleflex/filerobot-image-editor#onsave
-   * @param {object} props destructuring object
-   * @param {string} props.fullName the file name
-   * @param {HTMLCanvasElement} props.imageCanvas the image canvas
-   * @param {string} props.mimeType the image mime type
-   * @param {number} props.quality the image saving quality
    */
   async onSave({
     fullName,
-    imageCanvas,
-    mimeType,
-    quality,
+    imageBase64,
   }: {
     fullName?: string;
-    imageCanvas?: HTMLCanvasElement;
-    mimeType?: string;
-    quality?: number;
+    imageBase64?: string;
   }): Promise<void> {
+    if (!imageBase64) {
+      throw new Error("No image data");
+    }
+
     const { origin, pathname } = new URL(this.src);
     const putUrl = origin + join(dirname(pathname), fullName);
 
-    // toBlob is not very smart...
-    mimeType = mimeType.replace("jpg", "jpeg");
-
-    // Sanity check, 0 < quality < 1
-    quality = Math.max(Math.min(quality, 1), 0) || 1;
+    if (
+      !this.exif &&
+      !confirm(this.t("memories", "No Exif data found! Continue?"))
+    ) {
+      return;
+    }
 
     try {
-      const blob = await new Promise((resolve: BlobCallback) =>
-        imageCanvas.toBlob(resolve, mimeType, quality)
-      );
+      const blob = await fetch(imageBase64).then((res) => res.blob());
       const response = await axios.put(putUrl, new File([blob], fullName));
+      const fileid =
+        parseInt(response?.headers?.["oc-fileid"]?.split("oc")[0]) || null;
+      if (response.status >= 400) {
+        throw new Error("Failed to save image");
+      }
+
+      // Strip old and incorrect exif data
+      const exif = this.exif;
+      delete exif.Orientation;
+      delete exif.Rotation;
+      delete exif.ImageHeight;
+      delete exif.ImageWidth;
+      delete exif.ImageSize;
+      delete exif.ModifyDate;
+      delete exif.ExifImageHeight;
+      delete exif.ExifImageWidth;
+      delete exif.ExifImageSize;
+      delete exif.CompatibleBrands;
+      delete exif.FileType;
+      delete exif.FileTypeExtension;
+      delete exif.MIMEType;
+      delete exif.MajorBrand;
+
+      // Update exif data
+      await axios.patch(
+        generateUrl("/apps/memories/api/image/set-exif/{id}", {
+          id: fileid,
+        }),
+        {
+          raw: exif,
+        }
+      );
 
       showSuccess(this.t("memories", "Image saved successfully"));
-      if (putUrl !== this.src) {
-        emit("files:file:created", {
-          fileid:
-            parseInt(response?.headers?.["oc-fileid"]?.split("oc")[0]) || null,
-        });
+      if (fileid !== this.fileid) {
+        emit("files:file:created", { fileid });
       } else {
-        emit("files:file:updated", { fileid: this.fileid });
+        emit("files:file:updated", { fileid });
       }
       this.onClose(undefined, false);
     } catch (error) {
@@ -245,21 +299,6 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
       (
         document.querySelector(".FIE_topbar-undo-button") as HTMLElement
       ).click();
-    }
-  }
-
-  /**
-   * Watch out for Modal inject in document root
-   * That way we can adjust the focusTrap
-   *
-   * @param {Event} event Dom insertion event
-   */
-  handleSfxModal(event) {
-    if (
-      event.target?.classList &&
-      event.target.classList.contains("SfxModal-Wrapper")
-    ) {
-      emit("viewer:trapElements:changed", event.target);
     }
   }
 }
@@ -589,5 +628,10 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
   border-radius: 100%;
 
   filter: var(--background-invert-if-dark);
+}
+
+.FIE_carousel-prev-button,
+.FIE_carousel-next-button {
+  background: none !important;
 }
 </style>

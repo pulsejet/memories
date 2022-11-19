@@ -25,12 +25,14 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Exif;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
@@ -87,12 +89,14 @@ class ApiBase extends Controller
         return $user ? $user->getUID() : '';
     }
 
-    /** Get the Folder object relevant to the request */
-    protected function getRequestFolder()
+    /** Get the TimelineRoot object relevant to the request */
+    protected function getRequestRoot()
     {
+        $root = new TimelineRoot();
+
         // Albums have no folder
         if ($this->request->getParam('album')) {
-            return null;
+            return $root;
         }
 
         // Public shared folder
@@ -102,35 +106,79 @@ class ApiBase extends Controller
                 throw new \Exception('Share not found or invalid');
             }
 
-            return $share;
+            $root->addFolder($share);
+
+            return $root;
         }
 
         // Anything else needs a user
         $user = $this->userSession->getUser();
         if (null === $user) {
-            return null;
+            throw new \Exception('User not logged in');
         }
         $uid = $user->getUID();
 
         $folder = null;
         $folderPath = $this->request->getParam('folder');
-        $forcedTimelinePath = $this->request->getParam('timelinePath');
         $userFolder = $this->rootFolder->getUserFolder($uid);
 
-        if (null !== $folderPath) {
-            $folder = $userFolder->get($folderPath);
-        } elseif (null !== $forcedTimelinePath) {
-            $folder = $userFolder->get($forcedTimelinePath);
-        } else {
-            $configPath = Exif::removeExtraSlash(Exif::getPhotosPath($this->config, $uid));
-            $folder = $userFolder->get($configPath);
+        try {
+            if (null !== $folderPath) {
+                $folder = $userFolder->get(Exif::removeExtraSlash($folderPath));
+                $root->addFolder($folder);
+            } else {
+                $timelinePath = $this->request->getParam('timelinePath', Exif::getPhotosPath($this->config, $uid));
+                $timelinePath = Exif::removeExtraSlash($timelinePath);
+
+                // Multiple timeline path support
+                $paths = explode(';', $timelinePath);
+                foreach ($paths as &$path) {
+                    $folder = $userFolder->get(trim($path));
+                    $root->addFolder($folder);
+                }
+                $root->addMountPoints();
+            }
+        } catch (\OCP\Files\NotFoundException $e) {
+            $msg = $e->getMessage();
+
+            throw new \Exception("Folder not found: {$msg}");
         }
 
-        if (!$folder instanceof Folder) {
-            throw new \Exception('Folder not found');
+        return $root;
+    }
+
+    /**
+     * Get a file with ID from user's folder.
+     *
+     * @param int $fileId
+     *
+     * @return null|File
+     */
+    protected function getUserFile(int $id)
+    {
+        $user = $this->userSession->getUser();
+        if (null === $user) {
+            return null;
+        }
+        $userFolder = $this->rootFolder->getUserFolder($user->getUID());
+
+        // Check for permissions and get numeric Id
+        $file = $userFolder->getById($id);
+        if (0 === \count($file)) {
+            return null;
         }
 
-        return $folder;
+        // Check if node is a file
+        if (!$file[0] instanceof File) {
+            return null;
+        }
+
+        // Check read permission
+        if (!($file[0]->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
+            return null;
+        }
+
+        return $file[0];
     }
 
     protected function isRecursive()

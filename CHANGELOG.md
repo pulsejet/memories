@@ -2,6 +2,25 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## v4.8.0, v3.8.0
+
+- **Feature**: Timeline path now scans recursively for mounted volumes / shares inside it.
+- **Feature**: Multiple timeline paths can be specified.
+
+## v4.7.0, v3.7.0 (2022-11-14)
+
+- **Note**: you must run `occ memories:index -f` to take advantage of new features.
+- **Massively improved video performance**
+  - Memories now comes with a dedicated transcoding server with HLS support.
+  - Read the documentation [here](https://github.com/pulsejet/memories/wiki/Configuration#video-transcoding) carefully for more details.
+- **Feature**: Show EXIF metadata in sidebar ([#68](https://github.com/pulsejet/memories/issues/68))
+- **Feature**: Multi-selection with drag (mobile) and shift+click ([#28](https://github.com/pulsejet/memories/issues/28))
+- **Feature**: Show duration on video tiles
+- **Feature**: Allow editing all image formats (HEIC etc.)
+- Fix stretched images in viewer ([#176](https://github.com/pulsejet/memories/issues/176))
+- Restore metadata after image edit ([#174](https://github.com/pulsejet/memories/issues/174))
+- Fix loss of resolution after image edit
+
 ## v4.6.1, v3.6.1 (2022-11-07)
 
 - **Feature**: Native sharing from the viewer (images only)

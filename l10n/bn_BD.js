@@ -1,14 +1,16 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "সেটিংস",
     "Favorites" : "প্রিয়জন",
     "Tags" : "ট্যাগ",
     "Maps" : "মানচিত্র",
-    "Settings" : "সেটিংস",
+    "Edit" : "সম্পাদনা",
     "Cancel" : "বাতির",
     "Delete" : "মুছে",
     "Download" : "ডাউনলোড",
     "Favorite" : "প্রিয়জন",
+    "Share" : "ভাগাভাগি কর",
     "Back" : "পেছনে যাও",
     "Save" : "সংরক্ষণ",
     "Month" : "মাস",
@@ -17,6 +19,10 @@ OC.L10N.register(
     "Hour" : "ঘন্টা",
     "Name" : "নাম",
     "Update" : "পরিবর্ধন",
-    "Refresh" : "নবোদ্যম"
+    "Refresh" : "নবোদ্যম",
+    "Remove" : "অপসারণ",
+    "Reset" : "পূণঃনির্ধানণ",
+    "Continue" : "চালিয়ে যাও",
+    "Size" : "আকার"
 },
 "nplurals=2; plural=(n != 1);");

@@ -69,6 +69,26 @@ export function getFromNowStr(date: Date) {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
+/** Convert number of seconds to time string */
+export function getDurationStr(sec: number) {
+  let hours = Math.floor(sec / 3600);
+  let minutes: number | string = Math.floor((sec - hours * 3600) / 60);
+  let seconds: number | string = sec - hours * 3600 - minutes * 60;
+
+  if (seconds < 10) {
+    seconds = "0" + seconds;
+  }
+
+  if (hours > 0) {
+    if (minutes < 10) {
+      minutes = "0" + minutes;
+    }
+    return `${hours}:${minutes}:${seconds}`;
+  }
+
+  return `${minutes}:${seconds}`;
+}
+
 /**
  * Returns a hash code from a string
  * @param  {String} str The string to hash.

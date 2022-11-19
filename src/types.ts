@@ -1,6 +1,8 @@
 import { VueConstructor } from "vue";
 
 export type IFileInfo = {
+  /** Same as fileid */
+  id: number;
   /** Database file ID */
   fileid: number;
   /** Full file name, e.g. /pi/test/Qx0dq7dvEXA.jpg */
@@ -75,6 +77,8 @@ export type IPhoto = {
 
   /** Video flag from server */
   isvideo?: boolean;
+  /** Video duration from server */
+  video_duration?: number;
   /** Favorite flag from server */
   isfavorite?: boolean;
   /** Is this a folder */
@@ -146,10 +150,13 @@ export type IRow = {
   selected?: boolean;
   /** Main list of photo items */
   photos?: IPhoto[];
+
   /** Height in px of the row */
   size?: number;
   /** Count of placeholders to create */
   pct?: number;
+  /** Don't remove dom element */
+  virtualSticky?: boolean;
 };
 export type IHeadRow = IRow & {
   type: IRowType.HEAD;

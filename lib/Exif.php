@@ -109,7 +109,12 @@ class Exif
             throw new \Exception('Failed to get local file path');
         }
 
-        return self::getExifFromLocalPath($path);
+        $exif = self::getExifFromLocalPath($path);
+
+        // We need to remove blacklisted fields to prevent leaking info
+        unset($exif['SourceFile'], $exif['FileName'], $exif['ExifToolVersion'], $exif['Directory'], $exif['FileSize'], $exif['FileModifyDate'], $exif['FileAccessDate'], $exif['FileInodeChangeDate'], $exif['FilePermissions'], $exif['ThumbnailImage']);
+
+        return $exif;
     }
 
     /** Get exif data as a JSON object from a local file path */
@@ -225,29 +230,35 @@ class Exif
     }
 
     /**
-     * Update exif date using exiftool.
+     * Set exif data using raw json.
      *
-     * @param string $newDate formatted in standard Exif format (YYYY:MM:DD HH:MM:SS)
+     * @param string $path to local file
+     * @param array  $data exif data
+     *
+     * @throws \Exception on failure
      */
-    public static function updateExifDate(File &$file, string $newDate)
+    public static function setExif(string &$path, array &$data)
     {
-        // Don't want to mess these up, definitely
-        if ($file->isEncrypted()) {
-            throw new \Exception('Cannot update exif date on encrypted files');
-        }
+        $data['SourceFile'] = $path;
+        $raw = json_encode([$data]);
+        $cmd = array_merge(self::getExiftool(), ['-json=-', $path]);
+        $proc = proc_open($cmd, [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ], $pipes);
 
-        // Get path to local (copy) of the file
-        $path = $file->getStorage()->getLocalFile($file->getInternalPath());
-        if (!\is_string($path)) {
-            throw new \Exception('Failed to get local file path');
-        }
+        fwrite($pipes[0], $raw);
+        fclose($pipes[0]);
 
-        // Update exif data
-        self::updateExifDateForLocalFile($path, $newDate);
+        $stdout = self::readOrTimeout($pipes[1], 30000);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_terminate($proc);
+        if (false !== strpos($stdout, 'error')) {
+            error_log("Exiftool error: {$stdout}");
 
-        // Update remote file if not local
-        if (!$file->getStorage()->isLocal()) {
-            $file->putContent(fopen($path, 'r')); // closes the handler
+            throw new \Exception('Could not set exif data: '.$stdout);
         }
     }
 
@@ -269,28 +280,13 @@ class Exif
         }
 
         // Detect architecture
-        $arch = null;
-        $uname = php_uname('m');
-        if (false !== stripos($uname, 'aarch64') || false !== stripos($uname, 'arm64')) {
-            $arch = 'aarch64';
-        } elseif (false !== stripos($uname, 'x86_64') || false !== stripos($uname, 'amd64')) {
-            $arch = 'amd64';
-        }
-
-        // Detect glibc or musl
-        $libc = null;
-        if ($ldd = shell_exec('ldd --version 2>&1')) {
-            if (false !== stripos($ldd, 'musl')) {
-                $libc = 'musl';
-            } elseif (false !== stripos($ldd, 'glibc')) {
-                $libc = 'glibc';
-            }
-        }
+        $arch = $noLocal ? null : \OCA\Memories\Util::getArch();
+        $libc = $noLocal ? null : \OCA\Memories\Util::getLibc();
 
         // Get static binary if available
         if ($arch && $libc && !$noLocal) {
             // get target file path
-            $path = __DIR__."/../exiftool-bin/exiftool-{$arch}-{$libc}";
+            $path = realpath(__DIR__."/../exiftool-bin/exiftool-{$arch}-{$libc}");
 
             // check if file exists
             if (file_exists($path)) {
@@ -372,7 +368,7 @@ class Exif
 
     private static function getExifFromLocalPathWithStaticProc(string &$path)
     {
-        fwrite(self::$staticPipes[0], "{$path}\n-json\n-api\nQuickTimeUTC=1\n-n\n-execute\n");
+        fwrite(self::$staticPipes[0], "{$path}\n-U\n-json\n--b\n-api\nQuickTimeUTC=1\n-n\n-execute\n");
         fflush(self::$staticPipes[0]);
 
         $readyToken = "\n{ready}\n";
@@ -394,7 +390,7 @@ class Exif
     private static function getExifFromLocalPathWithSeparateProc(string &$path)
     {
         $pipes = [];
-        $proc = proc_open(array_merge(self::getExiftool(), ['-api', 'QuickTimeUTC=1', '-n', '-json', $path]), [
+        $proc = proc_open(array_merge(self::getExiftool(), ['-api', 'QuickTimeUTC=1', '-n', '-U', '-json', '--b', $path]), [
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
         ], $pipes);
@@ -424,30 +420,5 @@ class Exif
         }
 
         return $json[0];
-    }
-
-    /**
-     * Update exif date using exiftool for a local file.
-     *
-     * @param string $newDate formatted in standard Exif format (YYYY:MM:DD HH:MM:SS)
-     *
-     * @throws \Exception on failure
-     */
-    private static function updateExifDateForLocalFile(string $path, string $newDate)
-    {
-        $cmd = array_merge(self::getExiftool(), ['-api', 'QuickTimeUTC=1', '-overwrite_original', '-DateTimeOriginal='.$newDate, $path]);
-        $proc = proc_open($cmd, [
-            1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
-        ], $pipes);
-        $stdout = self::readOrTimeout($pipes[1], 300000);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        proc_terminate($proc);
-        if (false !== strpos($stdout, 'error')) {
-            error_log("Exiftool error: {$stdout}");
-
-            throw new \Exception('Could not update exif date: '.$stdout);
-        }
     }
 }

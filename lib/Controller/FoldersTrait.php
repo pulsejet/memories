@@ -13,7 +13,7 @@ trait FoldersTrait
     /**
      * Get subfolders entry for days response.
      */
-    public function getSubfoldersEntry(Folder &$folder)
+    public function getSubfoldersEntry(Folder $folder)
     {
         // Ugly: get the view of the folder with reflection
         // This is unfortunately the only way to get the contents of a folder
@@ -34,7 +34,7 @@ trait FoldersTrait
         return [
             'dayid' => \OCA\Memories\Util::$TAG_DAYID_FOLDERS,
             'count' => \count($folders),
-            'detail' => array_map(function (&$node) use (&$folder) {
+            'detail' => array_map(function ($node) use (&$folder) {
                 return [
                     'fileid' => $node->getId(),
                     'name' => $node->getName(),

@@ -52,10 +52,13 @@ return [
         ['name' => 'Faces#faces', 'url' => '/api/faces', 'verb' => 'GET'],
         ['name' => 'Faces#preview', 'url' => '/api/faces/preview/{id}', 'verb' => 'GET'],
 
-        ['name' => 'Image#info', 'url' => '/api/info/{id}', 'verb' => 'GET'],
-        ['name' => 'Image#edit', 'url' => '/api/edit/{id}', 'verb' => 'PATCH'],
+        ['name' => 'Image#info', 'url' => '/api/image/info/{id}', 'verb' => 'GET'],
+        ['name' => 'Image#setExif', 'url' => '/api/image/set-exif/{id}', 'verb' => 'PATCH'],
+        ['name' => 'Image#jpeg', 'url' => '/api/image/jpeg/{id}', 'verb' => 'GET'],
 
         ['name' => 'Archive#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
+
+        ['name' => 'Video#transcode', 'url' => '/api/video/transcode/{client}/{fileid}/{profile}', 'verb' => 'GET'],
 
         // Config API
         ['name' => 'Other#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],

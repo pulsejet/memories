@@ -14,7 +14,7 @@ cd memories
 sh "$od/scripts/get-exiftool.sh"
 cd ..
 
-tar -zvcf memories.tar.gz memories/
+tar --no-same-owner -p -zcf memories.tar.gz memories/
 rm -rf memories
 
 cd $od

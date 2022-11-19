@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories;
 
-use OCA\Memories\AppInfo\Application;
-use OCP\IConfig;
-
 class Util
 {
     public static $TAG_DAYID_START = -(1 << 30); // the world surely didn't exist
@@ -15,16 +12,36 @@ class Util
     public static $ARCHIVE_FOLDER = '.archive';
 
     /**
-     * Get the path to the user's configured photos directory.
+     * Get host CPU architecture (amd64 or aarch64).
      */
-    public static function getPhotosPath(IConfig &$config, string $userId)
+    public static function getArch()
     {
-        $p = $config->getUserValue($userId, Application::APPNAME, 'timelinePath', '');
-        if (empty($p)) {
-            return '/Photos/';
+        $uname = php_uname('m');
+        if (false !== stripos($uname, 'aarch64') || false !== stripos($uname, 'arm64')) {
+            return 'aarch64';
+        }
+        if (false !== stripos($uname, 'x86_64') || false !== stripos($uname, 'amd64')) {
+            return 'amd64';
         }
 
-        return $p;
+        return null;
+    }
+
+    /**
+     * Get the libc type for host (glibc or musl).
+     */
+    public static function getLibc()
+    {
+        if ($ldd = shell_exec('ldd --version 2>&1')) {
+            if (false !== stripos($ldd, 'musl')) {
+                return 'musl';
+            }
+            if (false !== stripos($ldd, 'glibc')) {
+                return 'glibc';
+            }
+        }
+
+        return null;
     }
 
     /**

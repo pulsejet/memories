@@ -102,5 +102,5 @@ export function getDownloadLink(photo: IPhoto) {
     }
   }
 
-  return `/remote.php/dav${photo.filename}`; // normal route
+  return `/remote.php/dav${photo.filename}`;
 }

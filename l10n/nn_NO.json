@@ -1,12 +1,14 @@
 { "translations": {
+    "Settings" : "Innstillingar",
     "Favorites" : "Favorittar",
     "Videos" : "Video",
     "Tags" : "Emneord",
-    "Settings" : "Innstillingar",
+    "Edit" : "Rediger",
     "Cancel" : "Avbryt",
     "Delete" : "Slett",
     "Download" : "Last ned",
     "Favorite" : "Favoritt",
+    "Share" : "Del",
     "Back" : "Tilbake",
     "Save" : "Lagre",
     "Year" : "År",
@@ -16,6 +18,10 @@
     "Minute" : "Minutt",
     "Name" : "Namn",
     "Update" : "Oppdater",
-    "Refresh" : "Last inn på nytt"
+    "Refresh" : "Last inn på nytt",
+    "Remove" : "Fjern",
+    "Continue" : "Gå vidare",
+    "Value" : "Verdi",
+    "Size" : "Storleik"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -29,12 +29,16 @@ import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 
 import App from "./App.vue";
 import router from "./router";
+import { IPhoto } from "./types";
 
 // Global exposed variables
 declare global {
   var vuerouter: typeof router;
   var OC: Nextcloud.v24.OC;
   var OCP: Nextcloud.v24.OCP;
+
+  var editDate: (photo: IPhoto) => void;
+  var currentViewerPhoto: IPhoto;
 }
 globalThis.vuerouter = router;
 

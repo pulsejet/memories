@@ -1,11 +1,11 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Sozlamalar",
     "Favorites" : "Favorites",
     "Videos" : "Videos",
     "Tags" : "Tags",
     "Maps" : "Maps",
-    "Settings" : "Sozlamalar",
     "Cancel" : "Cancel",
     "Delete" : "Delete",
     "Download" : "Download",
@@ -13,6 +13,9 @@ OC.L10N.register(
     "Save" : "Save",
     "Name" : "Name",
     "Update" : "Update",
-    "Refresh" : "Refresh"
+    "Refresh" : "Refresh",
+    "Remove" : "Remove",
+    "Continue" : "Continue",
+    "Size" : "Size"
 },
 "nplurals=1; plural=0;");

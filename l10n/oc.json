@@ -1,4 +1,5 @@
 { "translations": {
+    "Settings" : "Paramètres",
     "Folders" : "Repertòris",
     "Favorites" : "Favorits",
     "Albums" : "Albums",
@@ -6,11 +7,14 @@
     "Archive" : "Archiu",
     "Tags" : "Etiquetas",
     "Maps" : "Mapas",
-    "Settings" : "Paramètres",
+    "Unsaved changes" : "Modificacions pas enregistradas",
+    "Edit" : "Modificar",
+    "Loading …" : "Cargament…",
     "Cancel" : "Anullar",
     "Delete" : "Suprimir",
     "Download" : "Telecargar",
     "Favorite" : "Favorit",
+    "Share" : "Partejar",
     "Copy public link" : "Copiar lo ligam public",
     "Public link" : "Ligam public",
     "Back" : "Retorn",
@@ -23,7 +27,19 @@
     "Minute" : "Minuta",
     "Name" : "Nom",
     "Update" : "Actualizar",
-    "Loading …" : "Cargament…",
-    "Refresh" : "Actualizar"
+    "Refresh" : "Actualizar",
+    "Remove" : "Suprimir",
+    "Reset" : "Reïnicializar",
+    "Continue" : "Contunhar",
+    "Undo" : "Desfar",
+    "Redo" : "Refar",
+    "Custom" : "Personalizar",
+    "Portrait" : "Retrach",
+    "Value" : "Valor",
+    "Line" : "Linha",
+    "Text" : "Tèxt",
+    "Size" : "Talha",
+    "Position" : "Posicion",
+    "Extension" : "Extension"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }

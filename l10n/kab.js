@@ -1,18 +1,23 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "Iɣewwaṛen",
     "Favorites" : "Imenyafen",
     "Videos" : "Tividyutin",
     "Tags" : "Tibzimin",
-    "Settings" : "Iɣewwaṛen",
+    "Edit" : "Ẓreg",
     "Cancel" : "Sefsex",
     "Delete" : "Kkes",
     "Download" : "Sider",
     "Favorite" : "Menyif",
+    "Share" : "Bḍu",
     "Back" : "Retour",
     "Save" : "Sekles",
     "Hour" : "Asrag",
     "Name" : "Nom",
-    "Refresh" : "Sismeḍ"
+    "Refresh" : "Sismeḍ",
+    "Remove" : "Kkes",
+    "Continue" : "Continuer",
+    "Size" : "Teɣzi"
 },
 "nplurals=2; plural=(n != 1);");

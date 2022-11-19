@@ -23,9 +23,9 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\Db\TimelineRoot;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\Files\Folder;
 
 class DaysController extends ApiBase
 {
@@ -42,10 +42,10 @@ class DaysController extends ApiBase
         $uid = $this->getUid();
 
         // Get the folder to show
-        $folder = null;
+        $root = null;
 
         try {
-            $folder = $this->getRequestFolder();
+            $root = $this->getRequestRoot();
         } catch (\Exception $e) {
             return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
         }
@@ -53,7 +53,7 @@ class DaysController extends ApiBase
         // Run actual query
         try {
             $list = $this->timelineQuery->getDays(
-                $folder,
+                $root,
                 $uid,
                 $this->isRecursive(),
                 $this->isArchive(),
@@ -65,7 +65,7 @@ class DaysController extends ApiBase
                 $list = $this->timelineQuery->daysToMonths($list);
             } else {
                 // Preload some day responses
-                $this->preloadDays($list, $uid, $folder);
+                $this->preloadDays($list, $uid, $root);
             }
 
             // Reverse response if requested. Folders still stay at top.
@@ -75,7 +75,7 @@ class DaysController extends ApiBase
 
             // Add subfolder info if querying non-recursively
             if (!$this->isRecursive()) {
-                array_unshift($list, $this->getSubfoldersEntry($folder));
+                array_unshift($list, $this->getSubfoldersEntry($root->getFolder($root->getOneId())));
             }
 
             return new JSONResponse($list, Http::STATUS_OK);
@@ -111,10 +111,10 @@ class DaysController extends ApiBase
         }
 
         // Get the folder to show
-        $folder = null;
+        $root = null;
 
         try {
-            $folder = $this->getRequestFolder();
+            $root = $this->getRequestRoot();
         } catch (\Exception $e) {
             return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
         }
@@ -127,7 +127,7 @@ class DaysController extends ApiBase
         // Run actual query
         try {
             $list = $this->timelineQuery->getDay(
-                $folder,
+                $root,
                 $uid,
                 $dayIds,
                 $this->isRecursive(),
@@ -237,11 +237,11 @@ class DaysController extends ApiBase
     /**
      * Preload a few "day" at the start of "days" response.
      *
-     * @param array       $days   the days array
-     * @param string      $uid    User ID or blank for public shares
-     * @param null|Folder $folder the folder to search in
+     * @param array        $days the days array
+     * @param string       $uid  User ID or blank for public shares
+     * @param TimelineRoot $root the root folder
      */
-    private function preloadDays(array &$days, string $uid, &$folder)
+    private function preloadDays(array &$days, string $uid, TimelineRoot &$root)
     {
         $transforms = $this->getTransformations(false);
         $preloaded = 0;
@@ -263,7 +263,7 @@ class DaysController extends ApiBase
 
         if (\count($preloadDayIds) > 0) {
             $allDetails = $this->timelineQuery->getDay(
-                $folder,
+                $root,
                 $uid,
                 $preloadDayIds,
                 $this->isRecursive(),

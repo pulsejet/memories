@@ -1,17 +1,20 @@
 { "translations": {
+    "Settings" : "პარამეტრები",
     "Folders" : "დირექტორიები",
     "Favorites" : "რჩეულები",
     "Videos" : "ვიდეოები",
     "Archive" : "არქივი",
     "Tags" : "ტეგები",
     "Maps" : "რუკები",
-    "Settings" : "პარამეტრები",
+    "Unsaved changes" : "შეუნახავი ცვლილებები",
+    "Edit" : "შეცვლა",
     "Cancel" : "უარყოფა",
     "Delete" : "წაშლა",
     "Download" : "ჩამოტვირთვა",
     "Favorite" : "რჩეული",
     "Unarchive" : "ამოღება",
     "View in folder" : "ჩვენება დირექტორიაში",
+    "Share" : "გაზიარება",
     "Back" : "უკან",
     "Save" : "შენახვა",
     "Month" : "თვე",
@@ -20,6 +23,15 @@
     "Hour" : "საათი",
     "Name" : "სახელი",
     "Update" : "განახლება",
-    "Refresh" : "განახლება"
+    "Refresh" : "განახლება",
+    "Remove" : "წაშლა",
+    "Reset" : "საწყის მდოგმარეობაში დაბრუნება",
+    "Continue" : "გაგრძელება",
+    "Undo" : "დაბრუნება",
+    "Custom" : "ინდივიდუალური",
+    "Value" : "მნიშვნელობა",
+    "Text" : "ტექსტი",
+    "Size" : "ზომა",
+    "Position" : "პოზიცია"
 },"pluralForm" :"nplurals=2; plural=(n!=1);"
 }

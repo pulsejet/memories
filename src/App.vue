@@ -8,74 +8,20 @@
       'remove-gap': removeOuterGap,
     }"
   >
-    <NcAppNavigation v-if="showNavigation">
+    <NcAppNavigation v-if="showNavigation" ref="nav">
       <template id="app-memories-navigation" #list>
         <NcAppNavigationItem
-          :to="{ name: 'timeline' }"
-          :title="t('memories', 'Timeline')"
+          v-for="item in navItems"
+          :key="item.name"
+          :to="{ name: item.name }"
+          :title="item.title"
+          @click="linkClick"
           exact
         >
-          <ImageMultiple slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'folders' }"
-          :title="t('memories', 'Folders')"
-        >
-          <FolderIcon slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'favorites' }"
-          :title="t('memories', 'Favorites')"
-        >
-          <Star slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'videos' }"
-          :title="t('memories', 'Videos')"
-        >
-          <Video slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'albums' }"
-          :title="t('memories', 'Albums')"
-          v-if="showAlbums"
-        >
-          <AlbumIcon slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'people' }"
-          :title="t('memories', 'People')"
-          v-if="showPeople"
-        >
-          <PeopleIcon slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'archive' }"
-          :title="t('memories', 'Archive')"
-        >
-          <ArchiveIcon slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'thisday' }"
-          :title="t('memories', 'On this day')"
-        >
-          <CalendarIcon slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'tags' }"
-          v-if="config_tagsEnabled"
-          :title="t('memories', 'Tags')"
-        >
-          <TagsIcon slot="icon" :size="20" />
-        </NcAppNavigationItem>
-        <NcAppNavigationItem
-          :to="{ name: 'maps' }"
-          v-if="config_mapsEnabled"
-          :title="t('memories', 'Maps')"
-        >
-          <MapIcon slot="icon" :size="20" />
+          <component :is="item.icon" slot="icon" :size="20" />
         </NcAppNavigationItem>
       </template>
+
       <template #footer>
         <NcAppNavigationSettings :title="t('memories', 'Settings')">
           <Settings />
@@ -102,10 +48,12 @@ import {
 } from "@nextcloud/vue";
 import { generateUrl } from "@nextcloud/router";
 import { getCurrentUser } from "@nextcloud/auth";
+import { translate as t } from "@nextcloud/l10n";
 
 import Timeline from "./components/Timeline.vue";
 import Settings from "./components/Settings.vue";
 import FirstStart from "./components/FirstStart.vue";
+import Metadata from "./components/Metadata.vue";
 import GlobalMixin from "./mixins/GlobalMixin";
 import UserConfig from "./mixins/UserConfig";
 
@@ -147,6 +95,67 @@ import MapIcon from "vue-material-design-icons/Map.vue";
 export default class App extends Mixins(GlobalMixin, UserConfig) {
   // Outer element
 
+  private metadataComponent!: Metadata;
+
+  private readonly navItemsAll = [
+    {
+      name: "timeline",
+      icon: ImageMultiple,
+      title: t("memories", "Timeline"),
+    },
+    {
+      name: "folders",
+      icon: FolderIcon,
+      title: t("memories", "Folders"),
+    },
+    {
+      name: "favorites",
+      icon: Star,
+      title: t("memories", "Favorites"),
+    },
+    {
+      name: "videos",
+      icon: Video,
+      title: t("memories", "Videos"),
+    },
+    {
+      name: "albums",
+      icon: AlbumIcon,
+      title: t("memories", "Albums"),
+      if: (self: any) => self.showAlbums,
+    },
+    {
+      name: "people",
+      icon: PeopleIcon,
+      title: t("memories", "People"),
+      if: (self: any) => self.showPeople,
+    },
+    {
+      name: "archive",
+      icon: ArchiveIcon,
+      title: t("memories", "Archive"),
+    },
+    {
+      name: "thisday",
+      icon: CalendarIcon,
+      title: t("memories", "On this day"),
+    },
+    {
+      name: "tags",
+      icon: TagsIcon,
+      title: t("memories", "Tags"),
+      if: (self: any) => self.config_tagsEnabled,
+    },
+    {
+      name: "maps",
+      icon: MapIcon,
+      title: t("memories", "Maps"),
+      if: (self: any) => self.config_mapsEnabled,
+    },
+  ];
+
+  private navItems = [];
+
   get ncVersion() {
     const version = (<any>window.OC).config.version.split(".");
     return Number(version[0]);
@@ -180,11 +189,49 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
   mounted() {
     this.doRouteChecks();
 
+    // Populate navigation
+    this.navItems = this.navItemsAll.filter(
+      (item) => !item.if || item.if(this)
+    );
+
     // Store CSS variables modified
     const root = document.documentElement;
     const colorPrimary =
       getComputedStyle(root).getPropertyValue("--color-primary");
     root.style.setProperty("--color-primary-select-light", `${colorPrimary}40`);
+    root.style.setProperty("--plyr-color-main", colorPrimary);
+
+    // Register sidebar metadata tab
+    const OCA = globalThis.OCA;
+    if (OCA.Files && OCA.Files.Sidebar) {
+      OCA.Files.Sidebar.registerTab(
+        new OCA.Files.Sidebar.Tab({
+          id: "memories-metadata",
+          name: this.t("memories", "EXIF"),
+          icon: "icon-details",
+
+          async mount(el, fileInfo, context) {
+            if (this.metadataComponent) {
+              this.metadataComponent.$destroy();
+            }
+            this.metadataComponent = new Metadata({
+              // Better integration with vue parent component
+              parent: context,
+            });
+            // Only mount after we have all the info we need
+            await this.metadataComponent.update(fileInfo);
+            this.metadataComponent.$mount(el);
+          },
+          update(fileInfo) {
+            this.metadataComponent.update(fileInfo);
+          },
+          destroy() {
+            this.metadataComponent.$destroy();
+            this.metadataComponent = null;
+          },
+        })
+      );
+    }
   }
 
   async beforeMount() {
@@ -204,6 +251,11 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
     } else {
       console.debug("Service Worker is not enabled on this browser.");
     }
+  }
+
+  linkClick() {
+    const nav: any = this.$refs.nav;
+    if (window.innerWidth <= 1024) nav?.toggleNavigation(false);
   }
 
   doRouteChecks() {
@@ -259,15 +311,21 @@ body {
 // Nextcloud 25+: get rid of gap and border radius at right
 #content-vue.remove-gap {
   // was var(--body-container-radius)
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-
+  // now set on #app-navigation-vue
+  border-radius: 0;
   width: calc(100% - var(--body-container-margin) * 1); // was *2
 }
 
 // Prevent content overflow on NC <25
 #content-vue {
   max-height: 100vh;
+
+  // https://bugs.webkit.org/show_bug.cgi?id=160953
+  overflow: visible;
+  #app-navigation-vue {
+    border-top-left-radius: var(--body-container-radius);
+    border-bottom-left-radius: var(--body-container-radius);
+  }
 }
 
 // Top bar is above everything else on mobile
@@ -280,27 +338,15 @@ body.has-viewer header {
   z-index: 0 !important;
 }
 
-// Patch viewer to remove the title and
-// make the image fill the entire screen
-.viewer {
-  .modal-title {
-    display: none;
-  }
-  .modal-wrapper .modal-container {
-    top: 0 !important;
-    bottom: 0 !important;
-
-    .viewer__image-editor {
-      top: 0 !important;
-      bottom: 0 !important;
-    }
-  }
-}
-
 // Hide horizontal scrollbar on mobile
 // For the padding removal above
 #app-content-vue {
   overflow-x: hidden;
+}
+
+// Prevent sidebar from becoming too big
+aside.app-sidebar {
+  max-width: 360px !important;
 }
 
 // Fill all available space

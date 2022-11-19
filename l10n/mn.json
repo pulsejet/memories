@@ -1,17 +1,20 @@
 { "translations": {
+    "Settings" : "Тохиргоо",
     "Folders" : "Хавтсууд",
     "Favorites" : "Онцолсон",
     "Videos" : "Бичлэгүүд",
     "Archive" : "архив",
     "Tags" : "Tag-үүд",
     "Maps" : "Газрын зураг",
-    "Settings" : "Тохиргоо",
+    "Edit" : "засварлах",
+    "Loading …" : "Уншиж байна...",
     "Cancel" : "болиулах",
     "Delete" : "Устгах",
     "Download" : "Татах",
     "Favorite" : "Дуртай",
     "Unarchive" : "Архиваас гаргах",
     "View in folder" : "Хавтасыг нээх",
+    "Share" : "Түгээх",
     "Back" : "буцах",
     "Save" : "Хадгалах",
     "Month" : "Сар",
@@ -19,7 +22,14 @@
     "Time" : "Цаг",
     "Name" : "Нэр",
     "Update" : "Шинэчлэх",
-    "Loading …" : "Уншиж байна...",
-    "Refresh" : "Сэргээх"
+    "Refresh" : "Сэргээх",
+    "Remove" : "Устгах",
+    "Reset" : "тохируулах",
+    "Continue" : "үргэлжлүүлэх",
+    "Undo" : "буцах",
+    "Custom" : "Дурын",
+    "Value" : "Үнийн дүн",
+    "Size" : "Хэмжээ",
+    "Position" : "Байр"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

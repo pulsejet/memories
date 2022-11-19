@@ -1,0 +1,11 @@
+--- ./node_modules/vue-virtual-scroller/dist/vue-virtual-scroller.esm.js	2022-11-12 00:44:05.303602165 -0800
++++ ./node_modules/vue-virtual-scroller/dist/vue-virtual-scroller.esm.js	2022-11-12 00:43:40.030571395 -0800
+@@ -425,7 +425,7 @@
+             }
+
+             // Check if index is still in visible range
+-            if (view.nr.index === -1 || view.nr.index < startIndex || view.nr.index >= endIndex) {
++            if (!view.item.virtualSticky && (view.nr.index === -1 || view.nr.index < startIndex || view.nr.index >= endIndex)) {
+               this.unuseView(view);
+             }
+           }

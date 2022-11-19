@@ -1,13 +1,15 @@
 OC.L10N.register(
     "memories",
     {
+    "Settings" : "ការកំណត់",
     "Favorites" : "Favorites",
     "Tags" : "ស្លាក",
     "Maps" : "ផែនទី",
-    "Settings" : "ការកំណត់",
+    "Edit" : "កែប្រែ",
     "Cancel" : "បោះបង់",
     "Delete" : "លុប",
     "Download" : "ទាញយក",
+    "Share" : "ចែក​រំលែក",
     "Back" : "ត្រឡប់ក្រោយ",
     "Save" : "រក្សាទុក",
     "Year" : "ឆ្នាំ",
@@ -15,6 +17,11 @@ OC.L10N.register(
     "Day" : "ថ្ងៃ",
     "Time" : "ម៉ោង",
     "Name" : "ឈ្មោះ",
-    "Update" : "ធ្វើ​បច្ចុប្បន្នភាព"
+    "Update" : "ធ្វើ​បច្ចុប្បន្នភាព",
+    "Remove" : "ដកចេញ",
+    "Continue" : "បន្ត",
+    "Value" : "តម្លៃ",
+    "Line" : "បន្ទាត់",
+    "Size" : "ទំហំ"
 },
 "nplurals=1; plural=0;");

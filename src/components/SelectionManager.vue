@@ -52,13 +52,21 @@ import GlobalMixin from "../mixins/GlobalMixin";
 import UserConfig from "../mixins/UserConfig";
 
 import { showError } from "@nextcloud/dialogs";
-import { generateUrl } from "@nextcloud/router";
 import { NcActions, NcActionButton } from "@nextcloud/vue";
 import { translate as t, translatePlural as n } from "@nextcloud/l10n";
-import { IDay, IHeadRow, IPhoto, ISelectionAction } from "../types";
+import {
+  IDay,
+  IHeadRow,
+  IPhoto,
+  IRow,
+  IRowType,
+  ISelectionAction,
+} from "../types";
 import { getCurrentUser } from "@nextcloud/auth";
 
 import * as dav from "../services/DavRequests";
+import * as utils from "../services/Utils";
+
 import EditDate from "./modal/EditDate.vue";
 import FaceMoveModal from "./modal/FaceMoveModal.vue";
 import AddToAlbumModal from "./modal/AddToAlbumModal.vue";
@@ -91,10 +99,27 @@ type Selection = Map<number, IPhoto>;
 export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
   @Prop() public heads: { [dayid: number]: IHeadRow };
 
+  /** List of rows for multi selection */
+  @Prop() public rows: IRow[];
+
+  /** Rows are in ascending order (desc is normal) */
+  @Prop() public isreverse: boolean;
+
+  /** Recycler element to scroll during touch multi-select */
+  @Prop() public recycler: any;
+
   private show = false;
   private size = 0;
   private readonly selection!: Selection;
   private readonly defaultActions: ISelectionAction[];
+
+  private touchAnchor: IPhoto = null;
+  private touchTimer: number = 0;
+  private touchPrevSel!: Selection;
+  private prevOver!: IPhoto;
+  private touchScrollInterval: number = 0;
+  private touchScrollDelta: number = 0;
+  private prevTouch: Touch = null;
 
   @Emit("refresh")
   refresh() {}
@@ -179,6 +204,33 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
         if: () => this.$route.name === "people",
       },
     ];
+
+    // Ugly: globally exposed functions
+    globalThis.editDate = (photo: IPhoto) => {
+      const sel = new Map<number, IPhoto>();
+      sel.set(photo.fileid, photo);
+      this.editDateSelection(sel);
+    };
+  }
+
+  /** Archive is not allowed only on folder routes */
+  private allowArchive() {
+    return this.$route.name !== "folders";
+  }
+
+  /** Is archive route */
+  private routeIsArchive() {
+    return this.$route.name === "archive";
+  }
+
+  /** Is album route */
+  private routeIsAlbum() {
+    return this.config_albumsEnabled && this.$route.name === "albums";
+  }
+
+  /** Public route that can't modify anything */
+  private routeIsPublic() {
+    return this.$route.name === "folder-share";
   }
 
   @Watch("show")
@@ -191,6 +243,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
     }
   }
 
+  /** Trigger to update props from selection set */
   private selectionChanged() {
     this.show = this.selection.size > 0;
     this.size = this.selection.size;
@@ -204,37 +257,11 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
     return this.selection.has(fileid);
   }
 
-  /** Restore selections from new day object */
-  public restoreDay(day: IDay) {
-    if (!this.has()) {
-      return;
-    }
-
-    // FileID => Photo for new day
-    const dayMap = new Map<number, IPhoto>();
-    day.detail.forEach((photo) => {
-      dayMap.set(photo.fileid, photo);
-    });
-
-    this.selection.forEach((photo, fileid) => {
-      // Process this day only
-      if (photo.dayid !== day.dayid) {
-        return;
-      }
-
-      // Remove all selections that are not in the new day
-      if (!dayMap.has(fileid)) {
-        this.selection.delete(fileid);
-        return;
-      }
-
-      // Update the photo object
-      const newPhoto = dayMap.get(fileid);
-      this.selection.set(fileid, newPhoto);
-      newPhoto.flag |= this.c.FLAG_SELECTED;
-    });
-
-    this.selectionChanged();
+  /** Get the actions list */
+  private getActions(): ISelectionAction[] {
+    return this.defaultActions.filter(
+      (a) => (!a.if || a.if(this)) && (!this.routeIsPublic() || a.allowPublic)
+    );
   }
 
   /** Click on an action */
@@ -249,43 +276,202 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
     }
   }
 
-  /** Get the actions list */
-  private getActions(): ISelectionAction[] {
-    return this.defaultActions.filter(
-      (a) => (!a.if || a.if(this)) && (!this.routeIsPublic() || a.allowPublic)
-    );
-  }
+  /** Clicking on photo */
+  public clickPhoto(photo: IPhoto, event: PointerEvent, rowIdx: number) {
+    if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
+    if (event.pointerType === "touch") return; // let touch events handle this
 
-  /** Clear all selected photos */
-  public clearSelection(only?: IPhoto[]) {
-    const heads = new Set<IHeadRow>();
-    const toClear = only || this.selection.values();
-    Array.from(toClear).forEach((photo: IPhoto) => {
-      photo.flag &= ~this.c.FLAG_SELECTED;
-      heads.add(this.heads[photo.d.dayid]);
-      this.selection.delete(photo.fileid);
-      this.selectionChanged();
-    });
-    heads.forEach(this.updateHeadSelected);
-    this.$forceUpdate();
-  }
-
-  /** Check if the day for a photo is selected entirely */
-  private updateHeadSelected(head: IHeadRow) {
-    let selected = true;
-
-    // Check if all photos are selected
-    for (const row of head.day.rows) {
-      for (const photo of row.photos) {
-        if (!(photo.flag & this.c.FLAG_SELECTED)) {
-          selected = false;
-          break;
-        }
+    if (this.has()) {
+      if (event.shiftKey) {
+        this.selectMulti(photo, this.rows, rowIdx);
+      } else {
+        this.selectPhoto(photo);
       }
+    } else {
+      this.openViewer(photo);
+    }
+  }
+
+  /** Tap on */
+  protected touchstartPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
+    if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
+    this.rows[rowIdx].virtualSticky = true;
+
+    this.resetTouchParams();
+    document.body.classList.add("vue-touching");
+
+    this.touchAnchor = photo;
+    this.prevOver = photo;
+    this.touchPrevSel = new Map(this.selection);
+    this.touchTimer = window.setTimeout(() => {
+      if (this.touchAnchor === photo) {
+        this.selectPhoto(photo, true);
+      }
+      this.touchTimer = 0;
+    }, 600);
+  }
+
+  /** Tap off */
+  protected touchendPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
+    if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
+    delete this.rows[rowIdx].virtualSticky;
+
+    if (this.touchTimer) this.clickPhoto(photo, {} as any, rowIdx);
+    this.resetTouchParams();
+
+    window.setTimeout(() => {
+      if (!this.touchAnchor) document.body.classList.remove("vue-touching");
+    }, 1000);
+  }
+
+  private resetTouchParams() {
+    window.clearTimeout(this.touchTimer);
+    this.touchTimer = 0;
+    this.touchAnchor = null;
+    this.prevOver = undefined;
+
+    window.cancelAnimationFrame(this.touchScrollInterval);
+    this.touchScrollInterval = 0;
+
+    this.prevTouch = null;
+  }
+
+  /**
+   * Tap over
+   * photo and rowIdx are that of the *anchor*
+   */
+  protected touchmovePhoto(anchor: IPhoto, event: TouchEvent, rowIdx: number) {
+    if (anchor.flag & this.c.FLAG_PLACEHOLDER) return;
+
+    if (this.touchTimer) {
+      // Touch is not held, just cancel
+      window.clearTimeout(this.touchTimer);
+      this.touchTimer = 0;
+      this.touchAnchor = null;
+      return;
+    } else if (!this.touchAnchor) {
+      // Touch was previously cancelled
+      return;
     }
 
-    // Update head
-    head.selected = selected;
+    // Prevent scrolling
+    event.preventDefault();
+
+    // Use first touch -- can't do much
+    const touch: Touch = event.touches[0];
+    if (!touch) return;
+    this.prevTouch = touch;
+
+    // Scroll if at top or bottom
+    const scrollUp = touch.clientY > 50 && touch.clientY < 110; // 50 topbar
+    const scrollDown = touch.clientY > window.innerHeight - 60;
+    if (scrollUp || scrollDown) {
+      if (scrollUp) {
+        this.touchScrollDelta = (-1 * (110 - touch.clientY)) / 3;
+      } else {
+        this.touchScrollDelta = (touch.clientY - window.innerHeight + 60) / 3;
+      }
+
+      if (this.touchAnchor && !this.touchScrollInterval) {
+        const fun = () => {
+          this.recycler.$el.scrollTop += this.touchScrollDelta;
+          this.touchMoveSelect(this.prevTouch, rowIdx);
+
+          if (this.touchScrollInterval) {
+            this.touchScrollInterval = window.requestAnimationFrame(fun);
+          }
+        };
+        this.touchScrollInterval = window.requestAnimationFrame(fun);
+      }
+    } else {
+      window.cancelAnimationFrame(this.touchScrollInterval);
+      this.touchScrollInterval = 0;
+    }
+
+    this.touchMoveSelect(touch, rowIdx);
+  }
+
+  /** Multi-select triggered by touchmove */
+  private touchMoveSelect(touch: Touch, rowIdx: number) {
+    // Which photo is the cursor over, if any
+    const elems = document.elementsFromPoint(touch.clientX, touch.clientY);
+    const photoComp: any = elems.find((e) => e.classList.contains("p-outer"));
+    let overPhoto: IPhoto = photoComp?.__vue__?.data;
+    if (overPhoto && overPhoto.flag & this.c.FLAG_PLACEHOLDER) overPhoto = null;
+
+    // Do multi-selection "till" overPhoto "from" anchor
+    // This logic is completely different from the desktop because of the
+    // existence of a definitive "anchor" element. We just need to find
+    // rverything between the anchor and the current photo
+    if (overPhoto && this.prevOver !== overPhoto) {
+      this.prevOver = overPhoto;
+
+      // days reverse XOR rows reverse
+      let reverse: boolean;
+      if (overPhoto.dayid === this.touchAnchor.dayid) {
+        const l = overPhoto.d.detail;
+        const ai = l.indexOf(this.touchAnchor);
+        const oi = l.indexOf(overPhoto);
+        if (ai === -1 || oi === -1) return; // Shouldn't happen
+        reverse = ai > oi;
+      } else {
+        reverse = overPhoto.dayid > this.touchAnchor.dayid != this.isreverse;
+      }
+
+      const newSelection = new Map(this.touchPrevSel);
+      const updatedDays = new Set<number>();
+
+      // Walk over rows
+      let i = rowIdx;
+      let j = this.rows[i].photos.indexOf(this.touchAnchor);
+      while (true) {
+        if (j < 0) {
+          while (i > 0 && !this.rows[--i].photos);
+          if (!this.rows[i].photos) break;
+          j = this.rows[i].photos.length - 1;
+          continue;
+        } else if (j >= this.rows[i].photos.length) {
+          while (i < this.rows.length - 1 && !this.rows[++i].photos);
+          if (!this.rows[i].photos) break;
+          j = 0;
+          continue;
+        }
+
+        let p = this.rows[i]?.photos?.[j];
+        if (!p) break; // shouldn't happen, ever
+
+        // This is there now
+        newSelection.set(p.fileid, p);
+
+        // Perf: only update heads if not selected
+        if (!(p.flag & this.c.FLAG_SELECTED)) {
+          this.selectPhoto(p, true, true);
+          updatedDays.add(p.dayid);
+        }
+
+        // We're trying to update too much -- something went wrong
+        if (newSelection.size - this.selection.size > 50) break;
+
+        // Check goal
+        if (p === overPhoto) break;
+        j += reverse ? -1 : 1;
+      }
+
+      // Remove unselected
+      for (const [fileid, p] of this.selection) {
+        if (!newSelection.has(fileid)) {
+          this.selectPhoto(p, false, true);
+          updatedDays.add(p.dayid);
+        }
+      }
+
+      // Update heads
+      for (const dayid of updatedDays) {
+        this.updateHeadSelected(this.heads[dayid]);
+      }
+
+      this.$forceUpdate();
+    }
   }
 
   /** Add a photo to selection list */
@@ -321,6 +507,64 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
     }
   }
 
+  /** Multi-select */
+  public selectMulti(photo: IPhoto, rows: IRow[], rowIdx: number) {
+    const pRow = rows[rowIdx];
+    const pIdx = pRow.photos.indexOf(photo);
+    if (pIdx === -1) return;
+
+    const updateDaySet = new Set<number>();
+    let behind = [];
+    let behindFound = false;
+
+    // Look behind
+    for (let i = rowIdx; i > rowIdx - 100; i--) {
+      if (i < 0) break;
+      if (rows[i].type !== IRowType.PHOTOS) continue;
+      if (!rows[i].photos?.length) break;
+
+      const sj = i === rowIdx ? pIdx : rows[i].photos.length - 1;
+      for (let j = sj; j >= 0; j--) {
+        const p = rows[i].photos[j];
+        if (p.flag & this.c.FLAG_PLACEHOLDER || !p.fileid) continue;
+        if (p.flag & this.c.FLAG_SELECTED) {
+          behindFound = true;
+          break;
+        }
+        behind.push(p);
+        updateDaySet.add(p.d.dayid);
+      }
+
+      if (behindFound) break;
+    }
+
+    // Select everything behind
+    if (behindFound) {
+      // Clear everything in front in this day
+      const pdIdx = photo.d.detail.indexOf(photo);
+      for (let i = pdIdx + 1; i < photo.d.detail.length; i++) {
+        const p = photo.d.detail[i];
+        if (p.flag & this.c.FLAG_SELECTED) this.selectPhoto(p, false, true);
+      }
+
+      // Clear everything else in front
+      Array.from(this.selection.values())
+        .filter((p) => {
+          return this.isreverse
+            ? p.d.dayid > photo.d.dayid
+            : p.d.dayid < photo.d.dayid;
+        })
+        .forEach((photo: IPhoto) => {
+          this.selectPhoto(photo, false, true);
+          updateDaySet.add(photo.d.dayid);
+        });
+
+      behind.forEach((p) => this.selectPhoto(p, true, true));
+      updateDaySet.forEach((d) => this.updateHeadSelected(this.heads[d]));
+      this.$forceUpdate();
+    }
+  }
+
   /** Select or deselect all photos in a head */
   public selectHead(head: IHeadRow) {
     head.selected = !head.selected;
@@ -330,6 +574,71 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
       }
     }
     this.$forceUpdate();
+  }
+
+  /** Check if the day for a photo is selected entirely */
+  private updateHeadSelected(head: IHeadRow) {
+    let selected = true;
+
+    // Check if all photos are selected
+    for (const row of head.day.rows) {
+      for (const photo of row.photos) {
+        if (!(photo.flag & this.c.FLAG_SELECTED)) {
+          selected = false;
+          break;
+        }
+      }
+    }
+
+    // Update head
+    head.selected = selected;
+  }
+
+  /** Clear all selected photos */
+  public clearSelection(only?: IPhoto[]) {
+    const heads = new Set<IHeadRow>();
+    const toClear = only || this.selection.values();
+    Array.from(toClear).forEach((photo: IPhoto) => {
+      photo.flag &= ~this.c.FLAG_SELECTED;
+      heads.add(this.heads[photo.d.dayid]);
+      this.selection.delete(photo.fileid);
+      this.selectionChanged();
+    });
+    heads.forEach(this.updateHeadSelected);
+    this.$forceUpdate();
+  }
+
+  /** Restore selections from new day object */
+  public restoreDay(day: IDay) {
+    if (!this.has()) {
+      return;
+    }
+
+    // FileID => Photo for new day
+    const dayMap = new Map<number, IPhoto>();
+    day.detail.forEach((photo) => {
+      dayMap.set(photo.fileid, photo);
+    });
+
+    this.selection.forEach((photo, fileid) => {
+      // Process this day only
+      if (photo.dayid !== day.dayid) {
+        return;
+      }
+
+      // Remove all selections that are not in the new day
+      if (!dayMap.has(fileid)) {
+        this.selection.delete(fileid);
+        return;
+      }
+
+      // Update the photo object
+      const newPhoto = dayMap.get(fileid);
+      this.selection.set(fileid, newPhoto);
+      newPhoto.flag |= this.c.FLAG_SELECTED;
+    });
+
+    this.selectionChanged();
   }
 
   /**
@@ -446,26 +755,6 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
     }
   }
 
-  /** Archive is not allowed only on folder routes */
-  private allowArchive() {
-    return this.$route.name !== "folders";
-  }
-
-  /** Is archive route */
-  private routeIsArchive() {
-    return this.$route.name === "archive";
-  }
-
-  /** Is album route */
-  private routeIsAlbum() {
-    return this.config_albumsEnabled && this.$route.name === "albums";
-  }
-
-  /** Public route that can't modify anything */
-  private routeIsPublic() {
-    return this.$route.name === "folder-share";
-  }
-
   /**
    * Move selected photos to album
    */
@@ -547,6 +836,14 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
       const delPhotos = delIds.filter((x) => x).map((id) => selection.get(id));
       this.deletePhotos(delPhotos);
     }
+  }
+
+  /** Open viewer with given photo */
+  private openViewer(photo: IPhoto) {
+    this.$router.push({
+      ...this.$route,
+      hash: utils.getViewerHash(photo),
+    });
   }
 }
 </script>

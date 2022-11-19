@@ -137,13 +137,14 @@ import { IPhoto } from "../../types";
 import { NcButton, NcTextField } from "@nextcloud/vue";
 import { showError } from "@nextcloud/dialogs";
 import { generateUrl } from "@nextcloud/router";
+import { emit } from "@nextcloud/event-bus";
 import Modal from "./Modal.vue";
 import axios from "@nextcloud/axios";
 import * as utils from "../../services/Utils";
 import * as dav from "../../services/DavRequests";
 
-const INFO_API_URL = "/apps/memories/api/info/{id}";
-const EDIT_API_URL = "/apps/memories/api/edit/{id}";
+const INFO_API_URL = "/apps/memories/api/image/info/{id}";
+const EDIT_API_URL = "/apps/memories/api/image/set-exif/{id}";
 
 @Component({
   components: {
@@ -186,7 +187,7 @@ export default class EditDate extends Mixins(GlobalMixin) {
     const calls = photos.map((p) => async () => {
       try {
         const res = await axios.get<any>(
-          generateUrl(INFO_API_URL, { id: p.fileid })
+          generateUrl(INFO_API_URL, { id: p.fileid }) + "?basic=1"
         );
         if (typeof res.data.datetaken !== "number") {
           console.error("Invalid date for", p.fileid);
@@ -267,12 +268,13 @@ export default class EditDate extends Mixins(GlobalMixin) {
     // Make PATCH request to update date
     try {
       this.processing = true;
-      const res = await axios.patch<any>(
-        generateUrl(EDIT_API_URL, { id: this.photos[0].fileid }),
-        {
-          date: this.getExifFormat(this.getDate()),
-        }
-      );
+      const fileid = this.photos[0].fileid;
+      await axios.patch<any>(generateUrl(EDIT_API_URL, { id: fileid }), {
+        raw: {
+          DateTimeOriginal: this.getExifFormat(this.getDate()),
+        },
+      });
+      emit("files:file:updated", { fileid });
       this.emitRefresh(true);
       this.close();
     } catch (e) {
@@ -333,12 +335,12 @@ export default class EditDate extends Mixins(GlobalMixin) {
         const offset = date.getTime() - pDate.getTime();
         const scale = diff > 0 ? diffNew / diff : 0;
         const pDateNew = new Date(dateNew.getTime() - offset * scale);
-        const res = await axios.patch<any>(
-          generateUrl(EDIT_API_URL, { id: p.fileid }),
-          {
-            date: this.getExifFormat(pDateNew),
-          }
-        );
+        await axios.patch<any>(generateUrl(EDIT_API_URL, { id: p.fileid }), {
+          raw: {
+            DateTimeOriginal: this.getExifFormat(pDateNew),
+          },
+        });
+        emit("files:file:updated", { fileid: p.fileid });
       } catch (e) {
         if (e.response?.data?.message) {
           showError(e.response.data.message);

@@ -54,62 +54,94 @@ class ArchiveController extends ApiBase
         $file = $file[0];
 
         // Check if user has permissions
-        if (!$file->isUpdateable()) {
+        if (!$file->isUpdateable() || !($file->getPermissions() & \OCP\Constants::PERMISSION_UPDATE)) {
             return new JSONResponse(['message' => 'Cannot update this file'], Http::STATUS_FORBIDDEN);
         }
 
         // Create archive folder in the root of the user's configured timeline
-        $timelinePath = Exif::removeExtraSlash(Exif::getPhotosPath($this->config, $uid));
-        $timelineFolder = $userFolder->get($timelinePath);
-        if (null === $timelineFolder || !$timelineFolder instanceof Folder) {
-            return new JSONResponse(['message' => 'Cannot get timeline'], Http::STATUS_INTERNAL_SERVER_ERROR);
-        }
-        if (!$timelineFolder->isCreatable()) {
-            return new JSONResponse(['message' => 'Cannot create archive folder'], Http::STATUS_FORBIDDEN);
+        $configPath = Exif::removeExtraSlash(Exif::getPhotosPath($this->config, $uid));
+        $configPaths = explode(';', $configPath);
+        $timelineFolders = [];
+        $timelinePaths = [];
+
+        // Get all timeline paths
+        foreach ($configPaths as $path) {
+            try {
+                $f = $userFolder->get($path);
+                $timelineFolders[] = $f;
+                $timelinePaths[] = $f->getPath();
+            } catch (\OCP\Files\NotFoundException $e) {
+                return new JSONResponse(['message' => 'Timeline folder not found'], Http::STATUS_NOT_FOUND);
+            }
         }
 
-        // Get path of current file relative to the timeline folder
-        // remove timelineFolder path from start of file path
-        $timelinePath = $timelineFolder->getPath(); // no trailing slash
-        if (substr($file->getPath(), 0, \strlen($timelinePath)) !== $timelinePath) {
-            return new JSONResponse(['message' => 'Files outside timeline cannot be archived'], Http::STATUS_INTERNAL_SERVER_ERROR);
-        }
-        $relativePath = substr($file->getPath(), \strlen($timelinePath)); // has a leading slash
+        // Bubble up from file until we reach the correct folder
+        $fileStorageId = $file->getStorage()->getId();
+        $parent = $file->getParent();
+        $isArchived = false;
+        while (true) {
+            if (null === $parent) {
+                throw new \Exception('Cannot get correct parent of file');
+            }
 
-        // Final path of the file including the file name
-        $destinationPath = '';
+            // Hit a timeline folder
+            if (\in_array($parent->getPath(), $timelinePaths, true)) {
+                break;
+            }
+
+            // Hit a storage root
+            try {
+                if ($parent->getParent()->getStorage()->getId() !== $fileStorageId) {
+                    break;
+                }
+            } catch (\OCP\Files\NotFoundException $e) {
+                break;
+            }
+
+            // Hit an archive folder root
+            if ($parent->getName() === \OCA\Memories\Util::$ARCHIVE_FOLDER) {
+                $isArchived = true;
+
+                break;
+            }
+
+            $parent = $parent->getParent();
+        }
+
+        // Get path of current file relative to the parent folder
+        $relativeFilePath = $parent->getRelativePath($file->getPath());
 
         // Check if we want to archive or unarchive
         $body = $this->request->getParams();
         $unarchive = isset($body['archive']) && false === $body['archive'];
+        if ($isArchived && !$unarchive) {
+            return new JSONResponse(['message' => 'File already archived'], Http::STATUS_BAD_REQUEST);
+        }
+        if (!$isArchived && $unarchive) {
+            return new JSONResponse(['message' => 'File not archived'], Http::STATUS_BAD_REQUEST);
+        }
+
+        // Final path of the file including the file name
+        $destinationPath = '';
 
         // Get if the file is already in the archive (relativePath starts with archive)
-        $archiveFolderWithLeadingSlash = '/'.\OCA\Memories\Util::$ARCHIVE_FOLDER;
-        if (substr($relativePath, 0, \strlen($archiveFolderWithLeadingSlash)) === $archiveFolderWithLeadingSlash) {
-            // file already in archive, remove it instead
-            $destinationPath = substr($relativePath, \strlen($archiveFolderWithLeadingSlash));
-            if (!$unarchive) {
-                return new JSONResponse(['message' => 'File already archived'], Http::STATUS_BAD_REQUEST);
-            }
+        if ($isArchived) {
+            // file already in archive, remove it
+            $destinationPath = $relativeFilePath;
+            $parent = $parent->getParent();
         } else {
             // file not in archive, put it in there
-            $destinationPath = Exif::removeExtraSlash(\OCA\Memories\Util::$ARCHIVE_FOLDER.$relativePath);
-            if ($unarchive) {
-                return new JSONResponse(['message' => 'File not archived'], Http::STATUS_BAD_REQUEST);
-            }
+            $af = \OCA\Memories\Util::$ARCHIVE_FOLDER;
+            $destinationPath = Exif::removeExtraSlash($af.$relativeFilePath);
         }
 
         // Remove the filename
-        $destinationFolders = explode('/', $destinationPath);
+        $destinationFolders = array_filter(explode('/', $destinationPath));
         array_pop($destinationFolders);
 
         // Create folder tree
-        $folder = $timelineFolder;
+        $folder = $parent;
         foreach ($destinationFolders as $folderName) {
-            if ('' === $folderName) {
-                continue;
-            }
-
             try {
                 $existingFolder = $folder->get($folderName.'/');
                 if (!$existingFolder instanceof Folder) {

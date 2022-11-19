@@ -55,6 +55,7 @@ export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
     photosWithFilename.map((photo) => {
       const prefixPath = `/files/${getCurrentUser()?.uid}`;
       return {
+        id: photo.fileid,
         fileid: photo.fileid,
         filename: photo.filename.replace(prefixPath, ""),
         originalFilename: photo.filename,

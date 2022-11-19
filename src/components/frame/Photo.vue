@@ -6,7 +6,6 @@
       placeholder: data.flag & c.FLAG_PLACEHOLDER,
       leaving: data.flag & c.FLAG_LEAVING,
       error: data.flag & c.FLAG_LOAD_FAIL,
-      hasTouch: hasTouch,
     }"
   >
     <CheckCircle
@@ -16,17 +15,23 @@
       @click="toggleSelect"
     />
 
-    <Video :size="22" v-if="data.flag & c.FLAG_IS_VIDEO" />
+    <div class="video" v-if="data.flag & c.FLAG_IS_VIDEO">
+      <span v-if="data.video_duration" class="time">
+        {{ videoDuration }}
+      </span>
+      <Video :size="22" />
+    </div>
+
     <Star :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
 
     <div
       class="img-outer fill-block"
       @contextmenu="contextmenu"
-      @mousedown.passive="emitClick"
-      @touchstart.passive="touchstart"
-      @touchmove.passive="touchend"
-      @touchend.passive="touchend"
-      @touchcancel.passive="touchend"
+      @pointerdown.passive="$emit('pointerdown', $event)"
+      @touchstart.passive="$emit('touchstart', $event)"
+      @touchmove="$emit('touchmove', $event)"
+      @touchend.passive="$emit('touchend', $event)"
+      @touchcancel.passive="$emit('touchend', $event)"
     >
       <img
         ref="img"
@@ -43,14 +48,17 @@
 </template>
 
 <script lang="ts">
+import { Component, Emit, Mixins, Prop, Watch } from "vue-property-decorator";
+import GlobalMixin from "../../mixins/GlobalMixin";
+
+import { getPreviewUrl } from "../../services/FileUtils";
+import { IDay, IPhoto } from "../../types";
+import * as utils from "../../services/Utils";
+
+import errorsvg from "../../assets/error.svg";
 import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
 import Star from "vue-material-design-icons/Star.vue";
 import Video from "vue-material-design-icons/PlayCircleOutline.vue";
-import { Component, Emit, Mixins, Prop, Watch } from "vue-property-decorator";
-import errorsvg from "../../assets/error.svg";
-import GlobalMixin from "../../mixins/GlobalMixin";
-import { getPreviewUrl } from "../../services/FileUtils";
-import { IDay, IPhoto } from "../../types";
 
 @Component({
   components: {
@@ -63,13 +71,11 @@ export default class Photo extends Mixins(GlobalMixin) {
   private touchTimer = 0;
   private src = null;
   private hasFaceRect = false;
-  private hasTouch = false;
 
   @Prop() data: IPhoto;
   @Prop() day: IDay;
 
   @Emit("select") emitSelect(data: IPhoto) {}
-  @Emit("click") emitClick() {}
 
   @Watch("data")
   onDataChange(newData: IPhoto, oldData: IPhoto) {
@@ -89,6 +95,13 @@ export default class Photo extends Mixins(GlobalMixin) {
   mounted() {
     this.hasFaceRect = false;
     this.refresh();
+  }
+
+  get videoDuration() {
+    if (this.data.video_duration) {
+      return utils.getDurationStr(this.data.video_duration);
+    }
+    return null;
   }
 
   async refresh() {
@@ -184,26 +197,11 @@ export default class Photo extends Mixins(GlobalMixin) {
     this.emitSelect(this.data);
   }
 
-  touchstart() {
-    this.hasTouch = true;
-    this.touchTimer = window.setTimeout(() => {
-      this.toggleSelect();
-      this.touchTimer = 0;
-    }, 600);
-  }
-
   contextmenu(e: Event) {
-    // on mobile only
-    if (this.hasTouch) {
+    // user is trying to select the photo
+    if (document.body.classList.contains("vue-touching")) {
       e.preventDefault();
       e.stopPropagation();
-    }
-  }
-
-  touchend() {
-    if (this.touchTimer) {
-      clearTimeout(this.touchTimer);
-      this.touchTimer = 0;
     }
   }
 }
@@ -250,7 +248,7 @@ $icon-size: $icon-half-size * 2;
   cursor: pointer;
 
   display: none;
-  .p-outer:not(.hasTouch):hover > & {
+  body:not(.vue-touching) .p-outer:hover > & {
     display: flex;
   }
 
@@ -274,7 +272,7 @@ $icon-size: $icon-half-size * 2;
     color: var(--color-primary);
   }
 }
-.play-circle-outline-icon,
+.video,
 .star-icon {
   position: absolute;
   z-index: 100;
@@ -282,11 +280,22 @@ $icon-size: $icon-half-size * 2;
   transition: transform 0.15s ease;
   filter: invert(1) brightness(100);
 }
-.play-circle-outline-icon {
+.video {
+  position: absolute;
   top: var(--icon-dist);
   right: var(--icon-dist);
   .p-outer.selected > & {
     transform: translate(-$icon-size, $icon-size);
+  }
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .time {
+    font-size: 0.75em;
+    font-weight: bold;
+    margin-right: 3px;
   }
 }
 .star-icon {
@@ -341,7 +350,7 @@ div.img-outer {
 
     display: none;
     transition: border-radius 0.1s ease-in;
-    .p-outer:not(.hasTouch):not(.selected):hover > & {
+    body:not(.vue-touching) .p-outer:not(.selected):hover > & {
       display: block;
     }
   }
