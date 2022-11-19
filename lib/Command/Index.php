@@ -178,7 +178,7 @@ class Index extends Command
         // Time measurement
         $startTime = microtime(true);
 
-        if ($this->encryptionManager->isEnabled() && $this->encryptionManager->getDefaultEncryptionModuleId() != 'OC_DEFAULT_MODULE') {
+        if (\OCA\Memories\Util::isEncryptionEnabled($this->encryptionManager)) {
             // Can work with server-side but not with e2e encryption, see https://github.com/pulsejet/memories/issues/99
             error_log('FATAL: Only server-side encryption (OC_DEFAULT_MODULE) is supported, but another encryption module is enabled. Aborted.');
             return 1;
