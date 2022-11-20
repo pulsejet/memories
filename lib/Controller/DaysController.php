@@ -212,7 +212,7 @@ class DaysController extends ApiBase
         // Filter only for one face on Face Recognition
         $face = $this->request->getParam('facerecognition');
         if ($face && $this->facerecognitionIsEnabled()) {
-            $currentModel = intval($this->config->getAppValue('facerecognition', 'model', -1));
+            $currentModel = (int) ($this->config->getAppValue('facerecognition', 'model', -1));
             $transforms[] = [$this->timelineQuery, 'transformPeopleFaceRecognitionFilter', $currentModel, $face];
 
             $faceRect = $this->request->getParam('facerect');

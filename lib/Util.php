@@ -87,30 +87,16 @@ class Util
     }
 
     /**
-     * Check if Face Recognition is enabled by the user
+     * Check if Face Recognition is enabled by the user.
      *
+     * @param mixed $config
+     * @param mixed $userId
      */
-    public static function facerecognitionIsEnabled(IConfig &$config, $userId): bool
+    public static function facerecognitionIsEnabled(&$config, $userId): bool
     {
         $e = $config->getUserValue($userId, 'facerecognition', 'enabled', 'false');
 
-        return ($e === 'true');
-    }
-
-    /**
-     * Check if Face Recognition is installed and enabled for this user.
-     *
-     * @param mixed $appManager
-     */
-    public static function facerecognitionIsInstalled(&$appManager): bool
-    {
-        if (!$appManager->isEnabledForUser('facerecognition')) {
-            return false;
-        }
-
-        $v = $appManager->getAppInfo('facerecognition')['version'];
-
-        return version_compare($v, '0.9.10-beta.2', '>=');
+        return 'true' === $e;
     }
 
     /**

@@ -96,7 +96,7 @@ class PeopleController extends ApiBase
             return new DataResponse([], Http::STATUS_NOT_FOUND);
         }
 
-        return $this->getPeoplePreviewResponse($folder, $detections);
+        return $this->getPeoplePreviewResponse($root, $detections, $user);
     }
 
     /**
@@ -117,8 +117,8 @@ class PeopleController extends ApiBase
         }
 
         // If this isn't the timeline folder then things aren't going to work
-        $folder = $this->getRequestFolder();
-        if (null === $folder) {
+        $root = $this->getRequestRoot();
+        if ($root->isEmpty()) {
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }
 
@@ -128,14 +128,14 @@ class PeopleController extends ApiBase
         }
 
         // Run actual query
-        $currentModel = (int) ($this->config->getAppValue('facerecognition', 'model', -1));
+        $currentModel = (int) $this->config->getAppValue('facerecognition', 'model', -1);
         $list = $this->timelineQuery->getPeopleFaceRecognition(
-            $folder,
+            $root,
             $currentModel,
         );
         // Just append unnamed clusters to the end.
         $list = array_merge($list, $this->timelineQuery->getPeopleFaceRecognition(
-            $folder,
+            $root,
             $currentModel,
             true
         ));
@@ -165,8 +165,8 @@ class PeopleController extends ApiBase
         }
 
         // Get folder to search for
-        $folder = $this->getRequestFolder();
-        if (null === $folder) {
+        $root = $this->getRequestRoot();
+        if ($root->isEmpty()) {
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }
 
@@ -176,14 +176,14 @@ class PeopleController extends ApiBase
         }
 
         // Run actual query
-        $currentModel = (int) ($this->config->getAppValue('facerecognition', 'model', -1));
-        $detections = $this->timelineQuery->getFaceRecognitionPreview($folder, $currentModel, $id);
+        $currentModel = (int) $this->config->getAppValue('facerecognition', 'model', -1);
+        $detections = $this->timelineQuery->getFaceRecognitionPreview($root, $currentModel, $id);
 
         if (null === $detections || 0 === \count($detections)) {
             return new DataResponse([], Http::STATUS_NOT_FOUND);
         }
 
-        return $this->getPeoplePreviewResponse($folder, $detections);
+        return $this->getPeoplePreviewResponse($root, $detections, $user);
     }
 
     /**
@@ -191,10 +191,12 @@ class PeopleController extends ApiBase
      *
      * @param mixed $folder
      * @param mixed $detections
+     * @param mixed $root
+     * @param mixed $user
      *
      * @return DataResponse
      */
-    private function getPeoplePreviewResponse($folder, $detections): Http\Response
+    private function getPeoplePreviewResponse($root, $detections, $user): Http\Response
     {
         // Find the first detection that has a preview
         /** @var \Imagick */

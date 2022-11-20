@@ -47,7 +47,7 @@ trait TimelineQueryPeopleRecognize
         );
     }
 
-    public function getFaces(TimelineRoot &$root)
+    public function getPeopleRecognize(TimelineRoot &$root)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -87,7 +87,7 @@ trait TimelineQueryPeopleRecognize
         return $faces;
     }
 
-    public function getFacePreviewDetection(TimelineRoot &$root, int $id)
+    public function getPeopleRecognizePreview(TimelineRoot &$root, int $id)
     {
         $query = $this->connection->getQueryBuilder();
 

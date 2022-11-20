@@ -59,7 +59,7 @@ trait TimelineQueryPeopleFaceRecognition
         );
     }
 
-    public function getPeopleFaceRecognition(Folder $folder, int $currentModel, bool $show_clusters = false, bool $show_hidden = false)
+    public function getPeopleFaceRecognition(TimelineRoot &$root, int $currentModel, bool $show_clusters = false, bool $show_hidden = false)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -80,7 +80,7 @@ trait TimelineQueryPeopleFaceRecognition
         ));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $folder, true, false);
+        $query = $this->joinFilecache($query, $root, true, false);
 
         if ($show_clusters) {
             // GROUP by ID of face cluster
@@ -115,7 +115,7 @@ trait TimelineQueryPeopleFaceRecognition
         return $faces;
     }
 
-    public function getFaceRecognitionPreview(Folder &$folder, $currentModel, $previewId)
+    public function getFaceRecognitionPreview(TimelineRoot &$root, $currentModel, $previewId)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -152,7 +152,7 @@ trait TimelineQueryPeopleFaceRecognition
         }
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $folder, true, false);
+        $query = $this->joinFilecache($query, $root, true, false);
 
         // LIMIT results
         $query->setMaxResults(15);
