@@ -257,6 +257,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
       bgOpacity: 1,
       appendToEl: this.$refs.inner as HTMLElement,
       preload: [2, 2],
+      closeTitle: this.t("memories", "Close"),
+      arrowPrevTitle: this.t("memories", "Previous"),
+      arrowNextTitle: this.t("memories", "Next"),
       getViewportSizeFn: () => {
         const sidebarWidth = this.sidebarOpen ? this.sidebarWidth : 0;
         this.outerWidth = `calc(100vw - ${sidebarWidth}px)`;
