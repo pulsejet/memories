@@ -40,6 +40,7 @@ use OCP\IUserManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\ConsoleSectionOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Index extends Command
@@ -58,12 +59,14 @@ class Index extends Command
     protected TimelineWrite $timelineWrite;
 
     // Stats
+    private int $nUser = 0;
     private int $nProcessed = 0;
     private int $nSkipped = 0;
     private int $nInvalid = 0;
+    private int $nNoMedia = 0;
 
     // Helper for the progress bar
-    private int $previousLineLength = 0;
+    private ConsoleSectionOutput $outputSection;
 
     public function __construct(
         IRootFolder $rootFolder,
@@ -193,10 +196,11 @@ class Index extends Command
         // Show some stats
         $endTime = microtime(true);
         $execTime = (int) (($endTime - $startTime) * 1000) / 1000;
-        $nTotal = $this->nInvalid + $this->nSkipped + $this->nProcessed;
+        $nTotal = $this->nInvalid + $this->nSkipped + $this->nProcessed + $this->nNoMedia;
         $this->output->writeln('==========================================');
-        $this->output->writeln("Checked {$nTotal} files in {$execTime} sec");
+        $this->output->writeln("Checked {$nTotal} files of {$this->nUser} users in {$execTime} sec");
         $this->output->writeln($this->nInvalid.' not valid media items');
+        $this->output->writeln($this->nNoMedia.' .nomedia folders ignored');
         $this->output->writeln($this->nSkipped.' skipped because unmodified');
         $this->output->writeln($this->nProcessed.' (re-)processed');
         $this->output->writeln('==========================================');
@@ -246,31 +250,31 @@ class Index extends Command
 
         $uid = $user->getUID();
         $userFolder = $this->rootFolder->getUserFolder($uid);
-        $this->parseFolder($userFolder, $refresh);
-        if ($this->previousLineLength) {
-            $this->output->write("\r".str_repeat(' ', $this->previousLineLength)."\r");
-        }
+        $this->outputSection = $this->output->section();
+        $this->parseFolder($userFolder, $refresh, $this->nUser, $this->userManager->countSeenUsers());
+        $this->outputSection->overwrite('Scanned '.$userFolder->getPath());
+        ++$this->nUser;
     }
 
-    private function parseFolder(Folder &$folder, bool &$refresh): void
+    private function parseFolder(Folder &$folder, bool &$refresh, int $progress_i, int $progress_n): void
     {
         try {
             $folderPath = $folder->getPath();
 
             // Respect the '.nomedia' file. If present don't traverse the folder
             if ($folder->nodeExists('.nomedia')) {
-                $this->output->writeln('Skipping folder '.$folderPath.' because of .nomedia file');
-                $this->previousLineLength = 0;
+                ++$this->nNoMedia;
 
                 return;
             }
 
             $nodes = $folder->getDirectoryListing();
 
-            foreach ($nodes as &$node) {
+            foreach ($nodes as $i => &$node) {
                 if ($node instanceof Folder) {
-                    $this->parseFolder($node, $refresh);
+                    $this->parseFolder($node, $refresh, $progress_i * \count($nodes) + $i, $progress_n * \count($nodes));
                 } elseif ($node instanceof File) {
+                    $this->outputSection->overwrite(sprintf('%.2f%%', $progress_i / $progress_n * 100).' scanning '.$node->getPath());
                     $this->parseFile($node, $refresh);
                 }
             }
@@ -285,14 +289,6 @@ class Index extends Command
 
     private function parseFile(File &$file, bool &$refresh): void
     {
-        // Clear previous line and write new one
-        $line = 'Scanning file '.$file->getPath();
-        if ($this->previousLineLength) {
-            $this->output->write("\r".str_repeat(' ', $this->previousLineLength)."\r");
-        }
-        $this->output->write($line."\r");
-        $this->previousLineLength = \strlen($line);
-
         // Process the file
         $res = $this->timelineWrite->processFile($file, $refresh);
         if (2 === $res) {
