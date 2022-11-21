@@ -52,7 +52,15 @@ class VideoSetup extends Command
     {
         // Preset executables
         $ffmpegPath = $this->config->getSystemValue('memories.ffmpeg_path', 'ffmpeg');
+        if ($ffmpegPath === 'ffmpeg') {
+            $ffmpegPath = trim(shell_exec('which ffmpeg') ?: 'ffmpeg');
+            $this->config->setSystemValue('memories.ffmpeg_path', $ffmpegPath);
+        }
         $ffprobePath = $this->config->getSystemValue('memories.ffprobe_path', 'ffprobe');
+        if ($ffprobePath === 'ffprobe') {
+            $ffprobePath = trim(shell_exec('which ffprobe') ?: 'ffprobe');
+            $this->config->setSystemValue('memories.ffprobe_path', $ffprobePath);
+        }
 
         // Get ffmpeg version
         $ffmpeg = shell_exec("{$ffmpegPath} -version");
