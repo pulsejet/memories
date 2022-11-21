@@ -75,6 +75,11 @@ class ImageController extends ApiBase
             return new JSONResponse([], Http::STATUS_FORBIDDEN);
         }
 
+        // Check for end-to-end encryption
+        if (\OCA\Memories\Util::isEncryptionEnabled($this->encryptionManager)) {
+            return new JSONResponse(['message' => 'Cannot change encrypted file'], Http::STATUS_PRECONDITION_FAILED);
+        }
+
         // Get original file from body
         $exif = $this->request->getParam('raw');
         $path = $file->getStorage()->getLocalFile($file->getInternalPath());
