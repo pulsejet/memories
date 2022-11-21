@@ -122,7 +122,7 @@ import "photoswipe/style.css";
 import PsVideo from "./PsVideo";
 
 import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
-import DeleteIcon from "vue-material-design-icons/Delete.vue";
+import DeleteIcon from "vue-material-design-icons/TrashCanOutline.vue";
 import StarIcon from "vue-material-design-icons/Star.vue";
 import StarOutlineIcon from "vue-material-design-icons/StarOutline.vue";
 import DownloadIcon from "vue-material-design-icons/Download.vue";

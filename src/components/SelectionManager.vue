@@ -73,7 +73,7 @@ import AddToAlbumModal from "./modal/AddToAlbumModal.vue";
 
 import StarIcon from "vue-material-design-icons/Star.vue";
 import DownloadIcon from "vue-material-design-icons/Download.vue";
-import DeleteIcon from "vue-material-design-icons/Delete.vue";
+import DeleteIcon from "vue-material-design-icons/TrashCanOutline.vue";
 import EditIcon from "vue-material-design-icons/ClockEdit.vue";
 import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
 import UnarchiveIcon from "vue-material-design-icons/PackageUp.vue";
