@@ -153,8 +153,8 @@ func main() {
 		lookBehind:      5,
 		goalBufferMin:   3,
 		goalBufferMax:   8,
-		streamIdleTime:  300,
-		managerIdleTime: 600,
+		streamIdleTime:  60,
+		managerIdleTime: 60,
 	})
 
 	http.Handle("/", h)
