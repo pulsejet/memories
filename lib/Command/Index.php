@@ -40,8 +40,8 @@ use OCP\IUserManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\ConsoleSectionOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class Index extends Command
 {
@@ -264,16 +264,17 @@ class Index extends Command
             // Respect the '.nomedia' file. If present don't traverse the folder
             if ($folder->nodeExists('.nomedia')) {
                 ++$this->nNoMedia;
+
                 return;
             }
 
             $nodes = $folder->getDirectoryListing();
 
-            foreach ($nodes as $i=>&$node) {
+            foreach ($nodes as $i => &$node) {
                 if ($node instanceof Folder) {
-                    $this->parseFolder($node, $refresh, $progress_i * count($nodes) + $i, $progress_n * count($nodes));
+                    $this->parseFolder($node, $refresh, $progress_i * \count($nodes) + $i, $progress_n * \count($nodes));
                 } elseif ($node instanceof File) {
-                    $this->outputSection->overwrite(sprintf("%.2f%%", $progress_i/$progress_n*100).' scanning '.$node->getPath());
+                    $this->outputSection->overwrite(sprintf('%.2f%%', $progress_i / $progress_n * 100).' scanning '.$node->getPath());
                     $this->parseFile($node, $refresh);
                 }
             }
