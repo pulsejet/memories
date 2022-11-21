@@ -1318,6 +1318,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     display: block;
     transition: transform 0.2s ease;
     cursor: pointer;
+    font-size: 1.075em;
   }
 
   :hover,
