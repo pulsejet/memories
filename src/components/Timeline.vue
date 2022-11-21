@@ -64,7 +64,7 @@
             {{ item.super }}
           </div>
           <div class="main" @click="selectionManager.selectHead(item)">
-            <CheckCircle :size="18" class="select" v-if="item.name" />
+            <CheckCircle :size="20" class="select" v-if="item.name" />
             <span class="name"> {{ item.name || getHeadName(item) }} </span>
           </div>
         </div>
@@ -1328,7 +1328,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       opacity: 0.7;
     }
     .name {
-      transform: translateX(22px);
+      transform: translateX(24px);
     }
   }
   &.selected .select {
