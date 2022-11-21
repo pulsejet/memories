@@ -6,6 +6,7 @@ This file is manually updated. Please file an issue if something is missing.
 
 - **Feature**: Timeline path now scans recursively for mounted volumes / shares inside it.
 - **Feature**: Multiple timeline paths can be specified.
+- Support for server-side encrypted storage.
 
 ## v4.7.0, v3.7.0 (2022-11-14)
 
