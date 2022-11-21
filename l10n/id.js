@@ -30,6 +30,7 @@ OC.L10N.register(
     "Reset" : "Setel ulang",
     "Continue" : "Lanjutkan",
     "Undo" : "Undo",
+    "Value" : "Nilari",
     "Size" : "Ukuran"
 },
 "nplurals=1; plural=0;");

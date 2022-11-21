@@ -23,7 +23,7 @@ OC.L10N.register(
     "Loading …" : "Завантаження …",
     "Cancel" : "Скасувати",
     "Delete" : "Вилучити",
-    "Download" : "Завантажити",
+    "Download" : "Звантажити",
     "Favorite" : "Вподобати",
     "Unarchive" : "Розархівувати",
     "View in folder" : "Переглянути у каталозі",
