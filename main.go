@@ -151,8 +151,8 @@ func main() {
 		tempdir:         tempdir,
 		chunkSize:       3,
 		lookBehind:      5,
-		goalBufferMin:   3,
-		goalBufferMax:   8,
+		goalBufferMin:   1,
+		goalBufferMax:   4,
 		streamIdleTime:  60,
 		managerIdleTime: 60,
 	})
