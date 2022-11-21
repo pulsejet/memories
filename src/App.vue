@@ -325,6 +325,7 @@ body {
   #app-navigation-vue {
     border-top-left-radius: var(--body-container-radius);
     border-bottom-left-radius: var(--body-container-radius);
+    max-width: 250px;
   }
 }
 
