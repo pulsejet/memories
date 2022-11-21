@@ -253,6 +253,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
       counter: true,
       zoom: false,
       loop: false,
+      wheelToZoom: true,
       bgOpacity: 1,
       appendToEl: this.$refs.inner as HTMLElement,
       preload: [2, 2],
