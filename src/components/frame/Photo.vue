@@ -241,7 +241,7 @@ export default class Photo extends Mixins(GlobalMixin) {
 
   /** Start preview video */
   playVideo() {
-    if (this.$refs.video) {
+    if (this.$refs.video && !(this.data.flag & this.c.FLAG_SELECTED)) {
       const video = this.$refs.video as HTMLVideoElement;
       video.currentTime = 0;
       video.play();

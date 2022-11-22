@@ -370,6 +370,7 @@ aside.app-sidebar {
   img,
   video {
     position: absolute;
+    padding: inherit;
     top: 0;
     left: 0;
     width: 100%;
