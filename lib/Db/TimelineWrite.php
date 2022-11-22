@@ -103,10 +103,16 @@ class TimelineWrite
             $videoDuration = round($exif['Duration'] ?? $exif['TrackDuration'] ?? 0);
         }
 
-        // Truncate any fields >2048 chars
+        // Clean up EXIF to keep only useful metadata
         foreach ($exif as $key => &$value) {
+            // Truncate any fields > 2048 chars
             if (\is_string($value) && \strlen($value) > 2048) {
                 $exif[$key] = substr($value, 0, 2048);
+            }
+
+            // These are huge and not needed
+            if (str_starts_with($key, 'Nikon')) {
+                unset($exif[$key]);
             }
         }
 
