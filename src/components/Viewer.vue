@@ -87,6 +87,17 @@
             </template>
           </NcActionButton>
           <NcActionButton
+            v-if="currentPhoto.liveid"
+            :aria-label="t('memories', 'Download Video')"
+            @click="downloadCurrentLiveVideo"
+            :close-after-click="true"
+          >
+            {{ t("memories", "Download Video") }}
+            <template #icon>
+              <DownloadIcon :size="24" />
+            </template>
+          </NcActionButton>
+          <NcActionButton
             v-if="!routeIsPublic"
             :aria-label="t('memories', 'View in folder')"
             @click="viewInFolder"
@@ -793,6 +804,13 @@ export default class Viewer extends Mixins(GlobalMixin) {
     const photo = this.currentPhoto;
     if (!photo) return;
     dav.downloadFilesByPhotos([photo]);
+  }
+
+  /** Download live part of current video */
+  private async downloadCurrentLiveVideo() {
+    const photo = this.currentPhoto;
+    if (!photo) return;
+    window.location.href = utils.getLivePhotoVideoUrl(photo);
   }
 
   /** Open the sidebar */

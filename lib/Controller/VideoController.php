@@ -178,9 +178,13 @@ class VideoController extends ApiBase
 
         if ($liveFile instanceof File) {
             // Create and send response
+            $name = $liveFile->getName();
             $blob = $liveFile->getContent();
-            $response = new DataDisplayResponse($blob, Http::STATUS_OK, [
+
+            $response = new DataDisplayResponse($blob, Http::STATUS_OK, []);
+            $response->setHeaders([
                 'Content-Type' => $liveFile->getMimeType(),
+                'Content-Disposition' => "attachment; filename=\"$name\"",
             ]);
             $response->cacheFor(3600 * 24, false, false);
 
