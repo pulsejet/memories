@@ -29,6 +29,8 @@ OC.L10N.register(
     "Show hidden folders" : "Vis skjulte mapper",
     "Failed to load some photos" : "Kunne ikke indlæse nogle billeder",
     "Share" : "Del",
+    "Previous" : "Tidligere",
+    "Next" : "Næste",
     "Copy public link" : "Kopier offentligt link",
     "Public link" : "Offentligt link",
     "New album" : "Nyt album",

@@ -10,6 +10,7 @@ OC.L10N.register(
     "Favorite" : "په نښه شوی",
     "View in folder" : "په فولډر کې کتل",
     "Share" : "شریکول",
+    "Close" : "بندول",
     "Save" : "ساتل",
     "Name" : "نوم",
     "Continue" : "وړاندې تګ",

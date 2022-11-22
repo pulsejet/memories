@@ -11,6 +11,7 @@ OC.L10N.register(
     "Download" : "Luchdaich a-nuas",
     "Favorite" : "Annsachd",
     "Share" : "Co-roinn",
+    "Close" : "Dùin",
     "Back" : "Air ais",
     "Save" : "Sàbhail",
     "Name" : "Ainm",
