@@ -20,7 +20,7 @@ export async function getPeopleData(app: string): Promise<IDay[]> {
   }[] = [];
   try {
     const res = await axios.get<typeof data>(
-      generateUrl("/apps/memories/api/" + app + "/people")
+      generateUrl(`/apps/memories/api/${app}/people`)
     );
     data = res.data;
   } catch (e) {
@@ -55,6 +55,35 @@ export async function getPeopleFacerecognionData(): Promise<IDay[]> {
 
 export async function getPeopleRecognizeData(): Promise<IDay[]> {
   return await getPeopleData('recognize');
+}
+
+export async function updatePeopleFaceRecognition(
+  name: string,
+  params: object
+) {
+  if (Number.isInteger(Number(name))) {
+    return await axios.put(generateUrl(`/apps/facerecognition/api/2.0/cluster/${name}`), params)
+  } else {
+    return await axios.put(generateUrl(`/apps/facerecognition/api/2.0/person/${name}`), params)
+  }
+}
+
+export async function renamePeopleFaceRecognition(
+  name: string,
+  newName: string
+) {
+  return await updatePeopleFaceRecognition(name, {
+    name: newName
+  })
+}
+
+export async function setVisibilityPeopleFaceRecognition(
+  name: string,
+  visibility: boolean
+) {
+  return await updatePeopleFaceRecognition(name, {
+    visible: visibility
+  })
 }
 
 /**
