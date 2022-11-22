@@ -35,8 +35,6 @@ class VideoController extends ApiBase
      * @NoCSRFRequired
      *
      * Transcode a video to HLS by proxy
-     *
-     * @return JSONResponse an empty JSONResponse with respective http status code
      */
     public function transcode(string $client, string $fileid, string $profile): Http\Response
     {
@@ -135,6 +133,41 @@ class VideoController extends ApiBase
         $response->cacheFor(0, false, false);
 
         return $response;
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     *
+     * Return the live video part of a live photo
+     */
+    public function livephoto(string $fileid)
+    {
+        $fileid = (int) $fileid;
+        $files = $this->rootFolder->getById($fileid);
+        if (0 === \count($files)) {
+            return new JSONResponse(['message' => 'File not found'], Http::STATUS_NOT_FOUND);
+        }
+        $file = $files[0];
+
+        // Check file etag
+        $etag = $file->getEtag();
+        if ($etag !== $this->request->getParam('etag')) {
+            return new JSONResponse(['message' => 'File changed'], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // Check file liveid
+        $liveid = $this->request->getParam('liveid');
+        if (!$liveid) {
+            return new JSONResponse(['message' => 'Live ID not provided'], Http::STATUS_BAD_REQUEST);
+        }
+        $lp = $this->timelineQuery->getLivePhoto($fileid);
+        if (!$lp || $lp['liveid'] !== $liveid) {
+            return new JSONResponse(['message' => 'Live ID not found'], Http::STATUS_NOT_FOUND);
+        }
+
+        return new JSONResponse($lp);
     }
 
     private function getUpstream($client, $path, $profile)
