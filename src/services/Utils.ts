@@ -1,5 +1,6 @@
 import { getCanonicalLocale } from "@nextcloud/l10n";
 import { getCurrentUser } from "@nextcloud/auth";
+import { generateUrl } from "@nextcloud/router";
 import { loadState } from "@nextcloud/initial-state";
 import { IPhoto } from "../types";
 import moment from "moment";
@@ -234,6 +235,32 @@ export function getFolderRoutePath(basePath: string) {
   path = basePath + "/" + path;
   path = path.replace(/\/\/+/, "/"); // Remove double slashes
   return path;
+}
+
+/**
+ * Get URL to live photo video part
+ */
+export function getLivePhotoVideoUrl(p: IPhoto) {
+  return generateUrl(
+    `/apps/memories/api/video/livephoto/${p.fileid}?etag=${p.etag}&liveid=${p.liveid}`
+  );
+}
+
+/**
+ * Set up hooks to set classes on parent element for live photo
+ * @param video Video element
+ */
+export function setupLivePhotoHooks(video: HTMLVideoElement) {
+  const div = video.closest(".memories-livephoto") as HTMLDivElement;
+  video.onplay = () => {
+    div.classList.add("playing");
+  };
+  video.oncanplay = () => {
+    div.classList.add("canplay");
+  };
+  video.onended = video.onpause = () => {
+    div.classList.remove("playing");
+  };
 }
 
 /**

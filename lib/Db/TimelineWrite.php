@@ -15,11 +15,13 @@ class TimelineWrite
 {
     protected IDBConnection $connection;
     protected IPreview $preview;
+    protected LivePhoto $livePhoto;
 
     public function __construct(IDBConnection $connection, IPreview &$preview)
     {
         $this->connection = $connection;
         $this->preview = $preview;
+        $this->livePhoto = new LivePhoto($connection);
     }
 
     /**
@@ -79,6 +81,19 @@ class TimelineWrite
         $cursor = $query->executeQuery();
         $prevRow = $cursor->fetch();
         $cursor->closeCursor();
+
+        // Check in live-photo table in case this is a video part of a live photo
+        if (!$prevRow) {
+            $query = $this->connection->getQueryBuilder();
+            $query->select('fileid', 'mtime')
+                ->from('memories_livephoto')
+                ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
+            ;
+            $cursor = $query->executeQuery();
+            $prevRow = $cursor->fetch();
+            $cursor->closeCursor();
+        }
+
         if ($prevRow && !$force && (int) $prevRow['mtime'] === $mtime) {
             return 1;
         }
@@ -91,11 +106,19 @@ class TimelineWrite
         } catch (\Exception $e) {
         }
 
+        // Hand off if live photo video part
+        if ($isvideo && $this->livePhoto->isVideoPart($exif)) {
+            $this->livePhoto->processVideoPart($file, $exif);
+
+            return 2;
+        }
+
         // Get more parameters
         $dateTaken = Exif::getDateTaken($file, $exif);
         $dayId = floor($dateTaken / 86400);
         $dateTaken = gmdate('Y-m-d H:i:s', $dateTaken);
         [$w, $h] = Exif::getDimensions($exif);
+        $liveid = $this->livePhoto->getLivePhotoId($exif);
 
         // Video parameters
         $videoDuration = 0;
@@ -103,10 +126,16 @@ class TimelineWrite
             $videoDuration = round($exif['Duration'] ?? $exif['TrackDuration'] ?? 0);
         }
 
-        // Truncate any fields >2048 chars
+        // Clean up EXIF to keep only useful metadata
         foreach ($exif as $key => &$value) {
+            // Truncate any fields > 2048 chars
             if (\is_string($value) && \strlen($value) > 2048) {
                 $exif[$key] = substr($value, 0, 2048);
+            }
+
+            // These are huge and not needed
+            if (str_starts_with($key, 'Nikon') || str_starts_with($key, 'QuickTime')) {
+                unset($exif[$key]);
             }
         }
 
@@ -134,6 +163,7 @@ class TimelineWrite
                 ->set('w', $query->createNamedParameter($w, IQueryBuilder::PARAM_INT))
                 ->set('h', $query->createNamedParameter($h, IQueryBuilder::PARAM_INT))
                 ->set('exif', $query->createNamedParameter($exifJson, IQueryBuilder::PARAM_STR))
+                ->set('liveid', $query->createNamedParameter($liveid, IQueryBuilder::PARAM_STR))
                 ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
             ;
             $query->executeStatement();
@@ -152,6 +182,7 @@ class TimelineWrite
                         'w' => $query->createNamedParameter($w, IQueryBuilder::PARAM_INT),
                         'h' => $query->createNamedParameter($h, IQueryBuilder::PARAM_INT),
                         'exif' => $query->createNamedParameter($exifJson, IQueryBuilder::PARAM_STR),
+                        'liveid' => $query->createNamedParameter($liveid, IQueryBuilder::PARAM_STR),
                     ])
                 ;
                 $query->executeStatement();

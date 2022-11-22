@@ -87,6 +87,17 @@
             </template>
           </NcActionButton>
           <NcActionButton
+            v-if="currentPhoto?.liveid"
+            :aria-label="t('memories', 'Download Video')"
+            @click="downloadCurrentLiveVideo"
+            :close-after-click="true"
+          >
+            {{ t("memories", "Download Video") }}
+            <template #icon>
+              <DownloadIcon :size="24" />
+            </template>
+          </NcActionButton>
+          <NcActionButton
             v-if="!routeIsPublic"
             :aria-label="t('memories', 'View in folder')"
             @click="viewInFolder"
@@ -125,6 +136,7 @@ import PhotoSwipe, { PhotoSwipeOptions } from "photoswipe";
 import "photoswipe/style.css";
 
 import PsVideo from "./PsVideo";
+import PsLivePhoto from "./PsLivePhoto";
 
 import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
 import DeleteIcon from "vue-material-design-icons/TrashCanOutline.vue";
@@ -417,6 +429,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
       autoplay: true,
       preventDragOffset: 40,
     });
+
+    // Live photo support
+    new PsLivePhoto(this.photoswipe, {});
 
     return this.photoswipe;
   }
@@ -789,6 +804,13 @@ export default class Viewer extends Mixins(GlobalMixin) {
     const photo = this.currentPhoto;
     if (!photo) return;
     dav.downloadFilesByPhotos([photo]);
+  }
+
+  /** Download live part of current video */
+  private async downloadCurrentLiveVideo() {
+    const photo = this.currentPhoto;
+    if (!photo) return;
+    window.location.href = utils.getLivePhotoVideoUrl(photo);
   }
 
   /** Open the sidebar */

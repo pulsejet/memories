@@ -23,9 +23,11 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\Exif;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\Files\File;
 
 class VideoController extends ApiBase
 {
@@ -35,8 +37,6 @@ class VideoController extends ApiBase
      * @NoCSRFRequired
      *
      * Transcode a video to HLS by proxy
-     *
-     * @return JSONResponse an empty JSONResponse with respective http status code
      */
     public function transcode(string $client, string $fileid, string $profile): Http\Response
     {
@@ -135,6 +135,102 @@ class VideoController extends ApiBase
         $response->cacheFor(0, false, false);
 
         return $response;
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     *
+     * Return the live video part of a live photo
+     */
+    public function livephoto(string $fileid)
+    {
+        $fileid = (int) $fileid;
+        $files = $this->rootFolder->getById($fileid);
+        if (0 === \count($files)) {
+            return new JSONResponse(['message' => 'File not found'], Http::STATUS_NOT_FOUND);
+        }
+        $file = $files[0];
+
+        // Check file etag
+        $etag = $file->getEtag();
+        if ($etag !== $this->request->getParam('etag')) {
+            return new JSONResponse(['message' => 'File changed'], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // Check file liveid
+        $liveid = $this->request->getParam('liveid');
+        if (!$liveid) {
+            return new JSONResponse(['message' => 'Live ID not provided'], Http::STATUS_BAD_REQUEST);
+        }
+
+        // Response data
+        $name = '';
+        $blob = null;
+        $mime = '';
+
+        // Video is inside the file
+        $path = null;
+        if (str_starts_with($liveid, 'self__')) {
+            $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+            $mime = 'video/mp4';
+            $name = $file->getName().'.mp4';
+        }
+
+        // Different manufacurers have different formats
+        if ('self__trailer' === $liveid) {
+            try { // Get trailer
+                $blob = Exif::getBinaryExifProp($path, '-trailer');
+            } catch (\Exception $e) {
+                return new JSONResponse(['message' => 'Trailer not found'], Http::STATUS_NOT_FOUND);
+            }
+        } elseif ('self__embeddedvideo' === $liveid) {
+            try { // Get embedded video file
+                $blob = Exif::getBinaryExifProp($path, '-EmbeddedVideoFile');
+            } catch (\Exception $e) {
+                return new JSONResponse(['message' => 'Embedded video not found'], Http::STATUS_NOT_FOUND);
+            }
+        } else {
+            // Get stored video file (Apple MOV)
+            $lp = $this->timelineQuery->getLivePhoto($fileid);
+            if (!$lp || $lp['liveid'] !== $liveid) {
+                return new JSONResponse(['message' => 'Live ID not found'], Http::STATUS_NOT_FOUND);
+            }
+
+            // Get and return file
+            $liveFileId = (int) $lp['fileid'];
+            $files = $this->rootFolder->getById($liveFileId);
+            if (0 === \count($files)) {
+                return new JSONResponse(['message' => 'Live file not found'], Http::STATUS_NOT_FOUND);
+            }
+            $liveFile = $files[0];
+
+            if ($liveFile instanceof File) {
+                // Requested only JSON info
+                if ('json' === $this->request->getParam('format')) {
+                    return new JSONResponse($lp);
+                }
+
+                $name = $liveFile->getName();
+                $blob = $liveFile->getContent();
+                $mime = $liveFile->getMimeType();
+            }
+        }
+
+        // Make and send response
+        if ($blob) {
+            $response = new DataDisplayResponse($blob, Http::STATUS_OK, []);
+            $response->setHeaders([
+                'Content-Type' => $mime,
+                'Content-Disposition' => "attachment; filename=\"{$name}\"",
+            ]);
+            $response->cacheFor(3600 * 24, false, false);
+
+            return $response;
+        }
+
+        return new JSONResponse(['message' => 'Live file not found'], Http::STATUS_NOT_FOUND);
     }
 
     private function getUpstream($client, $path, $profile)

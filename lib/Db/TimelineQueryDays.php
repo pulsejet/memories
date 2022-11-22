@@ -152,7 +152,7 @@ trait TimelineQueryDays
         // We don't actually use m.datetaken here, but postgres
         // needs that all fields in ORDER BY are also in SELECT
         // when using DISTINCT on selected fields
-        $query->select($fileid, 'm.isvideo', 'm.video_duration', 'm.datetaken', 'm.dayid', 'm.w', 'm.h')
+        $query->select($fileid, 'm.isvideo', 'm.video_duration', 'm.datetaken', 'm.dayid', 'm.w', 'm.h', 'm.liveid')
             ->from('memories', 'm')
         ;
 
@@ -282,6 +282,9 @@ trait TimelineQueryDays
                 $row['isfavorite'] = 1;
             }
             unset($row['categoryid']);
+            if (!$row['liveid']) {
+                unset($row['liveid']);
+            }
 
             // Check if path exists and starts with basePath and remove
             if (isset($row['path']) && !empty($row['path'])) {
