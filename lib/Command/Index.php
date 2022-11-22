@@ -268,11 +268,6 @@ class Index extends Command
                 return;
             }
 
-            // check path contains IMDB then skip
-            if (false !== strpos($folderPath, 'IMDB')) {
-                return;
-            }
-
             $nodes = $folder->getDirectoryListing();
 
             foreach ($nodes as $i => &$node) {
@@ -292,21 +287,16 @@ class Index extends Command
         }
     }
 
-    private function parseFile(File &$file, bool &$refresh): bool
+    private function parseFile(File &$file, bool &$refresh): void
     {
         // Process the file
         $res = $this->timelineWrite->processFile($file, $refresh);
         if (2 === $res) {
             ++$this->nProcessed;
-
-            return true;
-        }
-        if (1 === $res) {
+        } elseif (1 === $res) {
             ++$this->nSkipped;
         } else {
             ++$this->nInvalid;
         }
-
-        return false;
     }
 }
