@@ -404,6 +404,9 @@ div.img-outer {
   }
 
   > .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, transparent 30%);
 
     display: none;
