@@ -22,6 +22,10 @@
       <Video :size="22" />
     </div>
 
+    <div class="livephoto">
+      <LivePhoto :size="22" v-if="data.liveid" />
+    </div>
+
     <Star :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
 
     <div
@@ -59,12 +63,14 @@ import errorsvg from "../../assets/error.svg";
 import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
 import Star from "vue-material-design-icons/Star.vue";
 import Video from "vue-material-design-icons/PlayCircleOutline.vue";
+import LivePhoto from "vue-material-design-icons/MotionPlayOutline.vue";
 
 @Component({
   components: {
     CheckCircle,
     Video,
     Star,
+    LivePhoto,
   },
 })
 export default class Photo extends Mixins(GlobalMixin) {
@@ -273,14 +279,16 @@ $icon-size: $icon-half-size * 2;
   }
 }
 .video,
-.star-icon {
+.star-icon,
+.livephoto {
   position: absolute;
   z-index: 100;
   pointer-events: none;
   transition: transform 0.15s ease;
   filter: invert(1) brightness(100);
 }
-.video {
+.video,
+.livephoto {
   position: absolute;
   top: var(--icon-dist);
   right: var(--icon-dist);
