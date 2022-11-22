@@ -7,6 +7,7 @@ This file is manually updated. Please file an issue if something is missing.
 - **Feature**: Timeline path now scans recursively for mounted volumes / shares inside it
 - **Feature**: Multiple timeline paths can be specified ([#178](https://github.com/pulsejet/memories/issues/178))
 - Support for server-side encrypted storage ([#99](https://github.com/pulsejet/memories/issues/99))
+- Mouse wheel now zooms on desktop
 
 ## v4.7.0, v3.7.0 (2022-11-14)
 
