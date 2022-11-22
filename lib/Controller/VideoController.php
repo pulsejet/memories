@@ -26,6 +26,7 @@ namespace OCA\Memories\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\Files\File;
 
 class VideoController extends ApiBase
 {
@@ -167,7 +168,26 @@ class VideoController extends ApiBase
             return new JSONResponse(['message' => 'Live ID not found'], Http::STATUS_NOT_FOUND);
         }
 
-        return new JSONResponse($lp);
+        // Get and return file
+        $liveFileId = (int) $lp['fileid'];
+        $files = $this->rootFolder->getById($liveFileId);
+        if (0 === \count($files)) {
+            return new JSONResponse(['message' => 'Live file not found'], Http::STATUS_NOT_FOUND);
+        }
+        $liveFile = $files[0];
+
+        if ($liveFile instanceof File) {
+            // Create and send response
+            $blob = $liveFile->getContent();
+            $response = new DataDisplayResponse($blob, Http::STATUS_OK, [
+                'Content-Type' => $liveFile->getMimeType(),
+            ]);
+            $response->cacheFor(3600 * 24, false, false);
+
+            return $response;
+        }
+
+        return new JSONResponse(['message' => 'Live file not found'], Http::STATUS_NOT_FOUND);
     }
 
     private function getUpstream($client, $path, $profile)
