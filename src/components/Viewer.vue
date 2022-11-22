@@ -87,7 +87,7 @@
             </template>
           </NcActionButton>
           <NcActionButton
-            v-if="currentPhoto.liveid"
+            v-if="currentPhoto?.liveid"
             :aria-label="t('memories', 'Download Video')"
             @click="downloadCurrentLiveVideo"
             :close-after-click="true"

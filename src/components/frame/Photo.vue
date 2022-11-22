@@ -397,12 +397,13 @@ div.img-outer {
     }
   }
 
-  > video,
-  > .overlay {
+  > video {
     pointer-events: none;
+    object-fit: cover;
   }
 
   > .overlay {
+    pointer-events: none;
     position: absolute;
     top: 0;
     left: 0;
