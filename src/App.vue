@@ -314,6 +314,11 @@ body {
   // now set on #app-navigation-vue
   border-radius: 0;
   width: calc(100% - var(--body-container-margin) * 1); // was *2
+
+  // Reduce size of navigation. NC <25 doesn't like this on mobile.
+  #app-navigation-vue {
+    max-width: 250px;
+  }
 }
 
 // Prevent content overflow on NC <25
@@ -325,7 +330,6 @@ body {
   #app-navigation-vue {
     border-top-left-radius: var(--body-container-radius);
     border-bottom-left-radius: var(--body-container-radius);
-    max-width: 250px;
   }
 }
 
