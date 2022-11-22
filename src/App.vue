@@ -130,13 +130,25 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
       name: "people",
       icon: PeopleIcon,
       title: t("memories", "People"),
-      if: (self: any) => self.showRecognizePeople,
+      if: (self: any) => self.showRecognizePeople && !self.showFaceRecognition,
     },
     {
       name: "facerecognition",
       icon: PeopleIcon,
-      title: t("memories", "Face Recognition"),
-      if: (self: any) => self.showFaceRecognition,
+      title: t("memories", "People"),
+      if: (self: any) => self.showFaceRecognition && !self.showRecognizePeople,
+    },
+    {
+      name: "people",
+      icon: PeopleIcon,
+      title: t("memories", "People (Recognize)"),
+      if: (self: any) => self.showRecognizePeople && self.showFaceRecognition,
+    },
+    {
+      name: "facerecognition",
+      icon: PeopleIcon,
+      title: t("memories", "People (Face Recognition)"),
+      if: (self: any) => self.showFaceRecognition && self.showRecognizePeople,
     },
     {
       name: "archive",

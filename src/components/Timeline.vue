@@ -697,9 +697,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     switch (this.$route.name) {
       case "facerecognition":
         if (this.config_facerecognitionEnabled)
-          return this.t('memories', 'You will find your friends soon. Please, be pacient.')
+          return this.t('memories', 'You will find your friends soon. Please, be patient.')
         else
-          return this.t('memories', 'Face Recognition is disabled. Enabled in settings to find your friends.')
+          return this.t('memories', 'Face Recognition is disabled. Enable in settings to find your friends.')
       case "timeline":
       case "favorites":
       case "people":
