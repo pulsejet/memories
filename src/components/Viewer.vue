@@ -668,7 +668,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
   }
 
   get canEdit() {
-    return this.currentPhoto?.mimetype?.startsWith("image/");
+    return (
+      this.currentPhoto?.mimetype?.startsWith("image/") &&
+      !this.currentPhoto.liveid
+    );
   }
 
   private openEditor() {
