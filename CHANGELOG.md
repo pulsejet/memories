@@ -4,7 +4,7 @@ This file is manually updated. Please file an issue if something is missing.
 
 ## v4.8.0, v3.8.0
 
-- **Feature**: Support for Live Photos
+- **Feature**: Support for Live Photos ([#124](https://github.com/pulsejet/memories/issues/124))
   - You need to run `occ memories:index --clear` to reindex live photos
   - Only JPEG (iOS with MOV, Google, Samsung) is supported. HEIC is not supported.
 - **Feature**: Timeline path now scans recursively for mounted volumes / shares inside it
