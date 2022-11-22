@@ -8,6 +8,8 @@ OC.L10N.register(
     "Delete" : "حذف کریں",
     "Download" : "ڈاؤن لوڈ",
     "Share" : "تقسیم",
+    "Close" : "بند ",
+    "Next" : "اگلا",
     "Save" : "حفظ",
     "Month" : "ماہ",
     "Name" : "اسم",

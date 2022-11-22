@@ -11,6 +11,8 @@ OC.L10N.register(
     "Download" : "Sider",
     "Favorite" : "Menyif",
     "Share" : "Bḍu",
+    "Close" : "Mdel",
+    "Previous" : "Ɣer deffir",
     "Back" : "Retour",
     "Save" : "Sekles",
     "Hour" : "Asrag",

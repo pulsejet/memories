@@ -60,6 +60,8 @@ OC.L10N.register(
     "Failed to load some photos" : "Laden einiger Fotos fehlgeschlagen",
     "Share" : "Teilen",
     "Sidebar" : "Seitenleiste",
+    "Previous" : "Benötigt keine Übersetzung. Hier wird nur die formelle Übersetzung verwendet (de_DE).",
+    "Next" : "Nächste",
     "Video sharing not supported yet" : "Teilen von Videos wird bislang nicht unterstützt",
     "Cannot share this type of data" : "Diese Art von Daten kann nicht geteilt werden",
     "Processing … {n}/{m}" : "Verarbeite … {n}/{m}",

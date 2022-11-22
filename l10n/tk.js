@@ -11,6 +11,7 @@ OC.L10N.register(
     "Download" : "Göçürip almak",
     "Favorite" : "Halaýan",
     "Share" : "Paýlaş",
+    "Close" : "Ýap",
     "Back" : "Yzyna",
     "Save" : "Saklamak",
     "Name" : "Ady",
