@@ -914,7 +914,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
 .fullyOpened :deep .pswp__container {
   @media (min-width: 1024px) {
-    transition: transform var(--pswp-transition-duration) ease !important;
+    // Animate transitions
+    // Disabled because this makes you sick if moving fast
+    // transition: transform var(--pswp-transition-duration) ease !important;
   }
 }
 
