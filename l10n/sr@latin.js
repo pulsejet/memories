@@ -11,6 +11,7 @@ OC.L10N.register(
     "Download" : "Preuzmi",
     "Favorite" : "Omiljene",
     "Share" : "Podeli",
+    "Close" : "Zatvori",
     "Back" : "Nazad",
     "Save" : "Sačuvaj",
     "Name" : "Ime",

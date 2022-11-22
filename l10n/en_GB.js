@@ -18,6 +18,8 @@ OC.L10N.register(
     "Unarchive" : "Unarchive",
     "View in folder" : "View in folder",
     "Share" : "Share",
+    "Previous" : "Previous",
+    "Next" : "Next",
     "Public link" : "Public link",
     "Back" : "Back",
     "Save" : "Save",

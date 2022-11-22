@@ -60,6 +60,8 @@ OC.L10N.register(
     "Failed to load some photos" : "Fallo al cargar algunas fotos",
     "Share" : "Compartir",
     "Sidebar" : "Barra lateral",
+    "Previous" : "Anterior",
+    "Next" : "Siguiente",
     "Video sharing not supported yet" : "Compartir videos no es soportado todavía",
     "Cannot share this type of data" : "No se puede compartir este tipo de datos",
     "Processing … {n}/{m}" : "Procesando ... {n}/{m}",
