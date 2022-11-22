@@ -184,7 +184,7 @@ class VideoController extends ApiBase
             $response = new DataDisplayResponse($blob, Http::STATUS_OK, []);
             $response->setHeaders([
                 'Content-Type' => $liveFile->getMimeType(),
-                'Content-Disposition' => "attachment; filename=\"$name\"",
+                'Content-Disposition' => "attachment; filename=\"{$name}\"",
             ]);
             $response->cacheFor(3600 * 24, false, false);
 
