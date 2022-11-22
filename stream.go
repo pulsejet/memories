@@ -224,7 +224,7 @@ func (s *Stream) waitForChunk(w http.ResponseWriter, chunk *Chunk) {
 	// Add our channel
 	notif := make(chan bool)
 	chunk.notifs = append(chunk.notifs, notif)
-	t := time.NewTimer(5 * time.Second)
+	t := time.NewTimer(10 * time.Second)
 
 	s.mutex.Unlock()
 
