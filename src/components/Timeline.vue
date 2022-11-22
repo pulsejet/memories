@@ -1213,7 +1213,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
    */
   async deleteFromViewWithAnimation(delPhotos: IPhoto[]) {
     // Only keep photos with day
-    delPhotos = delPhotos.filter((p) => p.d);
+    delPhotos = delPhotos.filter((p) => p?.d);
     if (delPhotos.length === 0) return;
 
     // Get all days that need to be updatd

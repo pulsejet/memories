@@ -207,6 +207,11 @@ class VideoController extends ApiBase
             $liveFile = $files[0];
 
             if ($liveFile instanceof File) {
+                // Requested only JSON info
+                if ('json' === $this->request->getParam('format')) {
+                    return new JSONResponse($lp);
+                }
+
                 $name = $liveFile->getName();
                 $blob = $liveFile->getContent();
                 $mime = $liveFile->getMimeType();

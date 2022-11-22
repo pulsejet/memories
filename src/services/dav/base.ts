@@ -1,10 +1,13 @@
 import { getCurrentUser } from "@nextcloud/auth";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
+import axios from "@nextcloud/axios";
+
 import { IFileInfo, IPhoto } from "../../types";
-import client from "../DavClient";
 import { genFileInfo } from "../FileUtils";
 import { getAlbumFileInfos } from "./albums";
+import * as utils from "../Utils";
+import client from "../DavClient";
 
 export const props = `
     <oc:fileid />
@@ -195,10 +198,32 @@ export async function* deletePhotos(photos: IPhoto[]) {
 
   const fileIdsSet = new Set(photos.map((p) => p.fileid));
 
+  // Get live photo data
+  const livePhotos = (
+    await Promise.all(
+      photos
+        .filter((p) => p.liveid && !p.liveid.startsWith("self__"))
+        .map(async (p) => {
+          const url = utils.getLivePhotoVideoUrl(p) + "&format=json";
+          try {
+            const response = await axios.get(url);
+            const data = response.data;
+            fileIdsSet.add(data.fileid);
+            return {
+              fileid: data.fileid,
+            } as IPhoto;
+          } catch (error) {
+            console.error(error);
+            return null;
+          }
+        })
+    )
+  ).filter((p) => p !== null) as IPhoto[];
+
   // Get files data
   let fileInfos: IFileInfo[] = [];
   try {
-    fileInfos = await getFiles(photos);
+    fileInfos = await getFiles(photos.concat(livePhotos));
   } catch (e) {
     console.error("Failed to get file info for files to delete", photos, e);
     showError(t("memories", "Failed to delete files."));
