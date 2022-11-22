@@ -26,8 +26,26 @@ class LivePhoto
     /** Get liveid from photo part */
     public function getLivePhotoId(array &$exif)
     {
+        // Apple JPEG (MOV has ContentIdentifier)
         if (\array_key_exists('MediaGroupUUID', $exif)) {
             return $exif['MediaGroupUUID'];
+        }
+
+        // Samsung JPEG
+        if (\array_key_exists('EmbeddedVideoType', $exif) && str_contains($exif['EmbeddedVideoType'], 'MotionPhoto')) {
+            return 'self__embeddedvideo';
+        }
+
+        // Google JPEG and Samsung HEIC (Apple?)
+        if (\array_key_exists('MotionPhoto', $exif)) {
+            if ('image/jpeg' === $exif['MIMEType']) {
+                // Google JPEG -- image should hopefully be in trailer
+                return 'self__trailer';
+            }
+            if ('image/heic' === $exif['MIMEType']) {
+                // Samsung HEIC -- no way to get this out yet
+                return '';
+            }
         }
 
         return '';

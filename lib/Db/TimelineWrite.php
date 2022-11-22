@@ -134,7 +134,7 @@ class TimelineWrite
             }
 
             // These are huge and not needed
-            if (str_starts_with($key, 'Nikon')) {
+            if (str_starts_with($key, 'Nikon') || str_starts_with($key, 'QuickTime')) {
                 unset($exif[$key]);
             }
         }

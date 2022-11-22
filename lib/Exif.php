@@ -262,6 +262,28 @@ class Exif
         }
     }
 
+    public static function getBinaryExifProp(string $path, string $prop)
+    {
+        $pipes = [];
+        $proc = proc_open(array_merge(self::getExiftool(), [$prop, '-n', '-b', $path]), [
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ], $pipes);
+        stream_set_blocking($pipes[1], false);
+
+        try {
+            return self::readOrTimeout($pipes[1], 5000);
+        } catch (\Exception $ex) {
+            error_log("Exiftool timeout: [{$path}]");
+
+            throw new \Exception('Could not read from Exiftool');
+        } finally {
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            proc_terminate($proc);
+        }
+    }
+
     /** Get path to exiftool binary */
     private static function getExiftool()
     {

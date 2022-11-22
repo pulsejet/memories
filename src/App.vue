@@ -358,7 +358,7 @@ aside.app-sidebar {
 }
 
 :root {
-  --livephoto-img-transition: opacity 0.5s linear, transform 0.4s ease-in-out;
+  --livephoto-img-transition: opacity 0.4s linear, transform 0.3s ease-in-out;
 }
 
 // Live photo transitions
@@ -388,7 +388,7 @@ aside.app-sidebar {
     opacity: 1;
   }
   &.playing.canplay img {
-    transform: scale(1.07);
+    transform: scale(1.05);
   }
 }
 </style>

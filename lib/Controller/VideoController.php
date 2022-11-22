@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\Exif;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
@@ -163,27 +164,60 @@ class VideoController extends ApiBase
         if (!$liveid) {
             return new JSONResponse(['message' => 'Live ID not provided'], Http::STATUS_BAD_REQUEST);
         }
-        $lp = $this->timelineQuery->getLivePhoto($fileid);
-        if (!$lp || $lp['liveid'] !== $liveid) {
-            return new JSONResponse(['message' => 'Live ID not found'], Http::STATUS_NOT_FOUND);
+
+        // Response data
+        $name = '';
+        $blob = null;
+        $mime = '';
+
+        // Video is inside the file
+        $path = null;
+        if (str_starts_with($liveid, 'self__')) {
+            $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+            $mime = 'video/mp4';
+            $name = $file->getName().'.mp4';
         }
 
-        // Get and return file
-        $liveFileId = (int) $lp['fileid'];
-        $files = $this->rootFolder->getById($liveFileId);
-        if (0 === \count($files)) {
-            return new JSONResponse(['message' => 'Live file not found'], Http::STATUS_NOT_FOUND);
+        // Different manufacurers have different formats
+        if ('self__trailer' === $liveid) {
+            try { // Get trailer
+                $blob = Exif::getBinaryExifProp($path, '-trailer');
+            } catch (\Exception $e) {
+                return new JSONResponse(['message' => 'Trailer not found'], Http::STATUS_NOT_FOUND);
+            }
+        } elseif ('self__embeddedvideo' === $liveid) {
+            try { // Get embedded video file
+                $blob = Exif::getBinaryExifProp($path, '-EmbeddedVideoFile');
+            } catch (\Exception $e) {
+                return new JSONResponse(['message' => 'Embedded video not found'], Http::STATUS_NOT_FOUND);
+            }
+        } else {
+            // Get stored video file (Apple MOV)
+            $lp = $this->timelineQuery->getLivePhoto($fileid);
+            if (!$lp || $lp['liveid'] !== $liveid) {
+                return new JSONResponse(['message' => 'Live ID not found'], Http::STATUS_NOT_FOUND);
+            }
+
+            // Get and return file
+            $liveFileId = (int) $lp['fileid'];
+            $files = $this->rootFolder->getById($liveFileId);
+            if (0 === \count($files)) {
+                return new JSONResponse(['message' => 'Live file not found'], Http::STATUS_NOT_FOUND);
+            }
+            $liveFile = $files[0];
+
+            if ($liveFile instanceof File) {
+                $name = $liveFile->getName();
+                $blob = $liveFile->getContent();
+                $mime = $liveFile->getMimeType();
+            }
         }
-        $liveFile = $files[0];
 
-        if ($liveFile instanceof File) {
-            // Create and send response
-            $name = $liveFile->getName();
-            $blob = $liveFile->getContent();
-
+        // Make and send response
+        if ($blob) {
             $response = new DataDisplayResponse($blob, Http::STATUS_OK, []);
             $response->setHeaders([
-                'Content-Type' => $liveFile->getMimeType(),
+                'Content-Type' => $mime,
                 'Content-Disposition' => "attachment; filename=\"{$name}\"",
             ]);
             $response->cacheFor(3600 * 24, false, false);
