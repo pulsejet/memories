@@ -71,8 +71,13 @@ class ImageController extends ApiBase
         }
 
         // Check if user has permissions
-        if (!$file->isUpdateable()) {
+        if (!$file->isUpdateable() || !($file->getPermissions() & \OCP\Constants::PERMISSION_UPDATE)) {
             return new JSONResponse([], Http::STATUS_FORBIDDEN);
+        }
+
+        // Check for end-to-end encryption
+        if (\OCA\Memories\Util::isEncryptionEnabled($this->encryptionManager)) {
+            return new JSONResponse(['message' => 'Cannot change encrypted file'], Http::STATUS_PRECONDITION_FAILED);
         }
 
         // Get original file from body

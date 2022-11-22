@@ -368,7 +368,7 @@ class Exif
 
     private static function getExifFromLocalPathWithStaticProc(string &$path)
     {
-        fwrite(self::$staticPipes[0], "{$path}\n-json\n-b\n-api\nQuickTimeUTC=1\n-n\n-execute\n");
+        fwrite(self::$staticPipes[0], "{$path}\n-U\n-json\n--b\n-api\nQuickTimeUTC=1\n-n\n-execute\n");
         fflush(self::$staticPipes[0]);
 
         $readyToken = "\n{ready}\n";
@@ -390,7 +390,7 @@ class Exif
     private static function getExifFromLocalPathWithSeparateProc(string &$path)
     {
         $pipes = [];
-        $proc = proc_open(array_merge(self::getExiftool(), ['-api', 'QuickTimeUTC=1', '-n', '-json', '-b', $path]), [
+        $proc = proc_open(array_merge(self::getExiftool(), ['-api', 'QuickTimeUTC=1', '-n', '-U', '-json', '--b', $path]), [
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
         ], $pipes);

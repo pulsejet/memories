@@ -261,7 +261,7 @@ $icon-size: $icon-half-size * 2;
   // Extremely ugly way to fill up the space
   // If this isn't done, bg has a border
   :deep path {
-    transform: scale(1.19) translate(-1.85px, -1.85px);
+    transform: scale(1.2) translate(-2px, -2px);
   }
 
   filter: invert(1) brightness(100);

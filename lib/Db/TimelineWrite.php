@@ -114,8 +114,12 @@ class TimelineWrite
         $exifJson = json_encode($exif);
 
         // Store error if data > 64kb
-        if (\strlen($exifJson) > 65535) {
-            $exifJson = json_encode(['error' => 'Exif data too large']);
+        if (\is_string($exifJson)) {
+            if (\strlen($exifJson) > 65535) {
+                $exifJson = json_encode(['error' => 'Exif data too large']);
+            }
+        } else {
+            $exifJson = json_encode(['error' => 'Exif data encoding error']);
         }
 
         if ($prevRow) {

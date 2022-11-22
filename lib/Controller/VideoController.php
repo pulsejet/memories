@@ -62,6 +62,10 @@ class VideoController extends ApiBase
         }
         $file = $files[0];
 
+        if (!($file->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
+            return new JSONResponse(['message' => 'File not readable'], Http::STATUS_FORBIDDEN);
+        }
+
         // Local files only for now
         if (!$file->getStorage()->isLocal()) {
             return new JSONResponse(['message' => 'External storage not supported'], Http::STATUS_FORBIDDEN);

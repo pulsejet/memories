@@ -164,6 +164,7 @@ class VideoContentSetup {
 
     sources.push({
       src: content.data.src,
+      type: "video/mp4",
     });
 
     const overrideNative = !videojs.browser.IS_SAFARI;
@@ -287,7 +288,7 @@ class VideoContentSetup {
       },
       fullscreen: {
         enabled: true,
-        container: ".pswp__item",
+        container: ".pswp__container",
       },
     };
 

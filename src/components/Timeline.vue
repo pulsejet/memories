@@ -64,7 +64,7 @@
             {{ item.super }}
           </div>
           <div class="main" @click="selectionManager.selectHead(item)">
-            <CheckCircle :size="18" class="select" v-if="item.name" />
+            <CheckCircle :size="20" class="select" v-if="item.name" />
             <span class="name"> {{ item.name || getHeadName(item) }} </span>
           </div>
         </div>
@@ -917,7 +917,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
             head.day.detail.length === photos.length &&
             head.day.detail.every(
               (p, i) =>
-                p.fileid === photos[i].fileid && p.etag === photos[i].etag
+                p.fileid === photos[i].fileid &&
+                p.etag === photos[i].etag &&
+                p.filename === photos[i].filename
             )
           ) {
             continue;
@@ -1316,6 +1318,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     display: block;
     transition: transform 0.2s ease;
     cursor: pointer;
+    font-size: 1.075em;
   }
 
   :hover,
@@ -1325,7 +1328,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       opacity: 0.7;
     }
     .name {
-      transform: translateX(22px);
+      transform: translateX(24px);
     }
   }
   &.selected .select {

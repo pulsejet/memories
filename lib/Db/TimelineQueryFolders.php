@@ -19,7 +19,9 @@ trait TimelineQueryFolders
         $query->select('f.fileid', 'f.etag')->from('memories', 'm');
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $folder, true, false);
+        $root = new TimelineRoot();
+        $root->addFolder($folder);
+        $query = $this->joinFilecache($query, $root, true, false);
 
         // ORDER descending by fileid
         $query->orderBy('f.fileid', 'DESC');

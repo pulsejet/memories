@@ -53,6 +53,12 @@
     >
       {{ t("memories", "Square grid mode") }}
     </NcCheckboxRadioSwitch>
+
+    <MultiPathSelectionModal
+      ref="multiPathModal"
+      :title="pathSelTitle"
+      @close="saveTimelinePath"
+    />
   </div>
 </template>
 
@@ -65,18 +71,24 @@ input[type="text"] {
 <script lang="ts">
 import { Component, Mixins } from "vue-property-decorator";
 import GlobalMixin from "../mixins/GlobalMixin";
-
-import { getFilePickerBuilder } from "@nextcloud/dialogs";
 import UserConfig from "../mixins/UserConfig";
 
+import { getFilePickerBuilder } from "@nextcloud/dialogs";
 import { NcCheckboxRadioSwitch } from "@nextcloud/vue";
+
+import MultiPathSelectionModal from "./modal/MultiPathSelectionModal.vue";
 
 @Component({
   components: {
     NcCheckboxRadioSwitch,
+    MultiPathSelectionModal,
   },
 })
 export default class Settings extends Mixins(UserConfig, GlobalMixin) {
+  get pathSelTitle() {
+    return this.t("memories", "Choose Timeline Paths");
+  }
+
   async chooseFolder(title: string, initial: string) {
     const picker = getFilePickerBuilder(title)
       .setMultiSelect(false)
@@ -91,10 +103,13 @@ export default class Settings extends Mixins(UserConfig, GlobalMixin) {
   }
 
   async chooseTimelinePath() {
-    const newPath = await this.chooseFolder(
-      this.t("memories", "Choose the root of your timeline"),
-      this.config_timelinePath
-    );
+    (<any>this.$refs.multiPathModal).open(this.config_timelinePath.split(";"));
+  }
+
+  async saveTimelinePath(paths: string[]) {
+    if (!paths || !paths.length) return;
+
+    const newPath = paths.join(";");
     if (newPath !== this.config_timelinePath) {
       this.config_timelinePath = newPath;
       await this.updateSetting("timelinePath");
@@ -102,10 +117,11 @@ export default class Settings extends Mixins(UserConfig, GlobalMixin) {
   }
 
   async chooseFoldersPath() {
-    const newPath = await this.chooseFolder(
+    let newPath = await this.chooseFolder(
       this.t("memories", "Choose the root for the folders view"),
       this.config_foldersPath
     );
+    if (newPath === "") newPath = "/";
     if (newPath !== this.config_foldersPath) {
       this.config_foldersPath = newPath;
       await this.updateSetting("foldersPath");

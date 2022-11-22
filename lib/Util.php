@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories;
 
-use OCA\Memories\AppInfo\Application;
-use OCP\IConfig;
-
 class Util
 {
     public static $TAG_DAYID_START = -(1 << 30); // the world surely didn't exist
@@ -45,19 +42,6 @@ class Util
         }
 
         return null;
-    }
-
-    /**
-     * Get the path to the user's configured photos directory.
-     */
-    public static function getPhotosPath(IConfig &$config, string $userId)
-    {
-        $p = $config->getUserValue($userId, Application::APPNAME, 'timelinePath', '');
-        if (empty($p)) {
-            return '/Photos/';
-        }
-
-        return $p;
     }
 
     /**
@@ -120,5 +104,21 @@ class Util
         }
 
         return true;
+    }
+
+    /**
+     * Check if any encryption is enabled that we can not cope with
+     * such as end-to-end encryption.
+     *
+     * @param mixed $encryptionManager
+     */
+    public static function isEncryptionEnabled(&$encryptionManager): bool
+    {
+        if ($encryptionManager->isEnabled()) {
+            // Server-side encryption (OC_DEFAULT_MODULE) is okay, others like e2e are not
+            return 'OC_DEFAULT_MODULE' !== $encryptionManager->getDefaultEncryptionModuleId();
+        }
+
+        return false;
     }
 }

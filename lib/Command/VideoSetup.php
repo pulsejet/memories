@@ -52,7 +52,15 @@ class VideoSetup extends Command
     {
         // Preset executables
         $ffmpegPath = $this->config->getSystemValue('memories.ffmpeg_path', 'ffmpeg');
+        if ('ffmpeg' === $ffmpegPath) {
+            $ffmpegPath = trim(shell_exec('which ffmpeg') ?: 'ffmpeg');
+            $this->config->setSystemValue('memories.ffmpeg_path', $ffmpegPath);
+        }
         $ffprobePath = $this->config->getSystemValue('memories.ffprobe_path', 'ffprobe');
+        if ('ffprobe' === $ffprobePath) {
+            $ffprobePath = trim(shell_exec('which ffprobe') ?: 'ffprobe');
+            $this->config->setSystemValue('memories.ffprobe_path', $ffprobePath);
+        }
 
         // Get ffmpeg version
         $ffmpeg = shell_exec("{$ffmpegPath} -version");
@@ -80,18 +88,22 @@ class VideoSetup extends Command
 
         // Check go-vod binary
         $output->writeln('Checking for go-vod binary');
+        $goVodPath = $this->config->getSystemValue('memories.transcoder', false);
 
-        // Detect architecture
-        $arch = \OCA\Memories\Util::getArch();
+        if (false === $goVodPath) {
+            // Detect architecture
+            $arch = \OCA\Memories\Util::getArch();
 
-        if (!$arch) {
-            $output->writeln('<error>Compatible go-vod binary not found</error>');
-            $this->suggestGoVod($output);
+            if (!$arch) {
+                $output->writeln('<error>Compatible go-vod binary not found</error>');
+                $this->suggestGoVod($output);
 
-            return $this->suggestDisable($output);
+                return $this->suggestDisable($output);
+            }
+
+            $goVodPath = realpath(__DIR__."/../../exiftool-bin/go-vod-{$arch}");
         }
 
-        $goVodPath = realpath(__DIR__."/../../exiftool-bin/go-vod-{$arch}");
         $output->writeln("Trying go-vod from {$goVodPath}");
         chmod($goVodPath, 0755);
 

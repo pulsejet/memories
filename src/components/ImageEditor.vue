@@ -220,6 +220,11 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
       delete exif.ExifImageHeight;
       delete exif.ExifImageWidth;
       delete exif.ExifImageSize;
+      delete exif.CompatibleBrands;
+      delete exif.FileType;
+      delete exif.FileTypeExtension;
+      delete exif.MIMEType;
+      delete exif.MajorBrand;
 
       // Update exif data
       await axios.patch(

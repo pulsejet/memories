@@ -334,7 +334,11 @@ export function cacheData(url: string, data: Object) {
     if (!cache) return;
 
     const response = new Response(str);
+    const encoded = new TextEncoder().encode(str);
     response.headers.set("Content-Type", "application/json");
+    response.headers.set("Content-Length", encoded.length.toString());
+    response.headers.set("Cache-Control", "max-age=604800"); // 1 week
+    response.headers.set("Vary", "Accept-Encoding");
     await cache.put(url, response);
   })();
 }

@@ -122,7 +122,7 @@ import "photoswipe/style.css";
 import PsVideo from "./PsVideo";
 
 import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
-import DeleteIcon from "vue-material-design-icons/Delete.vue";
+import DeleteIcon from "vue-material-design-icons/TrashCanOutline.vue";
 import StarIcon from "vue-material-design-icons/Star.vue";
 import StarOutlineIcon from "vue-material-design-icons/StarOutline.vue";
 import DownloadIcon from "vue-material-design-icons/Download.vue";
@@ -253,9 +253,13 @@ export default class Viewer extends Mixins(GlobalMixin) {
       counter: true,
       zoom: false,
       loop: false,
+      wheelToZoom: true,
       bgOpacity: 1,
       appendToEl: this.$refs.inner as HTMLElement,
       preload: [2, 2],
+      closeTitle: this.t("memories", "Close"),
+      arrowPrevTitle: this.t("memories", "Previous"),
+      arrowNextTitle: this.t("memories", "Next"),
       getViewportSizeFn: () => {
         const sidebarWidth = this.sidebarOpen ? this.sidebarWidth : 0;
         this.outerWidth = `calc(100vw - ${sidebarWidth}px)`;
