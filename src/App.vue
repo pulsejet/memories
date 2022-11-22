@@ -369,7 +369,6 @@ aside.app-sidebar {
 .memories-livephoto {
   position: relative;
   overflow: hidden;
-  contain: strict;
 
   img,
   video {
