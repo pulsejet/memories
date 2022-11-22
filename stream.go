@@ -323,7 +323,6 @@ func (s *Stream) transcode(startId int) {
 
 	// Output specs
 	args = append(args, []string{
-		"-map", "0",
 		"-c:v", CV,
 		"-profile:v", "high",
 	}...)
