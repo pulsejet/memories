@@ -60,7 +60,6 @@
         preload="none"
         muted
         playsinline
-        loop
       />
       <div class="overlay fill-block" />
     </div>
