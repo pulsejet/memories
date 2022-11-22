@@ -8,6 +8,8 @@ This file is manually updated. Please file an issue if something is missing.
 - **Feature**: Multiple timeline paths can be specified ([#178](https://github.com/pulsejet/memories/issues/178))
 - Support for server-side encrypted storage ([#99](https://github.com/pulsejet/memories/issues/99))
 - Mouse wheel now zooms on desktop
+- Improved caching performance
+  - Due to incorrect caching in previous versions, your browser cache may have become very large. You can clear it to save some space.
 
 ## v4.7.0, v3.7.0 (2022-11-14)
 
