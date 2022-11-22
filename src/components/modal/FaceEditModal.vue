@@ -31,6 +31,8 @@ const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
 
 import { showError } from "@nextcloud/dialogs";
 import { getCurrentUser } from "@nextcloud/auth";
+import { generateUrl } from "@nextcloud/router";
+import axios from '@nextcloud/axios'
 import Modal from "./Modal.vue";
 import GlobalMixin from "../../mixins/GlobalMixin";
 import client from "../../services/DavClient";
@@ -83,12 +85,24 @@ export default class FaceEditModal extends Mixins(GlobalMixin) {
 
   public async save() {
     try {
-      await client.moveFile(
-        `/recognize/${this.user}/faces/${this.oldName}`,
-        `/recognize/${this.user}/faces/${this.name}`
-      );
+      if (this.$route.name === 'people') {
+        await client.moveFile(
+          `/recognize/${this.user}/faces/${this.oldName}`,
+          `/recognize/${this.user}/faces/${this.name}`
+        );
+      } else {
+        if (Number.isInteger(Number(this.oldName))) {
+          await axios.put(generateUrl(`/apps/facerecognition/api/2.0/cluster/${this.oldName}`), {
+            name: this.name
+          })
+        } else {
+          await axios.put(generateUrl(`/apps/facerecognition/api/2.0/person/${this.oldName}`), {
+            name: this.name
+          })
+        }
+      }
       this.$router.push({
-        name: "people",
+        name: this.$route.name,
         params: { user: this.user, name: this.name },
       });
       this.close();
