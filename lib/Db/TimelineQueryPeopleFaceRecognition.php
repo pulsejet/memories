@@ -59,7 +59,7 @@ trait TimelineQueryPeopleFaceRecognition
         );
     }
 
-    public function getPeopleFaceRecognition(TimelineRoot &$root, int $currentModel, bool $show_clusters = false, bool $show_hidden = false)
+    public function getPeopleFaceRecognition(TimelineRoot &$root, int $currentModel, bool $show_clusters = false, bool $show_singles = false, bool $show_hidden = false)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -90,6 +90,11 @@ trait TimelineQueryPeopleFaceRecognition
             // GROUP by name of face clusters
             $query->groupBy('frp.name');
             $query->where($query->expr()->isNotNull('frp.name'));
+        }
+
+        // By default hides individual faces when they have no name.
+        if ($show_clusters && !$show_singles) {
+            $query->having($query->expr()->gt('count', $query->createNamedParameter(1)));
         }
 
         // By default it shows the people who were not hidden
