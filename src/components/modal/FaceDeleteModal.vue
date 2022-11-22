@@ -24,6 +24,8 @@ const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
 
 import { showError } from "@nextcloud/dialogs";
 import { getCurrentUser } from "@nextcloud/auth";
+import { generateUrl } from "@nextcloud/router";
+import axios from '@nextcloud/axios'
 import Modal from "./Modal.vue";
 import GlobalMixin from "../../mixins/GlobalMixin";
 import client from "../../services/DavClient";
@@ -74,8 +76,20 @@ export default class FaceDeleteModal extends Mixins(GlobalMixin) {
 
   public async save() {
     try {
-      await client.deleteFile(`/recognize/${this.user}/faces/${this.name}`);
-      this.$router.push({ name: "people" });
+      if (this.$route.name === 'people') {
+        await client.deleteFile(`/recognize/${this.user}/faces/${this.name}`);
+      } else {
+        if (Number.isInteger(Number(this.name))) {
+          await axios.put(generateUrl(`/apps/facerecognition/api/2.0/cluster/${this.name}`), {
+            visible: false
+          })
+        } else {
+          await axios.put(generateUrl(`/apps/facerecognition/api/2.0/person/${this.name}`), {
+            visible: false
+          })
+        }
+      }
+      this.$router.push({ name: this.$route.name });
       this.close();
     } catch (error) {
       console.log(error);
