@@ -356,4 +356,38 @@ aside.app-sidebar {
   height: 100%;
   display: block;
 }
+
+:root {
+  --livephoto-img-transition: opacity 0.5s linear, transform 0.4s ease-in-out;
+}
+
+// Live photo transitions
+.memories-livephoto {
+  position: relative;
+  overflow: hidden;
+  contain: strict;
+
+  img,
+  video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    transition: var(--livephoto-img-transition);
+  }
+
+  video,
+  &.playing.canplay img {
+    opacity: 0;
+  }
+  img,
+  &.playing.canplay video {
+    opacity: 1;
+  }
+  &.playing.canplay img {
+    transform: scale(1.07);
+  }
+}
 </style>

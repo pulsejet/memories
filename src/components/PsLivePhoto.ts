@@ -1,5 +1,5 @@
 import PhotoSwipe from "photoswipe";
-import { generateUrl } from "@nextcloud/router";
+import * as utils from "../services/Utils";
 
 function isLiveContent(content): boolean {
   return Boolean(content?.data?.photo?.liveid);
@@ -29,25 +29,16 @@ class LivePhotoContentSetup {
     const video = document.createElement("video");
     video.muted = true;
     video.autoplay = false;
+    video.playsInline = true;
     video.preload = "none";
-    video.src = generateUrl(
-      `/apps/memories/api/video/livephoto/${photo.fileid}?etag=${photo.etag}&liveid=${photo.liveid}`
-    );
+    video.src = utils.getLivePhotoVideoUrl(photo);
 
     const div = document.createElement("div");
-    div.className = "livephoto";
+    div.className = "memories-livephoto";
     div.appendChild(video);
     content.element = div;
 
-    video.onplay = () => {
-      div.classList.add("playing");
-    };
-    video.oncanplay = () => {
-      div.classList.add("canplay");
-    };
-    video.onended = video.onpause = () => {
-      div.classList.remove("playing");
-    };
+    utils.setupLivePhotoHooks(video);
 
     const img = document.createElement("img");
     img.src = content.data.src;
@@ -59,17 +50,17 @@ class LivePhotoContentSetup {
 
   onContentActivate({ content }) {
     if (isLiveContent(content) && content.element) {
-      content.element.querySelector("video")?.play();
+      const video = content.element.querySelector("video");
+      if (video) {
+        video.currentTime = 0;
+        video.play();
+      }
     }
   }
 
   onContentDeactivate({ content }) {
     if (isLiveContent(content) && content.element) {
-      const vid = content.element.querySelector("video");
-      if (vid) {
-        vid.pause();
-        vid.currentTime = 0;
-      }
+      content.element.querySelector("video")?.pause();
     }
   }
 
