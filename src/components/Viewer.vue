@@ -125,6 +125,7 @@ import PhotoSwipe, { PhotoSwipeOptions } from "photoswipe";
 import "photoswipe/style.css";
 
 import PsVideo from "./PsVideo";
+import PsLivePhoto from "./PsLivePhoto";
 
 import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
 import DeleteIcon from "vue-material-design-icons/TrashCanOutline.vue";
@@ -417,6 +418,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
       autoplay: true,
       preventDragOffset: 40,
     });
+
+    // Live photo support
+    new PsLivePhoto(this.photoswipe, {});
 
     return this.photoswipe;
   }
@@ -899,6 +903,35 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   .pswp__top-bar {
     background: linear-gradient(0deg, transparent, rgba(0, 0, 0, 0.3));
+  }
+
+  .livephoto {
+    position: relative;
+    overflow: hidden;
+    contain: strict;
+
+    img,
+    video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      transition: opacity 0.5s ease-in-out, transform 0.4s ease-in-out;
+    }
+
+    video,
+    &.playing.canplay img {
+      opacity: 0;
+    }
+    img,
+    &.playing.canplay video {
+      opacity: 1;
+    }
+    &.playing.canplay img {
+      transform: scale(1.07);
+    }
   }
 }
 
