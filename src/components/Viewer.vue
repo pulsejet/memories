@@ -13,7 +13,12 @@
       @close="editorOpen = false"
     />
 
-    <div class="inner" ref="inner" v-show="!editorOpen">
+    <div
+      class="inner"
+      ref="inner"
+      v-show="!editorOpen"
+      @pointermove.passive="setUiVisible"
+    >
       <div class="top-bar" v-if="photoswipe" :class="{ showControls }">
         <NcActions
           :inline="numInlineActions"
@@ -161,6 +166,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
   private sidebarWidth = 400;
   private outerWidth = "100vw";
 
+  /** User interaction detection */
+  private activityTimer = 0;
+
   /** Base dialog */
   private photoswipe: PhotoSwipe | null = null;
 
@@ -237,10 +245,37 @@ export default class Viewer extends Mixins(GlobalMixin) {
   }
 
   /** Event on file changed */
-  handleFileUpdated({ fileid }: { fileid: number }) {
+  private handleFileUpdated({ fileid }: { fileid: number }) {
     if (this.currentPhoto && this.currentPhoto.fileid === fileid) {
       this.currentPhoto.etag += "_";
       this.photoswipe.refreshSlideContent(this.currIndex);
+    }
+  }
+
+  /** User interacted with the page with mouse */
+  private setUiVisible(evt: any) {
+    clearTimeout(this.activityTimer);
+    if (evt) {
+      // If directly triggered, always update ui visibility
+      // If triggered through a pointer event, only update if this is not
+      // a touch event (i.e. a mouse move).
+      // On touch devices, tapAction directly handles the ui visibility
+      // through Photoswipe.
+      const isPointer = evt instanceof PointerEvent;
+      const isMouse = isPointer && evt.pointerType !== "touch";
+      if (this.isOpen && (!isPointer || isMouse)) {
+        this.photoswipe?.template?.classList.add("pswp--ui-visible");
+
+        if (isMouse) {
+          this.activityTimer = window.setTimeout(() => {
+            if (this.isOpen) {
+              this.photoswipe?.template?.classList.remove("pswp--ui-visible");
+            }
+          }, 2000);
+        }
+      }
+    } else {
+      this.photoswipe?.template?.classList.remove("pswp--ui-visible");
     }
   }
 
@@ -320,7 +355,6 @@ export default class Viewer extends Mixins(GlobalMixin) {
     this.photoswipe.on("openingAnimationStart", () => {
       this.isOpen = true;
       this.fullyOpened = false;
-      this.showControls = true;
       if (this.sidebarOpen) {
         this.openSidebar();
       }
@@ -331,7 +365,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
     this.photoswipe.on("close", () => {
       this.isOpen = false;
       this.fullyOpened = false;
-      this.showControls = false;
+      this.setUiVisible(false);
       this.hideSidebar();
       this.setRouteHash(undefined);
       this.updateTitle(undefined);
@@ -344,18 +378,12 @@ export default class Viewer extends Mixins(GlobalMixin) {
       this.show = false;
       this.isOpen = false;
       this.fullyOpened = false;
-      this.showControls = false;
       this.photoswipe = null;
       this.list = [];
       this.days.clear();
       this.dayIds = [];
       this.globalCount = 0;
       this.globalAnchor = -1;
-    });
-
-    // toggle-controls
-    this.photoswipe.on("tapAction", () => {
-      this.showControls = !this.showControls;
     });
 
     // Update vue route for deep linking
@@ -365,6 +393,22 @@ export default class Viewer extends Mixins(GlobalMixin) {
       this.setRouteHash(photo);
       this.updateTitle(photo);
       globalThis.currentViewerPhoto = photo;
+    });
+
+    // Show and hide controls
+    this.photoswipe.on("uiRegister", (e) => {
+      if (this.photoswipe?.template) {
+        new MutationObserver((mutations) => {
+          mutations.forEach((mutationRecord) => {
+            this.showControls = (<HTMLElement>(
+              mutationRecord.target
+            ))?.classList.contains("pswp--ui-visible");
+          });
+        }).observe(this.photoswipe.template, {
+          attributes: true,
+          attributeFilter: ["class"],
+        });
+      }
     });
 
     // Video support
