@@ -304,18 +304,29 @@ func (s *Stream) transcode(startId int) {
 
 	// Scaling for output
 	var scale string
+	var format string
 	if CV == "h264_vaapi" {
-		scale = fmt.Sprintf("format=nv12|vaapi,hwupload,scale_vaapi=w=%d:h=%d:force_original_aspect_ratio=decrease", s.width, s.height)
-	} else if s.width >= s.height {
-		scale = fmt.Sprintf("format=nv12,scale=-2:%d", s.height)
+		// VAAPI
+		format = "format=nv12|vaapi,hwupload"
+		scale = fmt.Sprintf("scale_vaapi=w=%d:h=%d:force_original_aspect_ratio=decrease", s.width, s.height)
 	} else {
-		scale = fmt.Sprintf("format=nv12,scale=%d:-2", s.width)
+		// x264
+		format = "format=nv12"
+		if s.width >= s.height {
+			scale = fmt.Sprintf("scale=-2:%d", s.height)
+		} else {
+			scale = fmt.Sprintf("scale=%d:-2", s.width)
+		}
 	}
 
 	// do not scale or set bitrate for full quality
-	if s.quality != "max" {
+	if s.quality == "max" {
 		args = append(args, []string{
-			"-vf", scale,
+			"-vf", format,
+		}...)
+	} else {
+		args = append(args, []string{
+			"-vf", fmt.Sprintf("%s,%s", format, scale),
 			"-maxrate", fmt.Sprintf("%d", s.bitrate),
 			"-bufsize", fmt.Sprintf("%d", s.bitrate*2),
 		}...)
