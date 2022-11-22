@@ -22,10 +22,21 @@
       <Video :size="22" />
     </div>
 
+    <div
+      class="livephoto"
+      @mouseenter.passive="playVideo"
+      @mouseleave.passive="stopVideo"
+    >
+      <LivePhoto :size="22" v-if="data.liveid" />
+    </div>
+
     <Star :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
 
     <div
       class="img-outer fill-block"
+      :class="{
+        'memories-livephoto': data.liveid,
+      }"
       @contextmenu="contextmenu"
       @pointerdown.passive="$emit('pointerdown', $event)"
       @touchstart.passive="$emit('touchstart', $event)"
@@ -42,7 +53,15 @@
         @load="load"
         @error="error"
       />
-      <div class="overlay" />
+      <video
+        ref="video"
+        v-if="videoUrl"
+        :src="videoUrl"
+        preload="none"
+        muted
+        playsinline
+      />
+      <div class="overlay fill-block" />
     </div>
   </div>
 </template>
@@ -59,12 +78,14 @@ import errorsvg from "../../assets/error.svg";
 import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
 import Star from "vue-material-design-icons/Star.vue";
 import Video from "vue-material-design-icons/PlayCircleOutline.vue";
+import LivePhoto from "vue-material-design-icons/MotionPlayOutline.vue";
 
 @Component({
   components: {
     CheckCircle,
     Video,
     Star,
+    LivePhoto,
   },
 })
 export default class Photo extends Mixins(GlobalMixin) {
@@ -95,6 +116,12 @@ export default class Photo extends Mixins(GlobalMixin) {
   mounted() {
     this.hasFaceRect = false;
     this.refresh();
+
+    // Setup video hooks
+    const video = this.$refs.video as HTMLVideoElement;
+    if (video) {
+      utils.setupLivePhotoHooks(video);
+    }
   }
 
   get videoDuration() {
@@ -102,6 +129,12 @@ export default class Photo extends Mixins(GlobalMixin) {
       return utils.getDurationStr(this.data.video_duration);
     }
     return null;
+  }
+
+  get videoUrl() {
+    if (this.data.liveid) {
+      return utils.getLivePhotoVideoUrl(this.data);
+    }
   }
 
   async refresh() {
@@ -204,6 +237,23 @@ export default class Photo extends Mixins(GlobalMixin) {
       e.stopPropagation();
     }
   }
+
+  /** Start preview video */
+  playVideo() {
+    if (this.$refs.video && !(this.data.flag & this.c.FLAG_SELECTED)) {
+      const video = this.$refs.video as HTMLVideoElement;
+      video.currentTime = 0;
+      video.play();
+    }
+  }
+
+  /** Stop preview video */
+  stopVideo() {
+    if (this.$refs.video) {
+      const video = this.$refs.video as HTMLVideoElement;
+      video.pause();
+    }
+  }
 }
 </script>
 
@@ -273,14 +323,16 @@ $icon-size: $icon-half-size * 2;
   }
 }
 .video,
-.star-icon {
+.star-icon,
+.livephoto {
   position: absolute;
   z-index: 100;
   pointer-events: none;
   transition: transform 0.15s ease;
   filter: invert(1) brightness(100);
 }
-.video {
+.video,
+.livephoto {
   position: absolute;
   top: var(--icon-dist);
   right: var(--icon-dist);
@@ -298,6 +350,9 @@ $icon-size: $icon-half-size * 2;
     margin-right: 3px;
   }
 }
+.livephoto {
+  pointer-events: auto;
+}
 .star-icon {
   bottom: var(--icon-dist);
   left: var(--icon-dist);
@@ -308,6 +363,7 @@ $icon-size: $icon-half-size * 2;
 
 /* Actual image */
 div.img-outer {
+  position: relative;
   box-sizing: border-box;
   padding: 0;
 
@@ -331,7 +387,7 @@ div.img-outer {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     user-select: none;
-    transition: border-radius 0.1s ease-in;
+    transition: border-radius 0.1s ease-in, var(--livephoto-img-transition);
 
     .p-outer.placeholder > & {
       display: none;
@@ -341,11 +397,16 @@ div.img-outer {
     }
   }
 
-  & > .overlay {
+  > video {
     pointer-events: none;
-    width: 100%;
-    height: 100%;
-    transform: translateY(-100%); // very weird stuff
+    object-fit: cover;
+  }
+
+  > .overlay {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, transparent 30%);
 
     display: none;

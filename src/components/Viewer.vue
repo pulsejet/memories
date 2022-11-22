@@ -13,7 +13,12 @@
       @close="editorOpen = false"
     />
 
-    <div class="inner" ref="inner" v-show="!editorOpen">
+    <div
+      class="inner"
+      ref="inner"
+      v-show="!editorOpen"
+      @pointermove.passive="setUiVisible"
+    >
       <div class="top-bar" v-if="photoswipe" :class="{ showControls }">
         <NcActions
           :inline="numInlineActions"
@@ -82,6 +87,17 @@
             </template>
           </NcActionButton>
           <NcActionButton
+            v-if="currentPhoto?.liveid"
+            :aria-label="t('memories', 'Download Video')"
+            @click="downloadCurrentLiveVideo"
+            :close-after-click="true"
+          >
+            {{ t("memories", "Download Video") }}
+            <template #icon>
+              <DownloadIcon :size="24" />
+            </template>
+          </NcActionButton>
+          <NcActionButton
             v-if="!routeIsPublic"
             :aria-label="t('memories', 'View in folder')"
             @click="viewInFolder"
@@ -120,6 +136,7 @@ import PhotoSwipe, { PhotoSwipeOptions } from "photoswipe";
 import "photoswipe/style.css";
 
 import PsVideo from "./PsVideo";
+import PsLivePhoto from "./PsLivePhoto";
 
 import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
 import DeleteIcon from "vue-material-design-icons/TrashCanOutline.vue";
@@ -160,6 +177,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
   private sidebarOpen = false;
   private sidebarWidth = 400;
   private outerWidth = "100vw";
+
+  /** User interaction detection */
+  private activityTimer = 0;
 
   /** Base dialog */
   private photoswipe: PhotoSwipe | null = null;
@@ -237,10 +257,37 @@ export default class Viewer extends Mixins(GlobalMixin) {
   }
 
   /** Event on file changed */
-  handleFileUpdated({ fileid }: { fileid: number }) {
+  private handleFileUpdated({ fileid }: { fileid: number }) {
     if (this.currentPhoto && this.currentPhoto.fileid === fileid) {
       this.currentPhoto.etag += "_";
       this.photoswipe.refreshSlideContent(this.currIndex);
+    }
+  }
+
+  /** User interacted with the page with mouse */
+  private setUiVisible(evt: any) {
+    clearTimeout(this.activityTimer);
+    if (evt) {
+      // If directly triggered, always update ui visibility
+      // If triggered through a pointer event, only update if this is not
+      // a touch event (i.e. a mouse move).
+      // On touch devices, tapAction directly handles the ui visibility
+      // through Photoswipe.
+      const isPointer = evt instanceof PointerEvent;
+      const isMouse = isPointer && evt.pointerType !== "touch";
+      if (this.isOpen && (!isPointer || isMouse)) {
+        this.photoswipe?.template?.classList.add("pswp--ui-visible");
+
+        if (isMouse) {
+          this.activityTimer = window.setTimeout(() => {
+            if (this.isOpen) {
+              this.photoswipe?.template?.classList.remove("pswp--ui-visible");
+            }
+          }, 2000);
+        }
+      }
+    } else {
+      this.photoswipe?.template?.classList.remove("pswp--ui-visible");
     }
   }
 
@@ -320,7 +367,6 @@ export default class Viewer extends Mixins(GlobalMixin) {
     this.photoswipe.on("openingAnimationStart", () => {
       this.isOpen = true;
       this.fullyOpened = false;
-      this.showControls = true;
       if (this.sidebarOpen) {
         this.openSidebar();
       }
@@ -331,7 +377,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
     this.photoswipe.on("close", () => {
       this.isOpen = false;
       this.fullyOpened = false;
-      this.showControls = false;
+      this.setUiVisible(false);
       this.hideSidebar();
       this.setRouteHash(undefined);
       this.updateTitle(undefined);
@@ -344,18 +390,12 @@ export default class Viewer extends Mixins(GlobalMixin) {
       this.show = false;
       this.isOpen = false;
       this.fullyOpened = false;
-      this.showControls = false;
       this.photoswipe = null;
       this.list = [];
       this.days.clear();
       this.dayIds = [];
       this.globalCount = 0;
       this.globalAnchor = -1;
-    });
-
-    // toggle-controls
-    this.photoswipe.on("tapAction", () => {
-      this.showControls = !this.showControls;
     });
 
     // Update vue route for deep linking
@@ -367,12 +407,31 @@ export default class Viewer extends Mixins(GlobalMixin) {
       globalThis.currentViewerPhoto = photo;
     });
 
+    // Show and hide controls
+    this.photoswipe.on("uiRegister", (e) => {
+      if (this.photoswipe?.template) {
+        new MutationObserver((mutations) => {
+          mutations.forEach((mutationRecord) => {
+            this.showControls = (<HTMLElement>(
+              mutationRecord.target
+            ))?.classList.contains("pswp--ui-visible");
+          });
+        }).observe(this.photoswipe.template, {
+          attributes: true,
+          attributeFilter: ["class"],
+        });
+      }
+    });
+
     // Video support
     new PsVideo(this.photoswipe, {
       videoAttributes: { controls: "", playsinline: "", preload: "none" },
       autoplay: true,
       preventDragOffset: 40,
     });
+
+    // Live photo support
+    new PsLivePhoto(this.photoswipe, {});
 
     return this.photoswipe;
   }
@@ -609,7 +668,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
   }
 
   get canEdit() {
-    return this.currentPhoto?.mimetype?.startsWith("image/");
+    return (
+      this.currentPhoto?.mimetype?.startsWith("image/") &&
+      !this.currentPhoto.liveid
+    );
   }
 
   private openEditor() {
@@ -747,6 +809,13 @@ export default class Viewer extends Mixins(GlobalMixin) {
     dav.downloadFilesByPhotos([photo]);
   }
 
+  /** Download live part of current video */
+  private async downloadCurrentLiveVideo() {
+    const photo = this.currentPhoto;
+    if (!photo) return;
+    window.location.href = utils.getLivePhotoVideoUrl(photo);
+  }
+
   /** Open the sidebar */
   private async openSidebar(photo?: IPhoto) {
     const fInfo = await dav.getFiles([photo || this.currentPhoto]);
@@ -852,6 +921,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
 .inner,
 .inner :deep .pswp {
   width: inherit;
+
+  .pswp__top-bar {
+    background: linear-gradient(0deg, transparent, rgba(0, 0, 0, 0.3));
+  }
 }
 
 :deep .video-js .vjs-big-play-button {
