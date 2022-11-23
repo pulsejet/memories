@@ -60,6 +60,7 @@ OC.L10N.register(
     "Failed to load some photos" : "Některé fotky se nepodařilo načíst",
     "Share" : "Sdílet",
     "Sidebar" : "Postranní panel",
+    "Close" : "Zavřít",
     "Previous" : "Předchozí",
     "Next" : "Další",
     "Video sharing not supported yet" : "Sdílení videí zatím není podporováno",
