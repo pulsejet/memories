@@ -306,7 +306,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
       appendToEl: this.$refs.inner as HTMLElement,
       preload: [2, 2],
 
-      easing: "cubic-bezier(.22,.51,.48,1.01)",
+      easing: "cubic-bezier(.49,.85,.55,1)",
       showHideAnimationType: "zoom",
       showAnimationDuration: 250,
       hideAnimationDuration: 250,
