@@ -304,6 +304,12 @@ export default class Viewer extends Mixins(GlobalMixin) {
       bgOpacity: 1,
       appendToEl: this.$refs.inner as HTMLElement,
       preload: [2, 2],
+
+      easing: "cubic-bezier(.22,.51,.48,1.01)",
+      showHideAnimationType: "zoom",
+      showAnimationDuration: 250,
+      hideAnimationDuration: 250,
+
       closeTitle: this.t("memories", "Close"),
       arrowPrevTitle: this.t("memories", "Previous"),
       arrowNextTitle: this.t("memories", "Next"),
