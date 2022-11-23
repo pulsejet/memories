@@ -9,6 +9,7 @@ OC.L10N.register(
     "Download" : "Escargar",
     "Favorite" : "Favorito",
     "Share" : "Compartir",
+    "Close" : "Zarrar",
     "Back" : "Ta zaga",
     "Name" : "Nombre",
     "Continue" : "Continar",

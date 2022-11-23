@@ -18,6 +18,7 @@ OC.L10N.register(
     "Favorite" : "Pliŝatati",
     "View in folder" : "Vidi en dosierujo",
     "Share" : "Kunhavigi",
+    "Close" : "Malfermi",
     "Previous" : "Antaŭa",
     "Next" : "Sekva",
     "Public link" : "Publika ligilo",

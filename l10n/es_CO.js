@@ -17,6 +17,7 @@ OC.L10N.register(
     "Unarchive" : "Desarchivar",
     "View in folder" : "Ver en la carpeta",
     "Share" : "Compartir",
+    "Close" : "Cerrar",
     "Previous" : "Previo",
     "Next" : "Siguiente",
     "Public link" : "Liga pública",

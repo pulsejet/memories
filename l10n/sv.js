@@ -39,6 +39,8 @@ OC.L10N.register(
     "Copy public link" : "Kopiera publik länk",
     "Share via public link" : "Dela via offentlig länk",
     "Public link" : "Publik länk",
+    "Failed to fetch album." : "Misslyckades att hämta album.",
+    "Failed to update album." : "Misslyckades att uppdatera album.",
     "New album" : "Nytt album",
     "Create new album" : "Skapa nytt album",
     "Back" : "Tillbaka",
