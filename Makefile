@@ -19,6 +19,8 @@ npm-init:
 npm-update:
 	npm update
 
+.PHONY: dev-setup exiftool php-cs-fixer php-lint npm-init npm-update
+
 # Building
 build-js:
 	npm run dev
@@ -33,6 +35,8 @@ patch-external:
 watch-js:
 	npm run watch
 
+.PHONY: build-js patch-external watch-js
+
 # Testing
 test:
 	npm run test
@@ -43,12 +47,16 @@ test-watch:
 test-coverage:
 	npm run test:coverage
 
+.PHONY: test test-watch test-coverage
+
 # Linting
 lint:
 	npm run lint
 
 lint-fix:
 	npm run lint:fix
+
+.PHONY: lint lint-fix
 
 # Cleaning
 clean:
@@ -57,3 +65,4 @@ clean:
 clean-dev:
 	rm -rf node_modules
 
+.PHONY: clean clean-dev
