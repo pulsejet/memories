@@ -199,11 +199,15 @@ class TimelineWrite
      */
     public function deleteFile(File &$file)
     {
-        $query = $this->connection->getQueryBuilder();
-        $query->delete('memories')
-            ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
-        ;
-        $query->executeStatement();
+        $deleteFrom = function ($table) use (&$file) {
+            $query = $this->connection->getQueryBuilder();
+            $query->delete($table)
+                ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
+            ;
+            $query->executeStatement();
+        };
+        $deleteFrom('memories');
+        $deleteFrom('memories_livephoto');
     }
 
     /**
