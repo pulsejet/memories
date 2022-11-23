@@ -18,6 +18,7 @@
       ref="inner"
       v-show="!editorOpen"
       @pointermove.passive="setUiVisible"
+      @pointerdown.passive="setUiVisible"
     >
       <div class="top-bar" v-if="photoswipe" :class="{ showControls }">
         <NcActions
