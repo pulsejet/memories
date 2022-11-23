@@ -39,8 +39,11 @@ declare global {
 
   var editDate: (photo: IPhoto) => void;
   var currentViewerPhoto: IPhoto;
+
+  var touchingPhoto: boolean;
 }
 globalThis.vuerouter = router;
+globalThis.touchingPhoto = false;
 
 Vue.use(VueVirtualScroller);
 

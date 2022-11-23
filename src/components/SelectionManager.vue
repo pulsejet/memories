@@ -298,7 +298,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
     this.rows[rowIdx].virtualSticky = true;
 
     this.resetTouchParams();
-    document.body.classList.add("vue-touching");
+    globalThis.touchingPhoto = true;
 
     this.touchAnchor = photo;
     this.prevOver = photo;
@@ -320,7 +320,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
     this.resetTouchParams();
 
     window.setTimeout(() => {
-      if (!this.touchAnchor) document.body.classList.remove("vue-touching");
+      if (!this.touchAnchor) globalThis.touchingPhoto = false;
     }, 1000);
   }
 

@@ -232,7 +232,7 @@ export default class Photo extends Mixins(GlobalMixin) {
 
   contextmenu(e: Event) {
     // user is trying to select the photo
-    if (document.body.classList.contains("vue-touching")) {
+    if (globalThis.touchingPhoto) {
       e.preventDefault();
       e.stopPropagation();
     }
@@ -298,7 +298,7 @@ $icon-size: $icon-half-size * 2;
   cursor: pointer;
 
   display: none;
-  body:not(.vue-touching) .p-outer:hover > & {
+  .p-outer:hover > & {
     display: flex;
   }
 
@@ -411,7 +411,7 @@ div.img-outer {
 
     display: none;
     transition: border-radius 0.1s ease-in;
-    body:not(.vue-touching) .p-outer:not(.selected):hover > & {
+    .p-outer:not(.selected):hover > & {
       display: block;
     }
   }
