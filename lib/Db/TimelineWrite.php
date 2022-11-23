@@ -213,7 +213,9 @@ class TimelineWrite
      */
     public function clear()
     {
-        $sql = $this->connection->getDatabasePlatform()->getTruncateTableSQL('`*PREFIX*memories`', false);
-        $this->connection->executeStatement($sql);
+        $p = $this->connection->getDatabasePlatform();
+        $t1 = $p->getTruncateTableSQL('`*PREFIX*memories`', false);
+        $t2 = $p->getTruncateTableSQL('`*PREFIX*memories_livephoto`', false);
+        $this->connection->executeStatement("$t1; $t2");
     }
 }
