@@ -95,7 +95,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
   /** Get the visible ticks */
   get visibleTicks() {
-    let key = 999900;
+    let key = 9999999900;
     return this.ticks
       .filter((tick) => tick.s)
       .map((tick) => {
