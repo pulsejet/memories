@@ -947,6 +947,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
 }
 
 :deep .pswp {
+  contain: strict;
+
   .pswp__zoom-wrap {
     width: 100%;
   }
