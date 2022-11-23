@@ -216,6 +216,6 @@ class TimelineWrite
         $p = $this->connection->getDatabasePlatform();
         $t1 = $p->getTruncateTableSQL('`*PREFIX*memories`', false);
         $t2 = $p->getTruncateTableSQL('`*PREFIX*memories_livephoto`', false);
-        $this->connection->executeStatement("$t1; $t2");
+        $this->connection->executeStatement("{$t1}; {$t2}");
     }
 }
