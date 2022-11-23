@@ -41,9 +41,15 @@ declare global {
   var currentViewerPhoto: IPhoto;
 
   var touchingPhoto: boolean;
+  var windowInnerWidth: number; // cache
+  var windowInnerHeight: number; // cache
 }
+
 globalThis.vuerouter = router;
+
 globalThis.touchingPhoto = false;
+globalThis.windowInnerWidth = window.innerWidth;
+globalThis.windowInnerHeight = window.innerHeight;
 
 Vue.use(VueVirtualScroller);
 
