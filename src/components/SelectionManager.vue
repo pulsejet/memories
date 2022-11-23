@@ -298,7 +298,6 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
     this.rows[rowIdx].virtualSticky = true;
 
     this.resetTouchParams();
-    globalThis.touchingPhoto = true;
 
     this.touchAnchor = photo;
     this.prevOver = photo;
@@ -318,10 +317,6 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
 
     if (this.touchTimer) this.clickPhoto(photo, {} as any, rowIdx);
     this.resetTouchParams();
-
-    window.setTimeout(() => {
-      if (!this.touchAnchor) globalThis.touchingPhoto = false;
-    }, 1000);
   }
 
   private resetTouchParams() {

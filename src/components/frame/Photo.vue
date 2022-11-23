@@ -231,11 +231,8 @@ export default class Photo extends Mixins(GlobalMixin) {
   }
 
   contextmenu(e: Event) {
-    // user is trying to select the photo
-    if (globalThis.touchingPhoto) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+    e.preventDefault();
+    e.stopPropagation();
   }
 
   /** Start preview video */
@@ -298,8 +295,10 @@ $icon-size: $icon-half-size * 2;
   cursor: pointer;
 
   display: none;
-  .p-outer:hover > & {
-    display: flex;
+  @media (hover: hover) {
+    .p-outer:hover > & {
+      display: flex;
+    }
   }
 
   opacity: 0.7;
@@ -411,8 +410,10 @@ div.img-outer {
 
     display: none;
     transition: border-radius 0.1s ease-in;
-    .p-outer:not(.selected):hover > & {
-      display: block;
+    @media (hover: hover) {
+      .p-outer:not(.selected):hover > & {
+        display: block;
+      }
     }
   }
 

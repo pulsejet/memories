@@ -213,13 +213,13 @@ class VideoContentSetup {
     content.videojs.on("loadedmetadata", () => {
       canPlay = true;
       this.updateRotation(content); // also gets the correct video elem as a side effect
-      this.initPlyr(content);
+
+      // Wait (also below) for the transition to end
+      window.setTimeout(() => this.initPlyr(content), 250);
     });
 
     content.videojs.qualityLevels()?.on("addqualitylevel", (e) => {
-      window.setTimeout(() => {
-        this.initPlyr(content);
-      }, 0);
+      window.setTimeout(() => this.initPlyr(content), 250);
     });
 
     // Get correct orientation
