@@ -255,7 +255,7 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
 
   linkClick() {
     const nav: any = this.$refs.nav;
-    if (window.innerWidth <= 1024) nav?.toggleNavigation(false);
+    if (globalThis.windowInnerWidth <= 1024) nav?.toggleNavigation(false);
   }
 
   doRouteChecks() {
@@ -369,7 +369,6 @@ aside.app-sidebar {
 .memories-livephoto {
   position: relative;
   overflow: hidden;
-  contain: strict;
 
   img,
   video {

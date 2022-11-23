@@ -298,7 +298,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
     this.rows[rowIdx].virtualSticky = true;
 
     this.resetTouchParams();
-    document.body.classList.add("vue-touching");
+    globalThis.touchingPhoto = true;
 
     this.touchAnchor = photo;
     this.prevOver = photo;
@@ -320,7 +320,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
     this.resetTouchParams();
 
     window.setTimeout(() => {
-      if (!this.touchAnchor) document.body.classList.remove("vue-touching");
+      if (!this.touchAnchor) globalThis.touchingPhoto = false;
     }, 1000);
   }
 
@@ -364,12 +364,13 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
 
     // Scroll if at top or bottom
     const scrollUp = touch.clientY > 50 && touch.clientY < 110; // 50 topbar
-    const scrollDown = touch.clientY > window.innerHeight - 60;
+    const scrollDown = touch.clientY > globalThis.windowInnerHeight - 60;
     if (scrollUp || scrollDown) {
       if (scrollUp) {
         this.touchScrollDelta = (-1 * (110 - touch.clientY)) / 3;
       } else {
-        this.touchScrollDelta = (touch.clientY - window.innerHeight + 60) / 3;
+        this.touchScrollDelta =
+          (touch.clientY - globalThis.windowInnerHeight + 60) / 3;
       }
 
       if (this.touchAnchor && !this.touchScrollInterval) {

@@ -147,7 +147,7 @@ export default class OnThisDay extends Mixins(GlobalMixin) {
     // Choose preview photo
     for (const year of this.years) {
       // Try to prioritize landscape photos on desktop
-      if (window.innerWidth <= 600) {
+      if (globalThis.windowInnerWidth <= 600) {
         const landscape = year.photos.filter((p) => p.w > p.h);
         year.preview = utils.randomChoice(landscape);
       }

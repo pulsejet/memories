@@ -218,19 +218,20 @@ class VideoController extends ApiBase
             }
         }
 
-        // Make and send response
-        if ($blob) {
-            $response = new DataDisplayResponse($blob, Http::STATUS_OK, []);
-            $response->setHeaders([
-                'Content-Type' => $mime,
-                'Content-Disposition' => "attachment; filename=\"{$name}\"",
-            ]);
-            $response->cacheFor(3600 * 24, false, false);
-
-            return $response;
+        // Data not found
+        if (!$blob) {
+            return new JSONResponse(['message' => 'Live file not found'], Http::STATUS_NOT_FOUND);
         }
 
-        return new JSONResponse(['message' => 'Live file not found'], Http::STATUS_NOT_FOUND);
+        // Make and send response
+        $response = new DataDisplayResponse($blob, Http::STATUS_OK, []);
+        $response->setHeaders([
+            'Content-Type' => $mime,
+            'Content-Disposition' => "attachment; filename=\"{$name}\"",
+        ]);
+        $response->cacheFor(3600 * 24, false, false);
+
+        return $response;
     }
 
     private function getUpstream($client, $path, $profile)

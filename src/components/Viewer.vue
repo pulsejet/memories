@@ -18,6 +18,7 @@
       ref="inner"
       v-show="!editorOpen"
       @pointermove.passive="setUiVisible"
+      @pointerdown.passive="setUiVisible"
     >
       <div class="top-bar" v-if="photoswipe" :class="{ showControls }">
         <NcActions
@@ -212,7 +213,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
     if (this.canShare) base++;
     if (this.canEdit) base++;
 
-    if (window.innerWidth < 768) {
+    if (globalThis.windowInnerWidth < 768) {
       return Math.min(base, 3);
     } else {
       return Math.min(base, 5);
@@ -304,6 +305,12 @@ export default class Viewer extends Mixins(GlobalMixin) {
       bgOpacity: 1,
       appendToEl: this.$refs.inner as HTMLElement,
       preload: [2, 2],
+
+      easing: "cubic-bezier(.22,.51,.48,1.01)",
+      showHideAnimationType: "zoom",
+      showAnimationDuration: 250,
+      hideAnimationDuration: 250,
+
       closeTitle: this.t("memories", "Close"),
       arrowPrevTitle: this.t("memories", "Previous"),
       arrowNextTitle: this.t("memories", "Next"),
@@ -311,8 +318,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
         const sidebarWidth = this.sidebarOpen ? this.sidebarWidth : 0;
         this.outerWidth = `calc(100vw - ${sidebarWidth}px)`;
         return {
-          x: window.innerWidth - sidebarWidth,
-          y: window.innerHeight,
+          x: globalThis.windowInnerWidth - sidebarWidth,
+          y: globalThis.windowInnerHeight,
         };
       },
       ...args,
@@ -550,7 +557,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
       const thumb = this.thumbElem(e.slide.data?.photo);
       if (thumb && this.fullyOpened) {
         const rect = thumb.getBoundingClientRect();
-        if (rect.bottom < 50 || rect.top > window.innerHeight - 50) {
+        if (rect.bottom < 50 || rect.top > globalThis.windowInnerHeight - 50) {
           thumb.scrollIntoView({
             block: "center",
           });
@@ -914,7 +921,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
 .fullyOpened :deep .pswp__container {
   @media (min-width: 1024px) {
-    transition: transform var(--pswp-transition-duration) ease !important;
+    // Animate transitions
+    // Disabled because this makes you sick if moving fast
+    // transition: transform var(--pswp-transition-duration) ease !important;
   }
 }
 
@@ -939,6 +948,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
 }
 
 :deep .pswp {
+  contain: strict;
+
   .pswp__zoom-wrap {
     width: 100%;
   }

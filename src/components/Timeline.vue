@@ -313,11 +313,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
   }
 
   isMobile() {
-    return window.innerWidth <= 768;
+    return globalThis.windowInnerWidth <= 768;
   }
 
   isMobileLayout() {
-    return window.innerWidth <= 600;
+    return globalThis.windowInnerWidth <= 600;
   }
 
   get isMonthView() {
@@ -378,6 +378,11 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
   /** Do resize after some time */
   handleResizeWithDelay() {
+    // Update global vars
+    globalThis.windowInnerWidth = window.innerWidth;
+    globalThis.windowInnerHeight = window.innerHeight;
+
+    // Reflow after timer
     if (this.resizeTimer) {
       clearTimeout(this.resizeTimer);
     }

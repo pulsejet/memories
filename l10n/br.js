@@ -14,6 +14,8 @@ OC.L10N.register(
     "Favorite" : "Pennrollañ",
     "View in folder" : "Diskwel en teuliad",
     "Share" : "Rannan",
+    "Close" : "Seriñ",
+    "Next" : "Da heul",
     "Copy public link" : "Eilañ al liamm foran",
     "Public link" : "Liamm publik",
     "Back" : "Distro",

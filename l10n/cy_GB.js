@@ -13,6 +13,7 @@ OC.L10N.register(
     "Download" : "Llwytho i lawr",
     "Favorite" : "Ffefryn",
     "Share" : "Rhannu",
+    "Close" : "Cau",
     "Previous" : "Blaenorol",
     "Next" : "Nesaf",
     "Copy public link" : "Copïo dolen gyhoeddus",

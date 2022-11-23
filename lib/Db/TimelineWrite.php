@@ -199,11 +199,15 @@ class TimelineWrite
      */
     public function deleteFile(File &$file)
     {
-        $query = $this->connection->getQueryBuilder();
-        $query->delete('memories')
-            ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
-        ;
-        $query->executeStatement();
+        $deleteFrom = function ($table) use (&$file) {
+            $query = $this->connection->getQueryBuilder();
+            $query->delete($table)
+                ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
+            ;
+            $query->executeStatement();
+        };
+        $deleteFrom('memories');
+        $deleteFrom('memories_livephoto');
     }
 
     /**
@@ -213,7 +217,9 @@ class TimelineWrite
      */
     public function clear()
     {
-        $sql = $this->connection->getDatabasePlatform()->getTruncateTableSQL('`*PREFIX*memories`', false);
-        $this->connection->executeStatement($sql);
+        $p = $this->connection->getDatabasePlatform();
+        $t1 = $p->getTruncateTableSQL('`*PREFIX*memories`', false);
+        $t2 = $p->getTruncateTableSQL('`*PREFIX*memories_livephoto`', false);
+        $this->connection->executeStatement("{$t1}; {$t2}");
     }
 }

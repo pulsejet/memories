@@ -90,18 +90,17 @@ class VideoSetup extends Command
         $output->writeln('Checking for go-vod binary');
         $goVodPath = $this->config->getSystemValue('memories.transcoder', false);
 
-        if (false === $goVodPath) {
+        if (!\is_string($goVodPath) || !file_exists($goVodPath)) {
             // Detect architecture
             $arch = \OCA\Memories\Util::getArch();
+            $goVodPath = realpath(__DIR__."/../../exiftool-bin/go-vod-{$arch}");
 
-            if (!$arch) {
+            if (!$goVodPath) {
                 $output->writeln('<error>Compatible go-vod binary not found</error>');
                 $this->suggestGoVod($output);
 
                 return $this->suggestDisable($output);
             }
-
-            $goVodPath = realpath(__DIR__."/../../exiftool-bin/go-vod-{$arch}");
         }
 
         $output->writeln("Trying go-vod from {$goVodPath}");
