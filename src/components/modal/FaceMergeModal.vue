@@ -31,7 +31,7 @@
 import { Component, Emit, Mixins } from "vue-property-decorator";
 
 import NcButton from "@nextcloud/vue/dist/Components/NcButton";
-import NcTextField from "@nextcloud/vue/dist/Components/NcTextField";
+const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
 
 import { showError } from "@nextcloud/dialogs";
 import { getCurrentUser } from "@nextcloud/auth";

@@ -43,8 +43,10 @@ import { Component, Mixins, Watch } from "vue-property-decorator";
 import NcContent from "@nextcloud/vue/dist/Components/NcContent";
 import NcAppContent from "@nextcloud/vue/dist/Components/NcAppContent";
 import NcAppNavigation from "@nextcloud/vue/dist/Components/NcAppNavigation";
-import NcAppNavigationItem from "@nextcloud/vue/dist/Components/NcAppNavigationItem";
-import NcAppNavigationSettings from "@nextcloud/vue/dist/Components/NcAppNavigationSettings";
+const NcAppNavigationItem = () =>
+  import("@nextcloud/vue/dist/Components/NcAppNavigationItem");
+const NcAppNavigationSettings = () =>
+  import("@nextcloud/vue/dist/Components/NcAppNavigationSettings");
 
 import { generateUrl } from "@nextcloud/router";
 import { getCurrentUser } from "@nextcloud/auth";

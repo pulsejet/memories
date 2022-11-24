@@ -35,8 +35,10 @@
 import { Component, Mixins, Watch } from "vue-property-decorator";
 import { TopMatterFolder, TopMatterType } from "../../types";
 
-import NcBreadcrumbs from "@nextcloud/vue/dist/Components/NcBreadcrumbs";
-import NcBreadcrumb from "@nextcloud/vue/dist/Components/NcBreadcrumb";
+const NcBreadcrumbs = () =>
+  import("@nextcloud/vue/dist/Components/NcBreadcrumbs");
+const NcBreadcrumb = () =>
+  import("@nextcloud/vue/dist/Components/NcBreadcrumb");
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 

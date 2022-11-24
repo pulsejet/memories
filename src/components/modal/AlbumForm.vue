@@ -124,7 +124,7 @@ import GlobalMixin from "../../mixins/GlobalMixin";
 import { getCurrentUser } from "@nextcloud/auth";
 import NcButton from "@nextcloud/vue/dist/Components/NcButton";
 import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
-import NcTextField from "@nextcloud/vue/dist/Components/NcTextField";
+const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
 import moment from "moment";
 import * as dav from "../../services/DavRequests";
 

@@ -87,8 +87,8 @@ import Plus from "vue-material-design-icons/Plus.vue";
 import ImageMultiple from "vue-material-design-icons/ImageMultiple.vue";
 
 import NcButton from "@nextcloud/vue/dist/Components/NcButton";
-import NcListItem from "@nextcloud/vue/dist/Components/NcListItem";
 import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
+const NcListItem = () => import("@nextcloud/vue/dist/Components/NcListItem");
 
 import { generateUrl } from "@nextcloud/router";
 import { getPhotosPreviewUrl } from "../../services/FileUtils";

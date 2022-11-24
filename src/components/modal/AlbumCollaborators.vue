@@ -179,11 +179,12 @@ import { getCurrentUser } from "@nextcloud/auth";
 import { generateOcsUrl, generateUrl } from "@nextcloud/router";
 
 import NcButton from "@nextcloud/vue/dist/Components/NcButton";
-import NcListItemIcon from "@nextcloud/vue/dist/Components/NcListItemIcon";
 import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
 import NcPopover from "@nextcloud/vue/dist/Components/NcPopover";
-import NcTextField from "@nextcloud/vue/dist/Components/NcTextField";
 import NcEmptyContent from "@nextcloud/vue/dist/Components/NcEmptyContent";
+const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
+const NcListItemIcon = () =>
+  import("@nextcloud/vue/dist/Components/NcListItemIcon");
 
 import { Type } from "@nextcloud/sharing";
 

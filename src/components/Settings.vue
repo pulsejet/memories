@@ -74,7 +74,8 @@ import GlobalMixin from "../mixins/GlobalMixin";
 import UserConfig from "../mixins/UserConfig";
 
 import { getFilePickerBuilder } from "@nextcloud/dialogs";
-import NcCheckboxRadioSwitch from "@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch";
+const NcCheckboxRadioSwitch = () =>
+  import("@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch");
 
 import MultiPathSelectionModal from "./modal/MultiPathSelectionModal.vue";
 
