@@ -737,7 +737,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       } else if (this.$route.name === "people" && !this.$route.params.name) {
         data = await dav.getPeopleRecognizeData();
       } else if (this.$route.name === "facerecognition" && !this.$route.params.name) {
-        data = await dav.getPeopleFacerecognionData();
+        data = await dav.getPeopleFacerecognitionData();
       } else if (this.$route.name === "albums" && !this.$route.params.name) {
         data = await dav.getAlbumsData("3");
       } else {

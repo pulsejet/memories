@@ -50,7 +50,7 @@ export default class FaceMergeModal extends Mixins(GlobalMixin) {
       data = await dav.getPeopleRecognizeData();
       flags |= this.c.FLAG_IS_FACE_RECOGNIZE;
     } else {
-      data = await dav.getPeopleFacerecognionData();
+      data = await dav.getPeopleFacerecognitionData();
       flags |= this.c.FLAG_IS_FACE_RECOGNITION;
     }
     let detail = data[0].detail;

@@ -49,7 +49,7 @@ export async function getPeopleData(app: string): Promise<IDay[]> {
   ];
 }
 
-export async function getPeopleFacerecognionData(): Promise<IDay[]> {
+export async function getPeopleFacerecognitionData(): Promise<IDay[]> {
   return await getPeopleData('facerecognition');
 }
 
