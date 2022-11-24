@@ -60,6 +60,7 @@ OC.L10N.register(
     "Failed to load some photos" : "Bazı fotoğraflar yüklenemedi",
     "Share" : "Paylaş",
     "Sidebar" : "Yan çubuk",
+    "Download Video" : "Görüntüyü indir",
     "Close" : "Kapat",
     "Previous" : "Önceki",
     "Next" : "Sonraki",
