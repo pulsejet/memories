@@ -132,6 +132,8 @@ import * as utils from "../services/Utils";
 import { getPreviewUrl } from "../services/FileUtils";
 import { getDownloadLink } from "../services/DavRequests";
 
+import ImageEditor from "./ImageEditor.vue";
+
 import PhotoSwipe, { PhotoSwipeOptions } from "photoswipe";
 import "photoswipe/style.css";
 
@@ -146,8 +148,6 @@ import DownloadIcon from "vue-material-design-icons/Download.vue";
 import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
 import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
 import TuneIcon from "vue-material-design-icons/Tune.vue";
-
-const ImageEditor = () => import("./ImageEditor.vue");
 
 @Component({
   components: {

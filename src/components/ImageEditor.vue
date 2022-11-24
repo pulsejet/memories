@@ -12,12 +12,22 @@ import { showError, showSuccess } from "@nextcloud/dialogs";
 import { generateUrl } from "@nextcloud/router";
 import axios from "@nextcloud/axios";
 
-import FilerobotImageEditor from "filerobot-image-editor";
 import { FilerobotImageEditorConfig } from "react-filerobot-image-editor";
 
 import translations from "./ImageEditorTranslations";
 
-const { TABS, TOOLS } = FilerobotImageEditor as any;
+let TABS, TOOLS: any;
+type FilerobotImageEditor = import("filerobot-image-editor").default;
+let FilerobotImageEditor: typeof import("filerobot-image-editor").default;
+
+async function loadFilerobot() {
+  if (!FilerobotImageEditor) {
+    FilerobotImageEditor = (await import("filerobot-image-editor")).default;
+    TABS = (<any>FilerobotImageEditor).TABS;
+    TOOLS = (<any>FilerobotImageEditor).TOOLS;
+  }
+  return FilerobotImageEditor;
+}
 
 @Component({
   components: {},
@@ -131,6 +141,7 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
   }
 
   async mounted() {
+    await loadFilerobot();
     this.imageEditor = new FilerobotImageEditor(
       <any>this.$refs.editor,
       <any>this.config
