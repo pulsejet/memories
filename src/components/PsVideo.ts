@@ -6,8 +6,6 @@ import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
 import { getCurrentUser } from "@nextcloud/auth";
 
-import "video.js/dist/video-js.min.css";
-import "plyr/dist/plyr.css";
 import plyrsvg from "../assets/plyr.svg";
 
 // Lazy loading
@@ -140,6 +138,10 @@ class VideoContentSetup {
       await Promise.all([
         import("plyr").then((m) => (Plyr = m.default)),
         import("videojs-contrib-quality-levels"),
+        // @ts-ignore
+        import("video.js/dist/video-js.min.css"),
+        // @ts-ignore
+        import("plyr/dist/plyr.css"),
       ]);
     }
 
