@@ -22,7 +22,7 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from "vue-property-decorator";
-import { NcModal } from "@nextcloud/vue";
+import NcModal from "@nextcloud/vue/dist/Components/NcModal";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 
 @Component({

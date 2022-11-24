@@ -52,7 +52,10 @@ import GlobalMixin from "../mixins/GlobalMixin";
 import UserConfig from "../mixins/UserConfig";
 
 import { showError } from "@nextcloud/dialogs";
-import { NcActions, NcActionButton } from "@nextcloud/vue";
+
+import NcActions from "@nextcloud/vue/dist/Components/NcActions";
+import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
+
 import { translate as t, translatePlural as n } from "@nextcloud/l10n";
 import {
   IDay,

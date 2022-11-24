@@ -43,7 +43,9 @@
 <script lang="ts">
 import { Component, Emit, Mixins, Prop } from "vue-property-decorator";
 import GlobalMixin from "../../mixins/GlobalMixin";
-import { NcActions, NcActionButton } from "@nextcloud/vue";
+
+import NcActions from "@nextcloud/vue/dist/Components/NcActions";
+import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 
 import * as utils from "../../services/Utils";
 import * as dav from "../../services/DavRequests";

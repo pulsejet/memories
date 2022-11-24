@@ -41,7 +41,7 @@ import { generateUrl } from "@nextcloud/router";
 import { getPhotosPreviewUrl, getPreviewUrl } from "../../services/FileUtils";
 import { getCurrentUser } from "@nextcloud/auth";
 
-import { NcCounterBubble } from "@nextcloud/vue";
+import NcCounterBubble from "@nextcloud/vue/dist/Components/NcCounterBubble";
 import axios from "@nextcloud/axios";
 import * as utils from "../../services/Utils";
 

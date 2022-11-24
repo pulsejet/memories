@@ -48,7 +48,9 @@
 import { Component, Mixins } from "vue-property-decorator";
 import GlobalMixin from "../mixins/GlobalMixin";
 
-import { NcActions, NcActionButton } from "@nextcloud/vue";
+import NcActions from "@nextcloud/vue/dist/Components/NcActions";
+import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
+
 import { generateUrl } from "@nextcloud/router";
 import axios from "@nextcloud/axios";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";

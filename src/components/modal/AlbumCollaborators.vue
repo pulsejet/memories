@@ -177,14 +177,14 @@ import * as dav from "../../services/DavRequests";
 import { showError } from "@nextcloud/dialogs";
 import { getCurrentUser } from "@nextcloud/auth";
 import { generateOcsUrl, generateUrl } from "@nextcloud/router";
-import {
-  NcButton,
-  NcListItemIcon,
-  NcLoadingIcon,
-  NcPopover,
-  NcTextField,
-  NcEmptyContent,
-} from "@nextcloud/vue";
+
+import NcButton from "@nextcloud/vue/dist/Components/NcButton";
+import NcListItemIcon from "@nextcloud/vue/dist/Components/NcListItemIcon";
+import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
+import NcPopover from "@nextcloud/vue/dist/Components/NcPopover";
+import NcTextField from "@nextcloud/vue/dist/Components/NcTextField";
+import NcEmptyContent from "@nextcloud/vue/dist/Components/NcEmptyContent";
+
 import { Type } from "@nextcloud/sharing";
 
 type Collaborator = {

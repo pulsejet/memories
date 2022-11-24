@@ -20,7 +20,9 @@
 import { Component, Emit, Mixins, Prop } from "vue-property-decorator";
 import GlobalMixin from "../../mixins/GlobalMixin";
 
-import { NcButton, NcTextField } from "@nextcloud/vue";
+import NcButton from "@nextcloud/vue/dist/Components/NcButton";
+import NcTextField from "@nextcloud/vue/dist/Components/NcTextField";
+
 import { showError } from "@nextcloud/dialogs";
 import { getCurrentUser } from "@nextcloud/auth";
 import { IPhoto, ITag } from "../../types";

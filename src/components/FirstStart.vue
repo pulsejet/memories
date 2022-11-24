@@ -48,7 +48,11 @@
 
 <script lang="ts">
 import { Component, Mixins } from "vue-property-decorator";
-import { NcContent, NcAppContent, NcButton } from "@nextcloud/vue";
+
+import NcContent from "@nextcloud/vue/dist/Components/NcContent";
+import NcAppContent from "@nextcloud/vue/dist/Components/NcAppContent";
+import NcButton from "@nextcloud/vue/dist/Components/NcButton";
+
 import { getFilePickerBuilder } from "@nextcloud/dialogs";
 import { generateUrl } from "@nextcloud/router";
 import { getCurrentUser } from "@nextcloud/auth";

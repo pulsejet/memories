@@ -86,7 +86,10 @@ import AlbumForm from "./AlbumForm.vue";
 import Plus from "vue-material-design-icons/Plus.vue";
 import ImageMultiple from "vue-material-design-icons/ImageMultiple.vue";
 
-import { NcButton, NcListItem, NcLoadingIcon } from "@nextcloud/vue";
+import NcButton from "@nextcloud/vue/dist/Components/NcButton";
+import NcListItem from "@nextcloud/vue/dist/Components/NcListItem";
+import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
+
 import { generateUrl } from "@nextcloud/router";
 import { getPhotosPreviewUrl } from "../../services/FileUtils";
 import { IAlbum, IPhoto } from "../../types";

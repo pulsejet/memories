@@ -56,7 +56,10 @@ import { Component, Mixins, Watch } from "vue-property-decorator";
 import GlobalMixin from "../../mixins/GlobalMixin";
 import UserConfig from "../../mixins/UserConfig";
 
-import { NcActions, NcActionButton, NcActionCheckbox } from "@nextcloud/vue";
+import NcActions from "@nextcloud/vue/dist/Components/NcActions";
+import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
+import NcActionCheckbox from "@nextcloud/vue/dist/Components/NcActionCheckbox";
+
 import FaceEditModal from "../modal/FaceEditModal.vue";
 import FaceDeleteModal from "../modal/FaceDeleteModal.vue";
 import FaceMergeModal from "../modal/FaceMergeModal.vue";

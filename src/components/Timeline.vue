@@ -148,7 +148,7 @@ import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import { generateUrl } from "@nextcloud/router";
-import { NcEmptyContent } from "@nextcloud/vue";
+import NcEmptyContent from "@nextcloud/vue/dist/Components/NcEmptyContent";
 
 import { getLayout } from "../services/Layout";
 import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";

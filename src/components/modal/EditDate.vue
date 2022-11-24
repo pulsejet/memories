@@ -134,7 +134,9 @@ import { Component, Emit, Mixins } from "vue-property-decorator";
 import GlobalMixin from "../../mixins/GlobalMixin";
 import { IPhoto } from "../../types";
 
-import { NcButton, NcTextField } from "@nextcloud/vue";
+import NcButton from "@nextcloud/vue/dist/Components/NcButton";
+import NcTextField from "@nextcloud/vue/dist/Components/NcTextField";
+
 import { showError } from "@nextcloud/dialogs";
 import { generateUrl } from "@nextcloud/router";
 import { emit } from "@nextcloud/event-bus";

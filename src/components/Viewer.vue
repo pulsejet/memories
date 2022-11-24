@@ -121,7 +121,8 @@ import GlobalMixin from "../mixins/GlobalMixin";
 
 import { IDay, IPhoto, IRow, IRowType } from "../types";
 
-import { NcActions, NcActionButton } from "@nextcloud/vue";
+import NcActions from "@nextcloud/vue/dist/Components/NcActions";
+import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import { generateUrl } from "@nextcloud/router";
 import { showError } from "@nextcloud/dialogs";
