@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCA\Memories\Exif;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -258,7 +259,7 @@ trait TimelineQueryDays
                         $actualPath[1] = $actualPath[2];
                         $actualPath[2] = $tmp;
                         $davPath = implode('/', $actualPath);
-                        $davPaths[$fileid] = \OCA\Memories\Exif::removeExtraSlash('/'.$davPath.'/');
+                        $davPaths[$fileid] = Exif::removeExtraSlash('/'.$davPath.'/');
                     }
                 }
             }
@@ -293,7 +294,8 @@ trait TimelineQueryDays
                 $davPath = $davPaths[$rootId] ?: '';
 
                 if (0 === strpos($row['path'], $basePath)) {
-                    $row['filename'] = $davPath.substr($row['path'], \strlen($basePath));
+                    $rpath = substr($row['path'], \strlen($basePath));
+                    $row['filename'] = Exif::removeExtraSlash($davPath.$rpath);
                 }
 
                 unset($row['path']);
