@@ -11,6 +11,7 @@ use OCP\IConfig;
 class Exif
 {
     private const EXIFTOOL_VER = '12.49';
+    private const EXIFTOOL_TIMEOUT = 30000;
 
     /** Opened instance of exiftool when running in command mode */
     private static $staticProc;
@@ -248,7 +249,7 @@ class Exif
         fwrite($pipes[0], $raw);
         fclose($pipes[0]);
 
-        $stdout = self::readOrTimeout($pipes[1], 30000);
+        $stdout = self::readOrTimeout($pipes[1], self::EXIFTOOL_TIMEOUT);
         fclose($pipes[1]);
         fclose($pipes[2]);
         proc_terminate($proc);
@@ -269,7 +270,7 @@ class Exif
         stream_set_blocking($pipes[1], false);
 
         try {
-            return self::readOrTimeout($pipes[1], 5000);
+            return self::readOrTimeout($pipes[1], self::EXIFTOOL_TIMEOUT);
         } catch (\Exception $ex) {
             error_log("Exiftool timeout: [{$path}]");
 
@@ -393,7 +394,7 @@ class Exif
         $readyToken = "\n{ready}\n";
 
         try {
-            $buf = self::readOrTimeout(self::$staticPipes[1], 5000, $readyToken);
+            $buf = self::readOrTimeout(self::$staticPipes[1], self::EXIFTOOL_TIMEOUT, $readyToken);
             $tokPos = strrpos($buf, $readyToken);
             $buf = substr($buf, 0, $tokPos);
 
@@ -416,7 +417,7 @@ class Exif
         stream_set_blocking($pipes[1], false);
 
         try {
-            $stdout = self::readOrTimeout($pipes[1], 5000);
+            $stdout = self::readOrTimeout($pipes[1], self::EXIFTOOL_TIMEOUT);
 
             return self::processStdout($stdout);
         } catch (\Exception $ex) {
