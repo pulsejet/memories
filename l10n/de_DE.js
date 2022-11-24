@@ -60,6 +60,7 @@ OC.L10N.register(
     "Failed to load some photos" : "Laden einiger Fotos fehlgeschlagen",
     "Share" : "Teilen",
     "Sidebar" : "Seitenleiste",
+    "Download Video" : "Video herunterladen",
     "Close" : "Schließen",
     "Previous" : "Zurück",
     "Next" : "Nächste",

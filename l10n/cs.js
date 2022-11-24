@@ -60,6 +60,7 @@ OC.L10N.register(
     "Failed to load some photos" : "Některé fotky se nepodařilo načíst",
     "Share" : "Sdílet",
     "Sidebar" : "Postranní panel",
+    "Download Video" : "Stáhnout si video",
     "Close" : "Zavřít",
     "Previous" : "Předchozí",
     "Next" : "Další",
