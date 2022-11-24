@@ -29,6 +29,8 @@ import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 
 import App from "./App.vue";
 import router from "./router";
+import { generateFilePath } from "@nextcloud/router";
+import { getRequestToken } from "@nextcloud/auth";
 import { IPhoto } from "./types";
 
 // Global exposed variables
@@ -42,6 +44,9 @@ declare global {
 
   var windowInnerWidth: number; // cache
   var windowInnerHeight: number; // cache
+
+  var __webpack_nonce__: string;
+  var __webpack_public_path__: string;
 }
 
 globalThis.vuerouter = router;
@@ -50,6 +55,15 @@ globalThis.windowInnerWidth = window.innerWidth;
 globalThis.windowInnerHeight = window.innerHeight;
 
 Vue.use(VueVirtualScroller);
+
+// CSP config for webpack dynamic chunk loading
+__webpack_nonce__ = window.btoa(getRequestToken());
+
+// Correct the root of the app for chunk loading
+// OC.linkTo matches the apps folders
+// OC.generateUrl ensure the index.php (or not)
+// We do not want the index.php since we're loading files
+__webpack_public_path__ = generateFilePath("memories", "", "js/");
 
 // https://github.com/nextcloud/photos/blob/156f280c0476c483cb9ce81769ccb0c1c6500a4e/src/main.js
 // TODO: remove when we have a proper fileinfo standalone library

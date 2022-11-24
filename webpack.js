@@ -18,7 +18,6 @@ webpackConfig.resolve.alias = {
     'vue$': 'vue/dist/vue.esm.js',
 }
 webpackConfig.entry.main = path.resolve(path.join('src', 'main'));
-delete webpackConfig.optimization.splitChunks;
 
 webpackConfig.watchOptions = {
     ignored: /node_modules/,

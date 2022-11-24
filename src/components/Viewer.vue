@@ -126,8 +126,6 @@ import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import { generateUrl } from "@nextcloud/router";
 import { showError } from "@nextcloud/dialogs";
 
-import ImageEditor from "./ImageEditor.vue";
-
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
 import { getPreviewUrl } from "../services/FileUtils";
@@ -147,6 +145,8 @@ import DownloadIcon from "vue-material-design-icons/Download.vue";
 import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
 import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
 import TuneIcon from "vue-material-design-icons/Tune.vue";
+
+const ImageEditor = () => import("./ImageEditor.vue");
 
 @Component({
   components: {

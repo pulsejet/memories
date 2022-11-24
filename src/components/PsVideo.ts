@@ -6,13 +6,13 @@ import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
 import { getCurrentUser } from "@nextcloud/auth";
 
-import Plyr from "plyr";
+import "video.js/dist/video-js.min.css";
 import "plyr/dist/plyr.css";
 import plyrsvg from "../assets/plyr.svg";
 
-import videojs from "video.js";
-import "video.js/dist/video-js.min.css";
-import "videojs-contrib-quality-levels";
+// Lazy loading
+let videojs: any;
+let Plyr: typeof import("plyr");
 
 const config_noTranscode = loadState(
   "memories",
@@ -126,11 +126,24 @@ class VideoContentSetup {
     });
   }
 
-  initVideo(content: any) {
+  async initVideo(content: any) {
     if (!isVideoContent(content) || content.videojs) {
       return;
     }
 
+    // Prevent double loading
+    content.videojs = {};
+
+    // Load videojs scripts
+    if (!videojs) {
+      videojs = (await import("video.js")).default;
+      await Promise.all([
+        import("plyr").then((m) => (Plyr = m.default)),
+        import("videojs-contrib-quality-levels"),
+      ]);
+    }
+
+    // Create video element
     content.videoElement = document.createElement("video");
     content.videoElement.className = "video-js";
     content.videoElement.setAttribute("poster", content.data.msrc);
