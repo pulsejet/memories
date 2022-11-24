@@ -210,8 +210,9 @@ class Index extends Command
     /** Make sure exiftool is available */
     private function testExif()
     {
-        $testfile = __DIR__.'/../../exiftest.jpg';
-        if (!file_exists($testfile)) {
+        $testfilepath = __DIR__.'/../../exiftest.jpg';
+        $testfile = realpath($testfilepath);
+        if (!$testfile) {
             error_log("Couldn't find Exif test file {$testfile}");
 
             return false;
