@@ -31,7 +31,6 @@ use OCP\Encryption\IManager;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
-use OCP\Files\StorageNotAvailableException;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IPreview;
@@ -279,11 +278,11 @@ class Index extends Command
                     $this->parseFile($node, $refresh);
                 }
             }
-        } catch (StorageNotAvailableException $e) {
+        } catch (\Exception $e) {
             $this->output->writeln(sprintf(
-                '<error>Storage for folder folder %s is not available: %s</error>',
+                '<error>Could not scan folder %s: %s</error>',
                 $folder->getPath(),
-                $e->getHint()
+                $e->getMessage()
             ));
         }
     }
@@ -291,7 +290,18 @@ class Index extends Command
     private function parseFile(File &$file, bool &$refresh): void
     {
         // Process the file
-        $res = $this->timelineWrite->processFile($file, $refresh);
+        $res = 1;
+
+        try {
+            $res = $this->timelineWrite->processFile($file, $refresh);
+        } catch (\Exception $e) {
+            $this->output->writeln(sprintf(
+                '<error>Could not process file %s: %s</error>',
+                $file->getPath(),
+                $e->getMessage()
+            ));
+        }
+
         if (2 === $res) {
             ++$this->nProcessed;
         } elseif (1 === $res) {
