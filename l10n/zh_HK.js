@@ -60,6 +60,7 @@ OC.L10N.register(
     "Failed to load some photos" : "未能加載一些照片",
     "Share" : "分享",
     "Sidebar" : "側邊欄",
+    "Download Video" : "下載視像",
     "Close" : "關閉",
     "Previous" : "上一",
     "Next" : "下一",
