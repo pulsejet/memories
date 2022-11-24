@@ -132,8 +132,7 @@ class Exif
     /**
      * Parse date from exif format and throw error if invalid.
      *
-     * @param string $dt
-     * @param mixed  $date
+     * @param mixed $date
      *
      * @return int unix timestamp
      */
@@ -159,10 +158,8 @@ class Exif
     /**
      * Forget the timezone for an epoch timestamp and get the same
      * time epoch for UTC.
-     *
-     * @param int $epoch
      */
-    public static function forgetTimezone($epoch)
+    public static function forgetTimezone(int $epoch)
     {
         $dt = new \DateTime();
         $dt->setTimestamp($epoch);
@@ -365,7 +362,7 @@ class Exif
      * @param int      $timeout   milliseconds
      * @param string   $delimiter null for eof
      */
-    private static function readOrTimeout($handle, $timeout, $delimiter = null)
+    private static function readOrTimeout($handle, int $timeout, ?string $delimiter = null)
     {
         $buf = '';
         $waitedMs = 0;

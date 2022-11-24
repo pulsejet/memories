@@ -30,7 +30,7 @@ trait TimelineQueryAlbums
     }
 
     /** Get list of albums */
-    public function getAlbums(string $uid, $shared = false)
+    public function getAlbums(string $uid, bool $shared = false)
     {
         $query = $this->connection->getQueryBuilder();
 

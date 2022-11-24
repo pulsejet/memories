@@ -139,7 +139,7 @@ trait TimelineQueryDays
     public function getDay(
         TimelineRoot &$root,
         string $uid,
-        $day_ids,
+        ?array $day_ids,
         bool $recursive,
         bool $archive,
         array $queryTransforms = []
