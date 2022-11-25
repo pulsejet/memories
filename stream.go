@@ -288,12 +288,16 @@ func (s *Stream) transcode(startId int) {
 	// encoder selection
 	CV := "libx264"
 
-	// no need to transcode h264 streams for max quality
+	// Check whether hwaccel should be used
 	if os.Getenv("VAAPI") == "1" {
 		CV = "h264_vaapi"
 		extra := "-hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format vaapi"
 		args = append(args, strings.Split(extra, " ")...)
-	}
+	} else if os.Getenv("NVENC") == "1" {
+                CV = "h264_nvenc"
+                extra := "-hwaccel cuda -hwaccel_output_format cuda"
+                args = append(args, strings.Split(extra, " ")...)
+        } 
 
 	// Input specs
 	args = append(args, []string{
@@ -309,7 +313,15 @@ func (s *Stream) transcode(startId int) {
 		// VAAPI
 		format = "format=nv12|vaapi,hwupload"
 		scale = fmt.Sprintf("scale_vaapi=w=%d:h=%d:force_original_aspect_ratio=decrease", s.width, s.height)
-	} else {
+	} else if CV == "h264_nvenc" {
+                // NVENC
+		format = "format=nv12|cuda,hwupload"
+                if s.width >= s.height {
+                        scale = fmt.Sprintf("scale_cuda=-2:%d", s.height)
+                } else {
+                        scale = fmt.Sprintf("scale_cuda=%d:-2", s.width)
+                }
+        } else {
 		// x264
 		format = "format=nv12"
 		if s.width >= s.height {
