@@ -112,11 +112,17 @@ export default class FirstStart extends Mixins(GlobalMixin, UserConfig) {
     }
 
     // Count total photos
-    const total = res.data.reduce((acc, day) => acc + day.count, 0);
-    this.info = this.t("memories", "Found {total} photos in {path}", {
-      total,
-      path,
-    });
+    const n = res.data.reduce((acc, day) => acc + day.count, 0);
+    this.info = this.n(
+      "memories",
+      "Found {n} item in {path}",
+      "Found {n} items in {path}",
+      n,
+      {
+        n,
+        path,
+      }
+    );
     this.chosenPath = path;
   }
 
