@@ -553,8 +553,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
       return this.thumbElem(photo) || thumbEl;
     });
 
-    // Scroll to keep the thumbnail in view
     this.photoswipe.on("slideActivate", (e) => {
+      // Scroll to keep the thumbnail in view
       const thumb = this.thumbElem(e.slide.data?.photo);
       if (thumb && this.fullyOpened) {
         const rect = thumb.getBoundingClientRect();
@@ -564,6 +564,12 @@ export default class Viewer extends Mixins(GlobalMixin) {
           });
         }
       }
+
+      // Remove active class from others and add to this one
+      document
+        .querySelectorAll(".pswp__item")
+        .forEach((el) => el.classList.remove("active"));
+      e.slide.holderElement?.classList.add("active");
     });
 
     this.photoswipe.init();
@@ -703,8 +709,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
       // Check navigator support
       if (!this.canShare) throw new Error("Share not supported");
 
-      // Get image data from "img.pswp__img"
-      const img = document.querySelector("img.pswp__img") as HTMLImageElement;
+      // Get image data from active slide
+      const img = document.querySelector(
+        ".pswp__item.active img.pswp__img"
+      ) as HTMLImageElement;
       if (!img?.src) return;
 
       // Shre image data using navigator api
