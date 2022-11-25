@@ -15,7 +15,17 @@
     </NcBreadcrumbs>
 
     <div class="right-actions">
-      <NcActions :inline="1">
+      <NcActions :inline="2">
+        <NcActionRouter
+          :to="{...this.$route, query: {recursive: recursive ? undefined : '1'}}"
+          close-after-click
+        >
+          {{ t("memories", recursive ? "Show folders" : "Timeline") }}
+          <template #icon>
+            <TimelineIcon v-if="recursive" :size="20"/>
+            <FoldersIcon v-else :size="20"/>
+          </template>
+        </NcActionRouter>
         <NcActionButton
           :aria-label="t('memories', 'Share folder')"
           @click="$refs.shareModal.open(false)"
@@ -41,6 +51,7 @@ const NcBreadcrumb = () =>
   import("@nextcloud/vue/dist/Components/NcBreadcrumb");
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
+import NcActionRouter from "@nextcloud/vue/dist/Components/NcActionRouter";
 
 import GlobalMixin from "../../mixins/GlobalMixin";
 
@@ -48,6 +59,8 @@ import FolderShareModal from "../modal/FolderShareModal.vue";
 
 import HomeIcon from "vue-material-design-icons/Home.vue";
 import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
+import TimelineIcon from "vue-material-design-icons/ImageMultiple.vue";
+import FoldersIcon from "vue-material-design-icons/FolderMultiple.vue";
 
 @Component({
   components: {
@@ -55,13 +68,17 @@ import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
     NcBreadcrumb,
     NcActions,
     NcActionButton,
+    NcActionRouter,
     FolderShareModal,
     HomeIcon,
     ShareIcon,
+    TimelineIcon,
+    FoldersIcon
   },
 })
 export default class FolderTopMatter extends Mixins(GlobalMixin) {
   private topMatter?: TopMatterFolder = null;
+  private recursive: boolean = false;
 
   @Watch("$route")
   async routeChange(from: any, to: any) {
@@ -90,8 +107,10 @@ export default class FolderTopMatter extends Mixins(GlobalMixin) {
             };
           }),
       };
+      this.recursive = this.$route.query.recursive === '1'
     } else {
       this.topMatter = null;
+      this.recursive = false;
     }
   }
 }

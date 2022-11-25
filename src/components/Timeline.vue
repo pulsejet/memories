@@ -240,7 +240,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
   @Watch("$route")
   async routeChange(to: any, from?: any) {
-    if (from?.path !== to.path) {
+    if (from?.path !== to.path || from.query.recursive !== to.query.recursive) {
       await this.refresh();
     }
 
@@ -565,6 +565,9 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     // Folder
     if (this.$route.name === "folders") {
       query.set("folder", utils.getFolderRoutePath(this.config_foldersPath));
+      if(this.$route.query.recursive === "1") {
+        query.set("recursive", "1");
+      }
     }
 
     // Archive
