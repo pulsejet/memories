@@ -22,8 +22,8 @@
         >
           {{ t("memories", recursive ? "Show folders" : "Timeline") }}
           <template #icon>
-            <TimelineIcon v-if="recursive" :size="20"/>
-            <FoldersIcon v-else :size="20"/>
+            <FoldersIcon v-if="recursive" :size="20"/>
+            <TimelineIcon v-else :size="20"/>
           </template>
         </NcActionRouter>
         <NcActionButton
