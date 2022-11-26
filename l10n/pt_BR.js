@@ -23,7 +23,6 @@ OC.L10N.register(
     "You can always change this later in settings" : "Você sempre pode alterar isso mais tarde nas configurações",
     "Choose the root of your timeline" : "Escolha a raiz da sua linha do tempo",
     "The selected folder does not seem to be valid. Try again." : "A pasta selecionada não parece ser válida. Tente novamente.",
-    "Found {total} photos in {path}" : "Encontrou {total} fotos em {path}",
     "Error saving image" : "Erro ao salvar imagem",
     "Unsaved changes" : "Alterações não salvas",
     "Drop changes" : "Cancelar mudanças",
@@ -212,6 +211,7 @@ OC.L10N.register(
     "Failed to delete files." : "Falha ao excluir arquivos.",
     "Failed to delete {fileName}." : "Falha ao excluir {fileName}.",
     "Failed to favorite files." : "Falha nos arquivos favoritos.",
-    "Failed to favorite {fileName}." : "Falha ao favoritar {fileName}"
+    "Failed to favorite {fileName}." : "Falha ao favoritar {fileName}",
+    "Found {total} photos in {path}" : "Encontrou {total} fotos em {path}"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

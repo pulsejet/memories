@@ -17,7 +17,6 @@
     "If you just installed Memories, run:" : "Если вы в первый раз используете приложение «Воспоминания»:",
     "Click here to start" : "Нажмите здесь чтобы начать",
     "You can always change this later in settings" : "Эти параметры могут быть позднее изменены в разделе «Настройки»",
-    "Found {total} photos in {path}" : "В размещении «{path}» найдено {total} фото.",
     "Failed to get Exif data. Metadata may be lost!" : "Не удалось получить данные EXIF. Метаданные могут быть утеряны.",
     "No Exif data found! Continue?" : "Данные EXIF не обнаружены. Продолжить?",
     "Image saved successfully" : "Изображение сохранено",
@@ -53,7 +52,6 @@
     "Close" : "Закрыть",
     "Previous" : "Назад",
     "Next" : "Далее",
-    "{n} photos added to album" : "Добавлено фотографий: {n}",
     "Search for collaborators" : "Поиск людей и групп для добавления в соавторы",
     "Search people or groups" : "Введите имя пользователя или название группы…",
     "Add {collaboratorLabel} to the collaborators list" : "Добавить {collaboratorLabel} в соавторы",
@@ -209,6 +207,8 @@
     "Failed to delete {fileName}." : "Ошибка удаления файла «{fileName}».",
     "Failed to download some files." : "Не удалось скачать некоторые файлы",
     "Failed to favorite files." : "Не удалось добавить файлы в избранное.",
-    "Failed to favorite {fileName}." : "Не удалось добавить файл «{fileName}» в избранное."
+    "Failed to favorite {fileName}." : "Не удалось добавить файл «{fileName}» в избранное.",
+    "Found {total} photos in {path}" : "В размещении «{path}» найдено {total} фото.",
+    "{n} photos added to album" : "Добавлено фотографий: {n}"
 },"pluralForm" :"nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);"
 }

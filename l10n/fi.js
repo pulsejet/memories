@@ -23,7 +23,6 @@ OC.L10N.register(
     "You can always change this later in settings" : "Voit vaihtaa tätä myöhemmin asetuksista",
     "Choose the root of your timeline" : "Valitse aikajanan juurihakemisto",
     "The selected folder does not seem to be valid. Try again." : "Valittu hakemisto ei ole kelvollinen. Yritä uudelleen.",
-    "Found {total} photos in {path}" : "{total} kuvaa löytyi polusta {path}",
     "Error saving image" : "Virhe kuvaa tallentaessa",
     "Unsaved changes" : "Tallentamattomia muutoksia",
     "Edit" : "Muokkaa",
@@ -57,7 +56,6 @@ OC.L10N.register(
     "Previous" : "Edellinen",
     "Next" : "Seuraava",
     "Processing … {n}/{m}" : "Käsitellään… {n}/{m}",
-    "{n} photos added to album" : "{n} kuvaa lisätty albumiin",
     "Search people or groups" : "Etsi käyttäjiä tai ryhmiä",
     "Copy the public link" : "Kopioi julkinen linkki",
     "Delete the public link" : "Poista julkinen linkki",
@@ -173,6 +171,8 @@ OC.L10N.register(
     "Failed to download some files." : "Joidenkin tiedostojen lataus epäonnistui.",
     "Failed to favorite files." : "Tiedostojen asettaminen suosikeiksi epäonnistui.",
     "Failed to favorite some files." : "Joidenkin tiedostojen määrittäminen suosikiksi epäonnistui.",
-    "Failed to favorite {fileName}." : "Tiedoston {fileName} asettaminen suosikiksi epäonnistui."
+    "Failed to favorite {fileName}." : "Tiedoston {fileName} asettaminen suosikiksi epäonnistui.",
+    "Found {total} photos in {path}" : "{total} kuvaa löytyi polusta {path}",
+    "{n} photos added to album" : "{n} kuvaa lisätty albumiin"
 },
 "nplurals=2; plural=(n != 1);");

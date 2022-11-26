@@ -25,7 +25,6 @@ OC.L10N.register(
     "You can always change this later in settings" : "You can always change this later in settings",
     "Choose the root of your timeline" : "Choose the root of your timeline",
     "The selected folder does not seem to be valid. Try again." : "The selected folder does not seem to be valid. Try again.",
-    "Found {total} photos in {path}" : "Found {total} photos in {path}",
     "Failed to get Exif data. Metadata may be lost!" : "Failed to get Exif data. Metadata may be lost!",
     "No Exif data found! Continue?" : "No Exif data found! Continue?",
     "Image saved successfully" : "Image saved successfully",
@@ -66,7 +65,6 @@ OC.L10N.register(
     "Video sharing not supported yet" : "Video sharing not supported yet",
     "Cannot share this type of data" : "Cannot share this type of data",
     "Processing … {n}/{m}" : "Processing … {n}/{m}",
-    "{n} photos added to album" : "{n} photos added to album",
     "Search for collaborators" : "Search for collaborators",
     "Search people or groups" : "Search people or groups",
     "Add {collaboratorLabel} to the collaborators list" : "Add {collaboratorLabel} to the collaborators list",
@@ -239,6 +237,8 @@ OC.L10N.register(
     "Failed to download some files." : "Failed to download some files.",
     "Failed to favorite files." : "Failed to favorite files.",
     "Failed to favorite some files." : "Failed to favorite some files.",
-    "Failed to favorite {fileName}." : "Failed to favorite {fileName}."
+    "Failed to favorite {fileName}." : "Failed to favorite {fileName}.",
+    "Found {total} photos in {path}" : "Found {total} photos in {path}",
+    "{n} photos added to album" : "{n} photos added to album"
 },
 "nplurals=2; plural=(n != 1);");

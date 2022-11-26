@@ -23,7 +23,6 @@
     "You can always change this later in settings" : "Bunu daha sonra istediğiniz zaman ayarlar bölümünden değiştirebilirsiniz",
     "Choose the root of your timeline" : "Zaman tünelinizin kök klasörünü seçin",
     "The selected folder does not seem to be valid. Try again." : "Seçilmiş klasör geçersiz gibi görünüyor. Yeniden deneyin.",
-    "Found {total} photos in {path}" : "{path} yolunda {total} fotoğraf bulundu",
     "Failed to get Exif data. Metadata may be lost!" : "EXIF verileri alınamadı. Üst veriler kaybolmuş olabilir!",
     "No Exif data found! Continue?" : "Herhangi bir EXIF verisi bulunamadı. İlerlensin mi?",
     "Image saved successfully" : "Görsel kaydedildi",
@@ -65,7 +64,6 @@
     "Video sharing not supported yet" : "Görüntü paylaşımı henüz desteklenmiyor",
     "Cannot share this type of data" : "Bu türdeki verileri paylaşamazsınız",
     "Processing … {n}/{m}" : "İşleniyor… {n}/{m}",
-    "{n} photos added to album" : "{n} fotoğraf albüme eklendi",
     "Search for collaborators" : "Katılımcı arama",
     "Search people or groups" : "Kişi ya da grup arama",
     "Add {collaboratorLabel} to the collaborators list" : "{collaboratorLabel} kullanıcısını katılımcı listesine ekle",
@@ -238,6 +236,8 @@
     "Failed to download some files." : "Bazı dosyalar indirilemedi.",
     "Failed to favorite files." : "Dosyalar sık kullanılanlara eklenemedi.",
     "Failed to favorite some files." : "Bazı dosyalar sık kullanılanlara eklenemedi.",
-    "Failed to favorite {fileName}." : "{fileName} sık kullanılanlara eklenemedi."
+    "Failed to favorite {fileName}." : "{fileName} sık kullanılanlara eklenemedi.",
+    "Found {total} photos in {path}" : "{path} yolunda {total} fotoğraf bulundu",
+    "{n} photos added to album" : "{n} fotoğraf albüme eklendi"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }
