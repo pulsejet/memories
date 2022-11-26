@@ -240,7 +240,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
   @Watch("$route")
   async routeChange(to: any, from?: any) {
-    if (from?.path !== to.path || from.query.recursive !== to.query.recursive) {
+    if (from?.path !== to.path || from.query !== to.query) {
       await this.refresh();
     }
 
