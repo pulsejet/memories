@@ -25,7 +25,6 @@ OC.L10N.register(
     "You can always change this later in settings" : "Toto je možné kdykoli později změnit v nastavení",
     "Choose the root of your timeline" : "Zvolte kořen vaší časové osy",
     "The selected folder does not seem to be valid. Try again." : "Vybraná složka se nezdá být platná. Zkuste to znovu.",
-    "Found {total} photos in {path}" : "V {path} nalezeno {total} fotek",
     "Failed to get Exif data. Metadata may be lost!" : "Nepodařilo se získat Exif metadata – může dojít k jejich ztrátě!",
     "No Exif data found! Continue?" : "Nenalezena žádná Exif data – pokračovat?",
     "Image saved successfully" : "Obrázek úspěšně uložen",
@@ -67,7 +66,6 @@ OC.L10N.register(
     "Video sharing not supported yet" : "Sdílení videí zatím není podporováno",
     "Cannot share this type of data" : "Tento typ dat není možné sdílet",
     "Processing … {n}/{m}" : "Zpracovávání… {n}/{m}",
-    "{n} photos added to album" : "{n} fotek přidáno do alba",
     "Search for collaborators" : "Vyhledat spolupracující",
     "Search people or groups" : "Hledat uživatele nebo skupiny",
     "Add {collaboratorLabel} to the collaborators list" : "Přidat {collaboratorLabel} na seznam spolupracujících",
@@ -240,6 +238,8 @@ OC.L10N.register(
     "Failed to download some files." : "Některé soubory se nepodařilo stáhnout.",
     "Failed to favorite files." : "Nepodařilo se přidat soubory mezi oblíbené.",
     "Failed to favorite some files." : "Některé soubory se nepodařilo označit jako oblíbené",
-    "Failed to favorite {fileName}." : "Nepodařilo se přidat {fileName} do oblíbených."
+    "Failed to favorite {fileName}." : "Nepodařilo se přidat {fileName} do oblíbených.",
+    "Found {total} photos in {path}" : "V {path} nalezeno {total} fotek",
+    "{n} photos added to album" : "{n} fotek přidáno do alba"
 },
 "nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;");

@@ -23,7 +23,6 @@
     "You can always change this later in settings" : "Siempre podrá cambiar esto luego en las configuraciones",
     "Choose the root of your timeline" : "Seleccione la raíz de su línea de tiempo",
     "The selected folder does not seem to be valid. Try again." : "La carpeta seleccionada no parece ser válida. Intente de nuevo.",
-    "Found {total} photos in {path}" : "Se encontraron {total} fotos en {path}",
     "Failed to get Exif data. Metadata may be lost!" : "Fallo al obtener los datos Exif. ¡Podrían haberse perdido los metadatos!",
     "No Exif data found! Continue?" : "¡No se encontraron datos Exif!, ¿Continuar?",
     "Image saved successfully" : "La imagen se guardó exitósamente",
@@ -65,7 +64,6 @@
     "Video sharing not supported yet" : "Compartir videos no es soportado todavía",
     "Cannot share this type of data" : "No se puede compartir este tipo de datos",
     "Processing … {n}/{m}" : "Procesando ... {n}/{m}",
-    "{n} photos added to album" : "Se agregaron {n} fotos al álbum",
     "Search for collaborators" : "Buscar colaboradores",
     "Search people or groups" : "Buscar personas o grupos",
     "Add {collaboratorLabel} to the collaborators list" : "Añadir {collaboratorLabel} a la lista de colaboradores",
@@ -238,6 +236,8 @@
     "Failed to download some files." : "Fallo al descargar algunos archivos.",
     "Failed to favorite files." : "Fallo al marcar archivos como favoritos.",
     "Failed to favorite some files." : "Fallo al marcar algunos archivos como favoritos.",
-    "Failed to favorite {fileName}." : "Fallo al marcar como favorito {fileName}."
+    "Failed to favorite {fileName}." : "Fallo al marcar como favorito {fileName}.",
+    "Found {total} photos in {path}" : "Se encontraron {total} fotos en {path}",
+    "{n} photos added to album" : "Se agregaron {n} fotos al álbum"
 },"pluralForm" :"nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }

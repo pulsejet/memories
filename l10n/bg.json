@@ -23,7 +23,6 @@
     "You can always change this later in settings" : "Винаги можете да промените това по-късно, в настройките",
     "Choose the root of your timeline" : "Изберете основата /началото/ на вашата времева линия ",
     "The selected folder does not seem to be valid. Try again." : "Избраната папка изглежда не е валидна. Опитайте отново.",
-    "Found {total} photos in {path}" : "Намерени са {total} снимки в {path}",
     "Failed to get Exif data. Metadata may be lost!" : "Неуспешно получаване на Exif данни. Възможно е метаданните да са загубени!",
     "No Exif data found! Continue?" : "Не са намерени Exif данни! Продължаване?",
     "Image saved successfully" : "Успешно запазено изображение",
@@ -65,7 +64,6 @@
     "Video sharing not supported yet" : "Видео споделянето все още не се поддържа",
     "Cannot share this type of data" : "Този тип данни не може да се споделят",
     "Processing … {n}/{m}" : "Обработва се ... {n}/{m}",
-    "{n} photos added to album" : "{n} снимки са добавени в албума",
     "Search for collaborators" : "Търсене на сътрудници",
     "Search people or groups" : "Търсене на хора или групи",
     "Add {collaboratorLabel} to the collaborators list" : "Добавяне на {collaboratorLabel} към списъка със сътрудници",
@@ -238,6 +236,8 @@
     "Failed to download some files." : "Неуспешно изтегляне на някои файлове.",
     "Failed to favorite files." : "Неуспешно добавяне на файлове в любими.",
     "Failed to favorite some files." : "Неуспешно добавяне на някой файлове в любими.",
-    "Failed to favorite {fileName}." : "Неуспешно добавяне на {fileName} в любими."
+    "Failed to favorite {fileName}." : "Неуспешно добавяне на {fileName} в любими.",
+    "Found {total} photos in {path}" : "Намерени са {total} снимки в {path}",
+    "{n} photos added to album" : "{n} снимки са добавени в албума"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

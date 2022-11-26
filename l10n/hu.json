@@ -23,7 +23,6 @@
     "You can always change this later in settings" : "Később bármikor módosíthatja a beállításokban",
     "Choose the root of your timeline" : "Válassza ki a gyökeret az idővonaláról",
     "The selected folder does not seem to be valid. Try again." : "A kiválasztott mappa nem tűnik érvényesnek. Próbálja újra.",
-    "Found {total} photos in {path}" : "Összesen {total} fénykép a következőben: {path}",
     "Failed to get Exif data. Metadata may be lost!" : "Az Exif-adatok lekérése sikertelen. A metaadatok elveszhetnek.",
     "No Exif data found! Continue?" : "Nem találhatók Exif-adatok. Folytatja?",
     "Image saved successfully" : "A kép sikeresen mentve",
@@ -65,7 +64,6 @@
     "Video sharing not supported yet" : "A videómegosztás még nem támogatott",
     "Cannot share this type of data" : "Az ilyen típusú adatok nem oszthatók meg",
     "Processing … {n}/{m}" : "Feldolgozás… {n}/{m}",
-    "{n} photos added to album" : "{n} fénykép hozzáadva az albumhoz",
     "Search for collaborators" : "Közreműködők keresése",
     "Search people or groups" : "Felhasználó vagy csoport keresése",
     "Add {collaboratorLabel} to the collaborators list" : "{collaboratorLabel} hozzáadása a közreműködőkhöz",
@@ -238,6 +236,8 @@
     "Failed to download some files." : "Egyes fájlok letöltése sikertelen.",
     "Failed to favorite files." : "A fájlok kedvencnek jelölése sikertelen.",
     "Failed to favorite some files." : "Egyes fájlok kedvencnek jelölése sikertelen.",
-    "Failed to favorite {fileName}." : "A(z) {fileName} kedvencnek jelölése sikertelen."
+    "Failed to favorite {fileName}." : "A(z) {fileName} kedvencnek jelölése sikertelen.",
+    "Found {total} photos in {path}" : "Összesen {total} fénykép a következőben: {path}",
+    "{n} photos added to album" : "{n} fénykép hozzáadva az albumhoz"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
