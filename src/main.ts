@@ -47,6 +47,9 @@ declare global {
 
   var __webpack_nonce__: string;
   var __webpack_public_path__: string;
+
+  var vidjs: typeof import("video.js").default;
+  var Plyr: typeof import("plyr");
 }
 
 globalThis.vuerouter = router;

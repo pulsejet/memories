@@ -6,12 +6,6 @@ import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
 import { getCurrentUser } from "@nextcloud/auth";
 
-import plyrsvg from "../assets/plyr.svg";
-
-// Lazy loading
-let videojs: any;
-let Plyr: typeof import("plyr");
-
 const config_noTranscode = loadState(
   "memories",
   "notranscode",
@@ -133,16 +127,8 @@ class VideoContentSetup {
     content.videojs = {};
 
     // Load videojs scripts
-    if (!videojs) {
-      videojs = (await import("video.js")).default;
-      await Promise.all([
-        import("plyr").then((m) => (Plyr = m.default)),
-        import("videojs-contrib-quality-levels"),
-        // @ts-ignore
-        import("video.js/dist/video-js.min.css"),
-        // @ts-ignore
-        import("plyr/dist/plyr.css"),
-      ]);
+    if (!globalThis.vidjs) {
+      await import("../services/videojs");
     }
 
     // Create video element
@@ -182,8 +168,8 @@ class VideoContentSetup {
       type: "video/mp4",
     });
 
-    const overrideNative = !videojs.browser.IS_SAFARI;
-    content.videojs = videojs(content.videoElement, {
+    const overrideNative = !vidjs.browser.IS_SAFARI;
+    content.videojs = vidjs(content.videoElement, {
       fill: true,
       autoplay: true,
       controls: false,
@@ -294,8 +280,6 @@ class VideoContentSetup {
 
     // Create the plyr instance
     const opts: Plyr.Options = {
-      iconUrl: <any>plyrsvg,
-      blankVideo: "",
       i18n: {
         qualityLabel: {
           0: t("memories", "Auto"),
