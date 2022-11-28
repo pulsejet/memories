@@ -41,6 +41,7 @@ class LivePhotoContentSetup {
     utils.setupLivePhotoHooks(video);
 
     const img = document.createElement("img");
+    img.classList.add("pswp__img");
     img.src = content.data.src;
     img.onload = () => content.onLoaded();
     div.appendChild(img);
