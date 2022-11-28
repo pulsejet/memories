@@ -124,6 +124,7 @@ class FacesController extends ApiBase
 
                 if ($iw <= 0 || $ih <= 0) {
                     $image = null;
+
                     throw new \Exception('Invalid image size');
                 }
             } catch (\Exception $e) {
