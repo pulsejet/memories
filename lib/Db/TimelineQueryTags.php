@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\Files\Folder;
 use OCP\IDBConnection;
 
 trait TimelineQueryTags
