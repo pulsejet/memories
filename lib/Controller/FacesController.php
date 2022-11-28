@@ -96,7 +96,8 @@ class FacesController extends ApiBase
         }
 
         // Find the first detection that has a preview
-        $preview = null;
+        /** @var \Imagick */
+        $image = null;
         $userFolder = $this->rootFolder->getUserFolder($user->getUID());
         foreach ($detections as &$detection) {
             // Get the file (also checks permissions)
@@ -113,6 +114,18 @@ class FacesController extends ApiBase
             // Get (hopefully cached) preview image
             try {
                 $preview = $this->previewManager->getPreview($files[0], 2048, 2048, false);
+
+                $image = new \Imagick();
+                if (!$image->readImageBlob($preview->getContent())) {
+                    throw new \Exception('Failed to read image blob');
+                }
+                $iw = $image->getImageWidth();
+                $ih = $image->getImageHeight();
+
+                if ($iw <= 0 || $ih <= 0) {
+                    $image = null;
+                    throw new \Exception('Invalid image size');
+                }
             } catch (\Exception $e) {
                 continue;
             }
@@ -122,15 +135,11 @@ class FacesController extends ApiBase
         }
 
         // Make sure the preview is valid
-        if (null === $preview) {
+        if (null === $image) {
             return new DataResponse([], Http::STATUS_NOT_FOUND);
         }
 
         // Crop image
-        $image = new \Imagick();
-        $image->readImageBlob($preview->getContent());
-        $iw = $image->getImageWidth();
-        $ih = $image->getImageHeight();
         $dw = (float) $detection['width'];
         $dh = (float) $detection['height'];
         $dcx = (float) $detection['x'] + (float) $detection['width'] / 2;
