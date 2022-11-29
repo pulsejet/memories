@@ -108,6 +108,12 @@ class VideoController extends ApiBase
                 $env .= 'VAAPI=1 ';
             }
 
+            // NVENC
+            $nvenc = $this->config->getSystemValue('memories.nvenc', false);
+            if ($nvenc) {
+                $env .= 'NVENC=1 ';
+            }
+
             // Paths
             $ffmpegPath = $this->config->getSystemValue('memories.ffmpeg_path', 'ffmpeg');
             $ffprobePath = $this->config->getSystemValue('memories.ffprobe_path', 'ffprobe');
