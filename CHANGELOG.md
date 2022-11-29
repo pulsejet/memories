@@ -2,6 +2,10 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## v4.9.0, v3.9.0
+
+- **Feature**: Support a slideshow of photos and videos
+
 ## v4.8.0, v3.8.0 (2022-11-22)
 
 - **Feature**: Support for Live Photos ([#124](https://github.com/pulsejet/memories/issues/124))
