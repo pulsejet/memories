@@ -55,7 +55,7 @@ class Util
             return false;
         }
 
-        $v = $appManager->getAppInfo('photos')['version'];
+        $v = $appManager->getAppVersion('photos');
 
         return version_compare($v, '1.7.0', '>=');
     }
@@ -81,7 +81,7 @@ class Util
             return false;
         }
 
-        $v = $appManager->getAppInfo('recognize')['version'];
+        $v = $appManager->getAppVersion('recognize');
 
         return version_compare($v, '3.0.0-alpha', '>=');
     }

@@ -39,7 +39,7 @@ trait TimelineQueryAlbums
         $query->select('pa.*', $count)->from('photos_albums', 'pa');
 
         if ($shared) {
-            $query->innerJoin('pa', 'photos_collaborators', 'pc', $query->expr()->andX(
+            $query->innerJoin('pa', $this->collaboratorsTable(), 'pc', $query->expr()->andX(
                 $query->expr()->eq('pa.album_id', 'pc.album_id'),
                 $query->expr()->eq('pc.collaborator_id', $query->createNamedParameter($uid)),
             ));
@@ -153,7 +153,7 @@ trait TimelineQueryAlbums
 
         // Check in collaborators instead
         $query = $conn->getQueryBuilder();
-        $query->select('album_id')->from('photos_collaborators')->where(
+        $query->select('album_id')->from($this->collaboratorsTable())->where(
             $query->expr()->andX(
                 $query->expr()->eq('album_id', $query->createNamedParameter($album['album_id'])),
                 $query->expr()->eq('collaborator_id', $query->createNamedParameter($uid)),
@@ -163,5 +163,17 @@ trait TimelineQueryAlbums
         if (false !== $query->executeQuery()->fetchOne()) {
             return $album;
         }
+    }
+
+    /** Get the name of the collaborators table */
+    private function collaboratorsTable() {
+        // https://github.com/nextcloud/photos/commit/20e3e61ad577014e5f092a292c90a8476f630355
+        $appManager = \OC::$server->getAppManager();
+        $photosVersion = $appManager->getAppVersion('photos');
+        if (version_compare($photosVersion, '2.2.0', '>=')) {
+            return 'photos_albums_collabs';
+        }
+
+        return 'photos_collaborators';
     }
 }
