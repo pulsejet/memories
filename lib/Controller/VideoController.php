@@ -83,54 +83,8 @@ class VideoController extends ApiBase
             return new JSONResponse(['message' => 'File is in temp dir!'], Http::STATUS_NOT_FOUND);
         }
 
-        // Make upstream request
-        $returnCode = $this->getUpstream($client, $path, $profile);
-
-        // If status code was 0, it's likely the server is down
-        // Make one attempt to start if we can't find the process
-        if (0 === $returnCode) {
-            $transcoder = $this->config->getSystemValue('memories.transcoder', false);
-            if (!$transcoder) {
-                return new JSONResponse(['message' => 'Transcoder not configured'], Http::STATUS_INTERNAL_SERVER_ERROR);
-            }
-
-            // Make transcoder executable
-            if (!is_executable($transcoder)) {
-                chmod($transcoder, 0755);
-            }
-
-            // Check for environment variables
-            $env = '';
-
-            // QSV with VAAPI
-            $vaapi = $this->config->getSystemValue('memories.qsv', false);
-            if ($vaapi) {
-                $env .= 'VAAPI=1 ';
-            }
-
-            // NVENC
-            $nvenc = $this->config->getSystemValue('memories.nvenc', false);
-            if ($nvenc) {
-                $env .= 'NVENC=1 ';
-            }
-
-            // Paths
-            $ffmpegPath = $this->config->getSystemValue('memories.ffmpeg_path', 'ffmpeg');
-            $ffprobePath = $this->config->getSystemValue('memories.ffprobe_path', 'ffprobe');
-            $tmpPath = $this->config->getSystemValue('memories.tmp_path', sys_get_temp_dir());
-            $env .= "FFMPEG='{$ffmpegPath}' FFPROBE='{$ffprobePath}' GOVOD_TEMPDIR='{$tmpPath}/go-vod' ";
-
-            // Check if already running
-            exec("pkill {$transcoder}");
-            shell_exec("{$env} nohup {$transcoder} > {$tmpPath}/go-vod.log 2>&1 & > /dev/null");
-
-            // wait for 1s and try again
-            sleep(1);
-            $returnCode = $this->getUpstream($client, $path, $profile);
-        }
-
-        // Check data was received
-        if (200 !== $returnCode) {
+        // Request and check data was received
+        if (200 !== $this->getUpstream($client, $path, $profile)) {
             return new JSONResponse(['message' => 'Transcode failed'], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
 
@@ -245,6 +199,58 @@ class VideoController extends ApiBase
     }
 
     private function getUpstream($client, $path, $profile)
+    {
+        $returnCode = $this->getUpstreamInternal($client, $path, $profile);
+
+        // If status code was 0, it's likely the server is down
+        // Make one attempt to start after killing whatever is there
+        if (0 !== $returnCode) {
+            return $returnCode;
+        }
+
+        // Get transcoder path
+        $transcoder = $this->config->getSystemValue('memories.transcoder', false);
+        if (!$transcoder) {
+            return 0;
+        }
+
+        // Make transcoder executable
+        if (!is_executable($transcoder)) {
+            @chmod($transcoder, 0755);
+        }
+
+        // Check for environment variables
+        $env = '';
+
+        // QSV with VAAPI
+        $vaapi = $this->config->getSystemValue('memories.qsv', false);
+        if ($vaapi) {
+            $env .= 'VAAPI=1 ';
+        }
+
+        // NVENC
+        $nvenc = $this->config->getSystemValue('memories.nvenc', false);
+        if ($nvenc) {
+            $env .= 'NVENC=1 ';
+        }
+
+        // Paths
+        $ffmpegPath = $this->config->getSystemValue('memories.ffmpeg_path', 'ffmpeg');
+        $ffprobePath = $this->config->getSystemValue('memories.ffprobe_path', 'ffprobe');
+        $tmpPath = $this->config->getSystemValue('memories.tmp_path', sys_get_temp_dir());
+        $env .= "FFMPEG='{$ffmpegPath}' FFPROBE='{$ffprobePath}' GOVOD_TEMPDIR='{$tmpPath}/go-vod' ";
+
+        // Check if already running
+        exec("pkill {$transcoder}");
+        shell_exec("{$env} nohup {$transcoder} > {$tmpPath}/go-vod.log 2>&1 & > /dev/null");
+
+        // wait for 1s and try again
+        sleep(1);
+
+        return $this->getUpstreamInternal($client, $path, $profile);
+    }
+
+    private function getUpstreamInternal($client, $path, $profile)
     {
         $path = rawurlencode($path);
         $ch = curl_init("http://127.0.0.1:47788/{$client}{$path}/{$profile}");
