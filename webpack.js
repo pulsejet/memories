@@ -48,8 +48,8 @@ if (!isDev) {
 
             // Define runtime caching rules.
             runtimeCaching: [{
-                // Do not cache video related files
-                urlPattern: /^.*\/apps\/memories\/api\/video\/.*/,
+                // Do not cache transcoded video files
+                urlPattern: /^.*\/apps\/memories\/api\/video\/transcode\/.*/,
                 handler: 'NetworkOnly',
             }, {
                 // Do not cache raw editing files
@@ -70,6 +70,10 @@ if (!isDev) {
             }, {
                 // Albums from Photos
                 urlPattern: /^.*\/apps\/photos\/api\/v1\/preview\/.*/,
+                ...imageCacheOpts(7),
+            }, {
+                // Live photo videos
+                urlPattern: /^.*\/apps\/memories\/api\/video\/livephoto\/.*/,
                 ...imageCacheOpts(7),
             }, {
                 // Face previews from Memories
