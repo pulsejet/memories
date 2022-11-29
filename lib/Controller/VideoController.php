@@ -124,7 +124,7 @@ class VideoController extends ApiBase
         }
 
         // Check data was received
-        if ($returnCode !== 200) {
+        if (200 !== $returnCode) {
             return new JSONResponse(['message' => 'Transcode failed'], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
 
@@ -210,6 +210,15 @@ class VideoController extends ApiBase
                 $name = $liveFile->getName();
                 $blob = $liveFile->getContent();
                 $mime = $liveFile->getMimeType();
+
+                if ($this->request->getParam('transcode') && !$this->config->getSystemValue('memories.no_transcode', true)) {
+                    // Only Apple uses HEVC for now, so pass this to the transcoder
+                    // If this is H.264 it won't get transcoded anyway
+                    $liveVideoPath = $liveFile->getStorage()->getLocalFile($liveFile->getInternalPath());
+                    if ($this->getUpstream('livephoto', $liveVideoPath, 'max.mp4')) {
+                        exit;
+                    }
+                }
             }
         }
 
@@ -242,20 +251,28 @@ class VideoController extends ApiBase
 
         // Stream the response to the browser without reading it into memory
         $headersWritten = false;
-        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($curl, $data) use (&$headersWritten) {
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($curl, $data) use (&$headersWritten, $profile) {
             $returnCode = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-            if ($returnCode === 200) {
+            if (200 === $returnCode) {
                 // Write headers if just got the first chunk of data
                 if (!$headersWritten) {
                     $headersWritten = true;
                     $contentType = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
                     header("Content-Type: {$contentType}");
-                    header('Cache-Control: no-cache, no-store, must-revalidate');
+
+                    if (str_ends_with($profile, 'mp4')) {
+                        // cache full video 24 hours
+                        header('Cache-Control: max-age=86400, public');
+                    } else {
+                        // no caching of segments
+                        header('Cache-Control: no-cache, no-store, must-revalidate');
+                    }
+
                     http_response_code($returnCode);
                 }
 
-                print($data);
+                echo $data;
                 ob_flush();
                 flush();
 
@@ -264,7 +281,7 @@ class VideoController extends ApiBase
                 }
             }
 
-            return strlen($data);
+            return \strlen($data);
         });
 
         // Start the request

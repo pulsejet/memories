@@ -133,7 +133,7 @@ export default class Photo extends Mixins(GlobalMixin) {
 
   get videoUrl() {
     if (this.data.liveid) {
-      return utils.getLivePhotoVideoUrl(this.data);
+      return utils.getLivePhotoVideoUrl(this.data, true);
     }
   }
 

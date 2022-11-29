@@ -874,7 +874,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
   private async downloadCurrentLiveVideo() {
     const photo = this.currentPhoto;
     if (!photo) return;
-    window.location.href = utils.getLivePhotoVideoUrl(photo);
+    window.location.href = utils.getLivePhotoVideoUrl(photo, false);
   }
 
   /** Open the sidebar */

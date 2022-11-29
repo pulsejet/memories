@@ -31,7 +31,7 @@ class LivePhotoContentSetup {
     video.autoplay = false;
     video.playsInline = true;
     video.preload = "none";
-    video.src = utils.getLivePhotoVideoUrl(photo);
+    video.src = utils.getLivePhotoVideoUrl(photo, true);
 
     const div = document.createElement("div");
     div.className = "memories-livephoto";

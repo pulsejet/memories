@@ -240,10 +240,12 @@ export function getFolderRoutePath(basePath: string) {
 /**
  * Get URL to live photo video part
  */
-export function getLivePhotoVideoUrl(p: IPhoto) {
-  return generateUrl(
+export function getLivePhotoVideoUrl(p: IPhoto, transcode: boolean) {
+  let url = generateUrl(
     `/apps/memories/api/video/livephoto/${p.fileid}?etag=${p.etag}&liveid=${p.liveid}`
   );
+  if (transcode) url += "&transcode=1";
+  return url;
 }
 
 /**
