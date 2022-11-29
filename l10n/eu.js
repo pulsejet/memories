@@ -2,7 +2,6 @@ OC.L10N.register(
     "memories",
     {
     "Memories" : "Memoriak",
-    "Yet another photo management app" : "Beste argazki kudeatze aplikazio bat",
     "Settings" : "Ezarpenak",
     "Timeline" : "Denbora-lerroa",
     "Folders" : "Karpetak",
@@ -188,6 +187,7 @@ OC.L10N.register(
     "Failed to delete files." : "Fitxategiak ezabatzeak huts egin du.",
     "Failed to delete {fileName}." : "{fileName} ezabatzeak huts egin du.",
     "Failed to favorite files." : "Fitxategiak gogoko egiteak huts egin du.",
-    "Failed to favorite {fileName}." : "Ezin izan da {fileName} gogoko egin."
+    "Failed to favorite {fileName}." : "Ezin izan da {fileName} gogoko egin.",
+    "Yet another photo management app" : "Beste argazki kudeatze aplikazio bat"
 },
 "nplurals=2; plural=(n != 1);");

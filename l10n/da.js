@@ -2,7 +2,6 @@ OC.L10N.register(
     "memories",
     {
     "Memories" : "Minder",
-    "Yet another photo management app" : "Endnu en fotostyringsapp",
     "Settings" : "Indstillinger",
     "Timeline" : "Tidslinje",
     "Folders" : "Mapper",
@@ -74,6 +73,7 @@ OC.L10N.register(
     "Failed to delete files." : "Kunne ikke slette filer.",
     "Failed to delete {fileName}." : "Kunne ikke slette {fileName}.",
     "Failed to favorite files." : "Kunne ikke vælge favorit filer.",
-    "Failed to favorite {fileName}." : "Kunne ikke vælge favorit {fileName}"
+    "Failed to favorite {fileName}." : "Kunne ikke vælge favorit {fileName}",
+    "Yet another photo management app" : "Endnu en fotostyringsapp"
 },
 "nplurals=2; plural=(n != 1);");
