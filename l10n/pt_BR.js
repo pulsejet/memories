@@ -2,7 +2,6 @@ OC.L10N.register(
     "memories",
     {
     "Memories" : "Memórias",
-    "Yet another photo management app" : "Mais um aplicativo de gerenciamento de fotos",
     "Settings" : "Configurações",
     "Timeline" : "Linha do tempo",
     "Folders" : "Pastas",
@@ -212,6 +211,7 @@ OC.L10N.register(
     "Failed to delete {fileName}." : "Falha ao excluir {fileName}.",
     "Failed to favorite files." : "Falha nos arquivos favoritos.",
     "Failed to favorite {fileName}." : "Falha ao favoritar {fileName}",
+    "Yet another photo management app" : "Mais um aplicativo de gerenciamento de fotos",
     "Found {total} photos in {path}" : "Encontrou {total} fotos em {path}"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

@@ -2,7 +2,6 @@ OC.L10N.register(
     "memories",
     {
     "Memories" : "Воспоминания",
-    "Yet another photo management app" : "Приложение для управления фотографиями",
     "Settings" : "Настройки",
     "Timeline" : "История",
     "Folders" : "Папки",
@@ -210,6 +209,7 @@ OC.L10N.register(
     "Failed to download some files." : "Не удалось скачать некоторые файлы",
     "Failed to favorite files." : "Не удалось добавить файлы в избранное.",
     "Failed to favorite {fileName}." : "Не удалось добавить файл «{fileName}» в избранное.",
+    "Yet another photo management app" : "Приложение для управления фотографиями",
     "Found {total} photos in {path}" : "В размещении «{path}» найдено {total} фото.",
     "{n} photos added to album" : "Добавлено фотографий: {n}"
 },

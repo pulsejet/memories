@@ -2,7 +2,6 @@ OC.L10N.register(
     "memories",
     {
     "Memories" : "Wspomnienia",
-    "Yet another photo management app" : "Kolejna aplikacja do zarządzania zdjęciami",
     "Settings" : "Ustawienia",
     "Timeline" : "Oś czasu",
     "Folders" : "Katalogi",
@@ -181,6 +180,7 @@ OC.L10N.register(
     "Failed to delete files." : "Nie udało się usunąć plików.",
     "Failed to delete {fileName}." : "Nie udało się usunąć {fileName}.",
     "Failed to favorite files." : "Nie udało się znaleźć ulubionych plików.",
-    "Failed to favorite {fileName}." : "Nie udało się dodać do ulubionych {fileName}."
+    "Failed to favorite {fileName}." : "Nie udało się dodać do ulubionych {fileName}.",
+    "Yet another photo management app" : "Kolejna aplikacja do zarządzania zdjęciami"
 },
 "nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);");
