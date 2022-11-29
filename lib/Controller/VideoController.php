@@ -237,6 +237,9 @@ class VideoController extends ApiBase
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($ch, CURLOPT_HEADER, 0);
 
+        // Catch connection abort here
+        ignore_user_abort(true);
+
         // Stream the response to the browser without reading it into memory
         $headersWritten = false;
         curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($curl, $data) use (&$headersWritten) {
@@ -248,13 +251,17 @@ class VideoController extends ApiBase
                     $headersWritten = true;
                     $contentType = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
                     header("Content-Type: {$contentType}");
-                    header("HTTP/1.1 {$returnCode}");
                     header('Cache-Control: no-cache, no-store, must-revalidate');
+                    http_response_code($returnCode);
                 }
 
                 print($data);
                 ob_flush();
                 flush();
+
+                if (connection_aborted()) {
+                    return -1; // stop the transfer
+                }
             }
 
             return strlen($data);
