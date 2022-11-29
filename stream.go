@@ -315,6 +315,7 @@ func (s *Stream) transcode(startId int) {
 		scale = fmt.Sprintf("scale_vaapi=w=%d:h=%d:force_original_aspect_ratio=decrease", s.width, s.height)
 	} else if CV == "h264_nvenc" {
                 // NVENC
+		format = "format=nv12|cuda,hwupload"
 		scale = fmt.Sprintf("scale_cuda=w=%d:h=%d:force_original_aspect_ratio=decrease:passthrough=0", s.width, s.height)
         } else {
 		// x264
@@ -331,7 +332,7 @@ func (s *Stream) transcode(startId int) {
 		if CV == "h264_nvenc" {
 			// Due to a bug(?) in NVENC, passthrough=0 must be set
 			args = append(args, []string{
-                                "-vf", "scale_cuda=passthrough=0",
+                                "-vf", fmt.Sprintf("%s,%s", format, "scale_cuda=passthrough=0"),
                         }...)
                 } else {
                         args = append(args, []string{
@@ -339,17 +340,8 @@ func (s *Stream) transcode(startId int) {
                         }...)
                 }
 	} else {
-		if CV == "h264_nvenc" {
-                        args = append(args, []string{
-                                "-vf", scale,
-                        }...)
-                } else {
-                        args = append(args, []string{
-                                "-vf", fmt.Sprintf("%s,%s", format, scale),
-                        }...)
-                }
-                // Common arguments
-                args = append(args, []string{
+		args = append(args, []string{
+			"-vf", fmt.Sprintf("%s,%s", format, scale),
                         "-maxrate", fmt.Sprintf("%d", s.bitrate),
                         "-bufsize", fmt.Sprintf("%d", s.bitrate*2),
                 }...)
