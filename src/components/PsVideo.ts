@@ -287,7 +287,7 @@ class VideoContentSetup {
       },
       fullscreen: {
         enabled: true,
-        container: ".pswp__container",
+        container: ".pswp",
       },
     };
 
