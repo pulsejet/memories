@@ -184,6 +184,11 @@ func (s *Stream) ServeChunk(w http.ResponseWriter, id int) error {
 func (s *Stream) ServeFullVideo(w http.ResponseWriter) error {
 	args := s.transcodeArgs(0)
 
+	if s.m.probe.CodecName == "h264" && s.quality == "max" {
+		// no need to transcode, just copy
+		args = []string{"-loglevel", "warning", "-i", s.m.path, "-c", "copy"}
+	}
+
 	// Output mp4
 	args = append(args, []string{
 		"-movflags", "frag_keyframe+empty_moov+faststart", "-f", "mp4", "pipe:1",
