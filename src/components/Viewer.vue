@@ -2,8 +2,9 @@
   <div
     class="memories_viewer outer"
     v-if="show"
-    :class="{ fullyOpened }"
+    :class="{ fullyOpened, slideshowTimer }"
     :style="{ width: outerWidth }"
+    @fullscreenchange="fullscreenChange"
   >
     <ImageEditor
       v-if="editorOpen"
@@ -109,6 +110,16 @@
               <OpenInNewIcon :size="24" />
             </template>
           </NcActionButton>
+          <NcActionButton
+            :aria-label="t('memories', 'Slideshow')"
+            @click="startSlideshow"
+            :close-after-click="true"
+          >
+            {{ t("memories", "Slideshow") }}
+            <template #icon>
+              <SlideshowIcon :size="24" />
+            </template>
+          </NcActionButton>
         </NcActions>
       </div>
     </div>
@@ -148,6 +159,9 @@ import DownloadIcon from "vue-material-design-icons/Download.vue";
 import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
 import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
 import TuneIcon from "vue-material-design-icons/Tune.vue";
+import SlideshowIcon from "vue-material-design-icons/PlayBox.vue";
+
+const SLIDESHOW_MS = 5000;
 
 @Component({
   components: {
@@ -162,6 +176,7 @@ import TuneIcon from "vue-material-design-icons/Tune.vue";
     InfoIcon,
     OpenInNewIcon,
     TuneIcon,
+    SlideshowIcon,
   },
 })
 export default class Viewer extends Mixins(GlobalMixin) {
@@ -193,6 +208,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
   private globalCount = 0;
   private globalAnchor = -1;
   private currIndex = -1;
+
+  /** Timer to move to next photo */
+  private slideshowTimer = 0;
 
   mounted() {
     subscribe("files:sidebar:opened", this.handleAppSidebarOpen);
@@ -306,6 +324,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
       bgOpacity: 1,
       appendToEl: this.$refs.inner as HTMLElement,
       preload: [2, 2],
+      clickToCloseNonZoomable: false,
+      bgClickAction: "toggle-controls",
 
       easing: "cubic-bezier(.49,.85,.55,1)",
       showHideAnimationType: "zoom",
@@ -404,6 +424,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
       this.dayIds = [];
       this.globalCount = 0;
       this.globalAnchor = -1;
+      clearTimeout(this.slideshowTimer);
+      this.slideshowTimer = 0;
     });
 
     // Update vue route for deep linking
@@ -440,6 +462,28 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
     // Live photo support
     new PsLivePhoto(this.photoswipe, {});
+
+    // Patch the close button to stop the slideshow
+    const _close = this.photoswipe.close.bind(this.photoswipe);
+    this.photoswipe.close = () => {
+      if (this.slideshowTimer) {
+        this.stopSlideshow();
+      } else {
+        _close();
+      }
+    };
+
+    // Patch the next/prev buttons to reset slideshow timer
+    const _next = this.photoswipe.next.bind(this.photoswipe);
+    const _prev = this.photoswipe.prev.bind(this.photoswipe);
+    this.photoswipe.next = () => {
+      this.resetSlideshowTimer();
+      _next();
+    };
+    this.photoswipe.prev = () => {
+      this.resetSlideshowTimer();
+      _prev();
+    };
 
     return this.photoswipe;
   }
@@ -895,6 +939,69 @@ export default class Viewer extends Mixins(GlobalMixin) {
   private async viewInFolder() {
     if (this.currentPhoto) dav.viewInFolder(this.currentPhoto);
   }
+
+  /**
+   * Start a slideshow
+   */
+  private async startSlideshow() {
+    // Full screen the pswp element
+    const pswp = this.photoswipe?.element;
+    if (!pswp) return;
+    pswp.requestFullscreen();
+
+    // Hide controls
+    this.setUiVisible(false);
+
+    // Start slideshow
+    this.slideshowTimer = window.setTimeout(
+      this.slideshowTimerFired,
+      SLIDESHOW_MS
+    );
+  }
+
+  /**
+   * Event of slideshow timer fire
+   */
+  private slideshowTimerFired() {
+    this.photoswipe.next();
+    // no need to set the timer again, since next
+    // calls resetSlideshowTimer anyway
+  }
+
+  /**
+   * Restart the slideshow timer
+   */
+  private resetSlideshowTimer() {
+    if (this.slideshowTimer) {
+      window.clearTimeout(this.slideshowTimer);
+      this.slideshowTimer = window.setTimeout(
+        this.slideshowTimerFired,
+        SLIDESHOW_MS
+      );
+    }
+  }
+
+  /**
+   * Stop the slideshow
+   */
+  private stopSlideshow() {
+    window.clearTimeout(this.slideshowTimer);
+    this.slideshowTimer = 0;
+
+    // exit full screen
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+  }
+
+  /**
+   * Detect change in fullscreen
+   */
+  private fullscreenChange() {
+    if (!document.fullscreenElement) {
+      this.stopSlideshow();
+    }
+  }
 }
 </script>
 
@@ -928,12 +1035,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
   }
 }
 
-.fullyOpened :deep .pswp__container {
-  @media (min-width: 1024px) {
-    // Animate transitions
-    // Disabled because this makes you sick if moving fast
-    // transition: transform var(--pswp-transition-duration) ease !important;
-  }
+.fullyOpened.slideshowTimer :deep .pswp__container {
+  // Animate transitions
+  // Disabled normally because this makes you sick if moving fast
+  transition: transform 0.75s ease !important;
 }
 
 .inner,
