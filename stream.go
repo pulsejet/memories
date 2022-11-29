@@ -189,9 +189,9 @@ func (s *Stream) ServeFullVideo(w http.ResponseWriter) error {
 		args = []string{"-loglevel", "warning", "-i", s.m.path, "-c", "copy"}
 	}
 
-	// Output mp4
+	// Output mov
 	args = append(args, []string{
-		"-movflags", "frag_keyframe+empty_moov+faststart", "-f", "mp4", "pipe:1",
+		"-movflags", "frag_keyframe+empty_moov+faststart", "-f", "mov", "pipe:1",
 	}...)
 
 	coder := exec.Command(s.c.ffmpeg, args...)
@@ -217,8 +217,8 @@ func (s *Stream) ServeFullVideo(w http.ResponseWriter) error {
 	defer cmdStdOut.Close()
 	stdoutReader := bufio.NewReader(cmdStdOut)
 
-	// Write mp4 header
-	w.Header().Set("Content-Type", "video/mp4")
+	// Write mov headers
+	w.Header().Set("Content-Type", "video/quicktime")
 	w.WriteHeader(http.StatusOK)
 	flusher, ok := w.(http.Flusher)
 	if !ok {
