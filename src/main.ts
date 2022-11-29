@@ -28,14 +28,15 @@ declare global {
 
   var vidjs: typeof import("video.js").default;
   var Plyr: typeof import("plyr");
+  var videoClientId: string;
 }
 
+// Allow global access to the router
 globalThis.vuerouter = router;
 
+// Cache these for better performance
 globalThis.windowInnerWidth = window.innerWidth;
 globalThis.windowInnerHeight = window.innerHeight;
-
-Vue.use(VueVirtualScroller);
 
 // CSP config for webpack dynamic chunk loading
 __webpack_nonce__ = window.btoa(getRequestToken());
@@ -45,6 +46,15 @@ __webpack_nonce__ = window.btoa(getRequestToken());
 // OC.generateUrl ensure the index.php (or not)
 // We do not want the index.php since we're loading files
 __webpack_public_path__ = generateFilePath("memories", "", "js/");
+
+// Generate client id for this instance
+// Does not need to be cryptographically secure
+globalThis.videoClientId = Math.random()
+  .toString(36)
+  .substring(2, 15)
+  .padEnd(12, "0");
+
+Vue.use(VueVirtualScroller);
 
 // https://github.com/nextcloud/photos/blob/156f280c0476c483cb9ce81769ccb0c1c6500a4e/src/main.js
 // TODO: remove when we have a proper fileinfo standalone library

@@ -217,11 +217,11 @@ class VideoController extends ApiBase
                 $blob = $liveFile->getContent();
                 $mime = $liveFile->getMimeType();
 
-                if ($this->request->getParam('transcode') && !$this->config->getSystemValue('memories.no_transcode', true)) {
+                if (($id = $this->request->getParam('transcode')) && !$this->config->getSystemValue('memories.no_transcode', true)) {
                     // Only Apple uses HEVC for now, so pass this to the transcoder
                     // If this is H.264 it won't get transcoded anyway
                     $liveVideoPath = $liveFile->getStorage()->getLocalFile($liveFile->getInternalPath());
-                    if ($this->getUpstream('livephoto', $liveVideoPath, 'max.mp4')) {
+                    if ($this->getUpstream($id, $liveVideoPath, 'max.mp4')) {
                         exit;
                     }
                 }
