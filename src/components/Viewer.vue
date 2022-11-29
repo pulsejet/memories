@@ -269,6 +269,11 @@ export default class Viewer extends Mixins(GlobalMixin) {
     return this.list[idx];
   }
 
+  /** Is the current slide a video */
+  get isVideo() {
+    return this.currentPhoto?.flag & this.c.FLAG_IS_VIDEO;
+  }
+
   /** Get download link for current photo */
   get currentDownloadLink() {
     return this.currentPhoto
@@ -740,11 +745,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Does the browser support native share API */
   get canShare() {
-    return (
-      "share" in navigator &&
-      this.currentPhoto &&
-      !(this.currentPhoto.flag & this.c.FLAG_IS_VIDEO)
-    );
+    return "share" in navigator && this.currentPhoto && !this.isVideo;
   }
 
   /** Share the current photo externally */
@@ -764,7 +765,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
       if (!photo) return;
 
       // No videos yet
-      if (photo.flag & this.c.FLAG_IS_VIDEO)
+      if (this.isVideo)
         throw new Error(this.t("memories", "Video sharing not supported yet"));
 
       // Get image blob
@@ -963,6 +964,26 @@ export default class Viewer extends Mixins(GlobalMixin) {
    * Event of slideshow timer fire
    */
   private slideshowTimerFired() {
+    // Cancel if timer doesn't exist anymore
+    // This can happen e.g. due to videos
+    if (!this.slideshowTimer) return;
+
+    // If this is a video, wait for it to finish
+    if (this.isVideo) {
+      // Get active video element
+      const video: HTMLVideoElement = this.photoswipe?.element?.querySelector(
+        ".pswp__item.active video"
+      );
+
+      // If no video tag is found by now, something likely went wrong. Just skip ahead.
+      // Otherwise check if video is not ended yet
+      if (video && video.currentTime < video.duration - 0.1) {
+        // Wait for video to finish
+        video.addEventListener("ended", this.slideshowTimerFired);
+        return;
+      }
+    }
+
     this.photoswipe.next();
     // no need to set the timer again, since next
     // calls resetSlideshowTimer anyway
