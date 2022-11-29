@@ -2,7 +2,6 @@ OC.L10N.register(
     "memories",
     {
     "Memories" : "Souvenirs",
-    "Yet another photo management app" : "Une nouvelle application de gestion des photos",
     "Settings" : "Paramètres",
     "Timeline" : "Fil chronologique",
     "Folders" : "Dossiers",
@@ -49,6 +48,7 @@ OC.L10N.register(
     "Failed to load some photos" : "Échec du chargement de certaines photos",
     "Share" : "Partage",
     "Sidebar" : "Panneau latéral",
+    "Download Video" : "Télécharger la vidéo",
     "Close" : "Fermer",
     "Previous" : "Précédente",
     "Next" : "Suivante",
@@ -85,6 +85,8 @@ OC.L10N.register(
     "Create album" : "Créer un album",
     "Add selection to album {albumName}" : "Ajouter la sélection à l'album {albumName}",
     "Create a new album." : "Créer un nouvel album",
+    "_Share with %n user_::_Share with %n users_" : ["Partager avec %n utilisateur","Partager avec %n utilisateurs","Partager avec %n utilisateurs"],
+    "_%n item_::_%n items_" : ["%n élément ","%n éléments","%n éléments"],
     "Save collaborators for this album." : "Enregistrer les collaborateurs pour cet album.",
     "Year" : "Année",
     "Month" : "Mois",
@@ -109,6 +111,8 @@ OC.L10N.register(
     "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Si vous créez un partage de lien public, cliquez sur rafraîchir et un lien correspondant à Souvenirs sera visible ci-dessous.",
     "Refresh" : "Actualiser",
     "Remove" : "Retirer",
+    "Add Path" : "Ajouter un chemin",
+    "Add a root to your timeline" : "Ajoutez un début à votre fil chronologique",
     "Delete album" : "Supprimer l'album",
     "Merge with different person" : "Fusionner avec une différente personne",
     "Share folder" : "Partager le dossier",
@@ -209,6 +213,8 @@ OC.L10N.register(
     "Failed to download some files." : "Échec du téléchargement de certains fichiers.",
     "Failed to favorite files." : "Échec de la mise en favoris des fichiers.",
     "Failed to favorite some files." : "Échec de l'ajout en favoris de certains fichiers.",
-    "Failed to favorite {fileName}." : "Échec de l'ajout aux favoris de {fileName}."
+    "Failed to favorite {fileName}." : "Échec de l'ajout aux favoris de {fileName}.",
+    "Yet another photo management app" : "Une nouvelle application de gestion des photos",
+    "Found {total} photos in {path}" : "{total} photos trouvées dans {path}"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

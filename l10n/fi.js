@@ -2,7 +2,6 @@ OC.L10N.register(
     "memories",
     {
     "Memories" : "Muistot",
-    "Yet another photo management app" : "Vaihtoehtoinen sovellus valokuvien hallintaan",
     "Settings" : "Asetukset",
     "Timeline" : "Aikajana",
     "Folders" : "Kansiot",
@@ -172,6 +171,7 @@ OC.L10N.register(
     "Failed to favorite files." : "Tiedostojen asettaminen suosikeiksi epäonnistui.",
     "Failed to favorite some files." : "Joidenkin tiedostojen määrittäminen suosikiksi epäonnistui.",
     "Failed to favorite {fileName}." : "Tiedoston {fileName} asettaminen suosikiksi epäonnistui.",
+    "Yet another photo management app" : "Vaihtoehtoinen sovellus valokuvien hallintaan",
     "Found {total} photos in {path}" : "{total} kuvaa löytyi polusta {path}",
     "{n} photos added to album" : "{n} kuvaa lisätty albumiin"
 },

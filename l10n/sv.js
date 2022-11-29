@@ -2,7 +2,6 @@ OC.L10N.register(
     "memories",
     {
     "Memories" : "Memories",
-    "Yet another photo management app" : "Ännu en app för fotohantering",
     "Settings" : "Inställningar",
     "Timeline" : "Tidslinje",
     "Folders" : "Mappar",
@@ -77,6 +76,7 @@ OC.L10N.register(
     "Failed to delete files." : "Misslyckades att radera filer.",
     "Failed to delete {fileName}." : "Misslyckades att radera {fileName}.",
     "Failed to favorite files." : "Misslyckades att favorisera filer.",
-    "Failed to favorite {fileName}." : "Misslyckades att favorisera {fileName}."
+    "Failed to favorite {fileName}." : "Misslyckades att favorisera {fileName}.",
+    "Yet another photo management app" : "Ännu en app för fotohantering"
 },
 "nplurals=2; plural=(n != 1);");

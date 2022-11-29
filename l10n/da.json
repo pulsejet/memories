@@ -1,6 +1,5 @@
 { "translations": {
     "Memories" : "Minder",
-    "Yet another photo management app" : "Endnu en fotostyringsapp",
     "Settings" : "Indstillinger",
     "Timeline" : "Tidslinje",
     "Folders" : "Mapper",
@@ -72,6 +71,7 @@
     "Failed to delete files." : "Kunne ikke slette filer.",
     "Failed to delete {fileName}." : "Kunne ikke slette {fileName}.",
     "Failed to favorite files." : "Kunne ikke vælge favorit filer.",
-    "Failed to favorite {fileName}." : "Kunne ikke vælge favorit {fileName}"
+    "Failed to favorite {fileName}." : "Kunne ikke vælge favorit {fileName}",
+    "Yet another photo management app" : "Endnu en fotostyringsapp"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

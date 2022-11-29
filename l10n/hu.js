@@ -2,7 +2,6 @@ OC.L10N.register(
     "memories",
     {
     "Memories" : "Emlékek",
-    "Yet another photo management app" : "Még egy fényképkezelő alkalmazás",
     "# Memories\n\nMemories is a *batteries-included* photo management solution for Nextcloud with advanced features including:\n\n- **📸 Timeline**: Sort photos and videos by date taken, parsed from Exif data.\n- **⏪ Rewind**: Jump to any time in the past instantly and relive your memories.\n- **🤖 AI Tagging**: Group photos by people and objects using AI, powered by [recognize](https://github.com/nextcloud/recognize).\n- **🖼️ Albums**: Create albums to group photos and videos together. Then share these albums with others.\n- **🫱🏻‍🫲🏻 External Sharing**: Share photos and videos with people outside of your Nextcloud instance.\n- **📱 Mobile Support**: Works on devices of any shape and size through the web app.\n- **✏️ Edit Metadata**: Edit dates on photos quickly and easily.\n- **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.\n- **📹 Video Transcoding**: Memories transcodes videos and uses HLS for maximal performance.\n- **⚡️ Performance**: In general, Memories is extremely fast.\n\n## 🌐 Online Demo\n\n- To get an idea of what memories looks and feels like, check out the [public demo](https://memories-demo.radialapps.com/apps/memories/).\n- The demo is read-only and may be slow (free tier VM from [Oracle Cloud](https://www.oracle.com/cloud/free/)).\n- Photo credits go to [Unsplash](https://unsplash.com/) (for individual credits, refer to each folder).\n\n## 🚀 Installation\n\n1. Install the app from the Nextcloud app store.\n1. Perform the recommended [configuration steps](https://github.com/pulsejet/memories/wiki/Extra-Configuration).\n1. Run `php ./occ memories:index` to generate metadata indices for existing photos.\n1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos." : "# Emlékek\n\nAz Emlékek egy *teljes értékű* fényképkezelő megoldás a Nextcloudhoz, többek között az alábbi speciális funkciókkal:\n\n- **📸 Idővonal**: Fényképek és videók rendezése az Exif-adatokból kinyert felvételi dátum alapján.\n- **⏪ Visszatekerés**: Azonnali visszaugrás a múltba, hogy újra átélhesse az emlékeit.\n- **🤖 MI-alapú címkézés**: Emberekről és tárgyakról készült képek csoportosítása MI segítségével, a [recognize](https://github.com/nextcloud/recognize) alkalmazásra támaszkodva.\n- **🖼️ Albumok**: Albumok létrehozása a fényképek és videók csoportosításához. Majd ezek megosztás másokkal.\n- **🫱🏻‍🫲🏻 Külső megosztás**: Fényképek és videók megosztása a Nextcloud-példányán kívüli emberekkel.\n- **📱 Mobilos támogatás**: A webalkalmazás segítségével tetszőleges alakú és méretű eszközön működik.\n- **✏️ Metaadatok szerkesztése**: Fényképek dátumának gyors és könnyű szerkesztése.\n- **📦 Archívum**: Azon képek külön mappában tárolása, melyeket nem akar az idővonalán látni.\n- **📹 Videók átkódolása**: Az Emlékek átkódolja a videókat, és HLS-t használ a maximális teljesítmény érdekében.\n- **⚡️ Teljesítmény**: Úgy általánosságban, az Emlékek rendkívül gyors.\n\n## 🌐 Online demó\n\n- Hogy megtudja hogy néz ki és milyen használni az Emlékeket, nézze meg a [nyilvános demót](https://memories-demo.radialapps.com/apps/memories/).\n- A demó csak olvasható, és lassú lehet (ingyenes virtuális gép az [Oracle Cloud-tól](https://www.oracle.com/cloud/free/)).\n- A fényképekért köszönet [Unsplashnek](https://unsplash.com/) (az egyes köszönetnyilvánításokért nézze meg az egyes mappákat).\n\n## 🚀 Telepítés\n\n1. Telepítse az alkalmazást a Nextcloud alkalmazástárából.\n1. Végezze el a javasolt [beállítási lépéseket](https://github.com/pulsejet/memories/wiki/Extra-Configuration).\n1. Futtassa a `php ./occ memories:index` parancsot, hogy előállítsa a meglévő fényképek metaadatindexét.\n1. Nyissa meg az 📷 Emlékek alkalmazást a Nextcloudban, és állítsa be a fényképeit tartalmazó könyvtárat.",
     "Settings" : "Beállítások",
     "Timeline" : "Idővonal",
@@ -25,6 +24,7 @@ OC.L10N.register(
     "You can always change this later in settings" : "Később bármikor módosíthatja a beállításokban",
     "Choose the root of your timeline" : "Válassza ki a gyökeret az idővonaláról",
     "The selected folder does not seem to be valid. Try again." : "A kiválasztott mappa nem tűnik érvényesnek. Próbálja újra.",
+    "_Found {n} item in {path}_::_Found {n} items in {path}_" : ["{n} elem található a következőben: {path}","{n} elem található a következőben: {path}"],
     "Failed to get Exif data. Metadata may be lost!" : "Az Exif-adatok lekérése sikertelen. A metaadatok elveszhetnek.",
     "No Exif data found! Continue?" : "Nem találhatók Exif-adatok. Folytatja?",
     "Image saved successfully" : "A kép sikeresen mentve",
@@ -66,6 +66,7 @@ OC.L10N.register(
     "Video sharing not supported yet" : "A videómegosztás még nem támogatott",
     "Cannot share this type of data" : "Az ilyen típusú adatok nem oszthatók meg",
     "Processing … {n}/{m}" : "Feldolgozás… {n}/{m}",
+    "_{n} item added to album_::_{n} items added to album_" : ["{n} elem hozzáadva az albumhoz","{n} elem hozzáadva az albumhoz"],
     "Search for collaborators" : "Közreműködők keresése",
     "Search people or groups" : "Felhasználó vagy csoport keresése",
     "Add {collaboratorLabel} to the collaborators list" : "{collaboratorLabel} hozzáadása a közreműködőkhöz",
@@ -239,6 +240,7 @@ OC.L10N.register(
     "Failed to favorite files." : "A fájlok kedvencnek jelölése sikertelen.",
     "Failed to favorite some files." : "Egyes fájlok kedvencnek jelölése sikertelen.",
     "Failed to favorite {fileName}." : "A(z) {fileName} kedvencnek jelölése sikertelen.",
+    "Yet another photo management app" : "Még egy fényképkezelő alkalmazás",
     "Found {total} photos in {path}" : "Összesen {total} fénykép a következőben: {path}",
     "{n} photos added to album" : "{n} fénykép hozzáadva az albumhoz"
 },
