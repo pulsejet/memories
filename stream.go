@@ -363,10 +363,10 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 		extra := "-hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format vaapi"
 		args = append(args, strings.Split(extra, " ")...)
 	} else if os.Getenv("NVENC") == "1" {
-                CV = "h264_nvenc"
-                extra := "-hwaccel cuda -hwaccel_output_format cuda"
-                args = append(args, strings.Split(extra, " ")...)
-        } 
+		CV = "h264_nvenc"
+		extra := "-hwaccel cuda -hwaccel_output_format cuda"
+		args = append(args, strings.Split(extra, " ")...)
+	}
 
 	// Input specs
 	args = append(args, []string{
@@ -383,10 +383,10 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 		format = "format=nv12|vaapi,hwupload"
 		scale = fmt.Sprintf("scale_vaapi=w=%d:h=%d:force_original_aspect_ratio=decrease", s.width, s.height)
 	} else if CV == "h264_nvenc" {
-                // NVENC
+		// NVENC
 		format = "format=nv12|cuda,hwupload"
 		scale = fmt.Sprintf("scale_cuda=w=%d:h=%d:force_original_aspect_ratio=decrease:passthrough=0", s.width, s.height)
-        } else {
+	} else {
 		// x264
 		format = "format=nv12"
 		if s.width >= s.height {
@@ -401,19 +401,19 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 		if CV == "h264_nvenc" {
 			// Due to a bug(?) in NVENC, passthrough=0 must be set
 			args = append(args, []string{
-                                "-vf", fmt.Sprintf("%s,%s", format, "scale_cuda=passthrough=0"),
-                        }...)
-                } else {
-                        args = append(args, []string{
-                                "-vf", format,
-                        }...)
-                }
+				"-vf", fmt.Sprintf("%s,%s", format, "scale_cuda=passthrough=0"),
+			}...)
+		} else {
+			args = append(args, []string{
+				"-vf", format,
+			}...)
+		}
 	} else {
 		args = append(args, []string{
 			"-vf", fmt.Sprintf("%s,%s", format, scale),
-                        "-maxrate", fmt.Sprintf("%d", s.bitrate),
-                        "-bufsize", fmt.Sprintf("%d", s.bitrate*2),
-                }...)
+			"-maxrate", fmt.Sprintf("%d", s.bitrate),
+			"-bufsize", fmt.Sprintf("%d", s.bitrate*2),
+		}...)
 	}
 
 	// Output specs
@@ -429,14 +429,14 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 			"-global_quality", "25",
 		}...)
 	} else if CV == "h264_nvenc" {
-                args = append(args, []string{
-                        "-preset", "p6",
-                        "-tune", "ll",
-                        "-temporal-aq", "1",
-                        "-rc", "vbr",
-                        "-rc-lookahead","30",
-                        "-cq", "24",
-                }...)
+		args = append(args, []string{
+			"-preset", "p6",
+			"-tune", "ll",
+			"-temporal-aq", "1",
+			"-rc", "vbr",
+			"-rc-lookahead", "30",
+			"-cq", "24",
+		}...)
 	} else if CV == "libx264" {
 		args = append(args, []string{
 			"-preset", "faster",
