@@ -244,7 +244,7 @@ export function getLivePhotoVideoUrl(p: IPhoto, transcode: boolean) {
   let url = generateUrl(
     `/apps/memories/api/video/livephoto/${p.fileid}?etag=${p.etag}&liveid=${p.liveid}`
   );
-  if (transcode) url += `&transcode=${videoClientId}`;
+  if (transcode) url += `&transcode=${videoClientIdPersistent}`;
   return url;
 }
 

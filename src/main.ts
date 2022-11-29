@@ -29,6 +29,7 @@ declare global {
   var vidjs: typeof import("video.js").default;
   var Plyr: typeof import("plyr");
   var videoClientId: string;
+  var videoClientIdPersistent: string;
 }
 
 // Allow global access to the router
@@ -49,10 +50,19 @@ __webpack_public_path__ = generateFilePath("memories", "", "js/");
 
 // Generate client id for this instance
 // Does not need to be cryptographically secure
-globalThis.videoClientId = Math.random()
-  .toString(36)
-  .substring(2, 15)
-  .padEnd(12, "0");
+const getClientId = () =>
+  Math.random().toString(36).substring(2, 15).padEnd(12, "0");
+globalThis.videoClientId = getClientId();
+globalThis.videoClientIdPersistent = localStorage.getItem(
+  "videoClientIdPersistent"
+);
+if (!globalThis.videoClientIdPersistent) {
+  globalThis.videoClientIdPersistent = getClientId();
+  localStorage.setItem(
+    "videoClientIdPersistent",
+    globalThis.videoClientIdPersistent
+  );
+}
 
 Vue.use(VueVirtualScroller);
 
