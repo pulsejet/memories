@@ -100,6 +100,7 @@ func (s *Stream) clear() {
 
 	if s.coder != nil {
 		s.coder.Process.Kill()
+		s.coder.Wait()
 		s.coder = nil
 	}
 }
@@ -177,6 +178,75 @@ func (s *Stream) ServeChunk(w http.ResponseWriter, id int) error {
 
 	// Let's start over
 	s.restartAtChunk(w, id)
+	return nil
+}
+
+func (s *Stream) ServeFullVideo(w http.ResponseWriter) error {
+	args := s.transcodeArgs(0)
+
+	// Output mp4
+	args = append(args, []string{
+		"-movflags", "frag_keyframe+empty_moov+faststart", "-f", "mp4", "pipe:1",
+	}...)
+
+	coder := exec.Command(s.c.ffmpeg, args...)
+	log.Printf("%s-%s: %s", s.m.id, s.quality, strings.Join(coder.Args[:], " "))
+
+	cmdStdOut, err := coder.StdoutPipe()
+	if err != nil {
+		fmt.Printf("FATAL: ffmpeg command stdout failed with %s\n", err)
+	}
+
+	cmdStdErr, err := coder.StderrPipe()
+	if err != nil {
+		fmt.Printf("FATAL: ffmpeg command stdout failed with %s\n", err)
+	}
+
+	err = coder.Start()
+	if err != nil {
+		log.Printf("FATAL: ffmpeg command failed with %s\n", err)
+	}
+	go s.monitorStderr(cmdStdErr)
+
+	// Write to response
+	defer cmdStdOut.Close()
+	stdoutReader := bufio.NewReader(cmdStdOut)
+
+	// Write mp4 header
+	w.Header().Set("Content-Type", "video/mp4")
+	w.WriteHeader(http.StatusOK)
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Server does not support Flusher!",
+			http.StatusInternalServerError)
+		return nil
+	}
+
+	// Write data, flusing every 1MB
+	buf := make([]byte, 1024*1024)
+	for {
+		n, err := stdoutReader.Read(buf)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			log.Printf("FATAL: ffmpeg command failed with %s\n", err)
+			break
+		}
+
+		_, err = w.Write(buf[:n])
+		if err != nil {
+			log.Printf("%s-%s: client closed connection", s.m.id, s.quality)
+			log.Println(err)
+			break
+		}
+		flusher.Flush()
+	}
+
+	// Terminate ffmpeg process
+	coder.Process.Kill()
+	coder.Wait()
+
 	return nil
 }
 
@@ -267,14 +337,8 @@ func (s *Stream) restartAtChunk(w http.ResponseWriter, id int) {
 	s.waitForChunk(w, chunk) // this is also a request
 }
 
-func (s *Stream) transcode(startId int) {
-	if startId > 0 {
-		// Start one frame before
-		// This ensures that the keyframes are aligned
-		startId--
-	}
-	startAt := float64(startId * s.c.chunkSize)
-
+// Get arguments to ffmpeg
+func (s *Stream) transcodeArgs(startAt float64) []string {
 	args := []string{
 		"-loglevel", "warning",
 	}
@@ -364,6 +428,19 @@ func (s *Stream) transcode(startId int) {
 		"-ac", "1",
 		"-b:a", ab,
 	}...)
+
+	return args
+}
+
+func (s *Stream) transcode(startId int) {
+	if startId > 0 {
+		// Start one frame before
+		// This ensures that the keyframes are aligned
+		startId--
+	}
+	startAt := float64(startId * s.c.chunkSize)
+
+	args := s.transcodeArgs(startAt)
 
 	// Segmenting specs
 	args = append(args, []string{
