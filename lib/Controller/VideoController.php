@@ -84,7 +84,7 @@ class VideoController extends ApiBase
         }
 
         // Make upstream request
-        [$data, $contentType, $returnCode] = $this->getUpstream($client, $path, $profile);
+        $returnCode = $this->getUpstream($client, $path, $profile);
 
         // If status code was 0, it's likely the server is down
         // Make one attempt to start if we can't find the process
@@ -120,21 +120,16 @@ class VideoController extends ApiBase
 
             // wait for 1s and try again
             sleep(1);
-            [$data, $contentType, $returnCode] = $this->getUpstream($client, $path, $profile);
+            $returnCode = $this->getUpstream($client, $path, $profile);
         }
 
         // Check data was received
-        if ($returnCode >= 400 || false === $data) {
+        if ($returnCode !== 200) {
             return new JSONResponse(['message' => 'Transcode failed'], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
 
-        // Create and send response
-        $response = new DataDisplayResponse($data, Http::STATUS_OK, [
-            'Content-Type' => $contentType,
-        ]);
-        $response->cacheFor(0, false, false);
-
-        return $response;
+        // The response was already streamed, so we have nothing to do here
+        exit;
     }
 
     /**
@@ -241,11 +236,35 @@ class VideoController extends ApiBase
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($ch, CURLOPT_HEADER, 0);
-        $data = curl_exec($ch);
-        $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+
+        // Stream the response to the browser without reading it into memory
+        $headersWritten = false;
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($curl, $data) use (&$headersWritten) {
+            $returnCode = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+            if ($returnCode === 200) {
+                // Write headers if just got the first chunk of data
+                if (!$headersWritten) {
+                    $headersWritten = true;
+                    $contentType = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
+                    header("Content-Type: {$contentType}");
+                    header("HTTP/1.1 {$returnCode}");
+                    header('Cache-Control: no-cache, no-store, must-revalidate');
+                }
+
+                print($data);
+                ob_flush();
+                flush();
+            }
+
+            return strlen($data);
+        });
+
+        // Start the request
+        curl_exec($ch);
         $returnCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        return [$data, $contentType, $returnCode];
+        return $returnCode;
     }
 }
