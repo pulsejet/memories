@@ -175,7 +175,7 @@ class VideoController extends ApiBase
                     // Only Apple uses HEVC for now, so pass this to the transcoder
                     // If this is H.264 it won't get transcoded anyway
                     $liveVideoPath = $liveFile->getStorage()->getLocalFile($liveFile->getInternalPath());
-                    if ($this->getUpstream($id, $liveVideoPath, 'max.mp4')) {
+                    if ($this->getUpstream($id, $liveVideoPath, 'max.mov')) {
                         exit;
                     }
                 }
@@ -273,7 +273,7 @@ class VideoController extends ApiBase
                     $contentType = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
                     header("Content-Type: {$contentType}");
 
-                    if (str_ends_with($profile, 'mp4')) {
+                    if (str_ends_with($profile, 'mov')) {
                         // cache full video 24 hours
                         header('Cache-Control: max-age=86400, public');
                     } else {
