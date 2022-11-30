@@ -814,24 +814,42 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Delete this photo and refresh */
   private async deleteCurrent() {
-    const idx = this.photoswipe.currIndex - this.globalAnchor;
+    let idx = this.photoswipe.currIndex - this.globalAnchor;
+    const photo = this.list[idx];
+    if (!photo) return;
 
     // Delete with WebDAV
     try {
       this.updateLoading(1);
-      for await (const p of dav.deletePhotos([this.list[idx]])) {
+      for await (const p of dav.deletePhotos([photo])) {
         if (!p[0]) return;
       }
     } finally {
       this.updateLoading(-1);
     }
 
-    const spliced = this.list.splice(idx, 1);
+    // Remove from main view
+    this.deleted([photo]);
+
+    // If this is the only photo, close viewer
+    if (this.list.length === 1) {
+      return this.close();
+    }
+
+    // If this is the last photo, move to the previous photo first
+    // https://github.com/pulsejet/memories/issues/269
+    if (idx === this.list.length - 1) {
+      this.photoswipe.prev();
+
+      // Some photos might lazy load, so recompute idx for the next element
+      idx = this.photoswipe.currIndex + 1 - this.globalAnchor;
+    }
+
+    this.list.splice(idx, 1);
     this.globalCount--;
     for (let i = idx - 3; i <= idx + 3; i++) {
       this.photoswipe.refreshSlideContent(i + this.globalAnchor);
     }
-    this.deleted(spliced);
   }
 
   /** Is the current photo a favorite */
