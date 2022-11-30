@@ -207,7 +207,7 @@ class VideoContentSetup {
     }, 200);
 
     let canPlay = false;
-    content.videojs.on("loadedmetadata", () => {
+    content.videojs.on("canplay", () => {
       canPlay = true;
       this.updateRotation(content); // also gets the correct video elem as a side effect
 
