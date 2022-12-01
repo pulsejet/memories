@@ -272,8 +272,12 @@ class VideoContentSetup {
     if (qualityList && qualityList.length > 1) {
       const s = new Set<number>();
       for (let i = 0; i < qualityList?.length; i++) {
-        const { width, height } = qualityList[i];
+        const { width, height, label } = qualityList[i];
         s.add(Math.min(width, height));
+
+        if (label?.includes("max.m3u8")) {
+          s.add(999999999);
+        }
       }
       qualityNums = Array.from(s).sort((a, b) => b - a);
       qualityNums.unshift(0);
@@ -284,6 +288,7 @@ class VideoContentSetup {
       i18n: {
         qualityLabel: {
           0: t("memories", "Auto"),
+          999999999: t("memories", "Original"),
         },
       },
       fullscreen: {
@@ -300,9 +305,12 @@ class VideoContentSetup {
         onChange: (quality: number) => {
           if (!qualityList || !content.videojs) return;
           for (let i = 0; i < qualityList.length; ++i) {
-            const { width, height } = qualityList[i];
+            const { width, height, label } = qualityList[i];
             const pixels = Math.min(width, height);
-            qualityList[i].enabled = pixels === quality || !quality;
+            qualityList[i].enabled =
+              !quality || // auto
+              pixels === quality || // exact match
+              (label?.includes("max.m3u8") && quality === 999999999); // max
           }
         },
       };
