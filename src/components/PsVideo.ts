@@ -210,13 +210,18 @@ class VideoContentSetup {
     content.videojs.on("canplay", () => {
       canPlay = true;
       this.updateRotation(content); // also gets the correct video elem as a side effect
-
-      // Wait (also below) for the transition to end
-      window.setTimeout(() => this.initPlyr(content), 250);
+      window.setTimeout(() => this.initPlyr(content), 0);
     });
 
     content.videojs.qualityLevels()?.on("addqualitylevel", (e) => {
-      window.setTimeout(() => this.initPlyr(content), 250);
+      if (e.qualityLevel?.label?.includes("max.m3u8")) {
+        // This is the highest quality level
+        // and guaranteed to be the last one
+        this.initPlyr(content);
+      }
+
+      // Fallback
+      window.setTimeout(() => this.initPlyr(content), 0);
     });
 
     // Get correct orientation
@@ -316,6 +321,12 @@ class VideoContentSetup {
     plyr.elements.wrapper.style.backgroundColor = "transparent";
 
     content.plyr = plyr;
+
+    // Wait for animation to end before showing Plyr
+    plyr.elements.container.style.opacity = "0";
+    setTimeout(() => {
+      plyr.elements.container.style.opacity = "1";
+    }, 250);
 
     // Restore original parent of video element
     origParent.appendChild(content.videoElement);
