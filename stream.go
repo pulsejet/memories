@@ -33,6 +33,7 @@ type Stream struct {
 	c       *Config
 	m       *Manager
 	quality string
+	order   int
 	height  int
 	width   int
 	bitrate int

@@ -76,6 +76,8 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 
 	// Only keep streams that are smaller than the video
 	for k, stream := range m.streams {
+		stream.order = 0
+
 		// scale bitrate by frame rate with reference 30
 		stream.bitrate = int(float64(stream.bitrate) * float64(m.probe.FrameRate) / 30.0)
 
@@ -94,8 +96,12 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 
 	// Original stream
 	m.streams["max"] = &Stream{
-		c: c, m: m, quality: "max", height: m.probe.Height, width: m.probe.Width,
+		c: c, m: m,
+		quality: "max",
+		height: m.probe.Height,
+		width: m.probe.Width,
 		bitrate: m.probe.BitRate,
+		order: 1,
 	}
 
 	// Start all streams
@@ -213,7 +219,8 @@ func (m *Manager) ServeIndex(w http.ResponseWriter) error {
 		streams = append(streams, stream)
 	}
 	sort.Slice(streams, func(i, j int) bool {
-		return streams[i].bitrate < streams[j].bitrate
+		return streams[i].order < streams[j].order ||
+			  (streams[i].order == streams[j].order && streams[i].bitrate < streams[j].bitrate)
 	})
 
 	// Write all streams
