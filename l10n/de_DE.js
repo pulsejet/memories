@@ -61,6 +61,7 @@ OC.L10N.register(
     "Share" : "Teilen",
     "Sidebar" : "Seitenleiste",
     "Download Video" : "Video herunterladen",
+    "Slideshow" : "Diashow",
     "Close" : "Schließen",
     "Previous" : "Zurück",
     "Next" : "Nächste",
