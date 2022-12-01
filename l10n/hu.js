@@ -61,6 +61,7 @@ OC.L10N.register(
     "Share" : "Megosztás",
     "Sidebar" : "Oldalsáv",
     "Download Video" : "Videó letöltése",
+    "Slideshow" : "Diavetítés",
     "Close" : "Bezárás",
     "Previous" : "Előző",
     "Next" : "Következő",
