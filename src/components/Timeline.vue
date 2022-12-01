@@ -1266,6 +1266,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 }
 
 .recycler {
+  will-change: scroll-position;
   contain: strict;
   height: 300px;
   width: calc(100% + 20px);
