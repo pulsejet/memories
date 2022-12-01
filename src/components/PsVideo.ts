@@ -114,6 +114,17 @@ class VideoContentSetup {
     });
   }
 
+  getHLSsrc(content: any) {
+    const fileid = content.data.photo.fileid;
+    const baseUrl = generateUrl(
+      `/apps/memories/api/video/transcode/${videoClientId}/${fileid}`
+    );
+    return {
+      src: `${baseUrl}/index.m3u8`,
+      type: "application/x-mpegURL",
+    };
+  }
+
   async initVideo(content: any) {
     if (!isVideoContent(content) || content.videojs) {
       return;
@@ -143,20 +154,11 @@ class VideoContentSetup {
     // Add the video element to the actual container
     content.element.appendChild(content.videoElement);
 
-    // Get file id
-    const fileid = content.data.photo.fileid;
-
     // Create hls sources if enabled
     let sources: any[] = [];
-    const baseUrl = generateUrl(
-      `/apps/memories/api/video/transcode/${videoClientId}/${fileid}`
-    );
 
     if (!config_noTranscode) {
-      sources.push({
-        src: `${baseUrl}/index.m3u8`,
-        type: "application/x-mpegURL",
-      });
+      sources.push(this.getHLSsrc(content));
     }
 
     sources.push({
@@ -267,7 +269,7 @@ class VideoContentSetup {
     const origParent = content.videoElement.parentElement;
 
     // Populate quality list
-    const qualityList = content.videojs?.qualityLevels();
+    let qualityList = content.videojs?.qualityLevels();
     let qualityNums: number[];
     if (qualityList && qualityList.length > 1) {
       const s = new Set<number>();
@@ -281,12 +283,14 @@ class VideoContentSetup {
       }
       qualityNums = Array.from(s).sort((a, b) => b - a);
       qualityNums.unshift(0);
+      qualityNums.unshift(-1);
     }
 
     // Create the plyr instance
     const opts: Plyr.Options = {
       i18n: {
         qualityLabel: {
+          "-1": t("memories", "Direct"),
           0: t("memories", "Auto"),
           999999999: t("memories", "Original"),
         },
@@ -303,7 +307,32 @@ class VideoContentSetup {
         options: qualityNums,
         forced: true,
         onChange: (quality: number) => {
+          qualityList = content.videojs?.qualityLevels();
           if (!qualityList || !content.videojs) return;
+
+          if (quality === -1) {
+            // Direct playback
+            // Prevent any useless transcodes
+            for (let i = 0; i < qualityList.length; ++i) {
+              qualityList[i].enabled = false;
+            }
+
+            // Set the source to the original video
+            if (content.videojs.src().includes("m3u8")) {
+              content.videojs.src({
+                src: content.data.src,
+                type: "video/mp4",
+              });
+            }
+            return;
+          } else {
+            // Set source to HLS
+            if (!content.videojs.src().includes("m3u8")) {
+              content.videojs.src(this.getHLSsrc(content));
+            }
+          }
+
+          // Enable only the selected quality
           for (let i = 0; i < qualityList.length; ++i) {
             const { width, height, label } = qualityList[i];
             const pixels = Math.min(width, height);
