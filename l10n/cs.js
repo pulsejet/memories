@@ -61,6 +61,7 @@ OC.L10N.register(
     "Share" : "Sdílet",
     "Sidebar" : "Postranní panel",
     "Download Video" : "Stáhnout si video",
+    "Slideshow" : "Promítání",
     "Close" : "Zavřít",
     "Previous" : "Předchozí",
     "Next" : "Další",
