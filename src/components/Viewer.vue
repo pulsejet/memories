@@ -1105,10 +1105,12 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   .pswp__zoom-wrap {
     width: 100%;
+    will-change: transform;
   }
 
   img.pswp__img {
     object-fit: contain;
+    will-change: width, height;
   }
 
   .pswp__button {
