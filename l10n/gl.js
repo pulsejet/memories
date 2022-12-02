@@ -53,6 +53,7 @@ OC.L10N.register(
     "Extension" : "Extensión",
     "Name is required." : "É obrigatorio  o nome.",
     "Quality" : "Calidade",
+    "Direct" : "Directa",
     "Auto" : "Automático"
 },
 "nplurals=2; plural=(n != 1);");

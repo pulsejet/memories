@@ -55,6 +55,7 @@ OC.L10N.register(
     "Saved image size (width x height)" : "Saglabātā attēla izmērs (platums x augstums)",
     "Actual size (100%)" : "Faktiskais izmērs (100%)",
     "Fit size" : "Atbilst izmēram",
+    "Direct" : "Tieši",
     "Auto" : "Automātiski",
     "Shared Folder" : "Koplietotā mape"
 },

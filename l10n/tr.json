@@ -226,6 +226,7 @@
     "Actual size (100%)" : "Gerçek boyut (%100)",
     "Fit size" : "Boyutu sığdır",
     "Transcoding failed." : "Kod dönüştürülemedi.",
+    "Direct" : "Doğrudan",
     "Auto" : "Otomatik",
     "Shared Folder" : "Paylaşılmış klasör",
     "Failed to create {albumName}." : "{albumName} albümü oluşturulamadı.",

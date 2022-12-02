@@ -64,6 +64,7 @@ OC.L10N.register(
     "Extension" : "Επέκταση",
     "Name is required." : "Απαιτείται όνομα.",
     "Quality" : "Ποιότητα",
+    "Direct" : "Άμεσα",
     "Auto" : "Αυτόματα",
     "Failed to create {albumName}." : "Απέτυχε η δημιουργία {albumName}",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Απέτυχε η μετονομασία του {currentAlbumName} σε {newAlbumName}.",

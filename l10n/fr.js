@@ -203,6 +203,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Taille actuelle (100%)",
     "Fit size" : "Adapter à la taille",
     "Transcoding failed." : "Échec du transcodage.",
+    "Direct" : "Direct",
     "Auto" : "Auto",
     "Failed to create {albumName}." : "Échec de la création de {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Échec du renommage de {currentAlbumName} en {newAlbumName}.",

@@ -78,6 +78,7 @@ OC.L10N.register(
     "Extension" : "拡張",
     "Name is required." : "名前は必須です。",
     "Quality" : "品質",
+    "Direct" : "ダイレクト",
     "Auto" : "自動"
 },
 "nplurals=1; plural=0;");
