@@ -1,5 +1,10 @@
 <template>
-  <div ref="editor" class="viewer__image-editor" v-bind="themeDataAttr" />
+  <div
+    ref="editor"
+    class="viewer__image-editor"
+    :class="{ loading: !imageEditor }"
+    v-bind="themeDataAttr"
+  />
 </template>
 
 <script lang="ts">
@@ -324,6 +329,7 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
   left: 0;
   width: 100%;
   height: 100vh;
+  background-color: black;
 }
 </style>
 
