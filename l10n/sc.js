@@ -53,6 +53,7 @@ OC.L10N.register(
     "Extension" : "Estensione",
     "Name is required." : "Su nùmene est rechertu: ",
     "Quality" : "Calidade",
+    "Direct" : "Deretu",
     "Auto" : "Auto"
 },
 "nplurals=2; plural=(n != 1);");

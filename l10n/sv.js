@@ -72,6 +72,7 @@ OC.L10N.register(
     "Position" : "Position",
     "Extension" : "Tillägg",
     "Name is required." : "Namn är obligatoriskt.",
+    "Direct" : "Direkt",
     "Auto" : "Auto",
     "Failed to delete files." : "Misslyckades att radera filer.",
     "Failed to delete {fileName}." : "Misslyckades att radera {fileName}.",

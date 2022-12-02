@@ -228,6 +228,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Действителен размер (100%)",
     "Fit size" : "Подходящ размер",
     "Transcoding failed." : "Прекодирането е неуспешно.",
+    "Direct" : "Директно",
     "Auto" : "Автоматично",
     "Shared Folder" : "Споделена папка",
     "Failed to create {albumName}." : "Неуспешно създаване на {albumName}.",
