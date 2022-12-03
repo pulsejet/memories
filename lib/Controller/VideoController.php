@@ -286,7 +286,6 @@ class VideoController extends ApiBase
                 }
 
                 echo $data;
-                ob_flush();
                 flush();
 
                 if (connection_aborted()) {
