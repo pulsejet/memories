@@ -109,6 +109,9 @@ class PublicController extends AuthPublicShareController
         // Video configuration
         $this->initialState->provideInitialState('notranscode', $this->config->getSystemValue('memories.no_transcode', 'UNSET'));
 
+        // Share info
+        $this->initialState->provideInitialState('no_download', $share->getHideDownload());
+
         $policy = new ContentSecurityPolicy();
         $policy->addAllowedWorkerSrcDomain("'self'");
         $policy->addAllowedScriptDomain("'self'");

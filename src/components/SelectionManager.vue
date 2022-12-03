@@ -157,6 +157,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
         icon: DownloadIcon,
         callback: this.downloadSelection.bind(this),
         allowPublic: true,
+        if: () => !this.allowDownload(),
       },
       {
         name: t("memories", "Favorite"),
@@ -214,6 +215,11 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
       sel.set(photo.fileid, photo);
       this.editDateSelection(sel);
     };
+  }
+
+  /** Download is not allowed on some public shares */
+  private allowDownload(): boolean {
+    return this.state_noDownload;
   }
 
   /** Archive is not allowed only on folder routes */
