@@ -352,6 +352,12 @@ export default class AddToAlbumModal extends Mixins(GlobalMixin) {
     try {
       this.loadingAlbum = true;
       this.errorFetchingAlbum = null;
+
+      const album = await dav.getAlbum(
+        getCurrentUser()?.uid.toString(),
+        this.albumName
+      );
+      this.populateCollaborators(album.collaborators);
     } catch (error) {
       if (error.response?.status === 404) {
         this.errorFetchingAlbum = 404;
