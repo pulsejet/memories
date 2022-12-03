@@ -38,7 +38,7 @@
 import { Component, Prop, Watch, Mixins, Emit } from "vue-property-decorator";
 import { IAlbum, IPhoto, ITag } from "../../types";
 import { generateUrl } from "@nextcloud/router";
-import { getPhotosPreviewUrl, getPreviewUrl } from "../../services/FileUtils";
+import { getPreviewUrl } from "../../services/FileUtils";
 import { getCurrentUser } from "@nextcloud/auth";
 
 import NcCounterBubble from "@nextcloud/vue/dist/Components/NcCounterBubble";
@@ -87,10 +87,6 @@ export default class Tag extends Mixins(GlobalMixin) {
       return generateUrl(
         "/apps/memories/api/faces/preview/" + this.data.fileid
       );
-    }
-
-    if (this.isAlbum) {
-      return getPhotosPreviewUrl(photo, true, 256);
     }
 
     return getPreviewUrl(photo, true, 256);

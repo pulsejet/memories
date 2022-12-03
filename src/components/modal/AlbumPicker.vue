@@ -70,7 +70,7 @@ import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
 const NcListItem = () => import("@nextcloud/vue/dist/Components/NcListItem");
 
 import { generateUrl } from "@nextcloud/router";
-import { getPhotosPreviewUrl } from "../../services/FileUtils";
+import { getPreviewUrl } from "../../services/FileUtils";
 import { IAlbum, IPhoto } from "../../types";
 import axios from "@nextcloud/axios";
 
@@ -85,7 +85,7 @@ import axios from "@nextcloud/axios";
   },
   filters: {
     toCoverUrl(fileId: string) {
-      return getPhotosPreviewUrl(
+      return getPreviewUrl(
         {
           fileid: Number(fileId),
         } as IPhoto,

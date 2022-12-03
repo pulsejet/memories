@@ -143,35 +143,23 @@ const getPreviewUrl = function (
   const [x, y] = typeof size === "number" ? [size, size] : size;
   const a = square ? "0" : "1";
 
-  // Public preview
-  if (vuerouter.currentRoute.name === "folder-share") {
-    const token = vuerouter.currentRoute.params.token;
-    return generateUrl(
-      `/apps/files_sharing/publicpreview/${token}?file=${photo.filename}&fileId=${photo.fileid}&x=${x}&y=${y}&a=${a}`
-    );
-  }
+  // Get base URL
+  let url = generateUrl(
+    `/apps/memories/api/image/preview/${photo.fileid}?c=${photo.etag}&x=${x}&y=${y}&a=${a}`
+  );
 
   // Albums from Photos
   if (vuerouter.currentRoute.name === "albums") {
-    return getPhotosPreviewUrl(photo, square, size);
+    url += `&album=1`;
   }
 
-  return generateUrl(
-    `/core/preview?fileId=${photo.fileid}&c=${photo.etag}&x=${x}&y=${y}&forceIcon=0&a=${a}`
-  );
-};
+  // Public preview
+  if (vuerouter.currentRoute.name === "folder-share") {
+    const token = vuerouter.currentRoute.params.token;
+    url += `&folder_share=${token}`;
+  }
 
-/** Get the preview URL from the photos app */
-const getPhotosPreviewUrl = function (
-  photo: IPhoto | IFileInfo,
-  square: boolean,
-  size: number | [number, number]
-): string {
-  const [x, y] = typeof size === "number" ? [size, size] : size;
-  const a = square ? "0" : "1";
-  return generateUrl(
-    `/apps/photos/api/v1/preview/${photo.fileid}?c=${photo.etag}&x=${x}&y=${y}&forceIcon=0&a=${a}`
-  );
+  return url;
 };
 
 export {
@@ -180,5 +168,4 @@ export {
   sortCompare,
   genFileInfo,
   getPreviewUrl,
-  getPhotosPreviewUrl,
 };

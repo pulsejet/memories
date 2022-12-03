@@ -64,12 +64,8 @@ if (!isDev) {
                 urlPattern: /^.*\/apps\/files\/ajax\/download.php?.*/,
                 handler: 'NetworkOnly',
             }, {
-                // Preview file request from core
-                urlPattern: /^.*\/core\/preview\?fileId=.*/,
-                ...imageCacheOpts(7),
-            }, {
-                // Albums from Photos
-                urlPattern: /^.*\/apps\/photos\/api\/v1\/preview\/.*/,
+                // Preview file request
+                urlPattern: /^.*\/apps\/memories\/api\/image\/preview\/.*/,
                 ...imageCacheOpts(7),
             }, {
                 // Live photo videos

@@ -26,10 +26,55 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Exif;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\FileDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 
 class ImageController extends ApiBase
 {
+    /**
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     *
+     * @PublicPage
+     *
+     * Get preview of image
+     */
+    public function preview(
+        int $id,
+        int $x = 32,
+        int $y = 32,
+        bool $a = false,
+        string $mode = 'fill'
+    ) {
+        if (-1 === $id || 0 === $x || 0 === $y) {
+            return new JSONResponse([
+                'message' => 'Invalid parameters',
+            ], Http::STATUS_BAD_REQUEST);
+        }
+
+        $file = $this->getUserFile($id);
+        if (!$file) {
+            return new JSONResponse([
+                'message' => 'File not found',
+            ], Http::STATUS_NOT_FOUND);
+        }
+
+        try {
+            $f = $this->previewManager->getPreview($file, $x, $y, !$a, $mode);
+            $response = new FileDisplayResponse($f, Http::STATUS_OK, [
+                'Content-Type' => $f->getMimeType(),
+            ]);
+            $response->cacheFor(3600 * 24, false, true);
+
+            return $response;
+        } catch (\OCP\Files\NotFoundException $e) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        } catch (\InvalidArgumentException $e) {
+            return new JSONResponse([], Http::STATUS_BAD_REQUEST);
+        }
+    }
+
     /**
      * @NoAdminRequired
      *
