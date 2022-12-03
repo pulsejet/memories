@@ -106,7 +106,7 @@ class ApiBase extends Controller
         // Public shared folder
         if ($token = $this->getShareToken()) {
             $share = $this->shareManager->getShareByToken($token)->getNode(); // throws exception if not found
-            if (!$share instanceof Folder) {
+            if (!$share instanceof Folder || !$share->isReadable() || !$share->isShareable()) {
                 throw new \Exception('Share not found or invalid');
             }
 
@@ -207,7 +207,7 @@ class ApiBase extends Controller
 
         try {
             $share = $this->shareManager->getShareByToken($token)->getNode(); // throws exception if not found
-            if (!$share instanceof Folder) {
+            if (!$share instanceof Folder || !$share->isReadable() || !$share->isShareable()) {
                 return null;
             }
         } catch (\Exception $e) {
