@@ -88,9 +88,11 @@ export default class Metadata extends Mixins(GlobalMixin) {
     this.nominatim = null;
 
     let state = this.state;
-    const res = await axios.get<any>(
-      generateUrl("/apps/memories/api/image/info/{id}", { id: fileInfo.id })
-    );
+    let url = generateUrl("/apps/memories/api/image/info/{id}", {
+      id: fileInfo.id,
+    });
+    url = utils.addQueryTokensToUrl(url);
+    const res = await axios.get<any>(url);
     if (state !== this.state) return;
 
     this.baseInfo = res.data;

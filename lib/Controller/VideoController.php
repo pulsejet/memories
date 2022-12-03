@@ -34,17 +34,14 @@ class VideoController extends ApiBase
     /**
      * @NoAdminRequired
      *
+     * @PublicPage
+     *
      * @NoCSRFRequired
      *
      * Transcode a video to HLS by proxy
      */
-    public function transcode(string $client, string $fileid, string $profile): Http\Response
+    public function transcode(string $client, int $fileid, string $profile): Http\Response
     {
-        $user = $this->userSession->getUser();
-        if (null === $user) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
-        }
-
         // Make sure not running in read-only mode
         if (false !== $this->config->getSystemValue('memories.no_transcode', 'UNSET')) {
             return new JSONResponse(['message' => 'Transcoding disabled'], Http::STATUS_FORBIDDEN);
@@ -56,11 +53,10 @@ class VideoController extends ApiBase
         }
 
         // Get file
-        $files = $this->rootFolder->getUserFolder($user->getUID())->getById($fileid);
-        if (0 === \count($files)) {
+        $file = $this->getUserFile($fileid);
+        if (!$file) {
             return new JSONResponse(['message' => 'File not found'], Http::STATUS_NOT_FOUND);
         }
-        $file = $files[0];
 
         if (!($file->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
             return new JSONResponse(['message' => 'File not readable'], Http::STATUS_FORBIDDEN);
@@ -250,7 +246,15 @@ class VideoController extends ApiBase
     private function getUpstreamInternal($client, $path, $profile)
     {
         $path = rawurlencode($path);
-        $ch = curl_init("http://127.0.0.1:47788/{$client}{$path}/{$profile}");
+
+        // Make sure query params are repeated
+        // For example, in folder sharing, we need the params on every request
+        $url = "http://127.0.0.1:47788/{$client}{$path}/{$profile}";
+        if ($params = $_SERVER['QUERY_STRING']) {
+            $url .= "?{$params}";
+        }
+
+        $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($ch, CURLOPT_HEADER, 0);

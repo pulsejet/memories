@@ -602,11 +602,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       );
     }
 
-    // Favorites
-    if (this.$route.name === "folder-share") {
-      query.set("folder_share", this.$route.params.token);
-    }
-
     // Month view
     if (this.isMonthView) {
       query.set("monthView", "1");
@@ -614,6 +609,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     }
 
     // Create query string and append to URL
+    utils.addQueryTokens(query);
     const queryStr = query.toString();
     if (queryStr) {
       url += "?" + queryStr;

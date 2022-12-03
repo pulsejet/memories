@@ -23,6 +23,7 @@ import { generateUrl } from "@nextcloud/router";
 import camelcase from "camelcase";
 import { IFileInfo, IPhoto } from "../types";
 import { isNumber } from "./NumberUtils";
+import { addQueryTokens } from "./Utils";
 
 /**
  * Get an url encoded path
@@ -153,9 +154,7 @@ const getPreviewUrl = function (
   query.set("a", square ? "0" : "1");
 
   // Public preview
-  if (vuerouter.currentRoute.name === "folder-share") {
-    query.set("folder_share", vuerouter.currentRoute.params.token);
-  }
+  addQueryTokens(query);
 
   return url + "?" + query.toString();
 };

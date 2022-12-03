@@ -121,6 +121,9 @@ class PublicController extends AuthPublicShareController
         $policy->addAllowedScriptDomain('blob:');
         $policy->addAllowedMediaDomain('blob:');
 
+        // Image editor
+        $policy->addAllowedConnectDomain('data:');
+
         // Allow nominatim for metadata
         $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
         $policy->addAllowedFrameDomain('www.openstreetmap.org');

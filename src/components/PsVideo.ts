@@ -5,6 +5,7 @@ import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
 import { getCurrentUser } from "@nextcloud/auth";
+import { addQueryTokensToUrl } from "../services/Utils";
 
 const config_noTranscode = loadState(
   "memories",
@@ -115,12 +116,16 @@ class VideoContentSetup {
   }
 
   getHLSsrc(content: any) {
+    // Get base URL
     const fileid = content.data.photo.fileid;
-    const baseUrl = generateUrl(
-      `/apps/memories/api/video/transcode/${videoClientId}/${fileid}`
+    let url = generateUrl(
+      `/apps/memories/api/video/transcode/${videoClientId}/${fileid}/index.m3u8`
     );
+
+    url = addQueryTokensToUrl(url);
+
     return {
-      src: `${baseUrl}/index.m3u8`,
+      src: url,
       type: "application/x-mpegURL",
     };
   }
@@ -227,19 +232,18 @@ class VideoContentSetup {
     });
 
     // Get correct orientation
-    axios
-      .get<any>(
-        generateUrl("/apps/memories/api/image/info/{id}", {
-          id: content.data.photo.fileid,
-        })
-      )
-      .then((response) => {
-        content.data.exif = response.data?.exif;
+    let url = generateUrl("/apps/memories/api/image/info/{id}", {
+      id: content.data.photo.fileid,
+    });
+    url = addQueryTokensToUrl(url);
 
-        // Update only after video is ready
-        // Otherwise the poster image is rotated
-        if (canPlay) this.updateRotation(content);
-      });
+    axios.get<any>(url).then((response) => {
+      content.data.exif = response.data?.exif;
+
+      // Update only after video is ready
+      // Otherwise the poster image is rotated
+      if (canPlay) this.updateRotation(content);
+    });
   }
 
   destroyVideo(content: any) {
