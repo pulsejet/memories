@@ -248,9 +248,9 @@ class ApiBase extends Controller
         // Check if share is password protected
         if (($password = $share->getPassword()) !== null) {
             // https://github.com/nextcloud/server/blob/0447b53bda9fe95ea0cbed765aa332584605d652/lib/public/AppFramework/PublicShareController.php#L119
-            if ($this->session->get('public_link_authenticated_token') !== $token ||
-			    $this->session->get('public_link_authenticated_password_hash') !== $password) {
-			    throw new \Exception('Share is password protected and user is not authenticated');
+            if ($this->session->get('public_link_authenticated_token') !== $token
+                || $this->session->get('public_link_authenticated_password_hash') !== $password) {
+                throw new \Exception('Share is password protected and user is not authenticated');
             }
         }
 
