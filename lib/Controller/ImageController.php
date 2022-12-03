@@ -176,7 +176,6 @@ class ImageController extends ApiBase
         $image = new \Imagick($path);
         $image->setImageFormat('jpeg');
         $image->setImageCompressionQuality(95);
-        $image->setInterlaceScheme(\Imagick::INTERLACE_PLANE);
         $blob = $image->getImageBlob();
 
         // Return the image
