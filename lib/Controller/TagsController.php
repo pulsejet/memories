@@ -64,7 +64,7 @@ class TagsController extends ApiBase
      *
      * Get previews for a tag
      */
-    public function previews(): JSONResponse
+    public function previews(string $tag = 'unknown'): JSONResponse
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
@@ -82,12 +82,9 @@ class TagsController extends ApiBase
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }
 
-        // Get the tag
-        $tagName = $this->request->getParam('tag');
-
         // Run actual query
         $list = $this->timelineQuery->getTagPreviews(
-            $tagName,
+            $tag,
             $root,
         );
 

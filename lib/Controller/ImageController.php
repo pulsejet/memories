@@ -39,20 +39,22 @@ class ImageController extends ApiBase
      *
      * @param string fileid
      */
-    public function info(string $id): JSONResponse
-    {
+    public function info(
+        string $id,
+        bool $basic = false,
+        bool $current = false
+    ): JSONResponse {
         $file = $this->getUserFile((int) $id);
         if (!$file) {
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }
 
         // Get the image info
-        $basic = false !== $this->request->getParam('basic', false);
         $info = $this->timelineQuery->getInfoById($file->getId(), $basic);
 
         // Get latest exif data if requested
         // Allow this ony for logged in users
-        if ($this->request->getParam('current', false) && null !== $this->userSession->getUser()) {
+        if ($current && null !== $this->userSession->getUser()) {
             $info['current'] = Exif::getExifFromFile($file);
         }
 

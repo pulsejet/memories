@@ -99,8 +99,13 @@ class VideoController extends ApiBase
      *
      * Return the live video part of a live photo
      */
-    public function livephoto(string $fileid)
-    {
+    public function livephoto(
+        string $fileid,
+        string $etag = '',
+        string $liveid = '',
+        string $format = '',
+        string $transcode = ''
+    ) {
         $fileid = (int) $fileid;
         $files = $this->rootFolder->getById($fileid);
         if (0 === \count($files)) {
@@ -109,13 +114,11 @@ class VideoController extends ApiBase
         $file = $files[0];
 
         // Check file etag
-        $etag = $file->getEtag();
-        if ($etag !== $this->request->getParam('etag')) {
+        if ($etag !== $file->getEtag()) {
             return new JSONResponse(['message' => 'File changed'], Http::STATUS_PRECONDITION_FAILED);
         }
 
         // Check file liveid
-        $liveid = $this->request->getParam('liveid');
         if (!$liveid) {
             return new JSONResponse(['message' => 'Live ID not provided'], Http::STATUS_BAD_REQUEST);
         }
@@ -163,7 +166,7 @@ class VideoController extends ApiBase
 
             if ($liveFile instanceof File) {
                 // Requested only JSON info
-                if ('json' === $this->request->getParam('format')) {
+                if ('json' === $format) {
                     return new JSONResponse($lp);
                 }
 
@@ -171,11 +174,11 @@ class VideoController extends ApiBase
                 $blob = $liveFile->getContent();
                 $mime = $liveFile->getMimeType();
 
-                if (($id = $this->request->getParam('transcode')) && !$this->config->getSystemValue('memories.no_transcode', true)) {
+                if ($transcode && !$this->config->getSystemValue('memories.no_transcode', true)) {
                     // Only Apple uses HEVC for now, so pass this to the transcoder
                     // If this is H.264 it won't get transcoded anyway
                     $liveVideoPath = $liveFile->getStorage()->getLocalFile($liveFile->getInternalPath());
-                    if ($this->getUpstream($id, $liveVideoPath, 'max.mov')) {
+                    if ($this->getUpstream($transcode, $liveVideoPath, 'max.mov')) {
                         exit;
                     }
                 }

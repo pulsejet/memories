@@ -33,7 +33,7 @@ class AlbumsController extends ApiBase
      *
      * Get list of albums with counts of images
      */
-    public function albums(): JSONResponse
+    public function albums(int $t = 0): JSONResponse
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
@@ -47,7 +47,6 @@ class AlbumsController extends ApiBase
 
         // Run actual query
         $list = [];
-        $t = (int) $this->request->getParam('t');
         if ($t & 1) { // personal
             $list = array_merge($list, $this->timelineQuery->getAlbums($user->getUID()));
         }
