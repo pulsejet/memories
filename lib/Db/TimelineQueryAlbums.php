@@ -118,11 +118,13 @@ trait TimelineQueryAlbums
 
     /**
      * Check if a file belongs to a user through an album.
+     *
+     * @return bool|string owner of file
      */
     public function albumHasUserFile(string $uid, int $fileId)
     {
         $query = $this->connection->getQueryBuilder();
-        $query->select('paf.album_id')->from('photos_albums_files', 'paf')->where(
+        $query->select('paf.owner')->from('photos_albums_files', 'paf')->where(
             $query->expr()->andX(
                 $query->expr()->eq('paf.file_id', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)),
                 $query->expr()->orX(
@@ -144,7 +146,7 @@ trait TimelineQueryAlbums
             $query->expr()->eq('pc.collaborator_id', $query->createNamedParameter($uid)),
         ));
 
-        return false !== $query->executeQuery()->fetchOne();
+        return $query->executeQuery()->fetchOne();
     }
 
     /**

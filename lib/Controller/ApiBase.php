@@ -190,11 +190,14 @@ class ApiBase extends Controller
         }
         $uid = $user->getUID();
 
-        if (!$this->timelineQuery->albumHasUserFile($uid, $id)) {
+        $owner = $this->timelineQuery->albumHasUserFile($uid, $id);
+        if (!$owner) {
             return null;
         }
 
-        return $this->getOneFileFromFolder($this->rootFolder, $id);
+        $folder = $this->rootFolder->getUserFolder($owner);
+
+        return $this->getOneFileFromFolder($folder, $id);
     }
 
     /**
