@@ -152,13 +152,19 @@ class ApiBase extends Controller
     }
 
     /**
-     * Get a file with ID from user's folder.
-     *
-     * @param int $fileId
-     *
-     * @return null|File
+     * Get a file with ID for the current user.
      */
-    protected function getUserFile(int $id)
+    protected function getUserFile(int $fileId): ?File
+    {
+        return $this->getUserFolderFile($fileId) ??
+               $this->getAlbumFile($fileId) ??
+               $this->getShareFile($fileId);
+    }
+
+    /**
+     * Get a file with ID from user's folder.
+     */
+    protected function getUserFolderFile(int $id): ?File
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
@@ -166,23 +172,49 @@ class ApiBase extends Controller
         }
         $userFolder = $this->rootFolder->getUserFolder($user->getUID());
 
-        // Check for permissions and get numeric Id
-        $file = $userFolder->getById($id);
-        if (0 === \count($file)) {
+        return $this->getOneFileFromFolder($userFolder, $id);
+    }
+
+    /**
+     * Get a file with ID from an album.
+     */
+    protected function getAlbumFile(int $id): ?File
+    {
+        $user = $this->userSession->getUser();
+        if (null === $user) {
+            return null;
+        }
+        $uid = $user->getUID();
+
+        if (!$this->timelineQuery->albumHasUserFile($uid, $id)) {
             return null;
         }
 
-        // Check if node is a file
-        if (!$file[0] instanceof File) {
+        return $this->getOneFileFromFolder($this->rootFolder, $id);
+    }
+
+    /**
+     * Get a file with ID from a public share.
+     *
+     * @param int $fileId
+     */
+    protected function getShareFile(int $id): ?File
+    {
+        $token = $this->getShareToken();
+        if (null === $token) {
             return null;
         }
 
-        // Check read permission
-        if (!($file[0]->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
+        try {
+            $share = $this->shareManager->getShareByToken($token)->getNode(); // throws exception if not found
+            if (!$share instanceof Folder) {
+                return null;
+            }
+        } catch (\Exception $e) {
             return null;
         }
 
-        return $file[0];
+        return $this->getOneFileFromFolder($share, $id);
     }
 
     protected function isRecursive()
@@ -232,5 +264,29 @@ class ApiBase extends Controller
     protected function recognizeIsEnabled(): bool
     {
         return \OCA\Memories\Util::recognizeIsEnabled($this->appManager);
+    }
+
+    /**
+     * Helper to get one file or null from a fiolder.
+     */
+    private function getOneFileFromFolder(Folder $folder, int $id): ?File
+    {
+        // Check for permissions and get numeric Id
+        $file = $folder->getById($id);
+        if (0 === \count($file)) {
+            return null;
+        }
+
+        // Check if node is a file
+        if (!$file[0] instanceof File) {
+            return null;
+        }
+
+        // Check read permission
+        if (!($file[0]->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
+            return null;
+        }
+
+        return $file[0];
     }
 }

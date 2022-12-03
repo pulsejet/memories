@@ -117,10 +117,41 @@ trait TimelineQueryAlbums
     }
 
     /**
+     * Check if a file belongs to a user through an album.
+     */
+    public function albumHasUserFile(string $uid, int $fileId)
+    {
+        $query = $this->connection->getQueryBuilder();
+        $query->select('paf.album_id')->from('photos_albums_files', 'paf')->where(
+            $query->expr()->andX(
+                $query->expr()->eq('paf.file_id', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)),
+                $query->expr()->orX(
+                    $query->expr()->eq('pa.album_id', 'paf.album_id'),
+                    $query->expr()->eq('pc.album_id', 'paf.album_id'),
+                ),
+            )
+        );
+
+        // Check if user-owned album or shared album
+        $query->leftJoin('paf', 'photos_albums', 'pa', $query->expr()->andX(
+            $query->expr()->eq('pa.album_id', 'paf.album_id'),
+            $query->expr()->eq('pa.user', $query->createNamedParameter($uid)),
+        ));
+
+        // Join to shared album
+        $query->leftJoin('paf', $this->collaboratorsTable(), 'pc', $query->expr()->andX(
+            $query->expr()->eq('pc.album_id', 'paf.album_id'),
+            $query->expr()->eq('pc.collaborator_id', $query->createNamedParameter($uid)),
+        ));
+
+        return false !== $query->executeQuery()->fetchOne();
+    }
+
+    /**
      * Get album if allowed. Also check if album is shared with user.
      *
-     * @param string        $uid        UID of CURRENT user
-     * @param string        $albumId    $user/$name where $user is the OWNER of the album
+     * @param string $uid     UID of CURRENT user
+     * @param string $albumId $user/$name where $user is the OWNER of the album
      */
     private function getAlbumIfAllowed(string $uid, string $albumId)
     {

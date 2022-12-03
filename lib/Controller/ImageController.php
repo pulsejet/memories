@@ -33,7 +33,9 @@ class ImageController extends ApiBase
     /**
      * @NoAdminRequired
      *
-     * Get image info for one file
+     * @PublicPage
+     *
+     * Get EXIF info for an image with file id
      *
      * @param string fileid
      */
@@ -49,7 +51,8 @@ class ImageController extends ApiBase
         $info = $this->timelineQuery->getInfoById($file->getId(), $basic);
 
         // Get latest exif data if requested
-        if ($this->request->getParam('current', false)) {
+        // Allow this ony for logged in users
+        if ($this->request->getParam('current', false) && null !== $this->userSession->getUser()) {
             $info['current'] = Exif::getExifFromFile($file);
         }
 
