@@ -650,7 +650,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Get base data object */
   private getItemData(photo: IPhoto) {
-    let previewUrl = getPreviewUrl(photo, false, 1024);
+    const sw = Math.floor(screen.width * devicePixelRatio);
+    const sh = Math.floor(screen.height * devicePixelRatio);
+    let previewUrl = getPreviewUrl(photo, false, [sw, sh]);
+
     const isvideo = photo.flag & this.c.FLAG_IS_VIDEO;
 
     // Preview aren't animated

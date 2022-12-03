@@ -138,15 +138,16 @@ const genFileInfo = function (obj) {
 const getPreviewUrl = function (
   photo: IPhoto | IFileInfo,
   square: boolean,
-  size: number
+  size: number | [number, number]
 ) {
+  const [x, y] = typeof size === "number" ? [size, size] : size;
   const a = square ? "0" : "1";
 
   // Public preview
   if (vuerouter.currentRoute.name === "folder-share") {
     const token = vuerouter.currentRoute.params.token;
     return generateUrl(
-      `/apps/files_sharing/publicpreview/${token}?file=${photo.filename}&fileId=${photo.fileid}&x=${size}&y=${size}&a=${a}`
+      `/apps/files_sharing/publicpreview/${token}?file=${photo.filename}&fileId=${photo.fileid}&x=${x}&y=${y}&a=${a}`
     );
   }
 
@@ -156,7 +157,7 @@ const getPreviewUrl = function (
   }
 
   return generateUrl(
-    `/core/preview?fileId=${photo.fileid}&c=${photo.etag}&x=${size}&y=${size}&forceIcon=0&a=${a}`
+    `/core/preview?fileId=${photo.fileid}&c=${photo.etag}&x=${x}&y=${y}&forceIcon=0&a=${a}`
   );
 };
 
@@ -164,11 +165,12 @@ const getPreviewUrl = function (
 const getPhotosPreviewUrl = function (
   photo: IPhoto | IFileInfo,
   square: boolean,
-  size: number
+  size: number | [number, number]
 ): string {
+  const [x, y] = typeof size === "number" ? [size, size] : size;
   const a = square ? "0" : "1";
   return generateUrl(
-    `/apps/photos/api/v1/preview/${photo.fileid}?c=${photo.etag}&x=${size}&y=${size}&forceIcon=0&a=${a}`
+    `/apps/photos/api/v1/preview/${photo.fileid}?c=${photo.etag}&x=${x}&y=${y}&forceIcon=0&a=${a}`
   );
 };
 
