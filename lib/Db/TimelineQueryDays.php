@@ -291,7 +291,7 @@ trait TimelineQueryDays
             if (isset($row['path']) && !empty($row['path'])) {
                 $rootId = \array_key_exists('rootid', $row) ? $row['rootid'] : $defaultRootId;
                 $basePath = $internalPaths[$rootId] ?? '#__#';
-                $davPath = $davPaths[$rootId] ?: '';
+                $davPath = (\array_key_exists($rootId, $davPaths) ? $davPaths[$rootId] : null) ?: '';
 
                 if (0 === strpos($row['path'], $basePath)) {
                     $rpath = substr($row['path'], \strlen($basePath));
