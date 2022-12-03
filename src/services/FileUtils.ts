@@ -141,20 +141,23 @@ const getPreviewUrl = function (
   size: number | [number, number]
 ) {
   const [x, y] = typeof size === "number" ? [size, size] : size;
-  const a = square ? "0" : "1";
 
   // Get base URL
-  let url = generateUrl(
-    `/apps/memories/api/image/preview/${photo.fileid}?c=${photo.etag}&x=${x}&y=${y}&a=${a}`
-  );
+  const url = generateUrl(`/apps/memories/api/image/preview/${photo.fileid}`);
+
+  // Build query
+  const query = new URLSearchParams();
+  query.set("c", photo.etag);
+  query.set("x", x.toString());
+  query.set("y", y.toString());
+  query.set("a", square ? "0" : "1");
 
   // Public preview
   if (vuerouter.currentRoute.name === "folder-share") {
-    const token = vuerouter.currentRoute.params.token;
-    url += `&folder_share=${token}`;
+    query.set("folder_share", vuerouter.currentRoute.params.token);
   }
 
-  return url;
+  return url + "?" + query.toString();
 };
 
 export {

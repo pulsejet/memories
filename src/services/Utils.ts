@@ -241,11 +241,25 @@ export function getFolderRoutePath(basePath: string) {
  * Get URL to live photo video part
  */
 export function getLivePhotoVideoUrl(p: IPhoto, transcode: boolean) {
-  let url = generateUrl(
-    `/apps/memories/api/video/livephoto/${p.fileid}?etag=${p.etag}&liveid=${p.liveid}`
-  );
-  if (transcode) url += `&transcode=${videoClientIdPersistent}`;
-  return url;
+  // Get base url
+  const url = generateUrl(`/apps/memories/api/video/livephoto/${p.fileid}`);
+
+  // Build query string
+  const query = new URLSearchParams();
+  query.set("etag", p.etag);
+  query.set("liveid", p.liveid);
+
+  // Transcode if allowed
+  if (transcode) {
+    query.set("transcode", videoClientIdPersistent);
+  }
+
+  // Add auth token for public share
+  if (vuerouter.currentRoute.name === "folder-share") {
+    query.set("folder_share", vuerouter.currentRoute.params.token);
+  }
+
+  return url + "?" + query.toString();
 }
 
 /**

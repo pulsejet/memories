@@ -95,27 +95,21 @@ class VideoController extends ApiBase
     /**
      * @NoAdminRequired
      *
+     * @PublicPage
+     *
      * @NoCSRFRequired
      *
      * Return the live video part of a live photo
      */
     public function livephoto(
-        string $fileid,
-        string $etag = '',
+        int $fileid,
         string $liveid = '',
         string $format = '',
         string $transcode = ''
     ) {
-        $fileid = (int) $fileid;
-        $files = $this->rootFolder->getById($fileid);
-        if (0 === \count($files)) {
+        $file = $this->getUserFile($fileid);
+        if (null === $file) {
             return new JSONResponse(['message' => 'File not found'], Http::STATUS_NOT_FOUND);
-        }
-        $file = $files[0];
-
-        // Check file etag
-        if ($etag !== $file->getEtag()) {
-            return new JSONResponse(['message' => 'File changed'], Http::STATUS_PRECONDITION_FAILED);
         }
 
         // Check file liveid
