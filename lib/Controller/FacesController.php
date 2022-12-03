@@ -140,6 +140,10 @@ class FacesController extends ApiBase
             return new DataResponse([], Http::STATUS_NOT_FOUND);
         }
 
+        // Set quality and make progressive
+        $image->setImageCompressionQuality(80);
+        $image->setInterlaceScheme(\Imagick::INTERLACE_PLANE);
+
         // Crop image
         $dw = (float) $detection['width'];
         $dh = (float) $detection['height'];
