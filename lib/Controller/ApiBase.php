@@ -40,12 +40,14 @@ use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IPreview;
 use OCP\IRequest;
+use OCP\ISession;
 use OCP\IUserSession;
 use OCP\Share\IManager as IShareManager;
 
 class ApiBase extends Controller
 {
     protected IConfig $config;
+    protected ISession $session;
     protected IUserSession $userSession;
     protected IRootFolder $rootFolder;
     protected IAppManager $appManager;
@@ -58,6 +60,7 @@ class ApiBase extends Controller
     public function __construct(
         IRequest $request,
         IConfig $config,
+        ISession $session,
         IUserSession $userSession,
         IDBConnection $connection,
         IRootFolder $rootFolder,
@@ -69,6 +72,7 @@ class ApiBase extends Controller
         parent::__construct(Application::APPNAME, $request);
 
         $this->config = $config;
+        $this->session = $session;
         $this->userSession = $userSession;
         $this->connection = $connection;
         $this->rootFolder = $rootFolder;
@@ -230,19 +234,43 @@ class ApiBase extends Controller
         return $this->request->getParam('folder_share');
     }
 
-    protected function getShareNode()
+    protected function getShareObject()
     {
+        // Get token from request
         $token = $this->getShareToken();
         if (null === $token) {
             return null;
         }
 
-        $share = $this->shareManager->getShareByToken($token)->getNode(); // throws exception if not found
-        if (!$share instanceof Folder || !$share->isReadable() || !$share->isShareable()) {
-            throw new \Exception('Share not found or invalid');
+        // Get share by token
+        $share = $this->shareManager->getShareByToken($token);
+
+        // Check if share is password protected
+        if (($password = $share->getPassword()) !== null) {
+            // https://github.com/nextcloud/server/blob/0447b53bda9fe95ea0cbed765aa332584605d652/lib/public/AppFramework/PublicShareController.php#L119
+            if ($this->session->get('public_link_authenticated_token') !== $token ||
+			    $this->session->get('public_link_authenticated_password_hash') !== $password) {
+			    throw new \Exception('Share is password protected and user is not authenticated');
+            }
         }
 
         return $share;
+    }
+
+    protected function getShareNode()
+    {
+        $share = $this->getShareObject();
+        if (null === $share) {
+            return null;
+        }
+
+        // Get node from share
+        $node = $share->getNode(); // throws exception if not found
+        if (!$node instanceof Folder || !$node->isReadable() || !$node->isShareable()) {
+            throw new \Exception('Share not found or invalid');
+        }
+
+        return $node;
     }
 
     /**
