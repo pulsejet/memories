@@ -23,7 +23,6 @@ import camelcase from "camelcase";
 import { IFileInfo, IPhoto } from "../types";
 import { API } from "./API";
 import { isNumber } from "./NumberUtils";
-import { addQueryTokens } from "./Utils";
 
 /**
  * Get an url encoded path
@@ -149,9 +148,6 @@ const getPreviewUrl = function (
   query.set("x", x.toString());
   query.set("y", y.toString());
   query.set("a", square ? "0" : "1");
-
-  // Public preview
-  addQueryTokens(query);
 
   return API.Q(API.IMAGE_PREVIEW(photo.fileid), query);
 };

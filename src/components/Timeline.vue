@@ -608,8 +608,6 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       query.set("reverse", "1");
     }
 
-    // Create query string and append to URL
-    utils.addQueryTokens(query);
     return query;
   }
 

@@ -4,7 +4,6 @@ import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
 import { getCurrentUser } from "@nextcloud/auth";
-import { addQueryTokensToUrl } from "../services/Utils";
 import { API } from "../services/API";
 
 const config_noTranscode = loadState(
@@ -118,11 +117,8 @@ class VideoContentSetup {
   getHLSsrc(content: any) {
     // Get base URL
     const fileid = content.data.photo.fileid;
-    let url = API.VIDEO_TRANSCODE(fileid);
-    url = addQueryTokensToUrl(url);
-
     return {
-      src: url,
+      src: API.VIDEO_TRANSCODE(fileid),
       type: "application/x-mpegURL",
     };
   }
@@ -229,9 +225,7 @@ class VideoContentSetup {
     });
 
     // Get correct orientation
-    let url = API.IMAGE_INFO(content.data.photo.fileid);
-    url = addQueryTokensToUrl(url);
-
+    const url = API.IMAGE_INFO(content.data.photo.fileid);
     axios.get<any>(url).then((response) => {
       content.data.exif = response.data?.exif;
 

@@ -238,34 +238,6 @@ export function getFolderRoutePath(basePath: string) {
 }
 
 /**
- * Add any access tokens to query param if required
- * @param query Query string
- */
-export function addQueryTokens(query: URLSearchParams) {
-  if (vuerouter.currentRoute.name === "folder-share") {
-    query.set("folder_share", vuerouter.currentRoute.params.token);
-  }
-}
-
-/**
- * Add query tokens to a string URL
- * @param url URL to add tokens to
- */
-export function addQueryTokensToUrl(url: string) {
-  const query = new URLSearchParams();
-  addQueryTokens(query);
-  if (query.toString()) {
-    if (url.indexOf("?") === -1) {
-      url += "?";
-    } else {
-      url += "&";
-    }
-    url += query.toString();
-  }
-  return url;
-}
-
-/**
  * Get URL to live photo video part
  */
 export function getLivePhotoVideoUrl(p: IPhoto, transcode: boolean) {
@@ -279,7 +251,6 @@ export function getLivePhotoVideoUrl(p: IPhoto, transcode: boolean) {
     query.set("transcode", videoClientIdPersistent);
   }
 
-  addQueryTokens(query);
   return API.Q(API.VIDEO_LIVEPHOTO(p.fileid), query);
 }
 

@@ -87,9 +87,8 @@ export default class Metadata extends Mixins(GlobalMixin) {
     this.exif = {};
     this.nominatim = null;
 
-    let state = this.state;
-    let url = API.IMAGE_INFO(fileInfo.id);
-    url = utils.addQueryTokensToUrl(url);
+    const state = this.state;
+    const url = API.IMAGE_INFO(fileInfo.id);
     const res = await axios.get<any>(url);
     if (state !== this.state) return;
 
