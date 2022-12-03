@@ -15,7 +15,7 @@ trait TimelineQueryAlbums
     public function transformAlbumFilter(IQueryBuilder &$query, string $uid, string $albumId)
     {
         // Get album object
-        $album = $this->getAlbumIfAllowed($query->getConnection(), $uid, $albumId);
+        $album = $this->getAlbumIfAllowed($uid, $albumId);
 
         // Check permission
         if (null === $album) {
@@ -119,11 +119,10 @@ trait TimelineQueryAlbums
     /**
      * Get album if allowed. Also check if album is shared with user.
      *
-     * @param IDBConnection $connection
      * @param string        $uid        UID of CURRENT user
      * @param string        $albumId    $user/$name where $user is the OWNER of the album
      */
-    private function getAlbumIfAllowed(IDBConnection $conn, string $uid, string $albumId)
+    private function getAlbumIfAllowed(string $uid, string $albumId)
     {
         // Split name and uid
         $parts = explode('/', $albumId);
@@ -134,7 +133,7 @@ trait TimelineQueryAlbums
         $albumName = $parts[1];
 
         // Check if owner
-        $query = $conn->getQueryBuilder();
+        $query = $this->connection->getQueryBuilder();
         $query->select('*')->from('photos_albums')->where(
             $query->expr()->andX(
                 $query->expr()->eq('name', $query->createNamedParameter($albumName)),
@@ -152,7 +151,7 @@ trait TimelineQueryAlbums
         }
 
         // Check in collaborators instead
-        $query = $conn->getQueryBuilder();
+        $query = $this->connection->getQueryBuilder();
         $query->select('album_id')->from($this->collaboratorsTable())->where(
             $query->expr()->andX(
                 $query->expr()->eq('album_id', $query->createNamedParameter($album['album_id'])),
