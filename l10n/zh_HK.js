@@ -230,6 +230,7 @@ OC.L10N.register(
     "Actual size (100%)" : "實際大小 (100%)",
     "Fit size" : "調整大小",
     "Transcoding failed." : "轉碼失敗。",
+    "Direct" : "私信",
     "Auto" : "自動",
     "Shared Folder" : "分享資料夾",
     "Failed to create {albumName}." : "創建 {albumName} 失敗。",

@@ -159,6 +159,7 @@ OC.L10N.register(
     "Quality" : "Laatu",
     "Actual size (100%)" : "Todellinen koko (100 %)",
     "Fit size" : "Sovita koko",
+    "Direct" : "Suoraan",
     "Auto" : "Automaattinen",
     "Shared Folder" : "Jaa kansio",
     "Failed to create {albumName}." : "Albumin {albumName} luominen epäonnistui.",

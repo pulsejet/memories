@@ -199,6 +199,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Фактический размер (100%)",
     "Fit size" : "По размеру окна",
     "Transcoding failed." : "Ошибка транскодирования.",
+    "Direct" : "Личное",
     "Auto" : "Автоматически",
     "Failed to create {albumName}." : "Не удалось создать альбом «{albumName}».",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Не удалось переименовать альбом «{currentAlbumName}» в «{newAlbumName}».",

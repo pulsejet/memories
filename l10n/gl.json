@@ -51,6 +51,7 @@
     "Extension" : "Extensión",
     "Name is required." : "É obrigatorio  o nome.",
     "Quality" : "Calidade",
+    "Direct" : "Directa",
     "Auto" : "Automático"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -230,6 +230,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Skutečná velikost (100%)",
     "Fit size" : "Přizpůsobit velikost",
     "Transcoding failed." : "Překódování se nezdařilo.",
+    "Direct" : "Přímo",
     "Auto" : "Automaticky",
     "Shared Folder" : "Sdílená složka",
     "Failed to create {albumName}." : "Nepodařilo se vytvořit {albumName}.",

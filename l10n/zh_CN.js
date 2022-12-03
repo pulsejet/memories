@@ -88,6 +88,7 @@ OC.L10N.register(
     "Extension" : "扩展",
     "Name is required." : "名称是必填项。",
     "Quality" : "质量",
+    "Direct" : "私信",
     "Auto" : "自动",
     "Failed to create {albumName}." : "创建 {albumName} 失败",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "重命名 {currentAlbumName} 为 {newAlbumName} 的操作失败",

@@ -228,6 +228,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Tamaño actual (100%)",
     "Fit size" : "Ajustar tamaño",
     "Transcoding failed." : "Falló el transcoding",
+    "Direct" : "Directo",
     "Auto" : "Auto",
     "Shared Folder" : "Carpeta compartida",
     "Failed to create {albumName}." : "Fallo al crear {albumName}",

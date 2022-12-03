@@ -172,6 +172,7 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Zwróć uwagę, że wybrany obszar kadrowania jest mniejszy niż zastosowana zmiana rozmiaru, co może spowodować spadek jakości",
     "Actual size (100%)" : "Rzeczywisty rozmiar (100%)",
     "Fit size" : "Dopasuj rozmiar",
+    "Direct" : "Bezpośredni",
     "Auto" : "Automatycznie",
     "Failed to create {albumName}." : "Nie udało się utworzyć {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Nie udało się zmienić nazwy {currentAlbumName} na {newAlbumName}.",

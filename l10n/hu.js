@@ -230,6 +230,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Tényleges méret (100%)",
     "Fit size" : "Illeszkedő méret",
     "Transcoding failed." : "Az átkódolás sikertelen.",
+    "Direct" : "Közvetlen",
     "Auto" : "Automatikus",
     "Shared Folder" : "Megosztott mappa",
     "Failed to create {albumName}." : "A(z) {albumName} létrehozása sikertelen.",

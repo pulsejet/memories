@@ -228,6 +228,7 @@
     "Actual size (100%)" : "Actual size (100%)",
     "Fit size" : "Fit size",
     "Transcoding failed." : "Transcoding failed.",
+    "Direct" : "Direct",
     "Auto" : "Auto",
     "Shared Folder" : "Shared Folder",
     "Failed to create {albumName}." : "Failed to create {albumName}.",
