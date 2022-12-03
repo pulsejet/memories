@@ -1,8 +1,8 @@
 import { Component, Vue } from "vue-property-decorator";
 import { emit, subscribe, unsubscribe } from "@nextcloud/event-bus";
-import { generateUrl } from "@nextcloud/router";
 import { loadState } from "@nextcloud/initial-state";
 import axios from "@nextcloud/axios";
+import { API } from "../services/API";
 
 const eventName = "memories:user-config-changed";
 const localSettings = ["squareThumbs", "showFaceRect"];
@@ -57,7 +57,7 @@ export default class UserConfig extends Vue {
       }
     } else {
       // Long time save setting
-      await axios.put(generateUrl("apps/memories/api/config/" + setting), {
+      await axios.put(API.CONFIG(setting), {
         value: value.toString(),
       });
     }

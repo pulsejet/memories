@@ -14,12 +14,13 @@ import GlobalMixin from "../mixins/GlobalMixin";
 import { basename, dirname, extname, join } from "path";
 import { emit } from "@nextcloud/event-bus";
 import { showError, showSuccess } from "@nextcloud/dialogs";
-import { generateUrl } from "@nextcloud/router";
 import axios from "@nextcloud/axios";
 
 import { FilerobotImageEditorConfig } from "react-filerobot-image-editor";
 
 import translations from "./ImageEditorTranslations";
+
+import { API } from "../services/API";
 
 let TABS, TOOLS: any;
 type FilerobotImageEditor = import("filerobot-image-editor").default;
@@ -51,9 +52,7 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
     if (["image/png", "image/jpeg", "image/webp"].includes(this.mime)) {
       src = this.src;
     } else {
-      src = generateUrl("/apps/memories/api/image/jpeg/{fileid}", {
-        fileid: this.fileid,
-      });
+      src = API.IMAGE_JPEG(this.fileid);
     }
 
     return {
@@ -157,9 +156,7 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
     // Get latest exif data
     try {
       const res = await axios.get(
-        generateUrl("/apps/memories/api/image/info/{id}?basic=1&current=1", {
-          id: this.fileid,
-        })
+        API.Q(API.IMAGE_INFO(this.fileid), "basic=1&current=1")
       );
 
       this.exif = res.data?.current;
@@ -243,14 +240,9 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
       delete exif.MajorBrand;
 
       // Update exif data
-      await axios.patch(
-        generateUrl("/apps/memories/api/image/set-exif/{id}", {
-          id: fileid,
-        }),
-        {
-          raw: exif,
-        }
-      );
+      await axios.patch(API.IMAGE_SETEXIF(fileid), {
+        raw: exif,
+      });
 
       showSuccess(this.t("memories", "Image saved successfully"));
       if (fileid !== this.fileid) {

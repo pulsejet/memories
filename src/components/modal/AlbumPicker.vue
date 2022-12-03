@@ -69,10 +69,10 @@ import NcButton from "@nextcloud/vue/dist/Components/NcButton";
 import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
 const NcListItem = () => import("@nextcloud/vue/dist/Components/NcListItem");
 
-import { generateUrl } from "@nextcloud/router";
 import { getPreviewUrl } from "../../services/FileUtils";
 import { IAlbum, IPhoto } from "../../types";
 import axios from "@nextcloud/axios";
+import { API } from "../../services/API";
 
 @Component({
   components: {
@@ -118,9 +118,7 @@ export default class AlbumPicker extends Mixins(GlobalMixin) {
 
   async loadAlbums() {
     try {
-      const res = await axios.get<IAlbum[]>(
-        generateUrl("/apps/memories/api/albums?t=3")
-      );
+      const res = await axios.get<IAlbum[]>(API.ALBUM_LIST());
       this.albums = res.data;
     } catch (e) {
       console.error(e);

@@ -1,8 +1,8 @@
 import * as base from "./base";
-import { generateUrl } from "@nextcloud/router";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t, translatePlural as n } from "@nextcloud/l10n";
 import axios from "@nextcloud/axios";
+import { API } from "../API";
 
 /**
  * Archive or unarchive a single file
@@ -11,10 +11,7 @@ import axios from "@nextcloud/axios";
  * @param archive Archive or unarchive
  */
 export async function archiveFile(fileid: number, archive: boolean) {
-  return await axios.patch(
-    generateUrl("/apps/memories/api/archive/{fileid}", { fileid }),
-    { archive }
-  );
+  return await axios.patch(API.ARCHIVE(fileid), { archive });
 }
 
 /**

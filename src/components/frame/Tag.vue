@@ -37,7 +37,6 @@
 <script lang="ts">
 import { Component, Prop, Watch, Mixins, Emit } from "vue-property-decorator";
 import { IAlbum, IPhoto, ITag } from "../../types";
-import { generateUrl } from "@nextcloud/router";
 import { getPreviewUrl } from "../../services/FileUtils";
 import { getCurrentUser } from "@nextcloud/auth";
 
@@ -47,6 +46,7 @@ import * as utils from "../../services/Utils";
 
 import GlobalMixin from "../../mixins/GlobalMixin";
 import { constants } from "../../services/Utils";
+import { API } from "../../services/API";
 
 @Component({
   components: {
@@ -84,9 +84,7 @@ export default class Tag extends Mixins(GlobalMixin) {
 
   getPreviewUrl(photo: IPhoto) {
     if (this.isFace) {
-      return generateUrl(
-        "/apps/memories/api/faces/preview/" + this.data.fileid
-      );
+      return API.FACE_PREVIEWS(this.data.fileid);
     }
 
     return getPreviewUrl(photo, true, 256);
@@ -127,9 +125,7 @@ export default class Tag extends Mixins(GlobalMixin) {
     if (!this.data.previews) {
       try {
         const todayDayId = utils.dateToDayId(new Date());
-        const url = generateUrl(
-          `/apps/memories/api/tag-previews?tag=${this.data.name}`
-        );
+        const url = API.TAG_PREVIEWS(this.data.name);
         const cacheUrl = `${url}&today=${todayDayId}`;
         const cache = await utils.getCachedData(cacheUrl);
         if (cache) {

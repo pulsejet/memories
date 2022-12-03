@@ -147,7 +147,6 @@ import UserConfig from "../mixins/UserConfig";
 import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
-import { generateUrl } from "@nextcloud/router";
 import NcEmptyContent from "@nextcloud/vue/dist/Components/NcEmptyContent";
 
 import { getLayout } from "../services/Layout";
@@ -168,6 +167,7 @@ import PeopleIcon from "vue-material-design-icons/AccountMultiple.vue";
 import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
 import ImageMultipleIcon from "vue-material-design-icons/ImageMultiple.vue";
 import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
+import { API } from "../services/API";
 
 const SCROLL_LOAD_DELAY = 100; // Delay in loading data when scrolling
 const DESKTOP_ROW_HEIGHT = 200; // Height of row on desktop
@@ -549,7 +549,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
   }
 
   /** Get query string for API calls */
-  appendQuery(url: string) {
+  getQuery() {
     const query = new URLSearchParams();
 
     // Favorites
@@ -610,11 +610,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     // Create query string and append to URL
     utils.addQueryTokens(query);
-    const queryStr = query.toString();
-    if (queryStr) {
-      url += "?" + queryStr;
-    }
-    return url;
+    return query;
   }
 
   /** Get view name for dynamic top matter */
@@ -671,8 +667,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
   /** Fetch timeline main call */
   async fetchDays(noCache = false) {
-    let params: any = {};
-    let url = generateUrl(this.appendQuery("/apps/memories/api/days"), params);
+    const url = API.Q(API.DAYS(), this.getQuery());
     const cacheUrl = this.$route.name + url;
 
     // Try cache first
@@ -838,9 +833,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
   /** API url for Day call */
   private getDayUrl(dayId: number | string) {
-    let baseUrl = "/apps/memories/api/days/{dayId}";
-    const params: any = { dayId };
-    return generateUrl(this.appendQuery(baseUrl), params);
+    return API.Q(API.DAY(dayId), this.getQuery());
   }
 
   /** Fetch image data for one dayId */

@@ -19,9 +19,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
-import { generateUrl } from "@nextcloud/router";
 import camelcase from "camelcase";
 import { IFileInfo, IPhoto } from "../types";
+import { API } from "./API";
 import { isNumber } from "./NumberUtils";
 import { addQueryTokens } from "./Utils";
 
@@ -143,9 +143,6 @@ const getPreviewUrl = function (
 ) {
   const [x, y] = typeof size === "number" ? [size, size] : size;
 
-  // Get base URL
-  const url = generateUrl(`/apps/memories/api/image/preview/${photo.fileid}`);
-
   // Build query
   const query = new URLSearchParams();
   query.set("c", photo.etag);
@@ -156,7 +153,7 @@ const getPreviewUrl = function (
   // Public preview
   addQueryTokens(query);
 
-  return url + "?" + query.toString();
+  return API.Q(API.IMAGE_PREVIEW(photo.fileid), query);
 };
 
 export {

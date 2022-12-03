@@ -1,11 +1,11 @@
 import PhotoSwipe from "photoswipe";
-import { generateUrl } from "@nextcloud/router";
 import { loadState } from "@nextcloud/initial-state";
 import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
 import { getCurrentUser } from "@nextcloud/auth";
 import { addQueryTokensToUrl } from "../services/Utils";
+import { API } from "../services/API";
 
 const config_noTranscode = loadState(
   "memories",
@@ -118,10 +118,7 @@ class VideoContentSetup {
   getHLSsrc(content: any) {
     // Get base URL
     const fileid = content.data.photo.fileid;
-    let url = generateUrl(
-      `/apps/memories/api/video/transcode/${videoClientId}/${fileid}/index.m3u8`
-    );
-
+    let url = API.VIDEO_TRANSCODE(fileid);
     url = addQueryTokensToUrl(url);
 
     return {
@@ -232,9 +229,7 @@ class VideoContentSetup {
     });
 
     // Get correct orientation
-    let url = generateUrl("/apps/memories/api/image/info/{id}", {
-      id: content.data.photo.fileid,
-    });
+    let url = API.IMAGE_INFO(content.data.photo.fileid);
     url = addQueryTokensToUrl(url);
 
     axios.get<any>(url).then((response) => {

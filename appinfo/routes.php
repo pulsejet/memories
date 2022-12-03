@@ -44,20 +44,20 @@ return [
         ['name' => 'Days#day', 'url' => '/api/days/{id}', 'verb' => 'GET'],
         ['name' => 'Days#dayPost', 'url' => '/api/days', 'verb' => 'POST'],
 
+        ['name' => 'Albums#albums', 'url' => '/api/albums', 'verb' => 'GET'],
+
         ['name' => 'Tags#tags', 'url' => '/api/tags', 'verb' => 'GET'],
         ['name' => 'Tags#previews', 'url' => '/api/tag-previews', 'verb' => 'GET'],
 
-        ['name' => 'Albums#albums', 'url' => '/api/albums', 'verb' => 'GET'],
-
         ['name' => 'Faces#faces', 'url' => '/api/faces', 'verb' => 'GET'],
         ['name' => 'Faces#preview', 'url' => '/api/faces/preview/{id}', 'verb' => 'GET'],
+
+        ['name' => 'Archive#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
 
         ['name' => 'Image#preview', 'url' => '/api/image/preview/{id}', 'verb' => 'GET'],
         ['name' => 'Image#info', 'url' => '/api/image/info/{id}', 'verb' => 'GET'],
         ['name' => 'Image#setExif', 'url' => '/api/image/set-exif/{id}', 'verb' => 'PATCH'],
         ['name' => 'Image#jpeg', 'url' => '/api/image/jpeg/{id}', 'verb' => 'GET'],
-
-        ['name' => 'Archive#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
 
         ['name' => 'Video#transcode', 'url' => '/api/video/transcode/{client}/{fileid}/{profile}', 'verb' => 'GET'],
         ['name' => 'Video#livephoto', 'url' => '/api/video/livephoto/{fileid}', 'verb' => 'GET'],

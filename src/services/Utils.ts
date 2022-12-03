@@ -1,9 +1,9 @@
 import { getCanonicalLocale } from "@nextcloud/l10n";
 import { getCurrentUser } from "@nextcloud/auth";
-import { generateUrl } from "@nextcloud/router";
 import { loadState } from "@nextcloud/initial-state";
 import { IPhoto } from "../types";
 import moment from "moment";
+import { API } from "./API";
 
 // Memoize the result of short date conversions
 // These operations are surprisingly expensive
@@ -269,9 +269,6 @@ export function addQueryTokensToUrl(url: string) {
  * Get URL to live photo video part
  */
 export function getLivePhotoVideoUrl(p: IPhoto, transcode: boolean) {
-  // Get base url
-  const url = generateUrl(`/apps/memories/api/video/livephoto/${p.fileid}`);
-
   // Build query string
   const query = new URLSearchParams();
   query.set("etag", p.etag);
@@ -283,7 +280,7 @@ export function getLivePhotoVideoUrl(p: IPhoto, transcode: boolean) {
   }
 
   addQueryTokens(query);
-  return url + "?" + query.toString();
+  return API.Q(API.VIDEO_LIVEPHOTO(p.fileid), query);
 }
 
 /**

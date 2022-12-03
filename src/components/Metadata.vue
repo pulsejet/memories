@@ -51,7 +51,6 @@ import GlobalMixin from "../mixins/GlobalMixin";
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 
-import { generateUrl } from "@nextcloud/router";
 import axios from "@nextcloud/axios";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import { getCanonicalLocale } from "@nextcloud/l10n";
@@ -66,6 +65,7 @@ import CalendarIcon from "vue-material-design-icons/Calendar.vue";
 import CameraIrisIcon from "vue-material-design-icons/CameraIris.vue";
 import ImageIcon from "vue-material-design-icons/Image.vue";
 import LocationIcon from "vue-material-design-icons/MapMarker.vue";
+import { API } from "../services/API";
 
 @Component({
   components: {
@@ -88,9 +88,7 @@ export default class Metadata extends Mixins(GlobalMixin) {
     this.nominatim = null;
 
     let state = this.state;
-    let url = generateUrl("/apps/memories/api/image/info/{id}", {
-      id: fileInfo.id,
-    });
+    let url = API.IMAGE_INFO(fileInfo.id);
     url = utils.addQueryTokensToUrl(url);
     const res = await axios.get<any>(url);
     if (state !== this.state) return;

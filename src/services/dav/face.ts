@@ -1,8 +1,8 @@
 import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
-import { generateUrl } from "@nextcloud/router";
 import { IDay, IPhoto } from "../../types";
+import { API } from "../API";
 import client from "../DavClient";
 import { constants } from "../Utils";
 import * as base from "./base";
@@ -19,9 +19,7 @@ export async function getPeopleData(): Promise<IDay[]> {
     previews: IPhoto[];
   }[] = [];
   try {
-    const res = await axios.get<typeof data>(
-      generateUrl("/apps/memories/api/faces")
-    );
+    const res = await axios.get<typeof data>(API.FACE_LIST());
     data = res.data;
   } catch (e) {
     throw e;
