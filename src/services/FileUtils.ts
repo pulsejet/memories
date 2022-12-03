@@ -148,11 +148,6 @@ const getPreviewUrl = function (
     `/apps/memories/api/image/preview/${photo.fileid}?c=${photo.etag}&x=${x}&y=${y}&a=${a}`
   );
 
-  // Albums from Photos
-  if (vuerouter.currentRoute.name === "albums") {
-    url += `&album=1`;
-  }
-
   // Public preview
   if (vuerouter.currentRoute.name === "folder-share") {
     const token = vuerouter.currentRoute.params.token;

@@ -155,9 +155,14 @@ class ApiBase extends Controller
      */
     protected function getUserFile(int $fileId): ?File
     {
+        // Don't check self for share token
+        if ($this->getShareToken()) {
+            return $this->getShareFile($fileId);
+        }
+
+        // Check both user folder and album
         return $this->getUserFolderFile($fileId) ??
-               $this->getAlbumFile($fileId) ??
-               $this->getShareFile($fileId);
+               $this->getAlbumFile($fileId);
     }
 
     /**
