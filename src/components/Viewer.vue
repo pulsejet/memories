@@ -136,7 +136,6 @@ import { IDay, IPhoto, IRow, IRowType } from "../types";
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
-import { generateUrl } from "@nextcloud/router";
 import { showError } from "@nextcloud/dialogs";
 
 import * as dav from "../services/DavRequests";
@@ -658,10 +657,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
     const isvideo = photo.flag & this.c.FLAG_IS_VIDEO;
 
     // Preview aren't animated
-    if (photo.mimetype === "image/gif") {
+    if (isvideo || photo.mimetype === "image/gif") {
       previewUrl = getDownloadLink(photo);
-    } else if (isvideo) {
-      previewUrl = generateUrl(getDownloadLink(photo));
     }
 
     // Get height and width
