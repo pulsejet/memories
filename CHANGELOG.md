@@ -8,6 +8,7 @@ This file is manually updated. Please file an issue if something is missing.
 - **Feature**: Support for GPU transcoding
 - Fixed support for HEVC live photos
 - Fixed native photo sharing
+- Use larger previews in viewer
 
 ## v4.8.0, v3.8.0 (2022-11-22)
 
