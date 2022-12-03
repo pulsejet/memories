@@ -220,7 +220,7 @@ class Exif
             return [$height, $width];
         }
 
-        if ($width <= 0 || $height <= 0 || $width > 10000 || $height > 10000) {
+        if ($width <= 0 || $height <= 0 || $width > 100000 || $height > 100000) {
             return [0, 0];
         }
 
