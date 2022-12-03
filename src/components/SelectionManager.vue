@@ -846,7 +846,8 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
   /** Open viewer with given photo */
   private openViewer(photo: IPhoto) {
     this.$router.push({
-      ...this.$route,
+      path: this.$route.path,
+      query: this.$route.query,
       hash: utils.getViewerHash(photo),
     });
   }

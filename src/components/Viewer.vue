@@ -722,7 +722,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
     }
     const hash = photo ? utils.getViewerHash(photo) : "";
     const route = {
-      ...this.$route,
+      path: this.$route.path,
+      query: this.$route.query,
       hash,
     };
     if (hash !== this.$route.hash) {
