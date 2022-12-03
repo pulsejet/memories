@@ -203,7 +203,7 @@ trait TimelineQueryAlbums
         // https://github.com/nextcloud/photos/commit/20e3e61ad577014e5f092a292c90a8476f630355
         $appManager = \OC::$server->getAppManager();
         $photosVersion = $appManager->getAppVersion('photos');
-        if (version_compare($photosVersion, '2.2.0', '>=')) {
+        if (version_compare($photosVersion, '2.0.1', '>=')) {
             return 'photos_albums_collabs';
         }
 
