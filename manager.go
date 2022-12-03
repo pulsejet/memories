@@ -201,7 +201,7 @@ func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request, chunk string
 	if strings.HasSuffix(chunk, movSfx) {
 		quality := strings.TrimSuffix(chunk, movSfx)
 		if stream, ok := m.streams[quality]; ok {
-			return stream.ServeFullVideo(w)
+			return stream.ServeFullVideo(w, r)
 		}
 	}
 
