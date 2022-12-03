@@ -113,13 +113,15 @@ func (s *Stream) Stop() {
 	}
 }
 
-func (s *Stream) ServeList(w http.ResponseWriter) error {
+func (s *Stream) ServeList(w http.ResponseWriter, r *http.Request) error {
 	WriteM3U8ContentType(w)
 	w.Write([]byte("#EXTM3U\n"))
 	w.Write([]byte("#EXT-X-VERSION:4\n"))
 	w.Write([]byte("#EXT-X-MEDIA-SEQUENCE:0\n"))
 	w.Write([]byte("#EXT-X-PLAYLIST-TYPE:VOD\n"))
 	w.Write([]byte(fmt.Sprintf("#EXT-X-TARGETDURATION:%d\n", s.c.chunkSize)))
+
+	query := GetQueryString(r)
 
 	duration := s.m.probe.Duration.Seconds()
 	i := 0
@@ -130,7 +132,7 @@ func (s *Stream) ServeList(w http.ResponseWriter) error {
 		}
 
 		w.Write([]byte(fmt.Sprintf("#EXTINF:%.3f, nodesc\n", size)))
-		w.Write([]byte(fmt.Sprintf("%s-%06d.ts\n", s.quality, i)))
+		w.Write([]byte(fmt.Sprintf("%s-%06d.ts%s\n", s.quality, i, query)))
 
 		duration -= float64(s.c.chunkSize)
 		i++

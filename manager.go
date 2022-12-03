@@ -98,10 +98,10 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 	m.streams["max"] = &Stream{
 		c: c, m: m,
 		quality: "max",
-		height: m.probe.Height,
-		width: m.probe.Width,
+		height:  m.probe.Height,
+		width:   m.probe.Width,
 		bitrate: m.probe.BitRate,
-		order: 1,
+		order:   1,
 	}
 
 	// Start all streams
@@ -162,7 +162,7 @@ func (m *Manager) Destroy() {
 func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request, chunk string) error {
 	// Master list
 	if chunk == "index.m3u8" {
-		return m.ServeIndex(w)
+		return m.ServeIndex(w, r)
 	}
 
 	// Stream list
@@ -170,7 +170,7 @@ func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request, chunk string
 	if strings.HasSuffix(chunk, m3u8Sfx) {
 		quality := strings.TrimSuffix(chunk, m3u8Sfx)
 		if stream, ok := m.streams[quality]; ok {
-			return stream.ServeList(w)
+			return stream.ServeList(w, r)
 		}
 	}
 
@@ -209,7 +209,7 @@ func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request, chunk string
 	return nil
 }
 
-func (m *Manager) ServeIndex(w http.ResponseWriter) error {
+func (m *Manager) ServeIndex(w http.ResponseWriter, r *http.Request) error {
 	WriteM3U8ContentType(w)
 	w.Write([]byte("#EXTM3U\n"))
 
@@ -220,19 +220,16 @@ func (m *Manager) ServeIndex(w http.ResponseWriter) error {
 	}
 	sort.Slice(streams, func(i, j int) bool {
 		return streams[i].order < streams[j].order ||
-			  (streams[i].order == streams[j].order && streams[i].bitrate < streams[j].bitrate)
+			(streams[i].order == streams[j].order && streams[i].bitrate < streams[j].bitrate)
 	})
 
 	// Write all streams
+	query := GetQueryString(r)
 	for _, stream := range streams {
-		s := fmt.Sprintf("#EXT-X-STREAM-INF:BANDWIDTH=%d,RESOLUTION=%dx%d,FRAME-RATE=%d\n%s.m3u8\n", stream.bitrate, stream.width, stream.height, m.probe.FrameRate, stream.quality)
+		s := fmt.Sprintf("#EXT-X-STREAM-INF:BANDWIDTH=%d,RESOLUTION=%dx%d,FRAME-RATE=%d\n%s.m3u8%s\n", stream.bitrate, stream.width, stream.height, m.probe.FrameRate, stream.quality, query)
 		w.Write([]byte(s))
 	}
 	return nil
-}
-
-func WriteM3U8ContentType(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/x-mpegURL")
 }
 
 func (m *Manager) ffprobe() error {
