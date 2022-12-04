@@ -32,7 +32,6 @@ use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\Encryption\IManager;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
@@ -40,18 +39,15 @@ use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IPreview;
 use OCP\IRequest;
-use OCP\ISession;
 use OCP\IUserSession;
 use OCP\Share\IManager as IShareManager;
 
 class ApiBase extends Controller
 {
     protected IConfig $config;
-    protected ISession $session;
     protected IUserSession $userSession;
     protected IRootFolder $rootFolder;
     protected IAppManager $appManager;
-    protected IManager $encryptionManager;
     protected TimelineQuery $timelineQuery;
     protected TimelineWrite $timelineWrite;
     protected IShareManager $shareManager;
@@ -60,24 +56,20 @@ class ApiBase extends Controller
     public function __construct(
         IRequest $request,
         IConfig $config,
-        ISession $session,
         IUserSession $userSession,
         IDBConnection $connection,
         IRootFolder $rootFolder,
         IAppManager $appManager,
-        IManager $encryptionManager,
         IShareManager $shareManager,
         IPreview $preview
     ) {
         parent::__construct(Application::APPNAME, $request);
 
         $this->config = $config;
-        $this->session = $session;
         $this->userSession = $userSession;
         $this->connection = $connection;
         $this->rootFolder = $rootFolder;
         $this->appManager = $appManager;
-        $this->encryptionManager = $encryptionManager;
         $this->shareManager = $shareManager;
         $this->previewManager = $preview;
         $this->timelineQuery = new TimelineQuery($connection);
@@ -257,10 +249,11 @@ class ApiBase extends Controller
         }
 
         // Check if share is password protected
+        $session = \OC::$server->getSession();
         if (($password = $share->getPassword()) !== null) {
             // https://github.com/nextcloud/server/blob/0447b53bda9fe95ea0cbed765aa332584605d652/lib/public/AppFramework/PublicShareController.php#L119
-            if ($this->session->get('public_link_authenticated_token') !== $token
-                || $this->session->get('public_link_authenticated_password_hash') !== $password) {
+            if ($session->get('public_link_authenticated_token') !== $token
+                || $session->get('public_link_authenticated_password_hash') !== $password) {
                 throw new \Exception('Share is password protected and user is not authenticated');
             }
         }

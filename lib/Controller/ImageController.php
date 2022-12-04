@@ -126,7 +126,7 @@ class ImageController extends ApiBase
         }
 
         // Check for end-to-end encryption
-        if (\OCA\Memories\Util::isEncryptionEnabled($this->encryptionManager)) {
+        if (\OCA\Memories\Util::isEncryptionEnabled()) {
             return new JSONResponse(['message' => 'Cannot change encrypted file'], Http::STATUS_PRECONDITION_FAILED);
         }
 

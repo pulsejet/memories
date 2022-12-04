@@ -27,7 +27,6 @@ use OC\DB\Connection;
 use OC\DB\SchemaWrapper;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineWrite;
-use OCP\Encryption\IManager;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
@@ -52,7 +51,6 @@ class Index extends Command
     protected IPreview $preview;
     protected IConfig $config;
     protected OutputInterface $output;
-    protected IManager $encryptionManager;
     protected IDBConnection $connection;
     protected Connection $connectionForSchema;
     protected TimelineWrite $timelineWrite;
@@ -72,7 +70,6 @@ class Index extends Command
         IUserManager $userManager,
         IPreview $preview,
         IConfig $config,
-        IManager $encryptionManager,
         IDBConnection $connection,
         Connection $connectionForSchema
     ) {
@@ -82,7 +79,6 @@ class Index extends Command
         $this->rootFolder = $rootFolder;
         $this->preview = $preview;
         $this->config = $config;
-        $this->encryptionManager = $encryptionManager;
         $this->connection = $connection;
         $this->connectionForSchema = $connectionForSchema;
         $this->timelineWrite = new TimelineWrite($connection, $preview);
@@ -180,7 +176,7 @@ class Index extends Command
         // Time measurement
         $startTime = microtime(true);
 
-        if (\OCA\Memories\Util::isEncryptionEnabled($this->encryptionManager)) {
+        if (\OCA\Memories\Util::isEncryptionEnabled()) {
             // Can work with server-side but not with e2e encryption, see https://github.com/pulsejet/memories/issues/99
             error_log('FATAL: Only server-side encryption (OC_DEFAULT_MODULE) is supported, but another encryption module is enabled. Aborted.');
 

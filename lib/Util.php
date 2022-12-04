@@ -109,11 +109,10 @@ class Util
     /**
      * Check if any encryption is enabled that we can not cope with
      * such as end-to-end encryption.
-     *
-     * @param mixed $encryptionManager
      */
-    public static function isEncryptionEnabled(&$encryptionManager): bool
+    public static function isEncryptionEnabled(): bool
     {
+        $encryptionManager = \OC::$server->getEncryptionManager();
         if ($encryptionManager->isEnabled()) {
             // Server-side encryption (OC_DEFAULT_MODULE) is okay, others like e2e are not
             return 'OC_DEFAULT_MODULE' !== $encryptionManager->getDefaultEncryptionModuleId();
