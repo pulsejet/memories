@@ -39,7 +39,7 @@ class DaysController extends ApiBase
     public function days(): JSONResponse
     {
         // Get the folder to show
-        $uid = $this->getUid();
+        $uid = $this->getUID();
 
         // Get the folder to show
         $root = null;
@@ -92,7 +92,7 @@ class DaysController extends ApiBase
     public function day(string $id): JSONResponse
     {
         // Get user
-        $uid = $this->getUid();
+        $uid = $this->getUID();
 
         // Check for wildcard
         $dayIds = [];

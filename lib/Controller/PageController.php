@@ -62,7 +62,7 @@ class PageController extends Controller
         $this->eventDispatcher->dispatchTyped(new LoadSidebar());
 
         // Configuration
-        $uid = $user->getUid();
+        $uid = $user->getUID();
         $this->initialState->provideInitialState('timelinePath', $this->config->getUserValue(
             $uid,
             Application::APPNAME,

@@ -85,7 +85,7 @@ class ApiBase extends Controller
     }
 
     /** Get logged in user's UID or throw HTTP error */
-    protected function getUid(): string
+    protected function getUID(): string
     {
         $user = $this->userSession->getUser();
         if ($this->getShareToken()) {
