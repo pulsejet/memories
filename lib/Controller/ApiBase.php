@@ -252,6 +252,9 @@ class ApiBase extends Controller
 
         // Get share by token
         $share = $this->shareManager->getShareByToken($token);
+        if (!PublicController::validateShare($share)) {
+            return null;
+        }
 
         // Check if share is password protected
         if (($password = $share->getPassword()) !== null) {

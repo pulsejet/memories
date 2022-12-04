@@ -95,7 +95,7 @@ class PublicController extends AuthPublicShareController
             throw new NotFoundException();
         }
 
-        if (!$this->validateShare($share)) {
+        if (!self::validateShare($share)) {
             throw new NotFoundException();
         }
 
@@ -134,6 +134,38 @@ class PublicController extends AuthPublicShareController
         return $response;
     }
 
+    /**
+     * Validate the permissions of the share.
+     */
+    public static function validateShare(?IShare $share): bool
+    {
+        if (null === $share) {
+            return false;
+        }
+
+        // Get user manager
+        $userManager = \OC::$server->getUserManager();
+
+        // Check if share read is allowed
+        if (!($share->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
+            return false;
+        }
+
+        // If the owner is disabled no access to the linke is granted
+        $owner = $userManager->get($share->getShareOwner());
+        if (null === $owner || !$owner->isEnabled()) {
+            return false;
+        }
+
+        // If the initiator of the share is disabled no access is granted
+        $initiator = $userManager->get($share->getSharedBy());
+        if (null === $initiator || !$initiator->isEnabled()) {
+            return false;
+        }
+
+        return $share->getNode()->isReadable() && $share->getNode()->isShareable();
+    }
+
     protected function showAuthFailed(): TemplateResponse
     {
         $templateParameters = ['share' => $this->share, 'wrongpw' => true];
@@ -154,29 +186,5 @@ class PublicController extends AuthPublicShareController
     protected function isPasswordProtected(): bool
     {
         return null !== $this->share->getPassword();
-    }
-
-    /**
-     * Validate the permissions of the share.
-     *
-     * @param Share\IShare $share
-     *
-     * @return bool
-     */
-    private function validateShare(IShare $share)
-    {
-        // If the owner is disabled no access to the linke is granted
-        $owner = $this->userManager->get($share->getShareOwner());
-        if (null === $owner || !$owner->isEnabled()) {
-            return false;
-        }
-
-        // If the initiator of the share is disabled no access is granted
-        $initiator = $this->userManager->get($share->getSharedBy());
-        if (null === $initiator || !$initiator->isEnabled()) {
-            return false;
-        }
-
-        return $share->getNode()->isReadable() && $share->getNode()->isShareable();
     }
 }
