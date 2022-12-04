@@ -290,7 +290,10 @@ class VideoContentSetup {
       },
       fullscreen: {
         enabled: true,
-        container: ".pswp",
+        // container: we need to set this after Plyr is loaded
+        // since we don't initialize Plyr inside the container,
+        // and this container is computed during construction
+        // https://github.com/sampotts/plyr/blob/20bf5a883306e9303b325e72c9102d76cc733c47/src/js/fullscreen.js#L30
       },
     };
 
@@ -338,6 +341,7 @@ class VideoContentSetup {
       };
     }
 
+    // Initialize Plyr and custom CSS
     const plyr = new Plyr(content.videoElement, opts);
     plyr.elements.container.style.height = "100%";
     plyr.elements.container.style.width = "100%";
@@ -350,6 +354,10 @@ class VideoContentSetup {
     plyr.elements.container.style.backgroundColor = "transparent";
     plyr.elements.wrapper.style.backgroundColor = "transparent";
 
+    // Set the fullscreen element to the container
+    plyr.elements.fullscreen = content.slide.holderElement;
+
+    // Done with init
     content.plyr = plyr;
 
     // Wait for animation to end before showing Plyr
