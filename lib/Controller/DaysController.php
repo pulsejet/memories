@@ -121,7 +121,7 @@ class DaysController extends ApiBase
 
         // Convert to actual dayIds if month view
         if ($this->isMonthView()) {
-            $dayIds = $this->timelineQuery->monthIdToDayIds($dayIds[0]);
+            $dayIds = $this->timelineQuery->monthIdToDayIds((int) $dayIds[0]);
         }
 
         // Run actual query

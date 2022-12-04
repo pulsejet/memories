@@ -26,7 +26,6 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Db\TimelineRoot;
-use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Exif;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
@@ -37,10 +36,8 @@ use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IDBConnection;
-use OCP\IPreview;
 use OCP\IRequest;
 use OCP\IUserSession;
-use OCP\Share\IManager as IShareManager;
 
 class ApiBase extends Controller
 {
@@ -49,9 +46,6 @@ class ApiBase extends Controller
     protected IRootFolder $rootFolder;
     protected IAppManager $appManager;
     protected TimelineQuery $timelineQuery;
-    protected TimelineWrite $timelineWrite;
-    protected IShareManager $shareManager;
-    protected IPreview $previewManager;
 
     public function __construct(
         IRequest $request,
@@ -59,9 +53,7 @@ class ApiBase extends Controller
         IUserSession $userSession,
         IDBConnection $connection,
         IRootFolder $rootFolder,
-        IAppManager $appManager,
-        IShareManager $shareManager,
-        IPreview $preview
+        IAppManager $appManager
     ) {
         parent::__construct(Application::APPNAME, $request);
 
@@ -70,10 +62,7 @@ class ApiBase extends Controller
         $this->connection = $connection;
         $this->rootFolder = $rootFolder;
         $this->appManager = $appManager;
-        $this->shareManager = $shareManager;
-        $this->previewManager = $preview;
         $this->timelineQuery = new TimelineQuery($connection);
-        $this->timelineWrite = new TimelineWrite($connection, $preview);
     }
 
     /** Get logged in user's UID or throw HTTP error */
@@ -243,14 +232,15 @@ class ApiBase extends Controller
         }
 
         // Get share by token
-        $share = $this->shareManager->getShareByToken($token);
+        $share = \OC::$server->getShareManager()->getShareByToken($token);
         if (!PublicController::validateShare($share)) {
             return null;
         }
 
         // Check if share is password protected
-        $session = \OC::$server->getSession();
         if (($password = $share->getPassword()) !== null) {
+            $session = \OC::$server->getSession();
+
             // https://github.com/nextcloud/server/blob/0447b53bda9fe95ea0cbed765aa332584605d652/lib/public/AppFramework/PublicShareController.php#L119
             if ($session->get('public_link_authenticated_token') !== $token
                 || $session->get('public_link_authenticated_password_hash') !== $password) {

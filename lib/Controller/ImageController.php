@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Exif;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\FileDisplayResponse;
@@ -61,9 +62,9 @@ class ImageController extends ApiBase
         }
 
         try {
-            $f = $this->previewManager->getPreview($file, $x, $y, !$a, $mode);
-            $response = new FileDisplayResponse($f, Http::STATUS_OK, [
-                'Content-Type' => $f->getMimeType(),
+            $preview = \OC::$server->getPreviewManager()->getPreview($file, $x, $y, !$a, $mode);
+            $response = new FileDisplayResponse($preview, Http::STATUS_OK, [
+                'Content-Type' => $preview->getMimeType(),
             ]);
             $response->cacheFor(3600 * 24, false, true);
 
@@ -146,7 +147,8 @@ class ImageController extends ApiBase
         }
 
         // Reprocess the file
-        $this->timelineWrite->processFile($file, true);
+        $timelineWrite = new TimelineWrite($this->connection);
+        $timelineWrite->processFile($file, true);
 
         return new JSONResponse([], Http::STATUS_OK);
     }

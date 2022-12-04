@@ -95,6 +95,9 @@ class FacesController extends ApiBase
             return new DataResponse([], Http::STATUS_NOT_FOUND);
         }
 
+        // Get preview manager
+        $previewManager = \OC::$server->getPreviewManager();
+
         // Find the first detection that has a preview
         /** @var \Imagick */
         $image = null;
@@ -113,7 +116,7 @@ class FacesController extends ApiBase
 
             // Get (hopefully cached) preview image
             try {
-                $preview = $this->previewManager->getPreview($files[0], 2048, 2048, false);
+                $preview = $previewManager->getPreview($files[0], 2048, 2048, false);
 
                 $image = new \Imagick();
                 if (!$image->readImageBlob($preview->getContent())) {

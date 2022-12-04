@@ -81,7 +81,7 @@ class Index extends Command
         $this->config = $config;
         $this->connection = $connection;
         $this->connectionForSchema = $connectionForSchema;
-        $this->timelineWrite = new TimelineWrite($connection, $preview);
+        $this->timelineWrite = new TimelineWrite($connection);
     }
 
     protected function configure(): void
