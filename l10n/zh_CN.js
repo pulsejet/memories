@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Memories" : "内存",
     "Settings" : "设置",
     "Timeline" : "时间线",
     "Folders" : "文件夹",
@@ -63,10 +64,13 @@ OC.L10N.register(
     "Time" : "时间",
     "Hour" : "小时",
     "Minute" : "分钟",
+    "Newest" : "最新",
     "Remove person" : "移除这个人",
     "Name" : "名称",
     "Rename person" : "重命名用户",
     "Update" : "更新",
+    "Error while moving {basename}" : "移动{basename}时出错。",
+    "Failed to move {name}." : "{name}移动失败。",
     "Refresh" : "刷新",
     "Remove" : "移除",
     "Delete album" : "删除相册",
@@ -92,6 +96,7 @@ OC.L10N.register(
     "Auto" : "自动",
     "Failed to create {albumName}." : "创建 {albumName} 失败",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "重命名 {currentAlbumName} 为 {newAlbumName} 的操作失败",
+    "Failed to delete files." : "文件删除失败。",
     "Failed to delete {fileName}." : "删除 {fileName} 失败"
 },
 "nplurals=1; plural=0;");
