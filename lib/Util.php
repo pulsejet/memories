@@ -112,7 +112,7 @@ class Util
      */
     public static function isEncryptionEnabled(): bool
     {
-        $encryptionManager = \OC::$server->getEncryptionManager();
+        $encryptionManager = \OC::$server->get(\OCP\Encryption\IManager::class);
         if ($encryptionManager->isEnabled()) {
             // Server-side encryption (OC_DEFAULT_MODULE) is okay, others like e2e are not
             return 'OC_DEFAULT_MODULE' !== $encryptionManager->getDefaultEncryptionModuleId();

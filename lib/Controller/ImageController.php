@@ -62,7 +62,7 @@ class ImageController extends ApiBase
         }
 
         try {
-            $preview = \OC::$server->getPreviewManager()->getPreview($file, $x, $y, !$a, $mode);
+            $preview = \OC::$server->get(\OCP\IPreview::class)->getPreview($file, $x, $y, !$a, $mode);
             $response = new FileDisplayResponse($preview, Http::STATUS_OK, [
                 'Content-Type' => $preview->getMimeType(),
             ]);

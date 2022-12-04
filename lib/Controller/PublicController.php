@@ -144,7 +144,7 @@ class PublicController extends AuthPublicShareController
         }
 
         // Get user manager
-        $userManager = \OC::$server->getUserManager();
+        $userManager = \OC::$server->get(IUserManager::class);
 
         // Check if share read is allowed
         if (!($share->getPermissions() & \OCP\Constants::PERMISSION_READ)) {

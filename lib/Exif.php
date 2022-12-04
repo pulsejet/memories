@@ -286,7 +286,7 @@ class Exif
     private static function getExiftool()
     {
         $configKey = 'memories.exiftool';
-        $config = \OC::$server->getConfig();
+        $config = \OC::$server->get(IConfig::class);
         $configPath = $config->getSystemValue($configKey);
         $noLocal = $config->getSystemValue($configKey.'_no_local', false);
 

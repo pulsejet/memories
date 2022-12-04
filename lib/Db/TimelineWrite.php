@@ -20,7 +20,7 @@ class TimelineWrite
     public function __construct(IDBConnection $connection)
     {
         $this->connection = $connection;
-        $this->preview = \OC::$server->getPreviewManager();
+        $this->preview = \OC::$server->get(IPreview::class);
         $this->livePhoto = new LivePhoto($connection);
     }
 

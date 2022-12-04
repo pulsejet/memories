@@ -201,7 +201,7 @@ trait TimelineQueryAlbums
     private function collaboratorsTable()
     {
         // https://github.com/nextcloud/photos/commit/20e3e61ad577014e5f092a292c90a8476f630355
-        $appManager = \OC::$server->getAppManager();
+        $appManager = \OC::$server->get(\OCP\App\IAppManager::class);
         $photosVersion = $appManager->getAppVersion('photos');
         if (version_compare($photosVersion, '2.0.1', '>=')) {
             return 'photos_albums_collabs';

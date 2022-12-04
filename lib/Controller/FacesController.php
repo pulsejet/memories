@@ -96,7 +96,7 @@ class FacesController extends ApiBase
         }
 
         // Get preview manager
-        $previewManager = \OC::$server->getPreviewManager();
+        $previewManager = \OC::$server->get(\OCP\IPreview::class);
 
         // Find the first detection that has a preview
         /** @var \Imagick */

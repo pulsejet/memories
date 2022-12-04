@@ -232,14 +232,14 @@ class ApiBase extends Controller
         }
 
         // Get share by token
-        $share = \OC::$server->getShareManager()->getShareByToken($token);
+        $share = \OC::$server->get(\OCP\Share\IManager::class)->getShareByToken($token);
         if (!PublicController::validateShare($share)) {
             return null;
         }
 
         // Check if share is password protected
         if (($password = $share->getPassword()) !== null) {
-            $session = \OC::$server->getSession();
+            $session = \OC::$server->get(\OCP\ISession::class);
 
             // https://github.com/nextcloud/server/blob/0447b53bda9fe95ea0cbed765aa332584605d652/lib/public/AppFramework/PublicShareController.php#L119
             if ($session->get('public_link_authenticated_token') !== $token
