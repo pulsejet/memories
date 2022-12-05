@@ -266,9 +266,6 @@ trait TimelineQueryDays
         }
 
         foreach ($day as &$row) {
-            // We don't need date taken (see query builder)
-            unset($row['datetaken']);
-
             // Convert field types
             $row['fileid'] = (int) $row['fileid'];
             $row['isvideo'] = (int) $row['isvideo'];
@@ -303,6 +300,10 @@ trait TimelineQueryDays
 
             // All transform processing
             $this->processFace($row);
+
+            // We don't need these fields
+            unset($row['datetaken']);
+            unset($row['rootid']);
         }
 
         return $day;
