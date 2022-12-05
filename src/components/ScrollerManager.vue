@@ -491,6 +491,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 }
 
 .scroller {
+  contain: layout style;
   overflow-y: clip;
   position: absolute;
   height: 100%;

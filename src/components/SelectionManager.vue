@@ -378,9 +378,15 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
       }
 
       if (this.touchAnchor && !this.touchScrollInterval) {
+        let frameCount = 3;
+
         const fun = () => {
           this.recycler.$el.scrollTop += this.touchScrollDelta;
-          this.touchMoveSelect(this.prevTouch, rowIdx);
+
+          if (frameCount++ >= 3) {
+            this.touchMoveSelect(this.prevTouch, rowIdx);
+            frameCount = 0;
+          }
 
           if (this.touchScrollInterval) {
             this.touchScrollInterval = window.requestAnimationFrame(fun);
@@ -856,6 +862,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
 
 <style lang="scss" scoped>
 .top-bar {
+  contain: style size;
   position: absolute;
   top: 10px;
   right: 60px;
