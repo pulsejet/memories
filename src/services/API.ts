@@ -42,15 +42,15 @@ export class API {
     return gen(`${BASE}/tags`);
   }
 
-  static TAG_PREVIEWS(tag: string) {
-    return gen(`${BASE}/tag-previews?tag=${tag}`);
+  static TAG_PREVIEW(tag: string) {
+    return gen(`${BASE}/tags/preview/{tag}`, { tag });
   }
 
   static FACE_LIST() {
     return gen(`${BASE}/faces`);
   }
 
-  static FACE_PREVIEWS(face: string | number) {
+  static FACE_PREVIEW(face: string | number) {
     return gen(`${BASE}/faces/preview/{face}`, { face });
   }
 

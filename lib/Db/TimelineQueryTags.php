@@ -100,8 +100,8 @@ trait TimelineQueryTags
         // WHERE these photos are in the user's requested folder recursively
         $query = $this->joinFilecache($query, $root, true, false);
 
-        // MAX 4
-        $query->setMaxResults(4);
+        // MAX 8
+        $query->setMaxResults(8);
 
         // FETCH tag previews
         $cursor = $this->executeQueryWithCTEs($query);

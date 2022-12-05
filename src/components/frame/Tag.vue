@@ -2,12 +2,7 @@
   <router-link
     draggable="false"
     class="tag fill-block"
-    :class="{
-      hasPreview: previews.length > 0,
-      onePreview: previews.length === 1,
-      hasError: error,
-      isFace: isFace,
-    }"
+    :class="{ face, error }"
     :to="target"
     @click.native="openTag(data)"
   >
@@ -20,14 +15,13 @@
     </div>
 
     <div class="previews fill-block" ref="previews">
-      <div class="img-outer" v-for="info of previews" :key="info.fileid">
+      <div class="img-outer">
         <img
           draggable="false"
           class="fill-block"
-          :class="{ error: info.flag & c.FLAG_LOAD_FAIL }"
-          :key="'fpreview-' + info.fileid"
-          :src="getPreviewUrl(info)"
-          @error="info.flag |= c.FLAG_LOAD_FAIL"
+          :class="{ error }"
+          :src="previewUrl"
+          @error="data.flag |= c.FLAG_LOAD_FAIL"
         />
       </div>
     </div>
@@ -35,14 +29,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Watch, Mixins, Emit } from "vue-property-decorator";
-import { IAlbum, IPhoto, ITag } from "../../types";
+import { Component, Prop, Mixins, Emit } from "vue-property-decorator";
+import { IAlbum, ITag } from "../../types";
 import { getPreviewUrl } from "../../services/FileUtils";
 import { getCurrentUser } from "@nextcloud/auth";
 
 import NcCounterBubble from "@nextcloud/vue/dist/Components/NcCounterBubble";
-import axios from "@nextcloud/axios";
-import * as utils from "../../services/Utils";
 
 import GlobalMixin from "../../mixins/GlobalMixin";
 import { constants } from "../../services/Utils";
@@ -57,15 +49,6 @@ export default class Tag extends Mixins(GlobalMixin) {
   @Prop() data: ITag;
   @Prop() noNavigate: boolean;
 
-  // Separate property because the one on data isn't reactive
-  private previews: IPhoto[] = [];
-
-  // Error occured fetching thumbs
-  private error = false;
-
-  // Smaller subtitle
-  private subtitle = "";
-
   /**
    * Open tag event
    * Unless noNavigate is set, the tag will be opened
@@ -73,108 +56,61 @@ export default class Tag extends Mixins(GlobalMixin) {
   @Emit("open")
   openTag(tag: ITag) {}
 
-  mounted() {
-    this.refreshPreviews();
-  }
-
-  @Watch("data")
-  dataChanged() {
-    this.refreshPreviews();
-  }
-
-  getPreviewUrl(photo: IPhoto) {
-    if (this.isFace) {
-      return API.FACE_PREVIEWS(this.data.fileid);
+  get previewUrl() {
+    if (this.face) {
+      return API.FACE_PREVIEW(this.face.fileid);
     }
 
-    return getPreviewUrl(photo, true, 256);
+    if (this.album) {
+      const mock = { fileid: this.album.last_added_photo, etag: "", flag: 0 };
+      return getPreviewUrl(mock, true, 512);
+    }
+
+    return API.TAG_PREVIEW(this.data.name);
   }
 
-  get isFace() {
-    return this.data.flag & constants.c.FLAG_IS_FACE;
+  get subtitle() {
+    if (this.album && this.album.user !== getCurrentUser()?.uid) {
+      return `(${this.album.user})`;
+    }
+
+    return "";
   }
 
-  get isAlbum() {
-    return this.data.flag & constants.c.FLAG_IS_ALBUM;
+  get face() {
+    return this.data.flag & constants.c.FLAG_IS_FACE ? this.data : null;
   }
 
-  async refreshPreviews() {
-    // Reset state
-    this.error = false;
-    this.subtitle = "";
-
-    // Add dummy preview if face
-    if (this.isFace) {
-      this.previews = [{ fileid: 0, etag: "", flag: 0 }];
-      return;
-    }
-
-    // Add preview from last photo if album
-    if (this.isAlbum) {
-      const album = this.data as IAlbum;
-      if (album.last_added_photo > 0) {
-        this.previews = [{ fileid: album.last_added_photo, etag: "", flag: 0 }];
-      }
-      if (album.user !== getCurrentUser()?.uid) {
-        this.subtitle = `(${album.user})`;
-      }
-      return;
-    }
-
-    // Look for previews
-    if (!this.data.previews) {
-      try {
-        const todayDayId = utils.dateToDayId(new Date());
-        const url = API.TAG_PREVIEWS(this.data.name);
-        const cacheUrl = `${url}&today=${todayDayId}`;
-        const cache = await utils.getCachedData(cacheUrl);
-        if (cache) {
-          this.data.previews = cache as any;
-        } else {
-          const res = await axios.get(url);
-          this.data.previews = res.data;
-
-          // Cache only if >= 4 previews
-          if (this.data.previews.length >= 4) {
-            utils.cacheData(cacheUrl, res.data);
-          }
-        }
-      } catch (e) {
-        this.error = true;
-        return;
-      }
-    }
-
-    // Reset flag
-    this.data.previews.forEach((p) => (p.flag = 0));
-
-    // Get 4 or 1 preview(s)
-    let data = this.data.previews;
-    if (data.length < 4) {
-      data = data.slice(0, 1);
-    }
-    this.previews = data;
-
-    this.error = this.previews.length === 0;
+  get album() {
+    return this.data.flag & constants.c.FLAG_IS_ALBUM
+      ? <IAlbum>this.data
+      : null;
   }
 
   /** Target URL to navigate to */
   get target() {
     if (this.noNavigate) return {};
 
-    if (this.isFace) {
-      const name = this.data.name || this.data.fileid.toString();
-      const user = this.data.user_id;
+    if (this.face) {
+      const name = this.face.name || this.face.fileid.toString();
+      const user = this.face.user_id;
       return { name: "people", params: { name, user } };
     }
 
-    if (this.isAlbum) {
-      const user = (<IAlbum>this.data).user;
-      const name = this.data.name;
+    if (this.album) {
+      const user = this.album.user;
+      const name = this.album.name;
       return { name: "albums", params: { user, name } };
     }
 
     return { name: "tags", params: { name: this.data.name } };
+  }
+
+  get error() {
+    return (
+      Boolean(this.data.flag & this.c.FLAG_LOAD_FAIL) ||
+      Boolean(this.album && this.album.last_added_photo <= 0)
+    );
   }
 }
 </script>
@@ -212,10 +148,14 @@ img {
     display: block;
   }
 
-  .isFace > & {
+  .tag.face > & {
     top: unset;
     bottom: 10%;
     transform: unset;
+  }
+
+  .tag.error > & {
+    color: unset;
   }
 
   @media (max-width: 768px) {
@@ -227,7 +167,7 @@ img {
   z-index: 100;
   position: absolute;
   top: 6px;
-  right: 5px;
+  right: 6px;
 }
 
 .previews {
@@ -236,29 +176,17 @@ img {
   position: absolute;
   padding: 2px;
   box-sizing: border-box;
-  @media (max-width: 768px) {
-    padding: 1px;
-  }
-
-  .tag:not(.hasPreview) & {
-    background-color: #444;
-    background-clip: content-box;
-  }
 
   > .img-outer {
     background-color: var(--color-background-dark);
+    border-radius: 10px;
     padding: 0;
     margin: 0;
-    width: 50%;
-    height: 50%;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
     display: inline-block;
     cursor: pointer;
-
-    .tag.onePreview > & {
-      width: 100%;
-      height: 100%;
-    }
 
     > img {
       object-fit: cover;

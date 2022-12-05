@@ -159,7 +159,7 @@ class FacesController extends ApiBase
             (int) ($dcx * $iw - $faceDim / 2),
             (int) ($dcy * $ih - $faceDim / 2),
         );
-        $image->scaleImage(256, 256, true);
+        $image->scaleImage(512, 512, true);
         $blob = $image->getImageBlob();
 
         // Create and send response

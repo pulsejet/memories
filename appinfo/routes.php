@@ -47,7 +47,7 @@ return [
         ['name' => 'Albums#albums', 'url' => '/api/albums', 'verb' => 'GET'],
 
         ['name' => 'Tags#tags', 'url' => '/api/tags', 'verb' => 'GET'],
-        ['name' => 'Tags#previews', 'url' => '/api/tag-previews', 'verb' => 'GET'],
+        ['name' => 'Tags#preview', 'url' => '/api/tags/preview/{tag}', 'verb' => 'GET'],
 
         ['name' => 'Faces#faces', 'url' => '/api/faces', 'verb' => 'GET'],
         ['name' => 'Faces#preview', 'url' => '/api/faces/preview/{id}', 'verb' => 'GET'],
