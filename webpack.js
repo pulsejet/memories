@@ -76,6 +76,14 @@ if (!isDev) {
                 urlPattern: /^.*\/apps\/memories\/api\/faces\/preview\/.*/,
                 ...imageCacheOpts(1),
             }, {
+                // Tag previews from Memories
+                urlPattern: /^.*\/apps\/memories\/api\/tags\/preview\/.*/,
+                ...imageCacheOpts(1),
+            }, {
+                // Do not cache any other API requests
+                urlPattern: /^.*\/apps\/memories\/api\/.*/,
+                handler: 'NetworkOnly',
+            }, {
                 // Match page requests
                 urlPattern: /^.*\/.*$/,
                 handler: 'NetworkFirst',
