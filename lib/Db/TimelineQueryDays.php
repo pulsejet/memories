@@ -302,8 +302,7 @@ trait TimelineQueryDays
             $this->processFace($row);
 
             // We don't need these fields
-            unset($row['datetaken']);
-            unset($row['rootid']);
+            unset($row['datetaken'], $row['rootid']);
         }
 
         return $day;
