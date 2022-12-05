@@ -1259,6 +1259,18 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
   width: calc(100% + 20px);
   transition: opacity 0.2s ease-in-out;
 
+  :deep .vue-recycle-scroller__slot {
+    contain: content;
+  }
+
+  :deep .vue-recycle-scroller__item-wrapper {
+    contain: strict;
+  }
+
+  :deep .vue-recycle-scroller__item-view {
+    contain: layout style;
+  }
+
   &.empty {
     opacity: 0;
     transition: none;
