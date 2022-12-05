@@ -15,12 +15,14 @@
     </div>
 
     <div class="previews fill-block">
-      <div class="img-outer" v-for="info of previews" :key="info.fileid">
-        <img
-          class="fill-block"
-          :src="getPreviewUrl(info, true, 256)"
-          @error="$event.target.classList.add('error')"
-        />
+      <div class="preview-container fill-block">
+        <div class="img-outer" v-for="info of previews" :key="info.fileid">
+          <img
+            class="fill-block"
+            :src="getPreviewUrl(info, true, 256)"
+            @error="$event.target.classList.add('error')"
+          />
+        </div>
       </div>
     </div>
   </router-link>
@@ -185,11 +187,13 @@ export default class Folder extends Mixins(GlobalMixin, UserConfig) {
   position: absolute;
   padding: 2px;
   box-sizing: border-box;
-  @media (max-width: 768px) {
-    padding: 1px;
+
+  .preview-container {
+    border-radius: 10px;
+    overflow: hidden;
   }
 
-  > .img-outer {
+  .img-outer {
     background-color: var(--color-background-dark);
     padding: 0;
     margin: 0;
