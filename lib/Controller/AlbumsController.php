@@ -77,7 +77,8 @@ class AlbumsController extends ApiBase
         }
 
         // Get download handle
-        $handle = \OCA\Memories\Controller\DownloadController::createHandle($files);
+        $albumName = explode('/', $name)[1];
+        $handle = \OCA\Memories\Controller\DownloadController::createHandle($albumName, $files);
 
         return new JSONResponse(['handle' => $handle], Http::STATUS_OK);
     }

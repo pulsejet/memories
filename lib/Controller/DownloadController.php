@@ -47,18 +47,20 @@ class DownloadController extends ApiBase
         }
 
         // Return id
-        return new JSONResponse(['handle' => $this->createHandle($files)]);
+        $handle = self::createHandle('memories', $files);
+        return new JSONResponse(['handle' => $handle]);
     }
 
     /**
      * Get a handle for downloading files.
      *
+     * @param string $name Name of zip file
      * @param int[] $files
      */
-    public static function createHandle(array $files): string
+    public static function createHandle(string $name, array $files): string
     {
         $handle = \OC::$server->get(ISecureRandom::class)->generate(16, ISecureRandom::CHAR_ALPHANUMERIC);
-        \OC::$server->get(ISession::class)->set("memories_download_ids_{$handle}", $files);
+        \OC::$server->get(ISession::class)->set("memories_download_{$handle}", [$name, $files]);
 
         return $handle;
     }
@@ -76,13 +78,15 @@ class DownloadController extends ApiBase
     {
         // Get ids from request
         $session = \OC::$server->get(ISession::class);
-        $key = "memories_download_ids_{$handle}";
-        $fileIds = $session->get($key);
+        $key = "memories_download_{$handle}";
+        $info = $session->get($key);
         $session->remove($key);
 
-        if (null === $fileIds) {
+        if (null === $info) {
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }
+        $name = $info[0] . '-' . \date('YmdHis');;
+        $fileIds = $info[1];
 
         /** @var int[] $fileIds */
         $fileIds = array_filter(array_map('intval', $fileIds), function (int $id): bool {
@@ -100,7 +104,7 @@ class DownloadController extends ApiBase
         }
 
         // Download multiple files
-        $this->multiple($fileIds); // exits
+        $this->multiple($name, $fileIds); // exits
     }
 
     /**
@@ -124,9 +128,10 @@ class DownloadController extends ApiBase
     /**
      * Download multiple files.
      *
+     * @param string $name Name of zip file
      * @param int[] $fileIds
      */
-    private function multiple(array &$fileIds)
+    private function multiple(string $name, array &$fileIds)
     {
         // Disable time limit
         $executionTime = (int) \OC::$server->get(IniGetWrapper::class)->getNumeric('max_execution_time');
@@ -141,7 +146,7 @@ class DownloadController extends ApiBase
         $streamer = new \OC\Streamer($this->request, $size, \count($fileIds));
 
         // Create a zip file
-        $streamer->sendHeaders('download');
+        $streamer->sendHeaders($name);
 
         // Multiple files might have the same name
         // So we need to add a number to the end of the name
