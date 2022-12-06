@@ -30,6 +30,15 @@
           <template #icon> <ShareIcon :size="20" /> </template>
         </NcActionButton>
         <NcActionButton
+          :aria-label="t('memories', 'Download album')"
+          @click="downloadAlbum()"
+          close-after-click
+          v-if="!isAlbumList"
+        >
+          {{ t("memories", "Download album") }}
+          <template #icon> <DownloadIcon :size="20" /> </template>
+        </NcActionButton>
+        <NcActionButton
           :aria-label="t('memories', 'Edit album details')"
           @click="$refs.createModal.open(true)"
           close-after-click
@@ -65,16 +74,21 @@ import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 import NcActionCheckbox from "@nextcloud/vue/dist/Components/NcActionCheckbox";
 import { getCurrentUser } from "@nextcloud/auth";
+import axios from "@nextcloud/axios";
 
 import AlbumCreateModal from "../modal/AlbumCreateModal.vue";
 import AlbumDeleteModal from "../modal/AlbumDeleteModal.vue";
 import AlbumShareModal from "../modal/AlbumShareModal.vue";
 
+import { downloadWithHandle } from "../../services/dav/download";
+
 import BackIcon from "vue-material-design-icons/ArrowLeft.vue";
+import DownloadIcon from "vue-material-design-icons/Download.vue";
 import EditIcon from "vue-material-design-icons/Pencil.vue";
 import DeleteIcon from "vue-material-design-icons/Close.vue";
 import PlusIcon from "vue-material-design-icons/Plus.vue";
 import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
+import { API } from "../../services/API";
 
 @Component({
   components: {
@@ -87,6 +101,7 @@ import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
     AlbumShareModal,
 
     BackIcon,
+    DownloadIcon,
     EditIcon,
     DeleteIcon,
     PlusIcon,
@@ -121,6 +136,15 @@ export default class AlbumTopMatter extends Mixins(GlobalMixin, UserConfig) {
 
   back() {
     this.$router.push({ name: "albums" });
+  }
+
+  async downloadAlbum() {
+    const res = await axios.post(
+      API.ALBUM_DOWNLOAD(this.$route.params.user, this.$route.params.name)
+    );
+    if (res.status === 200 && res.data.handle) {
+      downloadWithHandle(res.data.handle);
+    }
   }
 }
 </script>

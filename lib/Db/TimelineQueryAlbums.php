@@ -155,7 +155,7 @@ trait TimelineQueryAlbums
      * @param string $uid     UID of CURRENT user
      * @param string $albumId $user/$name where $user is the OWNER of the album
      */
-    private function getAlbumIfAllowed(string $uid, string $albumId)
+    public function getAlbumIfAllowed(string $uid, string $albumId)
     {
         // Split name and uid
         $parts = explode('/', $albumId);
@@ -195,6 +195,26 @@ trait TimelineQueryAlbums
         if (false !== $query->executeQuery()->fetchOne()) {
             return $album;
         }
+    }
+
+    /**
+     * Get full list of fileIds in album.
+     */
+    public function getAlbumFiles(int $albumId)
+    {
+        $query = $this->connection->getQueryBuilder();
+        $query->select('file_id')->from('photos_albums_files', 'paf')->where(
+            $query->expr()->eq('album_id', $query->createNamedParameter($albumId, IQueryBuilder::PARAM_INT))
+        );
+        $query->innerJoin('paf', 'filecache', 'fc', $query->expr()->eq('fc.fileid', 'paf.file_id'));
+
+        $fileIds = [];
+        $result = $query->executeQuery();
+        while ($row = $result->fetch()) {
+            $fileIds[] = (int) $row['file_id'];
+        }
+
+        return $fileIds;
     }
 
     /** Get the name of the collaborators table */

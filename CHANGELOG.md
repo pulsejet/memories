@@ -6,6 +6,7 @@ This file is manually updated. Please file an issue if something is missing.
 
 - **Feature**: Slideshow for photos and videos
 - **Feature**: Support for GPU transcoding
+- **Feature**: Allow downloading entire albums
 - Fixed support for HEVC live photos
 - Fixed native photo sharing
 - Use larger previews in viewer

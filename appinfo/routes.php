@@ -45,6 +45,7 @@ return [
         ['name' => 'Days#dayPost', 'url' => '/api/days', 'verb' => 'POST'],
 
         ['name' => 'Albums#albums', 'url' => '/api/albums', 'verb' => 'GET'],
+        ['name' => 'Albums#download', 'url' => '/api/albums/download', 'verb' => 'POST'],
 
         ['name' => 'Tags#tags', 'url' => '/api/tags', 'verb' => 'GET'],
         ['name' => 'Tags#preview', 'url' => '/api/tags/preview/{tag}', 'verb' => 'GET'],

@@ -38,6 +38,10 @@ export class API {
     return gen(`${BASE}/albums?t=${t}`);
   }
 
+  static ALBUM_DOWNLOAD(user: string, name: string) {
+    return gen(`${BASE}/albums/download?name={user}/{name}`, { user, name });
+  }
+
   static TAG_LIST() {
     return gen(`${BASE}/tags`);
   }
@@ -91,7 +95,7 @@ export class API {
     return tok(gen(`${BASE}/download`));
   }
 
-  static DOWNLOAD_FILE(handle: number) {
+  static DOWNLOAD_FILE(handle: string) {
     return tok(gen(`${BASE}/download/{handle}`, { handle }));
   }
 

@@ -46,15 +46,21 @@ class DownloadController extends ApiBase
             return new JSONResponse([], Http::STATUS_BAD_REQUEST);
         }
 
-        // Store in session
-        $session = \OC::$server->get(ISession::class);
-
-        // Generate random id
-        $handle = \OC::$server->get(ISecureRandom::class)->generate(16, ISecureRandom::CHAR_ALPHANUMERIC);
-        $session->set("memories_download_ids_{$handle}", $files);
-
         // Return id
-        return new JSONResponse(['handle' => $handle]);
+        return new JSONResponse(['handle' => $this->createHandle($files)]);
+    }
+
+    /**
+     * Get a handle for downloading files.
+     *
+     * @param int[] $files
+     */
+    public static function createHandle(array $files): string
+    {
+        $handle = \OC::$server->get(ISecureRandom::class)->generate(16, ISecureRandom::CHAR_ALPHANUMERIC);
+        \OC::$server->get(ISession::class)->set("memories_download_ids_{$handle}", $files);
+
+        return $handle;
     }
 
     /**
@@ -153,12 +159,16 @@ class DownloadController extends ApiBase
             /** @var ?File */
             $file = null;
 
+            /** @var ?string */
+            $name = (string) $fileId;
+
             try {
                 // This checks permissions
                 $file = $this->getUserFile($fileId);
                 if (null === $file) {
                     throw new \Exception('File not found');
                 }
+                $name = $file->getName();
 
                 // Open file
                 $handle = $file->fopen('rb');
@@ -167,9 +177,8 @@ class DownloadController extends ApiBase
                 }
 
                 // Handle duplicate names
-                $name = $file->getName();
                 if (isset($nameCounts[$name])) {
-                    $nameCounts[$name] += 1;
+                    ++$nameCounts[$name];
 
                     // add count before extension
                     $extpos = strrpos($name, '.');
@@ -192,9 +201,6 @@ class DownloadController extends ApiBase
                     throw new \Exception('Failed to add file to zip');
                 }
             } catch (\Exception $e) {
-                // Let the user know that something went wrong
-                $name = $file->getName() ?: (string) $fileId;
-
                 // create a dummy memory file with the error message
                 $dummy = fopen('php://memory', 'rw+');
                 fwrite($dummy, $e->getMessage());
@@ -204,7 +210,7 @@ class DownloadController extends ApiBase
                     $dummy,
                     "{$name}_error.txt",
                     \strlen($e->getMessage()),
-                    $file->getMTime(),
+                    time(),
                 );
 
                 // close the dummy file

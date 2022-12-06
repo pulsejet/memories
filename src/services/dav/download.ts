@@ -18,7 +18,15 @@ export async function downloadFiles(fileIds: number[]) {
     return;
   }
 
-  window.location.href = API.DOWNLOAD_FILE(res.data.handle);
+  downloadWithHandle(res.data.handle);
+}
+
+/**
+ * Download files with a download handle
+ * @param handle Download handle
+ */
+export function downloadWithHandle(handle: string) {
+  window.location.href = API.DOWNLOAD_FILE(handle);
 }
 
 /**
