@@ -48,14 +48,15 @@ class DownloadController extends ApiBase
 
         // Return id
         $handle = self::createHandle('memories', $files);
+
         return new JSONResponse(['handle' => $handle]);
     }
 
     /**
      * Get a handle for downloading files.
      *
-     * @param string $name Name of zip file
-     * @param int[] $files
+     * @param string $name  Name of zip file
+     * @param int[]  $files
      */
     public static function createHandle(string $name, array $files): string
     {
@@ -85,7 +86,7 @@ class DownloadController extends ApiBase
         if (null === $info) {
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }
-        $name = $info[0] . '-' . \date('YmdHis');;
+        $name = $info[0].'-'.date('YmdHis');
         $fileIds = $info[1];
 
         /** @var int[] $fileIds */
@@ -128,8 +129,8 @@ class DownloadController extends ApiBase
     /**
      * Download multiple files.
      *
-     * @param string $name Name of zip file
-     * @param int[] $fileIds
+     * @param string $name    Name of zip file
+     * @param int[]  $fileIds
      */
     private function multiple(string $name, array &$fileIds)
     {
