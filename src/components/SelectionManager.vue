@@ -862,7 +862,6 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
 
 <style lang="scss" scoped>
 .top-bar {
-  contain: style size;
   position: absolute;
   top: 10px;
   right: 60px;
