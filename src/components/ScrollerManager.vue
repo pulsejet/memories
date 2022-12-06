@@ -9,9 +9,12 @@
       scrolling: scrollingTimer,
     }"
     @mousemove.passive="mousemove"
-    @touchmove.prevent="touchmove"
     @mouseleave.passive="mouseleave"
     @mousedown.passive="mousedown"
+    @mouseup.passive="interactend"
+    @touchmove.prevent="touchmove"
+    @touchstart.passive="interactstart"
+    @touchend.passive="interactend"
   >
     <span
       class="cursor st"
@@ -24,6 +27,8 @@
       class="cursor hv"
       :style="{ transform: `translateY(${hoverCursorY}px)` }"
       @touchmove.prevent="touchmove"
+      @touchstart.passive="interactstart"
+      @touchend.passive="interactend"
     >
       <div class="text">{{ hoverCursorText }}</div>
       <div class="icon"><ScrollIcon :size="22" /></div>
@@ -42,7 +47,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 import { IRow, IRowType, ITick } from "../types";
 import GlobalMixin from "../mixins/GlobalMixin";
 import ScrollIcon from "vue-material-design-icons/UnfoldMoreHorizontal.vue";
@@ -92,6 +97,8 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
   private reflowRequest = false;
   /** Tick adjust timer */
   private adjustRequest = false;
+  /** Scroller is being moved with interaction */
+  private interacting = false;
 
   /** Get the visible ticks */
   get visibleTicks() {
@@ -145,8 +152,8 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
   /** Update cursor position from recycler scroll position */
   public updateFromRecyclerScroll() {
-    // Ignore if not initialized
-    if (!this.ticks.length) return;
+    // Ignore if not initialized or moving
+    if (!this.ticks.length || this.interacting) return;
 
     // Get the scroll position
     const scroll = this.recycler?.$el?.scrollTop || 0;
@@ -450,7 +457,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
   }
 
   /** Move to given scroller Y */
-  private moveto(y: number) {
+  private moveto(y: number, snap: boolean) {
     // Move cursor immediately to prevent jank
     this.cursorY = y;
     this.hoverCursorY = y;
@@ -458,20 +465,30 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
     const { top1, top2, y1, y2 } = this.getCoords(y, "topF");
     const yfrac = (y - top1) / (top2 - top1);
     const ry = y1 + (y2 - y1) * (yfrac || 0);
-    this.recycler.scrollToPosition(ry);
+    this.recycler.scrollToPosition(snap ? y1 : ry);
 
     this.handleScroll();
   }
 
   /** Handle mouse click */
   private mousedown(event: MouseEvent) {
-    this.moveto(event.offsetY);
+    this.interactstart(); // end called on mouseup
+    this.moveto(event.offsetY, false);
   }
 
   /** Handle touch */
   private touchmove(event: any) {
     const y = event.targetTouches[0].pageY - this.scrollerRect.top;
-    this.moveto(y);
+    this.moveto(y, true);
+  }
+
+  private interactstart() {
+    this.interacting = true;
+  }
+
+  private interactend() {
+    this.interacting = false;
+    this.recyclerScrolled(); // make sure final position is correct
   }
 
   /** Update scroller is being used to scroll recycler */
