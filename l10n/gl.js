@@ -42,6 +42,7 @@ OC.L10N.register(
     "Undo" : "Desfacer",
     "Redo" : "Refacer",
     "Zoom in" : "Achegar",
+    "Draw" : "Debuxa",
     "Original" : "Orixinal",
     "Custom" : "Personalizado",
     "Value" : "Valor",
