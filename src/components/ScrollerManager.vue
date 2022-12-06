@@ -99,6 +99,8 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
   private adjustRequest = false;
   /** Scroller is being moved with interaction */
   private interacting = false;
+  /** Track the last requested y position when interacting */
+  private lastRequestedRecyclerY = 0;
 
   /** Get the visible ticks */
   get visibleTicks() {
@@ -465,7 +467,12 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
     const { top1, top2, y1, y2 } = this.getCoords(y, "topF");
     const yfrac = (y - top1) / (top2 - top1);
     const ry = y1 + (y2 - y1) * (yfrac || 0);
-    this.recycler.scrollToPosition(snap ? y1 : ry);
+    const targetY = snap ? y1 : ry;
+
+    if (this.lastRequestedRecyclerY !== targetY) {
+      this.lastRequestedRecyclerY = targetY;
+      this.recycler.scrollToPosition(targetY);
+    }
 
     this.handleScroll();
   }
