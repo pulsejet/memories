@@ -87,6 +87,14 @@ export class API {
     return tok(gen(`${BASE}/video/livephoto/{fileid}`, { fileid }));
   }
 
+  static DOWNLOAD_REQUEST() {
+    return tok(gen(`${BASE}/download`));
+  }
+
+  static DOWNLOAD_FILE(handle: number) {
+    return tok(gen(`${BASE}/download/{handle}`, { handle }));
+  }
+
   static CONFIG(setting: string) {
     return gen(`${BASE}/config/{setting}`, { setting });
   }

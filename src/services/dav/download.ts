@@ -1,42 +1,24 @@
-import * as base from "./base";
 import { generateUrl } from "@nextcloud/router";
+import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
 import { IPhoto } from "../../types";
 import { getAlbumFileInfos } from "./albums";
+import { API } from "../API";
 
 /**
- * Download a file
- *
- * @param fileNames - The file's names
+ * Download files
  */
-export async function downloadFiles(fileNames: string[]): Promise<boolean> {
-  const randomToken = Math.random().toString(36).substring(2);
+export async function downloadFiles(fileIds: number[]) {
+  if (!fileIds.length) return;
 
-  const params = new URLSearchParams();
-  params.append("files", JSON.stringify(fileNames));
-  params.append("downloadStartSecret", randomToken);
+  const res = await axios.post(API.DOWNLOAD_REQUEST(), { files: fileIds });
+  if (res.status !== 200 || !res.data.handle) {
+    showError(t("memories", "Failed to download files"));
+    return;
+  }
 
-  let downloadURL = generateUrl(`/apps/files/ajax/download.php?${params}`);
-
-  window.location.href = `${downloadURL}downloadStartSecret=${randomToken}`;
-
-  return new Promise((resolve) => {
-    const waitForCookieInterval = setInterval(() => {
-      const cookieIsSet = document.cookie
-        .split(";")
-        .map((cookie) => cookie.split("="))
-        .findIndex(
-          ([cookieName, cookieValue]) =>
-            cookieName === "ocDownloadStarted" && cookieValue === randomToken
-        );
-
-      if (cookieIsSet) {
-        clearInterval(waitForCookieInterval);
-        resolve(true);
-      }
-    }, 50);
-  });
+  window.location.href = API.DOWNLOAD_FILE(res.data.handle);
 }
 
 /**
@@ -52,28 +34,7 @@ export async function downloadPublicPhoto(photo: IPhoto) {
  * @param photos list of photos
  */
 export async function downloadFilesByPhotos(photos: IPhoto[]) {
-  if (photos.length === 0) {
-    return;
-  }
-
-  // Public files
-  if (vuerouter.currentRoute.name === "folder-share") {
-    for (const photo of photos) {
-      await downloadPublicPhoto(photo);
-    }
-    return;
-  }
-
-  // Get files to download
-  const fileInfos = await base.getFiles(photos);
-  if (fileInfos.length !== photos.length) {
-    showError(t("memories", "Failed to download some files."));
-  }
-  if (fileInfos.length === 0) {
-    return;
-  }
-
-  await downloadFiles(fileInfos.map((f) => f.filename));
+  await downloadFiles(photos.map((f) => f.fileid));
 }
 
 /** Get URL to download one file (e.g. for video streaming) */
