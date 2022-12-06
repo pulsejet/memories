@@ -9,7 +9,7 @@ This file is manually updated. Please file an issue if something is missing.
 - **Feature**: Allow downloading entire albums
 - Fixed support for HEVC live photos
 - Fixed native photo sharing
-- Use larger previews in viewer
+- Use larger previews in viewer (please see [these docs](https://github.com/pulsejet/memories/wiki/Configuration#preview-storage-considerations))
 
 ## v4.8.0, v3.8.0 (2022-11-22)
 
