@@ -112,6 +112,14 @@ class VideoContentSetup {
         this.destroyVideo(pswp.currSlide.content);
       }
     });
+
+    // Prevent closing when video fullscreen is active
+    pswp.on("pointerMove", (e) => {
+      const plyr: Plyr = (<any>pswp.currSlide.content)?.plyr;
+      if (plyr?.fullscreen.active) {
+        e.preventDefault();
+      }
+    });
   }
 
   getHLSsrc(content: any) {
