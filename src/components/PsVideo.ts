@@ -370,21 +370,42 @@ class VideoContentSetup {
     origParent.appendChild(content.videoElement);
     // Move plyr to the slide container
     content.slide.holderElement.appendChild(plyr.elements.container);
+
+    // Add fullscreen orientation hooks
+    if (screen.orientation?.lock) {
+      plyr.on("enterfullscreen", (event) => {
+        const rotation = this.updateRotation(content);
+        const h = Number(content.data.exif?.ImageHeight || 0);
+        const w = Number(content.data.exif?.ImageWidth || 1);
+        if (h && w) {
+          if (h < w && !rotation) {
+            screen.orientation.lock("landscape");
+          } else {
+            screen.orientation.lock("portrait");
+          }
+        }
+      });
+
+      plyr.on("exitfullscreen", (event) => {
+        screen.orientation.unlock();
+      });
+    }
   }
 
-  updateRotation(content, val?: number) {
+  updateRotation(content: any, val?: number): boolean {
     if (!content.videojs) return;
 
     content.videoElement = content.videojs.el()?.querySelector("video");
     if (!content.videoElement) return;
 
-    const rotation = val ?? Number(content.data.exif?.Rotation);
+    const rotation = val ?? Number(content.data.exif?.Rotation || 0);
     const shouldRotate = content.videojs?.src().includes("m3u8");
 
     if (rotation && shouldRotate) {
       let transform = `rotate(${rotation}deg)`;
+      const hasRotation = rotation === 90 || rotation === 270;
 
-      if (rotation === 90 || rotation === 270) {
+      if (hasRotation) {
         content.videoElement.style.width = content.element.style.height;
         content.videoElement.style.height = content.element.style.width;
 
@@ -393,11 +414,15 @@ class VideoContentSetup {
       }
 
       content.videoElement.style.transform = transform;
+
+      return hasRotation;
     } else {
       content.videoElement.style.transform = "none";
       content.videoElement.style.width = "100%";
       content.videoElement.style.height = "100%";
     }
+
+    return false;
   }
 
   onContentDestroy({ content }) {
