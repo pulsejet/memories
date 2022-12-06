@@ -9,7 +9,7 @@
       scrolling: scrollingTimer,
     }"
     @mousemove.passive="mousemove"
-    @touchmove.passive="touchmove"
+    @touchmove.prevent="touchmove"
     @mouseleave.passive="mouseleave"
     @mousedown.passive="mousedown"
   >
@@ -23,7 +23,7 @@
     <span
       class="cursor hv"
       :style="{ transform: `translateY(${hoverCursorY}px)` }"
-      @touchmove.passive="touchmove"
+      @touchmove.prevent="touchmove"
     >
       <div class="text">{{ hoverCursorText }}</div>
       <div class="icon"><ScrollIcon :size="22" /></div>
@@ -471,7 +471,6 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
   /** Handle touch */
   private touchmove(event: any) {
     const y = event.targetTouches[0].pageY - this.scrollerRect.top;
-    event.stopPropagation();
     this.moveto(y);
   }
 
