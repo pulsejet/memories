@@ -508,38 +508,6 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
     opacity: 1;
   }
 
-  // Hide ticks on mobile unless hovering
-  @include phone {
-    // Shift pointer events to hover cursor
-    pointer-events: none;
-    .cursor.hv {
-      pointer-events: all;
-    }
-
-    &:not(.scrolling) {
-      .cursor.hv {
-        left: 5px;
-        border: none;
-        box-shadow: 0 0 5px -3px #000;
-        height: 40px;
-        width: 70px;
-        border-radius: 20px;
-        > .text {
-          display: none;
-        }
-        > .icon {
-          display: block;
-        }
-      }
-      > .tick {
-        opacity: 0;
-      }
-    }
-    .cursor.st {
-      display: none;
-    }
-  }
-
   > .tick {
     pointer-events: none;
     position: absolute;
@@ -609,6 +577,43 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
     transition: none !important;
     &.st {
       opacity: 1;
+    }
+  }
+
+  // Hide ticks on mobile unless hovering
+  @include phone {
+    // Shift pointer events to hover cursor
+    pointer-events: none;
+    .cursor.hv {
+      pointer-events: all;
+    }
+
+    > .tick {
+      right: 40px;
+    }
+    &:not(.scrolling) {
+      > .tick {
+        display: none;
+      }
+    }
+
+    .cursor.hv {
+      left: 5px;
+      border: none;
+      box-shadow: 0 0 5px -3px #000;
+      height: 40px;
+      width: 70px;
+      border-radius: 20px;
+      > .text {
+        display: none;
+      }
+      > .icon {
+        display: block;
+      }
+    }
+
+    .cursor.st {
+      display: none;
     }
   }
 }
