@@ -54,6 +54,9 @@ import ScrollIcon from "vue-material-design-icons/UnfoldMoreHorizontal.vue";
 
 import * as utils from "../services/Utils";
 
+// Pixels to snap at
+const SNAP_OFFSET = -35;
+
 @Component({
   components: {
     ScrollIcon,
@@ -467,7 +470,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
     const { top1, top2, y1, y2 } = this.getCoords(y, "topF");
     const yfrac = (y - top1) / (top2 - top1);
     const ry = y1 + (y2 - y1) * (yfrac || 0);
-    const targetY = snap ? y1 : ry;
+    const targetY = snap ? y1 + SNAP_OFFSET : ry;
 
     if (this.lastRequestedRecyclerY !== targetY) {
       this.lastRequestedRecyclerY = targetY;
