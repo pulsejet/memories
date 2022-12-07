@@ -36,3 +36,9 @@ registerRoute(/^.*\/.*$/, new NetworkFirst({
         }),
     ],
 }));
+
+self.addEventListener('activate', event => {
+    // Take control of all pages under this SW's scope immediately,
+    // instead of waiting for reload/navigation.
+    event.waitUntil(self.clients.claim());
+});
