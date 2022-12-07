@@ -237,12 +237,12 @@ OC.L10N.register(
     "Error: {msg}" : "Грешка: {msg}",
     "Failed to delete files." : "Неуспешно изтриване на файлове.",
     "Failed to delete {fileName}." : "Неуспешно изтриване на {fileName}.",
-    "Failed to download some files." : "Неуспешно изтегляне на някои файлове.",
     "Failed to favorite files." : "Неуспешно добавяне на файлове в любими.",
     "Failed to favorite some files." : "Неуспешно добавяне на някой файлове в любими.",
     "Failed to favorite {fileName}." : "Неуспешно добавяне на {fileName} в любими.",
     "Yet another photo management app" : "Вече е на разположение още едно приложение за управление на снимки",
     "Found {total} photos in {path}" : "Намерени са {total} снимки в {path}",
-    "{n} photos added to album" : "{n} снимки са добавени в албума"
+    "{n} photos added to album" : "{n} снимки са добавени в албума",
+    "Failed to download some files." : "Неуспешно изтегляне на някои файлове."
 },
 "nplurals=2; plural=(n != 1);");

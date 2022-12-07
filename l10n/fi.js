@@ -168,12 +168,12 @@ OC.L10N.register(
     "Error: {msg}" : "Virhe: {msg}",
     "Failed to delete files." : "Tiedostojen poisto epäonnistui.",
     "Failed to delete {fileName}." : "Tiedoston {fileName} poisto epäonnistui.",
-    "Failed to download some files." : "Joidenkin tiedostojen lataus epäonnistui.",
     "Failed to favorite files." : "Tiedostojen asettaminen suosikeiksi epäonnistui.",
     "Failed to favorite some files." : "Joidenkin tiedostojen määrittäminen suosikiksi epäonnistui.",
     "Failed to favorite {fileName}." : "Tiedoston {fileName} asettaminen suosikiksi epäonnistui.",
     "Yet another photo management app" : "Vaihtoehtoinen sovellus valokuvien hallintaan",
     "Found {total} photos in {path}" : "{total} kuvaa löytyi polusta {path}",
-    "{n} photos added to album" : "{n} kuvaa lisätty albumiin"
+    "{n} photos added to album" : "{n} kuvaa lisätty albumiin",
+    "Failed to download some files." : "Joidenkin tiedostojen lataus epäonnistui."
 },
 "nplurals=2; plural=(n != 1);");

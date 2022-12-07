@@ -239,12 +239,12 @@ OC.L10N.register(
     "Error: {msg}" : "Hiba: {msg}",
     "Failed to delete files." : "A fájlok törlése sikertelen.",
     "Failed to delete {fileName}." : "A(z) {fileName} törlése sikertelen.",
-    "Failed to download some files." : "Egyes fájlok letöltése sikertelen.",
     "Failed to favorite files." : "A fájlok kedvencnek jelölése sikertelen.",
     "Failed to favorite some files." : "Egyes fájlok kedvencnek jelölése sikertelen.",
     "Failed to favorite {fileName}." : "A(z) {fileName} kedvencnek jelölése sikertelen.",
     "Yet another photo management app" : "Még egy fényképkezelő alkalmazás",
     "Found {total} photos in {path}" : "Összesen {total} fénykép a következőben: {path}",
-    "{n} photos added to album" : "{n} fénykép hozzáadva az albumhoz"
+    "{n} photos added to album" : "{n} fénykép hozzáadva az albumhoz",
+    "Failed to download some files." : "Egyes fájlok letöltése sikertelen."
 },
 "nplurals=2; plural=(n != 1);");

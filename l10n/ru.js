@@ -207,11 +207,11 @@ OC.L10N.register(
     "Error: {msg}" : "Ошибка: {msg}",
     "Failed to delete files." : "Ошибка удаления файлов.",
     "Failed to delete {fileName}." : "Ошибка удаления файла «{fileName}».",
-    "Failed to download some files." : "Не удалось скачать некоторые файлы",
     "Failed to favorite files." : "Не удалось добавить файлы в избранное.",
     "Failed to favorite {fileName}." : "Не удалось добавить файл «{fileName}» в избранное.",
     "Yet another photo management app" : "Приложение для управления фотографиями",
     "Found {total} photos in {path}" : "В размещении «{path}» найдено {total} фото.",
-    "{n} photos added to album" : "Добавлено фотографий: {n}"
+    "{n} photos added to album" : "Добавлено фотографий: {n}",
+    "Failed to download some files." : "Не удалось скачать некоторые файлы"
 },
 "nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);");
