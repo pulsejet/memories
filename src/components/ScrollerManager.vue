@@ -491,7 +491,8 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
   /** Handle touch */
   private touchmove(event: any) {
-    const y = event.targetTouches[0].pageY - this.scrollerRect.top;
+    let y = event.targetTouches[0].pageY - this.scrollerRect.top;
+    y = Math.max(0, y - 20); // middle of touch finger
     this.moveto(y, true);
   }
 
