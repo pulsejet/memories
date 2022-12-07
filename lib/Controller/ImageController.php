@@ -86,7 +86,8 @@ class ImageController extends ApiBase
      *
      * Get preview of many images
      */
-    public function multipreview() {
+    public function multipreview()
+    {
         // read body to array
         try {
             $body = file_get_contents('php://input');
@@ -106,15 +107,15 @@ class ImageController extends ApiBase
 
         // stream the response
         header('Content-Type: application/octet-stream');
-        header('Expires: ' . \gmdate('D, d M Y H:i:s \G\M\T', \time() + 7 * 3600 * 24));
-        header('Cache-Control: max-age=' . 7 * 3600 * 24 . ', private');
+        header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time() + 7 * 3600 * 24));
+        header('Cache-Control: max-age='. 7 * 3600 * 24 .', private');
 
         foreach ($files as $bodyFile) {
             $reqid = $bodyFile['reqid'];
             $fileid = (int) $bodyFile['fileid'];
             $x = (int) $bodyFile['x'];
             $y = (int) $bodyFile['y'];
-            $a = $bodyFile['a'] === '1';
+            $a = '1' === $bodyFile['a'];
 
             $file = $this->getUserFile($fileid);
             if (!$file) {
