@@ -99,15 +99,6 @@ class VideoContentSetup {
 
     pswp.on("close", () => {
       if (isVideoContent(pswp.currSlide.content)) {
-        // Switch from zoom to fade closing transition,
-        // as zoom transition is choppy for videos
-        if (
-          !pswp.options.showHideAnimationType ||
-          pswp.options.showHideAnimationType === "zoom"
-        ) {
-          pswp.options.showHideAnimationType = "fade";
-        }
-
         // prevent more requests
         this.destroyVideo(pswp.currSlide.content);
       }
