@@ -237,12 +237,12 @@
     "Error: {msg}" : "Erreur : {msg}",
     "Failed to delete files." : "Échec de la suppression des fichiers.",
     "Failed to delete {fileName}." : "Échec de la suppression de {fileName}.",
-    "Failed to download some files." : "Échec du téléchargement de certains fichiers.",
     "Failed to favorite files." : "Échec de la mise en favoris des fichiers.",
     "Failed to favorite some files." : "Échec de l'ajout en favoris de certains fichiers.",
     "Failed to favorite {fileName}." : "Échec de l'ajout aux favoris de {fileName}.",
     "Yet another photo management app" : "Une nouvelle application de gestion des photos",
     "Found {total} photos in {path}" : "{total} photos trouvées dans {path}",
-    "{n} photos added to album" : "{n} photos ajoutées à l'album"
+    "{n} photos added to album" : "{n} photos ajoutées à l'album",
+    "Failed to download some files." : "Échec du téléchargement de certains fichiers."
 },"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }

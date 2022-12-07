@@ -237,12 +237,12 @@
     "Error: {msg}" : "Error: {msg}",
     "Failed to delete files." : "Failed to delete files.",
     "Failed to delete {fileName}." : "Failed to delete {fileName}.",
-    "Failed to download some files." : "Failed to download some files.",
     "Failed to favorite files." : "Failed to favorite files.",
     "Failed to favorite some files." : "Failed to favorite some files.",
     "Failed to favorite {fileName}." : "Failed to favorite {fileName}.",
     "Yet another photo management app" : "Yet another photo management app",
     "Found {total} photos in {path}" : "Found {total} photos in {path}",
-    "{n} photos added to album" : "{n} photos added to album"
+    "{n} photos added to album" : "{n} photos added to album",
+    "Failed to download some files." : "Failed to download some files."
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -237,12 +237,12 @@ OC.L10N.register(
     "Error: {msg}" : "Error: {msg}",
     "Failed to delete files." : "Fallo al eliminar archivos.",
     "Failed to delete {fileName}." : "Fallo al eliminar {fileName}.",
-    "Failed to download some files." : "Fallo al descargar algunos archivos.",
     "Failed to favorite files." : "Fallo al marcar archivos como favoritos.",
     "Failed to favorite some files." : "Fallo al marcar algunos archivos como favoritos.",
     "Failed to favorite {fileName}." : "Fallo al marcar como favorito {fileName}.",
     "Yet another photo management app" : "Otra aplicación de gestión de fotos mas",
     "Found {total} photos in {path}" : "Se encontraron {total} fotos en {path}",
-    "{n} photos added to album" : "Se agregaron {n} fotos al álbum"
+    "{n} photos added to album" : "Se agregaron {n} fotos al álbum",
+    "Failed to download some files." : "Fallo al descargar algunos archivos."
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

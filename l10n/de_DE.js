@@ -239,12 +239,12 @@ OC.L10N.register(
     "Error: {msg}" : "Fehler: {msg}",
     "Failed to delete files." : "Löschen der Dateien fehlgeschlagen.",
     "Failed to delete {fileName}." : "{fileName} konnte nicht gelöscht werden.",
-    "Failed to download some files." : "Einige Dateien konnten nicht heruntergeladen werden.",
     "Failed to favorite files." : "Favorisieren von Dateien fehlgeschlagen.",
     "Failed to favorite some files." : "Einige Dateien konnten nicht zu den Favoriten hinzugefügt werden.",
     "Failed to favorite {fileName}." : "{fileName} konnte nicht zu den Favoriten hinzugefügt werden.",
     "Yet another photo management app" : "Eine weitere Foto-Management-App",
     "Found {total} photos in {path}" : "{total} Fotos gefunden in {path}",
-    "{n} photos added to album" : "{n} Fotos zum Album hinzugefügt"
+    "{n} photos added to album" : "{n} Fotos zum Album hinzugefügt",
+    "Failed to download some files." : "Einige Dateien konnten nicht heruntergeladen werden."
 },
 "nplurals=2; plural=(n != 1);");

@@ -239,12 +239,12 @@ OC.L10N.register(
     "Error: {msg}" : "Chyba: {msg}",
     "Failed to delete files." : "Nepodařilo se smazat soubory.",
     "Failed to delete {fileName}." : "Nepodařilo se smazat {fileName}.",
-    "Failed to download some files." : "Některé soubory se nepodařilo stáhnout.",
     "Failed to favorite files." : "Nepodařilo se přidat soubory mezi oblíbené.",
     "Failed to favorite some files." : "Některé soubory se nepodařilo označit jako oblíbené",
     "Failed to favorite {fileName}." : "Nepodařilo se přidat {fileName} do oblíbených.",
     "Yet another photo management app" : "Další z aplikací pro správu fotek",
     "Found {total} photos in {path}" : "V {path} nalezeno {total} fotek",
-    "{n} photos added to album" : "{n} fotek přidáno do alba"
+    "{n} photos added to album" : "{n} fotek přidáno do alba",
+    "Failed to download some files." : "Některé soubory se nepodařilo stáhnout."
 },
 "nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;");
