@@ -24,79 +24,11 @@ webpackConfig.watchOptions = {
     aggregateTimeout: 300,
 };
 
-if (!isDev) {
-    const imageCacheOpts = (expiryDays) => ({
-        handler: 'CacheFirst',
-
-        options: {
-            cacheName: 'images',
-            expiration: {
-                maxAgeSeconds: 3600 * 24 * expiryDays, // days
-                maxEntries: 20000, // 20k images
-            },
-        },
-    });
-
-    webpackConfig.plugins.push(
-        new WorkboxPlugin.GenerateSW({
-            swDest: 'memories-service-worker.js',
-            clientsClaim: true,
-            skipWaiting: true,
-            exclude: [new RegExp('.*')], // don't do precaching
-            inlineWorkboxRuntime: true,
-            sourcemap: false,
-
-            // Define runtime caching rules.
-            runtimeCaching: [{
-                // Do not cache transcoded video files
-                urlPattern: /^.*\/apps\/memories\/api\/video\/transcode\/.*/,
-                handler: 'NetworkOnly',
-            }, {
-                // Do not cache raw editing files
-                urlPattern: /^.*\/apps\/memories\/api\/image\/jpeg\/.*/,
-                handler: 'NetworkOnly',
-            }, {
-                // Do not cache webdav
-                urlPattern: /^.*\/remote.php\/.*/,
-                handler: 'NetworkOnly',
-            }, {
-                // Do not cache downloads
-                urlPattern: /^.*\/apps\/files\/ajax\/download.php?.*/,
-                handler: 'NetworkOnly',
-            }, {
-                // Preview file request
-                urlPattern: /^.*\/apps\/memories\/api\/image\/preview\/.*/,
-                ...imageCacheOpts(7),
-            }, {
-                // Live photo videos
-                urlPattern: /^.*\/apps\/memories\/api\/video\/livephoto\/.*/,
-                ...imageCacheOpts(7),
-            }, {
-                // Face previews from Memories
-                urlPattern: /^.*\/apps\/memories\/api\/faces\/preview\/.*/,
-                ...imageCacheOpts(1),
-            }, {
-                // Tag previews from Memories
-                urlPattern: /^.*\/apps\/memories\/api\/tags\/preview\/.*/,
-                ...imageCacheOpts(1),
-            }, {
-                // Do not cache any other API requests
-                urlPattern: /^.*\/apps\/memories\/api\/.*/,
-                handler: 'NetworkOnly',
-            }, {
-                // Match page requests
-                urlPattern: /^.*\/.*$/,
-                handler: 'NetworkFirst',
-                options: {
-                    cacheName: 'pages',
-                    expiration: {
-                        maxAgeSeconds: 3600 * 24 * 7, // one week
-                        maxEntries: 2000, // assets
-                    },
-                },
-            }],
-        })
-    );
-}
+webpackConfig.plugins.push(
+    new WorkboxPlugin.InjectManifest({
+        swSrc: path.resolve(path.join('src', 'service-worker.js')),
+        swDest: 'memories-service-worker.js',
+    })
+);
 
 module.exports = webpackConfig
