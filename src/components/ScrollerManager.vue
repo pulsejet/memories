@@ -15,6 +15,7 @@
     @touchmove.prevent="touchmove"
     @touchstart.passive="interactstart"
     @touchend.passive="interactend"
+    @touchcancel.passive="interactend"
   >
     <span
       class="cursor st"
@@ -29,6 +30,7 @@
       @touchmove.prevent="touchmove"
       @touchstart.passive="interactstart"
       @touchend.passive="interactend"
+      @touchcancel.passive="interactend"
     >
       <div class="text">{{ hoverCursorText }}</div>
       <div class="icon"><ScrollIcon :size="22" /></div>
@@ -425,6 +427,7 @@ export default class ScrollerManager extends Mixins(GlobalMixin) {
 
   /** Handle mouse leave */
   private mouseleave() {
+    this.interactend();
     this.moveHoverCursor(this.cursorY);
   }
 
