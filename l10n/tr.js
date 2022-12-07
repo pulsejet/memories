@@ -239,12 +239,12 @@ OC.L10N.register(
     "Error: {msg}" : "Hata: {msg}",
     "Failed to delete files." : "Dosyalar silinemedi.",
     "Failed to delete {fileName}." : "{fileName} silinemedi.",
-    "Failed to download some files." : "Bazı dosyalar indirilemedi.",
     "Failed to favorite files." : "Dosyalar sık kullanılanlara eklenemedi.",
     "Failed to favorite some files." : "Bazı dosyalar sık kullanılanlara eklenemedi.",
     "Failed to favorite {fileName}." : "{fileName} sık kullanılanlara eklenemedi.",
     "Yet another photo management app" : "Başka bir fotoğraf yönetimi uygulaması daha",
     "Found {total} photos in {path}" : "{path} yolunda {total} fotoğraf bulundu",
-    "{n} photos added to album" : "{n} fotoğraf albüme eklendi"
+    "{n} photos added to album" : "{n} fotoğraf albüme eklendi",
+    "Failed to download some files." : "Bazı dosyalar indirilemedi."
 },
 "nplurals=2; plural=(n > 1);");
