@@ -5,6 +5,8 @@ import { ExpirationPlugin } from 'workbox-expiration';
 
 precacheAndRoute(self.__WB_MANIFEST);
 
+import './service-worker-custom';
+
 registerRoute(/^.*\/apps\/memories\/api\/video\/transcode\/.*/, new NetworkOnly());
 registerRoute(/^.*\/apps\/memories\/api\/image\/jpeg\/.*/, new NetworkOnly());
 registerRoute(/^.*\/remote.php\/.*/, new NetworkOnly());

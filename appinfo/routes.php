@@ -56,6 +56,7 @@ return [
         ['name' => 'Archive#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
 
         ['name' => 'Image#preview', 'url' => '/api/image/preview/{id}', 'verb' => 'GET'],
+        ['name' => 'Image#multipreview', 'url' => '/api/image/multipreview', 'verb' => 'POST'],
         ['name' => 'Image#info', 'url' => '/api/image/info/{id}', 'verb' => 'GET'],
         ['name' => 'Image#setExif', 'url' => '/api/image/set-exif/{id}', 'verb' => 'PATCH'],
         ['name' => 'Image#jpeg', 'url' => '/api/image/jpeg/{id}', 'verb' => 'GET'],

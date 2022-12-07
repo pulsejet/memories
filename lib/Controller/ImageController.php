@@ -29,6 +29,7 @@ use OCA\Memories\Exif;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\FileDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\Files\IRootFolder;
 
 class ImageController extends ApiBase
 {
@@ -74,6 +75,90 @@ class ImageController extends ApiBase
         } catch (\InvalidArgumentException $e) {
             return new JSONResponse([], Http::STATUS_BAD_REQUEST);
         }
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     *
+     * @PublicPage
+     *
+     * Get preview of many images
+     */
+    public function multipreview() {
+        // read body to array
+        try {
+            $body = file_get_contents('php://input');
+            $files = json_decode($body, true);
+        } catch (\Exception $e) {
+            return new JSONResponse([], Http::STATUS_BAD_REQUEST);
+        }
+
+        /** @var \OCP\IPreview $previewManager */
+        $previewManager = \OC::$server->get(\OCP\IPreview::class);
+
+        // For checking max previews
+        $previewRoot = new \OC\Preview\Storage\Root(
+            \OC::$server->get(IRootFolder::class),
+            \OC::$server->getSystemConfig(),
+        );
+
+        // stream the response
+        header('Content-Type: application/octet-stream');
+        header('Expires: ' . \gmdate('D, d M Y H:i:s \G\M\T', \time() + 7 * 3600 * 24));
+        header('Cache-Control: max-age=' . 7 * 3600 * 24 . ', private');
+
+        foreach ($files as $bodyFile) {
+            $reqid = $bodyFile['reqid'];
+            $fileid = (int) $bodyFile['fileid'];
+            $x = (int) $bodyFile['x'];
+            $y = (int) $bodyFile['y'];
+            $a = $bodyFile['a'] === '1';
+
+            $file = $this->getUserFile($fileid);
+            if (!$file) {
+                continue;
+            }
+
+            // Make sure max preview exists
+            $fileId = (string) $file->getId();
+            $folder = $previewRoot->getFolder($fileId);
+            $hasMax = false;
+            foreach ($folder->getDirectoryListing() as $preview) {
+                $name = $preview->getName();
+                if (str_contains($name, '-max')) {
+                    $hasMax = true;
+
+                    break;
+                }
+            }
+            if (!$hasMax) {
+                continue;
+            }
+
+            // Add this preview to the response
+            try {
+                $preview = $previewManager->getPreview($file, $x, $y, !$a, 'fill');
+                $content = $preview->getContent();
+                if (empty($content)) {
+                    continue;
+                }
+
+                echo json_encode([
+                    'reqid' => $reqid,
+                    'Content-Length' => \strlen($content),
+                    'Content-Type' => $preview->getMimeType(),
+                ]);
+                echo "\n";
+                echo $content;
+                flush();
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        exit;
     }
 
     /**
