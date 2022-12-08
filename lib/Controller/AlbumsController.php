@@ -55,6 +55,8 @@ class AlbumsController extends ApiBase
     /**
      * @NoAdminRequired
      *
+     * @UseSession
+     *
      * Download an album as a zip file
      */
     public function download(string $name = ''): JSONResponse
