@@ -111,35 +111,41 @@ class ImageController extends ApiBase
         header('Cache-Control: max-age='. 7 * 3600 * 24 .', private');
 
         foreach ($files as $bodyFile) {
+            if (!isset($bodyFile['reqid']) || !isset($bodyFile['fileid']) || !isset($bodyFile['x']) || !isset($bodyFile['y']) || !isset($bodyFile['a'])) {
+                continue;
+            }
             $reqid = $bodyFile['reqid'];
             $fileid = (int) $bodyFile['fileid'];
             $x = (int) $bodyFile['x'];
             $y = (int) $bodyFile['y'];
             $a = '1' === $bodyFile['a'];
+            if ($fileid <= 0 || $x <= 0 || $y <= 0) {
+                continue;
+            }
 
             $file = $this->getUserFile($fileid);
             if (!$file) {
                 continue;
             }
 
-            // Make sure max preview exists
-            $fileId = (string) $file->getId();
-            $folder = $previewRoot->getFolder($fileId);
-            $hasMax = false;
-            foreach ($folder->getDirectoryListing() as $preview) {
-                $name = $preview->getName();
-                if (str_contains($name, '-max')) {
-                    $hasMax = true;
-
-                    break;
-                }
-            }
-            if (!$hasMax) {
-                continue;
-            }
-
-            // Add this preview to the response
             try {
+                // Make sure max preview exists
+                $fileId = (string) $file->getId();
+                $folder = $previewRoot->getFolder($fileId);
+                $hasMax = false;
+                foreach ($folder->getDirectoryListing() as $preview) {
+                    $name = $preview->getName();
+                    if (str_contains($name, '-max')) {
+                        $hasMax = true;
+
+                        break;
+                    }
+                }
+                if (!$hasMax) {
+                    continue;
+                }
+
+                // Add this preview to the response
                 $preview = $previewManager->getPreview($file, $x, $y, !$a, 'fill');
                 $content = $preview->getContent();
                 if (empty($content)) {
@@ -154,6 +160,8 @@ class ImageController extends ApiBase
                 echo "\n";
                 echo $content;
                 flush();
+            } catch (\OCP\Files\NotFoundException $e) {
+                continue;
             } catch (\Exception $e) {
                 continue;
             }
