@@ -1130,8 +1130,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
+  pointer-events: none;
   &.showControls {
     opacity: 1;
+    pointer-events: auto;
   }
 }
 
