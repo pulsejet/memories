@@ -2,7 +2,7 @@
 
 set -e
 
-exifver="12.49"
+exifver="12.50"
 
 rm -rf exiftool-bin
 mkdir -p exiftool-bin
