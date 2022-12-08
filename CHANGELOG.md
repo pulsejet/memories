@@ -9,6 +9,7 @@ This file is manually updated. Please file an issue if something is missing.
 - **Feature**: Support for GPU transcoding ([#194](https://github.com/pulsejet/memories/issues/194))
 - **Feature**: Allow downloading entire albums
 - **Feature**: Allow editing more EXIF fields ([#169](https://github.com/pulsejet/memories/issues/169))
+- **Feature**: Alpha integration with the face recognition app ([#146](https://github.com/pulsejet/memories/issues/146))
 - Fix downloading from albums ([#259](https://github.com/pulsejet/memories/issues/259))
 - Fix support for HEVC live photos ([#234](https://github.com/pulsejet/memories/issues/234))
 - Fix native photo sharing ([#254](https://github.com/pulsejet/memories/issues/254), [#263](https://github.com/pulsejet/memories/issues/263))
