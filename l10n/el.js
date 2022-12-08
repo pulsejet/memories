@@ -26,6 +26,7 @@ OC.L10N.register(
     "Close" : "Κλείσιμο",
     "Previous" : "Προηγούμενο",
     "Next" : "Επόμενο",
+    "No collaborators available" : "Δεν υπάρχουν διαθέσιμοι συνεργάτες",
     "Copy public link" : "Αντιγραφή δημόσιου συνδέσμου",
     "Public link" : "Δημόσιος σύνδεσμος",
     "New album" : "Νέο άλμπουμ",
