@@ -129,14 +129,14 @@
         v-if="photoswipe"
         :class="{ showControls, showBottomBar }"
       >
-        <div class="exif title" v-if="currentPhoto.imageInfo?.exif?.Title">
-          {{ currentPhoto.imageInfo?.exif?.Title }}
+        <div class="exif title" v-if="currentPhoto?.imageInfo?.exif?.Title">
+          {{ currentPhoto.imageInfo.exif.Title }}
         </div>
         <div
           class="exif description"
-          v-if="currentPhoto.imageInfo?.exif?.Description"
+          v-if="currentPhoto?.imageInfo?.exif?.Description"
         >
-          {{ currentPhoto.imageInfo?.exif?.Description }}
+          {{ currentPhoto.imageInfo.exif.Description }}
         </div>
         <div class="exif date" v-if="currentDateTaken">
           {{ currentDateTaken }}
