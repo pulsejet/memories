@@ -25,12 +25,16 @@
 
 <script lang="ts">
 import { Component, Emit, Mixins, Watch } from "vue-property-decorator";
-import { NcButton, NcTextField } from "@nextcloud/vue";
+
+import NcButton from "@nextcloud/vue/dist/Components/NcButton";
+const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
+
 import { showError } from "@nextcloud/dialogs";
 import { getCurrentUser } from "@nextcloud/auth";
 import Modal from "./Modal.vue";
 import GlobalMixin from "../../mixins/GlobalMixin";
 import client from "../../services/DavClient";
+import * as dav from "../../services/DavRequests";
 
 @Component({
   components: {
@@ -80,12 +84,16 @@ export default class FaceEditModal extends Mixins(GlobalMixin) {
 
   public async save() {
     try {
-      await client.moveFile(
-        `/recognize/${this.user}/faces/${this.oldName}`,
-        `/recognize/${this.user}/faces/${this.name}`
-      );
+      if (this.$route.name === "recognize") {
+        await client.moveFile(
+          `/recognize/${this.user}/faces/${this.oldName}`,
+          `/recognize/${this.user}/faces/${this.name}`
+        );
+      } else {
+        await dav.renamePeopleFaceRecognition(this.oldName, this.name);
+      }
       this.$router.push({
-        name: "people",
+        name: this.$route.name,
         params: { user: this.user, name: this.name },
       });
       this.close();

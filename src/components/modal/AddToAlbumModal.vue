@@ -69,8 +69,15 @@ export default class AddToAlbumModal extends Mixins(GlobalMixin) {
       this.added(this.photos.filter((p) => fids.includes(p.fileid)));
     }
 
+    const n = this.photosDone;
     showInfo(
-      this.t("memories", "{n} photos added to album", { n: this.photosDone })
+      this.n(
+        "memories",
+        "{n} item added to album",
+        "{n} items added to album",
+        n,
+        { n }
+      )
     );
     this.close();
   }

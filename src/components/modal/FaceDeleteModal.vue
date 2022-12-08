@@ -18,12 +18,16 @@
 
 <script lang="ts">
 import { Component, Emit, Mixins, Watch } from "vue-property-decorator";
-import { NcButton, NcTextField } from "@nextcloud/vue";
+
+import NcButton from "@nextcloud/vue/dist/Components/NcButton";
+const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
+
 import { showError } from "@nextcloud/dialogs";
 import { getCurrentUser } from "@nextcloud/auth";
 import Modal from "./Modal.vue";
 import GlobalMixin from "../../mixins/GlobalMixin";
 import client from "../../services/DavClient";
+import * as dav from "../../services/DavRequests";
 
 @Component({
   components: {
@@ -71,8 +75,12 @@ export default class FaceDeleteModal extends Mixins(GlobalMixin) {
 
   public async save() {
     try {
-      await client.deleteFile(`/recognize/${this.user}/faces/${this.name}`);
-      this.$router.push({ name: "people" });
+      if (this.$route.name === "recognize") {
+        await client.deleteFile(`/recognize/${this.user}/faces/${this.name}`);
+      } else {
+        await dav.setVisibilityPeopleFaceRecognition(this.name, false);
+      }
+      this.$router.push({ name: this.$route.name });
       this.close();
     } catch (error) {
       console.log(error);

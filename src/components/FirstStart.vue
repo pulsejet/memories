@@ -48,9 +48,12 @@
 
 <script lang="ts">
 import { Component, Mixins } from "vue-property-decorator";
-import { NcContent, NcAppContent, NcButton } from "@nextcloud/vue";
+
+import NcContent from "@nextcloud/vue/dist/Components/NcContent";
+import NcAppContent from "@nextcloud/vue/dist/Components/NcAppContent";
+import NcButton from "@nextcloud/vue/dist/Components/NcButton";
+
 import { getFilePickerBuilder } from "@nextcloud/dialogs";
-import { generateUrl } from "@nextcloud/router";
 import { getCurrentUser } from "@nextcloud/auth";
 import axios from "@nextcloud/axios";
 
@@ -59,6 +62,7 @@ import UserConfig from "../mixins/UserConfig";
 
 import banner from "../assets/banner.svg";
 import { IDay } from "../types";
+import { API } from "../services/API";
 
 @Component({
   components: {
@@ -95,7 +99,7 @@ export default class FirstStart extends Mixins(GlobalMixin, UserConfig) {
     this.info = "";
     const query = new URLSearchParams();
     query.set("timelinePath", path);
-    let url = generateUrl("/apps/memories/api/days?" + query.toString());
+    let url = API.Q(API.DAYS(), query);
     const res = await axios.get<IDay[]>(url);
 
     // Check response
@@ -108,11 +112,17 @@ export default class FirstStart extends Mixins(GlobalMixin, UserConfig) {
     }
 
     // Count total photos
-    const total = res.data.reduce((acc, day) => acc + day.count, 0);
-    this.info = this.t("memories", "Found {total} photos in {path}", {
-      total,
-      path,
-    });
+    const n = res.data.reduce((acc, day) => acc + day.count, 0);
+    this.info = this.n(
+      "memories",
+      "Found {n} item in {path}",
+      "Found {n} items in {path}",
+      n,
+      {
+        n,
+        path,
+      }
+    );
     this.chosenPath = path;
   }
 

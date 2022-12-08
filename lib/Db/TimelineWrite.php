@@ -17,10 +17,10 @@ class TimelineWrite
     protected IPreview $preview;
     protected LivePhoto $livePhoto;
 
-    public function __construct(IDBConnection $connection, IPreview &$preview)
+    public function __construct(IDBConnection $connection)
     {
         $this->connection = $connection;
-        $this->preview = $preview;
+        $this->preview = \OC::$server->get(IPreview::class);
         $this->livePhoto = new LivePhoto($connection);
     }
 

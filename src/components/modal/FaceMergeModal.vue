@@ -29,7 +29,10 @@
 
 <script lang="ts">
 import { Component, Emit, Mixins } from "vue-property-decorator";
-import { NcButton, NcTextField } from "@nextcloud/vue";
+
+import NcButton from "@nextcloud/vue/dist/Components/NcButton";
+const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
+
 import { showError } from "@nextcloud/dialogs";
 import { getCurrentUser } from "@nextcloud/auth";
 import { IFileInfo, ITag } from "../../types";
@@ -132,7 +135,7 @@ export default class FaceMergeModal extends Mixins(GlobalMixin) {
       // Go to new face
       if (failures === 0) {
         this.$router.push({
-          name: "people",
+          name: "recognize",
           params: { user: face.user_id, name: newName },
         });
         this.close();

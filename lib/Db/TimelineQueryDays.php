@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCA\Memories\Exif;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -139,7 +140,7 @@ trait TimelineQueryDays
     public function getDay(
         TimelineRoot &$root,
         string $uid,
-        $day_ids,
+        ?array $day_ids,
         bool $recursive,
         bool $archive,
         array $queryTransforms = []
@@ -258,16 +259,13 @@ trait TimelineQueryDays
                         $actualPath[1] = $actualPath[2];
                         $actualPath[2] = $tmp;
                         $davPath = implode('/', $actualPath);
-                        $davPaths[$fileid] = \OCA\Memories\Exif::removeExtraSlash('/'.$davPath.'/');
+                        $davPaths[$fileid] = Exif::removeExtraSlash('/'.$davPath.'/');
                     }
                 }
             }
         }
 
         foreach ($day as &$row) {
-            // We don't need date taken (see query builder)
-            unset($row['datetaken']);
-
             // Convert field types
             $row['fileid'] = (int) $row['fileid'];
             $row['isvideo'] = (int) $row['isvideo'];
@@ -290,17 +288,22 @@ trait TimelineQueryDays
             if (isset($row['path']) && !empty($row['path'])) {
                 $rootId = \array_key_exists('rootid', $row) ? $row['rootid'] : $defaultRootId;
                 $basePath = $internalPaths[$rootId] ?? '#__#';
-                $davPath = $davPaths[$rootId] ?: '';
+                $davPath = (\array_key_exists($rootId, $davPaths) ? $davPaths[$rootId] : null) ?: '';
 
                 if (0 === strpos($row['path'], $basePath)) {
-                    $row['filename'] = $davPath.substr($row['path'], \strlen($basePath));
+                    $rpath = substr($row['path'], \strlen($basePath));
+                    $row['filename'] = Exif::removeExtraSlash($davPath.$rpath);
                 }
 
                 unset($row['path']);
             }
 
             // All transform processing
-            $this->processFace($row);
+            $this->processPeopleRecognizeDetection($row);
+            $this->processFaceRecognitionDetection($row);
+
+            // We don't need these fields
+            unset($row['datetaken'], $row['rootid']);
         }
 
         return $day;

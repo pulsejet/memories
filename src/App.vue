@@ -39,13 +39,15 @@
 
 <script lang="ts">
 import { Component, Mixins, Watch } from "vue-property-decorator";
-import {
-  NcContent,
-  NcAppContent,
-  NcAppNavigation,
-  NcAppNavigationItem,
-  NcAppNavigationSettings,
-} from "@nextcloud/vue";
+
+import NcContent from "@nextcloud/vue/dist/Components/NcContent";
+import NcAppContent from "@nextcloud/vue/dist/Components/NcAppContent";
+import NcAppNavigation from "@nextcloud/vue/dist/Components/NcAppNavigation";
+const NcAppNavigationItem = () =>
+  import("@nextcloud/vue/dist/Components/NcAppNavigationItem");
+const NcAppNavigationSettings = () =>
+  import("@nextcloud/vue/dist/Components/NcAppNavigationSettings");
+
 import { generateUrl } from "@nextcloud/router";
 import { getCurrentUser } from "@nextcloud/auth";
 import { translate as t } from "@nextcloud/l10n";
@@ -97,7 +99,7 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
 
   private metadataComponent!: Metadata;
 
-  private readonly navItemsAll = [
+  private readonly navItemsAll = (self: typeof this) => [
     {
       name: "timeline",
       icon: ImageMultiple,
@@ -122,13 +124,19 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
       name: "albums",
       icon: AlbumIcon,
       title: t("memories", "Albums"),
-      if: (self: any) => self.showAlbums,
+      if: self.showAlbums,
     },
     {
-      name: "people",
+      name: "recognize",
       icon: PeopleIcon,
-      title: t("memories", "People"),
-      if: (self: any) => self.showPeople,
+      title: self.recognize,
+      if: self.recognize,
+    },
+    {
+      name: "facerecognition",
+      icon: PeopleIcon,
+      title: self.facerecognition,
+      if: self.facerecognition,
     },
     {
       name: "archive",
@@ -144,13 +152,13 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
       name: "tags",
       icon: TagsIcon,
       title: t("memories", "Tags"),
-      if: (self: any) => self.config_tagsEnabled,
+      if: self.config_tagsEnabled,
     },
     {
       name: "maps",
       icon: MapIcon,
       title: t("memories", "Maps"),
-      if: (self: any) => self.config_mapsEnabled,
+      if: self.config_mapsEnabled,
     },
   ];
 
@@ -161,8 +169,28 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
     return Number(version[0]);
   }
 
-  get showPeople() {
-    return this.config_recognizeEnabled || getCurrentUser()?.isAdmin;
+  get recognize() {
+    if (!this.config_recognizeEnabled) {
+      return false;
+    }
+
+    if (this.config_facerecognitionInstalled) {
+      return t("memories", "People (Recognize)");
+    }
+
+    return t("memories", "People");
+  }
+
+  get facerecognition() {
+    if (!this.config_facerecognitionInstalled) {
+      return false;
+    }
+
+    if (this.config_recognizeEnabled) {
+      return t("memories", "People (Face Recognition)");
+    }
+
+    return t("memories", "People");
   }
 
   get isFirstStart() {
@@ -190,8 +218,8 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
     this.doRouteChecks();
 
     // Populate navigation
-    this.navItems = this.navItemsAll.filter(
-      (item) => !item.if || item.if(this)
+    this.navItems = this.navItemsAll(this).filter(
+      (item) => typeof item.if === "undefined" || Boolean(item.if)
     );
 
     // Store CSS variables modified

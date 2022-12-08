@@ -47,7 +47,8 @@ export default class TopMatter extends Mixins(GlobalMixin) {
           return this.$route.params.name
             ? TopMatterType.TAG
             : TopMatterType.NONE;
-        case "people":
+        case "recognize":
+        case "facerecognition":
           return this.$route.params.name
             ? TopMatterType.FACE
             : TopMatterType.NONE;

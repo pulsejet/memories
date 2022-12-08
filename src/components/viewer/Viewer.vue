@@ -2,8 +2,9 @@
   <div
     class="memories_viewer outer"
     v-if="show"
-    :class="{ fullyOpened }"
+    :class="{ fullyOpened, slideshowTimer }"
     :style="{ width: outerWidth }"
+    @fullscreenchange="fullscreenChange"
   >
     <ImageEditor
       v-if="editorOpen"
@@ -81,6 +82,7 @@
             :aria-label="t('memories', 'Download')"
             @click="downloadCurrent"
             :close-after-click="true"
+            v-if="!this.state_noDownload"
           >
             {{ t("memories", "Download") }}
             <template #icon>
@@ -88,7 +90,7 @@
             </template>
           </NcActionButton>
           <NcActionButton
-            v-if="currentPhoto?.liveid"
+            v-if="!this.state_noDownload && currentPhoto?.liveid"
             :aria-label="t('memories', 'Download Video')"
             @click="downloadCurrentLiveVideo"
             :close-after-click="true"
@@ -109,7 +111,47 @@
               <OpenInNewIcon :size="24" />
             </template>
           </NcActionButton>
+          <NcActionButton
+            :aria-label="t('memories', 'Slideshow')"
+            @click="startSlideshow"
+            :close-after-click="true"
+          >
+            {{ t("memories", "Slideshow") }}
+            <template #icon>
+              <SlideshowIcon :size="24" />
+            </template>
+          </NcActionButton>
+          <NcActionButton
+            :aria-label="t('memories', 'Edit EXIF Data')"
+            v-if="!routeIsPublic"
+            @click="editExif"
+            :close-after-click="true"
+          >
+            {{ t("memories", "Edit EXIF Data") }}
+            <template #icon>
+              <EditFileIcon :size="24" />
+            </template>
+          </NcActionButton>
         </NcActions>
+      </div>
+
+      <div
+        class="bottom-bar"
+        v-if="photoswipe"
+        :class="{ showControls, showBottomBar }"
+      >
+        <div class="exif title" v-if="currentPhoto?.imageInfo?.exif?.Title">
+          {{ currentPhoto.imageInfo.exif.Title }}
+        </div>
+        <div
+          class="exif description"
+          v-if="currentPhoto?.imageInfo?.exif?.Description"
+        >
+          {{ currentPhoto.imageInfo.exif.Description }}
+        </div>
+        <div class="exif date" v-if="currentDateTaken">
+          {{ currentDateTaken }}
+        </div>
       </div>
     </div>
   </div>
@@ -117,25 +159,24 @@
 
 <script lang="ts">
 import { Component, Emit, Mixins } from "vue-property-decorator";
-import GlobalMixin from "../mixins/GlobalMixin";
+import GlobalMixin from "../../mixins/GlobalMixin";
+import { IDay, IPhoto, IRow, IRowType } from "../../types";
 
-import { IDay, IPhoto, IRow, IRowType } from "../types";
-
-import { NcActions, NcActionButton } from "@nextcloud/vue";
+import NcActions from "@nextcloud/vue/dist/Components/NcActions";
+import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
+import axios from "@nextcloud/axios";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
-import { generateUrl } from "@nextcloud/router";
 import { showError } from "@nextcloud/dialogs";
 
+import { getPreviewUrl } from "../../services/FileUtils";
+import { getDownloadLink } from "../../services/DavRequests";
+import { API } from "../../services/API";
+import * as dav from "../../services/DavRequests";
+import * as utils from "../../services/Utils";
+
 import ImageEditor from "./ImageEditor.vue";
-
-import * as dav from "../services/DavRequests";
-import * as utils from "../services/Utils";
-import { getPreviewUrl } from "../services/FileUtils";
-import { getDownloadLink } from "../services/DavRequests";
-
 import PhotoSwipe, { PhotoSwipeOptions } from "photoswipe";
 import "photoswipe/style.css";
-
 import PsVideo from "./PsVideo";
 import PsLivePhoto from "./PsLivePhoto";
 
@@ -147,6 +188,10 @@ import DownloadIcon from "vue-material-design-icons/Download.vue";
 import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
 import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
 import TuneIcon from "vue-material-design-icons/Tune.vue";
+import SlideshowIcon from "vue-material-design-icons/PlayBox.vue";
+import EditFileIcon from "vue-material-design-icons/FileEdit.vue";
+
+const SLIDESHOW_MS = 5000;
 
 @Component({
   components: {
@@ -161,6 +206,8 @@ import TuneIcon from "vue-material-design-icons/Tune.vue";
     InfoIcon,
     OpenInNewIcon,
     TuneIcon,
+    SlideshowIcon,
+    EditFileIcon,
   },
 })
 export default class Viewer extends Mixins(GlobalMixin) {
@@ -192,6 +239,9 @@ export default class Viewer extends Mixins(GlobalMixin) {
   private globalCount = 0;
   private globalAnchor = -1;
   private currIndex = -1;
+
+  /** Timer to move to next photo */
+  private slideshowTimer = 0;
 
   mounted() {
     subscribe("files:sidebar:opened", this.handleAppSidebarOpen);
@@ -250,6 +300,23 @@ export default class Viewer extends Mixins(GlobalMixin) {
     return this.list[idx];
   }
 
+  /** Is the current slide a video */
+  get isVideo() {
+    return this.currentPhoto?.flag & this.c.FLAG_IS_VIDEO;
+  }
+
+  /** Show bottom bar info such as date taken */
+  get showBottomBar() {
+    return !this.isVideo && this.fullyOpened && this.currentPhoto?.imageInfo;
+  }
+
+  /** Get date taken string */
+  get currentDateTaken() {
+    const date = this.currentPhoto?.imageInfo?.datetaken;
+    if (!date) return null;
+    return utils.getLongDateStr(new Date(date * 1000), false, true);
+  }
+
   /** Get download link for current photo */
   get currentDownloadLink() {
     return this.currentPhoto
@@ -261,6 +328,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
   private handleFileUpdated({ fileid }: { fileid: number }) {
     if (this.currentPhoto && this.currentPhoto.fileid === fileid) {
       this.currentPhoto.etag += "_";
+      this.currentPhoto.imageInfo = null;
       this.photoswipe.refreshSlideContent(this.currIndex);
     }
   }
@@ -305,6 +373,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
       bgOpacity: 1,
       appendToEl: this.$refs.inner as HTMLElement,
       preload: [2, 2],
+      clickToCloseNonZoomable: false,
+      bgClickAction: "toggle-controls",
 
       easing: "cubic-bezier(.49,.85,.55,1)",
       showHideAnimationType: "zoom",
@@ -403,6 +473,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
       this.dayIds = [];
       this.globalCount = 0;
       this.globalAnchor = -1;
+      clearTimeout(this.slideshowTimer);
+      this.slideshowTimer = 0;
     });
 
     // Update vue route for deep linking
@@ -439,6 +511,28 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
     // Live photo support
     new PsLivePhoto(this.photoswipe, {});
+
+    // Patch the close button to stop the slideshow
+    const _close = this.photoswipe.close.bind(this.photoswipe);
+    this.photoswipe.close = () => {
+      if (this.slideshowTimer) {
+        this.stopSlideshow();
+      } else {
+        _close();
+      }
+    };
+
+    // Patch the next/prev buttons to reset slideshow timer
+    const _next = this.photoswipe.next.bind(this.photoswipe);
+    const _prev = this.photoswipe.prev.bind(this.photoswipe);
+    this.photoswipe.next = () => {
+      this.resetSlideshowTimer();
+      _next();
+    };
+    this.photoswipe.prev = () => {
+      this.resetSlideshowTimer();
+      _prev();
+    };
 
     return this.photoswipe;
   }
@@ -552,8 +646,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
       return this.thumbElem(photo) || thumbEl;
     });
 
-    // Scroll to keep the thumbnail in view
     this.photoswipe.on("slideActivate", (e) => {
+      // Scroll to keep the thumbnail in view
       const thumb = this.thumbElem(e.slide.data?.photo);
       if (thumb && this.fullyOpened) {
         const rect = thumb.getBoundingClientRect();
@@ -563,6 +657,12 @@ export default class Viewer extends Mixins(GlobalMixin) {
           });
         }
       }
+
+      // Remove active class from others and add to this one
+      document
+        .querySelectorAll(".pswp__item")
+        .forEach((el) => el.classList.remove("active"));
+      e.slide.holderElement?.classList.add("active");
     });
 
     this.photoswipe.init();
@@ -594,14 +694,15 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Get base data object */
   private getItemData(photo: IPhoto) {
-    let previewUrl = getPreviewUrl(photo, false, 1024);
+    const sw = Math.floor(screen.width * devicePixelRatio);
+    const sh = Math.floor(screen.height * devicePixelRatio);
+    let previewUrl = getPreviewUrl(photo, false, [sw, sh]);
+
     const isvideo = photo.flag & this.c.FLAG_IS_VIDEO;
 
     // Preview aren't animated
-    if (photo.mimetype === "image/gif") {
+    if (isvideo || photo.mimetype === "image/gif") {
       previewUrl = getDownloadLink(photo);
-    } else if (isvideo) {
-      previewUrl = generateUrl(getDownloadLink(photo));
     }
 
     // Get height and width
@@ -613,6 +714,14 @@ export default class Viewer extends Mixins(GlobalMixin) {
       // by scaling up the video by a maximum of 4x
       w *= 4;
       h *= 4;
+    }
+
+    // Lazy load the rest of EXIF data
+    if (!photo.imageInfo) {
+      axios.get(API.IMAGE_INFO(photo.fileid)).then((res) => {
+        photo.imageInfo = res.data;
+        this.$forceUpdate();
+      });
     }
 
     return {
@@ -662,7 +771,8 @@ export default class Viewer extends Mixins(GlobalMixin) {
     }
     const hash = photo ? utils.getViewerHash(photo) : "";
     const route = {
-      ...this.$route,
+      path: this.$route.path,
+      query: this.$route.query,
       hash,
     };
     if (hash !== this.$route.hash) {
@@ -689,11 +799,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Does the browser support native share API */
   get canShare() {
-    return (
-      "share" in navigator &&
-      this.currentPhoto &&
-      !(this.currentPhoto.flag & this.c.FLAG_IS_VIDEO)
-    );
+    return "share" in navigator && this.currentPhoto && !this.isVideo;
   }
 
   /** Share the current photo externally */
@@ -702,8 +808,10 @@ export default class Viewer extends Mixins(GlobalMixin) {
       // Check navigator support
       if (!this.canShare) throw new Error("Share not supported");
 
-      // Get image data from "img.pswp__img"
-      const img = document.querySelector("img.pswp__img") as HTMLImageElement;
+      // Get image data from active slide
+      const img = document.querySelector(
+        ".pswp__item.active img.pswp__img"
+      ) as HTMLImageElement;
       if (!img?.src) return;
 
       // Shre image data using navigator api
@@ -711,7 +819,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
       if (!photo) return;
 
       // No videos yet
-      if (photo.flag & this.c.FLAG_IS_VIDEO)
+      if (this.isVideo)
         throw new Error(this.t("memories", "Video sharing not supported yet"));
 
       // Get image blob
@@ -760,24 +868,42 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   /** Delete this photo and refresh */
   private async deleteCurrent() {
-    const idx = this.photoswipe.currIndex - this.globalAnchor;
+    let idx = this.photoswipe.currIndex - this.globalAnchor;
+    const photo = this.list[idx];
+    if (!photo) return;
 
     // Delete with WebDAV
     try {
       this.updateLoading(1);
-      for await (const p of dav.deletePhotos([this.list[idx]])) {
+      for await (const p of dav.deletePhotos([photo])) {
         if (!p[0]) return;
       }
     } finally {
       this.updateLoading(-1);
     }
 
-    const spliced = this.list.splice(idx, 1);
+    // Remove from main view
+    this.deleted([photo]);
+
+    // If this is the only photo, close viewer
+    if (this.list.length === 1) {
+      return this.close();
+    }
+
+    // If this is the last photo, move to the previous photo first
+    // https://github.com/pulsejet/memories/issues/269
+    if (idx === this.list.length - 1) {
+      this.photoswipe.prev();
+
+      // Some photos might lazy load, so recompute idx for the next element
+      idx = this.photoswipe.currIndex + 1 - this.globalAnchor;
+    }
+
+    this.list.splice(idx, 1);
     this.globalCount--;
     for (let i = idx - 3; i <= idx + 3; i++) {
       this.photoswipe.refreshSlideContent(i + this.globalAnchor);
     }
-    this.deleted(spliced);
   }
 
   /** Is the current photo a favorite */
@@ -820,7 +946,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
   private async downloadCurrentLiveVideo() {
     const photo = this.currentPhoto;
     if (!photo) return;
-    window.location.href = utils.getLivePhotoVideoUrl(photo);
+    window.location.href = utils.getLivePhotoVideoUrl(photo, false);
   }
 
   /** Open the sidebar */
@@ -886,6 +1012,96 @@ export default class Viewer extends Mixins(GlobalMixin) {
   private async viewInFolder() {
     if (this.currentPhoto) dav.viewInFolder(this.currentPhoto);
   }
+
+  /**
+   * Start a slideshow
+   */
+  private async startSlideshow() {
+    // Full screen the pswp element
+    const pswp = this.photoswipe?.element;
+    if (!pswp) return;
+    pswp.requestFullscreen();
+
+    // Hide controls
+    this.setUiVisible(false);
+
+    // Start slideshow
+    this.slideshowTimer = window.setTimeout(
+      this.slideshowTimerFired,
+      SLIDESHOW_MS
+    );
+  }
+
+  /**
+   * Event of slideshow timer fire
+   */
+  private slideshowTimerFired() {
+    // Cancel if timer doesn't exist anymore
+    // This can happen e.g. due to videos
+    if (!this.slideshowTimer) return;
+
+    // If this is a video, wait for it to finish
+    if (this.isVideo) {
+      // Get active video element
+      const video: HTMLVideoElement = this.photoswipe?.element?.querySelector(
+        ".pswp__item.active video"
+      );
+
+      // If no video tag is found by now, something likely went wrong. Just skip ahead.
+      // Otherwise check if video is not ended yet
+      if (video && video.currentTime < video.duration - 0.1) {
+        // Wait for video to finish
+        video.addEventListener("ended", this.slideshowTimerFired);
+        return;
+      }
+    }
+
+    this.photoswipe.next();
+    // no need to set the timer again, since next
+    // calls resetSlideshowTimer anyway
+  }
+
+  /**
+   * Restart the slideshow timer
+   */
+  private resetSlideshowTimer() {
+    if (this.slideshowTimer) {
+      window.clearTimeout(this.slideshowTimer);
+      this.slideshowTimer = window.setTimeout(
+        this.slideshowTimerFired,
+        SLIDESHOW_MS
+      );
+    }
+  }
+
+  /**
+   * Stop the slideshow
+   */
+  private stopSlideshow() {
+    window.clearTimeout(this.slideshowTimer);
+    this.slideshowTimer = 0;
+
+    // exit full screen
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+  }
+
+  /**
+   * Detect change in fullscreen
+   */
+  private fullscreenChange() {
+    if (!document.fullscreenElement) {
+      this.stopSlideshow();
+    }
+  }
+
+  /**
+   * Edit EXIF data for current photo
+   */
+  private editExif() {
+    globalThis.editExif(globalThis.currentViewerPhoto);
+  }
 }
 </script>
 
@@ -919,12 +1135,41 @@ export default class Viewer extends Mixins(GlobalMixin) {
   }
 }
 
-.fullyOpened :deep .pswp__container {
-  @media (min-width: 1024px) {
-    // Animate transitions
-    // Disabled because this makes you sick if moving fast
-    // transition: transform var(--pswp-transition-duration) ease !important;
+.bottom-bar {
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.3));
+  width: 100%;
+  padding: 10px;
+  z-index: 100001;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+
+  transition: opacity 0.2s ease-in-out;
+  opacity: 0;
+  &.showControls.showBottomBar {
+    opacity: 1;
   }
+
+  .exif {
+    &.title {
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+    &.description {
+      margin-top: -2px;
+      margin-bottom: 2px;
+      font-size: 0.9em;
+      max-width: 70vw;
+      word-break: break-word;
+      line-height: 1.2em;
+    }
+  }
+}
+
+.fullyOpened.slideshowTimer :deep .pswp__container {
+  // Animate transitions
+  // Disabled normally because this makes you sick if moving fast
+  transition: transform 0.75s ease !important;
 }
 
 .inner,
@@ -952,10 +1197,12 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   .pswp__zoom-wrap {
     width: 100%;
+    will-change: transform;
   }
 
   img.pswp__img {
     object-fit: contain;
+    will-change: width, height;
   }
 
   .pswp__button {
@@ -968,6 +1215,12 @@ export default class Viewer extends Mixins(GlobalMixin) {
   }
   .pswp__icn-shadow {
     display: none;
+  }
+
+  // the only popper is the action menu
+  // it needs to be moved a bit to the left
+  .v-popper__inner {
+    transform: translateX(-20px);
   }
 
   // Hide arrows on mobile

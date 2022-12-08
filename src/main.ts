@@ -1,25 +1,3 @@
-/**
- * @copyright Copyright (c) 2018 John Molakvoæ <skjnldsv@protonmail.com>
- *
- * @author John Molakvoæ <skjnldsv@protonmail.com>
- *
- * @license GNU AGPL version 3 or any later version
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
- */
-
 /// <reference types="@nextcloud/typings" />
 
 import "reflect-metadata";
@@ -29,6 +7,8 @@ import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 
 import App from "./App.vue";
 import router from "./router";
+import { generateFilePath } from "@nextcloud/router";
+import { getRequestToken } from "@nextcloud/auth";
 import { IPhoto } from "./types";
 
 // Global exposed variables
@@ -42,12 +22,47 @@ declare global {
 
   var windowInnerWidth: number; // cache
   var windowInnerHeight: number; // cache
+
+  var __webpack_nonce__: string;
+  var __webpack_public_path__: string;
+
+  var vidjs: typeof import("video.js").default;
+  var Plyr: typeof import("plyr");
+  var videoClientId: string;
+  var videoClientIdPersistent: string;
 }
 
+// Allow global access to the router
 globalThis.vuerouter = router;
 
+// Cache these for better performance
 globalThis.windowInnerWidth = window.innerWidth;
 globalThis.windowInnerHeight = window.innerHeight;
+
+// CSP config for webpack dynamic chunk loading
+__webpack_nonce__ = window.btoa(getRequestToken());
+
+// Correct the root of the app for chunk loading
+// OC.linkTo matches the apps folders
+// OC.generateUrl ensure the index.php (or not)
+// We do not want the index.php since we're loading files
+__webpack_public_path__ = generateFilePath("memories", "", "js/");
+
+// Generate client id for this instance
+// Does not need to be cryptographically secure
+const getClientId = () =>
+  Math.random().toString(36).substring(2, 15).padEnd(12, "0");
+globalThis.videoClientId = getClientId();
+globalThis.videoClientIdPersistent = localStorage.getItem(
+  "videoClientIdPersistent"
+);
+if (!globalThis.videoClientIdPersistent) {
+  globalThis.videoClientIdPersistent = getClientId();
+  localStorage.setItem(
+    "videoClientIdPersistent",
+    globalThis.videoClientIdPersistent
+  );
+}
 
 Vue.use(VueVirtualScroller);
 

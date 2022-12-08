@@ -19,9 +19,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
-import { generateUrl } from "@nextcloud/router";
 import camelcase from "camelcase";
 import { IFileInfo, IPhoto } from "../types";
+import { API } from "./API";
 import { isNumber } from "./NumberUtils";
 
 /**
@@ -138,38 +138,18 @@ const genFileInfo = function (obj) {
 const getPreviewUrl = function (
   photo: IPhoto | IFileInfo,
   square: boolean,
-  size: number
+  size: number | [number, number]
 ) {
-  const a = square ? "0" : "1";
+  const [x, y] = typeof size === "number" ? [size, size] : size;
 
-  // Public preview
-  if (vuerouter.currentRoute.name === "folder-share") {
-    const token = vuerouter.currentRoute.params.token;
-    return generateUrl(
-      `/apps/files_sharing/publicpreview/${token}?file=${photo.filename}&fileId=${photo.fileid}&x=${size}&y=${size}&a=${a}`
-    );
-  }
+  // Build query
+  const query = new URLSearchParams();
+  query.set("c", photo.etag);
+  query.set("x", x.toString());
+  query.set("y", y.toString());
+  query.set("a", square ? "0" : "1");
 
-  // Albums from Photos
-  if (vuerouter.currentRoute.name === "albums") {
-    return getPhotosPreviewUrl(photo, square, size);
-  }
-
-  return generateUrl(
-    `/core/preview?fileId=${photo.fileid}&c=${photo.etag}&x=${size}&y=${size}&forceIcon=0&a=${a}`
-  );
-};
-
-/** Get the preview URL from the photos app */
-const getPhotosPreviewUrl = function (
-  photo: IPhoto | IFileInfo,
-  square: boolean,
-  size: number
-): string {
-  const a = square ? "0" : "1";
-  return generateUrl(
-    `/apps/photos/api/v1/preview/${photo.fileid}?c=${photo.etag}&x=${size}&y=${size}&forceIcon=0&a=${a}`
-  );
+  return API.Q(API.IMAGE_PREVIEW(photo.fileid), query);
 };
 
 export {
@@ -178,5 +158,4 @@ export {
   sortCompare,
   genFileInfo,
   getPreviewUrl,
-  getPhotosPreviewUrl,
 };

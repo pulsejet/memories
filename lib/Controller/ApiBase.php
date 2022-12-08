@@ -26,22 +26,18 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Db\TimelineRoot;
-use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Exif;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\Encryption\IManager;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IDBConnection;
-use OCP\IPreview;
 use OCP\IRequest;
 use OCP\IUserSession;
-use OCP\Share\IManager as IShareManager;
 
 class ApiBase extends Controller
 {
@@ -49,11 +45,7 @@ class ApiBase extends Controller
     protected IUserSession $userSession;
     protected IRootFolder $rootFolder;
     protected IAppManager $appManager;
-    protected IManager $encryptionManager;
     protected TimelineQuery $timelineQuery;
-    protected TimelineWrite $timelineWrite;
-    protected IShareManager $shareManager;
-    protected IPreview $previewManager;
 
     public function __construct(
         IRequest $request,
@@ -61,10 +53,7 @@ class ApiBase extends Controller
         IUserSession $userSession,
         IDBConnection $connection,
         IRootFolder $rootFolder,
-        IAppManager $appManager,
-        IManager $encryptionManager,
-        IShareManager $shareManager,
-        IPreview $preview
+        IAppManager $appManager
     ) {
         parent::__construct(Application::APPNAME, $request);
 
@@ -73,15 +62,11 @@ class ApiBase extends Controller
         $this->connection = $connection;
         $this->rootFolder = $rootFolder;
         $this->appManager = $appManager;
-        $this->encryptionManager = $encryptionManager;
-        $this->shareManager = $shareManager;
-        $this->previewManager = $preview;
         $this->timelineQuery = new TimelineQuery($connection);
-        $this->timelineWrite = new TimelineWrite($connection, $preview);
     }
 
     /** Get logged in user's UID or throw HTTP error */
-    protected function getUid(): string
+    protected function getUID(): string
     {
         $user = $this->userSession->getUser();
         if ($this->getShareToken()) {
@@ -104,12 +89,7 @@ class ApiBase extends Controller
         }
 
         // Public shared folder
-        if ($token = $this->getShareToken()) {
-            $share = $this->shareManager->getShareByToken($token)->getNode(); // throws exception if not found
-            if (!$share instanceof Folder) {
-                throw new \Exception('Share not found or invalid');
-            }
-
+        if ($share = $this->getShareNode()) { // can throw
             $root->addFolder($share);
 
             return $root;
@@ -152,13 +132,24 @@ class ApiBase extends Controller
     }
 
     /**
-     * Get a file with ID from user's folder.
-     *
-     * @param int $fileId
-     *
-     * @return null|File
+     * Get a file with ID for the current user.
      */
-    protected function getUserFile(int $id)
+    protected function getUserFile(int $fileId): ?File
+    {
+        // Don't check self for share token
+        if ($this->getShareToken()) {
+            return $this->getShareFile($fileId);
+        }
+
+        // Check both user folder and album
+        return $this->getUserFolderFile($fileId) ??
+               $this->getAlbumFile($fileId);
+    }
+
+    /**
+     * Get a file with ID from user's folder.
+     */
+    protected function getUserFolderFile(int $id): ?File
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
@@ -166,23 +157,45 @@ class ApiBase extends Controller
         }
         $userFolder = $this->rootFolder->getUserFolder($user->getUID());
 
-        // Check for permissions and get numeric Id
-        $file = $userFolder->getById($id);
-        if (0 === \count($file)) {
+        return $this->getOneFileFromFolder($userFolder, $id);
+    }
+
+    /**
+     * Get a file with ID from an album.
+     */
+    protected function getAlbumFile(int $id): ?File
+    {
+        $user = $this->userSession->getUser();
+        if (null === $user) {
+            return null;
+        }
+        $uid = $user->getUID();
+
+        $owner = $this->timelineQuery->albumHasUserFile($uid, $id);
+        if (!$owner) {
             return null;
         }
 
-        // Check if node is a file
-        if (!$file[0] instanceof File) {
-            return null;
+        $folder = $this->rootFolder->getUserFolder($owner);
+
+        return $this->getOneFileFromFolder($folder, $id);
+    }
+
+    /**
+     * Get a file with ID from a public share.
+     *
+     * @param int $fileId
+     */
+    protected function getShareFile(int $id): ?File
+    {
+        try {
+            if ($share = $this->getShareNode()) {
+                return $this->getOneFileFromFolder($share, $id);
+            }
+        } catch (\Exception $e) {
         }
 
-        // Check read permission
-        if (!($file[0]->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
-            return null;
-        }
-
-        return $file[0];
+        return null;
     }
 
     protected function isRecursive()
@@ -210,6 +223,50 @@ class ApiBase extends Controller
         return $this->request->getParam('folder_share');
     }
 
+    protected function getShareObject()
+    {
+        // Get token from request
+        $token = $this->getShareToken();
+        if (null === $token) {
+            return null;
+        }
+
+        // Get share by token
+        $share = \OC::$server->get(\OCP\Share\IManager::class)->getShareByToken($token);
+        if (!PublicController::validateShare($share)) {
+            return null;
+        }
+
+        // Check if share is password protected
+        if (($password = $share->getPassword()) !== null) {
+            $session = \OC::$server->get(\OCP\ISession::class);
+
+            // https://github.com/nextcloud/server/blob/0447b53bda9fe95ea0cbed765aa332584605d652/lib/public/AppFramework/PublicShareController.php#L119
+            if ($session->get('public_link_authenticated_token') !== $token
+                || $session->get('public_link_authenticated_password_hash') !== $password) {
+                throw new \Exception('Share is password protected and user is not authenticated');
+            }
+        }
+
+        return $share;
+    }
+
+    protected function getShareNode()
+    {
+        $share = $this->getShareObject();
+        if (null === $share) {
+            return null;
+        }
+
+        // Get node from share
+        $node = $share->getNode(); // throws exception if not found
+        if (!$node instanceof Folder || !$node->isReadable() || !$node->isShareable()) {
+            throw new \Exception('Share not found or invalid');
+        }
+
+        return $node;
+    }
+
     /**
      * Check if albums are enabled for this user.
      */
@@ -232,5 +289,43 @@ class ApiBase extends Controller
     protected function recognizeIsEnabled(): bool
     {
         return \OCA\Memories\Util::recognizeIsEnabled($this->appManager);
+    }
+
+    // Check if facerecognition is installed and enabled for this user.
+    protected function facerecognitionIsInstalled(): bool
+    {
+        return \OCA\Memories\Util::facerecognitionIsInstalled($this->appManager);
+    }
+
+    /**
+     * Check if facerecognition is enabled for this user.
+     */
+    protected function facerecognitionIsEnabled(): bool
+    {
+        return \OCA\Memories\Util::facerecognitionIsEnabled($this->config, $this->getUID());
+    }
+
+    /**
+     * Helper to get one file or null from a fiolder.
+     */
+    private function getOneFileFromFolder(Folder $folder, int $id): ?File
+    {
+        // Check for permissions and get numeric Id
+        $file = $folder->getById($id);
+        if (0 === \count($file)) {
+            return null;
+        }
+
+        // Check if node is a file
+        if (!$file[0] instanceof File) {
+            return null;
+        }
+
+        // Check read permission
+        if (!($file[0]->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
+            return null;
+        }
+
+        return $file[0];
     }
 }

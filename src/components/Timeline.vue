@@ -10,11 +10,12 @@
     <!-- No content found and nothing is loading -->
     <NcEmptyContent
       title="Nothing to show here"
+      :description="emptyViewDescription"
       v-if="loading === 0 && list.length === 0"
     >
       <template #icon>
-        <PeopleIcon v-if="$route.name === 'people'" />
-        <ArchiveIcon v-else-if="$route.name === 'archive'" />
+        <PeopleIcon v-if="routeIsPeople" />
+        <ArchiveIcon v-else-if="routeIsArchive" />
         <ImageMultipleIcon v-else />
       </template>
     </NcEmptyContent>
@@ -26,7 +27,7 @@
       :class="{ empty: list.length === 0 }"
       :items="list"
       :emit-update="true"
-      :buffer="400"
+      :buffer="800"
       :skipHover="true"
       key-field="id"
       size-field="size"
@@ -43,7 +44,7 @@
           </div>
 
           <OnThisDay
-            v-if="$route.name === 'timeline'"
+            v-if="routeIsBase"
             :key="config_timelinePath"
             :viewer="$refs.viewer"
             @load="scrollerManager.adjust()"
@@ -147,8 +148,7 @@ import UserConfig from "../mixins/UserConfig";
 import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
-import { generateUrl } from "@nextcloud/router";
-import { NcEmptyContent } from "@nextcloud/vue";
+import NcEmptyContent from "@nextcloud/vue/dist/Components/NcEmptyContent";
 
 import { getLayout } from "../services/Layout";
 import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";
@@ -157,7 +157,7 @@ import Photo from "./frame/Photo.vue";
 import Tag from "./frame/Tag.vue";
 import ScrollerManager from "./ScrollerManager.vue";
 import SelectionManager from "./SelectionManager.vue";
-import Viewer from "./Viewer.vue";
+import Viewer from "./viewer/Viewer.vue";
 import OnThisDay from "./top-matter/OnThisDay.vue";
 import TopMatter from "./top-matter/TopMatter.vue";
 
@@ -168,6 +168,7 @@ import PeopleIcon from "vue-material-design-icons/AccountMultiple.vue";
 import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
 import ImageMultipleIcon from "vue-material-design-icons/ImageMultiple.vue";
 import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
+import { API } from "../services/API";
 
 const SCROLL_LOAD_DELAY = 100; // Delay in loading data when scrolling
 const DESKTOP_ROW_HEIGHT = 200; // Height of row on desktop
@@ -306,6 +307,18 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
   destroyed() {
     window.removeEventListener("resize", this.handleResizeWithDelay);
+  }
+
+  get routeIsBase() {
+    return this.$route.name === "timeline";
+  }
+
+  get routeIsPeople() {
+    return ["recognize", "facerecognition"].includes(this.$route.name);
+  }
+
+  get routeIsArchive() {
+    return this.$route.name === "archive";
   }
 
   updateLoading(delta: number) {
@@ -549,7 +562,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
   }
 
   /** Get query string for API calls */
-  appendQuery(url: string) {
+  getQuery() {
     const query = new URLSearchParams();
 
     // Favorites
@@ -574,12 +587,12 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     // People
     if (
-      this.$route.name === "people" &&
+      this.routeIsPeople &&
       this.$route.params.user &&
       this.$route.params.name
     ) {
       query.set(
-        "face",
+        this.$route.name, // "recognize" or "facerecognition"
         `${this.$route.params.user}/${this.$route.params.name}`
       );
 
@@ -602,23 +615,13 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
       );
     }
 
-    // Favorites
-    if (this.$route.name === "folder-share") {
-      query.set("folder_share", this.$route.params.token);
-    }
-
     // Month view
     if (this.isMonthView) {
       query.set("monthView", "1");
       query.set("reverse", "1");
     }
 
-    // Create query string and append to URL
-    const queryStr = query.toString();
-    if (queryStr) {
-      url += "?" + queryStr;
-    }
-    return url;
+    return query;
   }
 
   /** Get view name for dynamic top matter */
@@ -628,7 +631,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         return this.t("memories", "Your Timeline");
       case "favorites":
         return this.t("memories", "Favorites");
-      case "people":
+      case "recognize":
+      case "facerecognition":
         return this.t("memories", "People");
       case "videos":
         return this.t("memories", "Videos");
@@ -673,10 +677,36 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     return head.name;
   }
 
+  /* Get a friendly description of empty view */
+  get emptyViewDescription() {
+    switch (this.$route.name) {
+      case "facerecognition":
+        if (this.config_facerecognitionEnabled)
+          return this.t(
+            "memories",
+            "You will find your friends soon. Please, be patient."
+          );
+        else
+          return this.t(
+            "memories",
+            "Face Recognition is disabled. Enable in settings to find your friends."
+          );
+      case "timeline":
+      case "favorites":
+      case "recognize":
+      case "videos":
+      case "albums":
+      case "archive":
+      case "thisday":
+      case "tags":
+      default:
+        return "";
+    }
+  }
+
   /** Fetch timeline main call */
   async fetchDays(noCache = false) {
-    let params: any = {};
-    let url = generateUrl(this.appendQuery("/apps/memories/api/days"), params);
+    const url = API.Q(API.DAYS(), this.getQuery());
     const cacheUrl = this.$route.name + url;
 
     // Try cache first
@@ -694,8 +724,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         data = await dav.getOnThisDayData();
       } else if (this.$route.name === "tags" && !this.$route.params.name) {
         data = await dav.getTagsData();
-      } else if (this.$route.name === "people" && !this.$route.params.name) {
-        data = await dav.getPeopleData();
+      } else if (this.routeIsPeople && !this.$route.params.name) {
+        data = await dav.getPeopleData(this.$route.name as any);
       } else if (this.$route.name === "albums" && !this.$route.params.name) {
         data = await dav.getAlbumsData("3");
       } else {
@@ -842,9 +872,7 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
   /** API url for Day call */
   private getDayUrl(dayId: number | string) {
-    let baseUrl = "/apps/memories/api/days/{dayId}";
-    const params: any = { dayId };
-    return generateUrl(this.appendQuery(baseUrl), params);
+    return API.Q(API.DAY(dayId), this.getQuery());
   }
 
   /** Fetch image data for one dayId */
@@ -1266,10 +1294,23 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 }
 
 .recycler {
+  will-change: scroll-position;
   contain: strict;
   height: 300px;
   width: calc(100% + 20px);
   transition: opacity 0.2s ease-in-out;
+
+  :deep .vue-recycle-scroller__slot {
+    contain: content;
+  }
+
+  :deep .vue-recycle-scroller__item-wrapper {
+    contain: strict;
+  }
+
+  :deep .vue-recycle-scroller__item-view {
+    contain: layout style;
+  }
 
   &.empty {
     opacity: 0;

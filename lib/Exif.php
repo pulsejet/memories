@@ -11,6 +11,7 @@ use OCP\IConfig;
 class Exif
 {
     private const EXIFTOOL_VER = '12.49';
+    private const EXIFTOOL_TIMEOUT = 30000;
 
     /** Opened instance of exiftool when running in command mode */
     private static $staticProc;
@@ -132,8 +133,7 @@ class Exif
     /**
      * Parse date from exif format and throw error if invalid.
      *
-     * @param string $dt
-     * @param mixed  $date
+     * @param mixed $date
      *
      * @return int unix timestamp
      */
@@ -159,10 +159,8 @@ class Exif
     /**
      * Forget the timezone for an epoch timestamp and get the same
      * time epoch for UTC.
-     *
-     * @param int $epoch
      */
-    public static function forgetTimezone($epoch)
+    public static function forgetTimezone(int $epoch)
     {
         $dt = new \DateTime();
         $dt->setTimestamp($epoch);
@@ -222,7 +220,7 @@ class Exif
             return [$height, $width];
         }
 
-        if ($width <= 0 || $height <= 0 || $width > 10000 || $height > 10000) {
+        if ($width <= 0 || $height <= 0 || $width > 100000 || $height > 100000) {
             return [0, 0];
         }
 
@@ -251,7 +249,7 @@ class Exif
         fwrite($pipes[0], $raw);
         fclose($pipes[0]);
 
-        $stdout = self::readOrTimeout($pipes[1], 30000);
+        $stdout = self::readOrTimeout($pipes[1], self::EXIFTOOL_TIMEOUT);
         fclose($pipes[1]);
         fclose($pipes[2]);
         proc_terminate($proc);
@@ -272,7 +270,7 @@ class Exif
         stream_set_blocking($pipes[1], false);
 
         try {
-            return self::readOrTimeout($pipes[1], 5000);
+            return self::readOrTimeout($pipes[1], self::EXIFTOOL_TIMEOUT);
         } catch (\Exception $ex) {
             error_log("Exiftool timeout: [{$path}]");
 
@@ -288,7 +286,7 @@ class Exif
     private static function getExiftool()
     {
         $configKey = 'memories.exiftool';
-        $config = \OC::$server->getConfig();
+        $config = \OC::$server->get(IConfig::class);
         $configPath = $config->getSystemValue($configKey);
         $noLocal = $config->getSystemValue($configKey.'_no_local', false);
 
@@ -365,7 +363,7 @@ class Exif
      * @param int      $timeout   milliseconds
      * @param string   $delimiter null for eof
      */
-    private static function readOrTimeout($handle, $timeout, $delimiter = null)
+    private static function readOrTimeout($handle, int $timeout, ?string $delimiter = null)
     {
         $buf = '';
         $waitedMs = 0;
@@ -396,7 +394,7 @@ class Exif
         $readyToken = "\n{ready}\n";
 
         try {
-            $buf = self::readOrTimeout(self::$staticPipes[1], 5000, $readyToken);
+            $buf = self::readOrTimeout(self::$staticPipes[1], self::EXIFTOOL_TIMEOUT, $readyToken);
             $tokPos = strrpos($buf, $readyToken);
             $buf = substr($buf, 0, $tokPos);
 
@@ -419,7 +417,7 @@ class Exif
         stream_set_blocking($pipes[1], false);
 
         try {
-            $stdout = self::readOrTimeout($pipes[1], 5000);
+            $stdout = self::readOrTimeout($pipes[1], self::EXIFTOOL_TIMEOUT);
 
             return self::processStdout($stdout);
         } catch (\Exception $ex) {

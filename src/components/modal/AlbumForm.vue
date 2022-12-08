@@ -1,24 +1,3 @@
-<!--
- - @copyright Copyright (c) 2022 Louis Chemineau <louis@chmn.me>
- -
- - @author Louis Chemineau <louis@chmn.me>
- -
- - @license AGPL-3.0-or-later
- -
- - This program is free software: you can redistribute it and/or modify
- - it under the terms of the GNU Affero General Public License as
- - published by the Free Software Foundation, either version 3 of the
- - License, or (at your option) any later version.
- -
- - This program is distributed in the hope that it will be useful,
- - but WITHOUT ANY WARRANTY; without even the implied warranty of
- - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- - GNU Affero General Public License for more details.
- -
- - You should have received a copy of the GNU Affero General Public License
- - along with this program. If not, see <http://www.gnu.org/licenses/>.
- -
- -->
 <template>
   <form
     v-if="!showCollaboratorView"
@@ -122,7 +101,9 @@ import { Component, Emit, Mixins, Prop } from "vue-property-decorator";
 import GlobalMixin from "../../mixins/GlobalMixin";
 
 import { getCurrentUser } from "@nextcloud/auth";
-import { NcButton, NcLoadingIcon, NcTextField } from "@nextcloud/vue";
+import NcButton from "@nextcloud/vue/dist/Components/NcButton";
+import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
+const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
 import moment from "moment";
 import * as dav from "../../services/DavRequests";
 

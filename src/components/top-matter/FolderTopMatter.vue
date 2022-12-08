@@ -34,12 +34,14 @@
 <script lang="ts">
 import { Component, Mixins, Watch } from "vue-property-decorator";
 import { TopMatterFolder, TopMatterType } from "../../types";
-import {
-  NcBreadcrumbs,
-  NcBreadcrumb,
-  NcActions,
-  NcActionButton,
-} from "@nextcloud/vue";
+
+const NcBreadcrumbs = () =>
+  import("@nextcloud/vue/dist/Components/NcBreadcrumbs");
+const NcBreadcrumb = () =>
+  import("@nextcloud/vue/dist/Components/NcBreadcrumb");
+import NcActions from "@nextcloud/vue/dist/Components/NcActions";
+import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
+
 import GlobalMixin from "../../mixins/GlobalMixin";
 
 import FolderShareModal from "../modal/FolderShareModal.vue";

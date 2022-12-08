@@ -106,16 +106,6 @@
           })
         }}
       </div>
-
-      <div class="info-pad warn">
-        {{
-          t(
-            "memories",
-            "This feature modifies files in your storage to update Exif data."
-          )
-        }}
-        {{ t("memories", "Exercise caution and make sure you have backups.") }}
-      </div>
     </div>
 
     <div v-else>
@@ -134,17 +124,16 @@ import { Component, Emit, Mixins } from "vue-property-decorator";
 import GlobalMixin from "../../mixins/GlobalMixin";
 import { IPhoto } from "../../types";
 
-import { NcButton, NcTextField } from "@nextcloud/vue";
+import NcButton from "@nextcloud/vue/dist/Components/NcButton";
+const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
+
 import { showError } from "@nextcloud/dialogs";
-import { generateUrl } from "@nextcloud/router";
 import { emit } from "@nextcloud/event-bus";
 import Modal from "./Modal.vue";
 import axios from "@nextcloud/axios";
 import * as utils from "../../services/Utils";
 import * as dav from "../../services/DavRequests";
-
-const INFO_API_URL = "/apps/memories/api/image/info/{id}";
-const EDIT_API_URL = "/apps/memories/api/image/set-exif/{id}";
+import { API } from "../../services/API";
 
 @Component({
   components: {
@@ -187,7 +176,7 @@ export default class EditDate extends Mixins(GlobalMixin) {
     const calls = photos.map((p) => async () => {
       try {
         const res = await axios.get<any>(
-          generateUrl(INFO_API_URL, { id: p.fileid }) + "?basic=1"
+          API.Q(API.IMAGE_INFO(p.fileid), "basic=1")
         );
         if (typeof res.data.datetaken !== "number") {
           console.error("Invalid date for", p.fileid);
@@ -269,7 +258,7 @@ export default class EditDate extends Mixins(GlobalMixin) {
     try {
       this.processing = true;
       const fileid = this.photos[0].fileid;
-      await axios.patch<any>(generateUrl(EDIT_API_URL, { id: fileid }), {
+      await axios.patch<any>(API.IMAGE_SETEXIF(fileid), {
         raw: {
           DateTimeOriginal: this.getExifFormat(this.getDate()),
         },
@@ -335,7 +324,7 @@ export default class EditDate extends Mixins(GlobalMixin) {
         const offset = date.getTime() - pDate.getTime();
         const scale = diff > 0 ? diffNew / diff : 0;
         const pDateNew = new Date(dateNew.getTime() - offset * scale);
-        await axios.patch<any>(generateUrl(EDIT_API_URL, { id: p.fileid }), {
+        await axios.patch<any>(API.IMAGE_SETEXIF(p.fileid), {
           raw: {
             DateTimeOriginal: this.getExifFormat(pDateNew),
           },

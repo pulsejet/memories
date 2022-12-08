@@ -39,7 +39,7 @@ class DaysController extends ApiBase
     public function days(): JSONResponse
     {
         // Get the folder to show
-        $uid = $this->getUid();
+        $uid = $this->getUID();
 
         // Get the folder to show
         $root = null;
@@ -92,7 +92,7 @@ class DaysController extends ApiBase
     public function day(string $id): JSONResponse
     {
         // Get user
-        $uid = $this->getUid();
+        $uid = $this->getUID();
 
         // Check for wildcard
         $dayIds = [];
@@ -121,7 +121,7 @@ class DaysController extends ApiBase
 
         // Convert to actual dayIds if month view
         if ($this->isMonthView()) {
-            $dayIds = $this->timelineQuery->monthIdToDayIds($dayIds[0]);
+            $dayIds = $this->timelineQuery->monthIdToDayIds((int) $dayIds[0]);
         }
 
         // Run actual query
@@ -198,16 +198,24 @@ class DaysController extends ApiBase
             $transforms[] = [$this->timelineQuery, 'transformVideoFilter'];
         }
 
-        // Filter only for one face
-        if ($this->recognizeIsEnabled()) {
-            $face = $this->request->getParam('face');
-            if ($face) {
-                $transforms[] = [$this->timelineQuery, 'transformFaceFilter', $face];
-            }
+        // Filter only for one face on Recognize
+        if (($recognize = $this->request->getParam('recognize')) && $this->recognizeIsEnabled()) {
+            $transforms[] = [$this->timelineQuery, 'transformPeopleRecognitionFilter', $recognize];
 
             $faceRect = $this->request->getParam('facerect');
             if ($faceRect && !$aggregateOnly) {
-                $transforms[] = [$this->timelineQuery, 'transformFaceRect', $face];
+                $transforms[] = [$this->timelineQuery, 'transformPeopleRecognizeRect', $recognize];
+            }
+        }
+
+        // Filter only for one face on Face Recognition
+        if (($face = $this->request->getParam('facerecognition')) && $this->facerecognitionIsEnabled()) {
+            $currentModel = (int) $this->config->getAppValue('facerecognition', 'model', -1);
+            $transforms[] = [$this->timelineQuery, 'transformPeopleFaceRecognitionFilter', $currentModel, $face];
+
+            $faceRect = $this->request->getParam('facerect');
+            if ($faceRect && !$aggregateOnly) {
+                $transforms[] = [$this->timelineQuery, 'transformPeopleFaceRecognitionRect', $face];
             }
         }
 

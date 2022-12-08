@@ -1,24 +1,3 @@
-<!--
- - @copyright Copyright (c) 2022 Louis Chemineau <louis@chmn.me>
- -
- - @author Louis Chemineau <louis@chmn.me>
- -
- - @license AGPL-3.0-or-later
- -
- - This program is free software: you can redistribute it and/or modify
- - it under the terms of the GNU Affero General Public License as
- - published by the Free Software Foundation, either version 3 of the
- - License, or (at your option) any later version.
- -
- - This program is distributed in the hope that it will be useful,
- - but WITHOUT ANY WARRANTY; without even the implied warranty of
- - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- - GNU Affero General Public License for more details.
- -
- - You should have received a copy of the GNU Affero General Public License
- - along with this program. If not, see <http://www.gnu.org/licenses/>.
- -
- -->
 <template>
   <div v-if="!showAlbumCreationForm" class="album-picker">
     <NcLoadingIcon v-if="loadingAlbums" class="loading-icon" />
@@ -86,11 +65,14 @@ import AlbumForm from "./AlbumForm.vue";
 import Plus from "vue-material-design-icons/Plus.vue";
 import ImageMultiple from "vue-material-design-icons/ImageMultiple.vue";
 
-import { NcButton, NcListItem, NcLoadingIcon } from "@nextcloud/vue";
-import { generateUrl } from "@nextcloud/router";
-import { getPhotosPreviewUrl } from "../../services/FileUtils";
+import NcButton from "@nextcloud/vue/dist/Components/NcButton";
+import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
+const NcListItem = () => import("@nextcloud/vue/dist/Components/NcListItem");
+
+import { getPreviewUrl } from "../../services/FileUtils";
 import { IAlbum, IPhoto } from "../../types";
 import axios from "@nextcloud/axios";
+import { API } from "../../services/API";
 
 @Component({
   components: {
@@ -103,7 +85,7 @@ import axios from "@nextcloud/axios";
   },
   filters: {
     toCoverUrl(fileId: string) {
-      return getPhotosPreviewUrl(
+      return getPreviewUrl(
         {
           fileid: Number(fileId),
         } as IPhoto,
@@ -136,9 +118,7 @@ export default class AlbumPicker extends Mixins(GlobalMixin) {
 
   async loadAlbums() {
     try {
-      const res = await axios.get<IAlbum[]>(
-        generateUrl("/apps/memories/api/albums?t=3")
-      );
+      const res = await axios.get<IAlbum[]>(API.ALBUM_LIST());
       this.albums = res.data;
     } catch (e) {
       console.error(e);

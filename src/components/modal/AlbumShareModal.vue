@@ -31,7 +31,9 @@
 import { Component, Emit, Mixins } from "vue-property-decorator";
 import GlobalMixin from "../../mixins/GlobalMixin";
 
-import { NcButton, NcLoadingIcon } from "@nextcloud/vue";
+import NcButton from "@nextcloud/vue/dist/Components/NcButton";
+import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
+
 import * as dav from "../../services/DavRequests";
 
 import Modal from "./Modal.vue";

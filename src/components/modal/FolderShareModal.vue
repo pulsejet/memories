@@ -47,7 +47,7 @@ import { Component, Emit, Mixins } from "vue-property-decorator";
 
 import axios from "@nextcloud/axios";
 import { generateOcsUrl, generateUrl } from "@nextcloud/router";
-import { NcButton } from "@nextcloud/vue";
+import NcButton from "@nextcloud/vue/dist/Components/NcButton";
 
 import * as utils from "../../services/Utils";
 import Modal from "./Modal.vue";

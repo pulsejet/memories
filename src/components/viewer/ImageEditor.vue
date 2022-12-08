@@ -1,23 +1,39 @@
 <template>
-  <div ref="editor" class="viewer__image-editor" v-bind="themeDataAttr" />
+  <div
+    ref="editor"
+    class="viewer__image-editor"
+    :class="{ loading: !imageEditor }"
+    v-bind="themeDataAttr"
+  />
 </template>
 
 <script lang="ts">
 import { Component, Prop, Mixins } from "vue-property-decorator";
-import GlobalMixin from "../mixins/GlobalMixin";
+import GlobalMixin from "../../mixins/GlobalMixin";
 
 import { basename, dirname, extname, join } from "path";
 import { emit } from "@nextcloud/event-bus";
 import { showError, showSuccess } from "@nextcloud/dialogs";
-import { generateUrl } from "@nextcloud/router";
 import axios from "@nextcloud/axios";
 
-import FilerobotImageEditor from "filerobot-image-editor";
 import { FilerobotImageEditorConfig } from "react-filerobot-image-editor";
 
 import translations from "./ImageEditorTranslations";
 
-const { TABS, TOOLS } = FilerobotImageEditor as any;
+import { API } from "../../services/API";
+
+let TABS, TOOLS: any;
+type FilerobotImageEditor = import("filerobot-image-editor").default;
+let FilerobotImageEditor: typeof import("filerobot-image-editor").default;
+
+async function loadFilerobot() {
+  if (!FilerobotImageEditor) {
+    FilerobotImageEditor = (await import("filerobot-image-editor")).default;
+    TABS = (<any>FilerobotImageEditor).TABS;
+    TOOLS = (<any>FilerobotImageEditor).TOOLS;
+  }
+  return FilerobotImageEditor;
+}
 
 @Component({
   components: {},
@@ -36,9 +52,7 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
     if (["image/png", "image/jpeg", "image/webp"].includes(this.mime)) {
       src = this.src;
     } else {
-      src = generateUrl("/apps/memories/api/image/jpeg/{fileid}", {
-        fileid: this.fileid,
-      });
+      src = API.IMAGE_JPEG(this.fileid);
     }
 
     return {
@@ -131,6 +145,7 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
   }
 
   async mounted() {
+    await loadFilerobot();
     this.imageEditor = new FilerobotImageEditor(
       <any>this.$refs.editor,
       <any>this.config
@@ -141,9 +156,7 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
     // Get latest exif data
     try {
       const res = await axios.get(
-        generateUrl("/apps/memories/api/image/info/{id}?basic=1&current=1", {
-          id: this.fileid,
-        })
+        API.Q(API.IMAGE_INFO(this.fileid), "basic=1&current=1")
       );
 
       this.exif = res.data?.current;
@@ -227,14 +240,9 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
       delete exif.MajorBrand;
 
       // Update exif data
-      await axios.patch(
-        generateUrl("/apps/memories/api/image/set-exif/{id}", {
-          id: fileid,
-        }),
-        {
-          raw: exif,
-        }
-      );
+      await axios.patch(API.IMAGE_SETEXIF(fileid), {
+        raw: exif,
+      });
 
       showSuccess(this.t("memories", "Image saved successfully"));
       if (fileid !== this.fileid) {
@@ -313,6 +321,7 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
   left: 0;
   width: 100%;
   height: 100vh;
+  background-color: black;
 }
 </style>
 

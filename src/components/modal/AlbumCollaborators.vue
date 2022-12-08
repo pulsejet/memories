@@ -1,24 +1,3 @@
-<!--
- - @copyright Copyright (c) 2022 Louis Chemineau <louis@chmn.me>
- -
- - @author Louis Chemineau <louis@chmn.me>
- -
- - @license AGPL-3.0-or-later
- -
- - This program is free software: you can redistribute it and/or modify
- - it under the terms of the GNU Affero General Public License as
- - published by the Free Software Foundation, either version 3 of the
- - License, or (at your option) any later version.
- -
- - This program is distributed in the hope that it will be useful,
- - but WITHOUT ANY WARRANTY; without even the implied warranty of
- - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- - GNU Affero General Public License for more details.
- -
- - You should have received a copy of the GNU Affero General Public License
- - along with this program. If not, see <http://www.gnu.org/licenses/>.
- -
- -->
 <template>
   <div class="manage-collaborators">
     <div class="manage-collaborators__subtitle">
@@ -177,14 +156,15 @@ import * as dav from "../../services/DavRequests";
 import { showError } from "@nextcloud/dialogs";
 import { getCurrentUser } from "@nextcloud/auth";
 import { generateOcsUrl, generateUrl } from "@nextcloud/router";
-import {
-  NcButton,
-  NcListItemIcon,
-  NcLoadingIcon,
-  NcPopover,
-  NcTextField,
-  NcEmptyContent,
-} from "@nextcloud/vue";
+
+import NcButton from "@nextcloud/vue/dist/Components/NcButton";
+import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
+import NcPopover from "@nextcloud/vue/dist/Components/NcPopover";
+import NcEmptyContent from "@nextcloud/vue/dist/Components/NcEmptyContent";
+const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
+const NcListItemIcon = () =>
+  import("@nextcloud/vue/dist/Components/NcListItemIcon");
+
 import { Type } from "@nextcloud/sharing";
 
 type Collaborator = {
@@ -372,6 +352,12 @@ export default class AddToAlbumModal extends Mixins(GlobalMixin) {
     try {
       this.loadingAlbum = true;
       this.errorFetchingAlbum = null;
+
+      const album = await dav.getAlbum(
+        getCurrentUser()?.uid.toString(),
+        this.albumName
+      );
+      this.populateCollaborators(album.collaborators);
     } catch (error) {
       if (error.response?.status === 404) {
         this.errorFetchingAlbum = 404;

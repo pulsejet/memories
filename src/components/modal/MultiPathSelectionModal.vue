@@ -39,7 +39,9 @@ import UserConfig from "../../mixins/UserConfig";
 import Modal from "./Modal.vue";
 
 import { getFilePickerBuilder } from "@nextcloud/dialogs";
-import { NcActions, NcActionButton, NcButton } from "@nextcloud/vue";
+import NcActions from "@nextcloud/vue/dist/Components/NcActions";
+import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
+import NcButton from "@nextcloud/vue/dist/Components/NcButton";
 
 import CloseIcon from "vue-material-design-icons/Close.vue";
 

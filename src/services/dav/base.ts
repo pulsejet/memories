@@ -204,7 +204,7 @@ export async function* deletePhotos(photos: IPhoto[]) {
       photos
         .filter((p) => p.liveid && !p.liveid.startsWith("self__"))
         .map(async (p) => {
-          const url = utils.getLivePhotoVideoUrl(p) + "&format=json";
+          const url = utils.getLivePhotoVideoUrl(p, false) + "&format=json";
           try {
             const response = await axios.get(url);
             const data = response.data;

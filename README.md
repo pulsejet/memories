@@ -13,7 +13,7 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 
 - **📸 Timeline**: Sort photos and videos by date taken, parsed from Exif data.
 - **⏪ Rewind**: Jump to any time in the past instantly and relive your memories.
-- **🤖 AI Tagging**: Group photos by people and objects using AI, powered by [recognize](https://github.com/nextcloud/recognize).
+- **🤖 AI Tagging**: Group photos by people and objects, powered by [recognize](https://github.com/nextcloud/recognize) and [facerecognition](https://github.com/matiasdelellis/facerecognition).
 - **🖼️ Albums**: Create albums to group photos and videos together. Then share these albums with others.
 - **🫱🏻‍🫲🏻 External Sharing**: Share photos and videos with people outside of your Nextcloud instance.
 - **📱 Mobile Support**: Works on devices of any shape and size through the web app.

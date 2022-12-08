@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\Files\Folder;
 use OCP\IDBConnection;
 
 trait TimelineQueryTags
@@ -62,7 +61,7 @@ trait TimelineQueryTags
 
         // GROUP and ORDER by tag name
         $query->groupBy('st.id');
-        $query->orderBy('st.name', 'ASC');
+        $query->orderBy($query->createFunction('LOWER(st.name)'), 'ASC');
         $query->addOrderBy('st.id'); // tie-breaker
 
         // FETCH all tags
@@ -101,8 +100,8 @@ trait TimelineQueryTags
         // WHERE these photos are in the user's requested folder recursively
         $query = $this->joinFilecache($query, $root, true, false);
 
-        // MAX 4
-        $query->setMaxResults(4);
+        // MAX 8
+        $query->setMaxResults(8);
 
         // FETCH tag previews
         $cursor = $this->executeQueryWithCTEs($query);

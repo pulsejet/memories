@@ -1,6 +1,6 @@
-import { generateUrl } from "@nextcloud/router";
 import { IDay, IPhoto } from "../../types";
 import axios from "@nextcloud/axios";
+import { API } from "../API";
 
 /**
  * Get original onThisDay response.
@@ -23,7 +23,7 @@ export async function getOnThisDayRaw() {
   }
 
   return (
-    await axios.post<IPhoto[]>(generateUrl("/apps/memories/api/days"), {
+    await axios.post<IPhoto[]>(API.DAYS(), {
       body_ids: dayIds.join(","),
     })
   ).data;

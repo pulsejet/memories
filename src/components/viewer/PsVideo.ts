@@ -1,28 +1,18 @@
 import PhotoSwipe from "photoswipe";
-import { generateUrl } from "@nextcloud/router";
 import { loadState } from "@nextcloud/initial-state";
 import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
 import { getCurrentUser } from "@nextcloud/auth";
 
-import Plyr from "plyr";
-import "plyr/dist/plyr.css";
-import plyrsvg from "../assets/plyr.svg";
-
-import videojs from "video.js";
-import "video.js/dist/video-js.min.css";
-import "videojs-contrib-quality-levels";
+import { API } from "../../services/API";
+import { IPhoto } from "../../types";
 
 const config_noTranscode = loadState(
   "memories",
   "notranscode",
   <string>"UNSET"
 ) as boolean | string;
-
-// Generate client id for this instance
-// Does not need to be cryptographically secure
-const clientId = Math.random().toString(36).substring(2, 15).padEnd(12, "0");
 
 /**
  * Check if slide has video content
@@ -111,26 +101,43 @@ class VideoContentSetup {
 
     pswp.on("close", () => {
       if (isVideoContent(pswp.currSlide.content)) {
-        // Switch from zoom to fade closing transition,
-        // as zoom transition is choppy for videos
-        if (
-          !pswp.options.showHideAnimationType ||
-          pswp.options.showHideAnimationType === "zoom"
-        ) {
-          pswp.options.showHideAnimationType = "fade";
-        }
-
         // prevent more requests
         this.destroyVideo(pswp.currSlide.content);
       }
     });
+
+    // Prevent closing when video fullscreen is active
+    pswp.on("pointerMove", (e) => {
+      const plyr: Plyr = (<any>pswp.currSlide.content)?.plyr;
+      if (plyr?.fullscreen.active) {
+        e.preventDefault();
+      }
+    });
   }
 
-  initVideo(content: any) {
+  getHLSsrc(content: any) {
+    // Get base URL
+    const fileid = content.data.photo.fileid;
+    return {
+      src: API.VIDEO_TRANSCODE(fileid),
+      type: "application/x-mpegURL",
+    };
+  }
+
+  async initVideo(content: any) {
     if (!isVideoContent(content) || content.videojs) {
       return;
     }
 
+    // Prevent double loading
+    content.videojs = {};
+
+    // Load videojs scripts
+    if (!globalThis.vidjs) {
+      await import("../../services/videojs");
+    }
+
+    // Create video element
     content.videoElement = document.createElement("video");
     content.videoElement.className = "video-js";
     content.videoElement.setAttribute("poster", content.data.msrc);
@@ -146,20 +153,11 @@ class VideoContentSetup {
     // Add the video element to the actual container
     content.element.appendChild(content.videoElement);
 
-    // Get file id
-    const fileid = content.data.photo.fileid;
-
     // Create hls sources if enabled
     let sources: any[] = [];
-    const baseUrl = generateUrl(
-      `/apps/memories/api/video/transcode/${clientId}/${fileid}`
-    );
 
     if (!config_noTranscode) {
-      sources.push({
-        src: `${baseUrl}/index.m3u8`,
-        type: "application/x-mpegURL",
-      });
+      sources.push(this.getHLSsrc(content));
     }
 
     sources.push({
@@ -167,8 +165,8 @@ class VideoContentSetup {
       type: "video/mp4",
     });
 
-    const overrideNative = !videojs.browser.IS_SAFARI;
-    content.videojs = videojs(content.videoElement, {
+    const overrideNative = !vidjs.browser.IS_SAFARI;
+    content.videojs = vidjs(content.videoElement, {
       fill: true,
       autoplay: true,
       controls: false,
@@ -210,32 +208,36 @@ class VideoContentSetup {
     }, 200);
 
     let canPlay = false;
-    content.videojs.on("loadedmetadata", () => {
+    content.videojs.on("canplay", () => {
       canPlay = true;
       this.updateRotation(content); // also gets the correct video elem as a side effect
-
-      // Wait (also below) for the transition to end
-      window.setTimeout(() => this.initPlyr(content), 250);
+      window.setTimeout(() => this.initPlyr(content), 0);
     });
 
     content.videojs.qualityLevels()?.on("addqualitylevel", (e) => {
-      window.setTimeout(() => this.initPlyr(content), 250);
+      if (e.qualityLevel?.label?.includes("max.m3u8")) {
+        // This is the highest quality level
+        // and guaranteed to be the last one
+        this.initPlyr(content);
+      }
+
+      // Fallback
+      window.setTimeout(() => this.initPlyr(content), 0);
     });
 
     // Get correct orientation
-    axios
-      .get<any>(
-        generateUrl("/apps/memories/api/image/info/{id}", {
-          id: content.data.photo.fileid,
-        })
-      )
-      .then((response) => {
-        content.data.exif = response.data?.exif;
+    if (!content.data.photo.imageInfo) {
+      const url = API.IMAGE_INFO(content.data.photo.fileid);
+      axios.get<any>(url).then((response) => {
+        content.data.photo.imageInfo = response.data;
 
         // Update only after video is ready
         // Otherwise the poster image is rotated
         if (canPlay) this.updateRotation(content);
       });
+    } else {
+      if (canPlay) this.updateRotation(content);
+    }
   }
 
   destroyVideo(content: any) {
@@ -265,30 +267,38 @@ class VideoContentSetup {
     const origParent = content.videoElement.parentElement;
 
     // Populate quality list
-    const qualityList = content.videojs?.qualityLevels();
+    let qualityList = content.videojs?.qualityLevels();
     let qualityNums: number[];
     if (qualityList && qualityList.length > 1) {
       const s = new Set<number>();
       for (let i = 0; i < qualityList?.length; i++) {
-        const { width, height } = qualityList[i];
+        const { width, height, label } = qualityList[i];
         s.add(Math.min(width, height));
+
+        if (label?.includes("max.m3u8")) {
+          s.add(999999999);
+        }
       }
       qualityNums = Array.from(s).sort((a, b) => b - a);
       qualityNums.unshift(0);
+      qualityNums.unshift(-1);
     }
 
     // Create the plyr instance
     const opts: Plyr.Options = {
-      iconUrl: <any>plyrsvg,
-      blankVideo: "",
       i18n: {
         qualityLabel: {
+          "-1": t("memories", "Direct"),
           0: t("memories", "Auto"),
+          999999999: t("memories", "Original"),
         },
       },
       fullscreen: {
         enabled: true,
-        container: ".pswp__container",
+        // container: we need to set this after Plyr is loaded
+        // since we don't initialize Plyr inside the container,
+        // and this container is computed during construction
+        // https://github.com/sampotts/plyr/blob/20bf5a883306e9303b325e72c9102d76cc733c47/src/js/fullscreen.js#L30
       },
     };
 
@@ -298,16 +308,45 @@ class VideoContentSetup {
         options: qualityNums,
         forced: true,
         onChange: (quality: number) => {
+          qualityList = content.videojs?.qualityLevels();
           if (!qualityList || !content.videojs) return;
+
+          if (quality === -1) {
+            // Direct playback
+            // Prevent any useless transcodes
+            for (let i = 0; i < qualityList.length; ++i) {
+              qualityList[i].enabled = false;
+            }
+
+            // Set the source to the original video
+            if (content.videojs.src().includes("m3u8")) {
+              content.videojs.src({
+                src: content.data.src,
+                type: "video/mp4",
+              });
+            }
+            return;
+          } else {
+            // Set source to HLS
+            if (!content.videojs.src().includes("m3u8")) {
+              content.videojs.src(this.getHLSsrc(content));
+            }
+          }
+
+          // Enable only the selected quality
           for (let i = 0; i < qualityList.length; ++i) {
-            const { width, height } = qualityList[i];
+            const { width, height, label } = qualityList[i];
             const pixels = Math.min(width, height);
-            qualityList[i].enabled = pixels === quality || !quality;
+            qualityList[i].enabled =
+              !quality || // auto
+              pixels === quality || // exact match
+              (label?.includes("max.m3u8") && quality === 999999999); // max
           }
         },
       };
     }
 
+    // Initialize Plyr and custom CSS
     const plyr = new Plyr(content.videoElement, opts);
     plyr.elements.container.style.height = "100%";
     plyr.elements.container.style.width = "100%";
@@ -320,27 +359,61 @@ class VideoContentSetup {
     plyr.elements.container.style.backgroundColor = "transparent";
     plyr.elements.wrapper.style.backgroundColor = "transparent";
 
+    // Set the fullscreen element to the container
+    plyr.elements.fullscreen = content.slide.holderElement;
+
+    // Done with init
     content.plyr = plyr;
+
+    // Wait for animation to end before showing Plyr
+    plyr.elements.container.style.opacity = "0";
+    setTimeout(() => {
+      plyr.elements.container.style.opacity = "1";
+    }, 250);
 
     // Restore original parent of video element
     origParent.appendChild(content.videoElement);
     // Move plyr to the slide container
     content.slide.holderElement.appendChild(plyr.elements.container);
+
+    // Add fullscreen orientation hooks
+    if (screen.orientation?.lock) {
+      plyr.on("enterfullscreen", (event) => {
+        const rotation = this.updateRotation(content);
+        const exif = content.data.photo.imageInfo?.exif;
+        const h = Number(exif?.ImageHeight || 0);
+        const w = Number(exif?.ImageWidth || 1);
+        if (h && w) {
+          if (h < w && !rotation) {
+            screen.orientation.lock("landscape");
+          } else {
+            screen.orientation.lock("portrait");
+          }
+        }
+      });
+
+      plyr.on("exitfullscreen", (event) => {
+        screen.orientation.unlock();
+      });
+    }
   }
 
-  updateRotation(content, val?: number) {
+  updateRotation(content: any, val?: number): boolean {
     if (!content.videojs) return;
 
     content.videoElement = content.videojs.el()?.querySelector("video");
     if (!content.videoElement) return;
 
-    const rotation = val ?? Number(content.data.exif?.Rotation);
+    const photo: IPhoto = content.data.photo;
+    const exif = photo.imageInfo?.exif;
+    const rotation = val ?? Number(exif?.Rotation || 0);
     const shouldRotate = content.videojs?.src().includes("m3u8");
 
     if (rotation && shouldRotate) {
       let transform = `rotate(${rotation}deg)`;
+      const hasRotation = rotation === 90 || rotation === 270;
 
-      if (rotation === 90 || rotation === 270) {
+      if (hasRotation) {
         content.videoElement.style.width = content.element.style.height;
         content.videoElement.style.height = content.element.style.width;
 
@@ -349,11 +422,15 @@ class VideoContentSetup {
       }
 
       content.videoElement.style.transform = transform;
+
+      return hasRotation;
     } else {
       content.videoElement.style.transform = "none";
       content.videoElement.style.width = "100%";
       content.videoElement.style.height = "100%";
     }
+
+    return false;
   }
 
   onContentDestroy({ content }) {

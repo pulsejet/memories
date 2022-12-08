@@ -1,7 +1,7 @@
-import { generateUrl } from "@nextcloud/router";
 import { IDay, IPhoto, ITag } from "../../types";
 import { constants, hashCode } from "../Utils";
 import axios from "@nextcloud/axios";
+import { API } from "../API";
 
 /**
  * Get list of tags and convert to Days response
@@ -15,9 +15,7 @@ export async function getTagsData(): Promise<IDay[]> {
     previews: IPhoto[];
   }[] = [];
   try {
-    const res = await axios.get<typeof data>(
-      generateUrl("/apps/memories/api/tags")
-    );
+    const res = await axios.get<typeof data>(API.TAG_LIST());
     data = res.data;
   } catch (e) {
     throw e;

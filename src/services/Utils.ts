@@ -1,9 +1,9 @@
 import { getCanonicalLocale } from "@nextcloud/l10n";
 import { getCurrentUser } from "@nextcloud/auth";
-import { generateUrl } from "@nextcloud/router";
 import { loadState } from "@nextcloud/initial-state";
 import { IPhoto } from "../types";
 import moment from "moment";
+import { API } from "./API";
 
 // Memoize the result of short date conversions
 // These operations are surprisingly expensive
@@ -212,7 +212,12 @@ export function convertFlags(photo: IPhoto) {
     delete photo.isfolder;
   }
   if (photo.isface) {
-    photo.flag |= constants.c.FLAG_IS_FACE;
+    const app = photo.isface;
+    if (app === "recognize") {
+      photo.flag |= constants.c.FLAG_IS_FACE_RECOGNIZE;
+    } else if (app === "facerecognition") {
+      photo.flag |= constants.c.FLAG_IS_FACE_RECOGNITION;
+    }
     delete photo.isface;
   }
   if (photo.istag) {
@@ -240,10 +245,18 @@ export function getFolderRoutePath(basePath: string) {
 /**
  * Get URL to live photo video part
  */
-export function getLivePhotoVideoUrl(p: IPhoto) {
-  return generateUrl(
-    `/apps/memories/api/video/livephoto/${p.fileid}?etag=${p.etag}&liveid=${p.liveid}`
-  );
+export function getLivePhotoVideoUrl(p: IPhoto, transcode: boolean) {
+  // Build query string
+  const query = new URLSearchParams();
+  query.set("etag", p.etag);
+  query.set("liveid", p.liveid);
+
+  // Transcode if allowed
+  if (transcode) {
+    query.set("transcode", videoClientIdPersistent);
+  }
+
+  return API.Q(API.VIDEO_LIVEPHOTO(p.fileid), query);
 }
 
 /**
@@ -302,10 +315,11 @@ export const constants = {
     FLAG_IS_FAVORITE: 1 << 3,
     FLAG_IS_FOLDER: 1 << 4,
     FLAG_IS_TAG: 1 << 5,
-    FLAG_IS_FACE: 1 << 6,
-    FLAG_IS_ALBUM: 1 << 7,
-    FLAG_SELECTED: 1 << 8,
-    FLAG_LEAVING: 1 << 9,
+    FLAG_IS_FACE_RECOGNIZE: 1 << 6,
+    FLAG_IS_FACE_RECOGNITION: 1 << 7,
+    FLAG_IS_ALBUM: 1 << 8,
+    FLAG_SELECTED: 1 << 9,
+    FLAG_LEAVING: 1 << 10,
   },
 
   TagDayID: TagDayID,

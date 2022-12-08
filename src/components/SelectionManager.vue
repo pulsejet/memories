@@ -37,6 +37,7 @@
 
     <!-- Selection Modals -->
     <EditDate ref="editDate" @refresh="refresh" />
+    <EditExif ref="editExif" @refresh="refresh" />
     <FaceMoveModal
       ref="faceMoveModal"
       @moved="deletePhotos"
@@ -52,7 +53,10 @@ import GlobalMixin from "../mixins/GlobalMixin";
 import UserConfig from "../mixins/UserConfig";
 
 import { showError } from "@nextcloud/dialogs";
-import { NcActions, NcActionButton } from "@nextcloud/vue";
+
+import NcActions from "@nextcloud/vue/dist/Components/NcActions";
+import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
+
 import { translate as t, translatePlural as n } from "@nextcloud/l10n";
 import {
   IDay,
@@ -68,13 +72,15 @@ import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
 
 import EditDate from "./modal/EditDate.vue";
+import EditExif from "./modal/EditExif.vue";
 import FaceMoveModal from "./modal/FaceMoveModal.vue";
 import AddToAlbumModal from "./modal/AddToAlbumModal.vue";
 
 import StarIcon from "vue-material-design-icons/Star.vue";
 import DownloadIcon from "vue-material-design-icons/Download.vue";
 import DeleteIcon from "vue-material-design-icons/TrashCanOutline.vue";
-import EditIcon from "vue-material-design-icons/ClockEdit.vue";
+import EditFileIcon from "vue-material-design-icons/FileEdit.vue";
+import EditClockIcon from "vue-material-design-icons/ClockEdit.vue";
 import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
 import UnarchiveIcon from "vue-material-design-icons/PackageUp.vue";
 import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
@@ -90,6 +96,7 @@ type Selection = Map<number, IPhoto>;
     NcActions,
     NcActionButton,
     EditDate,
+    EditExif,
     FaceMoveModal,
     AddToAlbumModal,
 
@@ -154,6 +161,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
         icon: DownloadIcon,
         callback: this.downloadSelection.bind(this),
         allowPublic: true,
+        if: () => !this.allowDownload(),
       },
       {
         name: t("memories", "Favorite"),
@@ -175,8 +183,14 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
       },
       {
         name: t("memories", "Edit Date/Time"),
-        icon: EditIcon,
+        icon: EditClockIcon,
         callback: this.editDateSelection.bind(this),
+      },
+      {
+        name: t("memories", "Edit EXIF Data"),
+        icon: EditFileIcon,
+        callback: this.editExifSelection.bind(this),
+        if: () => this.selection.size === 1,
       },
       {
         name: t("memories", "View in folder"),
@@ -195,22 +209,31 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
         name: t("memories", "Move to another person"),
         icon: MoveIcon,
         callback: this.moveSelectionToPerson.bind(this),
-        if: () => this.$route.name === "people",
+        if: () => this.$route.name === "recognize",
       },
       {
         name: t("memories", "Remove from person"),
         icon: CloseIcon,
         callback: this.removeSelectionFromPerson.bind(this),
-        if: () => this.$route.name === "people",
+        if: () => this.$route.name === "recognize",
       },
     ];
 
     // Ugly: globally exposed functions
-    globalThis.editDate = (photo: IPhoto) => {
+    const getSel = (photo: IPhoto) => {
       const sel = new Map<number, IPhoto>();
       sel.set(photo.fileid, photo);
-      this.editDateSelection(sel);
+      return sel;
     };
+    globalThis.editDate = (photo: IPhoto) =>
+      this.editDateSelection(getSel(photo));
+    globalThis.editExif = (photo: IPhoto) =>
+      this.editExifSelection(getSel(photo));
+  }
+
+  /** Download is not allowed on some public shares */
+  private allowDownload(): boolean {
+    return this.state_noDownload;
   }
 
   /** Archive is not allowed only on folder routes */
@@ -369,9 +392,15 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
       }
 
       if (this.touchAnchor && !this.touchScrollInterval) {
+        let frameCount = 3;
+
         const fun = () => {
           this.recycler.$el.scrollTop += this.touchScrollDelta;
-          this.touchMoveSelect(this.prevTouch, rowIdx);
+
+          if (frameCount++ >= 3) {
+            this.touchMoveSelect(this.prevTouch, rowIdx);
+            frameCount = 0;
+          }
 
           if (this.touchScrollInterval) {
             this.touchScrollInterval = window.requestAnimationFrame(fun);
@@ -713,6 +742,14 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
   }
 
   /**
+   * Open the edit date dialog
+   */
+  private async editExifSelection(selection: Selection) {
+    if (selection.size !== 1) return;
+    (<any>this.$refs.editExif).open(selection.values().next().value);
+  }
+
+  /**
    * Open the files app with the selected file (one)
    * Opens a new window.
    */
@@ -809,7 +846,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
   private async removeSelectionFromPerson(selection: Selection) {
     // Make sure route is valid
     const { user, name } = this.$route.params;
-    if (this.$route.name !== "people" || !user || !name) {
+    if (this.$route.name !== "recognize" || !user || !name) {
       return;
     }
 
@@ -837,7 +874,8 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
   /** Open viewer with given photo */
   private openViewer(photo: IPhoto) {
     this.$router.push({
-      ...this.$route,
+      path: this.$route.path,
+      query: this.$route.query,
       hash: utils.getViewerHash(photo),
     });
   }

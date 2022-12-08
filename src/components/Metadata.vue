@@ -48,8 +48,9 @@
 import { Component, Mixins } from "vue-property-decorator";
 import GlobalMixin from "../mixins/GlobalMixin";
 
-import { NcActions, NcActionButton } from "@nextcloud/vue";
-import { generateUrl } from "@nextcloud/router";
+import NcActions from "@nextcloud/vue/dist/Components/NcActions";
+import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
+
 import axios from "@nextcloud/axios";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import { getCanonicalLocale } from "@nextcloud/l10n";
@@ -63,7 +64,9 @@ import EditIcon from "vue-material-design-icons/Pencil.vue";
 import CalendarIcon from "vue-material-design-icons/Calendar.vue";
 import CameraIrisIcon from "vue-material-design-icons/CameraIris.vue";
 import ImageIcon from "vue-material-design-icons/Image.vue";
+import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
 import LocationIcon from "vue-material-design-icons/MapMarker.vue";
+import { API } from "../services/API";
 
 @Component({
   components: {
@@ -85,10 +88,9 @@ export default class Metadata extends Mixins(GlobalMixin) {
     this.exif = {};
     this.nominatim = null;
 
-    let state = this.state;
-    const res = await axios.get<any>(
-      generateUrl("/apps/memories/api/image/info/{id}", { id: fileInfo.id })
-    );
+    const state = this.state;
+    const url = API.IMAGE_INFO(fileInfo.id);
+    const res = await axios.get<any>(url);
     if (state !== this.state) return;
 
     this.baseInfo = res.data;
@@ -143,6 +145,17 @@ export default class Metadata extends Mixins(GlobalMixin) {
         title: this.imageInfo,
         subtitle: this.imageInfoSub,
         icon: ImageIcon,
+      });
+    }
+
+    const title = this.exif?.["Title"];
+    const desc = this.exif?.["Description"];
+    if (title || desc) {
+      list.push({
+        title: title || this.t("memories", "No title"),
+        subtitle: [desc || this.t("memories", "No description")],
+        icon: InfoIcon,
+        edit: () => globalThis.editExif(globalThis.currentViewerPhoto),
       });
     }
 
@@ -330,6 +343,7 @@ export default class Metadata extends Mixins(GlobalMixin) {
   }
   .text {
     display: inline-block;
+    word-break: break-word;
     flex: 1;
 
     .subtitle {
