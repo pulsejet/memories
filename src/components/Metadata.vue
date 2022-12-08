@@ -64,6 +64,7 @@ import EditIcon from "vue-material-design-icons/Pencil.vue";
 import CalendarIcon from "vue-material-design-icons/Calendar.vue";
 import CameraIrisIcon from "vue-material-design-icons/CameraIris.vue";
 import ImageIcon from "vue-material-design-icons/Image.vue";
+import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
 import LocationIcon from "vue-material-design-icons/MapMarker.vue";
 import { API } from "../services/API";
 
@@ -146,6 +147,14 @@ export default class Metadata extends Mixins(GlobalMixin) {
         icon: ImageIcon,
       });
     }
+
+    const desc = this.exif?.["Description"];
+    list.push({
+      title: this.exif?.["Title"] || this.t("memories", "No title"),
+      subtitle: desc ? [desc] : [],
+      icon: InfoIcon,
+      edit: () => globalThis.editExif(globalThis.currentViewerPhoto),
+    });
 
     if (this.address) {
       list.push({
@@ -331,6 +340,7 @@ export default class Metadata extends Mixins(GlobalMixin) {
   }
   .text {
     display: inline-block;
+    word-break: break-all;
     flex: 1;
 
     .subtitle {

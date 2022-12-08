@@ -37,6 +37,7 @@
 
     <!-- Selection Modals -->
     <EditDate ref="editDate" @refresh="refresh" />
+    <EditExif ref="editExif" @refresh="refresh" />
     <FaceMoveModal
       ref="faceMoveModal"
       @moved="deletePhotos"
@@ -71,13 +72,15 @@ import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
 
 import EditDate from "./modal/EditDate.vue";
+import EditExif from "./modal/EditExif.vue";
 import FaceMoveModal from "./modal/FaceMoveModal.vue";
 import AddToAlbumModal from "./modal/AddToAlbumModal.vue";
 
 import StarIcon from "vue-material-design-icons/Star.vue";
 import DownloadIcon from "vue-material-design-icons/Download.vue";
 import DeleteIcon from "vue-material-design-icons/TrashCanOutline.vue";
-import EditIcon from "vue-material-design-icons/ClockEdit.vue";
+import EditIcon from "vue-material-design-icons/Pencil.vue";
+import EditClockIcon from "vue-material-design-icons/ClockEdit.vue";
 import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
 import UnarchiveIcon from "vue-material-design-icons/PackageUp.vue";
 import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
@@ -93,6 +96,7 @@ type Selection = Map<number, IPhoto>;
     NcActions,
     NcActionButton,
     EditDate,
+    EditExif,
     FaceMoveModal,
     AddToAlbumModal,
 
@@ -179,8 +183,14 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
       },
       {
         name: t("memories", "Edit Date/Time"),
-        icon: EditIcon,
+        icon: EditClockIcon,
         callback: this.editDateSelection.bind(this),
+      },
+      {
+        name: t("memories", "Edit EXIF Data"),
+        icon: EditIcon,
+        callback: this.editExifSelection.bind(this),
+        if: () => this.selection.size === 1,
       },
       {
         name: t("memories", "View in folder"),
@@ -210,11 +220,15 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
     ];
 
     // Ugly: globally exposed functions
-    globalThis.editDate = (photo: IPhoto) => {
+    const getSel = (photo: IPhoto) => {
       const sel = new Map<number, IPhoto>();
       sel.set(photo.fileid, photo);
-      this.editDateSelection(sel);
+      return sel;
     };
+    globalThis.editDate = (photo: IPhoto) =>
+      this.editDateSelection(getSel(photo));
+    globalThis.editExif = (photo: IPhoto) =>
+      this.editExifSelection(getSel(photo));
   }
 
   /** Download is not allowed on some public shares */
@@ -725,6 +739,14 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
    */
   private async editDateSelection(selection: Selection) {
     (<any>this.$refs.editDate).open(Array.from(selection.values()));
+  }
+
+  /**
+   * Open the edit date dialog
+   */
+  private async editExifSelection(selection: Selection) {
+    if (selection.size !== 1) return;
+    (<any>this.$refs.editExif).open(selection.values().next().value);
   }
 
   /**

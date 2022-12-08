@@ -106,16 +106,6 @@
           })
         }}
       </div>
-
-      <div class="info-pad warn">
-        {{
-          t(
-            "memories",
-            "This feature modifies files in your storage to update Exif data."
-          )
-        }}
-        {{ t("memories", "Exercise caution and make sure you have backups.") }}
-      </div>
     </div>
 
     <div v-else>
