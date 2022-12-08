@@ -5,6 +5,7 @@ import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
 import { getCurrentUser } from "@nextcloud/auth";
 import { API } from "../services/API";
+import { IPhoto } from "../types";
 
 const config_noTranscode = loadState(
   "memories",
@@ -224,14 +225,18 @@ class VideoContentSetup {
     });
 
     // Get correct orientation
-    const url = API.IMAGE_INFO(content.data.photo.fileid);
-    axios.get<any>(url).then((response) => {
-      content.data.exif = response.data?.exif;
+    if (!content.data.photo.imageInfo) {
+      const url = API.IMAGE_INFO(content.data.photo.fileid);
+      axios.get<any>(url).then((response) => {
+        content.data.photo.imageInfo = response.data;
 
-      // Update only after video is ready
-      // Otherwise the poster image is rotated
+        // Update only after video is ready
+        // Otherwise the poster image is rotated
+        if (canPlay) this.updateRotation(content);
+      });
+    } else {
       if (canPlay) this.updateRotation(content);
-    });
+    }
   }
 
   destroyVideo(content: any) {
@@ -374,8 +379,9 @@ class VideoContentSetup {
     if (screen.orientation?.lock) {
       plyr.on("enterfullscreen", (event) => {
         const rotation = this.updateRotation(content);
-        const h = Number(content.data.exif?.ImageHeight || 0);
-        const w = Number(content.data.exif?.ImageWidth || 1);
+        const exif = content.data.photo.imageInfo?.exif;
+        const h = Number(exif?.ImageHeight || 0);
+        const w = Number(exif?.ImageWidth || 1);
         if (h && w) {
           if (h < w && !rotation) {
             screen.orientation.lock("landscape");
@@ -397,7 +403,9 @@ class VideoContentSetup {
     content.videoElement = content.videojs.el()?.querySelector("video");
     if (!content.videoElement) return;
 
-    const rotation = val ?? Number(content.data.exif?.Rotation || 0);
+    const photo: IPhoto = content.data.photo;
+    const exif = photo.imageInfo?.exif;
+    const rotation = val ?? Number(exif?.Rotation || 0);
     const shouldRotate = content.videojs?.src().includes("m3u8");
 
     if (rotation && shouldRotate) {

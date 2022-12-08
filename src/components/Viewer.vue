@@ -123,6 +123,25 @@
           </NcActionButton>
         </NcActions>
       </div>
+
+      <div
+        class="bottom-bar"
+        v-if="photoswipe"
+        :class="{ showControls, showBottomBar }"
+      >
+        <div class="exif title" v-if="currentPhoto.imageInfo?.exif?.Title">
+          {{ currentPhoto.imageInfo?.exif?.Title }}
+        </div>
+        <div
+          class="exif description"
+          v-if="currentPhoto.imageInfo?.exif?.Description"
+        >
+          {{ currentPhoto.imageInfo?.exif?.Description }}
+        </div>
+        <div class="exif date" v-if="currentDateTaken">
+          {{ currentDateTaken }}
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -137,6 +156,7 @@ import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import { showError } from "@nextcloud/dialogs";
+import axios from "@nextcloud/axios";
 
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
@@ -160,6 +180,7 @@ import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
 import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
 import TuneIcon from "vue-material-design-icons/Tune.vue";
 import SlideshowIcon from "vue-material-design-icons/PlayBox.vue";
+import { API } from "../services/API";
 
 const SLIDESHOW_MS = 5000;
 
@@ -274,6 +295,18 @@ export default class Viewer extends Mixins(GlobalMixin) {
     return this.currentPhoto?.flag & this.c.FLAG_IS_VIDEO;
   }
 
+  /** Show bottom bar info such as date taken */
+  get showBottomBar() {
+    return !this.isVideo && this.fullyOpened && this.currentPhoto?.imageInfo;
+  }
+
+  /** Get date taken string */
+  get currentDateTaken() {
+    const date = this.currentPhoto?.imageInfo?.datetaken;
+    if (!date) return null;
+    return utils.getLongDateStr(new Date(date * 1000), false, true);
+  }
+
   /** Get download link for current photo */
   get currentDownloadLink() {
     return this.currentPhoto
@@ -285,6 +318,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
   private handleFileUpdated({ fileid }: { fileid: number }) {
     if (this.currentPhoto && this.currentPhoto.fileid === fileid) {
       this.currentPhoto.etag += "_";
+      this.currentPhoto.imageInfo = null;
       this.photoswipe.refreshSlideContent(this.currIndex);
     }
   }
@@ -670,6 +704,14 @@ export default class Viewer extends Mixins(GlobalMixin) {
       // by scaling up the video by a maximum of 4x
       w *= 4;
       h *= 4;
+    }
+
+    // Lazy load the rest of EXIF data
+    if (!photo.imageInfo) {
+      axios.get(API.IMAGE_INFO(photo.fileid)).then((res) => {
+        photo.imageInfo = res.data;
+        this.$forceUpdate();
+      });
     }
 
     return {
@@ -1073,6 +1115,36 @@ export default class Viewer extends Mixins(GlobalMixin) {
   opacity: 0;
   &.showControls {
     opacity: 1;
+  }
+}
+
+.bottom-bar {
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.3));
+  width: 100%;
+  padding: 10px;
+  z-index: 100001;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+
+  transition: opacity 0.2s ease-in-out;
+  opacity: 0;
+  &.showControls.showBottomBar {
+    opacity: 1;
+  }
+
+  .exif {
+    &.title {
+      font-size: 0.9em;
+    }
+    &.description {
+      margin-top: -2px;
+      margin-bottom: 2px;
+      font-size: 0.9em;
+      max-width: 300px;
+      word-break: break-word;
+      line-height: 1.2em;
+    }
   }
 }
 

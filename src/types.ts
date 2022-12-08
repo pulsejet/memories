@@ -73,6 +73,21 @@ export type IPhoto = {
 
   /** Reference to day object */
   d?: IDay;
+  /** Reference to exif object */
+  imageInfo?: {
+    h: number;
+    w: number;
+    datetaken: number;
+    exif?: {
+      Rotation?: number;
+      Orientation?: number;
+      ImageWidth?: number;
+      ImageHeight?: number;
+      Title?: string;
+      Description?: string;
+      [other: string]: unknown;
+    };
+  };
 
   /** Face dimensions */
   facerect?: IFaceRect;
