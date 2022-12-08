@@ -1140,7 +1140,7 @@ export default class Viewer extends Mixins(GlobalMixin) {
   width: 100%;
   padding: 10px;
   z-index: 100001;
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
 
