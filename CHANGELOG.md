@@ -5,7 +5,6 @@ This file is manually updated. Please file an issue if something is missing.
 ## v4.9.0, v3.9.0
 
 - **Important**: v4.9.0 comes with an optimization that greatly reduces CPU usage for preview serving. However, for best experience, the preview generator app is now **required** to be configured properly. Please install it from the app store.
-
 - **Feature**: Slideshow for photos and videos ([#217](https://github.com/pulsejet/memories/issues/217))
 - **Feature**: Support for GPU transcoding ([#194](https://github.com/pulsejet/memories/issues/194))
 - **Feature**: Allow downloading entire albums
