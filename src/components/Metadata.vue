@@ -343,7 +343,7 @@ export default class Metadata extends Mixins(GlobalMixin) {
   }
   .text {
     display: inline-block;
-    word-break: break-all;
+    word-break: break-word;
     flex: 1;
 
     .subtitle {
