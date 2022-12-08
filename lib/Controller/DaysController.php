@@ -198,16 +198,24 @@ class DaysController extends ApiBase
             $transforms[] = [$this->timelineQuery, 'transformVideoFilter'];
         }
 
-        // Filter only for one face
-        if ($this->recognizeIsEnabled()) {
-            $face = $this->request->getParam('face');
-            if ($face) {
-                $transforms[] = [$this->timelineQuery, 'transformFaceFilter', $face];
-            }
+        // Filter only for one face on Recognize
+        if (($recognize = $this->request->getParam('recognize')) && $this->recognizeIsEnabled()) {
+            $transforms[] = [$this->timelineQuery, 'transformPeopleRecognitionFilter', $recognize];
 
             $faceRect = $this->request->getParam('facerect');
             if ($faceRect && !$aggregateOnly) {
-                $transforms[] = [$this->timelineQuery, 'transformFaceRect', $face];
+                $transforms[] = [$this->timelineQuery, 'transformPeopleRecognizeRect', $recognize];
+            }
+        }
+
+        // Filter only for one face on Face Recognition
+        if (($face = $this->request->getParam('facerecognition')) && $this->facerecognitionIsEnabled()) {
+            $currentModel = (int) $this->config->getAppValue('facerecognition', 'model', -1);
+            $transforms[] = [$this->timelineQuery, 'transformPeopleFaceRecognitionFilter', $currentModel, $face];
+
+            $faceRect = $this->request->getParam('facerect');
+            if ($faceRect && !$aggregateOnly) {
+                $transforms[] = [$this->timelineQuery, 'transformPeopleFaceRecognitionRect', $face];
             }
         }
 

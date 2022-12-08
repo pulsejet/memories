@@ -291,6 +291,20 @@ class ApiBase extends Controller
         return \OCA\Memories\Util::recognizeIsEnabled($this->appManager);
     }
 
+    // Check if facerecognition is installed and enabled for this user.
+    protected function facerecognitionIsInstalled(): bool
+    {
+        return \OCA\Memories\Util::facerecognitionIsInstalled($this->appManager);
+    }
+
+    /**
+     * Check if facerecognition is enabled for this user.
+     */
+    protected function facerecognitionIsEnabled(): bool
+    {
+        return \OCA\Memories\Util::facerecognitionIsEnabled($this->config, $this->getUID());
+    }
+
     /**
      * Helper to get one file or null from a fiolder.
      */

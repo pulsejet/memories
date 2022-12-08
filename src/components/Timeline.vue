@@ -10,11 +10,12 @@
     <!-- No content found and nothing is loading -->
     <NcEmptyContent
       title="Nothing to show here"
+      :description="emptyViewDescription"
       v-if="loading === 0 && list.length === 0"
     >
       <template #icon>
-        <PeopleIcon v-if="$route.name === 'people'" />
-        <ArchiveIcon v-else-if="$route.name === 'archive'" />
+        <PeopleIcon v-if="routeIsPeople" />
+        <ArchiveIcon v-else-if="routeIsArchive" />
         <ImageMultipleIcon v-else />
       </template>
     </NcEmptyContent>
@@ -43,7 +44,7 @@
           </div>
 
           <OnThisDay
-            v-if="$route.name === 'timeline'"
+            v-if="routeIsBase"
             :key="config_timelinePath"
             :viewer="$refs.viewer"
             @load="scrollerManager.adjust()"
@@ -306,6 +307,18 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
   destroyed() {
     window.removeEventListener("resize", this.handleResizeWithDelay);
+  }
+
+  get routeIsBase() {
+    return this.$route.name === "timeline";
+  }
+
+  get routeIsPeople() {
+    return ["recognize", "facerecognition"].includes(this.$route.name);
+  }
+
+  get routeIsArchive() {
+    return this.$route.name === "archive";
   }
 
   updateLoading(delta: number) {
@@ -574,12 +587,12 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
 
     // People
     if (
-      this.$route.name === "people" &&
+      this.routeIsPeople &&
       this.$route.params.user &&
       this.$route.params.name
     ) {
       query.set(
-        "face",
+        this.$route.name, // "recognize" or "facerecognition"
         `${this.$route.params.user}/${this.$route.params.name}`
       );
 
@@ -618,7 +631,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         return this.t("memories", "Your Timeline");
       case "favorites":
         return this.t("memories", "Favorites");
-      case "people":
+      case "recognize":
+      case "facerecognition":
         return this.t("memories", "People");
       case "videos":
         return this.t("memories", "Videos");
@@ -663,6 +677,33 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
     return head.name;
   }
 
+  /* Get a friendly description of empty view */
+  get emptyViewDescription() {
+    switch (this.$route.name) {
+      case "facerecognition":
+        if (this.config_facerecognitionEnabled)
+          return this.t(
+            "memories",
+            "You will find your friends soon. Please, be patient."
+          );
+        else
+          return this.t(
+            "memories",
+            "Face Recognition is disabled. Enable in settings to find your friends."
+          );
+      case "timeline":
+      case "favorites":
+      case "recognize":
+      case "videos":
+      case "albums":
+      case "archive":
+      case "thisday":
+      case "tags":
+      default:
+        return "";
+    }
+  }
+
   /** Fetch timeline main call */
   async fetchDays(noCache = false) {
     const url = API.Q(API.DAYS(), this.getQuery());
@@ -683,8 +724,8 @@ export default class Timeline extends Mixins(GlobalMixin, UserConfig) {
         data = await dav.getOnThisDayData();
       } else if (this.$route.name === "tags" && !this.$route.params.name) {
         data = await dav.getTagsData();
-      } else if (this.$route.name === "people" && !this.$route.params.name) {
-        data = await dav.getPeopleData();
+      } else if (this.routeIsPeople && !this.$route.params.name) {
+        data = await dav.getPeopleData(this.$route.name as any);
       } else if (this.$route.name === "albums" && !this.$route.params.name) {
         data = await dav.getAlbumsData("3");
       } else {

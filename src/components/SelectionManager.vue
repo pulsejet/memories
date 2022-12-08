@@ -209,13 +209,13 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
         name: t("memories", "Move to another person"),
         icon: MoveIcon,
         callback: this.moveSelectionToPerson.bind(this),
-        if: () => this.$route.name === "people",
+        if: () => this.$route.name === "recognize",
       },
       {
         name: t("memories", "Remove from person"),
         icon: CloseIcon,
         callback: this.removeSelectionFromPerson.bind(this),
-        if: () => this.$route.name === "people",
+        if: () => this.$route.name === "recognize",
       },
     ];
 
@@ -846,7 +846,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
   private async removeSelectionFromPerson(selection: Selection) {
     // Make sure route is valid
     const { user, name } = this.$route.params;
-    if (this.$route.name !== "people" || !user || !name) {
+    if (this.$route.name !== "recognize" || !user || !name) {
       return;
     }
 

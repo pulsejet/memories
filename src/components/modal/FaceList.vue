@@ -44,10 +44,18 @@ export default class FaceMergeModal extends Mixins(GlobalMixin) {
     this.name = this.$route.params.name || "";
     this.detail = null;
 
-    const data = await dav.getPeopleData();
+    let data = [];
+    let flags = this.c.FLAG_IS_TAG;
+    if (this.$route.name === "recognize") {
+      data = await dav.getPeopleData("recognize");
+      flags |= this.c.FLAG_IS_FACE_RECOGNIZE;
+    } else {
+      data = await dav.getPeopleData("facerecognition");
+      flags |= this.c.FLAG_IS_FACE_RECOGNITION;
+    }
     let detail = data[0].detail;
     detail.forEach((photo: IPhoto) => {
-      photo.flag = this.c.FLAG_IS_FACE | this.c.FLAG_IS_TAG;
+      photo.flag = flags;
     });
     detail = detail.filter((photo: ITag) => {
       const pname = photo.name || photo.fileid.toString();

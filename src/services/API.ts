@@ -50,12 +50,15 @@ export class API {
     return gen(`${BASE}/tags/preview/{tag}`, { tag });
   }
 
-  static FACE_LIST() {
-    return gen(`${BASE}/faces`);
+  static FACE_LIST(app: "recognize" | "facerecognition") {
+    return gen(`${BASE}/${app}/people`);
   }
 
-  static FACE_PREVIEW(face: string | number) {
-    return gen(`${BASE}/faces/preview/{face}`, { face });
+  static FACE_PREVIEW(
+    app: "recognize" | "facerecognition",
+    face: string | number
+  ) {
+    return gen(`${BASE}/${app}/people/preview/{face}`, { face });
   }
 
   static ARCHIVE(fileid: number) {

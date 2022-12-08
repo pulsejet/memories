@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace OCA\Memories;
 
+use OCP\App\IAppManager;
+use OCP\IConfig;
+
 class Util
 {
     public static $TAG_DAYID_START = -(1 << 30); // the world surely didn't exist
@@ -46,10 +49,8 @@ class Util
 
     /**
      * Check if albums are enabled for this user.
-     *
-     * @param mixed $appManager
      */
-    public static function albumsIsEnabled(&$appManager): bool
+    public static function albumsIsEnabled(IAppManager &$appManager): bool
     {
         if (!$appManager->isEnabledForUser('photos')) {
             return false;
@@ -72,10 +73,8 @@ class Util
 
     /**
      * Check if recognize is enabled for this user.
-     *
-     * @param mixed $appManager
      */
-    public static function recognizeIsEnabled(&$appManager): bool
+    public static function recognizeIsEnabled(IAppManager &$appManager): bool
     {
         if (!$appManager->isEnabledForUser('recognize')) {
             return false;
@@ -87,11 +86,33 @@ class Util
     }
 
     /**
-     * Check if link sharing is allowed.
-     *
-     * @param mixed $config
+     * Check if Face Recognition is enabled by the user.
      */
-    public static function isLinkSharingEnabled(&$config): bool
+    public static function facerecognitionIsEnabled(IConfig &$config, string $userId): bool
+    {
+        $e = $config->getUserValue($userId, 'facerecognition', 'enabled', 'false');
+
+        return 'true' === $e;
+    }
+
+    /**
+     * Check if Face Recognition is installed and enabled for this user.
+     */
+    public static function facerecognitionIsInstalled(IAppManager &$appManager): bool
+    {
+        if (!$appManager->isEnabledForUser('facerecognition')) {
+            return false;
+        }
+
+        $v = $appManager->getAppInfo('facerecognition')['version'];
+
+        return version_compare($v, '0.9.10-beta.2', '>=');
+    }
+
+    /**
+     * Check if link sharing is allowed.
+     */
+    public static function isLinkSharingEnabled(IConfig &$config): bool
     {
         // Check if the shareAPI is enabled
         if ('yes' !== $config->getAppValue('core', 'shareapi_enabled', 'yes')) {

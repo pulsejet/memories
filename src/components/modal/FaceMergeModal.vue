@@ -135,7 +135,7 @@ export default class FaceMergeModal extends Mixins(GlobalMixin) {
       // Go to new face
       if (failures === 0) {
         this.$router.push({
-          name: "people",
+          name: "recognize",
           params: { user: face.user_id, name: newName },
         });
         this.close();

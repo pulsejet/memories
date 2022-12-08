@@ -23,7 +23,8 @@ return [
         // Routes with params
         w(['name' => 'Page#folder', 'url' => '/folders/{path}', 'verb' => 'GET'], 'path'),
         w(['name' => 'Page#albums', 'url' => '/albums/{id}', 'verb' => 'GET'], 'id'),
-        w(['name' => 'Page#people', 'url' => '/people/{name}', 'verb' => 'GET'], 'name'),
+        w(['name' => 'Page#recognize', 'url' => '/recognize/{name}', 'verb' => 'GET'], 'name'),
+        w(['name' => 'Page#facerecognition', 'url' => '/facerecognition/{name}', 'verb' => 'GET'], 'name'),
         w(['name' => 'Page#tags', 'url' => '/tags/{name}', 'verb' => 'GET'], 'name'),
 
         // Public folder share
@@ -50,8 +51,10 @@ return [
         ['name' => 'Tags#tags', 'url' => '/api/tags', 'verb' => 'GET'],
         ['name' => 'Tags#preview', 'url' => '/api/tags/preview/{tag}', 'verb' => 'GET'],
 
-        ['name' => 'Faces#faces', 'url' => '/api/faces', 'verb' => 'GET'],
-        ['name' => 'Faces#preview', 'url' => '/api/faces/preview/{id}', 'verb' => 'GET'],
+        ['name' => 'People#recognizePeople', 'url' => '/api/recognize/people', 'verb' => 'GET'],
+        ['name' => 'People#recognizePeoplePreview', 'url' => '/api/recognize/people/preview/{id}', 'verb' => 'GET'],
+        ['name' => 'People#facerecognitionPeople', 'url' => '/api/facerecognition/people', 'verb' => 'GET'],
+        ['name' => 'People#facerecognitionPeoplePreview', 'url' => '/api/facerecognition/people/preview/{id}', 'verb' => 'GET'],
 
         ['name' => 'Archive#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
 

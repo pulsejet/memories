@@ -99,7 +99,7 @@ export default class FaceTopMatter extends Mixins(GlobalMixin, UserConfig) {
   }
 
   back() {
-    this.$router.push({ name: "people" });
+    this.$router.push({ name: this.$route.name });
   }
 
   changeShowFaceRect() {

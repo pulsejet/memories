@@ -299,7 +299,8 @@ trait TimelineQueryDays
             }
 
             // All transform processing
-            $this->processFace($row);
+            $this->processPeopleRecognizeDetection($row);
+            $this->processFaceRecognitionDetection($row);
 
             // We don't need these fields
             unset($row['datetaken'], $row['rootid']);

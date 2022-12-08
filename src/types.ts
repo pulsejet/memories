@@ -105,7 +105,7 @@ export type IPhoto = {
   /** Is this an album */
   isalbum?: boolean;
   /** Is this a face */
-  isface?: boolean;
+  isface?: "recognize" | "facerecognition";
   /** Optional datetaken epoch */
   datetaken?: number;
 };

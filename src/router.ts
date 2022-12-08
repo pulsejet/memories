@@ -77,9 +77,18 @@ export default new Router({
     },
 
     {
-      path: "/people/:user?/:name?",
+      path: "/recognize/:user?/:name?",
       component: Timeline,
-      name: "people",
+      name: "recognize",
+      props: (route) => ({
+        rootTitle: t("memories", "People"),
+      }),
+    },
+
+    {
+      path: "/facerecognition/:user?/:name?",
+      component: Timeline,
+      name: "facerecognition",
       props: (route) => ({
         rootTitle: t("memories", "People"),
       }),

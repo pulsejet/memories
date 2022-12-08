@@ -58,7 +58,7 @@ export default class Tag extends Mixins(GlobalMixin) {
 
   get previewUrl() {
     if (this.face) {
-      return API.FACE_PREVIEW(this.face.fileid);
+      return API.FACE_PREVIEW(this.faceApp, this.face.fileid);
     }
 
     if (this.album) {
@@ -78,7 +78,16 @@ export default class Tag extends Mixins(GlobalMixin) {
   }
 
   get face() {
-    return this.data.flag & constants.c.FLAG_IS_FACE ? this.data : null;
+    return this.data.flag & constants.c.FLAG_IS_FACE_RECOGNIZE ||
+      this.data.flag & constants.c.FLAG_IS_FACE_RECOGNITION
+      ? this.data
+      : null;
+  }
+
+  get faceApp() {
+    return this.data.flag & constants.c.FLAG_IS_FACE_RECOGNITION
+      ? "facerecognition"
+      : "recognize";
   }
 
   get album() {
@@ -94,7 +103,7 @@ export default class Tag extends Mixins(GlobalMixin) {
     if (this.face) {
       const name = this.face.name || this.face.fileid.toString();
       const user = this.face.user_id;
-      return { name: "people", params: { name, user } };
+      return { name: this.faceApp, params: { name, user } };
     }
 
     if (this.album) {

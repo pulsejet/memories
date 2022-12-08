@@ -1,16 +1,19 @@
 import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
+import { generateUrl } from "@nextcloud/router";
 import { IDay, IPhoto } from "../../types";
 import { API } from "../API";
-import client from "../DavClient";
 import { constants } from "../Utils";
+import client from "../DavClient";
 import * as base from "./base";
 
 /**
  * Get list of tags and convert to Days response
  */
-export async function getPeopleData(): Promise<IDay[]> {
+export async function getPeopleData(
+  app: "recognize" | "facerecognition"
+): Promise<IDay[]> {
   // Query for photos
   let data: {
     id: number;
@@ -19,7 +22,7 @@ export async function getPeopleData(): Promise<IDay[]> {
     previews: IPhoto[];
   }[] = [];
   try {
-    const res = await axios.get<typeof data>(API.FACE_LIST());
+    const res = await axios.get<typeof data>(API.FACE_LIST(app));
     data = res.data;
   } catch (e) {
     throw e;
@@ -39,11 +42,46 @@ export async function getPeopleData(): Promise<IDay[]> {
             ...face,
             fileid: face.id,
             istag: true,
-            isface: true,
+            isface: app,
           } as any)
       ),
     },
   ];
+}
+
+export async function updatePeopleFaceRecognition(
+  name: string,
+  params: object
+) {
+  if (Number.isInteger(Number(name))) {
+    return await axios.put(
+      generateUrl(`/apps/facerecognition/api/2.0/cluster/${name}`),
+      params
+    );
+  } else {
+    return await axios.put(
+      generateUrl(`/apps/facerecognition/api/2.0/person/${name}`),
+      params
+    );
+  }
+}
+
+export async function renamePeopleFaceRecognition(
+  name: string,
+  newName: string
+) {
+  return await updatePeopleFaceRecognition(name, {
+    name: newName,
+  });
+}
+
+export async function setVisibilityPeopleFaceRecognition(
+  name: string,
+  visibility: boolean
+) {
+  return await updatePeopleFaceRecognition(name, {
+    visible: visibility,
+  });
 }
 
 /**

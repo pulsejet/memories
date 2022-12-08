@@ -212,7 +212,12 @@ export function convertFlags(photo: IPhoto) {
     delete photo.isfolder;
   }
   if (photo.isface) {
-    photo.flag |= constants.c.FLAG_IS_FACE;
+    const app = photo.isface;
+    if (app === "recognize") {
+      photo.flag |= constants.c.FLAG_IS_FACE_RECOGNIZE;
+    } else if (app === "facerecognition") {
+      photo.flag |= constants.c.FLAG_IS_FACE_RECOGNITION;
+    }
     delete photo.isface;
   }
   if (photo.istag) {
@@ -310,10 +315,11 @@ export const constants = {
     FLAG_IS_FAVORITE: 1 << 3,
     FLAG_IS_FOLDER: 1 << 4,
     FLAG_IS_TAG: 1 << 5,
-    FLAG_IS_FACE: 1 << 6,
-    FLAG_IS_ALBUM: 1 << 7,
-    FLAG_SELECTED: 1 << 8,
-    FLAG_LEAVING: 1 << 9,
+    FLAG_IS_FACE_RECOGNIZE: 1 << 6,
+    FLAG_IS_FACE_RECOGNITION: 1 << 7,
+    FLAG_IS_ALBUM: 1 << 8,
+    FLAG_SELECTED: 1 << 9,
+    FLAG_LEAVING: 1 << 10,
   },
 
   TagDayID: TagDayID,
