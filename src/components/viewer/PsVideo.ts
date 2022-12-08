@@ -4,8 +4,9 @@ import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
 import { getCurrentUser } from "@nextcloud/auth";
-import { API } from "../services/API";
-import { IPhoto } from "../types";
+
+import { API } from "../../services/API";
+import { IPhoto } from "../../types";
 
 const config_noTranscode = loadState(
   "memories",
@@ -133,7 +134,7 @@ class VideoContentSetup {
 
     // Load videojs scripts
     if (!globalThis.vidjs) {
-      await import("../services/videojs");
+      await import("../../services/videojs");
     }
 
     // Create video element

@@ -148,9 +148,9 @@
 
 <script lang="ts">
 import { Component, Emit, Mixins } from "vue-property-decorator";
-import GlobalMixin from "../mixins/GlobalMixin";
+import GlobalMixin from "../../mixins/GlobalMixin";
 
-import { IDay, IPhoto, IRow, IRowType } from "../types";
+import { IDay, IPhoto, IRow, IRowType } from "../../types";
 
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
@@ -158,10 +158,10 @@ import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import { showError } from "@nextcloud/dialogs";
 import axios from "@nextcloud/axios";
 
-import * as dav from "../services/DavRequests";
-import * as utils from "../services/Utils";
-import { getPreviewUrl } from "../services/FileUtils";
-import { getDownloadLink } from "../services/DavRequests";
+import * as dav from "../../services/DavRequests";
+import * as utils from "../../services/Utils";
+import { getPreviewUrl } from "../../services/FileUtils";
+import { getDownloadLink } from "../../services/DavRequests";
 
 import ImageEditor from "./ImageEditor.vue";
 
@@ -180,7 +180,7 @@ import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
 import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
 import TuneIcon from "vue-material-design-icons/Tune.vue";
 import SlideshowIcon from "vue-material-design-icons/PlayBox.vue";
-import { API } from "../services/API";
+import { API } from "../../services/API";
 
 const SLIDESHOW_MS = 5000;
 

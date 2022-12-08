@@ -156,7 +156,7 @@ import Photo from "./frame/Photo.vue";
 import Tag from "./frame/Tag.vue";
 import ScrollerManager from "./ScrollerManager.vue";
 import SelectionManager from "./SelectionManager.vue";
-import Viewer from "./Viewer.vue";
+import Viewer from "./viewer/Viewer.vue";
 import OnThisDay from "./top-matter/OnThisDay.vue";
 import TopMatter from "./top-matter/TopMatter.vue";
 

@@ -9,7 +9,7 @@
 
 <script lang="ts">
 import { Component, Prop, Mixins } from "vue-property-decorator";
-import GlobalMixin from "../mixins/GlobalMixin";
+import GlobalMixin from "../../mixins/GlobalMixin";
 
 import { basename, dirname, extname, join } from "path";
 import { emit } from "@nextcloud/event-bus";
@@ -20,7 +20,7 @@ import { FilerobotImageEditorConfig } from "react-filerobot-image-editor";
 
 import translations from "./ImageEditorTranslations";
 
-import { API } from "../services/API";
+import { API } from "../../services/API";
 
 let TABS, TOOLS: any;
 type FilerobotImageEditor = import("filerobot-image-editor").default;

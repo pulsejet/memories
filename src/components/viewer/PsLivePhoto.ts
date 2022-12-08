@@ -1,5 +1,5 @@
 import PhotoSwipe from "photoswipe";
-import * as utils from "../services/Utils";
+import * as utils from "../../services/Utils";
 
 function isLiveContent(content): boolean {
   return Boolean(content?.data?.photo?.liveid);
