@@ -189,16 +189,15 @@ class PeopleController extends ApiBase
     /**
      * Get face preview image cropped with imagick.
      *
-     * @param array $detections Array of detections to search
-     * @param \OCP\IUser $user User to search for
-     * @param int $padding Padding to add to the face in preview
+     * @param array      $detections Array of detections to search
+     * @param \OCP\IUser $user       User to search for
+     * @param int        $padding    Padding to add to the face in preview
      */
     private function getPreviewResponse(
         array $detections,
         \OCP\IUser $user,
         float $padding
-    ): Http\Response
-    {
+    ): Http\Response {
         // Get preview manager
         $previewManager = \OC::$server->get(\OCP\IPreview::class);
 
