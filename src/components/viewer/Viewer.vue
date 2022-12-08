@@ -1152,13 +1152,14 @@ export default class Viewer extends Mixins(GlobalMixin) {
 
   .exif {
     &.title {
+      font-weight: bold;
       font-size: 0.9em;
     }
     &.description {
       margin-top: -2px;
       margin-bottom: 2px;
       font-size: 0.9em;
-      max-width: 300px;
+      max-width: 70vw;
       word-break: break-word;
       line-height: 1.2em;
     }
