@@ -36,6 +36,8 @@ class DownloadController extends ApiBase
      *
      * @PublicPage
      *
+     * @UseSession
+     *
      * Request to download one or more files
      */
     public function request(): JSONResponse
@@ -54,6 +56,8 @@ class DownloadController extends ApiBase
 
     /**
      * Get a handle for downloading files.
+     *
+     * The calling controller must have the UseSession annotation.
      *
      * @param string $name  Name of zip file
      * @param int[]  $files
