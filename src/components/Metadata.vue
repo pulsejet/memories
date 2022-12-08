@@ -148,13 +148,16 @@ export default class Metadata extends Mixins(GlobalMixin) {
       });
     }
 
+    const title = this.exif?.["Title"];
     const desc = this.exif?.["Description"];
-    list.push({
-      title: this.exif?.["Title"] || this.t("memories", "No title"),
-      subtitle: [desc || this.t("memories", "No description")],
-      icon: InfoIcon,
-      edit: () => globalThis.editExif(globalThis.currentViewerPhoto),
-    });
+    if (title || desc) {
+      list.push({
+        title: title || this.t("memories", "No title"),
+        subtitle: [desc || this.t("memories", "No description")],
+        icon: InfoIcon,
+        edit: () => globalThis.editExif(globalThis.currentViewerPhoto),
+      });
+    }
 
     if (this.address) {
       list.push({

@@ -79,7 +79,7 @@ import AddToAlbumModal from "./modal/AddToAlbumModal.vue";
 import StarIcon from "vue-material-design-icons/Star.vue";
 import DownloadIcon from "vue-material-design-icons/Download.vue";
 import DeleteIcon from "vue-material-design-icons/TrashCanOutline.vue";
-import EditIcon from "vue-material-design-icons/Pencil.vue";
+import EditFileIcon from "vue-material-design-icons/FileEdit.vue";
 import EditClockIcon from "vue-material-design-icons/ClockEdit.vue";
 import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
 import UnarchiveIcon from "vue-material-design-icons/PackageUp.vue";
@@ -188,7 +188,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
       },
       {
         name: t("memories", "Edit EXIF Data"),
-        icon: EditIcon,
+        icon: EditFileIcon,
         callback: this.editExifSelection.bind(this),
         if: () => this.selection.size === 1,
       },

@@ -121,6 +121,17 @@
               <SlideshowIcon :size="24" />
             </template>
           </NcActionButton>
+          <NcActionButton
+            :aria-label="t('memories', 'Edit EXIF Data')"
+            v-if="!routeIsPublic"
+            @click="editExif"
+            :close-after-click="true"
+          >
+            {{ t("memories", "Edit EXIF Data") }}
+            <template #icon>
+              <EditFileIcon :size="24" />
+            </template>
+          </NcActionButton>
         </NcActions>
       </div>
 
@@ -149,25 +160,23 @@
 <script lang="ts">
 import { Component, Emit, Mixins } from "vue-property-decorator";
 import GlobalMixin from "../../mixins/GlobalMixin";
-
 import { IDay, IPhoto, IRow, IRowType } from "../../types";
 
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
+import axios from "@nextcloud/axios";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import { showError } from "@nextcloud/dialogs";
-import axios from "@nextcloud/axios";
 
-import * as dav from "../../services/DavRequests";
-import * as utils from "../../services/Utils";
 import { getPreviewUrl } from "../../services/FileUtils";
 import { getDownloadLink } from "../../services/DavRequests";
+import { API } from "../../services/API";
+import * as dav from "../../services/DavRequests";
+import * as utils from "../../services/Utils";
 
 import ImageEditor from "./ImageEditor.vue";
-
 import PhotoSwipe, { PhotoSwipeOptions } from "photoswipe";
 import "photoswipe/style.css";
-
 import PsVideo from "./PsVideo";
 import PsLivePhoto from "./PsLivePhoto";
 
@@ -180,7 +189,7 @@ import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
 import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
 import TuneIcon from "vue-material-design-icons/Tune.vue";
 import SlideshowIcon from "vue-material-design-icons/PlayBox.vue";
-import { API } from "../../services/API";
+import EditFileIcon from "vue-material-design-icons/FileEdit.vue";
 
 const SLIDESHOW_MS = 5000;
 
@@ -198,6 +207,7 @@ const SLIDESHOW_MS = 5000;
     OpenInNewIcon,
     TuneIcon,
     SlideshowIcon,
+    EditFileIcon,
   },
 })
 export default class Viewer extends Mixins(GlobalMixin) {
@@ -1084,6 +1094,13 @@ export default class Viewer extends Mixins(GlobalMixin) {
     if (!document.fullscreenElement) {
       this.stopSlideshow();
     }
+  }
+
+  /**
+   * Edit EXIF data for current photo
+   */
+  private editExif() {
+    globalThis.editExif(globalThis.currentViewerPhoto);
   }
 }
 </script>
