@@ -9,10 +9,10 @@ OC.L10N.register(
     "Download" : "ښکته کول",
     "Favorite" : "په نښه شوی",
     "View in folder" : "په فولډر کې کتل",
-    "Share" : "شریکول",
-    "Close" : "بندول",
     "Save" : "ساتل",
     "Name" : "نوم",
+    "Share" : "شریکول",
+    "Close" : "بندول",
     "Continue" : "وړاندې تګ",
     "Size" : "کچه"
 },

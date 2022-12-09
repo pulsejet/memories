@@ -10,12 +10,12 @@ OC.L10N.register(
     "Delete" : "Delete",
     "Download" : "Download",
     "Favorite" : "Favorite",
-    "Close" : "Close",
     "Save" : "Save",
     "Name" : "Name",
     "Update" : "Update",
     "Refresh" : "Refresh",
     "Remove" : "Remove",
+    "Close" : "Close",
     "Continue" : "Continue",
     "Size" : "Size"
 },
