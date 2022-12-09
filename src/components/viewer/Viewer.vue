@@ -36,13 +36,22 @@
             <template #icon> <ShareIcon :size="24" /> </template>
           </NcActionButton>
           <NcActionButton
-            v-if="!routeIsPublic"
+            v-if="!routeIsPublic && !routeIsAlbum"
             :aria-label="t('memories', 'Delete')"
             @click="deleteCurrent"
             :close-after-click="true"
           >
             {{ t("memories", "Delete") }}
             <template #icon> <DeleteIcon :size="24" /> </template>
+          </NcActionButton>
+          <NcActionButton
+            v-if="!routeIsPublic && routeIsAlbum"
+            :aria-label="t('memories', 'Remove from album')"
+            @click="deleteCurrent"
+            :close-after-click="true"
+          >
+            {{ t("memories", "Remove from album") }}
+            <template #icon> <AlbumRemoveIcon :size="24" /> </template>
           </NcActionButton>
           <NcActionButton
             v-if="!routeIsPublic"
@@ -101,7 +110,7 @@
             </template>
           </NcActionButton>
           <NcActionButton
-            v-if="!routeIsPublic"
+            v-if="!routeIsPublic && !routeIsAlbum"
             :aria-label="t('memories', 'View in folder')"
             @click="viewInFolder"
             :close-after-click="true"
@@ -190,6 +199,7 @@ import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
 import TuneIcon from "vue-material-design-icons/Tune.vue";
 import SlideshowIcon from "vue-material-design-icons/PlayBox.vue";
 import EditFileIcon from "vue-material-design-icons/FileEdit.vue";
+import AlbumRemoveIcon from "vue-material-design-icons/BookRemove.vue";
 
 const SLIDESHOW_MS = 5000;
 
@@ -208,6 +218,7 @@ const SLIDESHOW_MS = 5000;
     TuneIcon,
     SlideshowIcon,
     EditFileIcon,
+    AlbumRemoveIcon,
   },
 })
 export default class Viewer extends Mixins(GlobalMixin) {
@@ -273,6 +284,11 @@ export default class Viewer extends Mixins(GlobalMixin) {
   /** Route is public */
   get routeIsPublic() {
     return this.$route.name === "folder-share";
+  }
+
+  /** Route is album */
+  get routeIsAlbum() {
+    return this.$route.name === "albums";
   }
 
   /** Update the document title */
