@@ -185,12 +185,13 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
         name: t("memories", "Edit Date/Time"),
         icon: EditClockIcon,
         callback: this.editDateSelection.bind(this),
+        if: () => !this.routeIsAlbum(),
       },
       {
         name: t("memories", "Edit EXIF Data"),
         icon: EditFileIcon,
         callback: this.editExifSelection.bind(this),
-        if: () => this.selection.size === 1,
+        if: () => this.selection.size === 1 && !this.routeIsAlbum(),
       },
       {
         name: t("memories", "View in folder"),
