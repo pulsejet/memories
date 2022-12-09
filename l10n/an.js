@@ -8,10 +8,10 @@ OC.L10N.register(
     "Delete" : "Borrar",
     "Download" : "Escargar",
     "Favorite" : "Favorito",
-    "Share" : "Compartir",
-    "Close" : "Zarrar",
     "Back" : "Ta zaga",
     "Name" : "Nombre",
+    "Share" : "Compartir",
+    "Close" : "Zarrar",
     "Continue" : "Continar",
     "Size" : "Grandaria"
 },

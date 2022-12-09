@@ -9,10 +9,6 @@
     "Delete" : "Sil",
     "Download" : "Yüklə",
     "Favorite" : "İstəkli",
-    "Share" : "Paylaş",
-    "Close" : "Bağla",
-    "Previous" : "Əvvələ",
-    "Next" : "Növbəti",
     "Save" : "Saxla",
     "Month" : "Ay",
     "Day" : "Gün",
@@ -21,6 +17,10 @@
     "Update" : "Yenilənmə",
     "Refresh" : "Yenilə",
     "Remove" : "Sil",
+    "Share" : "Paylaş",
+    "Close" : "Bağla",
+    "Previous" : "Əvvələ",
+    "Next" : "Növbəti",
     "Reset" : "Sıfırla",
     "Size" : "Həcm"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

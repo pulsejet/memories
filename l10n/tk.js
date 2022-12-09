@@ -10,12 +10,12 @@ OC.L10N.register(
     "Delete" : "Pozmak",
     "Download" : "Göçürip almak",
     "Favorite" : "Halaýan",
-    "Share" : "Paýlaş",
-    "Close" : "Ýap",
     "Back" : "Yzyna",
     "Save" : "Saklamak",
     "Name" : "Ady",
     "Refresh" : "Täzelemek",
-    "Remove" : "Aýyrmak"
+    "Remove" : "Aýyrmak",
+    "Share" : "Paýlaş",
+    "Close" : "Ýap"
 },
 "nplurals=2; plural=(n != 1);");
