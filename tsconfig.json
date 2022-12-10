@@ -10,5 +10,8 @@
     "useDefineForClassFields": true,
     "noImplicitThis": true,
     "esModuleInterop": true
+  },
+  "vueCompilerOptions": {
+    "target": 2.7
   }
 }
