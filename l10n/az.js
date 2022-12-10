@@ -15,6 +15,8 @@ OC.L10N.register(
     "Month" : "Ay",
     "Day" : "Gün",
     "Time" : "Vaxt",
+    "Title" : "Başlıq",
+    "Description" : "Açıqlanma",
     "Name" : "Ad",
     "Update" : "Yenilənmə",
     "Refresh" : "Yenilə",

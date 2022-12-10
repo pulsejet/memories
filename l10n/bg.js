@@ -41,7 +41,6 @@ OC.L10N.register(
     "You are about to download a large number of files. Are you sure?" : "Предстои ви да изтеглите голям брой файлове. Сигурни ли сте?",
     "You are about to delete a large number of files. Are you sure?" : "Предстои ви да изтриете голям брой файлове. Сигурни ли сте?",
     "You are about to touch a large number of files. Are you sure?" : "Вие сте на път да засегнете голям брой файлове. Сигурни ли сте?",
-    "Could not remove photos from album" : "Неуспешно премахване на снимки от албума",
     "_{n} selected_::_{n} selected_" : ["{n} избрани","{n} избрани"],
     "Timeline Path" : "Път на времева линия/хронология/",
     "Folders Path" : "Път на папките",
@@ -99,6 +98,10 @@ OC.L10N.register(
     "Newest" : "Най-новият",
     "Oldest" : "Най-старият",
     "Loading data … {n}/{m}" : "Зареждане на данни ... {n}/{m}",
+    "Title" : "Заглавие",
+    "Description" : "Описание",
+    "Label" : "Име",
+    "Copyright" : "Авторско право",
     "Remove person" : "Премахване на лице",
     "Are you sure you want to remove {name}?" : "Сигурни ли сте, че искате премахване на {name}?",
     "Name" : "Име",
@@ -240,6 +243,7 @@ OC.L10N.register(
     "Failed to download files" : "Неуспешно изтегляне на файлове",
     "Failed to favorite files." : "Неуспешно добавяне на файлове в любими.",
     "Failed to favorite some files." : "Неуспешно добавяне на някой файлове в любими.",
-    "Failed to favorite {fileName}." : "Неуспешно добавяне на {fileName} в любими."
+    "Failed to favorite {fileName}." : "Неуспешно добавяне на {fileName} в любими.",
+    "Could not remove photos from album" : "Неуспешно премахване на снимки от албума"
 },
 "nplurals=2; plural=(n != 1);");

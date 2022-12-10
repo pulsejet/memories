@@ -23,6 +23,7 @@ OC.L10N.register(
     "Day" : "Tago",
     "Time" : "Dato",
     "Hour" : "Horo",
+    "Title" : "Titolo",
     "Description" : "Priskribo",
     "Copyright" : "Kopirajto",
     "Name" : "Nomo",

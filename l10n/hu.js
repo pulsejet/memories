@@ -41,7 +41,6 @@ OC.L10N.register(
     "You are about to download a large number of files. Are you sure?" : "Sok fájl letöltésére készül. Biztos benne?",
     "You are about to delete a large number of files. Are you sure?" : "Sok fájl törlésére készül. Biztos benne?",
     "You are about to touch a large number of files. Are you sure?" : "Sok fájl érintésére készül. Biztos benne?",
-    "Could not remove photos from album" : "Nem sikerült a fényképek eltávolítása az albumból",
     "_{n} selected_::_{n} selected_" : ["{n} kiválasztva","{n} kiválasztva"],
     "Timeline Path" : "Idővonal elérési útja",
     "Folders Path" : "Mappák útvonala",
@@ -242,6 +241,7 @@ OC.L10N.register(
     "Failed to delete {fileName}." : "A(z) {fileName} törlése sikertelen.",
     "Failed to favorite files." : "A fájlok kedvencnek jelölése sikertelen.",
     "Failed to favorite some files." : "Egyes fájlok kedvencnek jelölése sikertelen.",
-    "Failed to favorite {fileName}." : "A(z) {fileName} kedvencnek jelölése sikertelen."
+    "Failed to favorite {fileName}." : "A(z) {fileName} kedvencnek jelölése sikertelen.",
+    "Could not remove photos from album" : "Nem sikerült a fényképek eltávolítása az albumból"
 },
 "nplurals=2; plural=(n != 1);");
