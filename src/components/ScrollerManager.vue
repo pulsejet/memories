@@ -112,7 +112,7 @@ export default defineComponent({
 
   computed: {
     /** Get the visible ticks */
-    visibleTicks(): typeof this.ticks {
+    visibleTicks(): ITick[] {
       let key = 9999999900;
       return this.ticks
         .filter((tick) => tick.s)

@@ -43,10 +43,10 @@
     "reflect-metadata": "^0.1.13",
     "video.js": "^7.21.1",
     "videojs-contrib-quality-levels": "^2.2.1",
-    "vue": "^2.7.14",
+    "vue": "^3.2.45",
     "vue-material-design-icons": "^5.1.2",
-    "vue-router": "^3.6.5",
-    "vue-virtual-scroller": "1.1.2",
+    "vue-router": "^4.1.6",
+    "vue-virtual-scroller": "2.0.0-beta.5",
     "webdav": "^4.11.2"
   },
   "browserslist": [
@@ -57,15 +57,20 @@
     "npm": ">=7.0.0"
   },
   "devDependencies": {
-    "@nextcloud/babel-config": "^1.0.0",
     "@nextcloud/browserslist-config": "^2.3.0",
-    "@nextcloud/webpack-vue-config": "^5.4.0",
     "@playwright/test": "^1.28.1",
-    "@types/url-parse": "^1.4.8",
     "@types/video.js": "^7.3.50",
+    "babel-loader": "^9.1.0",
+    "css-loader": "^6.7.2",
+    "node-polyfill-webpack-plugin": "^2.0.1",
     "playwright": "^1.28.1",
+    "sass": "^1.56.2",
+    "sass-loader": "^13.2.0",
+    "style-loader": "^3.3.1",
     "ts-loader": "^9.4.2",
     "typescript": "^4.9.4",
+    "vue-loader": "^17.0.1",
+    "webpack-cli": "^5.0.1",
     "workbox-webpack-plugin": "^6.5.4"
   }
 }

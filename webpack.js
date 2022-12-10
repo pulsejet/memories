@@ -1,4 +1,4 @@
-const webpackConfig = require('@nextcloud/webpack-vue-config')
+const webpackConfig = require('./webpack-base')
 const WorkboxPlugin = require('workbox-webpack-plugin')
 const path = require('path')
 
@@ -14,9 +14,6 @@ webpackConfig.module.rules.push({
     },
 });
 webpackConfig.resolve.extensions.push('.ts');
-webpackConfig.resolve.alias = {
-    'vue$': 'vue/dist/vue.esm.js',
-}
 webpackConfig.entry.main = path.resolve(path.join('src', 'main'));
 
 webpackConfig.watchOptions = {
@@ -24,11 +21,13 @@ webpackConfig.watchOptions = {
     aggregateTimeout: 300,
 };
 
-webpackConfig.plugins.push(
-    new WorkboxPlugin.InjectManifest({
-        swSrc: path.resolve(path.join('src', 'service-worker.js')),
-        swDest: 'memories-service-worker.js',
-    })
-);
+if (!isDev) {
+    webpackConfig.plugins.push(
+        new WorkboxPlugin.InjectManifest({
+            swSrc: path.resolve(path.join('src', 'service-worker.js')),
+            swDest: 'memories-service-worker.js',
+        })
+    );
+}
 
 module.exports = webpackConfig

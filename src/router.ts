@@ -1,16 +1,13 @@
 import { generateUrl } from "@nextcloud/router";
 import { translate as t, translatePlural as n } from "@nextcloud/l10n";
-import Router from "vue-router";
-import Vue from "vue";
+import { createRouter, createWebHistory } from "vue-router";
 import Timeline from "./components/Timeline.vue";
 
-Vue.use(Router);
-
-export default new Router({
-  mode: "history",
+export default createRouter({
   // if index.php is in the url AND we got this far, then it's working:
   // let's keep using index.php in the url
-  base: generateUrl("/apps/memories"),
+  history: createWebHistory(generateUrl("/apps/memories")),
+
   linkActiveClass: "active",
   routes: [
     {
@@ -107,8 +104,8 @@ export default new Router({
       path: "/maps",
       name: "maps",
       // router-link doesn't support external url, let's force the redirect
-      beforeEnter() {
-        window.open(generateUrl("/apps/maps"), "_blank");
+      redirect() {
+        return generateUrl("/apps/maps");
       },
     },
 

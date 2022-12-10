@@ -3,7 +3,7 @@
 
   <NcContent
     app-name="memories"
-    v-else
+    v-else-if="false"
     :class="{
       'remove-gap': removeOuterGap,
     }"
@@ -35,10 +35,14 @@
       </div>
     </NcAppContent>
   </NcContent>
+
+  <div class="outer" v-else>
+    <router-view />
+  </div>
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent } from "vue";
+import { defineComponent } from "vue";
 
 import NcContent from "@nextcloud/vue/dist/Components/NcContent";
 import NcAppContent from "@nextcloud/vue/dist/Components/NcAppContent";
@@ -178,7 +182,7 @@ export default defineComponent({
             if (this.metadataComponent) {
               this.metadataComponent.$destroy();
             }
-            this.metadataComponent = new Vue(Metadata as any);
+            this.metadataComponent = new Metadata();
             // Only mount after we have all the info we need
             await this.metadataComponent.update(fileInfo);
             this.metadataComponent.$mount(el);

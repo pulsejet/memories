@@ -8,7 +8,7 @@
     <TopMatter ref="topmatter" />
 
     <!-- No content found and nothing is loading -->
-    <NcEmptyContent
+    <!-- <NcEmptyContent
       title="Nothing to show here"
       :description="emptyViewDescription"
       v-if="loading === 0 && list.length === 0"
@@ -18,7 +18,7 @@
         <ArchiveIcon v-else-if="routeIsArchive" />
         <ImageMultipleIcon v-else />
       </template>
-    </NcEmptyContent>
+    </NcEmptyContent> -->
 
     <!-- Main recycler view for rows -->
     <RecycleScroller
@@ -39,7 +39,10 @@
       <template #before>
         <!-- Show dynamic top matter, name of the view -->
         <div class="recycler-before" ref="recyclerBefore">
-          <div class="text" v-show="!$refs.topmatter.type && list.length > 0">
+          <div
+            class="text"
+            v-show="!(<any>$refs.topmatter)?.type && list.length > 0"
+          >
             {{ viewName }}
           </div>
 
