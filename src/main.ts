@@ -4,6 +4,8 @@ import "reflect-metadata";
 import Vue from "vue";
 import VueVirtualScroller from "vue-virtual-scroller";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
+import GlobalMixin from "./mixins/GlobalMixin";
+import UserConfig from "./mixins/UserConfig";
 
 import App from "./App.vue";
 import router from "./router";
@@ -64,6 +66,8 @@ if (!globalThis.videoClientIdPersistent) {
   );
 }
 
+Vue.mixin(GlobalMixin);
+Vue.mixin(UserConfig);
 Vue.use(VueVirtualScroller);
 
 // https://github.com/nextcloud/photos/blob/156f280c0476c483cb9ce81769ccb0c1c6500a4e/src/main.js

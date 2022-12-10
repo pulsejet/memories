@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Watch } from "vue-property-decorator";
+import Vue, { defineComponent } from "vue";
 
 import NcContent from "@nextcloud/vue/dist/Components/NcContent";
 import NcAppContent from "@nextcloud/vue/dist/Components/NcAppContent";
@@ -49,15 +49,12 @@ const NcAppNavigationSettings = () =>
   import("@nextcloud/vue/dist/Components/NcAppNavigationSettings");
 
 import { generateUrl } from "@nextcloud/router";
-import { getCurrentUser } from "@nextcloud/auth";
 import { translate as t } from "@nextcloud/l10n";
 
 import Timeline from "./components/Timeline.vue";
 import Settings from "./components/Settings.vue";
 import FirstStart from "./components/FirstStart.vue";
 import Metadata from "./components/Metadata.vue";
-import GlobalMixin from "./mixins/GlobalMixin";
-import UserConfig from "./mixins/UserConfig";
 
 import ImageMultiple from "vue-material-design-icons/ImageMultiple.vue";
 import FolderIcon from "vue-material-design-icons/Folder.vue";
@@ -70,7 +67,8 @@ import PeopleIcon from "vue-material-design-icons/AccountBoxMultiple.vue";
 import TagsIcon from "vue-material-design-icons/Tag.vue";
 import MapIcon from "vue-material-design-icons/Map.vue";
 
-@Component({
+export default defineComponent({
+  name: "App",
   components: {
     NcContent,
     NcAppContent,
@@ -93,132 +91,66 @@ import MapIcon from "vue-material-design-icons/Map.vue";
     TagsIcon,
     MapIcon,
   },
-})
-export default class App extends Mixins(GlobalMixin, UserConfig) {
-  // Outer element
 
-  private metadataComponent!: Metadata;
+  data() {
+    return {
+      navItems: [],
+      metadataComponent: null as Metadata,
+    };
+  },
 
-  private readonly navItemsAll = (self: typeof this) => [
-    {
-      name: "timeline",
-      icon: ImageMultiple,
-      title: t("memories", "Timeline"),
+  computed: {
+    ncVersion() {
+      const version = (<any>window.OC).config.version.split(".");
+      return Number(version[0]);
     },
-    {
-      name: "folders",
-      icon: FolderIcon,
-      title: t("memories", "Folders"),
+    recognize() {
+      if (!this.config_recognizeEnabled) {
+        return false;
+      }
+
+      if (this.config_facerecognitionInstalled) {
+        return t("memories", "People (Recognize)");
+      }
+
+      return t("memories", "People");
     },
-    {
-      name: "favorites",
-      icon: Star,
-      title: t("memories", "Favorites"),
+    facerecognition() {
+      if (!this.config_facerecognitionInstalled) {
+        return false;
+      }
+
+      if (this.config_recognizeEnabled) {
+        return t("memories", "People (Face Recognition)");
+      }
+
+      return t("memories", "People");
     },
-    {
-      name: "videos",
-      icon: Video,
-      title: t("memories", "Videos"),
+    isFirstStart() {
+      return this.config_timelinePath === "EMPTY";
     },
-    {
-      name: "albums",
-      icon: AlbumIcon,
-      title: t("memories", "Albums"),
-      if: self.showAlbums,
+    showAlbums() {
+      return this.config_albumsEnabled;
     },
-    {
-      name: "recognize",
-      icon: PeopleIcon,
-      title: self.recognize,
-      if: self.recognize,
+    removeOuterGap() {
+      return this.ncVersion >= 25;
     },
-    {
-      name: "facerecognition",
-      icon: PeopleIcon,
-      title: self.facerecognition,
-      if: self.facerecognition,
+    showNavigation() {
+      return this.$route.name !== "folder-share";
     },
-    {
-      name: "archive",
-      icon: ArchiveIcon,
-      title: t("memories", "Archive"),
+  },
+
+  watch: {
+    route() {
+      this.doRouteChecks();
     },
-    {
-      name: "thisday",
-      icon: CalendarIcon,
-      title: t("memories", "On this day"),
-    },
-    {
-      name: "tags",
-      icon: TagsIcon,
-      title: t("memories", "Tags"),
-      if: self.config_tagsEnabled,
-    },
-    {
-      name: "maps",
-      icon: MapIcon,
-      title: t("memories", "Maps"),
-      if: self.config_mapsEnabled,
-    },
-  ];
-
-  private navItems = [];
-
-  get ncVersion() {
-    const version = (<any>window.OC).config.version.split(".");
-    return Number(version[0]);
-  }
-
-  get recognize() {
-    if (!this.config_recognizeEnabled) {
-      return false;
-    }
-
-    if (this.config_facerecognitionInstalled) {
-      return t("memories", "People (Recognize)");
-    }
-
-    return t("memories", "People");
-  }
-
-  get facerecognition() {
-    if (!this.config_facerecognitionInstalled) {
-      return false;
-    }
-
-    if (this.config_recognizeEnabled) {
-      return t("memories", "People (Face Recognition)");
-    }
-
-    return t("memories", "People");
-  }
-
-  get isFirstStart() {
-    return this.config_timelinePath === "EMPTY";
-  }
-
-  get showAlbums() {
-    return this.config_albumsEnabled;
-  }
-
-  get removeOuterGap() {
-    return this.ncVersion >= 25;
-  }
-
-  get showNavigation() {
-    return this.$route.name !== "folder-share";
-  }
-
-  @Watch("$route")
-  routeChanged() {
-    this.doRouteChecks();
-  }
+  },
 
   mounted() {
     this.doRouteChecks();
 
     // Populate navigation
-    this.navItems = this.navItemsAll(this).filter(
+    this.navItems = this.navItemsAll().filter(
       (item) => typeof item.if === "undefined" || Boolean(item.if)
     );
 
@@ -242,10 +174,7 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
             if (this.metadataComponent) {
               this.metadataComponent.$destroy();
             }
-            this.metadataComponent = new Metadata({
-              // Better integration with vue parent component
-              parent: context,
-            });
+            this.metadataComponent = new Vue(Metadata);
             // Only mount after we have all the info we need
             await this.metadataComponent.update(fileInfo);
             this.metadataComponent.$mount(el);
@@ -260,56 +189,123 @@ export default class App extends Mixins(GlobalMixin, UserConfig) {
         })
       );
     }
-  }
+  },
 
-  async beforeMount() {
-    if ("serviceWorker" in navigator) {
-      // Use the window load event to keep the page load performant
-      window.addEventListener("load", async () => {
-        try {
-          const url = generateUrl("/apps/memories/service-worker.js");
-          const registration = await navigator.serviceWorker.register(url, {
-            scope: generateUrl("/apps/memories"),
-          });
-          console.log("SW registered: ", registration);
-        } catch (error) {
-          console.error("SW registration failed: ", error);
-        }
-      });
-    } else {
-      console.debug("Service Worker is not enabled on this browser.");
-    }
-  }
+  methods: {
+    navItemsAll() {
+      return [
+        {
+          name: "timeline",
+          icon: ImageMultiple,
+          title: t("memories", "Timeline"),
+        },
+        {
+          name: "folders",
+          icon: FolderIcon,
+          title: t("memories", "Folders"),
+        },
+        {
+          name: "favorites",
+          icon: Star,
+          title: t("memories", "Favorites"),
+        },
+        {
+          name: "videos",
+          icon: Video,
+          title: t("memories", "Videos"),
+        },
+        {
+          name: "albums",
+          icon: AlbumIcon,
+          title: t("memories", "Albums"),
+          if: this.showAlbums,
+        },
+        {
+          name: "recognize",
+          icon: PeopleIcon,
+          title: this.recognize,
+          if: this.recognize,
+        },
+        {
+          name: "facerecognition",
+          icon: PeopleIcon,
+          title: this.facerecognition,
+          if: this.facerecognition,
+        },
+        {
+          name: "archive",
+          icon: ArchiveIcon,
+          title: t("memories", "Archive"),
+        },
+        {
+          name: "thisday",
+          icon: CalendarIcon,
+          title: t("memories", "On this day"),
+        },
+        {
+          name: "tags",
+          icon: TagsIcon,
+          title: t("memories", "Tags"),
+          if: this.config_tagsEnabled,
+        },
+        {
+          name: "maps",
+          icon: MapIcon,
+          title: t("memories", "Maps"),
+          if: this.config_mapsEnabled,
+        },
+      ];
+    },
 
-  linkClick() {
-    const nav: any = this.$refs.nav;
-    if (globalThis.windowInnerWidth <= 1024) nav?.toggleNavigation(false);
-  }
+    async beforeMount() {
+      if ("serviceWorker" in navigator) {
+        // Use the window load event to keep the page load performant
+        window.addEventListener("load", async () => {
+          try {
+            const url = generateUrl("/apps/memories/service-worker.js");
+            const registration = await navigator.serviceWorker.register(url, {
+              scope: generateUrl("/apps/memories"),
+            });
+            console.log("SW registered: ", registration);
+          } catch (error) {
+            console.error("SW registration failed: ", error);
+          }
+        });
+      } else {
+        console.debug("Service Worker is not enabled on this browser.");
+      }
+    },
 
-  doRouteChecks() {
-    if (this.$route.name === "folder-share") {
-      this.putFolderShareToken(this.$route.params.token);
-    }
-  }
+    linkClick() {
+      const nav: any = this.$refs.nav;
+      if (globalThis.windowInnerWidth <= 1024) nav?.toggleNavigation(false);
+    },
 
-  putFolderShareToken(token: string) {
-    // Viewer looks for an input with ID sharingToken with the value as the token
-    // Create this element or update it otherwise files not gonna open
-    // https://github.com/nextcloud/viewer/blob/a8c46050fb687dcbb48a022a15a5d1275bf54a8e/src/utils/davUtils.js#L61
-    let tokenInput = document.getElementById(
-      "sharingToken"
-    ) as HTMLInputElement;
-    if (!tokenInput) {
-      tokenInput = document.createElement("input");
-      tokenInput.id = "sharingToken";
-      tokenInput.type = "hidden";
-      tokenInput.style.display = "none";
-      document.body.appendChild(tokenInput);
-    }
+    doRouteChecks() {
+      if (this.$route.name === "folder-share") {
+        this.putFolderShareToken(this.$route.params.token);
+      }
+    },
 
-    tokenInput.value = token;
-  }
-}
+    putFolderShareToken(token: string) {
+      // Viewer looks for an input with ID sharingToken with the value as the token
+      // Create this element or update it otherwise files not gonna open
+      // https://github.com/nextcloud/viewer/blob/a8c46050fb687dcbb48a022a15a5d1275bf54a8e/src/utils/davUtils.js#L61
+      let tokenInput = document.getElementById(
+        "sharingToken"
+      ) as HTMLInputElement;
+      if (!tokenInput) {
+        tokenInput = document.createElement("input");
+        tokenInput.id = "sharingToken";
+        tokenInput.type = "hidden";
+        tokenInput.style.display = "none";
+        document.body.appendChild(tokenInput);
+      }
+
+      tokenInput.value = token;
+    },
+  },
+});
 </script>
 
 <style scoped lang="scss">

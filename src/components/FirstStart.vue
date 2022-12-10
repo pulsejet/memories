@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins } from "vue-property-decorator";
+import { defineComponent } from "vue";
 
 import NcContent from "@nextcloud/vue/dist/Components/NcContent";
 import NcAppContent from "@nextcloud/vue/dist/Components/NcAppContent";
@@ -57,95 +57,100 @@ import { getFilePickerBuilder } from "@nextcloud/dialogs";
 import { getCurrentUser } from "@nextcloud/auth";
 import axios from "@nextcloud/axios";
 
-import GlobalMixin from "../mixins/GlobalMixin";
-import UserConfig from "../mixins/UserConfig";
-
 import banner from "../assets/banner.svg";
 import { IDay } from "../types";
 import { API } from "../services/API";
 
-@Component({
+export default defineComponent({
+  name: "FirstStart",
   components: {
     NcContent,
     NcAppContent,
     NcButton,
   },
-})
-export default class FirstStart extends Mixins(GlobalMixin, UserConfig) {
-  banner = banner;
-  error = "";
-  info = "";
-  show = false;
-  chosenPath = "";
+
+  data() {
+    return {
+      banner,
+      error: "",
+      info: "",
+      show: false,
+      chosenPath: "",
+    };
+  },
 
   mounted() {
     window.setTimeout(() => {
       this.show = true;
     }, 300);
-  }
+  },
 
-  get isAdmin() {
-    return getCurrentUser().isAdmin;
-  }
+  computed: {
+    isAdmin() {
+      return getCurrentUser().isAdmin;
+    },
+  },
 
-  async begin() {
-    const path = await this.chooseFolder(
-      this.t("memories", "Choose the root of your timeline"),
-      "/"
-    );
-
-    // Get folder days
-    this.error = "";
-    this.info = "";
-    const query = new URLSearchParams();
-    query.set("timelinePath", path);
-    let url = API.Q(API.DAYS(), query);
-    const res = await axios.get<IDay[]>(url);
-
-    // Check response
-    if (res.status !== 200) {
-      this.error = this.t(
-        "memories",
-        "The selected folder does not seem to be valid. Try again."
+  methods: {
+    async begin() {
+      const path = await this.chooseFolder(
+        this.t("memories", "Choose the root of your timeline"),
+        "/"
       );
-      return;
-    }
 
-    // Count total photos
-    const n = res.data.reduce((acc, day) => acc + day.count, 0);
-    this.info = this.n(
-      "memories",
-      "Found {n} item in {path}",
-      "Found {n} items in {path}",
-      n,
-      {
-        n,
-        path,
+      // Get folder days
+      this.error = "";
+      this.info = "";
+      const query = new URLSearchParams();
+      query.set("timelinePath", path);
+      let url = API.Q(API.DAYS(), query);
+      const res = await axios.get<IDay[]>(url);
+
+      // Check response
+      if (res.status !== 200) {
+        this.error = this.t(
+          "memories",
+          "The selected folder does not seem to be valid. Try again."
+        );
+        return;
       }
-    );
-    this.chosenPath = path;
-  }
 
-  async finish() {
-    this.show = false;
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    this.config_timelinePath = this.chosenPath;
-    await this.updateSetting("timelinePath");
-  }
+      // Count total photos
+      const n = res.data.reduce((acc, day) => acc + day.count, 0);
+      this.info = this.n(
+        "memories",
+        "Found {n} item in {path}",
+        "Found {n} items in {path}",
+        n,
+        {
+          n,
+          path,
+        }
+      );
+      this.chosenPath = path;
+    },
 
-  async chooseFolder(title: string, initial: string) {
-    const picker = getFilePickerBuilder(title)
-      .setMultiSelect(false)
-      .setModal(true)
-      .setType(1)
-      .addMimeTypeFilter("httpd/unix-directory")
-      .allowDirectories()
-      .startAt(initial)
-      .build();
+    async finish() {
+      this.show = false;
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      this.config_timelinePath = this.chosenPath;
+      await this.updateSetting("timelinePath");
+    },
 
-    return await picker.pick();
-  }
-}
+    async chooseFolder(title: string, initial: string) {
+      const picker = getFilePickerBuilder(title)
+        .setMultiSelect(false)
+        .setModal(true)
+        .setType(1)
+        .addMimeTypeFilter("httpd/unix-directory")
+        .allowDirectories()
+        .startAt(initial)
+        .build();
+
+      return await picker.pick();
+    },
+  },
+});
 </script>
 
 <style lang="scss" scoped>
