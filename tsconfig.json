@@ -6,8 +6,8 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "useDefineForClassFields": true,
+    "esModuleInterop": true
   }
 }

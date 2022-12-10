@@ -95,16 +95,17 @@ export default defineComponent({
   data() {
     return {
       navItems: [],
-      metadataComponent: null as Metadata,
+      metadataComponent: null as any,
     };
   },
 
   computed: {
-    ncVersion() {
+    ncVersion(): number {
       const version = (<any>window.OC).config.version.split(".");
       return Number(version[0]);
     },
-    recognize() {
+
+    recognize(): string | boolean {
       if (!this.config_recognizeEnabled) {
         return false;
       }
@@ -115,7 +116,8 @@ export default defineComponent({
 
       return t("memories", "People");
     },
-    facerecognition() {
+
+    facerecognition(): string | boolean {
       if (!this.config_facerecognitionInstalled) {
         return false;
       }
@@ -126,16 +128,20 @@ export default defineComponent({
 
       return t("memories", "People");
     },
-    isFirstStart() {
+
+    isFirstStart(): boolean {
       return this.config_timelinePath === "EMPTY";
     },
-    showAlbums() {
+
+    showAlbums(): boolean {
       return this.config_albumsEnabled;
     },
-    removeOuterGap() {
+
+    removeOuterGap(): boolean {
       return this.ncVersion >= 25;
     },
-    showNavigation() {
+
+    showNavigation(): boolean {
       return this.$route.name !== "folder-share";
     },
   },
@@ -283,7 +289,7 @@ export default defineComponent({
 
     doRouteChecks() {
       if (this.$route.name === "folder-share") {
-        this.putFolderShareToken(this.$route.params.token);
+        this.putFolderShareToken(<string>this.$route.params.token);
       }
     },
 

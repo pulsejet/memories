@@ -86,7 +86,7 @@ export default defineComponent({
   },
 
   computed: {
-    pathSelTitle() {
+    pathSelTitle(): string {
       return this.t("memories", "Choose Timeline Paths");
     },
   },

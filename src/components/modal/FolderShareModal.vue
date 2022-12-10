@@ -69,7 +69,7 @@ export default defineComponent({
   },
 
   computed: {
-    isRoot() {
+    isRoot(): boolean {
       return this.folderPath === "/" || this.folderPath === "";
     },
   },

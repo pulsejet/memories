@@ -74,8 +74,8 @@ export default defineComponent({
     },
 
     refreshParams() {
-      this.user = this.$route.params.user || "";
-      this.name = this.$route.params.name || "";
+      this.user = <string>this.$route.params.user || "";
+      this.name = <string>this.$route.params.name || "";
     },
 
     async save() {

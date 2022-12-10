@@ -1,5 +1,3 @@
-import { VueConstructor } from "vue";
-
 export type IFileInfo = {
   /** Same as fileid */
   id: number;
@@ -229,7 +227,7 @@ export type ISelectionAction = {
   /** Display text */
   name: string;
   /** Icon component */
-  icon: VueConstructor;
+  icon: any;
   /** Action to perform */
   callback: (selection: Map<number, IPhoto>) => Promise<void>;
   /** Condition to check for including */

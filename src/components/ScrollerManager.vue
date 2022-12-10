@@ -152,7 +152,7 @@ export default defineComponent({
     },
 
     /** Recycler scroll event, must be called by timeline */
-    recyclerScrolled() {
+    recyclerScrolled(event: Event | null) {
       // This isn't a renewing timer, it's a scheduled task
       if (this.scrollingRecyclerUpdateTimer) return;
       this.scrollingRecyclerUpdateTimer = window.setTimeout(() => {
@@ -510,7 +510,7 @@ export default defineComponent({
 
     interactend() {
       this.interacting = false;
-      this.recyclerScrolled(); // make sure final position is correct
+      this.recyclerScrolled(null); // make sure final position is correct
     },
 
     /** Update scroller is being used to scroll recycler */

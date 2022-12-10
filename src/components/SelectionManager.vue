@@ -840,8 +840,8 @@ export default defineComponent({
 
       // Run query
       for await (let delIds of dav.removeFaceImages(
-        user,
-        name,
+        <string>user,
+        <string>name,
         Array.from(selection.values())
       )) {
         const delPhotos = delIds

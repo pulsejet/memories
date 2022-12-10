@@ -270,7 +270,7 @@ export default defineComponent({
 
   computed: {
     /** Number of buttons to show inline */
-    numInlineActions() {
+    numInlineActions(): number {
       let base = 3;
       if (this.canShare) base++;
       if (this.canEdit) base++;
@@ -283,17 +283,17 @@ export default defineComponent({
     },
 
     /** Route is public */
-    routeIsPublic() {
+    routeIsPublic(): boolean {
       return this.$route.name === "folder-share";
     },
 
     /** Route is album */
-    routeIsAlbum() {
+    routeIsAlbum(): boolean {
       return this.$route.name === "albums";
     },
 
     /** Get the currently open photo */
-    currentPhoto() {
+    currentPhoto(): IPhoto | null {
       if (!this.list.length || !this.photoswipe) {
         return null;
       }
@@ -305,31 +305,35 @@ export default defineComponent({
     },
 
     /** Is the current slide a video */
-    isVideo() {
-      return this.currentPhoto?.flag & this.c.FLAG_IS_VIDEO;
+    isVideo(): boolean {
+      return Boolean(this.currentPhoto?.flag & this.c.FLAG_IS_VIDEO);
     },
 
     /** Show bottom bar info such as date taken */
-    showBottomBar() {
-      return !this.isVideo && this.fullyOpened && this.currentPhoto?.imageInfo;
+    showBottomBar(): boolean {
+      return (
+        !this.isVideo &&
+        this.fullyOpened &&
+        Boolean(this.currentPhoto?.imageInfo)
+      );
     },
 
     /** Get date taken string */
-    currentDateTaken() {
+    currentDateTaken(): string | null {
       const date = this.currentPhoto?.imageInfo?.datetaken;
       if (!date) return null;
       return utils.getLongDateStr(new Date(date * 1000), false, true);
     },
 
     /** Get download link for current photo */
-    currentDownloadLink() {
+    currentDownloadLink(): string | null {
       return this.currentPhoto
         ? window.location.origin + getDownloadLink(this.currentPhoto)
         : null;
     },
 
     /** Allow opening editor */
-    canEdit() {
+    canEdit(): boolean {
       return (
         this.currentPhoto?.mimetype?.startsWith("image/") &&
         !this.currentPhoto.liveid
@@ -337,7 +341,7 @@ export default defineComponent({
     },
 
     /** Does the browser support native share API */
-    canShare() {
+    canShare(): boolean {
       return "share" in navigator && this.currentPhoto && !this.isVideo;
     },
   },
@@ -547,14 +551,14 @@ export default defineComponent({
       });
 
       // Video support
-      new PsVideo(this.photoswipe, {
+      new PsVideo(<any>this.photoswipe, {
         videoAttributes: { controls: "", playsinline: "", preload: "none" },
         autoplay: true,
         preventDragOffset: 40,
       });
 
       // Live photo support
-      new PsLivePhoto(this.photoswipe, {});
+      new PsLivePhoto(<any>this.photoswipe, {});
 
       // Patch the close button to stop the slideshow
       const _close = this.photoswipe.close.bind(this.photoswipe);

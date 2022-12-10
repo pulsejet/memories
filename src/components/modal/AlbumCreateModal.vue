@@ -52,8 +52,8 @@ export default defineComponent({
       if (edit) {
         try {
           this.album = await dav.getAlbum(
-            this.$route.params.user,
-            this.$route.params.name
+            <string>this.$route.params.user,
+            <string>this.$route.params.name
           );
         } catch (e) {
           console.error(e);

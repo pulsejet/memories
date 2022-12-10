@@ -44,7 +44,7 @@ export default defineComponent({
 
   methods: {
     createMatter() {
-      this.name = this.$route.params.name || "";
+      this.name = <string>this.$route.params.name || "";
     },
 
     back() {

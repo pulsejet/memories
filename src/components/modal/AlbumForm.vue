@@ -136,6 +136,7 @@ export default defineComponent({
 
   data() {
     return {
+      collaborators: [],
       showCollaboratorView: false,
       albumName: "",
       albumLocation: "",
@@ -176,7 +177,7 @@ export default defineComponent({
   },
 
   methods: {
-    submit(collaborators = []) {
+    submit(collaborators: any = []) {
       if (this.albumName === "" || this.loading) {
         return;
       }

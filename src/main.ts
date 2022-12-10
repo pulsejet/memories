@@ -9,13 +9,14 @@ import UserConfig from "./mixins/UserConfig";
 
 import App from "./App.vue";
 import router from "./router";
+import { Route } from "vue-router";
 import { generateFilePath } from "@nextcloud/router";
 import { getRequestToken } from "@nextcloud/auth";
 import { IPhoto } from "./types";
 
 // Global exposed variables
 declare global {
-  var vuerouter: typeof router;
+  var vueroute: () => Route;
   var OC: Nextcloud.v24.OC;
   var OCP: Nextcloud.v24.OCP;
 
@@ -35,7 +36,7 @@ declare global {
 }
 
 // Allow global access to the router
-globalThis.vuerouter = router;
+globalThis.vueroute = () => router.currentRoute;
 
 // Cache these for better performance
 globalThis.windowInnerWidth = window.innerWidth;

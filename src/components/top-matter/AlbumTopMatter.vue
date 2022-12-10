@@ -114,11 +114,11 @@ export default defineComponent({
   },
 
   computed: {
-    isAlbumList() {
+    isAlbumList(): boolean {
       return !Boolean(this.$route.params.name);
     },
 
-    canEditAlbum() {
+    canEditAlbum(): boolean {
       return (
         !this.isAlbumList && this.$route.params.user === getCurrentUser()?.uid
       );
@@ -137,7 +137,8 @@ export default defineComponent({
 
   methods: {
     createMatter() {
-      this.name = this.$route.params.name || this.t("memories", "Albums");
+      this.name =
+        <string>this.$route.params.name || this.t("memories", "Albums");
     },
 
     back() {
@@ -146,7 +147,10 @@ export default defineComponent({
 
     async downloadAlbum() {
       const res = await axios.post(
-        API.ALBUM_DOWNLOAD(this.$route.params.user, this.$route.params.name)
+        API.ALBUM_DOWNLOAD(
+          <string>this.$route.params.user,
+          <string>this.$route.params.name
+        )
       );
       if (res.status === 200 && res.data.handle) {
         downloadWithHandle(res.data.handle);

@@ -19,7 +19,7 @@
           <img
             v-if="album.last_added_photo !== -1"
             class="album__image"
-            :src="album.last_added_photo | toCoverUrl"
+            :src="toCoverUrl(album.last_added_photo)"
           />
           <div v-else class="album__image album__image--placeholder">
             <ImageMultiple :size="32" />
@@ -85,18 +85,6 @@ export default defineComponent({
     NcLoadingIcon,
   },
 
-  filters: {
-    toCoverUrl(fileId: string) {
-      return getPreviewUrl(
-        {
-          fileid: Number(fileId),
-        } as IPhoto,
-        true,
-        256
-      );
-    },
-  },
-
   data() {
     return {
       showAlbumCreationForm: false,
@@ -110,6 +98,16 @@ export default defineComponent({
   },
 
   methods: {
+    toCoverUrl(fileId: string | number) {
+      return getPreviewUrl(
+        {
+          fileid: Number(fileId),
+        } as IPhoto,
+        true,
+        256
+      );
+    },
+
     albumCreatedHandler() {
       this.showAlbumCreationForm = false;
       this.loadAlbums();
