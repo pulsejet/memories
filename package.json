@@ -44,9 +44,7 @@
     "video.js": "^7.20.3",
     "videojs-contrib-quality-levels": "^2.2.0",
     "vue": "^2.7.10",
-    "vue-class-component": "^7.2.6",
     "vue-material-design-icons": "^5.1.2",
-    "vue-property-decorator": "^9.1.2",
     "vue-router": "^3.5.4",
     "vue-virtual-scroller": "1.1.2",
     "webdav": "^4.11.2"

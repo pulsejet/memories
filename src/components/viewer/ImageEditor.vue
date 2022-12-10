@@ -8,8 +8,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Mixins } from "vue-property-decorator";
-import GlobalMixin from "../../mixins/GlobalMixin";
+import { defineComponent } from "vue";
 
 import { basename, dirname, extname, join } from "path";
 import { emit } from "@nextcloud/event-bus";
@@ -35,114 +34,127 @@ async function loadFilerobot() {
   return FilerobotImageEditor;
 }
 
-@Component({
-  components: {},
-})
-export default class ImageEditor extends Mixins(GlobalMixin) {
-  @Prop() fileid: number;
-  @Prop() mime: string;
-  @Prop() src: string;
+export default defineComponent({
+  props: {
+    fileid: {
+      type: Number,
+      required: true,
+    },
+    mime: {
+      type: String,
+      required: true,
+    },
+    src: {
+      type: String,
+      required: true,
+    },
+  },
 
-  private exif: any = null;
-
-  private imageEditor: FilerobotImageEditor = null;
-
-  get config(): FilerobotImageEditorConfig & { theme: any } {
-    let src: string;
-    if (["image/png", "image/jpeg", "image/webp"].includes(this.mime)) {
-      src = this.src;
-    } else {
-      src = API.IMAGE_JPEG(this.fileid);
-    }
-
+  data() {
     return {
-      source: src,
-
-      defaultSavedImageName: this.defaultSavedImageName,
-      defaultSavedImageType: this.defaultSavedImageType,
-      // We use our own translations
-      useBackendTranslations: false,
-
-      // Watch resize
-      observePluginContainerSize: true,
-
-      // Default tab and tool
-      defaultTabId: TABS.ADJUST,
-      defaultToolId: TOOLS.CROP,
-
-      // Displayed tabs, disabling watermark
-      tabsIds: Object.values(TABS)
-        .filter((tab) => tab !== TABS.WATERMARK)
-        .sort((a: string, b: string) => a.localeCompare(b)) as any[],
-
-      // onBeforeSave: this.onBeforeSave,
-      onClose: this.onClose,
-      // onModify: this.onModify,
-      onSave: this.onSave,
-
-      Rotate: {
-        angle: 90,
-        componentType: "buttons",
-      },
-
-      // Translations
-      translations,
-
-      theme: {
-        palette: {
-          "bg-secondary": "var(--color-main-background)",
-          "bg-primary": "var(--color-background-dark)",
-          // Accent
-          "accent-primary": "var(--color-primary)",
-          // Use by the slider
-          "border-active-bottom": "var(--color-primary)",
-          "icons-primary": "var(--color-main-text)",
-          // Active state
-          "bg-primary-active": "var(--color-background-dark)",
-          "bg-primary-hover": "var(--color-background-hover)",
-          "accent-primary-active": "var(--color-main-text)",
-          // Used by the save button
-          "accent-primary-hover": "var(--color-primary)",
-
-          warning: "var(--color-error)",
-        },
-        typography: {
-          fontFamily: "var(--font-face)",
-        },
-      },
-
-      savingPixelRatio: 8,
-      previewPixelRatio: window.devicePixelRatio,
+      exif: null as any,
+      imageEditor: null as FilerobotImageEditor,
     };
-  }
+  },
 
-  get defaultSavedImageName() {
-    return basename(this.src, extname(this.src));
-  }
+  computed: {
+    config(): FilerobotImageEditorConfig & { theme: any } {
+      let src: string;
+      if (["image/png", "image/jpeg", "image/webp"].includes(this.mime)) {
+        src = this.src;
+      } else {
+        src = API.IMAGE_JPEG(this.fileid);
+      }
 
-  get defaultSavedImageType(): "jpeg" | "png" | "webp" {
-    const mime = extname(this.src).slice(1);
-    if (["jpeg", "png", "webp"].includes(mime)) {
-      return mime as any;
-    }
-    return "jpeg";
-  }
-
-  get hasHighContrastEnabled() {
-    const themes = globalThis.OCA?.Theming?.enabledThemes || [];
-    return themes.find((theme) => theme.indexOf("highcontrast") !== -1);
-  }
-
-  get themeDataAttr() {
-    if (this.hasHighContrastEnabled) {
       return {
-        "data-theme-dark-highcontrast": true,
+        source: src,
+
+        defaultSavedImageName: this.defaultSavedImageName,
+        defaultSavedImageType: this.defaultSavedImageType,
+        // We use our own translations
+        useBackendTranslations: false,
+
+        // Watch resize
+        observePluginContainerSize: true,
+
+        // Default tab and tool
+        defaultTabId: TABS.ADJUST,
+        defaultToolId: TOOLS.CROP,
+
+        // Displayed tabs, disabling watermark
+        tabsIds: Object.values(TABS)
+          .filter((tab) => tab !== TABS.WATERMARK)
+          .sort((a: string, b: string) => a.localeCompare(b)) as any[],
+
+        // onBeforeSave: this.onBeforeSave,
+        onClose: this.onClose,
+        // onModify: this.onModify,
+        onSave: this.onSave,
+
+        Rotate: {
+          angle: 90,
+          componentType: "buttons",
+        },
+
+        // Translations
+        translations,
+
+        theme: {
+          palette: {
+            "bg-secondary": "var(--color-main-background)",
+            "bg-primary": "var(--color-background-dark)",
+            // Accent
+            "accent-primary": "var(--color-primary)",
+            // Use by the slider
+            "border-active-bottom": "var(--color-primary)",
+            "icons-primary": "var(--color-main-text)",
+            // Active state
+            "bg-primary-active": "var(--color-background-dark)",
+            "bg-primary-hover": "var(--color-background-hover)",
+            "accent-primary-active": "var(--color-main-text)",
+            // Used by the save button
+            "accent-primary-hover": "var(--color-primary)",
+
+            warning: "var(--color-error)",
+          },
+          typography: {
+            fontFamily: "var(--font-face)",
+          },
+        },
+
+        savingPixelRatio: 8,
+        previewPixelRatio: window.devicePixelRatio,
       };
-    }
-    return {
-      "data-theme-dark": true,
-    };
-  }
+    },
+
+    defaultSavedImageName() {
+      return basename(this.src, extname(this.src));
+    },
+
+    defaultSavedImageType(): "jpeg" | "png" | "webp" {
+      const mime = extname(this.src).slice(1);
+      if (["jpeg", "png", "webp"].includes(mime)) {
+        return mime as any;
+      }
+      return "jpeg";
+    },
+
+    hasHighContrastEnabled() {
+      const themes = globalThis.OCA?.Theming?.enabledThemes || [];
+      return themes.find((theme) => theme.indexOf("highcontrast") !== -1);
+    },
+
+    themeDataAttr() {
+      if (this.hasHighContrastEnabled) {
+        return {
+          "data-theme-dark-highcontrast": true,
+        };
+      }
+      return {
+        "data-theme-dark": true,
+      };
+    },
+  },
 
   async mounted() {
     await loadFilerobot();
@@ -169,147 +181,149 @@ export default class ImageEditor extends Mixins(GlobalMixin) {
         this.t("memories", "Failed to get Exif data. Metadata may be lost!")
       );
     }
-  }
+  },
 
   beforeDestroy() {
     if (this.imageEditor) {
       this.imageEditor.terminate();
     }
     window.removeEventListener("keydown", this.handleKeydown, true);
-  }
+  },
 
-  onClose(closingReason, haveNotSavedChanges) {
-    if (haveNotSavedChanges) {
-      this.onExitWithoutSaving();
-      return;
-    }
-    window.removeEventListener("keydown", this.handleKeydown, true);
-    this.$emit("close");
-  }
+  methods: {
+    onClose(closingReason, haveNotSavedChanges) {
+      if (haveNotSavedChanges) {
+        this.onExitWithoutSaving();
+        return;
+      }
+      window.removeEventListener("keydown", this.handleKeydown, true);
+      this.$emit("close");
+    },
 
-  /**
-   * User saved the image
-   *
-   * @see https://github.com/scaleflex/filerobot-image-editor#onsave
-   */
-  async onSave({
-    fullName,
-    imageBase64,
-  }: {
-    fullName?: string;
-    imageBase64?: string;
-  }): Promise<void> {
-    if (!imageBase64) {
-      throw new Error("No image data");
-    }
-
-    const { origin, pathname } = new URL(this.src);
-    const putUrl = origin + join(dirname(pathname), fullName);
-
-    if (
-      !this.exif &&
-      !confirm(this.t("memories", "No Exif data found! Continue?"))
-    ) {
-      return;
-    }
-
-    try {
-      const blob = await fetch(imageBase64).then((res) => res.blob());
-      const response = await axios.put(putUrl, new File([blob], fullName));
-      const fileid =
-        parseInt(response?.headers?.["oc-fileid"]?.split("oc")[0]) || null;
-      if (response.status >= 400) {
-        throw new Error("Failed to save image");
+    /**
+     * User saved the image
+     *
+     * @see https://github.com/scaleflex/filerobot-image-editor#onsave
+     */
+    async onSave({
+      fullName,
+      imageBase64,
+    }: {
+      fullName?: string;
+      imageBase64?: string;
+    }): Promise<void> {
+      if (!imageBase64) {
+        throw new Error("No image data");
       }
 
-      // Strip old and incorrect exif data
-      const exif = this.exif;
-      delete exif.Orientation;
-      delete exif.Rotation;
-      delete exif.ImageHeight;
-      delete exif.ImageWidth;
-      delete exif.ImageSize;
-      delete exif.ModifyDate;
-      delete exif.ExifImageHeight;
-      delete exif.ExifImageWidth;
-      delete exif.ExifImageSize;
-      delete exif.CompatibleBrands;
-      delete exif.FileType;
-      delete exif.FileTypeExtension;
-      delete exif.MIMEType;
-      delete exif.MajorBrand;
+      const { origin, pathname } = new URL(this.src);
+      const putUrl = origin + join(dirname(pathname), fullName);
 
-      // Update exif data
-      await axios.patch(API.IMAGE_SETEXIF(fileid), {
-        raw: exif,
-      });
-
-      showSuccess(this.t("memories", "Image saved successfully"));
-      if (fileid !== this.fileid) {
-        emit("files:file:created", { fileid });
-      } else {
-        emit("files:file:updated", { fileid });
+      if (
+        !this.exif &&
+        !confirm(this.t("memories", "No Exif data found! Continue?"))
+      ) {
+        return;
       }
-      this.onClose(undefined, false);
-    } catch (error) {
-      showError(this.t("memories", "Error saving image"));
-    }
-  }
 
-  /**
-   * Show warning if unsaved changes
-   */
-  onExitWithoutSaving() {
-    (<any>OC.dialogs).confirmDestructive(
-      translations.changesLoseConfirmation +
-        "\n\n" +
-        translations.changesLoseConfirmationHint,
-      this.t("memories", "Unsaved changes"),
-      {
-        type: (<any>OC.dialogs).YES_NO_BUTTONS,
-        confirm: this.t("memories", "Drop changes"),
-        confirmClasses: "error",
-        cancel: translations.cancel,
-      },
-      (decision) => {
-        if (!decision) {
-          return;
+      try {
+        const blob = await fetch(imageBase64).then((res) => res.blob());
+        const response = await axios.put(putUrl, new File([blob], fullName));
+        const fileid =
+          parseInt(response?.headers?.["oc-fileid"]?.split("oc")[0]) || null;
+        if (response.status >= 400) {
+          throw new Error("Failed to save image");
         }
-        this.onClose("warning-ignored", false);
+
+        // Strip old and incorrect exif data
+        const exif = this.exif;
+        delete exif.Orientation;
+        delete exif.Rotation;
+        delete exif.ImageHeight;
+        delete exif.ImageWidth;
+        delete exif.ImageSize;
+        delete exif.ModifyDate;
+        delete exif.ExifImageHeight;
+        delete exif.ExifImageWidth;
+        delete exif.ExifImageSize;
+        delete exif.CompatibleBrands;
+        delete exif.FileType;
+        delete exif.FileTypeExtension;
+        delete exif.MIMEType;
+        delete exif.MajorBrand;
+
+        // Update exif data
+        await axios.patch(API.IMAGE_SETEXIF(fileid), {
+          raw: exif,
+        });
+
+        showSuccess(this.t("memories", "Image saved successfully"));
+        if (fileid !== this.fileid) {
+          emit("files:file:created", { fileid });
+        } else {
+          emit("files:file:updated", { fileid });
+        }
+        this.onClose(undefined, false);
+      } catch (error) {
+        showError(this.t("memories", "Error saving image"));
       }
-    );
-  }
+    },
 
-  // Key Handlers, override default Viewer arrow and escape key
-  handleKeydown(event) {
-    event.stopImmediatePropagation();
-    // escape key
-    if (event.key === "Escape") {
-      // Since we cannot call the closeMethod and know if there
-      // are unsaved changes, let's fake a close button trigger.
-      event.preventDefault();
-      (
-        document.querySelector(".FIE_topbar-close-button") as HTMLElement
-      ).click();
-    }
+    /**
+     * Show warning if unsaved changes
+     */
+    onExitWithoutSaving() {
+      (<any>OC.dialogs).confirmDestructive(
+        translations.changesLoseConfirmation +
+          "\n\n" +
+          translations.changesLoseConfirmationHint,
+        this.t("memories", "Unsaved changes"),
+        {
+          type: (<any>OC.dialogs).YES_NO_BUTTONS,
+          confirm: this.t("memories", "Drop changes"),
+          confirmClasses: "error",
+          cancel: translations.cancel,
+        },
+        (decision) => {
+          if (!decision) {
+            return;
+          }
+          this.onClose("warning-ignored", false);
+        }
+      );
+    },
 
-    // ctrl + S = save
-    if (event.ctrlKey && event.key === "s") {
-      event.preventDefault();
-      (
-        document.querySelector(".FIE_topbar-save-button") as HTMLElement
-      ).click();
-    }
+    // Key Handlers, override default Viewer arrow and escape key
+    handleKeydown(event) {
+      event.stopImmediatePropagation();
+      // escape key
+      if (event.key === "Escape") {
+        // Since we cannot call the closeMethod and know if there
+        // are unsaved changes, let's fake a close button trigger.
+        event.preventDefault();
+        (
+          document.querySelector(".FIE_topbar-close-button") as HTMLElement
+        ).click();
+      }
 
-    // ctrl + Z = undo
-    if (event.ctrlKey && event.key === "z") {
-      event.preventDefault();
-      (
-        document.querySelector(".FIE_topbar-undo-button") as HTMLElement
-      ).click();
-    }
-  }
-}
+      // ctrl + S = save
+      if (event.ctrlKey && event.key === "s") {
+        event.preventDefault();
+        (
+          document.querySelector(".FIE_topbar-save-button") as HTMLElement
+        ).click();
+      }
+
+      // ctrl + Z = undo
+      if (event.ctrlKey && event.key === "z") {
+        event.preventDefault();
+        (
+          document.querySelector(".FIE_topbar-undo-button") as HTMLElement
+        ).click();
+      }
+    },
+  },
+});
 </script>
 
 <style lang="scss" scoped>
