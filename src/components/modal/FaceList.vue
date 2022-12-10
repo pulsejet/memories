@@ -10,64 +10,72 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Watch } from "vue-property-decorator";
+import { defineComponent } from "vue";
 import { IPhoto, ITag } from "../../types";
 import Tag from "../frame/Tag.vue";
 
-import GlobalMixin from "../../mixins/GlobalMixin";
 import * as dav from "../../services/DavRequests";
 
-@Component({
+export default defineComponent({
+  name: "FaceList",
   components: {
     Tag,
   },
-})
-export default class FaceMergeModal extends Mixins(GlobalMixin) {
-  private user: string = "";
-  private name: string = "";
-  private detail: IPhoto[] | null = null;
 
-  @Emit("close")
-  public close() {}
+  data() {
+    return {
+      user: "",
+      name: "",
+      detail: null as IPhoto[] | null,
+    };
+  },
 
-  @Watch("$route")
-  async routeChange(from: any, to: any) {
-    this.refreshParams();
-  }
+  watch: {
+    $route: async function (from: any, to: any) {
+      this.refreshParams();
+    },
+  },
 
   mounted() {
     this.refreshParams();
-  }
+  },
 
-  public async refreshParams() {
-    this.user = this.$route.params.user || "";
-    this.name = this.$route.params.name || "";
-    this.detail = null;
+  methods: {
+    close() {
+      this.$emit("close");
+    },
 
-    let data = [];
-    let flags = this.c.FLAG_IS_TAG;
-    if (this.$route.name === "recognize") {
-      data = await dav.getPeopleData("recognize");
-      flags |= this.c.FLAG_IS_FACE_RECOGNIZE;
-    } else {
-      data = await dav.getPeopleData("facerecognition");
-      flags |= this.c.FLAG_IS_FACE_RECOGNITION;
-    }
-    let detail = data[0].detail;
-    detail.forEach((photo: IPhoto) => {
-      photo.flag = flags;
-    });
-    detail = detail.filter((photo: ITag) => {
-      const pname = photo.name || photo.fileid.toString();
-      return photo.user_id !== this.user || pname !== this.name;
-    });
+    async refreshParams() {
+      this.user = this.$route.params.user || "";
+      this.name = this.$route.params.name || "";
+      this.detail = null;
 
-    this.detail = detail;
-  }
+      let data = [];
+      let flags = this.c.FLAG_IS_TAG;
+      if (this.$route.name === "recognize") {
+        data = await dav.getPeopleData("recognize");
+        flags |= this.c.FLAG_IS_FACE_RECOGNIZE;
+      } else {
+        data = await dav.getPeopleData("facerecognition");
+        flags |= this.c.FLAG_IS_FACE_RECOGNITION;
+      }
+      let detail = data[0].detail;
+      detail.forEach((photo: IPhoto) => {
+        photo.flag = flags;
+      });
+      detail = detail.filter((photo: ITag) => {
+        const pname = photo.name || photo.fileid.toString();
+        return photo.user_id !== this.user || pname !== this.name;
+      });
 
-  @Emit("select")
-  public async clickFace(face: ITag) {}
-}
+      this.detail = detail;
+    },
+
+    async clickFace(face: ITag) {
+      this.$emit("select", face);
+    },
+  },
+});
 </script>
 
 <style lang="scss" scoped>

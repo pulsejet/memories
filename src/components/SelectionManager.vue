@@ -237,7 +237,7 @@ export default defineComponent({
     },
 
     deletePhotos(photos: IPhoto[]) {
-      this.$emit("deletePhotos", photos);
+      this.$emit("delete", photos);
     },
 
     updateLoading(delta: number) {

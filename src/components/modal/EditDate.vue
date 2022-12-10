@@ -120,8 +120,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins } from "vue-property-decorator";
-import GlobalMixin from "../../mixins/GlobalMixin";
+import { defineComponent } from "vue";
 import { IPhoto } from "../../types";
 
 import NcButton from "@nextcloud/vue/dist/Components/NcButton";
@@ -135,201 +134,146 @@ import * as utils from "../../services/Utils";
 import * as dav from "../../services/DavRequests";
 import { API } from "../../services/API";
 
-@Component({
+export default defineComponent({
+  name: "EditDate",
   components: {
     NcButton,
     NcTextField,
     Modal,
   },
-})
-export default class EditDate extends Mixins(GlobalMixin) {
-  @Emit("refresh") emitRefresh(val: boolean) {}
 
-  private photos: IPhoto[] = [];
-  private photosDone: number = 0;
-  private processing: boolean = false;
+  data() {
+    return {
+      photos: [] as IPhoto[],
+      photosDone: 0,
+      processing: false,
 
-  private longDateStr: string = "";
-  private year: string = "0";
-  private month: string = "0";
-  private day: string = "0";
-  private hour: string = "0";
-  private minute: string = "0";
-  private second: string = "0";
+      longDateStr: "",
+      year: "0",
+      month: "0",
+      day: "0",
+      hour: "0",
+      minute: "0",
+      second: "0",
 
-  private longDateStrLast: string = "";
-  private yearLast: string = "0";
-  private monthLast: string = "0";
-  private dayLast: string = "0";
-  private hourLast: string = "0";
-  private minuteLast: string = "0";
-  private secondLast: string = "0";
+      longDateStrLast: "",
+      yearLast: "0",
+      monthLast: "0",
+      dayLast: "0",
+      hourLast: "0",
+      minuteLast: "0",
+      secondLast: "0",
+    };
+  },
 
-  public async open(photos: IPhoto[]) {
-    this.photos = photos;
-    if (photos.length === 0) {
-      return;
-    }
-    this.photosDone = 0;
-    this.longDateStr = "";
+  methods: {
+    emitRefresh(val: boolean) {
+      this.$emit("refresh", val);
+    },
 
-    const calls = photos.map((p) => async () => {
-      try {
-        const res = await axios.get<any>(
-          API.Q(API.IMAGE_INFO(p.fileid), "basic=1")
-        );
-        if (typeof res.data.datetaken !== "number") {
-          console.error("Invalid date for", p.fileid);
-          return;
+    async open(photos: IPhoto[]) {
+      this.photos = photos;
+      if (photos.length === 0) {
+        return;
+      }
+      this.photosDone = 0;
+      this.longDateStr = "";
+
+      const calls = photos.map((p) => async () => {
+        try {
+          const res = await axios.get<any>(
+            API.Q(API.IMAGE_INFO(p.fileid), "basic=1")
+          );
+          if (typeof res.data.datetaken !== "number") {
+            console.error("Invalid date for", p.fileid);
+            return;
+          }
+          p.datetaken = res.data.datetaken * 1000;
+        } catch (error) {
+          console.error("Failed to get date info for", p.fileid, error);
+        } finally {
+          this.photosDone++;
         }
-        p.datetaken = res.data.datetaken * 1000;
-      } catch (error) {
-        console.error("Failed to get date info for", p.fileid, error);
-      } finally {
-        this.photosDone++;
-      }
-    });
-
-    for await (const _ of dav.runInParallel(calls, 10)) {
-      // nothing to do
-    }
-
-    // Remove photos without datetaken
-    this.photos = this.photos.filter((p) => p.datetaken !== undefined);
-
-    // Sort photos by datetaken descending
-    this.photos.sort((a, b) => b.datetaken - a.datetaken);
-
-    // Get date of newest photo
-    let date = new Date(this.photos[0].datetaken);
-    this.year = date.getUTCFullYear().toString();
-    this.month = (date.getUTCMonth() + 1).toString();
-    this.day = date.getUTCDate().toString();
-    this.hour = date.getUTCHours().toString();
-    this.minute = date.getUTCMinutes().toString();
-    this.second = date.getUTCSeconds().toString();
-    this.longDateStr = utils.getLongDateStr(date, false, true);
-
-    // Get date of oldest photo
-    if (this.photos.length > 1) {
-      date = new Date(this.photos[this.photos.length - 1].datetaken);
-      this.yearLast = date.getUTCFullYear().toString();
-      this.monthLast = (date.getUTCMonth() + 1).toString();
-      this.dayLast = date.getUTCDate().toString();
-      this.hourLast = date.getUTCHours().toString();
-      this.minuteLast = date.getUTCMinutes().toString();
-      this.secondLast = date.getUTCSeconds().toString();
-      this.longDateStrLast = utils.getLongDateStr(date, false, true);
-    }
-  }
-
-  public newestChange(time = false) {
-    if (this.photos.length === 0) {
-      return;
-    }
-
-    // Set the last date to have the same offset to newest date
-    try {
-      const date = new Date(this.photos[0].datetaken);
-      const dateLast = new Date(this.photos[this.photos.length - 1].datetaken);
-
-      const dateNew = this.getDate();
-      const offset = dateNew.getTime() - date.getTime();
-      const dateLastNew = new Date(dateLast.getTime() + offset);
-
-      this.yearLast = dateLastNew.getUTCFullYear().toString();
-      this.monthLast = (dateLastNew.getUTCMonth() + 1).toString();
-      this.dayLast = dateLastNew.getUTCDate().toString();
-
-      if (time) {
-        this.hourLast = dateLastNew.getUTCHours().toString();
-        this.minuteLast = dateLastNew.getUTCMinutes().toString();
-        this.secondLast = dateLastNew.getUTCSeconds().toString();
-      }
-    } catch (error) {}
-  }
-
-  public close() {
-    this.photos = [];
-  }
-
-  public async saveOne() {
-    // Make PATCH request to update date
-    try {
-      this.processing = true;
-      const fileid = this.photos[0].fileid;
-      await axios.patch<any>(API.IMAGE_SETEXIF(fileid), {
-        raw: {
-          DateTimeOriginal: this.getExifFormat(this.getDate()),
-        },
       });
-      emit("files:file:updated", { fileid });
-      this.emitRefresh(true);
-      this.close();
-    } catch (e) {
-      if (e.response?.data?.message) {
-        showError(e.response.data.message);
-      } else {
-        showError(e);
+
+      for await (const _ of dav.runInParallel(calls, 10)) {
+        // nothing to do
       }
-    } finally {
-      this.processing = false;
-    }
-  }
 
-  public async saveMany() {
-    if (this.processing) {
-      return;
-    }
+      // Remove photos without datetaken
+      this.photos = this.photos.filter((p) => p.datetaken !== undefined);
 
-    // Get difference between newest and oldest date
-    const date = new Date(this.photos[0].datetaken);
-    const dateLast = new Date(this.photos[this.photos.length - 1].datetaken);
-    const diff = date.getTime() - dateLast.getTime();
+      // Sort photos by datetaken descending
+      this.photos.sort((a, b) => b.datetaken - a.datetaken);
 
-    // Get new difference between newest and oldest date
-    let dateNew: Date;
-    let dateLastNew: Date;
-    let diffNew: number;
+      // Get date of newest photo
+      let date = new Date(this.photos[0].datetaken);
+      this.year = date.getUTCFullYear().toString();
+      this.month = (date.getUTCMonth() + 1).toString();
+      this.day = date.getUTCDate().toString();
+      this.hour = date.getUTCHours().toString();
+      this.minute = date.getUTCMinutes().toString();
+      this.second = date.getUTCSeconds().toString();
+      this.longDateStr = utils.getLongDateStr(date, false, true);
 
-    try {
-      dateNew = this.getDate();
-      dateLastNew = this.getDateLast();
-      diffNew = dateNew.getTime() - dateLastNew.getTime();
-    } catch (e) {
-      showError(e);
-      return;
-    }
+      // Get date of oldest photo
+      if (this.photos.length > 1) {
+        date = new Date(this.photos[this.photos.length - 1].datetaken);
+        this.yearLast = date.getUTCFullYear().toString();
+        this.monthLast = (date.getUTCMonth() + 1).toString();
+        this.dayLast = date.getUTCDate().toString();
+        this.hourLast = date.getUTCHours().toString();
+        this.minuteLast = date.getUTCMinutes().toString();
+        this.secondLast = date.getUTCSeconds().toString();
+        this.longDateStrLast = utils.getLongDateStr(date, false, true);
+      }
+    },
 
-    // Validate if the old is still old
-    if (diffNew < 0) {
-      showError("The newest date must be newer than the oldest date");
-      return;
-    }
+    newestChange(time = false) {
+      if (this.photos.length === 0) {
+        return;
+      }
 
-    // Mark processing
-    this.processing = true;
-    this.photosDone = 0;
-
-    // Create PATCH requests
-    const calls = this.photos.map((p) => async () => {
+      // Set the last date to have the same offset to newest date
       try {
-        let pDate = new Date(p.datetaken);
+        const date = new Date(this.photos[0].datetaken);
+        const dateLast = new Date(
+          this.photos[this.photos.length - 1].datetaken
+        );
 
-        // Fallback to start date if invalid date
-        if (isNaN(pDate.getTime())) {
-          pDate = date;
+        const dateNew = this.getDate();
+        const offset = dateNew.getTime() - date.getTime();
+        const dateLastNew = new Date(dateLast.getTime() + offset);
+
+        this.yearLast = dateLastNew.getUTCFullYear().toString();
+        this.monthLast = (dateLastNew.getUTCMonth() + 1).toString();
+        this.dayLast = dateLastNew.getUTCDate().toString();
+
+        if (time) {
+          this.hourLast = dateLastNew.getUTCHours().toString();
+          this.minuteLast = dateLastNew.getUTCMinutes().toString();
+          this.secondLast = dateLastNew.getUTCSeconds().toString();
         }
+      } catch (error) {}
+    },
 
-        const offset = date.getTime() - pDate.getTime();
-        const scale = diff > 0 ? diffNew / diff : 0;
-        const pDateNew = new Date(dateNew.getTime() - offset * scale);
-        await axios.patch<any>(API.IMAGE_SETEXIF(p.fileid), {
+    close() {
+      this.photos = [];
+    },
+
+    async saveOne() {
+      // Make PATCH request to update date
+      try {
+        this.processing = true;
+        const fileid = this.photos[0].fileid;
+        await axios.patch<any>(API.IMAGE_SETEXIF(fileid), {
           raw: {
-            DateTimeOriginal: this.getExifFormat(pDateNew),
+            DateTimeOriginal: this.getExifFormat(this.getDate()),
           },
         });
-        emit("files:file:updated", { fileid: p.fileid });
+        emit("files:file:updated", { fileid });
+        this.emitRefresh(true);
+        this.close();
       } catch (e) {
         if (e.response?.data?.message) {
           showError(e.response.data.message);
@@ -337,90 +281,155 @@ export default class EditDate extends Mixins(GlobalMixin) {
           showError(e);
         }
       } finally {
-        this.photosDone++;
+        this.processing = false;
       }
-    });
+    },
 
-    for await (const _ of dav.runInParallel(calls, 10)) {
-      // nothing to do
-    }
-    this.processing = false;
-    this.emitRefresh(true);
-    this.close();
-  }
+    async saveMany() {
+      if (this.processing) {
+        return;
+      }
 
-  public async save() {
-    if (this.photos.length === 0) {
-      return;
-    }
+      // Get difference between newest and oldest date
+      const date = new Date(this.photos[0].datetaken);
+      const dateLast = new Date(this.photos[this.photos.length - 1].datetaken);
+      const diff = date.getTime() - dateLast.getTime();
 
-    if (this.photos.length === 1) {
-      return await this.saveOne();
-    }
+      // Get new difference between newest and oldest date
+      let dateNew: Date;
+      let dateLastNew: Date;
+      let diffNew: number;
 
-    return await this.saveMany();
-  }
+      try {
+        dateNew = this.getDate();
+        dateLastNew = this.getDateLast();
+        diffNew = dateNew.getTime() - dateLastNew.getTime();
+      } catch (e) {
+        showError(e);
+        return;
+      }
 
-  private getExifFormat(date: Date) {
-    const year = date.getUTCFullYear().toString().padStart(4, "0");
-    const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
-    const day = date.getUTCDate().toString().padStart(2, "0");
-    const hour = date.getUTCHours().toString().padStart(2, "0");
-    const minute = date.getUTCMinutes().toString().padStart(2, "0");
-    const second = date.getUTCSeconds().toString().padStart(2, "0");
-    return `${year}:${month}:${day} ${hour}:${minute}:${second}`;
-  }
+      // Validate if the old is still old
+      if (diffNew < 0) {
+        showError("The newest date must be newer than the oldest date");
+        return;
+      }
 
-  public getDate() {
-    const dateNew = new Date();
-    const year = parseInt(this.year, 10);
-    const month = parseInt(this.month, 10) - 1;
-    const day = parseInt(this.day, 10);
-    const hour = parseInt(this.hour, 10);
-    const minute = parseInt(this.minute, 10);
-    const second = parseInt(this.second, 10) || 0;
+      // Mark processing
+      this.processing = true;
+      this.photosDone = 0;
 
-    if (isNaN(year)) throw new Error("Invalid year");
-    if (isNaN(month)) throw new Error("Invalid month");
-    if (isNaN(day)) throw new Error("Invalid day");
-    if (isNaN(hour)) throw new Error("Invalid hour");
-    if (isNaN(minute)) throw new Error("Invalid minute");
-    if (isNaN(second)) throw new Error("Invalid second");
+      // Create PATCH requests
+      const calls = this.photos.map((p) => async () => {
+        try {
+          let pDate = new Date(p.datetaken);
 
-    dateNew.setUTCFullYear(year);
-    dateNew.setUTCMonth(month);
-    dateNew.setUTCDate(day);
-    dateNew.setUTCHours(hour);
-    dateNew.setUTCMinutes(minute);
-    dateNew.setUTCSeconds(second);
-    return dateNew;
-  }
+          // Fallback to start date if invalid date
+          if (isNaN(pDate.getTime())) {
+            pDate = date;
+          }
 
-  public getDateLast() {
-    const dateNew = new Date();
-    const year = parseInt(this.yearLast, 10);
-    const month = parseInt(this.monthLast, 10) - 1;
-    const day = parseInt(this.dayLast, 10);
-    const hour = parseInt(this.hourLast, 10);
-    const minute = parseInt(this.minuteLast, 10);
-    const second = parseInt(this.secondLast, 10) || 0;
+          const offset = date.getTime() - pDate.getTime();
+          const scale = diff > 0 ? diffNew / diff : 0;
+          const pDateNew = new Date(dateNew.getTime() - offset * scale);
+          await axios.patch<any>(API.IMAGE_SETEXIF(p.fileid), {
+            raw: {
+              DateTimeOriginal: this.getExifFormat(pDateNew),
+            },
+          });
+          emit("files:file:updated", { fileid: p.fileid });
+        } catch (e) {
+          if (e.response?.data?.message) {
+            showError(e.response.data.message);
+          } else {
+            showError(e);
+          }
+        } finally {
+          this.photosDone++;
+        }
+      });
 
-    if (isNaN(year)) throw new Error("Invalid last year");
-    if (isNaN(month)) throw new Error("Invalid last month");
-    if (isNaN(day)) throw new Error("Invalid last day");
-    if (isNaN(hour)) throw new Error("Invalid last hour");
-    if (isNaN(minute)) throw new Error("Invalid last minute");
-    if (isNaN(second)) throw new Error("Invalid last second");
+      for await (const _ of dav.runInParallel(calls, 10)) {
+        // nothing to do
+      }
+      this.processing = false;
+      this.emitRefresh(true);
+      this.close();
+    },
 
-    dateNew.setUTCFullYear(year);
-    dateNew.setUTCMonth(month);
-    dateNew.setUTCDate(day);
-    dateNew.setUTCHours(hour);
-    dateNew.setUTCMinutes(minute);
-    dateNew.setUTCSeconds(second);
-    return dateNew;
-  }
-}
+    async save() {
+      if (this.photos.length === 0) {
+        return;
+      }
+
+      if (this.photos.length === 1) {
+        return await this.saveOne();
+      }
+
+      return await this.saveMany();
+    },
+
+    getExifFormat(date: Date) {
+      const year = date.getUTCFullYear().toString().padStart(4, "0");
+      const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
+      const day = date.getUTCDate().toString().padStart(2, "0");
+      const hour = date.getUTCHours().toString().padStart(2, "0");
+      const minute = date.getUTCMinutes().toString().padStart(2, "0");
+      const second = date.getUTCSeconds().toString().padStart(2, "0");
+      return `${year}:${month}:${day} ${hour}:${minute}:${second}`;
+    },
+
+    getDate() {
+      const dateNew = new Date();
+      const year = parseInt(this.year, 10);
+      const month = parseInt(this.month, 10) - 1;
+      const day = parseInt(this.day, 10);
+      const hour = parseInt(this.hour, 10);
+      const minute = parseInt(this.minute, 10);
+      const second = parseInt(this.second, 10) || 0;
+
+      if (isNaN(year)) throw new Error("Invalid year");
+      if (isNaN(month)) throw new Error("Invalid month");
+      if (isNaN(day)) throw new Error("Invalid day");
+      if (isNaN(hour)) throw new Error("Invalid hour");
+      if (isNaN(minute)) throw new Error("Invalid minute");
+      if (isNaN(second)) throw new Error("Invalid second");
+
+      dateNew.setUTCFullYear(year);
+      dateNew.setUTCMonth(month);
+      dateNew.setUTCDate(day);
+      dateNew.setUTCHours(hour);
+      dateNew.setUTCMinutes(minute);
+      dateNew.setUTCSeconds(second);
+      return dateNew;
+    },
+
+    getDateLast() {
+      const dateNew = new Date();
+      const year = parseInt(this.yearLast, 10);
+      const month = parseInt(this.monthLast, 10) - 1;
+      const day = parseInt(this.dayLast, 10);
+      const hour = parseInt(this.hourLast, 10);
+      const minute = parseInt(this.minuteLast, 10);
+      const second = parseInt(this.secondLast, 10) || 0;
+
+      if (isNaN(year)) throw new Error("Invalid last year");
+      if (isNaN(month)) throw new Error("Invalid last month");
+      if (isNaN(day)) throw new Error("Invalid last day");
+      if (isNaN(hour)) throw new Error("Invalid last hour");
+      if (isNaN(minute)) throw new Error("Invalid last minute");
+      if (isNaN(second)) throw new Error("Invalid last second");
+
+      dateNew.setUTCFullYear(year);
+      dateNew.setUTCMonth(month);
+      dateNew.setUTCDate(day);
+      dateNew.setUTCHours(hour);
+      dateNew.setUTCMinutes(minute);
+      dateNew.setUTCSeconds(second);
+      return dateNew;
+    },
+  },
+});
 </script>
 
 <style scoped lang="scss">
