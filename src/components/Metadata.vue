@@ -83,15 +83,13 @@ export default defineComponent({
     EditIcon,
   },
 
-  data() {
-    return {
-      fileInfo: null as IFileInfo,
-      exif: {} as { [prop: string]: any },
-      baseInfo: {} as any,
-      nominatim: null as any,
-      state: 0,
-    };
-  },
+  data: () => ({
+    fileInfo: null as IFileInfo,
+    exif: {} as { [prop: string]: any },
+    baseInfo: {} as any,
+    nominatim: null as any,
+    state: 0,
+  }),
 
   mounted() {
     subscribe("files:file:updated", this.handleFileUpdated);

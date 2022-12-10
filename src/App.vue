@@ -92,12 +92,10 @@ export default defineComponent({
     MapIcon,
   },
 
-  data() {
-    return {
-      navItems: [],
-      metadataComponent: null as any,
-    };
-  },
+  data: () => ({
+    navItems: [],
+    metadataComponent: null as any,
+  }),
 
   computed: {
     ncVersion(): number {
@@ -180,7 +178,7 @@ export default defineComponent({
             if (this.metadataComponent) {
               this.metadataComponent.$destroy();
             }
-            this.metadataComponent = new Vue(Metadata);
+            this.metadataComponent = new Metadata();
             // Only mount after we have all the info we need
             await this.metadataComponent.update(fileInfo);
             this.metadataComponent.$mount(el);

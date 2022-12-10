@@ -107,11 +107,9 @@ export default defineComponent({
     ShareIcon,
   },
 
-  data() {
-    return {
-      name: "",
-    };
-  },
+  data: () => ({
+    name: "",
+  }),
 
   computed: {
     isAlbumList(): boolean {

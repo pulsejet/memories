@@ -47,14 +47,12 @@ export default defineComponent({
     AlbumCollaborators,
   },
 
-  data() {
-    return {
-      album: null as any,
-      show: false,
-      loadingAddCollaborators: false,
-      collaborators: [] as any[],
-    };
-  },
+  data: () => ({
+    album: null as any,
+    show: false,
+    loadingAddCollaborators: false,
+    collaborators: [] as any[],
+  }),
 
   methods: {
     close() {

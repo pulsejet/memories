@@ -59,11 +59,9 @@ export default defineComponent({
     ShareIcon,
   },
 
-  data() {
-    return {
-      topMatter: null as TopMatterFolder | null,
-    };
-  },
+  data: () => ({
+    topMatter: null as TopMatterFolder | null,
+  }),
 
   watch: {
     $route: function (from: any, to: any) {

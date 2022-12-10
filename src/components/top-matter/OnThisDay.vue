@@ -78,15 +78,13 @@ export default defineComponent({
     },
   },
 
-  data() {
-    return {
-      getPreviewUrl,
-      years: [] as IYear[],
-      hasRight: false,
-      hasLeft: false,
-      scrollStack: [] as number[],
-    };
-  },
+  data: () => ({
+    getPreviewUrl,
+    years: [] as IYear[],
+    hasRight: false,
+    hasLeft: false,
+    scrollStack: [] as number[],
+  }),
 
   mounted() {
     const inner = this.$refs.inner as HTMLElement;

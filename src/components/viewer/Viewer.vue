@@ -222,37 +222,35 @@ export default defineComponent({
     AlbumRemoveIcon,
   },
 
-  data() {
-    return {
-      isOpen: false,
-      originalTitle: null,
-      editorOpen: false,
+  data: () => ({
+    isOpen: false,
+    originalTitle: null,
+    editorOpen: false,
 
-      show: false,
-      showControls: false,
-      fullyOpened: false,
-      sidebarOpen: false,
-      sidebarWidth: 400,
-      outerWidth: "100vw",
+    show: false,
+    showControls: false,
+    fullyOpened: false,
+    sidebarOpen: false,
+    sidebarWidth: 400,
+    outerWidth: "100vw",
 
-      /** User interaction detection */
-      activityTimer: 0,
+    /** User interaction detection */
+    activityTimer: 0,
 
-      /** Base dialog */
-      photoswipe: null as PhotoSwipe | null,
+    /** Base dialog */
+    photoswipe: null as PhotoSwipe | null,
 
-      list: [] as IPhoto[],
-      days: new Map<number, IDay>(),
-      dayIds: [] as number[],
+    list: [] as IPhoto[],
+    days: new Map<number, IDay>(),
+    dayIds: [] as number[],
 
-      globalCount: 0,
-      globalAnchor: -1,
-      currIndex: -1,
+    globalCount: 0,
+    globalAnchor: -1,
+    currIndex: -1,
 
-      /** Timer to move to next photo */
-      slideshowTimer: 0,
-    };
-  },
+    /** Timer to move to next photo */
+    slideshowTimer: 0,
+  }),
 
   mounted() {
     subscribe("files:sidebar:opened", this.handleAppSidebarOpen);

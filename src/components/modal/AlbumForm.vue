@@ -134,15 +134,13 @@ export default defineComponent({
     },
   },
 
-  data() {
-    return {
-      collaborators: [],
-      showCollaboratorView: false,
-      albumName: "",
-      albumLocation: "",
-      loading: false,
-    };
-  },
+  data: () => ({
+    collaborators: [],
+    showCollaboratorView: false,
+    albumName: "",
+    albumLocation: "",
+    loading: false,
+  }),
 
   computed: {
     /**

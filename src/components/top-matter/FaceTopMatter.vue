@@ -81,11 +81,9 @@ export default defineComponent({
     MergeIcon,
   },
 
-  data() {
-    return {
-      name: "",
-    };
-  },
+  data: () => ({
+    name: "",
+  }),
 
   watch: {
     $route: function (from: any, to: any) {

@@ -53,13 +53,11 @@ export default defineComponent({
     FaceList,
   },
 
-  data() {
-    return {
-      processing: 0,
-      procesingTotal: 0,
-      show: false,
-    };
-  },
+  data: () => ({
+    processing: 0,
+    procesingTotal: 0,
+    show: false,
+  }),
 
   methods: {
     close() {

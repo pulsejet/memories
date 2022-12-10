@@ -85,13 +85,11 @@ export default defineComponent({
     NcLoadingIcon,
   },
 
-  data() {
-    return {
-      showAlbumCreationForm: false,
-      albums: [] as IAlbum[],
-      loadingAlbums: true,
-    };
-  },
+  data: () => ({
+    showAlbumCreationForm: false,
+    albums: [] as IAlbum[],
+    loadingAlbums: true,
+  }),
 
   mounted() {
     this.loadAlbums();

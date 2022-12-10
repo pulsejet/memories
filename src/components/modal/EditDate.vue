@@ -142,29 +142,27 @@ export default defineComponent({
     Modal,
   },
 
-  data() {
-    return {
-      photos: [] as IPhoto[],
-      photosDone: 0,
-      processing: false,
+  data: () => ({
+    photos: [] as IPhoto[],
+    photosDone: 0,
+    processing: false,
 
-      longDateStr: "",
-      year: "0",
-      month: "0",
-      day: "0",
-      hour: "0",
-      minute: "0",
-      second: "0",
+    longDateStr: "",
+    year: "0",
+    month: "0",
+    day: "0",
+    hour: "0",
+    minute: "0",
+    second: "0",
 
-      longDateStrLast: "",
-      yearLast: "0",
-      monthLast: "0",
-      dayLast: "0",
-      hourLast: "0",
-      minuteLast: "0",
-      secondLast: "0",
-    };
-  },
+    longDateStrLast: "",
+    yearLast: "0",
+    monthLast: "0",
+    dayLast: "0",
+    hourLast: "0",
+    minuteLast: "0",
+    secondLast: "0",
+  }),
 
   methods: {
     emitRefresh(val: boolean) {

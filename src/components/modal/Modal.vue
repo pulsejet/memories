@@ -43,13 +43,11 @@ export default defineComponent({
     },
   },
 
-  data() {
-    return {
-      isSidebarShown: false,
-      sidebarWidth: 400,
-      trapElements: [],
-    };
-  },
+  data: () => ({
+    isSidebarShown: false,
+    sidebarWidth: 400,
+    trapElements: [],
+  }),
 
   beforeMount() {
     if (this.sidebar) {

@@ -26,11 +26,9 @@ export default defineComponent({
     AlbumTopMatter,
   },
 
-  data() {
-    return {
-      type: TopMatterType.NONE,
-    };
-  },
+  data: () => ({
+    type: TopMatterType.NONE,
+  }),
 
   watch: {
     $route: function (from: any, to: any) {

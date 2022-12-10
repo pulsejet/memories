@@ -54,48 +54,46 @@ export default defineComponent({
     Modal,
   },
 
-  data() {
-    return {
-      photo: null as IPhoto,
-      show: false,
-      exif: null as any,
-      processing: false,
-      fields: [
-        {
-          field: "Title",
-          label: t("memories", "Title"),
-        },
-        {
-          field: "Description",
-          label: t("memories", "Description"),
-        },
-        {
-          field: "DateTimeOriginal",
-          label: t("memories", "Date Taken"),
-        },
-        {
-          field: "Label",
-          label: t("memories", "Label"),
-        },
-        {
-          field: "Make",
-          label: t("memories", "Camera Make"),
-        },
-        {
-          field: "Model",
-          label: t("memories", "Camera Model"),
-        },
-        {
-          field: "Lens",
-          label: t("memories", "Lens"),
-        },
-        {
-          field: "Copyright",
-          label: t("memories", "Copyright"),
-        },
-      ],
-    };
-  },
+  data: () => ({
+    photo: null as IPhoto,
+    show: false,
+    exif: null as any,
+    processing: false,
+    fields: [
+      {
+        field: "Title",
+        label: t("memories", "Title"),
+      },
+      {
+        field: "Description",
+        label: t("memories", "Description"),
+      },
+      {
+        field: "DateTimeOriginal",
+        label: t("memories", "Date Taken"),
+      },
+      {
+        field: "Label",
+        label: t("memories", "Label"),
+      },
+      {
+        field: "Make",
+        label: t("memories", "Camera Make"),
+      },
+      {
+        field: "Model",
+        label: t("memories", "Camera Model"),
+      },
+      {
+        field: "Lens",
+        label: t("memories", "Lens"),
+      },
+      {
+        field: "Copyright",
+        label: t("memories", "Copyright"),
+      },
+    ],
+  }),
 
   methods: {
     emitRefresh(val: boolean) {

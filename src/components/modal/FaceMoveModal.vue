@@ -49,12 +49,10 @@ export default defineComponent({
     },
   },
 
-  data() {
-    return {
-      show: false,
-      photos: [] as IPhoto[],
-    };
-  },
+  data: () => ({
+    show: false,
+    photos: [] as IPhoto[],
+  }),
 
   methods: {
     open(photos: IPhoto[]) {

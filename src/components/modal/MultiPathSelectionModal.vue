@@ -60,12 +60,10 @@ export default defineComponent({
     },
   },
 
-  data() {
-    return {
-      show: false,
-      paths: [] as string[],
-    };
-  },
+  data: () => ({
+    show: false,
+    paths: [] as string[],
+  }),
 
   methods: {
     close(list: string[]) {

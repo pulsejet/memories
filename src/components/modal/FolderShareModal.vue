@@ -60,13 +60,11 @@ export default defineComponent({
     NcButton,
   },
 
-  data() {
-    return {
-      show: false,
-      folderPath: "",
-      links: [] as { url: string }[],
-    };
-  },
+  data: () => ({
+    show: false,
+    folderPath: "",
+    links: [] as { url: string }[],
+  }),
 
   computed: {
     isRoot(): boolean {

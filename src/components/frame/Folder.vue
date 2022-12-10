@@ -46,16 +46,14 @@ export default defineComponent({
     data: Object as PropType<IFolder>,
   },
 
-  data() {
-    return {
-      // Separate property because the one on data isn't reactive
-      previews: [] as IPhoto[],
-      // Error occured fetching thumbs
-      error: false,
-      // Passthrough
-      getPreviewUrl,
-    };
-  },
+  data: () => ({
+    // Separate property because the one on data isn't reactive
+    previews: [] as IPhoto[],
+    // Error occured fetching thumbs
+    error: false,
+    // Passthrough
+    getPreviewUrl,
+  }),
 
   computed: {
     /** Open folder */

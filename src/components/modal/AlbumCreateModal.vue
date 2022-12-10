@@ -36,12 +36,10 @@ export default defineComponent({
     AlbumForm,
   },
 
-  data() {
-    return {
-      show: false,
-      album: null as any,
-    };
-  },
+  data: () => ({
+    show: false,
+    album: null as any,
+  }),
 
   methods: {
     /**

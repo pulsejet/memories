@@ -8,6 +8,7 @@
     "allowSyntheticDefaultImports": true,
     "jsx": "preserve",
     "useDefineForClassFields": true,
+    "noImplicitThis": true,
     "esModuleInterop": true
   }
 }

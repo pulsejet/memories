@@ -40,13 +40,11 @@ export default defineComponent({
     Modal,
   },
 
-  data() {
-    return {
-      show: false,
-      user: "",
-      name: "",
-    };
-  },
+  data: () => ({
+    show: false,
+    user: "",
+    name: "",
+  }),
 
   watch: {
     $route: async function (from: any, to: any) {

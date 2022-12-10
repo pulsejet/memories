@@ -2,53 +2,48 @@ import { emit, subscribe, unsubscribe } from "@nextcloud/event-bus";
 import { loadState } from "@nextcloud/initial-state";
 import axios from "@nextcloud/axios";
 import { API } from "../services/API";
+import { defineComponent } from "vue";
 
 const eventName = "memories:user-config-changed";
 const localSettings = ["squareThumbs", "showFaceRect"];
 
-export default {
+export default defineComponent({
   name: "UserConfig",
 
-  data() {
-    return {
-      config_timelinePath: loadState(
-        "memories",
-        "timelinePath",
-        <string>""
-      ) as string,
-      config_foldersPath: loadState(
-        "memories",
-        "foldersPath",
-        <string>"/"
-      ) as string,
-      config_showHidden:
-        loadState("memories", "showHidden", <string>"false") === "true",
+  data: () => ({
+    config_timelinePath: loadState(
+      "memories",
+      "timelinePath",
+      <string>""
+    ) as string,
+    config_foldersPath: loadState(
+      "memories",
+      "foldersPath",
+      <string>"/"
+    ) as string,
+    config_showHidden:
+      loadState("memories", "showHidden", <string>"false") === "true",
 
-      config_tagsEnabled: Boolean(
-        loadState("memories", "systemtags", <string>"")
-      ),
-      config_recognizeEnabled: Boolean(
-        loadState("memories", "recognize", <string>"")
-      ),
-      config_facerecognitionInstalled: Boolean(
-        loadState("memories", "facerecognitionInstalled", <string>"")
-      ),
-      config_facerecognitionEnabled: Boolean(
-        loadState("memories", "facerecognitionEnabled", <string>"")
-      ),
-      config_mapsEnabled: Boolean(loadState("memories", "maps", <string>"")),
-      config_albumsEnabled: Boolean(
-        loadState("memories", "albums", <string>"")
-      ),
+    config_tagsEnabled: Boolean(
+      loadState("memories", "systemtags", <string>"")
+    ),
+    config_recognizeEnabled: Boolean(
+      loadState("memories", "recognize", <string>"")
+    ),
+    config_facerecognitionInstalled: Boolean(
+      loadState("memories", "facerecognitionInstalled", <string>"")
+    ),
+    config_facerecognitionEnabled: Boolean(
+      loadState("memories", "facerecognitionEnabled", <string>"")
+    ),
+    config_mapsEnabled: Boolean(loadState("memories", "maps", <string>"")),
+    config_albumsEnabled: Boolean(loadState("memories", "albums", <string>"")),
 
-      config_squareThumbs:
-        localStorage.getItem("memories_squareThumbs") === "1",
-      config_showFaceRect:
-        localStorage.getItem("memories_showFaceRect") === "1",
+    config_squareThumbs: localStorage.getItem("memories_squareThumbs") === "1",
+    config_showFaceRect: localStorage.getItem("memories_showFaceRect") === "1",
 
-      config_eventName: eventName,
-    };
-  },
+    config_eventName: eventName,
+  }),
 
   created() {
     subscribe(eventName, this.updateLocalSetting);
@@ -83,4 +78,4 @@ export default {
       emit(eventName, { setting, value });
     },
   },
-};
+});

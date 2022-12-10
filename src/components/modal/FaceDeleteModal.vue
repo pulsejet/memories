@@ -36,13 +36,11 @@ export default defineComponent({
     Modal,
   },
 
-  data() {
-    return {
-      show: false,
-      user: "",
-      name: "",
-    };
-  },
+  data: () => ({
+    show: false,
+    user: "",
+    name: "",
+  }),
 
   mounted() {
     this.refreshParams();

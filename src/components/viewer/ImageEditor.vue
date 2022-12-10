@@ -50,12 +50,10 @@ export default defineComponent({
     },
   },
 
-  data() {
-    return {
-      exif: null as any,
-      imageEditor: null as FilerobotImageEditor,
-    };
-  },
+  data: () => ({
+    exif: null as any,
+    imageEditor: null as FilerobotImageEditor,
+  }),
 
   computed: {
     config(): FilerobotImageEditorConfig & { theme: any } {
@@ -127,7 +125,7 @@ export default defineComponent({
       };
     },
 
-    defaultSavedImageName() {
+    defaultSavedImageName(): string {
       return basename(this.src, extname(this.src));
     },
 
@@ -139,12 +137,12 @@ export default defineComponent({
       return "jpeg";
     },
 
-    hasHighContrastEnabled() {
+    hasHighContrastEnabled(): boolean {
       const themes = globalThis.OCA?.Theming?.enabledThemes || [];
       return themes.find((theme) => theme.indexOf("highcontrast") !== -1);
     },
 
-    themeDataAttr() {
+    themeDataAttr(): Record<string, boolean> {
       if (this.hasHighContrastEnabled) {
         return {
           "data-theme-dark-highcontrast": true,

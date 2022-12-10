@@ -183,49 +183,47 @@ export default defineComponent({
     ImageMultipleIcon,
   },
 
-  data() {
-    return {
-      /** Loading days response */
-      loading: 0,
-      /** Main list of rows */
-      list: [] as IRow[],
-      /** Computed number of columns */
-      numCols: 0,
-      /** Header rows for dayId key */
-      heads: {} as { [dayid: number]: IHeadRow },
+  data: () => ({
+    /** Loading days response */
+    loading: 0,
+    /** Main list of rows */
+    list: [] as IRow[],
+    /** Computed number of columns */
+    numCols: 0,
+    /** Header rows for dayId key */
+    heads: {} as { [dayid: number]: IHeadRow },
 
-      /** Computed row height */
-      rowHeight: 100,
-      /** Computed row width */
-      rowWidth: 100,
+    /** Computed row height */
+    rowHeight: 100,
+    /** Computed row width */
+    rowWidth: 100,
 
-      /** Current start index */
-      currentStart: 0,
-      /** Current end index */
-      currentEnd: 0,
-      /** Resizing timer */
-      resizeTimer: null as number | null,
-      /** Height of the scroller */
-      scrollerHeight: 100,
+    /** Current start index */
+    currentStart: 0,
+    /** Current end index */
+    currentEnd: 0,
+    /** Resizing timer */
+    resizeTimer: null as number | null,
+    /** Height of the scroller */
+    scrollerHeight: 100,
 
-      /** Set of dayIds for which images loaded */
-      loadedDays: new Set<number>(),
-      /** Set of dayIds for which image size is calculated */
-      sizedDays: new Set<number>(),
-      /** Days to load in the next call */
-      fetchDayQueue: [] as number[],
-      /** Timer to load day call */
-      fetchDayTimer: null as number | null,
+    /** Set of dayIds for which images loaded */
+    loadedDays: new Set<number>(),
+    /** Set of dayIds for which image size is calculated */
+    sizedDays: new Set<number>(),
+    /** Days to load in the next call */
+    fetchDayQueue: [] as number[],
+    /** Timer to load day call */
+    fetchDayTimer: null as number | null,
 
-      /** State for request cancellations */
-      state: Math.random(),
+    /** State for request cancellations */
+    state: Math.random(),
 
-      /** Selection manager component */
-      selectionManager: null as InstanceType<typeof SelectionManager>,
-      /** Scroller manager component */
-      scrollerManager: null as InstanceType<typeof ScrollerManager>,
-    };
-  },
+    /** Selection manager component */
+    selectionManager: null as InstanceType<typeof SelectionManager> & any,
+    /** Scroller manager component */
+    scrollerManager: null as InstanceType<typeof ScrollerManager> & any,
+  }),
 
   mounted() {
     this.selectionManager = <any>this.$refs.selectionManager;

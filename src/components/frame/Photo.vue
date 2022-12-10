@@ -99,13 +99,11 @@ export default defineComponent({
     },
   },
 
-  data() {
-    return {
-      touchTimer: 0,
-      src: null,
-      hasFaceRect: false,
-    };
-  },
+  data: () => ({
+    touchTimer: 0,
+    src: null,
+    hasFaceRect: false,
+  }),
 
   watch: {
     data(newData: IPhoto, oldData: IPhoto) {
@@ -139,14 +137,14 @@ export default defineComponent({
   },
 
   computed: {
-    videoDuration() {
+    videoDuration(): string | null {
       if (this.data.video_duration) {
         return utils.getDurationStr(this.data.video_duration);
       }
       return null;
     },
 
-    videoUrl() {
+    videoUrl(): string | null {
       if (this.data.liveid) {
         return utils.getLivePhotoVideoUrl(this.data, true);
       }

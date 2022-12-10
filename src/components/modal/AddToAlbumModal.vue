@@ -36,14 +36,12 @@ export default defineComponent({
     AlbumPicker,
   },
 
-  data() {
-    return {
-      show: false,
-      photos: [] as IPhoto[],
-      photosDone: 0,
-      processing: false,
-    };
-  },
+  data: () => ({
+    show: false,
+    photos: [] as IPhoto[],
+    photosDone: 0,
+    processing: false,
+  }),
 
   methods: {
     open(photos: IPhoto[]) {

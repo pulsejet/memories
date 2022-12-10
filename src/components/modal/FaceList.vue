@@ -22,13 +22,11 @@ export default defineComponent({
     Tag,
   },
 
-  data() {
-    return {
-      user: "",
-      name: "",
-      detail: null as ITag[] | null,
-    };
-  },
+  data: () => ({
+    user: "",
+    name: "",
+    detail: null as ITag[] | null,
+  }),
 
   watch: {
     $route: async function (from: any, to: any) {

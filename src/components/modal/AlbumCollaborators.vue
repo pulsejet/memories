@@ -204,24 +204,22 @@ export default defineComponent({
     },
   },
 
-  data() {
-    return {
-      searchText: "",
-      availableCollaborators: {} as { [key: string]: Collaborator },
-      selectedCollaboratorsKeys: [] as string[],
-      currentSearchResults: [] as Collaborator[],
-      loadingAlbum: false,
-      errorFetchingAlbum: null,
-      loadingCollaborators: false,
-      errorFetchingCollaborators: null,
-      randomId: Math.random().toString().substring(2, 10),
-      publicLinkCopied: false,
-      config: {
-        minSearchStringLength:
-          parseInt(window.OC.config["sharing.minSearchStringLength"], 10) || 0,
-      },
-    };
-  },
+  data: () => ({
+    searchText: "",
+    availableCollaborators: {} as { [key: string]: Collaborator },
+    selectedCollaboratorsKeys: [] as string[],
+    currentSearchResults: [] as Collaborator[],
+    loadingAlbum: false,
+    errorFetchingAlbum: null,
+    loadingCollaborators: false,
+    errorFetchingCollaborators: null,
+    randomId: Math.random().toString().substring(2, 10),
+    publicLinkCopied: false,
+    config: {
+      minSearchStringLength:
+        parseInt(window.OC.config["sharing.minSearchStringLength"], 10) || 0,
+    },
+  }),
 
   computed: {
     searchResults(): string[] {
