@@ -41,7 +41,6 @@ OC.L10N.register(
     "You are about to download a large number of files. Are you sure?" : "Vous êtes sur le point de télécharger un grand nombre de fichiers. Êtes-vous certain de vouloir le faire ?",
     "You are about to delete a large number of files. Are you sure?" : "Vous êtes sur le point de supprimer un grand nombre de fichiers. Êtes-vous certain⋅e de vouloir le faire ?",
     "You are about to touch a large number of files. Are you sure?" : "Vous êtes sur le point de modifier un grand nombre de fichiers. Êtes-vous sûr(e) ?",
-    "Could not remove photos from album" : "Impossible de retirer les photos de l'album",
     "_{n} selected_::_{n} selected_" : ["{n} sélectionné","{n} sélectionnés","{n} sélectionnés"],
     "Timeline Path" : "Emplacement du Fil chronologique",
     "Folders Path" : "Chemin du dossier",
@@ -244,6 +243,7 @@ OC.L10N.register(
     "Failed to download files" : "Échec du téléchargement des fichiers",
     "Failed to favorite files." : "Échec de la mise en favoris des fichiers.",
     "Failed to favorite some files." : "Échec de l'ajout en favoris de certains fichiers.",
-    "Failed to favorite {fileName}." : "Échec de l'ajout aux favoris de {fileName}."
+    "Failed to favorite {fileName}." : "Échec de l'ajout aux favoris de {fileName}.",
+    "Could not remove photos from album" : "Impossible de retirer les photos de l'album"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

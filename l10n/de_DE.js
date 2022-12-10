@@ -41,7 +41,6 @@ OC.L10N.register(
     "You are about to download a large number of files. Are you sure?" : "Sie sind dabei, eine große Anzahl an Dateien herunterzuladen. Sind Sie sich sicher?",
     "You are about to delete a large number of files. Are you sure?" : "Sie sind dabei, eine große Anzahl an Dateien zu löschen. Sind Sie sich sicher?",
     "You are about to touch a large number of files. Are you sure?" : "Sie sind im Begriff, eine große Anzahl von Dateien zu ändern. Sind Sie sich sicher?",
-    "Could not remove photos from album" : "Fotos konnten nicht aus dem Album entfernt werden",
     "_{n} selected_::_{n} selected_" : ["{n} ausgewählt","{n} ausgewählt"],
     "Timeline Path" : "Pfad der Zeitleiste",
     "Folders Path" : "Ordnerpfad",
@@ -99,6 +98,13 @@ OC.L10N.register(
     "Newest" : "Neueste",
     "Oldest" : "Älteste",
     "Loading data … {n}/{m}" : "Daten werden geladen… {n}/{m}",
+    "Title" : "Titel",
+    "Description" : "Beschreibung",
+    "Label" : "Beschriftung",
+    "Camera Make" : "Kameramarke",
+    "Camera Model" : "Kameramodell",
+    "Lens" : "Linse",
+    "Copyright" : "Urheberrecht",
     "Remove person" : "Person entfernen",
     "Are you sure you want to remove {name}?" : "Soll {name} wirklich entfernt werden?",
     "Name" : "Name",
@@ -240,6 +246,7 @@ OC.L10N.register(
     "Failed to download files" : "Dateien konnten nicht heruntergeladen werden",
     "Failed to favorite files." : "Favorisieren von Dateien fehlgeschlagen.",
     "Failed to favorite some files." : "Einige Dateien konnten nicht zu den Favoriten hinzugefügt werden.",
-    "Failed to favorite {fileName}." : "{fileName} konnte nicht zu den Favoriten hinzugefügt werden."
+    "Failed to favorite {fileName}." : "{fileName} konnte nicht zu den Favoriten hinzugefügt werden.",
+    "Could not remove photos from album" : "Fotos konnten nicht aus dem Album entfernt werden"
 },
 "nplurals=2; plural=(n != 1);");

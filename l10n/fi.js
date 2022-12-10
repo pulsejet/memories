@@ -38,7 +38,6 @@ OC.L10N.register(
     "You are about to download a large number of files. Are you sure?" : "Olet lataamassa suurta määrää tiedostoja. Oletko varma?",
     "You are about to delete a large number of files. Are you sure?" : "Olet poistamassa suurta määrää tiedostoja. Oletko varma?",
     "You are about to touch a large number of files. Are you sure?" : "Olet aikeissa koskettaa suurta määrää tiedostoja. Oletko varma?",
-    "Could not remove photos from album" : "Kuvia ei voitu poistaa albumista",
     "_{n} selected_::_{n} selected_" : ["{n} valittu","{n} valittu"],
     "Timeline Path" : "Aikajanan polku",
     "Folders Path" : "Kansioiden polku",
@@ -171,6 +170,7 @@ OC.L10N.register(
     "Failed to delete {fileName}." : "Tiedoston {fileName} poisto epäonnistui.",
     "Failed to favorite files." : "Tiedostojen asettaminen suosikeiksi epäonnistui.",
     "Failed to favorite some files." : "Joidenkin tiedostojen määrittäminen suosikiksi epäonnistui.",
-    "Failed to favorite {fileName}." : "Tiedoston {fileName} asettaminen suosikiksi epäonnistui."
+    "Failed to favorite {fileName}." : "Tiedoston {fileName} asettaminen suosikiksi epäonnistui.",
+    "Could not remove photos from album" : "Kuvia ei voitu poistaa albumista"
 },
 "nplurals=2; plural=(n != 1);");

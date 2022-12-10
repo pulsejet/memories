@@ -41,7 +41,6 @@ OC.L10N.register(
     "You are about to download a large number of files. Are you sure?" : "您將要下載大量檔案。您確定嗎？",
     "You are about to delete a large number of files. Are you sure?" : "您將要刪除大量檔案。您確定嗎？",
     "You are about to touch a large number of files. Are you sure?" : "您將要處理大量檔案。您確定嗎？",
-    "Could not remove photos from album" : "無法從相簿移除照片",
     "_{n} selected_::_{n} selected_" : ["已選取 {n} 個"],
     "Timeline Path" : "時間軸路徑",
     "Folders Path" : "資料夾路徑",
@@ -242,6 +241,7 @@ OC.L10N.register(
     "Failed to delete {fileName}." : "刪除 {fileName} 失敗。",
     "Failed to favorite files." : "加入最愛檔案失敗。",
     "Failed to favorite some files." : "將部份檔案加入最愛失敗。",
-    "Failed to favorite {fileName}." : "將 {fileName} 加入最愛失敗。"
+    "Failed to favorite {fileName}." : "將 {fileName} 加入最愛失敗。",
+    "Could not remove photos from album" : "無法從相簿移除照片"
 },
 "nplurals=1; plural=0;");

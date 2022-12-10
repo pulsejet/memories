@@ -41,7 +41,6 @@ OC.L10N.register(
     "You are about to download a large number of files. Are you sure?" : "Çok sayıda dosyayı indirmek üzeresiniz. Bunu yapmak istediğinize emin misiniz?",
     "You are about to delete a large number of files. Are you sure?" : "Çok sayıda dosyayı silmek üzeresiniz. Bunu yapmak istediğinize emin misiniz?",
     "You are about to touch a large number of files. Are you sure?" : "Çok sayıda dosyayı güncellemek üzeresiniz. Bunu yapmak istediğinize emin misiniz?",
-    "Could not remove photos from album" : "Fotoğraflar albümden kaldırılamadı",
     "_{n} selected_::_{n} selected_" : ["{n} seçilmiş","{n} seçilmiş"],
     "Timeline Path" : "Zaman tüneli yolu",
     "Folders Path" : "Klasörlerin yolu",
@@ -242,6 +241,7 @@ OC.L10N.register(
     "Failed to delete {fileName}." : "{fileName} silinemedi.",
     "Failed to favorite files." : "Dosyalar sık kullanılanlara eklenemedi.",
     "Failed to favorite some files." : "Bazı dosyalar sık kullanılanlara eklenemedi.",
-    "Failed to favorite {fileName}." : "{fileName} sık kullanılanlara eklenemedi."
+    "Failed to favorite {fileName}." : "{fileName} sık kullanılanlara eklenemedi.",
+    "Could not remove photos from album" : "Fotoğraflar albümden kaldırılamadı"
 },
 "nplurals=2; plural=(n > 1);");
