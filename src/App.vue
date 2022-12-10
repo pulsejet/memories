@@ -178,7 +178,7 @@ export default defineComponent({
             if (this.metadataComponent) {
               this.metadataComponent.$destroy();
             }
-            this.metadataComponent = new Metadata();
+            this.metadataComponent = new Vue(Metadata as any);
             // Only mount after we have all the info we need
             await this.metadataComponent.update(fileInfo);
             this.metadataComponent.$mount(el);
