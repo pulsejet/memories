@@ -67,32 +67,31 @@
     :album-name="albumName"
     :allow-public-link="false"
     :collaborators="[]"
+    v-slot="{ collaborators }"
   >
-    <template slot-scope="{ collaborators }">
-      <span class="left-buttons">
-        <NcButton
-          :aria-label="t('photos', 'Back to the new album form.')"
-          type="tertiary"
-          @click="showCollaboratorView = false"
-        >
-          {{ t("photos", "Back") }}
-        </NcButton>
-      </span>
-      <span class="right-buttons">
-        <NcButton
-          :aria-label="saveText"
-          type="primary"
-          :disabled="albumName.trim() === '' || loading"
-          @click="submit(collaborators)"
-        >
-          <template #icon>
-            <NcLoadingIcon v-if="loading" />
-            <Send v-else />
-          </template>
-          {{ saveText }}
-        </NcButton>
-      </span>
-    </template>
+    <span class="left-buttons">
+      <NcButton
+        :aria-label="t('photos', 'Back to the new album form.')"
+        type="tertiary"
+        @click="showCollaboratorView = false"
+      >
+        {{ t("photos", "Back") }}
+      </NcButton>
+    </span>
+    <span class="right-buttons">
+      <NcButton
+        :aria-label="saveText"
+        type="primary"
+        :disabled="albumName.trim() === '' || loading"
+        @click="submit(collaborators)"
+      >
+        <template #icon>
+          <NcLoadingIcon v-if="loading" />
+          <Send v-else />
+        </template>
+        {{ saveText }}
+      </NcButton>
+    </span>
   </AlbumCollaborators>
 </template>
 

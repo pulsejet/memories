@@ -21,7 +21,7 @@
           class="fill-block"
           :class="{ error }"
           :src="previewUrl"
-          @error="data.flag |= c.FLAG_LOAD_FAIL"
+          @error="failed"
         />
       </div>
     </div>
@@ -131,6 +131,11 @@ export default defineComponent({
      */
     openTag(tag: ITag) {
       this.$emit("open", tag);
+    },
+
+    /** Mark as loading failed */
+    failed() {
+      this.data.flag |= this.c.FLAG_LOAD_FAIL;
     },
   },
 });

@@ -9,20 +9,19 @@
       :album-name="album.basename"
       :collaborators="album.collaborators"
       :public-link="album.publicLink"
+      v-slot="{ collaborators }"
     >
-      <template slot-scope="{ collaborators }">
-        <NcButton
-          :aria-label="t('photos', 'Save collaborators for this album.')"
-          type="primary"
-          :disabled="loadingAddCollaborators"
-          @click="handleSetCollaborators(collaborators)"
-        >
-          <template #icon>
-            <NcLoadingIcon v-if="loadingAddCollaborators" />
-          </template>
-          {{ t("photos", "Save") }}
-        </NcButton>
-      </template>
+      <NcButton
+        :aria-label="t('photos', 'Save collaborators for this album.')"
+        type="primary"
+        :disabled="loadingAddCollaborators"
+        @click="handleSetCollaborators(collaborators)"
+      >
+        <template #icon>
+          <NcLoadingIcon v-if="loadingAddCollaborators" />
+        </template>
+        {{ t("photos", "Save") }}
+      </NcButton>
     </AlbumCollaborators>
   </Modal>
 </template>

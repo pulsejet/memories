@@ -1,9 +1,9 @@
 <template>
   <div
+    v-bind="themeDataAttr"
     ref="editor"
     class="viewer__image-editor"
     :class="{ loading: !imageEditor }"
-    v-bind="themeDataAttr"
   />
 </template>
 

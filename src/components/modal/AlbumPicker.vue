@@ -15,7 +15,7 @@
         "
         @click="pickAlbum(album)"
       >
-        <template slot="icon">
+        <template v-slot:icon="{}">
           <img
             v-if="album.last_added_photo !== -1"
             class="album__image"
@@ -26,7 +26,7 @@
           </div>
         </template>
 
-        <template slot="subtitle">
+        <template v-slot:subtitle="{}">
           {{ n("photos", "%n item", "%n items", album.count) }}
           <!-- TODO: finish collaboration -->
           <!--⸱ {{ n('photos', 'Share with %n user', 'Share with %n users', album.isShared) }}-->
