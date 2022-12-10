@@ -57,8 +57,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins } from "vue-property-decorator";
-import GlobalMixin from "../../mixins/GlobalMixin";
+import { defineComponent } from "vue";
+
 import { getCurrentUser } from "@nextcloud/auth";
 
 import AlbumForm from "./AlbumForm.vue";
@@ -74,7 +74,8 @@ import { IAlbum, IPhoto } from "../../types";
 import axios from "@nextcloud/axios";
 import { API } from "../../services/API";
 
-@Component({
+export default defineComponent({
+  name: "AlbumPicker",
   components: {
     AlbumForm,
     Plus,
@@ -83,6 +84,7 @@ import { API } from "../../services/API";
     NcListItem,
     NcLoadingIcon,
   },
+
   filters: {
     toCoverUrl(fileId: string) {
       return getPreviewUrl(
@@ -94,42 +96,48 @@ import { API } from "../../services/API";
       );
     },
   },
-})
-export default class AlbumPicker extends Mixins(GlobalMixin) {
-  private showAlbumCreationForm = false;
-  private albums: IAlbum[] = [];
-  private loadingAlbums = true;
+
+  data() {
+    return {
+      showAlbumCreationForm: false,
+      albums: [] as IAlbum[],
+      loadingAlbums: true,
+    };
+  },
 
   mounted() {
     this.loadAlbums();
-  }
+  },
 
-  albumCreatedHandler() {
-    this.showAlbumCreationForm = false;
-    this.loadAlbums();
-  }
+  methods: {
+    albumCreatedHandler() {
+      this.showAlbumCreationForm = false;
+      this.loadAlbums();
+    },
 
-  getAlbumName(album: IAlbum) {
-    if (album.user === getCurrentUser()?.uid) {
-      return album.name;
-    }
-    return `${album.name} (${album.user})`;
-  }
+    getAlbumName(album: IAlbum) {
+      if (album.user === getCurrentUser()?.uid) {
+        return album.name;
+      }
+      return `${album.name} (${album.user})`;
+    },
 
-  async loadAlbums() {
-    try {
-      const res = await axios.get<IAlbum[]>(API.ALBUM_LIST());
-      this.albums = res.data;
-    } catch (e) {
-      console.error(e);
-    } finally {
-      this.loadingAlbums = false;
-    }
-  }
+    async loadAlbums() {
+      try {
+        const res = await axios.get<IAlbum[]>(API.ALBUM_LIST());
+        this.albums = res.data;
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.loadingAlbums = false;
+      }
+    },
 
-  @Emit("select")
-  pickAlbum(album: IAlbum) {}
-}
+    pickAlbum(album: IAlbum) {
+      this.$emit("select", album);
+    },
+  },
+});
 </script>
 
 <style lang="scss" scoped>

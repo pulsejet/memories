@@ -20,8 +20,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins } from "vue-property-decorator";
-import GlobalMixin from "../../mixins/GlobalMixin";
+import { defineComponent } from "vue";
 
 import * as dav from "../../services/DavRequests";
 import { showInfo } from "@nextcloud/dialogs";
@@ -30,58 +29,65 @@ import { IAlbum, IPhoto } from "../../types";
 import AlbumPicker from "./AlbumPicker.vue";
 import Modal from "./Modal.vue";
 
-@Component({
+export default defineComponent({
+  name: "AddToAlbumModal",
   components: {
     Modal,
     AlbumPicker,
   },
-})
-export default class AddToAlbumModal extends Mixins(GlobalMixin) {
-  private show = false;
-  private photos: IPhoto[] = [];
-  private photosDone: number = 0;
-  private processing: boolean = false;
 
-  public open(photos: IPhoto[]) {
-    this.photosDone = 0;
-    this.processing = false;
-    this.show = true;
-    this.photos = photos;
-  }
+  data() {
+    return {
+      show: false,
+      photos: [] as IPhoto[],
+      photosDone: 0,
+      processing: false,
+    };
+  },
 
-  @Emit("added")
-  public added(photos: IPhoto[]) {}
+  methods: {
+    open(photos: IPhoto[]) {
+      this.photosDone = 0;
+      this.processing = false;
+      this.show = true;
+      this.photos = photos;
+    },
 
-  @Emit("close")
-  public close() {
-    this.photos = [];
-    this.processing = false;
-    this.show = false;
-  }
+    added(photos: IPhoto[]) {
+      this.$emit("added", photos);
+    },
 
-  public async selectAlbum(album: IAlbum) {
-    const name = album.name || album.album_id.toString();
-    const gen = dav.addToAlbum(album.user, name, this.photos);
-    this.processing = true;
+    close() {
+      this.photos = [];
+      this.processing = false;
+      this.show = false;
+      this.$emit("close");
+    },
 
-    for await (const fids of gen) {
-      this.photosDone += fids.filter((f) => f).length;
-      this.added(this.photos.filter((p) => fids.includes(p.fileid)));
-    }
+    async selectAlbum(album: IAlbum) {
+      const name = album.name || album.album_id.toString();
+      const gen = dav.addToAlbum(album.user, name, this.photos);
+      this.processing = true;
 
-    const n = this.photosDone;
-    showInfo(
-      this.n(
-        "memories",
-        "{n} item added to album",
-        "{n} items added to album",
-        n,
-        { n }
-      )
-    );
-    this.close();
-  }
-}
+      for await (const fids of gen) {
+        this.photosDone += fids.filter((f) => f).length;
+        this.added(this.photos.filter((p) => fids.includes(p.fileid)));
+      }
+
+      const n = this.photosDone;
+      showInfo(
+        this.n(
+          "memories",
+          "{n} item added to album",
+          "{n} items added to album",
+          n,
+          { n }
+        )
+      );
+      this.close();
+    },
+  },
+});
 </script>
 
 <style lang="scss" scoped>
