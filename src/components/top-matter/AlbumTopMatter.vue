@@ -66,9 +66,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Watch } from "vue-property-decorator";
-import GlobalMixin from "../../mixins/GlobalMixin";
-import UserConfig from "../../mixins/UserConfig";
+import { defineComponent } from "vue";
 
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
@@ -90,7 +88,8 @@ import PlusIcon from "vue-material-design-icons/Plus.vue";
 import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
 import { API } from "../../services/API";
 
-@Component({
+export default defineComponent({
+  name: "AlbumTopMatter",
   components: {
     NcActions,
     NcActionButton,
@@ -107,46 +106,54 @@ import { API } from "../../services/API";
     PlusIcon,
     ShareIcon,
   },
-})
-export default class AlbumTopMatter extends Mixins(GlobalMixin, UserConfig) {
-  private name: string = "";
 
-  get isAlbumList() {
-    return !Boolean(this.$route.params.name);
-  }
+  data() {
+    return {
+      name: "",
+    };
+  },
 
-  get canEditAlbum() {
-    return (
-      !this.isAlbumList && this.$route.params.user === getCurrentUser()?.uid
-    );
-  }
+  computed: {
+    isAlbumList() {
+      return !Boolean(this.$route.params.name);
+    },
 
-  @Watch("$route")
-  async routeChange(from: any, to: any) {
-    this.createMatter();
-  }
+    canEditAlbum() {
+      return (
+        !this.isAlbumList && this.$route.params.user === getCurrentUser()?.uid
+      );
+    },
+  },
+
+  watch: {
+    $route: async function (from: any, to: any) {
+      this.createMatter();
+    },
+  },
 
   mounted() {
     this.createMatter();
-  }
+  },
 
-  createMatter() {
-    this.name = this.$route.params.name || this.t("memories", "Albums");
-  }
+  methods: {
+    createMatter() {
+      this.name = this.$route.params.name || this.t("memories", "Albums");
+    },
 
-  back() {
-    this.$router.push({ name: "albums" });
-  }
+    back() {
+      this.$router.push({ name: "albums" });
+    },
 
-  async downloadAlbum() {
-    const res = await axios.post(
-      API.ALBUM_DOWNLOAD(this.$route.params.user, this.$route.params.name)
-    );
-    if (res.status === 200 && res.data.handle) {
-      downloadWithHandle(res.data.handle);
-    }
-  }
-}
+    async downloadAlbum() {
+      const res = await axios.post(
+        API.ALBUM_DOWNLOAD(this.$route.params.user, this.$route.params.name)
+      );
+      if (res.status === 200 && res.data.handle) {
+        downloadWithHandle(res.data.handle);
+      }
+    },
+  },
+});
 </script>
 
 <style lang="scss" scoped>
