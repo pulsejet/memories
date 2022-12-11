@@ -50,6 +50,7 @@
     "Position" : "위치",
     "Extension" : "확장자",
     "Quality" : "품질",
+    "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "선택한 잘라내기 영역은 적절한 크기 범위에 미치지 못하며, 품질이 저하될 수 있습니다",
     "Auto" : "자동"
 },"pluralForm" :"nplurals=1; plural=0;"
 }
