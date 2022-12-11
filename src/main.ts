@@ -14,6 +14,8 @@ import { generateFilePath } from "@nextcloud/router";
 import { getRequestToken } from "@nextcloud/auth";
 import { IPhoto } from "./types";
 
+import "./global.scss";
+
 // Global exposed variables
 declare global {
   var vueroute: () => Route;
