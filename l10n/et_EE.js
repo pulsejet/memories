@@ -37,6 +37,7 @@ OC.L10N.register(
     "Next" : "Järgmine",
     "Reset" : "Lähtesta",
     "Continue" : "Jätka",
+    "Undo" : "Tühista",
     "Custom" : "Kohandatud",
     "Size" : "Suurus",
     "Position" : "Asukoht"
