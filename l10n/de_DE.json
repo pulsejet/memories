@@ -54,7 +54,7 @@
     "Choose the root for the folders view" : "Wählen Sie das Stammverzeichnis für die Ordneransicht",
     "Your Timeline" : "Ihre Zeitleiste",
     "You will find your friends soon. Please, be patient." : "Sie werden Ihre Freunde bald finden. Bitte haben Sie Geduld.",
-    "Face Recognition is disabled. Enable in settings to find your friends." : "Die Gesichtserkennung ist deaktiviert. Aktivieren Sie in den Einstellungen, um Ihre Freunde zu finden.",
+    "Face Recognition is disabled. Enable in settings to find your friends." : "Die Gesichtserkennung ist deaktiviert. Aktivieren Sie sie in den Einstellungen, um Ihre Freunde zu finden.",
     "Failed to load some photos" : "Laden einiger Fotos fehlgeschlagen",
     "Processing … {n}/{m}" : "Verarbeite… {n}/{m}",
     "_{n} item added to album_::_{n} items added to album_" : ["{n} Element zum Album hinzugefügt","{n} Elmente zum Album hinzugefügt"],
