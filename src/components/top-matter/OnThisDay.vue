@@ -41,8 +41,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Prop } from "vue-property-decorator";
-import GlobalMixin from "../../mixins/GlobalMixin";
+import { defineComponent } from "vue";
 
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
@@ -63,7 +62,7 @@ interface IYear {
   text: string;
 }
 
-@Component({
+export default defineComponent({
   name: "OnThisDay",
   components: {
     NcActions,
@@ -71,21 +70,21 @@ interface IYear {
     LeftMoveIcon,
     RightMoveIcon,
   },
-})
-export default class OnThisDay extends Mixins(GlobalMixin) {
-  private getPreviewUrl = getPreviewUrl;
 
-  @Prop()
-  private viewer: any;
+  props: {
+    viewer: {
+      type: Object,
+      required: false,
+    },
+  },
 
-  @Emit("load")
-  onload() {}
-
-  private years: IYear[] = [];
-
-  private hasRight = false;
-  private hasLeft = false;
-  private scrollStack: number[] = [];
+  data: () => ({
+    getPreviewUrl,
+    years: [] as IYear[],
+    hasRight: false,
+    hasLeft: false,
+    scrollStack: [] as number[],
+  }),
 
   mounted() {
     const inner = this.$refs.inner as HTMLElement;
@@ -94,112 +93,118 @@ export default class OnThisDay extends Mixins(GlobalMixin) {
     });
 
     this.refresh();
-  }
+  },
 
-  async refresh() {
-    // Look for cache
-    const dayIdToday = utils.dateToDayId(new Date());
-    const cacheUrl = `/onthisday/${dayIdToday}`;
-    const cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
-    if (cache) this.process(cache);
+  methods: {
+    onload() {
+      this.$emit("load");
+    },
 
-    // Network request
-    const photos = await dav.getOnThisDayRaw();
-    utils.cacheData(cacheUrl, photos);
+    async refresh() {
+      // Look for cache
+      const dayIdToday = utils.dateToDayId(new Date());
+      const cacheUrl = `/onthisday/${dayIdToday}`;
+      const cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
+      if (cache) this.process(cache);
 
-    // Check if exactly same as cache
-    if (
-      cache?.length === photos.length &&
-      cache.every((p, i) => p.fileid === photos[i].fileid)
-    )
-      return;
-    this.process(photos);
-  }
+      // Network request
+      const photos = await dav.getOnThisDayRaw();
+      utils.cacheData(cacheUrl, photos);
 
-  async process(photos: IPhoto[]) {
-    this.years = [];
+      // Check if exactly same as cache
+      if (
+        cache?.length === photos.length &&
+        cache.every((p, i) => p.fileid === photos[i].fileid)
+      )
+        return;
+      this.process(photos);
+    },
 
-    let currentYear = 9999;
+    async process(photos: IPhoto[]) {
+      this.years = [];
 
-    for (const photo of photos) {
-      const dateTaken = utils.dayIdToDate(photo.dayid);
-      const year = dateTaken.getUTCFullYear();
-      photo.key = `${photo.fileid}`;
+      let currentYear = 9999;
 
-      if (year !== currentYear) {
-        this.years.push({
-          year,
-          url: "",
-          preview: null,
-          photos: [],
-          text: utils.getFromNowStr(dateTaken),
-        });
-        currentYear = year;
+      for (const photo of photos) {
+        const dateTaken = utils.dayIdToDate(photo.dayid);
+        const year = dateTaken.getUTCFullYear();
+        photo.key = `${photo.fileid}`;
+
+        if (year !== currentYear) {
+          this.years.push({
+            year,
+            url: "",
+            preview: null,
+            photos: [],
+            text: utils.getFromNowStr(dateTaken),
+          });
+          currentYear = year;
+        }
+
+        const yearObj = this.years[this.years.length - 1];
+        yearObj.photos.push(photo);
       }
 
-      const yearObj = this.years[this.years.length - 1];
-      yearObj.photos.push(photo);
-    }
-
-    // For each year, randomly choose 10 photos to display
-    for (const year of this.years) {
-      year.photos = utils.randomSubarray(year.photos, 10);
-    }
-
-    // Choose preview photo
-    for (const year of this.years) {
-      // Try to prioritize landscape photos on desktop
-      if (globalThis.windowInnerWidth <= 600) {
-        const landscape = year.photos.filter((p) => p.w > p.h);
-        year.preview = utils.randomChoice(landscape);
+      // For each year, randomly choose 10 photos to display
+      for (const year of this.years) {
+        year.photos = utils.randomSubarray(year.photos, 10);
       }
 
-      // Get random photo
-      year.preview ||= utils.randomChoice(year.photos);
-      year.url = getPreviewUrl(year.preview, false, 512);
-    }
+      // Choose preview photo
+      for (const year of this.years) {
+        // Try to prioritize landscape photos on desktop
+        if (globalThis.windowInnerWidth <= 600) {
+          const landscape = year.photos.filter((p) => p.w > p.h);
+          year.preview = utils.randomChoice(landscape);
+        }
 
-    await this.$nextTick();
-    this.onScroll();
-    this.onload();
-  }
+        // Get random photo
+        year.preview ||= utils.randomChoice(year.photos);
+        year.url = getPreviewUrl(year.preview, false, 512);
+      }
 
-  moveLeft() {
-    const inner = this.$refs.inner as HTMLElement;
-    inner.scrollBy(-(this.scrollStack.pop() || inner.clientWidth), 0);
-  }
+      await this.$nextTick();
+      this.onScroll();
+      this.onload();
+    },
 
-  moveRight() {
-    const inner = this.$refs.inner as HTMLElement;
-    const innerRect = inner.getBoundingClientRect();
-    const nextChild = Array.from(inner.children)
-      .map((c) => c.getBoundingClientRect())
-      .find((rect) => rect.right > innerRect.right);
+    moveLeft() {
+      const inner = this.$refs.inner as HTMLElement;
+      inner.scrollBy(-(this.scrollStack.pop() || inner.clientWidth), 0);
+    },
 
-    let scroll = nextChild
-      ? nextChild.left - innerRect.left
-      : inner.clientWidth;
-    scroll = Math.min(
-      inner.scrollWidth - inner.scrollLeft - inner.clientWidth,
-      scroll
-    );
-    this.scrollStack.push(scroll);
-    inner.scrollBy(scroll, 0);
-  }
+    moveRight() {
+      const inner = this.$refs.inner as HTMLElement;
+      const innerRect = inner.getBoundingClientRect();
+      const nextChild = Array.from(inner.children)
+        .map((c) => c.getBoundingClientRect())
+        .find((rect) => rect.right > innerRect.right);
 
-  onScroll() {
-    const inner = this.$refs.inner as HTMLElement;
-    if (!inner) return;
-    this.hasLeft = inner.scrollLeft > 0;
-    this.hasRight =
-      inner.clientWidth + inner.scrollLeft < inner.scrollWidth - 20;
-  }
+      let scroll = nextChild
+        ? nextChild.left - innerRect.left
+        : inner.clientWidth;
+      scroll = Math.min(
+        inner.scrollWidth - inner.scrollLeft - inner.clientWidth,
+        scroll
+      );
+      this.scrollStack.push(scroll);
+      inner.scrollBy(scroll, 0);
+    },
 
-  click(year: IYear) {
-    const allPhotos = this.years.flatMap((y) => y.photos);
-    this.viewer.openStatic(year.preview, allPhotos, 512);
-  }
-}
+    onScroll() {
+      const inner = this.$refs.inner as HTMLElement;
+      if (!inner) return;
+      this.hasLeft = inner.scrollLeft > 0;
+      this.hasRight =
+        inner.clientWidth + inner.scrollLeft < inner.scrollWidth - 20;
+    },
+
+    click(year: IYear) {
+      const allPhotos = this.years.flatMap((y) => y.photos);
+      this.viewer.openStatic(year.preview, allPhotos, 512);
+    },
+  },
+});
 </script>
 
 <style lang="scss" scoped>

@@ -49,9 +49,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { defineComponent, PropType } from "vue";
 import { IRow, IRowType, ITick } from "../types";
-import GlobalMixin from "../mixins/GlobalMixin";
 import ScrollIcon from "vue-material-design-icons/UnfoldMoreHorizontal.vue";
 
 import * as utils from "../services/Utils";
@@ -59,458 +58,466 @@ import * as utils from "../services/Utils";
 // Pixels to snap at
 const SNAP_OFFSET = -35;
 
-@Component({
+export default defineComponent({
+  name: "ScrollerManager",
   components: {
     ScrollIcon,
   },
-})
-export default class ScrollerManager extends Mixins(GlobalMixin) {
-  /** Rows from Timeline */
-  @Prop() rows!: IRow[];
-  /** Total height */
-  @Prop() height!: number;
-  /** Actual recycler component */
-  @Prop() recycler!: any;
-  /** Recycler before slot component */
-  @Prop() recyclerBefore!: any;
 
-  /** Last known height at adjustment */
-  private lastAdjustHeight = 0;
-  /** Height of the entire photo view */
-  private recyclerHeight: number = 100;
-  /** Rect of scroller */
-  private scrollerRect: DOMRect = null;
-  /** Computed ticks */
-  private ticks: ITick[] = [];
-  /** Computed cursor top */
-  private cursorY = 0;
-  /** Hover cursor top */
-  private hoverCursorY = -5;
-  /** Hover cursor text */
-  private hoverCursorText = "";
-  /** Scrolling using the scroller */
-  private scrollingTimer = 0;
-  /** Scrolling now using the scroller */
-  private scrollingNowTimer = 0;
-  /** Scrolling recycler */
-  private scrollingRecyclerTimer = 0;
-  /** Scrolling recycler now */
-  private scrollingRecyclerNowTimer = 0;
-  /** Recycler scrolling throttle */
-  private scrollingRecyclerUpdateTimer = 0;
-  /** View size reflow timer */
-  private reflowRequest = false;
-  /** Tick adjust timer */
-  private adjustRequest = false;
-  /** Scroller is being moved with interaction */
-  private interacting = false;
-  /** Track the last requested y position when interacting */
-  private lastRequestedRecyclerY = 0;
+  props: {
+    /** Rows from Timeline */
+    rows: Array as PropType<IRow[]>,
+    /** Total height */
+    height: Number,
+    /** Actual recycler component */
+    recycler: Object,
+    /** Recycler before slot component */
+    recyclerBefore: HTMLDivElement,
+  },
 
-  /** Get the visible ticks */
-  get visibleTicks() {
-    let key = 9999999900;
-    return this.ticks
-      .filter((tick) => tick.s)
-      .map((tick) => {
-        if (tick.text) {
-          tick.key = key = tick.dayId * 100;
-        } else {
-          tick.key = ++key; // days are sorted descending
-        }
-        return tick;
-      });
-  }
+  data: () => ({
+    /** Last known height at adjustment */
+    lastAdjustHeight: 0,
+    /** Height of the entire photo view */
+    recyclerHeight: 100,
+    /** Rect of scroller */
+    scrollerRect: null as DOMRect,
+    /** Computed ticks */
+    ticks: [] as ITick[],
+    /** Computed cursor top */
+    cursorY: 0,
+    /** Hover cursor top */
+    hoverCursorY: -5,
+    /** Hover cursor text */
+    hoverCursorText: "",
+    /** Scrolling using the scroller */
+    scrollingTimer: 0,
+    /** Scrolling now using the scroller */
+    scrollingNowTimer: 0,
+    /** Scrolling recycler */
+    scrollingRecyclerTimer: 0,
+    /** Scrolling recycler now */
+    scrollingRecyclerNowTimer: 0,
+    /** Recycler scrolling throttle */
+    scrollingRecyclerUpdateTimer: 0,
+    /** View size reflow timer */
+    reflowRequest: false,
+    /** Tick adjust timer */
+    adjustRequest: false,
+    /** Scroller is being moved with interaction */
+    interacting: false,
+    /** Track the last requested y position when interacting */
+    lastRequestedRecyclerY: 0,
+  }),
 
-  /** Reset state */
-  public reset() {
-    this.ticks = [];
-    this.cursorY = 0;
-    this.hoverCursorY = -5;
-    this.hoverCursorText = "";
-    this.reflowRequest = false;
+  computed: {
+    /** Get the visible ticks */
+    visibleTicks(): ITick[] {
+      let key = 9999999900;
+      return this.ticks
+        .filter((tick) => tick.s)
+        .map((tick) => {
+          if (tick.text) {
+            tick.key = key = tick.dayId * 100;
+          } else {
+            tick.key = ++key; // days are sorted descending
+          }
+          return tick;
+        });
+    },
+  },
 
-    // Clear all timers
-    clearTimeout(this.scrollingTimer);
-    clearTimeout(this.scrollingNowTimer);
-    clearTimeout(this.scrollingRecyclerTimer);
-    clearTimeout(this.scrollingRecyclerNowTimer);
-    clearTimeout(this.scrollingRecyclerUpdateTimer);
-    this.scrollingTimer = 0;
-    this.scrollingNowTimer = 0;
-    this.scrollingRecyclerTimer = 0;
-    this.scrollingRecyclerNowTimer = 0;
-    this.scrollingRecyclerUpdateTimer = 0;
-  }
+  methods: {
+    /** Reset state */
+    reset() {
+      this.ticks = [];
+      this.cursorY = 0;
+      this.hoverCursorY = -5;
+      this.hoverCursorText = "";
+      this.reflowRequest = false;
 
-  /** Recycler scroll event, must be called by timeline */
-  public recyclerScrolled() {
-    // This isn't a renewing timer, it's a scheduled task
-    if (this.scrollingRecyclerUpdateTimer) return;
-    this.scrollingRecyclerUpdateTimer = window.setTimeout(() => {
+      // Clear all timers
+      clearTimeout(this.scrollingTimer);
+      clearTimeout(this.scrollingNowTimer);
+      clearTimeout(this.scrollingRecyclerTimer);
+      clearTimeout(this.scrollingRecyclerNowTimer);
+      clearTimeout(this.scrollingRecyclerUpdateTimer);
+      this.scrollingTimer = 0;
+      this.scrollingNowTimer = 0;
+      this.scrollingRecyclerTimer = 0;
+      this.scrollingRecyclerNowTimer = 0;
       this.scrollingRecyclerUpdateTimer = 0;
-      this.updateFromRecyclerScroll();
-    }, 100);
+    },
 
-    // Update that we're scrolling with the recycler
-    utils.setRenewingTimeout(this, "scrollingRecyclerNowTimer", null, 200);
-    utils.setRenewingTimeout(this, "scrollingRecyclerTimer", null, 1500);
-  }
+    /** Recycler scroll event, must be called by timeline */
+    recyclerScrolled(event: Event | null) {
+      // This isn't a renewing timer, it's a scheduled task
+      if (this.scrollingRecyclerUpdateTimer) return;
+      this.scrollingRecyclerUpdateTimer = window.setTimeout(() => {
+        this.scrollingRecyclerUpdateTimer = 0;
+        this.updateFromRecyclerScroll();
+      }, 100);
 
-  /** Update cursor position from recycler scroll position */
-  public updateFromRecyclerScroll() {
-    // Ignore if not initialized or moving
-    if (!this.ticks.length || this.interacting) return;
+      // Update that we're scrolling with the recycler
+      utils.setRenewingTimeout(this, "scrollingRecyclerNowTimer", null, 200);
+      utils.setRenewingTimeout(this, "scrollingRecyclerTimer", null, 1500);
+    },
 
-    // Get the scroll position
-    const scroll = this.recycler?.$el?.scrollTop || 0;
+    /** Update cursor position from recycler scroll position */
+    updateFromRecyclerScroll() {
+      // Ignore if not initialized or moving
+      if (!this.ticks.length || this.interacting) return;
 
-    // Get cursor px position
-    const { top1, top2, y1, y2 } = this.getCoords(scroll, "y");
-    const topfrac = (scroll - y1) / (y2 - y1);
-    const rtop = top1 + (top2 - top1) * (topfrac || 0);
+      // Get the scroll position
+      const scroll = this.recycler?.$el?.scrollTop || 0;
 
-    // Always move static cursor to right position
-    this.cursorY = rtop;
+      // Get cursor px position
+      const { top1, top2, y1, y2 } = this.getCoords(scroll, "y");
+      const topfrac = (scroll - y1) / (y2 - y1);
+      const rtop = top1 + (top2 - top1) * (topfrac || 0);
 
-    // Move hover cursor to same position unless hovering
-    // Regardless, we need this call because the internal mapping might have changed
-    if ((<HTMLElement>this.$refs.scroller).matches(":hover")) {
-      this.moveHoverCursor(this.hoverCursorY);
-    } else {
-      this.moveHoverCursor(rtop);
-    }
-  }
+      // Always move static cursor to right position
+      this.cursorY = rtop;
 
-  /** Re-create tick data in the next frame */
-  public async reflow() {
-    if (this.reflowRequest) return;
-    this.reflowRequest = true;
-    await this.$nextTick();
-    this.reflowNow();
-    this.reflowRequest = false;
-  }
+      // Move hover cursor to same position unless hovering
+      // Regardless, we need this call because the internal mapping might have changed
+      if ((<HTMLElement>this.$refs.scroller).matches(":hover")) {
+        this.moveHoverCursor(this.hoverCursorY);
+      } else {
+        this.moveHoverCursor(rtop);
+      }
+    },
 
-  /** Re-create tick data */
-  private reflowNow() {
-    // Ignore if not initialized
-    if (!this.recycler?.$refs.wrapper) return;
+    /** Re-create tick data in the next frame */
+    async reflow() {
+      if (this.reflowRequest) return;
+      this.reflowRequest = true;
+      await this.$nextTick();
+      this.reflowNow();
+      this.reflowRequest = false;
+    },
 
-    // Refresh height of recycler
-    this.recyclerHeight = this.recycler.$refs.wrapper.clientHeight;
+    /** Re-create tick data */
+    reflowNow() {
+      // Ignore if not initialized
+      if (!this.recycler?.$refs.wrapper) return;
 
-    // Recreate ticks data
-    this.recreate();
+      // Refresh height of recycler
+      this.recyclerHeight = this.recycler.$refs.wrapper.clientHeight;
 
-    // Adjust top
-    this.adjustNow();
-  }
+      // Recreate ticks data
+      this.recreate();
 
-  /** Recreate from scratch */
-  private recreate() {
-    // Clear and override any adjust timer
-    this.ticks = [];
+      // Adjust top
+      this.adjustNow();
+    },
 
-    // Ticks
-    let prevYear = 9999;
-    let prevMonth = 0;
+    /** Recreate from scratch */
+    recreate() {
+      // Clear and override any adjust timer
+      this.ticks = [];
 
-    // Get a new tick
-    const getTick = (
-      dayId: number,
-      isMonth = false,
-      text?: string | number
-    ): ITick => {
-      return {
-        dayId,
-        isMonth,
-        text,
-        y: 0,
-        count: 0,
-        topF: 0,
-        top: 0,
-        s: false,
+      // Ticks
+      let prevYear = 9999;
+      let prevMonth = 0;
+
+      // Get a new tick
+      const getTick = (
+        dayId: number,
+        isMonth = false,
+        text?: string | number
+      ): ITick => {
+        return {
+          dayId,
+          isMonth,
+          text,
+          y: 0,
+          count: 0,
+          topF: 0,
+          top: 0,
+          s: false,
+        };
       };
-    };
 
-    // Iterate over rows
-    for (const row of this.rows) {
-      if (row.type === IRowType.HEAD) {
-        // Create tick
-        if (this.TagDayIDValueSet.has(row.dayId)) {
-          // Blank tick
-          this.ticks.push(getTick(row.dayId));
-        } else {
-          // Make date string
-          const dateTaken = utils.dayIdToDate(row.dayId);
-
+      // Iterate over rows
+      for (const row of this.rows) {
+        if (row.type === IRowType.HEAD) {
           // Create tick
-          const dtYear = dateTaken.getUTCFullYear();
-          const dtMonth = dateTaken.getUTCMonth();
-          const isMonth = dtMonth !== prevMonth || dtYear !== prevYear;
-          const text = dtYear === prevYear ? undefined : dtYear;
-          this.ticks.push(getTick(row.dayId, isMonth, text));
+          if (this.TagDayIDValueSet.has(row.dayId)) {
+            // Blank tick
+            this.ticks.push(getTick(row.dayId));
+          } else {
+            // Make date string
+            const dateTaken = utils.dayIdToDate(row.dayId);
 
-          prevMonth = dtMonth;
-          prevYear = dtYear;
+            // Create tick
+            const dtYear = dateTaken.getUTCFullYear();
+            const dtMonth = dateTaken.getUTCMonth();
+            const isMonth = dtMonth !== prevMonth || dtYear !== prevYear;
+            const text = dtYear === prevYear ? undefined : dtYear;
+            this.ticks.push(getTick(row.dayId, isMonth, text));
+
+            prevMonth = dtMonth;
+            prevYear = dtYear;
+          }
         }
       }
-    }
-  }
+    },
 
-  /**
-   * Update tick positions without truncating the list
-   * This is much cheaper than reflowing the whole thing
-   */
-  public async adjust() {
-    if (this.adjustRequest) return;
-    this.adjustRequest = true;
-    await this.$nextTick();
-    this.adjustNow();
-    this.adjustRequest = false;
-  }
+    /**
+     * Update tick positions without truncating the list
+     * This is much cheaper than reflowing the whole thing
+     */
+    async adjust() {
+      if (this.adjustRequest) return;
+      this.adjustRequest = true;
+      await this.$nextTick();
+      this.adjustNow();
+      this.adjustRequest = false;
+    },
 
-  /** Do adjustment synchronously */
-  private adjustNow() {
-    // Refresh height of recycler
-    this.recyclerHeight = this.recycler.$refs.wrapper.clientHeight;
-    const extraY = this.recyclerBefore?.clientHeight || 0;
+    /** Do adjustment synchronously */
+    adjustNow() {
+      // Refresh height of recycler
+      this.recyclerHeight = this.recycler.$refs.wrapper.clientHeight;
+      const extraY = this.recyclerBefore?.clientHeight || 0;
 
-    // Start with the first tick. Walk over all rows counting the
-    // y position. When you hit a row with the tick, update y and
-    // top values and move to the next tick.
-    let tickId = 0;
-    let y = extraY;
-    let count = 0;
+      // Start with the first tick. Walk over all rows counting the
+      // y position. When you hit a row with the tick, update y and
+      // top values and move to the next tick.
+      let tickId = 0;
+      let y = extraY;
+      let count = 0;
 
-    // We only need to recompute top and visible ticks if count
-    // of some tick has changed.
-    let needRecomputeTop = false;
+      // We only need to recompute top and visible ticks if count
+      // of some tick has changed.
+      let needRecomputeTop = false;
 
-    // Check if height changed
-    if (this.lastAdjustHeight !== this.height) {
-      needRecomputeTop = true;
-      this.lastAdjustHeight = this.height;
-    }
-
-    for (const row of this.rows) {
-      // Check if tick is valid
-      if (tickId >= this.ticks.length) break;
-
-      // Check if we hit the next tick
-      const tick = this.ticks[tickId];
-      if (tick.dayId === row.dayId) {
-        tick.y = y;
-
-        // Check if count has changed
-        needRecomputeTop ||= tick.count !== count;
-        tick.count = count;
-
-        // Move to next tick
-        count += row.day.count;
-        tickId++;
+      // Check if height changed
+      if (this.lastAdjustHeight !== this.height) {
+        needRecomputeTop = true;
+        this.lastAdjustHeight = this.height;
       }
 
-      y += row.size;
-    }
+      for (const row of this.rows) {
+        // Check if tick is valid
+        if (tickId >= this.ticks.length) break;
 
-    // Compute visible ticks
-    if (needRecomputeTop) {
-      this.setTicksTop(count);
-      this.computeVisibleTicks();
-    }
-  }
+        // Check if we hit the next tick
+        const tick = this.ticks[tickId];
+        if (tick.dayId === row.dayId) {
+          tick.y = y;
 
-  /** Mark ticks as visible or invisible */
-  private computeVisibleTicks() {
-    // Kind of unrelated here, but refresh rect
-    this.scrollerRect = (
-      this.$refs.scroller as HTMLElement
-    ).getBoundingClientRect();
+          // Check if count has changed
+          needRecomputeTop ||= tick.count !== count;
+          tick.count = count;
 
-    // Do another pass to figure out which points are visible
-    // This is not as bad as it looks, it's actually 12*O(n)
-    // because there are only 12 months in a year
-    const fontSizePx = parseFloat(
-      getComputedStyle(this.$refs.cursorSt as any).fontSize
-    );
-    const minGap = fontSizePx + (globalThis.windowInnerWidth <= 768 ? 5 : 2);
-    let prevShow = -9999;
-    for (const [idx, tick] of this.ticks.entries()) {
-      // Conservative
-      tick.s = false;
-
-      // These aren't for showing
-      if (!tick.isMonth) continue;
-
-      // You can't see these anyway, why bother?
-      if (tick.top < minGap || tick.top > this.height - minGap) continue;
-
-      // Will overlap with the previous tick. Skip anyway.
-      if (tick.top - prevShow < minGap) continue;
-
-      // This is a labelled tick then show it anyway for the sake of best effort
-      if (tick.text) {
-        prevShow = tick.top;
-        tick.s = true;
-        continue;
-      }
-
-      // Lookahead for next labelled tick
-      // If showing this tick would overlap the next one, don't show this one
-      let i = idx + 1;
-      while (i < this.ticks.length) {
-        if (this.ticks[i].text) {
-          break;
+          // Move to next tick
+          count += row.day.count;
+          tickId++;
         }
-        i++;
+
+        y += row.size;
       }
-      if (i < this.ticks.length) {
-        // A labelled tick was found
-        const nextLabelledTick = this.ticks[i];
-        if (
-          tick.top + minGap > nextLabelledTick.top &&
-          nextLabelledTick.top < this.height - minGap
-        ) {
-          // make sure this will be shown
+
+      // Compute visible ticks
+      if (needRecomputeTop) {
+        this.setTicksTop(count);
+        this.computeVisibleTicks();
+      }
+    },
+
+    /** Mark ticks as visible or invisible */
+    computeVisibleTicks() {
+      // Kind of unrelated here, but refresh rect
+      this.scrollerRect = (
+        this.$refs.scroller as HTMLElement
+      ).getBoundingClientRect();
+
+      // Do another pass to figure out which points are visible
+      // This is not as bad as it looks, it's actually 12*O(n)
+      // because there are only 12 months in a year
+      const fontSizePx = parseFloat(
+        getComputedStyle(this.$refs.cursorSt as any).fontSize
+      );
+      const minGap = fontSizePx + (globalThis.windowInnerWidth <= 768 ? 5 : 2);
+      let prevShow = -9999;
+      for (const [idx, tick] of this.ticks.entries()) {
+        // Conservative
+        tick.s = false;
+
+        // These aren't for showing
+        if (!tick.isMonth) continue;
+
+        // You can't see these anyway, why bother?
+        if (tick.top < minGap || tick.top > this.height - minGap) continue;
+
+        // Will overlap with the previous tick. Skip anyway.
+        if (tick.top - prevShow < minGap) continue;
+
+        // This is a labelled tick then show it anyway for the sake of best effort
+        if (tick.text) {
+          prevShow = tick.top;
+          tick.s = true;
           continue;
         }
+
+        // Lookahead for next labelled tick
+        // If showing this tick would overlap the next one, don't show this one
+        let i = idx + 1;
+        while (i < this.ticks.length) {
+          if (this.ticks[i].text) {
+            break;
+          }
+          i++;
+        }
+        if (i < this.ticks.length) {
+          // A labelled tick was found
+          const nextLabelledTick = this.ticks[i];
+          if (
+            tick.top + minGap > nextLabelledTick.top &&
+            nextLabelledTick.top < this.height - minGap
+          ) {
+            // make sure this will be shown
+            continue;
+          }
+        }
+
+        // Show this tick
+        tick.s = true;
+        prevShow = tick.top;
+      }
+    },
+
+    setTicksTop(total: number) {
+      for (const tick of this.ticks) {
+        tick.topF = this.height * (tick.count / total);
+        tick.top = utils.roundHalf(tick.topF);
+      }
+    },
+
+    /** Change actual position of the hover cursor */
+    moveHoverCursor(y: number) {
+      this.hoverCursorY = y;
+
+      // Get index of previous tick
+      let idx = utils.binarySearch(this.ticks, y, "topF");
+      if (idx === 0) {
+        // use this tick
+      } else if (idx >= 1 && idx <= this.ticks.length) {
+        idx = idx - 1;
+      } else {
+        return;
       }
 
-      // Show this tick
-      tick.s = true;
-      prevShow = tick.top;
-    }
-  }
+      // DayId of current hover
+      const dayId = this.ticks[idx]?.dayId;
 
-  private setTicksTop(total: number) {
-    for (const tick of this.ticks) {
-      tick.topF = this.height * (tick.count / total);
-      tick.top = utils.roundHalf(tick.topF);
-    }
-  }
+      // Special days
+      if (dayId === undefined || this.TagDayIDValueSet.has(dayId)) {
+        this.hoverCursorText = "";
+        return;
+      }
 
-  /** Change actual position of the hover cursor */
-  private moveHoverCursor(y: number) {
-    this.hoverCursorY = y;
+      const date = utils.dayIdToDate(dayId);
+      this.hoverCursorText = utils.getShortDateStr(date);
+    },
 
-    // Get index of previous tick
-    let idx = utils.binarySearch(this.ticks, y, "topF");
-    if (idx === 0) {
-      // use this tick
-    } else if (idx >= 1 && idx <= this.ticks.length) {
-      idx = idx - 1;
-    } else {
-      return;
-    }
+    /** Handle mouse hover */
+    mousemove(event: MouseEvent) {
+      if (event.buttons) {
+        this.mousedown(event);
+      }
+      this.moveHoverCursor(event.offsetY);
+    },
 
-    // DayId of current hover
-    const dayId = this.ticks[idx]?.dayId;
+    /** Handle mouse leave */
+    mouseleave() {
+      this.interactend();
+      this.moveHoverCursor(this.cursorY);
+    },
 
-    // Special days
-    if (dayId === undefined || this.TagDayIDValueSet.has(dayId)) {
-      this.hoverCursorText = "";
-      return;
-    }
+    /** Binary search and get coords surrounding position */
+    getCoords(y: number, field: "topF" | "y") {
+      // Top of first and second ticks
+      let top1 = 0,
+        top2 = 0,
+        y1 = 0,
+        y2 = 0;
 
-    const date = utils.dayIdToDate(dayId);
-    this.hoverCursorText = utils.getShortDateStr(date);
-  }
+      // Get index of previous tick
+      let idx = utils.binarySearch(this.ticks, y, field);
+      if (idx <= 0) {
+        top1 = 0;
+        top2 = this.ticks[0].topF;
+        y1 = 0;
+        y2 = this.ticks[0].y;
+      } else if (idx >= this.ticks.length) {
+        const t = this.ticks[this.ticks.length - 1];
+        top1 = t.topF;
+        top2 = this.height;
+        y1 = t.y;
+        y2 = this.recyclerHeight;
+      } else {
+        const t1 = this.ticks[idx - 1];
+        const t2 = this.ticks[idx];
+        top1 = t1.topF;
+        top2 = t2.topF;
+        y1 = t1.y;
+        y2 = t2.y;
+      }
 
-  /** Handle mouse hover */
-  private mousemove(event: MouseEvent) {
-    if (event.buttons) {
-      this.mousedown(event);
-    }
-    this.moveHoverCursor(event.offsetY);
-  }
+      return { top1, top2, y1, y2 };
+    },
 
-  /** Handle mouse leave */
-  private mouseleave() {
-    this.interactend();
-    this.moveHoverCursor(this.cursorY);
-  }
+    /** Move to given scroller Y */
+    moveto(y: number, snap: boolean) {
+      // Move cursor immediately to prevent jank
+      this.cursorY = y;
+      this.hoverCursorY = y;
 
-  /** Binary search and get coords surrounding position */
-  private getCoords(y: number, field: "topF" | "y") {
-    // Top of first and second ticks
-    let top1 = 0,
-      top2 = 0,
-      y1 = 0,
-      y2 = 0;
+      const { top1, top2, y1, y2 } = this.getCoords(y, "topF");
+      const yfrac = (y - top1) / (top2 - top1);
+      const ry = y1 + (y2 - y1) * (yfrac || 0);
+      const targetY = snap ? y1 + SNAP_OFFSET : ry;
 
-    // Get index of previous tick
-    let idx = utils.binarySearch(this.ticks, y, field);
-    if (idx <= 0) {
-      top1 = 0;
-      top2 = this.ticks[0].topF;
-      y1 = 0;
-      y2 = this.ticks[0].y;
-    } else if (idx >= this.ticks.length) {
-      const t = this.ticks[this.ticks.length - 1];
-      top1 = t.topF;
-      top2 = this.height;
-      y1 = t.y;
-      y2 = this.recyclerHeight;
-    } else {
-      const t1 = this.ticks[idx - 1];
-      const t2 = this.ticks[idx];
-      top1 = t1.topF;
-      top2 = t2.topF;
-      y1 = t1.y;
-      y2 = t2.y;
-    }
+      if (this.lastRequestedRecyclerY !== targetY) {
+        this.lastRequestedRecyclerY = targetY;
+        this.recycler.scrollToPosition(targetY);
+      }
 
-    return { top1, top2, y1, y2 };
-  }
+      this.handleScroll();
+    },
 
-  /** Move to given scroller Y */
-  private moveto(y: number, snap: boolean) {
-    // Move cursor immediately to prevent jank
-    this.cursorY = y;
-    this.hoverCursorY = y;
+    /** Handle mouse click */
+    mousedown(event: MouseEvent) {
+      this.interactstart(); // end called on mouseup
+      this.moveto(event.offsetY, false);
+    },
 
-    const { top1, top2, y1, y2 } = this.getCoords(y, "topF");
-    const yfrac = (y - top1) / (top2 - top1);
-    const ry = y1 + (y2 - y1) * (yfrac || 0);
-    const targetY = snap ? y1 + SNAP_OFFSET : ry;
+    /** Handle touch */
+    touchmove(event: any) {
+      let y = event.targetTouches[0].pageY - this.scrollerRect.top;
+      y = Math.max(0, y - 20); // middle of touch finger
+      this.moveto(y, true);
+    },
 
-    if (this.lastRequestedRecyclerY !== targetY) {
-      this.lastRequestedRecyclerY = targetY;
-      this.recycler.scrollToPosition(targetY);
-    }
+    interactstart() {
+      this.interacting = true;
+    },
 
-    this.handleScroll();
-  }
+    interactend() {
+      this.interacting = false;
+      this.recyclerScrolled(null); // make sure final position is correct
+    },
 
-  /** Handle mouse click */
-  private mousedown(event: MouseEvent) {
-    this.interactstart(); // end called on mouseup
-    this.moveto(event.offsetY, false);
-  }
-
-  /** Handle touch */
-  private touchmove(event: any) {
-    let y = event.targetTouches[0].pageY - this.scrollerRect.top;
-    y = Math.max(0, y - 20); // middle of touch finger
-    this.moveto(y, true);
-  }
-
-  private interactstart() {
-    this.interacting = true;
-  }
-
-  private interactend() {
-    this.interacting = false;
-    this.recyclerScrolled(); // make sure final position is correct
-  }
-
-  /** Update scroller is being used to scroll recycler */
-  private handleScroll() {
-    utils.setRenewingTimeout(this, "scrollingNowTimer", null, 200);
-    utils.setRenewingTimeout(this, "scrollingTimer", null, 1500);
-  }
-}
+    /** Update scroller is being used to scroll recycler */
+    handleScroll() {
+      utils.setRenewingTimeout(this, "scrollingNowTimer", null, 200);
+      utils.setRenewingTimeout(this, "scrollingTimer", null, 1500);
+    },
+  },
+});
 </script>
 
 <style lang="scss" scoped>

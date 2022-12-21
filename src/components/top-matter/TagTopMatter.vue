@@ -11,41 +11,45 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Watch } from "vue-property-decorator";
-import GlobalMixin from "../../mixins/GlobalMixin";
+import { defineComponent } from "vue";
 
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 
 import BackIcon from "vue-material-design-icons/ArrowLeft.vue";
 
-@Component({
+export default defineComponent({
+  name: "TagTopMatter",
   components: {
     NcActions,
     NcActionButton,
     BackIcon,
   },
-})
-export default class TagTopMatter extends Mixins(GlobalMixin) {
-  private name: string = "";
 
-  @Watch("$route")
-  async routeChange(from: any, to: any) {
-    this.createMatter();
-  }
+  data: () => ({
+    name: "",
+  }),
+
+  watch: {
+    $route: function (from: any, to: any) {
+      this.createMatter();
+    },
+  },
 
   mounted() {
     this.createMatter();
-  }
+  },
 
-  createMatter() {
-    this.name = this.$route.params.name || "";
-  }
+  methods: {
+    createMatter() {
+      this.name = <string>this.$route.params.name || "";
+    },
 
-  back() {
-    this.$router.push({ name: "tags" });
-  }
-}
+    back() {
+      this.$router.push({ name: "tags" });
+    },
+  },
+});
 </script>
 
 <style lang="scss" scoped>

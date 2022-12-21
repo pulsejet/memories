@@ -21,25 +21,33 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from "vue-property-decorator";
+import { defineComponent } from "vue";
+
 const NcModal = () => import("@nextcloud/vue/dist/Components/NcModal");
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 
-@Component({
+export default defineComponent({
+  name: "Modal",
   components: {
     NcModal,
   },
-})
-export default class Modal extends Vue {
-  @Prop({ default: "small" }) private size?: string;
-  @Prop({ default: null }) private sidebar?: string;
 
-  private isSidebarShown = false;
-  private sidebarWidth = 400;
-  private trapElements: any = [];
+  props: {
+    size: {
+      type: String,
+      default: "small",
+    },
+    sidebar: {
+      type: String,
+      default: null,
+    },
+  },
 
-  @Emit("close")
-  public close() {}
+  data: () => ({
+    isSidebarShown: false,
+    sidebarWidth: 400,
+    trapElements: [],
+  }),
 
   beforeMount() {
     if (this.sidebar) {
@@ -48,7 +56,7 @@ export default class Modal extends Vue {
       window.addEventListener("DOMNodeInserted", this.handlePopover);
       globalThis.OCA?.Files?.Sidebar?.setFullScreenMode?.(true);
     }
-  }
+  },
 
   beforeDestroy() {
     if (this.sidebar) {
@@ -58,41 +66,47 @@ export default class Modal extends Vue {
       globalThis.OCA?.Files?.Sidebar?.setFullScreenMode?.(false);
       globalThis.OCA?.Files?.Sidebar?.close();
     }
-  }
+  },
 
   mounted() {
     if (this.sidebar) {
       globalThis.OCA.Files.Sidebar.open(this.sidebar);
     }
-  }
+  },
 
-  /**
-   * Watch out for Popover inject in document root
-   * That way we can adjust the focusTrap
-   */
-  handlePopover(event) {
-    if (
-      event.target?.classList &&
-      event.target.classList.contains("v-popper__popper")
-    ) {
-      this.trapElements.push(event.target);
-    }
-  }
+  methods: {
+    close() {
+      this.$emit("close");
+    },
 
-  handleAppSidebarOpen() {
-    this.isSidebarShown = true;
-    const sidebar: HTMLElement = document.querySelector("aside.app-sidebar");
-    if (sidebar) {
-      this.sidebarWidth = sidebar.offsetWidth;
-      this.trapElements = [sidebar];
-    }
-  }
+    /**
+     * Watch out for Popover inject in document root
+     * That way we can adjust the focusTrap
+     */
+    handlePopover(event) {
+      if (
+        event.target?.classList &&
+        event.target.classList.contains("v-popper__popper")
+      ) {
+        this.trapElements.push(event.target);
+      }
+    },
 
-  handleAppSidebarClose() {
-    this.isSidebarShown = false;
-    this.trapElements = [];
-  }
-}
+    handleAppSidebarOpen() {
+      this.isSidebarShown = true;
+      const sidebar: HTMLElement = document.querySelector("aside.app-sidebar");
+      if (sidebar) {
+        this.sidebarWidth = sidebar.offsetWidth;
+        this.trapElements = [sidebar];
+      }
+    },
+
+    handleAppSidebarClose() {
+      this.isSidebarShown = false;
+      this.trapElements = [];
+    },
+  },
+});
 </script>
 
 <style lang="scss" scoped>

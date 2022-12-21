@@ -1,10 +1,10 @@
 declare module "*.vue" {
-  import Vue from "vue";
-  export default Vue;
+  import { defineComponent } from "vue";
+  const Component: ReturnType<typeof defineComponent>;
+  export default Component;
 }
 
 declare module "*.svg" {
-  import Vue, { VueConstructor } from "vue";
-  const content: VueConstructor<Vue>;
+  const content: string;
   export default content;
 }

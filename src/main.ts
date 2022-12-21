@@ -4,16 +4,21 @@ import "reflect-metadata";
 import Vue from "vue";
 import VueVirtualScroller from "vue-virtual-scroller";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
+import GlobalMixin from "./mixins/GlobalMixin";
+import UserConfig from "./mixins/UserConfig";
 
 import App from "./App.vue";
 import router from "./router";
+import { Route } from "vue-router";
 import { generateFilePath } from "@nextcloud/router";
 import { getRequestToken } from "@nextcloud/auth";
 import { IPhoto } from "./types";
 
+import "./global.scss";
+
 // Global exposed variables
 declare global {
-  var vuerouter: typeof router;
+  var vueroute: () => Route;
   var OC: Nextcloud.v24.OC;
   var OCP: Nextcloud.v24.OCP;
 
@@ -33,7 +38,7 @@ declare global {
 }
 
 // Allow global access to the router
-globalThis.vuerouter = router;
+globalThis.vueroute = () => router.currentRoute;
 
 // Cache these for better performance
 globalThis.windowInnerWidth = window.innerWidth;
@@ -64,6 +69,8 @@ if (!globalThis.videoClientIdPersistent) {
   );
 }
 
+Vue.mixin(GlobalMixin);
+Vue.mixin(UserConfig);
 Vue.use(VueVirtualScroller);
 
 // https://github.com/nextcloud/photos/blob/156f280c0476c483cb9ce81769ccb0c1c6500a4e/src/main.js
