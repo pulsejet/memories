@@ -92,19 +92,18 @@ export default defineComponent({
     MapIcon,
   },
 
-  data() {
-    return {
-      navItems: [],
-      metadataComponent: null as Metadata,
-    };
-  },
+  data: () => ({
+    navItems: [],
+    metadataComponent: null as any,
+  }),
 
   computed: {
-    ncVersion() {
+    ncVersion(): number {
       const version = (<any>window.OC).config.version.split(".");
       return Number(version[0]);
     },
-    recognize() {
+
+    recognize(): string | boolean {
       if (!this.config_recognizeEnabled) {
         return false;
       }
@@ -115,7 +114,8 @@ export default defineComponent({
 
       return t("memories", "People");
     },
-    facerecognition() {
+
+    facerecognition(): string | boolean {
       if (!this.config_facerecognitionInstalled) {
         return false;
       }
@@ -126,16 +126,20 @@ export default defineComponent({
 
       return t("memories", "People");
     },
-    isFirstStart() {
+
+    isFirstStart(): boolean {
       return this.config_timelinePath === "EMPTY";
     },
-    showAlbums() {
+
+    showAlbums(): boolean {
       return this.config_albumsEnabled;
     },
-    removeOuterGap() {
+
+    removeOuterGap(): boolean {
       return this.ncVersion >= 25;
     },
-    showNavigation() {
+
+    showNavigation(): boolean {
       return this.$route.name !== "folder-share";
     },
   },
@@ -174,7 +178,7 @@ export default defineComponent({
             if (this.metadataComponent) {
               this.metadataComponent.$destroy();
             }
-            this.metadataComponent = new Vue(Metadata);
+            this.metadataComponent = new Vue(Metadata as any);
             // Only mount after we have all the info we need
             await this.metadataComponent.update(fileInfo);
             this.metadataComponent.$mount(el);
@@ -283,7 +287,7 @@ export default defineComponent({
 
     doRouteChecks() {
       if (this.$route.name === "folder-share") {
-        this.putFolderShareToken(this.$route.params.token);
+        this.putFolderShareToken(<string>this.$route.params.token);
       }
     },
 
@@ -323,99 +327,6 @@ export default defineComponent({
     // Also need to make sure we don't end up with a scrollbar -- see below
     margin-left: -1px;
     width: calc(100% + 3px); // 1px extra here because ... reasons
-  }
-}
-</style>
-
-<style lang="scss">
-body {
-  overflow: hidden;
-}
-
-// Nextcloud 25+: get rid of gap and border radius at right
-#content-vue.remove-gap {
-  // was var(--body-container-radius)
-  // now set on #app-navigation-vue
-  border-radius: 0;
-  width: calc(100% - var(--body-container-margin) * 1); // was *2
-
-  // Reduce size of navigation. NC <25 doesn't like this on mobile.
-  #app-navigation-vue {
-    max-width: 250px;
-  }
-}
-
-// Prevent content overflow on NC <25
-#content-vue {
-  max-height: 100vh;
-
-  // https://bugs.webkit.org/show_bug.cgi?id=160953
-  overflow: visible;
-  #app-navigation-vue {
-    border-top-left-radius: var(--body-container-radius);
-    border-bottom-left-radius: var(--body-container-radius);
-  }
-}
-
-// Top bar is above everything else on mobile
-body.has-top-bar header {
-  @media (max-width: 1024px) {
-    z-index: 0 !important;
-  }
-}
-body.has-viewer header {
-  z-index: 0 !important;
-}
-
-// Hide horizontal scrollbar on mobile
-// For the padding removal above
-#app-content-vue {
-  overflow-x: hidden;
-}
-
-// Prevent sidebar from becoming too big
-aside.app-sidebar {
-  max-width: 360px !important;
-}
-
-// Fill all available space
-.fill-block {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-:root {
-  --livephoto-img-transition: opacity 0.4s linear, transform 0.3s ease-in-out;
-}
-
-// Live photo transitions
-.memories-livephoto {
-  position: relative;
-  overflow: hidden;
-
-  img,
-  video {
-    position: absolute;
-    padding: inherit;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-    transition: var(--livephoto-img-transition);
-  }
-
-  video,
-  &.playing.canplay img {
-    opacity: 0;
-  }
-  img,
-  &.playing.canplay video {
-    opacity: 1;
-  }
-  &.playing.canplay img {
-    transform: scale(1.05);
   }
 }
 </style>

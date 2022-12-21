@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins } from "vue-property-decorator";
+import { defineComponent } from "vue";
 
 import axios from "@nextcloud/axios";
 import { generateOcsUrl, generateUrl } from "@nextcloud/router";
@@ -51,55 +51,59 @@ import NcButton from "@nextcloud/vue/dist/Components/NcButton";
 
 import * as utils from "../../services/Utils";
 import Modal from "./Modal.vue";
-import GlobalMixin from "../../mixins/GlobalMixin";
-import UserConfig from "../../mixins/UserConfig";
 import { Type } from "@nextcloud/sharing";
 
-@Component({
+export default defineComponent({
+  name: "FolderShareModal",
   components: {
     Modal,
     NcButton,
   },
-})
-export default class FolderShareModal extends Mixins(GlobalMixin, UserConfig) {
-  private show = false;
-  private folderPath = "";
-  private links: { url: string }[] = [];
 
-  get isRoot() {
-    return this.folderPath === "/" || this.folderPath === "";
-  }
+  data: () => ({
+    show: false,
+    folderPath: "",
+    links: [] as { url: string }[],
+  }),
 
-  @Emit("close")
-  public close() {
-    this.show = false;
-  }
+  computed: {
+    isRoot(): boolean {
+      return this.folderPath === "/" || this.folderPath === "";
+    },
+  },
 
-  public open() {
-    this.folderPath = utils.getFolderRoutePath(this.config_foldersPath);
-    this.show = true;
-    globalThis.OCA.Files.Sidebar.setActiveTab("sharing");
-    this.refreshUrls();
-  }
+  methods: {
+    close() {
+      this.show = false;
+      this.$emit("close");
+    },
 
-  private async refreshUrls() {
-    const query = `format=json&path=${encodeURIComponent(
-      this.folderPath
-    )}&reshares=true`;
-    const url = generateOcsUrl(`/apps/files_sharing/api/v1/shares?${query}`);
-    const response = await axios.get(url);
-    const data = response.data?.ocs?.data;
-    if (data) {
-      this.links = data
-        .filter((s) => s.share_type === Type.SHARE_TYPE_LINK && s.token)
-        .map((share: any) => ({
-          url:
-            window.location.origin +
-            generateUrl(`/apps/memories/s/${share.token}`),
-        }));
-    }
-  }
-}
+    open() {
+      this.folderPath = utils.getFolderRoutePath(this.config_foldersPath);
+      this.show = true;
+      globalThis.OCA.Files.Sidebar.setActiveTab("sharing");
+      this.refreshUrls();
+    },
+
+    async refreshUrls() {
+      const query = `format=json&path=${encodeURIComponent(
+        this.folderPath
+      )}&reshares=true`;
+      const url = generateOcsUrl(`/apps/files_sharing/api/v1/shares?${query}`);
+      const response = await axios.get(url);
+      const data = response.data?.ocs?.data;
+      if (data) {
+        this.links = data
+          .filter((s) => s.share_type === Type.SHARE_TYPE_LINK && s.token)
+          .map((share: any) => ({
+            url:
+              window.location.origin +
+              generateUrl(`/apps/memories/s/${share.token}`),
+          }));
+      }
+    },
+  },
+});
 </script>
 
 <style lang="scss" scoped>

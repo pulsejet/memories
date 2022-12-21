@@ -6,8 +6,10 @@ const gen = generateUrl;
 
 /** Add auth token to this URL */
 function tok(url: string) {
-  if (vuerouter.currentRoute.name === "folder-share") {
-    url = API.Q(url, `folder_share=${vuerouter.currentRoute.params.token}`);
+  const route = vueroute();
+  if (route.name === "folder-share") {
+    const token = <string>route.params.token;
+    url = API.Q(url, `folder_share=${token}`);
   }
   return url;
 }

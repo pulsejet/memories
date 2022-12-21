@@ -112,22 +112,20 @@ export default defineComponent({
     recycler: Object,
   },
 
-  data() {
-    return {
-      show: false,
-      size: 0,
-      selection: new Map<number, IPhoto>(),
-      defaultActions: null as ISelectionAction[],
+  data: () => ({
+    show: false,
+    size: 0,
+    selection: new Map<number, IPhoto>(),
+    defaultActions: null as ISelectionAction[],
 
-      touchAnchor: null as IPhoto,
-      touchTimer: 0,
-      touchPrevSel: null as Selection,
-      prevOver: null as IPhoto,
-      touchScrollInterval: 0,
-      touchScrollDelta: 0,
-      prevTouch: null as Touch,
-    };
-  },
+    touchAnchor: null as IPhoto,
+    touchTimer: 0,
+    touchPrevSel: null as Selection,
+    prevOver: null as IPhoto,
+    touchScrollInterval: 0,
+    touchScrollDelta: 0,
+    prevTouch: null as Touch,
+  }),
 
   mounted() {
     // Make default actions
@@ -237,7 +235,7 @@ export default defineComponent({
     },
 
     deletePhotos(photos: IPhoto[]) {
-      this.$emit("deletePhotos", photos);
+      this.$emit("delete", photos);
     },
 
     updateLoading(delta: number) {
@@ -840,8 +838,8 @@ export default defineComponent({
 
       // Run query
       for await (let delIds of dav.removeFaceImages(
-        user,
-        name,
+        <string>user,
+        <string>name,
         Array.from(selection.values())
       )) {
         const delPhotos = delIds

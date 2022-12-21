@@ -67,8 +67,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Prop, Watch } from "vue-property-decorator";
-import GlobalMixin from "../../mixins/GlobalMixin";
+import { defineComponent, PropType } from "vue";
 
 import { getPreviewUrl } from "../../services/FileUtils";
 import { IDay, IPhoto } from "../../types";
@@ -80,38 +79,46 @@ import Star from "vue-material-design-icons/Star.vue";
 import Video from "vue-material-design-icons/PlayCircleOutline.vue";
 import LivePhoto from "vue-material-design-icons/MotionPlayOutline.vue";
 
-@Component({
+export default defineComponent({
+  name: "Photo",
   components: {
     CheckCircle,
     Video,
     Star,
     LivePhoto,
   },
-})
-export default class Photo extends Mixins(GlobalMixin) {
-  private touchTimer = 0;
-  private src = null;
-  private hasFaceRect = false;
 
-  @Prop() data: IPhoto;
-  @Prop() day: IDay;
+  props: {
+    data: {
+      type: Object as PropType<IPhoto>,
+      required: true,
+    },
+    day: {
+      type: Object as PropType<IDay>,
+      required: true,
+    },
+  },
 
-  @Emit("select") emitSelect(data: IPhoto) {}
+  data: () => ({
+    touchTimer: 0,
+    src: null,
+    hasFaceRect: false,
+  }),
 
-  @Watch("data")
-  onDataChange(newData: IPhoto, oldData: IPhoto) {
-    // Copy flags relevant to this component
-    if (oldData && newData) {
-      newData.flag |=
-        oldData.flag & (this.c.FLAG_SELECTED | this.c.FLAG_LOAD_FAIL);
-    }
-  }
+  watch: {
+    data(newData: IPhoto, oldData: IPhoto) {
+      // Copy flags relevant to this component
+      if (oldData && newData) {
+        newData.flag |=
+          oldData.flag & (this.c.FLAG_SELECTED | this.c.FLAG_LOAD_FAIL);
+      }
+    },
 
-  @Watch("data.etag")
-  onEtagChange() {
-    this.hasFaceRect = false;
-    this.refresh();
-  }
+    "data.etag": function () {
+      this.hasFaceRect = false;
+      this.refresh();
+    },
+  },
 
   mounted() {
     this.hasFaceRect = false;
@@ -122,136 +129,144 @@ export default class Photo extends Mixins(GlobalMixin) {
     if (video) {
       utils.setupLivePhotoHooks(video);
     }
-  }
-
-  get videoDuration() {
-    if (this.data.video_duration) {
-      return utils.getDurationStr(this.data.video_duration);
-    }
-    return null;
-  }
-
-  get videoUrl() {
-    if (this.data.liveid) {
-      return utils.getLivePhotoVideoUrl(this.data, true);
-    }
-  }
-
-  async refresh() {
-    this.src = await this.getSrc();
-  }
-
-  /** Get src for image to show */
-  async getSrc() {
-    if (this.data.flag & this.c.FLAG_PLACEHOLDER) {
-      return null;
-    } else if (this.data.flag & this.c.FLAG_LOAD_FAIL) {
-      return errorsvg;
-    } else {
-      return this.url();
-    }
-  }
-
-  /** Get url of the photo */
-  url() {
-    let base = 256;
-
-    // Check if displayed size is larger than the image
-    if (this.data.dispH > base * 0.9 && this.data.dispW > base * 0.9) {
-      // Get a bigger image
-      // 1. No trickery here, just get one size bigger. This is to
-      //    ensure that the images can be cached even after reflow.
-      // 2. Nextcloud only allows 4**x sized images, so technically
-      //    this ends up being equivalent to 1024x1024.
-      base = 512;
-    }
-
-    // Make the shorter dimension equal to base
-    let size = base;
-    if (this.data.w && this.data.h) {
-      size =
-        Math.floor(
-          (base * Math.max(this.data.w, this.data.h)) /
-            Math.min(this.data.w, this.data.h)
-        ) - 1;
-    }
-
-    return getPreviewUrl(this.data, false, size);
-  }
-
-  /** Set src with overlay face rect */
-  async addFaceRect() {
-    if (!this.data.facerect || this.hasFaceRect) return;
-    this.hasFaceRect = true;
-
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    const img = this.$refs.img as HTMLImageElement;
-
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
-    context.drawImage(img, 0, 0);
-    context.strokeStyle = "#00ff00";
-    context.lineWidth = 2;
-    context.strokeRect(
-      this.data.facerect.x * img.naturalWidth,
-      this.data.facerect.y * img.naturalHeight,
-      this.data.facerect.w * img.naturalWidth,
-      this.data.facerect.h * img.naturalHeight
-    );
-
-    canvas.toBlob(
-      (blob) => {
-        this.src = URL.createObjectURL(blob);
-      },
-      "image/jpeg",
-      0.95
-    );
-  }
-
-  /** Post load tasks */
-  load() {
-    this.addFaceRect();
-  }
-
-  /** Error in loading image */
-  error(e: any) {
-    this.data.flag |= this.c.FLAG_LOAD_FAIL;
-    this.refresh();
-  }
+  },
 
   /** Clear timers */
   beforeUnmount() {
     clearTimeout(this.touchTimer);
-  }
+  },
 
-  toggleSelect() {
-    if (this.data.flag & this.c.FLAG_PLACEHOLDER) return;
-    this.emitSelect(this.data);
-  }
+  computed: {
+    videoDuration(): string | null {
+      if (this.data.video_duration) {
+        return utils.getDurationStr(this.data.video_duration);
+      }
+      return null;
+    },
 
-  contextmenu(e: Event) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
+    videoUrl(): string | null {
+      if (this.data.liveid) {
+        return utils.getLivePhotoVideoUrl(this.data, true);
+      }
+    },
+  },
 
-  /** Start preview video */
-  playVideo() {
-    if (this.$refs.video && !(this.data.flag & this.c.FLAG_SELECTED)) {
-      const video = this.$refs.video as HTMLVideoElement;
-      video.currentTime = 0;
-      video.play();
-    }
-  }
+  methods: {
+    emitSelect(data: IPhoto) {
+      this.$emit("select", data);
+    },
 
-  /** Stop preview video */
-  stopVideo() {
-    if (this.$refs.video) {
-      const video = this.$refs.video as HTMLVideoElement;
-      video.pause();
-    }
-  }
-}
+    async refresh() {
+      this.src = await this.getSrc();
+    },
+
+    /** Get src for image to show */
+    async getSrc() {
+      if (this.data.flag & this.c.FLAG_PLACEHOLDER) {
+        return null;
+      } else if (this.data.flag & this.c.FLAG_LOAD_FAIL) {
+        return errorsvg;
+      } else {
+        return this.url();
+      }
+    },
+
+    /** Get url of the photo */
+    url() {
+      let base = 256;
+
+      // Check if displayed size is larger than the image
+      if (this.data.dispH > base * 0.9 && this.data.dispW > base * 0.9) {
+        // Get a bigger image
+        // 1. No trickery here, just get one size bigger. This is to
+        //    ensure that the images can be cached even after reflow.
+        // 2. Nextcloud only allows 4**x sized images, so technically
+        //    this ends up being equivalent to 1024x1024.
+        base = 512;
+      }
+
+      // Make the shorter dimension equal to base
+      let size = base;
+      if (this.data.w && this.data.h) {
+        size =
+          Math.floor(
+            (base * Math.max(this.data.w, this.data.h)) /
+              Math.min(this.data.w, this.data.h)
+          ) - 1;
+      }
+
+      return getPreviewUrl(this.data, false, size);
+    },
+
+    /** Set src with overlay face rect */
+    async addFaceRect() {
+      if (!this.data.facerect || this.hasFaceRect) return;
+      this.hasFaceRect = true;
+
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      const img = this.$refs.img as HTMLImageElement;
+
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      context.drawImage(img, 0, 0);
+      context.strokeStyle = "#00ff00";
+      context.lineWidth = 2;
+      context.strokeRect(
+        this.data.facerect.x * img.naturalWidth,
+        this.data.facerect.y * img.naturalHeight,
+        this.data.facerect.w * img.naturalWidth,
+        this.data.facerect.h * img.naturalHeight
+      );
+
+      canvas.toBlob(
+        (blob) => {
+          this.src = URL.createObjectURL(blob);
+        },
+        "image/jpeg",
+        0.95
+      );
+    },
+
+    /** Post load tasks */
+    load() {
+      this.addFaceRect();
+    },
+
+    /** Error in loading image */
+    error(e: any) {
+      this.data.flag |= this.c.FLAG_LOAD_FAIL;
+      this.refresh();
+    },
+
+    toggleSelect() {
+      if (this.data.flag & this.c.FLAG_PLACEHOLDER) return;
+      this.emitSelect(this.data);
+    },
+
+    contextmenu(e: Event) {
+      e.preventDefault();
+      e.stopPropagation();
+    },
+
+    /** Start preview video */
+    playVideo() {
+      if (this.$refs.video && !(this.data.flag & this.c.FLAG_SELECTED)) {
+        const video = this.$refs.video as HTMLVideoElement;
+        video.currentTime = 0;
+        video.play();
+      }
+    },
+
+    /** Stop preview video */
+    stopVideo() {
+      if (this.$refs.video) {
+        const video = this.$refs.video as HTMLVideoElement;
+        video.pause();
+      }
+    },
+  },
+});
 </script>
 
 <style lang="scss" scoped>

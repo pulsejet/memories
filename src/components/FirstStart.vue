@@ -69,15 +69,13 @@ export default defineComponent({
     NcButton,
   },
 
-  data() {
-    return {
-      banner,
-      error: "",
-      info: "",
-      show: false,
-      chosenPath: "",
-    };
-  },
+  data: () => ({
+    banner,
+    error: "",
+    info: "",
+    show: false,
+    chosenPath: "",
+  }),
 
   mounted() {
     window.setTimeout(() => {
@@ -86,8 +84,8 @@ export default defineComponent({
   },
 
   computed: {
-    isAdmin() {
-      return getCurrentUser().isAdmin;
+    isAdmin(): boolean {
+      return Boolean(getCurrentUser()?.isAdmin);
     },
   },
 

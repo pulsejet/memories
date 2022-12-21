@@ -75,46 +75,44 @@ export default defineComponent({
     recyclerBefore: HTMLDivElement,
   },
 
-  data() {
-    return {
-      /** Last known height at adjustment */
-      lastAdjustHeight: 0,
-      /** Height of the entire photo view */
-      recyclerHeight: 100,
-      /** Rect of scroller */
-      scrollerRect: null as DOMRect,
-      /** Computed ticks */
-      ticks: [] as ITick[],
-      /** Computed cursor top */
-      cursorY: 0,
-      /** Hover cursor top */
-      hoverCursorY: -5,
-      /** Hover cursor text */
-      hoverCursorText: "",
-      /** Scrolling using the scroller */
-      scrollingTimer: 0,
-      /** Scrolling now using the scroller */
-      scrollingNowTimer: 0,
-      /** Scrolling recycler */
-      scrollingRecyclerTimer: 0,
-      /** Scrolling recycler now */
-      scrollingRecyclerNowTimer: 0,
-      /** Recycler scrolling throttle */
-      scrollingRecyclerUpdateTimer: 0,
-      /** View size reflow timer */
-      reflowRequest: false,
-      /** Tick adjust timer */
-      adjustRequest: false,
-      /** Scroller is being moved with interaction */
-      interacting: false,
-      /** Track the last requested y position when interacting */
-      lastRequestedRecyclerY: 0,
-    };
-  },
+  data: () => ({
+    /** Last known height at adjustment */
+    lastAdjustHeight: 0,
+    /** Height of the entire photo view */
+    recyclerHeight: 100,
+    /** Rect of scroller */
+    scrollerRect: null as DOMRect,
+    /** Computed ticks */
+    ticks: [] as ITick[],
+    /** Computed cursor top */
+    cursorY: 0,
+    /** Hover cursor top */
+    hoverCursorY: -5,
+    /** Hover cursor text */
+    hoverCursorText: "",
+    /** Scrolling using the scroller */
+    scrollingTimer: 0,
+    /** Scrolling now using the scroller */
+    scrollingNowTimer: 0,
+    /** Scrolling recycler */
+    scrollingRecyclerTimer: 0,
+    /** Scrolling recycler now */
+    scrollingRecyclerNowTimer: 0,
+    /** Recycler scrolling throttle */
+    scrollingRecyclerUpdateTimer: 0,
+    /** View size reflow timer */
+    reflowRequest: false,
+    /** Tick adjust timer */
+    adjustRequest: false,
+    /** Scroller is being moved with interaction */
+    interacting: false,
+    /** Track the last requested y position when interacting */
+    lastRequestedRecyclerY: 0,
+  }),
 
   computed: {
     /** Get the visible ticks */
-    visibleTicks() {
+    visibleTicks(): ITick[] {
       let key = 9999999900;
       return this.ticks
         .filter((tick) => tick.s)
@@ -152,7 +150,7 @@ export default defineComponent({
     },
 
     /** Recycler scroll event, must be called by timeline */
-    recyclerScrolled() {
+    recyclerScrolled(event: Event | null) {
       // This isn't a renewing timer, it's a scheduled task
       if (this.scrollingRecyclerUpdateTimer) return;
       this.scrollingRecyclerUpdateTimer = window.setTimeout(() => {
@@ -510,7 +508,7 @@ export default defineComponent({
 
     interactend() {
       this.interacting = false;
-      this.recyclerScrolled(); // make sure final position is correct
+      this.recyclerScrolled(null); // make sure final position is correct
     },
 
     /** Update scroller is being used to scroll recycler */

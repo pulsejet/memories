@@ -235,7 +235,7 @@ export function convertFlags(photo: IPhoto) {
  * This function does not check if this is the folder route
  */
 export function getFolderRoutePath(basePath: string) {
-  let path: any = vuerouter.currentRoute.params.path || "/";
+  let path: any = vueroute().params.path || "/";
   path = typeof path === "string" ? path : path.join("/");
   path = basePath + "/" + path;
   path = path.replace(/\/\/+/, "/"); // Remove double slashes

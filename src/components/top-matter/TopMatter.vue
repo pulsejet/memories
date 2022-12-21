@@ -8,56 +8,61 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Watch } from "vue-property-decorator";
+import { defineComponent } from "vue";
+
 import FolderTopMatter from "./FolderTopMatter.vue";
 import TagTopMatter from "./TagTopMatter.vue";
 import FaceTopMatter from "./FaceTopMatter.vue";
 import AlbumTopMatter from "./AlbumTopMatter.vue";
 
-import GlobalMixin from "../../mixins/GlobalMixin";
 import { TopMatterType } from "../../types";
 
-@Component({
+export default defineComponent({
+  name: "TopMatter",
   components: {
     FolderTopMatter,
     TagTopMatter,
     FaceTopMatter,
     AlbumTopMatter,
   },
-})
-export default class TopMatter extends Mixins(GlobalMixin) {
-  public type: TopMatterType = TopMatterType.NONE;
 
-  @Watch("$route")
-  async routeChange(from: any, to: any) {
-    this.setTopMatter();
-  }
+  data: () => ({
+    type: TopMatterType.NONE,
+  }),
+
+  watch: {
+    $route: function (from: any, to: any) {
+      this.setTopMatter();
+    },
+  },
 
   mounted() {
     this.setTopMatter();
-  }
+  },
 
-  /** Create top matter */
-  setTopMatter() {
-    this.type = (() => {
-      switch (this.$route.name) {
-        case "folders":
-          return TopMatterType.FOLDER;
-        case "tags":
-          return this.$route.params.name
-            ? TopMatterType.TAG
-            : TopMatterType.NONE;
-        case "recognize":
-        case "facerecognition":
-          return this.$route.params.name
-            ? TopMatterType.FACE
-            : TopMatterType.NONE;
-        case "albums":
-          return TopMatterType.ALBUM;
-        default:
-          return TopMatterType.NONE;
-      }
-    })();
-  }
-}
+  methods: {
+    /** Create top matter */
+    setTopMatter() {
+      this.type = (() => {
+        switch (this.$route.name) {
+          case "folders":
+            return TopMatterType.FOLDER;
+          case "tags":
+            return this.$route.params.name
+              ? TopMatterType.TAG
+              : TopMatterType.NONE;
+          case "recognize":
+          case "facerecognition":
+            return this.$route.params.name
+              ? TopMatterType.FACE
+              : TopMatterType.NONE;
+          case "albums":
+            return TopMatterType.ALBUM;
+          default:
+            return TopMatterType.NONE;
+        }
+      })();
+    },
+  },
+});
 </script>

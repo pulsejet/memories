@@ -81,23 +81,14 @@
               transform: `translate(${photo.dispX}px, ${photo.dispY}px`,
             }"
           >
-            <Folder
-              v-if="photo.flag & c.FLAG_IS_FOLDER"
-              :data="photo"
-              :key="photo.fileid"
-            />
+            <Folder v-if="photo.flag & c.FLAG_IS_FOLDER" :data="photo" />
 
-            <Tag
-              v-else-if="photo.flag & c.FLAG_IS_TAG"
-              :data="photo"
-              :key="photo.fileid"
-            />
+            <Tag v-else-if="photo.flag & c.FLAG_IS_TAG" :data="photo" />
 
             <Photo
               v-else
               :data="photo"
               :day="item.day"
-              :key="photo.fileid"
               @select="selectionManager.selectPhoto"
               @pointerdown="selectionManager.clickPhoto(photo, $event, index)"
               @touchstart="
@@ -192,53 +183,51 @@ export default defineComponent({
     ImageMultipleIcon,
   },
 
-  data() {
-    return {
-      /** Loading days response */
-      loading: 0,
-      /** Main list of rows */
-      list: [] as IRow[],
-      /** Computed number of columns */
-      numCols: 0,
-      /** Header rows for dayId key */
-      heads: {} as { [dayid: number]: IHeadRow },
+  data: () => ({
+    /** Loading days response */
+    loading: 0,
+    /** Main list of rows */
+    list: [] as IRow[],
+    /** Computed number of columns */
+    numCols: 0,
+    /** Header rows for dayId key */
+    heads: {} as { [dayid: number]: IHeadRow },
 
-      /** Computed row height */
-      rowHeight: 100,
-      /** Computed row width */
-      rowWidth: 100,
+    /** Computed row height */
+    rowHeight: 100,
+    /** Computed row width */
+    rowWidth: 100,
 
-      /** Current start index */
-      currentStart: 0,
-      /** Current end index */
-      currentEnd: 0,
-      /** Resizing timer */
-      resizeTimer: null as number | null,
-      /** Height of the scroller */
-      scrollerHeight: 100,
+    /** Current start index */
+    currentStart: 0,
+    /** Current end index */
+    currentEnd: 0,
+    /** Resizing timer */
+    resizeTimer: null as number | null,
+    /** Height of the scroller */
+    scrollerHeight: 100,
 
-      /** Set of dayIds for which images loaded */
-      loadedDays: new Set<number>(),
-      /** Set of dayIds for which image size is calculated */
-      sizedDays: new Set<number>(),
-      /** Days to load in the next call */
-      fetchDayQueue: [] as number[],
-      /** Timer to load day call */
-      fetchDayTimer: null as number | null,
+    /** Set of dayIds for which images loaded */
+    loadedDays: new Set<number>(),
+    /** Set of dayIds for which image size is calculated */
+    sizedDays: new Set<number>(),
+    /** Days to load in the next call */
+    fetchDayQueue: [] as number[],
+    /** Timer to load day call */
+    fetchDayTimer: null as number | null,
 
-      /** State for request cancellations */
-      state: Math.random(),
+    /** State for request cancellations */
+    state: Math.random(),
 
-      /** Selection manager component */
-      selectionManager: null as SelectionManager & any,
-      /** Scroller manager component */
-      scrollerManager: null as ScrollerManager & any,
-    };
-  },
+    /** Selection manager component */
+    selectionManager: null as InstanceType<typeof SelectionManager> & any,
+    /** Scroller manager component */
+    scrollerManager: null as InstanceType<typeof ScrollerManager> & any,
+  }),
 
   mounted() {
-    this.selectionManager = this.$refs.selectionManager;
-    this.scrollerManager = this.$refs.scrollerManager;
+    this.selectionManager = <any>this.$refs.selectionManager;
+    this.scrollerManager = <any>this.$refs.scrollerManager;
     this.routeChange(this.$route);
   },
 
@@ -265,20 +254,22 @@ export default defineComponent({
   },
 
   computed: {
-    routeIsBase() {
+    routeIsBase(): boolean {
       return this.$route.name === "timeline";
     },
-    routeIsPeople() {
-      return ["recognize", "facerecognition"].includes(this.$route.name);
+    routeIsPeople(): boolean {
+      return ["recognize", "facerecognition"].includes(
+        <string>this.$route.name
+      );
     },
-    routeIsArchive() {
+    routeIsArchive(): boolean {
       return this.$route.name === "archive";
     },
-    isMonthView() {
+    isMonthView(): boolean {
       return this.$route.name === "albums";
     },
     /** Get view name for dynamic top matter */
-    viewName() {
+    viewName(): string {
       switch (this.$route.name) {
         case "timeline":
           return this.t("memories", "Your Timeline");
@@ -301,7 +292,7 @@ export default defineComponent({
           return "";
       }
     },
-    emptyViewDescription() {
+    emptyViewDescription(): string {
       switch (this.$route.name) {
         case "facerecognition":
           if (this.config_facerecognitionEnabled)
@@ -655,7 +646,7 @@ export default defineComponent({
         this.$route.params.name
       ) {
         query.set(
-          this.$route.name, // "recognize" or "facerecognition"
+          <string>this.$route.name, // "recognize" or "facerecognition"
           `${this.$route.params.user}/${this.$route.params.name}`
         );
 
@@ -667,15 +658,14 @@ export default defineComponent({
 
       // Tags
       if (this.$route.name === "tags" && this.$route.params.name) {
-        query.set("tag", this.$route.params.name);
+        query.set("tag", <string>this.$route.params.name);
       }
 
       // Albums
       if (this.$route.name === "albums" && this.$route.params.name) {
-        query.set(
-          "album",
-          `${this.$route.params.user}/${this.$route.params.name}`
-        );
+        const user = <string>this.$route.params.user;
+        const name = <string>this.$route.params.name;
+        query.set("album", `${user}/${name}`);
       }
 
       // Month view
@@ -718,7 +708,7 @@ export default defineComponent({
     /** Fetch timeline main call */
     async fetchDays(noCache = false) {
       const url = API.Q(API.DAYS(), this.getQuery());
-      const cacheUrl = this.$route.name + url;
+      const cacheUrl = <string>this.$route.name + url;
 
       // Try cache first
       let cache: IDay[];

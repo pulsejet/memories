@@ -44,9 +44,13 @@ const GET_FILE_CHUNK_SIZE = 50;
  */
 export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
   // Check if albums
-  const route = vuerouter.currentRoute;
+  const route = vueroute();
   if (route.name === "albums") {
-    return getAlbumFileInfos(photos, route.params.user, route.params.name);
+    return getAlbumFileInfos(
+      photos,
+      <string>route.params.user,
+      <string>route.params.name
+    );
   }
 
   // Get file infos

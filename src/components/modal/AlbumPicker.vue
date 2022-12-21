@@ -15,18 +15,18 @@
         "
         @click="pickAlbum(album)"
       >
-        <template slot="icon">
+        <template v-slot:icon="{}">
           <img
             v-if="album.last_added_photo !== -1"
             class="album__image"
-            :src="album.last_added_photo | toCoverUrl"
+            :src="toCoverUrl(album.last_added_photo)"
           />
           <div v-else class="album__image album__image--placeholder">
             <ImageMultiple :size="32" />
           </div>
         </template>
 
-        <template slot="subtitle">
+        <template v-slot:subtitle="{}">
           {{ n("photos", "%n item", "%n items", album.count) }}
           <!-- TODO: finish collaboration -->
           <!--⸱ {{ n('photos', 'Share with %n user', 'Share with %n users', album.isShared) }}-->
@@ -57,8 +57,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins } from "vue-property-decorator";
-import GlobalMixin from "../../mixins/GlobalMixin";
+import { defineComponent } from "vue";
+
 import { getCurrentUser } from "@nextcloud/auth";
 
 import AlbumForm from "./AlbumForm.vue";
@@ -74,7 +74,8 @@ import { IAlbum, IPhoto } from "../../types";
 import axios from "@nextcloud/axios";
 import { API } from "../../services/API";
 
-@Component({
+export default defineComponent({
+  name: "AlbumPicker",
   components: {
     AlbumForm,
     Plus,
@@ -83,8 +84,19 @@ import { API } from "../../services/API";
     NcListItem,
     NcLoadingIcon,
   },
-  filters: {
-    toCoverUrl(fileId: string) {
+
+  data: () => ({
+    showAlbumCreationForm: false,
+    albums: [] as IAlbum[],
+    loadingAlbums: true,
+  }),
+
+  mounted() {
+    this.loadAlbums();
+  },
+
+  methods: {
+    toCoverUrl(fileId: string | number) {
       return getPreviewUrl(
         {
           fileid: Number(fileId),
@@ -93,43 +105,35 @@ import { API } from "../../services/API";
         256
       );
     },
+
+    albumCreatedHandler() {
+      this.showAlbumCreationForm = false;
+      this.loadAlbums();
+    },
+
+    getAlbumName(album: IAlbum) {
+      if (album.user === getCurrentUser()?.uid) {
+        return album.name;
+      }
+      return `${album.name} (${album.user})`;
+    },
+
+    async loadAlbums() {
+      try {
+        const res = await axios.get<IAlbum[]>(API.ALBUM_LIST());
+        this.albums = res.data;
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.loadingAlbums = false;
+      }
+    },
+
+    pickAlbum(album: IAlbum) {
+      this.$emit("select", album);
+    },
   },
-})
-export default class AlbumPicker extends Mixins(GlobalMixin) {
-  private showAlbumCreationForm = false;
-  private albums: IAlbum[] = [];
-  private loadingAlbums = true;
-
-  mounted() {
-    this.loadAlbums();
-  }
-
-  albumCreatedHandler() {
-    this.showAlbumCreationForm = false;
-    this.loadAlbums();
-  }
-
-  getAlbumName(album: IAlbum) {
-    if (album.user === getCurrentUser()?.uid) {
-      return album.name;
-    }
-    return `${album.name} (${album.user})`;
-  }
-
-  async loadAlbums() {
-    try {
-      const res = await axios.get<IAlbum[]>(API.ALBUM_LIST());
-      this.albums = res.data;
-    } catch (e) {
-      console.error(e);
-    } finally {
-      this.loadingAlbums = false;
-    }
-  }
-
-  @Emit("select")
-  pickAlbum(album: IAlbum) {}
-}
+});
 </script>
 
 <style lang="scss" scoped>

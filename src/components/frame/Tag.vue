@@ -21,7 +21,7 @@
           class="fill-block"
           :class="{ error }"
           :src="previewUrl"
-          @error="data.flag |= c.FLAG_LOAD_FAIL"
+          @error="failed"
         />
       </div>
     </div>
@@ -29,99 +29,116 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Mixins, Emit } from "vue-property-decorator";
+import { defineComponent, PropType } from "vue";
+
 import { IAlbum, ITag } from "../../types";
 import { getPreviewUrl } from "../../services/FileUtils";
 import { getCurrentUser } from "@nextcloud/auth";
 
 import NcCounterBubble from "@nextcloud/vue/dist/Components/NcCounterBubble";
 
-import GlobalMixin from "../../mixins/GlobalMixin";
 import { constants } from "../../services/Utils";
 import { API } from "../../services/API";
 
-@Component({
+export default defineComponent({
+  name: "Tag",
   components: {
     NcCounterBubble,
   },
-})
-export default class Tag extends Mixins(GlobalMixin) {
-  @Prop() data: ITag;
-  @Prop() noNavigate: boolean;
 
-  /**
-   * Open tag event
-   * Unless noNavigate is set, the tag will be opened
-   */
-  @Emit("open")
-  openTag(tag: ITag) {}
+  props: {
+    data: {
+      type: Object as PropType<ITag>,
+      required: true,
+    },
+    noNavigate: {
+      type: Boolean,
+      default: false,
+    },
+  },
 
-  get previewUrl() {
-    if (this.face) {
-      return API.FACE_PREVIEW(this.faceApp, this.face.fileid);
-    }
+  computed: {
+    previewUrl() {
+      if (this.face) {
+        return API.FACE_PREVIEW(this.faceApp, this.face.fileid);
+      }
 
-    if (this.album) {
-      const mock = { fileid: this.album.last_added_photo, etag: "", flag: 0 };
-      return getPreviewUrl(mock, true, 512);
-    }
+      if (this.album) {
+        const mock = { fileid: this.album.last_added_photo, etag: "", flag: 0 };
+        return getPreviewUrl(mock, true, 512);
+      }
 
-    return API.TAG_PREVIEW(this.data.name);
-  }
+      return API.TAG_PREVIEW(this.data.name);
+    },
 
-  get subtitle() {
-    if (this.album && this.album.user !== getCurrentUser()?.uid) {
-      return `(${this.album.user})`;
-    }
+    subtitle() {
+      if (this.album && this.album.user !== getCurrentUser()?.uid) {
+        return `(${this.album.user})`;
+      }
 
-    return "";
-  }
+      return "";
+    },
 
-  get face() {
-    return this.data.flag & constants.c.FLAG_IS_FACE_RECOGNIZE ||
-      this.data.flag & constants.c.FLAG_IS_FACE_RECOGNITION
-      ? this.data
-      : null;
-  }
+    face() {
+      return this.data.flag & constants.c.FLAG_IS_FACE_RECOGNIZE ||
+        this.data.flag & constants.c.FLAG_IS_FACE_RECOGNITION
+        ? this.data
+        : null;
+    },
 
-  get faceApp() {
-    return this.data.flag & constants.c.FLAG_IS_FACE_RECOGNITION
-      ? "facerecognition"
-      : "recognize";
-  }
+    faceApp() {
+      return this.data.flag & constants.c.FLAG_IS_FACE_RECOGNITION
+        ? "facerecognition"
+        : "recognize";
+    },
 
-  get album() {
-    return this.data.flag & constants.c.FLAG_IS_ALBUM
-      ? <IAlbum>this.data
-      : null;
-  }
+    album() {
+      return this.data.flag & constants.c.FLAG_IS_ALBUM
+        ? <IAlbum>this.data
+        : null;
+    },
 
-  /** Target URL to navigate to */
-  get target() {
-    if (this.noNavigate) return {};
+    /** Target URL to navigate to */
+    target() {
+      if (this.noNavigate) return {};
 
-    if (this.face) {
-      const name = this.face.name || this.face.fileid.toString();
-      const user = this.face.user_id;
-      return { name: this.faceApp, params: { name, user } };
-    }
+      if (this.face) {
+        const name = this.face.name || this.face.fileid.toString();
+        const user = this.face.user_id;
+        return { name: this.faceApp, params: { name, user } };
+      }
 
-    if (this.album) {
-      const user = this.album.user;
-      const name = this.album.name;
-      return { name: "albums", params: { user, name } };
-    }
+      if (this.album) {
+        const user = this.album.user;
+        const name = this.album.name;
+        return { name: "albums", params: { user, name } };
+      }
 
-    return { name: "tags", params: { name: this.data.name } };
-  }
+      return { name: "tags", params: { name: this.data.name } };
+    },
 
-  get error() {
-    return (
-      Boolean(this.data.flag & this.c.FLAG_LOAD_FAIL) ||
-      Boolean(this.album && this.album.last_added_photo <= 0)
-    );
-  }
-}
+    error() {
+      return (
+        Boolean(this.data.flag & this.c.FLAG_LOAD_FAIL) ||
+        Boolean(this.album && this.album.last_added_photo <= 0)
+      );
+    },
+  },
+  methods: {
+    /**
+     * Open tag event
+     * Unless noNavigate is set, the tag will be opened
+     */
+    openTag(tag: ITag) {
+      this.$emit("open", tag);
+    },
+
+    /** Mark as loading failed */
+    failed() {
+      this.data.flag |= this.c.FLAG_LOAD_FAIL;
+    },
+  },
+});
 </script>
 
 <style lang="scss" scoped>
