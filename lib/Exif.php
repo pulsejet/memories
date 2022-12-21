@@ -10,7 +10,7 @@ use OCP\IConfig;
 
 class Exif
 {
-    private const EXIFTOOL_VER = '12.49';
+    private const EXIFTOOL_VER = '12.50';
     private const EXIFTOOL_TIMEOUT = 30000;
 
     /** Opened instance of exiftool when running in command mode */
