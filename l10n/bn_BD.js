@@ -16,6 +16,8 @@ OC.L10N.register(
     "Day" : "দিবস",
     "Time" : "সময়",
     "Hour" : "ঘন্টা",
+    "Title" : "শিরোনাম",
+    "Description" : "বিবরণ",
     "Name" : "নাম",
     "Update" : "পরিবর্ধন",
     "Refresh" : "নবোদ্যম",

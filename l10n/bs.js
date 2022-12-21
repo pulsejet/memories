@@ -11,6 +11,8 @@ OC.L10N.register(
     "Save" : "Spremi",
     "Month" : "Mjesec",
     "Day" : "Dan",
+    "Title" : "Naslov",
+    "Description" : "Opis",
     "Name" : "Ime",
     "Update" : "Ažuriraj",
     "Share" : "Podjeli",

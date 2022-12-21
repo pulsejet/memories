@@ -19,6 +19,8 @@ OC.L10N.register(
     "Month" : "Mis",
     "Day" : "Diwrnod",
     "Time" : "Amser",
+    "Title" : "Teitl",
+    "Description" : "Disgrifiad",
     "Name" : "Enw",
     "Update" : "Diweddaru",
     "Refresh" : "Ail-lwytho",
