@@ -1,12 +1,12 @@
 { "translations": {
     "Settings" : "Paramètres",
+    "People" : "Gent",
     "Folders" : "Repertòris",
     "Favorites" : "Favorits",
     "Albums" : "Albums",
     "Archive" : "Archiu",
     "Tags" : "Etiquetas",
     "Maps" : "Mapas",
-    "People" : "Gent",
     "Edit" : "Modificar",
     "Loading …" : "Cargament…",
     "Cancel" : "Anullar",

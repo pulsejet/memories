@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Impostazioni",
+    "People" : "Persone",
     "Timeline" : "Linea temporale",
     "Folders" : "Cartelle",
     "Favorites" : "Preferiti",
@@ -11,7 +12,6 @@ OC.L10N.register(
     "On this day" : "In questo giorno",
     "Tags" : "Etichette",
     "Maps" : "Mappe",
-    "People" : "Persone",
     "Edit" : "Modifica",
     "Loading …" : "Caricamento …",
     "Cancel" : "Annulla",

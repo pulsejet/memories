@@ -1,5 +1,6 @@
 { "translations": {
     "Settings" : "Параметри",
+    "People" : "Луѓе",
     "Timeline" : "Времеплов",
     "Folders" : "Папки",
     "Favorites" : "Омилени",
@@ -9,7 +10,6 @@
     "On this day" : "На денешен ден",
     "Tags" : "Ознаки",
     "Maps" : "Мапи",
-    "People" : "Луѓе",
     "Edit" : "Уреди",
     "Loading …" : "Се вчитува…",
     "Cancel" : "Откажи",

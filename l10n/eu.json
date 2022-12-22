@@ -1,6 +1,7 @@
 { "translations": {
     "Memories" : "Memoriak",
     "Settings" : "Ezarpenak",
+    "People" : "Jendea",
     "Timeline" : "Denbora-lerroa",
     "Folders" : "Karpetak",
     "Favorites" : "Gogokoak",
@@ -10,7 +11,6 @@
     "On this day" : "Egun honetan",
     "Tags" : "Etiketak",
     "Maps" : "Mapak",
-    "People" : "Jendea",
     "Edit" : "Aldatu",
     "Loading …" : "Kargatzen …",
     "Cancel" : "Utzi",

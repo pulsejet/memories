@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Поставке",
+    "People" : "Људи",
     "Timeline" : "Временска оса",
     "Folders" : "Фасцикле",
     "Favorites" : "Омиљене",
@@ -9,7 +10,6 @@ OC.L10N.register(
     "Archive" : "Архива",
     "Tags" : "Ознаке",
     "Maps" : "Мапе",
-    "People" : "Људи",
     "Edit" : "Измени",
     "Loading …" : "Учитавање…",
     "Cancel" : "Поништи",

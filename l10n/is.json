@@ -1,5 +1,6 @@
 { "translations": {
     "Settings" : "Stillingar",
+    "People" : "Fólk",
     "Timeline" : "Tímalína",
     "Folders" : "Möppur",
     "Favorites" : "Eftirlæti",
@@ -8,7 +9,6 @@
     "On this day" : "Á þessum degi",
     "Tags" : "Merki",
     "Maps" : "Landakort",
-    "People" : "Fólk",
     "Edit" : "Breyta",
     "Loading …" : "Hleð inn …",
     "Cancel" : "Hætta við",

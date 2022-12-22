@@ -1,5 +1,6 @@
 { "translations": {
     "Settings" : "Iestatījumi",
+    "EXIF" : "EXIF",
     "Folders" : "Mapes",
     "Favorites" : "Favorīti",
     "Videos" : "Video",
@@ -7,7 +8,6 @@
     "Archive" : "Arhīvi",
     "Tags" : "Birkas",
     "Maps" : "Karte",
-    "EXIF" : "EXIF",
     "Edit" : "Rediģēt",
     "Cancel" : "Atcelt",
     "Delete" : "Dzēst",

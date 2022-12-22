@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Stillingar",
+    "People" : "Fólk",
     "Timeline" : "Tímalína",
     "Folders" : "Möppur",
     "Favorites" : "Eftirlæti",
@@ -10,7 +11,6 @@ OC.L10N.register(
     "On this day" : "Á þessum degi",
     "Tags" : "Merki",
     "Maps" : "Landakort",
-    "People" : "Fólk",
     "Edit" : "Breyta",
     "Loading …" : "Hleð inn …",
     "Cancel" : "Hætta við",

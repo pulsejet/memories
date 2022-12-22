@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Postavke",
+    "People" : "Ljudi",
     "Timeline" : "Vremenska crta",
     "Folders" : "Mape",
     "Favorites" : "Favoriti",
@@ -9,7 +10,6 @@ OC.L10N.register(
     "Archive" : "Arhiva",
     "Tags" : "Oznake",
     "Maps" : "Karte",
-    "People" : "Ljudi",
     "Edit" : "Uredi",
     "Loading …" : "Učitavanje…",
     "Cancel" : "Odustani",

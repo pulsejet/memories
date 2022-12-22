@@ -1,5 +1,6 @@
 { "translations": {
     "Settings" : "Ρυθμίσεις",
+    "People" : "Άτομα",
     "Timeline" : "Χρονολόγιο",
     "Folders" : "Φάκελοι",
     "Favorites" : "Αγαπημένα",
@@ -9,7 +10,6 @@
     "On this day" : "Αυτή τη μέρα",
     "Tags" : "Ετικέτες",
     "Maps" : "Χάρτες",
-    "People" : "Άτομα",
     "Edit" : "Επεξεργασία",
     "Loading …" : "Φόρτωση …",
     "Cancel" : "Ακύρωση",

@@ -3,6 +3,8 @@ OC.L10N.register(
     {
     "Memories" : "Prisiminimai",
     "Settings" : "Nustatymai",
+    "People" : "Žmonės",
+    "EXIF" : "EXIF",
     "Timeline" : "Laiko juosta",
     "Folders" : "Aplankai",
     "Favorites" : "Mėgstami",
@@ -12,8 +14,6 @@ OC.L10N.register(
     "On this day" : "Šią dieną",
     "Tags" : "Žymės",
     "Maps" : "Žemėlapiai",
-    "People" : "Žmonės",
-    "EXIF" : "EXIF",
     "If you just installed Memories, run:" : "Jei ką tik įdiegėte Prisiminimus, paleiskite:",
     "Click here to start" : "Spustelėkite čia, norėdami pradėti",
     "Edit" : "Taisyti",

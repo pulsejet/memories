@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Memories",
     "Settings" : "Inställningar",
+    "People" : "Personer",
     "Timeline" : "Tidslinje",
     "Folders" : "Mappar",
     "Favorites" : "Favoriter",
@@ -12,7 +13,6 @@ OC.L10N.register(
     "On this day" : "På den här dagen",
     "Tags" : "Taggar",
     "Maps" : "Kartor",
-    "People" : "Personer",
     "Edit" : "Ändra",
     "Loading …" : "Läser in …",
     "Cancel" : "Avbryt",
