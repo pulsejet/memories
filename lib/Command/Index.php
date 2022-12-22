@@ -291,12 +291,13 @@ class Index extends Command
 
         try {
             $res = $this->timelineWrite->processFile($file, $refresh);
-        } catch (\Exception $e) {
+        } catch (\Error $e) {
             $this->output->writeln(sprintf(
                 '<error>Could not process file %s: %s</error>',
                 $file->getPath(),
                 $e->getMessage()
             ));
+            $this->output->writeln($e->getTraceAsString());
         }
 
         if (2 === $res) {
