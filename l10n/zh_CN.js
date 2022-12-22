@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "内存",
     "Settings" : "设置",
+    "People" : "人物",
     "Timeline" : "时间线",
     "Folders" : "文件夹",
     "Favorites" : "收藏",
@@ -12,7 +13,6 @@ OC.L10N.register(
     "On this day" : "当年今日",
     "Tags" : "标签",
     "Maps" : "地图",
-    "People" : "人物",
     "Edit" : "编辑",
     "Loading …" : "正在加载 …",
     "Cancel" : "取消",

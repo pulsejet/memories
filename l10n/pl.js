@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Wspomnienia",
     "Settings" : "Ustawienia",
+    "People" : "Osoby",
     "Timeline" : "Oś czasu",
     "Folders" : "Katalogi",
     "Favorites" : "Ulubione",
@@ -12,7 +13,6 @@ OC.L10N.register(
     "On this day" : "W tym dniu",
     "Tags" : "Etykiety",
     "Maps" : "Mapy",
-    "People" : "Osoby",
     "Edit" : "Edytuj",
     "Loading …" : "Wczytywanie…",
     "Cancel" : "Anuluj",

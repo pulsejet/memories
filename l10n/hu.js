@@ -4,6 +4,8 @@ OC.L10N.register(
     "Memories" : "Emlékek",
     "Fast, modern and advanced photo management suite" : "Gyors, modern és fejlett fényképkezelő csomag",
     "Settings" : "Beállítások",
+    "People" : "Emberek",
+    "EXIF" : "EXIF",
     "Timeline" : "Idővonal",
     "Folders" : "Mappák",
     "Favorites" : "Kedvencek",
@@ -13,8 +15,6 @@ OC.L10N.register(
     "On this day" : "A mai napon",
     "Tags" : "Címkék",
     "Maps" : "Térképek",
-    "People" : "Emberek",
-    "EXIF" : "EXIF",
     "A better photos experience awaits you" : "Egy jobb fényképes élmény várja",
     "Choose the root folder of your timeline to begin" : "A kezdéshez válasszon gyökérmappát az idővonaláról",
     "If you just installed Memories, run:" : "Ha csak most telepítette az Emlékek alkalmazást, futtassa ezt:",
@@ -241,7 +241,6 @@ OC.L10N.register(
     "Failed to delete {fileName}." : "A(z) {fileName} törlése sikertelen.",
     "Failed to favorite files." : "A fájlok kedvencnek jelölése sikertelen.",
     "Failed to favorite some files." : "Egyes fájlok kedvencnek jelölése sikertelen.",
-    "Failed to favorite {fileName}." : "A(z) {fileName} kedvencnek jelölése sikertelen.",
-    "Could not remove photos from album" : "Nem sikerült a fényképek eltávolítása az albumból"
+    "Failed to favorite {fileName}." : "A(z) {fileName} kedvencnek jelölése sikertelen."
 },
 "nplurals=2; plural=(n != 1);");

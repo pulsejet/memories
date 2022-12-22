@@ -1,5 +1,6 @@
 { "translations": {
     "Settings" : "Instellingen",
+    "People" : "Mensen",
     "Timeline" : "Tijdlijn",
     "Folders" : "Mappen",
     "Favorites" : "Favorieten",
@@ -9,7 +10,6 @@
     "On this day" : "Vandaag",
     "Tags" : "Tags",
     "Maps" : "Kaarten",
-    "People" : "Mensen",
     "Edit" : "Bewerk",
     "Loading …" : "Laden …",
     "Cancel" : "Annuleren",

@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Параметри",
+    "People" : "Луѓе",
     "Timeline" : "Времеплов",
     "Folders" : "Папки",
     "Favorites" : "Омилени",
@@ -11,7 +12,6 @@ OC.L10N.register(
     "On this day" : "На денешен ден",
     "Tags" : "Ознаки",
     "Maps" : "Мапи",
-    "People" : "Луѓе",
     "Edit" : "Уреди",
     "Loading …" : "Се вчитува…",
     "Cancel" : "Откажи",

@@ -1,6 +1,7 @@
 { "translations": {
     "Memories" : "Spomienky",
     "Settings" : "Nastavenia",
+    "People" : "Ľudia",
     "Timeline" : "Časová os",
     "Folders" : "Priečinky",
     "Favorites" : "Obľúbené",
@@ -10,7 +11,6 @@
     "On this day" : "V tento deň",
     "Tags" : "Štítky",
     "Maps" : "Mapy",
-    "People" : "Ľudia",
     "Edit" : "Upraviť",
     "Loading …" : "Načítavam …",
     "Cancel" : "Zrušiť",

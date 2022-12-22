@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Memórias",
     "Settings" : "Configurações",
+    "People" : "Pessoas",
     "Timeline" : "Linha do tempo",
     "Folders" : "Pastas",
     "Favorites" : "Favoritos",
@@ -12,7 +13,6 @@ OC.L10N.register(
     "On this day" : "Nesse dia",
     "Tags" : "Etiquetas",
     "Maps" : "Mapas",
-    "People" : "Pessoas",
     "A better photos experience awaits you" : "Uma melhor experiência de fotos espera por você",
     "Choose the root folder of your timeline to begin" : "Escolha a pasta raiz da sua linha do tempo para começar",
     "If you just installed Memories, run:" : "Se você acabou de instalar o Memórias, execute:",
@@ -222,7 +222,6 @@ OC.L10N.register(
     "Failed to delete {fileName}." : "Falha ao excluir {fileName}.",
     "Failed to download files" : "Falha ao baixar arquivos",
     "Failed to favorite files." : "Falha nos arquivos favoritos.",
-    "Failed to favorite {fileName}." : "Falha ao favoritar {fileName}",
-    "Could not remove photos from album" : "Não foi possível remover fotos do álbum"
+    "Failed to favorite {fileName}." : "Falha ao favoritar {fileName}"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

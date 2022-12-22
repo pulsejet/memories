@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Muistot",
     "Settings" : "Asetukset",
+    "People" : "Ihmiset",
     "Timeline" : "Aikajana",
     "Folders" : "Kansiot",
     "Favorites" : "Suosikit",
@@ -12,7 +13,6 @@ OC.L10N.register(
     "On this day" : "Tänä päivänä",
     "Tags" : "Tunnisteet",
     "Maps" : "Kartat",
-    "People" : "Ihmiset",
     "A better photos experience awaits you" : "Parempi kuvakokemus odottaa sinua",
     "Choose the root folder of your timeline to begin" : "Valitse aikajanan juurihakemisto aloittaaksesi",
     "If you just installed Memories, run:" : "Jos olet juuri asentanut Muistot, suorita:",
@@ -170,7 +170,6 @@ OC.L10N.register(
     "Failed to delete {fileName}." : "Tiedoston {fileName} poisto epäonnistui.",
     "Failed to favorite files." : "Tiedostojen asettaminen suosikeiksi epäonnistui.",
     "Failed to favorite some files." : "Joidenkin tiedostojen määrittäminen suosikiksi epäonnistui.",
-    "Failed to favorite {fileName}." : "Tiedoston {fileName} asettaminen suosikiksi epäonnistui.",
-    "Could not remove photos from album" : "Kuvia ei voitu poistaa albumista"
+    "Failed to favorite {fileName}." : "Tiedoston {fileName} asettaminen suosikiksi epäonnistui."
 },
 "nplurals=2; plural=(n != 1);");
