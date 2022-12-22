@@ -5,6 +5,10 @@ OC.L10N.register(
     "Fast, modern and advanced photo management suite" : "Fast, modern and advanced photo management suite",
     "# Memories\n\nMemories is a *batteries-included* photo management solution for Nextcloud with advanced features including:\n\n- **📸 Timeline**: Sort photos and videos by date taken, parsed from Exif data.\n- **⏪ Rewind**: Jump to any time in the past instantly and relive your memories.\n- **🤖 AI Tagging**: Group photos by people and objects, powered by [recognize](https://github.com/nextcloud/recognize) and [facerecognition](https://github.com/matiasdelellis/facerecognition).\n- **🖼️ Albums**: Create albums to group photos and videos together. Then share these albums with others.\n- **🫱🏻‍🫲🏻 External Sharing**: Share photos and videos with people outside of your Nextcloud instance.\n- **📱 Mobile Support**: Works on devices of any shape and size through the web app.\n- **✏️ Edit Metadata**: Edit dates on photos quickly and easily.\n- **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.\n- **📹 Video Transcoding**: Memories transcodes videos and uses HLS for maximal performance.\n- **⚡️ Performance**: In general, Memories is extremely fast.\n\n## 🌐 Online Demo\n\n- To get an idea of what memories looks and feels like, check out the [public demo](https://memories-demo.radialapps.com/apps/memories/).\n- The demo is read-only and may be slow (free tier VM from [Oracle Cloud](https://www.oracle.com/cloud/free/)).\n- Photo credits go to [Unsplash](https://unsplash.com/) (for individual credits, refer to each folder).\n\n## 🚀 Installation\n\n1. Install the app from the Nextcloud app store.\n1. Perform the recommended [configuration steps](https://github.com/pulsejet/memories/wiki/Extra-Configuration).\n1. Run `php ./occ memories:index` to generate metadata indices for existing photos.\n1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos." : "# Memories\n\nMemories is a *batteries-included* photo management solution for Nextcloud with advanced features including:\n\n- **📸 Timeline**: Sort photos and videos by date taken, parsed from Exif data.\n- **⏪ Rewind**: Jump to any time in the past instantly and relive your memories.\n- **🤖 AI Tagging**: Group photos by people and objects, powered by [recognise](https://github.com/nextcloud/recognise) and [facerecognition](https://github.com/matiasdelellis/facerecognition).\n- **🖼️ Albums**: Create albums to group photos and videos together. Then share these albums with others.\n- **🫱🏻‍🫲🏻 External Sharing**: Share photos and videos with people outside of your Nextcloud instance.\n- **📱 Mobile Support**: Works on devices of any shape and size through the web app.\n- **✏️ Edit Metadata**: Edit dates on photos quickly and easily.\n- **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.\n- **📹 Video Transcoding**: Memories transcodes videos and uses HLS for maximal performance.\n- **⚡️ Performance**: In general, Memories is extremely fast.\n\n## 🌐 Online Demo\n\n- To get an idea of what memories looks and feels like, check out the [public demo](https://memories-demo.radialapps.com/apps/memories/).\n- The demo is read-only and may be slow (free tier VM from [Oracle Cloud](https://www.oracle.com/cloud/free/)).\n- Photo credits go to [Unsplash](https://unsplash.com/) (for individual credits, refer to each folder).\n\n## 🚀 Installation\n\n1. Install the app from the Nextcloud app store.\n1. Perform the recommended [configuration steps](https://github.com/pulsejet/memories/wiki/Extra-Configuration).\n1. Run `php ./occ memories:index` to generate metadata indices for existing photos.\n1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos.",
     "Settings" : "Settings",
+    "People (Recognize)" : "People (Recognise)",
+    "People" : "People",
+    "People (Face Recognition)" : "People (Face Recognition)",
+    "EXIF" : "EXIF",
     "Timeline" : "Timeline",
     "Folders" : "Folders",
     "Favorites" : "Favourites",
@@ -14,10 +18,6 @@ OC.L10N.register(
     "On this day" : "On this day",
     "Tags" : "Tags",
     "Maps" : "Maps",
-    "People (Recognize)" : "People (Recognise)",
-    "People" : "People",
-    "People (Face Recognition)" : "People (Face Recognition)",
-    "EXIF" : "EXIF",
     "A better photos experience awaits you" : "A better photos experience awaits you",
     "Choose the root folder of your timeline to begin" : "Choose the root folder of your timeline to begin",
     "If you just installed Memories, run:" : "If you just installed Memories, run:",
@@ -255,7 +255,6 @@ OC.L10N.register(
     "Failed to download files" : "Failed to download files",
     "Failed to favorite files." : "Failed to favorite files.",
     "Failed to favorite some files." : "Failed to favorite some files.",
-    "Failed to favorite {fileName}." : "Failed to favorite {fileName}.",
-    "Could not remove photos from album" : "Could not remove photos from album"
+    "Failed to favorite {fileName}." : "Failed to favorite {fileName}."
 },
 "nplurals=2; plural=(n != 1);");

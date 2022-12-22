@@ -2,6 +2,8 @@
     "Memories" : "Souvenirs",
     "Fast, modern and advanced photo management suite" : "Suite d'outils de gestion de photos rapide, moderne et avancée",
     "Settings" : "Paramètres",
+    "People" : "Personnes",
+    "EXIF" : "EXIF",
     "Timeline" : "Fil chronologique",
     "Folders" : "Dossiers",
     "Favorites" : "Favoris",
@@ -11,8 +13,6 @@
     "On this day" : "Ce même jour",
     "Tags" : "Étiquettes",
     "Maps" : "Cartes",
-    "People" : "Personnes",
-    "EXIF" : "EXIF",
     "A better photos experience awaits you" : "Une meilleure expérience photo vous attend",
     "Choose the root folder of your timeline to begin" : "Choisissez le dossier racine de votre fil chronologique pour commencer",
     "If you just installed Memories, run:" : "Si vous venez d'installer Souvenirs, exécuter :",
@@ -241,7 +241,6 @@
     "Failed to download files" : "Échec du téléchargement des fichiers",
     "Failed to favorite files." : "Échec de la mise en favoris des fichiers.",
     "Failed to favorite some files." : "Échec de l'ajout en favoris de certains fichiers.",
-    "Failed to favorite {fileName}." : "Échec de l'ajout aux favoris de {fileName}.",
-    "Could not remove photos from album" : "Impossible de retirer les photos de l'album"
+    "Failed to favorite {fileName}." : "Échec de l'ajout aux favoris de {fileName}."
 },"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }

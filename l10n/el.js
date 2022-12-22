@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Ρυθμίσεις",
+    "People" : "Άτομα",
     "Timeline" : "Χρονολόγιο",
     "Folders" : "Φάκελοι",
     "Favorites" : "Αγαπημένα",
@@ -11,7 +12,6 @@ OC.L10N.register(
     "On this day" : "Αυτή τη μέρα",
     "Tags" : "Ετικέτες",
     "Maps" : "Χάρτες",
-    "People" : "Άτομα",
     "Edit" : "Επεξεργασία",
     "Loading …" : "Φόρτωση …",
     "Cancel" : "Ακύρωση",

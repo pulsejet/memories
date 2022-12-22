@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Memoriak",
     "Settings" : "Ezarpenak",
+    "People" : "Jendea",
     "Timeline" : "Denbora-lerroa",
     "Folders" : "Karpetak",
     "Favorites" : "Gogokoak",
@@ -12,7 +13,6 @@ OC.L10N.register(
     "On this day" : "Egun honetan",
     "Tags" : "Etiketak",
     "Maps" : "Mapak",
-    "People" : "Jendea",
     "Edit" : "Aldatu",
     "Loading …" : "Kargatzen …",
     "Cancel" : "Utzi",

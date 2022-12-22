@@ -1,5 +1,6 @@
 { "translations": {
     "Settings" : "Impostatziones",
+    "People" : "Gente",
     "Timeline" : "Lìnia de tempus",
     "Folders" : "Cartellas",
     "Favorites" : "Preferidos",
@@ -8,7 +9,6 @@
     "Archive" : "Cartella",
     "Tags" : "Etichetas",
     "Maps" : "Mapas",
-    "People" : "Gente",
     "Edit" : "Modìfica",
     "Loading …" : "Carrigamentu …",
     "Cancel" : "Annulla",

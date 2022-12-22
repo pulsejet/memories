@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Spomienky",
     "Settings" : "Nastavenia",
+    "People" : "Ľudia",
     "Timeline" : "Časová os",
     "Folders" : "Priečinky",
     "Favorites" : "Obľúbené",
@@ -12,7 +13,6 @@ OC.L10N.register(
     "On this day" : "V tento deň",
     "Tags" : "Štítky",
     "Maps" : "Mapy",
-    "People" : "Ľudia",
     "Edit" : "Upraviť",
     "Loading …" : "Načítavam …",
     "Cancel" : "Zrušiť",

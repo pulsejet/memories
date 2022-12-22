@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Спогади",
     "Settings" : "Налаштування",
+    "People" : "Люди",
     "Timeline" : "Дії",
     "Folders" : "Каталоги",
     "Favorites" : "Із зірочкою",
@@ -12,7 +13,6 @@ OC.L10N.register(
     "On this day" : "Цього дня",
     "Tags" : "Мітки",
     "Maps" : "Мапи",
-    "People" : "Люди",
     "A better photos experience awaits you" : "На вас чекає краща якість фотографій",
     "Choose the root folder of your timeline to begin" : "Виберіть кореневу папку вашої шкали часу для початку ",
     "Edit" : "Редагувати",

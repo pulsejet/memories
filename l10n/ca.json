@@ -1,5 +1,6 @@
 { "translations": {
     "Settings" : "Paràmetres",
+    "People" : "Gent",
     "Timeline" : "Línia de temps",
     "Folders" : "Carpetes",
     "Favorites" : "Preferits",
@@ -9,7 +10,6 @@
     "On this day" : "Aquest mateix dia",
     "Tags" : "Etiquetes",
     "Maps" : "Mapes",
-    "People" : "Gent",
     "Edit" : "Edita",
     "Loading …" : "Carregant …",
     "Cancel" : "Cancel·la",

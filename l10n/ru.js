@@ -3,6 +3,8 @@ OC.L10N.register(
     {
     "Memories" : "Воспоминания",
     "Settings" : "Настройки",
+    "People" : "Люди",
+    "EXIF" : "EXIF",
     "Timeline" : "История",
     "Folders" : "Папки",
     "Favorites" : "Избранное",
@@ -12,8 +14,6 @@ OC.L10N.register(
     "On this day" : "В этот день",
     "Tags" : "Метки",
     "Maps" : "Карты",
-    "People" : "Люди",
-    "EXIF" : "EXIF",
     "Choose the root folder of your timeline to begin" : "Для начала выберите корневую папку",
     "If you just installed Memories, run:" : "Если вы в первый раз используете приложение «Воспоминания»:",
     "Click here to start" : "Нажмите здесь чтобы начать",

@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Axustes",
+    "People" : "Xente",
     "Timeline" : "Liña temporal",
     "Folders" : "Cartafoles",
     "Favorites" : "Favoritos",
@@ -9,7 +10,6 @@ OC.L10N.register(
     "Archive" : "Aquivar",
     "Tags" : "Etiquetas",
     "Maps" : "Mapas",
-    "People" : "Xente",
     "Edit" : "Editar",
     "Loading …" : "Cargando…",
     "Cancel" : "Cancelar",

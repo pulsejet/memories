@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Instellingen",
+    "People" : "Mensen",
     "Timeline" : "Tijdlijn",
     "Folders" : "Mappen",
     "Favorites" : "Favorieten",
@@ -11,7 +12,6 @@ OC.L10N.register(
     "On this day" : "Vandaag",
     "Tags" : "Tags",
     "Maps" : "Kaarten",
-    "People" : "Mensen",
     "Edit" : "Bewerk",
     "Loading …" : "Laden …",
     "Cancel" : "Annuleren",
