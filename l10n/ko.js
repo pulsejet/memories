@@ -26,6 +26,7 @@ OC.L10N.register(
     "Day" : "일",
     "Time" : "시간",
     "Hour" : "시간",
+    "Minute" : "분",
     "Title" : "제목",
     "Description" : "설명",
     "Label" : "이름표",
