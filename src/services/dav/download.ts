@@ -1,4 +1,4 @@
-import { generateUrl } from "@nextcloud/router";
+import { generateUrl, getRootUrl } from "@nextcloud/router";
 import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
@@ -68,9 +68,9 @@ export function getDownloadLink(photo: IPhoto) {
       <string>route.params.name
     );
     if (fInfos.length) {
-      return generateUrl(`/remote.php/dav${fInfos[0].originalFilename}`);
+      return getRootUrl() + `/remote.php/dav${fInfos[0].originalFilename}`;
     }
   }
 
-  return generateUrl(`/remote.php/dav${photo.filename}`);
+  return getRootUrl() + `/remote.php/dav${photo.filename}`;
 }
