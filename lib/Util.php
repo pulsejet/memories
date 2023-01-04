@@ -149,7 +149,10 @@ class Util
     public static function pkill(string $name): void
     {
         // get pids using ps as array
-        $pids = shell_exec("ps -ef | grep $name | grep -v grep | awk '{print $2}'");
+        $pids = shell_exec("ps -ef | grep {$name} | grep -v grep | awk '{print $2}'");
+        if (null === $pids || empty($pids)) {
+            return;
+        }
         $pids = array_filter(explode("\n", $pids));
 
         // kill all pids
