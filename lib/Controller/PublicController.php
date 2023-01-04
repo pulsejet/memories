@@ -129,6 +129,8 @@ class PublicController extends AuthPublicShareController
         $policy->addAllowedFrameDomain('www.openstreetmap.org');
 
         $response = new PublicTemplateResponse($this->appName, 'main');
+        $response->setHeaderTitle($share->getNode()->getName());
+        $response->setFooterVisible(false); // wth is that anyway?
         $response->setContentSecurityPolicy($policy);
 
         return $response;
