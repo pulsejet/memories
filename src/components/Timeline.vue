@@ -321,7 +321,10 @@ export default defineComponent({
 
   methods: {
     async routeChange(to: any, from?: any) {
-      if (from?.path !== to.path || from.query !== to.query) {
+      if (
+        from?.path !== to.path ||
+        JSON.stringify(from.query) !== JSON.stringify(to.query)
+      ) {
         await this.refresh();
       }
 
