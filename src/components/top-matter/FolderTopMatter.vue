@@ -124,6 +124,10 @@ export default defineComponent({
   display: flex;
   vertical-align: middle;
 
+  .breadcrumb {
+    min-width: 0;
+  }
+
   .right-actions {
     margin-right: 40px;
     z-index: 50;
