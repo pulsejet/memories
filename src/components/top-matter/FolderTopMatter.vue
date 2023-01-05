@@ -17,7 +17,7 @@
     <div class="right-actions">
       <NcActions :inline="2">
         <NcActionRouter
-          :to="{...this.$route, query: {recursive: recursive ? undefined : '1'}}"
+          :to="{ query: recursive ? {} : {recursive: '1'}}"
           close-after-click
         >
           {{ t("memories", recursive ? "Show folders" : "Timeline") }}
