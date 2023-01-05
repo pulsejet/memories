@@ -33,21 +33,15 @@ class AlbumsController extends ApiBase
      *
      * Get list of albums with counts of images
      */
-    public function albums(): JSONResponse
+    public function albums(int $t = 0): JSONResponse
     {
         $user = $this->userSession->getUser();
-        if (null === $user) {
+        if (null === $user || !$this->albumsIsEnabled()) {
             return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
-        }
-
-        // Check tags enabled for this user
-        if (!$this->albumsIsEnabled()) {
-            return new JSONResponse(['message' => 'Albums not enabled for user'], Http::STATUS_PRECONDITION_FAILED);
         }
 
         // Run actual query
         $list = [];
-        $t = (int) $this->request->getParam('t');
         if ($t & 1) { // personal
             $list = array_merge($list, $this->timelineQuery->getAlbums($user->getUID()));
         }
@@ -56,5 +50,38 @@ class AlbumsController extends ApiBase
         }
 
         return new JSONResponse($list, Http::STATUS_OK);
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @UseSession
+     *
+     * Download an album as a zip file
+     */
+    public function download(string $name = ''): JSONResponse
+    {
+        $user = $this->userSession->getUser();
+        if (null === $user || !$this->albumsIsEnabled()) {
+            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // Get album
+        $album = $this->timelineQuery->getAlbumIfAllowed($user->getUID(), $name);
+        if (null === $album) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
+
+        // Get files
+        $files = $this->timelineQuery->getAlbumFiles($album['album_id']);
+        if (empty($files)) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
+
+        // Get download handle
+        $albumName = explode('/', $name)[1];
+        $handle = \OCA\Memories\Controller\DownloadController::createHandle($albumName, $files);
+
+        return new JSONResponse(['handle' => $handle], Http::STATUS_OK);
     }
 }

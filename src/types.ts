@@ -1,5 +1,3 @@
-import { VueConstructor } from "vue";
-
 export type IFileInfo = {
   /** Same as fileid */
   id: number;
@@ -73,6 +71,21 @@ export type IPhoto = {
 
   /** Reference to day object */
   d?: IDay;
+  /** Reference to exif object */
+  imageInfo?: {
+    h: number;
+    w: number;
+    datetaken: number;
+    exif?: {
+      Rotation?: number;
+      Orientation?: number;
+      ImageWidth?: number;
+      ImageHeight?: number;
+      Title?: string;
+      Description?: string;
+      [other: string]: unknown;
+    };
+  };
 
   /** Face dimensions */
   facerect?: IFaceRect;
@@ -90,7 +103,7 @@ export type IPhoto = {
   /** Is this an album */
   isalbum?: boolean;
   /** Is this a face */
-  isface?: boolean;
+  isface?: "recognize" | "facerecognition";
   /** Optional datetaken epoch */
   datetaken?: number;
 };
@@ -214,7 +227,7 @@ export type ISelectionAction = {
   /** Display text */
   name: string;
   /** Icon component */
-  icon: VueConstructor;
+  icon: any;
   /** Action to perform */
   callback: (selection: Map<number, IPhoto>) => Promise<void>;
   /** Condition to check for including */

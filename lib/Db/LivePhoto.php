@@ -20,7 +20,9 @@ class LivePhoto
     /** Check if a given Exif data is the video part of a live photo */
     public function isVideoPart(array &$exif)
     {
-        return 'video/quicktime' === $exif['MIMEType'] && \array_key_exists('ContentIdentifier', $exif);
+        return \array_key_exists('MIMEType', $exif)
+               && 'video/quicktime' === $exif['MIMEType']
+               && \array_key_exists('ContentIdentifier', $exif);
     }
 
     /** Get liveid from photo part */

@@ -37,6 +37,7 @@
 
     <!-- Selection Modals -->
     <EditDate ref="editDate" @refresh="refresh" />
+    <EditExif ref="editExif" @refresh="refresh" />
     <FaceMoveModal
       ref="faceMoveModal"
       @moved="deletePhotos"
@@ -47,9 +48,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Prop, Watch } from "vue-property-decorator";
-import GlobalMixin from "../mixins/GlobalMixin";
-import UserConfig from "../mixins/UserConfig";
+import { defineComponent, PropType } from "vue";
 
 import { showError } from "@nextcloud/dialogs";
 
@@ -71,13 +70,15 @@ import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
 
 import EditDate from "./modal/EditDate.vue";
+import EditExif from "./modal/EditExif.vue";
 import FaceMoveModal from "./modal/FaceMoveModal.vue";
 import AddToAlbumModal from "./modal/AddToAlbumModal.vue";
 
 import StarIcon from "vue-material-design-icons/Star.vue";
 import DownloadIcon from "vue-material-design-icons/Download.vue";
 import DeleteIcon from "vue-material-design-icons/TrashCanOutline.vue";
-import EditIcon from "vue-material-design-icons/ClockEdit.vue";
+import EditFileIcon from "vue-material-design-icons/FileEdit.vue";
+import EditClockIcon from "vue-material-design-icons/ClockEdit.vue";
 import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
 import UnarchiveIcon from "vue-material-design-icons/PackageUp.vue";
 import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
@@ -88,56 +89,45 @@ import AlbumRemoveIcon from "vue-material-design-icons/BookRemove.vue";
 
 type Selection = Map<number, IPhoto>;
 
-@Component({
+export default defineComponent({
+  name: "SelectionManager",
   components: {
     NcActions,
     NcActionButton,
     EditDate,
+    EditExif,
     FaceMoveModal,
     AddToAlbumModal,
 
     CloseIcon,
   },
-})
-export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
-  @Prop() public heads: { [dayid: number]: IHeadRow };
 
-  /** List of rows for multi selection */
-  @Prop() public rows: IRow[];
+  props: {
+    heads: Object as PropType<{ [dayid: number]: IHeadRow }>,
+    /** List of rows for multi selection */
+    rows: Array as PropType<IRow[]>,
+    /** Rows are in ascending order (desc is normal) */
+    isreverse: Boolean,
+    /** Recycler element to scroll during touch multi-select */
+    recycler: Object,
+  },
 
-  /** Rows are in ascending order (desc is normal) */
-  @Prop() public isreverse: boolean;
+  data: () => ({
+    show: false,
+    size: 0,
+    selection: new Map<number, IPhoto>(),
+    defaultActions: null as ISelectionAction[],
 
-  /** Recycler element to scroll during touch multi-select */
-  @Prop() public recycler: any;
+    touchAnchor: null as IPhoto,
+    touchTimer: 0,
+    touchPrevSel: null as Selection,
+    prevOver: null as IPhoto,
+    touchScrollInterval: 0,
+    touchScrollDelta: 0,
+    prevTouch: null as Touch,
+  }),
 
-  private show = false;
-  private size = 0;
-  private readonly selection!: Selection;
-  private readonly defaultActions: ISelectionAction[];
-
-  private touchAnchor: IPhoto = null;
-  private touchTimer: number = 0;
-  private touchPrevSel!: Selection;
-  private prevOver!: IPhoto;
-  private touchScrollInterval: number = 0;
-  private touchScrollDelta: number = 0;
-  private prevTouch: Touch = null;
-
-  @Emit("refresh")
-  refresh() {}
-
-  @Emit("delete")
-  deletePhotos(photos: IPhoto[]) {}
-
-  @Emit("updateLoading")
-  updateLoading(delta: number) {}
-
-  constructor() {
-    super();
-
-    this.selection = new Map<number, IPhoto>();
-
+  mounted() {
     // Make default actions
     this.defaultActions = [
       {
@@ -149,7 +139,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
       {
         name: t("memories", "Remove from album"),
         icon: AlbumRemoveIcon,
-        callback: this.removeFromAlbum.bind(this),
+        callback: this.deleteSelection.bind(this),
         if: () => this.routeIsAlbum(),
       },
       {
@@ -157,6 +147,7 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
         icon: DownloadIcon,
         callback: this.downloadSelection.bind(this),
         allowPublic: true,
+        if: () => !this.allowDownload(),
       },
       {
         name: t("memories", "Favorite"),
@@ -178,8 +169,15 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
       },
       {
         name: t("memories", "Edit Date/Time"),
-        icon: EditIcon,
+        icon: EditClockIcon,
         callback: this.editDateSelection.bind(this),
+        if: () => !this.routeIsAlbum(),
+      },
+      {
+        name: t("memories", "Edit EXIF Data"),
+        icon: EditFileIcon,
+        callback: this.editExifSelection.bind(this),
+        if: () => this.selection.size === 1 && !this.routeIsAlbum(),
       },
       {
         name: t("memories", "View in folder"),
@@ -198,653 +196,669 @@ export default class SelectionManager extends Mixins(GlobalMixin, UserConfig) {
         name: t("memories", "Move to another person"),
         icon: MoveIcon,
         callback: this.moveSelectionToPerson.bind(this),
-        if: () => this.$route.name === "people",
+        if: () => this.$route.name === "recognize",
       },
       {
         name: t("memories", "Remove from person"),
         icon: CloseIcon,
         callback: this.removeSelectionFromPerson.bind(this),
-        if: () => this.$route.name === "people",
+        if: () => this.$route.name === "recognize",
       },
     ];
 
     // Ugly: globally exposed functions
-    globalThis.editDate = (photo: IPhoto) => {
+    const getSel = (photo: IPhoto) => {
       const sel = new Map<number, IPhoto>();
       sel.set(photo.fileid, photo);
-      this.editDateSelection(sel);
+      return sel;
     };
-  }
+    globalThis.editDate = (photo: IPhoto) =>
+      this.editDateSelection(getSel(photo));
+    globalThis.editExif = (photo: IPhoto) =>
+      this.editExifSelection(getSel(photo));
+  },
 
-  /** Archive is not allowed only on folder routes */
-  private allowArchive() {
-    return this.$route.name !== "folders";
-  }
-
-  /** Is archive route */
-  private routeIsArchive() {
-    return this.$route.name === "archive";
-  }
-
-  /** Is album route */
-  private routeIsAlbum() {
-    return this.config_albumsEnabled && this.$route.name === "albums";
-  }
-
-  /** Public route that can't modify anything */
-  private routeIsPublic() {
-    return this.$route.name === "folder-share";
-  }
-
-  @Watch("show")
-  onShowChange() {
-    const klass = "has-top-bar";
-    if (this.show) {
-      document.body.classList.add(klass);
-    } else {
-      document.body.classList.remove(klass);
-    }
-  }
-
-  /** Trigger to update props from selection set */
-  private selectionChanged() {
-    this.show = this.selection.size > 0;
-    this.size = this.selection.size;
-  }
-
-  /** Is this fileid (or anything if not specified) selected */
-  public has(fileid?: number) {
-    if (fileid === undefined) {
-      return this.selection.size > 0;
-    }
-    return this.selection.has(fileid);
-  }
-
-  /** Get the actions list */
-  private getActions(): ISelectionAction[] {
-    return this.defaultActions.filter(
-      (a) => (!a.if || a.if(this)) && (!this.routeIsPublic() || a.allowPublic)
-    );
-  }
-
-  /** Click on an action */
-  private async click(action: ISelectionAction) {
-    try {
-      this.updateLoading(1);
-      await action.callback(this.selection);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      this.updateLoading(-1);
-    }
-  }
-
-  /** Clicking on photo */
-  public clickPhoto(photo: IPhoto, event: PointerEvent, rowIdx: number) {
-    if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
-    if (event.pointerType === "touch") return; // let touch events handle this
-
-    if (this.has()) {
-      if (event.shiftKey) {
-        this.selectMulti(photo, this.rows, rowIdx);
+  watch: {
+    show() {
+      const klass = "has-top-bar";
+      if (this.show) {
+        document.body.classList.add(klass);
       } else {
-        this.selectPhoto(photo);
+        document.body.classList.remove(klass);
       }
-    } else {
-      this.openViewer(photo);
-    }
-  }
+    },
+  },
 
-  /** Tap on */
-  protected touchstartPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
-    if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
-    this.rows[rowIdx].virtualSticky = true;
+  methods: {
+    refresh() {
+      this.$emit("refresh");
+    },
 
-    this.resetTouchParams();
+    deletePhotos(photos: IPhoto[]) {
+      this.$emit("delete", photos);
+    },
 
-    this.touchAnchor = photo;
-    this.prevOver = photo;
-    this.touchPrevSel = new Map(this.selection);
-    this.touchTimer = window.setTimeout(() => {
-      if (this.touchAnchor === photo) {
-        this.selectPhoto(photo, true);
+    updateLoading(delta: number) {
+      this.$emit("updateLoading", delta);
+    },
+
+    /** Download is not allowed on some public shares */
+    allowDownload(): boolean {
+      return this.state_noDownload;
+    },
+
+    /** Archive is not allowed only on folder routes */
+    allowArchive() {
+      return this.$route.name !== "folders";
+    },
+
+    /** Is archive route */
+    routeIsArchive() {
+      return this.$route.name === "archive";
+    },
+
+    /** Is album route */
+    routeIsAlbum() {
+      return this.config_albumsEnabled && this.$route.name === "albums";
+    },
+
+    /** Public route that can't modify anything */
+    routeIsPublic() {
+      return this.$route.name === "folder-share";
+    },
+
+    /** Trigger to update props from selection set */
+    selectionChanged() {
+      this.show = this.selection.size > 0;
+      this.size = this.selection.size;
+    },
+
+    /** Is this fileid (or anything if not specified) selected */
+    has(fileid?: number) {
+      if (fileid === undefined) {
+        return this.selection.size > 0;
       }
-      this.touchTimer = 0;
-    }, 600);
-  }
+      return this.selection.has(fileid);
+    },
 
-  /** Tap off */
-  protected touchendPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
-    if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
-    delete this.rows[rowIdx].virtualSticky;
+    /** Get the actions list */
+    getActions(): ISelectionAction[] {
+      return (
+        this.defaultActions?.filter(
+          (a) =>
+            (!a.if || a.if(this)) && (!this.routeIsPublic() || a.allowPublic)
+        ) || []
+      );
+    },
 
-    if (this.touchTimer) this.clickPhoto(photo, {} as any, rowIdx);
-    this.resetTouchParams();
-  }
+    /** Click on an action */
+    async click(action: ISelectionAction) {
+      try {
+        this.updateLoading(1);
+        await action.callback(this.selection);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.updateLoading(-1);
+      }
+    },
 
-  private resetTouchParams() {
-    window.clearTimeout(this.touchTimer);
-    this.touchTimer = 0;
-    this.touchAnchor = null;
-    this.prevOver = undefined;
+    /** Clicking on photo */
+    clickPhoto(photo: IPhoto, event: PointerEvent, rowIdx: number) {
+      if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
+      if (event.pointerType === "touch") return; // let touch events handle this
 
-    window.cancelAnimationFrame(this.touchScrollInterval);
-    this.touchScrollInterval = 0;
+      if (this.has()) {
+        if (event.shiftKey) {
+          this.selectMulti(photo, this.rows, rowIdx);
+        } else {
+          this.selectPhoto(photo);
+        }
+      } else {
+        this.openViewer(photo);
+      }
+    },
 
-    this.prevTouch = null;
-  }
+    /** Tap on */
+    touchstartPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
+      if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
+      this.rows[rowIdx].virtualSticky = true;
 
-  /**
-   * Tap over
-   * photo and rowIdx are that of the *anchor*
-   */
-  protected touchmovePhoto(anchor: IPhoto, event: TouchEvent, rowIdx: number) {
-    if (anchor.flag & this.c.FLAG_PLACEHOLDER) return;
+      this.resetTouchParams();
 
-    if (this.touchTimer) {
-      // Touch is not held, just cancel
+      this.touchAnchor = photo;
+      this.prevOver = photo;
+      this.touchPrevSel = new Map(this.selection);
+      this.touchTimer = window.setTimeout(() => {
+        if (this.touchAnchor === photo) {
+          this.selectPhoto(photo, true);
+        }
+        this.touchTimer = 0;
+      }, 600);
+    },
+
+    /** Tap off */
+    touchendPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
+      if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
+      delete this.rows[rowIdx].virtualSticky;
+
+      if (this.touchTimer) this.clickPhoto(photo, {} as any, rowIdx);
+      this.resetTouchParams();
+    },
+
+    resetTouchParams() {
       window.clearTimeout(this.touchTimer);
       this.touchTimer = 0;
       this.touchAnchor = null;
-      return;
-    } else if (!this.touchAnchor) {
-      // Touch was previously cancelled
-      return;
-    }
+      this.prevOver = undefined;
 
-    // Prevent scrolling
-    event.preventDefault();
-
-    // Use first touch -- can't do much
-    const touch: Touch = event.touches[0];
-    if (!touch) return;
-    this.prevTouch = touch;
-
-    // Scroll if at top or bottom
-    const scrollUp = touch.clientY > 50 && touch.clientY < 110; // 50 topbar
-    const scrollDown = touch.clientY > globalThis.windowInnerHeight - 60;
-    if (scrollUp || scrollDown) {
-      if (scrollUp) {
-        this.touchScrollDelta = (-1 * (110 - touch.clientY)) / 3;
-      } else {
-        this.touchScrollDelta =
-          (touch.clientY - globalThis.windowInnerHeight + 60) / 3;
-      }
-
-      if (this.touchAnchor && !this.touchScrollInterval) {
-        const fun = () => {
-          this.recycler.$el.scrollTop += this.touchScrollDelta;
-          this.touchMoveSelect(this.prevTouch, rowIdx);
-
-          if (this.touchScrollInterval) {
-            this.touchScrollInterval = window.requestAnimationFrame(fun);
-          }
-        };
-        this.touchScrollInterval = window.requestAnimationFrame(fun);
-      }
-    } else {
       window.cancelAnimationFrame(this.touchScrollInterval);
       this.touchScrollInterval = 0;
-    }
 
-    this.touchMoveSelect(touch, rowIdx);
-  }
+      this.prevTouch = null;
+    },
 
-  /** Multi-select triggered by touchmove */
-  private touchMoveSelect(touch: Touch, rowIdx: number) {
-    // Which photo is the cursor over, if any
-    const elems = document.elementsFromPoint(touch.clientX, touch.clientY);
-    const photoComp: any = elems.find((e) => e.classList.contains("p-outer"));
-    let overPhoto: IPhoto = photoComp?.__vue__?.data;
-    if (overPhoto && overPhoto.flag & this.c.FLAG_PLACEHOLDER) overPhoto = null;
+    /**
+     * Tap over
+     * photo and rowIdx are that of the *anchor*
+     */
+    touchmovePhoto(anchor: IPhoto, event: TouchEvent, rowIdx: number) {
+      if (anchor.flag & this.c.FLAG_PLACEHOLDER) return;
 
-    // Do multi-selection "till" overPhoto "from" anchor
-    // This logic is completely different from the desktop because of the
-    // existence of a definitive "anchor" element. We just need to find
-    // rverything between the anchor and the current photo
-    if (overPhoto && this.prevOver !== overPhoto) {
-      this.prevOver = overPhoto;
+      if (this.touchTimer) {
+        // Touch is not held, just cancel
+        window.clearTimeout(this.touchTimer);
+        this.touchTimer = 0;
+        this.touchAnchor = null;
+        return;
+      } else if (!this.touchAnchor) {
+        // Touch was previously cancelled
+        return;
+      }
 
-      // days reverse XOR rows reverse
-      let reverse: boolean;
-      if (overPhoto.dayid === this.touchAnchor.dayid) {
-        const l = overPhoto.d.detail;
-        const ai = l.indexOf(this.touchAnchor);
-        const oi = l.indexOf(overPhoto);
-        if (ai === -1 || oi === -1) return; // Shouldn't happen
-        reverse = ai > oi;
+      // Prevent scrolling
+      event.preventDefault();
+
+      // Use first touch -- can't do much
+      const touch: Touch = event.touches[0];
+      if (!touch) return;
+      this.prevTouch = touch;
+
+      // Scroll if at top or bottom
+      const scrollUp = touch.clientY > 50 && touch.clientY < 110; // 50 topbar
+      const scrollDown = touch.clientY > globalThis.windowInnerHeight - 60;
+      if (scrollUp || scrollDown) {
+        if (scrollUp) {
+          this.touchScrollDelta = (-1 * (110 - touch.clientY)) / 3;
+        } else {
+          this.touchScrollDelta =
+            (touch.clientY - globalThis.windowInnerHeight + 60) / 3;
+        }
+
+        if (this.touchAnchor && !this.touchScrollInterval) {
+          let frameCount = 3;
+
+          const fun = () => {
+            this.recycler.$el.scrollTop += this.touchScrollDelta;
+
+            if (frameCount++ >= 3) {
+              this.touchMoveSelect(this.prevTouch, rowIdx);
+              frameCount = 0;
+            }
+
+            if (this.touchScrollInterval) {
+              this.touchScrollInterval = window.requestAnimationFrame(fun);
+            }
+          };
+          this.touchScrollInterval = window.requestAnimationFrame(fun);
+        }
       } else {
-        reverse = overPhoto.dayid > this.touchAnchor.dayid != this.isreverse;
+        window.cancelAnimationFrame(this.touchScrollInterval);
+        this.touchScrollInterval = 0;
       }
 
-      const newSelection = new Map(this.touchPrevSel);
-      const updatedDays = new Set<number>();
+      this.touchMoveSelect(touch, rowIdx);
+    },
 
-      // Walk over rows
-      let i = rowIdx;
-      let j = this.rows[i].photos.indexOf(this.touchAnchor);
-      while (true) {
-        if (j < 0) {
-          while (i > 0 && !this.rows[--i].photos);
-          if (!this.rows[i].photos) break;
-          j = this.rows[i].photos.length - 1;
-          continue;
-        } else if (j >= this.rows[i].photos.length) {
-          while (i < this.rows.length - 1 && !this.rows[++i].photos);
-          if (!this.rows[i].photos) break;
-          j = 0;
-          continue;
+    /** Multi-select triggered by touchmove */
+    touchMoveSelect(touch: Touch, rowIdx: number) {
+      // Which photo is the cursor over, if any
+      const elems = document.elementsFromPoint(touch.clientX, touch.clientY);
+      const photoComp: any = elems.find((e) => e.classList.contains("p-outer"));
+      let overPhoto: IPhoto = photoComp?.__vue__?.data;
+      if (overPhoto && overPhoto.flag & this.c.FLAG_PLACEHOLDER)
+        overPhoto = null;
+
+      // Do multi-selection "till" overPhoto "from" anchor
+      // This logic is completely different from the desktop because of the
+      // existence of a definitive "anchor" element. We just need to find
+      // rverything between the anchor and the current photo
+      if (overPhoto && this.prevOver !== overPhoto) {
+        this.prevOver = overPhoto;
+
+        // days reverse XOR rows reverse
+        let reverse: boolean;
+        if (overPhoto.dayid === this.touchAnchor.dayid) {
+          const l = overPhoto.d.detail;
+          const ai = l.indexOf(this.touchAnchor);
+          const oi = l.indexOf(overPhoto);
+          if (ai === -1 || oi === -1) return; // Shouldn't happen
+          reverse = ai > oi;
+        } else {
+          reverse = overPhoto.dayid > this.touchAnchor.dayid != this.isreverse;
         }
 
-        let p = this.rows[i]?.photos?.[j];
-        if (!p) break; // shouldn't happen, ever
+        const newSelection = new Map(this.touchPrevSel);
+        const updatedDays = new Set<number>();
 
-        // This is there now
-        newSelection.set(p.fileid, p);
+        // Walk over rows
+        let i = rowIdx;
+        let j = this.rows[i].photos.indexOf(this.touchAnchor);
+        while (true) {
+          if (j < 0) {
+            while (i > 0 && !this.rows[--i].photos);
+            if (!this.rows[i].photos) break;
+            j = this.rows[i].photos.length - 1;
+            continue;
+          } else if (j >= this.rows[i].photos.length) {
+            while (i < this.rows.length - 1 && !this.rows[++i].photos);
+            if (!this.rows[i].photos) break;
+            j = 0;
+            continue;
+          }
 
-        // Perf: only update heads if not selected
-        if (!(p.flag & this.c.FLAG_SELECTED)) {
-          this.selectPhoto(p, true, true);
-          updatedDays.add(p.dayid);
+          let p = this.rows[i]?.photos?.[j];
+          if (!p) break; // shouldn't happen, ever
+
+          // This is there now
+          newSelection.set(p.fileid, p);
+
+          // Perf: only update heads if not selected
+          if (!(p.flag & this.c.FLAG_SELECTED)) {
+            this.selectPhoto(p, true, true);
+            updatedDays.add(p.dayid);
+          }
+
+          // We're trying to update too much -- something went wrong
+          if (newSelection.size - this.selection.size > 50) break;
+
+          // Check goal
+          if (p === overPhoto) break;
+          j += reverse ? -1 : 1;
         }
 
-        // We're trying to update too much -- something went wrong
-        if (newSelection.size - this.selection.size > 50) break;
+        // Remove unselected
+        for (const [fileid, p] of this.selection) {
+          if (!newSelection.has(fileid)) {
+            this.selectPhoto(p, false, true);
+            updatedDays.add(p.dayid);
+          }
+        }
 
-        // Check goal
-        if (p === overPhoto) break;
-        j += reverse ? -1 : 1;
+        // Update heads
+        for (const dayid of updatedDays) {
+          this.updateHeadSelected(this.heads[dayid]);
+        }
+
+        this.$forceUpdate();
+      }
+    },
+
+    /** Add a photo to selection list */
+    selectPhoto(photo: IPhoto, val?: boolean, noUpdate?: boolean) {
+      if (
+        photo.flag & this.c.FLAG_PLACEHOLDER ||
+        photo.flag & this.c.FLAG_IS_FOLDER ||
+        photo.flag & this.c.FLAG_IS_TAG
+      ) {
+        return; // ignore placeholders
       }
 
-      // Remove unselected
-      for (const [fileid, p] of this.selection) {
-        if (!newSelection.has(fileid)) {
-          this.selectPhoto(p, false, true);
-          updatedDays.add(p.dayid);
+      const nval = val ?? !this.selection.has(photo.fileid);
+      if (nval) {
+        photo.flag |= this.c.FLAG_SELECTED;
+        this.selection.set(photo.fileid, photo);
+        this.selectionChanged();
+      } else {
+        photo.flag &= ~this.c.FLAG_SELECTED;
+
+        // Only do this if the photo in the selection set is this one.
+        // The problem arises when there are duplicates (e.g. face rect)
+        // in the list, which creates an inconsistent state if we do this.
+        if (this.selection.get(photo.fileid) === photo) {
+          this.selection.delete(photo.fileid);
+          this.selectionChanged();
         }
       }
 
-      // Update heads
-      for (const dayid of updatedDays) {
-        this.updateHeadSelected(this.heads[dayid]);
+      if (!noUpdate) {
+        this.updateHeadSelected(this.heads[photo.d.dayid]);
+        this.$forceUpdate();
+      }
+    },
+
+    /** Multi-select */
+    selectMulti(photo: IPhoto, rows: IRow[], rowIdx: number) {
+      const pRow = rows[rowIdx];
+      const pIdx = pRow.photos.indexOf(photo);
+      if (pIdx === -1) return;
+
+      const updateDaySet = new Set<number>();
+      let behind = [];
+      let behindFound = false;
+
+      // Look behind
+      for (let i = rowIdx; i > rowIdx - 100; i--) {
+        if (i < 0) break;
+        if (rows[i].type !== IRowType.PHOTOS) continue;
+        if (!rows[i].photos?.length) break;
+
+        const sj = i === rowIdx ? pIdx : rows[i].photos.length - 1;
+        for (let j = sj; j >= 0; j--) {
+          const p = rows[i].photos[j];
+          if (p.flag & this.c.FLAG_PLACEHOLDER || !p.fileid) continue;
+          if (p.flag & this.c.FLAG_SELECTED) {
+            behindFound = true;
+            break;
+          }
+          behind.push(p);
+          updateDaySet.add(p.d.dayid);
+        }
+
+        if (behindFound) break;
       }
 
+      // Select everything behind
+      if (behindFound) {
+        // Clear everything in front in this day
+        const pdIdx = photo.d.detail.indexOf(photo);
+        for (let i = pdIdx + 1; i < photo.d.detail.length; i++) {
+          const p = photo.d.detail[i];
+          if (p.flag & this.c.FLAG_SELECTED) this.selectPhoto(p, false, true);
+        }
+
+        // Clear everything else in front
+        Array.from(this.selection.values())
+          .filter((p: IPhoto) => {
+            return this.isreverse
+              ? p.d.dayid > photo.d.dayid
+              : p.d.dayid < photo.d.dayid;
+          })
+          .forEach((photo: IPhoto) => {
+            this.selectPhoto(photo, false, true);
+            updateDaySet.add(photo.d.dayid);
+          });
+
+        behind.forEach((p) => this.selectPhoto(p, true, true));
+        updateDaySet.forEach((d) => this.updateHeadSelected(this.heads[d]));
+        this.$forceUpdate();
+      }
+    },
+
+    /** Select or deselect all photos in a head */
+    selectHead(head: IHeadRow) {
+      head.selected = !head.selected;
+      for (const row of head.day.rows) {
+        for (const photo of row.photos) {
+          this.selectPhoto(photo, head.selected, true);
+        }
+      }
       this.$forceUpdate();
-    }
-  }
+    },
 
-  /** Add a photo to selection list */
-  public selectPhoto(photo: IPhoto, val?: boolean, noUpdate?: boolean) {
-    if (
-      photo.flag & this.c.FLAG_PLACEHOLDER ||
-      photo.flag & this.c.FLAG_IS_FOLDER ||
-      photo.flag & this.c.FLAG_IS_TAG
-    ) {
-      return; // ignore placeholders
-    }
+    /** Check if the day for a photo is selected entirely */
+    updateHeadSelected(head: IHeadRow) {
+      let selected = true;
 
-    const nval = val ?? !this.selection.has(photo.fileid);
-    if (nval) {
-      photo.flag |= this.c.FLAG_SELECTED;
-      this.selection.set(photo.fileid, photo);
-      this.selectionChanged();
-    } else {
-      photo.flag &= ~this.c.FLAG_SELECTED;
+      // Check if all photos are selected
+      for (const row of head.day.rows) {
+        for (const photo of row.photos) {
+          if (!(photo.flag & this.c.FLAG_SELECTED)) {
+            selected = false;
+            break;
+          }
+        }
+      }
 
-      // Only do this if the photo in the selection set is this one.
-      // The problem arises when there are duplicates (e.g. face rect)
-      // in the list, which creates an inconsistent state if we do this.
-      if (this.selection.get(photo.fileid) === photo) {
+      // Update head
+      head.selected = selected;
+    },
+
+    /** Clear all selected photos */
+    clearSelection(only?: IPhoto[]) {
+      const heads = new Set<IHeadRow>();
+      const toClear = only || this.selection.values();
+      Array.from(toClear).forEach((photo: IPhoto) => {
+        photo.flag &= ~this.c.FLAG_SELECTED;
+        heads.add(this.heads[photo.d.dayid]);
         this.selection.delete(photo.fileid);
         this.selectionChanged();
-      }
-    }
-
-    if (!noUpdate) {
-      this.updateHeadSelected(this.heads[photo.d.dayid]);
+      });
+      heads.forEach(this.updateHeadSelected);
       this.$forceUpdate();
-    }
-  }
+    },
 
-  /** Multi-select */
-  public selectMulti(photo: IPhoto, rows: IRow[], rowIdx: number) {
-    const pRow = rows[rowIdx];
-    const pIdx = pRow.photos.indexOf(photo);
-    if (pIdx === -1) return;
+    /** Restore selections from new day object */
+    restoreDay(day: IDay) {
+      if (!this.has()) {
+        return;
+      }
 
-    const updateDaySet = new Set<number>();
-    let behind = [];
-    let behindFound = false;
+      // FileID => Photo for new day
+      const dayMap = new Map<number, IPhoto>();
+      day.detail.forEach((photo) => {
+        dayMap.set(photo.fileid, photo);
+      });
 
-    // Look behind
-    for (let i = rowIdx; i > rowIdx - 100; i--) {
-      if (i < 0) break;
-      if (rows[i].type !== IRowType.PHOTOS) continue;
-      if (!rows[i].photos?.length) break;
-
-      const sj = i === rowIdx ? pIdx : rows[i].photos.length - 1;
-      for (let j = sj; j >= 0; j--) {
-        const p = rows[i].photos[j];
-        if (p.flag & this.c.FLAG_PLACEHOLDER || !p.fileid) continue;
-        if (p.flag & this.c.FLAG_SELECTED) {
-          behindFound = true;
-          break;
+      this.selection.forEach((photo, fileid) => {
+        // Process this day only
+        if (photo.dayid !== day.dayid) {
+          return;
         }
-        behind.push(p);
-        updateDaySet.add(p.d.dayid);
-      }
 
-      if (behindFound) break;
-    }
-
-    // Select everything behind
-    if (behindFound) {
-      // Clear everything in front in this day
-      const pdIdx = photo.d.detail.indexOf(photo);
-      for (let i = pdIdx + 1; i < photo.d.detail.length; i++) {
-        const p = photo.d.detail[i];
-        if (p.flag & this.c.FLAG_SELECTED) this.selectPhoto(p, false, true);
-      }
-
-      // Clear everything else in front
-      Array.from(this.selection.values())
-        .filter((p) => {
-          return this.isreverse
-            ? p.d.dayid > photo.d.dayid
-            : p.d.dayid < photo.d.dayid;
-        })
-        .forEach((photo: IPhoto) => {
-          this.selectPhoto(photo, false, true);
-          updateDaySet.add(photo.d.dayid);
-        });
-
-      behind.forEach((p) => this.selectPhoto(p, true, true));
-      updateDaySet.forEach((d) => this.updateHeadSelected(this.heads[d]));
-      this.$forceUpdate();
-    }
-  }
-
-  /** Select or deselect all photos in a head */
-  public selectHead(head: IHeadRow) {
-    head.selected = !head.selected;
-    for (const row of head.day.rows) {
-      for (const photo of row.photos) {
-        this.selectPhoto(photo, head.selected, true);
-      }
-    }
-    this.$forceUpdate();
-  }
-
-  /** Check if the day for a photo is selected entirely */
-  private updateHeadSelected(head: IHeadRow) {
-    let selected = true;
-
-    // Check if all photos are selected
-    for (const row of head.day.rows) {
-      for (const photo of row.photos) {
-        if (!(photo.flag & this.c.FLAG_SELECTED)) {
-          selected = false;
-          break;
+        // Remove all selections that are not in the new day
+        if (!dayMap.has(fileid)) {
+          this.selection.delete(fileid);
+          return;
         }
-      }
-    }
 
-    // Update head
-    head.selected = selected;
-  }
+        // Update the photo object
+        const newPhoto = dayMap.get(fileid);
+        this.selection.set(fileid, newPhoto);
+        newPhoto.flag |= this.c.FLAG_SELECTED;
+      });
 
-  /** Clear all selected photos */
-  public clearSelection(only?: IPhoto[]) {
-    const heads = new Set<IHeadRow>();
-    const toClear = only || this.selection.values();
-    Array.from(toClear).forEach((photo: IPhoto) => {
-      photo.flag &= ~this.c.FLAG_SELECTED;
-      heads.add(this.heads[photo.d.dayid]);
-      this.selection.delete(photo.fileid);
       this.selectionChanged();
-    });
-    heads.forEach(this.updateHeadSelected);
-    this.$forceUpdate();
-  }
+    },
 
-  /** Restore selections from new day object */
-  public restoreDay(day: IDay) {
-    if (!this.has()) {
-      return;
-    }
-
-    // FileID => Photo for new day
-    const dayMap = new Map<number, IPhoto>();
-    day.detail.forEach((photo) => {
-      dayMap.set(photo.fileid, photo);
-    });
-
-    this.selection.forEach((photo, fileid) => {
-      // Process this day only
-      if (photo.dayid !== day.dayid) {
-        return;
-      }
-
-      // Remove all selections that are not in the new day
-      if (!dayMap.has(fileid)) {
-        this.selection.delete(fileid);
-        return;
-      }
-
-      // Update the photo object
-      const newPhoto = dayMap.get(fileid);
-      this.selection.set(fileid, newPhoto);
-      newPhoto.flag |= this.c.FLAG_SELECTED;
-    });
-
-    this.selectionChanged();
-  }
-
-  /**
-   * Download the currently selected files
-   */
-  private async downloadSelection(selection: Selection) {
-    if (selection.size >= 100) {
-      if (
-        !confirm(
-          this.t(
-            "memories",
-            "You are about to download a large number of files. Are you sure?"
+    /**
+     * Download the currently selected files
+     */
+    async downloadSelection(selection: Selection) {
+      if (selection.size >= 100) {
+        if (
+          !confirm(
+            this.t(
+              "memories",
+              "You are about to download a large number of files. Are you sure?"
+            )
           )
-        )
-      ) {
-        return;
+        ) {
+          return;
+        }
       }
-    }
-    await dav.downloadFilesByPhotos(Array.from(selection.values()));
-  }
+      await dav.downloadFilesByPhotos(Array.from(selection.values()));
+    },
 
-  /**
-   * Check if all files selected currently are favorites
-   */
-  private allSelectedFavorites(selection: Selection) {
-    return Array.from(selection.values()).every(
-      (p) => p.flag & this.c.FLAG_IS_FAVORITE
-    );
-  }
-
-  /**
-   * Favorite the currently selected photos
-   */
-  private async favoriteSelection(selection: Selection) {
-    const val = !this.allSelectedFavorites(selection);
-    for await (const favIds of dav.favoritePhotos(
-      Array.from(selection.values()),
-      val
-    )) {
-    }
-    this.clearSelection();
-  }
-
-  /**
-   * Delete the currently selected photos
-   */
-  private async deleteSelection(selection: Selection) {
-    if (selection.size >= 100) {
-      if (
-        !confirm(
-          this.t(
-            "memories",
-            "You are about to delete a large number of files. Are you sure?"
-          )
-        )
-      ) {
-        return;
-      }
-    }
-
-    for await (const delIds of dav.deletePhotos(
-      Array.from(selection.values())
-    )) {
-      const delPhotos = delIds
-        .filter((id) => id)
-        .map((id) => selection.get(id));
-      this.deletePhotos(delPhotos);
-    }
-  }
-
-  /**
-   * Open the edit date dialog
-   */
-  private async editDateSelection(selection: Selection) {
-    (<any>this.$refs.editDate).open(Array.from(selection.values()));
-  }
-
-  /**
-   * Open the files app with the selected file (one)
-   * Opens a new window.
-   */
-  private async viewInFolder(selection: Selection) {
-    if (selection.size !== 1) return;
-    dav.viewInFolder(selection.values().next().value);
-  }
-
-  /**
-   * Archive the currently selected photos
-   */
-  private async archiveSelection(selection: Selection) {
-    if (selection.size >= 100) {
-      if (
-        !confirm(
-          this.t(
-            "memories",
-            "You are about to touch a large number of files. Are you sure?"
-          )
-        )
-      ) {
-        return;
-      }
-    }
-
-    for await (let delIds of dav.archiveFilesByIds(
-      Array.from(selection.keys()),
-      !this.routeIsArchive()
-    )) {
-      delIds = delIds.filter((x) => x);
-      if (delIds.length === 0) {
-        continue;
-      }
-      const delPhotos = delIds.map((id) => selection.get(id));
-      this.deletePhotos(delPhotos);
-    }
-  }
-
-  /**
-   * Move selected photos to album
-   */
-  private async addToAlbum(selection: Selection) {
-    (<any>this.$refs.addToAlbumModal).open(Array.from(selection.values()));
-  }
-
-  /**
-   * Remove selected photos from album
-   */
-  private async removeFromAlbum(selection: Selection) {
-    try {
-      this.updateLoading(1);
-      const user = this.$route.params.user;
-      const name = this.$route.params.name;
-      const gen = dav.removeFromAlbum(
-        user,
-        name,
-        Array.from(selection.values())
+    /**
+     * Check if all files selected currently are favorites
+     */
+    allSelectedFavorites(selection: Selection) {
+      return Array.from(selection.values()).every(
+        (p) => p.flag & this.c.FLAG_IS_FAVORITE
       );
-      for await (const delIds of gen) {
+    },
+
+    /**
+     * Favorite the currently selected photos
+     */
+    async favoriteSelection(selection: Selection) {
+      const val = !this.allSelectedFavorites(selection);
+      for await (const favIds of dav.favoritePhotos(
+        Array.from(selection.values()),
+        val
+      )) {
+      }
+      this.clearSelection();
+    },
+
+    /**
+     * Delete the currently selected photos
+     */
+    async deleteSelection(selection: Selection) {
+      if (selection.size >= 100) {
+        if (
+          !confirm(
+            this.t(
+              "memories",
+              "You are about to delete a large number of files. Are you sure?"
+            )
+          )
+        ) {
+          return;
+        }
+      }
+
+      for await (const delIds of dav.deletePhotos(
+        Array.from(selection.values())
+      )) {
         const delPhotos = delIds
-          .filter((p) => p)
+          .filter((id) => id)
           .map((id) => selection.get(id));
         this.deletePhotos(delPhotos);
       }
-    } catch (e) {
-      console.error(e);
-      showError(
-        e?.message || this.t("memories", "Could not remove photos from album")
-      );
-    } finally {
-      this.updateLoading(-1);
-    }
-  }
+    },
 
-  /**
-   * Move selected photos to another person
-   */
-  private async moveSelectionToPerson(selection: Selection) {
-    if (!this.config_showFaceRect) {
-      showError(
-        this.t(
-          "memories",
-          'You must enable "Mark person in preview" to use this feature'
-        )
-      );
-      return;
-    }
-    (<any>this.$refs.faceMoveModal).open(Array.from(selection.values()));
-  }
+    /**
+     * Open the edit date dialog
+     */
+    async editDateSelection(selection: Selection) {
+      (<any>this.$refs.editDate).open(Array.from(selection.values()));
+    },
 
-  /**
-   * Remove currently selected photos from person
-   */
-  private async removeSelectionFromPerson(selection: Selection) {
-    // Make sure route is valid
-    const { user, name } = this.$route.params;
-    if (this.$route.name !== "people" || !user || !name) {
-      return;
-    }
+    /**
+     * Open the edit date dialog
+     */
+    async editExifSelection(selection: Selection) {
+      if (selection.size !== 1) return;
+      (<any>this.$refs.editExif).open(selection.values().next().value);
+    },
 
-    // Check photo ownership
-    if (this.$route.params.user !== getCurrentUser()?.uid) {
-      showError(
-        this.t("memories", 'Only user "{user}" can update this person', {
-          user,
-        })
-      );
-      return;
-    }
+    /**
+     * Open the files app with the selected file (one)
+     * Opens a new window.
+     */
+    async viewInFolder(selection: Selection) {
+      if (selection.size !== 1) return;
+      dav.viewInFolder(selection.values().next().value);
+    },
 
-    // Run query
-    for await (let delIds of dav.removeFaceImages(
-      user,
-      name,
-      Array.from(selection.values())
-    )) {
-      const delPhotos = delIds.filter((x) => x).map((id) => selection.get(id));
-      this.deletePhotos(delPhotos);
-    }
-  }
+    /**
+     * Archive the currently selected photos
+     */
+    async archiveSelection(selection: Selection) {
+      if (selection.size >= 100) {
+        if (
+          !confirm(
+            this.t(
+              "memories",
+              "You are about to touch a large number of files. Are you sure?"
+            )
+          )
+        ) {
+          return;
+        }
+      }
 
-  /** Open viewer with given photo */
-  private openViewer(photo: IPhoto) {
-    this.$router.push({
-      ...this.$route,
-      hash: utils.getViewerHash(photo),
-    });
-  }
-}
+      for await (let delIds of dav.archiveFilesByIds(
+        Array.from(selection.keys()),
+        !this.routeIsArchive()
+      )) {
+        delIds = delIds.filter((x) => x);
+        if (delIds.length === 0) {
+          continue;
+        }
+        const delPhotos = delIds.map((id) => selection.get(id));
+        this.deletePhotos(delPhotos);
+      }
+    },
+
+    /**
+     * Move selected photos to album
+     */
+    async addToAlbum(selection: Selection) {
+      (<any>this.$refs.addToAlbumModal).open(Array.from(selection.values()));
+    },
+
+    /**
+     * Move selected photos to another person
+     */
+    async moveSelectionToPerson(selection: Selection) {
+      if (!this.config_showFaceRect) {
+        showError(
+          this.t(
+            "memories",
+            'You must enable "Mark person in preview" to use this feature'
+          )
+        );
+        return;
+      }
+      (<any>this.$refs.faceMoveModal).open(Array.from(selection.values()));
+    },
+
+    /**
+     * Remove currently selected photos from person
+     */
+    async removeSelectionFromPerson(selection: Selection) {
+      // Make sure route is valid
+      const { user, name } = this.$route.params;
+      if (this.$route.name !== "recognize" || !user || !name) {
+        return;
+      }
+
+      // Check photo ownership
+      if (this.$route.params.user !== getCurrentUser()?.uid) {
+        showError(
+          this.t("memories", 'Only user "{user}" can update this person', {
+            user,
+          })
+        );
+        return;
+      }
+
+      // Run query
+      for await (let delIds of dav.removeFaceImages(
+        <string>user,
+        <string>name,
+        Array.from(selection.values())
+      )) {
+        const delPhotos = delIds
+          .filter((x) => x)
+          .map((id) => selection.get(id));
+        this.deletePhotos(delPhotos);
+      }
+    },
+
+    /** Open viewer with given photo */
+    openViewer(photo: IPhoto) {
+      this.$router.push({
+        path: this.$route.path,
+        query: this.$route.query,
+        hash: utils.getViewerHash(photo),
+      });
+    },
+  },
+});
 </script>
 
 <style lang="scss" scoped>

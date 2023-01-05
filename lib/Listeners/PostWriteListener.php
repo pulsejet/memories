@@ -28,20 +28,14 @@ use OCP\Files\Events\Node\NodeTouchedEvent;
 use OCP\Files\Events\Node\NodeWrittenEvent;
 use OCP\Files\Folder;
 use OCP\IDBConnection;
-use OCP\IPreview;
-use OCP\IUserManager;
 
 class PostWriteListener implements IEventListener
 {
     private TimelineWrite $timelineWrite;
 
-    public function __construct(
-        IDBConnection $connection,
-        IUserManager $userManager,
-        IPreview $preview
-    ) {
-        $this->userManager = $userManager;
-        $this->timelineWrite = new TimelineWrite($connection, $preview);
+    public function __construct(IDBConnection $connection)
+    {
+        $this->timelineWrite = new TimelineWrite($connection);
     }
 
     public function handle(Event $event): void

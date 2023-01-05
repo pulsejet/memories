@@ -53,7 +53,7 @@ class OtherController extends ApiBase
             return new JSONResponse(['message' => 'Cannot change settings in readonly mode'], Http::STATUS_FORBIDDEN);
         }
 
-        $userId = $user->getUid();
+        $userId = $user->getUID();
         $this->config->setUserValue($userId, Application::APPNAME, $key, $value);
 
         return new JSONResponse([], Http::STATUS_OK);

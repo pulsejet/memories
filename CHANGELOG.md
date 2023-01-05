@@ -2,6 +2,19 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## v4.9.0, v3.9.0 (2022-12-08)
+
+- **Important**: v4.9.0 comes with an optimization that greatly reduces CPU usage for preview serving. However, for best experience, the preview generator app is now **required** to be configured properly. Please install it from the app store.
+- **Feature**: Slideshow for photos and videos ([#217](https://github.com/pulsejet/memories/issues/217))
+- **Feature**: Support for GPU transcoding ([#194](https://github.com/pulsejet/memories/issues/194))
+- **Feature**: Allow downloading entire albums
+- **Feature**: Allow editing more EXIF fields ([#169](https://github.com/pulsejet/memories/issues/169))
+- **Feature**: Alpha integration with the face recognition app ([#146](https://github.com/pulsejet/memories/issues/146))
+- Fix downloading from albums ([#259](https://github.com/pulsejet/memories/issues/259))
+- Fix support for HEVC live photos ([#234](https://github.com/pulsejet/memories/issues/234))
+- Fix native photo sharing ([#254](https://github.com/pulsejet/memories/issues/254), [#263](https://github.com/pulsejet/memories/issues/263))
+- Use larger previews in viewer (please see [these docs](https://github.com/pulsejet/memories/wiki/Configuration#preview-storage-considerations)) ([#226](https://github.com/pulsejet/memories/issues/226))
+
 ## v4.8.0, v3.8.0 (2022-11-22)
 
 - **Feature**: Support for Live Photos ([#124](https://github.com/pulsejet/memories/issues/124))

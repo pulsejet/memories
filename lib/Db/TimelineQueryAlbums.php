@@ -15,7 +15,7 @@ trait TimelineQueryAlbums
     public function transformAlbumFilter(IQueryBuilder &$query, string $uid, string $albumId)
     {
         // Get album object
-        $album = $this->getAlbumIfAllowed($query->getConnection(), $uid, $albumId);
+        $album = $this->getAlbumIfAllowed($uid, $albumId);
 
         // Check permission
         if (null === $album) {
@@ -39,7 +39,7 @@ trait TimelineQueryAlbums
         $query->select('pa.*', $count)->from('photos_albums', 'pa');
 
         if ($shared) {
-            $query->innerJoin('pa', 'photos_collaborators', 'pc', $query->expr()->andX(
+            $query->innerJoin('pa', $this->collaboratorsTable(), 'pc', $query->expr()->andX(
                 $query->expr()->eq('pa.album_id', 'pc.album_id'),
                 $query->expr()->eq('pc.collaborator_id', $query->createNamedParameter($uid)),
             ));
@@ -117,13 +117,45 @@ trait TimelineQueryAlbums
     }
 
     /**
+     * Check if a file belongs to a user through an album.
+     *
+     * @return bool|string owner of file
+     */
+    public function albumHasUserFile(string $uid, int $fileId)
+    {
+        $query = $this->connection->getQueryBuilder();
+        $query->select('paf.owner')->from('photos_albums_files', 'paf')->where(
+            $query->expr()->andX(
+                $query->expr()->eq('paf.file_id', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)),
+                $query->expr()->orX(
+                    $query->expr()->eq('pa.album_id', 'paf.album_id'),
+                    $query->expr()->eq('pc.album_id', 'paf.album_id'),
+                ),
+            )
+        );
+
+        // Check if user-owned album or shared album
+        $query->leftJoin('paf', 'photos_albums', 'pa', $query->expr()->andX(
+            $query->expr()->eq('pa.album_id', 'paf.album_id'),
+            $query->expr()->eq('pa.user', $query->createNamedParameter($uid)),
+        ));
+
+        // Join to shared album
+        $query->leftJoin('paf', $this->collaboratorsTable(), 'pc', $query->expr()->andX(
+            $query->expr()->eq('pc.album_id', 'paf.album_id'),
+            $query->expr()->eq('pc.collaborator_id', $query->createNamedParameter($uid)),
+        ));
+
+        return $query->executeQuery()->fetchOne();
+    }
+
+    /**
      * Get album if allowed. Also check if album is shared with user.
      *
-     * @param IDBConnection $connection
-     * @param string        $uid        UID of CURRENT user
-     * @param string        $albumId    $user/$name where $user is the OWNER of the album
+     * @param string $uid     UID of CURRENT user
+     * @param string $albumId $user/$name where $user is the OWNER of the album
      */
-    private function getAlbumIfAllowed(IDBConnection $conn, string $uid, string $albumId)
+    public function getAlbumIfAllowed(string $uid, string $albumId)
     {
         // Split name and uid
         $parts = explode('/', $albumId);
@@ -134,7 +166,7 @@ trait TimelineQueryAlbums
         $albumName = $parts[1];
 
         // Check if owner
-        $query = $conn->getQueryBuilder();
+        $query = $this->connection->getQueryBuilder();
         $query->select('*')->from('photos_albums')->where(
             $query->expr()->andX(
                 $query->expr()->eq('name', $query->createNamedParameter($albumName)),
@@ -152,8 +184,8 @@ trait TimelineQueryAlbums
         }
 
         // Check in collaborators instead
-        $query = $conn->getQueryBuilder();
-        $query->select('album_id')->from('photos_collaborators')->where(
+        $query = $this->connection->getQueryBuilder();
+        $query->select('album_id')->from($this->collaboratorsTable())->where(
             $query->expr()->andX(
                 $query->expr()->eq('album_id', $query->createNamedParameter($album['album_id'])),
                 $query->expr()->eq('collaborator_id', $query->createNamedParameter($uid)),
@@ -163,5 +195,38 @@ trait TimelineQueryAlbums
         if (false !== $query->executeQuery()->fetchOne()) {
             return $album;
         }
+    }
+
+    /**
+     * Get full list of fileIds in album.
+     */
+    public function getAlbumFiles(int $albumId)
+    {
+        $query = $this->connection->getQueryBuilder();
+        $query->select('file_id')->from('photos_albums_files', 'paf')->where(
+            $query->expr()->eq('album_id', $query->createNamedParameter($albumId, IQueryBuilder::PARAM_INT))
+        );
+        $query->innerJoin('paf', 'filecache', 'fc', $query->expr()->eq('fc.fileid', 'paf.file_id'));
+
+        $fileIds = [];
+        $result = $query->executeQuery();
+        while ($row = $result->fetch()) {
+            $fileIds[] = (int) $row['file_id'];
+        }
+
+        return $fileIds;
+    }
+
+    /** Get the name of the collaborators table */
+    private function collaboratorsTable()
+    {
+        // https://github.com/nextcloud/photos/commit/20e3e61ad577014e5f092a292c90a8476f630355
+        $appManager = \OC::$server->get(\OCP\App\IAppManager::class);
+        $photosVersion = $appManager->getAppVersion('photos');
+        if (version_compare($photosVersion, '2.0.1', '>=')) {
+            return 'photos_albums_collabs';
+        }
+
+        return 'photos_collaborators';
     }
 }

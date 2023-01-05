@@ -32,9 +32,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Prop } from "vue-property-decorator";
-import GlobalMixin from "../../mixins/GlobalMixin";
-import UserConfig from "../../mixins/UserConfig";
+import { defineComponent } from "vue";
 
 import Modal from "./Modal.vue";
 
@@ -45,7 +43,8 @@ import NcButton from "@nextcloud/vue/dist/Components/NcButton";
 
 import CloseIcon from "vue-material-design-icons/Close.vue";
 
-@Component({
+export default defineComponent({
+  name: "MultiPathSelectionModal",
   components: {
     Modal,
     NcActions,
@@ -53,53 +52,61 @@ import CloseIcon from "vue-material-design-icons/Close.vue";
     NcButton,
     CloseIcon,
   },
-})
-export default class Settings extends Mixins(UserConfig, GlobalMixin) {
-  @Prop({ required: true }) title: string;
 
-  private show = false;
-  private paths: string[] = [];
+  props: {
+    title: {
+      type: String,
+      required: true,
+    },
+  },
 
-  @Emit("close")
-  public close(list: string[]) {
-    this.show = false;
-  }
+  data: () => ({
+    show: false,
+    paths: [] as string[],
+  }),
 
-  public open(paths: string[]) {
-    this.paths = paths;
-    this.show = true;
-  }
+  methods: {
+    close(list: string[]) {
+      this.show = false;
+      this.$emit("close", list);
+    },
 
-  public save() {
-    this.close(this.paths);
-  }
+    open(paths: string[]) {
+      this.paths = paths;
+      this.show = true;
+    },
 
-  async chooseFolder(title: string, initial: string) {
-    const picker = getFilePickerBuilder(title)
-      .setMultiSelect(false)
-      .setModal(true)
-      .setType(1)
-      .addMimeTypeFilter("httpd/unix-directory")
-      .allowDirectories()
-      .startAt(initial)
-      .build();
+    save() {
+      this.close(this.paths);
+    },
 
-    return await picker.pick();
-  }
+    async chooseFolder(title: string, initial: string) {
+      const picker = getFilePickerBuilder(title)
+        .setMultiSelect(false)
+        .setModal(true)
+        .setType(1)
+        .addMimeTypeFilter("httpd/unix-directory")
+        .allowDirectories()
+        .startAt(initial)
+        .build();
 
-  public async add() {
-    let newPath = await this.chooseFolder(
-      this.t("memories", "Add a root to your timeline"),
-      "/"
-    );
-    if (newPath === "") newPath = "/";
-    this.paths.push(newPath);
-  }
+      return await picker.pick();
+    },
 
-  public remove(index: number) {
-    this.paths.splice(index, 1);
-  }
-}
+    async add() {
+      let newPath = await this.chooseFolder(
+        this.t("memories", "Add a root to your timeline"),
+        "/"
+      );
+      if (newPath === "") newPath = "/";
+      this.paths.push(newPath);
+    },
+
+    remove(index: number) {
+      this.paths.splice(index, 1);
+    },
+  },
+});
 </script>
 
 <style lang="scss" scoped>

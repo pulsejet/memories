@@ -17,10 +17,10 @@ class TimelineWrite
     protected IPreview $preview;
     protected LivePhoto $livePhoto;
 
-    public function __construct(IDBConnection $connection, IPreview &$preview)
+    public function __construct(IDBConnection $connection)
     {
         $this->connection = $connection;
-        $this->preview = $preview;
+        $this->preview = \OC::$server->get(IPreview::class);
         $this->livePhoto = new LivePhoto($connection);
     }
 
@@ -123,7 +123,7 @@ class TimelineWrite
         // Video parameters
         $videoDuration = 0;
         if ($isvideo) {
-            $videoDuration = round($exif['Duration'] ?? $exif['TrackDuration'] ?? 0);
+            $videoDuration = round((float) ($exif['Duration'] ?? $exif['TrackDuration'] ?? 0));
         }
 
         // Clean up EXIF to keep only useful metadata

@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Watch } from "vue-property-decorator";
+import { defineComponent } from "vue";
 
 import NcButton from "@nextcloud/vue/dist/Components/NcButton";
 const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
@@ -25,66 +25,75 @@ const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
 import { showError } from "@nextcloud/dialogs";
 import { getCurrentUser } from "@nextcloud/auth";
 import Modal from "./Modal.vue";
-import GlobalMixin from "../../mixins/GlobalMixin";
 import client from "../../services/DavClient";
+import * as dav from "../../services/DavRequests";
 
-@Component({
+export default defineComponent({
+  name: "FaceDeleteModal",
   components: {
     NcButton,
     NcTextField,
     Modal,
   },
-})
-export default class FaceDeleteModal extends Mixins(GlobalMixin) {
-  private user: string = "";
-  private name: string = "";
-  private show = false;
 
-  @Emit("close")
-  public close() {
-    this.show = false;
-  }
-
-  public open() {
-    const user = this.$route.params.user || "";
-    if (this.$route.params.user !== getCurrentUser()?.uid) {
-      showError(
-        this.t("memories", 'Only user "{user}" can delete this person', {
-          user,
-        })
-      );
-      return;
-    }
-    this.show = true;
-  }
-
-  @Watch("$route")
-  async routeChange(from: any, to: any) {
-    this.refreshParams();
-  }
+  data: () => ({
+    show: false,
+    user: "",
+    name: "",
+  }),
 
   mounted() {
     this.refreshParams();
-  }
+  },
 
-  public refreshParams() {
-    this.user = this.$route.params.user || "";
-    this.name = this.$route.params.name || "";
-  }
+  watch: {
+    $route: async function (from: any, to: any) {
+      this.refreshParams();
+    },
+  },
 
-  public async save() {
-    try {
-      await client.deleteFile(`/recognize/${this.user}/faces/${this.name}`);
-      this.$router.push({ name: "people" });
-      this.close();
-    } catch (error) {
-      console.log(error);
-      showError(
-        this.t("photos", "Failed to delete {name}.", {
-          name: this.name,
-        })
-      );
-    }
-  }
-}
+  methods: {
+    close() {
+      this.show = false;
+      this.$emit("close");
+    },
+
+    open() {
+      const user = this.$route.params.user || "";
+      if (this.$route.params.user !== getCurrentUser()?.uid) {
+        showError(
+          this.t("memories", 'Only user "{user}" can delete this person', {
+            user,
+          })
+        );
+        return;
+      }
+      this.show = true;
+    },
+
+    refreshParams() {
+      this.user = <string>this.$route.params.user || "";
+      this.name = <string>this.$route.params.name || "";
+    },
+
+    async save() {
+      try {
+        if (this.$route.name === "recognize") {
+          await client.deleteFile(`/recognize/${this.user}/faces/${this.name}`);
+        } else {
+          await dav.setVisibilityPeopleFaceRecognition(this.name, false);
+        }
+        this.$router.push({ name: this.$route.name });
+        this.close();
+      } catch (error) {
+        console.log(error);
+        showError(
+          this.t("photos", "Failed to delete {name}.", {
+            name: this.name,
+          })
+        );
+      }
+    },
+  },
+});
 </script>

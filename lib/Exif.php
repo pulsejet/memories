@@ -10,7 +10,7 @@ use OCP\IConfig;
 
 class Exif
 {
-    private const EXIFTOOL_VER = '12.49';
+    private const EXIFTOOL_VER = '12.50';
     private const EXIFTOOL_TIMEOUT = 30000;
 
     /** Opened instance of exiftool when running in command mode */
@@ -220,7 +220,7 @@ class Exif
             return [$height, $width];
         }
 
-        if ($width <= 0 || $height <= 0 || $width > 10000 || $height > 10000) {
+        if ($width <= 0 || $height <= 0 || $width > 100000 || $height > 100000) {
             return [0, 0];
         }
 
@@ -286,7 +286,7 @@ class Exif
     private static function getExiftool()
     {
         $configKey = 'memories.exiftool';
-        $config = \OC::$server->getConfig();
+        $config = \OC::$server->get(IConfig::class);
         $configPath = $config->getSystemValue($configKey);
         $noLocal = $config->getSystemValue($configKey.'_no_local', false);
 

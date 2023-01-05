@@ -52,9 +52,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Watch } from "vue-property-decorator";
-import GlobalMixin from "../../mixins/GlobalMixin";
-import UserConfig from "../../mixins/UserConfig";
+import { defineComponent } from "vue";
 
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
@@ -68,7 +66,8 @@ import EditIcon from "vue-material-design-icons/Pencil.vue";
 import DeleteIcon from "vue-material-design-icons/Close.vue";
 import MergeIcon from "vue-material-design-icons/Merge.vue";
 
-@Component({
+export default defineComponent({
+  name: "FaceTopMatter",
   components: {
     NcActions,
     NcActionButton,
@@ -81,37 +80,41 @@ import MergeIcon from "vue-material-design-icons/Merge.vue";
     DeleteIcon,
     MergeIcon,
   },
-})
-export default class FaceTopMatter extends Mixins(GlobalMixin, UserConfig) {
-  private name: string = "";
 
-  @Watch("$route")
-  async routeChange(from: any, to: any) {
-    this.createMatter();
-  }
+  data: () => ({
+    name: "",
+  }),
+
+  watch: {
+    $route: function (from: any, to: any) {
+      this.createMatter();
+    },
+  },
 
   mounted() {
     this.createMatter();
-  }
+  },
 
-  createMatter() {
-    this.name = this.$route.params.name || "";
-  }
+  methods: {
+    createMatter() {
+      this.name = <string>this.$route.params.name || "";
+    },
 
-  back() {
-    this.$router.push({ name: "people" });
-  }
+    back() {
+      this.$router.push({ name: this.$route.name });
+    },
 
-  changeShowFaceRect() {
-    localStorage.setItem(
-      "memories_showFaceRect",
-      this.config_showFaceRect ? "1" : "0"
-    );
-    setTimeout(() => {
-      this.$router.go(0); // refresh page
-    }, 500);
-  }
-}
+    changeShowFaceRect() {
+      localStorage.setItem(
+        "memories_showFaceRect",
+        this.config_showFaceRect ? "1" : "0"
+      );
+      setTimeout(() => {
+        this.$router.go(0); // refresh page
+      }, 500);
+    },
+  },
+});
 </script>
 
 <style lang="scss" scoped>

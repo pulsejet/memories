@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Watch } from "vue-property-decorator";
+import { defineComponent } from "vue";
 import { TopMatterFolder, TopMatterType } from "../../types";
 
 const NcBreadcrumbs = () =>
@@ -53,8 +53,6 @@ import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 import NcActionRouter from "@nextcloud/vue/dist/Components/NcActionRouter";
 
-import GlobalMixin from "../../mixins/GlobalMixin";
-
 import FolderShareModal from "../modal/FolderShareModal.vue";
 
 import HomeIcon from "vue-material-design-icons/Home.vue";
@@ -62,7 +60,8 @@ import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
 import TimelineIcon from "vue-material-design-icons/ImageMultiple.vue";
 import FoldersIcon from "vue-material-design-icons/FolderMultiple.vue";
 
-@Component({
+export default defineComponent({
+  name: "FolderTopMatter",
   components: {
     NcBreadcrumbs,
     NcBreadcrumb,
@@ -75,45 +74,49 @@ import FoldersIcon from "vue-material-design-icons/FolderMultiple.vue";
     TimelineIcon,
     FoldersIcon
   },
-})
-export default class FolderTopMatter extends Mixins(GlobalMixin) {
-  private topMatter?: TopMatterFolder = null;
-  private recursive: boolean = false;
 
-  @Watch("$route")
-  async routeChange(from: any, to: any) {
-    this.createMatter();
-  }
+  data: () => ({
+    topMatter: null as TopMatterFolder | null,
+    recursive: false
+  }),
+
+  watch: {
+    $route: function (from: any, to: any) {
+      this.createMatter();
+    },
+  },
 
   mounted() {
     this.createMatter();
-  }
+  },
 
-  createMatter() {
-    if (this.$route.name === "folders") {
-      let path: any = this.$route.params.path || "";
-      if (typeof path === "string") {
-        path = path.split("/");
+  methods: {
+    createMatter() {
+      if (this.$route.name === "folders") {
+        let path: any = this.$route.params.path || "";
+        if (typeof path === "string") {
+          path = path.split("/");
+        }
+
+        this.topMatter = {
+          type: TopMatterType.FOLDER,
+          list: path
+            .filter((x) => x)
+            .map((x, idx, arr) => {
+              return {
+                text: x,
+                path: arr.slice(0, idx + 1).join("/"),
+              };
+            }),
+        };
+        this.recursive = this.$route.query.recursive === '1'
+      } else {
+        this.topMatter = null;
+        this.recursive = false;
       }
-
-      this.topMatter = {
-        type: TopMatterType.FOLDER,
-        list: path
-          .filter((x) => x)
-          .map((x, idx, arr) => {
-            return {
-              text: x,
-              path: arr.slice(0, idx + 1).join("/"),
-            };
-          }),
-      };
-      this.recursive = this.$route.query.recursive === '1'
-    } else {
-      this.topMatter = null;
-      this.recursive = false;
     }
   }
-}
+});
 </script>
 
 <style lang="scss" scoped>

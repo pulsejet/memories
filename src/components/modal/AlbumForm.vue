@@ -1,24 +1,3 @@
-<!--
- - @copyright Copyright (c) 2022 Louis Chemineau <louis@chmn.me>
- -
- - @author Louis Chemineau <louis@chmn.me>
- -
- - @license AGPL-3.0-or-later
- -
- - This program is free software: you can redistribute it and/or modify
- - it under the terms of the GNU Affero General Public License as
- - published by the Free Software Foundation, either version 3 of the
- - License, or (at your option) any later version.
- -
- - This program is distributed in the hope that it will be useful,
- - but WITHOUT ANY WARRANTY; without even the implied warranty of
- - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- - GNU Affero General Public License for more details.
- -
- - You should have received a copy of the GNU Affero General Public License
- - along with this program. If not, see <http://www.gnu.org/licenses/>.
- -
- -->
 <template>
   <form
     v-if="!showCollaboratorView"
@@ -88,38 +67,36 @@
     :album-name="albumName"
     :allow-public-link="false"
     :collaborators="[]"
+    v-slot="{ collaborators }"
   >
-    <template slot-scope="{ collaborators }">
-      <span class="left-buttons">
-        <NcButton
-          :aria-label="t('photos', 'Back to the new album form.')"
-          type="tertiary"
-          @click="showCollaboratorView = false"
-        >
-          {{ t("photos", "Back") }}
-        </NcButton>
-      </span>
-      <span class="right-buttons">
-        <NcButton
-          :aria-label="saveText"
-          type="primary"
-          :disabled="albumName.trim() === '' || loading"
-          @click="submit(collaborators)"
-        >
-          <template #icon>
-            <NcLoadingIcon v-if="loading" />
-            <Send v-else />
-          </template>
-          {{ saveText }}
-        </NcButton>
-      </span>
-    </template>
+    <span class="left-buttons">
+      <NcButton
+        :aria-label="t('photos', 'Back to the new album form.')"
+        type="tertiary"
+        @click="showCollaboratorView = false"
+      >
+        {{ t("photos", "Back") }}
+      </NcButton>
+    </span>
+    <span class="right-buttons">
+      <NcButton
+        :aria-label="saveText"
+        type="primary"
+        :disabled="albumName.trim() === '' || loading"
+        @click="submit(collaborators)"
+      >
+        <template #icon>
+          <NcLoadingIcon v-if="loading" />
+          <Send v-else />
+        </template>
+        {{ saveText }}
+      </NcButton>
+    </span>
   </AlbumCollaborators>
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Prop } from "vue-property-decorator";
-import GlobalMixin from "../../mixins/GlobalMixin";
+import { defineComponent, PropType } from "vue";
 
 import { getCurrentUser } from "@nextcloud/auth";
 import NcButton from "@nextcloud/vue/dist/Components/NcButton";
@@ -133,7 +110,8 @@ import AlbumCollaborators from "./AlbumCollaborators.vue";
 import Send from "vue-material-design-icons/Send.vue";
 import AccountMultiplePlus from "vue-material-design-icons/AccountMultiplePlus.vue";
 
-@Component({
+export default defineComponent({
+  name: "AlbumForm",
   components: {
     NcButton,
     NcLoadingIcon,
@@ -143,35 +121,47 @@ import AccountMultiplePlus from "vue-material-design-icons/AccountMultiplePlus.v
     Send,
     AccountMultiplePlus,
   },
-})
-export default class AlbumForm extends Mixins(GlobalMixin) {
-  @Prop() private album: any;
-  @Prop() private displayBackButton: boolean;
 
-  private showCollaboratorView = false;
-  private albumName = "";
-  private albumLocation = "";
-  private loading = false;
+  props: {
+    album: {
+      type: Object as PropType<any>,
+      default: null,
+    },
+    displayBackButton: {
+      type: Boolean,
+      default: false,
+    },
+  },
 
-  /**
-   * @return Whether sharing is enabled.
-   */
-  get editMode(): boolean {
-    return Boolean(this.album);
-  }
+  data: () => ({
+    collaborators: [],
+    showCollaboratorView: false,
+    albumName: "",
+    albumLocation: "",
+    loading: false,
+  }),
 
-  get saveText(): string {
-    return this.editMode
-      ? this.t("photos", "Save")
-      : this.t("photos", "Create album");
-  }
+  computed: {
+    /**
+     * @return Whether sharing is enabled.
+     */
+    editMode(): boolean {
+      return Boolean(this.album);
+    },
 
-  /**
-   * @return Whether sharing is enabled.
-   */
-  get sharingEnabled(): boolean {
-    return window.OC.Share !== undefined;
-  }
+    saveText(): string {
+      return this.editMode
+        ? this.t("photos", "Save")
+        : this.t("photos", "Create album");
+    },
+
+    /**
+     * @return Whether sharing is enabled.
+     */
+    sharingEnabled(): boolean {
+      return window.OC.Share !== undefined;
+    },
+  },
 
   mounted() {
     if (this.editMode) {
@@ -179,76 +169,79 @@ export default class AlbumForm extends Mixins(GlobalMixin) {
       this.albumLocation = this.album.location;
     }
     this.$nextTick(() => {
-      (<any>this.$refs.nameInput).$el.getElementsByTagName("input")[0].focus();
+      (<any>this.$refs.nameInput)?.$el.getElementsByTagName("input")[0].focus();
     });
-  }
+  },
 
-  submit(collaborators = []) {
-    if (this.albumName === "" || this.loading) {
-      return;
-    }
-    if (this.editMode) {
-      this.handleUpdateAlbum();
-    } else {
-      this.handleCreateAlbum(collaborators);
-    }
-  }
-
-  async handleCreateAlbum(collaborators = []) {
-    try {
-      this.loading = true;
-      let album = {
-        basename: this.albumName,
-        filename: `/photos/${getCurrentUser()?.uid}/albums/${this.albumName}`,
-        nbItems: 0,
-        location: this.albumLocation,
-        lastPhoto: -1,
-        date: moment().format("MMMM YYYY"),
-        collaborators,
-      };
-      await dav.createAlbum(album.basename);
-
-      if (this.albumLocation !== "" || collaborators.length !== 0) {
-        album = await dav.updateAlbum(album, {
-          albumName: this.albumName,
-          properties: {
-            location: this.albumLocation,
-            collaborators,
-          },
-        });
+  methods: {
+    submit(collaborators: any = []) {
+      if (this.albumName === "" || this.loading) {
+        return;
       }
-
-      this.$emit("done", { album });
-    } finally {
-      this.loading = false;
-    }
-  }
-
-  async handleUpdateAlbum() {
-    try {
-      this.loading = true;
-      let album = { ...this.album };
-      if (this.album.basename !== this.albumName) {
-        album = await dav.renameAlbum(this.album, {
-          currentAlbumName: this.album.basename,
-          newAlbumName: this.albumName,
-        });
+      if (this.editMode) {
+        this.handleUpdateAlbum();
+      } else {
+        this.handleCreateAlbum(collaborators);
       }
-      if (this.album.location !== this.albumLocation) {
-        album.location = await dav.updateAlbum(this.album, {
-          albumName: this.albumName,
-          properties: { location: this.albumLocation },
-        });
-      }
-      this.$emit("done", { album });
-    } finally {
-      this.loading = false;
-    }
-  }
+    },
 
-  @Emit("back")
-  back() {}
-}
+    async handleCreateAlbum(collaborators = []) {
+      try {
+        this.loading = true;
+        let album = {
+          basename: this.albumName,
+          filename: `/photos/${getCurrentUser()?.uid}/albums/${this.albumName}`,
+          nbItems: 0,
+          location: this.albumLocation,
+          lastPhoto: -1,
+          date: moment().format("MMMM YYYY"),
+          collaborators,
+        };
+        await dav.createAlbum(album.basename);
+
+        if (this.albumLocation !== "" || collaborators.length !== 0) {
+          album = await dav.updateAlbum(album, {
+            albumName: this.albumName,
+            properties: {
+              location: this.albumLocation,
+              collaborators,
+            },
+          });
+        }
+
+        this.$emit("done", { album });
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async handleUpdateAlbum() {
+      try {
+        this.loading = true;
+        let album = { ...this.album };
+        if (this.album.basename !== this.albumName) {
+          album = await dav.renameAlbum(this.album, {
+            currentAlbumName: this.album.basename,
+            newAlbumName: this.albumName,
+          });
+        }
+        if (this.album.location !== this.albumLocation) {
+          album.location = await dav.updateAlbum(this.album, {
+            albumName: this.albumName,
+            properties: { location: this.albumLocation },
+          });
+        }
+        this.$emit("done", { album });
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    back() {
+      this.$emit("back");
+    },
+  },
+});
 </script>
 <style lang="scss" scoped>
 .album-form {

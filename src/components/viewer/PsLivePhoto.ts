@@ -1,5 +1,5 @@
 import PhotoSwipe from "photoswipe";
-import * as utils from "../services/Utils";
+import * as utils from "../../services/Utils";
 
 function isLiveContent(content): boolean {
   return Boolean(content?.data?.photo?.liveid);
@@ -31,7 +31,7 @@ class LivePhotoContentSetup {
     video.autoplay = false;
     video.playsInline = true;
     video.preload = "none";
-    video.src = utils.getLivePhotoVideoUrl(photo);
+    video.src = utils.getLivePhotoVideoUrl(photo, true);
 
     const div = document.createElement("div");
     div.className = "memories-livephoto";
@@ -41,6 +41,7 @@ class LivePhotoContentSetup {
     utils.setupLivePhotoHooks(video);
 
     const img = document.createElement("img");
+    img.classList.add("pswp__img");
     img.src = content.data.src;
     img.onload = () => content.onLoaded();
     div.appendChild(img);

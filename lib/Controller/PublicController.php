@@ -95,7 +95,7 @@ class PublicController extends AuthPublicShareController
             throw new NotFoundException();
         }
 
-        if (!$this->validateShare($share)) {
+        if (!self::validateShare($share)) {
             throw new NotFoundException();
         }
 
@@ -109,6 +109,9 @@ class PublicController extends AuthPublicShareController
         // Video configuration
         $this->initialState->provideInitialState('notranscode', $this->config->getSystemValue('memories.no_transcode', 'UNSET'));
 
+        // Share info
+        $this->initialState->provideInitialState('no_download', $share->getHideDownload());
+
         $policy = new ContentSecurityPolicy();
         $policy->addAllowedWorkerSrcDomain("'self'");
         $policy->addAllowedScriptDomain("'self'");
@@ -118,14 +121,51 @@ class PublicController extends AuthPublicShareController
         $policy->addAllowedScriptDomain('blob:');
         $policy->addAllowedMediaDomain('blob:');
 
+        // Image editor
+        $policy->addAllowedConnectDomain('data:');
+
         // Allow nominatim for metadata
         $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
         $policy->addAllowedFrameDomain('www.openstreetmap.org');
 
         $response = new PublicTemplateResponse($this->appName, 'main');
+        $response->setHeaderTitle($share->getNode()->getName());
+        $response->setFooterVisible(false); // wth is that anyway?
         $response->setContentSecurityPolicy($policy);
 
         return $response;
+    }
+
+    /**
+     * Validate the permissions of the share.
+     */
+    public static function validateShare(?IShare $share): bool
+    {
+        if (null === $share) {
+            return false;
+        }
+
+        // Get user manager
+        $userManager = \OC::$server->get(IUserManager::class);
+
+        // Check if share read is allowed
+        if (!($share->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
+            return false;
+        }
+
+        // If the owner is disabled no access to the linke is granted
+        $owner = $userManager->get($share->getShareOwner());
+        if (null === $owner || !$owner->isEnabled()) {
+            return false;
+        }
+
+        // If the initiator of the share is disabled no access is granted
+        $initiator = $userManager->get($share->getSharedBy());
+        if (null === $initiator || !$initiator->isEnabled()) {
+            return false;
+        }
+
+        return $share->getNode()->isReadable() && $share->getNode()->isShareable();
     }
 
     protected function showAuthFailed(): TemplateResponse
@@ -148,29 +188,5 @@ class PublicController extends AuthPublicShareController
     protected function isPasswordProtected(): bool
     {
         return null !== $this->share->getPassword();
-    }
-
-    /**
-     * Validate the permissions of the share.
-     *
-     * @param Share\IShare $share
-     *
-     * @return bool
-     */
-    private function validateShare(IShare $share)
-    {
-        // If the owner is disabled no access to the linke is granted
-        $owner = $this->userManager->get($share->getShareOwner());
-        if (null === $owner || !$owner->isEnabled()) {
-            return false;
-        }
-
-        // If the initiator of the share is disabled no access is granted
-        $initiator = $this->userManager->get($share->getSharedBy());
-        if (null === $initiator || !$initiator->isEnabled()) {
-            return false;
-        }
-
-        return $share->getNode()->isReadable() && $share->getNode()->isShareable();
     }
 }

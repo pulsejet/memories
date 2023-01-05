@@ -5,16 +5,15 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\Files\Folder;
 use OCP\IDBConnection;
 
-trait TimelineQueryFaces
+trait TimelineQueryPeopleRecognize
 {
     protected IDBConnection $connection;
 
-    public function transformFaceFilter(IQueryBuilder &$query, string $userId, string $faceStr)
+    public function transformPeopleRecognitionFilter(IQueryBuilder &$query, string $userId, string $faceStr)
     {
-        // Get title and uid of face user
+        // Get name and uid of face user
         $faceNames = explode('/', $faceStr);
         if (2 !== \count($faceNames)) {
             throw new \Exception('Invalid face query');
@@ -36,7 +35,7 @@ trait TimelineQueryFaces
         ));
     }
 
-    public function transformFaceRect(IQueryBuilder &$query, string $userId)
+    public function transformPeopleRecognizeRect(IQueryBuilder &$query, string $userId)
     {
         // Include detection params in response
         $query->addSelect(
@@ -47,7 +46,7 @@ trait TimelineQueryFaces
         );
     }
 
-    public function getFaces(TimelineRoot &$root)
+    public function getPeopleRecognize(TimelineRoot &$root)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -87,7 +86,7 @@ trait TimelineQueryFaces
         return $faces;
     }
 
-    public function getFacePreviewDetection(TimelineRoot &$root, int $id)
+    public function getPeopleRecognizePreview(TimelineRoot &$root, int $id)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -160,8 +159,9 @@ trait TimelineQueryFaces
     }
 
     /** Convert face fields to object */
-    private function processFace(&$row, $days = false)
+    private function processPeopleRecognizeDetection(&$row, $days = false)
     {
+        // Differentiate Recognize queries from Face Recognition
         if (!isset($row) || !isset($row['face_w'])) {
             return;
         }

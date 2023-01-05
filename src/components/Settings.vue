@@ -69,9 +69,7 @@ input[type="text"] {
 </style>
 
 <script lang="ts">
-import { Component, Mixins } from "vue-property-decorator";
-import GlobalMixin from "../mixins/GlobalMixin";
-import UserConfig from "../mixins/UserConfig";
+import { defineComponent } from "vue";
 
 import { getFilePickerBuilder } from "@nextcloud/dialogs";
 const NcCheckboxRadioSwitch = () =>
@@ -79,62 +77,69 @@ const NcCheckboxRadioSwitch = () =>
 
 import MultiPathSelectionModal from "./modal/MultiPathSelectionModal.vue";
 
-@Component({
+export default defineComponent({
+  name: "Settings",
+
   components: {
     NcCheckboxRadioSwitch,
     MultiPathSelectionModal,
   },
-})
-export default class Settings extends Mixins(UserConfig, GlobalMixin) {
-  get pathSelTitle() {
-    return this.t("memories", "Choose Timeline Paths");
-  }
 
-  async chooseFolder(title: string, initial: string) {
-    const picker = getFilePickerBuilder(title)
-      .setMultiSelect(false)
-      .setModal(true)
-      .setType(1)
-      .addMimeTypeFilter("httpd/unix-directory")
-      .allowDirectories()
-      .startAt(initial)
-      .build();
+  computed: {
+    pathSelTitle(): string {
+      return this.t("memories", "Choose Timeline Paths");
+    },
+  },
 
-    return await picker.pick();
-  }
+  methods: {
+    async chooseFolder(title: string, initial: string) {
+      const picker = getFilePickerBuilder(title)
+        .setMultiSelect(false)
+        .setModal(true)
+        .setType(1)
+        .addMimeTypeFilter("httpd/unix-directory")
+        .allowDirectories()
+        .startAt(initial)
+        .build();
 
-  async chooseTimelinePath() {
-    (<any>this.$refs.multiPathModal).open(this.config_timelinePath.split(";"));
-  }
+      return await picker.pick();
+    },
 
-  async saveTimelinePath(paths: string[]) {
-    if (!paths || !paths.length) return;
+    async chooseTimelinePath() {
+      (<any>this.$refs.multiPathModal).open(
+        this.config_timelinePath.split(";")
+      );
+    },
 
-    const newPath = paths.join(";");
-    if (newPath !== this.config_timelinePath) {
-      this.config_timelinePath = newPath;
-      await this.updateSetting("timelinePath");
-    }
-  }
+    async saveTimelinePath(paths: string[]) {
+      if (!paths || !paths.length) return;
 
-  async chooseFoldersPath() {
-    let newPath = await this.chooseFolder(
-      this.t("memories", "Choose the root for the folders view"),
-      this.config_foldersPath
-    );
-    if (newPath === "") newPath = "/";
-    if (newPath !== this.config_foldersPath) {
-      this.config_foldersPath = newPath;
-      await this.updateSetting("foldersPath");
-    }
-  }
+      const newPath = paths.join(";");
+      if (newPath !== this.config_timelinePath) {
+        this.config_timelinePath = newPath;
+        await this.updateSetting("timelinePath");
+      }
+    },
 
-  async updateSquareThumbs() {
-    await this.updateSetting("squareThumbs");
-  }
+    async chooseFoldersPath() {
+      let newPath = await this.chooseFolder(
+        this.t("memories", "Choose the root for the folders view"),
+        this.config_foldersPath
+      );
+      if (newPath === "") newPath = "/";
+      if (newPath !== this.config_foldersPath) {
+        this.config_foldersPath = newPath;
+        await this.updateSetting("foldersPath");
+      }
+    },
 
-  async updateShowHidden() {
-    await this.updateSetting("showHidden");
-  }
-}
+    async updateSquareThumbs() {
+      await this.updateSetting("squareThumbs");
+    },
+
+    async updateShowHidden() {
+      await this.updateSetting("showHidden");
+    },
+  },
+});
 </script>

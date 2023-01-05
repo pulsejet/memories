@@ -25,7 +25,7 @@ class Repair implements IRepairStep
     public function run(IOutput $output): void
     {
         // kill any instances of go-transcode and go-vod
-        shell_exec('pkill go-transcode');
-        shell_exec('pkill go-vod');
+        \OCA\Memories\Util::pkill('go-transcode');
+        \OCA\Memories\Util::pkill('go-vod');
     }
 }

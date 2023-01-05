@@ -1,42 +1,32 @@
-import * as base from "./base";
-import { generateUrl } from "@nextcloud/router";
+import { generateUrl, getRootUrl } from "@nextcloud/router";
+import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
 import { IPhoto } from "../../types";
 import { getAlbumFileInfos } from "./albums";
+import { API } from "../API";
 
 /**
- * Download a file
- *
- * @param fileNames - The file's names
+ * Download files
  */
-export async function downloadFiles(fileNames: string[]): Promise<boolean> {
-  const randomToken = Math.random().toString(36).substring(2);
+export async function downloadFiles(fileIds: number[]) {
+  if (!fileIds.length) return;
 
-  const params = new URLSearchParams();
-  params.append("files", JSON.stringify(fileNames));
-  params.append("downloadStartSecret", randomToken);
+  const res = await axios.post(API.DOWNLOAD_REQUEST(), { files: fileIds });
+  if (res.status !== 200 || !res.data.handle) {
+    showError(t("memories", "Failed to download files"));
+    return;
+  }
 
-  let downloadURL = generateUrl(`/apps/files/ajax/download.php?${params}`);
+  downloadWithHandle(res.data.handle);
+}
 
-  window.location.href = `${downloadURL}downloadStartSecret=${randomToken}`;
-
-  return new Promise((resolve) => {
-    const waitForCookieInterval = setInterval(() => {
-      const cookieIsSet = document.cookie
-        .split(";")
-        .map((cookie) => cookie.split("="))
-        .findIndex(
-          ([cookieName, cookieValue]) =>
-            cookieName === "ocDownloadStarted" && cookieValue === randomToken
-        );
-
-      if (cookieIsSet) {
-        clearInterval(waitForCookieInterval);
-        resolve(true);
-      }
-    }, 50);
-  });
+/**
+ * Download files with a download handle
+ * @param handle Download handle
+ */
+export function downloadWithHandle(handle: string) {
+  window.location.href = API.DOWNLOAD_FILE(handle);
 }
 
 /**
@@ -52,35 +42,16 @@ export async function downloadPublicPhoto(photo: IPhoto) {
  * @param photos list of photos
  */
 export async function downloadFilesByPhotos(photos: IPhoto[]) {
-  if (photos.length === 0) {
-    return;
-  }
-
-  // Public files
-  if (vuerouter.currentRoute.name === "folder-share") {
-    for (const photo of photos) {
-      await downloadPublicPhoto(photo);
-    }
-    return;
-  }
-
-  // Get files to download
-  const fileInfos = await base.getFiles(photos);
-  if (fileInfos.length !== photos.length) {
-    showError(t("memories", "Failed to download some files."));
-  }
-  if (fileInfos.length === 0) {
-    return;
-  }
-
-  await downloadFiles(fileInfos.map((f) => f.filename));
+  await downloadFiles(photos.map((f) => f.fileid));
 }
 
 /** Get URL to download one file (e.g. for video streaming) */
 export function getDownloadLink(photo: IPhoto) {
+  const route = vueroute();
+
   // Check if public
-  if (vuerouter.currentRoute.name === "folder-share") {
-    const token = window.vuerouter.currentRoute.params.token;
+  if (route.name === "folder-share") {
+    const token = <string>route.params.token;
     // TODO: allow proper dav access without the need of basic auth
     // https://github.com/nextcloud/server/issues/19700
     return generateUrl(`/s/${token}/download?path={dirname}&files={basename}`, {
@@ -90,17 +61,16 @@ export function getDownloadLink(photo: IPhoto) {
   }
 
   // Check if albums
-  const route = vuerouter.currentRoute;
   if (route.name === "albums") {
     const fInfos = getAlbumFileInfos(
       [photo],
-      route.params.user,
-      route.params.name
+      <string>route.params.user,
+      <string>route.params.name
     );
     if (fInfos.length) {
-      return `/remote.php/dav${fInfos[0].originalFilename}`;
+      return getRootUrl() + `/remote.php/dav${fInfos[0].originalFilename}`;
     }
   }
 
-  return `/remote.php/dav${photo.filename}`;
+  return getRootUrl() + `/remote.php/dav${photo.filename}`;
 }

@@ -1,24 +1,3 @@
-<!--
- - @copyright Copyright (c) 2022 Louis Chemineau <louis@chmn.me>
- -
- - @author Louis Chemineau <louis@chmn.me>
- -
- - @license AGPL-3.0-or-later
- -
- - This program is free software: you can redistribute it and/or modify
- - it under the terms of the GNU Affero General Public License as
- - published by the Free Software Foundation, either version 3 of the
- - License, or (at your option) any later version.
- -
- - This program is distributed in the hope that it will be useful,
- - but WITHOUT ANY WARRANTY; without even the implied warranty of
- - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- - GNU Affero General Public License for more details.
- -
- - You should have received a copy of the GNU Affero General Public License
- - along with this program. If not, see <http://www.gnu.org/licenses/>.
- -
- -->
 <template>
   <div class="manage-collaborators">
     <div class="manage-collaborators__subtitle">
@@ -162,8 +141,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
-import GlobalMixin from "../../mixins/GlobalMixin";
+import { defineComponent, PropType } from "vue";
 
 import Magnify from "vue-material-design-icons/Magnify.vue";
 import Close from "vue-material-design-icons/Close.vue";
@@ -194,7 +172,8 @@ type Collaborator = {
   type: Type;
 };
 
-@Component({
+export default defineComponent({
+  name: "AddToAlbumModal",
   components: {
     Magnify,
     Close,
@@ -209,244 +188,268 @@ type Collaborator = {
     NcPopover,
     NcEmptyContent,
   },
-})
-export default class AddToAlbumModal extends Mixins(GlobalMixin) {
-  @Prop() private albumName: string;
-  @Prop() collaborators: Collaborator[];
-  @Prop() allowPublicLink: boolean;
 
-  private searchText = "";
-  private availableCollaborators: { [key: string]: Collaborator } = {};
-  private selectedCollaboratorsKeys: string[] = [];
-  private currentSearchResults = [];
-  private loadingAlbum = false;
-  private errorFetchingAlbum = null;
-  private loadingCollaborators = false;
-  private errorFetchingCollaborators = null;
-  private randomId = Math.random().toString().substring(2, 10);
-  private publicLinkCopied = false;
-  private config = {
-    minSearchStringLength:
-      parseInt(window.OC.config["sharing.minSearchStringLength"], 10) || 0,
-  };
+  props: {
+    albumName: {
+      type: String,
+      required: true,
+    },
+    collaborators: {
+      type: Array as PropType<Collaborator[]>,
+      required: true,
+    },
+    allowPublicLink: {
+      type: Boolean,
+      required: false,
+    },
+  },
 
-  get searchResults(): string[] {
-    return this.currentSearchResults
-      .filter(({ id }) => id !== getCurrentUser()?.uid)
-      .map(({ type, id }) => `${type}:${id}`)
-      .filter(
+  data: () => ({
+    searchText: "",
+    availableCollaborators: {} as { [key: string]: Collaborator },
+    selectedCollaboratorsKeys: [] as string[],
+    currentSearchResults: [] as Collaborator[],
+    loadingAlbum: false,
+    errorFetchingAlbum: null,
+    loadingCollaborators: false,
+    errorFetchingCollaborators: null,
+    randomId: Math.random().toString().substring(2, 10),
+    publicLinkCopied: false,
+    config: {
+      minSearchStringLength:
+        parseInt(window.OC.config["sharing.minSearchStringLength"], 10) || 0,
+    },
+  }),
+
+  computed: {
+    searchResults(): string[] {
+      return this.currentSearchResults
+        .filter(({ id }) => id !== getCurrentUser()?.uid)
+        .map(({ type, id }) => `${type}:${id}`)
+        .filter(
+          (collaboratorKey) =>
+            !this.selectedCollaboratorsKeys.includes(collaboratorKey)
+        );
+    },
+
+    listableSelectedCollaboratorsKeys(): string[] {
+      return this.selectedCollaboratorsKeys.filter(
         (collaboratorKey) =>
-          !this.selectedCollaboratorsKeys.includes(collaboratorKey)
+          this.availableCollaborators[collaboratorKey].type !==
+          Type.SHARE_TYPE_LINK
       );
-  }
+    },
 
-  get listableSelectedCollaboratorsKeys(): string[] {
-    return this.selectedCollaboratorsKeys.filter(
-      (collaboratorKey) =>
-        this.availableCollaborators[collaboratorKey].type !==
-        Type.SHARE_TYPE_LINK
-    );
-  }
+    selectedCollaborators(): Collaborator[] {
+      return this.selectedCollaboratorsKeys.map(
+        (collaboratorKey) => this.availableCollaborators[collaboratorKey]
+      );
+    },
 
-  get selectedCollaborators(): Collaborator[] {
-    return this.selectedCollaboratorsKeys.map(
-      (collaboratorKey) => this.availableCollaborators[collaboratorKey]
-    );
-  }
+    isPublicLinkSelected(): boolean {
+      return this.selectedCollaboratorsKeys.includes(`${Type.SHARE_TYPE_LINK}`);
+    },
 
-  get isPublicLinkSelected(): boolean {
-    return this.selectedCollaboratorsKeys.includes(`${Type.SHARE_TYPE_LINK}`);
-  }
-
-  get publicLink(): Collaborator {
-    return this.availableCollaborators[Type.SHARE_TYPE_LINK];
-  }
-
-  @Watch("collaborators")
-  collaboratorsChanged(collaborators) {
-    this.populateCollaborators(collaborators);
-  }
+    publicLink(): Collaborator {
+      return this.availableCollaborators[Type.SHARE_TYPE_LINK];
+    },
+  },
+  watch: {
+    collaborators(collaborators) {
+      this.populateCollaborators(collaborators);
+    },
+  },
 
   mounted() {
     this.searchCollaborators();
     this.populateCollaborators(this.collaborators);
-  }
+  },
 
-  /**
-   * Fetch possible collaborators.
-   */
-  async searchCollaborators() {
-    if (this.searchText.length >= 1) {
-      (<any>this.$refs.popover).$refs.popover.show();
-    }
-
-    try {
-      if (this.searchText.length < this.config.minSearchStringLength) {
-        return;
+  methods: {
+    /**
+     * Fetch possible collaborators.
+     */
+    async searchCollaborators() {
+      if (this.searchText.length >= 1) {
+        (<any>this.$refs.popover).$refs.popover.show();
       }
 
-      this.loadingCollaborators = true;
-      const response = await axios.get(
-        generateOcsUrl("core/autocomplete/get"),
-        {
-          params: {
-            search: this.searchText,
-            itemType: "share-recipients",
-            shareTypes: [Type.SHARE_TYPE_USER, Type.SHARE_TYPE_GROUP],
-          },
+      try {
+        if (this.searchText.length < this.config.minSearchStringLength) {
+          return;
         }
+
+        this.loadingCollaborators = true;
+        const response = await axios.get(
+          generateOcsUrl("core/autocomplete/get"),
+          {
+            params: {
+              search: this.searchText,
+              itemType: "share-recipients",
+              shareTypes: [Type.SHARE_TYPE_USER, Type.SHARE_TYPE_GROUP],
+            },
+          }
+        );
+
+        this.currentSearchResults = response.data.ocs.data.map(
+          (collaborator) => {
+            switch (collaborator.source) {
+              case "users":
+                return {
+                  id: collaborator.id,
+                  label: collaborator.label,
+                  type: Type.SHARE_TYPE_USER,
+                };
+              case "groups":
+                return {
+                  id: collaborator.id,
+                  label: collaborator.label,
+                  type: Type.SHARE_TYPE_GROUP,
+                };
+              default:
+                throw new Error(
+                  `Invalid collaborator source ${collaborator.source}`
+                );
+            }
+          }
+        );
+
+        this.availableCollaborators = {
+          ...this.availableCollaborators,
+          ...this.currentSearchResults.reduce(this.indexCollaborators, {}),
+        };
+      } catch (error) {
+        this.errorFetchingCollaborators = error;
+        showError(this.t("photos", "Failed to fetch collaborators list."));
+      } finally {
+        this.loadingCollaborators = false;
+      }
+    },
+
+    /**
+     * Populate selectedCollaboratorsKeys and availableCollaborators.
+     */
+    populateCollaborators(collaborators: Collaborator[]) {
+      const initialCollaborators = collaborators.reduce(
+        this.indexCollaborators,
+        {}
       );
-
-      this.currentSearchResults = response.data.ocs.data.map((collaborator) => {
-        switch (collaborator.source) {
-          case "users":
-            return {
-              id: collaborator.id,
-              label: collaborator.label,
-              type: Type.SHARE_TYPE_USER,
-            };
-          case "groups":
-            return {
-              id: collaborator.id,
-              label: collaborator.label,
-              type: Type.SHARE_TYPE_GROUP,
-            };
-          default:
-            throw new Error(
-              `Invalid collaborator source ${collaborator.source}`
-            );
-        }
-      });
-
+      this.selectedCollaboratorsKeys = Object.keys(initialCollaborators);
       this.availableCollaborators = {
+        3: {
+          id: "",
+          label: this.t("photos", "Public link"),
+          type: Type.SHARE_TYPE_LINK,
+        },
         ...this.availableCollaborators,
-        ...this.currentSearchResults.reduce(this.indexCollaborators, {}),
+        ...initialCollaborators,
       };
-    } catch (error) {
-      this.errorFetchingCollaborators = error;
-      showError(this.t("photos", "Failed to fetch collaborators list."));
-    } finally {
-      this.loadingCollaborators = false;
-    }
-  }
+    },
 
-  /**
-   * Populate selectedCollaboratorsKeys and availableCollaborators.
-   */
-  populateCollaborators(collaborators: Collaborator[]) {
-    const initialCollaborators = collaborators.reduce(
-      this.indexCollaborators,
-      {}
-    );
-    this.selectedCollaboratorsKeys = Object.keys(initialCollaborators);
-    this.availableCollaborators = {
-      3: {
+    /**
+     * @param {Object<string, Collaborator>} collaborators - Index of collaborators
+     * @param {Collaborator} collaborator - A collaborator
+     */
+    indexCollaborators(
+      collaborators: { [s: string]: Collaborator },
+      collaborator: Collaborator
+    ) {
+      return {
+        ...collaborators,
+        [`${collaborator.type}${
+          collaborator.type === Type.SHARE_TYPE_LINK ? "" : ":"
+        }${collaborator.type === Type.SHARE_TYPE_LINK ? "" : collaborator.id}`]:
+          collaborator,
+      };
+    },
+
+    async createPublicLinkForAlbum() {
+      this.selectEntity(`${Type.SHARE_TYPE_LINK}`);
+      await this.updateAlbumCollaborators();
+      try {
+        this.loadingAlbum = true;
+        this.errorFetchingAlbum = null;
+
+        const album = await dav.getAlbum(
+          getCurrentUser()?.uid.toString(),
+          this.albumName
+        );
+        this.populateCollaborators(album.collaborators);
+      } catch (error) {
+        if (error.response?.status === 404) {
+          this.errorFetchingAlbum = 404;
+        } else {
+          this.errorFetchingAlbum = error;
+        }
+
+        showError(this.t("photos", "Failed to fetch album."));
+      } finally {
+        this.loadingAlbum = false;
+      }
+    },
+
+    async deletePublicLink() {
+      this.unselectEntity(`${Type.SHARE_TYPE_LINK}`);
+      this.availableCollaborators[3] = {
         id: "",
         label: this.t("photos", "Public link"),
         type: Type.SHARE_TYPE_LINK,
-      },
-      ...this.availableCollaborators,
-      ...initialCollaborators,
-    };
-  }
+      };
+      this.publicLinkCopied = false;
+      await this.updateAlbumCollaborators();
+    },
 
-  /**
-   * @param {Object<string, Collaborator>} collaborators - Index of collaborators
-   * @param {Collaborator} collaborator - A collaborator
-   */
-  indexCollaborators(
-    collaborators: { [s: string]: Collaborator },
-    collaborator: Collaborator
-  ) {
-    return {
-      ...collaborators,
-      [`${collaborator.type}${
-        collaborator.type === Type.SHARE_TYPE_LINK ? "" : ":"
-      }${collaborator.type === Type.SHARE_TYPE_LINK ? "" : collaborator.id}`]:
-        collaborator,
-    };
-  }
+    async updateAlbumCollaborators() {
+      try {
+        const album = await dav.getAlbum(
+          getCurrentUser()?.uid.toString(),
+          this.albumName
+        );
+        await dav.updateAlbum(album, {
+          albumName: this.albumName,
+          properties: {
+            collaborators: this.selectedCollaborators,
+          },
+        });
+      } catch (error) {
+        showError(this.t("photos", "Failed to update album."));
+      } finally {
+        this.loadingAlbum = false;
+      }
+    },
 
-  async createPublicLinkForAlbum() {
-    this.selectEntity(`${Type.SHARE_TYPE_LINK}`);
-    await this.updateAlbumCollaborators();
-    try {
-      this.loadingAlbum = true;
-      this.errorFetchingAlbum = null;
-    } catch (error) {
-      if (error.response?.status === 404) {
-        this.errorFetchingAlbum = 404;
-      } else {
-        this.errorFetchingAlbum = error;
+    async copyPublicLink() {
+      await navigator.clipboard.writeText(
+        `${window.location.protocol}//${window.location.host}${generateUrl(
+          `apps/photos/public/${this.publicLink.id}`
+        )}`
+      );
+      this.publicLinkCopied = true;
+      setTimeout(() => {
+        this.publicLinkCopied = false;
+      }, 10000);
+    },
+
+    selectEntity(collaboratorKey) {
+      if (this.selectedCollaboratorsKeys.includes(collaboratorKey)) {
+        return;
       }
 
-      showError(this.t("photos", "Failed to fetch album."));
-    } finally {
-      this.loadingAlbum = false;
-    }
-  }
+      (<any>this.$refs.popover).$refs.popover.hide();
+      this.selectedCollaboratorsKeys.push(collaboratorKey);
+    },
 
-  async deletePublicLink() {
-    this.unselectEntity(`${Type.SHARE_TYPE_LINK}`);
-    this.availableCollaborators[3] = {
-      id: "",
-      label: this.t("photos", "Public link"),
-      type: Type.SHARE_TYPE_LINK,
-    };
-    this.publicLinkCopied = false;
-    await this.updateAlbumCollaborators();
-  }
+    unselectEntity(collaboratorKey) {
+      const index = this.selectedCollaboratorsKeys.indexOf(collaboratorKey);
 
-  async updateAlbumCollaborators() {
-    try {
-      const album = await dav.getAlbum(
-        getCurrentUser()?.uid.toString(),
-        this.albumName
-      );
-      await dav.updateAlbum(album, {
-        albumName: this.albumName,
-        properties: {
-          collaborators: this.selectedCollaborators,
-        },
-      });
-    } catch (error) {
-      showError(this.t("photos", "Failed to update album."));
-    } finally {
-      this.loadingAlbum = false;
-    }
-  }
+      if (index === -1) {
+        return;
+      }
 
-  async copyPublicLink() {
-    await navigator.clipboard.writeText(
-      `${window.location.protocol}//${window.location.host}${generateUrl(
-        `apps/photos/public/${this.publicLink.id}`
-      )}`
-    );
-    this.publicLinkCopied = true;
-    setTimeout(() => {
-      this.publicLinkCopied = false;
-    }, 10000);
-  }
-
-  selectEntity(collaboratorKey) {
-    if (this.selectedCollaboratorsKeys.includes(collaboratorKey)) {
-      return;
-    }
-
-    (<any>this.$refs.popover).$refs.popover.hide();
-    this.selectedCollaboratorsKeys.push(collaboratorKey);
-  }
-
-  unselectEntity(collaboratorKey) {
-    const index = this.selectedCollaboratorsKeys.indexOf(collaboratorKey);
-
-    if (index === -1) {
-      return;
-    }
-
-    this.selectedCollaboratorsKeys.splice(index, 1);
-  }
-}
+      this.selectedCollaboratorsKeys.splice(index, 1);
+    },
+  },
+});
 </script>
 <style lang="scss" scoped>
 .manage-collaborators {

@@ -1,12 +1,12 @@
 import * as base from "./base";
 import { getCurrentUser } from "@nextcloud/auth";
-import { generateUrl } from "@nextcloud/router";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t, translatePlural as n } from "@nextcloud/l10n";
 import { IAlbum, IDay, IFileInfo, IPhoto, ITag } from "../../types";
 import { constants } from "../Utils";
 import axios from "@nextcloud/axios";
 import client from "../DavClient";
+import { API } from "../API";
 
 /**
  * Get DAV path for album
@@ -28,9 +28,7 @@ export function getAlbumPath(user: string, name: string) {
 export async function getAlbumsData(type: "1" | "2" | "3"): Promise<IDay[]> {
   let data: IAlbum[] = [];
   try {
-    const res = await axios.get<typeof data>(
-      generateUrl(`/apps/memories/api/albums?t=${type}`)
-    );
+    const res = await axios.get<typeof data>(API.ALBUM_LIST(type));
     data = res.data;
   } catch (e) {
     throw e;

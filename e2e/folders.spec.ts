@@ -12,6 +12,6 @@ test.describe("Open", () => {
 
   test("Open folder", async ({ page }) => {
     await page.locator("text=Local").click();
-    await page.waitForSelector('img[src*="core/preview"]');
+    await page.waitForSelector('img[src*="api/image/preview"]');
   });
 });

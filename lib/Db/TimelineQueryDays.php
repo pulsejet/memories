@@ -266,9 +266,6 @@ trait TimelineQueryDays
         }
 
         foreach ($day as &$row) {
-            // We don't need date taken (see query builder)
-            unset($row['datetaken']);
-
             // Convert field types
             $row['fileid'] = (int) $row['fileid'];
             $row['isvideo'] = (int) $row['isvideo'];
@@ -291,7 +288,7 @@ trait TimelineQueryDays
             if (isset($row['path']) && !empty($row['path'])) {
                 $rootId = \array_key_exists('rootid', $row) ? $row['rootid'] : $defaultRootId;
                 $basePath = $internalPaths[$rootId] ?? '#__#';
-                $davPath = $davPaths[$rootId] ?: '';
+                $davPath = (\array_key_exists($rootId, $davPaths) ? $davPaths[$rootId] : null) ?: '';
 
                 if (0 === strpos($row['path'], $basePath)) {
                     $rpath = substr($row['path'], \strlen($basePath));
@@ -302,7 +299,11 @@ trait TimelineQueryDays
             }
 
             // All transform processing
-            $this->processFace($row);
+            $this->processPeopleRecognizeDetection($row);
+            $this->processFaceRecognitionDetection($row);
+
+            // We don't need these fields
+            unset($row['datetaken'], $row['rootid']);
         }
 
         return $day;

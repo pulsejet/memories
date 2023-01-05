@@ -34,17 +34,14 @@ class VideoController extends ApiBase
     /**
      * @NoAdminRequired
      *
+     * @PublicPage
+     *
      * @NoCSRFRequired
      *
      * Transcode a video to HLS by proxy
      */
-    public function transcode(string $client, string $fileid, string $profile): Http\Response
+    public function transcode(string $client, int $fileid, string $profile): Http\Response
     {
-        $user = $this->userSession->getUser();
-        if (null === $user) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
-        }
-
         // Make sure not running in read-only mode
         if (false !== $this->config->getSystemValue('memories.no_transcode', 'UNSET')) {
             return new JSONResponse(['message' => 'Transcoding disabled'], Http::STATUS_FORBIDDEN);
@@ -56,11 +53,10 @@ class VideoController extends ApiBase
         }
 
         // Get file
-        $files = $this->rootFolder->getUserFolder($user->getUID())->getById($fileid);
-        if (0 === \count($files)) {
+        $file = $this->getUserFile($fileid);
+        if (!$file) {
             return new JSONResponse(['message' => 'File not found'], Http::STATUS_NOT_FOUND);
         }
-        $file = $files[0];
 
         if (!($file->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
             return new JSONResponse(['message' => 'File not readable'], Http::STATUS_FORBIDDEN);
@@ -83,84 +79,36 @@ class VideoController extends ApiBase
             return new JSONResponse(['message' => 'File is in temp dir!'], Http::STATUS_NOT_FOUND);
         }
 
-        // Make upstream request
-        [$data, $contentType, $returnCode] = $this->getUpstream($client, $path, $profile);
-
-        // If status code was 0, it's likely the server is down
-        // Make one attempt to start if we can't find the process
-        if (0 === $returnCode) {
-            $transcoder = $this->config->getSystemValue('memories.transcoder', false);
-            if (!$transcoder) {
-                return new JSONResponse(['message' => 'Transcoder not configured'], Http::STATUS_INTERNAL_SERVER_ERROR);
-            }
-
-            // Make transcoder executable
-            if (!is_executable($transcoder)) {
-                chmod($transcoder, 0755);
-            }
-
-            // Check for environment variables
-            $env = '';
-
-            // QSV with VAAPI
-            $vaapi = $this->config->getSystemValue('memories.qsv', false);
-            if ($vaapi) {
-                $env .= 'VAAPI=1 ';
-            }
-
-            // Paths
-            $ffmpegPath = $this->config->getSystemValue('memories.ffmpeg_path', 'ffmpeg');
-            $ffprobePath = $this->config->getSystemValue('memories.ffprobe_path', 'ffprobe');
-            $tmpPath = $this->config->getSystemValue('memories.tmp_path', sys_get_temp_dir());
-            $env .= "FFMPEG='{$ffmpegPath}' FFPROBE='{$ffprobePath}' GOVOD_TEMPDIR='{$tmpPath}/go-vod' ";
-
-            // Check if already running
-            exec("pkill {$transcoder}");
-            shell_exec("{$env} nohup {$transcoder} > {$tmpPath}/go-vod.log 2>&1 & > /dev/null");
-
-            // wait for 1s and try again
-            sleep(1);
-            [$data, $contentType, $returnCode] = $this->getUpstream($client, $path, $profile);
-        }
-
-        // Check data was received
-        if ($returnCode >= 400 || false === $data) {
+        // Request and check data was received
+        if (200 !== $this->getUpstream($client, $path, $profile)) {
             return new JSONResponse(['message' => 'Transcode failed'], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
 
-        // Create and send response
-        $response = new DataDisplayResponse($data, Http::STATUS_OK, [
-            'Content-Type' => $contentType,
-        ]);
-        $response->cacheFor(0, false, false);
-
-        return $response;
+        // The response was already streamed, so we have nothing to do here
+        exit;
     }
 
     /**
      * @NoAdminRequired
      *
+     * @PublicPage
+     *
      * @NoCSRFRequired
      *
      * Return the live video part of a live photo
      */
-    public function livephoto(string $fileid)
-    {
-        $fileid = (int) $fileid;
-        $files = $this->rootFolder->getById($fileid);
-        if (0 === \count($files)) {
+    public function livephoto(
+        int $fileid,
+        string $liveid = '',
+        string $format = '',
+        string $transcode = ''
+    ) {
+        $file = $this->getUserFile($fileid);
+        if (null === $file) {
             return new JSONResponse(['message' => 'File not found'], Http::STATUS_NOT_FOUND);
-        }
-        $file = $files[0];
-
-        // Check file etag
-        $etag = $file->getEtag();
-        if ($etag !== $this->request->getParam('etag')) {
-            return new JSONResponse(['message' => 'File changed'], Http::STATUS_PRECONDITION_FAILED);
         }
 
         // Check file liveid
-        $liveid = $this->request->getParam('liveid');
         if (!$liveid) {
             return new JSONResponse(['message' => 'Live ID not provided'], Http::STATUS_BAD_REQUEST);
         }
@@ -208,13 +156,22 @@ class VideoController extends ApiBase
 
             if ($liveFile instanceof File) {
                 // Requested only JSON info
-                if ('json' === $this->request->getParam('format')) {
+                if ('json' === $format) {
                     return new JSONResponse($lp);
                 }
 
                 $name = $liveFile->getName();
                 $blob = $liveFile->getContent();
                 $mime = $liveFile->getMimeType();
+
+                if ($transcode && !$this->config->getSystemValue('memories.no_transcode', true)) {
+                    // Only Apple uses HEVC for now, so pass this to the transcoder
+                    // If this is H.264 it won't get transcoded anyway
+                    $liveVideoPath = $liveFile->getStorage()->getLocalFile($liveFile->getInternalPath());
+                    if ($this->getUpstream($transcode, $liveVideoPath, 'max.mov')) {
+                        exit;
+                    }
+                }
             }
         }
 
@@ -236,16 +193,114 @@ class VideoController extends ApiBase
 
     private function getUpstream($client, $path, $profile)
     {
+        $returnCode = $this->getUpstreamInternal($client, $path, $profile);
+
+        // If status code was 0, it's likely the server is down
+        // Make one attempt to start after killing whatever is there
+        if (0 !== $returnCode) {
+            return $returnCode;
+        }
+
+        // Get transcoder path
+        $transcoder = $this->config->getSystemValue('memories.transcoder', false);
+        if (!$transcoder) {
+            return 0;
+        }
+
+        // Make transcoder executable
+        if (!is_executable($transcoder)) {
+            @chmod($transcoder, 0755);
+        }
+
+        // Check for environment variables
+        $env = '';
+
+        // QSV with VAAPI
+        $vaapi = $this->config->getSystemValue('memories.qsv', false);
+        if ($vaapi) {
+            $env .= 'VAAPI=1 ';
+        }
+
+        // NVENC
+        $nvenc = $this->config->getSystemValue('memories.nvenc', false);
+        if ($nvenc) {
+            $env .= 'NVENC=1 ';
+        }
+
+        // Paths
+        $ffmpegPath = $this->config->getSystemValue('memories.ffmpeg_path', 'ffmpeg');
+        $ffprobePath = $this->config->getSystemValue('memories.ffprobe_path', 'ffprobe');
+        $tmpPath = $this->config->getSystemValue('memories.tmp_path', sys_get_temp_dir());
+        $env .= "FFMPEG='{$ffmpegPath}' FFPROBE='{$ffprobePath}' GOVOD_TEMPDIR='{$tmpPath}/go-vod' ";
+
+        // Check if already running
+        \OCA\Memories\Util::pkill($transcoder);
+        shell_exec("{$env} nohup {$transcoder} > {$tmpPath}/go-vod.log 2>&1 & > /dev/null");
+
+        // wait for 1s and try again
+        sleep(1);
+
+        return $this->getUpstreamInternal($client, $path, $profile);
+    }
+
+    private function getUpstreamInternal($client, $path, $profile)
+    {
         $path = rawurlencode($path);
-        $ch = curl_init("http://127.0.0.1:47788/{$client}{$path}/{$profile}");
+
+        // Make sure query params are repeated
+        // For example, in folder sharing, we need the params on every request
+        $url = "http://127.0.0.1:47788/{$client}{$path}/{$profile}";
+        if ($params = $_SERVER['QUERY_STRING']) {
+            $url .= "?{$params}";
+        }
+
+        $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($ch, CURLOPT_HEADER, 0);
-        $data = curl_exec($ch);
-        $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+
+        // Catch connection abort here
+        ignore_user_abort(true);
+
+        // Stream the response to the browser without reading it into memory
+        $headersWritten = false;
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($curl, $data) use (&$headersWritten, $profile) {
+            $returnCode = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+            if (200 === $returnCode) {
+                // Write headers if just got the first chunk of data
+                if (!$headersWritten) {
+                    $headersWritten = true;
+                    $contentType = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
+                    header("Content-Type: {$contentType}");
+
+                    if (str_ends_with($profile, 'mov')) {
+                        // cache full video 24 hours
+                        header('Cache-Control: max-age=86400, public');
+                    } else {
+                        // no caching of segments
+                        header('Cache-Control: no-cache, no-store, must-revalidate');
+                    }
+
+                    http_response_code($returnCode);
+                }
+
+                echo $data;
+                flush();
+
+                if (connection_aborted()) {
+                    return -1; // stop the transfer
+                }
+            }
+
+            return \strlen($data);
+        });
+
+        // Start the request
+        curl_exec($ch);
         $returnCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        return [$data, $contentType, $returnCode];
+        return $returnCode;
     }
 }

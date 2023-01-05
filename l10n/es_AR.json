@@ -15,10 +15,6 @@
     "Favorite" : "Favorito",
     "Unarchive" : "Desarchivar",
     "View in folder" : "Ver en la carpeta",
-    "Share" : "Compartir",
-    "Close" : "Cerrar",
-    "Previous" : "Anterior",
-    "Next" : "Siguiente",
     "Copy public link" : "Copiar link publico",
     "Back" : "Atrás",
     "Save" : "Guardar",
@@ -26,10 +22,18 @@
     "Day" : "Día",
     "Time" : "Hora",
     "Hour" : "Hora",
+    "Title" : "Título",
+    "Description" : "Descripción",
+    "Label" : "Etiqueta",
+    "Copyright" : "Derechos de autor",
     "Name" : "Nombre",
     "Update" : "Actualizar",
     "Refresh" : "Recargar",
     "Remove" : "Borrar",
+    "Share" : "Compartir",
+    "Close" : "Cerrar",
+    "Previous" : "Anterior",
+    "Next" : "Siguiente",
     "Reset" : "Restablecer",
     "Continue" : "Continuar",
     "Undo" : "Deshacer",
@@ -37,6 +41,7 @@
     "Value" : "Valor",
     "Text" : "Texto",
     "Size" : "Tamaño",
-    "Position" : "Posición"
+    "Position" : "Posición",
+    "Direct" : "Directo"
 },"pluralForm" :"nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }

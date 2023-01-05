@@ -1,24 +1,3 @@
-<!--
- - @copyright Copyright (c) 2022 Louis Chemineau <louis@chmn.me>
- -
- - @author Louis Chemineau <louis@chmn.me>
- -
- - @license AGPL-3.0-or-later
- -
- - This program is free software: you can redistribute it and/or modify
- - it under the terms of the GNU Affero General Public License as
- - published by the Free Software Foundation, either version 3 of the
- - License, or (at your option) any later version.
- -
- - This program is distributed in the hope that it will be useful,
- - but WITHOUT ANY WARRANTY; without even the implied warranty of
- - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- - GNU Affero General Public License for more details.
- -
- - You should have received a copy of the GNU Affero General Public License
- - along with this program. If not, see <http://www.gnu.org/licenses/>.
- -
- -->
 <template>
   <div v-if="!showAlbumCreationForm" class="album-picker">
     <NcLoadingIcon v-if="loadingAlbums" class="loading-icon" />
@@ -36,18 +15,18 @@
         "
         @click="pickAlbum(album)"
       >
-        <template slot="icon">
+        <template v-slot:icon="{}">
           <img
             v-if="album.last_added_photo !== -1"
             class="album__image"
-            :src="album.last_added_photo | toCoverUrl"
+            :src="toCoverUrl(album.last_added_photo)"
           />
           <div v-else class="album__image album__image--placeholder">
             <ImageMultiple :size="32" />
           </div>
         </template>
 
-        <template slot="subtitle">
+        <template v-slot:subtitle="{}">
           {{ n("photos", "%n item", "%n items", album.count) }}
           <!-- TODO: finish collaboration -->
           <!--⸱ {{ n('photos', 'Share with %n user', 'Share with %n users', album.isShared) }}-->
@@ -78,8 +57,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins } from "vue-property-decorator";
-import GlobalMixin from "../../mixins/GlobalMixin";
+import { defineComponent } from "vue";
+
 import { getCurrentUser } from "@nextcloud/auth";
 
 import AlbumForm from "./AlbumForm.vue";
@@ -90,12 +69,13 @@ import NcButton from "@nextcloud/vue/dist/Components/NcButton";
 import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
 const NcListItem = () => import("@nextcloud/vue/dist/Components/NcListItem");
 
-import { generateUrl } from "@nextcloud/router";
-import { getPhotosPreviewUrl } from "../../services/FileUtils";
+import { getPreviewUrl } from "../../services/FileUtils";
 import { IAlbum, IPhoto } from "../../types";
 import axios from "@nextcloud/axios";
+import { API } from "../../services/API";
 
-@Component({
+export default defineComponent({
+  name: "AlbumPicker",
   components: {
     AlbumForm,
     Plus,
@@ -104,9 +84,20 @@ import axios from "@nextcloud/axios";
     NcListItem,
     NcLoadingIcon,
   },
-  filters: {
-    toCoverUrl(fileId: string) {
-      return getPhotosPreviewUrl(
+
+  data: () => ({
+    showAlbumCreationForm: false,
+    albums: [] as IAlbum[],
+    loadingAlbums: true,
+  }),
+
+  mounted() {
+    this.loadAlbums();
+  },
+
+  methods: {
+    toCoverUrl(fileId: string | number) {
+      return getPreviewUrl(
         {
           fileid: Number(fileId),
         } as IPhoto,
@@ -114,45 +105,35 @@ import axios from "@nextcloud/axios";
         256
       );
     },
+
+    albumCreatedHandler() {
+      this.showAlbumCreationForm = false;
+      this.loadAlbums();
+    },
+
+    getAlbumName(album: IAlbum) {
+      if (album.user === getCurrentUser()?.uid) {
+        return album.name;
+      }
+      return `${album.name} (${album.user})`;
+    },
+
+    async loadAlbums() {
+      try {
+        const res = await axios.get<IAlbum[]>(API.ALBUM_LIST());
+        this.albums = res.data;
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.loadingAlbums = false;
+      }
+    },
+
+    pickAlbum(album: IAlbum) {
+      this.$emit("select", album);
+    },
   },
-})
-export default class AlbumPicker extends Mixins(GlobalMixin) {
-  private showAlbumCreationForm = false;
-  private albums: IAlbum[] = [];
-  private loadingAlbums = true;
-
-  mounted() {
-    this.loadAlbums();
-  }
-
-  albumCreatedHandler() {
-    this.showAlbumCreationForm = false;
-    this.loadAlbums();
-  }
-
-  getAlbumName(album: IAlbum) {
-    if (album.user === getCurrentUser()?.uid) {
-      return album.name;
-    }
-    return `${album.name} (${album.user})`;
-  }
-
-  async loadAlbums() {
-    try {
-      const res = await axios.get<IAlbum[]>(
-        generateUrl("/apps/memories/api/albums?t=3")
-      );
-      this.albums = res.data;
-    } catch (e) {
-      console.error(e);
-    } finally {
-      this.loadingAlbums = false;
-    }
-  }
-
-  @Emit("select")
-  pickAlbum(album: IAlbum) {}
-}
+});
 </script>
 
 <style lang="scss" scoped>

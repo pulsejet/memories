@@ -11,10 +11,11 @@ class TimelineQuery
 {
     use TimelineQueryAlbums;
     use TimelineQueryDays;
-    use TimelineQueryFaces;
     use TimelineQueryFilters;
     use TimelineQueryFolders;
     use TimelineQueryLivePhoto;
+    use TimelineQueryPeopleFaceRecognition;
+    use TimelineQueryPeopleRecognize;
     use TimelineQueryTags;
 
     protected IDBConnection $connection;

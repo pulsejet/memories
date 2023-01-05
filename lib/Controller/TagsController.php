@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 
 class TagsController extends ApiBase
@@ -62,9 +63,11 @@ class TagsController extends ApiBase
     /**
      * @NoAdminRequired
      *
-     * Get previews for a tag
+     * @NoCSRFRequired
+     *
+     * Get preview for a tag
      */
-    public function previews(): JSONResponse
+    public function preview(string $tag): Http\Response
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
@@ -82,15 +85,43 @@ class TagsController extends ApiBase
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }
 
-        // Get the tag
-        $tagName = $this->request->getParam('tag');
-
         // Run actual query
-        $list = $this->timelineQuery->getTagPreviews(
-            $tagName,
-            $root,
-        );
+        $list = $this->timelineQuery->getTagPreviews($tag, $root);
+        if (null === $list || 0 === \count($list)) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
 
-        return new JSONResponse($list, Http::STATUS_OK);
+        // Get preview manager
+        $previewManager = \OC::$server->get(\OCP\IPreview::class);
+
+        // Try to get a preview
+        $userFolder = $this->rootFolder->getUserFolder($user->getUID());
+        foreach ($list as &$img) {
+            // Get the file
+            $files = $userFolder->getById($img['fileid']);
+            if (0 === \count($files)) {
+                continue;
+            }
+
+            // Check read permission
+            if (!($files[0]->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
+                continue;
+            }
+
+            // Get preview image
+            try {
+                $preview = $previewManager->getPreview($files[0], 512, 512, false);
+                $response = new DataDisplayResponse($preview->getContent(), Http::STATUS_OK, [
+                    'Content-Type' => $preview->getMimeType(),
+                ]);
+                $response->cacheFor(3600 * 24, false, false);
+
+                return $response;
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        return new JSONResponse([], Http::STATUS_NOT_FOUND);
     }
 }

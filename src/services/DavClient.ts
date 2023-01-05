@@ -27,15 +27,11 @@ import { generateRemoteUrl } from "@nextcloud/router";
 
 // Monkey business
 import * as rq from "webdav/dist/node/request";
-(<any>rq).prepareRequestOptionsOld = rq.prepareRequestOptions.bind(rq);
-(<any>rq).prepareRequestOptions = function (
-  requestOptions,
-  context,
-  userOptions
-) {
+const prepareRequestOptionsOld = rq.prepareRequestOptions.bind(rq);
+(<any>rq).prepareRequestOptions = (requestOptions, context, userOptions) => {
   requestOptions.method = userOptions.method || requestOptions.method;
-  return this.prepareRequestOptionsOld(requestOptions, context, userOptions);
-}.bind(rq);
+  return prepareRequestOptionsOld(requestOptions, context, userOptions);
+};
 
 // force our axios
 const patcher = webdav.getPatcher();
