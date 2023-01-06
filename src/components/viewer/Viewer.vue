@@ -813,6 +813,7 @@ export default defineComponent({
           if (this.$route.hash?.startsWith("#v")) {
             this.$router.replace({
               hash: "",
+              query: this.$route.query,
             });
           }
         }
