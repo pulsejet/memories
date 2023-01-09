@@ -6,8 +6,8 @@ namespace OCA\Memories\Db;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Exif;
-use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\DB\IPreparedStatement;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
 use OCP\IPreview;
@@ -30,13 +30,15 @@ class TimelineWrite
         $this->preview = \OC::$server->get(IPreview::class);
         $this->livePhoto = new LivePhoto($connection);
 
-        $selectBuilder = function ($table) : IPreparedStatement {
+        $selectBuilder = function ($table): IPreparedStatement {
             $query = $this->connection->getQueryBuilder();
             $sql = $query->select('fileid', 'mtime')
                 ->from($table)
                 ->where($query->expr()->eq('fileid', $query->createParameter('fileid')))
                 ->setMaxResults(1)
-                ->getSQL();
+                ->getSQL()
+            ;
+
             return $this->connection->prepare($sql);
         };
         $this->selectMemories = $selectBuilder('memories');
@@ -44,7 +46,7 @@ class TimelineWrite
 
         // Update existing row
         // No need to set objectid again
-        $query= $this->connection->getQueryBuilder();
+        $query = $this->connection->getQueryBuilder();
         $sql = $query->update('memories')
             ->set('dayid', $query->createParameter('dayid'))
             ->set('datetaken', $query->createParameter('datetaken'))
@@ -57,7 +59,8 @@ class TimelineWrite
             ->set('liveid', $query->createParameter('liveid'))
             ->where($query->expr()->eq('fileid', $query->createParameter('fileid')))
             ->setMaxResults(1)
-            ->getSQL();
+            ->getSQL()
+        ;
         $this->updateMemories = $this->connection->prepare($sql);
 
         // Create new row
@@ -74,17 +77,20 @@ class TimelineWrite
                 'w' => $query->createParameter('w'),
                 'h' => $query->createParameter('h'),
                 'exif' => $query->createParameter('exif'),
-                'liveid' => $query->createParameter('liveid')
+                'liveid' => $query->createParameter('liveid'),
             ])
-            ->getSQL();
+            ->getSQL()
+        ;
         $this->insertMemories = $this->connection->prepare($sql);
 
-        $deleteBuilder = function ($table) : IPreparedStatement {
+        $deleteBuilder = function ($table): IPreparedStatement {
             $query = $this->connection->getQueryBuilder();
             $sql = $query->delete($table)
                 ->where($query->expr()->eq('fileid', $query->createParameter('fileid')))
                 ->setMaxResults(1)
-                ->getSQL();
+                ->getSQL()
+            ;
+
             return $this->connection->prepare($sql);
         };
         $this->deleteMemories = $deleteBuilder('memories');
