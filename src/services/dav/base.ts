@@ -190,19 +190,12 @@ export async function* runInParallel<T>(
 }
 
 /**
- * Delete all files in a given list of Ids
+ * Extend given list of Ids with extra files for live photos.
  *
- * @param photos list of photos to delete
- * @returns list of file ids that were deleted
+ * @param photos list of photos to search for live photos
+ * @returns list of file ids that contains extra file Ids for live photos if any
  */
-export async function* deletePhotos(photos: IPhoto[]) {
-  if (photos.length === 0) {
-    return;
-  }
-
-  const fileIdsSet = new Set(photos.map((p) => p.fileid));
-
-  // Get live photo data
+async function extendWithLivePhotos(photos: IPhoto[]) {
   const livePhotos = (
     await Promise.all(
       photos
@@ -212,7 +205,6 @@ export async function* deletePhotos(photos: IPhoto[]) {
           try {
             const response = await axios.get(url);
             const data = response.data;
-            fileIdsSet.add(data.fileid);
             return {
               fileid: data.fileid,
             } as IPhoto;
@@ -224,12 +216,29 @@ export async function* deletePhotos(photos: IPhoto[]) {
     )
   ).filter((p) => p !== null) as IPhoto[];
 
+  return photos.concat(livePhotos);
+}
+
+/**
+ * Delete all files in a given list of Ids
+ *
+ * @param photos list of photos to delete
+ * @returns list of file ids that were deleted
+ */
+export async function* deletePhotos(photos: IPhoto[]) {
+  if (photos.length === 0) {
+    return;
+  }
+
+  const photosWithLive = await extendWithLivePhotos(photos);
+  const fileIdsSet = new Set(photosWithLive.map((p) => p.fileid));
+
   // Get files data
   let fileInfos: IFileInfo[] = [];
   try {
-    fileInfos = await getFiles(photos.concat(livePhotos));
+    fileInfos = await getFiles(photosWithLive);
   } catch (e) {
-    console.error("Failed to get file info for files to delete", photos, e);
+    console.error("Failed to get file info for files to delete", photosWithLive, e);
     showError(t("memories", "Failed to delete files."));
     return;
   }
@@ -244,6 +253,73 @@ export async function* deletePhotos(photos: IPhoto[]) {
       console.error("Failed to delete", fileInfo, error);
       showError(
         t("memories", "Failed to delete {fileName}.", {
+          fileName: fileInfo.filename,
+        })
+      );
+      return 0;
+    }
+  });
+
+  yield* runInParallel(calls, 10);
+}
+
+/**
+ * Move all files in a given list of Ids to given destination
+ *
+ * @param photos list of photos to move
+ * @param destination to move photos into
+ * @param overwrite behaviour if the target exists. `true` overwrites, `false` fails.
+ * @returns list of file ids that were moved
+ */
+export async function* movePhotos(photos: IPhoto[], destination: string, overwrite: boolean) {
+  if (photos.length === 0) {
+    return;
+  }
+
+  // Set absolute target path
+  const prefixPath = `files/${getCurrentUser()?.uid}`;
+  let targetPath = prefixPath + destination;
+  if (!targetPath.endsWith('/')) {
+    targetPath += '/';
+  }
+
+  const photosWithLive = await extendWithLivePhotos(photos);
+  const fileIdsSet = new Set(photosWithLive.map((p) => p.fileid));
+
+  // Get files data
+  let fileInfos: IFileInfo[] = [];
+  try {
+    fileInfos = await getFiles(photosWithLive);
+  } catch (e) {
+    console.error("Failed to get file info for files to move", photosWithLive, e);
+    showError(t("memories", "Failed to move files."));
+    return;
+  }
+
+  // Move each file
+  fileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid));
+  const calls = fileInfos.map((fileInfo) => async () => {
+    try {
+      await client.moveFile(
+        fileInfo.originalFilename,
+        targetPath + fileInfo.basename,
+        // @ts-ignore - https://github.com/perry-mitchell/webdav-client/issues/329
+        { headers: { 'Overwrite' : overwrite ? 'T' : 'F' }});
+      return fileInfo.fileid;
+    } catch (error) {
+      console.error("Failed to move", fileInfo, error);
+      if (error.response?.status === 412) {
+        // Precondition failed (only if `overwrite` flag set to false)
+        showError(
+          t("memories", "Could not move {fileName}, target exists.", {
+            fileName: fileInfo.filename,
+          })
+        );
+        return 0;
+      }
+
+      showError(
+        t("memories", "Failed to move {fileName}.", {
           fileName: fileInfo.filename,
         })
       );

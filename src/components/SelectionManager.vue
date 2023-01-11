@@ -44,6 +44,7 @@
       :updateLoading="updateLoading"
     />
     <AddToAlbumModal ref="addToAlbumModal" @added="clearSelection" />
+    <MoveToFolderModal ref="moveToFolderModal" @moved="refresh" />
   </div>
 </template>
 
@@ -73,6 +74,7 @@ import EditDate from "./modal/EditDate.vue";
 import EditExif from "./modal/EditExif.vue";
 import FaceMoveModal from "./modal/FaceMoveModal.vue";
 import AddToAlbumModal from "./modal/AddToAlbumModal.vue";
+import MoveToFolderModal from "./modal/MoveToFolderModal.vue";
 
 import StarIcon from "vue-material-design-icons/Star.vue";
 import DownloadIcon from "vue-material-design-icons/Download.vue";
@@ -86,6 +88,7 @@ import CloseIcon from "vue-material-design-icons/Close.vue";
 import MoveIcon from "vue-material-design-icons/ImageMove.vue";
 import AlbumsIcon from "vue-material-design-icons/ImageAlbum.vue";
 import AlbumRemoveIcon from "vue-material-design-icons/BookRemove.vue";
+import FolderMoveIcon from "vue-material-design-icons/FolderMove.vue";
 
 type Selection = Map<number, IPhoto>;
 
@@ -98,6 +101,7 @@ export default defineComponent({
     EditExif,
     FaceMoveModal,
     AddToAlbumModal,
+    MoveToFolderModal,
 
     CloseIcon,
   },
@@ -184,6 +188,12 @@ export default defineComponent({
         icon: OpenInNewIcon,
         callback: this.viewInFolder.bind(this),
         if: () => this.selection.size === 1 && !this.routeIsAlbum(),
+      },
+      {
+        name: t("memories", "Move to folder"),
+        icon: FolderMoveIcon,
+        callback: this.moveToFolder.bind(this),
+        if: () => !this.routeIsAlbum() && !this.routeIsArchive(),
       },
       {
         name: t("memories", "Add to album"),
@@ -798,6 +808,13 @@ export default defineComponent({
      */
     async addToAlbum(selection: Selection) {
       (<any>this.$refs.addToAlbumModal).open(Array.from(selection.values()));
+    },
+
+    /**
+     * Move selected photos to folder
+     */
+    async moveToFolder(selection: Selection) {
+      (<any>this.$refs.moveToFolderModal).open(Array.from(selection.values()));
     },
 
     /**
