@@ -73,7 +73,7 @@ class AlbumsController extends ApiBase
         }
 
         // Get files
-        $files = $this->timelineQuery->getAlbumFiles($album['album_id']);
+        $files = $this->timelineQuery->getAlbumFiles((int) $album['album_id']);
         if (empty($files)) {
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }
