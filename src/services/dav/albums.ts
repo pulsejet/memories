@@ -268,11 +268,7 @@ export function getAlbumFileInfos(
       : `/photos/${uid}/sharedalbums/${albumName} (${albumUser})`;
 
   return photos.map((photo) => {
-    const basename =
-      albumUser === uid
-        ? `${photo.fileid}-${photo.basename}`
-        : `${photo.fileid}-${albumName} (${albumUser})`;
-
+    const basename = `${photo.fileid}-${photo.basename}`;
     return {
       fileid: photo.fileid,
       filename: `${collection}/${basename}`,

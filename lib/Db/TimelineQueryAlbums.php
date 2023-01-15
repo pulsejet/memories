@@ -39,9 +39,10 @@ trait TimelineQueryAlbums
         $query->select('pa.*', $count)->from('photos_albums', 'pa');
 
         if ($shared) {
+            $ids = $this->getSelfCollaborators($uid);
             $query->innerJoin('pa', $this->collaboratorsTable(), 'pc', $query->expr()->andX(
                 $query->expr()->eq('pa.album_id', 'pc.album_id'),
-                $query->expr()->eq('pc.collaborator_id', $query->createNamedParameter($uid)),
+                $query->expr()->in('pc.collaborator_id', $query->createNamedParameter($ids, IQueryBuilder::PARAM_STR_ARRAY)),
             ));
         } else {
             $query->where(
@@ -141,9 +142,10 @@ trait TimelineQueryAlbums
         ));
 
         // Join to shared album
+        $ids = $this->getSelfCollaborators($uid);
         $query->leftJoin('paf', $this->collaboratorsTable(), 'pc', $query->expr()->andX(
             $query->expr()->eq('pc.album_id', 'paf.album_id'),
-            $query->expr()->eq('pc.collaborator_id', $query->createNamedParameter($uid)),
+            $query->expr()->in('pc.collaborator_id', $query->createNamedParameter($ids, IQueryBuilder::PARAM_STR_ARRAY)),
         ));
 
         return $query->executeQuery()->fetchOne();
@@ -185,10 +187,11 @@ trait TimelineQueryAlbums
 
         // Check in collaborators instead
         $query = $this->connection->getQueryBuilder();
+        $ids = $this->getSelfCollaborators($uid);
         $query->select('album_id')->from($this->collaboratorsTable())->where(
             $query->expr()->andX(
                 $query->expr()->eq('album_id', $query->createNamedParameter($album['album_id'])),
-                $query->expr()->eq('collaborator_id', $query->createNamedParameter($uid)),
+                $query->expr()->in('collaborator_id', $query->createNamedParameter($ids, IQueryBuilder::PARAM_STR_ARRAY)),
             )
         );
 
@@ -215,6 +218,20 @@ trait TimelineQueryAlbums
         }
 
         return $fileIds;
+    }
+
+    /** Get list of collaborator ids including user id and groups */
+    private function getSelfCollaborators(string $uid)
+    {
+        // Get groups for the user
+        $groupManager = \OC::$server->get(\OCP\IGroupManager::class);
+        $user = \OC::$server->get(\OCP\IUserManager::class)->get($uid);
+        $groups = $groupManager->getUserGroupIds($user);
+
+        // And albums shared with user
+        $groups[] = $uid;
+
+        return $groups;
     }
 
     /** Get the name of the collaborators table */
