@@ -5,6 +5,7 @@
     :class="{ fullyOpened, slideshowTimer }"
     :style="{ width: outerWidth }"
     @fullscreenchange="fullscreenChange"
+    @keydown="keydown"
   >
     <ImageEditor
       v-if="editorOpen"
@@ -902,6 +903,17 @@ export default defineComponent({
       } catch (err) {
         console.error(err.name, err.message);
         showError(err.message);
+      }
+    },
+
+    /** Key press events */
+    keydown(e: KeyboardEvent) {
+      if (
+        e.key === "Delete" &&
+        !this.routeIsPublic &&
+        confirm(this.t("memories", "Are you sure you want to delete?"))
+      ) {
+        this.deleteCurrent();
       }
     },
 
