@@ -44,6 +44,7 @@ OC.L10N.register(
     "Close" : "Sluit",
     "Previous" : "Vorige",
     "Next" : "Volgende",
+    "Are you sure you want to delete?" : "Weet je zeker dat je wilt verwijderen?",
     "Reset" : "Herstellen",
     "Continue" : "Doorgaan",
     "Undo" : "Ongedaan maken",

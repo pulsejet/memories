@@ -145,6 +145,7 @@ OC.L10N.register(
     "Next" : "Következő",
     "Video sharing not supported yet" : "A videómegosztás még nem támogatott",
     "Cannot share this type of data" : "Az ilyen típusú adatok nem oszthatók meg",
+    "Are you sure you want to delete?" : "Biztos, hogy törli?",
     "Save as" : "Mentés másként",
     "Reset" : "Alaphelyzetbe állítás",
     "All changes will be lost." : "Az összes változtatás elvész.",

@@ -101,6 +101,7 @@ OC.L10N.register(
     "Close" : "Zatvoriť",
     "Previous" : "Predchádzajúce",
     "Next" : "Ďalšie",
+    "Are you sure you want to delete?" : "Naozaj chcete vymazať?",
     "Save as" : "Uložiť ako",
     "Reset" : "Resetovať",
     "All changes will be lost." : "Vaše zmeny budú stratené.",

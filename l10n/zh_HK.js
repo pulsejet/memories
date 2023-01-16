@@ -158,6 +158,7 @@ OC.L10N.register(
     "Next" : "下一",
     "Video sharing not supported yet" : "尚不支援視像分享",
     "Cannot share this type of data" : "無法分享此類型的資料",
+    "Are you sure you want to delete?" : "您確定要刪除嗎？",
     "Save as" : "另存為",
     "Reset" : "重設",
     "All changes will be lost." : "所有的更改將被掉棄。",
