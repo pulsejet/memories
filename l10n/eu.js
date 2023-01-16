@@ -112,6 +112,7 @@ OC.L10N.register(
     "Next" : "Hurrengoa",
     "Video sharing not supported yet" : "Bideoen partekatzea ez dago onartuta oraindik",
     "Cannot share this type of data" : "Ezin duzu datu-mota hau partekatu",
+    "Are you sure you want to delete?" : "Ziur zaude ezabatu nahi duzula?",
     "Save as" : "Gorde honela",
     "Reset" : "Berrezarri",
     "All changes will be lost." : "Aldaketa guztiak galduko dira.",

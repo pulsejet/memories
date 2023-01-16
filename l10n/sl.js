@@ -52,6 +52,7 @@ OC.L10N.register(
     "Close" : "Zapri",
     "Previous" : "Predhodni",
     "Next" : "Naslednji",
+    "Are you sure you want to delete?" : "Ali ste prepričani, da želite predmet izbrisati?",
     "Reset" : "Ponastavi",
     "Continue" : "Nadaljuj",
     "Undo" : "Razveljavi",
