@@ -323,7 +323,10 @@ export default defineComponent({
 
   methods: {
     async routeChange(to: any, from?: any) {
-      if (from?.path !== to.path) {
+      if (
+        from?.path !== to.path ||
+        JSON.stringify(from.query) !== JSON.stringify(to.query)
+      ) {
         await this.refresh();
       }
 
@@ -634,6 +637,9 @@ export default defineComponent({
       // Folder
       if (this.$route.name === "folders") {
         query.set("folder", utils.getFolderRoutePath(this.config_foldersPath));
+        if(this.$route.query.recursive === "1") {
+          query.set("recursive", "1");
+        }
       }
 
       // Archive

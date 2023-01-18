@@ -222,7 +222,7 @@ class ApiBase extends Controller
 
     protected function isRecursive()
     {
-        return null === $this->request->getParam('folder');
+        return null === $this->request->getParam('folder') || "1" === $this->request->getParam('recursive');
     }
 
     protected function isArchive()
