@@ -6,7 +6,6 @@ use OCA\Files\Event\LoadSidebar;
 use OCA\Memories\Db\TimelineQuery;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
-use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
@@ -59,30 +58,12 @@ class PublicAlbumController extends Controller
         // Scripts
         Util::addScript($this->appName, 'memories-main');
         $this->eventDispatcher->dispatchTyped(new LoadSidebar());
-
-        $this->initialState->provideInitialState('version', $this->appManager->getAppInfo('memories')['version']);
-        $this->initialState->provideInitialState('notranscode', $this->config->getSystemValue('memories.no_transcode', 'UNSET'));
-
-        $policy = new ContentSecurityPolicy();
-        $policy->addAllowedWorkerSrcDomain("'self'");
-        $policy->addAllowedScriptDomain("'self'");
-
-        // Video player
-        $policy->addAllowedWorkerSrcDomain('blob:');
-        $policy->addAllowedScriptDomain('blob:');
-        $policy->addAllowedMediaDomain('blob:');
-
-        // Image editor
-        $policy->addAllowedConnectDomain('data:');
-
-        // Allow nominatim for metadata
-        $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
-        $policy->addAllowedFrameDomain('www.openstreetmap.org');
+        PageController::provideCommonInitialState($this->initialState);
 
         $response = new PublicTemplateResponse($this->appName, 'main');
         $response->setHeaderTitle($album['name']);
         $response->setFooterVisible(false); // wth is that anyway?
-        $response->setContentSecurityPolicy($policy);
+        $response->setContentSecurityPolicy(PageController::getCSP());
 
         return $response;
     }

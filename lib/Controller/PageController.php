@@ -90,12 +90,18 @@ class PageController extends Controller
         $this->initialState->provideInitialState('facerecognitionEnabled', \OCA\Memories\Util::facerecognitionIsEnabled($this->config, $uid));
         $this->initialState->provideInitialState('albums', \OCA\Memories\Util::albumsIsEnabled($this->appManager));
 
-        // App version
-        $this->initialState->provideInitialState('version', $this->appManager->getAppInfo('memories')['version']);
+        // Common state
+        self::provideCommonInitialState($this->initialState);
 
-        // Video configuration
-        $this->initialState->provideInitialState('notranscode', $this->config->getSystemValue('memories.no_transcode', 'UNSET'));
+        $response = new TemplateResponse($this->appName, 'main');
+        $response->setContentSecurityPolicy(self::getCSP());
 
+        return $response;
+    }
+
+    /** Get the common content security policy */
+    public static function getCSP()
+    {
         $policy = new ContentSecurityPolicy();
         $policy->addAllowedWorkerSrcDomain("'self'");
         $policy->addAllowedScriptDomain("'self'");
@@ -112,10 +118,20 @@ class PageController extends Controller
         $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
         $policy->addAllowedFrameDomain('www.openstreetmap.org');
 
-        $response = new TemplateResponse($this->appName, 'main');
-        $response->setContentSecurityPolicy($policy);
+        return $policy;
+    }
 
-        return $response;
+    /** Provide initial state for all pages */
+    public static function provideCommonInitialState(IInitialState &$initialState)
+    {
+        $appManager = \OC::$server->get(\OCP\App\IAppManager::class);
+        $config = \OC::$server->get(\OCP\IConfig::class);
+
+        // App version
+        $initialState->provideInitialState('version', $appManager->getAppInfo('memories')['version']);
+
+        // Video configuration
+        $initialState->provideInitialState('notranscode', $config->getSystemValue('memories.no_transcode', 'UNSET'));
     }
 
     /**
