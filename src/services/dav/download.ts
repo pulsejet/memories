@@ -1,9 +1,7 @@
-import { generateUrl, getRootUrl } from "@nextcloud/router";
 import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
 import { IPhoto } from "../../types";
-import { getAlbumFileInfos } from "./albums";
 import { API } from "../API";
 
 /**
