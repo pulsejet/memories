@@ -39,7 +39,11 @@ class DaysController extends ApiBase
     public function days(): JSONResponse
     {
         // Get the folder to show
-        $uid = $this->getUID();
+        try {
+            $uid = $this->getUID();
+        } catch (\Exception $e) {
+            return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_PRECONDITION_FAILED);
+        }
 
         // Get the folder to show
         $root = null;
@@ -183,6 +187,13 @@ class DaysController extends ApiBase
             $transforms[] = [$this->timelineQuery, 'transformExtraFields', $fields];
         }
 
+        // Filter for one album
+        if ($this->albumsIsEnabled()) {
+            if ($albumId = $this->request->getParam('album')) {
+                $transforms[] = [$this->timelineQuery, 'transformAlbumFilter', $albumId];
+            }
+        }
+
         // Other transforms not allowed for public shares
         if (null === $this->userSession->getUser()) {
             return $transforms;
@@ -223,13 +234,6 @@ class DaysController extends ApiBase
         if ($this->tagsIsEnabled()) {
             if ($tagName = $this->request->getParam('tag')) {
                 $transforms[] = [$this->timelineQuery, 'transformTagFilter', $tagName];
-            }
-        }
-
-        // Filter for one album
-        if ($this->albumsIsEnabled()) {
-            if ($albumId = $this->request->getParam('album')) {
-                $transforms[] = [$this->timelineQuery, 'transformAlbumFilter', $albumId];
             }
         }
 

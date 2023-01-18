@@ -120,5 +120,14 @@ export default new Router({
         rootTitle: t("memories", "Shared Folder"),
       }),
     },
+
+    {
+      path: "/a/:token",
+      component: Timeline,
+      name: "album-share",
+      props: (route) => ({
+        rootTitle: t("memories", "Shared Album"),
+      }),
+    },
   ],
 });

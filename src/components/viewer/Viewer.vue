@@ -283,7 +283,7 @@ export default defineComponent({
 
     /** Route is public */
     routeIsPublic(): boolean {
-      return this.$route.name === "folder-share";
+      return this.$route.name?.endsWith("-share");
     },
 
     /** Route is album */

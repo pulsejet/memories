@@ -4,6 +4,7 @@ This file is manually updated. Please file an issue if something is missing.
 
 ## v4.10.0, v3.10.0 (unreleased)
 
+- **Feature**: Allow sharing albums using public links
 - **Feature**: Allow sharing albums with groups
 - Fix folder share title and remove footer
 - Other minor fixes

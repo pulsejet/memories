@@ -264,7 +264,7 @@ export default defineComponent({
 
     /** Public route that can't modify anything */
     routeIsPublic() {
-      return this.$route.name === "folder-share";
+      return this.$route.name?.endsWith("-share");
     },
 
     /** Trigger to update props from selection set */

@@ -9,6 +9,7 @@
       :album-name="album.basename"
       :collaborators="album.collaborators"
       :public-link="album.publicLink"
+      :allow-public-link="true"
       v-slot="{ collaborators }"
     >
       <NcButton

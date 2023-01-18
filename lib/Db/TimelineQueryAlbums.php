@@ -118,6 +118,24 @@ trait TimelineQueryAlbums
     }
 
     /**
+     * Check if an album has a file.
+     *
+     * @return bool|string owner of file
+     */
+    public function albumHasFile(int $albumId, int $fileId)
+    {
+        $query = $this->connection->getQueryBuilder();
+        $query->select('owner')->from('photos_albums_files')->where(
+            $query->expr()->andX(
+                $query->expr()->eq('file_id', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)),
+                $query->expr()->eq('album_id', $query->createNamedParameter($albumId, IQueryBuilder::PARAM_INT)),
+            )
+        );
+
+        return $query->executeQuery()->fetchOne();
+    }
+
+    /**
      * Check if a file belongs to a user through an album.
      *
      * @return bool|string owner of file
@@ -159,25 +177,28 @@ trait TimelineQueryAlbums
      */
     public function getAlbumIfAllowed(string $uid, string $albumId)
     {
+        $album = null;
+
         // Split name and uid
         $parts = explode('/', $albumId);
-        if (2 !== \count($parts)) {
-            return null;
-        }
-        $albumUid = $parts[0];
-        $albumName = $parts[1];
+        if (2 === \count($parts)) {
+            $albumUid = $parts[0];
+            $albumName = $parts[1];
 
-        // Check if owner
-        $query = $this->connection->getQueryBuilder();
-        $query->select('*')->from('photos_albums')->where(
-            $query->expr()->andX(
-                $query->expr()->eq('name', $query->createNamedParameter($albumName)),
-                $query->expr()->eq('user', $query->createNamedParameter($albumUid)),
-            )
-        );
-        $album = $query->executeQuery()->fetch();
+            // Check if owner
+            $query = $this->connection->getQueryBuilder();
+            $query->select('*')->from('photos_albums')->where(
+                $query->expr()->andX(
+                    $query->expr()->eq('name', $query->createNamedParameter($albumName)),
+                    $query->expr()->eq('user', $query->createNamedParameter($albumUid)),
+                )
+            );
+            $album = $query->executeQuery()->fetch();
+        }
+
+        // Album not found: it could be a link token at best
         if (!$album) {
-            return null;
+            return $this->getAlbumByLink($albumId);
         }
 
         // Check if user is owner
@@ -198,6 +219,24 @@ trait TimelineQueryAlbums
         if (false !== $query->executeQuery()->fetchOne()) {
             return $album;
         }
+    }
+
+    /**
+     * Get album object by token.
+     * Returns false if album link does not exist.
+     */
+    public function getAlbumByLink(string $token)
+    {
+        $query = $this->connection->getQueryBuilder();
+        $query->select('*')->from('photos_albums', 'pa')
+            ->innerJoin('pa', $this->collaboratorsTable(), 'pc', $query->expr()->andX(
+                $query->expr()->eq('pc.album_id', 'pa.album_id'),
+                $query->expr()->eq('collaborator_id', $query->createNamedParameter($token)),
+                $query->expr()->eq('collaborator_type', $query->createNamedParameter(3)), // = TYPE_LINK
+            ))
+        ;
+
+        return $query->executeQuery()->fetch() ?: null;
     }
 
     /**

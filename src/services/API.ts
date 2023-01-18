@@ -9,7 +9,10 @@ function tok(url: string) {
   const route = vueroute();
   if (route.name === "folder-share") {
     const token = <string>route.params.token;
-    url = API.Q(url, `folder_share=${token}`);
+    url = API.Q(url, `token=${token}`);
+  } else if (route.name === "album-share") {
+    const token = <string>route.params.token;
+    url = API.Q(url, `token=${token}&album=${token}`);
   }
   return url;
 }
