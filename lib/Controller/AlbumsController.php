@@ -49,6 +49,17 @@ class AlbumsController extends ApiBase
             $list = array_merge($list, $this->timelineQuery->getAlbums($user->getUID(), true));
         }
 
+        // Remove elements with duplicate album_id
+        $seenIds = [];
+        $list = array_filter($list, function ($item) use (&$seenIds) {
+            if (\in_array($item['album_id'], $seenIds, true)) {
+                return false;
+            }
+            $seenIds[] = $item['album_id'];
+
+            return true;
+        });
+
         return new JSONResponse($list, Http::STATUS_OK);
     }
 
@@ -73,7 +84,7 @@ class AlbumsController extends ApiBase
         }
 
         // Get files
-        $files = $this->timelineQuery->getAlbumFiles($album['album_id']);
+        $files = $this->timelineQuery->getAlbumFiles((int) $album['album_id']);
         if (empty($files)) {
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }

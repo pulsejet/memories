@@ -123,7 +123,7 @@ class TimelineWrite
         // Video parameters
         $videoDuration = 0;
         if ($isvideo) {
-            $videoDuration = round($exif['Duration'] ?? $exif['TrackDuration'] ?? 0);
+            $videoDuration = round((float) ($exif['Duration'] ?? $exif['TrackDuration'] ?? 0));
         }
 
         // Clean up EXIF to keep only useful metadata
@@ -221,5 +221,48 @@ class TimelineWrite
         $t1 = $p->getTruncateTableSQL('`*PREFIX*memories`', false);
         $t2 = $p->getTruncateTableSQL('`*PREFIX*memories_livephoto`', false);
         $this->connection->executeStatement("{$t1}; {$t2}");
+    }
+
+    /**
+     * Mark a file as not orphaned.
+     */
+    public function unorphan(File &$file)
+    {
+        $query = $this->connection->getQueryBuilder();
+        $query->update('memories')
+            ->set('orphan', $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL))
+            ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
+        ;
+        $query->executeStatement();
+    }
+
+    /**
+     * Mark all files in the table as orphaned.
+     *
+     * @return int Number of rows affected
+     */
+    public function orphanAll(): int
+    {
+        $query = $this->connection->getQueryBuilder();
+        $query->update('memories')
+            ->set('orphan', $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL))
+        ;
+
+        return $query->executeStatement();
+    }
+
+    /**
+     * Remove all entries that are orphans.
+     *
+     * @return int Number of rows affected
+     */
+    public function removeOrphans(): int
+    {
+        $query = $this->connection->getQueryBuilder();
+        $query->delete('memories')
+            ->where($query->expr()->eq('orphan', $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL)))
+        ;
+
+        return $query->executeStatement();
     }
 }

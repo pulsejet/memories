@@ -234,7 +234,7 @@ class VideoController extends ApiBase
         $env .= "FFMPEG='{$ffmpegPath}' FFPROBE='{$ffprobePath}' GOVOD_TEMPDIR='{$tmpPath}/go-vod' ";
 
         // Check if already running
-        exec("pkill {$transcoder}");
+        \OCA\Memories\Util::pkill($transcoder);
         shell_exec("{$env} nohup {$transcoder} > {$tmpPath}/go-vod.log 2>&1 & > /dev/null");
 
         // wait for 1s and try again

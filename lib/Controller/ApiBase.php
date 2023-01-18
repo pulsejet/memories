@@ -29,8 +29,6 @@ use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Exif;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
-use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
@@ -46,6 +44,7 @@ class ApiBase extends Controller
     protected IRootFolder $rootFolder;
     protected IAppManager $appManager;
     protected TimelineQuery $timelineQuery;
+    protected IDBConnection $connection;
 
     public function __construct(
         IRequest $request,
@@ -65,14 +64,14 @@ class ApiBase extends Controller
         $this->timelineQuery = new TimelineQuery($connection);
     }
 
-    /** Get logged in user's UID or throw HTTP error */
+    /** Get logged in user's UID or throw exception */
     protected function getUID(): string
     {
         $user = $this->userSession->getUser();
         if ($this->getShareToken()) {
             $user = null;
         } elseif (null === $user) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+            throw new \Exception('User not logged in');
         }
 
         return $user ? $user->getUID() : '';
@@ -81,11 +80,17 @@ class ApiBase extends Controller
     /** Get the TimelineRoot object relevant to the request */
     protected function getRequestRoot()
     {
+        $user = $this->userSession->getUser();
         $root = new TimelineRoot();
 
         // Albums have no folder
-        if ($this->request->getParam('album')) {
-            return $root;
+        if ($this->albumsIsEnabled() && $this->request->getParam('album')) {
+            if (null !== $user) {
+                return $root;
+            }
+            if (($token = $this->getShareToken()) && $this->timelineQuery->getAlbumByLink($token)) {
+                return $root;
+            }
         }
 
         // Public shared folder
@@ -96,7 +101,6 @@ class ApiBase extends Controller
         }
 
         // Anything else needs a user
-        $user = $this->userSession->getUser();
         if (null === $user) {
             throw new \Exception('User not logged in');
         }
@@ -143,7 +147,7 @@ class ApiBase extends Controller
 
         // Check both user folder and album
         return $this->getUserFolderFile($fileId) ??
-               $this->getAlbumFile($fileId);
+            $this->getAlbumFile($fileId);
     }
 
     /**
@@ -189,6 +193,24 @@ class ApiBase extends Controller
     protected function getShareFile(int $id): ?File
     {
         try {
+            // Album share
+            if ($this->request->getParam('album')) {
+                $album = $this->timelineQuery->getAlbumByLink($this->getShareToken());
+                if (null === $album) {
+                    return null;
+                }
+
+                $owner = $this->timelineQuery->albumHasFile($album['album_id'], $id);
+                if (!$owner) {
+                    return null;
+                }
+
+                $folder = $this->rootFolder->getUserFolder($owner);
+
+                return $this->getOneFileFromFolder($folder, $id);
+            }
+
+            // Folder share
             if ($share = $this->getShareNode()) {
                 return $this->getOneFileFromFolder($share, $id);
             }
@@ -200,7 +222,7 @@ class ApiBase extends Controller
 
     protected function isRecursive()
     {
-        return null === $this->request->getParam('folder');
+        return null === $this->request->getParam('folder') || $this->request->getParam('recursive');
     }
 
     protected function isArchive()
@@ -220,7 +242,7 @@ class ApiBase extends Controller
 
     protected function getShareToken()
     {
-        return $this->request->getParam('folder_share');
+        return $this->request->getParam('token');
     }
 
     protected function getShareObject()
@@ -242,8 +264,10 @@ class ApiBase extends Controller
             $session = \OC::$server->get(\OCP\ISession::class);
 
             // https://github.com/nextcloud/server/blob/0447b53bda9fe95ea0cbed765aa332584605d652/lib/public/AppFramework/PublicShareController.php#L119
-            if ($session->get('public_link_authenticated_token') !== $token
-                || $session->get('public_link_authenticated_password_hash') !== $password) {
+            if (
+                $session->get('public_link_authenticated_token') !== $token
+                || $session->get('public_link_authenticated_password_hash') !== $password
+            ) {
                 throw new \Exception('Share is password protected and user is not authenticated');
             }
         }

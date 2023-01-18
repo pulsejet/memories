@@ -141,4 +141,23 @@ class Util
 
         return false;
     }
+
+    /**
+     * Kill all instances of a process by name.
+     * Similar to pkill, which may not be available on all systems.
+     */
+    public static function pkill(string $name): void
+    {
+        // get pids using ps as array
+        $pids = shell_exec("ps -ef | grep {$name} | grep -v grep | awk '{print $2}'");
+        if (null === $pids || empty($pids)) {
+            return;
+        }
+        $pids = array_filter(explode("\n", $pids));
+
+        // kill all pids
+        foreach ($pids as $pid) {
+            posix_kill((int) $pid, SIGKILL);
+        }
+    }
 }

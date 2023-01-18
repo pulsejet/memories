@@ -29,11 +29,11 @@
     "e2e": "playwright test"
   },
   "dependencies": {
-    "@nextcloud/l10n": "^1.6.0",
+    "@nextcloud/l10n": "^2.0.0",
     "@nextcloud/paths": "^2.1.0",
     "@nextcloud/sharing": "^0.1.0",
     "@nextcloud/vue": "^6.0.0",
-    "camelcase": "^7.0.0",
+    "camelcase": "^7.0.1",
     "filerobot-image-editor": "^4.3.7",
     "justified-layout": "^4.1.0",
     "moment": "^2.29.4",
@@ -42,7 +42,7 @@
     "plyr": "^3.7.3",
     "reflect-metadata": "^0.1.13",
     "video.js": "^7.21.1",
-    "videojs-contrib-quality-levels": "^2.2.1",
+    "videojs-contrib-quality-levels": "^3.0.0",
     "vue": "^2.7.14",
     "vue-material-design-icons": "^5.1.2",
     "vue-router": "^3.6.5",
@@ -53,16 +53,16 @@
     "extends @nextcloud/browserslist-config"
   ],
   "engines": {
-    "node": ">=14.0.0",
-    "npm": ">=7.0.0"
+    "node": ">=18.2.0",
+    "npm": ">=8.0.0"
   },
   "devDependencies": {
     "@nextcloud/browserslist-config": "^2.3.0",
     "@nextcloud/webpack-vue-config": "^5.4.0",
-    "@playwright/test": "^1.28.1",
+    "@playwright/test": "^1.29.2",
     "@types/url-parse": "^1.4.8",
     "@types/video.js": "^7.3.50",
-    "playwright": "^1.28.1",
+    "playwright": "^1.29.2",
     "ts-loader": "^9.4.2",
     "typescript": "^4.9.4",
     "workbox-webpack-plugin": "^6.5.4"

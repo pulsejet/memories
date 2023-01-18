@@ -140,7 +140,7 @@ export default defineComponent({
     },
 
     showNavigation(): boolean {
-      return this.$route.name !== "folder-share";
+      return !this.$route.name?.endsWith("-share");
     },
   },
 
@@ -286,12 +286,12 @@ export default defineComponent({
     },
 
     doRouteChecks() {
-      if (this.$route.name === "folder-share") {
-        this.putFolderShareToken(<string>this.$route.params.token);
+      if (this.$route.name.endsWith("-share")) {
+        this.putShareToken(<string>this.$route.params.token);
       }
     },
 
-    putFolderShareToken(token: string) {
+    putShareToken(token: string) {
       // Viewer looks for an input with ID sharingToken with the value as the token
       // Create this element or update it otherwise files not gonna open
       // https://github.com/nextcloud/viewer/blob/a8c46050fb687dcbb48a022a15a5d1275bf54a8e/src/utils/davUtils.js#L61

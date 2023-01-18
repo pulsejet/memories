@@ -421,7 +421,7 @@ export default defineComponent({
     async copyPublicLink() {
       await navigator.clipboard.writeText(
         `${window.location.protocol}//${window.location.host}${generateUrl(
-          `apps/photos/public/${this.publicLink.id}`
+          `apps/memories/a/${this.publicLink.id}`
         )}`
       );
       this.publicLinkCopied = true;

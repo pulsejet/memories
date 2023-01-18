@@ -266,7 +266,9 @@ export default defineComponent({
       return this.$route.name === "archive";
     },
     isMonthView(): boolean {
-      return this.$route.name === "albums";
+      return (
+        this.$route.name === "albums" || this.$route.name === "album-share"
+      );
     },
     /** Get view name for dynamic top matter */
     viewName(): string {
@@ -321,7 +323,10 @@ export default defineComponent({
 
   methods: {
     async routeChange(to: any, from?: any) {
-      if (from?.path !== to.path) {
+      if (
+        from?.path !== to.path ||
+        JSON.stringify(from.query) !== JSON.stringify(to.query)
+      ) {
         await this.refresh();
       }
 
@@ -632,6 +637,9 @@ export default defineComponent({
       // Folder
       if (this.$route.name === "folders") {
         query.set("folder", utils.getFolderRoutePath(this.config_foldersPath));
+        if (this.$route.query.recursive) {
+          query.set("recursive", "1");
+        }
       }
 
       // Archive

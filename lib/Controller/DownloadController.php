@@ -113,21 +113,37 @@ class DownloadController extends ApiBase
     }
 
     /**
-     * Download a single file.
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     *
+     * @PublicPage
      */
-    private function one(int $fileid): Http\Response
+    public function one(int $fileid): Http\Response
     {
         $file = $this->getUserFile($fileid);
         if (null === $file) {
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }
 
-        $response = new Http\StreamResponse($file->fopen('rb'));
-        $response->addHeader('Content-Type', $file->getMimeType());
-        $response->addHeader('Content-Disposition', 'attachment; filename="'.$file->getName().'"');
-        $response->addHeader('Content-Length', $file->getSize());
+        // Get DAV location of file
+        $userFolder = $this->rootFolder->getUserFolder($file->getOwner()->getUID());
+        $path = $userFolder->getRelativePath($file->getPath());
 
-        return $response;
+        // Setup filesystem for owner
+        \OC_Util::tearDownFS();
+        \OC_Util::setupFS($file->getOwner()->getUID());
+
+        // HEAD and RANGE support
+        $server_params = ['head' => 'HEAD' === $this->request->getMethod()];
+        if (isset($_SERVER['HTTP_RANGE'])) {
+            $server_params['range'] = $this->request->getHeader('Range');
+        }
+
+        // Write file to output and exit
+        \OC_Files::get(\dirname($path), basename($path), $server_params);
+
+        exit;
     }
 
     /**

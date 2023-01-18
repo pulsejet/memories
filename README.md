@@ -53,6 +53,7 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 A shout out to the current and past financial backers of Memories! See the sponsors page for a full list.
 
 [<img src="https://github.com/mpodshivalin.png" width="42" />](https://github.com/mpodshivalin)
+[<img src="https://github.com/k1l1.png" width="42" />](https://github.com/k1l1)
 
 ## Changelog
 

@@ -5,7 +5,6 @@ namespace OCA\Memories\Controller;
 use OCA\Files\Event\LoadSidebar;
 use OCP\App\IAppManager;
 use OCP\AppFramework\AuthPublicShareController;
-use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
@@ -102,34 +101,15 @@ class PublicController extends AuthPublicShareController
         // Scripts
         Util::addScript($this->appName, 'memories-main');
         $this->eventDispatcher->dispatchTyped(new LoadSidebar());
-
-        // App version
-        $this->initialState->provideInitialState('version', $this->appManager->getAppInfo('memories')['version']);
-
-        // Video configuration
-        $this->initialState->provideInitialState('notranscode', $this->config->getSystemValue('memories.no_transcode', 'UNSET'));
+        PageController::provideCommonInitialState($this->initialState);
 
         // Share info
         $this->initialState->provideInitialState('no_download', $share->getHideDownload());
 
-        $policy = new ContentSecurityPolicy();
-        $policy->addAllowedWorkerSrcDomain("'self'");
-        $policy->addAllowedScriptDomain("'self'");
-
-        // Video player
-        $policy->addAllowedWorkerSrcDomain('blob:');
-        $policy->addAllowedScriptDomain('blob:');
-        $policy->addAllowedMediaDomain('blob:');
-
-        // Image editor
-        $policy->addAllowedConnectDomain('data:');
-
-        // Allow nominatim for metadata
-        $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
-        $policy->addAllowedFrameDomain('www.openstreetmap.org');
-
         $response = new PublicTemplateResponse($this->appName, 'main');
-        $response->setContentSecurityPolicy($policy);
+        $response->setHeaderTitle($share->getNode()->getName());
+        $response->setFooterVisible(false); // wth is that anyway?
+        $response->setContentSecurityPolicy(PageController::getCSP());
 
         return $response;
     }

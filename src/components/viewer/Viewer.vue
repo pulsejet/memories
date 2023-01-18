@@ -5,11 +5,12 @@
     :class="{ fullyOpened, slideshowTimer }"
     :style="{ width: outerWidth }"
     @fullscreenchange="fullscreenChange"
+    @keydown="keydown"
   >
     <ImageEditor
       v-if="editorOpen"
       :mime="currentPhoto.mimetype"
-      :src="currentDownloadLink"
+      :src="editorDownloadLink"
       :fileid="currentPhoto.fileid"
       @close="editorOpen = false"
     />
@@ -176,6 +177,7 @@ import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 import axios from "@nextcloud/axios";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import { showError } from "@nextcloud/dialogs";
+import { getRootUrl } from "@nextcloud/router";
 
 import { getPreviewUrl } from "../../services/FileUtils";
 import { getDownloadLink } from "../../services/DavRequests";
@@ -282,7 +284,7 @@ export default defineComponent({
 
     /** Route is public */
     routeIsPublic(): boolean {
-      return this.$route.name === "folder-share";
+      return this.$route.name?.endsWith("-share");
     },
 
     /** Route is album */
@@ -323,10 +325,11 @@ export default defineComponent({
       return utils.getLongDateStr(new Date(date * 1000), false, true);
     },
 
-    /** Get download link for current photo */
-    currentDownloadLink(): string | null {
-      return this.currentPhoto
-        ? window.location.origin + getDownloadLink(this.currentPhoto)
+    /** Get DAV download link for current photo */
+    editorDownloadLink(): string | null {
+      const filename = this.currentPhoto?.filename;
+      return filename
+        ? window.location.origin + getRootUrl() + `/remote.php/dav${filename}`
         : null;
     },
 
@@ -813,6 +816,7 @@ export default defineComponent({
           if (this.$route.hash?.startsWith("#v")) {
             this.$router.replace({
               hash: "",
+              query: this.$route.query,
             });
           }
         }
@@ -902,6 +906,17 @@ export default defineComponent({
       } catch (err) {
         console.error(err.name, err.message);
         showError(err.message);
+      }
+    },
+
+    /** Key press events */
+    keydown(e: KeyboardEvent) {
+      if (
+        e.key === "Delete" &&
+        !this.routeIsPublic &&
+        confirm(this.t("memories", "Are you sure you want to delete?"))
+      ) {
+        this.deleteCurrent();
       }
     },
 

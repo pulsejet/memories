@@ -41,6 +41,20 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleSectionOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
+class IndexOpts
+{
+    public bool $refresh = false;
+    public bool $clear = false;
+    public bool $cleanup = false;
+
+    public function __construct(InputInterface $input)
+    {
+        $this->refresh = (bool) $input->getOption('refresh');
+        $this->clear = (bool) $input->getOption('clear');
+        $this->cleanup = (bool) $input->getOption('cleanup');
+    }
+}
+
 class Index extends Command
 {
     /** @var int[][] */
@@ -99,7 +113,13 @@ class Index extends Command
                 'clear',
                 null,
                 InputOption::VALUE_NONE,
-                'Clear existing index before creating a new one (SLOW)'
+                'Clear existing index before creating a new one (slow)'
+            )
+            ->addOption(
+                'cleanup',
+                null,
+                InputOption::VALUE_NONE,
+                'Remove orphaned entries from index (e.g. from .nomedia files)'
             )
         ;
     }
@@ -131,11 +151,10 @@ class Index extends Command
         }
 
         // Get options and arguments
-        $refresh = $input->getOption('refresh') ? true : false;
-        $clear = $input->getOption('clear') ? true : false;
+        $opts = new IndexOpts($input);
 
         // Clear index if asked for this
-        if ($clear && $input->isInteractive()) {
+        if ($opts->clear && $input->isInteractive()) {
             $output->write('Are you sure you want to clear the existing index? (y/N): ');
             $answer = trim(fgets(STDIN));
             if ('y' !== $answer) {
@@ -144,16 +163,23 @@ class Index extends Command
                 return 1;
             }
         }
-        if ($clear) {
+        if ($opts->clear) {
             $this->timelineWrite->clear();
             $output->writeln('Cleared existing index');
+        }
+
+        // Orphan all entries so we can delete them later
+        if ($opts->cleanup) {
+            $output->write('Marking all entries for cleanup ... ');
+            $count = $this->timelineWrite->orphanAll();
+            $output->writeln("{$count} marked");
         }
 
         // Run with the static process
         try {
             \OCA\Memories\Exif::ensureStaticExiftoolProc();
 
-            return $this->executeWithOpts($output, $refresh);
+            return $this->executeWithOpts($output, $opts);
         } catch (\Exception $e) {
             error_log('FATAL: '.$e->getMessage());
 
@@ -163,7 +189,7 @@ class Index extends Command
         }
     }
 
-    protected function executeWithOpts(OutputInterface $output, bool &$refresh): int
+    protected function executeWithOpts(OutputInterface $output, IndexOpts &$opts): int
     {
         // Refuse to run without exiftool
         if (!$this->testExif()) {
@@ -184,9 +210,16 @@ class Index extends Command
         }
         $this->output = $output;
 
-        $this->userManager->callForSeenUsers(function (IUser &$user) use (&$refresh) {
-            $this->generateUserEntries($user, $refresh);
+        $this->userManager->callForSeenUsers(function (IUser &$user) use (&$opts) {
+            $this->generateUserEntries($user, $opts);
         });
+
+        // Clear orphans if asked for this
+        if ($opts->cleanup) {
+            $output->write('Deleting orphaned entries ... ');
+            $count = $this->timelineWrite->removeOrphans();
+            $output->writeln("{$count} deleted");
+        }
 
         // Show some stats
         $endTime = microtime(true);
@@ -239,7 +272,7 @@ class Index extends Command
         return true;
     }
 
-    private function generateUserEntries(IUser &$user, bool &$refresh): void
+    private function generateUserEntries(IUser &$user, IndexOpts &$opts): void
     {
         \OC_Util::tearDownFS();
         \OC_Util::setupFS($user->getUID());
@@ -247,12 +280,12 @@ class Index extends Command
         $uid = $user->getUID();
         $userFolder = $this->rootFolder->getUserFolder($uid);
         $this->outputSection = $this->output->section();
-        $this->parseFolder($userFolder, $refresh, (float) $this->nUser, (float) $this->userManager->countSeenUsers());
+        $this->parseFolder($userFolder, $opts, (float) $this->nUser, (float) $this->userManager->countSeenUsers());
         $this->outputSection->overwrite('Scanned '.$userFolder->getPath());
         ++$this->nUser;
     }
 
-    private function parseFolder(Folder &$folder, bool $refresh, float $progress_i, float $progress_n): void
+    private function parseFolder(Folder &$folder, IndexOpts &$opts, float $progress_i, float $progress_n): void
     {
         try {
             // Respect the '.nomedia' file. If present don't traverse the folder
@@ -268,11 +301,11 @@ class Index extends Command
                 if ($node instanceof Folder) {
                     $new_progress_i = (float) ($progress_i * \count($nodes) + $i);
                     $new_progress_n = (float) ($progress_n * \count($nodes));
-                    $this->parseFolder($node, $refresh, $new_progress_i, $new_progress_n);
+                    $this->parseFolder($node, $opts, $new_progress_i, $new_progress_n);
                 } elseif ($node instanceof File) {
                     $progress = (float) (($progress_i / $progress_n) * 100);
                     $this->outputSection->overwrite(sprintf('%.2f%%', $progress).' scanning '.$node->getPath());
-                    $this->parseFile($node, $refresh);
+                    $this->parseFile($node, $opts);
                 }
             }
         } catch (\Exception $e) {
@@ -284,19 +317,24 @@ class Index extends Command
         }
     }
 
-    private function parseFile(File &$file, bool &$refresh): void
+    private function parseFile(File &$file, IndexOpts &$opts): void
     {
         // Process the file
         $res = 1;
 
         try {
-            $res = $this->timelineWrite->processFile($file, $refresh);
-        } catch (\Exception $e) {
+            $res = $this->timelineWrite->processFile($file, $opts->refresh);
+
+            if ($opts->cleanup) {
+                $this->timelineWrite->unorphan($file);
+            }
+        } catch (\Error $e) {
             $this->output->writeln(sprintf(
                 '<error>Could not process file %s: %s</error>',
                 $file->getPath(),
                 $e->getMessage()
             ));
+            $this->output->writeln($e->getTraceAsString());
         }
 
         if (2 === $res) {

@@ -1,13 +1,15 @@
 <?php
 
-function getWildcard($param) {
+function getWildcard($param)
+{
     return [
-        'requirements' => [ $param => '.*' ],
-        'defaults' => [ $param => '' ]
+        'requirements' => [$param => '.*'],
+        'defaults' => [$param => '']
     ];
 }
 
-function w($base, $param) {
+function w($base, $param)
+{
     return array_merge($base, getWildcard($param));
 }
 
@@ -30,15 +32,18 @@ return [
         // Public folder share
         ['name' => 'Public#showShare', 'url' => '/s/{token}', 'verb' => 'GET'],
         [
-			'name' => 'Public#showAuthenticate',
-			'url' => '/s/{token}/authenticate/{redirect}',
-			'verb' => 'GET',
-		],
-		[
-			'name' => 'Public#authenticate',
-			'url' => '/s/{token}/authenticate/{redirect}',
-			'verb' => 'POST',
-		],
+            'name' => 'Public#showAuthenticate',
+            'url' => '/s/{token}/authenticate/{redirect}',
+            'verb' => 'GET',
+        ],
+        [
+            'name' => 'Public#authenticate',
+            'url' => '/s/{token}/authenticate/{redirect}',
+            'verb' => 'POST',
+        ],
+
+        // Public album share
+        ['name' => 'PublicAlbum#showShare', 'url' => '/a/{token}', 'verb' => 'GET'],
 
         // API Routes
         ['name' => 'Days#days', 'url' => '/api/days', 'verb' => 'GET'],
@@ -69,6 +74,7 @@ return [
 
         ['name' => 'Download#request', 'url' => '/api/download', 'verb' => 'POST'],
         ['name' => 'Download#file', 'url' => '/api/download/{handle}', 'verb' => 'GET'],
+        ['name' => 'Download#one', 'url' => '/api/stream/{fileid}', 'verb' => 'GET'],
 
         // Config API
         ['name' => 'Other#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],

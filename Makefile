@@ -7,7 +7,7 @@ exiftool:
 	sh scripts/get-exiftool.sh
 
 php-cs-fixer:
-	mkdir --parents tools/php-cs-fixer
+	mkdir -p tools/php-cs-fixer
 	composer require --working-dir=tools/php-cs-fixer friendsofphp/php-cs-fixer
 
 php-lint:
