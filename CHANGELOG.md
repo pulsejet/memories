@@ -6,6 +6,7 @@ This file is manually updated. Please file an issue if something is missing.
 
 - **Feature**: Allow sharing albums using public links
 - **Feature**: Allow sharing albums with groups
+- **Feature**: Directly move photos from the timeline to any folder
 - Fix folder share title and remove footer
 - Other minor fixes
 
