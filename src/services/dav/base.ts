@@ -230,15 +230,20 @@ export async function* deletePhotos(photos: IPhoto[]) {
     return;
   }
 
-  const photosWithLive = await extendWithLivePhotos(photos);
-  const fileIdsSet = new Set(photosWithLive.map((p) => p.fileid));
+  // Extend with live photos unless this is an album
+  if (window.vueroute().name !== "albums") {
+    photos = await extendWithLivePhotos(photos);
+  }
+
+  // Get set of unique file ids
+  const fileIdsSet = new Set(photos.map((p) => p.fileid));
 
   // Get files data
   let fileInfos: IFileInfo[] = [];
   try {
-    fileInfos = await getFiles(photosWithLive);
+    fileInfos = await getFiles(photos);
   } catch (e) {
-    console.error("Failed to get file info for files to delete", photosWithLive, e);
+    console.error("Failed to get file info for files to delete", photos, e);
     showError(t("memories", "Failed to delete files."));
     return;
   }
@@ -271,7 +276,11 @@ export async function* deletePhotos(photos: IPhoto[]) {
  * @param overwrite behaviour if the target exists. `true` overwrites, `false` fails.
  * @returns list of file ids that were moved
  */
-export async function* movePhotos(photos: IPhoto[], destination: string, overwrite: boolean) {
+export async function* movePhotos(
+  photos: IPhoto[],
+  destination: string,
+  overwrite: boolean
+) {
   if (photos.length === 0) {
     return;
   }
@@ -279,19 +288,20 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
   // Set absolute target path
   const prefixPath = `files/${getCurrentUser()?.uid}`;
   let targetPath = prefixPath + destination;
-  if (!targetPath.endsWith('/')) {
-    targetPath += '/';
+  if (!targetPath.endsWith("/")) {
+    targetPath += "/";
   }
 
-  const photosWithLive = await extendWithLivePhotos(photos);
-  const fileIdsSet = new Set(photosWithLive.map((p) => p.fileid));
+  // Also move the live photo videos
+  photos = await extendWithLivePhotos(photos);
+  const fileIdsSet = new Set(photos.map((p) => p.fileid));
 
   // Get files data
   let fileInfos: IFileInfo[] = [];
   try {
-    fileInfos = await getFiles(photosWithLive);
+    fileInfos = await getFiles(photos);
   } catch (e) {
-    console.error("Failed to get file info for files to move", photosWithLive, e);
+    console.error("Failed to get file info for files to move", photos, e);
     showError(t("memories", "Failed to move files."));
     return;
   }
@@ -304,7 +314,8 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
         fileInfo.originalFilename,
         targetPath + fileInfo.basename,
         // @ts-ignore - https://github.com/perry-mitchell/webdav-client/issues/329
-        { headers: { 'Overwrite' : overwrite ? 'T' : 'F' }});
+        { headers: { Overwrite: overwrite ? "T" : "F" } }
+      );
       return fileInfo.fileid;
     } catch (error) {
       console.error("Failed to move", fileInfo, error);
