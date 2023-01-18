@@ -17,13 +17,17 @@
     <div class="right-actions">
       <NcActions :inline="2">
         <NcActionRouter
-          :to="{ query: recursive ? {} : {recursive: '1'}}"
+          :to="{ query: recursive ? {} : { recursive: '1' } }"
           close-after-click
         >
-          {{ t("memories", recursive ? "Show folders" : "Timeline") }}
+          {{
+            recursive
+              ? t("memories", "Folder View")
+              : t("memories", "Timeline View")
+          }}
           <template #icon>
-            <FoldersIcon v-if="recursive" :size="20"/>
-            <TimelineIcon v-else :size="20"/>
+            <FoldersIcon v-if="recursive" :size="20" />
+            <TimelineIcon v-else :size="20" />
           </template>
         </NcActionRouter>
         <NcActionButton
@@ -72,12 +76,12 @@ export default defineComponent({
     HomeIcon,
     ShareIcon,
     TimelineIcon,
-    FoldersIcon
+    FoldersIcon,
   },
 
   data: () => ({
     topMatter: null as TopMatterFolder | null,
-    recursive: false
+    recursive: false,
   }),
 
   watch: {
@@ -109,13 +113,13 @@ export default defineComponent({
               };
             }),
         };
-        this.recursive = this.$route.query.recursive === '1'
+        this.recursive = this.$route.query.recursive === "1";
       } else {
         this.topMatter = null;
         this.recursive = false;
       }
-    }
-  }
+    },
+  },
 });
 </script>
 
@@ -133,6 +137,10 @@ export default defineComponent({
     z-index: 50;
     @media (max-width: 768px) {
       margin-right: 10px;
+    }
+
+    :deep span {
+      cursor: pointer;
     }
   }
 }
