@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
-use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Exif;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\FileDisplayResponse;
@@ -240,9 +239,8 @@ class ImageController extends ApiBase
             $file->putContent(fopen($path, 'r')); // closes the handler
         }
 
-        // Reprocess the file
-        $timelineWrite = new TimelineWrite($this->connection);
-        $timelineWrite->processFile($file, true);
+        // Touch the file, triggering a reprocess through the hook
+        $file->touch();
 
         return new JSONResponse([], Http::STATUS_OK);
     }
