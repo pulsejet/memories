@@ -158,6 +158,7 @@ OC.L10N.register(
     "Next" : "Sonraki",
     "Video sharing not supported yet" : "Görüntü paylaşımı henüz desteklenmiyor",
     "Cannot share this type of data" : "Bu türdeki verileri paylaşamazsınız",
+    "Are you sure you want to delete?" : "Silmek istediğinize emin misiniz?",
     "Save as" : "Farklı kaydet",
     "Reset" : "Sıfırla",
     "All changes will be lost." : "Tüm değişiklikler kaybolacak.",

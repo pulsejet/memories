@@ -158,6 +158,7 @@ OC.L10N.register(
     "Next" : "Próxima",
     "Video sharing not supported yet" : "Compartilhamento de vídeo ainda não suportado",
     "Cannot share this type of data" : "Não é possível compartilhar este tipo de dados",
+    "Are you sure you want to delete?" : "Tem certeza de que deseja excluir?",
     "Save as" : "Salvar como",
     "Reset" : "Redefinir",
     "All changes will be lost." : "Todas as mudanças serão perdidas.",

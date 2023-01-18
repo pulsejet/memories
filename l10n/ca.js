@@ -54,6 +54,7 @@ OC.L10N.register(
     "Close" : "Tanca",
     "Previous" : "Anterior",
     "Next" : "Següent",
+    "Are you sure you want to delete?" : "Esteu segur que voleu suprimir?",
     "Save as" : "Anomena i desa",
     "Reset" : "Restableix",
     "All changes will be lost." : "Tots els canvis es perdran.",

@@ -90,6 +90,7 @@ OC.L10N.register(
     "Close" : "Zamknij",
     "Previous" : "Poprzednie",
     "Next" : "Następna",
+    "Are you sure you want to delete?" : "Czy na pewno chcesz usunąć?",
     "Save as" : "Zapisz jako",
     "Reset" : "Resetuj",
     "All changes will be lost." : "Wszystkie zmiany zostaną utracone.",
