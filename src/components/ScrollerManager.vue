@@ -390,9 +390,12 @@ export default defineComponent({
     },
 
     setTicksTop(total: number) {
+      const isMobile = globalThis.windowInnerWidth <= 768;
+      const padding = isMobile ? 20 : 0;
+
       for (const tick of this.ticks) {
         tick.topF = this.height * (tick.count / total);
-        tick.top = utils.roundHalf(tick.topF);
+        tick.top = utils.roundHalf(tick.topF) + padding;
       }
     },
 
