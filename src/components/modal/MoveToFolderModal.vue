@@ -94,7 +94,6 @@ export default defineComponent({
         )
       );
       this.close();
-
     },
   },
 });
