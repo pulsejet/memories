@@ -47,30 +47,5 @@ export async function downloadFilesByPhotos(photos: IPhoto[]) {
 
 /** Get URL to download one file (e.g. for video streaming) */
 export function getDownloadLink(photo: IPhoto) {
-  const route = vueroute();
-
-  // Check if public
-  if (route.name === "folder-share") {
-    const token = <string>route.params.token;
-    // TODO: allow proper dav access without the need of basic auth
-    // https://github.com/nextcloud/server/issues/19700
-    return generateUrl(`/s/${token}/download?path={dirname}&files={basename}`, {
-      dirname: photo.filename.split("/").slice(0, -1).join("/"),
-      basename: photo.basename,
-    });
-  }
-
-  // Check if albums
-  if (route.name === "albums") {
-    const fInfos = getAlbumFileInfos(
-      [photo],
-      <string>route.params.user,
-      <string>route.params.name
-    );
-    if (fInfos.length) {
-      return getRootUrl() + `/remote.php/dav${fInfos[0].originalFilename}`;
-    }
-  }
-
-  return getRootUrl() + `/remote.php/dav${photo.filename}`;
+  return API.STREAM_FILE(photo.fileid);
 }

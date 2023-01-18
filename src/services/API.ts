@@ -107,6 +107,10 @@ export class API {
     return tok(gen(`${BASE}/download/{handle}`, { handle }));
   }
 
+  static STREAM_FILE(id: number) {
+    return tok(gen(`${BASE}/stream/{id}`, { id }));
+  }
+
   static CONFIG(setting: string) {
     return gen(`${BASE}/config/{setting}`, { setting });
   }

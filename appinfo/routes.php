@@ -74,6 +74,7 @@ return [
 
         ['name' => 'Download#request', 'url' => '/api/download', 'verb' => 'POST'],
         ['name' => 'Download#file', 'url' => '/api/download/{handle}', 'verb' => 'GET'],
+        ['name' => 'Download#one', 'url' => '/api/stream/{fileid}', 'verb' => 'GET'],
 
         // Config API
         ['name' => 'Other#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],
