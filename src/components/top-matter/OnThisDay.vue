@@ -124,20 +124,27 @@ export default defineComponent({
       this.years = [];
 
       let currentYear = 9999;
+      let currentText = "";
 
       for (const photo of photos) {
         const dateTaken = utils.dayIdToDate(photo.dayid);
         const year = dateTaken.getUTCFullYear();
         photo.key = `${photo.fileid}`;
 
+        // DateTime calls are expensive, so check if the year
+        // itself is different first, then also check the text
         if (year !== currentYear) {
-          this.years.push({
-            year,
-            url: "",
-            preview: null,
-            photos: [],
-            text: utils.getFromNowStr(dateTaken),
-          });
+          const text = utils.getFromNowStr(dateTaken);
+          if (text !== currentText) {
+            this.years.push({
+              year,
+              text,
+              url: "",
+              preview: null,
+              photos: [],
+            });
+            currentText = text;
+          }
           currentYear = year;
         }
 
