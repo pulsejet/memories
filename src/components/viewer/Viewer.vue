@@ -10,7 +10,7 @@
     <ImageEditor
       v-if="editorOpen"
       :mime="currentPhoto.mimetype"
-      :src="currentDownloadLink"
+      :src="editorDownloadLink"
       :fileid="currentPhoto.fileid"
       @close="editorOpen = false"
     />
@@ -177,6 +177,7 @@ import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 import axios from "@nextcloud/axios";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import { showError } from "@nextcloud/dialogs";
+import { getRootUrl } from "@nextcloud/router";
 
 import { getPreviewUrl } from "../../services/FileUtils";
 import { getDownloadLink } from "../../services/DavRequests";
@@ -324,10 +325,11 @@ export default defineComponent({
       return utils.getLongDateStr(new Date(date * 1000), false, true);
     },
 
-    /** Get download link for current photo */
-    currentDownloadLink(): string | null {
-      return this.currentPhoto
-        ? window.location.origin + getDownloadLink(this.currentPhoto)
+    /** Get DAV download link for current photo */
+    editorDownloadLink(): string | null {
+      const filename = this.currentPhoto?.filename;
+      return filename
+        ? window.location.origin + getRootUrl() + `/remote.php/dav${filename}`
         : null;
     },
 
