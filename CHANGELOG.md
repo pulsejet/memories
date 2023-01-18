@@ -4,11 +4,12 @@ This file is manually updated. Please file an issue if something is missing.
 
 ## v4.10.0, v3.10.0 (unreleased)
 
-- **Feature**: Allow sharing albums using public links
-- **Feature**: Allow sharing albums with groups
-- **Feature**: Directly move photos from the timeline to any folder
-- Fix folder share title and remove footer
-- Other minor fixes
+- **Feature**: Allow sharing albums using public links ([#274](https://github.com/pulsejet/memories/issues/274))
+- **Feature**: Allow sharing albums with groups ([#329](https://github.com/pulsejet/memories/issues/329))
+- **Feature**: Directly move photos from the timeline to any folder ([#321](https://github.com/pulsejet/memories/pull/321))
+- **Feature**: Optionally view folders in the recursive timeline view ([#260](https://github.com/pulsejet/memories/pull/260))
+- Fix folder share title and remove footer ([#323](https://github.com/pulsejet/memories/issues/323))
+- Other minor fixes ([milestone](https://github.com/pulsejet/memories/milestone/6?closed=1))
 
 ## v4.9.0, v3.9.0 (2022-12-08)
 
