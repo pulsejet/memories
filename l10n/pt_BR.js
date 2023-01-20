@@ -247,6 +247,7 @@ OC.L10N.register(
     "Direct" : "Direto",
     "Auto" : "Automático",
     "Shared Folder" : "Pasta Compartilhada",
+    "Shared Album" : "Álbum compartilhado",
     "Failed to create {albumName}." : "Falha ao criar {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Falha ao renomear {currentAlbumName} para {newAlbumName}.",
     "General Failure" : "Falha Geral",

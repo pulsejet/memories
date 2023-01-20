@@ -247,6 +247,7 @@ OC.L10N.register(
     "Direct" : "Direct",
     "Auto" : "Auto",
     "Shared Folder" : "Shared Folder",
+    "Shared Album" : "Shared Album",
     "Failed to create {albumName}." : "Failed to create {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Failed to rename {currentAlbumName} to {newAlbumName}.",
     "General Failure" : "General Failure",

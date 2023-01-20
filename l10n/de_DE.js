@@ -247,6 +247,7 @@ OC.L10N.register(
     "Direct" : "Direkt",
     "Auto" : "Automatisch",
     "Shared Folder" : "Geteilter Ordner",
+    "Shared Album" : "Geteiltes Album",
     "Failed to create {albumName}." : "{albumName} konnte nicht erstellt werden.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "{currentAlbumName} konnte nicht in {newAlbumName} umbenannt werden.",
     "General Failure" : "Allgemeiner Fehler",

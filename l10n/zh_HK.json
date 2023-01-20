@@ -245,6 +245,7 @@
     "Direct" : "私信",
     "Auto" : "自動",
     "Shared Folder" : "分享資料夾",
+    "Shared Album" : "已分享了的相簿",
     "Failed to create {albumName}." : "創建 {albumName} 失敗。",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "重新命名 {currentAlbumName} 為 {newAlbumName} 失敗。",
     "General Failure" : "一般故障",
