@@ -200,7 +200,7 @@ class ApiBase extends Controller
                     return null;
                 }
 
-                $owner = $this->timelineQuery->albumHasFile($album['album_id'], $id);
+                $owner = $this->timelineQuery->albumHasFile((int) $album['album_id'], $id);
                 if (!$owner) {
                     return null;
                 }

@@ -2,7 +2,7 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
-## v4.10.0, v3.10.0 (unreleased)
+## v4.10.0, v3.10.0 (2023-01-17)
 
 - **Feature**: Allow sharing albums using public links ([#274](https://github.com/pulsejet/memories/issues/274))
 - **Feature**: Allow sharing albums with groups ([#329](https://github.com/pulsejet/memories/issues/329))
