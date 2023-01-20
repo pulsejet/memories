@@ -247,6 +247,7 @@ OC.L10N.register(
     "Direct" : "Přímo",
     "Auto" : "Automaticky",
     "Shared Folder" : "Sdílená složka",
+    "Shared Album" : "Sdílené album",
     "Failed to create {albumName}." : "Nepodařilo se vytvořit {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Nepodařilo přejmenovat {currentAlbumName} to {newAlbumName}.",
     "General Failure" : "Obecný nezdar",

@@ -247,6 +247,7 @@ OC.L10N.register(
     "Direct" : "Doğrudan",
     "Auto" : "Otomatik",
     "Shared Folder" : "Paylaşılmış klasör",
+    "Shared Album" : "Paylaşılmış albüm",
     "Failed to create {albumName}." : "{albumName} albümü oluşturulamadı.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "{currentAlbumName} albümünün adı {newAlbumName} olarak değiştirilemedi.",
     "General Failure" : "Genel sorun",

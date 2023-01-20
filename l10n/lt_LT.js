@@ -25,6 +25,7 @@ OC.L10N.register(
     "Favorite" : "Mėgstamas",
     "Unarchive" : "Išskleisti",
     "Edit Date/Time" : "Taisyti datą/laiką",
+    "Edit EXIF Data" : "Taisyti EXIF duomenis",
     "View in folder" : "Rodyti aplanke",
     "Add to album" : "Pridėti į albumą",
     "You are about to download a large number of files. Are you sure?" : "Jūs ketinate atsisiųsti didelį failų skaičių. Ar esate tikri?",
@@ -88,6 +89,7 @@ OC.L10N.register(
     "Share Folder" : "Bendrinti aplanką",
     "Refresh" : "Įkelti iš naujo",
     "Remove" : "Šalinti",
+    "Add Path" : "Pridėti kelią",
     "Share album" : "Bendrinti albumą",
     "Delete album" : "Ištrinti albumą",
     "Merge with different person" : "Sulieti su kitu žmogumi",
@@ -105,6 +107,7 @@ OC.L10N.register(
     "Close" : "Užverti",
     "Previous" : "Ankstesnis",
     "Next" : "Kitas",
+    "Are you sure you want to delete?" : "Ar tikrai norite ištrinti?",
     "Save as" : "Įrašyti kaip",
     "Reset" : "Atstatyti",
     "All changes will be lost." : "Visi pakeitimai bus prarasti.",
@@ -136,6 +139,7 @@ OC.L10N.register(
     "General Failure" : "Bendrinė nesėkmė",
     "Error: {msg}" : "Klaida: {msg}",
     "Failed to delete files." : "Nepavyko ištrinti failų.",
-    "Failed to delete {fileName}." : "Nepavyko ištrinti {fileName}."
+    "Failed to delete {fileName}." : "Nepavyko ištrinti {fileName}.",
+    "Failed to download files" : "Nepavyko atsisiųsti failų"
 },
 "nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);");
