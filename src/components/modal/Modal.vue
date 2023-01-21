@@ -1,12 +1,12 @@
 <template>
   <NcModal
     :size="size"
-    @close="close"
     :outTransition="true"
     :style="{ width: isSidebarShown ? `calc(100% - ${sidebarWidth}px)` : null }"
     :additionalTrapElements="trapElements"
+    @close="close"
   >
-    <div class="container">
+    <div class="container" @keydown.stop="true">
       <div class="head">
         <span> <slot name="title"></slot> </span>
       </div>
