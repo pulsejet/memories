@@ -126,13 +126,17 @@ class DownloadController extends ApiBase
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }
 
+        // Get the UID of the logged in user so that we can use the correct
+        // root path for files shared by another user.
+        $uid = $this->getUID();
+
         // Get DAV location of file
-        $userFolder = $this->rootFolder->getUserFolder($file->getOwner()->getUID());
+        $userFolder = $this->rootFolder->getUserFolder($uid);
         $path = $userFolder->getRelativePath($file->getPath());
 
         // Setup filesystem for owner
         \OC_Util::tearDownFS();
-        \OC_Util::setupFS($file->getOwner()->getUID());
+        \OC_Util::setupFS($uid);
 
         // HEAD and RANGE support
         $server_params = ['head' => 'HEAD' === $this->request->getMethod()];
