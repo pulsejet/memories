@@ -20,6 +20,7 @@ OC.L10N.register(
     "Share" : "Bḍu",
     "Close" : "Mdel",
     "Previous" : "Ɣer deffir",
+    "Next" : "Uḍfir",
     "Continue" : "Continuer",
     "Size" : "Teɣzi"
 },
