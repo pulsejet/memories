@@ -85,8 +85,8 @@ export default defineComponent({
         label: t("memories", "Camera Model"),
       },
       {
-        field: "Lens",
-        label: t("memories", "Lens"),
+        field: "LensModel",
+        label: t("memories", "Lens Model"),
       },
       {
         field: "Copyright",
