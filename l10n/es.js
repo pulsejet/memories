@@ -41,6 +41,7 @@ OC.L10N.register(
     "Edit Date/Time" : "Editar Fecha/Hora",
     "Edit EXIF Data" : "Editar datos EXIF",
     "View in folder" : "Ver en carpeta",
+    "Move to folder" : "Mover a la carpeta",
     "Add to album" : "Añadir al álbum",
     "Move to another person" : "Mover a otra persona",
     "Remove from person" : "Quitar de la persona",
@@ -112,7 +113,6 @@ OC.L10N.register(
     "Label" : "Etiqueta",
     "Camera Make" : "Marca de la cámara",
     "Camera Model" : "Modelo de la cámara",
-    "Lens" : "Lente",
     "Copyright" : "Derechos de autor",
     "Remove person" : "Eliminar persona",
     "Are you sure you want to remove {name}?" : "¿Está seguro de que quiere quitar {name}?",
@@ -132,6 +132,7 @@ OC.L10N.register(
     "Use the sidebar to share this folder." : "Utilice la barra lateral para compartir esta carpeta.",
     "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Si crea un enlace público de compartición, haga click en refrescar y se mostrará abajo el enlace correspondiente a Memories.",
     "Refresh" : "Actualizar",
+    "Choose a folder" : "Elige una carpeta",
     "Remove" : "Quitar",
     "Add Path" : "Añadir ruta",
     "Add a root to your timeline" : "Añadir una raíz a su línea de tiempo",
@@ -254,9 +255,11 @@ OC.L10N.register(
     "Error: {msg}" : "Error: {msg}",
     "Failed to delete files." : "Fallo al eliminar archivos.",
     "Failed to delete {fileName}." : "Fallo al eliminar {fileName}.",
+    "Failed to move files." : "Error al mover archivos.",
     "Failed to download files" : "Fallo al descargar archivos",
     "Failed to favorite files." : "Fallo al marcar archivos como favoritos.",
     "Failed to favorite some files." : "Fallo al marcar algunos archivos como favoritos.",
-    "Failed to favorite {fileName}." : "Fallo al marcar como favorito {fileName}."
+    "Failed to favorite {fileName}." : "Fallo al marcar como favorito {fileName}.",
+    "Lens" : "Lente"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

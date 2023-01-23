@@ -112,7 +112,6 @@ OC.L10N.register(
     "Label" : "Etiqueta",
     "Camera Make" : "Marca da câmera",
     "Camera Model" : "Modelo da câmera",
-    "Lens" : "Lente",
     "Copyright" : "Direito autoral",
     "Remove person" : "Remover pessoa",
     "Are you sure you want to remove {name}?" : "Tem certeza que deseja remover {name}?",
@@ -257,6 +256,7 @@ OC.L10N.register(
     "Failed to download files" : "Falha ao baixar arquivos",
     "Failed to favorite files." : "Falha nos arquivos favoritos.",
     "Failed to favorite some files." : "Falha ao adicionar alguns arquivos aos favoritos.",
-    "Failed to favorite {fileName}." : "Falha ao favoritar {fileName}"
+    "Failed to favorite {fileName}." : "Falha ao favoritar {fileName}",
+    "Lens" : "Lente"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
