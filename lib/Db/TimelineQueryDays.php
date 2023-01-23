@@ -31,11 +31,11 @@ const CTE_FOLDERS = // CTE to get all folders recursively in the given top folde
     ), *PREFIX*cte_folders AS (
         SELECT
             fileid,
-        	MIN(rootid) AS rootid
+            MIN(rootid) AS rootid
         FROM
             *PREFIX*cte_folders_all
         GROUP BY
-        	fileid
+            fileid
     )';
 
 const CTE_FOLDERS_ARCHIVE = // CTE to get all archive folders recursively in the given top folders
@@ -317,8 +317,8 @@ trait TimelineQueryDays
 
         // Get SQL
         $CTE_SQL = \array_key_exists('cteFoldersArchive', $params) && $params['cteFoldersArchive']
-         ? CTE_FOLDERS_ARCHIVE
-         : CTE_FOLDERS;
+            ? CTE_FOLDERS_ARCHIVE
+            : CTE_FOLDERS;
 
         // Add WITH clause if needed
         if (false !== strpos($sql, 'cte_folders')) {

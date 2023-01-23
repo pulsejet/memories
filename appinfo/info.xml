@@ -55,12 +55,12 @@ Memories is a *batteries-included* photo management solution for Nextcloud with 
             <route>memories.Page.main</route>
         </navigation>
     </navigations>
-	<repair-steps>
-		<post-migration>
-			<step>OCA\Memories\Migration\Repair</step>
-		</post-migration>
-		<install>
-			<step>OCA\Memories\Migration\Repair</step>
-		</install>
-	</repair-steps>
+    <repair-steps>
+        <post-migration>
+            <step>OCA\Memories\Migration\Repair</step>
+        </post-migration>
+        <install>
+            <step>OCA\Memories\Migration\Repair</step>
+        </install>
+    </repair-steps>
 </info>

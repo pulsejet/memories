@@ -11,6 +11,8 @@ use OCP\Files\File;
 use OCP\IDBConnection;
 use OCP\IPreview;
 
+require_once __DIR__.'/../ExifFields.php';
+
 class TimelineWrite
 {
     protected IDBConnection $connection;
@@ -134,7 +136,7 @@ class TimelineWrite
             }
 
             // These are huge and not needed
-            if (str_starts_with($key, 'Nikon') || str_starts_with($key, 'QuickTime')) {
+            if (!EXIF_FIELDS_LIST[$key] ?? false) {
                 unset($exif[$key]);
             }
         }

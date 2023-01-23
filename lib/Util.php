@@ -157,7 +157,7 @@ class Util
 
         // kill all pids
         foreach ($pids as $pid) {
-            posix_kill((int) $pid, SIGKILL);
+            posix_kill((int) $pid, 9); // SIGKILL
         }
     }
 }

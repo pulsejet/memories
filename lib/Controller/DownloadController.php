@@ -123,16 +123,36 @@ class DownloadController extends ApiBase
     {
         $file = $this->getUserFile($fileid);
         if (null === $file) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return new JSONResponse([
+                'message' => 'File not found',
+            ], Http::STATUS_NOT_FOUND);
         }
 
-        // Get DAV location of file
-        $userFolder = $this->rootFolder->getUserFolder($file->getOwner()->getUID());
-        $path = $userFolder->getRelativePath($file->getPath());
+        // Get the owner's root folder
+        $owner = $file->getOwner()->getUID();
+        $userFolder = $this->rootFolder->getUserFolder($owner);
+
+        // Get the file in the context of the owner
+        $ownerFile = $userFolder->getById($fileid);
+        if (0 === \count($ownerFile)) {
+            // This should never happen, since the file was already found earlier
+            // Except if it was deleted in the meantime ...
+            return new JSONResponse([
+                'message' => 'File not found in owner\'s root folder',
+            ], Http::STATUS_INTERNAL_SERVER_ERROR);
+        }
+
+        // Get DAV path of file relative to owner's root folder
+        $path = $userFolder->getRelativePath($ownerFile[0]->getPath());
+        if (null === $path) {
+            return new JSONResponse([
+                'message' => 'File path not found in owner\'s root folder',
+            ], Http::STATUS_INTERNAL_SERVER_ERROR);
+        }
 
         // Setup filesystem for owner
         \OC_Util::tearDownFS();
-        \OC_Util::setupFS($file->getOwner()->getUID());
+        \OC_Util::setupFS($owner);
 
         // HEAD and RANGE support
         $server_params = ['head' => 'HEAD' === $this->request->getMethod()];
