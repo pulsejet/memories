@@ -17,7 +17,7 @@ OC.L10N.register(
     "Download" : "ดาวน์โหลด",
     "Favorite" : "รายการโปรด",
     "View in folder" : "ดูในโฟลเดอร์",
-    "Public link" : "ลิงค์สาธารณะ",
+    "Public link" : "ลิงก์สาธารณะ",
     "Name of the album" : "ชื่อของอัลบั้ม",
     "Location of the album" : "ตำแหน่งของอัลบั้ม",
     "Go back to the previous view." : "กลับไปยังมุมมองก่อนหน้า",

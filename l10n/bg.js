@@ -112,7 +112,6 @@ OC.L10N.register(
     "Label" : "Име",
     "Camera Make" : "Марка на камера",
     "Camera Model" : "Модел на камера",
-    "Lens" : "Обектив",
     "Copyright" : "Авторско право",
     "Remove person" : "Премахване на лице",
     "Are you sure you want to remove {name}?" : "Сигурни ли сте, че искате премахване на {name}?",
@@ -256,6 +255,7 @@ OC.L10N.register(
     "Failed to download files" : "Неуспешно изтегляне на файлове",
     "Failed to favorite files." : "Неуспешно добавяне на файлове в любими.",
     "Failed to favorite some files." : "Неуспешно добавяне на някой файлове в любими.",
-    "Failed to favorite {fileName}." : "Неуспешно добавяне на {fileName} в любими."
+    "Failed to favorite {fileName}." : "Неуспешно добавяне на {fileName} в любими.",
+    "Lens" : "Обектив"
 },
 "nplurals=2; plural=(n != 1);");

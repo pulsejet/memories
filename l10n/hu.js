@@ -113,7 +113,6 @@ OC.L10N.register(
     "Label" : "Címke",
     "Camera Make" : "Kamera gyártmánya",
     "Camera Model" : "Kamera modellje",
-    "Lens" : "Lencse",
     "Copyright" : "Szerzői jog",
     "Remove person" : "Személy eltávolítása",
     "Are you sure you want to remove {name}?" : "Biztos, hogy eltávolítja a következőt: {name}?",
@@ -264,6 +263,7 @@ OC.L10N.register(
     "Failed to download files" : "A fájlok letöltése sikertelen",
     "Failed to favorite files." : "A fájlok kedvencnek jelölése sikertelen.",
     "Failed to favorite some files." : "Egyes fájlok kedvencnek jelölése sikertelen.",
-    "Failed to favorite {fileName}." : "A(z) {fileName} kedvencnek jelölése sikertelen."
+    "Failed to favorite {fileName}." : "A(z) {fileName} kedvencnek jelölése sikertelen.",
+    "Lens" : "Lencse"
 },
 "nplurals=2; plural=(n != 1);");

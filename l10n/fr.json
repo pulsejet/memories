@@ -110,7 +110,6 @@
     "Label" : "Étiquette",
     "Camera Make" : "Marque de l'appareil",
     "Camera Model" : "Modèle de l'appareil",
-    "Lens" : "Objectif",
     "Copyright" : "Droit d'auteur",
     "Remove person" : "Retirer la personne",
     "Are you sure you want to remove {name}?" : "Êtes-vous sûr de vouloir retirer {name}?",
@@ -254,6 +253,7 @@
     "Failed to download files" : "Échec du téléchargement des fichiers",
     "Failed to favorite files." : "Échec de la mise en favoris des fichiers.",
     "Failed to favorite some files." : "Échec de l'ajout en favoris de certains fichiers.",
-    "Failed to favorite {fileName}." : "Échec de l'ajout aux favoris de {fileName}."
+    "Failed to favorite {fileName}." : "Échec de l'ajout aux favoris de {fileName}.",
+    "Lens" : "Objectif"
 },"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }

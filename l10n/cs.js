@@ -113,7 +113,6 @@ OC.L10N.register(
     "Label" : "Štítek",
     "Camera Make" : "Výrobce fotoaparátu",
     "Camera Model" : "Model fotoaparátu",
-    "Lens" : "Objektiv",
     "Copyright" : "Autorská práva",
     "Remove person" : "Odebrat osobu",
     "Are you sure you want to remove {name}?" : "Opravdu chcete {name} odebrat?",
@@ -265,6 +264,7 @@ OC.L10N.register(
     "Failed to download files" : "Soubory se nepodařilo stáhnout",
     "Failed to favorite files." : "Nepodařilo se přidat soubory mezi oblíbené.",
     "Failed to favorite some files." : "Některé soubory se nepodařilo označit jako oblíbené",
-    "Failed to favorite {fileName}." : "Nepodařilo se přidat {fileName} do oblíbených."
+    "Failed to favorite {fileName}." : "Nepodařilo se přidat {fileName} do oblíbených.",
+    "Lens" : "Objektiv"
 },
 "nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;");
