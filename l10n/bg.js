@@ -255,7 +255,6 @@ OC.L10N.register(
     "Failed to download files" : "Неуспешно изтегляне на файлове",
     "Failed to favorite files." : "Неуспешно добавяне на файлове в любими.",
     "Failed to favorite some files." : "Неуспешно добавяне на някой файлове в любими.",
-    "Failed to favorite {fileName}." : "Неуспешно добавяне на {fileName} в любими.",
-    "Lens" : "Обектив"
+    "Failed to favorite {fileName}." : "Неуспешно добавяне на {fileName} в любими."
 },
 "nplurals=2; plural=(n != 1);");

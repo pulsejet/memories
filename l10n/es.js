@@ -259,7 +259,6 @@ OC.L10N.register(
     "Failed to download files" : "Fallo al descargar archivos",
     "Failed to favorite files." : "Fallo al marcar archivos como favoritos.",
     "Failed to favorite some files." : "Fallo al marcar algunos archivos como favoritos.",
-    "Failed to favorite {fileName}." : "Fallo al marcar como favorito {fileName}.",
-    "Lens" : "Lente"
+    "Failed to favorite {fileName}." : "Fallo al marcar como favorito {fileName}."
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
