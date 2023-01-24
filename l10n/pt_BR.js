@@ -256,7 +256,6 @@ OC.L10N.register(
     "Failed to download files" : "Falha ao baixar arquivos",
     "Failed to favorite files." : "Falha nos arquivos favoritos.",
     "Failed to favorite some files." : "Falha ao adicionar alguns arquivos aos favoritos.",
-    "Failed to favorite {fileName}." : "Falha ao favoritar {fileName}",
-    "Lens" : "Lente"
+    "Failed to favorite {fileName}." : "Falha ao favoritar {fileName}"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

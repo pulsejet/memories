@@ -256,7 +256,6 @@ OC.L10N.register(
     "Failed to download files" : "下載檔案失敗",
     "Failed to favorite files." : "加入最愛檔案失敗。",
     "Failed to favorite some files." : "將部份檔案加入最愛失敗。",
-    "Failed to favorite {fileName}." : "將 {fileName} 加入最愛失敗。",
-    "Lens" : "鏡頭"
+    "Failed to favorite {fileName}." : "將 {fileName} 加入最愛失敗。"
 },
 "nplurals=1; plural=0;");

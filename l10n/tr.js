@@ -264,7 +264,6 @@ OC.L10N.register(
     "Failed to download files" : "Dosyalar indirilemedi",
     "Failed to favorite files." : "Dosyalar sık kullanılanlara eklenemedi.",
     "Failed to favorite some files." : "Bazı dosyalar sık kullanılanlara eklenemedi.",
-    "Failed to favorite {fileName}." : "{fileName} sık kullanılanlara eklenemedi.",
-    "Lens" : "Lens"
+    "Failed to favorite {fileName}." : "{fileName} sık kullanılanlara eklenemedi."
 },
 "nplurals=2; plural=(n > 1);");

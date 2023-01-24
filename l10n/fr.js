@@ -255,7 +255,6 @@ OC.L10N.register(
     "Failed to download files" : "Échec du téléchargement des fichiers",
     "Failed to favorite files." : "Échec de la mise en favoris des fichiers.",
     "Failed to favorite some files." : "Échec de l'ajout en favoris de certains fichiers.",
-    "Failed to favorite {fileName}." : "Échec de l'ajout aux favoris de {fileName}.",
-    "Lens" : "Objectif"
+    "Failed to favorite {fileName}." : "Échec de l'ajout aux favoris de {fileName}."
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
