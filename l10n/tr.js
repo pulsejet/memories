@@ -113,6 +113,7 @@ OC.L10N.register(
     "Label" : "Etiket",
     "Camera Make" : "Kamera markası",
     "Camera Model" : "Kamera modeli",
+    "Lens Model" : "Lens modeli",
     "Copyright" : "Telif hakkı",
     "Remove person" : "Kişiyi sil",
     "Are you sure you want to remove {name}?" : "{name} kişisini silmek istediğinize emin misiniz?",
