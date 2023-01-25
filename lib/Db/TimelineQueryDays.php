@@ -99,13 +99,72 @@ trait TimelineQueryDays
         bool $recursive,
         bool $archive,
         array $queryTransforms = []
-    ): array {
+    ): array
+    {
         $query = $this->connection->getQueryBuilder();
 
         // Get all entries also present in filecache
         $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
         $query->select('m.dayid', $count)
             ->from('memories', 'm')
+        ;
+        $query = $this->joinFilecache($query, $root, $recursive, $archive);
+
+        // Group and sort by dayid
+        $query->groupBy('m.dayid')
+            ->orderBy('m.dayid', 'DESC')
+        ;
+
+        // Apply all transformations
+        $this->applyAllTransforms($queryTransforms, $query, $uid);
+
+        $cursor = $this->executeQueryWithCTEs($query);
+        $rows = $cursor->fetchAll();
+        $cursor->closeCursor();
+
+        return $this->processDays($rows);
+    }
+
+    /**
+     * Get the geomatrically filtered days response from the database for the location timeline.
+     *
+     * @param TimelineRoot $root            The root to get the days from
+     * @param bool         $recursive       Whether to get the days recursively
+     * @param bool         $archive         Whether to get the days only from the archive folder
+     * @param array        $queryTransforms An array of query transforms to apply to the query
+     * @param float        $minLat          The minimum latitude
+     * @param float        $maxLat          The maximum latitude
+     * @param float        $minLng          The minimum longitude
+     * @param float        $maxLng          The maximum longitude
+     * 
+     * @return array The days response
+     */
+    public function getDaysWithBounds(
+        TimelineRoot &$root,
+        string $uid,
+        bool $recursive,
+        bool $archive,
+        array $queryTransforms = [],
+        string $minLat,
+        string $maxLat,
+        string $minLng,
+        string $maxLng
+    ): array
+    {
+        $query = $this->connection->getQueryBuilder();
+
+        // Get all entries also present in filecache
+        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
+        $query->select('m.dayid', $count)
+            ->from('memories', 'm')
+            ->where(
+                $query->expr()->andX(
+                    $query->expr()->gte('m.latitude', $query->createNamedParameter($minLat, IQueryBuilder::PARAM_STR)),
+                    $query->expr()->lte('m.latitude', $query->createNamedParameter($maxLat, IQueryBuilder::PARAM_STR)),
+                    $query->expr()->gte('m.longitude', $query->createNamedParameter($minLng, IQueryBuilder::PARAM_STR)),
+                    $query->expr()->lte('m.longitude', $query->createNamedParameter($maxLng, IQueryBuilder::PARAM_STR))
+                )
+            )
         ;
         $query = $this->joinFilecache($query, $root, $recursive, $archive);
 
@@ -144,7 +203,8 @@ trait TimelineQueryDays
         bool $recursive,
         bool $archive,
         array $queryTransforms = []
-    ): array {
+    ): array
+    {
         $query = $this->connection->getQueryBuilder();
 
         // Get all entries also present in filecache
@@ -155,6 +215,95 @@ trait TimelineQueryDays
         // when using DISTINCT on selected fields
         $query->select($fileid, 'm.isvideo', 'm.video_duration', 'm.datetaken', 'm.dayid', 'm.w', 'm.h', 'm.liveid')
             ->from('memories', 'm')
+        ;
+
+        // JOIN with filecache for existing files
+        $query = $this->joinFilecache($query, $root, $recursive, $archive);
+        $query->addSelect('f.etag', 'f.path', 'f.name AS basename');
+
+        // SELECT rootid if not a single folder
+        if ($recursive && !$root->isEmpty()) {
+            $query->addSelect('cte_f.rootid');
+        }
+
+        // JOIN with mimetypes to get the mimetype
+        $query->join('f', 'mimetypes', 'mimetypes', $query->expr()->eq('f.mimetype', 'mimetypes.id'));
+        $query->addSelect('mimetypes.mimetype');
+
+        // Filter by dayid unless wildcard
+        if (null !== $day_ids) {
+            $query->andWhere($query->expr()->in('m.dayid', $query->createNamedParameter($day_ids, IQueryBuilder::PARAM_INT_ARRAY)));
+        } else {
+            // Limit wildcard to 100 results
+            $query->setMaxResults(100);
+        }
+
+        // Add favorite field
+        $this->addFavoriteTag($query, $uid);
+
+        // Group and sort by date taken
+        $query->orderBy('m.datetaken', 'DESC');
+        $query->addOrderBy('m.fileid', 'DESC'); // tie-breaker
+
+        // Apply all transformations
+        $this->applyAllTransforms($queryTransforms, $query, $uid);
+
+        $cursor = $this->executeQueryWithCTEs($query);
+        $rows = $cursor->fetchAll();
+        $cursor->closeCursor();
+
+        return $this->processDay($rows, $uid, $root);
+    }
+
+    /**
+     * Get the geomatrically filtered day response from the database for the location timeline.
+     *
+     * @param TimelineRoot $root            The root to get the day from
+     * @param string       $uid             The user id
+     * @param int[]        $day_ids         The day ids to fetch
+     * @param bool         $recursive       If the query should be recursive
+     * @param bool         $archive         If the query should include only the archive folder
+     * @param array        $queryTransforms The query transformations to apply
+     * @param mixed        $day_ids
+     * @param mixed        $minLat          The minimum latitude
+     * @param mixed        $maxLat          The maximum latitude
+     * @param mixed        $minLng          The minimum longitude
+     * @param mixed        $maxLng          The maximum longitude
+     *
+     * @return array An array of day responses
+     */
+
+    public function getDayWithBounds(
+        TimelineRoot &$root,
+        string $uid,
+        ?array $day_ids,
+        bool $recursive,
+        bool $archive,
+        array $queryTransforms = [],
+        string $minLat,
+        string $maxLat,
+        string $minLng,
+        string $maxLng
+    ): array
+    {
+        $query = $this->connection->getQueryBuilder();
+
+        // Get all entries also present in filecache
+        $fileid = $query->createFunction('DISTINCT m.fileid');
+
+        // We don't actually use m.datetaken here, but postgres
+        // needs that all fields in ORDER BY are also in SELECT
+        // when using DISTINCT on selected fields
+        $query->select($fileid, 'm.isvideo', 'm.video_duration', 'm.datetaken', 'm.dayid', 'm.w', 'm.h', 'm.liveid')
+            ->from('memories', 'm')
+            ->where(
+                $query->expr()->andX(
+                    $query->expr()->gte('m.latitude', $query->createNamedParameter($minLat, IQueryBuilder::PARAM_STR)),
+                    $query->expr()->lte('m.latitude', $query->createNamedParameter($maxLat, IQueryBuilder::PARAM_STR)),
+                    $query->expr()->gte('m.longitude', $query->createNamedParameter($minLng, IQueryBuilder::PARAM_STR)),
+                    $query->expr()->lte('m.longitude', $query->createNamedParameter($maxLng, IQueryBuilder::PARAM_STR))
+                )
+            )
         ;
 
         // JOIN with filecache for existing files
@@ -259,7 +408,7 @@ trait TimelineQueryDays
                         $actualPath[1] = $actualPath[2];
                         $actualPath[2] = $tmp;
                         $davPath = implode('/', $actualPath);
-                        $davPaths[$fileid] = Exif::removeExtraSlash('/'.$davPath.'/');
+                        $davPaths[$fileid] = Exif::removeExtraSlash('/' . $davPath . '/');
                     }
                 }
             }
@@ -292,7 +441,7 @@ trait TimelineQueryDays
 
                 if (0 === strpos($row['path'], $basePath)) {
                     $rpath = substr($row['path'], \strlen($basePath));
-                    $row['filename'] = Exif::removeExtraSlash($davPath.$rpath);
+                    $row['filename'] = Exif::removeExtraSlash($davPath . $rpath);
                 }
 
                 unset($row['path']);
@@ -322,7 +471,7 @@ trait TimelineQueryDays
 
         // Add WITH clause if needed
         if (false !== strpos($sql, 'cte_folders')) {
-            $sql = $CTE_SQL.' '.$sql;
+            $sql = $CTE_SQL . ' ' . $sql;
         }
 
         return $this->connection->executeQuery($sql, $params, $types);
@@ -335,7 +484,8 @@ trait TimelineQueryDays
         IQueryBuilder &$query,
         TimelineRoot &$root,
         bool $archive
-    ) {
+    )
+    {
         // Add query parameters
         $query->setParameter('topFolderIds', $root->getIds(), IQueryBuilder::PARAM_INT_ARRAY);
         $query->setParameter('cteFoldersArchive', $archive, IQueryBuilder::PARAM_BOOL);
@@ -354,7 +504,8 @@ trait TimelineQueryDays
         TimelineRoot &$root,
         bool $recursive,
         bool $archive
-    ) {
+    )
+    {
         // Join with memories
         $baseOp = $query->expr()->eq('f.fileid', 'm.fileid');
         if ($root->isEmpty()) {
@@ -372,9 +523,13 @@ trait TimelineQueryDays
             $pathOp = $query->expr()->eq('f.parent', $query->createNamedParameter($root->getOneId(), IQueryBuilder::PARAM_INT));
         }
 
-        return $query->innerJoin('m', 'filecache', 'f', $query->expr()->andX(
-            $baseOp,
-            $pathOp,
-        ));
+        return $query->innerJoin(
+            'm',
+            'filecache',
+            'f', $query->expr()->andX(
+                $baseOp,
+                $pathOp,
+            )
+        );
     }
 }

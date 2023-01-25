@@ -34,7 +34,8 @@ class PageController extends Controller
         IInitialState $initialState,
         IUserSession $userSession,
         IConfig $config
-    ) {
+    )
+    {
         parent::__construct($AppName, $request);
         $this->userId = $UserId;
         $this->appName = $AppName;
@@ -68,19 +69,22 @@ class PageController extends Controller
             Application::APPNAME,
             'timelinePath',
             'EMPTY'
-        ));
+        )
+        );
         $this->initialState->provideInitialState('foldersPath', $this->config->getUserValue(
             $uid,
             Application::APPNAME,
             'foldersPath',
             '/'
-        ));
+        )
+        );
         $this->initialState->provideInitialState('showHidden', $this->config->getUserValue(
             $uid,
             Application::APPNAME,
             'showHidden',
             false
-        ));
+        )
+        );
 
         // Apps enabled
         $this->initialState->provideInitialState('systemtags', true === $this->appManager->isEnabledForUser('systemtags'));
@@ -117,6 +121,7 @@ class PageController extends Controller
         // Allow nominatim for metadata
         $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
         $policy->addAllowedFrameDomain('www.openstreetmap.org');
+        $policy->addAllowedImageDomain('https://*.tile.openstreetmap.org');
 
         return $policy;
     }
@@ -220,6 +225,16 @@ class PageController extends Controller
      * @NoCSRFRequired
      */
     public function tags()
+    {
+        return $this->main();
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     */
+    public function locations()
     {
         return $this->main();
     }

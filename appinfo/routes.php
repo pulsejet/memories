@@ -21,6 +21,7 @@ return [
         ['name' => 'Page#videos', 'url' => '/videos', 'verb' => 'GET'],
         ['name' => 'Page#archive', 'url' => '/archive', 'verb' => 'GET'],
         ['name' => 'Page#thisday', 'url' => '/thisday', 'verb' => 'GET'],
+        ['name' => 'Page#locations', 'url' => '/locations', 'verb' => 'GET'],
 
         // Routes with params
         w(['name' => 'Page#folder', 'url' => '/folders/{path}', 'verb' => 'GET'], 'path'),
@@ -75,6 +76,9 @@ return [
         ['name' => 'Download#request', 'url' => '/api/download', 'verb' => 'POST'],
         ['name' => 'Download#file', 'url' => '/api/download/{handle}', 'verb' => 'GET'],
         ['name' => 'Download#one', 'url' => '/api/stream/{fileid}', 'verb' => 'GET'],
+
+        ['name' => 'Locations#daysWithBounds', 'url' => '/api/location/days/{minLat}/{maxLat}/{minLng}/{maxLng}', 'verb' => 'GET'],
+        ['name' => 'Locations#dayWithBounds', 'url' => '/api/location/days/{id}/{minLat}/{maxLat}/{minLng}/{maxLng}', 'verb' => 'GET'],
 
         // Config API
         ['name' => 'Other#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],

@@ -129,5 +129,14 @@ export default new Router({
         rootTitle: t("memories", "Shared Album"),
       }),
     },
+
+    {
+      path: "/locations",
+      component: Timeline,
+      name: "locations",
+      props: (route) => ({
+        rootTitle: t("memories", "Locations"),
+      })
+    },
   ],
 });

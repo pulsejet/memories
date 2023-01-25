@@ -214,6 +214,7 @@ export enum TopMatterType {
   TAG = 2,
   FACE = 3,
   ALBUM = 4,
+  LOCATION = 5,
 }
 export type TopMatterFolder = TopMatter & {
   type: TopMatterType.FOLDER;
@@ -235,3 +236,10 @@ export type ISelectionAction = {
   /** Allow for public routes (default false) */
   allowPublic?: boolean;
 };
+
+export type MapBoundary = {
+  minLat: number;
+  maxLat: number;
+  minLng: number;
+  maxLng: number;
+}

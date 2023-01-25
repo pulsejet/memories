@@ -1,4 +1,5 @@
 import { generateUrl } from "@nextcloud/router";
+import { MapBoundary } from "../types";
 
 const BASE = "/apps/memories/api";
 
@@ -37,6 +38,14 @@ export class API {
 
   static DAY(id: number | string) {
     return tok(gen(`${BASE}/days/{id}`, { id }));
+  }
+
+  static DAYS_WITH_BOUNDS(mapBoundary: MapBoundary) {
+    return tok(gen(`${BASE}/location/days/{minLat}/{maxLat}/{minLng}/{maxLng}`, mapBoundary));
+  }
+
+  static DAY_WITH_BOUNDS(id: number | string, mapBoundary: MapBoundary) {
+    return tok(gen(`${BASE}/location/days/{id}/{minLat}/{maxLat}/{minLng}/{maxLng}`, { id, ...mapBoundary }));
   }
 
   static ALBUM_LIST(t: "1" | "2" | "3" = "3") {

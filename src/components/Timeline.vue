@@ -1,18 +1,11 @@
 <template>
-  <div
-    class="container"
-    ref="container"
-    :class="{ 'icon-loading': loading > 0 }"
-  >
+  <div class="container" ref="container" :class="{ 'icon-loading': loading > 0 }">
     <!-- Static top matter -->
-    <TopMatter ref="topmatter" />
+    <TopMatter ref="topmatter" @updateBoundary="updateBoundary" />
 
     <!-- No content found and nothing is loading -->
-    <NcEmptyContent
-      title="Nothing to show here"
-      :description="emptyViewDescription"
-      v-if="loading === 0 && list.length === 0"
-    >
+    <NcEmptyContent title="Nothing to show here" :description="emptyViewDescription"
+      v-if="loading === 0 && list.length === 0">
       <template #icon>
         <PeopleIcon v-if="routeIsPeople" />
         <ArchiveIcon v-else-if="routeIsArchive" />
@@ -21,21 +14,9 @@
     </NcEmptyContent>
 
     <!-- Main recycler view for rows -->
-    <RecycleScroller
-      ref="recycler"
-      class="recycler"
-      :class="{ empty: list.length === 0 }"
-      :items="list"
-      :emit-update="true"
-      :buffer="800"
-      :skipHover="true"
-      key-field="id"
-      size-field="size"
-      type-field="type"
-      :updateInterval="100"
-      @update="scrollChange"
-      @resize="handleResizeWithDelay"
-    >
+    <RecycleScroller ref="recycler" class="recycler" :class="{ empty: list.length === 0 }" :items="list"
+      :emit-update="true" :buffer="800" :skipHover="true" key-field="id" size-field="size" type-field="type"
+      :updateInterval="100" @update="scrollChange" @resize="handleResizeWithDelay">
       <template #before>
         <!-- Show dynamic top matter, name of the view -->
         <div class="recycler-before" ref="recyclerBefore">
@@ -43,24 +24,15 @@
             {{ viewName }}
           </div>
 
-          <OnThisDay
-            v-if="routeIsBase"
-            :key="config_timelinePath"
-            :viewer="$refs.viewer"
-            @load="scrollerManager.adjust()"
-          >
+          <OnThisDay v-if="routeIsBase" :key="config_timelinePath" :viewer="$refs.viewer"
+            @load="scrollerManager.adjust()">
           </OnThisDay>
         </div>
       </template>
 
       <template v-slot="{ item, index }">
-        <div
-          v-if="item.type === 0"
-          class="head-row"
-          :class="{ selected: item.selected }"
-          :style="{ height: item.size + 'px' }"
-          :key="item.id"
-        >
+        <div v-if="item.type === 0" class="head-row" :class="{ selected: item.selected }"
+          :style="{ height: item.size + 'px' }" :key="item.id">
           <div class="super" v-if="item.super !== undefined">
             {{ item.super }}
           </div>
@@ -71,63 +43,34 @@
         </div>
 
         <template v-else>
-          <div
-            class="photo"
-            v-for="photo of item.photos"
-            :key="photo.key"
-            :style="{
-              height: photo.dispH + 'px',
-              width: photo.dispW + 'px',
-              transform: `translate(${photo.dispX}px, ${photo.dispY}px`,
-            }"
-          >
+          <div class="photo" v-for="photo of item.photos" :key="photo.key" :style="{
+            height: photo.dispH + 'px',
+            width: photo.dispW + 'px',
+            transform: `translate(${photo.dispX}px, ${photo.dispY}px`,
+          }">
             <Folder v-if="photo.flag & c.FLAG_IS_FOLDER" :data="photo" />
 
             <Tag v-else-if="photo.flag & c.FLAG_IS_TAG" :data="photo" />
 
-            <Photo
-              v-else
-              :data="photo"
-              :day="item.day"
-              @select="selectionManager.selectPhoto"
-              @pointerdown="selectionManager.clickPhoto(photo, $event, index)"
-              @touchstart="
+            <Photo v-else :data="photo" :day="item.day" @select="selectionManager.selectPhoto"
+              @pointerdown="selectionManager.clickPhoto(photo, $event, index)" @touchstart="
                 selectionManager.touchstartPhoto(photo, $event, index)
-              "
-              @touchend="selectionManager.touchendPhoto(photo, $event, index)"
-              @touchmove="selectionManager.touchmovePhoto(photo, $event, index)"
-            />
+              " @touchend="selectionManager.touchendPhoto(photo, $event, index)"
+              @touchmove="selectionManager.touchmovePhoto(photo, $event, index)" />
           </div>
         </template>
       </template>
     </RecycleScroller>
 
     <!-- Managers -->
-    <ScrollerManager
-      ref="scrollerManager"
-      :rows="list"
-      :height="scrollerHeight"
-      :recycler="$refs.recycler"
-      :recyclerBefore="$refs.recyclerBefore"
-    />
+    <ScrollerManager ref="scrollerManager" :rows="list" :height="scrollerHeight" :recycler="$refs.recycler"
+      :recyclerBefore="$refs.recyclerBefore" />
 
-    <SelectionManager
-      ref="selectionManager"
-      :heads="heads"
-      :rows="list"
-      :isreverse="isMonthView"
-      :recycler="$refs.recycler"
-      @refresh="softRefresh"
-      @delete="deleteFromViewWithAnimation"
-      @updateLoading="updateLoading"
-    />
+    <SelectionManager ref="selectionManager" :heads="heads" :rows="list" :isreverse="isMonthView"
+      :recycler="$refs.recycler" @refresh="softRefresh" @delete="deleteFromViewWithAnimation"
+      @updateLoading="updateLoading" />
 
-    <Viewer
-      ref="viewer"
-      @deleted="deleteFromViewWithAnimation"
-      @fetchDay="fetchDay"
-      @updateLoading="updateLoading"
-    />
+    <Viewer ref="viewer" @deleted="deleteFromViewWithAnimation" @fetchDay="fetchDay" @updateLoading="updateLoading" />
   </div>
 </template>
 
@@ -140,7 +83,7 @@ import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import NcEmptyContent from "@nextcloud/vue/dist/Components/NcEmptyContent";
 
 import { getLayout } from "../services/Layout";
-import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";
+import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType, MapBoundary } from "../types";
 import Folder from "./frame/Folder.vue";
 import Photo from "./frame/Photo.vue";
 import Tag from "./frame/Tag.vue";
@@ -223,6 +166,14 @@ export default defineComponent({
     selectionManager: null as InstanceType<typeof SelectionManager> & any,
     /** Scroller manager component */
     scrollerManager: null as InstanceType<typeof ScrollerManager> & any,
+
+    /** The boundary of the map */
+    mapBoundary: {
+      minLat: -90,
+      maxLat: 90,
+      minLng: -180,
+      maxLng: 180,
+    } as MapBoundary,
   }),
 
   mounted() {
@@ -715,7 +666,13 @@ export default defineComponent({
 
     /** Fetch timeline main call */
     async fetchDays(noCache = false) {
-      const url = API.Q(API.DAYS(), this.getQuery());
+
+      let url = "";
+      if (this.$route.name === "locations") {
+        url = API.Q(API.DAYS_WITH_BOUNDS(this.mapBoundary), this.getQuery());
+      } else {
+        url = API.Q(API.DAYS(), this.getQuery());
+      }
       const cacheUrl = <string>this.$route.name + url;
 
       // Try cache first
@@ -881,7 +838,11 @@ export default defineComponent({
 
     /** API url for Day call */
     getDayUrl(dayId: number | string) {
-      return API.Q(API.DAY(dayId), this.getQuery());
+      if (this.$route.name === "locations") {
+        return API.Q(API.DAY_WITH_BOUNDS(dayId, this.mapBoundary), this.getQuery());
+      } else {
+        return API.Q(API.DAY(dayId), this.getQuery());
+      }
     },
 
     /** Fetch image data for one dayId */
@@ -1280,6 +1241,12 @@ export default defineComponent({
         this.processDay(day.dayid, newDetail);
       }
     },
+
+    async updateBoundary(mapBoundary: MapBoundary) {
+      this.mapBoundary = mapBoundary;
+      console.log("parent get boundary:", this.mapBoundary);
+      await this.refresh();
+    },
   },
 });
 </script>
@@ -1347,13 +1314,15 @@ export default defineComponent({
   padding-left: 3px;
   font-size: 0.9em;
 
-  > div {
+  >div {
     position: relative;
+
     &.super {
       font-size: 1.4em;
       font-weight: bold;
       margin-bottom: 4px;
     }
+
     &.main {
       display: inline-block;
       font-weight: 600;
@@ -1371,6 +1340,7 @@ export default defineComponent({
     border-radius: 50%;
     cursor: pointer;
   }
+
   .name {
     display: block;
     transition: transform 0.2s ease;
@@ -1384,10 +1354,12 @@ export default defineComponent({
       display: flex;
       opacity: 0.7;
     }
+
     .name {
       transform: translateX(24px);
     }
   }
+
   &.selected .select {
     opacity: 1;
     color: var(--color-primary);
@@ -1401,16 +1373,20 @@ export default defineComponent({
 /** Static and dynamic top matter */
 .top-matter {
   padding-top: 4px;
+
   @include phone {
     padding-left: 40px;
   }
 }
+
 .recycler-before {
   width: 100%;
-  > .text {
+
+  >.text {
     font-size: 1.2em;
     padding-top: 13px;
     padding-left: 8px;
+
     @include phone {
       padding-left: 48px;
     }

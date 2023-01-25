@@ -4,26 +4,35 @@
     <TagTopMatter v-else-if="type === 2" />
     <FaceTopMatter v-else-if="type === 3" />
     <AlbumTopMatter v-else-if="type === 4" />
+    <LocationTopMatter v-else-if="type === 5" />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 
 import FolderTopMatter from "./FolderTopMatter.vue";
 import TagTopMatter from "./TagTopMatter.vue";
 import FaceTopMatter from "./FaceTopMatter.vue";
 import AlbumTopMatter from "./AlbumTopMatter.vue";
+import LocationTopMatter from "./LocationTopMatter.vue";
 
-import { TopMatterType } from "../../types";
+import { TopMatterType, IRow } from "../../types";
 
 export default defineComponent({
   name: "TopMatter",
+  props: {
+    list: {
+      type: Array as PropType<IRow[]>,
+      required: true,
+    }
+  },
   components: {
     FolderTopMatter,
     TagTopMatter,
     FaceTopMatter,
     AlbumTopMatter,
+    LocationTopMatter,
   },
 
   data: () => ({
@@ -58,6 +67,8 @@ export default defineComponent({
               : TopMatterType.NONE;
           case "albums":
             return TopMatterType.ALBUM;
+          case "locations":
+            return TopMatterType.LOCATION;
           default:
             return TopMatterType.NONE;
         }
