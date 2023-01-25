@@ -132,10 +132,10 @@ trait TimelineQueryDays
      * @param bool         $recursive       Whether to get the days recursively
      * @param bool         $archive         Whether to get the days only from the archive folder
      * @param array        $queryTransforms An array of query transforms to apply to the query
-     * @param float        $minLat          The minimum latitude
-     * @param float        $maxLat          The maximum latitude
-     * @param float        $minLng          The minimum longitude
-     * @param float        $maxLng          The maximum longitude
+     * @param string       $minLat          The minimum latitude
+     * @param string       $maxLat          The maximum latitude
+     * @param string       $minLng          The minimum longitude
+     * @param string       $maxLng          The maximum longitude
      * 
      * @return array The days response
      */
@@ -265,10 +265,10 @@ trait TimelineQueryDays
      * @param bool         $archive         If the query should include only the archive folder
      * @param array        $queryTransforms The query transformations to apply
      * @param mixed        $day_ids
-     * @param mixed        $minLat          The minimum latitude
-     * @param mixed        $maxLat          The maximum latitude
-     * @param mixed        $minLng          The minimum longitude
-     * @param mixed        $maxLng          The maximum longitude
+     * @param string        $minLat          The minimum latitude
+     * @param string       $maxLat          The maximum latitude
+     * @param string       $minLng          The minimum longitude
+     * @param string       $maxLng          The maximum longitude
      *
      * @return array An array of day responses
      */

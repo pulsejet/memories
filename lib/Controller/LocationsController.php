@@ -77,7 +77,7 @@ class LocationsController extends ApiBase
                 $list = $this->timelineQuery->daysToMonths($list);
             } else {
                 // Preload some day responses
-                $this->preloadDays($list, $uid, $root);
+                $this->preloadDaysWithBounds($list, $uid, $root, $minLat, $maxLat, $minLng, $maxLng);
             }
 
             // Reverse response if requested. Folders still stay at top.
@@ -98,10 +98,6 @@ class LocationsController extends ApiBase
 
     public function dayWithBounds(string $id, string $minLat, string $maxLat, string $minLng, string $maxLng): JSONResponse
     {
-        // $minLat = (float) $minLat;
-        // $maxLat = (float) $maxLat;
-        // $minLng = (float) $minLng;
-        // $maxLng = (float) $maxLng;
         if (null === $minLat || null === $maxLat || null === $minLng || null === $maxLng) {
             return new JSONResponse([], Http::STATUS_BAD_REQUEST);
         }
@@ -252,8 +248,12 @@ class LocationsController extends ApiBase
      * @param array        $days the days array
      * @param string       $uid  User ID or blank for public shares
      * @param TimelineRoot $root the root folder
+     * @param string       $minLat
+     * @param string       $maxLat
+     * @param string       $minLng
+     * @param string       $maxLng
      */
-    private function preloadDays(array &$days, string $uid, TimelineRoot &$root)
+    private function preloadDaysWithBounds(array &$days, string $uid, TimelineRoot &$root, string $minLat, string $maxLat, string $minLng, string $maxLng)
     {
         $transforms = $this->getTransformations(false);
         $preloaded = 0;
@@ -274,13 +274,17 @@ class LocationsController extends ApiBase
         }
 
         if (\count($preloadDayIds) > 0) {
-            $allDetails = $this->timelineQuery->getDay(
+            $allDetails = $this->timelineQuery->getDayWithBounds(
                 $root,
                 $uid,
                 $preloadDayIds,
                 $this->isRecursive(),
                 $this->isArchive(),
                 $transforms,
+                $minLat,
+                $maxLat,
+                $minLng,
+                $maxLng
             );
 
             // Group into dayid
