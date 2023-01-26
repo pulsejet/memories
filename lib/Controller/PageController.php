@@ -34,8 +34,7 @@ class PageController extends Controller
         IInitialState $initialState,
         IUserSession $userSession,
         IConfig $config
-    )
-    {
+    ) {
         parent::__construct($AppName, $request);
         $this->userId = $UserId;
         $this->appName = $AppName;
@@ -64,21 +63,27 @@ class PageController extends Controller
 
         // Configuration
         $uid = $user->getUID();
-        $this->initialState->provideInitialState('timelinePath', $this->config->getUserValue(
+        $this->initialState->provideInitialState(
+            'timelinePath',
+            $this->config->getUserValue(
             $uid,
             Application::APPNAME,
             'timelinePath',
             'EMPTY'
         )
         );
-        $this->initialState->provideInitialState('foldersPath', $this->config->getUserValue(
+        $this->initialState->provideInitialState(
+            'foldersPath',
+            $this->config->getUserValue(
             $uid,
             Application::APPNAME,
             'foldersPath',
             '/'
         )
         );
-        $this->initialState->provideInitialState('showHidden', $this->config->getUserValue(
+        $this->initialState->provideInitialState(
+            'showHidden',
+            $this->config->getUserValue(
             $uid,
             Application::APPNAME,
             'showHidden',

@@ -99,8 +99,7 @@ trait TimelineQueryDays
         bool $recursive,
         bool $archive,
         array $queryTransforms = []
-    ): array
-    {
+    ): array {
         $query = $this->connection->getQueryBuilder();
 
         // Get all entries also present in filecache
@@ -136,7 +135,7 @@ trait TimelineQueryDays
      * @param string       $maxLat          The maximum latitude
      * @param string       $minLng          The minimum longitude
      * @param string       $maxLng          The maximum longitude
-     * 
+     *
      * @return array The days response
      */
     public function getDaysWithBounds(
@@ -144,13 +143,12 @@ trait TimelineQueryDays
         string $uid,
         bool $recursive,
         bool $archive,
-        array $queryTransforms = [],
+        array $queryTransforms,
         string $minLat,
         string $maxLat,
         string $minLng,
         string $maxLng
-    ): array
-    {
+    ): array {
         $query = $this->connection->getQueryBuilder();
 
         // Get all entries also present in filecache
@@ -203,8 +201,7 @@ trait TimelineQueryDays
         bool $recursive,
         bool $archive,
         array $queryTransforms = []
-    ): array
-    {
+    ): array {
         $query = $this->connection->getQueryBuilder();
 
         // Get all entries also present in filecache
@@ -265,27 +262,25 @@ trait TimelineQueryDays
      * @param bool         $archive         If the query should include only the archive folder
      * @param array        $queryTransforms The query transformations to apply
      * @param mixed        $day_ids
-     * @param string        $minLat          The minimum latitude
+     * @param string       $minLat          The minimum latitude
      * @param string       $maxLat          The maximum latitude
      * @param string       $minLng          The minimum longitude
      * @param string       $maxLng          The maximum longitude
      *
      * @return array An array of day responses
      */
-
     public function getDayWithBounds(
         TimelineRoot &$root,
         string $uid,
         ?array $day_ids,
         bool $recursive,
         bool $archive,
-        array $queryTransforms = [],
+        array $queryTransforms,
         string $minLat,
         string $maxLat,
         string $minLng,
         string $maxLng
-    ): array
-    {
+    ): array {
         $query = $this->connection->getQueryBuilder();
 
         // Get all entries also present in filecache
@@ -408,7 +403,7 @@ trait TimelineQueryDays
                         $actualPath[1] = $actualPath[2];
                         $actualPath[2] = $tmp;
                         $davPath = implode('/', $actualPath);
-                        $davPaths[$fileid] = Exif::removeExtraSlash('/' . $davPath . '/');
+                        $davPaths[$fileid] = Exif::removeExtraSlash('/'.$davPath.'/');
                     }
                 }
             }
@@ -441,7 +436,7 @@ trait TimelineQueryDays
 
                 if (0 === strpos($row['path'], $basePath)) {
                     $rpath = substr($row['path'], \strlen($basePath));
-                    $row['filename'] = Exif::removeExtraSlash($davPath . $rpath);
+                    $row['filename'] = Exif::removeExtraSlash($davPath.$rpath);
                 }
 
                 unset($row['path']);
@@ -471,7 +466,7 @@ trait TimelineQueryDays
 
         // Add WITH clause if needed
         if (false !== strpos($sql, 'cte_folders')) {
-            $sql = $CTE_SQL . ' ' . $sql;
+            $sql = $CTE_SQL.' '.$sql;
         }
 
         return $this->connection->executeQuery($sql, $params, $types);
@@ -484,8 +479,7 @@ trait TimelineQueryDays
         IQueryBuilder &$query,
         TimelineRoot &$root,
         bool $archive
-    )
-    {
+    ) {
         // Add query parameters
         $query->setParameter('topFolderIds', $root->getIds(), IQueryBuilder::PARAM_INT_ARRAY);
         $query->setParameter('cteFoldersArchive', $archive, IQueryBuilder::PARAM_BOOL);
@@ -504,8 +498,7 @@ trait TimelineQueryDays
         TimelineRoot &$root,
         bool $recursive,
         bool $archive
-    )
-    {
+    ) {
         // Join with memories
         $baseOp = $query->expr()->eq('f.fileid', 'm.fileid');
         if ($root->isEmpty()) {
@@ -526,7 +519,8 @@ trait TimelineQueryDays
         return $query->innerJoin(
             'm',
             'filecache',
-            'f', $query->expr()->andX(
+            'f',
+            $query->expr()->andX(
                 $baseOp,
                 $pathOp,
             )

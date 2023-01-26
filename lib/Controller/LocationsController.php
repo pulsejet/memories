@@ -248,10 +248,6 @@ class LocationsController extends ApiBase
      * @param array        $days the days array
      * @param string       $uid  User ID or blank for public shares
      * @param TimelineRoot $root the root folder
-     * @param string       $minLat
-     * @param string       $maxLat
-     * @param string       $minLng
-     * @param string       $maxLng
      */
     private function preloadDaysWithBounds(array &$days, string $uid, TimelineRoot &$root, string $minLat, string $maxLat, string $minLng, string $maxLng)
     {
@@ -266,7 +262,7 @@ class LocationsController extends ApiBase
 
             $preloaded += $day['count'];
             $preloadDayIds[] = $day['dayid'];
-            $preloadDays[] = & $day;
+            $preloadDays[] = &$day;
 
             if ($preloaded >= 50 || \count($preloadDayIds) > 5) { // should be enough
                 break;
@@ -290,7 +286,7 @@ class LocationsController extends ApiBase
             // Group into dayid
             $detailMap = [];
             foreach ($allDetails as &$detail) {
-                $detailMap[$detail['dayid']][] = & $detail;
+                $detailMap[$detail['dayid']][] = &$detail;
             }
             foreach ($preloadDays as &$day) {
                 $m = $detailMap[$day['dayid']];
