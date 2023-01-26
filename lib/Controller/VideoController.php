@@ -139,6 +139,15 @@ class VideoController extends ApiBase
             } catch (\Exception $e) {
                 return new JSONResponse(['message' => 'Embedded video not found'], Http::STATUS_NOT_FOUND);
             }
+        } elseif (str_starts_with($liveid, 'self__traileroffset=')) {
+            // Remove prefix
+            $offset = (int) substr($liveid, \strlen('self__traileroffset='));
+            if ($offset <= 0) {
+                return new JSONResponse(['message' => 'Invalid offset'], Http::STATUS_BAD_REQUEST);
+            }
+
+            // Read file from offset to end
+            $blob = file_get_contents($path, false, null, $offset);
         } else {
             // Get stored video file (Apple MOV)
             $lp = $this->timelineQuery->getLivePhoto($fileid);

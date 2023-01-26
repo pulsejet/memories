@@ -282,6 +282,11 @@ class Exif
         }
     }
 
+    public static function getExifWithDuplicates(string $path)
+    {
+        return self::getExifFromLocalPathWithSeparateProc($path, ['-G4']);
+    }
+
     /** Get path to exiftool binary */
     private static function getExiftool()
     {
@@ -407,10 +412,10 @@ class Exif
         }
     }
 
-    private static function getExifFromLocalPathWithSeparateProc(string &$path)
+    private static function getExifFromLocalPathWithSeparateProc(string &$path, array $extraArgs = [])
     {
         $pipes = [];
-        $proc = proc_open(array_merge(self::getExiftool(), ['-api', 'QuickTimeUTC=1', '-n', '-U', '-json', '--b', $path]), [
+        $proc = proc_open(array_merge(self::getExiftool(), ['-api', 'QuickTimeUTC=1', '-n', '-U', '-json', '--b'], $extraArgs, [$path]), [
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
         ], $pipes);
