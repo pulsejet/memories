@@ -66,29 +66,29 @@ class PageController extends Controller
         $this->initialState->provideInitialState(
             'timelinePath',
             $this->config->getUserValue(
-            $uid,
-            Application::APPNAME,
-            'timelinePath',
-            'EMPTY'
-        )
+                $uid,
+                Application::APPNAME,
+                'timelinePath',
+                'EMPTY'
+            )
         );
         $this->initialState->provideInitialState(
             'foldersPath',
             $this->config->getUserValue(
-            $uid,
-            Application::APPNAME,
-            'foldersPath',
-            '/'
-        )
+                $uid,
+                Application::APPNAME,
+                'foldersPath',
+                '/'
+            )
         );
         $this->initialState->provideInitialState(
             'showHidden',
             $this->config->getUserValue(
-            $uid,
-            Application::APPNAME,
-            'showHidden',
-            false
-        )
+                $uid,
+                Application::APPNAME,
+                'showHidden',
+                false
+            )
         );
 
         // Apps enabled
