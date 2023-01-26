@@ -120,7 +120,7 @@ class TimelineWrite
         $dayId = floor($dateTaken / 86400);
         $dateTaken = gmdate('Y-m-d H:i:s', $dateTaken);
         [$w, $h] = Exif::getDimensions($exif);
-        $liveid = $this->livePhoto->getLivePhotoId($exif);
+        $liveid = $this->livePhoto->getLivePhotoId($file, $exif);
 
         // Video parameters
         $videoDuration = 0;
