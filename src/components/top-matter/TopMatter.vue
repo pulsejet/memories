@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 
 import FolderTopMatter from "./FolderTopMatter.vue";
 import TagTopMatter from "./TagTopMatter.vue";
@@ -17,16 +17,10 @@ import FaceTopMatter from "./FaceTopMatter.vue";
 import AlbumTopMatter from "./AlbumTopMatter.vue";
 import LocationTopMatter from "./LocationTopMatter.vue";
 
-import { TopMatterType, IRow } from "../../types";
+import { TopMatterType } from "../../types";
 
 export default defineComponent({
   name: "TopMatter",
-  props: {
-    list: {
-      type: Array as PropType<IRow[]>,
-      required: true,
-    }
-  },
   components: {
     FolderTopMatter,
     TagTopMatter,

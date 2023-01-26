@@ -1,14 +1,9 @@
 <template>
     <div class="location-top-matter">
-        <l-map style="height: 100%; width: 100%; margin-right: 3.5em;" :zoom="zoom" ref="map" @moveend="getBoundary"
-            @zoomend="getBoundary">
+        <l-map style="height: 100%; width: 100%; margin-right: 3.5em; z-index: 0;" :zoom="zoom" ref="map"
+            @moveend="getBoundary" @zoomend="getBoundary">
             <l-tile-layer :url="url" :attribution="attribution" />
             <v-marker-cluster>
-                <l-marker v-for="photo in getPhotos" :key="photo.key"
-                    :lat-lng="[photo.imageInfo.exif.GPSLatitude, photo.imageInfo.exif.GPSLongitude]"
-                    v-if="photo.imageInfo.exif.GPSLatitude && photo.imageInfo.exif.GPSLongitude">
-                    <l-popup :content="photo.filename" />
-                </l-marker>
             </v-marker-cluster>
         </l-map>
     </div>
@@ -100,6 +95,5 @@ export default defineComponent({
     display: flex;
     vertical-align: middle;
     height: 20em;
-
 }
 </style>

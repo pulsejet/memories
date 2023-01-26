@@ -1244,8 +1244,7 @@ export default defineComponent({
 
     async updateBoundary(mapBoundary: MapBoundary) {
       this.mapBoundary = mapBoundary;
-      console.log("parent get boundary:", this.mapBoundary);
-      await this.refresh();
+      await this.softRefresh();
     },
   },
 });
