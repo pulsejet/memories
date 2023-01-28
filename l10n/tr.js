@@ -113,6 +113,7 @@ OC.L10N.register(
     "Label" : "Etiket",
     "Camera Make" : "Kamera markası",
     "Camera Model" : "Kamera modeli",
+    "Lens Model" : "Lens modeli",
     "Copyright" : "Telif hakkı",
     "Remove person" : "Kişiyi sil",
     "Are you sure you want to remove {name}?" : "{name} kişisini silmek istediğinize emin misiniz?",
@@ -264,7 +265,6 @@ OC.L10N.register(
     "Failed to download files" : "Dosyalar indirilemedi",
     "Failed to favorite files." : "Dosyalar sık kullanılanlara eklenemedi.",
     "Failed to favorite some files." : "Bazı dosyalar sık kullanılanlara eklenemedi.",
-    "Failed to favorite {fileName}." : "{fileName} sık kullanılanlara eklenemedi.",
-    "Lens" : "Lens"
+    "Failed to favorite {fileName}." : "{fileName} sık kullanılanlara eklenemedi."
 },
 "nplurals=2; plural=(n > 1);");

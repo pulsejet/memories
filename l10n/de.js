@@ -264,7 +264,6 @@ OC.L10N.register(
     "Failed to download files" : "Dateien konnten nicht heruntergeladen werden",
     "Failed to favorite files." : "Favorisieren von Dateien fehlgeschlagen",
     "Failed to favorite some files." : "Einige Dateien konnten nicht zu den Favoriten hinzugefügt werden.",
-    "Failed to favorite {fileName}." : "{fileName} konnte nicht zu den Favoriten hinzugefügt werden.",
-    "Lens" : "Linse"
+    "Failed to favorite {fileName}." : "{fileName} konnte nicht zu den Favoriten hinzugefügt werden."
 },
 "nplurals=2; plural=(n != 1);");

@@ -42,7 +42,7 @@ OC.L10N.register(
     "Close" : "ปิด",
     "Previous" : "ก่อนหน้า",
     "Next" : "ถัดไป",
-    "Reset" : "ตั้งค่าใหม่",
+    "Reset" : "รีเซ็ต",
     "Continue" : "ดำเนินการต่อ",
     "Undo" : "เลิกทำ",
     "Custom" : "กำหนดเอง",

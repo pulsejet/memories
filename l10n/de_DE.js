@@ -113,6 +113,7 @@ OC.L10N.register(
     "Label" : "Beschriftung",
     "Camera Make" : "Kameramarke",
     "Camera Model" : "Kameramodell",
+    "Lens Model" : "Linsenmodell",
     "Copyright" : "Urheberrecht",
     "Remove person" : "Person entfernen",
     "Are you sure you want to remove {name}?" : "Möchten Sie wirklich {name} entfernen?",
@@ -264,7 +265,6 @@ OC.L10N.register(
     "Failed to download files" : "Dateien konnten nicht heruntergeladen werden",
     "Failed to favorite files." : "Favorisieren von Dateien fehlgeschlagen.",
     "Failed to favorite some files." : "Einige Dateien konnten nicht zu den Favoriten hinzugefügt werden.",
-    "Failed to favorite {fileName}." : "{fileName} konnte nicht zu den Favoriten hinzugefügt werden.",
-    "Lens" : "Linse"
+    "Failed to favorite {fileName}." : "{fileName} konnte nicht zu den Favoriten hinzugefügt werden."
 },
 "nplurals=2; plural=(n != 1);");
