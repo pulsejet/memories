@@ -159,8 +159,7 @@ class DaysController extends ApiBase
 
     /**
      * @NoAdminRequired
-     *
-     * @PublicPage
+     * @NoCSRFRequired
      */
     public function dayPost(): JSONResponse
     {
