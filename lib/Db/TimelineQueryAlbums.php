@@ -63,7 +63,7 @@ trait TimelineQueryAlbums
 
         // GROUP and ORDER by
         $query->groupBy('pa.album_id');
-        $query->orderBy('pa.created', 'DESC');
+        $query->orderBy('pa.name', 'ASC');
         $query->addOrderBy('pa.album_id', 'DESC'); // tie-breaker
 
         // FETCH all albums
