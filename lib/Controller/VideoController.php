@@ -249,11 +249,16 @@ class VideoController extends ApiBase
         shell_exec("rm -rf '{$tmpPath}'");
         mkdir($tmpPath, 0755, true);
 
+        // Remove trailing slash from temp path if present
+        if ('/' === substr($tmpPath, -1)) {
+            $tmpPath = substr($tmpPath, 0, -1);
+        }
+
         array_push($env, "GOVOD_TEMPDIR='{$tmpPath}'");
 
-        // Check if already running
-        $env = implode(' ', $env);
+        // Kill already running and start new
         \OCA\Memories\Util::pkill($transcoder);
+        $env = implode(' ', $env);
         shell_exec("{$env} nohup {$transcoder} > '{$tmpPath}.log' 2>&1 & > /dev/null");
 
         // wait for 1s and try again
