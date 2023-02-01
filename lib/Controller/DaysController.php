@@ -243,6 +243,15 @@ class DaysController extends ApiBase
             $transforms[] = [$this->timelineQuery, 'transformLimitDay', (int) $limit];
         }
 
+        // Filter geological bounds
+        $minLat = $this->request->getParam('minLat');
+        $maxLat = $this->request->getParam('maxLat');
+        $minLng = $this->request->getParam('minLng');
+        $maxLng = $this->request->getParam('maxLng');
+        if ($minLat && $maxLat && $minLng && $maxLng) {
+            $transforms[] = [$this->timelineQuery, 'transformBoundFilter', $minLat, $maxLat, $minLng, $maxLng];
+        }
+
         return $transforms;
     }
 

@@ -11,18 +11,28 @@ trait TimelineQueryFilters
 {
     public function transformFavoriteFilter(IQueryBuilder &$query, string $userId)
     {
-        $query->innerJoin('m', 'vcategory_to_object', 'vcoi', $query->expr()->andX(
-            $query->expr()->eq('vcoi.objid', 'm.fileid'),
-            $query->expr()->in('vcoi.categoryid', $this->getFavoriteVCategoryFun($query, $userId)),
-        ));
+        $query->innerJoin(
+            'm',
+            'vcategory_to_object',
+            'vcoi',
+            $query->expr()->andX(
+                $query->expr()->eq('vcoi.objid', 'm.fileid'),
+                $query->expr()->in('vcoi.categoryid', $this->getFavoriteVCategoryFun($query, $userId)),
+            )
+        );
     }
 
     public function addFavoriteTag(IQueryBuilder &$query, string $userId)
     {
-        $query->leftJoin('m', 'vcategory_to_object', 'vco', $query->expr()->andX(
-            $query->expr()->eq('vco.objid', 'm.fileid'),
-            $query->expr()->in('vco.categoryid', $this->getFavoriteVCategoryFun($query, $userId)),
-        ));
+        $query->leftJoin(
+            'm',
+            'vcategory_to_object',
+            'vco',
+            $query->expr()->andX(
+                $query->expr()->eq('vco.objid', 'm.fileid'),
+                $query->expr()->in('vco.categoryid', $this->getFavoriteVCategoryFun($query, $userId)),
+            )
+        );
         $query->addSelect('vco.categoryid');
     }
 
@@ -38,6 +48,18 @@ trait TimelineQueryFilters
             return;
         }
         $query->setMaxResults($limit);
+    }
+
+    public function transformBoundFilter(IQueryBuilder &$query, string $userId, string $minLat, string $maxLat, string $minLng, string $maxLng)
+    {
+        $query->andWhere(
+            $query->expr()->andX(
+                $query->expr()->gte('m.latitude', $query->createNamedParameter($minLat, IQueryBuilder::PARAM_STR)),
+                $query->expr()->lte('m.latitude', $query->createNamedParameter($maxLat, IQueryBuilder::PARAM_STR)),
+                $query->expr()->gte('m.longitude', $query->createNamedParameter($minLng, IQueryBuilder::PARAM_STR)),
+                $query->expr()->lte('m.longitude', $query->createNamedParameter($maxLng, IQueryBuilder::PARAM_STR))
+            )
+        );
     }
 
     private function applyAllTransforms(array $transforms, IQueryBuilder &$query, string $uid): void

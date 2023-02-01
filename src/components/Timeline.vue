@@ -698,6 +698,14 @@ export default defineComponent({
         query.set("reverse", "1");
       }
 
+      // Geological Bounds
+      if (this.$route.name === "locations") {
+        query.set("minLat", "" + this.mapBoundary.minLat);
+        query.set("maxLat", "" + this.mapBoundary.maxLat);
+        query.set("minLng", "" + this.mapBoundary.minLng);
+        query.set("maxLng", "" + this.mapBoundary.maxLng);
+      }
+
       return query;
     },
 
@@ -731,12 +739,7 @@ export default defineComponent({
 
     /** Fetch timeline main call */
     async fetchDays(noCache = false) {
-      let url = "";
-      if (this.$route.name === "locations") {
-        url = API.Q(API.DAYS_WITH_BOUNDS(this.mapBoundary), this.getQuery());
-      } else {
-        url = API.Q(API.DAYS(), this.getQuery());
-      }
+      const url = API.Q(API.DAYS(), this.getQuery());
       const cacheUrl = <string>this.$route.name + url;
 
       // Try cache first
@@ -902,14 +905,7 @@ export default defineComponent({
 
     /** API url for Day call */
     getDayUrl(dayId: number | string) {
-      if (this.$route.name === "locations") {
-        return API.Q(
-          API.DAY_WITH_BOUNDS(dayId, this.mapBoundary),
-          this.getQuery()
-        );
-      } else {
-        return API.Q(API.DAY(dayId), this.getQuery());
-      }
+      return API.Q(API.DAY(dayId), this.getQuery());
     },
 
     /** Fetch image data for one dayId */
@@ -1439,20 +1435,16 @@ export default defineComponent({
 /** Static and dynamic top matter */
 .top-matter {
   padding-top: 4px;
-
   @include phone {
     padding-left: 40px;
   }
 }
-
 .recycler-before {
   width: 100%;
-
   > .text {
     font-size: 1.2em;
     padding-top: 13px;
     padding-left: 8px;
-
     @include phone {
       padding-left: 48px;
     }

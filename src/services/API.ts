@@ -40,14 +40,6 @@ export class API {
     return tok(gen(`${BASE}/days/{id}`, { id }));
   }
 
-  static DAYS_WITH_BOUNDS(mapBoundary: MapBoundary) {
-    return tok(gen(`${BASE}/location/days/{minLat}/{maxLat}/{minLng}/{maxLng}`, mapBoundary));
-  }
-
-  static DAY_WITH_BOUNDS(id: number | string, mapBoundary: MapBoundary) {
-    return tok(gen(`${BASE}/location/days/{id}/{minLat}/{maxLat}/{minLng}/{maxLng}`, { id, ...mapBoundary }));
-  }
-
   static ALBUM_LIST(t: "1" | "2" | "3" = "3") {
     return gen(`${BASE}/albums?t=${t}`);
   }
