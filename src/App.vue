@@ -1,13 +1,23 @@
 <template>
   <FirstStart v-if="isFirstStart" />
 
-  <NcContent app-name="memories" v-else :class="{
-    'remove-gap': removeOuterGap,
-  }">
+  <NcContent
+    app-name="memories"
+    v-else
+    :class="{
+      'remove-gap': removeOuterGap,
+    }"
+  >
     <NcAppNavigation v-if="showNavigation" ref="nav">
       <template id="app-memories-navigation" #list>
-        <NcAppNavigationItem v-for="item in navItems" :key="item.name" :to="{ name: item.name }" :title="item.title"
-          @click="linkClick" exact>
+        <NcAppNavigationItem
+          v-for="item in navItems"
+          :key="item.name"
+          :to="{ name: item.name }"
+          :title="item.title"
+          @click="linkClick"
+          exact
+        >
           <component :is="item.icon" slot="icon" :size="20" />
         </NcAppNavigationItem>
       </template>
