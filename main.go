@@ -145,6 +145,12 @@ func main() {
 		tempdir = "/tmp/go-vod"
 	}
 
+	// get port
+	bind := os.Getenv("GOVOD_BIND")
+	if bind == "" {
+		bind = ":47788"
+	}
+
 	h := NewHandler(&Config{
 		ffmpeg:          ffmpeg,
 		ffprobe:         ffprobe,
@@ -158,7 +164,7 @@ func main() {
 	})
 
 	http.Handle("/", h)
-	http.ListenAndServe(":47788", nil)
+	http.ListenAndServe(bind, nil)
 
 	log.Println("Exiting VOD server")
 	h.Close()
