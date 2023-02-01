@@ -225,26 +225,28 @@ class VideoController extends ApiBase
         $env = [];
 
         // QSV with VAAPI
-        $vaapi = $this->config->getSystemValue('memories.qsv', false);
-        if ($vaapi) {
-            array_push($env, 'VAAPI=1');
+        if ($this->config->getSystemValue('memories.qsv', false)) {
+            $env[] = 'VAAPI=1';
         }
 
         // NVENC
-        $nvenc = $this->config->getSystemValue('memories.nvenc', false);
-        if ($nvenc) {
-            array_push($env, 'NVENC=1');
+        if ($this->config->getSystemValue('memories.nvenc', false)) {
+            $env[] = 'NVENC=1';
         }
+
+        // Bind address / port
+        $port = $this->config->getSystemValue('memories.govod_port', 47788);
+        $env[] = "GOVOD_BIND='127.0.0.1:{$port}'";
 
         // Paths
         $ffmpegPath = $this->config->getSystemValue('memories.ffmpeg_path', 'ffmpeg');
         $ffprobePath = $this->config->getSystemValue('memories.ffprobe_path', 'ffprobe');
-        array_push($env, "FFMPEG='{$ffmpegPath}'");
-        array_push($env, "FFPROBE='{$ffprobePath}'");
+        $env[] = "FFMPEG='{$ffmpegPath}'";
+        $env[] = "FFPROBE='{$ffprobePath}'";
 
         // (Re-)create Temp dir
         $instanceId = $this->config->getSystemValue('instanceid', 'default');
-        $defaultTmp = sys_get_temp_dir() . '/go-vod/' . $instanceId;
+        $defaultTmp = sys_get_temp_dir().'/go-vod/'.$instanceId;
         $tmpPath = $this->config->getSystemValue('memories.tmp_path', $defaultTmp);
         shell_exec("rm -rf '{$tmpPath}'");
         mkdir($tmpPath, 0755, true);
@@ -253,8 +255,7 @@ class VideoController extends ApiBase
         if ('/' === substr($tmpPath, -1)) {
             $tmpPath = substr($tmpPath, 0, -1);
         }
-
-        array_push($env, "GOVOD_TEMPDIR='{$tmpPath}'");
+        $env[] = "GOVOD_TEMPDIR='{$tmpPath}'";
 
         // Kill already running and start new
         \OCA\Memories\Util::pkill($transcoder);
@@ -273,7 +274,8 @@ class VideoController extends ApiBase
 
         // Make sure query params are repeated
         // For example, in folder sharing, we need the params on every request
-        $url = "http://127.0.0.1:47788/{$client}{$path}/{$profile}";
+        $port = $this->config->getSystemValue('memories.govod_port', 47788);
+        $url = "http://127.0.0.1:{$port}/{$client}{$path}/{$profile}";
         if ($params = $_SERVER['QUERY_STRING']) {
             $url .= "?{$params}";
         }
