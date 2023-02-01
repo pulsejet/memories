@@ -14,6 +14,10 @@ const config_noTranscode = loadState(
   <string>"UNSET"
 ) as boolean | string;
 
+const config_video_default_quality = Number(
+  loadState("memories", "video_default_quality", <string>"0") as string
+);
+
 /**
  * Check if slide has video content
  *
@@ -309,7 +313,7 @@ class VideoContentSetup {
 
     if (qualityNums) {
       opts.quality = {
-        default: 0,
+        default: config_video_default_quality,
         options: qualityNums,
         forced: true,
         onChange: (quality: number) => {
