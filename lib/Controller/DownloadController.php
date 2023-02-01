@@ -27,6 +27,7 @@ use bantu\IniGetWrapper\IniGetWrapper;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\ISession;
+use OCP\ITempManager;
 use OCP\Security\ISecureRandom;
 
 class DownloadController extends ApiBase
@@ -193,6 +194,9 @@ class DownloadController extends ApiBase
         // So we need to add a number to the end of the name
         $nameCounts = [];
 
+        /** @var ITempManager for clearing temp files */
+        $tempManager = \OC::$server->get(ITempManager::class);
+
         // Send each file
         foreach ($fileIds as $fileId) {
             if (connection_aborted()) {
@@ -265,6 +269,9 @@ class DownloadController extends ApiBase
                 if (false !== $handle) {
                     fclose($handle);
                 }
+
+                // Clear any temp files
+                $tempManager->clean();
             }
         }
 
