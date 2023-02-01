@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCA\Memories\Exif;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
@@ -26,7 +27,7 @@ class LivePhoto
     }
 
     /** Get liveid from photo part */
-    public function getLivePhotoId(array &$exif)
+    public function getLivePhotoId(File &$file, array &$exif)
     {
         // Apple JPEG (MOV has ContentIdentifier)
         if (\array_key_exists('MediaGroupUUID', $exif)) {
@@ -41,7 +42,36 @@ class LivePhoto
         // Google JPEG and Samsung HEIC (Apple?)
         if (\array_key_exists('MotionPhoto', $exif)) {
             if ('image/jpeg' === $exif['MIMEType']) {
-                // Google JPEG -- image should hopefully be in trailer
+                // Google Motion Photo JPEG
+
+                // We need to read the DirectoryItemLength key to get the length of the video
+                // These keys are duplicate, one for the image and one for the video
+                // With exiftool -G4, we get the following:
+                //
+                //    "Unknown:DirectoryItemSemantic": "Primary"
+                //    "Unknown:DirectoryItemLength": 0
+                //    "Copy1:DirectoryItemSemantic": "MotionPhoto"
+                //    "Copy1:DirectoryItemLength": 3011435    // <-- this is the length of the video
+                //
+                // The video is then located at the end of the file, so we can get the offset.
+                // Match each DirectoryItemSemantic to find MotionPhoto, then get the length.
+                $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+                $extExif = Exif::getExifWithDuplicates($path);
+
+                foreach ($extExif as $key => $value) {
+                    if (str_ends_with($key, ':DirectoryItemSemantic')) {
+                        if ('MotionPhoto' === $value) {
+                            $videoLength = $extExif[str_replace('Semantic', 'Length', $key)];
+                            if (\is_int($videoLength) && $videoLength > 0) {
+                                $videoOffset = $file->getSize() - $videoLength;
+
+                                return 'self__traileroffset='.((string) $videoOffset);
+                            }
+                        }
+                    }
+                }
+
+                // Fallback: video should hopefully be in trailer
                 return 'self__trailer';
             }
             if ('image/heic' === $exif['MIMEType']) {

@@ -142,6 +142,7 @@ class PageController extends Controller
 
         // Video configuration
         $initialState->provideInitialState('notranscode', $config->getSystemValue('memories.no_transcode', 'UNSET'));
+        $initialState->provideInitialState('video_default_quality', $config->getSystemValue('memories.video_default_quality', '0'));
     }
 
     /**

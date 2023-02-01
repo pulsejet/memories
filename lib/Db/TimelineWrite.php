@@ -120,7 +120,7 @@ class TimelineWrite
         $dayId = floor($dateTaken / 86400);
         $dateTaken = gmdate('Y-m-d H:i:s', $dateTaken);
         [$w, $h] = Exif::getDimensions($exif);
-        $liveid = $this->livePhoto->getLivePhotoId($exif);
+        $liveid = $this->livePhoto->getLivePhotoId($file, $exif);
 
         // Video parameters
         $videoDuration = 0;
@@ -129,20 +129,21 @@ class TimelineWrite
         }
 
         // Clean up EXIF to keep only useful metadata
-        foreach ($exif as $key => &$value) {
+        $filteredExif = [];
+        foreach ($exif as $key => $value) {
             // Truncate any fields > 2048 chars
             if (\is_string($value) && \strlen($value) > 2048) {
-                $exif[$key] = substr($value, 0, 2048);
+                $value = substr($value, 0, 2048);
             }
 
-            // These are huge and not needed
-            if (!EXIF_FIELDS_LIST[$key] ?? false) {
-                unset($exif[$key]);
+            // Only keep fields in the whitelist
+            if (\array_key_exists($key, EXIF_FIELDS_LIST)) {
+                $filteredExif[$key] = $value;
             }
         }
 
         // Store JSON string
-        $exifJson = json_encode($exif);
+        $exifJson = json_encode($filteredExif);
 
         // Store error if data > 64kb
         if (\is_string($exifJson)) {
