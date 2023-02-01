@@ -222,29 +222,39 @@ class VideoController extends ApiBase
         }
 
         // Check for environment variables
-        $env = '';
+        $env = [];
 
         // QSV with VAAPI
         $vaapi = $this->config->getSystemValue('memories.qsv', false);
         if ($vaapi) {
-            $env .= 'VAAPI=1 ';
+            array_push($env, 'VAAPI=1');
         }
 
         // NVENC
         $nvenc = $this->config->getSystemValue('memories.nvenc', false);
         if ($nvenc) {
-            $env .= 'NVENC=1 ';
+            array_push($env, 'NVENC=1');
         }
 
         // Paths
         $ffmpegPath = $this->config->getSystemValue('memories.ffmpeg_path', 'ffmpeg');
         $ffprobePath = $this->config->getSystemValue('memories.ffprobe_path', 'ffprobe');
-        $tmpPath = $this->config->getSystemValue('memories.tmp_path', sys_get_temp_dir());
-        $env .= "FFMPEG='{$ffmpegPath}' FFPROBE='{$ffprobePath}' GOVOD_TEMPDIR='{$tmpPath}/go-vod' ";
+        array_push($env, "FFMPEG='{$ffmpegPath}'");
+        array_push($env, "FFPROBE='{$ffprobePath}'");
+
+        // (Re-)create Temp dir
+        $instanceId = $this->config->getSystemValue('instanceid', 'default');
+        $defaultTmp = sys_get_temp_dir() . '/go-vod/' . $instanceId;
+        $tmpPath = $this->config->getSystemValue('memories.tmp_path', $defaultTmp);
+        shell_exec("rm -rf '{$tmpPath}'");
+        mkdir($tmpPath, 0755, true);
+
+        array_push($env, "GOVOD_TEMPDIR='{$tmpPath}'");
 
         // Check if already running
+        $env = implode(' ', $env);
         \OCA\Memories\Util::pkill($transcoder);
-        shell_exec("{$env} nohup {$transcoder} > {$tmpPath}/go-vod.log 2>&1 & > /dev/null");
+        shell_exec("{$env} nohup {$transcoder} > '{$tmpPath}.log' 2>&1 & > /dev/null");
 
         // wait for 1s and try again
         sleep(1);
