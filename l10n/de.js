@@ -113,6 +113,7 @@ OC.L10N.register(
     "Label" : "Beschriftung",
     "Camera Make" : "Kameramarke",
     "Camera Model" : "Kameramodell",
+    "Lens Model" : "Linsenmodell",
     "Copyright" : "Uhrheberrecht",
     "Remove person" : "Person entfernen",
     "Are you sure you want to remove {name}?" : "Soll {name} wirklich entfernt werden?",
