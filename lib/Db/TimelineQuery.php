@@ -40,7 +40,16 @@ class TimelineQuery
     {
         $params = $query->getParameters();
         foreach ($params as $key => $value) {
-            $sql = str_replace(':'.$key, $query->getConnection()->getDatabasePlatform()->quoteStringLiteral($value), $sql);
+            if (\is_array($value)) {
+                $value = implode(',', $value);
+            } elseif (\is_bool($value)) {
+                $value = $value ? '1' : '0';
+            } elseif (null === $value) {
+                $value = 'NULL';
+            }
+
+            $value = $query->getConnection()->getDatabasePlatform()->quoteStringLiteral($value);
+            $sql = str_replace(':'.$key, $value, $sql);
         }
 
         return $sql;
