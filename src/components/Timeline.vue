@@ -290,6 +290,8 @@ export default defineComponent({
           return this.t("memories", "On this day");
         case "tags":
           return this.t("memories", "Tags");
+        case "places":
+          return this.t("memories", "Places");
         default:
           return "";
       }
@@ -669,6 +671,12 @@ export default defineComponent({
         query.set("tag", <string>this.$route.params.name);
       }
 
+      // Places
+      if (this.$route.name === "places" && this.$route.params.name) {
+        const name = <string>this.$route.params.name;
+        query.set("place", <string>name.split("-", 2)[0]);
+      }
+
       // Albums
       if (this.$route.name === "albums" && this.$route.params.name) {
         const user = <string>this.$route.params.user;
@@ -737,6 +745,8 @@ export default defineComponent({
           data = await dav.getPeopleData(this.$route.name as any);
         } else if (this.$route.name === "albums" && !this.$route.params.name) {
           data = await dav.getAlbumsData("3");
+        } else if (this.$route.name === "places" && !this.$route.params.name) {
+          data = await dav.getPlacesData();
         } else {
           // Try the cache
           try {

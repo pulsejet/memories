@@ -154,6 +154,13 @@ class TimelineWrite
             $exifJson = json_encode(['error' => 'Exif data encoding error']);
         }
 
+        // Store location data
+        if (\array_key_exists('GPSLatitude', $exif) && \array_key_exists('GPSLongitude', $exif)) {
+            $lat = $exif['GPSLatitude'];
+            $lon = $exif['GPSLongitude'];
+            $this->updateGeoData($file, (float) $lat, (float) $lon);
+        }
+
         if ($prevRow) {
             // Update existing row
             // No need to set objectid again
@@ -267,5 +274,44 @@ class TimelineWrite
         ;
 
         return $query->executeStatement();
+    }
+
+    /**
+     * Add geolocation data for a file.
+     */
+    public function updateGeoData(File &$file, float $lat, float $lon): void
+    {
+        // Make query to memories_planet table
+        $query = $this->connection->getQueryBuilder();
+        $query->select('osm_id')
+            ->from('memories_planet')
+            ->where($query->createFunction('ST_Contains(`geometry`, ST_GeomFromText(\'POINT('.$lon.' '.$lat.')\', 4326))'))
+        ;
+
+        // Remove memories_planet has no *PREFIX*
+        $sql = $query->getSQL();
+        $sql = str_replace('*PREFIX*memories_planet', 'memories_planet', $sql);
+
+        // Run query
+        $result = $this->connection->executeQuery($sql);
+        $rows = $result->fetchAll();
+
+        // Delete previous records
+        $query = $this->connection->getQueryBuilder();
+        $query->delete('memories_geo')
+            ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
+        ;
+
+        // Insert records
+        foreach ($rows as $row) {
+            $query = $this->connection->getQueryBuilder();
+            $query->insert('memories_geo')
+                ->values([
+                    'fileid' => $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT),
+                    'osm_id' => $query->createNamedParameter($row['osm_id'], IQueryBuilder::PARAM_INT),
+                ])
+            ;
+            $query->executeStatement();
+        }
     }
 }

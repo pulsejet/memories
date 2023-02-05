@@ -237,6 +237,13 @@ class DaysController extends ApiBase
             }
         }
 
+        // Filter only for one place
+        if ($this->geoPlacesIsEnabled()) {
+            if ($locationId = $this->request->getParam('place')) {
+                $transforms[] = [$this->timelineQuery, 'transformPlaceFilter', (int) $locationId];
+            }
+        }
+
         // Limit number of responses for day query
         $limit = $this->request->getParam('limit');
         if ($limit) {

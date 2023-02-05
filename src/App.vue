@@ -64,6 +64,7 @@ import AlbumIcon from "vue-material-design-icons/ImageAlbum.vue";
 import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
 import CalendarIcon from "vue-material-design-icons/Calendar.vue";
 import PeopleIcon from "vue-material-design-icons/AccountBoxMultiple.vue";
+import MarkerIcon from "vue-material-design-icons/MapMarker.vue";
 import TagsIcon from "vue-material-design-icons/Tag.vue";
 import MapIcon from "vue-material-design-icons/Map.vue";
 
@@ -88,6 +89,7 @@ export default defineComponent({
     ArchiveIcon,
     CalendarIcon,
     PeopleIcon,
+    MarkerIcon,
     TagsIcon,
     MapIcon,
   },
@@ -245,6 +247,11 @@ export default defineComponent({
           name: "thisday",
           icon: CalendarIcon,
           title: t("memories", "On this day"),
+        },
+        {
+          name: "places",
+          icon: MarkerIcon,
+          title: t("memories", "Places"),
         },
         {
           name: "tags",

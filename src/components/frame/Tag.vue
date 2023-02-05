@@ -68,6 +68,10 @@ export default defineComponent({
         return getPreviewUrl(mock, true, 512);
       }
 
+      if (this.place) {
+        return API.PLACE_PREVIEW(this.place.fileid);
+      }
+
       return API.TAG_PREVIEW(this.data.name);
     },
 
@@ -92,6 +96,10 @@ export default defineComponent({
         : "recognize";
     },
 
+    place() {
+      return this.data.flag & constants.c.FLAG_IS_PLACE ? this.data : null;
+    },
+
     album() {
       return this.data.flag & constants.c.FLAG_IS_ALBUM
         ? <IAlbum>this.data
@@ -112,6 +120,13 @@ export default defineComponent({
         const user = this.album.user;
         const name = this.album.name;
         return { name: "albums", params: { user, name } };
+      }
+
+      if (this.place) {
+        const id = this.place.fileid.toString();
+        const placeName = this.place.name || id;
+        const name = `${id}-${placeName}`;
+        return { name: "places", params: { name } };
       }
 
       return { name: "tags", params: { name: this.data.name } };

@@ -220,6 +220,16 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
+    public function places()
+    {
+        return $this->main();
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     */
     public function tags()
     {
         return $this->main();
