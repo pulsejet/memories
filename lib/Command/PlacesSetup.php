@@ -235,17 +235,17 @@ class PlacesSetup extends Command
 
                         continue;
                     }
+                }
 
-                    // Print progress
-                    if (0 === $count % 500) {
-                        $end = time();
-                        $elapsed = $end - $start;
-                        $rate = $count / $elapsed;
-                        $remaining = APPROX_PLACES - $count;
-                        $eta = round($remaining / $rate);
-                        $rate = round($rate, 1);
-                        $this->output->writeln("Inserted {$count} places, {$rate}/s, ETA: {$eta}s, Last: {$name}");
-                    }
+                // Print progress
+                if (0 === $count % 500) {
+                    $end = time();
+                    $elapsed = $end - $start;
+                    $rate = $count / $elapsed;
+                    $remaining = APPROX_PLACES - $count;
+                    $eta = round($remaining / $rate);
+                    $rate = round($rate, 1);
+                    $this->output->writeln("Inserted {$count} places, {$rate}/s, ETA: {$eta}s, Last: {$name}");
                 }
             }
 
