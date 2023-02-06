@@ -29,7 +29,7 @@ php -S localhost:8080 &
 
 # Get test photo files
 cd data/admin/files
-wget https://github.com/pulsejet/memories-test/raw/main/Files.zip
+wget https://github.com/pulsejet/memories-assets/raw/main/Files.zip
 unzip Files.zip
 cd ../../..
 
