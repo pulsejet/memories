@@ -79,16 +79,16 @@ class PlacesSetup extends Command
         }
 
         // Check if the database is already set up
+        $hasDb = false;
+
         try {
             $this->output->writeln('');
             $this->connection->executeQuery('SELECT osm_id FROM memories_planet_geometry LIMIT 1')->fetch();
             $this->output->writeln('<error>Database is already set up</error>');
-            $this->output->writeln('<error>This will clear and re-download the planet database</error>');
+            $this->output->writeln('<error>This will drop and re-download the planet database</error>');
             $this->output->writeln('<error>This is generally not necessary to do frequently </error>');
+            $hasDb = true;
         } catch (\Exception $e) {
-            $this->output->write('Setting up database ... ');
-            $this->setupDatabase();
-            $this->output->writeln('OK');
         }
 
         // Ask confirmation
@@ -105,16 +105,29 @@ class PlacesSetup extends Command
             return 1;
         }
 
-        // Download the data
-        $this->output->write('Downloading data ... ');
-        $datafile = $this->downloadPlanet();
+        // Drop the table
+        $p = $this->connection->getDatabasePlatform();
+        if ($hasDb) {
+            $this->output->writeln('');
+            $this->output->write('Dropping table ... ');
+            $this->connection->executeStatement($p->getDropTableSQL('memories_planet_geometry'));
+            $this->output->writeln('OK');
+        }
+
+        // Setup the database
+        $this->output->write('Setting up database ... ');
+        $this->setupDatabase();
         $this->output->writeln('OK');
 
         // Truncate tables
         $this->output->write('Truncating tables ... ');
-        $p = $this->connection->getDatabasePlatform();
         $this->connection->executeStatement($p->getTruncateTableSQL('*PREFIX*memories_planet', false));
         $this->connection->executeStatement($p->getTruncateTableSQL('memories_planet_geometry', false));
+        $this->output->writeln('OK');
+
+        // Download the data
+        $this->output->write('Downloading data ... ');
+        $datafile = $this->downloadPlanet();
         $this->output->writeln('OK');
 
         // Start importing
@@ -168,13 +181,20 @@ class PlacesSetup extends Command
                 // Insert polygons into database
                 $idx = 0;
                 foreach ($boundaries as &$polygon) {
-                    // $boundary is a list of points
-                    // [ [lon, lat], [lon, lat], ... ]
+                    // $polygon is a struct as
+                    // [ "t" => "e", "c" => [lon, lat], [lon, lat], ... ] ]
+                    $this->output->writeln($polygon['k']);
+
+                    $polyid = $polygon['i'];
+                    $typeid = $polygon['t'];
+                    $pkey = $polygon['k'];
+                    $coords = $polygon['c'];
+
+                    // Create parameters
                     ++$idx;
-                    $pkey = $osmId.'-'.$idx;
                     $geometry = '';
 
-                    if (\count($polygon) < 3) {
+                    if (\count($coords) < 3) {
                         $this->output->writeln('<error>Invalid polygon</error>');
 
                         continue;
@@ -185,7 +205,7 @@ class PlacesSetup extends Command
                     if (GIS_TYPE_MYSQL === $this->gisType) {
                         $points = array_map(function ($point) {
                             return $point[0].' '.$point[1];
-                        }, $polygon);
+                        }, $coords);
                         $geometry = implode(',', $points);
 
                         $geometry = 'POLYGON(('.$geometry.'))';
@@ -193,7 +213,7 @@ class PlacesSetup extends Command
                     } elseif (GIS_TYPE_POSTGRES === $this->gisType) {
                         $points = array_map(function ($point) {
                             return '('.$point[0].','.$point[1].')';
-                        }, $polygon);
+                        }, $coords);
                         $geometry = implode(',', $points);
                         $geometry = 'POLYGON(\''.$geometry.'\')';
                     }
@@ -202,6 +222,8 @@ class PlacesSetup extends Command
                         $query->insert('memories_planet_geometry')
                             ->values([
                                 'id' => $query->createNamedParameter($pkey),
+                                'poly_id' => $query->createNamedParameter($polyid),
+                                'type_id' => $query->createNamedParameter($typeid),
                                 'osm_id' => $query->createNamedParameter($osmId),
                                 'geometry' => $query->createFunction($geometry),
                             ])
@@ -216,7 +238,7 @@ class PlacesSetup extends Command
                     }
 
                     // Print progress
-                    if (0 === $count % 1000) {
+                    if (0 === $count % 500) {
                         $end = time();
                         $elapsed = $end - $start;
                         $rate = $count / $elapsed;
@@ -290,6 +312,8 @@ class PlacesSetup extends Command
         try {
             $sql = 'CREATE TABLE memories_planet_geometry (
                 id varchar(255) NOT NULL PRIMARY KEY,
+                poly_id varchar(255) NOT NULL,
+                type_id int NOT NULL,
                 osm_id int NOT NULL,
                 geometry polygon NOT NULL
             );';
