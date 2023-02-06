@@ -10,6 +10,7 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
 use OCP\IPreview;
+use Psr\Log\LoggerInterface;
 
 require_once __DIR__.'/../ExifFields.php';
 
@@ -158,7 +159,13 @@ class TimelineWrite
         if (\array_key_exists('GPSLatitude', $exif) && \array_key_exists('GPSLongitude', $exif)) {
             $lat = $exif['GPSLatitude'];
             $lon = $exif['GPSLongitude'];
-            $this->updateGeoData($file, (float) $lat, (float) $lon);
+
+            try {
+                $this->updateGeoData($file, (float) $lat, (float) $lon);
+            } catch (\Exception $e) {
+                $logger = \OC::$server->get(LoggerInterface::class);
+                $logger->log(3, 'Error updating geo data: '.$e->getMessage(), ['app' => 'memories']);
+            }
         }
 
         if ($prevRow) {
@@ -281,16 +288,29 @@ class TimelineWrite
      */
     public function updateGeoData(File &$file, float $lat, float $lon): void
     {
+        // Get GIS type
+        $config = \OC::$server->get(\OCP\IConfig::class);
+        $gisType = $config->getSystemValue('memories.gis_type', 0);
+
+        // Construct WHERE clause depending on GIS type
+        $where = null;
+        if (1 === $gisType) {
+            $where = "ST_Contains(geometry, ST_GeomFromText('POINT({$lon} {$lat})'))";
+        } elseif (2 === $gisType) {
+            $where = "POINT('{$lon},{$lat}') <@ geometry";
+        } else {
+            return;
+        }
+
         // Make query to memories_planet table
         $query = $this->connection->getQueryBuilder();
         $query->select($query->createFunction('DISTINCT(osm_id)'))
             ->from('memories_planet_geometry')
-            ->where($query->createFunction('ST_Contains(`geometry`, ST_GeomFromText(\'POINT('.$lon.' '.$lat.')\'))'))
+            ->where($query->createFunction($where))
         ;
 
-        // Remove memories_planet has no *PREFIX*
-        $sql = $query->getSQL();
-        $sql = str_replace('*PREFIX*memories_planet_geometry', 'memories_planet_geometry', $sql);
+        // memories_planet_geometry has no *PREFIX*
+        $sql = str_replace('*PREFIX*memories_planet_geometry', 'memories_planet_geometry', $query->getSQL());
 
         // Run query
         $result = $this->connection->executeQuery($sql);
