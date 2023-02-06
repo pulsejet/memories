@@ -191,7 +191,7 @@ class GeoSetup extends Command
                         $elapsed = $end - $start;
                         $rate = $count / $elapsed;
                         $remaining = APPROX_PLACES - $count;
-                        $eta = $remaining / $rate;
+                        $eta = round($remaining / $rate);
                         $rate = round($rate, 2);
                         $this->output->writeln("Inserted {$count} places, {$rate} per second, ETA: {$eta} seconds");
                     }
