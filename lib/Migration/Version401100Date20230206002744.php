@@ -63,8 +63,8 @@ class Version401100Date20230206002744 extends SimpleMigrationStep
             ]);
 
             $table->setPrimaryKey(['id']);
-            $table->addIndex(['fileid'], 'memories_fileid_index');
-            $table->addIndex(['osm_id'], 'memories_osm_id_index');
+            $table->addIndex(['fileid'], 'memories_places_fileid_index');
+            $table->addIndex(['osm_id'], 'memories_places_osm_id_index');
         }
 
         if (!$schema->hasTable('memories_planet')) {
@@ -84,7 +84,7 @@ class Version401100Date20230206002744 extends SimpleMigrationStep
             ]);
 
             $table->setPrimaryKey(['id']);
-            $table->addIndex(['osm_id'], 'memories_osm_id_index');
+            $table->addIndex(['osm_id'], 'memories_planet_osm_id_index');
         }
 
         return $schema;
