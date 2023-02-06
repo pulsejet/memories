@@ -183,7 +183,6 @@ class PlacesSetup extends Command
                 foreach ($boundaries as &$polygon) {
                     // $polygon is a struct as
                     // [ "t" => "e", "c" => [lon, lat], [lon, lat], ... ] ]
-                    $this->output->writeln($polygon['k']);
 
                     $polyid = $polygon['i'];
                     $typeid = $polygon['t'];
