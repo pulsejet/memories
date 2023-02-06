@@ -309,7 +309,7 @@ class TimelineWrite
         ;
 
         // Cancel out inner rings
-        $query->groupBy('poly_id');
+        $query->groupBy('poly_id', 'osm_id');
         $query->having($query->createFunction('SUM(type_id) > 0'));
 
         // memories_planet_geometry has no *PREFIX*
