@@ -137,6 +137,38 @@ class PlacesSetup extends Command
         // Start time
         $start = time();
 
+        // Create place insertion statement
+        $query = $this->connection->getQueryBuilder();
+        $query->insert('memories_planet')
+            ->values([
+                'osm_id' => $query->createParameter('osm_id'),
+                'admin_level' => $query->createParameter('admin_level'),
+                'name' => $query->createParameter('name'),
+            ])
+        ;
+        $insertPlace = $this->connection->prepare($query->getSQL());
+
+        // Create geometry insertion statement
+        $query = $this->connection->getQueryBuilder();
+        $geomParam = $query->createParameter('geometry');
+        if (GIS_TYPE_MYSQL === $this->gisType) {
+            $geomParam = "ST_GeomFromText({$geomParam})";
+        } elseif (GIS_TYPE_POSTGRES === $this->gisType) {
+            $geomParam = "POLYGON({$geomParam})";
+        }
+        $query->insert('memories_planet_geometry')
+            ->values([
+                'id' => $query->createParameter('id'),
+                'poly_id' => $query->createParameter('poly_id'),
+                'type_id' => $query->createParameter('type_id'),
+                'osm_id' => $query->createParameter('osm_id'),
+                'geometry' => $query->createFunction($geomParam),
+            ])
+        ;
+        $sql = str_replace('*PREFIX*memories_planet_geometry', 'memories_planet_geometry', $query->getSQL());
+        $insertGeometry = $this->connection->prepare($sql);
+
+        // Iterate over the data file
         $handle = fopen($datafile, 'r');
         if ($handle) {
             $count = 0;
@@ -168,15 +200,10 @@ class PlacesSetup extends Command
                 }
 
                 // Insert place into database
-                $query = $this->connection->getQueryBuilder();
-                $query->insert('memories_planet')
-                    ->values([
-                        'osm_id' => $query->createNamedParameter($osmId),
-                        'admin_level' => $query->createNamedParameter($adminLevel),
-                        'name' => $query->createNamedParameter($name),
-                    ])
-                ;
-                $query->executeStatement();
+                $insertPlace->bindValue('osm_id', $osmId);
+                $insertPlace->bindValue('admin_level', $adminLevel);
+                $insertPlace->bindValue('name', $name);
+                $insertPlace->execute();
 
                 // Insert polygons into database
                 $idx = 0;
@@ -199,8 +226,6 @@ class PlacesSetup extends Command
                         continue;
                     }
 
-                    $query = $this->connection->getQueryBuilder();
-
                     if (GIS_TYPE_MYSQL === $this->gisType) {
                         $points = implode(',', array_map(function (&$point) {
                             $x = $point[0];
@@ -209,29 +234,23 @@ class PlacesSetup extends Command
                             return "{$x} {$y}";
                         }, $coords));
 
-                        $geometry = "ST_GeomFromText('POLYGON(({$points}))')";
+                        $geometry = "POLYGON(({$points}))";
                     } elseif (GIS_TYPE_POSTGRES === $this->gisType) {
-                        $points = implode(',', array_map(function (&$point) {
+                        $geometry = implode(',', array_map(function (&$point) {
                             $x = $point[0];
                             $y = $point[1];
 
                             return "({$x},{$y})";
                         }, $coords));
-                        $geometry = "POLYGON('{$points}')";
                     }
 
                     try {
-                        $query->insert('memories_planet_geometry')
-                            ->values([
-                                'id' => $query->createNamedParameter($pkey),
-                                'poly_id' => $query->createNamedParameter($polyid),
-                                'type_id' => $query->createNamedParameter($typeid),
-                                'osm_id' => $query->createNamedParameter($osmId),
-                                'geometry' => $query->createFunction($geometry),
-                            ])
-                        ;
-                        $sql = str_replace('*PREFIX*memories_planet_geometry', 'memories_planet_geometry', $query->getSQL());
-                        $this->connection->executeQuery($sql, $query->getParameters());
+                        $insertGeometry->bindValue('id', $pkey);
+                        $insertGeometry->bindValue('poly_id', $polyid);
+                        $insertGeometry->bindValue('type_id', $typeid);
+                        $insertGeometry->bindValue('osm_id', $osmId);
+                        $insertGeometry->bindValue('geometry', $geometry);
+                        $insertGeometry->execute();
                     } catch (\Exception $e) {
                         $this->output->writeln('<error>Failed to insert into database</error>');
                         $this->output->writeln($e->getMessage());
