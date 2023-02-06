@@ -181,7 +181,7 @@ img {
   font-size: 1.1em;
   word-wrap: break-word;
   text-overflow: ellipsis;
-  line-height: 1em;
+  line-height: 1.2em;
 
   > .subtitle {
     font-size: 0.7em;
