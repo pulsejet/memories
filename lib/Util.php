@@ -148,7 +148,7 @@ class Util
      */
     public static function placesGISType(): int
     {
-        return \OC::$server->get(\OCP\IConfig::class)->getSystemValue('memories.gis_type', 0);
+        return (int) \OC::$server->get(\OCP\IConfig::class)->getSystemValue('memories.gis_type', -1);
     }
 
     /**

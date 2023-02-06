@@ -92,8 +92,9 @@ class TimelineQuery
             }
         }
 
-        $address = null;
-        if (!$basic && \OCA\Memories\Util::placesGISType() !== 0) {
+        $gisType = \OCA\Memories\Util::placesGISType();
+        $address = -1 === $gisType ? 'Geocoding Unconfigured' : null;
+        if (!$basic && $gisType > 0) {
             $qb = $this->connection->getQueryBuilder();
             $qb->select('e.name')
                 ->from('memories_places', 'mp')

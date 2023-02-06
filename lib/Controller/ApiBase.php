@@ -376,7 +376,7 @@ class ApiBase extends Controller
      */
     protected function placesIsEnabled(): bool
     {
-        return \OCA\Memories\Util::placesGISType() !== 0;
+        return \OCA\Memories\Util::placesGISType() > 0;
     }
 
     /**

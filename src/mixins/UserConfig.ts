@@ -39,6 +39,8 @@ export default defineComponent({
     config_mapsEnabled: Boolean(loadState("memories", "maps", <string>"")),
     config_albumsEnabled: Boolean(loadState("memories", "albums", <string>"")),
 
+    config_placesGis: Number(loadState("memories", "places_gis", <string>"-1")),
+
     config_squareThumbs: localStorage.getItem("memories_squareThumbs") === "1",
     config_showFaceRect: localStorage.getItem("memories_showFaceRect") === "1",
 

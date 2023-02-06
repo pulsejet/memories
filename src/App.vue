@@ -252,6 +252,7 @@ export default defineComponent({
           name: "places",
           icon: MarkerIcon,
           title: t("memories", "Places"),
+          if: this.config_placesGis > 0,
         },
         {
           name: "tags",
