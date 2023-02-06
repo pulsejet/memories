@@ -324,6 +324,7 @@ class TimelineWrite
         $query->delete('memories_places')
             ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
         ;
+        $query->executeStatement();
 
         // Insert records
         foreach ($rows as $row) {
