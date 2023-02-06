@@ -34,7 +34,9 @@ const GIS_TYPE_MYSQL = 1;
 const GIS_TYPE_POSTGRES = 2;
 const APPROX_PLACES = 600000;
 
-class GeoSetup extends Command
+const PLANET_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-0.0.1/planet_coarse_boundaries.zip';
+
+class PlacesSetup extends Command
 {
     protected IConfig $config;
     protected OutputInterface $output;
@@ -54,7 +56,7 @@ class GeoSetup extends Command
     protected function configure(): void
     {
         $this
-            ->setName('memories:geo-setup')
+            ->setName('memories:places-setup')
             ->setDescription('Setup reverse geocoding')
         ;
     }
@@ -78,23 +80,46 @@ class GeoSetup extends Command
 
         // Check if the database is already set up
         try {
+            $this->output->writeln('');
             $this->connection->executeQuery('SELECT osm_id FROM memories_planet_geometry LIMIT 1')->fetch();
-            $this->output->writeln('Database already set up ... skipping');
+            $this->output->writeln('<error>Database is already set up</error>');
+            $this->output->writeln('<error>This will clear and re-download the planet database</error>');
+            $this->output->writeln('<error>This is generally not necessary to do frequently </error>');
         } catch (\Exception $e) {
-            $this->output->writeln('Setting up database ...');
+            $this->output->write('Setting up database ... ');
             $this->setupDatabase();
-            $this->output->writeln('Database set up');
+            $this->output->writeln('OK');
         }
 
-        // TODO: Download the data
-        // TODO: Warn user and truncate all tables
-        $datafile = '/tmp/planet_coarse_boundaries.txt';
+        // Ask confirmation
+        $tempdir = sys_get_temp_dir();
+        $this->output->writeln('');
+        $this->output->writeln('Are you sure you want to download the planet database?');
+        $this->output->writeln("This will take a very long time and use some disk space in {$tempdir}");
+        $this->output->write('Proceed? [y/N] ');
+        $handle = fopen('php://stdin', 'r');
+        $line = fgets($handle);
+        if ('y' !== trim($line)) {
+            $this->output->writeln('Aborting');
+
+            return 1;
+        }
+
+        // Download the data
+        $this->output->write('Downloading data ... ');
+        $datafile = $this->downloadPlanet();
+        $this->output->writeln('OK');
 
         // Truncate tables
-        $this->output->writeln('Truncating tables ...');
+        $this->output->write('Truncating tables ... ');
         $p = $this->connection->getDatabasePlatform();
         $this->connection->executeStatement($p->getTruncateTableSQL('*PREFIX*memories_planet', false));
         $this->connection->executeStatement($p->getTruncateTableSQL('memories_planet_geometry', false));
+        $this->output->writeln('OK');
+
+        // Start importing
+        $this->output->writeln('');
+        $this->output->writeln('Importing data (this will take a while) ...');
 
         // Start time
         $start = time();
@@ -200,6 +225,18 @@ class GeoSetup extends Command
             fclose($handle);
         }
 
+        // Delete file
+        unlink($datafile);
+
+        // Done
+        $this->output->writeln('');
+        $this->output->writeln('Planet database imported successfully!');
+        $this->output->writeln('If this is the first time you did this, you should now run:');
+        $this->output->writeln('occ memories:index -f');
+
+        // Mark success
+        $this->config->setSystemValue('memories.gis_type', $this->gisType);
+
         return 0;
     }
 
@@ -269,13 +306,47 @@ class GeoSetup extends Command
         }
     }
 
-    protected function runSQL(string &$line)
+    protected function downloadPlanet(): string
     {
-        try {
-            $this->connection->executeStatement($line);
-        } catch (\Exception $e) {
-            $this->output->writeln(substr($line, 0, 100));
-            $this->output->writeln($e->getMessage());
+        $txtfile = sys_get_temp_dir().'/planet_coarse_boundaries.txt';
+        unlink($txtfile);
+
+        $filename = sys_get_temp_dir().'/planet_coarse_boundaries.zip';
+
+        $fp = fopen($filename, 'w+');
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, PLANET_URL);
+        curl_setopt($ch, CURLOPT_FILE, $fp);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60000);
+        curl_exec($ch);
+        curl_close($ch);
+
+        fclose($fp);
+
+        // Unzip
+        $zip = new \ZipArchive();
+        $res = $zip->open($filename);
+        if (true === $res) {
+            $zip->extractTo(sys_get_temp_dir());
+            $zip->close();
+        } else {
+            $this->output->writeln('Failed to unzip planet file');
+
+            exit;
         }
+
+        // Check if file exists
+        if (!file_exists($txtfile)) {
+            $this->output->writeln('Failed to find planet data file after unzip');
+
+            exit;
+        }
+
+        // Delete zip file
+        unlink($filename);
+
+        return $txtfile;
     }
 }
