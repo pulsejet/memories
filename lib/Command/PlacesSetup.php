@@ -154,7 +154,7 @@ class PlacesSetup extends Command
         if (GIS_TYPE_MYSQL === $this->gisType) {
             $geomParam = "ST_GeomFromText({$geomParam})";
         } elseif (GIS_TYPE_POSTGRES === $this->gisType) {
-            $geomParam = "POLYGON({$geomParam})";
+            $geomParam = "POLYGON({$geomParam}::text)";
         }
         $query->insert('memories_planet_geometry')
             ->values([
