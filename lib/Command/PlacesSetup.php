@@ -335,7 +335,8 @@ class PlacesSetup extends Command
         }
     }
 
-    protected function ensureDeleted(string $filename) {
+    protected function ensureDeleted(string $filename)
+    {
         unlink($filename);
         if (file_exists($filename)) {
             $this->output->writeln('<error>Failed to delete data file</error>');
