@@ -163,7 +163,7 @@ class TimelineWrite
             $lon = $exif['GPSLongitude'];
 
             try {
-                $this->updateGeoData($file, (float) $lat, (float) $lon);
+                $this->updatePlacesData($file, (float) $lat, (float) $lon);
             } catch (\Exception $e) {
                 $logger = \OC::$server->get(LoggerInterface::class);
                 $logger->log(3, 'Error updating geo data: '.$e->getMessage(), ['app' => 'memories']);
@@ -284,9 +284,9 @@ class TimelineWrite
     }
 
     /**
-     * Add geolocation data for a file.
+     * Add places data for a file.
      */
-    public function updateGeoData(File &$file, float $lat, float $lon): void
+    public function updatePlacesData(File &$file, float $lat, float $lon): void
     {
         // Get GIS type
         $gisType = \OCA\Memories\Util::placesGISType();
