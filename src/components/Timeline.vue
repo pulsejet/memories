@@ -674,7 +674,7 @@ export default defineComponent({
       // Places
       if (this.$route.name === "places" && this.$route.params.name) {
         const name = <string>this.$route.params.name;
-        query.set("place", <string>name.split("-", 2)[0]);
+        query.set("place", <string>name.split("-", 1)[0]);
       }
 
       // Albums

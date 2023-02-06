@@ -45,7 +45,7 @@ export default defineComponent({
       this.name = <string>this.$route.params.name || "";
 
       if (this.$route.name === "places") {
-        this.name = this.name.split("-", 2)[1];
+        this.name = this.name.split("-").slice(1).join("-");
       }
     },
 
