@@ -202,19 +202,22 @@ class PlacesSetup extends Command
                     $query = $this->connection->getQueryBuilder();
 
                     if (GIS_TYPE_MYSQL === $this->gisType) {
-                        $points = array_map(function ($point) {
-                            return $point[0].' '.$point[1];
-                        }, $coords);
-                        $geometry = implode(',', $points);
+                        $points = implode(',', array_map(function (&$point) {
+                            $x = $point[0];
+                            $y = $point[1];
 
-                        $geometry = 'POLYGON(('.$geometry.'))';
-                        $geometry = 'ST_GeomFromText(\''.$geometry.'\')';
+                            return "{$x} {$y}";
+                        }, $coords));
+
+                        $geometry = "ST_GeomFromText('POLYGON(({$points}))')";
                     } elseif (GIS_TYPE_POSTGRES === $this->gisType) {
-                        $points = array_map(function ($point) {
-                            return '('.$point[0].','.$point[1].')';
-                        }, $coords);
-                        $geometry = implode(',', $points);
-                        $geometry = 'POLYGON(\''.$geometry.'\')';
+                        $points = implode(',', array_map(function (&$point) {
+                            $x = $point[0];
+                            $y = $point[1];
+
+                            return "({$x},{$y})";
+                        }, $coords));
+                        $geometry = "POLYGON('{$points}')";
                     }
 
                     try {
