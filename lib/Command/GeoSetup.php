@@ -93,9 +93,8 @@ class GeoSetup extends Command
         // Truncate tables
         $this->output->writeln('Truncating tables ...');
         $p = $this->connection->getDatabasePlatform();
-        $t1 = $p->getTruncateTableSQL('*PREFIX*memories_planet', false);
-        $t2 = $p->getTruncateTableSQL('memories_planet_geometry', false);
-        $this->connection->executeStatement("{$t1}; {$t2}");
+        $this->connection->executeStatement($p->getTruncateTableSQL('*PREFIX*memories_planet', false));
+        $this->connection->executeStatement($p->getTruncateTableSQL('memories_planet_geometry', false));
 
         // Start time
         $start = time();
