@@ -37,7 +37,7 @@ trait TimelineQueryPlaces
         $query = $this->joinFilecache($query, $root, true, false);
 
         // GROUP and ORDER by tag name
-        $query->groupBy('e.osm_id');
+        $query->groupBy('e.osm_id', 'e.name');
         $query->orderBy($query->createFunction('LOWER(e.name)'), 'ASC');
         $query->addOrderBy('e.osm_id'); // tie-breaker
 

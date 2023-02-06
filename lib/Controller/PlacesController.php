@@ -31,8 +31,6 @@ class PlacesController extends ApiBase
     /**
      * @NoAdminRequired
      *
-     * @NoCSRFRequired
-     *
      * Get list of places with counts of images
      */
     public function places(): JSONResponse
