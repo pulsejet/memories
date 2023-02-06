@@ -32,9 +32,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 const GIS_TYPE_NONE = 0;
 const GIS_TYPE_MYSQL = 1;
 const GIS_TYPE_POSTGRES = 2;
-const APPROX_PLACES = 600000;
+const APPROX_PLACES = 635189;
 
-const PLANET_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-0.0.1/planet_coarse_boundaries.zip';
+const PLANET_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-0.0.2/planet_coarse_boundaries.zip';
 
 class PlacesSetup extends Command
 {
