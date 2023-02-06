@@ -148,6 +148,12 @@ class PlacesSetup extends Command
                 $name = $data['name'];
                 $boundaries = $data['geometry'];
 
+                // Skip some places
+                if ($adminLevel >= 10) {
+                    // These are too specific, e.g. "Community Board"
+                    continue;
+                }
+
                 // Insert place into database
                 $query = $this->connection->getQueryBuilder();
                 $query->insert('memories_planet')
