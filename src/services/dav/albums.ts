@@ -4,9 +4,9 @@ import { showError } from "@nextcloud/dialogs";
 import { translate as t, translatePlural as n } from "@nextcloud/l10n";
 import { IAlbum, IDay, IFileInfo, IPhoto, ITag } from "../../types";
 import { constants } from "../Utils";
+import { API } from "../API";
 import axios from "@nextcloud/axios";
 import client from "../DavClient";
-import { API } from "../API";
 
 /**
  * Get DAV path for album

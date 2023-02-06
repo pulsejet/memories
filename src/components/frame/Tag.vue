@@ -59,13 +59,13 @@ export default defineComponent({
 
   computed: {
     previewUrl() {
-      if (this.face) {
-        return API.FACE_PREVIEW(this.faceApp, this.face.fileid);
-      }
-
       if (this.album) {
         const mock = { fileid: this.album.last_added_photo, etag: "", flag: 0 };
         return getPreviewUrl(mock, true, 512);
+      }
+
+      if (this.face) {
+        return API.FACE_PREVIEW(this.faceApp, this.face.fileid);
       }
 
       if (this.place) {
@@ -110,16 +110,16 @@ export default defineComponent({
     target() {
       if (this.noNavigate) return {};
 
-      if (this.face) {
-        const name = this.face.name || this.face.fileid.toString();
-        const user = this.face.user_id;
-        return { name: this.faceApp, params: { name, user } };
-      }
-
       if (this.album) {
         const user = this.album.user;
         const name = this.album.name;
         return { name: "albums", params: { user, name } };
+      }
+
+      if (this.face) {
+        const name = this.face.name || this.face.fileid.toString();
+        const user = this.face.user_id;
+        return { name: this.faceApp, params: { name, user } };
       }
 
       if (this.place) {

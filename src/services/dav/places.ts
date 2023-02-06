@@ -1,7 +1,7 @@
 import { IDay, IPhoto, ITag } from "../../types";
 import { constants } from "../Utils";
-import axios from "@nextcloud/axios";
 import { API } from "../API";
+import axios from "@nextcloud/axios";
 
 /**
  * Get list of tags and convert to Days response
@@ -12,7 +12,6 @@ export async function getPlacesData(): Promise<IDay[]> {
     osm_id: number;
     count: number;
     name: string;
-    previews: IPhoto[];
   }[] = [];
   try {
     const res = await axios.get<typeof data>(API.PLACE_LIST());
@@ -20,9 +19,6 @@ export async function getPlacesData(): Promise<IDay[]> {
   } catch (e) {
     throw e;
   }
-
-  // Add flag to previews
-  data.forEach((t) => t.previews?.forEach((preview) => (preview.flag = 0)));
 
   // Convert to days response
   return [
