@@ -14,9 +14,9 @@ class TimelineQuery
     use TimelineQueryFilters;
     use TimelineQueryFolders;
     use TimelineQueryLivePhoto;
-    use TimelineQueryPlaces;
     use TimelineQueryPeopleFaceRecognition;
     use TimelineQueryPeopleRecognize;
+    use TimelineQueryPlaces;
     use TimelineQueryTags;
 
     protected IDBConnection $connection;

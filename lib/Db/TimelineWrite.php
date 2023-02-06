@@ -228,8 +228,8 @@ class TimelineWrite
     public function clear()
     {
         $p = $this->connection->getDatabasePlatform();
-        $t1 = $p->getTruncateTableSQL('`*PREFIX*memories`', false);
-        $t2 = $p->getTruncateTableSQL('`*PREFIX*memories_livephoto`', false);
+        $t1 = $p->getTruncateTableSQL('*PREFIX*memories', false);
+        $t2 = $p->getTruncateTableSQL('*PREFIX*memories_livephoto', false);
         $this->connection->executeStatement("{$t1}; {$t2}");
     }
 
@@ -283,14 +283,14 @@ class TimelineWrite
     {
         // Make query to memories_planet table
         $query = $this->connection->getQueryBuilder();
-        $query->select('osm_id')
-            ->from('memories_planet')
-            ->where($query->createFunction('ST_Contains(`geometry`, ST_GeomFromText(\'POINT('.$lon.' '.$lat.')\', 4326))'))
+        $query->select($query->createFunction('DISTINCT(osm_id)'))
+            ->from('memories_planet_geometry')
+            ->where($query->createFunction('ST_Contains(`geometry`, ST_GeomFromText(\'POINT('.$lon.' '.$lat.')\'))'))
         ;
 
         // Remove memories_planet has no *PREFIX*
         $sql = $query->getSQL();
-        $sql = str_replace('*PREFIX*memories_planet', 'memories_planet', $sql);
+        $sql = str_replace('*PREFIX*memories_planet_geometry', 'memories_planet_geometry', $sql);
 
         // Run query
         $result = $this->connection->executeQuery($sql);
@@ -298,14 +298,14 @@ class TimelineWrite
 
         // Delete previous records
         $query = $this->connection->getQueryBuilder();
-        $query->delete('memories_geo')
+        $query->delete('memories_places')
             ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
         ;
 
         // Insert records
         foreach ($rows as $row) {
             $query = $this->connection->getQueryBuilder();
-            $query->insert('memories_geo')
+            $query->insert('memories_places')
                 ->values([
                     'fileid' => $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT),
                     'osm_id' => $query->createNamedParameter($row['osm_id'], IQueryBuilder::PARAM_INT),

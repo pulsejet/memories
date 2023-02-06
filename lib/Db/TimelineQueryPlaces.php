@@ -13,9 +13,9 @@ trait TimelineQueryPlaces
 
     public function transformPlaceFilter(IQueryBuilder &$query, string $userId, int $locationId)
     {
-        $query->innerJoin('m', 'memories_geo', 'mg', $query->expr()->andX(
-            $query->expr()->eq('mg.fileid', 'm.fileid'),
-            $query->expr()->eq('mg.osm_id', $query->createNamedParameter($locationId)),
+        $query->innerJoin('m', 'memories_places', 'mp', $query->expr()->andX(
+            $query->expr()->eq('mp.fileid', 'm.fileid'),
+            $query->expr()->eq('mp.osm_id', $query->createNamedParameter($locationId)),
         ));
     }
 
@@ -25,25 +25,24 @@ trait TimelineQueryPlaces
 
         // SELECT location name and count of photos
         $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
-        $query->select('p.osm_id', 'p.name', $count)->from('memories_planet', 'p');
+        $query->select('e.osm_id', 'e.name', $count)->from('memories_planet', 'e');
 
         // WHERE there are items with this osm_id
-        $query->innerJoin('p', 'memories_geo', 'mg', $query->expr()->eq('mg.osm_id', 'p.osm_id'));
+        $query->innerJoin('e', 'memories_places', 'mp', $query->expr()->eq('mp.osm_id', 'e.osm_id'));
 
         // WHERE these items are memories indexed photos
-        $query->innerJoin('mg', 'memories', 'm', $query->expr()->eq('m.fileid', 'mg.fileid'));
+        $query->innerJoin('mp', 'memories', 'm', $query->expr()->eq('m.fileid', 'mp.fileid'));
 
         // WHERE these photos are in the user's requested folder recursively
         $query = $this->joinFilecache($query, $root, true, false);
 
         // GROUP and ORDER by tag name
-        $query->groupBy('p.osm_id');
-        $query->orderBy($query->createFunction('LOWER(p.name)'), 'ASC');
-        $query->addOrderBy('p.osm_id'); // tie-breaker
+        $query->groupBy('e.osm_id');
+        $query->orderBy($query->createFunction('LOWER(e.name)'), 'ASC');
+        $query->addOrderBy('e.osm_id'); // tie-breaker
 
         // FETCH all tags
-        $sql = str_replace('*PREFIX*memories_planet', 'memories_planet', $query->getSQL());
-        $cursor = $this->executeQueryWithCTEs($query, $sql);
+        $cursor = $this->executeQueryWithCTEs($query);
         $places = $cursor->fetchAll();
 
         // Post process
@@ -60,12 +59,12 @@ trait TimelineQueryPlaces
         $query = $this->connection->getQueryBuilder();
 
         // SELECT all photos with this tag
-        $query->select('f.fileid', 'f.etag')->from('memories_geo', 'mg')
-            ->where($query->expr()->eq('mg.osm_id', $query->createNamedParameter($id)))
+        $query->select('f.fileid', 'f.etag')->from('memories_places', 'mp')
+            ->where($query->expr()->eq('mp.osm_id', $query->createNamedParameter($id)))
         ;
 
         // WHERE these items are memories indexed photos
-        $query->innerJoin('mg', 'memories', 'm', $query->expr()->eq('m.fileid', 'mg.fileid'));
+        $query->innerJoin('mp', 'memories', 'm', $query->expr()->eq('m.fileid', 'mp.fileid'));
 
         // WHERE these photos are in the user's requested folder recursively
         $query = $this->joinFilecache($query, $root, true, false);
