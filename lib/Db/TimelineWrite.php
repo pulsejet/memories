@@ -218,7 +218,7 @@ class TimelineWrite
      */
     public function deleteFile(File &$file)
     {
-        foreach(DELETE_TABLES as $table) {
+        foreach (DELETE_TABLES as $table) {
             $query = $this->connection->getQueryBuilder();
             $query->delete($table)
                 ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
