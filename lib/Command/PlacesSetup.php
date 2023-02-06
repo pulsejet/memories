@@ -340,6 +340,13 @@ class PlacesSetup extends Command
         $txtfile = sys_get_temp_dir().'/planet_coarse_boundaries.txt';
         unlink($txtfile);
 
+        if (file_exists($txtfile)) {
+            $this->output->writeln('<error>Failed to delete planet file</error>');
+            $this->output->writeln("Please delete {$txtfile} manually");
+
+            exit;
+        }
+
         $filename = sys_get_temp_dir().'/planet_coarse_boundaries.zip';
 
         $fp = fopen($filename, 'w+');
