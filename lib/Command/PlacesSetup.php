@@ -335,19 +335,23 @@ class PlacesSetup extends Command
         }
     }
 
-    protected function downloadPlanet(): string
-    {
-        $txtfile = sys_get_temp_dir().'/planet_coarse_boundaries.txt';
-        unlink($txtfile);
-
-        if (file_exists($txtfile)) {
-            $this->output->writeln('<error>Failed to delete planet file</error>');
-            $this->output->writeln("Please delete {$txtfile} manually");
+    protected function ensureDeleted(string $filename) {
+        unlink($filename);
+        if (file_exists($filename)) {
+            $this->output->writeln('<error>Failed to delete data file</error>');
+            $this->output->writeln("Please delete {$filename} manually");
 
             exit;
         }
+    }
 
+    protected function downloadPlanet(): string
+    {
         $filename = sys_get_temp_dir().'/planet_coarse_boundaries.zip';
+        $this->ensureDeleted($filename);
+
+        $txtfile = sys_get_temp_dir().'/planet_coarse_boundaries.txt';
+        $this->ensureDeleted($txtfile);
 
         $fp = fopen($filename, 'w+');
 
