@@ -14,6 +14,8 @@ use Psr\Log\LoggerInterface;
 
 require_once __DIR__.'/../ExifFields.php';
 
+const DELETE_TABLES = ['memories', 'memories_livephoto', 'memories_places'];
+
 class TimelineWrite
 {
     protected IDBConnection $connection;
@@ -216,15 +218,13 @@ class TimelineWrite
      */
     public function deleteFile(File &$file)
     {
-        $deleteFrom = function ($table) use (&$file) {
+        foreach(DELETE_TABLES as $table) {
             $query = $this->connection->getQueryBuilder();
             $query->delete($table)
                 ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
             ;
             $query->executeStatement();
-        };
-        $deleteFrom('memories');
-        $deleteFrom('memories_livephoto');
+        }
     }
 
     /**
@@ -235,9 +235,9 @@ class TimelineWrite
     public function clear()
     {
         $p = $this->connection->getDatabasePlatform();
-        $t1 = $p->getTruncateTableSQL('*PREFIX*memories', false);
-        $t2 = $p->getTruncateTableSQL('*PREFIX*memories_livephoto', false);
-        $this->connection->executeStatement("{$t1}; {$t2}");
+        foreach (DELETE_TABLES as $table) {
+            $this->connection->executeStatement($p->getTruncateTableSQL('*PREFIX*'.$table, false));
+        }
     }
 
     /**
