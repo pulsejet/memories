@@ -238,7 +238,7 @@ class DaysController extends ApiBase
         }
 
         // Filter only for one place
-        if ($this->geoPlacesIsEnabled()) {
+        if ($this->placesIsEnabled()) {
             if ($locationId = $this->request->getParam('place')) {
                 $transforms[] = [$this->timelineQuery, 'transformPlaceFilter', (int) $locationId];
             }

@@ -87,7 +87,6 @@ export default defineComponent({
     fileInfo: null as IFileInfo,
     exif: {} as { [prop: string]: any },
     baseInfo: {} as any,
-    nominatim: null as any,
     state: 0,
   }),
 
@@ -245,22 +244,7 @@ export default defineComponent({
     },
 
     address(): string | null {
-      if (!this.lat || !this.lon) return null;
-
-      if (!this.nominatim) return this.t("memories", "Loading …");
-
-      const n = this.nominatim;
-      const country = n.address.country_code?.toUpperCase();
-
-      if (n.address?.city && n.address.state) {
-        return `${n.address.city}, ${n.address.state}, ${country}`;
-      } else if (n.address?.state) {
-        return `${n.address.state}, ${country}`;
-      } else if (n.address?.country) {
-        return n.address.country;
-      } else {
-        return n.display_name;
-      }
+      return this.baseInfo.address;
     },
 
     lat(): number {
@@ -293,7 +277,6 @@ export default defineComponent({
       this.state = Math.random();
       this.fileInfo = fileInfo;
       this.exif = {};
-      this.nominatim = null;
 
       const state = this.state;
       const url = API.IMAGE_INFO(fileInfo.id);
@@ -302,28 +285,12 @@ export default defineComponent({
 
       this.baseInfo = res.data;
       this.exif = res.data.exif || {};
-
-      // Lazy loading
-      this.getNominatim().catch();
     },
 
     handleFileUpdated({ fileid }) {
       if (fileid && this.fileInfo?.id === fileid) {
         this.update(this.fileInfo);
       }
-    },
-
-    async getNominatim() {
-      const lat = this.lat;
-      const lon = this.lon;
-      if (!lat || !lon) return null;
-
-      const state = this.state;
-      const n = await axios.get(
-        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=18`
-      );
-      if (state !== this.state) return;
-      this.nominatim = n.data;
     },
   },
 });

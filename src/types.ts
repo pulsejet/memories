@@ -76,6 +76,7 @@ export type IPhoto = {
     h: number;
     w: number;
     datetaken: number;
+    address?: string;
     exif?: {
       Rotation?: number;
       Orientation?: number;

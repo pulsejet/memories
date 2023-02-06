@@ -43,7 +43,7 @@ class PlacesController extends ApiBase
         }
 
         // Check tags enabled for this user
-        if (!$this->geoPlacesIsEnabled()) {
+        if (!$this->placesIsEnabled()) {
             return new JSONResponse(['message' => 'Places not enabled'], Http::STATUS_PRECONDITION_FAILED);
         }
 
@@ -74,7 +74,7 @@ class PlacesController extends ApiBase
         }
 
         // Check tags enabled for this user
-        if (!$this->geoPlacesIsEnabled()) {
+        if (!$this->placesIsEnabled()) {
             return new JSONResponse(['message' => 'Places not enabled'], Http::STATUS_PRECONDITION_FAILED);
         }
 

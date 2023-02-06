@@ -114,8 +114,7 @@ class PageController extends Controller
         // Image editor
         $policy->addAllowedConnectDomain('data:');
 
-        // Allow nominatim for metadata
-        $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
+        // Allow OSM
         $policy->addAllowedFrameDomain('www.openstreetmap.org');
 
         return $policy;

@@ -289,8 +289,7 @@ class TimelineWrite
     public function updateGeoData(File &$file, float $lat, float $lon): void
     {
         // Get GIS type
-        $config = \OC::$server->get(\OCP\IConfig::class);
-        $gisType = $config->getSystemValue('memories.gis_type', 0);
+        $gisType = \OCA\Memories\Util::placesGISType();
 
         // Construct WHERE clause depending on GIS type
         $where = null;

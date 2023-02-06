@@ -143,6 +143,15 @@ class Util
     }
 
     /**
+     * Check if geolocation (places) is enabled and available.
+     * Returns the type of the GIS.
+     */
+    public static function placesGISType(): int
+    {
+        return \OC::$server->get(\OCP\IConfig::class)->getSystemValue('memories.gis_type', 0);
+    }
+
+    /**
      * Kill all instances of a process by name.
      * Similar to pkill, which may not be available on all systems.
      */

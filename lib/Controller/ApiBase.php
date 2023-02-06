@@ -374,9 +374,9 @@ class ApiBase extends Controller
     /**
      * Check if geolocation is enabled for this user.
      */
-    protected function geoPlacesIsEnabled(): bool
+    protected function placesIsEnabled(): bool
     {
-        return true;
+        return \OCA\Memories\Util::placesGISType() !== 0;
     }
 
     /**
