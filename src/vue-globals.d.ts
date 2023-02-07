@@ -23,6 +23,7 @@ declare module "vue" {
     config_facerecognitionEnabled: boolean;
     config_mapsEnabled: boolean;
     config_albumsEnabled: boolean;
+    config_placesGis: number;
     config_squareThumbs: boolean;
     config_showFaceRect: boolean;
     config_eventName: string;

@@ -95,6 +95,15 @@ export default new Router({
     },
 
     {
+      path: "/places/:name*",
+      component: Timeline,
+      name: "places",
+      props: (route) => ({
+        rootTitle: t("memories", "Places"),
+      }),
+    },
+
+    {
       path: "/tags/:name*",
       component: Timeline,
       name: "tags",

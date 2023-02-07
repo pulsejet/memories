@@ -59,13 +59,17 @@ export default defineComponent({
 
   computed: {
     previewUrl() {
+      if (this.album) {
+        const mock = { fileid: this.album.last_added_photo, etag: "", flag: 0 };
+        return getPreviewUrl(mock, true, 512);
+      }
+
       if (this.face) {
         return API.FACE_PREVIEW(this.faceApp, this.face.fileid);
       }
 
-      if (this.album) {
-        const mock = { fileid: this.album.last_added_photo, etag: "", flag: 0 };
-        return getPreviewUrl(mock, true, 512);
+      if (this.place) {
+        return API.PLACE_PREVIEW(this.place.fileid);
       }
 
       return API.TAG_PREVIEW(this.data.name);
@@ -92,6 +96,10 @@ export default defineComponent({
         : "recognize";
     },
 
+    place() {
+      return this.data.flag & constants.c.FLAG_IS_PLACE ? this.data : null;
+    },
+
     album() {
       return this.data.flag & constants.c.FLAG_IS_ALBUM
         ? <IAlbum>this.data
@@ -102,16 +110,23 @@ export default defineComponent({
     target() {
       if (this.noNavigate) return {};
 
+      if (this.album) {
+        const user = this.album.user;
+        const name = this.album.name;
+        return { name: "albums", params: { user, name } };
+      }
+
       if (this.face) {
         const name = this.face.name || this.face.fileid.toString();
         const user = this.face.user_id;
         return { name: this.faceApp, params: { name, user } };
       }
 
-      if (this.album) {
-        const user = this.album.user;
-        const name = this.album.name;
-        return { name: "albums", params: { user, name } };
+      if (this.place) {
+        const id = this.place.fileid.toString();
+        const placeName = this.place.name || id;
+        const name = `${id}-${placeName}`;
+        return { name: "places", params: { name } };
       }
 
       return { name: "tags", params: { name: this.data.name } };
@@ -166,7 +181,7 @@ img {
   font-size: 1.1em;
   word-wrap: break-word;
   text-overflow: ellipsis;
-  line-height: 1em;
+  line-height: 1.2em;
 
   > .subtitle {
     font-size: 0.7em;

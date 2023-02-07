@@ -1,20 +1,20 @@
 import { IDay, IPhoto, ITag } from "../../types";
-import { constants, hashCode } from "../Utils";
+import { constants } from "../Utils";
 import { API } from "../API";
 import axios from "@nextcloud/axios";
 
 /**
  * Get list of tags and convert to Days response
  */
-export async function getTagsData(): Promise<IDay[]> {
+export async function getPlacesData(): Promise<IDay[]> {
   // Query for photos
   let data: {
-    id: number;
+    osm_id: number;
     count: number;
     name: string;
   }[] = [];
   try {
-    const res = await axios.get<typeof data>(API.TAG_LIST());
+    const res = await axios.get<typeof data>(API.PLACE_LIST());
     data = res.data;
   } catch (e) {
     throw e;
@@ -29,9 +29,11 @@ export async function getTagsData(): Promise<IDay[]> {
         (tag) =>
           ({
             ...tag,
-            fileid: hashCode(tag.name),
+            id: tag.osm_id,
+            fileid: tag.osm_id,
             flag: constants.c.FLAG_IS_TAG,
             istag: true,
+            isplace: true,
           } as ITag)
       ),
     },

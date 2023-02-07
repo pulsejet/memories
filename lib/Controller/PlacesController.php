@@ -26,14 +26,14 @@ namespace OCA\Memories\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
-class TagsController extends ApiBase
+class PlacesController extends ApiBase
 {
     /**
      * @NoAdminRequired
      *
-     * Get list of tags with counts of images
+     * Get list of places with counts of images
      */
-    public function tags(): JSONResponse
+    public function places(): JSONResponse
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
@@ -41,8 +41,8 @@ class TagsController extends ApiBase
         }
 
         // Check tags enabled for this user
-        if (!$this->tagsIsEnabled()) {
-            return new JSONResponse(['message' => 'Tags not enabled for user'], Http::STATUS_PRECONDITION_FAILED);
+        if (!$this->placesIsEnabled()) {
+            return new JSONResponse(['message' => 'Places not enabled'], Http::STATUS_PRECONDITION_FAILED);
         }
 
         // If this isn't the timeline folder then things aren't going to work
@@ -52,9 +52,7 @@ class TagsController extends ApiBase
         }
 
         // Run actual query
-        $list = $this->timelineQuery->getTags(
-            $root,
-        );
+        $list = $this->timelineQuery->getPlaces($root);
 
         return new JSONResponse($list, Http::STATUS_OK);
     }
@@ -64,9 +62,9 @@ class TagsController extends ApiBase
      *
      * @NoCSRFRequired
      *
-     * Get preview for a tag
+     * Get preview for a location
      */
-    public function preview(string $tag): Http\Response
+    public function preview(int $id): Http\Response
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
@@ -74,8 +72,8 @@ class TagsController extends ApiBase
         }
 
         // Check tags enabled for this user
-        if (!$this->tagsIsEnabled()) {
-            return new JSONResponse(['message' => 'Tags not enabled for user'], Http::STATUS_PRECONDITION_FAILED);
+        if (!$this->placesIsEnabled()) {
+            return new JSONResponse(['message' => 'Places not enabled'], Http::STATUS_PRECONDITION_FAILED);
         }
 
         // If this isn't the timeline folder then things aren't going to work
@@ -85,7 +83,7 @@ class TagsController extends ApiBase
         }
 
         // Run actual query
-        $list = $this->timelineQuery->getTagPreviews($tag, $root);
+        $list = $this->timelineQuery->getPlacePreviews($id, $root);
         if (null === $list || 0 === \count($list)) {
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }

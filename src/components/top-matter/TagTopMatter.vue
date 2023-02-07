@@ -43,10 +43,14 @@ export default defineComponent({
   methods: {
     createMatter() {
       this.name = <string>this.$route.params.name || "";
+
+      if (this.$route.name === "places") {
+        this.name = this.name.split("-").slice(1).join("-");
+      }
     },
 
     back() {
-      this.$router.push({ name: "tags" });
+      this.$router.push({ name: this.$route.name });
     },
   },
 });

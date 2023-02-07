@@ -114,8 +114,7 @@ class PageController extends Controller
         // Image editor
         $policy->addAllowedConnectDomain('data:');
 
-        // Allow nominatim for metadata
-        $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
+        // Allow OSM
         $policy->addAllowedFrameDomain('www.openstreetmap.org');
 
         return $policy;
@@ -133,6 +132,9 @@ class PageController extends Controller
         // Video configuration
         $initialState->provideInitialState('notranscode', $config->getSystemValue('memories.no_transcode', 'UNSET'));
         $initialState->provideInitialState('video_default_quality', $config->getSystemValue('memories.video_default_quality', '0'));
+
+        // Geo configuration
+        $initialState->provideInitialState('places_gis', $config->getSystemValue('memories.gis_type', '-1'));
     }
 
     /**
@@ -211,6 +213,16 @@ class PageController extends Controller
      * @NoCSRFRequired
      */
     public function facerecognition()
+    {
+        return $this->main();
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     */
+    public function places()
     {
         return $this->main();
     }

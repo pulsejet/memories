@@ -76,6 +76,7 @@ export type IPhoto = {
     h: number;
     w: number;
     datetaken: number;
+    address?: string;
     exif?: {
       Rotation?: number;
       Orientation?: number;
@@ -104,6 +105,8 @@ export type IPhoto = {
   isalbum?: boolean;
   /** Is this a face */
   isface?: "recognize" | "facerecognition";
+  /** Is this a place */
+  isplace?: boolean;
   /** Optional datetaken epoch */
   datetaken?: number;
 };

@@ -16,6 +16,7 @@ class TimelineQuery
     use TimelineQueryLivePhoto;
     use TimelineQueryPeopleFaceRecognition;
     use TimelineQueryPeopleRecognize;
+    use TimelineQueryPlaces;
     use TimelineQueryTags;
 
     protected IDBConnection $connection;
@@ -40,7 +41,16 @@ class TimelineQuery
     {
         $params = $query->getParameters();
         foreach ($params as $key => $value) {
-            $sql = str_replace(':'.$key, $query->getConnection()->getDatabasePlatform()->quoteStringLiteral($value), $sql);
+            if (\is_array($value)) {
+                $value = implode(',', $value);
+            } elseif (\is_bool($value)) {
+                $value = $value ? '1' : '0';
+            } elseif (null === $value) {
+                $value = 'NULL';
+            }
+
+            $value = $query->getConnection()->getDatabasePlatform()->quoteStringLiteral($value);
+            $sql = str_replace(':'.$key, $value, $sql);
         }
 
         return $sql;
@@ -82,12 +92,29 @@ class TimelineQuery
             }
         }
 
+        $gisType = \OCA\Memories\Util::placesGISType();
+        $address = -1 === $gisType ? 'Geocoding Unconfigured' : null;
+        if (!$basic && $gisType > 0) {
+            $qb = $this->connection->getQueryBuilder();
+            $qb->select('e.name')
+                ->from('memories_places', 'mp')
+                ->innerJoin('mp', 'memories_planet', 'e', $qb->expr()->eq('mp.osm_id', 'e.osm_id'))
+                ->where($qb->expr()->eq('mp.fileid', $qb->createNamedParameter($id, \PDO::PARAM_INT)))
+                ->orderBy('e.admin_level', 'DESC')
+            ;
+            $places = $qb->executeQuery()->fetchAll(\PDO::FETCH_COLUMN);
+            if (\count($places) > 0) {
+                $address = implode(', ', $places);
+            }
+        }
+
         return [
             'fileid' => (int) $row['fileid'],
             'dayid' => (int) $row['dayid'],
-            'datetaken' => $utcTs,
             'w' => (int) $row['w'],
             'h' => (int) $row['h'],
+            'datetaken' => $utcTs,
+            'address' => $address,
             'exif' => $exif,
         ];
     }

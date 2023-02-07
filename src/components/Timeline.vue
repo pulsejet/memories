@@ -290,6 +290,8 @@ export default defineComponent({
           return this.t("memories", "On this day");
         case "tags":
           return this.t("memories", "Tags");
+        case "places":
+          return this.t("memories", "Places");
         default:
           return "";
       }
@@ -647,6 +649,13 @@ export default defineComponent({
         query.set("archive", "1");
       }
 
+      // Albums
+      if (this.$route.name === "albums" && this.$route.params.name) {
+        const user = <string>this.$route.params.user;
+        const name = <string>this.$route.params.name;
+        query.set("album", `${user}/${name}`);
+      }
+
       // People
       if (
         this.routeIsPeople &&
@@ -664,16 +673,15 @@ export default defineComponent({
         }
       }
 
+      // Places
+      if (this.$route.name === "places" && this.$route.params.name) {
+        const name = <string>this.$route.params.name;
+        query.set("place", <string>name.split("-", 1)[0]);
+      }
+
       // Tags
       if (this.$route.name === "tags" && this.$route.params.name) {
         query.set("tag", <string>this.$route.params.name);
-      }
-
-      // Albums
-      if (this.$route.name === "albums" && this.$route.params.name) {
-        const user = <string>this.$route.params.user;
-        const name = <string>this.$route.params.name;
-        query.set("album", `${user}/${name}`);
       }
 
       // Month view
@@ -731,12 +739,14 @@ export default defineComponent({
         let data: IDay[] = [];
         if (this.$route.name === "thisday") {
           data = await dav.getOnThisDayData();
-        } else if (this.$route.name === "tags" && !this.$route.params.name) {
-          data = await dav.getTagsData();
-        } else if (this.routeIsPeople && !this.$route.params.name) {
-          data = await dav.getPeopleData(this.$route.name as any);
         } else if (this.$route.name === "albums" && !this.$route.params.name) {
           data = await dav.getAlbumsData("3");
+        } else if (this.routeIsPeople && !this.$route.params.name) {
+          data = await dav.getPeopleData(this.$route.name as any);
+        } else if (this.$route.name === "places" && !this.$route.params.name) {
+          data = await dav.getPlacesData();
+        } else if (this.$route.name === "tags" && !this.$route.params.name) {
+          data = await dav.getTagsData();
         } else {
           // Try the cache
           try {

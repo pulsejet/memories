@@ -58,6 +58,10 @@ export default defineComponent({
               : TopMatterType.NONE;
           case "albums":
             return TopMatterType.ALBUM;
+          case "places":
+            return this.$route.params.name
+              ? TopMatterType.TAG
+              : TopMatterType.NONE;
           default:
             return TopMatterType.NONE;
         }
