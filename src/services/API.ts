@@ -122,4 +122,8 @@ export class API {
   static CONFIG(setting: string) {
     return gen(`${BASE}/config/{setting}`, { setting });
   }
+
+  static CLUSTERS() {
+    return tok(gen(`${BASE}/locations/clusters`));
+  }
 }

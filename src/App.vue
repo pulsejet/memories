@@ -266,6 +266,11 @@ export default defineComponent({
           title: t("memories", "Maps"),
           if: this.config_mapsEnabled,
         },
+        {
+          name: "locations",
+          icon: MapIcon,
+          title: t("memories", "Locations"),
+        },
       ];
     },
 

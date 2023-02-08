@@ -36,6 +36,7 @@
     "camelcase": "^7.0.1",
     "filerobot-image-editor": "^4.3.7",
     "justified-layout": "^4.1.0",
+    "leaflet": "^1.9.3",
     "moment": "^2.29.4",
     "path-posix": "^1.0.0",
     "photoswipe": "^5.3.4",
@@ -47,6 +48,8 @@
     "vue-material-design-icons": "^5.1.2",
     "vue-router": "^3.6.5",
     "vue-virtual-scroller": "1.1.2",
+    "vue2-leaflet": "^2.7.1",
+    "vue2-leaflet-markercluster": "^3.1.0",
     "webdav": "^4.11.2"
   },
   "browserslist": [

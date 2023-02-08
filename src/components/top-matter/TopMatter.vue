@@ -4,6 +4,7 @@
     <TagTopMatter v-else-if="type === 2" />
     <FaceTopMatter v-else-if="type === 3" />
     <AlbumTopMatter v-else-if="type === 4" />
+    <LocationTopMatter v-else-if="type === 5" />
   </div>
 </template>
 
@@ -14,6 +15,7 @@ import FolderTopMatter from "./FolderTopMatter.vue";
 import TagTopMatter from "./TagTopMatter.vue";
 import FaceTopMatter from "./FaceTopMatter.vue";
 import AlbumTopMatter from "./AlbumTopMatter.vue";
+import LocationTopMatter from "./LocationTopMatter.vue";
 
 import { TopMatterType } from "../../types";
 
@@ -24,6 +26,7 @@ export default defineComponent({
     TagTopMatter,
     FaceTopMatter,
     AlbumTopMatter,
+    LocationTopMatter,
   },
 
   data: () => ({
@@ -62,6 +65,8 @@ export default defineComponent({
             return this.$route.params.name
               ? TopMatterType.TAG
               : TopMatterType.NONE;
+          case "locations":
+            return TopMatterType.LOCATION;
           default:
             return TopMatterType.NONE;
         }

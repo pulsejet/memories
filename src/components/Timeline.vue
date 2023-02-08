@@ -5,7 +5,7 @@
     :class="{ 'icon-loading': loading > 0 }"
   >
     <!-- Static top matter -->
-    <TopMatter ref="topmatter" />
+    <TopMatter ref="topmatter" @updateBoundary="updateBoundary" />
 
     <!-- No content found and nothing is loading -->
     <NcEmptyContent
@@ -140,7 +140,15 @@ import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import NcEmptyContent from "@nextcloud/vue/dist/Components/NcEmptyContent";
 
 import { getLayout } from "../services/Layout";
-import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";
+import {
+  IDay,
+  IFolder,
+  IHeadRow,
+  IPhoto,
+  IRow,
+  IRowType,
+  MapBoundary,
+} from "../types";
 import Folder from "./frame/Folder.vue";
 import Photo from "./frame/Photo.vue";
 import Tag from "./frame/Tag.vue";
@@ -223,6 +231,14 @@ export default defineComponent({
     selectionManager: null as InstanceType<typeof SelectionManager> & any,
     /** Scroller manager component */
     scrollerManager: null as InstanceType<typeof ScrollerManager> & any,
+
+    /** The boundary of the map */
+    mapBoundary: {
+      minLat: -90,
+      maxLat: 90,
+      minLng: -180,
+      maxLng: 180,
+    } as MapBoundary,
   }),
 
   mounted() {
@@ -688,6 +704,14 @@ export default defineComponent({
       if (this.isMonthView) {
         query.set("monthView", "1");
         query.set("reverse", "1");
+      }
+
+      // Geological Bounds
+      if (this.$route.name === "locations") {
+        query.set("minLat", "" + this.mapBoundary.minLat);
+        query.set("maxLat", "" + this.mapBoundary.maxLat);
+        query.set("minLng", "" + this.mapBoundary.minLng);
+        query.set("maxLng", "" + this.mapBoundary.maxLng);
       }
 
       return query;
@@ -1289,6 +1313,11 @@ export default defineComponent({
         const newDetail = day.detail.filter((p) => !delPhotosSet.has(p));
         this.processDay(day.dayid, newDetail);
       }
+    },
+
+    async updateBoundary(mapBoundary: MapBoundary) {
+      this.mapBoundary = mapBoundary;
+      await this.softRefresh();
     },
   },
 });

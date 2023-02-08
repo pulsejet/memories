@@ -40,6 +40,18 @@ trait TimelineQueryFilters
         $query->setMaxResults($limit);
     }
 
+    public function transformBoundFilter(IQueryBuilder &$query, string $userId, string $minLat, string $maxLat, string $minLng, string $maxLng)
+    {
+        $query->andWhere(
+            $query->expr()->andX(
+                $query->expr()->gte('m.latitude', $query->createNamedParameter($minLat, IQueryBuilder::PARAM_STR)),
+                $query->expr()->lte('m.latitude', $query->createNamedParameter($maxLat, IQueryBuilder::PARAM_STR)),
+                $query->expr()->gte('m.longitude', $query->createNamedParameter($minLng, IQueryBuilder::PARAM_STR)),
+                $query->expr()->lte('m.longitude', $query->createNamedParameter($maxLng, IQueryBuilder::PARAM_STR))
+            )
+        );
+    }
+
     private function applyAllTransforms(array $transforms, IQueryBuilder &$query, string $uid): void
     {
         foreach ($transforms as &$transform) {

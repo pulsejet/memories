@@ -116,6 +116,7 @@ class PageController extends Controller
 
         // Allow OSM
         $policy->addAllowedFrameDomain('www.openstreetmap.org');
+        $policy->addAllowedImageDomain('https://*.tile.openstreetmap.org');
 
         return $policy;
     }
@@ -233,6 +234,16 @@ class PageController extends Controller
      * @NoCSRFRequired
      */
     public function tags()
+    {
+        return $this->main();
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     */
+    public function locations()
     {
         return $this->main();
     }
