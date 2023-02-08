@@ -196,7 +196,7 @@ trait TimelineQueryDays
     }
 
     public function getMapClusters(
-        float $boxSize,
+        float $gridLength,
         TimelineRoot &$root,
         string $uid,
         bool $recursive,
@@ -217,7 +217,7 @@ trait TimelineQueryDays
         $query = $this->joinFilecache($query, $root, $recursive, $archive);
 
         // Group by cluster
-        $groupFunction = $query->createFunction('lat DIV '.$boxSize.', lon DIV '.$boxSize);
+        $groupFunction = $query->createFunction('lat DIV '.$gridLength.', lon DIV '.$gridLength);
         $query->groupBy($groupFunction);
 
         // Apply all transformations (including map bounds)
