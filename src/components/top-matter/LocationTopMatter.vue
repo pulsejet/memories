@@ -8,7 +8,6 @@
       @zoomend="updateMapAndTimeline"
     >
       <l-tile-layer :url="url" :attribution="attribution" />
-      <!-- <v-marker-cluster ref="markerCluster"> -->
       <l-marker
         v-for="cluster in clusters"
         :key="cluster.center.toString()"
@@ -16,7 +15,6 @@
       >
         <l-popup :content="cluster.count.toString()" />
       </l-marker>
-      <!-- </v-marker-cluster> -->
     </l-map>
   </div>
 </template>
@@ -88,22 +86,28 @@ export default defineComponent({
 
     async updateMapAndTimeline() {
       let map = this.$refs.map as LMap;
-      //let markerCluster = this.$refs.markerCluster as Vue2LeafletMarkerCluster;
       let boundary = map.mapObject.getBounds();
+      let minLat = boundary.getSouth();
+      let maxLat = boundary.getNorth();
+      let minLng = boundary.getWest();
+      let maxLng = boundary.getEast();
       let zoomLevel = map.mapObject.getZoom().toString();
 
       this.$parent.$emit("updateBoundary", {
-        minLat: boundary.getSouth(),
-        maxLat: boundary.getNorth(),
-        minLng: boundary.getWest(),
-        maxLng: boundary.getEast(),
+        minLat: minLat,
+        maxLat: maxLat,
+        minLng: minLng,
+        maxLng: maxLng,
       });
 
+      let mapWidth = maxLat - minLat;
+      let mapHeight = maxLng - minLng;
       const query = new URLSearchParams();
-      query.set("minLat", boundary.getSouth().toString());
-      query.set("maxLat", boundary.getNorth().toString());
-      query.set("minLng", boundary.getWest().toString());
-      query.set("maxLng", boundary.getEast().toString());
+      // Show clusters correctly while draging the map
+      query.set("minLat", (minLat - mapWidth).toString());
+      query.set("maxLat", (maxLat + mapWidth).toString());
+      query.set("minLng", (minLng - mapHeight).toString());
+      query.set("maxLng", (maxLng + mapHeight).toString());
       query.set("zoom", zoomLevel);
 
       const url = API.Q(API.CLUSTERS(), query);
