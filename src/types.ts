@@ -243,3 +243,8 @@ export type MapBoundary = {
   minLng: number;
   maxLng: number;
 }
+
+export type MarkerClusters = {
+  center: [number, number];
+  count: number;
+}

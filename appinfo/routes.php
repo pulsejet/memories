@@ -77,6 +77,8 @@ return [
         ['name' => 'Download#file', 'url' => '/api/download/{handle}', 'verb' => 'GET'],
         ['name' => 'Download#one', 'url' => '/api/stream/{fileid}', 'verb' => 'GET'],
 
+        ['name' => 'Location#clusters', 'url' => '/api/locations/clusters', 'verb' => 'GET'],
+
         // Config API
         ['name' => 'Other#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],
 
