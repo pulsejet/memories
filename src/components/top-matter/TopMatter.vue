@@ -14,7 +14,6 @@ import FolderTopMatter from "./FolderTopMatter.vue";
 import TagTopMatter from "./TagTopMatter.vue";
 import FaceTopMatter from "./FaceTopMatter.vue";
 import AlbumTopMatter from "./AlbumTopMatter.vue";
-import LocationTopMatter from "./LocationTopMatter.vue";
 
 import { TopMatterType } from "../../types";
 
@@ -25,7 +24,6 @@ export default defineComponent({
     TagTopMatter,
     FaceTopMatter,
     AlbumTopMatter,
-    LocationTopMatter,
   },
 
   data: () => ({

@@ -23,7 +23,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { LMap, LTileLayer, LMarker, LPopup } from "vue2-leaflet";
-import { IMarkerCluster } from "../../types";
 import { Icon } from "leaflet";
 
 import { API } from "../../services/API";
@@ -35,6 +34,11 @@ import "leaflet/dist/leaflet.css";
 const TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 const ATTRIBUTION =
   '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors';
+
+type IMarkerCluster = {
+  center: [number, number];
+  count: number;
+};
 
 Icon.Default.mergeOptions({
   iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
@@ -89,16 +93,9 @@ export default defineComponent({
       }
       this.$router.replace({ query: { b: bounds, z: zoom } });
 
-      // Get query parameters for cluster API
-      // const mapWidth = maxLat - minLat;
-      // const mapHeight = maxLon - minLon;
-
       // Show clusters correctly while draging the map
       const query = new URLSearchParams();
-      // query.set("minLat", (minLat - mapWidth).toString());
-      // query.set("maxLat", (maxLat + mapWidth).toString());
-      // query.set("minLon", (minLon - mapHeight).toString());
-      // query.set("maxLon", (maxLon + mapHeight).toString());
+      query.set("bounds", bounds);
       query.set("zoom", zoom);
 
       // Make API call

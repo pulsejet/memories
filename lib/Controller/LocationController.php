@@ -31,8 +31,6 @@ class LocationController extends ApiBase
     /**
      * @NoAdminRequired
      *
-     * @PublicPage
-     *
      * @NoCSRFRequired
      */
     public function clusters(): JSONResponse
@@ -46,47 +44,30 @@ class LocationController extends ApiBase
 
         // Get the folder to show
         $root = null;
+
         try {
             $root = $this->getRequestRoot();
         } catch (\Exception $e) {
             return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
         }
 
-        // Make sure we have bounds
-        // $bounds = $this->request->getParam('bounds');
-        // if (!$bounds) {
-        //     return new JSONResponse(['message' => 'Invalid perameters'], Http::STATUS_PRECONDITION_FAILED);
-        // }
-
-        // // Make sure we have 4 bounds
-        // $bounds = explode(',', $bounds);
-        // $bounds = array_map('floatval', $bounds);
-        // if (4 !== \count($bounds)) {
-        //     return new JSONResponse(['message' => 'Invalid perameters'], Http::STATUS_PRECONDITION_FAILED);
-        // }
-
+        // Make sure we have bounds and zoom level
         // Zoom level is used to determine the grid length
+        $bounds = $this->request->getParam('bounds');
         $zoomLevel = $this->request->getParam('zoom');
-        if (!$zoomLevel || !is_numeric($zoomLevel)) {
-            return new JSONResponse(['message' => 'Invalid zoom level'], Http::STATUS_PRECONDITION_FAILED);
+        if (!$bounds || !$zoomLevel || !is_numeric($zoomLevel)) {
+            return new JSONResponse(['message' => 'Invalid parameters'], Http::STATUS_PRECONDITION_FAILED);
         }
 
         // A tweakable parameter to determine the number of boxes in the map
         $clusterDensity = 2;
-        $gridLength = 180.0 / (2 ** $zoomLevel * $clusterDensity);
+        $gridLen = 180.0 / (2 ** $zoomLevel * $clusterDensity);
 
         try {
-            $clusters = $this->timelineQuery->getMapClusters(
-                $gridLength,
-                $root,
-                $uid,
-                $this->isRecursive(),
-                $this->isArchive(),
-                $this->getTransformations(true),
-            );
+            $clusters = $this->timelineQuery->getMapClusters($gridLen, $bounds, $root);
 
             // Merge clusters that are close together
-            $distanceThreshold = $gridLength / 3;
+            $distanceThreshold = $gridLen / 3;
             $clusters = $this->mergeClusters($clusters, $distanceThreshold);
 
             return new JSONResponse($clusters);
@@ -125,7 +106,7 @@ class LocationController extends ApiBase
         return $updatedClusters;
     }
 
-    private function isCLose(array $cluster1, array $cluster2, float $threshold): bool
+    private function isClose(array $cluster1, array $cluster2, float $threshold): bool
     {
         $deltaX = (float) $cluster1['center'][0] - (float) $cluster2['center'][0];
         $deltaY = (float) $cluster1['center'][1] - (float) $cluster2['center'][1];

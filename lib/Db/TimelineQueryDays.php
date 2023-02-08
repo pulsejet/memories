@@ -195,47 +195,6 @@ trait TimelineQueryDays
         return $this->processDay($rows, $uid, $root);
     }
 
-    public function getMapClusters(
-        float $gridLength,
-        TimelineRoot &$root,
-        string $uid,
-        bool $recursive,
-        bool $archive,
-        array $queryTransforms = []
-    ): array {
-        $query = $this->connection->getQueryBuilder();
-
-        // Get the average location of each cluster
-        $avgLat = $query->createFunction('AVG(lat) AS avgLat');
-        $avgLng = $query->createFunction('AVG(lon) AS avgLng');
-        $count = $query->createFunction('COUNT(*) AS count');
-        $query->select($avgLat, $avgLng, $count)
-            ->from('memories', 'm')
-        ;
-
-        // JOIN with filecache for existing files
-        $query = $this->joinFilecache($query, $root, $recursive, $archive);
-
-        // Group by cluster
-        $groupFunction = $query->createFunction('lat DIV '.$gridLength.', lon DIV '.$gridLength);
-        $query->groupBy($groupFunction);
-
-        // Apply all transformations (including map bounds)
-        $this->applyAllTransforms($queryTransforms, $query, $uid);
-
-        $cursor = $this->executeQueryWithCTEs($query);
-        $res = $cursor->fetchAll();
-        $cursor->closeCursor();
-
-        $clusters = [];
-        foreach ($res as $cluster) {
-            $clusters[] =
-            ['center' => [(float) $cluster['avgLat'], (float) $cluster['avgLng']], 'count' => (float) $cluster['count']];
-        }
-
-        return $clusters;
-    }
-
     /**
      * Process the days response.
      *

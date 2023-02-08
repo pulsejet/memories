@@ -173,6 +173,93 @@ class DaysController extends ApiBase
     }
 
     /**
+     * Get transformations depending on the request.
+     *
+     * @param bool $aggregateOnly Only apply transformations for aggregation (days call)
+     */
+    private function getTransformations(bool $aggregateOnly)
+    {
+        $transforms = [];
+
+        // Add extra information, basename and mimetype
+        if (!$aggregateOnly && ($fields = $this->request->getParam('fields'))) {
+            $fields = explode(',', $fields);
+            $transforms[] = [$this->timelineQuery, 'transformExtraFields', $fields];
+        }
+
+        // Filter for one album
+        if ($this->albumsIsEnabled()) {
+            if ($albumId = $this->request->getParam('album')) {
+                $transforms[] = [$this->timelineQuery, 'transformAlbumFilter', $albumId];
+            }
+        }
+
+        // Other transforms not allowed for public shares
+        if (null === $this->userSession->getUser()) {
+            return $transforms;
+        }
+
+        // Filter only favorites
+        if ($this->request->getParam('fav')) {
+            $transforms[] = [$this->timelineQuery, 'transformFavoriteFilter'];
+        }
+
+        // Filter only videos
+        if ($this->request->getParam('vid')) {
+            $transforms[] = [$this->timelineQuery, 'transformVideoFilter'];
+        }
+
+        // Filter only for one face on Recognize
+        if (($recognize = $this->request->getParam('recognize')) && $this->recognizeIsEnabled()) {
+            $transforms[] = [$this->timelineQuery, 'transformPeopleRecognitionFilter', $recognize];
+
+            $faceRect = $this->request->getParam('facerect');
+            if ($faceRect && !$aggregateOnly) {
+                $transforms[] = [$this->timelineQuery, 'transformPeopleRecognizeRect', $recognize];
+            }
+        }
+
+        // Filter only for one face on Face Recognition
+        if (($face = $this->request->getParam('facerecognition')) && $this->facerecognitionIsEnabled()) {
+            $currentModel = (int) $this->config->getAppValue('facerecognition', 'model', -1);
+            $transforms[] = [$this->timelineQuery, 'transformPeopleFaceRecognitionFilter', $currentModel, $face];
+
+            $faceRect = $this->request->getParam('facerect');
+            if ($faceRect && !$aggregateOnly) {
+                $transforms[] = [$this->timelineQuery, 'transformPeopleFaceRecognitionRect', $face];
+            }
+        }
+
+        // Filter only for one tag
+        if ($this->tagsIsEnabled()) {
+            if ($tagName = $this->request->getParam('tag')) {
+                $transforms[] = [$this->timelineQuery, 'transformTagFilter', $tagName];
+            }
+        }
+
+        // Filter only for one place
+        if ($this->placesIsEnabled()) {
+            if ($locationId = $this->request->getParam('place')) {
+                $transforms[] = [$this->timelineQuery, 'transformPlaceFilter', (int) $locationId];
+            }
+        }
+
+        // Filter geological bounds
+        $bounds = $this->request->getParam('mapbounds');
+        if ($bounds) {
+            $transforms[] = [$this->timelineQuery, 'transformMapBoundsFilter', $bounds];
+        }
+
+        // Limit number of responses for day query
+        $limit = $this->request->getParam('limit');
+        if ($limit) {
+            $transforms[] = [$this->timelineQuery, 'transformLimitDay', (int) $limit];
+        }
+
+        return $transforms;
+    }
+
+    /**
      * Preload a few "day" at the start of "days" response.
      *
      * @param array        $days the days array
