@@ -194,8 +194,9 @@ class PlacesSetup extends Command
                 $boundaries = $data['geometry'];
 
                 // Skip some places
-                if ($adminLevel >= 10) {
-                    // These are too specific, e.g. "Community Board"
+                if ($adminLevel <= 1 || $adminLevel >= 10) {
+                    // <=1: These are too general, e.g. "Earth"? or invalid
+                    // >=10: These are too specific, e.g. "Community Board"
                     continue;
                 }
 
