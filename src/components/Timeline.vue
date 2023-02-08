@@ -399,7 +399,7 @@ export default defineComponent({
     },
 
     allowBreakout() {
-      return this.isMobileLayout() && !this.config_squareThumbs;
+      return globalThis.windowInnerWidth <= 600 && !this.config_squareThumbs;
     },
 
     /** Create new state */
