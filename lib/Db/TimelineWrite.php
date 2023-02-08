@@ -159,12 +159,11 @@ class TimelineWrite
 
         // Store location data
         if (\array_key_exists('GPSLatitude', $exif) && \array_key_exists('GPSLongitude', $exif)) {
-            $lat = $exif['GPSLatitude'];
-            $lon = $exif['GPSLongitude'];
-
             try {
-                $this->updatePlacesData($file, (float) $lat, (float) $lon);
-            } catch (\Exception $e) {
+                $lat = (float) $exif['GPSLatitude'];
+                $lon = (float) $exif['GPSLongitude'];
+                $this->updatePlacesData($file, $lat, $lon);
+            } catch (\Error $e) {
                 $logger = \OC::$server->get(LoggerInterface::class);
                 $logger->log(3, 'Error updating geo data: '.$e->getMessage(), ['app' => 'memories']);
             }
