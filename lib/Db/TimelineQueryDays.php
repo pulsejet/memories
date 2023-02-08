@@ -206,8 +206,8 @@ trait TimelineQueryDays
         $query = $this->connection->getQueryBuilder();
 
         // Get the average location of each cluster
-        $avgLat = $query->createFunction('AVG(latitude) AS avgLat');
-        $avgLng = $query->createFunction('AVG(longitude) AS avgLng');
+        $avgLat = $query->createFunction('AVG(lat) AS avgLat');
+        $avgLng = $query->createFunction('AVG(lon) AS avgLng');
         $count = $query->createFunction('COUNT(*) AS count');
         $query->select($avgLat, $avgLng, $count)
             ->from('memories', 'm')
@@ -217,7 +217,7 @@ trait TimelineQueryDays
         $query = $this->joinFilecache($query, $root, $recursive, $archive);
 
         // Group by cluster
-        $groupFunction = $query->createFunction('latitude DIV '.$boxSize.', longitude DIV '.$boxSize);
+        $groupFunction = $query->createFunction('lat DIV '.$boxSize.', lon DIV '.$boxSize);
         $query->groupBy($groupFunction);
 
         // Apply all transformations (including map bounds)

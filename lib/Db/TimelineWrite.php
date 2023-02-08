@@ -158,6 +158,8 @@ class TimelineWrite
         }
 
         // Store location data
+        $lat = null;
+        $lon = null;
         if (\array_key_exists('GPSLatitude', $exif) && \array_key_exists('GPSLongitude', $exif)) {
             try {
                 $lat = (float) $exif['GPSLatitude'];
@@ -169,40 +171,39 @@ class TimelineWrite
             }
         }
 
+        // Parameters for insert or update
+        $params = [
+            'fileid' => $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT),
+            'objectid' => $query->createNamedParameter((string) $fileId, IQueryBuilder::PARAM_STR),
+            'dayid' => $query->createNamedParameter($dayId, IQueryBuilder::PARAM_INT),
+            'datetaken' => $query->createNamedParameter($dateTaken, IQueryBuilder::PARAM_STR),
+            'mtime' => $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT),
+            'isvideo' => $query->createNamedParameter($isvideo, IQueryBuilder::PARAM_INT),
+            'video_duration' => $query->createNamedParameter($videoDuration, IQueryBuilder::PARAM_INT),
+            'w' => $query->createNamedParameter($w, IQueryBuilder::PARAM_INT),
+            'h' => $query->createNamedParameter($h, IQueryBuilder::PARAM_INT),
+            'exif' => $query->createNamedParameter($exifJson, IQueryBuilder::PARAM_STR),
+            'liveid' => $query->createNamedParameter($liveid, IQueryBuilder::PARAM_STR),
+            'lat' => $query->createNamedParameter($lat, IQueryBuilder::PARAM_STR),
+            'lon' => $query->createNamedParameter($lon, IQueryBuilder::PARAM_STR),
+        ];
+
         if ($prevRow) {
             // Update existing row
             // No need to set objectid again
             $query->update('memories')
-                ->set('dayid', $query->createNamedParameter($dayId, IQueryBuilder::PARAM_INT))
-                ->set('datetaken', $query->createNamedParameter($dateTaken, IQueryBuilder::PARAM_STR))
-                ->set('mtime', $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT))
-                ->set('isvideo', $query->createNamedParameter($isvideo, IQueryBuilder::PARAM_INT))
-                ->set('video_duration', $query->createNamedParameter($videoDuration, IQueryBuilder::PARAM_INT))
-                ->set('w', $query->createNamedParameter($w, IQueryBuilder::PARAM_INT))
-                ->set('h', $query->createNamedParameter($h, IQueryBuilder::PARAM_INT))
-                ->set('exif', $query->createNamedParameter($exifJson, IQueryBuilder::PARAM_STR))
-                ->set('liveid', $query->createNamedParameter($liveid, IQueryBuilder::PARAM_STR))
                 ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
             ;
+            foreach ($params as $key => $value) {
+                if ('objectid' !== $key && 'fileid' !== $key) {
+                    $query->set($key, $value);
+                }
+            }
             $query->executeStatement();
         } else {
             // Try to create new row
             try {
-                $query->insert('memories')
-                    ->values([
-                        'fileid' => $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT),
-                        'objectid' => $query->createNamedParameter((string) $fileId, IQueryBuilder::PARAM_STR),
-                        'dayid' => $query->createNamedParameter($dayId, IQueryBuilder::PARAM_INT),
-                        'datetaken' => $query->createNamedParameter($dateTaken, IQueryBuilder::PARAM_STR),
-                        'mtime' => $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT),
-                        'isvideo' => $query->createNamedParameter($isvideo, IQueryBuilder::PARAM_INT),
-                        'video_duration' => $query->createNamedParameter($videoDuration, IQueryBuilder::PARAM_INT),
-                        'w' => $query->createNamedParameter($w, IQueryBuilder::PARAM_INT),
-                        'h' => $query->createNamedParameter($h, IQueryBuilder::PARAM_INT),
-                        'exif' => $query->createNamedParameter($exifJson, IQueryBuilder::PARAM_STR),
-                        'liveid' => $query->createNamedParameter($liveid, IQueryBuilder::PARAM_STR),
-                    ])
-                ;
+                $query->insert('memories')->values($params);
                 $query->executeStatement();
             } catch (\Exception $ex) {
                 error_log('Failed to create memories record: '.$ex->getMessage());

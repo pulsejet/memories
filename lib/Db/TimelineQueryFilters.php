@@ -44,10 +44,10 @@ trait TimelineQueryFilters
     {
         $query->andWhere(
             $query->expr()->andX(
-                $query->expr()->gte('m.latitude', $query->createNamedParameter($minLat, IQueryBuilder::PARAM_STR)),
-                $query->expr()->lte('m.latitude', $query->createNamedParameter($maxLat, IQueryBuilder::PARAM_STR)),
-                $query->expr()->gte('m.longitude', $query->createNamedParameter($minLng, IQueryBuilder::PARAM_STR)),
-                $query->expr()->lte('m.longitude', $query->createNamedParameter($maxLng, IQueryBuilder::PARAM_STR))
+                $query->expr()->gte('m.lat', $query->createNamedParameter($minLat, IQueryBuilder::PARAM_STR)),
+                $query->expr()->lte('m.lat', $query->createNamedParameter($maxLat, IQueryBuilder::PARAM_STR)),
+                $query->expr()->gte('m.lon', $query->createNamedParameter($minLng, IQueryBuilder::PARAM_STR)),
+                $query->expr()->lte('m.lon', $query->createNamedParameter($maxLng, IQueryBuilder::PARAM_STR))
             )
         );
     }
