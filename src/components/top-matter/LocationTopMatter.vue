@@ -28,7 +28,6 @@ import { Icon } from "leaflet";
 import { API } from "../../services/API";
 import axios from "axios";
 
-import Vue2LeafletMarkerCluster from "vue2-leaflet-markercluster";
 import "leaflet/dist/leaflet.css";
 
 const TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -53,7 +52,6 @@ export default defineComponent({
     LTileLayer,
     LMarker,
     LPopup,
-    "v-marker-cluster": Vue2LeafletMarkerCluster,
   },
 
   data: () => ({
@@ -108,10 +106,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "~leaflet/dist/leaflet.css";
-@import "~leaflet.markercluster/dist/MarkerCluster.css";
-@import "~leaflet.markercluster/dist/MarkerCluster.Default.css";
-
 .location-top-matter {
   height: 100%;
   width: 100%;
