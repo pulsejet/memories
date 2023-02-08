@@ -84,7 +84,6 @@ class PageController extends Controller
 
         // Apps enabled
         $this->initialState->provideInitialState('systemtags', true === $this->appManager->isEnabledForUser('systemtags'));
-        $this->initialState->provideInitialState('maps', true === $this->appManager->isEnabledForUser('maps'));
         $this->initialState->provideInitialState('recognize', \OCA\Memories\Util::recognizeIsEnabled($this->appManager));
         $this->initialState->provideInitialState('facerecognitionInstalled', \OCA\Memories\Util::facerecognitionIsInstalled($this->appManager));
         $this->initialState->provideInitialState('facerecognitionEnabled', \OCA\Memories\Util::facerecognitionIsEnabled($this->config, $uid));
@@ -243,7 +242,7 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function locations()
+    public function map()
     {
         return $this->main();
     }

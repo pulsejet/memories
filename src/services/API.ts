@@ -123,7 +123,7 @@ export class API {
     return gen(`${BASE}/config/{setting}`, { setting });
   }
 
-  static CLUSTERS() {
-    return tok(gen(`${BASE}/locations/clusters`));
+  static MAP_CLUSTERS() {
+    return tok(gen(`${BASE}/map/clusters`));
   }
 }

@@ -21,7 +21,7 @@ return [
         ['name' => 'Page#videos', 'url' => '/videos', 'verb' => 'GET'],
         ['name' => 'Page#archive', 'url' => '/archive', 'verb' => 'GET'],
         ['name' => 'Page#thisday', 'url' => '/thisday', 'verb' => 'GET'],
-        ['name' => 'Page#locations', 'url' => '/locations', 'verb' => 'GET'],
+        ['name' => 'Page#map', 'url' => '/map', 'verb' => 'GET'],
 
         // Routes with params
         w(['name' => 'Page#folder', 'url' => '/folders/{path}', 'verb' => 'GET'], 'path'),
@@ -66,6 +66,8 @@ return [
         ['name' => 'Places#places', 'url' => '/api/places', 'verb' => 'GET'],
         ['name' => 'Places#preview', 'url' => '/api/places/preview/{id}', 'verb' => 'GET'],
 
+        ['name' => 'Map#clusters', 'url' => '/api/map/clusters', 'verb' => 'GET'],
+
         ['name' => 'Archive#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
 
         ['name' => 'Image#preview', 'url' => '/api/image/preview/{id}', 'verb' => 'GET'],
@@ -80,8 +82,6 @@ return [
         ['name' => 'Download#request', 'url' => '/api/download', 'verb' => 'POST'],
         ['name' => 'Download#file', 'url' => '/api/download/{handle}', 'verb' => 'GET'],
         ['name' => 'Download#one', 'url' => '/api/stream/{fileid}', 'verb' => 'GET'],
-
-        ['name' => 'Location#clusters', 'url' => '/api/locations/clusters', 'verb' => 'GET'],
 
         // Config API
         ['name' => 'Other#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],

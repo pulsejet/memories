@@ -151,7 +151,7 @@ export default defineComponent({
     },
 
     removeNavGap(): boolean {
-      return this.$route.name === "locations";
+      return this.$route.name === "map";
     },
   },
 
@@ -264,21 +264,15 @@ export default defineComponent({
           if: this.config_placesGis > 0,
         },
         {
+          name: "map",
+          icon: MapIcon,
+          title: t("memories", "Map"),
+        },
+        {
           name: "tags",
           icon: TagsIcon,
           title: t("memories", "Tags"),
           if: this.config_tagsEnabled,
-        },
-        {
-          name: "maps",
-          icon: MapIcon,
-          title: t("memories", "Maps"),
-          if: this.config_mapsEnabled,
-        },
-        {
-          name: "locations",
-          icon: MapIcon,
-          title: t("memories", "Locations"),
         },
       ];
     },

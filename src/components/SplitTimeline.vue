@@ -12,7 +12,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import Timeline from "./Timeline.vue";
-import LocationTopMatter from "./top-matter/LocationTopMatter.vue";
+import MapSplitMatter from "./top-matter/MapSplitMatter.vue";
 
 export default defineComponent({
   name: "SplitTimeline",
@@ -24,8 +24,8 @@ export default defineComponent({
   computed: {
     primary() {
       switch (this.$route.name) {
-        case "locations":
-          return LocationTopMatter;
+        case "map":
+          return MapSplitMatter;
         default:
           return "None";
       }

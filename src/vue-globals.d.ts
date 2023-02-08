@@ -21,7 +21,6 @@ declare module "vue" {
     config_recognizeEnabled: boolean;
     config_facerecognitionInstalled: boolean;
     config_facerecognitionEnabled: boolean;
-    config_mapsEnabled: boolean;
     config_albumsEnabled: boolean;
     config_placesGis: number;
     config_squareThumbs: boolean;

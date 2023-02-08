@@ -1,5 +1,5 @@
 <template>
-  <div class="location-top-matter">
+  <div class="map-matter">
     <l-map
       class="map"
       ref="map"
@@ -46,7 +46,7 @@ Icon.Default.mergeOptions({
 });
 
 export default defineComponent({
-  name: "LocationTopMatter",
+  name: "MapSplitMatter",
   components: {
     LMap,
     LTileLayer,
@@ -97,7 +97,7 @@ export default defineComponent({
       query.set("zoom", zoom);
 
       // Make API call
-      const url = API.Q(API.CLUSTERS(), query);
+      const url = API.Q(API.MAP_CLUSTERS(), query);
       const res = await axios.get(url);
       this.clusters = res.data;
     },
@@ -106,7 +106,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.location-top-matter {
+.map-matter {
   height: 100%;
   width: 100%;
 }

@@ -141,11 +141,11 @@ export default new Router({
     },
 
     {
-      path: "/locations",
+      path: "/map",
       component: SplitTimeline,
-      name: "locations",
+      name: "map",
       props: (route) => ({
-        rootTitle: t("memories", "Locations"),
+        rootTitle: t("memories", "Map"),
       }),
     },
   ],

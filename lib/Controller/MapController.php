@@ -26,7 +26,7 @@ namespace OCA\Memories\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
-class LocationController extends ApiBase
+class MapController extends ApiBase
 {
     /**
      * @NoAdminRequired
@@ -35,13 +35,6 @@ class LocationController extends ApiBase
      */
     public function clusters(): JSONResponse
     {
-        // Get the folder to show
-        try {
-            $uid = $this->getUID();
-        } catch (\Exception $e) {
-            return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_PRECONDITION_FAILED);
-        }
-
         // Get the folder to show
         $root = null;
 

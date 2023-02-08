@@ -395,9 +395,7 @@ export default defineComponent({
     },
 
     isMobileLayout() {
-      return (
-        globalThis.windowInnerWidth <= 600 || this.$route.name === "locations"
-      );
+      return globalThis.windowInnerWidth <= 600 || this.$route.name === "map";
     },
 
     allowBreakout() {
@@ -690,7 +688,7 @@ export default defineComponent({
       }
 
       // Map Bounds
-      if (this.$route.name === "locations" && this.$route.query.b) {
+      if (this.$route.name === "map" && this.$route.query.b) {
         query.set("mapbounds", <string>this.$route.query.b);
       }
 
