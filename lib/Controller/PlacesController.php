@@ -90,8 +90,8 @@ class PlacesController extends ApiBase
         shuffle($list);
 
         // Get preview from image list
-        return $this->getPreviewFromImageList(array_map(static function ($item) {
-            return $item['fileid'];
+        return $this->getPreviewFromImageList(array_map(static function (&$item) {
+            return (int) $item['fileid'];
         }, $list));
     }
 }
