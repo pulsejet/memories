@@ -46,22 +46,24 @@ class LocationController extends ApiBase
 
         // Get the folder to show
         $root = null;
-
         try {
             $root = $this->getRequestRoot();
         } catch (\Exception $e) {
             return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
         }
 
-        // Just check bound parameters instead of using them; they are used in transformation
-        $minLat = $this->request->getParam('minLat');
-        $maxLat = $this->request->getParam('maxLat');
-        $minLng = $this->request->getParam('minLng');
-        $maxLng = $this->request->getParam('maxLng');
+        // Make sure we have bounds
+        // $bounds = $this->request->getParam('bounds');
+        // if (!$bounds) {
+        //     return new JSONResponse(['message' => 'Invalid perameters'], Http::STATUS_PRECONDITION_FAILED);
+        // }
 
-        if (!is_numeric($minLat) || !is_numeric($maxLat) || !is_numeric($minLng) || !is_numeric($maxLng)) {
-            return new JSONResponse(['message' => 'Invalid perameters'], Http::STATUS_PRECONDITION_FAILED);
-        }
+        // // Make sure we have 4 bounds
+        // $bounds = explode(',', $bounds);
+        // $bounds = array_map('floatval', $bounds);
+        // if (4 !== \count($bounds)) {
+        //     return new JSONResponse(['message' => 'Invalid perameters'], Http::STATUS_PRECONDITION_FAILED);
+        // }
 
         // Zoom level is used to determine the grid length
         $zoomLevel = $this->request->getParam('zoom');

@@ -30,7 +30,12 @@
     </NcAppNavigation>
 
     <NcAppContent>
-      <div class="outer">
+      <div
+        :class="{
+          outer: true,
+          'remove-gap': removeNavGap,
+        }"
+      >
         <router-view />
       </div>
     </NcAppContent>
@@ -143,6 +148,10 @@ export default defineComponent({
 
     showNavigation(): boolean {
       return !this.$route.name?.endsWith("-share");
+    },
+
+    removeNavGap(): boolean {
+      return this.$route.name === "locations";
     },
   },
 
@@ -330,6 +339,10 @@ export default defineComponent({
   padding: 0 0 0 44px;
   height: 100%;
   width: 100%;
+
+  &.remove-gap {
+    padding: 0;
+  }
 }
 
 @media (max-width: 768px) {

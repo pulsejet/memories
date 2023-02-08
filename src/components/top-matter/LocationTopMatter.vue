@@ -1,11 +1,12 @@
 <template>
   <div class="location-top-matter">
     <l-map
-      style="height: 100%; width: 100%; margin-right: 3.5em; z-index: 0"
-      :zoom="zoom"
+      class="map"
       ref="map"
-      @moveend="updateMapAndTimeline"
-      @zoomend="updateMapAndTimeline"
+      :zoom="zoom"
+      :minZoom="2"
+      @moveend="refresh"
+      @zoomend="refresh"
     >
       <l-tile-layer :url="url" :attribution="attribution" />
       <l-marker
@@ -20,21 +21,20 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 import { LMap, LTileLayer, LMarker, LPopup } from "vue2-leaflet";
+import { IMarkerCluster } from "../../types";
+import { Icon } from "leaflet";
+
+import { API } from "../../services/API";
+import axios from "axios";
+
 import Vue2LeafletMarkerCluster from "vue2-leaflet-markercluster";
 import "leaflet/dist/leaflet.css";
-import { IPhoto, MarkerClusters } from "../../types";
 
-import { Icon } from "leaflet";
-import axios from "axios";
-import { API } from "../../services/API";
-
-type D = Icon.Default & {
-  _getIconUrl?: string;
-};
-
-delete (Icon.Default.prototype as D)._getIconUrl;
+const TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+const ATTRIBUTION =
+  '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors';
 
 Icon.Default.mergeOptions({
   iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
@@ -53,63 +53,55 @@ export default defineComponent({
   },
 
   data: () => ({
-    name: "locations", // add for test
-    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    attribution:
-      '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-    zoom: 1,
-    clusters: [] as MarkerClusters[],
+    url: TILE_URL,
+    attribution: ATTRIBUTION,
+    zoom: 2,
+    clusters: [] as IMarkerCluster[],
   }),
 
-  watch: {
-    $route: function (from: any, to: any) {
-      this.createMatter();
-    },
-  },
-
   mounted() {
-    this.createMatter();
-    this.updateMapAndTimeline();
-  },
+    const map = this.$refs.map as LMap;
 
-  computed: {
-    getPhotos() {
-      let photos: IPhoto[] = [];
-      return photos;
-    },
+    // Make sure the zoom control doesn't overlap with the navbar
+    map.mapObject.zoomControl.setPosition("topright");
+
+    // Initialize
+    this.refresh();
   },
 
   methods: {
-    createMatter() {
-      this.name = <string>this.$route.params.name || "";
-    },
+    async refresh() {
+      const map = this.$refs.map as LMap;
 
-    async updateMapAndTimeline() {
-      let map = this.$refs.map as LMap;
-      let boundary = map.mapObject.getBounds();
-      let minLat = boundary.getSouth();
-      let maxLat = boundary.getNorth();
-      let minLng = boundary.getWest();
-      let maxLng = boundary.getEast();
-      let zoomLevel = map.mapObject.getZoom().toString();
+      // Get boundaries of the map
+      const boundary = map.mapObject.getBounds();
+      const minLat = boundary.getSouth();
+      const maxLat = boundary.getNorth();
+      const minLon = boundary.getWest();
+      const maxLon = boundary.getEast();
 
-      this.$parent.$emit("updateBoundary", {
-        minLat: minLat,
-        maxLat: maxLat,
-        minLng: minLng,
-        maxLng: maxLng,
-      });
+      // Set query parameters to route if required
+      const s = (x: number) => x.toFixed(6);
+      const bounds = `${s(minLat)},${s(maxLat)},${s(minLon)},${s(maxLon)}`;
+      const zoom = map.mapObject.getZoom().toString();
+      if (this.$route.query.b === bounds && this.$route.query.z === zoom) {
+        return;
+      }
+      this.$router.replace({ query: { b: bounds, z: zoom } });
 
-      let mapWidth = maxLat - minLat;
-      let mapHeight = maxLng - minLng;
-      const query = new URLSearchParams();
+      // Get query parameters for cluster API
+      // const mapWidth = maxLat - minLat;
+      // const mapHeight = maxLon - minLon;
+
       // Show clusters correctly while draging the map
-      query.set("minLat", (minLat - mapWidth).toString());
-      query.set("maxLat", (maxLat + mapWidth).toString());
-      query.set("minLng", (minLng - mapHeight).toString());
-      query.set("maxLng", (maxLng + mapHeight).toString());
-      query.set("zoom", zoomLevel);
+      const query = new URLSearchParams();
+      // query.set("minLat", (minLat - mapWidth).toString());
+      // query.set("maxLat", (maxLat + mapWidth).toString());
+      // query.set("minLon", (minLon - mapHeight).toString());
+      // query.set("maxLon", (maxLon + mapHeight).toString());
+      query.set("zoom", zoom);
 
+      // Make API call
       const url = API.Q(API.CLUSTERS(), query);
       const res = await axios.get(url);
       this.clusters = res.data;
@@ -124,8 +116,14 @@ export default defineComponent({
 @import "~leaflet.markercluster/dist/MarkerCluster.Default.css";
 
 .location-top-matter {
-  display: flex;
-  vertical-align: middle;
-  height: 20em;
+  height: 100%;
+  width: 100%;
+}
+
+.map {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  z-index: 0;
 }
 </style>

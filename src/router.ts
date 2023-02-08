@@ -3,6 +3,7 @@ import { translate as t, translatePlural as n } from "@nextcloud/l10n";
 import Router from "vue-router";
 import Vue from "vue";
 import Timeline from "./components/Timeline.vue";
+import SplitTimeline from "./components/SplitTimeline.vue";
 
 Vue.use(Router);
 
@@ -141,11 +142,11 @@ export default new Router({
 
     {
       path: "/locations",
-      component: Timeline,
+      component: SplitTimeline,
       name: "locations",
       props: (route) => ({
         rootTitle: t("memories", "Locations"),
-      })
+      }),
     },
   ],
 });

@@ -5,7 +5,7 @@
     :class="{ 'icon-loading': loading > 0 }"
   >
     <!-- Static top matter -->
-    <TopMatter ref="topmatter" @updateBoundary="updateBoundary" />
+    <TopMatter ref="topmatter" />
 
     <!-- No content found and nothing is loading -->
     <NcEmptyContent
@@ -140,15 +140,7 @@ import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import NcEmptyContent from "@nextcloud/vue/dist/Components/NcEmptyContent";
 
 import { getLayout } from "../services/Layout";
-import {
-  IDay,
-  IFolder,
-  IHeadRow,
-  IPhoto,
-  IRow,
-  IRowType,
-  MapBoundary,
-} from "../types";
+import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";
 import Folder from "./frame/Folder.vue";
 import Photo from "./frame/Photo.vue";
 import Tag from "./frame/Tag.vue";
@@ -231,14 +223,6 @@ export default defineComponent({
     selectionManager: null as InstanceType<typeof SelectionManager> & any,
     /** Scroller manager component */
     scrollerManager: null as InstanceType<typeof ScrollerManager> & any,
-
-    /** The boundary of the map */
-    mapBoundary: {
-      minLat: -90,
-      maxLat: 90,
-      minLng: -180,
-      maxLng: 180,
-    } as MapBoundary,
   }),
 
   mounted() {
@@ -341,11 +325,14 @@ export default defineComponent({
 
   methods: {
     async routeChange(to: any, from?: any) {
-      if (
-        from?.path !== to.path ||
-        JSON.stringify(from.query) !== JSON.stringify(to.query)
-      ) {
+      // Always do a hard refresh if the path changes
+      if (from?.path !== to.path) {
         await this.refresh();
+      }
+
+      // Do a soft refresh if the query changes
+      else if (JSON.stringify(from.query) !== JSON.stringify(to.query)) {
+        await this.softRefresh();
       }
 
       // The viewer might change the route immediately again
@@ -408,7 +395,9 @@ export default defineComponent({
     },
 
     isMobileLayout() {
-      return globalThis.windowInnerWidth <= 600;
+      return (
+        globalThis.windowInnerWidth <= 600 || this.$route.name === "locations"
+      );
     },
 
     allowBreakout() {
@@ -700,18 +689,15 @@ export default defineComponent({
         query.set("tag", <string>this.$route.params.name);
       }
 
+      // Map Bounds
+      if (this.$route.name === "locations" && this.$route.query.b) {
+        query.set("mapbounds", <string>this.$route.query.b);
+      }
+
       // Month view
       if (this.isMonthView) {
         query.set("monthView", "1");
         query.set("reverse", "1");
-      }
-
-      // Geological Bounds
-      if (this.$route.name === "locations") {
-        query.set("minLat", "" + this.mapBoundary.minLat);
-        query.set("maxLat", "" + this.mapBoundary.maxLat);
-        query.set("minLng", "" + this.mapBoundary.minLng);
-        query.set("maxLng", "" + this.mapBoundary.maxLng);
       }
 
       return query;
@@ -1314,11 +1300,6 @@ export default defineComponent({
         this.processDay(day.dayid, newDetail);
       }
     },
-
-    async updateBoundary(mapBoundary: MapBoundary) {
-      this.mapBoundary = mapBoundary;
-      await this.softRefresh();
-    },
   },
 });
 </script>
@@ -1347,7 +1328,7 @@ export default defineComponent({
   will-change: scroll-position;
   contain: strict;
   height: 300px;
-  width: calc(100% + 20px);
+  width: 100%;
   transition: opacity 0.2s ease-in-out;
 
   :deep .vue-recycle-scroller__slot {
@@ -1365,6 +1346,7 @@ export default defineComponent({
   &.empty {
     opacity: 0;
     transition: none;
+    width: 0;
   }
 }
 

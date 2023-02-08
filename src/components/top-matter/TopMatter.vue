@@ -4,7 +4,6 @@
     <TagTopMatter v-else-if="type === 2" />
     <FaceTopMatter v-else-if="type === 3" />
     <AlbumTopMatter v-else-if="type === 4" />
-    <LocationTopMatter v-else-if="type === 5" />
   </div>
 </template>
 
@@ -65,8 +64,6 @@ export default defineComponent({
             return this.$route.params.name
               ? TopMatterType.TAG
               : TopMatterType.NONE;
-          case "locations":
-            return TopMatterType.LOCATION;
           default:
             return TopMatterType.NONE;
         }

@@ -458,12 +458,13 @@ class ApiBase extends Controller
         }
 
         // Filter geological bounds
-        $minLat = $this->request->getParam('minLat');
-        $maxLat = $this->request->getParam('maxLat');
-        $minLng = $this->request->getParam('minLng');
-        $maxLng = $this->request->getParam('maxLng');
-        if ($minLat && $maxLat && $minLng && $maxLng) {
-            $transforms[] = [$this->timelineQuery, 'transformBoundFilter', $minLat, $maxLat, $minLng, $maxLng];
+        $bounds = $this->request->getParam('mapbounds');
+        if ($bounds) {
+            $bounds = explode(',', $bounds);
+            $bounds = array_map('floatval', $bounds);
+            if (4 === \count($bounds)) {
+                $transforms[] = [$this->timelineQuery, 'transformBoundFilter', $bounds];
+            }
         }
 
         return $transforms;

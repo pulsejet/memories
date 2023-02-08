@@ -240,14 +240,14 @@ export type ISelectionAction = {
   allowPublic?: boolean;
 };
 
-export type MapBoundary = {
+export type IMapBoundary = {
   minLat: number;
   maxLat: number;
-  minLng: number;
-  maxLng: number;
-}
+  minLon: number;
+  maxLon: number;
+};
 
-export type MarkerClusters = {
+export type IMarkerCluster = {
   center: [number, number];
   count: number;
-}
+};
