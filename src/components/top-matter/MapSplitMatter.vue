@@ -8,7 +8,7 @@
       @moveend="refresh"
       @zoomend="refresh"
     >
-      <LTileLayer :url="url" :attribution="attribution" />
+      <LTileLayer :url="tileurl" :attribution="attribution" />
       <LMarker
         v-for="cluster in clusters"
         :key="cluster.id"
@@ -38,9 +38,11 @@ import axios from "@nextcloud/axios";
 
 import "leaflet/dist/leaflet.css";
 
-const TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-const ATTRIBUTION =
+const OSM_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+const OSM_ATTRIBUTION =
   '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors';
+const STAMEN_URL = `https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-background/{z}/{x}/{y}{r}.png`;
+const STAMEN_ATTRIBUTION = `Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.`;
 
 type IMarkerCluster = {
   id?: number;
@@ -66,8 +68,6 @@ export default defineComponent({
   },
 
   data: () => ({
-    url: TILE_URL,
-    attribution: ATTRIBUTION,
     zoom: 2,
     clusters: [] as IMarkerCluster[],
   }),
@@ -80,6 +80,16 @@ export default defineComponent({
 
     // Initialize
     this.refresh();
+  },
+
+  computed: {
+    tileurl() {
+      return this.zoom >= 5 ? OSM_TILE_URL : STAMEN_URL;
+    },
+
+    attribution() {
+      return this.zoom >= 5 ? OSM_ATTRIBUTION : STAMEN_ATTRIBUTION;
+    },
   },
 
   methods: {
@@ -96,7 +106,8 @@ export default defineComponent({
       // Set query parameters to route if required
       const s = (x: number) => x.toFixed(6);
       const bounds = `${s(minLat)},${s(maxLat)},${s(minLon)},${s(maxLon)}`;
-      const zoom = map.mapObject.getZoom().toString();
+      this.zoom = map.mapObject.getZoom();
+      const zoom = this.zoom.toString();
       if (this.$route.query.b === bounds && this.$route.query.z === zoom) {
         return;
       }

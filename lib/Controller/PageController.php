@@ -117,6 +117,7 @@ class PageController extends Controller
         // Allow OSM
         $policy->addAllowedFrameDomain('www.openstreetmap.org');
         $policy->addAllowedImageDomain('https://*.tile.openstreetmap.org');
+        $policy->addAllowedImageDomain('https://*.a.ssl.fastly.net');
 
         return $policy;
     }
