@@ -447,6 +447,7 @@ export default defineComponent({
     /** Re-process days */
     async softRefresh() {
       this.selectionManager.clearSelection();
+      this.fetchDayQueue = []; // reset queue
       await this.fetchDays(true);
     },
 
@@ -940,7 +941,8 @@ export default defineComponent({
       if (this.fetchDayQueue.length === 0) return;
 
       // Construct URL
-      const url = this.getDayUrl(this.fetchDayQueue.join(","));
+      const dayStr = this.fetchDayQueue.join(",");
+      const url = this.getDayUrl(dayStr);
       this.fetchDayQueue = [];
 
       try {
@@ -948,7 +950,11 @@ export default defineComponent({
         const res = await axios.get<IPhoto[]>(url);
         if (res.status !== 200) throw res;
         const data = res.data;
-        if (this.state !== startState) return;
+
+        // Check if the state has changed
+        if (this.state !== startState || this.getDayUrl(dayStr) !== url) {
+          return;
+        }
 
         // Bin the data into separate days
         // It is already sorted in dayid DESC
@@ -972,7 +978,7 @@ export default defineComponent({
         for (const [dayId, photos] of dayMap) {
           // Check if the response has any delta
           const head = this.heads[dayId];
-          if (head.day.detail?.length) {
+          if (head?.day?.detail?.length) {
             if (
               head.day.detail.length === photos.length &&
               head.day.detail.every(
