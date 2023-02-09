@@ -21,8 +21,11 @@ export default defineComponent({
       "foldersPath",
       <string>"/"
     ) as string,
+
     config_showHidden:
       loadState("memories", "showHidden", <string>"false") === "true",
+    config_enableTopMemories:
+      loadState("memories", "enableTopMemories", <string>"false") === "true",
 
     config_tagsEnabled: Boolean(
       loadState("memories", "systemtags", <string>"")

@@ -63,24 +63,20 @@ class PageController extends Controller
 
         // Configuration
         $uid = $user->getUID();
-        $this->initialState->provideInitialState('timelinePath', $this->config->getUserValue(
-            $uid,
-            Application::APPNAME,
-            'timelinePath',
-            'EMPTY'
-        ));
-        $this->initialState->provideInitialState('foldersPath', $this->config->getUserValue(
-            $uid,
-            Application::APPNAME,
-            'foldersPath',
-            '/'
-        ));
-        $this->initialState->provideInitialState('showHidden', $this->config->getUserValue(
-            $uid,
-            Application::APPNAME,
-            'showHidden',
-            false
-        ));
+        $pi = function ($key, $default) use ($uid) {
+            $this->initialState->provideInitialState($key, $this->config->getUserValue(
+                $uid,
+                Application::APPNAME,
+                $key,
+                $default
+            ));
+        };
+
+        // User configuration
+        $pi('timelinePath', 'EMPTY');
+        $pi('foldersPath', '/');
+        $pi('showHidden', false);
+        $pi('enableTopMemories', "true");
 
         // Apps enabled
         $this->initialState->provideInitialState('systemtags', true === $this->appManager->isEnabledForUser('systemtags'));

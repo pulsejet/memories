@@ -24,6 +24,7 @@ declare module "vue" {
     config_albumsEnabled: boolean;
     config_placesGis: number;
     config_squareThumbs: boolean;
+    config_enableTopMemories: boolean;
     config_showFaceRect: boolean;
     config_eventName: string;
 

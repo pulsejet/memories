@@ -47,6 +47,14 @@
         >
           {{ t("memories", "Square grid mode") }}
         </NcCheckboxRadioSwitch>
+
+        <NcCheckboxRadioSwitch
+          :checked.sync="config_enableTopMemories"
+          @update:checked="updateEnableTopMemories"
+          type="switch"
+        >
+          {{ t("memories", "Show past photos on top of timeline") }}
+        </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
       <NcAppSettingsSection
@@ -169,6 +177,10 @@ export default defineComponent({
 
     async updateSquareThumbs() {
       await this.updateSetting("squareThumbs");
+    },
+
+    async updateEnableTopMemories() {
+      await this.updateSetting("enableTopMemories");
     },
 
     async updateShowHidden() {
