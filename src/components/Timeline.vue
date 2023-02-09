@@ -1315,6 +1315,7 @@ export default defineComponent({
   width: 100%;
   overflow: hidden;
   user-select: none;
+  position: relative;
 
   * {
     -webkit-tap-highlight-color: transparent;
