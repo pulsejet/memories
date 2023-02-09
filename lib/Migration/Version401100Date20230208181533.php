@@ -48,8 +48,8 @@ class Version401100Date20230208181533 extends SimpleMigrationStep
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
 
+        // Add lat lon to memories
         $table = $schema->getTable('memories');
-
         if (!$table->hasColumn('lat')) {
             $table->addColumn('lat', Types::DECIMAL, [
                 'notnull' => false,
@@ -63,8 +63,44 @@ class Version401100Date20230208181533 extends SimpleMigrationStep
                 'precision' => 9,
                 'scale' => 6,
             ]);
-
             $table->addIndex(['lat', 'lon'], 'memories_lat_lon_index');
+
+            $table->addColumn('mapcluster', Types::INTEGER, [
+                'notnull' => false,
+                'default' => null,
+            ]);
+            $table->addIndex(['mapcluster'], 'memories_mapcluster_index');
+        }
+
+        // Add clusters table
+        if (!$schema->hasTable('memories_mapclusters')) {
+            $table = $schema->createTable('memories_mapclusters');
+            $table->addColumn('id', Types::INTEGER, [
+                'autoincrement' => true,
+                'notnull' => true,
+            ]);
+            $table->addColumn('point_count', Types::INTEGER, [
+                'notnull' => true,
+            ]);
+            $table->addColumn('lat_sum', Types::FLOAT, [
+                'notnull' => false,
+                'default' => null,
+            ]);
+            $table->addColumn('lon_sum', Types::FLOAT, [
+                'notnull' => false,
+                'default' => null,
+            ]);
+            $table->addColumn('lat', Types::FLOAT, [
+                'notnull' => false,
+                'default' => null,
+            ]);
+            $table->addColumn('lon', Types::FLOAT, [
+                'notnull' => false,
+                'default' => null,
+            ]);
+
+            $table->setPrimaryKey(['id']);
+            $table->addIndex(['lat', 'lon'], 'memories_clst_ll_idx');
         }
 
         return $schema;

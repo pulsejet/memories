@@ -58,6 +58,7 @@ class MapController extends ApiBase
 
         try {
             $clusters = $this->timelineQuery->getMapClusters($gridLen, $bounds, $root);
+
             return new JSONResponse($clusters);
         } catch (\Exception $e) {
             return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);

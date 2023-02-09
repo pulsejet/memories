@@ -44,7 +44,7 @@ trait TimelineQueryMap
         $count = $query->createFunction('COUNT(m.fileid) AS count');
 
         $query->select($lat, $lon, $count)
-            ->from('memories_map_clusters', 'c')
+            ->from('memories_mapclusters', 'c')
         ;
 
         if ($gridLen > 0.02) {
@@ -58,7 +58,7 @@ trait TimelineQueryMap
         }
 
         // JOIN with memories for files from the current user
-        $query->innerJoin('c', 'memories', 'm', $query->expr()->eq('c.id', 'm.map_cluster_id'));
+        $query->innerJoin('c', 'memories', 'm', $query->expr()->eq('c.id', 'm.mapcluster'));
 
         // JOIN with filecache for existing files
         $query = $this->joinFilecache($query, $root, true, false);
@@ -96,7 +96,7 @@ trait TimelineQueryMap
 
         // SELECT all photos with this tag
         $query->select('f.fileid', 'f.etag')->from('memories', 'm')->where(
-            $query->expr()->eq('m.map_cluster_id', $query->createNamedParameter($clusterId, IQueryBuilder::PARAM_INT))
+            $query->expr()->eq('m.mapcluster', $query->createNamedParameter($clusterId, IQueryBuilder::PARAM_INT))
         );
 
         // WHERE these photos are in the user's requested folder recursively

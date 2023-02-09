@@ -15,6 +15,7 @@ use Psr\Log\LoggerInterface;
 require_once __DIR__.'/../ExifFields.php';
 
 const DELETE_TABLES = ['memories', 'memories_livephoto', 'memories_places'];
+const TRUNCATE_TABLES = ['memories_mapclusters'];
 
 class TimelineWrite
 {
@@ -82,7 +83,7 @@ class TimelineWrite
 
         // Check if need to update
         $query = $this->connection->getQueryBuilder();
-        $query->select('fileid', 'mtime', 'map_cluster_id')
+        $query->select('fileid', 'mtime', 'mapcluster')
             ->from('memories')
             ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
         ;
@@ -163,16 +164,24 @@ class TimelineWrite
         // Store location data
         $lat = null;
         $lon = null;
-        $mapCluster = $prevRow ? (int) $prevRow['map_cluster_id'] : -1;
+        $mapCluster = $prevRow ? (int) $prevRow['mapcluster'] : -1;
         if (\array_key_exists('GPSLatitude', $exif) && \array_key_exists('GPSLongitude', $exif)) {
+            $lat = (float) $exif['GPSLatitude'];
+            $lon = (float) $exif['GPSLongitude'];
+
             try {
-                $lat = (float) $exif['GPSLatitude'];
-                $lon = (float) $exif['GPSLongitude'];
-                $mapCluster = $this->getMapCluster($fileId, $mapCluster, $lat, $lon);
+                $mapCluster = $this->getMapCluster($mapCluster, $lat, $lon);
+                $mapCluster = $mapCluster <= 0 ? null : $mapCluster;
+            } catch (\Error $e) {
+                $logger = \OC::$server->get(LoggerInterface::class);
+                $logger->log(3, 'Error updating map cluster data: '.$e->getMessage(), ['app' => 'memories']);
+            }
+
+            try {
                 $this->updatePlacesData($fileId, $lat, $lon);
             } catch (\Error $e) {
                 $logger = \OC::$server->get(LoggerInterface::class);
-                $logger->log(3, 'Error updating geo data: '.$e->getMessage(), ['app' => 'memories']);
+                $logger->log(3, 'Error updating places data: '.$e->getMessage(), ['app' => 'memories']);
             }
         }
 
@@ -191,7 +200,7 @@ class TimelineWrite
             'liveid' => $query->createNamedParameter($liveid, IQueryBuilder::PARAM_STR),
             'lat' => $query->createNamedParameter($lat, IQueryBuilder::PARAM_STR),
             'lon' => $query->createNamedParameter($lon, IQueryBuilder::PARAM_STR),
-            'map_cluster_id' => $query->createNamedParameter($mapCluster, IQueryBuilder::PARAM_INT),
+            'mapcluster' => $query->createNamedParameter($mapCluster, IQueryBuilder::PARAM_INT),
         ];
 
         if ($prevRow) {
@@ -241,7 +250,7 @@ class TimelineWrite
     public function clear()
     {
         $p = $this->connection->getDatabasePlatform();
-        foreach (DELETE_TABLES as $table) {
+        foreach (array_merge(DELETE_TABLES, TRUNCATE_TABLES) as $table) {
             $this->connection->executeStatement($p->getTruncateTableSQL('*PREFIX*'.$table, false));
         }
     }

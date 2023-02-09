@@ -297,7 +297,7 @@ class ApiBase extends Controller
     /**
      * Given a list of file ids, return the first preview image possible.
      */
-    protected function getPreviewFromImageList(array &$list, int $quality=512)
+    protected function getPreviewFromImageList(array &$list, int $quality = 512)
     {
         // Get preview manager
         $previewManager = \OC::$server->get(\OCP\IPreview::class);
