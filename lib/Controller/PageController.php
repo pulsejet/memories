@@ -102,9 +102,21 @@ class PageController extends Controller
     /** Get the common content security policy */
     public static function getCSP()
     {
+        // Image domains MUST be added to the connect domain list
+        // because of the service worker fetch() call
+        $addImageDomain = function ($url) use (&$policy) {
+            $policy->addAllowedImageDomain($url);
+            $policy->addAllowedConnectDomain($url);
+        };
+
+        // Create base policy
         $policy = new ContentSecurityPolicy();
         $policy->addAllowedWorkerSrcDomain("'self'");
         $policy->addAllowedScriptDomain("'self'");
+        $policy->addAllowedFrameDomain("'self'");
+        $policy->addAllowedImageDomain("'self'");
+        $policy->addAllowedMediaDomain("'self'");
+        $policy->addAllowedConnectDomain("'self'");
 
         // Video player
         $policy->addAllowedWorkerSrcDomain('blob:');
@@ -116,8 +128,8 @@ class PageController extends Controller
 
         // Allow OSM
         $policy->addAllowedFrameDomain('www.openstreetmap.org');
-        $policy->addAllowedImageDomain('https://*.tile.openstreetmap.org');
-        $policy->addAllowedImageDomain('https://*.a.ssl.fastly.net');
+        $addImageDomain('https://*.tile.openstreetmap.org');
+        $addImageDomain('https://*.a.ssl.fastly.net');
 
         return $policy;
     }

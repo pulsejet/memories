@@ -73,11 +73,7 @@ class OtherController extends ApiBase
             'Content-Type' => 'application/javascript',
             'Service-Worker-Allowed' => '/',
         ]);
-        $policy = new ContentSecurityPolicy();
-        $policy->addAllowedWorkerSrcDomain("'self'");
-        $policy->addAllowedScriptDomain("'self'");
-        $policy->addAllowedConnectDomain("'self'");
-        $response->setContentSecurityPolicy($policy);
+        $response->setContentSecurityPolicy(PageController::getCSP());
 
         return $response;
     }

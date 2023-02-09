@@ -3,6 +3,7 @@
     <LMap
       class="map"
       ref="map"
+      :crossOrigin="true"
       :zoom="zoom"
       :minZoom="2"
       @moveend="refresh"
