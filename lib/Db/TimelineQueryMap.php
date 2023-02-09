@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\IDBConnection;
 
 trait TimelineQueryMap
 {
+    protected IDBConnection $connection;
+
     public function transformMapBoundsFilter(IQueryBuilder &$query, string $userId, string $bounds)
     {
         $bounds = explode(',', $bounds);
