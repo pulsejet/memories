@@ -23,9 +23,12 @@
       </template>
 
       <template #footer>
-        <NcAppNavigationSettings :title="t('memories', 'Settings')">
-          <Settings />
-        </NcAppNavigationSettings>
+        <NcAppNavigationItem
+          :title="t('memories', 'Settings')"
+          @click="showSettings"
+        >
+          <CogIcon slot="icon" :size="20" />
+        </NcAppNavigationItem>
       </template>
     </NcAppNavigation>
 
@@ -39,6 +42,8 @@
         <router-view />
       </div>
     </NcAppContent>
+
+    <Settings :open.sync="settingsOpen" />
   </NcContent>
 </template>
 
@@ -50,8 +55,6 @@ import NcAppContent from "@nextcloud/vue/dist/Components/NcAppContent";
 import NcAppNavigation from "@nextcloud/vue/dist/Components/NcAppNavigation";
 const NcAppNavigationItem = () =>
   import("@nextcloud/vue/dist/Components/NcAppNavigationItem");
-const NcAppNavigationSettings = () =>
-  import("@nextcloud/vue/dist/Components/NcAppNavigationSettings");
 
 import { generateUrl } from "@nextcloud/router";
 import { translate as t } from "@nextcloud/l10n";
@@ -72,6 +75,7 @@ import PeopleIcon from "vue-material-design-icons/AccountBoxMultiple.vue";
 import MarkerIcon from "vue-material-design-icons/MapMarker.vue";
 import TagsIcon from "vue-material-design-icons/Tag.vue";
 import MapIcon from "vue-material-design-icons/Map.vue";
+import CogIcon from "vue-material-design-icons/Cog.vue";
 
 export default defineComponent({
   name: "App",
@@ -80,7 +84,6 @@ export default defineComponent({
     NcAppContent,
     NcAppNavigation,
     NcAppNavigationItem,
-    NcAppNavigationSettings,
 
     Timeline,
     Settings,
@@ -97,11 +100,13 @@ export default defineComponent({
     MarkerIcon,
     TagsIcon,
     MapIcon,
+    CogIcon,
   },
 
   data: () => ({
     navItems: [],
     metadataComponent: null as any,
+    settingsOpen: false,
   }),
 
   computed: {
@@ -323,6 +328,10 @@ export default defineComponent({
       }
 
       tokenInput.value = token;
+    },
+
+    showSettings() {
+      this.settingsOpen = true;
     },
   },
 });
