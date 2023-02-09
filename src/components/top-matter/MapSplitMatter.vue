@@ -13,6 +13,7 @@
         v-for="cluster in clusters"
         :key="cluster.center.toString()"
         :lat-lng="cluster.center"
+        @click="zoomTo(cluster.center)"
       >
         <LIcon v-if="cluster.id" :icon-anchor="[24, 24]">
           <div class="preview">
@@ -112,6 +113,12 @@ export default defineComponent({
     clusterPreviewUrl(cluster: IMarkerCluster) {
       return API.MAP_CLUSTER_PREVIEW(cluster.id);
     },
+
+    zoomTo(center: [number, number]) {
+      const map = this.$refs.map as LMap;
+      const zoom = Math.max(map.mapObject.getZoom() + 2, 14);
+      map.mapObject.setView(center, zoom, { animate: true });
+    },
   },
 });
 </script>
@@ -146,6 +153,7 @@ export default defineComponent({
     height: 100%;
     object-fit: cover;
     border-radius: 5px;
+    cursor: pointer;
   }
 
   .count {
