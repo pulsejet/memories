@@ -60,8 +60,7 @@ class MapController extends ApiBase
             $clusters = $this->timelineQuery->getMapClusters($gridLen, $bounds, $root);
 
             // Merge clusters that are close together
-            $distanceThreshold = $gridLen / 2;
-            $clusters = $this->mergeClusters($clusters, $distanceThreshold);
+            $clusters = $this->mergeClusters($clusters, $gridLen / 2);
 
             return new JSONResponse($clusters);
         } catch (\Exception $e) {

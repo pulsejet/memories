@@ -116,7 +116,7 @@ export default defineComponent({
 
     zoomTo(center: [number, number]) {
       const map = this.$refs.map as LMap;
-      const zoom = Math.max(map.mapObject.getZoom() + 2, 14);
+      const zoom = map.mapObject.getZoom() + 2;
       map.mapObject.setView(center, zoom, { animate: true });
     },
   },

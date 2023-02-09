@@ -47,8 +47,9 @@ trait TimelineQueryMap
             ->from('memories_map_clusters', 'c')
         ;
 
-        if ($gridLen > 0.2) {
+        if ($gridLen > 0.02) {
             // Coarse grouping
+            $query->addSelect($query->createFunction('MAX(c.id) as id'));
             $query->addGroupBy($query->createFunction("CAST(c.lat / {$gridLen} AS INT)"));
             $query->addGroupBy($query->createFunction("CAST(c.lon / {$gridLen} AS INT)"));
         } else {
