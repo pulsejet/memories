@@ -72,6 +72,7 @@ trait TimelineWriteMap
             ->set('lon_sum', $query->createFunction("lon_sum + {$lon}"))
             ->set('lat', $query->createFunction('lat_sum / point_count'))
             ->set('lon', $query->createFunction('lon_sum / point_count'))
+            ->set('last_update', $query->createNamedParameter(time(), IQueryBuilder::PARAM_INT))
             ->where($query->expr()->eq('id', $query->createNamedParameter($clusterId, IQueryBuilder::PARAM_INT)))
         ;
         $query->executeStatement();
@@ -87,6 +88,7 @@ trait TimelineWriteMap
                 'lon_sum' => $query->createNamedParameter($lon, IQueryBuilder::PARAM_STR),
                 'lat' => $query->createNamedParameter($lat, IQueryBuilder::PARAM_STR),
                 'lon' => $query->createNamedParameter($lon, IQueryBuilder::PARAM_STR),
+                'last_update' => $query->createNamedParameter(time(), IQueryBuilder::PARAM_INT),
             ])
         ;
         $query->executeStatement();
@@ -107,6 +109,7 @@ trait TimelineWriteMap
             ->set('lon_sum', $query->createFunction("lon_sum - {$lon}"))
             ->set('lat', $query->createFunction('lat_sum / point_count'))
             ->set('lon', $query->createFunction('lon_sum / point_count'))
+            ->set('last_update', $query->createNamedParameter(time(), IQueryBuilder::PARAM_INT))
             ->where($query->expr()->eq('id', $query->createNamedParameter($clusterId, IQueryBuilder::PARAM_INT)))
         ;
         $query->executeStatement();

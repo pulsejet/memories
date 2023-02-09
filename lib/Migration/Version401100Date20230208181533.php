@@ -98,6 +98,10 @@ class Version401100Date20230208181533 extends SimpleMigrationStep
                 'notnull' => false,
                 'default' => null,
             ]);
+            $table->addColumn('last_update', Types::INTEGER, [
+                'notnull' => false,
+                'default' => null,
+            ]);
 
             $table->setPrimaryKey(['id']);
             $table->addIndex(['lat', 'lon'], 'memories_clst_ll_idx');

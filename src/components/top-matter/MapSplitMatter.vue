@@ -44,6 +44,7 @@ const ATTRIBUTION =
 
 type IMarkerCluster = {
   id?: number;
+  u?: any;
   center: [number, number];
   count: number;
 };
@@ -113,7 +114,11 @@ export default defineComponent({
     },
 
     clusterPreviewUrl(cluster: IMarkerCluster) {
-      return API.MAP_CLUSTER_PREVIEW(cluster.id);
+      let url = API.MAP_CLUSTER_PREVIEW(cluster.id);
+      if (cluster.u) {
+        url += `?u=${cluster.u}`;
+      }
+      return url;
     },
 
     zoomTo(center: [number, number]) {
@@ -141,7 +146,7 @@ export default defineComponent({
 .preview {
   width: 48px;
   height: 48px;
-  background-color: #fff;
+  background-color: rgba(0, 0, 0, 0.3);
   border-radius: 5px;
   position: relative;
   transition: transform 0.2s;

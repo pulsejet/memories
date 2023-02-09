@@ -339,7 +339,7 @@ export default defineComponent({
       await this.$nextTick();
 
       // Check if hash has changed
-      const viewerIsOpen = (this.$refs.viewer as any).isOpen;
+      const viewerIsOpen = (this.$refs.viewer as any)?.isOpen;
       if (
         from?.hash !== to.hash &&
         to.hash?.startsWith("#v") &&
