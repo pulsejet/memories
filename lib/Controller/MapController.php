@@ -30,8 +30,6 @@ class MapController extends ApiBase
 {
     /**
      * @NoAdminRequired
-     *
-     * @NoCSRFRequired
      */
     public function clusters(): JSONResponse
     {

@@ -34,7 +34,7 @@ import { LMap, LTileLayer, LMarker, LPopup, LIcon } from "vue2-leaflet";
 import { Icon } from "leaflet";
 
 import { API } from "../../services/API";
-import axios from "axios";
+import axios from "@nextcloud/axios";
 
 import "leaflet/dist/leaflet.css";
 
