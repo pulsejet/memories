@@ -31,7 +31,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { LMap, LTileLayer, LMarker, LPopup, LIcon } from "vue2-leaflet";
-import { Icon } from "leaflet";
 
 import { API } from "../../services/API";
 import axios from "@nextcloud/axios";
@@ -50,12 +49,6 @@ type IMarkerCluster = {
   center: [number, number];
   count: number;
 };
-
-Icon.Default.mergeOptions({
-  iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
-  iconUrl: require("leaflet/dist/images/marker-icon.png"),
-  shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
-});
 
 export default defineComponent({
   name: "MapSplitMatter",
