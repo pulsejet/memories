@@ -16,6 +16,7 @@ OC.L10N.register(
     "Albums" : "Álbuns",
     "Archive" : "Arquivo",
     "On this day" : "Nesse dia",
+    "Places" : "Lugares",
     "Tags" : "Etiquetas",
     "Maps" : "Mapas",
     "A better photos experience awaits you" : "Uma melhor experiência de fotos espera por você",

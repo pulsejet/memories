@@ -16,6 +16,7 @@ OC.L10N.register(
     "Albums" : "Alba",
     "Archive" : "Archiv",
     "On this day" : "V tento den",
+    "Places" : "Místa",
     "Tags" : "Štítky",
     "Maps" : "Mapy",
     "A better photos experience awaits you" : "Lepší zážitek z fotek na vás čeká",
