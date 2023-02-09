@@ -14,6 +14,7 @@ class TimelineQuery
     use TimelineQueryFilters;
     use TimelineQueryFolders;
     use TimelineQueryLivePhoto;
+    use TimelineQueryMap;
     use TimelineQueryPeopleFaceRecognition;
     use TimelineQueryPeopleRecognize;
     use TimelineQueryPlaces;

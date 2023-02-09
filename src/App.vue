@@ -30,7 +30,12 @@
     </NcAppNavigation>
 
     <NcAppContent>
-      <div class="outer">
+      <div
+        :class="{
+          outer: true,
+          'remove-gap': removeNavGap,
+        }"
+      >
         <router-view />
       </div>
     </NcAppContent>
@@ -144,6 +149,10 @@ export default defineComponent({
     showNavigation(): boolean {
       return !this.$route.name?.endsWith("-share");
     },
+
+    removeNavGap(): boolean {
+      return this.$route.name === "map";
+    },
   },
 
   watch: {
@@ -255,16 +264,15 @@ export default defineComponent({
           if: this.config_placesGis > 0,
         },
         {
+          name: "map",
+          icon: MapIcon,
+          title: t("memories", "Map"),
+        },
+        {
           name: "tags",
           icon: TagsIcon,
           title: t("memories", "Tags"),
           if: this.config_tagsEnabled,
-        },
-        {
-          name: "maps",
-          icon: MapIcon,
-          title: t("memories", "Maps"),
-          if: this.config_mapsEnabled,
         },
       ];
     },
@@ -325,6 +333,10 @@ export default defineComponent({
   padding: 0 0 0 44px;
   height: 100%;
   width: 100%;
+
+  &.remove-gap {
+    padding: 0;
+  }
 }
 
 @media (max-width: 768px) {

@@ -122,4 +122,12 @@ export class API {
   static CONFIG(setting: string) {
     return gen(`${BASE}/config/{setting}`, { setting });
   }
+
+  static MAP_CLUSTERS() {
+    return tok(gen(`${BASE}/map/clusters`));
+  }
+
+  static MAP_CLUSTER_PREVIEW(id: number) {
+    return tok(gen(`${BASE}/map/clusters/preview/{id}`, { id }));
+  }
 }

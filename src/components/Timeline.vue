@@ -325,18 +325,21 @@ export default defineComponent({
 
   methods: {
     async routeChange(to: any, from?: any) {
-      if (
-        from?.path !== to.path ||
-        JSON.stringify(from.query) !== JSON.stringify(to.query)
-      ) {
+      // Always do a hard refresh if the path changes
+      if (from?.path !== to.path) {
         await this.refresh();
+      }
+
+      // Do a soft refresh if the query changes
+      else if (JSON.stringify(from.query) !== JSON.stringify(to.query)) {
+        await this.softRefresh();
       }
 
       // The viewer might change the route immediately again
       await this.$nextTick();
 
       // Check if hash has changed
-      const viewerIsOpen = (this.$refs.viewer as any).isOpen;
+      const viewerIsOpen = (this.$refs.viewer as any)?.isOpen;
       if (
         from?.hash !== to.hash &&
         to.hash?.startsWith("#v") &&
@@ -392,11 +395,11 @@ export default defineComponent({
     },
 
     isMobileLayout() {
-      return globalThis.windowInnerWidth <= 600;
+      return globalThis.windowInnerWidth <= 600 || this.$route.name === "map";
     },
 
     allowBreakout() {
-      return this.isMobileLayout() && !this.config_squareThumbs;
+      return globalThis.windowInnerWidth <= 600 && !this.config_squareThumbs;
     },
 
     /** Create new state */
@@ -682,6 +685,11 @@ export default defineComponent({
       // Tags
       if (this.$route.name === "tags" && this.$route.params.name) {
         query.set("tag", <string>this.$route.params.name);
+      }
+
+      // Map Bounds
+      if (this.$route.name === "map" && this.$route.query.b) {
+        query.set("mapbounds", <string>this.$route.query.b);
       }
 
       // Month view
@@ -1307,6 +1315,7 @@ export default defineComponent({
   width: 100%;
   overflow: hidden;
   user-select: none;
+  position: relative;
 
   * {
     -webkit-tap-highlight-color: transparent;
@@ -1318,7 +1327,7 @@ export default defineComponent({
   will-change: scroll-position;
   contain: strict;
   height: 300px;
-  width: calc(100% + 20px);
+  width: 100%;
   transition: opacity 0.2s ease-in-out;
 
   :deep .vue-recycle-scroller__slot {
@@ -1336,6 +1345,7 @@ export default defineComponent({
   &.empty {
     opacity: 0;
     transition: none;
+    width: 0;
   }
 }
 

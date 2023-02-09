@@ -84,7 +84,6 @@ class PageController extends Controller
 
         // Apps enabled
         $this->initialState->provideInitialState('systemtags', true === $this->appManager->isEnabledForUser('systemtags'));
-        $this->initialState->provideInitialState('maps', true === $this->appManager->isEnabledForUser('maps'));
         $this->initialState->provideInitialState('recognize', \OCA\Memories\Util::recognizeIsEnabled($this->appManager));
         $this->initialState->provideInitialState('facerecognitionInstalled', \OCA\Memories\Util::facerecognitionIsInstalled($this->appManager));
         $this->initialState->provideInitialState('facerecognitionEnabled', \OCA\Memories\Util::facerecognitionIsEnabled($this->config, $uid));
@@ -95,6 +94,7 @@ class PageController extends Controller
 
         $response = new TemplateResponse($this->appName, 'main');
         $response->setContentSecurityPolicy(self::getCSP());
+        $response->cacheFor(0);
 
         return $response;
     }
@@ -116,6 +116,8 @@ class PageController extends Controller
 
         // Allow OSM
         $policy->addAllowedFrameDomain('www.openstreetmap.org');
+        $policy->addAllowedImageDomain('https://*.tile.openstreetmap.org');
+        $policy->addAllowedImageDomain('https://*.a.ssl.fastly.net');
 
         return $policy;
     }
@@ -233,6 +235,16 @@ class PageController extends Controller
      * @NoCSRFRequired
      */
     public function tags()
+    {
+        return $this->main();
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     */
+    public function map()
     {
         return $this->main();
     }

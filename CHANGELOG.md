@@ -4,6 +4,7 @@ This file is manually updated. Please file an issue if something is missing.
 
 ## v4.11.0, v3.11.0 (unreleased)
 
+- **Feature**: Show map of photos ([#396](https://github.com/pulsejet/memories/pull/396))
 - **Feature**: Show list of places using reverse geocoding (MySQL/Postgres only) ([#395](https://github.com/pulsejet/memories/issues/395))  
   To configure this feature, you need to run `occ memories:places-setup` followed by `occ memories:index -f`
 - Other minor fixes and features ([milestone](https://github.com/pulsejet/memories/milestone/7?closed=1))

@@ -36,7 +36,6 @@ export default defineComponent({
     config_facerecognitionEnabled: Boolean(
       loadState("memories", "facerecognitionEnabled", <string>"")
     ),
-    config_mapsEnabled: Boolean(loadState("memories", "maps", <string>"")),
     config_albumsEnabled: Boolean(loadState("memories", "albums", <string>"")),
 
     config_placesGis: Number(loadState("memories", "places_gis", <string>"-1")),

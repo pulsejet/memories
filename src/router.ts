@@ -3,6 +3,7 @@ import { translate as t, translatePlural as n } from "@nextcloud/l10n";
 import Router from "vue-router";
 import Vue from "vue";
 import Timeline from "./components/Timeline.vue";
+import SplitTimeline from "./components/SplitTimeline.vue";
 
 Vue.use(Router);
 
@@ -136,6 +137,15 @@ export default new Router({
       name: "album-share",
       props: (route) => ({
         rootTitle: t("memories", "Shared Album"),
+      }),
+    },
+
+    {
+      path: "/map",
+      component: SplitTimeline,
+      name: "map",
+      props: (route) => ({
+        rootTitle: t("memories", "Map"),
       }),
     },
   ],
