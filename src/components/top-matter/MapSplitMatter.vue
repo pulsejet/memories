@@ -17,7 +17,9 @@
       >
         <LIcon :icon-anchor="[24, 24]">
           <div class="preview">
-            <div class="count">{{ cluster.count }}</div>
+            <div class="count" v-if="cluster.count > 1">
+              {{ cluster.count }}
+            </div>
             <img :src="clusterPreviewUrl(cluster)" />
           </div>
         </LIcon>
