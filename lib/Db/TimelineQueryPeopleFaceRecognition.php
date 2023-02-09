@@ -61,63 +61,11 @@ trait TimelineQueryPeopleFaceRecognition
 
     public function getPeopleFaceRecognition(TimelineRoot &$root, int $currentModel, bool $show_clusters = false, bool $show_singles = false, bool $show_hidden = false)
     {
-        $query = $this->connection->getQueryBuilder();
-
-        // SELECT all face clusters
-        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
-        $query->select('frp.id', 'frp.user as user_id', 'frp.name', $count)->from('facerecog_persons', 'frp');
-
-        // WHERE there are faces with this cluster
-        $query->innerJoin('frp', 'facerecog_faces', 'frf', $query->expr()->eq('frp.id', 'frf.person'));
-
-        // WHERE faces are from images.
-        $query->innerJoin('frf', 'facerecog_images', 'fri', $query->expr()->eq('fri.id', 'frf.image'));
-
-        // WHERE these items are memories indexed photos
-        $query->innerJoin('fri', 'memories', 'm', $query->expr()->andX(
-            $query->expr()->eq('fri.file', 'm.fileid'),
-            $query->expr()->eq('fri.model', $query->createNamedParameter($currentModel)),
-        ));
-
-        // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $root, true, false);
-
         if ($show_clusters) {
-            // GROUP by ID of face cluster
-            $query->groupBy('frp.id');
-            $query->where($query->expr()->isNull('frp.name'));
-        } else {
-            // GROUP by name of face clusters
-            $query->groupBy('frp.name');
-            $query->where($query->expr()->isNotNull('frp.name'));
+            return $this->getFaceRecognitionClusters($root, $currentModel, $show_singles, $show_hidden);
         }
 
-        // By default hides individual faces when they have no name.
-        if ($show_clusters && !$show_singles) {
-            $query->having($query->expr()->gt('count', $query->createNamedParameter(1)));
-        }
-
-        // By default it shows the people who were not hidden
-        if (!$show_hidden) {
-            $query->andWhere($query->expr()->eq('frp.is_visible', $query->createNamedParameter(true)));
-        }
-
-        // ORDER by number of faces in cluster
-        $query->orderBy('count', 'DESC');
-        $query->addOrderBy('name', 'ASC');
-        $query->addOrderBy('frp.id'); // tie-breaker
-
-        // FETCH all faces
-        $cursor = $this->executeQueryWithCTEs($query);
-        $faces = $cursor->fetchAll();
-
-        // Post process
-        foreach ($faces as &$row) {
-            $row['id'] = $row['name'] ?: (int) $row['id'];
-            $row['count'] = (int) $row['count'];
-        }
-
-        return $faces;
+        return $this->getFaceRecognitionPersons($root, $currentModel);
     }
 
     public function getFaceRecognitionPreview(TimelineRoot &$root, $currentModel, $previewId)
@@ -212,6 +160,113 @@ trait TimelineQueryPeopleFaceRecognition
         });
 
         return $previews;
+    }
+
+    private function getFaceRecognitionClusters(TimelineRoot &$root, int $currentModel, bool $show_singles = false, bool $show_hidden = false)
+    {
+        $query = $this->connection->getQueryBuilder();
+
+        // SELECT all face clusters
+        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'));
+        $query->select('frp.id')->from('facerecog_persons', 'frp');
+        $query->selectAlias($count, 'count');
+        $query->selectAlias('frp.user', 'user_id');
+
+        // WHERE there are faces with this cluster
+        $query->innerJoin('frp', 'facerecog_faces', 'frf', $query->expr()->eq('frp.id', 'frf.person'));
+
+        // WHERE faces are from images.
+        $query->innerJoin('frf', 'facerecog_images', 'fri', $query->expr()->eq('fri.id', 'frf.image'));
+
+        // WHERE these items are memories indexed photos
+        $query->innerJoin('fri', 'memories', 'm', $query->expr()->andX(
+            $query->expr()->eq('fri.file', 'm.fileid'),
+            $query->expr()->eq('fri.model', $query->createNamedParameter($currentModel)),
+        ));
+
+        // WHERE these photos are in the user's requested folder recursively
+        $query = $this->joinFilecache($query, $root, true, false);
+
+        // GROUP by ID of face cluster
+        $query->groupBy('frp.id');
+        $query->addGroupBy('frp.user');
+        $query->where($query->expr()->isNull('frp.name'));
+
+        // By default hides individual faces when they have no name.
+        if (!$show_singles) {
+            $query->having($count, $query->createNamedParameter(1));
+        }
+
+        // By default it shows the people who were not hidden
+        if (!$show_hidden) {
+            $query->andWhere($query->expr()->eq('frp.is_visible', $query->createNamedParameter(true)));
+        }
+
+        // ORDER by number of faces in cluster and id for response stability.
+        $query->orderBy('count', 'DESC');
+        $query->addOrderBy('frp.id', 'DESC');
+
+        // It is not worth displaying all unnamed clusters. We show 15 to name them progressively,
+        $query->setMaxResults(15);
+
+        // FETCH all faces
+        $cursor = $this->executeQueryWithCTEs($query);
+        $faces = $cursor->fetchAll();
+
+        // Post process
+        foreach ($faces as &$row) {
+            $row['id'] = (int) $row['id'];
+            $row['count'] = (int) $row['count'];
+        }
+
+        return $faces;
+    }
+
+    private function getFaceRecognitionPersons(TimelineRoot &$root, int $currentModel)
+    {
+        $query = $this->connection->getQueryBuilder();
+
+        // SELECT all face clusters
+        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'));
+        $query->select('frp.name')->from('facerecog_persons', 'frp');
+        $query->selectAlias($count, 'count');
+        $query->selectAlias('frp.user', 'user_id');
+
+        // WHERE there are faces with this cluster
+        $query->innerJoin('frp', 'facerecog_faces', 'frf', $query->expr()->eq('frp.id', 'frf.person'));
+
+        // WHERE faces are from images.
+        $query->innerJoin('frf', 'facerecog_images', 'fri', $query->expr()->eq('fri.id', 'frf.image'));
+
+        // WHERE these items are memories indexed photos
+        $query->innerJoin('fri', 'memories', 'm', $query->expr()->andX(
+            $query->expr()->eq('fri.file', 'm.fileid'),
+            $query->expr()->eq('fri.model', $query->createNamedParameter($currentModel)),
+        ));
+
+        // WHERE these photos are in the user's requested folder recursively
+        $query = $this->joinFilecache($query, $root, true, false);
+
+        // GROUP by name of face clusters
+        $query->where($query->expr()->isNotNull('frp.name'));
+        $query->groupBy('frp.user');
+        $query->addGroupBy('frp.name');
+
+        // ORDER by number of faces in cluster
+        $query->orderBy('count', 'DESC');
+        $query->addOrderBy('frp.name', 'ASC');
+
+        // FETCH all faces
+        $cursor = $this->executeQueryWithCTEs($query);
+        $faces = $cursor->fetchAll();
+
+        // Post process
+        foreach ($faces as &$row) {
+            $row['id'] = $row['name'];
+            $row['count'] = (int) $row['count'];
+        }
+
+        return $faces;
     }
 
     /** Convert face fields to object */
