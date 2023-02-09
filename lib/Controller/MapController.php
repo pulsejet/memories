@@ -53,15 +53,11 @@ class MapController extends ApiBase
         }
 
         // A tweakable parameter to determine the number of boxes in the map
-        $clusterDensity = 2;
+        $clusterDensity = 1;
         $gridLen = 180.0 / (2 ** $zoomLevel * $clusterDensity);
 
         try {
             $clusters = $this->timelineQuery->getMapClusters($gridLen, $bounds, $root);
-
-            // Merge clusters that are close together
-            $clusters = $this->mergeClusters($clusters, $gridLen / 2);
-
             return new JSONResponse($clusters);
         } catch (\Exception $e) {
             return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);
@@ -99,62 +95,5 @@ class MapController extends ApiBase
         return $this->getPreviewFromImageList(array_map(static function (&$item) {
             return (int) $item['fileid'];
         }, $list), 256);
-    }
-
-    private function mergeClusters($clusters, $distanceThreshold): array
-    {
-        $valid = array_fill(0, \count($clusters), true);
-        for ($i = 0; $i < \count($clusters); ++$i) {
-            if (!$valid[$i]) {
-                continue;
-            }
-            for ($j = 0; $j < \count($clusters); ++$j) {
-                if ($i === $j) {
-                    continue;
-                }
-                if (!$valid[$i] || !$valid[$j]) {
-                    continue;
-                }
-                if ($this->isClose($clusters[$i], $clusters[$j], $distanceThreshold)) {
-                    $this->merge($valid, $clusters, $i, $j);
-                }
-            }
-        }
-
-        $updatedClusters = [];
-        for ($i = 0; $i < \count($clusters); ++$i) {
-            if ($valid[$i]) {
-                $updatedClusters[] = $clusters[$i];
-            }
-        }
-
-        return $updatedClusters;
-    }
-
-    private function isClose(array $cluster1, array $cluster2, float $threshold): bool
-    {
-        $deltaX = (float) $cluster1['center'][0] - (float) $cluster2['center'][0];
-        $deltaY = (float) $cluster1['center'][1] - (float) $cluster2['center'][1];
-
-        return $deltaX * $deltaX + $deltaY * $deltaY < $threshold * $threshold;
-    }
-
-    private function merge(array &$valid, array &$clusters, int $index1, int $index2): void
-    {
-        $cluster1Count = (int) $clusters[$index1]['count'];
-        $cluster1Center = $clusters[$index1]['center'];
-        $cluster2Count = (int) $clusters[$index2]['count'];
-        $cluster2Center = $clusters[$index2]['center'];
-        $newCenter = [
-            ($cluster1Count * $cluster1Center[0] + $cluster2Count * $cluster2Center[0]) / ($cluster1Count + $cluster2Count),
-            ($cluster1Count * $cluster1Center[1] + $cluster2Count * $cluster2Center[1]) / ($cluster1Count + $cluster2Count),
-        ];
-        $clusters[] = [
-            'id' => $clusters[$index1]['id'],
-            'center' => $newCenter,
-            'count' => $cluster1Count + $cluster2Count,
-        ];
-        $valid[] = true;
-        $valid[$index1] = $valid[$index2] = false;
     }
 }

@@ -11,11 +11,11 @@
       <LTileLayer :url="url" :attribution="attribution" />
       <LMarker
         v-for="cluster in clusters"
-        :key="cluster.center.toString()"
+        :key="cluster.id"
         :lat-lng="cluster.center"
         @click="zoomTo(cluster.center)"
       >
-        <LIcon v-if="cluster.id" :icon-anchor="[24, 24]">
+        <LIcon :icon-anchor="[24, 24]">
           <div class="preview">
             <div class="count">{{ cluster.count }}</div>
             <img :src="clusterPreviewUrl(cluster)" />
@@ -170,8 +170,22 @@ export default defineComponent({
 </style>
 
 <style lang="scss">
+.leaflet-marker-icon {
+  transition: transform 0.2s;
+  animation: fade-in 0.2s;
+}
+
 // Show leaflet marker on top on hover
 .leaflet-marker-icon:hover {
   z-index: 100000 !important;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 </style>
