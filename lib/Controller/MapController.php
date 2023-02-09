@@ -60,13 +60,46 @@ class MapController extends ApiBase
             $clusters = $this->timelineQuery->getMapClusters($gridLen, $bounds, $root);
 
             // Merge clusters that are close together
-            $distanceThreshold = $gridLen / 3;
+            $distanceThreshold = $gridLen / 2;
             $clusters = $this->mergeClusters($clusters, $distanceThreshold);
 
             return new JSONResponse($clusters);
         } catch (\Exception $e) {
             return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     *
+     * Get preview for a cluster
+     */
+    public function clusterPreview(int $id)
+    {
+        $user = $this->userSession->getUser();
+        if (null === $user) {
+            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // If this isn't the timeline folder then things aren't going to work
+        $root = $this->getRequestRoot();
+        if ($root->isEmpty()) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
+
+        // Run actual query
+        $list = $this->timelineQuery->getMapClusterPreviews($id, $root);
+        if (null === $list || 0 === \count($list)) {
+            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        }
+        shuffle($list);
+
+        // Get preview from image list
+        return $this->getPreviewFromImageList(array_map(static function (&$item) {
+            return (int) $item['fileid'];
+        }, $list), 256);
     }
 
     private function mergeClusters($clusters, $distanceThreshold): array
@@ -117,7 +150,11 @@ class MapController extends ApiBase
             ($cluster1Count * $cluster1Center[0] + $cluster2Count * $cluster2Center[0]) / ($cluster1Count + $cluster2Count),
             ($cluster1Count * $cluster1Center[1] + $cluster2Count * $cluster2Center[1]) / ($cluster1Count + $cluster2Count),
         ];
-        $clusters[] = ['center' => $newCenter, 'count' => $cluster1Count + $cluster2Count];
+        $clusters[] = [
+            'id' => $clusters[$index1]['id'],
+            'center' => $newCenter,
+            'count' => $cluster1Count + $cluster2Count,
+        ];
         $valid[] = true;
         $valid[$index1] = $valid[$index2] = false;
     }

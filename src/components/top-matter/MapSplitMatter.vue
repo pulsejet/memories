@@ -1,6 +1,6 @@
 <template>
   <div class="map-matter">
-    <l-map
+    <LMap
       class="map"
       ref="map"
       :zoom="zoom"
@@ -8,21 +8,26 @@
       @moveend="refresh"
       @zoomend="refresh"
     >
-      <l-tile-layer :url="url" :attribution="attribution" />
-      <l-marker
+      <LTileLayer :url="url" :attribution="attribution" />
+      <LMarker
         v-for="cluster in clusters"
         :key="cluster.center.toString()"
         :lat-lng="cluster.center"
       >
-        <l-popup :content="cluster.count.toString()" />
-      </l-marker>
-    </l-map>
+        <LIcon v-if="cluster.id" :icon-anchor="[24, 24]">
+          <div class="preview">
+            <div class="count">{{ cluster.count }}</div>
+            <img :src="clusterPreviewUrl(cluster)" />
+          </div>
+        </LIcon>
+      </LMarker>
+    </LMap>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { LMap, LTileLayer, LMarker, LPopup } from "vue2-leaflet";
+import { LMap, LTileLayer, LMarker, LPopup, LIcon } from "vue2-leaflet";
 import { Icon } from "leaflet";
 
 import { API } from "../../services/API";
@@ -35,6 +40,7 @@ const ATTRIBUTION =
   '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors';
 
 type IMarkerCluster = {
+  id?: number;
   center: [number, number];
   count: number;
 };
@@ -52,6 +58,7 @@ export default defineComponent({
     LTileLayer,
     LMarker,
     LPopup,
+    LIcon,
   },
 
   data: () => ({
@@ -101,6 +108,10 @@ export default defineComponent({
       const res = await axios.get(url);
       this.clusters = res.data;
     },
+
+    clusterPreviewUrl(cluster: IMarkerCluster) {
+      return API.MAP_CLUSTER_PREVIEW(cluster.id);
+    },
   },
 });
 </script>
@@ -116,5 +127,43 @@ export default defineComponent({
   width: 100%;
   margin: 0;
   z-index: 0;
+}
+
+.preview {
+  width: 48px;
+  height: 48px;
+  background-color: #fff;
+  border-radius: 5px;
+  position: relative;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: scale(1.8);
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+  }
+
+  .count {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: var(--color-primary-default);
+    color: var(--color-primary-text);
+    padding: 0 4px;
+    border-radius: 5px;
+    font-size: 0.8em;
+  }
+}
+</style>
+
+<style lang="scss">
+// Show leaflet marker on top on hover
+.leaflet-marker-icon:hover {
+  z-index: 100000 !important;
 }
 </style>

@@ -18,6 +18,9 @@ const DELETE_TABLES = ['memories', 'memories_livephoto', 'memories_places'];
 
 class TimelineWrite
 {
+    use TimelineWriteMap;
+    use TimelineWriteOrphans;
+    use TimelineWritePlaces;
     protected IDBConnection $connection;
     protected IPreview $preview;
     protected LivePhoto $livePhoto;
@@ -79,7 +82,7 @@ class TimelineWrite
 
         // Check if need to update
         $query = $this->connection->getQueryBuilder();
-        $query->select('fileid', 'mtime')
+        $query->select('fileid', 'mtime', 'map_cluster_id')
             ->from('memories')
             ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
         ;
@@ -160,11 +163,13 @@ class TimelineWrite
         // Store location data
         $lat = null;
         $lon = null;
+        $mapCluster = $prevRow ? (int) $prevRow['map_cluster_id'] : -1;
         if (\array_key_exists('GPSLatitude', $exif) && \array_key_exists('GPSLongitude', $exif)) {
             try {
                 $lat = (float) $exif['GPSLatitude'];
                 $lon = (float) $exif['GPSLongitude'];
-                $this->updatePlacesData($file, $lat, $lon);
+                $mapCluster = $this->getMapCluster($fileId, $mapCluster, $lat, $lon);
+                $this->updatePlacesData($fileId, $lat, $lon);
             } catch (\Error $e) {
                 $logger = \OC::$server->get(LoggerInterface::class);
                 $logger->log(3, 'Error updating geo data: '.$e->getMessage(), ['app' => 'memories']);
@@ -186,6 +191,7 @@ class TimelineWrite
             'liveid' => $query->createNamedParameter($liveid, IQueryBuilder::PARAM_STR),
             'lat' => $query->createNamedParameter($lat, IQueryBuilder::PARAM_STR),
             'lon' => $query->createNamedParameter($lon, IQueryBuilder::PARAM_STR),
+            'map_cluster_id' => $query->createNamedParameter($mapCluster, IQueryBuilder::PARAM_INT),
         ];
 
         if ($prevRow) {
@@ -237,105 +243,6 @@ class TimelineWrite
         $p = $this->connection->getDatabasePlatform();
         foreach (DELETE_TABLES as $table) {
             $this->connection->executeStatement($p->getTruncateTableSQL('*PREFIX*'.$table, false));
-        }
-    }
-
-    /**
-     * Mark a file as not orphaned.
-     */
-    public function unorphan(File &$file)
-    {
-        $query = $this->connection->getQueryBuilder();
-        $query->update('memories')
-            ->set('orphan', $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL))
-            ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
-        ;
-        $query->executeStatement();
-    }
-
-    /**
-     * Mark all files in the table as orphaned.
-     *
-     * @return int Number of rows affected
-     */
-    public function orphanAll(): int
-    {
-        $query = $this->connection->getQueryBuilder();
-        $query->update('memories')
-            ->set('orphan', $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL))
-        ;
-
-        return $query->executeStatement();
-    }
-
-    /**
-     * Remove all entries that are orphans.
-     *
-     * @return int Number of rows affected
-     */
-    public function removeOrphans(): int
-    {
-        $query = $this->connection->getQueryBuilder();
-        $query->delete('memories')
-            ->where($query->expr()->eq('orphan', $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL)))
-        ;
-
-        return $query->executeStatement();
-    }
-
-    /**
-     * Add places data for a file.
-     */
-    public function updatePlacesData(File &$file, float $lat, float $lon): void
-    {
-        // Get GIS type
-        $gisType = \OCA\Memories\Util::placesGISType();
-
-        // Construct WHERE clause depending on GIS type
-        $where = null;
-        if (1 === $gisType) {
-            $where = "ST_Contains(geometry, ST_GeomFromText('POINT({$lon} {$lat})'))";
-        } elseif (2 === $gisType) {
-            $where = "POINT('{$lon},{$lat}') <@ geometry";
-        } else {
-            return;
-        }
-
-        // Make query to memories_planet table
-        $query = $this->connection->getQueryBuilder();
-        $query->select($query->createFunction('DISTINCT(osm_id)'))
-            ->from('memories_planet_geometry')
-            ->where($query->createFunction($where))
-        ;
-
-        // Cancel out inner rings
-        $query->groupBy('poly_id', 'osm_id');
-        $query->having($query->createFunction('SUM(type_id) > 0'));
-
-        // memories_planet_geometry has no *PREFIX*
-        $sql = str_replace('*PREFIX*memories_planet_geometry', 'memories_planet_geometry', $query->getSQL());
-
-        // Run query
-        $result = $this->connection->executeQuery($sql);
-        $rows = $result->fetchAll();
-
-        // Delete previous records
-        $query = $this->connection->getQueryBuilder();
-        $query->delete('memories_places')
-            ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
-        ;
-        $query->executeStatement();
-
-        // Insert records
-        foreach ($rows as $row) {
-            $query = $this->connection->getQueryBuilder();
-            $query->insert('memories_places')
-                ->values([
-                    'fileid' => $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT),
-                    'osm_id' => $query->createNamedParameter($row['osm_id'], IQueryBuilder::PARAM_INT),
-                ])
-            ;
-            $query->executeStatement();
         }
     }
 }

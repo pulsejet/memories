@@ -297,7 +297,7 @@ class ApiBase extends Controller
     /**
      * Given a list of file ids, return the first preview image possible.
      */
-    protected function getPreviewFromImageList(array &$list)
+    protected function getPreviewFromImageList(array &$list, int $quality=512)
     {
         // Get preview manager
         $previewManager = \OC::$server->get(\OCP\IPreview::class);
@@ -318,7 +318,7 @@ class ApiBase extends Controller
 
             // Get preview image
             try {
-                $preview = $previewManager->getPreview($files[0], 512, 512, false);
+                $preview = $previewManager->getPreview($files[0], $quality, $quality, false);
                 $response = new DataDisplayResponse($preview->getContent(), Http::STATUS_OK, [
                     'Content-Type' => $preview->getMimeType(),
                 ]);
