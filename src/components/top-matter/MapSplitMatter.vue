@@ -187,6 +187,21 @@ export default defineComponent({
   z-index: 100000 !important;
 }
 
+// Dark mode
+$darkFilter: invert(1) grayscale(1) brightness(1.3) contrast(1.3);
+.leaflet-tile-pane {
+  body[data-theme-dark] &,
+  body[data-theme-dark-highcontrast] & {
+    filter: $darkFilter;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body[data-theme-default] & {
+      filter: $darkFilter;
+    }
+  }
+}
+
 @keyframes fade-in {
   0% {
     opacity: 0;
