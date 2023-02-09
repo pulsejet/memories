@@ -76,7 +76,7 @@ class PageController extends Controller
         $pi('timelinePath', 'EMPTY');
         $pi('foldersPath', '/');
         $pi('showHidden', false);
-        $pi('enableTopMemories', "true");
+        $pi('enableTopMemories', 'true');
 
         // Apps enabled
         $this->initialState->provideInitialState('systemtags', true === $this->appManager->isEnabledForUser('systemtags'));
