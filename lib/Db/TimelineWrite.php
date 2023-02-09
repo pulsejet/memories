@@ -233,12 +233,26 @@ class TimelineWrite
      */
     public function deleteFile(File &$file)
     {
+        // Get full record
+        $query = $this->connection->getQueryBuilder();
+        $query->select('*')
+            ->from('memories')
+            ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
+        ;
+        $record = $query->executeQuery()->fetch();
+
+        // Delete all records regardless of existence
         foreach (DELETE_TABLES as $table) {
             $query = $this->connection->getQueryBuilder();
             $query->delete($table)
                 ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
             ;
             $query->executeStatement();
+        }
+
+        // Delete from map cluster
+        if ($record && ($cid = (int) $record['mapcluster']) > 0) {
+            $this->removeFromCluster($cid, (float) $record['lat'], (float) $record['lon']);
         }
     }
 
