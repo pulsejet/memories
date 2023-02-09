@@ -13,6 +13,7 @@ OC.L10N.register(
     "Albums" : "Albumak",
     "Archive" : "Artxibatu",
     "On this day" : "Egun honetan",
+    "Places" : "Lekuak",
     "Tags" : "Etiketak",
     "Maps" : "Mapak",
     "Choose again" : "Aukeratu berriro",
