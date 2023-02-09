@@ -94,6 +94,7 @@ class PageController extends Controller
 
         $response = new TemplateResponse($this->appName, 'main');
         $response->setContentSecurityPolicy(self::getCSP());
+        $response->cacheFor(0);
 
         return $response;
     }
