@@ -12,7 +12,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import Timeline from "./Timeline.vue";
-import MapSplitMatter from "./top-matter/MapSplitMatter.vue";
+const MapSplitMatter = () => import("./top-matter/MapSplitMatter.vue");
 
 export default defineComponent({
   name: "SplitTimeline",
