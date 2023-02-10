@@ -21,7 +21,7 @@
         :lat-lng="cluster.center"
         @click="zoomTo(cluster)"
       >
-        <LIcon :icon-anchor="[24, 24]">
+        <LIcon :icon-anchor="[24, 24]" :className="clusterIconClass(cluster)">
           <div class="preview">
             <div class="count" v-if="cluster.count > 1">
               {{ cluster.count }}
@@ -58,11 +58,15 @@ const OSM_ATTRIBUTION =
 const STAMEN_URL = `https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-background/{z}/{x}/{y}{r}.png`;
 const STAMEN_ATTRIBUTION = `Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.`;
 
+// CSS transition time for zooming in/out cluster animation
+const CLUSTER_TRANSITION_TIME = 300;
+
 type IMarkerCluster = {
   id?: number;
   center: [number, number];
   count: number;
   preview?: IPhoto;
+  dummy?: boolean;
 };
 
 export default defineComponent({
@@ -135,16 +139,25 @@ export default defineComponent({
       // Make API call
       const url = API.Q(API.MAP_CLUSTERS(), query);
       const res = await axios.get(url);
-      this.clusters = res.data;
 
-      // Animate markers if zoom level changed
-      if (oldZoom !== this.zoom) {
-        this.animateMarkers();
+      if (this.zoom > oldZoom) {
+        this.setClustersZoomIn(res.data, oldZoom);
+      } else if (this.zoom < oldZoom) {
+        this.setClustersZoomOut(res.data);
+      } else {
+        this.clusters = res.data;
       }
+
+      // Animate markers
+      this.animateMarkers();
     },
 
     clusterPreviewUrl(cluster: IMarkerCluster) {
       return getPreviewUrl(cluster.preview, false, 256);
+    },
+
+    clusterIconClass(cluster: IMarkerCluster) {
+      return cluster.dummy ? "dummy" : "";
     },
 
     zoomTo(cluster: IMarkerCluster) {
@@ -162,9 +175,96 @@ export default defineComponent({
       map.mapObject.setView(cluster.center, zoom, { animate: true });
     },
 
+    getGridKey(center: [number, number], zoom: number) {
+      // Calcluate grid length
+      const clusterDensity = 1;
+      const oldGridLen = 180.0 / (2 ** zoom * clusterDensity);
+
+      // Get map key
+      const latGid = Math.floor(center[0] / oldGridLen);
+      const lonGid = Math.floor(center[1] / oldGridLen);
+      return `${latGid}-${lonGid}`;
+    },
+
+    getGridMap(clusters: IMarkerCluster[], zoom: number) {
+      const gridMap = new Map<string, IMarkerCluster>();
+      for (const cluster of clusters) {
+        const key = this.getGridKey(cluster.center, zoom);
+        gridMap.set(key, cluster);
+      }
+      return gridMap;
+    },
+
+    async setClustersZoomIn(clusters: IMarkerCluster[], oldZoom: number) {
+      // Create GID-map for old clusters
+      const oldClusters = this.getGridMap(this.clusters, oldZoom);
+
+      // Dummy clusters to animate markers
+      const dummyClusters: IMarkerCluster[] = [];
+
+      // Iterate new clusters
+      for (const cluster of clusters) {
+        // Check if cluster already exists
+        const key = this.getGridKey(cluster.center, oldZoom);
+        const oldCluster = oldClusters.get(key);
+        if (oldCluster) {
+          // Copy cluster and set location to old cluster
+          dummyClusters.push({
+            ...cluster,
+            center: oldCluster.center,
+          });
+        } else {
+          // Just show it
+          dummyClusters.push(cluster);
+        }
+      }
+
+      // Set clusters
+      this.clusters = dummyClusters;
+      await this.$nextTick();
+      await new Promise((r) => setTimeout(r, 0));
+      this.clusters = clusters;
+    },
+
+    async setClustersZoomOut(clusters: IMarkerCluster[]) {
+      // Get GID-map for new clusters
+      const newClustersGid = this.getGridMap(clusters, this.zoom);
+
+      // Get ID-map for new clusters
+      const newClustersId = new Map<number, IMarkerCluster>();
+      for (const cluster of clusters) {
+        newClustersId.set(cluster.id, cluster);
+      }
+
+      // Dummy clusters to animate markers
+      const dummyClusters: IMarkerCluster[] = [...clusters];
+
+      // Iterate old clusters
+      for (const oldCluster of this.clusters) {
+        // Process only clusters that are not in the new clusters
+        const newCluster = newClustersId.get(oldCluster.id);
+        if (!newCluster) {
+          // Get the new cluster at the same GID
+          const key = this.getGridKey(oldCluster.center, this.zoom);
+          const newCluster = newClustersGid.get(key);
+          if (newCluster) {
+            // No need to copy; it is gone anyway
+            oldCluster.center = newCluster.center;
+            oldCluster.dummy = true;
+            dummyClusters.push(oldCluster);
+          }
+        }
+      }
+
+      // Set clusters
+      this.clusters = dummyClusters;
+      await new Promise((r) => setTimeout(r, CLUSTER_TRANSITION_TIME)); // wait for animation
+      this.clusters = clusters;
+    },
+
     async animateMarkers() {
       this.animMarkers = true;
-      await new Promise((r) => setTimeout(r, 200)); // wait for animation
+      await new Promise((r) => setTimeout(r, CLUSTER_TRANSITION_TIME)); // wait for animation
       this.animMarkers = false;
     },
   },
@@ -219,16 +319,17 @@ export default defineComponent({
 
 <style lang="scss">
 .leaflet-marker-icon {
-  animation: fade-in 0.2s;
-
   .anim-markers & {
-    transition: transform 0.2s ease;
+    transition: transform 0.3s ease;
   }
-}
 
-// Show leaflet marker on top on hover
-.leaflet-marker-icon:hover {
-  z-index: 100000 !important;
+  &.dummy {
+    z-index: -100000 !important;
+  }
+
+  &:hover {
+    z-index: 100000 !important;
+  }
 }
 
 // Dark mode
@@ -243,15 +344,6 @@ $darkFilter: invert(1) grayscale(1) brightness(1.3) contrast(1.3);
     body[data-theme-default] & {
       filter: $darkFilter;
     }
-  }
-}
-
-@keyframes fade-in {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
   }
 }
 </style>

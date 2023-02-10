@@ -51,6 +51,7 @@ class MapController extends ApiBase
         }
 
         // A tweakable parameter to determine the number of boxes in the map
+        // Note: these parameters need to be changed in MapSplitMatter.vue as well
         $clusterDensity = 1;
         $gridLen = 180.0 / (2 ** $zoomLevel * $clusterDensity);
 
