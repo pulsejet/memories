@@ -55,7 +55,6 @@ const STAMEN_ATTRIBUTION = `Map tiles by <a href="http://stamen.com">Stamen Desi
 
 type IMarkerCluster = {
   id?: number;
-  u?: any;
   center: [number, number];
   count: number;
   preview?: IPhoto;
@@ -129,11 +128,7 @@ export default defineComponent({
     },
 
     clusterPreviewUrl(cluster: IMarkerCluster) {
-      let url = getPreviewUrl(cluster.preview, false, 256);
-      if (cluster.u) {
-        url += `?u=${cluster.u}`;
-      }
-      return url;
+      return getPreviewUrl(cluster.preview, false, 256);
     },
 
     zoomTo(cluster: IMarkerCluster) {

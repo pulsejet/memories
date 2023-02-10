@@ -42,9 +42,8 @@ trait TimelineQueryMap
         $lat = $query->createFunction('AVG(c.lat) AS lat');
         $lon = $query->createFunction('AVG(c.lon) AS lon');
         $count = $query->createFunction('COUNT(m.fileid) AS count');
-        $update = $query->createFunction('MAX(c.last_update) as u');
 
-        $query->select($lat, $lon, $update, $count)
+        $query->select($lat, $lon, $count)
             ->from('memories_mapclusters', 'c')
         ;
 
@@ -81,7 +80,6 @@ trait TimelineQueryMap
                     (float) $cluster['lon'],
                 ],
                 'count' => (float) $cluster['count'],
-                'u' => (int) $cluster['u'],
             ];
             if (\array_key_exists('id', $cluster)) {
                 $c['id'] = (int) $cluster['id'];
