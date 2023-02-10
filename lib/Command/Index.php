@@ -299,6 +299,11 @@ class Index extends Command
                 return;
             }
 
+            // skip IMDB name
+            if ('IMDB' === $folder->getName()) {
+                return;
+            }
+
             $nodes = $folder->getDirectoryListing();
 
             foreach ($nodes as $i => &$node) {
