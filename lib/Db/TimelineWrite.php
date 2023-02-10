@@ -170,8 +170,7 @@ class TimelineWrite
             $lon = (float) $exif['GPSLongitude'];
 
             try {
-                $mapCluster = $this->getMapCluster($mapCluster, $lat, $lon);
-                $mapCluster = $mapCluster <= 0 ? null : $mapCluster;
+                $mapCluster = $this->mapGetCluster($mapCluster, $lat, $lon);
             } catch (\Error $e) {
                 $logger = \OC::$server->get(LoggerInterface::class);
                 $logger->log(3, 'Error updating map cluster data: '.$e->getMessage(), ['app' => 'memories']);
@@ -184,6 +183,9 @@ class TimelineWrite
                 $logger->log(3, 'Error updating places data: '.$e->getMessage(), ['app' => 'memories']);
             }
         }
+
+        // NULL if invalid
+        $mapCluster = $mapCluster <= 0 ? null : $mapCluster;
 
         // Parameters for insert or update
         $params = [
@@ -252,7 +254,7 @@ class TimelineWrite
 
         // Delete from map cluster
         if ($record && ($cid = (int) $record['mapcluster']) > 0) {
-            $this->removeFromCluster($cid, (float) $record['lat'], (float) $record['lon']);
+            $this->mapRemoveFromCluster($cid, (float) $record['lat'], (float) $record['lon']);
         }
     }
 

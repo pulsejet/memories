@@ -13,7 +13,17 @@ trait TimelineWriteMap
 {
     protected IDBConnection $connection;
 
-    protected function getMapCluster(int $prevCluster, float $lat, float $lon): int
+    /**
+     * Get the cluster ID for a given point.
+     * If the cluster ID changes, update the old cluster and the new cluster.
+     *
+     * @param int   $prevCluster The current cluster ID of the point
+     * @param float $lat         The latitude of the point
+     * @param float $lon         The longitude of the point
+     *
+     * @return int The new cluster ID
+     */
+    protected function mapGetCluster(int $prevCluster, float $lat, float $lon): int
     {
         // Get all possible clusters within CLUSTER_DEG radius
         $query = $this->connection->getQueryBuilder();
@@ -41,9 +51,9 @@ trait TimelineWriteMap
 
         // If no cluster found, create a new one
         if ($minId <= 0) {
-            $this->removeFromCluster($prevCluster, $lat, $lon);
+            $this->mapRemoveFromCluster($prevCluster, $lat, $lon);
 
-            return $this->createMapCluster($lat, $lon);
+            return $this->mapCreateCluster($lat, $lon);
         }
 
         // If the file was previously in the same cluster, return that
@@ -53,13 +63,20 @@ trait TimelineWriteMap
 
         // If the file was previously in a different cluster,
         // remove it from the first cluster and add it to the second
-        $this->removeFromCluster($prevCluster, $lat, $lon);
-        $this->addToCluster($minId, $lat, $lon);
+        $this->mapRemoveFromCluster($prevCluster, $lat, $lon);
+        $this->mapAddToCluster($minId, $lat, $lon);
 
         return $minId;
     }
 
-    protected function addToCluster(int $clusterId, float $lat, float $lon): void
+    /**
+     * Add a point to a cluster.
+     *
+     * @param int   $clusterId The ID of the cluster
+     * @param float $lat       The latitude of the point
+     * @param float $lon       The longitude of the point
+     */
+    protected function mapAddToCluster(int $clusterId, float $lat, float $lon): void
     {
         if ($clusterId <= 0) {
             return;
@@ -70,15 +87,22 @@ trait TimelineWriteMap
             ->set('point_count', $query->createFunction('point_count + 1'))
             ->set('lat_sum', $query->createFunction("lat_sum + {$lat}"))
             ->set('lon_sum', $query->createFunction("lon_sum + {$lon}"))
-            ->set('lat', $query->createFunction('lat_sum / point_count'))
-            ->set('lon', $query->createFunction('lon_sum / point_count'))
-            ->set('last_update', $query->createNamedParameter(time(), IQueryBuilder::PARAM_INT))
             ->where($query->expr()->eq('id', $query->createNamedParameter($clusterId, IQueryBuilder::PARAM_INT)))
         ;
         $query->executeStatement();
+
+        $this->mapUpdateAggregates($clusterId);
     }
 
-    private function createMapCluster(float $lat, float $lon): int
+    /**
+     * Create a new cluster.
+     *
+     * @param float $lat The latitude of the point
+     * @param float $lon The longitude of the point
+     *
+     * @return int The ID of the new cluster
+     */
+    private function mapCreateCluster(float $lat, float $lon): int
     {
         $query = $this->connection->getQueryBuilder();
         $query->insert('memories_mapclusters')
@@ -86,17 +110,24 @@ trait TimelineWriteMap
                 'point_count' => $query->createNamedParameter(1, IQueryBuilder::PARAM_INT),
                 'lat_sum' => $query->createNamedParameter($lat, IQueryBuilder::PARAM_STR),
                 'lon_sum' => $query->createNamedParameter($lon, IQueryBuilder::PARAM_STR),
-                'lat' => $query->createNamedParameter($lat, IQueryBuilder::PARAM_STR),
-                'lon' => $query->createNamedParameter($lon, IQueryBuilder::PARAM_STR),
-                'last_update' => $query->createNamedParameter(time(), IQueryBuilder::PARAM_INT),
             ])
         ;
         $query->executeStatement();
 
-        return (int) $query->getLastInsertId();
+        $clusterId = (int) $query->getLastInsertId();
+        $this->mapUpdateAggregates($clusterId);
+
+        return $clusterId;
     }
 
-    private function removeFromCluster(int $clusterId, float $lat, float $lon): void
+    /**
+     * Remove a point from a cluster.
+     *
+     * @param int   $clusterId The ID of the cluster
+     * @param float $lat       The latitude of the point
+     * @param float $lon       The longitude of the point
+     */
+    private function mapRemoveFromCluster(int $clusterId, float $lat, float $lon): void
     {
         if ($clusterId <= 0) {
             return;
@@ -107,6 +138,26 @@ trait TimelineWriteMap
             ->set('point_count', $query->createFunction('point_count - 1'))
             ->set('lat_sum', $query->createFunction("lat_sum - {$lat}"))
             ->set('lon_sum', $query->createFunction("lon_sum - {$lon}"))
+            ->where($query->expr()->eq('id', $query->createNamedParameter($clusterId, IQueryBuilder::PARAM_INT)))
+        ;
+        $query->executeStatement();
+
+        $this->mapUpdateAggregates($clusterId);
+    }
+
+    /**
+     * Update the aggregate values of a cluster.
+     *
+     * @param int $clusterId The ID of the cluster
+     */
+    private function mapUpdateAggregates(int $clusterId): void
+    {
+        if ($clusterId <= 0) {
+            return;
+        }
+
+        $query = $this->connection->getQueryBuilder();
+        $query->update('memories_mapclusters')
             ->set('lat', $query->createFunction('lat_sum / point_count'))
             ->set('lon', $query->createFunction('lon_sum / point_count'))
             ->set('last_update', $query->createNamedParameter(time(), IQueryBuilder::PARAM_INT))
