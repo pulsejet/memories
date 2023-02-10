@@ -186,7 +186,7 @@ export default defineComponent({
     position: absolute;
     top: 0;
     right: 0;
-    background-color: var(--color-primary-default);
+    background-color: var(--color-primary);
     color: var(--color-primary-text);
     padding: 0 4px;
     border-radius: 5px;
