@@ -868,11 +868,7 @@ export default defineComponent({
 
     /** Open viewer with given photo */
     openViewer(photo: IPhoto) {
-      this.$router.push({
-        path: this.$route.path,
-        query: this.$route.query,
-        hash: utils.getViewerHash(photo),
-      });
+      this.$router.push(utils.getViewerRoute(photo));
     },
   },
 });

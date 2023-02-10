@@ -57,42 +57,24 @@ class MapController extends ApiBase
         try {
             $clusters = $this->timelineQuery->getMapClusters($gridLen, $bounds, $root);
 
+            // Get previews for each cluster
+            $clusterIds = array_map(function ($cluster) {
+                return (int) $cluster['id'];
+            }, $clusters);
+            $previews = $this->timelineQuery->getMapClusterPreviews($clusterIds, $root);
+
+            // Merge the responses
+            $fileMap = [];
+            foreach ($previews as &$preview) {
+                $fileMap[$preview['mapcluster']] = $preview;
+            }
+            foreach ($clusters as &$cluster) {
+                $cluster['preview'] = $fileMap[$cluster['id']] ?? null;
+            }
+
             return new JSONResponse($clusters);
         } catch (\Exception $e) {
             return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
-    }
-
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     *
-     * Get preview for a cluster
-     */
-    public function clusterPreview(int $id)
-    {
-        $user = $this->userSession->getUser();
-        if (null === $user) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
-        }
-
-        // If this isn't the timeline folder then things aren't going to work
-        $root = $this->getRequestRoot();
-        if ($root->isEmpty()) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
-        }
-
-        // Run actual query
-        $list = $this->timelineQuery->getMapClusterPreviews($id, $root);
-        if (null === $list || 0 === \count($list)) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
-        }
-        shuffle($list);
-
-        // Get preview from image list
-        return $this->getPreviewFromImageList(array_map(static function (&$item) {
-            return (int) $item['fileid'];
-        }, $list), 256);
     }
 }

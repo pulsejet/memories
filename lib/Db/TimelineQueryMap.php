@@ -92,30 +92,41 @@ trait TimelineQueryMap
         return $clusters;
     }
 
-    public function getMapClusterPreviews(int $clusterId, TimelineRoot &$root)
+    public function getMapClusterPreviews(array $clusterIds, TimelineRoot &$root)
     {
         $query = $this->connection->getQueryBuilder();
 
         // SELECT all photos with this tag
-        $query->select('f.fileid', 'f.etag')->from('memories', 'm')->where(
-            $query->expr()->eq('m.mapcluster', $query->createNamedParameter($clusterId, IQueryBuilder::PARAM_INT))
+        $fileid = $query->createFunction('MAX(m.fileid) AS fileid');
+        $query->select($fileid)->from('memories', 'm')->where(
+            $query->expr()->in('m.mapcluster', $query->createNamedParameter($clusterIds, IQueryBuilder::PARAM_INT_ARRAY))
         );
 
         // WHERE these photos are in the user's requested folder recursively
         $query = $this->joinFilecache($query, $root, true, false);
 
-        // MAX 8
-        $query->setMaxResults(8);
+        // GROUP BY the cluster
+        $query->groupBy('m.mapcluster');
 
-        // FETCH tag previews
+        // Get the fileIds
         $cursor = $this->executeQueryWithCTEs($query);
-        $ans = $cursor->fetchAll();
+        $fileIds = $cursor->fetchAll(\PDO::FETCH_COLUMN);
+
+        // SELECT these files from the filecache
+        $query = $this->connection->getQueryBuilder();
+        $query->select('m.fileid', 'm.dayid', 'm.mapcluster', 'f.etag')
+            ->from('memories', 'm')
+            ->innerJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'))
+            ->where($query->expr()->in('m.fileid', $query->createNamedParameter($fileIds, IQueryBuilder::PARAM_INT_ARRAY)));
+        $files = $query->executeQuery()->fetchAll();
 
         // Post-process
-        foreach ($ans as &$row) {
+        foreach ($files as &$row) {
             $row['fileid'] = (int) $row['fileid'];
+            $row['mapcluster'] = (int) $row['mapcluster'];
+            $row['dayid'] = (int) $row['dayid'];
         }
 
-        return $ans;
+        return $files;
     }
 }

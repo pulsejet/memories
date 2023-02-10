@@ -67,7 +67,6 @@ return [
         ['name' => 'Places#preview', 'url' => '/api/places/preview/{id}', 'verb' => 'GET'],
 
         ['name' => 'Map#clusters', 'url' => '/api/map/clusters', 'verb' => 'GET'],
-        ['name' => 'Map#clusterPreview', 'url' => '/api/map/clusters/preview/{id}', 'verb' => 'GET'],
 
         ['name' => 'Archive#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
 

@@ -287,6 +287,18 @@ export function getViewerHash(photo: IPhoto) {
   return `#v/${photo.dayid}/${photo.key}`;
 }
 
+/**
+ * Get route for viewer for photo
+ */
+export function getViewerRoute(photo: IPhoto) {
+  const $route = globalThis.vueroute();
+  return {
+    path: $route.path,
+    query: $route.query,
+    hash: getViewerHash(photo),
+  };
+}
+
 /** Set a timer that renews if existing */
 export function setRenewingTimeout(
   ctx: any,
