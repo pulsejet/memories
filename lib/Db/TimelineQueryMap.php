@@ -47,15 +47,10 @@ trait TimelineQueryMap
             ->from('memories_mapclusters', 'c')
         ;
 
-        if ($gridLen > 0.02) {
-            // Coarse grouping
-            $query->addSelect($query->createFunction('MAX(c.id) as id'));
-            $query->addGroupBy($query->createFunction("CAST(c.lat / {$gridLen} AS INT)"));
-            $query->addGroupBy($query->createFunction("CAST(c.lon / {$gridLen} AS INT)"));
-        } else {
-            // Fine grouping
-            $query->addSelect('c.id')->groupBy('c.id');
-        }
+        // Coarse grouping
+        $query->addSelect($query->createFunction('MAX(c.id) as id'));
+        $query->addGroupBy($query->createFunction("CAST(c.lat / {$gridLen} AS INT)"));
+        $query->addGroupBy($query->createFunction("CAST(c.lon / {$gridLen} AS INT)"));
 
         // JOIN with memories for files from the current user
         $query->innerJoin('c', 'memories', 'm', $query->expr()->eq('c.id', 'm.mapcluster'));
