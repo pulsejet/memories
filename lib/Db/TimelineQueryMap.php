@@ -117,7 +117,8 @@ trait TimelineQueryMap
         $query->select('m.fileid', 'm.dayid', 'm.mapcluster', 'f.etag')
             ->from('memories', 'm')
             ->innerJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'))
-            ->where($query->expr()->in('m.fileid', $query->createNamedParameter($fileIds, IQueryBuilder::PARAM_INT_ARRAY)));
+            ->where($query->expr()->in('m.fileid', $query->createNamedParameter($fileIds, IQueryBuilder::PARAM_INT_ARRAY)))
+        ;
         $files = $query->executeQuery()->fetchAll();
 
         // Post-process
