@@ -222,29 +222,45 @@ class VideoController extends ApiBase
         }
 
         // Check for environment variables
-        $env = '';
+        $env = [];
 
         // QSV with VAAPI
-        $vaapi = $this->config->getSystemValue('memories.qsv', false);
-        if ($vaapi) {
-            $env .= 'VAAPI=1 ';
+        if ($this->config->getSystemValue('memories.qsv', false)) {
+            $env[] = 'VAAPI=1';
         }
 
         // NVENC
-        $nvenc = $this->config->getSystemValue('memories.nvenc', false);
-        if ($nvenc) {
-            $env .= 'NVENC=1 ';
+        if ($this->config->getSystemValue('memories.nvenc', false)) {
+            $env[] = 'NVENC=1';
         }
+
+        // Bind address / port
+        $port = $this->config->getSystemValue('memories.govod_port', 47788);
+        $env[] = "GOVOD_BIND='127.0.0.1:{$port}'";
 
         // Paths
         $ffmpegPath = $this->config->getSystemValue('memories.ffmpeg_path', 'ffmpeg');
         $ffprobePath = $this->config->getSystemValue('memories.ffprobe_path', 'ffprobe');
-        $tmpPath = $this->config->getSystemValue('memories.tmp_path', sys_get_temp_dir());
-        $env .= "FFMPEG='{$ffmpegPath}' FFPROBE='{$ffprobePath}' GOVOD_TEMPDIR='{$tmpPath}/go-vod' ";
+        $env[] = "FFMPEG='{$ffmpegPath}'";
+        $env[] = "FFPROBE='{$ffprobePath}'";
 
-        // Check if already running
+        // (Re-)create Temp dir
+        $instanceId = $this->config->getSystemValue('instanceid', 'default');
+        $defaultTmp = sys_get_temp_dir().'/go-vod/'.$instanceId;
+        $tmpPath = $this->config->getSystemValue('memories.tmp_path', $defaultTmp);
+        shell_exec("rm -rf '{$tmpPath}'");
+        mkdir($tmpPath, 0755, true);
+
+        // Remove trailing slash from temp path if present
+        if ('/' === substr($tmpPath, -1)) {
+            $tmpPath = substr($tmpPath, 0, -1);
+        }
+        $env[] = "GOVOD_TEMPDIR='{$tmpPath}'";
+
+        // Kill already running and start new
         \OCA\Memories\Util::pkill($transcoder);
-        shell_exec("{$env} nohup {$transcoder} > {$tmpPath}/go-vod.log 2>&1 & > /dev/null");
+        $env = implode(' ', $env);
+        shell_exec("{$env} nohup {$transcoder} > '{$tmpPath}.log' 2>&1 & > /dev/null");
 
         // wait for 1s and try again
         sleep(1);
@@ -258,7 +274,8 @@ class VideoController extends ApiBase
 
         // Make sure query params are repeated
         // For example, in folder sharing, we need the params on every request
-        $url = "http://127.0.0.1:47788/{$client}{$path}/{$profile}";
+        $port = $this->config->getSystemValue('memories.govod_port', 47788);
+        $url = "http://127.0.0.1:{$port}/{$client}{$path}/{$profile}";
         if ($params = $_SERVER['QUERY_STRING']) {
             $url .= "?{$params}";
         }

@@ -23,17 +23,27 @@
       </template>
 
       <template #footer>
-        <NcAppNavigationSettings :title="t('memories', 'Settings')">
-          <Settings />
-        </NcAppNavigationSettings>
+        <NcAppNavigationItem
+          :title="t('memories', 'Settings')"
+          @click="showSettings"
+        >
+          <CogIcon slot="icon" :size="20" />
+        </NcAppNavigationItem>
       </template>
     </NcAppNavigation>
 
     <NcAppContent>
-      <div class="outer">
+      <div
+        :class="{
+          outer: true,
+          'remove-gap': removeNavGap,
+        }"
+      >
         <router-view />
       </div>
     </NcAppContent>
+
+    <Settings :open.sync="settingsOpen" />
   </NcContent>
 </template>
 
@@ -45,8 +55,6 @@ import NcAppContent from "@nextcloud/vue/dist/Components/NcAppContent";
 import NcAppNavigation from "@nextcloud/vue/dist/Components/NcAppNavigation";
 const NcAppNavigationItem = () =>
   import("@nextcloud/vue/dist/Components/NcAppNavigationItem");
-const NcAppNavigationSettings = () =>
-  import("@nextcloud/vue/dist/Components/NcAppNavigationSettings");
 
 import { generateUrl } from "@nextcloud/router";
 import { translate as t } from "@nextcloud/l10n";
@@ -64,8 +72,10 @@ import AlbumIcon from "vue-material-design-icons/ImageAlbum.vue";
 import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
 import CalendarIcon from "vue-material-design-icons/Calendar.vue";
 import PeopleIcon from "vue-material-design-icons/AccountBoxMultiple.vue";
+import MarkerIcon from "vue-material-design-icons/MapMarker.vue";
 import TagsIcon from "vue-material-design-icons/Tag.vue";
 import MapIcon from "vue-material-design-icons/Map.vue";
+import CogIcon from "vue-material-design-icons/Cog.vue";
 
 export default defineComponent({
   name: "App",
@@ -74,7 +84,6 @@ export default defineComponent({
     NcAppContent,
     NcAppNavigation,
     NcAppNavigationItem,
-    NcAppNavigationSettings,
 
     Timeline,
     Settings,
@@ -88,13 +97,16 @@ export default defineComponent({
     ArchiveIcon,
     CalendarIcon,
     PeopleIcon,
+    MarkerIcon,
     TagsIcon,
     MapIcon,
+    CogIcon,
   },
 
   data: () => ({
     navItems: [],
     metadataComponent: null as any,
+    settingsOpen: false,
   }),
 
   computed: {
@@ -141,6 +153,10 @@ export default defineComponent({
 
     showNavigation(): boolean {
       return !this.$route.name?.endsWith("-share");
+    },
+
+    removeNavGap(): boolean {
+      return this.$route.name === "map";
     },
   },
 
@@ -192,6 +208,25 @@ export default defineComponent({
           },
         })
       );
+    }
+  },
+
+  async beforeMount() {
+    if ("serviceWorker" in navigator) {
+      // Use the window load event to keep the page load performant
+      window.addEventListener("load", async () => {
+        try {
+          const url = generateUrl("/apps/memories/service-worker.js");
+          const registration = await navigator.serviceWorker.register(url, {
+            scope: generateUrl("/apps/memories"),
+          });
+          console.log("SW registered: ", registration);
+        } catch (error) {
+          console.error("SW registration failed: ", error);
+        }
+      });
+    } else {
+      console.debug("Service Worker is not enabled on this browser.");
     }
   },
 
@@ -247,37 +282,23 @@ export default defineComponent({
           title: t("memories", "On this day"),
         },
         {
+          name: "places",
+          icon: MarkerIcon,
+          title: t("memories", "Places"),
+          if: this.config_placesGis > 0,
+        },
+        {
+          name: "map",
+          icon: MapIcon,
+          title: t("memories", "Map"),
+        },
+        {
           name: "tags",
           icon: TagsIcon,
           title: t("memories", "Tags"),
           if: this.config_tagsEnabled,
         },
-        {
-          name: "maps",
-          icon: MapIcon,
-          title: t("memories", "Maps"),
-          if: this.config_mapsEnabled,
-        },
       ];
-    },
-
-    async beforeMount() {
-      if ("serviceWorker" in navigator) {
-        // Use the window load event to keep the page load performant
-        window.addEventListener("load", async () => {
-          try {
-            const url = generateUrl("/apps/memories/service-worker.js");
-            const registration = await navigator.serviceWorker.register(url, {
-              scope: generateUrl("/apps/memories"),
-            });
-            console.log("SW registered: ", registration);
-          } catch (error) {
-            console.error("SW registration failed: ", error);
-          }
-        });
-      } else {
-        console.debug("Service Worker is not enabled on this browser.");
-      }
     },
 
     linkClick() {
@@ -308,6 +329,10 @@ export default defineComponent({
 
       tokenInput.value = token;
     },
+
+    showSettings() {
+      this.settingsOpen = true;
+    },
   },
 });
 </script>
@@ -317,6 +342,10 @@ export default defineComponent({
   padding: 0 0 0 44px;
   height: 100%;
   width: 100%;
+
+  &.remove-gap {
+    padding: 0;
+  }
 }
 
 @media (max-width: 768px) {

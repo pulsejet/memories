@@ -29,6 +29,9 @@ use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Exif;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\DataDisplayResponse;
+use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
@@ -292,6 +295,45 @@ class ApiBase extends Controller
     }
 
     /**
+     * Given a list of file ids, return the first preview image possible.
+     */
+    protected function getPreviewFromImageList(array &$list, int $quality = 512)
+    {
+        // Get preview manager
+        $previewManager = \OC::$server->get(\OCP\IPreview::class);
+
+        // Try to get a preview
+        $userFolder = $this->rootFolder->getUserFolder($this->getUID());
+        foreach ($list as &$img) {
+            // Get the file
+            $files = $userFolder->getById($img);
+            if (0 === \count($files)) {
+                continue;
+            }
+
+            // Check read permission
+            if (!($files[0]->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
+                continue;
+            }
+
+            // Get preview image
+            try {
+                $preview = $previewManager->getPreview($files[0], $quality, $quality, false);
+                $response = new DataDisplayResponse($preview->getContent(), Http::STATUS_OK, [
+                    'Content-Type' => $preview->getMimeType(),
+                ]);
+                $response->cacheFor(3600 * 24, false, false);
+
+                return $response;
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        return new JSONResponse([], Http::STATUS_NOT_FOUND);
+    }
+
+    /**
      * Check if albums are enabled for this user.
      */
     protected function albumsIsEnabled(): bool
@@ -327,6 +369,14 @@ class ApiBase extends Controller
     protected function facerecognitionIsEnabled(): bool
     {
         return \OCA\Memories\Util::facerecognitionIsEnabled($this->config, $this->getUID());
+    }
+
+    /**
+     * Check if geolocation is enabled for this user.
+     */
+    protected function placesIsEnabled(): bool
+    {
+        return \OCA\Memories\Util::placesGISType() > 0;
     }
 
     /**

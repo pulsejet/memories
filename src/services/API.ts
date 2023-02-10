@@ -47,6 +47,14 @@ export class API {
     return gen(`${BASE}/albums/download?name={user}/{name}`, { user, name });
   }
 
+  static PLACE_LIST() {
+    return gen(`${BASE}/places`);
+  }
+
+  static PLACE_PREVIEW(place: number | string) {
+    return gen(`${BASE}/places/preview/{place}`, { place });
+  }
+
   static TAG_LIST() {
     return gen(`${BASE}/tags`);
   }
@@ -113,5 +121,13 @@ export class API {
 
   static CONFIG(setting: string) {
     return gen(`${BASE}/config/{setting}`, { setting });
+  }
+
+  static MAP_CLUSTERS() {
+    return tok(gen(`${BASE}/map/clusters`));
+  }
+
+  static MAP_CLUSTER_PREVIEW(id: number) {
+    return tok(gen(`${BASE}/map/clusters/preview/{id}`, { id }));
   }
 }

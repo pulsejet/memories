@@ -868,11 +868,7 @@ export default defineComponent({
 
     /** Open viewer with given photo */
     openViewer(photo: IPhoto) {
-      this.$router.push({
-        path: this.$route.path,
-        query: this.$route.query,
-        hash: utils.getViewerHash(photo),
-      });
+      this.$router.push(utils.getViewerRoute(photo));
     },
   },
 });
@@ -882,10 +878,10 @@ export default defineComponent({
 .top-bar {
   position: absolute;
   top: 10px;
-  right: 60px;
+  right: min(60px, 10%);
   padding: 8px;
   width: 400px;
-  max-width: 100vw;
+  max-width: 80%;
   background-color: var(--color-main-background);
   box-shadow: 0 0 2px gray;
   border-radius: 10px;
@@ -907,6 +903,7 @@ export default defineComponent({
     right: unset;
     position: fixed;
     width: 100vw;
+    max-width: 100vw;
     border-radius: 0px;
     opacity: 1;
     padding-top: 3px;

@@ -2,6 +2,14 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## v4.11.0, v3.11.0 (unreleased)
+
+- **Feature**: Show map of photos ([#396](https://github.com/pulsejet/memories/pull/396))  
+  To index existing images, you must run `occ memories:index -f`
+- **Feature**: Show list of places using reverse geocoding (MySQL/Postgres only) ([#395](https://github.com/pulsejet/memories/issues/395))  
+  To configure this feature, you need to run `occ memories:places-setup` followed by `occ memories:index -f`
+- Other minor fixes and features ([milestone](https://github.com/pulsejet/memories/milestone/7?closed=1))
+
 ## v4.10.0, v3.10.0 (2023-01-17)
 
 - **Feature**: Allow sharing albums using public links ([#274](https://github.com/pulsejet/memories/issues/274))

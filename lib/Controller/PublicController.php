@@ -110,6 +110,7 @@ class PublicController extends AuthPublicShareController
         $response->setHeaderTitle($share->getNode()->getName());
         $response->setFooterVisible(false); // wth is that anyway?
         $response->setContentSecurityPolicy(PageController::getCSP());
+        $response->cacheFor(0);
 
         return $response;
     }

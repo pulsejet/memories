@@ -789,10 +789,18 @@ export default defineComponent({
     /** Get element for thumbnail if it exists */
     thumbElem(photo: IPhoto): HTMLImageElement | undefined {
       if (!photo) return;
-      const elems = document.querySelectorAll(`.memories-thumb-${photo.key}`);
+      const elems = Array.from(
+        document.querySelectorAll(`.memories-thumb-${photo.key}`)
+      );
 
       if (elems.length === 0) return;
       if (elems.length === 1) return elems[0] as HTMLImageElement;
+
+      // Find if any element has the thumb-important class
+      const important = elems.filter((e) =>
+        e.classList.contains("thumb-important")
+      );
+      if (important.length > 0) return important[0] as HTMLImageElement;
 
       // Find element within 500px of the screen top
       let elem: HTMLImageElement;

@@ -63,28 +63,23 @@ class PageController extends Controller
 
         // Configuration
         $uid = $user->getUID();
-        $this->initialState->provideInitialState('timelinePath', $this->config->getUserValue(
-            $uid,
-            Application::APPNAME,
-            'timelinePath',
-            'EMPTY'
-        ));
-        $this->initialState->provideInitialState('foldersPath', $this->config->getUserValue(
-            $uid,
-            Application::APPNAME,
-            'foldersPath',
-            '/'
-        ));
-        $this->initialState->provideInitialState('showHidden', $this->config->getUserValue(
-            $uid,
-            Application::APPNAME,
-            'showHidden',
-            false
-        ));
+        $pi = function ($key, $default) use ($uid) {
+            $this->initialState->provideInitialState($key, $this->config->getUserValue(
+                $uid,
+                Application::APPNAME,
+                $key,
+                $default
+            ));
+        };
+
+        // User configuration
+        $pi('timelinePath', 'EMPTY');
+        $pi('foldersPath', '/');
+        $pi('showHidden', false);
+        $pi('enableTopMemories', 'true');
 
         // Apps enabled
         $this->initialState->provideInitialState('systemtags', true === $this->appManager->isEnabledForUser('systemtags'));
-        $this->initialState->provideInitialState('maps', true === $this->appManager->isEnabledForUser('maps'));
         $this->initialState->provideInitialState('recognize', \OCA\Memories\Util::recognizeIsEnabled($this->appManager));
         $this->initialState->provideInitialState('facerecognitionInstalled', \OCA\Memories\Util::facerecognitionIsInstalled($this->appManager));
         $this->initialState->provideInitialState('facerecognitionEnabled', \OCA\Memories\Util::facerecognitionIsEnabled($this->config, $uid));
@@ -95,6 +90,7 @@ class PageController extends Controller
 
         $response = new TemplateResponse($this->appName, 'main');
         $response->setContentSecurityPolicy(self::getCSP());
+        $response->cacheFor(0);
 
         return $response;
     }
@@ -102,9 +98,21 @@ class PageController extends Controller
     /** Get the common content security policy */
     public static function getCSP()
     {
+        // Image domains MUST be added to the connect domain list
+        // because of the service worker fetch() call
+        $addImageDomain = function ($url) use (&$policy) {
+            $policy->addAllowedImageDomain($url);
+            $policy->addAllowedConnectDomain($url);
+        };
+
+        // Create base policy
         $policy = new ContentSecurityPolicy();
         $policy->addAllowedWorkerSrcDomain("'self'");
         $policy->addAllowedScriptDomain("'self'");
+        $policy->addAllowedFrameDomain("'self'");
+        $policy->addAllowedImageDomain("'self'");
+        $policy->addAllowedMediaDomain("'self'");
+        $policy->addAllowedConnectDomain("'self'");
 
         // Video player
         $policy->addAllowedWorkerSrcDomain('blob:');
@@ -114,9 +122,10 @@ class PageController extends Controller
         // Image editor
         $policy->addAllowedConnectDomain('data:');
 
-        // Allow nominatim for metadata
-        $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
+        // Allow OSM
         $policy->addAllowedFrameDomain('www.openstreetmap.org');
+        $addImageDomain('https://*.tile.openstreetmap.org');
+        $addImageDomain('https://*.a.ssl.fastly.net');
 
         return $policy;
     }
@@ -132,6 +141,10 @@ class PageController extends Controller
 
         // Video configuration
         $initialState->provideInitialState('notranscode', $config->getSystemValue('memories.no_transcode', 'UNSET'));
+        $initialState->provideInitialState('video_default_quality', $config->getSystemValue('memories.video_default_quality', '0'));
+
+        // Geo configuration
+        $initialState->provideInitialState('places_gis', $config->getSystemValue('memories.gis_type', '-1'));
     }
 
     /**
@@ -219,7 +232,27 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
+    public function places()
+    {
+        return $this->main();
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     */
     public function tags()
+    {
+        return $this->main();
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     */
+    public function map()
     {
         return $this->main();
     }

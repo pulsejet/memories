@@ -19,7 +19,6 @@ export async function getPeopleData(
     id: number;
     count: number;
     name: string;
-    previews: IPhoto[];
   }[] = [];
   try {
     const res = await axios.get<typeof data>(API.FACE_LIST(app));
@@ -27,9 +26,6 @@ export async function getPeopleData(
   } catch (e) {
     throw e;
   }
-
-  // Add flag to previews
-  data.forEach((t) => t.previews?.forEach((preview) => (preview.flag = 0)));
 
   // Convert to days response
   return [

@@ -87,3 +87,18 @@ aside.app-sidebar {
     transform: scale(1.05);
   }
 }
+
+// Hide scrollbar
+.recycler::-webkit-scrollbar {
+  display: none;
+  width: 0 !important;
+}
+.recycler {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+// Make sure empty content is full width
+[role="note"].empty-content {
+  width: 100%;
+}

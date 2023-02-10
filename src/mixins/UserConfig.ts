@@ -21,8 +21,11 @@ export default defineComponent({
       "foldersPath",
       <string>"/"
     ) as string,
+
     config_showHidden:
       loadState("memories", "showHidden", <string>"false") === "true",
+    config_enableTopMemories:
+      loadState("memories", "enableTopMemories", <string>"false") === "true",
 
     config_tagsEnabled: Boolean(
       loadState("memories", "systemtags", <string>"")
@@ -36,8 +39,9 @@ export default defineComponent({
     config_facerecognitionEnabled: Boolean(
       loadState("memories", "facerecognitionEnabled", <string>"")
     ),
-    config_mapsEnabled: Boolean(loadState("memories", "maps", <string>"")),
     config_albumsEnabled: Boolean(loadState("memories", "albums", <string>"")),
+
+    config_placesGis: Number(loadState("memories", "places_gis", <string>"-1")),
 
     config_squareThumbs: localStorage.getItem("memories_squareThumbs") === "1",
     config_showFaceRect: localStorage.getItem("memories_showFaceRect") === "1",

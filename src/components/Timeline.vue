@@ -290,6 +290,8 @@ export default defineComponent({
           return this.t("memories", "On this day");
         case "tags":
           return this.t("memories", "Tags");
+        case "places":
+          return this.t("memories", "Places");
         default:
           return "";
       }
@@ -323,18 +325,21 @@ export default defineComponent({
 
   methods: {
     async routeChange(to: any, from?: any) {
-      if (
-        from?.path !== to.path ||
-        JSON.stringify(from.query) !== JSON.stringify(to.query)
-      ) {
+      // Always do a hard refresh if the path changes
+      if (from?.path !== to.path) {
         await this.refresh();
+      }
+
+      // Do a soft refresh if the query changes
+      else if (JSON.stringify(from.query) !== JSON.stringify(to.query)) {
+        await this.softRefresh();
       }
 
       // The viewer might change the route immediately again
       await this.$nextTick();
 
       // Check if hash has changed
-      const viewerIsOpen = (this.$refs.viewer as any).isOpen;
+      const viewerIsOpen = (this.$refs.viewer as any)?.isOpen;
       if (
         from?.hash !== to.hash &&
         to.hash?.startsWith("#v") &&
@@ -390,11 +395,11 @@ export default defineComponent({
     },
 
     isMobileLayout() {
-      return globalThis.windowInnerWidth <= 600;
+      return globalThis.windowInnerWidth <= 600 || this.$route.name === "map";
     },
 
     allowBreakout() {
-      return this.isMobileLayout() && !this.config_squareThumbs;
+      return globalThis.windowInnerWidth <= 600 && !this.config_squareThumbs;
     },
 
     /** Create new state */
@@ -442,6 +447,7 @@ export default defineComponent({
     /** Re-process days */
     async softRefresh() {
       this.selectionManager.clearSelection();
+      this.fetchDayQueue = []; // reset queue
       await this.fetchDays(true);
     },
 
@@ -647,6 +653,13 @@ export default defineComponent({
         query.set("archive", "1");
       }
 
+      // Albums
+      if (this.$route.name === "albums" && this.$route.params.name) {
+        const user = <string>this.$route.params.user;
+        const name = <string>this.$route.params.name;
+        query.set("album", `${user}/${name}`);
+      }
+
       // People
       if (
         this.routeIsPeople &&
@@ -664,16 +677,20 @@ export default defineComponent({
         }
       }
 
+      // Places
+      if (this.$route.name === "places" && this.$route.params.name) {
+        const name = <string>this.$route.params.name;
+        query.set("place", <string>name.split("-", 1)[0]);
+      }
+
       // Tags
       if (this.$route.name === "tags" && this.$route.params.name) {
         query.set("tag", <string>this.$route.params.name);
       }
 
-      // Albums
-      if (this.$route.name === "albums" && this.$route.params.name) {
-        const user = <string>this.$route.params.user;
-        const name = <string>this.$route.params.name;
-        query.set("album", `${user}/${name}`);
+      // Map Bounds
+      if (this.$route.name === "map" && this.$route.query.b) {
+        query.set("mapbounds", <string>this.$route.query.b);
       }
 
       // Month view
@@ -731,12 +748,14 @@ export default defineComponent({
         let data: IDay[] = [];
         if (this.$route.name === "thisday") {
           data = await dav.getOnThisDayData();
-        } else if (this.$route.name === "tags" && !this.$route.params.name) {
-          data = await dav.getTagsData();
-        } else if (this.routeIsPeople && !this.$route.params.name) {
-          data = await dav.getPeopleData(this.$route.name as any);
         } else if (this.$route.name === "albums" && !this.$route.params.name) {
           data = await dav.getAlbumsData("3");
+        } else if (this.routeIsPeople && !this.$route.params.name) {
+          data = await dav.getPeopleData(this.$route.name as any);
+        } else if (this.$route.name === "places" && !this.$route.params.name) {
+          data = await dav.getPlacesData();
+        } else if (this.$route.name === "tags" && !this.$route.params.name) {
+          data = await dav.getTagsData();
         } else {
           // Try the cache
           try {
@@ -922,7 +941,8 @@ export default defineComponent({
       if (this.fetchDayQueue.length === 0) return;
 
       // Construct URL
-      const url = this.getDayUrl(this.fetchDayQueue.join(","));
+      const dayStr = this.fetchDayQueue.join(",");
+      const url = this.getDayUrl(dayStr);
       this.fetchDayQueue = [];
 
       try {
@@ -930,7 +950,11 @@ export default defineComponent({
         const res = await axios.get<IPhoto[]>(url);
         if (res.status !== 200) throw res;
         const data = res.data;
-        if (this.state !== startState) return;
+
+        // Check if the state has changed
+        if (this.state !== startState || this.getDayUrl(dayStr) !== url) {
+          return;
+        }
 
         // Bin the data into separate days
         // It is already sorted in dayid DESC
@@ -954,7 +978,7 @@ export default defineComponent({
         for (const [dayId, photos] of dayMap) {
           // Check if the response has any delta
           const head = this.heads[dayId];
-          if (head.day.detail?.length) {
+          if (head?.day?.detail?.length) {
             if (
               head.day.detail.length === photos.length &&
               head.day.detail.every(
@@ -1297,6 +1321,7 @@ export default defineComponent({
   width: 100%;
   overflow: hidden;
   user-select: none;
+  position: relative;
 
   * {
     -webkit-tap-highlight-color: transparent;
@@ -1308,7 +1333,7 @@ export default defineComponent({
   will-change: scroll-position;
   contain: strict;
   height: 300px;
-  width: calc(100% + 20px);
+  width: 100%;
   transition: opacity 0.2s ease-in-out;
 
   :deep .vue-recycle-scroller__slot {
@@ -1326,6 +1351,7 @@ export default defineComponent({
   &.empty {
     opacity: 0;
     transition: none;
+    width: 0;
   }
 }
 

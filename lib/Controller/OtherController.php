@@ -25,7 +25,6 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
 use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\StreamResponse;
 
@@ -73,11 +72,7 @@ class OtherController extends ApiBase
             'Content-Type' => 'application/javascript',
             'Service-Worker-Allowed' => '/',
         ]);
-        $policy = new ContentSecurityPolicy();
-        $policy->addAllowedWorkerSrcDomain("'self'");
-        $policy->addAllowedScriptDomain("'self'");
-        $policy->addAllowedConnectDomain("'self'");
-        $response->setContentSecurityPolicy($policy);
+        $response->setContentSecurityPolicy(PageController::getCSP());
 
         return $response;
     }

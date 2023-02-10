@@ -14,6 +14,10 @@ const config_noTranscode = loadState(
   <string>"UNSET"
 ) as boolean | string;
 
+const config_video_default_quality = Number(
+  loadState("memories", "video_default_quality", <string>"0") as string
+);
+
 /**
  * Check if slide has video content
  *
@@ -271,26 +275,31 @@ class VideoContentSetup {
     let qualityNums: number[];
     if (qualityList && qualityList.length > 1) {
       const s = new Set<number>();
+      let hasMax = false;
       for (let i = 0; i < qualityList?.length; i++) {
         const { width, height, label } = qualityList[i];
         s.add(Math.min(width, height));
 
         if (label?.includes("max.m3u8")) {
-          s.add(999999999);
+          hasMax = true;
         }
       }
+
       qualityNums = Array.from(s).sort((a, b) => b - a);
       qualityNums.unshift(0);
-      qualityNums.unshift(-1);
+      if (hasMax) {
+        qualityNums.unshift(-1);
+      }
+      qualityNums.unshift(-2);
     }
 
     // Create the plyr instance
     const opts: Plyr.Options = {
       i18n: {
         qualityLabel: {
-          "-1": t("memories", "Direct"),
-          0: t("memories", "Auto"),
-          999999999: t("memories", "Original"),
+          "-2": t("memories", "Direct"),
+          "-1": t("memories", "Original"),
+          "0": t("memories", "Auto"),
         },
       },
       fullscreen: {
@@ -304,14 +313,14 @@ class VideoContentSetup {
 
     if (qualityNums) {
       opts.quality = {
-        default: 0,
+        default: config_video_default_quality,
         options: qualityNums,
         forced: true,
         onChange: (quality: number) => {
           qualityList = content.videojs?.qualityLevels();
           if (!qualityList || !content.videojs) return;
 
-          if (quality === -1) {
+          if (quality === -2) {
             // Direct playback
             // Prevent any useless transcodes
             for (let i = 0; i < qualityList.length; ++i) {
@@ -340,7 +349,7 @@ class VideoContentSetup {
             qualityList[i].enabled =
               !quality || // auto
               pixels === quality || // exact match
-              (label?.includes("max.m3u8") && quality === 999999999); // max
+              (label?.includes("max.m3u8") && quality === -1); // max
           }
         },
       };

@@ -33,6 +33,7 @@ use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IPreview;
+use OCP\ITempManager;
 use OCP\IUser;
 use OCP\IUserManager;
 use Symfony\Component\Console\Command\Command;
@@ -68,6 +69,7 @@ class Index extends Command
     protected IDBConnection $connection;
     protected Connection $connectionForSchema;
     protected TimelineWrite $timelineWrite;
+    protected ITempManager $tempManager;
 
     // Stats
     private int $nUser = 0;
@@ -85,7 +87,8 @@ class Index extends Command
         IPreview $preview,
         IConfig $config,
         IDBConnection $connection,
-        Connection $connectionForSchema
+        Connection $connectionForSchema,
+        ITempManager $tempManager
     ) {
         parent::__construct();
 
@@ -95,6 +98,7 @@ class Index extends Command
         $this->config = $config;
         $this->connection = $connection;
         $this->connectionForSchema = $connectionForSchema;
+        $this->tempManager = $tempManager;
         $this->timelineWrite = new TimelineWrite($connection);
     }
 
@@ -295,6 +299,11 @@ class Index extends Command
                 return;
             }
 
+            // skip IMDB name
+            if ('IMDB' === $folder->getName()) {
+                return;
+            }
+
             $nodes = $folder->getDirectoryListing();
 
             foreach ($nodes as $i => &$node) {
@@ -306,6 +315,7 @@ class Index extends Command
                     $progress = (float) (($progress_i / $progress_n) * 100);
                     $this->outputSection->overwrite(sprintf('%.2f%%', $progress).' scanning '.$node->getPath());
                     $this->parseFile($node, $opts);
+                    $this->tempManager->clean();
                 }
             }
         } catch (\Exception $e) {

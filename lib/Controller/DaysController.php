@@ -237,6 +237,19 @@ class DaysController extends ApiBase
             }
         }
 
+        // Filter only for one place
+        if ($this->placesIsEnabled()) {
+            if ($locationId = $this->request->getParam('place')) {
+                $transforms[] = [$this->timelineQuery, 'transformPlaceFilter', (int) $locationId];
+            }
+        }
+
+        // Filter geological bounds
+        $bounds = $this->request->getParam('mapbounds');
+        if ($bounds) {
+            $transforms[] = [$this->timelineQuery, 'transformMapBoundsFilter', $bounds];
+        }
+
         // Limit number of responses for day query
         $limit = $this->request->getParam('limit');
         if ($limit) {
