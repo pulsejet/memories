@@ -170,7 +170,7 @@ class TimelineWrite
             $lon = (float) $exif['GPSLongitude'];
 
             try {
-                $mapCluster = $this->getMapCluster($mapCluster, $lat, $lon);
+                $mapCluster = $this->mapGetCluster($mapCluster, $lat, $lon);
                 $mapCluster = $mapCluster <= 0 ? null : $mapCluster;
             } catch (\Error $e) {
                 $logger = \OC::$server->get(LoggerInterface::class);
@@ -252,7 +252,7 @@ class TimelineWrite
 
         // Delete from map cluster
         if ($record && ($cid = (int) $record['mapcluster']) > 0) {
-            $this->removeFromCluster($cid, (float) $record['lat'], (float) $record['lon']);
+            $this->mapRemoveFromCluster($cid, (float) $record['lat'], (float) $record['lon']);
         }
     }
 

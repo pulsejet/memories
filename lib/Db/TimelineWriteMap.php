@@ -13,7 +13,7 @@ trait TimelineWriteMap
 {
     protected IDBConnection $connection;
 
-    protected function getMapCluster(int $prevCluster, float $lat, float $lon): int
+    protected function mapGetCluster(int $prevCluster, float $lat, float $lon): int
     {
         // Get all possible clusters within CLUSTER_DEG radius
         $query = $this->connection->getQueryBuilder();
@@ -41,9 +41,9 @@ trait TimelineWriteMap
 
         // If no cluster found, create a new one
         if ($minId <= 0) {
-            $this->removeFromCluster($prevCluster, $lat, $lon);
+            $this->mapRemoveFromCluster($prevCluster, $lat, $lon);
 
-            return $this->createMapCluster($lat, $lon);
+            return $this->mapCreateCluster($lat, $lon);
         }
 
         // If the file was previously in the same cluster, return that
@@ -53,13 +53,13 @@ trait TimelineWriteMap
 
         // If the file was previously in a different cluster,
         // remove it from the first cluster and add it to the second
-        $this->removeFromCluster($prevCluster, $lat, $lon);
-        $this->addToCluster($minId, $lat, $lon);
+        $this->mapRemoveFromCluster($prevCluster, $lat, $lon);
+        $this->mapAddToCluster($minId, $lat, $lon);
 
         return $minId;
     }
 
-    protected function addToCluster(int $clusterId, float $lat, float $lon): void
+    protected function mapAddToCluster(int $clusterId, float $lat, float $lon): void
     {
         if ($clusterId <= 0) {
             return;
@@ -74,10 +74,10 @@ trait TimelineWriteMap
         ;
         $query->executeStatement();
 
-        $this->updateMapAggregates($clusterId);
+        $this->mapUpdateAggregates($clusterId);
     }
 
-    private function createMapCluster(float $lat, float $lon): int
+    private function mapCreateCluster(float $lat, float $lon): int
     {
         $query = $this->connection->getQueryBuilder();
         $query->insert('memories_mapclusters')
@@ -90,12 +90,12 @@ trait TimelineWriteMap
         $query->executeStatement();
 
         $clusterId = (int) $query->getLastInsertId();
-        $this->updateMapAggregates($clusterId);
+        $this->mapUpdateAggregates($clusterId);
 
         return $clusterId;
     }
 
-    private function removeFromCluster(int $clusterId, float $lat, float $lon): void
+    private function mapRemoveFromCluster(int $clusterId, float $lat, float $lon): void
     {
         if ($clusterId <= 0) {
             return;
@@ -110,10 +110,10 @@ trait TimelineWriteMap
         ;
         $query->executeStatement();
 
-        $this->updateMapAggregates($clusterId);
+        $this->mapUpdateAggregates($clusterId);
     }
 
-    private function updateMapAggregates(int $clusterId): void
+    private function mapUpdateAggregates(int $clusterId): void
     {
         if ($clusterId <= 0) {
             return;
