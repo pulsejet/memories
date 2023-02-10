@@ -53,6 +53,7 @@ import axios from "@nextcloud/axios";
 import * as utils from "../../services/Utils";
 
 import "leaflet/dist/leaflet.css";
+import "leaflet-edgebuffer";
 
 const OSM_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 const OSM_ATTRIBUTION =

@@ -37,6 +37,7 @@
     "filerobot-image-editor": "^4.3.7",
     "justified-layout": "^4.1.0",
     "leaflet": "^1.9.3",
+    "leaflet-edgebuffer": "^1.0.6",
     "moment": "^2.29.4",
     "path-posix": "^1.0.0",
     "photoswipe": "^5.3.4",
