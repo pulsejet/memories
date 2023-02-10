@@ -89,6 +89,7 @@ export default defineComponent({
     },
     clusters: [] as IMarkerCluster[],
     animMarkers: false,
+    isDark: false,
   }),
 
   mounted() {
@@ -99,15 +100,22 @@ export default defineComponent({
 
     // Initialize
     this.refresh();
+
+    // If currently dark mode, set isDark
+    const pane = document.querySelector(".leaflet-tile-pane");
+    this.isDark =
+      !pane || window.getComputedStyle(pane)?.["filter"]?.includes("invert");
   },
 
   computed: {
     tileurl() {
-      return this.zoom >= 5 ? OSM_TILE_URL : STAMEN_URL;
+      return this.zoom >= 5 || this.isDark ? OSM_TILE_URL : STAMEN_URL;
     },
 
     attribution() {
-      return this.zoom >= 5 ? OSM_ATTRIBUTION : STAMEN_ATTRIBUTION;
+      return this.zoom >= 5 || this.isDark
+        ? OSM_ATTRIBUTION
+        : STAMEN_ATTRIBUTION;
     },
   },
 
@@ -303,6 +311,21 @@ export default defineComponent({
   width: 100%;
   margin: 0;
   z-index: 0;
+  background-color: var(--color-background-dark);
+
+  :deep .leaflet-control-attribution {
+    background-color: var(--color-background-dark);
+    color: var(--color-text-light);
+  }
+
+  :deep .leaflet-bar a {
+    background-color: var(--color-main-background);
+    color: var(--color-main-text);
+
+    &.leaflet-disabled {
+      opacity: 0.6;
+    }
+  }
 }
 
 .preview {
