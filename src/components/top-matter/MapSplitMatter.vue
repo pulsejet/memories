@@ -100,7 +100,7 @@ export default defineComponent({
       // Set query parameters to route if required
       const s = (x: number) => x.toFixed(6);
       const bounds = `${s(minLat)},${s(maxLat)},${s(minLon)},${s(maxLon)}`;
-      this.zoom = map.mapObject.getZoom();
+      this.zoom = Math.round(map.mapObject.getZoom());
       const zoom = this.zoom.toString();
       if (this.$route.query.b === bounds && this.$route.query.z === zoom) {
         return;
@@ -128,7 +128,8 @@ export default defineComponent({
 
     zoomTo(center: [number, number]) {
       const map = this.$refs.map as LMap;
-      const zoom = map.mapObject.getZoom() + 2;
+      const factor = globalThis.innerWidth >= 768 ? 2 : 1;
+      const zoom = map.mapObject.getZoom() + factor;
       map.mapObject.setView(center, zoom, { animate: true });
     },
   },
@@ -183,7 +184,6 @@ export default defineComponent({
 
 <style lang="scss">
 .leaflet-marker-icon {
-  transition: transform 0.2s;
   animation: fade-in 0.2s;
 }
 
