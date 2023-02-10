@@ -1,7 +1,7 @@
 OC.L10N.register(
     "memories",
     {
-    "Memories" : "内存",
+    "Memories" : "记忆",
     "Settings" : "设置",
     "People" : "人物",
     "Timeline" : "时间线",
@@ -12,7 +12,6 @@ OC.L10N.register(
     "Archive" : "归档",
     "On this day" : "当年今日",
     "Tags" : "标签",
-    "Maps" : "地图",
     "Edit" : "编辑",
     "Cancel" : "取消",
     "Delete" : "删除",
@@ -21,6 +20,7 @@ OC.L10N.register(
     "Unarchive" : "取消归档",
     "View in folder" : "在文件夹中查看",
     "Add to album" : "添加至相册",
+    "General" : "常规",
     "Search for collaborators" : "搜索协作者",
     "Search people or groups" : "搜索用户或群组",
     "Add {collaboratorLabel} to the collaborators list" : "将 {collaboratorLabel} 加入协作者列表",

@@ -10,6 +10,7 @@ OC.L10N.register(
     "Delete" : "Pozmak",
     "Download" : "Göçürip almak",
     "Favorite" : "Halaýan",
+    "General" : "Esasy",
     "Back" : "Yzyna",
     "Save" : "Saklamak",
     "Name" : "Ady",

@@ -10,6 +10,7 @@ OC.L10N.register(
     "Delete" : "Obriši",
     "Download" : "Preuzmi",
     "Favorite" : "Omiljene",
+    "General" : "Opšte",
     "Back" : "Nazad",
     "Save" : "Sačuvaj",
     "Title" : "Naslov",

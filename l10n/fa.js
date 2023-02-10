@@ -9,7 +9,6 @@ OC.L10N.register(
     "Videos" : "فیلم ها ",
     "Archive" : "بایگانی",
     "Tags" : "برچسب ها",
-    "Maps" : "نقشه‌ها",
     "Edit" : "ویرایش",
     "Cancel" : "لغو",
     "Delete" : "حذف",

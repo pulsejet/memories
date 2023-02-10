@@ -12,7 +12,6 @@ OC.L10N.register(
     "Archive" : "Archiwum",
     "On this day" : "W tym dniu",
     "Tags" : "Etykiety",
-    "Maps" : "Mapy",
     "Edit" : "Edytuj",
     "Cancel" : "Anuluj",
     "Delete" : "Usuń",

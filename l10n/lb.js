@@ -4,7 +4,6 @@ OC.L10N.register(
     "Settings" : "Astellungen",
     "Favorites" : "Favoriten",
     "Tags" : "Tags",
-    "Maps" : "Kaarten",
     "Edit" : "Änneren",
     "Cancel" : "Ofbriechen",
     "Delete" : "Läschen",

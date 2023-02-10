@@ -4,7 +4,6 @@ OC.L10N.register(
     "Settings" : "ការកំណត់",
     "Favorites" : "Favorites",
     "Tags" : "ស្លាក",
-    "Maps" : "ផែនទី",
     "Edit" : "កែប្រែ",
     "Cancel" : "បោះបង់",
     "Delete" : "លុប",

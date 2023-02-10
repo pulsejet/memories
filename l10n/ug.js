@@ -9,6 +9,7 @@ OC.L10N.register(
     "Delete" : "ئۆچۈر",
     "Download" : "چۈشۈر",
     "Favorite" : "يىغقۇچ",
+    "General" : "ئادەتتىكى",
     "Save" : "ساقلا",
     "Month" : "ئاي",
     "Time" : "ۋاقىت",

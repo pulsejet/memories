@@ -9,7 +9,6 @@ OC.L10N.register(
     "Albums" : "Álbumes",
     "Archive" : "Archivar",
     "Tags" : "Etiquetas",
-    "Maps" : "Mapas",
     "Edit" : "Editar",
     "Cancel" : "Cancelar",
     "Delete" : "Eliminar",

@@ -7,7 +7,6 @@ OC.L10N.register(
     "Videos" : "Videod",
     "Archive" : "Arhiiv",
     "Tags" : "Sildid",
-    "Maps" : "Kaardid",
     "Edit" : "Redigeeri",
     "Cancel" : "Loobu",
     "Delete" : "Kustuta",
