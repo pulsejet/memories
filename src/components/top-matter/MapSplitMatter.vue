@@ -13,8 +13,9 @@
       :minZoom="2"
       @moveend="refresh"
       @zoomend="refresh"
+      :options="mapOptions"
     >
-      <LTileLayer :url="tileurl" :attribution="attribution" />
+      <LTileLayer :url="tileurl" :attribution="attribution" :noWrap="true" />
       <LMarker
         v-for="cluster in clusters"
         :key="cluster.id"
@@ -43,6 +44,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { LMap, LTileLayer, LMarker, LPopup, LIcon } from "vue2-leaflet";
+import { latLngBounds } from "leaflet";
 import { IPhoto } from "../../types";
 
 import { API } from "../../services/API";
@@ -81,6 +83,10 @@ export default defineComponent({
 
   data: () => ({
     zoom: 2,
+    mapOptions: {
+      maxBounds: latLngBounds([-90, -180], [90, 180]),
+      maxBoundsViscosity: 0.9,
+    },
     clusters: [] as IMarkerCluster[],
     animMarkers: false,
   }),
