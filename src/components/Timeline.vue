@@ -1011,6 +1011,8 @@ export default defineComponent({
       if (!data) return;
 
       const head = this.heads[dayId];
+      if (!head) return;
+
       const day = head.day;
       this.loadedDays.add(dayId);
       this.sizedDays.add(dayId);
