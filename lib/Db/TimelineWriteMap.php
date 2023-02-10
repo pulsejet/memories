@@ -29,13 +29,13 @@ trait TimelineWriteMap
         // Find cluster closest to the point
         $minDist = PHP_INT_MAX;
         $minId = -1;
-        foreach ($rows as $r) {
+        foreach ($rows as &$r) {
             $clusterLat = (float) $r['lat'];
             $clusterLon = (float) $r['lon'];
             $dist = ($lat - $clusterLat) ** 2 + ($lon - $clusterLon) ** 2;
             if ($dist < $minDist) {
                 $minDist = $dist;
-                $minId = $r['id'];
+                $minId = (int) $r['id'];
             }
         }
 

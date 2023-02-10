@@ -4,7 +4,6 @@ OC.L10N.register(
     "Settings" : "සැකසුම්",
     "Favorites" : "ප්‍රියතම",
     "Archive" : "සංරක්ෂණය",
-    "Maps" : "සිතියම්",
     "Edit" : "සංස්කරණය",
     "Cancel" : "අවලංගු කරන්න",
     "Download" : "බාගන්න",

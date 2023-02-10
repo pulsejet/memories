@@ -42,21 +42,15 @@ trait TimelineQueryMap
         $lat = $query->createFunction('AVG(c.lat) AS lat');
         $lon = $query->createFunction('AVG(c.lon) AS lon');
         $count = $query->createFunction('COUNT(m.fileid) AS count');
-        $update = $query->createFunction('MAX(c.last_update) as u');
 
-        $query->select($lat, $lon, $update, $count)
+        $query->select($lat, $lon, $count)
             ->from('memories_mapclusters', 'c')
         ;
 
-        if ($gridLen > 0.02) {
-            // Coarse grouping
-            $query->addSelect($query->createFunction('MAX(c.id) as id'));
-            $query->addGroupBy($query->createFunction("CAST(c.lat / {$gridLen} AS INT)"));
-            $query->addGroupBy($query->createFunction("CAST(c.lon / {$gridLen} AS INT)"));
-        } else {
-            // Fine grouping
-            $query->addSelect('c.id')->groupBy('c.id');
-        }
+        // Coarse grouping
+        $query->addSelect($query->createFunction('MAX(c.id) as id'));
+        $query->addGroupBy($query->createFunction("CAST(c.lat / {$gridLen} AS INT)"));
+        $query->addGroupBy($query->createFunction("CAST(c.lon / {$gridLen} AS INT)"));
 
         // JOIN with memories for files from the current user
         $query->innerJoin('c', 'memories', 'm', $query->expr()->eq('c.id', 'm.mapcluster'));
@@ -81,7 +75,6 @@ trait TimelineQueryMap
                     (float) $cluster['lon'],
                 ],
                 'count' => (float) $cluster['count'],
-                'u' => (int) $cluster['u'],
             ];
             if (\array_key_exists('id', $cluster)) {
                 $c['id'] = (int) $cluster['id'];

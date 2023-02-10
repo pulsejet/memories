@@ -11,7 +11,6 @@ OC.L10N.register(
     "Archive" : "Arxiu",
     "On this day" : "Aquest mateix dia",
     "Tags" : "Etiquetes",
-    "Maps" : "Mapes",
     "Edit" : "Edita",
     "Cancel" : "Cancel·la",
     "Delete" : "Suprimeix",

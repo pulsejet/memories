@@ -7,7 +7,6 @@ OC.L10N.register(
     "Videos" : "ვიდეოები",
     "Archive" : "არქივი",
     "Tags" : "ტეგები",
-    "Maps" : "რუკები",
     "Edit" : "შეცვლა",
     "Cancel" : "უარყოფა",
     "Delete" : "წაშლა",

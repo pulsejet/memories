@@ -10,7 +10,6 @@ OC.L10N.register(
     "Archive" : "לארכיון",
     "On this day" : "בתאריך זה",
     "Tags" : "תגיות",
-    "Maps" : "מפות",
     "Edit" : "עריכה",
     "Cancel" : "ביטול",
     "Delete" : "מחיקה",

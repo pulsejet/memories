@@ -4,7 +4,6 @@ OC.L10N.register(
     "Settings" : "সেটিংস",
     "Favorites" : "প্রিয়জন",
     "Tags" : "ট্যাগ",
-    "Maps" : "মানচিত্র",
     "Edit" : "সম্পাদনা",
     "Cancel" : "বাতির",
     "Delete" : "মুছে",

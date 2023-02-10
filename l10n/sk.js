@@ -12,7 +12,6 @@ OC.L10N.register(
     "Archive" : "Archív",
     "On this day" : "V tento deň",
     "Tags" : "Štítky",
-    "Maps" : "Mapy",
     "Edit" : "Upraviť",
     "Cancel" : "Zrušiť",
     "Delete" : "Vymazať",

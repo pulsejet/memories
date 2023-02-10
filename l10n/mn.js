@@ -7,7 +7,6 @@ OC.L10N.register(
     "Videos" : "Бичлэгүүд",
     "Archive" : "архив",
     "Tags" : "Tag-үүд",
-    "Maps" : "Газрын зураг",
     "Edit" : "засварлах",
     "Cancel" : "болиулах",
     "Delete" : "Устгах",
