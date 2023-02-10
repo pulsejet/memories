@@ -7,7 +7,6 @@ OC.L10N.register(
     "Videos" : "Video's ",
     "Archive" : "Argief",
     "Tags" : "Etikette",
-    "Maps" : "Kaarte",
     "Edit" : "Wysig",
     "Cancel" : "Kanselleer",
     "Delete" : "Skrap",

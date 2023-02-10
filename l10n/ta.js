@@ -9,6 +9,7 @@ OC.L10N.register(
     "Delete" : "நீக்குக",
     "Download" : "பதிவிறக்குக",
     "Favorite" : "விருப்பமான",
+    "General" : "பொதுவான",
     "Back" : "பின்னுக்கு",
     "Save" : "சேமிக்க ",
     "Month" : "மாதம்",

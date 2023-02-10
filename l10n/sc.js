@@ -10,7 +10,6 @@ OC.L10N.register(
     "Albums" : "Album",
     "Archive" : "Cartella",
     "Tags" : "Etichetas",
-    "Maps" : "Mapas",
     "Edit" : "Modìfica",
     "Cancel" : "Annulla",
     "Delete" : "Cantzella",

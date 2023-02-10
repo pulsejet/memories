@@ -8,7 +8,6 @@ OC.L10N.register(
     "Videos" : "فيديوهات",
     "Archive" : "الأرشيف",
     "Tags" : "الوسوم",
-    "Maps" : "الخرائط",
     "Edit" : "تعديل",
     "Cancel" : "إلغاء",
     "Delete" : "إزالة",

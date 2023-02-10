@@ -8,7 +8,6 @@ OC.L10N.register(
     "Videos" : "Videaĵoj",
     "Archive" : "Arĥivujo",
     "Tags" : "Etikedoj",
-    "Maps" : "Mapoj",
     "Edit" : "Modifi",
     "Cancel" : "Nuligi",
     "Delete" : "Forigi",

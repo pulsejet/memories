@@ -10,7 +10,6 @@ OC.L10N.register(
     "Archive" : "Arkiv",
     "On this day" : "På denne dagen",
     "Tags" : "Merkelapper",
-    "Maps" : "Kart",
     "Edit" : "Rediger",
     "Cancel" : "Avbryt",
     "Delete" : "Slett",

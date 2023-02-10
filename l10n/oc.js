@@ -8,7 +8,6 @@ OC.L10N.register(
     "Albums" : "Albums",
     "Archive" : "Archiu",
     "Tags" : "Etiquetas",
-    "Maps" : "Mapas",
     "Edit" : "Modificar",
     "Cancel" : "Anullar",
     "Delete" : "Suprimir",
