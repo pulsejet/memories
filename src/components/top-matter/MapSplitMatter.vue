@@ -21,7 +21,13 @@
             <div class="count" v-if="cluster.count > 1">
               {{ cluster.count }}
             </div>
-            <img :src="clusterPreviewUrl(cluster)" />
+            <img
+              :src="clusterPreviewUrl(cluster)"
+              :class="[
+                'thumb-important',
+                `memories-thumb-${cluster.preview.fileid}`,
+              ]"
+            />
           </div>
         </LIcon>
       </LMarker>
@@ -132,7 +138,7 @@ export default defineComponent({
 
     zoomTo(cluster: IMarkerCluster) {
       // At high zoom levels, open the photo
-      if (this.zoom >= 14 && cluster.preview) {
+      if (this.zoom >= 12 && cluster.preview) {
         cluster.preview.key = cluster.preview.fileid.toString();
         this.$router.push(utils.getViewerRoute(cluster.preview));
         return;
