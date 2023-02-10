@@ -1,7 +1,7 @@
 OC.L10N.register(
     "memories",
     {
-    "Memories" : "内存",
+    "Memories" : "记忆",
     "Settings" : "设置",
     "People" : "人物",
     "Timeline" : "时间线",
