@@ -39,18 +39,19 @@ trait TimelineQueryMap
         $query = $this->connection->getQueryBuilder();
 
         // Get the average location of each cluster
+        $id = $query->createFunction('MAX(c.id) as id');
+        $ct = $query->createFunction('COUNT(m.fileid) AS count');
         $lat = $query->createFunction('AVG(c.lat) AS lat');
         $lon = $query->createFunction('AVG(c.lon) AS lon');
-        $count = $query->createFunction('COUNT(m.fileid) AS count');
 
-        $query->select($lat, $lon, $count)
+        $query->select($id, $ct, $lat, $lon)
             ->from('memories_mapclusters', 'c')
         ;
 
         // Coarse grouping
-        $query->addSelect($query->createFunction('MAX(c.id) as id'));
-        $query->addGroupBy($query->createFunction("CAST(c.lat / {$gridLen} AS INT)"));
-        $query->addGroupBy($query->createFunction("CAST(c.lon / {$gridLen} AS INT)"));
+        $gridParam = $query->createNamedParameter($gridLen, IQueryBuilder::PARAM_STR);
+        $query->addGroupBy($query->createFunction("FLOOR(c.lat / {$gridParam})"));
+        $query->addGroupBy($query->createFunction("FLOOR(c.lon / {$gridParam})"));
 
         // JOIN with memories for files from the current user
         $query->innerJoin('c', 'memories', 'm', $query->expr()->eq('c.id', 'm.mapcluster'));
