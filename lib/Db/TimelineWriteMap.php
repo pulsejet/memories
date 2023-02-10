@@ -13,6 +13,16 @@ trait TimelineWriteMap
 {
     protected IDBConnection $connection;
 
+    /**
+     * Get the cluster ID for a given point.
+     * If the cluster ID changes, update the old cluster and the new cluster.
+     *
+     * @param int   $prevCluster The current cluster ID of the point
+     * @param float $lat         The latitude of the point
+     * @param float $lon         The longitude of the point
+     *
+     * @return int The new cluster ID
+     */
     protected function mapGetCluster(int $prevCluster, float $lat, float $lon): int
     {
         // Get all possible clusters within CLUSTER_DEG radius
@@ -59,6 +69,13 @@ trait TimelineWriteMap
         return $minId;
     }
 
+    /**
+     * Add a point to a cluster.
+     *
+     * @param int   $clusterId The ID of the cluster
+     * @param float $lat       The latitude of the point
+     * @param float $lon       The longitude of the point
+     */
     protected function mapAddToCluster(int $clusterId, float $lat, float $lon): void
     {
         if ($clusterId <= 0) {
@@ -77,6 +94,14 @@ trait TimelineWriteMap
         $this->mapUpdateAggregates($clusterId);
     }
 
+    /**
+     * Create a new cluster.
+     *
+     * @param float $lat The latitude of the point
+     * @param float $lon The longitude of the point
+     *
+     * @return int The ID of the new cluster
+     */
     private function mapCreateCluster(float $lat, float $lon): int
     {
         $query = $this->connection->getQueryBuilder();
@@ -95,6 +120,13 @@ trait TimelineWriteMap
         return $clusterId;
     }
 
+    /**
+     * Remove a point from a cluster.
+     *
+     * @param int   $clusterId The ID of the cluster
+     * @param float $lat       The latitude of the point
+     * @param float $lon       The longitude of the point
+     */
     private function mapRemoveFromCluster(int $clusterId, float $lat, float $lon): void
     {
         if ($clusterId <= 0) {
@@ -113,6 +145,11 @@ trait TimelineWriteMap
         $this->mapUpdateAggregates($clusterId);
     }
 
+    /**
+     * Update the aggregate values of a cluster.
+     *
+     * @param int $clusterId The ID of the cluster
+     */
     private function mapUpdateAggregates(int $clusterId): void
     {
         if ($clusterId <= 0) {

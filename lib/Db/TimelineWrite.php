@@ -171,7 +171,6 @@ class TimelineWrite
 
             try {
                 $mapCluster = $this->mapGetCluster($mapCluster, $lat, $lon);
-                $mapCluster = $mapCluster <= 0 ? null : $mapCluster;
             } catch (\Error $e) {
                 $logger = \OC::$server->get(LoggerInterface::class);
                 $logger->log(3, 'Error updating map cluster data: '.$e->getMessage(), ['app' => 'memories']);
@@ -184,6 +183,9 @@ class TimelineWrite
                 $logger->log(3, 'Error updating places data: '.$e->getMessage(), ['app' => 'memories']);
             }
         }
+
+        // NULL if invalid
+        $mapCluster = $mapCluster <= 0 ? null : $mapCluster;
 
         // Parameters for insert or update
         $params = [
