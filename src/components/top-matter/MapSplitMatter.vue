@@ -1,5 +1,10 @@
 <template>
-  <div class="map-matter">
+  <div
+    :class="{
+      'map-matter': true,
+      'anim-markers': animMarkers,
+    }"
+  >
     <LMap
       class="map"
       ref="map"
@@ -73,6 +78,7 @@ export default defineComponent({
   data: () => ({
     zoom: 2,
     clusters: [] as IMarkerCluster[],
+    animMarkers: false,
   }),
 
   mounted() {
@@ -109,22 +115,32 @@ export default defineComponent({
       // Set query parameters to route if required
       const s = (x: number) => x.toFixed(6);
       const bounds = `${s(minLat)},${s(maxLat)},${s(minLon)},${s(maxLon)}`;
+
+      // Zoom level
+      const oldZoom = this.zoom;
       this.zoom = Math.round(map.mapObject.getZoom());
-      const zoom = this.zoom.toString();
-      if (this.$route.query.b === bounds && this.$route.query.z === zoom) {
+      const zoomStr = this.zoom.toString();
+
+      // Check if we already have the data
+      if (this.$route.query.b === bounds && this.$route.query.z === zoomStr) {
         return;
       }
-      this.$router.replace({ query: { b: bounds, z: zoom } });
+      this.$router.replace({ query: { b: bounds, z: zoomStr } });
 
       // Show clusters correctly while draging the map
       const query = new URLSearchParams();
       query.set("bounds", bounds);
-      query.set("zoom", zoom);
+      query.set("zoom", zoomStr);
 
       // Make API call
       const url = API.Q(API.MAP_CLUSTERS(), query);
       const res = await axios.get(url);
       this.clusters = res.data;
+
+      // Animate markers if zoom level changed
+      if (oldZoom !== this.zoom) {
+        this.animateMarkers();
+      }
     },
 
     clusterPreviewUrl(cluster: IMarkerCluster) {
@@ -144,6 +160,12 @@ export default defineComponent({
       const factor = globalThis.innerWidth >= 768 ? 2 : 1;
       const zoom = map.mapObject.getZoom() + factor;
       map.mapObject.setView(cluster.center, zoom, { animate: true });
+    },
+
+    async animateMarkers() {
+      this.animMarkers = true;
+      await new Promise((r) => setTimeout(r, 200)); // wait for animation
+      this.animMarkers = false;
     },
   },
 });
@@ -198,6 +220,10 @@ export default defineComponent({
 <style lang="scss">
 .leaflet-marker-icon {
   animation: fade-in 0.2s;
+
+  .anim-markers & {
+    transition: transform 0.2s ease;
+  }
 }
 
 // Show leaflet marker on top on hover
