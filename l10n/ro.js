@@ -7,7 +7,6 @@ OC.L10N.register(
     "Videos" : "Fișiere video",
     "Archive" : "Arhivă",
     "Tags" : "Etichete",
-    "Maps" : "Hărți",
     "Edit" : "Editează",
     "Cancel" : "Anulare",
     "Delete" : "Șterge",

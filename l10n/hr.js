@@ -9,7 +9,6 @@ OC.L10N.register(
     "Videos" : "Videozapisi",
     "Archive" : "Arhiva",
     "Tags" : "Oznake",
-    "Maps" : "Karte",
     "Edit" : "Uredi",
     "Cancel" : "Odustani",
     "Delete" : "Izbriši",

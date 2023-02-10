@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Settings" : "ಆಯ್ಕೆ",
     "Favorites" : "ಅಚ್ಚುಮೆಚ್ಚಿನ",
-    "Maps" : "ನಕಾಶೆ",
     "Edit" : "ಸಂಪಾದಿಸು",
     "Cancel" : "﻿ರದ್ದು",
     "Delete" : "﻿ಅಳಿಸಿ",

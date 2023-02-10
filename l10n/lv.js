@@ -9,7 +9,6 @@ OC.L10N.register(
     "Albums" : "Albumi",
     "Archive" : "Arhīvi",
     "Tags" : "Birkas",
-    "Maps" : "Karte",
     "Edit" : "Rediģēt",
     "Cancel" : "Atcelt",
     "Delete" : "Dzēst",

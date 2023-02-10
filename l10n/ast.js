@@ -7,7 +7,6 @@ OC.L10N.register(
     "Videos" : "Vídeos",
     "Archive" : "Archivu",
     "Tags" : "Etiquetes",
-    "Maps" : "Mapes",
     "Edit" : "Editar",
     "Cancel" : "Encaboxar",
     "Delete" : "Desaniciar",

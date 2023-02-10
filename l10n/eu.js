@@ -15,7 +15,6 @@ OC.L10N.register(
     "On this day" : "Egun honetan",
     "Places" : "Lekuak",
     "Tags" : "Etiketak",
-    "Maps" : "Mapak",
     "Choose again" : "Aukeratu berriro",
     "Click here to start" : "Egin klik hemen hasteko",
     "Edit" : "Aldatu",
