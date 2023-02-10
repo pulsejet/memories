@@ -70,12 +70,11 @@ trait TimelineWriteMap
             ->set('point_count', $query->createFunction('point_count + 1'))
             ->set('lat_sum', $query->createFunction("lat_sum + {$lat}"))
             ->set('lon_sum', $query->createFunction("lon_sum + {$lon}"))
-            ->set('lat', $query->createFunction('lat_sum / point_count'))
-            ->set('lon', $query->createFunction('lon_sum / point_count'))
-            ->set('last_update', $query->createNamedParameter(time(), IQueryBuilder::PARAM_INT))
             ->where($query->expr()->eq('id', $query->createNamedParameter($clusterId, IQueryBuilder::PARAM_INT)))
         ;
         $query->executeStatement();
+
+        $this->updateMapAggregates($clusterId);
     }
 
     private function createMapCluster(float $lat, float $lon): int
@@ -86,14 +85,14 @@ trait TimelineWriteMap
                 'point_count' => $query->createNamedParameter(1, IQueryBuilder::PARAM_INT),
                 'lat_sum' => $query->createNamedParameter($lat, IQueryBuilder::PARAM_STR),
                 'lon_sum' => $query->createNamedParameter($lon, IQueryBuilder::PARAM_STR),
-                'lat' => $query->createNamedParameter($lat, IQueryBuilder::PARAM_STR),
-                'lon' => $query->createNamedParameter($lon, IQueryBuilder::PARAM_STR),
-                'last_update' => $query->createNamedParameter(time(), IQueryBuilder::PARAM_INT),
             ])
         ;
         $query->executeStatement();
 
-        return (int) $query->getLastInsertId();
+        $clusterId = (int) $query->getLastInsertId();
+        $this->updateMapAggregates($clusterId);
+
+        return $clusterId;
     }
 
     private function removeFromCluster(int $clusterId, float $lat, float $lon): void
@@ -107,6 +106,21 @@ trait TimelineWriteMap
             ->set('point_count', $query->createFunction('point_count - 1'))
             ->set('lat_sum', $query->createFunction("lat_sum - {$lat}"))
             ->set('lon_sum', $query->createFunction("lon_sum - {$lon}"))
+            ->where($query->expr()->eq('id', $query->createNamedParameter($clusterId, IQueryBuilder::PARAM_INT)))
+        ;
+        $query->executeStatement();
+
+        $this->updateMapAggregates($clusterId);
+    }
+
+    private function updateMapAggregates(int $clusterId): void
+    {
+        if ($clusterId <= 0) {
+            return;
+        }
+
+        $query = $this->connection->getQueryBuilder();
+        $query->update('memories_mapclusters')
             ->set('lat', $query->createFunction('lat_sum / point_count'))
             ->set('lon', $query->createFunction('lon_sum / point_count'))
             ->set('last_update', $query->createNamedParameter(time(), IQueryBuilder::PARAM_INT))
