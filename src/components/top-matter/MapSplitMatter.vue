@@ -117,29 +117,44 @@ export default defineComponent({
 
       // Get boundaries of the map
       const boundary = map.mapObject.getBounds();
-      const minLat = boundary.getSouth();
-      const maxLat = boundary.getNorth();
-      const minLon = boundary.getWest();
-      const maxLon = boundary.getEast();
+      let minLat = boundary.getSouth();
+      let maxLat = boundary.getNorth();
+      let minLon = boundary.getWest();
+      let maxLon = boundary.getEast();
 
       // Set query parameters to route if required
       const s = (x: number) => x.toFixed(6);
-      const bounds = `${s(minLat)},${s(maxLat)},${s(minLon)},${s(maxLon)}`;
+      const bounds = () =>
+        `${s(minLat)},${s(maxLat)},${s(minLon)},${s(maxLon)}`;
 
       // Zoom level
       const oldZoom = this.zoom;
-      this.zoom = Math.round(map.mapObject.getZoom());
-      const zoomStr = this.zoom.toString();
+      const newZoom = Math.round(map.mapObject.getZoom());
+      const zoomStr = newZoom.toString();
+      this.zoom = newZoom;
 
       // Check if we already have the data
-      if (this.$route.query.b === bounds && this.$route.query.z === zoomStr) {
+      if (this.$route.query.b === bounds() && this.$route.query.z === zoomStr) {
         return;
       }
-      this.$router.replace({ query: { b: bounds, z: zoomStr } });
+      this.$router.replace({
+        query: {
+          b: bounds(),
+          z: zoomStr,
+        },
+      });
+
+      // Extend bounds by 25% beyond the map
+      const latDiff = Math.abs(maxLat - minLat);
+      const lonDiff = Math.abs(maxLon - minLon);
+      minLat -= latDiff * 0.25;
+      maxLat += latDiff * 0.25;
+      minLon -= lonDiff * 0.25;
+      maxLon += lonDiff * 0.25;
 
       // Show clusters correctly while draging the map
       const query = new URLSearchParams();
-      query.set("bounds", bounds);
+      query.set("bounds", bounds());
       query.set("zoom", zoomStr);
 
       // Make API call
