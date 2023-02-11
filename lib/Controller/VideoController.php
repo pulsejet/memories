@@ -115,8 +115,9 @@ class VideoController extends ApiBase
 
         // Response data
         $name = '';
-        $blob = null;
         $mime = '';
+        $blob = null;
+        $liveVideoPath = null;
 
         // Video is inside the file
         $path = null;
@@ -172,21 +173,31 @@ class VideoController extends ApiBase
                 $name = $liveFile->getName();
                 $blob = $liveFile->getContent();
                 $mime = $liveFile->getMimeType();
-
-                if ($transcode && !$this->config->getSystemValue('memories.no_transcode', true)) {
-                    // Only Apple uses HEVC for now, so pass this to the transcoder
-                    // If this is H.264 it won't get transcoded anyway
-                    $liveVideoPath = $liveFile->getStorage()->getLocalFile($liveFile->getInternalPath());
-                    if ($this->getUpstream($transcode, $liveVideoPath, 'max.mov')) {
-                        exit;
-                    }
-                }
+                $liveVideoPath = $liveFile->getStorage()->getLocalFile($liveFile->getInternalPath());
             }
         }
 
         // Data not found
         if (!$blob) {
             return new JSONResponse(['message' => 'Live file not found'], Http::STATUS_NOT_FOUND);
+        }
+
+        // Transcode video if allowed
+        if ($transcode && !$this->config->getSystemValue('memories.no_transcode', true)) {
+            // If video path not given, write to temp file
+            if (!$liveVideoPath) {
+                $liveVideoPath = tempnam(sys_get_temp_dir(), 'livevideo');
+                file_put_contents($liveVideoPath, $blob);
+
+                register_shutdown_function(function () use ($liveVideoPath) {
+                    unlink($liveVideoPath);
+                });
+            }
+
+            // If this is H.264 it won't get transcoded anyway
+            if ($this->getUpstream($transcode, $liveVideoPath, 'max.mov')) {
+                exit;
+            }
         }
 
         // Make and send response
