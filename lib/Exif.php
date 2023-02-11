@@ -180,17 +180,25 @@ class Exif
      */
     public static function getDateTaken(File &$file, array &$exif)
     {
-        // Try to parse the date from exif metadata
         $dt = $exif['DateTimeOriginal'] ?? null;
+        if (!isset($dt) || empty($dt)) {
+            $dt = $exif['CreateDate'] ?? null;
+        }
 
+        // Check if found something
         try {
             return self::parseExifDate($dt);
         } catch (\Exception $ex) {
         } catch (\ValueError $ex) {
         }
 
+        // Fall back to creation time
+        $dateTaken = $file->getCreationTime();
+
         // Fall back to modification time
-        $dateTaken = $file->getMtime();
+        if (0 === $dateTaken) {
+            $dateTaken = $file->getMtime();
+        }
 
         return self::forgetTimezone($dateTaken);
     }
