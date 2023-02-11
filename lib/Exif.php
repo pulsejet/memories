@@ -142,6 +142,8 @@ class Exif
         $dt = $date;
         if (isset($dt) && \is_string($dt) && !empty($dt)) {
             $dt = explode('-', explode('+', $dt, 2)[0], 2)[0]; // get rid of timezone if present
+            $dt = explode('.', $dt, 2)[0]; // timezone may be after a dot (https://github.com/pulsejet/memories/pull/397)
+
             $dt = \DateTime::createFromFormat('Y:m:d H:i:s', $dt);
             if (!$dt) {
                 throw new \Exception("Invalid date: {$date}");
@@ -180,6 +182,7 @@ class Exif
      */
     public static function getDateTaken(File &$file, array &$exif)
     {
+        // Try to parse the date from exif metadata
         $dt = $exif['DateTimeOriginal'] ?? null;
         if (!isset($dt) || empty($dt)) {
             $dt = $exif['CreateDate'] ?? null;
@@ -192,13 +195,8 @@ class Exif
         } catch (\ValueError $ex) {
         }
 
-        // Fall back to creation time
-        $dateTaken = $file->getCreationTime();
-
         // Fall back to modification time
-        if (0 === $dateTaken) {
-            $dateTaken = $file->getMtime();
-        }
+        $dateTaken = $file->getMtime();
 
         return self::forgetTimezone($dateTaken);
     }
