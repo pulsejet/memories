@@ -10,6 +10,7 @@ OC.L10N.register(
     "Delete" : "Kkes",
     "Download" : "Sider",
     "Favorite" : "Menyif",
+    "General" : "Amatu",
     "Back" : "Retour",
     "Save" : "Sekles",
     "Hour" : "Asrag",

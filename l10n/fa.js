@@ -15,6 +15,7 @@ OC.L10N.register(
     "Download" : "بارگیری",
     "Favorite" : "مورد‌ ‌علاقه‌",
     "View in folder" : "مشاهده در پوشه",
+    "General" : "عمومی",
     "Copy public link" : "پیوند عمومی را کپی کنید",
     "Public link" : "پیوند عمومی",
     "Back" : "بازگشت",

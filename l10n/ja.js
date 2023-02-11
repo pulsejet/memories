@@ -17,6 +17,7 @@ OC.L10N.register(
     "Favorite" : "お気に入り",
     "Unarchive" : "アーカイブを解除",
     "View in folder" : "フォルダー内で表示",
+    "General" : "一般",
     "Copy public link" : "公開リンクをコピー",
     "Public link" : "公開リンク",
     "Create new album" : "新しいアルバムを作成",

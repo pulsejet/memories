@@ -13,6 +13,7 @@ OC.L10N.register(
     "Download" : "Laai af",
     "Favorite" : "Gunsteling",
     "View in folder" : "Vertoon in gids",
+    "General" : "Algemeen",
     "Public link" : "Openbare skakel",
     "Back" : "Terug",
     "Save" : "Bewaar",

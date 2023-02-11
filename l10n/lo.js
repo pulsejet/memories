@@ -11,6 +11,7 @@ OC.L10N.register(
     "Download" : "ດາວໂຫລດ",
     "Favorite" : "ລາຍການທີ່ມັກ",
     "View in folder" : "ເບິ່ງໃນໂຟນເດີ",
+    "General" : "ທົ່ວໄປ",
     "Back" : "ຫຼັງ",
     "Save" : "ບັນທຶກ",
     "Name" : "ຊື່",

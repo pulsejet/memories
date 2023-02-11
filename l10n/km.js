@@ -8,6 +8,7 @@ OC.L10N.register(
     "Cancel" : "បោះបង់",
     "Delete" : "លុប",
     "Download" : "ទាញយក",
+    "General" : "ទូទៅ",
     "Back" : "ត្រឡប់ក្រោយ",
     "Save" : "រក្សាទុក",
     "Year" : "ឆ្នាំ",

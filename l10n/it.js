@@ -18,6 +18,7 @@ OC.L10N.register(
     "Favorite" : "Preferito",
     "Unarchive" : "Togli dall'archivio",
     "View in folder" : "Visualizza nella cartella",
+    "General" : "Generale",
     "Search for collaborators" : "Cerca collaboratori",
     "Search people or groups" : "Cerca persone o gruppi",
     "No collaborators available" : "Nessun collaboratore disponibile",

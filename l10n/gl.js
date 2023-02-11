@@ -16,6 +16,7 @@ OC.L10N.register(
     "Favorite" : "Favorito",
     "Unarchive" : "Desarquivar",
     "View in folder" : "Ver no cartafol",
+    "General" : "Xeral",
     "Copy public link" : "Copiar a ligazón pública",
     "Public link" : "Ligazón pública",
     "Back" : "Atrás",

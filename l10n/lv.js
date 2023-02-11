@@ -15,6 +15,7 @@ OC.L10N.register(
     "Download" : "Lejupielādēt",
     "Favorite" : "Favorīts",
     "View in folder" : "Skatīt mapē",
+    "General" : "Vispārīgs",
     "Copy the public link" : "Kopējiet publisko saiti",
     "Delete the public link" : "Dzēst publisko saiti",
     "Public link copied!" : "Publiskā saite nokopēta!",

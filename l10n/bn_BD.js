@@ -9,6 +9,7 @@ OC.L10N.register(
     "Delete" : "মুছে",
     "Download" : "ডাউনলোড",
     "Favorite" : "প্রিয়জন",
+    "General" : "সাধারণ",
     "Back" : "পেছনে যাও",
     "Save" : "সংরক্ষণ",
     "Month" : "মাস",
