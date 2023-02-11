@@ -10,6 +10,7 @@ OC.L10N.register(
     "Download" : "Eroflueden",
     "Favorite" : "Favorit",
     "View in folder" : "Kuk am Dossier ",
+    "General" : "Allgemeng",
     "Back" : "Zeréck",
     "Save" : "Späicheren",
     "Month" : "Mount",

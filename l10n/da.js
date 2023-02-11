@@ -21,6 +21,7 @@ OC.L10N.register(
     "View in folder" : "Vis i mappe",
     "You are about to download a large number of files. Are you sure?" : "Du er ved at downloade et stort antal filer. Er du sikker?",
     "You are about to delete a large number of files. Are you sure?" : "Du er ved at slette et stort antal filer. Er du sikker?",
+    "General" : "Generelt",
     "Timeline Path" : "Tidslinjesti",
     "Show hidden folders" : "Vis skjulte mapper",
     "Failed to load some photos" : "Kunne ikke indlæse nogle billeder",

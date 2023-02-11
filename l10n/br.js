@@ -11,6 +11,7 @@ OC.L10N.register(
     "Download" : "Pellgargañ",
     "Favorite" : "Pennrollañ",
     "View in folder" : "Diskwel en teuliad",
+    "General" : "Hollek",
     "Copy public link" : "Eilañ al liamm foran",
     "Public link" : "Liamm publik",
     "Back" : "Distro",

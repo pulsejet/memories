@@ -18,6 +18,7 @@ OC.L10N.register(
     "Favorite" : "Омилен",
     "View in folder" : "Погледни во папката",
     "Add to album" : "Додади во албум",
+    "General" : "Општо",
     "Copy public link" : "Копирај јавен линк",
     "Public link" : "Јавен линк",
     "New album" : "Нов албум",

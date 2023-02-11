@@ -11,6 +11,7 @@ OC.L10N.register(
     "Delete" : "Dileu",
     "Download" : "Llwytho i lawr",
     "Favorite" : "Ffefryn",
+    "General" : "Cyffredinol",
     "Copy public link" : "Copïo dolen gyhoeddus",
     "Back" : "Nôl",
     "Save" : "Cadw",

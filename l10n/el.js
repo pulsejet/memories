@@ -19,6 +19,7 @@ OC.L10N.register(
     "Unarchive" : "Αναίρεση αρχειοθέτησης",
     "View in folder" : "Προβολή στον φάκελο",
     "Add to album" : "Προσθήκη στο άλμπουμ",
+    "General" : "Γενικά",
     "No collaborators available" : "Δεν υπάρχουν διαθέσιμοι συνεργάτες",
     "Copy public link" : "Αντιγραφή δημόσιου συνδέσμου",
     "Public link" : "Δημόσιος σύνδεσμος",

@@ -17,6 +17,7 @@ OC.L10N.register(
     "Favorite" : "סימון כמועדף",
     "Unarchive" : "הוצאה מהארכיון",
     "View in folder" : "הצג בתיקייה",
+    "General" : "כללי",
     "Add {collaboratorLabel} to the collaborators list" : "הוסף {collaboratorLabel} לרשימת השותפים",
     "Copy public link" : "העתקת הקישור הציבורי",
     "Public link" : "קישור ציבורי",

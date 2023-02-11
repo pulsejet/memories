@@ -13,6 +13,7 @@ OC.L10N.register(
     "Download" : "Lae alla",
     "Favorite" : "Lemmik",
     "View in folder" : "Vaata kaustas",
+    "General" : "Üldine",
     "Copy public link" : "Kopeeri avalik link",
     "Public link" : "Avalik link",
     "Back" : "Tagasi",

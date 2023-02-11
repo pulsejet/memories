@@ -17,6 +17,7 @@ OC.L10N.register(
     "Favorite" : "Eftirlæti",
     "Unarchive" : "Taka úr geymslu",
     "View in folder" : "Skoða í möppu",
+    "General" : "Almennt",
     "Copy public link" : "Afrita opinberan tengil",
     "Public link" : "Opinber tengill",
     "Back" : "Til baka",

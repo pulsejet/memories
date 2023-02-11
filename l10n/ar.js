@@ -14,6 +14,7 @@ OC.L10N.register(
     "Download" : "تنزيل",
     "Favorite" : "المفضلة",
     "View in folder" : "اعرض في المجلد",
+    "General" : "العامة",
     "Copy public link" : "نسخ الرابط العام",
     "Back" : "العودة",
     "Save" : "Save",

@@ -13,6 +13,7 @@ OC.L10N.register(
     "Download" : "Baxar",
     "Favorite" : "Marcar como favoritu",
     "View in folder" : "Ver na carpeta",
+    "General" : "Xeneral",
     "Back" : "Atrás",
     "Save" : "Guardar",
     "Month" : "Mes",

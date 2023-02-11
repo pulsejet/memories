@@ -15,6 +15,7 @@ OC.L10N.register(
     "Favorite" : "즐겨찾기",
     "Unarchive" : "보관 해제",
     "View in folder" : "폴더에서 보기",
+    "General" : "일반",
     "Copy public link" : "공용 링크 복사",
     "Public link" : "공개 링크",
     "Back" : "뒤로",

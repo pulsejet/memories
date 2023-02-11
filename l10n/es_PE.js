@@ -14,6 +14,7 @@ OC.L10N.register(
     "Favorite" : "Hacer favorito",
     "Unarchive" : "Desarchivar",
     "View in folder" : "Ver en la carpeta",
+    "General" : "General",
     "Back" : "Atrás",
     "Save" : "Guardar",
     "Month" : "Mes",

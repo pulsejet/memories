@@ -35,6 +35,7 @@
     "You are about to delete a large number of files. Are you sure?" : "Fitxategi asko ezabatuko dituzu. Ziur zaude?",
     "You are about to touch a large number of files. Are you sure?" : "Fitxategi asko ukituko dituzu. Ziur zaude?",
     "_{n} selected_::_{n} selected_" : ["{n} hautatuta","{n} hautatuta"],
+    "General" : "Orokorra",
     "Timeline Path" : "Denbora-lerroa",
     "Folders Path" : "Karpeten bide-izena",
     "Show hidden folders" : "Erakutsi ezkutuko karpetak",

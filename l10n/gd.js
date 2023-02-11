@@ -10,6 +10,7 @@ OC.L10N.register(
     "Delete" : "Sguab às",
     "Download" : "Luchdaich a-nuas",
     "Favorite" : "Annsachd",
+    "General" : "Coitcheann",
     "Back" : "Air ais",
     "Save" : "Sàbhail",
     "Name" : "Ainm",
