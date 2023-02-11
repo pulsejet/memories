@@ -14,6 +14,7 @@ OC.L10N.register(
     "Download" : "Unduh",
     "Favorite" : "Favorit",
     "View in folder" : "Lihat dalam folder",
+    "General" : "Umum",
     "Copy public link" : "Salin tautan publik",
     "Back" : "Kembali",
     "Save" : "Simpan",

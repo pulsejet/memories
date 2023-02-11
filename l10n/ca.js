@@ -19,6 +19,7 @@ OC.L10N.register(
     "Unarchive" : "Desbloquejar",
     "View in folder" : "Visualitza-ho a la carpeta",
     "Add to album" : "Afegeix a l'àlbum",
+    "General" : "General",
     "Delete the public link" : "Esborra l'enllaç públic",
     "Public link copied!" : "S'ha copiat l'enllaç públic!",
     "Copy public link" : "Copia l'enllaç públic",

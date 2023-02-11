@@ -17,6 +17,7 @@ OC.L10N.register(
     "Favorite" : "Favoritt",
     "Unarchive" : "Dearkivere",
     "View in folder" : "Vis i mappe",
+    "General" : "Generell",
     "Copy public link" : "Kopier offentlig lenke",
     "Public link" : "Offentlig lenke",
     "Back" : "Tilbake",

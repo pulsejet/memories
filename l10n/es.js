@@ -47,6 +47,7 @@ OC.L10N.register(
     "You are about to delete a large number of files. Are you sure?" : "Está a punto de eliminar un gran número de archivos. ¿Está seguro?",
     "You are about to touch a large number of files. Are you sure?" : "Está a punto de tocar un gran número de archivos. ¿Está seguro?",
     "_{n} selected_::_{n} selected_" : ["{n} seleccionado","{n} seleccionados","{n} seleccionados"],
+    "General" : "General",
     "Timeline Path" : "Ruta a la línea de tiempo",
     "Square grid mode" : "Modo de rejilla cuadrada",
     "Folders Path" : "Ruta a las carpetas",

@@ -44,6 +44,7 @@
     "You are about to delete a large number of files. Are you sure?" : "Предстои ви да изтриете голям брой файлове. Сигурни ли сте?",
     "You are about to touch a large number of files. Are you sure?" : "Вие сте на път да засегнете голям брой файлове. Сигурни ли сте?",
     "_{n} selected_::_{n} selected_" : ["{n} избрани","{n} избрани"],
+    "General" : "Общи",
     "Timeline Path" : "Път на времева линия/хронология/",
     "Square grid mode" : "Режим на квадратна мрежа",
     "Folders Path" : "Път на папките",

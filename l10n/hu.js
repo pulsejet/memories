@@ -46,6 +46,7 @@ OC.L10N.register(
     "You are about to delete a large number of files. Are you sure?" : "Sok fájl törlésére készül. Biztos benne?",
     "You are about to touch a large number of files. Are you sure?" : "Sok fájl érintésére készül. Biztos benne?",
     "_{n} selected_::_{n} selected_" : ["{n} kiválasztva","{n} kiválasztva"],
+    "General" : "Általános",
     "Timeline Path" : "Idővonal elérési útja",
     "Square grid mode" : "Négyzetrácsos mód",
     "Folders Path" : "Mappák útvonala",

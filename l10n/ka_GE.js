@@ -14,6 +14,7 @@ OC.L10N.register(
     "Favorite" : "რჩეული",
     "Unarchive" : "ამოღება",
     "View in folder" : "ჩვენება დირექტორიაში",
+    "General" : "ზოგადი",
     "Back" : "უკან",
     "Save" : "შენახვა",
     "Month" : "თვე",

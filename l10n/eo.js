@@ -14,6 +14,7 @@ OC.L10N.register(
     "Download" : "Elŝuti",
     "Favorite" : "Pliŝatati",
     "View in folder" : "Vidi en dosierujo",
+    "General" : "Ĝenerala",
     "Public link" : "Publika ligilo",
     "Back" : "Antaŭen",
     "Save" : "Konservi",

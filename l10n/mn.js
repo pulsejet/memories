@@ -14,6 +14,7 @@ OC.L10N.register(
     "Favorite" : "Дуртай",
     "Unarchive" : "Архиваас гаргах",
     "View in folder" : "Хавтасыг нээх",
+    "General" : "Ерөнхий",
     "Back" : "буцах",
     "Save" : "Хадгалах",
     "Month" : "Сар",

@@ -10,6 +10,7 @@ OC.L10N.register(
     "Download" : "Discargar",
     "Favorite" : "Favorite",
     "View in folder" : "Vider in dossier",
+    "General" : "General",
     "Back" : "Retro",
     "Save" : "Salveguardar",
     "Month" : "Mense",

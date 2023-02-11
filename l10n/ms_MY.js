@@ -7,6 +7,7 @@ OC.L10N.register(
     "Cancel" : "Batal",
     "Delete" : "Padam",
     "Download" : "Muat turun",
+    "General" : "Umum",
     "Back" : "Kembali",
     "Save" : "Simpan",
     "Month" : "Bulan",

@@ -16,6 +16,7 @@ OC.L10N.register(
     "Favorite" : "Favorit",
     "Unarchive" : "Dearhiviraj",
     "View in folder" : "Prikaži u mapi",
+    "General" : "Općenito",
     "Copy public link" : "Kopiraj javnu poveznicu",
     "Public link" : "Javna poveznica",
     "Back" : "Natrag",
