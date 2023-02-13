@@ -434,7 +434,9 @@ export default defineComponent({
         arrowPrevTitle: this.t("memories", "Previous"),
         arrowNextTitle: this.t("memories", "Next"),
         getViewportSizeFn: () => {
-          const sidebarWidth = this.sidebarOpen ? this.sidebarWidth : 0;
+          const isMobile = globalThis.windowInnerWidth < 768;
+          const sidebarWidth =
+            this.sidebarOpen && !isMobile ? this.sidebarWidth : 0;
           this.outerWidth = `calc(100vw - ${sidebarWidth}px)`;
           return {
             x: globalThis.windowInnerWidth - sidebarWidth,
