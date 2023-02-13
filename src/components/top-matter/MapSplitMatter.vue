@@ -151,6 +151,7 @@ export default defineComponent({
           b: bounds(),
           z: zoomStr,
         },
+        hash: this.$route.hash,
       });
 
       // Extend bounds by 25% beyond the map
