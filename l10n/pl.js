@@ -25,6 +25,7 @@ OC.L10N.register(
     "You are about to delete a large number of files. Are you sure?" : "Zamierzasz usunąć dużą liczbę plików. Jesteś pewny?",
     "You are about to touch a large number of files. Are you sure?" : "Zamierzasz przeglądać dużą ilość plików. Jesteś pewny?",
     "_{n} selected_::_{n} selected_" : ["{n} wybrana","{n} wybrane","{n} wybranych","{n} wybranych"],
+    "General" : "Ogólne",
     "Timeline Path" : "Ścieżka osi czasu",
     "Show hidden folders" : "Pokaż ukryte katalogi",
     "Failed to load some photos" : "Nie udało się załadować niektórych zdjęć",

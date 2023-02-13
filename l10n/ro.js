@@ -13,6 +13,7 @@ OC.L10N.register(
     "Download" : "Descărcare",
     "Favorite" : "Favorite",
     "View in folder" : "Vizualizează în director",
+    "General" : "General",
     "Copy public link" : "Copiză link-ul public",
     "Public link" : "Link public",
     "Back" : "Înapoi",

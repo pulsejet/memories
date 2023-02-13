@@ -26,6 +26,7 @@ OC.L10N.register(
     "You are about to delete a large number of files. Are you sure?" : "Chystáte sa odstrániť veľké množstvo súborov. Si si istý?",
     "You are about to touch a large number of files. Are you sure?" : "Chystáte sa zmeniť veľké množstvo súborov. Si si istý?",
     "_{n} selected_::_{n} selected_" : ["{n} vybraté","{n} vybraté","{n} vybratých","{n} vybraté"],
+    "General" : "Všeobecné",
     "Timeline Path" : "Popis umiestnenia časovej osi",
     "Show hidden folders" : "Zobraziť skryté priečinky",
     "Your Timeline" : "Vaša časová os",

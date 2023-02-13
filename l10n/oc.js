@@ -13,6 +13,7 @@ OC.L10N.register(
     "Delete" : "Suprimir",
     "Download" : "Telecargar",
     "Favorite" : "Favorit",
+    "General" : "Generals",
     "Copy public link" : "Copiar lo ligam public",
     "Public link" : "Ligam public",
     "Back" : "Retorn",

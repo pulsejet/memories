@@ -33,6 +33,7 @@ OC.L10N.register(
     "View in folder" : "Pokaži v mapi",
     "Move to folder" : "Premakni v mapo",
     "Add to album" : "Dodaj album",
+    "General" : "Splošno",
     "Square grid mode" : "Način kvadratne mreže",
     "Folders Path" : "Pot map",
     "Show hidden folders" : "Pokaži skrite mape",

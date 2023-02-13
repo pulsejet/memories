@@ -34,6 +34,7 @@
     "View in folder" : "Bekijken in map",
     "Move to folder" : "Verplaatsen naar map",
     "Add to album" : "Toevoegen aan album",
+    "General" : "Algemeen",
     "Your Timeline" : "Je tijdlijn",
     "Processing … {n}/{m}" : "Verwerken … {n}/{m}",
     "_{n} item added to album_::_{n} items added to album_" : ["{n} items toegevoegd aan album","{n} items toegevoegd aan album"],

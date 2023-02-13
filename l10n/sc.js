@@ -16,6 +16,7 @@ OC.L10N.register(
     "Download" : "Iscàrriga",
     "Favorite" : "Preferidu",
     "View in folder" : "Càstia in sa cartella",
+    "General" : "Generale",
     "Copy public link" : "Còpia ligòngiu pùblicu",
     "Public link" : "Ligòngiu pùblicu",
     "Back" : "In segus",
