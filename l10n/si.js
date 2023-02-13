@@ -9,6 +9,7 @@ OC.L10N.register(
     "Download" : "බාගන්න",
     "Favorite" : "ප්‍රියතම",
     "View in folder" : "බහාලුමේ බලන්න",
+    "General" : "සමාන්‍යය",
     "Back" : "ආපසු",
     "Save" : "සුරකින්න",
     "Year" : "වර්ෂය",

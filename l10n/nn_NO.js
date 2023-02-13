@@ -10,6 +10,7 @@ OC.L10N.register(
     "Delete" : "Slett",
     "Download" : "Last ned",
     "Favorite" : "Favoritt",
+    "General" : "Generelt",
     "Back" : "Tilbake",
     "Save" : "Lagre",
     "Year" : "År",
