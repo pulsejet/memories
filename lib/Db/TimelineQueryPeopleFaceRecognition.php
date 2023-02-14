@@ -59,15 +59,6 @@ trait TimelineQueryPeopleFaceRecognition
         );
     }
 
-    public function getPeopleFaceRecognition(TimelineRoot &$root, int $currentModel, bool $show_clusters = false, bool $show_singles = false, bool $show_hidden = false)
-    {
-        if ($show_clusters) {
-            return $this->getFaceRecognitionClusters($root, $currentModel, $show_singles, $show_hidden);
-        }
-
-        return $this->getFaceRecognitionPersons($root, $currentModel);
-    }
-
     public function getFaceRecognitionPreview(TimelineRoot &$root, $currentModel, $previewId)
     {
         $query = $this->connection->getQueryBuilder();
@@ -162,7 +153,7 @@ trait TimelineQueryPeopleFaceRecognition
         return $previews;
     }
 
-    private function getFaceRecognitionClusters(TimelineRoot &$root, int $currentModel, bool $show_singles = false, bool $show_hidden = false)
+    public function getFaceRecognitionClusters(TimelineRoot &$root, int $currentModel, bool $show_singles = false, bool $show_hidden = false)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -194,7 +185,7 @@ trait TimelineQueryPeopleFaceRecognition
 
         // By default hides individual faces when they have no name.
         if (!$show_singles) {
-            $query->having($count, $query->createNamedParameter(1));
+            $query->having($query->expr()->gt($count, $query->createNamedParameter(1)));
         }
 
         // By default it shows the people who were not hidden
@@ -222,7 +213,7 @@ trait TimelineQueryPeopleFaceRecognition
         return $faces;
     }
 
-    private function getFaceRecognitionPersons(TimelineRoot &$root, int $currentModel)
+    public function getFaceRecognitionPersons(TimelineRoot &$root, int $currentModel)
     {
         $query = $this->connection->getQueryBuilder();
 
