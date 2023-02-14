@@ -90,9 +90,9 @@ class PageController extends Controller
 
         // Extra translations
         if (\OCA\Memories\Util::recognizeIsEnabled($this->appManager)) {
-			// Auto translation for tags
-			Util::addTranslations('recognize');
-		}
+            // Auto translation for tags
+            Util::addTranslations('recognize');
+        }
 
         $response = new TemplateResponse($this->appName, 'main');
         $response->setContentSecurityPolicy(self::getCSP());
