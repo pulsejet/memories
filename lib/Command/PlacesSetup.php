@@ -292,30 +292,26 @@ class PlacesSetup extends Command
 
     protected function detectGisType()
     {
+        // Detect database type
+        $platform = strtolower(get_class($this->connection->getDatabasePlatform()));
+
         // Test MySQL-like support in databse
-        try {
-            $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)')")->fetch();
-            if (0 === \count($res)) {
-                throw new \Exception('Invalid result');
+        if (str_contains($platform, 'mysql') || str_contains($platform, 'mariadb')) {
+            try {
+                $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)')")->fetch();
+                if (0 === \count($res)) {
+                    throw new \Exception('Invalid result');
+                }
+                $this->output->writeln('MySQL-like support detected!');
+                $this->gisType = GIS_TYPE_MYSQL;
+                return;
+            } catch (\Exception $e) {
+                $this->output->writeln('No MySQL-like support detected');
             }
-            $this->output->writeln('MySQL-like support detected!');
-
-            // Make sure this is actually MySQL
-            $res = $this->connection->executeQuery('SELECT VERSION()')->fetch();
-            if (0 === \count($res)) {
-                throw new \Exception('Invalid result');
-            }
-            if (false === strpos($res['VERSION()'], 'MariaDB') && false === strpos($res['VERSION()'], 'MySQL')) {
-                throw new \Exception('MySQL not detected');
-            }
-
-            $this->gisType = GIS_TYPE_MYSQL;
-        } catch (\Exception $e) {
-            $this->output->writeln('No MySQL-like support detected');
         }
 
         // Test Postgres native geometry like support in database
-        if (GIS_TYPE_NONE === $this->gisType) {
+        if (str_contains($platform, 'postgres')) {
             try {
                 $res = $this->connection->executeQuery("SELECT POINT('1,1')")->fetch();
                 if (0 === \count($res)) {
@@ -323,6 +319,7 @@ class PlacesSetup extends Command
                 }
                 $this->output->writeln('Postgres native geometry support detected!');
                 $this->gisType = GIS_TYPE_POSTGRES;
+                return;
             } catch (\Exception $e) {
                 $this->output->writeln('No Postgres native geometry support detected');
             }
