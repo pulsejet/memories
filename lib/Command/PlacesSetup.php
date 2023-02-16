@@ -293,7 +293,7 @@ class PlacesSetup extends Command
     protected function detectGisType()
     {
         // Detect database type
-        $platform = strtolower(get_class($this->connection->getDatabasePlatform()));
+        $platform = strtolower(\get_class($this->connection->getDatabasePlatform()));
 
         // Test MySQL-like support in databse
         if (str_contains($platform, 'mysql') || str_contains($platform, 'mariadb')) {
@@ -304,6 +304,7 @@ class PlacesSetup extends Command
                 }
                 $this->output->writeln('MySQL-like support detected!');
                 $this->gisType = GIS_TYPE_MYSQL;
+
                 return;
             } catch (\Exception $e) {
                 $this->output->writeln('No MySQL-like support detected');
@@ -319,6 +320,7 @@ class PlacesSetup extends Command
                 }
                 $this->output->writeln('Postgres native geometry support detected!');
                 $this->gisType = GIS_TYPE_POSTGRES;
+
                 return;
             } catch (\Exception $e) {
                 $this->output->writeln('No Postgres native geometry support detected');
