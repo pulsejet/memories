@@ -17,6 +17,7 @@ OC.L10N.register(
     "Unarchive" : "Desarquivar",
     "View in folder" : "Ver no cartafol",
     "General" : "Xeral",
+    "Public link copied!" : "Enlace público copiado!",
     "Copy public link" : "Copiar a ligazón pública",
     "Public link" : "Ligazón pública",
     "Back" : "Atrás",
