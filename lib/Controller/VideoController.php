@@ -82,11 +82,11 @@ class VideoController extends ApiBase
         // Request and check data was received
         try {
             $status = $this->getUpstream($client, $path, $profile);
-            if ($status === 409 || $status === -1) {
+            if (409 === $status || -1 === $status) {
                 // Just a conflict (transcoding process changed)
                 return new JSONResponse(['message' => 'Conflict'], Http::STATUS_CONFLICT);
             }
-            if ($status !== 200) {
+            if (200 !== $status) {
                 throw new \Exception("Transcoder returned {$status}");
             }
         } catch (\Exception $e) {
@@ -313,6 +313,7 @@ class VideoController extends ApiBase
         if (0 === $returnCode) {
             throw new \Exception("Transcoder could not be started, check {$logFile}");
         }
+
         return $returnCode;
     }
 
