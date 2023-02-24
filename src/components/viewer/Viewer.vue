@@ -774,7 +774,6 @@ export default defineComponent({
       if (!photo.imageInfo) {
         axios.get(API.IMAGE_INFO(photo.fileid)).then((res) => {
           photo.imageInfo = res.data;
-          this.$forceUpdate();
         });
       }
 
