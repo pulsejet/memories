@@ -23,17 +23,11 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 - **🗺️ Map**: View your photos on a map, tagged with accurate reverse geocoding.
 - **⚡️ Performance**: Memories is very fast.
 
-## 🌐 Online Demo
-
-- To get an idea of what memories looks and feels like, check out the [public demo](https://memories-demo.radialapps.com/apps/memories/).
-- The demo is read-only and may be slow (free tier VM from [Oracle Cloud](https://www.oracle.com/cloud/free/)).
-- Photo credits go to [Unsplash](https://unsplash.com/) (for individual credits, refer to each folder).
-
 ## 🚀 Installation
 
 1. Install the app from the Nextcloud app store.
 1. Perform the recommended [configuration steps](https://github.com/pulsejet/memories/wiki/Configuration).
-1. Run `php ./occ memories:index` to generate metadata indices for existing photos.
+1. Run `php occ memories:index` to generate metadata indices for existing photos.
 1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos.
 
 ## 🏗 Development Setup
