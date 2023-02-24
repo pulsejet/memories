@@ -228,7 +228,7 @@ class PlacesSetup extends Command
                     }
 
                     if (GIS_TYPE_MYSQL === $this->gisType) {
-                        $points = implode(',', array_map(function (&$point) {
+                        $points = implode(',', array_map(function ($point) {
                             $x = $point[0];
                             $y = $point[1];
 
@@ -237,7 +237,7 @@ class PlacesSetup extends Command
 
                         $geometry = "POLYGON(({$points}))";
                     } elseif (GIS_TYPE_POSTGRES === $this->gisType) {
-                        $geometry = implode(',', array_map(function (&$point) {
+                        $geometry = implode(',', array_map(function ($point) {
                             $x = $point[0];
                             $y = $point[1];
 
