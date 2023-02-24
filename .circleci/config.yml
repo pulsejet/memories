@@ -9,7 +9,7 @@ jobs:
       - checkout
 
       - run: |
-          docker run -it --rm -v "$PWD":/work -w /work golang:1.19-bullseye bash -c 'CGO_ENABLED=0 go build -ldflags="-s -w"'
+          docker run -it --rm -v "$PWD":/work -w /work golang:1.20-bullseye bash -c 'CGO_ENABLED=0 go build -ldflags="-s -w"'
           sudo mv go-vod go-vod-aarch64
 
       - persist_to_workspace:

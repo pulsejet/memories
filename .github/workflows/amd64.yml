@@ -3,7 +3,7 @@ name: amd64
 on:
   push:
     tags:
-      - '*'
+      - "*"
 
 jobs:
   build-amd64:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: golang:1.19-bullseye
+      image: golang:1.20-bullseye
 
     steps:
       - name: Checkout
