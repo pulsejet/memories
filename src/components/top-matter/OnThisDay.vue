@@ -91,6 +91,7 @@ export default defineComponent({
     inner.addEventListener("scroll", this.onScroll.bind(this), {
       passive: true,
     });
+    new ResizeObserver(this.onScroll.bind(this)).observe(inner);
 
     this.refresh();
   },
