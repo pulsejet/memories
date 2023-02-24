@@ -115,6 +115,17 @@ class Exif
         // We need to remove blacklisted fields to prevent leaking info
         unset($exif['SourceFile'], $exif['FileName'], $exif['ExifToolVersion'], $exif['Directory'], $exif['FileSize'], $exif['FileModifyDate'], $exif['FileAccessDate'], $exif['FileInodeChangeDate'], $exif['FilePermissions'], $exif['ThumbnailImage']);
 
+        // Ignore zero date
+        if (\array_key_exists('DateTimeOriginal', $exif) && '0000:00:00 00:00:00' === $exif['DateTimeOriginal']) {
+            unset($exif['DateTimeOriginal']);
+        }
+
+        // Ignore zero lat lng
+        if (\array_key_exists('GPSLatitude', $exif) && abs((float) $exif['GPSLatitude']) < 0.0001
+            && \array_key_exists('GPSLongitude', $exif) && abs((float) $exif['GPSLongitude']) < 0.0001) {
+            unset($exif['GPSLatitude'], $exif['GPSLongitude']);
+        }
+
         return $exif;
     }
 
