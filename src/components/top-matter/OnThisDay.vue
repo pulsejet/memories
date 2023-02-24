@@ -109,9 +109,6 @@ export default defineComponent({
     },
 
     async refresh() {
-      // Skip if disabled
-      if (!this.config_enableTopMemories) return;
-
       // Look for cache
       const dayIdToday = utils.dateToDayId(new Date());
       const cacheUrl = `/onthisday/${dayIdToday}`;
