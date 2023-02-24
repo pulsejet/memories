@@ -168,6 +168,9 @@ class PlacesSetup extends Command
         $sql = str_replace('*PREFIX*memories_planet_geometry', 'memories_planet_geometry', $query->getSQL());
         $insertGeometry = $this->connection->prepare($sql);
 
+        // The number of places in the current transaction
+        $txnCount = 0;
+
         // Iterate over the data file
         $handle = fopen($datafile, 'r');
         if ($handle) {
@@ -176,6 +179,11 @@ class PlacesSetup extends Command
                 // Skip empty lines
                 if ('' === trim($line)) {
                     continue;
+                }
+
+                // Begin transaction
+                if (0 === $txnCount++) {
+                    $this->connection->beginTransaction();
                 }
                 ++$count;
 
@@ -260,10 +268,14 @@ class PlacesSetup extends Command
                     }
                 }
 
-                // Print progress
-                if (0 === $count % 500) {
+                // Commit transaction every once in a while
+                if ($count % 250 === 0) {
+                    $this->connection->commit();
+                    $txnCount = 0;
+
+                    // Print progress
                     $end = time();
-                    $elapsed = $end - $start;
+                    $elapsed = ($end - $start) ?: 1;
                     $rate = $count / $elapsed;
                     $remaining = APPROX_PLACES - $count;
                     $eta = round($remaining / $rate);
@@ -273,6 +285,11 @@ class PlacesSetup extends Command
             }
 
             fclose($handle);
+        }
+
+        // Commit final transaction
+        if ($txnCount > 0) {
+            $this->connection->commit();
         }
 
         // Delete file
