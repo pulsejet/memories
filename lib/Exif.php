@@ -12,6 +12,7 @@ class Exif
 {
     private const EXIFTOOL_VER = '12.50';
     private const EXIFTOOL_TIMEOUT = 30000;
+    private const EXIFTOOL_ARGS = ['-api', 'QuickTimeUTC=1', '-n', '-U', '-json', '--b'];
 
     /** Opened instance of exiftool when running in command mode */
     private static $staticProc;
@@ -402,7 +403,8 @@ class Exif
 
     private static function getExifFromLocalPathWithStaticProc(string &$path)
     {
-        fwrite(self::$staticPipes[0], "{$path}\n-U\n-json\n--b\n-api\nQuickTimeUTC=1\n-n\n-execute\n");
+        $args = implode("\n", self::EXIFTOOL_ARGS);
+        fwrite(self::$staticPipes[0], "{$path}\n{$args}\n-execute\n");
         fflush(self::$staticPipes[0]);
 
         $readyToken = "\n{ready}\n";
@@ -424,7 +426,7 @@ class Exif
     private static function getExifFromLocalPathWithSeparateProc(string &$path, array $extraArgs = [])
     {
         $pipes = [];
-        $proc = proc_open(array_merge(self::getExiftool(), ['-api', 'QuickTimeUTC=1', '-n', '-U', '-json', '--b'], $extraArgs, [$path]), [
+        $proc = proc_open(array_merge(self::getExiftool(), self::EXIFTOOL_ARGS, $extraArgs, [$path]), [
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
         ], $pipes);
