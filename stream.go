@@ -307,6 +307,7 @@ func (s *Stream) waitForChunk(w http.ResponseWriter, chunk *Chunk) {
 	notif := make(chan bool)
 	chunk.notifs = append(chunk.notifs, notif)
 	t := time.NewTimer(10 * time.Second)
+	coder := s.coder
 
 	s.mutex.Unlock()
 
@@ -329,6 +330,12 @@ func (s *Stream) waitForChunk(w http.ResponseWriter, chunk *Chunk) {
 	// check for success
 	if chunk.done {
 		s.returnChunk(w, chunk)
+		return
+	}
+
+	// Check if coder was changed
+	if coder != s.coder {
+		w.WriteHeader(http.StatusConflict)
 		return
 	}
 
