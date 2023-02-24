@@ -292,6 +292,24 @@ class PlacesSetup extends Command
 
     protected function detectGisType()
     {
+        // Make sure database prefix is set
+        $prefix = $this->config->getSystemValue('dbtableprefix', '') ?: '';
+        if ('' === $prefix) {
+            $this->output->writeln('<error>Database table prefix is not set</error>');
+            $this->output->writeln('Custom database extensions cannot be used without a prefix');
+            $this->output->writeln('Reverse geocoding will not work and is disabled');
+            $this->gisType = GIS_TYPE_NONE;
+
+            return;
+        } else {
+            $this->output->writeln('');
+            $this->output->writeln("Database table prefix is set to '{$prefix}'");
+            $this->output->writeln('If the planet can be imported, it will not use this prefix');
+            $this->output->writeln('The table will be named "memories_planet_geometry"');
+            $this->output->writeln('This is necessary for using custom database extensions');
+            $this->output->writeln('');
+        }
+
         // Detect database type
         $platform = strtolower(\get_class($this->connection->getDatabasePlatform()));
 
