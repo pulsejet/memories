@@ -1029,16 +1029,20 @@ export default defineComponent({
     },
 
     handleAppSidebarOpen() {
-      if (this.show && this.photoswipe) {
-        const sidebar: HTMLElement =
-          document.querySelector("aside.app-sidebar");
-        if (sidebar) {
-          this.sidebarWidth = sidebar.offsetWidth - 2;
-        }
+      if (!(this.show && this.photoswipe)) return;
 
-        this.sidebarOpen = true;
-        this.updateSizeWithoutAnim();
+      const sidebar: HTMLElement = document.querySelector("aside.app-sidebar");
+      if (sidebar) {
+        this.sidebarWidth = sidebar.offsetWidth - 2;
+
+        // Stop sidebar typing from leaking to viewer
+        sidebar.addEventListener("keydown", (e) => {
+          if (e.key.length === 1) e.stopPropagation();
+        });
       }
+
+      this.sidebarOpen = true;
+      this.updateSizeWithoutAnim();
     },
 
     handleAppSidebarClose() {
