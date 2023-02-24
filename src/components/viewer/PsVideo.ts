@@ -170,7 +170,7 @@ class VideoContentSetup {
     });
 
     const overrideNative = !vidjs.browser.IS_SAFARI;
-    content.videojs = vidjs(content.videoElement, {
+    const vjs = (content.videojs = vidjs(content.videoElement, {
       fill: true,
       autoplay: true,
       controls: false,
@@ -186,24 +186,22 @@ class VideoContentSetup {
         nativeAudioTracks: !overrideNative,
         nativeVideoTracks: !overrideNative,
       },
-    });
+    }));
 
-    content.videojs.on("error", () => {
-      if (content.videojs.error().code === 4) {
-        if (content.videojs.src().includes("m3u8")) {
-          // HLS could not be streamed
-          console.error("Video.js: HLS stream could not be opened.");
+    vjs.on("error", () => {
+      if (vjs.error().code === 4 && vjs.src().includes("m3u8")) {
+        // HLS could not be streamed
+        console.error("Video.js: HLS stream could not be opened.");
 
-          if (getCurrentUser()?.isAdmin) {
-            showError(t("memories", "Transcoding failed."));
-          }
-
-          content.videojs.src({
-            src: content.data.src,
-            type: "video/mp4",
-          });
-          this.updateRotation(content, 0);
+        if (getCurrentUser()?.isAdmin) {
+          showError(t("memories", "Transcoding failed, check Nextcloud logs."));
         }
+
+        vjs.src({
+          src: content.data.src,
+          type: "video/mp4",
+        });
+        this.updateRotation(content, 0);
       }
     });
 

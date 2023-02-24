@@ -80,8 +80,20 @@ class VideoController extends ApiBase
         }
 
         // Request and check data was received
-        if (200 !== $this->getUpstream($client, $path, $profile)) {
-            return new JSONResponse(['message' => 'Transcode failed'], Http::STATUS_INTERNAL_SERVER_ERROR);
+        try {
+            $status = $this->getUpstream($client, $path, $profile);
+            if ($status === 409 || $status === -1) {
+                // Just a conflict (transcoding process changed)
+                return new JSONResponse(['message' => 'Conflict'], Http::STATUS_CONFLICT);
+            }
+            if ($status !== 200) {
+                throw new \Exception("Transcoder returned {$status}");
+            }
+        } catch (\Exception $e) {
+            $msg = 'Transcode failed: '.$e->getMessage();
+            $this->logger->error($msg, ['app' => 'memories']);
+
+            return new JSONResponse(['message' => $msg], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
 
         // The response was already streamed, so we have nothing to do here
@@ -224,12 +236,15 @@ class VideoController extends ApiBase
         // Get transcoder path
         $transcoder = $this->config->getSystemValue('memories.transcoder', false);
         if (!$transcoder) {
-            return 0;
+            throw new \Exception('Transcoder not configured');
         }
 
         // Make transcoder executable
         if (!is_executable($transcoder)) {
             @chmod($transcoder, 0755);
+            if (!is_executable($transcoder)) {
+                throw new \Exception("Transcoder not executable (chmod 755 {$transcoder})");
+            }
         }
 
         // Kill the transcoder in case it's running
@@ -271,20 +286,34 @@ class VideoController extends ApiBase
         $tmpPath .= $this->config->getSystemValue('instanceid', 'default');
 
         // (Re-)create temp dir
-        shell_exec("rm -rf '{$tmpPath}'");
-        mkdir($tmpPath, 0755, true);
+        shell_exec("rm -rf '{$tmpPath}' && mkdir -p '{$tmpPath}' && chmod 755 '{$tmpPath}'");
+
+        // Check temp directory exists
+        if (!is_dir($tmpPath)) {
+            throw new \Exception("Temp directory could not be created ({$tmpPath})");
+        }
+
+        // Check temp directory is writable
+        if (!is_writable($tmpPath)) {
+            throw new \Exception("Temp directory is not writable ({$tmpPath})");
+        }
 
         // Set temp dir
         $env[] = "GOVOD_TEMPDIR='{$tmpPath}'";
 
         // Start transcoder
         $env = implode(' ', $env);
-        shell_exec("{$env} nohup {$transcoder} > '{$tmpPath}.log' 2>&1 & > /dev/null");
+        $logFile = $tmpPath.'.log';
+        shell_exec("{$env} nohup {$transcoder} > '{$logFile}' 2>&1 & > /dev/null");
 
         // wait for 1s and try again
         sleep(1);
 
-        return $this->getUpstreamInternal($client, $path, $profile);
+        $returnCode = $this->getUpstreamInternal($client, $path, $profile);
+        if (0 === $returnCode) {
+            throw new \Exception("Transcoder could not be started, check {$logFile}");
+        }
+        return $returnCode;
     }
 
     private function getUpstreamInternal($client, $path, $profile)
