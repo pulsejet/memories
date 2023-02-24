@@ -301,14 +301,15 @@ class PlacesSetup extends Command
             $this->gisType = GIS_TYPE_NONE;
 
             return;
-        } else {
-            $this->output->writeln('');
-            $this->output->writeln("Database table prefix is set to '{$prefix}'");
-            $this->output->writeln('If the planet can be imported, it will not use this prefix');
-            $this->output->writeln('The table will be named "memories_planet_geometry"');
-            $this->output->writeln('This is necessary for using custom database extensions');
-            $this->output->writeln('');
         }
+
+        // Warn the admin about the database prefix not being used
+        $this->output->writeln('');
+        $this->output->writeln("Database table prefix is set to '{$prefix}'");
+        $this->output->writeln('If the planet can be imported, it will not use this prefix');
+        $this->output->writeln('The table will be named "memories_planet_geometry"');
+        $this->output->writeln('This is necessary for using custom database extensions');
+        $this->output->writeln('');
 
         // Detect database type
         $platform = strtolower(\get_class($this->connection->getDatabasePlatform()));
