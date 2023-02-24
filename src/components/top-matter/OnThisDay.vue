@@ -84,6 +84,7 @@ export default defineComponent({
     hasRight: false,
     hasLeft: false,
     scrollStack: [] as number[],
+    resizeObserver: null as ResizeObserver,
   }),
 
   mounted() {
@@ -91,9 +92,15 @@ export default defineComponent({
     inner.addEventListener("scroll", this.onScroll.bind(this), {
       passive: true,
     });
-    new ResizeObserver(this.onScroll.bind(this)).observe(inner);
+
+    this.resizeObserver = new ResizeObserver(this.onScroll.bind(this));
+    this.resizeObserver.observe(inner);
 
     this.refresh();
+  },
+
+  beforeUnmount() {
+    this.resizeObserver?.disconnect();
   },
 
   methods: {
