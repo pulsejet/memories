@@ -232,6 +232,9 @@ class VideoController extends ApiBase
             @chmod($transcoder, 0755);
         }
 
+        // Kill the transcoder in case it's running
+        \OCA\Memories\Util::pkill($transcoder);
+
         // Check for environment variables
         $env = [];
 
@@ -255,21 +258,26 @@ class VideoController extends ApiBase
         $env[] = "FFMPEG='{$ffmpegPath}'";
         $env[] = "FFPROBE='{$ffprobePath}'";
 
-        // (Re-)create Temp dir
-        $instanceId = $this->config->getSystemValue('instanceid', 'default');
-        $defaultTmp = sys_get_temp_dir().'/go-vod/'.$instanceId;
+        // Get temp directory
+        $defaultTmp = sys_get_temp_dir().'/go-vod/';
         $tmpPath = $this->config->getSystemValue('memories.tmp_path', $defaultTmp);
+
+        // Make sure path ends with slash
+        if ('/' !== substr($tmpPath, -1)) {
+            $tmpPath .= '/';
+        }
+
+        // Add instance ID to path
+        $tmpPath .= $this->config->getSystemValue('instanceid', 'default');
+
+        // (Re-)create temp dir
         shell_exec("rm -rf '{$tmpPath}'");
         mkdir($tmpPath, 0755, true);
 
-        // Remove trailing slash from temp path if present
-        if ('/' === substr($tmpPath, -1)) {
-            $tmpPath = substr($tmpPath, 0, -1);
-        }
+        // Set temp dir
         $env[] = "GOVOD_TEMPDIR='{$tmpPath}'";
 
-        // Kill already running and start new
-        \OCA\Memories\Util::pkill($transcoder);
+        // Start transcoder
         $env = implode(' ', $env);
         shell_exec("{$env} nohup {$transcoder} > '{$tmpPath}.log' 2>&1 & > /dev/null");
 
