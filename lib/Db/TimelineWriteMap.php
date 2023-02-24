@@ -162,6 +162,7 @@ trait TimelineWriteMap
             ->set('lon', $query->createFunction('lon_sum / point_count'))
             ->set('last_update', $query->createNamedParameter(time(), IQueryBuilder::PARAM_INT))
             ->where($query->expr()->eq('id', $query->createNamedParameter($clusterId, IQueryBuilder::PARAM_INT)))
+            ->andWhere($query->expr()->gt('point_count', $query->createNamedParameter(0, IQueryBuilder::PARAM_INT)))
         ;
         $query->executeStatement();
     }
