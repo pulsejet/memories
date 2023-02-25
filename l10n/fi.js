@@ -227,7 +227,6 @@ OC.L10N.register(
     "Saved image size (width x height)" : "Tallennetun kuvan koko (leveys x korkeus)",
     "Actual size (100%)" : "Todellinen koko (100 %)",
     "Fit size" : "Sovita koko",
-    "Transcoding failed." : "Transkoodaus epäonnistui.",
     "Direct" : "Suoraan",
     "Auto" : "Automaattinen",
     "Shared Folder" : "Jaa kansio",
@@ -244,6 +243,7 @@ OC.L10N.register(
     "Failed to download files" : "Tiedostojen lataus epäonnistui",
     "Failed to favorite files." : "Tiedostojen asettaminen suosikeiksi epäonnistui.",
     "Failed to favorite some files." : "Joidenkin tiedostojen määrittäminen suosikiksi epäonnistui.",
-    "Failed to favorite {fileName}." : "Tiedoston {fileName} asettaminen suosikiksi epäonnistui."
+    "Failed to favorite {fileName}." : "Tiedoston {fileName} asettaminen suosikiksi epäonnistui.",
+    "Transcoding failed." : "Transkoodaus epäonnistui."
 },
 "nplurals=2; plural=(n != 1);");
