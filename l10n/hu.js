@@ -247,7 +247,6 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Vegye figyelembe, hogy a kijelölt levágási terület kisebb mint az alkalmazott átméretezés, amely minőségcsökkenést okozhat",
     "Actual size (100%)" : "Tényleges méret (100%)",
     "Fit size" : "Illeszkedő méret",
-    "Transcoding failed." : "Az átkódolás sikertelen.",
     "Direct" : "Közvetlen",
     "Auto" : "Automatikus",
     "Shared Folder" : "Megosztott mappa",
@@ -264,6 +263,7 @@ OC.L10N.register(
     "Failed to download files" : "A fájlok letöltése sikertelen",
     "Failed to favorite files." : "A fájlok kedvencnek jelölése sikertelen.",
     "Failed to favorite some files." : "Egyes fájlok kedvencnek jelölése sikertelen.",
-    "Failed to favorite {fileName}." : "A(z) {fileName} kedvencnek jelölése sikertelen."
+    "Failed to favorite {fileName}." : "A(z) {fileName} kedvencnek jelölése sikertelen.",
+    "Transcoding failed." : "Az átkódolás sikertelen."
 },
 "nplurals=2; plural=(n != 1);");

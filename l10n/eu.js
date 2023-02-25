@@ -218,7 +218,6 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Kontuan izan hautatutako mozte-eremua aplikatutako tamaina baino txikiagoa dela eta horrek kalitatea gutxitzea eragin dezakeela",
     "Actual size (100%)" : "Benetako tamaina (% 100)",
     "Fit size" : "Egokitu tamaina",
-    "Transcoding failed." : "Transkodifikazioak huts egin du.",
     "Direct" : "Zuzena",
     "Auto" : "Auto",
     "Shared Folder" : "Partekatutako karpeta",
@@ -234,6 +233,7 @@ OC.L10N.register(
     "Failed to move {fileName}." : "{fileName} lekuz aldatzeak huts egin du.",
     "Failed to download files" : "Ezin izan dira fitxategiak deskargatu",
     "Failed to favorite files." : "Fitxategiak gogoko egiteak huts egin du.",
-    "Failed to favorite {fileName}." : "Ezin izan da {fileName} gogoko egin."
+    "Failed to favorite {fileName}." : "Ezin izan da {fileName} gogoko egin.",
+    "Transcoding failed." : "Transkodifikazioak huts egin du."
 },
 "nplurals=2; plural=(n != 1);");
