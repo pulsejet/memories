@@ -14,7 +14,7 @@
           v-for="item in navItems"
           :key="item.name"
           :to="{ name: item.name }"
-          :title="item.title"
+          :name="item.title"
           @click="linkClick"
           exact
         >
@@ -24,7 +24,7 @@
 
       <template #footer>
         <NcAppNavigationItem
-          :title="t('memories', 'Settings')"
+          :name="t('memories', 'Settings')"
           @click="showSettings"
         >
           <CogIcon slot="icon" :size="20" />
