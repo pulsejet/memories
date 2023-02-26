@@ -182,6 +182,7 @@ import { getRootUrl } from "@nextcloud/router";
 import { getPreviewUrl } from "../../services/FileUtils";
 import { getDownloadLink } from "../../services/DavRequests";
 import { API } from "../../services/API";
+import { fetchImage } from "../frame/XImgCache";
 import * as dav from "../../services/DavRequests";
 import * as utils from "../../services/Utils";
 
@@ -879,7 +880,8 @@ export default defineComponent({
           );
 
         // Get image blob
-        const blob = await (await fetch(img.src)).blob();
+        const imgSrc = this.photoswipe.currSlide.data.src;
+        const blob = await fetchImage(imgSrc);
 
         // Fix basename extension
         let basename = photo.basename;

@@ -79,14 +79,7 @@ async function flushPreviewQueue() {
       fetchPreviewQueueCopy
         .filter((p) => p.reqid === reqid)
         .forEach((p) => {
-          p.callback(
-            getResponse(imgBlob, imgType, {
-              "Content-Type": imgType,
-              "Content-Length": imgLen,
-              "Cache-Control": res.headers["Cache-Control"],
-              Expires: res.headers["Expires"],
-            })
-          );
+          p.callback(getResponse(imgBlob, imgType, res.headers));
           p.callback = null;
         });
     }
@@ -159,16 +152,17 @@ export async function fetchOneImage(url: string) {
   const res = await axios.get(url, {
     responseType: "blob",
   });
-  return getResponse(res.data, res.headers["content-type"], res.headers);
+  return getResponse(res.data, null, res.headers);
 }
 
-function getResponse(blob: Blob, type: string, headers: any = {}) {
+function getResponse(blob: Blob, type: string | null, headers: any = {}) {
   return new Response(blob, {
     status: 200,
     headers: {
-      "Content-Type": type,
+      "Content-Type": type || headers["content-type"],
       "Content-Length": blob.size.toString(),
-      ...headers,
+      "Cache-Control": headers["cache-control"],
+      Expires: headers["expires"],
     },
   });
 }
