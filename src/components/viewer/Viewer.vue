@@ -188,6 +188,7 @@ import * as utils from "../../services/Utils";
 import ImageEditor from "./ImageEditor.vue";
 import PhotoSwipe, { PhotoSwipeOptions } from "photoswipe";
 import "photoswipe/style.css";
+import PsImage from "./PsImage";
 import PsVideo from "./PsVideo";
 import PsLivePhoto from "./PsLivePhoto";
 
@@ -562,6 +563,9 @@ export default defineComponent({
 
       // Live photo support
       new PsLivePhoto(<any>this.photoswipe, {});
+
+      // Image support
+      new PsImage(<any>this.photoswipe);
 
       // Patch the close button to stop the slideshow
       const _close = this.photoswipe.close.bind(this.photoswipe);

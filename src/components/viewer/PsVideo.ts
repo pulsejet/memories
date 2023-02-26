@@ -24,7 +24,7 @@ const config_video_default_quality = Number(
  * @param {Slide|Content} content Slide or Content object
  * @returns Boolean
  */
-function isVideoContent(content): boolean {
+export function isVideoContent(content): boolean {
   return content?.data?.type === "video";
 }
 
