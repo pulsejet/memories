@@ -46,7 +46,7 @@
     >
       <XImg
         ref="ximg"
-        :class="['fill-block', `memories-thumb-${data.key}`]"
+        :class="['ximg', 'fill-block', `memories-thumb-${data.key}`]"
         draggable="false"
         :src="src"
         :key="data.fileid"

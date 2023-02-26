@@ -6,7 +6,7 @@ test.beforeEach(login("/"));
 test.describe("Open", () => {
   test("Look for Images", async ({ page }) => {
     expect(
-      await page.locator('img[src*="api/image/preview"]').count(),
+      await page.locator("img.ximg").count(),
       "Number of previews"
     ).toBeGreaterThan(4);
     await page.waitForTimeout(1000);
@@ -52,7 +52,7 @@ test.describe("Open", () => {
     await page.waitForTimeout(4000); // cache
     await page.reload(); // prevent stale cache issues
     await page.waitForTimeout(4000); // cache
-    await page.waitForSelector('img[src*="api/image/preview"]');
+    await page.waitForSelector("img.ximg");
     expect(await page.locator(`img[src="${src1}"]`).count()).toBe(0);
     expect(await page.locator(`img[src="${src2}"]`).count()).toBe(0);
   });
