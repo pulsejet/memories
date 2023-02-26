@@ -26,6 +26,7 @@ export default defineComponent({
   data: () => {
     return {
       dataSrc: BLANK_IMG,
+      isDestroyed: false,
     };
   },
 
@@ -42,11 +43,13 @@ export default defineComponent({
 
   beforeDestroy() {
     this.cleanup(this.src);
+    this.isDestroyed = true;
   },
 
   methods: {
     async loadImage() {
       if (!this.src) return;
+      this.isDestroyed = false;
 
       // Just set src if not http
       if (this.src.startsWith("data:") || this.src.startsWith("blob:")) {
@@ -56,12 +59,35 @@ export default defineComponent({
 
       // Fetch image with axios
       try {
-        if (BLOB_CACHE[this.src]) {
-          this.dataSrc = BLOB_CACHE[this.src][1];
-          BLOB_CACHE[this.src][0]++;
-        } else {
-          this.dataSrc = URL.createObjectURL(await fetchImage(this.src));
-          BLOB_CACHE[this.src] = [1, this.dataSrc];
+        // Use BLOB from cache assuming it exists
+        const usedCache = (src: string) => {
+          if (BLOB_CACHE[src]) {
+            this.dataSrc = BLOB_CACHE[src][1];
+            BLOB_CACHE[src][0]++;
+            return true;
+          }
+          return false;
+        };
+
+        // Check if the blob cache exists
+        if (!usedCache(this.src)) {
+          const src = this.src;
+          const newBlob = URL.createObjectURL(await fetchImage(src));
+          if (this.src !== src || this.isDestroyed) {
+            URL.revokeObjectURL(newBlob); // the src has changed, abort
+            return;
+          }
+
+          // Check if the blob cache exists now
+          // In this case, someone else already created the blob
+          // Free up the current blob and use the existing one instead
+          if (usedCache(src)) {
+            URL.revokeObjectURL(newBlob);
+          } else {
+            // Create new blob cache entry
+            this.dataSrc = newBlob;
+            BLOB_CACHE[src] = [1, this.dataSrc];
+          }
         }
       } catch (error) {
         this.dataSrc = BLANK_IMG;
