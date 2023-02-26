@@ -132,7 +132,7 @@ export default defineComponent({
   },
 
   /** Clear timers */
-  beforeUnmount() {
+  beforeDestroy() {
     clearTimeout(this.touchTimer);
   },
 

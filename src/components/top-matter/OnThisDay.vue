@@ -99,7 +99,7 @@ export default defineComponent({
     this.refresh();
   },
 
-  beforeUnmount() {
+  beforeDestroy() {
     this.resizeObserver?.disconnect();
   },
 
