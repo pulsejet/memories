@@ -10,6 +10,7 @@ export default class ImageContentSetup {
 
   initLightboxEvents(lightbox: PhotoSwipe) {
     lightbox.on("contentLoad", this.onContentLoad.bind(this));
+    lightbox.on("contentLoadImage", this.onContentLoadImage.bind(this));
   }
 
   onContentLoad(e) {
@@ -31,5 +32,10 @@ export default class ImageContentSetup {
         URL.revokeObjectURL(blobUrl);
       };
     });
+  }
+
+  onContentLoadImage(e) {
+    if (isVideoContent(e.content) || isLiveContent(e.content)) return;
+    e.preventDefault();
   }
 }
