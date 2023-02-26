@@ -38,9 +38,16 @@ export default defineComponent({
     this.loadImage();
   },
 
+  beforeUnmount() {
+    this.cleanup();
+  },
+
   methods: {
     async loadImage() {
       if (!this.src) return;
+
+      // Clean up previous blob
+      this.cleanup();
 
       // Just set src if not http
       if (this.src.startsWith("data:") || this.src.startsWith("blob:")) {
@@ -60,6 +67,10 @@ export default defineComponent({
     load() {
       if (this.dataSrc === BLANK_IMG) return;
       this.$emit("load", this.dataSrc);
+    },
+
+    cleanup() {
+      if (this.dataSrc.startsWith("blob:")) URL.revokeObjectURL(this.dataSrc);
     },
   },
 });
