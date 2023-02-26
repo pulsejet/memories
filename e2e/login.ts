@@ -13,6 +13,6 @@ export function login(route: string) {
     await expect(page).toHaveURL(
       "http://localhost:8080/index.php/apps/memories" + route
     );
-    await page.waitForSelector('img[src*="api/image/preview"]');
+    await page.waitForSelector("img.ximg");
   };
 }
