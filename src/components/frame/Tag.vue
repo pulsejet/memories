@@ -16,7 +16,7 @@
 
     <div class="previews fill-block" ref="previews">
       <div class="img-outer">
-        <img
+        <XImg
           draggable="false"
           class="fill-block"
           :class="{ error }"

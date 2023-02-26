@@ -16,7 +16,7 @@
         @click="pickAlbum(album)"
       >
         <template v-slot:icon="{}">
-          <img
+          <XImg
             v-if="album.last_added_photo !== -1"
             class="album__image"
             :src="toCoverUrl(album.last_added_photo)"

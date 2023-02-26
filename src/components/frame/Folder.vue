@@ -17,7 +17,7 @@
     <div class="previews fill-block">
       <div class="preview-container fill-block">
         <div class="img-outer" v-for="info of previews" :key="info.fileid">
-          <img
+          <XImg
             class="fill-block"
             :src="getPreviewUrl(info, true, 256)"
             @error="$event.target.classList.add('error')"

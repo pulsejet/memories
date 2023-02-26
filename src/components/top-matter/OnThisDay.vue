@@ -7,7 +7,7 @@
         :key="year.year"
         @click="click(year)"
       >
-        <img class="fill-block" :src="year.url" />
+        <XImg class="fill-block" :src="year.url" />
 
         <div class="overlay">
           {{ year.text }}

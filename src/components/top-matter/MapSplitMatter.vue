@@ -27,7 +27,7 @@
             <div class="count" v-if="cluster.count > 1">
               {{ cluster.count }}
             </div>
-            <img
+            <XImg
               :src="clusterPreviewUrl(cluster)"
               :class="[
                 'thumb-important',

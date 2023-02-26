@@ -73,8 +73,6 @@ import { getPreviewUrl } from "../../services/FileUtils";
 import { IDay, IPhoto } from "../../types";
 import * as utils from "../../services/Utils";
 
-import XImg from "./XImg.vue";
-
 import errorsvg from "../../assets/error.svg";
 import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
 import Star from "vue-material-design-icons/Star.vue";
@@ -84,7 +82,6 @@ import LivePhoto from "vue-material-design-icons/MotionPlayOutline.vue";
 export default defineComponent({
   name: "Photo",
   components: {
-    XImg,
     CheckCircle,
     Video,
     Star,
