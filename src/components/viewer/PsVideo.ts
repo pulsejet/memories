@@ -244,7 +244,7 @@ class VideoContentSetup {
 
   destroyVideo(content: any) {
     if (isVideoContent(content) && content.videojs) {
-      content.videojs.dispose();
+      content.videojs.dispose?.();
       content.videojs = null;
 
       content.plyr?.elements?.container?.remove();
@@ -443,7 +443,7 @@ class VideoContentSetup {
   onContentDestroy({ content }) {
     if (isVideoContent(content)) {
       if (content.videojs) {
-        content.videojs.dispose();
+        content.videojs.dispose?.();
         content.videojs = null;
       }
     }
