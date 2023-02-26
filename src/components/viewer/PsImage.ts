@@ -21,13 +21,19 @@ export default class ImageContentSetup {
     const content = e.content;
     const img = document.createElement("img");
     img.classList.add("pswp__img");
+    img.style.visibility = "hidden";
     content.element = img;
 
     // Fetch with Axios
     fetchImage(content.data.src).then((blob) => {
+      // Check if destroyed already
+      if (!content.element) return;
+
+      // Insert image
       const blobUrl = URL.createObjectURL(blob);
       img.src = blobUrl;
       img.onerror = img.onload = () => {
+        img.style.visibility = "visible";
         content.onLoaded();
         URL.revokeObjectURL(blobUrl);
       };
