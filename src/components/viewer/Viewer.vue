@@ -182,6 +182,7 @@ import { getRootUrl } from "@nextcloud/router";
 import { getPreviewUrl } from "../../services/FileUtils";
 import { getDownloadLink } from "../../services/DavRequests";
 import { API } from "../../services/API";
+import { fetchImage } from "../frame/XImgCache";
 import * as dav from "../../services/DavRequests";
 import * as utils from "../../services/Utils";
 
@@ -862,12 +863,6 @@ export default defineComponent({
         // Check navigator support
         if (!this.canShare) throw new Error("Share not supported");
 
-        // Get image data from active slide
-        const img = document.querySelector(
-          ".pswp__item.active img.pswp__img"
-        ) as HTMLImageElement;
-        if (!img?.src) return;
-
         // Shre image data using navigator api
         const photo = this.currentPhoto;
         if (!photo) return;
@@ -879,7 +874,8 @@ export default defineComponent({
           );
 
         // Get image blob
-        const blob = await (await fetch(img.src)).blob();
+        const imgSrc = this.photoswipe.currSlide.data.src;
+        const blob = await fetchImage(imgSrc);
 
         // Fix basename extension
         let basename = photo.basename;
