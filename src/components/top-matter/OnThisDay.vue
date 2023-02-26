@@ -7,7 +7,7 @@
         :key="year.year"
         @click="click(year)"
       >
-        <img class="fill-block" :src="year.url" />
+        <XImg class="fill-block" :src="year.url" />
 
         <div class="overlay">
           {{ year.text }}
@@ -84,6 +84,7 @@ export default defineComponent({
     hasRight: false,
     hasLeft: false,
     scrollStack: [] as number[],
+    resizeObserver: null as ResizeObserver,
   }),
 
   mounted() {
@@ -92,7 +93,14 @@ export default defineComponent({
       passive: true,
     });
 
+    this.resizeObserver = new ResizeObserver(this.onScroll.bind(this));
+    this.resizeObserver.observe(inner);
+
     this.refresh();
+  },
+
+  beforeDestroy() {
+    this.resizeObserver?.disconnect();
   },
 
   methods: {
@@ -101,9 +109,6 @@ export default defineComponent({
     },
 
     async refresh() {
-      // Skip if disabled
-      if (!this.config_enableTopMemories) return;
-
       // Look for cache
       const dayIdToday = utils.dateToDayId(new Date());
       const cacheUrl = `/onthisday/${dayIdToday}`;

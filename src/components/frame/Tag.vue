@@ -10,13 +10,13 @@
       <NcCounterBubble> {{ data.count }} </NcCounterBubble>
     </div>
     <div class="name">
-      {{ data.name }}
+      {{ title }}
       <span class="subtitle" v-if="subtitle"> {{ subtitle }} </span>
     </div>
 
     <div class="previews fill-block" ref="previews">
       <div class="img-outer">
-        <img
+        <XImg
           draggable="false"
           class="fill-block"
           :class="{ error }"
@@ -75,12 +75,24 @@ export default defineComponent({
       return API.TAG_PREVIEW(this.data.name);
     },
 
+    title() {
+      if (this.tag) {
+        return this.t("recognize", this.tag.name);
+      }
+
+      return this.data.name;
+    },
+
     subtitle() {
       if (this.album && this.album.user !== getCurrentUser()?.uid) {
         return `(${this.album.user})`;
       }
 
       return "";
+    },
+
+    tag() {
+      return !this.face && !this.place && !this.album ? this.data : null;
     },
 
     face() {

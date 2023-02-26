@@ -39,6 +39,7 @@ use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IRequest;
 use OCP\IUserSession;
+use Psr\Log\LoggerInterface;
 
 class ApiBase extends Controller
 {
@@ -48,6 +49,7 @@ class ApiBase extends Controller
     protected IAppManager $appManager;
     protected TimelineQuery $timelineQuery;
     protected IDBConnection $connection;
+    protected LoggerInterface $logger;
 
     public function __construct(
         IRequest $request,
@@ -55,7 +57,8 @@ class ApiBase extends Controller
         IUserSession $userSession,
         IDBConnection $connection,
         IRootFolder $rootFolder,
-        IAppManager $appManager
+        IAppManager $appManager,
+        LoggerInterface $logger
     ) {
         parent::__construct(Application::APPNAME, $request);
 
@@ -64,6 +67,7 @@ class ApiBase extends Controller
         $this->connection = $connection;
         $this->rootFolder = $rootFolder;
         $this->appManager = $appManager;
+        $this->logger = $logger;
         $this->timelineQuery = new TimelineQuery($connection);
     }
 
@@ -297,7 +301,7 @@ class ApiBase extends Controller
     /**
      * Given a list of file ids, return the first preview image possible.
      */
-    protected function getPreviewFromImageList(array &$list, int $quality = 512)
+    protected function getPreviewFromImageList(array $list, int $quality = 512)
     {
         // Get preview manager
         $previewManager = \OC::$server->get(\OCP\IPreview::class);

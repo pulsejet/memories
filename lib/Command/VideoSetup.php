@@ -130,6 +130,8 @@ class VideoSetup extends Command
             $this->config->setSystemValue('memories.no_transcode', true);
             $output->writeln('<error>Transcoding and HLS are now disabled</error>');
 
+            $this->killGoVod($output, $goVodPath);
+
             return 0;
         }
 
@@ -157,6 +159,8 @@ class VideoSetup extends Command
             $this->config->setSystemValue('memories.qsv', false);
         }
 
+        $this->killGoVod($output, $goVodPath);
+
         return 0;
     }
 
@@ -182,5 +186,11 @@ class VideoSetup extends Command
         $output->writeln('You should restart the server for changes to take effect');
 
         return 0;
+    }
+
+    protected function killGoVod(OutputInterface $output, string $path): void
+    {
+        $output->writeln("\nKilling any existing go-vod processes");
+        \OCA\Memories\Util::pkill($path);
     }
 }

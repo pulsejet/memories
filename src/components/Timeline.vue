@@ -44,7 +44,7 @@
           </div>
 
           <OnThisDay
-            v-if="routeIsBase"
+            v-if="routeIsBase && config_enableTopMemories"
             :key="config_timelinePath"
             :viewer="$refs.viewer"
             @load="scrollerManager.adjust()"

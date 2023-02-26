@@ -2,7 +2,7 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
-## v4.11.0, v3.11.0 (unreleased)
+## v4.11.0, v3.11.0 (2023-02-10)
 
 - **Feature**: Show map of photos ([#396](https://github.com/pulsejet/memories/pull/396))  
   To index existing images, you must run `occ memories:index -f`

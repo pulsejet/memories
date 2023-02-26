@@ -6,7 +6,7 @@ test.beforeEach(login("/"));
 test.describe("Open", () => {
   test("Look for Images", async ({ page }) => {
     expect(
-      await page.locator('img[src*="api/image/preview"]').count(),
+      await page.locator("img.ximg").count(),
       "Number of previews"
     ).toBeGreaterThan(4);
     await page.waitForTimeout(1000);
@@ -22,6 +22,8 @@ test.describe("Open", () => {
   });
 
   test("Select two images and delete", async ({ page }) => {
+    await page.waitForTimeout(4000);
+
     const i1 = "div:nth-child(2) > div:nth-child(1) > .p-outer";
     const i2 = "div:nth-child(2) > div:nth-child(2) > .p-outer";
 
@@ -43,16 +45,7 @@ test.describe("Open", () => {
     await page.waitForTimeout(1000);
 
     await page.locator('[aria-label="Delete"]').click();
-    await page.waitForTimeout(4000);
-    expect(await page.locator(`img[src="${src1}"]`).count()).toBe(0);
-    expect(await page.locator(`img[src="${src2}"]`).count()).toBe(0);
-
-    // refresh page
-    await page.reload();
-    await page.waitForTimeout(4000); // cache
-    await page.reload(); // prevent stale cache issues
-    await page.waitForTimeout(4000); // cache
-    await page.waitForSelector('img[src*="api/image/preview"]');
+    await page.waitForTimeout(2000);
     expect(await page.locator(`img[src="${src1}"]`).count()).toBe(0);
     expect(await page.locator(`img[src="${src2}"]`).count()).toBe(0);
   });

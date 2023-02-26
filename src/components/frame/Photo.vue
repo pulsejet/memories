@@ -44,9 +44,9 @@
       @touchend.passive="$emit('touchend', $event)"
       @touchcancel.passive="$emit('touchend', $event)"
     >
-      <img
-        ref="img"
-        :class="['fill-block', `memories-thumb-${data.key}`]"
+      <XImg
+        ref="ximg"
+        :class="['ximg', 'fill-block', `memories-thumb-${data.key}`]"
         draggable="false"
         :src="src"
         :key="data.fileid"
@@ -132,7 +132,7 @@ export default defineComponent({
   },
 
   /** Clear timers */
-  beforeUnmount() {
+  beforeDestroy() {
     clearTimeout(this.touchTimer);
   },
 
@@ -205,7 +205,7 @@ export default defineComponent({
 
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
-      const img = this.$refs.img as HTMLImageElement;
+      const img = (this.$refs.ximg as any).$el as HTMLImageElement;
 
       canvas.width = img.naturalWidth;
       canvas.height = img.naturalHeight;

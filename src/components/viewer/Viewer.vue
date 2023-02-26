@@ -188,6 +188,7 @@ import * as utils from "../../services/Utils";
 import ImageEditor from "./ImageEditor.vue";
 import PhotoSwipe, { PhotoSwipeOptions } from "photoswipe";
 import "photoswipe/style.css";
+import PsImage from "./PsImage";
 import PsVideo from "./PsVideo";
 import PsLivePhoto from "./PsLivePhoto";
 
@@ -434,7 +435,9 @@ export default defineComponent({
         arrowPrevTitle: this.t("memories", "Previous"),
         arrowNextTitle: this.t("memories", "Next"),
         getViewportSizeFn: () => {
-          const sidebarWidth = this.sidebarOpen ? this.sidebarWidth : 0;
+          const isMobile = globalThis.windowInnerWidth < 768;
+          const sidebarWidth =
+            this.sidebarOpen && !isMobile ? this.sidebarWidth : 0;
           this.outerWidth = `calc(100vw - ${sidebarWidth}px)`;
           return {
             x: globalThis.windowInnerWidth - sidebarWidth,
@@ -560,6 +563,9 @@ export default defineComponent({
 
       // Live photo support
       new PsLivePhoto(<any>this.photoswipe, {});
+
+      // Image support
+      new PsImage(<any>this.photoswipe);
 
       // Patch the close button to stop the slideshow
       const _close = this.photoswipe.close.bind(this.photoswipe);
@@ -772,7 +778,6 @@ export default defineComponent({
       if (!photo.imageInfo) {
         axios.get(API.IMAGE_INFO(photo.fileid)).then((res) => {
           photo.imageInfo = res.data;
-          this.$forceUpdate();
         });
       }
 
@@ -1028,16 +1033,20 @@ export default defineComponent({
     },
 
     handleAppSidebarOpen() {
-      if (this.show && this.photoswipe) {
-        const sidebar: HTMLElement =
-          document.querySelector("aside.app-sidebar");
-        if (sidebar) {
-          this.sidebarWidth = sidebar.offsetWidth - 2;
-        }
+      if (!(this.show && this.photoswipe)) return;
 
-        this.sidebarOpen = true;
-        this.updateSizeWithoutAnim();
+      const sidebar: HTMLElement = document.querySelector("aside.app-sidebar");
+      if (sidebar) {
+        this.sidebarWidth = sidebar.offsetWidth - 2;
+
+        // Stop sidebar typing from leaking to viewer
+        sidebar.addEventListener("keydown", (e) => {
+          if (e.key.length === 1) e.stopPropagation();
+        });
       }
+
+      this.sidebarOpen = true;
+      this.updateSizeWithoutAnim();
     },
 
     handleAppSidebarClose() {

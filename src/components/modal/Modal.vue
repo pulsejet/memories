@@ -6,7 +6,7 @@
     :additionalTrapElements="trapElements"
     @close="close"
   >
-    <div class="container" @keydown.stop="true">
+    <div class="container" @keydown.stop="0">
       <div class="head">
         <span> <slot name="title"></slot> </span>
       </div>

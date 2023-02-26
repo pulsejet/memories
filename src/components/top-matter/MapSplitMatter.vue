@@ -27,7 +27,7 @@
             <div class="count" v-if="cluster.count > 1">
               {{ cluster.count }}
             </div>
-            <img
+            <XImg
               :src="clusterPreviewUrl(cluster)"
               :class="[
                 'thumb-important',
@@ -151,6 +151,7 @@ export default defineComponent({
           b: bounds(),
           z: zoomStr,
         },
+        hash: this.$route.hash,
       });
 
       // Extend bounds by 25% beyond the map

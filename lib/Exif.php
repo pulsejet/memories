@@ -12,6 +12,7 @@ class Exif
 {
     private const EXIFTOOL_VER = '12.50';
     private const EXIFTOOL_TIMEOUT = 30000;
+    private const EXIFTOOL_ARGS = ['-api', 'QuickTimeUTC=1', '-n', '-U', '-json', '--b'];
 
     /** Opened instance of exiftool when running in command mode */
     private static $staticProc;
@@ -115,6 +116,17 @@ class Exif
         // We need to remove blacklisted fields to prevent leaking info
         unset($exif['SourceFile'], $exif['FileName'], $exif['ExifToolVersion'], $exif['Directory'], $exif['FileSize'], $exif['FileModifyDate'], $exif['FileAccessDate'], $exif['FileInodeChangeDate'], $exif['FilePermissions'], $exif['ThumbnailImage']);
 
+        // Ignore zero date
+        if (\array_key_exists('DateTimeOriginal', $exif) && '0000:00:00 00:00:00' === $exif['DateTimeOriginal']) {
+            unset($exif['DateTimeOriginal']);
+        }
+
+        // Ignore zero lat lng
+        if (\array_key_exists('GPSLatitude', $exif) && abs((float) $exif['GPSLatitude']) < 0.0001
+            && \array_key_exists('GPSLongitude', $exif) && abs((float) $exif['GPSLongitude']) < 0.0001) {
+            unset($exif['GPSLatitude'], $exif['GPSLongitude']);
+        }
+
         return $exif;
     }
 
@@ -142,6 +154,8 @@ class Exif
         $dt = $date;
         if (isset($dt) && \is_string($dt) && !empty($dt)) {
             $dt = explode('-', explode('+', $dt, 2)[0], 2)[0]; // get rid of timezone if present
+            $dt = explode('.', $dt, 2)[0]; // timezone may be after a dot (https://github.com/pulsejet/memories/pull/397)
+
             $dt = \DateTime::createFromFormat('Y:m:d H:i:s', $dt);
             if (!$dt) {
                 throw new \Exception("Invalid date: {$date}");
@@ -182,7 +196,11 @@ class Exif
     {
         // Try to parse the date from exif metadata
         $dt = $exif['DateTimeOriginal'] ?? null;
+        if (!isset($dt) || empty($dt)) {
+            $dt = $exif['CreateDate'] ?? null;
+        }
 
+        // Check if found something
         try {
             return self::parseExifDate($dt);
         } catch (\Exception $ex) {
@@ -385,7 +403,8 @@ class Exif
 
     private static function getExifFromLocalPathWithStaticProc(string &$path)
     {
-        fwrite(self::$staticPipes[0], "{$path}\n-U\n-json\n--b\n-api\nQuickTimeUTC=1\n-n\n-execute\n");
+        $args = implode("\n", self::EXIFTOOL_ARGS);
+        fwrite(self::$staticPipes[0], "{$path}\n{$args}\n-execute\n");
         fflush(self::$staticPipes[0]);
 
         $readyToken = "\n{ready}\n";
@@ -407,7 +426,7 @@ class Exif
     private static function getExifFromLocalPathWithSeparateProc(string &$path, array $extraArgs = [])
     {
         $pipes = [];
-        $proc = proc_open(array_merge(self::getExiftool(), ['-api', 'QuickTimeUTC=1', '-n', '-U', '-json', '--b'], $extraArgs, [$path]), [
+        $proc = proc_open(array_merge(self::getExiftool(), self::EXIFTOOL_ARGS, $extraArgs, [$path]), [
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
         ], $pipes);

@@ -1,8 +1,10 @@
-import { registerRoute } from "workbox-routing";
 import { CacheExpiration } from "workbox-expiration";
+import { API } from "../../services/API";
+import axios from "@nextcloud/axios";
 
 // Queue of requests to fetch preview images
 interface FetchPreviewObject {
+  origUrl: string;
   url: URL;
   fileid: number;
   reqid: number;
@@ -35,7 +37,7 @@ async function flushPreviewQueue() {
   // Check if only one request
   if (fetchPreviewQueueCopy.length === 1) {
     const p = fetchPreviewQueueCopy[0];
-    return p.callback(await fetch(p.url));
+    return p.callback(await fetchOneImage(p.origUrl));
   }
 
   // Create aggregated request body
@@ -48,26 +50,15 @@ async function flushPreviewQueue() {
   }));
 
   try {
-    // infer the url from the first file
-    const firstUrl = fetchPreviewQueueCopy[0].url;
-    const url = new URL(firstUrl.toString());
-    const path = url.pathname.split("/");
-    const previewIndex = path.indexOf("preview");
-    url.pathname = path.slice(0, previewIndex).join("/") + "/multipreview";
-    url.searchParams.delete("x");
-    url.searchParams.delete("y");
-    url.searchParams.delete("a");
-    url.searchParams.delete("c");
-
     // Fetch multipreview
-    const res = await fetch(url, {
-      method: "POST",
-      body: JSON.stringify(files),
+    const multiUrl = API.IMAGE_MULTIPREVIEW();
+    const res = await axios.post(multiUrl, files, {
+      responseType: "blob",
     });
 
     // Get blob
     if (res.status !== 200) throw new Error("Error fetching multi-preview");
-    const blob = await res.blob();
+    const blob = res.data;
 
     let idx = 0;
     while (idx < blob.size) {
@@ -80,8 +71,6 @@ async function flushPreviewQueue() {
       const reqid = jsonParsed["reqid"];
       idx += newlineIndex + 1;
 
-      console.debug("multi-preview", jsonParsed);
-
       // Read the image data
       const imgBlob = blob.slice(idx, idx + imgLen);
       idx += imgLen;
@@ -91,14 +80,11 @@ async function flushPreviewQueue() {
         .filter((p) => p.reqid === reqid)
         .forEach((p) => {
           p.callback(
-            new Response(imgBlob, {
-              status: 200,
-              headers: {
-                "Content-Type": imgType,
-                "Content-Length": imgLen,
-                Expires: res.headers.get("Expires"),
-                "Cache-Control": res.headers.get("Cache-Control"),
-              },
+            getResponse(imgBlob, imgType, {
+              "Content-Type": imgType,
+              "Content-Length": imgLen,
+              "Cache-Control": res.headers["Cache-Control"],
+              Expires: res.headers["Expires"],
             })
           );
           p.callback = null;
@@ -119,46 +105,70 @@ async function flushPreviewQueue() {
   });
 }
 
-// Intercept preview requests
-registerRoute(
-  /^.*\/apps\/memories\/api\/image\/preview\/.*/,
-  async ({ url, request }) => {
-    // Check if in cache
-    const cache = await imageCache?.match(url);
-    if (cache) return cache;
+/** Accepts a URL and returns a promise with a blob */
+export async function fetchImage(url: string): Promise<Blob> {
+  // Check if in cache
+  const cache = await imageCache?.match(url);
+  if (cache) return await cache.blob();
 
-    // Get file id from URL
-    const fileid = Number(url.pathname.split("/").pop());
+  // Get file id from URL
+  const urlObj = new URL(url, window.location.origin);
+  const fileid = Number(urlObj.pathname.split("/").pop());
 
-    // Aggregate requests
-    let res: Response = await new Promise((callback) => {
+  // Check if preview image
+  const regex = /^.*\/apps\/memories\/api\/image\/preview\/.*/;
+
+  // Aggregate requests
+  let res: Response;
+
+  if (regex.test(url)) {
+    res = await new Promise((callback) => {
       fetchPreviewQueue.push({
-        url,
+        origUrl: url,
+        url: urlObj,
         fileid,
         reqid: Math.random(),
         callback,
       });
       if (!fetchPreviewTimer) {
-        fetchPreviewTimer = setTimeout(flushPreviewQueue, 50);
+        fetchPreviewTimer = setTimeout(flushPreviewQueue, 10);
       }
     });
-
-    // Fallback to single request
-    if (res.status !== 200) {
-      res = await fetch(url);
-    }
-
-    // Cache response
-    if (res.status === 200) {
-      imageCache?.put(request, res.clone());
-      expirationManager.updateTimestamp(request.url);
-    }
-
-    // Run expiration once in every 20 requests
-    if (Math.random() < 0.05) {
-      expirationManager.expireEntries();
-    }
-
-    return res;
   }
-);
+
+  // Fallback to single request
+  if (!res || res.status !== 200) {
+    res = await fetchOneImage(url);
+  }
+
+  // Cache response
+  if (res.status === 200) {
+    imageCache?.put(url, res.clone());
+    expirationManager.updateTimestamp(url.toString());
+  }
+
+  // Run expiration once in every 100 requests
+  if (Math.random() < 0.01) {
+    expirationManager.expireEntries();
+  }
+
+  return await res.blob();
+}
+
+export async function fetchOneImage(url: string) {
+  const res = await axios.get(url, {
+    responseType: "blob",
+  });
+  return getResponse(res.data, res.headers["content-type"], res.headers);
+}
+
+function getResponse(blob: Blob, type: string, headers: any = {}) {
+  return new Response(blob, {
+    status: 200,
+    headers: {
+      "Content-Type": type,
+      "Content-Length": blob.size.toString(),
+      ...headers,
+    },
+  });
+}

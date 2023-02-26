@@ -80,8 +80,20 @@ class VideoController extends ApiBase
         }
 
         // Request and check data was received
-        if (200 !== $this->getUpstream($client, $path, $profile)) {
-            return new JSONResponse(['message' => 'Transcode failed'], Http::STATUS_INTERNAL_SERVER_ERROR);
+        try {
+            $status = $this->getUpstream($client, $path, $profile);
+            if (409 === $status || -1 === $status) {
+                // Just a conflict (transcoding process changed)
+                return new JSONResponse(['message' => 'Conflict'], Http::STATUS_CONFLICT);
+            }
+            if (200 !== $status) {
+                throw new \Exception("Transcoder returned {$status}");
+            }
+        } catch (\Exception $e) {
+            $msg = 'Transcode failed: '.$e->getMessage();
+            $this->logger->error($msg, ['app' => 'memories']);
+
+            return new JSONResponse(['message' => $msg], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
 
         // The response was already streamed, so we have nothing to do here
@@ -115,8 +127,9 @@ class VideoController extends ApiBase
 
         // Response data
         $name = '';
-        $blob = null;
         $mime = '';
+        $blob = null;
+        $liveVideoPath = null;
 
         // Video is inside the file
         $path = null;
@@ -172,21 +185,31 @@ class VideoController extends ApiBase
                 $name = $liveFile->getName();
                 $blob = $liveFile->getContent();
                 $mime = $liveFile->getMimeType();
-
-                if ($transcode && !$this->config->getSystemValue('memories.no_transcode', true)) {
-                    // Only Apple uses HEVC for now, so pass this to the transcoder
-                    // If this is H.264 it won't get transcoded anyway
-                    $liveVideoPath = $liveFile->getStorage()->getLocalFile($liveFile->getInternalPath());
-                    if ($this->getUpstream($transcode, $liveVideoPath, 'max.mov')) {
-                        exit;
-                    }
-                }
+                $liveVideoPath = $liveFile->getStorage()->getLocalFile($liveFile->getInternalPath());
             }
         }
 
         // Data not found
         if (!$blob) {
             return new JSONResponse(['message' => 'Live file not found'], Http::STATUS_NOT_FOUND);
+        }
+
+        // Transcode video if allowed
+        if ($transcode && !$this->config->getSystemValue('memories.no_transcode', true)) {
+            // If video path not given, write to temp file
+            if (!$liveVideoPath) {
+                $liveVideoPath = tempnam(sys_get_temp_dir(), 'livevideo');
+                file_put_contents($liveVideoPath, $blob);
+
+                register_shutdown_function(function () use ($liveVideoPath) {
+                    unlink($liveVideoPath);
+                });
+            }
+
+            // If this is H.264 it won't get transcoded anyway
+            if ($this->getUpstream($transcode, $liveVideoPath, 'max.mov')) {
+                exit;
+            }
         }
 
         // Make and send response
@@ -213,13 +236,19 @@ class VideoController extends ApiBase
         // Get transcoder path
         $transcoder = $this->config->getSystemValue('memories.transcoder', false);
         if (!$transcoder) {
-            return 0;
+            throw new \Exception('Transcoder not configured');
         }
 
         // Make transcoder executable
         if (!is_executable($transcoder)) {
             @chmod($transcoder, 0755);
+            if (!is_executable($transcoder)) {
+                throw new \Exception("Transcoder not executable (chmod 755 {$transcoder})");
+            }
         }
+
+        // Kill the transcoder in case it's running
+        \OCA\Memories\Util::pkill($transcoder);
 
         // Check for environment variables
         $env = [];
@@ -244,28 +273,48 @@ class VideoController extends ApiBase
         $env[] = "FFMPEG='{$ffmpegPath}'";
         $env[] = "FFPROBE='{$ffprobePath}'";
 
-        // (Re-)create Temp dir
-        $instanceId = $this->config->getSystemValue('instanceid', 'default');
-        $defaultTmp = sys_get_temp_dir().'/go-vod/'.$instanceId;
+        // Get temp directory
+        $defaultTmp = sys_get_temp_dir().'/go-vod/';
         $tmpPath = $this->config->getSystemValue('memories.tmp_path', $defaultTmp);
-        shell_exec("rm -rf '{$tmpPath}'");
-        mkdir($tmpPath, 0755, true);
 
-        // Remove trailing slash from temp path if present
-        if ('/' === substr($tmpPath, -1)) {
-            $tmpPath = substr($tmpPath, 0, -1);
+        // Make sure path ends with slash
+        if ('/' !== substr($tmpPath, -1)) {
+            $tmpPath .= '/';
         }
+
+        // Add instance ID to path
+        $tmpPath .= $this->config->getSystemValue('instanceid', 'default');
+
+        // (Re-)create temp dir
+        shell_exec("rm -rf '{$tmpPath}' && mkdir -p '{$tmpPath}' && chmod 755 '{$tmpPath}'");
+
+        // Check temp directory exists
+        if (!is_dir($tmpPath)) {
+            throw new \Exception("Temp directory could not be created ({$tmpPath})");
+        }
+
+        // Check temp directory is writable
+        if (!is_writable($tmpPath)) {
+            throw new \Exception("Temp directory is not writable ({$tmpPath})");
+        }
+
+        // Set temp dir
         $env[] = "GOVOD_TEMPDIR='{$tmpPath}'";
 
-        // Kill already running and start new
-        \OCA\Memories\Util::pkill($transcoder);
+        // Start transcoder
         $env = implode(' ', $env);
-        shell_exec("{$env} nohup {$transcoder} > '{$tmpPath}.log' 2>&1 & > /dev/null");
+        $logFile = $tmpPath.'.log';
+        shell_exec("{$env} nohup {$transcoder} > '{$logFile}' 2>&1 & > /dev/null");
 
         // wait for 1s and try again
         sleep(1);
 
-        return $this->getUpstreamInternal($client, $path, $profile);
+        $returnCode = $this->getUpstreamInternal($client, $path, $profile);
+        if (0 === $returnCode) {
+            throw new \Exception("Transcoder could not be started, check {$logFile}");
+        }
+
+        return $returnCode;
     }
 
     private function getUpstreamInternal($client, $path, $profile)

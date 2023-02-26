@@ -168,6 +168,9 @@ class PlacesSetup extends Command
         $sql = str_replace('*PREFIX*memories_planet_geometry', 'memories_planet_geometry', $query->getSQL());
         $insertGeometry = $this->connection->prepare($sql);
 
+        // The number of places in the current transaction
+        $txnCount = 0;
+
         // Iterate over the data file
         $handle = fopen($datafile, 'r');
         if ($handle) {
@@ -176,6 +179,11 @@ class PlacesSetup extends Command
                 // Skip empty lines
                 if ('' === trim($line)) {
                     continue;
+                }
+
+                // Begin transaction
+                if (0 === $txnCount++) {
+                    $this->connection->beginTransaction();
                 }
                 ++$count;
 
@@ -228,7 +236,7 @@ class PlacesSetup extends Command
                     }
 
                     if (GIS_TYPE_MYSQL === $this->gisType) {
-                        $points = implode(',', array_map(function (&$point) {
+                        $points = implode(',', array_map(function ($point) {
                             $x = $point[0];
                             $y = $point[1];
 
@@ -237,7 +245,7 @@ class PlacesSetup extends Command
 
                         $geometry = "POLYGON(({$points}))";
                     } elseif (GIS_TYPE_POSTGRES === $this->gisType) {
-                        $geometry = implode(',', array_map(function (&$point) {
+                        $geometry = implode(',', array_map(function ($point) {
                             $x = $point[0];
                             $y = $point[1];
 
@@ -260,10 +268,14 @@ class PlacesSetup extends Command
                     }
                 }
 
-                // Print progress
+                // Commit transaction every once in a while
                 if (0 === $count % 500) {
+                    $this->connection->commit();
+                    $txnCount = 0;
+
+                    // Print progress
                     $end = time();
-                    $elapsed = $end - $start;
+                    $elapsed = ($end - $start) ?: 1;
                     $rate = $count / $elapsed;
                     $remaining = APPROX_PLACES - $count;
                     $eta = round($remaining / $rate);
@@ -273,6 +285,11 @@ class PlacesSetup extends Command
             }
 
             fclose($handle);
+        }
+
+        // Commit final transaction
+        if ($txnCount > 0) {
+            $this->connection->commit();
         }
 
         // Delete file
@@ -292,30 +309,46 @@ class PlacesSetup extends Command
 
     protected function detectGisType()
     {
+        // Make sure database prefix is set
+        $prefix = $this->config->getSystemValue('dbtableprefix', '') ?: '';
+        if ('' === $prefix) {
+            $this->output->writeln('<error>Database table prefix is not set</error>');
+            $this->output->writeln('Custom database extensions cannot be used without a prefix');
+            $this->output->writeln('Reverse geocoding will not work and is disabled');
+            $this->gisType = GIS_TYPE_NONE;
+
+            return;
+        }
+
+        // Warn the admin about the database prefix not being used
+        $this->output->writeln('');
+        $this->output->writeln("Database table prefix is set to '{$prefix}'");
+        $this->output->writeln('If the planet can be imported, it will not use this prefix');
+        $this->output->writeln('The table will be named "memories_planet_geometry"');
+        $this->output->writeln('This is necessary for using custom database extensions');
+        $this->output->writeln('');
+
+        // Detect database type
+        $platform = strtolower(\get_class($this->connection->getDatabasePlatform()));
+
         // Test MySQL-like support in databse
-        try {
-            $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)')")->fetch();
-            if (0 === \count($res)) {
-                throw new \Exception('Invalid result');
-            }
-            $this->output->writeln('MySQL-like support detected!');
+        if (str_contains($platform, 'mysql') || str_contains($platform, 'mariadb')) {
+            try {
+                $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)')")->fetch();
+                if (0 === \count($res)) {
+                    throw new \Exception('Invalid result');
+                }
+                $this->output->writeln('MySQL-like support detected!');
+                $this->gisType = GIS_TYPE_MYSQL;
 
-            // Make sure this is actually MySQL
-            $res = $this->connection->executeQuery('SELECT VERSION()')->fetch();
-            if (0 === \count($res)) {
-                throw new \Exception('Invalid result');
+                return;
+            } catch (\Exception $e) {
+                $this->output->writeln('No MySQL-like support detected');
             }
-            if (false === strpos($res['VERSION()'], 'MariaDB') && false === strpos($res['VERSION()'], 'MySQL')) {
-                throw new \Exception('MySQL not detected');
-            }
-
-            $this->gisType = GIS_TYPE_MYSQL;
-        } catch (\Exception $e) {
-            $this->output->writeln('No MySQL-like support detected');
         }
 
         // Test Postgres native geometry like support in database
-        if (GIS_TYPE_NONE === $this->gisType) {
+        if (str_contains($platform, 'postgres')) {
             try {
                 $res = $this->connection->executeQuery("SELECT POINT('1,1')")->fetch();
                 if (0 === \count($res)) {
@@ -323,6 +356,8 @@ class PlacesSetup extends Command
                 }
                 $this->output->writeln('Postgres native geometry support detected!');
                 $this->gisType = GIS_TYPE_POSTGRES;
+
+                return;
             } catch (\Exception $e) {
                 $this->output->writeln('No Postgres native geometry support detected');
             }
@@ -360,6 +395,10 @@ class PlacesSetup extends Command
 
     protected function ensureDeleted(string $filename)
     {
+        if (!file_exists($filename)) {
+            return;
+        }
+
         unlink($filename);
         if (file_exists($filename)) {
             $this->output->writeln('<error>Failed to delete data file</error>');

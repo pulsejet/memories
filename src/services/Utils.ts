@@ -197,6 +197,7 @@ export function randomSubarray(arr: any[], size: number) {
 export function convertFlags(photo: IPhoto) {
   if (typeof photo.flag === "undefined") {
     photo.flag = 0; // flags
+    photo.imageInfo = null; // make it reactive
   }
 
   if (photo.isvideo) {
