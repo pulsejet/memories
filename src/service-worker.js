@@ -5,10 +5,9 @@ import { ExpirationPlugin } from 'workbox-expiration';
 
 precacheAndRoute(self.__WB_MANIFEST);
 
-import './service-worker-custom';
-
 registerRoute(/^.*\/apps\/memories\/api\/video\/transcode\/.*/, new NetworkOnly());
 registerRoute(/^.*\/apps\/memories\/api\/image\/jpeg\/.*/, new NetworkOnly());
+registerRoute(/^.*\/apps\/memories\/api\/image\/preview\/.*/, new NetworkOnly());
 registerRoute(/^.*\/remote.php\/.*/, new NetworkOnly());
 registerRoute(/^.*\/apps\/files\/ajax\/download.php?.*/, new NetworkOnly());
 
@@ -22,7 +21,6 @@ const imageCache = new CacheFirst({
     ],
 });
 
-registerRoute(/^.*\/apps\/memories\/api\/image\/preview\/.*/, imageCache);
 registerRoute(/^.*\/apps\/memories\/api\/video\/livephoto\/.*/, imageCache);
 registerRoute(/^.*\/apps\/memories\/api\/faces\/preview\/.*/, imageCache);
 registerRoute(/^.*\/apps\/memories\/api\/tags\/preview\/.*/, imageCache);

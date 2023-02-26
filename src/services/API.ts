@@ -82,6 +82,10 @@ export class API {
     return tok(gen(`${BASE}/image/preview/{fileid}`, { fileid }));
   }
 
+  static IMAGE_MULTIPREVIEW() {
+    return tok(gen(`${BASE}/image/multipreview`));
+  }
+
   static IMAGE_INFO(id: number) {
     return tok(gen(`${BASE}/image/info/{id}`, { id }));
   }

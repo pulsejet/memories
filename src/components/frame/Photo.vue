@@ -44,8 +44,8 @@
       @touchend.passive="$emit('touchend', $event)"
       @touchcancel.passive="$emit('touchend', $event)"
     >
-      <img
-        ref="img"
+      <XImg
+        ref="ximg"
         :class="['fill-block', `memories-thumb-${data.key}`]"
         draggable="false"
         :src="src"
@@ -73,6 +73,8 @@ import { getPreviewUrl } from "../../services/FileUtils";
 import { IDay, IPhoto } from "../../types";
 import * as utils from "../../services/Utils";
 
+import XImg from "./XImg.vue";
+
 import errorsvg from "../../assets/error.svg";
 import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
 import Star from "vue-material-design-icons/Star.vue";
@@ -82,6 +84,7 @@ import LivePhoto from "vue-material-design-icons/MotionPlayOutline.vue";
 export default defineComponent({
   name: "Photo",
   components: {
+    XImg,
     CheckCircle,
     Video,
     Star,
@@ -205,7 +208,7 @@ export default defineComponent({
 
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
-      const img = this.$refs.img as HTMLImageElement;
+      const img = (this.$refs.ximg as any).$el as HTMLImageElement;
 
       canvas.width = img.naturalWidth;
       canvas.height = img.naturalHeight;
