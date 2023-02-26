@@ -863,12 +863,6 @@ export default defineComponent({
         // Check navigator support
         if (!this.canShare) throw new Error("Share not supported");
 
-        // Get image data from active slide
-        const img = document.querySelector(
-          ".pswp__item.active img.pswp__img"
-        ) as HTMLImageElement;
-        if (!img?.src) return;
-
         // Shre image data using navigator api
         const photo = this.currentPhoto;
         if (!photo) return;
