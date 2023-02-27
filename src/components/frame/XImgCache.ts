@@ -30,7 +30,13 @@ let fetchPreviewTimer: any;
 async function flushPreviewQueue() {
   if (fetchPreviewQueue.length === 0) return;
 
-  fetchPreviewTimer = 0;
+  // Clear timer
+  if (fetchPreviewTimer) {
+    window.clearTimeout(fetchPreviewTimer);
+    fetchPreviewTimer = 0;
+  }
+
+  // Copy queue and clear
   const fetchPreviewQueueCopy = fetchPreviewQueue;
   fetchPreviewQueue = [];
 
@@ -116,6 +122,7 @@ export async function fetchImage(url: string): Promise<Blob> {
 
   if (regex.test(url)) {
     res = await new Promise((callback) => {
+      // Add to queue
       fetchPreviewQueue.push({
         origUrl: url,
         url: urlObj,
@@ -123,8 +130,16 @@ export async function fetchImage(url: string): Promise<Blob> {
         reqid: Math.random(),
         callback,
       });
+
+      // Start timer for flushing queue
       if (!fetchPreviewTimer) {
         fetchPreviewTimer = setTimeout(flushPreviewQueue, 10);
+      }
+
+      // If queue has >10 items, flush immediately
+      // This will internally clear the timer
+      if (fetchPreviewQueue.length >= 10) {
+        flushPreviewQueue();
       }
     });
   }
