@@ -27,6 +27,8 @@ const expirationManager = new CacheExpiration(cacheName, {
 
 // Start fetching with multipreview
 let fetchPreviewTimer: any;
+
+/** Flushes the queue of preview image requests */
 async function flushPreviewQueue() {
   if (fetchPreviewQueue.length === 0) return;
 
@@ -57,13 +59,10 @@ async function flushPreviewQueue() {
 
   try {
     // Fetch multipreview
-    const multiUrl = API.IMAGE_MULTIPREVIEW();
-    const res = await axios.post(multiUrl, files, {
-      responseType: "blob",
-    });
-
-    // Get blob
+    const res = await fetchMultipreview(files);
     if (res.status !== 200) throw new Error("Error fetching multi-preview");
+
+    // Read blob
     const blob = res.data;
 
     let idx = 0;
@@ -163,13 +162,7 @@ export async function fetchImage(url: string): Promise<Blob> {
   return await res.blob();
 }
 
-export async function fetchOneImage(url: string) {
-  const res = await axios.get(url, {
-    responseType: "blob",
-  });
-  return getResponse(res.data, null, res.headers);
-}
-
+/** Creates a dummy response from a blob and headers */
 function getResponse(blob: Blob, type: string | null, headers: any = {}) {
   return new Response(blob, {
     status: 200,
@@ -179,5 +172,22 @@ function getResponse(blob: Blob, type: string | null, headers: any = {}) {
       "Cache-Control": headers["cache-control"],
       Expires: headers["expires"],
     },
+  });
+}
+
+/** Fetch single image with axios */
+export async function fetchOneImage(url: string) {
+  const res = await axios.get(url, {
+    responseType: "blob",
+  });
+  return getResponse(res.data, null, res.headers);
+}
+
+/** Fetch multipreview with axios */
+export async function fetchMultipreview(files: any[]) {
+  const multiUrl = API.IMAGE_MULTIPREVIEW();
+
+  return await axios.post(multiUrl, files, {
+    responseType: "blob",
   });
 }
