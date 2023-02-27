@@ -151,6 +151,7 @@ class ImageController extends ApiBase
                     continue;
                 }
 
+                ob_start();
                 echo json_encode([
                     'reqid' => $reqid,
                     'Content-Length' => \strlen($content),
@@ -158,7 +159,7 @@ class ImageController extends ApiBase
                 ]);
                 echo "\n";
                 echo $content;
-                flush();
+                ob_end_flush();
             } catch (\OCP\Files\NotFoundException $e) {
                 continue;
             } catch (\Exception $e) {
