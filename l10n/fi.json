@@ -241,7 +241,6 @@
     "Failed to download files" : "Tiedostojen lataus epäonnistui",
     "Failed to favorite files." : "Tiedostojen asettaminen suosikeiksi epäonnistui.",
     "Failed to favorite some files." : "Joidenkin tiedostojen määrittäminen suosikiksi epäonnistui.",
-    "Failed to favorite {fileName}." : "Tiedoston {fileName} asettaminen suosikiksi epäonnistui.",
-    "Transcoding failed." : "Transkoodaus epäonnistui."
+    "Failed to favorite {fileName}." : "Tiedoston {fileName} asettaminen suosikiksi epäonnistui."
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

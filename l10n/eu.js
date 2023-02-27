@@ -233,7 +233,6 @@ OC.L10N.register(
     "Failed to move {fileName}." : "{fileName} lekuz aldatzeak huts egin du.",
     "Failed to download files" : "Ezin izan dira fitxategiak deskargatu",
     "Failed to favorite files." : "Fitxategiak gogoko egiteak huts egin du.",
-    "Failed to favorite {fileName}." : "Ezin izan da {fileName} gogoko egin.",
-    "Transcoding failed." : "Transkodifikazioak huts egin du."
+    "Failed to favorite {fileName}." : "Ezin izan da {fileName} gogoko egin."
 },
 "nplurals=2; plural=(n != 1);");

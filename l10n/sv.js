@@ -11,6 +11,8 @@ OC.L10N.register(
     "Albums" : "Album",
     "Archive" : "Arkivera",
     "On this day" : "På den här dagen",
+    "Places" : "Platser",
+    "Map" : "Karta",
     "Tags" : "Taggar",
     "Edit" : "Ändra",
     "Cancel" : "Avbryt",

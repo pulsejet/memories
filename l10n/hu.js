@@ -263,7 +263,6 @@ OC.L10N.register(
     "Failed to download files" : "A fájlok letöltése sikertelen",
     "Failed to favorite files." : "A fájlok kedvencnek jelölése sikertelen.",
     "Failed to favorite some files." : "Egyes fájlok kedvencnek jelölése sikertelen.",
-    "Failed to favorite {fileName}." : "A(z) {fileName} kedvencnek jelölése sikertelen.",
-    "Transcoding failed." : "Az átkódolás sikertelen."
+    "Failed to favorite {fileName}." : "A(z) {fileName} kedvencnek jelölése sikertelen."
 },
 "nplurals=2; plural=(n != 1);");
