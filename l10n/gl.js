@@ -37,6 +37,7 @@ OC.L10N.register(
     "Loading …" : "Cargando…",
     "Refresh" : "Actualizar",
     "Remove" : "Retirar",
+    "Share folder" : "Compartir cartafol",
     "Unsaved changes" : "Cambios sen gardar",
     "Share" : "Compartir",
     "Close" : "Pechar",
