@@ -35,6 +35,7 @@ OC.L10N.register(
     "Loading …" : "Учитавање…",
     "Refresh" : "Освежи",
     "Remove" : "Уклони",
+    "Share folder" : "Дели фолдер",
     "Unsaved changes" : "Несачуване измене",
     "Share" : "Подели",
     "Sidebar" : "Бочна трака",

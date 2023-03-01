@@ -14,6 +14,7 @@ OC.L10N.register(
     "Archive" : "Artxibatu",
     "On this day" : "Egun honetan",
     "Places" : "Lekuak",
+    "Map" : "Mapa",
     "Tags" : "Etiketak",
     "Choose again" : "Aukeratu berriro",
     "Click here to start" : "Egin klik hemen hasteko",
