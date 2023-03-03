@@ -56,7 +56,7 @@ aside.app-sidebar {
 }
 
 // Make popper menus full height
-.v-popper__inner {
+.v-popper--theme-dropdown .v-popper__inner {
   max-height: calc(90vh - 16px) !important; // was 50vh
   margin: 0 10px; // was unset
 }
