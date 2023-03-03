@@ -292,12 +292,14 @@ class Index extends Command
         $uid = $user->getUID();
         $userFolder = $this->rootFolder->getUserFolder($uid);
         $this->outputSection = $this->output->section();
-        $this->parseFolder($userFolder, $opts, (float) $this->nUser, (float) $this->userManager->countSeenUsers());
-        $this->outputSection->overwrite('Scanned '.$userFolder->getPath());
         ++$this->nUser;
+
+        $this->outputSection->overwrite("Scanning files for {$uid}");
+        $this->parseFolder($userFolder, $opts);
+        $this->outputSection->overwrite("Scanned all files for {$uid}");
     }
 
-    private function parseFolder(Folder &$folder, IndexOpts &$opts, float $progress_i, float $progress_n): void
+    private function parseFolder(Folder &$folder, IndexOpts &$opts): void
     {
         try {
             // Respect the '.nomedia' file. If present don't traverse the folder
@@ -311,12 +313,12 @@ class Index extends Command
 
             foreach ($nodes as $i => &$node) {
                 if ($node instanceof Folder) {
-                    $new_progress_i = (float) ($progress_i * \count($nodes) + $i);
-                    $new_progress_n = (float) ($progress_n * \count($nodes));
-                    $this->parseFolder($node, $opts, $new_progress_i, $new_progress_n);
+                    $this->parseFolder($node, $opts);
                 } elseif ($node instanceof File) {
-                    $progress = (float) (($progress_i / $progress_n) * 100);
-                    $this->outputSection->overwrite(sprintf('%.2f%%', $progress).' scanning '.$node->getPath());
+                    $path = $node->getPath();
+                    $path = \strlen($path) > 80 ? '...'.substr($path, -77) : $path;
+
+                    $this->outputSection->overwrite("Scanning {$path}");
                     $this->parseFile($node, $opts);
                     $this->tempManager->clean();
                 }
