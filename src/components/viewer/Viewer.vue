@@ -1289,12 +1289,6 @@ export default defineComponent({
     display: none;
   }
 
-  // the only popper is the action menu
-  // it needs to be moved a bit to the left
-  .v-popper__inner {
-    transform: translateX(-20px);
-  }
-
   // Hide arrows on mobile
   @media (max-width: 768px) {
     .pswp__button--arrow {

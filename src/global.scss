@@ -55,6 +55,12 @@ aside.app-sidebar {
   display: block;
 }
 
+// Make popper menus full height
+.v-popper__inner {
+  max-height: calc(90vh - 16px) !important; // was 50vh
+  margin: 0 10px; // was unset
+}
+
 // Live photo transitions
 :root {
   --livephoto-img-transition: opacity 0.4s linear, transform 0.3s ease-in-out;
