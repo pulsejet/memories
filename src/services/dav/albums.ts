@@ -24,14 +24,25 @@ export function getAlbumPath(user: string, name: string) {
 /**
  * Get list of albums and convert to Days response
  * @param type Type of albums to get; 1 = personal, 2 = shared, 3 = all
+ * @param sortOrder Sort order; 1 = by date, 2 = by name
  */
-export async function getAlbumsData(type: "1" | "2" | "3"): Promise<IDay[]> {
+export async function getAlbumsData(
+  type: 1 | 2 | 3,
+  sortOrder: 1 | 2
+): Promise<IDay[]> {
   let data: IAlbum[] = [];
   try {
     const res = await axios.get<typeof data>(API.ALBUM_LIST(type));
     data = res.data;
   } catch (e) {
     throw e;
+  }
+
+  // Response is already sorted by date, sort otherwise
+  if (sortOrder === 2) {
+    data.sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+    );
   }
 
   // Convert to days response

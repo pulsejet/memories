@@ -10,6 +10,34 @@
     <div class="name">{{ name }}</div>
 
     <div class="right-actions">
+      <NcActions :forceMenu="true" v-if="isAlbumList">
+        <template #icon>
+          <SortIcon :size="20" />
+        </template>
+
+        <NcActionRadio
+          name="sort"
+          :aria-label="t('memories', 'Sort by date')"
+          :checked="config_albumSort === 1"
+          @change="changeSort(1)"
+          close-after-click
+        >
+          {{ t("memories", "Sort by date") }}
+          <template #icon> <SortDateIcon :size="20" /> </template>
+        </NcActionRadio>
+
+        <NcActionRadio
+          name="sort"
+          :aria-label="t('memories', 'Sort by name')"
+          :checked="config_albumSort === 2"
+          @change="changeSort(2)"
+          close-after-click
+        >
+          {{ t("memories", "Sort by name") }}
+          <template #icon> <SlotAlphabeticalIcon :size="20" /> </template>
+        </NcActionRadio>
+      </NcActions>
+
       <NcActions :inline="1">
         <NcActionButton
           :aria-label="t('memories', 'Create new album')"
@@ -68,9 +96,12 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
+import UserConfig from "../../mixins/UserConfig";
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 import NcActionCheckbox from "@nextcloud/vue/dist/Components/NcActionCheckbox";
+import NcActionRadio from "@nextcloud/vue/dist/Components/NcActionRadio";
+
 import { getCurrentUser } from "@nextcloud/auth";
 import axios from "@nextcloud/axios";
 
@@ -86,6 +117,9 @@ import EditIcon from "vue-material-design-icons/Pencil.vue";
 import DeleteIcon from "vue-material-design-icons/Close.vue";
 import PlusIcon from "vue-material-design-icons/Plus.vue";
 import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
+import SortIcon from "vue-material-design-icons/SortVariant.vue";
+import SlotAlphabeticalIcon from "vue-material-design-icons/SortAlphabeticalAscending.vue";
+import SortDateIcon from "vue-material-design-icons/SortCalendarDescending.vue";
 import { API } from "../../services/API";
 
 export default defineComponent({
@@ -94,6 +128,7 @@ export default defineComponent({
     NcActions,
     NcActionButton,
     NcActionCheckbox,
+    NcActionRadio,
 
     AlbumCreateModal,
     AlbumDeleteModal,
@@ -105,7 +140,12 @@ export default defineComponent({
     DeleteIcon,
     PlusIcon,
     ShareIcon,
+    SortIcon,
+    SlotAlphabeticalIcon,
+    SortDateIcon,
   },
+
+  mixins: [UserConfig],
 
   data: () => ({
     name: "",
@@ -153,6 +193,15 @@ export default defineComponent({
       if (res.status === 200 && res.data.handle) {
         downloadWithHandle(res.data.handle);
       }
+    },
+
+    /**
+     * Change the sorting order
+     * 1 = date, 2 = name
+     */
+    changeSort(order: 1 | 2) {
+      this.config_albumSort = order;
+      this.updateSetting("albumSort");
     },
   },
 });

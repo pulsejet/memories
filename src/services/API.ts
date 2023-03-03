@@ -39,7 +39,7 @@ export class API {
     return tok(gen(`${BASE}/days/{id}`, { id }));
   }
 
-  static ALBUM_LIST(t: "1" | "2" | "3" = "3") {
+  static ALBUM_LIST(t: 1 | 2 | 3 = 3) {
     return gen(`${BASE}/albums?t=${t}`);
   }
 

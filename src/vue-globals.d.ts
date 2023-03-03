@@ -26,6 +26,7 @@ declare module "vue" {
     config_squareThumbs: boolean;
     config_enableTopMemories: boolean;
     config_showFaceRect: boolean;
+    config_albumSort: 1 | 2;
     config_eventName: string;
 
     updateSetting(setting: string): Promise<void>;

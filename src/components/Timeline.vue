@@ -753,7 +753,7 @@ export default defineComponent({
         if (this.$route.name === "thisday") {
           data = await dav.getOnThisDayData();
         } else if (this.$route.name === "albums" && !this.$route.params.name) {
-          data = await dav.getAlbumsData("3");
+          data = await dav.getAlbumsData(3, this.config_albumSort);
         } else if (this.routeIsPeople && !this.$route.params.name) {
           data = await dav.getPeopleData(this.$route.name as any);
         } else if (this.$route.name === "places" && !this.$route.params.name) {
