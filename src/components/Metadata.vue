@@ -1,5 +1,5 @@
 <template>
-  <div class="outer">
+  <div class="outer" v-if="fileInfo">
     <div class="top-field" v-for="field of topFields" :key="field.title">
       <div class="icon">
         <component :is="field.icon" :size="24" />
@@ -42,6 +42,10 @@
       <iframe class="fill-block" :src="mapUrl" />
     </div>
   </div>
+
+  <div class="loading-icon fill-block" v-else>
+    <NcLoadingIcon />
+  </div>
 </template>
 
 <script lang="ts">
@@ -49,6 +53,7 @@ import { defineComponent } from "vue";
 
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
+import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
 
 import axios from "@nextcloud/axios";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
@@ -80,6 +85,7 @@ export default defineComponent({
   components: {
     NcActions,
     NcActionButton,
+    NcLoadingIcon,
     EditIcon,
   },
 
@@ -221,7 +227,7 @@ export default defineComponent({
 
     /** Image info */
     imageInfo(): string | null {
-      return this.fileInfo.basename || (<any>this.fileInfo).name;
+      return this.fileInfo?.basename || (<any>this.fileInfo)?.name;
     },
 
     imageInfoSub(): string[] | null {
@@ -275,7 +281,7 @@ export default defineComponent({
   methods: {
     async update(fileInfo: IFileInfo) {
       this.state = Math.random();
-      this.fileInfo = fileInfo;
+      this.fileInfo = null;
       this.exif = {};
 
       const state = this.state;
@@ -283,8 +289,9 @@ export default defineComponent({
       const res = await axios.get<any>(url);
       if (state !== this.state) return;
 
-      this.baseInfo = res.data;
+      this.fileInfo = fileInfo;
       this.exif = res.data.exif || {};
+      this.baseInfo = res.data;
     },
 
     handleFileUpdated({ fileid }) {
@@ -326,6 +333,14 @@ export default defineComponent({
         margin-right: 5px;
       }
     }
+  }
+}
+
+.loading-icon {
+  height: 75%;
+  :deep svg {
+    width: 60px;
+    height: 60px;
   }
 }
 

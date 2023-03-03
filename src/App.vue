@@ -9,7 +9,7 @@
     }"
   >
     <NcAppNavigation v-if="showNavigation" ref="nav">
-      <template id="app-memories-navigation" #list>
+      <template #list>
         <NcAppNavigationItem
           v-for="item in navItems"
           :key="item.name"
@@ -190,20 +190,17 @@ export default defineComponent({
           name: this.t("memories", "EXIF"),
           icon: "icon-details",
 
-          async mount(el, fileInfo, context) {
-            if (this.metadataComponent) {
-              this.metadataComponent.$destroy();
-            }
+          mount(el, fileInfo, context) {
+            this.metadataComponent?.$destroy?.();
             this.metadataComponent = new Vue(Metadata as any);
-            // Only mount after we have all the info we need
-            await this.metadataComponent.update(fileInfo);
             this.metadataComponent.$mount(el);
+            this.metadataComponent.update(fileInfo);
           },
           update(fileInfo) {
             this.metadataComponent.update(fileInfo);
           },
           destroy() {
-            this.metadataComponent.$destroy();
+            this.metadataComponent?.$destroy?.();
             this.metadataComponent = null;
           },
         })
