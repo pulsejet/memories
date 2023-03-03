@@ -18,7 +18,7 @@
         <NcActionRadio
           name="sort"
           :aria-label="t('memories', 'Sort by date')"
-          :checked="config_albumSort === 1"
+          :checked="config_albumListSort === 1"
           @change="changeSort(1)"
           close-after-click
         >
@@ -29,7 +29,7 @@
         <NcActionRadio
           name="sort"
           :aria-label="t('memories', 'Sort by name')"
-          :checked="config_albumSort === 2"
+          :checked="config_albumListSort === 2"
           @change="changeSort(2)"
           close-after-click
         >
@@ -200,8 +200,8 @@ export default defineComponent({
      * 1 = date, 2 = name
      */
     changeSort(order: 1 | 2) {
-      this.config_albumSort = order;
-      this.updateSetting("albumSort");
+      this.config_albumListSort = order;
+      this.updateSetting("albumListSort");
     },
   },
 });

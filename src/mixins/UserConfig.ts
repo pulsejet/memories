@@ -5,7 +5,7 @@ import { API } from "../services/API";
 import { defineComponent } from "vue";
 
 const eventName = "memories:user-config-changed";
-const localSettings = ["squareThumbs", "showFaceRect", "albumSort"];
+const localSettings = ["squareThumbs", "showFaceRect", "albumListSort"];
 
 export default defineComponent({
   name: "UserConfig",
@@ -45,7 +45,9 @@ export default defineComponent({
 
     config_squareThumbs: localStorage.getItem("memories_squareThumbs") === "1",
     config_showFaceRect: localStorage.getItem("memories_showFaceRect") === "1",
-    config_albumSort: Number(localStorage.getItem("memories_albumSort") || 1),
+    config_albumListSort: Number(
+      localStorage.getItem("memories_albumListSort") || 1
+    ),
 
     config_eventName: eventName,
   }),
