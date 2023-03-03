@@ -89,6 +89,11 @@ class ArchiveController extends ApiBase
                 break;
             }
 
+            // Hit the user's root folder
+            if ($parent->getPath() === $userFolder->getPath()) {
+                break;
+            }
+
             // Hit a storage root
             try {
                 if ($parent->getParent()->getStorage()->getId() !== $fileStorageId) {
