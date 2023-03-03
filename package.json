@@ -35,6 +35,7 @@
     "@nextcloud/vue": "7.4.0",
     "camelcase": "^7.0.1",
     "filerobot-image-editor": "^4.3.7",
+    "fuse.js": "^6.6.2",
     "justified-layout": "^4.1.0",
     "leaflet": "^1.9.3",
     "leaflet-edgebuffer": "^1.0.6",

@@ -1,5 +1,14 @@
 <template>
   <div class="outer" v-if="detail">
+    <div class="search">
+      <NcTextField
+        :value.sync="search"
+        :label="t('memories', 'Search')"
+        :placeholder="t('memories', 'Search')"
+        @input="searchChanged"
+      />
+    </div>
+
     <div class="photo" v-for="photo of detail" :key="photo.fileid">
       <Tag :data="photo" :noNavigate="true" @open="clickFace" />
     </div>
@@ -14,18 +23,25 @@ import { defineComponent } from "vue";
 import { IPhoto, ITag } from "../../types";
 import Tag from "../frame/Tag.vue";
 
+import NcTextField from "@nextcloud/vue/dist/Components/NcTextField";
+
 import * as dav from "../../services/DavRequests";
+import Fuse from "fuse.js";
 
 export default defineComponent({
   name: "FaceList",
   components: {
     Tag,
+    NcTextField,
   },
 
   data: () => ({
     user: "",
     name: "",
+    fullDetail: null as ITag[] | null,
     detail: null as ITag[] | null,
+    fuse: null as Fuse<ITag>,
+    search: "",
   }),
 
   watch: {
@@ -47,6 +63,8 @@ export default defineComponent({
       this.user = <string>this.$route.params.user || "";
       this.name = <string>this.$route.params.name || "";
       this.detail = null;
+      this.fullDetail = null;
+      this.search = "";
 
       let data = [];
       let flags = this.c.FLAG_IS_TAG;
@@ -63,14 +81,22 @@ export default defineComponent({
       });
       detail = detail.filter((photo: ITag) => {
         const pname = photo.name || photo.fileid.toString();
-        return photo.user_id !== this.user || pname !== this.name;
+        return photo.user_id === this.user && pname !== this.name;
       });
 
       this.detail = detail;
+      this.fullDetail = detail;
+      this.fuse = new Fuse(detail, { keys: ["name"] });
     },
 
     async clickFace(face: ITag) {
       this.$emit("select", face);
+    },
+
+    searchChanged() {
+      this.detail = this.search
+        ? this.fuse.search(this.search).map((r) => r.item)
+        : this.fullDetail;
     },
   },
 });
@@ -82,7 +108,12 @@ export default defineComponent({
   max-height: calc(90vh - 80px - 4em);
   overflow-x: hidden;
   overflow-y: auto;
+
+  .search {
+    margin-bottom: 10px;
+  }
 }
+
 .photo {
   display: inline-block;
   position: relative;
