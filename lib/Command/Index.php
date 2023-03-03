@@ -214,6 +214,14 @@ class Index extends Command
         }
         $this->output = $output;
 
+        // Reset mtime if forcing a refresh
+        if ($opts->refresh) {
+            $output->write('Forcing a refresh ... ');
+            $this->timelineWrite->resetAllMtime();
+            $output->writeln("all files will be reprocessed\n");
+        }
+
+        // Call indexing for each user
         $this->userManager->callForSeenUsers(function (IUser &$user) use (&$opts) {
             $this->generateUserEntries($user, $opts);
         });
@@ -328,7 +336,7 @@ class Index extends Command
         $res = 1;
 
         try {
-            $res = $this->timelineWrite->processFile($file, $opts->refresh);
+            $res = $this->timelineWrite->processFile($file);
 
             if ($opts->cleanup) {
                 $this->timelineWrite->unorphan($file);

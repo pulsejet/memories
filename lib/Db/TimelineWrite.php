@@ -103,7 +103,7 @@ class TimelineWrite
             $cursor->closeCursor();
         }
 
-        if ($prevRow && !$force && (int) $prevRow['mtime'] === $mtime) {
+        if (!$force && $prevRow && ((int) $prevRow['mtime'] === $mtime)) {
             return 1;
         }
 
