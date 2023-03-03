@@ -162,14 +162,13 @@ export default defineComponent({
         name: t("memories", "Archive"),
         icon: ArchiveIcon,
         callback: this.archiveSelection.bind(this),
-        if: () =>
-          this.allowArchive() && !this.routeIsArchive() && !this.routeIsAlbum(),
+        if: () => !this.routeIsArchive() && !this.routeIsAlbum(),
       },
       {
         name: t("memories", "Unarchive"),
         icon: UnarchiveIcon,
         callback: this.archiveSelection.bind(this),
-        if: () => this.allowArchive() && this.routeIsArchive(),
+        if: () => this.routeIsArchive(),
       },
       {
         name: t("memories", "Edit Date/Time"),
@@ -257,14 +256,21 @@ export default defineComponent({
       return this.state_noDownload;
     },
 
-    /** Archive is not allowed only on folder routes */
-    allowArchive() {
-      return this.$route.name !== "folders";
-    },
-
     /** Is archive route */
     routeIsArchive() {
-      return this.$route.name === "archive";
+      // Check if the route itself is archive
+      if (this.$route.name === "archive") {
+        return true;
+      }
+
+      // Check if route is folder and the path contains .archive
+      if (this.$route.name === "folders") {
+        let path = this.$route.params.path || "";
+        if (Array.isArray(path)) path = path.join("/");
+        return ("/" + path + "/").includes("/.archive/");
+      }
+
+      return false;
     },
 
     /** Is album route */
