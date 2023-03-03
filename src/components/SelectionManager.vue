@@ -53,6 +53,7 @@ import { defineComponent, PropType } from "vue";
 
 import { showError } from "@nextcloud/dialogs";
 
+import UserConfig from "../mixins/UserConfig";
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 
@@ -105,6 +106,8 @@ export default defineComponent({
 
     CloseIcon,
   },
+
+  mixins: [UserConfig],
 
   props: {
     heads: Object as PropType<{ [dayid: number]: IHeadRow }>,
