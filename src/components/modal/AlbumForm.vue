@@ -99,9 +99,11 @@
 import { defineComponent, PropType } from "vue";
 
 import { getCurrentUser } from "@nextcloud/auth";
+import { showError } from "@nextcloud/dialogs";
 import NcButton from "@nextcloud/vue/dist/Components/NcButton";
 import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
 const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
+
 import moment from "moment";
 import * as dav from "../../services/DavRequests";
 
@@ -178,6 +180,18 @@ export default defineComponent({
       if (this.albumName === "" || this.loading) {
         return;
       }
+
+      // Validate the album name, it shouldn't contain any slash
+      if (this.albumName.includes("/")) {
+        showError(
+          this.t(
+            "memories",
+            "Invalid album name; should not contain any slashes."
+          )
+        );
+        return;
+      }
+
       if (this.editMode) {
         this.handleUpdateAlbum();
       } else {
