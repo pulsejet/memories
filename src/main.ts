@@ -6,7 +6,6 @@ import VueVirtualScroller from "vue-virtual-scroller";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 import XImg from "./components/frame/XImg.vue";
 import GlobalMixin from "./mixins/GlobalMixin";
-import UserConfig from "./mixins/UserConfig";
 
 import App from "./App.vue";
 import router from "./router";
@@ -71,7 +70,6 @@ if (!globalThis.videoClientIdPersistent) {
 }
 
 Vue.mixin(GlobalMixin);
-Vue.mixin(UserConfig);
 Vue.use(VueVirtualScroller);
 Vue.component("XImg", XImg);
 

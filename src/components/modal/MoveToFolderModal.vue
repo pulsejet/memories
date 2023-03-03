@@ -23,6 +23,7 @@ import { getFilePickerBuilder, FilePickerType } from "@nextcloud/dialogs";
 import { showInfo } from "@nextcloud/dialogs";
 import { IPhoto } from "../../types";
 
+import UserConfig from "../../mixins/UserConfig";
 import Modal from "./Modal.vue";
 
 export default defineComponent({
@@ -30,6 +31,8 @@ export default defineComponent({
   components: {
     Modal,
   },
+
+  mixins: [UserConfig],
 
   data: () => ({
     photos: [] as IPhoto[],

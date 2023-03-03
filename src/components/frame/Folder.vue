@@ -34,6 +34,7 @@ import { IFolder, IPhoto } from "../../types";
 
 import { getPreviewUrl } from "../../services/FileUtils";
 
+import UserConfig from "../../mixins/UserConfig";
 import FolderIcon from "vue-material-design-icons/Folder.vue";
 
 export default defineComponent({
@@ -41,6 +42,8 @@ export default defineComponent({
   components: {
     FolderIcon,
   },
+
+  mixins: [UserConfig],
 
   props: {
     data: Object as PropType<IFolder>,

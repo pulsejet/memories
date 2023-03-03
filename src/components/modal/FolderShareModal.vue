@@ -47,6 +47,8 @@ import { defineComponent } from "vue";
 
 import axios from "@nextcloud/axios";
 import { generateOcsUrl, generateUrl } from "@nextcloud/router";
+
+import UserConfig from "../../mixins/UserConfig";
 import NcButton from "@nextcloud/vue/dist/Components/NcButton";
 
 import * as utils from "../../services/Utils";
@@ -59,6 +61,8 @@ export default defineComponent({
     Modal,
     NcButton,
   },
+
+  mixins: [UserConfig],
 
   data: () => ({
     show: false,

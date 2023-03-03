@@ -59,6 +59,7 @@ const NcAppNavigationItem = () =>
 import { generateUrl } from "@nextcloud/router";
 import { translate as t } from "@nextcloud/l10n";
 
+import UserConfig from "./mixins/UserConfig";
 import Timeline from "./components/Timeline.vue";
 import Settings from "./components/Settings.vue";
 import FirstStart from "./components/FirstStart.vue";
@@ -102,6 +103,8 @@ export default defineComponent({
     MapIcon,
     CogIcon,
   },
+
+  mixins: [UserConfig],
 
   data: () => ({
     navItems: [],

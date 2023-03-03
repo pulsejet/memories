@@ -97,6 +97,8 @@ input[type="text"] {
 import { defineComponent } from "vue";
 
 import { getFilePickerBuilder } from "@nextcloud/dialogs";
+
+import UserConfig from "../mixins/UserConfig";
 const NcAppSettingsDialog = () =>
   import("@nextcloud/vue/dist/Components/NcAppSettingsDialog");
 const NcAppSettingsSection = () =>
@@ -115,6 +117,8 @@ export default defineComponent({
     NcCheckboxRadioSwitch,
     MultiPathSelectionModal,
   },
+
+  mixins: [UserConfig],
 
   props: {
     open: {

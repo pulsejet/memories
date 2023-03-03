@@ -49,6 +49,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
+import UserConfig from "../mixins/UserConfig";
 import NcContent from "@nextcloud/vue/dist/Components/NcContent";
 import NcAppContent from "@nextcloud/vue/dist/Components/NcAppContent";
 import NcButton from "@nextcloud/vue/dist/Components/NcButton";
@@ -68,6 +69,8 @@ export default defineComponent({
     NcAppContent,
     NcButton,
   },
+
+  mixins: [UserConfig],
 
   data: () => ({
     banner,

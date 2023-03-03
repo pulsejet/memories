@@ -141,6 +141,8 @@ import NcEmptyContent from "@nextcloud/vue/dist/Components/NcEmptyContent";
 
 import { getLayout } from "../services/Layout";
 import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";
+
+import UserConfig from "../mixins/UserConfig";
 import Folder from "./frame/Folder.vue";
 import Photo from "./frame/Photo.vue";
 import Tag from "./frame/Tag.vue";
@@ -182,6 +184,8 @@ export default defineComponent({
     PeopleIcon,
     ImageMultipleIcon,
   },
+
+  mixins: [UserConfig],
 
   data: () => ({
     /** Loading days response */
