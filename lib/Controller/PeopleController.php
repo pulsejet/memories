@@ -129,15 +129,14 @@ class PeopleController extends ApiBase
 
         // Run actual query
         $currentModel = (int) $this->config->getAppValue('facerecognition', 'model', -1);
-        $list = $this->timelineQuery->getPeopleFaceRecognition(
+        $list = $this->timelineQuery->getFaceRecognitionPersons(
             $root,
-            $currentModel,
+            $currentModel
         );
         // Just append unnamed clusters to the end.
-        $list = array_merge($list, $this->timelineQuery->getPeopleFaceRecognition(
+        $list = array_merge($list, $this->timelineQuery->getFaceRecognitionClusters(
             $root,
-            $currentModel,
-            true
+            $currentModel
         ));
 
         return new JSONResponse($list, Http::STATUS_OK);
