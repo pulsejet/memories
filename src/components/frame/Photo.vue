@@ -134,6 +134,11 @@ export default defineComponent({
   /** Clear timers */
   beforeDestroy() {
     clearTimeout(this.touchTimer);
+
+    // Clean up blob url if face rect was created
+    if (this.hasFaceRect) {
+      URL.revokeObjectURL(this.src);
+    }
   },
 
   computed: {
