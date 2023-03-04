@@ -142,6 +142,8 @@ OC.L10N.register(
     "Remove" : "Entfernen",
     "Add Path" : "Pfad hinzufügen",
     "Add a root to your timeline" : "Einen Start Ihrer Zeitleiste hinzufügen",
+    "Sort by date" : "Nach Datum sortieren",
+    "Sort by name" : "Nach Namen sortieren",
     "Share album" : "Album teilen",
     "Download album" : "Album herunterladen",
     "Delete album" : "Album löschen",

@@ -15,6 +15,7 @@ OC.L10N.register(
     "Back" : "ຫຼັງ",
     "Save" : "ບັນທຶກ",
     "Name" : "ຊື່",
+    "Search" : "ຄົ້ນຫາ",
     "Loading …" : "ກຳລັງໂຫຼດ",
     "Refresh" : "Refresh",
     "Remove" : "ຍ້າຍອອກ",

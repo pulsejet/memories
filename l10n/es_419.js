@@ -29,6 +29,8 @@ OC.L10N.register(
     "Update" : "Actualizar",
     "Refresh" : "Actualizar",
     "Remove" : "Eliminar",
+    "Sort by date" : "Ordenar por fecha",
+    "Sort by name" : "Ordenar por nombre",
     "Unsaved changes" : "Cambios no guardados",
     "Share" : "Compartir",
     "Close" : "Cerrar",

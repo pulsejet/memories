@@ -30,6 +30,8 @@ OC.L10N.register(
     "Loading …" : "Ŝargas …",
     "Refresh" : "Aktualigi",
     "Remove" : "Forigi",
+    "Sort by date" : "Ordigi laŭ dato",
+    "Sort by name" : "Ordigi laŭ nomo",
     "Unsaved changes" : "Nekonservitaj ŝanĝoj",
     "Share" : "Kunhavigi",
     "Close" : "Malfermi",

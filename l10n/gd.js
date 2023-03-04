@@ -14,6 +14,7 @@ OC.L10N.register(
     "Back" : "Air ais",
     "Save" : "Sàbhail",
     "Name" : "Ainm",
+    "Search" : "Lorg",
     "Refresh" : "Ath-nuadhaich",
     "Remove" : "Thoir air falbh",
     "Share" : "Co-roinn",

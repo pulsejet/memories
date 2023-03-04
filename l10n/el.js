@@ -47,6 +47,8 @@ OC.L10N.register(
     "Loading …" : "Φόρτωση …",
     "Refresh" : "Ανανέωση",
     "Remove" : "Αφαίρεση",
+    "Sort by date" : "Ταξινόμηση κατά ημερομηνία",
+    "Sort by name" : "Ταξινόμηση κατά όνομα",
     "Delete album" : "Διαγραφή άλμπουμ",
     "Share folder" : "Διαμοιρασμός φακέλου",
     "Unsaved changes" : "Μη αποθηκευμένες αλλαγές",

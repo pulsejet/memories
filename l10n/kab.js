@@ -16,6 +16,7 @@ OC.L10N.register(
     "Hour" : "Asrag",
     "Title" : "Azwel",
     "Name" : "Nom",
+    "Search" : "Nadi",
     "Refresh" : "Sismeḍ",
     "Remove" : "Kkes",
     "Share" : "Bḍu",

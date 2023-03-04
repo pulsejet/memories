@@ -26,6 +26,8 @@ OC.L10N.register(
     "Loading …" : "Yn llwytho …",
     "Refresh" : "Ail-lwytho",
     "Remove" : "Gwaredu",
+    "Sort by date" : "Order by date",
+    "Sort by name" : "Order by name",
     "Share" : "Rhannu",
     "Close" : "Cau",
     "Previous" : "Blaenorol",

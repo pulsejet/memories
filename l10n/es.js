@@ -142,6 +142,8 @@ OC.L10N.register(
     "Remove" : "Quitar",
     "Add Path" : "Añadir ruta",
     "Add a root to your timeline" : "Añadir una raíz a su línea de tiempo",
+    "Sort by date" : "Ordenar por fecha",
+    "Sort by name" : "Ordenar por nombre",
     "Share album" : "Compartir álbum",
     "Download album" : "Descargar álbum",
     "Delete album" : "Eliminar álbum",

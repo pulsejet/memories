@@ -54,6 +54,8 @@ OC.L10N.register(
     "Loading …" : "Loading …",
     "Refresh" : "Opdater",
     "Remove" : "Fjern",
+    "Sort by date" : "Order by date",
+    "Sort by name" : "Order by name",
     "Share folder" : "Del mappe",
     "Unsaved changes" : "Ikke gemte ændringer",
     "Share" : "Del",

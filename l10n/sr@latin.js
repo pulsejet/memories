@@ -17,8 +17,11 @@ OC.L10N.register(
     "Description" : "Opis",
     "Name" : "Ime",
     "Update" : "Ažuriraj",
+    "Search" : "Traži",
     "Refresh" : "Osveži",
     "Remove" : "Ukloni",
+    "Sort by date" : "Order by date",
+    "Sort by name" : "Order by name",
     "Share" : "Podeli",
     "Close" : "Zatvori",
     "Undo" : "Opozovi"

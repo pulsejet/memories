@@ -14,6 +14,7 @@ OC.L10N.register(
     "Back" : "Yzyna",
     "Save" : "Saklamak",
     "Name" : "Ady",
+    "Search" : "Gözlemek",
     "Refresh" : "Täzelemek",
     "Remove" : "Aýyrmak",
     "Share" : "Paýlaş",

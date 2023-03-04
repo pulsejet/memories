@@ -20,6 +20,7 @@ OC.L10N.register(
     "Copyright" : "ප්‍රකාශන හිමිකම",
     "Name" : "නම",
     "Update" : "යාවත්කාල",
+    "Search" : "සොයන්න",
     "Loading …" : "පූරණය වෙමින් …",
     "Remove" : "ඉවත් කරන්න",
     "Share" : "බෙදාගන්න",

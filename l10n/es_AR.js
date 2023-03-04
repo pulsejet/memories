@@ -32,6 +32,8 @@ OC.L10N.register(
     "Loading …" : "Cargando …",
     "Refresh" : "Recargar",
     "Remove" : "Borrar",
+    "Sort by date" : "Ordenar por fecha",
+    "Sort by name" : "Ordenar por nombre",
     "Share" : "Compartir",
     "Close" : "Cerrar",
     "Previous" : "Anterior",
