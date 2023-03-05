@@ -101,6 +101,7 @@ OC.L10N.register(
     "Name" : "Izena",
     "Rename person" : "Berridatzi pertsonaren izena",
     "Update" : "Eguneratu",
+    "Failed to rename {oldName} to {name}." : "{oldName} {name}(e)ra aldatzeak huts egin du.",
     "Search" : "Bilatu",
     "Loading …" : "Kargatzen …",
     "Too many failures, aborting" : "Hutsegite gehiegi, abortatzen",

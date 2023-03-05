@@ -26,6 +26,7 @@ OC.L10N.register(
     "Label" : "Etiket",
     "Name" : "Naam",
     "Update" : "Werk by",
+    "Search" : "Soek",
     "Loading …" : "Laai …",
     "Refresh" : "Verfris",
     "Remove" : "Verwyder",

@@ -23,6 +23,7 @@ OC.L10N.register(
     "Label" : "Tiketenn",
     "Name" : "Anv",
     "Update" : "Hizivaat",
+    "Search" : "Klask",
     "Loading …" : "O Kargañ ...",
     "Refresh" : "Freskaat",
     "Remove" : "Lemel",

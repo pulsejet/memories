@@ -23,6 +23,7 @@ OC.L10N.register(
     "Description" : "Disgrifiad",
     "Name" : "Enw",
     "Update" : "Diweddaru",
+    "Search" : "Chwilio",
     "Loading …" : "Yn llwytho …",
     "Refresh" : "Ail-lwytho",
     "Remove" : "Gwaredu",
