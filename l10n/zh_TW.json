@@ -92,6 +92,7 @@
     "Add collaborators" : "新增協作者",
     "Save" : "儲存",
     "Create album" : "建立相簿",
+    "Invalid album name; should not contain any slashes." : "無效的相簿名稱；不應包含任何斜線。",
     "Add selection to album {albumName}" : "新增選取範圍至相簿 {albumName}",
     "Create a new album." : "建立新相簿。",
     "_Share with %n user_::_Share with %n users_" : ["與 %n 個使用者分享"],

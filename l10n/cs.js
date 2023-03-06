@@ -93,6 +93,7 @@ OC.L10N.register(
     "Add collaborators" : "Přidat spolupracující",
     "Save" : "Uložit",
     "Create album" : "Vytvořit album",
+    "Invalid album name; should not contain any slashes." : "Nesprávný název alba; nesmí obsahovat lomítka.",
     "Add selection to album {albumName}" : "Přidat výběr do alba {albumName}",
     "Create a new album." : "Vytvořit nové album.",
     "_Share with %n user_::_Share with %n users_" : ["Nasdílet %n uživateli","Nasdílet %n uživatelům","Nasdílet %n uživatelům","Nasdílet %n uživatelům"],
