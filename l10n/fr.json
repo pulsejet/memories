@@ -92,6 +92,7 @@
     "Add collaborators" : "Ajouter des collaborateurs",
     "Save" : "Enregistrer",
     "Create album" : "Créer un album",
+    "Invalid album name; should not contain any slashes." : "Nom d'album invalide ; il ne devrait pas contenir de slash.",
     "Add selection to album {albumName}" : "Ajouter la sélection à l'album {albumName}",
     "Create a new album." : "Créer un nouvel album",
     "_Share with %n user_::_Share with %n users_" : ["Partager avec %n utilisateur","Partager avec %n utilisateurs","Partager avec %n utilisateurs"],
