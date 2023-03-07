@@ -59,8 +59,8 @@ class TimelineWrite
     /**
      * Process a file to insert Exif data into the database.
      *
-     * @param File $file File node to process
-     * @param int $force 0 = none, 1 = force, 2 = force if orphan
+     * @param File $file  File node to process
+     * @param int  $force 0 = none, 1 = force, 2 = force if orphan
      *
      * @return int 2 if processed, 1 if skipped, 0 if not valid
      */
@@ -109,11 +109,11 @@ class TimelineWrite
         // Check if a forced update is required
         $isForced = (1 === $force);
         if (2 === $force) {
-            $isForced = !$prevRow ||
+            $isForced = !$prevRow
                         // Could be live video, force regardless
-                        !\array_key_exists('orphan', $prevRow) ||
+                        || !\array_key_exists('orphan', $prevRow)
                         // If orphan, force for sure
-                        $prevRow['orphan'];
+                        || $prevRow['orphan'];
         }
 
         // Skip if not forced and file has not changed
