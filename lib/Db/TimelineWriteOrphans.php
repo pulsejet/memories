@@ -13,18 +13,6 @@ trait TimelineWriteOrphans
     protected IDBConnection $connection;
 
     /**
-     * Set the mtime of all files in the table to -1.
-     */
-    public function resetAllMtime()
-    {
-        $query = $this->connection->getQueryBuilder();
-        $query->update('memories')
-            ->set('mtime', $query->createNamedParameter(-1, IQueryBuilder::PARAM_INT))
-        ;
-        $query->executeStatement();
-    }
-
-    /**
      * Mark a file as not orphaned.
      */
     public function unorphan(File &$file)

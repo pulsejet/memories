@@ -59,11 +59,14 @@ class TimelineWrite
     /**
      * Process a file to insert Exif data into the database.
      *
+     * @param File $file File node to process
+     * @param int $force 0 = none, 1 = force, 2 = force if orphan
+     *
      * @return int 2 if processed, 1 if skipped, 0 if not valid
      */
     public function processFile(
         File &$file,
-        bool $force = false
+        int $force = 0
     ): int {
         // There is no easy way to UPSERT in a standard SQL way, so just
         // do multiple calls. The worst that can happen is more updates,
@@ -83,7 +86,7 @@ class TimelineWrite
 
         // Check if need to update
         $query = $this->connection->getQueryBuilder();
-        $query->select('fileid', 'mtime', 'mapcluster')
+        $query->select('fileid', 'mtime', 'mapcluster', 'orphan')
             ->from('memories')
             ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
         ;
@@ -103,7 +106,18 @@ class TimelineWrite
             $cursor->closeCursor();
         }
 
-        if (!$force && $prevRow && ((int) $prevRow['mtime'] === $mtime)) {
+        // Check if a forced update is required
+        $isForced = (1 === $force);
+        if (2 === $force) {
+            $isForced = !$prevRow ||
+                        // Could be live video, force regardless
+                        !\array_key_exists('orphan', $prevRow) ||
+                        // If orphan, force for sure
+                        $prevRow['orphan'];
+        }
+
+        // Skip if not forced and file has not changed
+        if (!$isForced && $prevRow && ((int) $prevRow['mtime'] === $mtime)) {
             return 1;
         }
 

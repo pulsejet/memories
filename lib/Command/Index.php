@@ -173,8 +173,9 @@ class Index extends Command
         }
 
         // Orphan all entries so we can delete them later
-        if ($opts->cleanup) {
-            $output->write('Marking all entries for cleanup ... ');
+        // Refresh works similarly, with a different flag on the process call
+        if ($opts->cleanup || $opts->refresh) {
+            $output->write('Marking all entries for refresh / cleanup ... ');
             $count = $this->timelineWrite->orphanAll();
             $output->writeln("{$count} marked");
         }
@@ -214,20 +215,13 @@ class Index extends Command
         }
         $this->output = $output;
 
-        // Reset mtime if forcing a refresh
-        if ($opts->refresh) {
-            $output->write('Forcing a refresh ... ');
-            $this->timelineWrite->resetAllMtime();
-            $output->writeln("all files will be reprocessed\n");
-        }
-
         // Call indexing for each user
         $this->userManager->callForSeenUsers(function (IUser &$user) use (&$opts) {
             $this->generateUserEntries($user, $opts);
         });
 
         // Clear orphans if asked for this
-        if ($opts->cleanup) {
+        if ($opts->cleanup || $opts->refresh) {
             $output->write('Deleting orphaned entries ... ');
             $count = $this->timelineWrite->removeOrphans();
             $output->writeln("{$count} deleted");
@@ -338,9 +332,17 @@ class Index extends Command
         $res = 1;
 
         try {
-            $res = $this->timelineWrite->processFile($file);
+            // If refreshing the index, force reprocessing
+            // when the file is still an orphan. this way, the
+            // files are reprocessed exactly once
+            $force = $opts->refresh ? 2 : 0;
 
-            if ($opts->cleanup) {
+            // (re-)process the file
+            $res = $this->timelineWrite->processFile($file, $force);
+
+            // If the file was processed successfully,
+            // remove it from the orphan list
+            if ($opts->cleanup || $opts->refresh) {
                 $this->timelineWrite->unorphan($file);
             }
         } catch (\Error $e) {
