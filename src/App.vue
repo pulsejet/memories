@@ -190,7 +190,7 @@ export default defineComponent({
       OCA.Files.Sidebar.registerTab(
         new OCA.Files.Sidebar.Tab({
           id: "memories-metadata",
-          name: this.t("memories", "EXIF"),
+          name: this.t("memories", "Info"),
           icon: "icon-details",
 
           mount(el, fileInfo, context) {
