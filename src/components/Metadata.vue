@@ -70,6 +70,7 @@ import CameraIrisIcon from "vue-material-design-icons/CameraIris.vue";
 import ImageIcon from "vue-material-design-icons/Image.vue";
 import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
 import LocationIcon from "vue-material-design-icons/MapMarker.vue";
+import TagIcon from "vue-material-design-icons/Tag.vue";
 import { API } from "../services/API";
 
 interface TopField {
@@ -150,6 +151,14 @@ export default defineComponent({
           subtitle: [],
           icon: LocationIcon,
           href: this.mapFullUrl,
+        });
+      }
+
+      if (this.tagNamesStr) {
+        list.push({
+          title: this.tagNamesStr,
+          subtitle: [],
+          icon: TagIcon,
         });
       }
 
@@ -261,6 +270,14 @@ export default defineComponent({
       return this.exif["GPSLongitude"];
     },
 
+    tagNames(): string[] {
+      return Object.values(this.baseInfo?.tags || {});
+    },
+
+    tagNamesStr(): string {
+      return this.tagNames.length > 0 ? this.tagNames.join(", ") : null;
+    },
+
     mapUrl(): string | null {
       const boxSize = 0.0075;
       const bbox = [
@@ -304,6 +321,12 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.outer {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .top-field {
   margin: 10px;
   margin-bottom: 25px;

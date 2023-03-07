@@ -192,6 +192,11 @@ class ImageController extends ApiBase
         // Get the image info
         $info = $this->timelineQuery->getInfoById($file->getId(), $basic);
 
+        // Get list of tags for this file
+        if (!$basic) {
+            $info['tags'] = $this->getTags($file->getId());
+        }
+
         // Get latest exif data if requested
         // Allow this ony for logged in users
         if ($current && null !== $this->userSession->getUser()) {
@@ -278,5 +283,31 @@ class ImageController extends ApiBase
         $response->cacheFor(3600 * 24, false, false);
 
         return $response;
+    }
+
+    /**
+     * Get the tags for a file.
+     */
+    private function getTags(int $fileId): array
+    {
+        // Make sure tags are enabled
+        if (!\OCA\Memories\Util::tagsIsEnabled($this->appManager)) {
+            return [];
+        }
+
+        // Get the tag ids for this file
+        $objectMapper = \OC::$server->get(\OCP\SystemTag\ISystemTagObjectMapper::class);
+        $tagIds = $objectMapper->getTagIdsForObjects([$fileId], 'files')[(string) $fileId];
+
+        // Get the tag names and filter out the ones that are not user visible
+        $tagManager = \OC::$server->get(\OCP\SystemTag\ISystemTagManager::class);
+
+        /** @var \OCP\SystemTag\ISystemTag[] */
+        $tags = $tagManager->getTagsByIds($tagIds);
+        return array_map(function ($tag) {
+            return $tag->getName();
+        }, array_filter($tags, function ($tag) {
+            return $tag->isUserVisible();
+        }));
     }
 }
