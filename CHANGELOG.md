@@ -2,6 +2,13 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## v4.12.0, v3.12.0
+
+- **Feature**: Configurable album sorting order ([#377](https://github.com/pulsejet/memories/issues/377))
+- **Feature**: Allow archiving photos throw folder view ([#350](https://github.com/pulsejet/memories/issues/350))
+- **Feature**: Add search bar to face cluster merge dialog ([#177](https://github.com/pulsejet/memories/issues/177))
+- Other fixes and features ([milestone](https://github.com/pulsejet/memories/milestone/9?closed=1))
+
 ## v4.11.0, v3.11.0 (2023-02-10)
 
 - **Feature**: Show map of photos ([#396](https://github.com/pulsejet/memories/pull/396))  
