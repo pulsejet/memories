@@ -24,7 +24,9 @@ trait TimelineWritePlaces
         $gisType = \OCA\Memories\Util::placesGISType();
 
         // Check if valid
-        if ($gisType <= 0) return;
+        if ($gisType <= 0) {
+            return;
+        }
 
         // Delete previous records
         $query = $this->connection->getQueryBuilder();
