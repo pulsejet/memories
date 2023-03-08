@@ -229,11 +229,13 @@ export default defineComponent({
     margin-bottom: -10px;
 
     > .coords {
+      display: inline-block;
+      flex-grow: 1;
+      min-height: 36px;
+
       > span {
         user-select: all;
       }
-      display: inline-block;
-      flex-grow: 1;
     }
 
     > .action {
