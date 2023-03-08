@@ -2,15 +2,20 @@ import { CacheExpiration } from "workbox-expiration";
 import { API } from "../../services/API";
 import axios from "@nextcloud/axios";
 
+type BlobCallback = (blob: Blob) => void;
+
 // Queue of requests to fetch preview images
-interface FetchPreviewObject {
+type FetchPreviewObject = {
   origUrl: string;
   url: URL;
   fileid: number;
   reqid: number;
-  callback: (blob: Response) => void;
-}
+  done?: boolean;
+};
 let fetchPreviewQueue: FetchPreviewObject[] = [];
+
+// Pending requests
+const pendingUrls = new Map<string, BlobCallback[]>();
 
 // Cache for preview images
 const cacheName = "images";
@@ -30,22 +35,33 @@ let fetchPreviewTimer: any;
 
 /** Flushes the queue of preview image requests */
 async function flushPreviewQueue() {
-  if (fetchPreviewQueue.length === 0) return;
-
   // Clear timer
   if (fetchPreviewTimer) {
     window.clearTimeout(fetchPreviewTimer);
     fetchPreviewTimer = 0;
   }
 
+  // Check if queue is empty
+  if (fetchPreviewQueue.length === 0) return;
+
   // Copy queue and clear
   const fetchPreviewQueueCopy = fetchPreviewQueue;
   fetchPreviewQueue = [];
 
+  // Make callbacks and erase pending
+  const makeCallbacks = async (url: string, res: Response) => {
+    cacheResponse(url, res);
+    const blob = await res.blob();
+    pendingUrls.get(url)?.forEach((cb) => cb?.(blob));
+    pendingUrls.delete(url);
+  };
+
   // Check if only one request
   if (fetchPreviewQueueCopy.length === 1) {
     const p = fetchPreviewQueueCopy[0];
-    return p.callback(await fetchOneImage(p.origUrl));
+    const res = await fetchOneImage(p.origUrl);
+    makeCallbacks(p.origUrl, res);
+    return;
   }
 
   // Create aggregated request body
@@ -82,10 +98,10 @@ async function flushPreviewQueue() {
 
       // Initiate callbacks
       fetchPreviewQueueCopy
-        .filter((p) => p.reqid === reqid)
+        .filter((p) => p.reqid === reqid && !p.done)
         .forEach((p) => {
-          p.callback?.(getResponse(imgBlob, imgType, res.headers));
-          p.callback = null;
+          makeCallbacks(p.origUrl, getResponse(imgBlob, imgType, res.headers));
+          p.done = true;
         });
     }
   } catch (e) {
@@ -93,14 +109,12 @@ async function flushPreviewQueue() {
   }
 
   // Initiate callbacks for failed requests
-  fetchPreviewQueueCopy.forEach((fetchPreviewObject) => {
-    fetchPreviewObject.callback?.(
-      new Response("Image not found", {
-        status: 404,
-        statusText: "Image not found",
-      })
-    );
-  });
+  fetchPreviewQueueCopy
+    .filter((p) => !p.done)
+    .forEach(async (p) => {
+      // Fallback to single request
+      makeCallbacks(p.origUrl, await fetchOneImage(p.origUrl));
+    });
 }
 
 /** Accepts a URL and returns a promise with a blob */
@@ -113,53 +127,60 @@ export async function fetchImage(url: string): Promise<Blob> {
   const urlObj = new URL(url, window.location.origin);
   const fileid = Number(urlObj.pathname.split("/").pop());
 
-  // Check if preview image
+  // Just fetch if not a preview
   const regex = /^.*\/apps\/memories\/api\/image\/preview\/.*/;
 
-  // Aggregate requests
-  let res: Response;
+  if (!regex.test(url)) {
+    const res = await fetchOneImage(url);
+    cacheResponse(url, res);
+    return await res.blob();
+  }
 
-  if (regex.test(url)) {
-    res = await new Promise((callback) => {
+  return await new Promise((callback) => {
+    if (pendingUrls.has(url)) {
+      // Already in queue, just add callback
+      pendingUrls.get(url)?.push(callback);
+    } else {
       // Add to queue
       fetchPreviewQueue.push({
         origUrl: url,
         url: urlObj,
         fileid,
         reqid: Math.random(),
-        callback,
       });
+
+      // Add to pending
+      pendingUrls.set(url, [callback]);
 
       // Start timer for flushing queue
       if (!fetchPreviewTimer) {
-        fetchPreviewTimer = setTimeout(flushPreviewQueue, 10);
+        fetchPreviewTimer = window.setTimeout(flushPreviewQueue, 20);
       }
 
       // If queue has >10 items, flush immediately
       // This will internally clear the timer
-      if (fetchPreviewQueue.length >= 10) {
+      if (fetchPreviewQueue.length >= 20) {
         flushPreviewQueue();
       }
-    });
-  }
+    }
+  });
+}
 
-  // Fallback to single request
-  if (!res || res.status !== 200) {
-    res = await fetchOneImage(url);
-  }
+function cacheResponse(url: string, res: Response) {
+  try {
+    // Cache valid responses
+    if (res.status === 200) {
+      imageCache?.put(url, res.clone());
+      expirationManager.updateTimestamp(url.toString());
+    }
 
-  // Cache response
-  if (res.status === 200) {
-    imageCache?.put(url, res.clone());
-    expirationManager.updateTimestamp(url.toString());
+    // Run expiration once in every 100 requests
+    if (Math.random() < 0.01) {
+      expirationManager.expireEntries();
+    }
+  } catch (e) {
+    console.error("Error caching response", e);
   }
-
-  // Run expiration once in every 100 requests
-  if (Math.random() < 0.01) {
-    expirationManager.expireEntries();
-  }
-
-  return await res.blob();
 }
 
 /** Creates a dummy response from a blob and headers */

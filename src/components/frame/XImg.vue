@@ -90,6 +90,7 @@ export default defineComponent({
       } catch (error) {
         this.dataSrc = BLANK_IMG;
         this.$emit("error", error);
+        console.error(error);
       }
     },
 
