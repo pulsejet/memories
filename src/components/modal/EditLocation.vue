@@ -153,6 +153,7 @@ export default defineComponent({
       return {
         GPSLatitude: this.lat,
         GPSLongitude: this.lon,
+        GPSCoordinates: `${this.lat.toFixed(6)}, ${this.lon.toFixed(6)}`,
       };
     },
   },

@@ -377,9 +377,11 @@ export default defineComponent({
 
     /** Event on file changed */
     handleFileUpdated({ fileid }: { fileid: number }) {
-      if (this.currentPhoto && this.currentPhoto.fileid === fileid) {
-        this.currentPhoto.etag += "_";
-        this.currentPhoto.imageInfo = null;
+      const photo = this.currentPhoto;
+      const isvideo = photo && photo.flag & this.c.FLAG_IS_VIDEO;
+      if (photo && !isvideo && photo.fileid === fileid) {
+        photo.etag += "_";
+        photo.imageInfo = null;
         this.photoswipe.refreshSlideContent(this.currIndex);
       }
     },
