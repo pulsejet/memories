@@ -22,16 +22,13 @@
         :lat-lng="cluster.center"
         @click="zoomTo(cluster)"
       >
-        <LIcon
-          :icon-anchor="[24, 24]"
-          :className="clusterIconClass(cluster)"
-          v-once
-        >
+        <LIcon :icon-anchor="[24, 24]" :className="clusterIconClass(cluster)">
           <div class="preview">
             <div class="count" v-if="cluster.count > 1">
               {{ cluster.count }}
             </div>
             <XImg
+              v-once
               :src="clusterPreviewUrl(cluster)"
               :class="[
                 'thumb-important',
