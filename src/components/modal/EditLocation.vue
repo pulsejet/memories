@@ -1,13 +1,30 @@
 <template>
   <div class="outer">
     <div class="lat-lon">
-      <span>{{ loc }}</span> {{ dirty ? "*" : "" }}
+      <div class="coords">
+        <span>{{ loc }}</span> {{ dirty ? "*" : "" }}
+      </div>
 
       <div class="action">
-        <UndoIcon :size="20" v-if="dirty" @click="reset" />
-      </div>
-      <div class="action">
-        <CloseIcon :size="20" v-if="lat && lon" @click="clear" />
+        <NcActions :inline="2">
+          <NcActionButton
+            v-if="dirty"
+            :aria-label="t('memories', 'Reset')"
+            @click="reset()"
+          >
+            {{ t("memories", "Reset") }}
+            <template #icon> <UndoIcon :size="20" /> </template>
+          </NcActionButton>
+
+          <NcActionButton
+            v-if="lat && lon"
+            :aria-label="t('memories', 'Remove location')"
+            @click="clear()"
+          >
+            {{ t("memories", "Remove location") }}
+            <template #icon> <CloseIcon :size="20" /> </template>
+          </NcActionButton>
+        </NcActions>
       </div>
     </div>
 
@@ -43,6 +60,8 @@
         v-for="option in options"
         :key="option.osm_id"
         @click="select(option)"
+        @keypress.enter="select(option)"
+        tabindex="0"
       >
         {{ option.display_name }}
       </li>
@@ -57,6 +76,8 @@ import { IPhoto } from "../../types";
 import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 
+import NcActions from "@nextcloud/vue/dist/Components/NcActions";
+import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
 const NcListItem = () => import("@nextcloud/vue/dist/Components/NcListItem");
 import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
@@ -76,6 +97,8 @@ type NLocation = {
 
 export default defineComponent({
   components: {
+    NcActions,
+    NcActionButton,
     NcTextField,
     NcListItem,
     NcLoadingIcon,
@@ -201,14 +224,20 @@ export default defineComponent({
   margin-bottom: 10px;
 
   .lat-lon {
+    display: flex;
     padding: 4px;
+    margin-bottom: -10px;
 
-    > span {
-      user-select: all;
+    > .coords {
+      > span {
+        user-select: all;
+      }
+      display: inline-block;
+      flex-grow: 1;
     }
 
     > .action {
-      float: right;
+      margin-top: -10px;
       margin-left: 2px;
       > * {
         cursor: pointer;
