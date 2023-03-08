@@ -304,6 +304,7 @@ class ImageController extends ApiBase
 
         /** @var \OCP\SystemTag\ISystemTag[] */
         $tags = $tagManager->getTagsByIds($tagIds);
+
         return array_map(function ($tag) {
             return $tag->getName();
         }, array_filter($tags, function ($tag) {
