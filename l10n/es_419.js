@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Ajustes",
+    "Info" : "Info",
     "Folders" : "Carpetas",
     "Favorites" : "Favoritos",
     "Videos" : "Videos",
@@ -25,8 +26,10 @@ OC.L10N.register(
     "Description" : "Descripción",
     "Label" : "Etiqueta",
     "Copyright" : "Derechos de autor",
+    "Empty" : "Vacío",
     "Name" : "Nombre",
     "Update" : "Actualizar",
+    "Search" : "Buscar",
     "Refresh" : "Actualizar",
     "Remove" : "Eliminar",
     "Sort by date" : "Ordenar por fecha",

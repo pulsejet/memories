@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "سیٹینگز",
+    "Info" : "Info",
     "Favorites" : "Favorites",
     "Edit" : "تدوین کریں",
     "Cancel" : "منسوخ کریں",

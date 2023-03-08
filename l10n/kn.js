@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "ಆಯ್ಕೆ",
+    "Info" : "Info",
     "Favorites" : "ಅಚ್ಚುಮೆಚ್ಚಿನ",
     "Edit" : "ಸಂಪಾದಿಸು",
     "Cancel" : "﻿ರದ್ದು",

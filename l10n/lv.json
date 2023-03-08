@@ -1,6 +1,6 @@
 { "translations": {
     "Settings" : "Iestatījumi",
-    "EXIF" : "EXIF",
+    "Info" : "Info",
     "Folders" : "Mapes",
     "Favorites" : "Favorīti",
     "Videos" : "Video",
@@ -31,6 +31,7 @@
     "Description" : "Apraksts",
     "Label" : "Etiķete",
     "Copyright" : "Autortiesības",
+    "Empty" : "Tukšs",
     "Name" : "Vārds",
     "Update" : "Atjaunināt",
     "Search" : "Meklēt",
@@ -62,6 +63,7 @@
     "Fit size" : "Atbilst izmēram",
     "Direct" : "Tieši",
     "Auto" : "Automātiski",
-    "Shared Folder" : "Koplietotā mape"
+    "Shared Folder" : "Koplietotā mape",
+    "EXIF" : "EXIF"
 },"pluralForm" :"nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);"
 }

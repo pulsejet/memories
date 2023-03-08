@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Innstillingar",
+    "Info" : "Info",
     "Favorites" : "Favorittar",
     "Videos" : "Video",
     "Tags" : "Emneord",

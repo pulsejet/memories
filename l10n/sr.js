@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Settings" : "Поставке",
     "People" : "Људи",
+    "Info" : "Инфо",
     "Timeline" : "Временска оса",
     "Folders" : "Фасцикле",
     "Favorites" : "Омиљене",
@@ -63,6 +64,7 @@ OC.L10N.register(
     "Description" : "Опис",
     "Label" : "Ознака",
     "Copyright" : "Ауторско право",
+    "Empty" : "Празно",
     "Remove person" : "Уклони особу",
     "Name" : "Име",
     "Rename person" : "Промени име особе",

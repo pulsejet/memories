@@ -1,5 +1,6 @@
 { "translations": {
     "Settings" : "Agordoj",
+    "Info" : "Info",
     "Timeline" : "Kronologio",
     "Folders" : "Dosierujoj",
     "Favorites" : "Plej ŝatataj",
@@ -23,8 +24,10 @@
     "Title" : "Titolo",
     "Description" : "Priskribo",
     "Copyright" : "Kopirajto",
+    "Empty" : "Malplena",
     "Name" : "Nomo",
     "Update" : "Ĝisdatigi",
+    "Search" : "Serĉi",
     "Loading …" : "Ŝargas …",
     "Refresh" : "Aktualigi",
     "Remove" : "Forigi",

@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Setelan",
+    "Info" : "Info",
     "Timeline" : "Linimasa",
     "Folders" : "Folder-folder",
     "Favorites" : "Disukai",

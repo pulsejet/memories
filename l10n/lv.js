@@ -2,7 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Iestatījumi",
-    "EXIF" : "EXIF",
+    "Info" : "Info",
     "Folders" : "Mapes",
     "Favorites" : "Favorīti",
     "Videos" : "Video",
@@ -33,6 +33,7 @@ OC.L10N.register(
     "Description" : "Apraksts",
     "Label" : "Etiķete",
     "Copyright" : "Autortiesības",
+    "Empty" : "Tukšs",
     "Name" : "Vārds",
     "Update" : "Atjaunināt",
     "Search" : "Meklēt",
@@ -64,6 +65,7 @@ OC.L10N.register(
     "Fit size" : "Atbilst izmēram",
     "Direct" : "Tieši",
     "Auto" : "Automātiski",
-    "Shared Folder" : "Koplietotā mape"
+    "Shared Folder" : "Koplietotā mape",
+    "EXIF" : "EXIF"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");

@@ -1,6 +1,7 @@
 { "translations": {
     "Settings" : "تنظیمات",
     "People" : "مردم",
+    "Info" : "اطلاعات",
     "Timeline" : "خط زمانی",
     "Folders" : "پوشه ها",
     "Favorites" : "مورد علاقه‌ها",
@@ -26,6 +27,7 @@
     "Description" : "توضیحات",
     "Label" : "برچسب",
     "Copyright" : "کپی‌رایت",
+    "Empty" : "خالی",
     "Name" : "نام",
     "Update" : "یه‌روزرسانی",
     "Search" : "جستجو",

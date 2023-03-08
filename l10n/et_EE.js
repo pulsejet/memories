@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Seaded",
+    "Info" : "Info",
     "Folders" : "Kaustad",
     "Favorites" : "Lemmikud",
     "Videos" : "Videod",
@@ -26,6 +27,7 @@ OC.L10N.register(
     "Description" : "Kirjeldus",
     "Label" : "Silt",
     "Copyright" : "Autoriõigused",
+    "Empty" : "Tühi",
     "Name" : "Nimi",
     "Update" : "Uuenda",
     "Search" : "Otsi",

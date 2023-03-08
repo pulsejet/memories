@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Cài đặt",
+    "Info" : "Thông tin",
     "Folders" : "Thư mục",
     "Favorites" : "Ưa thích",
     "Videos" : "Phim",
@@ -26,6 +27,7 @@ OC.L10N.register(
     "Description" : "Mô tả",
     "Label" : "Nhãn",
     "Copyright" : "Bản quyền",
+    "Empty" : "Trống",
     "Name" : "Tên",
     "Update" : "Cập nhật",
     "Search" : "Tìm kiếm",

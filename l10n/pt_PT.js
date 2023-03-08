@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Memories" : "Memories",
     "Settings" : "Definições",
+    "Info" : "Informação",
     "Timeline" : "Linha do tempo",
     "Folders" : "Pastas",
     "Favorites" : "Favoritos",
@@ -33,6 +34,7 @@ OC.L10N.register(
     "Description" : "Descrição",
     "Label" : "Legenda",
     "Copyright" : "Direitos de Autor",
+    "Empty" : "Vazio",
     "Name" : "Nome",
     "Update" : "Atualizar",
     "Search" : "Pesquisa sobre",

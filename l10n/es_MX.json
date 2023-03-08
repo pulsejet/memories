@@ -1,6 +1,7 @@
 { "translations": {
     "Memories" : "Recuerdos",
     "Settings" : "Ajustes",
+    "Info" : "Info",
     "Folders" : "Carpetas",
     "Favorites" : "Favoritos",
     "Videos" : "Videos",
@@ -27,6 +28,7 @@
     "Description" : "Descripción",
     "Label" : "Etiqueta",
     "Copyright" : "Derechos de autor",
+    "Empty" : "Vacío",
     "Name" : "Nombre",
     "Update" : "Actualizar",
     "Search" : "Buscar",

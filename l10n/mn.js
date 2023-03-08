@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Тохиргоо",
+    "Info" : "Info",
     "Folders" : "Хавтсууд",
     "Favorites" : "Онцолсон",
     "Videos" : "Бичлэгүүд",

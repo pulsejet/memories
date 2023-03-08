@@ -1,5 +1,6 @@
 { "translations": {
     "Settings" : "პარამეტრები",
+    "Info" : "ინფორმაცია",
     "Folders" : "დირექტორიები",
     "Favorites" : "რჩეულები",
     "Videos" : "ვიდეოები",
@@ -23,6 +24,7 @@
     "Description" : "აღწერილობა",
     "Label" : "ლეიბლი",
     "Copyright" : "საავტორო უფლებები",
+    "Empty" : "ცარიელი",
     "Name" : "სახელი",
     "Update" : "განახლება",
     "Search" : "ძიება",

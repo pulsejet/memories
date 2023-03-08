@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "הגדרות",
+    "Info" : "פרטים",
     "Timeline" : "ציר זמן",
     "Folders" : "תיקייה",
     "Favorites" : "מועדפים",
@@ -38,6 +39,7 @@ OC.L10N.register(
     "Description" : "תיאור",
     "Label" : "תווית",
     "Copyright" : "זכויות יוצרים",
+    "Empty" : "ריק",
     "Name" : "שם",
     "Update" : "עדכון",
     "Search" : "חיפוש",

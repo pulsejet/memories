@@ -1,6 +1,7 @@
 { "translations": {
     "Settings" : "Postavke",
     "People" : "Ljudi",
+    "Info" : "Informacije",
     "Timeline" : "Vremenska crta",
     "Folders" : "Mape",
     "Favorites" : "Favoriti",
@@ -29,6 +30,7 @@
     "Description" : "Opis",
     "Label" : "Oznaka",
     "Copyright" : "Autorsko pravo",
+    "Empty" : "Prazno",
     "Name" : "Naziv",
     "Update" : "Ažuriraj",
     "Search" : "Traži",

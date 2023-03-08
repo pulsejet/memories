@@ -1,6 +1,7 @@
 { "translations": {
     "Settings" : "Axustes",
     "People" : "Xente",
+    "Info" : "Información",
     "Timeline" : "Liña temporal",
     "Folders" : "Cartafoles",
     "Favorites" : "Favoritos",
@@ -56,6 +57,7 @@
     "Description" : "Descrición",
     "Label" : "Etiqueta",
     "Copyright" : "Copyright",
+    "Empty" : "Baleiro",
     "Name" : "Nome",
     "Update" : "Actualizar",
     "Search" : "Buscar",

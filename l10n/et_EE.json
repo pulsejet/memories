@@ -1,5 +1,6 @@
 { "translations": {
     "Settings" : "Seaded",
+    "Info" : "Info",
     "Folders" : "Kaustad",
     "Favorites" : "Lemmikud",
     "Videos" : "Videod",
@@ -24,6 +25,7 @@
     "Description" : "Kirjeldus",
     "Label" : "Silt",
     "Copyright" : "Autoriõigused",
+    "Empty" : "Tühi",
     "Name" : "Nimi",
     "Update" : "Uuenda",
     "Search" : "Otsi",

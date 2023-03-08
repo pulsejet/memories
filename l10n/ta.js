@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "அமைப்புகள்",
+    "Info" : "Info",
     "Favorites" : "விருப்பங்கள்",
     "Tags" : "சீட்டுகள்",
     "Edit" : "தொகுக்க",

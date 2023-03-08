@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Settings" : "Impostazioni",
     "People" : "Persone",
+    "Info" : "Info",
     "Timeline" : "Linea temporale",
     "Folders" : "Cartelle",
     "Favorites" : "Preferiti",
@@ -50,6 +51,7 @@ OC.L10N.register(
     "Description" : "Descrizione",
     "Label" : "Etichetta",
     "Copyright" : "Copyright",
+    "Empty" : "Vuoto",
     "Remove person" : "Rimuovi persona",
     "Name" : "Nome",
     "Rename person" : "Rinomina persona",

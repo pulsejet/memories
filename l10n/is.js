@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Settings" : "Stillingar",
     "People" : "Fólk",
+    "Info" : "Upplýsingar",
     "Timeline" : "Tímalína",
     "Folders" : "Möppur",
     "Favorites" : "Eftirlæti",
@@ -32,6 +33,7 @@ OC.L10N.register(
     "Description" : "Lýsing",
     "Label" : "Skýring",
     "Copyright" : "Höfundarréttur",
+    "Empty" : "Tómt",
     "Name" : "Heiti",
     "Update" : "Uppfæra",
     "Search" : "Search",

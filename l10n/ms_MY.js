@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Tetapan",
+    "Info" : "Info",
     "Favorites" : "Favorites",
     "Edit" : "Sunting",
     "Cancel" : "Batal",

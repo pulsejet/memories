@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Agordoj",
+    "Info" : "Info",
     "Timeline" : "Kronologio",
     "Folders" : "Dosierujoj",
     "Favorites" : "Plej ŝatataj",
@@ -25,8 +26,10 @@ OC.L10N.register(
     "Title" : "Titolo",
     "Description" : "Priskribo",
     "Copyright" : "Kopirajto",
+    "Empty" : "Malplena",
     "Name" : "Nomo",
     "Update" : "Ĝisdatigi",
+    "Search" : "Serĉi",
     "Loading …" : "Ŝargas …",
     "Refresh" : "Aktualigi",
     "Remove" : "Forigi",
