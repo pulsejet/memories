@@ -36,8 +36,7 @@
     </div>
 
     <!-- Selection Modals -->
-    <EditDate ref="editDate" @refresh="refresh" />
-    <EditExif ref="editExif" @refresh="refresh" />
+    <EditMetadata ref="editMetadata" @refresh="refresh" />
     <FaceMoveModal
       ref="faceMoveModal"
       @moved="deletePhotos"
@@ -71,8 +70,7 @@ import { getCurrentUser } from "@nextcloud/auth";
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
 
-import EditDate from "./modal/EditDate.vue";
-import EditExif from "./modal/EditExif.vue";
+import EditMetadata from "./modal/EditMetadataModal.vue";
 import FaceMoveModal from "./modal/FaceMoveModal.vue";
 import AddToAlbumModal from "./modal/AddToAlbumModal.vue";
 import MoveToFolderModal from "./modal/MoveToFolderModal.vue";
@@ -98,8 +96,7 @@ export default defineComponent({
   components: {
     NcActions,
     NcActionButton,
-    EditDate,
-    EditExif,
+    EditMetadata,
     FaceMoveModal,
     AddToAlbumModal,
     MoveToFolderModal,
@@ -174,16 +171,9 @@ export default defineComponent({
         if: () => this.routeIsArchive(),
       },
       {
-        name: t("memories", "Edit Date/Time"),
-        icon: EditClockIcon,
-        callback: this.editDateSelection.bind(this),
-        if: () => !this.routeIsAlbum(),
-      },
-      {
-        name: t("memories", "Edit EXIF Data"),
+        name: t("memories", "Edit Metadata"),
         icon: EditFileIcon,
-        callback: this.editExifSelection.bind(this),
-        if: () => this.selection.size === 1 && !this.routeIsAlbum(),
+        callback: this.editMetadataSelection.bind(this),
       },
       {
         name: t("memories", "View in folder"),
@@ -224,10 +214,8 @@ export default defineComponent({
       sel.set(photo.fileid, photo);
       return sel;
     };
-    globalThis.editDate = (photo: IPhoto) =>
-      this.editDateSelection(getSel(photo));
-    globalThis.editExif = (photo: IPhoto) =>
-      this.editExifSelection(getSel(photo));
+    globalThis.editMetadata = (photo: IPhoto) =>
+      this.editMetadataSelection(getSel(photo));
   },
 
   watch: {
@@ -761,16 +749,8 @@ export default defineComponent({
     /**
      * Open the edit date dialog
      */
-    async editDateSelection(selection: Selection) {
-      (<any>this.$refs.editDate).open(Array.from(selection.values()));
-    },
-
-    /**
-     * Open the edit date dialog
-     */
-    async editExifSelection(selection: Selection) {
-      if (selection.size !== 1) return;
-      (<any>this.$refs.editExif).open(selection.values().next().value);
+    async editMetadataSelection(selection: Selection) {
+      (<any>this.$refs.editMetadata).open(Array.from(selection.values()));
     },
 
     /**
