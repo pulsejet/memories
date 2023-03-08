@@ -49,6 +49,7 @@ A shout out to the current and past financial backers of Memories! See the spons
 
 [<img src="https://github.com/mpodshivalin.png" width="42" />](https://github.com/mpodshivalin)
 [<img src="https://github.com/k1l1.png" width="42" />](https://github.com/k1l1)
+[<img src="https://github.com/ChickenTarm.png" width="42" />](https://github.com/ChickenTarm)
 
 ## Changelog
 
