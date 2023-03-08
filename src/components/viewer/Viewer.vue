@@ -1168,7 +1168,7 @@ export default defineComponent({
      * Edit Metadata for current photo
      */
     editMetadata() {
-      globalThis.editMetadata(globalThis.currentViewerPhoto);
+      globalThis.editMetadata([globalThis.currentViewerPhoto]);
     },
   },
 });

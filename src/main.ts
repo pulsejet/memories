@@ -22,7 +22,7 @@ declare global {
   var OC: Nextcloud.v24.OC;
   var OCP: Nextcloud.v24.OCP;
 
-  var editDate: (photo: IPhoto) => void;
+  var editMetadata: (photos: IPhoto[]) => void;
   var currentViewerPhoto: IPhoto;
 
   var windowInnerWidth: number; // cache

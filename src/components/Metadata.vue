@@ -114,7 +114,7 @@ export default defineComponent({
           title: this.dateOriginalStr,
           subtitle: this.dateOriginalTime,
           icon: CalendarIcon,
-          edit: () => globalThis.editDate(globalThis.currentViewerPhoto),
+          edit: () => globalThis.editMetadata([globalThis.currentViewerPhoto]),
         });
       }
 
@@ -141,7 +141,15 @@ export default defineComponent({
           title: title || this.t("memories", "No title"),
           subtitle: [desc || this.t("memories", "No description")],
           icon: InfoIcon,
-          edit: () => globalThis.editExif(globalThis.currentViewerPhoto),
+          edit: () => globalThis.editMetadata([globalThis.currentViewerPhoto]),
+        });
+      }
+
+      if (this.tagNamesStr) {
+        list.push({
+          title: this.tagNamesStr,
+          subtitle: [],
+          icon: TagIcon,
         });
       }
 
@@ -151,14 +159,6 @@ export default defineComponent({
           subtitle: [],
           icon: LocationIcon,
           href: this.mapFullUrl,
-        });
-      }
-
-      if (this.tagNamesStr) {
-        list.push({
-          title: this.tagNamesStr,
-          subtitle: [],
-          icon: TagIcon,
         });
       }
 

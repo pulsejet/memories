@@ -209,13 +209,13 @@ export default defineComponent({
     ];
 
     // Ugly: globally exposed functions
-    const getSel = (photo: IPhoto) => {
+    globalThis.editMetadata = (photos: IPhoto[]) => {
       const sel = new Map<number, IPhoto>();
-      sel.set(photo.fileid, photo);
-      return sel;
+      for (const photo of photos) {
+        sel.set(photo.fileid, photo);
+      }
+      this.editMetadataSelection(sel);
     };
-    globalThis.editMetadata = (photo: IPhoto) =>
-      this.editMetadataSelection(getSel(photo));
   },
 
   watch: {
