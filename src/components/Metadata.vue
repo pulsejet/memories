@@ -158,7 +158,7 @@ export default defineComponent({
       }
 
       list.push({
-        title: this.address || this.t("memories", "Unknown coordinates"),
+        title: this.address || this.t("memories", "No coordinates"),
         subtitle: this.address
           ? []
           : [this.t("memories", "Click edit to set location")],

@@ -13,11 +13,30 @@ trait TimelineWritePlaces
 
     /**
      * Add places data for a file.
+     *
+     * @param int        $fileId The file ID
+     * @param null|float $lat    The latitude of the file
+     * @param null|float $lon    The longitude of the file
      */
-    protected function updatePlacesData(int $fileId, float $lat, float $lon): void
+    protected function updatePlacesData(int $fileId, $lat, $lon): void
     {
         // Get GIS type
         $gisType = \OCA\Memories\Util::placesGISType();
+
+        // Check if valid
+        if ($gisType <= 0) return;
+
+        // Delete previous records
+        $query = $this->connection->getQueryBuilder();
+        $query->delete('memories_places')
+            ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
+        ;
+        $query->executeStatement();
+
+        // Just remove from if the point is no longer valid
+        if (null === $lat || null === $lon) {
+            return;
+        }
 
         // Construct WHERE clause depending on GIS type
         $where = null;
@@ -46,13 +65,6 @@ trait TimelineWritePlaces
         // Run query
         $result = $this->connection->executeQuery($sql);
         $rows = $result->fetchAll();
-
-        // Delete previous records
-        $query = $this->connection->getQueryBuilder();
-        $query->delete('memories_places')
-            ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
-        ;
-        $query->executeStatement();
 
         // Insert records
         foreach ($rows as $row) {

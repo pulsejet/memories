@@ -2,6 +2,13 @@
   <div class="outer">
     <div class="lat-lon">
       <span>{{ loc }}</span> {{ dirty ? "*" : "" }}
+
+      <div class="action">
+        <UndoIcon :size="20" v-if="dirty" @click="reset" />
+      </div>
+      <div class="action">
+        <CloseIcon :size="20" v-if="lat && lon" @click="clear" />
+      </div>
     </div>
 
     <NcTextField
@@ -12,7 +19,7 @@
       @trailing-button-click="search"
       @keypress.enter="search"
     >
-      <Magnify :size="16" />
+      <MagnifyIcon :size="16" />
     </NcTextField>
 
     <div class="osm-attribution">
@@ -54,7 +61,9 @@ const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
 const NcListItem = () => import("@nextcloud/vue/dist/Components/NcListItem");
 import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
 
-import Magnify from "vue-material-design-icons/Magnify.vue";
+import MagnifyIcon from "vue-material-design-icons/Magnify.vue";
+import CloseIcon from "vue-material-design-icons/Close.vue";
+import UndoIcon from "vue-material-design-icons/UndoVariant.vue";
 
 type NLocation = {
   osm_id: number;
@@ -70,7 +79,9 @@ export default defineComponent({
     NcTextField,
     NcListItem,
     NcLoadingIcon,
-    Magnify,
+    MagnifyIcon,
+    CloseIcon,
+    UndoIcon,
   },
 
   props: {
@@ -95,36 +106,41 @@ export default defineComponent({
       if (this.lat && this.lon) {
         return `${this.lat.toFixed(6)}, ${this.lon.toFixed(6)}`;
       }
-      return this.t("memories", "Unknown coordinates");
+      return this.t("memories", "No coordinates");
     },
   },
 
   mounted() {
-    const photos = this.photos as IPhoto[];
-
-    let lat = 0,
-      lon = 0,
-      count = 0;
-    for (const photo of photos) {
-      const exif = photo.imageInfo?.exif;
-      if (!exif) {
-        continue;
-      }
-
-      if (exif.GPSLatitude && exif.GPSLongitude) {
-        lat += Number(exif.GPSLatitude);
-        lon += Number(exif.GPSLongitude);
-        count++;
-      }
-    }
-
-    if (count > 0) {
-      this.lat = lat / count;
-      this.lon = lon / count;
-    }
+    this.reset();
   },
 
   methods: {
+    reset() {
+      this.dirty = false;
+      const photos = this.photos as IPhoto[];
+
+      let lat = 0,
+        lon = 0,
+        count = 0;
+      for (const photo of photos) {
+        const exif = photo.imageInfo?.exif;
+        if (!exif) {
+          continue;
+        }
+
+        if (exif.GPSLatitude && exif.GPSLongitude) {
+          lat += Number(exif.GPSLatitude);
+          lon += Number(exif.GPSLongitude);
+          count++;
+        }
+      }
+
+      if (count > 0) {
+        this.lat = lat / count;
+        this.lon = lon / count;
+      }
+    },
+
     search() {
       if (this.loading || this.searchBar.length === 0) {
         return;
@@ -151,6 +167,12 @@ export default defineComponent({
         });
     },
 
+    clear() {
+      this.dirty = true;
+      this.lat = 0;
+      this.lon = 0;
+    },
+
     select(option: NLocation) {
       this.dirty = true;
       this.lat = Number(option.lat);
@@ -160,7 +182,7 @@ export default defineComponent({
     },
 
     result() {
-      if (!this.dirty || !this.lat || !this.lon) {
+      if (!this.dirty) {
         return null;
       }
 
@@ -180,8 +202,17 @@ export default defineComponent({
 
   .lat-lon {
     padding: 4px;
+
     > span {
       user-select: all;
+    }
+
+    > .action {
+      float: right;
+      margin-left: 2px;
+      > * {
+        cursor: pointer;
+      }
     }
   }
 

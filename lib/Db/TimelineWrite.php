@@ -86,7 +86,7 @@ class TimelineWrite
 
         // Check if need to update
         $query = $this->connection->getQueryBuilder();
-        $query->select('fileid', 'mtime', 'mapcluster', 'orphan')
+        $query->select('fileid', 'mtime', 'mapcluster', 'orphan', 'lat', 'lon')
             ->from('memories')
             ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
         ;
@@ -176,15 +176,15 @@ class TimelineWrite
         }
 
         // Store location data
-        $lat = null;
-        $lon = null;
+        $lat = \array_key_exists('GPSLatitude', $exif) ? (float) $exif['GPSLatitude'] : null;
+        $lon = \array_key_exists('GPSLongitude', $exif) ? (float) $exif['GPSLongitude'] : null;
+        $oldLat = $prevRow ? (float) $prevRow['lat'] : null;
+        $oldLon = $prevRow ? (float) $prevRow['lon'] : null;
         $mapCluster = $prevRow ? (int) $prevRow['mapcluster'] : -1;
-        if (\array_key_exists('GPSLatitude', $exif) && \array_key_exists('GPSLongitude', $exif)) {
-            $lat = (float) $exif['GPSLatitude'];
-            $lon = (float) $exif['GPSLongitude'];
 
+        if ($lat || $lon || $oldLat || $oldLon) {
             try {
-                $mapCluster = $this->mapGetCluster($mapCluster, $lat, $lon);
+                $mapCluster = $this->mapGetCluster($mapCluster, $lat, $lon, $oldLat, $oldLon);
             } catch (\Error $e) {
                 $logger = \OC::$server->get(LoggerInterface::class);
                 $logger->log(3, 'Error updating map cluster data: '.$e->getMessage(), ['app' => 'memories']);

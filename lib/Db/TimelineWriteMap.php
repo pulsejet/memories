@@ -17,14 +17,23 @@ trait TimelineWriteMap
      * Get the cluster ID for a given point.
      * If the cluster ID changes, update the old cluster and the new cluster.
      *
-     * @param int   $prevCluster The current cluster ID of the point
-     * @param float $lat         The latitude of the point
-     * @param float $lon         The longitude of the point
+     * @param int        $prevCluster The current cluster ID of the point
+     * @param null|float $lat         The latitude of the point
+     * @param null|float $lon         The longitude of the point
+     * @param null|float $oldLat      The old latitude of the point
+     * @param null|float $oldLon      The old longitude of the point
      *
      * @return int The new cluster ID
      */
-    protected function mapGetCluster(int $prevCluster, float $lat, float $lon): int
+    protected function mapGetCluster(int $prevCluster, $lat, $lon, $oldLat, $oldLon): int
     {
+        // Just remove from old cluster if the point is no longer valid
+        if (null === $lat || null === $lon) {
+            $this->mapRemoveFromCluster($prevCluster, $oldLat, $oldLon);
+
+            return -1;
+        }
+
         // Get all possible clusters within CLUSTER_DEG radius
         $query = $this->connection->getQueryBuilder();
         $query->select('id', 'lat', 'lon')
@@ -51,7 +60,7 @@ trait TimelineWriteMap
 
         // If no cluster found, create a new one
         if ($minId <= 0) {
-            $this->mapRemoveFromCluster($prevCluster, $lat, $lon);
+            $this->mapRemoveFromCluster($prevCluster, $oldLat, $oldLon);
 
             return $this->mapCreateCluster($lat, $lon);
         }
@@ -63,7 +72,7 @@ trait TimelineWriteMap
 
         // If the file was previously in a different cluster,
         // remove it from the first cluster and add it to the second
-        $this->mapRemoveFromCluster($prevCluster, $lat, $lon);
+        $this->mapRemoveFromCluster($prevCluster, $oldLat, $oldLon);
         $this->mapAddToCluster($minId, $lat, $lon);
 
         return $minId;
@@ -135,9 +144,9 @@ trait TimelineWriteMap
      * @param float $lat       The latitude of the point
      * @param float $lon       The longitude of the point
      */
-    private function mapRemoveFromCluster(int $clusterId, float $lat, float $lon): void
+    private function mapRemoveFromCluster(int $clusterId, $lat, $lon): void
     {
-        if ($clusterId <= 0) {
+        if ($clusterId <= 0 || null === $lat || null === $lon) {
             return;
         }
 
