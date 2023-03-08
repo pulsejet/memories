@@ -157,16 +157,16 @@ export default defineComponent({
         });
       }
 
-      if (this.address) {
-        list.push({
-          title: this.address,
-          subtitle: [],
-          icon: LocationIcon,
-          href: this.mapFullUrl,
-          edit: () =>
-            globalThis.editMetadata([globalThis.currentViewerPhoto], [4]),
-        });
-      }
+      list.push({
+        title: this.address || this.t("memories", "Unknown coordinates"),
+        subtitle: this.address
+          ? []
+          : [this.t("memories", "Click edit to set location")],
+        icon: LocationIcon,
+        href: this.address ? this.mapFullUrl : undefined,
+        edit: () =>
+          globalThis.editMetadata([globalThis.currentViewerPhoto], [4]),
+      });
 
       return list;
     },
