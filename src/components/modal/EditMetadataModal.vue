@@ -17,15 +17,26 @@
     </template>
 
     <div v-if="photos">
-      <div class="title-text">
-        {{ t("memories", "Date / Time") }}
+      <div>
+        <div class="title-text">
+          {{ t("memories", "Date / Time") }}
+        </div>
+        <EditDate ref="editDate" :photos="photos" />
       </div>
-      <EditDate ref="editDate" :photos="photos" />
 
-      <div class="title-text">
-        {{ t("memories", "EXIF Fields") }}
+      <div v-if="config_tagsEnabled">
+        <div class="title-text">
+          {{ t("memories", "Collaborative Tags") }}
+        </div>
+        <EditTags ref="editTags" :photos="photos" />
       </div>
-      <EditExif ref="editExif" :photos="photos" />
+
+      <div>
+        <div class="title-text">
+          {{ t("memories", "EXIF Fields") }}
+        </div>
+        <EditExif ref="editExif" :photos="photos" />
+      </div>
     </div>
 
     <div v-if="processing">
@@ -38,6 +49,7 @@
 import { defineComponent } from "vue";
 import { IPhoto } from "../../types";
 
+import UserConfig from "../../mixins/UserConfig";
 import NcButton from "@nextcloud/vue/dist/Components/NcButton";
 const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
 const NcProgressBar = () =>
@@ -46,6 +58,7 @@ import Modal from "./Modal.vue";
 
 import EditExif from "./EditExif.vue";
 import EditDate from "./EditDate.vue";
+import EditTags from "./EditTags.vue";
 
 import { showError } from "@nextcloud/dialogs";
 import { emit } from "@nextcloud/event-bus";
@@ -63,7 +76,10 @@ export default defineComponent({
 
     EditExif,
     EditDate,
+    EditTags,
   },
+
+  mixins: [UserConfig],
 
   data: () => ({
     photos: null as IPhoto[],
@@ -89,7 +105,8 @@ export default defineComponent({
       // Load metadata for all photos
       const calls = photos.map((p) => async () => {
         try {
-          const res = await axios.get<any>(API.IMAGE_INFO(p.fileid));
+          const url = API.Q(API.IMAGE_INFO(p.fileid), "tags=1");
+          const res = await axios.get<any>(url);
 
           // Validate response
           p.imageInfo = null;
@@ -145,7 +162,10 @@ export default defineComponent({
       }
 
       // Get exif fields diff
-      const exifChanges = (<any>this.$refs.editExif).changes();
+      const exifResult = (<any>this.$refs.editExif).result();
+      const tagsResult = this.config_tagsEnabled
+        ? (<any>this.$refs.editTags).result()
+        : null;
 
       // Start processing
       let done = 0;
@@ -155,10 +175,11 @@ export default defineComponent({
       // Update exif fields
       const calls = this.photos.map((p) => async () => {
         try {
+          let dirty = false;
           const fileid = p.fileid;
 
           // Basic EXIF fields
-          const raw = JSON.parse(JSON.stringify(exifChanges));
+          const raw = JSON.parse(JSON.stringify(exifResult));
 
           // Date
           const date = (<any>this.$refs.editDate).result(p);
@@ -166,22 +187,25 @@ export default defineComponent({
             raw.DateTimeOriginal = date;
           }
 
-          if (Object.keys(raw).length === 0) {
-            console.log("No changes for", p.fileid);
-            return;
-          } else {
-            console.log("Saving EXIF info for", p.fileid, raw);
+          // Update EXIF if required
+          if (Object.keys(raw).length > 0) {
+            await axios.patch<any>(API.IMAGE_SETEXIF(fileid), { raw });
+            dirty = true;
           }
 
-          await axios.patch<any>(API.IMAGE_SETEXIF(fileid), { raw });
+          // Update tags if required
+          if (tagsResult) {
+            await axios.patch<any>(API.TAG_SET(fileid), tagsResult);
+            dirty = true;
+          }
 
-          // Clear imageInfo in photo
-          p.imageInfo = null;
-
-          // Emit event to update photo
-          emit("files:file:updated", { fileid });
+          // Refresh UX
+          if (dirty) {
+            p.imageInfo = null;
+            emit("files:file:updated", { fileid });
+          }
         } catch (e) {
-          console.error("Failed to save EXIF info for", p.fileid, e);
+          console.error("Failed to save metadata for", p.fileid, e);
           if (e.response?.data?.message) {
             showError(e.response.data.message);
           } else {

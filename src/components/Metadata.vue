@@ -141,7 +141,6 @@ export default defineComponent({
           title: title || this.t("memories", "No title"),
           subtitle: [desc || this.t("memories", "No description")],
           icon: InfoIcon,
-          edit: () => globalThis.editMetadata([globalThis.currentViewerPhoto]),
         });
       }
 

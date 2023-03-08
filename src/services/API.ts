@@ -63,6 +63,10 @@ export class API {
     return gen(`${BASE}/tags/preview/{tag}`, { tag });
   }
 
+  static TAG_SET(fileid: string | number) {
+    return gen(`${BASE}/tags/set/{fileid}`, { fileid });
+  }
+
   static FACE_LIST(app: "recognize" | "facerecognition") {
     return gen(`${BASE}/${app}/people`);
   }

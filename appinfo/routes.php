@@ -57,6 +57,7 @@ return [
 
         ['name' => 'Tags#tags', 'url' => '/api/tags', 'verb' => 'GET'],
         ['name' => 'Tags#preview', 'url' => '/api/tags/preview/{tag}', 'verb' => 'GET'],
+        ['name' => 'Tags#set', 'url' => '/api/tags/set/{id}', 'verb' => 'PATCH'],
 
         ['name' => 'People#recognizePeople', 'url' => '/api/recognize/people', 'verb' => 'GET'],
         ['name' => 'People#recognizePeoplePreview', 'url' => '/api/recognize/people/preview/{id}', 'verb' => 'GET'],

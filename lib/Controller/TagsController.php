@@ -96,4 +96,39 @@ class TagsController extends ApiBase
             return (int) $item['fileid'];
         }, $list));
     }
+
+    /**
+     * @NoAdminRequired
+     *
+     * Set tags for a file
+     */
+    public function set(int $id, array $add, array $remove): JSONResponse
+    {
+        // Check tags enabled for this user
+        if (!$this->tagsIsEnabled()) {
+            return new JSONResponse(['message' => 'Tags not enabled for user'], Http::STATUS_PRECONDITION_FAILED);
+        }
+
+        // Check the user is allowed to edit the file
+        $file = $this->getUserFile($id);
+        if (null === $file) {
+            return new JSONResponse([
+                'message' => 'File not found',
+            ], Http::STATUS_NOT_FOUND);
+        }
+
+        // Check the user is allowed to edit the file
+        if (!$file->isUpdateable() || !($file->getPermissions() & \OCP\Constants::PERMISSION_UPDATE)) {
+            return new JSONResponse(['message' => 'Cannot update this file'], Http::STATUS_FORBIDDEN);
+        }
+
+        // Get mapper from tags to objects
+        $om = \OC::$server->get(\OCP\SystemTag\ISystemTagObjectMapper::class);
+
+        // Add and remove tags
+        $om->assignTags((string) $id, 'files', $add);
+        $om->unassignTags((string) $id, 'files', $remove);
+
+        return new JSONResponse([], Http::STATUS_OK);
+    }
 }

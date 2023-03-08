@@ -100,7 +100,7 @@ export default defineComponent({
   },
 
   methods: {
-    changes() {
+    result() {
       const diff = {};
       for (const field of this.fields) {
         if (this.dirty[field.field]) {
