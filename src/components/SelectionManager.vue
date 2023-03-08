@@ -79,7 +79,6 @@ import StarIcon from "vue-material-design-icons/Star.vue";
 import DownloadIcon from "vue-material-design-icons/Download.vue";
 import DeleteIcon from "vue-material-design-icons/TrashCanOutline.vue";
 import EditFileIcon from "vue-material-design-icons/FileEdit.vue";
-import EditClockIcon from "vue-material-design-icons/ClockEdit.vue";
 import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
 import UnarchiveIcon from "vue-material-design-icons/PackageUp.vue";
 import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
