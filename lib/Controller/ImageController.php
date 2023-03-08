@@ -213,8 +213,9 @@ class ImageController extends ApiBase
      * Set the exif data for a file.
      *
      * @param string fileid
+     * @param array  raw exif data
      */
-    public function setExif(string $id): JSONResponse
+    public function setExif(string $id, array $raw): JSONResponse
     {
         $file = $this->getUserFile((int) $id);
         if (!$file) {
@@ -232,11 +233,10 @@ class ImageController extends ApiBase
         }
 
         // Get original file from body
-        $exif = $this->request->getParam('raw');
         $path = $file->getStorage()->getLocalFile($file->getInternalPath());
 
         try {
-            Exif::setExif($path, $exif);
+            Exif::setExif($path, $raw);
         } catch (\Exception $e) {
             return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
