@@ -116,7 +116,7 @@ export default defineComponent({
 
   props: {
     photos: {
-      type: Array,
+      type: Array<IPhoto>,
       required: true,
     },
   },
