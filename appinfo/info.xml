@@ -15,7 +15,7 @@ Memories is a *batteries-included* photo management solution for Nextcloud with 
 - **🖼️ Albums**: Create albums to group photos and videos together. Then share these albums with others.
 - **🫱🏻‍🫲🏻 External Sharing**: Share photos and videos with people outside of your Nextcloud instance.
 - **📱 Mobile Support**: Works on devices of any shape and size through the web app.
-- **✏️ Edit Metadata**: Edit dates on photos quickly and easily.
+- **✏️ Edit Metadata**: Edit dates and other metadata on photos quickly and easily.
 - **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.
 - **📹 Video Transcoding**: Memories transcodes videos and uses HLS for maximal performance.
 - **🗺️ Map**: View your photos on a map, tagged with accurate reverse geocoding.
