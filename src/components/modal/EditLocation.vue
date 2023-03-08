@@ -221,8 +221,6 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .outer {
-  margin-bottom: 10px;
-
   .lat-lon {
     display: flex;
     padding: 4px;

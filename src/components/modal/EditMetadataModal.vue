@@ -29,6 +29,7 @@
           {{ t("memories", "Collaborative Tags") }}
         </div>
         <EditTags ref="editTags" :photos="photos" />
+        <div class="tag-padding" v-if="sections.length === 1"></div>
       </div>
 
       <div v-if="sections.includes(3)">
@@ -46,7 +47,7 @@
       </div>
     </div>
 
-    <div v-if="processing">
+    <div v-if="processing" class="progressbar">
       <NcProgressBar :value="progress" :error="true" />
     </div>
   </Modal>
@@ -251,5 +252,15 @@ export default defineComponent({
   &:first-of-type {
     margin-top: 10px;
   }
+}
+
+.tag-padding {
+  height: 200px;
+  width: 100%;
+  display: block;
+}
+
+.progressbar {
+  margin-top: 10px;
 }
 </style>
