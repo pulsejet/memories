@@ -239,6 +239,11 @@ class VideoController extends ApiBase
             throw new \Exception('Transcoder not configured');
         }
 
+        // Make sure transcoder exists
+        if (!file_exists($transcoder)) {
+            throw new \Exception("Transcoder not found; run occ memories video-setup! ({$transcoder})");
+        }
+
         // Make transcoder executable
         if (!is_executable($transcoder)) {
             @chmod($transcoder, 0755);
