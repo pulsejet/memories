@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Setări",
+    "Info" : "Info",
     "Folders" : "Director",
     "Favorites" : "Favorite",
     "Videos" : "Fișiere video",

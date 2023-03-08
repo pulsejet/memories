@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Settings" : "การตั้งค่า",
     "People" : "ผู้คน",
+    "Info" : "ข้อมูล",
     "Folders" : "แฟ้มเอกสาร",
     "Favorites" : "รายการโปรด",
     "Videos" : "วิดีโอ",
@@ -33,6 +34,7 @@ OC.L10N.register(
     "Title" : "ชื่อเรื่อง",
     "Description" : "รายละเอียด",
     "Copyright" : "ลิขสิทธิ์",
+    "Empty" : "ว่างเปล่า",
     "Name" : "ชื่อ",
     "Update" : "อัปเดต",
     "Search" : "ค้นหา",

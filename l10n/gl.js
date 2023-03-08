@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Settings" : "Axustes",
     "People" : "Xente",
+    "Info" : "Información",
     "Timeline" : "Liña temporal",
     "Folders" : "Cartafoles",
     "Favorites" : "Favoritos",
@@ -58,6 +59,7 @@ OC.L10N.register(
     "Description" : "Descrición",
     "Label" : "Etiqueta",
     "Copyright" : "Copyright",
+    "Empty" : "Baleiro",
     "Name" : "Nome",
     "Update" : "Actualizar",
     "Search" : "Buscar",

@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Settings" : "تنظیمات",
     "People" : "مردم",
+    "Info" : "اطلاعات",
     "Timeline" : "خط زمانی",
     "Folders" : "پوشه ها",
     "Favorites" : "مورد علاقه‌ها",
@@ -28,6 +29,7 @@ OC.L10N.register(
     "Description" : "توضیحات",
     "Label" : "برچسب",
     "Copyright" : "کپی‌رایت",
+    "Empty" : "خالی",
     "Name" : "نام",
     "Update" : "یه‌روزرسانی",
     "Search" : "جستجو",

@@ -1,5 +1,6 @@
 { "translations": {
     "Settings" : "Ajustes",
+    "Info" : "Info",
     "Folders" : "Carpetas",
     "Favorites" : "Favoritos",
     "Videos" : "Videos",
@@ -23,8 +24,10 @@
     "Description" : "Descripción",
     "Label" : "Etiqueta",
     "Copyright" : "Derechos de autor",
+    "Empty" : "Vacío",
     "Name" : "Nombre",
     "Update" : "Actualizar",
+    "Search" : "Buscar",
     "Refresh" : "Actualizar",
     "Remove" : "Eliminar",
     "Sort by date" : "Ordenar por fecha",

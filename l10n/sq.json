@@ -1,5 +1,6 @@
 { "translations": {
     "Settings" : "Rregullimet",
+    "Info" : "Info",
     "Folders" : "Dosjet",
     "Favorites" : "Favorites",
     "Videos" : "Videot",
@@ -23,6 +24,7 @@
     "Description" : "Përshkrim",
     "Label" : "Etiketa.",
     "Copyright" : "Të drejta kopjimi",
+    "Empty" : "Bosh",
     "Name" : "Emri",
     "Update" : "Përditëso",
     "Search" : "Kërko",

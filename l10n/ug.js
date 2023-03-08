@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "تەڭشەكلەر",
+    "Info" : "Info",
     "Favorites" : "يىغقۇچ",
     "Tags" : "بەلگەلەر",
     "Edit" : "تەھرىر",

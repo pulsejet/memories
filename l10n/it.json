@@ -1,6 +1,7 @@
 { "translations": {
     "Settings" : "Impostazioni",
     "People" : "Persone",
+    "Info" : "Info",
     "Timeline" : "Linea temporale",
     "Folders" : "Cartelle",
     "Favorites" : "Preferiti",
@@ -48,6 +49,7 @@
     "Description" : "Descrizione",
     "Label" : "Etichetta",
     "Copyright" : "Copyright",
+    "Empty" : "Vuoto",
     "Remove person" : "Rimuovi persona",
     "Name" : "Nome",
     "Rename person" : "Rinomina persona",

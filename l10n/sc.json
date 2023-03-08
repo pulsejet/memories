@@ -1,6 +1,7 @@
 { "translations": {
     "Settings" : "Impostatziones",
     "People" : "Gente",
+    "Info" : "Informatziones",
     "Timeline" : "Lìnia de tempus",
     "Folders" : "Cartellas",
     "Favorites" : "Preferidos",
@@ -29,6 +30,7 @@
     "Description" : "Descritzione",
     "Label" : "Eticheta",
     "Copyright" : "Deretos de autoria",
+    "Empty" : "Bòidu",
     "Name" : "Nùmene",
     "Update" : "Agiorna",
     "Search" : "Chirca",

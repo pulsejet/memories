@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Settings" : "Impostatziones",
     "People" : "Gente",
+    "Info" : "Informatziones",
     "Timeline" : "Lìnia de tempus",
     "Folders" : "Cartellas",
     "Favorites" : "Preferidos",
@@ -31,6 +32,7 @@ OC.L10N.register(
     "Description" : "Descritzione",
     "Label" : "Eticheta",
     "Copyright" : "Deretos de autoria",
+    "Empty" : "Bòidu",
     "Name" : "Nùmene",
     "Update" : "Agiorna",
     "Search" : "Chirca",

@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "ការកំណត់",
+    "Info" : "Info",
     "Favorites" : "Favorites",
     "Tags" : "ស្លាក",
     "Edit" : "កែប្រែ",

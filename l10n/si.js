@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "සැකසුම්",
+    "Info" : "තොරතුරු",
     "Favorites" : "ප්‍රියතම",
     "Archive" : "සංරක්ෂණය",
     "Edit" : "සංස්කරණය",
@@ -18,6 +19,7 @@ OC.L10N.register(
     "Time" : "වේලාව",
     "Description" : "විස්තරය",
     "Copyright" : "ප්‍රකාශන හිමිකම",
+    "Empty" : "හිස්",
     "Name" : "නම",
     "Update" : "යාවත්කාල",
     "Search" : "සොයන්න",

@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Rregullimet",
+    "Info" : "Info",
     "Folders" : "Dosjet",
     "Favorites" : "Favorites",
     "Videos" : "Videot",
@@ -25,6 +26,7 @@ OC.L10N.register(
     "Description" : "Përshkrim",
     "Label" : "Etiketa.",
     "Copyright" : "Të drejta kopjimi",
+    "Empty" : "Bosh",
     "Name" : "Emri",
     "Update" : "Përditëso",
     "Search" : "Kërko",

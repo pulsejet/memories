@@ -2,6 +2,7 @@
     "Memories" : "Spomienky",
     "Settings" : "Nastavenia",
     "People" : "Ľudia",
+    "Info" : "Info",
     "Timeline" : "Časová os",
     "Folders" : "Priečinky",
     "Favorites" : "Obľúbené",
@@ -16,7 +17,6 @@
     "Download" : "Sťahovanie",
     "Favorite" : "Obľúbené",
     "Unarchive" : "Vybrať z archívu",
-    "Edit Date/Time" : "Upraviť Dátum/Čas",
     "View in folder" : "Zobraziť v priečinku",
     "Add to album" : "Pridať do albumu",
     "Remove from person" : "Odobrať z osoby",
@@ -67,14 +67,13 @@
     "Time" : "Čas",
     "Hour" : "Hodina",
     "Minute" : "Minúta",
-    "Update Exif" : "Aktualizovať Exif",
     "Newest" : "Najnovšie",
     "Oldest" : "Najstaršie",
-    "Loading data … {n}/{m}" : "Nahrávanie údajov ... {n}/{m}",
     "Title" : "Názov",
     "Description" : "Popis",
     "Label" : "Štítok",
     "Copyright" : "Copyright",
+    "Empty" : "Prázdny",
     "Remove person" : "Odstrániť osobu",
     "Name" : "Meno",
     "Rename person" : "Premenovať osobu",
@@ -196,6 +195,9 @@
     "Failed to delete files." : "Nepodarilo sa zmazať súbory.",
     "Failed to delete {fileName}." : "Nepodarilo sa zmazať {fileName}.",
     "Failed to favorite files." : "Nepodarilo sa pridať súbory medzi obľúbené.",
-    "Failed to favorite {fileName}." : "Nepodarilo sa pridať súbor {fileName} medzi obľúbené."
+    "Failed to favorite {fileName}." : "Nepodarilo sa pridať súbor {fileName} medzi obľúbené.",
+    "Edit Date/Time" : "Upraviť Dátum/Čas",
+    "Update Exif" : "Aktualizovať Exif",
+    "Loading data … {n}/{m}" : "Nahrávanie údajov ... {n}/{m}"
 },"pluralForm" :"nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);"
 }

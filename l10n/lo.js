@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "ການຕັ້ງຄ່າ",
+    "Info" : "ຂໍ້ມຸນ",
     "Favorites" : "ລາຍການທີ່ມັກ",
     "Videos" : "ວິດີໂອ",
     "Tags" : "ປ້າຍກຳກັບ",

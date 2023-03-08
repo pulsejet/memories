@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Settings" : "Paramètres",
     "People" : "Gent",
+    "Info" : "Info",
     "Folders" : "Repertòris",
     "Favorites" : "Favorits",
     "Albums" : "Albums",

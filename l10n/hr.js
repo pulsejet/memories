@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Settings" : "Postavke",
     "People" : "Ljudi",
+    "Info" : "Informacije",
     "Timeline" : "Vremenska crta",
     "Folders" : "Mape",
     "Favorites" : "Favoriti",
@@ -31,6 +32,7 @@ OC.L10N.register(
     "Description" : "Opis",
     "Label" : "Oznaka",
     "Copyright" : "Autorsko pravo",
+    "Empty" : "Prazno",
     "Name" : "Naziv",
     "Update" : "Ažuriraj",
     "Search" : "Traži",

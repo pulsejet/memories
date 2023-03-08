@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "პარამეტრები",
+    "Info" : "ინფორმაცია",
     "Folders" : "დირექტორიები",
     "Favorites" : "რჩეულები",
     "Videos" : "ვიდეოები",
@@ -25,6 +26,7 @@ OC.L10N.register(
     "Description" : "აღწერილობა",
     "Label" : "ლეიბლი",
     "Copyright" : "საავტორო უფლებები",
+    "Empty" : "ცარიელი",
     "Name" : "სახელი",
     "Update" : "განახლება",
     "Search" : "ძიება",

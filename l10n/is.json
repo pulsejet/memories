@@ -1,6 +1,7 @@
 { "translations": {
     "Settings" : "Stillingar",
     "People" : "Fólk",
+    "Info" : "Upplýsingar",
     "Timeline" : "Tímalína",
     "Folders" : "Möppur",
     "Favorites" : "Eftirlæti",
@@ -30,6 +31,7 @@
     "Description" : "Lýsing",
     "Label" : "Skýring",
     "Copyright" : "Höfundarréttur",
+    "Empty" : "Tómt",
     "Name" : "Heiti",
     "Update" : "Uppfæra",
     "Search" : "Search",

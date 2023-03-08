@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Поставке",
+    "Info" : "Info",
     "Favorites" : "Omiljene",
     "Videos" : "Video",
     "Tags" : "Oznake",

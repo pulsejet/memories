@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "設定",
+    "Info" : "情報",
     "Timeline" : "タイムライン",
     "Folders" : "フォルダー",
     "Favorites" : "お気に入り",
@@ -39,6 +40,7 @@ OC.L10N.register(
     "Description" : "説明",
     "Label" : "ラベル",
     "Copyright" : "著作権",
+    "Empty" : "空",
     "Name" : "名前",
     "Update" : "更新",
     "Search" : "検索",
