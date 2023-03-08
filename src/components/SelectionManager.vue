@@ -208,12 +208,12 @@ export default defineComponent({
     ];
 
     // Ugly: globally exposed functions
-    globalThis.editMetadata = (photos: IPhoto[]) => {
+    globalThis.editMetadata = (photos: IPhoto[], sections?: number[]) => {
       const sel = new Map<number, IPhoto>();
       for (const photo of photos) {
         sel.set(photo.fileid, photo);
       }
-      this.editMetadataSelection(sel);
+      this.editMetadataSelection(sel, sections);
     };
   },
 
@@ -748,8 +748,11 @@ export default defineComponent({
     /**
      * Open the edit date dialog
      */
-    async editMetadataSelection(selection: Selection) {
-      (<any>this.$refs.editMetadata).open(Array.from(selection.values()));
+    async editMetadataSelection(selection: Selection, sections?: number[]) {
+      (<any>this.$refs.editMetadata).open(
+        Array.from(selection.values()),
+        sections
+      );
     },
 
     /**

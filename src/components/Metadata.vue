@@ -114,7 +114,8 @@ export default defineComponent({
           title: this.dateOriginalStr,
           subtitle: this.dateOriginalTime,
           icon: CalendarIcon,
-          edit: () => globalThis.editMetadata([globalThis.currentViewerPhoto]),
+          edit: () =>
+            globalThis.editMetadata([globalThis.currentViewerPhoto], [1]),
         });
       }
 
@@ -141,6 +142,8 @@ export default defineComponent({
           title: title || this.t("memories", "No title"),
           subtitle: [desc || this.t("memories", "No description")],
           icon: InfoIcon,
+          edit: () =>
+            globalThis.editMetadata([globalThis.currentViewerPhoto], [3]),
         });
       }
 
@@ -149,6 +152,8 @@ export default defineComponent({
           title: this.tagNamesStr,
           subtitle: [],
           icon: TagIcon,
+          edit: () =>
+            globalThis.editMetadata([globalThis.currentViewerPhoto], [2]),
         });
       }
 

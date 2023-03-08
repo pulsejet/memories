@@ -17,21 +17,21 @@
     </template>
 
     <div v-if="photos">
-      <div>
+      <div v-if="sections.includes(1)">
         <div class="title-text">
           {{ t("memories", "Date / Time") }}
         </div>
         <EditDate ref="editDate" :photos="photos" />
       </div>
 
-      <div v-if="config_tagsEnabled">
+      <div v-if="config_tagsEnabled && sections.includes(2)">
         <div class="title-text">
           {{ t("memories", "Collaborative Tags") }}
         </div>
         <EditTags ref="editTags" :photos="photos" />
       </div>
 
-      <div>
+      <div v-if="sections.includes(3)">
         <div class="title-text">
           {{ t("memories", "EXIF Fields") }}
         </div>
@@ -83,6 +83,7 @@ export default defineComponent({
 
   data: () => ({
     photos: null as IPhoto[],
+    sections: [] as number[],
     show: false,
     processing: false,
     progress: 0,
@@ -94,10 +95,11 @@ export default defineComponent({
       this.$emit("refresh", val);
     },
 
-    async open(photos: IPhoto[]) {
+    async open(photos: IPhoto[], sections: number[] = [1, 2, 3]) {
       const state = (this.state = Math.random());
       this.show = true;
       this.processing = true;
+      this.sections = sections;
 
       let done = 0;
       this.progress = 0;
@@ -154,7 +156,7 @@ export default defineComponent({
     async save() {
       // Perform validation
       try {
-        (<any>this.$refs.editDate).validate();
+        (<any>this.$refs.editDate)?.validate?.();
       } catch (e) {
         console.error(e);
         showError(e);
@@ -162,10 +164,8 @@ export default defineComponent({
       }
 
       // Get exif fields diff
-      const exifResult = (<any>this.$refs.editExif).result();
-      const tagsResult = this.config_tagsEnabled
-        ? (<any>this.$refs.editTags).result()
-        : null;
+      const exifResult = (<any>this.$refs.editExif)?.result?.() || {};
+      const tagsResult = (<any>this.$refs.editTags)?.result?.() || null;
 
       // Start processing
       let done = 0;
@@ -182,7 +182,7 @@ export default defineComponent({
           const raw = JSON.parse(JSON.stringify(exifResult));
 
           // Date
-          const date = (<any>this.$refs.editDate).result(p);
+          const date = (<any>this.$refs.editDate)?.result?.(p);
           if (date) {
             raw.DateTimeOriginal = date;
           }
