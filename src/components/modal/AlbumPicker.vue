@@ -156,19 +156,20 @@ export default defineComponent({
 
     .album {
       :deep .list-item {
-        padding: 8px 16px;
         box-sizing: border-box;
       }
 
-      &:not(:last-child) {
-        margin-bottom: 16px;
+      :deep .line-one__title {
+        font-weight: 500;
       }
 
       &__image {
-        width: 40px;
-        height: 40px;
+        width: auto;
+        height: 100%;
+        aspect-ratio: 1/1;
         object-fit: cover;
-        border-radius: var(--border-radius);
+        border-radius: 50%;
+        margin-right: 5px;
 
         &--placeholder {
           background: var(--color-primary-light);

@@ -1,19 +1,17 @@
 <template>
   <Modal @close="close" size="normal" v-if="show">
     <template #title>
-      {{ t("memories", "Add to album") }}
+      {{ t("memories", "Add to Album") }}
     </template>
 
     <div class="outer">
       <AlbumPicker @select="selectAlbum" />
 
-      <div v-if="processing" class="info-pad">
-        {{
-          t("memories", "Processing … {n}/{m}", {
-            n: photosDone,
-            m: photos.length,
-          })
-        }}
+      <div v-if="processing">
+        <NcProgressBar
+          :value="Math.round((photosDone * 100) / photos.length)"
+          :error="true"
+        />
       </div>
     </div>
   </Modal>
@@ -26,12 +24,16 @@ import * as dav from "../../services/DavRequests";
 import { showInfo } from "@nextcloud/dialogs";
 import { IAlbum, IPhoto } from "../../types";
 
-import AlbumPicker from "./AlbumPicker.vue";
+const NcProgressBar = () =>
+  import("@nextcloud/vue/dist/Components/NcProgressBar");
+
 import Modal from "./Modal.vue";
+import AlbumPicker from "./AlbumPicker.vue";
 
 export default defineComponent({
   name: "AddToAlbumModal",
   components: {
+    NcProgressBar,
     Modal,
     AlbumPicker,
   },
@@ -63,6 +65,8 @@ export default defineComponent({
     },
 
     async selectAlbum(album: IAlbum) {
+      if (this.processing) return;
+
       const name = album.name || album.album_id.toString();
       const gen = dav.addToAlbum(album.user, name, this.photos);
       this.processing = true;
@@ -91,9 +95,5 @@ export default defineComponent({
 <style lang="scss" scoped>
 .outer {
   margin-top: 15px;
-}
-
-.info-pad {
-  margin-top: 6px;
 }
 </style>

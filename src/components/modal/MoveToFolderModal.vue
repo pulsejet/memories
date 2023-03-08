@@ -5,12 +5,10 @@
     </template>
 
     <div class="outer">
-      {{
-        t("memories", "Processing … {n}/{m}", {
-          n: photosDone,
-          m: photos.length,
-        })
-      }}
+      <NcProgressBar
+        :value="Math.round((photosDone * 100) / photos.length)"
+        :error="true"
+      />
     </div>
   </Modal>
 </template>
@@ -23,12 +21,16 @@ import { getFilePickerBuilder, FilePickerType } from "@nextcloud/dialogs";
 import { showInfo } from "@nextcloud/dialogs";
 import { IPhoto } from "../../types";
 
+const NcProgressBar = () =>
+  import("@nextcloud/vue/dist/Components/NcProgressBar");
+
 import UserConfig from "../../mixins/UserConfig";
 import Modal from "./Modal.vue";
 
 export default defineComponent({
   name: "MoveToFolderModal",
   components: {
+    NcProgressBar,
     Modal,
   },
 

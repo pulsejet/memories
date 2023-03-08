@@ -9,13 +9,11 @@
     <div class="outer">
       <FaceList @select="clickFace" />
 
-      <div v-if="procesingTotal > 0" class="info-pad">
-        {{
-          t("memories", "Processing … {n}/{m}", {
-            n: processing,
-            m: procesingTotal,
-          })
-        }}
+      <div v-if="processingTotal > 0">
+        <NcProgressBar
+          :value="Math.round((processing * 100) / processingTotal)"
+          :error="true"
+        />
       </div>
     </div>
 
@@ -32,6 +30,8 @@ import { defineComponent } from "vue";
 
 import NcButton from "@nextcloud/vue/dist/Components/NcButton";
 const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
+const NcProgressBar = () =>
+  import("@nextcloud/vue/dist/Components/NcProgressBar");
 
 import { showError } from "@nextcloud/dialogs";
 import { getCurrentUser } from "@nextcloud/auth";
@@ -48,6 +48,7 @@ export default defineComponent({
   components: {
     NcButton,
     NcTextField,
+    NcProgressBar,
     Modal,
     Tag,
     FaceList,
@@ -55,7 +56,7 @@ export default defineComponent({
 
   data: () => ({
     processing: 0,
-    procesingTotal: 0,
+    processingTotal: 0,
     show: false,
   }),
 
@@ -102,7 +103,7 @@ export default defineComponent({
           { details: true }
         )) as any;
         let data: IFileInfo[] = res.data;
-        this.procesingTotal = data.length;
+        this.processingTotal = data.length;
 
         // Don't try too much
         let failures = 0;
@@ -154,9 +155,5 @@ export default defineComponent({
 <style lang="scss" scoped>
 .outer {
   margin-top: 15px;
-}
-.info-pad {
-  margin-top: 6px;
-  margin-bottom: 2px;
 }
 </style>
