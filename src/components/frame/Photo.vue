@@ -45,6 +45,7 @@
       @touchcancel.passive="$emit('touchend', $event)"
     >
       <XImg
+        v-if="src"
         ref="ximg"
         :class="['ximg', 'fill-block', `memories-thumb-${data.key}`]"
         draggable="false"
@@ -101,8 +102,7 @@ export default defineComponent({
 
   data: () => ({
     touchTimer: 0,
-    src: null,
-    hasFaceRect: false,
+    faceSrc: null,
   }),
 
   watch: {
@@ -113,16 +113,10 @@ export default defineComponent({
           oldData.flag & (this.c.FLAG_SELECTED | this.c.FLAG_LOAD_FAIL);
       }
     },
-
-    "data.etag": function () {
-      this.hasFaceRect = false;
-      this.refresh();
-    },
   },
 
   mounted() {
-    this.hasFaceRect = false;
-    this.refresh();
+    this.faceSrc = null;
 
     // Setup video hooks
     const video = this.$refs.video as HTMLVideoElement;
@@ -136,8 +130,8 @@ export default defineComponent({
     clearTimeout(this.touchTimer);
 
     // Clean up blob url if face rect was created
-    if (this.hasFaceRect) {
-      URL.revokeObjectURL(this.src);
+    if (this.faceSrc) {
+      URL.revokeObjectURL(this.faceSrc);
     }
   },
 
@@ -154,26 +148,25 @@ export default defineComponent({
         return utils.getLivePhotoVideoUrl(this.data, true);
       }
     },
+
+    src(): string | null {
+      this.data.etag; // dependency
+
+      if (this.data.flag & this.c.FLAG_PLACEHOLDER) {
+        return null;
+      } else if (this.data.flag & this.c.FLAG_LOAD_FAIL) {
+        return errorsvg;
+      } else if (this.faceSrc) {
+        return this.faceSrc;
+      } else {
+        return this.url();
+      }
+    },
   },
 
   methods: {
     emitSelect(data: IPhoto) {
       this.$emit("select", data);
-    },
-
-    async refresh() {
-      this.src = await this.getSrc();
-    },
-
-    /** Get src for image to show */
-    async getSrc() {
-      if (this.data.flag & this.c.FLAG_PLACEHOLDER) {
-        return null;
-      } else if (this.data.flag & this.c.FLAG_LOAD_FAIL) {
-        return errorsvg;
-      } else {
-        return this.url();
-      }
     },
 
     /** Get url of the photo */
@@ -205,8 +198,7 @@ export default defineComponent({
 
     /** Set src with overlay face rect */
     async addFaceRect() {
-      if (!this.data.facerect || this.hasFaceRect) return;
-      this.hasFaceRect = true;
+      if (!this.data.facerect || this.faceSrc) return;
 
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
@@ -226,7 +218,7 @@ export default defineComponent({
 
       canvas.toBlob(
         (blob) => {
-          this.src = URL.createObjectURL(blob);
+          this.faceSrc = URL.createObjectURL(blob);
         },
         "image/jpeg",
         0.95
@@ -241,7 +233,6 @@ export default defineComponent({
     /** Error in loading image */
     error(e: any) {
       this.data.flag |= this.c.FLAG_LOAD_FAIL;
-      this.refresh();
     },
 
     toggleSelect() {
