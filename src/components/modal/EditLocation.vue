@@ -41,9 +41,7 @@
 
     <div class="osm-attribution">
       Powered by
-      <a
-        href="https://nominatim.openstreetmap.org/ui/search.html"
-        target="_blank"
+      <a href="https://nominatim.openstreetmap.org" target="_blank"
         >Nominatim</a
       >
       &copy;
