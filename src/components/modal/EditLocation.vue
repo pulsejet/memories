@@ -15,6 +15,20 @@
       <Magnify :size="16" />
     </NcTextField>
 
+    <div class="osm-attribution">
+      Powered by
+      <a
+        href="https://nominatim.openstreetmap.org/ui/search.html"
+        target="_blank"
+        >Nominatim</a
+      >
+      &copy;
+      <a href="https://www.openstreetmap.org/copyright" target="_blank"
+        >OpenStreetMap</a
+      >
+      contributors
+    </div>
+
     <NcLoadingIcon class="loading-spinner" v-if="loading" />
 
     <ul v-if="options.length > 0">
@@ -168,6 +182,14 @@ export default defineComponent({
     padding: 4px;
     > span {
       user-select: all;
+    }
+  }
+
+  .osm-attribution {
+    margin: -3px 4px;
+    font-size: 0.65em;
+    a {
+      color: var(--color-primary);
     }
   }
 
