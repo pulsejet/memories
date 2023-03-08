@@ -17,7 +17,7 @@
       {{
         t(
           "memories",
-          "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below."
+          "After creating a public share link in the sidebar, click 'Refresh' and a corresponding link to Memories will be shown below."
         )
       }}
     </div>
