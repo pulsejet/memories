@@ -17,12 +17,16 @@
     >
       <LTileLayer :url="tileurl" :attribution="attribution" :noWrap="true" />
       <LMarker
-        v-for="cluster in clusters"
+        v-for="cluster of clusters"
         :key="cluster.id"
         :lat-lng="cluster.center"
         @click="zoomTo(cluster)"
       >
-        <LIcon :icon-anchor="[24, 24]" :className="clusterIconClass(cluster)">
+        <LIcon
+          :icon-anchor="[24, 24]"
+          :className="clusterIconClass(cluster)"
+          v-once
+        >
           <div class="preview">
             <div class="count" v-if="cluster.count > 1">
               {{ cluster.count }}
