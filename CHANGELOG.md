@@ -4,6 +4,7 @@ This file is manually updated. Please file an issue if something is missing.
 
 ## v4.12.0, v3.12.0
 
+- **Feature**: Allow editing of GPS coordinates ([#418](https://github.com/pulsejet/memories/issues/418))
 - **Feature**: Allow bulk editing of EXIF attributes other than date/time
 - **Feature**: Allow (optionally bulk) editing of collaborative tags
 - **Feature**: Show list of tags in sidebar
