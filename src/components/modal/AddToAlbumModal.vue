@@ -1,7 +1,7 @@
 <template>
   <Modal @close="close" size="normal" v-if="show">
     <template #title>
-      {{ t("memories", "Add to Album") }}
+      {{ t("memories", "Add to album") }}
     </template>
 
     <div class="outer">
