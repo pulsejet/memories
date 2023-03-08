@@ -4,7 +4,8 @@ This file is manually updated. Please file an issue if something is missing.
 
 ## v4.12.0, v3.12.0
 
-Note: Make sure you run at least Nextcloud 25.0.4
+Note: Make sure you run at least Nextcloud 25.0.4  
+You may need to clear browser cache to use location search.
 
 - **Feature**: Allow editing of GPS coordinates ([#418](https://github.com/pulsejet/memories/issues/418))
 - **Feature**: Allow bulk editing of EXIF attributes other than date/time
