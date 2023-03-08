@@ -9,7 +9,9 @@
 [![GitHub issues](https://img.shields.io/github/issues/pulsejet/memories)](https://github.com/pulsejet/memories/issues)
 [![GitHub Sponsor](https://img.shields.io/github/sponsors/pulsejet?logo=GitHub)](https://github.com/sponsors/pulsejet)
 
-Memories is a _batteries-included_ photo management solution for Nextcloud with advanced features including:
+Memories is a _batteries-included_ photo management solution for Nextcloud with advanced features
+
+## 🎁 Features
 
 - **📸 Timeline**: Sort photos and videos by date taken, parsed from Exif data.
 - **⏪ Rewind**: Jump to any time in the past instantly and relive your memories.
@@ -38,7 +40,7 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 1. ✅ Enable the app through the app management of your Nextcloud.
 1. ⚒️ (Strongly recommended) use VS Code and install Vetur and Prettier.
 
-## Support the project
+## 🤝 Support the project
 
 1. **🌟 Star this repository**: This is the easiest way to support Memories and costs nothing.
 1. **🪲 Report bugs**: Report any bugs you find on the issue tracker.
@@ -51,10 +53,10 @@ A shout out to the current and past financial backers of Memories! See the spons
 [<img src="https://github.com/k1l1.png" width="42" />](https://github.com/k1l1)
 [<img src="https://github.com/ChickenTarm.png" width="42" />](https://github.com/ChickenTarm)
 
-## Changelog
+## 📝 Changelog
 
 For the full changelog, see [CHANGELOG.md](CHANGELOG.md).
 
-## Special Thanks
+## 🙏 Special Thanks
 
 Nextcloud team. A lot of this work is based on [Photos](https://github.com/nextcloud/photos).
