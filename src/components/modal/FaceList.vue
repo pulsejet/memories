@@ -6,7 +6,9 @@
         :label="t('memories', 'Search')"
         :placeholder="t('memories', 'Search')"
         @input="searchChanged"
-      />
+      >
+        <Magnify :size="16" />
+      </NcTextField>
     </div>
 
     <div class="photo" v-for="photo of detail" :key="photo.fileid">
@@ -28,11 +30,14 @@ import NcTextField from "@nextcloud/vue/dist/Components/NcTextField";
 import * as dav from "../../services/DavRequests";
 import Fuse from "fuse.js";
 
+import Magnify from "vue-material-design-icons/Magnify.vue";
+
 export default defineComponent({
   name: "FaceList",
   components: {
     Tag,
     NcTextField,
+    Magnify,
   },
 
   data: () => ({

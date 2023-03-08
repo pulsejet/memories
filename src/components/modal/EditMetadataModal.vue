@@ -37,6 +37,13 @@
         </div>
         <EditExif ref="editExif" :photos="photos" />
       </div>
+
+      <div v-if="sections.includes(4)">
+        <div class="title-text">
+          {{ t("memories", "Geolocation") }}
+        </div>
+        <EditLocation ref="editLocation" :photos="photos" />
+      </div>
     </div>
 
     <div v-if="processing">
@@ -56,9 +63,10 @@ const NcProgressBar = () =>
   import("@nextcloud/vue/dist/Components/NcProgressBar");
 import Modal from "./Modal.vue";
 
-import EditExif from "./EditExif.vue";
 import EditDate from "./EditDate.vue";
 import EditTags from "./EditTags.vue";
+import EditExif from "./EditExif.vue";
+import EditLocation from "./EditLocation.vue";
 
 import { showError } from "@nextcloud/dialogs";
 import { emit } from "@nextcloud/event-bus";
@@ -74,9 +82,10 @@ export default defineComponent({
     NcProgressBar,
     Modal,
 
-    EditExif,
     EditDate,
     EditTags,
+    EditExif,
+    EditLocation,
   },
 
   mixins: [UserConfig],
@@ -95,7 +104,7 @@ export default defineComponent({
       this.$emit("refresh", val);
     },
 
-    async open(photos: IPhoto[], sections: number[] = [1, 2, 3]) {
+    async open(photos: IPhoto[], sections: number[] = [1, 2, 3, 4]) {
       const state = (this.state = Math.random());
       this.show = true;
       this.processing = true;
@@ -164,7 +173,10 @@ export default defineComponent({
       }
 
       // Get exif fields diff
-      const exifResult = (<any>this.$refs.editExif)?.result?.() || {};
+      const exifResult = {
+        ...((<any>this.$refs.editExif)?.result?.() || {}),
+        ...((<any>this.$refs.editLocation)?.result?.() || {}),
+      };
       const tagsResult = (<any>this.$refs.editTags)?.result?.() || null;
 
       // Start processing

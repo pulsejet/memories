@@ -7,10 +7,13 @@
       <NcTextField
         class="field"
         :id="'exif-field-' + field.field"
-        :value.sync="exif[field.field]"
         :label-outside="true"
+        :value.sync="exif[field.field]"
         :placeholder="placeholder(field)"
         @input="dirty[field.field] = true"
+        trailing-button-icon="close"
+        :show-trailing-button="dirty[field.field]"
+        @trailing-button-click="reset(field)"
       />
     </div>
   </div>
@@ -118,6 +121,11 @@ export default defineComponent({
       return this.dirty[field.field]
         ? t("memories", "Empty")
         : t("memories", "Unchanged");
+    },
+
+    reset(field: any) {
+      this.exif[field.field] = "";
+      this.dirty[field.field] = false;
     },
   },
 });

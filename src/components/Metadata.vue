@@ -163,6 +163,8 @@ export default defineComponent({
           subtitle: [],
           icon: LocationIcon,
           href: this.mapFullUrl,
+          edit: () =>
+            globalThis.editMetadata([globalThis.currentViewerPhoto], [4]),
         });
       }
 
