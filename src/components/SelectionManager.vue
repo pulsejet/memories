@@ -171,7 +171,7 @@ export default defineComponent({
         if: () => this.routeIsArchive(),
       },
       {
-        name: t("memories", "Edit Metadata"),
+        name: t("memories", "Edit metadata"),
         icon: EditFileIcon,
         callback: this.editMetadataSelection.bind(this),
       },
@@ -191,11 +191,10 @@ export default defineComponent({
         name: t("memories", "Add to album"),
         icon: AlbumsIcon,
         callback: this.addToAlbum.bind(this),
-        if: (self: typeof this) =>
-          self.config_albumsEnabled && !self.routeIsAlbum(),
+        if: (self: any) => self.config_albumsEnabled && !self.routeIsAlbum(),
       },
       {
-        name: t("memories", "Move to another person"),
+        name: t("memories", "Move to person"),
         icon: MoveIcon,
         callback: this.moveSelectionToPerson.bind(this),
         if: () => this.$route.name === "recognize",

@@ -132,12 +132,12 @@
             </template>
           </NcActionButton>
           <NcActionButton
-            :aria-label="t('memories', 'Edit Metadata')"
+            :aria-label="t('memories', 'Edit metadata')"
             v-if="!routeIsPublic"
             @click="editMetadata"
             :close-after-click="true"
           >
-            {{ t("memories", "Edit Metadata") }}
+            {{ t("memories", "Edit metadata") }}
             <template #icon>
               <EditFileIcon :size="24" />
             </template>
@@ -1165,7 +1165,7 @@ export default defineComponent({
     },
 
     /**
-     * Edit Metadata for current photo
+     * Edit metadata for current photo
      */
     editMetadata() {
       globalThis.editMetadata([globalThis.currentViewerPhoto]);

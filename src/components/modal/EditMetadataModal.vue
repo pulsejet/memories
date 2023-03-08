@@ -1,7 +1,7 @@
 <template>
   <Modal v-if="show" @close="close">
     <template #title>
-      {{ t("memories", "Edit Metadata") }}
+      {{ t("memories", "Edit metadata") }}
     </template>
 
     <template #buttons>
