@@ -104,6 +104,17 @@ aside.app-sidebar {
   -ms-overflow-style: none;
 }
 
+// Make metadata tab scrollbar thin
+#tab-memories-metadata {
+  scrollbar-width: thin;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
 // Make sure empty content is full width
 [role="note"].empty-content {
   width: 100%;

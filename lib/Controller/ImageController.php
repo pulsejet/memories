@@ -182,7 +182,8 @@ class ImageController extends ApiBase
     public function info(
         string $id,
         bool $basic = false,
-        bool $current = false
+        bool $current = false,
+        bool $tags = false
     ): JSONResponse {
         $file = $this->getUserFile((int) $id);
         if (!$file) {
@@ -193,7 +194,7 @@ class ImageController extends ApiBase
         $info = $this->timelineQuery->getInfoById($file->getId(), $basic);
 
         // Get list of tags for this file
-        if (!$basic) {
+        if ($tags) {
             $info['tags'] = $this->getTags($file->getId());
         }
 

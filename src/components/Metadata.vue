@@ -302,7 +302,7 @@ export default defineComponent({
       this.exif = {};
 
       const state = this.state;
-      const url = API.IMAGE_INFO(fileInfo.id);
+      const url = API.Q(API.IMAGE_INFO(fileInfo.id), "tags=1");
       const res = await axios.get<any>(url);
       if (state !== this.state) return;
 
@@ -321,12 +321,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.outer {
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
 .top-field {
   margin: 10px;
   margin-bottom: 25px;
