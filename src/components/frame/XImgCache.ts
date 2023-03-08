@@ -84,7 +84,7 @@ async function flushPreviewQueue() {
       fetchPreviewQueueCopy
         .filter((p) => p.reqid === reqid)
         .forEach((p) => {
-          p.callback(getResponse(imgBlob, imgType, res.headers));
+          p.callback?.(getResponse(imgBlob, imgType, res.headers));
           p.callback = null;
         });
     }

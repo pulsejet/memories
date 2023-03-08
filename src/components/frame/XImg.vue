@@ -72,20 +72,18 @@ export default defineComponent({
         // Check if the blob cache exists
         if (!usedCache(this.src)) {
           const src = this.src;
-          const newBlob = URL.createObjectURL(await fetchImage(src));
+          const img = await fetchImage(src);
           if (this.src !== src || this.isDestroyed) {
-            URL.revokeObjectURL(newBlob); // the src has changed, abort
+            // the src has changed, abort
             return;
           }
 
           // Check if the blob cache exists now
           // In this case, someone else already created the blob
           // Free up the current blob and use the existing one instead
-          if (usedCache(src)) {
-            URL.revokeObjectURL(newBlob);
-          } else {
+          if (!usedCache(src)) {
             // Create new blob cache entry
-            this.dataSrc = newBlob;
+            this.dataSrc = URL.createObjectURL(img);
             BLOB_CACHE[src] = [1, this.dataSrc];
           }
         }
