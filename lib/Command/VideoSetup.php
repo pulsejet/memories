@@ -180,6 +180,10 @@ class VideoSetup extends Command
 
     protected function detectFeatures()
     {
+        // Reset the current configuration
+        $this->config->deleteSystemValue('memories.vod.vaapi');
+        $this->config->deleteSystemValue('memories.vod.nvenc');
+
         $this->output->writeln("\nStarting ffmpeg feature detection");
         $this->output->writeln('This may take a while. Please be patient');
 
@@ -203,6 +207,7 @@ class VideoSetup extends Command
 
             $this->checkCPU();
             $this->checkVAAPI();
+            $this->checkNVENC();
         } finally {
             if (file_exists($this->sampleFile)) {
                 unlink($this->sampleFile);
@@ -220,11 +225,15 @@ class VideoSetup extends Command
 
     protected function checkVAAPI()
     {
+        // Reset current configuration
+        $this->config->deleteSystemValue('memories.vod.vaapi');
+        $this->config->deleteSystemValue('memories.vod.vaapi.low_power');
+
         // Check for VAAPI
         $this->output->write("\nChecking for VAAPI acceleration (/dev/dri/renderD128) ... ");
         if (!file_exists('/dev/dri/renderD128')) {
             $this->output->writeln('NOT FOUND');
-            $this->config->setSystemValue('memories.vod.vaapi', false);
+            $this->config->deleteSystemValue('memories.vod.vaapi');
 
             return;
         }
@@ -236,7 +245,7 @@ class VideoSetup extends Command
             $this->output->writeln('NO');
             $this->output->writeln('<error>Current user does not have read permissions on /dev/dri/renderD128</error>');
             $this->output->writeln('VAAPI will not work. You may need to add your user to the video/render groups');
-            $this->config->setSystemValue('memories.vod.vaapi', false);
+            $this->config->deleteSystemValue('memories.vod.vaapi');
 
             return;
         }
@@ -255,13 +264,13 @@ class VideoSetup extends Command
 
         // Check if passed any test
         if (!$basic && !$lowPower) {
-            $this->config->setSystemValue('memories.vod.vaapi', false);
+            $this->config->deleteSystemValue('memories.vod.vaapi');
 
             return;
         }
 
         // Everything is good
-        $this->output->writeln('Do you want to enable VAAPI acceleration? [Y/n]');
+        $this->output->write('Do you want to enable VAAPI acceleration? [Y/n] ');
         if ('n' === trim(fgets(fopen('php://stdin', 'r')))) {
             $this->config->setSystemValue('memories.vod.vaapi', false);
             $this->output->writeln('VAAPI is now disabled');
@@ -270,6 +279,52 @@ class VideoSetup extends Command
             $this->output->writeln('and ensure proper permissions for /dev/dri/renderD128.');
             $this->output->writeln('See the documentation for more details.');
             $this->config->setSystemValue('memories.vod.vaapi', true);
+        }
+    }
+
+    protected function checkNVENC()
+    {
+        $this->output->writeln("\nChecking for NVIDIA acceleration with NVENC");
+
+        // Reset the current configuration
+        $this->config->deleteSystemValue('memories.vod.nvenc.temporal_aq');
+        $this->config->deleteSystemValue('memories.vod.nvenc.scale');
+
+        // Basic test
+        $this->config->setSystemValue('memories.vod.nvenc', true);
+
+        // Different scaling methods
+        $this->config->setSystemValue('memories.vod.nvenc.scale', 'npp');
+        $withScaleNpp = $this->testResult('NVENC (scale_npp)', true);
+        $this->config->setSystemValue('memories.vod.nvenc.scale', 'cuda');
+        $withScaleCuda = $this->testResult('NVENC (scale_cuda)', true);
+
+        if (!$withScaleNpp && !$withScaleCuda) {
+            $this->config->deleteSystemValue('memories.vod.nvenc');
+            $this->config->deleteSystemValue('memories.vod.nvenc.scale');
+            $this->output->writeln('NVENC does not seem to be available');
+
+            return;
+        }
+        if ($withScaleNpp) {
+            $this->config->setSystemValue('memories.vod.nvenc.scale', 'npp');
+        } elseif ($withScaleCuda) {
+            $this->config->setSystemValue('memories.vod.nvenc.scale', 'cuda');
+        }
+
+        // Try with temporal-aq
+        $this->config->setSystemValue('memories.vod.nvenc.temporal_aq', true);
+        if (!$this->testResult('NVENC (temporal-aq)', true)) {
+            $this->config->deleteSystemValue('memories.vod.nvenc.temporal_aq');
+        }
+
+        // Good to go
+        $this->output->write('Do you want to enable NVENC acceleration? [Y/n] ');
+        if ('n' === trim(fgets(fopen('php://stdin', 'r')))) {
+            $this->config->setSystemValue('memories.vod.nvenc', false);
+            $this->output->writeln('NVENC is now disabled');
+        } else {
+            $this->output->writeln('NVENC transcoding is now enabled');
         }
     }
 
@@ -302,7 +357,7 @@ class VideoSetup extends Command
         }
     }
 
-    private function testResult(string $name): bool
+    private function testResult(string $name, bool $minor = false): bool
     {
         $this->output->write("Testing transcoding with {$name} ... ");
 
@@ -316,8 +371,10 @@ class VideoSetup extends Command
             $msg = $e->getMessage();
             $logFile = $this->logFile;
             $this->output->writeln('FAIL');
-            $this->output->writeln("<error>{$name} transcoding failed with error {$msg}</error>");
-            $this->output->writeln("Check the log file of go-vod for more details ({$logFile})");
+            if (!$minor) {
+                $this->output->writeln("<error>{$name} transcoding failed with error {$msg}</error>");
+                $this->output->writeln("Check the log file of go-vod for more details ({$logFile})");
+            }
 
             return false;
         }

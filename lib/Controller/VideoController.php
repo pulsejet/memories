@@ -402,6 +402,8 @@ class VideoController extends ApiBase
             'vaapiLowPower' => $config->getSystemValue('memories.vod.vaapi.low_power', false),
 
             'nvenc' => $config->getSystemValue('memories.vod.nvenc', false),
+            'nvencTemporalAQ' => $config->getSystemValue('memories.vod.nvenc.temporal_aq', false),
+            'nvencScale' => $config->getSystemValue('memories.vod.nvenc.scale', 'npp'),
         ];
 
         // Write config to file
