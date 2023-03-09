@@ -92,7 +92,7 @@ export default defineComponent({
         const ePhoto = photo.imageInfo?.exif[field.field];
         const eCurr = exif[field.field];
         if (ePhoto && (eCurr === null || ePhoto === eCurr)) {
-          exif[field.field] = ePhoto;
+          exif[field.field] = String(ePhoto);
         } else {
           exif[field.field] = "";
         }
