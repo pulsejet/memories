@@ -24,6 +24,10 @@ export default defineComponent({
 
     config_showHidden:
       loadState("memories", "showHidden", <string>"false") === "true",
+    config_sortFolderMonth:
+      loadState("memories", "sortFolderMonth", <string>"false") === "true",
+    config_sortAlbumMonth:
+      loadState("memories", "sortAlbumMonth", <string>"true") === "true",
     config_enableTopMemories:
       loadState("memories", "enableTopMemories", <string>"false") === "true",
 

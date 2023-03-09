@@ -11,7 +11,8 @@ You may need to clear browser cache to use location search.
 - **Feature**: Allow bulk editing of EXIF attributes other than date/time
 - **Feature**: Allow (optionally bulk) editing of collaborative tags
 - **Feature**: Show list of tags in sidebar
-- **Feature**: Configurable album sorting order ([#377](https://github.com/pulsejet/memories/issues/377))
+- **Feature**: Configurable folder/album sorting order ([#371](https://github.com/pulsejet/memories/issues/371))
+- **Feature**: Configurable album list sorting order ([#377](https://github.com/pulsejet/memories/issues/377))
 - **Feature**: Allow archiving photos throw folder view ([#350](https://github.com/pulsejet/memories/issues/350))
 - **Feature**: Add search bar to face cluster merge dialog ([#177](https://github.com/pulsejet/memories/issues/177))
 - Other fixes and features ([milestone](https://github.com/pulsejet/memories/milestone/9?closed=1))

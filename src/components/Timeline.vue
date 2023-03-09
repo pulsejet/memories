@@ -271,7 +271,11 @@ export default defineComponent({
     },
     isMonthView(): boolean {
       return (
-        this.$route.name === "albums" || this.$route.name === "album-share"
+        (this.config_sortAlbumMonth &&
+          (this.$route.name === "albums" ||
+            this.$route.name === "album-share")) ||
+        (this.config_sortFolderMonth && this.$route.name === "folders") ||
+        this.$route.query.sort === "album"
       );
     },
     /** Get view name for dynamic top matter */

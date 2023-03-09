@@ -76,6 +76,8 @@ class PageController extends Controller
         $pi('timelinePath', 'EMPTY');
         $pi('foldersPath', '/');
         $pi('showHidden', false);
+        $pi('sortFolderMonth', false);
+        $pi('sortAlbumMonth', 'true');
         $pi('enableTopMemories', 'true');
 
         // Apps enabled

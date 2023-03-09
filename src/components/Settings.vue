@@ -76,6 +76,27 @@
         >
           {{ t("memories", "Show hidden folders") }}
         </NcCheckboxRadioSwitch>
+
+        <NcCheckboxRadioSwitch
+          :checked.sync="config_sortFolderMonth"
+          @update:checked="updateSortFolderMonth"
+          type="switch"
+        >
+          {{ t("memories", "Treat folders as albums (sort order)") }}
+        </NcCheckboxRadioSwitch>
+      </NcAppSettingsSection>
+
+      <NcAppSettingsSection
+        id="albums-settings"
+        :title="t('memories', 'Albums')"
+      >
+        <NcCheckboxRadioSwitch
+          :checked.sync="config_sortAlbumMonth"
+          @update:checked="updateSortAlbumMonth"
+          type="switch"
+        >
+          {{ t("memories", "Enable timeline view (sort order)") }}
+        </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
     </NcAppSettingsDialog>
 
@@ -189,6 +210,14 @@ export default defineComponent({
 
     async updateShowHidden() {
       await this.updateSetting("showHidden");
+    },
+
+    async updateSortFolderMonth() {
+      await this.updateSetting("sortFolderMonth");
+    },
+
+    async updateSortAlbumMonth() {
+      await this.updateSetting("sortAlbumMonth");
     },
   },
 });

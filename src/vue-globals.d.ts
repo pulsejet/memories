@@ -17,6 +17,8 @@ declare module "vue" {
     config_timelinePath: string;
     config_foldersPath: string;
     config_showHidden: boolean;
+    config_sortFolderMonth: boolean;
+    config_sortAlbumMonth: boolean;
     config_tagsEnabled: boolean;
     config_recognizeEnabled: boolean;
     config_facerecognitionInstalled: boolean;
