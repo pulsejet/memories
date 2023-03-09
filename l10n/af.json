@@ -1,5 +1,6 @@
 { "translations": {
     "Settings" : "Instellings",
+    "Info" : "Inligting",
     "Folders" : "Vouers",
     "Favorites" : "Gunstelinge",
     "Videos" : "Video's ",
@@ -22,6 +23,7 @@
     "Title" : "Titel",
     "Description" : "Beskrywing",
     "Label" : "Etiket",
+    "Reset" : "Herstel",
     "Name" : "Naam",
     "Update" : "Werk by",
     "Search" : "Soek",
@@ -33,7 +35,6 @@
     "Close" : "Sluit",
     "Previous" : "Vorige",
     "Next" : "Volgende",
-    "Reset" : "Herstel",
     "Continue" : "Gaan voort",
     "Original" : "Oorspronklik",
     "Custom" : "Eie",

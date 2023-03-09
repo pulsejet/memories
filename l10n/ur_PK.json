@@ -10,6 +10,7 @@
     "Month" : "ماہ",
     "Title" : "عنوان",
     "Description" : "تصریح",
+    "Reset" : "ری سیٹ",
     "Name" : "اسم",
     "Search" : "Search",
     "Sort by date" : "Order by date",
@@ -17,7 +18,6 @@
     "Share" : "تقسیم",
     "Close" : "بند ",
     "Next" : "اگلا",
-    "Reset" : "ری سیٹ",
     "Continue" : "جاری"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

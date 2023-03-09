@@ -37,7 +37,6 @@ OC.L10N.register(
     "Add to album" : "Toevoegen aan album",
     "General" : "Algemeen",
     "Your Timeline" : "Je tijdlijn",
-    "Processing … {n}/{m}" : "Verwerken … {n}/{m}",
     "_{n} item added to album_::_{n} items added to album_" : ["{n} items toegevoegd aan album","{n} items toegevoegd aan album"],
     "Search for collaborators" : "Zoeken naar bijdragers",
     "Search people or groups" : "Zoek mensen of groepen",
@@ -87,6 +86,7 @@ OC.L10N.register(
     "Lens Model" : "Lensmodel",
     "Copyright" : "Auteursrecht",
     "Empty" : "Leeg",
+    "Reset" : "Herstellen",
     "Remove person" : "Verwijder persoon",
     "Name" : "Naam",
     "Rename person" : "Hernoem persoon",
@@ -96,7 +96,6 @@ OC.L10N.register(
     "Share Folder" : "Map delen",
     "You cannot share the root folder" : "Je kunt de hoofdmap niet delen",
     "Use the sidebar to share this folder." : "Gebruik de zijbalk om deze map te delen.",
-    "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Als je een openbare deellink maakt, klik op vernieuwen en een bijbehorende link naar Herinneringen wordt hieronder weergegeven.",
     "Refresh" : "Verversen",
     "Remove" : "Verwijderen",
     "Sort by date" : "Sorteren op datum",
@@ -117,7 +116,6 @@ OC.L10N.register(
     "Previous" : "Vorige",
     "Next" : "Volgende",
     "Are you sure you want to delete?" : "Weet je zeker dat je wilt verwijderen?",
-    "Reset" : "Herstellen",
     "All changes will be lost." : "Alle aanpassingen zullen verloren gaan.",
     "Are you sure you want to continue?" : "Weet je zeker dat je wilt doorgaan?",
     "Continue" : "Doorgaan",
@@ -177,7 +175,9 @@ OC.L10N.register(
     "Failed to delete {fileName}." : "Verwijderen van {fileName} mislukt.",
     "Edit Date/Time" : "Datum/tijd bewerken",
     "Edit EXIF Data" : "Bewerk EXIF gegevens",
+    "Processing … {n}/{m}" : "Verwerken … {n}/{m}",
     "Update Exif" : "Exif bijwerken",
-    "Date Taken" : "Datum gemaakt"
+    "Date Taken" : "Datum gemaakt",
+    "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Als je een openbare deellink maakt, klik op vernieuwen en een bijbehorende link naar Herinneringen wordt hieronder weergegeven."
 },
 "nplurals=2; plural=(n != 1);");

@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Arventennoù",
+    "Info" : "Titouroù",
     "Favorites" : "Pennrolloù",
     "Videos" : "Videoioù",
     "Tags" : "Klavioù",

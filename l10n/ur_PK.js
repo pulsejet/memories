@@ -12,6 +12,7 @@ OC.L10N.register(
     "Month" : "ماہ",
     "Title" : "عنوان",
     "Description" : "تصریح",
+    "Reset" : "ری سیٹ",
     "Name" : "اسم",
     "Search" : "Search",
     "Sort by date" : "Order by date",
@@ -19,7 +20,6 @@ OC.L10N.register(
     "Share" : "تقسیم",
     "Close" : "بند ",
     "Next" : "اگلا",
-    "Reset" : "ری سیٹ",
     "Continue" : "جاری"
 },
 "nplurals=2; plural=(n != 1);");

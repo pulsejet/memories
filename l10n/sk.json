@@ -29,7 +29,6 @@
     "Show hidden folders" : "Zobraziť skryté priečinky",
     "Your Timeline" : "Vaša časová os",
     "Failed to load some photos" : "Načítanie akýchkoľvek fotiek zlyhalo",
-    "Processing … {n}/{m}" : "Spracúvam ... {n}/{m}",
     "Search for collaborators" : "Vyhľadať spolupracovníkov",
     "Search people or groups" : "Vyhľadať užívateľov alebo skupiny",
     "Add {collaboratorLabel} to the collaborators list" : "Pridať {collaboratorLabel} na zoznam spolupracovníkov",
@@ -74,6 +73,7 @@
     "Label" : "Štítok",
     "Copyright" : "Copyright",
     "Empty" : "Prázdny",
+    "Reset" : "Resetovať",
     "Remove person" : "Odstrániť osobu",
     "Name" : "Meno",
     "Rename person" : "Premenovať osobu",
@@ -103,7 +103,6 @@
     "Next" : "Ďalšie",
     "Are you sure you want to delete?" : "Naozaj chcete vymazať?",
     "Save as" : "Uložiť ako",
-    "Reset" : "Resetovať",
     "All changes will be lost." : "Vaše zmeny budú stratené.",
     "Are you sure you want to continue?" : "Naozaj chcete pokračovať?",
     "Continue" : "Pokračovať",
@@ -197,6 +196,7 @@
     "Failed to favorite files." : "Nepodarilo sa pridať súbory medzi obľúbené.",
     "Failed to favorite {fileName}." : "Nepodarilo sa pridať súbor {fileName} medzi obľúbené.",
     "Edit Date/Time" : "Upraviť Dátum/Čas",
+    "Processing … {n}/{m}" : "Spracúvam ... {n}/{m}",
     "Update Exif" : "Aktualizovať Exif",
     "Loading data … {n}/{m}" : "Nahrávanie údajov ... {n}/{m}"
 },"pluralForm" :"nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);"

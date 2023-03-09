@@ -32,7 +32,6 @@
     "Show hidden folders" : "Rodyti paslėptus aplankus",
     "Your Timeline" : "Jūsų laiko juostą",
     "Failed to load some photos" : "Nepavyko įkelti kai kurių nuotraukų",
-    "Processing … {n}/{m}" : "Apdorojama… {n}/{m}",
     "Search people or groups" : "Ieškoti žmonių ar grupių",
     "Copy the public link" : "Kopijuoti viešąją nuorodą",
     "Delete the public link" : "Ištrinti viešąją nuorodą",
@@ -71,6 +70,7 @@
     "Label" : "Etiketė",
     "Copyright" : "Autorių teisės",
     "Empty" : "Tuščias",
+    "Reset" : "Atstatyti",
     "Remove person" : "Šalinti žmogų",
     "Name" : "Vardas",
     "Rename person" : "Pervadinti žmogų",
@@ -107,7 +107,6 @@
     "Next" : "Kitas",
     "Are you sure you want to delete?" : "Ar tikrai norite ištrinti?",
     "Save as" : "Įrašyti kaip",
-    "Reset" : "Atstatyti",
     "All changes will be lost." : "Visi pakeitimai bus prarasti.",
     "Are you sure you want to continue?" : "Ar tikrai norite tęsti?",
     "Continue" : "Tęsti",
@@ -142,6 +141,7 @@
     "EXIF" : "EXIF",
     "Edit Date/Time" : "Taisyti datą/laiką",
     "Edit EXIF Data" : "Taisyti EXIF duomenis",
+    "Processing … {n}/{m}" : "Apdorojama… {n}/{m}",
     "Update Exif" : "Atnaujinti EXIF",
     "Loading data … {n}/{m}" : "Įkeliami duomenys… {n}/{m}"
 },"pluralForm" :"nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);"
