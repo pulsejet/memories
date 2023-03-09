@@ -392,11 +392,11 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 	// Scaling for output
 	var scale string
 	var format string
-	if CV == "h264_vaapi" {
+	if s.c.VAAPI {
 		// VAAPI
 		format = "format=nv12|vaapi,hwupload"
 		scale = fmt.Sprintf("scale_vaapi=w=%d:h=%d:force_original_aspect_ratio=decrease", s.width, s.height)
-	} else if CV == "h264_nvenc" {
+	} else if s.c.NVENC {
 		// NVENC
 		format = "format=nv12|cuda,hwupload"
 		scale = fmt.Sprintf("scale_cuda=w=%d:h=%d:force_original_aspect_ratio=decrease:passthrough=0", s.width, s.height)
@@ -412,7 +412,7 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 
 	// do not scale or set bitrate for full quality
 	if s.quality == "max" {
-		if CV == "h264_nvenc" {
+		if s.c.NVENC {
 			// Due to a bug(?) in NVENC, passthrough=0 must be set
 			args = append(args, []string{
 				"-vf", fmt.Sprintf("%s,%s", format, "scale_cuda=passthrough=0"),
@@ -437,12 +437,13 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 	}...)
 
 	// Device specific output args
-	if CV == "h264_vaapi" {
-		args = append(args, []string{
-			"-low_power", "1",
-			"-global_quality", "25",
-		}...)
-	} else if CV == "h264_nvenc" {
+	if s.c.VAAPI {
+		args = append(args, []string{"-global_quality", "25"}...)
+
+		if s.c.VAAPILowPower {
+			args = append(args, []string{"-low_power", "1"}...)
+		}
+	} else if s.c.NVENC {
 		args = append(args, []string{
 			"-preset", "p6",
 			"-tune", "ll",

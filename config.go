@@ -26,6 +26,8 @@ type Config struct {
 	ManagerIdleTime int `json:"managerIdleTime"`
 
 	// Hardware acceleration configuration
-	VAAPI bool `json:"vaapi"`
+	VAAPI         bool `json:"vaapi"`
+	VAAPILowPower bool `json:"vaapiLowPower"`
+
 	NVENC bool `json:"nvenc"`
 }
