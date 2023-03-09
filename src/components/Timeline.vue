@@ -270,12 +270,14 @@ export default defineComponent({
       return this.$route.name === "archive";
     },
     isMonthView(): boolean {
+      if (this.$route.query.sort === "timeline") return false;
+
       return (
+        this.$route.query.sort === "album" ||
         (this.config_sortAlbumMonth &&
           (this.$route.name === "albums" ||
             this.$route.name === "album-share")) ||
-        (this.config_sortFolderMonth && this.$route.name === "folders") ||
-        this.$route.query.sort === "album"
+        (this.config_sortFolderMonth && this.$route.name === "folders")
       );
     },
     /** Get view name for dynamic top matter */
