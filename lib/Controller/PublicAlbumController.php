@@ -2,7 +2,6 @@
 
 namespace OCA\Memories\Controller;
 
-use OCA\Files\Event\LoadSidebar;
 use OCA\Memories\Db\TimelineQuery;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
@@ -57,7 +56,6 @@ class PublicAlbumController extends Controller
 
         // Scripts
         Util::addScript($this->appName, 'memories-main');
-        $this->eventDispatcher->dispatchTyped(new LoadSidebar());
         PageController::provideCommonInitialState($this->initialState);
 
         $response = new PublicTemplateResponse($this->appName, 'main');

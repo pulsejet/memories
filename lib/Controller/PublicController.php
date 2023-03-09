@@ -2,7 +2,6 @@
 
 namespace OCA\Memories\Controller;
 
-use OCA\Files\Event\LoadSidebar;
 use OCP\App\IAppManager;
 use OCP\AppFramework\AuthPublicShareController;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
@@ -100,7 +99,6 @@ class PublicController extends AuthPublicShareController
 
         // Scripts
         Util::addScript($this->appName, 'memories-main');
-        $this->eventDispatcher->dispatchTyped(new LoadSidebar());
         PageController::provideCommonInitialState($this->initialState);
 
         // Share info
