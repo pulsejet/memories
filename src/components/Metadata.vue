@@ -25,7 +25,7 @@
         </template>
       </div>
 
-      <div class="edit" v-if="field.edit">
+      <div class="edit" v-if="canEdit && field.edit">
         <NcActions :inline="1">
           <NcActionButton
             :aria-label="t('memories', 'Edit')"
@@ -169,6 +169,10 @@ export default defineComponent({
       });
 
       return list;
+    },
+
+    canEdit(): boolean {
+      return !this.$route.name?.endsWith("-share");
     },
 
     /** Date taken info */
