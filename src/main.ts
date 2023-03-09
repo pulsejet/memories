@@ -12,7 +12,7 @@ import router from "./router";
 import { Route } from "vue-router";
 import { generateFilePath } from "@nextcloud/router";
 import { getRequestToken } from "@nextcloud/auth";
-import { IPhoto } from "./types";
+import { IFileInfo, IPhoto } from "./types";
 
 import "./global.scss";
 
@@ -25,7 +25,7 @@ declare global {
   var editMetadata: (photos: IPhoto[], sections?: number[]) => void;
 
   var mSidebar: {
-    open: (filename: string) => void;
+    open: (filename: IFileInfo) => void;
     close: () => void;
     setTab: (tab: string) => void;
   };

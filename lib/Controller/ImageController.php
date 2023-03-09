@@ -193,15 +193,17 @@ class ImageController extends ApiBase
         // Get the image info
         $info = $this->timelineQuery->getInfoById($file->getId(), $basic);
 
-        // Get list of tags for this file
-        if ($tags) {
-            $info['tags'] = $this->getTags($file->getId());
-        }
+        // Allow these ony for logged in users
+        if (null !== $this->userSession->getUser()) {
+            // Get list of tags for this file
+            if ($tags) {
+                $info['tags'] = $this->getTags($file->getId());
+            }
 
-        // Get latest exif data if requested
-        // Allow this ony for logged in users
-        if ($current && null !== $this->userSession->getUser()) {
-            $info['current'] = Exif::getExifFromFile($file);
+            // Get latest exif data if requested
+            if ($current) {
+                $info['current'] = Exif::getExifFromFile($file);
+            }
         }
 
         return new JSONResponse($info, Http::STATUS_OK);

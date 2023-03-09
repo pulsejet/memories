@@ -191,6 +191,11 @@ export default defineComponent({
     // Register sidebar metadata tab
     const OCA = globalThis.OCA;
     if (OCA.Files && OCA.Files.Sidebar) {
+      const pf = (fileInfo) => {
+        fileInfo.fileid = Number(fileInfo.id);
+        return fileInfo;
+      };
+
       OCA.Files.Sidebar.registerTab(
         new OCA.Files.Sidebar.Tab({
           id: "memories-metadata",
@@ -201,10 +206,10 @@ export default defineComponent({
             this.metadataComponent?.$destroy?.();
             this.metadataComponent = new Vue(Metadata as any);
             this.metadataComponent.$mount(el);
-            this.metadataComponent.update(fileInfo);
+            this.metadataComponent.update(pf(fileInfo));
           },
           update(fileInfo) {
-            this.metadataComponent.update(fileInfo);
+            this.metadataComponent.update(pf(fileInfo));
           },
           destroy() {
             this.metadataComponent?.$destroy?.();

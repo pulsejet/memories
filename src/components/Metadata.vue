@@ -308,7 +308,7 @@ export default defineComponent({
       this.exif = {};
 
       const state = this.state;
-      const url = API.Q(API.IMAGE_INFO(fileInfo.id), "tags=1");
+      const url = API.Q(API.IMAGE_INFO(fileInfo.fileid), "tags=1");
       const res = await axios.get<any>(url);
       if (state !== this.state) return;
 

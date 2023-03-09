@@ -1,18 +1,46 @@
 <template>
-  <aside class="app-sidebar" v-if="false"></aside>
+  <aside class="app-sidebar" v-if="reducedOpen">
+    <div class="title">
+      <h2>{{ filename }}</h2>
+
+      <NcActions :inline="1">
+        <NcActionButton :aria-label="t('memories', 'Close')" @click="close()">
+          {{ t("memories", "Close") }}
+          <template #icon> <CloseIcon :size="20" /> </template>
+        </NcActionButton>
+      </NcActions>
+    </div>
+
+    <Metadata ref="metadata" />
+  </aside>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { subscribe, unsubscribe, emit } from "@nextcloud/event-bus";
 
+import NcActions from "@nextcloud/vue/dist/Components/NcActions";
+import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
+
+import Metadata from "./Metadata.vue";
+import { IFileInfo } from "../types";
+
+import CloseIcon from "vue-material-design-icons/Close.vue";
+
 export default defineComponent({
   name: "Sidebar",
-  components: {},
+  components: {
+    Metadata,
+    NcActions,
+    NcActionButton,
+    CloseIcon,
+  },
 
   data: () => {
     return {
       nativeOpen: false,
+      reducedOpen: false,
+      filename: "",
     };
   },
 
@@ -33,17 +61,42 @@ export default defineComponent({
   },
 
   methods: {
-    open(filename: string) {
-      globalThis.OCA.Files.Sidebar.setFullScreenMode?.(true);
-      globalThis.OCA.Files.Sidebar.open(filename);
+    async open(file: IFileInfo) {
+      if (
+        !this.reducedOpen &&
+        this.native() &&
+        (!file.fileid || file.originalFilename?.startsWith("/files/"))
+      ) {
+        this.native()?.setFullScreenMode?.(true);
+        this.native()?.open(file.filename);
+      } else {
+        this.reducedOpen = true;
+        await this.$nextTick();
+        this.filename = file.basename;
+
+        (<any>this.$refs.metadata)?.update(file);
+        emit("memories:sidebar:opened", null);
+      }
     },
 
-    close() {
-      globalThis.OCA.Files.Sidebar.close();
+    async close() {
+      if (this.nativeOpen) {
+        this.native()?.close();
+      } else {
+        if (this.reducedOpen) {
+          this.reducedOpen = false;
+          await this.$nextTick();
+        }
+        emit("memories:sidebar:closed", null);
+      }
     },
 
     setTab(tab: string) {
-      globalThis.OCA.Files.Sidebar.setActiveTab(tab);
+      this.native()?.setActiveTab(tab);
+    },
+
+    native() {
+      return globalThis.OCA?.Files?.Sidebar;
     },
 
     handleNativeOpen(event: any) {
@@ -62,8 +115,34 @@ export default defineComponent({
 <style scoped lang="scss">
 aside.app-sidebar {
   position: fixed;
+  top: 0;
   right: 0;
-  z-index: 100000000;
+  width: 27vw;
+  min-width: 300px;
+  height: 100% !important;
+  z-index: 2525;
+  padding: 10px;
+  background-color: var(--color-main-background);
+  border-left: 1px solid var(--color-border);
+
+  @media (max-width: 512px) {
+    width: 100vw;
+    min-width: unset;
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+
+    h2 {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin: 0;
+    }
+  }
 }
 </style>
 
@@ -71,5 +150,9 @@ aside.app-sidebar {
 // Prevent sidebar from becoming too big
 aside.app-sidebar {
   max-width: 360px !important;
+
+  @media (max-width: 512px) {
+    max-width: unset !important;
+  }
 }
 </style>

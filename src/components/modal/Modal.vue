@@ -68,7 +68,9 @@ export default defineComponent({
 
   mounted() {
     if (this.sidebar) {
-      globalThis.mSidebar.open(this.sidebar);
+      globalThis.mSidebar.open({
+        filename: this.sidebar,
+      } as any);
     }
   },
 

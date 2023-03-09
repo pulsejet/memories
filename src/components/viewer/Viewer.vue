@@ -67,7 +67,6 @@
             </template>
           </NcActionButton>
           <NcActionButton
-            v-if="!routeIsPublic"
             :aria-label="t('memories', 'Sidebar')"
             @click="toggleSidebar"
             :close-after-click="true"
@@ -170,7 +169,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { IDay, IPhoto, IRow, IRowType } from "../../types";
+import { IDay, IFileInfo, IPhoto, IRow, IRowType } from "../../types";
 
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
@@ -1016,9 +1015,12 @@ export default defineComponent({
 
     /** Open the sidebar */
     async openSidebar(photo?: IPhoto) {
-      const fInfo = await dav.getFiles([photo || this.currentPhoto]);
+      let fInfo: IFileInfo | IPhoto = photo || this.currentPhoto;
+      if (!this.routeIsPublic) {
+        fInfo = (await dav.getFiles([fInfo]))[0];
+      }
       globalThis.mSidebar.setTab("memories-metadata");
-      globalThis.mSidebar.open(fInfo[0].filename);
+      globalThis.mSidebar.open(fInfo as IFileInfo);
     },
 
     async updateSizeWithoutAnim() {
