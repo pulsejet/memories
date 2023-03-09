@@ -399,7 +399,13 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 	} else if s.c.NVENC {
 		// NVENC
 		format = "format=nv12|cuda,hwupload"
-		scale = fmt.Sprintf("scale_cuda=w=%d:h=%d:force_original_aspect_ratio=decrease:passthrough=0", s.width, s.height)
+
+		if s.c.NVENCScale == "cuda" {
+			scale = fmt.Sprintf("scale_cuda=w=%d:h=%d:force_original_aspect_ratio=decrease:passthrough=0", s.width, s.height)
+		} else {
+			// default to "npp"
+			scale = fmt.Sprintf("scale_npp=%d:%d", s.width, s.height)
+		}
 	} else {
 		// x264
 		format = "format=nv12"
@@ -447,11 +453,14 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 		args = append(args, []string{
 			"-preset", "p6",
 			"-tune", "ll",
-			"-temporal-aq", "1",
 			"-rc", "vbr",
 			"-rc-lookahead", "30",
 			"-cq", "24",
 		}...)
+
+		if s.c.NVENCTemporalAQ {
+			args = append(args, []string{"-temporal-aq", "1"}...)
+		}
 	} else if CV == "libx264" {
 		args = append(args, []string{
 			"-preset", "faster",
