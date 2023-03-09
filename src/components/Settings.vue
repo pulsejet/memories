@@ -82,7 +82,7 @@
           @update:checked="updateSortFolderMonth"
           type="switch"
         >
-          {{ t("memories", "Treat folders as albums (sort order)") }}
+          {{ t("memories", "Sort folders oldest-first") }}
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
@@ -95,7 +95,7 @@
           @update:checked="updateSortAlbumMonth"
           type="switch"
         >
-          {{ t("memories", "Enable timeline view (sort order)") }}
+          {{ t("memories", "Sort albums oldest-first") }}
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
     </NcAppSettingsDialog>
