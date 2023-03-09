@@ -1,24 +1,31 @@
 package main
 
 type Config struct {
+	// Bind address
+	Bind string `json:"bind"`
+
 	// FFmpeg binary
-	ffmpeg string
+	FFmpeg string `json:"ffmpeg"`
 	// FFprobe binary
-	ffprobe string
+	FFprobe string `json:"ffprobe"`
 	// Temp files directory
-	tempdir string
+	TempDir string `json:"tempdir"`
 
 	// Size of each chunk in seconds
-	chunkSize int
+	ChunkSize int `json:"chunkSize"`
 	// How many *chunks* to look behind before restarting transcoding
-	lookBehind int
+	LookBehind int `json:"lookBehind"`
 	// Number of chunks in goal to restart encoding
-	goalBufferMin int
+	GoalBufferMin int `json:"goalBufferMin"`
 	// Number of chunks in goal to stop encoding
-	goalBufferMax int
+	GoalBufferMax int `json:"goalBufferMax"`
 
 	// Number of seconds to wait before shutting down encoding
-	streamIdleTime int
+	StreamIdleTime int `json:"streamIdleTime"`
 	// Number of seconds to wait before shutting down a client
-	managerIdleTime int
+	ManagerIdleTime int `json:"managerIdleTime"`
+
+	// Hardware acceleration configuration
+	VAAPI bool `json:"vaapi"`
+	NVENC bool `json:"nvenc"`
 }

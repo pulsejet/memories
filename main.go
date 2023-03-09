@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -24,8 +26,8 @@ func NewHandler(c *Config) *Handler {
 	}
 
 	// Recreate tempdir
-	os.RemoveAll(c.tempdir)
-	os.MkdirAll(c.tempdir, 0755)
+	os.RemoveAll(c.TempDir)
+	os.MkdirAll(c.TempDir, 0755)
 
 	go h.watchClose()
 	return h
@@ -120,51 +122,54 @@ func (h *Handler) Close() {
 	h.close <- ""
 }
 
+func loadConfig(path string, c *Config) {
+	// load json config
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatal("Error when opening file: ", err)
+	}
+
+	err = json.Unmarshal(content, &c)
+	if err != nil {
+		log.Fatal("Error loading config file", err)
+	}
+
+	// Print loaded config
+	fmt.Printf("%+v\n", c)
+}
+
 func main() {
 	if len(os.Args) >= 2 && os.Args[1] == "test" {
 		fmt.Println("test successful")
 		return
 	}
 
+	c := &Config{
+		Bind:            ":47788",
+		ChunkSize:       3,
+		LookBehind:      5,
+		GoalBufferMin:   1,
+		GoalBufferMax:   4,
+		StreamIdleTime:  60,
+		ManagerIdleTime: 60,
+	}
+
+	// Load config file from second argument
+	if len(os.Args) >= 2 {
+		loadConfig(os.Args[1], c)
+	} else {
+		log.Fatal("Missing config file")
+	}
+
+	if c.FFmpeg == "" || c.FFprobe == "" || c.TempDir == "" {
+		log.Fatal("Missing critical param -- check config file")
+	}
+
 	log.Println("Starting VOD server")
 
-	// get executable paths
-	ffmpeg := os.Getenv("FFMPEG")
-	if ffmpeg == "" {
-		ffmpeg = "ffmpeg"
-	}
-
-	ffprobe := os.Getenv("FFPROBE")
-	if ffprobe == "" {
-		ffprobe = "ffprobe"
-	}
-
-	// get tempdir
-	tempdir := os.Getenv("GOVOD_TEMPDIR")
-	if tempdir == "" {
-		tempdir = "/tmp/go-vod"
-	}
-
-	// get port
-	bind := os.Getenv("GOVOD_BIND")
-	if bind == "" {
-		bind = ":47788"
-	}
-
-	h := NewHandler(&Config{
-		ffmpeg:          ffmpeg,
-		ffprobe:         ffprobe,
-		tempdir:         tempdir,
-		chunkSize:       3,
-		lookBehind:      5,
-		goalBufferMin:   1,
-		goalBufferMax:   4,
-		streamIdleTime:  60,
-		managerIdleTime: 60,
-	})
-
+	h := NewHandler(c)
 	http.Handle("/", h)
-	http.ListenAndServe(bind, nil)
+	http.ListenAndServe(c.Bind, nil)
 
 	log.Println("Exiting VOD server")
 	h.Close()

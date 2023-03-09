@@ -49,7 +49,7 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 	h := fnv.New32a()
 	h.Write([]byte(path))
 	ph := fmt.Sprint(h.Sum32())
-	m.tempDir = fmt.Sprintf("%s/%s-%s", m.c.tempdir, id, ph)
+	m.tempDir = fmt.Sprintf("%s/%s-%s", m.c.TempDir, id, ph)
 
 	// Delete temp dir if exists
 	os.RemoveAll(m.tempDir)
@@ -64,7 +64,7 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 		m.probe.BitRate *= 2
 	}
 
-	m.numChunks = int(math.Ceil(m.probe.Duration.Seconds() / float64(c.chunkSize)))
+	m.numChunks = int(math.Ceil(m.probe.Duration.Seconds() / float64(c.ChunkSize)))
 
 	// Possible streams
 	m.streams["360p"] = &Stream{c: c, m: m, quality: "360p", height: 360, width: 640, bitrate: 500000}
@@ -134,7 +134,7 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 			}
 
 			// Nothing done for 5 minutes
-			if m.inactive >= m.c.managerIdleTime/5 {
+			if m.inactive >= m.c.ManagerIdleTime/5 {
 				t.Stop()
 				m.Destroy()
 				m.close <- m.id
@@ -247,7 +247,7 @@ func (m *Manager) ffprobe() error {
 	}
 
 	ctx, _ := context.WithDeadline(context.TODO(), time.Now().Add(5*time.Second))
-	cmd := exec.CommandContext(ctx, m.c.ffprobe, args...)
+	cmd := exec.CommandContext(ctx, m.c.FFprobe, args...)
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout

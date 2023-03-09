@@ -63,7 +63,7 @@ func (s *Stream) Run() {
 			s.mutex.Lock()
 			// Prune chunks
 			for id := range s.chunks {
-				if id < s.goal-s.c.goalBufferMax {
+				if id < s.goal-s.c.GoalBufferMax {
 					s.pruneChunk(id)
 				}
 			}
@@ -71,7 +71,7 @@ func (s *Stream) Run() {
 			s.inactive++
 
 			// Nothing done for 2 minutes
-			if s.inactive >= s.c.streamIdleTime/5 && s.coder != nil {
+			if s.inactive >= s.c.StreamIdleTime/5 && s.coder != nil {
 				t.Stop()
 				s.clear()
 			}
@@ -119,14 +119,14 @@ func (s *Stream) ServeList(w http.ResponseWriter, r *http.Request) error {
 	w.Write([]byte("#EXT-X-VERSION:4\n"))
 	w.Write([]byte("#EXT-X-MEDIA-SEQUENCE:0\n"))
 	w.Write([]byte("#EXT-X-PLAYLIST-TYPE:VOD\n"))
-	w.Write([]byte(fmt.Sprintf("#EXT-X-TARGETDURATION:%d\n", s.c.chunkSize)))
+	w.Write([]byte(fmt.Sprintf("#EXT-X-TARGETDURATION:%d\n", s.c.ChunkSize)))
 
 	query := GetQueryString(r)
 
 	duration := s.m.probe.Duration.Seconds()
 	i := 0
 	for duration > 0 {
-		size := float64(s.c.chunkSize)
+		size := float64(s.c.ChunkSize)
 		if duration < size {
 			size = duration
 		}
@@ -134,7 +134,7 @@ func (s *Stream) ServeList(w http.ResponseWriter, r *http.Request) error {
 		w.Write([]byte(fmt.Sprintf("#EXTINF:%.3f, nodesc\n", size)))
 		w.Write([]byte(fmt.Sprintf("%s-%06d.ts%s\n", s.quality, i, query)))
 
-		duration -= float64(s.c.chunkSize)
+		duration -= float64(s.c.ChunkSize)
 		i++
 	}
 
@@ -165,7 +165,7 @@ func (s *Stream) ServeChunk(w http.ResponseWriter, id int) error {
 
 	// Will have this soon enough
 	foundBehind := false
-	for i := id - 1; i > id-s.c.lookBehind && i >= 0; i-- {
+	for i := id - 1; i > id-s.c.LookBehind && i >= 0; i-- {
 		if _, ok := s.chunks[i]; ok {
 			foundBehind = true
 		}
@@ -201,7 +201,7 @@ func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
 		"-movflags", "frag_keyframe+empty_moov+faststart", "-f", "mov", "pipe:1",
 	}...)
 
-	coder := exec.Command(s.c.ffmpeg, args...)
+	coder := exec.Command(s.c.FFmpeg, args...)
 	log.Printf("%s-%s: %s", s.m.id, s.quality, strings.Join(coder.Args[:], " "))
 
 	cmdStdOut, err := coder.StdoutPipe()
@@ -350,7 +350,7 @@ func (s *Stream) restartAtChunk(w http.ResponseWriter, id int) {
 	chunk := s.createChunk(id) // create first chunk
 
 	// Start the transcoder
-	s.goal = id + s.c.goalBufferMax
+	s.goal = id + s.c.GoalBufferMax
 	s.transcode(id)
 
 	s.waitForChunk(w, chunk) // this is also a request
@@ -372,11 +372,11 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 	CV := "libx264"
 
 	// Check whether hwaccel should be used
-	if os.Getenv("VAAPI") == "1" {
+	if s.c.VAAPI {
 		CV = "h264_vaapi"
 		extra := "-hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format vaapi"
 		args = append(args, strings.Split(extra, " ")...)
-	} else if os.Getenv("NVENC") == "1" {
+	} else if s.c.NVENC {
 		CV = "h264_nvenc"
 		extra := "-hwaccel cuda -hwaccel_output_format cuda"
 		args = append(args, strings.Split(extra, " ")...)
@@ -481,7 +481,7 @@ func (s *Stream) transcode(startId int) {
 		// This ensures that the keyframes are aligned
 		startId--
 	}
-	startAt := float64(startId * s.c.chunkSize)
+	startAt := float64(startId * s.c.ChunkSize)
 
 	args := s.transcodeArgs(startAt)
 
@@ -489,15 +489,15 @@ func (s *Stream) transcode(startId int) {
 	args = append(args, []string{
 		"-avoid_negative_ts", "disabled",
 		"-f", "hls",
-		"-hls_time", fmt.Sprintf("%d", s.c.chunkSize),
-		"-force_key_frames", fmt.Sprintf("expr:gte(t,n_forced*%d)", s.c.chunkSize),
+		"-hls_time", fmt.Sprintf("%d", s.c.ChunkSize),
+		"-force_key_frames", fmt.Sprintf("expr:gte(t,n_forced*%d)", s.c.ChunkSize),
 		"-hls_segment_type", "mpegts",
 		"-start_number", fmt.Sprintf("%d", startId),
 		"-hls_segment_filename", s.getTsPath(-1),
 		"-",
 	}...)
 
-	s.coder = exec.Command(s.c.ffmpeg, args...)
+	s.coder = exec.Command(s.c.FFmpeg, args...)
 	log.Printf("%s-%s: %s", s.m.id, s.quality, strings.Join(s.coder.Args[:], " "))
 
 	cmdStdOut, err := s.coder.StdoutPipe()
@@ -520,9 +520,9 @@ func (s *Stream) transcode(startId int) {
 }
 
 func (s *Stream) checkGoal(id int) {
-	goal := id + s.c.goalBufferMin
+	goal := id + s.c.GoalBufferMin
 	if goal > s.goal {
-		s.goal = id + s.c.goalBufferMax
+		s.goal = id + s.c.GoalBufferMax
 
 		// resume encoding
 		if s.coder != nil {
