@@ -85,7 +85,7 @@ export default defineComponent({
     open() {
       this.folderPath = utils.getFolderRoutePath(this.config_foldersPath);
       this.show = true;
-      globalThis.OCA.Files.Sidebar.setActiveTab("sharing");
+      globalThis.mSidebar.setTab("sharing");
       this.refreshUrls();
     },
 

@@ -44,6 +44,8 @@
     </NcAppContent>
 
     <Settings :open.sync="settingsOpen" />
+
+    <Sidebar />
   </NcContent>
 </template>
 
@@ -64,6 +66,7 @@ import Timeline from "./components/Timeline.vue";
 import Settings from "./components/Settings.vue";
 import FirstStart from "./components/FirstStart.vue";
 import Metadata from "./components/Metadata.vue";
+import Sidebar from "./components/Sidebar.vue";
 
 import ImageMultiple from "vue-material-design-icons/ImageMultiple.vue";
 import FolderIcon from "vue-material-design-icons/Folder.vue";
@@ -89,6 +92,7 @@ export default defineComponent({
     Timeline,
     Settings,
     FirstStart,
+    Sidebar,
 
     ImageMultiple,
     FolderIcon,

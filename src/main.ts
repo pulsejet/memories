@@ -23,6 +23,13 @@ declare global {
   var OCP: Nextcloud.v24.OCP;
 
   var editMetadata: (photos: IPhoto[], sections?: number[]) => void;
+
+  var mSidebar: {
+    open: (filename: string) => void;
+    close: () => void;
+    setTab: (tab: string) => void;
+  };
+
   var currentViewerPhoto: IPhoto;
 
   var windowInnerWidth: number; // cache

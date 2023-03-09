@@ -51,26 +51,24 @@ export default defineComponent({
 
   beforeMount() {
     if (this.sidebar) {
-      subscribe("files:sidebar:opened", this.handleAppSidebarOpen);
-      subscribe("files:sidebar:closed", this.handleAppSidebarClose);
+      subscribe("memories:sidebar:opened", this.handleAppSidebarOpen);
+      subscribe("memories:sidebar:closed", this.handleAppSidebarClose);
       window.addEventListener("DOMNodeInserted", this.handlePopover);
-      globalThis.OCA?.Files?.Sidebar?.setFullScreenMode?.(true);
     }
   },
 
   beforeDestroy() {
     if (this.sidebar) {
-      unsubscribe("files:sidebar:opened", this.handleAppSidebarOpen);
-      unsubscribe("files:sidebar:closed", this.handleAppSidebarClose);
+      unsubscribe("memories:sidebar:opened", this.handleAppSidebarOpen);
+      unsubscribe("memories:sidebar:closed", this.handleAppSidebarClose);
       window.removeEventListener("DOMNodeInserted", this.handlePopover);
-      globalThis.OCA?.Files?.Sidebar?.setFullScreenMode?.(false);
-      globalThis.OCA?.Files?.Sidebar?.close();
+      globalThis.mSidebar.close();
     }
   },
 
   mounted() {
     if (this.sidebar) {
-      globalThis.OCA.Files.Sidebar.open(this.sidebar);
+      globalThis.mSidebar.open(this.sidebar);
     }
   },
 

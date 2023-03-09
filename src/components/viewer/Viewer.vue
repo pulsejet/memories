@@ -257,15 +257,15 @@ export default defineComponent({
   }),
 
   mounted() {
-    subscribe("files:sidebar:opened", this.handleAppSidebarOpen);
-    subscribe("files:sidebar:closed", this.handleAppSidebarClose);
+    subscribe("memories:sidebar:opened", this.handleAppSidebarOpen);
+    subscribe("memories:sidebar:closed", this.handleAppSidebarClose);
     subscribe("files:file:created", this.handleFileUpdated);
     subscribe("files:file:updated", this.handleFileUpdated);
   },
 
   beforeDestroy() {
-    unsubscribe("files:sidebar:opened", this.handleAppSidebarOpen);
-    unsubscribe("files:sidebar:closed", this.handleAppSidebarClose);
+    unsubscribe("memories:sidebar:opened", this.handleAppSidebarOpen);
+    unsubscribe("memories:sidebar:closed", this.handleAppSidebarClose);
     unsubscribe("files:file:created", this.handleFileUpdated);
     unsubscribe("files:file:updated", this.handleFileUpdated);
   },
@@ -1017,9 +1017,8 @@ export default defineComponent({
     /** Open the sidebar */
     async openSidebar(photo?: IPhoto) {
       const fInfo = await dav.getFiles([photo || this.currentPhoto]);
-      globalThis.OCA?.Files?.Sidebar?.setFullScreenMode?.(true);
-      globalThis.OCA.Files.Sidebar.setActiveTab("memories-metadata");
-      globalThis.OCA.Files.Sidebar.open(fInfo[0].filename);
+      globalThis.mSidebar.setTab("memories-metadata");
+      globalThis.mSidebar.open(fInfo[0].filename);
     },
 
     async updateSizeWithoutAnim() {
@@ -1056,8 +1055,7 @@ export default defineComponent({
 
     /** Hide the sidebar, without marking it as closed */
     hideSidebar() {
-      globalThis.OCA?.Files?.Sidebar?.close();
-      globalThis.OCA?.Files?.Sidebar?.setFullScreenMode?.(false);
+      globalThis.mSidebar.close();
     },
 
     /** Close the sidebar */
