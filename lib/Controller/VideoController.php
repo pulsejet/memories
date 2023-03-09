@@ -43,7 +43,7 @@ class VideoController extends ApiBase
     public function transcode(string $client, int $fileid, string $profile): Http\Response
     {
         // Make sure not running in read-only mode
-        if (false !== $this->config->getSystemValue('memories.no_transcode', 'UNSET')) {
+        if (false !== $this->config->getSystemValue('memories.vod.disable', 'UNSET')) {
             return new JSONResponse(['message' => 'Transcoding disabled'], Http::STATUS_FORBIDDEN);
         }
 
@@ -195,7 +195,7 @@ class VideoController extends ApiBase
         }
 
         // Transcode video if allowed
-        if ($transcode && !$this->config->getSystemValue('memories.no_transcode', true)) {
+        if ($transcode && !$this->config->getSystemValue('memories.vod.disable', true)) {
             // If video path not given, write to temp file
             if (!$liveVideoPath) {
                 $liveVideoPath = tempnam(sys_get_temp_dir(), 'livevideo');
@@ -223,18 +223,17 @@ class VideoController extends ApiBase
         return $response;
     }
 
-    private function getUpstream($client, $path, $profile)
+    /**
+     * Start the transcoder.
+     *
+     * @return string Path to log file
+     */
+    public static function startGoVod()
     {
-        $returnCode = $this->getUpstreamInternal($client, $path, $profile);
-
-        // If status code was 0, it's likely the server is down
-        // Make one attempt to start after killing whatever is there
-        if (0 !== $returnCode) {
-            return $returnCode;
-        }
+        $config = \OC::$server->get(\OCP\IConfig::class);
 
         // Get transcoder path
-        $transcoder = $this->config->getSystemValue('memories.transcoder', false);
+        $transcoder = $config->getSystemValue('memories.vod.path', false);
         if (!$transcoder) {
             throw new \Exception('Transcoder not configured');
         }
@@ -255,64 +254,40 @@ class VideoController extends ApiBase
         // Kill the transcoder in case it's running
         \OCA\Memories\Util::pkill($transcoder);
 
-        // Check for environment variables
-        $env = [];
-
-        // QSV with VAAPI
-        if ($this->config->getSystemValue('memories.qsv', false)) {
-            $env[] = 'VAAPI=1';
-        }
-
-        // NVENC
-        if ($this->config->getSystemValue('memories.nvenc', false)) {
-            $env[] = 'NVENC=1';
-        }
-
-        // Bind address / port
-        $port = $this->config->getSystemValue('memories.govod_port', 47788);
-        $env[] = "GOVOD_BIND='127.0.0.1:{$port}'";
-
-        // Paths
-        $ffmpegPath = $this->config->getSystemValue('memories.ffmpeg_path', 'ffmpeg');
-        $ffprobePath = $this->config->getSystemValue('memories.ffprobe_path', 'ffprobe');
-        $env[] = "FFMPEG='{$ffmpegPath}'";
-        $env[] = "FFPROBE='{$ffprobePath}'";
-
-        // Get temp directory
-        $defaultTmp = sys_get_temp_dir().'/go-vod/';
-        $tmpPath = $this->config->getSystemValue('memories.tmp_path', $defaultTmp);
-
-        // Make sure path ends with slash
-        if ('/' !== substr($tmpPath, -1)) {
-            $tmpPath .= '/';
-        }
-
-        // Add instance ID to path
-        $tmpPath .= $this->config->getSystemValue('instanceid', 'default');
-
-        // (Re-)create temp dir
-        shell_exec("rm -rf '{$tmpPath}' && mkdir -p '{$tmpPath}' && chmod 755 '{$tmpPath}'");
-
-        // Check temp directory exists
-        if (!is_dir($tmpPath)) {
-            throw new \Exception("Temp directory could not be created ({$tmpPath})");
-        }
-
-        // Check temp directory is writable
-        if (!is_writable($tmpPath)) {
-            throw new \Exception("Temp directory is not writable ({$tmpPath})");
-        }
-
-        // Set temp dir
-        $env[] = "GOVOD_TEMPDIR='{$tmpPath}'";
-
         // Start transcoder
-        $env = implode(' ', $env);
-        $logFile = $tmpPath.'.log';
-        shell_exec("{$env} nohup {$transcoder} > '{$logFile}' 2>&1 & > /dev/null");
+        [$configFile, $logFile] = self::makeGoVodConfig($config);
+        shell_exec("nohup {$transcoder} {$configFile} >> '{$logFile}' 2>&1 & > /dev/null");
 
-        // wait for 1s and try again
+        // wait for 1s
         sleep(1);
+
+        return $logFile;
+    }
+
+    /**
+     * Get the upstream URL for a video.
+     */
+    public static function getGoVodUrl(string $client, string $path, string $profile): string
+    {
+        $config = \OC::$server->get(\OCP\IConfig::class);
+        $path = rawurlencode($path);
+        $port = $config->getSystemValue('memories.govod_port', 47788);
+
+        return "http://127.0.0.1:{$port}/{$client}{$path}/{$profile}";
+    }
+
+    private function getUpstream(string $client, string $path, string $profile)
+    {
+        $returnCode = $this->getUpstreamInternal($client, $path, $profile);
+
+        // If status code was 0, it's likely the server is down
+        // Make one attempt to start after killing whatever is there
+        if (0 !== $returnCode) {
+            return $returnCode;
+        }
+
+        // Start goVod and get log file
+        $logFile = self::startGoVod();
 
         $returnCode = $this->getUpstreamInternal($client, $path, $profile);
         if (0 === $returnCode) {
@@ -322,14 +297,11 @@ class VideoController extends ApiBase
         return $returnCode;
     }
 
-    private function getUpstreamInternal($client, $path, $profile)
+    private function getUpstreamInternal(string $client, string $path, string $profile)
     {
-        $path = rawurlencode($path);
-
         // Make sure query params are repeated
         // For example, in folder sharing, we need the params on every request
-        $port = $this->config->getSystemValue('memories.govod_port', 47788);
-        $url = "http://127.0.0.1:{$port}/{$client}{$path}/{$profile}";
+        $url = self::getGoVodUrl($client, $path, $profile);
         if ($params = $_SERVER['QUERY_STRING']) {
             $url .= "?{$params}";
         }
@@ -382,5 +354,99 @@ class VideoController extends ApiBase
         curl_close($ch);
 
         return $returnCode;
+    }
+
+    /**
+     * Construct the goVod config JSON.
+     *
+     * @return array [config file, log file]
+     */
+    private static function makeGoVodConfig(\OCP\IConfig $config): array
+    {
+        // Migrate legacy config: remove in 2024
+        self::migrateLegacyConfig($config);
+
+        // Get temp directory
+        $defaultTmp = sys_get_temp_dir().'/go-vod/';
+        $tmpPath = $config->getSystemValue('memories.vod.tempdir', $defaultTmp);
+
+        // Make sure path ends with slash
+        if ('/' !== substr($tmpPath, -1)) {
+            $tmpPath .= '/';
+        }
+
+        // Add instance ID to path
+        $tmpPath .= $config->getSystemValue('instanceid', 'default');
+
+        // (Re-)create temp dir
+        shell_exec("rm -rf '{$tmpPath}' && mkdir -p '{$tmpPath}' && chmod 755 '{$tmpPath}'");
+
+        // Check temp directory exists
+        if (!is_dir($tmpPath)) {
+            throw new \Exception("Temp directory could not be created ({$tmpPath})");
+        }
+
+        // Check temp directory is writable
+        if (!is_writable($tmpPath)) {
+            throw new \Exception("Temp directory is not writable ({$tmpPath})");
+        }
+
+        // Get config from system values
+        $env = [
+            'bind' => $config->getSystemValue('memories.vod.bind', '127.0.0.1:47788'),
+            'ffmpeg' => $config->getSystemValue('memories.vod.ffmpeg', 'ffmpeg'),
+            'ffprobe' => $config->getSystemValue('memories.vod.ffprobe', 'ffprobe'),
+            'tempdir' => $tmpPath,
+
+            'vaapi' => $config->getSystemValue('memories.vod.vaapi', false),
+            'vaapiLowPower' => $config->getSystemValue('memories.vod.vaapi.low_power', false),
+
+            'nvenc' => $config->getSystemValue('memories.vod.nvenc', false),
+        ];
+
+        // Write config to file
+        $logFile = $tmpPath.'.log';
+        $configFile = $tmpPath.'.json';
+        file_put_contents($configFile, json_encode($env, JSON_PRETTY_PRINT));
+
+        // Log file is not in config
+        // go-vod just writes to stdout/stderr
+        return [$configFile, $logFile];
+    }
+
+    /**
+     * Migrate legacy config to new.
+     *
+     * Remove in year 2024
+     */
+    private static function migrateLegacyConfig(\OCP\IConfig $config)
+    {
+        if (null === $config->getSystemValue('memories.no_transcode', null)) {
+            return;
+        }
+
+        // Mapping
+        $legacyConfig = [
+            'memories.no_transcode' => 'memories.vod.disable',
+            'memories.transcoder' => 'memories.vod.path',
+            'memories.ffmpeg_path' => 'memories.vod.ffmpeg',
+            'memories.ffprobe_path' => 'memories.vod.ffprobe',
+            'memories.qsv' => 'memories.vod.vaapi',
+            'memories.nvenc' => 'memories.vod.nvenc',
+            'memories.tmp_path' => 'memories.vod.tempdir',
+        ];
+
+        foreach ($legacyConfig as $old => $new) {
+            if (null !== $config->getSystemValue($old, null)) {
+                $config->setSystemValue($new, $config->getSystemValue($old));
+                $config->deleteSystemValue($old);
+            }
+        }
+
+        // Migrate bind address
+        if ($port = null !== $config->getSystemValue('memories.govod_port', null)) {
+            $config->setSystemValue('memories.vod.bind', "127.0.0.1:{$port}");
+            $config->deleteSystemValue('memories.govod_port');
+        }
     }
 }

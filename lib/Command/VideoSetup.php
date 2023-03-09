@@ -32,6 +32,8 @@ class VideoSetup extends Command
 {
     protected IConfig $config;
     protected OutputInterface $output;
+    protected string $sampleFile;
+    protected string $logFile;
 
     public function __construct(
         IConfig $config
@@ -50,16 +52,18 @@ class VideoSetup extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $this->output = $output;
+
         // Preset executables
-        $ffmpegPath = $this->config->getSystemValue('memories.ffmpeg_path', 'ffmpeg');
+        $ffmpegPath = $this->config->getSystemValue('memories.vod.ffmpeg', 'ffmpeg');
         if ('ffmpeg' === $ffmpegPath) {
             $ffmpegPath = trim(shell_exec('which ffmpeg') ?: 'ffmpeg');
-            $this->config->setSystemValue('memories.ffmpeg_path', $ffmpegPath);
+            $this->config->setSystemValue('memories.vod.ffmpeg', $ffmpegPath);
         }
-        $ffprobePath = $this->config->getSystemValue('memories.ffprobe_path', 'ffprobe');
+        $ffprobePath = $this->config->getSystemValue('memories.vod.ffprobe', 'ffprobe');
         if ('ffprobe' === $ffprobePath) {
             $ffprobePath = trim(shell_exec('which ffprobe') ?: 'ffprobe');
-            $this->config->setSystemValue('memories.ffprobe_path', $ffprobePath);
+            $this->config->setSystemValue('memories.vod.ffprobe', $ffprobePath);
         }
 
         // Get ffmpeg version
@@ -83,12 +87,12 @@ class VideoSetup extends Command
         if (null === $ffmpeg || null === $ffprobe) {
             $output->writeln('ffmpeg and ffprobe are required for video transcoding');
 
-            return $this->suggestDisable($output);
+            return $this->suggestDisable();
         }
 
         // Check go-vod binary
         $output->writeln('Checking for go-vod binary');
-        $goVodPath = $this->config->getSystemValue('memories.transcoder', false);
+        $goVodPath = $this->config->getSystemValue('memories.vod.path', false);
 
         if (!\is_string($goVodPath) || !file_exists($goVodPath)) {
             // Detect architecture
@@ -97,9 +101,9 @@ class VideoSetup extends Command
 
             if (!$goVodPath) {
                 $output->writeln('<error>Compatible go-vod binary not found</error>');
-                $this->suggestGoVod($output);
+                $this->suggestGoVod();
 
-                return $this->suggestDisable($output);
+                return $this->suggestDisable();
             }
         }
 
@@ -109,9 +113,9 @@ class VideoSetup extends Command
         $goVod = shell_exec($goVodPath.' test');
         if (!$goVod || false === strpos($goVod, 'test successful')) {
             $output->writeln('<error>go-vod could not be run</error>');
-            $this->suggestGoVod($output);
+            $this->suggestGoVod();
 
-            return $this->suggestDisable($output);
+            return $this->suggestDisable();
         }
 
         // Go transcode is working. Yay!
@@ -127,70 +131,251 @@ class VideoSetup extends Command
         $output->writeln('Do you want to enable transcoding and HLS? [Y/n]');
 
         if ('n' === trim(fgets(fopen('php://stdin', 'r')))) {
-            $this->config->setSystemValue('memories.no_transcode', true);
+            $this->config->setSystemValue('memories.vod.disable', true);
             $output->writeln('<error>Transcoding and HLS are now disabled</error>');
 
-            $this->killGoVod($output, $goVodPath);
+            $this->killGoVod($goVodPath);
 
             return 0;
         }
 
-        $this->config->setSystemValue('memories.transcoder', $goVodPath);
-        $this->config->setSystemValue('memories.no_transcode', false);
-        $output->writeln('Transcoding and HLS are now enabled! Monitor the output at /tmp/go-vod.log for any errors');
-        $output->writeln('You should restart the server for changes to take effect');
+        $this->config->setSystemValue('memories.vod.path', $goVodPath);
+        $this->config->setSystemValue('memories.vod.disable', false);
 
-        // Check for VAAPI
-        $output->writeln("\nChecking for VAAPI (/dev/dri/renderD128)");
-        if (file_exists('/dev/dri/renderD128')) {
-            $output->writeln('VAAPI is available. Do you want to enable it? [Y/n]');
+        // Feature detection
+        $this->detectFeatures();
 
-            if ('n' === trim(fgets(fopen('php://stdin', 'r')))) {
-                $this->config->setSystemValue('memories.qsv', false);
-                $output->writeln('VAAPI is now disabled');
-            } else {
-                $output->writeln("\nVAAPI is now enabled. You may still need to install the Intel Media Driver");
-                $output->writeln('and ensure proper permissions for /dev/dri/renderD128.');
-                $output->writeln('See the documentation for more details.');
-                $this->config->setSystemValue('memories.qsv', true);
-            }
-        } else {
-            $output->writeln('VAAPI is not available');
-            $this->config->setSystemValue('memories.qsv', false);
-        }
+        // Success
+        $output->writeln("\nTranscoding and HLS are now enabled! Monitor the log file for any errors");
+        $output->writeln('<error>You should restart the server for changes to take effect</error>');
 
-        $this->killGoVod($output, $goVodPath);
+        $this->killGoVod();
 
         return 0;
     }
 
-    protected function suggestGoVod(OutputInterface $output): void
+    protected function suggestGoVod(): void
     {
-        $output->writeln('You may build go-vod from source');
-        $output->writeln('It can be downloaded from https://github.com/pulsejet/go-vod');
-        $output->writeln('Once built, point the path to the binary in the config for `memories.transcoder`');
+        $this->output->writeln('You may build go-vod from source');
+        $this->output->writeln('It can be downloaded from https://github.com/pulsejet/go-vod');
+        $this->output->writeln('Once built, point the path to the binary in the config for `memories.vod.path`');
     }
 
-    protected function suggestDisable(OutputInterface $output)
+    protected function suggestDisable()
     {
-        $output->writeln('Without transcoding, video playback may be slow and limited');
-        $output->writeln('Do you want to disable transcoding and HLS streaming? [y/N]');
+        $this->output->writeln('Without transcoding, video playback may be slow and limited');
+        $this->output->writeln('Do you want to disable transcoding and HLS streaming? [y/N]');
         if ('y' !== trim(fgets(fopen('php://stdin', 'r')))) {
-            $output->writeln('Aborting');
+            $this->output->writeln('Aborting');
 
             return 1;
         }
 
-        $this->config->setSystemValue('memories.no_transcode', true);
-        $output->writeln('<error>Transcoding and HLS are now disabled</error>');
-        $output->writeln('You should restart the server for changes to take effect');
+        $this->config->setSystemValue('memories.vod.disable', true);
+        $this->output->writeln('<error>Transcoding and HLS are now disabled</error>');
+        $this->output->writeln('You should restart the server for changes to take effect');
 
         return 0;
     }
 
-    protected function killGoVod(OutputInterface $output, string $path): void
+    protected function detectFeatures()
     {
-        $output->writeln("\nKilling any existing go-vod processes");
+        $this->output->writeln("\nStarting ffmpeg feature detection");
+        $this->output->writeln('This may take a while. Please be patient');
+
+        try {
+            // Download test file
+            $this->output->write("\nDownloading test video file ... ");
+            $this->sampleFile = $this->downloadSampleFile();
+            if (!file_exists($this->sampleFile)) {
+                $this->output->writeln('FAIL');
+                $this->output->writeln('<error>Could not download sample file</error>');
+                $this->output->writeln('<error>Failed to perform feature detection</error>');
+
+                return;
+            }
+            $this->output->writeln('OK');
+
+            // Start go-vod
+            if (!$this->startGoVod()) {
+                return;
+            }
+
+            $this->checkCPU();
+            $this->checkVAAPI();
+        } finally {
+            if (file_exists($this->sampleFile)) {
+                unlink($this->sampleFile);
+            }
+        }
+
+        $this->output->writeln("\nFeature detection completed");
+    }
+
+    protected function checkCPU()
+    {
+        $this->output->writeln('');
+        $this->testResult('CPU');
+    }
+
+    protected function checkVAAPI()
+    {
+        // Check for VAAPI
+        $this->output->write("\nChecking for VAAPI acceleration (/dev/dri/renderD128) ... ");
+        if (!file_exists('/dev/dri/renderD128')) {
+            $this->output->writeln('NOT FOUND');
+            $this->config->setSystemValue('memories.vod.vaapi', false);
+
+            return;
+        }
+        $this->output->writeln('OK');
+
+        // Check permissions
+        $this->output->write('Checking for permissions on /dev/dri/renderD128 ... ');
+        if (!is_readable('/dev/dri/renderD128')) {
+            $this->output->writeln('NO');
+            $this->output->writeln('<error>Current user does not have read permissions on /dev/dri/renderD128</error>');
+            $this->output->writeln('VAAPI will not work. You may need to add your user to the video/render groups');
+            $this->config->setSystemValue('memories.vod.vaapi', false);
+
+            return;
+        }
+        $this->output->writeln('OK');
+
+        // Try enabling VAAPI
+        $this->config->setSystemValue('memories.vod.vaapi', true);
+        $basic = $this->testResult('VAAPI');
+
+        // Try with low_power
+        $this->config->setSystemValue('memories.vod.vaapi.low_power', true);
+        $lowPower = $this->testResult('VAAPI (low_power)');
+        if (!$lowPower) {
+            $this->config->deleteSystemValue('memories.vod.vaapi.low_power');
+        }
+
+        // Check if passed any test
+        if (!$basic && !$lowPower) {
+            $this->config->setSystemValue('memories.vod.vaapi', false);
+
+            return;
+        }
+
+        // Everything is good
+        $this->output->writeln('Do you want to enable VAAPI acceleration? [Y/n]');
+        if ('n' === trim(fgets(fopen('php://stdin', 'r')))) {
+            $this->config->setSystemValue('memories.vod.vaapi', false);
+            $this->output->writeln('VAAPI is now disabled');
+        } else {
+            $this->output->writeln("\nVAAPI is now enabled. You may still need to install the Intel Media Driver");
+            $this->output->writeln('and ensure proper permissions for /dev/dri/renderD128.');
+            $this->output->writeln('See the documentation for more details.');
+            $this->config->setSystemValue('memories.vod.vaapi', true);
+        }
+    }
+
+    protected function test(): void
+    {
+        $url = \OCA\Memories\Controller\VideoController::getGoVodUrl('test', $this->sampleFile, '360p-000001.ts');
+
+        // Make a GET request
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        // Check for errors
+        if (curl_errno($ch)) {
+            throw new \Exception('Curl: '.curl_error($ch));
+        }
+
+        // Check for 200
+        if (200 !== $httpCode) {
+            throw new \Exception('HTTP status: '.$httpCode);
+        }
+
+        // Check response size is greater than 10kb
+        if (\strlen($response) < 10240) {
+            throw new \Exception('Response size is too small');
+        }
+    }
+
+    private function testResult(string $name): bool
+    {
+        $this->output->write("Testing transcoding with {$name} ... ");
+
+        try {
+            $this->restartGoVod($this->output);
+            $this->test();
+            $this->output->writeln('OK');
+
+            return true;
+        } catch (\Throwable $e) {
+            $msg = $e->getMessage();
+            $logFile = $this->logFile;
+            $this->output->writeln('FAIL');
+            $this->output->writeln("<error>{$name} transcoding failed with error {$msg}</error>");
+            $this->output->writeln("Check the log file of go-vod for more details ({$logFile})");
+
+            return false;
+        }
+    }
+
+    private function startGoVod(bool $suppress = false): bool
+    {
+        if (!$suppress) {
+            $this->output->write("\nAttempting to start go-vod ... ");
+        }
+
+        try {
+            $this->logFile = $logFile = \OCA\Memories\Controller\VideoController::startGoVod();
+            if (!$suppress) {
+                $this->output->writeln('OK');
+                $this->output->writeln("go-vod logs will be stored at: {$logFile}");
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            if (!$suppress) {
+                $this->output->writeln('FAIL');
+            } else {
+                $this->output->writeln('<error>Failed to (re-)start go-vod</error>');
+            }
+            $this->output->writeln($e->getMessage());
+
+            return false;
+        }
+    }
+
+    private function killGoVod(string $path = ''): void
+    {
+        if ('' === $path) {
+            $path = $this->config->getSystemValue('memories.vod.path');
+        }
+
         \OCA\Memories\Util::pkill($path);
+    }
+
+    private function restartGoVod(): void
+    {
+        $this->killGoVod();
+        sleep(1);
+        $this->startGoVod(true);
+    }
+
+    private function downloadSampleFile(): string
+    {
+        $sampleFile = tempnam(sys_get_temp_dir(), 'sample.mp4');
+        $fp = fopen($sampleFile, 'w+');
+        $ch = curl_init('https://github.com/pulsejet/memories-assets/raw/main/sample.mp4');
+        curl_setopt($ch, CURLOPT_FILE, $fp);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_exec($ch);
+        curl_close($ch);
+        fclose($fp);
+
+        return $sampleFile;
     }
 }

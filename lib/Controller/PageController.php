@@ -151,7 +151,7 @@ class PageController extends Controller
         $initialState->provideInitialState('version', $appManager->getAppInfo('memories')['version']);
 
         // Video configuration
-        $initialState->provideInitialState('notranscode', $config->getSystemValue('memories.no_transcode', 'UNSET'));
+        $initialState->provideInitialState('notranscode', $config->getSystemValue('memories.vod.disable', 'UNSET'));
         $initialState->provideInitialState('video_default_quality', $config->getSystemValue('memories.video_default_quality', '0'));
 
         // Geo configuration
