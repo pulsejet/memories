@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Instellings",
+    "Info" : "Inligting",
     "Folders" : "Vouers",
     "Favorites" : "Gunstelinge",
     "Videos" : "Video's ",
@@ -24,6 +25,7 @@ OC.L10N.register(
     "Title" : "Titel",
     "Description" : "Beskrywing",
     "Label" : "Etiket",
+    "Reset" : "Herstel",
     "Name" : "Naam",
     "Update" : "Werk by",
     "Search" : "Soek",
@@ -35,7 +37,6 @@ OC.L10N.register(
     "Close" : "Sluit",
     "Previous" : "Vorige",
     "Next" : "Volgende",
-    "Reset" : "Herstel",
     "Continue" : "Gaan voort",
     "Original" : "Oorspronklik",
     "Custom" : "Eie",

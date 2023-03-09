@@ -12,6 +12,7 @@ OC.L10N.register(
     "Save" : "﻿ಉಳಿಸಿ",
     "Time" : "ಸಮಯ",
     "Title" : "ಶೀರ್ಷಿಕೆ",
+    "Reset" : "ಮರುಹೊಂದಿಸಿ",
     "Name" : "﻿ಹೆಸರು",
     "Search" : "Search",
     "Remove" : "ತೆಗೆದುಹಾಕಿ",
@@ -20,7 +21,6 @@ OC.L10N.register(
     "Share" : "﻿ಹಂಚಿಕೊಳ್ಳಿ",
     "Close" : "ಮುಚ್ಚು",
     "Next" : "ಮುಂದೆ",
-    "Reset" : "ಮರುಹೊಂದಿಸಿ",
     "Continue" : "﻿ಮುಂದುವರಿಸಿ",
     "Size" : "﻿ ಗಾತ್ರ"
 },

@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "الإعدادات",
+    "Info" : "معلومات",
     "Timeline" : "الجدول الزمني",
     "Folders" : "المجلدات",
     "Favorites" : "المفضلات",
@@ -26,6 +27,7 @@ OC.L10N.register(
     "Description" : "الوصف",
     "Label" : "تسمية",
     "Copyright" : "حقوق التأليف",
+    "Reset" : "إعادة الضبط",
     "Name" : "الاسم",
     "Update" : "تحديث",
     "Search" : "البحث",
@@ -38,7 +40,6 @@ OC.L10N.register(
     "Close" : "إغلاق",
     "Previous" : "السابق",
     "Next" : "التالي",
-    "Reset" : "إعادة الضبط",
     "Continue" : "متابعة",
     "Undo" : "تراجع",
     "Redo" : "إعادة",

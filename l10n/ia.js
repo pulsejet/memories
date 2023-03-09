@@ -20,6 +20,7 @@ OC.L10N.register(
     "Title" : "Titulo",
     "Description" : "Description",
     "Copyright" : "Copyright",
+    "Reset" : "Re-fixar",
     "Name" : "Nomine",
     "Update" : "Actualisation",
     "Search" : "Cercar",
@@ -30,7 +31,6 @@ OC.L10N.register(
     "Close" : "Clauder",
     "Previous" : "Previe",
     "Next" : "Sequente",
-    "Reset" : "Re-fixar",
     "Undo" : "Disfacer",
     "Custom" : "Personalisate",
     "Size" : "Dimension"

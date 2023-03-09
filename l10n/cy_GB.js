@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Gosodiadau",
+    "Info" : "Info",
     "Favorites" : "Ffefrynnau",
     "Videos" : "Fideos",
     "Archive" : "Archif",

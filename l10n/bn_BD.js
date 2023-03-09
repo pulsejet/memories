@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "সেটিংস",
+    "Info" : "Info",
     "Favorites" : "প্রিয়জন",
     "Tags" : "ট্যাগ",
     "Edit" : "সম্পাদনা",
@@ -18,6 +19,7 @@ OC.L10N.register(
     "Hour" : "ঘন্টা",
     "Title" : "শিরোনাম",
     "Description" : "বিবরণ",
+    "Reset" : "পূণঃনির্ধানণ",
     "Name" : "নাম",
     "Update" : "পরিবর্ধন",
     "Search" : "Search",
@@ -29,7 +31,6 @@ OC.L10N.register(
     "Close" : "বন্ধ",
     "Previous" : "পূর্ববর্তী",
     "Next" : "পরবর্তী",
-    "Reset" : "পূণঃনির্ধানণ",
     "Continue" : "চালিয়ে যাও",
     "Size" : "আকার"
 },

@@ -38,7 +38,6 @@
     "View in folder" : "Vis i mappe",
     "Move to folder" : "Flytt til mappe",
     "Add to album" : "Legg til i album",
-    "Move to another person" : "Flytt til en annen person",
     "Remove from person" : "Fjern fra person",
     "You are about to download a large number of files. Are you sure?" : "Du er i ferd med å laste ned et stort antall filer. Er du sikker?",
     "You are about to delete a large number of files. Are you sure?" : "Du er i ferd med å slette et stort antall filer. Er du sikker?",
@@ -57,7 +56,6 @@
     "You will find your friends soon. Please, be patient." : "Du vil finne vennene dine snart. Vær tålmodig.",
     "Face Recognition is disabled. Enable in settings to find your friends." : "Ansiktsgjenkjenning er deaktivert. Aktiver i innstillingene for å finne vennene dine.",
     "Failed to load some photos" : "Kunne ikke laste inn noen bilder",
-    "Processing … {n}/{m}" : "Behandler… {n}/{m}",
     "_{n} item added to album_::_{n} items added to album_" : ["{n} element lagt til album","{n} elementer lagt til i albumet"],
     "Search for collaborators" : "Søk etter samarbeidspartnere",
     "Search people or groups" : "Søk etter personer eller grupper",
@@ -111,6 +109,7 @@
     "Lens Model" : "Objektivmodell",
     "Copyright" : "Opphavsrett",
     "Empty" : "Tom",
+    "Reset" : "Tilbakestill",
     "Remove person" : "Fjern person",
     "Are you sure you want to remove {name}?" : "Er du sikker på at du vil fjerne {name}?",
     "Name" : "Navn",
@@ -129,7 +128,6 @@
     "Share Folder" : "Del mappe",
     "You cannot share the root folder" : "Du kan ikke dele rotmappen",
     "Use the sidebar to share this folder." : "Bruk sidefeltet for å dele denne mappen.",
-    "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Hvis du oppretter en offentlig lenkedeling, klikker du på oppdatering og en tilsvarende lenke til Minner vises nedenfor.",
     "Refresh" : "Oppdater",
     "Choose a folder" : "Velg en mappe",
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["{n} element flyttet til mappe","{n} elementer er flyttet til mappen"],
@@ -165,7 +163,6 @@
     "Cannot share this type of data" : "Kan ikke dele denne typen data",
     "Are you sure you want to delete?" : "Er du sikker på at du vil slette?",
     "Save as" : "Lagre som",
-    "Reset" : "Tilbakestill",
     "All changes will be lost." : "Alle endringer vil gå tapt.",
     "Are you sure you want to continue?" : "Er du sikker på at du vil fortsette?",
     "Continue" : "Fortsett",
@@ -267,8 +264,11 @@
     "EXIF" : "EXIF",
     "Edit Date/Time" : "Rediger dato/tid",
     "Edit EXIF Data" : "Rediger EXIF-data",
+    "Move to another person" : "Flytt til en annen person",
+    "Processing … {n}/{m}" : "Behandler… {n}/{m}",
     "Update Exif" : "Oppdater Exif",
     "Loading data … {n}/{m}" : "Laster inn data… {n}/{m}",
-    "Date Taken" : "Dato tatt"
+    "Date Taken" : "Dato tatt",
+    "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Hvis du oppretter en offentlig lenkedeling, klikker du på oppdatering og en tilsvarende lenke til Minner vises nedenfor."
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Podešavanje",
+    "Info" : "Info",
     "Favorites" : "Favoriti",
     "Edit" : "Izmjeni",
     "Cancel" : "Otkaži",

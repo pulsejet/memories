@@ -18,6 +18,7 @@
     "Hour" : "Stonn",
     "Title" : "Titel",
     "Description" : "Beschreiwung",
+    "Reset" : "Zeréck setzen",
     "Name" : "Numm",
     "Update" : "Update",
     "Search" : "Search",
@@ -29,7 +30,6 @@
     "Close" : "Zoumaachen",
     "Previous" : "Zeréck",
     "Next" : "Weider",
-    "Reset" : "Zeréck setzen",
     "Continue" : "Weider",
     "Custom" : "Individualiséier",
     "Size" : "Gréisst"

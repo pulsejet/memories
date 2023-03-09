@@ -20,6 +20,7 @@ OC.L10N.register(
     "Hour" : "Stonn",
     "Title" : "Titel",
     "Description" : "Beschreiwung",
+    "Reset" : "Zeréck setzen",
     "Name" : "Numm",
     "Update" : "Update",
     "Search" : "Search",
@@ -31,7 +32,6 @@ OC.L10N.register(
     "Close" : "Zoumaachen",
     "Previous" : "Zeréck",
     "Next" : "Weider",
-    "Reset" : "Zeréck setzen",
     "Continue" : "Weider",
     "Custom" : "Individualiséier",
     "Size" : "Gréisst"

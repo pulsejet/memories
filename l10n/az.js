@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Settings" : "Quraşdırmalar",
+    "Info" : "Info",
     "Favorites" : "Sevimlilər",
     "Archive" : "Arxiv",
     "Tags" : "Işarələr",
@@ -17,6 +18,7 @@ OC.L10N.register(
     "Time" : "Vaxt",
     "Title" : "Başlıq",
     "Description" : "Açıqlanma",
+    "Reset" : "Sıfırla",
     "Name" : "Ad",
     "Update" : "Yenilənmə",
     "Search" : "Axtarış",
@@ -28,7 +30,6 @@ OC.L10N.register(
     "Close" : "Bağla",
     "Previous" : "Əvvələ",
     "Next" : "Növbəti",
-    "Reset" : "Sıfırla",
     "Size" : "Həcm"
 },
 "nplurals=2; plural=(n != 1);");

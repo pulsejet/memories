@@ -1,5 +1,6 @@
 { "translations": {
     "Settings" : "Quraşdırmalar",
+    "Info" : "Info",
     "Favorites" : "Sevimlilər",
     "Archive" : "Arxiv",
     "Tags" : "Işarələr",
@@ -15,6 +16,7 @@
     "Time" : "Vaxt",
     "Title" : "Başlıq",
     "Description" : "Açıqlanma",
+    "Reset" : "Sıfırla",
     "Name" : "Ad",
     "Update" : "Yenilənmə",
     "Search" : "Axtarış",
@@ -26,7 +28,6 @@
     "Close" : "Bağla",
     "Previous" : "Əvvələ",
     "Next" : "Növbəti",
-    "Reset" : "Sıfırla",
     "Size" : "Həcm"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
