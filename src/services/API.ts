@@ -110,11 +110,12 @@ export class API {
     return gen(`${BASE}/image/jpeg/{id}`, { id });
   }
 
-  static VIDEO_TRANSCODE(fileid: number) {
+  static VIDEO_TRANSCODE(fileid: number, file = "index.m3u8") {
     return tok(
-      gen(`${BASE}/video/transcode/{videoClientId}/{fileid}/index.m3u8`, {
+      gen(`${BASE}/video/transcode/{videoClientId}/{fileid}/{file}`, {
         videoClientId,
         fileid,
+        file,
       })
     );
   }

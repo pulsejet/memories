@@ -24,7 +24,7 @@
       </NcListItem>
 
       <NcListItem
-        v-if="canShareNative && !isVideo"
+        v-if="canShareNative && canShareHighRes"
         :title="t('memories', 'High Resolution')"
         :bold="false"
         @click.prevent="shareHighRes()"
@@ -33,7 +33,11 @@
           <LargePhotoIcon class="avatar" :size="24" />
         </template>
         <template #subtitle>
-          {{ t("memories", "Share the image as a high-quality JPEG") }}
+          {{
+            isVideo
+              ? t("memories", "Share the video as a high-quality MOV")
+              : t("memories", "Share the image as a high-quality JPEG")
+          }}
         </template>
       </NcListItem>
 
@@ -44,7 +48,7 @@
         @click.prevent="shareOriginal()"
       >
         <template #icon>
-          <LargePhotoIcon class="avatar" :size="24" />
+          <FileIcon class="avatar" :size="24" />
         </template>
         <template #subtitle>
           {{ t("memories", "Share the original image / video file") }}
@@ -72,20 +76,25 @@
 import { defineComponent } from "vue";
 
 import { showError } from "@nextcloud/dialogs";
+import { loadState } from "@nextcloud/initial-state";
+import axios from "@nextcloud/axios";
 
 import NcListItem from "@nextcloud/vue/dist/Components/NcListItem";
 import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
 import Modal from "./Modal.vue";
 
 import { IFileInfo, IPhoto } from "../../types";
+import { getPreviewUrl } from "../../services/FileUtils";
+import { API } from "../../services/API";
 import * as dav from "../../services/DavRequests";
 
 import PhotoIcon from "vue-material-design-icons/Image.vue";
 import LargePhotoIcon from "vue-material-design-icons/ImageArea.vue";
 import LinkIcon from "vue-material-design-icons/LinkVariant.vue";
-import { fetchImage } from "../frame/XImgCache";
-import { getPreviewUrl } from "../../services/FileUtils";
-import { API } from "../../services/API";
+import FileIcon from "vue-material-design-icons/File.vue";
+
+// Is video transcoding enabled?
+const config_noTranscode = loadState("memories", "notranscode", true);
 
 export default defineComponent({
   name: "ShareModal",
@@ -98,6 +107,7 @@ export default defineComponent({
     PhotoIcon,
     LargePhotoIcon,
     LinkIcon,
+    FileIcon,
   },
 
   data: () => {
@@ -124,6 +134,10 @@ export default defineComponent({
 
     canShareNative() {
       return "share" in navigator;
+    },
+
+    canShareHighRes() {
+      return !this.isVideo || !config_noTranscode;
     },
 
     canShareLink() {
@@ -154,27 +168,20 @@ export default defineComponent({
     },
 
     async sharePreview() {
-      await this.l(async () => {
-        const src = getPreviewUrl(this.photo, false, 2048);
-        const blob = await fetchImage(src);
-        await this.shareBlob(blob, true);
-      });
+      const src = getPreviewUrl(this.photo, false, 2048);
+      this.shareWithHref(src, true);
     },
 
     async shareHighRes() {
-      await this.l(async () => {
-        const src = API.IMAGE_JPEG(this.photo.fileid);
-        const blob = await fetchImage(src);
-        await this.shareBlob(blob, true);
-      });
+      const fileid = this.photo.fileid;
+      const src = this.isVideo
+        ? API.VIDEO_TRANSCODE(fileid, "max.mov")
+        : API.IMAGE_JPEG(fileid);
+      this.shareWithHref(src);
     },
 
     async shareOriginal() {
-      await this.l(async () => {
-        const src = dav.getDownloadLink(this.photo);
-        const blob = await fetch(src).then((r) => r.blob());
-        await this.shareBlob(blob);
-      });
+      this.shareWithHref(dav.getDownloadLink(this.photo));
     },
 
     async shareLink() {
@@ -184,8 +191,19 @@ export default defineComponent({
       this.close();
     },
 
-    async shareBlob(blob: Blob, replaceExt = false) {
-      const fileInfo = await this.getFileInfo();
+    async shareWithHref(href: string, replaceExt = false) {
+      let fileInfo: IFileInfo, blob: Blob;
+      await this.l(async () => {
+        const res = await axios.get(href, { responseType: "blob" });
+        blob = res.data;
+        fileInfo = await this.getFileInfo();
+      });
+
+      if (!blob || !fileInfo) {
+        showError(this.t("memories", "Failed to download and share file"));
+        return;
+      }
+
       let basename = fileInfo.originalBasename || fileInfo.basename;
 
       if (replaceExt) {
