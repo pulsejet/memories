@@ -285,6 +285,7 @@ export function getAlbumFileInfos(
       filename: `${collection}/${basename}`,
       originalFilename: `${collection}/${basename}`,
       basename: basename,
+      originalBasename: photo.basename,
       mime: photo.mimetype,
       hasPreview: true,
       etag: photo.etag,

@@ -1,7 +1,7 @@
 <template>
   <aside class="app-sidebar" v-if="reducedOpen">
     <div class="title">
-      <h2>{{ filename }}</h2>
+      <h2>{{ basename }}</h2>
 
       <NcActions :inline="1">
         <NcActionButton :aria-label="t('memories', 'Close')" @click="close()">
@@ -40,7 +40,7 @@ export default defineComponent({
     return {
       nativeOpen: false,
       reducedOpen: false,
-      filename: "",
+      basename: "",
     };
   },
 
@@ -72,7 +72,7 @@ export default defineComponent({
       } else {
         this.reducedOpen = true;
         await this.$nextTick();
-        this.filename = file.basename;
+        this.basename = file.originalBasename || file.basename;
 
         (<any>this.$refs.metadata)?.update(file);
         emit("memories:sidebar:opened", null);

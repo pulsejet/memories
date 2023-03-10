@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\Memories;
 
 use OCP\App\IAppManager;
+use OCP\Files\Node;
 use OCP\IConfig;
 
 class Util
@@ -125,6 +126,57 @@ class Util
         }
 
         return true;
+    }
+
+    /**
+     * Force a fileinfo value on a node.
+     * This is a hack to avoid subclassing everything.
+     *
+     * @param mixed $node  File to patch
+     * @param mixed $key   Key to set
+     * @param mixed $value Value to set
+     */
+    public static function forceFileInfo(Node &$node, $key, $value)
+    {
+        /** @var \OC\Files\Node\Node */
+        $node = $node;
+        $node->getFileInfo()[$key] = $value;
+    }
+
+    /**
+     * Force permissions on a node.
+     *
+     * @param mixed $node        File to patch
+     * @param mixed $permissions Permissions to set
+     */
+    public static function forcePermissions(Node &$node, int $permissions)
+    {
+        self::forceFileInfo($node, 'permissions', $permissions);
+    }
+
+    /**
+     * Convert permissions to string.
+     */
+    public static function permissionsToStr(int $permissions): string
+    {
+        $str = '';
+        if ($permissions & \OCP\Constants::PERMISSION_CREATE) {
+            $str .= 'C';
+        }
+        if ($permissions & \OCP\Constants::PERMISSION_READ) {
+            $str .= 'R';
+        }
+        if ($permissions & \OCP\Constants::PERMISSION_UPDATE) {
+            $str .= 'U';
+        }
+        if ($permissions & \OCP\Constants::PERMISSION_DELETE) {
+            $str .= 'D';
+        }
+        if ($permissions & \OCP\Constants::PERMISSION_SHARE) {
+            $str .= 'S';
+        }
+
+        return $str;
     }
 
     /**

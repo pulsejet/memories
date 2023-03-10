@@ -9,6 +9,8 @@ export type IFileInfo = {
   originalFilename?: string;
   /** Base name of file e.g. Qx0dq7dvEXA.jpg */
   basename: string;
+  /** Original base name, e.g. in albums without the file id */
+  originalBasename?: string;
   /** Etag identifier */
   etag: string;
   /** File has preview available */
@@ -78,6 +80,7 @@ export type IPhoto = {
     datetaken: number;
     address?: string;
     tags: { [id: string]: string };
+    permissions: string;
     exif?: {
       Rotation?: number;
       Orientation?: number;

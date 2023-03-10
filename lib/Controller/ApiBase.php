@@ -27,6 +27,7 @@ use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Exif;
+use OCA\Memories\Util;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
@@ -168,6 +169,9 @@ class ApiBase extends Controller
         }
         $userFolder = $this->rootFolder->getUserFolder($user->getUID());
 
+        // No need to force permissions when reading
+        // from the user's own folder. This includes shared
+        // folders and files from other users.
         return $this->getOneFileFromFolder($userFolder, $id);
     }
 
@@ -189,7 +193,10 @@ class ApiBase extends Controller
 
         $folder = $this->rootFolder->getUserFolder($owner);
 
-        return $this->getOneFileFromFolder($folder, $id);
+        // Album files are always read-only
+        // Note that albums have lowest priority, so it means the
+        // user doesn't have access to the file in their own folder.
+        return $this->getOneFileFromFolder($folder, $id, \OCP\Constants::PERMISSION_READ);
     }
 
     /**
@@ -214,12 +221,15 @@ class ApiBase extends Controller
 
                 $folder = $this->rootFolder->getUserFolder($owner);
 
-                return $this->getOneFileFromFolder($folder, $id);
+                // Public albums are always read-only
+                return $this->getOneFileFromFolder($folder, $id, \OCP\Constants::PERMISSION_READ);
             }
 
             // Folder share
             if ($share = $this->getShareNode()) {
-                return $this->getOneFileFromFolder($share, $id);
+                // Public shares may allow editing
+                // Just use the same permissions as the share
+                return $this->getOneFileFromFolder($share, $id, $share->getPermissions());
             }
         } catch (\Exception $e) {
         }
@@ -294,6 +304,9 @@ class ApiBase extends Controller
         if (!$node instanceof Folder || !$node->isReadable() || !$node->isShareable()) {
             throw new \Exception('Share not found or invalid');
         }
+
+        // Force permissions from the share onto the node
+        Util::forcePermissions($node, $share->getPermissions());
 
         return $node;
     }
@@ -385,25 +398,35 @@ class ApiBase extends Controller
 
     /**
      * Helper to get one file or null from a fiolder.
+     *
+     * @param Folder $folder Folder to search in
+     * @param int    $id     Id of the file
+     * @param int    $perm   Permissions to force on the file
      */
-    private function getOneFileFromFolder(Folder $folder, int $id): ?File
+    private function getOneFileFromFolder(Folder $folder, int $id, int $perm = -1): ?File
     {
         // Check for permissions and get numeric Id
         $file = $folder->getById($id);
         if (0 === \count($file)) {
             return null;
         }
+        $file = $file[0];
 
         // Check if node is a file
-        if (!$file[0] instanceof File) {
+        if (!$file instanceof File) {
             return null;
         }
 
         // Check read permission
-        if (!($file[0]->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
+        if (!$file->isReadable()) {
             return null;
         }
 
-        return $file[0];
+        // Force file permissions if required
+        if ($perm >= 0) {
+            Util::forcePermissions($file, $perm);
+        }
+
+        return $file;
     }
 }

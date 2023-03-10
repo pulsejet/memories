@@ -172,7 +172,7 @@ export default defineComponent({
     },
 
     canEdit(): boolean {
-      return !this.$route.name?.endsWith("-share");
+      return this.baseInfo?.permissions?.includes("U");
     },
 
     /** Date taken info */
@@ -246,7 +246,11 @@ export default defineComponent({
 
     /** Image info */
     imageInfo(): string | null {
-      return this.fileInfo?.basename || (<any>this.fileInfo)?.name;
+      return (
+        this.fileInfo?.originalBasename ||
+        this.fileInfo?.basename ||
+        (<any>this.fileInfo)?.name
+      );
     },
 
     imageInfoSub(): string[] | null {

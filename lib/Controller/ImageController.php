@@ -206,6 +206,9 @@ class ImageController extends ApiBase
             }
         }
 
+        // Inject permissions and convert to string
+        $info['permissions'] = \OCA\Memories\Util::permissionsToStr($file->getPermissions());
+
         return new JSONResponse($info, Http::STATUS_OK);
     }
 
