@@ -36,7 +36,6 @@
     </div>
 
     <!-- Selection Modals -->
-    <EditMetadata ref="editMetadata" @refresh="refresh" />
     <FaceMoveModal
       ref="faceMoveModal"
       @moved="deletePhotos"
@@ -70,7 +69,6 @@ import { getCurrentUser } from "@nextcloud/auth";
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
 
-import EditMetadata from "./modal/EditMetadataModal.vue";
 import FaceMoveModal from "./modal/FaceMoveModal.vue";
 import AddToAlbumModal from "./modal/AddToAlbumModal.vue";
 import MoveToFolderModal from "./modal/MoveToFolderModal.vue";
@@ -95,7 +93,6 @@ export default defineComponent({
   components: {
     NcActions,
     NcActionButton,
-    EditMetadata,
     FaceMoveModal,
     AddToAlbumModal,
     MoveToFolderModal,
@@ -205,15 +202,6 @@ export default defineComponent({
         if: () => this.$route.name === "recognize",
       },
     ];
-
-    // Ugly: globally exposed functions
-    globalThis.editMetadata = (photos: IPhoto[], sections?: number[]) => {
-      const sel = new Map<number, IPhoto>();
-      for (const photo of photos) {
-        sel.set(photo.fileid, photo);
-      }
-      this.editMetadataSelection(sel, sections);
-    };
   },
 
   watch: {
@@ -748,10 +736,7 @@ export default defineComponent({
      * Open the edit date dialog
      */
     async editMetadataSelection(selection: Selection, sections?: number[]) {
-      (<any>this.$refs.editMetadata).open(
-        Array.from(selection.values()),
-        sections
-      );
+      globalThis.editMetadata(Array.from(selection.values()), sections);
     },
 
     /**

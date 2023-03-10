@@ -100,11 +100,11 @@ export default defineComponent({
     state: 0,
   }),
 
-  methods: {
-    emitRefresh(val: boolean) {
-      this.$emit("refresh", val);
-    },
+  mounted() {
+    globalThis.editMetadata = this.open;
+  },
 
+  methods: {
     async open(photos: IPhoto[], sections: number[] = [1, 2, 3, 4]) {
       const state = (this.state = Math.random());
       this.show = true;
@@ -234,7 +234,8 @@ export default defineComponent({
       this.processing = false;
       this.close();
 
-      this.emitRefresh(true);
+      // Trigger a soft refresh
+      emit("files:file:created", { fileid: 0 });
     },
 
     filterValid(photos: IPhoto[]) {
