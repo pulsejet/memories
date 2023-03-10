@@ -12,6 +12,8 @@ You may need to clear browser cache to use location search.
 - **Feature**: Allow editing of GPS coordinates ([#418](https://github.com/pulsejet/memories/issues/418))
 - **Feature**: Allow bulk editing of EXIF attributes other than date/time
 - **Feature**: Allow (optionally bulk) editing of collaborative tags
+- **Feature**: Allow sharing single photo / video ([#307](https://github.com/pulsejet/memories/issues/307))
+- **Feature**: Allow sharing videos ([#261](https://github.com/pulsejet/memories/issues/261))
 - **Feature**: Show list of tags in sidebar
 - **Feature**: Better configurability and feature detection for go-vod ([#450](https://github.com/pulsejet/memories/issues/450))
 - **Feature**: Configurable folder/album sorting order ([#371](https://github.com/pulsejet/memories/issues/371))

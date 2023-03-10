@@ -48,6 +48,7 @@
     <Sidebar />
     <EditMetadataModal />
     <NodeShareModal />
+    <ShareModal />
   </NcContent>
 </template>
 
@@ -71,6 +72,7 @@ import Metadata from "./components/Metadata.vue";
 import Sidebar from "./components/Sidebar.vue";
 import EditMetadataModal from "./components/modal/EditMetadataModal.vue";
 import NodeShareModal from "./components/modal/NodeShareModal.vue";
+import ShareModal from "./components/modal/ShareModal.vue";
 
 import ImageMultiple from "vue-material-design-icons/ImageMultiple.vue";
 import FolderIcon from "vue-material-design-icons/Folder.vue";
@@ -99,6 +101,7 @@ export default defineComponent({
     Sidebar,
     EditMetadataModal,
     NodeShareModal,
+    ShareModal,
 
     ImageMultiple,
     FolderIcon,

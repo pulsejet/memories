@@ -351,7 +351,7 @@ export default defineComponent({
 
     /** Show share button */
     canShare(): boolean {
-      return "share" in navigator && this.currentPhoto && !this.isVideo;
+      return Boolean(this.currentPhoto);
     },
   },
 
@@ -879,63 +879,7 @@ export default defineComponent({
 
     /** Share the current photo externally */
     async shareCurrent() {
-      try {
-        // Check navigator support
-        if (!this.canShare) throw new Error("Share not supported");
-
-        // Shre image data using navigator api
-        const photo = this.currentPhoto;
-        if (!photo) return;
-
-        // No videos yet
-        if (this.isVideo)
-          throw new Error(
-            this.t("memories", "Video sharing not supported yet")
-          );
-
-        // Get image blob
-        const imgSrc = this.photoswipe.currSlide.data.src;
-        const blob = await fetchImage(imgSrc);
-
-        // Fix basename extension
-        let basename = photo.basename;
-        let targetExts = [];
-        if (photo.mimetype === "image/png") {
-          targetExts = ["png"];
-        } else {
-          targetExts = ["jpg", "jpeg"];
-        }
-
-        // Append extension if not found
-        if (!targetExts.includes(basename.split(".").pop().toLowerCase())) {
-          basename += "." + targetExts[0];
-        }
-
-        const data = {
-          files: [
-            new File([blob], basename, {
-              type: blob.type,
-            }),
-          ],
-          title: photo.basename,
-          text: photo.basename,
-        };
-
-        if (!(<any>navigator).canShare(data)) {
-          throw new Error(this.t("memories", "Cannot share this type of data"));
-        }
-
-        try {
-          await navigator.share(data);
-        } catch (e) {
-          // Don't show this error because it's silly stuff
-          // like "share canceled"
-          console.error(e);
-        }
-      } catch (err) {
-        console.error(err.name, err.message);
-        showError(err.message);
-      }
+      globalThis.sharePhoto(this.currentPhoto);
     },
 
     /** Key press events */
