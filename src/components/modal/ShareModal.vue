@@ -177,7 +177,7 @@ export default defineComponent({
       const src = this.isVideo
         ? API.VIDEO_TRANSCODE(fileid, "max.mov")
         : API.IMAGE_JPEG(fileid);
-      this.shareWithHref(src);
+      this.shareWithHref(src, !this.isVideo);
     },
 
     async shareOriginal() {
