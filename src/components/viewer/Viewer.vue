@@ -338,7 +338,6 @@ export default defineComponent({
     canEdit(): boolean {
       return (
         this.currentPhoto?.mimetype?.startsWith("image/") &&
-        !this.currentPhoto.liveid &&
         this.currentPhoto.imageInfo?.permissions?.includes("U")
       );
     },
@@ -861,6 +860,15 @@ export default defineComponent({
     openEditor() {
       // Only for JPEG for now
       if (!this.canEdit) return;
+
+      // Prevent editing live photos
+      if (this.currentPhoto.liveid) {
+        alert(
+          this.t("memories", "Editing is currently disabled for live photos")
+        );
+        return;
+      }
+
       this.editorOpen = true;
     },
 
