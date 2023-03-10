@@ -11,13 +11,13 @@ OC.L10N.register(
     "Download" : "Göçürip almak",
     "Favorite" : "Halaýan",
     "General" : "Esasy",
+    "Close" : "Ýap",
     "Back" : "Yzyna",
     "Save" : "Saklamak",
     "Name" : "Ady",
     "Search" : "Gözlemek",
     "Refresh" : "Täzelemek",
     "Remove" : "Aýyrmak",
-    "Share" : "Paýlaş",
-    "Close" : "Ýap"
+    "Share" : "Paýlaş"
 },
 "nplurals=2; plural=(n != 1);");

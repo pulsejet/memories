@@ -11,6 +11,7 @@ OC.L10N.register(
     "Download" : "چۈشۈر",
     "Favorite" : "يىغقۇچ",
     "General" : "ئادەتتىكى",
+    "Close" : "ياپ",
     "Save" : "ساقلا",
     "Month" : "ئاي",
     "Time" : "ۋاقىت",
@@ -24,7 +25,6 @@ OC.L10N.register(
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Share" : "ھەمبەھىر",
-    "Close" : "ياپ",
     "Previous" : "ئالدىنقى",
     "Next" : "كېيىنكى",
     "Size" : "چوڭلۇقى"
