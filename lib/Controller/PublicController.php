@@ -2,18 +2,21 @@
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
 use OCP\App\IAppManager;
 use OCP\AppFramework\AuthPublicShareController;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\Files\IRootFolder;
 use OCP\Files\NotFoundException;
 use OCP\IConfig;
 use OCP\IRequest;
 use OCP\ISession;
 use OCP\IURLGenerator;
 use OCP\IUserManager;
+use OCP\IUserSession;
 use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
 use OCP\Util;
@@ -23,6 +26,8 @@ class PublicController extends AuthPublicShareController
     protected $appName;
     protected IEventDispatcher $eventDispatcher;
     protected IInitialState $initialState;
+    protected IUserSession $userSession;
+    protected IRootFolder $rootFolder;
     protected IShareManager $shareManager;
     protected IUserManager $userManager;
     protected IAppManager $appManager;
@@ -37,6 +42,8 @@ class PublicController extends AuthPublicShareController
         IURLGenerator $urlGenerator,
         IEventDispatcher $eventDispatcher,
         IInitialState $initialState,
+        IUserSession $userSession,
+        IRootFolder $rootFolder,
         IShareManager $shareManager,
         IUserManager $userManager,
         IAppManager $appManager,
@@ -45,6 +52,8 @@ class PublicController extends AuthPublicShareController
         parent::__construct($AppName, $request, $session, $urlGenerator);
         $this->eventDispatcher = $eventDispatcher;
         $this->initialState = $initialState;
+        $this->userSession = $userSession;
+        $this->rootFolder = $rootFolder;
         $this->shareManager = $shareManager;
         $this->userManager = $userManager;
         $this->appManager = $appManager;
@@ -61,6 +70,8 @@ class PublicController extends AuthPublicShareController
      */
     public function showAuthenticate(): TemplateResponse
     {
+        $this->redirectIfOwned($this->share);
+
         $templateParameters = ['share' => $this->share];
 
         return new TemplateResponse('core', 'publicshareauth', $templateParameters, 'guest');
@@ -84,8 +95,6 @@ class PublicController extends AuthPublicShareController
      */
     public function showShare(): TemplateResponse
     {
-        \OC_User::setIncognitoMode(true);
-
         // Check whether share exists
         try {
             $share = $this->shareManager->getShareByToken($this->getToken());
@@ -96,6 +105,12 @@ class PublicController extends AuthPublicShareController
         if (!self::validateShare($share)) {
             throw new NotFoundException();
         }
+
+        // Redirect to main app if user owns this share
+        $this->redirectIfOwned($share);
+
+        // Set incognito mode
+        \OC_User::setIncognitoMode(true);
 
         // Scripts
         Util::addScript($this->appName, 'memories-main');
@@ -165,5 +180,55 @@ class PublicController extends AuthPublicShareController
     protected function isPasswordProtected(): bool
     {
         return null !== $this->share->getPassword();
+    }
+
+    protected function redirectIfOwned(IShare $share)
+    {
+        $user = $this->userSession->getUser();
+        if (!$user) {
+            return null;
+        }
+
+        /** @var \OCP\Files\Node */
+        $node = null;
+
+        /** @var \OCP\Files\Folder */
+        $userFolder = null;
+
+        // Check if the user has this folder in their root
+        try {
+            $userFolder = $this->rootFolder->getUserFolder($user->getUID());
+            $nodes = $userFolder->getById($share->getNodeId());
+            if (0 === \count($nodes)) {
+                return null;
+            }
+            $node = $nodes[0];
+        } catch (NotFoundException $e) {
+            return null;
+        }
+
+        // Remove user folder path from start of node path
+        $relPath = substr($node->getPath(), \strlen($userFolder->getPath()));
+
+        // Get the user's folders path
+        $foldersPath = $this->config->getUserValue($user->getUID(), Application::APPNAME, 'foldersPath', '/');
+
+        // Check if relPath starts with foldersPath
+        if (0 !== strpos($relPath, $foldersPath)) {
+            return null;
+        }
+
+        // Remove foldersPath from start of relPath
+        $relPath = substr($relPath, \strlen($foldersPath));
+
+        // Redirect to the local path
+        $url = $this->urlGenerator->linkToRouteAbsolute('memories.Page.folder', ['path' => $relPath]);
+
+        // Cannot send a redirect response here because the return
+        // type is a template response for the base class
+        header('HTTP/1.1 302 Found');
+        header('Location: '.$url);
+
+        exit;
     }
 }
