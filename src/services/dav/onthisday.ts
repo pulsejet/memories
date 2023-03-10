@@ -1,5 +1,6 @@
 import { IDay, IPhoto } from "../../types";
 import axios from "@nextcloud/axios";
+import * as utils from "../Utils";
 import { API } from "../API";
 
 /**
@@ -22,11 +23,12 @@ export async function getOnThisDayRaw() {
     }
   }
 
-  return (
-    await axios.post<IPhoto[]>(API.DAYS(), {
-      body_ids: dayIds.join(","),
-    })
-  ).data;
+  const res = await axios.post<IPhoto[]>(API.DAYS(), {
+    body_ids: dayIds.join(","),
+  });
+
+  res.data.forEach(utils.convertFlags);
+  return res.data;
 }
 
 /**
