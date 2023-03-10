@@ -77,7 +77,7 @@
             </template>
           </NcActionButton>
           <NcActionButton
-            v-if="canEdit"
+            v-if="canEdit && !isVideo"
             :aria-label="t('memories', 'Edit')"
             @click="openEditor"
             :close-after-click="true"
@@ -336,10 +336,7 @@ export default defineComponent({
 
     /** Show edit buttons */
     canEdit(): boolean {
-      return (
-        this.currentPhoto?.mimetype?.startsWith("image/") &&
-        this.currentPhoto.imageInfo?.permissions?.includes("U")
-      );
+      return this.currentPhoto?.imageInfo?.permissions?.includes("U");
     },
 
     /** Show delete button */
