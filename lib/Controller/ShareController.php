@@ -55,26 +55,7 @@ class ShareController extends ApiBase
             ], Http::STATUS_NOT_FOUND);
         }
 
-        /** @var \OCP\IURLGenerator $urlGenerator */
-        $urlGenerator = \OC::$server->get(\OCP\IURLGenerator::class);
-
-        $links = array_map(function (\OCP\Share\IShare $share) use ($urlGenerator) {
-            $tok = $share->getToken();
-            $exp = $share->getExpirationDate();
-            $url = $urlGenerator->linkToRouteAbsolute('memories.Public.showShare', [
-                'token' => $tok,
-            ]);
-
-            return [
-                'id' => $share->getFullId(),
-                'label' => $share->getLabel(),
-                'token' => $tok,
-                'url' => $url,
-                'hasPassword' => $share->getPassword() ? true : false,
-                'expiration' => $exp ? $exp->getTimestamp() : null,
-                'editable' => $share->getPermissions() & \OCP\Constants::PERMISSION_UPDATE,
-            ];
-        }, $shares);
+        $links = array_map([$this, 'makeShareResponse'], $shares);
 
         return new JSONResponse($links, Http::STATUS_OK);
     }
@@ -106,11 +87,9 @@ class ShareController extends ApiBase
         $share->setSharedBy($this->userSession->getUser()->getUID());
         $share->setPermissions(\OCP\Constants::PERMISSION_READ);
 
-        $shareManager->createShare($share);
+        $share = $shareManager->createShare($share);
 
-        return new JSONResponse([
-            'token' => $share->getToken(),
-        ], Http::STATUS_OK);
+        return new JSONResponse($this->makeShareResponse($share), Http::STATUS_OK);
     }
 
     /**
@@ -154,8 +133,12 @@ class ShareController extends ApiBase
         if ($id) {
             $file = $this->getUserFile($id);
         } elseif ($path) {
-            $userFolder = $this->rootFolder->getUserFolder($uid);
-            $file = $userFolder->get($path);
+            try {
+                $userFolder = $this->rootFolder->getUserFolder($uid);
+                $file = $userFolder->get($path);
+            } catch (\OCP\Files\NotFoundException $e) {
+                return null;
+            }
         }
 
         if (!$file || !$file->isShareable()) {
@@ -163,5 +146,26 @@ class ShareController extends ApiBase
         }
 
         return $file;
+    }
+
+    private function makeShareResponse(\OCP\Share\IShare $share) {
+        /** @var \OCP\IURLGenerator $urlGenerator */
+        $urlGenerator = \OC::$server->get(\OCP\IURLGenerator::class);
+
+        $tok = $share->getToken();
+        $exp = $share->getExpirationDate();
+        $url = $urlGenerator->linkToRouteAbsolute('memories.Public.showShare', [
+            'token' => $tok,
+        ]);
+
+        return [
+            'id' => $share->getFullId(),
+            'label' => $share->getLabel(),
+            'token' => $tok,
+            'url' => $url,
+            'hasPassword' => $share->getPassword() ? true : false,
+            'expiration' => $exp ? $exp->getTimestamp() : null,
+            'editable' => $share->getPermissions() & \OCP\Constants::PERMISSION_UPDATE,
+        ];
     }
 }

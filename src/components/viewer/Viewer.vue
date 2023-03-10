@@ -1034,12 +1034,15 @@ export default defineComponent({
 
     /** Open the sidebar */
     async openSidebar(photo?: IPhoto) {
-      let fInfo: IFileInfo | IPhoto = photo || this.currentPhoto;
-      if (!this.routeIsPublic) {
-        fInfo = (await dav.getFiles([fInfo]))[0];
-      }
       globalThis.mSidebar.setTab("memories-metadata");
-      globalThis.mSidebar.open(fInfo as IFileInfo);
+      globalThis.mSidebar.open(await this.getFileInfo(photo));
+    },
+
+    /** Get fileInfo for a photo */
+    async getFileInfo(photo?: IPhoto): Promise<IFileInfo> {
+      photo = photo || this.currentPhoto;
+      if (this.routeIsPublic) return photo as IFileInfo;
+      return (await dav.getFiles([photo]))[0];
     },
 
     async updateSizeWithoutAnim() {

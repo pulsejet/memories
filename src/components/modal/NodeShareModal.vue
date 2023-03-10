@@ -37,7 +37,9 @@
           :title="share.label || t('memories', 'Share link')"
           :key="share.id"
           :bold="false"
-          @click="copy(share.url)"
+          :href="share.url"
+          :compact="true"
+          @click.prevent="copy(share.url)"
         >
           <template #icon>
             <LinkIcon class="avatar" :size="20" />
@@ -76,7 +78,6 @@ import { defineComponent } from "vue";
 
 import axios from "@nextcloud/axios";
 import { showSuccess } from "@nextcloud/dialogs";
-import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 
 import UserConfig from "../../mixins/UserConfig";
 import NcButton from "@nextcloud/vue/dist/Components/NcButton";
@@ -140,6 +141,7 @@ export default defineComponent({
   methods: {
     open() {
       this.show = true;
+      this.shares = [];
       globalThis.mSidebar.setTab("sharing");
       this.refreshUrls();
     },
@@ -155,6 +157,8 @@ export default defineComponent({
         this.shares = (
           await axios.get(API.Q(API.SHARE_LINKS(), { path: this.filename }))
         ).data;
+      } catch (e) {
+        this.shares = [];
       } finally {
         this.loading = false;
       }
@@ -186,11 +190,15 @@ export default defineComponent({
     async createLink() {
       this.loading = true;
       try {
-        await axios.post(API.SHARE_NODE(), { path: this.filename });
+        const res = await axios.post<IShare>(API.SHARE_NODE(), {
+          path: this.filename,
+        });
+        const share = res.data;
+        this.shares.push(share);
+        this.copy(share.url);
       } finally {
         this.loading = false;
       }
-      this.refreshUrls();
       this.refreshSidebar();
     },
 
@@ -212,9 +220,7 @@ export default defineComponent({
 
     refreshSidebar() {
       globalThis.mSidebar.close();
-      globalThis.mSidebar.open({
-        filename: this.filename,
-      } as any);
+      globalThis.mSidebar.open({ filename: this.filename } as any);
     },
   },
 });

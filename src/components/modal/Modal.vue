@@ -68,9 +68,10 @@ export default defineComponent({
 
   mounted() {
     if (this.sidebar) {
-      globalThis.mSidebar.open({
-        filename: this.sidebar,
-      } as any);
+      globalThis.mSidebar.open({ filename: this.sidebar } as any);
+
+      // Adjust width anyway in case the sidebar is already open
+      this.handleAppSidebarOpen();
     }
   },
 
@@ -93,9 +94,9 @@ export default defineComponent({
     },
 
     handleAppSidebarOpen() {
-      this.isSidebarShown = true;
       const sidebar: HTMLElement = document.querySelector("aside.app-sidebar");
       if (sidebar) {
+        this.isSidebarShown = true;
         this.sidebarWidth = sidebar.offsetWidth;
         this.trapElements = [sidebar];
       }
