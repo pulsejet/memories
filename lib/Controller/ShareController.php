@@ -32,6 +32,9 @@ class ShareController extends ApiBase
      * @NoAdminRequired
      *
      * Get the tokens of a node shared using an external link
+     *
+     * @param mixed $id
+     * @param mixed $path
      */
     public function links($id, $path)
     {
@@ -80,6 +83,9 @@ class ShareController extends ApiBase
      * @NoAdminRequired
      *
      * Share a node using an external link
+     *
+     * @param mixed $id
+     * @param mixed $path
      */
     public function createNode($id, $path)
     {
@@ -137,7 +143,8 @@ class ShareController extends ApiBase
         return new JSONResponse([], Http::STATUS_OK);
     }
 
-    private function getNodeByIdOrPath($id, $path) {
+    private function getNodeByIdOrPath($id, $path)
+    {
         $uid = $this->getUID();
         if (!$uid) {
             return null;
@@ -146,7 +153,7 @@ class ShareController extends ApiBase
         $file = null;
         if ($id) {
             $file = $this->getUserFile($id);
-        } else if ($path) {
+        } elseif ($path) {
             $userFolder = $this->rootFolder->getUserFolder($uid);
             $file = $userFolder->get($path);
         }
