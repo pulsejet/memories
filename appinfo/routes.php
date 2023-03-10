@@ -84,6 +84,10 @@ return [
         ['name' => 'Download#file', 'url' => '/api/download/{handle}', 'verb' => 'GET'],
         ['name' => 'Download#one', 'url' => '/api/stream/{fileid}', 'verb' => 'GET'],
 
+        ['name' => 'Share#links', 'url' => '/api/share/links', 'verb' => 'GET'],
+        ['name' => 'Share#createNode', 'url' => '/api/share/node', 'verb' => 'POST'],
+        ['name' => 'Share#deleteShare', 'url' => '/api/share/delete', 'verb' => 'POST'],
+
         // Config API
         ['name' => 'Other#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],
 

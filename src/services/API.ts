@@ -18,16 +18,24 @@ function tok(url: string) {
 }
 
 export class API {
-  static Q(url: string, query: string | URLSearchParams | undefined | null) {
+  static Q(
+    url: string,
+    query: string | URLSearchParams | Object | undefined | null
+  ) {
     if (!query) return url;
 
-    let queryStr = typeof query === "string" ? query : query.toString();
-    if (!queryStr) return url;
+    if (query instanceof URLSearchParams) {
+      query = query.toString();
+    } else if (typeof query === "object") {
+      query = new URLSearchParams(query as any).toString();
+    }
+
+    if (!query) return url;
 
     if (url.indexOf("?") > -1) {
-      return `${url}&${queryStr}`;
+      return `${url}&${query}`;
     } else {
-      return `${url}?${queryStr}`;
+      return `${url}?${query}`;
     }
   }
 
@@ -125,6 +133,18 @@ export class API {
 
   static STREAM_FILE(id: number) {
     return tok(gen(`${BASE}/stream/{id}`, { id }));
+  }
+
+  static SHARE_LINKS() {
+    return gen(`${BASE}/share/links`);
+  }
+
+  static SHARE_NODE() {
+    return gen(`${BASE}/share/node`);
+  }
+
+  static SHARE_DELETE() {
+    return gen(`${BASE}/share/delete`);
   }
 
   static CONFIG(setting: string) {

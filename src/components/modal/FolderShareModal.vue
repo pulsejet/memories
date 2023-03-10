@@ -6,36 +6,65 @@
     :sidebar="!isRoot ? this.folderPath : null"
   >
     <template #title>
-      {{ t("memories", "Share Folder") }}
+      {{ t("memories", "Link Sharing") }}
     </template>
 
     <div v-if="isRoot">
       {{ t("memories", "You cannot share the root folder") }}
     </div>
     <div v-else>
-      {{ t("memories", "Use the sidebar to share this folder.") }} <br />
       {{
         t(
           "memories",
-          "After creating a public share link in the sidebar, click Refresh and a corresponding link to Memories will be shown below."
+          "Public link shares are available to people outside Nextcloud."
         )
       }}
+      <br />
+      {{
+        t(
+          "memories",
+          "You may create or update permissions on public links using the sidebar."
+        )
+      }}
+      <br />
+      {{ t("memories", "Click a link to copy to clipboard.") }}
     </div>
 
     <div class="links">
-      <a
-        v-for="link of links"
-        :key="link.url"
-        :href="link.url"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {{ link.url }}
-      </a>
+      <ul>
+        <NcListItem
+          v-for="share of shares"
+          :title="share.label || share.token"
+          :key="share.id"
+          :bold="false"
+          @click="copy(share.url)"
+        >
+          <template #icon>
+            <LinkIcon class="avatar" :size="20" />
+          </template>
+          <template #subtitle>
+            {{ getShareLabels(share) }}
+          </template>
+          <template #actions>
+            <NcActionButton @click="deleteLink(share)" :disabled="loading">
+              {{ t("memories", "Remove") }}
+
+              <template #icon>
+                <CloseIcon :size="20" />
+              </template>
+            </NcActionButton>
+          </template>
+        </NcListItem>
+      </ul>
     </div>
 
+    <NcLoadingIcon v-if="loading" />
+
     <template #buttons>
-      <NcButton class="primary" @click="refreshUrls">
+      <NcButton class="primary" :disabled="loading" @click="createLink">
+        {{ t("memories", "Create Link") }}
+      </NcButton>
+      <NcButton class="primary" :disabled="loading" @click="refreshUrls">
         {{ t("memories", "Refresh") }}
       </NcButton>
     </template>
@@ -46,20 +75,44 @@
 import { defineComponent } from "vue";
 
 import axios from "@nextcloud/axios";
-import { generateOcsUrl, generateUrl } from "@nextcloud/router";
+import { showSuccess } from "@nextcloud/dialogs";
+import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 
 import UserConfig from "../../mixins/UserConfig";
 import NcButton from "@nextcloud/vue/dist/Components/NcButton";
+import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
+const NcListItem = () => import("@nextcloud/vue/dist/Components/NcListItem");
+import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 
 import * as utils from "../../services/Utils";
 import Modal from "./Modal.vue";
-import { Type } from "@nextcloud/sharing";
+
+import { API } from "../../services/API";
+
+import CloseIcon from "vue-material-design-icons/Close.vue";
+import LinkIcon from "vue-material-design-icons/LinkVariant.vue";
+
+type IShare = {
+  id: string;
+  label: string;
+  token: string;
+  url: string;
+  hasPassword: boolean;
+  expiration: number | null;
+  editable: number;
+};
 
 export default defineComponent({
   name: "FolderShareModal",
   components: {
     Modal,
     NcButton,
+    NcLoadingIcon,
+    NcListItem,
+    NcActionButton,
+
+    CloseIcon,
+    LinkIcon,
   },
 
   mixins: [UserConfig],
@@ -67,13 +120,22 @@ export default defineComponent({
   data: () => ({
     show: false,
     folderPath: "",
-    links: [] as { url: string }[],
+    loading: false,
+    shares: [] as IShare[],
   }),
 
   computed: {
     isRoot(): boolean {
       return this.folderPath === "/" || this.folderPath === "";
     },
+  },
+
+  created() {
+    subscribe("update:share", this.refreshUrls);
+  },
+
+  beforeDestroy() {
+    unsubscribe("update:share", this.refreshUrls);
   },
 
   methods: {
@@ -90,21 +152,62 @@ export default defineComponent({
     },
 
     async refreshUrls() {
-      const query = `format=json&path=${encodeURIComponent(
-        this.folderPath
-      )}&reshares=true`;
-      const url = generateOcsUrl(`/apps/files_sharing/api/v1/shares?${query}`);
-      const response = await axios.get(url);
-      const data = response.data?.ocs?.data;
-      if (data) {
-        this.links = data
-          .filter((s) => s.share_type === Type.SHARE_TYPE_LINK && s.token)
-          .map((share: any) => ({
-            url:
-              window.location.origin +
-              generateUrl(`/apps/memories/s/${share.token}`),
-          }));
+      this.loading = true;
+      try {
+        this.shares = (
+          await axios.get(API.Q(API.SHARE_LINKS(), { path: this.folderPath }))
+        ).data;
+      } finally {
+        this.loading = false;
       }
+    },
+
+    getShareLabels(share: IShare): string {
+      const labels = [];
+      if (share.hasPassword) {
+        labels.push(this.t("memories", "Password protected"));
+      }
+
+      if (share.expiration) {
+        const exp = utils.getLongDateStr(new Date(share.expiration * 1000));
+        const kw = this.t("memories", "Expires");
+        labels.push(`${kw} ${exp}`);
+      }
+
+      if (share.editable) {
+        labels.push(this.t("memories", "Editable"));
+      }
+
+      if (labels.length > 0) {
+        return `${labels.join(", ")}`;
+      }
+
+      return this.t("memories", "Read only");
+    },
+
+    async createLink() {
+      this.loading = true;
+      try {
+        await axios.post(API.SHARE_NODE(), { path: this.folderPath });
+      } finally {
+        this.loading = false;
+      }
+      this.refreshUrls();
+    },
+
+    async deleteLink(share: IShare) {
+      this.loading = true;
+      try {
+        await axios.post(API.SHARE_DELETE(), { id: share.id });
+      } finally {
+        this.loading = false;
+      }
+      this.refreshUrls();
+    },
+
+    copy(url: string) {
+      window.navigator.clipboard.writeText(url);
+      showSuccess(this.t("memories", "Link copied to clipboard"));
     },
   },
 });
@@ -113,10 +216,9 @@ export default defineComponent({
 <style lang="scss" scoped>
 .links {
   margin-top: 1em;
-  a {
-    display: block;
-    margin-bottom: 0.2em;
-    color: var(--color-primary-element);
+
+  :deep .avatar {
+    padding: 0 0.5em;
   }
 }
 </style>
