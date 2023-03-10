@@ -148,7 +148,8 @@ class ShareController extends ApiBase
         return $file;
     }
 
-    private function makeShareResponse(\OCP\Share\IShare $share) {
+    private function makeShareResponse(\OCP\Share\IShare $share)
+    {
         /** @var \OCP\IURLGenerator $urlGenerator */
         $urlGenerator = \OC::$server->get(\OCP\IURLGenerator::class);
 
