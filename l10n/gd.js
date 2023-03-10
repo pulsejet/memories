@@ -11,6 +11,7 @@ OC.L10N.register(
     "Download" : "Luchdaich a-nuas",
     "Favorite" : "Annsachd",
     "General" : "Coitcheann",
+    "Close" : "Dùin",
     "Back" : "Air ais",
     "Save" : "Sàbhail",
     "Name" : "Ainm",
@@ -18,7 +19,6 @@ OC.L10N.register(
     "Refresh" : "Ath-nuadhaich",
     "Remove" : "Thoir air falbh",
     "Share" : "Co-roinn",
-    "Close" : "Dùin",
     "Undo" : "Neo-dhèan"
 },
 "nplurals=4; plural=(n==1 || n==11) ? 0 : (n==2 || n==12) ? 1 : (n > 2 && n < 20) ? 2 : 3;");

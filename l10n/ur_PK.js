@@ -8,6 +8,7 @@ OC.L10N.register(
     "Cancel" : "منسوخ کریں",
     "Delete" : "حذف کریں",
     "Download" : "ڈاؤن لوڈ",
+    "Close" : "بند ",
     "Save" : "حفظ",
     "Month" : "ماہ",
     "Title" : "عنوان",
@@ -18,7 +19,6 @@ OC.L10N.register(
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Share" : "تقسیم",
-    "Close" : "بند ",
     "Next" : "اگلا",
     "Continue" : "جاری"
 },

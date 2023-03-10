@@ -9,6 +9,7 @@ OC.L10N.register(
     "Delete" : "﻿ಅಳಿಸಿ",
     "Download" : "ಪ್ರತಿಯನ್ನು ಸ್ಥಳೀಯವಾಗಿ ಉಳಿಸಿಕೊಳ್ಳಿ",
     "Favorite" : "ಅಚ್ಚುಮೆಚ್ಚಿನ",
+    "Close" : "ಮುಚ್ಚು",
     "Save" : "﻿ಉಳಿಸಿ",
     "Time" : "ಸಮಯ",
     "Title" : "ಶೀರ್ಷಿಕೆ",
@@ -19,7 +20,6 @@ OC.L10N.register(
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Share" : "﻿ಹಂಚಿಕೊಳ್ಳಿ",
-    "Close" : "ಮುಚ್ಚು",
     "Next" : "ಮುಂದೆ",
     "Continue" : "﻿ಮುಂದುವರಿಸಿ",
     "Size" : "﻿ ಗಾತ್ರ"

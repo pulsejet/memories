@@ -12,6 +12,7 @@ OC.L10N.register(
     "Download" : "Yüklə",
     "Favorite" : "İstəkli",
     "General" : "Ümumi",
+    "Close" : "Bağla",
     "Save" : "Saxla",
     "Month" : "Ay",
     "Day" : "Gün",
@@ -27,7 +28,6 @@ OC.L10N.register(
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Share" : "Paylaş",
-    "Close" : "Bağla",
     "Previous" : "Əvvələ",
     "Next" : "Növbəti",
     "Size" : "Həcm"

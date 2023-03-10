@@ -9,6 +9,7 @@ OC.L10N.register(
     "Delete" : "Padam",
     "Download" : "Muat turun",
     "General" : "Umum",
+    "Close" : "Tutup",
     "Back" : "Kembali",
     "Save" : "Simpan",
     "Month" : "Bulan",
@@ -23,7 +24,6 @@ OC.L10N.register(
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Share" : "Kongsi",
-    "Close" : "Tutup",
     "Previous" : "Sebelum",
     "Next" : "Seterus",
     "Size" : "Saiz"
