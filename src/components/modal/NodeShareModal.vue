@@ -3,7 +3,7 @@
     @close="close"
     size="normal"
     v-if="show"
-    :sidebar="!isRoot ? this.folderPath : null"
+    :sidebar="!isRoot ? this.filename : null"
   >
     <template #title>
       {{ t("memories", "Link Sharing") }}
@@ -91,6 +91,7 @@ import { API } from "../../services/API";
 
 import CloseIcon from "vue-material-design-icons/Close.vue";
 import LinkIcon from "vue-material-design-icons/LinkVariant.vue";
+import { IPhoto } from "../../types";
 
 type IShare = {
   id: string;
@@ -103,7 +104,7 @@ type IShare = {
 };
 
 export default defineComponent({
-  name: "FolderShareModal",
+  name: "NodeShareModal",
   components: {
     Modal,
     NcButton,
@@ -119,14 +120,14 @@ export default defineComponent({
 
   data: () => ({
     show: false,
-    folderPath: "",
+    filename: "",
     loading: false,
     shares: [] as IShare[],
   }),
 
   computed: {
     isRoot(): boolean {
-      return this.folderPath === "/" || this.folderPath === "";
+      return this.filename === "/" || this.filename === "";
     },
   },
 
@@ -139,23 +140,32 @@ export default defineComponent({
   },
 
   methods: {
-    close() {
-      this.show = false;
-      this.$emit("close");
+    openFolder() {
+      this.filename = utils.getFolderRoutePath(this.config_foldersPath);
+      this.open();
+    },
+
+    openPhoto(photo: IPhoto) {
+      this.filename = photo.filename;
+      this.open();
     },
 
     open() {
-      this.folderPath = utils.getFolderRoutePath(this.config_foldersPath);
       this.show = true;
       globalThis.mSidebar.setTab("sharing");
       this.refreshUrls();
+    },
+
+    close() {
+      this.show = false;
+      this.$emit("close");
     },
 
     async refreshUrls() {
       this.loading = true;
       try {
         this.shares = (
-          await axios.get(API.Q(API.SHARE_LINKS(), { path: this.folderPath }))
+          await axios.get(API.Q(API.SHARE_LINKS(), { path: this.filename }))
         ).data;
       } finally {
         this.loading = false;
@@ -188,7 +198,7 @@ export default defineComponent({
     async createLink() {
       this.loading = true;
       try {
-        await axios.post(API.SHARE_NODE(), { path: this.folderPath });
+        await axios.post(API.SHARE_NODE(), { path: this.filename });
       } finally {
         this.loading = false;
       }
@@ -215,7 +225,7 @@ export default defineComponent({
     refreshSidebar() {
       globalThis.mSidebar.close();
       globalThis.mSidebar.open({
-        filename: this.folderPath,
+        filename: this.filename,
       } as any);
     },
   },

@@ -32,7 +32,7 @@
         </NcActionRouter>
         <NcActionButton
           :aria-label="t('memories', 'Share folder')"
-          @click="$refs.shareModal.open(false)"
+          @click="$refs.shareModal.openFolder()"
           close-after-click
         >
           {{ t("memories", "Share folder") }}
@@ -41,7 +41,7 @@
       </NcActions>
     </div>
 
-    <FolderShareModal ref="shareModal" />
+    <NodeShareModal ref="shareModal" />
   </div>
 </template>
 
@@ -57,7 +57,7 @@ import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 import NcActionRouter from "@nextcloud/vue/dist/Components/NcActionRouter";
 
-import FolderShareModal from "../modal/FolderShareModal.vue";
+import NodeShareModal from "../modal/NodeShareModal.vue";
 
 import HomeIcon from "vue-material-design-icons/Home.vue";
 import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
@@ -72,7 +72,7 @@ export default defineComponent({
     NcActions,
     NcActionButton,
     NcActionRouter,
-    FolderShareModal,
+    NodeShareModal,
     HomeIcon,
     ShareIcon,
     TimelineIcon,
