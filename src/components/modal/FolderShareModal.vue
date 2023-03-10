@@ -34,7 +34,7 @@
       <ul>
         <NcListItem
           v-for="share of shares"
-          :title="share.label || share.token"
+          :title="share.label || t('memories', 'Share link')"
           :key="share.id"
           :bold="false"
           @click="copy(share.url)"
@@ -193,6 +193,7 @@ export default defineComponent({
         this.loading = false;
       }
       this.refreshUrls();
+      this.refreshSidebar();
     },
 
     async deleteLink(share: IShare) {
@@ -203,11 +204,19 @@ export default defineComponent({
         this.loading = false;
       }
       this.refreshUrls();
+      this.refreshSidebar();
     },
 
     copy(url: string) {
       window.navigator.clipboard.writeText(url);
       showSuccess(this.t("memories", "Link copied to clipboard"));
+    },
+
+    refreshSidebar() {
+      globalThis.mSidebar.close();
+      globalThis.mSidebar.open({
+        filename: this.folderPath,
+      } as any);
     },
   },
 });
