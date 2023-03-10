@@ -143,24 +143,21 @@ export default defineComponent({
       // Check if already quit
       if (!this.show || this.state !== state) return;
 
-      // Check for anything invalid
-      const invalid = photos.filter((p) => !p.imageInfo);
-      if (invalid.length > 0) {
-        showError(
-          this.t("memories", "Failed to load metadata for {n} photos.", {
-            n: invalid.length,
-          })
-        );
-        photos = photos.filter((p) => p.imageInfo);
+      // Use valid photos
+      const valid = this.filterValid(photos);
+      if (valid.length === 0) {
+        this.close();
+        return;
       }
 
-      this.photos = photos;
+      this.photos = valid;
       this.processing = false;
     },
 
     close() {
       this.photos = null;
       this.show = false;
+      this.processing = false;
     },
 
     async save() {
@@ -238,6 +235,36 @@ export default defineComponent({
       this.close();
 
       this.emitRefresh(true);
+    },
+
+    filterValid(photos: IPhoto[]) {
+      // Check if we have image info
+      const valid = photos.filter((p) => p.imageInfo);
+      if (valid.length !== photos.length) {
+        showError(
+          this.t("memories", "Failed to load metadata for {n} photos.", {
+            n: photos.length - valid.length,
+          })
+        );
+      }
+
+      // Check if photos are updatable
+      const updatable = valid.filter((p) =>
+        p.imageInfo?.permissions?.includes("U")
+      );
+      if (updatable.length !== valid.length) {
+        showError(
+          this.t(
+            "memories",
+            "{n} photos cannot be edited (permissions error).",
+            {
+              n: valid.length - updatable.length,
+            }
+          )
+        );
+      }
+
+      return updatable;
     },
   },
 });
