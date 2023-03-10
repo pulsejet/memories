@@ -91,7 +91,6 @@ import { API } from "../../services/API";
 
 import CloseIcon from "vue-material-design-icons/Close.vue";
 import LinkIcon from "vue-material-design-icons/LinkVariant.vue";
-import { IPhoto } from "../../types";
 
 type IShare = {
   id: string;
@@ -132,24 +131,13 @@ export default defineComponent({
   },
 
   created() {
-    subscribe("update:share", this.refreshUrls);
-  },
-
-  beforeDestroy() {
-    unsubscribe("update:share", this.refreshUrls);
+    globalThis.shareNodeLink = (path: string) => {
+      this.filename = path;
+      this.open();
+    };
   },
 
   methods: {
-    openFolder() {
-      this.filename = utils.getFolderRoutePath(this.config_foldersPath);
-      this.open();
-    },
-
-    openPhoto(photo: IPhoto) {
-      this.filename = photo.filename;
-      this.open();
-    },
-
     open() {
       this.show = true;
       globalThis.mSidebar.setTab("sharing");

@@ -150,6 +150,7 @@ aside.app-sidebar {
 // Prevent sidebar from becoming too big
 aside.app-sidebar {
   max-width: 360px !important;
+  position: fixed !important;
 
   @media (max-width: 512px) {
     max-width: unset !important;

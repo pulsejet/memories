@@ -32,7 +32,7 @@
         </NcActionRouter>
         <NcActionButton
           :aria-label="t('memories', 'Share folder')"
-          @click="$refs.shareModal.openFolder()"
+          @click="share()"
           close-after-click
         >
           {{ t("memories", "Share folder") }}
@@ -40,8 +40,6 @@
         </NcActionButton>
       </NcActions>
     </div>
-
-    <NodeShareModal ref="shareModal" />
   </div>
 </template>
 
@@ -49,6 +47,7 @@
 import { defineComponent } from "vue";
 import { TopMatterFolder, TopMatterType } from "../../types";
 
+import UserConfig from "../../mixins/UserConfig";
 const NcBreadcrumbs = () =>
   import("@nextcloud/vue/dist/Components/NcBreadcrumbs");
 const NcBreadcrumb = () =>
@@ -57,7 +56,7 @@ import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 import NcActionRouter from "@nextcloud/vue/dist/Components/NcActionRouter";
 
-import NodeShareModal from "../modal/NodeShareModal.vue";
+import * as utils from "../../services/Utils";
 
 import HomeIcon from "vue-material-design-icons/Home.vue";
 import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
@@ -72,12 +71,13 @@ export default defineComponent({
     NcActions,
     NcActionButton,
     NcActionRouter,
-    NodeShareModal,
     HomeIcon,
     ShareIcon,
     TimelineIcon,
     FoldersIcon,
   },
+
+  mixins: [UserConfig],
 
   data: () => ({
     topMatter: null as TopMatterFolder | null,
@@ -118,6 +118,12 @@ export default defineComponent({
         this.topMatter = null;
         this.recursive = false;
       }
+    },
+
+    share() {
+      globalThis.shareNodeLink(
+        utils.getFolderRoutePath(this.config_foldersPath)
+      );
     },
   },
 });

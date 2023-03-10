@@ -23,6 +23,7 @@ declare global {
   var OCP: Nextcloud.v24.OCP;
 
   var editMetadata: (photos: IPhoto[], sections?: number[]) => void;
+  var shareNodeLink: (path: string) => void;
 
   var mSidebar: {
     open: (filename: IFileInfo) => void;

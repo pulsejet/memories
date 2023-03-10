@@ -46,7 +46,8 @@
     <Settings :open.sync="settingsOpen" />
 
     <Sidebar />
-    <EditMetadata />
+    <EditMetadataModal />
+    <NodeShareModal />
   </NcContent>
 </template>
 
@@ -68,7 +69,8 @@ import Settings from "./components/Settings.vue";
 import FirstStart from "./components/FirstStart.vue";
 import Metadata from "./components/Metadata.vue";
 import Sidebar from "./components/Sidebar.vue";
-import EditMetadata from "./components/modal/EditMetadataModal.vue";
+import EditMetadataModal from "./components/modal/EditMetadataModal.vue";
+import NodeShareModal from "./components/modal/NodeShareModal.vue";
 
 import ImageMultiple from "vue-material-design-icons/ImageMultiple.vue";
 import FolderIcon from "vue-material-design-icons/Folder.vue";
@@ -95,7 +97,8 @@ export default defineComponent({
     Settings,
     FirstStart,
     Sidebar,
-    EditMetadata,
+    EditMetadataModal,
+    NodeShareModal,
 
     ImageMultiple,
     FolderIcon,
