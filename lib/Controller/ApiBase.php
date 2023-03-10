@@ -103,6 +103,10 @@ class ApiBase extends Controller
 
         // Public shared folder
         if ($share = $this->getShareNode()) { // can throw
+            if (!$share instanceof Folder) {
+                throw new \Exception('Share is not a folder');
+            }
+
             $root->addFolder($share);
 
             return $root;
@@ -229,7 +233,14 @@ class ApiBase extends Controller
             if ($share = $this->getShareNode()) {
                 // Public shares may allow editing
                 // Just use the same permissions as the share
-                return $this->getOneFileFromFolder($share, $id, $share->getPermissions());
+                if ($share instanceof File) {
+                    return $share;
+                }
+                if ($share instanceof Folder) {
+                    return $this->getOneFileFromFolder($share, $id, $share->getPermissions());
+                }
+
+                return null;
             }
         } catch (\Exception $e) {
         }
@@ -301,7 +312,7 @@ class ApiBase extends Controller
 
         // Get node from share
         $node = $share->getNode(); // throws exception if not found
-        if (!$node instanceof Folder || !$node->isReadable() || !$node->isShareable()) {
+        if (!$node->isReadable() || !$node->isShareable()) {
             throw new \Exception('Share not found or invalid');
         }
 

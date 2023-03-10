@@ -18,7 +18,13 @@ class TimelineQuery
     use TimelineQueryPeopleFaceRecognition;
     use TimelineQueryPeopleRecognize;
     use TimelineQueryPlaces;
+    use TimelineQuerySingleItem;
     use TimelineQueryTags;
+
+    public const TIMELINE_SELECT = [
+        'm.isvideo', 'm.video_duration', 'm.datetaken', 'm.dayid', 'm.w', 'm.h', 'm.liveid',
+        'f.etag', 'f.path', 'f.name AS basename', 'mimetypes.mimetype',
+    ];
 
     protected IDBConnection $connection;
 

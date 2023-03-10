@@ -9,3 +9,4 @@ export * from "./dav/onthisday";
 export * from "./dav/tags";
 export * from "./dav/other";
 export * from "./dav/places";
+export * from "./dav/single-item";

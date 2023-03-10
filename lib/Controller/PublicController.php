@@ -3,6 +3,7 @@
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\TimelineQuery;
 use OCP\App\IAppManager;
 use OCP\AppFramework\AuthPublicShareController;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
@@ -12,6 +13,7 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\IRootFolder;
 use OCP\Files\NotFoundException;
 use OCP\IConfig;
+use OCP\IDBConnection;
 use OCP\IRequest;
 use OCP\ISession;
 use OCP\IURLGenerator;
@@ -31,6 +33,7 @@ class PublicController extends AuthPublicShareController
     protected IShareManager $shareManager;
     protected IUserManager $userManager;
     protected IAppManager $appManager;
+    protected IDBConnection $db;
     protected IConfig $config;
 
     protected IShare $share;
@@ -47,6 +50,7 @@ class PublicController extends AuthPublicShareController
         IShareManager $shareManager,
         IUserManager $userManager,
         IAppManager $appManager,
+        IDBConnection $db,
         IConfig $config
     ) {
         parent::__construct($AppName, $request, $session, $urlGenerator);
@@ -57,6 +61,7 @@ class PublicController extends AuthPublicShareController
         $this->shareManager = $shareManager;
         $this->userManager = $userManager;
         $this->appManager = $appManager;
+        $this->db = $db;
         $this->config = $config;
     }
 
@@ -106,11 +111,6 @@ class PublicController extends AuthPublicShareController
             throw new NotFoundException();
         }
 
-        if (!($share->getNode() instanceof \OCP\Files\Folder)) {
-            // TODO: single file share
-            throw new NotFoundException();
-        }
-
         // Redirect to main app if user owns this share
         $this->redirectIfOwned($share);
 
@@ -124,8 +124,14 @@ class PublicController extends AuthPublicShareController
         // Share info
         $this->initialState->provideInitialState('no_download', $share->getHideDownload());
 
+        // Share file id only if not a folder
+        $node = $share->getNode();
+        if ($node instanceof \OCP\Files\File) {
+            $this->initialState->provideInitialState('single_item', $this->getSingleItemInitialState($node));
+        }
+
         $response = new PublicTemplateResponse($this->appName, 'main');
-        $response->setHeaderTitle($share->getNode()->getName());
+        $response->setHeaderTitle($node->getName());
         $response->setFooterVisible(false); // wth is that anyway?
         $response->setContentSecurityPolicy(PageController::getCSP());
         $response->cacheFor(0);
@@ -240,5 +246,14 @@ class PublicController extends AuthPublicShareController
         header('Location: '.$url);
 
         exit;
+    }
+
+    /** Get initial state of single item */
+    private function getSingleItemInitialState(\OCP\Files\File $file): string
+    {
+        $timelineQuery = new TimelineQuery($this->db);
+        $photo = $timelineQuery->getSingleItem($file->getId());
+
+        return json_encode($photo);
     }
 }

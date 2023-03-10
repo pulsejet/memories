@@ -766,6 +766,8 @@ export default defineComponent({
           data = await dav.getPlacesData();
         } else if (this.$route.name === "tags" && !this.$route.params.name) {
           data = await dav.getTagsData();
+        } else if (dav.isSingleItem()) {
+          data = await dav.getSingleItemData();
         } else {
           // Try the cache
           try {

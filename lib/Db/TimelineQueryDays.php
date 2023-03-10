@@ -153,13 +153,12 @@ trait TimelineQueryDays
         // We don't actually use m.datetaken here, but postgres
         // needs that all fields in ORDER BY are also in SELECT
         // when using DISTINCT on selected fields
-        $query->select($fileid, 'm.isvideo', 'm.video_duration', 'm.datetaken', 'm.dayid', 'm.w', 'm.h', 'm.liveid')
+        $query->select($fileid, ...TimelineQuery::TIMELINE_SELECT)
             ->from('memories', 'm')
         ;
 
         // JOIN with filecache for existing files
         $query = $this->joinFilecache($query, $root, $recursive, $archive);
-        $query->addSelect('f.etag', 'f.path', 'f.name AS basename');
 
         // SELECT rootid if not a single folder
         if ($recursive && !$root->isEmpty()) {
@@ -168,7 +167,6 @@ trait TimelineQueryDays
 
         // JOIN with mimetypes to get the mimetype
         $query->join('f', 'mimetypes', 'mimetypes', $query->expr()->eq('f.mimetype', 'mimetypes.id'));
-        $query->addSelect('mimetypes.mimetype');
 
         // Filter by dayid unless wildcard
         if (null !== $day_ids) {
