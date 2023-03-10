@@ -329,7 +329,7 @@ class ApiBase extends Controller
             }
 
             // Check read permission
-            if (!($files[0]->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
+            if (!$files[0]->isReadable()) {
                 continue;
             }
 

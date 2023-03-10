@@ -58,7 +58,7 @@ class VideoController extends ApiBase
             return new JSONResponse(['message' => 'File not found'], Http::STATUS_NOT_FOUND);
         }
 
-        if (!($file->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
+        if (!$file->isReadable()) {
             return new JSONResponse(['message' => 'File not readable'], Http::STATUS_FORBIDDEN);
         }
 

@@ -32,7 +32,7 @@ class TimelineRoot
             throw new \Exception("Not a folder: {$folderPath}");
         }
 
-        if (!($folder->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
+        if (!$folder->isReadable()) {
             throw new \Exception("Folder not readable: {$folderPath}");
         }
 
