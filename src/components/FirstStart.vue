@@ -102,9 +102,7 @@ export default defineComponent({
       // Get folder days
       this.error = "";
       this.info = "";
-      const query = new URLSearchParams();
-      query.set("timelinePath", path);
-      let url = API.Q(API.DAYS(), query);
+      let url = API.Q(API.DAYS(), { timelinePath: path });
       const res = await axios.get<IDay[]>(url);
 
       // Check response

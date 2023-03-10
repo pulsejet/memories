@@ -117,7 +117,7 @@ export default defineComponent({
       // Load metadata for all photos
       const calls = photos.map((p) => async () => {
         try {
-          const url = API.Q(API.IMAGE_INFO(p.fileid), "tags=1");
+          const url = API.Q(API.IMAGE_INFO(p.fileid), { tags: 1 });
           const res = await axios.get<any>(url);
 
           // Validate response

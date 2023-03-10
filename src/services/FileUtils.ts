@@ -142,14 +142,12 @@ const getPreviewUrl = function (
 ) {
   const [x, y] = typeof size === "number" ? [size, size] : size;
 
-  // Build query
-  const query = new URLSearchParams();
-  query.set("c", photo.etag);
-  query.set("x", x.toString());
-  query.set("y", y.toString());
-  query.set("a", square ? "0" : "1");
-
-  return API.Q(API.IMAGE_PREVIEW(photo.fileid), query);
+  return API.Q(API.IMAGE_PREVIEW(photo.fileid), {
+    c: photo.etag,
+    x,
+    y,
+    a: square ? "0" : "1",
+  });
 };
 
 export {

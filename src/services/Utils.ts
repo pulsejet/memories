@@ -251,17 +251,11 @@ export function getFolderRoutePath(basePath: string) {
  * Get URL to live photo video part
  */
 export function getLivePhotoVideoUrl(p: IPhoto, transcode: boolean) {
-  // Build query string
-  const query = new URLSearchParams();
-  query.set("etag", p.etag);
-  query.set("liveid", p.liveid);
-
-  // Transcode if allowed
-  if (transcode) {
-    query.set("transcode", videoClientIdPersistent);
-  }
-
-  return API.Q(API.VIDEO_LIVEPHOTO(p.fileid), query);
+  return API.Q(API.VIDEO_LIVEPHOTO(p.fileid), {
+    etag: p.etag,
+    liveid: p.liveid,
+    transcode: transcode ? videoClientIdPersistent : undefined,
+  });
 }
 
 /**

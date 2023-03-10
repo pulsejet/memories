@@ -163,13 +163,11 @@ export default defineComponent({
       minLon -= lonDiff * 0.25;
       maxLon += lonDiff * 0.25;
 
-      // Show clusters correctly while draging the map
-      const query = new URLSearchParams();
-      query.set("bounds", bounds());
-      query.set("zoom", zoomStr);
-
       // Make API call
-      const url = API.Q(API.MAP_CLUSTERS(), query);
+      const url = API.Q(API.MAP_CLUSTERS(), {
+        bounds: bounds(),
+        zoom: zoomStr,
+      });
       const res = await axios.get(url);
 
       if (this.zoom > oldZoom) {

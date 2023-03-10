@@ -166,7 +166,10 @@ export default defineComponent({
     // Get latest exif data
     try {
       const res = await axios.get(
-        API.Q(API.IMAGE_INFO(this.fileid), "basic=1&current=1")
+        API.Q(API.IMAGE_INFO(this.fileid), {
+          basic: "1",
+          current: "1",
+        })
       );
 
       this.exif = res.data?.current;
