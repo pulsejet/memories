@@ -37,7 +37,7 @@
             <template #icon> <ShareIcon :size="24" /> </template>
           </NcActionButton>
           <NcActionButton
-            v-if="!routeIsPublic && !routeIsAlbum"
+            v-if="!routeIsAlbum && canDelete"
             :aria-label="t('memories', 'Delete')"
             @click="deleteCurrent"
             :close-after-click="true"
@@ -46,7 +46,7 @@
             <template #icon> <DeleteIcon :size="24" /> </template>
           </NcActionButton>
           <NcActionButton
-            v-if="!routeIsPublic && routeIsAlbum"
+            v-if="routeIsAlbum"
             :aria-label="t('memories', 'Remove from album')"
             @click="deleteCurrent"
             :close-after-click="true"
@@ -77,7 +77,7 @@
             </template>
           </NcActionButton>
           <NcActionButton
-            v-if="canEdit && !routeIsPublic"
+            v-if="canEdit"
             :aria-label="t('memories', 'Edit')"
             @click="openEditor"
             :close-after-click="true"
@@ -132,7 +132,7 @@
           </NcActionButton>
           <NcActionButton
             :aria-label="t('memories', 'Edit metadata')"
-            v-if="!routeIsPublic"
+            v-if="canEdit"
             @click="editMetadata"
             :close-after-click="true"
           >
@@ -334,15 +334,21 @@ export default defineComponent({
         : null;
     },
 
-    /** Allow opening editor */
+    /** Show edit buttons */
     canEdit(): boolean {
       return (
         this.currentPhoto?.mimetype?.startsWith("image/") &&
-        !this.currentPhoto.liveid
+        !this.currentPhoto.liveid &&
+        this.currentPhoto.imageInfo?.permissions?.includes("U")
       );
     },
 
-    /** Does the browser support native share API */
+    /** Show delete button */
+    canDelete(): boolean {
+      return this.currentPhoto?.imageInfo?.permissions?.includes("D");
+    },
+
+    /** Show share button */
     canShare(): boolean {
       return "share" in navigator && this.currentPhoto && !this.isVideo;
     },
