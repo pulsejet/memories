@@ -106,6 +106,11 @@ class PublicController extends AuthPublicShareController
             throw new NotFoundException();
         }
 
+        if (!($share->getNode() instanceof \OCP\Files\Folder)) {
+            // TODO: single file share
+            throw new NotFoundException();
+        }
+
         // Redirect to main app if user owns this share
         $this->redirectIfOwned($share);
 
@@ -204,6 +209,11 @@ class PublicController extends AuthPublicShareController
             }
             $node = $nodes[0];
         } catch (NotFoundException $e) {
+            return null;
+        }
+
+        // Check if node is a folder
+        if (!$node instanceof \OCP\Files\Folder) {
             return null;
         }
 
