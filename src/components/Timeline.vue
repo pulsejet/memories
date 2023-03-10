@@ -768,6 +768,7 @@ export default defineComponent({
           data = await dav.getTagsData();
         } else if (dav.isSingleItem()) {
           data = await dav.getSingleItemData();
+          this.$router.replace(utils.getViewerRoute(data[0]!.detail[0]));
         } else {
           // Try the cache
           try {

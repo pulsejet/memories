@@ -12,6 +12,7 @@ export async function getSingleItemData(): Promise<IDay[]> {
     return [];
   }
 
+  singleItem.key = singleItem.fileid;
   return [
     {
       dayid: singleItem.dayid,

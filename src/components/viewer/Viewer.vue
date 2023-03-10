@@ -319,6 +319,11 @@ export default defineComponent({
       );
     },
 
+    /** Allow closing the viewer */
+    allowClose(): boolean {
+      return !this.editorOpen && !dav.isSingleItem();
+    },
+
     /** Get date taken string */
     currentDateTaken(): string | null {
       const date = this.currentPhoto?.imageInfo?.datetaken;
@@ -427,8 +432,11 @@ export default defineComponent({
         bgOpacity: 1,
         appendToEl: this.$refs.inner as HTMLElement,
         preload: [2, 2],
-        clickToCloseNonZoomable: false,
         bgClickAction: "toggle-controls",
+
+        clickToCloseNonZoomable: false,
+        pinchToClose: this.allowClose,
+        closeOnVerticalDrag: this.allowClose,
 
         easing: "cubic-bezier(.49,.85,.55,1)",
         showHideAnimationType: "zoom",
