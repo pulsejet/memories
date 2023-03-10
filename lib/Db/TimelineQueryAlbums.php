@@ -207,18 +207,34 @@ trait TimelineQueryAlbums
         }
 
         // Check in collaborators instead
+        $albumNumId = (int) $album['album_id'];
+        if ($this->userIsAlbumCollaborator($uid, $albumNumId)) {
+            return $album;
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if user is a collaborator by numeric ID.
+     * Also checks if a group is a collaborator.
+     * Does not check if the user is the owner.
+     *
+     * @param string $uid     User ID
+     * @param int    $albumId Album ID (numeric)
+     */
+    public function userIsAlbumCollaborator(string $uid, int $albumId): bool
+    {
         $query = $this->connection->getQueryBuilder();
         $ids = $this->getSelfCollaborators($uid);
         $query->select('album_id')->from($this->collaboratorsTable())->where(
             $query->expr()->andX(
-                $query->expr()->eq('album_id', $query->createNamedParameter($album['album_id'])),
+                $query->expr()->eq('album_id', $query->createNamedParameter($albumId, IQueryBuilder::PARAM_INT)),
                 $query->expr()->in('collaborator_id', $query->createNamedParameter($ids, IQueryBuilder::PARAM_STR_ARRAY)),
             )
         );
 
-        if (false !== $query->executeQuery()->fetchOne()) {
-            return $album;
-        }
+        return false !== $query->executeQuery()->fetchOne();
     }
 
     /**
