@@ -565,7 +565,7 @@ export default defineComponent({
         preventDragOffset: 40,
       });
 
-      // Live photo support
+      // Live Photo support
       new PsLivePhoto(<any>this.photoswipe, {});
 
       // Image support
@@ -858,10 +858,10 @@ export default defineComponent({
       // Only for JPEG for now
       if (!this.canEdit) return;
 
-      // Prevent editing live photos
+      // Prevent editing Live Photos
       if (this.currentPhoto.liveid) {
         alert(
-          this.t("memories", "Editing is currently disabled for live photos")
+          this.t("memories", "Editing is currently disabled for Live Photos")
         );
         return;
       }

@@ -107,7 +107,7 @@ class VideoController extends ApiBase
      *
      * @NoCSRFRequired
      *
-     * Return the live video part of a live photo
+     * Return the live video part of a Live Photo
      */
     public function livephoto(
         int $fileid,

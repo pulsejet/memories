@@ -2,7 +2,7 @@ import PhotoSwipe from "photoswipe";
 import * as utils from "../../services/Utils";
 
 export function isLiveContent(content): boolean {
-  // Do not play live photo if the slideshow is
+  // Do not play Live Photo if the slideshow is
   // playing in full screen mode.
   if (document.fullscreenElement) {
     return false;

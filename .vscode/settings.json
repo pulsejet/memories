@@ -85,5 +85,6 @@
     "**/l10n": true,
     "**/.vscode": true,
     "**/patches": true
-  }
+  },
+  "git.alwaysSignOff": true
 }

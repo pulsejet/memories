@@ -18,7 +18,7 @@ class LivePhoto
         $this->connection = $connection;
     }
 
-    /** Check if a given Exif data is the video part of a live photo */
+    /** Check if a given Exif data is the video part of a Live Photo */
     public function isVideoPart(array &$exif)
     {
         return \array_key_exists('MIMEType', $exif)
