@@ -5,35 +5,19 @@ import { ExpirationPlugin } from "workbox-expiration";
 
 precacheAndRoute(self.__WB_MANIFEST);
 
-registerRoute(
-  /^.*\/apps\/memories\/api\/video\/transcode\/.*/,
-  new NetworkOnly()
-);
-registerRoute(/^.*\/apps\/memories\/api\/image\/jpeg\/.*/, new NetworkOnly());
-registerRoute(
-  /^.*\/apps\/memories\/api\/image\/preview\/.*/,
-  new NetworkOnly()
-);
-registerRoute(/^.*\/remote.php\/.*/, new NetworkOnly());
-registerRoute(/^.*\/apps\/files\/ajax\/download.php?.*/, new NetworkOnly());
-
-const imageCache = new CacheFirst({
-  cacheName: "images",
+registerRoute(/^.*\/apps\/memories\/api\/video\/livephoto\/.*/, new CacheFirst({
+  cacheName: "livephotos",
   plugins: [
     new ExpirationPlugin({
       maxAgeSeconds: 3600 * 24 * 7, // days
-      maxEntries: 20000, // 20k images
+      maxEntries: 1000, // 1k videos
     }),
   ],
-});
-
-registerRoute(/^.*\/apps\/memories\/api\/video\/livephoto\/.*/, imageCache);
-registerRoute(/^.*\/apps\/memories\/api\/faces\/preview\/.*/, imageCache);
-registerRoute(/^.*\/apps\/memories\/api\/tags\/preview\/.*/, imageCache);
+}));
 
 registerRoute(/^.*\/apps\/memories\/api\/.*/, new NetworkOnly());
 
-// Cache pages for same-origin requests only
+// Cache pages for same-origin requests only\
 registerRoute(
   ({ url }) => url.origin === self.location.origin,
   new NetworkFirst({
