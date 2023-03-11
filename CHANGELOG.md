@@ -2,7 +2,7 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
-## v4.12.0
+## v4.12.0 (2023-03-10)
 
 **This release drops support for Nextcloud 24.**
 
