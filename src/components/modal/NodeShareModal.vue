@@ -151,7 +151,7 @@ export default defineComponent({
       if (immediate) {
         let share =
           this.shares.find((s) => !s.hasPassword) ||
-          (await this.createLink(false));
+          (this.shares.length === 0 ? await this.createLink(false) : null);
 
         if (share) {
           if ("share" in window.navigator) {
