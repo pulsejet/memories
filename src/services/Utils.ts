@@ -248,7 +248,7 @@ export function getFolderRoutePath(basePath: string) {
 }
 
 /**
- * Get URL to live photo video part
+ * Get URL to Live Photo video part
  */
 export function getLivePhotoVideoUrl(p: IPhoto, transcode: boolean) {
   return API.Q(API.VIDEO_LIVEPHOTO(p.fileid), {
@@ -259,7 +259,7 @@ export function getLivePhotoVideoUrl(p: IPhoto, transcode: boolean) {
 }
 
 /**
- * Set up hooks to set classes on parent element for live photo
+ * Set up hooks to set classes on parent element for Live Photo
  * @param video Video element
  */
 export function setupLivePhotoHooks(video: HTMLVideoElement) {

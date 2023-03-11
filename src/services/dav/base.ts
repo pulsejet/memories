@@ -190,10 +190,10 @@ export async function* runInParallel<T>(
 }
 
 /**
- * Extend given list of Ids with extra files for live photos.
+ * Extend given list of Ids with extra files for Live Photos.
  *
- * @param photos list of photos to search for live photos
- * @returns list of file ids that contains extra file Ids for live photos if any
+ * @param photos list of photos to search for Live Photos
+ * @returns list of file ids that contains extra file Ids for Live Photos if any
  */
 async function extendWithLivePhotos(photos: IPhoto[]) {
   const livePhotos = (
@@ -230,7 +230,7 @@ export async function* deletePhotos(photos: IPhoto[]) {
     return;
   }
 
-  // Extend with live photos unless this is an album
+  // Extend with Live Photos unless this is an album
   if (window.vueroute().name !== "albums") {
     photos = await extendWithLivePhotos(photos);
   }
@@ -292,7 +292,7 @@ export async function* movePhotos(
     targetPath += "/";
   }
 
-  // Also move the live photo videos
+  // Also move the Live Photo videos
   photos = await extendWithLivePhotos(photos);
   const fileIdsSet = new Set(photos.map((p) => p.fileid));
 

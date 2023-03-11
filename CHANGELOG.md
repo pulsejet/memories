@@ -50,14 +50,14 @@ You may need to clear browser cache to use location search.
 - **Feature**: Allow editing more EXIF fields ([#169](https://github.com/pulsejet/memories/issues/169))
 - **Feature**: Alpha integration with the face recognition app ([#146](https://github.com/pulsejet/memories/issues/146))
 - Fix downloading from albums ([#259](https://github.com/pulsejet/memories/issues/259))
-- Fix support for HEVC live photos ([#234](https://github.com/pulsejet/memories/issues/234))
+- Fix support for HEVC Live Photos ([#234](https://github.com/pulsejet/memories/issues/234))
 - Fix native photo sharing ([#254](https://github.com/pulsejet/memories/issues/254), [#263](https://github.com/pulsejet/memories/issues/263))
 - Use larger previews in viewer (please see [these docs](https://github.com/pulsejet/memories/wiki/Configuration#preview-storage-considerations)) ([#226](https://github.com/pulsejet/memories/issues/226))
 
 ## v4.8.0, v3.8.0 (2022-11-22)
 
 - **Feature**: Support for Live Photos ([#124](https://github.com/pulsejet/memories/issues/124))
-  - You need to run `occ memories:index --clear` to reindex live photos
+  - You need to run `occ memories:index --clear` to reindex Live Photos
   - Only JPEG (iOS with MOV, Google, Samsung) is supported. HEIC is not supported.
 - **Feature**: Timeline path now scans recursively for mounted volumes / shares inside it
 - **Feature**: Multiple timeline paths can be specified ([#178](https://github.com/pulsejet/memories/issues/178))

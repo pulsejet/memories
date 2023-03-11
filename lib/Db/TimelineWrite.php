@@ -94,7 +94,7 @@ class TimelineWrite
         $prevRow = $cursor->fetch();
         $cursor->closeCursor();
 
-        // Check in live-photo table in case this is a video part of a live photo
+        // Check in live-photo table in case this is a video part of a Live Photo
         if (!$prevRow) {
             $query = $this->connection->getQueryBuilder();
             $query->select('fileid', 'mtime')
@@ -129,7 +129,7 @@ class TimelineWrite
         } catch (\Exception $e) {
         }
 
-        // Hand off if live photo video part
+        // Hand off if Live Photo video part
         if ($isvideo && $this->livePhoto->isVideoPart($exif)) {
             $this->livePhoto->processVideoPart($file, $exif);
 

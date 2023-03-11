@@ -57,7 +57,7 @@ export type IPhoto = {
   w?: number;
   /** Height of full image */
   h?: number;
-  /** Live photo identifier */
+  /** Live Photo identifier */
   liveid?: string;
 
   /** Grid display width px */
