@@ -101,7 +101,7 @@ class ImageController extends ApiBase
         // For checking max previews
         $previewRoot = new \OC\Preview\Storage\Root(
             \OC::$server->get(IRootFolder::class),
-            \OC::$server->getSystemConfig(),
+            \OC::$server->get(\OC\SystemConfig::class),
         );
 
         // stream the response
@@ -145,7 +145,7 @@ class ImageController extends ApiBase
                 }
 
                 // Add this preview to the response
-                $preview = $previewManager->getPreview($file, $x, $y, !$a, 'fill');
+                $preview = $previewManager->getPreview($file, $x, $y, !$a, \OCP\IPreview::MODE_FILL);
                 $content = $preview->getContent();
                 if (empty($content)) {
                     continue;
