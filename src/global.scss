@@ -114,3 +114,10 @@ body.has-viewer header {
 [role="note"].empty-content {
   width: 100%;
 }
+
+// Make NcListItem border-box to prevent overflow
+li.list-item__wrapper {
+  > a.list-item {
+    box-sizing: border-box;
+  }
+}

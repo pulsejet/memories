@@ -24,7 +24,7 @@ declare global {
 
   var editMetadata: (photos: IPhoto[], sections?: number[]) => void;
   var sharePhoto: (photo: IPhoto) => void;
-  var shareNodeLink: (path: string) => void;
+  var shareNodeLink: (path: string, immediate?: boolean) => Promise<void>;
 
   var mSidebar: {
     open: (filename: IFileInfo) => void;

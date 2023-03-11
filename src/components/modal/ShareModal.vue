@@ -186,7 +186,7 @@ export default defineComponent({
 
     async shareLink() {
       this.l(async () =>
-        globalThis.shareNodeLink((await this.getFileInfo()).filename)
+        globalThis.shareNodeLink((await this.getFileInfo()).filename, true)
       );
       this.close();
     },

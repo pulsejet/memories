@@ -132,18 +132,38 @@ export default defineComponent({
   },
 
   created() {
-    globalThis.shareNodeLink = (path: string) => {
-      this.filename = path;
-      this.open();
-    };
+    globalThis.shareNodeLink = this.open;
   },
 
   methods: {
-    open() {
+    async open(path: string, immediate?: boolean) {
+      this.filename = path;
       this.show = true;
       this.shares = [];
       globalThis.mSidebar.setTab("sharing");
-      this.refreshUrls();
+
+      // Get current shares
+      await this.refreshUrls();
+
+      // Immediate sharing
+      // If an existing share is found, just share it directly if it's
+      // not password protected. Otherwise create a new share.
+      if (immediate) {
+        let share =
+          this.shares.find((s) => !s.hasPassword) ||
+          (await this.createLink(false));
+
+        if (share) {
+          if ("share" in window.navigator) {
+            window.navigator.share({
+              title: this.filename,
+              url: share.url,
+            });
+          } else {
+            this.copy(share.url);
+          }
+        }
+      }
     },
 
     close() {
@@ -187,7 +207,7 @@ export default defineComponent({
       return this.t("memories", "Read only");
     },
 
-    async createLink() {
+    async createLink(copy = true): Promise<IShare> {
       this.loading = true;
       try {
         const res = await axios.post<IShare>(API.SHARE_NODE(), {
@@ -195,11 +215,16 @@ export default defineComponent({
         });
         const share = res.data;
         this.shares.push(share);
-        this.copy(share.url);
+        this.refreshSidebar();
+
+        if (copy) {
+          this.copy(share.url);
+        }
+
+        return share;
       } finally {
         this.loading = false;
       }
-      this.refreshSidebar();
     },
 
     async deleteLink(share: IShare) {
