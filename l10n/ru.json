@@ -103,13 +103,12 @@
     "Loading …" : "Загрузка …",
     "Too many failures, aborting" : "Произошло множество ошибок, действие прервано",
     "Failed to move {name}." : "Не удалось переместить «{name}».",
-    "Share Folder" : "Опубликовать папку",
-    "You cannot share the root folder" : "Корневая папка не может быть опубликована",
-    "Use the sidebar to share this folder." : "Чтобы опубликовать эту папку, воспользуйтесь боковым меню. ",
-    "Refresh" : "Обновить",
     "Choose a folder" : "Выберите папку",
     "Remove" : "Удалить",
     "Add Path" : "Добавть путь",
+    "You cannot share the root folder" : "Корневая папка не может быть опубликована",
+    "Refresh" : "Обновить",
+    "Cannot share this type of data" : "Невозможно опубликовать такой тип данных",
     "Sort by date" : "Сортировать по дате",
     "Sort by name" : "Сортировать по имени",
     "Share album" : "Опубликовать альбом",
@@ -134,8 +133,6 @@
     "Slideshow" : "Слайд шоу",
     "Previous" : "Назад",
     "Next" : "Далее",
-    "Video sharing not supported yet" : "Публикация видео пока не поддерживается",
-    "Cannot share this type of data" : "Невозможно опубликовать такой тип данных",
     "Are you sure you want to delete?" : "Вы уверены, что хотите удалить?",
     "Save as" : "Сохранить как",
     "All changes will be lost." : "Изменения не будут сохранены.",
@@ -244,6 +241,9 @@
     "Processing … {n}/{m}" : "Обработка... {n}/{m}",
     "Update Exif" : "Обновить EXIF",
     "Loading data … {n}/{m}" : "Загрузка данных... {n}/{m}",
-    "Date Taken" : "Дата съемки"
+    "Date Taken" : "Дата съемки",
+    "Share Folder" : "Опубликовать папку",
+    "Use the sidebar to share this folder." : "Чтобы опубликовать эту папку, воспользуйтесь боковым меню. ",
+    "Video sharing not supported yet" : "Публикация видео пока не поддерживается"
 },"pluralForm" :"nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);"
 }
