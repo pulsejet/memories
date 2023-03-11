@@ -39,9 +39,8 @@ OC.L10N.register(
     "Name" : "Vārds",
     "Update" : "Atjaunināt",
     "Search" : "Meklēt",
-    "Share Folder" : "Kopīgot mapi",
-    "Refresh" : "Atsvaidzināt",
     "Remove" : "Noņemt",
+    "Refresh" : "Atsvaidzināt",
     "Sort by date" : "Kārtot pēc datuma",
     "Sort by name" : "Kārtot pēc nosaukuma",
     "Share" : "Koplietot",
@@ -66,6 +65,7 @@ OC.L10N.register(
     "Direct" : "Tieši",
     "Auto" : "Automātiski",
     "Shared Folder" : "Koplietotā mape",
-    "EXIF" : "EXIF"
+    "EXIF" : "EXIF",
+    "Share Folder" : "Kopīgot mapi"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");

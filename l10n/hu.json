@@ -122,15 +122,14 @@
     "Failed to move {name}." : "A(z) {name} áthelyezése sikertelen",
     "Move selected photos to person" : "A kiválasztott fényképek áthelyezése egy személyhez",
     "Are you sure you want to move the selected photos from {name} to {newName}?" : "Biztos, hogy áthelyezi a kiválasztott fényképeket a következőtől: {name}, a következőhöz: {newName}?",
-    "Share Folder" : "Mappa megosztása",
-    "You cannot share the root folder" : "Nem oszthatja meg a gyökérmappát",
-    "Use the sidebar to share this folder." : "Használja az oldalsávot a mappa megosztásához.",
-    "Refresh" : "Frissítés",
     "Choose a folder" : "Válasszon mappát",
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["{n} elem áthelyezve a mappába","{n} elem áthelyezve a mappába"],
     "Remove" : "Eltávolítás",
     "Add Path" : "Útvonal hozzáadása",
     "Add a root to your timeline" : "Gyökér hozzáadása az idővonalához",
+    "You cannot share the root folder" : "Nem oszthatja meg a gyökérmappát",
+    "Refresh" : "Frissítés",
+    "Cannot share this type of data" : "Az ilyen típusú adatok nem oszthatók meg",
     "Sort by date" : "Rendezés dátum szerint",
     "Sort by name" : "Rendezés név szerint",
     "Share album" : "Album megosztása",
@@ -155,8 +154,6 @@
     "Slideshow" : "Diavetítés",
     "Previous" : "Előző",
     "Next" : "Következő",
-    "Video sharing not supported yet" : "A videómegosztás még nem támogatott",
-    "Cannot share this type of data" : "Az ilyen típusú adatok nem oszthatók meg",
     "Are you sure you want to delete?" : "Biztos, hogy törli?",
     "Save as" : "Mentés másként",
     "All changes will be lost." : "Az összes változtatás elvész.",
@@ -266,6 +263,9 @@
     "Update Exif" : "Exif frissítése",
     "Loading data … {n}/{m}" : "Adatok betöltése… {n}/{m}",
     "Date Taken" : "Elkészítés dátuma",
-    "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Ha nyilvános hivatkozásos megosztást hoz létre, kattintson a frissítésre, és lent megjelenik az Emlékeknek megfelelő hivatkozás."
+    "Share Folder" : "Mappa megosztása",
+    "Use the sidebar to share this folder." : "Használja az oldalsávot a mappa megosztásához.",
+    "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Ha nyilvános hivatkozásos megosztást hoz létre, kattintson a frissítésre, és lent megjelenik az Emlékeknek megfelelő hivatkozás.",
+    "Video sharing not supported yet" : "A videómegosztás még nem támogatott"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

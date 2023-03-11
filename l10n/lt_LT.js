@@ -85,10 +85,9 @@ OC.L10N.register(
     "Too many failures, aborting" : "Per daug nesėkmių, nutraukiama",
     "Error while moving {basename}" : "Klaida perkeliant {basename}",
     "Failed to move {name}." : "Nepavyko perkelti {name}.",
-    "Share Folder" : "Bendrinti aplanką",
-    "Refresh" : "Įkelti iš naujo",
     "Remove" : "Šalinti",
     "Add Path" : "Pridėti kelią",
+    "Refresh" : "Įkelti iš naujo",
     "Sort by date" : "Rikiuoti pagal datą",
     "Sort by name" : "Rikiuoti pagal pavadinimą",
     "Share album" : "Bendrinti albumą",
@@ -145,6 +144,7 @@ OC.L10N.register(
     "Edit EXIF Data" : "Taisyti EXIF duomenis",
     "Processing … {n}/{m}" : "Apdorojama… {n}/{m}",
     "Update Exif" : "Atnaujinti EXIF",
-    "Loading data … {n}/{m}" : "Įkeliami duomenys… {n}/{m}"
+    "Loading data … {n}/{m}" : "Įkeliami duomenys… {n}/{m}",
+    "Share Folder" : "Bendrinti aplanką"
 },
 "nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);");

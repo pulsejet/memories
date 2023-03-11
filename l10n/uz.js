@@ -15,8 +15,8 @@ OC.L10N.register(
     "Name" : "Name",
     "Update" : "Update",
     "Search" : "Search",
-    "Refresh" : "Refresh",
     "Remove" : "Remove",
+    "Refresh" : "Refresh",
     "Continue" : "Continue",
     "Size" : "Size"
 },

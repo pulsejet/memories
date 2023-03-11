@@ -144,15 +144,14 @@
     "Failed to move {name}." : "{name} taşınamadı.",
     "Move selected photos to person" : "Seçilmiş fotoğrafları kişiye taşı",
     "Are you sure you want to move the selected photos from {name} to {newName}?" : "Seçilmiş fotoğrafları {name} kişisinden {newName} kişisine aktarmak istediğinize emin misiniz?",
-    "Share Folder" : "Klasörü paylaş",
-    "You cannot share the root folder" : "Kök klasörü paylaşamazsınız",
-    "Use the sidebar to share this folder." : "Bu klasörü paylaşmak için yan çubuğu kullanın.",
-    "Refresh" : "Yenlle",
     "Choose a folder" : "Bir klasör seçin",
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["{n} öge klasöre taşındı","{n} öge klasöre taşındı"],
     "Remove" : "Kaldır",
     "Add Path" : "Yol ekle",
     "Add a root to your timeline" : "Zaman tünelinize bir kök klasör ekleyin",
+    "You cannot share the root folder" : "Kök klasörü paylaşamazsınız",
+    "Refresh" : "Yenlle",
+    "Cannot share this type of data" : "Bu türdeki verileri paylaşamazsınız",
     "Sort by date" : "Tarihe göre sırala",
     "Sort by name" : "Ada göre sırala",
     "Share album" : "Albümü paylaş",
@@ -177,8 +176,6 @@
     "Slideshow" : "Slayt sunumu",
     "Previous" : "Önceki",
     "Next" : "Sonraki",
-    "Video sharing not supported yet" : "Görüntü paylaşımı henüz desteklenmiyor",
-    "Cannot share this type of data" : "Bu türdeki verileri paylaşamazsınız",
     "Are you sure you want to delete?" : "Silmek istediğinize emin misiniz?",
     "Save as" : "Farklı kaydet",
     "All changes will be lost." : "Tüm değişiklikler kaybolacak.",
@@ -289,6 +286,9 @@
     "Update Exif" : "EXIF verilerini güncelle",
     "Loading data … {n}/{m}" : "Veriler yükleniyor… {n}/{m}",
     "Date Taken" : "Çekildiği tarih",
-    "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Herkese açık bir bağlantı paylaşımı oluşturduktan sonra yenile üzerine tıklayın. Anılar için ilgili bağlantı aşağıda görüntülenir."
+    "Share Folder" : "Klasörü paylaş",
+    "Use the sidebar to share this folder." : "Bu klasörü paylaşmak için yan çubuğu kullanın.",
+    "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Herkese açık bir bağlantı paylaşımı oluşturduktan sonra yenile üzerine tıklayın. Anılar için ilgili bağlantı aşağıda görüntülenir.",
+    "Video sharing not supported yet" : "Görüntü paylaşımı henüz desteklenmiyor"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }

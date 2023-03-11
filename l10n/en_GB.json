@@ -144,15 +144,14 @@
     "Failed to move {name}." : "Failed to move {name}.",
     "Move selected photos to person" : "Move selected photos to person",
     "Are you sure you want to move the selected photos from {name} to {newName}?" : "Are you sure you want to move the selected photos from {name} to {newName}?",
-    "Share Folder" : "Share Folder",
-    "You cannot share the root folder" : "You cannot share the root folder",
-    "Use the sidebar to share this folder." : "Use the sidebar to share this folder.",
-    "Refresh" : "Refresh",
     "Choose a folder" : "Choose a folder",
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["{n} item moved to folder","{n} items moved to folder"],
     "Remove" : "Remove",
     "Add Path" : "Add Path",
     "Add a root to your timeline" : "Add a root to your timeline",
+    "You cannot share the root folder" : "You cannot share the root folder",
+    "Refresh" : "Refresh",
+    "Cannot share this type of data" : "Cannot share this type of data",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Share album" : "Share album",
@@ -177,8 +176,6 @@
     "Slideshow" : "Slideshow",
     "Previous" : "Previous",
     "Next" : "Next",
-    "Video sharing not supported yet" : "Video sharing not supported yet",
-    "Cannot share this type of data" : "Cannot share this type of data",
     "Are you sure you want to delete?" : "Are you sure you want to delete?",
     "Save as" : "Save as",
     "All changes will be lost." : "All changes will be lost.",
@@ -290,6 +287,9 @@
     "Update Exif" : "Update Exif",
     "Loading data … {n}/{m}" : "Loading data … {n}/{m}",
     "Date Taken" : "Date Taken",
-    "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below."
+    "Share Folder" : "Share Folder",
+    "Use the sidebar to share this folder." : "Use the sidebar to share this folder.",
+    "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below.",
+    "Video sharing not supported yet" : "Video sharing not supported yet"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
