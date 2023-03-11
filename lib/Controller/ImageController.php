@@ -262,6 +262,8 @@ class ImageController extends ApiBase
      *
      * @NoCSRFRequired
      *
+     * @PublicPage
+     *
      * Get a full resolution JPEG for editing from a file.
      */
     public function jpeg(string $id)

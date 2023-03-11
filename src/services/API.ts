@@ -107,7 +107,7 @@ export class API {
   }
 
   static IMAGE_JPEG(id: number) {
-    return gen(`${BASE}/image/jpeg/{id}`, { id });
+    return tok(gen(`${BASE}/image/jpeg/{id}`, { id }));
   }
 
   static VIDEO_TRANSCODE(fileid: number, file = "index.m3u8") {
