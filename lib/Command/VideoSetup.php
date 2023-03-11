@@ -207,7 +207,16 @@ class VideoSetup extends Command
 
             $this->checkCPU();
             $this->checkVAAPI();
+
+            // We need to turn off VAAPI before checking NVENC
+            $wasVaapi = $this->config->getSystemValue('memories.vod.vaapi', false);
+            $this->config->deleteSystemValue('memories.vod.vaapi');
             $this->checkNVENC();
+
+            // Restore VAAPI configuration
+            if ($wasVaapi) {
+                $this->config->setSystemValue('memories.vod.vaapi', true);
+            }
         } finally {
             if (file_exists($this->sampleFile)) {
                 unlink($this->sampleFile);
