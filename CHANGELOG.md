@@ -7,6 +7,7 @@ This file is manually updated. Please file an issue if something is missing.
 **This release drops support for Nextcloud 24.**
 
 Make sure you run at least Nextcloud 25.0.4  
+PHP 7.4 support is now deprecated. Please upgrade to at least PHP 8.0.  
 You may need to clear browser cache to use location search.
 
 - **Feature**: Allow editing of GPS coordinates ([#418](https://github.com/pulsejet/memories/issues/418))
