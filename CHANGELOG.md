@@ -13,6 +13,7 @@ You may need to clear browser cache to use location search.
 - **Feature**: Allow bulk editing of EXIF attributes other than date/time
 - **Feature**: Allow (optionally bulk) editing of collaborative tags
 - **Feature**: Allow sharing single photo / video ([#307](https://github.com/pulsejet/memories/issues/307))
+- **Feature**: Allow sharing photos in high/low resolution.
 - **Feature**: Allow sharing videos ([#261](https://github.com/pulsejet/memories/issues/261))
 - **Feature**: Show list of tags in sidebar
 - **Feature**: Better configurability and feature detection for go-vod ([#450](https://github.com/pulsejet/memories/issues/450))
