@@ -271,7 +271,8 @@ class VideoController extends ApiBase
     {
         $config = \OC::$server->get(\OCP\IConfig::class);
         $path = rawurlencode($path);
-        $port = $config->getSystemValue('memories.govod_port', 47788);
+        $bind = $config->getSystemValue('memories.vod.bind', '127.0.0.1:47788');
+        $port = explode(':', $bind)[1];
 
         return "http://127.0.0.1:{$port}/{$client}{$path}/{$profile}";
     }
