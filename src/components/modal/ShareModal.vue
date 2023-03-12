@@ -35,8 +35,8 @@
         <template #subtitle>
           {{
             isVideo
-              ? t("memories", "Share the video as a high-quality MOV")
-              : t("memories", "Share the image as a high-quality JPEG")
+              ? t("memories", "Share the video as a high quality MOV")
+              : t("memories", "Share the image as a high quality JPEG")
           }}
         </template>
       </NcListItem>
