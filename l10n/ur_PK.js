@@ -16,6 +16,8 @@ OC.L10N.register(
     "Reset" : "ری سیٹ",
     "Name" : "اسم",
     "Search" : "Search",
+    "Share link" : "اشتراک لنک",
+    "Password protected" : "پاسورڈ سے محفوظ کیا گیا ہے",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Share" : "تقسیم",

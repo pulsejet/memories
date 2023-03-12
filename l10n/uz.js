@@ -16,7 +16,9 @@ OC.L10N.register(
     "Update" : "Update",
     "Search" : "Search",
     "Remove" : "Remove",
+    "Share link" : "Share link",
     "Refresh" : "Refresh",
+    "Read only" : "Read only",
     "Continue" : "Continue",
     "Size" : "Size"
 },

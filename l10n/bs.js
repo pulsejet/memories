@@ -18,6 +18,8 @@ OC.L10N.register(
     "Name" : "Ime",
     "Update" : "Ažuriraj",
     "Search" : "Search",
+    "Share link" : "Podijelite vezu",
+    "Password protected" : "Zaštićeno lozinkom",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Share" : "Podjeli",

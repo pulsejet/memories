@@ -19,6 +19,7 @@ OC.L10N.register(
     "Name" : "Nom",
     "Search" : "Nadi",
     "Remove" : "Kkes",
+    "Share link" : "Fren aseɣwen",
     "Refresh" : "Sismeḍ",
     "Share" : "Bḍu",
     "Previous" : "Ɣer deffir",

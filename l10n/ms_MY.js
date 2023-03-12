@@ -20,6 +20,7 @@ OC.L10N.register(
     "Update" : "Kemaskini",
     "Search" : "Search",
     "Remove" : "Buang",
+    "Share link" : "Share link",
     "Refresh" : "Refresh",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",

@@ -24,6 +24,8 @@ OC.L10N.register(
     "Update" : "ធ្វើ​បច្ចុប្បន្នភាព",
     "Search" : "ស្វែងរក",
     "Remove" : "ដកចេញ",
+    "Share link" : "Share link",
+    "Password protected" : "បាន​ការ​ពារ​ដោយ​ពាក្យ​សម្ងាត់",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Share" : "ចែក​រំលែក",

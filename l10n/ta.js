@@ -22,6 +22,7 @@ OC.L10N.register(
     "Update" : "இற்றைப்படுத்தல்",
     "Search" : "Search",
     "Remove" : "அகற்றுக",
+    "Share link" : "இணைப்பைப் பகிரவும்",
     "Refresh" : "மீள் ஏற்றுக",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",

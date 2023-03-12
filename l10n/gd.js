@@ -17,7 +17,9 @@ OC.L10N.register(
     "Name" : "Ainm",
     "Search" : "Lorg",
     "Remove" : "Thoir air falbh",
+    "Share link" : "Ceangal co-roinnidh",
     "Refresh" : "Ath-nuadhaich",
+    "Read only" : "Ri leughadh a-mhàin",
     "Share" : "Co-roinn",
     "Undo" : "Neo-dhèan"
 },

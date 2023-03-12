@@ -17,7 +17,9 @@ OC.L10N.register(
     "Name" : "Ady",
     "Search" : "Gözlemek",
     "Remove" : "Aýyrmak",
+    "Share link" : "Baglanyşyk paýlaş",
     "Refresh" : "Täzelemek",
+    "Read only" : "Diňe okaň",
     "Share" : "Paýlaş"
 },
 "nplurals=2; plural=(n != 1);");

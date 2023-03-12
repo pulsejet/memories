@@ -19,6 +19,7 @@ OC.L10N.register(
     "Name" : "Անուն",
     "Update" : "Թարմացնել",
     "Search" : "Search",
+    "Share link" : "Կիսվել հղմամբ",
     "Refresh" : "Թարմացնել",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",

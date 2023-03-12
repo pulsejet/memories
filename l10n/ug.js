@@ -21,6 +21,7 @@ OC.L10N.register(
     "Update" : "يېڭىلا",
     "Search" : "Search",
     "Remove" : "چىقىرىۋەت",
+    "Share link" : "Share link",
     "Refresh" : "يېڭىلا",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
