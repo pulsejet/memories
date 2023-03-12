@@ -200,9 +200,17 @@ export default defineComponent({
     async addFaceRect() {
       if (!this.data.facerect || this.faceSrc) return;
 
+      const img = (this.$refs.ximg as any).$el as HTMLImageElement;
+
+      // This is a hack to check if img is actually loaded.
+      //   XImg loads an empty image, which may sometimes show up here
+      //   If the size is less than 5px it is probably this dummy image
+      //   Either way, the user cannot see anything if the image is this small
+      //   so there's no point in trying to draw the face rect
+      if (!img || img.naturalWidth < 5) return;
+
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
-      const img = (this.$refs.ximg as any).$el as HTMLImageElement;
 
       canvas.width = img.naturalWidth;
       canvas.height = img.naturalHeight;
