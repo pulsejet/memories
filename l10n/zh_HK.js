@@ -172,8 +172,6 @@ OC.L10N.register(
     "Public Link" : "公共連結",
     "Share File" : "分享檔案",
     "Share a lower resolution image preview" : "共享較低清晰度的圖像預覽",
-    "Share the video as a high-quality MOV" : "將視像分享為高質量的 MOV",
-    "Share the image as a high-quality JPEG" : "將圖像分享為高質量的 JPEG",
     "Share the original image / video file" : "分享原先的圖像/視像檔案",
     "Share an external Nextcloud link" : "共享外部 Nextcloud 連結",
     "Failed to download and share file" : "下載和分享檔案失敗",

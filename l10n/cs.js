@@ -171,8 +171,6 @@ OC.L10N.register(
     "Public Link" : "Veřejný odkaz",
     "Share File" : "Nasdílet soubor",
     "Share a lower resolution image preview" : "Nasdílet náhled obrázku s nízkým rozlišením",
-    "Share the video as a high-quality MOV" : "Nasdílet video jako MOV s vysokou kvalitou",
-    "Share the image as a high-quality JPEG" : "Nasdílet obrázek jako JPEG s vysokou kvalitou",
     "Share the original image / video file" : "Nasdílet původní obrázek / soubor s videem",
     "Share an external Nextcloud link" : "Nasdílet odkaz na externí Nextcloud",
     "Failed to download and share file" : "Nepodařilo se stáhnout a nasdílet soubor",

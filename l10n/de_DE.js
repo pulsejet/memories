@@ -172,8 +172,6 @@ OC.L10N.register(
     "Public Link" : "Öffentlicher Link",
     "Share File" : "Datei teilen",
     "Share a lower resolution image preview" : "Bildvorschau mit niedrigerer Auflösung teilen",
-    "Share the video as a high-quality MOV" : "Video als hochwertiges MOV teilen",
-    "Share the image as a high-quality JPEG" : "Bild als hochwertiges JPEG teilen",
     "Share the original image / video file" : "Die original Bild- / Video-Datei teilen",
     "Share an external Nextcloud link" : "Einen externen Nextcloud-Link teilen",
     "Failed to download and share file" : "Fehler beim Herunterladen und Teilen der Datei",
