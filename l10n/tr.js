@@ -172,6 +172,8 @@ OC.L10N.register(
     "Public Link" : "Herkese açık bağlantı",
     "Share File" : "Dosyayı paylaş",
     "Share a lower resolution image preview" : "Görselin daha düşük çözünürlüklü bir ön izlemesini paylaş",
+    "Share the video as a high quality MOV" : "Görüntüyü yüksek kaliteli MOV olarak paylaş",
+    "Share the image as a high quality JPEG" : "Görseli yüksek kaliteli JPEG olarak paylaş",
     "Share the original image / video file" : "Özgün görsel / görüntü dosyasını paylaş",
     "Share an external Nextcloud link" : "Bir dış Nextcloud bağlantısı paylaş",
     "Failed to download and share file" : "Dosya indirilip paylaşılamadı",
