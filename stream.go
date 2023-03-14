@@ -188,9 +188,6 @@ func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
 	args := s.transcodeArgs(0)
 
 	if s.m.probe.CodecName == "h264" && s.quality == "max" {
-		// no need to transcode, just copy
-		// args = []string{"-loglevel", "warning", "-i", s.m.path, "-c", "copy"}
-
 		// try to just send the original file
 		http.ServeFile(w, r, s.m.path)
 		return nil
