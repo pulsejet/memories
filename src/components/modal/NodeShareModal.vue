@@ -3,7 +3,7 @@
     @close="close"
     size="normal"
     v-if="show"
-    :sidebar="!isRoot ? this.filename : null"
+    :sidebar="!isRoot && !isMobile ? this.filename : null"
   >
     <template #title>
       {{ t("memories", "Link Sharing") }}
@@ -129,6 +129,10 @@ export default defineComponent({
     isRoot(): boolean {
       return this.filename === "/" || this.filename === "";
     },
+
+    isMobile(): boolean {
+      return globalThis.windowInnerWidth <= 768;
+    },
   },
 
   created() {
@@ -244,6 +248,7 @@ export default defineComponent({
     },
 
     refreshSidebar() {
+      if (this.isMobile) return;
       globalThis.mSidebar.close();
       globalThis.mSidebar.open({ filename: this.filename } as any);
     },
