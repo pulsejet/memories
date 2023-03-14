@@ -130,6 +130,12 @@ class PublicController extends AuthPublicShareController
             $this->initialState->provideInitialState('single_item', $this->getSingleItemInitialState($node));
         }
 
+        // Add OG metadata
+        $params = ['token' => $this->getToken()];
+        $url = $this->urlGenerator->linkToRouteAbsolute('memories.Public.showShare', $params);
+        \OCA\Memories\Util::addOgMetadata($node, $node->getName(), $url, $params);
+
+        // Render the template
         $response = new PublicTemplateResponse($this->appName, 'main');
         $response->setHeaderTitle($node->getName());
         $response->setFooterVisible(false); // wth is that anyway?

@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace OCA\Memories;
 
+use OC\Files\Search\SearchBinaryOperator;
+use OC\Files\Search\SearchComparison;
+use OC\Files\Search\SearchQuery;
 use OCP\App\IAppManager;
 use OCP\Files\Node;
+use OCP\Files\Search\ISearchBinaryOperator;
+use OCP\Files\Search\ISearchComparison;
 use OCP\IConfig;
 
 class Util
@@ -177,6 +182,57 @@ class Util
         }
 
         return $str;
+    }
+
+    /**
+     * Add OG metadata to a page for a node.
+     *
+     * @param mixed $node        Node to get metadata from
+     * @param mixed $title       Title of the page
+     * @param mixed $url         URL of the page
+     * @param mixed $previewArgs Preview arguments (e.g. token)
+     */
+    public static function addOgMetadata(Node $node, string $title, string $url, array $previewArgs)
+    {
+        // Add title
+        \OCP\Util::addHeader('meta', ['property' => 'og:title', 'content' => $title]);
+
+        // Get first node if folder
+        if ($node instanceof \OCP\Files\Folder) {
+            $query = new SearchBinaryOperator(ISearchBinaryOperator::OPERATOR_OR, [
+                new SearchComparison(ISearchComparison::COMPARE_LIKE, 'mimetype', 'image/%'),
+                new SearchComparison(ISearchComparison::COMPARE_LIKE, 'mimetype', 'video/%'),
+            ]);
+            $query = new SearchQuery($query, 1, 0, [], null);
+            $nodes = $node->search($query);
+            if (0 === \count($nodes)) {
+                return;
+            }
+            $node = $nodes[0];
+        }
+
+        // Add file type
+        $mimeType = $node->getMimeType();
+        if (str_starts_with($mimeType, 'image/')) {
+            \OCP\Util::addHeader('meta', ['property' => 'og:type', 'content' => 'image']);
+        } elseif (str_starts_with($mimeType, 'video/')) {
+            \OCP\Util::addHeader('meta', ['property' => 'og:type', 'content' => 'video']);
+        }
+
+        // Add OG url
+        \OCP\Util::addHeader('meta', ['property' => 'og:url', 'content' => $url]);
+
+        // Get URL generator
+        $urlGenerator = \OC::$server->get(\OCP\IURLGenerator::class);
+
+        // Add OG image
+        $preview = $urlGenerator->linkToRouteAbsolute('memories.Image.preview', array_merge($previewArgs, [
+            'id' => $node->getId(),
+            'x' => 1024,
+            'y' => 1024,
+            'a' => true,
+        ]));
+        \OCP\Util::addHeader('meta', ['property' => 'og:image', 'content' => $preview]);
     }
 
     /**
