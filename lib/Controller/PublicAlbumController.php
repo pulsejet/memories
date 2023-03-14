@@ -10,6 +10,7 @@ use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IURLGenerator;
@@ -25,7 +26,9 @@ class PublicAlbumController extends Controller
     protected IConfig $config;
     protected IDBConnection $connection;
     protected IUserSession $userSession;
+    protected IRootFolder $rootFolder;
     protected IURLGenerator $urlGenerator;
+    protected TimelineQuery $timelineQuery;
 
     public function __construct(
         string $appName,
@@ -35,6 +38,7 @@ class PublicAlbumController extends Controller
         IConfig $config,
         IDBConnection $connection,
         IUserSession $userSession,
+        IRootFolder $rootFolder,
         IURLGenerator $urlGenerator
     ) {
         $this->appName = $appName;
@@ -44,7 +48,9 @@ class PublicAlbumController extends Controller
         $this->config = $config;
         $this->connection = $connection;
         $this->userSession = $userSession;
+        $this->rootFolder = $rootFolder;
         $this->urlGenerator = $urlGenerator;
+        $this->timelineQuery = new TimelineQuery($this->connection);
     }
 
     /**
@@ -55,8 +61,7 @@ class PublicAlbumController extends Controller
     public function showShare(string $token)
     {
         // Validate token exists
-        $timelineQuery = new TimelineQuery($this->connection);
-        $album = $timelineQuery->getAlbumByLink($token);
+        $album = $this->timelineQuery->getAlbumByLink($token);
         if (!$album) {
             return new TemplateResponse('core', '404', [], 'guest');
         }
@@ -67,7 +72,7 @@ class PublicAlbumController extends Controller
             $uid = $user->getUID();
             $albumId = (int) $album['album_id'];
 
-            if ($uid === $album['user'] || $timelineQuery->userIsAlbumCollaborator($uid, $albumId)) {
+            if ($uid === $album['user'] || $this->timelineQuery->userIsAlbumCollaborator($uid, $albumId)) {
                 $idStr = $album['user'].'/'.$album['name'];
                 $url = $this->urlGenerator->linkToRoute('memories.Page.albums', ['id' => $idStr]);
 
@@ -77,6 +82,9 @@ class PublicAlbumController extends Controller
 
         // Browse anonymously if the album is accessed as a link
         \OC_User::setIncognitoMode(true);
+
+        // Add OG metadata
+        $this->addOgMetadata($album, $token);
 
         // Scripts
         Util::addScript($this->appName, 'memories-main');
@@ -88,5 +96,25 @@ class PublicAlbumController extends Controller
         $response->setContentSecurityPolicy(PageController::getCSP());
 
         return $response;
+    }
+
+    private function addOgMetadata(array $album, string $token)
+    {
+        $fileId = (int) $album['last_added_photo'];
+        $albumId = (int) $album['album_id'];
+        $owner = $this->timelineQuery->albumHasFile($albumId, $fileId);
+        if (!$owner) {
+            return;
+        }
+
+        $nodes = $this->rootFolder->getUserFolder($owner)->getById($fileId);
+        if (0 === \count($nodes)) {
+            return;
+        }
+        $node = $nodes[0];
+
+        $params = ['token' => $token];
+        $url = $this->urlGenerator->linkToRouteAbsolute('memories.PublicAlbum.showShare', $params);
+        \OCA\Memories\Util::addOGMetadata($node, $album['name'], $url, array_merge($params, ['album' => true]));
     }
 }
