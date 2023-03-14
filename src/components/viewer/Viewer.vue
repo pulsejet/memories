@@ -55,6 +55,15 @@
             <template #icon> <AlbumRemoveIcon :size="24" /> </template>
           </NcActionButton>
           <NcActionButton
+            v-if="isLivePhoto"
+            :aria-label="t('memories', 'Play live video')"
+            @click="playLivePhoto"
+            :close-after-click="true"
+          >
+            {{ t("memories", "Play live video") }}
+            <template #icon> <LivePhotoIcon :size="24" /> </template>
+          </NcActionButton>
+          <NcActionButton
             v-if="!routeIsPublic"
             :aria-label="t('memories', 'Favorite')"
             @click="favoriteCurrent"
@@ -175,13 +184,11 @@ import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 import axios from "@nextcloud/axios";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
-import { showError } from "@nextcloud/dialogs";
 import { getRootUrl } from "@nextcloud/router";
 
 import { getPreviewUrl } from "../../services/FileUtils";
 import { getDownloadLink } from "../../services/DavRequests";
 import { API } from "../../services/API";
-import { fetchImage } from "../frame/XImgCache";
 import * as dav from "../../services/DavRequests";
 import * as utils from "../../services/Utils";
 
@@ -203,6 +210,7 @@ import TuneIcon from "vue-material-design-icons/Tune.vue";
 import SlideshowIcon from "vue-material-design-icons/PlayBox.vue";
 import EditFileIcon from "vue-material-design-icons/FileEdit.vue";
 import AlbumRemoveIcon from "vue-material-design-icons/BookRemove.vue";
+import LivePhotoIcon from "vue-material-design-icons/MotionPlayOutline.vue";
 
 const SLIDESHOW_MS = 5000;
 
@@ -223,6 +231,7 @@ export default defineComponent({
     SlideshowIcon,
     EditFileIcon,
     AlbumRemoveIcon,
+    LivePhotoIcon,
   },
 
   data: () => ({
@@ -242,6 +251,7 @@ export default defineComponent({
 
     /** Base dialog */
     photoswipe: null as PhotoSwipe | null,
+    psLivePhoto: null as PsLivePhoto | null,
 
     list: [] as IPhoto[],
     days: new Map<number, IDay>(),
@@ -308,6 +318,11 @@ export default defineComponent({
     /** Is the current slide a video */
     isVideo(): boolean {
       return Boolean(this.currentPhoto?.flag & this.c.FLAG_IS_VIDEO);
+    },
+
+    /** Is the current slide a live photo */
+    isLivePhoto(): boolean {
+      return Boolean(this.currentPhoto?.liveid);
     },
 
     /** Show bottom bar info such as date taken */
@@ -574,7 +589,7 @@ export default defineComponent({
       });
 
       // Live Photo support
-      new PsLivePhoto(<any>this.photoswipe, {});
+      this.psLivePhoto = new PsLivePhoto(<any>this.photoswipe, {});
 
       // Image support
       new PsImage(<any>this.photoswipe);
@@ -931,6 +946,11 @@ export default defineComponent({
       for (let i = idx - 3; i <= idx + 3; i++) {
         this.photoswipe.refreshSlideContent(i + this.globalAnchor);
       }
+    },
+
+    /** Play the current live photo */
+    playLivePhoto() {
+      this.psLivePhoto.onContentActivate(this.photoswipe.currSlide);
     },
 
     /** Is the current photo a favorite */
