@@ -156,4 +156,10 @@ aside.app-sidebar {
     max-width: unset !important;
   }
 }
+
+// Hack to put the floating dropdown menu above the
+// sidebar ... this may have unintended side effects
+.vs__dropdown-menu--floating {
+  z-index: 2526;
+}
 </style>
