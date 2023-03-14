@@ -126,7 +126,9 @@ export default defineComponent({
             return photoMap.get(p.fileid);
           } catch (e) {
             console.error(e);
-            showError(this.t("memories", "Error while moving {basename}", p));
+            showError(
+              this.t("memories", "Error while moving {basename}", <any>p)
+            );
           }
         });
         for await (const resp of dav.runInParallel(calls, 10)) {

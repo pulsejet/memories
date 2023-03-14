@@ -189,7 +189,7 @@ class VideoContentSetup {
     }));
 
     vjs.on("error", () => {
-      if (vjs.error().code === 4 && vjs.src().includes("m3u8")) {
+      if (vjs.src(undefined).includes("m3u8")) {
         // HLS could not be streamed
         console.error("Video.js: HLS stream could not be opened.");
 

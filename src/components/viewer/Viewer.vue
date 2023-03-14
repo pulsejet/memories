@@ -478,8 +478,8 @@ export default defineComponent({
       globalThis.photoswipe = this.photoswipe;
 
       // Monkey patch for focus trapping in sidebar
-      const _onFocusIn = this.photoswipe.keyboard._onFocusIn;
-      this.photoswipe.keyboard._onFocusIn = (e: FocusEvent) => {
+      const _onFocusIn = this.photoswipe.keyboard['_onFocusIn'];
+      this.photoswipe.keyboard['_onFocusIn'] = (e: FocusEvent) => {
         if (e.target instanceof HTMLElement) {
           if (
             e.target.closest("aside.app-sidebar") ||

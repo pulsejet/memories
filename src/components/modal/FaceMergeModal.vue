@@ -125,7 +125,9 @@ export default defineComponent({
             );
           } catch (e) {
             console.error(e);
-            showError(this.t("memories", "Error while moving {basename}", p));
+            showError(
+              this.t("memories", "Error while moving {basename}", <any>p)
+            );
             failures++;
           } finally {
             this.processing++;
