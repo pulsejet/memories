@@ -1,7 +1,8 @@
 <template>
-  <div class="outer" v-if="detail">
+  <div class="outer">
     <div class="search">
       <NcTextField
+        :autofocus="true"
         :value.sync="search"
         :label="t('memories', 'Search')"
         :placeholder="t('memories', 'Search')"
@@ -11,12 +12,14 @@
       </NcTextField>
     </div>
 
-    <div class="photo" v-for="photo of detail" :key="photo.fileid">
-      <Tag :data="photo" :noNavigate="true" @open="clickFace" />
+    <div v-if="detail">
+      <div class="photo" v-for="photo of detail" :key="photo.fileid">
+        <Tag :data="photo" :noNavigate="true" @open="clickFace" />
+      </div>
     </div>
-  </div>
-  <div v-else>
-    {{ t("memories", "Loading …") }}
+    <div v-else>
+      {{ t("memories", "Loading …") }}
+    </div>
   </div>
 </template>
 
@@ -99,6 +102,7 @@ export default defineComponent({
     },
 
     searchChanged() {
+      if (!this.detail) return;
       this.detail = this.search
         ? this.fuse.search(this.search).map((r) => r.item)
         : this.fullDetail;

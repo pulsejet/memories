@@ -6,8 +6,9 @@
 
     <div class="fields">
       <NcTextField
-        :value.sync="name"
         class="field"
+        :autofocus="true"
+        :value.sync="name"
         :label="t('memories', 'Name')"
         :label-visible="false"
         :placeholder="t('memories', 'Name')"
