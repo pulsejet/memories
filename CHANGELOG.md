@@ -2,7 +2,7 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
-## v4.12.1
+## v4.12.1 (2023-03-15)
 
 - **Feature**: Load full image on zoom ([#266](https://github.com/pulsejet/memories/issues/266))
 
