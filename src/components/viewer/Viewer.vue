@@ -56,11 +56,11 @@
           </NcActionButton>
           <NcActionButton
             v-if="isLivePhoto"
-            :aria-label="t('memories', 'Play live video')"
+            :aria-label="t('memories', 'Play Live Photo')"
             @click="playLivePhoto"
             :close-after-click="true"
           >
-            {{ t("memories", "Play live video") }}
+            {{ t("memories", "Play Live Photo") }}
             <template #icon> <LivePhotoIcon :size="24" /> </template>
           </NcActionButton>
           <NcActionButton
