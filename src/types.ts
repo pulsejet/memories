@@ -92,6 +92,8 @@ export type IPhoto = {
     };
   };
 
+  /** Face detection ID */
+  faceid?: number;
   /** Face dimensions */
   facerect?: IFaceRect;
 

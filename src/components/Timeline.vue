@@ -1189,13 +1189,14 @@ export default defineComponent({
         // Duplicate detection.
         // These may be valid, e.g. in face rects. All we need to have
         // is a unique Vue key for the v-for loop.
-        if (seen.has(photo.fileid)) {
-          const val = seen.get(photo.fileid);
-          photo.key = `${photo.fileid}-${val}`;
-          seen.set(photo.fileid, val + 1);
+        const key = photo.faceid || photo.fileid;
+        if (seen.has(key)) {
+          const val = seen.get(key);
+          photo.key = `${key}-${val}`;
+          seen.set(key, val + 1);
         } else {
-          photo.key = `${photo.fileid}`;
-          seen.set(photo.fileid, 1);
+          photo.key = `${key}`;
+          seen.set(key, 1);
         }
 
         // Add photo to row

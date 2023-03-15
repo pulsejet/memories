@@ -211,7 +211,7 @@ class DaysController extends ApiBase
 
         // Filter only for one face on Recognize
         if (($recognize = $this->request->getParam('recognize')) && $this->recognizeIsEnabled()) {
-            $transforms[] = [$this->timelineQuery, 'transformPeopleRecognitionFilter', $recognize];
+            $transforms[] = [$this->timelineQuery, 'transformPeopleRecognitionFilter', $recognize, $aggregateOnly];
 
             $faceRect = $this->request->getParam('facerect');
             if ($faceRect && !$aggregateOnly) {

@@ -11,7 +11,7 @@ trait TimelineQueryPeopleRecognize
 {
     protected IDBConnection $connection;
 
-    public function transformPeopleRecognitionFilter(IQueryBuilder &$query, string $userId, string $faceStr)
+    public function transformPeopleRecognitionFilter(IQueryBuilder &$query, string $userId, string $faceStr, bool $isAggregate)
     {
         // Get name and uid of face user
         $faceNames = explode('/', $faceStr);
@@ -21,17 +21,28 @@ trait TimelineQueryPeopleRecognize
         $faceUid = $faceNames[0];
         $faceName = $faceNames[1];
 
+        if (!$isAggregate) {
+            // Multiple detections for the same image
+            $query->addSelect('rfd.id AS faceid');
+        }
+
         // Join with cluster
-        $nameField = is_numeric($faceName) ? 'rfc.id' : 'rfc.title';
-        $query->innerJoin('m', 'recognize_face_clusters', 'rfc', $query->expr()->andX(
-            $query->expr()->eq('rfc.user_id', $query->createNamedParameter($faceUid)),
-            $query->expr()->eq($nameField, $query->createNamedParameter($faceName)),
-        ));
+        $clusterQuery = null;
+        if ($faceName !== 'NULL') {
+            $nameField = is_numeric($faceName) ? 'rfc.id' : 'rfc.title';
+            $query->innerJoin('m', 'recognize_face_clusters', 'rfc', $query->expr()->andX(
+                $query->expr()->eq('rfc.user_id', $query->createNamedParameter($faceUid)),
+                $query->expr()->eq($nameField, $query->createNamedParameter($faceName)),
+            ));
+            $clusterQuery = $query->expr()->eq('rfd.cluster_id', 'rfc.id');
+        } else {
+            $clusterQuery = $query->expr()->isNull('rfd.cluster_id');
+        }
 
         // Join with detections
         $query->innerJoin('m', 'recognize_face_detections', 'rfd', $query->expr()->andX(
             $query->expr()->eq('rfd.file_id', 'm.fileid'),
-            $query->expr()->eq('rfd.cluster_id', 'rfc.id'),
+            $clusterQuery,
         ));
     }
 
