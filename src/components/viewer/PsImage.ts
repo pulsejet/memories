@@ -3,6 +3,32 @@ import { isVideoContent } from "./PsVideo";
 import { isLiveContent } from "./PsLivePhoto";
 import { fetchImage } from "../frame/XImgCache";
 
+export function getXImgElem(
+  content: any,
+  onLoad: () => void
+): HTMLImageElement {
+  const img = document.createElement("img");
+  img.classList.add("pswp__img");
+  img.style.visibility = "hidden";
+
+  // Fetch with Axios
+  fetchImage(content.data.src).then((blob) => {
+    // Check if destroyed already
+    if (!content.element) return;
+
+    // Insert image
+    const blobUrl = URL.createObjectURL(blob);
+    img.src = blobUrl;
+    img.onerror = img.onload = () => {
+      img.style.visibility = "visible";
+      onLoad();
+      URL.revokeObjectURL(blobUrl);
+    };
+  });
+
+  return img;
+}
+
 export default class ImageContentSetup {
   constructor(lightbox: PhotoSwipe) {
     this.initLightboxEvents(lightbox);
@@ -16,28 +42,9 @@ export default class ImageContentSetup {
   onContentLoad(e) {
     if (isVideoContent(e.content) || isLiveContent(e.content)) return;
 
-    // Don't insert default image
+    // Insert image throgh XImgCache
     e.preventDefault();
-    const content = e.content;
-    const img = document.createElement("img");
-    img.classList.add("pswp__img");
-    img.style.visibility = "hidden";
-    content.element = img;
-
-    // Fetch with Axios
-    fetchImage(content.data.src).then((blob) => {
-      // Check if destroyed already
-      if (!content.element) return;
-
-      // Insert image
-      const blobUrl = URL.createObjectURL(blob);
-      img.src = blobUrl;
-      img.onerror = img.onload = () => {
-        img.style.visibility = "visible";
-        content.onLoaded();
-        URL.revokeObjectURL(blobUrl);
-      };
-    });
+    e.content.element = getXImgElem(e.content, () => e.content.onLoaded());
   }
 
   onContentLoadImage(e) {

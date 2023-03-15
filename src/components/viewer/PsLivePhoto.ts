@@ -1,4 +1,5 @@
 import PhotoSwipe from "photoswipe";
+import { getXImgElem } from "./PsImage";
 import * as utils from "../../services/Utils";
 
 export function isLiveContent(content): boolean {
@@ -46,10 +47,7 @@ class LivePhotoContentSetup {
 
     utils.setupLivePhotoHooks(video);
 
-    const img = document.createElement("img");
-    img.classList.add("pswp__img");
-    img.src = content.data.src;
-    img.onload = () => content.onLoaded();
+    const img = getXImgElem(content, () => content.onLoaded());
     div.appendChild(img);
 
     content.element = div;
