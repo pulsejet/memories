@@ -176,7 +176,7 @@ export default defineComponent({
       const fileid = this.photo.fileid;
       const src = this.isVideo
         ? API.VIDEO_TRANSCODE(fileid, "max.mov")
-        : API.IMAGE_JPEG(fileid);
+        : API.IMAGE_DECODABLE(fileid, this.photo.etag);
       this.shareWithHref(src, !this.isVideo);
     },
 

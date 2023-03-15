@@ -75,7 +75,7 @@ return [
         ['name' => 'Image#multipreview', 'url' => '/api/image/multipreview', 'verb' => 'POST'],
         ['name' => 'Image#info', 'url' => '/api/image/info/{id}', 'verb' => 'GET'],
         ['name' => 'Image#setExif', 'url' => '/api/image/set-exif/{id}', 'verb' => 'PATCH'],
-        ['name' => 'Image#jpeg', 'url' => '/api/image/jpeg/{id}', 'verb' => 'GET'],
+        ['name' => 'Image#decodable', 'url' => '/api/image/decodable/{id}', 'verb' => 'GET'],
 
         ['name' => 'Video#transcode', 'url' => '/api/video/transcode/{client}/{fileid}/{profile}', 'verb' => 'GET'],
         ['name' => 'Video#livephoto', 'url' => '/api/video/livephoto/{fileid}', 'verb' => 'GET'],

@@ -264,30 +264,38 @@ class ImageController extends ApiBase
      *
      * @PublicPage
      *
-     * Get a full resolution JPEG for editing from a file.
+     * Get a full resolution decodable image for editing from a file.
+     * The returned image may be png / webp / jpeg.
+     * These formats are supported by all browsers.
      */
-    public function jpeg(string $id)
+    public function decodable(string $id)
     {
         $file = $this->getUserFile((int) $id);
         if (!$file) {
             return new JSONResponse([], Http::STATUS_NOT_FOUND);
         }
 
-        // check if valid image
+        // Check if valid image
         $mimetype = $file->getMimeType();
         if (!\in_array($mimetype, Application::IMAGE_MIMES, true)) {
             return new JSONResponse([], Http::STATUS_FORBIDDEN);
         }
 
-        // Get the image
-        $path = $file->getStorage()->getLocalFile($file->getInternalPath());
-        $image = new \Imagick($path);
-        $image->setImageFormat('jpeg');
-        $image->setImageCompressionQuality(95);
-        $blob = $image->getImageBlob();
+        /** @var string Blob of image */
+        $blob = $file->getContent();
+
+        // Convert image to JPEG if required
+        if (!\in_array($mimetype, ['image/png', 'image/webp', 'image/jpeg'], true)) {
+            $image = new \Imagick();
+            $image->readImageBlob($blob);
+            $image->setImageFormat('jpeg');
+            $image->setImageCompressionQuality(95);
+            $blob = $image->getImageBlob();
+            $mimetype = $image->getImageMimeType();
+        }
 
         // Return the image
-        $response = new Http\DataDisplayResponse($blob, Http::STATUS_OK, ['Content-Type' => $image->getImageMimeType()]);
+        $response = new Http\DataDisplayResponse($blob, Http::STATUS_OK, ['Content-Type' => $mimetype]);
         $response->cacheFor(3600 * 24, false, false);
 
         return $response;

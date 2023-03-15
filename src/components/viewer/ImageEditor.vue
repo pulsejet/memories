@@ -40,11 +40,11 @@ export default defineComponent({
       type: Number,
       required: true,
     },
-    mime: {
+    src: {
       type: String,
       required: true,
     },
-    src: {
+    etag: {
       type: String,
       required: true,
     },
@@ -57,12 +57,7 @@ export default defineComponent({
 
   computed: {
     config(): FilerobotImageEditorConfig & { theme: any } {
-      let src: string;
-      if (["image/png", "image/jpeg", "image/webp"].includes(this.mime)) {
-        src = this.src;
-      } else {
-        src = API.IMAGE_JPEG(this.fileid);
-      }
+      const src = API.IMAGE_DECODABLE(this.fileid, this.etag);
 
       return {
         source: src,

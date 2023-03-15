@@ -106,8 +106,8 @@ export class API {
     return gen(`${BASE}/image/set-exif/{id}`, { id });
   }
 
-  static IMAGE_JPEG(id: number) {
-    return tok(gen(`${BASE}/image/jpeg/{id}`, { id }));
+  static IMAGE_DECODABLE(id: number, etag: string) {
+    return tok(API.Q(gen(`${BASE}/image/decodable/{id}`, { id }), { etag }));
   }
 
   static VIDEO_TRANSCODE(fileid: number, file = "index.m3u8") {
