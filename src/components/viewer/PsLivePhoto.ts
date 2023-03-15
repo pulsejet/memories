@@ -1,5 +1,5 @@
 import PhotoSwipe from "photoswipe";
-import { getXImgElem } from "./PsImage";
+import PsImage from "./PsImage";
 import * as utils from "../../services/Utils";
 
 export function isLiveContent(content): boolean {
@@ -13,11 +13,7 @@ export function isLiveContent(content): boolean {
 }
 
 class LivePhotoContentSetup {
-  constructor(lightbox: PhotoSwipe, private options) {
-    this.initLightboxEvents(lightbox);
-  }
-
-  initLightboxEvents(lightbox: PhotoSwipe) {
+  constructor(lightbox: PhotoSwipe, private psImage: PsImage) {
     lightbox.on("contentLoad", this.onContentLoad.bind(this));
     lightbox.on("contentActivate", this.onContentActivate.bind(this));
     lightbox.on("contentDeactivate", this.onContentDeactivate.bind(this));
@@ -47,7 +43,7 @@ class LivePhotoContentSetup {
 
     utils.setupLivePhotoHooks(video);
 
-    const img = getXImgElem(content, () => content.onLoaded());
+    const img = this.psImage.getXImgElem(content, () => content.onLoaded());
     div.appendChild(img);
 
     content.element = div;

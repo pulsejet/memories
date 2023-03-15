@@ -55,6 +55,22 @@
         >
           {{ t("memories", "Show past photos on top of timeline") }}
         </NcCheckboxRadioSwitch>
+
+        <NcCheckboxRadioSwitch
+          :checked.sync="config_fullResOnZoom"
+          @update:checked="updateFullResOnZoom"
+          type="switch"
+        >
+          {{ t("memories", "Load full size image on zoom") }}
+        </NcCheckboxRadioSwitch>
+
+        <NcCheckboxRadioSwitch
+          :checked.sync="config_fullResAlways"
+          @update:checked="updateFullResAlways"
+          type="switch"
+        >
+          {{ t("memories", "Always load full size image (not recommended)") }}
+        </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
       <NcAppSettingsSection
@@ -202,6 +218,14 @@ export default defineComponent({
 
     async updateSquareThumbs() {
       await this.updateSetting("squareThumbs");
+    },
+
+    async updateFullResOnZoom() {
+      await this.updateSetting("fullResOnZoom");
+    },
+
+    async updateFullResAlways() {
+      await this.updateSetting("fullResAlways");
     },
 
     async updateEnableTopMemories() {

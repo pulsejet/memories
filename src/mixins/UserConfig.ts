@@ -5,7 +5,13 @@ import { API } from "../services/API";
 import { defineComponent } from "vue";
 
 const eventName = "memories:user-config-changed";
-const localSettings = ["squareThumbs", "showFaceRect", "albumListSort"];
+const localSettings = [
+  "squareThumbs",
+  "fullResOnZoom",
+  "fullResAlways",
+  "showFaceRect",
+  "albumListSort",
+];
 
 export default defineComponent({
   name: "UserConfig",
@@ -48,6 +54,10 @@ export default defineComponent({
     config_placesGis: Number(loadState("memories", "places_gis", <string>"-1")),
 
     config_squareThumbs: localStorage.getItem("memories_squareThumbs") === "1",
+    config_fullResOnZoom:
+      localStorage.getItem("memories_fullResOnZoom") !== "0",
+    config_fullResAlways:
+      localStorage.getItem("memories_fullResAlways") === "1",
     config_showFaceRect: localStorage.getItem("memories_showFaceRect") === "1",
     config_albumListSort: Number(
       localStorage.getItem("memories_albumListSort") || 1

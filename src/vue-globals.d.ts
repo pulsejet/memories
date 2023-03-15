@@ -27,6 +27,8 @@ declare module "vue" {
     config_placesGis: number;
     config_squareThumbs: boolean;
     config_enableTopMemories: boolean;
+    config_fullResOnZoom: boolean;
+    config_fullResAlways: boolean;
     config_showFaceRect: boolean;
     config_albumListSort: 1 | 2;
     config_eventName: string;

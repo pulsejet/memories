@@ -180,6 +180,7 @@ import { defineComponent } from "vue";
 
 import { IDay, IFileInfo, IPhoto, IRow, IRowType } from "../../types";
 
+import UserConfig from "../../mixins/UserConfig";
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 import axios from "@nextcloud/axios";
@@ -234,6 +235,8 @@ export default defineComponent({
     LivePhotoIcon,
   },
 
+  mixins: [UserConfig],
+
   data: () => ({
     isOpen: false,
     originalTitle: null,
@@ -251,6 +254,8 @@ export default defineComponent({
 
     /** Base dialog */
     photoswipe: null as PhotoSwipe | null,
+    psVideo: null as PsVideo | null,
+    psImage: null as PsImage | null,
     psLivePhoto: null as PsLivePhoto | null,
 
     list: [] as IPhoto[],
@@ -582,17 +587,20 @@ export default defineComponent({
       });
 
       // Video support
-      new PsVideo(<any>this.photoswipe, {
+      this.psVideo = new PsVideo(<any>this.photoswipe, {
         videoAttributes: { controls: "", playsinline: "", preload: "none" },
         autoplay: true,
         preventDragOffset: 40,
       });
 
-      // Live Photo support
-      this.psLivePhoto = new PsLivePhoto(<any>this.photoswipe, {});
-
       // Image support
-      new PsImage(<any>this.photoswipe);
+      this.psImage = new PsImage(<any>this.photoswipe);
+
+      // Live Photo support
+      this.psLivePhoto = new PsLivePhoto(
+        <any>this.photoswipe,
+        <any>this.psImage
+      );
 
       // Patch the close button to stop the slideshow
       const _close = this.photoswipe.close.bind(this.photoswipe);
@@ -808,8 +816,20 @@ export default defineComponent({
         });
       }
 
+      // Get full image URL
+      const fullUrl = isvideo
+        ? null
+        : API.IMAGE_DECODABLE(photo.fileid, photo.etag);
+      const fullLoadCond = this.config_fullResAlways
+        ? "always"
+        : this.config_fullResOnZoom
+        ? "zoom"
+        : "never";
+
       return {
         src: previewUrl,
+        highSrc: fullUrl,
+        highSrcCond: fullLoadCond,
         width: w || undefined,
         height: h || undefined,
         thumbCropped: true,

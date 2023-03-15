@@ -265,7 +265,7 @@ class ImageController extends ApiBase
      * @PublicPage
      *
      * Get a full resolution decodable image for editing from a file.
-     * The returned image may be png / webp / jpeg.
+     * The returned image may be png / webp / jpeg / gif.
      * These formats are supported by all browsers.
      */
     public function decodable(string $id)
@@ -285,7 +285,7 @@ class ImageController extends ApiBase
         $blob = $file->getContent();
 
         // Convert image to JPEG if required
-        if (!\in_array($mimetype, ['image/png', 'image/webp', 'image/jpeg'], true)) {
+        if (!\in_array($mimetype, ['image/png', 'image/webp', 'image/jpeg', 'image/gif'], true)) {
             $image = new \Imagick();
             $image->readImageBlob($blob);
             $image->setImageFormat('jpeg');
