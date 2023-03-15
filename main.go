@@ -147,7 +147,7 @@ func main() {
 	c := &Config{
 		Bind:            ":47788",
 		ChunkSize:       3,
-		LookBehind:      5,
+		LookBehind:      3,
 		GoalBufferMin:   1,
 		GoalBufferMax:   4,
 		StreamIdleTime:  60,
