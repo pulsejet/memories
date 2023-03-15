@@ -28,7 +28,7 @@ trait TimelineQueryPeopleRecognize
 
         // Join with cluster
         $clusterQuery = null;
-        if ($faceName !== 'NULL') {
+        if ('NULL' !== $faceName) {
             $nameField = is_numeric($faceName) ? 'rfc.id' : 'rfc.title';
             $query->innerJoin('m', 'recognize_face_clusters', 'rfc', $query->expr()->andX(
                 $query->expr()->eq('rfc.user_id', $query->createNamedParameter($faceUid)),
