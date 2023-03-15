@@ -23,6 +23,7 @@
           :src="previewUrl"
           @error="failed"
         />
+        <div class="overlay fill-block" />
       </div>
     </div>
   </router-link>
@@ -184,13 +185,12 @@ img {
 .name {
   z-index: 100;
   position: absolute;
-  top: 50%;
+  bottom: 7%;
   width: 100%;
-  transform: translateY(-50%);
   color: white;
   padding: 0 5%;
   text-align: center;
-  font-size: 1.1em;
+  font-size: 1em;
   word-wrap: break-word;
   text-overflow: ellipsis;
   line-height: 1.2em;
@@ -201,18 +201,12 @@ img {
     display: block;
   }
 
-  .tag.face > & {
-    top: unset;
-    bottom: 10%;
-    transform: unset;
-  }
-
   .tag.error > & {
     color: unset;
   }
 
   @media (max-width: 768px) {
-    font-size: 0.95em;
+    font-size: 0.9em;
   }
 }
 
@@ -231,6 +225,7 @@ img {
   box-sizing: border-box;
 
   > .img-outer {
+    position: relative;
     background-color: var(--color-background-dark);
     border-radius: 10px;
     padding: 0;
@@ -244,16 +239,22 @@ img {
     > img {
       object-fit: cover;
       padding: 0;
-      filter: brightness(60%);
       cursor: pointer;
-      transition: filter 0.2s ease-in-out;
-
       &.error {
         display: none;
       }
-      .tag:hover & {
-        filter: brightness(100%);
-      }
+    }
+
+    > .overlay {
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.7) 10%,
+        transparent 35%
+      );
     }
   }
 }
