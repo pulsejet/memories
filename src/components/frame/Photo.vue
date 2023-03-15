@@ -396,9 +396,9 @@ div.img-outer {
   }
 
   > img {
-    filter: contrast(1.05); // most real world images are a bit overexposed
     background-clip: content-box;
     object-fit: cover;
+    z-index: 1;
     cursor: pointer;
     background-color: var(--color-background-dark);
 
@@ -418,6 +418,7 @@ div.img-outer {
   > video {
     pointer-events: none;
     object-fit: cover;
+    z-index: 2;
   }
 
   > .overlay {
@@ -425,6 +426,7 @@ div.img-outer {
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 3;
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, transparent 30%);
 
     display: none;
