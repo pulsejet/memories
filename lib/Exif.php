@@ -155,6 +155,13 @@ class Exif
         if (isset($dt) && \is_string($dt) && !empty($dt)) {
             $dt = explode('-', explode('+', $dt, 2)[0], 2)[0]; // get rid of timezone if present
             $dt = explode('.', $dt, 2)[0]; // timezone may be after a dot (https://github.com/pulsejet/memories/pull/397)
+            $dt = explode('Z', $dt, 2)[0]; // get rid of Z if present (https://github.com/pulsejet/memories/issues/485)
+
+            // Some cameras don't add seconds to the date if it's 00
+            // https://github.com/pulsejet/memories/issues/485
+            if (3 === substr_count($dt, ':')) {
+                $dt .= ':00';
+            }
 
             $dt = \DateTime::createFromFormat('Y:m:d H:i:s', $dt);
             if (!$dt) {
