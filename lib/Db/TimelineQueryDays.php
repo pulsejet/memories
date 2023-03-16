@@ -4,23 +4,20 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCA\Memories\Exif;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 const CTE_FOLDERS = // CTE to get all folders recursively in the given top folders excluding archive
-    'WITH RECURSIVE *PREFIX*cte_folders_all(fileid, rootid) AS (
+    'WITH RECURSIVE *PREFIX*cte_folders_all(fileid) AS (
         SELECT
-            f.fileid,
-            f.fileid AS rootid
+            f.fileid
         FROM
             *PREFIX*filecache f
         WHERE
             f.fileid IN (:topFolderIds)
         UNION ALL
         SELECT
-            f.fileid,
-            c.rootid
+            f.fileid
         FROM
             *PREFIX*filecache f
         INNER JOIN *PREFIX*cte_folders_all c
@@ -30,8 +27,7 @@ const CTE_FOLDERS = // CTE to get all folders recursively in the given top folde
             )
     ), *PREFIX*cte_folders AS (
         SELECT
-            fileid,
-            MIN(rootid) AS rootid
+            fileid
         FROM
             *PREFIX*cte_folders_all
         GROUP BY
@@ -39,11 +35,10 @@ const CTE_FOLDERS = // CTE to get all folders recursively in the given top folde
     )';
 
 const CTE_FOLDERS_ARCHIVE = // CTE to get all archive folders recursively in the given top folders
-    'WITH RECURSIVE *PREFIX*cte_folders_all(fileid, name, rootid) AS (
+    'WITH RECURSIVE *PREFIX*cte_folders_all(fileid, name) AS (
         SELECT
             f.fileid,
-            f.name,
-            f.fileid AS rootid
+            f.name
         FROM
             *PREFIX*filecache f
         WHERE
@@ -51,18 +46,16 @@ const CTE_FOLDERS_ARCHIVE = // CTE to get all archive folders recursively in the
         UNION ALL
         SELECT
             f.fileid,
-            f.name,
-            c.rootid
+            f.name
         FROM
             *PREFIX*filecache f
         INNER JOIN *PREFIX*cte_folders_all c
             ON (f.parent = c.fileid
                 AND f.mimetype = (SELECT `id` FROM `*PREFIX*mimetypes` WHERE `mimetype` = \'httpd/unix-directory\')
             )
-    ), *PREFIX*cte_folders(fileid, rootid) AS (
+    ), *PREFIX*cte_folders(fileid) AS (
         SELECT
-            cfa.fileid,
-            MIN(cfa.rootid) AS rootid
+            cfa.fileid
         FROM
             *PREFIX*cte_folders_all cfa
         WHERE
@@ -71,8 +64,7 @@ const CTE_FOLDERS_ARCHIVE = // CTE to get all archive folders recursively in the
             cfa.fileid
         UNION ALL
         SELECT
-            f.fileid,
-            c.rootid
+            f.fileid
         FROM
             *PREFIX*filecache f
         INNER JOIN *PREFIX*cte_folders c
@@ -160,11 +152,6 @@ trait TimelineQueryDays
         // JOIN with filecache for existing files
         $query = $this->joinFilecache($query, $root, $recursive, $archive);
 
-        // SELECT rootid if not a single folder
-        if ($recursive && !$root->isEmpty()) {
-            $query->addSelect('cte_f.rootid');
-        }
-
         // JOIN with mimetypes to get the mimetype
         $query->join('f', 'mimetypes', 'mimetypes', $query->expr()->eq('f.mimetype', 'mimetypes.id'));
 
@@ -213,56 +200,6 @@ trait TimelineQueryDays
      */
     private function processDay(array &$day, string $uid, TimelineRoot &$root)
     {
-        /**
-         * Path entry in database for folder.
-         * We need to splice this from the start of the file path.
-         */
-        $internalPaths = [];
-
-        /**
-         * DAV paths for the folders.
-         * We need to prefix this to the start of the file path.
-         */
-        $davPaths = [];
-
-        /**
-         * The root folder id for the folder.
-         * We fallback to this if rootid is not found.
-         */
-        $defaultRootId = 0;
-
-        if (!$root->isEmpty()) {
-            // Get root id of the top folder
-            $defaultRootId = $root->getOneId();
-
-            // No way to get the internal path from the folder
-            $query = $this->connection->getQueryBuilder();
-            $query->select('fileid', 'path')
-                ->from('filecache')
-                ->where($query->expr()->in('fileid', $query->createNamedParameter($root->getIds(), IQueryBuilder::PARAM_INT_ARRAY)))
-            ;
-            $paths = $query->executeQuery()->fetchAll();
-            foreach ($paths as &$path) {
-                $fileid = (int) $path['fileid'];
-                $internalPaths[$fileid] = $path['path'];
-
-                // Get DAV path.
-                // getPath looks like /user/files/... but we want /files/user/...
-                // Split at / and swap these
-                // For public shares, we just give the relative path
-                if (!empty($uid) && ($actualPath = $root->getFolderPath($fileid))) {
-                    $actualPath = explode('/', $actualPath);
-                    if (\count($actualPath) >= 3) {
-                        $tmp = $actualPath[1];
-                        $actualPath[1] = $actualPath[2];
-                        $actualPath[2] = $tmp;
-                        $davPath = implode('/', $actualPath);
-                        $davPaths[$fileid] = Exif::removeExtraSlash('/'.$davPath.'/');
-                    }
-                }
-            }
-        }
-
         foreach ($day as &$row) {
             // Convert field types
             $row['fileid'] = (int) $row['fileid'];
@@ -282,26 +219,12 @@ trait TimelineQueryDays
                 unset($row['liveid']);
             }
 
-            // Check if path exists and starts with basePath and remove
-            if (isset($row['path']) && !empty($row['path'])) {
-                $rootId = \array_key_exists('rootid', $row) ? $row['rootid'] : $defaultRootId;
-                $basePath = $internalPaths[$rootId] ?? '#__#';
-                $davPath = (\array_key_exists($rootId, $davPaths) ? $davPaths[$rootId] : null) ?: '';
-
-                if (0 === strpos($row['path'], $basePath)) {
-                    $rpath = substr($row['path'], \strlen($basePath));
-                    $row['filename'] = Exif::removeExtraSlash($davPath.$rpath);
-                }
-
-                unset($row['path']);
-            }
-
             // All transform processing
             $this->processPeopleRecognizeDetection($row);
             $this->processFaceRecognitionDetection($row);
 
             // We don't need these fields
-            unset($row['datetaken'], $row['rootid']);
+            unset($row['datetaken']);
         }
 
         return $day;

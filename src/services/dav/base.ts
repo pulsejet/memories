@@ -56,33 +56,8 @@ export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
   // Get file infos
   let fileInfos: IFileInfo[] = [];
 
-  // Get all photos that already have and don't have a filename
-  const photosWithFilename = photos.filter((photo) => photo.filename);
-  fileInfos = fileInfos.concat(
-    photosWithFilename.map((photo) => {
-      const prefixPath = `/files/${getCurrentUser()?.uid}`;
-      return {
-        id: photo.fileid,
-        fileid: photo.fileid,
-        filename: photo.filename.replace(prefixPath, ""),
-        originalFilename: photo.filename,
-        basename: photo.basename,
-        mime: photo.mimetype,
-        hasPreview: true,
-        etag: photo.etag,
-        permissions: "RWD",
-      } as IFileInfo;
-    })
-  );
-
-  // Next: get all photos that have no filename using ID
-  if (photosWithFilename.length === photos.length) {
-    return fileInfos;
-  }
-  const photosWithoutFilename = photos.filter((photo) => !photo.filename);
-
   // Get file IDs array
-  const fileIds = photosWithoutFilename.map((photo) => photo.fileid);
+  const fileIds = photos.map((photo) => photo.fileid);
 
   // Divide fileIds into chunks of GET_FILE_CHUNK_SIZE
   const chunks = [];

@@ -20,7 +20,7 @@
  *
  */
 import camelcase from "camelcase";
-import { IFileInfo, IPhoto } from "../types";
+import { IPhoto } from "../types";
 import { API } from "./API";
 import { isNumber } from "./NumberUtils";
 
@@ -136,7 +136,7 @@ const genFileInfo = function (obj) {
 
 /** Get preview URL from photo object */
 const getPreviewUrl = function (
-  photo: IPhoto | IFileInfo,
+  photo: IPhoto,
   square: boolean,
   size: number | [number, number]
 ) {

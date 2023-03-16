@@ -12,7 +12,7 @@ import router from "./router";
 import { Route } from "vue-router";
 import { generateFilePath } from "@nextcloud/router";
 import { getRequestToken } from "@nextcloud/auth";
-import { IFileInfo, IPhoto } from "./types";
+import { IPhoto } from "./types";
 
 import "./global.scss";
 
@@ -27,7 +27,7 @@ declare global {
   var shareNodeLink: (path: string, immediate?: boolean) => Promise<void>;
 
   var mSidebar: {
-    open: (filename: IFileInfo) => void;
+    open: (fileid: number, filename?: string, forceNative?: boolean) => void;
     close: () => void;
     setTab: (tab: string) => void;
   };

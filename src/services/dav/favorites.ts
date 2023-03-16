@@ -1,6 +1,6 @@
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
-import { IPhoto } from "../../types";
+import { IFileInfo, IPhoto } from "../../types";
 import client from "../DavClient";
 import * as base from "./base";
 import * as utils from "../Utils";
@@ -45,7 +45,7 @@ export async function* favoritePhotos(
   }
 
   // Get files data
-  let fileInfos: any[] = [];
+  let fileInfos: IFileInfo[] = [];
   try {
     fileInfos = await base.getFiles(photos);
   } catch (e) {

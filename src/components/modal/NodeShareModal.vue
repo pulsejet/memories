@@ -250,7 +250,7 @@ export default defineComponent({
     refreshSidebar() {
       if (this.isMobile) return;
       globalThis.mSidebar.close();
-      globalThis.mSidebar.open({ filename: this.filename } as any);
+      globalThis.mSidebar.open(0, this.filename, true);
     },
   },
 });

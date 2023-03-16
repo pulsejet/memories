@@ -83,7 +83,7 @@ import NcListItem from "@nextcloud/vue/dist/Components/NcListItem";
 import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
 import Modal from "./Modal.vue";
 
-import { IFileInfo, IPhoto } from "../../types";
+import { IPhoto } from "../../types";
 import { getPreviewUrl } from "../../services/FileUtils";
 import { API } from "../../services/API";
 import * as dav from "../../services/DavRequests";
@@ -159,14 +159,6 @@ export default defineComponent({
       }
     },
 
-    async getFileInfo() {
-      if (this.$route.name.endsWith("-share")) {
-        return this.photo as IFileInfo;
-      }
-
-      return (await dav.getFiles([this.photo]))[0];
-    },
-
     async sharePreview() {
       const src = getPreviewUrl(this.photo, false, 2048);
       this.shareWithHref(src, true);
@@ -185,26 +177,26 @@ export default defineComponent({
     },
 
     async shareLink() {
-      this.l(async () =>
-        globalThis.shareNodeLink((await this.getFileInfo()).filename, true)
-      );
+      this.l(async () => {
+        const fileInfo = (await dav.getFiles([this.photo]))[0];
+        globalThis.shareNodeLink(fileInfo.filename, true);
+      });
       this.close();
     },
 
     async shareWithHref(href: string, replaceExt = false) {
-      let fileInfo: IFileInfo, blob: Blob;
+      let blob: Blob;
       await this.l(async () => {
         const res = await axios.get(href, { responseType: "blob" });
         blob = res.data;
-        fileInfo = await this.getFileInfo();
       });
 
-      if (!blob || !fileInfo) {
-        showError(this.t("memories", "Failed to download and share file"));
+      if (!blob) {
+        showError(this.t("memories", "Failed to download file"));
         return;
       }
 
-      let basename = fileInfo.originalBasename || fileInfo.basename;
+      let basename = this.photo.basename;
 
       if (replaceExt) {
         // Fix basename extension

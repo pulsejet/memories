@@ -118,11 +118,8 @@ export async function* removeFromAlbum(
   name: string,
   photos: IPhoto[]
 ) {
-  // Get files data
-  let fileInfos = await base.getFiles(photos);
-
   // Add each file
-  const calls = fileInfos.map((f) => async () => {
+  const calls = photos.map((f) => async () => {
     try {
       await client.deleteFile(
         `/photos/${user}/albums/${name}/${f.fileid}-${f.basename}`
@@ -131,7 +128,7 @@ export async function* removeFromAlbum(
     } catch (e) {
       showError(
         t("memories", "Failed to remove {filename}.", {
-          filename: f.filename,
+          filename: f.basename,
         })
       );
       return 0;
@@ -285,10 +282,6 @@ export function getAlbumFileInfos(
       filename: `${collection}/${basename}`,
       originalFilename: `${collection}/${basename}`,
       basename: basename,
-      originalBasename: photo.basename,
-      mime: photo.mimetype,
-      hasPreview: true,
-      etag: photo.etag,
     } as IFileInfo;
   });
 }

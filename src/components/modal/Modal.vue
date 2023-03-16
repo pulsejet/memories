@@ -68,7 +68,7 @@ export default defineComponent({
 
   mounted() {
     if (this.sidebar) {
-      globalThis.mSidebar.open({ filename: this.sidebar } as any);
+      globalThis.mSidebar.open(0, this.sidebar, true);
 
       // Adjust width anyway in case the sidebar is already open
       this.handleAppSidebarOpen();

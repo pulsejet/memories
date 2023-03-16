@@ -23,7 +23,7 @@ import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 
 import Metadata from "./Metadata.vue";
-import { IFileInfo } from "../types";
+import { IImageInfo } from "../types";
 
 import CloseIcon from "vue-material-design-icons/Close.vue";
 
@@ -61,20 +61,17 @@ export default defineComponent({
   },
 
   methods: {
-    async open(file: IFileInfo) {
-      if (
-        !this.reducedOpen &&
-        this.native() &&
-        (!file.fileid || file.originalFilename?.startsWith("/files/"))
-      ) {
+    async open(fileid: number, filename?: string, forceNative = false) {
+      if (!this.reducedOpen && this.native() && (!fileid || forceNative)) {
         this.native()?.setFullScreenMode?.(true);
-        this.native()?.open(file.filename);
+        this.native()?.open(filename);
       } else {
         this.reducedOpen = true;
         await this.$nextTick();
-        this.basename = file.originalBasename || file.basename;
-
-        (<any>this.$refs.metadata)?.update(file);
+        const info: IImageInfo = await (<any>this.$refs.metadata)?.update(
+          fileid
+        );
+        this.basename = info.basename;
         emit("memories:sidebar:opened", null);
       }
     },

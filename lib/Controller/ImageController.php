@@ -209,6 +209,11 @@ class ImageController extends ApiBase
         // Inject permissions and convert to string
         $info['permissions'] = \OCA\Memories\Util::permissionsToStr($file->getPermissions());
 
+        // Inject other file parameters that are cheap to get now
+        $info['mimetype'] = $file->getMimeType();
+        $info['size'] = $file->getSize();
+        $info['basename'] = $file->getName();
+
         return new JSONResponse($info, Http::STATUS_OK);
     }
 

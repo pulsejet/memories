@@ -1,5 +1,5 @@
 <template>
-  <div class="outer" v-if="fileInfo">
+  <div class="outer" v-if="fileid">
     <div class="top-field" v-for="field of topFields" :key="field.title">
       <div class="icon">
         <component :is="field.icon" :size="24" />
@@ -62,8 +62,6 @@ import moment from "moment";
 
 import * as utils from "../services/Utils";
 
-import { IFileInfo } from "../types";
-
 import EditIcon from "vue-material-design-icons/Pencil.vue";
 import CalendarIcon from "vue-material-design-icons/Calendar.vue";
 import CameraIrisIcon from "vue-material-design-icons/CameraIris.vue";
@@ -72,6 +70,7 @@ import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
 import LocationIcon from "vue-material-design-icons/MapMarker.vue";
 import TagIcon from "vue-material-design-icons/Tag.vue";
 import { API } from "../services/API";
+import { IImageInfo } from "../types";
 
 interface TopField {
   title: string;
@@ -91,9 +90,9 @@ export default defineComponent({
   },
 
   data: () => ({
-    fileInfo: null as IFileInfo,
+    fileid: null as number | null,
     exif: {} as { [prop: string]: any },
-    baseInfo: {} as any,
+    baseInfo: {} as IImageInfo,
     state: 0,
   }),
 
@@ -246,11 +245,7 @@ export default defineComponent({
 
     /** Image info */
     imageInfo(): string | null {
-      return (
-        this.fileInfo?.originalBasename ||
-        this.fileInfo?.basename ||
-        (<any>this.fileInfo)?.name
-      );
+      return this.baseInfo.basename;
     },
 
     imageInfoSub(): string[] | null {
@@ -310,24 +305,25 @@ export default defineComponent({
   },
 
   methods: {
-    async update(fileInfo: IFileInfo) {
+    async update(fileid: number): Promise<IImageInfo> {
       this.state = Math.random();
-      this.fileInfo = null;
+      this.fileid = null;
       this.exif = {};
 
       const state = this.state;
-      const url = API.Q(API.IMAGE_INFO(fileInfo.fileid), { tags: 1 });
+      const url = API.Q(API.IMAGE_INFO(fileid), { tags: 1 });
       const res = await axios.get<any>(url);
-      if (state !== this.state) return;
+      if (state !== this.state) return res.data;
 
-      this.fileInfo = fileInfo;
+      this.fileid = fileid;
       this.exif = res.data.exif || {};
       this.baseInfo = res.data;
+      return this.baseInfo;
     },
 
     handleFileUpdated({ fileid }) {
-      if (fileid && this.fileInfo?.id === fileid) {
-        this.update(this.fileInfo);
+      if (fileid && this.fileid === fileid) {
+        this.update(this.fileid);
       }
     },
   },

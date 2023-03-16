@@ -114,10 +114,8 @@ export default defineComponent({
           photoMap.set(photo.fileid, photo);
         }
 
-        let data = await dav.getFiles(this.photos);
-
         // Create move calls
-        const calls = data.map((p) => async () => {
+        const calls = this.photos.map((p) => async () => {
           try {
             await client.moveFile(
               `/recognize/${user}/faces/${name}/${p.fileid}-${p.basename}`,

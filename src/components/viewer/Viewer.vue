@@ -10,7 +10,7 @@
     <ImageEditor
       v-if="editorOpen"
       :etag="currentPhoto.etag"
-      :src="editorDownloadLink"
+      :src="editorSrc"
       :fileid="currentPhoto.fileid"
       @close="editorOpen = false"
     />
@@ -178,7 +178,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { IDay, IFileInfo, IPhoto, IRow, IRowType } from "../../types";
+import { IDay, IPhoto, IRow, IRowType } from "../../types";
 
 import UserConfig from "../../mixins/UserConfig";
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
@@ -241,6 +241,7 @@ export default defineComponent({
     isOpen: false,
     originalTitle: null,
     editorOpen: false,
+    editorSrc: "",
 
     show: false,
     showControls: false,
@@ -349,14 +350,6 @@ export default defineComponent({
       const date = this.currentPhoto?.imageInfo?.datetaken;
       if (!date) return null;
       return utils.getLongDateStr(new Date(date * 1000), false, true);
-    },
-
-    /** Get DAV download link for current photo */
-    editorDownloadLink(): string | null {
-      const filename = this.currentPhoto?.filename;
-      return filename
-        ? window.location.origin + getRootUrl() + `/remote.php/dav${filename}`
-        : null;
     },
 
     /** Show edit buttons */
@@ -897,7 +890,7 @@ export default defineComponent({
       }
     },
 
-    openEditor() {
+    async openEditor() {
       // Only for JPEG for now
       if (!this.canEdit) return;
 
@@ -909,6 +902,18 @@ export default defineComponent({
         return;
       }
 
+      // Get DAV path
+      const fileInfo = (await dav.getFiles([this.currentPhoto]))[0];
+      if (!fileInfo) {
+        alert(this.t("memories", "Cannot edit this file"));
+        return;
+      }
+
+      this.editorSrc =
+        window.location.origin +
+        getRootUrl() +
+        "/remote.php/dav" +
+        fileInfo.originalFilename;
       this.editorOpen = true;
     },
 
@@ -1019,14 +1024,15 @@ export default defineComponent({
     /** Open the sidebar */
     async openSidebar(photo?: IPhoto) {
       globalThis.mSidebar.setTab("memories-metadata");
-      globalThis.mSidebar.open(await this.getFileInfo(photo));
-    },
+      photo ||= this.currentPhoto;
 
-    /** Get fileInfo for a photo */
-    async getFileInfo(photo?: IPhoto): Promise<IFileInfo> {
-      photo = photo || this.currentPhoto;
-      if (this.routeIsPublic) return photo as IFileInfo;
-      return (await dav.getFiles([photo]))[0];
+      if (this.routeIsPublic) {
+        globalThis.mSidebar.open(photo.fileid);
+      } else {
+        const fileInfo = (await dav.getFiles([photo]))[0];
+        const forceNative = fileInfo?.originalFilename?.startsWith("/files/");
+        globalThis.mSidebar.open(photo.fileid, fileInfo?.filename, forceNative);
+      }
     },
 
     async updateSizeWithoutAnim() {

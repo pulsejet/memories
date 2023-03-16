@@ -25,8 +25,6 @@ trait TimelineQuerySingleItem
         // JOIN with mimetypes to get the mimetype
         $query->join('f', 'mimetypes', 'mimetypes', $query->expr()->eq('f.mimetype', 'mimetypes.id'));
 
-        unset($row['datetaken'], $row['path']);
-
         return $query->executeQuery()->fetch();
     }
 }

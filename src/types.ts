@@ -9,20 +9,6 @@ export type IFileInfo = {
   originalFilename?: string;
   /** Base name of file e.g. Qx0dq7dvEXA.jpg */
   basename: string;
-  /** Original base name, e.g. in albums without the file id */
-  originalBasename?: string;
-  /** Etag identifier */
-  etag: string;
-  /** File has preview available */
-  hasPreview: boolean;
-  /** File is marked favorite */
-  favorite?: boolean;
-  /** Vue flags */
-  flag?: number;
-  /** MIME type of file */
-  mime?: string;
-  /** WebDAV permissions string */
-  permissions?: string;
 };
 
 export type IDay = {
@@ -43,8 +29,6 @@ export type IPhoto = {
   key?: string;
   /** Etag from server */
   etag?: string;
-  /** Path to file */
-  filename?: string;
   /** Base name of file */
   basename?: string;
   /** Mime type of file */
@@ -74,23 +58,7 @@ export type IPhoto = {
   /** Reference to day object */
   d?: IDay;
   /** Reference to exif object */
-  imageInfo?: {
-    h: number;
-    w: number;
-    datetaken: number;
-    address?: string;
-    tags: { [id: string]: string };
-    permissions: string;
-    exif?: {
-      Rotation?: number;
-      Orientation?: number;
-      ImageWidth?: number;
-      ImageHeight?: number;
-      Title?: string;
-      Description?: string;
-      [other: string]: unknown;
-    };
-  };
+  imageInfo?: IImageInfo;
 
   /** Face detection ID */
   faceid?: number;
@@ -116,6 +84,29 @@ export type IPhoto = {
   /** Optional datetaken epoch */
   datetaken?: number;
 };
+
+export interface IImageInfo {
+  h: number;
+  w: number;
+  datetaken: number;
+  address?: string;
+  tags: { [id: string]: string };
+
+  permissions: string;
+  basename: string;
+  mimetype: string;
+  size: number;
+
+  exif?: {
+    Rotation?: number;
+    Orientation?: number;
+    ImageWidth?: number;
+    ImageHeight?: number;
+    Title?: string;
+    Description?: string;
+    [other: string]: unknown;
+  };
+}
 
 export interface IFolder extends IPhoto {
   /** Path to folder */

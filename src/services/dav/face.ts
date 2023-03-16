@@ -93,11 +93,8 @@ export async function* removeFaceImages(
   name: string,
   photos: IPhoto[]
 ) {
-  // Get files data
-  let fileInfos = await base.getFiles(photos);
-
   // Remove each file
-  const calls = fileInfos.map((f) => async () => {
+  const calls = photos.map((f) => async () => {
     try {
       await client.deleteFile(
         `/recognize/${user}/faces/${name}/${f.fileid}-${f.basename}`
@@ -107,7 +104,7 @@ export async function* removeFaceImages(
       console.error(e);
       showError(
         t("memories", "Failed to remove {filename} from face.", {
-          filename: f.filename,
+          filename: f.basename,
         })
       );
       return 0;
