@@ -23,7 +23,7 @@
           :src="previewUrl"
           @error="failed"
         />
-        <div class="overlay fill-block" />
+        <div v-if="title || subtitle" class="overlay fill-block" />
       </div>
     </div>
   </router-link>
