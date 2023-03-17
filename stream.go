@@ -565,10 +565,10 @@ func (s *Stream) monitorTranscodeOutput(cmdStdOut io.ReadCloser, startAt float64
 			if len(line) == 0 {
 				break
 			}
+		} else if err != nil {
+			log.Println(err)
+			break
 		} else {
-			if err != nil {
-				log.Fatal(err)
-			}
 			line = line[:(len(line) - 1)]
 		}
 
@@ -631,10 +631,10 @@ func (s *Stream) monitorStderr(cmdStdErr io.ReadCloser) {
 			if len(line) == 0 {
 				break
 			}
+		} else if err != nil {
+			log.Println(err)
+			break
 		} else {
-			if err != nil {
-				log.Fatal(err)
-			}
 			line = line[:(len(line) - 1)]
 		}
 		log.Println("ffmpeg-error:", string(line))
