@@ -143,7 +143,11 @@ class MigrateGoogleTakeout extends Command
             if ($node instanceof Folder) {
                 $this->migrateFolder($node);
             } elseif ($node instanceof File) {
-                $this->migrateFile($node);
+                try {
+                    $this->migrateFile($node);
+                } catch (\Exception $e) {
+                    $this->output->writeln("<error>Error migrating file {$node->getPath()}: {$e->getMessage()}</error>");
+                }
             }
         }
     }
