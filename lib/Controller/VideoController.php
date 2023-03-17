@@ -330,10 +330,11 @@ class VideoController extends ApiBase
     private function getUpstream(string $client, string $path, string $profile)
     {
         $returnCode = $this->getUpstreamInternal($client, $path, $profile);
+        $isExternal = $this->config->getSystemValue('memories.vod.external', false);
 
         // If status code was 0, it's likely the server is down
         // Make one attempt to start after killing whatever is there
-        if (0 !== $returnCode) {
+        if (0 !== $returnCode || $isExternal) {
             return $returnCode;
         }
 
