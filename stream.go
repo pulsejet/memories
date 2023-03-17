@@ -386,48 +386,35 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 		"-copyts", // So the "-to" refers to the original TS
 	}...)
 
-	// Scaling for output
-	var scale string
-	var format string
-	if s.c.VAAPI {
-		// VAAPI
-		format = "format=nv12|vaapi,hwupload"
-		scale = fmt.Sprintf("scale_vaapi=w=%d:h=%d:force_original_aspect_ratio=decrease", s.width, s.height)
-	} else if s.c.NVENC {
-		// NVENC
-		format = "format=nv12|cuda,hwupload"
+	// Filters
+	format := "format=nv12"
+	scaler := "scale"
+	scalerArgs := make([]string, 0)
+	scalerArgs = append(scalerArgs, "force_original_aspect_ratio=decrease")
 
-		if s.c.NVENCScale == "cuda" {
-			scale = fmt.Sprintf("scale_cuda=w=%d:h=%d:force_original_aspect_ratio=decrease:passthrough=0", s.width, s.height)
-		} else {
-			// default to "npp"
-			scale = fmt.Sprintf("scale_npp=%d:%d", s.width, s.height)
-		}
-	} else {
-		// x264
-		format = "format=nv12"
-		if s.width >= s.height {
-			scale = fmt.Sprintf("scale=-2:%d", s.height)
-		} else {
-			scale = fmt.Sprintf("scale=%d:-2", s.width)
-		}
+	if s.c.VAAPI {
+		format = "format=nv12|vaapi,hwupload"
+		scaler = "scale_vaapi"
+		scalerArgs = append(scalerArgs, "format=nv12")
+	} else if s.c.NVENC {
+		format = "format=nv12|cuda,hwupload"
+		scaler = fmt.Sprintf("scale_%s", s.c.NVENCScale)
+		scalerArgs = append(scalerArgs, "passthrough=0")
 	}
 
-	// do not scale or set bitrate for full quality
-	if s.quality == "max" {
-		if s.c.NVENC {
-			// Due to a bug(?) in NVENC, passthrough=0 must be set
-			args = append(args, []string{
-				"-vf", fmt.Sprintf("%s,%s", format, "scale_cuda=passthrough=0"),
-			}...)
-		} else {
-			args = append(args, []string{
-				"-vf", format,
-			}...)
-		}
-	} else {
+	// Scale height and width if not max quality
+	if s.quality != "max" {
+		scalerArgs = append(scalerArgs, fmt.Sprintf("w=%d", s.width))
+		scalerArgs = append(scalerArgs, fmt.Sprintf("h=%d", s.height))
+	}
+
+	// Apply filter
+	filter := fmt.Sprintf("%s,%s=%s", format, scaler, strings.Join(scalerArgs, ":"))
+	args = append(args, []string{"-vf", filter}...)
+
+	// Apply bitrate cap if not max quality
+	if s.quality != "max" {
 		args = append(args, []string{
-			"-vf", fmt.Sprintf("%s,%s", format, scale),
 			"-maxrate", fmt.Sprintf("%d", s.bitrate),
 			"-bufsize", fmt.Sprintf("%d", s.bitrate*2),
 		}...)
