@@ -176,7 +176,6 @@ OC.L10N.register(
     "Share the image as a high quality JPEG" : "Compartir la imagen como JPEG de alta calidad",
     "Share the original image / video file" : "Compartir el archivo original de la imagen / video",
     "Share an external Nextcloud link" : "Compartir un enlace externo de Nextcloud",
-    "Failed to download and share file" : "Fallo al descargar y compartir archivo",
     "Cannot share this type of data" : "No se puede compartir este tipo de datos",
     "Sort by date" : "Ordenar por fecha",
     "Sort by name" : "Ordenar por nombre",
