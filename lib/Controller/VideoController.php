@@ -207,7 +207,7 @@ class VideoController extends ApiBase
             }
 
             // If this is H.264 it won't get transcoded anyway
-            if ($this->getUpstream($transcode, $liveVideoPath, 'max.mov')) {
+            if ($this->getUpstream($transcode, $liveVideoPath, 'max.mov') === 200) {
                 exit;
             }
         }
