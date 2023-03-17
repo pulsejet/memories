@@ -134,6 +134,12 @@ class MigrateGoogleTakeout extends Command
 
     protected function migrateFolder(Folder $folder): void
     {
+        // Check for .nomedia
+        if ($folder->nodeExists('.nomedia')) {
+            return;
+        }
+
+        // Get all nodes in this folder
         $nodes = $folder->getDirectoryListing();
         $path = $folder->getPath();
         $this->output->writeln("Scanning folder {$path}");
@@ -229,9 +235,7 @@ class MigrateGoogleTakeout extends Command
 
             // Write EXIF metadata
             try {
-                $localPath = $file->getStorage()->getLocalFile($file->getInternalPath());
-                Exif::setExif($localPath, $txf);
-                $file->touch();
+                Exif::setFileExif($file, $txf);
             } catch (\Exception $e) {
                 $this->output->writeln("<error>Error while writing EXIF metadata for {$path}: {$e->getMessage()}</error>");
 

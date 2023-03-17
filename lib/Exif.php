@@ -261,7 +261,7 @@ class Exif
      *
      * @throws \Exception on failure
      */
-    public static function setExif(string &$path, array &$data)
+    public static function setExif(string $path, array $data)
     {
         $data['SourceFile'] = $path;
         $raw = json_encode([$data]);
@@ -284,6 +284,23 @@ class Exif
 
             throw new \Exception('Could not set exif data: '.$stdout);
         }
+    }
+
+    public static function setFileExif(File $file, array $data)
+    {
+        // Get path to local file so we can skip reading
+        $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+
+        // Set exif data
+        self::setExif($path, $data);
+
+        // Update remote file if not local
+        if (!$file->getStorage()->isLocal()) {
+            $file->putContent(fopen($path, 'r')); // closes the handler
+        }
+
+        // Touch the file, triggering a reprocess through the hook
+        $file->touch();
     }
 
     public static function getBinaryExifProp(string $path, string $prop)

@@ -250,22 +250,11 @@ class ImageController extends ApiBase
             return new JSONResponse(['message' => "Cannot edit file {$name} (blacklisted type {$mime})"], Http::STATUS_PRECONDITION_FAILED);
         }
 
-        // Get original file from body
-        $path = $file->getStorage()->getLocalFile($file->getInternalPath());
-
         try {
-            Exif::setExif($path, $raw);
+            Exif::setFileExif($file, $raw);
         } catch (\Exception $e) {
             return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
-
-        // Update remote file if not local
-        if (!$file->getStorage()->isLocal()) {
-            $file->putContent(fopen($path, 'r')); // closes the handler
-        }
-
-        // Touch the file, triggering a reprocess through the hook
-        $file->touch();
 
         return new JSONResponse([], Http::STATUS_OK);
     }
