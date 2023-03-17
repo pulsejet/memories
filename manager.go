@@ -157,6 +157,9 @@ func (m *Manager) Destroy() {
 
 	// Delete temp dir
 	os.RemoveAll(m.tempDir)
+
+	// Delete file if temp
+	freeIfTemp(m.path)
 }
 
 func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request, chunk string) error {

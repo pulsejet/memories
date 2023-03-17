@@ -37,39 +37,58 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Path
 	parts := make([]string, 0)
 
+	// log.Println("Serving", url)
+
+	// Break url into parts
 	for _, part := range strings.Split(url, "/") {
 		if part != "" {
 			parts = append(parts, part)
 		}
 	}
 
+	// Serve actual file from manager
 	if len(parts) < 3 {
 		log.Println("Invalid URL", url)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
+	// Get streamid and chunk
 	streamid := parts[0]
 	path := "/" + strings.Join(parts[1:len(parts)-1], "/")
 	chunk := parts[len(parts)-1]
 
-	// log.Println("Serving", path, streamid, chunk)
+	// Check if POST request to create temp file
+	if r.Method == "POST" && len(parts) >= 2 && parts[1] == "create" {
+		var err error
+		path, err = h.createTempFile(w, r, parts)
+		if err != nil {
+			return
+		}
+	}
 
-	if streamid == "" || chunk == "" || path == "" {
+	// Check if valid
+	if streamid == "" || path == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
+	// Get existing manager or create new one
 	manager := h.getManager(path, streamid)
 	if manager == nil {
 		manager = h.createManager(path, streamid)
 	}
 
+	// Failed to create manager
 	if manager == nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	manager.ServeHTTP(w, r, chunk)
+
+	// Serve chunk if asked for
+	if chunk != "" && chunk != "ignore" {
+		manager.ServeHTTP(w, r, chunk)
+	}
 }
 
 func (h *Handler) getManager(path string, streamid string) *Manager {
@@ -87,6 +106,7 @@ func (h *Handler) createManager(path string, streamid string) *Manager {
 	manager, err := NewManager(h.c, path, streamid, h.close)
 	if err != nil {
 		log.Println("Error creating manager", err)
+		freeIfTemp(path)
 		return nil
 	}
 
