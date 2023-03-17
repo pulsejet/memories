@@ -56,6 +56,7 @@ class Application extends App implements IBootstrap
         'video/mp4',
         'video/quicktime',
         'video/x-matroska',
+        'video/MP2T',
         // 'video/x-m4v',       // too rarely used for photos
         // 'video/ogg',         // too rarely used for photos
     ];
