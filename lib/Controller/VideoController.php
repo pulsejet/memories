@@ -271,10 +271,11 @@ class VideoController extends ApiBase
     {
         $config = \OC::$server->get(\OCP\IConfig::class);
         $path = rawurlencode($path);
-        $bind = $config->getSystemValue('memories.vod.bind', '127.0.0.1:47788');
-        $port = explode(':', $bind)[1];
 
-        return "http://127.0.0.1:{$port}/{$client}{$path}/{$profile}";
+        $bind = $config->getSystemValue('memories.vod.bind', '127.0.0.1:47788');
+        $connect = $config->getSystemValue('memories.vod.connect', $bind);
+
+        return "http://{$connect}/{$client}{$path}/{$profile}";
     }
 
     private function getUpstream(string $client, string $path, string $profile)
