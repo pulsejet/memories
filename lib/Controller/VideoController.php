@@ -196,19 +196,18 @@ class VideoController extends ApiBase
 
         // Transcode video if allowed
         if ($transcode && !$this->config->getSystemValue('memories.vod.disable', true)) {
-            // If video path not given, write to temp file
-            if (!$liveVideoPath) {
-                $liveVideoPath = tempnam(sys_get_temp_dir(), 'livevideo');
-                file_put_contents($liveVideoPath, $blob);
+            try {
+                // If video path not given, write to temp file
+                if (!$liveVideoPath) {
+                    $liveVideoPath = self::postFile($transcode, $blob)['path'];
+                }
 
-                register_shutdown_function(function () use ($liveVideoPath) {
-                    unlink($liveVideoPath);
-                });
-            }
-
-            // If this is H.264 it won't get transcoded anyway
-            if ($this->getUpstream($transcode, $liveVideoPath, 'max.mov') === 200) {
-                exit;
+                // If this is H.264 it won't get transcoded anyway
+                if ($liveVideoPath && 200 === $this->getUpstream($transcode, $liveVideoPath, 'max.mov')) {
+                    exit;
+                }
+            } catch (\Exception $e) {
+                // Transcoding failed, just return the original video
             }
         }
 
@@ -406,6 +405,33 @@ class VideoController extends ApiBase
         curl_close($ch);
 
         return $returnCode;
+    }
+
+    /**
+     * POST to go-vod to create a temporary file.
+     *
+     * @param mixed $blob
+     */
+    private static function postFile(string $client, $blob)
+    {
+        $url = self::getGoVodUrl($client, '/create', 'ignore');
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $blob);
+
+        $response = curl_exec($ch);
+        $returnCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if (200 !== $returnCode) {
+            throw new \Exception("Could not create temporary file ({$returnCode})");
+        }
+
+        return json_decode($response, true);
     }
 
     /**
