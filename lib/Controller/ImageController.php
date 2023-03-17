@@ -242,6 +242,14 @@ class ImageController extends ApiBase
             return new JSONResponse(['message' => 'Cannot change encrypted file'], Http::STATUS_PRECONDITION_FAILED);
         }
 
+        // Check if allowed to edit file
+        $mime = $file->getMimeType();
+        if (!\in_array($mime, Exif::allowedEditMimetypes(), true)) {
+            $name = $file->getName();
+
+            return new JSONResponse(['message' => "Cannot edit file {$name} (blacklisted type {$mime})"], Http::STATUS_PRECONDITION_FAILED);
+        }
+
         // Get original file from body
         $path = $file->getStorage()->getLocalFile($file->getInternalPath());
 

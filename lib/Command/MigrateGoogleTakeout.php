@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Command;
 
-use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Exif;
 use OCP\Files\File;
@@ -88,7 +87,7 @@ class MigrateGoogleTakeout extends Command
     {
         $this->output = $output;
         $this->input = $input;
-        $this->mimeTypes = array_merge(Application::IMAGE_MIMES, Application::VIDEO_MIMES);
+        $this->mimeTypes = Exif::allowedEditMimetypes();
 
         // Provide ample warnings
         if ($input->isInteractive()) {

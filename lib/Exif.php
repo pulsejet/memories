@@ -10,6 +10,7 @@ use OCP\IConfig;
 
 class Exif
 {
+    private const FORBIDDEN_EDIT_MIMES = ['image/bmp', 'image/x-dcraw', 'video/MP2T'];
     private const EXIFTOOL_VER = '12.50';
     private const EXIFTOOL_TIMEOUT = 30000;
     private const EXIFTOOL_ARGS = ['-api', 'QuickTimeUTC=1', '-n', '-U', '-json', '--b'];
@@ -242,6 +243,14 @@ class Exif
         }
 
         return [$width, $height];
+    }
+
+    /**
+     * Get the list of MIME Types that are allowed to be edited.
+     */
+    public static function allowedEditMimetypes(): array
+    {
+        return array_diff(array_merge(Application::IMAGE_MIMES, Application::VIDEO_MIMES), self::FORBIDDEN_EDIT_MIMES);
     }
 
     /**
