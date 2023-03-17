@@ -47,12 +47,21 @@ class VideoSetup extends Command
         $this
             ->setName('memories:video-setup')
             ->setDescription('Setup video streaming')
+            ->addOption('print-config', null, null, 'Print the current go-vod configuration JSON')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->output = $output;
+
+        // Check if we just need the config
+        if ($input->getOption('print-config')) {
+            $conf = \OCA\Memories\Controller\VideoController::getGoVodConfig(\OC::$server->get(IConfig::class));
+            $output->writeln(json_encode($conf, JSON_PRETTY_PRINT));
+
+            return 0;
+        }
 
         // Preset executables
         $ffmpegPath = $this->config->getSystemValue('memories.vod.ffmpeg', 'ffmpeg');

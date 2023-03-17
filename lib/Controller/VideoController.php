@@ -278,6 +278,55 @@ class VideoController extends ApiBase
         return "http://{$connect}/{$client}{$path}/{$profile}";
     }
 
+    /**
+     * Get the goVod config JSON.
+     */
+    public static function getGoVodConfig(\OCP\IConfig $config): array
+    {
+        // Migrate legacy config: remove in 2024
+        self::migrateLegacyConfig($config);
+
+        // Get temp directory
+        $defaultTmp = sys_get_temp_dir().'/go-vod/';
+        $tmpPath = $config->getSystemValue('memories.vod.tempdir', $defaultTmp);
+
+        // Make sure path ends with slash
+        if ('/' !== substr($tmpPath, -1)) {
+            $tmpPath .= '/';
+        }
+
+        // Add instance ID to path
+        $tmpPath .= $config->getSystemValue('instanceid', 'default');
+
+        // (Re-)create temp dir
+        shell_exec("rm -rf '{$tmpPath}' && mkdir -p '{$tmpPath}' && chmod 755 '{$tmpPath}'");
+
+        // Check temp directory exists
+        if (!is_dir($tmpPath)) {
+            throw new \Exception("Temp directory could not be created ({$tmpPath})");
+        }
+
+        // Check temp directory is writable
+        if (!is_writable($tmpPath)) {
+            throw new \Exception("Temp directory is not writable ({$tmpPath})");
+        }
+
+        // Get config from system values
+        return [
+            'bind' => $config->getSystemValue('memories.vod.bind', '127.0.0.1:47788'),
+            'ffmpeg' => $config->getSystemValue('memories.vod.ffmpeg', 'ffmpeg'),
+            'ffprobe' => $config->getSystemValue('memories.vod.ffprobe', 'ffprobe'),
+            'tempdir' => $tmpPath,
+
+            'vaapi' => $config->getSystemValue('memories.vod.vaapi', false),
+            'vaapiLowPower' => $config->getSystemValue('memories.vod.vaapi.low_power', false),
+
+            'nvenc' => $config->getSystemValue('memories.vod.nvenc', false),
+            'nvencTemporalAQ' => $config->getSystemValue('memories.vod.nvenc.temporal_aq', false),
+            'nvencScale' => $config->getSystemValue('memories.vod.nvenc.scale', 'npp'),
+        ];
+    }
+
     private function getUpstream(string $client, string $path, string $profile)
     {
         $returnCode = $this->getUpstreamInternal($client, $path, $profile);
@@ -359,54 +408,14 @@ class VideoController extends ApiBase
     }
 
     /**
-     * Construct the goVod config JSON.
+     * Construct the goVod config JSON and put it to a file.
      *
      * @return array [config file, log file]
      */
     private static function makeGoVodConfig(\OCP\IConfig $config): array
     {
-        // Migrate legacy config: remove in 2024
-        self::migrateLegacyConfig($config);
-
-        // Get temp directory
-        $defaultTmp = sys_get_temp_dir().'/go-vod/';
-        $tmpPath = $config->getSystemValue('memories.vod.tempdir', $defaultTmp);
-
-        // Make sure path ends with slash
-        if ('/' !== substr($tmpPath, -1)) {
-            $tmpPath .= '/';
-        }
-
-        // Add instance ID to path
-        $tmpPath .= $config->getSystemValue('instanceid', 'default');
-
-        // (Re-)create temp dir
-        shell_exec("rm -rf '{$tmpPath}' && mkdir -p '{$tmpPath}' && chmod 755 '{$tmpPath}'");
-
-        // Check temp directory exists
-        if (!is_dir($tmpPath)) {
-            throw new \Exception("Temp directory could not be created ({$tmpPath})");
-        }
-
-        // Check temp directory is writable
-        if (!is_writable($tmpPath)) {
-            throw new \Exception("Temp directory is not writable ({$tmpPath})");
-        }
-
-        // Get config from system values
-        $env = [
-            'bind' => $config->getSystemValue('memories.vod.bind', '127.0.0.1:47788'),
-            'ffmpeg' => $config->getSystemValue('memories.vod.ffmpeg', 'ffmpeg'),
-            'ffprobe' => $config->getSystemValue('memories.vod.ffprobe', 'ffprobe'),
-            'tempdir' => $tmpPath,
-
-            'vaapi' => $config->getSystemValue('memories.vod.vaapi', false),
-            'vaapiLowPower' => $config->getSystemValue('memories.vod.vaapi.low_power', false),
-
-            'nvenc' => $config->getSystemValue('memories.vod.nvenc', false),
-            'nvencTemporalAQ' => $config->getSystemValue('memories.vod.nvenc.temporal_aq', false),
-            'nvencScale' => $config->getSystemValue('memories.vod.nvenc.scale', 'npp'),
-        ];
+        $env = self::getGoVodConfig($config);
+        $tmpPath = $env['tempdir'];
 
         // Write config to file
         $logFile = $tmpPath.'.log';
