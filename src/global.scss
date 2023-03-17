@@ -72,13 +72,23 @@ body.has-viewer header {
     display: block;
     z-index: 1;
   }
+
   video {
     opacity: 0;
     z-index: 2;
     transition: opacity 0.3s ease-in-out;
   }
-  &.playing.canplay video {
-    opacity: 1;
+  img {
+    transition: transform 0.3s ease-in-out;
+  }
+
+  &.playing.canplay {
+    video {
+      opacity: 1;
+    }
+    img {
+      transform: scale(1.05);
+    }
   }
 }
 

@@ -405,7 +405,7 @@ div.img-outer {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     user-select: none;
-    transition: border-radius 0.1s ease-in;
+    transition: border-radius 0.1s ease-in, transform 0.3s ease-in-out;
 
     .p-outer.placeholder > & {
       display: none;
