@@ -23,6 +23,7 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 - **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.
 - **📹 Video Transcoding**: Memories transcodes videos and uses HLS for maximal performance.
 - **🗺️ Map**: View your photos on a map, tagged with accurate reverse geocoding.
+- **📦 Migration**: Supports easy migration from Nextcloud Photos and Google Takeout.
 - **⚡️ Performance**: Memories is very fast.
 
 ## 🚀 Installation
