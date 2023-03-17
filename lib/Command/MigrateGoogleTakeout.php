@@ -199,6 +199,13 @@ class MigrateGoogleTakeout extends Command
         // Get current EXIF metadata
         $exif = Exif::getExifFromFile($file);
 
+        // Check if EXIF is blank, which is probably wrong
+        if (0 === \count($exif)) {
+            $this->output->writeln("<error>EXIF metadata for {$path} is blank, probably an error</error>");
+
+            return;
+        }
+
         // Keep keys that are not in EXIF unless --override is specified
         if (!((bool) $this->input->getOption('override'))) {
             $txf = array_filter($txf, function ($value, $key) use ($exif) {
