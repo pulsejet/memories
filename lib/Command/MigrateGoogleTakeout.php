@@ -243,7 +243,7 @@ class MigrateGoogleTakeout extends Command
             return;
         }
 
-        $this->nProcessed++;
+        ++$this->nProcessed;
     }
 
     protected function takeoutToExiftoolJson(array $json)
@@ -285,7 +285,7 @@ class MigrateGoogleTakeout extends Command
         $epoch = $get('photoTakenTime.timestamp');
         if (is_numeric($epoch)) {
             $date = new \DateTime();
-            $date->setTimestamp((int)$epoch);
+            $date->setTimestamp((int) $epoch);
             $txf['DateTimeOriginal'] = $date->format('Y:m:d H:i:s');
         }
 
