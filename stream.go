@@ -524,6 +524,7 @@ func (s *Stream) transcode(startId int) {
 
 	go s.monitorTranscodeOutput(cmdStdOut, startAt)
 	go s.monitorStderr(cmdStdErr)
+	go s.monitorExit()
 }
 
 func (s *Stream) checkGoal(id int) {
@@ -617,9 +618,6 @@ func (s *Stream) monitorTranscodeOutput(cmdStdOut io.ReadCloser, startAt float64
 			}()
 		}
 	}
-
-	// Join the process
-	coder.Wait()
 }
 
 func (s *Stream) monitorStderr(cmdStdErr io.ReadCloser) {
@@ -638,5 +636,30 @@ func (s *Stream) monitorStderr(cmdStdErr io.ReadCloser) {
 			line = line[:(len(line) - 1)]
 		}
 		log.Println("ffmpeg-error:", string(line))
+	}
+}
+
+func (s *Stream) monitorExit() {
+	// Join the process
+	coder := s.coder
+	err := coder.Wait()
+
+	// Try to get exit status
+	if exitError, ok := err.(*exec.ExitError); ok {
+		exitcode := exitError.ExitCode()
+		log.Printf("%s-%s: ffmpeg exited with status: %d", s.m.id, s.quality, exitcode)
+
+		s.mutex.Lock()
+		defer s.mutex.Unlock()
+
+		// If error code is >0, there was an error in transcoding
+		if exitcode > 0 && s.coder == coder {
+			// Notify all outstanding chunks
+			for _, chunk := range s.chunks {
+				for _, n := range chunk.notifs {
+					n <- true
+				}
+			}
+		}
 	}
 }
