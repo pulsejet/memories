@@ -436,7 +436,7 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 	// Output specs
 	args = append(args, []string{
 		"-c:v", CV,
-		"-profile:v", "high",
+		"-profile:v", "main",
 	}...)
 
 	// Device specific output args
