@@ -30,6 +30,7 @@ declare global {
     open: (fileid: number, filename?: string, forceNative?: boolean) => void;
     close: () => void;
     setTab: (tab: string) => void;
+    getWidth: () => number;
   };
 
   var currentViewerPhoto: IPhoto;

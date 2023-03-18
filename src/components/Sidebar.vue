@@ -41,6 +41,7 @@ export default defineComponent({
       nativeOpen: false,
       reducedOpen: false,
       basename: "",
+      width: 0,
     };
   },
 
@@ -58,6 +59,7 @@ export default defineComponent({
       open: this.open.bind(this),
       close: this.close.bind(this),
       setTab: this.setTab.bind(this),
+      getWidth: () => this.width,
     };
   },
 
@@ -69,16 +71,19 @@ export default defineComponent({
   methods: {
     async open(fileid: number, filename?: string, forceNative = false) {
       if (!this.reducedOpen && this.native && (!fileid || forceNative)) {
+        // Open native sidebar
         this.native?.setFullScreenMode?.(true);
         this.native?.open(filename);
       } else {
+        // Open reduced sidebar
         this.reducedOpen = true;
         await this.$nextTick();
-        const info: IImageInfo = await (<any>this.$refs.metadata)?.update(
-          fileid
-        );
+
+        // Update metadata compoenent
+        const m = <any>this.$refs.metadata;
+        const info: IImageInfo = await m?.update(fileid);
         this.basename = info.basename;
-        emit("memories:sidebar:opened", null);
+        this.handleOpen();
       }
     },
 
@@ -90,7 +95,7 @@ export default defineComponent({
           this.reducedOpen = false;
           await this.$nextTick();
         }
-        emit("memories:sidebar:closed", null);
+        this.handleClose();
       }
     },
 
@@ -98,15 +103,34 @@ export default defineComponent({
       this.native?.setActiveTab(tab);
     },
 
-    handleNativeOpen(event: any) {
-      this.nativeOpen = true;
-      emit("memories:sidebar:opened", event);
+    handleClose() {
+      emit("memories:sidebar:closed", null);
     },
 
-    handleNativeClose(event: any) {
+    handleOpen() {
+      const sidebar: HTMLElement = document.querySelector("aside.app-sidebar");
+      if (sidebar) {
+        // Get and store sidebar width
+        this.width = sidebar.offsetWidth - 2;
+
+        // Stop sidebar typing from leaking outside
+        sidebar.addEventListener("keydown", (e) => {
+          if (e.key.length === 1) e.stopPropagation();
+        });
+      }
+
+      emit("memories:sidebar:opened", null);
+    },
+
+    handleNativeOpen() {
+      this.nativeOpen = true;
+      this.handleOpen();
+    },
+
+    handleNativeClose() {
       this.nativeOpen = false;
       this.native?.setFullScreenMode?.(false);
-      emit("memories:sidebar:closed", event);
+      this.handleClose();
     },
   },
 });

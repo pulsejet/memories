@@ -466,7 +466,7 @@ export default defineComponent({
           const use = this.sidebarOpen && !isMobile && !isFullscreen;
 
           // Calculate the sidebar width to use and outer width
-          const sidebarWidth = use ? this.sidebarWidth : 0;
+          const sidebarWidth = use ? globalThis.mSidebar.getWidth() : 0;
           this.outerWidth = `calc(100vw - ${sidebarWidth}px)`;
 
           return {
@@ -1041,20 +1041,10 @@ export default defineComponent({
     },
 
     handleAppSidebarOpen() {
-      if (!this.show || !this.photoswipe) return;
-
-      const sidebar: HTMLElement = document.querySelector("aside.app-sidebar");
-      if (sidebar) {
-        this.sidebarWidth = sidebar.offsetWidth - 2;
-
-        // Stop sidebar typing from leaking to viewer
-        sidebar.addEventListener("keydown", (e) => {
-          if (e.key.length === 1) e.stopPropagation();
-        });
+      if (this.show && this.photoswipe) {
+        this.sidebarOpen = true;
+        this.photoswipe.updateSize();
       }
-
-      this.sidebarOpen = true;
-      this.photoswipe.updateSize();
     },
 
     handleAppSidebarClose() {
