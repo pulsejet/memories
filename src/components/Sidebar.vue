@@ -41,7 +41,7 @@ export default defineComponent({
       nativeOpen: false,
       reducedOpen: false,
       basename: "",
-      width: 0,
+      lastKnownWidth: 0,
     };
   },
 
@@ -59,7 +59,7 @@ export default defineComponent({
       open: this.open.bind(this),
       close: this.close.bind(this),
       setTab: this.setTab.bind(this),
-      getWidth: () => this.width,
+      getWidth: this.getWidth.bind(this),
     };
   },
 
@@ -103,21 +103,22 @@ export default defineComponent({
       this.native?.setActiveTab(tab);
     },
 
+    getWidth() {
+      const sidebar = document.querySelector<HTMLElement>("aside.app-sidebar");
+      this.lastKnownWidth = sidebar?.offsetWidth || this.lastKnownWidth;
+      return (this.lastKnownWidth || 2) - 2;
+    },
+
     handleClose() {
       emit("memories:sidebar:closed", null);
     },
 
     handleOpen() {
+      // Stop sidebar typing from leaking outside
       const sidebar: HTMLElement = document.querySelector("aside.app-sidebar");
-      if (sidebar) {
-        // Get and store sidebar width
-        this.width = sidebar.offsetWidth - 2;
-
-        // Stop sidebar typing from leaking outside
-        sidebar.addEventListener("keydown", (e) => {
-          if (e.key.length === 1) e.stopPropagation();
-        });
-      }
+      sidebar?.addEventListener("keydown", (e) => {
+        if (e.key.length === 1) e.stopPropagation();
+      });
 
       emit("memories:sidebar:opened", null);
     },

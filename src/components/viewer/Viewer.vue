@@ -276,6 +276,7 @@ export default defineComponent({
     subscribe("memories:sidebar:closed", this.handleAppSidebarClose);
     subscribe("files:file:created", this.handleFileUpdated);
     subscribe("files:file:updated", this.handleFileUpdated);
+    subscribe("memories:window:resize", this.handleWindowResize);
   },
 
   beforeDestroy() {
@@ -283,6 +284,7 @@ export default defineComponent({
     unsubscribe("memories:sidebar:closed", this.handleAppSidebarClose);
     unsubscribe("files:file:created", this.handleFileUpdated);
     unsubscribe("files:file:updated", this.handleFileUpdated);
+    unsubscribe("memories:window:resize", this.handleWindowResize);
   },
 
   computed: {
@@ -1052,6 +1054,10 @@ export default defineComponent({
         this.sidebarOpen = false;
         this.photoswipe.updateSize();
       }
+    },
+
+    handleWindowResize() {
+      this.show && this.photoswipe?.updateSize();
     },
 
     /** Hide the sidebar, without marking it as closed */
