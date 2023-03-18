@@ -11,6 +11,7 @@ use OCP\App\IAppManager;
 use OCP\Files\Node;
 use OCP\Files\Search\ISearchBinaryOperator;
 use OCP\Files\Search\ISearchComparison;
+use OCP\IAppConfig;
 use OCP\IConfig;
 
 class Util
@@ -87,8 +88,16 @@ class Util
         }
 
         $v = $appManager->getAppVersion('recognize');
+        if (!version_compare($v, '3.0.0-alpha', '>=')) {
+            return false;
+        }
 
-        return version_compare($v, '3.0.0-alpha', '>=');
+        $c = \OC::$server->get(IAppConfig::class);
+        if ('true' !== $c->getValue('recognize', 'faces.enabled', 'false')) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
