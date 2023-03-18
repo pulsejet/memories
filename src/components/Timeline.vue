@@ -241,20 +241,17 @@ export default defineComponent({
     },
   },
 
-  beforeDestroy() {
-    unsubscribe(this.config_eventName, this.softRefresh);
-    unsubscribe("files:file:created", this.softRefresh);
-    this.resetState();
-  },
-
   created() {
     subscribe(this.config_eventName, this.softRefresh);
     subscribe("files:file:created", this.softRefresh);
-    window.addEventListener("resize", this.handleResizeWithDelay);
+    subscribe("memories:window:resize", this.handleResizeWithDelay);
   },
 
-  destroyed() {
-    window.removeEventListener("resize", this.handleResizeWithDelay);
+  beforeDestroy() {
+    unsubscribe(this.config_eventName, this.softRefresh);
+    unsubscribe("files:file:created", this.softRefresh);
+    unsubscribe("memories:window:resize", this.handleResizeWithDelay);
+    this.resetState();
   },
 
   computed: {
@@ -463,18 +460,7 @@ export default defineComponent({
 
     /** Do resize after some time */
     handleResizeWithDelay() {
-      // Update global vars
-      globalThis.windowInnerWidth = window.innerWidth;
-      globalThis.windowInnerHeight = window.innerHeight;
-
-      // Reflow after timer
-      if (this.resizeTimer) {
-        clearTimeout(this.resizeTimer);
-      }
-      this.resizeTimer = window.setTimeout(() => {
-        this.recomputeSizes();
-        this.resizeTimer = null;
-      }, 100);
+      utils.setRenewingTimeout(this, "resizeTimer", this.recomputeSizes, 100);
     },
 
     /** Recompute static sizes of containers */

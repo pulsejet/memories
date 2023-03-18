@@ -63,7 +63,9 @@ const NcAppNavigationItem = () =>
 
 import { generateUrl } from "@nextcloud/router";
 import { translate as t } from "@nextcloud/l10n";
+import { emit } from "@nextcloud/event-bus";
 
+import * as utils from "./services/Utils";
 import UserConfig from "./mixins/UserConfig";
 import Timeline from "./components/Timeline.vue";
 import Settings from "./components/Settings.vue";
@@ -180,6 +182,18 @@ export default defineComponent({
     route() {
       this.doRouteChecks();
     },
+  },
+
+  created() {
+    // No real need to unbind these, as the app is never destroyed
+    const onResize = () => {
+      globalThis.windowInnerWidth = window.innerWidth;
+      globalThis.windowInnerHeight = window.innerHeight;
+      emit("memories:window:resize", null);
+    };
+    window.addEventListener("resize", () => {
+      utils.setRenewingTimeout(this, "resizeTimer", onResize, 100);
+    });
   },
 
   mounted() {
