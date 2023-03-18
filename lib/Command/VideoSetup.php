@@ -63,6 +63,19 @@ class VideoSetup extends Command
             return 0;
         }
 
+        // Print some information
+        $output->writeln('');
+        $output->writeln('This command will help you setup video streaming');
+        $output->writeln('It will check if ffmpeg and ffprobe are installed and go-vod (the transcoder) works');
+        $output->writeln('If you are running go-vod externally, feature detection will not work properly');
+        $output->writeln('In that case you will need to manually adjust the configuration file (add --print-config)');
+        $output->writeln('For details on hardware support: https://github.com/pulsejet/memories/wiki/HW-Transcoding');
+        $output->writeln('');
+        $output->writeln('Press enter to continue or CTRL+C to abort');
+        if (false === fgets(STDIN)) {
+            return 1;
+        }
+
         // Preset executables
         $ffmpegPath = $this->config->getSystemValue('memories.vod.ffmpeg', 'ffmpeg');
         if ('ffmpeg' === $ffmpegPath) {
