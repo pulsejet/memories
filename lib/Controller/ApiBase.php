@@ -26,13 +26,13 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Db\TimelineRoot;
+use OCA\Memories\Errors;
 use OCA\Memories\Exif;
 use OCA\Memories\Util;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataDisplayResponse;
-use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
@@ -358,7 +358,7 @@ class ApiBase extends Controller
             }
         }
 
-        return new JSONResponse([], Http::STATUS_NOT_FOUND);
+        return Errors::NotFound('preview from list');
     }
 
     /**

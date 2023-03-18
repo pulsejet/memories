@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\Errors;
 use OCA\Memories\Exif;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
@@ -41,7 +42,7 @@ class ArchiveController extends ApiBase
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
-            return new JSONResponse(['message' => 'Not logged in'], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotLoggedIn();
         }
         $uid = $user->getUID();
         $userFolder = $this->rootFolder->getUserFolder($uid);
@@ -49,13 +50,13 @@ class ArchiveController extends ApiBase
         // Check for permissions and get numeric Id
         $file = $userFolder->getById((int) $id);
         if (0 === \count($file)) {
-            return new JSONResponse(['message' => 'No such file'], Http::STATUS_NOT_FOUND);
+            return Errors::NotFound("file id {$id}");
         }
         $file = $file[0];
 
         // Check if user has permissions
         if (!$file->isUpdateable()) {
-            return new JSONResponse(['message' => 'Cannot update this file'], Http::STATUS_FORBIDDEN);
+            return Errors::ForbiddenFileUpdate($file->getName());
         }
 
         // Create archive folder in the root of the user's configured timeline

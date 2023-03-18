@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\Errors;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
@@ -37,18 +38,18 @@ class PlacesController extends ApiBase
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotLoggedIn();
         }
 
         // Check tags enabled for this user
         if (!$this->placesIsEnabled()) {
-            return new JSONResponse(['message' => 'Places not enabled'], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotEnabled('places');
         }
 
         // If this isn't the timeline folder then things aren't going to work
         $root = $this->getRequestRoot();
         if ($root->isEmpty()) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NoRequestRoot();
         }
 
         // Run actual query
@@ -68,24 +69,24 @@ class PlacesController extends ApiBase
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotLoggedIn();
         }
 
         // Check tags enabled for this user
         if (!$this->placesIsEnabled()) {
-            return new JSONResponse(['message' => 'Places not enabled'], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotEnabled('places');
         }
 
         // If this isn't the timeline folder then things aren't going to work
         $root = $this->getRequestRoot();
         if ($root->isEmpty()) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NoRequestRoot();
         }
 
         // Run actual query
         $list = $this->timelineQuery->getPlacePreviews($id, $root);
         if (null === $list || 0 === \count($list)) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NotFound('previews');
         }
         shuffle($list);
 

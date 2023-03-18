@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\Errors;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
@@ -36,8 +37,12 @@ class AlbumsController extends ApiBase
     public function albums(int $t = 0): JSONResponse
     {
         $user = $this->userSession->getUser();
-        if (null === $user || !$this->albumsIsEnabled()) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        if (null === $user) {
+            return Errors::NotLoggedIn();
+        }
+
+        if (!$this->albumsIsEnabled()) {
+            return Errors::NotEnabled('Albums');
         }
 
         // Run actual query
@@ -73,20 +78,24 @@ class AlbumsController extends ApiBase
     public function download(string $name = ''): JSONResponse
     {
         $user = $this->userSession->getUser();
-        if (null === $user || !$this->albumsIsEnabled()) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+        if (null === $user) {
+            return Errors::NotLoggedIn();
+        }
+
+        if (!$this->albumsIsEnabled()) {
+            return Errors::NotEnabled('Albums');
         }
 
         // Get album
         $album = $this->timelineQuery->getAlbumIfAllowed($user->getUID(), $name);
         if (null === $album) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NotFound("album {$name}");
         }
 
         // Get files
         $files = $this->timelineQuery->getAlbumFiles((int) $album['album_id']);
         if (empty($files)) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NotFound("zero files in album {$name}");
         }
 
         // Get download handle

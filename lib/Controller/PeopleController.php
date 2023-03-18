@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\Errors;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\DataResponse;
@@ -40,18 +41,18 @@ class PeopleController extends ApiBase
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotLoggedIn();
         }
 
         // Check faces enabled for this user
         if (!$this->recognizeIsEnabled()) {
-            return new JSONResponse(['message' => 'Recognize app not enabled or not v3+.'], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotEnabled('Recognize');
         }
 
         // If this isn't the timeline folder then things aren't going to work
         $root = $this->getRequestRoot();
         if ($root->isEmpty()) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NoRequestRoot();
         }
 
         // Run actual query
@@ -75,25 +76,25 @@ class PeopleController extends ApiBase
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
-            return new DataResponse([], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotLoggedIn();
         }
 
         // Check faces enabled for this user
         if (!$this->recognizeIsEnabled()) {
-            return new DataResponse([], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotEnabled('Recognize');
         }
 
         // Get folder to search for
         $root = $this->getRequestRoot();
         if ($root->isEmpty()) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NoRequestRoot();
         }
 
         // Run actual query
         $detections = $this->timelineQuery->getPeopleRecognizePreview($root, $id);
 
         if (null === $detections || 0 === \count($detections)) {
-            return new DataResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NotFound('detections');
         }
 
         return $this->getPreviewResponse($detections, $user, 1.5);
@@ -108,18 +109,18 @@ class PeopleController extends ApiBase
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotLoggedIn();
         }
 
         // Check if face recognition is installed and enabled for this user
         if (!$this->facerecognitionIsInstalled()) {
-            return new DataResponse([], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotEnabled('Face Recognition');
         }
 
         // If this isn't the timeline folder then things aren't going to work
         $root = $this->getRequestRoot();
         if ($root->isEmpty()) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NoRequestRoot();
         }
 
         // If the user has recognition disabled, just returns an empty response.
@@ -155,18 +156,18 @@ class PeopleController extends ApiBase
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
-            return new DataResponse([], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotLoggedIn();
         }
 
         // Check if face recognition is installed and enabled for this user
         if (!$this->facerecognitionIsInstalled()) {
-            return new DataResponse([], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotEnabled('Face Recognition');
         }
 
         // Get folder to search for
         $root = $this->getRequestRoot();
         if ($root->isEmpty()) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NoRequestRoot();
         }
 
         // If the user has facerecognition disabled, just returns an empty response.
@@ -179,7 +180,7 @@ class PeopleController extends ApiBase
         $detections = $this->timelineQuery->getFaceRecognitionPreview($root, $currentModel, $id);
 
         if (null === $detections || 0 === \count($detections)) {
-            return new DataResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NotFound('detections');
         }
 
         return $this->getPreviewResponse($detections, $user, 1.8);
@@ -242,7 +243,7 @@ class PeopleController extends ApiBase
 
         // Make sure the preview is valid
         if (null === $image) {
-            return new DataResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NotFound('preview');
         }
 
         // Set quality and make progressive

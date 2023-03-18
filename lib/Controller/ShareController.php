@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\Errors;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
@@ -40,9 +41,7 @@ class ShareController extends ApiBase
     {
         $file = $this->getNodeByIdOrPath($id, $path);
         if (!$file) {
-            return new JSONResponse([
-                'message' => 'File not found',
-            ], Http::STATUS_FORBIDDEN);
+            return Errors::Forbidden('file');
         }
 
         /** @var \OCP\Share\IManager $shareManager */
@@ -50,9 +49,7 @@ class ShareController extends ApiBase
 
         $shares = $shareManager->getSharesBy($this->getUID(), \OCP\Share\IShare::TYPE_LINK, $file, true, 50, 0);
         if (empty($shares)) {
-            return new JSONResponse([
-                'message' => 'No external links found',
-            ], Http::STATUS_NOT_FOUND);
+            return Errors::NotFound('external links');
         }
 
         $links = array_map([$this, 'makeShareResponse'], $shares);
@@ -72,9 +69,7 @@ class ShareController extends ApiBase
     {
         $file = $this->getNodeByIdOrPath($id, $path);
         if (!$file) {
-            return new JSONResponse([
-                'message' => 'You are not allowed to share this file',
-            ], Http::STATUS_FORBIDDEN);
+            return Errors::Forbidden('You are not allowed to share this file');
         }
 
         /** @var \OCP\Share\IManager $shareManager */
@@ -101,9 +96,7 @@ class ShareController extends ApiBase
     {
         $uid = $this->getUID();
         if (!$uid) {
-            return new JSONResponse([
-                'message' => 'You are not logged in',
-            ], Http::STATUS_FORBIDDEN);
+            return Errors::NotLoggedIn();
         }
 
         /** @var \OCP\Share\IManager $shareManager */
@@ -112,9 +105,7 @@ class ShareController extends ApiBase
         $share = $shareManager->getShareById($id);
 
         if ($share->getSharedBy() !== $uid) {
-            return new JSONResponse([
-                'message' => 'You are not the owner of this share',
-            ], Http::STATUS_FORBIDDEN);
+            return Errors::Forbidden('You are not the owner of this share');
         }
 
         $shareManager->deleteShare($share);

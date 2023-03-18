@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\Errors;
 use OCA\Memories\Exif;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataDisplayResponse;
@@ -44,39 +45,35 @@ class VideoController extends ApiBase
     {
         // Make sure not running in read-only mode
         if (false !== $this->config->getSystemValue('memories.vod.disable', 'UNSET')) {
-            return new JSONResponse(['message' => 'Transcoding disabled'], Http::STATUS_FORBIDDEN);
+            return Errors::Forbidden('Transcoding disabled');
         }
 
         // Check client identifier is 8 characters or more
         if (\strlen($client) < 8) {
-            return new JSONResponse(['message' => 'Invalid client identifier'], Http::STATUS_BAD_REQUEST);
+            return Errors::MissingParameter('client (invalid)');
         }
 
         // Get file
         $file = $this->getUserFile($fileid);
-        if (!$file) {
-            return new JSONResponse(['message' => 'File not found'], Http::STATUS_NOT_FOUND);
-        }
-
-        if (!$file->isReadable()) {
-            return new JSONResponse(['message' => 'File not readable'], Http::STATUS_FORBIDDEN);
+        if (!$file || !$file->isReadable()) {
+            return Errors::NotFoundFile($fileid);
         }
 
         // Local files only for now
         if (!$file->getStorage()->isLocal()) {
-            return new JSONResponse(['message' => 'External storage not supported'], Http::STATUS_FORBIDDEN);
+            return Errors::Forbidden('External storage not supported');
         }
 
         // Get file path
         $path = $file->getStorage()->getLocalFile($file->getInternalPath());
         if (!$path || !file_exists($path)) {
-            return new JSONResponse(['message' => 'File not found'], Http::STATUS_NOT_FOUND);
+            return Errors::NotFound('local file path');
         }
 
         // Check if file starts with temp dir
         $tmpDir = sys_get_temp_dir();
         if (0 === strpos($path, $tmpDir)) {
-            return new JSONResponse(['message' => 'File is in temp dir!'], Http::STATUS_NOT_FOUND);
+            return Errors::Forbidden('files in temp directory not supported');
         }
 
         // Request and check data was received
@@ -93,7 +90,7 @@ class VideoController extends ApiBase
             $msg = 'Transcode failed: '.$e->getMessage();
             $this->logger->error($msg, ['app' => 'memories']);
 
-            return new JSONResponse(['message' => $msg], Http::STATUS_INTERNAL_SERVER_ERROR);
+            return Errors::Generic($e);
         }
 
         // The response was already streamed, so we have nothing to do here
@@ -117,12 +114,12 @@ class VideoController extends ApiBase
     ) {
         $file = $this->getUserFile($fileid);
         if (null === $file) {
-            return new JSONResponse(['message' => 'File not found'], Http::STATUS_NOT_FOUND);
+            return Errors::NotFoundFile($fileid);
         }
 
         // Check file liveid
         if (!$liveid) {
-            return new JSONResponse(['message' => 'Live ID not provided'], Http::STATUS_BAD_REQUEST);
+            return Errors::MissingParameter('liveid');
         }
 
         // Response data
@@ -144,13 +141,13 @@ class VideoController extends ApiBase
             try { // Get trailer
                 $blob = Exif::getBinaryExifProp($path, '-trailer');
             } catch (\Exception $e) {
-                return new JSONResponse(['message' => 'Trailer not found'], Http::STATUS_NOT_FOUND);
+                return Errors::NotFound('file trailer');
             }
         } elseif ('self__embeddedvideo' === $liveid) {
             try { // Get embedded video file
                 $blob = Exif::getBinaryExifProp($path, '-EmbeddedVideoFile');
             } catch (\Exception $e) {
-                return new JSONResponse(['message' => 'Embedded video not found'], Http::STATUS_NOT_FOUND);
+                return Errors::NotFound('embedded video');
             }
         } elseif (str_starts_with($liveid, 'self__traileroffset=')) {
             // Remove prefix
@@ -165,14 +162,14 @@ class VideoController extends ApiBase
             // Get stored video file (Apple MOV)
             $lp = $this->timelineQuery->getLivePhoto($fileid);
             if (!$lp || $lp['liveid'] !== $liveid) {
-                return new JSONResponse(['message' => 'Live ID not found'], Http::STATUS_NOT_FOUND);
+                return Errors::NotFound('live video entry');
             }
 
             // Get and return file
             $liveFileId = (int) $lp['fileid'];
             $files = $this->rootFolder->getById($liveFileId);
             if (0 === \count($files)) {
-                return new JSONResponse(['message' => 'Live file not found'], Http::STATUS_NOT_FOUND);
+                return Errors::NotFound('live video file');
             }
             $liveFile = $files[0];
 
@@ -191,7 +188,7 @@ class VideoController extends ApiBase
 
         // Data not found
         if (!$blob) {
-            return new JSONResponse(['message' => 'Live file not found'], Http::STATUS_NOT_FOUND);
+            return Errors::NotFound('live video data');
         }
 
         // Transcode video if allowed

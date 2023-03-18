@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\Errors;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
@@ -37,18 +38,18 @@ class TagsController extends ApiBase
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotLoggedIn();
         }
 
         // Check tags enabled for this user
         if (!$this->tagsIsEnabled()) {
-            return new JSONResponse(['message' => 'Tags not enabled for user'], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotEnabled('Tags');
         }
 
         // If this isn't the timeline folder then things aren't going to work
         $root = $this->getRequestRoot();
         if ($root->isEmpty()) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NoRequestRoot();
         }
 
         // Run actual query
@@ -70,18 +71,18 @@ class TagsController extends ApiBase
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotLoggedIn();
         }
 
         // Check tags enabled for this user
         if (!$this->tagsIsEnabled()) {
-            return new JSONResponse(['message' => 'Tags not enabled for user'], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotEnabled('Tags');
         }
 
         // If this isn't the timeline folder then things aren't going to work
         $root = $this->getRequestRoot();
         if ($root->isEmpty()) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NoRequestRoot();
         }
 
         // Run actual query
@@ -106,20 +107,18 @@ class TagsController extends ApiBase
     {
         // Check tags enabled for this user
         if (!$this->tagsIsEnabled()) {
-            return new JSONResponse(['message' => 'Tags not enabled for user'], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotEnabled('Tags');
         }
 
         // Check the user is allowed to edit the file
         $file = $this->getUserFile($id);
         if (null === $file) {
-            return new JSONResponse([
-                'message' => 'File not found',
-            ], Http::STATUS_NOT_FOUND);
+            return Errors::NotFoundFile($id);
         }
 
         // Check the user is allowed to edit the file
         if (!$file->isUpdateable() || !($file->getPermissions() & \OCP\Constants::PERMISSION_UPDATE)) {
-            return new JSONResponse(['message' => 'Cannot update this file'], Http::STATUS_FORBIDDEN);
+            return Errors::ForbiddenFileUpdate($file->getName());
         }
 
         // Get mapper from tags to objects

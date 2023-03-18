@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Errors;
 use OCA\Memories\Exif;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\FileDisplayResponse;
@@ -49,16 +50,12 @@ class ImageController extends ApiBase
         string $mode = 'fill'
     ) {
         if (-1 === $id || 0 === $x || 0 === $y) {
-            return new JSONResponse([
-                'message' => 'Invalid parameters',
-            ], Http::STATUS_BAD_REQUEST);
+            return Errors::MissingParameter('id, x, y');
         }
 
         $file = $this->getUserFile($id);
         if (!$file) {
-            return new JSONResponse([
-                'message' => 'File not found',
-            ], Http::STATUS_NOT_FOUND);
+            return Errors::NotFoundFile($id);
         }
 
         try {
@@ -70,9 +67,9 @@ class ImageController extends ApiBase
 
             return $response;
         } catch (\OCP\Files\NotFoundException $e) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NotFound('preview');
         } catch (\InvalidArgumentException $e) {
-            return new JSONResponse([], Http::STATUS_BAD_REQUEST);
+            return Errors::Generic($e);
         }
     }
 
@@ -187,7 +184,7 @@ class ImageController extends ApiBase
     ): JSONResponse {
         $file = $this->getUserFile((int) $id);
         if (!$file) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NotFoundFile($id);
         }
 
         // Get the image info
@@ -229,12 +226,12 @@ class ImageController extends ApiBase
     {
         $file = $this->getUserFile((int) $id);
         if (!$file) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NotFoundFile($id);
         }
 
         // Check if user has permissions
         if (!$file->isUpdateable()) {
-            return new JSONResponse([], Http::STATUS_FORBIDDEN);
+            return Errors::ForbiddenFileUpdate($file->getName());
         }
 
         // Check for end-to-end encryption
@@ -253,7 +250,7 @@ class ImageController extends ApiBase
         try {
             Exif::setFileExif($file, $raw);
         } catch (\Exception $e) {
-            return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);
+            return Errors::Generic($e);
         }
 
         return new JSONResponse([], Http::STATUS_OK);
@@ -274,13 +271,13 @@ class ImageController extends ApiBase
     {
         $file = $this->getUserFile((int) $id);
         if (!$file) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NotFoundFile($id);
         }
 
         // Check if valid image
         $mimetype = $file->getMimeType();
         if (!\in_array($mimetype, Application::IMAGE_MIMES, true)) {
-            return new JSONResponse([], Http::STATUS_FORBIDDEN);
+            return Errors::ForbiddenFileUpdate($file->getName());
         }
 
         /** @var string Blob of image */

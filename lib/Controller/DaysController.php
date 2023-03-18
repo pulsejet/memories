@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\Db\TimelineRoot;
+use OCA\Memories\Errors;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
@@ -42,7 +43,7 @@ class DaysController extends ApiBase
         try {
             $uid = $this->getUID();
         } catch (\Exception $e) {
-            return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotLoggedIn();
         }
 
         // Get the folder to show
@@ -51,7 +52,7 @@ class DaysController extends ApiBase
         try {
             $root = $this->getRequestRoot();
         } catch (\Exception $e) {
-            return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
+            return Errors::Generic($e);
         }
 
         // Run actual query
@@ -120,7 +121,7 @@ class DaysController extends ApiBase
         try {
             $root = $this->getRequestRoot();
         } catch (\Exception $e) {
-            return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
+            return Errors::Generic($e);
         }
 
         // Convert to actual dayIds if month view
@@ -166,7 +167,7 @@ class DaysController extends ApiBase
     {
         $id = $this->request->getParam('body_ids');
         if (null === $id) {
-            return new JSONResponse([], Http::STATUS_BAD_REQUEST);
+            return Errors::MissingParameter('body_ids');
         }
 
         return $this->day($id);

@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Errors;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\StreamResponse;
@@ -44,7 +45,7 @@ class OtherController extends ApiBase
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
-            return new JSONResponse([], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::NotLoggedIn();
         }
 
         // Make sure not running in read-only mode

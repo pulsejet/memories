@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use bantu\IniGetWrapper\IniGetWrapper;
+use OCA\Memories\Errors;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\ISession;
@@ -46,7 +47,7 @@ class DownloadController extends ApiBase
         // Get ids from body
         $files = $this->request->getParam('files');
         if (null === $files || !\is_array($files)) {
-            return new JSONResponse([], Http::STATUS_BAD_REQUEST);
+            return Errors::MissingParameter('files');
         }
 
         // Return id
@@ -89,8 +90,9 @@ class DownloadController extends ApiBase
         $session->remove($key);
 
         if (null === $info) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NotFound('handle');
         }
+
         $name = $info[0].'-'.date('YmdHis');
         $fileIds = $info[1];
 
@@ -101,7 +103,7 @@ class DownloadController extends ApiBase
 
         // Check if we have any valid ids
         if (0 === \count($fileIds)) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
+            return Errors::NotFound('file IDs');
         }
 
         // Download single file
@@ -124,9 +126,7 @@ class DownloadController extends ApiBase
     {
         $file = $this->getUserFile($fileid);
         if (null === $file) {
-            return new JSONResponse([
-                'message' => 'File not found',
-            ], Http::STATUS_NOT_FOUND);
+            return Errors::NotFoundFile($fileid);
         }
 
         // Get the owner's root folder

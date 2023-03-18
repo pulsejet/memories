@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
-use OCP\AppFramework\Http;
+use OCA\Memories\Errors;
 use OCP\AppFramework\Http\JSONResponse;
 
 class MapController extends ApiBase
@@ -39,7 +39,7 @@ class MapController extends ApiBase
         try {
             $root = $this->getRequestRoot();
         } catch (\Exception $e) {
-            return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
+            return Errors::NoRequestRoot();
         }
 
         // Make sure we have bounds and zoom level
@@ -47,7 +47,7 @@ class MapController extends ApiBase
         $bounds = $this->request->getParam('bounds');
         $zoomLevel = $this->request->getParam('zoom');
         if (!$bounds || !$zoomLevel || !is_numeric($zoomLevel)) {
-            return new JSONResponse(['message' => 'Invalid parameters'], Http::STATUS_PRECONDITION_FAILED);
+            return Errors::MissingParameter('bounds or zoom');
         }
 
         // A tweakable parameter to determine the number of boxes in the map
@@ -75,7 +75,7 @@ class MapController extends ApiBase
 
             return new JSONResponse($clusters);
         } catch (\Exception $e) {
-            return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);
+            return Errors::Generic($e);
         }
     }
 }
