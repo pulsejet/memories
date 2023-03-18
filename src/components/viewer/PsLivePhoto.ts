@@ -30,10 +30,11 @@ class LivePhotoContentSetup {
     const photo = content?.data?.photo;
 
     const video = document.createElement("video");
-    video.muted = true;
-    video.autoplay = false;
-    video.playsInline = true;
     video.preload = "none";
+    video.muted = true;
+    video.playsInline = true;
+    video.disableRemotePlayback = true;
+    video.autoplay = false;
     video.src = utils.getLivePhotoVideoUrl(photo, true);
 
     const div = document.createElement("div");

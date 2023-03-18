@@ -61,6 +61,7 @@
         preload="none"
         muted
         playsinline
+        disableRemotePlayback
       />
       <div class="overlay fill-block" />
     </div>
