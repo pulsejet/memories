@@ -94,7 +94,7 @@ export default defineComponent({
     },
 
     handleAppSidebarOpen() {
-      const sidebar: HTMLElement = document.querySelector("aside.app-sidebar");
+      const sidebar = document.getElementById("app-sidebar-vue");
       if (sidebar) {
         this.isSidebarShown = true;
         this.sidebarWidth = sidebar.offsetWidth;

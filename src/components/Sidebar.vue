@@ -1,5 +1,5 @@
 <template>
-  <aside class="app-sidebar" v-if="reducedOpen">
+  <aside id="app-sidebar-vue" class="app-sidebar" v-if="reducedOpen">
     <div class="title">
       <h2>{{ basename }}</h2>
 
@@ -104,7 +104,7 @@ export default defineComponent({
     },
 
     getWidth() {
-      const sidebar = document.querySelector<HTMLElement>("aside.app-sidebar");
+      const sidebar = document.getElementById("app-sidebar-vue");
       this.lastKnownWidth = sidebar?.offsetWidth || this.lastKnownWidth;
       return (this.lastKnownWidth || 2) - 2;
     },
@@ -115,7 +115,7 @@ export default defineComponent({
 
     handleOpen() {
       // Stop sidebar typing from leaking outside
-      const sidebar: HTMLElement = document.querySelector("aside.app-sidebar");
+      const sidebar = document.getElementById("app-sidebar-vue");
       sidebar?.addEventListener("keydown", (e) => {
         if (e.key.length === 1) e.stopPropagation();
       });
@@ -138,7 +138,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-aside.app-sidebar {
+#app-sidebar-vue {
   position: fixed;
   top: 0;
   right: 0;
@@ -173,7 +173,7 @@ aside.app-sidebar {
 
 <style lang="scss">
 // Prevent sidebar from becoming too big
-aside.app-sidebar {
+#app-sidebar-vue {
   max-width: 360px !important;
   position: fixed !important;
 

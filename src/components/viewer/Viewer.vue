@@ -485,14 +485,11 @@ export default defineComponent({
       // Monkey patch for focus trapping in sidebar
       const _onFocusIn = this.photoswipe.keyboard["_onFocusIn"];
       this.photoswipe.keyboard["_onFocusIn"] = (e: FocusEvent) => {
-        if (e.target instanceof HTMLElement) {
-          if (
-            e.target.closest("aside.app-sidebar") ||
-            e.target.closest(".v-popper__popper") ||
-            e.target.closest(".modal-mask")
-          ) {
-            return;
-          }
+        if (
+          e.target instanceof HTMLElement &&
+          e.target.closest("#app-sidebar-vue, .v-popper__popper, .modal-mask")
+        ) {
+          return;
         }
         _onFocusIn.call(this.photoswipe.keyboard, e);
       };
@@ -752,7 +749,7 @@ export default defineComponent({
         }
 
         // Remove active class from others and add to this one
-        document
+        this.photoswipe.element
           .querySelectorAll(".pswp__item")
           .forEach((el) => el.classList.remove("active"));
         e.slide.holderElement?.classList.add("active");
