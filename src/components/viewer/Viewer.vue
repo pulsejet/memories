@@ -1035,16 +1035,8 @@ export default defineComponent({
       }
     },
 
-    async updateSizeWithoutAnim() {
-      const wasFullyOpened = this.fullyOpened;
-      this.fullyOpened = false;
-      this.photoswipe.updateSize();
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      this.fullyOpened = wasFullyOpened;
-    },
-
     handleAppSidebarOpen() {
-      if (!(this.show && this.photoswipe)) return;
+      if (!this.show || !this.photoswipe) return;
 
       const sidebar: HTMLElement = document.querySelector("aside.app-sidebar");
       if (sidebar) {
@@ -1057,13 +1049,13 @@ export default defineComponent({
       }
 
       this.sidebarOpen = true;
-      this.updateSizeWithoutAnim();
+      this.photoswipe.updateSize();
     },
 
     handleAppSidebarClose() {
       if (this.show && this.photoswipe && this.fullyOpened) {
         this.sidebarOpen = false;
-        this.updateSizeWithoutAnim();
+        this.photoswipe.updateSize();
       }
     },
 

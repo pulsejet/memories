@@ -44,6 +44,12 @@ export default defineComponent({
     };
   },
 
+  computed: {
+    native() {
+      return globalThis.OCA?.Files?.Sidebar;
+    },
+  },
+
   mounted() {
     subscribe("files:sidebar:opened", this.handleNativeOpen);
     subscribe("files:sidebar:closed", this.handleNativeClose);
@@ -62,9 +68,9 @@ export default defineComponent({
 
   methods: {
     async open(fileid: number, filename?: string, forceNative = false) {
-      if (!this.reducedOpen && this.native() && (!fileid || forceNative)) {
-        this.native()?.setFullScreenMode?.(true);
-        this.native()?.open(filename);
+      if (!this.reducedOpen && this.native && (!fileid || forceNative)) {
+        this.native?.setFullScreenMode?.(true);
+        this.native?.open(filename);
       } else {
         this.reducedOpen = true;
         await this.$nextTick();
@@ -78,7 +84,7 @@ export default defineComponent({
 
     async close() {
       if (this.nativeOpen) {
-        this.native()?.close();
+        this.native?.close();
       } else {
         if (this.reducedOpen) {
           this.reducedOpen = false;
@@ -89,11 +95,7 @@ export default defineComponent({
     },
 
     setTab(tab: string) {
-      this.native()?.setActiveTab(tab);
-    },
-
-    native() {
-      return globalThis.OCA?.Files?.Sidebar;
+      this.native?.setActiveTab(tab);
     },
 
     handleNativeOpen(event: any) {
@@ -103,6 +105,7 @@ export default defineComponent({
 
     handleNativeClose(event: any) {
       this.nativeOpen = false;
+      this.native?.setFullScreenMode?.(false);
       emit("memories:sidebar:closed", event);
     },
   },
