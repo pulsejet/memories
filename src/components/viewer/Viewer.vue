@@ -460,10 +460,15 @@ export default defineComponent({
         arrowPrevTitle: this.t("memories", "Previous"),
         arrowNextTitle: this.t("memories", "Next"),
         getViewportSizeFn: () => {
+          // Ignore the sidebar if mobile or fullscreen
           const isMobile = globalThis.windowInnerWidth < 768;
-          const sidebarWidth =
-            this.sidebarOpen && !isMobile ? this.sidebarWidth : 0;
+          const isFullscreen = Boolean(document.fullscreenElement);
+          const use = this.sidebarOpen && !isMobile && !isFullscreen;
+
+          // Calculate the sidebar width to use and outer width
+          const sidebarWidth = use ? this.sidebarWidth : 0;
           this.outerWidth = `calc(100vw - ${sidebarWidth}px)`;
+
           return {
             x: globalThis.windowInnerWidth - sidebarWidth,
             y: globalThis.windowInnerHeight,
@@ -1168,6 +1173,7 @@ export default defineComponent({
       if (!document.fullscreenElement) {
         this.stopSlideshow();
       }
+      this.photoswipe?.updateSize();
     },
 
     /**
