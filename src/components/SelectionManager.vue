@@ -321,6 +321,7 @@ export default defineComponent({
 
       this.touchAnchor = photo;
       this.prevOver = photo;
+      this.prevTouch = event.touches[0];
       this.touchPrevSel = new Map(this.selection);
       this.touchTimer = window.setTimeout(() => {
         if (this.touchAnchor === photo) {
@@ -358,7 +359,20 @@ export default defineComponent({
     touchmovePhoto(anchor: IPhoto, event: TouchEvent, rowIdx: number) {
       if (anchor.flag & this.c.FLAG_PLACEHOLDER) return;
 
+      // Use first touch -- can't do much
+      const touch: Touch = event.touches[0];
+
       if (this.touchTimer) {
+        // To be more forgiving, check if touch is still
+        // within 30px of anchor touch (prevTouch)
+        if (
+          this.prevTouch &&
+          Math.abs(this.prevTouch.clientX - touch.clientX) < 30 &&
+          Math.abs(this.prevTouch.clientY - touch.clientY) < 30
+        ) {
+          return;
+        }
+
         // Touch is not held, just cancel
         window.clearTimeout(this.touchTimer);
         this.touchTimer = 0;
@@ -372,8 +386,7 @@ export default defineComponent({
       // Prevent scrolling
       event.preventDefault();
 
-      // Use first touch -- can't do much
-      const touch: Touch = event.touches[0];
+      // This should never happen
       if (!touch) return;
       this.prevTouch = touch;
 
