@@ -385,6 +385,7 @@ div.img-outer {
   position: relative;
   box-sizing: border-box;
   padding: 0;
+  cursor: pointer;
 
   transition: padding 0.15s ease;
   .p-outer.selected > & {
@@ -400,7 +401,6 @@ div.img-outer {
     background-clip: content-box;
     object-fit: cover;
     z-index: 1;
-    cursor: pointer;
     background-color: var(--color-background-dark);
 
     -webkit-tap-highlight-color: transparent;
