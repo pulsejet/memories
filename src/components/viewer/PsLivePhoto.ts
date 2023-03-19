@@ -17,7 +17,7 @@ class LivePhotoContentSetup {
     lightbox.on("contentLoad", this.onContentLoad.bind(this));
     lightbox.on("contentActivate", this.onContentActivate.bind(this));
     lightbox.on("contentDeactivate", this.onContentDeactivate.bind(this));
-    lightbox.on("contentAppend", this.onContentAppend.bind(this));
+    lightbox.on("contentDestroy", this.onContentDestroy.bind(this));
   }
 
   onContentLoad(e) {
@@ -51,8 +51,8 @@ class LivePhotoContentSetup {
   }
 
   onContentActivate({ content }) {
-    if (isLiveContent(content) && content.element) {
-      const video = content.element.querySelector("video");
+    if (isLiveContent(content)) {
+      const video = content.element?.querySelector("video");
       if (video) {
         video.currentTime = 0;
         video.play();
@@ -61,16 +61,14 @@ class LivePhotoContentSetup {
   }
 
   onContentDeactivate({ content }) {
-    if (isLiveContent(content) && content.element) {
-      content.element.querySelector("video")?.pause();
+    if (isLiveContent(content)) {
+      content.element?.querySelector("video")?.pause();
     }
   }
 
-  onContentAppend(e) {
+  onContentDestroy(e) {
     if (isLiveContent(e.content)) {
-      e.preventDefault();
-      e.content.isAttached = true;
-      e.content.appendImage();
+      e.content.element?.remove();
     }
   }
 }
