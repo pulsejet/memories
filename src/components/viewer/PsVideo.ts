@@ -44,6 +44,10 @@ class VideoContentSetup {
     lightbox.on("contentDeactivate", this.onContentDeactivate.bind(this));
     lightbox.on("contentResize", this.onContentResize.bind(this));
 
+    lightbox.addFilter(
+      "isKeepingPlaceholder",
+      this.isKeepingPlaceholder.bind(this)
+    );
     lightbox.addFilter("isContentZoomable", this.isContentZoomable.bind(this));
     lightbox.addFilter(
       "useContentPlaceholder",
@@ -462,8 +466,12 @@ class VideoContentSetup {
     }
   }
 
-  isContentZoomable(isZoomable, content) {
+  isContentZoomable(isZoomable: boolean, content) {
     return !isVideoContent(content) && isZoomable;
+  }
+
+  isKeepingPlaceholder(keep: boolean, content) {
+    return isVideoContent(content) || keep;
   }
 
   onContentActivate({ content }) {
