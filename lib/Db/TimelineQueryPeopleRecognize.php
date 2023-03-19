@@ -11,14 +11,19 @@ trait TimelineQueryPeopleRecognize
 {
     protected IDBConnection $connection;
 
-    public function transformPeopleRecognitionFilter(IQueryBuilder &$query, string $userId, string $faceStr, bool $isAggregate)
+    public function transformPeopleRecognitionFilter(IQueryBuilder $query, string $userId, string $faceStr, bool $isAggregate)
     {
         // Get name and uid of face user
         $faceNames = explode('/', $faceStr);
         if (2 !== \count($faceNames)) {
             throw new \Exception('Invalid face query');
         }
-        $faceUid = $faceNames[0];
+
+        // Starting with Recognize v3.6, the detections are duplicated for each user
+        // So we don't need to use the user ID provided by the user, but retain
+        // this here for backwards compatibility + API consistency with Face Recognition
+        // $faceUid = $faceNames[0];
+
         $faceName = $faceNames[1];
 
         if (!$isAggregate) {
@@ -28,15 +33,15 @@ trait TimelineQueryPeopleRecognize
 
         // Join with cluster
         $clusterQuery = null;
-        if ('NULL' !== $faceName) {
+        if ('NULL' === $faceName) {
+            $clusterQuery = $query->expr()->isNull('rfd.cluster_id');
+        } else {
             $nameField = is_numeric($faceName) ? 'rfc.id' : 'rfc.title';
             $query->innerJoin('m', 'recognize_face_clusters', 'rfc', $query->expr()->andX(
-                $query->expr()->eq('rfc.user_id', $query->createNamedParameter($faceUid)),
+                $query->expr()->eq('rfc.user_id', $query->createNamedParameter($userId)),
                 $query->expr()->eq($nameField, $query->createNamedParameter($faceName)),
             ));
             $clusterQuery = $query->expr()->eq('rfd.cluster_id', 'rfc.id');
-        } else {
-            $clusterQuery = $query->expr()->isNull('rfd.cluster_id');
         }
 
         // Join with detections
@@ -57,7 +62,7 @@ trait TimelineQueryPeopleRecognize
         );
     }
 
-    public function getPeopleRecognize(TimelineRoot &$root)
+    public function getPeopleRecognize(TimelineRoot &$root, string $uid)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -74,6 +79,9 @@ trait TimelineQueryPeopleRecognize
         // WHERE these photos are in the user's requested folder recursively
         $query = $this->joinFilecache($query, $root, true, false);
 
+        // WHERE this cluster belongs to the user
+        $query->where($query->expr()->eq('rfc.user_id', $query->createNamedParameter($uid)));
+
         // GROUP by ID of face cluster
         $query->groupBy('rfc.id');
 
@@ -89,15 +97,15 @@ trait TimelineQueryPeopleRecognize
         // Post process
         foreach ($faces as &$row) {
             $row['id'] = (int) $row['id'];
+            $row['count'] = (int) $row['count'];
             $row['name'] = $row['title'];
             unset($row['title']);
-            $row['count'] = (int) $row['count'];
         }
 
         return $faces;
     }
 
-    public function getPeopleRecognizePreview(TimelineRoot &$root, int $id)
+    public function getPeopleRecognizePreview(TimelineRoot &$root, int $id, string $uid): array
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -113,7 +121,12 @@ trait TimelineQueryPeopleRecognize
             'm.fileid',
             'm.datetaken',              // Just in case, for postgres
         )->from('recognize_face_detections', 'rfd');
-        $query->where($query->expr()->eq('rfd.cluster_id', $query->createNamedParameter($id)));
+
+        // WHERE detection belongs to this cluster AND user
+        $query->where($query->expr()->andX(
+            $query->expr()->eq('rfd.cluster_id', $query->createNamedParameter($id)),
+            $query->expr()->eq('rfd.user_id', $query->createNamedParameter($uid)),
+        ));
 
         // WHERE these photos are memories indexed
         $query->innerJoin('rfd', 'memories', 'm', $query->expr()->eq('m.fileid', 'rfd.file_id'));
@@ -132,7 +145,7 @@ trait TimelineQueryPeopleRecognize
         $cursor = $this->executeQueryWithCTEs($query);
         $previews = $cursor->fetchAll();
         if (empty($previews)) {
-            return null;
+            return [];
         }
 
         // Score the face detections

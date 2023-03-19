@@ -39,8 +39,9 @@ class PeopleController extends ApiBase
      */
     public function recognizePeople(): JSONResponse
     {
-        $user = $this->userSession->getUser();
-        if (null === $user) {
+        try {
+            $uid = $this->getUID();
+        } catch (\Exception $e) {
             return Errors::NotLoggedIn();
         }
 
@@ -57,7 +58,7 @@ class PeopleController extends ApiBase
 
         // Run actual query
         $list = $this->timelineQuery->getPeopleRecognize(
-            $root,
+            $root, $uid
         );
 
         return new JSONResponse($list, Http::STATUS_OK);
@@ -74,8 +75,9 @@ class PeopleController extends ApiBase
      */
     public function recognizePeoplePreview(int $id): Http\Response
     {
-        $user = $this->userSession->getUser();
-        if (null === $user) {
+        try {
+            $uid = $this->getUID();
+        } catch (\Exception $e) {
             return Errors::NotLoggedIn();
         }
 
@@ -91,13 +93,13 @@ class PeopleController extends ApiBase
         }
 
         // Run actual query
-        $detections = $this->timelineQuery->getPeopleRecognizePreview($root, $id);
+        $detections = $this->timelineQuery->getPeopleRecognizePreview($root, $id, $uid);
 
-        if (null === $detections || 0 === \count($detections)) {
+        if (0 === \count($detections)) {
             return Errors::NotFound('detections');
         }
 
-        return $this->getPreviewResponse($detections, $user, 1.5);
+        return $this->getPreviewResponse($detections, 1.5);
     }
 
     /**
@@ -183,7 +185,7 @@ class PeopleController extends ApiBase
             return Errors::NotFound('detections');
         }
 
-        return $this->getPreviewResponse($detections, $user, 1.8);
+        return $this->getPreviewResponse($detections, 1.8);
     }
 
     /**
@@ -195,16 +197,17 @@ class PeopleController extends ApiBase
      */
     private function getPreviewResponse(
         array $detections,
-        \OCP\IUser $user,
         float $padding
     ): Http\Response {
         // Get preview manager
         $previewManager = \OC::$server->get(\OCP\IPreview::class);
 
-        // Find the first detection that has a preview
         /** @var \Imagick */
         $image = null;
-        $userFolder = $this->rootFolder->getUserFolder($user->getUID());
+
+        // Find the first detection that has a preview
+        $userFolder = $this->rootFolder->getUserFolder($this->getUID());
+
         foreach ($detections as &$detection) {
             // Get the file (also checks permissions)
             $files = $userFolder->getById($detection['file_id']);
