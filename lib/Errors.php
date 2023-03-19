@@ -26,7 +26,7 @@ class Errors
     public static function NotEnabled(string $app): Http\Response
     {
         return new DataResponse([
-            'message' => "{$app} app not enabled or not v3+.",
+            'message' => "{$app} app not enabled or not the required version.",
         ], Http::STATUS_PRECONDITION_FAILED);
     }
 
