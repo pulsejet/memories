@@ -13,6 +13,7 @@ const config_noTranscode = loadState(
   "notranscode",
   <string>"UNSET"
 ) as boolean | string;
+const config_videoIsSetup = config_noTranscode !== "UNSET";
 
 const config_video_default_quality = Number(
   loadState("memories", "video_default_quality", <string>"0") as string
@@ -129,7 +130,7 @@ class VideoContentSetup {
   }
 
   async initVideo(content: any) {
-    if (!isVideoContent(content) || content.videojs) {
+    if (!isVideoContent(content) || content.videojs || !config_videoIsSetup) {
       return;
     }
 
@@ -514,31 +515,25 @@ class VideoContentSetup {
     // stop default content load
     e.preventDefault();
 
-    if (content.element) {
-      return;
-    }
+    if (content.element) return;
 
-    if (config_noTranscode === "UNSET") {
-      content.element = document.createElement("div");
-      content.element.innerHTML =
-        "Video not configured. Run occ memories:video-setup";
+    // Create DIV
+    content.element = document.createElement("div");
+
+    if (config_videoIsSetup) {
+      content.state = "loading";
+      content.type = "video";
+    } else {
+      // Stop if video not setup
+      content.element.innerHTML = t(
+        "memories",
+        "Video not configured. Run occ memories:video-setup"
+      );
       content.element.style.color = "red";
       content.element.style.display = "flex";
       content.element.style.alignItems = "center";
       content.element.style.justifyContent = "center";
-      content.onLoaded();
-      return;
     }
-
-    content.state = "loading";
-    content.type = "video"; // TODO: move this to pswp core?
-
-    content.element = document.createElement("div");
-    content.element.style.position = "absolute";
-    content.element.style.left = 0;
-    content.element.style.top = 0;
-    content.element.style.width = "100%";
-    content.element.style.height = "100%";
 
     content.onLoaded();
   }
