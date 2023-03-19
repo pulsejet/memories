@@ -1256,6 +1256,15 @@ export default defineComponent({
   .pswp__top-bar {
     background: linear-gradient(0deg, transparent, rgba(0, 0, 0, 0.3));
   }
+
+  .video-container {
+    &.error {
+      color: red;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
 }
 
 :deep .video-js .vjs-big-play-button {

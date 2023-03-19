@@ -14,6 +14,7 @@ export default class ImageContentSetup {
     lightbox.on("zoomPanUpdate", this.zoomPanUpdate.bind(this));
     lightbox.on("slideActivate", this.slideActivate.bind(this));
     lightbox.addFilter("isContentLoading", this.isContentLoading.bind(this));
+    lightbox.addFilter("placeholderSrc", this.placeholderSrc.bind(this));
   }
 
   isContentLoading(isLoading: boolean, content: any) {
@@ -33,16 +34,14 @@ export default class ImageContentSetup {
     e.preventDefault();
   }
 
+  placeholderSrc(placeholderSrc: string, content: any) {
+    return content.data.msrc || placeholderSrc;
+  }
+
   getXImgElem(content: any, onLoad: () => void): HTMLImageElement {
     const img = document.createElement("img");
     img.classList.add("pswp__img", "ximg");
-
-    // Load thumbnail in case the user is scrolling fast
-    if (content.data.msrc) {
-      img.src = content.data.msrc;
-    } else {
-      img.style.visibility = "hidden";
-    }
+    img.style.visibility = "hidden";
 
     // Fetch with Axios
     fetchImage(content.data.src).then((blob) => {

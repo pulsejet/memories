@@ -44,10 +44,6 @@ class VideoContentSetup {
     lightbox.on("contentDeactivate", this.onContentDeactivate.bind(this));
     lightbox.on("contentResize", this.onContentResize.bind(this));
 
-    lightbox.addFilter(
-      "isKeepingPlaceholder",
-      this.isKeepingPlaceholder.bind(this)
-    );
     lightbox.addFilter("isContentZoomable", this.isContentZoomable.bind(this));
     lightbox.addFilter(
       "useContentPlaceholder",
@@ -240,8 +236,8 @@ class VideoContentSetup {
   }
 
   destroyVideo(content: any) {
-    if (isVideoContent(content) && content.videojs) {
-      content.videojs.dispose?.();
+    if (isVideoContent(content)) {
+      content.videojs?.dispose?.();
       content.videojs = null;
 
       content.plyr?.elements?.container?.remove();
@@ -438,12 +434,7 @@ class VideoContentSetup {
   }
 
   onContentDestroy({ content }) {
-    if (isVideoContent(content)) {
-      if (content.videojs) {
-        content.videojs.dispose?.();
-        content.videojs = null;
-      }
-    }
+    this.destroyVideo(content);
   }
 
   onContentResize(e) {
@@ -471,18 +462,8 @@ class VideoContentSetup {
     }
   }
 
-  isKeepingPlaceholder(isZoomable, content) {
-    if (isVideoContent(content)) {
-      return false;
-    }
-    return isZoomable;
-  }
-
   isContentZoomable(isZoomable, content) {
-    if (isVideoContent(content)) {
-      return false;
-    }
-    return isZoomable;
+    return !isVideoContent(content) && isZoomable;
   }
 
   onContentActivate({ content }) {
@@ -497,40 +478,30 @@ class VideoContentSetup {
     const content = e.content;
     if (!isVideoContent(e.content)) return;
 
-    // stop default content load
+    // Stop default content load
     e.preventDefault();
+    content.type = "video";
 
     if (content.element) return;
 
     // Create DIV
     content.element = document.createElement("div");
-    content.element.classList.add("pswp__img");
-    content.element.style.background = `url(${content.data.msrc})`;
-    content.element.style.backgroundSize = "cover";
+    content.element.classList.add("video-container");
 
-    if (config_videoIsSetup) {
-      content.state = "loading";
-      content.type = "video";
-    } else {
-      // Stop if video not setup
+    // Stop if video not setup
+    if (!config_videoIsSetup) {
       content.element.innerHTML = t(
         "memories",
         "Video not configured. Run occ memories:video-setup"
       );
-      content.element.style.color = "red";
-      content.element.style.display = "flex";
-      content.element.style.alignItems = "center";
-      content.element.style.justifyContent = "center";
+      content.element.classList.add("error");
     }
 
     content.onLoaded();
   }
 
-  useContentPlaceholder(usePlaceholder, content) {
-    if (isVideoContent(content)) {
-      return true;
-    }
-    return usePlaceholder;
+  useContentPlaceholder(usePlaceholder: boolean, content: any) {
+    return isVideoContent(content) || usePlaceholder;
   }
 }
 
