@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\Errors;
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
 class MapController extends ApiBase
@@ -31,7 +32,7 @@ class MapController extends ApiBase
     /**
      * @NoAdminRequired
      */
-    public function clusters(): JSONResponse
+    public function clusters(): Http\Response
     {
         // Get the folder to show
         $root = null;

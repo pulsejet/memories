@@ -37,7 +37,7 @@ class DaysController extends ApiBase
      *
      * @PublicPage
      */
-    public function days(): JSONResponse
+    public function days(): Http\Response
     {
         // Get the folder to show
         try {
@@ -94,7 +94,7 @@ class DaysController extends ApiBase
      *
      * @PublicPage
      */
-    public function day(string $id): JSONResponse
+    public function day(string $id): Http\Response
     {
         // Get user
         $uid = $this->getUID();
@@ -163,7 +163,7 @@ class DaysController extends ApiBase
      *
      * @PublicPage
      */
-    public function dayPost(): JSONResponse
+    public function dayPost(): Http\Response
     {
         $id = $this->request->getParam('body_ids');
         if (null === $id) {

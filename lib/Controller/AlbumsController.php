@@ -34,7 +34,7 @@ class AlbumsController extends ApiBase
      *
      * Get list of albums with counts of images
      */
-    public function albums(int $t = 0): JSONResponse
+    public function albums(int $t = 0): Http\Response
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
@@ -75,7 +75,7 @@ class AlbumsController extends ApiBase
      *
      * Download an album as a zip file
      */
-    public function download(string $name = ''): JSONResponse
+    public function download(string $name = ''): Http\Response
     {
         $user = $this->userSession->getUser();
         if (null === $user) {

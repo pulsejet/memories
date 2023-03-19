@@ -34,7 +34,7 @@ class PlacesController extends ApiBase
      *
      * Get list of places with counts of images
      */
-    public function places(): JSONResponse
+    public function places(): Http\Response
     {
         $user = $this->userSession->getUser();
         if (null === $user) {

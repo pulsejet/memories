@@ -181,7 +181,7 @@ class ImageController extends ApiBase
         bool $basic = false,
         bool $current = false,
         bool $tags = false
-    ): JSONResponse {
+    ): Http\Response {
         $file = $this->getUserFile((int) $id);
         if (!$file) {
             return Errors::NotFoundFile($id);
@@ -222,7 +222,7 @@ class ImageController extends ApiBase
      * @param string fileid
      * @param array  raw exif data
      */
-    public function setExif(string $id, array $raw): JSONResponse
+    public function setExif(string $id, array $raw): Http\Response
     {
         $file = $this->getUserFile((int) $id);
         if (!$file) {
@@ -267,7 +267,7 @@ class ImageController extends ApiBase
      * The returned image may be png / webp / jpeg / gif.
      * These formats are supported by all browsers.
      */
-    public function decodable(string $id)
+    public function decodable(string $id): Http\Response
     {
         $file = $this->getUserFile((int) $id);
         if (!$file) {

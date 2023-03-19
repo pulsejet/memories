@@ -42,7 +42,7 @@ class DownloadController extends ApiBase
      *
      * Request to download one or more files
      */
-    public function request(): JSONResponse
+    public function request(): Http\Response
     {
         // Get ids from body
         $files = $this->request->getParam('files');

@@ -41,7 +41,7 @@ class OtherController extends ApiBase
      *
      * @return JSONResponse an empty JSONResponse with respective http status code
      */
-    public function setUserConfig(string $key, string $value): JSONResponse
+    public function setUserConfig(string $key, string $value): Http\Response
     {
         $user = $this->userSession->getUser();
         if (null === $user) {

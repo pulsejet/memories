@@ -37,7 +37,7 @@ class PeopleController extends ApiBase
      *
      * Get list of faces with counts of images
      */
-    public function recognizePeople(): JSONResponse
+    public function recognizePeople(): Http\Response
     {
         try {
             $uid = $this->getUID();
@@ -58,7 +58,8 @@ class PeopleController extends ApiBase
 
         // Run actual query
         $list = $this->timelineQuery->getPeopleRecognize(
-            $root, $uid
+            $root,
+            $uid
         );
 
         return new JSONResponse($list, Http::STATUS_OK);
@@ -107,7 +108,7 @@ class PeopleController extends ApiBase
      *
      * Get list of faces with counts of images
      */
-    public function facerecognitionPeople(): JSONResponse
+    public function facerecognitionPeople(): Http\Response
     {
         $user = $this->userSession->getUser();
         if (null === $user) {

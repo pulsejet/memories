@@ -37,7 +37,7 @@ class ShareController extends ApiBase
      * @param mixed $id
      * @param mixed $path
      */
-    public function links($id, $path)
+    public function links($id, $path): Http\Response
     {
         $file = $this->getNodeByIdOrPath($id, $path);
         if (!$file) {
@@ -65,7 +65,7 @@ class ShareController extends ApiBase
      * @param mixed $id
      * @param mixed $path
      */
-    public function createNode($id, $path)
+    public function createNode($id, $path): Http\Response
     {
         $file = $this->getNodeByIdOrPath($id, $path);
         if (!$file) {
@@ -92,7 +92,7 @@ class ShareController extends ApiBase
      *
      * Delete an external link share
      */
-    public function deleteShare(string $id)
+    public function deleteShare(string $id): Http\Response
     {
         $uid = $this->getUID();
         if (!$uid) {

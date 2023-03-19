@@ -34,7 +34,7 @@ class TagsController extends ApiBase
      *
      * Get list of tags with counts of images
      */
-    public function tags(): JSONResponse
+    public function tags(): Http\Response
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
@@ -103,7 +103,7 @@ class TagsController extends ApiBase
      *
      * Set tags for a file
      */
-    public function set(int $id, array $add, array $remove): JSONResponse
+    public function set(int $id, array $add, array $remove): Http\Response
     {
         // Check tags enabled for this user
         if (!$this->tagsIsEnabled()) {

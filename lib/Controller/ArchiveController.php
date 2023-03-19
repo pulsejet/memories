@@ -38,7 +38,7 @@ class ArchiveController extends ApiBase
      *
      * @param string fileid
      */
-    public function archive(string $id): JSONResponse
+    public function archive(string $id): Http\Response
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
