@@ -36,7 +36,13 @@ export default class ImageContentSetup {
   getXImgElem(content: any, onLoad: () => void): HTMLImageElement {
     const img = document.createElement("img");
     img.classList.add("pswp__img", "ximg");
-    img.style.visibility = "hidden";
+
+    // Load thumbnail in case the user is scrolling fast
+    if (content.data.msrc) {
+      img.src = content.data.msrc;
+    } else {
+      img.style.visibility = "hidden";
+    }
 
     // Fetch with Axios
     fetchImage(content.data.src).then((blob) => {
