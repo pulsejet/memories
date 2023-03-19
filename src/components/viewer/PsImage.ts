@@ -1,9 +1,9 @@
 import PhotoSwipe from "photoswipe";
-import Slide from "photoswipe/dist/types/slide/slide";
 
 import { isVideoContent } from "./PsVideo";
 import { isLiveContent } from "./PsLivePhoto";
 import { fetchImage } from "../frame/XImgCache";
+import { PsContent, PsEvent, PsSlide } from "./types";
 
 export default class ImageContentSetup {
   private loading = 0;
@@ -17,11 +17,11 @@ export default class ImageContentSetup {
     lightbox.addFilter("placeholderSrc", this.placeholderSrc.bind(this));
   }
 
-  isContentLoading(isLoading: boolean, content: any) {
+  isContentLoading(isLoading: boolean, content: PsContent) {
     return isLoading || this.loading > 0;
   }
 
-  onContentLoad(e) {
+  onContentLoad(e: PsEvent) {
     if (isVideoContent(e.content) || isLiveContent(e.content)) return;
 
     // Insert image throgh XImgCache
@@ -29,16 +29,16 @@ export default class ImageContentSetup {
     e.content.element = this.getXImgElem(e.content, () => e.content.onLoaded());
   }
 
-  onContentLoadImage(e) {
+  onContentLoadImage(e: PsEvent) {
     if (isVideoContent(e.content) || isLiveContent(e.content)) return;
     e.preventDefault();
   }
 
-  placeholderSrc(placeholderSrc: string, content: any) {
+  placeholderSrc(placeholderSrc: string, content: PsContent) {
     return content.data.msrc || placeholderSrc;
   }
 
-  getXImgElem(content: any, onLoad: () => void): HTMLImageElement {
+  getXImgElem(content: PsContent, onLoad: () => void): HTMLImageElement {
     const img = document.createElement("img");
     img.classList.add("pswp__img", "ximg");
     img.style.visibility = "hidden";
@@ -63,7 +63,7 @@ export default class ImageContentSetup {
     return img;
   }
 
-  zoomPanUpdate({ slide }: { slide: Slide }) {
+  zoomPanUpdate({ slide }: { slide: PsSlide }) {
     if (!slide.data.highSrc || slide.data.highSrcCond !== "zoom") return;
 
     if (slide.currZoomLevel >= slide.zoomLevels.secondary) {
@@ -78,7 +78,7 @@ export default class ImageContentSetup {
     }
   }
 
-  loadFullImage(slide: Slide) {
+  loadFullImage(slide: PsSlide) {
     if (!slide.data.highSrc) return;
 
     // Get ximg element

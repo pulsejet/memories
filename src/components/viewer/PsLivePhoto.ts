@@ -1,8 +1,9 @@
 import PhotoSwipe from "photoswipe";
 import PsImage from "./PsImage";
 import * as utils from "../../services/Utils";
+import { PsContent, PsEvent } from "./types";
 
-export function isLiveContent(content): boolean {
+export function isLiveContent(content: PsContent): boolean {
   // Do not play Live Photo if the slideshow is
   // playing in full screen mode.
   if (document.fullscreenElement) {
@@ -21,7 +22,7 @@ class LivePhotoContentSetup {
   }
 
   onContentLoad(e) {
-    const content = e.content;
+    const content: PsContent = e.content;
     if (!isLiveContent(content)) return;
 
     e.preventDefault();
@@ -50,7 +51,7 @@ class LivePhotoContentSetup {
     content.element = div;
   }
 
-  onContentActivate({ content }) {
+  onContentActivate({ content }: { content: PsContent }) {
     if (isLiveContent(content)) {
       const video = content.element?.querySelector("video");
       if (video) {
@@ -60,15 +61,15 @@ class LivePhotoContentSetup {
     }
   }
 
-  onContentDeactivate({ content }) {
+  onContentDeactivate({ content }: PsEvent) {
     if (isLiveContent(content)) {
       content.element?.querySelector("video")?.pause();
     }
   }
 
-  onContentDestroy(e) {
-    if (isLiveContent(e.content)) {
-      e.content.element?.remove();
+  onContentDestroy({ content }: PsEvent) {
+    if (isLiveContent(content)) {
+      content.element?.remove();
     }
   }
 }

@@ -179,6 +179,7 @@
 import { defineComponent } from "vue";
 
 import { IDay, IPhoto, IRow, IRowType } from "../../types";
+import { PsSlide } from "./types";
 
 import UserConfig from "../../mixins/UserConfig";
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
@@ -584,19 +585,17 @@ export default defineComponent({
       });
 
       // Video support
-      this.psVideo = new PsVideo(<any>this.photoswipe, {
-        videoAttributes: { controls: "", playsinline: "", preload: "none" },
-        autoplay: true,
+      this.psVideo = new PsVideo(<PhotoSwipe>this.photoswipe, {
         preventDragOffset: 40,
       });
 
       // Image support
-      this.psImage = new PsImage(<any>this.photoswipe);
+      this.psImage = new PsImage(<PhotoSwipe>this.photoswipe);
 
       // Live Photo support
       this.psLivePhoto = new PsLivePhoto(
-        <any>this.photoswipe,
-        <any>this.psImage
+        <PhotoSwipe>this.photoswipe,
+        <PsImage>this.psImage
       );
 
       // Patch the close button to stop the slideshow
@@ -979,7 +978,7 @@ export default defineComponent({
 
     /** Play the current live photo */
     playLivePhoto() {
-      this.psLivePhoto.onContentActivate(this.photoswipe.currSlide);
+      this.psLivePhoto.onContentActivate(this.photoswipe.currSlide as PsSlide);
     },
 
     /** Is the current photo a favorite */

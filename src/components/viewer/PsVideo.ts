@@ -1,12 +1,27 @@
 import PhotoSwipe from "photoswipe";
 import { loadState } from "@nextcloud/initial-state";
-import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
 import { getCurrentUser } from "@nextcloud/auth";
+import axios from "@nextcloud/axios";
 
 import { API } from "../../services/API";
-import { IPhoto } from "../../types";
+import { PsContent, PsEvent, PsSlide } from "./types";
+
+import Player from "video.js/dist/types/player";
+import { QualityLevelList } from "videojs-contrib-quality-levels";
+
+type VideoContent = PsContent & {
+  videoElement: HTMLVideoElement;
+  videojs: Player & {
+    qualityLevels?: () => QualityLevelList;
+  };
+  plyr: globalThis.Plyr;
+};
+
+type PsVideoEvent = PsEvent & {
+  content: VideoContent;
+};
 
 const config_noTranscode = loadState(
   "memories",
@@ -21,16 +36,18 @@ const config_video_default_quality = Number(
 
 /**
  * Check if slide has video content
- *
- * @param {Slide|Content} content Slide or Content object
- * @returns Boolean
  */
-export function isVideoContent(content): boolean {
+export function isVideoContent(content: PsSlide | PsContent): boolean {
   return content?.data?.type === "video";
 }
 
 class VideoContentSetup {
-  constructor(lightbox: PhotoSwipe, private options) {
+  constructor(
+    lightbox: PhotoSwipe,
+    private options: {
+      preventDragOffset: number;
+    }
+  ) {
     this.initLightboxEvents(lightbox);
     lightbox.on("init", () => {
       this.initPswpEvents(lightbox);
@@ -53,10 +70,6 @@ class VideoContentSetup {
       "useContentPlaceholder",
       this.useContentPlaceholder.bind(this)
     );
-
-    lightbox.addFilter("domItemData", (itemData, element, linkEl) => {
-      return itemData;
-    });
   }
 
   initPswpEvents(pswp: PhotoSwipe) {
@@ -101,22 +114,19 @@ class VideoContentSetup {
     });
 
     pswp.on("close", () => {
-      if (isVideoContent(pswp.currSlide.content)) {
-        // prevent more requests
-        this.destroyVideo(pswp.currSlide.content);
-      }
+      this.destroyVideo(pswp.currSlide.content as VideoContent);
     });
 
     // Prevent closing when video fullscreen is active
     pswp.on("pointerMove", (e) => {
-      const plyr: Plyr = (<any>pswp.currSlide.content)?.plyr;
+      const plyr = (<VideoContent>pswp.currSlide.content)?.plyr;
       if (plyr?.fullscreen.active) {
         e.preventDefault();
       }
     });
   }
 
-  getHLSsrc(content: any) {
+  getHLSsrc(content: VideoContent) {
     // Get base URL
     const fileid = content.data.photo.fileid;
     return {
@@ -125,13 +135,13 @@ class VideoContentSetup {
     };
   }
 
-  async initVideo(content: any) {
+  async initVideo(content: VideoContent) {
     if (!isVideoContent(content) || content.videojs || !config_videoIsSetup) {
       return;
     }
 
     // Prevent double loading
-    content.videojs = {};
+    content.videojs = {} as any;
 
     // Load videojs scripts
     if (!globalThis.vidjs) {
@@ -142,20 +152,18 @@ class VideoContentSetup {
     content.videoElement = document.createElement("video");
     content.videoElement.className = "video-js";
     content.videoElement.setAttribute("poster", content.data.msrc);
-    if (this.options.videoAttributes) {
-      for (let key in this.options.videoAttributes) {
-        content.videoElement.setAttribute(
-          key,
-          this.options.videoAttributes[key] || ""
-        );
-      }
-    }
+    content.videoElement.setAttribute("preload", "none");
+    content.videoElement.setAttribute("controls", "");
+    content.videoElement.setAttribute("playsinline", "");
 
     // Add the video element to the actual container
     content.element.appendChild(content.videoElement);
 
     // Create hls sources if enabled
-    let sources: any[] = [];
+    const sources: {
+      src: string;
+      type: string;
+    }[] = [];
 
     if (!config_noTranscode) {
       sources.push(this.getHLSsrc(content));
@@ -239,7 +247,7 @@ class VideoContentSetup {
     }
   }
 
-  destroyVideo(content: any) {
+  destroyVideo(content: VideoContent) {
     if (isVideoContent(content)) {
       content.videojs?.dispose?.();
       content.videojs = null;
@@ -256,7 +264,7 @@ class VideoContentSetup {
     }
   }
 
-  initPlyr(content: any) {
+  initPlyr(content: VideoContent) {
     if (content.plyr) return;
 
     content.videoElement = content.videojs?.el()?.querySelector("video");
@@ -323,7 +331,7 @@ class VideoContentSetup {
             }
 
             // Set the source to the original video
-            if (content.videojs.src().includes("m3u8")) {
+            if (content.videojs.src(undefined).includes("m3u8")) {
               content.videojs.src({
                 src: content.data.src,
                 type: "video/mp4",
@@ -332,7 +340,7 @@ class VideoContentSetup {
             return;
           } else {
             // Set source to HLS
-            if (!content.videojs.src().includes("m3u8")) {
+            if (!content.videojs.src(undefined).includes("m3u8")) {
               content.videojs.src(this.getHLSsrc(content));
             }
           }
@@ -402,16 +410,16 @@ class VideoContentSetup {
     }
   }
 
-  updateRotation(content: any, val?: number): boolean {
+  updateRotation(content: VideoContent, val?: number): boolean {
     if (!content.videojs) return;
 
     content.videoElement = content.videojs.el()?.querySelector("video");
     if (!content.videoElement) return;
 
-    const photo: IPhoto = content.data.photo;
+    const photo = content.data.photo;
     const exif = photo.imageInfo?.exif;
     const rotation = val ?? Number(exif?.Rotation || 0);
-    const shouldRotate = content.videojs?.src().includes("m3u8");
+    const shouldRotate = content.videojs?.src(undefined).includes("m3u8");
 
     if (rotation && shouldRotate) {
       let transform = `rotate(${rotation}deg)`;
@@ -437,7 +445,7 @@ class VideoContentSetup {
     return false;
   }
 
-  onContentDestroy({ content }) {
+  onContentDestroy({ content }: PsVideoEvent) {
     this.destroyVideo(content);
   }
 
@@ -466,25 +474,25 @@ class VideoContentSetup {
     }
   }
 
-  isContentZoomable(isZoomable: boolean, content) {
+  isContentZoomable(isZoomable: boolean, content: PsContent) {
     return !isVideoContent(content) && isZoomable;
   }
 
-  isKeepingPlaceholder(keep: boolean, content) {
+  isKeepingPlaceholder(keep: boolean, content: PsContent) {
     return isVideoContent(content) || keep;
   }
 
-  onContentActivate({ content }) {
+  onContentActivate({ content }: PsVideoEvent) {
     this.initVideo(content);
   }
 
-  onContentDeactivate({ content }) {
+  onContentDeactivate({ content }: PsVideoEvent) {
     this.destroyVideo(content);
   }
 
-  onContentLoad(e) {
-    const content = e.content;
-    if (!isVideoContent(e.content)) return;
+  onContentLoad(e: PsVideoEvent) {
+    const content: PsContent = e.content;
+    if (!isVideoContent(content)) return;
 
     // Stop default content load
     e.preventDefault();
@@ -508,7 +516,7 @@ class VideoContentSetup {
     content.onLoaded();
   }
 
-  useContentPlaceholder(usePlaceholder: boolean, content: any) {
+  useContentPlaceholder(usePlaceholder: boolean, content: PsContent) {
     return isVideoContent(content) || usePlaceholder;
   }
 }
