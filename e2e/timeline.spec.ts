@@ -14,7 +14,7 @@ test.describe("Open", () => {
 
   test("Open one image", async ({ page }) => {
     await page
-      .locator("div:nth-child(2) > .p-outer > .img-outer > img")
+      .locator("div:nth-child(2) > .p-outer > .img-outer")
       .first()
       .click();
     await page.waitForTimeout(1000);
