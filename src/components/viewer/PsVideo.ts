@@ -42,7 +42,6 @@ class VideoContentSetup {
     lightbox.on("contentDestroy", this.onContentDestroy.bind(this));
     lightbox.on("contentActivate", this.onContentActivate.bind(this));
     lightbox.on("contentDeactivate", this.onContentDeactivate.bind(this));
-    lightbox.on("contentAppend", this.onContentAppend.bind(this));
     lightbox.on("contentResize", this.onContentResize.bind(this));
 
     lightbox.addFilter(
@@ -95,10 +94,7 @@ class VideoContentSetup {
     pswp.on("appendHeavy", (e) => {
       if (isVideoContent(e.slide)) {
         const content = <any>e.slide.content;
-
-        if (!e.slide.isActive) {
-          e.preventDefault();
-        } else if (content.videoElement) {
+        if (e.slide.isActive && content.videoElement) {
           this.initVideo(content);
         }
       }
@@ -497,20 +493,9 @@ class VideoContentSetup {
     this.destroyVideo(content);
   }
 
-  onContentAppend(e) {
-    if (isVideoContent(e.content)) {
-      e.preventDefault();
-      e.content.isAttached = true;
-      e.content.appendImage();
-    }
-  }
-
   onContentLoad(e) {
-    const content = e.content; // todo: videocontent
-
-    if (!isVideoContent(e.content)) {
-      return;
-    }
+    const content = e.content;
+    if (!isVideoContent(e.content)) return;
 
     // stop default content load
     e.preventDefault();
@@ -519,6 +504,9 @@ class VideoContentSetup {
 
     // Create DIV
     content.element = document.createElement("div");
+    content.element.classList.add("pswp__img");
+    content.element.style.background = `url(${content.data.msrc})`;
+    content.element.style.backgroundSize = "cover";
 
     if (config_videoIsSetup) {
       content.state = "loading";
