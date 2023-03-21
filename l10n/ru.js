@@ -12,6 +12,8 @@ OC.L10N.register(
     "Albums" : "Альбомы",
     "Archive" : "Архив",
     "On this day" : "В этот день",
+    "Places" : "Места",
+    "Map" : "Карта",
     "Tags" : "Метки",
     "Choose the root folder of your timeline to begin" : "Для начала выберите корневую папку",
     "If you just installed Memories, run:" : "Если вы в первый раз используете приложение «Воспоминания»:",

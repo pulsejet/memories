@@ -291,6 +291,7 @@
     "Transcoding failed, check Nextcloud logs." : "Převod mezi formáty se nezdařil – podívejte se do záznamů událostí v Nextcloud.",
     "Direct" : "Přímo",
     "Auto" : "Automaticky",
+    "Video not configured. Run occ memories:video-setup" : "Video nenastaveno. Spusťte occ memories:video-setup",
     "Shared Folder" : "Sdílená složka",
     "Shared Album" : "Sdílené album",
     "Failed to create {albumName}." : "Nepodařilo se vytvořit {albumName}.",
