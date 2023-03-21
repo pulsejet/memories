@@ -11,6 +11,7 @@ js/
 *.ntvs*
 *.njsproj
 *.sln
+.vscode/launch.json
 
 .marginalia
 
