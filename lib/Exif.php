@@ -11,7 +11,7 @@ use OCP\IConfig;
 class Exif
 {
     private const FORBIDDEN_EDIT_MIMES = ['image/bmp', 'image/x-dcraw', 'video/MP2T'];
-    private const EXIFTOOL_VER = '12.50';
+    private const EXIFTOOL_VER = '12.58';
     private const EXIFTOOL_TIMEOUT = 30000;
     private const EXIFTOOL_ARGS = ['-api', 'QuickTimeUTC=1', '-n', '-U', '-json', '--b'];
 

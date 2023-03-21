@@ -2,7 +2,7 @@
 
 set -e
 
-exifver="12.50"
+exifver="12.58"
 
 rm -rf exiftool-bin
 mkdir -p exiftool-bin
@@ -17,7 +17,7 @@ chmod 755 *
 wget -q "https://github.com/exiftool/exiftool/archive/refs/tags/$exifver.zip"
 unzip -qq "$exifver.zip"
 mv "exiftool-$exifver" exiftool
-rm -rf *.zip exiftool/t exiftool/html
+rm -rf *.zip exiftool/t exiftool/html exiftool/windows_exiftool
 chmod 755 exiftool/exiftool
 
 govod="0.0.34"
