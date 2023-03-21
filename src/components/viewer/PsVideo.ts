@@ -479,7 +479,10 @@ class VideoContentSetup {
   }
 
   isKeepingPlaceholder(keep: boolean, content: PsContent) {
-    return isVideoContent(content) || keep;
+    if (isVideoContent(content)) {
+      return config_videoIsSetup;
+    }
+    return keep;
   }
 
   onContentActivate({ content }: PsVideoEvent) {
