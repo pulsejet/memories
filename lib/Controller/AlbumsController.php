@@ -65,6 +65,9 @@ class AlbumsController extends ApiBase
             return true;
         });
 
+        // Convert $list to sequential array
+        $list = array_values($list);
+
         return new JSONResponse($list, Http::STATUS_OK);
     }
 
