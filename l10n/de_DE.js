@@ -294,6 +294,7 @@ OC.L10N.register(
     "Transcoding failed, check Nextcloud logs." : "Transkodierung fehlgeschlagen, überprüfen Sie die Nextcloud-Protokolle.",
     "Direct" : "Direkt",
     "Auto" : "Automatisch",
+    "Video not configured. Run occ memories:video-setup" : "Video ist nicht eingerichtet. Führen Sie occ memories:video-setup aus",
     "Shared Folder" : "Geteilter Ordner",
     "Shared Album" : "Geteiltes Album",
     "Failed to create {albumName}." : "{albumName} konnte nicht erstellt werden.",
