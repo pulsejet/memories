@@ -59,8 +59,9 @@ return [
         ['name' => 'Tags#preview', 'url' => '/api/tags/preview/{name}', 'verb' => 'GET'],
         ['name' => 'Tags#set', 'url' => '/api/tags/set/{id}', 'verb' => 'PATCH'],
 
-        ['name' => 'People#recognizePeople', 'url' => '/api/recognize/people', 'verb' => 'GET'],
-        ['name' => 'People#recognizePeoplePreview', 'url' => '/api/recognize/people/preview/{id}', 'verb' => 'GET'],
+        ['name' => 'PeopleRecognize#list', 'url' => '/api/recognize/people', 'verb' => 'GET'],
+        ['name' => 'PeopleRecognize#preview', 'url' => '/api/recognize/people/preview/{name}', 'verb' => 'GET'],
+
         ['name' => 'People#facerecognitionPeople', 'url' => '/api/facerecognition/people', 'verb' => 'GET'],
         ['name' => 'People#facerecognitionPeoplePreview', 'url' => '/api/facerecognition/people/preview/{id}', 'verb' => 'GET'],
 

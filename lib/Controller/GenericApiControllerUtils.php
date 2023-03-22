@@ -23,10 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
-use OCA\Memories\Errors;
 use OCP\App\IAppManager;
-use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\IConfig;
 
 trait GenericApiControllerUtils
@@ -91,44 +88,5 @@ trait GenericApiControllerUtils
     protected function placesIsEnabled(): bool
     {
         return \OCA\Memories\Util::placesGISType() > 0;
-    }
-
-    /**
-     * Given a list of file ids, return the first preview image possible.
-     */
-    protected function getPreviewFromImageList(array $list, int $quality = 512): Http\Response
-    {
-        // Get preview manager
-        $previewManager = \OC::$server->get(\OCP\IPreview::class);
-
-        // Try to get a preview
-        $userFolder = $this->rootFolder->getUserFolder($this->getUID());
-        foreach ($list as &$img) {
-            // Get the file
-            $files = $userFolder->getById($img);
-            if (0 === \count($files)) {
-                continue;
-            }
-
-            // Check read permission
-            if (!$files[0]->isReadable()) {
-                continue;
-            }
-
-            // Get preview image
-            try {
-                $preview = $previewManager->getPreview($files[0], $quality, $quality, false);
-                $response = new DataDisplayResponse($preview->getContent(), Http::STATUS_OK, [
-                    'Content-Type' => $preview->getMimeType(),
-                ]);
-                $response->cacheFor(3600 * 24, false, false);
-
-                return $response;
-            } catch (\Exception $e) {
-                continue;
-            }
-        }
-
-        return Errors::NotFound('preview from list');
     }
 }

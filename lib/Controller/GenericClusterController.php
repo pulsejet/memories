@@ -27,6 +27,7 @@ use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Errors;
 use OCA\Memories\HttpResponseException;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 
 abstract class GenericClusterController extends GenericApiController
@@ -80,7 +81,7 @@ abstract class GenericClusterController extends GenericApiController
             $this->sortFilesForPreview($files);
 
             // Get preview from image list
-            return $this->getPreviewFromImageList($this->getFileIds($files));
+            return $this->getPreviewFromImageList($files);
         } catch (HttpResponseException $e) {
             return $e->response;
         } catch (\Exception $e) {
@@ -101,7 +102,8 @@ abstract class GenericClusterController extends GenericApiController
             $this->init();
 
             // Get list of all files in this cluster
-            $fileIds = $this->getFileIds($this->getFiles($name));
+            $files = $this->getFiles($name);
+            $fileIds = array_map([$this, 'getFileId'], $files);
 
             // Get download handle
             $filename = $this->clusterName($name);
@@ -141,6 +143,60 @@ abstract class GenericClusterController extends GenericApiController
     abstract protected function getFiles(string $name, ?int $limit = null): array;
 
     /**
+     * Human readable name for the cluster.
+     */
+    protected function clusterName(string $name)
+    {
+        return $name;
+    }
+
+    /**
+     * Put the file objects in priority list.
+     * Works on the array in place.
+     */
+    protected function sortFilesForPreview(array &$files)
+    {
+        shuffle($files);
+    }
+
+    /**
+     * Quality to use for the preview file.
+     */
+    protected function getPreviewQuality(): int
+    {
+        return 512;
+    }
+
+    /**
+     * Perform any post processing and get the blob from the preview file.
+     *
+     * @param \OCP\Files\SimpleFS\ISimpleFile $file
+     * @param array                           $object The file object
+     *
+     * @return [Blob, mimetype] of data
+     */
+    protected function getPreviewBlob($file, $object): array
+    {
+        return [$file->getContent(), $file->getMimeType()];
+    }
+
+    /**
+     * Get the file ID for a file object.
+     */
+    protected function getFileId(array $file): int
+    {
+        return (int) $file['fileid'];
+    }
+
+    /**
+     * Should the timeline root be queried?
+     */
+    protected function useTimelineRoot(): bool
+    {
+        return true;
+    }
+
+    /**
      * Initialize and check if the app is enabled.
      * Gets the root node if required.
      */
@@ -165,43 +221,45 @@ abstract class GenericClusterController extends GenericApiController
     }
 
     /**
-     * Should the timeline root be queried?
+     * Given a list of file objects, return the first preview image possible.
      */
-    protected function useTimelineRoot(): bool
+    private function getPreviewFromImageList(array $list): Http\Response
     {
-        return true;
-    }
+        // Get preview manager
+        $previewManager = \OC::$server->get(\OCP\IPreview::class);
 
-    /**
-     * Human readable name for the cluster.
-     */
-    protected function clusterName(string $name)
-    {
-        return $name;
-    }
+        // Try to get a preview
+        $userFolder = $this->rootFolder->getUserFolder($this->getUID());
+        foreach ($list as $img) {
+            // Get the file
+            $files = $userFolder->getById($this->getFileId($img));
+            if (0 === \count($files)) {
+                continue;
+            }
 
-    /**
-     * Put the file objects in priority list.
-     * Works on the array in place.
-     */
-    protected function sortFilesForPreview(array &$files)
-    {
-        shuffle($files);
-    }
+            // Check read permission
+            if (!$files[0]->isReadable()) {
+                continue;
+            }
 
-    /**
-     * Get the file ID for a file object.
-     */
-    protected function getFileId(array $file): int
-    {
-        return (int) $file['fileid'];
-    }
+            // Get preview image
+            try {
+                $quality = $this->getPreviewQuality();
+                $file = $previewManager->getPreview($files[0], $quality, $quality, false);
 
-    /**
-     * Get array of fileIds from array of file objects.
-     */
-    private function getFileIds(array $files): array
-    {
-        return array_map([$this, 'getFileId'], $files);
+                [$blob, $mimetype] = $this->getPreviewBlob($file, $img);
+
+                $response = new DataDisplayResponse($blob, Http::STATUS_OK, [
+                    'Content-Type' => $mimetype,
+                ]);
+                $response->cacheFor(3600 * 24, false, false);
+
+                return $response;
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        return Errors::NotFound('preview from list');
     }
 }

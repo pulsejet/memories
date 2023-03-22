@@ -85,6 +85,7 @@ class AlbumsController extends GenericClusterController
 
         // Get files
         $id = (int) $album['album_id'];
+
         return $this->timelineQuery->getAlbumFiles($id, $limit) ?? [];
     }
 }
