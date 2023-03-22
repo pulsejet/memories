@@ -23,76 +23,27 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
-use OCA\Memories\Errors;
-use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\JSONResponse;
-
-class PlacesController extends GenericApiController
+class PlacesController extends GenericClusterController
 {
-    /**
-     * @NoAdminRequired
-     *
-     * Get list of places with counts of images
-     */
-    public function places(): Http\Response
+    protected function appName(): string
     {
-        $user = $this->userSession->getUser();
-        if (null === $user) {
-            return Errors::NotLoggedIn();
-        }
-
-        // Check tags enabled for this user
-        if (!$this->placesIsEnabled()) {
-            return Errors::NotEnabled('places');
-        }
-
-        // If this isn't the timeline folder then things aren't going to work
-        $root = $this->getRequestRoot();
-        if ($root->isEmpty()) {
-            return Errors::NoRequestRoot();
-        }
-
-        // Run actual query
-        $list = $this->timelineQuery->getPlaces($root);
-
-        return new JSONResponse($list, Http::STATUS_OK);
+        return 'Places';
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     *
-     * Get preview for a location
-     */
-    public function preview(int $id): Http\Response
+    protected function isEnabled(): bool
     {
-        $user = $this->userSession->getUser();
-        if (null === $user) {
-            return Errors::NotLoggedIn();
-        }
+        return $this->placesIsEnabled();
+    }
 
-        // Check tags enabled for this user
-        if (!$this->placesIsEnabled()) {
-            return Errors::NotEnabled('places');
-        }
+    protected function getClusters(): array
+    {
+        return $this->timelineQuery->getPlaces($this->root);
+    }
 
-        // If this isn't the timeline folder then things aren't going to work
-        $root = $this->getRequestRoot();
-        if ($root->isEmpty()) {
-            return Errors::NoRequestRoot();
-        }
+    protected function getFileIds(string $name, ?int $limit = null): array
+    {
+        $list = $this->timelineQuery->getPlaceFiles((int) $name, $this->root, $limit) ?? [];
 
-        // Run actual query
-        $list = $this->timelineQuery->getPlacePreviews($id, $root);
-        if (null === $list || 0 === \count($list)) {
-            return Errors::NotFound('previews');
-        }
-        shuffle($list);
-
-        // Get preview from image list
-        return $this->getPreviewFromImageList(array_map(function ($item) {
-            return (int) $item['fileid'];
-        }, $list));
+        return array_map(fn ($item) => (int) $item['fileid'], $list);
     }
 }

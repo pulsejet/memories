@@ -258,7 +258,7 @@ trait TimelineQueryAlbums
     /**
      * Get full list of fileIds in album.
      */
-    public function getAlbumFiles(int $albumId)
+    public function getAlbumFiles(int $albumId, ?int $limit)
     {
         $query = $this->connection->getQueryBuilder();
         $query->select('file_id')->from('photos_albums_files', 'paf')->where(
@@ -266,13 +266,17 @@ trait TimelineQueryAlbums
         );
         $query->innerJoin('paf', 'filecache', 'fc', $query->expr()->eq('fc.fileid', 'paf.file_id'));
 
-        $fileIds = [];
-        $result = $query->executeQuery();
-        while ($row = $result->fetch()) {
-            $fileIds[] = (int) $row['file_id'];
+        if (null !== $limit) {
+            $query->setMaxResults($limit);
         }
 
-        return $fileIds;
+        $result = $query->executeQuery()->fetchAll();
+
+        foreach ($result as &$row) {
+            $row['fileid'] = (int) $row['file_id'];
+        }
+
+        return $result;
     }
 
     /** Get list of collaborator ids including user id and groups */

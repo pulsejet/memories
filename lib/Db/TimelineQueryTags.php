@@ -77,7 +77,7 @@ trait TimelineQueryTags
         return $tags;
     }
 
-    public function getTagPreviews(string $tagName, TimelineRoot &$root)
+    public function getTagFiles(string $tagName, TimelineRoot $root, ?int $limit)
     {
         $query = $this->connection->getQueryBuilder();
         $tagId = $this->getSystemTagId($query, $tagName);
@@ -100,8 +100,10 @@ trait TimelineQueryTags
         // WHERE these photos are in the user's requested folder recursively
         $query = $this->joinFilecache($query, $root, true, false);
 
-        // MAX 8
-        $query->setMaxResults(8);
+        // MAX number of files
+        if (null !== $limit) {
+            $query->setMaxResults($limit);
+        }
 
         // FETCH tag previews
         $cursor = $this->executeQueryWithCTEs($query);

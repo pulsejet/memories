@@ -24,34 +24,40 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\Errors;
-use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\JSONResponse;
+use OCA\Memories\HttpResponseException;
 
-class AlbumsController extends GenericApiController
+class AlbumsController extends GenericClusterController
 {
-    /**
-     * @NoAdminRequired
-     *
-     * Get list of albums with counts of images
-     */
-    public function albums(int $t = 0): Http\Response
+    protected function appName(): string
     {
-        $user = $this->userSession->getUser();
-        if (null === $user) {
-            return Errors::NotLoggedIn();
-        }
+        return 'Albums';
+    }
 
-        if (!$this->albumsIsEnabled()) {
-            return Errors::NotEnabled('Albums');
-        }
+    protected function isEnabled(): bool
+    {
+        return $this->albumsIsEnabled();
+    }
 
+    protected function useTimelineRoot(): bool
+    {
+        return false;
+    }
+
+    protected function clusterName(string $name)
+    {
+        return explode('/', $name)[1];
+    }
+
+    protected function getClusters(): array
+    {
         // Run actual query
         $list = [];
+        $t = (int) $this->request->getParam('t', 0);
         if ($t & 1) { // personal
-            $list = array_merge($list, $this->timelineQuery->getAlbums($user->getUID()));
+            $list = array_merge($list, $this->timelineQuery->getAlbums($this->getUID()));
         }
         if ($t & 2) { // shared
-            $list = array_merge($list, $this->timelineQuery->getAlbums($user->getUID(), true));
+            $list = array_merge($list, $this->timelineQuery->getAlbums($this->getUID(), true));
         }
 
         // Remove elements with duplicate album_id
@@ -66,45 +72,20 @@ class AlbumsController extends GenericApiController
         });
 
         // Convert $list to sequential array
-        $list = array_values($list);
-
-        return new JSONResponse($list, Http::STATUS_OK);
+        return array_values($list);
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @UseSession
-     *
-     * Download an album as a zip file
-     */
-    public function download(string $name = ''): Http\Response
+    protected function getFileIds(string $name, ?int $limit = null): array
     {
-        $user = $this->userSession->getUser();
-        if (null === $user) {
-            return Errors::NotLoggedIn();
-        }
-
-        if (!$this->albumsIsEnabled()) {
-            return Errors::NotEnabled('Albums');
-        }
-
         // Get album
-        $album = $this->timelineQuery->getAlbumIfAllowed($user->getUID(), $name);
+        $album = $this->timelineQuery->getAlbumIfAllowed($this->getUID(), $name);
         if (null === $album) {
-            return Errors::NotFound("album {$name}");
+            throw new HttpResponseException(Errors::NotFound("album {$name}"));
         }
 
         // Get files
-        $files = $this->timelineQuery->getAlbumFiles((int) $album['album_id']);
-        if (empty($files)) {
-            return Errors::NotFound("zero files in album {$name}");
-        }
+        $list = $this->timelineQuery->getAlbumFiles((int) $album['album_id'], $limit) ?? [];
 
-        // Get download handle
-        $albumName = explode('/', $name)[1];
-        $handle = \OCA\Memories\Controller\DownloadController::createHandle($albumName, $files);
-
-        return new JSONResponse(['handle' => $handle], Http::STATUS_OK);
+        return array_map(fn ($item) => (int) $item['fileid'], $list);
     }
 }

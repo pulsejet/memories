@@ -27,77 +27,8 @@ use OCA\Memories\Errors;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
-class TagsController extends GenericApiController
+class TagsController extends GenericClusterController
 {
-    /**
-     * @NoAdminRequired
-     *
-     * Get list of tags with counts of images
-     */
-    public function tags(): Http\Response
-    {
-        $user = $this->userSession->getUser();
-        if (null === $user) {
-            return Errors::NotLoggedIn();
-        }
-
-        // Check tags enabled for this user
-        if (!$this->tagsIsEnabled()) {
-            return Errors::NotEnabled('Tags');
-        }
-
-        // If this isn't the timeline folder then things aren't going to work
-        $root = $this->getRequestRoot();
-        if ($root->isEmpty()) {
-            return Errors::NoRequestRoot();
-        }
-
-        // Run actual query
-        $list = $this->timelineQuery->getTags(
-            $root,
-        );
-
-        return new JSONResponse($list, Http::STATUS_OK);
-    }
-
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     *
-     * Get preview for a tag
-     */
-    public function preview(string $tag): Http\Response
-    {
-        $user = $this->userSession->getUser();
-        if (null === $user) {
-            return Errors::NotLoggedIn();
-        }
-
-        // Check tags enabled for this user
-        if (!$this->tagsIsEnabled()) {
-            return Errors::NotEnabled('Tags');
-        }
-
-        // If this isn't the timeline folder then things aren't going to work
-        $root = $this->getRequestRoot();
-        if ($root->isEmpty()) {
-            return Errors::NoRequestRoot();
-        }
-
-        // Run actual query
-        $list = $this->timelineQuery->getTagPreviews($tag, $root);
-        if (null === $list || 0 === \count($list)) {
-            return new JSONResponse([], Http::STATUS_NOT_FOUND);
-        }
-        shuffle($list);
-
-        // Get preview from image list
-        return $this->getPreviewFromImageList(array_map(function ($item) {
-            return (int) $item['fileid'];
-        }, $list));
-    }
-
     /**
      * @NoAdminRequired
      *
@@ -107,7 +38,7 @@ class TagsController extends GenericApiController
     {
         // Check tags enabled for this user
         if (!$this->tagsIsEnabled()) {
-            return Errors::NotEnabled('Tags');
+            return Errors::NotEnabled($this->appName());
         }
 
         // Check the user is allowed to edit the file
@@ -129,5 +60,27 @@ class TagsController extends GenericApiController
         $om->unassignTags((string) $id, 'files', $remove);
 
         return new JSONResponse([], Http::STATUS_OK);
+    }
+
+    protected function appName(): string
+    {
+        return 'Tags';
+    }
+
+    protected function isEnabled(): bool
+    {
+        return $this->tagsIsEnabled();
+    }
+
+    protected function getClusters(): array
+    {
+        return $this->timelineQuery->getTags($this->root);
+    }
+
+    protected function getFileIds(string $name, ?int $limit = null): array
+    {
+        $list = $this->timelineQuery->getTagFiles($name, $this->root, $limit) ?? [];
+
+        return array_map(fn ($item) => (int) $item['fileid'], $list);
     }
 }
