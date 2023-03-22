@@ -69,19 +69,19 @@ abstract class GenericClusterController extends GenericApiController
         try {
             $this->init();
 
-            // Get list of some files in this cluster
-            $files = $this->getFiles($name, 8);
+            // Get list of some photos in this cluster
+            $photos = $this->getPhotos($name, 8);
 
-            // If no files found then return 404
-            if (0 === \count($files)) {
+            // If no photos found then return 404
+            if (0 === \count($photos)) {
                 return new JSONResponse([], Http::STATUS_NOT_FOUND);
             }
 
-            // Put the files in the correct order
-            $this->sortFilesForPreview($files);
+            // Put the photos in the correct order
+            $this->sortPhotosForPreview($photos);
 
             // Get preview from image list
-            return $this->getPreviewFromImageList($files);
+            return $this->getPreviewFromPhotoList($photos);
         } catch (HttpResponseException $e) {
             return $e->response;
         } catch (\Exception $e) {
@@ -102,8 +102,8 @@ abstract class GenericClusterController extends GenericApiController
             $this->init();
 
             // Get list of all files in this cluster
-            $files = $this->getFiles($name);
-            $fileIds = array_map([$this, 'getFileId'], $files);
+            $photos = $this->getPhotos($name);
+            $fileIds = array_map([$this, 'getFileId'], $photos);
 
             // Get download handle
             $filename = $this->clusterName($name);
@@ -134,13 +134,13 @@ abstract class GenericClusterController extends GenericApiController
     abstract protected function getClusters(): array;
 
     /**
-     * Get a list of files with extra parameters for the given cluster
+     * Get a list of photos with any extra parameters for the given cluster
      * Used for preview generation and download.
      *
      * @param string $name  Identifier for the cluster
-     * @param int    $limit Maximum number of fileids to return
+     * @param int    $limit Maximum number of photos to return
      */
-    abstract protected function getFiles(string $name, ?int $limit = null): array;
+    abstract protected function getPhotos(string $name, ?int $limit = null): array;
 
     /**
      * Human readable name for the cluster.
@@ -151,12 +151,12 @@ abstract class GenericClusterController extends GenericApiController
     }
 
     /**
-     * Put the file objects in priority list.
+     * Put the photo objects in priority list.
      * Works on the array in place.
      */
-    protected function sortFilesForPreview(array &$files)
+    protected function sortPhotosForPreview(array &$photos)
     {
-        shuffle($files);
+        shuffle($photos);
     }
 
     /**
@@ -170,22 +170,22 @@ abstract class GenericClusterController extends GenericApiController
     /**
      * Perform any post processing and get the blob from the preview file.
      *
-     * @param \OCP\Files\SimpleFS\ISimpleFile $file
-     * @param array                           $object The file object
+     * @param \OCP\Files\SimpleFS\ISimpleFile $file  Preview file
+     * @param array                           $photo Photo object
      *
      * @return [Blob, mimetype] of data
      */
-    protected function getPreviewBlob($file, $object): array
+    protected function getPreviewBlob($file, $photo): array
     {
         return [$file->getContent(), $file->getMimeType()];
     }
 
     /**
-     * Get the file ID for a file object.
+     * Get the file ID for a photo object.
      */
-    protected function getFileId(array $file): int
+    protected function getFileId(array $photo): int
     {
-        return (int) $file['fileid'];
+        return (int) $photo['fileid'];
     }
 
     /**
@@ -221,16 +221,16 @@ abstract class GenericClusterController extends GenericApiController
     }
 
     /**
-     * Given a list of file objects, return the first preview image possible.
+     * Given a list of photo objects, return the first preview image possible.
      */
-    private function getPreviewFromImageList(array $list): Http\Response
+    private function getPreviewFromPhotoList(array $photos): Http\Response
     {
         // Get preview manager
         $previewManager = \OC::$server->get(\OCP\IPreview::class);
 
         // Try to get a preview
         $userFolder = $this->rootFolder->getUserFolder($this->getUID());
-        foreach ($list as $img) {
+        foreach ($photos as $img) {
             // Get the file
             $files = $userFolder->getById($this->getFileId($img));
             if (0 === \count($files)) {
@@ -260,6 +260,6 @@ abstract class GenericClusterController extends GenericApiController
             }
         }
 
-        return Errors::NotFound('preview from list');
+        return Errors::NotFound('preview from photos list');
     }
 }

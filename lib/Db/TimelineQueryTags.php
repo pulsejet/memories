@@ -77,7 +77,7 @@ trait TimelineQueryTags
         return $tags;
     }
 
-    public function getTagFiles(string $tagName, TimelineRoot $root, ?int $limit)
+    public function getTagPhotos(string $tagName, TimelineRoot $root, ?int $limit)
     {
         $query = $this->connection->getQueryBuilder();
         $tagId = $this->getSystemTagId($query, $tagName);
@@ -105,15 +105,7 @@ trait TimelineQueryTags
             $query->setMaxResults($limit);
         }
 
-        // FETCH tag previews
-        $cursor = $this->executeQueryWithCTEs($query);
-        $ans = $cursor->fetchAll();
-
-        // Post-process
-        foreach ($ans as &$row) {
-            $row['fileid'] = (int) $row['fileid'];
-        }
-
-        return $ans;
+        // FETCH tag photos
+        return $this->executeQueryWithCTEs($query)->fetchAll();
     }
 }

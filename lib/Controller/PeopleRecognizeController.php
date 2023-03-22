@@ -42,18 +42,18 @@ class PeopleRecognizeController extends GenericClusterController
         return $this->timelineQuery->getPeopleRecognize($this->root, $this->getUID());
     }
 
-    protected function getFiles(string $name, ?int $limit = null): array
+    protected function getPhotos(string $name, ?int $limit = null): array
     {
-        return $this->timelineQuery->getPeopleRecognizeFiles((int) $name, $this->root, $limit) ?? [];
+        return $this->timelineQuery->getPeopleRecognizePhotos((int) $name, $this->root, $limit) ?? [];
     }
 
-    protected function sortFilesForPreview(array &$files)
+    protected function sortPhotosForPreview(array &$photos)
     {
-        $this->sortByScores($files);
+        $this->sortByScores($photos);
     }
 
-    protected function getPreviewBlob($file, $object): array
+    protected function getPreviewBlob($file, $photo): array
     {
-        return $this->cropFace($file, $object, 1.5);
+        return $this->cropFace($file, $photo, 1.5);
     }
 }

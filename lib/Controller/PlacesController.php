@@ -40,8 +40,8 @@ class PlacesController extends GenericClusterController
         return $this->timelineQuery->getPlaces($this->root);
     }
 
-    protected function getFiles(string $name, ?int $limit = null): array
+    protected function getPhotos(string $name, ?int $limit = null): array
     {
-        return $this->timelineQuery->getPlaceFiles((int) $name, $this->root, $limit) ?? [];
+        return $this->timelineQuery->getPlacePhotos((int) $name, $this->root, $limit) ?? [];
     }
 }

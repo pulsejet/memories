@@ -256,9 +256,9 @@ trait TimelineQueryAlbums
     }
 
     /**
-     * Get full list of fileIds in album.
+     * Get list of photos in album.
      */
-    public function getAlbumFiles(int $albumId, ?int $limit)
+    public function getAlbumPhotos(int $albumId, ?int $limit)
     {
         $query = $this->connection->getQueryBuilder();
         $query->select('file_id')->from('photos_albums_files', 'paf')->where(

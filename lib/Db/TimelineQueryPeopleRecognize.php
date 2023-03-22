@@ -105,7 +105,7 @@ trait TimelineQueryPeopleRecognize
         return $faces;
     }
 
-    public function getPeopleRecognizeFiles(int $id, TimelineRoot $root, ?int $limit): array
+    public function getPeopleRecognizePhotos(int $id, TimelineRoot $root, ?int $limit): array
     {
         $query = $this->connection->getQueryBuilder();
 

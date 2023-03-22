@@ -70,7 +70,7 @@ trait PeopleControllerUtils
      *
      * @throws \Exception if file could not be used
      */
-    private function cropFace($file, array $object, float $padding)
+    private function cropFace($file, array $photo, float $padding)
     {
         /** @var \Imagick */
         $image = null;
@@ -96,10 +96,10 @@ trait PeopleControllerUtils
         $image->setInterlaceScheme(\Imagick::INTERLACE_PLANE);
 
         // Crop image
-        $dw = (float) $object['width'];
-        $dh = (float) $object['height'];
-        $dcx = (float) $object['x'] + (float) $object['width'] / 2;
-        $dcy = (float) $object['y'] + (float) $object['height'] / 2;
+        $dw = (float) $photo['width'];
+        $dh = (float) $photo['height'];
+        $dcx = (float) $photo['x'] + (float) $photo['width'] / 2;
+        $dcy = (float) $photo['y'] + (float) $photo['height'] / 2;
         $faceDim = max($dw * $iw, $dh * $ih) * $padding;
         $image->cropImage(
             (int) $faceDim,

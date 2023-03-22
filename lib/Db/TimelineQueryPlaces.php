@@ -54,7 +54,7 @@ trait TimelineQueryPlaces
         return $places;
     }
 
-    public function getPlaceFiles(int $id, TimelineRoot $root, ?int $limit)
+    public function getPlacePhotos(int $id, TimelineRoot $root, ?int $limit): array
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -69,20 +69,12 @@ trait TimelineQueryPlaces
         // WHERE these photos are in the user's requested folder recursively
         $query = $this->joinFilecache($query, $root, true, false);
 
-        // MAX number of files
+        // MAX number of photos
         if (null !== $limit) {
             $query->setMaxResults($limit);
         }
 
-        // FETCH tag previews
-        $cursor = $this->executeQueryWithCTEs($query);
-        $ans = $cursor->fetchAll();
-
-        // Post-process
-        foreach ($ans as &$row) {
-            $row['fileid'] = (int) $row['fileid'];
-        }
-
-        return $ans;
+        // FETCH tag photos
+        return $this->executeQueryWithCTEs($query)->fetchAll();
     }
 }
