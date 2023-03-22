@@ -27,7 +27,7 @@ use OCA\Memories\Errors;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
-class AlbumsController extends ApiBase
+class AlbumsController extends GenericApiController
 {
     /**
      * @NoAdminRequired

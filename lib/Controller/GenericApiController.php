@@ -34,11 +34,11 @@ use OCP\IRequest;
 use OCP\IUserSession;
 use Psr\Log\LoggerInterface;
 
-abstract class ApiBase extends Controller
+abstract class GenericApiController extends Controller
 {
-    use ApiBaseFs;
-    use ApiBaseParams;
-    use ApiBaseUtils;
+    use GenericApiControllerFs;
+    use GenericApiControllerParams;
+    use GenericApiControllerUtils;
 
     protected IConfig $config;
     protected IUserSession $userSession;

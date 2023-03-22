@@ -31,7 +31,7 @@ use OCP\ISession;
 use OCP\ITempManager;
 use OCP\Security\ISecureRandom;
 
-class DownloadController extends ApiBase
+class DownloadController extends GenericApiController
 {
     /**
      * @NoAdminRequired

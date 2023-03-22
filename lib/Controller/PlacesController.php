@@ -27,7 +27,7 @@ use OCA\Memories\Errors;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
-class PlacesController extends ApiBase
+class PlacesController extends GenericApiController
 {
     /**
      * @NoAdminRequired

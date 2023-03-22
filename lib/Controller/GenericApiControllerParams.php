@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
-trait ApiBaseParams
+trait GenericApiControllerParams
 {
     /**
      * current request.

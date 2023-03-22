@@ -29,7 +29,7 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\Folder;
 
-class ArchiveController extends ApiBase
+class ArchiveController extends GenericApiController
 {
     /**
      * @NoAdminRequired

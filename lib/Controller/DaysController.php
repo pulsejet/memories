@@ -28,7 +28,7 @@ use OCA\Memories\Errors;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
-class DaysController extends ApiBase
+class DaysController extends GenericApiController
 {
     use FoldersTrait;
 

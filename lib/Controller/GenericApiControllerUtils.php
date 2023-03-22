@@ -29,7 +29,7 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\IConfig;
 
-trait ApiBaseUtils
+trait GenericApiControllerUtils
 {
     protected IAppManager $appManager;
     protected IConfig $config;

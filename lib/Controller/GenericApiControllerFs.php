@@ -33,10 +33,10 @@ use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IUserSession;
 
-trait ApiBaseFs
+trait GenericApiControllerFs
 {
-    use ApiBaseParams;
-    use ApiBaseUtils;
+    use GenericApiControllerParams;
+    use GenericApiControllerUtils;
 
     protected IConfig $config;
     protected IUserSession $userSession;

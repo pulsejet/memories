@@ -31,7 +31,7 @@ use OCP\AppFramework\Http\FileDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\IRootFolder;
 
-class ImageController extends ApiBase
+class ImageController extends GenericApiController
 {
     /**
      * @NoAdminRequired

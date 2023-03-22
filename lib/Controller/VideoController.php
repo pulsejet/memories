@@ -30,7 +30,7 @@ use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\File;
 
-class VideoController extends ApiBase
+class VideoController extends GenericApiController
 {
     /**
      * @NoAdminRequired

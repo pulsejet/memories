@@ -29,7 +29,7 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\StreamResponse;
 
-class OtherController extends ApiBase
+class OtherController extends GenericApiController
 {
     /**
      * @NoAdminRequired

@@ -27,7 +27,7 @@ use OCA\Memories\Errors;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
-class ShareController extends ApiBase
+class ShareController extends GenericApiController
 {
     /**
      * @NoAdminRequired
