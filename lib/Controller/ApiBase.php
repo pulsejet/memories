@@ -34,7 +34,7 @@ use OCP\IRequest;
 use OCP\IUserSession;
 use Psr\Log\LoggerInterface;
 
-class ApiBase extends Controller
+abstract class ApiBase extends Controller
 {
     use ApiBaseFs;
     use ApiBaseParams;
