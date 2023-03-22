@@ -218,7 +218,12 @@ class VideoContentSetup {
     content.videojs.on("canplay", () => {
       canPlay = true;
       this.updateRotation(content); // also gets the correct video elem as a side effect
+
+      // Initialize the player UI
       window.setTimeout(() => this.initPlyr(content), 0);
+
+      // Hide the preview image
+      content.placeholder?.element?.setAttribute("hidden", "true");
     });
 
     content.videojs.qualityLevels()?.on("addqualitylevel", (e) => {
@@ -249,18 +254,24 @@ class VideoContentSetup {
 
   destroyVideo(content: VideoContent) {
     if (isVideoContent(content)) {
+      // Destroy videojs
       content.videojs?.dispose?.();
       content.videojs = null;
 
+      // Destroy plyr
       content.plyr?.elements?.container?.remove();
       content.plyr?.destroy();
       content.plyr = null;
 
+      // Clear the video element
       const elem: HTMLDivElement = content.element;
       while (elem.lastElementChild) {
         elem.removeChild(elem.lastElementChild);
       }
       content.videoElement = null;
+
+      // Restore placeholder image
+      content.placeholder?.element?.removeAttribute("hidden");
     }
   }
 
@@ -314,6 +325,7 @@ class VideoContentSetup {
       },
     };
 
+    // Add quality options
     if (qualityNums) {
       opts.quality = {
         default: config_video_default_quality,
