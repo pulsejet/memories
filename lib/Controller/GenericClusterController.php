@@ -69,18 +69,18 @@ abstract class GenericClusterController extends GenericApiController
             $this->init();
 
             // Get list of some files in this cluster
-            $fileIds = $this->getFileIds($name, 8);
+            $files = $this->getFiles($name, 8);
 
             // If no files found then return 404
-            if (0 === \count($fileIds)) {
+            if (0 === \count($files)) {
                 return new JSONResponse([], Http::STATUS_NOT_FOUND);
             }
 
-            // Shuffle the list so we don't always get the same preview
-            shuffle($fileIds);
+            // Put the files in the correct order
+            $this->sortFilesForPreview($files);
 
             // Get preview from image list
-            return $this->getPreviewFromImageList($fileIds);
+            return $this->getPreviewFromImageList($this->getFileIds($files));
         } catch (HttpResponseException $e) {
             return $e->response;
         } catch (\Exception $e) {
@@ -101,7 +101,7 @@ abstract class GenericClusterController extends GenericApiController
             $this->init();
 
             // Get list of all files in this cluster
-            $fileIds = $this->getFileIds($name);
+            $fileIds = $this->getFileIds($this->getFiles($name));
 
             // Get download handle
             $filename = $this->clusterName($name);
@@ -132,14 +132,13 @@ abstract class GenericClusterController extends GenericApiController
     abstract protected function getClusters(): array;
 
     /**
-     * Get a list of fileids for the given cluster for preview generation.
+     * Get a list of files with extra parameters for the given cluster
+     * Used for preview generation and download.
      *
      * @param string $name  Identifier for the cluster
      * @param int    $limit Maximum number of fileids to return
-     *
-     * @return int[]
      */
-    abstract protected function getFileIds(string $name, ?int $limit = null): array;
+    abstract protected function getFiles(string $name, ?int $limit = null): array;
 
     /**
      * Initialize and check if the app is enabled.
@@ -179,5 +178,30 @@ abstract class GenericClusterController extends GenericApiController
     protected function clusterName(string $name)
     {
         return $name;
+    }
+
+    /**
+     * Put the file objects in priority list.
+     * Works on the array in place.
+     */
+    protected function sortFilesForPreview(array &$files)
+    {
+        shuffle($files);
+    }
+
+    /**
+     * Get the file ID for a file object.
+     */
+    protected function getFileId(array $file): int
+    {
+        return (int) $file['fileid'];
+    }
+
+    /**
+     * Get array of fileIds from array of file objects.
+     */
+    private function getFileIds(array $files): array
+    {
+        return array_map([$this, 'getFileId'], $files);
     }
 }

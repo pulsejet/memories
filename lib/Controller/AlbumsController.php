@@ -75,7 +75,7 @@ class AlbumsController extends GenericClusterController
         return array_values($list);
     }
 
-    protected function getFileIds(string $name, ?int $limit = null): array
+    protected function getFiles(string $name, ?int $limit = null): array
     {
         // Get album
         $album = $this->timelineQuery->getAlbumIfAllowed($this->getUID(), $name);
@@ -84,8 +84,7 @@ class AlbumsController extends GenericClusterController
         }
 
         // Get files
-        $list = $this->timelineQuery->getAlbumFiles((int) $album['album_id'], $limit) ?? [];
-
-        return array_map(fn ($item) => (int) $item['fileid'], $list);
+        $id = (int) $album['album_id'];
+        return $this->timelineQuery->getAlbumFiles($id, $limit) ?? [];
     }
 }

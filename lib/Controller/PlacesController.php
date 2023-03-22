@@ -40,10 +40,8 @@ class PlacesController extends GenericClusterController
         return $this->timelineQuery->getPlaces($this->root);
     }
 
-    protected function getFileIds(string $name, ?int $limit = null): array
+    protected function getFiles(string $name, ?int $limit = null): array
     {
-        $list = $this->timelineQuery->getPlaceFiles((int) $name, $this->root, $limit) ?? [];
-
-        return array_map(fn ($item) => (int) $item['fileid'], $list);
+        return $this->timelineQuery->getPlaceFiles((int) $name, $this->root, $limit) ?? [];
     }
 }

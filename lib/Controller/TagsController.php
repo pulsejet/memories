@@ -77,10 +77,8 @@ class TagsController extends GenericClusterController
         return $this->timelineQuery->getTags($this->root);
     }
 
-    protected function getFileIds(string $name, ?int $limit = null): array
+    protected function getFiles(string $name, ?int $limit = null): array
     {
-        $list = $this->timelineQuery->getTagFiles($name, $this->root, $limit) ?? [];
-
-        return array_map(fn ($item) => (int) $item['fileid'], $list);
+        return $this->timelineQuery->getTagFiles($name, $this->root, $limit) ?? [];
     }
 }
