@@ -105,6 +105,7 @@ OC.L10N.register(
     "Name is required." : "Namn är obligatoriskt.",
     "Direct" : "Direkt",
     "Auto" : "Auto",
+    "Video not configured. Run occ memories:video-setup" : "Video är inte konfigurerad. Kör occ memories:video-setup",
     "Failed to create {albumName}." : "Lyckades inte skapa {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Lyckades inte döpa om {currentAlbumName} till {newAlbumName}.",
     "Failed to delete files." : "Misslyckades att radera filer.",
