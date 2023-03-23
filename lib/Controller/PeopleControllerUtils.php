@@ -25,6 +25,20 @@ namespace OCA\Memories\Controller;
 
 trait PeopleControllerUtils
 {
+    /**
+     * Sort a list of faces by the score.
+     *
+     * Needs the following fields:
+     *  - x: x position of the face in the image (percentage)
+     *  - y: y position of the face in the image (percentage)
+     *  - width: width of the face in the image (percentage)
+     *  - height: height of the face in the image (percentage)
+     *  - image_width: width of the image in pixels
+     *  - image_height: height of the image in pixels
+     *  - fileid: file id of the image (unused, converted to int)
+     *
+     * A score is calculated for each face, and the list is sorted by that score.
+     */
     private function sortByScores(array &$list): void
     {
         // Score the face detections
@@ -63,8 +77,15 @@ trait PeopleControllerUtils
     /**
      * Crop the preview to the face.
      *
-     * @param \OCP\Files\SimpleFS\ISimpleFile $file
-     * @param array                           $object The face object
+     * Needs the following fields:
+     * - x: x position of the face in the image (percentage)
+     * - y: y position of the face in the image (percentage)
+     * - width: width of the face in the image (percentage)
+     * - height: height of the face in the image (percentage)
+     *
+     * @param \OCP\Files\SimpleFS\ISimpleFile $file    Actual file containing the image
+     * @param array                           $object  The face object
+     * @param float                           $padding The padding to add around the face
      *
      * @return [Blob, mimetype] of resulting image
      *
