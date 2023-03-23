@@ -145,21 +145,20 @@ trait TimelineQueryPeopleRecognize
     }
 
     /** Convert face fields to object */
-    private function processPeopleRecognizeDetection(&$row, $days = false)
+    private function processPeopleRecognizeDetection(&$row)
     {
         // Differentiate Recognize queries from Face Recognition
         if (!isset($row) || !isset($row['face_w'])) {
             return;
         }
 
-        if (!$days) {
-            $row['facerect'] = [
-                'w' => (float) $row['face_w'],
-                'h' => (float) $row['face_h'],
-                'x' => (float) $row['face_x'],
-                'y' => (float) $row['face_y'],
-            ];
-        }
+        // Convert face rect to object
+        $row['facerect'] = [
+            'w' => (float) $row['face_w'],
+            'h' => (float) $row['face_h'],
+            'x' => (float) $row['face_x'],
+            'y' => (float) $row['face_y'],
+        ];
 
         unset($row['face_w'], $row['face_h'], $row['face_x'], $row['face_y']);
     }
