@@ -36,9 +36,6 @@ class MapController extends GenericApiController
     public function clusters(): Http\Response
     {
         return Util::guardEx(function () {
-            // Get the folder to show
-            $root = $this->getRequestRoot();
-
             // Make sure we have bounds and zoom level
             // Zoom level is used to determine the grid length
             $bounds = $this->request->getParam('bounds');
@@ -52,11 +49,11 @@ class MapController extends GenericApiController
             $clusterDensity = 1;
             $gridLen = 180.0 / (2 ** $zoomLevel * $clusterDensity);
 
-            $clusters = $this->timelineQuery->getMapClusters($gridLen, $bounds, $root);
+            $clusters = $this->timelineQuery->getMapClusters($gridLen, $bounds);
 
             // Get previews for each cluster
             $clusterIds = array_map(fn ($cluster) => (int) $cluster['id'], $clusters);
-            $previews = $this->timelineQuery->getMapClusterPreviews($clusterIds, $root);
+            $previews = $this->timelineQuery->getMapClusterPreviews($clusterIds);
 
             // Merge the responses
             $fileMap = [];

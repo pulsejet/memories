@@ -21,7 +21,7 @@ declare(strict_types=1);
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\Memories\Controller;
+namespace OCA\Memories\Manager;
 
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Db\TimelineRoot;
@@ -31,22 +31,37 @@ use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
+use OCP\IRequest;
+use OCP\IUserManager;
 use OCP\IUserSession;
+use OCP\Share\IShare;
 
-trait GenericApiControllerFs
+class FsManager
 {
-    use GenericApiControllerParams;
-
     protected IConfig $config;
     protected IUserSession $userSession;
     protected IRootFolder $rootFolder;
     protected TimelineQuery $timelineQuery;
+    protected IRequest $request;
+
+    public function __construct(
+        IConfig $config,
+        IUserSession $userSession,
+        IRootFolder $rootFolder,
+        TimelineQuery $timelineQuery,
+        IRequest $request
+    ) {
+        $this->config = $config;
+        $this->userSession = $userSession;
+        $this->rootFolder = $rootFolder;
+        $this->timelineQuery = $timelineQuery;
+        $this->request = $request;
+    }
 
     /** Get the TimelineRoot object relevant to the request */
-    protected function getRequestRoot()
+    public function populateRoot(TimelineRoot &$root)
     {
         $user = $this->userSession->getUser();
-        $root = new TimelineRoot();
 
         // Albums have no folder
         if ($this->request->getParam('album') && Util::albumsIsEnabled()) {
@@ -71,7 +86,7 @@ trait GenericApiControllerFs
 
         // Anything else needs a user
         if (null === $user) {
-            throw new \Exception('User not logged in');
+            throw new \Exception('User not logged in: no timeline root');
         }
         $uid = $user->getUID();
 
@@ -107,7 +122,7 @@ trait GenericApiControllerFs
     /**
      * Get a file with ID for the current user.
      */
-    protected function getUserFile(int $fileId): ?File
+    public function getUserFile(int $fileId): ?File
     {
         // Don't check self for share token
         if ($this->getShareToken()) {
@@ -122,7 +137,7 @@ trait GenericApiControllerFs
     /**
      * Get a file with ID from user's folder.
      */
-    protected function getUserFolderFile(int $id): ?File
+    public function getUserFolderFile(int $id): ?File
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
@@ -138,8 +153,10 @@ trait GenericApiControllerFs
 
     /**
      * Get a file with ID from an album.
+     *
+     * @param int $id FileID
      */
-    protected function getAlbumFile(int $id): ?File
+    public function getAlbumFile(int $id): ?File
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
@@ -163,9 +180,9 @@ trait GenericApiControllerFs
     /**
      * Get a file with ID from a public share.
      *
-     * @param int $fileId
+     * @param int $id FileID
      */
-    protected function getShareFile(int $id): ?File
+    public function getShareFile(int $id): ?File
     {
         try {
             // Album share
@@ -205,7 +222,7 @@ trait GenericApiControllerFs
         return null;
     }
 
-    protected function getShareObject()
+    public function getShareObject()
     {
         // Get token from request
         $token = $this->getShareToken();
@@ -215,7 +232,7 @@ trait GenericApiControllerFs
 
         // Get share by token
         $share = \OC::$server->get(\OCP\Share\IManager::class)->getShareByToken($token);
-        if (!PublicController::validateShare($share)) {
+        if (!self::validateShare($share)) {
             return null;
         }
 
@@ -235,14 +252,14 @@ trait GenericApiControllerFs
         return $share;
     }
 
-    protected function getShareNode()
+    public function getShareNode()
     {
         $share = $this->getShareObject();
         if (null === $share) {
             return null;
         }
 
-    // Get node from share
+        // Get node from share
         $node = $share->getNode(); // throws exception if not found
         if (!$node->isReadable() || !$node->isShareable()) {
             throw new \Exception('Share not found or invalid');
@@ -252,6 +269,38 @@ trait GenericApiControllerFs
         Util::forcePermissions($node, $share->getPermissions());
 
         return $node;
+    }
+
+    /**
+     * Validate the permissions of the share.
+     */
+    public static function validateShare(?IShare $share): bool
+    {
+        if (null === $share) {
+            return false;
+        }
+
+        // Get user manager
+        $userManager = \OC::$server->get(IUserManager::class);
+
+        // Check if share read is allowed
+        if (!($share->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
+            return false;
+        }
+
+        // If the owner is disabled no access to the linke is granted
+        $owner = $userManager->get($share->getShareOwner());
+        if (null === $owner || !$owner->isEnabled()) {
+            return false;
+        }
+
+        // If the initiator of the share is disabled no access is granted
+        $initiator = $userManager->get($share->getSharedBy());
+        if (null === $initiator || !$initiator->isEnabled()) {
+            return false;
+        }
+
+        return $share->getNode()->isReadable() && $share->getNode()->isShareable();
     }
 
     /**
@@ -286,5 +335,10 @@ trait GenericApiControllerFs
         }
 
         return $file;
+    }
+
+    private function getShareToken()
+    {
+        return $this->request->getParam('token');
     }
 }

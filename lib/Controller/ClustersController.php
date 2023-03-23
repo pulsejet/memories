@@ -123,13 +123,6 @@ class ClustersController extends GenericApiController
         if (!$this->backend->isEnabled()) {
             throw Exceptions::NotEnabled($this->backend->appName());
         }
-
-        if (property_exists($this->backend, 'root')) {
-            $this->backend->root = $this->getRequestRoot();
-            if ($this->backend->root->isEmpty()) {
-                throw Exceptions::NoRequestRoot();
-            }
-        }
     }
 
     /**

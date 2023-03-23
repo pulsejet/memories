@@ -25,6 +25,7 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Manager\FsManager;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\Files\IRootFolder;
@@ -36,16 +37,16 @@ use Psr\Log\LoggerInterface;
 
 abstract class GenericApiController extends Controller
 {
-    use GenericApiControllerFs;
     use GenericApiControllerParams;
 
     protected IConfig $config;
     protected IUserSession $userSession;
     protected IRootFolder $rootFolder;
     protected IAppManager $appManager;
-    protected TimelineQuery $timelineQuery;
     protected IDBConnection $connection;
     protected LoggerInterface $logger;
+    protected TimelineQuery $timelineQuery;
+    protected FsManager $fs;
 
     public function __construct(
         IRequest $request,
@@ -55,7 +56,8 @@ abstract class GenericApiController extends Controller
         IRootFolder $rootFolder,
         IAppManager $appManager,
         LoggerInterface $logger,
-        TimelineQuery $timelineQuery
+        TimelineQuery $timelineQuery,
+        FsManager $fs
     ) {
         parent::__construct(Application::APPNAME, $request);
 
@@ -66,5 +68,6 @@ abstract class GenericApiController extends Controller
         $this->appManager = $appManager;
         $this->logger = $logger;
         $this->timelineQuery = $timelineQuery;
+        $this->fs = $fs;
     }
 }

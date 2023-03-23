@@ -68,7 +68,7 @@ class Exif
     /**
      * Get the path to the user's configured photos directory.
      */
-    public static function getPhotosPath(IConfig &$config, string &$userId)
+    public static function getPhotosPath(IConfig $config, string &$userId)
     {
         $p = $config->getUserValue($userId, Application::APPNAME, 'timelinePath', '');
         if (empty($p)) {

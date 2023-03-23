@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\TimelineQuery;
-use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Util;
 use OCP\IConfig;
 
@@ -32,7 +31,6 @@ class FaceRecognitionBackend extends Backend
 {
     use PeopleBackendUtils;
 
-    public TimelineRoot $root;
     protected TimelineQuery $timelineQuery;
     protected IConfig $config;
 
@@ -58,14 +56,14 @@ class FaceRecognitionBackend extends Backend
     public function getClusters(): array
     {
         return array_merge(
-            $this->timelineQuery->getFaceRecognitionPersons($this->root, $this->model()),
-            $this->timelineQuery->getFaceRecognitionClusters($this->root, $this->model())
+            $this->timelineQuery->getFaceRecognitionPersons($this->model()),
+            $this->timelineQuery->getFaceRecognitionClusters($this->model())
         );
     }
 
     public function getPhotos(string $name, ?int $limit = null): array
     {
-        return $this->timelineQuery->getFaceRecognitionPhotos($name, $this->model(), $this->root, $limit) ?? [];
+        return $this->timelineQuery->getFaceRecognitionPhotos($name, $this->model(), $limit) ?? [];
     }
 
     public function sortPhotosForPreview(array &$photos)

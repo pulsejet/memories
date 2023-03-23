@@ -55,7 +55,7 @@ class ImageController extends GenericApiController
                 throw Exceptions::MissingParameter('id, x, y');
             }
 
-            $file = $this->getUserFile($id);
+            $file = $this->fs->getUserFile($id);
             if (!$file) {
                 throw Exceptions::NotFoundFile($id);
             }
@@ -113,7 +113,7 @@ class ImageController extends GenericApiController
                     continue;
                 }
 
-                $file = $this->getUserFile($fileid);
+                $file = $this->fs->getUserFile($fileid);
                 if (!$file) {
                     continue;
                 }
@@ -178,7 +178,7 @@ class ImageController extends GenericApiController
         bool $tags = false
     ): Http\Response {
         return Util::guardEx(function () use ($id, $basic, $current, $tags) {
-            $file = $this->getUserFile((int) $id);
+            $file = $this->fs->getUserFile((int) $id);
             if (!$file) {
                 throw Exceptions::NotFoundFile($id);
             }
@@ -222,7 +222,7 @@ class ImageController extends GenericApiController
     public function setExif(string $id, array $raw): Http\Response
     {
         return Util::guardEx(function () use ($id, $raw) {
-            $file = $this->getUserFile((int) $id);
+            $file = $this->fs->getUserFile((int) $id);
             if (!$file) {
                 throw Exceptions::NotFoundFile($id);
             }
@@ -261,7 +261,7 @@ class ImageController extends GenericApiController
     public function decodable(string $id): Http\Response
     {
         return Util::guardEx(function () use ($id) {
-            $file = $this->getUserFile((int) $id);
+            $file = $this->fs->getUserFile((int) $id);
             if (!$file) {
                 throw Exceptions::NotFoundFile($id);
             }

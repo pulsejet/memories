@@ -19,7 +19,7 @@ trait TimelineQueryPlaces
         ));
     }
 
-    public function getPlaces(TimelineRoot &$root)
+    public function getPlaces()
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -34,7 +34,7 @@ trait TimelineQueryPlaces
         $query->innerJoin('mp', 'memories', 'm', $query->expr()->eq('m.fileid', 'mp.fileid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $root, true, false);
+        $query = $this->joinFilecache($query);
 
         // GROUP and ORDER by tag name
         $query->groupBy('e.osm_id', 'e.name');
@@ -54,7 +54,7 @@ trait TimelineQueryPlaces
         return $places;
     }
 
-    public function getPlacePhotos(int $id, TimelineRoot $root, ?int $limit): array
+    public function getPlacePhotos(int $id, ?int $limit): array
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -67,7 +67,7 @@ trait TimelineQueryPlaces
         $query->innerJoin('mp', 'memories', 'm', $query->expr()->eq('m.fileid', 'mp.fileid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $root, true, false);
+        $query = $this->joinFilecache($query);
 
         // MAX number of photos
         if (null !== $limit) {

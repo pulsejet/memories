@@ -62,7 +62,7 @@ trait TimelineQueryPeopleRecognize
         );
     }
 
-    public function getPeopleRecognize(TimelineRoot &$root, string $uid)
+    public function getPeopleRecognize(string $uid)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -77,7 +77,7 @@ trait TimelineQueryPeopleRecognize
         $query->innerJoin('rfd', 'memories', 'm', $query->expr()->eq('m.fileid', 'rfd.file_id'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $root, true, false);
+        $query = $this->joinFilecache($query);
 
         // WHERE this cluster belongs to the user
         $query->where($query->expr()->eq('rfc.user_id', $query->createNamedParameter($uid)));
@@ -105,7 +105,7 @@ trait TimelineQueryPeopleRecognize
         return $faces;
     }
 
-    public function getPeopleRecognizePhotos(int $id, TimelineRoot $root, ?int $limit): array
+    public function getPeopleRecognizePhotos(int $id, ?int $limit): array
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -129,7 +129,7 @@ trait TimelineQueryPeopleRecognize
         $query->innerJoin('rfd', 'memories', 'm', $query->expr()->eq('m.fileid', 'rfd.file_id'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $root, true, false);
+        $query = $this->joinFilecache($query);
 
         // LIMIT results
         if (null !== $limit) {

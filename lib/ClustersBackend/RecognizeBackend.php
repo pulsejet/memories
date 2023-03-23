@@ -24,14 +24,12 @@ declare(strict_types=1);
 namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\TimelineQuery;
-use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Util;
 
 class RecognizeBackend extends Backend
 {
     use PeopleBackendUtils;
 
-    public TimelineRoot $root;
     protected TimelineQuery $timelineQuery;
 
     public function __construct(
@@ -52,12 +50,12 @@ class RecognizeBackend extends Backend
 
     public function getClusters(): array
     {
-        return $this->timelineQuery->getPeopleRecognize($this->root, Util::getUID());
+        return $this->timelineQuery->getPeopleRecognize(Util::getUID());
     }
 
     public function getPhotos(string $name, ?int $limit = null): array
     {
-        return $this->timelineQuery->getPeopleRecognizePhotos((int) $name, $this->root, $limit) ?? [];
+        return $this->timelineQuery->getPeopleRecognizePhotos((int) $name, $limit) ?? [];
     }
 
     public function sortPhotosForPreview(array &$photos)

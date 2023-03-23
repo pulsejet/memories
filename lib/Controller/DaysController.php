@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
-use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
@@ -42,10 +41,8 @@ class DaysController extends GenericApiController
     {
         return Util::guardEx(function () {
             $uid = $this->getShareToken() ? '' : Util::getUID();
-            $root = $this->getRequestRoot();
 
             $list = $this->timelineQuery->getDays(
-                $root,
                 $uid,
                 $this->isRecursive(),
                 $this->isArchive(),
@@ -57,7 +54,7 @@ class DaysController extends GenericApiController
                 $list = $this->timelineQuery->daysToMonths($list);
             } else {
                 // Preload some day responses
-                $this->preloadDays($list, $uid, $root);
+                $this->preloadDays($list, $uid);
             }
 
             // Reverse response if requested. Folders still stay at top.
@@ -67,6 +64,7 @@ class DaysController extends GenericApiController
 
             // Add subfolder info if querying non-recursively
             if (!$this->isRecursive()) {
+                $root = $this->timelineQuery->root();
                 array_unshift($list, $this->getSubfoldersEntry($root->getFolder($root->getOneId())));
             }
 
@@ -98,9 +96,6 @@ class DaysController extends GenericApiController
                 return new JSONResponse([], Http::STATUS_OK);
             }
 
-            // Get the folder to show
-            $root = $this->getRequestRoot();
-
             // Convert to actual dayIds if month view
             if ($this->isMonthView()) {
                 $dayIds = $this->timelineQuery->monthIdToDayIds((int) $dayIds[0]);
@@ -108,7 +103,6 @@ class DaysController extends GenericApiController
 
             // Run actual query
             $list = $this->timelineQuery->getDay(
-                $root,
                 $uid,
                 $dayIds,
                 $this->isRecursive(),
@@ -158,17 +152,9 @@ class DaysController extends GenericApiController
     {
         $transforms = [];
 
-        // Add extra information, basename and mimetype
-        if (!$aggregateOnly && ($fields = $this->request->getParam('fields'))) {
-            $fields = explode(',', $fields);
-            $transforms[] = [$this->timelineQuery, 'transformExtraFields', $fields];
-        }
-
         // Filter for one album
-        if (Util::albumsIsEnabled()) {
-            if ($albumId = $this->request->getParam('album')) {
-                $transforms[] = [$this->timelineQuery, 'transformAlbumFilter', $albumId];
-            }
+        if (($albumId = $this->request->getParam('album')) && Util::albumsIsEnabled()) {
+            $transforms[] = [$this->timelineQuery, 'transformAlbumFilter', $albumId];
         }
 
         // Other transforms not allowed for public shares
@@ -235,11 +221,10 @@ class DaysController extends GenericApiController
     /**
      * Preload a few "day" at the start of "days" response.
      *
-     * @param array        $days the days array
-     * @param string       $uid  User ID or blank for public shares
-     * @param TimelineRoot $root the root folder
+     * @param array  $days the days array
+     * @param string $uid  User ID or blank for public shares
      */
-    private function preloadDays(array &$days, string $uid, TimelineRoot &$root)
+    private function preloadDays(array &$days, string $uid)
     {
         $transforms = $this->getTransformations(false);
         $preloaded = 0;
@@ -261,7 +246,6 @@ class DaysController extends GenericApiController
 
         if (\count($preloadDayIds) > 0) {
             $allDetails = $this->timelineQuery->getDay(
-                $root,
                 $uid,
                 $preloadDayIds,
                 $this->isRecursive(),

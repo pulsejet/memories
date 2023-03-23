@@ -33,8 +33,7 @@ trait TimelineQueryMap
 
     public function getMapClusters(
         float $gridLen,
-        string $bounds,
-        TimelineRoot &$root
+        string $bounds
     ): array {
         $query = $this->connection->getQueryBuilder();
 
@@ -57,7 +56,7 @@ trait TimelineQueryMap
         $query->innerJoin('c', 'memories', 'm', $query->expr()->eq('c.id', 'm.mapcluster'));
 
         // JOIN with filecache for existing files
-        $query = $this->joinFilecache($query, $root, true, false);
+        $query = $this->joinFilecache($query);
 
         // Bound the query to the map bounds
         $this->transformMapBoundsFilter($query, '', $bounds, 'c');
@@ -86,7 +85,7 @@ trait TimelineQueryMap
         return $clusters;
     }
 
-    public function getMapClusterPreviews(array $clusterIds, TimelineRoot &$root)
+    public function getMapClusterPreviews(array $clusterIds)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -97,7 +96,7 @@ trait TimelineQueryMap
         );
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $root, true, false);
+        $query = $this->joinFilecache($query);
 
         // GROUP BY the cluster
         $query->groupBy('m.mapcluster');

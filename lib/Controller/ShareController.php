@@ -118,7 +118,7 @@ class ShareController extends GenericApiController
         try {
             $file = null;
             if ($id) {
-                $file = $this->getUserFile($id);
+                $file = $this->fs->getUserFile($id);
             } elseif ($path) {
                 $file = Util::getUserFolder($uid)->get($path);
             }

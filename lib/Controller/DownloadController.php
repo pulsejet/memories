@@ -128,7 +128,7 @@ class DownloadController extends GenericApiController
     public function one(int $fileid): Http\Response
     {
         return Util::guardEx(function () use ($fileid) {
-            $file = $this->getUserFile($fileid);
+            $file = $this->fs->getUserFile($fileid);
             if (null === $file) {
                 return Exceptions::NotFoundFile($fileid);
             }
@@ -215,7 +215,7 @@ class DownloadController extends GenericApiController
 
             try {
                 // This checks permissions
-                $file = $this->getUserFile($fileId);
+                $file = $this->fs->getUserFile($fileId);
                 if (null === $file) {
                     throw new \Exception('File not found');
                 }

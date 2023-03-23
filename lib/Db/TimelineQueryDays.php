@@ -78,15 +78,13 @@ trait TimelineQueryDays
     /**
      * Get the days response from the database for the timeline.
      *
-     * @param TimelineRoot $root            The root to get the days from
-     * @param bool         $recursive       Whether to get the days recursively
-     * @param bool         $archive         Whether to get the days only from the archive folder
-     * @param array        $queryTransforms An array of query transforms to apply to the query
+     * @param bool  $recursive       Whether to get the days recursively
+     * @param bool  $archive         Whether to get the days only from the archive folder
+     * @param array $queryTransforms An array of query transforms to apply to the query
      *
      * @return array The days response
      */
     public function getDays(
-        TimelineRoot &$root,
         string $uid,
         bool $recursive,
         bool $archive,
@@ -99,7 +97,7 @@ trait TimelineQueryDays
         $query->select('m.dayid', $count)
             ->from('memories', 'm')
         ;
-        $query = $this->joinFilecache($query, $root, $recursive, $archive);
+        $query = $this->joinFilecache($query, null, $recursive, $archive);
 
         // Group and sort by dayid
         $query->groupBy('m.dayid')
@@ -119,18 +117,16 @@ trait TimelineQueryDays
     /**
      * Get the day response from the database for the timeline.
      *
-     * @param TimelineRoot $root            The root to get the day from
-     * @param string       $uid             The user id
-     * @param int[]        $day_ids         The day ids to fetch
-     * @param bool         $recursive       If the query should be recursive
-     * @param bool         $archive         If the query should include only the archive folder
-     * @param array        $queryTransforms The query transformations to apply
-     * @param mixed        $day_ids
+     * @param string $uid             The user id
+     * @param int[]  $day_ids         The day ids to fetch
+     * @param bool   $recursive       If the query should be recursive
+     * @param bool   $archive         If the query should include only the archive folder
+     * @param array  $queryTransforms The query transformations to apply
+     * @param mixed  $day_ids
      *
      * @return array An array of day responses
      */
     public function getDay(
-        TimelineRoot &$root,
         string $uid,
         ?array $day_ids,
         bool $recursive,
@@ -150,7 +146,7 @@ trait TimelineQueryDays
         ;
 
         // JOIN with filecache for existing files
-        $query = $this->joinFilecache($query, $root, $recursive, $archive);
+        $query = $this->joinFilecache($query, null, $recursive, $archive);
 
         // JOIN with mimetypes to get the mimetype
         $query->join('f', 'mimetypes', 'mimetypes', $query->expr()->eq('f.mimetype', 'mimetypes.id'));
@@ -271,11 +267,15 @@ trait TimelineQueryDays
      * @param bool          $archive   Whether to get the days only from the archive folder
      */
     private function joinFilecache(
-        IQueryBuilder &$query,
-        TimelineRoot &$root,
-        bool $recursive,
-        bool $archive
+        IQueryBuilder $query,
+        ?TimelineRoot $root = null,
+        bool $recursive = true,
+        bool $archive = false
     ) {
+        if (null === $root) {
+            $root = $this->root();
+        }
+
         // Join with memories
         $baseOp = $query->expr()->eq('f.fileid', 'm.fileid');
         if ($root->isEmpty()) {

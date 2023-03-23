@@ -27,10 +27,22 @@ class TimelineQuery
     ];
 
     protected IDBConnection $connection;
+    private ?TimelineRoot $_root = null;
 
     public function __construct(IDBConnection $connection)
     {
         $this->connection = $connection;
+    }
+
+    public function root(): TimelineRoot
+    {
+        if (null === $this->_root) {
+            $this->_root = new TimelineRoot();
+            $fsManager = \OC::$server->get(\OCA\Memories\Manager\FsManager::class);
+            $fsManager->populateRoot($this->_root);
+        }
+
+        return $this->_root;
     }
 
     public static function debugQuery(IQueryBuilder &$query, string $sql = '')
@@ -61,10 +73,6 @@ class TimelineQuery
         }
 
         return $sql;
-    }
-
-    public function transformExtraFields(IQueryBuilder &$query, string $uid, array &$fields)
-    {
     }
 
     public function getInfoById(int $id, bool $basic): array

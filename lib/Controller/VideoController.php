@@ -56,7 +56,7 @@ class VideoController extends GenericApiController
             }
 
             // Get file
-            $file = $this->getUserFile($fileid);
+            $file = $this->fs->getUserFile($fileid);
             if (!$file || !$file->isReadable()) {
                 throw Exceptions::NotFoundFile($fileid);
             }
@@ -116,7 +116,7 @@ class VideoController extends GenericApiController
         string $transcode = ''
     ) {
         return Util::guardEx(function () use ($fileid, $liveid, $format, $transcode) {
-            $file = $this->getUserFile($fileid);
+            $file = $this->fs->getUserFile($fileid);
             if (null === $file) {
                 throw Exceptions::NotFoundFile($fileid);
             }

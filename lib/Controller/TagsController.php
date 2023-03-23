@@ -44,7 +44,7 @@ class TagsController extends GenericApiController
             }
 
             // Check the user is allowed to edit the file
-            $file = $this->getUserFile($id);
+            $file = $this->fs->getUserFile($id);
             if (null === $file) {
                 throw Exceptions::NotFoundFile($id);
             }

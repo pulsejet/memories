@@ -24,12 +24,10 @@ declare(strict_types=1);
 namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\TimelineQuery;
-use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Util;
 
 class TagsBackend extends Backend
 {
-    public TimelineRoot $root;
     protected TimelineQuery $timelineQuery;
 
     public function __construct(
@@ -50,11 +48,11 @@ class TagsBackend extends Backend
 
     public function getClusters(): array
     {
-        return $this->timelineQuery->getTags($this->root);
+        return $this->timelineQuery->getTags();
     }
 
     public function getPhotos(string $name, ?int $limit = null): array
     {
-        return $this->timelineQuery->getTagPhotos($name, $this->root, $limit) ?? [];
+        return $this->timelineQuery->getTagPhotos($name, $limit) ?? [];
     }
 }

@@ -37,7 +37,7 @@ trait TimelineQueryTags
         ));
     }
 
-    public function getTags(TimelineRoot &$root)
+    public function getTags()
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -57,7 +57,7 @@ trait TimelineQueryTags
         $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.objectid', 'stom.objectid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $root, true, false);
+        $query = $this->joinFilecache($query);
 
         // GROUP and ORDER by tag name
         $query->groupBy('st.id');
@@ -77,7 +77,7 @@ trait TimelineQueryTags
         return $tags;
     }
 
-    public function getTagPhotos(string $tagName, TimelineRoot $root, ?int $limit)
+    public function getTagPhotos(string $tagName, ?int $limit)
     {
         $query = $this->connection->getQueryBuilder();
         $tagId = $this->getSystemTagId($query, $tagName);
@@ -98,7 +98,7 @@ trait TimelineQueryTags
         $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.objectid', 'stom.objectid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $root, true, false);
+        $query = $this->joinFilecache($query);
 
         // MAX number of files
         if (null !== $limit) {

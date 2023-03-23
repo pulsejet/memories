@@ -4,7 +4,6 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineQuery;
-use OCP\App\IAppManager;
 use OCP\AppFramework\AuthPublicShareController;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -16,7 +15,6 @@ use OCP\IConfig;
 use OCP\IRequest;
 use OCP\ISession;
 use OCP\IURLGenerator;
-use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
@@ -30,8 +28,6 @@ class PublicController extends AuthPublicShareController
     protected IUserSession $userSession;
     protected IRootFolder $rootFolder;
     protected IShareManager $shareManager;
-    protected IUserManager $userManager;
-    protected IAppManager $appManager;
     protected IConfig $config;
     protected TimelineQuery $timelineQuery;
 
@@ -47,8 +43,6 @@ class PublicController extends AuthPublicShareController
         IUserSession $userSession,
         IRootFolder $rootFolder,
         IShareManager $shareManager,
-        IUserManager $userManager,
-        IAppManager $appManager,
         IConfig $config,
         TimelineQuery $timelineQuery
     ) {
@@ -58,8 +52,6 @@ class PublicController extends AuthPublicShareController
         $this->userSession = $userSession;
         $this->rootFolder = $rootFolder;
         $this->shareManager = $shareManager;
-        $this->userManager = $userManager;
-        $this->appManager = $appManager;
         $this->config = $config;
         $this->timelineQuery = $timelineQuery;
     }
@@ -106,7 +98,7 @@ class PublicController extends AuthPublicShareController
             throw new NotFoundException();
         }
 
-        if (!self::validateShare($share)) {
+        if (!\OCA\Memories\Manager\FsManager::validateShare($share)) {
             throw new NotFoundException();
         }
 
@@ -142,38 +134,6 @@ class PublicController extends AuthPublicShareController
         $response->cacheFor(0);
 
         return $response;
-    }
-
-    /**
-     * Validate the permissions of the share.
-     */
-    public static function validateShare(?IShare $share): bool
-    {
-        if (null === $share) {
-            return false;
-        }
-
-        // Get user manager
-        $userManager = \OC::$server->get(IUserManager::class);
-
-        // Check if share read is allowed
-        if (!($share->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
-            return false;
-        }
-
-        // If the owner is disabled no access to the linke is granted
-        $owner = $userManager->get($share->getShareOwner());
-        if (null === $owner || !$owner->isEnabled()) {
-            return false;
-        }
-
-        // If the initiator of the share is disabled no access is granted
-        $initiator = $userManager->get($share->getSharedBy());
-        if (null === $initiator || !$initiator->isEnabled()) {
-            return false;
-        }
-
-        return $share->getNode()->isReadable() && $share->getNode()->isShareable();
     }
 
     protected function showAuthFailed(): TemplateResponse

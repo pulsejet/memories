@@ -58,7 +58,7 @@ trait TimelineQueryPeopleFaceRecognition
         );
     }
 
-    public function getFaceRecognitionPhotos(string $id, int $currentModel, TimelineRoot &$root, ?int $limit)
+    public function getFaceRecognitionPhotos(string $id, int $currentModel, ?int $limit)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -95,7 +95,7 @@ trait TimelineQueryPeopleFaceRecognition
         }
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $root, true, false);
+        $query = $this->joinFilecache($query);
 
         // LIMIT results
         if (null !== $limit) {
@@ -110,7 +110,7 @@ trait TimelineQueryPeopleFaceRecognition
         return $this->executeQueryWithCTEs($query)->fetchAll();
     }
 
-    public function getFaceRecognitionClusters(TimelineRoot &$root, int $currentModel, bool $show_singles = false, bool $show_hidden = false)
+    public function getFaceRecognitionClusters(int $currentModel, bool $show_singles = false, bool $show_hidden = false)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -133,7 +133,7 @@ trait TimelineQueryPeopleFaceRecognition
         ));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $root, true, false);
+        $query = $this->joinFilecache($query);
 
         // GROUP by ID of face cluster
         $query->groupBy('frp.id');
@@ -170,7 +170,7 @@ trait TimelineQueryPeopleFaceRecognition
         return $faces;
     }
 
-    public function getFaceRecognitionPersons(TimelineRoot &$root, int $currentModel)
+    public function getFaceRecognitionPersons(int $currentModel)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -193,7 +193,7 @@ trait TimelineQueryPeopleFaceRecognition
         ));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $root, true, false);
+        $query = $this->joinFilecache($query);
 
         // GROUP by name of face clusters
         $query->where($query->expr()->isNotNull('frp.name'));
