@@ -24,7 +24,8 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\Db\TimelineRoot;
-use OCA\Memories\Errors;
+use OCA\Memories\Exceptions;
+use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
@@ -39,24 +40,10 @@ class DaysController extends GenericApiController
      */
     public function days(): Http\Response
     {
-        // Get the folder to show
-        try {
-            $uid = $this->getUID();
-        } catch (\Exception $e) {
-            return Errors::NotLoggedIn();
-        }
-
-        // Get the folder to show
-        $root = null;
-
-        try {
+        return Util::guardEx(function () {
+            $uid = $this->getShareToken() ? '' : Util::getUID();
             $root = $this->getRequestRoot();
-        } catch (\Exception $e) {
-            return Errors::Generic($e);
-        }
 
-        // Run actual query
-        try {
             $list = $this->timelineQuery->getDays(
                 $root,
                 $uid,
@@ -84,9 +71,7 @@ class DaysController extends GenericApiController
             }
 
             return new JSONResponse($list, Http::STATUS_OK);
-        } catch (\Exception $e) {
-            return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);
-        }
+        });
     }
 
     /**
@@ -96,41 +81,32 @@ class DaysController extends GenericApiController
      */
     public function day(string $id): Http\Response
     {
-        // Get user
-        $uid = $this->getUID();
+        return Util::guardEx(function () use ($id) {
+            $uid = $this->getShareToken() ? '' : Util::getUID();
 
-        // Check for wildcard
-        $dayIds = [];
-        if ('*' === $id) {
-            $dayIds = null;
-        } else {
-            // Split at commas and convert all parts to int
-            $dayIds = array_map(function ($part) {
-                return (int) $part;
-            }, explode(',', $id));
-        }
+            // Check for wildcard
+            $dayIds = [];
+            if ('*' === $id) {
+                $dayIds = null;
+            } else {
+                // Split at commas and convert all parts to int
+                $dayIds = array_map(fn ($p) => (int) $p, explode(',', $id));
+            }
 
-        // Check if $dayIds is empty
-        if (null !== $dayIds && 0 === \count($dayIds)) {
-            return new JSONResponse([], Http::STATUS_OK);
-        }
+            // Check if $dayIds is empty
+            if (null !== $dayIds && 0 === \count($dayIds)) {
+                return new JSONResponse([], Http::STATUS_OK);
+            }
 
-        // Get the folder to show
-        $root = null;
-
-        try {
+            // Get the folder to show
             $root = $this->getRequestRoot();
-        } catch (\Exception $e) {
-            return Errors::Generic($e);
-        }
 
-        // Convert to actual dayIds if month view
-        if ($this->isMonthView()) {
-            $dayIds = $this->timelineQuery->monthIdToDayIds((int) $dayIds[0]);
-        }
+            // Convert to actual dayIds if month view
+            if ($this->isMonthView()) {
+                $dayIds = $this->timelineQuery->monthIdToDayIds((int) $dayIds[0]);
+            }
 
-        // Run actual query
-        try {
+            // Run actual query
             $list = $this->timelineQuery->getDay(
                 $root,
                 $uid,
@@ -153,9 +129,7 @@ class DaysController extends GenericApiController
             }
 
             return new JSONResponse($list, Http::STATUS_OK);
-        } catch (\Exception $e) {
-            return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);
-        }
+        });
     }
 
     /**
@@ -165,12 +139,14 @@ class DaysController extends GenericApiController
      */
     public function dayPost(): Http\Response
     {
-        $id = $this->request->getParam('body_ids');
-        if (null === $id) {
-            return Errors::MissingParameter('body_ids');
-        }
+        return Util::guardEx(function () {
+            $id = $this->request->getParam('body_ids');
+            if (null === $id) {
+                throw Exceptions::MissingParameter('body_ids');
+            }
 
-        return $this->day($id);
+            return $this->day($id);
+        });
     }
 
     /**

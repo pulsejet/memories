@@ -23,7 +23,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
-use OCA\Memories\Errors;
+use OCA\Memories\Exceptions;
+use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
@@ -34,35 +35,27 @@ class MapController extends GenericApiController
      */
     public function clusters(): Http\Response
     {
-        // Get the folder to show
-        $root = null;
-
-        try {
+        return Util::guardEx(function () {
+            // Get the folder to show
             $root = $this->getRequestRoot();
-        } catch (\Exception $e) {
-            return Errors::NoRequestRoot();
-        }
 
-        // Make sure we have bounds and zoom level
-        // Zoom level is used to determine the grid length
-        $bounds = $this->request->getParam('bounds');
-        $zoomLevel = $this->request->getParam('zoom');
-        if (!$bounds || !$zoomLevel || !is_numeric($zoomLevel)) {
-            return Errors::MissingParameter('bounds or zoom');
-        }
+            // Make sure we have bounds and zoom level
+            // Zoom level is used to determine the grid length
+            $bounds = $this->request->getParam('bounds');
+            $zoomLevel = $this->request->getParam('zoom');
+            if (!$bounds || !$zoomLevel || !is_numeric($zoomLevel)) {
+                throw Exceptions::MissingParameter('bounds or zoom');
+            }
 
-        // A tweakable parameter to determine the number of boxes in the map
-        // Note: these parameters need to be changed in MapSplitMatter.vue as well
-        $clusterDensity = 1;
-        $gridLen = 180.0 / (2 ** $zoomLevel * $clusterDensity);
+            // A tweakable parameter to determine the number of boxes in the map
+            // Note: these parameters need to be changed in MapSplitMatter.vue as well
+            $clusterDensity = 1;
+            $gridLen = 180.0 / (2 ** $zoomLevel * $clusterDensity);
 
-        try {
             $clusters = $this->timelineQuery->getMapClusters($gridLen, $bounds, $root);
 
             // Get previews for each cluster
-            $clusterIds = array_map(function ($cluster) {
-                return (int) $cluster['id'];
-            }, $clusters);
+            $clusterIds = array_map(fn ($cluster) => (int) $cluster['id'], $clusters);
             $previews = $this->timelineQuery->getMapClusterPreviews($clusterIds, $root);
 
             // Merge the responses
@@ -75,8 +68,6 @@ class MapController extends GenericApiController
             }
 
             return new JSONResponse($clusters);
-        } catch (\Exception $e) {
-            return Errors::Generic($e);
-        }
+        });
     }
 }

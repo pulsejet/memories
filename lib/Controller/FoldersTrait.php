@@ -26,9 +26,7 @@ trait FoldersTrait
         $folders = $view->getDirectoryContent($folder->getPath(), FileInfo::MIMETYPE_FOLDER, $folder);
 
         // Sort by name
-        usort($folders, function ($a, $b) {
-            return strnatcmp($a->getName(), $b->getName());
-        });
+        usort($folders, fn ($a, $b) => strnatcmp($a->getName(), $b->getName()));
 
         // Process to response type
         return [

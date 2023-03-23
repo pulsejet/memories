@@ -24,8 +24,8 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\ClustersBackend\Backend;
-use OCA\Memories\Errors;
-use OCA\Memories\HttpResponseException;
+use OCA\Memories\Exceptions;
+use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
@@ -42,7 +42,7 @@ class ClustersController extends GenericApiController
      */
     public function list(string $backend): Http\Response
     {
-        return $this->guardEx(function () use ($backend) {
+        return Util::guardEx(function () use ($backend) {
             $this->init($backend);
 
             $list = $this->backend->getClusters();
@@ -60,7 +60,7 @@ class ClustersController extends GenericApiController
      */
     public function preview(string $backend, string $name): Http\Response
     {
-        return $this->guardEx(function () use ($backend, $name) {
+        return Util::guardEx(function () use ($backend, $name) {
             $this->init($backend);
 
             // Get list of some photos in this cluster
@@ -88,7 +88,7 @@ class ClustersController extends GenericApiController
      */
     public function download(string $backend, string $name): Http\Response
     {
-        return $this->guardEx(function () use ($backend, $name) {
+        return Util::guardEx(function () use ($backend, $name) {
             $this->init($backend);
 
             // Get list of all files in this cluster
@@ -111,7 +111,7 @@ class ClustersController extends GenericApiController
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
-            throw new HttpResponseException(Errors::NotLoggedIn());
+            throw Exceptions::NotLoggedIn();
         }
 
         if (\array_key_exists($backend, Backend::$backends)) {
@@ -121,13 +121,13 @@ class ClustersController extends GenericApiController
         }
 
         if (!$this->backend->isEnabled()) {
-            throw new HttpResponseException(Errors::NotEnabled($this->backend->appName()));
+            throw Exceptions::NotEnabled($this->backend->appName());
         }
 
         if (property_exists($this->backend, 'root')) {
             $this->backend->root = $this->getRequestRoot();
             if ($this->backend->root->isEmpty()) {
-                throw new HttpResponseException(Errors::NoRequestRoot());
+                throw Exceptions::NoRequestRoot();
             }
         }
     }
@@ -141,7 +141,7 @@ class ClustersController extends GenericApiController
         $previewManager = \OC::$server->get(\OCP\IPreview::class);
 
         // Try to get a preview
-        $userFolder = $this->rootFolder->getUserFolder($this->getUID());
+        $userFolder = Util::getUserFolder();
         foreach ($photos as $img) {
             // Get the file
             $files = $userFolder->getById($this->backend->getFileId($img));
@@ -172,6 +172,6 @@ class ClustersController extends GenericApiController
             }
         }
 
-        return Errors::NotFound('preview from photos list');
+        throw Exceptions::NotFound('preview from photos list');
     }
 }

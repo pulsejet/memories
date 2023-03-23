@@ -24,8 +24,9 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
-use OCA\Memories\Errors;
+use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
+use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\FileDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
@@ -49,16 +50,16 @@ class ImageController extends GenericApiController
         bool $a = false,
         string $mode = 'fill'
     ) {
-        if (-1 === $id || 0 === $x || 0 === $y) {
-            return Errors::MissingParameter('id, x, y');
-        }
+        return Util::guardEx(function () use ($id, $x, $y, $a, $mode) {
+            if (-1 === $id || 0 === $x || 0 === $y) {
+                throw Exceptions::MissingParameter('id, x, y');
+            }
 
-        $file = $this->getUserFile($id);
-        if (!$file) {
-            return Errors::NotFoundFile($id);
-        }
+            $file = $this->getUserFile($id);
+            if (!$file) {
+                throw Exceptions::NotFoundFile($id);
+            }
 
-        try {
             $preview = \OC::$server->get(\OCP\IPreview::class)->getPreview($file, $x, $y, !$a, $mode);
             $response = new FileDisplayResponse($preview, Http::STATUS_OK, [
                 'Content-Type' => $preview->getMimeType(),
@@ -66,11 +67,7 @@ class ImageController extends GenericApiController
             $response->cacheFor(3600 * 24, false, true);
 
             return $response;
-        } catch (\OCP\Files\NotFoundException $e) {
-            return Errors::NotFound('preview');
-        } catch (\InvalidArgumentException $e) {
-            return Errors::Generic($e);
-        }
+        });
     }
 
     /**
@@ -84,87 +81,85 @@ class ImageController extends GenericApiController
      */
     public function multipreview()
     {
-        // read body to array
-        try {
+        return Util::guardEx(function () {
+            // read body to array
             $body = file_get_contents('php://input');
             $files = json_decode($body, true);
-        } catch (\Exception $e) {
-            return new JSONResponse([], Http::STATUS_BAD_REQUEST);
-        }
 
-        /** @var \OCP\IPreview $previewManager */
-        $previewManager = \OC::$server->get(\OCP\IPreview::class);
+            /** @var \OCP\IPreview $previewManager */
+            $previewManager = \OC::$server->get(\OCP\IPreview::class);
 
-        // For checking max previews
-        $previewRoot = new \OC\Preview\Storage\Root(
-            \OC::$server->get(IRootFolder::class),
-            \OC::$server->get(\OC\SystemConfig::class),
-        );
+            // For checking max previews
+            $previewRoot = new \OC\Preview\Storage\Root(
+                \OC::$server->get(IRootFolder::class),
+                \OC::$server->get(\OC\SystemConfig::class),
+            );
 
-        // stream the response
-        header('Content-Type: application/octet-stream');
-        header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time() + 7 * 3600 * 24));
-        header('Cache-Control: max-age='. 7 * 3600 * 24 .', private');
+            // stream the response
+            header('Content-Type: application/octet-stream');
+            header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time() + 7 * 3600 * 24));
+            header('Cache-Control: max-age='. 7 * 3600 * 24 .', private');
 
-        foreach ($files as $bodyFile) {
-            if (!isset($bodyFile['reqid']) || !isset($bodyFile['fileid']) || !isset($bodyFile['x']) || !isset($bodyFile['y']) || !isset($bodyFile['a'])) {
-                continue;
-            }
-            $reqid = $bodyFile['reqid'];
-            $fileid = (int) $bodyFile['fileid'];
-            $x = (int) $bodyFile['x'];
-            $y = (int) $bodyFile['y'];
-            $a = '1' === $bodyFile['a'];
-            if ($fileid <= 0 || $x <= 0 || $y <= 0) {
-                continue;
-            }
+            foreach ($files as $bodyFile) {
+                if (!isset($bodyFile['reqid']) || !isset($bodyFile['fileid']) || !isset($bodyFile['x']) || !isset($bodyFile['y']) || !isset($bodyFile['a'])) {
+                    continue;
+                }
+                $reqid = $bodyFile['reqid'];
+                $fileid = (int) $bodyFile['fileid'];
+                $x = (int) $bodyFile['x'];
+                $y = (int) $bodyFile['y'];
+                $a = '1' === $bodyFile['a'];
+                if ($fileid <= 0 || $x <= 0 || $y <= 0) {
+                    continue;
+                }
 
-            $file = $this->getUserFile($fileid);
-            if (!$file) {
-                continue;
-            }
+                $file = $this->getUserFile($fileid);
+                if (!$file) {
+                    continue;
+                }
 
-            try {
-                // Make sure max preview exists
-                $fileId = (string) $file->getId();
-                $folder = $previewRoot->getFolder($fileId);
-                $hasMax = false;
-                foreach ($folder->getDirectoryListing() as $preview) {
-                    $name = $preview->getName();
-                    if (str_contains($name, '-max')) {
-                        $hasMax = true;
+                try {
+                    // Make sure max preview exists
+                    $fileId = (string) $file->getId();
+                    $folder = $previewRoot->getFolder($fileId);
+                    $hasMax = false;
+                    foreach ($folder->getDirectoryListing() as $preview) {
+                        $name = $preview->getName();
+                        if (str_contains($name, '-max')) {
+                            $hasMax = true;
 
-                        break;
+                            break;
+                        }
                     }
-                }
-                if (!$hasMax) {
+                    if (!$hasMax) {
+                        continue;
+                    }
+
+                    // Add this preview to the response
+                    $preview = $previewManager->getPreview($file, $x, $y, !$a, \OCP\IPreview::MODE_FILL);
+                    $content = $preview->getContent();
+                    if (empty($content)) {
+                        continue;
+                    }
+
+                    ob_start();
+                    echo json_encode([
+                        'reqid' => $reqid,
+                        'Content-Length' => \strlen($content),
+                        'Content-Type' => $preview->getMimeType(),
+                    ]);
+                    echo "\n";
+                    echo $content;
+                    ob_end_flush();
+                } catch (\OCP\Files\NotFoundException $e) {
+                    continue;
+                } catch (\Exception $e) {
                     continue;
                 }
-
-                // Add this preview to the response
-                $preview = $previewManager->getPreview($file, $x, $y, !$a, \OCP\IPreview::MODE_FILL);
-                $content = $preview->getContent();
-                if (empty($content)) {
-                    continue;
-                }
-
-                ob_start();
-                echo json_encode([
-                    'reqid' => $reqid,
-                    'Content-Length' => \strlen($content),
-                    'Content-Type' => $preview->getMimeType(),
-                ]);
-                echo "\n";
-                echo $content;
-                ob_end_flush();
-            } catch (\OCP\Files\NotFoundException $e) {
-                continue;
-            } catch (\Exception $e) {
-                continue;
             }
-        }
 
-        exit;
+            exit;
+        });
     }
 
     /**
@@ -182,36 +177,38 @@ class ImageController extends GenericApiController
         bool $current = false,
         bool $tags = false
     ): Http\Response {
-        $file = $this->getUserFile((int) $id);
-        if (!$file) {
-            return Errors::NotFoundFile($id);
-        }
-
-        // Get the image info
-        $info = $this->timelineQuery->getInfoById($file->getId(), $basic);
-
-        // Allow these ony for logged in users
-        if (null !== $this->userSession->getUser()) {
-            // Get list of tags for this file
-            if ($tags) {
-                $info['tags'] = $this->getTags($file->getId());
+        return Util::guardEx(function () use ($id, $basic, $current, $tags) {
+            $file = $this->getUserFile((int) $id);
+            if (!$file) {
+                throw Exceptions::NotFoundFile($id);
             }
 
-            // Get latest exif data if requested
-            if ($current) {
-                $info['current'] = Exif::getExifFromFile($file);
+            // Get the image info
+            $info = $this->timelineQuery->getInfoById($file->getId(), $basic);
+
+            // Allow these ony for logged in users
+            if (null !== $this->userSession->getUser()) {
+                // Get list of tags for this file
+                if ($tags) {
+                    $info['tags'] = $this->getTags($file->getId());
+                }
+
+                // Get latest exif data if requested
+                if ($current) {
+                    $info['current'] = Exif::getExifFromFile($file);
+                }
             }
-        }
 
-        // Inject permissions and convert to string
-        $info['permissions'] = \OCA\Memories\Util::permissionsToStr($file->getPermissions());
+            // Inject permissions and convert to string
+            $info['permissions'] = \OCA\Memories\Util::permissionsToStr($file->getPermissions());
 
-        // Inject other file parameters that are cheap to get now
-        $info['mimetype'] = $file->getMimeType();
-        $info['size'] = $file->getSize();
-        $info['basename'] = $file->getName();
+            // Inject other file parameters that are cheap to get now
+            $info['mimetype'] = $file->getMimeType();
+            $info['size'] = $file->getSize();
+            $info['basename'] = $file->getName();
 
-        return new JSONResponse($info, Http::STATUS_OK);
+            return new JSONResponse($info, Http::STATUS_OK);
+        });
     }
 
     /**
@@ -224,36 +221,30 @@ class ImageController extends GenericApiController
      */
     public function setExif(string $id, array $raw): Http\Response
     {
-        $file = $this->getUserFile((int) $id);
-        if (!$file) {
-            return Errors::NotFoundFile($id);
-        }
+        return Util::guardEx(function () use ($id, $raw) {
+            $file = $this->getUserFile((int) $id);
+            if (!$file) {
+                throw Exceptions::NotFoundFile($id);
+            }
 
-        // Check if user has permissions
-        if (!$file->isUpdateable()) {
-            return Errors::ForbiddenFileUpdate($file->getName());
-        }
+            // Check if user has permissions
+            if (!$file->isUpdateable() || Util::isEncryptionEnabled()) {
+                throw Exceptions::ForbiddenFileUpdate($file->getName());
+            }
 
-        // Check for end-to-end encryption
-        if (\OCA\Memories\Util::isEncryptionEnabled()) {
-            return new JSONResponse(['message' => 'Cannot change encrypted file'], Http::STATUS_PRECONDITION_FAILED);
-        }
+            // Check if allowed to edit file
+            $mime = $file->getMimeType();
+            if (!\in_array($mime, Exif::allowedEditMimetypes(), true)) {
+                $name = $file->getName();
 
-        // Check if allowed to edit file
-        $mime = $file->getMimeType();
-        if (!\in_array($mime, Exif::allowedEditMimetypes(), true)) {
-            $name = $file->getName();
+                throw Exceptions::Forbidden("Cannot edit file {$name} (blacklisted type {$mime})");
+            }
 
-            return new JSONResponse(['message' => "Cannot edit file {$name} (blacklisted type {$mime})"], Http::STATUS_PRECONDITION_FAILED);
-        }
-
-        try {
+            // Set the exif data
             Exif::setFileExif($file, $raw);
-        } catch (\Exception $e) {
-            return Errors::Generic($e);
-        }
 
-        return new JSONResponse([], Http::STATUS_OK);
+            return new JSONResponse([], Http::STATUS_OK);
+        });
     }
 
     /**
@@ -269,35 +260,37 @@ class ImageController extends GenericApiController
      */
     public function decodable(string $id): Http\Response
     {
-        $file = $this->getUserFile((int) $id);
-        if (!$file) {
-            return Errors::NotFoundFile($id);
-        }
+        return Util::guardEx(function () use ($id) {
+            $file = $this->getUserFile((int) $id);
+            if (!$file) {
+                throw Exceptions::NotFoundFile($id);
+            }
 
-        // Check if valid image
-        $mimetype = $file->getMimeType();
-        if (!\in_array($mimetype, Application::IMAGE_MIMES, true)) {
-            return Errors::ForbiddenFileUpdate($file->getName());
-        }
+            // Check if valid image
+            $mimetype = $file->getMimeType();
+            if (!\in_array($mimetype, Application::IMAGE_MIMES, true)) {
+                throw Exceptions::Forbidden('Not an image');
+            }
 
-        /** @var string Blob of image */
-        $blob = $file->getContent();
+            /** @var string Blob of image */
+            $blob = $file->getContent();
 
-        // Convert image to JPEG if required
-        if (!\in_array($mimetype, ['image/png', 'image/webp', 'image/jpeg', 'image/gif'], true)) {
-            $image = new \Imagick();
-            $image->readImageBlob($blob);
-            $image->setImageFormat('jpeg');
-            $image->setImageCompressionQuality(95);
-            $blob = $image->getImageBlob();
-            $mimetype = $image->getImageMimeType();
-        }
+            // Convert image to JPEG if required
+            if (!\in_array($mimetype, ['image/png', 'image/webp', 'image/jpeg', 'image/gif'], true)) {
+                $image = new \Imagick();
+                $image->readImageBlob($blob);
+                $image->setImageFormat('jpeg');
+                $image->setImageCompressionQuality(95);
+                $blob = $image->getImageBlob();
+                $mimetype = $image->getImageMimeType();
+            }
 
-        // Return the image
-        $response = new Http\DataDisplayResponse($blob, Http::STATUS_OK, ['Content-Type' => $mimetype]);
-        $response->cacheFor(3600 * 24, false, false);
+            // Return the image
+            $response = new Http\DataDisplayResponse($blob, Http::STATUS_OK, ['Content-Type' => $mimetype]);
+            $response->cacheFor(3600 * 24, false, false);
 
-        return $response;
+            return $response;
+        });
     }
 
     /**
@@ -306,7 +299,7 @@ class ImageController extends GenericApiController
     private function getTags(int $fileId): array
     {
         // Make sure tags are enabled
-        if (!\OCA\Memories\Util::tagsIsEnabled($this->appManager)) {
+        if (!Util::tagsIsEnabled($this->appManager)) {
             return [];
         }
 
@@ -320,10 +313,9 @@ class ImageController extends GenericApiController
         /** @var \OCP\SystemTag\ISystemTag[] */
         $tags = $tagManager->getTagsByIds($tagIds);
 
-        return array_map(function ($tag) {
-            return $tag->getName();
-        }, array_filter($tags, function ($tag) {
-            return $tag->isUserVisible();
-        }));
+        $visible = array_filter($tags, fn ($t) => $t->isUserVisible());
+
+        // Get the tag names
+        return array_map(fn ($t) => $t->getName(), $visible);
     }
 }

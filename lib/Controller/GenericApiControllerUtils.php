@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\Util;
 use OCP\App\IAppManager;
 use OCP\IConfig;
 
@@ -31,41 +32,12 @@ trait GenericApiControllerUtils
     protected IAppManager $appManager;
     protected IConfig $config;
 
-    /** Get logged in user's UID or throw exception */
-    protected function getUID(): string
-    {
-        $user = $this->userSession->getUser();
-        if ($this->getShareToken()) {
-            $user = null;
-        } elseif (null === $user) {
-            throw new \Exception('User not logged in');
-        }
-
-        return $user ? $user->getUID() : '';
-    }
-
-    /**
-     * Runa function and catch exceptions to return HTTP response.
-     *
-     * @param mixed $function
-     */
-    protected function guardEx($function): \OCP\AppFramework\Http\Response
-    {
-        try {
-            return $function();
-        } catch (\OCA\Memories\HttpResponseException $e) {
-            return $e->response;
-        } catch (\Exception $e) {
-            return \OCA\Memories\Errors::Generic($e);
-        }
-    }
-
     /**
      * Check if albums are enabled for this user.
      */
     protected function albumsIsEnabled(): bool
     {
-        return \OCA\Memories\Util::albumsIsEnabled($this->appManager);
+        return Util::albumsIsEnabled($this->appManager);
     }
 
     /**
@@ -73,7 +45,7 @@ trait GenericApiControllerUtils
      */
     protected function tagsIsEnabled(): bool
     {
-        return \OCA\Memories\Util::tagsIsEnabled($this->appManager);
+        return Util::tagsIsEnabled($this->appManager);
     }
 
     /**
@@ -81,13 +53,13 @@ trait GenericApiControllerUtils
      */
     protected function recognizeIsEnabled(): bool
     {
-        return \OCA\Memories\Util::recognizeIsEnabled($this->appManager);
+        return Util::recognizeIsEnabled($this->appManager);
     }
 
     // Check if facerecognition is installed and enabled for this user.
     protected function facerecognitionIsInstalled(): bool
     {
-        return \OCA\Memories\Util::facerecognitionIsInstalled($this->appManager);
+        return Util::facerecognitionIsInstalled($this->appManager);
     }
 
     /**
@@ -95,7 +67,7 @@ trait GenericApiControllerUtils
      */
     protected function facerecognitionIsEnabled(): bool
     {
-        return \OCA\Memories\Util::facerecognitionIsEnabled($this->config, $this->getUID());
+        return Util::facerecognitionIsEnabled($this->config, Util::getUID());
     }
 
     /**
@@ -103,6 +75,6 @@ trait GenericApiControllerUtils
      */
     protected function placesIsEnabled(): bool
     {
-        return \OCA\Memories\Util::placesGISType() > 0;
+        return Util::placesGISType() > 0;
     }
 }

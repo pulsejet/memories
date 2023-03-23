@@ -24,7 +24,8 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
-use OCA\Memories\Errors;
+use OCA\Memories\Exceptions;
+use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\StreamResponse;
@@ -43,20 +44,18 @@ class OtherController extends GenericApiController
      */
     public function setUserConfig(string $key, string $value): Http\Response
     {
-        $user = $this->userSession->getUser();
-        if (null === $user) {
-            return Errors::NotLoggedIn();
-        }
+        return Util::guardEx(function () use ($key, $value) {
+            $uid = Util::getUID();
 
-        // Make sure not running in read-only mode
-        if ($this->config->getSystemValue('memories.readonly', false)) {
-            return new JSONResponse(['message' => 'Cannot change settings in readonly mode'], Http::STATUS_FORBIDDEN);
-        }
+            // Make sure not running in read-only mode
+            if ($this->config->getSystemValue('memories.readonly', false)) {
+                throw Exceptions::Forbidden('Cannot change settings in readonly mode');
+            }
 
-        $userId = $user->getUID();
-        $this->config->setUserValue($userId, Application::APPNAME, $key, $value);
+            $this->config->setUserValue($uid, Application::APPNAME, $key, $value);
 
-        return new JSONResponse([], Http::STATUS_OK);
+            return new JSONResponse([], Http::STATUS_OK);
+        });
     }
 
     /**

@@ -23,7 +23,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
-use OCA\Memories\Errors;
+use OCA\Memories\Exceptions;
+use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
@@ -39,22 +40,21 @@ class ShareController extends GenericApiController
      */
     public function links($id, $path): Http\Response
     {
-        $file = $this->getNodeByIdOrPath($id, $path);
-        if (!$file) {
-            return Errors::Forbidden('file');
-        }
+        return Util::guardEx(function () use ($id, $path) {
+            $file = $this->getNodeByIdOrPath($id, $path);
 
-        /** @var \OCP\Share\IManager $shareManager */
-        $shareManager = \OC::$server->get(\OCP\Share\IManager::class);
+            /** @var \OCP\Share\IManager $shareManager */
+            $shareManager = \OC::$server->get(\OCP\Share\IManager::class);
 
-        $shares = $shareManager->getSharesBy($this->getUID(), \OCP\Share\IShare::TYPE_LINK, $file, true, 50, 0);
-        if (empty($shares)) {
-            return Errors::NotFound('external links');
-        }
+            $shares = $shareManager->getSharesBy(Util::getUID(), \OCP\Share\IShare::TYPE_LINK, $file, true, 50, 0);
+            if (empty($shares)) {
+                throw Exceptions::NotFound('external links');
+            }
 
-        $links = array_map([$this, 'makeShareResponse'], $shares);
+            $links = array_map(fn ($s) => $this->makeShareResponse($s), $shares);
 
-        return new JSONResponse($links, Http::STATUS_OK);
+            return new JSONResponse($links, Http::STATUS_OK);
+        });
     }
 
     /**
@@ -67,24 +67,23 @@ class ShareController extends GenericApiController
      */
     public function createNode($id, $path): Http\Response
     {
-        $file = $this->getNodeByIdOrPath($id, $path);
-        if (!$file) {
-            return Errors::Forbidden('You are not allowed to share this file');
-        }
+        return Util::guardEx(function () use ($id, $path) {
+            $file = $this->getNodeByIdOrPath($id, $path);
 
-        /** @var \OCP\Share\IManager $shareManager */
-        $shareManager = \OC::$server->get(\OCP\Share\IManager::class);
+            /** @var \OCP\Share\IManager $shareManager */
+            $shareManager = \OC::$server->get(\OCP\Share\IManager::class);
 
-        /** @var \OCP\Share\IShare $share */
-        $share = $shareManager->newShare();
-        $share->setNode($file);
-        $share->setShareType(\OCP\Share\IShare::TYPE_LINK);
-        $share->setSharedBy($this->userSession->getUser()->getUID());
-        $share->setPermissions(\OCP\Constants::PERMISSION_READ);
+            /** @var \OCP\Share\IShare $share */
+            $share = $shareManager->newShare();
+            $share->setNode($file);
+            $share->setShareType(\OCP\Share\IShare::TYPE_LINK);
+            $share->setSharedBy($this->userSession->getUser()->getUID());
+            $share->setPermissions(\OCP\Constants::PERMISSION_READ);
 
-        $share = $shareManager->createShare($share);
+            $share = $shareManager->createShare($share);
 
-        return new JSONResponse($this->makeShareResponse($share), Http::STATUS_OK);
+            return new JSONResponse($this->makeShareResponse($share), Http::STATUS_OK);
+        });
     }
 
     /**
@@ -94,46 +93,41 @@ class ShareController extends GenericApiController
      */
     public function deleteShare(string $id): Http\Response
     {
-        $uid = $this->getUID();
-        if (!$uid) {
-            return Errors::NotLoggedIn();
-        }
+        return Util::guardEx(function () use ($id) {
+            $uid = Util::getUID();
 
-        /** @var \OCP\Share\IManager $shareManager */
-        $shareManager = \OC::$server->get(\OCP\Share\IManager::class);
+            /** @var \OCP\Share\IManager $shareManager */
+            $shareManager = \OC::$server->get(\OCP\Share\IManager::class);
 
-        $share = $shareManager->getShareById($id);
+            $share = $shareManager->getShareById($id);
 
-        if ($share->getSharedBy() !== $uid) {
-            return Errors::Forbidden('You are not the owner of this share');
-        }
+            if ($share->getSharedBy() !== $uid) {
+                throw Exceptions::Forbidden('You are not the owner of this share');
+            }
 
-        $shareManager->deleteShare($share);
+            $shareManager->deleteShare($share);
 
-        return new JSONResponse([], Http::STATUS_OK);
+            return new JSONResponse([], Http::STATUS_OK);
+        });
     }
 
     private function getNodeByIdOrPath($id, $path)
     {
-        $uid = $this->getUID();
-        if (!$uid) {
-            return null;
-        }
+        $uid = Util::getUID();
 
-        $file = null;
-        if ($id) {
-            $file = $this->getUserFile($id);
-        } elseif ($path) {
-            try {
-                $userFolder = $this->rootFolder->getUserFolder($uid);
-                $file = $userFolder->get($path);
-            } catch (\OCP\Files\NotFoundException $e) {
-                return null;
+        try {
+            $file = null;
+            if ($id) {
+                $file = $this->getUserFile($id);
+            } elseif ($path) {
+                $file = Util::getUserFolder($uid)->get($path);
             }
+        } catch (\OCP\Files\NotFoundException $e) {
+            throw Exceptions::NotFoundFile($path ?? $id);
         }
 
         if (!$file || !$file->isShareable()) {
-            return null;
+            throw Exceptions::Forbidden('File not sharable');
         }
 
         return $file;

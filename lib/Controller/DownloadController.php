@@ -24,7 +24,8 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use bantu\IniGetWrapper\IniGetWrapper;
-use OCA\Memories\Errors;
+use OCA\Memories\Exceptions;
+use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\ISession;
@@ -44,16 +45,18 @@ class DownloadController extends GenericApiController
      */
     public function request(): Http\Response
     {
-        // Get ids from body
-        $files = $this->request->getParam('files');
-        if (null === $files || !\is_array($files)) {
-            return Errors::MissingParameter('files');
-        }
+        return Util::guardEx(function () {
+            // Get ids from body
+            $files = $this->request->getParam('files');
+            if (null === $files || !\is_array($files)) {
+                throw Exceptions::MissingParameter('files');
+            }
 
-        // Return id
-        $handle = self::createHandle('memories', $files);
+            // Return id
+            $handle = self::createHandle('memories', $files);
 
-        return new JSONResponse(['handle' => $handle]);
+            return new JSONResponse(['handle' => $handle]);
+        });
     }
 
     /**
@@ -83,36 +86,36 @@ class DownloadController extends GenericApiController
      */
     public function file(string $handle): Http\Response
     {
-        // Get ids from request
-        $session = \OC::$server->get(ISession::class);
-        $key = "memories_download_{$handle}";
-        $info = $session->get($key);
-        $session->remove($key);
+        return Util::guardEx(function () use ($handle) {
+            // Get ids from request
+            $session = \OC::$server->get(ISession::class);
+            $key = "memories_download_{$handle}";
+            $info = $session->get($key);
+            $session->remove($key);
 
-        if (null === $info) {
-            return Errors::NotFound('handle');
-        }
+            if (null === $info) {
+                return Exceptions::NotFound('handle');
+            }
 
-        $name = $info[0].'-'.date('YmdHis');
-        $fileIds = $info[1];
+            $name = $info[0].'-'.date('YmdHis');
+            $fileIds = $info[1];
 
-        /** @var int[] $fileIds */
-        $fileIds = array_filter(array_map('intval', $fileIds), function (int $id): bool {
-            return $id > 0;
+            /** @var int[] $fileIds */
+            $fileIds = array_filter(array_map('intval', $fileIds), fn ($id) => $id > 0);
+
+            // Check if we have any valid ids
+            if (0 === \count($fileIds)) {
+                return Exceptions::NotFound('file IDs');
+            }
+
+            // Download single file
+            if (1 === \count($fileIds)) {
+                return $this->one($fileIds[0]);
+            }
+
+            // Download multiple files
+            $this->multiple($name, $fileIds); // exits
         });
-
-        // Check if we have any valid ids
-        if (0 === \count($fileIds)) {
-            return Errors::NotFound('file IDs');
-        }
-
-        // Download single file
-        if (1 === \count($fileIds)) {
-            return $this->one($fileIds[0]);
-        }
-
-        // Download multiple files
-        $this->multiple($name, $fileIds); // exits
     }
 
     /**
@@ -124,47 +127,45 @@ class DownloadController extends GenericApiController
      */
     public function one(int $fileid): Http\Response
     {
-        $file = $this->getUserFile($fileid);
-        if (null === $file) {
-            return Errors::NotFoundFile($fileid);
-        }
+        return Util::guardEx(function () use ($fileid) {
+            $file = $this->getUserFile($fileid);
+            if (null === $file) {
+                return Exceptions::NotFoundFile($fileid);
+            }
 
-        // Get the owner's root folder
-        $owner = $file->getOwner()->getUID();
-        $userFolder = $this->rootFolder->getUserFolder($owner);
+            // Get the owner's root folder
+            $owner = $file->getOwner()->getUID();
+            $userFolder = Util::getUserFolder($owner);
 
-        // Get the file in the context of the owner
-        $ownerFile = $userFolder->getById($fileid);
-        if (0 === \count($ownerFile)) {
-            // This should never happen, since the file was already found earlier
-            // Except if it was deleted in the meantime ...
-            return new JSONResponse([
-                'message' => 'File not found in owner\'s root folder',
-            ], Http::STATUS_INTERNAL_SERVER_ERROR);
-        }
+            // Get the file in the context of the owner
+            $ownerFile = $userFolder->getById($fileid);
+            if (0 === \count($ownerFile)) {
+                // This should never happen, since the file was already found earlier
+                // Except if it was deleted in the meantime ...
+                throw new \Exception('File not found in owner\'s root folder');
+            }
 
-        // Get DAV path of file relative to owner's root folder
-        $path = $userFolder->getRelativePath($ownerFile[0]->getPath());
-        if (null === $path) {
-            return new JSONResponse([
-                'message' => 'File path not found in owner\'s root folder',
-            ], Http::STATUS_INTERNAL_SERVER_ERROR);
-        }
+            // Get DAV path of file relative to owner's root folder
+            $path = $userFolder->getRelativePath($ownerFile[0]->getPath());
+            if (null === $path) {
+                throw new \Exception('File path not found in owner\'s root folder');
+            }
 
-        // Setup filesystem for owner
-        \OC_Util::tearDownFS();
-        \OC_Util::setupFS($owner);
+            // Setup filesystem for owner
+            \OC_Util::tearDownFS();
+            \OC_Util::setupFS($owner);
 
-        // HEAD and RANGE support
-        $server_params = ['head' => 'HEAD' === $this->request->getMethod()];
-        if (isset($_SERVER['HTTP_RANGE'])) {
-            $server_params['range'] = $this->request->getHeader('Range');
-        }
+            // HEAD and RANGE support
+            $server_params = ['head' => 'HEAD' === $this->request->getMethod()];
+            if (isset($_SERVER['HTTP_RANGE'])) {
+                $server_params['range'] = $this->request->getHeader('Range');
+            }
 
-        // Write file to output and exit
-        \OC_Files::get(\dirname($path), basename($path), $server_params);
+            // Write file to output and exit
+            \OC_Files::get(\dirname($path), basename($path), $server_params);
 
-        exit;
+            exit;
+        });
     }
 
     /**
@@ -173,7 +174,7 @@ class DownloadController extends GenericApiController
      * @param string $name    Name of zip file
      * @param int[]  $fileIds
      */
-    private function multiple(string $name, array &$fileIds)
+    private function multiple(string $name, array $fileIds)
     {
         // Disable time limit
         $executionTime = (int) \OC::$server->get(IniGetWrapper::class)->getNumeric('max_execution_time');

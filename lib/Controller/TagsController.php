@@ -23,7 +23,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
-use OCA\Memories\Errors;
+use OCA\Memories\Exceptions;
+use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
@@ -36,29 +37,31 @@ class TagsController extends GenericApiController
      */
     public function set(int $id, array $add, array $remove): Http\Response
     {
-        // Check tags enabled for this user
-        if (!$this->tagsIsEnabled()) {
-            return Errors::NotEnabled('Tags');
-        }
+        return Util::guardEx(function () use ($id, $add, $remove) {
+            // Check tags enabled for this user
+            if (!$this->tagsIsEnabled()) {
+                throw Exceptions::NotEnabled('Tags');
+            }
 
-        // Check the user is allowed to edit the file
-        $file = $this->getUserFile($id);
-        if (null === $file) {
-            return Errors::NotFoundFile($id);
-        }
+            // Check the user is allowed to edit the file
+            $file = $this->getUserFile($id);
+            if (null === $file) {
+                throw Exceptions::NotFoundFile($id);
+            }
 
-        // Check the user is allowed to edit the file
-        if (!$file->isUpdateable() || !($file->getPermissions() & \OCP\Constants::PERMISSION_UPDATE)) {
-            return Errors::ForbiddenFileUpdate($file->getName());
-        }
+            // Check the user is allowed to edit the file
+            if (!$file->isUpdateable() || !($file->getPermissions() & \OCP\Constants::PERMISSION_UPDATE)) {
+                throw Exceptions::ForbiddenFileUpdate($file->getName());
+            }
 
-        // Get mapper from tags to objects
-        $om = \OC::$server->get(\OCP\SystemTag\ISystemTagObjectMapper::class);
+            // Get mapper from tags to objects
+            $om = \OC::$server->get(\OCP\SystemTag\ISystemTagObjectMapper::class);
 
-        // Add and remove tags
-        $om->assignTags((string) $id, 'files', $add);
-        $om->unassignTags((string) $id, 'files', $remove);
+            // Add and remove tags
+            $om->assignTags((string) $id, 'files', $add);
+            $om->unassignTags((string) $id, 'files', $remove);
 
-        return new JSONResponse([], Http::STATUS_OK);
+            return new JSONResponse([], Http::STATUS_OK);
+        });
     }
 }

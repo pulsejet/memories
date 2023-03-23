@@ -23,8 +23,9 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
-use OCA\Memories\Errors;
+use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
+use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
@@ -43,58 +44,60 @@ class VideoController extends GenericApiController
      */
     public function transcode(string $client, int $fileid, string $profile): Http\Response
     {
-        // Make sure not running in read-only mode
-        if (false !== $this->config->getSystemValue('memories.vod.disable', 'UNSET')) {
-            return Errors::Forbidden('Transcoding disabled');
-        }
-
-        // Check client identifier is 8 characters or more
-        if (\strlen($client) < 8) {
-            return Errors::MissingParameter('client (invalid)');
-        }
-
-        // Get file
-        $file = $this->getUserFile($fileid);
-        if (!$file || !$file->isReadable()) {
-            return Errors::NotFoundFile($fileid);
-        }
-
-        // Local files only for now
-        if (!$file->getStorage()->isLocal()) {
-            return Errors::Forbidden('External storage not supported');
-        }
-
-        // Get file path
-        $path = $file->getStorage()->getLocalFile($file->getInternalPath());
-        if (!$path || !file_exists($path)) {
-            return Errors::NotFound('local file path');
-        }
-
-        // Check if file starts with temp dir
-        $tmpDir = sys_get_temp_dir();
-        if (0 === strpos($path, $tmpDir)) {
-            return Errors::Forbidden('files in temp directory not supported');
-        }
-
-        // Request and check data was received
-        try {
-            $status = $this->getUpstream($client, $path, $profile);
-            if (409 === $status || -1 === $status) {
-                // Just a conflict (transcoding process changed)
-                return new JSONResponse(['message' => 'Conflict'], Http::STATUS_CONFLICT);
+        return Util::guardEx(function () use ($client, $fileid, $profile) {
+            // Make sure not running in read-only mode
+            if (false !== $this->config->getSystemValue('memories.vod.disable', 'UNSET')) {
+                throw Exceptions::Forbidden('Transcoding disabled');
             }
-            if (200 !== $status) {
-                throw new \Exception("Transcoder returned {$status}");
+
+            // Check client identifier is 8 characters or more
+            if (\strlen($client) < 8) {
+                throw Exceptions::MissingParameter('client (invalid)');
             }
-        } catch (\Exception $e) {
-            $msg = 'Transcode failed: '.$e->getMessage();
-            $this->logger->error($msg, ['app' => 'memories']);
 
-            return Errors::Generic($e);
-        }
+            // Get file
+            $file = $this->getUserFile($fileid);
+            if (!$file || !$file->isReadable()) {
+                throw Exceptions::NotFoundFile($fileid);
+            }
 
-        // The response was already streamed, so we have nothing to do here
-        exit;
+            // Local files only for now
+            if (!$file->getStorage()->isLocal()) {
+                throw Exceptions::Forbidden('External storage not supported');
+            }
+
+            // Get file path
+            $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+            if (!$path || !file_exists($path)) {
+                throw Exceptions::NotFound('local file path');
+            }
+
+            // Check if file starts with temp dir
+            $tmpDir = sys_get_temp_dir();
+            if (0 === strpos($path, $tmpDir)) {
+                throw Exceptions::Forbidden('files in temp directory not supported');
+            }
+
+            // Request and check data was received
+            try {
+                $status = $this->getUpstream($client, $path, $profile);
+                if (409 === $status || -1 === $status) {
+                    // Just a conflict (transcoding process changed)
+                    return new JSONResponse(['message' => 'Conflict'], Http::STATUS_CONFLICT);
+                }
+                if (200 !== $status) {
+                    throw new \Exception("Transcoder returned {$status}");
+                }
+            } catch (\Exception $e) {
+                $msg = 'Transcode failed: '.$e->getMessage();
+                $this->logger->error($msg, ['app' => 'memories']);
+
+                throw $e;
+            }
+
+            // The response was already streamed, so we have nothing to do here
+            exit;
+        });
     }
 
     /**
@@ -112,111 +115,113 @@ class VideoController extends GenericApiController
         string $format = '',
         string $transcode = ''
     ) {
-        $file = $this->getUserFile($fileid);
-        if (null === $file) {
-            return Errors::NotFoundFile($fileid);
-        }
-
-        // Check file liveid
-        if (!$liveid) {
-            return Errors::MissingParameter('liveid');
-        }
-
-        // Response data
-        $name = '';
-        $mime = '';
-        $blob = null;
-        $liveVideoPath = null;
-
-        // Video is inside the file
-        $path = null;
-        if (str_starts_with($liveid, 'self__')) {
-            $path = $file->getStorage()->getLocalFile($file->getInternalPath());
-            $mime = 'video/mp4';
-            $name = $file->getName().'.mp4';
-        }
-
-        // Different manufacurers have different formats
-        if ('self__trailer' === $liveid) {
-            try { // Get trailer
-                $blob = Exif::getBinaryExifProp($path, '-trailer');
-            } catch (\Exception $e) {
-                return Errors::NotFound('file trailer');
-            }
-        } elseif ('self__embeddedvideo' === $liveid) {
-            try { // Get embedded video file
-                $blob = Exif::getBinaryExifProp($path, '-EmbeddedVideoFile');
-            } catch (\Exception $e) {
-                return Errors::NotFound('embedded video');
-            }
-        } elseif (str_starts_with($liveid, 'self__traileroffset=')) {
-            // Remove prefix
-            $offset = (int) substr($liveid, \strlen('self__traileroffset='));
-            if ($offset <= 0) {
-                return new JSONResponse(['message' => 'Invalid offset'], Http::STATUS_BAD_REQUEST);
+        return Util::guardEx(function () use ($fileid, $liveid, $format, $transcode) {
+            $file = $this->getUserFile($fileid);
+            if (null === $file) {
+                throw Exceptions::NotFoundFile($fileid);
             }
 
-            // Read file from offset to end
-            $blob = file_get_contents($path, false, null, $offset);
-        } else {
-            // Get stored video file (Apple MOV)
-            $lp = $this->timelineQuery->getLivePhoto($fileid);
-            if (!$lp || $lp['liveid'] !== $liveid) {
-                return Errors::NotFound('live video entry');
+            // Check file liveid
+            if (!$liveid) {
+                throw Exceptions::MissingParameter('liveid');
             }
 
-            // Get and return file
-            $liveFileId = (int) $lp['fileid'];
-            $files = $this->rootFolder->getById($liveFileId);
-            if (0 === \count($files)) {
-                return Errors::NotFound('live video file');
-            }
-            $liveFile = $files[0];
+            // Response data
+            $name = '';
+            $mime = '';
+            $blob = null;
+            $liveVideoPath = null;
 
-            if ($liveFile instanceof File) {
-                // Requested only JSON info
-                if ('json' === $format) {
-                    return new JSONResponse($lp);
+            // Video is inside the file
+            $path = null;
+            if (str_starts_with($liveid, 'self__')) {
+                $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+                $mime = 'video/mp4';
+                $name = $file->getName().'.mp4';
+            }
+
+            // Different manufacurers have different formats
+            if ('self__trailer' === $liveid) {
+                try { // Get trailer
+                    $blob = Exif::getBinaryExifProp($path, '-trailer');
+                } catch (\Exception $e) {
+                    throw Exceptions::NotFound('file trailer');
+                }
+            } elseif ('self__embeddedvideo' === $liveid) {
+                try { // Get embedded video file
+                    $blob = Exif::getBinaryExifProp($path, '-EmbeddedVideoFile');
+                } catch (\Exception $e) {
+                    throw Exceptions::NotFound('embedded video');
+                }
+            } elseif (str_starts_with($liveid, 'self__traileroffset=')) {
+                // Remove prefix
+                $offset = (int) substr($liveid, \strlen('self__traileroffset='));
+                if ($offset <= 0) {
+                    throw Exceptions::BadRequest('Invalid offset');
                 }
 
-                $name = $liveFile->getName();
-                $blob = $liveFile->getContent();
-                $mime = $liveFile->getMimeType();
-                $liveVideoPath = $liveFile->getStorage()->getLocalFile($liveFile->getInternalPath());
-            }
-        }
-
-        // Data not found
-        if (!$blob) {
-            return Errors::NotFound('live video data');
-        }
-
-        // Transcode video if allowed
-        if ($transcode && !$this->config->getSystemValue('memories.vod.disable', true)) {
-            try {
-                // If video path not given, write to temp file
-                if (!$liveVideoPath) {
-                    $liveVideoPath = self::postFile($transcode, $blob)['path'];
+                // Read file from offset to end
+                $blob = file_get_contents($path, false, null, $offset);
+            } else {
+                // Get stored video file (Apple MOV)
+                $lp = $this->timelineQuery->getLivePhoto($fileid);
+                if (!$lp || $lp['liveid'] !== $liveid) {
+                    throw Exceptions::NotFound('live video entry');
                 }
 
-                // If this is H.264 it won't get transcoded anyway
-                if ($liveVideoPath && 200 === $this->getUpstream($transcode, $liveVideoPath, 'max.mov')) {
-                    exit;
+                // Get and return file
+                $liveFileId = (int) $lp['fileid'];
+                $files = $this->rootFolder->getById($liveFileId);
+                if (0 === \count($files)) {
+                    throw Exceptions::NotFound('live video file');
                 }
-            } catch (\Exception $e) {
-                // Transcoding failed, just return the original video
+                $liveFile = $files[0];
+
+                if ($liveFile instanceof File) {
+                    // Requested only JSON info
+                    if ('json' === $format) {
+                        return new JSONResponse($lp);
+                    }
+
+                    $name = $liveFile->getName();
+                    $blob = $liveFile->getContent();
+                    $mime = $liveFile->getMimeType();
+                    $liveVideoPath = $liveFile->getStorage()->getLocalFile($liveFile->getInternalPath());
+                }
             }
-        }
 
-        // Make and send response
-        $response = new DataDisplayResponse($blob, Http::STATUS_OK, []);
-        $response->setHeaders([
-            'Content-Type' => $mime,
-            'Content-Disposition' => "attachment; filename=\"{$name}\"",
-        ]);
-        $response->cacheFor(3600 * 24, false, false);
+            // Data not found
+            if (!$blob) {
+                throw Exceptions::NotFound('live video data');
+            }
 
-        return $response;
+            // Transcode video if allowed
+            if ($transcode && !$this->config->getSystemValue('memories.vod.disable', true)) {
+                try {
+                    // If video path not given, write to temp file
+                    if (!$liveVideoPath) {
+                        $liveVideoPath = self::postFile($transcode, $blob)['path'];
+                    }
+
+                    // If this is H.264 it won't get transcoded anyway
+                    if ($liveVideoPath && 200 === $this->getUpstream($transcode, $liveVideoPath, 'max.mov')) {
+                        exit;
+                    }
+                } catch (\Exception $e) {
+                    // Transcoding failed, just return the original video
+                }
+            }
+
+            // Make and send response
+            $response = new DataDisplayResponse($blob, Http::STATUS_OK, []);
+            $response->setHeaders([
+                'Content-Type' => $mime,
+                'Content-Disposition' => "attachment; filename=\"{$name}\"",
+            ]);
+            $response->cacheFor(3600 * 24, false, false);
+
+            return $response;
+        });
     }
 
     /**

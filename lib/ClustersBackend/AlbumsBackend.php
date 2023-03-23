@@ -24,8 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\TimelineQuery;
-use OCA\Memories\Errors;
-use OCA\Memories\HttpResponseException;
+use OCA\Memories\Exceptions;
 use OCP\App\IAppManager;
 use OCP\IUserSession;
 
@@ -95,7 +94,7 @@ class AlbumsBackend extends Backend
         // Get album
         $album = $this->timelineQuery->getAlbumIfAllowed($this->userId, $name);
         if (null === $album) {
-            throw new HttpResponseException(Errors::NotFound("album {$name}"));
+            throw Exceptions::NotFound("album {$name}");
         }
 
         // Get files
