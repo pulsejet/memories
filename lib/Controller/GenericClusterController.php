@@ -37,8 +37,6 @@ abstract class GenericClusterController extends GenericApiController
     /**
      * @NoAdminRequired
      *
-     * @NoCSRFRequired
-     *
      * Get list of clusters
      */
     public function list(): Http\Response
