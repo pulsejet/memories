@@ -177,7 +177,7 @@ trait TimelineQueryDays
         $rows = $cursor->fetchAll();
         $cursor->closeCursor();
 
-        return $this->processDay($rows, $uid, $root);
+        return $this->processDay($rows);
     }
 
     /**
@@ -185,7 +185,7 @@ trait TimelineQueryDays
      *
      * @param array $days
      */
-    private function processDays(&$days)
+    private function processDays($days)
     {
         foreach ($days as &$row) {
             $row['dayid'] = (int) $row['dayid'];
@@ -198,7 +198,7 @@ trait TimelineQueryDays
     /**
      * Process the single day response.
      */
-    private function processDay(array &$day, string $uid, TimelineRoot &$root)
+    private function processDay(array $day)
     {
         foreach ($day as &$row) {
             // Convert field types
