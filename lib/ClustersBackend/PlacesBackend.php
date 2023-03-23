@@ -25,20 +25,17 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Db\TimelineRoot;
-use OCP\IUserSession;
+use OCA\Memories\Util;
 
 class PlacesBackend extends Backend
 {
     public TimelineRoot $root;
     protected TimelineQuery $timelineQuery;
-    protected string $userId;
 
     public function __construct(
-        TimelineQuery $timelineQuery,
-        IUserSession $userSession
+        TimelineQuery $timelineQuery
     ) {
         $this->timelineQuery = $timelineQuery;
-        $this->userId = $userSession->getUser()->getUID();
     }
 
     public function appName(): string
@@ -48,7 +45,7 @@ class PlacesBackend extends Backend
 
     public function isEnabled(): bool
     {
-        return \OCA\Memories\Util::placesGISType() > 0;
+        return Util::placesGISType() > 0;
     }
 
     public function getClusters(): array

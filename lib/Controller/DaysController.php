@@ -165,7 +165,7 @@ class DaysController extends GenericApiController
         }
 
         // Filter for one album
-        if ($this->albumsIsEnabled()) {
+        if (Util::albumsIsEnabled()) {
             if ($albumId = $this->request->getParam('album')) {
                 $transforms[] = [$this->timelineQuery, 'transformAlbumFilter', $albumId];
             }
@@ -187,7 +187,7 @@ class DaysController extends GenericApiController
         }
 
         // Filter only for one face on Recognize
-        if (($recognize = $this->request->getParam('recognize')) && $this->recognizeIsEnabled()) {
+        if (($recognize = $this->request->getParam('recognize')) && Util::recognizeIsEnabled()) {
             $transforms[] = [$this->timelineQuery, 'transformPeopleRecognitionFilter', $recognize, $aggregateOnly];
 
             $faceRect = $this->request->getParam('facerect');
@@ -197,7 +197,7 @@ class DaysController extends GenericApiController
         }
 
         // Filter only for one face on Face Recognition
-        if (($face = $this->request->getParam('facerecognition')) && $this->facerecognitionIsEnabled()) {
+        if (($face = $this->request->getParam('facerecognition')) && Util::facerecognitionIsEnabled()) {
             $currentModel = (int) $this->config->getAppValue('facerecognition', 'model', -1);
             $transforms[] = [$this->timelineQuery, 'transformPeopleFaceRecognitionFilter', $currentModel, $face];
 
@@ -208,17 +208,13 @@ class DaysController extends GenericApiController
         }
 
         // Filter only for one tag
-        if ($this->tagsIsEnabled()) {
-            if ($tagName = $this->request->getParam('tag')) {
-                $transforms[] = [$this->timelineQuery, 'transformTagFilter', $tagName];
-            }
+        if (($tagName = $this->request->getParam('tag')) && Util::tagsIsEnabled()) {
+            $transforms[] = [$this->timelineQuery, 'transformTagFilter', $tagName];
         }
 
         // Filter only for one place
-        if ($this->placesIsEnabled()) {
-            if ($locationId = $this->request->getParam('place')) {
-                $transforms[] = [$this->timelineQuery, 'transformPlaceFilter', (int) $locationId];
-            }
+        if (($locationId = $this->request->getParam('place')) && Util::placesGISType() > 0) {
+            $transforms[] = [$this->timelineQuery, 'transformPlaceFilter', (int) $locationId];
         }
 
         // Filter geological bounds

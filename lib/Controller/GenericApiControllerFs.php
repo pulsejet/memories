@@ -36,7 +36,6 @@ use OCP\IUserSession;
 trait GenericApiControllerFs
 {
     use GenericApiControllerParams;
-    use GenericApiControllerUtils;
 
     protected IConfig $config;
     protected IUserSession $userSession;
@@ -50,7 +49,7 @@ trait GenericApiControllerFs
         $root = new TimelineRoot();
 
         // Albums have no folder
-        if ($this->albumsIsEnabled() && $this->request->getParam('album')) {
+        if ($this->request->getParam('album') && Util::albumsIsEnabled()) {
             if (null !== $user) {
                 return $root;
             }

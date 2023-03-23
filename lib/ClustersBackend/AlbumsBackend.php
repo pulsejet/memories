@@ -25,23 +25,16 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
-use OCP\App\IAppManager;
-use OCP\IUserSession;
+use OCA\Memories\Util;
 
 class AlbumsBackend extends Backend
 {
     protected TimelineQuery $timelineQuery;
-    protected string $userId;
-    protected IAppManager $appManager;
 
     public function __construct(
-        TimelineQuery $timelineQuery,
-        IUserSession $userSession,
-        IAppManager $appManager
+        TimelineQuery $timelineQuery
     ) {
         $this->timelineQuery = $timelineQuery;
-        $this->userId = $userSession->getUser()->getUID();
-        $this->appManager = $appManager;
     }
 
     public function appName(): string
@@ -51,7 +44,7 @@ class AlbumsBackend extends Backend
 
     public function isEnabled(): bool
     {
-        return \OCA\Memories\Util::albumsIsEnabled($this->appManager);
+        return Util::albumsIsEnabled();
     }
 
     public function clusterName(string $name)
@@ -68,10 +61,10 @@ class AlbumsBackend extends Backend
         $list = [];
         $t = (int) $request->getParam('t', 0);
         if ($t & 1) { // personal
-            $list = array_merge($list, $this->timelineQuery->getAlbums($this->userId));
+            $list = array_merge($list, $this->timelineQuery->getAlbums(Util::getUID()));
         }
         if ($t & 2) { // shared
-            $list = array_merge($list, $this->timelineQuery->getAlbums($this->userId, true));
+            $list = array_merge($list, $this->timelineQuery->getAlbums(Util::getUID(), true));
         }
 
         // Remove elements with duplicate album_id
@@ -92,7 +85,7 @@ class AlbumsBackend extends Backend
     public function getPhotos(string $name, ?int $limit = null): array
     {
         // Get album
-        $album = $this->timelineQuery->getAlbumIfAllowed($this->userId, $name);
+        $album = $this->timelineQuery->getAlbumIfAllowed(Util::getUID(), $name);
         if (null === $album) {
             throw Exceptions::NotFound("album {$name}");
         }

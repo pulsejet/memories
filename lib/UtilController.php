@@ -12,7 +12,7 @@ trait UtilController
     /**
      * Run a function and catch exceptions to return HTTP response.
      *
-     * @param Function $function
+     * @param mixed $function
      */
     public static function guardEx($function): Http\Response
     {

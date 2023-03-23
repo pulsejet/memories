@@ -25,24 +25,17 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Db\TimelineRoot;
-use OCP\App\IAppManager;
-use OCP\IUserSession;
+use OCA\Memories\Util;
 
 class TagsBackend extends Backend
 {
     public TimelineRoot $root;
     protected TimelineQuery $timelineQuery;
-    protected string $userId;
-    protected IAppManager $appManager;
 
     public function __construct(
-        TimelineQuery $timelineQuery,
-        IUserSession $userSession,
-        IAppManager $appManager
+        TimelineQuery $timelineQuery
     ) {
         $this->timelineQuery = $timelineQuery;
-        $this->userId = $userSession->getUser()->getUID();
-        $this->appManager = $appManager;
     }
 
     public function appName(): string
@@ -52,7 +45,7 @@ class TagsBackend extends Backend
 
     public function isEnabled(): bool
     {
-        return \OCA\Memories\Util::tagsIsEnabled($this->appManager);
+        return Util::tagsIsEnabled();
     }
 
     public function getClusters(): array

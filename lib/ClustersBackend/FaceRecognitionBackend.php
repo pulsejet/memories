@@ -25,9 +25,8 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Db\TimelineRoot;
-use OCP\App\IAppManager;
+use OCA\Memories\Util;
 use OCP\IConfig;
-use OCP\IUserSession;
 
 class FaceRecognitionBackend extends Backend
 {
@@ -35,19 +34,13 @@ class FaceRecognitionBackend extends Backend
 
     public TimelineRoot $root;
     protected TimelineQuery $timelineQuery;
-    protected string $userId;
-    protected IAppManager $appManager;
     protected IConfig $config;
 
     public function __construct(
         TimelineQuery $timelineQuery,
-        IUserSession $userSession,
-        IAppManager $appManager,
         IConfig $config
     ) {
         $this->timelineQuery = $timelineQuery;
-        $this->userId = $userSession->getUser()->getUID();
-        $this->appManager = $appManager;
         $this->config = $config;
     }
 
@@ -58,8 +51,8 @@ class FaceRecognitionBackend extends Backend
 
     public function isEnabled(): bool
     {
-        return \OCA\Memories\Util::facerecognitionIsInstalled($this->appManager)
-               && \OCA\Memories\Util::facerecognitionIsEnabled($this->config, $this->userId);
+        return Util::facerecognitionIsInstalled()
+               && Util::facerecognitionIsEnabled();
     }
 
     public function getClusters(): array

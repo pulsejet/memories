@@ -25,8 +25,7 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Db\TimelineRoot;
-use OCP\App\IAppManager;
-use OCP\IUserSession;
+use OCA\Memories\Util;
 
 class RecognizeBackend extends Backend
 {
@@ -34,17 +33,11 @@ class RecognizeBackend extends Backend
 
     public TimelineRoot $root;
     protected TimelineQuery $timelineQuery;
-    protected string $userId;
-    protected IAppManager $appManager;
 
     public function __construct(
-        TimelineQuery $timelineQuery,
-        IUserSession $userSession,
-        IAppManager $appManager
+        TimelineQuery $timelineQuery
     ) {
         $this->timelineQuery = $timelineQuery;
-        $this->userId = $userSession->getUser()->getUID();
-        $this->appManager = $appManager;
     }
 
     public function appName(): string
@@ -54,12 +47,12 @@ class RecognizeBackend extends Backend
 
     public function isEnabled(): bool
     {
-        return \OCA\Memories\Util::recognizeIsEnabled($this->appManager);
+        return Util::recognizeIsEnabled();
     }
 
     public function getClusters(): array
     {
-        return $this->timelineQuery->getPeopleRecognize($this->root, $this->userId);
+        return $this->timelineQuery->getPeopleRecognize($this->root, Util::getUID());
     }
 
     public function getPhotos(string $name, ?int $limit = null): array

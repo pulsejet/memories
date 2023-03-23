@@ -59,8 +59,10 @@ class Util
     /**
      * Check if albums are enabled for this user.
      */
-    public static function albumsIsEnabled(IAppManager &$appManager): bool
+    public static function albumsIsEnabled(): bool
     {
+        $appManager = \OC::$server->get(IAppManager::class);
+
         if (!$appManager->isEnabledForUser('photos')) {
             return false;
         }
@@ -72,19 +74,21 @@ class Util
 
     /**
      * Check if tags is enabled for this user.
-     *
-     * @param mixed $appManager
      */
-    public static function tagsIsEnabled(&$appManager): bool
+    public static function tagsIsEnabled(): bool
     {
+        $appManager = \OC::$server->get(IAppManager::class);
+
         return $appManager->isEnabledForUser('systemtags');
     }
 
     /**
      * Check if recognize is enabled for this user.
      */
-    public static function recognizeIsEnabled(IAppManager &$appManager): bool
+    public static function recognizeIsEnabled(): bool
     {
+        $appManager = \OC::$server->get(IAppManager::class);
+
         if (!$appManager->isEnabledForUser('recognize')) {
             return false;
         }
@@ -105,9 +109,16 @@ class Util
     /**
      * Check if Face Recognition is enabled by the user.
      */
-    public static function facerecognitionIsEnabled(IConfig &$config, string $userId): bool
+    public static function facerecognitionIsEnabled(): bool
     {
-        $e = $config->getUserValue($userId, 'facerecognition', 'enabled', 'false');
+        try {
+            $uid = self::getUID();
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        $config = \OC::$server->get(IConfig::class);
+        $e = $config->getUserValue($uid, 'facerecognition', 'enabled', 'false');
 
         return 'true' === $e;
     }
@@ -115,8 +126,10 @@ class Util
     /**
      * Check if Face Recognition is installed and enabled for this user.
      */
-    public static function facerecognitionIsInstalled(IAppManager &$appManager): bool
+    public static function facerecognitionIsInstalled(): bool
     {
+        $appManager = \OC::$server->get(IAppManager::class);
+
         if (!$appManager->isEnabledForUser('facerecognition')) {
             return false;
         }
@@ -129,8 +142,10 @@ class Util
     /**
      * Check if link sharing is allowed.
      */
-    public static function isLinkSharingEnabled(IConfig &$config): bool
+    public static function isLinkSharingEnabled(): bool
     {
+        $config = \OC::$server->get(IConfig::class);
+
         // Check if the shareAPI is enabled
         if ('yes' !== $config->getAppValue('core', 'shareapi_enabled', 'yes')) {
             return false;

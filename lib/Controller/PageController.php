@@ -4,6 +4,7 @@ namespace OCA\Memories\Controller;
 
 use OCA\Files\Event\LoadSidebar;
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Util;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
@@ -13,7 +14,7 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IConfig;
 use OCP\IRequest;
 use OCP\IUserSession;
-use OCP\Util;
+use OCP\Util as OCPUtil;
 
 class PageController extends Controller
 {
@@ -58,7 +59,7 @@ class PageController extends Controller
         }
 
         // Scripts
-        Util::addScript($this->appName, 'memories-main');
+        OCPUtil::addScript($this->appName, 'memories-main');
         $this->eventDispatcher->dispatchTyped(new LoadSidebar());
 
         // Configuration
@@ -81,19 +82,19 @@ class PageController extends Controller
         $pi('enableTopMemories', 'true');
 
         // Apps enabled
-        $this->initialState->provideInitialState('systemtags', true === $this->appManager->isEnabledForUser('systemtags'));
-        $this->initialState->provideInitialState('recognize', \OCA\Memories\Util::recognizeIsEnabled($this->appManager));
-        $this->initialState->provideInitialState('facerecognitionInstalled', \OCA\Memories\Util::facerecognitionIsInstalled($this->appManager));
-        $this->initialState->provideInitialState('facerecognitionEnabled', \OCA\Memories\Util::facerecognitionIsEnabled($this->config, $uid));
-        $this->initialState->provideInitialState('albums', \OCA\Memories\Util::albumsIsEnabled($this->appManager));
+        $this->initialState->provideInitialState('systemtags', Util::tagsIsEnabled());
+        $this->initialState->provideInitialState('recognize', Util::recognizeIsEnabled());
+        $this->initialState->provideInitialState('facerecognitionInstalled', Util::facerecognitionIsInstalled());
+        $this->initialState->provideInitialState('facerecognitionEnabled', Util::facerecognitionIsEnabled());
+        $this->initialState->provideInitialState('albums', Util::albumsIsEnabled());
 
         // Common state
         self::provideCommonInitialState($this->initialState);
 
         // Extra translations
-        if (\OCA\Memories\Util::recognizeIsEnabled($this->appManager)) {
+        if (Util::recognizeIsEnabled()) {
             // Auto translation for tags
-            Util::addTranslations('recognize');
+            OCPUtil::addTranslations('recognize');
         }
 
         $response = new TemplateResponse($this->appName, 'main');

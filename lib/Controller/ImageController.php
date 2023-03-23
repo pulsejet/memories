@@ -299,7 +299,7 @@ class ImageController extends GenericApiController
     private function getTags(int $fileId): array
     {
         // Make sure tags are enabled
-        if (!Util::tagsIsEnabled($this->appManager)) {
+        if (!Util::tagsIsEnabled()) {
             return [];
         }
 

@@ -38,7 +38,6 @@ abstract class GenericApiController extends Controller
 {
     use GenericApiControllerFs;
     use GenericApiControllerParams;
-    use GenericApiControllerUtils;
 
     protected IConfig $config;
     protected IUserSession $userSession;

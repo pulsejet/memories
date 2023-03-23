@@ -39,7 +39,7 @@ class TagsController extends GenericApiController
     {
         return Util::guardEx(function () use ($id, $add, $remove) {
             // Check tags enabled for this user
-            if (!$this->tagsIsEnabled()) {
+            if (!Util::tagsIsEnabled()) {
                 throw Exceptions::NotEnabled('Tags');
             }
 
