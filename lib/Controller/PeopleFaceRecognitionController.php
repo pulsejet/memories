@@ -54,10 +54,10 @@ class PeopleFaceRecognitionController extends GenericClusterController
     {
         // Convert to recognize format (percentage position-size)
         foreach ($photos as &$p) {
-            $p['x'] = (float) $p['x'] / $p['image_width'];
-            $p['y'] = (float) $p['y'] / $p['image_height'];
-            $p['width'] = (float) $p['width'] / $p['image_width'];
-            $p['height'] = (float) $p['height'] / $p['image_height'];
+            $p['x'] = (float) $p['x'] / (float) $p['image_width'];
+            $p['y'] = (float) $p['y'] / (float) $p['image_height'];
+            $p['width'] = (float) $p['width'] / (float) $p['image_width'];
+            $p['height'] = (float) $p['height'] / (float) $p['image_height'];
         }
 
         $this->sortByScores($photos);
