@@ -13,7 +13,6 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\IRootFolder;
 use OCP\Files\NotFoundException;
 use OCP\IConfig;
-use OCP\IDBConnection;
 use OCP\IRequest;
 use OCP\ISession;
 use OCP\IURLGenerator;
@@ -33,8 +32,8 @@ class PublicController extends AuthPublicShareController
     protected IShareManager $shareManager;
     protected IUserManager $userManager;
     protected IAppManager $appManager;
-    protected IDBConnection $db;
     protected IConfig $config;
+    protected TimelineQuery $timelineQuery;
 
     protected IShare $share;
 
@@ -50,8 +49,8 @@ class PublicController extends AuthPublicShareController
         IShareManager $shareManager,
         IUserManager $userManager,
         IAppManager $appManager,
-        IDBConnection $db,
-        IConfig $config
+        IConfig $config,
+        TimelineQuery $timelineQuery
     ) {
         parent::__construct($AppName, $request, $session, $urlGenerator);
         $this->eventDispatcher = $eventDispatcher;
@@ -61,8 +60,8 @@ class PublicController extends AuthPublicShareController
         $this->shareManager = $shareManager;
         $this->userManager = $userManager;
         $this->appManager = $appManager;
-        $this->db = $db;
         $this->config = $config;
+        $this->timelineQuery = $timelineQuery;
     }
 
     /**
@@ -257,8 +256,7 @@ class PublicController extends AuthPublicShareController
     /** Get initial state of single item */
     private function getSingleItemInitialState(\OCP\Files\File $file): string
     {
-        $timelineQuery = new TimelineQuery($this->db);
-        $photo = $timelineQuery->getSingleItem($file->getId());
+        $photo = $this->timelineQuery->getSingleItem($file->getId());
 
         return json_encode($photo);
     }

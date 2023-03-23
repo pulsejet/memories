@@ -12,7 +12,6 @@ use OCP\AppFramework\Services\IInitialState;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
-use OCP\IDBConnection;
 use OCP\IURLGenerator;
 use OCP\IUserSession;
 use OCP\Util;
@@ -24,7 +23,6 @@ class PublicAlbumController extends Controller
     protected IInitialState $initialState;
     protected IAppManager $appManager;
     protected IConfig $config;
-    protected IDBConnection $connection;
     protected IUserSession $userSession;
     protected IRootFolder $rootFolder;
     protected IURLGenerator $urlGenerator;
@@ -36,21 +34,20 @@ class PublicAlbumController extends Controller
         IInitialState $initialState,
         IAppManager $appManager,
         IConfig $config,
-        IDBConnection $connection,
         IUserSession $userSession,
         IRootFolder $rootFolder,
-        IURLGenerator $urlGenerator
+        IURLGenerator $urlGenerator,
+        TimelineQuery $timelineQuery
     ) {
         $this->appName = $appName;
         $this->eventDispatcher = $eventDispatcher;
         $this->initialState = $initialState;
         $this->appManager = $appManager;
         $this->config = $config;
-        $this->connection = $connection;
         $this->userSession = $userSession;
         $this->rootFolder = $rootFolder;
         $this->urlGenerator = $urlGenerator;
-        $this->timelineQuery = new TimelineQuery($this->connection);
+        $this->timelineQuery = $timelineQuery;
     }
 
     /**

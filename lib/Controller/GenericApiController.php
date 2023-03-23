@@ -55,7 +55,8 @@ abstract class GenericApiController extends Controller
         IDBConnection $connection,
         IRootFolder $rootFolder,
         IAppManager $appManager,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        TimelineQuery $timelineQuery
     ) {
         parent::__construct(Application::APPNAME, $request);
 
@@ -65,6 +66,6 @@ abstract class GenericApiController extends Controller
         $this->rootFolder = $rootFolder;
         $this->appManager = $appManager;
         $this->logger = $logger;
-        $this->timelineQuery = new TimelineQuery($connection);
+        $this->timelineQuery = $timelineQuery;
     }
 }
