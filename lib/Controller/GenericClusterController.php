@@ -43,18 +43,12 @@ abstract class GenericClusterController extends GenericApiController
      */
     public function list(): Http\Response
     {
-        try {
+        return $this->guardEx(function () {
             $this->init();
 
-            // Get cluster list that will directly be returned as JSON
             $list = $this->getClusters();
-
             return new JSONResponse($list, Http::STATUS_OK);
-        } catch (HttpResponseException $e) {
-            return $e->response;
-        } catch (\Exception $e) {
-            return Errors::Generic($e);
-        }
+        });
     }
 
     /**
@@ -66,7 +60,7 @@ abstract class GenericClusterController extends GenericApiController
      */
     public function preview(string $name): Http\Response
     {
-        try {
+        return $this->guardEx(function () use ($name) {
             $this->init();
 
             // Get list of some photos in this cluster
@@ -82,11 +76,7 @@ abstract class GenericClusterController extends GenericApiController
 
             // Get preview from image list
             return $this->getPreviewFromPhotoList($photos);
-        } catch (HttpResponseException $e) {
-            return $e->response;
-        } catch (\Exception $e) {
-            return Errors::Generic($e);
-        }
+        });
     }
 
     /**
@@ -98,7 +88,7 @@ abstract class GenericClusterController extends GenericApiController
      */
     public function download(string $name): Http\Response
     {
-        try {
+        return $this->guardEx(function () use ($name) {
             $this->init();
 
             // Get list of all files in this cluster
@@ -110,11 +100,7 @@ abstract class GenericClusterController extends GenericApiController
             $handle = \OCA\Memories\Controller\DownloadController::createHandle($filename, $fileIds);
 
             return new JSONResponse(['handle' => $handle], Http::STATUS_OK);
-        } catch (HttpResponseException $e) {
-            return $e->response;
-        } catch (\Exception $e) {
-            return Errors::Generic($e);
-        }
+        });
     }
 
     /**

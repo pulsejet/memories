@@ -45,6 +45,20 @@ trait GenericApiControllerUtils
     }
 
     /**
+     * Runa function and catch exceptions to return HTTP response.
+     */
+    protected function guardEx($function): \OCP\AppFramework\Http\Response
+    {
+        try {
+            return $function();
+        } catch (\OCA\Memories\HttpResponseException $e) {
+            return $e->response;
+        } catch (\Exception $e) {
+            return \OCA\Memories\Errors::Generic($e);
+        }
+    }
+
+    /**
      * Check if albums are enabled for this user.
      */
     protected function albumsIsEnabled(): bool
