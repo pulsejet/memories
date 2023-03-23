@@ -653,7 +653,7 @@ export default defineComponent({
       if (this.$route.name === "albums" && this.$route.params.name) {
         const user = <string>this.$route.params.user;
         const name = <string>this.$route.params.name;
-        query.set("album", `${user}/${name}`);
+        query.set("albums", `${user}/${name}`);
       }
 
       // People
@@ -676,12 +676,12 @@ export default defineComponent({
       // Places
       if (this.$route.name === "places" && this.$route.params.name) {
         const name = <string>this.$route.params.name;
-        query.set("place", <string>name.split("-", 1)[0]);
+        query.set("places", <string>name.split("-", 1)[0]);
       }
 
       // Tags
       if (this.$route.name === "tags" && this.$route.params.name) {
-        query.set("tag", <string>this.$route.params.name);
+        query.set("tags", <string>this.$route.params.name);
       }
 
       // Map Bounds

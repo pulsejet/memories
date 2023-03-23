@@ -12,7 +12,7 @@ function tok(url: string) {
     url = API.Q(url, { token });
   } else if (route.name === "album-share") {
     const token = <string>route.params.token;
-    url = API.Q(url, { token, album: token });
+    url = API.Q(url, { token, albums: token });
   }
   return url;
 }

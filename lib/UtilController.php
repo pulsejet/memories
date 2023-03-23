@@ -53,6 +53,14 @@ trait UtilController
     }
 
     /**
+     * Check if the user is logged in.
+     */
+    public static function isLoggedIn(): bool
+    {
+        return null !== \OC::$server->get(\OCP\IUserSession::class)->getUser();
+    }
+
+    /**
      * Get a user's home folder.
      *
      * @param null|string $uid User ID, or null for current user

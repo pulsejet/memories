@@ -23,6 +23,9 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
+use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\IRequest;
+
 abstract class Backend
 {
     /** Mapping of backend name to className */
@@ -40,6 +43,18 @@ abstract class Backend
     abstract public function isEnabled(): bool;
 
     /**
+     * Apply query transformations for days query.
+     */
+    abstract public function transformDays(IQueryBuilder &$query, bool $aggregate): void;
+
+    /**
+     * Apply post-query transformations for the given day object.
+     */
+    public function transformDayPhoto(array &$row): void
+    {
+    }
+
+    /**
      * Get the cluster list for the current user.
      */
     abstract public function getClusters(): array;
@@ -52,6 +67,55 @@ abstract class Backend
      * @param int    $limit Maximum number of photos to return
      */
     abstract public function getPhotos(string $name, ?int $limit = null): array;
+
+    /**
+     * Get a cluster backend.
+     *
+     * @param string $name Name of the backend
+     *
+     * @throws \Exception If the backend is not registered
+     */
+    public static function get(string $name): self
+    {
+        if (!\array_key_exists($name, self::$backends)) {
+            throw new \Exception("Invalid clusters backend '{$name}'");
+        }
+
+        return \OC::$server->get(self::$backends[$name]);
+    }
+
+    /**
+     * Apply all query transformations for the given request.
+     */
+    public static function getTransforms(IRequest $request): array
+    {
+        $transforms = [];
+        foreach (array_keys(self::$backends) as $backendName) {
+            if ($request->getParam($backendName)) {
+                $backend = self::get($backendName);
+                if ($backend->isEnabled()) {
+                    $transforms[] = [$backend, 'transformDays'];
+                }
+            }
+        }
+
+        return $transforms;
+    }
+
+    /**
+     * Apply all post-query transformations for the given day object.
+     */
+    public static function applyDayPostTransforms(IRequest $request, array &$row): void
+    {
+        foreach (array_keys(self::$backends) as $backendName) {
+            if ($request->getParam($backendName)) {
+                $backend = self::get($backendName);
+                if ($backend->isEnabled()) {
+                    $backend->transformDayPhoto($row);
+                }
+            }
+        }
+    }
 
     /**
      * Register a new backend.

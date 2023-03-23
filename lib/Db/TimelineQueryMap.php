@@ -11,7 +11,7 @@ trait TimelineQueryMap
 {
     protected IDBConnection $connection;
 
-    public function transformMapBoundsFilter(IQueryBuilder &$query, string $userId, string $bounds, $table = 'm')
+    public function transformMapBoundsFilter(IQueryBuilder &$query, bool $aggregate, string $bounds, string $table = 'm')
     {
         $bounds = explode(',', $bounds);
         $bounds = array_map('floatval', $bounds);
@@ -59,7 +59,7 @@ trait TimelineQueryMap
         $query = $this->joinFilecache($query);
 
         // Bound the query to the map bounds
-        $this->transformMapBoundsFilter($query, '', $bounds, 'c');
+        $this->transformMapBoundsFilter($query, false, $bounds, 'c');
 
         // Execute query
         $cursor = $this->executeQueryWithCTEs($query);

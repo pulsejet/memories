@@ -114,11 +114,7 @@ class ClustersController extends GenericApiController
             throw Exceptions::NotLoggedIn();
         }
 
-        if (\array_key_exists($backend, Backend::$backends)) {
-            $this->backend = \OC::$server->get(Backend::$backends[$backend]);
-        } else {
-            throw new \Exception("Invalid clusters backend '{$backend}'");
-        }
+        $this->backend = Backend::get($backend);
 
         if (!$this->backend->isEnabled()) {
             throw Exceptions::NotEnabled($this->backend->appName());

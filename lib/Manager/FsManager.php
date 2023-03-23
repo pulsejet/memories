@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Manager;
 
-use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Db\AlbumsQuery;
 use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Exif;
 use OCA\Memories\Util;
@@ -41,20 +41,20 @@ class FsManager
     protected IConfig $config;
     protected IUserSession $userSession;
     protected IRootFolder $rootFolder;
-    protected TimelineQuery $timelineQuery;
+    protected AlbumsQuery $albumsQuery;
     protected IRequest $request;
 
     public function __construct(
         IConfig $config,
         IUserSession $userSession,
         IRootFolder $rootFolder,
-        TimelineQuery $timelineQuery,
+        AlbumsQuery $albumsQuery,
         IRequest $request
     ) {
         $this->config = $config;
         $this->userSession = $userSession;
         $this->rootFolder = $rootFolder;
-        $this->timelineQuery = $timelineQuery;
+        $this->albumsQuery = $albumsQuery;
         $this->request = $request;
     }
 
@@ -64,11 +64,11 @@ class FsManager
         $user = $this->userSession->getUser();
 
         // Albums have no folder
-        if ($this->request->getParam('album') && Util::albumsIsEnabled()) {
+        if ($this->request->getParam('albums') && Util::albumsIsEnabled()) {
             if (null !== $user) {
                 return $root;
             }
-            if (($token = $this->getShareToken()) && $this->timelineQuery->getAlbumByLink($token)) {
+            if (($token = $this->getShareToken()) && $this->albumsQuery->getAlbumByLink($token)) {
                 return $root;
             }
         }
@@ -164,7 +164,7 @@ class FsManager
         }
         $uid = $user->getUID();
 
-        $owner = $this->timelineQuery->albumHasUserFile($uid, $id);
+        $owner = $this->albumsQuery->userHasFile($uid, $id);
         if (!$owner) {
             return null;
         }
@@ -186,13 +186,13 @@ class FsManager
     {
         try {
             // Album share
-            if ($this->request->getParam('album')) {
-                $album = $this->timelineQuery->getAlbumByLink($this->getShareToken());
+            if ($this->request->getParam('albums')) {
+                $album = $this->albumsQuery->getAlbumByLink($this->getShareToken());
                 if (null === $album) {
                     return null;
                 }
 
-                $owner = $this->timelineQuery->albumHasFile((int) $album['album_id'], $id);
+                $owner = $this->albumsQuery->hasFile((int) $album['album_id'], $id);
                 if (!$owner) {
                     return null;
                 }

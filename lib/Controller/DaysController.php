@@ -40,21 +40,18 @@ class DaysController extends GenericApiController
     public function days(): Http\Response
     {
         return Util::guardEx(function () {
-            $uid = $this->getShareToken() ? '' : Util::getUID();
-
             $list = $this->timelineQuery->getDays(
-                $uid,
                 $this->isRecursive(),
                 $this->isArchive(),
-                $this->getTransformations(true),
+                $this->getTransformations(),
             );
 
             if ($this->isMonthView()) {
                 // Group days together into months
-                $list = $this->timelineQuery->daysToMonths($list);
+                $list = $this->daysToMonths($list);
             } else {
                 // Preload some day responses
-                $this->preloadDays($list, $uid);
+                $this->preloadDays($list);
             }
 
             // Reverse response if requested. Folders still stay at top.
@@ -80,8 +77,6 @@ class DaysController extends GenericApiController
     public function day(string $id): Http\Response
     {
         return Util::guardEx(function () use ($id) {
-            $uid = $this->getShareToken() ? '' : Util::getUID();
-
             // Check for wildcard
             $dayIds = [];
             if ('*' === $id) {
@@ -98,16 +93,15 @@ class DaysController extends GenericApiController
 
             // Convert to actual dayIds if month view
             if ($this->isMonthView()) {
-                $dayIds = $this->timelineQuery->monthIdToDayIds((int) $dayIds[0]);
+                $dayIds = $this->monthIdToDayIds((int) $dayIds[0]);
             }
 
             // Run actual query
             $list = $this->timelineQuery->getDay(
-                $uid,
                 $dayIds,
                 $this->isRecursive(),
                 $this->isArchive(),
-                $this->getTransformations(false),
+                $this->getTransformations(),
             );
 
             // Force month id for dayId for month view
@@ -145,20 +139,16 @@ class DaysController extends GenericApiController
 
     /**
      * Get transformations depending on the request.
-     *
-     * @param bool $aggregateOnly Only apply transformations for aggregation (days call)
      */
-    private function getTransformations(bool $aggregateOnly)
+    private function getTransformations()
     {
         $transforms = [];
 
-        // Filter for one album
-        if (($albumId = $this->request->getParam('album')) && Util::albumsIsEnabled()) {
-            $transforms[] = [$this->timelineQuery, 'transformAlbumFilter', $albumId];
-        }
+        // Add clustering transforms
+        $transforms = array_merge($transforms, \OCA\Memories\ClustersBackend\Backend::getTransforms($this->request));
 
         // Other transforms not allowed for public shares
-        if (null === $this->userSession->getUser()) {
+        if (!Util::isLoggedIn()) {
             return $transforms;
         }
 
@@ -172,47 +162,14 @@ class DaysController extends GenericApiController
             $transforms[] = [$this->timelineQuery, 'transformVideoFilter'];
         }
 
-        // Filter only for one face on Recognize
-        if (($recognize = $this->request->getParam('recognize')) && Util::recognizeIsEnabled()) {
-            $transforms[] = [$this->timelineQuery, 'transformPeopleRecognitionFilter', $recognize, $aggregateOnly];
-
-            $faceRect = $this->request->getParam('facerect');
-            if ($faceRect && !$aggregateOnly) {
-                $transforms[] = [$this->timelineQuery, 'transformPeopleRecognizeRect', $recognize];
-            }
-        }
-
-        // Filter only for one face on Face Recognition
-        if (($face = $this->request->getParam('facerecognition')) && Util::facerecognitionIsEnabled()) {
-            $currentModel = (int) $this->config->getAppValue('facerecognition', 'model', -1);
-            $transforms[] = [$this->timelineQuery, 'transformPeopleFaceRecognitionFilter', $currentModel, $face];
-
-            $faceRect = $this->request->getParam('facerect');
-            if ($faceRect && !$aggregateOnly) {
-                $transforms[] = [$this->timelineQuery, 'transformPeopleFaceRecognitionRect', $face];
-            }
-        }
-
-        // Filter only for one tag
-        if (($tagName = $this->request->getParam('tag')) && Util::tagsIsEnabled()) {
-            $transforms[] = [$this->timelineQuery, 'transformTagFilter', $tagName];
-        }
-
-        // Filter only for one place
-        if (($locationId = $this->request->getParam('place')) && Util::placesGISType() > 0) {
-            $transforms[] = [$this->timelineQuery, 'transformPlaceFilter', (int) $locationId];
-        }
-
         // Filter geological bounds
-        $bounds = $this->request->getParam('mapbounds');
-        if ($bounds) {
+        if ($bounds = $this->request->getParam('mapbounds')) {
             $transforms[] = [$this->timelineQuery, 'transformMapBoundsFilter', $bounds];
         }
 
         // Limit number of responses for day query
-        $limit = $this->request->getParam('limit');
-        if ($limit) {
-            $transforms[] = [$this->timelineQuery, 'transformLimitDay', (int) $limit];
+        if ($limit = $this->request->getParam('limit')) {
+            $transforms[] = [$this->timelineQuery, 'transformLimit', (int) $limit];
         }
 
         return $transforms;
@@ -221,10 +178,9 @@ class DaysController extends GenericApiController
     /**
      * Preload a few "day" at the start of "days" response.
      *
-     * @param array  $days the days array
-     * @param string $uid  User ID or blank for public shares
+     * @param array $days the days array
      */
-    private function preloadDays(array &$days, string $uid)
+    private function preloadDays(array &$days)
     {
         $transforms = $this->getTransformations(false);
         $preloaded = 0;
@@ -246,7 +202,6 @@ class DaysController extends GenericApiController
 
         if (\count($preloadDayIds) > 0) {
             $allDetails = $this->timelineQuery->getDay(
-                $uid,
                 $preloadDayIds,
                 $this->isRecursive(),
                 $this->isArchive(),
@@ -265,5 +220,43 @@ class DaysController extends GenericApiController
                 }
             }
         }
+    }
+
+    /**
+     * Convert days response to months response.
+     * The dayId is used to group the days into months.
+     */
+    private function daysToMonths(array $days)
+    {
+        $months = [];
+        foreach ($days as $day) {
+            $dayId = $day['dayid'];
+            $time = $dayId * 86400;
+            $monthid = strtotime(date('Ym', $time).'01') / 86400;
+
+            if (empty($months) || $months[\count($months) - 1]['dayid'] !== $monthid) {
+                $months[] = [
+                    'dayid' => $monthid,
+                    'count' => 0,
+                ];
+            }
+
+            $months[\count($months) - 1]['count'] += $day['count'];
+        }
+
+        return $months;
+    }
+
+    /** Convert list of month IDs to list of dayIds */
+    private function monthIdToDayIds(int $monthId)
+    {
+        $dayIds = [];
+        $firstDay = (int) $monthId;
+        $lastDay = strtotime(date('Ymt', $firstDay * 86400)) / 86400;
+        for ($i = $firstDay; $i <= $lastDay; ++$i) {
+            $dayIds[] = (string) $i;
+        }
+
+        return $dayIds;
     }
 }

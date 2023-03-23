@@ -30,14 +30,13 @@ trait TimelineQueryFolders
         $query->setMaxResults(4);
 
         // FETCH tag previews
-        $cursor = $this->executeQueryWithCTEs($query);
-        $ans = $cursor->fetchAll();
+        $rows = $this->executeQueryWithCTEs($query)->fetchAll();
 
         // Post-process
-        foreach ($ans as &$row) {
+        foreach ($rows as &$row) {
             $row['fileid'] = (int) $row['fileid'];
         }
 
-        return $ans;
+        return $rows;
     }
 }

@@ -51,9 +51,4 @@ trait GenericApiControllerParams
     {
         return null !== $this->request->getParam('reverse');
     }
-
-    protected function getShareToken()
-    {
-        return $this->request->getParam('token');
-    }
 }

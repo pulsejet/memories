@@ -7,30 +7,17 @@ namespace OCA\Memories\Db;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
-trait TimelineQueryAlbums
+class AlbumsQuery
 {
     protected IDBConnection $connection;
 
-    /** Transform only for album */
-    public function transformAlbumFilter(IQueryBuilder &$query, string $uid, string $albumId)
+    public function __construct(IDBConnection $connection)
     {
-        // Get album object
-        $album = $this->getAlbumIfAllowed($uid, $albumId);
-
-        // Check permission
-        if (null === $album) {
-            throw new \Exception("Album {$albumId} not found");
-        }
-
-        // WHERE these are items with this album
-        $query->innerJoin('m', 'photos_albums_files', 'paf', $query->expr()->andX(
-            $query->expr()->eq('paf.album_id', $query->createNamedParameter($album['album_id'])),
-            $query->expr()->eq('paf.file_id', 'm.fileid'),
-        ));
+        $this->connection = $connection;
     }
 
     /** Get list of albums */
-    public function getAlbums(string $uid, bool $shared = false)
+    public function getList(string $uid, bool $shared = false)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -80,49 +67,11 @@ trait TimelineQueryAlbums
     }
 
     /**
-     * Convert days response to months response.
-     * The dayId is used to group the days into months.
-     */
-    public function daysToMonths(array &$days)
-    {
-        $months = [];
-        foreach ($days as &$day) {
-            $dayId = $day['dayid'];
-            $time = $dayId * 86400;
-            $monthid = strtotime(date('Ym', $time).'01') / 86400;
-
-            if (empty($months) || $months[\count($months) - 1]['dayid'] !== $monthid) {
-                $months[] = [
-                    'dayid' => $monthid,
-                    'count' => 0,
-                ];
-            }
-
-            $months[\count($months) - 1]['count'] += $day['count'];
-        }
-
-        return $months;
-    }
-
-    /** Convert list of month IDs to list of dayIds */
-    public function monthIdToDayIds(int $monthId)
-    {
-        $dayIds = [];
-        $firstDay = (int) $monthId;
-        $lastDay = strtotime(date('Ymt', $firstDay * 86400)) / 86400;
-        for ($i = $firstDay; $i <= $lastDay; ++$i) {
-            $dayIds[] = (string) $i;
-        }
-
-        return $dayIds;
-    }
-
-    /**
      * Check if an album has a file.
      *
      * @return bool|string owner of file
      */
-    public function albumHasFile(int $albumId, int $fileId)
+    public function hasFile(int $albumId, int $fileId)
     {
         $query = $this->connection->getQueryBuilder();
         $query->select('owner')->from('photos_albums_files')->where(
@@ -140,7 +89,7 @@ trait TimelineQueryAlbums
      *
      * @return bool|string owner of file
      */
-    public function albumHasUserFile(string $uid, int $fileId)
+    public function userHasFile(string $uid, int $fileId)
     {
         $query = $this->connection->getQueryBuilder();
         $query->select('paf.owner')->from('photos_albums_files', 'paf')->where(
@@ -175,7 +124,7 @@ trait TimelineQueryAlbums
      * @param string $uid     UID of CURRENT user
      * @param string $albumId $user/$name where $user is the OWNER of the album
      */
-    public function getAlbumIfAllowed(string $uid, string $albumId)
+    public function getIfAllowed(string $uid, string $albumId)
     {
         $album = null;
 
@@ -208,7 +157,7 @@ trait TimelineQueryAlbums
 
         // Check in collaborators instead
         $albumNumId = (int) $album['album_id'];
-        if ($this->userIsAlbumCollaborator($uid, $albumNumId)) {
+        if ($this->userIsCollaborator($uid, $albumNumId)) {
             return $album;
         }
 
@@ -223,7 +172,7 @@ trait TimelineQueryAlbums
      * @param string $uid     User ID
      * @param int    $albumId Album ID (numeric)
      */
-    public function userIsAlbumCollaborator(string $uid, int $albumId): bool
+    public function userIsCollaborator(string $uid, int $albumId): bool
     {
         $query = $this->connection->getQueryBuilder();
         $ids = $this->getSelfCollaborators($uid);

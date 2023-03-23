@@ -25,15 +25,18 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
+use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\IRequest;
 
 class PlacesBackend extends Backend
 {
-    protected TimelineQuery $timelineQuery;
+    protected TimelineQuery $tq;
+    protected IRequest $request;
 
-    public function __construct(
-        TimelineQuery $timelineQuery
-    ) {
-        $this->timelineQuery = $timelineQuery;
+    public function __construct(TimelineQuery $tq, IRequest $request)
+    {
+        $this->tq = $tq;
+        $this->request = $request;
     }
 
     public function appName(): string
@@ -46,13 +49,72 @@ class PlacesBackend extends Backend
         return Util::placesGISType() > 0;
     }
 
+    public function transformDays(IQueryBuilder &$query, bool $aggregate): void
+    {
+        $locationId = (int) $this->request->getParam('places');
+
+        $query->innerJoin('m', 'memories_places', 'mp', $query->expr()->andX(
+            $query->expr()->eq('mp.fileid', 'm.fileid'),
+            $query->expr()->eq('mp.osm_id', $query->createNamedParameter($locationId)),
+        ));
+    }
+
     public function getClusters(): array
     {
-        return $this->timelineQuery->getPlaces();
+        $query = $this->tq->getBuilder();
+
+        // SELECT location name and count of photos
+        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
+        $query->select('e.osm_id', 'e.name', $count)->from('memories_planet', 'e');
+
+        // WHERE there are items with this osm_id
+        $query->innerJoin('e', 'memories_places', 'mp', $query->expr()->eq('mp.osm_id', 'e.osm_id'));
+
+        // WHERE these items are memories indexed photos
+        $query->innerJoin('mp', 'memories', 'm', $query->expr()->eq('m.fileid', 'mp.fileid'));
+
+        // WHERE these photos are in the user's requested folder recursively
+        $query = $this->tq->joinFilecache($query);
+
+        // GROUP and ORDER by tag name
+        $query->groupBy('e.osm_id', 'e.name');
+        $query->orderBy($query->createFunction('LOWER(e.name)'), 'ASC');
+        $query->addOrderBy('e.osm_id'); // tie-breaker
+
+        // FETCH all tags
+        $cursor = $this->tq->executeQueryWithCTEs($query);
+        $places = $cursor->fetchAll();
+
+        // Post process
+        foreach ($places as &$row) {
+            $row['osm_id'] = (int) $row['osm_id'];
+            $row['count'] = (int) $row['count'];
+        }
+
+        return $places;
     }
 
     public function getPhotos(string $name, ?int $limit = null): array
     {
-        return $this->timelineQuery->getPlacePhotos((int) $name, $limit) ?? [];
+        $query = $this->tq->getBuilder();
+
+        // SELECT all photos with this tag
+        $query->select('f.fileid', 'f.etag')->from('memories_places', 'mp')
+            ->where($query->expr()->eq('mp.osm_id', $query->createNamedParameter((int) $name)))
+        ;
+
+        // WHERE these items are memories indexed photos
+        $query->innerJoin('mp', 'memories', 'm', $query->expr()->eq('m.fileid', 'mp.fileid'));
+
+        // WHERE these photos are in the user's requested folder recursively
+        $query = $this->tq->joinFilecache($query);
+
+        // MAX number of photos
+        if (null !== $limit) {
+            $query->setMaxResults($limit);
+        }
+
+        // FETCH tag photos
+        return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 }

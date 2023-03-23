@@ -2,7 +2,7 @@
 
 namespace OCA\Memories\Controller;
 
-use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Db\AlbumsQuery;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\RedirectResponse;
@@ -26,7 +26,7 @@ class PublicAlbumController extends Controller
     protected IUserSession $userSession;
     protected IRootFolder $rootFolder;
     protected IURLGenerator $urlGenerator;
-    protected TimelineQuery $timelineQuery;
+    protected AlbumsQuery $albumsQuery;
 
     public function __construct(
         string $appName,
@@ -37,7 +37,7 @@ class PublicAlbumController extends Controller
         IUserSession $userSession,
         IRootFolder $rootFolder,
         IURLGenerator $urlGenerator,
-        TimelineQuery $timelineQuery
+        AlbumsQuery $albumsQuery
     ) {
         $this->appName = $appName;
         $this->eventDispatcher = $eventDispatcher;
@@ -47,7 +47,7 @@ class PublicAlbumController extends Controller
         $this->userSession = $userSession;
         $this->rootFolder = $rootFolder;
         $this->urlGenerator = $urlGenerator;
-        $this->timelineQuery = $timelineQuery;
+        $this->albumsQuery = $albumsQuery;
     }
 
     /**
@@ -58,7 +58,7 @@ class PublicAlbumController extends Controller
     public function showShare(string $token)
     {
         // Validate token exists
-        $album = $this->timelineQuery->getAlbumByLink($token);
+        $album = $this->albumsQuery->getAlbumByLink($token);
         if (!$album) {
             return new TemplateResponse('core', '404', [], 'guest');
         }
@@ -69,7 +69,7 @@ class PublicAlbumController extends Controller
             $uid = $user->getUID();
             $albumId = (int) $album['album_id'];
 
-            if ($uid === $album['user'] || $this->timelineQuery->userIsAlbumCollaborator($uid, $albumId)) {
+            if ($uid === $album['user'] || $this->albumsQuery->userIsCollaborator($uid, $albumId)) {
                 $idStr = $album['user'].'/'.$album['name'];
                 $url = $this->urlGenerator->linkToRoute('memories.Page.albums', ['id' => $idStr]);
 
@@ -99,7 +99,7 @@ class PublicAlbumController extends Controller
     {
         $fileId = (int) $album['last_added_photo'];
         $albumId = (int) $album['album_id'];
-        $owner = $this->timelineQuery->albumHasFile($albumId, $fileId);
+        $owner = $this->albumsQuery->hasFile($albumId, $fileId);
         if (!$owner) {
             return;
         }

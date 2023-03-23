@@ -23,18 +23,23 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
-use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Db\AlbumsQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
+use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\IRequest;
 
 class AlbumsBackend extends Backend
 {
-    protected TimelineQuery $timelineQuery;
+    protected AlbumsQuery $albumsQuery;
+    protected IRequest $request;
 
     public function __construct(
-        TimelineQuery $timelineQuery
+        AlbumsQuery $albumsQuery,
+        IRequest $request
     ) {
-        $this->timelineQuery = $timelineQuery;
+        $this->albumsQuery = $albumsQuery;
+        $this->request = $request;
     }
 
     public function appName(): string
@@ -52,6 +57,27 @@ class AlbumsBackend extends Backend
         return explode('/', $name)[1];
     }
 
+    public function transformDays(IQueryBuilder &$query, bool $aggregate): void
+    {
+        $albumId = (string) $this->request->getParam('albums');
+
+        $uid = Util::isLoggedIn() ? Util::getUID() : '';
+
+        // Get album object
+        $album = $this->albumsQuery->getIfAllowed($uid, $albumId);
+
+        // Check permission
+        if (null === $album) {
+            throw new \Exception("Album {$albumId} not found");
+        }
+
+        // WHERE these are items with this album
+        $query->innerJoin('m', 'photos_albums_files', 'paf', $query->expr()->andX(
+            $query->expr()->eq('paf.album_id', $query->createNamedParameter($album['album_id'])),
+            $query->expr()->eq('paf.file_id', 'm.fileid'),
+        ));
+    }
+
     public function getClusters(): array
     {
         /** @var \OCP\IRequest $request */
@@ -61,10 +87,10 @@ class AlbumsBackend extends Backend
         $list = [];
         $t = (int) $request->getParam('t', 0);
         if ($t & 1) { // personal
-            $list = array_merge($list, $this->timelineQuery->getAlbums(Util::getUID()));
+            $list = array_merge($list, $this->albumsQuery->getList(Util::getUID()));
         }
         if ($t & 2) { // shared
-            $list = array_merge($list, $this->timelineQuery->getAlbums(Util::getUID(), true));
+            $list = array_merge($list, $this->albumsQuery->getList(Util::getUID(), true));
         }
 
         // Remove elements with duplicate album_id
@@ -85,7 +111,7 @@ class AlbumsBackend extends Backend
     public function getPhotos(string $name, ?int $limit = null): array
     {
         // Get album
-        $album = $this->timelineQuery->getAlbumIfAllowed(Util::getUID(), $name);
+        $album = $this->albumsQuery->getIfAllowed(Util::getUID(), $name);
         if (null === $album) {
             throw Exceptions::NotFound("album {$name}");
         }
@@ -93,6 +119,6 @@ class AlbumsBackend extends Backend
         // Get files
         $id = (int) $album['album_id'];
 
-        return $this->timelineQuery->getAlbumPhotos($id, $limit) ?? [];
+        return $this->albumsQuery->getAlbumPhotos($id, $limit) ?? [];
     }
 }
