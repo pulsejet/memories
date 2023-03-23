@@ -47,6 +47,7 @@ abstract class GenericClusterController extends GenericApiController
             $this->init();
 
             $list = $this->getClusters();
+
             return new JSONResponse($list, Http::STATUS_OK);
         });
     }

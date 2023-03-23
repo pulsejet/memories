@@ -46,6 +46,8 @@ trait GenericApiControllerUtils
 
     /**
      * Runa function and catch exceptions to return HTTP response.
+     *
+     * @param mixed $function
      */
     protected function guardEx($function): \OCP\AppFramework\Http\Response
     {

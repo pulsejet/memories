@@ -59,14 +59,14 @@ return [
         ['name' => 'Tags#preview', 'url' => '/api/tags/preview/{name}', 'verb' => 'GET'],
         ['name' => 'Tags#set', 'url' => '/api/tags/set/{id}', 'verb' => 'PATCH'],
 
+        ['name' => 'Places#list', 'url' => '/api/places', 'verb' => 'GET'],
+        ['name' => 'Places#preview', 'url' => '/api/places/preview/{name}', 'verb' => 'GET'],
+
         ['name' => 'PeopleRecognize#list', 'url' => '/api/recognize/people', 'verb' => 'GET'],
         ['name' => 'PeopleRecognize#preview', 'url' => '/api/recognize/people/preview/{name}', 'verb' => 'GET'],
 
-        ['name' => 'People#facerecognitionPeople', 'url' => '/api/facerecognition/people', 'verb' => 'GET'],
-        ['name' => 'People#facerecognitionPeoplePreview', 'url' => '/api/facerecognition/people/preview/{id}', 'verb' => 'GET'],
-
-        ['name' => 'Places#list', 'url' => '/api/places', 'verb' => 'GET'],
-        ['name' => 'Places#preview', 'url' => '/api/places/preview/{name}', 'verb' => 'GET'],
+        ['name' => 'PeopleFaceRecognition#list', 'url' => '/api/facerecognition/people', 'verb' => 'GET'],
+        ['name' => 'PeopleFaceRecognition#preview', 'url' => '/api/facerecognition/people/preview/{name}', 'verb' => 'GET'],
 
         ['name' => 'Map#clusters', 'url' => '/api/map/clusters', 'verb' => 'GET'],
 

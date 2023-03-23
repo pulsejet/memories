@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\Files\Folder;
 use OCP\IDBConnection;
 
 trait TimelineQueryPeopleFaceRecognition
@@ -59,7 +58,7 @@ trait TimelineQueryPeopleFaceRecognition
         );
     }
 
-    public function getFaceRecognitionPreview(TimelineRoot &$root, $currentModel, $previewId)
+    public function getFaceRecognitionPhotos(string $id, int $currentModel, TimelineRoot &$root, ?int $limit)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -87,70 +86,28 @@ trait TimelineQueryPeopleFaceRecognition
         $query->innerJoin('fri', 'memories', 'm', $query->expr()->eq('m.fileid', 'fri.file'));
 
         $query->innerJoin('frf', 'facerecog_persons', 'frp', $query->expr()->eq('frp.id', 'frf.person'));
-        if (is_numeric($previewId)) {
+        if (is_numeric($id)) {
             // WHERE faces are from id persons (a cluster).
-            $query->where($query->expr()->eq('frp.id', $query->createNamedParameter($previewId)));
+            $query->where($query->expr()->eq('frp.id', $query->createNamedParameter($id)));
         } else {
             // WHERE faces are from name on persons.
-            $query->where($query->expr()->eq('frp.name', $query->createNamedParameter($previewId)));
+            $query->where($query->expr()->eq('frp.name', $query->createNamedParameter($id)));
         }
 
         // WHERE these photos are in the user's requested folder recursively
         $query = $this->joinFilecache($query, $root, true, false);
 
         // LIMIT results
-        $query->setMaxResults(15);
+        if (null !== $limit) {
+            $query->setMaxResults($limit);
+        }
 
         // Sort by date taken so we get recent photos
         $query->orderBy('m.datetaken', 'DESC');
         $query->addOrderBy('m.fileid', 'DESC'); // tie-breaker
 
         // FETCH face detections
-        $cursor = $this->executeQueryWithCTEs($query);
-        $previews = $cursor->fetchAll();
-        if (empty($previews)) {
-            return null;
-        }
-
-        // Score the face detections
-        foreach ($previews as &$p) {
-            // Get actual pixel size of face
-            $iw = min((int) ($p['image_width'] ?: 512), 2048);
-            $ih = min((int) ($p['image_height'] ?: 512), 2048);
-
-            // Get percentage position and size
-            $p['x'] = (float) $p['x'] / $p['image_width'];
-            $p['y'] = (float) $p['y'] / $p['image_height'];
-            $p['width'] = (float) $p['width'] / $p['image_width'];
-            $p['height'] = (float) $p['height'] / $p['image_height'];
-
-            $w = (float) $p['width'];
-            $h = (float) $p['height'];
-
-            // Get center of face
-            $x = (float) $p['x'] + (float) $p['width'] / 2;
-            $y = (float) $p['y'] + (float) $p['height'] / 2;
-
-            // 3D normal distribution - if the face is closer to the center, it's better
-            $positionScore = exp(-($x - 0.5) ** 2 * 4) * exp(-($y - 0.5) ** 2 * 4);
-
-            // Root size distribution - if the image is bigger, it's better,
-            // but it doesn't matter beyond a certain point
-            $imgSizeScore = ($iw * 100) ** (1 / 2) * ($ih * 100) ** (1 / 2);
-
-            // Faces occupying too much of the image don't look particularly good
-            $faceSizeScore = (-$w ** 2 + $w) * (-$h ** 2 + $h);
-
-            // Combine scores
-            $p['score'] = $positionScore * $imgSizeScore * $faceSizeScore * $p['confidence'];
-        }
-
-        // Sort previews by score descending
-        usort($previews, function ($a, $b) {
-            return $b['score'] <=> $a['score'];
-        });
-
-        return $previews;
+        return $this->executeQueryWithCTEs($query)->fetchAll();
     }
 
     public function getFaceRecognitionClusters(TimelineRoot &$root, int $currentModel, bool $show_singles = false, bool $show_hidden = false)
@@ -261,7 +218,7 @@ trait TimelineQueryPeopleFaceRecognition
     }
 
     /** Convert face fields to object */
-    private function processFaceRecognitionDetection(&$row, $days = false)
+    private function processFaceRecognitionDetection(&$row)
     {
         if (!isset($row)) {
             return;
@@ -272,15 +229,13 @@ trait TimelineQueryPeopleFaceRecognition
             return;
         }
 
-        if (!$days) {
-            $row['facerect'] = [
-                // Get percentage position and size
-                'w' => (float) $row['face_width'] / $row['image_width'],
-                'h' => (float) $row['face_height'] / $row['image_height'],
-                'x' => (float) $row['face_x'] / $row['image_width'],
-                'y' => (float) $row['face_y'] / $row['image_height'],
-            ];
-        }
+        // Get percentage position and size
+        $row['facerect'] = [
+            'w' => (float) $row['face_width'] / $row['image_width'],
+            'h' => (float) $row['face_height'] / $row['image_height'],
+            'x' => (float) $row['face_x'] / $row['image_width'],
+            'y' => (float) $row['face_y'] / $row['image_height'],
+        ];
 
         unset($row['face_x'], $row['face_y'], $row['face_w'], $row['face_h'], $row['image_height'], $row['image_width']);
     }
