@@ -27,7 +27,7 @@ use OCA\Memories\Errors;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 
-class TagsController extends GenericClusterController
+class TagsController extends GenericApiController
 {
     /**
      * @NoAdminRequired
@@ -38,7 +38,7 @@ class TagsController extends GenericClusterController
     {
         // Check tags enabled for this user
         if (!$this->tagsIsEnabled()) {
-            return Errors::NotEnabled($this->appName());
+            return Errors::NotEnabled('Tags');
         }
 
         // Check the user is allowed to edit the file
@@ -60,25 +60,5 @@ class TagsController extends GenericClusterController
         $om->unassignTags((string) $id, 'files', $remove);
 
         return new JSONResponse([], Http::STATUS_OK);
-    }
-
-    protected function appName(): string
-    {
-        return 'Tags';
-    }
-
-    protected function isEnabled(): bool
-    {
-        return $this->tagsIsEnabled();
-    }
-
-    protected function getClusters(): array
-    {
-        return $this->timelineQuery->getTags($this->root);
-    }
-
-    protected function getPhotos(string $name, ?int $limit = null): array
-    {
-        return $this->timelineQuery->getTagPhotos($name, $this->root, $limit) ?? [];
     }
 }

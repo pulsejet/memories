@@ -23,28 +23,29 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
-use OCA\Memories\Db\TimelineRoot;
+use OCA\Memories\ClustersBackend\Backend;
 use OCA\Memories\Errors;
 use OCA\Memories\HttpResponseException;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 
-abstract class GenericClusterController extends GenericApiController
+class ClustersController extends GenericApiController
 {
-    protected ?TimelineRoot $root;
+    /** Current backend for this instance */
+    protected Backend $backend;
 
     /**
      * @NoAdminRequired
      *
      * Get list of clusters
      */
-    public function list(): Http\Response
+    public function list(string $backend): Http\Response
     {
-        return $this->guardEx(function () {
-            $this->init();
+        return $this->guardEx(function () use ($backend) {
+            $this->init($backend);
 
-            $list = $this->getClusters();
+            $list = $this->backend->getClusters();
 
             return new JSONResponse($list, Http::STATUS_OK);
         });
@@ -57,13 +58,13 @@ abstract class GenericClusterController extends GenericApiController
      *
      * Get preview for a cluster
      */
-    public function preview(string $name): Http\Response
+    public function preview(string $backend, string $name): Http\Response
     {
-        return $this->guardEx(function () use ($name) {
-            $this->init();
+        return $this->guardEx(function () use ($backend, $name) {
+            $this->init($backend);
 
             // Get list of some photos in this cluster
-            $photos = $this->getPhotos($name, 8);
+            $photos = $this->backend->getPhotos($name, 8);
 
             // If no photos found then return 404
             if (0 === \count($photos)) {
@@ -71,7 +72,7 @@ abstract class GenericClusterController extends GenericApiController
             }
 
             // Put the photos in the correct order
-            $this->sortPhotosForPreview($photos);
+            $this->backend->sortPhotosForPreview($photos);
 
             // Get preview from image list
             return $this->getPreviewFromPhotoList($photos);
@@ -85,17 +86,17 @@ abstract class GenericClusterController extends GenericApiController
      *
      * Download a cluster as a zip file
      */
-    public function download(string $name): Http\Response
+    public function download(string $backend, string $name): Http\Response
     {
-        return $this->guardEx(function () use ($name) {
-            $this->init();
+        return $this->guardEx(function () use ($backend, $name) {
+            $this->init($backend);
 
             // Get list of all files in this cluster
-            $photos = $this->getPhotos($name);
-            $fileIds = array_map([$this, 'getFileId'], $photos);
+            $photos = $this->backend->getPhotos($name);
+            $fileIds = array_map(fn ($p) => $this->backend->getFileId($p), $photos);
 
             // Get download handle
-            $filename = $this->clusterName($name);
+            $filename = $this->backend->clusterName($name);
             $handle = \OCA\Memories\Controller\DownloadController::createHandle($filename, $fileIds);
 
             return new JSONResponse(['handle' => $handle], Http::STATUS_OK);
@@ -103,103 +104,29 @@ abstract class GenericClusterController extends GenericApiController
     }
 
     /**
-     * A human-readable name for the app.
-     * Used for error messages.
-     */
-    abstract protected function appName(): string;
-
-    /**
-     * Whether the app is enabled for the current user.
-     */
-    abstract protected function isEnabled(): bool;
-
-    /**
-     * Get the cluster list for the current user.
-     */
-    abstract protected function getClusters(): array;
-
-    /**
-     * Get a list of photos with any extra parameters for the given cluster
-     * Used for preview generation and download.
-     *
-     * @param string $name  Identifier for the cluster
-     * @param int    $limit Maximum number of photos to return
-     */
-    abstract protected function getPhotos(string $name, ?int $limit = null): array;
-
-    /**
-     * Human readable name for the cluster.
-     */
-    protected function clusterName(string $name)
-    {
-        return $name;
-    }
-
-    /**
-     * Put the photo objects in priority list.
-     * Works on the array in place.
-     */
-    protected function sortPhotosForPreview(array &$photos)
-    {
-        shuffle($photos);
-    }
-
-    /**
-     * Quality to use for the preview file.
-     */
-    protected function getPreviewQuality(): int
-    {
-        return 512;
-    }
-
-    /**
-     * Perform any post processing and get the blob from the preview file.
-     *
-     * @param \OCP\Files\SimpleFS\ISimpleFile $file  Preview file
-     * @param array                           $photo Photo object
-     *
-     * @return [Blob, mimetype] of data
-     */
-    protected function getPreviewBlob($file, $photo): array
-    {
-        return [$file->getContent(), $file->getMimeType()];
-    }
-
-    /**
-     * Get the file ID for a photo object.
-     */
-    protected function getFileId(array $photo): int
-    {
-        return (int) $photo['fileid'];
-    }
-
-    /**
-     * Should the timeline root be queried?
-     */
-    protected function useTimelineRoot(): bool
-    {
-        return true;
-    }
-
-    /**
      * Initialize and check if the app is enabled.
      * Gets the root node if required.
      */
-    protected function init(): void
+    protected function init(string $backend): void
     {
         $user = $this->userSession->getUser();
         if (null === $user) {
             throw new HttpResponseException(Errors::NotLoggedIn());
         }
 
-        if (!$this->isEnabled()) {
-            throw new HttpResponseException(Errors::NotEnabled($this->appName()));
+        if (\array_key_exists($backend, Backend::$backends)) {
+            $this->backend = \OC::$server->get(Backend::$backends[$backend]);
+        } else {
+            throw new \Exception("Invalid clusters backend '{$backend}'");
         }
 
-        $this->root = null;
-        if ($this->useTimelineRoot()) {
-            $this->root = $this->getRequestRoot();
-            if ($this->root->isEmpty()) {
+        if (!$this->backend->isEnabled()) {
+            throw new HttpResponseException(Errors::NotEnabled($this->backend->appName()));
+        }
+
+        if (property_exists($this->backend, 'root')) {
+            $this->backend->root = $this->getRequestRoot();
+            if ($this->backend->root->isEmpty()) {
                 throw new HttpResponseException(Errors::NoRequestRoot());
             }
         }
@@ -217,7 +144,7 @@ abstract class GenericClusterController extends GenericApiController
         $userFolder = $this->rootFolder->getUserFolder($this->getUID());
         foreach ($photos as $img) {
             // Get the file
-            $files = $userFolder->getById($this->getFileId($img));
+            $files = $userFolder->getById($this->backend->getFileId($img));
             if (0 === \count($files)) {
                 continue;
             }
@@ -229,10 +156,10 @@ abstract class GenericClusterController extends GenericApiController
 
             // Get preview image
             try {
-                $quality = $this->getPreviewQuality();
+                $quality = $this->backend->getPreviewQuality();
                 $file = $previewManager->getPreview($files[0], $quality, $quality, false);
 
-                [$blob, $mimetype] = $this->getPreviewBlob($file, $img);
+                [$blob, $mimetype] = $this->backend->getPreviewBlob($file, $img);
 
                 $response = new DataDisplayResponse($blob, Http::STATUS_OK, [
                     'Content-Type' => $mimetype,

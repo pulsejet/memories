@@ -21,23 +21,48 @@ declare(strict_types=1);
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\Memories\Controller;
+namespace OCA\Memories\ClustersBackend;
 
-class PeopleFaceRecognitionController extends GenericClusterController
+use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Db\TimelineRoot;
+use OCP\App\IAppManager;
+use OCP\IConfig;
+use OCP\IUserSession;
+
+class FaceRecognitionBackend extends Backend
 {
-    use PeopleControllerUtils;
+    use PeopleBackendUtils;
 
-    protected function appName(): string
+    public TimelineRoot $root;
+    protected TimelineQuery $timelineQuery;
+    protected string $userId;
+    protected IAppManager $appManager;
+    protected IConfig $config;
+
+    public function __construct(
+        TimelineQuery $timelineQuery,
+        IUserSession $userSession,
+        IAppManager $appManager,
+        IConfig $config
+    ) {
+        $this->timelineQuery = $timelineQuery;
+        $this->userId = $userSession->getUser()->getUID();
+        $this->appManager = $appManager;
+        $this->config = $config;
+    }
+
+    public function appName(): string
     {
         return 'Face Recognition';
     }
 
-    protected function isEnabled(): bool
+    public function isEnabled(): bool
     {
-        return $this->recognizeIsEnabled();
+        return \OCA\Memories\Util::facerecognitionIsInstalled($this->appManager)
+               && \OCA\Memories\Util::facerecognitionIsEnabled($this->config, $this->userId);
     }
 
-    protected function getClusters(): array
+    public function getClusters(): array
     {
         return array_merge(
             $this->timelineQuery->getFaceRecognitionPersons($this->root, $this->model()),
@@ -45,12 +70,12 @@ class PeopleFaceRecognitionController extends GenericClusterController
         );
     }
 
-    protected function getPhotos(string $name, ?int $limit = null): array
+    public function getPhotos(string $name, ?int $limit = null): array
     {
         return $this->timelineQuery->getFaceRecognitionPhotos($name, $this->model(), $this->root, $limit) ?? [];
     }
 
-    protected function sortPhotosForPreview(array &$photos)
+    public function sortPhotosForPreview(array &$photos)
     {
         // Convert to recognize format (percentage position-size)
         foreach ($photos as &$p) {
@@ -63,9 +88,14 @@ class PeopleFaceRecognitionController extends GenericClusterController
         $this->sortByScores($photos);
     }
 
-    protected function getPreviewBlob($file, $photo): array
+    public function getPreviewBlob($file, $photo): array
     {
         return $this->cropFace($file, $photo, 1.8);
+    }
+
+    public function getPreviewQuality(): int
+    {
+        return 2048;
     }
 
     private function model(): int

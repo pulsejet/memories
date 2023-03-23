@@ -21,26 +21,42 @@ declare(strict_types=1);
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\Memories\Controller;
+namespace OCA\Memories\ClustersBackend;
 
-class PlacesController extends GenericClusterController
+use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Db\TimelineRoot;
+use OCP\IUserSession;
+
+class PlacesBackend extends Backend
 {
-    protected function appName(): string
+    public TimelineRoot $root;
+    protected TimelineQuery $timelineQuery;
+    protected string $userId;
+
+    public function __construct(
+        TimelineQuery $timelineQuery,
+        IUserSession $userSession
+    ) {
+        $this->timelineQuery = $timelineQuery;
+        $this->userId = $userSession->getUser()->getUID();
+    }
+
+    public function appName(): string
     {
         return 'Places';
     }
 
-    protected function isEnabled(): bool
+    public function isEnabled(): bool
     {
-        return $this->placesIsEnabled();
+        return \OCA\Memories\Util::placesGISType() > 0;
     }
 
-    protected function getClusters(): array
+    public function getClusters(): array
     {
         return $this->timelineQuery->getPlaces($this->root);
     }
 
-    protected function getPhotos(string $name, ?int $limit = null): array
+    public function getPhotos(string $name, ?int $limit = null): array
     {
         return $this->timelineQuery->getPlacePhotos((int) $name, $this->root, $limit) ?? [];
     }

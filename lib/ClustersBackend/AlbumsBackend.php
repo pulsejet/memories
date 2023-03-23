@@ -21,43 +21,58 @@ declare(strict_types=1);
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\Memories\Controller;
+namespace OCA\Memories\ClustersBackend;
 
+use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Errors;
 use OCA\Memories\HttpResponseException;
+use OCP\App\IAppManager;
+use OCP\IUserSession;
 
-class AlbumsController extends GenericClusterController
+class AlbumsBackend extends Backend
 {
-    protected function appName(): string
+    protected TimelineQuery $timelineQuery;
+    protected string $userId;
+    protected IAppManager $appManager;
+
+    public function __construct(
+        TimelineQuery $timelineQuery,
+        IUserSession $userSession,
+        IAppManager $appManager
+    ) {
+        $this->timelineQuery = $timelineQuery;
+        $this->userId = $userSession->getUser()->getUID();
+        $this->appManager = $appManager;
+    }
+
+    public function appName(): string
     {
         return 'Albums';
     }
 
-    protected function isEnabled(): bool
+    public function isEnabled(): bool
     {
-        return $this->albumsIsEnabled();
+        return \OCA\Memories\Util::albumsIsEnabled($this->appManager);
     }
 
-    protected function useTimelineRoot(): bool
-    {
-        return false;
-    }
-
-    protected function clusterName(string $name)
+    public function clusterName(string $name)
     {
         return explode('/', $name)[1];
     }
 
-    protected function getClusters(): array
+    public function getClusters(): array
     {
+        /** @var \OCP\IRequest $request */
+        $request = \OC::$server->get(\OCP\IRequest::class);
+
         // Run actual query
         $list = [];
-        $t = (int) $this->request->getParam('t', 0);
+        $t = (int) $request->getParam('t', 0);
         if ($t & 1) { // personal
-            $list = array_merge($list, $this->timelineQuery->getAlbums($this->getUID()));
+            $list = array_merge($list, $this->timelineQuery->getAlbums($this->userId));
         }
         if ($t & 2) { // shared
-            $list = array_merge($list, $this->timelineQuery->getAlbums($this->getUID(), true));
+            $list = array_merge($list, $this->timelineQuery->getAlbums($this->userId, true));
         }
 
         // Remove elements with duplicate album_id
@@ -75,10 +90,10 @@ class AlbumsController extends GenericClusterController
         return array_values($list);
     }
 
-    protected function getPhotos(string $name, ?int $limit = null): array
+    public function getPhotos(string $name, ?int $limit = null): array
     {
         // Get album
-        $album = $this->timelineQuery->getAlbumIfAllowed($this->getUID(), $name);
+        $album = $this->timelineQuery->getAlbumIfAllowed($this->userId, $name);
         if (null === $album) {
             throw new HttpResponseException(Errors::NotFound("album {$name}"));
         }

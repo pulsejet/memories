@@ -48,27 +48,27 @@ export class API {
   }
 
   static ALBUM_LIST(t: 1 | 2 | 3 = 3) {
-    return gen(`${BASE}/albums?t=${t}`);
+    return gen(`${BASE}/clusters/albums?t=${t}`);
   }
 
   static ALBUM_DOWNLOAD(user: string, name: string) {
-    return gen(`${BASE}/albums/download?name={user}/{name}`, { user, name });
+    return gen(`${BASE}/clusters/albums/download?name={user}/{name}`, { user, name });
   }
 
   static PLACE_LIST() {
-    return gen(`${BASE}/places`);
+    return gen(`${BASE}/clusters/places`);
   }
 
   static PLACE_PREVIEW(place: number | string) {
-    return gen(`${BASE}/places/preview/{place}`, { place });
+    return gen(`${BASE}/clusters/places/preview/{place}`, { place });
   }
 
   static TAG_LIST() {
-    return gen(`${BASE}/tags`);
+    return gen(`${BASE}/clusters/tags`);
   }
 
   static TAG_PREVIEW(tag: string) {
-    return gen(`${BASE}/tags/preview/{tag}`, { tag });
+    return gen(`${BASE}/clusters/tags/preview/{tag}`, { tag });
   }
 
   static TAG_SET(fileid: string | number) {
@@ -76,14 +76,14 @@ export class API {
   }
 
   static FACE_LIST(app: "recognize" | "facerecognition") {
-    return gen(`${BASE}/${app}/people`);
+    return gen(`${BASE}/clusters/${app}`);
   }
 
   static FACE_PREVIEW(
     app: "recognize" | "facerecognition",
     face: string | number
   ) {
-    return gen(`${BASE}/${app}/people/preview/{face}`, { face });
+    return gen(`${BASE}/clusters/${app}/preview/{face}`, { face });
   }
 
   static ARCHIVE(fileid: number) {

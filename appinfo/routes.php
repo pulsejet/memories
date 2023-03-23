@@ -52,21 +52,11 @@ return [
         ['name' => 'Days#day', 'url' => '/api/days/{id}', 'verb' => 'GET'],
         ['name' => 'Days#dayPost', 'url' => '/api/days', 'verb' => 'POST'],
 
-        ['name' => 'Albums#list', 'url' => '/api/albums', 'verb' => 'GET'],
-        ['name' => 'Albums#download', 'url' => '/api/albums/download', 'verb' => 'POST'],
+        ['name' => 'Clusters#list', 'url' => '/api/clusters/{backend}', 'verb' => 'GET'],
+        ['name' => 'Clusters#preview', 'url' => '/api/clusters/{backend}/preview/{name}', 'verb' => 'GET'],
+        ['name' => 'Clusters#download', 'url' => '/api/clusters/{backend}/download', 'verb' => 'POST'],
 
-        ['name' => 'Tags#list', 'url' => '/api/tags', 'verb' => 'GET'],
-        ['name' => 'Tags#preview', 'url' => '/api/tags/preview/{name}', 'verb' => 'GET'],
         ['name' => 'Tags#set', 'url' => '/api/tags/set/{id}', 'verb' => 'PATCH'],
-
-        ['name' => 'Places#list', 'url' => '/api/places', 'verb' => 'GET'],
-        ['name' => 'Places#preview', 'url' => '/api/places/preview/{name}', 'verb' => 'GET'],
-
-        ['name' => 'PeopleRecognize#list', 'url' => '/api/recognize/people', 'verb' => 'GET'],
-        ['name' => 'PeopleRecognize#preview', 'url' => '/api/recognize/people/preview/{name}', 'verb' => 'GET'],
-
-        ['name' => 'PeopleFaceRecognition#list', 'url' => '/api/facerecognition/people', 'verb' => 'GET'],
-        ['name' => 'PeopleFaceRecognition#preview', 'url' => '/api/facerecognition/people/preview/{name}', 'verb' => 'GET'],
 
         ['name' => 'Map#clusters', 'url' => '/api/map/clusters', 'verb' => 'GET'],
 

@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\AppInfo;
 
+use OCA\Memories\ClustersBackend;
 use OCA\Memories\Listeners\PostDeleteListener;
 use OCA\Memories\Listeners\PostWriteListener;
 use OCP\AppFramework\App;
@@ -68,9 +69,17 @@ class Application extends App implements IBootstrap
 
     public function register(IRegistrationContext $context): void
     {
+        // Register file hooks
         $context->registerEventListener(NodeWrittenEvent::class, PostWriteListener::class);
         $context->registerEventListener(NodeTouchedEvent::class, PostWriteListener::class);
         $context->registerEventListener(NodeDeletedEvent::class, PostDeleteListener::class);
+
+        // Register clusters backends
+        ClustersBackend\Backend::register('albums', ClustersBackend\AlbumsBackend::class);
+        ClustersBackend\Backend::register('tags', ClustersBackend\TagsBackend::class);
+        ClustersBackend\Backend::register('places', ClustersBackend\PlacesBackend::class);
+        ClustersBackend\Backend::register('recognize', ClustersBackend\RecognizeBackend::class);
+        ClustersBackend\Backend::register('facerecognition', ClustersBackend\FaceRecognitionBackend::class);
     }
 
     public function boot(IBootContext $context): void
