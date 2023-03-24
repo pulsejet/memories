@@ -110,10 +110,7 @@ class ClustersController extends GenericApiController
      */
     protected function init(string $backend): void
     {
-        $user = $this->userSession->getUser();
-        if (null === $user) {
-            throw Exceptions::NotLoggedIn();
-        }
+        Util::getUser();
 
         $this->backend = ClustersBackendManager::get($backend);
 

@@ -87,7 +87,7 @@ class FsManager
 
         // Anything else needs a user
         if (null === $user) {
-            throw new \Exception('User not logged in: no timeline root');
+            throw Exceptions::NotLoggedIn();
         }
         $uid = $user->getUID();
 
