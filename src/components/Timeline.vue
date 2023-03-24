@@ -37,10 +37,7 @@
           >
           </OnThisDay>
 
-          <FolderGrid
-            v-if="routeIsFolders && !$route.query.recursive"
-            @load="scrollerManager.adjust()"
-          />
+          <FolderGrid v-if="folders.length" :items="folders" />
         </div>
       </template>
 
@@ -122,7 +119,7 @@ import { showError } from "@nextcloud/dialogs";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 
 import { getLayout } from "../services/Layout";
-import { IDay, IHeadRow, IPhoto, IRow, IRowType } from "../types";
+import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";
 
 import UserConfig from "../mixins/UserConfig";
 import FolderGrid from "./FolderGrid.vue";
@@ -169,6 +166,8 @@ export default defineComponent({
     loading: 0,
     /** Main list of rows */
     list: [] as IRow[],
+    /** List of top folders */
+    folders: [] as IFolder[],
     /** Computed number of columns */
     numCols: 0,
     /** Header rows for dayId key */
@@ -265,7 +264,7 @@ export default defineComponent({
 
     /** Nothing to show here */
     empty(): boolean {
-      return !this.list.length && !this.routeIsFolders;
+      return !this.list.length && !this.folders.length;
     },
   },
 
@@ -372,6 +371,7 @@ export default defineComponent({
       this.selectionManager.clearSelection();
       this.loading = 0;
       this.list = [];
+      this.folders = [];
       this.heads = {};
       this.currentStart = 0;
       this.currentEnd = 0;
@@ -659,8 +659,42 @@ export default defineComponent({
       return head.name;
     },
 
+    /** Fetch folders */
+    async fetchFolders() {
+      if (!this.routeIsFolders || this.$route.query.recursive) {
+        this.folders = [];
+        return;
+      }
+
+      // Get subfolders URL
+      const folder = utils.getFolderRoutePath(this.config_foldersPath);
+      const url = API.Q(API.FOLDERS_SUB(), { folder });
+
+      // Make API call to get subfolders
+      try {
+        this.loading++;
+        const state = this.state;
+        const res = await axios.get<IFolder[]>(url);
+        if (state !== this.state) return;
+        this.folders = res.data;
+      } finally {
+        this.loading--;
+      }
+
+      // Filter out hidden folders
+      if (!this.config_showHidden) {
+        this.folders = this.folders.filter(
+          (f) => !f.name.startsWith(".") && f.previews.length
+        );
+      }
+    },
+
     /** Fetch timeline main call */
     async fetchDays(noCache = false) {
+      // Get top folders if route
+      await this.fetchFolders();
+
+      // Get URL an cache identifier
       const url = API.Q(API.DAYS(), this.getQuery());
       const cacheUrl = <string>this.$route.name + url;
 
