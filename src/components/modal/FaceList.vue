@@ -11,11 +11,13 @@
       </NcTextField>
     </div>
 
-    <div v-if="list">
-      <div class="photo" v-for="photo of filteredList" :key="photo.cluster_id">
-        <Cluster :data="photo" :link="false" @click="clickFace" />
-      </div>
-    </div>
+    <ClusterGrid
+      v-if="list"
+      :items="filteredList"
+      :link="false"
+      :maxSize="120"
+      @click="click"
+    />
     <div v-else>
       {{ t("memories", "Loading …") }}
     </div>
@@ -25,7 +27,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { ICluster, IFace } from "../../types";
-import Cluster from "../frame/Cluster.vue";
+import ClusterGrid from "../ClusterGrid.vue";
 
 import NcTextField from "@nextcloud/vue/dist/Components/NcTextField";
 
@@ -37,7 +39,7 @@ import Magnify from "vue-material-design-icons/Magnify.vue";
 export default defineComponent({
   name: "FaceList",
   components: {
-    Cluster,
+    ClusterGrid,
     NcTextField,
     Magnify,
   },
@@ -88,7 +90,7 @@ export default defineComponent({
       this.fuse = new Fuse(this.list, { keys: ["name"] });
     },
 
-    async clickFace(face: IFace) {
+    async click(face: IFace) {
       this.$emit("select", face);
     },
   },
@@ -99,23 +101,12 @@ export default defineComponent({
 .outer {
   width: 100%;
   max-height: calc(90vh - 80px - 4em);
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 
   .search {
     margin-bottom: 10px;
   }
-}
-
-.photo {
-  display: inline-block;
-  position: relative;
-  cursor: pointer;
-  vertical-align: top;
-  font-size: 0.8em;
-
-  max-width: 120px;
-  width: calc(33.33%);
-  aspect-ratio: 1/1;
 }
 </style>

@@ -37,6 +37,10 @@ export default defineComponent({
       type: Array<ICluster>,
       required: true,
     },
+    maxSize: {
+      type: Number,
+      default: 200,
+    },
     link: {
       type: Boolean,
       default: true,
@@ -59,7 +63,7 @@ export default defineComponent({
 
     resize() {
       const w = (<any>this.$refs.recycler).$el.clientWidth;
-      this.gridItems = Math.max(Math.floor(w / 200), 3);
+      this.gridItems = Math.max(Math.floor(w / this.maxSize), 3);
       this.itemSize = Math.floor(w / this.gridItems);
     },
   },
