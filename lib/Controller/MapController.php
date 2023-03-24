@@ -33,21 +33,19 @@ class MapController extends GenericApiController
     /**
      * @NoAdminRequired
      */
-    public function clusters(): Http\Response
+    public function clusters(string $bounds, string $zoom): Http\Response
     {
-        return Util::guardEx(function () {
+        return Util::guardEx(function () use ($bounds, $zoom) {
             // Make sure we have bounds and zoom level
             // Zoom level is used to determine the grid length
-            $bounds = $this->request->getParam('bounds');
-            $zoomLevel = $this->request->getParam('zoom');
-            if (!$bounds || !$zoomLevel || !is_numeric($zoomLevel)) {
+            if (!$bounds || !$zoom || !is_numeric($zoom)) {
                 throw Exceptions::MissingParameter('bounds or zoom');
             }
 
             // A tweakable parameter to determine the number of boxes in the map
             // Note: these parameters need to be changed in MapSplitMatter.vue as well
             $clusterDensity = 1;
-            $gridLen = 180.0 / (2 ** $zoomLevel * $clusterDensity);
+            $gridLen = 180.0 / (2 ** $zoom * $clusterDensity);
 
             $clusters = $this->timelineQuery->getMapClusters($gridLen, $bounds);
 

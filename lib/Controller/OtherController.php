@@ -45,14 +45,12 @@ class OtherController extends GenericApiController
     public function setUserConfig(string $key, string $value): Http\Response
     {
         return Util::guardEx(function () use ($key, $value) {
-            $uid = Util::getUID();
-
             // Make sure not running in read-only mode
             if ($this->config->getSystemValue('memories.readonly', false)) {
                 throw Exceptions::Forbidden('Cannot change settings in readonly mode');
             }
 
-            $this->config->setUserValue($uid, Application::APPNAME, $key, $value);
+            $this->config->setUserValue(Util::getUID(), Application::APPNAME, $key, $value);
 
             return new JSONResponse([], Http::STATUS_OK);
         });

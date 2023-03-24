@@ -60,10 +60,8 @@ class AlbumsBackend extends Backend
     {
         $albumId = (string) $this->request->getParam('albums');
 
-        $uid = Util::isLoggedIn() ? Util::getUID() : '';
-
         // Get album object
-        $album = $this->albumsQuery->getIfAllowed($uid, $albumId);
+        $album = $this->albumsQuery->getIfAllowed($this->getUID(), $albumId);
 
         // Check permission
         if (null === $album) {
@@ -110,7 +108,7 @@ class AlbumsBackend extends Backend
     public function getPhotos(string $name, ?int $limit = null): array
     {
         // Get album
-        $album = $this->albumsQuery->getIfAllowed(Util::getUID(), $name);
+        $album = $this->albumsQuery->getIfAllowed($this->getUID(), $name);
         if (null === $album) {
             throw Exceptions::NotFound("album {$name}");
         }
@@ -119,5 +117,10 @@ class AlbumsBackend extends Backend
         $id = (int) $album['album_id'];
 
         return $this->albumsQuery->getAlbumPhotos($id, $limit) ?? [];
+    }
+
+    private function getUID(): string
+    {
+        return Util::isLoggedIn() ? Util::getUID() : '---';
     }
 }

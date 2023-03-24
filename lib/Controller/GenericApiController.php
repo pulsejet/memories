@@ -37,8 +37,6 @@ use Psr\Log\LoggerInterface;
 
 abstract class GenericApiController extends Controller
 {
-    use GenericApiControllerParams;
-
     protected IConfig $config;
     protected IUserSession $userSession;
     protected IRootFolder $rootFolder;

@@ -25,6 +25,7 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\ClustersBackend\Backend;
 use OCA\Memories\Exceptions;
+use OCA\Memories\Manager\ClustersBackendManager;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataDisplayResponse;
@@ -114,7 +115,7 @@ class ClustersController extends GenericApiController
             throw Exceptions::NotLoggedIn();
         }
 
-        $this->backend = Backend::get($backend);
+        $this->backend = ClustersBackendManager::get($backend);
 
         if (!$this->backend->isEnabled()) {
             throw Exceptions::NotEnabled($this->backend->appName());
@@ -130,23 +131,13 @@ class ClustersController extends GenericApiController
         $previewManager = \OC::$server->get(\OCP\IPreview::class);
 
         // Try to get a preview
-        $userFolder = Util::getUserFolder();
         foreach ($photos as $img) {
-            // Get the file
-            $files = $userFolder->getById($this->backend->getFileId($img));
-            if (0 === \count($files)) {
-                continue;
-            }
-
-            // Check read permission
-            if (!$files[0]->isReadable()) {
-                continue;
-            }
-
             // Get preview image
             try {
                 $quality = $this->backend->getPreviewQuality();
-                $file = $previewManager->getPreview($files[0], $quality, $quality, false);
+
+                $file = $this->fs->getUserFile($this->backend->getFileId($img));
+                $file = $previewManager->getPreview($file, $quality, $quality, false);
 
                 [$blob, $mimetype] = $this->backend->getPreviewBlob($file, $img);
 

@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\Exceptions;
+use OCA\Memories\Manager\ClustersBackendManager;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
@@ -145,7 +146,7 @@ class DaysController extends GenericApiController
         $transforms = [];
 
         // Add clustering transforms
-        $transforms = array_merge($transforms, \OCA\Memories\ClustersBackend\Backend::getTransforms($this->request));
+        $transforms = array_merge($transforms, ClustersBackendManager::getTransforms($this->request));
 
         // Other transforms not allowed for public shares
         if (!Util::isLoggedIn()) {
@@ -258,5 +259,25 @@ class DaysController extends GenericApiController
         }
 
         return $dayIds;
+    }
+
+    private function isRecursive()
+    {
+        return null === $this->request->getParam('folder') || $this->request->getParam('recursive');
+    }
+
+    private function isArchive()
+    {
+        return null !== $this->request->getParam('archive');
+    }
+
+    private function isMonthView()
+    {
+        return null !== $this->request->getParam('monthView');
+    }
+
+    private function isReverse()
+    {
+        return null !== $this->request->getParam('reverse');
     }
 }

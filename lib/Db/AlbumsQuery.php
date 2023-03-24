@@ -124,7 +124,7 @@ class AlbumsQuery
      * @param string $uid     UID of CURRENT user
      * @param string $albumId $user/$name where $user is the OWNER of the album
      */
-    public function getIfAllowed(string $uid, string $albumId)
+    public function getIfAllowed(string $uid, string $albumId): ?array
     {
         $album = null;
 
