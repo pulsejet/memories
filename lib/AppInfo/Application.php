@@ -26,7 +26,6 @@ namespace OCA\Memories\AppInfo;
 use OCA\Memories\ClustersBackend;
 use OCA\Memories\Listeners\PostDeleteListener;
 use OCA\Memories\Listeners\PostWriteListener;
-use OCA\Memories\Manager\ClustersBackendManager;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
@@ -76,11 +75,11 @@ class Application extends App implements IBootstrap
         $context->registerEventListener(NodeDeletedEvent::class, PostDeleteListener::class);
 
         // Register clusters backends
-        ClustersBackendManager::register('albums', ClustersBackend\AlbumsBackend::class);
-        ClustersBackendManager::register('tags', ClustersBackend\TagsBackend::class);
-        ClustersBackendManager::register('places', ClustersBackend\PlacesBackend::class);
-        ClustersBackendManager::register('recognize', ClustersBackend\RecognizeBackend::class);
-        ClustersBackendManager::register('facerecognition', ClustersBackend\FaceRecognitionBackend::class);
+        ClustersBackend\Manager::register('albums', ClustersBackend\AlbumsBackend::class);
+        ClustersBackend\Manager::register('tags', ClustersBackend\TagsBackend::class);
+        ClustersBackend\Manager::register('places', ClustersBackend\PlacesBackend::class);
+        ClustersBackend\Manager::register('recognize', ClustersBackend\RecognizeBackend::class);
+        ClustersBackend\Manager::register('facerecognition', ClustersBackend\FaceRecognitionBackend::class);
     }
 
     public function boot(IBootContext $context): void

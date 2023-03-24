@@ -21,10 +21,8 @@ declare(strict_types=1);
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\Memories\Manager;
+namespace OCA\Memories\Db;
 
-use OCA\Memories\Db\AlbumsQuery;
-use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
 use OCA\Memories\Util;

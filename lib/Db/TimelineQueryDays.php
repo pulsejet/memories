@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCA\Memories\Manager\ClustersBackendManager;
+use OCA\Memories\ClustersBackend;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -275,7 +275,7 @@ trait TimelineQueryDays
             }
 
             // All cluster transformations
-            ClustersBackendManager::applyDayPostTransforms($this->request, $row);
+            ClustersBackend\Manager::applyDayPostTransforms($this->request, $row);
 
             // We don't need these fields
             unset($row['datetaken']);

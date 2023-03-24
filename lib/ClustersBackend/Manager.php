@@ -21,12 +21,11 @@ declare(strict_types=1);
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\Memories\Manager;
+namespace OCA\Memories\ClustersBackend;
 
-use OCA\Memories\ClustersBackend\Backend;
 use OCP\IRequest;
 
-class ClustersBackendManager
+class Manager
 {
     /** Mapping of backend name to className */
     public static array $backends = [];

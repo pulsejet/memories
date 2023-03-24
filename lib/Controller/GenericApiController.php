@@ -24,8 +24,8 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\FsManager;
 use OCA\Memories\Db\TimelineQuery;
-use OCA\Memories\Manager\FsManager;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\Files\IRootFolder;

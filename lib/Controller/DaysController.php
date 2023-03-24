@@ -23,8 +23,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\ClustersBackend;
 use OCA\Memories\Exceptions;
-use OCA\Memories\Manager\ClustersBackendManager;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
@@ -146,7 +146,8 @@ class DaysController extends GenericApiController
         $transforms = [];
 
         // Add clustering transforms
-        $transforms = array_merge($transforms, ClustersBackendManager::getTransforms($this->request));
+        $clusterTs = ClustersBackend\Manager::getTransforms($this->request);
+        $transforms = array_merge($transforms, $clusterTs);
 
         // Other transforms not allowed for public shares
         if (!Util::isLoggedIn()) {

@@ -3,6 +3,7 @@
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\FsManager;
 use OCA\Memories\Db\TimelineQuery;
 use OCP\AppFramework\AuthPublicShareController;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
@@ -98,7 +99,7 @@ class PublicController extends AuthPublicShareController
             throw new NotFoundException();
         }
 
-        if (!\OCA\Memories\Manager\FsManager::validateShare($share)) {
+        if (!FsManager::validateShare($share)) {
             throw new NotFoundException();
         }
 

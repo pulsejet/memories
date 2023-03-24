@@ -36,8 +36,7 @@ class TimelineQuery
     {
         if (null === $this->_root) {
             $this->_root = new TimelineRoot();
-            $fsManager = \OC::$server->get(\OCA\Memories\Manager\FsManager::class);
-            $fsManager->populateRoot($this->_root);
+            \OC::$server->get(FsManager::class)->populateRoot($this->_root);
         }
 
         return $this->_root;

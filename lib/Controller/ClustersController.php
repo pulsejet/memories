@@ -23,9 +23,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
-use OCA\Memories\ClustersBackend\Backend;
+use OCA\Memories\ClustersBackend;
 use OCA\Memories\Exceptions;
-use OCA\Memories\Manager\ClustersBackendManager;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataDisplayResponse;
@@ -34,7 +33,7 @@ use OCP\AppFramework\Http\JSONResponse;
 class ClustersController extends GenericApiController
 {
     /** Current backend for this instance */
-    protected Backend $backend;
+    protected ClustersBackend\Backend $backend;
 
     /**
      * @NoAdminRequired
@@ -112,7 +111,7 @@ class ClustersController extends GenericApiController
     {
         Util::getUser();
 
-        $this->backend = ClustersBackendManager::get($backend);
+        $this->backend = ClustersBackend\Manager::get($backend);
 
         if (!$this->backend->isEnabled()) {
             throw Exceptions::NotEnabled($this->backend->appName());
