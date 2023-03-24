@@ -86,5 +86,7 @@
     "**/.vscode": true,
     "**/patches": true
   },
-  "git.alwaysSignOff": true
+  "git.alwaysSignOff": true,
+  "intelephense.environment.documentRoot": "/var/www/html",
+  "editor.formatOnSave": true
 }
