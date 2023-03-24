@@ -2,14 +2,15 @@
   <div v-if="noParams" class="container" :class="{ 'icon-loading': loading }">
     <TopMatter />
 
-    <EmptyContent v-if="items.length === 0 && !loading" />
+    <EmptyContent v-if="!items.length && !loading" />
 
     <RecycleScroller
+      ref="recycler"
       class="grid-recycler hide-scrollbar-mobile"
       :class="{ empty: !items.length }"
-      ref="recycler"
       :items="items"
       :skipHover="true"
+      :buffer="400"
       :itemSize="itemSize"
       :gridItems="gridItems"
       :updateInterval="100"
