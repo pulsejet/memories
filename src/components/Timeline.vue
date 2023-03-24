@@ -4,13 +4,13 @@
     <TopMatter ref="topmatter" />
 
     <!-- No content found and nothing is loading -->
-    <EmptyContent v-if="!loading && !list.length" />
+    <EmptyContent v-if="!loading && empty" />
 
     <!-- Main recycler view for rows -->
     <RecycleScroller
       ref="recycler"
       class="recycler hide-scrollbar"
-      :class="{ empty: !list.length }"
+      :class="{ empty }"
       :items="list"
       :emit-update="true"
       :buffer="800"
@@ -257,9 +257,15 @@ export default defineComponent({
         (this.config_sortFolderMonth && this.$route.name === "folders")
       );
     },
+
     /** Get view name for dynamic top matter */
     viewName(): string {
       return strings.viewName(this.$route.name);
+    },
+
+    /** Nothing to show here */
+    empty(): boolean {
+      return !this.list.length && !this.routeIsFolders;
     },
   },
 
