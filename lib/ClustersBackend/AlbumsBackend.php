@@ -26,7 +26,6 @@ namespace OCA\Memories\ClustersBackend;
 use OCA\Memories\Db\AlbumsQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
-use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
 
 class AlbumsBackend extends Backend
@@ -57,7 +56,7 @@ class AlbumsBackend extends Backend
         return explode('/', $name)[1];
     }
 
-    public function transformDays(IQueryBuilder &$query, bool $aggregate): void
+    public function transformDayQuery(&$query, bool $aggregate): void
     {
         $albumId = (string) $this->request->getParam('albums');
 

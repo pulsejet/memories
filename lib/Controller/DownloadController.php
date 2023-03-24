@@ -129,9 +129,6 @@ class DownloadController extends GenericApiController
     {
         return Util::guardEx(function () use ($fileid) {
             $file = $this->fs->getUserFile($fileid);
-            if (null === $file) {
-                return Exceptions::NotFoundFile($fileid);
-            }
 
             // Get the owner's root folder
             $owner = $file->getOwner()->getUID();
@@ -216,9 +213,6 @@ class DownloadController extends GenericApiController
             try {
                 // This checks permissions
                 $file = $this->fs->getUserFile($fileId);
-                if (null === $file) {
-                    throw new \Exception('File not found');
-                }
                 $name = $file->getName();
 
                 // Open file

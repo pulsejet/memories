@@ -25,6 +25,7 @@ namespace OCA\Memories\Manager;
 
 use OCA\Memories\Db\AlbumsQuery;
 use OCA\Memories\Db\TimelineRoot;
+use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
 use OCA\Memories\Util;
 use OCP\Files\File;
@@ -121,8 +122,23 @@ class FsManager
 
     /**
      * Get a file with ID for the current user.
+     *
+     * @throws Exceptions\NotFoundFile
      */
-    public function getUserFile(int $fileId): ?File
+    public function getUserFile(int $fileId): File
+    {
+        $file = $this->getUserFileOrNull($fileId);
+        if (null === $file) {
+            throw Exceptions::NotFoundFile($fileId);
+        }
+
+        return $file;
+    }
+
+    /**
+     * Get a file with ID for the current user.
+     */
+    public function getUserFileOrNull(int $fileId): ?File
     {
         // Don't check self for share token
         if ($this->getShareToken()) {

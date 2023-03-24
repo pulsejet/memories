@@ -44,13 +44,16 @@ abstract class Backend
 
     /**
      * Apply query transformations for days query.
+     *
+     * @param IQueryBuilder $query     Query builder
+     * @param bool          $aggregate Whether this is an aggregate query
      */
-    abstract public function transformDays(IQueryBuilder &$query, bool $aggregate): void;
+    abstract public function transformDayQuery(&$query, bool $aggregate): void;
 
     /**
-     * Apply post-query transformations for the given day object.
+     * Apply post-query transformations for the given photo object.
      */
-    public function transformDayPhoto(array &$row): void
+    public function transformDayPost(array &$row): void
     {
     }
 
@@ -94,7 +97,7 @@ abstract class Backend
             if ($request->getParam($backendName)) {
                 $backend = self::get($backendName);
                 if ($backend->isEnabled()) {
-                    $transforms[] = [$backend, 'transformDays'];
+                    $transforms[] = [$backend, 'transformDayQuery'];
                 }
             }
         }
@@ -111,7 +114,7 @@ abstract class Backend
             if ($request->getParam($backendName)) {
                 $backend = self::get($backendName);
                 if ($backend->isEnabled()) {
-                    $backend->transformDayPhoto($row);
+                    $backend->transformDayPost($row);
                 }
             }
         }
@@ -159,7 +162,7 @@ abstract class Backend
      * @param \OCP\Files\SimpleFS\ISimpleFile $file  Preview file
      * @param array                           $photo Photo object
      *
-     * @return [Blob, mimetype] of data
+     * @return array [Blob, mimetype] of data
      */
     public function getPreviewBlob($file, $photo): array
     {

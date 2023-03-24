@@ -25,7 +25,6 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
-use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IConfig;
 use OCP\IRequest;
 
@@ -58,7 +57,7 @@ class FaceRecognitionBackend extends Backend
                && Util::facerecognitionIsEnabled();
     }
 
-    public function transformDays(IQueryBuilder &$query, bool $aggregate): void
+    public function transformDayQuery(&$query, bool $aggregate): void
     {
         $personStr = (string) $this->request->getParam('facerecognition');
 
@@ -78,12 +77,7 @@ class FaceRecognitionBackend extends Backend
         ));
 
         // Join with faces
-        $query->innerJoin(
-            'fri',
-            'facerecog_faces',
-            'frf',
-            $query->expr()->eq('frf.image', 'fri.id')
-        );
+        $query->innerJoin('fri', 'facerecog_faces', 'frf', $query->expr()->eq('frf.image', 'fri.id'));
 
         // Join with persons
         $nameField = is_numeric($personName) ? 'frp.id' : 'frp.name';
@@ -106,7 +100,7 @@ class FaceRecognitionBackend extends Backend
         }
     }
 
-    public function transformDayPhoto(array &$row): void
+    public function transformDayPost(array &$row): void
     {
         // Differentiate Recognize queries from Face Recognition
         if (!isset($row) || !isset($row['face_width']) || !isset($row['image_width'])) {
@@ -168,13 +162,10 @@ class FaceRecognitionBackend extends Backend
         $query->innerJoin('fri', 'memories', 'm', $query->expr()->eq('m.fileid', 'fri.file'));
 
         $query->innerJoin('frf', 'facerecog_persons', 'frp', $query->expr()->eq('frp.id', 'frf.person'));
-        if (is_numeric($name)) {
-            // WHERE faces are from id persons (a cluster).
-            $query->where($query->expr()->eq('frp.id', $query->createNamedParameter($name)));
-        } else {
-            // WHERE faces are from name on persons.
-            $query->where($query->expr()->eq('frp.name', $query->createNamedParameter($name)));
-        }
+
+        // WHERE faces are from id persons (or a cluster).
+        $nameField = is_numeric($name) ? 'frp.id' : 'frp.name';
+        $query->where($query->expr()->eq($nameField, $query->createNamedParameter($name)));
 
         // WHERE these photos are in the user's requested folder recursively
         $query = $this->tq->joinFilecache($query);

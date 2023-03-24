@@ -57,9 +57,6 @@ class VideoController extends GenericApiController
 
             // Get file
             $file = $this->fs->getUserFile($fileid);
-            if (!$file || !$file->isReadable()) {
-                throw Exceptions::NotFoundFile($fileid);
-            }
 
             // Local files only for now
             if (!$file->getStorage()->isLocal()) {
@@ -117,9 +114,6 @@ class VideoController extends GenericApiController
     ) {
         return Util::guardEx(function () use ($fileid, $liveid, $format, $transcode) {
             $file = $this->fs->getUserFile($fileid);
-            if (null === $file) {
-                throw Exceptions::NotFoundFile($fileid);
-            }
 
             // Check file liveid
             if (!$liveid) {

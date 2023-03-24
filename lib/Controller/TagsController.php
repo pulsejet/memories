@@ -45,9 +45,6 @@ class TagsController extends GenericApiController
 
             // Check the user is allowed to edit the file
             $file = $this->fs->getUserFile($id);
-            if (null === $file) {
-                throw Exceptions::NotFoundFile($id);
-            }
 
             // Check the user is allowed to edit the file
             if (!$file->isUpdateable() || !($file->getPermissions() & \OCP\Constants::PERMISSION_UPDATE)) {

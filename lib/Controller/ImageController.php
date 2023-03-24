@@ -56,10 +56,6 @@ class ImageController extends GenericApiController
             }
 
             $file = $this->fs->getUserFile($id);
-            if (!$file) {
-                throw Exceptions::NotFoundFile($id);
-            }
-
             $preview = \OC::$server->get(\OCP\IPreview::class)->getPreview($file, $x, $y, !$a, $mode);
             $response = new FileDisplayResponse($preview, Http::STATUS_OK, [
                 'Content-Type' => $preview->getMimeType(),
@@ -113,13 +109,9 @@ class ImageController extends GenericApiController
                     continue;
                 }
 
-                $file = $this->fs->getUserFile($fileid);
-                if (!$file) {
-                    continue;
-                }
-
                 try {
                     // Make sure max preview exists
+                    $file = $this->fs->getUserFile($fileid);
                     $fileId = (string) $file->getId();
                     $folder = $previewRoot->getFolder($fileId);
                     $hasMax = false;
@@ -179,9 +171,6 @@ class ImageController extends GenericApiController
     ): Http\Response {
         return Util::guardEx(function () use ($id, $basic, $current, $tags) {
             $file = $this->fs->getUserFile((int) $id);
-            if (!$file) {
-                throw Exceptions::NotFoundFile($id);
-            }
 
             // Get the image info
             $info = $this->timelineQuery->getInfoById($file->getId(), $basic);
@@ -223,9 +212,6 @@ class ImageController extends GenericApiController
     {
         return Util::guardEx(function () use ($id, $raw) {
             $file = $this->fs->getUserFile((int) $id);
-            if (!$file) {
-                throw Exceptions::NotFoundFile($id);
-            }
 
             // Check if user has permissions
             if (!$file->isUpdateable() || Util::isEncryptionEnabled()) {
@@ -262,9 +248,6 @@ class ImageController extends GenericApiController
     {
         return Util::guardEx(function () use ($id) {
             $file = $this->fs->getUserFile((int) $id);
-            if (!$file) {
-                throw Exceptions::NotFoundFile($id);
-            }
 
             // Check if valid image
             $mimetype = $file->getMimeType();

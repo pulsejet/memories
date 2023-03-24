@@ -25,7 +25,6 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
-use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
 
 class RecognizeBackend extends Backend
@@ -51,7 +50,7 @@ class RecognizeBackend extends Backend
         return Util::recognizeIsEnabled();
     }
 
-    public function transformDays(IQueryBuilder &$query, bool $aggregate): void
+    public function transformDayQuery(&$query, bool $aggregate): void
     {
         $faceStr = (string) $this->request->getParam('recognize');
 
@@ -103,7 +102,7 @@ class RecognizeBackend extends Backend
         ));
     }
 
-    public function transformDayPhoto(array &$row): void
+    public function transformDayPost(array &$row): void
     {
         // Differentiate Recognize queries from Face Recognition
         if (!isset($row) || !isset($row['face_w'])) {
