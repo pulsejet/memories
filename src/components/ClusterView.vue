@@ -4,25 +4,7 @@
 
     <EmptyContent v-if="!items.length && !loading" />
 
-    <RecycleScroller
-      ref="recycler"
-      class="grid-recycler hide-scrollbar-mobile"
-      :class="{ empty: !items.length }"
-      :items="items"
-      :skipHover="true"
-      :buffer="400"
-      :itemSize="itemSize"
-      :gridItems="gridItems"
-      :updateInterval="100"
-      key-field="cluster_id"
-      @resize="resize"
-    >
-      <template v-slot="{ item }">
-        <div class="grid-item fill-block">
-          <Cluster :data="item" @click="click(item)" :link="link" />
-        </div>
-      </template>
-    </RecycleScroller>
+    <ClusterGrid :items="items" />
   </div>
 
   <Timeline v-else />
@@ -33,7 +15,7 @@ import { defineComponent } from "vue";
 
 import UserConfig from "../mixins/UserConfig";
 import TopMatter from "./top-matter/TopMatter.vue";
-import Cluster from "./frame/Cluster.vue";
+import ClusterGrid from "./ClusterGrid.vue";
 import Timeline from "./Timeline.vue";
 import EmptyContent from "./top-matter/EmptyContent.vue";
 
@@ -46,7 +28,7 @@ export default defineComponent({
 
   components: {
     TopMatter,
-    Cluster,
+    ClusterGrid,
     Timeline,
     EmptyContent,
   },
@@ -55,17 +37,8 @@ export default defineComponent({
 
   data: () => ({
     items: [] as ICluster[],
-    itemSize: 200,
-    gridItems: 5,
     loading: 0,
   }),
-
-  props: {
-    link: {
-      type: Boolean,
-      default: true,
-    },
-  },
 
   computed: {
     noParams() {
@@ -74,44 +47,34 @@ export default defineComponent({
   },
 
   mounted() {
-    this.routeChange(this.$route);
-    this.resize();
+    this.routeChange();
   },
 
   watch: {
-    async $route(to: any, from?: any) {
-      this.routeChange(to, from);
+    async $route() {
+      this.routeChange();
     },
   },
 
   methods: {
-    async routeChange(to: any, from?: any) {
+    async routeChange() {
       try {
+        const route = this.$route.name;
         this.items = [];
         this.loading++;
 
-        if (to.name === "albums") {
+        if (route === "albums") {
           this.items = await dav.getAlbums(3, this.config_albumListSort);
-        } else if (to.name === "tags") {
+        } else if (route === "tags") {
           this.items = await dav.getTags();
-        } else if (to.name === "recognize" || to.name === "facerecognition") {
-          this.items = await dav.getFaceList(to.name);
-        } else if (to.name === "places") {
+        } else if (route === "recognize" || route === "facerecognition") {
+          this.items = await dav.getFaceList(route);
+        } else if (route === "places") {
           this.items = await dav.getPlaces();
         }
       } finally {
         this.loading--;
       }
-    },
-
-    click(item: ICluster) {
-      this.$emit("click", item);
-    },
-
-    resize() {
-      const w = (<any>this.$refs.recycler).$el.clientWidth;
-      this.gridItems = Math.max(Math.floor(w / 200), 3);
-      this.itemSize = Math.floor(w / this.gridItems);
     },
   },
 });
@@ -123,16 +86,5 @@ export default defineComponent({
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-.grid-recycler {
-  flex: 1;
-  max-height: 100%;
-  overflow-y: scroll !important;
-  &.empty {
-    visibility: hidden;
-  }
-}
-.grid-item {
-  position: relative;
 }
 </style>
