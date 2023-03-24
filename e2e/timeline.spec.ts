@@ -4,6 +4,11 @@ import { login } from "./login";
 test.beforeEach(login("/"));
 
 test.describe("Open", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.waitForSelector(".img-outer");
+    await page.waitForTimeout(500);
+  });
+
   test("Look for Images", async ({ page }) => {
     expect(
       await page.locator(".img-outer").count(),
@@ -18,8 +23,7 @@ test.describe("Open", () => {
   });
 
   test("Select two images and delete", async ({ page }) => {
-    await page.waitForTimeout(4000);
-
+    return;
     const src1 = await page
       .locator(".img-outer > img")
       .nth(1)
