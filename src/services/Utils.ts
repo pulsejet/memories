@@ -208,10 +208,6 @@ export function convertFlags(photo: IPhoto) {
     photo.flag |= constants.c.FLAG_IS_FAVORITE;
     delete photo.isfavorite;
   }
-  if (photo.isfolder) {
-    photo.flag |= constants.c.FLAG_IS_FOLDER;
-    delete photo.isfolder;
-  }
 }
 
 /**
@@ -287,15 +283,6 @@ export function setRenewingTimeout(
   }, delay);
 }
 
-// Outside for set
-const TagDayID = {
-  START: -(1 << 30),
-  FOLDERS: -(1 << 30) + 1,
-  TAGS: -(1 << 30) + 2,
-  FACES: -(1 << 30) + 3,
-  ALBUMS: -(1 << 30) + 4,
-};
-
 /** Global constants */
 export const constants = {
   c: {
@@ -303,13 +290,9 @@ export const constants = {
     FLAG_LOAD_FAIL: 1 << 1,
     FLAG_IS_VIDEO: 1 << 2,
     FLAG_IS_FAVORITE: 1 << 3,
-    FLAG_IS_FOLDER: 1 << 4,
-    FLAG_SELECTED: 1 << 5,
-    FLAG_LEAVING: 1 << 6,
+    FLAG_SELECTED: 1 << 4,
+    FLAG_LEAVING: 1 << 5,
   },
-
-  TagDayID: TagDayID,
-  TagDayIDValueSet: new Set(Object.values(TagDayID)),
 };
 
 /** Cache store */

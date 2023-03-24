@@ -242,24 +242,18 @@ export default defineComponent({
       // Iterate over rows
       for (const row of this.rows) {
         if (row.type === IRowType.HEAD) {
+          // Make date string
+          const dateTaken = utils.dayIdToDate(row.dayId);
+
           // Create tick
-          if (this.TagDayIDValueSet.has(row.dayId)) {
-            // Blank tick
-            this.ticks.push(getTick(row.dayId));
-          } else {
-            // Make date string
-            const dateTaken = utils.dayIdToDate(row.dayId);
+          const dtYear = dateTaken.getUTCFullYear();
+          const dtMonth = dateTaken.getUTCMonth();
+          const isMonth = dtMonth !== prevMonth || dtYear !== prevYear;
+          const text = dtYear === prevYear ? undefined : dtYear;
+          this.ticks.push(getTick(row.dayId, isMonth, text));
 
-            // Create tick
-            const dtYear = dateTaken.getUTCFullYear();
-            const dtMonth = dateTaken.getUTCMonth();
-            const isMonth = dtMonth !== prevMonth || dtYear !== prevYear;
-            const text = dtYear === prevYear ? undefined : dtYear;
-            this.ticks.push(getTick(row.dayId, isMonth, text));
-
-            prevMonth = dtMonth;
-            prevYear = dtYear;
-          }
+          prevMonth = dtMonth;
+          prevYear = dtYear;
         }
       }
     },
@@ -417,7 +411,7 @@ export default defineComponent({
       const dayId = this.ticks[idx]?.dayId;
 
       // Special days
-      if (dayId === undefined || this.TagDayIDValueSet.has(dayId)) {
+      if (dayId === undefined) {
         this.hoverCursorText = "";
         return;
       }
@@ -538,6 +532,7 @@ export default defineComponent({
   width: 36px;
   top: 0;
   right: 0;
+  z-index: 100;
   cursor: ns-resize;
   opacity: 0;
   transition: opacity 0.2s ease-in-out;

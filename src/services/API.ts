@@ -70,6 +70,10 @@ export class API {
     query[filter] = value;
   }
 
+  static FOLDERS_SUB() {
+    return tok(gen(`${BASE}/folders/sub`));
+  }
+
   static ALBUM_LIST(t: 1 | 2 | 3 = 3) {
     return gen(`${BASE}/clusters/albums?t=${t}`);
   }

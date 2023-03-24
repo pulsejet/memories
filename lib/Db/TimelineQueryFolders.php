@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCP\Files\Folder;
+use OCP\Files\FileInfo;
 use OCP\IDBConnection;
 
 trait TimelineQueryFolders
 {
     protected IDBConnection $connection;
 
-    public function getFolderPreviews(Folder &$folder)
+    public function getFolderPreviews(FileInfo $folder)
     {
         $query = $this->connection->getQueryBuilder();
 

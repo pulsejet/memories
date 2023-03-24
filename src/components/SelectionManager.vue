@@ -526,10 +526,7 @@ export default defineComponent({
 
     /** Add a photo to selection list */
     selectPhoto(photo: IPhoto, val?: boolean, noUpdate?: boolean) {
-      if (
-        photo.flag & this.c.FLAG_PLACEHOLDER ||
-        photo.flag & this.c.FLAG_IS_FOLDER
-      ) {
+      if (photo.flag & this.c.FLAG_PLACEHOLDER) {
         return; // ignore placeholders
       }
 

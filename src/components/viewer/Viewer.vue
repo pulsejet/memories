@@ -631,8 +631,6 @@ export default defineComponent({
       // Get days list and map
       for (const r of rows) {
         if (r.type === IRowType.HEAD) {
-          if (this.TagDayIDValueSet.has(r.dayId)) continue;
-
           if (r.day.dayid == anchorPhoto.d.dayid) {
             startIndex = r.day.detail.indexOf(anchorPhoto);
             this.globalAnchor = this.globalCount;

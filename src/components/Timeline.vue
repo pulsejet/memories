@@ -36,6 +36,11 @@
             @load="scrollerManager.adjust()"
           >
           </OnThisDay>
+
+          <FolderGrid
+            v-if="routeIsFolders && !$route.query.recursive"
+            @load="scrollerManager.adjust()"
+          />
         </div>
       </template>
 
@@ -67,10 +72,7 @@
               transform: `translate(${photo.dispX}px, ${photo.dispY}px`,
             }"
           >
-            <Folder v-if="photo.flag & c.FLAG_IS_FOLDER" :data="photo" />
-
             <Photo
-              v-else
               :data="photo"
               :day="item.day"
               @select="selectionManager.selectPhoto"
@@ -123,10 +125,10 @@ import { showError } from "@nextcloud/dialogs";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 
 import { getLayout } from "../services/Layout";
-import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";
+import { IDay, IHeadRow, IPhoto, IRow, IRowType } from "../types";
 
 import UserConfig from "../mixins/UserConfig";
-import Folder from "./frame/Folder.vue";
+import FolderGrid from "./FolderGrid.vue";
 import Photo from "./frame/Photo.vue";
 import ScrollerManager from "./ScrollerManager.vue";
 import SelectionManager from "./SelectionManager.vue";
@@ -151,7 +153,7 @@ export default defineComponent({
   name: "Timeline",
 
   components: {
-    Folder,
+    FolderGrid,
     Photo,
     EmptyContent,
     OnThisDay,
@@ -243,6 +245,9 @@ export default defineComponent({
     },
     routeIsArchive(): boolean {
       return this.$route.name === "archive";
+    },
+    routeIsFolders(): boolean {
+      return this.$route.name === "folders";
     },
     isMonthView(): boolean {
       if (this.$route.query.sort === "timeline") return false;
@@ -635,11 +640,6 @@ export default defineComponent({
         return head.name;
       }
 
-      // Special headers
-      if (this.TagDayIDValueSet.has(head.dayId)) {
-        return (head.name = "");
-      }
-
       // Make date string
       // The reason this function is separate from processDays is
       // because this call is terribly slow even on desktop
@@ -756,9 +756,7 @@ export default defineComponent({
         };
 
         // Special headers
-        if (this.TagDayIDValueSet.has(day.dayid)) {
-          head.size = 10;
-        } else if (
+        if (
           this.$route.name === "thisday" &&
           (!prevDay || Math.abs(prevDay.dayid - day.dayid) > 30)
         ) {
@@ -939,19 +937,6 @@ export default defineComponent({
       // Convert server flags to bitflags
       data.forEach(utils.convertFlags);
 
-      // Filter out items we don't want to show at all
-      if (!this.config_showHidden && dayId === this.TagDayID.FOLDERS) {
-        // Hidden folders and folders without previews
-        data = data.filter(
-          (p) =>
-            !(
-              p.flag & this.c.FLAG_IS_FOLDER &&
-              ((<IFolder>p).name.startsWith(".") ||
-                !(<IFolder>p).previews.length)
-            )
-        );
-      }
-
       // Set and make reactive
       day.count = data.length;
       day.detail = data;
@@ -970,7 +955,7 @@ export default defineComponent({
           return {
             width: p.w || this.rowHeight,
             height: p.h || this.rowHeight,
-            forceSquare: Boolean(p.flag & this.c.FLAG_IS_FOLDER),
+            forceSquare: false,
           };
         }),
         {
@@ -1167,17 +1152,12 @@ export default defineComponent({
 
     /** Add and get a new blank photos row */
     addRow(day: IDay): IRow {
-      let rowType = IRowType.PHOTOS;
-      if (day.dayid === this.TagDayID.FOLDERS) {
-        rowType = IRowType.FOLDERS;
-      }
-
       // Create new row
       const row = {
         id: `${day.dayid}-${day.rows.length}`,
         num: day.rows.length,
         photos: [],
-        type: rowType,
+        type: IRowType.PHOTOS,
         size: this.rowHeight,
         dayId: day.dayid,
         day: day,

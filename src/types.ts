@@ -71,16 +71,6 @@ export type IPhoto = {
   video_duration?: number;
   /** Favorite flag from server */
   isfavorite?: boolean;
-  /** Is this a folder */
-  isfolder?: boolean;
-  /** Is this a tag */
-  istag?: boolean;
-  /** Is this an album */
-  isalbum?: boolean;
-  /** Is this a face */
-  isface?: "recognize" | "facerecognition";
-  /** Is this a place */
-  isplace?: boolean;
   /** Optional datetaken epoch */
   datetaken?: number;
 };
@@ -196,7 +186,6 @@ export type IHeadRow = IRow & {
 export enum IRowType {
   HEAD = 0,
   PHOTOS = 1,
-  FOLDERS = 2,
 }
 
 export type ITick = {

@@ -31,8 +31,6 @@ use OCP\AppFramework\Http\JSONResponse;
 
 class DaysController extends GenericApiController
 {
-    use FoldersTrait;
-
     /**
      * @NoAdminRequired
      *
@@ -58,12 +56,6 @@ class DaysController extends GenericApiController
             // Reverse response if requested. Folders still stay at top.
             if ($this->isReverse()) {
                 $list = array_reverse($list);
-            }
-
-            // Add subfolder info if querying non-recursively
-            if (!$this->isRecursive()) {
-                $root = $this->timelineQuery->root();
-                array_unshift($list, $this->getSubfoldersEntry($root->getFolder($root->getOneId())));
             }
 
             return new JSONResponse($list, Http::STATUS_OK);

@@ -51,6 +51,7 @@ return [
         ['name' => 'Days#days', 'url' => '/api/days', 'verb' => 'GET'],
         ['name' => 'Days#day', 'url' => '/api/days/{id}', 'verb' => 'GET'],
         ['name' => 'Days#dayPost', 'url' => '/api/days', 'verb' => 'POST'],
+        ['name' => 'Folders#sub', 'url' => '/api/folders/sub', 'verb' => 'GET'],
 
         ['name' => 'Clusters#list', 'url' => '/api/clusters/{backend}', 'verb' => 'GET'],
         ['name' => 'Clusters#preview', 'url' => '/api/clusters/{backend}/preview/{name}', 'verb' => 'GET'],

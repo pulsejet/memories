@@ -8,8 +8,6 @@ declare module "vue" {
     n: typeof n;
 
     c: typeof constants.c;
-    TagDayID: typeof constants.TagDayID;
-    TagDayIDValueSet: typeof constants.TagDayIDValueSet;
 
     state_noDownload: boolean;
 
