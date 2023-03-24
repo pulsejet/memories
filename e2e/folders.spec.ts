@@ -12,6 +12,7 @@ test.describe("Open", () => {
   test("Open folder", async ({ page }) => {
     await page.locator("text=Local").click();
     await page.waitForTimeout(2000);
-    await page.waitForSelector("img.ximg");
+    const elems = await page.locator(".img-outer").all();
+    expect(elems.length).toBeGreaterThanOrEqual(3);
   });
 });
