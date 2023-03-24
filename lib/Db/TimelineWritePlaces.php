@@ -65,10 +65,11 @@ trait TimelineWritePlaces
         $sql = str_replace('*PREFIX*memories_planet_geometry', 'memories_planet_geometry', $query->getSQL());
 
         // Run query
-        $result = $this->connection->executeQuery($sql);
-        $rows = $result->fetchAll();
+        $rows = $this->connection->executeQuery($sql)->fetchAll();
 
-        // Insert records
+        // Insert records in transaction
+        $this->connection->beginTransaction();
+
         foreach ($rows as $row) {
             $query = $this->connection->getQueryBuilder();
             $query->insert('memories_places')
@@ -79,5 +80,7 @@ trait TimelineWritePlaces
             ;
             $query->executeStatement();
         }
+
+        $this->connection->commit();
     }
 }

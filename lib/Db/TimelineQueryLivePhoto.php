@@ -16,10 +16,7 @@ trait TimelineQueryLivePhoto
                 $qb->expr()->eq('lp.liveid', 'm.liveid'),
             ))
         ;
-        $result = $qb->executeQuery();
-        $row = $result->fetch();
-        $result->closeCursor();
 
-        return $row;
+        return $qb->executeQuery()->fetch();
     }
 }

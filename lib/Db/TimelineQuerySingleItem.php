@@ -40,9 +40,7 @@ trait TimelineQuerySingleItem
             $qb->addSelect('exif');
         }
 
-        $result = $qb->executeQuery();
-        $row = $result->fetch();
-        $result->closeCursor();
+        $row = $qb->executeQuery()->fetch();
 
         $utcTs = 0;
 

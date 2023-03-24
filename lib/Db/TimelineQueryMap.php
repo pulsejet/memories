@@ -62,9 +62,7 @@ trait TimelineQueryMap
         $this->transformMapBoundsFilter($query, false, $bounds, 'c');
 
         // Execute query
-        $cursor = $this->executeQueryWithCTEs($query);
-        $res = $cursor->fetchAll();
-        $cursor->closeCursor();
+        $res = $this->executeQueryWithCTEs($query)->fetchAll();
 
         // Post-process results
         $clusters = [];
