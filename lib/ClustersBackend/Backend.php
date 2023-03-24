@@ -31,12 +31,12 @@ abstract class Backend
      * A human-readable name for the app.
      * Used for error messages.
      */
-    abstract static public function appName(): string;
+    abstract public static function appName(): string;
 
     /**
      * Get name of the cluster type.
      */
-    abstract static public function clusterType(): string;
+    abstract public static function clusterType(): string;
 
     /**
      * Whether the app is enabled for the current user.
@@ -66,7 +66,7 @@ abstract class Backend
     /**
      * Get a cluster ID for the given cluster.
      */
-    abstract static public function getClusterId(array $cluster);
+    abstract public static function getClusterId(array $cluster);
 
     /**
      * Get a list of photos with any extra parameters for the given cluster
