@@ -75,6 +75,7 @@ export default defineComponent({
   flex: 1;
   max-height: 100%;
   overflow-y: scroll !important;
+  margin: 1px;
   &.empty {
     visibility: hidden;
   }
