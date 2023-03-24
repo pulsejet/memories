@@ -47,10 +47,10 @@
       <template v-slot="{ item, index }">
         <div
           v-if="item.type === 0"
-          class="head-row"
-          :class="{ selected: item.selected }"
-          :style="{ height: item.size + 'px' }"
           :key="item.id"
+          :style="{ height: `${item.size}px` }"
+          :class="{ selected: item.selected }"
+          class="head-row"
         >
           <div class="super" v-if="item.super !== undefined">
             {{ item.super }}
@@ -61,30 +61,27 @@
           </div>
         </div>
 
-        <template v-else>
-          <div
-            class="photo"
-            v-for="photo of item.photos"
-            :key="photo.key"
-            :style="{
-              height: photo.dispH + 'px',
-              width: photo.dispW + 'px',
-              transform: `translate(${photo.dispX}px, ${photo.dispY}px`,
-            }"
-          >
-            <Photo
-              :data="photo"
-              :day="item.day"
-              @select="selectionManager.selectPhoto"
-              @pointerdown="selectionManager.clickPhoto(photo, $event, index)"
-              @touchstart="
-                selectionManager.touchstartPhoto(photo, $event, index)
-              "
-              @touchend="selectionManager.touchendPhoto(photo, $event, index)"
-              @touchmove="selectionManager.touchmovePhoto(photo, $event, index)"
-            />
-          </div>
-        </template>
+        <div
+          v-else
+          v-for="photo of item.photos"
+          :key="photo.key"
+          :style="{
+            height: `${photo.dispH}px`,
+            width: `${photo.dispW}px`,
+            transform: `translate(${photo.dispX}px, ${photo.dispY}px`,
+          }"
+          class="photo"
+        >
+          <Photo
+            :data="photo"
+            :day="item.day"
+            @select="selectionManager.selectPhoto"
+            @pointerdown="selectionManager.clickPhoto(photo, $event, index)"
+            @touchstart="selectionManager.touchstartPhoto(photo, $event, index)"
+            @touchend="selectionManager.touchendPhoto(photo, $event, index)"
+            @touchmove="selectionManager.touchmovePhoto(photo, $event, index)"
+          />
+        </div>
       </template>
     </RecycleScroller>
 
