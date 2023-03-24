@@ -17,6 +17,24 @@ function tok(url: string) {
   return url;
 }
 
+export enum DaysFilterType {
+  FAVORITES = "fav",
+  VIDEOS = "vid",
+  FOLDER = "folder",
+  ARCHIVE = "archive",
+  ALBUM = "albums",
+  RECOGNIZE = "recognize",
+  FACERECOGNITION = "facerecognition",
+  PLACE = "places",
+  TAG = "tags",
+  MAP_BOUNDS = "mapbounds",
+
+  FACE_RECT = "facerect",
+  RECURSIVE = "recursive",
+  MONTH_VIEW = "monthView",
+  REVERSE = "reverse",
+}
+
 export class API {
   static Q(
     url: string,
@@ -45,6 +63,10 @@ export class API {
 
   static DAY(id: number | string) {
     return tok(gen(`${BASE}/days/{id}`, { id }));
+  }
+
+  static DAYS_FILTER(query: any, filter: DaysFilterType, value: string = '1') {
+    query[filter] = value;
   }
 
   static ALBUM_LIST(t: 1 | 2 | 3 = 3) {

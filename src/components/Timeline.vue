@@ -159,7 +159,7 @@ import PeopleIcon from "vue-material-design-icons/AccountMultiple.vue";
 import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
 import ImageMultipleIcon from "vue-material-design-icons/ImageMultiple.vue";
 import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
-import { API } from "../services/API";
+import { API, DaysFilterType } from "../services/API";
 
 const SCROLL_LOAD_DELAY = 100; // Delay in loading data when scrolling
 const DESKTOP_ROW_HEIGHT = 200; // Height of row on desktop
@@ -624,75 +624,70 @@ export default defineComponent({
 
     /** Get query string for API calls */
     getQuery() {
-      const query = new URLSearchParams();
+      const query: { [key: string]: string } = {};
 
       // Favorites
       if (this.$route.name === "favorites") {
-        query.set("fav", "1");
+        API.DAYS_FILTER(query, DaysFilterType.FAVORITES);
       }
 
       // Videos
       if (this.$route.name === "videos") {
-        query.set("vid", "1");
+        API.DAYS_FILTER(query, DaysFilterType.VIDEOS);
       }
 
       // Folder
       if (this.$route.name === "folders") {
-        query.set("folder", utils.getFolderRoutePath(this.config_foldersPath));
+        const path = utils.getFolderRoutePath(this.config_foldersPath);
+        API.DAYS_FILTER(query, DaysFilterType.FOLDER, path);
         if (this.$route.query.recursive) {
-          query.set("recursive", "1");
+          API.DAYS_FILTER(query, DaysFilterType.RECURSIVE);
         }
       }
 
       // Archive
       if (this.$route.name === "archive") {
-        query.set("archive", "1");
+        API.DAYS_FILTER(query, DaysFilterType.ARCHIVE);
       }
 
       // Albums
-      if (this.$route.name === "albums" && this.$route.params.name) {
-        const user = <string>this.$route.params.user;
-        const name = <string>this.$route.params.name;
-        query.set("albums", `${user}/${name}`);
+      const user = <string>this.$route.params.user;
+      const name = <string>this.$route.params.name;
+      if (this.$route.name === "albums" && user && name) {
+        API.DAYS_FILTER(query, DaysFilterType.ALBUM, `${user}/${name}`);
       }
 
       // People
-      if (
-        this.routeIsPeople &&
-        this.$route.params.user &&
-        this.$route.params.name
-      ) {
-        query.set(
-          <string>this.$route.name, // "recognize" or "facerecognition"
-          `${this.$route.params.user}/${this.$route.params.name}`
-        );
+      if (this.routeIsPeople && user && name) {
+        const filter = <DaysFilterType>this.$route.name;
+        API.DAYS_FILTER(query, filter, `${user}/${name}`);
 
         // Face rect
         if (this.config_showFaceRect) {
-          query.set("facerect", "1");
+          API.DAYS_FILTER(query, DaysFilterType.FACE_RECT);
         }
       }
 
       // Places
-      if (this.$route.name === "places" && this.$route.params.name) {
-        const name = <string>this.$route.params.name;
-        query.set("places", <string>name.split("-", 1)[0]);
+      if (this.$route.name === "places" && name) {
+        const id = <string>name.split("-", 1)[0];
+        API.DAYS_FILTER(query, DaysFilterType.PLACE, id);
       }
 
       // Tags
-      if (this.$route.name === "tags" && this.$route.params.name) {
-        query.set("tags", <string>this.$route.params.name);
+      if (this.$route.name === "tags" && name) {
+        API.DAYS_FILTER(query, DaysFilterType.TAG, name);
       }
 
       // Map Bounds
       if (this.$route.name === "map" && this.$route.query.b) {
-        query.set("mapbounds", <string>this.$route.query.b);
+        API.DAYS_FILTER(query, DaysFilterType.MAP_BOUNDS, <string>this.$route.query.b);
       }
 
       // Month view
       if (this.isMonthView) {
-        query.set("monthView", "1");
-        query.set("reverse", "1");
+        API.DAYS_FILTER(query, DaysFilterType.MONTH_VIEW);
+        API.DAYS_FILTER(query, DaysFilterType.REVERSE);
       }
 
       return query;
