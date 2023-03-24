@@ -1,7 +1,7 @@
 <template>
-  <div class="top-matter" v-if="type">
+  <div class="top-matter-container" v-if="type">
     <FolderTopMatter v-if="type === 1" />
-    <TagTopMatter v-else-if="type === 2" />
+    <ClusterTopMatter v-else-if="type === 2" />
     <FaceTopMatter v-else-if="type === 3" />
     <AlbumTopMatter v-else-if="type === 4" />
   </div>
@@ -11,7 +11,7 @@
 import { defineComponent } from "vue";
 
 import FolderTopMatter from "./FolderTopMatter.vue";
-import TagTopMatter from "./TagTopMatter.vue";
+import ClusterTopMatter from "./ClusterTopMatter.vue";
 import FaceTopMatter from "./FaceTopMatter.vue";
 import AlbumTopMatter from "./AlbumTopMatter.vue";
 
@@ -21,7 +21,7 @@ export default defineComponent({
   name: "TopMatter",
   components: {
     FolderTopMatter,
-    TagTopMatter,
+    ClusterTopMatter,
     FaceTopMatter,
     AlbumTopMatter,
   },
@@ -47,21 +47,16 @@ export default defineComponent({
         switch (this.$route.name) {
           case "folders":
             return TopMatterType.FOLDER;
+          case "albums":
+            return TopMatterType.ALBUM;
           case "tags":
-            return this.$route.params.name
-              ? TopMatterType.TAG
-              : TopMatterType.NONE;
+          case "places":
+            return TopMatterType.CLUSTER;
           case "recognize":
           case "facerecognition":
             return this.$route.params.name
               ? TopMatterType.FACE
-              : TopMatterType.NONE;
-          case "albums":
-            return TopMatterType.ALBUM;
-          case "places":
-            return this.$route.params.name
-              ? TopMatterType.TAG
-              : TopMatterType.NONE;
+              : TopMatterType.CLUSTER;
           default:
             return TopMatterType.NONE;
         }
@@ -70,3 +65,46 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.top-matter-container {
+  padding-top: 4px;
+  @media (max-width: 768px) {
+    padding-left: 40px;
+  }
+
+  > div {
+    display: flex;
+    vertical-align: middle;
+  }
+
+  :deep .name {
+    font-size: 1.3em;
+    font-weight: 400;
+    line-height: 42px;
+    vertical-align: top;
+    flex-grow: 1;
+    padding-left: 10px;
+  }
+
+  :deep button + .name {
+    padding-left: 0;
+  }
+
+  :deep .right-actions {
+    margin-right: 40px;
+    z-index: 50;
+    @media (max-width: 768px) {
+      margin-right: 10px;
+    }
+
+    span {
+      cursor: pointer;
+    }
+  }
+
+  :deep button {
+    display: inline-block;
+  }
+}
+</style>

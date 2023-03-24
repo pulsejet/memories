@@ -8,22 +8,12 @@
     <TopMatter ref="topmatter" />
 
     <!-- No content found and nothing is loading -->
-    <NcEmptyContent
-      title="Nothing to show here"
-      :description="emptyViewDescription"
-      v-if="loading === 0 && list.length === 0"
-    >
-      <template #icon>
-        <PeopleIcon v-if="routeIsPeople" />
-        <ArchiveIcon v-else-if="routeIsArchive" />
-        <ImageMultipleIcon v-else />
-      </template>
-    </NcEmptyContent>
+    <EmptyContent v-if="loading === 0 && list.length === 0" />
 
     <!-- Main recycler view for rows -->
     <RecycleScroller
       ref="recycler"
-      class="recycler"
+      class="recycler hide-scrollbar"
       :class="{ empty: list.length === 0 }"
       :items="list"
       :emit-update="true"
@@ -83,8 +73,6 @@
           >
             <Folder v-if="photo.flag & c.FLAG_IS_FOLDER" :data="photo" />
 
-            <Tag v-else-if="photo.flag & c.FLAG_IS_TAG" :data="photo" />
-
             <Photo
               v-else
               :data="photo"
@@ -137,7 +125,6 @@ import { defineComponent } from "vue";
 import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
-import NcEmptyContent from "@nextcloud/vue/dist/Components/NcEmptyContent";
 
 import { getLayout } from "../services/Layout";
 import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";
@@ -145,20 +132,19 @@ import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";
 import UserConfig from "../mixins/UserConfig";
 import Folder from "./frame/Folder.vue";
 import Photo from "./frame/Photo.vue";
-import Tag from "./frame/Tag.vue";
 import ScrollerManager from "./ScrollerManager.vue";
 import SelectionManager from "./SelectionManager.vue";
 import Viewer from "./viewer/Viewer.vue";
+
+import EmptyContent from "./top-matter/EmptyContent.vue";
 import OnThisDay from "./top-matter/OnThisDay.vue";
 import TopMatter from "./top-matter/TopMatter.vue";
 
 import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
+import * as strings from "../services/strings";
 
-import PeopleIcon from "vue-material-design-icons/AccountMultiple.vue";
 import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
-import ImageMultipleIcon from "vue-material-design-icons/ImageMultiple.vue";
-import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
 import { API, DaysFilterType } from "../services/API";
 
 const SCROLL_LOAD_DELAY = 100; // Delay in loading data when scrolling
@@ -170,19 +156,15 @@ export default defineComponent({
 
   components: {
     Folder,
-    Tag,
     Photo,
-    TopMatter,
+    EmptyContent,
     OnThisDay,
+    TopMatter,
     SelectionManager,
     ScrollerManager,
     Viewer,
-    NcEmptyContent,
 
     CheckCircle,
-    ArchiveIcon,
-    PeopleIcon,
-    ImageMultipleIcon,
   },
 
   mixins: [UserConfig],
@@ -279,54 +261,7 @@ export default defineComponent({
     },
     /** Get view name for dynamic top matter */
     viewName(): string {
-      switch (this.$route.name) {
-        case "timeline":
-          return this.t("memories", "Your Timeline");
-        case "favorites":
-          return this.t("memories", "Favorites");
-        case "recognize":
-        case "facerecognition":
-          return this.t("memories", "People");
-        case "videos":
-          return this.t("memories", "Videos");
-        case "albums":
-          return this.t("memories", "Albums");
-        case "archive":
-          return this.t("memories", "Archive");
-        case "thisday":
-          return this.t("memories", "On this day");
-        case "tags":
-          return this.t("memories", "Tags");
-        case "places":
-          return this.t("memories", "Places");
-        default:
-          return "";
-      }
-    },
-    emptyViewDescription(): string {
-      switch (this.$route.name) {
-        case "facerecognition":
-          if (this.config_facerecognitionEnabled)
-            return this.t(
-              "memories",
-              "You will find your friends soon. Please, be patient."
-            );
-          else
-            return this.t(
-              "memories",
-              "Face Recognition is disabled. Enable in settings to find your friends."
-            );
-        case "timeline":
-        case "favorites":
-        case "recognize":
-        case "videos":
-        case "albums":
-        case "archive":
-        case "thisday":
-        case "tags":
-        default:
-          return "";
-      }
+      return strings.viewName(this.$route.name);
     },
   },
 
@@ -681,7 +616,11 @@ export default defineComponent({
 
       // Map Bounds
       if (this.$route.name === "map" && this.$route.query.b) {
-        API.DAYS_FILTER(query, DaysFilterType.MAP_BOUNDS, <string>this.$route.query.b);
+        API.DAYS_FILTER(
+          query,
+          DaysFilterType.MAP_BOUNDS,
+          <string>this.$route.query.b
+        );
       }
 
       // Month view
@@ -739,14 +678,6 @@ export default defineComponent({
         let data: IDay[] = [];
         if (this.$route.name === "thisday") {
           data = await dav.getOnThisDayData();
-        } else if (this.$route.name === "albums" && !this.$route.params.name) {
-          data = await dav.getAlbumsData(3, this.config_albumListSort);
-        } else if (this.routeIsPeople && !this.$route.params.name) {
-          data = await dav.getPeopleData(this.$route.name as any);
-        } else if (this.$route.name === "places" && !this.$route.params.name) {
-          data = await dav.getPlacesData();
-        } else if (this.$route.name === "tags" && !this.$route.params.name) {
-          data = await dav.getTagsData();
         } else if (dav.isSingleItem()) {
           data = await dav.getSingleItemData();
           this.$router.replace(utils.getViewerRoute(data[0]!.detail[0]));
@@ -1043,9 +974,7 @@ export default defineComponent({
           return {
             width: p.w || this.rowHeight,
             height: p.h || this.rowHeight,
-            forceSquare: Boolean(
-              (p.flag & this.c.FLAG_IS_FOLDER) | (p.flag & this.c.FLAG_IS_TAG)
-            ),
+            forceSquare: Boolean(p.flag & this.c.FLAG_IS_FOLDER),
           };
         }),
         {
@@ -1419,13 +1348,7 @@ export default defineComponent({
   }
 }
 
-/** Static and dynamic top matter */
-.top-matter {
-  padding-top: 4px;
-  @include phone {
-    padding-left: 40px;
-  }
-}
+/** Dynamic top matter */
 .recycler-before {
   width: 100%;
   > .text {

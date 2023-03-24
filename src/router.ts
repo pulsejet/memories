@@ -4,6 +4,7 @@ import Router from "vue-router";
 import Vue from "vue";
 import Timeline from "./components/Timeline.vue";
 import SplitTimeline from "./components/SplitTimeline.vue";
+import ClusterView from "./components/ClusterView.vue";
 
 Vue.use(Router);
 
@@ -52,7 +53,7 @@ export default new Router({
 
     {
       path: "/albums/:user?/:name?",
-      component: Timeline,
+      component: ClusterView,
       name: "albums",
       props: (route) => ({
         rootTitle: t("memories", "Albums"),
@@ -79,7 +80,7 @@ export default new Router({
 
     {
       path: "/recognize/:user?/:name?",
-      component: Timeline,
+      component: ClusterView,
       name: "recognize",
       props: (route) => ({
         rootTitle: t("memories", "People"),
@@ -88,7 +89,7 @@ export default new Router({
 
     {
       path: "/facerecognition/:user?/:name?",
-      component: Timeline,
+      component: ClusterView,
       name: "facerecognition",
       props: (route) => ({
         rootTitle: t("memories", "People"),
@@ -97,7 +98,7 @@ export default new Router({
 
     {
       path: "/places/:name*",
-      component: Timeline,
+      component: ClusterView,
       name: "places",
       props: (route) => ({
         rootTitle: t("memories", "Places"),
@@ -106,7 +107,7 @@ export default new Router({
 
     {
       path: "/tags/:name*",
-      component: Timeline,
+      component: ClusterView,
       name: "tags",
       props: (route) => ({
         rootTitle: t("memories", "Tags"),

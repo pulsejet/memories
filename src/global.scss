@@ -94,13 +94,21 @@ body.has-viewer header {
 }
 
 // Hide scrollbar
-.recycler::-webkit-scrollbar {
-  display: none;
-  width: 0 !important;
-}
-.recycler {
+@mixin hide-scrollbar {
   scrollbar-width: none;
   -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0 !important;
+  }
+}
+.hide-scrollbar {
+  @include hide-scrollbar;
+}
+.hide-scrollbar-mobile {
+  @media (max-width: 768px) {
+    @include hide-scrollbar;
+  }
 }
 
 // Make metadata tab scrollbar thin

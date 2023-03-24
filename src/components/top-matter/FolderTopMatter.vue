@@ -131,23 +131,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .top-matter {
-  display: flex;
-  vertical-align: middle;
-
   .breadcrumb {
     min-width: 0;
-  }
-
-  .right-actions {
-    margin-right: 40px;
-    z-index: 50;
-    @media (max-width: 768px) {
-      margin-right: 10px;
-    }
-
-    :deep span {
-      cursor: pointer;
-    }
   }
 }
 </style>

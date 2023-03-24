@@ -1,4 +1,5 @@
 import { generateUrl } from "@nextcloud/router";
+import { ClusterTypes } from "../types";
 
 const BASE = "/apps/memories/api";
 
@@ -65,7 +66,7 @@ export class API {
     return tok(gen(`${BASE}/days/{id}`, { id }));
   }
 
-  static DAYS_FILTER(query: any, filter: DaysFilterType, value: string = '1') {
+  static DAYS_FILTER(query: any, filter: DaysFilterType, value: string = "1") {
     query[filter] = value;
   }
 
@@ -74,23 +75,18 @@ export class API {
   }
 
   static ALBUM_DOWNLOAD(user: string, name: string) {
-    return gen(`${BASE}/clusters/albums/download?name={user}/{name}`, { user, name });
+    return gen(`${BASE}/clusters/albums/download?name={user}/{name}`, {
+      user,
+      name,
+    });
   }
 
   static PLACE_LIST() {
     return gen(`${BASE}/clusters/places`);
   }
 
-  static PLACE_PREVIEW(place: number | string) {
-    return gen(`${BASE}/clusters/places/preview/{place}`, { place });
-  }
-
   static TAG_LIST() {
     return gen(`${BASE}/clusters/tags`);
-  }
-
-  static TAG_PREVIEW(tag: string) {
-    return gen(`${BASE}/clusters/tags/preview/{tag}`, { tag });
   }
 
   static TAG_SET(fileid: string | number) {
@@ -101,11 +97,8 @@ export class API {
     return gen(`${BASE}/clusters/${app}`);
   }
 
-  static FACE_PREVIEW(
-    app: "recognize" | "facerecognition",
-    face: string | number
-  ) {
-    return gen(`${BASE}/clusters/${app}/preview/{face}`, { face });
+  static CLUSTER_PREVIEW(backend: ClusterTypes, name: string | number) {
+    return gen(`${BASE}/clusters/${backend}/preview/{name}`, { name });
   }
 
   static ARCHIVE(fileid: number) {

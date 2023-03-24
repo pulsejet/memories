@@ -1,12 +1,12 @@
 <template>
-  <div v-if="name" class="tag-top-matter">
-    <NcActions>
+  <div class="top-matter">
+    <NcActions v-if="name">
       <NcActionButton :aria-label="t('memories', 'Back')" @click="back()">
         {{ t("memories", "Back") }}
         <template #icon> <BackIcon :size="20" /> </template>
       </NcActionButton>
     </NcActions>
-    <span class="name">{{ name }}</span>
+    <span class="name">{{ name || viewname }}</span>
   </div>
 </template>
 
@@ -15,6 +15,7 @@ import { defineComponent } from "vue";
 
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
+import * as strings from "../../services/strings";
 
 import BackIcon from "vue-material-design-icons/ArrowLeft.vue";
 
@@ -26,48 +27,27 @@ export default defineComponent({
     BackIcon,
   },
 
-  data: () => ({
-    name: "",
-  }),
-
-  watch: {
-    $route: function (from: any, to: any) {
-      this.createMatter();
+  computed: {
+    viewname(): string {
+      return strings.viewName(this.$route.name);
     },
-  },
 
-  mounted() {
-    this.createMatter();
+    name(): string | null {
+      switch (this.$route.name) {
+        case "tags":
+          return this.$route.params.name;
+        case "places":
+          return this.$route.params.name?.split("-").slice(1).join("-");
+        default:
+          return null;
+      }
+    },
   },
 
   methods: {
-    createMatter() {
-      this.name = <string>this.$route.params.name || "";
-
-      if (this.$route.name === "places") {
-        this.name = this.name.split("-").slice(1).join("-");
-      }
-    },
-
     back() {
       this.$router.push({ name: this.$route.name });
     },
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.tag-top-matter {
-  .name {
-    font-size: 1.3em;
-    font-weight: 400;
-    line-height: 42px;
-    display: inline-block;
-    vertical-align: top;
-  }
-
-  button {
-    display: inline-block;
-  }
-}
-</style>

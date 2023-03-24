@@ -2,47 +2,13 @@ import axios from "@nextcloud/axios";
 import { showError } from "@nextcloud/dialogs";
 import { translate as t } from "@nextcloud/l10n";
 import { generateUrl } from "@nextcloud/router";
-import { IDay, IPhoto } from "../../types";
+import { IFace, IPhoto } from "../../types";
 import { API } from "../API";
-import { constants } from "../Utils";
 import client from "../DavClient";
 import * as base from "./base";
 
-/**
- * Get list of tags and convert to Days response
- */
-export async function getPeopleData(
-  app: "recognize" | "facerecognition"
-): Promise<IDay[]> {
-  // Query for photos
-  let data: {
-    id: number;
-    count: number;
-    name: string;
-  }[] = [];
-  try {
-    const res = await axios.get<typeof data>(API.FACE_LIST(app));
-    data = res.data;
-  } catch (e) {
-    throw e;
-  }
-
-  // Convert to days response
-  return [
-    {
-      dayid: constants.TagDayID.FACES,
-      count: data.length,
-      detail: data.map(
-        (face) =>
-          ({
-            ...face,
-            fileid: face.id,
-            istag: true,
-            isface: app,
-          } as any)
-      ),
-    },
-  ];
+export async function getFaceList(app: "recognize" | "facerecognition") {
+  return (await axios.get<IFace[]>(API.FACE_LIST(app))).data;
 }
 
 export async function updatePeopleFaceRecognition(

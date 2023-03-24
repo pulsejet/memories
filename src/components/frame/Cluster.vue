@@ -1,10 +1,10 @@
 <template>
   <router-link
     draggable="false"
-    class="tag fill-block"
-    :class="{ face, error }"
+    class="cluster fill-block"
+    :class="{ error }"
     :to="target"
-    @click.native="openTag(data)"
+    @click.native="click"
   >
     <div class="bbl">
       <NcCounterBubble> {{ data.count }} </NcCounterBubble>
@@ -32,29 +32,30 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
-import { IAlbum, ITag } from "../../types";
+import { IAlbum, ICluster, IFace } from "../../types";
 import { getPreviewUrl } from "../../services/FileUtils";
 import { getCurrentUser } from "@nextcloud/auth";
 
 import NcCounterBubble from "@nextcloud/vue/dist/Components/NcCounterBubble";
 
-import { constants } from "../../services/Utils";
 import { API } from "../../services/API";
 
+import Vue from "vue";
+
 export default defineComponent({
-  name: "Tag",
+  name: "Cluster",
   components: {
     NcCounterBubble,
   },
 
   props: {
     data: {
-      type: Object as PropType<ITag>,
+      type: Object as PropType<ICluster>,
       required: true,
     },
-    noNavigate: {
+    link: {
       type: Boolean,
-      default: false,
+      default: true,
     },
   },
 
@@ -65,15 +66,7 @@ export default defineComponent({
         return getPreviewUrl(mock, true, 512);
       }
 
-      if (this.face) {
-        return API.FACE_PREVIEW(this.faceApp, this.face.fileid);
-      }
-
-      if (this.place) {
-        return API.PLACE_PREVIEW(this.place.fileid);
-      }
-
-      return API.TAG_PREVIEW(this.data.name);
+      return API.CLUSTER_PREVIEW(this.data.cluster_type, this.data.cluster_id);
     },
 
     title() {
@@ -93,35 +86,28 @@ export default defineComponent({
     },
 
     tag() {
-      return !this.face && !this.place && !this.album ? this.data : null;
+      return this.data.cluster_type === "tags" && this.data;
     },
 
     face() {
-      return this.data.flag & constants.c.FLAG_IS_FACE_RECOGNIZE ||
-        this.data.flag & constants.c.FLAG_IS_FACE_RECOGNITION
-        ? this.data
-        : null;
-    },
-
-    faceApp() {
-      return this.data.flag & constants.c.FLAG_IS_FACE_RECOGNITION
-        ? "facerecognition"
-        : "recognize";
+      return (
+        (this.data.cluster_type === "recognize" ||
+          this.data.cluster_type === "facerecognition") &&
+        (this.data as IFace)
+      );
     },
 
     place() {
-      return this.data.flag & constants.c.FLAG_IS_PLACE ? this.data : null;
+      return this.data.cluster_type === "places" && this.data;
     },
 
     album() {
-      return this.data.flag & constants.c.FLAG_IS_ALBUM
-        ? <IAlbum>this.data
-        : null;
+      return this.data.cluster_type === "albums" && (this.data as IAlbum);
     },
 
     /** Target URL to navigate to */
     target() {
-      if (this.noNavigate) return {};
+      if (!this.link) return {};
 
       if (this.album) {
         const user = this.album.user;
@@ -130,13 +116,13 @@ export default defineComponent({
       }
 
       if (this.face) {
-        const name = this.face.name || this.face.fileid.toString();
+        const name = this.face.name || this.face.cluster_id.toString();
         const user = this.face.user_id;
-        return { name: this.faceApp, params: { name, user } };
+        return { name: this.data.cluster_type, params: { name, user } };
       }
 
       if (this.place) {
-        const id = this.place.fileid.toString();
+        const id = this.place.cluster_id;
         const placeName = this.place.name || id;
         const name = `${id}-${placeName}`;
         return { name: "places", params: { name } };
@@ -147,30 +133,24 @@ export default defineComponent({
 
     error() {
       return (
-        Boolean(this.data.flag & this.c.FLAG_LOAD_FAIL) ||
+        Boolean(this.data.previewError) ||
         Boolean(this.album && this.album.last_added_photo <= 0)
       );
     },
   },
   methods: {
-    /**
-     * Open tag event
-     * Unless noNavigate is set, the tag will be opened
-     */
-    openTag(tag: ITag) {
-      this.$emit("open", tag);
-    },
-
-    /** Mark as loading failed */
     failed() {
-      this.data.flag |= this.c.FLAG_LOAD_FAIL;
+      Vue.set(this.data, "previewError", true);
+    },
+    click() {
+      this.$emit("click", this.data);
     },
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.tag,
+.cluster,
 .name,
 .bubble,
 img {
@@ -178,7 +158,7 @@ img {
 }
 
 // Get rid of color of the bubble
-.tag .bbl :deep .counter-bubble__counter {
+.cluster .bbl :deep .counter-bubble__counter {
   color: unset !important;
 }
 
@@ -201,7 +181,7 @@ img {
     display: block;
   }
 
-  .tag.error > & {
+  .cluster.error > & {
     color: unset;
   }
 

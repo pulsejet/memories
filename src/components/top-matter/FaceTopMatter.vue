@@ -119,26 +119,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.face-top-matter {
-  display: flex;
-  vertical-align: middle;
-
-  .name {
-    font-size: 1.3em;
-    font-weight: 400;
-    line-height: 40px;
-    padding-left: 3px;
-    flex-grow: 1;
-  }
-
-  .right-actions {
-    margin-right: 40px;
-    z-index: 50;
-    @media (max-width: 768px) {
-      margin-right: 10px;
-    }
-  }
-}
-</style>

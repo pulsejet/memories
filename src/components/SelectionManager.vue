@@ -528,8 +528,7 @@ export default defineComponent({
     selectPhoto(photo: IPhoto, val?: boolean, noUpdate?: boolean) {
       if (
         photo.flag & this.c.FLAG_PLACEHOLDER ||
-        photo.flag & this.c.FLAG_IS_FOLDER ||
-        photo.flag & this.c.FLAG_IS_TAG
+        photo.flag & this.c.FLAG_IS_FOLDER
       ) {
         return; // ignore placeholders
       }

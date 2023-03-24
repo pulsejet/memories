@@ -1,9 +1,8 @@
 import * as base from "./base";
 import { getCurrentUser } from "@nextcloud/auth";
 import { showError } from "@nextcloud/dialogs";
-import { translate as t, translatePlural as n } from "@nextcloud/l10n";
-import { IAlbum, IDay, IFileInfo, IPhoto, ITag } from "../../types";
-import { constants } from "../Utils";
+import { translate as t } from "@nextcloud/l10n";
+import { IAlbum, IFileInfo, IPhoto } from "../../types";
 import { API } from "../API";
 import axios from "@nextcloud/axios";
 import client from "../DavClient";
@@ -22,21 +21,12 @@ export function getAlbumPath(user: string, name: string) {
 }
 
 /**
- * Get list of albums and convert to Days response
+ * Get list of albums.
  * @param type Type of albums to get; 1 = personal, 2 = shared, 3 = all
  * @param sortOrder Sort order; 1 = by date, 2 = by name
  */
-export async function getAlbumsData(
-  type: 1 | 2 | 3,
-  sortOrder: 1 | 2
-): Promise<IDay[]> {
-  let data: IAlbum[] = [];
-  try {
-    const res = await axios.get<typeof data>(API.ALBUM_LIST(type));
-    data = res.data;
-  } catch (e) {
-    throw e;
-  }
+export async function getAlbums(type: 1 | 2 | 3, sortOrder: 1 | 2) {
+  const data = (await axios.get<IAlbum[]>(API.ALBUM_LIST(type))).data;
 
   // Response is already sorted by date, sort otherwise
   if (sortOrder === 2) {
@@ -45,23 +35,7 @@ export async function getAlbumsData(
     );
   }
 
-  // Convert to days response
-  return [
-    {
-      dayid: constants.TagDayID.ALBUMS,
-      count: data.length,
-      detail: data.map(
-        (album) =>
-          ({
-            ...album,
-            fileid: album.album_id,
-            flag: constants.c.FLAG_IS_TAG & constants.c.FLAG_IS_ALBUM,
-            istag: true,
-            isalbum: true,
-          } as ITag)
-      ),
-    },
-  ];
+  return data;
 }
 
 /**

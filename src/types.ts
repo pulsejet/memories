@@ -117,18 +117,28 @@ export interface IFolder extends IPhoto {
   name: string;
 }
 
-export interface ITag extends IPhoto {
-  /** Name of tag */
-  name: string;
-  /** Number of images in this tag */
+export type ClusterTypes =
+  | "tags"
+  | "albums"
+  | "places"
+  | "recognize"
+  | "facerecognition";
+
+export interface ICluster {
+  /** A unique identifier for the cluster */
+  cluster_id: number | string;
+  /** Type of cluster */
+  cluster_type: ClusterTypes;
+  /** Number of images in this cluster */
   count: number;
-  /** User for face if face */
-  user_id?: string;
-  /** Cache of previews */
-  previews?: IPhoto[];
+  /** Name of cluster */
+  name: string;
+
+  /** Preview loading failed */
+  previewError?: boolean;
 }
 
-export interface IAlbum extends ITag {
+export interface IAlbum extends ICluster {
   /** ID of album */
   album_id: number;
   /** Owner of album */
@@ -139,6 +149,11 @@ export interface IAlbum extends ITag {
   location: string;
   /** File ID of last added photo */
   last_added_photo: number;
+}
+
+export interface IFace extends ICluster {
+  /** User for face */
+  user_id: string;
 }
 
 export interface IFaceRect {
@@ -211,7 +226,7 @@ export type TopMatter = {
 export enum TopMatterType {
   NONE = 0,
   FOLDER = 1,
-  TAG = 2,
+  CLUSTER = 2,
   FACE = 3,
   ALBUM = 4,
 }

@@ -6,15 +6,14 @@
         :value.sync="search"
         :label="t('memories', 'Search')"
         :placeholder="t('memories', 'Search')"
-        @input="searchChanged"
       >
         <Magnify :size="16" />
       </NcTextField>
     </div>
 
-    <div v-if="detail">
-      <div class="photo" v-for="photo of detail" :key="photo.fileid">
-        <Tag :data="photo" :noNavigate="true" @open="clickFace" />
+    <div v-if="list">
+      <div class="photo" v-for="photo of filteredList" :key="photo.cluster_id">
+        <Cluster :data="photo" :link="false" @click="clickFace" />
       </div>
     </div>
     <div v-else>
@@ -25,8 +24,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { IPhoto, ITag } from "../../types";
-import Tag from "../frame/Tag.vue";
+import { ICluster, IFace } from "../../types";
+import Cluster from "../frame/Cluster.vue";
 
 import NcTextField from "@nextcloud/vue/dist/Components/NcTextField";
 
@@ -38,7 +37,7 @@ import Magnify from "vue-material-design-icons/Magnify.vue";
 export default defineComponent({
   name: "FaceList",
   components: {
-    Tag,
+    Cluster,
     NcTextField,
     Magnify,
   },
@@ -46,9 +45,8 @@ export default defineComponent({
   data: () => ({
     user: "",
     name: "",
-    fullDetail: null as ITag[] | null,
-    detail: null as ITag[] | null,
-    fuse: null as Fuse<ITag>,
+    list: null as ICluster[] | null,
+    fuse: null as Fuse<ICluster>,
     search: "",
   }),
 
@@ -62,6 +60,13 @@ export default defineComponent({
     this.refreshParams();
   },
 
+  computed: {
+    filteredList() {
+      if (!this.list || !this.search || !this.fuse) return this.list || [];
+      return this.fuse.search(this.search).map((r) => r.item);
+    },
+  },
+
   methods: {
     close() {
       this.$emit("close");
@@ -70,42 +75,21 @@ export default defineComponent({
     async refreshParams() {
       this.user = <string>this.$route.params.user || "";
       this.name = <string>this.$route.params.name || "";
-      this.detail = null;
-      this.fullDetail = null;
+      this.list = null;
       this.search = "";
 
-      let data = [];
-      let flags = this.c.FLAG_IS_TAG;
-      if (this.$route.name === "recognize") {
-        data = await dav.getPeopleData("recognize");
-        flags |= this.c.FLAG_IS_FACE_RECOGNIZE;
-      } else {
-        data = await dav.getPeopleData("facerecognition");
-        flags |= this.c.FLAG_IS_FACE_RECOGNITION;
-      }
-      let detail = data[0].detail;
-      detail.forEach((photo: IPhoto) => {
-        photo.flag = flags;
-      });
-      detail = detail.filter((photo: ITag) => {
-        const pname = photo.name || photo.fileid.toString();
-        return photo.user_id === this.user && pname !== this.name;
-      });
+      this.list = (await dav.getFaceList(this.$route.name as any)).filter(
+        (c: IFace) => {
+          const clusterName = String(c.name || c.cluster_id);
+          return c.user_id === this.user && clusterName !== this.name;
+        }
+      );
 
-      this.detail = detail;
-      this.fullDetail = detail;
-      this.fuse = new Fuse(detail, { keys: ["name"] });
+      this.fuse = new Fuse(this.list, { keys: ["name"] });
     },
 
-    async clickFace(face: ITag) {
+    async clickFace(face: IFace) {
       this.$emit("select", face);
-    },
-
-    searchChanged() {
-      if (!this.detail) return;
-      this.detail = this.search
-        ? this.fuse.search(this.search).map((r) => r.item)
-        : this.fullDetail;
     },
   },
 });

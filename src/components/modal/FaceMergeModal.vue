@@ -35,8 +35,8 @@ const NcProgressBar = () =>
 
 import { showError } from "@nextcloud/dialogs";
 import { getCurrentUser } from "@nextcloud/auth";
-import { IFileInfo, ITag } from "../../types";
-import Tag from "../frame/Tag.vue";
+import { IFileInfo, IFace } from "../../types";
+import Cluster from "../frame/Cluster.vue";
 import FaceList from "./FaceList.vue";
 
 import Modal from "./Modal.vue";
@@ -50,7 +50,7 @@ export default defineComponent({
     NcTextField,
     NcProgressBar,
     Modal,
-    Tag,
+    Cluster,
     FaceList,
   },
 
@@ -79,11 +79,11 @@ export default defineComponent({
       this.show = true;
     },
 
-    async clickFace(face: ITag) {
+    async clickFace(face: IFace) {
       const user = this.$route.params.user || "";
       const name = this.$route.params.name || "";
 
-      const newName = face.name || face.fileid.toString();
+      const newName = String(face.name || face.cluster_id);
       if (
         !confirm(
           this.t(

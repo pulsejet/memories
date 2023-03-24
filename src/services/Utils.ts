@@ -212,27 +212,6 @@ export function convertFlags(photo: IPhoto) {
     photo.flag |= constants.c.FLAG_IS_FOLDER;
     delete photo.isfolder;
   }
-  if (photo.isface) {
-    const app = photo.isface;
-    if (app === "recognize") {
-      photo.flag |= constants.c.FLAG_IS_FACE_RECOGNIZE;
-    } else if (app === "facerecognition") {
-      photo.flag |= constants.c.FLAG_IS_FACE_RECOGNITION;
-    }
-    delete photo.isface;
-  }
-  if (photo.isplace) {
-    photo.flag |= constants.c.FLAG_IS_PLACE;
-    delete photo.isplace;
-  }
-  if (photo.istag) {
-    photo.flag |= constants.c.FLAG_IS_TAG;
-    delete photo.istag;
-  }
-  if (photo.isalbum) {
-    photo.flag |= constants.c.FLAG_IS_ALBUM;
-    delete photo.isalbum;
-  }
 }
 
 /**
@@ -325,13 +304,8 @@ export const constants = {
     FLAG_IS_VIDEO: 1 << 2,
     FLAG_IS_FAVORITE: 1 << 3,
     FLAG_IS_FOLDER: 1 << 4,
-    FLAG_IS_ALBUM: 1 << 5,
-    FLAG_IS_FACE_RECOGNIZE: 1 << 6,
-    FLAG_IS_FACE_RECOGNITION: 1 << 7,
-    FLAG_IS_PLACE: 1 << 8,
-    FLAG_IS_TAG: 1 << 9,
-    FLAG_SELECTED: 1 << 10,
-    FLAG_LEAVING: 1 << 11,
+    FLAG_SELECTED: 1 << 5,
+    FLAG_LEAVING: 1 << 6,
   },
 
   TagDayID: TagDayID,
