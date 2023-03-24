@@ -26,7 +26,9 @@ export function emptyDescription(routeName: string): string {
     case "videos":
       return t("memories", "Your videos will appear here");
     case "albums":
-      return t("memories", "Create an album to get started");
+      return vueroute().params.name
+        ? t("memories", "No photos in this album yet")
+        : t("memories", "Create an album to get started");
     case "archive":
       return t(
         "memories",
