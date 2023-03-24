@@ -40,9 +40,14 @@ class RecognizeBackend extends Backend
         $this->request = $request;
     }
 
-    public function appName(): string
+    public static function appName(): string
     {
         return 'Recognize';
+    }
+
+    public static function clusterType(): string
+    {
+        return 'recognize';
     }
 
     public function isEnabled(): bool
@@ -160,6 +165,11 @@ class RecognizeBackend extends Backend
         }
 
         return $faces;
+    }
+
+    public static function getClusterId(array $cluster)
+    {
+        return $cluster['id'];
     }
 
     public function getPhotos(string $name, ?int $limit = null): array

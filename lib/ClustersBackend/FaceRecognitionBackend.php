@@ -46,9 +46,14 @@ class FaceRecognitionBackend extends Backend
         $this->config = $config;
     }
 
-    public function appName(): string
+    public static function appName(): string
     {
         return 'Face Recognition';
+    }
+
+    public static function clusterType(): string
+    {
+        return 'facerecognition';
     }
 
     public function isEnabled(): bool
@@ -132,6 +137,11 @@ class FaceRecognitionBackend extends Backend
         }
 
         return $faces;
+    }
+
+    public static function getClusterId(array $cluster)
+    {
+        return $cluster['id'];
     }
 
     public function getPhotos(string $name, ?int $limit = null): array

@@ -38,9 +38,14 @@ class PlacesBackend extends Backend
         $this->request = $request;
     }
 
-    public function appName(): string
+    public static function appName(): string
     {
         return 'Places';
+    }
+
+    public static function clusterType(): string
+    {
+        return 'places';
     }
 
     public function isEnabled(): bool
@@ -90,6 +95,11 @@ class PlacesBackend extends Backend
         }
 
         return $places;
+    }
+
+    public static function getClusterId(array $cluster)
+    {
+        return $cluster['osm_id'];
     }
 
     public function getPhotos(string $name, ?int $limit = null): array

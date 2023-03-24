@@ -75,11 +75,11 @@ class Application extends App implements IBootstrap
         $context->registerEventListener(NodeDeletedEvent::class, PostDeleteListener::class);
 
         // Register clusters backends
-        ClustersBackend\Manager::register('albums', ClustersBackend\AlbumsBackend::class);
-        ClustersBackend\Manager::register('tags', ClustersBackend\TagsBackend::class);
-        ClustersBackend\Manager::register('places', ClustersBackend\PlacesBackend::class);
-        ClustersBackend\Manager::register('recognize', ClustersBackend\RecognizeBackend::class);
-        ClustersBackend\Manager::register('facerecognition', ClustersBackend\FaceRecognitionBackend::class);
+        ClustersBackend\AlbumsBackend::register();
+        ClustersBackend\TagsBackend::register();
+        ClustersBackend\PlacesBackend::register();
+        ClustersBackend\RecognizeBackend::register();
+        ClustersBackend\FaceRecognitionBackend::register();
     }
 
     public function boot(IBootContext $context): void

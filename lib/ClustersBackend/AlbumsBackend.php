@@ -41,9 +41,14 @@ class AlbumsBackend extends Backend
         $this->request = $request;
     }
 
-    public function appName(): string
+    public static function appName(): string
     {
         return 'Albums';
+    }
+
+    public static function clusterType(): string
+    {
+        return 'albums';
     }
 
     public function isEnabled(): bool
@@ -103,6 +108,11 @@ class AlbumsBackend extends Backend
 
         // Convert $list to sequential array
         return array_values($list);
+    }
+
+    public static function getClusterId(array $cluster)
+    {
+        return $cluster['album_id'];
     }
 
     public function getPhotos(string $name, ?int $limit = null): array

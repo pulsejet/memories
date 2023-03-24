@@ -39,9 +39,14 @@ class TagsBackend extends Backend
         $this->request = $request;
     }
 
-    public function appName(): string
+    public static function appName(): string
     {
         return 'Tags';
+    }
+
+    public static function clusterType(): string
+    {
+        return 'tags';
     }
 
     public function isEnabled(): bool
@@ -99,6 +104,11 @@ class TagsBackend extends Backend
         }
 
         return $tags;
+    }
+
+    public static function getClusterId(array $cluster)
+    {
+        return $cluster['name'];
     }
 
     public function getPhotos(string $name, ?int $limit = null): array
