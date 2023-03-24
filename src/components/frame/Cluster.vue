@@ -236,6 +236,10 @@ img {
         rgba(0, 0, 0, 0.7) 10%,
         transparent 35%
       );
+
+      .cluster.error & {
+        display: none;
+      }
     }
   }
 }
