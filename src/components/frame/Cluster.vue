@@ -20,6 +20,7 @@
           draggable="false"
           class="fill-block"
           :class="{ error }"
+          :key="data.cluster_id"
           :src="previewUrl"
           @error="failed"
         />

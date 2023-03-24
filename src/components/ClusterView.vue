@@ -17,7 +17,7 @@
       @resize="resize"
     >
       <template v-slot="{ item }">
-        <div class="grid-item fill-block" :key="item.cluster_id">
+        <div class="grid-item fill-block">
           <Cluster :data="item" @click="click(item)" :link="link" />
         </div>
       </template>
