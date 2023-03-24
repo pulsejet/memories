@@ -6,7 +6,7 @@ export function login(route: string) {
     await page.goto("http://localhost:8080/index.php/apps/memories" + route);
 
     await page.locator("#user").click();
-    await page.locator("#user").fill("varun");
+    await page.locator("#user").fill("admin");
     await page.locator("#user").press("Tab");
     await page.locator("#password").fill("admin");
     await page.locator('button[type="submit"]').click();
