@@ -18,6 +18,14 @@ class TimelineRoot
     }
 
     /**
+     * Populate the root with the current user's folders.
+     */
+    public function populate()
+    {
+        \OC::$server->get(FsManager::class)->populateRoot($this);
+    }
+
+    /**
      * Add a folder to the root.
      *
      * @param Node $folder Node to add
