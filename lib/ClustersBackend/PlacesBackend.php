@@ -81,8 +81,7 @@ class PlacesBackend extends Backend
         $query->addOrderBy('e.osm_id'); // tie-breaker
 
         // FETCH all tags
-        $cursor = $this->tq->executeQueryWithCTEs($query);
-        $places = $cursor->fetchAll();
+        $places = $this->tq->executeQueryWithCTEs($query)->fetchAll();
 
         // Post process
         foreach ($places as &$row) {

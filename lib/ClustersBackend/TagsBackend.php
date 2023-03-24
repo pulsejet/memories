@@ -54,9 +54,6 @@ class TagsBackend extends Backend
         $tagName = (string) $this->request->getParam('tags');
 
         $tagId = $this->getSystemTagId($query, $tagName);
-        if (false === $tagId) {
-            throw new \Exception("Tag {$tagName} not found");
-        }
 
         $query->innerJoin('m', 'systemtag_object_mapping', 'stom', $query->expr()->andX(
             $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
@@ -93,8 +90,7 @@ class TagsBackend extends Backend
         $query->addOrderBy('st.id'); // tie-breaker
 
         // FETCH all tags
-        $cursor = $this->tq->executeQueryWithCTEs($query);
-        $tags = $cursor->fetchAll();
+        $tags = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
 
         // Post process
         foreach ($tags as &$row) {
@@ -109,9 +105,6 @@ class TagsBackend extends Backend
     {
         $query = $this->tq->getBuilder();
         $tagId = $this->getSystemTagId($query, $name);
-        if (false === $tagId) {
-            return [];
-        }
 
         // SELECT all photos with this tag
         $query->select('f.fileid', 'f.etag', 'stom.systemtagid')->from(
@@ -134,18 +127,24 @@ class TagsBackend extends Backend
         }
 
         // FETCH tag photos
-        return $this->tq->executeQueryWithCTEs($query)->fetchAll();
+        return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
-    private function getSystemTagId(IQueryBuilder $query, string $tagName)
+    private function getSystemTagId(IQueryBuilder $query, string $tagName): int
     {
         $sqb = $query->getConnection()->getQueryBuilder();
 
-        return $sqb->select('id')->from('systemtag')->where(
+        $res = $sqb->select('id')->from('systemtag')->where(
             $sqb->expr()->andX(
                 $sqb->expr()->eq('name', $sqb->createNamedParameter($tagName)),
                 $sqb->expr()->eq('visibility', $sqb->createNamedParameter(1)),
             )
         )->executeQuery()->fetchOne();
+
+        if (false === $res) {
+            throw new \Exception("Tag {$tagName} not found");
+        }
+
+        return (int) $res;
     }
 }
