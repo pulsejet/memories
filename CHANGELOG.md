@@ -2,6 +2,10 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## v4.12.4 (2023-03-23)
+
+- **Important**: This release significantly overhauls the backend logic for better maintainability. If you run into any regressions, please [file a bug report](https://github.com/pulsejet/memories/issues).
+
 ## v4.12.2 (2023-03-17)
 
 - **Feature**: Allow migrating Google Takeout metadata to EXIF ([#430](https://github.com/pulsejet/memories/issues/430))
