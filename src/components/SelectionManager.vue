@@ -119,12 +119,13 @@ export default defineComponent({
     defaultActions: null as ISelectionAction[],
 
     touchAnchor: null as IPhoto,
+    prevTouch: null as Touch,
     touchTimer: 0,
+    touchMoved: false,
     touchPrevSel: null as Selection,
     prevOver: null as IPhoto,
     touchScrollInterval: 0,
     touchScrollDelta: 0,
-    prevTouch: null as Touch,
   }),
 
   mounted() {
@@ -323,6 +324,7 @@ export default defineComponent({
       this.prevOver = photo;
       this.prevTouch = event.touches[0];
       this.touchPrevSel = new Map(this.selection);
+      this.touchMoved = false;
       this.touchTimer = window.setTimeout(() => {
         if (this.touchAnchor === photo) {
           this.selectPhoto(photo, true);
@@ -336,14 +338,19 @@ export default defineComponent({
       if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
       delete this.rows[rowIdx].virtualSticky;
 
-      if (this.touchTimer) this.clickPhoto(photo, {} as any, rowIdx);
+      if (this.touchTimer && !this.touchMoved) {
+        // Register a single tap, only if the touch hadn't moved at all
+        this.clickPhoto(photo, {} as any, rowIdx);
+      }
+
       this.resetTouchParams();
     },
 
     resetTouchParams() {
+      this.touchAnchor = null;
       window.clearTimeout(this.touchTimer);
       this.touchTimer = 0;
-      this.touchAnchor = null;
+      this.touchMoved = false;
       this.prevOver = undefined;
 
       window.cancelAnimationFrame(this.touchScrollInterval);
@@ -363,6 +370,13 @@ export default defineComponent({
       const touch: Touch = event.touches[0];
 
       if (this.touchTimer) {
+        // Regardless of whether we continue to run the timer,
+        // we still need to mark that the touch had moved.
+        // This is so that we can disregard the event if only
+        // registering a tap event (not a long press).
+        // https://github.com/pulsejet/memories/issues/516
+        this.touchMoved = true;
+
         // To be more forgiving, check if touch is still
         // within 30px of anchor touch (prevTouch)
         if (
