@@ -1,20 +1,16 @@
 <template>
-  <div
-    class="container"
-    ref="container"
-    :class="{ 'icon-loading': loading > 0 }"
-  >
+  <div class="container" ref="container" :class="{ 'icon-loading': loading }">
     <!-- Static top matter -->
     <TopMatter ref="topmatter" />
 
     <!-- No content found and nothing is loading -->
-    <EmptyContent v-if="loading === 0 && list.length === 0" />
+    <EmptyContent v-if="!loading && !list.length" />
 
     <!-- Main recycler view for rows -->
     <RecycleScroller
       ref="recycler"
       class="recycler hide-scrollbar"
-      :class="{ empty: list.length === 0 }"
+      :class="{ empty: !list.length }"
       :items="list"
       :emit-update="true"
       :buffer="800"
@@ -29,7 +25,7 @@
       <template #before>
         <!-- Show dynamic top matter, name of the view -->
         <div class="recycler-before" ref="recyclerBefore">
-          <div class="text" v-show="!$refs.topmatter.type && list.length > 0">
+          <div class="text" v-show="!$refs.topmatter.type && list.length">
             {{ viewName }}
           </div>
 
