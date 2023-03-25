@@ -33,11 +33,12 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
+import { getCurrentUser } from "@nextcloud/auth";
+import NcCounterBubble from "@nextcloud/vue/dist/Components/NcCounterBubble";
+
 import { IAlbum, ICluster, IFace } from "../../types";
 import { getPreviewUrl } from "../../services/FileUtils";
-import { getCurrentUser } from "@nextcloud/auth";
-
-import NcCounterBubble from "@nextcloud/vue/dist/Components/NcCounterBubble";
+import errorsvg from "../../assets/error.svg";
 
 import { API } from "../../services/API";
 
@@ -62,6 +63,8 @@ export default defineComponent({
 
   computed: {
     previewUrl() {
+      if (this.error) return errorsvg;
+
       if (this.album) {
         const mock = { fileid: this.album.last_added_photo, etag: "", flag: 0 };
         return getPreviewUrl(mock, true, 512);
@@ -221,9 +224,6 @@ img {
       object-fit: cover;
       padding: 0;
       cursor: pointer;
-      &.error {
-        display: none;
-      }
     }
 
     > .overlay {
