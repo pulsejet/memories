@@ -132,7 +132,7 @@ class FaceRecognitionBackend extends Backend
 
         // Post process
         foreach ($faces as &$row) {
-            $row['id'] = $row['name'] ?: (int) $row['id'];
+            $row['id'] = \array_key_exists('name', $row) ? $row['name'] : (int) $row['id'];
             $row['count'] = (int) $row['count'];
         }
 
