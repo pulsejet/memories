@@ -120,7 +120,7 @@ export default defineComponent({
       }
 
       if (this.face) {
-        const name = this.face.name || this.face.cluster_id.toString();
+        const name = String(this.face.name || this.face.cluster_id);
         const user = this.face.user_id;
         return { name: this.data.cluster_type, params: { name, user } };
       }

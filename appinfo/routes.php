@@ -54,7 +54,7 @@ return [
         ['name' => 'Folders#sub', 'url' => '/api/folders/sub', 'verb' => 'GET'],
 
         ['name' => 'Clusters#list', 'url' => '/api/clusters/{backend}', 'verb' => 'GET'],
-        ['name' => 'Clusters#preview', 'url' => '/api/clusters/{backend}/preview/{name}', 'verb' => 'GET'],
+        ['name' => 'Clusters#preview', 'url' => '/api/clusters/{backend}/preview', 'verb' => 'GET'],
         ['name' => 'Clusters#download', 'url' => '/api/clusters/{backend}/download', 'verb' => 'POST'],
 
         ['name' => 'Tags#set', 'url' => '/api/tags/set/{id}', 'verb' => 'PATCH'],

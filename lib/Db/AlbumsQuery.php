@@ -58,6 +58,7 @@ class AlbumsQuery
 
         // Post process
         foreach ($albums as &$row) {
+            $row['cluster_id'] = $row['user'].'/'.$row['name'];
             $row['album_id'] = (int) $row['album_id'];
             $row['created'] = (int) $row['created'];
             $row['last_added_photo'] = (int) $row['last_added_photo'];
@@ -210,11 +211,25 @@ class AlbumsQuery
     public function getAlbumPhotos(int $albumId, ?int $limit)
     {
         $query = $this->connection->getQueryBuilder();
-        $query->select('file_id')->from('photos_albums_files', 'paf')->where(
-            $query->expr()->eq('album_id', $query->createNamedParameter($albumId, IQueryBuilder::PARAM_INT))
-        );
+
+        // SELECT all files
+        $query->select('file_id')->from('photos_albums_files', 'paf');
+
+        // WHERE they are in this album
+        $query->where($query->expr()->eq('album_id', $query->createNamedParameter($albumId, IQueryBuilder::PARAM_INT)));
+
+        // AND in the filecache
         $query->innerJoin('paf', 'filecache', 'fc', $query->expr()->eq('fc.fileid', 'paf.file_id'));
 
+        // Do not check if these files are indexed in memories
+        // This is since this function is called for downloads
+        // so funky things might happen if non-indexed files were
+        // added throught the Photos app
+
+        // ORDER by the id of the paf i.e. the order in which they were added
+        $query->orderBy('paf.album_file_id', 'DESC');
+
+        // LIMIT the results
         if (null !== $limit) {
             $query->setMaxResults($limit);
         }

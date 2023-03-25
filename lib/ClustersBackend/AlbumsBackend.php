@@ -112,7 +112,7 @@ class AlbumsBackend extends Backend
 
     public static function getClusterId(array $cluster)
     {
-        return $cluster['album_id'];
+        return $cluster['cluster_id'];
     }
 
     public function getPhotos(string $name, ?int $limit = null): array
@@ -127,6 +127,11 @@ class AlbumsBackend extends Backend
         $id = (int) $album['album_id'];
 
         return $this->albumsQuery->getAlbumPhotos($id, $limit) ?? [];
+    }
+
+    public function sortPhotosForPreview(array &$photos)
+    {
+        // Do nothing, the photos are already sorted by added date desc
     }
 
     private function getUID(): string

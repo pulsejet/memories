@@ -102,7 +102,7 @@ export class API {
   }
 
   static CLUSTER_PREVIEW(backend: ClusterTypes, name: string | number) {
-    return gen(`${BASE}/clusters/${backend}/preview/{name}`, { name });
+    return API.Q(gen(`${BASE}/clusters/${backend}/preview`), { name });
   }
 
   static ARCHIVE(fileid: number) {
