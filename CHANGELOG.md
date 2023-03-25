@@ -2,9 +2,9 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
-## v4.12.4 (2023-03-23)
+## v4.12.4 + v4.12.5 (2023-03-23)
 
-- **Important**: This release significantly overhauls the backend logic for better maintainability. If you run into any regressions, please [file a bug report](https://github.com/pulsejet/memories/issues).
+- These releases significantly overhaul the application logic for better maintainability. If you run into any regressions, please [file a bug report](https://github.com/pulsejet/memories/issues).
 
 ## v4.12.2 (2023-03-17)
 
