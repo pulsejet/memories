@@ -35,7 +35,15 @@ export default class ImageContentSetup {
   }
 
   placeholderSrc(placeholderSrc: string, content: PsContent) {
-    return content.data.msrc || placeholderSrc;
+    // We can't load msrc unless it is a blob
+    // since these requests are not cached, leading to race conditions
+    // with the loading of the actual images.
+    // Sample is for OnThisDay, where msrc isn't blob
+    if (content.data.msrc?.startsWith("blob:")) {
+      return content.data.msrc;
+    }
+
+    return placeholderSrc;
   }
 
   getXImgElem(content: PsContent, onLoad: () => void): HTMLImageElement {
