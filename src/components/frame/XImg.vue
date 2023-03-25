@@ -1,5 +1,5 @@
 <template>
-  <img :alt="alt" :src="dataSrc" @load="load" />
+  <img :alt="alt" :src="dataSrc" @load="load" decoding="async" />
 </template>
 
 <script lang="ts">
