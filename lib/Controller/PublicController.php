@@ -215,10 +215,8 @@ class PublicController extends AuthPublicShareController
     }
 
     /** Get initial state of single item */
-    private function getSingleItemInitialState(\OCP\Files\File $file): string
+    private function getSingleItemInitialState(\OCP\Files\File $file): array
     {
-        $photo = $this->timelineQuery->getSingleItem($file->getId());
-
-        return json_encode($photo);
+        return $this->timelineQuery->getSingleItem($file->getId());
     }
 }

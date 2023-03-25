@@ -168,11 +168,15 @@ trait TimelineQueryDays
         // Apply all transformations
         $this->applyAllTransforms($queryTransforms, $query, false);
 
-        $cursor = $this->executeQueryWithCTEs($query);
-        $rows = $cursor->fetchAll();
-        $cursor->closeCursor();
+        // FETCH all photos in this day
+        $day = $this->executeQueryWithCTEs($query)->fetchAll();
 
-        return $this->processDay($rows);
+        // Post process the day in-place
+        foreach ($day as &$photo) {
+            $this->processDayPhoto($photo);
+        }
+
+        return $day;
     }
 
     public function executeQueryWithCTEs(IQueryBuilder $query, string $psql = '')
@@ -253,35 +257,31 @@ trait TimelineQueryDays
     /**
      * Process the single day response.
      */
-    private function processDay(array $day)
+    private function processDayPhoto(array &$row)
     {
-        foreach ($day as &$row) {
-            // Convert field types
-            $row['fileid'] = (int) $row['fileid'];
-            $row['isvideo'] = (int) $row['isvideo'];
-            $row['video_duration'] = (int) $row['video_duration'];
-            $row['dayid'] = (int) $row['dayid'];
-            $row['w'] = (int) $row['w'];
-            $row['h'] = (int) $row['h'];
-            if (!$row['isvideo']) {
-                unset($row['isvideo'], $row['video_duration']);
-            }
-            if ($row['categoryid']) {
-                $row['isfavorite'] = 1;
-            }
-            unset($row['categoryid']);
-            if (!$row['liveid']) {
-                unset($row['liveid']);
-            }
-
-            // All cluster transformations
-            ClustersBackend\Manager::applyDayPostTransforms($this->request, $row);
-
-            // We don't need these fields
-            unset($row['datetaken']);
+        // Convert field types
+        $row['fileid'] = (int) $row['fileid'];
+        $row['isvideo'] = (int) $row['isvideo'];
+        $row['video_duration'] = (int) $row['video_duration'];
+        $row['dayid'] = (int) $row['dayid'];
+        $row['w'] = (int) $row['w'];
+        $row['h'] = (int) $row['h'];
+        if (!$row['isvideo']) {
+            unset($row['isvideo'], $row['video_duration']);
+        }
+        if ($row['categoryid']) {
+            $row['isfavorite'] = 1;
+        }
+        unset($row['categoryid']);
+        if (!$row['liveid']) {
+            unset($row['liveid']);
         }
 
-        return $day;
+        // All cluster transformations
+        ClustersBackend\Manager::applyDayPostTransforms($this->request, $row);
+
+        // We don't need these fields
+        unset($row['datetaken']);
     }
 
     /**

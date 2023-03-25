@@ -25,7 +25,13 @@ trait TimelineQuerySingleItem
         // JOIN with mimetypes to get the mimetype
         $query->join('f', 'mimetypes', 'mimetypes', $query->expr()->eq('f.mimetype', 'mimetypes.id'));
 
-        return $query->executeQuery()->fetch();
+        // FETCH the photo
+        $photo = $query->executeQuery()->fetch();
+
+        // Post process the record
+        $this->processDayPhoto($photo);
+
+        return $photo;
     }
 
     public function getInfoById(int $id, bool $basic): array

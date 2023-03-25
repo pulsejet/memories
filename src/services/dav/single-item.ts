@@ -1,7 +1,12 @@
 import { IDay } from "../../types";
 import { loadState } from "@nextcloud/initial-state";
 
-const singleItem = JSON.parse(loadState("memories", "single_item", "{}"));
+let singleItem = null;
+try {
+  singleItem = loadState("memories", "single_item", {});
+} catch (e) {
+  console.error("Could not load single item", e);
+}
 
 export function isSingleItem(): boolean {
   return Boolean(singleItem?.fileid);
