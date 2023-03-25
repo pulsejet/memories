@@ -2,7 +2,10 @@ import { CacheExpiration } from "workbox-expiration";
 import { API } from "../../services/API";
 import axios from "@nextcloud/axios";
 
-type BlobCallback = (blob: Blob) => void;
+type BlobCallback = {
+  resolve: (blob: Blob) => void;
+  reject: (err: Error) => void;
+};
 
 // Queue of requests to fetch preview images
 type FetchPreviewObject = {
@@ -48,20 +51,41 @@ async function flushPreviewQueue() {
   const fetchPreviewQueueCopy = fetchPreviewQueue;
   fetchPreviewQueue = [];
 
-  // Make callbacks and erase pending
-  const makeCallbacks = async (url: string, res: Response) => {
-    cacheResponse(url, res);
+  // Respond to URL
+  const resolve = async (url: string, res: Response) => {
+    // Response body can be read only once
+    const clone = res.clone();
+
+    // In case this throws, let the outer catch handle it
+    // This is because we want to ignore this response in case
+    // it came from a multipreview, so that we can try fetching
+    // the single image instead
     const blob = await res.blob();
-    pendingUrls.get(url)?.forEach((cb) => cb?.(blob));
+    pendingUrls.get(url)?.forEach((cb) => cb?.resolve?.(blob));
+    pendingUrls.delete(url);
+
+    // Cache response
+    cacheResponse(url, clone);
+  };
+
+  // Throw error on URL
+  const reject = (url: string, e: any) => {
+    pendingUrls.get(url)?.forEach((cb) => cb?.reject?.(e));
     pendingUrls.delete(url);
   };
 
-  // Check if only one request
+  // Make a single-file request
+  const fetchOneSafe = async (p: FetchPreviewObject) => {
+    try {
+      resolve(p.origUrl, await fetchOneImage(p.origUrl));
+    } catch (e) {
+      reject(p.origUrl, e);
+    }
+  };
+
+  // Check if only one request, not worth a multipreview
   if (fetchPreviewQueueCopy.length === 1) {
-    const p = fetchPreviewQueueCopy[0];
-    const res = await fetchOneImage(p.origUrl);
-    makeCallbacks(p.origUrl, res);
-    return;
+    return fetchOneSafe(fetchPreviewQueueCopy[0]);
   }
 
   // Create aggregated request body
@@ -100,8 +124,14 @@ async function flushPreviewQueue() {
       fetchPreviewQueueCopy
         .filter((p) => p.reqid === reqid && !p.done)
         .forEach((p) => {
-          makeCallbacks(p.origUrl, getResponse(imgBlob, imgType, res.headers));
-          p.done = true;
+          try {
+            const dummy = getResponse(imgBlob, imgType, res.headers);
+            resolve(p.origUrl, dummy);
+            p.done = true;
+          } catch (e) {
+            // In case of error, we want to try fetching the single
+            // image instead, so we don't reject here
+          }
         });
     }
   } catch (e) {
@@ -109,12 +139,7 @@ async function flushPreviewQueue() {
   }
 
   // Initiate callbacks for failed requests
-  fetchPreviewQueueCopy
-    .filter((p) => !p.done)
-    .forEach(async (p) => {
-      // Fallback to single request
-      makeCallbacks(p.origUrl, await fetchOneImage(p.origUrl));
-    });
+  fetchPreviewQueueCopy.filter((p) => !p.done).forEach(fetchOneSafe);
 }
 
 /** Accepts a URL and returns a promise with a blob */
@@ -136,10 +161,10 @@ export async function fetchImage(url: string): Promise<Blob> {
     return await res.blob();
   }
 
-  return await new Promise((callback) => {
+  return await new Promise((resolve, reject) => {
     if (pendingUrls.has(url)) {
       // Already in queue, just add callback
-      pendingUrls.get(url)?.push(callback);
+      pendingUrls.get(url)?.push({ resolve, reject });
     } else {
       // Add to queue
       fetchPreviewQueue.push({
@@ -150,7 +175,7 @@ export async function fetchImage(url: string): Promise<Blob> {
       });
 
       // Add to pending
-      pendingUrls.set(url, [callback]);
+      pendingUrls.set(url, [{ resolve, reject }]);
 
       // Start timer for flushing queue
       if (!fetchPreviewTimer) {

@@ -101,7 +101,7 @@ export default defineComponent({
       } catch (error) {
         this.dataSrc = BLANK_IMG;
         this.$emit("error", error);
-        console.error(error);
+        console.error("Failed to load XImg", error);
       }
     },
 
