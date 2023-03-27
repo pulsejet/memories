@@ -117,9 +117,20 @@ class Exif
         // We need to remove blacklisted fields to prevent leaking info
         unset($exif['SourceFile'], $exif['FileName'], $exif['ExifToolVersion'], $exif['Directory'], $exif['FileSize'], $exif['FileModifyDate'], $exif['FileAccessDate'], $exif['FileInodeChangeDate'], $exif['FilePermissions'], $exif['ThumbnailImage']);
 
-        // Ignore zero date
-        if (\array_key_exists('DateTimeOriginal', $exif) && '0000:00:00 00:00:00' === $exif['DateTimeOriginal']) {
-            unset($exif['DateTimeOriginal']);
+        // Ignore zero dates
+        $dateFields = [
+            'DateTimeOriginal',
+            'CreateDate',
+            'ModifyDate',
+            'TrackCreateDate',
+            'TrackModifyDate',
+            'MediaCreateDate',
+            'MediaModifyDate',
+        ];
+        foreach ($dateFields as $field) {
+            if (\array_key_exists($field, $exif) && \is_string($exif[$field]) && str_starts_with($exif[$field], '0000:00:00')) {
+                unset($exif[$field]);
+            }
         }
 
         // Ignore zero lat lng
