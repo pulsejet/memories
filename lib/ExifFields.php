@@ -3,6 +3,7 @@
 const EXIF_FIELDS_LIST = [
     // Date/Time
     'DateTimeOriginal' => true,
+    'SubSecDateTimeOriginal' => true,
     'CreateDate' => true,
     'OffsetTimeOriginal' => true,
     'OffsetTime' => true,

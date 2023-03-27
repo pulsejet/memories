@@ -176,12 +176,14 @@ export default defineComponent({
 
     /** Date taken info */
     dateOriginal(): moment.Moment | null {
-      const dt = this.exif["DateTimeOriginal"] || this.exif["CreateDate"];
-      if (!dt) return null;
-
-      const m = moment.utc(dt, "YYYY:MM:DD HH:mm:ss");
+      const m = moment.utc(this.baseInfo.datetaken * 1000);
       if (!m.isValid()) return null;
       m.locale(getCanonicalLocale());
+
+      // set timezeon
+      const tz = this.exif["OffsetTimeOriginal"] || this.exif["OffsetTime"];
+      if (tz) m.utcOffset(tz);
+
       return m;
     },
 
@@ -193,15 +195,7 @@ export default defineComponent({
     dateOriginalTime(): string[] | null {
       if (!this.dateOriginal) return null;
 
-      // Try to get timezone
-      let tz = this.exif["OffsetTimeOriginal"] || this.exif["OffsetTime"];
-      tz = tz ? "GMT" + tz : "";
-
-      let parts = [];
-      parts.push(this.dateOriginal.format("h:mm A"));
-      if (tz) parts.push(tz);
-
-      return parts;
+      return [this.dateOriginal.format("h:mm A Z")];
     },
 
     /** Camera make and model info */

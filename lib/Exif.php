@@ -120,6 +120,7 @@ class Exif
         // Ignore zero dates
         $dateFields = [
             'DateTimeOriginal',
+            'SubSecDateTimeOriginal',
             'CreateDate',
             'ModifyDate',
             'TrackCreateDate',
@@ -157,53 +158,56 @@ class Exif
     /**
      * Parse date from exif format and throw error if invalid.
      *
-     * @param mixed $date
+     * @param array $exif
      *
      * @return int unix timestamp
      */
-    public static function parseExifDate($date)
+    public static function parseExifDate(array $exif)
     {
-        $dt = $date;
-        if (isset($dt) && \is_string($dt) && !empty($dt)) {
-            $dt = explode('-', explode('+', $dt, 2)[0], 2)[0]; // get rid of timezone if present
-            $dt = explode('.', $dt, 2)[0]; // timezone may be after a dot (https://github.com/pulsejet/memories/pull/397)
-            $dt = explode('Z', $dt, 2)[0]; // get rid of Z if present (https://github.com/pulsejet/memories/issues/485)
-
-            // Some cameras don't add seconds to the date if it's 00
-            // https://github.com/pulsejet/memories/issues/485
-            if (3 === substr_count($dt, ':')) {
-                $dt .= ':00';
-            }
-
-            $dt = \DateTime::createFromFormat('Y:m:d H:i:s', $dt);
-            if (!$dt) {
-                throw new \Exception("Invalid date: {$date}");
-            }
-            if ($dt && $dt->getTimestamp() > -5364662400) { // 1800 A.D.
-                return $dt->getTimestamp();
-            }
-
-            throw new \Exception("Date too old: {$date}");
-        } else {
-            throw new \Exception('No date provided');
+        // Get date from exif
+        $exifDate = $exif['SubSecDateTimeOriginal'] ?? $exif['DateTimeOriginal'] ?? $exif['CreateDate'] ?? null;
+        if (null === $exifDate || empty($exifDate) || !\is_string($exifDate)) {
+            throw new \Exception('No date found in exif');
         }
-    }
 
-    /**
-     * Forget the timezone for an epoch timestamp and get the same
-     * time epoch for UTC.
-     */
-    public static function forgetTimezone(int $epoch)
-    {
-        $dt = new \DateTime();
-        $dt->setTimestamp($epoch);
-        $tz = getenv('TZ'); // at least works on debian ...
-        if ($tz) {
-            $dt->setTimezone(new \DateTimeZone($tz));
+        // Get timezone from exif
+        $exifTz = $exif["OffsetTimeOriginal"] ?? $exif["OffsetTime"] ?? null;
+        try {
+            $parseTz = new \DateTimeZone($exifTz);
+        } catch (\Error $e) {
+            $parseTz = new \DateTimeZone('UTC');
         }
-        $utc = new \DateTime($dt->format('Y-m-d H:i:s'), new \DateTimeZone('UTC'));
 
-        return $utc->getTimestamp();
+        // https://github.com/pulsejet/memories/pull/397
+        // https://github.com/pulsejet/memories/issues/485
+
+        $formats = [
+            'Y:m:d H:i', // 2023:03:05 18:58
+            'Y:m:d H:iO', // 2023:03:05 18:58+05:00
+            'Y:m:d H:i:s', // 2023:03:05 18:58:17
+            'Y:m:d H:i:sO', // 2023:03:05 10:58:17+05:00
+            'Y:m:d H:i:s.u', // 2023:03:05 10:58:17.000
+            'Y:m:d H:i:s.uO', // 2023:03:05 10:58:17.000Z
+        ];
+
+        /** @var \DateTime $dt */
+        $parsedDate = null;
+
+        foreach ($formats as $format) {
+            if ($parsedDate = \DateTime::createFromFormat($format, $exifDate, $parseTz)) {
+                break;
+            }
+        }
+
+        if (!$parsedDate) {
+            throw new \Exception("Invalid date: {$exifDate}");
+        }
+
+        if ($parsedDate->getTimestamp() < -5364662400) { // 1800 A.D.
+            throw new \Exception("Date too old: {$exifDate}");
+        }
+
+        return $parsedDate->getTimestamp();
     }
 
     /**
@@ -211,25 +215,16 @@ class Exif
      *
      * @return int unix timestamp
      */
-    public static function getDateTaken(File &$file, array &$exif)
+    public static function getDateTaken(File $file, array $exif)
     {
-        // Try to parse the date from exif metadata
-        $dt = $exif['DateTimeOriginal'] ?? null;
-        if (!isset($dt) || empty($dt)) {
-            $dt = $exif['CreateDate'] ?? null;
-        }
-
-        // Check if found something
         try {
-            return self::parseExifDate($dt);
+            return self::parseExifDate($exif);
         } catch (\Exception $ex) {
         } catch (\ValueError $ex) {
         }
 
         // Fall back to modification time
-        $dateTaken = $file->getMtime();
-
-        return self::forgetTimezone($dateTaken);
+        return $file->getMtime();
     }
 
     /**
