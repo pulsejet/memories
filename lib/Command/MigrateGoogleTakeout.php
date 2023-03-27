@@ -35,6 +35,7 @@ use OCP\IUser;
 use OCP\IUserManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class MigrateGoogleTakeout extends Command
@@ -80,6 +81,8 @@ class MigrateGoogleTakeout extends Command
             ->setName('memories:migrate-google-takeout')
             ->setDescription('Migrate JSON metadata from Google Takeout')
             ->addOption('override', 'o', null, 'Override existing EXIF metadata')
+            ->addOption('user', 'u', InputOption::VALUE_REQUIRED, 'Migrate only for the specified user')
+            ->addOption('folder', 'f', InputOption::VALUE_REQUIRED, 'Migrate only for the specified folder')
         ;
     }
 
@@ -109,9 +112,20 @@ class MigrateGoogleTakeout extends Command
         Exif::ensureStaticExiftoolProc();
 
         // Call migration for each user
-        $this->userManager->callForSeenUsers(function (IUser $user) {
+        if ($input->getOption('user')) {
+            $user = $this->userManager->get($input->getOption('user'));
+            if (!$user) {
+                $output->writeln("<error>User {$input->getOption('user')} does not exist</error>");
+
+                return 1;
+            }
+
             $this->migrateUser($user);
-        });
+        } else {
+            $this->userManager->callForSeenUsers(function (IUser $user) {
+                $this->migrateUser($user);
+            });
+        }
 
         // Print statistics
         $output->writeln("\nMigrated JSON metadata from {$this->nProcessed} files");
@@ -126,10 +140,21 @@ class MigrateGoogleTakeout extends Command
         // Get user's root folder
         \OC_Util::tearDownFS();
         \OC_Util::setupFS($user->getUID());
-        $userFolder = $this->rootFolder->getUserFolder($user->getUID());
+        $folder = $this->rootFolder->getUserFolder($user->getUID());
+
+        // Check if we need to migrate a specific folder
+        if ($path = $this->input->getOption('folder')) {
+            try {
+                $folder = $folder->get($path);
+            } catch (\Exception $e) {
+                $this->output->writeln("<error>Folder {$path} does not exist</error>");
+
+                return;
+            }
+        }
 
         // Iterate all files
-        $this->migrateFolder($userFolder);
+        $this->migrateFolder($folder);
     }
 
     protected function migrateFolder(Folder $folder): void
