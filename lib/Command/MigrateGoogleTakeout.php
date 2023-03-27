@@ -245,6 +245,12 @@ class MigrateGoogleTakeout extends Command
             $txf = array_filter($txf, function ($value, $key) use ($exif) {
                 return !isset($exif[$key]);
             }, ARRAY_FILTER_USE_BOTH);
+
+            // Videos may not have DateTimeOriginal but have TrackCreateDate,
+            // in that case do not override it
+            if (isset($exif['TrackCreateDate'])) {
+                unset($txf['DateTimeOriginal']);
+            }
         }
 
         // Special case: if $txf has both GPSLatitude and GPSLongitude,
