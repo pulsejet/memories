@@ -2,6 +2,11 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## Unreleased
+
+- **Feature**: Use GPS location data for timezone calculation.  
+  Many cameras do not store the timezone in EXIF data. This feature allows Memories to use the GPS location data to calculate the timezone. To take advantage of this, you will need to run `occ memories:places-setup` followed by `occ memories:index --clear` (or `occ memories:index -f`) to reindex your photos.
+
 ## v4.12.4 + v4.12.5 (2023-03-23)
 
 - These releases significantly overhaul the application logic for better maintainability. If you run into any regressions, please [file a bug report](https://github.com/pulsejet/memories/issues).

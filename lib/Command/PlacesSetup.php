@@ -202,9 +202,10 @@ class PlacesSetup extends Command
                 $boundaries = $data['geometry'];
 
                 // Skip some places
-                if ($adminLevel <= 1 || $adminLevel >= 10) {
+                if ($adminLevel > -2 && ($adminLevel <= 1 || $adminLevel >= 10)) {
                     // <=1: These are too general, e.g. "Earth"? or invalid
                     // >=10: These are too specific, e.g. "Community Board"
+                    // <-1: These are special, e.g. "Timezone" = -7
                     continue;
                 }
 

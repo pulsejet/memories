@@ -40,6 +40,7 @@
     "leaflet": "^1.9.3",
     "leaflet-edgebuffer": "^1.0.6",
     "moment": "^2.29.4",
+    "moment-timezone": "^0.5.42",
     "path-posix": "^1.0.0",
     "photoswipe": "^5.3.6",
     "plyr": "^3.7.7",

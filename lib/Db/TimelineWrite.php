@@ -10,7 +10,6 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
 use OCP\IPreview;
-use Psr\Log\LoggerInterface;
 
 require_once __DIR__.'/../ExifFields.php';
 
@@ -136,77 +135,44 @@ class TimelineWrite
             return 2;
         }
 
-        // Get more parameters
+        // Video parameters
+        $videoDuration = round((float) ($isvideo ? ($exif['Duration'] ?? $exif['TrackDuration'] ?? 0) : 0));
+
+        // Process location data
+        // This also modifies the exif array in-place to set the LocationTZID
+        [$lat, $lon, $mapCluster] = $this->processExifLocation($fileId, $exif, $prevRow);
+
+        // Get date parameters (after setting timezone offset)
         $dateTaken = Exif::getDateTaken($file, $exif);
-        $dayId = floor($dateTaken / 86400);
-        $dateTaken = gmdate('Y-m-d H:i:s', $dateTaken);
+
+        // Store the acutal epoch with the EXIF data
+        $exif['DateTimeEpoch'] = $dateTaken->getTimestamp();
+
+        // Store the date taken in the database as UTC (local date) only
+        // Basically, assume everything happens in Greenwich
+        $dateLocalUtc = Exif::forgetTimezone($dateTaken)->getTimestamp();
+        $dateTakenStr = gmdate('Y-m-d H:i:s', $dateLocalUtc);
+
+        // We need to use the local time in UTC for the dayId
+        // This way two photos in different timezones on the same date locally
+        // end up in the same dayId group
+        $dayId = floor($dateLocalUtc / 86400);
+
+        // Get size of image
         [$w, $h] = Exif::getDimensions($exif);
+
+        // Get live photo ID of video part
         $liveid = $this->livePhoto->getLivePhotoId($file, $exif);
 
-        // Video parameters
-        $videoDuration = 0;
-        if ($isvideo) {
-            $videoDuration = round((float) ($exif['Duration'] ?? $exif['TrackDuration'] ?? 0));
-        }
-
-        // Clean up EXIF to keep only useful metadata
-        $filteredExif = [];
-        foreach ($exif as $key => $value) {
-            // Truncate any fields > 2048 chars
-            if (\is_string($value) && \strlen($value) > 2048) {
-                $value = substr($value, 0, 2048);
-            }
-
-            // Only keep fields in the whitelist
-            if (\array_key_exists($key, EXIF_FIELDS_LIST)) {
-                $filteredExif[$key] = $value;
-            }
-        }
-
-        // Store JSON string
-        $exifJson = json_encode($filteredExif);
-
-        // Store error if data > 64kb
-        if (\is_string($exifJson)) {
-            if (\strlen($exifJson) > 65535) {
-                $exifJson = json_encode(['error' => 'Exif data too large']);
-            }
-        } else {
-            $exifJson = json_encode(['error' => 'Exif data encoding error']);
-        }
-
-        // Store location data
-        $lat = \array_key_exists('GPSLatitude', $exif) ? (float) $exif['GPSLatitude'] : null;
-        $lon = \array_key_exists('GPSLongitude', $exif) ? (float) $exif['GPSLongitude'] : null;
-        $oldLat = $prevRow ? (float) $prevRow['lat'] : null;
-        $oldLon = $prevRow ? (float) $prevRow['lon'] : null;
-        $mapCluster = $prevRow ? (int) $prevRow['mapcluster'] : -1;
-
-        if ($lat || $lon || $oldLat || $oldLon) {
-            try {
-                $mapCluster = $this->mapGetCluster($mapCluster, $lat, $lon, $oldLat, $oldLon);
-            } catch (\Error $e) {
-                $logger = \OC::$server->get(LoggerInterface::class);
-                $logger->log(3, 'Error updating map cluster data: '.$e->getMessage(), ['app' => 'memories']);
-            }
-
-            try {
-                $this->updatePlacesData($fileId, $lat, $lon);
-            } catch (\Error $e) {
-                $logger = \OC::$server->get(LoggerInterface::class);
-                $logger->log(3, 'Error updating places data: '.$e->getMessage(), ['app' => 'memories']);
-            }
-        }
-
-        // NULL if invalid
-        $mapCluster = $mapCluster <= 0 ? null : $mapCluster;
+        // Get exif json
+        $exifJson = $this->getExifJson($exif);
 
         // Parameters for insert or update
         $params = [
             'fileid' => $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT),
             'objectid' => $query->createNamedParameter((string) $fileId, IQueryBuilder::PARAM_STR),
             'dayid' => $query->createNamedParameter($dayId, IQueryBuilder::PARAM_INT),
-            'datetaken' => $query->createNamedParameter($dateTaken, IQueryBuilder::PARAM_STR),
+            'datetaken' => $query->createNamedParameter($dateTakenStr, IQueryBuilder::PARAM_STR),
             'mtime' => $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT),
             'isvideo' => $query->createNamedParameter($isvideo, IQueryBuilder::PARAM_INT),
             'video_duration' => $query->createNamedParameter($videoDuration, IQueryBuilder::PARAM_INT),
@@ -283,5 +249,39 @@ class TimelineWrite
         foreach (array_merge(DELETE_TABLES, TRUNCATE_TABLES) as $table) {
             $this->connection->executeStatement($p->getTruncateTableSQL('*PREFIX*'.$table, false));
         }
+    }
+
+    /**
+     * Convert EXIF data to filtered JSON string.
+     */
+    private function getExifJson(array $exif): string
+    {
+        // Clean up EXIF to keep only useful metadata
+        $filteredExif = [];
+        foreach ($exif as $key => $value) {
+            // Truncate any fields > 2048 chars
+            if (\is_string($value) && \strlen($value) > 2048) {
+                $value = substr($value, 0, 2048);
+            }
+
+            // Only keep fields in the whitelist
+            if (\array_key_exists($key, EXIF_FIELDS_LIST)) {
+                $filteredExif[$key] = $value;
+            }
+        }
+
+        // Store JSON string
+        $exifJson = json_encode($filteredExif);
+
+        // Store error if data > 64kb
+        if (\is_string($exifJson)) {
+            if (\strlen($exifJson) > 65535) {
+                $exifJson = json_encode(['error' => 'Exif data too large']);
+            }
+        } else {
+            $exifJson = json_encode(['error' => 'Exif data encoding error']);
+        }
+
+        return $exifJson;
     }
 }

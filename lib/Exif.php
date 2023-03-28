@@ -157,12 +157,8 @@ class Exif
 
     /**
      * Parse date from exif format and throw error if invalid.
-     *
-     * @param array $exif
-     *
-     * @return int unix timestamp
      */
-    public static function parseExifDate(array $exif)
+    public static function parseExifDate(array $exif): \DateTime
     {
         // Get date from exif
         $exifDate = $exif['SubSecDateTimeOriginal'] ?? $exif['DateTimeOriginal'] ?? $exif['CreateDate'] ?? null;
@@ -171,12 +167,15 @@ class Exif
         }
 
         // Get timezone from exif
-        $exifTz = $exif["OffsetTimeOriginal"] ?? $exif["OffsetTime"] ?? null;
         try {
-            $parseTz = new \DateTimeZone($exifTz);
+            $exifTz = $exif['OffsetTimeOriginal'] ?? $exif['OffsetTime'] ?? $exif['LocationTZID'] ?? null;
+            $exifTz = new \DateTimeZone($exifTz);
         } catch (\Error $e) {
-            $parseTz = new \DateTimeZone('UTC');
+            $exifTz = null;
         }
+
+        // Force UTC if no timezone found
+        $parseTz = $exifTz ?? new \DateTimeZone('UTC');
 
         // https://github.com/pulsejet/memories/pull/397
         // https://github.com/pulsejet/memories/issues/485
@@ -199,23 +198,28 @@ class Exif
             }
         }
 
+        // If we couldn't parse the date, throw an error
         if (!$parsedDate) {
             throw new \Exception("Invalid date: {$exifDate}");
         }
 
+        // Filter out dates before 1800 A.D.
         if ($parsedDate->getTimestamp() < -5364662400) { // 1800 A.D.
             throw new \Exception("Date too old: {$exifDate}");
         }
 
-        return $parsedDate->getTimestamp();
+        // Force the timezone to be the same as parseTz
+        if ($exifTz) {
+            $parsedDate->setTimezone($exifTz);
+        }
+
+        return $parsedDate;
     }
 
     /**
      * Get the date taken from either the file or exif data if available.
-     *
-     * @return int unix timestamp
      */
-    public static function getDateTaken(File $file, array $exif)
+    public static function getDateTaken(File $file, array $exif): \DateTime
     {
         try {
             return self::parseExifDate($exif);
@@ -224,7 +228,24 @@ class Exif
         }
 
         // Fall back to modification time
-        return $file->getMtime();
+        try {
+            $parseTz = new \DateTimeZone(getenv('TZ')); // debian
+        } catch (\Error $e) {
+            $parseTz = new \DateTimeZone('UTC');
+        }
+
+        $dt = new \DateTime('@'.$file->getMtime(), $parseTz);
+        $dt->setTimezone($parseTz);
+
+        return self::forgetTimezone($dt);
+    }
+
+    /**
+     * Convert time to local date in UTC.
+     */
+    public static function forgetTimezone(\DateTime $date): \DateTime
+    {
+        return new \DateTime($date->format('Y-m-d H:i:s'), new \DateTimeZone('UTC'));
     }
 
     /**

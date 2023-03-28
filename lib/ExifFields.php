@@ -9,6 +9,10 @@ const EXIF_FIELDS_LIST = [
     'OffsetTime' => true,
     'ModifyDate' => true,
 
+    // Generated date fields
+    'DateTimeEpoch' => true,
+    'LocationTZID' => true,
+
     // Camera Info
     'Make' => true,
     'Model' => true,

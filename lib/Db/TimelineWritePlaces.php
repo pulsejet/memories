@@ -6,10 +6,58 @@ namespace OCA\Memories\Db;
 
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
+use Psr\Log\LoggerInterface;
 
 trait TimelineWritePlaces
 {
     protected IDBConnection $connection;
+
+    /**
+     * Process the location part of exif data.
+     *
+     * Also update the exif data with the tzid from location (LocationTZID)
+     *
+     * @param int        $fileId  The file ID
+     * @param array      $exif    The exif data
+     * @param array|bool $prevRow The previous row of data
+     *
+     * @return array Update values
+     */
+    protected function processExifLocation(int $fileId, array &$exif, mixed $prevRow): array
+    {
+        // Store location data
+        $lat = \array_key_exists('GPSLatitude', $exif) ? (float) $exif['GPSLatitude'] : null;
+        $lon = \array_key_exists('GPSLongitude', $exif) ? (float) $exif['GPSLongitude'] : null;
+        $oldLat = $prevRow ? (float) $prevRow['lat'] : null;
+        $oldLon = $prevRow ? (float) $prevRow['lon'] : null;
+        $mapCluster = $prevRow ? (int) $prevRow['mapcluster'] : -1;
+        $osmIds = [];
+
+        if ($lat || $lon || $oldLat || $oldLon) {
+            try {
+                $mapCluster = $this->mapGetCluster($mapCluster, $lat, $lon, $oldLat, $oldLon);
+            } catch (\Error $e) {
+                $logger = \OC::$server->get(LoggerInterface::class);
+                $logger->log(3, 'Error updating map cluster data: '.$e->getMessage(), ['app' => 'memories']);
+            }
+
+            try {
+                $osmIds = $this->updatePlacesData($fileId, $lat, $lon);
+            } catch (\Error $e) {
+                $logger = \OC::$server->get(LoggerInterface::class);
+                $logger->log(3, 'Error updating places data: '.$e->getMessage(), ['app' => 'memories']);
+            }
+        }
+
+        // NULL if invalid
+        $mapCluster = $mapCluster <= 0 ? null : $mapCluster;
+
+        // Set tzid from location if not present
+        $this->setTzidFromLocation($exif, $osmIds);
+
+        // Return update values
+        return [$lat, $lon, $mapCluster, $osmIds];
+    }
 
     /**
      * Add places data for a file.
@@ -17,15 +65,17 @@ trait TimelineWritePlaces
      * @param int        $fileId The file ID
      * @param null|float $lat    The latitude of the file
      * @param null|float $lon    The longitude of the file
+     *
+     * @return array The list of osm_id of the places
      */
-    protected function updatePlacesData(int $fileId, $lat, $lon): void
+    protected function updatePlacesData(int $fileId, $lat, $lon): array
     {
         // Get GIS type
         $gisType = \OCA\Memories\Util::placesGISType();
 
         // Check if valid
         if ($gisType <= 0) {
-            return;
+            return [];
         }
 
         // Delete previous records
@@ -37,7 +87,7 @@ trait TimelineWritePlaces
 
         // Just remove from if the point is no longer valid
         if (null === $lat || null === $lon) {
-            return;
+            return [];
         }
 
         // Construct WHERE clause depending on GIS type
@@ -47,7 +97,7 @@ trait TimelineWritePlaces
         } elseif (2 === $gisType) {
             $where = "POINT('{$lon},{$lat}') <@ geometry";
         } else {
-            return;
+            return [];
         }
 
         // Make query to memories_planet table
@@ -82,5 +132,36 @@ trait TimelineWritePlaces
         }
 
         $this->connection->commit();
+
+        // Return list of osm_id
+        return array_map(fn ($row) => $row['osm_id'], $rows);
+    }
+
+    /**
+     * Set timezone offset from location if not present.
+     *
+     * @param array $exif   The exif data
+     * @param array $osmIds The list of osm_id of the places
+     */
+    private function setTzidFromLocation(array &$exif, array $osmIds): void
+    {
+        // Make sure we have some places
+        if (empty($osmIds)) {
+            return;
+        }
+
+        // Get timezone offset from places
+        $query = $this->connection->getQueryBuilder();
+        $query->select('name')
+            ->from('memories_planet')
+            ->where($query->expr()->in('osm_id', $query->createNamedParameter($osmIds, IQueryBuilder::PARAM_INT_ARRAY)))
+            ->andWhere($query->expr()->eq('admin_level', $query->createNamedParameter(-7, IQueryBuilder::PARAM_INT)))
+        ;
+
+        // Get name of timezone
+        $tzName = $query->executeQuery()->fetchOne();
+        if ($tzName) {
+            $exif['LocationTZID'] = $tzName;
+        }
     }
 }

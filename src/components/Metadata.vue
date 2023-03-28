@@ -58,7 +58,9 @@ import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
 import axios from "@nextcloud/axios";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import { getCanonicalLocale } from "@nextcloud/l10n";
+
 import moment from "moment";
+import "moment-timezone";
 
 import * as utils from "../services/Utils";
 
@@ -176,26 +178,45 @@ export default defineComponent({
 
     /** Date taken info */
     dateOriginal(): moment.Moment | null {
-      const m = moment.utc(this.baseInfo.datetaken * 1000);
+      const epoch = this.exif.DateTimeEpoch || this.baseInfo.datetaken;
+      const m = moment.utc(epoch * 1000);
       if (!m.isValid()) return null;
       m.locale(getCanonicalLocale());
 
-      // set timezeon
-      const tz = this.exif["OffsetTimeOriginal"] || this.exif["OffsetTime"];
-      if (tz) m.utcOffset(tz);
+      // The fallback to datetaken can be eventually removed
+      // and then this can be discarded
+      if (this.exif.DateTimeEpoch) {
+        const tzOffset =
+          this.exif["OffsetTimeOriginal"] || this.exif["OffsetTime"];
+        const tzId = this.exif["LocationTZID"];
+
+        if (tzOffset) {
+          m.utcOffset(tzOffset);
+        } else if (tzId) {
+          m.tz(tzId);
+        }
+      }
 
       return m;
     },
 
     dateOriginalStr(): string | null {
-      if (!this.dateOriginal) return null;
-      return utils.getLongDateStr(this.dateOriginal.toDate(), true);
+      return utils.getLongDateStr(
+        new Date(this.baseInfo.datetaken * 1000),
+        true
+      );
     },
 
     dateOriginalTime(): string[] | null {
       if (!this.dateOriginal) return null;
 
-      return [this.dateOriginal.format("h:mm A Z")];
+      let format = "h:mm A";
+      const fields = ["OffsetTimeOriginal", "OffsetTime", "LocationTZID"];
+      if (fields.some((key) => this.exif[key])) {
+        format += " Z";
+      }
+
+      return [this.dateOriginal.format(format)];
     },
 
     /** Camera make and model info */
