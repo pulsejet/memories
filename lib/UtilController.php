@@ -75,4 +75,24 @@ trait UtilController
 
         return \OC::$server->get(\OCP\Files\IRootFolder::class)->getUserFolder($uid);
     }
+
+    /**
+     * Get the language code for the current user.
+     */
+    public static function getUserLang(): string
+    {
+        // Default language
+        $config = \OC::$server->get(\OCP\IConfig::class);
+        $default = $config->getSystemValue('default_language', 'en');
+
+        // Get UID of the user
+        try {
+            $uid = self::getUID();
+        } catch (\Exception $e) {
+            return 'en';
+        }
+
+        // Get language of the user
+        return $config->getUserValue($uid, 'core', 'lang', $default);
+    }
 }

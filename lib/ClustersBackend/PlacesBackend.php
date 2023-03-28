@@ -69,7 +69,7 @@ class PlacesBackend extends Backend
 
         // SELECT location name and count of photos
         $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
-        $query->select('e.osm_id', 'e.name', $count)->from('memories_planet', 'e');
+        $query->select('e.osm_id', 'e.name', 'e.other_names', $count)->from('memories_planet', 'e');
 
         // WHERE these are not special clusters (e.g. timezone)
         $query->where($query->expr()->gt('e.admin_level', $query->createNamedParameter(0)));
@@ -84,7 +84,7 @@ class PlacesBackend extends Backend
         $query = $this->tq->joinFilecache($query);
 
         // GROUP and ORDER by tag name
-        $query->groupBy('e.osm_id', 'e.name');
+        $query->groupBy('e.osm_id', 'e.name', 'e.other_names');
         $query->orderBy($query->createFunction('LOWER(e.name)'), 'ASC');
         $query->addOrderBy('e.osm_id'); // tie-breaker
 
@@ -92,9 +92,11 @@ class PlacesBackend extends Backend
         $places = $this->tq->executeQueryWithCTEs($query)->fetchAll();
 
         // Post process
+        $lang = Util::getUserLang();
         foreach ($places as &$row) {
             $row['osm_id'] = (int) $row['osm_id'];
             $row['count'] = (int) $row['count'];
+            self::choosePlaceLang($row, $lang);
         }
 
         return $places;
@@ -127,5 +129,22 @@ class PlacesBackend extends Backend
 
         // FETCH tag photos
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+    }
+
+    /**
+     * Choose the best name for the place.
+     */
+    public static function choosePlaceLang(array &$place, string $lang): array
+    {
+        try {
+            $otherNames = json_decode($place['other_names'], true);
+            if (isset($otherNames[$lang])) {
+                $place['name'] = $otherNames[$lang];
+            }
+        } finally {
+            unset($place['other_names']);
+        }
+
+        return $place;
     }
 }

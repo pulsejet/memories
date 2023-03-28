@@ -144,6 +144,7 @@ class PlacesSetup extends Command
                 'osm_id' => $query->createParameter('osm_id'),
                 'admin_level' => $query->createParameter('admin_level'),
                 'name' => $query->createParameter('name'),
+                'other_names' => $query->createParameter('other_names'),
             ])
         ;
         $insertPlace = $this->connection->prepare($query->getSQL());
@@ -200,6 +201,7 @@ class PlacesSetup extends Command
                 $adminLevel = $data['admin_level'];
                 $name = $data['name'];
                 $boundaries = $data['geometry'];
+                $otherNames = json_encode($data['other_names'] ?? []);
 
                 // Skip some places
                 if ($adminLevel > -2 && ($adminLevel <= 1 || $adminLevel >= 10)) {
@@ -213,6 +215,7 @@ class PlacesSetup extends Command
                 $insertPlace->bindValue('osm_id', $osmId);
                 $insertPlace->bindValue('admin_level', $adminLevel);
                 $insertPlace->bindValue('name', $name);
+                $insertPlace->bindValue('other_names', $otherNames);
                 $insertPlace->execute();
 
                 // Insert polygons into database

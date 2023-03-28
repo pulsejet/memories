@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCA\Memories\ClustersBackend\PlacesBackend;
+use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -56,6 +58,7 @@ trait TimelineQuerySingleItem
         } catch (\Throwable $e) {
         }
 
+        // Get exif if needed
         $exif = [];
         if (!$basic && !empty($row['exif'])) {
             try {
@@ -64,19 +67,23 @@ trait TimelineQuerySingleItem
             }
         }
 
+        // Get address from places
         $gisType = \OCA\Memories\Util::placesGISType();
         $address = -1 === $gisType ? 'Geocoding Unconfigured' : null;
         if (!$basic && $gisType > 0) {
             $qb = $this->connection->getQueryBuilder();
-            $qb->select('e.name')
+            $qb->select('e.name', 'e.other_names')
                 ->from('memories_places', 'mp')
                 ->innerJoin('mp', 'memories_planet', 'e', $qb->expr()->eq('mp.osm_id', 'e.osm_id'))
                 ->where($qb->expr()->eq('mp.fileid', $qb->createNamedParameter($id, \PDO::PARAM_INT)))
                 ->andWhere($qb->expr()->gt('e.admin_level', $qb->createNamedParameter(0)))
                 ->orderBy('e.admin_level', 'DESC')
             ;
-            $places = $qb->executeQuery()->fetchAll(\PDO::FETCH_COLUMN);
+
+            $places = $qb->executeQuery()->fetchAll();
+            $lang = Util::getUserLang();
             if (\count($places) > 0) {
+                $places = array_map(fn ($p) => PlacesBackend::choosePlaceLang($p, $lang)['name'], $places);
                 $address = implode(', ', $places);
             }
         }
