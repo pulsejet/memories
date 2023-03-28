@@ -34,7 +34,7 @@ const GIS_TYPE_MYSQL = 1;
 const GIS_TYPE_POSTGRES = 2;
 const APPROX_PLACES = 635189;
 
-const PLANET_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-0.0.2/planet_coarse_boundaries.zip';
+const PLANET_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-0.0.3/planet_coarse_boundaries.zip';
 
 class PlacesSetup extends Command
 {
