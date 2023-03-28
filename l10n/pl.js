@@ -12,6 +12,8 @@ OC.L10N.register(
     "Albums" : "Albumy",
     "Archive" : "Archiwum",
     "On this day" : "W tym dniu",
+    "Places" : "Miejsca",
+    "Map" : "Mapa",
     "Tags" : "Etykiety",
     "Edit" : "Edytuj",
     "Cancel" : "Anuluj",
