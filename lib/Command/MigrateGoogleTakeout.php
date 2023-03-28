@@ -254,8 +254,10 @@ class MigrateGoogleTakeout extends Command
         }
 
         // Special case: if $txf has both GPSLatitude and GPSLongitude,
-        // also specify GPSCoordinates, since videos need this
+        // also specify GPSCoordinates, since videos need this and refs
         if (isset($txf['GPSLatitude'], $txf['GPSLongitude'])) {
+            $txf['GPSLatitudeRef'] = $txf['GPSLatitude'];
+            $txf['GPSLongitudeRef'] = $txf['GPSLongitude'];
             $txf['GPSCoordinates'] = $txf['GPSLatitude'].', '.$txf['GPSLongitude'];
         }
 

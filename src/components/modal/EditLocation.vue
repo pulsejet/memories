@@ -210,6 +210,8 @@ export default defineComponent({
       return {
         GPSLatitude: this.lat,
         GPSLongitude: this.lon,
+        GPSLatitudeRef: this.lat,
+        GPSLongitudeRef: this.lon,
         GPSCoordinates: `${this.lat.toFixed(6)}, ${this.lon.toFixed(6)}`,
       };
     },
