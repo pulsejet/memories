@@ -297,6 +297,7 @@ class ImageController extends GenericApiController
 
         // Convert to JPEG
         try {
+            $image->autoOrient();
             $image->setImageFormat('jpeg');
             $image->setImageCompressionQuality(95);
             $blob = $image->getImageBlob();
