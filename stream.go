@@ -449,7 +449,6 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 	} else if CV == "libx264" {
 		args = append(args, []string{
 			"-preset", "faster",
-			"-level:v", "4.0",
 			"-crf", "24",
 		}...)
 	}
