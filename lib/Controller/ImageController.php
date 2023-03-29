@@ -260,12 +260,7 @@ class ImageController extends GenericApiController
 
             // Convert image to JPEG if required
             if (!\in_array($mimetype, ['image/png', 'image/webp', 'image/jpeg', 'image/gif'], true)) {
-                $image = new \Imagick();
-                $image->readImageBlob($blob);
-                $image->setImageFormat('jpeg');
-                $image->setImageCompressionQuality(95);
-                $blob = $image->getImageBlob();
-                $mimetype = $image->getImageMimeType();
+                [$blob, $mimetype] = $this->getImageJPEG($blob, $mimetype);
             }
 
             // Return the image
@@ -274,6 +269,43 @@ class ImageController extends GenericApiController
 
             return $response;
         });
+    }
+
+    /**
+     * Given a blob of image data, return a JPEG blob.
+     *
+     * @param string $blob Blob of image data in any format
+     * @param string $mimetype Mimetype of image data
+     *
+     * @return array [blob, mimetype]
+     */
+    private function getImageJPEG($blob, $mimetype): array {
+        // TODO: Use imaginary if available
+
+        // Check if Imagick is available
+        if (!\class_exists('Imagick')) {
+            throw Exceptions::Forbidden('Imagick extension is not available');
+        }
+
+        // Read original image
+        try {
+            $image = new \Imagick();
+            $image->readImageBlob($blob);
+        } catch (\ImagickException $e) {
+            throw Exceptions::Forbidden('Imagick failed to read image: '. $e->getMessage());
+        }
+
+        // Convert to JPEG
+        try {
+            $image->setImageFormat('jpeg');
+            $image->setImageCompressionQuality(95);
+            $blob = $image->getImageBlob();
+            $mimetype = $image->getImageMimeType();
+        } catch (\ImagickException $e) {
+            throw Exceptions::Forbidden('Imagick failed to convert image: '. $e->getMessage());
+        }
+
+        return [$blob, $mimetype];
     }
 
     /**
