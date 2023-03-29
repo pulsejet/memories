@@ -274,16 +274,17 @@ class ImageController extends GenericApiController
     /**
      * Given a blob of image data, return a JPEG blob.
      *
-     * @param string $blob Blob of image data in any format
+     * @param string $blob     Blob of image data in any format
      * @param string $mimetype Mimetype of image data
      *
      * @return array [blob, mimetype]
      */
-    private function getImageJPEG($blob, $mimetype): array {
+    private function getImageJPEG($blob, $mimetype): array
+    {
         // TODO: Use imaginary if available
 
         // Check if Imagick is available
-        if (!\class_exists('Imagick')) {
+        if (!class_exists('Imagick')) {
             throw Exceptions::Forbidden('Imagick extension is not available');
         }
 
@@ -292,7 +293,7 @@ class ImageController extends GenericApiController
             $image = new \Imagick();
             $image->readImageBlob($blob);
         } catch (\ImagickException $e) {
-            throw Exceptions::Forbidden('Imagick failed to read image: '. $e->getMessage());
+            throw Exceptions::Forbidden('Imagick failed to read image: '.$e->getMessage());
         }
 
         // Convert to JPEG
@@ -303,7 +304,7 @@ class ImageController extends GenericApiController
             $blob = $image->getImageBlob();
             $mimetype = $image->getImageMimeType();
         } catch (\ImagickException $e) {
-            throw Exceptions::Forbidden('Imagick failed to convert image: '. $e->getMessage());
+            throw Exceptions::Forbidden('Imagick failed to convert image: '.$e->getMessage());
         }
 
         return [$blob, $mimetype];
