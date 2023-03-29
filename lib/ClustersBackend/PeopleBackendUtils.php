@@ -93,43 +93,34 @@ trait PeopleBackendUtils
      */
     private function cropFace($file, array $photo, float $padding)
     {
-        /** @var \Imagick */
-        $image = null;
+        $img = new \OCP\Image();
+        $img->loadFromData($file->getContent());
 
-        try {
-            $image = new \Imagick();
-            $image->readImageBlob($file->getContent());
-        } catch (\ImagickException $e) {
-            throw new \Exception('Could not read image');
-        }
-
-        $iw = $image->getImageWidth();
-        $ih = $image->getImageHeight();
+        $iw = $img->width();
+        $ih = $img->height();
 
         if ($iw <= 0 || $ih <= 0) {
-            $image = null;
-
             throw new \Exception('Invalid image size');
         }
 
-        // Set quality and make progressive
-        $image->setImageCompressionQuality(80);
-        $image->setInterlaceScheme(\Imagick::INTERLACE_PLANE);
-
-        // Crop image
+        // Get target dimensions
         $dw = (float) $photo['width'];
         $dh = (float) $photo['height'];
         $dcx = (float) $photo['x'] + (float) $photo['width'] / 2;
         $dcy = (float) $photo['y'] + (float) $photo['height'] / 2;
         $faceDim = max($dw * $iw, $dh * $ih) * $padding;
-        $image->cropImage(
-            (int) $faceDim,
-            (int) $faceDim,
+
+        // Crop image
+        $img->crop(
             (int) ($dcx * $iw - $faceDim / 2),
             (int) ($dcy * $ih - $faceDim / 2),
+            (int) $faceDim,
+            (int) $faceDim
         );
-        $image->scaleImage(512, 512, true);
 
-        return [$image->getImageBlob(), $image->getImageMimeType()];
+        // Max 512x512
+        $img->scaleDownToFit(512, 512);
+
+        return [$img->data(), $img->mimeType()];
     }
 }
