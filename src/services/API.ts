@@ -43,10 +43,20 @@ export class API {
   ) {
     if (!query) return url;
 
+    if (typeof query === "object") {
+      // Clean up undefined and null
+      Object.keys(query).forEach((key) => {
+        if (query[key] === undefined || query[key] === null) {
+          delete query[key];
+        }
+      });
+
+      // Convert to search params
+      query = new URLSearchParams(<any>query);
+    }
+
     if (query instanceof URLSearchParams) {
       query = query.toString();
-    } else if (typeof query === "object") {
-      query = new URLSearchParams(query as any).toString();
     }
 
     if (!query) return url;
