@@ -69,7 +69,7 @@ class PlacesBackend extends Backend
 
         // SELECT location name and count of photos
         $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
-        $query->select('e.osm_id', 'e.name', 'e.other_names', $count)->from('memories_planet', 'e');
+        $query->select('e.osm_id', $count)->from('memories_planet', 'e');
 
         // WHERE these are not special clusters (e.g. timezone)
         $query->where($query->expr()->gt('e.admin_level', $query->createNamedParameter(0, \PDO::PARAM_INT)));
@@ -84,7 +84,27 @@ class PlacesBackend extends Backend
         $query = $this->tq->joinFilecache($query);
 
         // GROUP and ORDER by tag name
-        $query->groupBy('e.osm_id', 'e.name', 'e.other_names');
+        $query->groupBy('e.osm_id');
+
+        // We use this as the subquery for the main query, where we also re-join with
+        // oc_memories_planet to the the names from the IDS
+        // If we just AGGREGATE+GROUP with the name in one query, then it can't use indexes
+        $sub = $query;
+
+        // Create new query and copy over parameters (and types)
+        $query = $this->tq->getBuilder();
+        $query->setParameters($sub->getParameters(), $sub->getParameterTypes());
+
+        // Create the subquery function for selecting from it
+        $sqf = $query->createFunction("({$sub->getSQL()})");
+
+        // SELECT osm_id
+        $query->select('sub.osm_id', 'sub.count', 'e.name', 'e.other_names')->from($sqf, 'sub');
+
+        // INNER JOIN back on the planet table to get the names
+        $query->innerJoin('sub', 'memories_planet', 'e', $query->expr()->eq('e.osm_id', 'sub.osm_id'));
+
+        // ORDER BY name and osm_id
         $query->orderBy($query->createFunction('LOWER(e.name)'), 'ASC');
         $query->addOrderBy('e.osm_id'); // tie-breaker
 
@@ -141,6 +161,8 @@ class PlacesBackend extends Backend
             if (isset($otherNames[$lang])) {
                 $place['name'] = $otherNames[$lang];
             }
+        } catch (\Error $e) {
+            // Ignore
         } finally {
             unset($place['other_names']);
         }
