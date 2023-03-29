@@ -454,16 +454,9 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 	}
 
 	// Audio
-	ab := "192k"
-	if s.bitrate < 1000000 {
-		ab = "64k"
-	} else if s.bitrate < 3000000 {
-		ab = "128k"
-	}
 	args = append(args, []string{
 		"-c:a", "aac",
 		"-ac", "1",
-		"-b:a", ab,
 	}...)
 
 	return args
