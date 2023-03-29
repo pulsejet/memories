@@ -39,6 +39,23 @@ class LivePhoto
             return 'self__embeddedvideo';
         }
 
+        // Google MVIMG
+        if (\array_key_exists('MicroVideoOffset', $exif) && ($videoLength = $exif['MicroVideoOffset']) > 0) {
+            // As explained in the following issue,
+            // https://github.com/pulsejet/memories/issues/468
+            //
+            // MicroVideoOffset is the length of the video in bytes
+            // and the video is located at the end of the file.
+            //
+            // Note that we could have just used "self__trailer" here,
+            // since exiftool can extract the video from the trailer,
+            // but explicitly specifying the offset is much faster because
+            // we don't need to spawn exiftool to read the video file.
+            $videoOffset = $file->getSize() - $videoLength;
+
+            return "self__traileroffset={$videoOffset}";
+        }
+
         // Google JPEG and Samsung HEIC (Apple?)
         if (\array_key_exists('MotionPhoto', $exif)) {
             if ('image/jpeg' === $exif['MIMEType']) {
@@ -65,7 +82,7 @@ class LivePhoto
                             if (\is_int($videoLength) && $videoLength > 0) {
                                 $videoOffset = $file->getSize() - $videoLength;
 
-                                return 'self__traileroffset='.((string) $videoOffset);
+                                return "self__traileroffset={$videoOffset}";
                             }
                         }
                     }
