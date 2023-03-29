@@ -420,8 +420,9 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 		}...)
 	}
 
-	// Output specs
+	// Output specs for video
 	args = append(args, []string{
+		"-map", "0:v:0",
 		"-c:v", CV,
 		"-profile:v", "main",
 	}...)
@@ -453,8 +454,9 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 		}...)
 	}
 
-	// Audio
+	// Audio output specs
 	args = append(args, []string{
+		"-map", "0:a:0?",
 		"-c:a", "aac",
 		"-ac", "1",
 	}...)
