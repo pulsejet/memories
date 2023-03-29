@@ -47,12 +47,16 @@ class IndexOpts
     public bool $refresh = false;
     public bool $clear = false;
     public bool $cleanup = false;
+    public ?string $user = null;
+    public ?string $folder = null;
 
     public function __construct(InputInterface $input)
     {
         $this->refresh = (bool) $input->getOption('refresh');
         $this->clear = (bool) $input->getOption('clear');
         $this->cleanup = (bool) $input->getOption('cleanup');
+        $this->user = $input->getOption('user');
+        $this->folder = $input->getOption('folder');
     }
 }
 
@@ -81,6 +85,9 @@ class Index extends Command
     // Helper for the progress bar
     private ConsoleSectionOutput $outputSection;
 
+    // Command options
+    private IndexOpts $opts;
+
     public function __construct(
         IRootFolder $rootFolder,
         IUserManager $userManager,
@@ -107,24 +114,11 @@ class Index extends Command
         $this
             ->setName('memories:index')
             ->setDescription('Generate photo entries')
-            ->addOption(
-                'refresh',
-                'f',
-                InputOption::VALUE_NONE,
-                'Refresh existing entries'
-            )
-            ->addOption(
-                'clear',
-                null,
-                InputOption::VALUE_NONE,
-                'Clear existing index before creating a new one (slow)'
-            )
-            ->addOption(
-                'cleanup',
-                null,
-                InputOption::VALUE_NONE,
-                'Remove orphaned entries from index (e.g. from .nomedia files)'
-            )
+            ->addOption('user', 'u', InputOption::VALUE_REQUIRED, 'Index only the specified user')
+            ->addOption('folder', null, InputOption::VALUE_REQUIRED, 'Index only the specified folder')
+            ->addOption('refresh', 'f', InputOption::VALUE_NONE, 'Refresh existing entries')
+            ->addOption('clear', null, InputOption::VALUE_NONE, 'Clear existing index before creating a new one (slow)')
+            ->addOption('cleanup', null, InputOption::VALUE_NONE, 'Remove orphaned entries from index (e.g. from .nomedia files)')
         ;
     }
 
@@ -138,7 +132,7 @@ class Index extends Command
         $output->writeln("\nMIME Type support:");
         $mimes = array_merge(Application::IMAGE_MIMES, Application::VIDEO_MIMES);
         $someUnsupported = false;
-        foreach ($mimes as &$mimeType) {
+        foreach ($mimes as $mimeType) {
             if ($this->preview->isMimeSupported($mimeType)) {
                 $output->writeln("  {$mimeType}: supported");
             } else {
@@ -155,10 +149,10 @@ class Index extends Command
         }
 
         // Get options and arguments
-        $opts = new IndexOpts($input);
+        $this->opts = new IndexOpts($input);
 
         // Clear index if asked for this
-        if ($opts->clear && $input->isInteractive()) {
+        if ($this->opts->clear && $input->isInteractive()) {
             $output->write('Are you sure you want to clear the existing index? (y/N): ');
             $answer = trim(fgets(STDIN));
             if ('y' !== $answer) {
@@ -167,14 +161,21 @@ class Index extends Command
                 return 1;
             }
         }
-        if ($opts->clear) {
+        if ($this->opts->clear) {
             $this->timelineWrite->clear();
             $output->writeln('Cleared existing index');
         }
 
+        // Detect incompatible options
+        if ($this->opts->cleanup && ($this->opts->user || $this->opts->folder)) {
+            $output->writeln('<error>Cannot use --cleanup with --user or --folder</error>');
+
+            return 1;
+        }
+
         // Orphan all entries so we can delete them later
         // Refresh works similarly, with a different flag on the process call
-        if ($opts->cleanup || $opts->refresh) {
+        if ($this->opts->cleanup || $this->opts->refresh) {
             $output->write('Marking all entries for refresh / cleanup ... ');
             $count = $this->timelineWrite->orphanAll();
             $output->writeln("{$count} marked");
@@ -184,9 +185,9 @@ class Index extends Command
         try {
             \OCA\Memories\Exif::ensureStaticExiftoolProc();
 
-            return $this->executeWithOpts($output, $opts);
+            return $this->executeNow($output);
         } catch (\Exception $e) {
-            error_log('FATAL: '.$e->getMessage());
+            $this->output->writeln("<error>{$e->getMessage()}</error>");
 
             return 1;
         } finally {
@@ -194,7 +195,7 @@ class Index extends Command
         }
     }
 
-    protected function executeWithOpts(OutputInterface $output, IndexOpts &$opts): int
+    protected function executeNow(OutputInterface $output): int
     {
         // Refuse to run without exiftool
         if (!$this->testExif()) {
@@ -215,13 +216,21 @@ class Index extends Command
         }
         $this->output = $output;
 
-        // Call indexing for each user
-        $this->userManager->callForSeenUsers(function (IUser &$user) use (&$opts) {
-            $this->generateUserEntries($user, $opts);
-        });
+        // Call indexing for specified or each user
+        if ($uid = $this->opts->user) {
+            if ($user = $this->userManager->get($uid)) {
+                $this->indexOneUser($user);
+            } else {
+                throw new \Exception("User {$uid} not found");
+            }
+        } else {
+            $this->userManager->callForSeenUsers(function (IUser $user) {
+                $this->indexOneUser($user);
+            });
+        }
 
         // Clear orphans if asked for this
-        if ($opts->cleanup || $opts->refresh) {
+        if (($this->opts->cleanup || $this->opts->refresh) && !($this->opts->user || $this->opts->folder)) {
             $output->write('Deleting orphaned entries ... ');
             $count = $this->timelineWrite->removeOrphans();
             $output->writeln("{$count} deleted");
@@ -278,22 +287,39 @@ class Index extends Command
         return true;
     }
 
-    private function generateUserEntries(IUser &$user, IndexOpts &$opts): void
+    private function indexOneUser(IUser $user): void
     {
         \OC_Util::tearDownFS();
         \OC_Util::setupFS($user->getUID());
 
         $uid = $user->getUID();
-        $userFolder = $this->rootFolder->getUserFolder($uid);
+        $folder = $this->rootFolder->getUserFolder($uid);
+
+        if ($path = $this->opts->folder) {
+            try {
+                $folder = $folder->get($path);
+            } catch (\OCP\Files\NotFoundException $e) {
+                $this->output->writeln("<error>Folder {$path} not found for user {$uid}</error>");
+
+                return;
+            }
+
+            if (!$folder instanceof Folder) {
+                $this->output->writeln("<error>Path {$path} is not a folder for user {$uid}</error>");
+
+                return;
+            }
+        }
+
         $this->outputSection = $this->output->section();
         ++$this->nUser;
 
         $this->outputSection->overwrite("Scanning files for {$uid}");
-        $this->parseFolder($userFolder, $opts);
+        $this->indexFolder($folder);
         $this->outputSection->overwrite("Scanned all files for {$uid}");
     }
 
-    private function parseFolder(Folder &$folder, IndexOpts &$opts): void
+    private function indexFolder(Folder $folder): void
     {
         try {
             // Respect the '.nomedia' file. If present don't traverse the folder
@@ -305,15 +331,15 @@ class Index extends Command
 
             $nodes = $folder->getDirectoryListing();
 
-            foreach ($nodes as $i => &$node) {
+            foreach ($nodes as $i => $node) {
                 if ($node instanceof Folder) {
-                    $this->parseFolder($node, $opts);
+                    $this->indexFolder($node);
                 } elseif ($node instanceof File) {
                     $path = $node->getPath();
                     $path = \strlen($path) > 80 ? '...'.substr($path, -77) : $path;
 
                     $this->outputSection->overwrite("Scanning {$path}");
-                    $this->parseFile($node, $opts);
+                    $this->indexFile($node);
                     $this->tempManager->clean();
                 }
             }
@@ -326,7 +352,7 @@ class Index extends Command
         }
     }
 
-    private function parseFile(File &$file, IndexOpts &$opts): void
+    private function indexFile(File $file): void
     {
         // Process the file
         $res = 1;
@@ -335,14 +361,14 @@ class Index extends Command
             // If refreshing the index, force reprocessing
             // when the file is still an orphan. this way, the
             // files are reprocessed exactly once
-            $force = $opts->refresh ? 2 : 0;
+            $force = $this->opts->refresh ? 2 : 0;
 
             // (re-)process the file
             $res = $this->timelineWrite->processFile($file, $force);
 
             // If the file was processed successfully,
             // remove it from the orphan list
-            if ($opts->cleanup || $opts->refresh) {
+            if ($this->opts->cleanup || $this->opts->refresh) {
                 $this->timelineWrite->unorphan($file);
             }
         } catch (\Error $e) {
