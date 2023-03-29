@@ -63,10 +63,8 @@ class TimelineWrite
      *
      * @return int 2 if processed, 1 if skipped, 0 if not valid
      */
-    public function processFile(
-        File &$file,
-        int $force = 0
-    ): int {
+    public function processFile(File $file, int $force = 0): int
+    {
         // There is no easy way to UPSERT in a standard SQL way, so just
         // do multiple calls. The worst that can happen is more updates,
         // but that's not a big deal.
