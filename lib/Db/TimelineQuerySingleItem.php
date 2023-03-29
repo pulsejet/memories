@@ -76,7 +76,7 @@ trait TimelineQuerySingleItem
                 ->from('memories_places', 'mp')
                 ->innerJoin('mp', 'memories_planet', 'e', $qb->expr()->eq('mp.osm_id', 'e.osm_id'))
                 ->where($qb->expr()->eq('mp.fileid', $qb->createNamedParameter($id, \PDO::PARAM_INT)))
-                ->andWhere($qb->expr()->gt('e.admin_level', $qb->createNamedParameter(0)))
+                ->andWhere($qb->expr()->gt('e.admin_level', $qb->createNamedParameter(0, \PDO::PARAM_INT)))
                 ->orderBy('e.admin_level', 'DESC')
             ;
 
