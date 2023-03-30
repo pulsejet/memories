@@ -48,9 +48,11 @@ import { LMap, LTileLayer, LMarker, LPopup, LIcon } from "vue2-leaflet";
 import { latLngBounds, Icon } from "leaflet";
 import { IPhoto } from "../../types";
 
+import axios from "@nextcloud/axios";
+import { subscribe, unsubscribe } from "@nextcloud/event-bus";
+
 import { API } from "../../services/API";
 import { getPreviewUrl } from "../../services/FileUtils";
-import axios from "@nextcloud/axios";
 import * as utils from "../../services/Utils";
 
 import "leaflet/dist/leaflet.css";
@@ -115,6 +117,14 @@ export default defineComponent({
     const pane = document.querySelector(".leaflet-tile-pane");
     this.isDark =
       !pane || window.getComputedStyle(pane)?.["filter"]?.includes("invert");
+  },
+
+  created() {
+    subscribe("memories:window:resize", this.handleContainerResize);
+  },
+
+  beforeDestroy() {
+    unsubscribe("memories:window:resize", this.handleContainerResize);
   },
 
   computed: {
@@ -304,6 +314,10 @@ export default defineComponent({
       this.animMarkers = true;
       await new Promise((r) => setTimeout(r, CLUSTER_TRANSITION_TIME)); // wait for animation
       this.animMarkers = false;
+    },
+
+    handleContainerResize() {
+      (<any>this.$refs.map)?.mapObject?.invalidateSize();
     },
   },
 });
