@@ -72,6 +72,8 @@ export async function* addToAlbum(
           filename: f.filename,
         })
       );
+
+      console.error("DAV COPY error", e.response?.data);
       return 0;
     }
   });
