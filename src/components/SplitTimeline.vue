@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="split-container">
     <div class="primary" ref="primary">
       <component :is="primary" />
     </div>
@@ -105,7 +105,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.container {
+.split-container {
   width: 100%;
   height: 100%;
   display: flex;
@@ -146,7 +146,7 @@ export default defineComponent({
 }
 
 @media (max-width: 768px) {
-  .container {
+  .split-container {
     flex-direction: column;
 
     > div {
