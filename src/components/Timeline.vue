@@ -509,8 +509,10 @@ export default defineComponent({
               dispY: 0,
             };
           }
-          delete row.pct;
         }
+
+        // No need for the fake count regardless of what happened above
+        delete row.pct;
       }
 
       // Check if this was requested by a refresh
@@ -810,11 +812,8 @@ export default defineComponent({
         let nrows = Math.ceil(day.count / this.numCols);
 
         // Check if already loaded - we can learn
-        let prevRows: IRow[] | null = null;
-        if (this.loadedDays.has(day.dayid)) {
-          prevRows = this.heads[day.dayid]?.day.rows;
-          nrows = prevRows?.length || nrows;
-        }
+        const prevRows = this.heads[day.dayid]?.day?.rows;
+        nrows = prevRows?.length || nrows;
 
         // Add rows
         for (let i = 0; i < nrows; i++) {
@@ -827,9 +826,10 @@ export default defineComponent({
           row.photos = [];
 
           // Learn from existing row
-          if (prevRows && i < prevRows.length) {
+          if (prevRows && i < prevRows.length && !prevRows[i].pct) {
             row.size = prevRows[i].size;
             row.photos = prevRows[i].photos;
+            delete row.pct;
           }
         }
 
@@ -1127,6 +1127,7 @@ export default defineComponent({
 
         // Add photo to row
         row.photos.push(photo);
+        delete row.pct;
       }
 
       // Restore selection day
