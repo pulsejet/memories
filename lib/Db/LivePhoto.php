@@ -34,12 +34,7 @@ class LivePhoto
             return $exif['MediaGroupUUID'];
         }
 
-        // Samsung JPEG
-        if (\array_key_exists('EmbeddedVideoType', $exif) && str_contains($exif['EmbeddedVideoType'], 'MotionPhoto')) {
-            return 'self__embeddedvideo';
-        }
-
-        // Google MVIMG
+        // Google MVIMG and Samsung JPEG
         if (\array_key_exists('MicroVideoOffset', $exif) && ($videoLength = $exif['MicroVideoOffset']) > 0) {
             // As explained in the following issue,
             // https://github.com/pulsejet/memories/issues/468
@@ -51,6 +46,11 @@ class LivePhoto
             // since exiftool can extract the video from the trailer,
             // but explicitly specifying the offset is much faster because
             // we don't need to spawn exiftool to read the video file.
+            //
+            // For Samsung JPEG, we can also check for EmbeddedVideoType
+            // and subsequently extract the video file using the
+            // EmbeddedVideoFile binary prop, but setting the offset
+            // is faster for the same reason mentioned above.
             $videoOffset = $file->getSize() - $videoLength;
 
             return "self__traileroffset={$videoOffset}";
