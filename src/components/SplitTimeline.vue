@@ -310,7 +310,8 @@ export default defineComponent({
     }
 
     &.m-two > .timeline {
-      transform: translateY(0); // show timeline
+      will-change: unset; // ensure top-bar is at top
+      transform: none; // show timeline
       height: 100%;
     }
   }
