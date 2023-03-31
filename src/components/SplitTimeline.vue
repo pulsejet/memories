@@ -1,5 +1,5 @@
 <template>
-  <div class="split-container" :class="headerClass">
+  <div class="split-container" ref="container" :class="headerClass">
     <div class="primary" ref="primary">
       <component :is="primary" />
     </div>
@@ -44,6 +44,7 @@ export default defineComponent({
   data: () => ({
     pointerDown: false,
     primaryPos: 0,
+    containerSize: 0,
     mobileOpen: 1,
     hammer: null as HammerManager,
     photoCount: 0,
@@ -100,6 +101,11 @@ export default defineComponent({
       const rect = primary.getBoundingClientRect();
       this.primaryPos = this.isVertical() ? rect.top : rect.left;
 
+      // Get size of container element
+      const container = <HTMLDivElement>this.$refs.container;
+      const cRect = container.getBoundingClientRect();
+      this.containerSize = this.isVertical() ? cRect.height : cRect.width;
+
       // Let touch handle itself
       if (event.pointerType === "touch") return;
 
@@ -132,8 +138,9 @@ export default defineComponent({
 
     setFlexBasis(pos: { clientX: number; clientY: number }) {
       const ref = this.isVertical() ? pos.clientY : pos.clientX;
-      const newWidth = Math.max(ref - this.primaryPos, 50);
-      (<HTMLDivElement>this.$refs.primary).style.flexBasis = `${newWidth}px`;
+      const newSize = Math.max(ref - this.primaryPos, 50);
+      const pctSize = (newSize / this.containerSize) * 100;
+      (<HTMLDivElement>this.$refs.primary).style.flexBasis = `${pctSize}%`;
     },
 
     daysLoaded({ count }: { count: number }) {
