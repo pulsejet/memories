@@ -349,7 +349,7 @@ export default defineComponent({
     },
 
     allowBreakout() {
-      return this.containerSize[0] && !this.config_squareThumbs;
+      return globalThis.windowInnerWidth <= 600 && !this.config_squareThumbs;
     },
 
     /** Create new state */
