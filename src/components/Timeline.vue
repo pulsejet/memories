@@ -25,7 +25,10 @@
       <template #before>
         <!-- Show dynamic top matter, name of the view -->
         <div class="recycler-before" ref="recyclerBefore">
-          <div class="text" v-show="!$refs.topmatter.type && list.length">
+          <div
+            class="text"
+            v-show="!$refs.topmatter.type && list.length && viewName"
+          >
             {{ viewName }}
           </div>
 
@@ -851,6 +854,11 @@ export default defineComponent({
       for (const dayId in preloads) {
         this.processDay(Number(dayId), preloads[dayId].detail);
       }
+
+      // Notify parent components about stats
+      this.$emit("daysLoaded", {
+        count: data.reduce((acc, day) => acc + day.count, 0),
+      });
 
       // Fix view height variable
       await this.scrollerManager.reflow();

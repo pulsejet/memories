@@ -1,5 +1,5 @@
 <template>
-  <div class="split-container">
+  <div class="split-container" :class="headerClass">
     <div class="primary" ref="primary">
       <component :is="primary" />
     </div>
@@ -14,7 +14,15 @@
     ></div>
 
     <div class="timeline">
-      <Timeline />
+      <div class="timeline-header" ref="timelineHeader">
+        <div class="swiper"></div>
+        <div class="title">
+          {{ t("memories", "{photoCount} photos", { photoCount }) }}
+        </div>
+      </div>
+      <div class="timeline-inner">
+        <Timeline @daysLoaded="daysLoaded" />
+      </div>
     </div>
   </div>
 </template>
@@ -24,6 +32,7 @@ import { defineComponent } from "vue";
 import Timeline from "./Timeline.vue";
 const MapSplitMatter = () => import("./top-matter/MapSplitMatter.vue");
 import { emit } from "@nextcloud/event-bus";
+import Hammer from "hammerjs";
 
 export default defineComponent({
   name: "SplitTimeline",
@@ -35,6 +44,9 @@ export default defineComponent({
   data: () => ({
     pointerDown: false,
     primaryPos: 0,
+    mobileOpen: 1,
+    hammer: null as HammerManager,
+    photoCount: 0,
   }),
 
   computed: {
@@ -46,15 +58,44 @@ export default defineComponent({
           return "None";
       }
     },
+
+    headerClass() {
+      switch (this.mobileOpen) {
+        case 0:
+          return "m-zero";
+        case 1:
+          return "m-one";
+        case 2:
+          return "m-two";
+      }
+    },
+  },
+
+  mounted() {
+    // Set up hammerjs hooks
+    this.hammer = new Hammer(this.$refs.timelineHeader as HTMLElement);
+    this.hammer.get("swipe").set({
+      direction: Hammer.DIRECTION_VERTICAL,
+      threshold: 3,
+    });
+    this.hammer.on(
+      "swipeup",
+      () => (this.mobileOpen = Math.min(this.mobileOpen + 1, 2))
+    );
+    this.hammer.on(
+      "swipedown",
+      () => (this.mobileOpen = Math.max(this.mobileOpen - 1, 0))
+    );
   },
 
   beforeDestroy() {
     this.pointerUp();
+    this.hammer.destroy();
   },
 
   methods: {
     isVertical() {
-      return globalThis.windowInnerWidth <= 768;
+      return false; // for future
     },
 
     sepDown(event: PointerEvent) {
@@ -100,6 +141,10 @@ export default defineComponent({
       const newWidth = Math.max(ref - this.primaryPos, 50);
       (<HTMLDivElement>this.$refs.primary).style.flexBasis = `${newWidth}px`;
     },
+
+    daysLoaded({ count }: { count: number }) {
+      this.photoCount = count;
+    },
   },
 });
 </script>
@@ -126,6 +171,34 @@ export default defineComponent({
     flex-grow: 1;
     padding-left: 8px;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    > .timeline-header {
+      position: relative;
+      display: block;
+      height: 50px;
+      flex-shrink: 0;
+      flex-grow: 0;
+      border-bottom: 1px solid var(--color-border-dark);
+
+      .swiper {
+        display: none;
+      }
+
+      > .title {
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        font-weight: 500;
+        padding-top: 12px;
+      }
+    }
+
+    > .timeline-inner {
+      flex-grow: 1;
+      overflow: hidden;
+    }
   }
 
   > .separator {
@@ -146,25 +219,76 @@ export default defineComponent({
 }
 
 @media (max-width: 768px) {
+  /**
+   * On mobile the layout works completely differently
+   * Both components are full-height, and the separatator
+   * brings up the timeline to cover up the primary component
+   * fully when dragged up.
+   */
   .split-container {
-    flex-direction: column;
+    display: block;
 
     > div {
+      position: absolute;
       width: 100%;
-      height: unset;
+      background-color: var(--color-main-background);
     }
 
-    > .primary {
-      flex-basis: 40%;
-    }
-
-    > .timeline {
-      padding-left: 0;
+    .primary {
+      height: 50%;
+      will-change: height;
     }
 
     > .separator {
-      height: 5px;
-      width: 100%;
+      display: none;
+    }
+
+    > .timeline {
+      height: 100%;
+      padding-left: 0;
+      will-change: transform;
+      transition: transform 0.2s ease;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+
+      > .timeline-header {
+        height: 58px;
+
+        > .swiper {
+          display: block;
+          position: absolute;
+          left: 50%;
+          top: 0;
+          transform: translate(-50%, 9px);
+          width: 22px;
+          height: 4px;
+          border-radius: 40px;
+          background-color: var(--color-text-light);
+          z-index: 1;
+          opacity: 0.75;
+          pointer-events: none;
+        }
+
+        > .title {
+          font-size: 1.4em;
+          padding-top: 22px;
+        }
+      }
+    }
+
+    &.m-zero > .timeline {
+      transform: translateY(calc(100% - 60px)); // show attribution
+    }
+    &.m-zero > .primary {
+      height: calc(100% - 60px); // show full map
+    }
+
+    &.m-one > .timeline {
+      transform: translateY(calc(50%)); // show half map
+    }
+
+    &.m-two > .timeline {
+      transform: translateY(0); // show timeline
     }
   }
 }
