@@ -14,6 +14,7 @@ OC.L10N.register(
     "Delete" : "Suprimir",
     "Download" : "Telecargar",
     "Favorite" : "Favorit",
+    "View in folder" : "Veire dins lo dossièr",
     "General" : "Generals",
     "Close" : "Tampar",
     "Copy public link" : "Copiar lo ligam public",
