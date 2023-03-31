@@ -61,8 +61,6 @@ import "leaflet-edgebuffer";
 const OSM_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 const OSM_ATTRIBUTION =
   '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors';
-const STAMEN_URL = `https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-background/{z}/{x}/{y}{r}.png`;
-const STAMEN_ATTRIBUTION = `Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.`;
 
 // CSS transition time for zooming in/out cluster animation
 const CLUSTER_TRANSITION_TIME = 300;
@@ -129,13 +127,11 @@ export default defineComponent({
 
   computed: {
     tileurl() {
-      return this.zoom >= 5 || this.isDark ? OSM_TILE_URL : STAMEN_URL;
+      return OSM_TILE_URL;
     },
 
     attribution() {
-      return this.zoom >= 5 || this.isDark
-        ? OSM_ATTRIBUTION
-        : STAMEN_ATTRIBUTION;
+      return OSM_ATTRIBUTION;
     },
   },
 
