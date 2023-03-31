@@ -173,6 +173,8 @@ export default defineComponent({
     /** Header rows for dayId key */
     heads: {} as { [dayid: number]: IHeadRow },
 
+    /** Size of outer container [w, h] */
+    containerSize: [0, 0] as [number, number],
     /** Computed row height */
     rowHeight: 100,
     /** Computed row width */
@@ -336,15 +338,15 @@ export default defineComponent({
     },
 
     isMobile() {
-      return globalThis.windowInnerWidth <= 768;
+      return this.containerSize[0] <= 768;
     },
 
     isMobileLayout() {
-      return globalThis.windowInnerWidth <= 600 || this.$route.name === "map";
+      return this.containerSize[0] <= 600;
     },
 
     allowBreakout() {
-      return globalThis.windowInnerWidth <= 600 && !this.config_squareThumbs;
+      return this.containerSize[0] && !this.config_squareThumbs;
     },
 
     /** Create new state */
@@ -406,8 +408,9 @@ export default defineComponent({
     recomputeSizes() {
       // Size of outer container
       const e = this.$refs.container as Element;
-      let height = e.clientHeight;
+      const height = e.clientHeight;
       const width = e.clientWidth;
+      this.containerSize = [width, height];
 
       // Scroller spans the container height
       this.scrollerHeight = height;
