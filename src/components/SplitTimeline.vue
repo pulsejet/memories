@@ -78,14 +78,8 @@ export default defineComponent({
       direction: Hammer.DIRECTION_VERTICAL,
       threshold: 3,
     });
-    this.hammer.on(
-      "swipeup",
-      () => (this.mobileOpen = Math.min(this.mobileOpen + 1, 2))
-    );
-    this.hammer.on(
-      "swipedown",
-      () => (this.mobileOpen = Math.max(this.mobileOpen - 1, 0))
-    );
+    this.hammer.on("swipeup", this.mobileSwipeUp);
+    this.hammer.on("swipedown", this.mobileSwipeDown);
   },
 
   beforeDestroy() {
@@ -144,6 +138,27 @@ export default defineComponent({
 
     daysLoaded({ count }: { count: number }) {
       this.photoCount = count;
+    },
+
+    async mobileSwipeUp() {
+      this.mobileOpen = Math.min(this.mobileOpen + 1, 2);
+
+      // When swiping up, immediately emit a resize event
+      // so that we can prepare in advance for showing more photos
+      // on the timeline
+      await this.$nextTick();
+      emit("memories:window:resize", null);
+    },
+
+    async mobileSwipeDown() {
+      this.mobileOpen = Math.max(this.mobileOpen - 1, 0);
+
+      // When swiping down, wait for the animation to end, so that
+      // we don't hide the lower half of the timeline before the animation
+      // ends. Note that this is necesary: the height of the timeline inner
+      // div is also animated to the smaller size.
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      emit("memories:window:resize", null);
     },
   },
 });
@@ -244,10 +259,10 @@ export default defineComponent({
     }
 
     > .timeline {
-      height: 100%;
+      height: 50%;
       padding-left: 0;
-      will-change: transform;
-      transition: transform 0.2s ease;
+      will-change: transform, height;
+      transition: transform 0.2s ease, height 0.2s ease;
       border-top-left-radius: 20px;
       border-top-right-radius: 20px;
 
@@ -277,18 +292,19 @@ export default defineComponent({
     }
 
     &.m-zero > .timeline {
-      transform: translateY(calc(100% - 60px)); // show attribution
+      transform: translateY(calc(200% - 60px)); // show attribution
     }
     &.m-zero > .primary {
       height: calc(100% - 60px); // show full map
     }
 
     &.m-one > .timeline {
-      transform: translateY(calc(50%)); // show half map
+      transform: translateY(100%); // show half map
     }
 
     &.m-two > .timeline {
       transform: translateY(0); // show timeline
+      height: 100%;
     }
   }
 }
