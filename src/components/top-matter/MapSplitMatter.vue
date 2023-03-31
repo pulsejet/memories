@@ -11,8 +11,8 @@
       :crossOrigin="true"
       :zoom="zoom"
       :minZoom="2"
-      @moveend="refresh"
-      @zoomend="refresh"
+      @moveend="refreshDebounced"
+      @zoomend="refreshDebounced"
       :options="mapOptions"
     >
       <LTileLayer :url="tileurl" :attribution="attribution" :noWrap="true" />
@@ -93,6 +93,7 @@ export default defineComponent({
 
   data: () => ({
     zoom: 2,
+    oldZoom: 2,
     mapOptions: {
       maxBounds: latLngBounds([-90, -180], [90, 180]),
       maxBoundsViscosity: 0.9,
@@ -109,7 +110,12 @@ export default defineComponent({
     map.mapObject.zoomControl.setPosition("topright");
 
     // Initialize
-    this.refresh();
+    if (this.$route.query.b && this.$route.query.z) {
+      this.setBoundsFromQuery();
+      this.fetchClusters();
+    } else {
+      this.refresh();
+    }
 
     // If currently dark mode, set isDark
     const pane = document.querySelector(".leaflet-tile-pane");
@@ -135,7 +141,17 @@ export default defineComponent({
     },
   },
 
+  watch: {
+    $route() {
+      this.fetchClusters();
+    },
+  },
+
   methods: {
+    async refreshDebounced() {
+      utils.setRenewingTimeout(this, "refreshTimer", this.refresh, 250);
+    },
+
     async refresh() {
       const map = this.$refs.map as LMap;
 
@@ -147,27 +163,37 @@ export default defineComponent({
       let maxLon = boundary.getEast();
 
       // Set query parameters to route if required
-      const s = (x: number) => x.toFixed(6);
-      const bounds = () =>
-        `${s(minLat)},${s(maxLat)},${s(minLon)},${s(maxLon)}`;
+      const bounds = this.boundsToStr({ minLat, maxLat, minLon, maxLon });
 
       // Zoom level
-      const oldZoom = this.zoom;
-      const newZoom = Math.round(map.mapObject.getZoom());
-      const zoomStr = newZoom.toString();
-      this.zoom = newZoom;
+      this.zoom = Math.round(map.mapObject.getZoom());
 
-      // Check if we already have the data
-      if (this.$route.query.b === bounds() && this.$route.query.z === zoomStr) {
+      // Construct query
+      const query = {
+        b: bounds,
+        z: this.zoom.toString(),
+      };
+
+      // If the query parameters are the same, don't do anything
+      if (this.$route.query.b === query.b && this.$route.query.z === query.z) {
         return;
       }
+
+      // Add new query keeping old hash for viewer
       this.$router.replace({
-        query: {
-          b: bounds(),
-          z: zoomStr,
-        },
+        query: query,
         hash: this.$route.hash,
       });
+    },
+
+    async fetchClusters() {
+      const oldZoom = this.oldZoom;
+      const qbounds = this.$route.query.b;
+      const zoom = this.$route.query.z;
+      const paramsChanged = () =>
+        this.$route.query.b !== qbounds || this.$route.query.z !== zoom;
+
+      let { minLat, maxLat, minLon, maxLon } = this.boundsFromQuery();
 
       // Extend bounds by 25% beyond the map
       const latDiff = Math.abs(maxLat - minLat);
@@ -177,12 +203,18 @@ export default defineComponent({
       minLon -= lonDiff * 0.25;
       maxLon += lonDiff * 0.25;
 
+      // Get bounds with expanded margins
+      const bounds = this.boundsToStr({ minLat, maxLat, minLon, maxLon });
+
       // Make API call
-      const url = API.Q(API.MAP_CLUSTERS(), {
-        bounds: bounds(),
-        zoom: zoomStr,
-      });
+      const url = API.Q(API.MAP_CLUSTERS(), { bounds, zoom });
+
+      // Params have changed, quit
       const res = await axios.get(url);
+      if (paramsChanged()) return;
+
+      // Mark currently loaded zoom level
+      this.oldZoom = this.zoom;
 
       if (this.zoom > oldZoom) {
         this.setClustersZoomIn(res.data, oldZoom);
@@ -194,6 +226,40 @@ export default defineComponent({
 
       // Animate markers
       this.animateMarkers();
+    },
+
+    boundsFromQuery() {
+      const bounds = (this.$route.query.b as string).split(",");
+      return {
+        minLat: parseFloat(bounds[0]),
+        maxLat: parseFloat(bounds[1]),
+        minLon: parseFloat(bounds[2]),
+        maxLon: parseFloat(bounds[3]),
+      };
+    },
+
+    boundsToStr({
+      minLat,
+      maxLat,
+      minLon,
+      maxLon,
+    }: {
+      minLat: number;
+      maxLat: number;
+      minLon: number;
+      maxLon: number;
+    }) {
+      const s = (x: number) => x.toFixed(6);
+      return `${s(minLat)},${s(maxLat)},${s(minLon)},${s(maxLon)}`;
+    },
+
+    setBoundsFromQuery() {
+      const map = this.$refs.map as LMap;
+      const { minLat, maxLat, minLon, maxLon } = this.boundsFromQuery();
+      map.mapObject.fitBounds([
+        [minLat, minLon],
+        [maxLat, maxLon],
+      ]);
     },
 
     clusterPreviewUrl(cluster: IMarkerCluster) {
