@@ -268,8 +268,6 @@ export default defineComponent({
     > .timeline {
       height: 50%;
       padding-left: 0;
-      border-top-left-radius: 20px;
-      border-top-right-radius: 20px;
 
       // Note: you can't use transforms to animate the top
       // because it causes the viewer to be rendered incorrectly
