@@ -268,10 +268,13 @@ export default defineComponent({
     > .timeline {
       height: 50%;
       padding-left: 0;
-      will-change: transform, height;
-      transition: transform 0.2s ease, height 0.2s ease;
       border-top-left-radius: 20px;
       border-top-right-radius: 20px;
+
+      // Note: you can't use transforms to animate the top
+      // because it causes the viewer to be rendered incorrectly
+      will-change: top, height;
+      transition: top 0.2s ease, height 0.2s ease;
 
       > .timeline-header {
         height: 58px;
@@ -299,19 +302,18 @@ export default defineComponent({
     }
 
     &.m-zero > .timeline {
-      transform: translateY(calc(200% - 60px)); // show attribution
+      top: calc(100% - 58px); // show attribution
     }
     &.m-zero > .primary {
-      height: calc(100% - 60px); // show full map
+      height: calc(100% - 58px); // show full map
     }
 
     &.m-one > .timeline {
-      transform: translateY(100%); // show half map
+      top: 50%; // show half map
     }
 
     &.m-two > .timeline {
-      will-change: unset; // ensure top-bar is at top
-      transform: none; // show timeline
+      top: 0%;
       height: 100%;
     }
   }
