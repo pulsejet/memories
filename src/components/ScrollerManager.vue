@@ -535,12 +535,18 @@ export default defineComponent({
   z-index: 100;
   cursor: ns-resize;
   opacity: 0;
-  transition: opacity 0.2s ease-in-out;
+  transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
 
   // Show on hover or scroll of main window
   &:hover,
   &.scrolling-recycler {
     opacity: 1;
+    visibility: visible;
+  }
+
+  // On phone, there is no point of hover, so just hide it when not scrolling
+  @include phone {
+    visibility: hidden;
   }
 
   > .tick {
