@@ -273,7 +273,7 @@ class PlacesSetup extends Command
                 }
 
                 // Commit transaction every once in a while
-                if (0 === $count % 500) {
+                if (0 === $count % 100) {
                     $this->connection->commit();
                     $txnCount = 0;
 
