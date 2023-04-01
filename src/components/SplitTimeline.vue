@@ -295,7 +295,6 @@ export default defineComponent({
         }
 
         > .title {
-          font-size: 1.4em;
           padding-top: 22px;
         }
       }
