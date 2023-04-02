@@ -82,6 +82,22 @@ class ImageController extends GenericApiController
             $body = file_get_contents('php://input');
             $files = json_decode($body, true);
 
+            // Filter files with valid parameters
+            $files = array_filter($files, function ($file) {
+                return isset($file['reqid'], $file['fileid'], $file['x'], $file['y'], $file['a'])
+                    && (int) $file['fileid'] > 0
+                    && (int) $file['x'] > 0
+                    && (int) $file['y'] > 0;
+            });
+
+            // Sort files by size, ascending
+            usort($files, function ($a, $b) {
+                $aArea = (int) $a['x'] * (int) $a['y'];
+                $bArea = (int) $b['x'] * (int) $b['y'];
+
+                return $aArea <=> $bArea;
+            });
+
             /** @var \OCP\IPreview $previewManager */
             $previewManager = \OC::$server->get(\OCP\IPreview::class);
 
@@ -95,17 +111,11 @@ class ImageController extends GenericApiController
             header('Content-Type: application/octet-stream');
 
             foreach ($files as $bodyFile) {
-                if (!isset($bodyFile['reqid']) || !isset($bodyFile['fileid']) || !isset($bodyFile['x']) || !isset($bodyFile['y']) || !isset($bodyFile['a'])) {
-                    continue;
-                }
                 $reqid = $bodyFile['reqid'];
                 $fileid = (int) $bodyFile['fileid'];
                 $x = (int) $bodyFile['x'];
                 $y = (int) $bodyFile['y'];
                 $a = '1' === $bodyFile['a'];
-                if ($fileid <= 0 || $x <= 0 || $y <= 0) {
-                    continue;
-                }
 
                 try {
                     // Make sure max preview exists
