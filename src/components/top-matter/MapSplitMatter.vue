@@ -170,7 +170,8 @@ export default defineComponent({
         // This will trigger route change -> fetchClusters
         map.mapObject.setView([pos.lat, pos.lon], 11);
       } catch (e) {
-        // Make sure we initialize clusters anyway
+        // We will initialize clusters anyway
+      } finally {
         this.refresh();
       }
     },
@@ -181,6 +182,7 @@ export default defineComponent({
 
     async refresh() {
       const map = this.$refs.map as LMap;
+      if (!map || !map.mapObject) return;
 
       // Get boundaries of the map
       const boundary = map.mapObject.getBounds();
