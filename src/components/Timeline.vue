@@ -600,12 +600,19 @@ export default defineComponent({
       // Albums
       const user = <string>this.$route.params.user;
       const name = <string>this.$route.params.name;
-      if (this.$route.name === "albums" && user && name) {
+      if (this.$route.name === "albums") {
+        if (!user || !name) {
+          throw new Error("Invalid album route");
+        }
         API.DAYS_FILTER(query, DaysFilterType.ALBUM, `${user}/${name}`);
       }
 
       // People
-      if (this.routeIsPeople && user && name) {
+      if (this.routeIsPeople) {
+        if (!user || !name) {
+          throw new Error("Invalid album route");
+        }
+
         const filter = <DaysFilterType>this.$route.name;
         API.DAYS_FILTER(query, filter, `${user}/${name}`);
 
@@ -616,13 +623,20 @@ export default defineComponent({
       }
 
       // Places
-      if (this.$route.name === "places" && name) {
+      if (this.$route.name === "places") {
+        if (!name || !name.includes("-")) {
+          throw new Error("Invalid place route");
+        }
+
         const id = <string>name.split("-", 1)[0];
         API.DAYS_FILTER(query, DaysFilterType.PLACE, id);
       }
 
       // Tags
-      if (this.$route.name === "tags" && name) {
+      if (this.$route.name === "tags") {
+        if (!name) {
+          throw new Error("Invalid tag route");
+        }
         API.DAYS_FILTER(query, DaysFilterType.TAG, name);
       }
 
