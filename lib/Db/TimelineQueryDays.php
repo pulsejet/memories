@@ -211,7 +211,7 @@ trait TimelineQueryDays
         ?TimelineRoot $root = null,
         bool $recursive = true,
         bool $archive = false
-    ) {
+    ): IQueryBuilder {
         if (null === $root) {
             $root = $this->root();
         }

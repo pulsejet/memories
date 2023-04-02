@@ -9,6 +9,8 @@ use OCP\IDBConnection;
 
 trait TimelineQueryMap
 {
+    use TimelineQueryDays;
+
     protected IDBConnection $connection;
 
     public function transformMapBoundsFilter(IQueryBuilder &$query, bool $aggregate, string $bounds, string $table = 'm')
@@ -120,5 +122,37 @@ trait TimelineQueryMap
         }
 
         return $files;
+    }
+
+    /**
+     * Gets the suggested initial coordinates for the map.
+     * Uses the coordinates of the newest photo (by date).
+     */
+    public function getMapInitialPosition(): ?array
+    {
+        $query = $this->connection->getQueryBuilder();
+
+        // SELECT coordinates
+        $query->select('m.lat', 'm.lon')->from('memories', 'm');
+
+        // WHERE this photo is in the user's requested folder recursively
+        $query = $this->joinFilecache($query);
+
+        // WHERE this photo has coordinates
+        $query->where($query->expr()->andX(
+            $query->expr()->isNotNull('m.lat'),
+            $query->expr()->isNotNull('m.lon')
+        ));
+
+        // ORDER BY datetaken DESC
+        $query->orderBy('m.datetaken', 'DESC');
+
+        // LIMIT 1
+        $query->setMaxResults(1);
+
+        // FETCH coordinates
+        $coords = $this->executeQueryWithCTEs($query)->fetch();
+
+        return $coords ?: null;
     }
 }

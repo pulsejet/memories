@@ -65,4 +65,16 @@ class MapController extends GenericApiController
             return new JSONResponse($clusters);
         });
     }
+
+    /**
+     * @NoAdminRequired
+     */
+    public function init(): Http\Response
+    {
+        return Util::guardEx(function () {
+            return new JSONResponse([
+                'pos' => $this->timelineQuery->getMapInitialPosition(),
+            ]);
+        });
+    }
 }

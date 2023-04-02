@@ -627,12 +627,13 @@ export default defineComponent({
       }
 
       // Map Bounds
-      if (this.$route.name === "map" && this.$route.query.b) {
-        API.DAYS_FILTER(
-          query,
-          DaysFilterType.MAP_BOUNDS,
-          <string>this.$route.query.b
-        );
+      if (this.$route.name === "map") {
+        const bounds = <string>this.$route.query.b;
+        if (!bounds) {
+          throw new Error("Missing map bounds");
+        }
+
+        API.DAYS_FILTER(query, DaysFilterType.MAP_BOUNDS, bounds);
       }
 
       // Month view
@@ -699,11 +700,20 @@ export default defineComponent({
 
     /** Fetch timeline main call */
     async fetchDays(noCache = false) {
-      // Get top folders if route
+      // Awaiting this is important because the folders must render
+      // before the timeline to prevent glitches
       await this.fetchFolders();
 
       // Get URL an cache identifier
-      const url = API.Q(API.DAYS(), this.getQuery());
+      let url: string;
+      try {
+        url = API.Q(API.DAYS(), this.getQuery());
+      } catch (err) {
+        // Likely invalid route; just quit doing anything
+        return;
+      }
+
+      // URL for cached data
       const cacheUrl = <string>this.$route.name + url;
 
       // Try cache first

@@ -188,4 +188,8 @@ export class API {
   static MAP_CLUSTER_PREVIEW(id: number) {
     return tok(gen(`${BASE}/map/clusters/preview/{id}`, { id }));
   }
+
+  static MAP_INIT() {
+    return tok(gen(`${BASE}/map/init`));
+  }
 }

@@ -110,12 +110,7 @@ export default defineComponent({
     map.mapObject.zoomControl.setPosition("topright");
 
     // Initialize
-    if (this.$route.query.b && this.$route.query.z) {
-      this.setBoundsFromQuery();
-      this.fetchClusters();
-    } else {
-      this.refresh();
-    }
+    this.initialize();
 
     // If currently dark mode, set isDark
     const pane = document.querySelector(".leaflet-tile-pane");
@@ -143,11 +138,43 @@ export default defineComponent({
 
   watch: {
     $route() {
-      this.fetchClusters();
+      this.initialize(true);
     },
   },
 
   methods: {
+    /**
+     * Get initial coordinates for display and set them.
+     * Then fetch clusters.
+     */
+    async initialize(reinit: boolean = false) {
+      // Check if we have bounds and zoom in query
+      if (this.$route.query.b && this.$route.query.z) {
+        if (!reinit) {
+          this.setBoundsFromQuery();
+        }
+        return await this.fetchClusters();
+      }
+
+      // Otherwise, get location from server
+      try {
+        const init = await axios.get<any>(API.MAP_INIT());
+
+        // Init data contains position information
+        const map = this.$refs.map as LMap;
+        const pos = init?.data?.pos;
+        if (!pos?.lat || !pos?.lon) {
+          throw new Error("No position data");
+        }
+
+        // This will trigger route change -> fetchClusters
+        map.mapObject.setView([pos.lat, pos.lon], 11);
+      } catch (e) {
+        // Make sure we initialize clusters anyway
+        this.refresh();
+      }
+    },
+
     async refreshDebounced() {
       utils.setRenewingTimeout(this, "refreshTimer", this.refresh, 250);
     },
