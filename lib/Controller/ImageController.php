@@ -93,8 +93,6 @@ class ImageController extends GenericApiController
 
             // stream the response
             header('Content-Type: application/octet-stream');
-            header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time() + 7 * 3600 * 24));
-            header('Cache-Control: max-age='. 7 * 3600 * 24 .', private');
 
             foreach ($files as $bodyFile) {
                 if (!isset($bodyFile['reqid']) || !isset($bodyFile['fileid']) || !isset($bodyFile['x']) || !isset($bodyFile['y']) || !isset($bodyFile['a'])) {
@@ -135,12 +133,18 @@ class ImageController extends GenericApiController
                     }
 
                     ob_start();
-                    echo json_encode([
+                    // Encode parameters
+                    $json = json_encode([
                         'reqid' => $reqid,
-                        'Content-Length' => \strlen($content),
-                        'Content-Type' => $preview->getMimeType(),
+                        'len' => \strlen($content),
+                        'type' => $preview->getMimeType(),
                     ]);
-                    echo "\n";
+
+                    // Send the length of the json as a single byte
+                    echo \chr(\strlen($json));
+                    echo $json;
+
+                    // Send the image
                     echo $content;
                     ob_end_flush();
                 } catch (\OCP\Files\NotFoundException $e) {
