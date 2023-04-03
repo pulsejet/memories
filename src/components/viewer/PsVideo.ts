@@ -415,7 +415,7 @@ class VideoContentSetup {
         const w = Number(exif?.ImageWidth || 1);
 
         if (h && w) {
-          previousOrientation = screen.orientation.type;
+          previousOrientation ||= screen.orientation.type;
           const orientation = h < w && !rotation ? "landscape" : "portrait";
           screen.orientation.lock(orientation);
         }
