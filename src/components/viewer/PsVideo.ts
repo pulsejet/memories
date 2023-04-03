@@ -193,20 +193,35 @@ class VideoContentSetup {
       },
     }));
 
+    // Fallbacks
+    let directFailed = false;
+    let hlsFailed = false;
+
     vjs.on("error", () => {
       if (vjs.src(undefined).includes("m3u8")) {
-        // HLS could not be streamed
-        console.error("Video.js: HLS stream could not be opened.");
+        hlsFailed = true;
+        console.warn("PsVideo: HLS stream could not be opened.");
 
         if (getCurrentUser()?.isAdmin) {
           showError(t("memories", "Transcoding failed, check Nextcloud logs."));
         }
 
-        vjs.src({
-          src: content.data.src,
-          type: "video/mp4",
-        });
-        this.updateRotation(content, 0);
+        if (!directFailed) {
+          console.warn("PsVideo: Trying direct video stream");
+          vjs.src({
+            src: content.data.src,
+            type: "video/mp4",
+          });
+          this.updateRotation(content, 0);
+        }
+      } else {
+        directFailed = true;
+        console.warn("PsVideo: Direct video stream could not be opened.");
+
+        if (!hlsFailed && !config_noTranscode) {
+          console.warn("PsVideo: Trying HLS stream");
+          vjs.src(this.getHLSsrc(content));
+        }
       }
     });
 

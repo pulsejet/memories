@@ -2,6 +2,10 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## Unreleased
+
+- **Feature**: "Direct" video playback will now fall back to HLS (transcoding) if playback fails (e.g. due to lack of browser support).
+
 ## v4.13.0 (2023-04-03)
 
 - **Feature**: Use GPS location data for timezone calculation.  
