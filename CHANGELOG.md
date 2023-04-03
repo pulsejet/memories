@@ -2,7 +2,7 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
-## Unreleased
+## v4.13.0 (2023-04-03)
 
 - **Feature**: Use GPS location data for timezone calculation.  
   Many cameras do not store the timezone in EXIF data. This feature allows Memories to use the GPS location data to calculate the timezone. To take advantage of this, you will need to run `occ memories:places-setup` followed by `occ memories:index --clear` (or `occ memories:index -f`) to reindex your photos.
