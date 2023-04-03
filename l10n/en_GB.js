@@ -64,6 +64,7 @@ OC.L10N.register(
     "Choose Timeline Paths" : "Choose Timeline Paths",
     "Choose the root for the folders view" : "Choose the root for the folders view",
     "Close" : "Close",
+    "{photoCount} photos" : "{photoCount} photos",
     "Failed to load some photos" : "Failed to load some photos",
     "_{n} item added to album_::_{n} items added to album_" : ["{n} item added to album","{n} items added to album"],
     "Search for collaborators" : "Search for collaborators",
