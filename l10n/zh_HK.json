@@ -62,6 +62,7 @@
     "Choose Timeline Paths" : "選擇時間線途徑",
     "Choose the root for the folders view" : "選擇資料夾檢視的根",
     "Close" : "關閉",
+    "{photoCount} photos" : "{photoCount} 張照片",
     "Failed to load some photos" : "未能加載一些照片",
     "_{n} item added to album_::_{n} items added to album_" : ["已新增 {n} 個項目至相簿"],
     "Search for collaborators" : "尋找協作者",

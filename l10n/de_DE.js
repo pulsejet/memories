@@ -64,6 +64,7 @@ OC.L10N.register(
     "Choose Timeline Paths" : "Pfade der Zeitleiste auswählen",
     "Choose the root for the folders view" : "Wählen Sie das Stammverzeichnis für die Ordneransicht",
     "Close" : "Schließen",
+    "{photoCount} photos" : "{photoCount} Fotos",
     "Failed to load some photos" : "Laden einiger Fotos fehlgeschlagen",
     "_{n} item added to album_::_{n} items added to album_" : ["{n} Element zum Album hinzugefügt","{n} Elmente zum Album hinzugefügt"],
     "Search for collaborators" : "Suche nach Mitbearbeitenden",
