@@ -408,7 +408,7 @@ class VideoContentSetup {
       let previousOrientation: OrientationLockType;
 
       // Lock orientation when entering fullscreen
-      plyr.on("enterfullscreen", (event) => {
+      plyr.on("enterfullscreen", async (event) => {
         const rotation = this.updateRotation(content);
         const exif = content.data.photo.imageInfo?.exif;
         const h = Number(exif?.ImageHeight || 0);
@@ -417,18 +417,27 @@ class VideoContentSetup {
         if (h && w) {
           previousOrientation ||= screen.orientation.type;
           const orientation = h < w && !rotation ? "landscape" : "portrait";
-          screen.orientation.lock(orientation);
+
+          try {
+            await screen.orientation.lock(orientation);
+          } catch (e) {
+            previousOrientation = undefined;
+          }
         }
       });
 
       // Unlock orientation when exiting fullscreen
-      plyr.on("exitfullscreen", (event) => {
-        if (previousOrientation) {
-          screen.orientation.lock(previousOrientation);
-          previousOrientation = undefined;
+      plyr.on("exitfullscreen", async (event) => {
+        try {
+          if (previousOrientation) {
+            await screen.orientation.lock(previousOrientation);
+            previousOrientation = undefined;
+          }
+        } catch (e) {
+          // Ignore
+        } finally {
+          screen.orientation.unlock();
         }
-
-        screen.orientation.unlock();
       });
     }
   }
