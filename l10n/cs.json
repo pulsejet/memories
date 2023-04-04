@@ -61,6 +61,7 @@
     "Choose Timeline Paths" : "Zvolte trasy časovou osou",
     "Choose the root for the folders view" : "Zvolte kořen pro zobrazení složek",
     "Close" : "Zavřít",
+    "{photoCount} photos" : "{photoCount} fotek",
     "Failed to load some photos" : "Některé fotky se nepodařilo načíst",
     "_{n} item added to album_::_{n} items added to album_" : ["{n} položka přidána do alba","{n} položky přidány do alba","{n} položek přidáno do alba","{n} položky přidány do alba"],
     "Search for collaborators" : "Vyhledat spolupracující",

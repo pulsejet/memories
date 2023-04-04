@@ -33,6 +33,7 @@ OC.L10N.register(
     "Name" : "Nombre",
     "Update" : "Actualizar",
     "Search" : "Buscar",
+    "Loading …" : "Loading …",
     "Remove" : "Eliminar",
     "Share link" : "Compartir liga",
     "Refresh" : "Actualizar",
