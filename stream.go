@@ -15,19 +15,14 @@ import (
 	"time"
 )
 
-type Chunk struct {
-	id     int
-	done   bool
-	notifs []chan bool
-}
+const (
+	ENCODER_X264 = "libx264"
+	ENCODER_VAAPI = "h264_vaapi"
+	ENCODER_NVENC = "h264_nvenc"
 
-func NewChunk(id int) *Chunk {
-	return &Chunk{
-		id:     id,
-		done:   false,
-		notifs: make([]chan bool, 0),
-	}
-}
+	QUALITY_MAX = "max"
+	CODEC_H264 = "h264"
+)
 
 type Stream struct {
 	c       *Config
@@ -187,7 +182,7 @@ func (s *Stream) ServeChunk(w http.ResponseWriter, id int) error {
 func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
 	args := s.transcodeArgs(0)
 
-	if s.m.probe.CodecName == "h264" && s.quality == "max" {
+	if s.m.probe.CodecName == CODEC_H264 && s.quality == QUALITY_MAX {
 		// try to just send the original file
 		http.ServeFile(w, r, s.m.path)
 		return nil
@@ -366,15 +361,15 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 	}
 
 	// encoder selection
-	CV := "libx264"
+	CV := ENCODER_X264
 
 	// Check whether hwaccel should be used
 	if s.c.VAAPI {
-		CV = "h264_vaapi"
+		CV = ENCODER_VAAPI
 		extra := "-hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format vaapi"
 		args = append(args, strings.Split(extra, " ")...)
 	} else if s.c.NVENC {
-		CV = "h264_nvenc"
+		CV = ENCODER_NVENC
 		extra := "-hwaccel cuda"
 		args = append(args, strings.Split(extra, " ")...)
 	}
@@ -392,18 +387,18 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 	scalerArgs := make([]string, 0)
 	scalerArgs = append(scalerArgs, "force_original_aspect_ratio=decrease")
 
-	if s.c.VAAPI {
+	if CV == ENCODER_VAAPI {
 		format = "format=nv12|vaapi,hwupload"
 		scaler = "scale_vaapi"
 		scalerArgs = append(scalerArgs, "format=nv12")
-	} else if s.c.NVENC {
+	} else if CV == ENCODER_NVENC {
 		format = "format=nv12|cuda,hwupload"
 		scaler = fmt.Sprintf("scale_%s", s.c.NVENCScale)
 		scalerArgs = append(scalerArgs, "passthrough=0")
 	}
 
 	// Scale height and width if not max quality
-	if s.quality != "max" {
+	if s.quality != QUALITY_MAX {
 		scalerArgs = append(scalerArgs, fmt.Sprintf("w=%d", s.width))
 		scalerArgs = append(scalerArgs, fmt.Sprintf("h=%d", s.height))
 	}
@@ -413,7 +408,7 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 	args = append(args, []string{"-vf", filter}...)
 
 	// Apply bitrate cap if not max quality
-	if s.quality != "max" {
+	if s.quality != QUALITY_MAX {
 		args = append(args, []string{
 			"-maxrate", fmt.Sprintf("%d", s.bitrate),
 			"-bufsize", fmt.Sprintf("%d", s.bitrate*2),
@@ -428,13 +423,13 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 	}...)
 
 	// Device specific output args
-	if s.c.VAAPI {
+	if CV == ENCODER_VAAPI {
 		args = append(args, []string{"-global_quality", "25"}...)
 
 		if s.c.VAAPILowPower {
 			args = append(args, []string{"-low_power", "1"}...)
 		}
-	} else if s.c.NVENC {
+	} else if CV == ENCODER_NVENC {
 		args = append(args, []string{
 			"-preset", "p6",
 			"-tune", "ll",
@@ -446,7 +441,7 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 		if s.c.NVENCTemporalAQ {
 			args = append(args, []string{"-temporal-aq", "1"}...)
 		}
-	} else if CV == "libx264" {
+	} else if CV == ENCODER_X264 {
 		args = append(args, []string{
 			"-preset", "faster",
 			"-crf", "24",
