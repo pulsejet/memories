@@ -15,11 +15,18 @@ registerRoute(/^.*\/apps\/memories\/api\/video\/livephoto\/.*/, new CacheFirst({
   ],
 }));
 
-registerRoute(/^.*\/apps\/memories\/api\/.*/, new NetworkOnly());
+// Important: Using the NetworkOnly strategy and not registering
+// a route are NOT equivalent. The NetworkOnly strategy will
+// strip certain headers such as HTTP-Range, which is required
+// for proper playback of videos.
 
-// Cache pages for same-origin requests only\
+const networkOnly = [
+  /^.*\/apps\/memories\/api\/.*/,
+];
+
+// Cache pages for same-origin requests only
 registerRoute(
-  ({ url }) => url.origin === self.location.origin,
+  ({ url }) => url.origin === self.location.origin && !networkOnly.some((regex) => regex.test(url.href)),
   new NetworkFirst({
     cacheName: "pages",
     plugins: [
