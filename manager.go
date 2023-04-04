@@ -81,23 +81,16 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 		// scale bitrate by frame rate with reference 30
 		stream.bitrate = int(float64(stream.bitrate) * float64(m.probe.FrameRate) / 30.0)
 
-		if stream.height > m.probe.Height || stream.width > m.probe.Width {
+		// these streams are pointless
+		if stream.height > m.probe.Height || stream.width > m.probe.Width || float64(stream.bitrate) > float64(m.probe.BitRate)*0.8 {
 			delete(m.streams, k)
-		}
-
-		if stream.height == m.probe.Height || stream.width == m.probe.Width {
-			if stream.bitrate > m.probe.BitRate || float64(stream.bitrate) > float64(m.probe.BitRate)*0.8 {
-				// no point in "upscaling"
-				// should have at least 20% difference
-				delete(m.streams, k)
-			}
 		}
 	}
 
 	// Original stream
-	m.streams["max"] = &Stream{
+	m.streams[QUALITY_MAX] = &Stream{
 		c: c, m: m,
-		quality: "max",
+		quality: QUALITY_MAX,
 		height:  m.probe.Height,
 		width:   m.probe.Width,
 		bitrate: m.probe.BitRate,
