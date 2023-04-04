@@ -193,6 +193,9 @@ class VideoContentSetup {
         vhs: {
           overrideNative: overrideNative,
           withCredentials: false,
+          useBandwidthFromLocalStorage: true,
+          useNetworkInformationApi: true,
+          limitRenditionByPlayerDimensions: false,
         },
         nativeAudioTracks: !overrideNative,
         nativeVideoTracks: !overrideNative,
@@ -305,7 +308,7 @@ class VideoContentSetup {
     // Populate quality list
     let qualityList = content.videojs?.qualityLevels();
     let qualityNums: number[];
-    if (qualityList && qualityList.length > 1) {
+    if (qualityList && qualityList.length >= 1) {
       const s = new Set<number>();
       let hasMax = false;
       for (let i = 0; i < qualityList?.length; i++) {
