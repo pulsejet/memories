@@ -126,6 +126,15 @@ class VideoContentSetup {
     });
   }
 
+  getDirectSrc(content: VideoContent) {
+    const numChunks =
+      Math.ceil((content.data.photo?.video_duration || 0) / 3) || undefined;
+    return {
+      src: API.Q(content.data.src, { numChunks }),
+      type: "video/mp4", // chrome refuses to play video/quicktime, so fool it
+    };
+  }
+
   getHLSsrc(content: VideoContent) {
     // Get base URL
     const fileid = content.data.photo.fileid;
@@ -169,10 +178,7 @@ class VideoContentSetup {
       sources.push(this.getHLSsrc(content));
     }
 
-    sources.push({
-      src: content.data.src,
-      type: "video/mp4",
-    });
+    sources.push(this.getDirectSrc(content));
 
     const overrideNative = !vidjs.browser.IS_SAFARI;
     const vjs = (content.videojs = vidjs(content.videoElement, {
@@ -208,10 +214,7 @@ class VideoContentSetup {
 
         if (!directFailed) {
           console.warn("PsVideo: Trying direct video stream");
-          vjs.src({
-            src: content.data.src,
-            type: "video/mp4",
-          });
+          vjs.src(this.getDirectSrc(content));
           this.updateRotation(content, 0);
         }
       } else {
@@ -350,6 +353,8 @@ class VideoContentSetup {
           qualityList = content.videojs?.qualityLevels();
           if (!qualityList || !content.videojs) return;
 
+          const isHLS = content.videojs.src(undefined).includes("m3u8");
+
           if (quality === -2) {
             // Direct playback
             // Prevent any useless transcodes
@@ -358,16 +363,13 @@ class VideoContentSetup {
             }
 
             // Set the source to the original video
-            if (content.videojs.src(undefined).includes("m3u8")) {
-              content.videojs.src({
-                src: content.data.src,
-                type: "video/mp4",
-              });
+            if (isHLS) {
+              content.videojs.src(this.getDirectSrc(content));
             }
             return;
           } else {
             // Set source to HLS
-            if (!content.videojs.src(undefined).includes("m3u8")) {
+            if (!isHLS) {
               content.videojs.src(this.getHLSsrc(content));
             }
           }

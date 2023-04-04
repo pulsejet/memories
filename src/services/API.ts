@@ -51,6 +51,9 @@ export class API {
         }
       });
 
+      // Check if nothing in query
+      if (!Object.keys(query).length) return url;
+
       // Convert to search params
       query = new URLSearchParams(<any>query);
     }

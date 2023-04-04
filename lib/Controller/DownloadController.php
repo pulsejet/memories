@@ -125,9 +125,9 @@ class DownloadController extends GenericApiController
      *
      * @PublicPage
      */
-    public function one(int $fileid, bool $resumable = true): Http\Response
+    public function one(int $fileid, bool $resumable = true, int $numChunks = 0): Http\Response
     {
-        return Util::guardEx(function () use ($fileid, $resumable) {
+        return Util::guardEx(function () use ($fileid, $resumable, $numChunks) {
             $file = $this->fs->getUserFile($fileid);
 
             // check if http_range is sent by browser
@@ -157,10 +157,18 @@ class DownloadController extends GenericApiController
                 // Default to 64MB
                 $maxLen = 64 * 1024 * 1024;
 
-                // For videos, use 4MB
+                // For videos, use a max of 8MB
                 if ('video' === $this->request->getHeader('Sec-Fetch-Dest')) {
-                    $maxLen = 4 * 1024 * 1024;
+                    $maxLen = 8 * 1024 * 1024;
                 }
+
+                // Check if the client sent a hint for the chunk size
+                if ($numChunks) {
+                    $maxLen = min(ceil($size / $numChunks), $maxLen * 3);
+                }
+
+                // No less than 1MB; this is just wasteful
+                $maxLen = max($maxLen, 1024 * 1024);
 
                 $seekEnd = min($seekEnd, $seekStart + $maxLen);
             }
