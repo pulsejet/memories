@@ -110,7 +110,7 @@ class DownloadController extends GenericApiController
 
             // Download single file
             if (1 === \count($fileIds)) {
-                return $this->one($fileIds[0]);
+                return $this->one($fileIds[0], false);
             }
 
             // Download multiple files
@@ -125,41 +125,107 @@ class DownloadController extends GenericApiController
      *
      * @PublicPage
      */
-    public function one(int $fileid): Http\Response
+    public function one(int $fileid, bool $resumable = true): Http\Response
     {
-        return Util::guardEx(function () use ($fileid) {
+        return Util::guardEx(function () use ($fileid, $resumable) {
             $file = $this->fs->getUserFile($fileid);
 
-            // Get the owner's root folder
-            $owner = $file->getOwner()->getUID();
-            $userFolder = Util::getUserFolder($owner);
-
-            // Get the file in the context of the owner
-            $ownerFile = $userFolder->getById($fileid);
-            if (0 === \count($ownerFile)) {
-                // This should never happen, since the file was already found earlier
-                // Except if it was deleted in the meantime ...
-                throw new \Exception('File not found in owner\'s root folder');
+            // check if http_range is sent by browser
+            $range = $this->request->getHeader('Range');
+            if (!empty($range)) {
+                [$sizeUnit, $rangeOrig] = explode('=', $range, 2);
+                if ('bytes' === $sizeUnit) {
+                    // http://tools.ietf.org/id/draft-ietf-http-range-retrieval-00.txt
+                    [$range, $extra] = explode(',', $rangeOrig, 2);
+                }
             }
 
-            // Get DAV path of file relative to owner's root folder
-            $path = $userFolder->getRelativePath($ownerFile[0]->getPath());
-            if (null === $path) {
-                throw new \Exception('File path not found in owner\'s root folder');
+            // If not resumable, discard the range
+            if (!$resumable) {
+                $range = '';
             }
 
-            // Setup filesystem for owner
-            \OC_Util::tearDownFS();
-            \OC_Util::setupFS($owner);
+            // Get file reading parameters
+            $size = $file->getSize();
+            [$seekStart, $seekEnd] = explode('-', $range, 2);
+            $seekEnd = (empty($seekEnd)) ? ($size - 1) : min(abs((int) $seekEnd), $size - 1);
+            $seekStart = (empty($seekStart) || $seekEnd < abs((int) $seekStart)) ? 0 : max(abs((int) $seekStart), 0);
 
-            // HEAD and RANGE support
-            $server_params = ['head' => 'HEAD' === $this->request->getMethod()];
-            if (isset($_SERVER['HTTP_RANGE'])) {
-                $server_params['range'] = $this->request->getHeader('Range');
+            // If the client knows about ranges, only send a maximum of X KB
+            // This way we don't read the whole file for no reason
+            if (!empty($range)) {
+                // Default to 64MB
+                $maxLen = 64 * 1024 * 1024;
+
+                // For videos, use 4MB
+                if ('video' === $this->request->getHeader('Sec-Fetch-Dest')) {
+                    $maxLen = 4 * 1024 * 1024;
+                }
+
+                $seekEnd = min($seekEnd, $seekStart + $maxLen);
             }
 
-            // Write file to output and exit
-            \OC_Files::get(\dirname($path), basename($path), $server_params);
+            // Only send partial content header if downloading a piece of the file
+            if ($seekStart > 0 || $seekEnd < ($size - 1)) {
+                header('HTTP/1.1 206 Partial Content');
+            }
+
+            // Set headers
+            header('Accept-Ranges: bytes');
+            header("Content-Range: bytes {$seekStart}-{$seekEnd}/{$size}");
+            header('Content-Length: '.($seekEnd - $seekStart + 1));
+            header('Content-Type: '.$file->getMimeType());
+
+            // Make sure the browser downloads the file
+            header('Content-Disposition: attachment; filename="'.$file->getName().'"');
+
+            // Open file to send
+            $res = $file->fopen('rb');
+
+            // Seek to start if not zero
+            if ($seekStart > 0) {
+                fseek($res, $seekStart);
+            }
+
+            // Handle aborts manually
+            ignore_user_abort(true);
+
+            // Send 1MB at a time
+            // But send 256KB initially in case loading metadata only
+            $chunkRead = 0;
+
+            // Start output buffering
+            ob_start();
+
+            while (!feof($res) && $seekStart <= $seekEnd) {
+                $buffer = fread($res, 1024 * 1024);
+                if (false === $buffer) {
+                    break;
+                }
+                $seekStart += \strlen($buffer);
+                $chunkRead += \strlen($buffer);
+
+                // Send buffer
+                echo $buffer;
+
+                // Flush output if chunk is large enough
+                if ($chunkRead > 1024 * 512) {
+                    // Check if client disconnected
+                    if (CONNECTION_NORMAL !== connection_status() || connection_aborted()) {
+                        break;
+                    }
+
+                    // Flush output
+                    ob_flush();
+                    $chunkRead = 0;
+                }
+            }
+
+            // Flush remaining output
+            ob_end_flush();
+
+            // Close file
+            fclose($res);
 
             exit;
         });
