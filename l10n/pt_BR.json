@@ -62,6 +62,7 @@
     "Choose Timeline Paths" : "Escolha os caminhos da linha do tempo",
     "Choose the root for the folders view" : "Escolha a raiz para a visualização de pastas",
     "Close" : "Fechar",
+    "{photoCount} photos" : "{photoCount} fotos",
     "Failed to load some photos" : "Falha ao carregar algumas fotos",
     "_{n} item added to album_::_{n} items added to album_" : ["{n} itens adicionados ao álbum","{n} itens adicionados ao álbum","{n} itens adicionados ao álbum"],
     "Search for collaborators" : "Pesquisar colaboradores",
