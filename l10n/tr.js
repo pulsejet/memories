@@ -64,6 +64,7 @@ OC.L10N.register(
     "Choose Timeline Paths" : "Zaman tüneli yollarını seçin",
     "Choose the root for the folders view" : "Klasörler görünümünün kök klasörünü seçin",
     "Close" : "Kapat",
+    "{photoCount} photos" : "{photoCount} fotoğraf",
     "Failed to load some photos" : "Bazı fotoğraflar yüklenemedi",
     "_{n} item added to album_::_{n} items added to album_" : ["{n} öge albüme eklendi","{n} öge albüme eklendi"],
     "Search for collaborators" : "Katılımcı arama",
