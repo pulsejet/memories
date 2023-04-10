@@ -92,7 +92,11 @@ class OtherController extends GenericApiController
 
             // If changing vod settings, kill any running go-vod instances
             if (0 === strpos($key, 'memories.vod.')) {
-                Util::pkill('go-vod');
+                try {
+                    BinExt::startGoVod();
+                } catch (\Exception $e) {
+                    error_log('Failed to start go-vod: '.$e->getMessage());
+                }
             }
 
             return new JSONResponse([], Http::STATUS_OK);
@@ -129,6 +133,14 @@ class OtherController extends GenericApiController
 
             // Check go-vod binary
             $status['govod'] = $this->getExecutableStatus(Util::getSystemConfig('memories.vod.path'));
+            if ('ok' === $status['govod'] || Util::getSystemConfig('memories.vod.external')) {
+                try {
+                    BinExt::testStartGoVod();
+                    $status['govod'] = 'test_ok';
+                } catch (\Exception $e) {
+                    $status['govod'] = 'test_fail:'.$e->getMessage();
+                }
+            }
 
             // Check for VA-API device
             $devPath = '/dev/dri/renderD128';

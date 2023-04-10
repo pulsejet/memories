@@ -5,6 +5,7 @@ namespace OCA\Memories;
 class BinExt
 {
     public const EXIFTOOL_VER = '12.58';
+    public const GOVOD_VER = '0.0.34';
 
     /** Test configured exiftool binary */
     public static function testExiftool(): bool
@@ -74,6 +75,192 @@ class BinExt
         Util::setSystemConfig('memories.exiftool_no_local', true);
 
         return false;
+    }
+
+    /**
+     * Get the upstream URL for a video.
+     */
+    public static function getGoVodUrl(string $client, string $path, string $profile): string
+    {
+        $path = rawurlencode($path);
+
+        $bind = Util::getSystemConfig('memories.vod.bind');
+        $connect = Util::getSystemConfig('memories.vod.connect', $bind);
+
+        return "http://{$connect}/{$client}{$path}/{$profile}";
+    }
+
+    public static function getGoVodConfig($local = false)
+    {
+        // Get config from system values
+        $env = [
+            'vaapi' => Util::getSystemConfig('memories.vod.vaapi'),
+            'vaapiLowPower' => Util::getSystemConfig('memories.vod.vaapi.low_power'),
+
+            'nvenc' => Util::getSystemConfig('memories.vod.nvenc', false),
+            'nvencTemporalAQ' => Util::getSystemConfig('memories.vod.nvenc.temporal_aq'),
+            'nvencScale' => Util::getSystemConfig('memories.vod.nvenc.scale'),
+        ];
+
+        if (!$local) {
+            return $env;
+        }
+
+        // Get temp directory
+        $tmpPath = Util::getSystemConfig('memories.vod.tempdir', sys_get_temp_dir().'/go-vod/');
+
+        // Make sure path ends with slash
+        if ('/' !== substr($tmpPath, -1)) {
+            $tmpPath .= '/';
+        }
+
+        // Add instance ID to path
+        $tmpPath .= Util::getSystemConfig('instanceid', 'default');
+
+        return array_merge($env, [
+            'bind' => Util::getSystemConfig('memories.vod.bind'),
+            'ffmpeg' => Util::getSystemConfig('memories.vod.ffmpeg'),
+            'ffprobe' => Util::getSystemConfig('memories.vod.ffprobe'),
+            'tempdir' => $tmpPath,
+        ]);
+    }
+
+    /**
+     * If local, restart the go-vod instance.
+     * If external, configure the go-vod instance.
+     */
+    public static function startGoVod()
+    {
+        // Check if external
+        if (Util::getSystemConfig('memories.vod.external')) {
+            self::configureGoVod();
+
+            return;
+        }
+
+        // Get transcoder path
+        $transcoder = Util::getSystemConfig('memories.vod.path');
+        if (empty($transcoder)) {
+            throw new \Exception('Transcoder not configured');
+        }
+
+        // Make sure transcoder exists
+        if (!file_exists($transcoder)) {
+            throw new \Exception("Transcoder not found; ({$transcoder})");
+        }
+
+        // Make transcoder executable
+        if (!is_executable($transcoder)) {
+            @chmod($transcoder, 0755);
+            if (!is_executable($transcoder)) {
+                throw new \Exception("Transcoder not executable (chmod 755 {$transcoder})");
+            }
+        }
+
+        // Get local config
+        $env = self::getGoVodConfig(true);
+        $tmpPath = $env['tempdir'];
+
+        // (Re-)create temp dir
+        shell_exec("rm -rf '{$tmpPath}' && mkdir -p '{$tmpPath}' && chmod 755 '{$tmpPath}'");
+
+        // Check temp directory exists
+        if (!is_dir($tmpPath)) {
+            throw new \Exception("Temp directory could not be created ({$tmpPath})");
+        }
+
+        // Check temp directory is writable
+        if (!is_writable($tmpPath)) {
+            throw new \Exception("Temp directory is not writable ({$tmpPath})");
+        }
+
+        // Write config to file
+        $logFile = $tmpPath.'.log';
+        $configFile = $tmpPath.'.json';
+        file_put_contents($configFile, json_encode($env, JSON_PRETTY_PRINT));
+
+        // Kill the transcoder in case it's running
+        \OCA\Memories\Util::pkill($transcoder);
+
+        // Start transcoder
+        shell_exec("nohup {$transcoder} {$configFile} >> '{$logFile}' 2>&1 & > /dev/null");
+
+        // wait for 500ms
+        usleep(500000);
+
+        return $logFile;
+    }
+
+    /**
+     * Test go-vod and (re)-start if it is not external.
+     */
+    public static function testStartGoVod(): bool
+    {
+        try {
+            return self::testGoVod();
+        } catch (\Exception $e) {
+            // silently try to restart
+        }
+
+        // Attempt to (re)start go-vod
+        // If it is external, this only attempts to reconfigure
+        self::startGoVod();
+
+        // Test again
+        return self::testGoVod();
+    }
+
+    /** Test the go-vod instance that is running */
+    public static function testGoVod(): bool
+    {
+        // TODO: check data mount; ignoring the result of the file for now
+        $testfile = realpath(__DIR__.'/../exiftest.jpg');
+
+        // Make request
+        $url = self::getGoVodUrl('test', $testfile, 'test');
+
+        try {
+            $client = new \GuzzleHttp\Client();
+            $res = $client->request('GET', $url);
+        } catch (\Exception $e) {
+            throw new \Exception('failed to connect to go-vod: '.$e->getMessage());
+        }
+
+        // Parse body
+        $json = json_decode($res->getBody(), true);
+        if (!$json) {
+            throw new \Exception('failed to parse go-vod response');
+        }
+
+        // Check version
+        $version = $json['version'];
+        $target = self::GOVOD_VER;
+        if (!version_compare($version, $target, '=')) {
+            throw new \Exception("version does not match {$version} <==> {$target}");
+        }
+
+        return true;
+    }
+
+    /** POST a new configuration to go-vod */
+    public static function configureGoVod()
+    {
+        // Get config
+        $config = self::getGoVodConfig();
+
+        // Make request
+        $url = self::getGoVodUrl('config', '/config', 'config');
+
+        try {
+            $client = new \GuzzleHttp\Client();
+            $client->request('POST', $url, [
+                'json' => $config,
+            ]);
+        } catch (\Exception $e) {
+            throw new \Exception('failed to connect to go-vod: '.$e->getMessage());
+        }
+
+        return true;
     }
 
     /** Detect the go-vod binary to use */
