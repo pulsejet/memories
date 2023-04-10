@@ -146,17 +146,16 @@ class PageController extends Controller
     public static function provideCommonInitialState(IInitialState &$initialState)
     {
         $appManager = \OC::$server->get(\OCP\App\IAppManager::class);
-        $config = \OC::$server->get(\OCP\IConfig::class);
 
         // App version
         $initialState->provideInitialState('version', $appManager->getAppInfo('memories')['version']);
 
         // Video configuration
-        $initialState->provideInitialState('notranscode', $config->getSystemValue('memories.vod.disable', 'UNSET'));
-        $initialState->provideInitialState('video_default_quality', $config->getSystemValue('memories.video_default_quality', '0'));
+        $initialState->provideInitialState('vod_disable', Util::getSystemConfig('memories.vod.disable'));
+        $initialState->provideInitialState('video_default_quality', Util::getSystemConfig('memories.video_default_quality'));
 
         // Geo configuration
-        $initialState->provideInitialState('places_gis', $config->getSystemValue('memories.gis_type', '-1'));
+        $initialState->provideInitialState('places_gis', Util::getSystemConfig('memories.gis_type'));
     }
 
     /**

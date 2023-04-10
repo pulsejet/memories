@@ -23,12 +23,7 @@ type PsVideoEvent = PsEvent & {
   content: VideoContent;
 };
 
-const config_noTranscode = loadState(
-  "memories",
-  "notranscode",
-  <string>"UNSET"
-) as boolean | string;
-const config_videoIsSetup = config_noTranscode !== "UNSET";
+const config_vodDisable = loadState("memories", "vod_disable");
 
 const config_video_default_quality = Number(
   loadState("memories", "video_default_quality", <string>"0") as string
@@ -145,7 +140,7 @@ class VideoContentSetup {
   }
 
   async initVideo(content: VideoContent) {
-    if (!isVideoContent(content) || content.videojs || !config_videoIsSetup) {
+    if (!isVideoContent(content) || content.videojs) {
       return;
     }
 
@@ -174,7 +169,7 @@ class VideoContentSetup {
       type: string;
     }[] = [];
 
-    if (!config_noTranscode) {
+    if (!config_vodDisable) {
       sources.push(this.getHLSsrc(content));
     }
 
@@ -224,7 +219,7 @@ class VideoContentSetup {
         directFailed = true;
         console.warn("PsVideo: Direct video stream could not be opened.");
 
-        if (!hlsFailed && !config_noTranscode) {
+        if (!hlsFailed && !config_vodDisable) {
           console.warn("PsVideo: Trying HLS stream");
           vjs.src(this.getHLSsrc(content));
         }
@@ -532,7 +527,7 @@ class VideoContentSetup {
 
   isKeepingPlaceholder(keep: boolean, content: PsContent) {
     if (isVideoContent(content)) {
-      return config_videoIsSetup;
+      return true;
     }
     return keep;
   }
@@ -558,15 +553,6 @@ class VideoContentSetup {
     // Create DIV
     content.element = document.createElement("div");
     content.element.classList.add("video-container");
-
-    // Stop if video not setup
-    if (!config_videoIsSetup) {
-      content.element.innerHTML = t(
-        "memories",
-        "Video not configured. Run occ memories:video-setup"
-      );
-      content.element.classList.add("error");
-    }
 
     content.onLoaded();
   }
