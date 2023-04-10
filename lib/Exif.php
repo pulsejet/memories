@@ -11,7 +11,6 @@ use OCP\IConfig;
 class Exif
 {
     private const FORBIDDEN_EDIT_MIMES = ['image/bmp', 'image/x-dcraw', 'video/MP2T'];
-    private const EXIFTOOL_VER = '12.58';
     private const EXIFTOOL_TIMEOUT = 30000;
     private const EXIFTOOL_ARGS = ['-api', 'QuickTimeUTC=1', '-n', '-U', '-json', '--b'];
 
@@ -357,66 +356,9 @@ class Exif
         return self::getExifFromLocalPathWithSeparateProc($path, ['-G4']);
     }
 
-    /** Get path to exiftool binary */
-    private static function getExiftool()
+    private static function getExiftool(): array
     {
-        $configKey = 'memories.exiftool';
-        $config = \OC::$server->get(IConfig::class);
-        $configPath = $config->getSystemValue($configKey);
-        $noLocal = $config->getSystemValue($configKey.'_no_local', false);
-
-        // We know already where it is
-        if (!empty($configPath) && file_exists($configPath)) {
-            if (!is_executable($configPath)) {
-                chmod($configPath, 0755);
-            }
-
-            return explode(' ', $configPath);
-        }
-
-        // Detect architecture
-        $arch = $noLocal ? null : \OCA\Memories\Util::getArch();
-        $libc = $noLocal ? null : \OCA\Memories\Util::getLibc();
-
-        // Get static binary if available
-        if ($arch && $libc && !$noLocal) {
-            // get target file path
-            $path = realpath(__DIR__."/../exiftool-bin/exiftool-{$arch}-{$libc}");
-
-            // check if file exists
-            if (file_exists($path)) {
-                // make executable before version check
-                if (!is_executable($path)) {
-                    chmod($path, 0755);
-                }
-
-                // check if the version prints correctly
-                $ver = self::EXIFTOOL_VER;
-                $vero = shell_exec("{$path} -ver");
-                if ($vero && false !== stripos(trim($vero), $ver)) {
-                    $out = trim($vero);
-                    echo "Exiftool binary version check passed {$out} <==> {$ver}\n";
-                    $config->setSystemValue($configKey, $path);
-
-                    return [$path];
-                }
-                error_log("Exiftool version check failed {$vero} <==> {$ver}");
-                $config->setSystemValue($configKey.'_no_local', true);
-            } else {
-                error_log("Exiftool not found: {$path}");
-            }
-        }
-
-        // Fallback to perl script
-        $path = __DIR__.'/../exiftool-bin/exiftool/exiftool';
-        if (file_exists($path)) {
-            return ['perl', $path];
-        }
-
-        error_log("Exiftool not found: {$path}");
-
-        // Fallback to system binary
-        return ['exiftool'];
+        return BinExt::getExiftool();
     }
 
     /** Initialize static exiftool process for local reads */

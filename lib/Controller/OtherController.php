@@ -24,8 +24,8 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\BinExt;
 use OCA\Memories\Exceptions;
-use OCA\Memories\Exif;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
@@ -87,22 +87,7 @@ class OtherController extends GenericApiController
                 throw Exceptions::Forbidden('Cannot change settings in readonly mode');
             }
 
-            // Make sure the key is valid
-            $defaults = Util::systemConfigDefaults();
-            if (!\array_key_exists($key, $defaults)) {
-                throw Exceptions::BadRequest('Invalid key');
-            }
-
-            // Make sure the value has the same type as the default value
-            if (\gettype($value) !== \gettype($defaults[$key])) {
-                throw Exceptions::BadRequest('Invalid value type');
-            }
-
-            if ($value === $defaults[$key]) {
-                $this->config->deleteSystemValue($key);
-            } else {
-                $this->config->setSystemValue($key, $value);
-            }
+            Util::setSystemConfig($key, $value);
 
             return new JSONResponse([], Http::STATUS_OK);
         });
@@ -118,8 +103,16 @@ class OtherController extends GenericApiController
         return Util::guardEx(function () {
             $status = [];
 
-            // Check exiftool
+            // Check exiftool version
             $status['exiftool'] = $this->getExecutableStatus(Util::getSystemConfig('memories.exiftool'));
+            if ('ok' === $status['exiftool'] || Util::getSystemConfig('memories.exiftool_no_local')) {
+                try {
+                    BinExt::testExiftool();
+                    $status['exiftool'] = 'test_ok';
+                } catch (\Exception $e) {
+                    $status['exiftool'] = 'test_fail:'.$e->getMessage();
+                }
+            }
 
             // Check for system perl
             $status['perl'] = $this->getExecutableStatus(exec('which perl'));

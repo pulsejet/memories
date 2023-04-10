@@ -24,6 +24,9 @@ class Repair implements IRepairStep
 
     public function run(IOutput $output): void
     {
+        // detect exiftool binary
+        \OCA\Memories\BinExt::detectExiftool();
+
         // kill any instances of go-transcode and go-vod
         \OCA\Memories\Util::pkill('go-transcode');
         \OCA\Memories\Util::pkill('go-vod');

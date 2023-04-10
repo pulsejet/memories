@@ -294,6 +294,38 @@ class Util
         return $config->getSystemValue($key, $default ?? self::systemConfigDefaults()[$key]);
     }
 
+    /**
+     * Set a system config key.
+     *
+     * @param mixed $value
+     *
+     * @throws \InvalidArgumentException
+     */
+    public static function setSystemConfig(string $key, $value): void
+    {
+        $config = \OC::$server->get(\OCP\IConfig::class);
+
+        // Check if the key is valid
+        $defaults = self::systemConfigDefaults();
+        if (!\array_key_exists($key, $defaults)) {
+            throw new \InvalidArgumentException('Invalid system config key');
+        }
+
+        // Check if the value has the correct type
+        if (null !== $value && \gettype($value) !== \gettype($defaults[$key])) {
+            $expected = \gettype($defaults[$key]);
+            $got = \gettype($value);
+
+            throw new \InvalidArgumentException("Invalid type for system config {$key}, expected {$expected}, got {$got}");
+        }
+
+        if ($value === $defaults[$key] || null === $value) {
+            $config->deleteSystemValue($key);
+        } else {
+            $config->setSystemValue($key, $value);
+        }
+    }
+
     /** Get list of defaults for all system config keys. */
     public static function systemConfigDefaults(): array
     {

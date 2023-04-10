@@ -430,7 +430,7 @@ export default defineComponent({
       } else if (status.startsWith("test_fail")) {
         return this.t(
           "memories",
-          "{name} binary failed test: {info}",
+          "{name} failed test: {info}",
           {
             name,
             info: status.substring(10),
