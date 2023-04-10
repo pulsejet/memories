@@ -190,6 +190,10 @@ export class API {
       : gen(`${BASE}/system-config`);
   }
 
+  static SYSTEM_STATUS() {
+    return gen(`${BASE}/system-status`);
+  }
+
   static MAP_CLUSTERS() {
     return tok(gen(`${BASE}/map/clusters`));
   }

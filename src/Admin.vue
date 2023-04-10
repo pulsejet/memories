@@ -2,6 +2,12 @@
   <div class="outer" v-if="loaded">
     <h2>{{ t("memories", "EXIF Extraction") }}</h2>
 
+    <template v-if="status">
+      <NcNoteCard :type="binaryStatusType(status.exiftool)">
+        {{ binaryStatus("exiftool", status.exiftool) }}
+      </NcNoteCard>
+    </template>
+
     <NcTextField
       :label="t('memories', 'Path to packaged exiftool binary')"
       :label-visible="true"
@@ -9,6 +15,12 @@
       @change="update('exiftoolPath', $event.target.value)"
       disabled
     />
+
+    <template v-if="status">
+      <NcNoteCard :type="binaryStatusType(status.perl, false)">
+        {{ binaryStatus("perl", status.perl) }}
+      </NcNoteCard>
+    </template>
 
     <NcCheckboxRadioSwitch
       :checked.sync="exiftoolPerl"
@@ -44,6 +56,15 @@
       >
         {{ t("memories", "Enable Transcoding") }}
       </NcCheckboxRadioSwitch>
+
+      <template v-if="status">
+        <NcNoteCard :type="binaryStatusType(status.ffmpeg)">
+          {{ binaryStatus("ffmpeg", status.ffmpeg) }}
+        </NcNoteCard>
+        <NcNoteCard :type="binaryStatusType(status.ffprobe)">
+          {{ binaryStatus("ffprobe", status.ffprobe) }}
+        </NcNoteCard>
+      </template>
 
       <NcTextField
         :label="t('memories', 'ffmpeg path')"
@@ -101,6 +122,12 @@
       >
         {{ t("memories", "external transcoder configuration") }}
       </a>
+
+      <template v-if="status">
+        <NcNoteCard :type="binaryStatusType(status.govod)">
+          {{ binaryStatus("go-vod", status.govod) }}
+        </NcNoteCard>
+      </template>
 
       <NcCheckboxRadioSwitch
         :checked.sync="enableExternalTranscoder"
@@ -178,13 +205,8 @@
         VA-API configuration
       </a>
 
-      <NcNoteCard type="warning">
-        {{
-          t(
-            "memories",
-            "/dev/dri/renderD128 is required for VA-API acceleration."
-          )
-        }}
+      <NcNoteCard :type="vaapiStatusType()" v-if="status">
+        {{ vaapiStatusText() }}
       </NcNoteCard>
 
       <NcCheckboxRadioSwitch
@@ -300,6 +322,22 @@ const settings = {
 /** Invert setting before saving */
 const invertedBooleans = ["enableTranscoding"];
 
+type BinaryStatus =
+  | "ok"
+  | "not_found"
+  | "not_executable"
+  | "test_fail"
+  | "test_ok";
+
+type IStatus = {
+  exiftool: BinaryStatus;
+  perl: BinaryStatus;
+  ffmpeg: BinaryStatus;
+  ffprobe: BinaryStatus;
+  govod: BinaryStatus;
+  vaapi_dev: "ok" | "not_found" | "not_readable";
+};
+
 export default defineComponent({
   name: "Admin",
   components: {
@@ -329,10 +367,13 @@ export default defineComponent({
     enableNvenc: false,
     enableNvencTemporalAQ: false,
     nvencScaler: "",
+
+    status: null as IStatus,
   }),
 
   mounted() {
     this.reload();
+    this.refreshStatus();
   },
 
   methods: {
@@ -356,6 +397,11 @@ export default defineComponent({
       this.loaded = true;
     },
 
+    async refreshStatus() {
+      const res = await axios.get(API.SYSTEM_STATUS());
+      this.status = res.data;
+    },
+
     async update(key: string, value = null) {
       value ||= this[key];
       const setting = settings[key];
@@ -373,6 +419,70 @@ export default defineComponent({
           console.error(err);
           showError(this.t("memories", "Failed to update setting"));
         });
+    },
+
+    binaryStatus(name: string, status: BinaryStatus): string {
+      if (status === "ok") {
+        return this.t("memories", "{name} binary exists and is executable", {
+          name,
+        });
+      } else if (status === "not_found") {
+        return this.t("memories", "{name} binary not found", { name });
+      } else if (status === "not_executable") {
+        return this.t("memories", "{name} binary is not executable", {
+          name,
+        });
+      } else if (status === "test_fail") {
+        return this.t("memories", "{name} binary exists but failed test", {
+          name,
+        });
+      } else if (status === "test_ok") {
+        return this.t("memories", "{name} binary exists and is usable", {
+          name,
+        });
+      } else {
+        return this.t("memories", "{name} binary status: {status}", {
+          name,
+          status,
+        });
+      }
+    },
+
+    binaryStatusType(status: BinaryStatus, critical = true): string {
+      if (status === "ok" || status === "test_ok") {
+        return "success";
+      } else if (
+        status === "not_found" ||
+        status === "not_executable" ||
+        status === "test_fail"
+      ) {
+        return critical ? "error" : "warning";
+      } else {
+        return "warning";
+      }
+    },
+
+    vaapiStatusText(): string {
+      const dev = "/dev/dri/renderD128";
+      if (this.status.vaapi_dev === "ok") {
+        return this.t("memories", "VA-API device ({dev}) is readable", { dev });
+      } else if (this.status.vaapi_dev === "not_found") {
+        return this.t("memories", "VA-API device ({dev}) not found", { dev });
+      } else if (this.status.vaapi_dev === "not_readable") {
+        return this.t(
+          "memories",
+          "VA-API device ({dev}) has incorrect permissions",
+          { dev }
+        );
+      } else {
+        return this.t("memories", "VA-API device status: {status}", {
+          status: this.status.vaapi_dev,
+        });
+      }
+    },
+
+    vaapiStatusType(): string {
+      return this.status.vaapi_dev === "ok" ? "success" : "error";
     },
   },
 });

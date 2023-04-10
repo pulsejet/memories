@@ -25,6 +25,7 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Exceptions;
+use OCA\Memories\Exif;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
@@ -76,8 +77,6 @@ class OtherController extends GenericApiController
     /**
      * @AdminRequired
      *
-     * @NoCSRFRequired
-     *
      * @param mixed $value
      */
     public function setSystemConfig(string $key, $value): Http\Response
@@ -110,6 +109,43 @@ class OtherController extends GenericApiController
     }
 
     /**
+     * @AdminRequired
+     *
+     * @NoCSRFRequired
+     */
+    public function getSystemStatus(): Http\Response
+    {
+        return Util::guardEx(function () {
+            $status = [];
+
+            // Check exiftool
+            $status['exiftool'] = $this->getExecutableStatus(Util::getSystemConfig('memories.exiftool'));
+
+            // Check for system perl
+            $status['perl'] = $this->getExecutableStatus(exec('which perl'));
+
+            // Check ffmpeg and ffprobe binaries
+            $status['ffmpeg'] = $this->getExecutableStatus(Util::getSystemConfig('memories.vod.ffmpeg'));
+            $status['ffprobe'] = $this->getExecutableStatus(Util::getSystemConfig('memories.vod.ffprobe'));
+
+            // Check go-vod binary
+            $status['govod'] = $this->getExecutableStatus(Util::getSystemConfig('memories.vod.path'));
+
+            // Check for VA-API device
+            $devPath = '/dev/dri/renderD128';
+            if (!is_file($devPath)) {
+                $status['vaapi_dev'] = 'not_found';
+            } elseif (!is_readable($devPath)) {
+                $status['vaapi_dev'] = 'not_readable';
+            } else {
+                $status['vaapi_dev'] = 'ok';
+            }
+
+            return new JSONResponse($status, Http::STATUS_OK);
+        });
+    }
+
+    /**
      * @NoAdminRequired
      *
      * @PublicPage
@@ -126,5 +162,18 @@ class OtherController extends GenericApiController
         $response->setContentSecurityPolicy(PageController::getCSP());
 
         return $response;
+    }
+
+    private function getExecutableStatus(string $path): string
+    {
+        if (!is_file($path)) {
+            return 'not_found';
+        }
+
+        if (!is_executable($path)) {
+            return 'not_executable';
+        }
+
+        return 'ok';
     }
 }
