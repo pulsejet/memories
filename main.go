@@ -7,8 +7,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
 	"sync"
+)
+
+const (
+	VERSION = "0.0.34"
 )
 
 type Handler struct {
@@ -65,6 +70,56 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return
 		}
+	}
+
+	// Check if test request
+	if chunk == "test" {
+		w.Header().Set("Content-Type", "application/json")
+
+		// check if test file is readable
+		size := 0
+		info, err := os.Stat(path)
+		if err == nil {
+			size = int(info.Size())
+		}
+
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"version": VERSION,
+			"size":    size,
+		})
+		return
+	}
+
+	// Check if configuration request
+	if r.Method == "POST" && chunk == "config" {
+		w.Header().Set("Content-Type", "application/json")
+		// read new config
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			log.Println("Error reading body", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		// Unmarshal config
+		if err := json.Unmarshal(body, h.c); err != nil {
+			log.Println("Error unmarshaling config", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		// Set config as loaded
+		h.c.Configured = true
+
+		// Print loaded config
+		fmt.Printf("%+v\n", h.c)
+		return
+	}
+
+	// Check if configured
+	if !h.c.Configured {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
 	}
 
 	// Check if valid
@@ -154,6 +209,9 @@ func loadConfig(path string, c *Config) {
 		log.Fatal("Error loading config file", err)
 	}
 
+	// Set config as loaded
+	c.Configured = true
+
 	// Print loaded config
 	fmt.Printf("%+v\n", c)
 }
@@ -177,19 +235,41 @@ func main() {
 	// Load config file from second argument
 	if len(os.Args) >= 2 {
 		loadConfig(os.Args[1], c)
-	} else {
-		log.Fatal("Missing config file")
 	}
 
-	if c.FFmpeg == "" || c.FFprobe == "" || c.TempDir == "" {
-		log.Fatal("Missing critical param -- check config file")
+	// Auto-detect ffmpeg and ffprobe paths
+	if c.FFmpeg == "" || c.FFprobe == "" {
+		ffmpeg, err := exec.LookPath("ffmpeg")
+		if err != nil {
+			log.Fatal("Could not find ffmpeg")
+		}
+
+		ffprobe, err := exec.LookPath("ffprobe")
+		if err != nil {
+			log.Fatal("Could not find ffprobe")
+		}
+
+		c.FFmpeg = ffmpeg
+		c.FFprobe = ffprobe
 	}
 
+	// Auto-choose tempdir
+	if c.TempDir == "" {
+		c.TempDir = os.TempDir() + "/go-vod"
+	}
+
+	// Print config
+	fmt.Printf("%+v\n", c)
+
+	// Start server
 	log.Println("Starting VOD server")
 
 	h := NewHandler(c)
 	http.Handle("/", h)
-	http.ListenAndServe(c.Bind, nil)
+	err := http.ListenAndServe(c.Bind, nil)
+	if err != nil {
+		log.Fatal("Error starting server", err)
+	}
 
 	log.Println("Exiting VOD server")
 	h.Close()

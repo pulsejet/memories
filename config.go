@@ -1,6 +1,9 @@
 package main
 
 type Config struct {
+	// Is this server configured?
+	Configured bool
+
 	// Bind address
 	Bind string `json:"bind"`
 
