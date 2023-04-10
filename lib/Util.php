@@ -298,6 +298,13 @@ class Util
     public static function systemConfigDefaults(): array
     {
         return [
+            // Path to exiftool binary
+            'memories.exiftool' => '',
+
+            // Do not use packaged binaries of exiftool
+            // This requires perl to be available
+            'memories.exiftool_no_local' => false,
+
             // Places database type identifier
             'memories.gis_type' => -1,
 
