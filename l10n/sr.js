@@ -64,6 +64,7 @@ OC.L10N.register(
     "Choose Timeline Paths" : "Изаберите путање временске линије",
     "Choose the root for the folders view" : "Изаберите корен за поглед на фолдере",
     "Close" : "Затвори",
+    "{photoCount} photos" : "{photoCount} фотографија",
     "Failed to load some photos" : "Неке фотографије нису могле да се учитају",
     "_{n} item added to album_::_{n} items added to album_" : ["{n} ставка је додата у албум","{n} ставке су додате у албум","{n} ставки је додато у албум"],
     "Search for collaborators" : "Претрага сарадника",
