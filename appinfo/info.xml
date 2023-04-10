@@ -43,7 +43,6 @@ Memories is a *batteries-included* photo management solution for Nextcloud with 
     </dependencies>
     <commands>
         <command>OCA\Memories\Command\Index</command>
-        <command>OCA\Memories\Command\VideoSetup</command>
         <command>OCA\Memories\Command\PlacesSetup</command>
         <command>OCA\Memories\Command\MigrateGoogleTakeout</command>
     </commands>
