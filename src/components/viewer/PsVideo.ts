@@ -23,7 +23,7 @@ type PsVideoEvent = PsEvent & {
   content: VideoContent;
 };
 
-const config_vodDisable = loadState("memories", "vod_disable");
+const config_vodDisable = loadState("memories", "vod_disable", true);
 
 const config_video_default_quality = Number(
   loadState("memories", "video_default_quality", <string>"0") as string

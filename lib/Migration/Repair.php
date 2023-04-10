@@ -24,11 +24,28 @@ class Repair implements IRepairStep
 
     public function run(IOutput $output): void
     {
-        // detect exiftool binary
-        \OCA\Memories\BinExt::detectExiftool();
-
-        // kill any instances of go-transcode and go-vod
-        \OCA\Memories\Util::pkill('go-transcode');
+        // kill any instances of go-vod
         \OCA\Memories\Util::pkill('go-vod');
+
+        // detect exiftool
+        if ($path = \OCA\Memories\BinExt::detectExiftool()) {
+            $output->info("exiftool binary is configured: {$path}");
+        } else {
+            $output->warning('exiftool binary could not be configured');
+        }
+
+        // detect go-vod
+        if ($path = \OCA\Memories\BinExt::detectGoVod()) {
+            $output->info("go-vod binary is configured: {$path}");
+        } else {
+            $output->warning('go-vod binary could not be configured');
+        }
+
+        // detect ffmpeg
+        if ($path = \OCA\Memories\BinExt::detectFFmpeg()) {
+            $output->info("ffmpeg binary is configured: {$path}");
+        } else {
+            $output->warning('ffmpeg binary could not be configured');
+        }
     }
 }

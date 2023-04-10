@@ -94,7 +94,7 @@ import LinkIcon from "vue-material-design-icons/LinkVariant.vue";
 import FileIcon from "vue-material-design-icons/File.vue";
 
 // Is video transcoding enabled?
-const config_vodDisable = loadState("memories", "vod_disable");
+const config_vodDisable = loadState("memories", "vod_disable", true);
 
 export default defineComponent({
   name: "ShareModal",

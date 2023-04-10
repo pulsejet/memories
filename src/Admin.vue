@@ -398,7 +398,7 @@ export default defineComponent({
     },
 
     async update(key: string, value = null) {
-      value ||= this[key];
+      value = value ?? this[key];
       const setting = settings[key];
 
       // Inversion

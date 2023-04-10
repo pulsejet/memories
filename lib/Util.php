@@ -308,7 +308,7 @@ class Util
         // Check if the key is valid
         $defaults = self::systemConfigDefaults();
         if (!\array_key_exists($key, $defaults)) {
-            throw new \InvalidArgumentException('Invalid system config key');
+            throw new \InvalidArgumentException("Invalid system config key: {$key}");
         }
 
         // Check if the value has the correct type
