@@ -87,7 +87,13 @@ class OtherController extends GenericApiController
                 throw Exceptions::Forbidden('Cannot change settings in readonly mode');
             }
 
+            // Assign config with type checking
             Util::setSystemConfig($key, $value);
+
+            // If changing vod settings, kill any running go-vod instances
+            if (0 === strpos($key, 'memories.vod.')) {
+                Util::pkill('go-vod');
+            }
 
             return new JSONResponse([], Http::STATUS_OK);
         });
