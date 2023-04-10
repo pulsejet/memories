@@ -83,6 +83,8 @@ return [
 
         // Config API
         ['name' => 'Other#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],
+        ['name' => 'Other#getSystemConfig', 'url' => '/api/system-config', 'verb' => 'GET'],
+        ['name' => 'Other#setSystemConfig', 'url' => '/api/system-config/{key}', 'verb' => 'PUT'],
 
         // Service worker
         ['name' => 'Other#serviceWorker', 'url' => '/service-worker.js', 'verb' => 'GET'],

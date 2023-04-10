@@ -8,6 +8,7 @@ import XImg from "./components/frame/XImg.vue";
 import GlobalMixin from "./mixins/GlobalMixin";
 
 import App from "./App.vue";
+import Admin from "./Admin.vue";
 import router from "./router";
 import { Route } from "vue-router";
 import { generateFilePath } from "@nextcloud/router";
@@ -103,8 +104,20 @@ window.addEventListener("DOMContentLoaded", () => {
   );
 });
 
-export default new Vue({
-  el: "#content",
-  router,
-  render: (h) => h(App),
-});
+let app = null;
+
+const adminSection = document.getElementById("memories-admin-content");
+if (adminSection) {
+  app = new Vue({
+    el: "#memories-admin-content",
+    render: (h) => h(Admin),
+  });
+} else {
+  app = new Vue({
+    el: "#content",
+    router,
+    render: (h) => h(App),
+  });
+}
+
+export default app;

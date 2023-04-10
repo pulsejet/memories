@@ -57,6 +57,59 @@ class OtherController extends GenericApiController
     }
 
     /**
+     * @AdminRequired
+     *
+     * @NoCSRFRequired
+     */
+    public function getSystemConfig(): Http\Response
+    {
+        return Util::guardEx(function () {
+            $config = [];
+            foreach (Util::systemConfigDefaults() as $key => $default) {
+                $config[$key] = $this->config->getSystemValue($key, $default);
+            }
+
+            return new JSONResponse($config, Http::STATUS_OK);
+        });
+    }
+
+    /**
+     * @AdminRequired
+     *
+     * @NoCSRFRequired
+     *
+     * @param mixed $value
+     */
+    public function setSystemConfig(string $key, $value): Http\Response
+    {
+        return Util::guardEx(function () use ($key, $value) {
+            // Make sure not running in read-only mode
+            if ($this->config->getSystemValue('memories.readonly', false)) {
+                throw Exceptions::Forbidden('Cannot change settings in readonly mode');
+            }
+
+            // Make sure the key is valid
+            $defaults = Util::systemConfigDefaults();
+            if (!\array_key_exists($key, $defaults)) {
+                throw Exceptions::BadRequest('Invalid key');
+            }
+
+            // Make sure the value has the same type as the default value
+            if (\gettype($value) !== \gettype($defaults[$key])) {
+                throw Exceptions::BadRequest('Invalid value type');
+            }
+
+            if ($value === $defaults[$key]) {
+                $this->config->deleteSystemValue($key);
+            } else {
+                $this->config->setSystemValue($key, $value);
+            }
+
+            return new JSONResponse([], Http::STATUS_OK);
+        });
+    }
+
+    /**
      * @NoAdminRequired
      *
      * @PublicPage

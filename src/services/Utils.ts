@@ -297,12 +297,17 @@ export const constants = {
 
 /** Cache store */
 let staticCache: Cache | null = null;
-const cacheName = `memories-${loadState("memories", "version")}-${
-  getCurrentUser()?.uid
-}`;
-openCache().then((cache) => {
-  staticCache = cache;
-});
+let cacheName: string;
+let memoriesVersion: string;
+
+try {
+  memoriesVersion = loadState("memories", "version");
+  const uid = getCurrentUser()?.uid;
+  cacheName = `memories-${memoriesVersion}-${uid}`;
+  openCache().then((cache) => (staticCache = cache));
+} catch (e) {
+  console.warn("Failed to open cache");
+}
 
 // Clear all caches except the current one
 window.caches?.keys().then((keys) => {

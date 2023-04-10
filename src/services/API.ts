@@ -184,6 +184,12 @@ export class API {
     return gen(`${BASE}/config/{setting}`, { setting });
   }
 
+  static SYSTEM_CONFIG(setting: string | null) {
+    return setting
+      ? gen(`${BASE}/system-config/{setting}`, { setting })
+      : gen(`${BASE}/system-config`);
+  }
+
   static MAP_CLUSTERS() {
     return tok(gen(`${BASE}/map/clusters`));
   }
