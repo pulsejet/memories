@@ -322,12 +322,7 @@ const settings = {
 /** Invert setting before saving */
 const invertedBooleans = ["enableTranscoding"];
 
-type BinaryStatus =
-  | "ok"
-  | "not_found"
-  | "not_executable"
-  | "test_fail"
-  | "test_ok";
+type BinaryStatus = "ok" | "not_found" | "not_executable" | "test_ok" | string;
 
 type IStatus = {
   exiftool: BinaryStatus;
@@ -432,10 +427,20 @@ export default defineComponent({
         return this.t("memories", "{name} binary is not executable", {
           name,
         });
-      } else if (status === "test_fail") {
-        return this.t("memories", "{name} binary exists but failed test", {
-          name,
-        });
+      } else if (status.startsWith("test_fail")) {
+        return this.t(
+          "memories",
+          "{name} binary failed test: {info}",
+          {
+            name,
+            info: status.substring(10),
+          },
+          0,
+          {
+            escape: false,
+            sanitize: false,
+          }
+        );
       } else if (status === "test_ok") {
         return this.t("memories", "{name} binary exists and is usable", {
           name,
@@ -454,7 +459,7 @@ export default defineComponent({
       } else if (
         status === "not_found" ||
         status === "not_executable" ||
-        status === "test_fail"
+        status.startsWith("test_fail")
       ) {
         return critical ? "error" : "warning";
       } else {
