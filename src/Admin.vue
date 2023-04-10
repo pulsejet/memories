@@ -1,5 +1,7 @@
 <template>
   <div class="outer" v-if="loaded">
+    <NcLoadingIcon class="loading-icon" v-show="loading" />
+
     <h2>{{ t("memories", "EXIF Extraction") }}</h2>
 
     <template v-if="status">
@@ -296,6 +298,7 @@ const NcCheckboxRadioSwitch = () =>
   import("@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch");
 const NcNoteCard = () => import("@nextcloud/vue/dist/Components/NcNoteCard");
 const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
+import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
 
 /** Map from UI to backend settings */
 const settings = {
@@ -339,6 +342,7 @@ export default defineComponent({
     NcCheckboxRadioSwitch,
     NcNoteCard,
     NcTextField,
+    NcLoadingIcon,
   },
 
   data: () => ({
@@ -362,6 +366,8 @@ export default defineComponent({
     enableNvenc: false,
     enableNvencTemporalAQ: false,
     nvencScaler: "",
+
+    loading: 0,
 
     status: null as IStatus,
   }),
@@ -393,19 +399,27 @@ export default defineComponent({
     },
 
     async refreshStatus() {
-      const res = await axios.get(API.SYSTEM_STATUS());
-      this.status = res.data;
+      try {
+        this.loading++;
+        const res = await axios.get(API.SYSTEM_STATUS());
+        this.status = res.data;
+      } finally {
+        this.loading--;
+      }
     },
 
     async update(key: string, value = null) {
       value = value ?? this[key];
       const setting = settings[key];
 
+      this[key] = value;
+
       // Inversion
       if (invertedBooleans.includes(key)) {
         value = !value;
       }
 
+      this.loading++;
       axios
         .put(API.SYSTEM_CONFIG(setting), {
           value: value,
@@ -413,6 +427,17 @@ export default defineComponent({
         .catch((err) => {
           console.error(err);
           showError(this.t("memories", "Failed to update setting"));
+        })
+        .finally(() => {
+          this.loading--;
+
+          if (this["refreshTimer"]) {
+            clearTimeout(this["refreshTimer"]);
+          }
+          this["refreshTimer"] = setTimeout(() => {
+            this.refreshStatus();
+            delete this["refreshTimer"];
+          }, 500);
         });
     },
 
@@ -497,6 +522,19 @@ export default defineComponent({
 .outer {
   padding: 20px;
   padding-top: 0px;
+
+  .loading-icon {
+    top: 10px;
+    right: 20px;
+    position: absolute;
+    width: 28px;
+    height: 28px;
+
+    :deep svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
 
   .checkbox-radio-switch {
     margin: 2px 8px;
