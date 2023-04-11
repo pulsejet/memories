@@ -285,13 +285,22 @@ class Util
     /**
      * Get a system config key with the correct default.
      *
-     * @param null|mixed $default
+     * @param string     $key     System config key
+     * @param null|mixed $default Default value
+     * @param bool       $force   Do not check if the key is valid
      */
-    public static function getSystemConfig(string $key, $default = null)
+    public static function getSystemConfig(string $key, $default = null, bool $force = false)
     {
         $config = \OC::$server->get(\OCP\IConfig::class);
 
-        return $config->getSystemValue($key, $default ?? self::systemConfigDefaults()[$key]);
+        $defaults = self::systemConfigDefaults();
+        if (!$force) {
+            if (!\array_key_exists($key, $defaults)) {
+                throw new \InvalidArgumentException("Invalid system config key: {$key}");
+            }
+        }
+
+        return $config->getSystemValue($key, $default ?? $defaults[$key]);
     }
 
     /**
@@ -381,6 +390,14 @@ class Util
             // 1080 => 1080p (and so on)
             'memories.video_default_quality' => '0',
         ];
+    }
+
+    /**
+     * Get the instance ID for this instance.
+     */
+    public static function getInstanceId(): string
+    {
+        return self::getSystemConfig('instanceid', 'default', true);
     }
 
     /**

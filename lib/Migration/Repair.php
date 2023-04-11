@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Migration;
 
+use OCA\Memories\BinExt;
+use OCA\Memories\Util;
 use OCP\IConfig;
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
@@ -25,8 +27,8 @@ class Repair implements IRepairStep
     public function run(IOutput $output): void
     {
         // kill any instances of go-vod and exiftool
-        \OCA\Memories\Util::pkill('go-vod');
-        \OCA\Memories\Util::pkill('exiftool');
+        Util::pkill(BinExt::getName('go-vod'));
+        Util::pkill(BinExt::getName('exiftool'));
 
         // detect exiftool
         if ($path = \OCA\Memories\BinExt::detectExiftool()) {

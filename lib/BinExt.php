@@ -38,6 +38,14 @@ class BinExt
         throw new \Exception("failed to find exiftool temp binary {$target}");
     }
 
+    /** Get the name for a binary */
+    public static function getName(string $name, string $version = ''): string
+    {
+        $id = Util::getInstanceId();
+
+        return empty($version) ? "{$name}-{$id}" : "{$name}-{$id}-{$version}";
+    }
+
     /** Test configured exiftool binary */
     public static function testExiftool(): bool
     {
@@ -61,7 +69,7 @@ class BinExt
     {
         $path = Util::getSystemConfig('memories.exiftool');
 
-        return self::getTempBin($path, 'exiftool-'.self::EXIFTOOL_VER);
+        return self::getTempBin($path, self::getName('exiftool', self::EXIFTOOL_VER));
     }
 
     /** Get path to exiftool binary for proc_open */
@@ -146,7 +154,7 @@ class BinExt
         }
 
         // Add instance ID to path
-        $tmpPath .= Util::getSystemConfig('instanceid', 'default');
+        $tmpPath .= Util::getInstanceId();
 
         return array_merge($env, [
             'bind' => Util::getSystemConfig('memories.vod.bind'),
@@ -161,7 +169,9 @@ class BinExt
      */
     public static function getGoVodBin()
     {
-        return self::getTempBin(Util::getSystemConfig('memories.vod.path'), 'go-vod-'.self::GOVOD_VER);
+        $path = Util::getSystemConfig('memories.vod.path');
+
+        return self::getTempBin($path, self::getName('go-vod', self::GOVOD_VER));
     }
 
     /**
@@ -170,6 +180,14 @@ class BinExt
      */
     public static function startGoVod()
     {
+        // Check if disabled
+        if (Util::getSystemConfig('memories.vod.disable')) {
+            // Make sure it's dead, in case the user just disabled it
+            Util::pkill(self::getName('go-vod'));
+
+            return;
+        }
+
         // Check if external
         if (Util::getSystemConfig('memories.vod.external')) {
             self::configureGoVod();
@@ -206,7 +224,7 @@ class BinExt
         file_put_contents($configFile, json_encode($env, JSON_PRETTY_PRINT));
 
         // Kill the transcoder in case it's running
-        \OCA\Memories\Util::pkill($transcoder);
+        Util::pkill(self::getName('go-vod'));
 
         // Start transcoder
         shell_exec("nohup {$transcoder} {$configFile} >> '{$logFile}' 2>&1 & > /dev/null");
@@ -239,6 +257,11 @@ class BinExt
     /** Test the go-vod instance that is running */
     public static function testGoVod(): bool
     {
+        // Check if disabled
+        if (Util::getSystemConfig('memories.vod.disable')) {
+            throw new \Exception('Transcoding is disabled');
+        }
+
         // TODO: check data mount; ignoring the result of the file for now
         $testfile = realpath(__DIR__.'/../exiftest.jpg');
 
