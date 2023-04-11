@@ -316,6 +316,7 @@ class Places
 
         // Mark success
         echo "Planet database imported successfully!\n";
+        echo "You should re-index your library now.\n";
         $this->config->setSystemValue('memories.gis_type', $gis);
 
         // Delete data file
