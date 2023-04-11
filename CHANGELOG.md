@@ -2,6 +2,18 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## v5.0.0 (Unreleased)
+
+Note: this is a major release and may introduce breaking changes to your workflow.
+
+- **Feature**: You can now configure Memories from the admin panel.  
+  To access the admin panel, go to the admin settings and click on the "Memories" tab.
+- **Breaking**: The `memories:video-setup` command has been removed.  
+  Transcoding with or without hardware acceleration must now be configured from the admin panel.  
+  For running an external go-vod instance, specifying a configuration file is no longer required.
+- **Breaking**: The transcoder and exiftool binaries will be copied to the temp directory before execution.  
+  Make sure your temp directory is writable by the web server.
+
 ## v4.13.1 (2023-04-03)
 
 - **Feature**: "Direct" video playback will now fall back to HLS (transcoding) if playback fails (e.g. due to lack of browser support).
