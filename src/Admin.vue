@@ -55,6 +55,15 @@
               : t("memories", "Geometry table has not been created")
           }}
         </NcNoteCard>
+        <NcNoteCard v-if="gisType < 0" type="warning">
+          {{
+            t(
+              "memories",
+              "Reverse geocoding has not been configured ({gisType}).",
+              { gisType }
+            )
+          }}
+        </NcNoteCard>
       </template>
 
       {{
@@ -371,6 +380,8 @@ const settings = {
   exiftoolPath: "memories.exiftool",
   exiftoolPerl: "memories.exiftool_no_local",
 
+  gisType: "memories.gis_type",
+
   enableTranscoding: "memories.vod.disable",
   ffmpegPath: "memories.vod.ffmpeg",
   ffprobePath: "memories.vod.ffprobe",
@@ -419,6 +430,8 @@ export default defineComponent({
 
     exiftoolPath: "",
     exiftoolPerl: false,
+
+    gisType: 0,
 
     enableTranscoding: false,
     ffmpegPath: "",
