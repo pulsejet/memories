@@ -2,6 +2,7 @@
   <div class="outer" v-if="loaded">
     <NcLoadingIcon class="loading-icon" v-show="loading" />
 
+    <!----------------------------- General Settings ----------------------------->
     <h2>{{ t("memories", "EXIF Extraction") }}</h2>
 
     <template v-if="status">
@@ -34,6 +35,70 @@
       }}
     </NcCheckboxRadioSwitch>
 
+    <!----------------------------- Places ----------------------------->
+    <h2>{{ t("memories", "Reverse Geocoding") }}</h2>
+
+    <p>
+      <template v-if="status">
+        <NcNoteCard :type="gisStatusType">
+          {{ gisStatus }}
+        </NcNoteCard>
+        <NcNoteCard
+          v-if="status.gis_count !== undefined"
+          :type="status.gis_count > 0 ? 'success' : 'warning'"
+        >
+          {{
+            status.gis_count > 0
+              ? t("memories", "Database is populated with {n} geometries", {
+                  n: status.gis_count,
+                })
+              : t("memories", "Geometry table has not been created")
+          }}
+        </NcNoteCard>
+      </template>
+
+      {{
+        t(
+          "memories",
+          "Memories supports offline reverse geocoding using the OpenStreetMaps data on MySQL and Postgres."
+        )
+      }}
+      <br />
+      {{
+        t(
+          "memories",
+          "You need to download the planet data into your database. This is highly recommended and has low overhead."
+        )
+      }}
+      <br />
+      {{
+        t(
+          "memories",
+          "If the button below does not work for importing the planet data, use 'occ memories:places-setup'."
+        )
+      }}
+      <br />
+      {{
+        t(
+          "memories",
+          "Note: the geometry data is stored in the 'memories_planet_geometry' table, with no prefix."
+        )
+      }}
+    </p>
+
+    <form
+      :action="placesSetupUrl"
+      method="post"
+      @submit="placesSetup"
+      target="_blank"
+    >
+      <input name="requesttoken" type="hidden" :value="requestToken" />
+      <NcButton nativeType="submit" type="warning">
+        {{ t("memories", "Download planet database") }}
+      </NcButton>
+    </form>
+
+    <!----------------------------- Video Streaming ----------------------------->
     <h2>{{ t("memories", "Video Streaming") }}</h2>
 
     <p>
@@ -207,8 +272,8 @@
         VA-API configuration
       </a>
 
-      <NcNoteCard :type="vaapiStatusType()" v-if="status">
-        {{ vaapiStatusText() }}
+      <NcNoteCard :type="vaapiStatusType" v-if="status">
+        {{ vaapiStatusText }}
       </NcNoteCard>
 
       <NcCheckboxRadioSwitch
@@ -299,6 +364,7 @@ const NcCheckboxRadioSwitch = () =>
 const NcNoteCard = () => import("@nextcloud/vue/dist/Components/NcNoteCard");
 const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
 import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
+import NcButton from "@nextcloud/vue/dist/Components/NcButton";
 
 /** Map from UI to backend settings */
 const settings = {
@@ -328,6 +394,8 @@ const invertedBooleans = ["enableTranscoding"];
 type BinaryStatus = "ok" | "not_found" | "not_executable" | "test_ok" | string;
 
 type IStatus = {
+  gis_type: number;
+  gis_count?: number;
   exiftool: BinaryStatus;
   perl: BinaryStatus;
   ffmpeg: BinaryStatus;
@@ -343,6 +411,7 @@ export default defineComponent({
     NcNoteCard,
     NcTextField,
     NcLoadingIcon,
+    NcButton,
   },
 
   data: () => ({
@@ -441,6 +510,20 @@ export default defineComponent({
         });
     },
 
+    placesSetup(event: Event) {
+      const msg =
+        "Looks like the database is already setup. Are you sure you want to drop the table and redownload OSM data?";
+      if (this.status.gis_count && !confirm(msg)) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      } else {
+        alert(
+          "Please wait for the download and insertion to complete. This may take a while."
+        );
+      }
+    },
+
     binaryStatus(name: string, status: BinaryStatus): string {
       if (status === "ok") {
         return this.t("memories", "{name} binary exists and is executable", {
@@ -491,6 +574,43 @@ export default defineComponent({
         return "warning";
       }
     },
+  },
+
+  computed: {
+    requestToken() {
+      return (<any>axios.defaults.headers).requesttoken;
+    },
+
+    gisStatus() {
+      if (typeof this.status.gis_type !== "number") {
+        return this.status.gis_type;
+      }
+
+      if (this.status.gis_type <= 0) {
+        return this.t(
+          "memories",
+          "Geometry support was not detected in your database"
+        );
+      } else if (this.status.gis_type === 1) {
+        return this.t("memories", "MySQL-like geometry support was detected ");
+      } else if (this.status.gis_type === 2) {
+        return this.t(
+          "memories",
+          "Postgres native geometry support was detected"
+        );
+      }
+    },
+
+    gisStatusType() {
+      return typeof this.status.gis_type !== "number" ||
+        this.status.gis_type <= 0
+        ? "error"
+        : "success";
+    },
+
+    placesSetupUrl() {
+      return API.OCC_PLACES_SETUP();
+    },
 
     vaapiStatusText(): string {
       const dev = "/dev/dri/renderD128";
@@ -534,6 +654,10 @@ export default defineComponent({
       width: 100%;
       height: 100%;
     }
+  }
+
+  form {
+    margin-top: 1em;
   }
 
   .checkbox-radio-switch {

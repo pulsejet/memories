@@ -194,6 +194,10 @@ export class API {
     return gen(`${BASE}/system-status`);
   }
 
+  static OCC_PLACES_SETUP() {
+    return gen(`${BASE}/occ/places-setup`);
+  }
+
   static MAP_CLUSTERS() {
     return tok(gen(`${BASE}/map/clusters`));
   }

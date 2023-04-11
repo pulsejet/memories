@@ -128,6 +128,16 @@ class OtherController extends GenericApiController
             // Check for system perl
             $status['perl'] = $this->getExecutableStatus(exec('which perl'));
 
+            // Get GIS status
+            $places = \OC::$server->get(\OCA\Memories\Service\Places::class);
+
+            try {
+                $status['gis_type'] = $places->detectGisType();
+                $status['gis_count'] = $places->geomCount();
+            } catch (\Exception $e) {
+                $status['gis_type'] = $e->getMessage();
+            }
+
             // Check ffmpeg and ffprobe binaries
             $status['ffmpeg'] = $this->getExecutableStatus(Util::getSystemConfig('memories.vod.ffmpeg'));
             $status['ffprobe'] = $this->getExecutableStatus(Util::getSystemConfig('memories.vod.ffprobe'));
@@ -156,6 +166,37 @@ class OtherController extends GenericApiController
 
             return new JSONResponse($status, Http::STATUS_OK);
         });
+    }
+
+    /**
+     * @AdminRequired
+     */
+    public function placesSetup(): Http\Response
+    {
+        try {
+            // Set PHP timeout to infinite
+            set_time_limit(0);
+
+            // Send headers for long-running request
+            header('Content-Type: text/plain');
+            header('X-Accel-Buffering: no');
+            header('Cache-Control: no-cache');
+            header('Connection: keep-alive');
+            header('Content-Length: 0');
+
+            $places = \OC::$server->get(\OCA\Memories\Service\Places::class);
+
+            echo "Downloading planet file...\n";
+            flush();
+            $datafile = $places->downloadPlanet();
+            $places->importPlanet($datafile);
+
+            echo "Done.\n";
+        } catch (\Exception $e) {
+            echo 'Failed: '.$e->getMessage()."\n";
+        }
+
+        exit;
     }
 
     /**

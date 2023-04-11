@@ -23,8 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Command;
 
-use OCP\IConfig;
-use OCP\IDBConnection;
+use OCA\Memories\Service\Places;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -38,19 +37,14 @@ const PLANET_URL = 'https://github.com/pulsejet/memories-assets/releases/downloa
 
 class PlacesSetup extends Command
 {
-    protected IConfig $config;
     protected OutputInterface $output;
-    protected IDBConnection $connection;
-
-    protected int $gisType = GIS_TYPE_NONE;
+    protected Places $places;
 
     public function __construct(
-        IConfig $config,
-        IDBConnection $connection
+        Places $places
     ) {
         parent::__construct();
-        $this->config = $config;
-        $this->connection = $connection;
+        $this->places = $places;
     }
 
     protected function configure(): void
@@ -68,392 +62,43 @@ class PlacesSetup extends Command
         $this->output->writeln('Attempting to set up reverse geocoding');
 
         // Detect the GIS type
-        $this->detectGisType();
-        $this->config->setSystemValue('memories.gis_type', $this->gisType);
-
-        // Make sure we support something
-        if (GIS_TYPE_NONE === $this->gisType) {
+        if ($this->places->detectGisType() <= 0) {
             $this->output->writeln('<error>No supported GIS type detected</error>');
 
             return 1;
         }
+        $this->output->writeln('Database support was detected');
 
-        // Check if the database is already set up
-        $hasDb = false;
-
-        try {
+        // Check if database is already set up
+        if ($this->places->geomCount() > 0) {
             $this->output->writeln('');
-            $this->connection->executeQuery('SELECT osm_id FROM memories_planet_geometry LIMIT 1')->fetch();
             $this->output->writeln('<error>Database is already set up</error>');
             $this->output->writeln('<error>This will drop and re-download the planet database</error>');
             $this->output->writeln('<error>This is generally not necessary to do frequently </error>');
-            $hasDb = true;
-        } catch (\Exception $e) {
-        }
 
-        // Ask confirmation
-        $tempdir = sys_get_temp_dir();
-        $this->output->writeln('');
-        $this->output->writeln('Are you sure you want to download the planet database?');
-        $this->output->writeln("This will take a very long time and use some disk space in {$tempdir}");
-        $this->output->write('Proceed? [y/N] ');
-        $handle = fopen('php://stdin', 'r');
-        $line = fgets($handle);
-        if ('y' !== trim($line)) {
-            $this->output->writeln('Aborting');
-
-            return 1;
-        }
-
-        // Drop the table
-        $p = $this->connection->getDatabasePlatform();
-        if ($hasDb) {
+            // Ask confirmation
             $this->output->writeln('');
-            $this->output->write('Dropping table ... ');
-            $this->connection->executeStatement($p->getDropTableSQL('memories_planet_geometry'));
-            $this->output->writeln('OK');
-        }
+            $this->output->writeln('Are you sure you want to download the planet database?');
+            $this->output->write('Proceed? [y/N] ');
+            $handle = fopen('php://stdin', 'r');
+            $line = fgets($handle);
+            if (false === $line) {
+                $this->output->writeln('<error>You need an interactive terminal to run this command</error>');
 
-        // Setup the database
-        $this->output->write('Setting up database ... ');
-        $this->setupDatabase();
-        $this->output->writeln('OK');
-
-        // Truncate tables
-        $this->output->write('Truncating tables ... ');
-        $this->connection->executeStatement($p->getTruncateTableSQL('*PREFIX*memories_planet', false));
-        $this->connection->executeStatement($p->getTruncateTableSQL('memories_planet_geometry', false));
-        $this->output->writeln('OK');
-
-        // Download the data
-        $this->output->write('Downloading data ... ');
-        $datafile = $this->downloadPlanet();
-        $this->output->writeln('OK');
-
-        // Start importing
-        $this->output->writeln('');
-        $this->output->writeln('Importing data (this will take a while) ...');
-
-        // Start time
-        $start = time();
-
-        // Create place insertion statement
-        $query = $this->connection->getQueryBuilder();
-        $query->insert('memories_planet')
-            ->values([
-                'osm_id' => $query->createParameter('osm_id'),
-                'admin_level' => $query->createParameter('admin_level'),
-                'name' => $query->createParameter('name'),
-                'other_names' => $query->createParameter('other_names'),
-            ])
-        ;
-        $insertPlace = $this->connection->prepare($query->getSQL());
-
-        // Create geometry insertion statement
-        $query = $this->connection->getQueryBuilder();
-        $geomParam = $query->createParameter('geometry');
-        if (GIS_TYPE_MYSQL === $this->gisType) {
-            $geomParam = "ST_GeomFromText({$geomParam})";
-        } elseif (GIS_TYPE_POSTGRES === $this->gisType) {
-            $geomParam = "POLYGON({$geomParam}::text)";
-        }
-        $query->insert('memories_planet_geometry')
-            ->values([
-                'id' => $query->createParameter('id'),
-                'poly_id' => $query->createParameter('poly_id'),
-                'type_id' => $query->createParameter('type_id'),
-                'osm_id' => $query->createParameter('osm_id'),
-                'geometry' => $query->createFunction($geomParam),
-            ])
-        ;
-        $sql = str_replace('*PREFIX*memories_planet_geometry', 'memories_planet_geometry', $query->getSQL());
-        $insertGeometry = $this->connection->prepare($sql);
-
-        // The number of places in the current transaction
-        $txnCount = 0;
-
-        // Iterate over the data file
-        $handle = fopen($datafile, 'r');
-        if ($handle) {
-            $count = 0;
-            while (($line = fgets($handle)) !== false) {
-                // Skip empty lines
-                if ('' === trim($line)) {
-                    continue;
-                }
-
-                // Begin transaction
-                if (0 === $txnCount++) {
-                    $this->connection->beginTransaction();
-                }
-                ++$count;
-
-                // Decode JSON
-                $data = json_decode($line, true);
-                if (null === $data) {
-                    $this->output->writeln('<error>Failed to decode JSON</error>');
-
-                    continue;
-                }
-
-                // Extract data
-                $osmId = $data['osm_id'];
-                $adminLevel = $data['admin_level'];
-                $name = $data['name'];
-                $boundaries = $data['geometry'];
-                $otherNames = json_encode($data['other_names'] ?? []);
-
-                // Skip some places
-                if ($adminLevel > -2 && ($adminLevel <= 1 || $adminLevel >= 10)) {
-                    // <=1: These are too general, e.g. "Earth"? or invalid
-                    // >=10: These are too specific, e.g. "Community Board"
-                    // <-1: These are special, e.g. "Timezone" = -7
-                    continue;
-                }
-
-                // Insert place into database
-                $insertPlace->bindValue('osm_id', $osmId);
-                $insertPlace->bindValue('admin_level', $adminLevel);
-                $insertPlace->bindValue('name', $name);
-                $insertPlace->bindValue('other_names', $otherNames);
-                $insertPlace->execute();
-
-                // Insert polygons into database
-                $idx = 0;
-                foreach ($boundaries as &$polygon) {
-                    // $polygon is a struct as
-                    // [ "t" => "e", "c" => [lon, lat], [lon, lat], ... ] ]
-
-                    $polyid = $polygon['i'];
-                    $typeid = $polygon['t'];
-                    $pkey = $polygon['k'];
-                    $coords = $polygon['c'];
-
-                    // Create parameters
-                    ++$idx;
-                    $geometry = '';
-
-                    if (\count($coords) < 3) {
-                        $this->output->writeln('<error>Invalid polygon</error>');
-
-                        continue;
-                    }
-
-                    if (GIS_TYPE_MYSQL === $this->gisType) {
-                        $points = implode(',', array_map(function ($point) {
-                            $x = $point[0];
-                            $y = $point[1];
-
-                            return "{$x} {$y}";
-                        }, $coords));
-
-                        $geometry = "POLYGON(({$points}))";
-                    } elseif (GIS_TYPE_POSTGRES === $this->gisType) {
-                        $geometry = implode(',', array_map(function ($point) {
-                            $x = $point[0];
-                            $y = $point[1];
-
-                            return "({$x},{$y})";
-                        }, $coords));
-                    }
-
-                    try {
-                        $insertGeometry->bindValue('id', $pkey);
-                        $insertGeometry->bindValue('poly_id', $polyid);
-                        $insertGeometry->bindValue('type_id', $typeid);
-                        $insertGeometry->bindValue('osm_id', $osmId);
-                        $insertGeometry->bindValue('geometry', $geometry);
-                        $insertGeometry->execute();
-                    } catch (\Exception $e) {
-                        $this->output->writeln('<error>Failed to insert into database</error>');
-                        $this->output->writeln($e->getMessage());
-
-                        continue;
-                    }
-                }
-
-                // Commit transaction every once in a while
-                if (0 === $count % 100) {
-                    $this->connection->commit();
-                    $txnCount = 0;
-
-                    // Print progress
-                    $end = time();
-                    $elapsed = ($end - $start) ?: 1;
-                    $rate = $count / $elapsed;
-                    $remaining = APPROX_PLACES - $count;
-                    $eta = round($remaining / $rate);
-                    $rate = round($rate, 1);
-                    $this->output->writeln("Inserted {$count} places, {$rate}/s, ETA: {$eta}s, Last: {$name}");
-                }
+                return 1;
             }
+            if ('y' !== trim($line)) {
+                $this->output->writeln('Aborting');
 
-            fclose($handle);
-        }
-
-        // Commit final transaction
-        if ($txnCount > 0) {
-            $this->connection->commit();
-        }
-
-        // Delete file
-        unlink($datafile);
-
-        // Done
-        $this->output->writeln('');
-        $this->output->writeln('Planet database imported successfully!');
-        $this->output->writeln('If this is the first time you did this, you should now run:');
-        $this->output->writeln('occ memories:index -f');
-
-        // Mark success
-        $this->config->setSystemValue('memories.gis_type', $this->gisType);
-
-        return 0;
-    }
-
-    protected function detectGisType()
-    {
-        // Make sure database prefix is set
-        $prefix = $this->config->getSystemValue('dbtableprefix', '') ?: '';
-        if ('' === $prefix) {
-            $this->output->writeln('<error>Database table prefix is not set</error>');
-            $this->output->writeln('Custom database extensions cannot be used without a prefix');
-            $this->output->writeln('Reverse geocoding will not work and is disabled');
-            $this->gisType = GIS_TYPE_NONE;
-
-            return;
-        }
-
-        // Warn the admin about the database prefix not being used
-        $this->output->writeln('');
-        $this->output->writeln("Database table prefix is set to '{$prefix}'");
-        $this->output->writeln('If the planet can be imported, it will not use this prefix');
-        $this->output->writeln('The table will be named "memories_planet_geometry"');
-        $this->output->writeln('This is necessary for using custom database extensions');
-        $this->output->writeln('');
-
-        // Detect database type
-        $platform = strtolower(\get_class($this->connection->getDatabasePlatform()));
-
-        // Test MySQL-like support in databse
-        if (str_contains($platform, 'mysql') || str_contains($platform, 'mariadb')) {
-            try {
-                $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)')")->fetch();
-                if (0 === \count($res)) {
-                    throw new \Exception('Invalid result');
-                }
-                $this->output->writeln('MySQL-like support detected!');
-                $this->gisType = GIS_TYPE_MYSQL;
-
-                return;
-            } catch (\Exception $e) {
-                $this->output->writeln('No MySQL-like support detected');
+                return 1;
             }
         }
 
-        // Test Postgres native geometry like support in database
-        if (str_contains($platform, 'postgres')) {
-            try {
-                $res = $this->connection->executeQuery("SELECT POINT('1,1')")->fetch();
-                if (0 === \count($res)) {
-                    throw new \Exception('Invalid result');
-                }
-                $this->output->writeln('Postgres native geometry support detected!');
-                $this->gisType = GIS_TYPE_POSTGRES;
+        // Download the planet database
+        $this->output->writeln('Downloading planet database');
+        $datafile = $this->places->downloadPlanet();
 
-                return;
-            } catch (\Exception $e) {
-                $this->output->writeln('No Postgres native geometry support detected');
-            }
-        }
-    }
-
-    protected function setupDatabase(): void
-    {
-        try {
-            $sql = 'CREATE TABLE memories_planet_geometry (
-                id varchar(255) NOT NULL PRIMARY KEY,
-                poly_id varchar(255) NOT NULL,
-                type_id int NOT NULL,
-                osm_id int NOT NULL,
-                geometry polygon NOT NULL
-            );';
-            $this->connection->executeQuery($sql);
-
-            // Add indexes
-            $this->connection->executeQuery('CREATE INDEX planet_osm_id_idx ON memories_planet_geometry (osm_id);');
-
-            // Add spatial index
-            if (GIS_TYPE_MYSQL === $this->gisType) {
-                $this->connection->executeQuery('CREATE SPATIAL INDEX planet_osm_polygon_geometry_idx ON memories_planet_geometry (geometry);');
-            } elseif (GIS_TYPE_POSTGRES === $this->gisType) {
-                $this->connection->executeQuery('CREATE INDEX planet_osm_polygon_geometry_idx ON memories_planet_geometry USING GIST (geometry);');
-            }
-        } catch (\Exception $e) {
-            $this->output->writeln('Failed to create planet table');
-            $this->output->writeln($e->getMessage());
-
-            exit;
-        }
-    }
-
-    protected function ensureDeleted(string $filename)
-    {
-        if (!file_exists($filename)) {
-            return;
-        }
-
-        unlink($filename);
-        if (file_exists($filename)) {
-            $this->output->writeln('<error>Failed to delete data file</error>');
-            $this->output->writeln("Please delete {$filename} manually");
-
-            exit;
-        }
-    }
-
-    protected function downloadPlanet(): string
-    {
-        $filename = sys_get_temp_dir().'/planet_coarse_boundaries.zip';
-        $this->ensureDeleted($filename);
-
-        $txtfile = sys_get_temp_dir().'/planet_coarse_boundaries.txt';
-        $this->ensureDeleted($txtfile);
-
-        $fp = fopen($filename, 'w+');
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, PLANET_URL);
-        curl_setopt($ch, CURLOPT_FILE, $fp);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 60000);
-        curl_exec($ch);
-        curl_close($ch);
-
-        fclose($fp);
-
-        // Unzip
-        $zip = new \ZipArchive();
-        $res = $zip->open($filename);
-        if (true === $res) {
-            $zip->extractTo(sys_get_temp_dir());
-            $zip->close();
-        } else {
-            $this->output->writeln('Failed to unzip planet file');
-
-            exit;
-        }
-
-        // Check if file exists
-        if (!file_exists($txtfile)) {
-            $this->output->writeln('Failed to find planet data file after unzip');
-
-            exit;
-        }
-
-        // Delete zip file
-        unlink($filename);
-
-        return $txtfile;
+        // Import the planet database
+        $this->places->importPlanet($datafile);
     }
 }

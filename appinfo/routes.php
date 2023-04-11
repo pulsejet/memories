@@ -86,6 +86,7 @@ return [
         ['name' => 'Other#getSystemStatus', 'url' => '/api/system-status', 'verb' => 'GET'],
         ['name' => 'Other#getSystemConfig', 'url' => '/api/system-config', 'verb' => 'GET'],
         ['name' => 'Other#setSystemConfig', 'url' => '/api/system-config/{key}', 'verb' => 'PUT'],
+        ['name' => 'Other#placesSetup', 'url' => '/api/occ/places-setup', 'verb' => 'POST'],
 
         // Service worker
         ['name' => 'Other#serviceWorker', 'url' => '/service-worker.js', 'verb' => 'GET'],

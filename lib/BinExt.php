@@ -243,7 +243,10 @@ class BinExt
 
         try {
             $client = new \GuzzleHttp\Client();
-            $res = $client->request('GET', $url);
+            $res = $client->request('GET', $url, [
+                'timeout' => 1,
+                'connect_timeout' => 1,
+            ]);
         } catch (\Exception $e) {
             throw new \Exception('failed to connect to go-vod: '.$e->getMessage());
         }
@@ -277,6 +280,8 @@ class BinExt
             $client = new \GuzzleHttp\Client();
             $client->request('POST', $url, [
                 'json' => $config,
+                'timeout' => 1,
+                'connect_timeout' => 1,
             ]);
         } catch (\Exception $e) {
             throw new \Exception('failed to connect to go-vod: '.$e->getMessage());
