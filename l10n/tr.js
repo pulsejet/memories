@@ -293,7 +293,6 @@ OC.L10N.register(
     "Transcoding failed, check Nextcloud logs." : "Dönüşüm yapılamadı. Nextcloud günlüklerini denetleyin.",
     "Direct" : "Doğrudan",
     "Auto" : "Otomatik",
-    "Video not configured. Run occ memories:video-setup" : "Görüntü yapılandırılmamış. occ memories:video-setup komutunu yürütün",
     "Shared Folder" : "Paylaşılmış klasör",
     "Shared Album" : "Paylaşılmış albüm",
     "Failed to create {albumName}." : "{albumName} albümü oluşturulamadı.",
