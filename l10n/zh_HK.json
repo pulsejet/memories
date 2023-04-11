@@ -291,7 +291,6 @@
     "Transcoding failed, check Nextcloud logs." : "轉碼失敗，查看 Nextcloud 記錄。",
     "Direct" : "私信",
     "Auto" : "自動",
-    "Video not configured. Run occ memories:video-setup" : "視像未配置。運行 occ memories:video-setup",
     "Shared Folder" : "分享資料夾",
     "Shared Album" : "已分享了的相簿",
     "Failed to create {albumName}." : "創建 {albumName} 失敗。",

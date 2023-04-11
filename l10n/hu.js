@@ -292,7 +292,6 @@ OC.L10N.register(
     "Transcoding failed, check Nextcloud logs." : "Az átkódolás sikertelen, ellenőrizze a Nextcloud naplóit",
     "Direct" : "Közvetlen",
     "Auto" : "Automatikus",
-    "Video not configured. Run occ memories:video-setup" : "A videó nincs beállítva. Futtassa a következő parancsot: occ memories:video-setup",
     "Shared Folder" : "Megosztott mappa",
     "Shared Album" : "Megosztott album",
     "Failed to create {albumName}." : "A(z) {albumName} létrehozása sikertelen.",

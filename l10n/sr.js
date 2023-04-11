@@ -293,7 +293,6 @@ OC.L10N.register(
     "Transcoding failed, check Nextcloud logs." : "Транскодирање није успело, погледајте Nextcloud дневнике.",
     "Direct" : "Директно",
     "Auto" : "Аутоматски",
-    "Video not configured. Run occ memories:video-setup" : "Видо није подешен. Извршите occ memories:video-setup",
     "Shared Folder" : "Дељени фолдер",
     "Shared Album" : "Дељени албум",
     "Failed to create {albumName}." : "{albumName} није могао да се креира.",
