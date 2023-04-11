@@ -35,7 +35,7 @@ class Places
         // Make sure database prefix is set
         $prefix = $this->config->getSystemValue('dbtableprefix', '') ?: '';
         if ('' === $prefix) {
-            throw new \Exception('Database table prefix is not set. Cannot use database exceptions (dbtableprefix).');
+            throw new \Exception('Database table prefix is not set. Cannot use database extensions (dbtableprefix).');
         }
 
         // Detect database type
