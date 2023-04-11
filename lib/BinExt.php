@@ -10,7 +10,11 @@ class BinExt
     /** Copy a binary to temp dir for execution */
     public static function getTempBin(string $path, string $name, bool $copy = true): string
     {
-        $target = sys_get_temp_dir().'/'.$name;
+        // Hash the path to provide a suffix using md5, 8 characters
+        $suffix = substr(md5($path), 0, 8);
+
+        // Check target temp file
+        $target = sys_get_temp_dir().'/'.$name.'-'.$suffix;
         if (file_exists($target)) {
             if (!is_writable($target)) {
                 throw new \Exception("{$name} temp binary path is not writable: {$target}");
