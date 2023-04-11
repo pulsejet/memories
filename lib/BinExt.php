@@ -153,6 +153,14 @@ class BinExt
     }
 
     /**
+     * Get temp binary for go-vod.
+     */
+    public static function getGoVodBin()
+    {
+        return self::getTempBin(Util::getSystemConfig('memories.vod.path'), 'go-vod-'.self::GOVOD_VER);
+    }
+
+    /**
      * If local, restart the go-vod instance.
      * If external, configure the go-vod instance.
      */
@@ -166,22 +174,9 @@ class BinExt
         }
 
         // Get transcoder path
-        $transcoder = self::getTempBin(Util::getSystemConfig('memories.vod.path'), 'go-vod-'.self::GOVOD_VER);
+        $transcoder = self::getGoVodBin();
         if (empty($transcoder)) {
             throw new \Exception('Transcoder not configured');
-        }
-
-        // Make sure transcoder exists
-        if (!file_exists($transcoder)) {
-            throw new \Exception("Transcoder not found; ({$transcoder})");
-        }
-
-        // Make transcoder executable
-        if (!is_executable($transcoder)) {
-            @chmod($transcoder, 0755);
-            if (!is_executable($transcoder)) {
-                throw new \Exception("Transcoder not executable (chmod 755 {$transcoder})");
-            }
         }
 
         // Get local config

@@ -133,14 +133,15 @@ class OtherController extends GenericApiController
             $status['ffprobe'] = $this->getExecutableStatus(Util::getSystemConfig('memories.vod.ffprobe'));
 
             // Check go-vod binary
-            $status['govod'] = $this->getExecutableStatus(Util::getSystemConfig('memories.vod.path'));
-            if ('ok' === $status['govod'] || Util::getSystemConfig('memories.vod.external')) {
-                try {
+            try {
+                $s = $this->getExecutableStatus(BinExt::getGoVodBin());
+                if ('ok' === $s || Util::getSystemConfig('memories.vod.external')) {
                     BinExt::testStartGoVod();
-                    $status['govod'] = 'test_ok';
-                } catch (\Exception $e) {
-                    $status['govod'] = 'test_fail:'.$e->getMessage();
+                    $s = 'test_ok';
                 }
+                $status['govod'] = $s;
+            } catch (\Exception $e) {
+                $status['govod'] = 'test_fail:'.$e->getMessage();
             }
 
             // Check for VA-API device
