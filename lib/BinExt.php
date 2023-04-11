@@ -5,7 +5,7 @@ namespace OCA\Memories;
 class BinExt
 {
     public const EXIFTOOL_VER = '12.58';
-    public const GOVOD_VER = '0.0.34';
+    public const GOVOD_VER = '0.1.0';
 
     /** Test configured exiftool binary */
     public static function testExiftool(): bool
