@@ -40,7 +40,7 @@ class BinExt
         $cmd = implode(' ', array_merge(self::getExiftool(), ['-ver']));
         $out = shell_exec($cmd);
         if (!$out) {
-            throw new \Exception('failed to run exiftool');
+            throw new \Exception("failed to run exiftool: {$cmd}");
         }
 
         $version = trim($out);
@@ -64,7 +64,7 @@ class BinExt
     public static function getExiftool(): array
     {
         if (Util::getSystemConfig('memories.exiftool_no_local')) {
-            return ['perl', __DIR__.'/../exiftool-bin/exiftool/exiftool'];
+            return ['perl', realpath(__DIR__.'/../exiftool-bin/exiftool/exiftool')];
         }
 
         return [self::getExiftoolPBin()];
