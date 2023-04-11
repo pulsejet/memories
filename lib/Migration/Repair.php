@@ -24,8 +24,9 @@ class Repair implements IRepairStep
 
     public function run(IOutput $output): void
     {
-        // kill any instances of go-vod
+        // kill any instances of go-vod and exiftool
         \OCA\Memories\Util::pkill('go-vod');
+        \OCA\Memories\Util::pkill('exiftool');
 
         // detect exiftool
         if ($path = \OCA\Memories\BinExt::detectExiftool()) {

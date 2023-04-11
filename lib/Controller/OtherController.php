@@ -114,14 +114,15 @@ class OtherController extends GenericApiController
             $status = [];
 
             // Check exiftool version
-            $status['exiftool'] = $this->getExecutableStatus(Util::getSystemConfig('memories.exiftool'));
-            if ('ok' === $status['exiftool'] || Util::getSystemConfig('memories.exiftool_no_local')) {
-                try {
+            try {
+                $s = $this->getExecutableStatus(BinExt::getExiftoolPBin());
+                if ('ok' === $s || Util::getSystemConfig('memories.exiftool_no_local')) {
                     BinExt::testExiftool();
-                    $status['exiftool'] = 'test_ok';
-                } catch (\Exception $e) {
-                    $status['exiftool'] = 'test_fail:'.$e->getMessage();
+                    $s = 'test_ok';
                 }
+                $status['exiftool'] = $s;
+            } catch (\Exception $e) {
+                $status['exiftool'] = 'test_fail:'.$e->getMessage();
             }
 
             // Check for system perl

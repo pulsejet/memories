@@ -7,6 +7,33 @@ class BinExt
     public const EXIFTOOL_VER = '12.58';
     public const GOVOD_VER = '0.1.0';
 
+    /** Copy a binary to temp dir for execution */
+    public static function getTempBin(string $path, string $name, bool $copy = true): string
+    {
+        $target = sys_get_temp_dir().'/'.$name;
+        if (file_exists($target)) {
+            if (!is_writable($target)) {
+                throw new \Exception("{$name} temp binary path is not writable: {$target}");
+            }
+
+            if (!is_executable($target) && !chmod($target, 0755)) {
+                throw new \Exception("failed to make {$name} temp binary executable: {$target}");
+            }
+
+            return $target;
+        }
+
+        if ($copy) {
+            if (!copy($path, $target)) {
+                throw new \Exception("failed to copy {$name} binary from {$path} to {$target}");
+            }
+
+            return self::getTempBin($path, $name, false);
+        }
+
+        throw new \Exception("failed to find exiftool temp binary {$target}");
+    }
+
     /** Test configured exiftool binary */
     public static function testExiftool(): bool
     {
@@ -25,6 +52,14 @@ class BinExt
         return true;
     }
 
+    /** Get path to exiftool binary */
+    public static function getExiftoolPBin(): string
+    {
+        $path = Util::getSystemConfig('memories.exiftool');
+
+        return self::getTempBin($path, 'exiftool-'.self::EXIFTOOL_VER);
+    }
+
     /** Get path to exiftool binary for proc_open */
     public static function getExiftool(): array
     {
@@ -32,17 +67,13 @@ class BinExt
             return ['perl', __DIR__.'/../exiftool-bin/exiftool/exiftool'];
         }
 
-        return [Util::getSystemConfig('memories.exiftool')];
+        return [self::getExiftoolPBin()];
     }
 
     /** Detect the exiftool binary to use */
     public static function detectExiftool()
     {
         if (!empty($path = Util::getSystemConfig('memories.exiftool'))) {
-            if (file_exists($path) && !is_executable($path)) {
-                @chmod($path, 0755);
-            }
-
             return $path;
         }
 
@@ -62,12 +93,8 @@ class BinExt
             // Set config
             Util::setSystemConfig('memories.exiftool', $path);
 
-            // make sure it is executable
+            // make sure it exists
             if (file_exists($path)) {
-                if (!is_executable($path)) {
-                    @chmod($path, 0755);
-                }
-
                 return $path;
             }
         }
@@ -139,7 +166,7 @@ class BinExt
         }
 
         // Get transcoder path
-        $transcoder = Util::getSystemConfig('memories.vod.path');
+        $transcoder = self::getTempBin(Util::getSystemConfig('memories.vod.path'), 'go-vod-'.self::GOVOD_VER);
         if (empty($transcoder)) {
             throw new \Exception('Transcoder not configured');
         }
