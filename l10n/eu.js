@@ -2,6 +2,8 @@ OC.L10N.register(
     "memories",
     {
     "Memories" : "Memoriak",
+    "Hardware Acceleration" : "Hardware azelerazioa",
+    "Enable acceleration with VA-API" : "Gaitu VA-API bidezko azelerazioa",
     "Settings" : "Ezarpenak",
     "People (Recognize)" : "Pertsonak (Recognize)",
     "People" : "Jendea",
