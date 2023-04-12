@@ -227,7 +227,7 @@ class VideoContentSetup {
     });
 
     setTimeout(() => {
-      content.videojs.play(); // iOS needs this
+      content.videojs?.play(); // iOS needs this
     }, 200);
 
     let canPlay = false;
@@ -292,7 +292,7 @@ class VideoContentSetup {
   }
 
   initPlyr(content: VideoContent) {
-    if (content.plyr) return;
+    if (content.plyr || !content.videojs || !content.element) return;
 
     content.videoElement = content.videojs?.el()?.querySelector("video");
     if (!content.videoElement) return;
