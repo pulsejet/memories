@@ -52,20 +52,18 @@ export default class ImageContentSetup {
     img.style.visibility = "hidden";
 
     // Fetch with Axios
-    fetchImage(content.data.src).then((blob) => {
+    fetchImage(content.data.src).then((blobSrc) => {
       // Check if destroyed already
       if (!content.element) return;
 
       // Insert image
-      const blobUrl = URL.createObjectURL(blob);
-      img.src = blobUrl;
       img.onerror = img.onload = () => {
+        img.onerror = img.onload = null;
         img.style.visibility = "visible";
         onLoad();
-        URL.revokeObjectURL(blobUrl);
-        img.onerror = img.onload = null;
         this.slideActivate();
       };
+      img.src = blobSrc;
     });
 
     return img;
@@ -102,17 +100,12 @@ export default class ImageContentSetup {
     this.lightbox.ui.updatePreloaderVisibility();
 
     fetchImage(slide.data.highSrc)
-      .then((blob) => {
+      .then((blobSrc) => {
         // Check if destroyed already
         if (!slide.content.element) return;
 
-        // Insert image
-        const blobUrl = URL.createObjectURL(blob);
-        img.onerror = img.onload = () => {
-          URL.revokeObjectURL(blobUrl);
-          img.onerror = img.onload = null;
-        };
-        img.src = blobUrl;
+        // Set src
+        img.src = blobSrc;
 
         // Don't load again
         slide.data.highSrcCond = "never";
