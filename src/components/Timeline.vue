@@ -68,7 +68,7 @@
           :style="{
             height: `${photo.dispH}px`,
             width: `${photo.dispW}px`,
-            transform: `translate(${photo.dispX}px, ${photo.dispY}px`,
+            transform: `translate(${photo.dispX}px, ${photo.dispY}px)`,
           }"
           class="photo"
         >
