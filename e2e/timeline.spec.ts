@@ -23,7 +23,6 @@ test.describe("Open", () => {
   });
 
   test("Select two images and delete", async ({ page }) => {
-    return;
     const src1 = await page
       .locator(".img-outer > img")
       .nth(1)
