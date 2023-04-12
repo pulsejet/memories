@@ -443,16 +443,17 @@ export default defineComponent({
     /** Multi-select triggered by touchmove */
     touchMoveSelect(touch: Touch, rowIdx: number) {
       // Which photo is the cursor over, if any
-      const elems = document.elementsFromPoint(touch.clientX, touch.clientY);
-      const photoComp: any = elems.find((e) => e.classList.contains("p-outer"));
-      let overPhoto: IPhoto = photoComp?.__vue__?.data;
+      const elem: any = document
+        .elementFromPoint(touch.clientX, touch.clientY)
+        ?.closest(".p-outer-super");
+      let overPhoto: IPhoto = elem?.__vue__?.data;
       if (overPhoto && overPhoto.flag & this.c.FLAG_PLACEHOLDER)
         overPhoto = null;
 
       // Do multi-selection "till" overPhoto "from" anchor
       // This logic is completely different from the desktop because of the
       // existence of a definitive "anchor" element. We just need to find
-      // rverything between the anchor and the current photo
+      // everything between the anchor and the current photo
       if (overPhoto && this.prevOver !== overPhoto) {
         this.prevOver = overPhoto;
 
