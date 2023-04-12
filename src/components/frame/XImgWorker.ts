@@ -303,15 +303,9 @@ async function fetchOneImage(url: string) {
   return await fetch(url);
 }
 
-/** Will be configured after the worker starts */
-let multiUrl: string;
-async function configMp(url: string) {
-  multiUrl = url;
-}
-
 /** Fetch multipreview with axios */
 async function fetchMultipreview(files: any[]) {
-  return await fetch(multiUrl, {
+  return await fetch(config.multiUrl, {
     method: "POST",
     body: JSON.stringify(files),
     headers: {
@@ -320,8 +314,14 @@ async function fetchMultipreview(files: any[]) {
   });
 }
 
+/** Will be configured after the worker starts */
+let config: { multiUrl: string };
+export async function configure(_config: typeof config) {
+  config = _config;
+}
+
 /** Get BLOB url for image */
-async function fetchImageSrc(url: string) {
+export async function fetchImageSrc(url: string) {
   // Check memcache entry
   if (BLOB_CACHE.has(url)) return BLOB_CACHE.get(url)[1];
 
@@ -338,7 +338,7 @@ async function fetchImageSrc(url: string) {
 }
 
 /** Change stickiness for a BLOB url */
-async function sticky(url: string, delta: number) {
+export async function sticky(url: string, delta: number) {
   if (!BLOB_STICKY.has(url)) BLOB_STICKY.set(url, 0);
   const val = BLOB_STICKY.get(url) + delta;
   if (val <= 0) {
@@ -349,8 +349,4 @@ async function sticky(url: string, delta: number) {
 }
 
 // Exports to main thread
-workerExport({
-  fetchImageSrc,
-  configMp,
-  sticky,
-});
+workerExport({ fetchImageSrc, configure, sticky });

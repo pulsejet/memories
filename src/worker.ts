@@ -30,13 +30,15 @@ export function workerImporter(worker: Worker) {
     if (reject) promises[id].reject(reject);
     delete promises[id];
   };
-  return function importer<T>(name: string) {
-    return function fun<T>(...args: any): Promise<T> {
+  return function importer<F extends (...args: any) => Promise<any>>(
+    name: string
+  ): (...args: Parameters<F>) => ReturnType<F> {
+    return function fun(...args: any) {
       return new Promise((resolve, reject) => {
         const id = Math.random();
         promises[id] = { resolve, reject };
         worker.postMessage({ id, name, args });
       });
-    };
+    } as any;
   };
 }
