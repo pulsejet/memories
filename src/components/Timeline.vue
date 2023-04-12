@@ -142,9 +142,10 @@ import * as strings from "../services/strings";
 import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
 import { API, DaysFilterType } from "../services/API";
 
-const SCROLL_LOAD_DELAY = 100; // Delay in loading data when scrolling
+const SCROLL_LOAD_DELAY = 250; // Delay in loading data when scrolling
 const DESKTOP_ROW_HEIGHT = 200; // Height of row on desktop
 const MOBILE_ROW_HEIGHT = 120; // Approx row height on mobile
+const ROW_NUM_LPAD = 16; // Number of rows to load before and after viewport
 
 export default defineComponent({
   name: "Timeline",
@@ -493,8 +494,10 @@ export default defineComponent({
         return;
       }
 
-      // Reset image state
-      for (let i = startIndex; i < endIndex; i++) {
+      // Reset placeholder state for rows including padding
+      const rmin = Math.max(0, startIndex - ROW_NUM_LPAD);
+      const rmax = Math.min(this.list.length, endIndex + ROW_NUM_LPAD);
+      for (let i = rmin; i < rmax; i++) {
         const row = this.list[i];
         if (!row) {
           continue;
@@ -549,13 +552,30 @@ export default defineComponent({
 
     /** Load image data for given view */
     loadScrollChanges(startIndex: number, endIndex: number) {
+      // Check if any side needs a padding.
+      // Whenever less than half rows are loaded, we need to pad with full
+      // rows on that side. This ensures we have minimal reflows.
+      const rmin = Math.max(0, startIndex - ROW_NUM_LPAD / 2);
+      const rmax = Math.min(this.list.length - 1, endIndex + ROW_NUM_LPAD / 2);
+      const notsized = (r: IRow) => r && !this.sizedDays.has(r.dayId);
+
+      // Check at the start
+      if (this.list.slice(rmin, startIndex).some(notsized)) {
+        startIndex -= ROW_NUM_LPAD;
+      }
+
+      // Check at the end
+      if (this.list.slice(endIndex + 1, rmax + 1).some(notsized)) {
+        endIndex += ROW_NUM_LPAD;
+      }
+
       // Make sure start and end valid
       startIndex = Math.max(0, startIndex);
       endIndex = Math.min(this.list.length - 1, endIndex);
 
       // Fetch all visible days
       for (let i = startIndex; i <= endIndex; i++) {
-        let item = this.list[i];
+        const item = this.list[i];
         if (!item) continue;
         if (this.loadedDays.has(item.dayId)) {
           if (!this.sizedDays.has(item.dayId)) {
