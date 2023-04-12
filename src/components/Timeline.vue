@@ -61,7 +61,8 @@
           </div>
         </div>
 
-        <div
+        <Photo
+          class="photo"
           v-else
           v-for="photo of item.photos"
           :key="photo.key"
@@ -70,18 +71,14 @@
             width: `${photo.dispW}px`,
             transform: `translate(${photo.dispX}px, ${photo.dispY}px)`,
           }"
-          class="photo"
-        >
-          <Photo
-            :data="photo"
-            :day="item.day"
-            @select="selectionManager.selectPhoto"
-            @pointerdown="selectionManager.clickPhoto(photo, $event, index)"
-            @touchstart="selectionManager.touchstartPhoto(photo, $event, index)"
-            @touchend="selectionManager.touchendPhoto(photo, $event, index)"
-            @touchmove="selectionManager.touchmovePhoto(photo, $event, index)"
-          />
-        </div>
+          :data="photo"
+          :day="item.day"
+          @select="selectionManager.selectPhoto"
+          @pointerdown="selectionManager.clickPhoto(photo, $event, index)"
+          @touchstart="selectionManager.touchstartPhoto(photo, $event, index)"
+          @touchend="selectionManager.touchendPhoto(photo, $event, index)"
+          @touchmove="selectionManager.touchmovePhoto(photo, $event, index)"
+        />
       </template>
     </RecycleScroller>
 

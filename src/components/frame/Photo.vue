@@ -1,64 +1,66 @@
 <template>
-  <div
-    class="p-outer fill-block"
-    :class="{
-      selected: data.flag & c.FLAG_SELECTED,
-      placeholder: data.flag & c.FLAG_PLACEHOLDER,
-      leaving: data.flag & c.FLAG_LEAVING,
-      error: data.flag & c.FLAG_LOAD_FAIL,
-    }"
-  >
-    <CheckCircle v-once :size="18" class="select" @click="toggleSelect" />
-
-    <div class="video" v-if="data.flag & c.FLAG_IS_VIDEO">
-      <span v-if="data.video_duration" class="time">
-        {{ videoDuration }}
-      </span>
-      <Video :size="22" />
-    </div>
-
+  <div class="p-outer-super">
     <div
-      class="livephoto"
-      @mouseenter.passive="playVideo"
-      @mouseleave.passive="stopVideo"
-    >
-      <LivePhoto :size="22" v-if="data.liveid" />
-    </div>
-
-    <Star :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
-
-    <div
-      class="img-outer fill-block"
+      class="p-outer fill-block"
       :class="{
-        'memories-livephoto': data.liveid,
+        selected: data.flag & c.FLAG_SELECTED,
+        placeholder: data.flag & c.FLAG_PLACEHOLDER,
+        leaving: data.flag & c.FLAG_LEAVING,
+        error: data.flag & c.FLAG_LOAD_FAIL,
       }"
-      @contextmenu="contextmenu"
-      @pointerdown.passive="$emit('pointerdown', $event)"
-      @touchstart.passive="$emit('touchstart', $event)"
-      @touchmove="$emit('touchmove', $event)"
-      @touchend.passive="$emit('touchend', $event)"
-      @touchcancel.passive="$emit('touchend', $event)"
     >
-      <XImg
-        v-if="src"
-        ref="ximg"
-        :class="['ximg', 'fill-block', `memories-thumb-${data.key}`]"
-        draggable="false"
-        :src="src"
-        :key="data.fileid"
-        @load="load"
-        @error="error"
-      />
-      <video
-        ref="video"
-        v-if="videoUrl"
-        :src="videoUrl"
-        preload="none"
-        muted
-        playsinline
-        disableRemotePlayback
-      />
-      <div class="overlay fill-block" />
+      <CheckCircle v-once :size="18" class="select" @click="toggleSelect" />
+
+      <div class="video" v-if="data.flag & c.FLAG_IS_VIDEO">
+        <span v-if="data.video_duration" class="time">
+          {{ videoDuration }}
+        </span>
+        <Video :size="22" />
+      </div>
+
+      <div
+        class="livephoto"
+        @mouseenter.passive="playVideo"
+        @mouseleave.passive="stopVideo"
+      >
+        <LivePhoto :size="22" v-if="data.liveid" />
+      </div>
+
+      <Star :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
+
+      <div
+        class="img-outer fill-block"
+        :class="{
+          'memories-livephoto': data.liveid,
+        }"
+        @contextmenu="contextmenu"
+        @pointerdown.passive="$emit('pointerdown', $event)"
+        @touchstart.passive="$emit('touchstart', $event)"
+        @touchmove="$emit('touchmove', $event)"
+        @touchend.passive="$emit('touchend', $event)"
+        @touchcancel.passive="$emit('touchend', $event)"
+      >
+        <XImg
+          v-if="src"
+          ref="ximg"
+          :class="['ximg', 'fill-block', `memories-thumb-${data.key}`]"
+          draggable="false"
+          :src="src"
+          :key="data.fileid"
+          @load="load"
+          @error="error"
+        />
+        <video
+          ref="video"
+          v-if="videoUrl"
+          :src="videoUrl"
+          preload="none"
+          muted
+          playsinline
+          disableRemotePlayback
+        />
+        <div class="overlay fill-block" />
+      </div>
     </div>
   </div>
 </template>
