@@ -8,12 +8,7 @@
       error: data.flag & c.FLAG_LOAD_FAIL,
     }"
   >
-    <CheckCircle
-      :size="18"
-      class="select"
-      v-if="!(data.flag & c.FLAG_PLACEHOLDER)"
-      @click="toggleSelect"
-    />
+    <CheckCircle v-once :size="18" class="select" @click="toggleSelect" />
 
     <div class="video" v-if="data.flag & c.FLAG_IS_VIDEO">
       <span v-if="data.video_duration" class="time">

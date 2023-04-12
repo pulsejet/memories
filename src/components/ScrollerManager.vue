@@ -33,7 +33,7 @@
       @touchcancel.passive="interactend"
     >
       <div class="text">{{ hoverCursorText }}</div>
-      <div class="icon"><ScrollIcon :size="22" /></div>
+      <div class="icon"><ScrollIcon v-once :size="22" /></div>
     </span>
 
     <div

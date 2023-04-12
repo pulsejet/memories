@@ -56,7 +56,7 @@
             {{ item.super }}
           </div>
           <div class="main" @click="selectionManager.selectHead(item)">
-            <CheckCircle :size="20" class="select" v-if="item.name" />
+            <CheckCircle v-once :size="20" class="select" />
             <span class="name"> {{ item.name || getHeadName(item) }} </span>
           </div>
         </div>
