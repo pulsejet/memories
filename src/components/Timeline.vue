@@ -45,21 +45,12 @@
       </template>
 
       <template v-slot="{ item, index }">
-        <div
+        <RowHead
           v-if="item.type === 0"
-          :key="item.id"
-          :style="{ height: `${item.size}px` }"
-          :class="{ selected: item.selected }"
-          class="head-row"
-        >
-          <div class="super" v-if="item.super !== undefined">
-            {{ item.super }}
-          </div>
-          <div class="main" @click="selectionManager.selectHead(item)">
-            <CheckCircle v-once :size="20" class="select" />
-            <span class="name"> {{ item.name || getHeadName(item) }} </span>
-          </div>
-        </div>
+          :item="item"
+          :monthView="isMonthView"
+          @click="selectionManager.selectHead(item)"
+        />
 
         <Photo
           class="photo"
@@ -123,6 +114,7 @@ import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";
 
 import UserConfig from "../mixins/UserConfig";
 import FolderGrid from "./FolderGrid.vue";
+import RowHead from "./frame/RowHead.vue";
 import Photo from "./frame/Photo.vue";
 import ScrollerManager from "./ScrollerManager.vue";
 import SelectionManager from "./SelectionManager.vue";
@@ -136,7 +128,6 @@ import * as dav from "../services/DavRequests";
 import * as utils from "../services/Utils";
 import * as strings from "../services/strings";
 
-import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
 import { API, DaysFilterType } from "../services/API";
 
 const SCROLL_LOAD_DELAY = 250; // Delay in loading data when scrolling
@@ -149,6 +140,7 @@ export default defineComponent({
 
   components: {
     FolderGrid,
+    RowHead,
     Photo,
     EmptyContent,
     OnThisDay,
@@ -156,8 +148,6 @@ export default defineComponent({
     SelectionManager,
     ScrollerManager,
     Viewer,
-
-    CheckCircle,
   },
 
   mixins: [UserConfig],
@@ -674,29 +664,6 @@ export default defineComponent({
       }
 
       return query;
-    },
-
-    /** Get name of header */
-    getHeadName(head: IHeadRow) {
-      // Check cache
-      if (head.name) {
-        return head.name;
-      }
-
-      // Make date string
-      // The reason this function is separate from processDays is
-      // because this call is terribly slow even on desktop
-      const dateTaken = utils.dayIdToDate(head.dayId);
-      let name: string;
-      if (this.isMonthView) {
-        name = utils.getMonthDateStr(dateTaken);
-      } else {
-        name = utils.getLongDateStr(dateTaken, true);
-      }
-
-      // Cache and return
-      head.name = name;
-      return head.name;
     },
 
     /** Fetch folders */
@@ -1299,12 +1266,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@mixin phone {
-  @media (max-width: 768px) {
-    @content;
-  }
-}
-
 /** Main view */
 .container {
   height: 100%;
@@ -1357,63 +1318,6 @@ export default defineComponent({
     transform 0.2s ease-in-out; // reflow
 }
 
-.head-row {
-  contain: strict;
-  padding-top: 10px;
-  padding-left: 3px;
-  font-size: 0.9em;
-
-  > div {
-    position: relative;
-    &.super {
-      font-size: 1.4em;
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-    &.main {
-      display: inline-block;
-      font-weight: 600;
-    }
-  }
-
-  .select {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    display: none;
-    opacity: 0;
-    transform: translateY(-45%);
-    transition: opacity 0.2s ease;
-    border-radius: 50%;
-    cursor: pointer;
-  }
-  .name {
-    display: block;
-    transition: transform 0.2s ease;
-    cursor: pointer;
-    font-size: 1.075em;
-  }
-
-  :hover,
-  &.selected {
-    .select {
-      display: flex;
-      opacity: 0.7;
-    }
-    .name {
-      transform: translateX(24px);
-    }
-  }
-  &.selected .select {
-    opacity: 1;
-    color: var(--color-primary);
-  }
-
-  @include phone {
-    transform: translateX(8px);
-  }
-}
-
 /** Dynamic top matter */
 .recycler-before {
   width: 100%;
@@ -1421,7 +1325,7 @@ export default defineComponent({
     font-size: 1.2em;
     padding-top: 13px;
     padding-left: 8px;
-    @include phone {
+    @media (max-width: 768px) {
       padding-left: 48px;
     }
   }
