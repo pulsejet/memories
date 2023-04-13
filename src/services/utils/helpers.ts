@@ -1,6 +1,22 @@
 import { IPhoto } from "../../types";
 import { API } from "../API";
 
+/** Get preview URL from photo object */
+export function getPreviewUrl(
+  photo: IPhoto,
+  square: boolean,
+  size: number | [number, number]
+) {
+  const [x, y] = typeof size === "number" ? [size, size] : size;
+
+  return API.Q(API.IMAGE_PREVIEW(photo.fileid), {
+    c: photo.etag,
+    x,
+    y,
+    a: square ? "0" : "1",
+  });
+}
+
 /**
  * Get the path of the folder on folders route
  * This function does not check if this is the folder route

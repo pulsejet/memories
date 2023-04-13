@@ -134,26 +134,4 @@ const genFileInfo = function (obj) {
   return fileInfo;
 };
 
-/** Get preview URL from photo object */
-const getPreviewUrl = function (
-  photo: IPhoto,
-  square: boolean,
-  size: number | [number, number]
-) {
-  const [x, y] = typeof size === "number" ? [size, size] : size;
-
-  return API.Q(API.IMAGE_PREVIEW(photo.fileid), {
-    c: photo.etag,
-    x,
-    y,
-    a: square ? "0" : "1",
-  });
-};
-
-export {
-  encodeFilePath,
-  extractFilePaths,
-  sortCompare,
-  genFileInfo,
-  getPreviewUrl,
-};
+export { encodeFilePath, extractFilePaths, sortCompare, genFileInfo };

@@ -49,7 +49,6 @@ import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 import * as utils from "../../services/Utils";
 import * as dav from "../../services/DavRequests";
 import { IPhoto } from "../../types";
-import { getPreviewUrl } from "../../services/FileUtils";
 
 import LeftMoveIcon from "vue-material-design-icons/ChevronLeft.vue";
 import RightMoveIcon from "vue-material-design-icons/ChevronRight.vue";
@@ -79,7 +78,6 @@ export default defineComponent({
   },
 
   data: () => ({
-    getPreviewUrl,
     years: [] as IYear[],
     hasRight: false,
     hasLeft: false,
@@ -175,7 +173,7 @@ export default defineComponent({
 
         // Get random photo
         year.preview ||= utils.randomChoice(year.photos);
-        year.url = getPreviewUrl(year.preview, false, 512);
+        year.url = utils.getPreviewUrl(year.preview, false, 512);
       }
 
       await this.$nextTick();

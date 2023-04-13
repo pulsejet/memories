@@ -32,7 +32,7 @@
 import { defineComponent, PropType } from "vue";
 import { IFolder, IPhoto } from "../../types";
 
-import { getPreviewUrl } from "../../services/FileUtils";
+import { getPreviewUrl } from "../../services/utils/helpers";
 
 import UserConfig from "../../mixins/UserConfig";
 import FolderIcon from "vue-material-design-icons/Folder.vue";

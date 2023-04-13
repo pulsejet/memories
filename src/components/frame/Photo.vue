@@ -68,7 +68,6 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
-import { getPreviewUrl } from "../../services/FileUtils";
 import { IDay, IPhoto } from "../../types";
 import * as utils from "../../services/Utils";
 
@@ -191,7 +190,7 @@ export default defineComponent({
           ) - 1;
       }
 
-      return getPreviewUrl(this.data, false, size);
+      return utils.getPreviewUrl(this.data, false, size);
     },
 
     /** Set src with overlay face rect */

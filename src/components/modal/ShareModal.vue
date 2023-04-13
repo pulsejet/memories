@@ -84,9 +84,9 @@ import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
 import Modal from "./Modal.vue";
 
 import { IPhoto } from "../../types";
-import { getPreviewUrl } from "../../services/FileUtils";
 import { API } from "../../services/API";
 import * as dav from "../../services/DavRequests";
+import * as utils from "../../services/Utils";
 
 import PhotoIcon from "vue-material-design-icons/Image.vue";
 import LargePhotoIcon from "vue-material-design-icons/ImageArea.vue";
@@ -160,7 +160,7 @@ export default defineComponent({
     },
 
     async sharePreview() {
-      const src = getPreviewUrl(this.photo, false, 2048);
+      const src = utils.getPreviewUrl(this.photo, false, 2048);
       this.shareWithHref(src, true);
     },
 

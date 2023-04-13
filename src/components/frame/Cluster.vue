@@ -37,7 +37,7 @@ import { getCurrentUser } from "@nextcloud/auth";
 import NcCounterBubble from "@nextcloud/vue/dist/Components/NcCounterBubble";
 
 import { IAlbum, ICluster, IFace } from "../../types";
-import { getPreviewUrl } from "../../services/FileUtils";
+import { getPreviewUrl } from "../../services/utils/helpers";
 import errorsvg from "../../assets/error.svg";
 
 import { API } from "../../services/API";

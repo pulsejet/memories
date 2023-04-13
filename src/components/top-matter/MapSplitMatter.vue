@@ -52,7 +52,6 @@ import axios from "@nextcloud/axios";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 
 import { API } from "../../services/API";
-import { getPreviewUrl } from "../../services/FileUtils";
 import * as utils from "../../services/Utils";
 
 import "leaflet/dist/leaflet.css";
@@ -292,7 +291,7 @@ export default defineComponent({
     },
 
     clusterPreviewUrl(cluster: IMarkerCluster) {
-      return getPreviewUrl(cluster.preview, false, 256);
+      return utils.getPreviewUrl(cluster.preview, false, 256);
     },
 
     clusterIconClass(cluster: IMarkerCluster) {

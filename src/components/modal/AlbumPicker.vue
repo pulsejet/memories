@@ -69,7 +69,7 @@ import NcButton from "@nextcloud/vue/dist/Components/NcButton";
 import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
 const NcListItem = () => import("@nextcloud/vue/dist/Components/NcListItem");
 
-import { getPreviewUrl } from "../../services/FileUtils";
+import { getPreviewUrl } from "../../services/utils/helpers";
 import { IAlbum, IPhoto } from "../../types";
 import axios from "@nextcloud/axios";
 import { API } from "../../services/API";

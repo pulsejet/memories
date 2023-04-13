@@ -188,7 +188,6 @@ import axios from "@nextcloud/axios";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
 import { getRootUrl } from "@nextcloud/router";
 
-import { getPreviewUrl } from "../../services/FileUtils";
 import { getDownloadLink } from "../../services/DavRequests";
 import { API } from "../../services/API";
 import * as dav from "../../services/DavRequests";
@@ -714,7 +713,7 @@ export default defineComponent({
         // Get thumb image
         const thumbSrc: string =
           this.thumbElem(photo)?.getAttribute("src") ||
-          getPreviewUrl(photo, false, 256);
+          utils.getPreviewUrl(photo, false, 256);
 
         // Get full image
         return {
@@ -772,7 +771,9 @@ export default defineComponent({
 
       this.photoswipe.addFilter("itemData", (itemData, index) => ({
         ...this.getItemData(this.list[index]),
-        msrc: thumbSize ? getPreviewUrl(photo, false, thumbSize) : undefined,
+        msrc: thumbSize
+          ? utils.getPreviewUrl(photo, false, thumbSize)
+          : undefined,
       }));
 
       this.isOpen = true;
@@ -783,7 +784,7 @@ export default defineComponent({
     getItemData(photo: IPhoto) {
       const sw = Math.floor(screen.width * devicePixelRatio);
       const sh = Math.floor(screen.height * devicePixelRatio);
-      let previewUrl = getPreviewUrl(photo, false, [sw, sh]);
+      let previewUrl = utils.getPreviewUrl(photo, false, [sw, sh]);
 
       const isvideo = photo.flag & this.c.FLAG_IS_VIDEO;
 
