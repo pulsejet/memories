@@ -1,5 +1,5 @@
-import { IPhoto } from "../types";
-import { API } from "./API";
+import { IPhoto } from "../../types";
+import { API } from "../API";
 
 /**
  * Get the path of the folder on folders route

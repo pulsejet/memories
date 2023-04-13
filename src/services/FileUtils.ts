@@ -22,7 +22,7 @@
 import camelcase from "camelcase";
 import { IPhoto } from "../types";
 import { API } from "./API";
-import { isNumber } from "./UtilsAlgo";
+import { isNumber } from "./utils/algo";
 
 /**
  * Get an url encoded path

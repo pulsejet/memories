@@ -1,4 +1,4 @@
-import { IPhoto } from "../types";
+import { IPhoto } from "../../types";
 
 /** Global constants */
 export const constants = {
