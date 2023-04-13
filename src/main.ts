@@ -22,6 +22,8 @@ import "./global.scss";
 
 // Global exposed variables
 declare global {
+  var mode: "admin" | "user";
+
   var vueroute: () => Route;
   var OC: Nextcloud.v24.OC;
   var OCP: Nextcloud.v24.OCP;
@@ -115,12 +117,14 @@ if (adminSection) {
     el: "#memories-admin-content",
     render: (h) => h(Admin),
   });
+  globalThis.mode = "admin";
 } else {
   app = new Vue({
     el: "#content",
     router,
     render: (h) => h(App),
   });
+  globalThis.mode = "user";
 }
 
 export default app;
