@@ -506,6 +506,7 @@ export default defineComponent({
     interactend() {
       this.interacting = false;
       this.recyclerScrolled(null); // make sure final position is correct
+      this.$emit("interactend"); // tell recycler to load stuff
     },
 
     /** Update scroller is being used to scroll recycler */

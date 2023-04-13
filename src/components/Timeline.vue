@@ -80,6 +80,7 @@
       :height="scrollerHeight"
       :recycler="$refs.recycler"
       :recyclerBefore="$refs.recyclerBefore"
+      @interactend="loadScrollView()"
     />
 
     <SelectionManager
@@ -462,7 +463,7 @@ export default defineComponent({
         this.scrollerManager.adjust();
 
         // Explicitly request a scroll event
-        this.loadScrollChanges(this.currentStart, this.currentEnd);
+        this.loadScrollView();
       }
     },
 
@@ -514,31 +515,31 @@ export default defineComponent({
       // Check if this was requested by a refresh
       const force = this.currentEnd === -1;
 
+      // We only need to debounce loads if the user is dragging the scrollbar
+      const scrolling = this.scrollerManager.interacting;
+
       // Make sure we don't do this too often
       this.currentStart = startIndex;
       this.currentEnd = endIndex;
 
-      // Check if this was requested specifically
-      if (force) {
-        this.loadScrollChanges(startIndex, endIndex);
-        return;
-      }
+      // Check if we can do this immediately
+      const delay = force || !scrolling ? 0 : SCROLL_LOAD_DELAY;
 
-      setTimeout(() => {
-        // Get the overlapping range between startIndex and
-        // currentStart and endIndex and currentEnd.
-        // This is the range of rows that we need to update.
-        const start = Math.max(startIndex, this.currentStart);
-        const end = Math.min(endIndex, this.currentEnd);
-
-        if (end - start > 0) {
-          this.loadScrollChanges(start, end);
-        }
-      }, SCROLL_LOAD_DELAY);
+      // Debounce; only execute the newest call after delay
+      utils.setRenewingTimeout(
+        this,
+        "_scrollChangeTimer",
+        this.loadScrollView,
+        delay
+      );
     },
 
-    /** Load image data for given view */
-    loadScrollChanges(startIndex: number, endIndex: number) {
+    /** Load image data for given view (index based) */
+    loadScrollView(startIndex?: number, endIndex?: number) {
+      // Default values if not defined
+      startIndex ??= this.currentStart;
+      endIndex ??= this.currentEnd;
+
       // Check if any side needs a padding.
       // Whenever less than half rows are loaded, we need to pad with full
       // rows on that side. This ensures we have minimal reflows.
