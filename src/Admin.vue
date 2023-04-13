@@ -83,7 +83,7 @@
       {{
         t(
           "memories",
-          "If the button below does not work for importing the planet data, use 'occ memories:places-setup'."
+          "If the button below does not work for importing the planet data, use the 'occ memories:places-setup' command."
         )
       }}
       <br />
