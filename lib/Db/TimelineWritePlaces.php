@@ -37,14 +37,14 @@ trait TimelineWritePlaces
         if ($lat || $lon || $oldLat || $oldLon) {
             try {
                 $mapCluster = $this->mapGetCluster($mapCluster, $lat, $lon, $oldLat, $oldLon);
-            } catch (\Error $e) {
+            } catch (\Exception $e) {
                 $logger = \OC::$server->get(LoggerInterface::class);
                 $logger->log(3, 'Error updating map cluster data: '.$e->getMessage(), ['app' => 'memories']);
             }
 
             try {
                 $osmIds = $this->updatePlacesData($fileId, $lat, $lon);
-            } catch (\Error $e) {
+            } catch (\Exception $e) {
                 $logger = \OC::$server->get(LoggerInterface::class);
                 $logger->log(3, 'Error updating places data: '.$e->getMessage(), ['app' => 'memories']);
             }
