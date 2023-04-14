@@ -1,6 +1,8 @@
 <?php
 
-namespace OCA\Memories;
+namespace OCA\Memories\Service;
+
+use OCA\Memories\Util;
 
 class BinExt
 {
@@ -63,7 +65,7 @@ class BinExt
         }
 
         // Test with actual file
-        $file = realpath(__DIR__.'/../exiftest.jpg');
+        $file = realpath(__DIR__.'/../../exiftest.jpg');
         if (!$file) {
             throw new \Exception('Could not find EXIF test file');
         }
@@ -97,7 +99,7 @@ class BinExt
     public static function getExiftool(): array
     {
         if (Util::getSystemConfig('memories.exiftool_no_local')) {
-            return ['perl', realpath(__DIR__.'/../exiftool-bin/exiftool/exiftool')];
+            return ['perl', realpath(__DIR__.'/../../exiftool-bin/exiftool/exiftool')];
         }
 
         return [self::getExiftoolPBin()];
@@ -121,7 +123,7 @@ class BinExt
         // Get static binary if available
         if ($arch && $libc) {
             // get target file path
-            $path = realpath(__DIR__."/../exiftool-bin/exiftool-{$arch}-{$libc}");
+            $path = realpath(__DIR__."/../../exiftool-bin/exiftool-{$arch}-{$libc}");
 
             // Set config
             Util::setSystemConfig('memories.exiftool', $path);
@@ -284,7 +286,7 @@ class BinExt
         }
 
         // TODO: check data mount; ignoring the result of the file for now
-        $testfile = realpath(__DIR__.'/../exiftest.jpg');
+        $testfile = realpath(__DIR__.'/../../exiftest.jpg');
 
         // Make request
         $url = self::getGoVodUrl('test', $testfile, 'test');
@@ -346,7 +348,7 @@ class BinExt
         if (empty($goVodPath) || !file_exists($goVodPath)) {
             // Detect architecture
             $arch = \OCA\Memories\Util::getArch();
-            $path = __DIR__."/../exiftool-bin/go-vod-{$arch}";
+            $path = __DIR__."/../../exiftool-bin/go-vod-{$arch}";
             $goVodPath = realpath($path);
 
             if (!$goVodPath) {

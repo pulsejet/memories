@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\Memories;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Service\BinExt;
 use OCP\Files\File;
 use OCP\IConfig;
 

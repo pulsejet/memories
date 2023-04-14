@@ -23,9 +23,9 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
-use OCA\Memories\BinExt;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
+use OCA\Memories\Service\BinExt;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataDisplayResponse;

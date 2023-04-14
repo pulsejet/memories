@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Command;
 
-use OCA\Memories\BinExt;
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Service;
 use OCP\Files\IRootFolder;
@@ -111,7 +110,7 @@ class Index extends Command
         try {
             // Use static exiftool process
             \OCA\Memories\Exif::ensureStaticExiftoolProc();
-            if (!BinExt::testExiftool()) { // throws
+            if (!Service\BinExt::testExiftool()) { // throws
                 throw new \Exception('exiftool could not be executed or test failed');
             }
 
