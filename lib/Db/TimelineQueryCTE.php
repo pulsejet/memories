@@ -29,9 +29,10 @@ trait TimelineQueryCTE
         return
         "*PREFIX*cte_folders_all(fileid, name) AS (
             {$BASE_QUERY}
-            WHERE
+            WHERE (
                 {$CLS_TOP_FOLDER} AND
                 {$CLS_NOMEDIA}
+            )
 
             UNION ALL
 
@@ -42,8 +43,9 @@ trait TimelineQueryCTE
                     {$CLS_MIME_FOLDER} AND
                     {$CLS_ARCHIVE_JOIN}
                 )
-            WHERE
+            WHERE (
                 {$CLS_NOMEDIA}
+            )
         )";
     }
 
