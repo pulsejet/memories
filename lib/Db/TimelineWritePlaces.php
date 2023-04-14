@@ -175,8 +175,8 @@ trait TimelineWritePlaces
      */
     private static function readCoord(array &$exif)
     {
-        $lat = array_key_exists(LAT_KEY, $exif) ? round((float) $exif[LAT_KEY], 6) : null;
-        $lon = array_key_exists(LON_KEY, $exif) ? round((float) $exif[LON_KEY], 6) : null;
+        $lat = \array_key_exists(LAT_KEY, $exif) ? round((float) $exif[LAT_KEY], 6) : null;
+        $lon = \array_key_exists(LON_KEY, $exif) ? round((float) $exif[LON_KEY], 6) : null;
 
         // Make sure we have valid coordinates
         if (null === $lat || null === $lon || abs($lat) > 90 || abs($lon) > 180 || ($lat < 0.00001 && $lon < 0.00001)) {
@@ -184,10 +184,10 @@ trait TimelineWritePlaces
         }
 
         // Remove invalid coordinates
-        if (null === $lat && array_key_exists(LAT_KEY, $exif)) {
+        if (null === $lat && \array_key_exists(LAT_KEY, $exif)) {
             unset($exif[LAT_KEY]);
         }
-        if (null === $lon && array_key_exists(LON_KEY, $exif)) {
+        if (null === $lon && \array_key_exists(LON_KEY, $exif)) {
             unset($exif[LON_KEY]);
         }
 
