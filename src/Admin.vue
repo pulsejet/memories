@@ -83,7 +83,9 @@
         name="idxm_radio"
         type="radio"
         @update:checked="update('indexingMode')"
-        >{{ t("memories", "Only index timeline folders (configured by user)") }}
+        >{{
+          t("memories", "Index per-user timeline folders (not recommended)")
+        }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
         :checked.sync="indexingMode"
@@ -91,7 +93,7 @@
         name="idxm_radio"
         type="radio"
         @update:checked="update('indexingMode')"
-        >{{ t("memories", "Only index a selected path") }}
+        >{{ t("memories", "Index a fixed relative path") }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
         :checked.sync="indexingMode"

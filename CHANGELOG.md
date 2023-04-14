@@ -15,7 +15,12 @@ Note: this is a major release and may introduce breaking changes to your workflo
   Make sure your temp directory is writable by the web server.
 - **Breaking**: The `--cleanup` flag to `memories:index` has been removed and is no longer necessary.  
   Folders having a `.nomedia` file will automatically be excluded from the timeline.
-- Significant performance improvements for the timeline view.
+- **Feature**: You can now choose which folders to index by default.  
+  This can be configured from the admin panel. The available options are:
+  - All media files (excluding folders with `.nomedia` files, default and recommended)
+  - All files in every user's configured timeline folder (not recommended).
+  - All files in a given folder for each user (relative path).
+- **Feature**: Significant performance improvements for the timeline view.
 
 ## v4.13.1 (2023-04-03)
 
