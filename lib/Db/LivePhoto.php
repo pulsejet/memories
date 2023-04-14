@@ -19,7 +19,7 @@ class LivePhoto
     }
 
     /** Check if a given Exif data is the video part of a Live Photo */
-    public function isVideoPart(array &$exif)
+    public function isVideoPart(array $exif)
     {
         return \array_key_exists('MIMEType', $exif)
                && 'video/quicktime' === $exif['MIMEType']
@@ -27,7 +27,7 @@ class LivePhoto
     }
 
     /** Get liveid from photo part */
-    public function getLivePhotoId(File &$file, array &$exif)
+    public function getLivePhotoId(File $file, array $exif)
     {
         // Apple JPEG (MOV has ContentIdentifier)
         if (\array_key_exists('MediaGroupUUID', $exif)) {
@@ -100,7 +100,10 @@ class LivePhoto
         return '';
     }
 
-    public function processVideoPart(File &$file, array &$exif)
+    /**
+     * Process video part of Live Photo.
+     */
+    public function processVideoPart(File $file, array $exif)
     {
         $fileId = $file->getId();
         $mtime = $file->getMTime();
@@ -141,5 +144,17 @@ class LivePhoto
                 error_log('Failed to create memories_livephoto record: '.$ex->getMessage());
             }
         }
+    }
+
+    /**
+     * Delete entry from memories_livephoto table.
+     */
+    public function deleteVideoPart(File $file): void
+    {
+        $query = $this->connection->getQueryBuilder();
+        $query->delete('memories_livephoto')
+            ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
+        ;
+        $query->executeStatement();
     }
 }

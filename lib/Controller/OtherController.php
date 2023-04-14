@@ -128,6 +128,16 @@ class OtherController extends GenericApiController
             // Check for system perl
             $status['perl'] = $this->getExecutableStatus(exec('which perl'));
 
+            // Check number of indexed files
+            $index = \OC::$server->get(\OCA\Memories\Service\Index::class);
+            $status['indexed_count'] = $index->getIndexedCount();
+
+            // Check supported preview mimes
+            $status['mimes'] = $index->getPreviewMimes($index->getAllMimes());
+
+            // Check for bad encryption module
+            $status['bad_encryption'] = \OCA\Memories\Util::isEncryptionEnabled();
+
             // Get GIS status
             $places = \OC::$server->get(\OCA\Memories\Service\Places::class);
 

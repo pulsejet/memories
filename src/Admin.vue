@@ -35,6 +35,120 @@
       }}
     </NcCheckboxRadioSwitch>
 
+    <!----------------------------- Index Settings ----------------------------->
+    <h2>{{ t("memories", "Media Indexing") }}</h2>
+
+    <template v-if="status">
+      <NcNoteCard :type="status.indexed_count > 0 ? 'success' : 'warning'">
+        {{
+          t("memories", "{n} media files have been indexed", {
+            n: status.indexed_count,
+          })
+        }}
+      </NcNoteCard>
+      <NcNoteCard type="error" v-if="status.bad_encryption">
+        {{
+          t(
+            "memories",
+            "Only server-side encryption (OC_DEFAULT_MODULE) is supported, but another encryption module is enabled."
+          )
+        }}
+      </NcNoteCard>
+    </template>
+
+    <p>
+      {{
+        t(
+          "memories",
+          "The EXIF indexes are built and checked in a periodic background task. Be careful when selecting anything other than automatic indexing. For example, setting the indexing to only timeline folders may cause delays before media becomes available to users, since the user configures the timeline only after logging in."
+        )
+      }}
+      {{
+        t(
+          "memories",
+          'Folders with a ".nomedia" file are always excluded from indexing.'
+        )
+      }}
+      <NcCheckboxRadioSwitch
+        :checked.sync="indexingMode"
+        value="1"
+        name="idxm_radio"
+        type="radio"
+        @update:checked="update('indexingMode')"
+        >{{ t("memories", "Index all media automatically (recommended)") }}
+      </NcCheckboxRadioSwitch>
+      <NcCheckboxRadioSwitch
+        :checked.sync="indexingMode"
+        value="2"
+        name="idxm_radio"
+        type="radio"
+        @update:checked="update('indexingMode')"
+        >{{ t("memories", "Only index timeline folders (configured by user)") }}
+      </NcCheckboxRadioSwitch>
+      <NcCheckboxRadioSwitch
+        :checked.sync="indexingMode"
+        value="3"
+        name="idxm_radio"
+        type="radio"
+        @update:checked="update('indexingMode')"
+        >{{ t("memories", "Only index a selected path") }}
+      </NcCheckboxRadioSwitch>
+      <NcCheckboxRadioSwitch
+        :checked.sync="indexingMode"
+        value="0"
+        name="idxm_radio"
+        type="radio"
+        @update:checked="update('indexingMode')"
+        >{{ t("memories", "Disable background indexing") }}
+      </NcCheckboxRadioSwitch>
+
+      <NcTextField
+        :label="t('memories', 'Indexing path (relative, all users)')"
+        :label-visible="true"
+        :value="indexingPath"
+        @change="update('indexingPath', $event.target.value)"
+        v-if="indexingMode === '3'"
+      />
+    </p>
+
+    {{
+      t("memories", "For advanced usage, perform a run of indexing by running:")
+    }}
+    <br />
+    <code>occ memories:index</code>
+    <br />
+    {{ t("memories", "Force re-indexing of all files:") }}
+    <br />
+    <code>occ memories:index --force</code>
+    <br />
+    {{ t("memories", "You can limit indexing by user and/or folder:") }}
+    <br />
+    <code>occ memories:index --user=admin --folder=/Photos/</code>
+    <br />
+    {{ t("memories", "Clear all existing index tables:") }}
+    <br />
+    <code>occ memories:index --clear</code>
+    <br />
+
+    <br />
+    {{
+      t(
+        "memories",
+        "The following MIME types are configured for preview generation correctly. More documentation:"
+      )
+    }}
+    <a
+      href="https://github.com/pulsejet/memories/wiki/File-Type-Support"
+      target="_blank"
+    >
+      {{ t("memories", "External Link") }}
+    </a>
+    <br />
+    <code
+      ><template v-for="mime in status.mimes"
+        >{{ mime }}<br :key="mime" /></template
+    ></code>
+
     <!----------------------------- Places ----------------------------->
     <h2>{{ t("memories", "Reverse Geocoding") }}</h2>
 
@@ -83,9 +197,11 @@
       {{
         t(
           "memories",
-          "If the button below does not work for importing the planet data, use 'occ memories:places-setup'."
+          "If the button below does not work for importing the planet data, use the following command:"
         )
       }}
+      <br />
+      <code>occ memories:places-setup</code>
       <br />
       {{
         t(
@@ -147,6 +263,7 @@
         :label-visible="true"
         :value="ffmpegPath"
         @change="update('ffmpegPath', $event.target.value)"
+        :disabled="!enableTranscoding"
       />
 
       <NcTextField
@@ -154,11 +271,13 @@
         :label-visible="true"
         :value="ffprobePath"
         @change="update('ffprobePath', $event.target.value)"
+        :disabled="!enableTranscoding"
       />
 
       <br />
       {{ t("memories", "Global default video quality (user may override)") }}
       <NcCheckboxRadioSwitch
+        :disabled="!enableTranscoding"
         :checked.sync="videoDefaultQuality"
         value="0"
         name="vdq_radio"
@@ -167,6 +286,7 @@
         >{{ t("memories", "Auto (adaptive transcode)") }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
+        :disabled="!enableTranscoding"
         :checked.sync="videoDefaultQuality"
         value="-1"
         name="vdq_radio"
@@ -175,6 +295,7 @@
         >{{ t("memories", "Original (transcode with max quality)") }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
+        :disabled="!enableTranscoding"
         :checked.sync="videoDefaultQuality"
         value="-2"
         name="vdq_radio"
@@ -189,14 +310,14 @@
       {{
         t(
           "memories",
-          "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions at this link:"
+          "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:"
         )
       }}
       <a
         target="_blank"
         href="https://github.com/pulsejet/memories/wiki/HW-Transcoding"
       >
-        {{ t("memories", "external transcoder configuration") }}
+        {{ t("memories", "External Link") }}
       </a>
 
       <template v-if="status">
@@ -206,6 +327,7 @@
       </template>
 
       <NcCheckboxRadioSwitch
+        :disabled="!enableTranscoding"
         :checked.sync="enableExternalTranscoder"
         @update:checked="update('enableExternalTranscoder')"
         type="switch"
@@ -214,6 +336,7 @@
       </NcCheckboxRadioSwitch>
 
       <NcTextField
+        :disabled="!enableTranscoding"
         :label="t('memories', 'Binary path (local only)')"
         :label-visible="true"
         :value="goVodPath"
@@ -221,6 +344,7 @@
       />
 
       <NcTextField
+        :disabled="!enableTranscoding"
         :label="t('memories', 'Bind address (local only)')"
         :label-visible="true"
         :value="goVodBind"
@@ -228,6 +352,7 @@
       />
 
       <NcTextField
+        :disabled="!enableTranscoding"
         :label="t('memories', 'Connection address (same as bind if local)')"
         :label-visible="true"
         :value="goVodConnect"
@@ -271,14 +396,14 @@
       {{
         t(
           "memories",
-          "For more details on driver installation, check the following link:"
+          "For more details on driver installation, check the documentation:"
         )
       }}
       <a
         target="_blank"
         href="https://github.com/pulsejet/memories/wiki/HW-Transcoding#va-api"
       >
-        VA-API configuration
+        {{ t("memories", "External Link") }}
       </a>
 
       <NcNoteCard :type="vaapiStatusType" v-if="status">
@@ -286,6 +411,7 @@
       </NcNoteCard>
 
       <NcCheckboxRadioSwitch
+        :disabled="!enableTranscoding"
         :checked.sync="enableVaapi"
         @update:checked="update('enableVaapi')"
         type="switch"
@@ -294,6 +420,7 @@
       </NcCheckboxRadioSwitch>
 
       <NcCheckboxRadioSwitch
+        :disabled="!enableTranscoding || !enableVaapi"
         :checked.sync="enableVaapiLowPower"
         @update:checked="update('enableVaapiLowPower')"
         type="switch"
@@ -325,6 +452,7 @@
       </NcNoteCard>
 
       <NcCheckboxRadioSwitch
+        :disabled="!enableTranscoding"
         :checked.sync="enableNvenc"
         @update:checked="update('enableNvenc')"
         type="switch"
@@ -332,6 +460,7 @@
         {{ t("memories", "Enable acceleration with NVENC") }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
+        :disabled="!enableTranscoding || !enableNvenc"
         :checked.sync="enableNvencTemporalAQ"
         @update:checked="update('enableNvencTemporalAQ')"
         type="switch"
@@ -340,6 +469,7 @@
       </NcCheckboxRadioSwitch>
 
       <NcCheckboxRadioSwitch
+        :disabled="!enableTranscoding || !enableNvenc"
         :checked.sync="nvencScaler"
         value="npp"
         name="nvence_scaler_radio"
@@ -349,6 +479,7 @@
         >{{ t("memories", "NPP scaler") }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
+        :disabled="!enableTranscoding || !enableNvenc"
         :checked.sync="nvencScaler"
         value="cuda"
         name="nvence_scaler_radio"
@@ -379,6 +510,8 @@ import NcButton from "@nextcloud/vue/dist/Components/NcButton";
 const settings = {
   exiftoolPath: "memories.exiftool",
   exiftoolPerl: "memories.exiftool_no_local",
+  indexingMode: "memories.index.mode",
+  indexingPath: "memories.index.path",
 
   gisType: "memories.gis_type",
 
@@ -405,6 +538,9 @@ const invertedBooleans = ["enableTranscoding"];
 type BinaryStatus = "ok" | "not_found" | "not_executable" | "test_ok" | string;
 
 type IStatus = {
+  bad_encryption: boolean;
+  indexed_count: number;
+  mimes: string[];
   gis_type: number;
   gis_count?: number;
   exiftool: BinaryStatus;
@@ -430,6 +566,8 @@ export default defineComponent({
 
     exiftoolPath: "",
     exiftoolPerl: false,
+    indexingMode: "0",
+    indexingPath: "",
 
     gisType: 0,
 
@@ -695,6 +833,12 @@ export default defineComponent({
 
   a {
     color: var(--color-primary-element);
+  }
+
+  code {
+    padding-left: 10px;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
   }
 }
 </style>

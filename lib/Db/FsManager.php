@@ -98,14 +98,14 @@ class FsManager
                 $folder = $userFolder->get(Exif::removeExtraSlash($folderPath));
                 $root->addFolder($folder);
             } else {
-                $timelinePath = $this->request->getParam('timelinePath', Exif::getPhotosPath($this->config, $uid));
-                $timelinePath = Exif::removeExtraSlash($timelinePath);
+                $paths = Exif::getTimelinePaths($uid);
+                if ($path = $this->request->getParam('timelinePath', null)) {
+                    $paths = [Exif::removeExtraSlash($path)];
+                }
 
                 // Multiple timeline path support
-                $paths = explode(';', $timelinePath);
-                foreach ($paths as &$path) {
-                    $folder = $userFolder->get(trim($path));
-                    $root->addFolder($folder);
+                foreach ($paths as $path) {
+                    $root->addFolder($userFolder->get($path));
                 }
                 $root->addMountPoints();
             }

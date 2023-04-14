@@ -52,7 +52,7 @@ class Version400308Date20221026151748 extends SimpleMigrationStep
         $fileCacheTable->addIndex(['parent', 'mimetype'], 'memories_parent_mimetype');
 
         // Add other indices
-        return \OCA\Memories\Db\AddMissingIndices::run($schema, null);
+        return $schema;
     }
 
     /**

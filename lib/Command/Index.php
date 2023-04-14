@@ -23,17 +23,11 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Command;
 
-use OC\DB\Connection;
-use OC\DB\SchemaWrapper;
-use OCA\Memories\AppInfo\Application;
+use OCA\Memories\BinExt;
 use OCA\Memories\Db\TimelineWrite;
-use OCP\Files\File;
-use OCP\Files\Folder;
+use OCA\Memories\Service;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
-use OCP\IDBConnection;
-use OCP\IPreview;
-use OCP\ITempManager;
 use OCP\IUser;
 use OCP\IUserManager;
 use Symfony\Component\Console\Command\Command;
@@ -44,17 +38,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class IndexOpts
 {
-    public bool $refresh = false;
+    public bool $force = false;
     public bool $clear = false;
-    public bool $cleanup = false;
     public ?string $user = null;
     public ?string $folder = null;
 
     public function __construct(InputInterface $input)
     {
-        $this->refresh = (bool) $input->getOption('refresh');
+        $this->force = (bool) $input->getOption('force');
         $this->clear = (bool) $input->getOption('clear');
-        $this->cleanup = (bool) $input->getOption('cleanup');
         $this->user = $input->getOption('user');
         $this->folder = $input->getOption('folder');
     }
@@ -67,22 +59,13 @@ class Index extends Command
 
     protected IUserManager $userManager;
     protected IRootFolder $rootFolder;
-    protected IPreview $preview;
     protected IConfig $config;
-    protected OutputInterface $output;
-    protected IDBConnection $connection;
-    protected Connection $connectionForSchema;
+    protected Service\Index $indexer;
     protected TimelineWrite $timelineWrite;
-    protected ITempManager $tempManager;
 
-    // Stats
-    private int $nUser = 0;
-    private int $nProcessed = 0;
-    private int $nSkipped = 0;
-    private int $nInvalid = 0;
-    private int $nNoMedia = 0;
-
-    // Helper for the progress bar
+    // IO
+    private InputInterface $input;
+    private OutputInterface $output;
     private ConsoleSectionOutput $outputSection;
 
     // Command options
@@ -91,22 +74,17 @@ class Index extends Command
     public function __construct(
         IRootFolder $rootFolder,
         IUserManager $userManager,
-        IPreview $preview,
         IConfig $config,
-        IDBConnection $connection,
-        Connection $connectionForSchema,
-        ITempManager $tempManager
+        Service\Index $indexer,
+        TimelineWrite $timelineWrite
     ) {
         parent::__construct();
 
         $this->userManager = $userManager;
         $this->rootFolder = $rootFolder;
-        $this->preview = $preview;
         $this->config = $config;
-        $this->connection = $connection;
-        $this->connectionForSchema = $connectionForSchema;
-        $this->tempManager = $tempManager;
-        $this->timelineWrite = new TimelineWrite($connection);
+        $this->indexer = $indexer;
+        $this->timelineWrite = $timelineWrite;
     }
 
     protected function configure(): void
@@ -115,77 +93,34 @@ class Index extends Command
             ->setName('memories:index')
             ->setDescription('Generate photo entries')
             ->addOption('user', 'u', InputOption::VALUE_REQUIRED, 'Index only the specified user')
-            ->addOption('folder', null, InputOption::VALUE_REQUIRED, 'Index only the specified folder')
-            ->addOption('refresh', 'f', InputOption::VALUE_NONE, 'Refresh existing entries')
-            ->addOption('clear', null, InputOption::VALUE_NONE, 'Clear existing index before creating a new one (slow)')
-            ->addOption('cleanup', null, InputOption::VALUE_NONE, 'Remove orphaned entries from index (e.g. from .nomedia files)')
+            ->addOption('folder', null, InputOption::VALUE_REQUIRED, 'Index only the specified folder (relative to the user\'s root)')
+            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force refresh of existing index entries')
+            ->addOption('clear', null, InputOption::VALUE_NONE, 'Clear all existing index entries')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        // Add missing indices
-        $output->writeln('Checking database indices');
-        \OCA\Memories\Db\AddMissingIndices::run(new SchemaWrapper($this->connectionForSchema), $this->connectionForSchema);
-
-        // Print mime type support information
-        $output->writeln("\nMIME Type support:");
-        $mimes = array_merge(Application::IMAGE_MIMES, Application::VIDEO_MIMES);
-        $someUnsupported = false;
-        foreach ($mimes as $mimeType) {
-            if ($this->preview->isMimeSupported($mimeType)) {
-                $output->writeln("  {$mimeType}: supported");
-            } else {
-                $output->writeln("  {$mimeType}: <error>not supported</error>");
-                $someUnsupported = true;
-            }
-        }
-
-        // Print file type support info
-        if ($someUnsupported) {
-            $output->writeln("\nSome file types are not supported by your preview provider.\nPlease see https://github.com/pulsejet/memories/wiki/File-Type-Support\n");
-        } else {
-            $output->writeln("\nAll file types are supported by your preview provider.\n");
-        }
-
-        // Get options and arguments
+        // Store input/output/opts for later use
+        $this->input = $input;
+        $this->output = $output;
         $this->opts = new IndexOpts($input);
 
-        // Clear index if asked for this
-        if ($this->opts->clear && $input->isInteractive()) {
-            $output->write('Are you sure you want to clear the existing index? (y/N): ');
-            $answer = trim(fgets(STDIN));
-            if ('y' !== $answer) {
-                $output->writeln('Aborting');
-
-                return 1;
-            }
-        }
-        if ($this->opts->clear) {
-            $this->timelineWrite->clear();
-            $output->writeln('Cleared existing index');
-        }
-
-        // Detect incompatible options
-        if ($this->opts->cleanup && ($this->opts->user || $this->opts->folder)) {
-            $output->writeln('<error>Cannot use --cleanup with --user or --folder</error>');
-
-            return 1;
-        }
-
-        // Orphan all entries so we can delete them later
-        // Refresh works similarly, with a different flag on the process call
-        if ($this->opts->cleanup || $this->opts->refresh) {
-            $output->write('Marking all entries for refresh / cleanup ... ');
-            $count = $this->timelineWrite->orphanAll();
-            $output->writeln("{$count} marked");
-        }
-
-        // Run with the static process
         try {
+            // Use static exiftool process
             \OCA\Memories\Exif::ensureStaticExiftoolProc();
+            if (!BinExt::testExiftool()) { // throws
+                throw new \Exception('exiftool could not be executed or test failed');
+            }
 
-            return $this->executeNow($output);
+            // Perform steps based on opts
+            $this->checkClear();
+            $this->checkForce();
+
+            // Run the indexer
+            $this->runIndex();
+
+            return 0;
         } catch (\Exception $e) {
             $this->output->writeln("<error>{$e->getMessage()}</error>");
 
@@ -195,197 +130,60 @@ class Index extends Command
         }
     }
 
-    protected function executeNow(OutputInterface $output): int
+    /**
+     * Check and act on the clear option if set.
+     */
+    protected function checkClear(): void
     {
-        // Refuse to run without exiftool
-        if (!$this->testExif()) {
-            error_log('FATAL: exiftool could not be executed or test failed');
-            error_log('Make sure you have perl 5 installed in PATH');
+        if ($this->opts->clear) {
+            if ($this->input->isInteractive()) {
+                $this->output->write('Are you sure you want to clear the existing index? (y/N): ');
+                if ('y' !== trim(fgets(STDIN))) {
+                    $this->output->writeln('Aborting');
 
-            return 1;
+                    exit;
+                }
+            }
+
+            $this->timelineWrite->clear();
+            $this->output->writeln('Cleared existing index');
         }
+    }
 
-        // Time measurement
-        $startTime = microtime(true);
+    /**
+     * Check and act on the force option if set.
+     */
+    protected function checkForce(): void
+    {
+        if ($this->opts->force) {
+            $this->output->writeln('Forcing refresh of existing index entries');
 
-        if (\OCA\Memories\Util::isEncryptionEnabled()) {
-            // Can work with server-side but not with e2e encryption, see https://github.com/pulsejet/memories/issues/99
-            error_log('FATAL: Only server-side encryption (OC_DEFAULT_MODULE) is supported, but another encryption module is enabled. Aborted.');
-
-            return 1;
+            // TODO
         }
-        $this->output = $output;
+    }
 
+    /**
+     * Run the indexer.
+     */
+    protected function runIndex(): void
+    {
         // Call indexing for specified or each user
         if ($uid = $this->opts->user) {
             if ($user = $this->userManager->get($uid)) {
-                $this->indexOneUser($user);
+                $this->indexer->indexUser($user->getUID(), $this->opts->folder);
             } else {
                 throw new \Exception("User {$uid} not found");
             }
         } else {
             $this->userManager->callForSeenUsers(function (IUser $user) {
-                $this->indexOneUser($user);
-            });
-        }
-
-        // Clear orphans if asked for this
-        if (($this->opts->cleanup || $this->opts->refresh) && !($this->opts->user || $this->opts->folder)) {
-            $output->write('Deleting orphaned entries ... ');
-            $count = $this->timelineWrite->removeOrphans();
-            $output->writeln("{$count} deleted");
-        }
-
-        // Show some stats
-        $endTime = microtime(true);
-        $execTime = (int) (($endTime - $startTime) * 1000) / 1000;
-        $nTotal = $this->nInvalid + $this->nSkipped + $this->nProcessed + $this->nNoMedia;
-        $this->output->writeln('==========================================');
-        $this->output->writeln("Checked {$nTotal} files of {$this->nUser} users in {$execTime} sec");
-        $this->output->writeln($this->nInvalid.' not valid media items');
-        $this->output->writeln($this->nNoMedia.' .nomedia folders ignored');
-        $this->output->writeln($this->nSkipped.' skipped because unmodified');
-        $this->output->writeln($this->nProcessed.' (re-)processed');
-        $this->output->writeln('==========================================');
-
-        return 0;
-    }
-
-    /** Make sure exiftool is available */
-    private function testExif()
-    {
-        $testfilepath = __DIR__.'/../../exiftest.jpg';
-        $testfile = realpath($testfilepath);
-        if (!$testfile) {
-            error_log("Couldn't find Exif test file {$testfile}");
-
-            return false;
-        }
-
-        $exif = null;
-
-        try {
-            $exif = \OCA\Memories\Exif::getExifFromLocalPath($testfile);
-        } catch (\Exception $e) {
-            error_log("Couldn't read Exif data from test file: ".$e->getMessage());
-
-            return false;
-        }
-
-        if (!$exif) {
-            error_log('Got blank Exif data from test file');
-
-            return false;
-        }
-
-        if ('2004:08:31 19:52:58' !== $exif['DateTimeOriginal']) {
-            error_log('Got unexpected Exif data from test file');
-
-            return false;
-        }
-
-        return true;
-    }
-
-    private function indexOneUser(IUser $user): void
-    {
-        \OC_Util::tearDownFS();
-        \OC_Util::setupFS($user->getUID());
-
-        $uid = $user->getUID();
-        $folder = $this->rootFolder->getUserFolder($uid);
-
-        if ($path = $this->opts->folder) {
-            try {
-                $folder = $folder->get($path);
-            } catch (\OCP\Files\NotFoundException $e) {
-                $this->output->writeln("<error>Folder {$path} not found for user {$uid}</error>");
-
-                return;
-            }
-
-            if (!$folder instanceof Folder) {
-                $this->output->writeln("<error>Path {$path} is not a folder for user {$uid}</error>");
-
-                return;
-            }
-        }
-
-        $this->outputSection = $this->output->section();
-        ++$this->nUser;
-
-        $this->outputSection->overwrite("Scanning files for {$uid}");
-        $this->indexFolder($folder);
-        $this->outputSection->overwrite("Scanned all files for {$uid}");
-    }
-
-    private function indexFolder(Folder $folder): void
-    {
-        try {
-            // Respect the '.nomedia' file. If present don't traverse the folder
-            if ($folder->nodeExists('.nomedia')) {
-                ++$this->nNoMedia;
-
-                return;
-            }
-
-            $nodes = $folder->getDirectoryListing();
-
-            foreach ($nodes as $i => $node) {
-                if ($node instanceof Folder) {
-                    $this->indexFolder($node);
-                } elseif ($node instanceof File) {
-                    $path = $node->getPath();
-                    $path = \strlen($path) > 80 ? '...'.substr($path, -77) : $path;
-
-                    $this->outputSection->overwrite("Scanning {$path}");
-                    $this->indexFile($node);
-                    $this->tempManager->clean();
+                try {
+                    $uid = $user->getUID();
+                    $this->output->writeln("Indexing user {$uid}");
+                    $this->indexer->indexUser($uid, $this->opts->folder);
+                } catch (\Exception $e) {
+                    $this->output->writeln("<error>{$e->getMessage()}</error>");
                 }
-            }
-        } catch (\Exception $e) {
-            $this->output->writeln(sprintf(
-                '<error>Could not scan folder %s: %s</error>',
-                $folder->getPath(),
-                $e->getMessage()
-            ));
-        }
-    }
-
-    private function indexFile(File $file): void
-    {
-        // Process the file
-        $res = 1;
-
-        try {
-            // If refreshing the index, force reprocessing
-            // when the file is still an orphan. this way, the
-            // files are reprocessed exactly once
-            $force = $this->opts->refresh ? 2 : 0;
-
-            // (re-)process the file
-            $res = $this->timelineWrite->processFile($file, $force);
-
-            // If the file was processed successfully,
-            // remove it from the orphan list
-            if ($this->opts->cleanup || $this->opts->refresh) {
-                $this->timelineWrite->unorphan($file);
-            }
-        } catch (\Error $e) {
-            $this->output->writeln(sprintf(
-                '<error>Could not process file %s: %s</error>',
-                $file->getPath(),
-                $e->getMessage()
-            ));
-            $this->output->writeln($e->getTraceAsString());
-        }
-
-        if (2 === $res) {
-            ++$this->nProcessed;
-        } elseif (1 === $res) {
-            ++$this->nSkipped;
-        } else {
-            ++$this->nInvalid;
+            });
         }
     }
 }

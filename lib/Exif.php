@@ -65,16 +65,13 @@ class Exif
     }
 
     /**
-     * Get the path to the user's configured photos directory.
+     * Get list of timeline paths as array.
      */
-    public static function getPhotosPath(IConfig $config, string &$userId)
+    public static function getTimelinePaths(string $uid): array
     {
-        $p = $config->getUserValue($userId, Application::APPNAME, 'timelinePath', '');
-        if (empty($p)) {
-            return 'Photos/';
-        }
-
-        return self::sanitizePath($p);
+        $config = \OC::$server->get(IConfig::class);
+        $paths = $config->getUserValue($uid, Application::APPNAME, 'timelinePath', null) ?? 'Photos/';
+        return array_map(fn ($p) => self::sanitizePath(trim($p)), explode(';', $paths));
     }
 
     /**

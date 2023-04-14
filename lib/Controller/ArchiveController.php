@@ -42,7 +42,6 @@ class ArchiveController extends GenericApiController
     public function archive(string $id): Http\Response
     {
         return Util::guardEx(function () use ($id) {
-            $uid = Util::getUID();
             $userFolder = Util::getUserFolder();
 
             // Check for permissions and get numeric Id
@@ -58,8 +57,7 @@ class ArchiveController extends GenericApiController
             }
 
             // Create archive folder in the root of the user's configured timeline
-            $configPath = Exif::removeExtraSlash(Exif::getPhotosPath($this->config, $uid));
-            $configPaths = explode(';', $configPath);
+            $configPaths = Exif::getTimelinePaths(Util::getUID());
             $timelineFolders = [];
             $timelinePaths = [];
 

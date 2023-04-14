@@ -26,6 +26,9 @@ class Repair implements IRepairStep
 
     public function run(IOutput $output): void
     {
+        // Add missing indices
+        \OCA\Memories\Db\AddMissingIndices::run();
+
         // kill any instances of go-vod and exiftool
         Util::pkill(BinExt::getName('go-vod'));
         Util::pkill(BinExt::getName('exiftool'));

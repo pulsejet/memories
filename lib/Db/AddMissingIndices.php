@@ -2,19 +2,18 @@
 
 namespace OCA\Memories\Db;
 
-use OC\DB\Connection;
 use OC\DB\SchemaWrapper;
 
 class AddMissingIndices
 {
     /**
      * Add missing indices to the database schema.
-     *
-     * @param SchemaWrapper   $schema     Schema wrapper
-     * @param null|Connection $connection Connection to db
      */
-    public static function run(SchemaWrapper $schema, $connection)
+    public static function run()
     {
+        $connection = \OC::$server->get(\OC\DB\Connection::class);
+        $schema = new SchemaWrapper($connection);
+
         // Should migrate at end
         $shouldMigrate = false;
 

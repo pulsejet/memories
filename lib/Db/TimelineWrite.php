@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Exif;
+use OCA\Memories\Service\Index;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
@@ -33,104 +33,49 @@ class TimelineWrite
     }
 
     /**
-     * Check if a file has a valid mimetype for processing.
-     *
-     * @return int 0 for invalid, 1 for image, 2 for video
-     */
-    public function getFileType(File $file): int
-    {
-        $mime = $file->getMimeType();
-        if (\in_array($mime, Application::IMAGE_MIMES, true)) {
-            // Make sure preview generator supports the mime type
-            if (!$this->preview->isMimeSupported($mime)) {
-                return 0;
-            }
-
-            return 1;
-        }
-        if (\in_array($mime, Application::VIDEO_MIMES, true)) {
-            return 2;
-        }
-
-        return 0;
-    }
-
-    /**
      * Process a file to insert Exif data into the database.
      *
      * @param File $file  File node to process
-     * @param int  $force 0 = none, 1 = force, 2 = force if orphan
-     *
-     * @return int 2 if processed, 1 if skipped, 0 if not valid
+     * @param bool $force Update the record even if the file has not changed
      */
-    public function processFile(File $file, int $force = 0): int
+    public function processFile(File $file, bool $force = false): bool
     {
-        // There is no easy way to UPSERT in a standard SQL way, so just
-        // do multiple calls. The worst that can happen is more updates,
-        // but that's not a big deal.
-        // https://stackoverflow.com/questions/15252213/sql-standard-upsert-call
-
         // Check if we want to process this file
-        $fileType = $this->getFileType($file);
-        $isvideo = (2 === $fileType);
-        if (!$fileType) {
-            return 0;
+        if (!Index::isSupported($file)) {
+            return false;
         }
 
         // Get parameters
         $mtime = $file->getMtime();
         $fileId = $file->getId();
+        $isvideo = Index::isVideo($file);
 
-        // Check if need to update
-        $query = $this->connection->getQueryBuilder();
-        $query->select('fileid', 'mtime', 'mapcluster', 'orphan', 'lat', 'lon')
-            ->from('memories')
-            ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
-        ;
-        $cursor = $query->executeQuery();
-        $prevRow = $cursor->fetch();
-        $cursor->closeCursor();
-
-        // Check in live-photo table in case this is a video part of a Live Photo
-        if (!$prevRow) {
-            $query = $this->connection->getQueryBuilder();
-            $query->select('fileid', 'mtime')
-                ->from('memories_livephoto')
-                ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
-            ;
-            $cursor = $query->executeQuery();
-            $prevRow = $cursor->fetch();
-            $cursor->closeCursor();
-        }
-
-        // Check if a forced update is required
-        $isForced = (1 === $force);
-        if (2 === $force) {
-            $isForced = !$prevRow
-                        // Could be live video, force regardless
-                        || !\array_key_exists('orphan', $prevRow)
-                        // If orphan, force for sure
-                        || $prevRow['orphan'];
-        }
+        // Get previous row
+        $prevRow = $this->getCurrentRow($fileId);
 
         // Skip if not forced and file has not changed
-        if (!$isForced && $prevRow && ((int) $prevRow['mtime'] === $mtime)) {
-            return 1;
+        if (!$force && $prevRow && ((int) $prevRow['mtime'] === $mtime)) {
+            return false;
         }
 
         // Get exif data
-        $exif = [];
-
         try {
             $exif = Exif::getExifFromFile($file);
         } catch (\Exception $e) {
+            $exif = [];
         }
 
         // Hand off if Live Photo video part
         if ($isvideo && $this->livePhoto->isVideoPart($exif)) {
             $this->livePhoto->processVideoPart($file, $exif);
 
-            return 2;
+            return true;
+        }
+
+        // Delete video part if it is no longer valid
+        if ($prevRow && !\array_key_exists('mapcluster', $prevRow)) {
+            $this->livePhoto->deleteVideoPart($file);
+            $prevRow = null;
         }
 
         // Video parameters
@@ -166,6 +111,7 @@ class TimelineWrite
         $exifJson = $this->getExifJson($exif);
 
         // Parameters for insert or update
+        $query = $this->connection->getQueryBuilder();
         $params = [
             'fileid' => $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT),
             'objectid' => $query->createNamedParameter((string) $fileId, IQueryBuilder::PARAM_STR),
@@ -183,29 +129,26 @@ class TimelineWrite
             'mapcluster' => $query->createNamedParameter($mapCluster, IQueryBuilder::PARAM_INT),
         ];
 
-        if ($prevRow) {
-            // Update existing row
-            // No need to set objectid again
-            $query->update('memories')
-                ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
-            ;
-            foreach ($params as $key => $value) {
-                if ('objectid' !== $key && 'fileid' !== $key) {
+        // There is no easy way to UPSERT in standard SQL
+        // https://stackoverflow.com/questions/15252213/sql-standard-upsert-call
+        try {
+            if ($prevRow) {
+                $query->update('memories')
+                    ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
+                ;
+                foreach ($params as $key => $value) {
                     $query->set($key, $value);
                 }
-            }
-            $query->executeStatement();
-        } else {
-            // Try to create new row
-            try {
+            } else {
                 $query->insert('memories')->values($params);
-                $query->executeStatement();
-            } catch (\Exception $ex) {
-                error_log('Failed to create memories record: '.$ex->getMessage());
             }
-        }
 
-        return 2;
+            return $query->executeStatement() > 0;
+        } catch (\Exception $ex) {
+            error_log('Failed to create memories record: '.$ex->getMessage());
+
+            return false;
+        }
     }
 
     /**
@@ -247,6 +190,25 @@ class TimelineWrite
         foreach (array_merge(DELETE_TABLES, TRUNCATE_TABLES) as $table) {
             $this->connection->executeStatement($p->getTruncateTableSQL('*PREFIX*'.$table, false));
         }
+    }
+
+    /**
+     * Get the current row for a file_id, from either table.
+     */
+    private function getCurrentRow(int $fileId): ?array
+    {
+        $fetch = function (string $table) use ($fileId) {
+            $query = $this->connection->getQueryBuilder();
+
+            return $query->select('*')
+                ->from($table)
+                ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
+                ->executeQuery()
+                ->fetch()
+            ;
+        };
+
+        return $fetch('memories') ?: $fetch('memories_livephoto') ?: null;
     }
 
     /**

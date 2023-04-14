@@ -55,10 +55,31 @@ class BinExt
             throw new \Exception("failed to run exiftool: {$cmd}");
         }
 
+        // Check version
         $version = trim($out);
         $target = self::EXIFTOOL_VER;
         if (!version_compare($version, $target, '=')) {
             throw new \Exception("version does not match {$version} <==> {$target}");
+        }
+
+        // Test with actual file
+        $file = realpath(__DIR__.'/../exiftest.jpg');
+        if (!$file) {
+            throw new \Exception('Could not find EXIF test file');
+        }
+
+        try {
+            $exif = \OCA\Memories\Exif::getExifFromLocalPath($file);
+        } catch (\Exception $e) {
+            throw new \Exception("Couldn't read Exif data from test file: ".$e->getMessage());
+        }
+
+        if (!$exif) {
+            throw new \Exception('Got no Exif data from test file');
+        }
+
+        if (($exp = '2004:08:31 19:52:58') !== ($got = $exif['DateTimeOriginal'])) {
+            throw new \Exception("Got wrong Exif data from test file {$exp} <==> {$got}");
         }
 
         return true;

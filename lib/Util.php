@@ -346,6 +346,16 @@ class Util
             // This requires perl to be available
             'memories.exiftool_no_local' => false,
 
+            // How to index user directories
+            // 0 = auto-index disabled
+            // 1 = index everything
+            // 2 = index only user timelines
+            // 3 = index only configured path
+            'memories.index.mode' => '1',
+
+            // Path to index (only used if indexing mode is 3)
+            'memories.index.path' => '/',
+
             // Places database type identifier
             'memories.gis_type' => -1,
 
