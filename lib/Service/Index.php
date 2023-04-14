@@ -144,12 +144,12 @@ class Index
             // Filter out files that are already indexed
             $addFilter = function (string $table, string $alias) use (&$query) {
                 $query->leftJoin('f', $table, $alias, $query->expr()->andX(
-                    $query->expr()->eq('f.fileid', "$alias.fileid"),
-                    $query->expr()->eq('f.mtime', "$alias.mtime"),
-                    $query->expr()->eq("$alias.orphan", $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL))
+                    $query->expr()->eq('f.fileid', "{$alias}.fileid"),
+                    $query->expr()->eq('f.mtime', "{$alias}.mtime"),
+                    $query->expr()->eq("{$alias}.orphan", $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL))
                 ));
 
-                $query->andWhere($query->expr()->isNull("$alias.fileid"));
+                $query->andWhere($query->expr()->isNull("{$alias}.fileid"));
             };
             $addFilter('memories', 'm');
             $addFilter('memories_livephoto', 'lp');
