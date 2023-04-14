@@ -8,72 +8,10 @@ use OCA\Memories\ClustersBackend;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
-const CTE_FOLDERS = // CTE to get all folders recursively in the given top folders excluding archive
-    'WITH RECURSIVE *PREFIX*cte_folders_all(fileid) AS (
-        SELECT
-            f.fileid
-        FROM
-            *PREFIX*filecache f
-        WHERE
-            f.fileid IN (:topFolderIds)
-        UNION ALL
-        SELECT
-            f.fileid
-        FROM
-            *PREFIX*filecache f
-        INNER JOIN *PREFIX*cte_folders_all c
-            ON (f.parent = c.fileid
-                AND f.mimetype = (SELECT `id` FROM `*PREFIX*mimetypes` WHERE `mimetype` = \'httpd/unix-directory\')
-                AND f.name <> \'.archive\'
-            )
-    ), *PREFIX*cte_folders AS (
-        SELECT
-            fileid
-        FROM
-            *PREFIX*cte_folders_all
-        GROUP BY
-            fileid
-    )';
-
-const CTE_FOLDERS_ARCHIVE = // CTE to get all archive folders recursively in the given top folders
-    'WITH RECURSIVE *PREFIX*cte_folders_all(fileid, name) AS (
-        SELECT
-            f.fileid,
-            f.name
-        FROM
-            *PREFIX*filecache f
-        WHERE
-            f.fileid IN (:topFolderIds)
-        UNION ALL
-        SELECT
-            f.fileid,
-            f.name
-        FROM
-            *PREFIX*filecache f
-        INNER JOIN *PREFIX*cte_folders_all c
-            ON (f.parent = c.fileid
-                AND f.mimetype = (SELECT `id` FROM `*PREFIX*mimetypes` WHERE `mimetype` = \'httpd/unix-directory\')
-            )
-    ), *PREFIX*cte_folders(fileid) AS (
-        SELECT
-            cfa.fileid
-        FROM
-            *PREFIX*cte_folders_all cfa
-        WHERE
-            cfa.name = \'.archive\'
-        GROUP BY
-            cfa.fileid
-        UNION ALL
-        SELECT
-            f.fileid
-        FROM
-            *PREFIX*filecache f
-        INNER JOIN *PREFIX*cte_folders c
-            ON (f.parent = c.fileid)
-    )';
-
 trait TimelineQueryDays
 {
+    use TimelineQueryCTE;
+
     protected IDBConnection $connection;
 
     /**
@@ -187,8 +125,8 @@ trait TimelineQueryDays
 
         // Get SQL
         $CTE_SQL = \array_key_exists('cteFoldersArchive', $params) && $params['cteFoldersArchive']
-            ? CTE_FOLDERS_ARCHIVE
-            : CTE_FOLDERS;
+            ? self::CTE_FOLDERS_ARCHIVE()
+            : self::CTE_FOLDERS();
 
         // Add WITH clause if needed
         if (false !== strpos($sql, 'cte_folders')) {
