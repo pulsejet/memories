@@ -13,6 +13,8 @@ Note: this is a major release and may introduce breaking changes to your workflo
   For running an external go-vod instance, specifying a configuration file is no longer required.
 - **Breaking**: The transcoder and exiftool binaries will be copied to the temp directory before execution.  
   Make sure your temp directory is writable by the web server.
+- **Breaking**: The `--cleanup` flag to `memories:index` has been removed and is no longer necessary.  
+  Folders having a `.nomedia` file will automatically be excluded from the timeline.
 - Significant performance improvements for the timeline view.
 
 ## v4.13.1 (2023-04-03)
