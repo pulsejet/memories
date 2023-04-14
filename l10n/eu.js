@@ -2,6 +2,8 @@ OC.L10N.register(
     "memories",
     {
     "Memories" : "Memoriak",
+    "ffmpeg path" : "ffmpeg bide-izena",
+    "ffprobe path" : "ffprobe bide-izena",
     "Hardware Acceleration" : "Hardware azelerazioa",
     "Enable acceleration with VA-API" : "Gaitu VA-API bidezko azelerazioa",
     "Settings" : "Ezarpenak",
@@ -18,6 +20,7 @@ OC.L10N.register(
     "Places" : "Lekuak",
     "Map" : "Mapa",
     "Tags" : "Etiketak",
+    "Continue to Memories" : "Jarraitu Memories-era",
     "Choose again" : "Aukeratu berriro",
     "Click here to start" : "Egin klik hemen hasteko",
     "Edit" : "Aldatu",
