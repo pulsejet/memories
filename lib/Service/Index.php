@@ -35,11 +35,13 @@ use OCP\IDBConnection;
 use OCP\IPreview;
 use OCP\ITempManager;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Output\ConsoleSectionOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Index
 {
     public ?OutputInterface $output;
+    public ?ConsoleSectionOutput $section;
 
     protected IRootFolder $rootFolder;
     protected TimelineWrite $timelineWrite;
@@ -112,8 +114,9 @@ class Index
      */
     public function indexFolder(Folder $folder): void
     {
-        // Respect the '.nomedia' file. If present don't traverse the folder
         if ($folder->nodeExists('.nomedia')) {
+            $this->log("Skipping folder {$folder->getPath()} due to .nomedia file\n", true);
+
             return;
         }
 
@@ -183,6 +186,7 @@ class Index
     public function indexFile(File $file): void
     {
         try {
+            $this->log("Indexing file {$file->getPath()}", true);
             $this->timelineWrite->processFile($file);
         } catch (\Exception $e) {
             $this->error("Failed to index file {$file->getPath()}: {$e->getMessage()}");
@@ -263,10 +267,13 @@ class Index
     }
 
     /** Log to console if CLI */
-    private function log(string $message)
+    private function log(string $message, bool $overwrite = false)
     {
         if ($this->output) {
-            $this->output->writeln($message);
+            if ($overwrite) {
+                $this->section->clear(1);
+            }
+            $this->section->write($message);
         }
     }
 }

@@ -33,7 +33,6 @@ use OCP\IUserManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\ConsoleSectionOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class IndexOpts
@@ -66,7 +65,6 @@ class Index extends Command
     // IO
     private InputInterface $input;
     private OutputInterface $output;
-    private ConsoleSectionOutput $outputSection;
 
     // Command options
     private IndexOpts $opts;
@@ -105,7 +103,10 @@ class Index extends Command
         $this->input = $input;
         $this->output = $output;
         $this->opts = new IndexOpts($input);
+
+        // Assign to indexer
         $this->indexer->output = $output;
+        $this->indexer->section = $output->section();
 
         try {
             // Use static exiftool process

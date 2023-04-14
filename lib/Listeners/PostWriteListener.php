@@ -52,28 +52,16 @@ class PostWriteListener implements IEventListener
         }
 
         // Check if a directory at a higher level contains a .nomedia file
-        // Do this by getting all the parent folders first, then checking them
-        // in reverse order from root to leaf. The rationale is that the
-        // .nomedia file is most likely to be in higher level directories.
-        $parents = [];
-
         try {
-            $parent = $node->getParent();
-            while ($parent) {
-                $parents[] = $parent;
-                $parent = $parent->getParent();
+            $parent = $node;
+            while ($parent = $parent->getParent()) {
+                if ($parent->nodeExists('.nomedia')) {
+                    return;
+                }
             }
         } catch (\OCP\Files\NotFoundException $e) {
             // This happens when the parent is in the root directory
             // and getParent() is called on it.
-        }
-
-        // Traverse the array in reverse order looking for .nomedia
-        $parents = array_reverse($parents);
-        foreach ($parents as &$parent) {
-            if ($parent->nodeExists('.nomedia')) {
-                return;
-            }
         }
 
         $this->timelineWrite->processFile($node);
