@@ -86,6 +86,7 @@ class TimelineWrite
 
         // Process location data
         // This also modifies the exif array in-place to set the LocationTZID
+        // and drop the GPS data if it is not valid
         [$lat, $lon, $mapCluster] = $this->processExifLocation($fileId, $exif, $prevRow);
 
         // Get date parameters (after setting timezone offset)

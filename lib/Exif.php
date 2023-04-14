@@ -131,12 +131,6 @@ class Exif
             }
         }
 
-        // Ignore zero lat lng
-        if (\array_key_exists('GPSLatitude', $exif) && abs((float) $exif['GPSLatitude']) < 0.0001
-            && \array_key_exists('GPSLongitude', $exif) && abs((float) $exif['GPSLongitude']) < 0.0001) {
-            unset($exif['GPSLatitude'], $exif['GPSLongitude']);
-        }
-
         return $exif;
     }
 

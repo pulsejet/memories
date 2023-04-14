@@ -8,6 +8,9 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 use Psr\Log\LoggerInterface;
 
+const LAT_KEY = 'GPSLatitude';
+const LON_KEY = 'GPSLongitude';
+
 trait TimelineWritePlaces
 {
     protected IDBConnection $connection;
@@ -27,8 +30,7 @@ trait TimelineWritePlaces
     protected function processExifLocation(int $fileId, array &$exif, $prevRow): array
     {
         // Store location data
-        $lat = \array_key_exists('GPSLatitude', $exif) ? (float) $exif['GPSLatitude'] : null;
-        $lon = \array_key_exists('GPSLongitude', $exif) ? (float) $exif['GPSLongitude'] : null;
+        [$lat, $lon] = self::readCoord($exif);
         $oldLat = $prevRow ? (float) $prevRow['lat'] : null;
         $oldLon = $prevRow ? (float) $prevRow['lon'] : null;
         $mapCluster = $prevRow ? (int) $prevRow['mapcluster'] : -1;
@@ -164,5 +166,31 @@ trait TimelineWritePlaces
         if ($tzName) {
             $exif['LocationTZID'] = $tzName;
         }
+    }
+
+    /**
+     * Read coordinates from array and round to 6 decimal places.
+     *
+     * Modifies the array to remove invalid coordinates.
+     */
+    private static function readCoord(array &$exif)
+    {
+        $lat = array_key_exists(LAT_KEY, $exif) ? round((float) $exif[LAT_KEY], 6) : null;
+        $lon = array_key_exists(LON_KEY, $exif) ? round((float) $exif[LON_KEY], 6) : null;
+
+        // Make sure we have valid coordinates
+        if (null === $lat || null === $lon || abs($lat) > 90 || abs($lon) > 180 || ($lat < 0.00001 && $lon < 0.00001)) {
+            $lat = $lon = null;
+        }
+
+        // Remove invalid coordinates
+        if (null === $lat && array_key_exists(LAT_KEY, $exif)) {
+            unset($exif[LAT_KEY]);
+        }
+        if (null === $lon && array_key_exists(LON_KEY, $exif)) {
+            unset($exif[LON_KEY]);
+        }
+
+        return [$lat, $lon];
     }
 }
