@@ -32,12 +32,16 @@ trait TimelineWriteOrphans
      */
     public function orphanAll(): int
     {
-        $query = $this->connection->getQueryBuilder();
-        $query->update('memories')
-            ->set('orphan', $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL))
-        ;
+        $do = function (string $table) {
+            $query = $this->connection->getQueryBuilder();
+            $query->update($table)
+                ->set('orphan', $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL))
+            ;
 
-        return $query->executeStatement();
+            return $query->executeStatement();
+        };
+
+        return $do('memories') + $do('memories_livephoto');
     }
 
     /**

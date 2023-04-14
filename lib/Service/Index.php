@@ -30,13 +30,17 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
+use OCP\Files\Node;
 use OCP\IDBConnection;
 use OCP\IPreview;
 use OCP\ITempManager;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class Index
 {
+    public ?OutputInterface $output;
+
     protected IRootFolder $rootFolder;
     protected TimelineWrite $timelineWrite;
     protected IDBConnection $db;
@@ -74,12 +78,14 @@ class Index
         $mode = Util::getSystemConfig('memories.index.mode');
         if (null !== $folder) {
             $paths = [$folder];
-        }  elseif ('1' === $mode || '0' === $mode) { // everything (or nothing)
+        } elseif ('1' === $mode || '0' === $mode) { // everything (or nothing)
             $paths = ['/'];
         } elseif ('2' === $mode) { // timeline
             $paths = \OCA\Memories\Exif::getTimelinePaths($uid);
         } elseif ('3' === $mode) { // custom
             $paths = [Util::getSystemConfig('memories.index.path')];
+        } else {
+            throw new \Exception('Invalid index mode');
         }
 
         // If a folder is specified, traverse only that folder
@@ -90,11 +96,8 @@ class Index
                     throw new \Exception('Not a folder');
                 }
             } catch (\Exception $e) {
-                if (\OC::$CLI && null !== $folder) { // admin asked for this explicitly
-                    throw new \Exception("The specified folder {$path} does not exist for ${uid}");
-                }
+                $this->error("The specified folder {$path} does not exist for {$uid}");
 
-                $this->logger->warning("The specified folder {$path} does not exist for ${uid}");
                 continue;
             }
 
@@ -138,24 +141,18 @@ class Index
                 ->where($query->expr()->in('f.fileid', $query->createNamedParameter($fileIds, IQueryBuilder::PARAM_INT_ARRAY)))
             ;
 
-            // TODO: check if forcing a refresh is needed
-            // Check in memories table
-            $query->leftJoin('f', 'memories', 'm', $query->expr()->andX(
-                $query->expr()->eq('f.fileid', 'm.fileid'),
-                $query->expr()->eq('f.mtime', 'm.mtime')
-            ));
+            // Filter out files that are already indexed
+            $addFilter = function (string $table, string $alias) use (&$query) {
+                $query->leftJoin('f', $table, $alias, $query->expr()->andX(
+                    $query->expr()->eq('f.fileid', "$alias.fileid"),
+                    $query->expr()->eq('f.mtime', "$alias.mtime"),
+                    $query->expr()->eq("$alias.orphan", $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL))
+                ));
 
-            // Check in livephoto table
-            $query->leftJoin('f', 'memories_livephoto', 'mlp', $query->expr()->andX(
-                $query->expr()->eq('f.fileid', 'mlp.fileid'),
-                $query->expr()->eq('f.mtime', 'mlp.mtime')
-            ));
-
-            // Exclude files that are already indexed
-            $query->andWhere($query->expr()->andX(
-                $query->expr()->isNull('m.mtime'),
-                $query->expr()->isNull('mlp.mtime'),
-            ));
+                $query->andWhere($query->expr()->isNull("$alias.fileid"));
+            };
+            $addFilter('memories', 'm');
+            $addFilter('memories_livephoto', 'lp');
 
             // Get file IDs to actually index
             $fileIds = $query->executeQuery()->fetchAll(\PDO::FETCH_COLUMN);
@@ -188,10 +185,7 @@ class Index
         try {
             $this->timelineWrite->processFile($file);
         } catch (\Exception $e) {
-            $this->logger->error('Failed to index file {file}: {error}', [
-                'file' => $file->getPath(),
-                'error' => $e->getMessage(),
-            ]);
+            $this->error("Failed to index file {$file->getPath()}: {$e->getMessage()}");
         }
 
         $this->tempManager->clean();
@@ -245,7 +239,7 @@ class Index
     /**
      * Check if a file is supported.
      */
-    public static function isSupported(File $file): bool
+    public static function isSupported(Node $file): bool
     {
         return \in_array($file->getMimeType(), self::getMimeList(), true);
     }
@@ -256,5 +250,23 @@ class Index
     public static function isVideo(File $file): bool
     {
         return \in_array($file->getMimeType(), Application::VIDEO_MIMES, true);
+    }
+
+    /** Log to console if CLI or logger */
+    private function error(string $message)
+    {
+        $this->logger->error($message);
+
+        if ($this->output) {
+            $this->output->writeln("<error>{$message}</error>");
+        }
+    }
+
+    /** Log to console if CLI */
+    private function log(string $message)
+    {
+        if ($this->output) {
+            $this->output->writeln($message);
+        }
     }
 }

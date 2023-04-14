@@ -105,6 +105,7 @@ class Index extends Command
         $this->input = $input;
         $this->output = $output;
         $this->opts = new IndexOpts($input);
+        $this->indexer->output = $output;
 
         try {
             // Use static exiftool process
@@ -135,19 +136,21 @@ class Index extends Command
      */
     protected function checkClear(): void
     {
-        if ($this->opts->clear) {
-            if ($this->input->isInteractive()) {
-                $this->output->write('Are you sure you want to clear the existing index? (y/N): ');
-                if ('y' !== trim(fgets(STDIN))) {
-                    $this->output->writeln('Aborting');
-
-                    exit;
-                }
-            }
-
-            $this->timelineWrite->clear();
-            $this->output->writeln('Cleared existing index');
+        if (!$this->opts->clear) {
+            return;
         }
+
+        if ($this->input->isInteractive()) {
+            $this->output->write('Are you sure you want to clear the existing index? (y/N): ');
+            if ('y' !== trim(fgets(STDIN))) {
+                $this->output->writeln('Aborting');
+
+                exit;
+            }
+        }
+
+        $this->timelineWrite->clear();
+        $this->output->writeln('Cleared existing index');
     }
 
     /**
@@ -155,11 +158,13 @@ class Index extends Command
      */
     protected function checkForce(): void
     {
-        if ($this->opts->force) {
-            $this->output->writeln('Forcing refresh of existing index entries');
-
-            // TODO
+        if (!$this->opts->force) {
+            return;
         }
+
+        $this->output->writeln('Forcing refresh of existing index entries');
+
+        $this->timelineWrite->orphanAll();
     }
 
     /**
@@ -167,23 +172,32 @@ class Index extends Command
      */
     protected function runIndex(): void
     {
-        // Call indexing for specified or each user
+        $this->runForUsers(function (IUser $user) {
+            try {
+                $uid = $user->getUID();
+                $this->output->writeln("Indexing user {$uid}");
+                $this->indexer->indexUser($uid, $this->opts->folder);
+            } catch (\Exception $e) {
+                $this->output->writeln("<error>{$e->getMessage()}</error>");
+            }
+        });
+    }
+
+    /**
+     * Run function for all users (or selected user if set).
+     *
+     * @param mixed $closure
+     */
+    private function runForUsers($closure)
+    {
         if ($uid = $this->opts->user) {
             if ($user = $this->userManager->get($uid)) {
-                $this->indexer->indexUser($user->getUID(), $this->opts->folder);
+                $closure($user);
             } else {
-                throw new \Exception("User {$uid} not found");
+                $this->output->writeln("<error>User {$uid} not found</error>");
             }
         } else {
-            $this->userManager->callForSeenUsers(function (IUser $user) {
-                try {
-                    $uid = $user->getUID();
-                    $this->output->writeln("Indexing user {$uid}");
-                    $this->indexer->indexUser($uid, $this->opts->folder);
-                } catch (\Exception $e) {
-                    $this->output->writeln("<error>{$e->getMessage()}</error>");
-                }
-            });
+            $this->userManager->callForSeenUsers(fn (IUser $user) => $closure($user));
         }
     }
 }

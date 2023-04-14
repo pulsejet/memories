@@ -26,15 +26,14 @@ use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Files\Events\Node\NodeDeletedEvent;
 use OCP\Files\Folder;
-use OCP\IDBConnection;
 
 class PostDeleteListener implements IEventListener
 {
     private TimelineWrite $util;
 
-    public function __construct(IDBConnection $connection)
+    public function __construct(TimelineWrite $util)
     {
-        $this->util = new TimelineWrite($connection);
+        $this->util = $util;
     }
 
     public function handle(Event $event): void

@@ -22,20 +22,19 @@ declare(strict_types=1);
 namespace OCA\Memories\Listeners;
 
 use OCA\Memories\Db\TimelineWrite;
+use OCA\Memories\Service\Index;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Files\Events\Node\NodeTouchedEvent;
 use OCP\Files\Events\Node\NodeWrittenEvent;
-use OCP\Files\Folder;
-use OCP\IDBConnection;
 
 class PostWriteListener implements IEventListener
 {
     private TimelineWrite $timelineWrite;
 
-    public function __construct(IDBConnection $connection)
+    public function __construct(TimelineWrite $timelineWrite)
     {
-        $this->timelineWrite = new TimelineWrite($connection);
+        $this->timelineWrite = $timelineWrite;
     }
 
     public function handle(Event $event): void
@@ -46,12 +45,9 @@ class PostWriteListener implements IEventListener
         }
 
         $node = $event->getNode();
-        if ($node instanceof Folder) {
-            return;
-        }
 
         // Check the mime type first
-        if (!$this->timelineWrite->getFileType($node)) {
+        if (!Index::isSupported($node)) {
             return;
         }
 

@@ -103,13 +103,13 @@ class LivePhoto
     /**
      * Process video part of Live Photo.
      */
-    public function processVideoPart(File $file, array $exif)
+    public function processVideoPart(File $file, array $exif): bool
     {
         $fileId = $file->getId();
         $mtime = $file->getMTime();
         $liveid = $exif['ContentIdentifier'];
         if (empty($liveid)) {
-            return;
+            return false;
         }
 
         $query = $this->connection->getQueryBuilder();
@@ -117,32 +117,30 @@ class LivePhoto
             ->from('memories_livephoto')
             ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
         ;
-        $cursor = $query->executeQuery();
-        $prevRow = $cursor->fetch();
-        $cursor->closeCursor();
+        $prevRow = $query->executeQuery()->fetch();
 
-        if ($prevRow) {
-            // Update existing row
-            $query->update('memories_livephoto')
-                ->set('liveid', $query->createNamedParameter($liveid, IQueryBuilder::PARAM_STR))
-                ->set('mtime', $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT))
-                ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
-            ;
-            $query->executeStatement();
-        } else {
-            // Try to create new row
-            try {
-                $query->insert('memories_livephoto')
-                    ->values([
-                        'liveid' => $query->createNamedParameter($liveid, IQueryBuilder::PARAM_STR),
-                        'mtime' => $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT),
-                        'fileid' => $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT),
-                    ])
+        $params = [
+            'liveid' => $query->createNamedParameter($liveid, IQueryBuilder::PARAM_STR),
+            'mtime' => $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT),
+            'fileid' => $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT),
+            'orphan' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
+        ];
+
+        try {
+            if ($prevRow) {
+                $query->update('memories_livephoto')
+                    ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
                 ;
-                $query->executeStatement();
-            } catch (\Exception $ex) {
-                error_log('Failed to create memories_livephoto record: '.$ex->getMessage());
+                foreach ($params as $key => $value) {
+                    $query->set($key, $value);
+                }
+            } else {
+                $query->insert('memories_livephoto')->values($params);
             }
+
+            return $query->executeStatement() > 0;
+        } catch (\Exception $ex) {
+            throw new \Exception('Failed to create livephoto record: '.$ex->getMessage());
         }
     }
 

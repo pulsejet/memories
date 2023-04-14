@@ -71,6 +71,7 @@ class Exif
     {
         $config = \OC::$server->get(IConfig::class);
         $paths = $config->getUserValue($uid, Application::APPNAME, 'timelinePath', null) ?? 'Photos/';
+
         return array_map(fn ($p) => self::sanitizePath(trim($p)), explode(';', $paths));
     }
 

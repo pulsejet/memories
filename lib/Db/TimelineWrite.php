@@ -9,7 +9,6 @@ use OCA\Memories\Service\Index;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
-use OCP\IPreview;
 
 require_once __DIR__.'/../ExifFields.php';
 
@@ -22,14 +21,14 @@ class TimelineWrite
     use TimelineWriteOrphans;
     use TimelineWritePlaces;
     protected IDBConnection $connection;
-    protected IPreview $preview;
     protected LivePhoto $livePhoto;
 
-    public function __construct(IDBConnection $connection)
-    {
+    public function __construct(
+        IDBConnection $connection,
+        LivePhoto $livePhoto
+    ) {
         $this->connection = $connection;
-        $this->preview = \OC::$server->get(IPreview::class);
-        $this->livePhoto = new LivePhoto($connection);
+        $this->livePhoto = $livePhoto;
     }
 
     /**
@@ -53,8 +52,12 @@ class TimelineWrite
         // Get previous row
         $prevRow = $this->getCurrentRow($fileId);
 
-        // Skip if not forced and file has not changed
-        if (!$force && $prevRow && ((int) $prevRow['mtime'] === $mtime)) {
+        // Skip if all of the following:
+        // - not forced
+        // - the record exists
+        // - the file has not changed
+        // - the record is not an orphan
+        if (!$force && $prevRow && ((int) $prevRow['mtime'] === $mtime) && (!(bool) $prevRow['orphan'])) {
             return false;
         }
 
@@ -127,6 +130,7 @@ class TimelineWrite
             'lat' => $query->createNamedParameter($lat, IQueryBuilder::PARAM_STR),
             'lon' => $query->createNamedParameter($lon, IQueryBuilder::PARAM_STR),
             'mapcluster' => $query->createNamedParameter($mapCluster, IQueryBuilder::PARAM_INT),
+            'orphan' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
         ];
 
         // There is no easy way to UPSERT in standard SQL
@@ -145,9 +149,7 @@ class TimelineWrite
 
             return $query->executeStatement() > 0;
         } catch (\Exception $ex) {
-            error_log('Failed to create memories record: '.$ex->getMessage());
-
-            return false;
+            throw new \Exception('Failed to create memories record: '.$ex->getMessage());
         }
     }
 

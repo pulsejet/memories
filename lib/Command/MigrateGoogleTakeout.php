@@ -63,7 +63,8 @@ class MigrateGoogleTakeout extends Command
         IUserManager $userManager,
         IConfig $config,
         IDBConnection $connection,
-        ITempManager $tempManager
+        ITempManager $tempManager,
+        TimelineWrite $timelineWrite
     ) {
         parent::__construct();
 
@@ -72,7 +73,7 @@ class MigrateGoogleTakeout extends Command
         $this->config = $config;
         $this->connection = $connection;
         $this->tempManager = $tempManager;
-        $this->timelineWrite = new TimelineWrite($connection);
+        $this->timelineWrite = $timelineWrite;
     }
 
     protected function configure(): void
