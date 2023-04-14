@@ -304,7 +304,7 @@ class BinExt
         }
 
         // Parse body
-        $json = json_decode($res->getBody(), true);
+        $json = json_decode((string) $res->getBody(), true);
         if (!$json) {
             throw new \Exception('failed to parse go-vod response');
         }
