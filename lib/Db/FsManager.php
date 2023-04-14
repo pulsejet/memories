@@ -23,12 +23,17 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OC\Files\Search\SearchComparison;
+use OC\Files\Search\SearchQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
 use OCA\Memories\Util;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
+use OCP\Files\Search\ISearchComparison;
+use OCP\ICache;
+use OCP\ICacheFactory;
 use OCP\IConfig;
 use OCP\IRequest;
 use OCP\IUserManager;
@@ -42,19 +47,22 @@ class FsManager
     protected IRootFolder $rootFolder;
     protected AlbumsQuery $albumsQuery;
     protected IRequest $request;
+    protected ICache $nomediaCache;
 
     public function __construct(
         IConfig $config,
         IUserSession $userSession,
         IRootFolder $rootFolder,
         AlbumsQuery $albumsQuery,
-        IRequest $request
+        IRequest $request,
+        ICacheFactory $cacheFactory
     ) {
         $this->config = $config;
         $this->userSession = $userSession;
         $this->rootFolder = $rootFolder;
         $this->albumsQuery = $albumsQuery;
         $this->request = $request;
+        $this->nomediaCache = $cacheFactory->createLocal('memories:nomedia');
     }
 
     /** Get the TimelineRoot object relevant to the request */
@@ -98,16 +106,30 @@ class FsManager
                 $folder = $userFolder->get(Exif::removeExtraSlash($folderPath));
                 $root->addFolder($folder);
             } else {
+                // Get timeline paths
                 $paths = Exif::getTimelinePaths($uid);
                 if ($path = $this->request->getParam('timelinePath', null)) {
                     $paths = [Exif::removeExtraSlash($path)];
                 }
 
+                // Combined etag, for cache invalidation.
+                // This is cheaper and more sensible than the root etag.
+                // The only time this breaks down is if the user places a .nomedia
+                // outside the timeline path; rely on expiration for that.
+                $cEtag = $uid;
+
                 // Multiple timeline path support
                 foreach ($paths as $path) {
-                    $root->addFolder($userFolder->get($path));
+                    $node = $userFolder->get($path);
+                    $root->addFolder($node);
+                    $cEtag .= $node->getEtag();
                 }
+
+                // Add shares or external stores inside the current folders
                 $root->addMountPoints();
+
+                // Exclude .nomedia folders
+                $root->excludePaths($this->getNoMediaFolders($userFolder, md5($cEtag)));
             }
         } catch (\OCP\Files\NotFoundException $e) {
             $msg = $e->getMessage();
@@ -116,6 +138,27 @@ class FsManager
         }
 
         return $root;
+    }
+
+    /**
+     * Get list of folders with .nomedia file.
+     *
+     * @param Folder $root root folder
+     * @param string $key  etag for cache key
+     */
+    public function getNoMediaFolders(Folder $root, string $key): array
+    {
+        if (null !== ($paths = $this->nomediaCache->get($key))) {
+            return $paths;
+        }
+
+        $comp = new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'name', '.nomedia');
+        $search = $root->search(new SearchQuery($comp, 0, 0, [], Util::getUser()));
+
+        $paths = array_map(fn (File $node) => \dirname($node->getPath()), $search);
+        $this->nomediaCache->set($key, $paths, 60 * 60); // 1 hour
+
+        return $paths;
     }
 
     /**

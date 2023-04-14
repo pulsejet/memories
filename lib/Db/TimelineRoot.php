@@ -14,6 +14,8 @@ class TimelineRoot
     /** Initialize */
     public function __construct()
     {
+        $this->folders = [];
+        $this->folderPaths = [];
     }
 
     /**
@@ -31,35 +33,42 @@ class TimelineRoot
      */
     public function addFolder(FileInfo $info)
     {
-        $folderPath = $info->getPath();
+        $path = $info->getPath();
 
         if (FileInfo::MIMETYPE_FOLDER !== $info->getMimetype()) {
-            throw new \Exception("Not a folder: {$folderPath}");
+            throw new \Exception("Not a folder: {$path}");
         }
 
         if (!$info->isReadable()) {
-            throw new \Exception("Folder not readable: {$folderPath}");
+            throw new \Exception("Folder not readable: {$path}");
         }
 
         // Add top level folder
-        $id = $info->getId();
-        $this->folders[$id] = $info;
-        $this->folderPaths[$id] = $folderPath;
+        $this->setFolder($info->getId(), $info, $path);
     }
 
     // Add mountpoints recursively
     public function addMountPoints()
     {
-        $mp = [];
+        $folders = [];
         foreach ($this->folderPaths as $id => $folderPath) {
             $mounts = \OC\Files\Filesystem::getMountManager()->findIn($folderPath);
-            foreach ($mounts as &$mount) {
-                $id = $mount->getStorageRootId();
-                $path = $mount->getMountPoint();
-                $mp[$id] = $path;
+            foreach ($mounts as $mount) {
+                $this->setFolder($mount->getStorageRootId(), null, $mount->getMountPoint());
             }
         }
-        $this->folderPaths += $mp;
+        $this->folderPaths += $folders;
+    }
+
+    public function excludePaths(array $paths)
+    {
+        foreach ($paths as $path) {
+            foreach ($this->folderPaths as $id => $folderPath) {
+                if (str_starts_with($folderPath, $path)) {
+                    unset($this->folderPaths[$id], $this->folders[$id]);
+                }
+            }
+        }
     }
 
     public function getFolderPath(int $id)
@@ -85,5 +94,16 @@ class TimelineRoot
     public function isEmpty()
     {
         return empty($this->folderPaths);
+    }
+
+    private function setFolder(int $id, ?FileInfo $fileInfo, ?string $path)
+    {
+        if (null !== $path) {
+            $this->folderPaths[$id] = $path;
+        }
+
+        if (null !== $fileInfo) {
+            $this->folders[$id] = $fileInfo;
+        }
     }
 }

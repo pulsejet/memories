@@ -154,6 +154,11 @@ trait TimelineQueryDays
             $root = $this->root();
         }
 
+        // Never join against an empty root
+        if (!$root || $root->isEmpty()) {
+            throw new \InvalidArgumentException('Timeline root is empty');
+        }
+
         // Join with memories
         $baseOp = $query->expr()->eq('f.fileid', 'm.fileid');
         if ($root->isEmpty()) {
