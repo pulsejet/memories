@@ -110,8 +110,8 @@ async function flushPreviewQueue() {
     // Read blob
     const reader = res.body.getReader();
 
-    // 256KB buffer for reading data into
-    let buffer = new Uint8Array(256 * 1024);
+    // 512KB buffer for reading data into
+    let buffer = new Uint8Array(512 * 1024);
     let bufSize = 0;
 
     // Parameters of the image we're currently reading
