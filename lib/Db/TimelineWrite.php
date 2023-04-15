@@ -9,6 +9,7 @@ use OCA\Memories\Service\Index;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
+use OCP\Lock\ILockingProvider;
 
 require_once __DIR__.'/../ExifFields.php';
 
@@ -22,26 +23,52 @@ class TimelineWrite
     use TimelineWritePlaces;
     protected IDBConnection $connection;
     protected LivePhoto $livePhoto;
+    protected ILockingProvider $lockingProvider;
 
     public function __construct(
         IDBConnection $connection,
-        LivePhoto $livePhoto
+        LivePhoto $livePhoto,
+        ILockingProvider $lockingProvider
     ) {
         $this->connection = $connection;
         $this->livePhoto = $livePhoto;
+        $this->lockingProvider = $lockingProvider;
     }
 
     /**
      * Process a file to insert Exif data into the database.
      *
      * @param File $file  File node to process
+     * @param bool $lock  Lock the file before processing
      * @param bool $force Update the record even if the file has not changed
+     *
+     * @return bool True if the file was processed
+     *
+     * @throws \OCP\Lock\LockedException If the file is locked
+     * @throws \OCP\DB\Exception         If the database query fails
      */
-    public function processFile(File $file, bool $force = false): bool
-    {
+    public function processFile(
+        File $file,
+        bool $lock = true,
+        bool $force = false
+    ): bool {
         // Check if we want to process this file
         if (!Index::isSupported($file)) {
             return false;
+        }
+
+        // Check if we need to lock the file
+        if ($lock) {
+            $lockKey = 'memories/'.$file->getId();
+            $lockType = ILockingProvider::LOCK_EXCLUSIVE;
+
+            try {
+                $this->lockingProvider->acquireLock($lockKey, $lockType);
+
+                return $this->processFile($file, false, $force);
+            } finally {
+                $this->lockingProvider->releaseLock($lockKey, $lockType);
+            }
         }
 
         // Get parameters

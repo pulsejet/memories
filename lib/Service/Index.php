@@ -185,11 +185,15 @@ class Index
      */
     public function indexFile(File $file): void
     {
+        $path = $file->getPath();
+
         try {
-            $this->log("Indexing file {$file->getPath()}", true);
+            $this->log("Indexing file {$path}", true);
             $this->timelineWrite->processFile($file);
+        } catch (\OCP\Lock\LockedException $e) {
+            $this->log("Skipping file {$path} due to lock\n", true);
         } catch (\Exception $e) {
-            $this->error("Failed to index file {$file->getPath()}: {$e->getMessage()}");
+            $this->error("Failed to index file {$path}: {$e->getMessage()}");
         } finally {
             $this->tempManager->clean();
         }

@@ -27,14 +27,19 @@ use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Files\Events\Node\NodeTouchedEvent;
 use OCP\Files\Events\Node\NodeWrittenEvent;
+use Psr\Log\LoggerInterface;
 
 class PostWriteListener implements IEventListener
 {
     private TimelineWrite $timelineWrite;
+    private LoggerInterface $logger;
 
-    public function __construct(TimelineWrite $timelineWrite)
-    {
+    public function __construct(
+        TimelineWrite $timelineWrite,
+        LoggerInterface $logger
+    ) {
         $this->timelineWrite = $timelineWrite;
+        $this->logger = $logger;
     }
 
     public function handle(Event $event): void
@@ -64,6 +69,12 @@ class PostWriteListener implements IEventListener
             // and getParent() is called on it.
         }
 
-        $this->timelineWrite->processFile($node);
+        try {
+            $this->timelineWrite->processFile($node);
+        } catch (\Exception $e) {
+            $this->logger->error('Memories failed to process file: {message}', [
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 }
