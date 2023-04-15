@@ -190,9 +190,9 @@ class Index
             $this->timelineWrite->processFile($file);
         } catch (\Exception $e) {
             $this->error("Failed to index file {$file->getPath()}: {$e->getMessage()}");
+        } finally {
+            $this->tempManager->clean();
         }
-
-        $this->tempManager->clean();
     }
 
     /**
