@@ -136,7 +136,8 @@ export default defineComponent({
   },
 
   watch: {
-    $route() {
+    $route(curr, old) {
+      if (curr.query.b === old.query.b && curr.query.z === old.query.z) return;
       this.initialize(true);
     },
   },
