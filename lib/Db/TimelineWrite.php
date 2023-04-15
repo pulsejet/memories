@@ -136,22 +136,18 @@ class TimelineWrite
 
         // There is no easy way to UPSERT in standard SQL
         // https://stackoverflow.com/questions/15252213/sql-standard-upsert-call
-        try {
-            if ($prevRow) {
-                $query->update('memories')
-                    ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
-                ;
-                foreach ($params as $key => $value) {
-                    $query->set($key, $value);
-                }
-            } else {
-                $query->insert('memories')->values($params);
+        if ($prevRow) {
+            $query->update('memories')
+                ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
+            ;
+            foreach ($params as $key => $value) {
+                $query->set($key, $value);
             }
-
-            return $query->executeStatement() > 0;
-        } catch (\Exception $ex) {
-            throw new \Exception('Failed to create memories record: '.$ex->getMessage());
+        } else {
+            $query->insert('memories')->values($params);
         }
+
+        return $query->executeStatement() > 0;
     }
 
     /**

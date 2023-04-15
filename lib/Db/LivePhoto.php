@@ -126,22 +126,18 @@ class LivePhoto
             'orphan' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
         ];
 
-        try {
-            if ($prevRow) {
-                $query->update('memories_livephoto')
-                    ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
-                ;
-                foreach ($params as $key => $value) {
-                    $query->set($key, $value);
-                }
-            } else {
-                $query->insert('memories_livephoto')->values($params);
+        if ($prevRow) {
+            $query->update('memories_livephoto')
+                ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
+            ;
+            foreach ($params as $key => $value) {
+                $query->set($key, $value);
             }
-
-            return $query->executeStatement() > 0;
-        } catch (\Exception $ex) {
-            throw new \Exception('Failed to create livephoto record: '.$ex->getMessage());
+        } else {
+            $query->insert('memories_livephoto')->values($params);
         }
+
+        return $query->executeStatement() > 0;
     }
 
     /**
