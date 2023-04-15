@@ -271,7 +271,6 @@ export default defineComponent({
 
       // Note: you can't use transforms to animate the top
       // because it causes the viewer to be rendered incorrectly
-      will-change: top, height;
       transition: top 0.2s ease, height 0.2s ease;
 
       > .timeline-header {

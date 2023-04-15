@@ -1281,12 +1281,10 @@ export default defineComponent({
 
   .pswp__zoom-wrap {
     width: 100%;
-    will-change: transform;
   }
 
   img.pswp__img {
     object-fit: contain;
-    will-change: width, height;
   }
 
   .pswp__button {
