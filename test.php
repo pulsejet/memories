@@ -1,6 +1,6 @@
 <?php
 
-class ImageState {
+class FileRobotImageState {
     /** -1 to 1 */
     public ?float $brightness = null;
     /** -100 to 100 */
@@ -34,19 +34,14 @@ class ImageState {
     /** Flipped Y */
     public bool $isFlippedY = false;
 
+    /** Filter */
+    public ?string $filter = null;
+
     public function __construct(array $json)
     {
         if ($order = $json['finetunes']) {
             foreach ($order as $key) {
-                switch ($key) {
-                    case 'Brighten':
-                    case 'Contrast':
-                    case 'HSV':
-                    case 'Blur':
-                    case 'Warmth':
-                        $this->finetuneOrder[] = $key;
-                        break;
-                }
+                $this->finetuneOrder[] = $key;
             }
         }
 
@@ -71,6 +66,11 @@ class ImageState {
             $this->_set($props, 'isFlippedX');
             $this->_set($props, 'isFlippedY');
         }
+
+        if ($filter = $json['filter']) {
+            // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/components/tools/Filters/Filters.constants.js#L8
+            $this->filter = $filter;
+        }
     }
 
     private function _set(array $parent, string $key, string $ckey = null) {
@@ -81,11 +81,11 @@ class ImageState {
     }
 }
 
-class KonvaMagick {
+class FileRobotMagick {
     private \Imagick $image;
-    private ImageState $state;
+    private FileRobotImageState $state;
 
-    public function __construct(\Imagick $image, ImageState $state)
+    public function __construct(\Imagick $image, FileRobotImageState $state)
     {
         $this->image = $image;
         $this->state = $state;
@@ -97,6 +97,17 @@ class KonvaMagick {
 
         foreach ($this->state->finetuneOrder as $key) {
             $method = 'apply' . $key;
+            if (!method_exists($this, $method)) {
+                throw new \Exception('Unknown finetune: ' . $key);
+            }
+            $this->$method();
+        }
+
+        if ($this->state->filter) {
+            $method = 'applyFilter' . $this->state->filter;
+            if (!method_exists($this, $method)) {
+                throw new \Exception('Unknown filter: ' . $this->state->filter);
+            }
             $this->$method();
         }
 
@@ -128,8 +139,8 @@ class KonvaMagick {
         }
     }
 
-    protected function applyBrighten() {
-        $brightness = $this->state->brightness ?? 0;
+    protected function applyBrighten(?float $value = null) {
+        $brightness = $value ?? $this->state->brightness ?? 0;
         if ($brightness === 0) {
             return;
         }
@@ -138,8 +149,8 @@ class KonvaMagick {
         $this->image->evaluateImage(\Imagick::EVALUATE_ADD, $brightness * 255 * 255, \Imagick::CHANNEL_ALL);
     }
 
-    protected function applyContrast() {
-        $contrast = $this->state->contrast ?? 0;
+    protected function applyContrast(?float $value = null) {
+        $contrast = $value ?? $this->state->contrast ?? 0;
         if ($contrast === 0) {
             return;
         }
@@ -154,14 +165,18 @@ class KonvaMagick {
         $this->image->functionImage(\Imagick::FUNCTION_POLYNOMIAL, [$m, $c], \Imagick::CHANNEL_ALL);
     }
 
-    protected function applyHSV() {
-        if (!$this->state->hue && !$this->state->saturation && !$this->state->value) {
+    protected function applyHSV(?float $hue = null, ?float $saturation = null, ?float $value = null) {
+        $hue ??= $this->state->hue ?? 0;
+        $saturation ??= $this->state->saturation ?? 0;
+        $value ??= $this->state->value ?? 0;
+
+        if ($hue === 0 && $saturation === 0 && $value === 0) {
             return;
         }
 
-        $h = abs(($this->state->hue ?? 0) + 360) % 360;
-        $s = 2 ** ($this->state->saturation ?? 0);
-        $v = 2 ** ($this->state->value ?? 0);
+        $h = abs(($hue ?? 0) + 360) % 360;
+        $s = 2 ** ($saturation ?? 0);
+        $v = 2 ** ($value ?? 0);
 
         // https://github.com/konvajs/konva/blob/f0e18b09079175404a1026363689f8f89eae0749/src/filters/HSV.ts#L17-L63
         $vsu = $v * $s * cos(($h * pi()) / 180);
@@ -209,30 +224,77 @@ class KonvaMagick {
         $this->image->evaluateImage(\Imagick::EVALUATE_ADD, $warmth*255, \Imagick::CHANNEL_RED);
         $this->image->evaluateImage(\Imagick::EVALUATE_SUBTRACT, $warmth*255, \Imagick::CHANNEL_BLUE);
     }
+
+    protected function applyFilterInvert() {
+        $this->image->negateImage(false);
+    }
+
+    protected function applyFilterBlackAndWhite() {
+        // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/BlackAndWhite.js
+        $this->image->thresholdImage(100 * 255);
+    }
+
+    protected function applyFilterSepia() {
+        // https://github.com/konvajs/konva/blob/master/src/filters/Sepia.ts
+        $this->image->colorMatrixImage([
+            0.393, 0.769, 0.189, 0, 0,
+            0.349, 0.686, 0.168, 0, 0,
+            0.272, 0.534, 0.131, 0, 0,
+            0, 0, 0, 1, 0,
+            0, 0, 0, 0, 1,
+        ]);
+    }
+
+    protected function applyFilterSolarize() {
+        // https://github.com/konvajs/konva/blob/master/src/filters/Solarize.ts
+        $this->image->solarizeImage(128 * 255);
+    }
+
+    protected function applyFilterClarendon() {
+        // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/Clarendon.js
+        $this->applyBaseFilterBrightness(0.1);
+        $this->applyContrast(10); // TODO: this is wrong
+        $this->applyHSV(0, 0.15, 0); // TODO: this is wrong
+    }
+
+    protected function applyFilterGingham() {
+        // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/Gingham.js
+        // ...
+    }
+
+    protected function applyBaseFilterBrightness(float $value) {
+        // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/BaseFilters.js#L2
+        $this->applyBrighten($value);
+    }
+
+    protected function applyFilterTest() {
+        $this->applyFilterClarendon();
+    }
 }
 
 // Create new ImageState object
-$imageState = new ImageState([
+$imageState = new FileRobotImageState([
     'finetunes' => ['Blur', 'Warmth', 'HSV', 'Contrast', 'Brighten'],
     'finetuneProps' => [
         'brightness' => 0,
-        'contrast' => 49,
+        'contrast' => 0,
         'hue' => 0,
         'saturation' => 0,
         'value' => 0,
         'blurRadius' => 0,
         'warmth' => 0,
     ],
+    'filter' => 'Test',
     'adjustments' =>[
-        'crop' => [
-            'x' => 0.04811054824217651,
-            'y' => 0.30121176094862184,
-            'width' => 0.47661152675402463,
-            'height' => 0.47661153565936554,
-        ],
-        'rotation' => 90,
-        'isFlippedX' => false,
-        'isFlippedY' => true,
+        // 'crop' => [
+        //     'x' => 0.04811054824217651,
+        //     'y' => 0.30121176094862184,
+        //     'width' => 0.47661152675402463,
+        //     'height' => 0.47661153565936554,
+        // ],
+        // 'rotation' => 0,
+        // 'isFlippedX' => false,
+        // 'isFlippedY' => false,
     ]
 ]);
 
@@ -241,10 +303,10 @@ $image = new \Imagick('test.jpg');
 $image->setResourceLimit(\Imagick::RESOURCETYPE_THREAD, 4);
 
 // Apply image state
-(new KonvaMagick($image, $imageState))->apply();
+(new FileRobotMagick($image, $imageState))->apply();
 
 //resize to max width
-$image->resizeImage(400, 0, \Imagick::FILTER_LANCZOS, 1);
+$image->resizeImage(800, 0, \Imagick::FILTER_LANCZOS, 1);
 
 // Write to out.jpg
 $image->writeImage('out.jpg');
