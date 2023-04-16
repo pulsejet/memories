@@ -176,7 +176,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { IDay, IPhoto, IRow, IRowType } from "../../types";
+import { IDay, IImageInfo, IPhoto, IRow, IRowType } from "../../types";
 import { PsSlide } from "./types";
 
 import UserConfig from "../../mixins/UserConfig";
@@ -800,8 +800,14 @@ export default defineComponent({
 
       // Lazy load the rest of EXIF data
       if (!photo.imageInfo) {
-        axios.get(API.IMAGE_INFO(photo.fileid)).then((res) => {
+        axios.get<IImageInfo>(API.IMAGE_INFO(photo.fileid)).then((res) => {
           photo.imageInfo = res.data;
+
+          // Update params in photo object
+          photo.w = res.data.w;
+          photo.h = res.data.h;
+          photo.basename = res.data.basename;
+          photo.mimetype = res.data.mimetype;
         });
       }
 

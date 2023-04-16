@@ -344,6 +344,9 @@ class ImageController extends GenericApiController
                 $file->putContent($blob);
             }
 
+            // Make sure the preview is updated
+            \OC::$server->get(\OCP\IPreview::class)->getPreview($file);
+
             return new JSONResponse([
                 'fileid' => $file->getId(),
                 'etag' => $file->getEtag(),
