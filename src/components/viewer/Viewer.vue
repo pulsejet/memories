@@ -398,8 +398,6 @@ export default defineComponent({
       const photo = this.currentPhoto;
       const isvideo = photo && photo.flag & this.c.FLAG_IS_VIDEO;
       if (photo && !isvideo && photo.fileid === fileid) {
-        photo.etag += "_";
-        photo.imageInfo = null;
         this.photoswipe.refreshSlideContent(this.currIndex);
       }
     },

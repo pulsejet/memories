@@ -190,6 +190,10 @@ class ImageController extends GenericApiController
             // Get the image info
             $info = $this->timelineQuery->getInfoById($file->getId(), $basic);
 
+            // Add fileid and etag
+            $info['fileid'] = $file->getId();
+            $info['etag'] = $file->getEtag();
+
             // Allow these ony for logged in users
             if (null !== $this->userSession->getUser()) {
                 // Get list of tags for this file
@@ -347,10 +351,7 @@ class ImageController extends GenericApiController
             // Make sure the preview is updated
             \OC::$server->get(\OCP\IPreview::class)->getPreview($file);
 
-            return new JSONResponse([
-                'fileid' => $file->getId(),
-                'etag' => $file->getEtag(),
-            ], Http::STATUS_OK);
+            return $this->info((string) $file->getId(), true);
         });
     }
 

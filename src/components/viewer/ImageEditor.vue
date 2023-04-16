@@ -19,7 +19,7 @@ import { FilerobotImageEditorConfig } from "react-filerobot-image-editor";
 import translations from "./ImageEditorTranslations";
 
 import { API } from "../../services/API";
-import { IPhoto } from "../../types";
+import { IImageInfo, IPhoto } from "../../types";
 import * as utils from "../../services/Utils";
 import { fetchImage } from "../frame/XImgCache";
 
@@ -234,14 +234,17 @@ export default defineComponent({
       }
 
       try {
-        const res = await axios.put(API.IMAGE_EDIT(this.photo.fileid), {
-          name: name,
-          width: data.width,
-          height: data.height,
-          quality: data.quality,
-          extension: data.extension,
-          state: state,
-        });
+        const res = await axios.put<IImageInfo>(
+          API.IMAGE_EDIT(this.photo.fileid),
+          {
+            name: name,
+            width: data.width,
+            height: data.height,
+            quality: data.quality,
+            extension: data.extension,
+            state: state,
+          }
+        );
         const fileid = res.data.fileid;
 
         // Success, emit an appropriate event
@@ -250,6 +253,7 @@ export default defineComponent({
         if (fileid !== this.photo.fileid) {
           emit("files:file:created", { fileid });
         } else {
+          utils.updatePhotoFromImageInfo(this.photo, res.data);
           emit("files:file:updated", { fileid });
         }
         this.onClose(undefined, false);

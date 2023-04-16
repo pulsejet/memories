@@ -76,6 +76,8 @@ export type IPhoto = {
 };
 
 export interface IImageInfo {
+  fileid: number;
+  etag: string;
   h: number;
   w: number;
   datetaken: number;

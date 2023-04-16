@@ -1,4 +1,4 @@
-import { IPhoto } from "../../types";
+import { IImageInfo, IPhoto } from "../../types";
 import { API } from "../API";
 
 /** Get preview URL from photo object */
@@ -23,6 +23,21 @@ export function getPreviewUrl(
     y,
     a: square ? "0" : "1",
   });
+}
+
+/**
+ * Update photo object using imageInfo.
+ */
+export function updatePhotoFromImageInfo(photo: IPhoto, imageInfo: IImageInfo) {
+  photo.etag = imageInfo.etag;
+  photo.basename = imageInfo.basename;
+  photo.mimetype = imageInfo.mimetype;
+  photo.w = imageInfo.w;
+  photo.h = imageInfo.h;
+  photo.imageInfo = {
+    ...photo.imageInfo,
+    ...imageInfo,
+  };
 }
 
 /**
