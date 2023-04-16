@@ -7,7 +7,6 @@ namespace OCA\Memories;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Service\BinExt;
 use OCP\Files\File;
-use OCP\IConfig;
 
 class Exif
 {
@@ -63,35 +62,6 @@ class Exif
             self::$staticProc = null;
             self::ensureStaticExiftoolProc();
         }
-    }
-
-    /**
-     * Get list of timeline paths as array.
-     */
-    public static function getTimelinePaths(string $uid): array
-    {
-        $config = \OC::$server->get(IConfig::class);
-        $paths = $config->getUserValue($uid, Application::APPNAME, 'timelinePath', null) ?? 'Photos/';
-
-        return array_map(fn ($p) => self::sanitizePath(trim($p)), explode(';', $paths));
-    }
-
-    /**
-     * Sanitize a path to keep only ASCII characters and special characters.
-     */
-    public static function sanitizePath(string $path)
-    {
-        $path = mb_ereg_replace('([^\\w\\s\\d\\-_~,;:!@#$&*{}\[\]\'\\[\\]\\(\\).\\\/])', '', $path);
-        $path = mb_ereg_replace('\/\/+', '/', $path); // remove extra slashes
-        return $path;
-    }
-
-    /**
-     * Remove any leading slash present on the path.
-     */
-    public static function removeLeadingSlash(string $path)
-    {
-        return mb_ereg_replace('~^/+~', '', $path);
     }
 
     /**

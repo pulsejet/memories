@@ -26,7 +26,6 @@ namespace OCA\Memories\Db;
 use OC\Files\Search\SearchComparison;
 use OC\Files\Search\SearchQuery;
 use OCA\Memories\Exceptions;
-use OCA\Memories\Exif;
 use OCA\Memories\Util;
 use OCP\Files\File;
 use OCP\Files\Folder;
@@ -103,13 +102,13 @@ class FsManager
 
         try {
             if (null !== $folderPath) {
-                $folder = $userFolder->get(Exif::sanitizePath($folderPath));
+                $folder = $userFolder->get(Util::sanitizePath($folderPath));
                 $root->addFolder($folder);
             } else {
                 // Get timeline paths
-                $paths = Exif::getTimelinePaths($uid);
+                $paths = Util::getTimelinePaths($uid);
                 if ($path = $this->request->getParam('timelinePath', null)) {
-                    $paths = [Exif::sanitizePath($path)];
+                    $paths = [Util::sanitizePath($path)];
                 }
 
                 // Combined etag, for cache invalidation.

@@ -7,6 +7,7 @@ namespace OCA\Memories;
 use OC\Files\Search\SearchBinaryOperator;
 use OC\Files\Search\SearchComparison;
 use OC\Files\Search\SearchQuery;
+use OCA\Memories\AppInfo\Application;
 use OCP\App\IAppManager;
 use OCP\Files\Node;
 use OCP\Files\Search\ISearchBinaryOperator;
@@ -280,6 +281,27 @@ class Util
     public static function placesGISType(): int
     {
         return self::getSystemConfig('memories.gis_type');
+    }
+
+    /**
+     * Get list of timeline paths as array.
+     */
+    public static function getTimelinePaths(string $uid): array
+    {
+        $config = \OC::$server->get(IConfig::class);
+        $paths = $config->getUserValue($uid, Application::APPNAME, 'timelinePath', null) ?? 'Photos/';
+
+        return array_map(fn ($p) => self::sanitizePath(trim($p)), explode(';', $paths));
+    }
+
+    /**
+     * Sanitize a path to keep only ASCII characters and special characters.
+     */
+    public static function sanitizePath(string $path)
+    {
+        $path = mb_ereg_replace('([^\\w\\s\\d\\-_~,;:!@#$&*{}\[\]\'\\[\\]\\(\\).\\\/])', '', $path);
+
+        return mb_ereg_replace('\/\/+', '/', $path); // remove extra slashes
     }
 
     /**

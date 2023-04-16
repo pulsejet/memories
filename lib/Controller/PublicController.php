@@ -5,6 +5,7 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\FsManager;
 use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Util;
 use OCP\AppFramework\AuthPublicShareController;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -19,7 +20,6 @@ use OCP\IURLGenerator;
 use OCP\IUserSession;
 use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
-use OCP\Util;
 
 class PublicController extends AuthPublicShareController
 {
@@ -110,7 +110,7 @@ class PublicController extends AuthPublicShareController
         \OC_User::setIncognitoMode(true);
 
         // Scripts
-        Util::addScript($this->appName, 'memories-main');
+        \OCP\Util::addScript($this->appName, 'memories-main');
         PageController::provideCommonInitialState($this->initialState);
 
         // Share info
@@ -125,7 +125,7 @@ class PublicController extends AuthPublicShareController
         // Add OG metadata
         $params = ['token' => $this->getToken()];
         $url = $this->urlGenerator->linkToRouteAbsolute('memories.Public.showShare', $params);
-        \OCA\Memories\Util::addOgMetadata($node, $node->getName(), $url, $params);
+        Util::addOgMetadata($node, $node->getName(), $url, $params);
 
         // Render the template
         $response = new PublicTemplateResponse($this->appName, 'main');
@@ -195,7 +195,7 @@ class PublicController extends AuthPublicShareController
         // Get the user's folders path
         $foldersPath = $this->config->getUserValue($user->getUID(), Application::APPNAME, 'foldersPath', '');
         $foldersPath = $foldersPath ?: '/';
-        $foldersPath = \OCA\Memories\Exif::sanitizePath($foldersPath);
+        $foldersPath = Util::sanitizePath($foldersPath);
 
         // Check if relPath starts with foldersPath
         if (0 !== strpos($relPath, $foldersPath)) {

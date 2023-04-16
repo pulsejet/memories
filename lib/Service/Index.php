@@ -83,7 +83,7 @@ class Index
         } elseif ('1' === $mode || '0' === $mode) { // everything (or nothing)
             $paths = ['/'];
         } elseif ('2' === $mode) { // timeline
-            $paths = \OCA\Memories\Exif::getTimelinePaths($uid);
+            $paths = Util::getTimelinePaths($uid);
         } elseif ('3' === $mode) { // custom
             $paths = [Util::getSystemConfig('memories.index.path')];
         } else {

@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\Exceptions;
-use OCA\Memories\Exif;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
@@ -57,7 +56,7 @@ class ArchiveController extends GenericApiController
             }
 
             // Create archive folder in the root of the user's configured timeline
-            $configPaths = Exif::getTimelinePaths(Util::getUID());
+            $configPaths = Util::getTimelinePaths(Util::getUID());
             $timelineFolders = [];
             $timelinePaths = [];
 
@@ -134,7 +133,7 @@ class ArchiveController extends GenericApiController
             } else {
                 // file not in archive, put it in there
                 $af = \OCA\Memories\Util::$ARCHIVE_FOLDER;
-                $destinationPath = Exif::sanitizePath($af.$relativeFilePath);
+                $destinationPath = Util::sanitizePath($af.$relativeFilePath);
             }
 
             // Remove the filename
