@@ -209,16 +209,20 @@ trait TimelineQueryDays
         $row['dayid'] = (int) $row['dayid'];
         $row['w'] = (int) $row['w'];
         $row['h'] = (int) $row['h'];
+
+        // Optional fields
         if (!$row['isvideo']) {
             unset($row['isvideo'], $row['video_duration']);
         }
-        if ($row['categoryid']) {
-            $row['isfavorite'] = 1;
-        }
-        unset($row['categoryid']);
         if (!$row['liveid']) {
             unset($row['liveid']);
         }
+
+        // Favorite field, may not be present
+        if (\array_key_exists('categoryid', $row) && $row['categoryid']) {
+            $row['isfavorite'] = 1;
+        }
+        unset($row['categoryid']);
 
         // All cluster transformations
         ClustersBackend\Manager::applyDayPostTransforms($this->request, $row);
