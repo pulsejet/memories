@@ -69,6 +69,7 @@ return [
         ['name' => 'Image#info', 'url' => '/api/image/info/{id}', 'verb' => 'GET'],
         ['name' => 'Image#setExif', 'url' => '/api/image/set-exif/{id}', 'verb' => 'PATCH'],
         ['name' => 'Image#decodable', 'url' => '/api/image/decodable/{id}', 'verb' => 'GET'],
+        ['name' => 'Image#editImage', 'url' => '/api/image/edit/{id}', 'verb' => 'PUT'],
 
         ['name' => 'Video#transcode', 'url' => '/api/video/transcode/{client}/{fileid}/{profile}', 'verb' => 'GET'],
         ['name' => 'Video#livephoto', 'url' => '/api/video/livephoto/{fileid}', 'verb' => 'GET'],

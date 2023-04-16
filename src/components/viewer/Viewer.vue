@@ -9,9 +9,7 @@
   >
     <ImageEditor
       v-if="editorOpen"
-      :etag="currentPhoto.etag"
-      :src="editorSrc"
-      :fileid="currentPhoto.fileid"
+      :photo="currentPhoto"
       @close="editorOpen = false"
     />
 
@@ -186,7 +184,6 @@ import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
 import axios from "@nextcloud/axios";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
-import { getRootUrl } from "@nextcloud/router";
 
 import { getDownloadLink } from "../../services/DavRequests";
 import { API } from "../../services/API";
@@ -904,18 +901,7 @@ export default defineComponent({
         return;
       }
 
-      // Get DAV path
-      const fileInfo = (await dav.getFiles([this.currentPhoto]))[0];
-      if (!fileInfo) {
-        alert(this.t("memories", "Cannot edit this file"));
-        return;
-      }
-
-      this.editorSrc =
-        window.location.origin +
-        getRootUrl() +
-        "/remote.php/dav" +
-        fileInfo.originalFilename;
+      // Open editor
       this.editorOpen = true;
     },
 

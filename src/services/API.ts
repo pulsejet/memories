@@ -142,6 +142,10 @@ export class API {
     return tok(API.Q(gen(`${BASE}/image/decodable/{id}`, { id }), { etag }));
   }
 
+  static IMAGE_EDIT(id: number) {
+    return gen(`${BASE}/image/edit/{id}`, { id });
+  }
+
   static VIDEO_TRANSCODE(fileid: number, file = "index.m3u8") {
     return tok(
       gen(`${BASE}/video/transcode/{videoClientId}/{fileid}/{file}`, {

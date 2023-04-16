@@ -26,6 +26,7 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
+use OCA\Memories\Service;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\FileDisplayResponse;
@@ -282,6 +283,61 @@ class ImageController extends GenericApiController
             $response->cacheFor(3600 * 24, false, false);
 
             return $response;
+        });
+    }
+
+    /**
+     * @NoAdminRequired
+     */
+    public function editImage(
+        int $id,
+        string $name,
+        int $width,
+        int $height,
+        float $quality,
+        string $extension,
+        array $state
+    ): Http\Response {
+        return Util::guardEx(function () use ($id, $name, $quality, $extension, $state) {
+            // Get the file
+            $file = $this->fs->getUserFile($id);
+
+            // Check if creating a copy
+            $copy = $name !== $file->getName();
+
+            // Check if user has permissions to do this
+            if (!$file->isUpdateable() || ($copy && !$file->getParent()->isCreatable())) {
+                throw Exceptions::ForbiddenFileUpdate($file->getName());
+            }
+
+            // Check if we have imagick
+            if (!class_exists('Imagick')) {
+                throw Exceptions::Forbidden('Imagick extension is not available');
+            }
+
+            // Read the image
+            $image = new \Imagick();
+            $image->readImageBlob($file->getContent());
+
+            // Apply the edits
+            (new Service\FileRobotMagick($image, $state))->apply();
+
+            // Save the image
+            $image->setImageFormat($extension);
+            $image->setImageCompressionQuality((int) round(100 * $quality));
+            $blob = $image->getImageBlob();
+
+            // Save the file
+            if ($copy) {
+                $file = $file->getParent()->newFile($name, $blob);
+            } else {
+                $file->putContent($blob);
+            }
+
+            return new JSONResponse([
+                'fileid' => $file->getId(),
+                'etag' => $file->getEtag(),
+            ], Http::STATUS_OK);
         });
     }
 
