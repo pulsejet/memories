@@ -182,8 +182,9 @@ import { PsSlide } from "./types";
 import UserConfig from "../../mixins/UserConfig";
 import NcActions from "@nextcloud/vue/dist/Components/NcActions";
 import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
-import axios from "@nextcloud/axios";
 import { subscribe, unsubscribe } from "@nextcloud/event-bus";
+import { showError } from "@nextcloud/dialogs";
+import axios from "@nextcloud/axios";
 
 import { getDownloadLink } from "../../services/DavRequests";
 import { API } from "../../services/API";
@@ -896,7 +897,7 @@ export default defineComponent({
 
       // Prevent editing Live Photos
       if (this.currentPhoto.liveid) {
-        alert(
+        showError(
           this.t("memories", "Editing is currently disabled for Live Photos")
         );
         return;
