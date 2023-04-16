@@ -20,6 +20,9 @@ Note: this is a major release and may introduce breaking changes to your workflo
   - All media files (excluding folders with `.nomedia` files, default and recommended)
   - All files in every user's configured timeline folder (not recommended).
   - All files in a given folder for each user (relative path).
+- **Feature**: Image editing is now done server-side, and is much faster and more reliable.
+  - PHP Imagick extension is now required for image editing.
+  - This fixes multiple issues editing images especially in Firefox.
 - **Feature**: Significant performance improvements for the timeline view.
 
 ## v4.13.1 (2023-04-03)
