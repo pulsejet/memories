@@ -24,7 +24,8 @@ class TimelineQuery
 
     protected IDBConnection $connection;
     protected IRequest $request;
-    private ?TimelineRoot $_root = null;
+    protected ?TimelineRoot $_root = null;
+    protected bool $_rootEmptyAllowed = false;
 
     public function __construct(IDBConnection $connection, IRequest $request)
     {
@@ -32,14 +33,27 @@ class TimelineQuery
         $this->request = $request;
     }
 
-    public function root(): TimelineRoot
+    public function root(?TimelineRoot $override = null): TimelineRoot
     {
+        if (null !== $override) {
+            $this->_root = $override;
+        }
+
         if (null === $this->_root) {
             $this->_root = new TimelineRoot();
             $this->_root->populate();
         }
 
+        if (!$this->_rootEmptyAllowed && $this->_root->isEmpty()) {
+            throw new \Exception('No valid root folder found (.nomedia?)');
+        }
+
         return $this->_root;
+    }
+
+    public function allowEmptyRoot(bool $value = true)
+    {
+        $this->_rootEmptyAllowed = $value;
     }
 
     public function getBuilder()

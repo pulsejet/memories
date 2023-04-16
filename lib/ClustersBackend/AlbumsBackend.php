@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\AlbumsQuery;
+use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
 use OCP\IRequest;
@@ -32,13 +33,16 @@ class AlbumsBackend extends Backend
 {
     protected AlbumsQuery $albumsQuery;
     protected IRequest $request;
+    protected TimelineQuery $tq;
 
     public function __construct(
         AlbumsQuery $albumsQuery,
-        IRequest $request
+        IRequest $request,
+        TimelineQuery $tq
     ) {
         $this->albumsQuery = $albumsQuery;
         $this->request = $request;
+        $this->tq = $tq;
     }
 
     public static function appName(): string
@@ -78,6 +82,9 @@ class AlbumsBackend extends Backend
             $query->expr()->eq('paf.album_id', $query->createNamedParameter($album['album_id'])),
             $query->expr()->eq('paf.file_id', 'm.fileid'),
         ));
+
+        // Since we joined to the album, otherwise this is unsafe
+        $this->tq->allowEmptyRoot();
     }
 
     public function getClusters(): array

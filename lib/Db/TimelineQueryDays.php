@@ -35,7 +35,6 @@ trait TimelineQueryDays
         $query->select('m.dayid', $count)
             ->from('memories', 'm')
         ;
-        $query = $this->joinFilecache($query, null, $recursive, $archive);
 
         // Group and sort by dayid
         $query->groupBy('m.dayid')
@@ -45,9 +44,11 @@ trait TimelineQueryDays
         // Apply all transformations
         $this->applyAllTransforms($queryTransforms, $query, true);
 
-        $cursor = $this->executeQueryWithCTEs($query);
-        $rows = $cursor->fetchAll();
-        $cursor->closeCursor();
+        // JOIN with filecache for existing files
+        $query = $this->joinFilecache($query, null, $recursive, $archive);
+
+        // FETCH all days
+        $rows = $this->executeQueryWithCTEs($query)->fetchAll();
 
         return $this->processDays($rows);
     }
@@ -82,9 +83,6 @@ trait TimelineQueryDays
             ->from('memories', 'm')
         ;
 
-        // JOIN with filecache for existing files
-        $query = $this->joinFilecache($query, null, $recursive, $archive);
-
         // JOIN with mimetypes to get the mimetype
         $query->join('f', 'mimetypes', 'mimetypes', $query->expr()->eq('f.mimetype', 'mimetypes.id'));
 
@@ -105,6 +103,9 @@ trait TimelineQueryDays
 
         // Apply all transformations
         $this->applyAllTransforms($queryTransforms, $query, false);
+
+        // JOIN with filecache for existing files
+        $query = $this->joinFilecache($query, null, $recursive, $archive);
 
         // FETCH all photos in this day
         $day = $this->executeQueryWithCTEs($query)->fetchAll();
@@ -150,14 +151,8 @@ trait TimelineQueryDays
         bool $recursive = true,
         bool $archive = false
     ): IQueryBuilder {
-        if (null === $root) {
-            $root = $this->root();
-        }
-
-        // Never join against an empty root
-        if (!$root || $root->isEmpty()) {
-            throw new \InvalidArgumentException('Timeline root is empty');
-        }
+        // This will throw if the root is illegally empty
+        $root = $this->root($root);
 
         // Join with memories
         $baseOp = $query->expr()->eq('f.fileid', 'm.fileid');
