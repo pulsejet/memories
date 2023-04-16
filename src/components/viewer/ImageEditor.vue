@@ -52,7 +52,10 @@ export default defineComponent({
   computed: {
     config(): FilerobotImageEditorConfig & { theme: any } {
       return {
-        source: "nonexistent",
+        source:
+          this.photo.h && this.photo.w
+            ? utils.getPreviewUrl(this.photo, false, "screen")
+            : API.IMAGE_DECODABLE(this.photo.fileid, this.photo.etag),
 
         defaultSavedImageName: this.defaultSavedImageName,
         defaultSavedImageType: this.defaultSavedImageType,
@@ -145,10 +148,9 @@ export default defineComponent({
   async mounted() {
     await loadFilerobot();
 
-    const div = <HTMLElement>this.$refs.editor;
-    const config = this.config;
-    config.source = await this.getImg();
+    globalThis._fileRobotOverrideImage = await this.getImage();
 
+    const div = <HTMLElement>this.$refs.editor;
     this.imageEditor = new FilerobotImageEditor(div, this.config);
     this.imageEditor.render();
 
@@ -160,29 +162,25 @@ export default defineComponent({
     if (this.imageEditor) {
       this.imageEditor.terminate();
     }
+    globalThis._fileRobotOverrideImage = undefined;
     window.removeEventListener("keydown", this.handleKeydown, true);
   },
 
   methods: {
-    async getImg(): Promise<any> {
-      if (this.photo.w && this.photo.h) {
-        // Fetch the image to a blob
-        const preview = utils.getPreviewUrl(this.photo, false, 2048);
+    async getImage(): Promise<HTMLImageElement> {
+      const img = new Image();
 
-        // Fetch preview image
-        const img = new Image();
+      await new Promise(async (resolve) => {
+        img.onload = resolve;
+        img.src = await fetchImage(<string>this.config.source);
+      });
+
+      if (this.photo.w && this.photo.h) {
         img.height = this.photo.h;
         img.width = this.photo.w;
-        await new Promise(async (resolve) => {
-          img.onload = resolve;
-          img.src = await fetchImage(preview);
-        });
-
-        return img;
       }
 
-      // If we don't have the size, we need to use the original image
-      return API.IMAGE_DECODABLE(this.photo.fileid, this.photo.etag);
+      return img;
     },
 
     onClose(closingReason, haveNotSavedChanges) {
@@ -241,13 +239,9 @@ export default defineComponent({
         // Success, emit an appropriate event
         showSuccess(this.t("memories", "Image saved successfully"));
 
-        console.log(state);
-
         if (fileid !== this.photo.fileid) {
-          console.log("Fileid changed", fileid);
           emit("files:file:created", { fileid });
         } else {
-          console.log("Fileid unchanged", fileid);
           emit("files:file:updated", { fileid });
         }
         this.onClose(undefined, false);

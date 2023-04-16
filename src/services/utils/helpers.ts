@@ -5,8 +5,16 @@ import { API } from "../API";
 export function getPreviewUrl(
   photo: IPhoto,
   square: boolean,
-  size: number | [number, number]
+  size: number | [number, number] | "screen"
 ) {
+  // Screen-appropriate size
+  if (size === "screen") {
+    const sw = Math.floor(screen.width * devicePixelRatio);
+    const sh = Math.floor(screen.height * devicePixelRatio);
+    size = [sw, sh];
+  }
+
+  // Convert to array
   const [x, y] = typeof size === "number" ? [size, size] : size;
 
   return API.Q(API.IMAGE_PREVIEW(photo.fileid), {

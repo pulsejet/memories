@@ -779,10 +779,7 @@ export default defineComponent({
 
     /** Get base data object */
     getItemData(photo: IPhoto) {
-      const sw = Math.floor(screen.width * devicePixelRatio);
-      const sh = Math.floor(screen.height * devicePixelRatio);
-      let previewUrl = utils.getPreviewUrl(photo, false, [sw, sh]);
-
+      let previewUrl = utils.getPreviewUrl(photo, false, "screen");
       const isvideo = photo.flag & this.c.FLAG_IS_VIDEO;
 
       // Preview aren't animated
