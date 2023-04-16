@@ -103,13 +103,13 @@ class FsManager
 
         try {
             if (null !== $folderPath) {
-                $folder = $userFolder->get(Exif::removeExtraSlash($folderPath));
+                $folder = $userFolder->get(Exif::sanitizePath($folderPath));
                 $root->addFolder($folder);
             } else {
                 // Get timeline paths
                 $paths = Exif::getTimelinePaths($uid);
                 if ($path = $this->request->getParam('timelinePath', null)) {
-                    $paths = [Exif::removeExtraSlash($path)];
+                    $paths = [Exif::sanitizePath($path)];
                 }
 
                 // Combined etag, for cache invalidation.

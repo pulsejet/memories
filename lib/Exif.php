@@ -81,15 +81,9 @@ class Exif
      */
     public static function sanitizePath(string $path)
     {
-        return mb_ereg_replace('([^\\w\\s\\d\\-_~,;:!@#$&*{}\[\]\'\\[\\]\\(\\).\\\/])', '', $path);
-    }
-
-    /**
-     * Keep only one slash if multiple repeating.
-     */
-    public static function removeExtraSlash(string $path)
-    {
-        return mb_ereg_replace('\/\/+', '/', $path);
+        $path = mb_ereg_replace('([^\\w\\s\\d\\-_~,;:!@#$&*{}\[\]\'\\[\\]\\(\\).\\\/])', '', $path);
+        $path = mb_ereg_replace('\/\/+', '/', $path); // remove extra slashes
+        return $path;
     }
 
     /**

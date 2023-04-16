@@ -134,7 +134,7 @@ class ArchiveController extends GenericApiController
             } else {
                 // file not in archive, put it in there
                 $af = \OCA\Memories\Util::$ARCHIVE_FOLDER;
-                $destinationPath = Exif::removeExtraSlash($af.$relativeFilePath);
+                $destinationPath = Exif::sanitizePath($af.$relativeFilePath);
             }
 
             // Remove the filename
