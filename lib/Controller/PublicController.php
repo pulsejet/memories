@@ -193,7 +193,9 @@ class PublicController extends AuthPublicShareController
         $relPath = substr($node->getPath(), \strlen($userFolder->getPath()));
 
         // Get the user's folders path
-        $foldersPath = $this->config->getUserValue($user->getUID(), Application::APPNAME, 'foldersPath', '/');
+        $foldersPath = $this->config->getUserValue($user->getUID(), Application::APPNAME, 'foldersPath', '');
+        $foldersPath = $foldersPath ?: '/';
+        $foldersPath = \OCA\Memories\Exif::sanitizePath($foldersPath);
 
         // Check if relPath starts with foldersPath
         if (0 !== strpos($relPath, $foldersPath)) {
