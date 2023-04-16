@@ -273,7 +273,7 @@ OC.L10N.register(
     "Play Live Photo" : "Erreproduzitu zuzeneko argazkia",
     "Sidebar" : "Alboko barra",
     "Download Video" : "Deskargatu bideoa",
-    "Slideshow" : "Aurkezpena",
+    "Slideshow" : "Diapositiba-aurkezpena",
     "Previous" : "Aurrekoa",
     "Next" : "Hurrengoa",
     "Editing is currently disabled for Live Photos" : "Zuzeneko argazkiak editatzeko aukera desgaituta dago",
