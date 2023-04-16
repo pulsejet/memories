@@ -50,27 +50,39 @@ trait TimelineQuerySingleItem
 
         $row = $qb->executeQuery()->fetch();
 
-        $utcTs = 0;
+        // Basic information to return
+        $info = [
+            'fileid' => (int) $row['fileid'],
+            'dayid' => (int) $row['dayid'],
+            'w' => (int) $row['w'],
+            'h' => (int) $row['h'],
+            'datetaken' => (int) $row['datetaken'],
+        ];
 
+        // Attempt to get the date in the correct timezone
         try {
             $utcDate = new \DateTime($row['datetaken'], new \DateTimeZone('UTC'));
-            $utcTs = $utcDate->getTimestamp();
+            $info['datetaken'] = $utcDate->getTimestamp();
         } catch (\Throwable $e) {
+            // Ignore
         }
 
-        // Get exif if needed
-        $exif = [];
-        if (!$basic && !empty($row['exif'])) {
+        // Return if only basic info is needed
+        if ($basic) {
+            return $info;
+        }
+
+        // Get exif data for metadata
+        if (!empty($row['exif'])) {
             try {
-                $exif = json_decode($row['exif'], true);
+                $info['exif'] = json_decode($row['exif'], true);
             } catch (\Throwable $e) {
+                // Ignore
             }
         }
 
         // Get address from places
-        $gisType = \OCA\Memories\Util::placesGISType();
-        $address = -1 === $gisType ? 'Geocoding Unconfigured' : null;
-        if (!$basic && $gisType > 0) {
+        if (Util::placesGISType() > 0) {
             $qb = $this->connection->getQueryBuilder();
             $qb->select('e.name', 'e.other_names')
                 ->from('memories_places', 'mp')
@@ -84,18 +96,10 @@ trait TimelineQuerySingleItem
             $lang = Util::getUserLang();
             if (\count($places) > 0) {
                 $places = array_map(fn ($p) => PlacesBackend::choosePlaceLang($p, $lang)['name'], $places);
-                $address = implode(', ', $places);
+                $info['address'] = implode(', ', $places);
             }
         }
 
-        return [
-            'fileid' => (int) $row['fileid'],
-            'dayid' => (int) $row['dayid'],
-            'w' => (int) $row['w'],
-            'h' => (int) $row['h'],
-            'datetaken' => $utcTs,
-            'address' => $address,
-            'exif' => $exif,
-        ];
+        return $info;
     }
 }
