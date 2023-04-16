@@ -10,9 +10,9 @@ let importer: ReturnType<typeof workerImporter>;
 const BLOB_CACHE = new Map<string, object>() as Map<string, [number, string]>;
 const BLOB_STICKY = new Map<string, number>();
 
-// Configure worker on startup
-document.addEventListener("DOMContentLoaded", () => {
-  if (globalThis.mode !== "user") return;
+// Start and configure the worker
+function startWorker() {
+  if (worker || globalThis.mode !== "user") return;
 
   // Start worker
   worker = new Worker(new URL("./XImgWorker.ts", import.meta.url));
@@ -22,6 +22,11 @@ document.addEventListener("DOMContentLoaded", () => {
   importer<typeof w.configure>("configure")({
     multiUrl: API.IMAGE_MULTIPREVIEW(),
   });
+}
+
+// Configure worker on startup
+document.addEventListener("DOMContentLoaded", () => {
+  if (globalThis.mode !== "user") return;
 
   // Periodic blob cache cleaner
   window.setInterval(() => {
@@ -53,6 +58,9 @@ export async function sticky(url: string, delta: number) {
 }
 
 export async function fetchImage(url: string) {
+  // Start worker
+  startWorker();
+
   // Check memcache entry
   if (BLOB_CACHE.has(url)) return BLOB_CACHE.get(url)[1];
 
