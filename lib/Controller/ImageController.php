@@ -310,6 +310,11 @@ class ImageController extends GenericApiController
                 throw Exceptions::ForbiddenFileUpdate($file->getName());
             }
 
+            // Check if target copy file exists
+            if ($copy && $file->getParent()->nodeExists($name)) {
+                throw Exceptions::ForbiddenFileUpdate($name);
+            }
+
             // Check if we have imagick
             if (!class_exists('Imagick')) {
                 throw Exceptions::Forbidden('Imagick extension is not available');
