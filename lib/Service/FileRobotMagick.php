@@ -148,6 +148,11 @@ class FileRobotMagick
 
     public function apply()
     {
+        // Ensure the image is in the correct colorspace
+        if (\Imagick::COLORSPACE_SRGB !== $this->image->getColorspace()) {
+            $this->image->transformImageColorspace(\Imagick::COLORSPACE_SRGB);
+        }
+
         $this->applyCrop();
         $this->applyFlipRotation();
         $this->applyResize();
