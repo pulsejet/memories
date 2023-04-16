@@ -59,12 +59,14 @@ class TimelineWrite
 
         // Check if we need to lock the file
         if ($lock) {
-            $lockKey = 'memories/'.$file->getId();
+            $lockKey = '/memories/'.$file->getId();
             $lockType = ILockingProvider::LOCK_EXCLUSIVE;
 
-            try {
-                $this->lockingProvider->acquireLock($lockKey, $lockType);
+            // Throw directly to caller if we can't get the lock
+            // This way we don't release someone else's lock
+            $this->lockingProvider->acquireLock($lockKey, $lockType);
 
+            try {
                 return $this->processFile($file, false, $force);
             } finally {
                 $this->lockingProvider->releaseLock($lockKey, $lockType);

@@ -20,6 +20,8 @@ Note: this is a major release and may introduce breaking changes to your workflo
   - All media files (excluding folders with `.nomedia` files, default and recommended)
   - All files in every user's configured timeline folder (not recommended).
   - All files in a given folder for each user (relative path).
+- **Feature**: You can now run indexing in parallel on multiple threads.  
+  `for i in {1..4}; do (occ memories:index &); done`
 - **Feature**: Image editing is now done server-side, and is much faster and more reliable.
   - PHP Imagick extension is now required for image editing.
   - This fixes multiple issues editing images especially in Firefox.

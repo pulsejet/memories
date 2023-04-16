@@ -119,6 +119,10 @@
     <br />
     <code>occ memories:index</code>
     <br />
+    {{ t("memories", "Run index in parallel with 4 threads:") }}
+    <br />
+    <code>bash -c 'for i in {1..4}; do (occ memories:index &amp;); done'</code>
+    <br />
     {{ t("memories", "Force re-indexing of all files:") }}
     <br />
     <code>occ memories:index --force</code>
