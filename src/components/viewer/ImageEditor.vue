@@ -8,9 +8,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 
-import { basename, dirname, extname, join } from "path";
 import { emit } from "@nextcloud/event-bus";
 import { showError, showSuccess } from "@nextcloud/dialogs";
 import axios from "@nextcloud/axios";
@@ -20,6 +19,9 @@ import { FilerobotImageEditorConfig } from "react-filerobot-image-editor";
 import translations from "./ImageEditorTranslations";
 
 import { API } from "../../services/API";
+import { IPhoto } from "../../types";
+import * as utils from "../../services/Utils";
+import { fetchImage } from "../frame/XImgCache";
 
 let TABS, TOOLS: any;
 type FilerobotImageEditor = import("filerobot-image-editor").default;
@@ -36,16 +38,8 @@ async function loadFilerobot() {
 
 export default defineComponent({
   props: {
-    fileid: {
-      type: Number,
-      required: true,
-    },
-    src: {
-      type: String,
-      required: true,
-    },
-    etag: {
-      type: String,
+    photo: {
+      type: Object as PropType<IPhoto>,
       required: true,
     },
   },
@@ -57,10 +51,8 @@ export default defineComponent({
 
   computed: {
     config(): FilerobotImageEditorConfig & { theme: any } {
-      const src = API.IMAGE_DECODABLE(this.fileid, this.etag);
-
       return {
-        source: src,
+        source: "nonexistent",
 
         defaultSavedImageName: this.defaultSavedImageName,
         defaultSavedImageType: this.defaultSavedImageType,
@@ -74,9 +66,9 @@ export default defineComponent({
         defaultTabId: TABS.ADJUST,
         defaultToolId: TOOLS.CROP,
 
-        // Displayed tabs, disabling watermark
+        // Displayed tabs, disabling watermark and draw
         tabsIds: Object.values(TABS)
-          .filter((tab) => tab !== TABS.WATERMARK)
+          .filter((tab) => ![TABS.WATERMARK, TABS.ANNOTATE].includes(tab))
           .sort((a: string, b: string) => a.localeCompare(b)) as any[],
 
         // onBeforeSave: this.onBeforeSave,
@@ -115,19 +107,20 @@ export default defineComponent({
           },
         },
 
-        savingPixelRatio: 8,
+        savingPixelRatio: window.devicePixelRatio,
         previewPixelRatio: window.devicePixelRatio,
       };
     },
 
     defaultSavedImageName(): string {
-      return basename(this.src, extname(this.src));
+      return this.photo.basename;
     },
 
     defaultSavedImageType(): "jpeg" | "png" | "webp" {
-      const mime = extname(this.src).slice(1);
-      if (["jpeg", "png", "webp"].includes(mime)) {
-        return mime as any;
+      if (
+        ["image/jpeg", "image/png", "image/webp"].includes(this.photo.mimetype)
+      ) {
+        return this.photo.mimetype.split("/")[1] as any;
       }
       return "jpeg";
     },
@@ -151,32 +144,16 @@ export default defineComponent({
 
   async mounted() {
     await loadFilerobot();
-    this.imageEditor = new FilerobotImageEditor(
-      <any>this.$refs.editor,
-      <any>this.config
-    );
+
+    const div = <HTMLElement>this.$refs.editor;
+    const config = this.config;
+    config.source = await this.getImg();
+
+    this.imageEditor = new FilerobotImageEditor(div, this.config);
     this.imageEditor.render();
+
+    // Handle keyboard
     window.addEventListener("keydown", this.handleKeydown, true);
-
-    // Get latest exif data
-    try {
-      const res = await axios.get(
-        API.Q(API.IMAGE_INFO(this.fileid), {
-          basic: "1",
-          current: "1",
-        })
-      );
-
-      this.exif = res.data?.current;
-      if (!this.exif) {
-        throw new Error("No exif data");
-      }
-    } catch (err) {
-      console.error(err);
-      alert(
-        this.t("memories", "Failed to get Exif data. Metadata may be lost!")
-      );
-    }
   },
 
   beforeDestroy() {
@@ -187,6 +164,27 @@ export default defineComponent({
   },
 
   methods: {
+    async getImg(): Promise<any> {
+      if (this.photo.w && this.photo.h) {
+        // Fetch the image to a blob
+        const preview = utils.getPreviewUrl(this.photo, false, 2048);
+
+        // Fetch preview image
+        const img = new Image();
+        img.height = this.photo.h;
+        img.width = this.photo.w;
+        await new Promise(async (resolve) => {
+          img.onload = resolve;
+          img.src = await fetchImage(preview);
+        });
+
+        return img;
+      }
+
+      // If we don't have the size, we need to use the original image
+      return API.IMAGE_DECODABLE(this.photo.fileid, this.photo.etag);
+    },
+
     onClose(closingReason, haveNotSavedChanges) {
       if (haveNotSavedChanges) {
         this.onExitWithoutSaving();
@@ -201,67 +199,61 @@ export default defineComponent({
      *
      * @see https://github.com/scaleflex/filerobot-image-editor#onsave
      */
-    async onSave({
-      fullName,
-      imageBase64,
-    }: {
-      fullName?: string;
-      imageBase64?: string;
-    }): Promise<void> {
-      if (!imageBase64) {
-        throw new Error("No image data");
-      }
+    async onSave(
+      data: {
+        name?: string;
+        width?: number;
+        height?: number;
+        quality?: number;
+        extension?: string;
+        fullName?: string;
+        imageBase64?: string;
+      },
+      state: any
+    ): Promise<void> {
+      // Copy state
+      state = JSON.parse(JSON.stringify(state));
 
-      const { origin, pathname } = new URL(this.src);
-      const putUrl = origin + join(dirname(pathname), fullName);
-
-      if (
-        !this.exif &&
-        !confirm(this.t("memories", "No Exif data found! Continue?"))
-      ) {
-        return;
+      // Convert crop to relative values
+      if (state?.adjustments?.crop) {
+        const iw = state.shownImageDimensions.width;
+        const ih = state.shownImageDimensions.height;
+        const { x, y, width, height } = state.adjustments.crop;
+        state.adjustments.crop = {
+          x: x / iw,
+          y: y / ih,
+          width: width / iw,
+          height: height / ih,
+        };
       }
 
       try {
-        const blob = await fetch(imageBase64).then((res) => res.blob());
-        const response = await axios.put(putUrl, new File([blob], fullName));
-        const fileid =
-          parseInt(response?.headers?.["oc-fileid"]?.split("oc")[0]) || null;
-        if (response.status >= 400) {
-          throw new Error("Failed to save image");
-        }
-
-        // Strip old and incorrect exif data
-        const exif = this.exif;
-        delete exif.Orientation;
-        delete exif.Rotation;
-        delete exif.ImageHeight;
-        delete exif.ImageWidth;
-        delete exif.ImageSize;
-        delete exif.ModifyDate;
-        delete exif.ExifImageHeight;
-        delete exif.ExifImageWidth;
-        delete exif.ExifImageSize;
-        delete exif.CompatibleBrands;
-        delete exif.FileType;
-        delete exif.FileTypeExtension;
-        delete exif.MIMEType;
-        delete exif.MajorBrand;
-
-        // Update exif data
-        await axios.patch(API.IMAGE_SETEXIF(fileid), {
-          raw: exif,
+        const res = await axios.put(API.IMAGE_EDIT(this.photo.fileid), {
+          name: data.name,
+          width: data.width,
+          height: data.height,
+          quality: data.quality,
+          extension: data.extension,
+          state: state,
         });
+        const fileid = res.data.fileid;
 
+        // Success, emit an appropriate event
         showSuccess(this.t("memories", "Image saved successfully"));
-        if (fileid !== this.fileid) {
+
+        console.log(state);
+
+        if (fileid !== this.photo.fileid) {
+          console.log("Fileid changed", fileid);
           emit("files:file:created", { fileid });
         } else {
+          console.log("Fileid unchanged", fileid);
           emit("files:file:updated", { fileid });
         }
         this.onClose(undefined, false);
-      } catch (error) {
+      } catch (err) {
         showError(this.t("memories", "Error saving image"));
+        console.error(err);
       }
     },
 

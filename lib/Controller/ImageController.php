@@ -298,7 +298,7 @@ class ImageController extends GenericApiController
         string $extension,
         array $state
     ): Http\Response {
-        return Util::guardEx(function () use ($id, $name, $quality, $extension, $state) {
+        return Util::guardEx(function () use ($id, $name, $width, $height, $quality, $extension, $state) {
             // Get the file
             $file = $this->fs->getUserFile($id);
 
@@ -321,6 +321,11 @@ class ImageController extends GenericApiController
 
             // Apply the edits
             (new Service\FileRobotMagick($image, $state))->apply();
+
+            // Resize the image
+            if ($width > 0 && $height > 0 && ($width !== $image->getImageWidth() || $height !== $image->getImageHeight())) {
+                $image->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1, true);
+            }
 
             // Save the image
             $image->setImageFormat($extension);
