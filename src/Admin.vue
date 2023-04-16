@@ -150,7 +150,7 @@
       {{ t("memories", "External Link") }}
     </a>
     <br />
-    <code
+    <code v-if="status"
       ><template v-for="mime in status.mimes"
         >{{ mime }}<br :key="mime" /></template
     ></code>
