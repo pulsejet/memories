@@ -169,6 +169,7 @@ export default defineComponent({
   methods: {
     async getImage(): Promise<HTMLImageElement> {
       const img = new Image();
+      img.name = this.photo.basename;
 
       await new Promise(async (resolve) => {
         img.onload = resolve;
@@ -225,9 +226,16 @@ export default defineComponent({
         };
       }
 
+      // Make sure we have an extension
+      let name = data.name;
+      const nameLower = name.toLowerCase();
+      if (!nameLower.endsWith(data.extension) && !nameLower.endsWith(".jpg")) {
+        name += "." + data.extension;
+      }
+
       try {
         const res = await axios.put(API.IMAGE_EDIT(this.photo.fileid), {
-          name: data.name,
+          name: name,
           width: data.width,
           height: data.height,
           quality: data.quality,
