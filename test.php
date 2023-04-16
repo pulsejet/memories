@@ -27,6 +27,12 @@ class ImageState {
     public ?float $cropWidth = null;
     /** Crop height */
     public ?float $cropHeight = null;
+    /** Rotation */
+    public ?int $rotation = null;
+    /** Flipped X */
+    public bool $isFlippedX = false;
+    /** Flipped Y */
+    public bool $isFlippedY = false;
 
     public function __construct(array $json)
     {
@@ -61,6 +67,9 @@ class ImageState {
                 $this->_set($crop, 'width', 'cropWidth');
                 $this->_set($crop, 'height', 'cropHeight');
             }
+            $this->_set($props, 'rotation');
+            $this->_set($props, 'isFlippedX');
+            $this->_set($props, 'isFlippedY');
         }
     }
 
@@ -84,6 +93,7 @@ class KonvaMagick {
 
     public function apply() {
         $this->applyCrop();
+        $this->applyFlipRotation();
 
         foreach ($this->state->finetuneOrder as $key) {
             $method = 'apply' . $key;
@@ -103,6 +113,18 @@ class KonvaMagick {
                 (int) (($this->state->cropX ?? 0) * $iw),
                 (int) (($this->state->cropY ?? 0) * $ih)
             );
+        }
+    }
+
+    protected function applyFlipRotation() {
+        if ($this->state->isFlippedX) {
+            $this->image->flopImage();
+        }
+        if ($this->state->isFlippedY) {
+            $this->image->flipImage();
+        }
+        if ($this->state->rotation) {
+            $this->image->rotateImage(new \ImagickPixel(), $this->state->rotation);
         }
     }
 
@@ -208,6 +230,9 @@ $imageState = new ImageState([
             'width' => 0.47661152675402463,
             'height' => 0.47661153565936554,
         ],
+        'rotation' => 90,
+        'isFlippedX' => false,
+        'isFlippedY' => true,
     ]
 ]);
 
