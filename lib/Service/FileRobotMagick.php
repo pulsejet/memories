@@ -173,6 +173,9 @@ class FileRobotMagick
             $this->{$method}();
         }
 
+        // Orient the image
+        $this->image->autoOrient();
+
         return $this->image;
     }
 
