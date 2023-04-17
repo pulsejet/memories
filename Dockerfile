@@ -11,4 +11,4 @@ RUN ./build-ffmpeg.sh
 
 COPY --from=builder /app/go-vod .
 EXPOSE 47788
-CMD ["/app/go-vod", "config.json"]
+CMD ["/app/go-vod"]
