@@ -115,7 +115,6 @@ class OtherController extends GenericApiController
         return Util::guardEx(function () {
             $config = \OC::$server->get(\OCP\IConfig::class);
             $index = \OC::$server->get(\OCA\Memories\Service\Index::class);
-            $session = \OC::$server->get(\OCP\ISession::class);
 
             // Build status array
             $status = [];
