@@ -21,6 +21,7 @@ function startWorker() {
   // Configure worker
   importer<typeof w.configure>("configure")({
     multiUrl: API.IMAGE_MULTIPREVIEW(),
+    __webpack_public_path__: globalThis.__webpack_public_path__,
   });
 }
 

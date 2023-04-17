@@ -68,6 +68,7 @@ __webpack_nonce__ = window.btoa(getRequestToken());
 // OC.generateUrl ensure the index.php (or not)
 // We do not want the index.php since we're loading files
 __webpack_public_path__ = generateFilePath("memories", "", "js/");
+globalThis.__webpack_public_path__ = __webpack_public_path__;
 
 // Generate client id for this instance
 // Does not need to be cryptographically secure
