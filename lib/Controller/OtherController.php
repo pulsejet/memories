@@ -107,12 +107,15 @@ class OtherController extends GenericApiController
      * @AdminRequired
      *
      * @NoCSRFRequired
+     *
+     * @UseSession
      */
     public function getSystemStatus(): Http\Response
     {
         return Util::guardEx(function () {
             $config = \OC::$server->get(\OCP\IConfig::class);
             $index = \OC::$server->get(\OCA\Memories\Service\Index::class);
+            $session = \OC::$server->get(\OCP\ISession::class);
 
             // Build status array
             $status = [];
@@ -184,15 +187,27 @@ class OtherController extends GenericApiController
                 $status['vaapi_dev'] = 'ok';
             }
 
+            // Action token
+            $status['action_token'] = $this->actionToken(true);
+
             return new JSONResponse($status, Http::STATUS_OK);
         });
     }
 
     /**
      * @AdminRequired
+     *
+     * @UseSession
      */
-    public function placesSetup(): Http\Response
+    public function placesSetup(?string $actiontoken): Http\Response
     {
+        if (!$actiontoken || $this->actionToken() !== $actiontoken) {
+            return new JSONResponse(['error' => 'Invalid action token. Refresh the memories admin page.'], Http::STATUS_BAD_REQUEST);
+        }
+
+        // Reset action token
+        $this->actionToken(true);
+
         try {
             // Set PHP timeout to infinite
             set_time_limit(0);
@@ -247,5 +262,18 @@ class OtherController extends GenericApiController
         }
 
         return 'ok';
+    }
+
+    private function actionToken(bool $set = false): string
+    {
+        $session = \OC::$server->get(\OCP\ISession::class);
+        if (!$set) {
+            return $session->get('memories_action_token');
+        }
+
+        $token = bin2hex(random_bytes(32));
+        $session->set('memories_action_token', $token);
+
+        return $token ?? '';
     }
 }

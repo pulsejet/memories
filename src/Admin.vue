@@ -248,6 +248,7 @@
       target="_blank"
     >
       <input name="requesttoken" type="hidden" :value="requestToken" />
+      <input name="actiontoken" type="hidden" :value="actionToken" />
       <NcButton nativeType="submit" type="warning">
         {{ t("memories", "Download planet database") }}
       </NcButton>
@@ -584,6 +585,8 @@ type IStatus = {
   ffprobe: BinaryStatus;
   govod: BinaryStatus;
   vaapi_dev: "ok" | "not_found" | "not_readable";
+
+  action_token: string;
 };
 
 export default defineComponent({
@@ -773,6 +776,10 @@ export default defineComponent({
   computed: {
     requestToken() {
       return (<any>axios.defaults.headers).requesttoken;
+    },
+
+    actionToken() {
+      return this.status?.action_token || "";
     },
 
     gisStatus() {
