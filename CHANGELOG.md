@@ -2,7 +2,7 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
-## v5.0.0 (Unreleased)
+## v5.0.0 (2023-04-16)
 
 Note: this is a major release and may introduce breaking changes to your workflow.
 
