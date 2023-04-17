@@ -15,7 +15,7 @@ function startWorker() {
   if (worker || globalThis.mode !== "user") return;
 
   // Start worker
-  worker = new Worker(new URL("./XImgWorker.ts", import.meta.url));
+  worker = new Worker(new URL("./XImgWorkerStub.ts", import.meta.url));
   importer = workerImporter(worker);
 
   // Configure worker
