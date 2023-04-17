@@ -364,20 +364,15 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 	// encoder selection
 	CV := ENCODER_X264
 
-	if s.m.probe.CodecName == CODEC_H264 && s.quality == QUALITY_MAX {
-		// Use original stream
-		CV = ENCODER_COPY
-	} else {
-		// Check whether hwaccel should be used
-		if s.c.VAAPI {
-			CV = ENCODER_VAAPI
-			extra := "-hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format vaapi"
-			args = append(args, strings.Split(extra, " ")...)
-		} else if s.c.NVENC {
-			CV = ENCODER_NVENC
-			extra := "-hwaccel cuda"
-			args = append(args, strings.Split(extra, " ")...)
-		}
+	// Check whether hwaccel should be used
+	if s.c.VAAPI {
+		CV = ENCODER_VAAPI
+		extra := "-hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format vaapi"
+		args = append(args, strings.Split(extra, " ")...)
+	} else if s.c.NVENC {
+		CV = ENCODER_NVENC
+		extra := "-hwaccel cuda"
+		args = append(args, strings.Split(extra, " ")...)
 	}
 
 	// Input specs
