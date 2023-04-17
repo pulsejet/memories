@@ -837,7 +837,7 @@ export default defineComponent({
 
           // Add placeholder count
           const leftNum = day.count - i * this.numCols;
-          row.pct = leftNum > this.numCols ? this.numCols : leftNum;
+          row.pct = Math.max(0, Math.min(this.numCols, leftNum));
           row.photos = [];
 
           // Learn from existing row
