@@ -47,23 +47,25 @@ export default defineComponent({
     isSidebarShown: false,
     sidebarWidth: 400,
     trapElements: [],
+    _mutationObserver: null,
   }),
 
   beforeMount() {
     if (this.sidebar) {
       subscribe("memories:sidebar:opened", this.handleAppSidebarOpen);
       subscribe("memories:sidebar:closed", this.handleAppSidebarClose);
-      window.addEventListener("DOMNodeInserted", this.handlePopover);
     }
+    this._mutationObserver = new MutationObserver(this.handleBodyMutation);
+    this._mutationObserver.observe(document.body, { childList: true });
   },
 
   beforeDestroy() {
     if (this.sidebar) {
       unsubscribe("memories:sidebar:opened", this.handleAppSidebarOpen);
       unsubscribe("memories:sidebar:closed", this.handleAppSidebarClose);
-      window.removeEventListener("DOMNodeInserted", this.handlePopover);
       globalThis.mSidebar.close();
     }
+    this._mutationObserver.disconnect();
   },
 
   mounted() {
@@ -84,13 +86,25 @@ export default defineComponent({
      * Watch out for Popover inject in document root
      * That way we can adjust the focusTrap
      */
-    handlePopover(event) {
-      if (
-        event.target?.classList &&
-        event.target.classList.contains("v-popper__popper")
-      ) {
-        this.trapElements.push(event.target);
-      }
+    handleBodyMutation(mutations: MutationRecord[]) {
+      const test = (node: HTMLElement) =>
+        node?.classList?.contains("v-popper__popper");
+
+      mutations.forEach((mutation) => {
+        if (mutation.type === "childList") {
+          Array.from(mutation.addedNodes)
+            .filter(test)
+            .forEach((node) => this.trapElements.push(node));
+          Array.from(mutation.removedNodes)
+            .filter(test)
+            .forEach(
+              (node) =>
+                (this.trapElements = this.trapElements.filter(
+                  (el) => el !== node
+                ))
+            );
+        }
+      });
     },
 
     handleAppSidebarOpen() {
