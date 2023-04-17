@@ -9,7 +9,7 @@ use OCA\Memories\Util;
 class BinExt
 {
     public const EXIFTOOL_VER = '12.58';
-    public const GOVOD_VER = '0.1.0';
+    public const GOVOD_VER = '0.1.1';
 
     /** Copy a binary to temp dir for execution */
     public static function getTempBin(string $path, string $name, bool $copy = true): string
