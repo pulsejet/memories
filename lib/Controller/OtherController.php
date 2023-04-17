@@ -178,7 +178,7 @@ class OtherController extends GenericApiController
 
             // Check for VA-API device
             $devPath = '/dev/dri/renderD128';
-            if (!is_file($devPath)) {
+            if (!file_exists($devPath)) {
                 $status['vaapi_dev'] = 'not_found';
             } elseif (!is_readable($devPath)) {
                 $status['vaapi_dev'] = 'not_readable';
