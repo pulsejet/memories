@@ -697,16 +697,24 @@ export default defineComponent({
     },
 
     placesSetup(event: Event) {
+      const warnSetup = this.t(
+        "memories",
+        "Looks like the database is already setup. Are you sure you want to redownload planet data?"
+      );
+      const warnLong = this.t(
+        "memories",
+        "You are about to download the planet database. This may take a while."
+      );
+      const warnReindex = this.t(
+        "memories",
+        "This may also cause all photos to be re-indexed!"
+      );
       const msg =
-        "Looks like the database is already setup. Are you sure you want to drop the table and redownload OSM data?";
-      if (this.status.gis_count && !confirm(msg)) {
+        (this.status.gis_count ? warnSetup : warnLong) + " " + warnReindex;
+      if (!confirm(msg)) {
         event.preventDefault();
         event.stopPropagation();
         return;
-      } else {
-        alert(
-          "Please wait for the download and insertion to complete. This may take a while."
-        );
       }
     },
 

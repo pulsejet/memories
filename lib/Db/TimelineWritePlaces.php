@@ -16,53 +16,6 @@ trait TimelineWritePlaces
     protected IDBConnection $connection;
 
     /**
-     * Process the location part of exif data.
-     *
-     * Also update the exif data with the tzid from location (LocationTZID)
-     * Performs an in-place update of the exif data.
-     *
-     * @param int        $fileId  The file ID
-     * @param array      $exif    The exif data (will change)
-     * @param array|bool $prevRow The previous row of data
-     *
-     * @return array Update values
-     */
-    protected function processExifLocation(int $fileId, array &$exif, $prevRow): array
-    {
-        // Store location data
-        [$lat, $lon] = self::readCoord($exif);
-        $oldLat = $prevRow ? (float) $prevRow['lat'] : null;
-        $oldLon = $prevRow ? (float) $prevRow['lon'] : null;
-        $mapCluster = $prevRow ? (int) $prevRow['mapcluster'] : -1;
-        $osmIds = [];
-
-        if ($lat || $lon || $oldLat || $oldLon) {
-            try {
-                $mapCluster = $this->mapGetCluster($mapCluster, $lat, $lon, $oldLat, $oldLon);
-            } catch (\Exception $e) {
-                $logger = \OC::$server->get(LoggerInterface::class);
-                $logger->log(3, 'Error updating map cluster data: '.$e->getMessage(), ['app' => 'memories']);
-            }
-
-            try {
-                $osmIds = $this->updatePlacesData($fileId, $lat, $lon);
-            } catch (\Exception $e) {
-                $logger = \OC::$server->get(LoggerInterface::class);
-                $logger->log(3, 'Error updating places data: '.$e->getMessage(), ['app' => 'memories']);
-            }
-        }
-
-        // NULL if invalid
-        $mapCluster = $mapCluster <= 0 ? null : $mapCluster;
-
-        // Set tzid from location if not present
-        $this->setTzidFromLocation($exif, $osmIds);
-
-        // Return update values
-        return [$lat, $lon, $mapCluster, $osmIds];
-    }
-
-    /**
      * Add places data for a file.
      *
      * @param int        $fileId The file ID
@@ -71,7 +24,7 @@ trait TimelineWritePlaces
      *
      * @return array The list of osm_id of the places
      */
-    protected function updatePlacesData(int $fileId, $lat, $lon): array
+    public function updatePlacesData(int $fileId, $lat, $lon): array
     {
         // Get GIS type
         $gisType = \OCA\Memories\Util::placesGISType();
@@ -138,6 +91,53 @@ trait TimelineWritePlaces
 
         // Return list of osm_id
         return array_map(fn ($row) => $row['osm_id'], $rows);
+    }
+
+    /**
+     * Process the location part of exif data.
+     *
+     * Also update the exif data with the tzid from location (LocationTZID)
+     * Performs an in-place update of the exif data.
+     *
+     * @param int        $fileId  The file ID
+     * @param array      $exif    The exif data (will change)
+     * @param array|bool $prevRow The previous row of data
+     *
+     * @return array Update values
+     */
+    protected function processExifLocation(int $fileId, array &$exif, $prevRow): array
+    {
+        // Store location data
+        [$lat, $lon] = self::readCoord($exif);
+        $oldLat = $prevRow ? (float) $prevRow['lat'] : null;
+        $oldLon = $prevRow ? (float) $prevRow['lon'] : null;
+        $mapCluster = $prevRow ? (int) $prevRow['mapcluster'] : -1;
+        $osmIds = [];
+
+        if ($lat || $lon || $oldLat || $oldLon) {
+            try {
+                $mapCluster = $this->mapGetCluster($mapCluster, $lat, $lon, $oldLat, $oldLon);
+            } catch (\Exception $e) {
+                $logger = \OC::$server->get(LoggerInterface::class);
+                $logger->log(3, 'Error updating map cluster data: '.$e->getMessage(), ['app' => 'memories']);
+            }
+
+            try {
+                $osmIds = $this->updatePlacesData($fileId, $lat, $lon);
+            } catch (\Exception $e) {
+                $logger = \OC::$server->get(LoggerInterface::class);
+                $logger->log(3, 'Error updating places data: '.$e->getMessage(), ['app' => 'memories']);
+            }
+        }
+
+        // NULL if invalid
+        $mapCluster = $mapCluster <= 0 ? null : $mapCluster;
+
+        // Set tzid from location if not present
+        $this->setTzidFromLocation($exif, $osmIds);
+
+        // Return update values
+        return [$lat, $lon, $mapCluster, $osmIds];
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace OCA\Memories\Service;
 
+use OCA\Memories\Db\TimelineWrite;
 use OCP\IConfig;
 use OCP\IDBConnection;
 
@@ -18,13 +19,16 @@ class Places
 
     protected IConfig $config;
     protected IDBConnection $connection;
+    protected TimelineWrite $timelineWrite;
 
     public function __construct(
         IConfig $config,
-        IDBConnection $connection
+        IDBConnection $connection,
+        TimelineWrite $timelineWrite
     ) {
         $this->config = $config;
         $this->connection = $connection;
+        $this->timelineWrite = $timelineWrite;
     }
 
     /**
@@ -89,6 +93,9 @@ class Places
      */
     public function downloadPlanet(): string
     {
+        echo "Download planet data to temporary file...\n";
+        flush();
+
         $filename = sys_get_temp_dir().'/planet_coarse_boundaries.zip';
         unlink($filename);
 
@@ -134,6 +141,7 @@ class Places
     public function importPlanet(string $datafile): void
     {
         echo "Inserting planet data into database...\n";
+        flush();
 
         // Detect the GIS type
         $gis = $this->detectGisType();
@@ -317,6 +325,7 @@ class Places
         // Mark success
         echo "Planet database imported successfully!\n";
         echo "You should re-index your library now.\n";
+        flush();
         $this->config->setSystemValue('memories.gis_type', $gis);
 
         // Delete data file
@@ -324,9 +333,39 @@ class Places
     }
 
     /**
+     * Recalculate all places for all users.
+     */
+    public function recalculateAll()
+    {
+        echo "Recalculating places for all files (do not interrupt this process)...\n";
+        flush();
+
+        $count = 0;
+        $this->timelineWrite->orphanAndRun(['fileid', 'lat', 'lon'], 20, function (array $row) use (&$count) {
+            ++$count;
+
+            // Only proceed if we have a valid location
+            $fileid = $row['fileid'];
+            $lat = (float) $row['lat'];
+            $lon = (float) $row['lon'];
+
+            // Update places
+            if ($lat || $lon) {
+                $this->timelineWrite->updatePlacesData($fileid, $lat, $lon);
+            }
+
+            // Print every 500 files
+            if (0 === $count % 500) {
+                echo "Updated places data for {$count} files\n";
+                flush();
+            }
+        });
+    }
+
+    /**
      * Create database tables and indices.
      */
-    private function setupDatabase(): void
+    protected function setupDatabase(): void
     {
         try {
             // Get Gis type

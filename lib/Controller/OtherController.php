@@ -205,11 +205,9 @@ class OtherController extends GenericApiController
             header('Content-Length: 0');
 
             $places = \OC::$server->get(\OCA\Memories\Service\Places::class);
-
-            echo "Downloading planet file...\n";
-            flush();
             $datafile = $places->downloadPlanet();
             $places->importPlanet($datafile);
+            $places->recalculateAll();
 
             echo "Done.\n";
         } catch (\Exception $e) {

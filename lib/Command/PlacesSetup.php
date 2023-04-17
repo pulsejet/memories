@@ -88,10 +88,16 @@ class PlacesSetup extends Command
         }
 
         // Download the planet database
-        $this->output->writeln('Downloading planet database');
         $datafile = $this->places->downloadPlanet();
 
         // Import the planet database
         $this->places->importPlanet($datafile);
+
+        // Recalculate all places
+        $this->places->recalculateAll();
+
+        $this->output->writeln('Done');
+
+        return 0;
     }
 }
