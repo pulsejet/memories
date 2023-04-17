@@ -226,9 +226,9 @@ class VideoContentSetup {
       }
     });
 
-    setTimeout(() => {
-      content.videojs?.play(); // iOS needs this
-    }, 200);
+    // Play the video (hopefully)
+    const playWithDelay = () => setTimeout(() => content.videojs?.play(), 100);
+    playWithDelay();
 
     let canPlay = false;
     content.videojs.on("canplay", () => {
@@ -240,6 +240,9 @@ class VideoContentSetup {
 
       // Hide the preview image
       content.placeholder?.element?.setAttribute("hidden", "true");
+
+      // Another attempt to play the video
+      playWithDelay();
     });
 
     content.videojs.qualityLevels()?.on("addqualitylevel", (e) => {
