@@ -199,12 +199,15 @@
               : t("memories", "Geometry table has not been created")
           }}
         </NcNoteCard>
-        <NcNoteCard v-if="gisType < 0" type="warning">
+        <NcNoteCard
+          v-if="typeof gisType !== 'number' || gisType < 0"
+          type="warning"
+        >
           {{
             t(
               "memories",
-              "Reverse geocoding has not been configured ({gisType}).",
-              { gisType }
+              "Reverse geocoding has not been configured ({status}).",
+              { status: gisType }
             )
           }}
         </NcNoteCard>
