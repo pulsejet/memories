@@ -111,6 +111,10 @@ class OtherController extends GenericApiController
     public function getSystemStatus(): Http\Response
     {
         return Util::guardEx(function () {
+            $config = \OC::$server->get(\OCP\IConfig::class);
+            $index = \OC::$server->get(\OCA\Memories\Service\Index::class);
+
+            // Build status array
             $status = [];
 
             // Check exiftool version
@@ -129,8 +133,14 @@ class OtherController extends GenericApiController
             $status['perl'] = $this->getExecutableStatus(exec('which perl'));
 
             // Check number of indexed files
-            $index = \OC::$server->get(\OCA\Memories\Service\Index::class);
             $status['indexed_count'] = $index->getIndexedCount();
+
+            // Automatic indexing stats
+            $jobStart = $config->getAppValue(Application::APPNAME, 'last_index_job_start', 0);
+            $status['last_index_job_start'] = $jobStart ? time() - $jobStart : 0; // Seconds ago
+            $status['last_index_job_duration'] = $config->getAppValue(Application::APPNAME, 'last_index_job_duration', 0);
+            $status['last_index_job_status'] = $config->getAppValue(Application::APPNAME, 'last_index_job_status', 'Indexing has not been run yet');
+            $status['last_index_job_status_type'] = $config->getAppValue(Application::APPNAME, 'last_index_job_status_type', 'warning');
 
             // Check supported preview mimes
             $status['mimes'] = $index->getPreviewMimes($index->getAllMimes());

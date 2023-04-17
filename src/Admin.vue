@@ -46,6 +46,30 @@
           })
         }}
       </NcNoteCard>
+      <NcNoteCard :type="status.last_index_job_status_type">
+        {{
+          t("memories", "Automatic Indexing status: {status}", {
+            status: status.last_index_job_status,
+          })
+        }}
+      </NcNoteCard>
+      <NcNoteCard
+        v-if="status.last_index_job_start"
+        :type="status.last_index_job_duration ? 'success' : 'warning'"
+      >
+        {{
+          t("memories", "Last index job was run {t} seconds ago.", {
+            t: status.last_index_job_start,
+          })
+        }}
+        {{
+          status.last_index_job_duration
+            ? t("memories", "It took {t} seconds to complete.", {
+                t: status.last_index_job_duration,
+              })
+            : t("memories", "It is still running or was interrupted.")
+        }}
+      </NcNoteCard>
       <NcNoteCard type="error" v-if="status.bad_encryption">
         {{
           t(
@@ -544,6 +568,11 @@ const invertedBooleans = ["enableTranscoding"];
 type BinaryStatus = "ok" | "not_found" | "not_executable" | "test_ok" | string;
 
 type IStatus = {
+  last_index_job_start: number;
+  last_index_job_duration: number;
+  last_index_job_status: string;
+  last_index_job_status_type: string;
+
   bad_encryption: boolean;
   indexed_count: number;
   mimes: string[];
