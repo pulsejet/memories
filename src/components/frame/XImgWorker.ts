@@ -1,4 +1,4 @@
-import type { CacheExpiration } from "workbox-expiration";
+import { CacheExpiration } from "workbox-expiration";
 import { workerExport } from "../../worker";
 
 type BlobCallback = {
@@ -27,7 +27,10 @@ let imageCache: Cache;
 })();
 
 // Expiration for cache
-let expirationManager: CacheExpiration;
+const expirationManager = new CacheExpiration(cacheName, {
+  maxAgeSeconds: 3600 * 24 * 7, // days
+  maxEntries: 20000, // 20k images
+});
 
 // Start fetching with multipreview
 let fetchPreviewTimer: any;
@@ -249,12 +252,12 @@ function cacheResponse(url: string, res: Response) {
     // Cache valid responses
     if (res.status === 200) {
       imageCache?.put(url, res.clone());
-      expirationManager?.updateTimestamp(url.toString());
+      expirationManager.updateTimestamp(url.toString());
     }
 
     // Run expiration once in every 100 requests
     if (Math.random() < 0.01) {
-      expirationManager?.expireEntries();
+      expirationManager.expireEntries();
     }
   } catch (e) {
     console.error("Error caching response", e);
@@ -291,20 +294,9 @@ async function fetchMultipreview(files: any[]) {
 }
 
 /** Will be configured after the worker starts */
-let config: {
-  multiUrl: string;
-  __webpack_public_path__: string;
-};
+let config: { multiUrl: string };
 export async function configure(_config: typeof config) {
   config = _config;
-  __webpack_public_path__ = config.__webpack_public_path__;
-
-  // Get external deps
-  const { CacheExpiration } = await import("workbox-expiration");
-  expirationManager = new CacheExpiration(cacheName, {
-    maxAgeSeconds: 3600 * 24 * 7, // days
-    maxEntries: 20000, // 20k images
-  });
 }
 
 /** Get BLOB url for image */
