@@ -22,6 +22,12 @@
     <template v-if="status">
       <NcNoteCard :type="binaryStatusType(status.perl, false)">
         {{ binaryStatus("perl", status.perl) }}
+        {{
+          t(
+            "memories",
+            "You need perl only if the packaged exiftool binary does not work for some reason."
+          )
+        }}
       </NcNoteCard>
     </template>
 
@@ -31,7 +37,7 @@
       type="switch"
     >
       {{
-        t("memories", "Use system perl (only if packaged binary does not work)")
+        t("memories", "Use system perl (only if exiftool binary does not work)")
       }}
     </NcCheckboxRadioSwitch>
 
@@ -731,19 +737,19 @@ export default defineComponent({
 
     binaryStatus(name: string, status: BinaryStatus): string {
       if (status === "ok") {
-        return this.t("memories", "{name} binary exists and is executable", {
+        return this.t("memories", "{name} binary exists and is executable.", {
           name,
         });
       } else if (status === "not_found") {
-        return this.t("memories", "{name} binary not found", { name });
+        return this.t("memories", "{name} binary not found.", { name });
       } else if (status === "not_executable") {
-        return this.t("memories", "{name} binary is not executable", {
+        return this.t("memories", "{name} binary is not executable.", {
           name,
         });
       } else if (status.startsWith("test_fail")) {
         return this.t(
           "memories",
-          "{name} failed test: {info}",
+          "{name} failed test: {info}.",
           {
             name,
             info: status.substring(10),
@@ -755,11 +761,11 @@ export default defineComponent({
           }
         );
       } else if (status === "test_ok") {
-        return this.t("memories", "{name} binary exists and is usable", {
+        return this.t("memories", "{name} binary exists and is usable.", {
           name,
         });
       } else {
-        return this.t("memories", "{name} binary status: {status}", {
+        return this.t("memories", "{name} binary status: {status}.", {
           name,
           status,
         });
