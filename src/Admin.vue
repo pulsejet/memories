@@ -188,15 +188,20 @@
           {{ gisStatus }}
         </NcNoteCard>
         <NcNoteCard
-          v-if="status.gis_count !== undefined"
-          :type="status.gis_count > 0 ? 'success' : 'warning'"
+          v-if="typeof status.gis_count === 'number'"
+          :type="status.gis_count > 500000 ? 'success' : 'warning'"
         >
           {{
             status.gis_count > 0
-              ? t("memories", "Database is populated with {n} geometries", {
+              ? t("memories", "Database is populated with {n} geometries.", {
                   n: status.gis_count,
                 })
-              : t("memories", "Geometry table has not been created")
+              : t("memories", "Geometry table has not been created.")
+          }}
+          {{
+            status.gis_count > 0 && status.gis_count <= 500000
+              ? t("memories", "Looks like the planet data is incomplete.")
+              : ""
           }}
         </NcNoteCard>
         <NcNoteCard
