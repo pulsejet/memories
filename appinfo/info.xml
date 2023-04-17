@@ -64,4 +64,7 @@ Memories is a *batteries-included* photo management solution for Nextcloud with 
             <step>OCA\Memories\Migration\Repair</step>
         </install>
     </repair-steps>
+    <background-jobs>
+        <job>OCA\Memories\Cron\IndexJob</job>
+    </background-jobs>
 </info>

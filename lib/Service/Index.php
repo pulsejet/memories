@@ -40,8 +40,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Index
 {
-    public ?OutputInterface $output;
-    public ?ConsoleSectionOutput $section;
+    public ?OutputInterface $output = null;
+    public ?ConsoleSectionOutput $section = null;
+
+    /**
+     * Callback to check if the process should continue.
+     * This is called before every file is indexed.
+     */
+    public ?\Closure $continueCheck = null;
 
     protected IRootFolder $rootFolder;
     protected TimelineWrite $timelineWrite;
@@ -162,6 +168,7 @@ class Index
 
             // Index files
             foreach ($fileIds as $fileId) {
+                $this->ensureContinueOk();
                 $this->indexFile($chunk[$fileId]);
             }
         }
@@ -169,8 +176,12 @@ class Index
         // All folders
         $folders = array_filter($nodes, fn ($n) => $n instanceof Folder);
         foreach ($folders as $folder) {
+            $this->ensureContinueOk();
+
             try {
                 $this->indexFolder($folder);
+            } catch (ProcessClosedException $e) {
+                throw $e;
             } catch (\Exception $e) {
                 $this->logger->error('Failed to index folder {folder}: {error}', [
                     'folder' => $folder->getPath(),
@@ -278,6 +289,16 @@ class Index
                 $this->section->clear(1);
             }
             $this->section->write($message);
+        }
+    }
+
+    /**
+     * Ensure that the process should go on.
+     */
+    private function ensureContinueOk(): void
+    {
+        if (null !== $this->continueCheck && !($this->continueCheck)()) {
+            throw new ProcessClosedException();
         }
     }
 }

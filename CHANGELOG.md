@@ -15,6 +15,9 @@ Note: this is a major release and may introduce breaking changes to your workflo
   Make sure your temp directory is writable by the web server.
 - **Breaking**: The `--cleanup` flag to `memories:index` has been removed and is no longer necessary.  
   Folders having a `.nomedia` file will automatically be excluded from the timeline.
+- **Feature**: Indexing will now build and check indices automatically in the backgroud.  
+  Make sure Nextcloud cron is configured correctly. You can disable automatic indexing in the admin panel.
+  Note that files are still indexed immediately on upload.
 - **Feature**: You can now choose which folders to index by default.  
   This can be configured from the admin panel. The available options are:
   - All media files (excluding folders with `.nomedia` files, default and recommended)
