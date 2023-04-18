@@ -51,7 +51,7 @@ class BinExt
     }
 
     /** Test configured exiftool binary */
-    public static function testExiftool(): bool
+    public static function testExiftool(): string
     {
         $cmd = implode(' ', array_merge(self::getExiftool(), ['-ver']));
         $out = shell_exec($cmd);
@@ -86,7 +86,7 @@ class BinExt
             throw new \Exception("Got wrong Exif data from test file {$exp} <==> {$got}");
         }
 
-        return true;
+        return $version;
     }
 
     /** Get path to exiftool binary */
@@ -263,7 +263,7 @@ class BinExt
     /**
      * Test go-vod and (re)-start if it is not external.
      */
-    public static function testStartGoVod(): bool
+    public static function testStartGoVod(): string
     {
         try {
             return self::testGoVod();
@@ -280,7 +280,7 @@ class BinExt
     }
 
     /** Test the go-vod instance that is running */
-    public static function testGoVod(): bool
+    public static function testGoVod(): string
     {
         // Check if disabled
         if (Util::getSystemConfig('memories.vod.disable')) {
@@ -316,7 +316,7 @@ class BinExt
             throw new \Exception("version does not match {$version} <==> {$target}");
         }
 
-        return true;
+        return $version;
     }
 
     /** POST a new configuration to go-vod */
@@ -397,5 +397,30 @@ class BinExt
         }
 
         return $ffmpegPath;
+    }
+
+    public static function testFFmpeg(string $path, string $vername)
+    {
+        $version = shell_exec("{$path} -version");
+        if (!preg_match("/{$vername} version\\s+([0-9\\.]+)/", $version, $matches)) {
+            throw new \Exception("failed to detect version, found {$version}");
+        }
+
+        $minver = '4.0';
+        $semver = $matches[1];
+        if (!version_compare($semver, $minver, '>=')) {
+            throw new \Exception("version must be >= {$minver}, found {$semver}");
+        }
+
+        return $semver;
+    }
+
+    public static function testSystemPerl(string $path): string
+    {
+        if (($out = shell_exec("{$path} -e 'print \"OK\";'")) !== 'OK') {
+            throw new \Exception('Failed to run test perl script: '.$out);
+        }
+
+        return shell_exec("{$path} -e 'print $^V;'");
     }
 }

@@ -736,6 +736,10 @@ export default defineComponent({
     },
 
     binaryStatus(name: string, status: BinaryStatus): string {
+      const noescape = {
+        escape: false,
+        sanitize: false,
+      };
       if (status === "ok") {
         return this.t("memories", "{name} binary exists and is executable.", {
           name,
@@ -755,15 +759,19 @@ export default defineComponent({
             info: status.substring(10),
           },
           0,
-          {
-            escape: false,
-            sanitize: false,
-          }
+          noescape
         );
-      } else if (status === "test_ok") {
-        return this.t("memories", "{name} binary exists and is usable.", {
-          name,
-        });
+      } else if (status.startsWith("test_ok")) {
+        return this.t(
+          "memories",
+          "{name} binary exists and is usable ({info}).",
+          {
+            name,
+            info: status.substring(8),
+          },
+          0,
+          noescape
+        );
       } else {
         return this.t("memories", "{name} binary status: {status}.", {
           name,
@@ -773,7 +781,7 @@ export default defineComponent({
     },
 
     binaryStatusType(status: BinaryStatus, critical = true): string {
-      if (status === "ok" || status === "test_ok") {
+      if (status === "ok" || status.startsWith("test_ok")) {
         return "success";
       } else if (
         status === "not_found" ||

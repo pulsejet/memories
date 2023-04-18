@@ -120,19 +120,16 @@ class OtherController extends GenericApiController
             $status = [];
 
             // Check exiftool version
-            try {
-                $s = $this->getExecutableStatus(BinExt::getExiftoolPBin());
-                if ('ok' === $s || Util::getSystemConfig('memories.exiftool_no_local')) {
-                    BinExt::testExiftool();
-                    $s = 'test_ok';
-                }
-                $status['exiftool'] = $s;
-            } catch (\Exception $e) {
-                $status['exiftool'] = 'test_fail:'.$e->getMessage();
-            }
+            $exiftoolNoLocal = Util::getSystemConfig('memories.exiftool_no_local');
+            $status['exiftool'] = $this->getExecutableStatus(
+                BinExt::getExiftoolPBin(),
+                fn ($p) => BinExt::testExiftool(),
+                !$exiftoolNoLocal,
+                !$exiftoolNoLocal,
+            );
 
             // Check for system perl
-            $status['perl'] = $this->getExecutableStatus(exec('which perl'));
+            $status['perl'] = $this->getExecutableStatus(exec('which perl'), fn ($p) => BinExt::testSystemPerl($p));
 
             // Check number of indexed files
             $status['indexed_count'] = $index->getIndexedCount();
@@ -161,20 +158,23 @@ class OtherController extends GenericApiController
             }
 
             // Check ffmpeg and ffprobe binaries
-            $status['ffmpeg'] = $this->getExecutableStatus(Util::getSystemConfig('memories.vod.ffmpeg'));
-            $status['ffprobe'] = $this->getExecutableStatus(Util::getSystemConfig('memories.vod.ffprobe'));
+            $status['ffmpeg'] = $this->getExecutableStatus(
+                Util::getSystemConfig('memories.vod.ffmpeg'),
+                fn ($p) => BinExt::testFFmpeg($p, 'ffmpeg'),
+            );
+            $status['ffprobe'] = $this->getExecutableStatus(
+                Util::getSystemConfig('memories.vod.ffprobe'),
+                fn ($p) => BinExt::testFFmpeg($p, 'ffprobe'),
+            );
 
             // Check go-vod binary
-            try {
-                $s = $this->getExecutableStatus(BinExt::getGoVodBin());
-                if ('ok' === $s || Util::getSystemConfig('memories.vod.external')) {
-                    BinExt::testStartGoVod();
-                    $s = 'test_ok';
-                }
-                $status['govod'] = $s;
-            } catch (\Exception $e) {
-                $status['govod'] = 'test_fail:'.$e->getMessage();
-            }
+            $extGoVod = Util::getSystemConfig('memories.vod.external');
+            $status['govod'] = $this->getExecutableStatus(
+                BinExt::getGoVodBin(),
+                fn ($p) => BinExt::testStartGoVod(),
+                !$extGoVod,
+                !$extGoVod,
+            );
 
             // Check for VA-API device
             $devPath = '/dev/dri/renderD128';
@@ -250,14 +250,38 @@ class OtherController extends GenericApiController
         return $response;
     }
 
-    private function getExecutableStatus(string $path): string
-    {
-        if (!is_file($path)) {
+    /**
+     * Get the status of an executable.
+     *
+     * @param string    $path             Path to the executable
+     * @param ?\Closure $testFunction     Function to test the executable
+     * @param bool      $testIfFile       Test if the path is a file
+     * @param bool      $testIfExecutable Test if the path is executable
+     */
+    private function getExecutableStatus(
+        $path,
+        ?\Closure $testFunction = null,
+        bool $testIfFile = true,
+        bool $testIfExecutable = true
+    ): string {
+        if (!\is_string($path)) {
             return 'not_found';
         }
 
-        if (!is_executable($path)) {
+        if ($testIfFile && !is_file($path)) {
+            return 'not_found';
+        }
+
+        if ($testIfExecutable && !is_executable($path)) {
             return 'not_executable';
+        }
+
+        if ($testFunction) {
+            try {
+                return 'test_ok:'.$testFunction($path);
+            } catch (\Exception $e) {
+                return 'test_fail:'.$e->getMessage();
+            }
         }
 
         return 'ok';
