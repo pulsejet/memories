@@ -1,6 +1,8 @@
 OC.L10N.register(
     "memories",
     {
+    "Fast, modern and advanced photo management suite" : "Soluzione efficiente, moderna e avanzata per la gestione delle foto",
+    "You must first make sure the correct drivers are installed before configuring acceleration." : "Assicurati di avere installato i driver appropriati, prima di configurare l'accelerazione.",
     "Settings" : "Impostazioni",
     "People" : "Persone",
     "Info" : "Info",

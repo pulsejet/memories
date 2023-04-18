@@ -188,8 +188,6 @@ OC.L10N.register(
     "Timeline View" : "Zeitleistenansicht",
     "Move left" : "Nach links verschieben",
     "Move right" : "Nach rechts verschieben",
-    "Failed to get Exif data. Metadata may be lost!" : "Exif-Daten konnten nicht abgerufen werden. Metadaten können verloren gehen!",
-    "No Exif data found! Continue?" : "Keine Exif-Daten gefunden! Fortsetzen?",
     "Image saved successfully" : "Bild erfolgreich gespeichert",
     "Error saving image" : "Fehler beim Speichern des Bildes",
     "Unsaved changes" : "Ungespeicherte Änderungen",
@@ -202,7 +200,6 @@ OC.L10N.register(
     "Previous" : "Vorherige",
     "Next" : "Nächste",
     "Editing is currently disabled for Live Photos" : "Bearbeitung ist derzeit für Live-Fotos deaktiviert",
-    "Cannot edit this file" : "Diese Datei kann nicht bearbeitet werden",
     "Are you sure you want to delete?" : "Bist du sicher, dass du löschen möchtest?",
     "Save as" : "Speichern als",
     "All changes will be lost." : "Alle Änderungen gehen verloren.",
@@ -320,6 +317,8 @@ OC.L10N.register(
     "Share Folder" : "Ordner teilen",
     "Use the sidebar to share this folder." : "Verwende die Seitenleiste, um diesen Ordner zu teilen.",
     "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Wenn du eine öffentliche Linkfreigabe erstellst, klicke auf Aktualisieren und ein entsprechender Link zu Memories wird unten angezeigt.",
+    "Failed to get Exif data. Metadata may be lost!" : "Exif-Daten konnten nicht abgerufen werden. Metadaten können verloren gehen!",
+    "No Exif data found! Continue?" : "Keine Exif-Daten gefunden! Fortsetzen?",
     "Video sharing not supported yet" : "Teilen von Videos wird bislang nicht unterstützt"
 },
 "nplurals=2; plural=(n != 1);");

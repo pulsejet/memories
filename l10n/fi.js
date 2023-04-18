@@ -151,7 +151,6 @@ OC.L10N.register(
     "Timeline View" : "Aikajananäkymä",
     "Move left" : "Siirry vasemmalle",
     "Move right" : "Siirry oikealle",
-    "No Exif data found! Continue?" : "EXIF-tietoja ei löytynyt! Jatketaanko?",
     "Image saved successfully" : "Kuva tallennettu",
     "Error saving image" : "Virhe kuvaa tallentaessa",
     "Unsaved changes" : "Tallentamattomia muutoksia",
@@ -162,7 +161,6 @@ OC.L10N.register(
     "Slideshow" : "Diaesitys",
     "Previous" : "Edellinen",
     "Next" : "Seuraava",
-    "Cannot edit this file" : "Tätä tiedostoa ei voi muokata",
     "Are you sure you want to delete?" : "Haluatko varmasti poistaa?",
     "Save as" : "Tallenna nimellä",
     "All changes will be lost." : "Kaikki muutokset menetetään.",
@@ -269,6 +267,7 @@ OC.L10N.register(
     "Date Taken" : "Kuvattu päivänä",
     "Share Folder" : "Jaa kansio",
     "Use the sidebar to share this folder." : "Käytä sivupalkkia jakaaksesi tämän kansion.",
+    "No Exif data found! Continue?" : "EXIF-tietoja ei löytynyt! Jatketaanko?",
     "Video sharing not supported yet" : "Videojakoa ei vielä tueta"
 },
 "nplurals=2; plural=(n != 1);");

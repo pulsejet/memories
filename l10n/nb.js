@@ -151,8 +151,6 @@ OC.L10N.register(
     "Timeline View" : "Tidslinjevisning",
     "Move left" : "Flytt til venstre",
     "Move right" : "Flytt til høyre",
-    "Failed to get Exif data. Metadata may be lost!" : "Kunne ikke hente Exif-data. Metadata kan gå tapt!",
-    "No Exif data found! Continue?" : "Ingen Exif-data funnet! Fortsette?",
     "Image saved successfully" : "Bildet er lagret",
     "Error saving image" : "Feil under lagring av bildet",
     "Unsaved changes" : "Ulagrede endringer",
@@ -277,6 +275,8 @@ OC.L10N.register(
     "Share Folder" : "Del mappe",
     "Use the sidebar to share this folder." : "Bruk sidefeltet for å dele denne mappen.",
     "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Hvis du oppretter en offentlig lenkedeling, klikker du på oppdatering og en tilsvarende lenke til Minner vises nedenfor.",
+    "Failed to get Exif data. Metadata may be lost!" : "Kunne ikke hente Exif-data. Metadata kan gå tapt!",
+    "No Exif data found! Continue?" : "Ingen Exif-data funnet! Fortsette?",
     "Video sharing not supported yet" : "Videodeling støttes ikke ennå"
 },
 "nplurals=2; plural=(n != 1);");

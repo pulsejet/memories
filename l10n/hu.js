@@ -190,8 +190,6 @@ OC.L10N.register(
     "Timeline View" : "Idővonal nézet",
     "Move left" : "Mozgatás balra",
     "Move right" : "Mozgatás jobbra",
-    "Failed to get Exif data. Metadata may be lost!" : "Az Exif-adatok lekérése sikertelen. A metaadatok elveszhetnek.",
-    "No Exif data found! Continue?" : "Nem találhatók Exif-adatok. Folytatja?",
     "Image saved successfully" : "A kép sikeresen mentve",
     "Error saving image" : "Hiba a kép mentése során",
     "Unsaved changes" : "Mentetlen változtatások",
@@ -204,7 +202,6 @@ OC.L10N.register(
     "Previous" : "Előző",
     "Next" : "Következő",
     "Editing is currently disabled for Live Photos" : "A szerkesztés jelenleg tiltott az élő fényképek esetén",
-    "Cannot edit this file" : "Ez a fájl nem szerkeszthető",
     "Are you sure you want to delete?" : "Biztos, hogy törli?",
     "Save as" : "Mentés másként",
     "All changes will be lost." : "Az összes változtatás elvész.",
@@ -334,6 +331,8 @@ OC.L10N.register(
     "Share Folder" : "Mappa megosztása",
     "Use the sidebar to share this folder." : "Használja az oldalsávot a mappa megosztásához.",
     "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Ha nyilvános hivatkozásos megosztást hoz létre, kattintson a frissítésre, és lent megjelenik az Emlékeknek megfelelő hivatkozás.",
+    "Failed to get Exif data. Metadata may be lost!" : "Az Exif-adatok lekérése sikertelen. A metaadatok elveszhetnek.",
+    "No Exif data found! Continue?" : "Nem találhatók Exif-adatok. Folytatja?",
     "Video sharing not supported yet" : "A videómegosztás még nem támogatott"
 },
 "nplurals=2; plural=(n != 1);");
