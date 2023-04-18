@@ -102,7 +102,6 @@ OC.L10N.register(
     "Share folder" : "Bendrinti aplanką",
     "Move left" : "Perkelti kairėn",
     "Move right" : "Perkelti dešinėn",
-    "No Exif data found! Continue?" : "Nerasta jokių EXIF duomenų! Tęsti?",
     "Image saved successfully" : "Paveikslas sėkmingai įrašytas",
     "Error saving image" : "Klaida įrašant paveikslą",
     "Unsaved changes" : "Neįrašyti pakeitimai",
@@ -152,6 +151,7 @@ OC.L10N.register(
     "Processing … {n}/{m}" : "Apdorojama… {n}/{m}",
     "Update Exif" : "Atnaujinti EXIF",
     "Loading data … {n}/{m}" : "Įkeliami duomenys… {n}/{m}",
-    "Share Folder" : "Bendrinti aplanką"
+    "Share Folder" : "Bendrinti aplanką",
+    "No Exif data found! Continue?" : "Nerasta jokių EXIF duomenų! Tęsti?"
 },
 "nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);");

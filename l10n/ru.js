@@ -128,8 +128,6 @@ OC.L10N.register(
     "Timeline View" : "Просмотр в виде шкалы времени",
     "Move left" : "Переместить влево",
     "Move right" : "Переместить вправо",
-    "Failed to get Exif data. Metadata may be lost!" : "Не удалось получить данные EXIF. Метаданные могут быть утеряны.",
-    "No Exif data found! Continue?" : "Данные EXIF не обнаружены. Продолжить?",
     "Image saved successfully" : "Изображение сохранено",
     "Error saving image" : "Не удалось сохранить изображение",
     "Unsaved changes" : "Несохранённые изменения",
@@ -254,6 +252,8 @@ OC.L10N.register(
     "Date Taken" : "Дата съемки",
     "Share Folder" : "Опубликовать папку",
     "Use the sidebar to share this folder." : "Чтобы опубликовать эту папку, воспользуйтесь боковым меню. ",
+    "Failed to get Exif data. Metadata may be lost!" : "Не удалось получить данные EXIF. Метаданные могут быть утеряны.",
+    "No Exif data found! Continue?" : "Данные EXIF не обнаружены. Продолжить?",
     "Video sharing not supported yet" : "Публикация видео пока не поддерживается"
 },
 "nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);");

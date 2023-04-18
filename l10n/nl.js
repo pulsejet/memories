@@ -111,7 +111,6 @@ OC.L10N.register(
     "Share folder" : "Map delen",
     "Folder View" : "Mapweergave",
     "Timeline View" : "Tijdlijnweergave",
-    "No Exif data found! Continue?" : "Geen Exif gegevens gevonden! Doorgaan?",
     "Unsaved changes" : "Niet opgeslagen veranderingen",
     "Share" : "Delen",
     "Sidebar" : "Zijbalk",
@@ -184,6 +183,7 @@ OC.L10N.register(
     "Date Taken" : "Datum gemaakt",
     "Share Folder" : "Map delen",
     "Use the sidebar to share this folder." : "Gebruik de zijbalk om deze map te delen.",
-    "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Als je een openbare deellink maakt, klik op vernieuwen en een bijbehorende link naar Herinneringen wordt hieronder weergegeven."
+    "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Als je een openbare deellink maakt, klik op vernieuwen en een bijbehorende link naar Herinneringen wordt hieronder weergegeven.",
+    "No Exif data found! Continue?" : "Geen Exif gegevens gevonden! Doorgaan?"
 },
 "nplurals=2; plural=(n != 1);");
