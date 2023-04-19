@@ -1,35 +1,33 @@
 import { getCurrentUser } from "@nextcloud/auth";
 import { loadState } from "@nextcloud/initial-state";
 
-/** Cache store */
-let staticCache: Cache | null = null;
-let cacheName: string;
-let memoriesVersion: string;
-
-try {
-  memoriesVersion = loadState("memories", "version");
-  const uid = getCurrentUser()?.uid;
-  cacheName = `memories-${memoriesVersion}-${uid}`;
-  openCache().then((cache) => (staticCache = cache));
-} catch (e) {
-  console.warn("Failed to open cache");
-}
+/** Cache keys */
+const memoriesVersion: string = loadState("memories", "version", "");
+const uid = getCurrentUser()?.uid || "guest";
+const cacheName = `memories-${memoriesVersion}-${uid}`;
 
 // Clear all caches except the current one
-window.caches?.keys().then((keys) => {
-  keys
-    .filter((key) => key.startsWith("memories-") && key !== cacheName)
-    .forEach((key) => {
-      window.caches.delete(key);
-    });
-});
+(async function clearCaches() {
+  if (!memoriesVersion || uid === "guest") return;
 
-/** Open the cache */
+  const keys = await window.caches?.keys();
+  if (!keys?.length) return;
+
+  for (const key of keys) {
+    if (key.startsWith("memories-") && key !== cacheName) {
+      window.caches.delete(key);
+    }
+  }
+})();
+
+/** Singleton cache instance */
+let staticCache: Cache | null = null;
 export async function openCache() {
+  if (!memoriesVersion) return null;
+
   try {
-    return await window.caches?.open(cacheName);
+    return (staticCache ??= (await window.caches?.open(cacheName)) ?? null);
   } catch {
-    console.warn("Failed to get cache", cacheName);
     return null;
   }
 }
@@ -37,7 +35,7 @@ export async function openCache() {
 /** Get data from the cache */
 export async function getCachedData<T>(url: string): Promise<T | null> {
   if (!window.caches) return null;
-  const cache = staticCache || (await openCache());
+  const cache = staticCache ?? (await openCache());
   if (!cache) return null;
 
   const cachedResponse = await cache.match(url);
@@ -51,7 +49,7 @@ export function cacheData(url: string, data: Object) {
   const str = JSON.stringify(data);
 
   (async () => {
-    const cache = staticCache || (await openCache());
+    const cache = staticCache ?? (await openCache());
     if (!cache) return;
 
     const response = new Response(str);
