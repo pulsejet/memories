@@ -30,7 +30,6 @@ OC.L10N.register(
     "Memories supports offline reverse geocoding using the OpenStreetMaps data on MySQL and Postgres." : "Memories-ek lineaz kanpoko alderantzizko geokodetzea onartzen du MySQL eta Postgres-en OpenStreetMaps datuak erabiliz.",
     "You need to download the planet data into your database. This is highly recommended and has low overhead." : "Planetaren datuak zure datu-basera deskargatu behar dituzu. Oso gomendagarria da eta kostu txikia du.",
     "If the button below does not work for importing the planet data, use the following command:" : "Beheko botoiak planetaren datuak inportatzeko balio ez badu, erabili komando hau:",
-    "Note: the geometry data is stored in the " : "Oharra: geometria datuak gordetzen dira hemen",
     "Download planet database" : "Deskargatu planeten datu-basea",
     "Video Streaming" : "Bideo-streaming",
     "Live transcoding provides for adaptive streaming of videos using HLS." : "Zuzeneko transkodetzeak HLS erabiliz bideoen streaming moldagarria eskaintzen du.",

@@ -11,7 +11,6 @@
     "Reverse Geocoding" : "Obrácené geokódování",
     "Memories supports offline reverse geocoding using the OpenStreetMaps data on MySQL and Postgres." : "Memories podporuje obrácené geokódování, přičemž k tomu nepoužívá služby na Internetu (soukromí). Je založeno na datech z OpenStreetMaps (ukládaných v MySQL či Postgres).",
     "You need to download the planet data into your database. This is highly recommended and has low overhead." : "Je třeba stáhnout si geografická data do databáze. Je to velmi doporučováno a má nízkou režii.",
-    "Note: the geometry data is stored in the " : "Pozn.: data o geometrii jsou uložena v",
     "Download planet database" : "Stáhnout si geografickou databázi",
     "Video Streaming" : "Proudové vysílání videa",
     "Live transcoding provides for adaptive streaming of videos using HLS." : "Živé překódovávání poskytuje adaptivní proudové vysílání videí pomocí HLS.",

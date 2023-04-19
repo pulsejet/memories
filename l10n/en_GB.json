@@ -28,7 +28,6 @@
     "Memories supports offline reverse geocoding using the OpenStreetMaps data on MySQL and Postgres." : "Memories supports offline reverse geocoding using the OpenStreetMaps data on MySQL and Postgres.",
     "You need to download the planet data into your database. This is highly recommended and has low overhead." : "You need to download the planet data into your database. This is highly recommended and has low overhead.",
     "If the button below does not work for importing the planet data, use the following command:" : "If the button below does not work for importing the planet data, use the following command:",
-    "Note: the geometry data is stored in the " : "Note: the geometry data is stored in the ",
     "Download planet database" : "Download planet database",
     "Video Streaming" : "Video Streaming",
     "Live transcoding provides for adaptive streaming of videos using HLS." : "Live transcoding provides for adaptive streaming of videos using HLS.",
