@@ -206,7 +206,8 @@ class DownloadController extends GenericApiController
             ob_start();
 
             while (!feof($res) && $seekStart <= $seekEnd) {
-                $buffer = fread($res, 1024 * 1024);
+                $lenLeft = $seekEnd - $seekStart + 1;
+                $buffer = fread($res, min(1024 * 1024, $lenLeft));
                 if (false === $buffer) {
                     break;
                 }
