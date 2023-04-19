@@ -30,6 +30,7 @@ use OCA\Memories\Util;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
+use OCP\Files\Node;
 use OCP\Files\Search\ISearchComparison;
 use OCP\ICache;
 use OCP\ICacheFactory;
@@ -154,7 +155,7 @@ class FsManager
         $comp = new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'name', '.nomedia');
         $search = $root->search(new SearchQuery($comp, 0, 0, [], Util::getUser()));
 
-        $paths = array_map(fn (File $node) => \dirname($node->getPath()), $search);
+        $paths = array_map(fn (Node $node) => \dirname($node->getPath()), $search);
         $this->nomediaCache->set($key, $paths, 60 * 60); // 1 hour
 
         return $paths;
