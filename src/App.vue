@@ -89,6 +89,13 @@ import TagsIcon from "vue-material-design-icons/Tag.vue";
 import MapIcon from "vue-material-design-icons/Map.vue";
 import CogIcon from "vue-material-design-icons/Cog.vue";
 
+type NavItem = {
+  name: string;
+  title: string;
+  icon: any;
+  if?: any;
+};
+
 export default defineComponent({
   name: "App",
   components: {
@@ -122,7 +129,7 @@ export default defineComponent({
   mixins: [UserConfig],
 
   data: () => ({
-    navItems: [],
+    navItems: [] as NavItem[],
     metadataComponent: null as any,
     settingsOpen: false,
   }),
@@ -133,7 +140,7 @@ export default defineComponent({
       return Number(version[0]);
     },
 
-    recognize(): string | boolean {
+    recognize(): string | false {
       if (!this.config_recognizeEnabled) {
         return false;
       }
@@ -145,7 +152,7 @@ export default defineComponent({
       return t("memories", "People");
     },
 
-    facerecognition(): string | boolean {
+    facerecognition(): string | false {
       if (!this.config_facerecognitionInstalled) {
         return false;
       }
@@ -189,7 +196,7 @@ export default defineComponent({
     const onResize = () => {
       globalThis.windowInnerWidth = window.innerWidth;
       globalThis.windowInnerHeight = window.innerHeight;
-      emit("memories:window:resize", null);
+      emit("memories:window:resize", {});
     };
     window.addEventListener("resize", () => {
       utils.setRenewingTimeout(this, "resizeTimer", onResize, 100);
@@ -258,7 +265,7 @@ export default defineComponent({
   },
 
   methods: {
-    navItemsAll() {
+    navItemsAll(): NavItem[] {
       return [
         {
           name: "timeline",
@@ -289,13 +296,13 @@ export default defineComponent({
         {
           name: "recognize",
           icon: PeopleIcon,
-          title: this.recognize,
+          title: this.recognize || "",
           if: this.recognize,
         },
         {
           name: "facerecognition",
           icon: PeopleIcon,
-          title: this.facerecognition,
+          title: this.facerecognition || "",
           if: this.facerecognition,
         },
         {
@@ -334,7 +341,7 @@ export default defineComponent({
     },
 
     doRouteChecks() {
-      if (this.$route.name.endsWith("-share")) {
+      if (this.$route.name?.endsWith("-share")) {
         this.putShareToken(<string>this.$route.params.token);
       }
     },

@@ -104,7 +104,7 @@ export async function* removeFromAlbum(
     } catch (e) {
       showError(
         t("memories", "Failed to remove {filename}.", {
-          filename: f.basename,
+          filename: f.basename ?? f.fileid,
         })
       );
       return 0;

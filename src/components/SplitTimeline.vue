@@ -46,7 +46,7 @@ export default defineComponent({
     primaryPos: 0,
     containerSize: 0,
     mobileOpen: 1,
-    hammer: null as HammerManager,
+    hammer: null as HammerManager | null,
     photoCount: 0,
   }),
 
@@ -85,7 +85,7 @@ export default defineComponent({
 
   beforeDestroy() {
     this.pointerUp();
-    this.hammer.destroy();
+    this.hammer?.destroy();
   },
 
   methods: {
@@ -133,7 +133,7 @@ export default defineComponent({
       this.pointerDown = false;
       document.removeEventListener("pointermove", this.documentPointerMove);
       document.removeEventListener("pointerup", this.pointerUp);
-      emit("memories:window:resize", null);
+      emit("memories:window:resize", {});
     },
 
     setFlexBasis(pos: { clientX: number; clientY: number }) {
@@ -154,7 +154,7 @@ export default defineComponent({
       // so that we can prepare in advance for showing more photos
       // on the timeline
       await this.$nextTick();
-      emit("memories:window:resize", null);
+      emit("memories:window:resize", {});
     },
 
     async mobileSwipeDown() {
@@ -165,7 +165,7 @@ export default defineComponent({
       // ends. Note that this is necesary: the height of the timeline inner
       // div is also animated to the smaller size.
       await new Promise((resolve) => setTimeout(resolve, 300));
-      emit("memories:window:resize", null);
+      emit("memories:window:resize", {});
     },
   },
 });

@@ -46,7 +46,7 @@ export default defineComponent({
 
   methods: {
     back() {
-      this.$router.push({ name: this.$route.name });
+      this.$router.push({ name: this.$route.name as string });
     },
   },
 });

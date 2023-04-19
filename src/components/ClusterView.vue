@@ -21,7 +21,7 @@ import EmptyContent from "./top-matter/EmptyContent.vue";
 
 import * as dav from "../services/DavRequests";
 
-import { ICluster } from "../types";
+import type { ICluster } from "../types";
 
 export default defineComponent({
   name: "ClusterView",

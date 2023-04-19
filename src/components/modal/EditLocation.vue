@@ -203,16 +203,17 @@ export default defineComponent({
     },
 
     result() {
-      if (!this.dirty) {
-        return null;
-      }
+      if (!this.dirty) return null;
+
+      const lat = (this.lat || 0).toFixed(6);
+      const lon = (this.lon || 0).toFixed(6);
 
       return {
-        GPSLatitude: this.lat,
-        GPSLongitude: this.lon,
-        GPSLatitudeRef: this.lat,
-        GPSLongitudeRef: this.lon,
-        GPSCoordinates: `${this.lat.toFixed(6)}, ${this.lon.toFixed(6)}`,
+        GPSLatitude: lat,
+        GPSLongitude: lon,
+        GPSLatitudeRef: lat,
+        GPSLongitudeRef: lon,
+        GPSCoordinates: `${lat}, ${lon}`,
       };
     },
   },

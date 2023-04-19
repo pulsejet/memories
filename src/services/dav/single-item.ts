@@ -1,7 +1,7 @@
 import { IDay } from "../../types";
 import { loadState } from "@nextcloud/initial-state";
 
-let singleItem = null;
+let singleItem: any;
 try {
   singleItem = loadState("memories", "single_item", {});
 } catch (e) {

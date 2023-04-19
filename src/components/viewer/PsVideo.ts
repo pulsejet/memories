@@ -6,17 +6,19 @@ import { getCurrentUser } from "@nextcloud/auth";
 import axios from "@nextcloud/axios";
 
 import { API } from "../../services/API";
-import { PsContent, PsEvent, PsSlide } from "./types";
+import type { PsContent, PsEvent } from "./types";
 
 import Player from "video.js/dist/types/player";
 import { QualityLevelList } from "videojs-contrib-quality-levels";
 
 type VideoContent = PsContent & {
-  videoElement: HTMLVideoElement;
-  videojs: Player & {
-    qualityLevels?: () => QualityLevelList;
-  };
-  plyr: globalThis.Plyr;
+  videoElement: HTMLVideoElement | null;
+  videojs:
+    | (Player & {
+        qualityLevels?: () => QualityLevelList;
+      })
+    | null;
+  plyr: globalThis.Plyr | null;
 };
 
 type PsVideoEvent = PsEvent & {
@@ -32,7 +34,7 @@ const config_video_default_quality = Number(
 /**
  * Check if slide has video content
  */
-export function isVideoContent(content: PsSlide | PsContent): boolean {
+export function isVideoContent(content: any): content is VideoContent {
   return content?.data?.type === "video";
 }
 
@@ -109,12 +111,12 @@ class VideoContentSetup {
     });
 
     pswp.on("close", () => {
-      this.destroyVideo(pswp.currSlide.content as VideoContent);
+      this.destroyVideo(pswp.currSlide?.content as VideoContent);
     });
 
     // Prevent closing when video fullscreen is active
     pswp.on("pointerMove", (e) => {
-      const plyr = (<VideoContent>pswp.currSlide.content)?.plyr;
+      const plyr = (<VideoContent>pswp.currSlide?.content)?.plyr;
       if (plyr?.fullscreen.active) {
         e.preventDefault();
       }
@@ -161,7 +163,7 @@ class VideoContentSetup {
     content.videoElement.setAttribute("playsinline", "");
 
     // Add the video element to the actual container
-    content.element.appendChild(content.videoElement);
+    content.element?.appendChild(content.videoElement);
 
     // Create hls sources if enabled
     const sources: {
@@ -202,7 +204,7 @@ class VideoContentSetup {
     let hlsFailed = false;
 
     vjs.on("error", () => {
-      if (vjs.src(undefined).includes("m3u8")) {
+      if (vjs.src(undefined)?.includes("m3u8")) {
         hlsFailed = true;
         console.warn("PsVideo: HLS stream could not be opened.");
 
@@ -245,7 +247,7 @@ class VideoContentSetup {
       playWithDelay();
     });
 
-    content.videojs.qualityLevels()?.on("addqualitylevel", (e) => {
+    content.videojs.qualityLevels?.()?.on("addqualitylevel", (e) => {
       if (e.qualityLevel?.label?.includes("max.m3u8")) {
         // This is the highest quality level
         // and guaranteed to be the last one
@@ -274,6 +276,7 @@ class VideoContentSetup {
   destroyVideo(content: VideoContent) {
     if (isVideoContent(content)) {
       // Destroy videojs
+      content.videojs?.pause?.();
       content.videojs?.dispose?.();
       content.videojs = null;
 
@@ -283,9 +286,11 @@ class VideoContentSetup {
       content.plyr = null;
 
       // Clear the video element
-      const elem: HTMLDivElement = content.element;
-      while (elem.lastElementChild) {
-        elem.removeChild(elem.lastElementChild);
+      if (content.element instanceof HTMLDivElement) {
+        const elem = content.element;
+        while (elem.lastElementChild) {
+          elem.removeChild(elem.lastElementChild);
+        }
       }
       content.videoElement = null;
 
@@ -301,17 +306,17 @@ class VideoContentSetup {
     if (!content.videoElement) return;
 
     // Retain original parent for video element
-    const origParent = content.videoElement.parentElement;
+    const origParent = content.videoElement.parentElement!;
 
     // Populate quality list
-    let qualityList = content.videojs?.qualityLevels();
-    let qualityNums: number[];
+    let qualityList = content.videojs?.qualityLevels?.();
+    let qualityNums: number[] | undefined;
     if (qualityList && qualityList.length >= 1) {
       const s = new Set<number>();
       let hasMax = false;
       for (let i = 0; i < qualityList?.length; i++) {
         const { width, height, label } = qualityList[i];
-        s.add(Math.min(width, height));
+        s.add(Math.min(width!, height!));
 
         if (label?.includes("max.m3u8")) {
           hasMax = true;
@@ -351,10 +356,10 @@ class VideoContentSetup {
         options: qualityNums,
         forced: true,
         onChange: (quality: number) => {
-          qualityList = content.videojs?.qualityLevels();
+          qualityList = content.videojs?.qualityLevels?.();
           if (!qualityList || !content.videojs) return;
 
-          const isHLS = content.videojs.src(undefined).includes("m3u8");
+          const isHLS = content.videojs.src(undefined)?.includes("m3u8");
 
           if (quality === -2) {
             // Direct playback
@@ -378,7 +383,7 @@ class VideoContentSetup {
           // Enable only the selected quality
           for (let i = 0; i < qualityList.length; ++i) {
             const { width, height, label } = qualityList[i];
-            const pixels = Math.min(width, height);
+            const pixels = Math.min(width!, height!);
             qualityList[i].enabled =
               !quality || // auto
               pixels === quality || // exact match
@@ -390,40 +395,42 @@ class VideoContentSetup {
 
     // Initialize Plyr and custom CSS
     const plyr = new Plyr(content.videoElement, opts);
-    plyr.elements.container.style.height = "100%";
-    plyr.elements.container.style.width = "100%";
-    plyr.elements.container
+    const container = plyr.elements.container!;
+
+    container.style.height = "100%";
+    container.style.width = "100%";
+    container
       .querySelectorAll("button")
       .forEach((el) => el.classList.add("button-vue"));
-    plyr.elements.container
+    container
       .querySelectorAll("progress")
       .forEach((el) => el.classList.add("vue"));
-    plyr.elements.container.style.backgroundColor = "transparent";
-    plyr.elements.wrapper.style.backgroundColor = "transparent";
+    container.style.backgroundColor = "transparent";
+    plyr.elements.wrapper!.style.backgroundColor = "transparent";
 
     // Set the fullscreen element to the container
-    plyr.elements.fullscreen = content.slide.holderElement;
+    plyr.elements.fullscreen = content.slide?.holderElement || null;
 
     // Done with init
     content.plyr = plyr;
 
     // Wait for animation to end before showing Plyr
-    plyr.elements.container.style.opacity = "0";
+    container.style.opacity = "0";
     setTimeout(() => {
-      plyr.elements.container.style.opacity = "1";
+      container.style.opacity = "1";
     }, 250);
 
     // Restore original parent of video element
     origParent.appendChild(content.videoElement);
     // Move plyr to the slide container
-    content.slide.holderElement.appendChild(plyr.elements.container);
+    content.slide?.holderElement?.appendChild(container);
 
     // Add fullscreen orientation hooks
     if (screen.orientation?.lock) {
       // Store the previous orientation
       // This is because unlocking (at least on Chrome) does
       // not restore the previous orientation
-      let previousOrientation: OrientationLockType;
+      let previousOrientation: OrientationLockType | undefined;
 
       // Lock orientation when entering fullscreen
       plyr.on("enterfullscreen", async (event) => {
@@ -461,25 +468,25 @@ class VideoContentSetup {
   }
 
   updateRotation(content: VideoContent, val?: number): boolean {
-    if (!content.videojs) return;
+    if (!content.videojs) return false;
 
     content.videoElement = content.videojs.el()?.querySelector("video");
-    if (!content.videoElement) return;
+    if (!content.videoElement) return false;
 
     const photo = content.data.photo;
     const exif = photo.imageInfo?.exif;
     const rotation = val ?? Number(exif?.Rotation || 0);
-    const shouldRotate = content.videojs?.src(undefined).includes("m3u8");
+    const shouldRotate = content.videojs?.src(undefined)?.includes("m3u8");
 
     if (rotation && shouldRotate) {
       let transform = `rotate(${rotation}deg)`;
       const hasRotation = rotation === 90 || rotation === 270;
 
       if (hasRotation) {
-        content.videoElement.style.width = content.element.style.height;
-        content.videoElement.style.height = content.element.style.width;
+        content.videoElement.style.width = content.element!.style.height;
+        content.videoElement.style.height = content.element!.style.width;
 
-        transform = `translateY(-${content.element.style.width}) ${transform}`;
+        transform = `translateY(-${content.element!.style.width}) ${transform}`;
         content.videoElement.style.transformOrigin = "bottom left";
       }
 

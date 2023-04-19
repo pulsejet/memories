@@ -45,11 +45,11 @@ export class API {
 
     if (typeof query === "object") {
       // Clean up undefined and null
-      Object.keys(query).forEach((key) => {
+      for (const key of Object.keys(query)) {
         if (query[key] === undefined || query[key] === null) {
           delete query[key];
         }
-      });
+      }
 
       // Check if nothing in query
       if (!Object.keys(query).length) return url;
@@ -138,7 +138,7 @@ export class API {
     return gen(`${BASE}/image/set-exif/{id}`, { id });
   }
 
-  static IMAGE_DECODABLE(id: number, etag: string) {
+  static IMAGE_DECODABLE(id: number, etag?: string) {
     return tok(API.Q(gen(`${BASE}/image/decodable/{id}`, { id }), { etag }));
   }
 

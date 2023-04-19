@@ -1,5 +1,5 @@
 import { generateUrl } from "@nextcloud/router";
-import { translate as t, translatePlural as n } from "@nextcloud/l10n";
+import { translate as t } from "@nextcloud/l10n";
 import Router from "vue-router";
 import Vue from "vue";
 import Timeline from "./components/Timeline.vue";

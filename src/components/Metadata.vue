@@ -29,7 +29,7 @@
         <NcActions :inline="1">
           <NcActionButton
             :aria-label="t('memories', 'Edit')"
-            @click="field.edit()"
+            @click="field.edit?.()"
           >
             {{ t("memories", "Edit") }}
             <template #icon> <EditIcon :size="20" /> </template>
@@ -72,7 +72,7 @@ import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
 import LocationIcon from "vue-material-design-icons/MapMarker.vue";
 import TagIcon from "vue-material-design-icons/Tag.vue";
 import { API } from "../services/API";
-import { IImageInfo } from "../types";
+import type { IImageInfo } from "../types";
 
 interface TopField {
   title: string;
@@ -112,8 +112,8 @@ export default defineComponent({
 
       if (this.dateOriginal) {
         list.push({
-          title: this.dateOriginalStr,
-          subtitle: this.dateOriginalTime,
+          title: this.dateOriginalStr!,
+          subtitle: this.dateOriginalTime!,
           icon: CalendarIcon,
           edit: () =>
             globalThis.editMetadata([globalThis.currentViewerPhoto], [1]),
@@ -228,13 +228,13 @@ export default defineComponent({
       return `${make} ${model}`;
     },
 
-    cameraSub(): string[] | null {
+    cameraSub(): string[] {
       const f = this.exif["FNumber"] || this.exif["Aperture"];
       const s = this.shutterSpeed;
       const len = this.exif["FocalLength"];
       const iso = this.exif["ISO"];
 
-      const parts = [];
+      const parts: string[] = [];
       if (f) parts.push(`f/${f}`);
       if (s) parts.push(`${s}`);
       if (len) parts.push(`${len}mm`);
@@ -263,8 +263,8 @@ export default defineComponent({
       return this.baseInfo.basename;
     },
 
-    imageInfoSub(): string[] | null {
-      let parts = [];
+    imageInfoSub(): string[] {
+      let parts: string[] = [];
       let mp = Number(this.exif["Megapixels"]);
 
       if (this.baseInfo.w && this.baseInfo.h) {
@@ -282,7 +282,7 @@ export default defineComponent({
       return parts;
     },
 
-    address(): string | null {
+    address(): string | undefined {
       return this.baseInfo.address;
     },
 
@@ -298,11 +298,11 @@ export default defineComponent({
       return Object.values(this.baseInfo?.tags || {});
     },
 
-    tagNamesStr(): string {
+    tagNamesStr(): string | null {
       return this.tagNames.length > 0 ? this.tagNames.join(", ") : null;
     },
 
-    mapUrl(): string | null {
+    mapUrl(): string {
       const boxSize = 0.0075;
       const bbox = [
         this.lon - boxSize,
@@ -314,7 +314,7 @@ export default defineComponent({
       return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox.join()}&marker=${m}`;
     },
 
-    mapFullUrl(): string | null {
+    mapFullUrl(): string {
       return `https://www.openstreetmap.org/?mlat=${this.lat}&mlon=${this.lon}#map=18/${this.lat}/${this.lon}`;
     },
   },
@@ -336,7 +336,7 @@ export default defineComponent({
       return this.baseInfo;
     },
 
-    handleFileUpdated({ fileid }) {
+    handleFileUpdated({ fileid }: { fileid: number }) {
       if (fileid && this.fileid === fileid) {
         this.update(this.fileid);
       }

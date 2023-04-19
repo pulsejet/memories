@@ -130,7 +130,8 @@ export default defineComponent({
           }
         });
         for await (const resp of dav.runInParallel(calls, 10)) {
-          this.moved(resp);
+          const valid = resp.filter((r): r is IPhoto => r !== undefined);
+          this.moved(valid);
         }
       } catch (error) {
         console.error(error);

@@ -40,7 +40,7 @@ export default defineComponent({
 
   methods: {
     init() {
-      let tagIds: number[] = null;
+      let tagIds: number[] | null = null;
 
       // Find common tags in all selected photos
       for (const photo of this.photos) {
@@ -53,7 +53,7 @@ export default defineComponent({
         tagIds = tagIds ? [...tagIds].filter((x) => s.has(x)) : [...s];
       }
 
-      this.tagSelection = tagIds;
+      this.tagSelection = tagIds || [];
       this.origIds = new Set(this.tagSelection);
     },
 

@@ -60,7 +60,7 @@ export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
   const fileIds = photos.map((photo) => photo.fileid);
 
   // Divide fileIds into chunks of GET_FILE_CHUNK_SIZE
-  const chunks = [];
+  const chunks: number[][] = [];
   for (let i = 0; i < fileIds.length; i += GET_FILE_CHUNK_SIZE) {
     chunks.push(fileIds.slice(i, i + GET_FILE_CHUNK_SIZE));
   }

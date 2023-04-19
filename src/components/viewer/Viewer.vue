@@ -237,7 +237,7 @@ export default defineComponent({
 
   data: () => ({
     isOpen: false,
-    originalTitle: null,
+    originalTitle: null as string | null,
     editorOpen: false,
     editorSrc: "",
 
@@ -301,7 +301,7 @@ export default defineComponent({
 
     /** Route is public */
     routeIsPublic(): boolean {
-      return this.$route.name?.endsWith("-share");
+      return this.$route.name?.endsWith("-share") ?? false;
     },
 
     /** Route is album */
@@ -323,7 +323,7 @@ export default defineComponent({
 
     /** Is the current slide a video */
     isVideo(): boolean {
-      return Boolean(this.currentPhoto?.flag & this.c.FLAG_IS_VIDEO);
+      return Boolean((this.currentPhoto?.flag ?? 0) & this.c.FLAG_IS_VIDEO);
     },
 
     /** Is the current slide a live photo */
@@ -354,12 +354,12 @@ export default defineComponent({
 
     /** Show edit buttons */
     canEdit(): boolean {
-      return this.currentPhoto?.imageInfo?.permissions?.includes("U");
+      return this.currentPhoto?.imageInfo?.permissions?.includes("U") ?? false;
     },
 
     /** Show delete button */
     canDelete(): boolean {
-      return this.currentPhoto?.imageInfo?.permissions?.includes("D");
+      return this.currentPhoto?.imageInfo?.permissions?.includes("D") ?? false;
     },
 
     /** Show share button */
@@ -399,7 +399,7 @@ export default defineComponent({
       const photo = this.currentPhoto;
       const isvideo = photo && photo.flag & this.c.FLAG_IS_VIDEO;
       if (photo && !isvideo && photo.fileid === fileid) {
-        this.photoswipe.refreshSlideContent(this.currIndex);
+        this.photoswipe?.refreshSlideContent(this.currIndex);
       }
     },
 
@@ -487,7 +487,7 @@ export default defineComponent({
         ) {
           return;
         }
-        _onFocusIn.call(this.photoswipe.keyboard, e);
+        _onFocusIn.call(this.photoswipe!.keyboard, e);
       };
 
       // Refresh sidebar on change
@@ -556,7 +556,7 @@ export default defineComponent({
 
       // Update vue route for deep linking
       this.photoswipe.on("slideActivate", (e) => {
-        this.currIndex = this.photoswipe.currIndex;
+        this.currIndex = this.photoswipe!.currIndex;
         const photo = e.slide?.data?.photo;
         this.setRouteHash(photo);
         this.updateTitle(photo);
@@ -619,15 +619,20 @@ export default defineComponent({
     },
 
     /** Open using start photo and rows list */
-    async open(anchorPhoto: IPhoto, rows?: IRow[]) {
-      this.list = [...anchorPhoto.d.detail];
-      let startIndex = -1;
+    async open(anchorPhoto: IPhoto, rows: IRow[]) {
+      const detail = anchorPhoto.d?.detail;
+      if (!detail) {
+        console.error("Attempted to open viewer with no detail list!");
+        return;
+      }
+
+      this.list = [...detail];
+      const startIndex = detail.indexOf(anchorPhoto);
 
       // Get days list and map
       for (const r of rows) {
         if (r.type === IRowType.HEAD) {
-          if (r.day.dayid == anchorPhoto.d.dayid) {
-            startIndex = r.day.detail.indexOf(anchorPhoto);
+          if (r.day.dayid == anchorPhoto.dayid) {
             this.globalAnchor = this.globalCount;
           }
 
@@ -638,18 +643,18 @@ export default defineComponent({
       }
 
       // Create basic viewer
-      await this.createBase({
+      const photoswipe = await this.createBase({
         index: this.globalAnchor + startIndex,
       });
 
       // Lazy-generate item data.
       // Load the next two days in the timeline.
-      this.photoswipe.addFilter("itemData", (itemData, index) => {
+      photoswipe.addFilter("itemData", (itemData, index) => {
         // Get photo object from list
         let idx = index - this.globalAnchor;
         if (idx < 0) {
           // Load previous day
-          const firstDayId = this.list[0].d.dayid;
+          const firstDayId = this.list[0].dayid;
           const firstDayIdx = utils.binarySearch(this.dayIds, firstDayId);
           if (firstDayIdx === 0) {
             // No previous day
@@ -657,7 +662,7 @@ export default defineComponent({
           }
           const prevDayId = this.dayIds[firstDayIdx - 1];
           const prevDay = this.days.get(prevDayId);
-          if (!prevDay.detail) {
+          if (!prevDay?.detail) {
             console.error("[BUG] No detail for previous day");
             return {};
           }
@@ -665,7 +670,7 @@ export default defineComponent({
           this.globalAnchor -= prevDay.count;
         } else if (idx >= this.list.length) {
           // Load next day
-          const lastDayId = this.list[this.list.length - 1].d.dayid;
+          const lastDayId = this.list[this.list.length - 1].dayid;
           const lastDayIdx = utils.binarySearch(this.dayIds, lastDayId);
           if (lastDayIdx === this.dayIds.length - 1) {
             // No next day
@@ -673,7 +678,7 @@ export default defineComponent({
           }
           const nextDayId = this.dayIds[lastDayIdx + 1];
           const nextDay = this.days.get(nextDayId);
-          if (!nextDay.detail) {
+          if (!nextDay?.detail) {
             console.error("[BUG] No detail for next day");
             return {};
           }
@@ -689,12 +694,12 @@ export default defineComponent({
         }
 
         // Preload next and previous 3 days
-        const dayIdx = utils.binarySearch(this.dayIds, photo.d.dayid);
+        const dayIdx = utils.binarySearch(this.dayIds, photo.dayid);
         const preload = (idx: number) => {
           if (
             idx > 0 &&
             idx < this.dayIds.length &&
-            !this.days.get(this.dayIds[idx]).detail
+            !this.days.get(this.dayIds[idx])?.detail
           ) {
             this.fetchDay(this.dayIds[idx]);
           }
@@ -719,13 +724,13 @@ export default defineComponent({
       });
 
       // Get the thumbnail image
-      this.photoswipe.addFilter("thumbEl", (thumbEl, data, index) => {
+      photoswipe.addFilter("thumbEl", (thumbEl, data, index) => {
         const photo = this.list[index - this.globalAnchor];
-        if (!photo || !photo.w || !photo.h) return thumbEl;
-        return this.thumbElem(photo) || thumbEl;
+        if (!photo || !photo.w || !photo.h) return thumbEl as HTMLElement;
+        return this.thumbElem(photo) ?? (thumbEl as HTMLElement); // bug in PhotoSwipe types
       });
 
-      this.photoswipe.on("slideActivate", (e) => {
+      photoswipe.on("slideActivate", (e) => {
         // Scroll to keep the thumbnail in view
         const thumb = this.thumbElem(e.slide.data?.photo);
         if (thumb && this.fullyOpened) {
@@ -741,13 +746,13 @@ export default defineComponent({
         }
 
         // Remove active class from others and add to this one
-        this.photoswipe.element
-          .querySelectorAll(".pswp__item")
+        photoswipe.element
+          ?.querySelectorAll(".pswp__item")
           .forEach((el) => el.classList.remove("active"));
         e.slide.holderElement?.classList.add("active");
       });
 
-      this.photoswipe.init();
+      photoswipe.init();
     },
 
     /** Close the viewer */
@@ -758,14 +763,14 @@ export default defineComponent({
     /** Open with a static list of photos */
     async openStatic(photo: IPhoto, list: IPhoto[], thumbSize?: number) {
       this.list = list;
-      await this.createBase({
+      const photoswipe = await this.createBase({
         index: list.findIndex((p) => p.fileid === photo.fileid),
       });
 
       this.globalCount = list.length;
       this.globalAnchor = 0;
 
-      this.photoswipe.addFilter("itemData", (itemData, index) => ({
+      photoswipe.addFilter("itemData", (itemData, index) => ({
         ...this.getItemData(this.list[index]),
         msrc: thumbSize
           ? utils.getPreviewUrl(photo, false, thumbSize)
@@ -773,7 +778,7 @@ export default defineComponent({
       }));
 
       this.isOpen = true;
-      this.photoswipe.init();
+      photoswipe!.init();
     },
 
     /** Get base data object */
@@ -849,7 +854,7 @@ export default defineComponent({
       if (important.length > 0) return important[0] as HTMLImageElement;
 
       // Find element within 500px of the screen top
-      let elem: HTMLImageElement;
+      let elem: HTMLImageElement | undefined;
       elems.forEach((e) => {
         const rect = e.getBoundingClientRect();
         if (rect.top > -500) {
@@ -896,7 +901,7 @@ export default defineComponent({
       if (!this.canEdit) return;
 
       // Prevent editing Live Photos
-      if (this.currentPhoto.liveid) {
+      if (this.isLivePhoto) {
         showError(
           this.t("memories", "Editing is currently disabled for Live Photos")
         );
@@ -909,7 +914,7 @@ export default defineComponent({
 
     /** Share the current photo externally */
     async shareCurrent() {
-      globalThis.sharePhoto(this.currentPhoto);
+      globalThis.sharePhoto(this.currentPhoto!);
     },
 
     /** Key press events */
@@ -925,7 +930,7 @@ export default defineComponent({
 
     /** Delete this photo and refresh */
     async deleteCurrent() {
-      let idx = this.photoswipe.currIndex - this.globalAnchor;
+      let idx = this.photoswipe!.currIndex - this.globalAnchor;
       const photo = this.list[idx];
       if (!photo) return;
 
@@ -950,22 +955,24 @@ export default defineComponent({
       // If this is the last photo, move to the previous photo first
       // https://github.com/pulsejet/memories/issues/269
       if (idx === this.list.length - 1) {
-        this.photoswipe.prev();
+        this.photoswipe!.prev();
 
         // Some photos might lazy load, so recompute idx for the next element
-        idx = this.photoswipe.currIndex + 1 - this.globalAnchor;
+        idx = this.photoswipe!.currIndex + 1 - this.globalAnchor;
       }
 
       this.list.splice(idx, 1);
       this.globalCount--;
       for (let i = idx - 3; i <= idx + 3; i++) {
-        this.photoswipe.refreshSlideContent(i + this.globalAnchor);
+        this.photoswipe!.refreshSlideContent(i + this.globalAnchor);
       }
     },
 
     /** Play the current live photo */
     playLivePhoto() {
-      this.psLivePhoto.onContentActivate(this.photoswipe.currSlide as PsSlide);
+      this.psLivePhoto?.onContentActivate(
+        this.photoswipe!.currSlide as PsSlide
+      );
     },
 
     /** Is the current photo a favorite */
@@ -977,7 +984,7 @@ export default defineComponent({
 
     /** Favorite the current photo */
     async favoriteCurrent() {
-      const photo = this.currentPhoto;
+      const photo = this.currentPhoto!;
       const val = !this.isFavorite();
       try {
         this.updateLoading(1);
@@ -1014,7 +1021,7 @@ export default defineComponent({
     /** Open the sidebar */
     async openSidebar(photo?: IPhoto) {
       globalThis.mSidebar.setTab("memories-metadata");
-      photo ||= this.currentPhoto;
+      photo ??= this.currentPhoto!;
 
       if (this.routeIsPublic) {
         globalThis.mSidebar.open(photo.fileid);
@@ -1052,7 +1059,7 @@ export default defineComponent({
     closeSidebar() {
       this.hideSidebar();
       this.sidebarOpen = false;
-      this.photoswipe.updateSize();
+      this.photoswipe?.updateSize();
     },
 
     /** Toggle the sidebar visibility */
@@ -1101,7 +1108,7 @@ export default defineComponent({
       // If this is a video, wait for it to finish
       if (this.isVideo) {
         // Get active video element
-        const video: HTMLVideoElement = this.photoswipe?.element?.querySelector(
+        const video = this.photoswipe?.element?.querySelector<HTMLVideoElement>(
           ".pswp__item.active video"
         );
 
@@ -1114,7 +1121,7 @@ export default defineComponent({
         }
       }
 
-      this.photoswipe.next();
+      this.photoswipe?.next();
       // no need to set the timer again, since next
       // calls resetSlideshowTimer anyway
     },

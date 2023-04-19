@@ -79,8 +79,8 @@ export default class ImageContentSetup {
 
   slideActivate() {
     const slide = this.lightbox.currSlide;
-    if (slide.data.highSrcCond === "always") {
-      this.loadFullImage(slide);
+    if (slide?.data.highSrcCond === "always") {
+      this.loadFullImage(slide as PsSlide);
     }
   }
 
@@ -97,7 +97,7 @@ export default class ImageContentSetup {
     img.classList.add("ximg--full");
 
     this.loading++;
-    this.lightbox.ui.updatePreloaderVisibility();
+    this.lightbox.ui?.updatePreloaderVisibility();
 
     fetchImage(slide.data.highSrc)
       .then((blobSrc) => {
@@ -112,7 +112,7 @@ export default class ImageContentSetup {
       })
       .finally(() => {
         this.loading--;
-        this.lightbox.ui.updatePreloaderVisibility();
+        this.lightbox.ui?.updatePreloaderVisibility();
       });
   }
 }

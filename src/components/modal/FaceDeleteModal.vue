@@ -83,7 +83,7 @@ export default defineComponent({
         } else {
           await dav.setVisibilityPeopleFaceRecognition(this.name, false);
         }
-        this.$router.push({ name: this.$route.name });
+        this.$router.push({ name: this.$route.name as string });
         this.close();
       } catch (error) {
         console.log(error);

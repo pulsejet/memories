@@ -9,7 +9,8 @@
     "jsx": "preserve",
     "useDefineForClassFields": true,
     "noImplicitThis": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "strictNullChecks": true
   },
   "vueCompilerOptions": {
     "target": 2.7

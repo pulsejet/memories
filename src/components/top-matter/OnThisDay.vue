@@ -82,7 +82,7 @@ export default defineComponent({
     hasRight: false,
     hasLeft: false,
     scrollStack: [] as number[],
-    resizeObserver: null as ResizeObserver,
+    resizeObserver: null! as ResizeObserver,
   }),
 
   mounted() {
@@ -146,7 +146,7 @@ export default defineComponent({
               year,
               text,
               url: "",
-              preview: null,
+              preview: null!,
               photos: [],
             });
             currentText = text;
@@ -167,7 +167,7 @@ export default defineComponent({
       for (const year of this.years) {
         // Try to prioritize landscape photos on desktop
         if (globalThis.windowInnerWidth <= 600) {
-          const landscape = year.photos.filter((p) => p.w > p.h);
+          const landscape = year.photos.filter((p) => (p.w ?? 0) > (p.h ?? 0));
           year.preview = utils.randomChoice(landscape);
         }
 
@@ -214,7 +214,7 @@ export default defineComponent({
 
     click(year: IYear) {
       const allPhotos = this.years.flatMap((y) => y.photos);
-      this.viewer.openStatic(year.preview, allPhotos, 512);
+      this.viewer?.openStatic(year.preview, allPhotos, 512);
     },
   },
 });

@@ -66,13 +66,25 @@ export default defineComponent({
 
   props: {
     /** Rows from Timeline */
-    rows: Array as PropType<IRow[]>,
+    rows: {
+      type: Array as PropType<IRow[]>,
+      required: true,
+    },
     /** Total height */
-    height: Number,
+    height: {
+      type: Number,
+      required: true,
+    },
     /** Actual recycler component */
-    recycler: Object,
+    recycler: {
+      type: Object,
+      required: false,
+    },
     /** Recycler before slot component */
-    recyclerBefore: HTMLDivElement,
+    recyclerBefore: {
+      type: HTMLDivElement,
+      required: false,
+    },
   },
 
   data: () => ({
@@ -81,7 +93,7 @@ export default defineComponent({
     /** Height of the entire photo view */
     recyclerHeight: 100,
     /** Rect of scroller */
-    scrollerRect: null as DOMRect,
+    scrollerRect: null as DOMRect | null,
     /** Computed ticks */
     ticks: [] as ITick[],
     /** Computed cursor top */
@@ -273,8 +285,8 @@ export default defineComponent({
     /** Do adjustment synchronously */
     adjustNow() {
       // Refresh height of recycler
-      this.recyclerHeight = this.recycler.$refs.wrapper.clientHeight;
-      const extraY = this.recyclerBefore?.clientHeight || 0;
+      this.recyclerHeight = this.recycler?.$refs.wrapper.clientHeight ?? 0;
+      const extraY = this.recyclerBefore?.clientHeight ?? 0;
 
       // Start with the first tick. Walk over all rows counting the
       // y position. When you hit a row with the tick, update y and
@@ -417,7 +429,7 @@ export default defineComponent({
       }
 
       const date = utils.dayIdToDate(dayId);
-      this.hoverCursorText = utils.getShortDateStr(date);
+      this.hoverCursorText = utils.getShortDateStr(date) ?? "";
     },
 
     /** Handle mouse hover */
@@ -480,7 +492,7 @@ export default defineComponent({
 
       if (this.lastRequestedRecyclerY !== targetY) {
         this.lastRequestedRecyclerY = targetY;
-        this.recycler.scrollToPosition(targetY);
+        this.recycler?.scrollToPosition(targetY);
       }
 
       this.handleScroll();
@@ -494,6 +506,7 @@ export default defineComponent({
 
     /** Handle touch */
     touchmove(event: any) {
+      if (!this.scrollerRect) return;
       let y = event.targetTouches[0].pageY - this.scrollerRect.top;
       y = Math.max(0, y - 20); // middle of touch finger
       this.moveto(y, true);

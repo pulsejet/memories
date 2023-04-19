@@ -210,7 +210,7 @@ export default defineComponent({
     selectedCollaboratorsKeys: [] as string[],
     currentSearchResults: [] as Collaborator[],
     loadingAlbum: false,
-    errorFetchingAlbum: null,
+    errorFetchingAlbum: null as number | null,
     loadingCollaborators: false,
     errorFetchingCollaborators: null,
     randomId: Math.random().toString().substring(2, 10),
@@ -370,10 +370,9 @@ export default defineComponent({
         this.loadingAlbum = true;
         this.errorFetchingAlbum = null;
 
-        const album = await dav.getAlbum(
-          getCurrentUser()?.uid.toString(),
-          this.albumName
-        );
+        const uid = getCurrentUser()?.uid.toString();
+        if (!uid) return;
+        const album = await dav.getAlbum(uid, this.albumName);
         this.populateCollaborators(album.collaborators);
       } catch (error) {
         if (error.response?.status === 404) {
@@ -401,10 +400,9 @@ export default defineComponent({
 
     async updateAlbumCollaborators() {
       try {
-        const album = await dav.getAlbum(
-          getCurrentUser()?.uid.toString(),
-          this.albumName
-        );
+        const uid = getCurrentUser()?.uid?.toString();
+        if (!uid) return;
+        const album = await dav.getAlbum(uid, this.albumName);
         await dav.updateAlbum(album, {
           albumName: this.albumName,
           properties: {

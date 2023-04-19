@@ -48,7 +48,7 @@ export default defineComponent({
     user: "",
     name: "",
     list: null as ICluster[] | null,
-    fuse: null as Fuse<ICluster>,
+    fuse: null as Fuse<ICluster> | null,
     search: "",
   }),
 

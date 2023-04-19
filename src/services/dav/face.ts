@@ -70,7 +70,7 @@ export async function* removeFaceImages(
       console.error(e);
       showError(
         t("memories", "Failed to remove {filename} from face.", {
-          filename: f.basename,
+          filename: f.basename ?? f.fileid,
         })
       );
       return 0;

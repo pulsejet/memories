@@ -1,19 +1,19 @@
 import { CacheExpiration } from "workbox-expiration";
 import { workerExport } from "../../worker";
 
-type BlobCallback = {
+interface BlobCallback {
   resolve: (blob: Blob) => void;
   reject: (err: Error) => void;
-};
+}
 
 // Queue of requests to fetch preview images
-type FetchPreviewObject = {
+interface FetchPreviewObject {
   origUrl: string;
   url: URL;
   fileid: number;
   reqid: number;
   done?: boolean;
-};
+}
 let fetchPreviewQueue: FetchPreviewObject[] = [];
 
 // Pending requests
@@ -22,9 +22,12 @@ const pendingUrls = new Map<string, BlobCallback[]>();
 // Cache for preview images
 const cacheName = "images";
 let imageCache: Cache;
-(async () => {
-  imageCache = await caches.open(cacheName);
-})();
+caches
+  .open(cacheName)
+  .then((c) => (imageCache = c))
+  .catch(() => {
+    /* ignore */
+  });
 
 // Expiration for cache
 const expirationManager = new CacheExpiration(cacheName, {
@@ -60,7 +63,9 @@ async function flushPreviewQueue() {
     // it came from a multipreview, so that we can try fetching
     // the single image instead
     const blob = await res.blob();
-    pendingUrls.get(url)?.forEach((cb) => cb?.resolve?.(blob));
+    pendingUrls.get(url)?.forEach((cb) => {
+      cb?.resolve?.(blob);
+    });
     pendingUrls.delete(url);
 
     // Cache response
@@ -68,15 +73,17 @@ async function flushPreviewQueue() {
   };
 
   // Throw error on URL
-  const reject = (url: string, e: any) => {
-    pendingUrls.get(url)?.forEach((cb) => cb?.reject?.(e));
+  const reject = (url: string, e: any): void => {
+    pendingUrls.get(url)?.forEach((cb) => {
+      cb?.reject?.(e);
+    });
     pendingUrls.delete(url);
   };
 
   // Make a single-file request
   const fetchOneSafe = async (p: FetchPreviewObject) => {
     try {
-      resolve(p.origUrl, await fetchOneImage(p.origUrl));
+      await resolve(p.origUrl, await fetchOneImage(p.origUrl));
     } catch (e) {
       reject(p.origUrl, e);
     }
@@ -84,7 +91,8 @@ async function flushPreviewQueue() {
 
   // Check if only one request, not worth a multipreview
   if (fetchPreviewQueueCopy.length === 1) {
-    return fetchOneSafe(fetchPreviewQueueCopy[0]);
+    await fetchOneSafe(fetchPreviewQueueCopy[0]);
+    return;
   }
 
   // Create aggregated request body
@@ -99,7 +107,8 @@ async function flushPreviewQueue() {
   try {
     // Fetch multipreview
     const res = await fetchMultipreview(files);
-    if (res.status !== 200) throw new Error("Error fetching multi-preview");
+    if (res.status !== 200 || !res.body)
+      throw new Error("Error fetching multi-preview");
 
     // Create fake headers for 7-day expiry
     const headers = {
@@ -119,7 +128,7 @@ async function flushPreviewQueue() {
       reqid: number;
       len: number;
       type: string;
-    } = null;
+    } | null = null;
 
     // Index at which we are currently reading
     let idx = 0;
@@ -161,30 +170,31 @@ async function flushPreviewQueue() {
           if (bufSize - jsonStart < jsonLen) break;
           const jsonB = buffer.slice(jsonStart, jsonStart + jsonLen);
           const jsonT = new TextDecoder().decode(jsonB);
-          params = JSON.parse(jsonT);
           idx = jsonStart + jsonLen;
+          params = JSON.parse(jsonT);
+          params = params!;
         }
 
         // Read the image data
-        if (bufSize - idx < params.len) break;
-        const imgBlob = new Blob([buffer.slice(idx, idx + params.len)], {
-          type: params.type,
+        if (bufSize - idx < params!.len) break;
+        const imgBlob = new Blob([buffer.slice(idx, idx + params!.len)], {
+          type: params!.type,
         });
-        idx += params.len;
+        idx += params!.len;
 
         // Initiate callbacks
-        fetchPreviewQueueCopy
-          .filter((p) => p.reqid === params.reqid && !p.done)
-          .forEach((p) => {
+        for (const p of fetchPreviewQueueCopy) {
+          if (p.reqid === params.reqid && !p.done) {
             try {
-              const dummy = getResponse(imgBlob, params.type, headers);
-              resolve(p.origUrl, dummy);
+              const dummy = getResponse(imgBlob, params!.type, headers);
+              await resolve(p.origUrl, dummy);
               p.done = true;
             } catch (e) {
               // In case of error, we want to try fetching the single
               // image instead, so we don't reject here
             }
-          });
+          }
+        }
 
         // Reset for next iteration
         params = null;
@@ -272,7 +282,7 @@ function getResponse(blob: Blob, type: string | null, headers: any = {}) {
       "Content-Type": type || headers["content-type"],
       "Content-Length": blob.size.toString(),
       "Cache-Control": headers["cache-control"],
-      Expires: headers["expires"],
+      Expires: headers.expires,
     },
   });
 }

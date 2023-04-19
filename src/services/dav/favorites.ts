@@ -62,7 +62,7 @@ export async function* favoritePhotos(
   const calls = fileInfos.map((fileInfo) => async () => {
     try {
       await favoriteFile(fileInfo.originalFilename, favoriteState);
-      const photo = photos.find((p) => p.fileid === fileInfo.fileid);
+      const photo = photos.find((p) => p.fileid === fileInfo.fileid)!;
       if (favoriteState) {
         photo.flag |= utils.constants.c.FLAG_IS_FAVORITE;
       } else {

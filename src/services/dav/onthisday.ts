@@ -57,7 +57,7 @@ export async function getOnThisDayData(): Promise<IDay[]> {
 
     // Add to last day
     const day = ans[ans.length - 1];
-    day.detail.push(photo);
+    day.detail!.push(photo);
     day.count++;
   }
 

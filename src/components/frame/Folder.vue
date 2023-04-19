@@ -46,7 +46,10 @@ export default defineComponent({
   mixins: [UserConfig],
 
   props: {
-    data: Object as PropType<IFolder>,
+    data: {
+      type: Object as PropType<IFolder>,
+      required: true,
+    },
   },
 
   data: () => ({

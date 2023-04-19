@@ -88,7 +88,7 @@
       :heads="heads"
       :rows="list"
       :isreverse="isMonthView"
-      :recycler="$refs.recycler"
+      :recycler="$refs.recycler?.$el"
       @refresh="softRefresh"
       @delete="deleteFromViewWithAnimation"
       @updateLoading="updateLoading"
@@ -374,8 +374,8 @@ export default defineComponent({
       this.loadedDays.clear();
       this.sizedDays.clear();
       this.fetchDayQueue = [];
-      window.clearTimeout(this.fetchDayTimer);
-      window.clearTimeout(this.resizeTimer);
+      window.clearTimeout(this.fetchDayTimer ?? 0);
+      window.clearTimeout(this.resizeTimer ?? 0);
     },
 
     /** Recreate everything */
@@ -492,7 +492,7 @@ export default defineComponent({
         }
 
         // Initialize photos and add placeholders
-        if (row.pct && !row.photos.length) {
+        if (row.pct && !row.photos?.length) {
           row.photos = new Array(row.pct);
           for (let j = 0; j < row.pct; j++) {
             // Any row that has placeholders has ONLY placeholders
@@ -500,6 +500,7 @@ export default defineComponent({
             row.photos[j] = {
               flag: this.c.FLAG_PLACEHOLDER,
               fileid: Math.random(),
+              dayid: row.dayId,
               dispW: utils.roundHalf(this.rowWidth / this.numCols),
               dispX: utils.roundHalf((j * this.rowWidth) / this.numCols),
               dispH: this.rowHeight,
@@ -568,7 +569,7 @@ export default defineComponent({
         if (this.loadedDays.has(item.dayId)) {
           if (!this.sizedDays.has(item.dayId)) {
             // Just quietly reflow without refetching
-            this.processDay(item.dayId, item.day.detail);
+            this.processDay(item.dayId, item.day.detail!);
           }
           continue;
         }
@@ -692,7 +693,7 @@ export default defineComponent({
       // Filter out hidden folders
       if (!this.config_showHidden) {
         this.folders = this.folders.filter(
-          (f) => !f.name.startsWith(".") && f.previews.length
+          (f) => !f.name.startsWith(".") && f.previews?.length
         );
       }
     },
@@ -716,7 +717,7 @@ export default defineComponent({
       const cacheUrl = <string>this.$route.name + url;
 
       // Try cache first
-      let cache: IDay[];
+      let cache: IDay[] | null = null;
 
       // Make sure to refresh scroll later
       this.currentEnd = -1;
@@ -730,18 +731,19 @@ export default defineComponent({
           data = await dav.getOnThisDayData();
         } else if (dav.isSingleItem()) {
           data = await dav.getSingleItemData();
-          this.$router.replace(utils.getViewerRoute(data[0]!.detail[0]));
+          this.$router.replace(utils.getViewerRoute(data[0]!.detail![0]));
         } else {
           // Try the cache
-          try {
-            cache = noCache ? null : await utils.getCachedData(cacheUrl);
-            if (cache) {
-              await this.processDays(cache);
-              this.loading--;
+          if (!noCache) {
+            try {
+              if ((cache = await utils.getCachedData(cacheUrl))) {
+                await this.processDays(cache);
+                this.loading--;
+              }
+            } catch {
+              console.warn(`Failed to process days cache: ${cacheUrl}`);
+              cache = null;
             }
-          } catch {
-            console.warn(`Failed to process days cache: ${cacheUrl}`);
-            cache = null;
           }
 
           // Get from network
@@ -760,6 +762,7 @@ export default defineComponent({
         console.error(err);
         showError(err?.response?.data?.message || err.message);
       } finally {
+        // If cache is set here, loading was already decremented
         if (!cache) this.loading--;
       }
     },
@@ -891,7 +894,8 @@ export default defineComponent({
       // Look for cache
       const cacheUrl = this.getDayUrl(dayId);
       try {
-        this.processDay(dayId, await utils.getCachedData(cacheUrl));
+        const cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
+        if (cache) this.processDay(dayId, cache);
       } catch {
         console.warn(`Failed to process day cache: ${cacheUrl}`);
       }
@@ -936,8 +940,8 @@ export default defineComponent({
         // It is already sorted in dayid DESC
         const dayMap = new Map<number, IPhoto[]>();
         for (const photo of data) {
-          if (!dayMap.get(photo.dayid)) dayMap.set(photo.dayid, []);
-          dayMap.get(photo.dayid).push(photo);
+          if (!dayMap.has(photo.dayid)) dayMap.set(photo.dayid, []);
+          dayMap.get(photo.dayid)!.push(photo);
         }
 
         // Store cache asynchronously
@@ -997,9 +1001,10 @@ export default defineComponent({
       // Set and make reactive
       day.count = data.length;
       day.detail = data;
+      day.rows ??= [];
 
       // Reset rows including placeholders
-      for (const row of head.day.rows || []) {
+      for (const row of day.rows) {
         row.photos = [];
       }
 
@@ -1136,8 +1141,8 @@ export default defineComponent({
         // These may be valid, e.g. in face rects. All we need to have
         // is a unique Vue key for the v-for loop.
         const key = photo.faceid || photo.fileid;
-        if (seen.has(key)) {
-          const val = seen.get(key);
+        const val = seen.get(key);
+        if (val) {
           photo.key = `${key}-${val}`;
           seen.set(key, val + 1);
         } else {
@@ -1146,7 +1151,7 @@ export default defineComponent({
         }
 
         // Add photo to row
-        row.photos.push(photo);
+        row.photos!.push(photo);
         delete row.pct;
       }
 
@@ -1187,8 +1192,8 @@ export default defineComponent({
         needAdjust = true;
 
         // Remove from day
-        const idx = head.day.rows.indexOf(row);
-        if (idx >= 0) head.day.rows.splice(idx, 1);
+        const idx = day.rows.indexOf(row);
+        if (idx >= 0) day.rows.splice(idx, 1);
       }
 
       // This will be true even if the head is being spliced
@@ -1210,6 +1215,9 @@ export default defineComponent({
 
     /** Add and get a new blank photos row */
     addRow(day: IDay): IRow {
+      // Make sure rows exists
+      day.rows ??= [];
+
       // Create new row
       const row = {
         id: `${day.dayid}-${day.rows.length}`,
@@ -1242,7 +1250,7 @@ export default defineComponent({
       if (delPhotos.length === 0) return;
 
       // Get all days that need to be updatd
-      const updatedDays = new Set<IDay>(delPhotos.map((p) => p.d));
+      const updatedDays = new Set<IDay>(delPhotos.map((p) => p.d!));
       const delPhotosSet = new Set(delPhotos);
 
       // Animate the deletion
@@ -1258,8 +1266,8 @@ export default defineComponent({
 
       // Reflow all touched days
       for (const day of updatedDays) {
-        const newDetail = day.detail.filter((p) => !delPhotosSet.has(p));
-        this.processDay(day.dayid, newDetail);
+        const newDetail = day.detail?.filter((p) => !delPhotosSet.has(p));
+        this.processDay(day.dayid, newDetail!);
       }
     },
   },

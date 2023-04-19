@@ -189,7 +189,7 @@ export default defineComponent({
     },
 
     getShareLabels(share: IShare): string {
-      const labels = [];
+      const labels: string[] = [];
       if (share.hasPassword) {
         labels.push(this.t("memories", "Password protected"));
       }

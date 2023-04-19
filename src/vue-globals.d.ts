@@ -1,11 +1,11 @@
-import { constants } from "./services/Utils";
-import { translate as t, translatePlural as n } from "@nextcloud/l10n";
+import { type constants } from "./services/Utils";
+import type { translate, translatePlural } from "@nextcloud/l10n";
 
 declare module "vue" {
   interface ComponentCustomProperties {
     // GlobalMixin.ts
-    t: typeof t;
-    n: typeof n;
+    t: typeof translate;
+    n: typeof translatePlural;
 
     c: typeof constants.c;
 
@@ -31,14 +31,8 @@ declare module "vue" {
     config_albumListSort: 1 | 2;
     config_eventName: string;
 
-    updateSetting(setting: string): Promise<void>;
-    updateLocalSetting({
-      setting,
-      value,
-    }: {
-      setting: string;
-      value: any;
-    }): void;
+    updateSetting: (setting: string) => Promise<void>;
+    updateLocalSetting: (opts: { setting: string; value: any }) => void;
   }
 }
 

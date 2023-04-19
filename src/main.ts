@@ -1,5 +1,3 @@
-/// <reference types="@nextcloud/typings" />
-
 import "reflect-metadata";
 import Vue from "vue";
 import VueVirtualScroller from "vue-virtual-scroller";
@@ -10,11 +8,11 @@ import GlobalMixin from "./mixins/GlobalMixin";
 import App from "./App.vue";
 import Admin from "./Admin.vue";
 import router from "./router";
-import { Route } from "vue-router";
 import { generateFilePath } from "@nextcloud/router";
 import { getRequestToken } from "@nextcloud/auth";
-import { IPhoto } from "./types";
 
+import type { Route } from "vue-router";
+import type { IPhoto } from "./types";
 import type PlyrType from "plyr";
 import type videojsType from "video.js";
 
@@ -61,7 +59,7 @@ globalThis.windowInnerWidth = window.innerWidth;
 globalThis.windowInnerHeight = window.innerHeight;
 
 // CSP config for webpack dynamic chunk loading
-__webpack_nonce__ = window.btoa(getRequestToken());
+__webpack_nonce__ = window.btoa(getRequestToken() ?? "");
 
 // Correct the root of the app for chunk loading
 // OC.linkTo matches the apps folders
@@ -71,21 +69,17 @@ __webpack_public_path__ = generateFilePath("memories", "", "js/");
 
 // Generate client id for this instance
 // Does not need to be cryptographically secure
-const getClientId = () =>
+const getClientId = (): string =>
   Math.random().toString(36).substring(2, 15).padEnd(12, "0");
 globalThis.videoClientId = getClientId();
-globalThis.videoClientIdPersistent = localStorage.getItem(
-  "videoClientIdPersistent"
+globalThis.videoClientIdPersistent =
+  localStorage.getItem("videoClientIdPersistent") ?? getClientId();
+localStorage.setItem(
+  "videoClientIdPersistent",
+  globalThis.videoClientIdPersistent
 );
-if (!globalThis.videoClientIdPersistent) {
-  globalThis.videoClientIdPersistent = getClientId();
-  localStorage.setItem(
-    "videoClientIdPersistent",
-    globalThis.videoClientIdPersistent
-  );
-}
 
-Vue.mixin(GlobalMixin);
+Vue.mixin(GlobalMixin as any);
 Vue.use(VueVirtualScroller);
 Vue.component("XImg", XImg);
 

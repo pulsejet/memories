@@ -112,7 +112,7 @@ export default defineComponent({
 
   data: () => {
     return {
-      photo: null as IPhoto,
+      photo: null as IPhoto | null,
       loading: 0,
     };
   },
@@ -127,7 +127,7 @@ export default defineComponent({
     isVideo() {
       return (
         this.photo &&
-        (this.photo.mimetype.startsWith("video/") ||
+        (this.photo.mimetype?.startsWith("video/") ||
           this.photo.flag & this.c.FLAG_IS_VIDEO)
       );
     },
@@ -160,32 +160,32 @@ export default defineComponent({
     },
 
     async sharePreview() {
-      const src = utils.getPreviewUrl(this.photo, false, 2048);
+      const src = utils.getPreviewUrl(this.photo!, false, 2048);
       this.shareWithHref(src, true);
     },
 
     async shareHighRes() {
-      const fileid = this.photo.fileid;
+      const fileid = this.photo!.fileid;
       const src = this.isVideo
         ? API.VIDEO_TRANSCODE(fileid, "max.mov")
-        : API.IMAGE_DECODABLE(fileid, this.photo.etag);
+        : API.IMAGE_DECODABLE(fileid, this.photo!.etag);
       this.shareWithHref(src, !this.isVideo);
     },
 
     async shareOriginal() {
-      this.shareWithHref(dav.getDownloadLink(this.photo));
+      this.shareWithHref(dav.getDownloadLink(this.photo!));
     },
 
     async shareLink() {
       this.l(async () => {
-        const fileInfo = (await dav.getFiles([this.photo]))[0];
+        const fileInfo = (await dav.getFiles([this.photo!]))[0];
         globalThis.shareNodeLink(fileInfo.filename, true);
       });
       this.close();
     },
 
     async shareWithHref(href: string, replaceExt = false) {
-      let blob: Blob;
+      let blob: Blob | undefined;
       await this.l(async () => {
         const res = await axios.get(href, { responseType: "blob" });
         blob = res.data;
@@ -196,11 +196,11 @@ export default defineComponent({
         return;
       }
 
-      let basename = this.photo.basename;
+      let basename = this.photo?.basename ?? "blank";
 
       if (replaceExt) {
         // Fix basename extension
-        let targetExts = [];
+        let targetExts: string[] = [];
         if (blob.type === "image/png") {
           targetExts = ["png"];
         } else {
@@ -208,7 +208,8 @@ export default defineComponent({
         }
 
         // Append extension if not found
-        if (!targetExts.includes(basename.split(".").pop().toLowerCase())) {
+        const baseExt = basename.split(".").pop()?.toLowerCase() ?? "";
+        if (!targetExts.includes(baseExt)) {
           basename += "." + targetExts[0];
         }
       }

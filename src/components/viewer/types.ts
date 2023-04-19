@@ -4,10 +4,15 @@ import { IPhoto } from "../../types";
 
 type PsAugment = {
   data: _SlideData & {
-    photo?: IPhoto;
+    src: string;
+    msrc: string;
+    photo: IPhoto;
   };
 };
-export type PsSlide = Slide & PsAugment;
+export type PsSlide = Slide &
+  PsAugment & {
+    content: PsContent;
+  };
 export type PsContent = Content & PsAugment;
 export type PsEvent = {
   content: PsContent;

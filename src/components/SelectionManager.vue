@@ -103,27 +103,39 @@ export default defineComponent({
   mixins: [UserConfig],
 
   props: {
-    heads: Object as PropType<{ [dayid: number]: IHeadRow }>,
+    heads: {
+      type: Object as PropType<{ [dayid: number]: IHeadRow }>,
+      required: true,
+    },
     /** List of rows for multi selection */
-    rows: Array as PropType<IRow[]>,
+    rows: {
+      type: Array as PropType<IRow[]>,
+      required: true,
+    },
     /** Rows are in ascending order (desc is normal) */
-    isreverse: Boolean,
+    isreverse: {
+      type: Boolean,
+      required: true,
+    },
     /** Recycler element to scroll during touch multi-select */
-    recycler: Object,
+    recycler: {
+      type: HTMLDivElement,
+      required: false,
+    },
   },
 
   data: () => ({
     show: false,
     size: 0,
     selection: new Map<number, IPhoto>(),
-    defaultActions: null as ISelectionAction[],
+    defaultActions: null! as ISelectionAction[],
 
-    touchAnchor: null as IPhoto,
-    prevTouch: null as Touch,
+    touchAnchor: null as IPhoto | null,
+    prevTouch: null as Touch | null,
     touchTimer: 0,
     touchMoved: false,
-    touchPrevSel: null as Selection,
-    prevOver: null as IPhoto,
+    touchPrevSel: null as Selection | null,
+    prevOver: null as IPhoto | null,
     touchScrollInterval: 0,
     touchScrollDelta: 0,
   }),
@@ -223,6 +235,14 @@ export default defineComponent({
 
     deletePhotos(photos: IPhoto[]) {
       this.$emit("delete", photos);
+    },
+
+    deleteSelectedPhotosById(delIds: number[], selection: Selection) {
+      return this.deletePhotos(
+        delIds
+          .map((id) => selection.get(id))
+          .filter((p): p is IPhoto => p !== undefined)
+      );
     },
 
     updateLoading(delta: number) {
@@ -351,7 +371,7 @@ export default defineComponent({
       window.clearTimeout(this.touchTimer);
       this.touchTimer = 0;
       this.touchMoved = false;
-      this.prevOver = undefined;
+      this.prevOver = null;
 
       window.cancelAnimationFrame(this.touchScrollInterval);
       this.touchScrollInterval = 0;
@@ -419,7 +439,8 @@ export default defineComponent({
           let frameCount = 3;
 
           const fun = () => {
-            this.recycler.$el.scrollTop += this.touchScrollDelta;
+            if (!this.prevTouch) return;
+            this.recycler!.scrollTop += this.touchScrollDelta;
 
             if (frameCount++ >= 3) {
               this.touchMoveSelect(this.prevTouch, rowIdx);
@@ -442,11 +463,14 @@ export default defineComponent({
 
     /** Multi-select triggered by touchmove */
     touchMoveSelect(touch: Touch, rowIdx: number) {
+      // Assertions
+      if (!this.touchAnchor) return;
+
       // Which photo is the cursor over, if any
       const elem: any = document
         .elementFromPoint(touch.clientX, touch.clientY)
         ?.closest(".p-outer-super");
-      let overPhoto: IPhoto = elem?.__vue__?.data;
+      let overPhoto: IPhoto | null = elem?.__vue__?.data;
       if (overPhoto && overPhoto.flag & this.c.FLAG_PLACEHOLDER)
         overPhoto = null;
 
@@ -460,7 +484,8 @@ export default defineComponent({
         // days reverse XOR rows reverse
         let reverse: boolean;
         if (overPhoto.dayid === this.touchAnchor.dayid) {
-          const l = overPhoto.d.detail;
+          const l = overPhoto?.d?.detail;
+          if (!l) return; // Shouldn't happen
           const ai = l.indexOf(this.touchAnchor);
           const oi = l.indexOf(overPhoto);
           if (ai === -1 || oi === -1) return; // Shouldn't happen
@@ -474,14 +499,16 @@ export default defineComponent({
 
         // Walk over rows
         let i = rowIdx;
-        let j = this.rows[i].photos.indexOf(this.touchAnchor);
+        let j = this.rows[i].photos?.indexOf(this.touchAnchor) ?? -2;
+        if (j === -2) return; // row is not initialized yet?!
         while (true) {
           if (j < 0) {
             while (i > 0 && !this.rows[--i].photos);
-            if (!this.rows[i].photos) break;
-            j = this.rows[i].photos.length - 1;
+            const plen = this.rows[i].photos?.length;
+            if (!plen) break;
+            j = plen - 1;
             continue;
-          } else if (j >= this.rows[i].photos.length) {
+          } else if (j >= this.rows[i].photos!.length) {
             while (i < this.rows.length - 1 && !this.rows[++i].photos);
             if (!this.rows[i].photos) break;
             j = 0;
@@ -549,7 +576,7 @@ export default defineComponent({
       }
 
       if (!noUpdate) {
-        this.updateHeadSelected(this.heads[photo.d.dayid]);
+        this.updateHeadSelected(this.heads[photo.dayid]);
         this.$forceUpdate();
       }
     },
@@ -557,11 +584,11 @@ export default defineComponent({
     /** Multi-select */
     selectMulti(photo: IPhoto, rows: IRow[], rowIdx: number) {
       const pRow = rows[rowIdx];
-      const pIdx = pRow.photos.indexOf(photo);
+      const pIdx = pRow.photos?.indexOf(photo) ?? -1;
       if (pIdx === -1) return;
 
       const updateDaySet = new Set<number>();
-      let behind = [];
+      let behind: IPhoto[] = [];
       let behindFound = false;
 
       // Look behind
@@ -570,16 +597,16 @@ export default defineComponent({
         if (rows[i].type !== IRowType.PHOTOS) continue;
         if (!rows[i].photos?.length) break;
 
-        const sj = i === rowIdx ? pIdx : rows[i].photos.length - 1;
+        const sj = i === rowIdx ? pIdx : rows[i].photos!.length - 1;
         for (let j = sj; j >= 0; j--) {
-          const p = rows[i].photos[j];
+          const p = rows[i].photos![j];
           if (p.flag & this.c.FLAG_PLACEHOLDER || !p.fileid) continue;
           if (p.flag & this.c.FLAG_SELECTED) {
             behindFound = true;
             break;
           }
           behind.push(p);
-          updateDaySet.add(p.d.dayid);
+          updateDaySet.add(p.dayid);
         }
 
         if (behindFound) break;
@@ -587,23 +614,25 @@ export default defineComponent({
 
       // Select everything behind
       if (behindFound) {
+        const detail = photo.d!.detail!;
+
         // Clear everything in front in this day
-        const pdIdx = photo.d.detail.indexOf(photo);
-        for (let i = pdIdx + 1; i < photo.d.detail.length; i++) {
-          const p = photo.d.detail[i];
-          if (p.flag & this.c.FLAG_SELECTED) this.selectPhoto(p, false, true);
+        const pdIdx = detail.indexOf(photo);
+        for (let i = pdIdx + 1; i < detail.length; i++) {
+          if (detail[i].flag & this.c.FLAG_SELECTED)
+            this.selectPhoto(detail[i], false, true);
         }
 
         // Clear everything else in front
         Array.from(this.selection.values())
           .filter((p: IPhoto) => {
             return this.isreverse
-              ? p.d.dayid > photo.d.dayid
-              : p.d.dayid < photo.d.dayid;
+              ? p.dayid > photo.dayid
+              : p.dayid < photo.dayid;
           })
           .forEach((photo: IPhoto) => {
             this.selectPhoto(photo, false, true);
-            updateDaySet.add(photo.d.dayid);
+            updateDaySet.add(photo.dayid);
           });
 
         behind.forEach((p) => this.selectPhoto(p, true, true));
@@ -615,8 +644,8 @@ export default defineComponent({
     /** Select or deselect all photos in a head */
     selectHead(head: IHeadRow) {
       head.selected = !head.selected;
-      for (const row of head.day.rows) {
-        for (const photo of row.photos) {
+      for (const row of head.day.rows ?? []) {
+        for (const photo of row.photos ?? []) {
           this.selectPhoto(photo, head.selected, true);
         }
       }
@@ -628,8 +657,8 @@ export default defineComponent({
       let selected = true;
 
       // Check if all photos are selected
-      for (const row of head.day.rows) {
-        for (const photo of row.photos) {
+      for (const row of head.day.rows ?? []) {
+        for (const photo of row.photos ?? []) {
           if (!(photo.flag & this.c.FLAG_SELECTED)) {
             selected = false;
             break;
@@ -647,7 +676,7 @@ export default defineComponent({
       const toClear = only || this.selection.values();
       Array.from(toClear).forEach((photo: IPhoto) => {
         photo.flag &= ~this.c.FLAG_SELECTED;
-        heads.add(this.heads[photo.d.dayid]);
+        heads.add(this.heads[photo.dayid]);
         this.selection.delete(photo.fileid);
         this.selectionChanged();
       });
@@ -663,7 +692,7 @@ export default defineComponent({
 
       // FileID => Photo for new day
       const dayMap = new Map<number, IPhoto>();
-      day.detail.forEach((photo) => {
+      day.detail?.forEach((photo) => {
         dayMap.set(photo.fileid, photo);
       });
 
@@ -674,13 +703,13 @@ export default defineComponent({
         }
 
         // Remove all selections that are not in the new day
-        if (!dayMap.has(fileid)) {
+        const newPhoto = dayMap.get(fileid);
+        if (!newPhoto) {
           this.selection.delete(fileid);
           return;
         }
 
         // Update the photo object
-        const newPhoto = dayMap.get(fileid);
         this.selection.set(fileid, newPhoto);
         newPhoto.flag |= this.c.FLAG_SELECTED;
       });
@@ -749,10 +778,7 @@ export default defineComponent({
       for await (const delIds of dav.deletePhotos(
         Array.from(selection.values())
       )) {
-        const delPhotos = delIds
-          .filter((id) => id)
-          .map((id) => selection.get(id));
-        this.deletePhotos(delPhotos);
+        this.deleteSelectedPhotosById(delIds, selection);
       }
     },
 
@@ -793,12 +819,7 @@ export default defineComponent({
         Array.from(selection.keys()),
         !this.routeIsArchive()
       )) {
-        delIds = delIds.filter((x) => x);
-        if (delIds.length === 0) {
-          continue;
-        }
-        const delPhotos = delIds.map((id) => selection.get(id));
-        this.deletePhotos(delPhotos);
+        this.deleteSelectedPhotosById(delIds, selection);
       }
     },
 
@@ -858,10 +879,7 @@ export default defineComponent({
         <string>name,
         Array.from(selection.values())
       )) {
-        const delPhotos = delIds
-          .filter((x) => x)
-          .map((id) => selection.get(id));
-        this.deletePhotos(delPhotos);
+        this.deleteSelectedPhotosById(delIds, selection);
       }
     },
 

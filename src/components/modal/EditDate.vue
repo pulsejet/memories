@@ -176,16 +176,18 @@ export default defineComponent({
     },
 
     dateDiff() {
-      return this.date.getTime() - this.dateLast.getTime();
+      return this.date && this.dateLast
+        ? this.date.getTime() - this.dateLast.getTime()
+        : 0;
     },
 
     origDateNewest() {
-      return new Date(this.sortedPhotos[0].datetaken);
+      return new Date(this.sortedPhotos[0].datetaken!);
     },
 
     origDateOldest() {
       return new Date(
-        this.sortedPhotos[this.sortedPhotos.length - 1].datetaken
+        this.sortedPhotos[this.sortedPhotos.length - 1].datetaken!
       );
     },
 
@@ -212,13 +214,16 @@ export default defineComponent({
 
   methods: {
     init() {
-      const photos = (this.sortedPhotos = [...this.photos] as IPhoto[]);
+      // Filter out only photos that have a datetaken
+      const photos = (this.sortedPhotos = this.photos.filter(
+        (photo) => photo.datetaken !== undefined
+      ));
 
       // Sort photos by datetaken descending
-      photos.sort((a, b) => b.datetaken - a.datetaken);
+      photos.sort((a, b) => b.datetaken! - a.datetaken!);
 
       // Get date of newest photo
-      let date = new Date(photos[0].datetaken);
+      let date = new Date(photos[0].datetaken!);
       this.year = date.getUTCFullYear().toString();
       this.month = (date.getUTCMonth() + 1).toString();
       this.day = date.getUTCDate().toString();
@@ -228,7 +233,7 @@ export default defineComponent({
 
       // Get date of oldest photo
       if (photos.length > 1) {
-        date = new Date(photos[photos.length - 1].datetaken);
+        date = new Date(photos[photos.length - 1].datetaken!);
         this.yearLast = date.getUTCFullYear().toString();
         this.monthLast = (date.getUTCMonth() + 1).toString();
         this.dayLast = date.getUTCDate().toString();
@@ -262,7 +267,7 @@ export default defineComponent({
         return undefined;
       }
 
-      if (this.sortedPhotos.length === 0) {
+      if (this.sortedPhotos.length === 0 || !this.date) {
         return undefined;
       }
 
@@ -278,7 +283,7 @@ export default defineComponent({
     },
 
     newestChange(time = false) {
-      if (this.sortedPhotos.length === 0) {
+      if (this.sortedPhotos.length === 0 || !this.date) {
         return;
       }
 

@@ -12,7 +12,7 @@ import { defineComponent } from "vue";
 import UserConfig from "../mixins/UserConfig";
 import Folder from "./frame/Folder.vue";
 
-import { IFolder } from "../types";
+import type { IFolder } from "../types";
 
 export default defineComponent({
   name: "ClusterGrid",

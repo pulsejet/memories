@@ -46,8 +46,8 @@ export default defineComponent({
   data: () => ({
     isSidebarShown: false,
     sidebarWidth: 400,
-    trapElements: [],
-    _mutationObserver: null,
+    trapElements: [] as HTMLElement[],
+    _mutationObserver: null! as MutationObserver,
   }),
 
   beforeMount() {
@@ -87,7 +87,8 @@ export default defineComponent({
      * That way we can adjust the focusTrap
      */
     handleBodyMutation(mutations: MutationRecord[]) {
-      const test = (node: HTMLElement) =>
+      const test = (node: Node): node is HTMLElement =>
+        node instanceof HTMLElement &&
         node?.classList?.contains("v-popper__popper");
 
       mutations.forEach((mutation) => {

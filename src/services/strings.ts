@@ -5,7 +5,9 @@ const config_facerecognitionEnabled = Boolean(
   loadState("memories", "facerecognitionEnabled", <string>"")
 );
 
-export function emptyDescription(routeName: string): string {
+type RouteNameType = string | null | undefined;
+
+export function emptyDescription(routeName: RouteNameType): string {
   switch (routeName) {
     case "timeline":
       return t(
@@ -45,7 +47,7 @@ export function emptyDescription(routeName: string): string {
   }
 }
 
-export function viewName(routeName: string): string {
+export function viewName(routeName: RouteNameType): string {
   switch (routeName) {
     case "timeline":
       return t("memories", "Your Timeline");

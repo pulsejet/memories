@@ -86,7 +86,7 @@ export function randomSubarray(arr: any[], size: number) {
 export function setRenewingTimeout(
   ctx: any,
   name: string,
-  callback: () => void | null,
+  callback: (() => void) | null,
   delay: number
 ) {
   if (ctx[name]) window.clearTimeout(ctx[name]);

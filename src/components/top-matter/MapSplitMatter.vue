@@ -65,10 +65,10 @@ const OSM_ATTRIBUTION =
 const CLUSTER_TRANSITION_TIME = 300;
 
 type IMarkerCluster = {
-  id?: number;
+  id: number;
   center: [number, number];
   count: number;
-  preview?: IPhoto;
+  preview: IPhoto;
   dummy?: boolean;
 };
 

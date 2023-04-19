@@ -641,7 +641,7 @@ export default defineComponent({
 
     loading: 0,
 
-    status: null as IStatus,
+    status: null as IStatus | null,
   }),
 
   mounted() {
@@ -680,7 +680,7 @@ export default defineComponent({
       }
     },
 
-    async update(key: string, value = null) {
+    async update(key: string, value: any = null) {
       value = value ?? this[key];
       const setting = settings[key];
 
@@ -727,7 +727,7 @@ export default defineComponent({
         "This may also cause all photos to be re-indexed!"
       );
       const msg =
-        (this.status.gis_count ? warnSetup : warnLong) + " " + warnReindex;
+        (this.status?.gis_count ? warnSetup : warnLong) + " " + warnReindex;
       if (!confirm(msg)) {
         event.preventDefault();
         event.stopPropagation();
@@ -805,6 +805,8 @@ export default defineComponent({
     },
 
     gisStatus() {
+      if (!this.status) return "";
+
       if (typeof this.status.gis_type !== "number") {
         return this.status.gis_type;
       }
@@ -825,7 +827,7 @@ export default defineComponent({
     },
 
     gisStatusType() {
-      return typeof this.status.gis_type !== "number" ||
+      return typeof this.status?.gis_type !== "number" ||
         this.status.gis_type <= 0
         ? "error"
         : "success";
@@ -836,6 +838,8 @@ export default defineComponent({
     },
 
     vaapiStatusText(): string {
+      if (!this.status) return "";
+
       const dev = "/dev/dri/renderD128";
       if (this.status.vaapi_dev === "ok") {
         return this.t("memories", "VA-API device ({dev}) is readable", { dev });
@@ -855,7 +859,7 @@ export default defineComponent({
     },
 
     vaapiStatusType(): string {
-      return this.status.vaapi_dev === "ok" ? "success" : "error";
+      return this.status?.vaapi_dev === "ok" ? "success" : "error";
     },
   },
 });

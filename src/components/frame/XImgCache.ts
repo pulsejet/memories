@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
 /** Change stickiness for a BLOB url */
 export async function sticky(url: string, delta: number) {
   if (!BLOB_STICKY.has(url)) BLOB_STICKY.set(url, 0);
-  const val = BLOB_STICKY.get(url) + delta;
+  const val = BLOB_STICKY.get(url)! + delta;
   if (val <= 0) {
     BLOB_STICKY.delete(url);
   } else {
@@ -62,15 +62,16 @@ export async function fetchImage(url: string) {
   startWorker();
 
   // Check memcache entry
-  if (BLOB_CACHE.has(url)) return BLOB_CACHE.get(url)[1];
+  let entry = BLOB_CACHE.get(url);
+  if (entry) return entry[1];
 
   // Fetch image
   const blobUrl = await importer<typeof w.fetchImageSrc>("fetchImageSrc")(url);
 
   // Check memcache entry again and revoke if it was added in the meantime
-  if (BLOB_CACHE.has(url)) {
+  if ((entry = BLOB_CACHE.get(url))) {
     URL.revokeObjectURL(blobUrl);
-    return BLOB_CACHE.get(url)[1];
+    return entry[1];
   }
 
   // Create new memecache entry

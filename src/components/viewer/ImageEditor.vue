@@ -45,8 +45,8 @@ export default defineComponent({
   },
 
   data: () => ({
-    exif: null as any,
-    imageEditor: null as FilerobotImageEditor,
+    exif: null as Object | null,
+    imageEditor: null as FilerobotImageEditor | null,
   }),
 
   computed: {
@@ -116,14 +116,14 @@ export default defineComponent({
     },
 
     defaultSavedImageName(): string {
-      return this.photo.basename;
+      return this.photo.basename || "";
     },
 
     defaultSavedImageType(): "jpeg" | "png" | "webp" {
       if (
-        ["image/jpeg", "image/png", "image/webp"].includes(this.photo.mimetype)
+        ["image/jpeg", "image/png", "image/webp"].includes(this.photo.mimetype!)
       ) {
-        return this.photo.mimetype.split("/")[1] as any;
+        return this.photo.mimetype!.split("/")[1] as any;
       }
       return "jpeg";
     },
@@ -169,7 +169,7 @@ export default defineComponent({
   methods: {
     async getImage(): Promise<HTMLImageElement> {
       const img = new Image();
-      img.name = this.photo.basename;
+      img.name = this.defaultSavedImageName;
 
       await new Promise(async (resolve) => {
         img.onload = resolve;
@@ -200,11 +200,11 @@ export default defineComponent({
      */
     async onSave(
       data: {
-        name?: string;
+        name: string;
+        extension: string;
         width?: number;
         height?: number;
         quality?: number;
-        extension?: string;
         fullName?: string;
         imageBase64?: string;
       },

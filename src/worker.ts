@@ -1,9 +1,17 @@
 /** Set the receiver function for a worker */
-export function workerExport(handlers: {
-  [key: string]: (...data: any) => Promise<any>;
-}) {
+export function workerExport(
+  handlers: Record<string, (...data: any) => Promise<any>>
+): void {
   /** Promise API for web worker */
-  self.onmessage = async ({ data }) => {
+  self.onmessage = async ({
+    data,
+  }: {
+    data: {
+      id: number;
+      name: string;
+      args: any[];
+    };
+  }) => {
     try {
       const handler = handlers[data.name];
       if (!handler) throw new Error(`No handler for type ${data.name}`);
@@ -23,22 +31,23 @@ export function workerExport(handlers: {
 
 /** Get the CALL function for a worker. Call this only once. */
 export function workerImporter(worker: Worker) {
-  const promises: { [id: string]: any } = {};
+  const promises = new Map<number, { resolve: any; reject: any }>();
+
   worker.onmessage = ({ data }: { data: any }) => {
     const { id, resolve, reject } = data;
-    if (resolve) promises[id].resolve(resolve);
-    if (reject) promises[id].reject(reject);
-    delete promises[id];
+    if (resolve) promises.get(id)?.resolve(resolve);
+    if (reject) promises.get(id)?.reject(reject);
+    promises.delete(id);
   };
-  return function importer<F extends (...args: any) => Promise<any>>(
-    name: string
-  ): (...args: Parameters<F>) => ReturnType<F> {
-    return function fun(...args: any) {
-      return new Promise((resolve, reject) => {
+
+  type PromiseFun = (...args: any) => Promise<any>;
+  return function importer<F extends PromiseFun>(name: string) {
+    return async function fun(...args: Parameters<F>) {
+      return await new Promise<ReturnType<Awaited<F>>>((resolve, reject) => {
         const id = Math.random();
-        promises[id] = { resolve, reject };
+        promises.set(id, { resolve, reject });
         worker.postMessage({ id, name, args });
       });
-    } as any;
+    };
   };
 }

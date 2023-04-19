@@ -92,7 +92,7 @@ export default defineComponent({
   mixins: [UserConfig],
 
   data: () => ({
-    photos: null as IPhoto[],
+    photos: null as IPhoto[] | null,
     sections: [] as number[],
     show: false,
     processing: false,
@@ -183,7 +183,7 @@ export default defineComponent({
       this.processing = true;
 
       // Update exif fields
-      const calls = this.photos.map((p) => async () => {
+      const calls = this.photos!.map((p) => async () => {
         try {
           let dirty = false;
           const fileid = p.fileid;
@@ -223,7 +223,7 @@ export default defineComponent({
           }
         } finally {
           done++;
-          this.progress = Math.round((done * 100) / this.photos.length);
+          this.progress = Math.round((done * 100) / this.photos!.length);
         }
       });
 

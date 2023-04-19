@@ -6,7 +6,7 @@ export type IFileInfo = {
   /** Full file name, e.g. /pi/test/Qx0dq7dvEXA.jpg */
   filename: string;
   /** Original file name, e.g. /files/admin/pi/test/Qx0dq7dvEXA.jpg */
-  originalFilename?: string;
+  originalFilename: string;
   /** Base name of file e.g. Qx0dq7dvEXA.jpg */
   basename: string;
 };
@@ -36,7 +36,7 @@ export type IPhoto = {
   /** Bit flags */
   flag: number;
   /** DayID from server */
-  dayid?: number;
+  dayid: number;
   /** Width of full image */
   w?: number;
   /** Height of full image */
@@ -58,7 +58,7 @@ export type IPhoto = {
   /** Reference to day object */
   d?: IDay;
   /** Reference to exif object */
-  imageInfo?: IImageInfo;
+  imageInfo?: IImageInfo | null;
 
   /** Face detection ID */
   faceid?: number;
@@ -174,7 +174,7 @@ export type IRow = {
   photos?: IPhoto[];
 
   /** Height in px of the row */
-  size?: number;
+  size: number;
   /** Count of placeholders to create */
   pct?: number;
   /** Don't remove dom element */

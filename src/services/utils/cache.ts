@@ -35,13 +35,13 @@ export async function openCache() {
 }
 
 /** Get data from the cache */
-export async function getCachedData<T>(url: string): Promise<T> {
+export async function getCachedData<T>(url: string): Promise<T | null> {
   if (!window.caches) return null;
   const cache = staticCache || (await openCache());
   if (!cache) return null;
 
   const cachedResponse = await cache.match(url);
-  if (!cachedResponse || !cachedResponse.ok) return undefined;
+  if (!cachedResponse || !cachedResponse.ok) return null;
   return await cachedResponse.json();
 }
 

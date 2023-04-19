@@ -13,7 +13,7 @@
       <NcActions :inline="1">
         <NcActionButton
           :aria-label="t('memories', 'Rename person')"
-          @click="$refs.editModal.open()"
+          @click="$refs.editModal?.open()"
           close-after-click
         >
           {{ t("memories", "Rename person") }}
@@ -21,7 +21,7 @@
         </NcActionButton>
         <NcActionButton
           :aria-label="t('memories', 'Merge with different person')"
-          @click="$refs.mergeModal.open()"
+          @click="$refs.mergeModal?.open()"
           close-after-click
         >
           {{ t("memories", "Merge with different person") }}
@@ -36,7 +36,7 @@
         </NcActionCheckbox>
         <NcActionButton
           :aria-label="t('memories', 'Remove person')"
-          @click="$refs.deleteModal.open()"
+          @click="$refs.deleteModal?.open()"
           close-after-click
         >
           {{ t("memories", "Remove person") }}
@@ -104,7 +104,7 @@ export default defineComponent({
     },
 
     back() {
-      this.$router.push({ name: this.$route.name });
+      this.$router.push({ name: this.$route.name as string });
     },
 
     changeShowFaceRect() {

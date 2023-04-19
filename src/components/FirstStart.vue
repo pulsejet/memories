@@ -59,7 +59,7 @@ import { getCurrentUser } from "@nextcloud/auth";
 import axios from "@nextcloud/axios";
 
 import banner from "../assets/banner.svg";
-import { IDay } from "../types";
+import type { IDay } from "../types";
 import { API } from "../services/API";
 
 export default defineComponent({

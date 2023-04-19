@@ -110,7 +110,7 @@ export default defineComponent({
     },
 
     handleClose() {
-      emit("memories:sidebar:closed", null);
+      emit("memories:sidebar:closed", {});
     },
 
     handleOpen() {
@@ -120,7 +120,7 @@ export default defineComponent({
         if (e.key.length === 1) e.stopPropagation();
       });
 
-      emit("memories:sidebar:opened", null);
+      emit("memories:sidebar:opened", {});
     },
 
     handleNativeOpen() {

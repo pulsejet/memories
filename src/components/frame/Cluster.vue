@@ -36,7 +36,7 @@ import { defineComponent, PropType } from "vue";
 import { getCurrentUser } from "@nextcloud/auth";
 import NcCounterBubble from "@nextcloud/vue/dist/Components/NcCounterBubble";
 
-import { IAlbum, ICluster, IFace } from "../../types";
+import type { IAlbum, ICluster, IFace, IPhoto } from "../../types";
 import { getPreviewUrl } from "../../services/utils/helpers";
 import errorsvg from "../../assets/error.svg";
 
@@ -66,7 +66,11 @@ export default defineComponent({
       if (this.error) return errorsvg;
 
       if (this.album) {
-        const mock = { fileid: this.album.last_added_photo, etag: "", flag: 0 };
+        const mock = {
+          fileid: this.album.last_added_photo,
+          etag: this.album.album_id,
+          flag: 0,
+        } as unknown as IPhoto;
         return getPreviewUrl(mock, true, 512);
       }
 
