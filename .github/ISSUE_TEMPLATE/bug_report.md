@@ -1,10 +1,9 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
+title: ""
 labels: needs triage
-assignees: ''
-
+assignees: ""
 ---
 
 **Describe the bug**
@@ -24,6 +23,9 @@ If applicable, add screenshots to help explain your problem.
 
 **Additional context**
 Add any other context about the problem here.
+
+- Any errors in the JS console?
+- Any errors in the Nextcloud server logs?
 
 **Important: Are all of the following are true?**
 
