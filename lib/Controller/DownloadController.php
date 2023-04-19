@@ -133,10 +133,10 @@ class DownloadController extends GenericApiController
             // check if http_range is sent by browser
             $range = $this->request->getHeader('Range');
             if (!empty($range)) {
-                [$sizeUnit, $rangeOrig] = explode('=', $range, 2);
+                [$sizeUnit, $rangeOrig] = Util::explode_exact('=', $range, 2);
                 if ('bytes' === $sizeUnit) {
                     // http://tools.ietf.org/id/draft-ietf-http-range-retrieval-00.txt
-                    [$range, $extra] = explode(',', $rangeOrig, 2);
+                    [$range, $extra] = Util::explode_exact(',', $rangeOrig, 2);
                 }
             }
 
@@ -147,7 +147,7 @@ class DownloadController extends GenericApiController
 
             // Get file reading parameters
             $size = $file->getSize();
-            [$seekStart, $seekEnd] = explode('-', $range, 2);
+            [$seekStart, $seekEnd] = Util::explode_exact('-', $range, 2);
             $seekEnd = (empty($seekEnd)) ? ($size - 1) : min(abs((int) $seekEnd), $size - 1);
             $seekStart = (empty($seekStart) || $seekEnd < abs((int) $seekStart)) ? 0 : max(abs((int) $seekStart), 0);
 

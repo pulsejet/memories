@@ -305,6 +305,20 @@ class Util
     }
 
     /**
+     * Explode a string into fixed number of components.
+     *
+     * @param string $delimiter Delimiter
+     * @param string $string    String to explode
+     * @param int    $count     Number of components
+     *
+     * @return string[] Array of components
+     */
+    public static function explode_exact(string $delimiter, string $string, int $count): array
+    {
+        return array_pad(explode($delimiter, $string, $count), $count, '');
+    }
+
+    /**
      * Get a system config key with the correct default.
      *
      * @param string     $key     System config key
