@@ -6,7 +6,7 @@ import XImg from "./components/frame/XImg.vue";
 import GlobalMixin from "./mixins/GlobalMixin";
 
 import App from "./App.vue";
-import Admin from "./Admin.vue";
+import Admin from "./components/admin/AdminMain.vue";
 import router from "./router";
 import { generateFilePath } from "@nextcloud/router";
 import { getRequestToken } from "@nextcloud/auth";
