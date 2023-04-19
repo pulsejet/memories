@@ -54,7 +54,7 @@ async function flushPreviewQueue() {
   fetchPreviewQueue = [];
 
   // Respond to URL
-  const resolve = async (url: string, res: Response) => {
+  const resolve = async (url: string, res: Response, blob?: Blob) => {
     // Response body can be read only once
     const clone = res.clone();
 
@@ -62,9 +62,9 @@ async function flushPreviewQueue() {
     // This is because we want to ignore this response in case
     // it came from a multipreview, so that we can try fetching
     // the single image instead
-    const blob = await res.blob();
+    blob ??= await res.blob();
     pendingUrls.get(url)?.forEach((cb) => {
-      cb?.resolve?.(blob);
+      cb?.resolve?.(blob!);
     });
     pendingUrls.delete(url);
 
@@ -187,7 +187,7 @@ async function flushPreviewQueue() {
           if (p.reqid === params.reqid && !p.done) {
             try {
               const dummy = getResponse(imgBlob, params!.type, headers);
-              await resolve(p.origUrl, dummy);
+              await resolve(p.origUrl, dummy, imgBlob);
               p.done = true;
             } catch (e) {
               // In case of error, we want to try fetching the single
