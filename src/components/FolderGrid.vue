@@ -35,7 +35,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100% / 3, 165px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100% / 3, 180px), 1fr));
 
   width: calc(100% - 40px); // leave space for scroller
   @media (max-width: 768px) {
