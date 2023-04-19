@@ -6,7 +6,6 @@ import XImg from './components/frame/XImg.vue';
 import GlobalMixin from './mixins/GlobalMixin';
 
 import App from './App.vue';
-import Admin from './components/admin/AdminMain.vue';
 import router from './router';
 import { generateFilePath } from '@nextcloud/router';
 import { getRequestToken } from '@nextcloud/auth';
@@ -102,9 +101,11 @@ let app = null;
 
 const adminSection = document.getElementById('memories-admin-content');
 if (adminSection) {
-  app = new Vue({
-    el: '#memories-admin-content',
-    render: (h) => h(Admin),
+  import('./components/admin/AdminMain.vue').then((module) => {
+    app = new Vue({
+      el: '#memories-admin-content',
+      render: (h) => h(module.default),
+    });
   });
   globalThis.mode = 'admin';
 } else {
