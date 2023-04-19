@@ -28,7 +28,6 @@
     "Memories supports offline reverse geocoding using the OpenStreetMaps data on MySQL and Postgres." : "Приложението Memories поддържа обратно геокодиране офлайн, като използва данните на OpenStreetMaps в MySQL и Postgres.",
     "You need to download the planet data into your database. This is highly recommended and has low overhead." : "Трябва да изтеглите планетарните данни във вашата база данни. Това е силно препоръчително и има нисък режиен разход.",
     "If the button below does not work for importing the planet data, use the following command:" : "Ако долният бутон за импортиране на планетарни данни не работи, използвайте следната команда:",
-    "Note: the geometry data is stored in the " : "Забележка: геометричните данни се съхраняват в ",
     "Download planet database" : "Изтегляне на планетарна база данни",
     "Video Streaming" : "Поточно предаване на видео",
     "Live transcoding provides for adaptive streaming of videos using HLS." : "Транскодирането в реално време осигурява адаптивно поточно предаване на видеоклипове с помощта на HLS.",

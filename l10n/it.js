@@ -79,6 +79,7 @@ OC.L10N.register(
     "Share" : "Condividi",
     "Previous" : "Precedente",
     "Next" : "Successivo",
+    "Are you sure you want to delete?" : "Sei sicuro di voler eliminare?",
     "Continue" : "Continua",
     "Undo" : "Annulla",
     "Redo" : "Rifai",

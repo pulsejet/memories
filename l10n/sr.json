@@ -28,7 +28,6 @@
     "Memories supports offline reverse geocoding using the OpenStreetMaps data on MySQL and Postgres." : "Успомене подржавају обрнуто геокодирање ван мреже употребом OpenStreetMaps података на MySQL и Postgres.",
     "You need to download the planet data into your database. This is highly recommended and has low overhead." : "Морате да презумете податке о планети у своју базу података. Ово се снажно препоручује и није превише захтевно.",
     "If the button below does not work for importing the planet data, use the following command:" : "Ако дугме испод не функционше за увоз података о планети, употребите следећу команду:",
-    "Note: the geometry data is stored in the " : "Напомена: подаци о геометрији су сачувани у",
     "Download planet database" : "Преузми базу података планете",
     "Video Streaming" : "Видео стриминг",
     "Live transcoding provides for adaptive streaming of videos using HLS." : "Транскодирање уживо обезбеђује прилагодљиви стриминг видеа употребом HLS.",

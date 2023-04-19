@@ -28,7 +28,6 @@
     "Memories supports offline reverse geocoding using the OpenStreetMaps data on MySQL and Postgres." : "Memories soporta la geo-codificación reversa fuera de línea utilizando las datos de OpenStreeMaps en MySQL y Postgres.",
     "You need to download the planet data into your database. This is highly recommended and has low overhead." : "Debe descargar los datos del planeta en su base de datos. Esto es altamente recomendado y tiene un bajo requerimiento de carga",
     "If the button below does not work for importing the planet data, use the following command:" : "Si el botón a continuación no funciona al importar los datos del planeta, utilice el siguiente comando:",
-    "Note: the geometry data is stored in the " : "Nota: los datos de geometría están guardados en la",
     "Download planet database" : "Descargar base de datos del planeta",
     "Video Streaming" : "Transmisión de Video",
     "Live transcoding provides for adaptive streaming of videos using HLS." : "La transcodificación en vivo proporciona una transmisión adaptativa de videos utilizando HLS.",
