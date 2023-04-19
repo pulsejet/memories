@@ -250,7 +250,7 @@
       {{
         t(
           "memories",
-          "Note: the geometry data is stored in the 'memories_planet_geometry' table, with no prefix."
+          "Note: the geometry data is stored in the memories_planet_geometry table, with no prefix."
         )
       }}
     </p>
