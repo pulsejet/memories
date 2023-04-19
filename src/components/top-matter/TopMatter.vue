@@ -8,17 +8,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import FolderTopMatter from "./FolderTopMatter.vue";
-import ClusterTopMatter from "./ClusterTopMatter.vue";
-import FaceTopMatter from "./FaceTopMatter.vue";
-import AlbumTopMatter from "./AlbumTopMatter.vue";
+import FolderTopMatter from './FolderTopMatter.vue';
+import ClusterTopMatter from './ClusterTopMatter.vue';
+import FaceTopMatter from './FaceTopMatter.vue';
+import AlbumTopMatter from './AlbumTopMatter.vue';
 
-import { TopMatterType } from "../../types";
+import { TopMatterType } from '../../types';
 
 export default defineComponent({
-  name: "TopMatter",
+  name: 'TopMatter',
   components: {
     FolderTopMatter,
     ClusterTopMatter,
@@ -45,18 +45,16 @@ export default defineComponent({
     setTopMatter() {
       this.type = (() => {
         switch (this.$route.name) {
-          case "folders":
+          case 'folders':
             return TopMatterType.FOLDER;
-          case "albums":
+          case 'albums':
             return TopMatterType.ALBUM;
-          case "tags":
-          case "places":
+          case 'tags':
+          case 'places':
             return TopMatterType.CLUSTER;
-          case "recognize":
-          case "facerecognition":
-            return this.$route.params.name
-              ? TopMatterType.FACE
-              : TopMatterType.CLUSTER;
+          case 'recognize':
+          case 'facerecognition':
+            return this.$route.params.name ? TopMatterType.FACE : TopMatterType.CLUSTER;
           default:
             return TopMatterType.NONE;
         }

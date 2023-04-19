@@ -9,11 +9,8 @@
         {{ path }}
 
         <NcActions :inline="1">
-          <NcActionButton
-            :aria-label="t('memories', 'Remove')"
-            @click="remove(index)"
-          >
-            {{ t("memories", "Remove") }}
+          <NcActionButton :aria-label="t('memories', 'Remove')" @click="remove(index)">
+            {{ t('memories', 'Remove') }}
             <template #icon> <CloseIcon :size="20" /> </template>
           </NcActionButton>
         </NcActions>
@@ -22,29 +19,29 @@
 
     <template #buttons>
       <NcButton @click="add" class="button" type="secondary">
-        {{ t("memories", "Add Path") }}
+        {{ t('memories', 'Add Path') }}
       </NcButton>
       <NcButton @click="save" class="button" type="primary">
-        {{ t("memories", "Save") }}
+        {{ t('memories', 'Save') }}
       </NcButton>
     </template>
   </Modal>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import Modal from "./Modal.vue";
+import Modal from './Modal.vue';
 
-import { getFilePickerBuilder } from "@nextcloud/dialogs";
-import NcActions from "@nextcloud/vue/dist/Components/NcActions";
-import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
-import NcButton from "@nextcloud/vue/dist/Components/NcButton";
+import { getFilePickerBuilder } from '@nextcloud/dialogs';
+import NcActions from '@nextcloud/vue/dist/Components/NcActions';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 
-import CloseIcon from "vue-material-design-icons/Close.vue";
+import CloseIcon from 'vue-material-design-icons/Close.vue';
 
 export default defineComponent({
-  name: "MultiPathSelectionModal",
+  name: 'MultiPathSelectionModal',
   components: {
     Modal,
     NcActions,
@@ -68,7 +65,7 @@ export default defineComponent({
   methods: {
     close(list: string[]) {
       this.show = false;
-      this.$emit("close", list);
+      this.$emit('close', list);
     },
 
     open(paths: string[]) {
@@ -85,7 +82,7 @@ export default defineComponent({
         .setMultiSelect(false)
         .setModal(true)
         .setType(1)
-        .addMimeTypeFilter("httpd/unix-directory")
+        .addMimeTypeFilter('httpd/unix-directory')
         .allowDirectories()
         .startAt(initial)
         .build();
@@ -94,11 +91,8 @@ export default defineComponent({
     },
 
     async add() {
-      let newPath = await this.chooseFolder(
-        this.t("memories", "Add a root to your timeline"),
-        "/"
-      );
-      if (newPath === "") newPath = "/";
+      let newPath = await this.chooseFolder(this.t('memories', 'Add a root to your timeline'), '/');
+      if (newPath === '') newPath = '/';
       this.paths.push(newPath);
     },
 

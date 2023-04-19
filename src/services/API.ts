@@ -1,17 +1,17 @@
-import { generateUrl } from "@nextcloud/router";
-import { ClusterTypes } from "../types";
+import { generateUrl } from '@nextcloud/router';
+import { ClusterTypes } from '../types';
 
-const BASE = "/apps/memories/api";
+const BASE = '/apps/memories/api';
 
 const gen = generateUrl;
 
 /** Add auth token to this URL */
 function tok(url: string) {
   const route = vueroute();
-  if (route.name === "folder-share") {
+  if (route.name === 'folder-share') {
     const token = <string>route.params.token;
     url = API.Q(url, { token });
-  } else if (route.name === "album-share") {
+  } else if (route.name === 'album-share') {
     const token = <string>route.params.token;
     url = API.Q(url, { token, albums: token });
   }
@@ -19,31 +19,28 @@ function tok(url: string) {
 }
 
 export enum DaysFilterType {
-  FAVORITES = "fav",
-  VIDEOS = "vid",
-  FOLDER = "folder",
-  ARCHIVE = "archive",
-  ALBUM = "albums",
-  RECOGNIZE = "recognize",
-  FACERECOGNITION = "facerecognition",
-  PLACE = "places",
-  TAG = "tags",
-  MAP_BOUNDS = "mapbounds",
+  FAVORITES = 'fav',
+  VIDEOS = 'vid',
+  FOLDER = 'folder',
+  ARCHIVE = 'archive',
+  ALBUM = 'albums',
+  RECOGNIZE = 'recognize',
+  FACERECOGNITION = 'facerecognition',
+  PLACE = 'places',
+  TAG = 'tags',
+  MAP_BOUNDS = 'mapbounds',
 
-  FACE_RECT = "facerect",
-  RECURSIVE = "recursive",
-  MONTH_VIEW = "monthView",
-  REVERSE = "reverse",
+  FACE_RECT = 'facerect',
+  RECURSIVE = 'recursive',
+  MONTH_VIEW = 'monthView',
+  REVERSE = 'reverse',
 }
 
 export class API {
-  static Q(
-    url: string,
-    query: string | URLSearchParams | Object | undefined | null
-  ) {
+  static Q(url: string, query: string | URLSearchParams | Object | undefined | null) {
     if (!query) return url;
 
-    if (typeof query === "object") {
+    if (typeof query === 'object') {
       // Clean up undefined and null
       for (const key of Object.keys(query)) {
         if (query[key] === undefined || query[key] === null) {
@@ -64,7 +61,7 @@ export class API {
 
     if (!query) return url;
 
-    if (url.indexOf("?") > -1) {
+    if (url.indexOf('?') > -1) {
       return `${url}&${query}`;
     } else {
       return `${url}?${query}`;
@@ -79,7 +76,7 @@ export class API {
     return tok(gen(`${BASE}/days/{id}`, { id }));
   }
 
-  static DAYS_FILTER(query: any, filter: DaysFilterType, value: string = "1") {
+  static DAYS_FILTER(query: any, filter: DaysFilterType, value: string = '1') {
     query[filter] = value;
   }
 
@@ -110,7 +107,7 @@ export class API {
     return gen(`${BASE}/tags/set/{fileid}`, { fileid });
   }
 
-  static FACE_LIST(app: "recognize" | "facerecognition") {
+  static FACE_LIST(app: 'recognize' | 'facerecognition') {
     return gen(`${BASE}/clusters/${app}`);
   }
 
@@ -146,7 +143,7 @@ export class API {
     return gen(`${BASE}/image/edit/{id}`, { id });
   }
 
-  static VIDEO_TRANSCODE(fileid: number, file = "index.m3u8") {
+  static VIDEO_TRANSCODE(fileid: number, file = 'index.m3u8') {
     return tok(
       gen(`${BASE}/video/transcode/{videoClientId}/{fileid}/{file}`, {
         videoClientId,
@@ -189,9 +186,7 @@ export class API {
   }
 
   static SYSTEM_CONFIG(setting: string | null) {
-    return setting
-      ? gen(`${BASE}/system-config/{setting}`, { setting })
-      : gen(`${BASE}/system-config`);
+    return setting ? gen(`${BASE}/system-config/{setting}`, { setting }) : gen(`${BASE}/system-config`);
   }
 
   static SYSTEM_STATUS() {

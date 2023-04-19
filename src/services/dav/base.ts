@@ -1,13 +1,13 @@
-import { getCurrentUser } from "@nextcloud/auth";
-import { showError } from "@nextcloud/dialogs";
-import { translate as t } from "@nextcloud/l10n";
-import axios from "@nextcloud/axios";
+import { getCurrentUser } from '@nextcloud/auth';
+import { showError } from '@nextcloud/dialogs';
+import { translate as t } from '@nextcloud/l10n';
+import axios from '@nextcloud/axios';
 
-import { IFileInfo, IPhoto } from "../../types";
-import { genFileInfo } from "../FileUtils";
-import { getAlbumFileInfos } from "./albums";
-import * as utils from "../Utils";
-import client from "../DavClient";
+import { IFileInfo, IPhoto } from '../../types';
+import { genFileInfo } from '../FileUtils';
+import { getAlbumFileInfos } from './albums';
+import * as utils from '../Utils';
+import client from '../DavClient';
 
 export const props = `
     <oc:fileid />
@@ -21,18 +21,18 @@ export const props = `
     <d:resourcetype />`;
 
 export const IMAGE_MIME_TYPES = [
-  "image/png",
-  "image/jpeg",
-  "image/heic",
-  "image/png",
-  "image/tiff",
-  "image/gif",
-  "image/bmp",
-  "video/mpeg",
-  "video/webm",
-  "video/mp4",
-  "video/quicktime",
-  "video/x-matroska",
+  'image/png',
+  'image/jpeg',
+  'image/heic',
+  'image/png',
+  'image/tiff',
+  'image/gif',
+  'image/bmp',
+  'video/mpeg',
+  'video/webm',
+  'video/mp4',
+  'video/quicktime',
+  'video/x-matroska',
 ];
 
 const GET_FILE_CHUNK_SIZE = 50;
@@ -45,12 +45,8 @@ const GET_FILE_CHUNK_SIZE = 50;
 export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
   // Check if albums
   const route = vueroute();
-  if (route.name === "albums") {
-    return getAlbumFileInfos(
-      photos,
-      <string>route.params.user,
-      <string>route.params.name
-    );
+  if (route.name === 'albums') {
+    return getAlbumFileInfos(photos, <string>route.params.user, <string>route.params.name);
   }
 
   // Get file infos
@@ -97,12 +93,12 @@ async function getFilesInternal(fileIds: number[]): Promise<IFileInfo[]> {
         </d:eq>
     `
     )
-    .join("");
+    .join('');
 
   const options = {
-    method: "SEARCH",
+    method: 'SEARCH',
     headers: {
-      "content-Type": "text/xml",
+      'content-Type': 'text/xml',
     },
     data: `<?xml version="1.0" encoding="UTF-8"?>
             <d:searchrequest xmlns:d="DAV:"
@@ -131,16 +127,16 @@ async function getFilesInternal(fileIds: number[]): Promise<IFileInfo[]> {
             </d:searchrequest>`,
     deep: true,
     details: true,
-    responseType: "text",
+    responseType: 'text',
   };
 
-  let response: any = await client.getDirectoryContents("", options);
+  let response: any = await client.getDirectoryContents('', options);
   return response.data
     .map((data: any) => genFileInfo(data))
     .map((data: any) =>
       Object.assign({}, data, {
         originalFilename: data.filename,
-        filename: data.filename.replace(prefixPath, ""),
+        filename: data.filename.replace(prefixPath, ''),
       })
     );
 }
@@ -150,15 +146,10 @@ async function getFilesInternal(fileIds: number[]): Promise<IFileInfo[]> {
  * @param promises Array of promise generator funnction (async functions)
  * @param n Number of promises to run in parallel
  */
-export async function* runInParallel<T>(
-  promises: (() => Promise<T>)[],
-  n: number
-) {
+export async function* runInParallel<T>(promises: (() => Promise<T>)[], n: number) {
   while (promises.length > 0) {
     const promisesToRun = promises.splice(0, n);
-    const resultsForThisBatch = await Promise.all(
-      promisesToRun.map((p) => p())
-    );
+    const resultsForThisBatch = await Promise.all(promisesToRun.map((p) => p()));
     yield resultsForThisBatch;
   }
   return;
@@ -174,9 +165,9 @@ async function extendWithLivePhotos(photos: IPhoto[]) {
   const livePhotos = (
     await Promise.all(
       photos
-        .filter((p) => p.liveid && !p.liveid.startsWith("self__"))
+        .filter((p) => p.liveid && !p.liveid.startsWith('self__'))
         .map(async (p) => {
-          const url = utils.getLivePhotoVideoUrl(p, false) + "&format=json";
+          const url = utils.getLivePhotoVideoUrl(p, false) + '&format=json';
           try {
             const response = await axios.get(url);
             const data = response.data;
@@ -206,7 +197,7 @@ export async function* deletePhotos(photos: IPhoto[]) {
   }
 
   // Extend with Live Photos unless this is an album
-  if (window.vueroute().name !== "albums") {
+  if (window.vueroute().name !== 'albums') {
     photos = await extendWithLivePhotos(photos);
   }
 
@@ -218,8 +209,8 @@ export async function* deletePhotos(photos: IPhoto[]) {
   try {
     fileInfos = await getFiles(photos);
   } catch (e) {
-    console.error("Failed to get file info for files to delete", photos, e);
-    showError(t("memories", "Failed to delete files."));
+    console.error('Failed to get file info for files to delete', photos, e);
+    showError(t('memories', 'Failed to delete files.'));
     return;
   }
 
@@ -230,9 +221,9 @@ export async function* deletePhotos(photos: IPhoto[]) {
       await client.deleteFile(fileInfo.originalFilename);
       return fileInfo.fileid;
     } catch (error) {
-      console.error("Failed to delete", fileInfo, error);
+      console.error('Failed to delete', fileInfo, error);
       showError(
-        t("memories", "Failed to delete {fileName}.", {
+        t('memories', 'Failed to delete {fileName}.', {
           fileName: fileInfo.filename,
         })
       );
@@ -251,11 +242,7 @@ export async function* deletePhotos(photos: IPhoto[]) {
  * @param overwrite behaviour if the target exists. `true` overwrites, `false` fails.
  * @returns list of file ids that were moved
  */
-export async function* movePhotos(
-  photos: IPhoto[],
-  destination: string,
-  overwrite: boolean
-) {
+export async function* movePhotos(photos: IPhoto[], destination: string, overwrite: boolean) {
   if (photos.length === 0) {
     return;
   }
@@ -263,8 +250,8 @@ export async function* movePhotos(
   // Set absolute target path
   const prefixPath = `files/${getCurrentUser()?.uid}`;
   let targetPath = prefixPath + destination;
-  if (!targetPath.endsWith("/")) {
-    targetPath += "/";
+  if (!targetPath.endsWith('/')) {
+    targetPath += '/';
   }
 
   // Also move the Live Photo videos
@@ -276,8 +263,8 @@ export async function* movePhotos(
   try {
     fileInfos = await getFiles(photos);
   } catch (e) {
-    console.error("Failed to get file info for files to move", photos, e);
-    showError(t("memories", "Failed to move files."));
+    console.error('Failed to get file info for files to move', photos, e);
+    showError(t('memories', 'Failed to move files.'));
     return;
   }
 
@@ -289,15 +276,15 @@ export async function* movePhotos(
         fileInfo.originalFilename,
         targetPath + fileInfo.basename,
         // @ts-ignore - https://github.com/perry-mitchell/webdav-client/issues/329
-        { headers: { Overwrite: overwrite ? "T" : "F" } }
+        { headers: { Overwrite: overwrite ? 'T' : 'F' } }
       );
       return fileInfo.fileid;
     } catch (error) {
-      console.error("Failed to move", fileInfo, error);
+      console.error('Failed to move', fileInfo, error);
       if (error.response?.status === 412) {
         // Precondition failed (only if `overwrite` flag set to false)
         showError(
-          t("memories", "Could not move {fileName}, target exists.", {
+          t('memories', 'Could not move {fileName}, target exists.', {
             fileName: fileInfo.filename,
           })
         );
@@ -305,7 +292,7 @@ export async function* movePhotos(
       }
 
       showError(
-        t("memories", "Failed to move {fileName}.", {
+        t('memories', 'Failed to move {fileName}.', {
           fileName: fileInfo.filename,
         })
       );

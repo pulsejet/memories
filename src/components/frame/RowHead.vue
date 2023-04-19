@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="head-row"
-    :class="{ selected: item.selected }"
-    :style="{ height: `${item.size}px` }"
-  >
+  <div class="head-row" :class="{ selected: item.selected }" :style="{ height: `${item.size}px` }">
     <div class="super" v-if="item.super !== undefined">
       {{ item.super }}
     </div>
@@ -15,15 +11,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
-import { IHeadRow } from "../../types";
+import { defineComponent, PropType } from 'vue';
+import { IHeadRow } from '../../types';
 
-import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
+import CheckCircle from 'vue-material-design-icons/CheckCircle.vue';
 
-import * as utils from "../../services/Utils";
+import * as utils from '../../services/Utils';
 
 export default defineComponent({
-  name: "RowHead",
+  name: 'RowHead',
 
   components: {
     CheckCircle,
@@ -66,7 +62,7 @@ export default defineComponent({
 
   methods: {
     click() {
-      this.$emit("click", this.item);
+      this.$emit('click', this.item);
     },
   },
 });

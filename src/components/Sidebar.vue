@@ -5,7 +5,7 @@
 
       <NcActions :inline="1">
         <NcActionButton :aria-label="t('memories', 'Close')" @click="close()">
-          {{ t("memories", "Close") }}
+          {{ t('memories', 'Close') }}
           <template #icon> <CloseIcon :size="20" /> </template>
         </NcActionButton>
       </NcActions>
@@ -16,19 +16,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { subscribe, unsubscribe, emit } from "@nextcloud/event-bus";
+import { defineComponent } from 'vue';
+import { subscribe, unsubscribe, emit } from '@nextcloud/event-bus';
 
-import NcActions from "@nextcloud/vue/dist/Components/NcActions";
-import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
+import NcActions from '@nextcloud/vue/dist/Components/NcActions';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
-import Metadata from "./Metadata.vue";
-import { IImageInfo } from "../types";
+import Metadata from './Metadata.vue';
+import { IImageInfo } from '../types';
 
-import CloseIcon from "vue-material-design-icons/Close.vue";
+import CloseIcon from 'vue-material-design-icons/Close.vue';
 
 export default defineComponent({
-  name: "Sidebar",
+  name: 'Sidebar',
   components: {
     Metadata,
     NcActions,
@@ -40,7 +40,7 @@ export default defineComponent({
     return {
       nativeOpen: false,
       reducedOpen: false,
-      basename: "",
+      basename: '',
       lastKnownWidth: 0,
     };
   },
@@ -52,8 +52,8 @@ export default defineComponent({
   },
 
   mounted() {
-    subscribe("files:sidebar:opened", this.handleNativeOpen);
-    subscribe("files:sidebar:closed", this.handleNativeClose);
+    subscribe('files:sidebar:opened', this.handleNativeOpen);
+    subscribe('files:sidebar:closed', this.handleNativeClose);
 
     globalThis.mSidebar = {
       open: this.open.bind(this),
@@ -64,8 +64,8 @@ export default defineComponent({
   },
 
   beforeDestroy() {
-    unsubscribe("files:sidebar:opened", this.handleNativeOpen);
-    unsubscribe("files:sidebar:closed", this.handleNativeClose);
+    unsubscribe('files:sidebar:opened', this.handleNativeOpen);
+    unsubscribe('files:sidebar:closed', this.handleNativeClose);
   },
 
   methods: {
@@ -104,23 +104,23 @@ export default defineComponent({
     },
 
     getWidth() {
-      const sidebar = document.getElementById("app-sidebar-vue");
+      const sidebar = document.getElementById('app-sidebar-vue');
       this.lastKnownWidth = sidebar?.offsetWidth || this.lastKnownWidth;
       return (this.lastKnownWidth || 2) - 2;
     },
 
     handleClose() {
-      emit("memories:sidebar:closed", {});
+      emit('memories:sidebar:closed', {});
     },
 
     handleOpen() {
       // Stop sidebar typing from leaking outside
-      const sidebar = document.getElementById("app-sidebar-vue");
-      sidebar?.addEventListener("keydown", (e) => {
+      const sidebar = document.getElementById('app-sidebar-vue');
+      sidebar?.addEventListener('keydown', (e) => {
         if (e.key.length === 1) e.stopPropagation();
       });
 
-      emit("memories:sidebar:opened", {});
+      emit('memories:sidebar:opened', {});
     },
 
     handleNativeOpen() {

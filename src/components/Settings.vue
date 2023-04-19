@@ -28,24 +28,12 @@
       :title="t('memories', 'Memories Settings')"
       @update:open="onClose"
     >
-      <NcAppSettingsSection
-        id="general-settings"
-        :title="t('memories', 'General')"
-      >
-        <label for="timeline-path">{{ t("memories", "Timeline Path") }}</label>
-        <input
-          id="timeline-path"
-          @click="chooseTimelinePath"
-          v-model="config_timelinePath"
-          type="text"
-        />
+      <NcAppSettingsSection id="general-settings" :title="t('memories', 'General')">
+        <label for="timeline-path">{{ t('memories', 'Timeline Path') }}</label>
+        <input id="timeline-path" @click="chooseTimelinePath" v-model="config_timelinePath" type="text" />
 
-        <NcCheckboxRadioSwitch
-          :checked.sync="config_squareThumbs"
-          @update:checked="updateSquareThumbs"
-          type="switch"
-        >
-          {{ t("memories", "Square grid mode") }}
+        <NcCheckboxRadioSwitch :checked.sync="config_squareThumbs" @update:checked="updateSquareThumbs" type="switch">
+          {{ t('memories', 'Square grid mode') }}
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
@@ -53,44 +41,24 @@
           @update:checked="updateEnableTopMemories"
           type="switch"
         >
-          {{ t("memories", "Show past photos on top of timeline") }}
+          {{ t('memories', 'Show past photos on top of timeline') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch
-          :checked.sync="config_fullResOnZoom"
-          @update:checked="updateFullResOnZoom"
-          type="switch"
-        >
-          {{ t("memories", "Load full size image on zoom") }}
+        <NcCheckboxRadioSwitch :checked.sync="config_fullResOnZoom" @update:checked="updateFullResOnZoom" type="switch">
+          {{ t('memories', 'Load full size image on zoom') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch
-          :checked.sync="config_fullResAlways"
-          @update:checked="updateFullResAlways"
-          type="switch"
-        >
-          {{ t("memories", "Always load full size image (not recommended)") }}
+        <NcCheckboxRadioSwitch :checked.sync="config_fullResAlways" @update:checked="updateFullResAlways" type="switch">
+          {{ t('memories', 'Always load full size image (not recommended)') }}
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection
-        id="folders-settings"
-        :title="t('memories', 'Folders')"
-      >
-        <label for="folders-path">{{ t("memories", "Folders Path") }}</label>
-        <input
-          id="folders-path"
-          @click="chooseFoldersPath"
-          v-model="config_foldersPath"
-          type="text"
-        />
+      <NcAppSettingsSection id="folders-settings" :title="t('memories', 'Folders')">
+        <label for="folders-path">{{ t('memories', 'Folders Path') }}</label>
+        <input id="folders-path" @click="chooseFoldersPath" v-model="config_foldersPath" type="text" />
 
-        <NcCheckboxRadioSwitch
-          :checked.sync="config_showHidden"
-          @update:checked="updateShowHidden"
-          type="switch"
-        >
-          {{ t("memories", "Show hidden folders") }}
+        <NcCheckboxRadioSwitch :checked.sync="config_showHidden" @update:checked="updateShowHidden" type="switch">
+          {{ t('memories', 'Show hidden folders') }}
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
@@ -98,55 +66,45 @@
           @update:checked="updateSortFolderMonth"
           type="switch"
         >
-          {{ t("memories", "Sort folders oldest-first") }}
+          {{ t('memories', 'Sort folders oldest-first') }}
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection
-        id="albums-settings"
-        :title="t('memories', 'Albums')"
-      >
+      <NcAppSettingsSection id="albums-settings" :title="t('memories', 'Albums')">
         <NcCheckboxRadioSwitch
           :checked.sync="config_sortAlbumMonth"
           @update:checked="updateSortAlbumMonth"
           type="switch"
         >
-          {{ t("memories", "Sort albums oldest-first") }}
+          {{ t('memories', 'Sort albums oldest-first') }}
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
     </NcAppSettingsDialog>
 
-    <MultiPathSelectionModal
-      ref="multiPathModal"
-      :title="pathSelTitle"
-      @close="saveTimelinePath"
-    />
+    <MultiPathSelectionModal ref="multiPathModal" :title="pathSelTitle" @close="saveTimelinePath" />
   </div>
 </template>
 
 <style scoped>
-input[type="text"] {
+input[type='text'] {
   width: 100%;
 }
 </style>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import { getFilePickerBuilder } from "@nextcloud/dialogs";
+import { getFilePickerBuilder } from '@nextcloud/dialogs';
 
-import UserConfig from "../mixins/UserConfig";
-const NcAppSettingsDialog = () =>
-  import("@nextcloud/vue/dist/Components/NcAppSettingsDialog");
-const NcAppSettingsSection = () =>
-  import("@nextcloud/vue/dist/Components/NcAppSettingsSection");
-const NcCheckboxRadioSwitch = () =>
-  import("@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch");
+import UserConfig from '../mixins/UserConfig';
+const NcAppSettingsDialog = () => import('@nextcloud/vue/dist/Components/NcAppSettingsDialog');
+const NcAppSettingsSection = () => import('@nextcloud/vue/dist/Components/NcAppSettingsSection');
+const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch');
 
-import MultiPathSelectionModal from "./modal/MultiPathSelectionModal.vue";
+import MultiPathSelectionModal from './modal/MultiPathSelectionModal.vue';
 
 export default defineComponent({
-  name: "Settings",
+  name: 'Settings',
 
   components: {
     NcAppSettingsDialog,
@@ -166,13 +124,13 @@ export default defineComponent({
 
   computed: {
     pathSelTitle(): string {
-      return this.t("memories", "Choose Timeline Paths");
+      return this.t('memories', 'Choose Timeline Paths');
     },
   },
 
   methods: {
     onClose() {
-      this.$emit("update:open", false);
+      this.$emit('update:open', false);
     },
 
     async chooseFolder(title: string, initial: string) {
@@ -180,7 +138,7 @@ export default defineComponent({
         .setMultiSelect(false)
         .setModal(true)
         .setType(1)
-        .addMimeTypeFilter("httpd/unix-directory")
+        .addMimeTypeFilter('httpd/unix-directory')
         .allowDirectories()
         .startAt(initial)
         .build();
@@ -189,59 +147,57 @@ export default defineComponent({
     },
 
     async chooseTimelinePath() {
-      (<any>this.$refs.multiPathModal).open(
-        this.config_timelinePath.split(";")
-      );
+      (<any>this.$refs.multiPathModal).open(this.config_timelinePath.split(';'));
     },
 
     async saveTimelinePath(paths: string[]) {
       if (!paths || !paths.length) return;
 
-      const newPath = paths.join(";");
+      const newPath = paths.join(';');
       if (newPath !== this.config_timelinePath) {
         this.config_timelinePath = newPath;
-        await this.updateSetting("timelinePath");
+        await this.updateSetting('timelinePath');
       }
     },
 
     async chooseFoldersPath() {
       let newPath = await this.chooseFolder(
-        this.t("memories", "Choose the root for the folders view"),
+        this.t('memories', 'Choose the root for the folders view'),
         this.config_foldersPath
       );
-      if (newPath === "") newPath = "/";
+      if (newPath === '') newPath = '/';
       if (newPath !== this.config_foldersPath) {
         this.config_foldersPath = newPath;
-        await this.updateSetting("foldersPath");
+        await this.updateSetting('foldersPath');
       }
     },
 
     async updateSquareThumbs() {
-      await this.updateSetting("squareThumbs");
+      await this.updateSetting('squareThumbs');
     },
 
     async updateFullResOnZoom() {
-      await this.updateSetting("fullResOnZoom");
+      await this.updateSetting('fullResOnZoom');
     },
 
     async updateFullResAlways() {
-      await this.updateSetting("fullResAlways");
+      await this.updateSetting('fullResAlways');
     },
 
     async updateEnableTopMemories() {
-      await this.updateSetting("enableTopMemories");
+      await this.updateSetting('enableTopMemories');
     },
 
     async updateShowHidden() {
-      await this.updateSetting("showHidden");
+      await this.updateSetting('showHidden');
     },
 
     async updateSortFolderMonth() {
-      await this.updateSetting("sortFolderMonth");
+      await this.updateSetting('sortFolderMonth');
     },
 
     async updateSortAlbumMonth() {
-      await this.updateSetting("sortAlbumMonth");
+      await this.updateSetting('sortAlbumMonth');
     },
   },
 });

@@ -1,12 +1,7 @@
 <template>
   <div class="outer" v-show="years.length > 0">
     <div class="inner" ref="inner">
-      <div
-        v-for="year of years"
-        class="group"
-        :key="year.year"
-        @click="click(year)"
-      >
+      <div v-for="year of years" class="group" :key="year.year" @click="click(year)">
         <XImg class="fill-block" :src="year.url" />
 
         <div class="overlay">
@@ -17,22 +12,16 @@
 
     <div class="left-btn dir-btn" v-if="hasLeft">
       <NcActions>
-        <NcActionButton
-          :aria-label="t('memories', 'Move left')"
-          @click="moveLeft"
-        >
-          {{ t("memories", "Move left") }}
+        <NcActionButton :aria-label="t('memories', 'Move left')" @click="moveLeft">
+          {{ t('memories', 'Move left') }}
           <template #icon> <LeftMoveIcon v-once :size="28" /> </template>
         </NcActionButton>
       </NcActions>
     </div>
     <div class="right-btn dir-btn" v-if="hasRight">
       <NcActions>
-        <NcActionButton
-          :aria-label="t('memories', 'Move right')"
-          @click="moveRight"
-        >
-          {{ t("memories", "Move right") }}
+        <NcActionButton :aria-label="t('memories', 'Move right')" @click="moveRight">
+          {{ t('memories', 'Move right') }}
           <template #icon> <RightMoveIcon v-once :size="28" /> </template>
         </NcActionButton>
       </NcActions>
@@ -41,17 +30,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import NcActions from "@nextcloud/vue/dist/Components/NcActions";
-import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
+import NcActions from '@nextcloud/vue/dist/Components/NcActions';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
-import * as utils from "../../services/Utils";
-import * as dav from "../../services/DavRequests";
-import { IPhoto } from "../../types";
+import * as utils from '../../services/Utils';
+import * as dav from '../../services/DavRequests';
+import { IPhoto } from '../../types';
 
-import LeftMoveIcon from "vue-material-design-icons/ChevronLeft.vue";
-import RightMoveIcon from "vue-material-design-icons/ChevronRight.vue";
+import LeftMoveIcon from 'vue-material-design-icons/ChevronLeft.vue';
+import RightMoveIcon from 'vue-material-design-icons/ChevronRight.vue';
 
 interface IYear {
   year: number;
@@ -62,7 +51,7 @@ interface IYear {
 }
 
 export default defineComponent({
-  name: "OnThisDay",
+  name: 'OnThisDay',
   components: {
     NcActions,
     NcActionButton,
@@ -87,7 +76,7 @@ export default defineComponent({
 
   mounted() {
     const inner = this.$refs.inner as HTMLElement;
-    inner.addEventListener("scroll", this.onScroll.bind(this), {
+    inner.addEventListener('scroll', this.onScroll.bind(this), {
       passive: true,
     });
 
@@ -103,7 +92,7 @@ export default defineComponent({
 
   methods: {
     onload() {
-      this.$emit("load");
+      this.$emit('load');
     },
 
     async refresh() {
@@ -118,11 +107,7 @@ export default defineComponent({
       utils.cacheData(cacheUrl, photos);
 
       // Check if exactly same as cache
-      if (
-        cache?.length === photos.length &&
-        cache.every((p, i) => p.fileid === photos[i].fileid)
-      )
-        return;
+      if (cache?.length === photos.length && cache.every((p, i) => p.fileid === photos[i].fileid)) return;
       this.process(photos);
     },
 
@@ -130,7 +115,7 @@ export default defineComponent({
       this.years = [];
 
       let currentYear = 9999;
-      let currentText = "";
+      let currentText = '';
 
       for (const photo of photos) {
         const dateTaken = utils.dayIdToDate(photo.dayid);
@@ -145,7 +130,7 @@ export default defineComponent({
             this.years.push({
               year,
               text,
-              url: "",
+              url: '',
               preview: null!,
               photos: [],
             });
@@ -193,13 +178,8 @@ export default defineComponent({
         .map((c) => c.getBoundingClientRect())
         .find((rect) => rect.right > innerRect.right);
 
-      let scroll = nextChild
-        ? nextChild.left - innerRect.left
-        : inner.clientWidth;
-      scroll = Math.min(
-        inner.scrollWidth - inner.scrollLeft - inner.clientWidth,
-        scroll
-      );
+      let scroll = nextChild ? nextChild.left - innerRect.left : inner.clientWidth;
+      scroll = Math.min(inner.scrollWidth - inner.scrollLeft - inner.clientWidth, scroll);
       this.scrollStack.push(scroll);
       inner.scrollBy(scroll, 0);
     },
@@ -208,8 +188,7 @@ export default defineComponent({
       const inner = this.$refs.inner as HTMLElement;
       if (!inner) return;
       this.hasLeft = inner.scrollLeft > 0;
-      this.hasRight =
-        inner.clientWidth + inner.scrollLeft < inner.scrollWidth - 20;
+      this.hasRight = inner.clientWidth + inner.scrollLeft < inner.scrollWidth - 20;
     },
 
     click(year: IYear) {

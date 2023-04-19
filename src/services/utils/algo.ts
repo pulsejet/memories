@@ -9,9 +9,7 @@
 export function binarySearch(arr: any, elem: any, key?: string) {
   if (arr.length === 0) return 0;
 
-  const desc = key
-    ? arr[0][key] > arr[arr.length - 1][key]
-    : arr[0] > arr[arr.length - 1];
+  const desc = key ? arr[0][key] > arr[arr.length - 1][key] : arr[0] > arr[arr.length - 1];
 
   let minIndex = 0;
   let maxIndex = arr.length - 1;
@@ -83,12 +81,7 @@ export function randomSubarray(arr: any[], size: number) {
 }
 
 /** Set a timer that renews if existing */
-export function setRenewingTimeout(
-  ctx: any,
-  name: string,
-  callback: (() => void) | null,
-  delay: number
-) {
+export function setRenewingTimeout(ctx: any, name: string, callback: (() => void) | null, delay: number) {
   if (ctx[name]) window.clearTimeout(ctx[name]);
   ctx[name] = window.setTimeout(() => {
     ctx[name] = 0;

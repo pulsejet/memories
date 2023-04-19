@@ -3,14 +3,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { fetchImage, sticky } from "./XImgCache";
+import { defineComponent } from 'vue';
+import { fetchImage, sticky } from './XImgCache';
 
-const BLANK_IMG =
-  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+const BLANK_IMG = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 export default defineComponent({
-  name: "XImg",
+  name: 'XImg',
   props: {
     src: {
       type: String,
@@ -18,7 +17,7 @@ export default defineComponent({
     },
     alt: {
       type: String,
-      default: "",
+      default: '',
     },
   },
 
@@ -55,7 +54,7 @@ export default defineComponent({
       this.freeBlob();
 
       // Just set src if not http
-      if (this.src.startsWith("data:") || this.src.startsWith("blob:")) {
+      if (this.src.startsWith('data:') || this.src.startsWith('blob:')) {
         this.dataSrc = this.src;
         return;
       }
@@ -72,14 +71,14 @@ export default defineComponent({
         this.lockBlob();
       } catch (error) {
         this.dataSrc = BLANK_IMG;
-        this.$emit("error", error);
-        console.error("Failed to load XImg", error);
+        this.$emit('error', error);
+        console.error('Failed to load XImg', error);
       }
     },
 
     load() {
       if (this.dataSrc === BLANK_IMG) return;
-      this.$emit("load", this.dataSrc);
+      this.$emit('load', this.dataSrc);
     },
 
     lockBlob() {

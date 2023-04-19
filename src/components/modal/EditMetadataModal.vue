@@ -1,32 +1,26 @@
 <template>
   <Modal v-if="show" @close="close">
     <template #title>
-      {{ t("memories", "Edit metadata") }}
+      {{ t('memories', 'Edit metadata') }}
     </template>
 
     <template #buttons>
-      <NcButton
-        @click="save"
-        class="button"
-        type="error"
-        v-if="photos"
-        :disabled="processing"
-      >
-        {{ t("memories", "Save") }}
+      <NcButton @click="save" class="button" type="error" v-if="photos" :disabled="processing">
+        {{ t('memories', 'Save') }}
       </NcButton>
     </template>
 
     <div v-if="photos">
       <div v-if="sections.includes(1)">
         <div class="title-text">
-          {{ t("memories", "Date / Time") }}
+          {{ t('memories', 'Date / Time') }}
         </div>
         <EditDate ref="editDate" :photos="photos" />
       </div>
 
       <div v-if="config_tagsEnabled && sections.includes(2)">
         <div class="title-text">
-          {{ t("memories", "Collaborative Tags") }}
+          {{ t('memories', 'Collaborative Tags') }}
         </div>
         <EditTags ref="editTags" :photos="photos" />
         <div class="tag-padding" v-if="sections.length === 1"></div>
@@ -34,14 +28,14 @@
 
       <div v-if="sections.includes(3)">
         <div class="title-text">
-          {{ t("memories", "EXIF Fields") }}
+          {{ t('memories', 'EXIF Fields') }}
         </div>
         <EditExif ref="editExif" :photos="photos" />
       </div>
 
       <div v-if="sections.includes(4)">
         <div class="title-text">
-          {{ t("memories", "Geolocation") }}
+          {{ t('memories', 'Geolocation') }}
         </div>
         <EditLocation ref="editLocation" :photos="photos" />
       </div>
@@ -54,27 +48,26 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { IPhoto } from "../../types";
+import { defineComponent } from 'vue';
+import { IPhoto } from '../../types';
 
-import UserConfig from "../../mixins/UserConfig";
-import NcButton from "@nextcloud/vue/dist/Components/NcButton";
-const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
-const NcProgressBar = () =>
-  import("@nextcloud/vue/dist/Components/NcProgressBar");
-import Modal from "./Modal.vue";
+import UserConfig from '../../mixins/UserConfig';
+import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
+import Modal from './Modal.vue';
 
-import EditDate from "./EditDate.vue";
-import EditTags from "./EditTags.vue";
-import EditExif from "./EditExif.vue";
-import EditLocation from "./EditLocation.vue";
+import EditDate from './EditDate.vue';
+import EditTags from './EditTags.vue';
+import EditExif from './EditExif.vue';
+import EditLocation from './EditLocation.vue';
 
-import { showError } from "@nextcloud/dialogs";
-import { emit } from "@nextcloud/event-bus";
-import axios from "@nextcloud/axios";
+import { showError } from '@nextcloud/dialogs';
+import { emit } from '@nextcloud/event-bus';
+import axios from '@nextcloud/axios';
 
-import * as dav from "../../services/DavRequests";
-import { API } from "../../services/API";
+import * as dav from '../../services/DavRequests';
+import { API } from '../../services/API';
 
 export default defineComponent({
   components: {
@@ -122,14 +115,14 @@ export default defineComponent({
 
           // Validate response
           p.imageInfo = null;
-          if (typeof res.data.datetaken !== "number") {
-            console.error("Invalid date for", p.fileid);
+          if (typeof res.data.datetaken !== 'number') {
+            console.error('Invalid date for', p.fileid);
             return;
           }
           p.datetaken = res.data.datetaken * 1000;
           p.imageInfo = res.data;
         } catch (error) {
-          console.error("Failed to get date info for", p.fileid, error);
+          console.error('Failed to get date info for', p.fileid, error);
         } finally {
           done++;
           this.progress = Math.round((done * 100) / photos.length);
@@ -212,10 +205,10 @@ export default defineComponent({
           // Refresh UX
           if (dirty) {
             p.imageInfo = null;
-            emit("files:file:updated", { fileid });
+            emit('files:file:updated', { fileid });
           }
         } catch (e) {
-          console.error("Failed to save metadata for", p.fileid, e);
+          console.error('Failed to save metadata for', p.fileid, e);
           if (e.response?.data?.message) {
             showError(e.response.data.message);
           } else {
@@ -235,7 +228,7 @@ export default defineComponent({
       this.close();
 
       // Trigger a soft refresh
-      emit("files:file:created", { fileid: 0 });
+      emit('files:file:created', { fileid: 0 });
     },
 
     filterValid(photos: IPhoto[]) {
@@ -243,25 +236,19 @@ export default defineComponent({
       const valid = photos.filter((p) => p.imageInfo);
       if (valid.length !== photos.length) {
         showError(
-          this.t("memories", "Failed to load metadata for {n} photos.", {
+          this.t('memories', 'Failed to load metadata for {n} photos.', {
             n: photos.length - valid.length,
           })
         );
       }
 
       // Check if photos are updatable
-      const updatable = valid.filter((p) =>
-        p.imageInfo?.permissions?.includes("U")
-      );
+      const updatable = valid.filter((p) => p.imageInfo?.permissions?.includes('U'));
       if (updatable.length !== valid.length) {
         showError(
-          this.t(
-            "memories",
-            "{n} photos cannot be edited (permissions error).",
-            {
-              n: valid.length - updatable.length,
-            }
-          )
+          this.t('memories', '{n} photos cannot be edited (permissions error).', {
+            n: valid.length - updatable.length,
+          })
         );
       }
 

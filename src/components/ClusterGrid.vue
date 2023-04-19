@@ -21,12 +21,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import Cluster from "./frame/Cluster.vue";
-import type { ICluster } from "../types";
+import { defineComponent } from 'vue';
+import Cluster from './frame/Cluster.vue';
+import type { ICluster } from '../types';
 
 export default defineComponent({
-  name: "ClusterGrid",
+  name: 'ClusterGrid',
 
   components: {
     Cluster,
@@ -58,7 +58,7 @@ export default defineComponent({
 
   methods: {
     click(item: ICluster) {
-      this.$emit("click", item);
+      this.$emit('click', item);
     },
 
     resize() {

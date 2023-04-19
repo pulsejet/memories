@@ -29,16 +29,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
-import { IFolder, IPhoto } from "../../types";
+import { defineComponent, PropType } from 'vue';
+import { IFolder, IPhoto } from '../../types';
 
-import { getPreviewUrl } from "../../services/utils/helpers";
+import { getPreviewUrl } from '../../services/utils/helpers';
 
-import UserConfig from "../../mixins/UserConfig";
-import FolderIcon from "vue-material-design-icons/Folder.vue";
+import UserConfig from '../../mixins/UserConfig';
+import FolderIcon from 'vue-material-design-icons/Folder.vue';
 
 export default defineComponent({
-  name: "Folder",
+  name: 'Folder',
   components: {
     FolderIcon,
   },
@@ -65,20 +65,17 @@ export default defineComponent({
     /** Open folder */
     target() {
       const path = this.data.path
-        .split("/")
+        .split('/')
         .filter((x) => x)
         .slice(2) as string[];
 
       // Remove base path if present
-      const basePath = this.config_foldersPath.split("/").filter((x) => x);
-      if (
-        path.length >= basePath.length &&
-        path.slice(0, basePath.length).every((x, i) => x === basePath[i])
-      ) {
+      const basePath = this.config_foldersPath.split('/').filter((x) => x);
+      if (path.length >= basePath.length && path.slice(0, basePath.length).every((x, i) => x === basePath[i])) {
         path.splice(0, basePath.length);
       }
 
-      return { name: "folders", params: { path: path as any } };
+      return { name: 'folders', params: { path: path as any } };
     },
   },
 
@@ -176,8 +173,7 @@ export default defineComponent({
   // Make it red if has an error
   .folder.hasError > & {
     .folder-icon {
-      filter: invert(12%) sepia(62%) saturate(5862%) hue-rotate(8deg)
-        brightness(103%) contrast(128%);
+      filter: invert(12%) sepia(62%) saturate(5862%) hue-rotate(8deg) brightness(103%) contrast(128%);
     }
     .name {
       color: #bb0000;

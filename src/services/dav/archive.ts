@@ -1,8 +1,8 @@
-import * as base from "./base";
-import { showError } from "@nextcloud/dialogs";
-import { translate as t, translatePlural as n } from "@nextcloud/l10n";
-import axios from "@nextcloud/axios";
-import { API } from "../API";
+import * as base from './base';
+import { showError } from '@nextcloud/dialogs';
+import { translate as t, translatePlural as n } from '@nextcloud/l10n';
+import axios from '@nextcloud/axios';
+import { API } from '../API';
 
 /**
  * Archive or unarchive a single file
@@ -32,10 +32,9 @@ export async function* archiveFilesByIds(fileIds: number[], archive: boolean) {
       await archiveFile(id, archive);
       return id as number;
     } catch (error) {
-      console.error("Failed to (un)archive", id, error);
-      const msg =
-        error?.response?.data?.message || t("memories", "General Failure");
-      showError(t("memories", "Error: {msg}", { msg }));
+      console.error('Failed to (un)archive', id, error);
+      const msg = error?.response?.data?.message || t('memories', 'General Failure');
+      showError(t('memories', 'Error: {msg}', { msg }));
       return 0;
     }
   });

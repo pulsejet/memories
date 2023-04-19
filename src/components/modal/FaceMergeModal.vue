@@ -1,50 +1,44 @@
 <template>
   <Modal @close="close" size="large" v-if="show">
     <template #title>
-      {{
-        t("memories", "Merge {name} with person", { name: $route.params.name })
-      }}
+      {{ t('memories', 'Merge {name} with person', { name: $route.params.name }) }}
     </template>
 
     <div class="outer">
       <FaceList @select="clickFace" />
 
       <div v-if="processingTotal > 0">
-        <NcProgressBar
-          :value="Math.round((processing * 100) / processingTotal)"
-          :error="true"
-        />
+        <NcProgressBar :value="Math.round((processing * 100) / processingTotal)" :error="true" />
       </div>
     </div>
 
     <template #buttons>
       <NcButton @click="close" class="button" type="error">
-        {{ t("memories", "Cancel") }}
+        {{ t('memories', 'Cancel') }}
       </NcButton>
     </template>
   </Modal>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import NcButton from "@nextcloud/vue/dist/Components/NcButton";
-const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
-const NcProgressBar = () =>
-  import("@nextcloud/vue/dist/Components/NcProgressBar");
+import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
 
-import { showError } from "@nextcloud/dialogs";
-import { getCurrentUser } from "@nextcloud/auth";
-import { IFileInfo, IFace } from "../../types";
-import Cluster from "../frame/Cluster.vue";
-import FaceList from "./FaceList.vue";
+import { showError } from '@nextcloud/dialogs';
+import { getCurrentUser } from '@nextcloud/auth';
+import { IFileInfo, IFace } from '../../types';
+import Cluster from '../frame/Cluster.vue';
+import FaceList from './FaceList.vue';
 
-import Modal from "./Modal.vue";
-import client from "../../services/DavClient";
-import * as dav from "../../services/DavRequests";
+import Modal from './Modal.vue';
+import client from '../../services/DavClient';
+import * as dav from '../../services/DavRequests';
 
 export default defineComponent({
-  name: "FaceMergeModal",
+  name: 'FaceMergeModal',
   components: {
     NcButton,
     NcTextField,
@@ -63,14 +57,14 @@ export default defineComponent({
   methods: {
     close() {
       this.show = false;
-      this.$emit("close");
+      this.$emit('close');
     },
 
     open() {
-      const user = this.$route.params.user || "";
+      const user = this.$route.params.user || '';
       if (this.$route.params.user !== getCurrentUser()?.uid) {
         showError(
-          this.t("memories", 'Only user "{user}" can update this person', {
+          this.t('memories', 'Only user "{user}" can update this person', {
             user,
           })
         );
@@ -80,28 +74,17 @@ export default defineComponent({
     },
 
     async clickFace(face: IFace) {
-      const user = this.$route.params.user || "";
-      const name = this.$route.params.name || "";
+      const user = this.$route.params.user || '';
+      const name = this.$route.params.name || '';
 
       const newName = String(face.name || face.cluster_id);
-      if (
-        !confirm(
-          this.t(
-            "memories",
-            "Are you sure you want to merge {name} with {newName}?",
-            { name, newName }
-          )
-        )
-      ) {
+      if (!confirm(this.t('memories', 'Are you sure you want to merge {name} with {newName}?', { name, newName }))) {
         return;
       }
 
       try {
         // Get all files for current face
-        let res = (await client.getDirectoryContents(
-          `/recognize/${user}/faces/${name}`,
-          { details: true }
-        )) as any;
+        let res = (await client.getDirectoryContents(`/recognize/${user}/faces/${name}`, { details: true })) as any;
         let data: IFileInfo[] = res.data;
         this.processingTotal = data.length;
 
@@ -112,7 +95,7 @@ export default defineComponent({
         const calls = data.map((p) => async () => {
           // Short circuit if we have too many failures
           if (failures === 10) {
-            showError(this.t("memories", "Too many failures, aborting"));
+            showError(this.t('memories', 'Too many failures, aborting'));
             failures++;
           }
           if (failures >= 10) return;
@@ -125,9 +108,7 @@ export default defineComponent({
             );
           } catch (e) {
             console.error(e);
-            showError(
-              this.t("memories", "Error while moving {basename}", <any>p)
-            );
+            showError(this.t('memories', 'Error while moving {basename}', <any>p));
             failures++;
           } finally {
             this.processing++;
@@ -140,14 +121,14 @@ export default defineComponent({
         // Go to new face
         if (failures === 0) {
           this.$router.push({
-            name: "recognize",
+            name: 'recognize',
             params: { user: face.user_id, name: newName },
           });
           this.close();
         }
       } catch (error) {
         console.error(error);
-        showError(this.t("photos", "Failed to move {name}.", { name }));
+        showError(this.t('photos', 'Failed to move {name}.', { name }));
       }
     },
   },

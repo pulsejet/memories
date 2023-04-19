@@ -1,9 +1,5 @@
 <template>
-  <form
-    v-if="!showCollaboratorView"
-    class="album-form"
-    @submit.prevent="submit"
-  >
+  <form v-if="!showCollaboratorView" class="album-form" @submit.prevent="submit">
     <div class="form-inputs">
       <NcTextField
         ref="nameInput"
@@ -31,7 +27,7 @@
           type="tertiary"
           @click="back"
         >
-          {{ t("photos", "Back") }}
+          {{ t('photos', 'Back') }}
         </NcButton>
       </span>
       <span class="right-buttons">
@@ -45,14 +41,9 @@
           <template #icon>
             <AccountMultiplePlus />
           </template>
-          {{ t("photos", "Add collaborators") }}
+          {{ t('photos', 'Add collaborators') }}
         </NcButton>
-        <NcButton
-          :aria-label="saveText"
-          type="primary"
-          :disabled="albumName === '' || loading"
-          @click="submit()"
-        >
+        <NcButton :aria-label="saveText" type="primary" :disabled="albumName === '' || loading" @click="submit()">
           <template #icon>
             <NcLoadingIcon v-if="loading" />
             <Send v-else />
@@ -75,7 +66,7 @@
         type="tertiary"
         @click="showCollaboratorView = false"
       >
-        {{ t("photos", "Back") }}
+        {{ t('photos', 'Back') }}
       </NcButton>
     </span>
     <span class="right-buttons">
@@ -96,24 +87,24 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType } from 'vue';
 
-import { getCurrentUser } from "@nextcloud/auth";
-import { showError } from "@nextcloud/dialogs";
-import NcButton from "@nextcloud/vue/dist/Components/NcButton";
-import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
-const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
+import { getCurrentUser } from '@nextcloud/auth';
+import { showError } from '@nextcloud/dialogs';
+import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
-import moment from "moment";
-import * as dav from "../../services/DavRequests";
+import moment from 'moment';
+import * as dav from '../../services/DavRequests';
 
-import AlbumCollaborators from "./AlbumCollaborators.vue";
+import AlbumCollaborators from './AlbumCollaborators.vue';
 
-import Send from "vue-material-design-icons/Send.vue";
-import AccountMultiplePlus from "vue-material-design-icons/AccountMultiplePlus.vue";
+import Send from 'vue-material-design-icons/Send.vue';
+import AccountMultiplePlus from 'vue-material-design-icons/AccountMultiplePlus.vue';
 
 export default defineComponent({
-  name: "AlbumForm",
+  name: 'AlbumForm',
   components: {
     NcButton,
     NcLoadingIcon,
@@ -138,8 +129,8 @@ export default defineComponent({
   data: () => ({
     collaborators: [],
     showCollaboratorView: false,
-    albumName: "",
-    albumLocation: "",
+    albumName: '',
+    albumLocation: '',
     loading: false,
   }),
 
@@ -152,9 +143,7 @@ export default defineComponent({
     },
 
     saveText(): string {
-      return this.editMode
-        ? this.t("photos", "Save")
-        : this.t("photos", "Create album");
+      return this.editMode ? this.t('photos', 'Save') : this.t('photos', 'Create album');
     },
 
     /**
@@ -171,24 +160,19 @@ export default defineComponent({
       this.albumLocation = this.album.location;
     }
     this.$nextTick(() => {
-      (<any>this.$refs.nameInput)?.$el.getElementsByTagName("input")[0].focus();
+      (<any>this.$refs.nameInput)?.$el.getElementsByTagName('input')[0].focus();
     });
   },
 
   methods: {
     submit(collaborators: any = []) {
-      if (this.albumName === "" || this.loading) {
+      if (this.albumName === '' || this.loading) {
         return;
       }
 
       // Validate the album name, it shouldn't contain any slash
-      if (this.albumName.includes("/")) {
-        showError(
-          this.t(
-            "memories",
-            "Invalid album name; should not contain any slashes."
-          )
-        );
+      if (this.albumName.includes('/')) {
+        showError(this.t('memories', 'Invalid album name; should not contain any slashes.'));
         return;
       }
 
@@ -208,12 +192,12 @@ export default defineComponent({
           nbItems: 0,
           location: this.albumLocation,
           lastPhoto: -1,
-          date: moment().format("MMMM YYYY"),
+          date: moment().format('MMMM YYYY'),
           collaborators,
         };
         await dav.createAlbum(album.basename);
 
-        if (this.albumLocation !== "" || collaborators.length !== 0) {
+        if (this.albumLocation !== '' || collaborators.length !== 0) {
           album = await dav.updateAlbum(album, {
             albumName: this.albumName,
             properties: {
@@ -223,7 +207,7 @@ export default defineComponent({
           });
         }
 
-        this.$emit("done", { album });
+        this.$emit('done', { album });
       } finally {
         this.loading = false;
       }
@@ -245,14 +229,14 @@ export default defineComponent({
             properties: { location: this.albumLocation },
           });
         }
-        this.$emit("done", { album });
+        this.$emit('done', { album });
       } finally {
         this.loading = false;
       }
     },
 
     back() {
-      this.$emit("back");
+      this.$emit('back');
     },
   },
 });

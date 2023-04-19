@@ -25,10 +25,7 @@
       <template #before>
         <!-- Show dynamic top matter, name of the view -->
         <div class="recycler-before" ref="recyclerBefore">
-          <div
-            class="text"
-            v-show="!$refs.topmatter.type && list.length && viewName"
-          >
+          <div class="text" v-show="!$refs.topmatter.type && list.length && viewName">
             {{ viewName }}
           </div>
 
@@ -94,42 +91,37 @@
       @updateLoading="updateLoading"
     />
 
-    <Viewer
-      ref="viewer"
-      @deleted="deleteFromViewWithAnimation"
-      @fetchDay="fetchDay"
-      @updateLoading="updateLoading"
-    />
+    <Viewer ref="viewer" @deleted="deleteFromViewWithAnimation" @fetchDay="fetchDay" @updateLoading="updateLoading" />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import axios from "@nextcloud/axios";
-import { showError } from "@nextcloud/dialogs";
-import { subscribe, unsubscribe } from "@nextcloud/event-bus";
+import axios from '@nextcloud/axios';
+import { showError } from '@nextcloud/dialogs';
+import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 
-import { getLayout } from "../services/Layout";
-import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from "../types";
+import { getLayout } from '../services/Layout';
+import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from '../types';
 
-import UserConfig from "../mixins/UserConfig";
-import FolderGrid from "./FolderGrid.vue";
-import RowHead from "./frame/RowHead.vue";
-import Photo from "./frame/Photo.vue";
-import ScrollerManager from "./ScrollerManager.vue";
-import SelectionManager from "./SelectionManager.vue";
-import Viewer from "./viewer/Viewer.vue";
+import UserConfig from '../mixins/UserConfig';
+import FolderGrid from './FolderGrid.vue';
+import RowHead from './frame/RowHead.vue';
+import Photo from './frame/Photo.vue';
+import ScrollerManager from './ScrollerManager.vue';
+import SelectionManager from './SelectionManager.vue';
+import Viewer from './viewer/Viewer.vue';
 
-import EmptyContent from "./top-matter/EmptyContent.vue";
-import OnThisDay from "./top-matter/OnThisDay.vue";
-import TopMatter from "./top-matter/TopMatter.vue";
+import EmptyContent from './top-matter/EmptyContent.vue';
+import OnThisDay from './top-matter/OnThisDay.vue';
+import TopMatter from './top-matter/TopMatter.vue';
 
-import * as dav from "../services/DavRequests";
-import * as utils from "../services/Utils";
-import * as strings from "../services/strings";
+import * as dav from '../services/DavRequests';
+import * as utils from '../services/Utils';
+import * as strings from '../services/strings';
 
-import { API, DaysFilterType } from "../services/API";
+import { API, DaysFilterType } from '../services/API';
 
 const SCROLL_LOAD_DELAY = 250; // Delay in loading data when scrolling
 const DESKTOP_ROW_HEIGHT = 200; // Height of row on desktop
@@ -137,7 +129,7 @@ const MOBILE_ROW_HEIGHT = 120; // Approx row height on mobile
 const ROW_NUM_LPAD = 16; // Number of rows to load before and after viewport
 
 export default defineComponent({
-  name: "Timeline",
+  name: 'Timeline',
 
   components: {
     FolderGrid,
@@ -213,41 +205,37 @@ export default defineComponent({
 
   created() {
     subscribe(this.config_eventName, this.softRefresh);
-    subscribe("files:file:created", this.softRefresh);
-    subscribe("memories:window:resize", this.handleResizeWithDelay);
+    subscribe('files:file:created', this.softRefresh);
+    subscribe('memories:window:resize', this.handleResizeWithDelay);
   },
 
   beforeDestroy() {
     unsubscribe(this.config_eventName, this.softRefresh);
-    unsubscribe("files:file:created", this.softRefresh);
-    unsubscribe("memories:window:resize", this.handleResizeWithDelay);
+    unsubscribe('files:file:created', this.softRefresh);
+    unsubscribe('memories:window:resize', this.handleResizeWithDelay);
     this.resetState();
   },
 
   computed: {
     routeIsBase(): boolean {
-      return this.$route.name === "timeline";
+      return this.$route.name === 'timeline';
     },
     routeIsPeople(): boolean {
-      return ["recognize", "facerecognition"].includes(
-        <string>this.$route.name
-      );
+      return ['recognize', 'facerecognition'].includes(<string>this.$route.name);
     },
     routeIsArchive(): boolean {
-      return this.$route.name === "archive";
+      return this.$route.name === 'archive';
     },
     routeIsFolders(): boolean {
-      return this.$route.name === "folders";
+      return this.$route.name === 'folders';
     },
     isMonthView(): boolean {
-      if (this.$route.query.sort === "timeline") return false;
+      if (this.$route.query.sort === 'timeline') return false;
 
       return (
-        this.$route.query.sort === "album" ||
-        (this.config_sortAlbumMonth &&
-          (this.$route.name === "albums" ||
-            this.$route.name === "album-share")) ||
-        (this.config_sortFolderMonth && this.$route.name === "folders")
+        this.$route.query.sort === 'album' ||
+        (this.config_sortAlbumMonth && (this.$route.name === 'albums' || this.$route.name === 'album-share')) ||
+        (this.config_sortFolderMonth && this.$route.name === 'folders')
       );
     },
 
@@ -279,13 +267,9 @@ export default defineComponent({
 
       // Check if hash has changed
       const viewerIsOpen = (this.$refs.viewer as any)?.isOpen;
-      if (
-        from?.hash !== to.hash &&
-        to.hash?.startsWith("#v") &&
-        !viewerIsOpen
-      ) {
+      if (from?.hash !== to.hash && to.hash?.startsWith('#v') && !viewerIsOpen) {
         // Open viewer
-        const parts = to.hash.split("/");
+        const parts = to.hash.split('/');
         if (parts.length !== 3) return;
 
         // Get params
@@ -307,20 +291,14 @@ export default defineComponent({
 
         // Scroll to photo if initializing
         if (!from) {
-          const index = this.list.findIndex(
-            (r) => r.day.dayid === dayid && r.photos?.includes(photo)
-          );
+          const index = this.list.findIndex((r) => r.day.dayid === dayid && r.photos?.includes(photo));
           if (index !== -1) {
             (this.$refs.recycler as any).scrollToItem(index);
           }
         }
 
         (this.$refs.viewer as any).open(photo, this.list);
-      } else if (
-        from?.hash?.startsWith("#v") &&
-        !to.hash?.startsWith("#v") &&
-        viewerIsOpen
-      ) {
+      } else if (from?.hash?.startsWith('#v') && !to.hash?.startsWith('#v') && viewerIsOpen) {
         // Close viewer
         (this.$refs.viewer as any).close();
       }
@@ -350,11 +328,7 @@ export default defineComponent({
       this.recomputeSizes();
 
       // Timeline recycler init
-      (this.$refs.recycler as any).$el.addEventListener(
-        "scroll",
-        this.scrollPositionChange,
-        { passive: true }
-      );
+      (this.$refs.recycler as any).$el.addEventListener('scroll', this.scrollPositionChange, { passive: true });
 
       // Get data
       await this.fetchDays();
@@ -393,7 +367,7 @@ export default defineComponent({
 
     /** Do resize after some time */
     handleResizeWithDelay() {
-      utils.setRenewingTimeout(this, "resizeTimer", this.recomputeSizes, 100);
+      utils.setRenewingTimeout(this, 'resizeTimer', this.recomputeSizes, 100);
     },
 
     /** Recompute static sizes of containers */
@@ -419,7 +393,7 @@ export default defineComponent({
       const widthChanged = this.rowWidth !== targetWidth;
 
       if (heightChanged) {
-        recycler.$el.style.height = targetHeight + "px";
+        recycler.$el.style.height = targetHeight + 'px';
       }
 
       if (widthChanged) {
@@ -434,18 +408,12 @@ export default defineComponent({
 
       if (this.isMobileLayout()) {
         // Mobile
-        this.numCols = Math.max(
-          3,
-          Math.floor(this.rowWidth / MOBILE_ROW_HEIGHT)
-        );
+        this.numCols = Math.max(3, Math.floor(this.rowWidth / MOBILE_ROW_HEIGHT));
         this.rowHeight = Math.floor(this.rowWidth / this.numCols);
       } else {
         // Desktop
         if (this.config_squareThumbs) {
-          this.numCols = Math.max(
-            3,
-            Math.floor(this.rowWidth / DESKTOP_ROW_HEIGHT)
-          );
+          this.numCols = Math.max(3, Math.floor(this.rowWidth / DESKTOP_ROW_HEIGHT));
           this.rowHeight = Math.floor(this.rowWidth / this.numCols);
         } else {
           // As a heuristic, assume all images are 4:3 landscape
@@ -527,12 +495,7 @@ export default defineComponent({
       const delay = force || !scrolling ? 0 : SCROLL_LOAD_DELAY;
 
       // Debounce; only execute the newest call after delay
-      utils.setRenewingTimeout(
-        this,
-        "_scrollChangeTimer",
-        this.loadScrollView,
-        delay
-      );
+      utils.setRenewingTimeout(this, '_scrollChangeTimer', this.loadScrollView, delay);
     },
 
     /** Load image data for given view (index based) */
@@ -583,17 +546,17 @@ export default defineComponent({
       const query: { [key: string]: string } = {};
 
       // Favorites
-      if (this.$route.name === "favorites") {
+      if (this.$route.name === 'favorites') {
         API.DAYS_FILTER(query, DaysFilterType.FAVORITES);
       }
 
       // Videos
-      if (this.$route.name === "videos") {
+      if (this.$route.name === 'videos') {
         API.DAYS_FILTER(query, DaysFilterType.VIDEOS);
       }
 
       // Folder
-      if (this.$route.name === "folders") {
+      if (this.$route.name === 'folders') {
         const path = utils.getFolderRoutePath(this.config_foldersPath);
         API.DAYS_FILTER(query, DaysFilterType.FOLDER, path);
         if (this.$route.query.recursive) {
@@ -602,16 +565,16 @@ export default defineComponent({
       }
 
       // Archive
-      if (this.$route.name === "archive") {
+      if (this.$route.name === 'archive') {
         API.DAYS_FILTER(query, DaysFilterType.ARCHIVE);
       }
 
       // Albums
       const user = <string>this.$route.params.user;
       const name = <string>this.$route.params.name;
-      if (this.$route.name === "albums") {
+      if (this.$route.name === 'albums') {
         if (!user || !name) {
-          throw new Error("Invalid album route");
+          throw new Error('Invalid album route');
         }
         API.DAYS_FILTER(query, DaysFilterType.ALBUM, `${user}/${name}`);
       }
@@ -619,7 +582,7 @@ export default defineComponent({
       // People
       if (this.routeIsPeople) {
         if (!user || !name) {
-          throw new Error("Invalid album route");
+          throw new Error('Invalid album route');
         }
 
         const filter = <DaysFilterType>this.$route.name;
@@ -632,28 +595,28 @@ export default defineComponent({
       }
 
       // Places
-      if (this.$route.name === "places") {
-        if (!name || !name.includes("-")) {
-          throw new Error("Invalid place route");
+      if (this.$route.name === 'places') {
+        if (!name || !name.includes('-')) {
+          throw new Error('Invalid place route');
         }
 
-        const id = <string>name.split("-", 1)[0];
+        const id = <string>name.split('-', 1)[0];
         API.DAYS_FILTER(query, DaysFilterType.PLACE, id);
       }
 
       // Tags
-      if (this.$route.name === "tags") {
+      if (this.$route.name === 'tags') {
         if (!name) {
-          throw new Error("Invalid tag route");
+          throw new Error('Invalid tag route');
         }
         API.DAYS_FILTER(query, DaysFilterType.TAG, name);
       }
 
       // Map Bounds
-      if (this.$route.name === "map") {
+      if (this.$route.name === 'map') {
         const bounds = <string>this.$route.query.b;
         if (!bounds) {
-          throw new Error("Missing map bounds");
+          throw new Error('Missing map bounds');
         }
 
         API.DAYS_FILTER(query, DaysFilterType.MAP_BOUNDS, bounds);
@@ -692,9 +655,7 @@ export default defineComponent({
 
       // Filter out hidden folders
       if (!this.config_showHidden) {
-        this.folders = this.folders.filter(
-          (f) => !f.name.startsWith(".") && f.previews?.length
-        );
+        this.folders = this.folders.filter((f) => !f.name.startsWith('.') && f.previews?.length);
       }
     },
 
@@ -727,7 +688,7 @@ export default defineComponent({
         const startState = this.state;
 
         let data: IDay[] = [];
-        if (this.$route.name === "thisday") {
+        if (this.$route.name === 'thisday') {
           data = await dav.getOnThisDayData();
         } else if (dav.isSingleItem()) {
           data = await dav.getSingleItemData();
@@ -813,10 +774,7 @@ export default defineComponent({
         };
 
         // Special headers
-        if (
-          this.$route.name === "thisday" &&
-          (!prevDay || Math.abs(prevDay.dayid - day.dayid) > 30)
-        ) {
+        if (this.$route.name === 'thisday' && (!prevDay || Math.abs(prevDay.dayid - day.dayid) > 30)) {
           // thisday view with new year title
           head.size = 67;
           head.super = utils.getFromNowStr(utils.dayIdToDate(day.dayid));
@@ -868,7 +826,7 @@ export default defineComponent({
       }
 
       // Notify parent components about stats
-      this.$emit("daysLoaded", {
+      this.$emit('daysLoaded', {
         count: data.reduce((acc, day) => acc + day.count, 0),
       });
 
@@ -921,7 +879,7 @@ export default defineComponent({
       if (this.fetchDayQueue.length === 0) return;
 
       // Construct URL
-      const dayStr = this.fetchDayQueue.join(",");
+      const dayStr = this.fetchDayQueue.join(',');
       const url = this.getDayUrl(dayStr);
       this.fetchDayQueue = [];
 
@@ -961,10 +919,7 @@ export default defineComponent({
           if (head?.day?.detail?.length) {
             if (
               head.day.detail.length === photos.length &&
-              head.day.detail.every(
-                (p, i) =>
-                  p.fileid === photos[i].fileid && p.etag === photos[i].etag
-              )
+              head.day.detail.every((p, i) => p.fileid === photos[i].fileid && p.etag === photos[i].etag)
             ) {
               continue;
             }
@@ -974,7 +929,7 @@ export default defineComponent({
           this.processDay(dayId, photos);
         }
       } catch (e) {
-        showError(this.t("memories", "Failed to load some photos"));
+        showError(this.t('memories', 'Failed to load some photos'));
         console.error(e);
       }
     },
@@ -1058,10 +1013,7 @@ export default defineComponent({
       let dataIdx = 0;
       while (dataIdx < data.length) {
         // Check if we ran out of rows
-        if (
-          rowIdx >= this.list.length ||
-          this.list[rowIdx].type === IRowType.HEAD
-        ) {
+        if (rowIdx >= this.list.length || this.list[rowIdx].type === IRowType.HEAD) {
           const newRow = this.addRow(day);
           addedRows.push(newRow);
           this.list.splice(rowIdx, 0, newRow);
@@ -1172,11 +1124,7 @@ export default defineComponent({
 
       // Get rid of any extra rows
       let spliceCount = 0;
-      for (
-        let i = rowIdx + 1;
-        i < this.list.length && this.list[i].type !== IRowType.HEAD;
-        i++
-      ) {
+      for (let i = rowIdx + 1; i < this.list.length && this.list[i].type !== IRowType.HEAD; i++) {
         spliceCount++;
       }
       if (spliceCount > 0) {
@@ -1323,8 +1271,7 @@ export default defineComponent({
   left: 0;
   cursor: pointer;
   height: 100%;
-  transition: width 0.2s ease-in-out, height 0.2s ease-in-out,
-    transform 0.2s ease-in-out; // reflow
+  transition: width 0.2s ease-in-out, height 0.2s ease-in-out, transform 0.2s ease-in-out; // reflow
 }
 
 /** Dynamic top matter */

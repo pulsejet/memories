@@ -1,8 +1,8 @@
-import axios from "@nextcloud/axios";
-import { showError } from "@nextcloud/dialogs";
-import { translate as t } from "@nextcloud/l10n";
-import { IPhoto } from "../../types";
-import { API } from "../API";
+import axios from '@nextcloud/axios';
+import { showError } from '@nextcloud/dialogs';
+import { translate as t } from '@nextcloud/l10n';
+import { IPhoto } from '../../types';
+import { API } from '../API';
 
 /**
  * Download files
@@ -12,7 +12,7 @@ export async function downloadFiles(fileIds: number[]) {
 
   const res = await axios.post(API.DOWNLOAD_REQUEST(), { files: fileIds });
   if (res.status !== 200 || !res.data.handle) {
-    showError(t("memories", "Failed to download files"));
+    showError(t('memories', 'Failed to download files'));
     return;
   }
 

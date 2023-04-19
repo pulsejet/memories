@@ -1,9 +1,9 @@
-import { showError } from "@nextcloud/dialogs";
-import { translate as t } from "@nextcloud/l10n";
-import { IFileInfo, IPhoto } from "../../types";
-import client from "../DavClient";
-import * as base from "./base";
-import * as utils from "../Utils";
+import { showError } from '@nextcloud/dialogs';
+import { translate as t } from '@nextcloud/l10n';
+import { IFileInfo, IPhoto } from '../../types';
+import client from '../DavClient';
+import * as base from './base';
+import * as utils from '../Utils';
 
 /**
  * Favorite a file
@@ -14,7 +14,7 @@ import * as utils from "../Utils";
  */
 export function favoriteFile(fileName: string, favoriteState: boolean) {
   return client.customRequest(fileName, {
-    method: "PROPPATCH",
+    method: 'PROPPATCH',
     data: `<?xml version="1.0"?>
             <d:propertyupdate xmlns:d="DAV:"
               xmlns:oc="http://owncloud.org/ns"
@@ -22,7 +22,7 @@ export function favoriteFile(fileName: string, favoriteState: boolean) {
               xmlns:ocs="http://open-collaboration-services.org/ns">
             <d:set>
               <d:prop>
-                <oc:favorite>${favoriteState ? "1" : "0"}</oc:favorite>
+                <oc:favorite>${favoriteState ? '1' : '0'}</oc:favorite>
               </d:prop>
             </d:set>
             </d:propertyupdate>`,
@@ -36,10 +36,7 @@ export function favoriteFile(fileName: string, favoriteState: boolean) {
  * @param favoriteState the new favorite state
  * @returns generator of lists of file ids that were state-changed
  */
-export async function* favoritePhotos(
-  photos: IPhoto[],
-  favoriteState: boolean
-) {
+export async function* favoritePhotos(photos: IPhoto[], favoriteState: boolean) {
   if (photos.length === 0) {
     return;
   }
@@ -49,13 +46,13 @@ export async function* favoritePhotos(
   try {
     fileInfos = await base.getFiles(photos);
   } catch (e) {
-    console.error("Failed to get file info", photos, e);
-    showError(t("memories", "Failed to favorite files."));
+    console.error('Failed to get file info', photos, e);
+    showError(t('memories', 'Failed to favorite files.'));
     return;
   }
 
   if (fileInfos.length !== photos.length) {
-    showError(t("memories", "Failed to favorite some files."));
+    showError(t('memories', 'Failed to favorite some files.'));
   }
 
   // Favorite each file
@@ -70,9 +67,9 @@ export async function* favoritePhotos(
       }
       return fileInfo.fileid as number;
     } catch (error) {
-      console.error("Failed to favorite", fileInfo, error);
+      console.error('Failed to favorite', fileInfo, error);
       showError(
-        t("memories", "Failed to favorite {fileName}.", {
+        t('memories', 'Failed to favorite {fileName}.', {
           fileName: fileInfo.originalFilename,
         })
       );

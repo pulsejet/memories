@@ -1,15 +1,15 @@
-import PhotoSwipe from "photoswipe";
-import { loadState } from "@nextcloud/initial-state";
-import { showError } from "@nextcloud/dialogs";
-import { translate as t } from "@nextcloud/l10n";
-import { getCurrentUser } from "@nextcloud/auth";
-import axios from "@nextcloud/axios";
+import PhotoSwipe from 'photoswipe';
+import { loadState } from '@nextcloud/initial-state';
+import { showError } from '@nextcloud/dialogs';
+import { translate as t } from '@nextcloud/l10n';
+import { getCurrentUser } from '@nextcloud/auth';
+import axios from '@nextcloud/axios';
 
-import { API } from "../../services/API";
-import type { PsContent, PsEvent } from "./types";
+import { API } from '../../services/API';
+import type { PsContent, PsEvent } from './types';
 
-import Player from "video.js/dist/types/player";
-import { QualityLevelList } from "videojs-contrib-quality-levels";
+import Player from 'video.js/dist/types/player';
+import { QualityLevelList } from 'videojs-contrib-quality-levels';
 
 type VideoContent = PsContent & {
   videoElement: HTMLVideoElement | null;
@@ -25,17 +25,15 @@ type PsVideoEvent = PsEvent & {
   content: VideoContent;
 };
 
-const config_vodDisable = loadState("memories", "vod_disable", true);
+const config_vodDisable = loadState('memories', 'vod_disable', true);
 
-const config_video_default_quality = Number(
-  loadState("memories", "video_default_quality", <string>"0") as string
-);
+const config_video_default_quality = Number(loadState('memories', 'video_default_quality', <string>'0') as string);
 
 /**
  * Check if slide has video content
  */
 export function isVideoContent(content: any): content is VideoContent {
-  return content?.data?.type === "video";
+  return content?.data?.type === 'video';
 }
 
 class VideoContentSetup {
@@ -46,43 +44,34 @@ class VideoContentSetup {
     }
   ) {
     this.initLightboxEvents(lightbox);
-    lightbox.on("init", () => {
+    lightbox.on('init', () => {
       this.initPswpEvents(lightbox);
     });
   }
 
   initLightboxEvents(lightbox: PhotoSwipe) {
-    lightbox.on("contentLoad", this.onContentLoad.bind(this));
-    lightbox.on("contentDestroy", this.onContentDestroy.bind(this));
-    lightbox.on("contentActivate", this.onContentActivate.bind(this));
-    lightbox.on("contentDeactivate", this.onContentDeactivate.bind(this));
-    lightbox.on("contentResize", this.onContentResize.bind(this));
+    lightbox.on('contentLoad', this.onContentLoad.bind(this));
+    lightbox.on('contentDestroy', this.onContentDestroy.bind(this));
+    lightbox.on('contentActivate', this.onContentActivate.bind(this));
+    lightbox.on('contentDeactivate', this.onContentDeactivate.bind(this));
+    lightbox.on('contentResize', this.onContentResize.bind(this));
 
-    lightbox.addFilter(
-      "isKeepingPlaceholder",
-      this.isKeepingPlaceholder.bind(this)
-    );
-    lightbox.addFilter("isContentZoomable", this.isContentZoomable.bind(this));
-    lightbox.addFilter(
-      "useContentPlaceholder",
-      this.useContentPlaceholder.bind(this)
-    );
+    lightbox.addFilter('isKeepingPlaceholder', this.isKeepingPlaceholder.bind(this));
+    lightbox.addFilter('isContentZoomable', this.isContentZoomable.bind(this));
+    lightbox.addFilter('useContentPlaceholder', this.useContentPlaceholder.bind(this));
   }
 
   initPswpEvents(pswp: PhotoSwipe) {
     // Prevent draggin when pointer is in bottom part of the video
     // todo: add option for this
-    pswp.on("pointerDown", (e) => {
+    pswp.on('pointerDown', (e) => {
       const slide = pswp.currSlide;
       if (isVideoContent(slide) && this.options.preventDragOffset) {
         const origEvent = e.originalEvent;
-        if (origEvent.type === "pointerdown") {
+        if (origEvent.type === 'pointerdown') {
           // Check if directly over the videojs control bar
-          const elems = document.elementsFromPoint(
-            origEvent.clientX,
-            origEvent.clientY
-          );
-          if (elems.some((el) => el.classList.contains("plyr__controls"))) {
+          const elems = document.elementsFromPoint(origEvent.clientX, origEvent.clientY);
+          if (elems.some((el) => el.classList.contains('plyr__controls'))) {
             e.preventDefault();
             return;
           }
@@ -90,10 +79,7 @@ class VideoContentSetup {
           const videoHeight = Math.ceil(slide.height * slide.currZoomLevel);
           const verticalEnding = videoHeight + slide.bounds.center.y;
           const pointerYPos = origEvent.pageY - pswp.offset.y;
-          if (
-            pointerYPos > verticalEnding - this.options.preventDragOffset &&
-            pointerYPos < verticalEnding
-          ) {
+          if (pointerYPos > verticalEnding - this.options.preventDragOffset && pointerYPos < verticalEnding) {
             e.preventDefault();
           }
         }
@@ -101,7 +87,7 @@ class VideoContentSetup {
     });
 
     // do not append video on nearby slides
-    pswp.on("appendHeavy", (e) => {
+    pswp.on('appendHeavy', (e) => {
       if (isVideoContent(e.slide)) {
         const content = <any>e.slide.content;
         if (e.slide.isActive && content.videoElement) {
@@ -110,12 +96,12 @@ class VideoContentSetup {
       }
     });
 
-    pswp.on("close", () => {
+    pswp.on('close', () => {
       this.destroyVideo(pswp.currSlide?.content as VideoContent);
     });
 
     // Prevent closing when video fullscreen is active
-    pswp.on("pointerMove", (e) => {
+    pswp.on('pointerMove', (e) => {
       const plyr = (<VideoContent>pswp.currSlide?.content)?.plyr;
       if (plyr?.fullscreen.active) {
         e.preventDefault();
@@ -124,11 +110,10 @@ class VideoContentSetup {
   }
 
   getDirectSrc(content: VideoContent) {
-    const numChunks =
-      Math.ceil((content.data.photo?.video_duration || 0) / 3) || undefined;
+    const numChunks = Math.ceil((content.data.photo?.video_duration || 0) / 3) || undefined;
     return {
       src: API.Q(content.data.src, { numChunks }),
-      type: "video/mp4", // chrome refuses to play video/quicktime, so fool it
+      type: 'video/mp4', // chrome refuses to play video/quicktime, so fool it
     };
   }
 
@@ -137,7 +122,7 @@ class VideoContentSetup {
     const fileid = content.data.photo.fileid;
     return {
       src: API.VIDEO_TRANSCODE(fileid),
-      type: "application/x-mpegURL",
+      type: 'application/x-mpegURL',
     };
   }
 
@@ -151,16 +136,16 @@ class VideoContentSetup {
 
     // Load videojs scripts
     if (!globalThis.vidjs) {
-      await import("../../services/videojs");
+      await import('../../services/videojs');
     }
 
     // Create video element
-    content.videoElement = document.createElement("video");
-    content.videoElement.className = "video-js";
-    content.videoElement.setAttribute("poster", content.data.msrc);
-    content.videoElement.setAttribute("preload", "none");
-    content.videoElement.setAttribute("controls", "");
-    content.videoElement.setAttribute("playsinline", "");
+    content.videoElement = document.createElement('video');
+    content.videoElement.className = 'video-js';
+    content.videoElement.setAttribute('poster', content.data.msrc);
+    content.videoElement.setAttribute('preload', 'none');
+    content.videoElement.setAttribute('controls', '');
+    content.videoElement.setAttribute('playsinline', '');
 
     // Add the video element to the actual container
     content.element?.appendChild(content.videoElement);
@@ -183,7 +168,7 @@ class VideoContentSetup {
       autoplay: true,
       controls: false,
       sources: sources,
-      preload: "metadata",
+      preload: 'metadata',
       playbackRates: [0.5, 1, 1.5, 2],
       responsive: true,
       html5: {
@@ -203,26 +188,26 @@ class VideoContentSetup {
     let directFailed = false;
     let hlsFailed = false;
 
-    vjs.on("error", () => {
-      if (vjs.src(undefined)?.includes("m3u8")) {
+    vjs.on('error', () => {
+      if (vjs.src(undefined)?.includes('m3u8')) {
         hlsFailed = true;
-        console.warn("PsVideo: HLS stream could not be opened.");
+        console.warn('PsVideo: HLS stream could not be opened.');
 
         if (getCurrentUser()?.isAdmin) {
-          showError(t("memories", "Transcoding failed, check Nextcloud logs."));
+          showError(t('memories', 'Transcoding failed, check Nextcloud logs.'));
         }
 
         if (!directFailed) {
-          console.warn("PsVideo: Trying direct video stream");
+          console.warn('PsVideo: Trying direct video stream');
           vjs.src(this.getDirectSrc(content));
           this.updateRotation(content, 0);
         }
       } else {
         directFailed = true;
-        console.warn("PsVideo: Direct video stream could not be opened.");
+        console.warn('PsVideo: Direct video stream could not be opened.');
 
         if (!hlsFailed && !config_vodDisable) {
-          console.warn("PsVideo: Trying HLS stream");
+          console.warn('PsVideo: Trying HLS stream');
           vjs.src(this.getHLSsrc(content));
         }
       }
@@ -233,7 +218,7 @@ class VideoContentSetup {
     playWithDelay();
 
     let canPlay = false;
-    content.videojs.on("canplay", () => {
+    content.videojs.on('canplay', () => {
       canPlay = true;
       this.updateRotation(content); // also gets the correct video elem as a side effect
 
@@ -241,14 +226,14 @@ class VideoContentSetup {
       window.setTimeout(() => this.initPlyr(content), 0);
 
       // Hide the preview image
-      content.placeholder?.element?.setAttribute("hidden", "true");
+      content.placeholder?.element?.setAttribute('hidden', 'true');
 
       // Another attempt to play the video
       playWithDelay();
     });
 
-    content.videojs.qualityLevels?.()?.on("addqualitylevel", (e) => {
-      if (e.qualityLevel?.label?.includes("max.m3u8")) {
+    content.videojs.qualityLevels?.()?.on('addqualitylevel', (e) => {
+      if (e.qualityLevel?.label?.includes('max.m3u8')) {
         // This is the highest quality level
         // and guaranteed to be the last one
         this.initPlyr(content);
@@ -295,14 +280,14 @@ class VideoContentSetup {
       content.videoElement = null;
 
       // Restore placeholder image
-      content.placeholder?.element?.removeAttribute("hidden");
+      content.placeholder?.element?.removeAttribute('hidden');
     }
   }
 
   initPlyr(content: VideoContent) {
     if (content.plyr || !content.videojs || !content.element) return;
 
-    content.videoElement = content.videojs?.el()?.querySelector("video");
+    content.videoElement = content.videojs?.el()?.querySelector('video');
     if (!content.videoElement) return;
 
     // Retain original parent for video element
@@ -318,7 +303,7 @@ class VideoContentSetup {
         const { width, height, label } = qualityList[i];
         s.add(Math.min(width!, height!));
 
-        if (label?.includes("max.m3u8")) {
+        if (label?.includes('max.m3u8')) {
           hasMax = true;
         }
       }
@@ -335,9 +320,9 @@ class VideoContentSetup {
     const opts: Plyr.Options = {
       i18n: {
         qualityLabel: {
-          "-2": t("memories", "Direct"),
-          "-1": t("memories", "Original"),
-          "0": t("memories", "Auto"),
+          '-2': t('memories', 'Direct'),
+          '-1': t('memories', 'Original'),
+          '0': t('memories', 'Auto'),
         },
       },
       fullscreen: {
@@ -359,7 +344,7 @@ class VideoContentSetup {
           qualityList = content.videojs?.qualityLevels?.();
           if (!qualityList || !content.videojs) return;
 
-          const isHLS = content.videojs.src(undefined)?.includes("m3u8");
+          const isHLS = content.videojs.src(undefined)?.includes('m3u8');
 
           if (quality === -2) {
             // Direct playback
@@ -387,7 +372,7 @@ class VideoContentSetup {
             qualityList[i].enabled =
               !quality || // auto
               pixels === quality || // exact match
-              (label?.includes("max.m3u8") && quality === -1); // max
+              (label?.includes('max.m3u8') && quality === -1); // max
           }
         },
       };
@@ -397,16 +382,12 @@ class VideoContentSetup {
     const plyr = new Plyr(content.videoElement, opts);
     const container = plyr.elements.container!;
 
-    container.style.height = "100%";
-    container.style.width = "100%";
-    container
-      .querySelectorAll("button")
-      .forEach((el) => el.classList.add("button-vue"));
-    container
-      .querySelectorAll("progress")
-      .forEach((el) => el.classList.add("vue"));
-    container.style.backgroundColor = "transparent";
-    plyr.elements.wrapper!.style.backgroundColor = "transparent";
+    container.style.height = '100%';
+    container.style.width = '100%';
+    container.querySelectorAll('button').forEach((el) => el.classList.add('button-vue'));
+    container.querySelectorAll('progress').forEach((el) => el.classList.add('vue'));
+    container.style.backgroundColor = 'transparent';
+    plyr.elements.wrapper!.style.backgroundColor = 'transparent';
 
     // Set the fullscreen element to the container
     plyr.elements.fullscreen = content.slide?.holderElement || null;
@@ -415,9 +396,9 @@ class VideoContentSetup {
     content.plyr = plyr;
 
     // Wait for animation to end before showing Plyr
-    container.style.opacity = "0";
+    container.style.opacity = '0';
     setTimeout(() => {
-      container.style.opacity = "1";
+      container.style.opacity = '1';
     }, 250);
 
     // Restore original parent of video element
@@ -433,7 +414,7 @@ class VideoContentSetup {
       let previousOrientation: OrientationLockType | undefined;
 
       // Lock orientation when entering fullscreen
-      plyr.on("enterfullscreen", async (event) => {
+      plyr.on('enterfullscreen', async (event) => {
         const rotation = this.updateRotation(content);
         const exif = content.data.photo.imageInfo?.exif;
         const h = Number(exif?.ImageHeight || 0);
@@ -441,7 +422,7 @@ class VideoContentSetup {
 
         if (h && w) {
           previousOrientation ||= screen.orientation.type;
-          const orientation = h < w && !rotation ? "landscape" : "portrait";
+          const orientation = h < w && !rotation ? 'landscape' : 'portrait';
 
           try {
             await screen.orientation.lock(orientation);
@@ -452,7 +433,7 @@ class VideoContentSetup {
       });
 
       // Unlock orientation when exiting fullscreen
-      plyr.on("exitfullscreen", async (event) => {
+      plyr.on('exitfullscreen', async (event) => {
         try {
           if (previousOrientation) {
             await screen.orientation.lock(previousOrientation);
@@ -470,13 +451,13 @@ class VideoContentSetup {
   updateRotation(content: VideoContent, val?: number): boolean {
     if (!content.videojs) return false;
 
-    content.videoElement = content.videojs.el()?.querySelector("video");
+    content.videoElement = content.videojs.el()?.querySelector('video');
     if (!content.videoElement) return false;
 
     const photo = content.data.photo;
     const exif = photo.imageInfo?.exif;
     const rotation = val ?? Number(exif?.Rotation || 0);
-    const shouldRotate = content.videojs?.src(undefined)?.includes("m3u8");
+    const shouldRotate = content.videojs?.src(undefined)?.includes('m3u8');
 
     if (rotation && shouldRotate) {
       let transform = `rotate(${rotation}deg)`;
@@ -487,16 +468,16 @@ class VideoContentSetup {
         content.videoElement.style.height = content.element!.style.width;
 
         transform = `translateY(-${content.element!.style.width}) ${transform}`;
-        content.videoElement.style.transformOrigin = "bottom left";
+        content.videoElement.style.transformOrigin = 'bottom left';
       }
 
       content.videoElement.style.transform = transform;
 
       return hasRotation;
     } else {
-      content.videoElement.style.transform = "none";
-      content.videoElement.style.width = "100%";
-      content.videoElement.style.height = "100%";
+      content.videoElement.style.transform = 'none';
+      content.videoElement.style.width = '100%';
+      content.videoElement.style.height = '100%';
     }
 
     return false;
@@ -515,16 +496,16 @@ class VideoContentSetup {
       const content = e.content;
 
       if (content.element) {
-        content.element.style.width = width + "px";
-        content.element.style.height = height + "px";
+        content.element.style.width = width + 'px';
+        content.element.style.height = height + 'px';
       }
 
       if (content.slide && content.slide.placeholder) {
         // override placeholder size, so it more accurately matches the video
         const placeholderElStyle = content.slide.placeholder.element.style;
-        placeholderElStyle.transform = "none";
-        placeholderElStyle.width = width + "px";
-        placeholderElStyle.height = height + "px";
+        placeholderElStyle.transform = 'none';
+        placeholderElStyle.width = width + 'px';
+        placeholderElStyle.height = height + 'px';
       }
 
       this.updateRotation(content);
@@ -556,13 +537,13 @@ class VideoContentSetup {
 
     // Stop default content load
     e.preventDefault();
-    content.type = "video";
+    content.type = 'video';
 
     if (content.element) return;
 
     // Create DIV
-    content.element = document.createElement("div");
-    content.element.classList.add("video-container");
+    content.element = document.createElement('div');
+    content.element.classList.add('video-container');
 
     content.onLoaded();
   }

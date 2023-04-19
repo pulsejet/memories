@@ -17,7 +17,7 @@
       <div class="timeline-header" ref="timelineHeader">
         <div class="swiper"></div>
         <div class="title">
-          {{ t("memories", "{photoCount} photos", { photoCount }) }}
+          {{ t('memories', '{photoCount} photos', { photoCount }) }}
         </div>
       </div>
       <div class="timeline-inner">
@@ -28,14 +28,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import Timeline from "./Timeline.vue";
-const MapSplitMatter = () => import("./top-matter/MapSplitMatter.vue");
-import { emit } from "@nextcloud/event-bus";
-import Hammer from "hammerjs";
+import { defineComponent } from 'vue';
+import Timeline from './Timeline.vue';
+const MapSplitMatter = () => import('./top-matter/MapSplitMatter.vue');
+import { emit } from '@nextcloud/event-bus';
+import Hammer from 'hammerjs';
 
 export default defineComponent({
-  name: "SplitTimeline",
+  name: 'SplitTimeline',
 
   components: {
     Timeline,
@@ -53,21 +53,21 @@ export default defineComponent({
   computed: {
     primary() {
       switch (this.$route.name) {
-        case "map":
+        case 'map':
           return MapSplitMatter;
         default:
-          return "None";
+          return 'None';
       }
     },
 
     headerClass() {
       switch (this.mobileOpen) {
         case 0:
-          return "m-zero";
+          return 'm-zero';
         case 1:
-          return "m-one";
+          return 'm-one';
         case 2:
-          return "m-two";
+          return 'm-two';
       }
     },
   },
@@ -75,12 +75,12 @@ export default defineComponent({
   mounted() {
     // Set up hammerjs hooks
     this.hammer = new Hammer(this.$refs.timelineHeader as HTMLElement);
-    this.hammer.get("swipe").set({
+    this.hammer.get('swipe').set({
       direction: Hammer.DIRECTION_VERTICAL,
       threshold: 3,
     });
-    this.hammer.on("swipeup", this.mobileSwipeUp);
-    this.hammer.on("swipedown", this.mobileSwipeDown);
+    this.hammer.on('swipeup', this.mobileSwipeUp);
+    this.hammer.on('swipedown', this.mobileSwipeDown);
   },
 
   beforeDestroy() {
@@ -107,11 +107,11 @@ export default defineComponent({
       this.containerSize = this.isVertical() ? cRect.height : cRect.width;
 
       // Let touch handle itself
-      if (event.pointerType === "touch") return;
+      if (event.pointerType === 'touch') return;
 
       // Otherwise, handle pointer events on document
-      document.addEventListener("pointermove", this.documentPointerMove);
-      document.addEventListener("pointerup", this.pointerUp);
+      document.addEventListener('pointermove', this.documentPointerMove);
+      document.addEventListener('pointerup', this.pointerUp);
 
       // Prevent text selection
       event.preventDefault();
@@ -131,9 +131,9 @@ export default defineComponent({
     pointerUp() {
       // Get rid of listeners on document quickly
       this.pointerDown = false;
-      document.removeEventListener("pointermove", this.documentPointerMove);
-      document.removeEventListener("pointerup", this.pointerUp);
-      emit("memories:window:resize", {});
+      document.removeEventListener('pointermove', this.documentPointerMove);
+      document.removeEventListener('pointerup', this.pointerUp);
+      emit('memories:window:resize', {});
     },
 
     setFlexBasis(pos: { clientX: number; clientY: number }) {
@@ -154,7 +154,7 @@ export default defineComponent({
       // so that we can prepare in advance for showing more photos
       // on the timeline
       await this.$nextTick();
-      emit("memories:window:resize", {});
+      emit('memories:window:resize', {});
     },
 
     async mobileSwipeDown() {
@@ -165,7 +165,7 @@ export default defineComponent({
       // ends. Note that this is necesary: the height of the timeline inner
       // div is also animated to the smaller size.
       await new Promise((resolve) => setTimeout(resolve, 300));
-      emit("memories:window:resize", {});
+      emit('memories:window:resize', {});
     },
   },
 });

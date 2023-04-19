@@ -7,13 +7,13 @@
  */
 
 const pathname = self.location.pathname;
-__webpack_public_path__ = pathname.substring(0, pathname.lastIndexOf("/") + 1);
+__webpack_public_path__ = pathname.substring(0, pathname.lastIndexOf('/') + 1);
 
 const missedQueue: any[] = [];
 self.onmessage = function (val: any) {
   missedQueue.push(val);
 };
 
-import("./XImgWorker").then(function () {
+import('./XImgWorker').then(function () {
   missedQueue.forEach((data: any) => self.onmessage?.(data));
 });

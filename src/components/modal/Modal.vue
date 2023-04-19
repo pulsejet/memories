@@ -21,13 +21,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-const NcModal = () => import("@nextcloud/vue/dist/Components/NcModal");
-import { subscribe, unsubscribe } from "@nextcloud/event-bus";
+const NcModal = () => import('@nextcloud/vue/dist/Components/NcModal');
+import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 
 export default defineComponent({
-  name: "Modal",
+  name: 'Modal',
   components: {
     NcModal,
   },
@@ -35,7 +35,7 @@ export default defineComponent({
   props: {
     size: {
       type: String,
-      default: "small",
+      default: 'small',
     },
     sidebar: {
       type: String,
@@ -52,8 +52,8 @@ export default defineComponent({
 
   beforeMount() {
     if (this.sidebar) {
-      subscribe("memories:sidebar:opened", this.handleAppSidebarOpen);
-      subscribe("memories:sidebar:closed", this.handleAppSidebarClose);
+      subscribe('memories:sidebar:opened', this.handleAppSidebarOpen);
+      subscribe('memories:sidebar:closed', this.handleAppSidebarClose);
     }
     this._mutationObserver = new MutationObserver(this.handleBodyMutation);
     this._mutationObserver.observe(document.body, { childList: true });
@@ -61,8 +61,8 @@ export default defineComponent({
 
   beforeDestroy() {
     if (this.sidebar) {
-      unsubscribe("memories:sidebar:opened", this.handleAppSidebarOpen);
-      unsubscribe("memories:sidebar:closed", this.handleAppSidebarClose);
+      unsubscribe('memories:sidebar:opened', this.handleAppSidebarOpen);
+      unsubscribe('memories:sidebar:closed', this.handleAppSidebarClose);
       globalThis.mSidebar.close();
     }
     this._mutationObserver.disconnect();
@@ -79,7 +79,7 @@ export default defineComponent({
 
   methods: {
     close() {
-      this.$emit("close");
+      this.$emit('close');
     },
 
     /**
@@ -88,28 +88,22 @@ export default defineComponent({
      */
     handleBodyMutation(mutations: MutationRecord[]) {
       const test = (node: Node): node is HTMLElement =>
-        node instanceof HTMLElement &&
-        node?.classList?.contains("v-popper__popper");
+        node instanceof HTMLElement && node?.classList?.contains('v-popper__popper');
 
       mutations.forEach((mutation) => {
-        if (mutation.type === "childList") {
+        if (mutation.type === 'childList') {
           Array.from(mutation.addedNodes)
             .filter(test)
             .forEach((node) => this.trapElements.push(node));
           Array.from(mutation.removedNodes)
             .filter(test)
-            .forEach(
-              (node) =>
-                (this.trapElements = this.trapElements.filter(
-                  (el) => el !== node
-                ))
-            );
+            .forEach((node) => (this.trapElements = this.trapElements.filter((el) => el !== node)));
         }
       });
     },
 
     handleAppSidebarOpen() {
-      const sidebar = document.getElementById("app-sidebar-vue");
+      const sidebar = document.getElementById('app-sidebar-vue');
       if (sidebar) {
         this.isSidebarShown = true;
         this.sidebarWidth = sidebar.offsetWidth;

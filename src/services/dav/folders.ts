@@ -1,18 +1,15 @@
-import * as base from "./base";
-import { getCurrentUser } from "@nextcloud/auth";
-import { genFileInfo } from "../FileUtils";
-import { IFileInfo } from "../../types";
-import client from "../DavClient";
+import * as base from './base';
+import { getCurrentUser } from '@nextcloud/auth';
+import { genFileInfo } from '../FileUtils';
+import { IFileInfo } from '../../types';
+import client from '../DavClient';
 
 /**
  * Get file infos for files in folder path
  * @param folderPath Path to folder
  * @param limit Max number of files to return
  */
-export async function getFolderPreviewFileIds(
-  folderPath: string,
-  limit: number
-): Promise<IFileInfo[]> {
+export async function getFolderPreviewFileIds(folderPath: string, limit: number): Promise<IFileInfo[]> {
   const prefixPath = `/files/${getCurrentUser()?.uid}`;
 
   const filter = base.IMAGE_MIME_TYPES.map(
@@ -24,12 +21,12 @@ export async function getFolderPreviewFileIds(
             <d:literal>${mime}</d:literal>
         </d:like>
     `
-  ).join("");
+  ).join('');
 
   const options = {
-    method: "SEARCH",
+    method: 'SEARCH',
     headers: {
-      "content-Type": "text/xml",
+      'content-Type': 'text/xml',
     },
     data: `<?xml version="1.0" encoding="UTF-8"?>
             <d:searchrequest xmlns:d="DAV:"
@@ -61,16 +58,16 @@ export async function getFolderPreviewFileIds(
             </d:searchrequest>`,
     deep: true,
     details: true,
-    responseType: "text",
+    responseType: 'text',
   };
 
-  let response: any = await client.getDirectoryContents("", options);
+  let response: any = await client.getDirectoryContents('', options);
   return response.data
     .map((data: any) => genFileInfo(data))
     .map((data: any) =>
       Object.assign({}, data, {
-        filename: data.filename.replace(prefixPath, ""),
-        etag: data.etag.replace(/&quot;/g, ""), // remove quotes
+        filename: data.filename.replace(prefixPath, ''),
+        etag: data.etag.replace(/&quot;/g, ''), // remove quotes
       })
     );
 }

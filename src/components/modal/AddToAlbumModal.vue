@@ -1,37 +1,33 @@
 <template>
   <Modal @close="close" size="normal" v-if="show">
     <template #title>
-      {{ t("memories", "Add to album") }}
+      {{ t('memories', 'Add to album') }}
     </template>
 
     <div class="outer">
       <AlbumPicker @select="selectAlbum" />
 
       <div v-if="processing">
-        <NcProgressBar
-          :value="Math.round((photosDone * 100) / photos.length)"
-          :error="true"
-        />
+        <NcProgressBar :value="Math.round((photosDone * 100) / photos.length)" :error="true" />
       </div>
     </div>
   </Modal>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import * as dav from "../../services/DavRequests";
-import { showInfo } from "@nextcloud/dialogs";
-import { IAlbum, IPhoto } from "../../types";
+import * as dav from '../../services/DavRequests';
+import { showInfo } from '@nextcloud/dialogs';
+import { IAlbum, IPhoto } from '../../types';
 
-const NcProgressBar = () =>
-  import("@nextcloud/vue/dist/Components/NcProgressBar");
+const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
 
-import Modal from "./Modal.vue";
-import AlbumPicker from "./AlbumPicker.vue";
+import Modal from './Modal.vue';
+import AlbumPicker from './AlbumPicker.vue';
 
 export default defineComponent({
-  name: "AddToAlbumModal",
+  name: 'AddToAlbumModal',
   components: {
     NcProgressBar,
     Modal,
@@ -54,14 +50,14 @@ export default defineComponent({
     },
 
     added(photos: IPhoto[]) {
-      this.$emit("added", photos);
+      this.$emit('added', photos);
     },
 
     close() {
       this.photos = [];
       this.processing = false;
       this.show = false;
-      this.$emit("close");
+      this.$emit('close');
     },
 
     async selectAlbum(album: IAlbum) {
@@ -77,15 +73,7 @@ export default defineComponent({
       }
 
       const n = this.photosDone;
-      showInfo(
-        this.n(
-          "memories",
-          "{n} item added to album",
-          "{n} items added to album",
-          n,
-          { n }
-        )
-      );
+      showInfo(this.n('memories', '{n} item added to album', '{n} items added to album', n, { n }));
       this.close();
     },
   },

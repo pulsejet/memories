@@ -1,20 +1,20 @@
-import { getCurrentUser } from "@nextcloud/auth";
-import { loadState } from "@nextcloud/initial-state";
+import { getCurrentUser } from '@nextcloud/auth';
+import { loadState } from '@nextcloud/initial-state';
 
 /** Cache keys */
-const memoriesVersion: string = loadState("memories", "version", "");
-const uid = getCurrentUser()?.uid || "guest";
+const memoriesVersion: string = loadState('memories', 'version', '');
+const uid = getCurrentUser()?.uid || 'guest';
 const cacheName = `memories-${memoriesVersion}-${uid}`;
 
 // Clear all caches except the current one
 (async function clearCaches() {
-  if (!memoriesVersion || uid === "guest") return;
+  if (!memoriesVersion || uid === 'guest') return;
 
   const keys = await window.caches?.keys();
   if (!keys?.length) return;
 
   for (const key of keys) {
-    if (key.startsWith("memories-") && key !== cacheName) {
+    if (key.startsWith('memories-') && key !== cacheName) {
       window.caches.delete(key);
     }
   }
@@ -54,10 +54,10 @@ export function cacheData(url: string, data: Object) {
 
     const response = new Response(str);
     const encoded = new TextEncoder().encode(str);
-    response.headers.set("Content-Type", "application/json");
-    response.headers.set("Content-Length", encoded.length.toString());
-    response.headers.set("Cache-Control", "max-age=604800"); // 1 week
-    response.headers.set("Vary", "Accept-Encoding");
+    response.headers.set('Content-Type', 'application/json');
+    response.headers.set('Content-Length', encoded.length.toString());
+    response.headers.set('Cache-Control', 'max-age=604800'); // 1 week
+    response.headers.set('Vary', 'Accept-Encoding');
     await cache.put(url, response);
   })();
 }

@@ -1,33 +1,18 @@
 <template>
-  <Modal
-    @close="close"
-    size="normal"
-    v-if="show"
-    :sidebar="!isRoot && !isMobile ? this.filename : null"
-  >
+  <Modal @close="close" size="normal" v-if="show" :sidebar="!isRoot && !isMobile ? this.filename : null">
     <template #title>
-      {{ t("memories", "Link Sharing") }}
+      {{ t('memories', 'Link Sharing') }}
     </template>
 
     <div v-if="isRoot">
-      {{ t("memories", "You cannot share the root folder") }}
+      {{ t('memories', 'You cannot share the root folder') }}
     </div>
     <div v-else>
-      {{
-        t(
-          "memories",
-          "Public link shares are available to people outside Nextcloud."
-        )
-      }}
+      {{ t('memories', 'Public link shares are available to people outside Nextcloud.') }}
       <br />
-      {{
-        t(
-          "memories",
-          "You may create or update permissions on public links using the sidebar."
-        )
-      }}
+      {{ t('memories', 'You may create or update permissions on public links using the sidebar.') }}
       <br />
-      {{ t("memories", "Click a link to copy to clipboard.") }}
+      {{ t('memories', 'Click a link to copy to clipboard.') }}
     </div>
 
     <div class="links">
@@ -49,7 +34,7 @@
           </template>
           <template #actions>
             <NcActionButton @click="deleteLink(share)" :disabled="loading">
-              {{ t("memories", "Remove") }}
+              {{ t('memories', 'Remove') }}
 
               <template #icon>
                 <CloseIcon :size="20" />
@@ -64,34 +49,34 @@
 
     <template #buttons>
       <NcButton class="primary" :disabled="loading" @click="createLink">
-        {{ t("memories", "Create Link") }}
+        {{ t('memories', 'Create Link') }}
       </NcButton>
       <NcButton class="primary" :disabled="loading" @click="refreshUrls">
-        {{ t("memories", "Refresh") }}
+        {{ t('memories', 'Refresh') }}
       </NcButton>
     </template>
   </Modal>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import axios from "@nextcloud/axios";
-import { showSuccess } from "@nextcloud/dialogs";
+import axios from '@nextcloud/axios';
+import { showSuccess } from '@nextcloud/dialogs';
 
-import UserConfig from "../../mixins/UserConfig";
-import NcButton from "@nextcloud/vue/dist/Components/NcButton";
-import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
-const NcListItem = () => import("@nextcloud/vue/dist/Components/NcListItem");
-import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
+import UserConfig from '../../mixins/UserConfig';
+import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
+const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
-import * as utils from "../../services/Utils";
-import Modal from "./Modal.vue";
+import * as utils from '../../services/Utils';
+import Modal from './Modal.vue';
 
-import { API } from "../../services/API";
+import { API } from '../../services/API';
 
-import CloseIcon from "vue-material-design-icons/Close.vue";
-import LinkIcon from "vue-material-design-icons/LinkVariant.vue";
+import CloseIcon from 'vue-material-design-icons/Close.vue';
+import LinkIcon from 'vue-material-design-icons/LinkVariant.vue';
 
 type IShare = {
   id: string;
@@ -104,7 +89,7 @@ type IShare = {
 };
 
 export default defineComponent({
-  name: "NodeShareModal",
+  name: 'NodeShareModal',
   components: {
     Modal,
     NcButton,
@@ -120,14 +105,14 @@ export default defineComponent({
 
   data: () => ({
     show: false,
-    filename: "",
+    filename: '',
     loading: false,
     shares: [] as IShare[],
   }),
 
   computed: {
     isRoot(): boolean {
-      return this.filename === "/" || this.filename === "";
+      return this.filename === '/' || this.filename === '';
     },
 
     isMobile(): boolean {
@@ -144,7 +129,7 @@ export default defineComponent({
       this.filename = path;
       this.show = true;
       this.shares = [];
-      globalThis.mSidebar.setTab("sharing");
+      globalThis.mSidebar.setTab('sharing');
 
       // Get current shares
       await this.refreshUrls();
@@ -154,11 +139,10 @@ export default defineComponent({
       // not password protected. Otherwise create a new share.
       if (immediate) {
         let share =
-          this.shares.find((s) => !s.hasPassword) ||
-          (this.shares.length === 0 ? await this.createLink(false) : null);
+          this.shares.find((s) => !s.hasPassword) || (this.shares.length === 0 ? await this.createLink(false) : null);
 
         if (share) {
-          if ("share" in window.navigator) {
+          if ('share' in window.navigator) {
             window.navigator.share({
               title: this.filename,
               url: share.url,
@@ -172,15 +156,13 @@ export default defineComponent({
 
     close() {
       this.show = false;
-      this.$emit("close");
+      this.$emit('close');
     },
 
     async refreshUrls() {
       this.loading = true;
       try {
-        this.shares = (
-          await axios.get(API.Q(API.SHARE_LINKS(), { path: this.filename }))
-        ).data;
+        this.shares = (await axios.get(API.Q(API.SHARE_LINKS(), { path: this.filename }))).data;
       } catch (e) {
         this.shares = [];
       } finally {
@@ -191,24 +173,24 @@ export default defineComponent({
     getShareLabels(share: IShare): string {
       const labels: string[] = [];
       if (share.hasPassword) {
-        labels.push(this.t("memories", "Password protected"));
+        labels.push(this.t('memories', 'Password protected'));
       }
 
       if (share.expiration) {
         const exp = utils.getLongDateStr(new Date(share.expiration * 1000));
-        const kw = this.t("memories", "Expires");
+        const kw = this.t('memories', 'Expires');
         labels.push(`${kw} ${exp}`);
       }
 
       if (share.editable) {
-        labels.push(this.t("memories", "Editable"));
+        labels.push(this.t('memories', 'Editable'));
       }
 
       if (labels.length > 0) {
-        return `${labels.join(", ")}`;
+        return `${labels.join(', ')}`;
       }
 
-      return this.t("memories", "Read only");
+      return this.t('memories', 'Read only');
     },
 
     async createLink(copy = true): Promise<IShare> {
@@ -244,7 +226,7 @@ export default defineComponent({
 
     copy(url: string) {
       window.navigator.clipboard.writeText(url);
-      showSuccess(this.t("memories", "Link copied to clipboard"));
+      showSuccess(this.t('memories', 'Link copied to clipboard'));
     },
 
     refreshSidebar() {

@@ -7,11 +7,7 @@
     @fullscreenchange="fullscreenChange"
     @keydown="keydown"
   >
-    <ImageEditor
-      v-if="editorOpen"
-      :photo="currentPhoto"
-      @close="editorOpen = false"
-    />
+    <ImageEditor v-if="editorOpen" :photo="currentPhoto" @close="editorOpen = false" />
 
     <div
       class="inner"
@@ -21,17 +17,14 @@
       @pointerdown.passive="setUiVisible"
     >
       <div class="top-bar" v-if="photoswipe" :class="{ showControls }">
-        <NcActions
-          :inline="numInlineActions"
-          container=".memories_viewer .pswp"
-        >
+        <NcActions :inline="numInlineActions" container=".memories_viewer .pswp">
           <NcActionButton
             v-if="canShare"
             :aria-label="t('memories', 'Share')"
             @click="shareCurrent"
             :close-after-click="true"
           >
-            {{ t("memories", "Share") }}
+            {{ t('memories', 'Share') }}
             <template #icon> <ShareIcon :size="24" /> </template>
           </NcActionButton>
           <NcActionButton
@@ -40,7 +33,7 @@
             @click="deleteCurrent"
             :close-after-click="true"
           >
-            {{ t("memories", "Delete") }}
+            {{ t('memories', 'Delete') }}
             <template #icon> <DeleteIcon :size="24" /> </template>
           </NcActionButton>
           <NcActionButton
@@ -49,7 +42,7 @@
             @click="deleteCurrent"
             :close-after-click="true"
           >
-            {{ t("memories", "Remove from album") }}
+            {{ t('memories', 'Remove from album') }}
             <template #icon> <AlbumRemoveIcon :size="24" /> </template>
           </NcActionButton>
           <NcActionButton
@@ -58,7 +51,7 @@
             @click="playLivePhoto"
             :close-after-click="true"
           >
-            {{ t("memories", "Play Live Photo") }}
+            {{ t('memories', 'Play Live Photo') }}
             <template #icon> <LivePhotoIcon :size="24" /> </template>
           </NcActionButton>
           <NcActionButton
@@ -67,18 +60,14 @@
             @click="favoriteCurrent"
             :close-after-click="true"
           >
-            {{ t("memories", "Favorite") }}
+            {{ t('memories', 'Favorite') }}
             <template #icon>
               <StarIcon v-if="isFavorite()" :size="24" />
               <StarOutlineIcon v-else :size="24" />
             </template>
           </NcActionButton>
-          <NcActionButton
-            :aria-label="t('memories', 'Sidebar')"
-            @click="toggleSidebar"
-            :close-after-click="true"
-          >
-            {{ t("memories", "Sidebar") }}
+          <NcActionButton :aria-label="t('memories', 'Sidebar')" @click="toggleSidebar" :close-after-click="true">
+            {{ t('memories', 'Sidebar') }}
             <template #icon>
               <InfoIcon :size="24" />
             </template>
@@ -89,7 +78,7 @@
             @click="openEditor"
             :close-after-click="true"
           >
-            {{ t("memories", "Edit") }}
+            {{ t('memories', 'Edit') }}
             <template #icon>
               <TuneIcon :size="24" />
             </template>
@@ -100,7 +89,7 @@
             :close-after-click="true"
             v-if="!this.state_noDownload"
           >
-            {{ t("memories", "Download") }}
+            {{ t('memories', 'Download') }}
             <template #icon>
               <DownloadIcon :size="24" />
             </template>
@@ -111,7 +100,7 @@
             @click="downloadCurrentLiveVideo"
             :close-after-click="true"
           >
-            {{ t("memories", "Download Video") }}
+            {{ t('memories', 'Download Video') }}
             <template #icon>
               <DownloadIcon :size="24" />
             </template>
@@ -122,17 +111,13 @@
             @click="viewInFolder"
             :close-after-click="true"
           >
-            {{ t("memories", "View in folder") }}
+            {{ t('memories', 'View in folder') }}
             <template #icon>
               <OpenInNewIcon :size="24" />
             </template>
           </NcActionButton>
-          <NcActionButton
-            :aria-label="t('memories', 'Slideshow')"
-            @click="startSlideshow"
-            :close-after-click="true"
-          >
-            {{ t("memories", "Slideshow") }}
+          <NcActionButton :aria-label="t('memories', 'Slideshow')" @click="startSlideshow" :close-after-click="true">
+            {{ t('memories', 'Slideshow') }}
             <template #icon>
               <SlideshowIcon :size="24" />
             </template>
@@ -143,7 +128,7 @@
             @click="editMetadata"
             :close-after-click="true"
           >
-            {{ t("memories", "Edit metadata") }}
+            {{ t('memories', 'Edit metadata') }}
             <template #icon>
               <EditFileIcon :size="24" />
             </template>
@@ -151,18 +136,11 @@
         </NcActions>
       </div>
 
-      <div
-        class="bottom-bar"
-        v-if="photoswipe"
-        :class="{ showControls, showBottomBar }"
-      >
+      <div class="bottom-bar" v-if="photoswipe" :class="{ showControls, showBottomBar }">
         <div class="exif title" v-if="currentPhoto?.imageInfo?.exif?.Title">
           {{ currentPhoto.imageInfo.exif.Title }}
         </div>
-        <div
-          class="exif description"
-          v-if="currentPhoto?.imageInfo?.exif?.Description"
-        >
+        <div class="exif description" v-if="currentPhoto?.imageInfo?.exif?.Description">
           {{ currentPhoto.imageInfo.exif.Description }}
         </div>
         <div class="exif date" v-if="currentDateTaken">
@@ -174,47 +152,47 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import { IDay, IImageInfo, IPhoto, IRow, IRowType } from "../../types";
-import { PsSlide } from "./types";
+import { IDay, IImageInfo, IPhoto, IRow, IRowType } from '../../types';
+import { PsSlide } from './types';
 
-import UserConfig from "../../mixins/UserConfig";
-import NcActions from "@nextcloud/vue/dist/Components/NcActions";
-import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
-import { subscribe, unsubscribe } from "@nextcloud/event-bus";
-import { showError } from "@nextcloud/dialogs";
-import axios from "@nextcloud/axios";
+import UserConfig from '../../mixins/UserConfig';
+import NcActions from '@nextcloud/vue/dist/Components/NcActions';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+import { subscribe, unsubscribe } from '@nextcloud/event-bus';
+import { showError } from '@nextcloud/dialogs';
+import axios from '@nextcloud/axios';
 
-import { getDownloadLink } from "../../services/DavRequests";
-import { API } from "../../services/API";
-import * as dav from "../../services/DavRequests";
-import * as utils from "../../services/Utils";
+import { getDownloadLink } from '../../services/DavRequests';
+import { API } from '../../services/API';
+import * as dav from '../../services/DavRequests';
+import * as utils from '../../services/Utils';
 
-import ImageEditor from "./ImageEditor.vue";
-import PhotoSwipe, { PhotoSwipeOptions } from "photoswipe";
-import "photoswipe/style.css";
-import PsImage from "./PsImage";
-import PsVideo from "./PsVideo";
-import PsLivePhoto from "./PsLivePhoto";
+import ImageEditor from './ImageEditor.vue';
+import PhotoSwipe, { PhotoSwipeOptions } from 'photoswipe';
+import 'photoswipe/style.css';
+import PsImage from './PsImage';
+import PsVideo from './PsVideo';
+import PsLivePhoto from './PsLivePhoto';
 
-import ShareIcon from "vue-material-design-icons/ShareVariant.vue";
-import DeleteIcon from "vue-material-design-icons/TrashCanOutline.vue";
-import StarIcon from "vue-material-design-icons/Star.vue";
-import StarOutlineIcon from "vue-material-design-icons/StarOutline.vue";
-import DownloadIcon from "vue-material-design-icons/Download.vue";
-import InfoIcon from "vue-material-design-icons/InformationOutline.vue";
-import OpenInNewIcon from "vue-material-design-icons/OpenInNew.vue";
-import TuneIcon from "vue-material-design-icons/Tune.vue";
-import SlideshowIcon from "vue-material-design-icons/PlayBox.vue";
-import EditFileIcon from "vue-material-design-icons/FileEdit.vue";
-import AlbumRemoveIcon from "vue-material-design-icons/BookRemove.vue";
-import LivePhotoIcon from "vue-material-design-icons/MotionPlayOutline.vue";
+import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
+import DeleteIcon from 'vue-material-design-icons/TrashCanOutline.vue';
+import StarIcon from 'vue-material-design-icons/Star.vue';
+import StarOutlineIcon from 'vue-material-design-icons/StarOutline.vue';
+import DownloadIcon from 'vue-material-design-icons/Download.vue';
+import InfoIcon from 'vue-material-design-icons/InformationOutline.vue';
+import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue';
+import TuneIcon from 'vue-material-design-icons/Tune.vue';
+import SlideshowIcon from 'vue-material-design-icons/PlayBox.vue';
+import EditFileIcon from 'vue-material-design-icons/FileEdit.vue';
+import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
+import LivePhotoIcon from 'vue-material-design-icons/MotionPlayOutline.vue';
 
 const SLIDESHOW_MS = 5000;
 
 export default defineComponent({
-  name: "Viewer",
+  name: 'Viewer',
   components: {
     NcActions,
     NcActionButton,
@@ -239,14 +217,14 @@ export default defineComponent({
     isOpen: false,
     originalTitle: null as string | null,
     editorOpen: false,
-    editorSrc: "",
+    editorSrc: '',
 
     show: false,
     showControls: false,
     fullyOpened: false,
     sidebarOpen: false,
     sidebarWidth: 400,
-    outerWidth: "100vw",
+    outerWidth: '100vw',
 
     /** User interaction detection */
     activityTimer: 0,
@@ -270,19 +248,19 @@ export default defineComponent({
   }),
 
   mounted() {
-    subscribe("memories:sidebar:opened", this.handleAppSidebarOpen);
-    subscribe("memories:sidebar:closed", this.handleAppSidebarClose);
-    subscribe("files:file:created", this.handleFileUpdated);
-    subscribe("files:file:updated", this.handleFileUpdated);
-    subscribe("memories:window:resize", this.handleWindowResize);
+    subscribe('memories:sidebar:opened', this.handleAppSidebarOpen);
+    subscribe('memories:sidebar:closed', this.handleAppSidebarClose);
+    subscribe('files:file:created', this.handleFileUpdated);
+    subscribe('files:file:updated', this.handleFileUpdated);
+    subscribe('memories:window:resize', this.handleWindowResize);
   },
 
   beforeDestroy() {
-    unsubscribe("memories:sidebar:opened", this.handleAppSidebarOpen);
-    unsubscribe("memories:sidebar:closed", this.handleAppSidebarClose);
-    unsubscribe("files:file:created", this.handleFileUpdated);
-    unsubscribe("files:file:updated", this.handleFileUpdated);
-    unsubscribe("memories:window:resize", this.handleWindowResize);
+    unsubscribe('memories:sidebar:opened', this.handleAppSidebarOpen);
+    unsubscribe('memories:sidebar:closed', this.handleAppSidebarClose);
+    unsubscribe('files:file:created', this.handleFileUpdated);
+    unsubscribe('files:file:updated', this.handleFileUpdated);
+    unsubscribe('memories:window:resize', this.handleWindowResize);
   },
 
   computed: {
@@ -301,12 +279,12 @@ export default defineComponent({
 
     /** Route is public */
     routeIsPublic(): boolean {
-      return this.$route.name?.endsWith("-share") ?? false;
+      return this.$route.name?.endsWith('-share') ?? false;
     },
 
     /** Route is album */
     routeIsAlbum(): boolean {
-      return this.$route.name === "albums";
+      return this.$route.name === 'albums';
     },
 
     /** Get the currently open photo */
@@ -333,11 +311,7 @@ export default defineComponent({
 
     /** Show bottom bar info such as date taken */
     showBottomBar(): boolean {
-      return (
-        !this.isVideo &&
-        this.fullyOpened &&
-        Boolean(this.currentPhoto?.imageInfo)
-      );
+      return !this.isVideo && this.fullyOpened && Boolean(this.currentPhoto?.imageInfo);
     },
 
     /** Allow closing the viewer */
@@ -354,12 +328,12 @@ export default defineComponent({
 
     /** Show edit buttons */
     canEdit(): boolean {
-      return this.currentPhoto?.imageInfo?.permissions?.includes("U") ?? false;
+      return this.currentPhoto?.imageInfo?.permissions?.includes('U') ?? false;
     },
 
     /** Show delete button */
     canDelete(): boolean {
-      return this.currentPhoto?.imageInfo?.permissions?.includes("D") ?? false;
+      return this.currentPhoto?.imageInfo?.permissions?.includes('D') ?? false;
     },
 
     /** Show share button */
@@ -370,15 +344,15 @@ export default defineComponent({
 
   methods: {
     deleted(photos: IPhoto[]) {
-      this.$emit("deleted", photos);
+      this.$emit('deleted', photos);
     },
 
     fetchDay(dayId: number) {
-      this.$emit("fetchDay", dayId);
+      this.$emit('fetchDay', dayId);
     },
 
     updateLoading(delta: number) {
-      this.$emit("updateLoading", delta);
+      this.$emit('updateLoading', delta);
     },
 
     /** Update the document title */
@@ -413,20 +387,20 @@ export default defineComponent({
         // On touch devices, tapAction directly handles the ui visibility
         // through Photoswipe.
         const isPointer = evt instanceof PointerEvent;
-        const isMouse = isPointer && evt.pointerType !== "touch";
+        const isMouse = isPointer && evt.pointerType !== 'touch';
         if (this.isOpen && (!isPointer || isMouse)) {
-          this.photoswipe?.template?.classList.add("pswp--ui-visible");
+          this.photoswipe?.template?.classList.add('pswp--ui-visible');
 
           if (isMouse) {
             this.activityTimer = window.setTimeout(() => {
               if (this.isOpen) {
-                this.photoswipe?.template?.classList.remove("pswp--ui-visible");
+                this.photoswipe?.template?.classList.remove('pswp--ui-visible');
               }
             }, 2000);
           }
         }
       } else {
-        this.photoswipe?.template?.classList.remove("pswp--ui-visible");
+        this.photoswipe?.template?.classList.remove('pswp--ui-visible');
       }
     },
 
@@ -443,20 +417,20 @@ export default defineComponent({
         bgOpacity: 1,
         appendToEl: this.$refs.inner as HTMLElement,
         preload: [2, 2],
-        bgClickAction: "toggle-controls",
+        bgClickAction: 'toggle-controls',
 
         clickToCloseNonZoomable: false,
         pinchToClose: this.allowClose,
         closeOnVerticalDrag: this.allowClose,
 
-        easing: "cubic-bezier(.49,.85,.55,1)",
-        showHideAnimationType: "zoom",
+        easing: 'cubic-bezier(.49,.85,.55,1)',
+        showHideAnimationType: 'zoom',
         showAnimationDuration: 250,
         hideAnimationDuration: 250,
 
-        closeTitle: this.t("memories", "Close"),
-        arrowPrevTitle: this.t("memories", "Previous"),
-        arrowNextTitle: this.t("memories", "Next"),
+        closeTitle: this.t('memories', 'Close'),
+        arrowPrevTitle: this.t('memories', 'Previous'),
+        arrowNextTitle: this.t('memories', 'Next'),
         getViewportSizeFn: () => {
           // Ignore the sidebar if mobile or fullscreen
           const isMobile = globalThis.windowInnerWidth < 768;
@@ -479,56 +453,53 @@ export default defineComponent({
       globalThis.photoswipe = this.photoswipe;
 
       // Monkey patch for focus trapping in sidebar
-      const _onFocusIn = this.photoswipe.keyboard["_onFocusIn"];
-      this.photoswipe.keyboard["_onFocusIn"] = (e: FocusEvent) => {
-        if (
-          e.target instanceof HTMLElement &&
-          e.target.closest("#app-sidebar-vue, .v-popper__popper, .modal-mask")
-        ) {
+      const _onFocusIn = this.photoswipe.keyboard['_onFocusIn'];
+      this.photoswipe.keyboard['_onFocusIn'] = (e: FocusEvent) => {
+        if (e.target instanceof HTMLElement && e.target.closest('#app-sidebar-vue, .v-popper__popper, .modal-mask')) {
           return;
         }
         _onFocusIn.call(this.photoswipe!.keyboard, e);
       };
 
       // Refresh sidebar on change
-      this.photoswipe.on("change", () => {
+      this.photoswipe.on('change', () => {
         if (this.sidebarOpen) {
           this.openSidebar();
         }
       });
 
       // Make sure buttons are styled properly
-      this.photoswipe.addFilter("uiElement", (element, data) => {
+      this.photoswipe.addFilter('uiElement', (element, data) => {
         // add button-vue class if button
-        if (element.classList.contains("pswp__button")) {
-          element.classList.add("button-vue");
+        if (element.classList.contains('pswp__button')) {
+          element.classList.add('button-vue');
         }
         return element;
       });
 
       // Total number of photos in this view
-      this.photoswipe.addFilter("numItems", (numItems) => {
+      this.photoswipe.addFilter('numItems', (numItems) => {
         return this.globalCount;
       });
 
       // Put viewer over everything else
-      const navElem = document.getElementById("app-navigation-vue");
-      const klass = "has-viewer";
-      this.photoswipe.on("beforeOpen", () => {
+      const navElem = document.getElementById('app-navigation-vue');
+      const klass = 'has-viewer';
+      this.photoswipe.on('beforeOpen', () => {
         document.body.classList.add(klass);
-        if (navElem) navElem.style.zIndex = "0";
+        if (navElem) navElem.style.zIndex = '0';
       });
-      this.photoswipe.on("openingAnimationStart", () => {
+      this.photoswipe.on('openingAnimationStart', () => {
         this.isOpen = true;
         this.fullyOpened = false;
         if (this.sidebarOpen) {
           this.openSidebar();
         }
       });
-      this.photoswipe.on("openingAnimationEnd", () => {
+      this.photoswipe.on('openingAnimationEnd', () => {
         this.fullyOpened = true;
       });
-      this.photoswipe.on("close", () => {
+      this.photoswipe.on('close', () => {
         this.isOpen = false;
         this.fullyOpened = false;
         this.setUiVisible(false);
@@ -536,9 +507,9 @@ export default defineComponent({
         this.setRouteHash(undefined);
         this.updateTitle(undefined);
       });
-      this.photoswipe.on("destroy", () => {
+      this.photoswipe.on('destroy', () => {
         document.body.classList.remove(klass);
-        if (navElem) navElem.style.zIndex = "";
+        if (navElem) navElem.style.zIndex = '';
 
         // reset everything
         this.show = false;
@@ -555,7 +526,7 @@ export default defineComponent({
       });
 
       // Update vue route for deep linking
-      this.photoswipe.on("slideActivate", (e) => {
+      this.photoswipe.on('slideActivate', (e) => {
         this.currIndex = this.photoswipe!.currIndex;
         const photo = e.slide?.data?.photo;
         this.setRouteHash(photo);
@@ -564,17 +535,15 @@ export default defineComponent({
       });
 
       // Show and hide controls
-      this.photoswipe.on("uiRegister", (e) => {
+      this.photoswipe.on('uiRegister', (e) => {
         if (this.photoswipe?.template) {
           new MutationObserver((mutations) => {
             mutations.forEach((mutationRecord) => {
-              this.showControls = (<HTMLElement>(
-                mutationRecord.target
-              ))?.classList.contains("pswp--ui-visible");
+              this.showControls = (<HTMLElement>mutationRecord.target)?.classList.contains('pswp--ui-visible');
             });
           }).observe(this.photoswipe.template, {
             attributes: true,
-            attributeFilter: ["class"],
+            attributeFilter: ['class'],
           });
         }
       });
@@ -588,10 +557,7 @@ export default defineComponent({
       this.psImage = new PsImage(<PhotoSwipe>this.photoswipe);
 
       // Live Photo support
-      this.psLivePhoto = new PsLivePhoto(
-        <PhotoSwipe>this.photoswipe,
-        <PsImage>this.psImage
-      );
+      this.psLivePhoto = new PsLivePhoto(<PhotoSwipe>this.photoswipe, <PsImage>this.psImage);
 
       // Patch the close button to stop the slideshow
       const _close = this.photoswipe.close.bind(this.photoswipe);
@@ -622,7 +588,7 @@ export default defineComponent({
     async open(anchorPhoto: IPhoto, rows: IRow[]) {
       const detail = anchorPhoto.d?.detail;
       if (!detail) {
-        console.error("Attempted to open viewer with no detail list!");
+        console.error('Attempted to open viewer with no detail list!');
         return;
       }
 
@@ -649,7 +615,7 @@ export default defineComponent({
 
       // Lazy-generate item data.
       // Load the next two days in the timeline.
-      photoswipe.addFilter("itemData", (itemData, index) => {
+      photoswipe.addFilter('itemData', (itemData, index) => {
         // Get photo object from list
         let idx = index - this.globalAnchor;
         if (idx < 0) {
@@ -663,7 +629,7 @@ export default defineComponent({
           const prevDayId = this.dayIds[firstDayIdx - 1];
           const prevDay = this.days.get(prevDayId);
           if (!prevDay?.detail) {
-            console.error("[BUG] No detail for previous day");
+            console.error('[BUG] No detail for previous day');
             return {};
           }
           this.list.unshift(...prevDay.detail);
@@ -679,7 +645,7 @@ export default defineComponent({
           const nextDayId = this.dayIds[lastDayIdx + 1];
           const nextDay = this.days.get(nextDayId);
           if (!nextDay?.detail) {
-            console.error("[BUG] No detail for next day");
+            console.error('[BUG] No detail for next day');
             return {};
           }
           this.list.push(...nextDay.detail);
@@ -696,11 +662,7 @@ export default defineComponent({
         // Preload next and previous 3 days
         const dayIdx = utils.binarySearch(this.dayIds, photo.dayid);
         const preload = (idx: number) => {
-          if (
-            idx > 0 &&
-            idx < this.dayIds.length &&
-            !this.days.get(this.dayIds[idx])?.detail
-          ) {
+          if (idx > 0 && idx < this.dayIds.length && !this.days.get(this.dayIds[idx])?.detail) {
             this.fetchDay(this.dayIds[idx]);
           }
         };
@@ -712,9 +674,7 @@ export default defineComponent({
         preload(dayIdx + 3);
 
         // Get thumb image
-        const thumbSrc: string =
-          this.thumbElem(photo)?.getAttribute("src") ||
-          utils.getPreviewUrl(photo, false, 256);
+        const thumbSrc: string = this.thumbElem(photo)?.getAttribute('src') || utils.getPreviewUrl(photo, false, 256);
 
         // Get full image
         return {
@@ -724,32 +684,27 @@ export default defineComponent({
       });
 
       // Get the thumbnail image
-      photoswipe.addFilter("thumbEl", (thumbEl, data, index) => {
+      photoswipe.addFilter('thumbEl', (thumbEl, data, index) => {
         const photo = this.list[index - this.globalAnchor];
         if (!photo || !photo.w || !photo.h) return thumbEl as HTMLElement;
         return this.thumbElem(photo) ?? (thumbEl as HTMLElement); // bug in PhotoSwipe types
       });
 
-      photoswipe.on("slideActivate", (e) => {
+      photoswipe.on('slideActivate', (e) => {
         // Scroll to keep the thumbnail in view
         const thumb = this.thumbElem(e.slide.data?.photo);
         if (thumb && this.fullyOpened) {
           const rect = thumb.getBoundingClientRect();
-          if (
-            rect.bottom < 50 ||
-            rect.top > globalThis.windowInnerHeight - 50
-          ) {
+          if (rect.bottom < 50 || rect.top > globalThis.windowInnerHeight - 50) {
             thumb.scrollIntoView({
-              block: "center",
+              block: 'center',
             });
           }
         }
 
         // Remove active class from others and add to this one
-        photoswipe.element
-          ?.querySelectorAll(".pswp__item")
-          .forEach((el) => el.classList.remove("active"));
-        e.slide.holderElement?.classList.add("active");
+        photoswipe.element?.querySelectorAll('.pswp__item').forEach((el) => el.classList.remove('active'));
+        e.slide.holderElement?.classList.add('active');
       });
 
       photoswipe.init();
@@ -770,11 +725,9 @@ export default defineComponent({
       this.globalCount = list.length;
       this.globalAnchor = 0;
 
-      photoswipe.addFilter("itemData", (itemData, index) => ({
+      photoswipe.addFilter('itemData', (itemData, index) => ({
         ...this.getItemData(this.list[index]),
-        msrc: thumbSize
-          ? utils.getPreviewUrl(photo, false, thumbSize)
-          : undefined,
+        msrc: thumbSize ? utils.getPreviewUrl(photo, false, thumbSize) : undefined,
       }));
 
       this.isOpen = true;
@@ -783,11 +736,11 @@ export default defineComponent({
 
     /** Get base data object */
     getItemData(photo: IPhoto) {
-      let previewUrl = utils.getPreviewUrl(photo, false, "screen");
+      let previewUrl = utils.getPreviewUrl(photo, false, 'screen');
       const isvideo = photo.flag & this.c.FLAG_IS_VIDEO;
 
       // Preview aren't animated
-      if (isvideo || photo.mimetype === "image/gif") {
+      if (isvideo || photo.mimetype === 'image/gif') {
         previewUrl = getDownloadLink(photo);
       }
 
@@ -816,14 +769,8 @@ export default defineComponent({
       }
 
       // Get full image URL
-      const fullUrl = isvideo
-        ? null
-        : API.IMAGE_DECODABLE(photo.fileid, photo.etag);
-      const fullLoadCond = this.config_fullResAlways
-        ? "always"
-        : this.config_fullResOnZoom
-        ? "zoom"
-        : "never";
+      const fullUrl = isvideo ? null : API.IMAGE_DECODABLE(photo.fileid, photo.etag);
+      const fullLoadCond = this.config_fullResAlways ? 'always' : this.config_fullResOnZoom ? 'zoom' : 'never';
 
       return {
         src: previewUrl,
@@ -833,24 +780,20 @@ export default defineComponent({
         height: h || undefined,
         thumbCropped: true,
         photo: photo,
-        type: isvideo ? "video" : "image",
+        type: isvideo ? 'video' : 'image',
       };
     },
 
     /** Get element for thumbnail if it exists */
     thumbElem(photo: IPhoto): HTMLImageElement | undefined {
       if (!photo) return;
-      const elems = Array.from(
-        document.querySelectorAll(`.memories-thumb-${photo.key}`)
-      );
+      const elems = Array.from(document.querySelectorAll(`.memories-thumb-${photo.key}`));
 
       if (elems.length === 0) return;
       if (elems.length === 1) return elems[0] as HTMLImageElement;
 
       // Find if any element has the thumb-important class
-      const important = elems.filter((e) =>
-        e.classList.contains("thumb-important")
-      );
+      const important = elems.filter((e) => e.classList.contains('thumb-important'));
       if (important.length > 0) return important[0] as HTMLImageElement;
 
       // Find element within 500px of the screen top
@@ -868,20 +811,20 @@ export default defineComponent({
     /** Set the route hash to the given photo */
     setRouteHash(photo: IPhoto | undefined) {
       if (!photo) {
-        if (!this.isOpen && this.$route.hash?.startsWith("#v")) {
+        if (!this.isOpen && this.$route.hash?.startsWith('#v')) {
           this.$router.back();
 
           // Ensure this does not have the hash, otherwise replace it
-          if (this.$route.hash?.startsWith("#v")) {
+          if (this.$route.hash?.startsWith('#v')) {
             this.$router.replace({
-              hash: "",
+              hash: '',
               query: this.$route.query,
             });
           }
         }
         return;
       }
-      const hash = photo ? utils.getViewerHash(photo) : "";
+      const hash = photo ? utils.getViewerHash(photo) : '';
       const route = {
         path: this.$route.path,
         query: this.$route.query,
@@ -902,9 +845,7 @@ export default defineComponent({
 
       // Prevent editing Live Photos
       if (this.isLivePhoto) {
-        showError(
-          this.t("memories", "Editing is currently disabled for Live Photos")
-        );
+        showError(this.t('memories', 'Editing is currently disabled for Live Photos'));
         return;
       }
 
@@ -920,9 +861,9 @@ export default defineComponent({
     /** Key press events */
     keydown(e: KeyboardEvent) {
       if (
-        e.key === "Delete" &&
+        e.key === 'Delete' &&
         !this.routeIsPublic &&
-        confirm(this.t("memories", "Are you sure you want to delete?"))
+        confirm(this.t('memories', 'Are you sure you want to delete?'))
       ) {
         this.deleteCurrent();
       }
@@ -970,9 +911,7 @@ export default defineComponent({
 
     /** Play the current live photo */
     playLivePhoto() {
-      this.psLivePhoto?.onContentActivate(
-        this.photoswipe!.currSlide as PsSlide
-      );
+      this.psLivePhoto?.onContentActivate(this.photoswipe!.currSlide as PsSlide);
     },
 
     /** Is the current photo a favorite */
@@ -1020,14 +959,14 @@ export default defineComponent({
 
     /** Open the sidebar */
     async openSidebar(photo?: IPhoto) {
-      globalThis.mSidebar.setTab("memories-metadata");
+      globalThis.mSidebar.setTab('memories-metadata');
       photo ??= this.currentPhoto!;
 
       if (this.routeIsPublic) {
         globalThis.mSidebar.open(photo.fileid);
       } else {
         const fileInfo = (await dav.getFiles([photo]))[0];
-        const forceNative = fileInfo?.originalFilename?.startsWith("/files/");
+        const forceNative = fileInfo?.originalFilename?.startsWith('/files/');
         globalThis.mSidebar.open(photo.fileid, fileInfo?.filename, forceNative);
       }
     },
@@ -1091,10 +1030,7 @@ export default defineComponent({
       this.setUiVisible(false);
 
       // Start slideshow
-      this.slideshowTimer = window.setTimeout(
-        this.slideshowTimerFired,
-        SLIDESHOW_MS
-      );
+      this.slideshowTimer = window.setTimeout(this.slideshowTimerFired, SLIDESHOW_MS);
     },
 
     /**
@@ -1108,15 +1044,13 @@ export default defineComponent({
       // If this is a video, wait for it to finish
       if (this.isVideo) {
         // Get active video element
-        const video = this.photoswipe?.element?.querySelector<HTMLVideoElement>(
-          ".pswp__item.active video"
-        );
+        const video = this.photoswipe?.element?.querySelector<HTMLVideoElement>('.pswp__item.active video');
 
         // If no video tag is found by now, something likely went wrong. Just skip ahead.
         // Otherwise check if video is not ended yet
         if (video && video.currentTime < video.duration - 0.1) {
           // Wait for video to finish
-          video.addEventListener("ended", this.slideshowTimerFired);
+          video.addEventListener('ended', this.slideshowTimerFired);
           return;
         }
       }
@@ -1132,10 +1066,7 @@ export default defineComponent({
     resetSlideshowTimer() {
       if (this.slideshowTimer) {
         window.clearTimeout(this.slideshowTimer);
-        this.slideshowTimer = window.setTimeout(
-          this.slideshowTimerFired,
-          SLIDESHOW_MS
-        );
+        this.slideshowTimer = window.setTimeout(this.slideshowTimerFired, SLIDESHOW_MS);
       }
     },
 

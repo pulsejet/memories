@@ -2,40 +2,33 @@
   <div class="outer" v-if="loaded">
     <NcLoadingIcon class="loading-icon" v-show="loading" />
 
-    <component
-      v-for="c in components"
-      :key="c.__name"
-      :is="c"
-      :status="status"
-      :config="config"
-      @update="update"
-    />
+    <component v-for="c in components" :key="c.__name" :is="c" :status="status" :config="config" @update="update" />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import axios from "@nextcloud/axios";
-import { showError } from "@nextcloud/dialogs";
+import axios from '@nextcloud/axios';
+import { showError } from '@nextcloud/dialogs';
 
-import { API } from "../../services/API";
-import * as utils from "../../services/Utils";
+import { API } from '../../services/API';
+import * as utils from '../../services/Utils';
 
-import Exif from "./sections/Exif.vue";
-import Indexing from "./sections/Indexing.vue";
-import Performance from "./sections/Performance.vue";
-import Places from "./sections/Places.vue";
-import Video from "./sections/Video.vue";
-import VideoTranscoder from "./sections/VideoTranscoder.vue";
-import VideoAccel from "./sections/VideoAccel.vue";
+import Exif from './sections/Exif.vue';
+import Indexing from './sections/Indexing.vue';
+import Performance from './sections/Performance.vue';
+import Places from './sections/Places.vue';
+import Video from './sections/Video.vue';
+import VideoTranscoder from './sections/VideoTranscoder.vue';
+import VideoAccel from './sections/VideoAccel.vue';
 
-import { ISystemConfig, ISystemStatus } from "./AdminTypes";
+import { ISystemConfig, ISystemStatus } from './AdminTypes';
 
-import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
+import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
 
 export default defineComponent({
-  name: "Admin",
+  name: 'Admin',
   components: {
     NcLoadingIcon,
   },
@@ -47,15 +40,7 @@ export default defineComponent({
     status: null as ISystemStatus | null,
     config: null as ISystemConfig | null,
 
-    components: [
-      Exif,
-      Indexing,
-      Performance,
-      Places,
-      Video,
-      VideoTranscoder,
-      VideoAccel,
-    ],
+    components: [Exif, Indexing, Performance, Places, Video, VideoTranscoder, VideoAccel],
   }),
 
   mounted() {
@@ -91,7 +76,7 @@ export default defineComponent({
 
     async update(key: keyof ISystemConfig, value: any = null) {
       if (!this.config?.hasOwnProperty(key)) {
-        console.error("Unknown setting", key);
+        console.error('Unknown setting', key);
         return;
       }
 
@@ -105,15 +90,10 @@ export default defineComponent({
           value: value,
         });
 
-        utils.setRenewingTimeout(
-          this,
-          "_refreshTimer",
-          this.refreshStatus.bind(this),
-          500
-        );
+        utils.setRenewingTimeout(this, '_refreshTimer', this.refreshStatus.bind(this), 500);
       } catch (err) {
         console.error(err);
-        showError(this.t("memories", "Failed to update setting"));
+        showError(this.t('memories', 'Failed to update setting'));
       } finally {
         this.loading--;
       }

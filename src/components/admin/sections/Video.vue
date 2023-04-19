@@ -1,19 +1,14 @@
 <template>
   <div class="admin-section">
-    <h2>{{ t("memories", "Video Streaming") }}</h2>
+    <h2>{{ t('memories', 'Video Streaming') }}</h2>
 
     <p>
-      {{
-        t(
-          "memories",
-          "Live transcoding provides for adaptive streaming of videos using HLS."
-        )
-      }}
+      {{ t('memories', 'Live transcoding provides for adaptive streaming of videos using HLS.') }}
       <br />
       {{
         t(
-          "memories",
-          "Note that this may be very CPU intensive without hardware acceleration, and transcoding will not be used for external storage."
+          'memories',
+          'Note that this may be very CPU intensive without hardware acceleration, and transcoding will not be used for external storage.'
         )
       }}
 
@@ -22,15 +17,15 @@
         @update:checked="update('memories.vod.disable', !enableTranscoding)"
         type="switch"
       >
-        {{ t("memories", "Enable Transcoding") }}
+        {{ t('memories', 'Enable Transcoding') }}
       </NcCheckboxRadioSwitch>
 
       <template v-if="status">
         <NcNoteCard :type="binaryStatusType(status.ffmpeg)">
-          {{ binaryStatus("ffmpeg", status.ffmpeg) }}
+          {{ binaryStatus('ffmpeg', status.ffmpeg) }}
         </NcNoteCard>
         <NcNoteCard :type="binaryStatusType(status.ffprobe)">
-          {{ binaryStatus("ffprobe", status.ffprobe) }}
+          {{ binaryStatus('ffprobe', status.ffprobe) }}
         </NcNoteCard>
       </template>
 
@@ -51,7 +46,7 @@
       />
 
       <br />
-      {{ t("memories", "Global default video quality (user may override)") }}
+      {{ t('memories', 'Global default video quality (user may override)') }}
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding"
         :checked.sync="config['memories.video_default_quality']"
@@ -59,7 +54,7 @@
         name="vdq_radio"
         type="radio"
         @update:checked="update('memories.video_default_quality')"
-        >{{ t("memories", "Auto (adaptive transcode)") }}
+        >{{ t('memories', 'Auto (adaptive transcode)') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding"
@@ -68,7 +63,7 @@
         name="vdq_radio"
         type="radio"
         @update:checked="update('memories.video_default_quality')"
-        >{{ t("memories", "Original (transcode with max quality)") }}
+        >{{ t('memories', 'Original (transcode with max quality)') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding"
@@ -77,19 +72,19 @@
         name="vdq_radio"
         type="radio"
         @update:checked="update('memories.video_default_quality')"
-        >{{ t("memories", "Direct (original video file without transcode)") }}
+        >{{ t('memories', 'Direct (original video file without transcode)') }}
       </NcCheckboxRadioSwitch>
     </p>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import AdminMixin from "../AdminMixin";
+import AdminMixin from '../AdminMixin';
 
 export default defineComponent({
-  name: "Video",
+  name: 'Video',
   mixins: [AdminMixin],
 });
 </script>

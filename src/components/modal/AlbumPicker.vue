@@ -16,18 +16,14 @@
         @click="pickAlbum(album)"
       >
         <template v-slot:icon="{}">
-          <XImg
-            v-if="album.last_added_photo !== -1"
-            class="album__image"
-            :src="toCoverUrl(album.last_added_photo)"
-          />
+          <XImg v-if="album.last_added_photo !== -1" class="album__image" :src="toCoverUrl(album.last_added_photo)" />
           <div v-else class="album__image album__image--placeholder">
             <ImageMultiple :size="32" />
           </div>
         </template>
 
         <template v-slot:subtitle="{}">
-          {{ n("photos", "%n item", "%n items", album.count) }}
+          {{ n('photos', '%n item', '%n items', album.count) }}
           <!-- TODO: finish collaboration -->
           <!--⸱ {{ n('photos', 'Share with %n user', 'Share with %n users', album.isShared) }}-->
         </template>
@@ -43,7 +39,7 @@
       <template #icon>
         <Plus />
       </template>
-      {{ t("photos", "Create new album") }}
+      {{ t('photos', 'Create new album') }}
     </NcButton>
   </div>
 
@@ -57,25 +53,25 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import { getCurrentUser } from "@nextcloud/auth";
+import { getCurrentUser } from '@nextcloud/auth';
 
-import AlbumForm from "./AlbumForm.vue";
-import Plus from "vue-material-design-icons/Plus.vue";
-import ImageMultiple from "vue-material-design-icons/ImageMultiple.vue";
+import AlbumForm from './AlbumForm.vue';
+import Plus from 'vue-material-design-icons/Plus.vue';
+import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue';
 
-import NcButton from "@nextcloud/vue/dist/Components/NcButton";
-import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
-const NcListItem = () => import("@nextcloud/vue/dist/Components/NcListItem");
+import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
+const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
 
-import { getPreviewUrl } from "../../services/utils/helpers";
-import { IAlbum, IPhoto } from "../../types";
-import axios from "@nextcloud/axios";
-import { API } from "../../services/API";
+import { getPreviewUrl } from '../../services/utils/helpers';
+import { IAlbum, IPhoto } from '../../types';
+import axios from '@nextcloud/axios';
+import { API } from '../../services/API';
 
 export default defineComponent({
-  name: "AlbumPicker",
+  name: 'AlbumPicker',
   components: {
     AlbumForm,
     Plus,
@@ -130,7 +126,7 @@ export default defineComponent({
     },
 
     pickAlbum(album: IAlbum) {
-      this.$emit("select", album);
+      this.$emit('select', album);
     },
   },
 });

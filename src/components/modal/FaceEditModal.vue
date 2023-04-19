@@ -1,7 +1,7 @@
 <template>
   <Modal @close="close" v-if="show">
     <template #title>
-      {{ t("memories", "Rename person") }}
+      {{ t('memories', 'Rename person') }}
     </template>
 
     <div class="fields">
@@ -18,26 +18,26 @@
 
     <template #buttons>
       <NcButton @click="save" class="button" type="primary">
-        {{ t("memories", "Update") }}
+        {{ t('memories', 'Update') }}
       </NcButton>
     </template>
   </Modal>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import NcButton from "@nextcloud/vue/dist/Components/NcButton";
-const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
+import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
-import { showError } from "@nextcloud/dialogs";
-import { getCurrentUser } from "@nextcloud/auth";
-import Modal from "./Modal.vue";
-import client from "../../services/DavClient";
-import * as dav from "../../services/DavRequests";
+import { showError } from '@nextcloud/dialogs';
+import { getCurrentUser } from '@nextcloud/auth';
+import Modal from './Modal.vue';
+import client from '../../services/DavClient';
+import * as dav from '../../services/DavRequests';
 
 export default defineComponent({
-  name: "FaceEditModal",
+  name: 'FaceEditModal',
   components: {
     NcButton,
     NcTextField,
@@ -46,9 +46,9 @@ export default defineComponent({
 
   data: () => ({
     show: false,
-    user: "",
-    name: "",
-    oldName: "",
+    user: '',
+    name: '',
+    oldName: '',
   }),
 
   mounted() {
@@ -64,14 +64,14 @@ export default defineComponent({
   methods: {
     close() {
       this.show = false;
-      this.$emit("close");
+      this.$emit('close');
     },
 
     open() {
-      const user = this.$route.params.user || "";
+      const user = this.$route.params.user || '';
       if (this.$route.params.user !== getCurrentUser()?.uid) {
         showError(
-          this.t("memories", 'Only user "{user}" can update this person', {
+          this.t('memories', 'Only user "{user}" can update this person', {
             user,
           })
         );
@@ -81,14 +81,14 @@ export default defineComponent({
     },
 
     refreshParams() {
-      this.user = <string>this.$route.params.user || "";
-      this.name = <string>this.$route.params.name || "";
-      this.oldName = <string>this.$route.params.name || "";
+      this.user = <string>this.$route.params.user || '';
+      this.name = <string>this.$route.params.name || '';
+      this.oldName = <string>this.$route.params.name || '';
     },
 
     async save() {
       try {
-        if (this.$route.name === "recognize") {
+        if (this.$route.name === 'recognize') {
           await client.moveFile(
             `/recognize/${this.user}/faces/${this.oldName}`,
             `/recognize/${this.user}/faces/${this.name}`
@@ -104,7 +104,7 @@ export default defineComponent({
       } catch (error) {
         console.log(error);
         showError(
-          this.t("photos", "Failed to rename {oldName} to {name}.", {
+          this.t('photos', 'Failed to rename {oldName} to {name}.', {
             oldName: this.oldName,
             name: this.name,
           })

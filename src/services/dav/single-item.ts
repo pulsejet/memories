@@ -1,11 +1,11 @@
-import { IDay } from "../../types";
-import { loadState } from "@nextcloud/initial-state";
+import { IDay } from '../../types';
+import { loadState } from '@nextcloud/initial-state';
 
 let singleItem: any;
 try {
-  singleItem = loadState("memories", "single_item", {});
+  singleItem = loadState('memories', 'single_item', {});
 } catch (e) {
-  console.error("Could not load single item", e);
+  console.error('Could not load single item', e);
 }
 
 export function isSingleItem(): boolean {

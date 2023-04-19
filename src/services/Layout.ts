@@ -1,4 +1,4 @@
-import justifiedLayout from "justified-layout";
+import justifiedLayout from 'justified-layout';
 
 /**
  * Generate the layout matrix.
@@ -93,8 +93,7 @@ export function getLayout(
     // Number of photos left
     const numLeft = input.length - photoId - 1;
     // Number of photos needed for perfect fill after using n
-    const needFill = (n: number) =>
-      opts.numCols - col - 2 + (n / 2 - 1) * (opts.numCols - 2);
+    const needFill = (n: number) => opts.numCols - col - 2 + (n / 2 - 1) * (opts.numCols - 2);
 
     let canUse4 =
       // We have enough space
@@ -222,12 +221,10 @@ export function getLayout(
 }
 
 function flagMatrixStr(matrix: number[][], numFlag: number) {
-  let str = "";
+  let str = '';
   for (let i = 0; i < matrix.length; i++) {
-    const rstr = matrix[i]
-      .map((v) => v.toString(2).padStart(numFlag, "0"))
-      .join(" ");
-    str += i.toString().padStart(2) + " | " + rstr + "\n";
+    const rstr = matrix[i].map((v) => v.toString(2).padStart(numFlag, '0')).join(' ');
+    str += i.toString().padStart(2) + ' | ' + rstr + '\n';
   }
   return str;
 }

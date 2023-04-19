@@ -1,7 +1,7 @@
 <template>
   <div class="manage-collaborators">
     <div class="manage-collaborators__subtitle">
-      {{ t("photos", "Add people or groups who can edit your album") }}
+      {{ t('photos', 'Add people or groups who can edit your album') }}
     </div>
 
     <form class="manage-collaborators__form" @submit.prevent>
@@ -37,14 +37,9 @@
               :user="availableCollaborators[collaboratorKey].id"
               :display-name="availableCollaborators[collaboratorKey].label"
               :aria-label="
-                t(
-                  'photos',
-                  'Add {collaboratorLabel} to the collaborators list',
-                  {
-                    collaboratorLabel:
-                      availableCollaborators[collaboratorKey].label,
-                  }
-                )
+                t('photos', 'Add {collaboratorLabel} to the collaborators list', {
+                  collaboratorLabel: availableCollaborators[collaboratorKey].label,
+                })
               "
               @click="selectEntity(collaboratorKey)"
             />
@@ -76,14 +71,9 @@
           <NcButton
             type="tertiary"
             :aria-label="
-              t(
-                'photos',
-                'Remove {collaboratorLabel} from the collaborators list',
-                {
-                  collaboratorLabel:
-                    availableCollaborators[collaboratorKey].label,
-                }
-              )
+              t('photos', 'Remove {collaboratorLabel} from the collaborators list', {
+                collaboratorLabel: availableCollaborators[collaboratorKey].label,
+              })
             "
             @click="unselectEntity(collaboratorKey)"
           >
@@ -103,10 +93,10 @@
             @click="copyPublicLink"
           >
             <template v-if="publicLinkCopied">
-              {{ t("photos", "Public link copied!") }}
+              {{ t('photos', 'Public link copied!') }}
             </template>
             <template v-else>
-              {{ t("photos", "Copy public link") }}
+              {{ t('photos', 'Copy public link') }}
             </template>
             <template #icon>
               <Check v-if="publicLinkCopied" />
@@ -123,13 +113,9 @@
             <Close v-else slot="icon" />
           </NcButton>
         </template>
-        <NcButton
-          v-else
-          class="manage-collaborators__public-link-button"
-          @click="createPublicLinkForAlbum"
-        >
+        <NcButton v-else class="manage-collaborators__public-link-button" @click="createPublicLinkForAlbum">
           <Earth slot="icon" />
-          {{ t("photos", "Share via public link") }}
+          {{ t('photos', 'Share via public link') }}
         </NcButton>
       </div>
 
@@ -141,30 +127,29 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType } from 'vue';
 
-import Magnify from "vue-material-design-icons/Magnify.vue";
-import Close from "vue-material-design-icons/Close.vue";
-import Check from "vue-material-design-icons/Check.vue";
-import ContentCopy from "vue-material-design-icons/ContentCopy.vue";
-import AccountGroup from "vue-material-design-icons/AccountGroup.vue";
-import Earth from "vue-material-design-icons/Earth.vue";
+import Magnify from 'vue-material-design-icons/Magnify.vue';
+import Close from 'vue-material-design-icons/Close.vue';
+import Check from 'vue-material-design-icons/Check.vue';
+import ContentCopy from 'vue-material-design-icons/ContentCopy.vue';
+import AccountGroup from 'vue-material-design-icons/AccountGroup.vue';
+import Earth from 'vue-material-design-icons/Earth.vue';
 
-import axios from "@nextcloud/axios";
-import * as dav from "../../services/DavRequests";
-import { showError } from "@nextcloud/dialogs";
-import { getCurrentUser } from "@nextcloud/auth";
-import { generateOcsUrl, generateUrl } from "@nextcloud/router";
+import axios from '@nextcloud/axios';
+import * as dav from '../../services/DavRequests';
+import { showError } from '@nextcloud/dialogs';
+import { getCurrentUser } from '@nextcloud/auth';
+import { generateOcsUrl, generateUrl } from '@nextcloud/router';
 
-import NcButton from "@nextcloud/vue/dist/Components/NcButton";
-import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
-import NcPopover from "@nextcloud/vue/dist/Components/NcPopover";
-import NcEmptyContent from "@nextcloud/vue/dist/Components/NcEmptyContent";
-const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
-const NcListItemIcon = () =>
-  import("@nextcloud/vue/dist/Components/NcListItemIcon");
+import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
+import NcPopover from '@nextcloud/vue/dist/Components/NcPopover';
+import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+const NcListItemIcon = () => import('@nextcloud/vue/dist/Components/NcListItemIcon');
 
-import { Type } from "@nextcloud/sharing";
+import { Type } from '@nextcloud/sharing';
 
 type Collaborator = {
   id: string;
@@ -173,7 +158,7 @@ type Collaborator = {
 };
 
 export default defineComponent({
-  name: "AddToAlbumModal",
+  name: 'AddToAlbumModal',
   components: {
     Magnify,
     Close,
@@ -205,7 +190,7 @@ export default defineComponent({
   },
 
   data: () => ({
-    searchText: "",
+    searchText: '',
     availableCollaborators: {} as { [key: string]: Collaborator },
     selectedCollaboratorsKeys: [] as string[],
     currentSearchResults: [] as Collaborator[],
@@ -216,8 +201,7 @@ export default defineComponent({
     randomId: Math.random().toString().substring(2, 10),
     publicLinkCopied: false,
     config: {
-      minSearchStringLength:
-        parseInt(window.OC.config["sharing.minSearchStringLength"], 10) || 0,
+      minSearchStringLength: parseInt(window.OC.config['sharing.minSearchStringLength'], 10) || 0,
     },
   }),
 
@@ -226,24 +210,17 @@ export default defineComponent({
       return this.currentSearchResults
         .filter(({ id }) => id !== getCurrentUser()?.uid)
         .map(({ type, id }) => `${type}:${id}`)
-        .filter(
-          (collaboratorKey) =>
-            !this.selectedCollaboratorsKeys.includes(collaboratorKey)
-        );
+        .filter((collaboratorKey) => !this.selectedCollaboratorsKeys.includes(collaboratorKey));
     },
 
     listableSelectedCollaboratorsKeys(): string[] {
       return this.selectedCollaboratorsKeys.filter(
-        (collaboratorKey) =>
-          this.availableCollaborators[collaboratorKey].type !==
-          Type.SHARE_TYPE_LINK
+        (collaboratorKey) => this.availableCollaborators[collaboratorKey].type !== Type.SHARE_TYPE_LINK
       );
     },
 
     selectedCollaborators(): Collaborator[] {
-      return this.selectedCollaboratorsKeys.map(
-        (collaboratorKey) => this.availableCollaborators[collaboratorKey]
-      );
+      return this.selectedCollaboratorsKeys.map((collaboratorKey) => this.availableCollaborators[collaboratorKey]);
     },
 
     isPublicLinkSelected(): boolean {
@@ -280,39 +257,32 @@ export default defineComponent({
         }
 
         this.loadingCollaborators = true;
-        const response = await axios.get(
-          generateOcsUrl("core/autocomplete/get"),
-          {
-            params: {
-              search: this.searchText,
-              itemType: "share-recipients",
-              shareTypes: [Type.SHARE_TYPE_USER, Type.SHARE_TYPE_GROUP],
-            },
-          }
-        );
+        const response = await axios.get(generateOcsUrl('core/autocomplete/get'), {
+          params: {
+            search: this.searchText,
+            itemType: 'share-recipients',
+            shareTypes: [Type.SHARE_TYPE_USER, Type.SHARE_TYPE_GROUP],
+          },
+        });
 
-        this.currentSearchResults = response.data.ocs.data.map(
-          (collaborator) => {
-            switch (collaborator.source) {
-              case "users":
-                return {
-                  id: collaborator.id,
-                  label: collaborator.label,
-                  type: Type.SHARE_TYPE_USER,
-                };
-              case "groups":
-                return {
-                  id: collaborator.id,
-                  label: collaborator.label,
-                  type: Type.SHARE_TYPE_GROUP,
-                };
-              default:
-                throw new Error(
-                  `Invalid collaborator source ${collaborator.source}`
-                );
-            }
+        this.currentSearchResults = response.data.ocs.data.map((collaborator) => {
+          switch (collaborator.source) {
+            case 'users':
+              return {
+                id: collaborator.id,
+                label: collaborator.label,
+                type: Type.SHARE_TYPE_USER,
+              };
+            case 'groups':
+              return {
+                id: collaborator.id,
+                label: collaborator.label,
+                type: Type.SHARE_TYPE_GROUP,
+              };
+            default:
+              throw new Error(`Invalid collaborator source ${collaborator.source}`);
           }
-        );
+        });
 
         this.availableCollaborators = {
           ...this.availableCollaborators,
@@ -320,7 +290,7 @@ export default defineComponent({
         };
       } catch (error) {
         this.errorFetchingCollaborators = error;
-        showError(this.t("photos", "Failed to fetch collaborators list."));
+        showError(this.t('photos', 'Failed to fetch collaborators list.'));
       } finally {
         this.loadingCollaborators = false;
       }
@@ -330,15 +300,12 @@ export default defineComponent({
      * Populate selectedCollaboratorsKeys and availableCollaborators.
      */
     populateCollaborators(collaborators: Collaborator[]) {
-      const initialCollaborators = collaborators.reduce(
-        this.indexCollaborators,
-        {}
-      );
+      const initialCollaborators = collaborators.reduce(this.indexCollaborators, {});
       this.selectedCollaboratorsKeys = Object.keys(initialCollaborators);
       this.availableCollaborators = {
         3: {
-          id: "",
-          label: this.t("photos", "Public link"),
+          id: '',
+          label: this.t('photos', 'Public link'),
           type: Type.SHARE_TYPE_LINK,
         },
         ...this.availableCollaborators,
@@ -350,16 +317,12 @@ export default defineComponent({
      * @param {Object<string, Collaborator>} collaborators - Index of collaborators
      * @param {Collaborator} collaborator - A collaborator
      */
-    indexCollaborators(
-      collaborators: { [s: string]: Collaborator },
-      collaborator: Collaborator
-    ) {
+    indexCollaborators(collaborators: { [s: string]: Collaborator }, collaborator: Collaborator) {
       return {
         ...collaborators,
-        [`${collaborator.type}${
-          collaborator.type === Type.SHARE_TYPE_LINK ? "" : ":"
-        }${collaborator.type === Type.SHARE_TYPE_LINK ? "" : collaborator.id}`]:
-          collaborator,
+        [`${collaborator.type}${collaborator.type === Type.SHARE_TYPE_LINK ? '' : ':'}${
+          collaborator.type === Type.SHARE_TYPE_LINK ? '' : collaborator.id
+        }`]: collaborator,
       };
     },
 
@@ -381,7 +344,7 @@ export default defineComponent({
           this.errorFetchingAlbum = error;
         }
 
-        showError(this.t("photos", "Failed to fetch album."));
+        showError(this.t('photos', 'Failed to fetch album.'));
       } finally {
         this.loadingAlbum = false;
       }
@@ -390,8 +353,8 @@ export default defineComponent({
     async deletePublicLink() {
       this.unselectEntity(`${Type.SHARE_TYPE_LINK}`);
       this.availableCollaborators[3] = {
-        id: "",
-        label: this.t("photos", "Public link"),
+        id: '',
+        label: this.t('photos', 'Public link'),
         type: Type.SHARE_TYPE_LINK,
       };
       this.publicLinkCopied = false;
@@ -410,7 +373,7 @@ export default defineComponent({
           },
         });
       } catch (error) {
-        showError(this.t("photos", "Failed to update album."));
+        showError(this.t('photos', 'Failed to update album.'));
       } finally {
         this.loadingAlbum = false;
       }
@@ -418,9 +381,7 @@ export default defineComponent({
 
     async copyPublicLink() {
       await navigator.clipboard.writeText(
-        `${window.location.protocol}//${window.location.host}${generateUrl(
-          `apps/memories/a/${this.publicLink.id}`
-        )}`
+        `${window.location.protocol}//${window.location.host}${generateUrl(`apps/memories/a/${this.publicLink.id}`)}`
       );
       this.publicLinkCopied = true;
       setTimeout(() => {

@@ -1,7 +1,7 @@
-import PhotoSwipe from "photoswipe";
-import PsImage from "./PsImage";
-import * as utils from "../../services/Utils";
-import { PsContent, PsEvent } from "./types";
+import PhotoSwipe from 'photoswipe';
+import PsImage from './PsImage';
+import * as utils from '../../services/Utils';
+import { PsContent, PsEvent } from './types';
 
 export function isLiveContent(content: PsContent): boolean {
   // Do not play Live Photo if the slideshow is
@@ -15,10 +15,10 @@ export function isLiveContent(content: PsContent): boolean {
 
 class LivePhotoContentSetup {
   constructor(lightbox: PhotoSwipe, private psImage: PsImage) {
-    lightbox.on("contentLoad", this.onContentLoad.bind(this));
-    lightbox.on("contentActivate", this.onContentActivate.bind(this));
-    lightbox.on("contentDeactivate", this.onContentDeactivate.bind(this));
-    lightbox.on("contentDestroy", this.onContentDestroy.bind(this));
+    lightbox.on('contentLoad', this.onContentLoad.bind(this));
+    lightbox.on('contentActivate', this.onContentActivate.bind(this));
+    lightbox.on('contentDeactivate', this.onContentDeactivate.bind(this));
+    lightbox.on('contentDestroy', this.onContentDestroy.bind(this));
   }
 
   onContentLoad(e) {
@@ -30,16 +30,16 @@ class LivePhotoContentSetup {
 
     const photo = content?.data?.photo;
 
-    const video = document.createElement("video");
-    video.preload = "none";
+    const video = document.createElement('video');
+    video.preload = 'none';
     video.muted = true;
     video.playsInline = true;
     video.disableRemotePlayback = true;
     video.autoplay = false;
     video.src = utils.getLivePhotoVideoUrl(photo, true);
 
-    const div = document.createElement("div");
-    div.className = "memories-livephoto";
+    const div = document.createElement('div');
+    div.className = 'memories-livephoto';
     div.appendChild(video);
     content.element = div;
 
@@ -53,7 +53,7 @@ class LivePhotoContentSetup {
 
   onContentActivate({ content }: { content: PsContent }) {
     if (isLiveContent(content)) {
-      const video = content.element?.querySelector("video");
+      const video = content.element?.querySelector('video');
       if (video) {
         video.currentTime = 0;
         video.play();
@@ -63,7 +63,7 @@ class LivePhotoContentSetup {
 
   onContentDeactivate({ content }: PsEvent) {
     if (isLiveContent(content)) {
-      content.element?.querySelector("video")?.pause();
+      content.element?.querySelector('video')?.pause();
     }
   }
 

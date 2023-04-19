@@ -1,11 +1,5 @@
 <template>
-  <router-link
-    draggable="false"
-    class="cluster fill-block"
-    :class="{ error }"
-    :to="target"
-    @click.native="click"
-  >
+  <router-link draggable="false" class="cluster fill-block" :class="{ error }" :to="target" @click.native="click">
     <div class="bbl">
       <NcCounterBubble> {{ data.count }} </NcCounterBubble>
     </div>
@@ -31,21 +25,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType } from 'vue';
 
-import { getCurrentUser } from "@nextcloud/auth";
-import NcCounterBubble from "@nextcloud/vue/dist/Components/NcCounterBubble";
+import { getCurrentUser } from '@nextcloud/auth';
+import NcCounterBubble from '@nextcloud/vue/dist/Components/NcCounterBubble';
 
-import type { IAlbum, ICluster, IFace, IPhoto } from "../../types";
-import { getPreviewUrl } from "../../services/utils/helpers";
-import errorsvg from "../../assets/error.svg";
+import type { IAlbum, ICluster, IFace, IPhoto } from '../../types';
+import { getPreviewUrl } from '../../services/utils/helpers';
+import errorsvg from '../../assets/error.svg';
 
-import { API } from "../../services/API";
+import { API } from '../../services/API';
 
-import Vue from "vue";
+import Vue from 'vue';
 
 export default defineComponent({
-  name: "Cluster",
+  name: 'Cluster',
   components: {
     NcCounterBubble,
   },
@@ -79,7 +73,7 @@ export default defineComponent({
 
     title() {
       if (this.tag) {
-        return this.t("recognize", this.tag.name);
+        return this.t('recognize', this.tag.name);
       }
 
       return this.data.name;
@@ -90,27 +84,25 @@ export default defineComponent({
         return `(${this.album.user})`;
       }
 
-      return "";
+      return '';
     },
 
     tag() {
-      return this.data.cluster_type === "tags" && this.data;
+      return this.data.cluster_type === 'tags' && this.data;
     },
 
     face() {
       return (
-        (this.data.cluster_type === "recognize" ||
-          this.data.cluster_type === "facerecognition") &&
-        (this.data as IFace)
+        (this.data.cluster_type === 'recognize' || this.data.cluster_type === 'facerecognition') && (this.data as IFace)
       );
     },
 
     place() {
-      return this.data.cluster_type === "places" && this.data;
+      return this.data.cluster_type === 'places' && this.data;
     },
 
     album() {
-      return this.data.cluster_type === "albums" && (this.data as IAlbum);
+      return this.data.cluster_type === 'albums' && (this.data as IAlbum);
     },
 
     /** Target URL to navigate to */
@@ -120,7 +112,7 @@ export default defineComponent({
       if (this.album) {
         const user = this.album.user;
         const name = this.album.name;
-        return { name: "albums", params: { user, name } };
+        return { name: 'albums', params: { user, name } };
       }
 
       if (this.face) {
@@ -133,25 +125,22 @@ export default defineComponent({
         const id = this.place.cluster_id;
         const placeName = this.place.name || id;
         const name = `${id}-${placeName}`;
-        return { name: "places", params: { name } };
+        return { name: 'places', params: { name } };
       }
 
-      return { name: "tags", params: { name: this.data.name } };
+      return { name: 'tags', params: { name: this.data.name } };
     },
 
     error() {
-      return (
-        Boolean(this.data.previewError) ||
-        Boolean(this.album && this.album.last_added_photo <= 0)
-      );
+      return Boolean(this.data.previewError) || Boolean(this.album && this.album.last_added_photo <= 0);
     },
   },
   methods: {
     failed() {
-      Vue.set(this.data, "previewError", true);
+      Vue.set(this.data, 'previewError', true);
     },
     click() {
-      this.$emit("click", this.data);
+      this.$emit('click', this.data);
     },
   },
 });
@@ -235,11 +224,7 @@ img {
       position: absolute;
       top: 0;
       left: 0;
-      background: linear-gradient(
-        0deg,
-        rgba(0, 0, 0, 0.7) 10%,
-        transparent 35%
-      );
+      background: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 10%, transparent 35%);
 
       .cluster.error & {
         display: none;

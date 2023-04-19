@@ -1,7 +1,7 @@
 <template>
   <Modal @close="close" size="normal" v-if="photo">
     <template #title>
-      {{ t("memories", "Share File") }}
+      {{ t('memories', 'Share File') }}
     </template>
 
     <div class="loading-icon fill-block" v-if="loading > 0">
@@ -19,7 +19,7 @@
           <PhotoIcon class="avatar" :size="24" />
         </template>
         <template #subtitle>
-          {{ t("memories", "Share a lower resolution image preview") }}
+          {{ t('memories', 'Share a lower resolution image preview') }}
         </template>
       </NcListItem>
 
@@ -35,8 +35,8 @@
         <template #subtitle>
           {{
             isVideo
-              ? t("memories", "Share the video as a high quality MOV")
-              : t("memories", "Share the image as a high quality JPEG")
+              ? t('memories', 'Share the video as a high quality MOV')
+              : t('memories', 'Share the image as a high quality JPEG')
           }}
         </template>
       </NcListItem>
@@ -51,21 +51,16 @@
           <FileIcon class="avatar" :size="24" />
         </template>
         <template #subtitle>
-          {{ t("memories", "Share the original image / video file") }}
+          {{ t('memories', 'Share the original image / video file') }}
         </template>
       </NcListItem>
 
-      <NcListItem
-        v-if="canShareLink"
-        :title="t('memories', 'Public Link')"
-        :bold="false"
-        @click.prevent="shareLink()"
-      >
+      <NcListItem v-if="canShareLink" :title="t('memories', 'Public Link')" :bold="false" @click.prevent="shareLink()">
         <template #icon>
           <LinkIcon class="avatar" :size="24" />
         </template>
         <template #subtitle>
-          {{ t("memories", "Share an external Nextcloud link") }}
+          {{ t('memories', 'Share an external Nextcloud link') }}
         </template>
       </NcListItem>
     </ul>
@@ -73,31 +68,31 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import { showError } from "@nextcloud/dialogs";
-import { loadState } from "@nextcloud/initial-state";
-import axios from "@nextcloud/axios";
+import { showError } from '@nextcloud/dialogs';
+import { loadState } from '@nextcloud/initial-state';
+import axios from '@nextcloud/axios';
 
-import NcListItem from "@nextcloud/vue/dist/Components/NcListItem";
-import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
-import Modal from "./Modal.vue";
+import NcListItem from '@nextcloud/vue/dist/Components/NcListItem';
+import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
+import Modal from './Modal.vue';
 
-import { IPhoto } from "../../types";
-import { API } from "../../services/API";
-import * as dav from "../../services/DavRequests";
-import * as utils from "../../services/Utils";
+import { IPhoto } from '../../types';
+import { API } from '../../services/API';
+import * as dav from '../../services/DavRequests';
+import * as utils from '../../services/Utils';
 
-import PhotoIcon from "vue-material-design-icons/Image.vue";
-import LargePhotoIcon from "vue-material-design-icons/ImageArea.vue";
-import LinkIcon from "vue-material-design-icons/LinkVariant.vue";
-import FileIcon from "vue-material-design-icons/File.vue";
+import PhotoIcon from 'vue-material-design-icons/Image.vue';
+import LargePhotoIcon from 'vue-material-design-icons/ImageArea.vue';
+import LinkIcon from 'vue-material-design-icons/LinkVariant.vue';
+import FileIcon from 'vue-material-design-icons/File.vue';
 
 // Is video transcoding enabled?
-const config_vodDisable = loadState("memories", "vod_disable", true);
+const config_vodDisable = loadState('memories', 'vod_disable', true);
 
 export default defineComponent({
-  name: "ShareModal",
+  name: 'ShareModal',
 
   components: {
     NcListItem,
@@ -125,15 +120,11 @@ export default defineComponent({
 
   computed: {
     isVideo() {
-      return (
-        this.photo &&
-        (this.photo.mimetype?.startsWith("video/") ||
-          this.photo.flag & this.c.FLAG_IS_VIDEO)
-      );
+      return this.photo && (this.photo.mimetype?.startsWith('video/') || this.photo.flag & this.c.FLAG_IS_VIDEO);
     },
 
     canShareNative() {
-      return "share" in navigator;
+      return 'share' in navigator;
     },
 
     canShareHighRes() {
@@ -141,7 +132,7 @@ export default defineComponent({
     },
 
     canShareLink() {
-      return this.photo?.imageInfo?.permissions?.includes("S");
+      return this.photo?.imageInfo?.permissions?.includes('S');
     },
   },
 
@@ -166,9 +157,7 @@ export default defineComponent({
 
     async shareHighRes() {
       const fileid = this.photo!.fileid;
-      const src = this.isVideo
-        ? API.VIDEO_TRANSCODE(fileid, "max.mov")
-        : API.IMAGE_DECODABLE(fileid, this.photo!.etag);
+      const src = this.isVideo ? API.VIDEO_TRANSCODE(fileid, 'max.mov') : API.IMAGE_DECODABLE(fileid, this.photo!.etag);
       this.shareWithHref(src, !this.isVideo);
     },
 
@@ -187,30 +176,30 @@ export default defineComponent({
     async shareWithHref(href: string, replaceExt = false) {
       let blob: Blob | undefined;
       await this.l(async () => {
-        const res = await axios.get(href, { responseType: "blob" });
+        const res = await axios.get(href, { responseType: 'blob' });
         blob = res.data;
       });
 
       if (!blob) {
-        showError(this.t("memories", "Failed to download file"));
+        showError(this.t('memories', 'Failed to download file'));
         return;
       }
 
-      let basename = this.photo?.basename ?? "blank";
+      let basename = this.photo?.basename ?? 'blank';
 
       if (replaceExt) {
         // Fix basename extension
         let targetExts: string[] = [];
-        if (blob.type === "image/png") {
-          targetExts = ["png"];
+        if (blob.type === 'image/png') {
+          targetExts = ['png'];
         } else {
-          targetExts = ["jpg", "jpeg"];
+          targetExts = ['jpg', 'jpeg'];
         }
 
         // Append extension if not found
-        const baseExt = basename.split(".").pop()?.toLowerCase() ?? "";
+        const baseExt = basename.split('.').pop()?.toLowerCase() ?? '';
         if (!targetExts.includes(baseExt)) {
-          basename += "." + targetExts[0];
+          basename += '.' + targetExts[0];
         }
       }
 
@@ -223,7 +212,7 @@ export default defineComponent({
       };
 
       if (!(<any>navigator).canShare(data)) {
-        showError(this.t("memories", "Cannot share this type of data"));
+        showError(this.t('memories', 'Cannot share this type of data'));
       }
 
       try {

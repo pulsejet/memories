@@ -18,11 +18,7 @@
         <Video :size="22" />
       </div>
 
-      <div
-        class="livephoto"
-        @mouseenter.passive="playVideo"
-        @mouseleave.passive="stopVideo"
-      >
+      <div class="livephoto" @mouseenter.passive="playVideo" @mouseleave.passive="stopVideo">
         <LivePhoto :size="22" v-if="data.liveid" />
       </div>
 
@@ -50,15 +46,7 @@
           @load="load"
           @error="error"
         />
-        <video
-          ref="video"
-          v-if="videoUrl"
-          :src="videoUrl"
-          preload="none"
-          muted
-          playsinline
-          disableRemotePlayback
-        />
+        <video ref="video" v-if="videoUrl" :src="videoUrl" preload="none" muted playsinline disableRemotePlayback />
         <div class="overlay fill-block" />
       </div>
     </div>
@@ -66,19 +54,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType } from 'vue';
 
-import { IDay, IPhoto } from "../../types";
-import * as utils from "../../services/Utils";
+import { IDay, IPhoto } from '../../types';
+import * as utils from '../../services/Utils';
 
-import errorsvg from "../../assets/error.svg";
-import CheckCircle from "vue-material-design-icons/CheckCircle.vue";
-import Star from "vue-material-design-icons/Star.vue";
-import Video from "vue-material-design-icons/PlayCircleOutline.vue";
-import LivePhoto from "vue-material-design-icons/MotionPlayOutline.vue";
+import errorsvg from '../../assets/error.svg';
+import CheckCircle from 'vue-material-design-icons/CheckCircle.vue';
+import Star from 'vue-material-design-icons/Star.vue';
+import Video from 'vue-material-design-icons/PlayCircleOutline.vue';
+import LivePhoto from 'vue-material-design-icons/MotionPlayOutline.vue';
 
 export default defineComponent({
-  name: "Photo",
+  name: 'Photo',
   components: {
     CheckCircle,
     Video,
@@ -106,8 +94,7 @@ export default defineComponent({
     data(newData: IPhoto, oldData: IPhoto) {
       // Copy flags relevant to this component
       if (oldData && newData) {
-        newData.flag |=
-          oldData.flag & (this.c.FLAG_SELECTED | this.c.FLAG_LOAD_FAIL);
+        newData.flag |= oldData.flag & (this.c.FLAG_SELECTED | this.c.FLAG_LOAD_FAIL);
       }
     },
   },
@@ -164,7 +151,7 @@ export default defineComponent({
 
   methods: {
     emitSelect(data: IPhoto) {
-      this.$emit("select", data);
+      this.$emit('select', data);
     },
 
     /** Get url of the photo */
@@ -184,11 +171,7 @@ export default defineComponent({
       // Make the shorter dimension equal to base
       let size = base;
       if (this.data.w && this.data.h) {
-        size =
-          Math.floor(
-            (base * Math.max(this.data.w, this.data.h)) /
-              Math.min(this.data.w, this.data.h)
-          ) - 1;
+        size = Math.floor((base * Math.max(this.data.w, this.data.h)) / Math.min(this.data.w, this.data.h)) - 1;
       }
 
       return utils.getPreviewUrl(this.data, false, size);
@@ -207,14 +190,14 @@ export default defineComponent({
       //   so there's no point in trying to draw the face rect
       if (!img || img.naturalWidth < 5) return;
 
-      const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d");
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
       if (!context) return; // failed to create canvas
 
       canvas.width = img.naturalWidth;
       canvas.height = img.naturalHeight;
       context.drawImage(img, 0, 0);
-      context.strokeStyle = "#00ff00";
+      context.strokeStyle = '#00ff00';
       context.lineWidth = 2;
       context.strokeRect(
         this.data.facerect.x * img.naturalWidth,
@@ -228,7 +211,7 @@ export default defineComponent({
           if (!blob) return;
           this.faceSrc = URL.createObjectURL(blob);
         },
-        "image/jpeg",
+        'image/jpeg',
         0.95
       );
     },
@@ -281,8 +264,7 @@ export default defineComponent({
     padding: 1px;
   }
 
-  transition: background-color 0.15s ease, opacity 0.2s ease-in,
-    transform 0.2s ease-in;
+  transition: background-color 0.15s ease, opacity 0.2s ease-in, transform 0.2s ease-in;
 
   &.leaving {
     transform: scale(0.9);

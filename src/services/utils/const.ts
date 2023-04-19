@@ -1,4 +1,4 @@
-import { IPhoto } from "../../types";
+import { IPhoto } from '../../types';
 
 /** Global constants */
 export const constants = {
@@ -17,7 +17,7 @@ export const constants = {
  * @param photo Photo to process
  */
 export function convertFlags(photo: IPhoto) {
-  if (typeof photo.flag === "undefined") {
+  if (typeof photo.flag === 'undefined') {
     photo.flag = 0; // flags
     photo.imageInfo = null; // make it reactive
   }

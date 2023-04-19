@@ -1,7 +1,7 @@
-import { type constants } from "./services/Utils";
-import type { translate, translatePlural } from "@nextcloud/l10n";
+import { type constants } from './services/Utils';
+import type { translate, translatePlural } from '@nextcloud/l10n';
 
-declare module "vue" {
+declare module 'vue' {
   interface ComponentCustomProperties {
     // GlobalMixin.ts
     t: typeof translate;

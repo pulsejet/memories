@@ -1,20 +1,20 @@
-import PhotoSwipe from "photoswipe";
+import PhotoSwipe from 'photoswipe';
 
-import { isVideoContent } from "./PsVideo";
-import { isLiveContent } from "./PsLivePhoto";
-import { fetchImage } from "../frame/XImgCache";
-import { PsContent, PsEvent, PsSlide } from "./types";
+import { isVideoContent } from './PsVideo';
+import { isLiveContent } from './PsLivePhoto';
+import { fetchImage } from '../frame/XImgCache';
+import { PsContent, PsEvent, PsSlide } from './types';
 
 export default class ImageContentSetup {
   private loading = 0;
 
   constructor(private lightbox: PhotoSwipe) {
-    lightbox.on("contentLoad", this.onContentLoad.bind(this));
-    lightbox.on("contentLoadImage", this.onContentLoadImage.bind(this));
-    lightbox.on("zoomPanUpdate", this.zoomPanUpdate.bind(this));
-    lightbox.on("slideActivate", this.slideActivate.bind(this));
-    lightbox.addFilter("isContentLoading", this.isContentLoading.bind(this));
-    lightbox.addFilter("placeholderSrc", this.placeholderSrc.bind(this));
+    lightbox.on('contentLoad', this.onContentLoad.bind(this));
+    lightbox.on('contentLoadImage', this.onContentLoadImage.bind(this));
+    lightbox.on('zoomPanUpdate', this.zoomPanUpdate.bind(this));
+    lightbox.on('slideActivate', this.slideActivate.bind(this));
+    lightbox.addFilter('isContentLoading', this.isContentLoading.bind(this));
+    lightbox.addFilter('placeholderSrc', this.placeholderSrc.bind(this));
   }
 
   isContentLoading(isLoading: boolean, content: PsContent) {
@@ -39,7 +39,7 @@ export default class ImageContentSetup {
     // since these requests are not cached, leading to race conditions
     // with the loading of the actual images.
     // Sample is for OnThisDay, where msrc isn't blob
-    if (content.data.msrc?.startsWith("blob:")) {
+    if (content.data.msrc?.startsWith('blob:')) {
       return content.data.msrc;
     }
 
@@ -47,9 +47,9 @@ export default class ImageContentSetup {
   }
 
   getXImgElem(content: PsContent, onLoad: () => void): HTMLImageElement {
-    const img = document.createElement("img");
-    img.classList.add("pswp__img", "ximg");
-    img.style.visibility = "hidden";
+    const img = document.createElement('img');
+    img.classList.add('pswp__img', 'ximg');
+    img.style.visibility = 'hidden';
 
     // Fetch with Axios
     fetchImage(content.data.src).then((blobSrc) => {
@@ -59,7 +59,7 @@ export default class ImageContentSetup {
       // Insert image
       img.onerror = img.onload = () => {
         img.onerror = img.onload = null;
-        img.style.visibility = "visible";
+        img.style.visibility = 'visible';
         onLoad();
         this.slideActivate();
       };
@@ -70,7 +70,7 @@ export default class ImageContentSetup {
   }
 
   zoomPanUpdate({ slide }: { slide: PsSlide }) {
-    if (!slide.data.highSrc || slide.data.highSrcCond !== "zoom") return;
+    if (!slide.data.highSrc || slide.data.highSrcCond !== 'zoom') return;
 
     if (slide.currZoomLevel >= slide.zoomLevels.secondary) {
       this.loadFullImage(slide);
@@ -79,7 +79,7 @@ export default class ImageContentSetup {
 
   slideActivate() {
     const slide = this.lightbox.currSlide;
-    if (slide?.data.highSrcCond === "always") {
+    if (slide?.data.highSrcCond === 'always') {
       this.loadFullImage(slide as PsSlide);
     }
   }
@@ -88,13 +88,11 @@ export default class ImageContentSetup {
     if (!slide.data.highSrc) return;
 
     // Get ximg element
-    const img = slide.holderElement?.querySelector(
-      ".ximg:not(.ximg--full)"
-    ) as HTMLImageElement;
+    const img = slide.holderElement?.querySelector('.ximg:not(.ximg--full)') as HTMLImageElement;
     if (!img) return;
 
     // Load full image at secondary zoom level
-    img.classList.add("ximg--full");
+    img.classList.add('ximg--full');
 
     this.loading++;
     this.lightbox.ui?.updatePreloaderVisibility();
@@ -108,7 +106,7 @@ export default class ImageContentSetup {
         img.src = blobSrc;
 
         // Don't load again
-        slide.data.highSrcCond = "never";
+        slide.data.highSrcCond = 'never';
       })
       .finally(() => {
         this.loading--;

@@ -1,6 +1,6 @@
-import { ICluster } from "../../types";
-import { API } from "../API";
-import axios from "@nextcloud/axios";
+import { ICluster } from '../../types';
+import { API } from '../API';
+import axios from '@nextcloud/axios';
 
 /**
  * Get list of tags.

@@ -1,5 +1,5 @@
-import { CacheExpiration } from "workbox-expiration";
-import { workerExport } from "../../worker";
+import { CacheExpiration } from 'workbox-expiration';
+import { workerExport } from '../../worker';
 
 interface BlobCallback {
   resolve: (blob: Blob) => void;
@@ -20,13 +20,13 @@ let fetchPreviewQueue: FetchPreviewObject[] = [];
 const pendingUrls = new Map<string, BlobCallback[]>();
 
 // Cache for preview images
-const cacheName = "images";
+const cacheName = 'images';
 let imageCache: Cache;
 self.caches
   ?.open(cacheName)
   .then((c) => (imageCache = c))
   .catch((e) => {
-    console.warn("Failed to open cache in worker", e);
+    console.warn('Failed to open cache in worker', e);
   });
 
 // Expiration for cache
@@ -98,21 +98,20 @@ async function flushPreviewQueue() {
   // Create aggregated request body
   const files = fetchPreviewQueueCopy.map((p) => ({
     fileid: p.fileid,
-    x: Number(p.url.searchParams.get("x")),
-    y: Number(p.url.searchParams.get("y")),
-    a: p.url.searchParams.get("a"),
+    x: Number(p.url.searchParams.get('x')),
+    y: Number(p.url.searchParams.get('y')),
+    a: p.url.searchParams.get('a'),
     reqid: p.reqid,
   }));
 
   try {
     // Fetch multipreview
     const res = await fetchMultipreview(files);
-    if (res.status !== 200 || !res.body)
-      throw new Error("Error fetching multi-preview");
+    if (res.status !== 200 || !res.body) throw new Error('Error fetching multi-preview');
 
     // Create fake headers for 7-day expiry
     const headers = {
-      "cache-control": "max-age=604800",
+      'cache-control': 'max-age=604800',
       expires: new Date(Date.now() + 604800000).toUTCString(),
     };
 
@@ -151,7 +150,7 @@ async function flushPreviewQueue() {
         const newBuffer = new Uint8Array(buffer.length * 2);
         newBuffer.set(buffer);
         buffer = newBuffer;
-        console.warn("Doubling multipreview buffer size", buffer.length);
+        console.warn('Doubling multipreview buffer size', buffer.length);
       }
 
       // Copy data into buffer
@@ -201,7 +200,7 @@ async function flushPreviewQueue() {
       }
     }
   } catch (e) {
-    console.error("Multipreview error", e);
+    console.error('Multipreview error', e);
   }
 
   // Initiate callbacks for failed requests
@@ -216,7 +215,7 @@ async function fetchImage(url: string): Promise<Blob> {
 
   // Get file id from URL
   const urlObj = new URL(url, self.location.origin);
-  const fileid = Number(urlObj.pathname.split("/").pop());
+  const fileid = Number(urlObj.pathname.split('/').pop());
 
   // Just fetch if not a preview
   const regex = /^.*\/apps\/memories\/api\/image\/preview\/.*/;
@@ -270,7 +269,7 @@ function cacheResponse(url: string, res: Response) {
       expirationManager.expireEntries();
     }
   } catch (e) {
-    console.error("Error caching response", e);
+    console.error('Error caching response', e);
   }
 }
 
@@ -279,9 +278,9 @@ function getResponse(blob: Blob, type: string | null, headers: any = {}) {
   return new Response(blob, {
     status: 200,
     headers: {
-      "Content-Type": type || headers["content-type"],
-      "Content-Length": blob.size.toString(),
-      "Cache-Control": headers["cache-control"],
+      'Content-Type': type || headers['content-type'],
+      'Content-Length': blob.size.toString(),
+      'Cache-Control': headers['cache-control'],
       Expires: headers.expires,
     },
   });
@@ -295,10 +294,10 @@ async function fetchOneImage(url: string) {
 /** Fetch multipreview with axios */
 async function fetchMultipreview(files: any[]) {
   return await fetch(config.multiUrl, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify(files),
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 }

@@ -1,11 +1,11 @@
-import * as base from "./base";
-import { getCurrentUser } from "@nextcloud/auth";
-import { showError } from "@nextcloud/dialogs";
-import { translate as t } from "@nextcloud/l10n";
-import { IAlbum, IFileInfo, IPhoto } from "../../types";
-import { API } from "../API";
-import axios from "@nextcloud/axios";
-import client from "../DavClient";
+import * as base from './base';
+import { getCurrentUser } from '@nextcloud/auth';
+import { showError } from '@nextcloud/dialogs';
+import { translate as t } from '@nextcloud/l10n';
+import { IAlbum, IFileInfo, IPhoto } from '../../types';
+import { API } from '../API';
+import axios from '@nextcloud/axios';
+import client from '../DavClient';
 
 /**
  * Get DAV path for album
@@ -30,9 +30,7 @@ export async function getAlbums(type: 1 | 2 | 3, sortOrder: 1 | 2) {
 
   // Response is already sorted by date, sort otherwise
   if (sortOrder === 2) {
-    data.sort((a, b) =>
-      a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
-    );
+    data.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
   }
 
   return data;
@@ -46,11 +44,7 @@ export async function getAlbums(type: 1 | 2 | 3, sortOrder: 1 | 2) {
  * @param photos List of photos to add
  * @returns Generator
  */
-export async function* addToAlbum(
-  user: string,
-  name: string,
-  photos: IPhoto[]
-) {
+export async function* addToAlbum(user: string, name: string, photos: IPhoto[]) {
   // Get files data
   let fileInfos = await base.getFiles(photos);
 
@@ -68,12 +62,12 @@ export async function* addToAlbum(
       }
 
       showError(
-        t("memories", "Failed to add {filename} to album.", {
+        t('memories', 'Failed to add {filename} to album.', {
           filename: f.filename,
         })
       );
 
-      console.error("DAV COPY error", e.response?.data);
+      console.error('DAV COPY error', e.response?.data);
       return 0;
     }
   });
@@ -89,21 +83,15 @@ export async function* addToAlbum(
  * @param photos List of photos to remove
  * @returns Generator
  */
-export async function* removeFromAlbum(
-  user: string,
-  name: string,
-  photos: IPhoto[]
-) {
+export async function* removeFromAlbum(user: string, name: string, photos: IPhoto[]) {
   // Add each file
   const calls = photos.map((f) => async () => {
     try {
-      await client.deleteFile(
-        `/photos/${user}/albums/${name}/${f.fileid}-${f.basename}`
-      );
+      await client.deleteFile(`/photos/${user}/albums/${name}/${f.fileid}-${f.basename}`);
       return f.fileid;
     } catch (e) {
       showError(
-        t("memories", "Failed to remove {filename}.", {
+        t('memories', 'Failed to remove {filename}.', {
           filename: f.basename ?? f.fileid,
         })
       );
@@ -119,12 +107,10 @@ export async function* removeFromAlbum(
  */
 export async function createAlbum(albumName: string) {
   try {
-    await client.createDirectory(
-      `/photos/${getCurrentUser()?.uid}/albums/${albumName}`
-    );
+    await client.createDirectory(`/photos/${getCurrentUser()?.uid}/albums/${albumName}`);
   } catch (error) {
     console.error(error);
-    showError(t("photos", "Failed to create {albumName}.", { albumName }));
+    showError(t('photos', 'Failed to create {albumName}.', { albumName }));
   }
 }
 
@@ -140,19 +126,19 @@ export async function updateAlbum(album: any, { albumName, properties }: any) {
   const stringifiedProperties = Object.entries(properties)
     .map(([name, value]) => {
       switch (typeof value) {
-        case "string":
+        case 'string':
           return `<nc:${name}>${value}</nc:${name}>`;
-        case "object":
+        case 'object':
           return `<nc:${name}>${JSON.stringify(value)}</nc:${name}>`;
         default:
-          return "";
+          return '';
       }
     })
     .join();
 
   try {
     await client.customRequest(album.filename, {
-      method: "PROPPATCH",
+      method: 'PROPPATCH',
       data: `<?xml version="1.0"?>
                         <d:propertyupdate xmlns:d="DAV:"
                             xmlns:oc="http://owncloud.org/ns"
@@ -170,11 +156,10 @@ export async function updateAlbum(album: any, { albumName, properties }: any) {
   } catch (error) {
     console.error(error);
     showError(
-      t(
-        "photos",
-        "Failed to update properties of {albumName} with {properties}.",
-        { albumName, properties: JSON.stringify(properties) }
-      )
+      t('photos', 'Failed to update properties of {albumName} with {properties}.', {
+        albumName,
+        properties: JSON.stringify(properties),
+      })
     );
     return album;
   }
@@ -216,10 +201,7 @@ export async function getAlbum(user: string, name: string, extraProps = {}) {
 }
 
 /** Rename an album */
-export async function renameAlbum(
-  album: any,
-  { currentAlbumName, newAlbumName }
-) {
+export async function renameAlbum(album: any, { currentAlbumName, newAlbumName }) {
   const newAlbum = { ...album, basename: newAlbumName };
   try {
     await client.moveFile(
@@ -230,7 +212,7 @@ export async function renameAlbum(
   } catch (error) {
     console.error(error);
     showError(
-      t("photos", "Failed to rename {currentAlbumName} to {newAlbumName}.", {
+      t('photos', 'Failed to rename {currentAlbumName} to {newAlbumName}.', {
         currentAlbumName,
         newAlbumName,
       })
@@ -240,11 +222,7 @@ export async function renameAlbum(
 }
 
 /** Get fileinfo objects from album photos */
-export function getAlbumFileInfos(
-  photos: IPhoto[],
-  albumUser: string,
-  albumName: string
-): IFileInfo[] {
+export function getAlbumFileInfos(photos: IPhoto[], albumUser: string, albumName: string): IFileInfo[] {
   const uid = getCurrentUser()?.uid;
   const collection =
     albumUser === uid

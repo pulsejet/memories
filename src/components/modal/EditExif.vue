@@ -20,12 +20,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { IPhoto } from "../../types";
+import { defineComponent } from 'vue';
+import { IPhoto } from '../../types';
 
-const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
-import { translate as t } from "@nextcloud/l10n";
+import { translate as t } from '@nextcloud/l10n';
 
 export default defineComponent({
   components: {
@@ -45,32 +45,32 @@ export default defineComponent({
 
     fields: [
       {
-        field: "Title",
-        label: t("memories", "Title"),
+        field: 'Title',
+        label: t('memories', 'Title'),
       },
       {
-        field: "Description",
-        label: t("memories", "Description"),
+        field: 'Description',
+        label: t('memories', 'Description'),
       },
       {
-        field: "Label",
-        label: t("memories", "Label"),
+        field: 'Label',
+        label: t('memories', 'Label'),
       },
       {
-        field: "Make",
-        label: t("memories", "Camera Make"),
+        field: 'Make',
+        label: t('memories', 'Camera Make'),
       },
       {
-        field: "Model",
-        label: t("memories", "Camera Model"),
+        field: 'Model',
+        label: t('memories', 'Camera Model'),
       },
       {
-        field: "LensModel",
-        label: t("memories", "Lens Model"),
+        field: 'LensModel',
+        label: t('memories', 'Lens Model'),
       },
       {
-        field: "Copyright",
-        label: t("memories", "Copyright"),
+        field: 'Copyright',
+        label: t('memories', 'Copyright'),
       },
     ],
   }),
@@ -94,7 +94,7 @@ export default defineComponent({
         if (ePhoto && (eCurr === null || ePhoto === eCurr)) {
           exif[field.field] = String(ePhoto);
         } else {
-          exif[field.field] = "";
+          exif[field.field] = '';
         }
       }
     }
@@ -114,17 +114,15 @@ export default defineComponent({
     },
 
     label(field: any) {
-      return field.label + (this.dirty[field.field] ? "*" : "");
+      return field.label + (this.dirty[field.field] ? '*' : '');
     },
 
     placeholder(field: any) {
-      return this.dirty[field.field]
-        ? t("memories", "Empty")
-        : t("memories", "Unchanged");
+      return this.dirty[field.field] ? t('memories', 'Empty') : t('memories', 'Unchanged');
     },
 
     reset(field: any) {
-      this.exif[field.field] = "";
+      this.exif[field.field] = '';
       this.dirty[field.field] = false;
     },
   },

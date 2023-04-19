@@ -1,5 +1,5 @@
-import { getCanonicalLocale } from "@nextcloud/l10n";
-import moment from "moment";
+import { getCanonicalLocale } from '@nextcloud/l10n';
+import moment from 'moment';
 
 // Memoize the result of short date conversions
 // These operations are surprisingly expensive
@@ -23,9 +23,9 @@ export function getShortDateStr(date: Date) {
     shortDateStrMemo.set(
       dayId,
       date.toLocaleDateString(getCanonicalLocale(), {
-        month: "short",
-        year: "numeric",
-        timeZone: "UTC",
+        month: 'short',
+        year: 'numeric',
+        timeZone: 'UTC',
       })
     );
   }
@@ -35,25 +35,22 @@ export function getShortDateStr(date: Date) {
 /** Get long date string with optional year if same as current */
 export function getLongDateStr(date: Date, skipYear = false, time = false) {
   return date.toLocaleDateString(getCanonicalLocale(), {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year:
-      skipYear && date.getUTCFullYear() === new Date().getUTCFullYear()
-        ? undefined
-        : "numeric",
-    timeZone: "UTC",
-    hour: time ? "numeric" : undefined,
-    minute: time ? "numeric" : undefined,
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: skipYear && date.getUTCFullYear() === new Date().getUTCFullYear() ? undefined : 'numeric',
+    timeZone: 'UTC',
+    hour: time ? 'numeric' : undefined,
+    minute: time ? 'numeric' : undefined,
   });
 }
 
 /** Get month and year string */
 export function getMonthDateStr(date: Date) {
   return date.toLocaleDateString(getCanonicalLocale(), {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
   });
 }
 
@@ -73,12 +70,12 @@ export function getDurationStr(sec: number) {
   let seconds: number | string = sec - hours * 3600 - minutes * 60;
 
   if (seconds < 10) {
-    seconds = "0" + seconds;
+    seconds = '0' + seconds;
   }
 
   if (hours > 0) {
     if (minutes < 10) {
-      minutes = "0" + minutes;
+      minutes = '0' + minutes;
     }
     return `${hours}:${minutes}:${seconds}`;
   }

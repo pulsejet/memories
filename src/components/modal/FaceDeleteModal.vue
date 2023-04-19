@@ -1,35 +1,33 @@
 <template>
   <Modal @close="close" v-if="show">
     <template #title>
-      {{ t("memories", "Remove person") }}
+      {{ t('memories', 'Remove person') }}
     </template>
 
-    <span>{{
-      t("memories", "Are you sure you want to remove {name}?", { name })
-    }}</span>
+    <span>{{ t('memories', 'Are you sure you want to remove {name}?', { name }) }}</span>
 
     <template #buttons>
       <NcButton @click="save" class="button" type="error">
-        {{ t("memories", "Delete") }}
+        {{ t('memories', 'Delete') }}
       </NcButton>
     </template>
   </Modal>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import NcButton from "@nextcloud/vue/dist/Components/NcButton";
-const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
+import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
-import { showError } from "@nextcloud/dialogs";
-import { getCurrentUser } from "@nextcloud/auth";
-import Modal from "./Modal.vue";
-import client from "../../services/DavClient";
-import * as dav from "../../services/DavRequests";
+import { showError } from '@nextcloud/dialogs';
+import { getCurrentUser } from '@nextcloud/auth';
+import Modal from './Modal.vue';
+import client from '../../services/DavClient';
+import * as dav from '../../services/DavRequests';
 
 export default defineComponent({
-  name: "FaceDeleteModal",
+  name: 'FaceDeleteModal',
   components: {
     NcButton,
     NcTextField,
@@ -38,8 +36,8 @@ export default defineComponent({
 
   data: () => ({
     show: false,
-    user: "",
-    name: "",
+    user: '',
+    name: '',
   }),
 
   mounted() {
@@ -55,14 +53,14 @@ export default defineComponent({
   methods: {
     close() {
       this.show = false;
-      this.$emit("close");
+      this.$emit('close');
     },
 
     open() {
-      const user = this.$route.params.user || "";
+      const user = this.$route.params.user || '';
       if (this.$route.params.user !== getCurrentUser()?.uid) {
         showError(
-          this.t("memories", 'Only user "{user}" can delete this person', {
+          this.t('memories', 'Only user "{user}" can delete this person', {
             user,
           })
         );
@@ -72,13 +70,13 @@ export default defineComponent({
     },
 
     refreshParams() {
-      this.user = <string>this.$route.params.user || "";
-      this.name = <string>this.$route.params.name || "";
+      this.user = <string>this.$route.params.user || '';
+      this.name = <string>this.$route.params.name || '';
     },
 
     async save() {
       try {
-        if (this.$route.name === "recognize") {
+        if (this.$route.name === 'recognize') {
           await client.deleteFile(`/recognize/${this.user}/faces/${this.name}`);
         } else {
           await dav.setVisibilityPeopleFaceRecognition(this.name, false);
@@ -88,7 +86,7 @@ export default defineComponent({
       } catch (error) {
         console.log(error);
         showError(
-          this.t("photos", "Failed to delete {name}.", {
+          this.t('photos', 'Failed to delete {name}.', {
             name: this.name,
           })
         );

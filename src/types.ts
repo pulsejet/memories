@@ -109,12 +109,7 @@ export interface IFolder extends IPhoto {
   name: string;
 }
 
-export type ClusterTypes =
-  | "tags"
-  | "albums"
-  | "places"
-  | "recognize"
-  | "facerecognition";
+export type ClusterTypes = 'tags' | 'albums' | 'places' | 'recognize' | 'facerecognition';
 
 export interface ICluster {
   /** A unique identifier for the cluster */

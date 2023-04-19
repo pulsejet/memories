@@ -1,67 +1,37 @@
-import { emit, subscribe, unsubscribe } from "@nextcloud/event-bus";
-import { loadState } from "@nextcloud/initial-state";
-import axios from "@nextcloud/axios";
-import { API } from "../services/API";
-import { defineComponent } from "vue";
+import { emit, subscribe, unsubscribe } from '@nextcloud/event-bus';
+import { loadState } from '@nextcloud/initial-state';
+import axios from '@nextcloud/axios';
+import { API } from '../services/API';
+import { defineComponent } from 'vue';
 
-const eventName = "memories:user-config-changed";
-const localSettings = [
-  "squareThumbs",
-  "fullResOnZoom",
-  "fullResAlways",
-  "showFaceRect",
-  "albumListSort",
-];
+const eventName = 'memories:user-config-changed';
+const localSettings = ['squareThumbs', 'fullResOnZoom', 'fullResAlways', 'showFaceRect', 'albumListSort'];
 
 export default defineComponent({
-  name: "UserConfig",
+  name: 'UserConfig',
 
   data: () => ({
-    config_timelinePath: loadState(
-      "memories",
-      "timelinePath",
-      <string>""
-    ) as string,
-    config_foldersPath: loadState(
-      "memories",
-      "foldersPath",
-      <string>"/"
-    ) as string,
+    config_timelinePath: loadState('memories', 'timelinePath', <string>'') as string,
+    config_foldersPath: loadState('memories', 'foldersPath', <string>'/') as string,
 
-    config_showHidden:
-      loadState("memories", "showHidden", <string>"false") === "true",
-    config_sortFolderMonth:
-      loadState("memories", "sortFolderMonth", <string>"false") === "true",
-    config_sortAlbumMonth:
-      loadState("memories", "sortAlbumMonth", <string>"true") === "true",
-    config_enableTopMemories:
-      loadState("memories", "enableTopMemories", <string>"false") === "true",
+    config_showHidden: loadState('memories', 'showHidden', <string>'false') === 'true',
+    config_sortFolderMonth: loadState('memories', 'sortFolderMonth', <string>'false') === 'true',
+    config_sortAlbumMonth: loadState('memories', 'sortAlbumMonth', <string>'true') === 'true',
+    config_enableTopMemories: loadState('memories', 'enableTopMemories', <string>'false') === 'true',
 
-    config_tagsEnabled: Boolean(
-      loadState("memories", "systemtags", <string>"")
-    ),
-    config_recognizeEnabled: Boolean(
-      loadState("memories", "recognize", <string>"")
-    ),
-    config_facerecognitionInstalled: Boolean(
-      loadState("memories", "facerecognitionInstalled", <string>"")
-    ),
-    config_facerecognitionEnabled: Boolean(
-      loadState("memories", "facerecognitionEnabled", <string>"")
-    ),
-    config_albumsEnabled: Boolean(loadState("memories", "albums", <string>"")),
+    config_tagsEnabled: Boolean(loadState('memories', 'systemtags', <string>'')),
+    config_recognizeEnabled: Boolean(loadState('memories', 'recognize', <string>'')),
+    config_facerecognitionInstalled: Boolean(loadState('memories', 'facerecognitionInstalled', <string>'')),
+    config_facerecognitionEnabled: Boolean(loadState('memories', 'facerecognitionEnabled', <string>'')),
+    config_albumsEnabled: Boolean(loadState('memories', 'albums', <string>'')),
 
-    config_placesGis: Number(loadState("memories", "places_gis", <string>"-1")),
+    config_placesGis: Number(loadState('memories', 'places_gis', <string>'-1')),
 
-    config_squareThumbs: localStorage.getItem("memories_squareThumbs") === "1",
-    config_fullResOnZoom:
-      localStorage.getItem("memories_fullResOnZoom") !== "0",
-    config_fullResAlways:
-      localStorage.getItem("memories_fullResAlways") === "1",
-    config_showFaceRect: localStorage.getItem("memories_showFaceRect") === "1",
-    config_albumListSort: Number(
-      localStorage.getItem("memories_albumListSort") || 1
-    ),
+    config_squareThumbs: localStorage.getItem('memories_squareThumbs') === '1',
+    config_fullResOnZoom: localStorage.getItem('memories_fullResOnZoom') !== '0',
+    config_fullResAlways: localStorage.getItem('memories_fullResAlways') === '1',
+    config_showFaceRect: localStorage.getItem('memories_showFaceRect') === '1',
+    config_albumListSort: Number(localStorage.getItem('memories_albumListSort') || 1),
 
     config_eventName: eventName,
   }),
@@ -76,17 +46,17 @@ export default defineComponent({
 
   methods: {
     updateLocalSetting({ setting, value }) {
-      this["config_" + setting] = value;
+      this['config_' + setting] = value;
     },
 
     async updateSetting(setting: string) {
-      const value = this["config_" + setting];
+      const value = this['config_' + setting];
 
       if (localSettings.includes(setting)) {
-        if (typeof value === "boolean") {
-          localStorage.setItem("memories_" + setting, value ? "1" : "0");
+        if (typeof value === 'boolean') {
+          localStorage.setItem('memories_' + setting, value ? '1' : '0');
         } else {
-          localStorage.setItem("memories_" + setting, value);
+          localStorage.setItem('memories_' + setting, value);
         }
       } else {
         // Long time save setting

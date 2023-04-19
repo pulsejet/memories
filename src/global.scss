@@ -71,8 +71,7 @@ body.has-viewer header {
     height: 100%;
     display: block;
     z-index: 1;
-    transition: transform 0.3s ease-in-out, visibility 0.3s ease-in-out,
-      opacity 0.3s ease-in-out;
+    transition: transform 0.3s ease-in-out, visibility 0.3s ease-in-out, opacity 0.3s ease-in-out;
   }
 
   video {
@@ -123,7 +122,7 @@ body.has-viewer header {
 }
 
 // Make sure empty content is full width
-[role="note"].empty-content {
+[role='note'].empty-content {
   width: 100%;
 }
 

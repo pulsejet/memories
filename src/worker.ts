@@ -1,7 +1,5 @@
 /** Set the receiver function for a worker */
-export function workerExport(
-  handlers: Record<string, (...data: any) => Promise<any>>
-): void {
+export function workerExport(handlers: Record<string, (...data: any) => Promise<any>>): void {
   /** Promise API for web worker */
   self.onmessage = async ({
     data,

@@ -11,20 +11,20 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import UserConfig from "../mixins/UserConfig";
-import TopMatter from "./top-matter/TopMatter.vue";
-import ClusterGrid from "./ClusterGrid.vue";
-import Timeline from "./Timeline.vue";
-import EmptyContent from "./top-matter/EmptyContent.vue";
+import UserConfig from '../mixins/UserConfig';
+import TopMatter from './top-matter/TopMatter.vue';
+import ClusterGrid from './ClusterGrid.vue';
+import Timeline from './Timeline.vue';
+import EmptyContent from './top-matter/EmptyContent.vue';
 
-import * as dav from "../services/DavRequests";
+import * as dav from '../services/DavRequests';
 
-import type { ICluster } from "../types";
+import type { ICluster } from '../types';
 
 export default defineComponent({
-  name: "ClusterView",
+  name: 'ClusterView',
 
   components: {
     TopMatter,
@@ -63,13 +63,13 @@ export default defineComponent({
         this.items = [];
         this.loading++;
 
-        if (route === "albums") {
+        if (route === 'albums') {
           this.items = await dav.getAlbums(3, this.config_albumListSort);
-        } else if (route === "tags") {
+        } else if (route === 'tags') {
           this.items = await dav.getTags();
-        } else if (route === "recognize" || route === "facerecognition") {
+        } else if (route === 'recognize' || route === 'facerecognition') {
           this.items = await dav.getFaceList(route);
-        } else if (route === "places") {
+        } else if (route === 'places') {
           this.items = await dav.getPlaces();
         }
       } finally {

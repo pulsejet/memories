@@ -1,23 +1,17 @@
 <template>
   <div class="outer">
-    <NcSelectTags
-      class="nc-comp"
-      v-model="tagSelection"
-      :limit="null"
-      :options-filter="tagFilter"
-    />
+    <NcSelectTags class="nc-comp" v-model="tagSelection" :limit="null" :options-filter="tagFilter" />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { IPhoto } from "../../types";
+import { defineComponent } from 'vue';
+import { IPhoto } from '../../types';
 
-const NcSelectTags = () =>
-  import("@nextcloud/vue/dist/Components/NcSelectTags");
+const NcSelectTags = () => import('@nextcloud/vue/dist/Components/NcSelectTags');
 
 export default defineComponent({
-  name: "EditTags",
+  name: 'EditTags',
   components: {
     NcSelectTags,
   },
@@ -45,9 +39,7 @@ export default defineComponent({
       // Find common tags in all selected photos
       for (const photo of this.photos) {
         const s = new Set<number>();
-        for (const tag of Object.keys(photo.imageInfo?.tags || {}).map(
-          Number
-        )) {
+        for (const tag of Object.keys(photo.imageInfo?.tags || {}).map(Number)) {
           s.add(tag);
         }
         tagIds = tagIds ? [...tagIds].filter((x) => s.has(x)) : [...s];
@@ -60,7 +52,7 @@ export default defineComponent({
     tagFilter(element, index) {
       return (
         element.id >= 2 &&
-        element.displayName !== "" &&
+        element.displayName !== '' &&
         element.canAssign &&
         element.userAssignable &&
         element.userVisible
@@ -69,9 +61,7 @@ export default defineComponent({
 
     result() {
       const add = this.tagSelection.filter((x) => !this.origIds.has(x));
-      const remove = [...this.origIds].filter(
-        (x) => !this.tagSelection.includes(x)
-      );
+      const remove = [...this.origIds].filter((x) => !this.tagSelection.includes(x));
 
       if (add.length === 0 && remove.length === 0) {
         return null;

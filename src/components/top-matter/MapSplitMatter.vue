@@ -16,12 +16,7 @@
       :options="mapOptions"
     >
       <LTileLayer :url="tileurl" :attribution="attribution" :noWrap="true" />
-      <LMarker
-        v-for="cluster of clusters"
-        :key="cluster.id"
-        :lat-lng="cluster.center"
-        @click="zoomTo(cluster)"
-      >
+      <LMarker v-for="cluster of clusters" :key="cluster.id" :lat-lng="cluster.center" @click="zoomTo(cluster)">
         <LIcon :icon-anchor="[24, 24]" :className="clusterIconClass(cluster)">
           <div class="preview">
             <div class="count" v-if="cluster.count > 1">
@@ -30,10 +25,7 @@
             <XImg
               v-once
               :src="clusterPreviewUrl(cluster)"
-              :class="[
-                'thumb-important',
-                `memories-thumb-${cluster.preview.fileid}`,
-              ]"
+              :class="['thumb-important', `memories-thumb-${cluster.preview.fileid}`]"
             />
           </div>
         </LIcon>
@@ -43,23 +35,22 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { LMap, LTileLayer, LMarker, LPopup, LIcon } from "vue2-leaflet";
-import { latLngBounds, Icon } from "leaflet";
-import { IPhoto } from "../../types";
+import { defineComponent } from 'vue';
+import { LMap, LTileLayer, LMarker, LPopup, LIcon } from 'vue2-leaflet';
+import { latLngBounds, Icon } from 'leaflet';
+import { IPhoto } from '../../types';
 
-import axios from "@nextcloud/axios";
-import { subscribe, unsubscribe } from "@nextcloud/event-bus";
+import axios from '@nextcloud/axios';
+import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 
-import { API } from "../../services/API";
-import * as utils from "../../services/Utils";
+import { API } from '../../services/API';
+import * as utils from '../../services/Utils';
 
-import "leaflet/dist/leaflet.css";
-import "leaflet-edgebuffer";
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-edgebuffer';
 
-const OSM_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-const OSM_ATTRIBUTION =
-  '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors';
+const OSM_TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const OSM_ATTRIBUTION = '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors';
 
 // CSS transition time for zooming in/out cluster animation
 const CLUSTER_TRANSITION_TIME = 300;
@@ -75,13 +66,13 @@ type IMarkerCluster = {
 delete (<any>Icon.Default.prototype)._getIconUrl;
 
 Icon.Default.mergeOptions({
-  iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
-  iconUrl: require("leaflet/dist/images/marker-icon.png"),
-  shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl: require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
 export default defineComponent({
-  name: "MapSplitMatter",
+  name: 'MapSplitMatter',
   components: {
     LMap,
     LTileLayer,
@@ -106,23 +97,22 @@ export default defineComponent({
     const map = this.$refs.map as LMap;
 
     // Make sure the zoom control doesn't overlap with the navbar
-    map.mapObject.zoomControl.setPosition("topright");
+    map.mapObject.zoomControl.setPosition('topright');
 
     // Initialize
     this.initialize();
 
     // If currently dark mode, set isDark
-    const pane = document.querySelector(".leaflet-tile-pane");
-    this.isDark =
-      !pane || window.getComputedStyle(pane)?.["filter"]?.includes("invert");
+    const pane = document.querySelector('.leaflet-tile-pane');
+    this.isDark = !pane || window.getComputedStyle(pane)?.['filter']?.includes('invert');
   },
 
   created() {
-    subscribe("memories:window:resize", this.handleContainerResize);
+    subscribe('memories:window:resize', this.handleContainerResize);
   },
 
   beforeDestroy() {
-    unsubscribe("memories:window:resize", this.handleContainerResize);
+    unsubscribe('memories:window:resize', this.handleContainerResize);
   },
 
   computed: {
@@ -164,7 +154,7 @@ export default defineComponent({
         const map = this.$refs.map as LMap;
         const pos = init?.data?.pos;
         if (!pos?.lat || !pos?.lon) {
-          throw new Error("No position data");
+          throw new Error('No position data');
         }
 
         // This will trigger route change -> fetchClusters
@@ -177,7 +167,7 @@ export default defineComponent({
     },
 
     async refreshDebounced() {
-      utils.setRenewingTimeout(this, "refreshTimer", this.refresh, 250);
+      utils.setRenewingTimeout(this, 'refreshTimer', this.refresh, 250);
     },
 
     async refresh() {
@@ -219,8 +209,7 @@ export default defineComponent({
       const oldZoom = this.oldZoom;
       const qbounds = this.$route.query.b;
       const zoom = this.$route.query.z;
-      const paramsChanged = () =>
-        this.$route.query.b !== qbounds || this.$route.query.z !== zoom;
+      const paramsChanged = () => this.$route.query.b !== qbounds || this.$route.query.z !== zoom;
 
       let { minLat, maxLat, minLon, maxLon } = this.boundsFromQuery();
 
@@ -258,7 +247,7 @@ export default defineComponent({
     },
 
     boundsFromQuery() {
-      const bounds = (this.$route.query.b as string).split(",");
+      const bounds = (this.$route.query.b as string).split(',');
       return {
         minLat: parseFloat(bounds[0]),
         maxLat: parseFloat(bounds[1]),
@@ -296,7 +285,7 @@ export default defineComponent({
     },
 
     clusterIconClass(cluster: IMarkerCluster) {
-      return cluster.dummy ? "dummy" : "";
+      return cluster.dummy ? 'dummy' : '';
     },
 
     zoomTo(cluster: IMarkerCluster) {

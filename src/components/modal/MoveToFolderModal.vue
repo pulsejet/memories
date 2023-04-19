@@ -1,34 +1,30 @@
 <template>
   <Modal @close="close" size="normal" v-if="processing">
     <template #title>
-      {{ t("memories", "Move to folder") }}
+      {{ t('memories', 'Move to folder') }}
     </template>
 
     <div class="outer">
-      <NcProgressBar
-        :value="Math.round((photosDone * 100) / photos.length)"
-        :error="true"
-      />
+      <NcProgressBar :value="Math.round((photosDone * 100) / photos.length)" :error="true" />
     </div>
   </Modal>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import * as dav from "../../services/DavRequests";
-import { getFilePickerBuilder, FilePickerType } from "@nextcloud/dialogs";
-import { showInfo } from "@nextcloud/dialogs";
-import { IPhoto } from "../../types";
+import * as dav from '../../services/DavRequests';
+import { getFilePickerBuilder, FilePickerType } from '@nextcloud/dialogs';
+import { showInfo } from '@nextcloud/dialogs';
+import { IPhoto } from '../../types';
 
-const NcProgressBar = () =>
-  import("@nextcloud/vue/dist/Components/NcProgressBar");
+const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
 
-import UserConfig from "../../mixins/UserConfig";
-import Modal from "./Modal.vue";
+import UserConfig from '../../mixins/UserConfig';
+import Modal from './Modal.vue';
 
 export default defineComponent({
-  name: "MoveToFolderModal",
+  name: 'MoveToFolderModal',
   components: {
     NcProgressBar,
     Modal,
@@ -52,13 +48,13 @@ export default defineComponent({
     },
 
     moved(photos: IPhoto[]) {
-      this.$emit("moved", photos);
+      this.$emit('moved', photos);
     },
 
     close() {
       this.photos = [];
       this.processing = false;
-      this.$emit("close");
+      this.$emit('close');
     },
 
     async chooseFolderModal(title: string, initial: string) {
@@ -66,7 +62,7 @@ export default defineComponent({
         .setMultiSelect(false)
         .setModal(false)
         .setType(FilePickerType.Move)
-        .addMimeTypeFilter("httpd/unix-directory")
+        .addMimeTypeFilter('httpd/unix-directory')
         .allowDirectories()
         .startAt(initial)
         .build();
@@ -75,10 +71,7 @@ export default defineComponent({
     },
 
     async chooseFolderPath() {
-      let destination = await this.chooseFolderModal(
-        this.t("memories", "Choose a folder"),
-        this.config_foldersPath
-      );
+      let destination = await this.chooseFolderModal(this.t('memories', 'Choose a folder'), this.config_foldersPath);
       // Fails if the target exists, same behavior with Nextcloud files implementation.
       const gen = dav.movePhotos(this.photos, destination, false);
       this.processing = true;
@@ -89,15 +82,7 @@ export default defineComponent({
       }
 
       const n = this.photosDone;
-      showInfo(
-        this.n(
-          "memories",
-          "{n} item moved to folder",
-          "{n} items moved to folder",
-          n,
-          { n }
-        )
-      );
+      showInfo(this.n('memories', '{n} item moved to folder', '{n} items moved to folder', n, { n }));
       this.close();
     },
   },

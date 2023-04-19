@@ -7,14 +7,12 @@
         </div>
 
         <div class="text">
-          {{ t("memories", "A better photos experience awaits you") }} <br />
-          {{
-            t("memories", "Choose the root folder of your timeline to begin")
-          }}
+          {{ t('memories', 'A better photos experience awaits you') }} <br />
+          {{ t('memories', 'Choose the root folder of your timeline to begin') }}
         </div>
 
         <div class="admin-text" v-if="isAdmin">
-          {{ t("memories", "If you just installed Memories, run:") }}
+          {{ t('memories', 'If you just installed Memories, run:') }}
           <br />
           <code>occ memories:index</code>
         </div>
@@ -27,19 +25,19 @@
           {{ info }} <br />
 
           <NcButton @click="finish" class="button" type="primary">
-            {{ t("memories", "Continue to Memories") }}
+            {{ t('memories', 'Continue to Memories') }}
           </NcButton>
         </div>
 
         <NcButton @click="begin" class="button" v-if="info">
-          {{ t("memories", "Choose again") }}
+          {{ t('memories', 'Choose again') }}
         </NcButton>
         <NcButton @click="begin" class="button" type="primary" v-else>
-          {{ t("memories", "Click here to start") }}
+          {{ t('memories', 'Click here to start') }}
         </NcButton>
 
         <div class="footer">
-          {{ t("memories", "You can always change this later in settings") }}
+          {{ t('memories', 'You can always change this later in settings') }}
         </div>
       </div>
     </NcAppContent>
@@ -47,23 +45,23 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import UserConfig from "../mixins/UserConfig";
-import NcContent from "@nextcloud/vue/dist/Components/NcContent";
-import NcAppContent from "@nextcloud/vue/dist/Components/NcAppContent";
-import NcButton from "@nextcloud/vue/dist/Components/NcButton";
+import UserConfig from '../mixins/UserConfig';
+import NcContent from '@nextcloud/vue/dist/Components/NcContent';
+import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent';
+import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 
-import { getFilePickerBuilder } from "@nextcloud/dialogs";
-import { getCurrentUser } from "@nextcloud/auth";
-import axios from "@nextcloud/axios";
+import { getFilePickerBuilder } from '@nextcloud/dialogs';
+import { getCurrentUser } from '@nextcloud/auth';
+import axios from '@nextcloud/axios';
 
-import banner from "../assets/banner.svg";
-import type { IDay } from "../types";
-import { API } from "../services/API";
+import banner from '../assets/banner.svg';
+import type { IDay } from '../types';
+import { API } from '../services/API';
 
 export default defineComponent({
-  name: "FirstStart",
+  name: 'FirstStart',
   components: {
     NcContent,
     NcAppContent,
@@ -74,10 +72,10 @@ export default defineComponent({
 
   data: () => ({
     banner,
-    error: "",
-    info: "",
+    error: '',
+    info: '',
     show: false,
-    chosenPath: "",
+    chosenPath: '',
   }),
 
   mounted() {
@@ -94,38 +92,26 @@ export default defineComponent({
 
   methods: {
     async begin() {
-      const path = await this.chooseFolder(
-        this.t("memories", "Choose the root of your timeline"),
-        "/"
-      );
+      const path = await this.chooseFolder(this.t('memories', 'Choose the root of your timeline'), '/');
 
       // Get folder days
-      this.error = "";
-      this.info = "";
+      this.error = '';
+      this.info = '';
       let url = API.Q(API.DAYS(), { timelinePath: path });
       const res = await axios.get<IDay[]>(url);
 
       // Check response
       if (res.status !== 200) {
-        this.error = this.t(
-          "memories",
-          "The selected folder does not seem to be valid. Try again."
-        );
+        this.error = this.t('memories', 'The selected folder does not seem to be valid. Try again.');
         return;
       }
 
       // Count total photos
       const n = res.data.reduce((acc, day) => acc + day.count, 0);
-      this.info = this.n(
-        "memories",
-        "Found {n} item in {path}",
-        "Found {n} items in {path}",
+      this.info = this.n('memories', 'Found {n} item in {path}', 'Found {n} items in {path}', n, {
         n,
-        {
-          n,
-          path,
-        }
-      );
+        path,
+      });
       this.chosenPath = path;
     },
 
@@ -133,7 +119,7 @@ export default defineComponent({
       this.show = false;
       await new Promise((resolve) => setTimeout(resolve, 500));
       this.config_timelinePath = this.chosenPath;
-      await this.updateSetting("timelinePath");
+      await this.updateSetting('timelinePath');
     },
 
     async chooseFolder(title: string, initial: string) {
@@ -141,7 +127,7 @@ export default defineComponent({
         .setMultiSelect(false)
         .setModal(true)
         .setType(1)
-        .addMimeTypeFilter("httpd/unix-directory")
+        .addMimeTypeFilter('httpd/unix-directory')
         .allowDirectories()
         .startAt(initial)
         .build();

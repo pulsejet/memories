@@ -1,6 +1,6 @@
-import Content from "photoswipe/dist/types/slide/content";
-import Slide, { _SlideData } from "photoswipe/dist/types/slide/slide";
-import { IPhoto } from "../../types";
+import Content from 'photoswipe/dist/types/slide/content';
+import Slide, { _SlideData } from 'photoswipe/dist/types/slide/slide';
+import { IPhoto } from '../../types';
 
 type PsAugment = {
   data: _SlideData & {

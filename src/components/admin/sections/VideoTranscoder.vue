@@ -1,23 +1,20 @@
 <template>
   <div class="admin-section">
-    <h3>{{ t("memories", "Transcoder configuration") }}</h3>
+    <h3>{{ t('memories', 'Transcoder configuration') }}</h3>
     <p>
       {{
         t(
-          "memories",
-          "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:"
+          'memories',
+          'Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:'
         )
       }}
-      <a
-        target="_blank"
-        href="https://github.com/pulsejet/memories/wiki/HW-Transcoding"
-      >
-        {{ t("memories", "External Link") }}
+      <a target="_blank" href="https://github.com/pulsejet/memories/wiki/HW-Transcoding">
+        {{ t('memories', 'External Link') }}
       </a>
 
       <template v-if="status">
         <NcNoteCard :type="binaryStatusType(status.govod)">
-          {{ binaryStatus("go-vod", status.govod) }}
+          {{ binaryStatus('go-vod', status.govod) }}
         </NcNoteCard>
       </template>
 
@@ -27,7 +24,7 @@
         @update:checked="update('memories.vod.external')"
         type="switch"
       >
-        {{ t("memories", "Enable external transcoder (go-vod)") }}
+        {{ t('memories', 'Enable external transcoder (go-vod)') }}
       </NcCheckboxRadioSwitch>
 
       <NcTextField
@@ -58,12 +55,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import AdminMixin from "../AdminMixin";
+import AdminMixin from '../AdminMixin';
 
 export default defineComponent({
-  name: "VideoTranscoder",
+  name: 'VideoTranscoder',
   mixins: [AdminMixin],
 });
 </script>

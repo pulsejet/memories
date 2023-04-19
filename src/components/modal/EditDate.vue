@@ -1,9 +1,9 @@
 <template>
   <div>
     <div class="title-text">
-      <span v-if="photos.length > 1"> [{{ t("memories", "Newest") }}] </span>
+      <span v-if="photos.length > 1"> [{{ t('memories', 'Newest') }}] </span>
       {{ longDateStr }}
-      {{ newestDirty ? "*" : "" }}
+      {{ newestDirty ? '*' : '' }}
     </div>
 
     <div class="fields">
@@ -50,9 +50,9 @@
 
     <div v-if="photos.length > 1" class="oldest">
       <div class="title-text">
-        <span> [{{ t("memories", "Oldest") }}] </span>
+        <span> [{{ t('memories', 'Oldest') }}] </span>
         {{ longDateStrLast }}
-        {{ oldestDirty ? "*" : "" }}
+        {{ oldestDirty ? '*' : '' }}
       </div>
 
       <div class="fields">
@@ -101,15 +101,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { IPhoto } from "../../types";
+import { defineComponent } from 'vue';
+import { IPhoto } from '../../types';
 
-const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
-import * as utils from "../../services/Utils";
+import * as utils from '../../services/Utils';
 
 export default defineComponent({
-  name: "EditDate",
+  name: 'EditDate',
   components: {
     NcTextField,
   },
@@ -124,19 +124,19 @@ export default defineComponent({
   data: () => ({
     sortedPhotos: [] as IPhoto[],
 
-    year: "0",
-    month: "0",
-    day: "0",
-    hour: "0",
-    minute: "0",
-    second: "0",
+    year: '0',
+    month: '0',
+    day: '0',
+    hour: '0',
+    minute: '0',
+    second: '0',
 
-    yearLast: "0",
-    monthLast: "0",
-    dayLast: "0",
-    hourLast: "0",
-    minuteLast: "0",
-    secondLast: "0",
+    yearLast: '0',
+    monthLast: '0',
+    dayLast: '0',
+    hourLast: '0',
+    minuteLast: '0',
+    secondLast: '0',
 
     newestDirty: false,
     oldestDirty: false,
@@ -154,14 +154,7 @@ export default defineComponent({
 
   computed: {
     date() {
-      return this.makeDate(
-        this.year,
-        this.month,
-        this.day,
-        this.hour,
-        this.minute,
-        this.second
-      );
+      return this.makeDate(this.year, this.month, this.day, this.hour, this.minute, this.second);
     },
 
     dateLast() {
@@ -176,9 +169,7 @@ export default defineComponent({
     },
 
     dateDiff() {
-      return this.date && this.dateLast
-        ? this.date.getTime() - this.dateLast.getTime()
-        : 0;
+      return this.date && this.dateLast ? this.date.getTime() - this.dateLast.getTime() : 0;
     },
 
     origDateNewest() {
@@ -186,9 +177,7 @@ export default defineComponent({
     },
 
     origDateOldest() {
-      return new Date(
-        this.sortedPhotos[this.sortedPhotos.length - 1].datetaken!
-      );
+      return new Date(this.sortedPhotos[this.sortedPhotos.length - 1].datetaken!);
     },
 
     origDateDiff() {
@@ -200,24 +189,18 @@ export default defineComponent({
     },
 
     longDateStr() {
-      return this.date
-        ? utils.getLongDateStr(this.date, false, true)
-        : this.t("memories", "Invalid Date");
+      return this.date ? utils.getLongDateStr(this.date, false, true) : this.t('memories', 'Invalid Date');
     },
 
     longDateStrLast() {
-      return this.dateLast
-        ? utils.getLongDateStr(this.dateLast, false, true)
-        : this.t("memories", "Invalid Date");
+      return this.dateLast ? utils.getLongDateStr(this.dateLast, false, true) : this.t('memories', 'Invalid Date');
     },
   },
 
   methods: {
     init() {
       // Filter out only photos that have a datetaken
-      const photos = (this.sortedPhotos = this.photos.filter(
-        (photo) => photo.datetaken !== undefined
-      ));
+      const photos = (this.sortedPhotos = this.photos.filter((photo) => photo.datetaken !== undefined));
 
       // Sort photos by datetaken descending
       photos.sort((a, b) => b.datetaken! - a.datetaken!);
@@ -245,19 +228,17 @@ export default defineComponent({
 
     validate() {
       if (!this.date) {
-        throw new Error(this.t("memories", "Invalid Date"));
+        throw new Error(this.t('memories', 'Invalid Date'));
       }
 
       if (this.photos.length > 1) {
         if (!this.dateLast) {
-          throw new Error(this.t("memories", "Invalid Date"));
+          throw new Error(this.t('memories', 'Invalid Date'));
         }
 
         if (this.dateDiff < -60000) {
           // 1 minute
-          throw new Error(
-            this.t("memories", "Newest date is older than oldest date")
-          );
+          throw new Error(this.t('memories', 'Newest date is older than oldest date'));
         }
       }
     },
@@ -312,23 +293,16 @@ export default defineComponent({
     },
 
     getExifFormat(date: Date) {
-      const year = date.getUTCFullYear().toString().padStart(4, "0");
-      const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
-      const day = date.getUTCDate().toString().padStart(2, "0");
-      const hour = date.getUTCHours().toString().padStart(2, "0");
-      const minute = date.getUTCMinutes().toString().padStart(2, "0");
-      const second = date.getUTCSeconds().toString().padStart(2, "0");
+      const year = date.getUTCFullYear().toString().padStart(4, '0');
+      const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+      const day = date.getUTCDate().toString().padStart(2, '0');
+      const hour = date.getUTCHours().toString().padStart(2, '0');
+      const minute = date.getUTCMinutes().toString().padStart(2, '0');
+      const second = date.getUTCSeconds().toString().padStart(2, '0');
       return `${year}:${month}:${day} ${hour}:${minute}:${second}`;
     },
 
-    makeDate(
-      yearS: string,
-      monthS: string,
-      dayS: string,
-      hourS: string,
-      minuteS: string,
-      secondS: string
-    ) {
+    makeDate(yearS: string, monthS: string, dayS: string, hourS: string, minuteS: string, secondS: string) {
       const date = new Date();
       const year = parseInt(yearS, 10);
       const month = parseInt(monthS, 10) - 1;

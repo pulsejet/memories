@@ -1,7 +1,7 @@
 <template>
   <Modal @close="close" size="large" v-if="show">
     <template #title>
-      {{ t("memories", "Move selected photos to person") }}
+      {{ t('memories', 'Move selected photos to person') }}
     </template>
 
     <div class="outer">
@@ -10,30 +10,30 @@
 
     <template #buttons>
       <NcButton @click="close" class="button" type="error">
-        {{ t("memories", "Cancel") }}
+        {{ t('memories', 'Cancel') }}
       </NcButton>
     </template>
   </Modal>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import NcButton from "@nextcloud/vue/dist/Components/NcButton";
-const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
+import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
-import { showError } from "@nextcloud/dialogs";
-import { getCurrentUser } from "@nextcloud/auth";
-import { IPhoto, IFace } from "../../types";
-import Cluster from "../frame/Cluster.vue";
-import FaceList from "./FaceList.vue";
+import { showError } from '@nextcloud/dialogs';
+import { getCurrentUser } from '@nextcloud/auth';
+import { IPhoto, IFace } from '../../types';
+import Cluster from '../frame/Cluster.vue';
+import FaceList from './FaceList.vue';
 
-import Modal from "./Modal.vue";
-import client from "../../services/DavClient";
-import * as dav from "../../services/DavRequests";
+import Modal from './Modal.vue';
+import client from '../../services/DavClient';
+import * as dav from '../../services/DavRequests';
 
 export default defineComponent({
-  name: "FaceMoveModal",
+  name: 'FaceMoveModal',
   components: {
     NcButton,
     NcTextField,
@@ -62,10 +62,10 @@ export default defineComponent({
       }
 
       // check ownership
-      const user = this.$route.params.user || "";
+      const user = this.$route.params.user || '';
       if (this.$route.params.user !== getCurrentUser()?.uid) {
         showError(
-          this.t("memories", 'Only user "{user}" can update this person', {
+          this.t('memories', 'Only user "{user}" can update this person', {
             user,
           })
         );
@@ -79,26 +79,25 @@ export default defineComponent({
     close() {
       this.photos = [];
       this.show = false;
-      this.$emit("close");
+      this.$emit('close');
     },
 
     moved(list: IPhoto[]) {
-      this.$emit("moved", list);
+      this.$emit('moved', list);
     },
 
     async clickFace(face: IFace) {
-      const user = this.$route.params.user || "";
-      const name = this.$route.params.name || "";
+      const user = this.$route.params.user || '';
+      const name = this.$route.params.name || '';
 
       const newName = String(face.name || face.cluster_id);
 
       if (
         !confirm(
-          this.t(
-            "memories",
-            "Are you sure you want to move the selected photos from {name} to {newName}?",
-            { name, newName }
-          )
+          this.t('memories', 'Are you sure you want to move the selected photos from {name} to {newName}?', {
+            name,
+            newName,
+          })
         )
       ) {
         return;
@@ -124,9 +123,7 @@ export default defineComponent({
             return photoMap.get(p.fileid);
           } catch (e) {
             console.error(e);
-            showError(
-              this.t("memories", "Error while moving {basename}", <any>p)
-            );
+            showError(this.t('memories', 'Error while moving {basename}', <any>p));
           }
         });
         for await (const resp of dav.runInParallel(calls, 10)) {
@@ -135,7 +132,7 @@ export default defineComponent({
         }
       } catch (error) {
         console.error(error);
-        showError(this.t("photos", "Failed to move {name}.", { name }));
+        showError(this.t('photos', 'Failed to move {name}.', { name }));
       } finally {
         this.updateLoading(-1);
         this.close();

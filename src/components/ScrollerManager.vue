@@ -17,12 +17,7 @@
     @touchend.passive="interactend"
     @touchcancel.passive="interactend"
   >
-    <span
-      class="cursor st"
-      ref="cursorSt"
-      :style="{ transform: `translateY(${cursorY}px)` }"
-    >
-    </span>
+    <span class="cursor st" ref="cursorSt" :style="{ transform: `translateY(${cursorY}px)` }"> </span>
 
     <span
       class="cursor hv"
@@ -49,17 +44,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
-import { IRow, IRowType, ITick } from "../types";
-import ScrollIcon from "vue-material-design-icons/UnfoldMoreHorizontal.vue";
+import { defineComponent, PropType } from 'vue';
+import { IRow, IRowType, ITick } from '../types';
+import ScrollIcon from 'vue-material-design-icons/UnfoldMoreHorizontal.vue';
 
-import * as utils from "../services/Utils";
+import * as utils from '../services/Utils';
 
 // Pixels to snap at
 const SNAP_OFFSET = -35;
 
 export default defineComponent({
-  name: "ScrollerManager",
+  name: 'ScrollerManager',
   components: {
     ScrollIcon,
   },
@@ -101,7 +96,7 @@ export default defineComponent({
     /** Hover cursor top */
     hoverCursorY: -5,
     /** Hover cursor text */
-    hoverCursorText: "",
+    hoverCursorText: '',
     /** Scrolling using the scroller */
     scrollingTimer: 0,
     /** Scrolling now using the scroller */
@@ -145,7 +140,7 @@ export default defineComponent({
       this.ticks = [];
       this.cursorY = 0;
       this.hoverCursorY = -5;
-      this.hoverCursorText = "";
+      this.hoverCursorText = '';
       this.reflowRequest = false;
 
       // Clear all timers
@@ -171,8 +166,8 @@ export default defineComponent({
       }, 100);
 
       // Update that we're scrolling with the recycler
-      utils.setRenewingTimeout(this, "scrollingRecyclerNowTimer", null, 200);
-      utils.setRenewingTimeout(this, "scrollingRecyclerTimer", null, 1500);
+      utils.setRenewingTimeout(this, 'scrollingRecyclerNowTimer', null, 200);
+      utils.setRenewingTimeout(this, 'scrollingRecyclerTimer', null, 1500);
     },
 
     /** Update cursor position from recycler scroll position */
@@ -184,7 +179,7 @@ export default defineComponent({
       const scroll = this.recycler?.$el?.scrollTop || 0;
 
       // Get cursor px position
-      const { top1, top2, y1, y2 } = this.getCoords(scroll, "y");
+      const { top1, top2, y1, y2 } = this.getCoords(scroll, 'y');
       const topfrac = (scroll - y1) / (y2 - y1);
       const rtop = top1 + (top2 - top1) * (topfrac || 0);
 
@@ -193,7 +188,7 @@ export default defineComponent({
 
       // Move hover cursor to same position unless hovering
       // Regardless, we need this call because the internal mapping might have changed
-      if ((<HTMLElement>this.$refs.scroller).matches(":hover")) {
+      if ((<HTMLElement>this.$refs.scroller).matches(':hover')) {
         this.moveHoverCursor(this.hoverCursorY);
       } else {
         this.moveHoverCursor(rtop);
@@ -234,11 +229,7 @@ export default defineComponent({
       let prevMonth = 0;
 
       // Get a new tick
-      const getTick = (
-        dayId: number,
-        isMonth = false,
-        text?: string | number
-      ): ITick => {
+      const getTick = (dayId: number, isMonth = false, text?: string | number): ITick => {
         return {
           dayId,
           isMonth,
@@ -336,16 +327,12 @@ export default defineComponent({
     /** Mark ticks as visible or invisible */
     computeVisibleTicks() {
       // Kind of unrelated here, but refresh rect
-      this.scrollerRect = (
-        this.$refs.scroller as HTMLElement
-      ).getBoundingClientRect();
+      this.scrollerRect = (this.$refs.scroller as HTMLElement).getBoundingClientRect();
 
       // Do another pass to figure out which points are visible
       // This is not as bad as it looks, it's actually 12*O(n)
       // because there are only 12 months in a year
-      const fontSizePx = parseFloat(
-        getComputedStyle(this.$refs.cursorSt as any).fontSize
-      );
+      const fontSizePx = parseFloat(getComputedStyle(this.$refs.cursorSt as any).fontSize);
       const minGap = fontSizePx + (globalThis.windowInnerWidth <= 768 ? 5 : 2);
       let prevShow = -9999;
       for (const [idx, tick] of this.ticks.entries()) {
@@ -380,10 +367,7 @@ export default defineComponent({
         if (i < this.ticks.length) {
           // A labelled tick was found
           const nextLabelledTick = this.ticks[i];
-          if (
-            tick.top + minGap > nextLabelledTick.top &&
-            nextLabelledTick.top < this.height - minGap
-          ) {
+          if (tick.top + minGap > nextLabelledTick.top && nextLabelledTick.top < this.height - minGap) {
             // make sure this will be shown
             continue;
           }
@@ -410,7 +394,7 @@ export default defineComponent({
       this.hoverCursorY = y;
 
       // Get index of previous tick
-      let idx = utils.binarySearch(this.ticks, y, "topF");
+      let idx = utils.binarySearch(this.ticks, y, 'topF');
       if (idx === 0) {
         // use this tick
       } else if (idx >= 1 && idx <= this.ticks.length) {
@@ -424,12 +408,12 @@ export default defineComponent({
 
       // Special days
       if (dayId === undefined) {
-        this.hoverCursorText = "";
+        this.hoverCursorText = '';
         return;
       }
 
       const date = utils.dayIdToDate(dayId);
-      this.hoverCursorText = utils.getShortDateStr(date) ?? "";
+      this.hoverCursorText = utils.getShortDateStr(date) ?? '';
     },
 
     /** Handle mouse hover */
@@ -447,7 +431,7 @@ export default defineComponent({
     },
 
     /** Binary search and get coords surrounding position */
-    getCoords(y: number, field: "topF" | "y") {
+    getCoords(y: number, field: 'topF' | 'y') {
       // Top of first and second ticks
       let top1 = 0,
         top2 = 0,
@@ -485,7 +469,7 @@ export default defineComponent({
       this.cursorY = y;
       this.hoverCursorY = y;
 
-      const { top1, top2, y1, y2 } = this.getCoords(y, "topF");
+      const { top1, top2, y1, y2 } = this.getCoords(y, 'topF');
       const yfrac = (y - top1) / (top2 - top1);
       const ry = y1 + (y2 - y1) * (yfrac || 0);
       const targetY = snap ? y1 + SNAP_OFFSET : ry;
@@ -519,13 +503,13 @@ export default defineComponent({
     interactend() {
       this.interacting = false;
       this.recyclerScrolled(null); // make sure final position is correct
-      this.$emit("interactend"); // tell recycler to load stuff
+      this.$emit('interactend'); // tell recycler to load stuff
     },
 
     /** Update scroller is being used to scroll recycler */
     handleScroll() {
-      utils.setRenewingTimeout(this, "scrollingNowTimer", null, 200);
-      utils.setRenewingTimeout(this, "scrollingTimer", null, 1500);
+      utils.setRenewingTimeout(this, 'scrollingNowTimer', null, 200);
+      utils.setRenewingTimeout(this, 'scrollingTimer', null, 1500);
     },
   },
 });

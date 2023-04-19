@@ -2,26 +2,18 @@
   <div class="outer">
     <div class="lat-lon">
       <div class="coords">
-        <span>{{ loc }}</span> {{ dirty ? "*" : "" }}
+        <span>{{ loc }}</span> {{ dirty ? '*' : '' }}
       </div>
 
       <div class="action">
         <NcActions :inline="2">
-          <NcActionButton
-            v-if="dirty"
-            :aria-label="t('memories', 'Reset')"
-            @click="reset()"
-          >
-            {{ t("memories", "Reset") }}
+          <NcActionButton v-if="dirty" :aria-label="t('memories', 'Reset')" @click="reset()">
+            {{ t('memories', 'Reset') }}
             <template #icon> <UndoIcon :size="20" /> </template>
           </NcActionButton>
 
-          <NcActionButton
-            v-if="lat && lon"
-            :aria-label="t('memories', 'Remove location')"
-            @click="clear()"
-          >
-            {{ t("memories", "Remove location") }}
+          <NcActionButton v-if="lat && lon" :aria-label="t('memories', 'Remove location')" @click="clear()">
+            {{ t('memories', 'Remove location') }}
             <template #icon> <CloseIcon :size="20" /> </template>
           </NcActionButton>
         </NcActions>
@@ -41,13 +33,9 @@
 
     <div class="osm-attribution">
       Powered by
-      <a href="https://nominatim.openstreetmap.org" target="_blank"
-        >Nominatim</a
-      >
+      <a href="https://nominatim.openstreetmap.org" target="_blank">Nominatim</a>
       &copy;
-      <a href="https://www.openstreetmap.org/copyright" target="_blank"
-        >OpenStreetMap</a
-      >
+      <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>
       contributors
     </div>
 
@@ -68,21 +56,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { IPhoto } from "../../types";
+import { defineComponent } from 'vue';
+import { IPhoto } from '../../types';
 
-import axios from "@nextcloud/axios";
-import { showError } from "@nextcloud/dialogs";
+import axios from '@nextcloud/axios';
+import { showError } from '@nextcloud/dialogs';
 
-import NcActions from "@nextcloud/vue/dist/Components/NcActions";
-import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton";
-const NcTextField = () => import("@nextcloud/vue/dist/Components/NcTextField");
-const NcListItem = () => import("@nextcloud/vue/dist/Components/NcListItem");
-import NcLoadingIcon from "@nextcloud/vue/dist/Components/NcLoadingIcon";
+import NcActions from '@nextcloud/vue/dist/Components/NcActions';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
+import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
 
-import MagnifyIcon from "vue-material-design-icons/Magnify.vue";
-import CloseIcon from "vue-material-design-icons/Close.vue";
-import UndoIcon from "vue-material-design-icons/UndoVariant.vue";
+import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';
+import CloseIcon from 'vue-material-design-icons/Close.vue';
+import UndoIcon from 'vue-material-design-icons/UndoVariant.vue';
 
 type NLocation = {
   osm_id: number;
@@ -116,7 +104,7 @@ export default defineComponent({
     dirty: false,
     lat: null as number | null,
     lon: null as number | null,
-    searchBar: "",
+    searchBar: '',
     loading: false,
 
     options: [] as NLocation[],
@@ -127,7 +115,7 @@ export default defineComponent({
       if (this.lat && this.lon) {
         return `${this.lat.toFixed(6)}, ${this.lon.toFixed(6)}`;
       }
-      return this.t("memories", "No coordinates");
+      return this.t('memories', 'No coordinates');
     },
   },
 
@@ -170,9 +158,7 @@ export default defineComponent({
       this.loading = true;
       const q = window.encodeURIComponent(this.searchBar);
       axios
-        .get(
-          `https://nominatim.openstreetmap.org/search.php?q=${q}&format=jsonv2`
-        )
+        .get(`https://nominatim.openstreetmap.org/search.php?q=${q}&format=jsonv2`)
         .then((response) => {
           this.loading = false;
           this.options = response.data.filter((x: NLocation) => {
@@ -182,9 +168,7 @@ export default defineComponent({
         .catch((error) => {
           this.loading = false;
           console.error(error);
-          showError(
-            this.t("memories", "Failed to search for location with Nominatim.")
-          );
+          showError(this.t('memories', 'Failed to search for location with Nominatim.'));
         });
     },
 
@@ -199,7 +183,7 @@ export default defineComponent({
       this.lat = Number(option.lat);
       this.lon = Number(option.lon);
       this.options = [];
-      this.searchBar = "";
+      this.searchBar = '';
     },
 
     result() {

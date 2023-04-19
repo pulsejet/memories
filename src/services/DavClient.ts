@@ -20,13 +20,13 @@
  *
  */
 
-import * as webdav from "webdav";
-import axios from "@nextcloud/axios";
-import parseUrl from "url-parse";
-import { generateRemoteUrl } from "@nextcloud/router";
+import * as webdav from 'webdav';
+import axios from '@nextcloud/axios';
+import parseUrl from 'url-parse';
+import { generateRemoteUrl } from '@nextcloud/router';
 
 // Monkey business
-import * as rq from "webdav/dist/node/request";
+import * as rq from 'webdav/dist/node/request';
 const prepareRequestOptionsOld = rq.prepareRequestOptions.bind(rq);
 (<any>rq).prepareRequestOptions = (requestOptions, context, userOptions) => {
   requestOptions.method = userOptions.method || requestOptions.method;
@@ -35,10 +35,10 @@ const prepareRequestOptionsOld = rq.prepareRequestOptions.bind(rq);
 
 // force our axios
 const patcher = webdav.getPatcher();
-patcher.patch("request", axios);
+patcher.patch('request', axios);
 
 // init webdav client on default dav endpoint
-const remote = generateRemoteUrl("dav");
+const remote = generateRemoteUrl('dav');
 const client = webdav.createClient(remote);
 
 export const remotePath = parseUrl(remote).pathname;

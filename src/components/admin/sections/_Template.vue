@@ -3,12 +3,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import AdminMixin from "../AdminMixin";
+import AdminMixin from '../AdminMixin';
 
 export default defineComponent({
-  name: "Template",
+  name: 'Template',
   mixins: [AdminMixin],
 });
 </script>

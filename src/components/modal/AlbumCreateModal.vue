@@ -2,35 +2,30 @@
   <Modal @close="close" size="normal" v-if="show">
     <template #title>
       <template v-if="!album">
-        {{ t("memories", "Create new album") }}
+        {{ t('memories', 'Create new album') }}
       </template>
       <template v-else>
-        {{ t("memories", "Edit album details") }}
+        {{ t('memories', 'Edit album details') }}
       </template>
     </template>
 
     <div class="outer">
-      <AlbumForm
-        :album="album"
-        :display-back-button="false"
-        :title="t('photos', 'New album')"
-        @done="done"
-      />
+      <AlbumForm :album="album" :display-back-button="false" :title="t('photos', 'New album')" @done="done" />
     </div>
   </Modal>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
-import { showError } from "@nextcloud/dialogs";
-import * as dav from "../../services/DavRequests";
+import { showError } from '@nextcloud/dialogs';
+import * as dav from '../../services/DavRequests';
 
-import Modal from "./Modal.vue";
-import AlbumForm from "./AlbumForm.vue";
+import Modal from './Modal.vue';
+import AlbumForm from './AlbumForm.vue';
 
 export default defineComponent({
-  name: "AlbumCreateModal",
+  name: 'AlbumCreateModal',
   components: {
     Modal,
     AlbumForm,
@@ -49,13 +44,10 @@ export default defineComponent({
     async open(edit: boolean) {
       if (edit) {
         try {
-          this.album = await dav.getAlbum(
-            <string>this.$route.params.user,
-            <string>this.$route.params.name
-          );
+          this.album = await dav.getAlbum(<string>this.$route.params.user, <string>this.$route.params.name);
         } catch (e) {
           console.error(e);
-          showError(this.t("photos", "Could not load the selected album"));
+          showError(this.t('photos', 'Could not load the selected album'));
           return;
         }
       } else {
@@ -67,14 +59,14 @@ export default defineComponent({
 
     close() {
       this.show = false;
-      this.$emit("close");
+      this.$emit('close');
     },
 
     done({ album }: any) {
       if (!this.album || album.basename !== this.album.basename) {
-        const user = album.filename.split("/")[2];
+        const user = album.filename.split('/')[2];
         const name = album.basename;
-        this.$router.push({ name: "albums", params: { user, name } });
+        this.$router.push({ name: 'albums', params: { user, name } });
       }
       this.close();
     },

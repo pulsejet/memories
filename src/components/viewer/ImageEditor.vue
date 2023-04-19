@@ -1,35 +1,30 @@
 <template>
-  <div
-    v-bind="themeDataAttr"
-    ref="editor"
-    class="viewer__image-editor"
-    :class="{ loading: !imageEditor }"
-  />
+  <div v-bind="themeDataAttr" ref="editor" class="viewer__image-editor" :class="{ loading: !imageEditor }" />
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType } from 'vue';
 
-import { emit } from "@nextcloud/event-bus";
-import { showError, showSuccess } from "@nextcloud/dialogs";
-import axios from "@nextcloud/axios";
+import { emit } from '@nextcloud/event-bus';
+import { showError, showSuccess } from '@nextcloud/dialogs';
+import axios from '@nextcloud/axios';
 
-import { FilerobotImageEditorConfig } from "react-filerobot-image-editor";
+import { FilerobotImageEditorConfig } from 'react-filerobot-image-editor';
 
-import translations from "./ImageEditorTranslations";
+import translations from './ImageEditorTranslations';
 
-import { API } from "../../services/API";
-import { IImageInfo, IPhoto } from "../../types";
-import * as utils from "../../services/Utils";
-import { fetchImage } from "../frame/XImgCache";
+import { API } from '../../services/API';
+import { IImageInfo, IPhoto } from '../../types';
+import * as utils from '../../services/Utils';
+import { fetchImage } from '../frame/XImgCache';
 
 let TABS, TOOLS: any;
-type FilerobotImageEditor = import("filerobot-image-editor").default;
-let FilerobotImageEditor: typeof import("filerobot-image-editor").default;
+type FilerobotImageEditor = import('filerobot-image-editor').default;
+let FilerobotImageEditor: typeof import('filerobot-image-editor').default;
 
 async function loadFilerobot() {
   if (!FilerobotImageEditor) {
-    FilerobotImageEditor = (await import("filerobot-image-editor")).default;
+    FilerobotImageEditor = (await import('filerobot-image-editor')).default;
     TABS = (<any>FilerobotImageEditor).TABS;
     TOOLS = (<any>FilerobotImageEditor).TOOLS;
   }
@@ -54,7 +49,7 @@ export default defineComponent({
       return {
         source:
           this.photo.h && this.photo.w
-            ? utils.getPreviewUrl(this.photo, false, "screen")
+            ? utils.getPreviewUrl(this.photo, false, 'screen')
             : API.IMAGE_DECODABLE(this.photo.fileid, this.photo.etag),
 
         defaultSavedImageName: this.defaultSavedImageName,
@@ -81,7 +76,7 @@ export default defineComponent({
 
         Rotate: {
           angle: 90,
-          componentType: "buttons",
+          componentType: 'buttons',
         },
 
         // Translations
@@ -89,24 +84,24 @@ export default defineComponent({
 
         theme: {
           palette: {
-            "bg-secondary": "var(--color-main-background)",
-            "bg-primary": "var(--color-background-dark)",
+            'bg-secondary': 'var(--color-main-background)',
+            'bg-primary': 'var(--color-background-dark)',
             // Accent
-            "accent-primary": "var(--color-primary)",
+            'accent-primary': 'var(--color-primary)',
             // Use by the slider
-            "border-active-bottom": "var(--color-primary)",
-            "icons-primary": "var(--color-main-text)",
+            'border-active-bottom': 'var(--color-primary)',
+            'icons-primary': 'var(--color-main-text)',
             // Active state
-            "bg-primary-active": "var(--color-background-dark)",
-            "bg-primary-hover": "var(--color-background-hover)",
-            "accent-primary-active": "var(--color-main-text)",
+            'bg-primary-active': 'var(--color-background-dark)',
+            'bg-primary-hover': 'var(--color-background-hover)',
+            'accent-primary-active': 'var(--color-main-text)',
             // Used by the save button
-            "accent-primary-hover": "var(--color-primary)",
+            'accent-primary-hover': 'var(--color-primary)',
 
-            warning: "var(--color-error)",
+            warning: 'var(--color-error)',
           },
           typography: {
-            fontFamily: "var(--font-face)",
+            fontFamily: 'var(--font-face)',
           },
         },
 
@@ -116,31 +111,29 @@ export default defineComponent({
     },
 
     defaultSavedImageName(): string {
-      return this.photo.basename || "";
+      return this.photo.basename || '';
     },
 
-    defaultSavedImageType(): "jpeg" | "png" | "webp" {
-      if (
-        ["image/jpeg", "image/png", "image/webp"].includes(this.photo.mimetype!)
-      ) {
-        return this.photo.mimetype!.split("/")[1] as any;
+    defaultSavedImageType(): 'jpeg' | 'png' | 'webp' {
+      if (['image/jpeg', 'image/png', 'image/webp'].includes(this.photo.mimetype!)) {
+        return this.photo.mimetype!.split('/')[1] as any;
       }
-      return "jpeg";
+      return 'jpeg';
     },
 
     hasHighContrastEnabled(): boolean {
       const themes = globalThis.OCA?.Theming?.enabledThemes || [];
-      return themes.find((theme) => theme.indexOf("highcontrast") !== -1);
+      return themes.find((theme) => theme.indexOf('highcontrast') !== -1);
     },
 
     themeDataAttr(): Record<string, boolean> {
       if (this.hasHighContrastEnabled) {
         return {
-          "data-theme-dark-highcontrast": true,
+          'data-theme-dark-highcontrast': true,
         };
       }
       return {
-        "data-theme-dark": true,
+        'data-theme-dark': true,
       };
     },
   },
@@ -155,7 +148,7 @@ export default defineComponent({
     this.imageEditor.render();
 
     // Handle keyboard
-    window.addEventListener("keydown", this.handleKeydown, true);
+    window.addEventListener('keydown', this.handleKeydown, true);
   },
 
   beforeDestroy() {
@@ -163,7 +156,7 @@ export default defineComponent({
       this.imageEditor.terminate();
     }
     globalThis._fileRobotOverrideImage = undefined;
-    window.removeEventListener("keydown", this.handleKeydown, true);
+    window.removeEventListener('keydown', this.handleKeydown, true);
   },
 
   methods: {
@@ -189,8 +182,8 @@ export default defineComponent({
         this.onExitWithoutSaving();
         return;
       }
-      window.removeEventListener("keydown", this.handleKeydown, true);
-      this.$emit("close");
+      window.removeEventListener('keydown', this.handleKeydown, true);
+      this.$emit('close');
     },
 
     /**
@@ -229,36 +222,33 @@ export default defineComponent({
       // Make sure we have an extension
       let name = data.name;
       const nameLower = name.toLowerCase();
-      if (!nameLower.endsWith(data.extension) && !nameLower.endsWith(".jpg")) {
-        name += "." + data.extension;
+      if (!nameLower.endsWith(data.extension) && !nameLower.endsWith('.jpg')) {
+        name += '.' + data.extension;
       }
 
       try {
-        const res = await axios.put<IImageInfo>(
-          API.IMAGE_EDIT(this.photo.fileid),
-          {
-            name: name,
-            width: data.width,
-            height: data.height,
-            quality: data.quality,
-            extension: data.extension,
-            state: state,
-          }
-        );
+        const res = await axios.put<IImageInfo>(API.IMAGE_EDIT(this.photo.fileid), {
+          name: name,
+          width: data.width,
+          height: data.height,
+          quality: data.quality,
+          extension: data.extension,
+          state: state,
+        });
         const fileid = res.data.fileid;
 
         // Success, emit an appropriate event
-        showSuccess(this.t("memories", "Image saved successfully"));
+        showSuccess(this.t('memories', 'Image saved successfully'));
 
         if (fileid !== this.photo.fileid) {
-          emit("files:file:created", { fileid });
+          emit('files:file:created', { fileid });
         } else {
           utils.updatePhotoFromImageInfo(this.photo, res.data);
-          emit("files:file:updated", { fileid });
+          emit('files:file:updated', { fileid });
         }
         this.onClose(undefined, false);
       } catch (err) {
-        showError(this.t("memories", "Error saving image"));
+        showError(this.t('memories', 'Error saving image'));
         console.error(err);
       }
     },
@@ -268,21 +258,19 @@ export default defineComponent({
      */
     onExitWithoutSaving() {
       (<any>OC.dialogs).confirmDestructive(
-        translations.changesLoseConfirmation +
-          "\n\n" +
-          translations.changesLoseConfirmationHint,
-        this.t("memories", "Unsaved changes"),
+        translations.changesLoseConfirmation + '\n\n' + translations.changesLoseConfirmationHint,
+        this.t('memories', 'Unsaved changes'),
         {
           type: (<any>OC.dialogs).YES_NO_BUTTONS,
-          confirm: this.t("memories", "Drop changes"),
-          confirmClasses: "error",
+          confirm: this.t('memories', 'Drop changes'),
+          confirmClasses: 'error',
           cancel: translations.cancel,
         },
         (decision) => {
           if (!decision) {
             return;
           }
-          this.onClose("warning-ignored", false);
+          this.onClose('warning-ignored', false);
         }
       );
     },
@@ -291,29 +279,23 @@ export default defineComponent({
     handleKeydown(event) {
       event.stopImmediatePropagation();
       // escape key
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         // Since we cannot call the closeMethod and know if there
         // are unsaved changes, let's fake a close button trigger.
         event.preventDefault();
-        (
-          document.querySelector(".FIE_topbar-close-button") as HTMLElement
-        ).click();
+        (document.querySelector('.FIE_topbar-close-button') as HTMLElement).click();
       }
 
       // ctrl + S = save
-      if (event.ctrlKey && event.key === "s") {
+      if (event.ctrlKey && event.key === 's') {
         event.preventDefault();
-        (
-          document.querySelector(".FIE_topbar-save-button") as HTMLElement
-        ).click();
+        (document.querySelector('.FIE_topbar-save-button') as HTMLElement).click();
       }
 
       // ctrl + Z = undo
-      if (event.ctrlKey && event.key === "z") {
+      if (event.ctrlKey && event.key === 'z') {
         event.preventDefault();
-        (
-          document.querySelector(".FIE_topbar-undo-button") as HTMLElement
-        ).click();
+        (document.querySelector('.FIE_topbar-undo-button') as HTMLElement).click();
       }
     },
   },
@@ -390,7 +372,7 @@ export default defineComponent({
   min-height: 44px !important;
   margin: 0 !important;
   border: transparent !important;
-  &[color="error"] {
+  &[color='error'] {
     color: white !important;
     background-color: var(--color-error) !important;
     &:hover,
@@ -399,7 +381,7 @@ export default defineComponent({
       background-color: var(--color-error-hover) !important;
     }
   }
-  &[color="primary"] {
+  &[color='primary'] {
     color: var(--color-primary-text) !important;
     background-color: var(--color-primary-element) !important;
     &:hover,
@@ -423,7 +405,7 @@ export default defineComponent({
   }
 
   // Disable jpeg saving (jpg is already here)
-  &[value="jpeg"] {
+  &[value='jpeg'] {
     display: none;
   }
 }
@@ -500,7 +482,7 @@ export default defineComponent({
     background-color: var(--color-background-hover) !important;
   }
 
-  &[aria-selected="true"] {
+  &[aria-selected='true'] {
     color: var(--color-main-text);
     background-color: var(--color-background-dark);
     box-shadow: 0 0 0 2px var(--color-primary-element);
@@ -514,8 +496,8 @@ export default defineComponent({
   }
 
   // Matching buttons tools
-  & > div[class$="-tool-button"],
-  & > div[class$="-tool"] {
+  & > div[class$='-tool-button'],
+  & > div[class$='-tool'] {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -634,7 +616,7 @@ export default defineComponent({
   width: 28px;
   height: 28px;
   margin: -16px 0 0 -16px;
-  content: "";
+  content: '';
   -webkit-transform-origin: center;
   -ms-transform-origin: center;
   transform-origin: center;

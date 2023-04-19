@@ -23,10 +23,7 @@
       </template>
 
       <template #footer>
-        <NcAppNavigationItem
-          :name="t('memories', 'Settings')"
-          @click="showSettings"
-        >
+        <NcAppNavigationItem :name="t('memories', 'Settings')" @click="showSettings">
           <CogIcon slot="icon" :size="20" />
         </NcAppNavigationItem>
       </template>
@@ -53,41 +50,40 @@
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent } from "vue";
+import Vue, { defineComponent } from 'vue';
 
-import NcContent from "@nextcloud/vue/dist/Components/NcContent";
-import NcAppContent from "@nextcloud/vue/dist/Components/NcAppContent";
-import NcAppNavigation from "@nextcloud/vue/dist/Components/NcAppNavigation";
-const NcAppNavigationItem = () =>
-  import("@nextcloud/vue/dist/Components/NcAppNavigationItem");
+import NcContent from '@nextcloud/vue/dist/Components/NcContent';
+import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent';
+import NcAppNavigation from '@nextcloud/vue/dist/Components/NcAppNavigation';
+const NcAppNavigationItem = () => import('@nextcloud/vue/dist/Components/NcAppNavigationItem');
 
-import { generateUrl } from "@nextcloud/router";
-import { translate as t } from "@nextcloud/l10n";
-import { emit } from "@nextcloud/event-bus";
+import { generateUrl } from '@nextcloud/router';
+import { translate as t } from '@nextcloud/l10n';
+import { emit } from '@nextcloud/event-bus';
 
-import * as utils from "./services/Utils";
-import UserConfig from "./mixins/UserConfig";
-import Timeline from "./components/Timeline.vue";
-import Settings from "./components/Settings.vue";
-import FirstStart from "./components/FirstStart.vue";
-import Metadata from "./components/Metadata.vue";
-import Sidebar from "./components/Sidebar.vue";
-import EditMetadataModal from "./components/modal/EditMetadataModal.vue";
-import NodeShareModal from "./components/modal/NodeShareModal.vue";
-import ShareModal from "./components/modal/ShareModal.vue";
+import * as utils from './services/Utils';
+import UserConfig from './mixins/UserConfig';
+import Timeline from './components/Timeline.vue';
+import Settings from './components/Settings.vue';
+import FirstStart from './components/FirstStart.vue';
+import Metadata from './components/Metadata.vue';
+import Sidebar from './components/Sidebar.vue';
+import EditMetadataModal from './components/modal/EditMetadataModal.vue';
+import NodeShareModal from './components/modal/NodeShareModal.vue';
+import ShareModal from './components/modal/ShareModal.vue';
 
-import ImageMultiple from "vue-material-design-icons/ImageMultiple.vue";
-import FolderIcon from "vue-material-design-icons/Folder.vue";
-import Star from "vue-material-design-icons/Star.vue";
-import Video from "vue-material-design-icons/PlayCircle.vue";
-import AlbumIcon from "vue-material-design-icons/ImageAlbum.vue";
-import ArchiveIcon from "vue-material-design-icons/PackageDown.vue";
-import CalendarIcon from "vue-material-design-icons/Calendar.vue";
-import PeopleIcon from "vue-material-design-icons/AccountBoxMultiple.vue";
-import MarkerIcon from "vue-material-design-icons/MapMarker.vue";
-import TagsIcon from "vue-material-design-icons/Tag.vue";
-import MapIcon from "vue-material-design-icons/Map.vue";
-import CogIcon from "vue-material-design-icons/Cog.vue";
+import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue';
+import FolderIcon from 'vue-material-design-icons/Folder.vue';
+import Star from 'vue-material-design-icons/Star.vue';
+import Video from 'vue-material-design-icons/PlayCircle.vue';
+import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
+import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
+import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
+import PeopleIcon from 'vue-material-design-icons/AccountBoxMultiple.vue';
+import MarkerIcon from 'vue-material-design-icons/MapMarker.vue';
+import TagsIcon from 'vue-material-design-icons/Tag.vue';
+import MapIcon from 'vue-material-design-icons/Map.vue';
+import CogIcon from 'vue-material-design-icons/Cog.vue';
 
 type NavItem = {
   name: string;
@@ -97,7 +93,7 @@ type NavItem = {
 };
 
 export default defineComponent({
-  name: "App",
+  name: 'App',
   components: {
     NcContent,
     NcAppContent,
@@ -136,7 +132,7 @@ export default defineComponent({
 
   computed: {
     ncVersion(): number {
-      const version = (<any>window.OC).config.version.split(".");
+      const version = (<any>window.OC).config.version.split('.');
       return Number(version[0]);
     },
 
@@ -146,10 +142,10 @@ export default defineComponent({
       }
 
       if (this.config_facerecognitionInstalled) {
-        return t("memories", "People (Recognize)");
+        return t('memories', 'People (Recognize)');
       }
 
-      return t("memories", "People");
+      return t('memories', 'People');
     },
 
     facerecognition(): string | false {
@@ -158,14 +154,14 @@ export default defineComponent({
       }
 
       if (this.config_recognizeEnabled) {
-        return t("memories", "People (Face Recognition)");
+        return t('memories', 'People (Face Recognition)');
       }
 
-      return t("memories", "People");
+      return t('memories', 'People');
     },
 
     isFirstStart(): boolean {
-      return this.config_timelinePath === "EMPTY";
+      return this.config_timelinePath === 'EMPTY';
     },
 
     showAlbums(): boolean {
@@ -177,11 +173,11 @@ export default defineComponent({
     },
 
     showNavigation(): boolean {
-      return !this.$route.name?.endsWith("-share");
+      return !this.$route.name?.endsWith('-share');
     },
 
     removeNavGap(): boolean {
-      return this.$route.name === "map";
+      return this.$route.name === 'map';
     },
   },
 
@@ -196,10 +192,10 @@ export default defineComponent({
     const onResize = () => {
       globalThis.windowInnerWidth = window.innerWidth;
       globalThis.windowInnerHeight = window.innerHeight;
-      emit("memories:window:resize", {});
+      emit('memories:window:resize', {});
     };
-    window.addEventListener("resize", () => {
-      utils.setRenewingTimeout(this, "resizeTimer", onResize, 100);
+    window.addEventListener('resize', () => {
+      utils.setRenewingTimeout(this, 'resizeTimer', onResize, 100);
     });
   },
 
@@ -207,25 +203,22 @@ export default defineComponent({
     this.doRouteChecks();
 
     // Populate navigation
-    this.navItems = this.navItemsAll().filter(
-      (item) => typeof item.if === "undefined" || Boolean(item.if)
-    );
+    this.navItems = this.navItemsAll().filter((item) => typeof item.if === 'undefined' || Boolean(item.if));
 
     // Store CSS variables modified
     const root = document.documentElement;
-    const colorPrimary =
-      getComputedStyle(root).getPropertyValue("--color-primary");
-    root.style.setProperty("--color-primary-select-light", `${colorPrimary}40`);
-    root.style.setProperty("--plyr-color-main", colorPrimary);
+    const colorPrimary = getComputedStyle(root).getPropertyValue('--color-primary');
+    root.style.setProperty('--color-primary-select-light', `${colorPrimary}40`);
+    root.style.setProperty('--plyr-color-main', colorPrimary);
 
     // Register sidebar metadata tab
     const OCA = globalThis.OCA;
     if (OCA.Files && OCA.Files.Sidebar) {
       OCA.Files.Sidebar.registerTab(
         new OCA.Files.Sidebar.Tab({
-          id: "memories-metadata",
-          name: this.t("memories", "Info"),
-          icon: "icon-details",
+          id: 'memories-metadata',
+          name: this.t('memories', 'Info'),
+          icon: 'icon-details',
 
           mount(el, fileInfo, context) {
             this.metadataComponent?.$destroy?.();
@@ -246,21 +239,21 @@ export default defineComponent({
   },
 
   async beforeMount() {
-    if ("serviceWorker" in navigator) {
+    if ('serviceWorker' in navigator) {
       // Use the window load event to keep the page load performant
-      window.addEventListener("load", async () => {
+      window.addEventListener('load', async () => {
         try {
-          const url = generateUrl("/apps/memories/service-worker.js");
+          const url = generateUrl('/apps/memories/service-worker.js');
           const registration = await navigator.serviceWorker.register(url, {
-            scope: generateUrl("/apps/memories"),
+            scope: generateUrl('/apps/memories'),
           });
-          console.log("SW registered: ", registration);
+          console.log('SW registered: ', registration);
         } catch (error) {
-          console.error("SW registration failed: ", error);
+          console.error('SW registration failed: ', error);
         }
       });
     } else {
-      console.debug("Service Worker is not enabled on this browser.");
+      console.debug('Service Worker is not enabled on this browser.');
     }
   },
 
@@ -268,68 +261,68 @@ export default defineComponent({
     navItemsAll(): NavItem[] {
       return [
         {
-          name: "timeline",
+          name: 'timeline',
           icon: ImageMultiple,
-          title: t("memories", "Timeline"),
+          title: t('memories', 'Timeline'),
         },
         {
-          name: "folders",
+          name: 'folders',
           icon: FolderIcon,
-          title: t("memories", "Folders"),
+          title: t('memories', 'Folders'),
         },
         {
-          name: "favorites",
+          name: 'favorites',
           icon: Star,
-          title: t("memories", "Favorites"),
+          title: t('memories', 'Favorites'),
         },
         {
-          name: "videos",
+          name: 'videos',
           icon: Video,
-          title: t("memories", "Videos"),
+          title: t('memories', 'Videos'),
         },
         {
-          name: "albums",
+          name: 'albums',
           icon: AlbumIcon,
-          title: t("memories", "Albums"),
+          title: t('memories', 'Albums'),
           if: this.showAlbums,
         },
         {
-          name: "recognize",
+          name: 'recognize',
           icon: PeopleIcon,
-          title: this.recognize || "",
+          title: this.recognize || '',
           if: this.recognize,
         },
         {
-          name: "facerecognition",
+          name: 'facerecognition',
           icon: PeopleIcon,
-          title: this.facerecognition || "",
+          title: this.facerecognition || '',
           if: this.facerecognition,
         },
         {
-          name: "archive",
+          name: 'archive',
           icon: ArchiveIcon,
-          title: t("memories", "Archive"),
+          title: t('memories', 'Archive'),
         },
         {
-          name: "thisday",
+          name: 'thisday',
           icon: CalendarIcon,
-          title: t("memories", "On this day"),
+          title: t('memories', 'On this day'),
         },
         {
-          name: "places",
+          name: 'places',
           icon: MarkerIcon,
-          title: t("memories", "Places"),
+          title: t('memories', 'Places'),
           if: this.config_placesGis > 0,
         },
         {
-          name: "map",
+          name: 'map',
           icon: MapIcon,
-          title: t("memories", "Map"),
+          title: t('memories', 'Map'),
         },
         {
-          name: "tags",
+          name: 'tags',
           icon: TagsIcon,
-          title: t("memories", "Tags"),
+          title: t('memories', 'Tags'),
           if: this.config_tagsEnabled,
         },
       ];
@@ -341,7 +334,7 @@ export default defineComponent({
     },
 
     doRouteChecks() {
-      if (this.$route.name?.endsWith("-share")) {
+      if (this.$route.name?.endsWith('-share')) {
         this.putShareToken(<string>this.$route.params.token);
       }
     },
@@ -350,14 +343,12 @@ export default defineComponent({
       // Viewer looks for an input with ID sharingToken with the value as the token
       // Create this element or update it otherwise files not gonna open
       // https://github.com/nextcloud/viewer/blob/a8c46050fb687dcbb48a022a15a5d1275bf54a8e/src/utils/davUtils.js#L61
-      let tokenInput = document.getElementById(
-        "sharingToken"
-      ) as HTMLInputElement;
+      let tokenInput = document.getElementById('sharingToken') as HTMLInputElement;
       if (!tokenInput) {
-        tokenInput = document.createElement("input");
-        tokenInput.id = "sharingToken";
-        tokenInput.type = "hidden";
-        tokenInput.style.display = "none";
+        tokenInput = document.createElement('input');
+        tokenInput.id = 'sharingToken';
+        tokenInput.type = 'hidden';
+        tokenInput.style.display = 'none';
         document.body.appendChild(tokenInput);
       }
 
