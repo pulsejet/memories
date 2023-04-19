@@ -94,7 +94,9 @@ export default defineComponent({
         return "warning";
       }
     },
+  },
 
+  computed: {
     requestToken() {
       return (<any>axios.defaults.headers).requesttoken;
     },
@@ -102,9 +104,8 @@ export default defineComponent({
     actionToken() {
       return this.status?.action_token || "";
     },
-  },
 
-  computed: {
+    /** Reverse of memories.vod.disable, unfortunately */
     enableTranscoding: {
       get() {
         return !this.config["memories.vod.disable"];
