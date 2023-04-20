@@ -143,9 +143,7 @@ class Index extends Command
         if ($this->input->isInteractive()) {
             $this->output->write('Are you sure you want to clear the existing index? (y/N): ');
             if ('y' !== trim(fgets(STDIN))) {
-                $this->output->writeln('Aborting');
-
-                exit;
+                throw new \Exception('Aborting');
             }
         }
 
