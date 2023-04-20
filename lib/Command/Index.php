@@ -98,6 +98,9 @@ class Index extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        /** @var \Symfony\Component\Console\Output\ConsoleOutputInterface $output */
+        $output = $output;
+
         // Store input/output/opts for later use
         $this->input = $input;
         $this->output = $output;
