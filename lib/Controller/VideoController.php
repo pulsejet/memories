@@ -25,6 +25,7 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
+use OCA\Memories\HttpResponseException;
 use OCA\Memories\Service\BinExt;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
@@ -77,24 +78,29 @@ class VideoController extends GenericApiController
             }
 
             // Request and check data was received
-            try {
-                $status = $this->getUpstream($client, $path, $profile);
-                if (409 === $status || -1 === $status) {
-                    // Just a conflict (transcoding process changed)
-                    return new JSONResponse(['message' => 'Conflict'], Http::STATUS_CONFLICT);
-                }
-                if (200 !== $status) {
-                    throw new \Exception("Transcoder returned {$status}");
-                }
-            } catch (\Exception $e) {
-                $msg = 'Transcode failed: '.$e->getMessage();
-                $this->logger->error($msg, ['app' => 'memories']);
+            return Util::guardExDirect(function ($out) use ($client, $path, $profile) {
+                try {
+                    $status = $this->getUpstream($client, $path, $profile);
+                    if (409 === $status || -1 === $status) {
+                        // Just a conflict (transcoding process changed)
+                        $response = new JSONResponse(['message' => 'Conflict'], Http::STATUS_CONFLICT);
 
-                throw $e;
-            }
+                        throw new HttpResponseException($response);
+                    }
+                    if (200 !== $status) {
+                        throw new \Exception("Transcoder returned {$status}");
+                    }
+                } catch (\Exception $e) {
+                    if ($e instanceof HttpResponseException && Http::STATUS_CONFLICT === $e->response->getStatus()) {
+                        throw $e; // Logging this is noise
+                    }
 
-            // The response was already streamed, so we have nothing to do here
-            exit;
+                    // We cannot show this error in the user interface, so log it
+                    $this->logger->error('Transcode failed: '.$e->getMessage(), ['app' => 'memories']);
+
+                    throw $e;
+                }
+            });
         });
     }
 
