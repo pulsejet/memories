@@ -213,7 +213,7 @@ class PublicController extends AuthPublicShareController
         header('HTTP/1.1 302 Found');
         header('Location: '.$url);
 
-        exit;
+        exit; // no other way to do this due to typing of super class
     }
 
     /** Get initial state of single item */

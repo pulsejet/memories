@@ -69,7 +69,7 @@ class TimelineQuery
         $sql = self::replaceQueryParams($query, $sql);
         echo "{$sql}";
 
-        exit;
+        exit; // only for debugging, so this is okay
     }
 
     public static function replaceQueryParams(IQueryBuilder &$query, string $sql)
