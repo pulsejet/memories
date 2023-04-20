@@ -207,28 +207,28 @@ class OtherController extends GenericApiController
         // Reset action token
         $this->actionToken(true);
 
-        try {
-            // Set PHP timeout to infinite
-            set_time_limit(0);
+        return Util::guardExDirect(function (Http\IOutput $out) {
+            try {
+                // Set PHP timeout to infinite
+                set_time_limit(0);
 
-            // Send headers for long-running request
-            header('Content-Type: text/plain');
-            header('X-Accel-Buffering: no');
-            header('Cache-Control: no-cache');
-            header('Connection: keep-alive');
-            header('Content-Length: 0');
+                // Send headers for long-running request
+                $out->setHeader('Content-Type: text/plain');
+                $out->setHeader('X-Accel-Buffering: no');
+                $out->setHeader('Cache-Control: no-cache');
+                $out->setHeader('Connection: keep-alive');
+                $out->setHeader('Content-Length: 0');
 
-            $places = \OC::$server->get(\OCA\Memories\Service\Places::class);
-            $datafile = $places->downloadPlanet();
-            $places->importPlanet($datafile);
-            $places->recalculateAll();
+                $places = \OC::$server->get(\OCA\Memories\Service\Places::class);
+                $datafile = $places->downloadPlanet();
+                $places->importPlanet($datafile);
+                $places->recalculateAll();
 
-            echo "Done.\n";
-        } catch (\Exception $e) {
-            echo 'Failed: '.$e->getMessage()."\n";
-        }
-
-        exit;
+                $out->setOutput("Done.\n");
+            } catch (\Exception $e) {
+                $out->setOutput('Failed: '.$e->getMessage()."\n");
+            }
+        });
     }
 
     /**
