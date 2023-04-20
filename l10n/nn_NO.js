@@ -13,6 +13,7 @@ OC.L10N.register(
     "Favorite" : "Favoritt",
     "General" : "Generelt",
     "Close" : "Lat att",
+    "Unknown" : "Ukjend",
     "Back" : "Tilbake",
     "Save" : "Lagre",
     "Year" : "År",

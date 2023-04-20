@@ -14,6 +14,7 @@ OC.L10N.register(
     "Favorite" : "Ffefryn",
     "General" : "Cyffredinol",
     "Close" : "Cau",
+    "Unknown" : "Anhysbys",
     "Copy public link" : "Copïo dolen gyhoeddus",
     "Back" : "Nôl",
     "Save" : "Cadw",

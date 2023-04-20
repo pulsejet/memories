@@ -16,6 +16,7 @@ OC.L10N.register(
     "View in folder" : "Vizualizează în director",
     "General" : "General",
     "Close" : "Închide",
+    "Unknown" : "Necunoscut",
     "Copy public link" : "Copiză link-ul public",
     "Public link" : "Link public",
     "Back" : "Înapoi",

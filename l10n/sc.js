@@ -19,6 +19,8 @@ OC.L10N.register(
     "View in folder" : "Càstia in sa cartella",
     "General" : "Generale",
     "Close" : "Serra",
+    "Performance" : "Atuatzione",
+    "Unknown" : "Disconnotu",
     "Copy public link" : "Còpia ligòngiu pùblicu",
     "Public link" : "Ligòngiu pùblicu",
     "Back" : "In segus",

@@ -23,6 +23,7 @@ OC.L10N.register(
     "Show hidden folders" : "Mostrar pastas ocultas",
     "Close" : "Fechar",
     "Failed to load some photos" : "Não foi possível carregar algumas fotografias",
+    "Unknown" : "Desconhecido",
     "Copy public link" : "Copiar ligação publica",
     "Public link" : "Hiperligação Pública",
     "Back" : "Anterior",

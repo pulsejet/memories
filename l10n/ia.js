@@ -13,6 +13,7 @@ OC.L10N.register(
     "View in folder" : "Vider in dossier",
     "General" : "General",
     "Close" : "Clauder",
+    "Unknown" : "Incognite",
     "Back" : "Retro",
     "Save" : "Salveguardar",
     "Month" : "Mense",

@@ -14,6 +14,7 @@ OC.L10N.register(
     "View in folder" : "ເບິ່ງໃນໂຟນເດີ",
     "General" : "ທົ່ວໄປ",
     "Close" : "ປິດ",
+    "Unknown" : "ບໍ່ຮູ້",
     "Back" : "ຫຼັງ",
     "Save" : "ບັນທຶກ",
     "Name" : "ຊື່",

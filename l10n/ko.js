@@ -18,6 +18,7 @@ OC.L10N.register(
     "View in folder" : "폴더에서 보기",
     "General" : "일반",
     "Close" : "닫기",
+    "Unknown" : "알 수 없음",
     "Copy public link" : "공용 링크 복사",
     "Public link" : "공개 링크",
     "Back" : "뒤로",

@@ -17,6 +17,7 @@ OC.L10N.register(
     "View in folder" : "Veire dins lo dossièr",
     "General" : "Generals",
     "Close" : "Tampar",
+    "Unknown" : "Desconegut",
     "Copy public link" : "Copiar lo ligam public",
     "Public link" : "Ligam public",
     "Back" : "Retorn",

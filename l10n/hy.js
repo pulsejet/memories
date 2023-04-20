@@ -10,6 +10,7 @@ OC.L10N.register(
     "Download" : "Ներբեռնել",
     "General" : "Ընդհանուր",
     "Close" : "Փակել",
+    "Unknown" : "Անհայտ",
     "Save" : "Պահպանել",
     "Month" : "Ամիս",
     "Day" : "Օր",

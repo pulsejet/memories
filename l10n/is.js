@@ -20,6 +20,8 @@ OC.L10N.register(
     "View in folder" : "Skoða í möppu",
     "General" : "Almennt",
     "Close" : "Loka",
+    "Performance" : "Afköst",
+    "Unknown" : "Óþekkt",
     "Copy public link" : "Afrita opinberan tengil",
     "Public link" : "Opinber tengill",
     "Back" : "Til baka",

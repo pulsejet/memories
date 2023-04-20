@@ -17,6 +17,7 @@ OC.L10N.register(
     "View in folder" : "Ver en la carpeta",
     "General" : "General",
     "Close" : "Cerrar",
+    "Unknown" : "Desconocido",
     "Public link" : "Liga pública",
     "Back" : "Atrás",
     "Save" : "Guardar",
