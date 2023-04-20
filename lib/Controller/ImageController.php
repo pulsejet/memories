@@ -76,9 +76,9 @@ class ImageController extends GenericApiController
      *
      * Get preview of many images
      */
-    public function multipreview()
+    public function multipreview(): Http\Response
     {
-        return Util::guardEx(function () {
+        return Util::guardExDirect(function (Http\IOutput $out) {
             // read body to array
             $body = file_get_contents('php://input');
             $files = json_decode($body, true);
@@ -109,7 +109,7 @@ class ImageController extends GenericApiController
             );
 
             // stream the response
-            header('Content-Type: application/octet-stream');
+            $out->setHeader('Content-Type: application/octet-stream');
 
             foreach ($files as $bodyFile) {
                 $reqid = $bodyFile['reqid'];
@@ -152,11 +152,11 @@ class ImageController extends GenericApiController
                     ]);
 
                     // Send the length of the json as a single byte
-                    echo \chr(\strlen($json));
-                    echo $json;
+                    $out->setOutput(\chr(\strlen($json)));
+                    $out->setOutput($json);
 
                     // Send the image
-                    echo $content;
+                    $out->setOutput($content);
                     ob_end_flush();
                 } catch (\OCP\Files\NotFoundException $e) {
                     continue;
@@ -164,8 +164,6 @@ class ImageController extends GenericApiController
                     continue;
                 }
             }
-
-            exit;
         });
     }
 
