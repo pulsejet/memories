@@ -170,7 +170,7 @@ class Exif
         // Filter out January 1, 1904 12:00:00 AM UTC
         // Exiftool returns this as the date when QuickTimeUTC is set and
         // the date is set to 0000:00:00 00:00:00
-        if ($timestamp === -2082844800) {
+        if (-2082844800 === $timestamp) {
             throw new \Exception("Blacklisted date: {$exifDate}");
         }
 
