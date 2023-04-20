@@ -159,9 +159,19 @@ class Exif
             throw new \Exception("Invalid date: {$exifDate}");
         }
 
+        // Epoch timestamp
+        $timestamp = $parsedDate->getTimestamp();
+
         // Filter out dates before 1800 A.D.
-        if ($parsedDate->getTimestamp() < -5364662400) { // 1800 A.D.
+        if ($timestamp < -5364662400) { // 1800 A.D.
             throw new \Exception("Date too old: {$exifDate}");
+        }
+
+        // Filter out January 1, 1904 12:00:00 AM UTC
+        // Exiftool returns this as the date when QuickTimeUTC is set and
+        // the date is set to 0000:00:00 00:00:00
+        if ($timestamp === -2082844800) {
+            throw new \Exception("Blacklisted date: {$exifDate}");
         }
 
         // Force the timezone to be the same as parseTz
