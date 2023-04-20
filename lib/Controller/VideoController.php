@@ -198,18 +198,16 @@ class VideoController extends GenericApiController
 
             // Transcode video if allowed
             if ($transcode && !$this->config->getSystemValue('memories.vod.disable', true)) {
-                try {
-                    // If video path not given, write to temp file
-                    if (!$liveVideoPath) {
-                        $liveVideoPath = self::postFile($transcode, $blob)['path'];
-                    }
+                // If video path not given, write to temp file
+                if (!$liveVideoPath) {
+                    $liveVideoPath = self::postFile($transcode, $blob)['path'];
+                }
 
-                    // If this is H.264 it won't get transcoded anyway
-                    if ($liveVideoPath && 200 === $this->getUpstream($transcode, $liveVideoPath, 'max.mov')) {
-                        exit;
-                    }
-                } catch (\Exception $e) {
-                    // Transcoding failed, just return the original video
+                // If this is H.264 it won't get transcoded anyway
+                if ($liveVideoPath) {
+                    return Util::guardExDirect(function ($out) use ($transcode, $liveVideoPath) {
+                        $this->getUpstream($transcode, $liveVideoPath, 'max.mov');
+                    });
                 }
             }
 
@@ -310,7 +308,19 @@ class VideoController extends GenericApiController
      *
      * @param mixed $blob
      */
-    private static function postFile(string $client, $blob)
+    private static function postFile(string $client, $blob) {
+        try {
+            return self::postFileInternal($client, $blob);
+        } catch (\Exception $e) {
+            if (BinExt::startGoVod()) { // If the server is down, try to start it
+                return self::postFileInternal($client, $blob);
+            }
+
+            throw $e;
+        }
+    }
+
+    private static function postFileInternal(string $client, $blob)
     {
         $url = BinExt::getGoVodUrl($client, '/create', 'ignore');
 
