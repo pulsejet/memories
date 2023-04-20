@@ -308,7 +308,8 @@ class VideoController extends GenericApiController
      *
      * @param mixed $blob
      */
-    private static function postFile(string $client, $blob) {
+    private static function postFile(string $client, $blob)
+    {
         try {
             return self::postFileInternal($client, $blob);
         } catch (\Exception $e) {
