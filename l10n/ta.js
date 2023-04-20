@@ -12,6 +12,7 @@ OC.L10N.register(
     "Favorite" : "விருப்பமான",
     "General" : "பொதுவான",
     "Close" : "மூடுக",
+    "Unknown" : "தெரியாத",
     "Back" : "பின்னுக்கு",
     "Save" : "சேமிக்க ",
     "Month" : "மாதம்",

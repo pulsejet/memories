@@ -17,6 +17,7 @@ OC.L10N.register(
     "View in folder" : "Shikoje në dosje",
     "General" : "Të përgjithshme",
     "Close" : "Mbylleni",
+    "Unknown" : "I panjohur",
     "Back" : "Prapa",
     "Save" : "Ruaj",
     "Month" : "Muaj",

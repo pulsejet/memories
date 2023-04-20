@@ -17,6 +17,8 @@ OC.L10N.register(
     "View in folder" : "Vidi en dosierujo",
     "General" : "Ĝenerala",
     "Close" : "Malfermi",
+    "Performance" : "Rendimento",
+    "Unknown" : "Nekonata",
     "Public link" : "Publika ligilo",
     "Back" : "Antaŭen",
     "Save" : "Konservi",

@@ -13,6 +13,7 @@ OC.L10N.register(
     "View in folder" : "Kuk am Dossier ",
     "General" : "Allgemeng",
     "Close" : "Zoumaachen",
+    "Unknown" : "Onbekannt",
     "Back" : "Zeréck",
     "Save" : "Späicheren",
     "Month" : "Mount",

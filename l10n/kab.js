@@ -12,6 +12,7 @@ OC.L10N.register(
     "Favorite" : "Menyif",
     "General" : "Amatu",
     "Close" : "Mdel",
+    "Unknown" : "Arussin",
     "Back" : "Retour",
     "Save" : "Sekles",
     "Hour" : "Asrag",

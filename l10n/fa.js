@@ -18,6 +18,8 @@ OC.L10N.register(
     "View in folder" : "مشاهده در پوشه",
     "General" : "عمومی",
     "Close" : "بسته",
+    "Performance" : "کارایی",
+    "Unknown" : "ناشناخته",
     "Copy public link" : "پیوند عمومی را کپی کنید",
     "Public link" : "پیوند عمومی",
     "Back" : "بازگشت",

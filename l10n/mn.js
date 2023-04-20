@@ -17,6 +17,7 @@ OC.L10N.register(
     "View in folder" : "Хавтасыг нээх",
     "General" : "Ерөнхий",
     "Close" : "Хаах",
+    "Unknown" : "Үл танигдах зүйл",
     "Back" : "буцах",
     "Save" : "Хадгалах",
     "Month" : "Сар",

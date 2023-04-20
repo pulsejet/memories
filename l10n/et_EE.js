@@ -16,6 +16,7 @@ OC.L10N.register(
     "View in folder" : "Vaata kaustas",
     "General" : "Üldine",
     "Close" : "Sulge",
+    "Unknown" : "Teadmata",
     "Copy public link" : "Kopeeri avalik link",
     "Public link" : "Avalik link",
     "Back" : "Tagasi",

@@ -17,6 +17,7 @@ OC.L10N.register(
     "View in folder" : "Xem trong thư mục",
     "General" : "Cài đặt chung",
     "Close" : "Đóng",
+    "Unknown" : "Không xác định",
     "Copy public link" : "Sao chép liên kết công khai",
     "Back" : "Quay lại",
     "Save" : "Lưu",

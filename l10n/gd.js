@@ -12,6 +12,7 @@ OC.L10N.register(
     "Favorite" : "Annsachd",
     "General" : "Coitcheann",
     "Close" : "Dùin",
+    "Unknown" : "Chan eil fhios",
     "Back" : "Air ais",
     "Save" : "Sàbhail",
     "Name" : "Ainm",

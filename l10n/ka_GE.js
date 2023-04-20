@@ -17,6 +17,7 @@ OC.L10N.register(
     "View in folder" : "ჩვენება დირექტორიაში",
     "General" : "ზოგადი",
     "Close" : "დახურვა",
+    "Unknown" : "უცნობია",
     "Back" : "უკან",
     "Save" : "შენახვა",
     "Month" : "თვე",

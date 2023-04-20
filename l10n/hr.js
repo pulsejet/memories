@@ -19,6 +19,8 @@ OC.L10N.register(
     "View in folder" : "Prikaži u mapi",
     "General" : "Općenito",
     "Close" : "Zatvori",
+    "Performance" : "Učinkovitost",
+    "Unknown" : "Nepoznata pogreška",
     "Copy public link" : "Kopiraj javnu poveznicu",
     "Public link" : "Javna poveznica",
     "Back" : "Natrag",

@@ -20,6 +20,8 @@ OC.L10N.register(
     "View in folder" : "フォルダー内で表示",
     "General" : "一般",
     "Close" : "閉じる",
+    "Performance" : "パフォーマンス",
+    "Unknown" : "不明",
     "Copy public link" : "公開リンクをコピー",
     "Public link" : "公開リンク",
     "Create new album" : "新しいアルバムを作成",
