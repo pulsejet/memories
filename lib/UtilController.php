@@ -28,6 +28,43 @@ trait UtilController
     }
 
     /**
+     * Return a callback response with guarded exceptions.
+     */
+    public static function guardExDirect(\Closure $closure): Http\Response
+    {
+        return new class($closure) extends Http\Response implements Http\ICallbackResponse {
+            private \Closure $_closure;
+
+            public function __construct(\Closure $closure)
+            {
+                $this->_closure = $closure;
+            }
+
+            public function callback(Http\IOutput $output)
+            {
+                try {
+                    ($this->_closure)($output);
+                } catch (\OCA\Memories\HttpResponseException $e) {
+                    $res = $e->response;
+                    $output->setHttpResponseCode($res->getStatus());
+                    if ($res instanceof Http\DataResponse) {
+                        $output->setHeader('Content-Type: application/json');
+                        $output->setOutput(json_encode($res->getData()));
+                    } else {
+                        $output->setOutput($res->render());
+                    }
+                } catch (\Exception $e) {
+                    $output->setHttpResponseCode(Http::STATUS_INTERNAL_SERVER_ERROR);
+                    $output->setHeader('Content-Type: application/json');
+                    $output->setOutput(json_encode([
+                        'message' => $e->getMessage(),
+                    ]));
+                }
+            }
+        };
+    }
+
+    /**
      * Get the current user.
      *
      * @throws \OCA\Memories\HttpResponseException if the user is not logged in

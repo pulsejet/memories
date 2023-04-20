@@ -114,7 +114,7 @@ class DownloadController extends GenericApiController
             }
 
             // Download multiple files
-            $this->multiple($name, $fileIds); // exits
+            return $this->multiple($name, $fileIds);
         });
     }
 
@@ -127,7 +127,7 @@ class DownloadController extends GenericApiController
      */
     public function one(int $fileid, bool $resumable = true, int $numChunks = 0): Http\Response
     {
-        return Util::guardEx(function () use ($fileid, $resumable, $numChunks) {
+        return Util::guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable, $numChunks) {
             $file = $this->fs->getUserFile($fileid);
 
             // check if http_range is sent by browser
@@ -175,17 +175,17 @@ class DownloadController extends GenericApiController
 
             // Only send partial content header if downloading a piece of the file
             if ($seekStart > 0 || $seekEnd < ($size - 1)) {
-                header('HTTP/1.1 206 Partial Content');
+                $out->setHeader('HTTP/1.1 206 Partial Content');
             }
 
             // Set headers
-            header('Accept-Ranges: bytes');
-            header("Content-Range: bytes {$seekStart}-{$seekEnd}/{$size}");
-            header('Content-Length: '.($seekEnd - $seekStart + 1));
-            header('Content-Type: '.$file->getMimeType());
+            $out->setHeader('Accept-Ranges: bytes');
+            $out->setHeader("Content-Range: bytes {$seekStart}-{$seekEnd}/{$size}");
+            $out->setHeader('Content-Length: '.($seekEnd - $seekStart + 1));
+            $out->setHeader('Content-Type: '.$file->getMimeType());
 
             // Make sure the browser downloads the file
-            header('Content-Disposition: attachment; filename="'.$file->getName().'"');
+            $out->setHeader('Content-Disposition: attachment; filename="'.$file->getName().'"');
 
             // Open file to send
             $res = $file->fopen('rb');
@@ -215,7 +215,7 @@ class DownloadController extends GenericApiController
                 $chunkRead += \strlen($buffer);
 
                 // Send buffer
-                echo $buffer;
+                $out->setOutput($buffer);
 
                 // Flush output if chunk is large enough
                 if ($chunkRead > 1024 * 512) {
@@ -235,8 +235,6 @@ class DownloadController extends GenericApiController
 
             // Close file
             fclose($res);
-
-            exit;
         });
     }
 
@@ -246,111 +244,111 @@ class DownloadController extends GenericApiController
      * @param string $name    Name of zip file
      * @param int[]  $fileIds
      */
-    private function multiple(string $name, array $fileIds)
+    private function multiple(string $name, array $fileIds): Http\Response
     {
-        // Disable time limit
-        $executionTime = (int) \OC::$server->get(IniGetWrapper::class)->getNumeric('max_execution_time');
-        @set_time_limit(0);
+        return Util::guardExDirect(function ($out) use ($name, $fileIds) {
+            // Disable time limit
+            $executionTime = (int) \OC::$server->get(IniGetWrapper::class)->getNumeric('max_execution_time');
+            @set_time_limit(0);
 
-        // Ensure we can abort the request if user stops it
-        ignore_user_abort(true);
+            // Ensure we can abort the request if user stops it
+            ignore_user_abort(true);
 
-        // Pretend the size is huge so forced zip64
-        // Lookup the constructor of \OC\Streamer for more info
-        $size = \count($fileIds) * 1024 * 1024 * 1024 * 8;
-        $streamer = new \OC\Streamer($this->request, $size, \count($fileIds));
+            // Pretend the size is huge so forced zip64
+            // Lookup the constructor of \OC\Streamer for more info
+            $size = \count($fileIds) * 1024 * 1024 * 1024 * 8;
+            $streamer = new \OC\Streamer($this->request, $size, \count($fileIds));
 
-        // Create a zip file
-        $streamer->sendHeaders($name);
+            // Create a zip file
+            $streamer->sendHeaders($name);
 
-        // Multiple files might have the same name
-        // So we need to add a number to the end of the name
-        $nameCounts = [];
+            // Multiple files might have the same name
+            // So we need to add a number to the end of the name
+            $nameCounts = [];
 
-        /** @var ITempManager for clearing temp files */
-        $tempManager = \OC::$server->get(ITempManager::class);
+            /** @var ITempManager for clearing temp files */
+            $tempManager = \OC::$server->get(ITempManager::class);
 
-        // Send each file
-        foreach ($fileIds as $fileId) {
-            if (connection_aborted()) {
-                break;
-            }
-
-            /** @var bool|resource */
-            $handle = false;
-
-            /** @var ?File */
-            $file = null;
-
-            /** @var ?string */
-            $name = (string) $fileId;
-
-            try {
-                // This checks permissions
-                $file = $this->fs->getUserFile($fileId);
-                $name = $file->getName();
-
-                // Open file
-                $handle = $file->fopen('rb');
-                if (false === $handle) {
-                    throw new \Exception('Failed to open file');
+            // Send each file
+            foreach ($fileIds as $fileId) {
+                if (connection_aborted()) {
+                    break;
                 }
 
-                // Handle duplicate names
-                if (isset($nameCounts[$name])) {
-                    ++$nameCounts[$name];
+                /** @var bool|resource */
+                $handle = false;
 
-                    // add count before extension
-                    $extpos = strrpos($name, '.');
-                    if (false === $extpos) {
-                        $name .= " ({$nameCounts[$name]})";
-                    } else {
-                        $name = substr($name, 0, $extpos)." ({$nameCounts[$name]})".substr($name, $extpos);
+                /** @var ?File */
+                $file = null;
+
+                /** @var ?string */
+                $name = (string) $fileId;
+
+                try {
+                    // This checks permissions
+                    $file = $this->fs->getUserFile($fileId);
+                    $name = $file->getName();
+
+                    // Open file
+                    $handle = $file->fopen('rb');
+                    if (false === $handle) {
+                        throw new \Exception('Failed to open file');
                     }
-                } else {
-                    $nameCounts[$name] = 0;
+
+                    // Handle duplicate names
+                    if (isset($nameCounts[$name])) {
+                        ++$nameCounts[$name];
+
+                        // add count before extension
+                        $extpos = strrpos($name, '.');
+                        if (false === $extpos) {
+                            $name .= " ({$nameCounts[$name]})";
+                        } else {
+                            $name = substr($name, 0, $extpos)." ({$nameCounts[$name]})".substr($name, $extpos);
+                        }
+                    } else {
+                        $nameCounts[$name] = 0;
+                    }
+
+                    // Add file to zip
+                    if (!$streamer->addFileFromStream(
+                        $handle,
+                        $name,
+                        $file->getSize(),
+                        $file->getMTime(),
+                    )) {
+                        throw new \Exception('Failed to add file to zip');
+                    }
+                } catch (\Exception $e) {
+                    // create a dummy memory file with the error message
+                    $dummy = fopen('php://memory', 'rw+');
+                    fwrite($dummy, $e->getMessage());
+                    rewind($dummy);
+
+                    $streamer->addFileFromStream(
+                        $dummy,
+                        "{$name}_error.txt",
+                        \strlen($e->getMessage()),
+                        time(),
+                    );
+
+                    // close the dummy file
+                    fclose($dummy);
+                } finally {
+                    if (false !== $handle) {
+                        fclose($handle);
+                    }
+
+                    // Clear any temp files
+                    $tempManager->clean();
                 }
-
-                // Add file to zip
-                if (!$streamer->addFileFromStream(
-                    $handle,
-                    $name,
-                    $file->getSize(),
-                    $file->getMTime(),
-                )) {
-                    throw new \Exception('Failed to add file to zip');
-                }
-            } catch (\Exception $e) {
-                // create a dummy memory file with the error message
-                $dummy = fopen('php://memory', 'rw+');
-                fwrite($dummy, $e->getMessage());
-                rewind($dummy);
-
-                $streamer->addFileFromStream(
-                    $dummy,
-                    "{$name}_error.txt",
-                    \strlen($e->getMessage()),
-                    time(),
-                );
-
-                // close the dummy file
-                fclose($dummy);
-            } finally {
-                if (false !== $handle) {
-                    fclose($handle);
-                }
-
-                // Clear any temp files
-                $tempManager->clean();
             }
-        }
 
-        // Restore time limit
-        @set_time_limit($executionTime);
+            // Restore time limit
+            @set_time_limit($executionTime);
 
-        // Done
-        $streamer->finalize();
-
-        exit;
+            // Done
+            $streamer->finalize();
+        });
     }
 }
