@@ -16,6 +16,7 @@ OC.L10N.register(
     "View in folder" : "Ver na carpeta",
     "General" : "Xeneral",
     "Close" : "Zarrar",
+    "Unknown" : "Desconozse",
     "Back" : "Atrás",
     "Save" : "Guardar",
     "Month" : "Mes",

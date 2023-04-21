@@ -24,6 +24,8 @@ OC.L10N.register(
     "Add to album" : "Afegeix a l'àlbum",
     "General" : "General",
     "Close" : "Tanca",
+    "Performance" : "Rendiment",
+    "Unknown" : "Desconegut",
     "Add people or groups who can edit your album" : "Afegeix persones o grups que puguin editar el teu àlbum",
     "Search for collaborators" : "Cerca de col·laboradors",
     "Search people or groups" : "Cerca persones o grups",
