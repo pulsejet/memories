@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
-use bantu\IniGetWrapper\IniGetWrapper;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
@@ -210,6 +209,9 @@ class DownloadController extends GenericApiController
             // Start output buffering
             ob_start();
 
+            // Disable time limit
+            @set_time_limit(0);
+
             while (!feof($res) && $seekStart <= $seekEnd) {
                 $lenLeft = $seekEnd - $seekStart + 1;
                 $buffer = fread($res, min(1024 * 1024, $lenLeft));
@@ -253,7 +255,6 @@ class DownloadController extends GenericApiController
     {
         return Util::guardExDirect(function ($out) use ($name, $fileIds) {
             // Disable time limit
-            $executionTime = (int) \OC::$server->get(IniGetWrapper::class)->getNumeric('max_execution_time');
             @set_time_limit(0);
 
             // Ensure we can abort the request if user stops it
@@ -348,9 +349,6 @@ class DownloadController extends GenericApiController
                     $tempManager->clean();
                 }
             }
-
-            // Restore time limit
-            @set_time_limit($executionTime);
 
             // Done
             $streamer->finalize();
