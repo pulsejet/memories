@@ -116,20 +116,20 @@ class FsManager
                 // This is cheaper and more sensible than the root etag.
                 // The only time this breaks down is if the user places a .nomedia
                 // outside the timeline path; rely on expiration for that.
-                $cEtag = $uid;
+                $etag = $uid;
 
                 // Multiple timeline path support
                 foreach ($paths as $path) {
                     $node = $userFolder->get($path);
                     $root->addFolder($node);
-                    $cEtag .= $node->getEtag();
+                    $etag .= $node->getEtag();
                 }
 
                 // Add shares or external stores inside the current folders
                 $root->addMountPoints();
 
                 // Exclude .nomedia folders
-                $root->excludePaths($this->getNoMediaFolders($userFolder, md5($cEtag)));
+                $root->excludePaths($this->getNoMediaFolders($userFolder, md5($etag)));
             }
         } catch (\OCP\Files\NotFoundException $e) {
             $msg = $e->getMessage();
@@ -144,7 +144,7 @@ class FsManager
      * Get list of folders with .nomedia file.
      *
      * @param Folder $root root folder
-     * @param string $key  etag for cache key
+     * @param string $key  cache key
      */
     public function getNoMediaFolders(Folder $root, string $key): array
     {
