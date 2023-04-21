@@ -14,8 +14,8 @@ class BinExt
     /** Copy a binary to temp dir for execution */
     public static function getTempBin(string $path, string $name, bool $copy = true): string
     {
-        // Hash the path to provide a suffix using md5, 8 characters
-        $suffix = substr(md5($path), 0, 8);
+        // Bust cache if the path changes
+        $suffix = hash('crc32', $path);
 
         // Check target temp file
         $target = sys_get_temp_dir().'/'.$name.'-'.$suffix;
