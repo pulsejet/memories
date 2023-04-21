@@ -187,6 +187,11 @@ class DownloadController extends GenericApiController
             // Make sure the browser downloads the file
             $out->setHeader('Content-Disposition: attachment; filename="'.$file->getName().'"');
 
+            // Prevent output from being buffered
+            $out->setHeader('Content-Encoding: none');
+            $out->setHeader('X-Content-Encoded-By: none');
+            $out->setHeader('X-Accel-Buffering: no');
+
             // Open file to send
             $res = $file->fopen('rb');
 
