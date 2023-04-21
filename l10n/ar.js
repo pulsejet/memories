@@ -17,6 +17,7 @@ OC.L10N.register(
     "View in folder" : "اعرض في المجلد",
     "General" : "العامة",
     "Close" : "إغلاق",
+    "Unknown" : "غير معروف",
     "Copy public link" : "نسخ الرابط العام",
     "Back" : "العودة",
     "Save" : "Save",
