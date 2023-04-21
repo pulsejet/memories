@@ -45,4 +45,7 @@ webpackConfig.optimization.minimizer[0] = new TerserPlugin({
   extractComments: true,
 });
 
+// Disable source maps in production
+webpackConfig.devtool = isDev ? 'cheap-source-map' : false;
+
 module.exports = webpackConfig;
