@@ -63,7 +63,7 @@ class IndexJob extends TimedJob
             $this->indexAllUsers();
             $this->log('Indexing completed successfully', 'success');
         } catch (Service\ProcessClosedException $e) {
-            $this->log('Indexing process stopped before completion. Will continue on next run', 'warning');
+            $this->log('Indexing process stopped before completion. Will continue on next run', 'info');
         } finally {
             \OCA\Memories\Exif::closeStaticExiftoolProc();
         }
@@ -95,6 +95,11 @@ class IndexJob extends TimedJob
 
     private function log(string $msg, string $type = 'error'): void
     {
+        if ('success' === $type || 'info' === $type) {
+            // If this is just an informational message, we log it with level info
+            $this->logger->info('Memories: '.$msg);
+        }
+
         if ($this->_hasError && 'success' === $type) {
             // Don't overwrite an error with a success
             return;
@@ -103,9 +108,7 @@ class IndexJob extends TimedJob
         $this->config->setAppValue(Application::APPNAME, 'last_index_job_status', $msg);
         $this->config->setAppValue(Application::APPNAME, 'last_index_job_status_type', $type);
 
-        if ('success' === $type) {
-            // Nothing
-        } elseif ('warning' === $type) {
+        if ('warning' === $type) {
             $this->logger->warning('Memories: '.$msg);
         } elseif ('error' === $type) {
             $this->_hasError = true;
