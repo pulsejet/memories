@@ -32,6 +32,10 @@ class BinExt
         }
 
         if ($copy) {
+            if (empty($path)) {
+                throw new \Exception('binary path is empty (run occ maintenance:repair)');
+            }
+
             if (!copy($path, $target)) {
                 throw new \Exception("failed to copy {$name} binary from {$path} to {$target}");
             }

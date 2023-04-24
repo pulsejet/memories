@@ -122,7 +122,7 @@ class OtherController extends GenericApiController
             // Check exiftool version
             $exiftoolNoLocal = Util::getSystemConfig('memories.exiftool_no_local');
             $status['exiftool'] = $this->getExecutableStatus(
-                BinExt::getExiftoolPBin(),
+                fn () => BinExt::getExiftoolPBin(),
                 fn ($p) => BinExt::testExiftool(),
                 !$exiftoolNoLocal,
                 !$exiftoolNoLocal,
@@ -253,10 +253,10 @@ class OtherController extends GenericApiController
     /**
      * Get the status of an executable.
      *
-     * @param string    $path             Path to the executable
-     * @param ?\Closure $testFunction     Function to test the executable
-     * @param bool      $testIfFile       Test if the path is a file
-     * @param bool      $testIfExecutable Test if the path is executable
+     * @param \Closure|string $path             Path to the executable
+     * @param ?\Closure       $testFunction     Function to test the executable
+     * @param bool            $testIfFile       Test if the path is a file
+     * @param bool            $testIfExecutable Test if the path is executable
      */
     private function getExecutableStatus(
         $path,
@@ -264,6 +264,14 @@ class OtherController extends GenericApiController
         bool $testIfFile = true,
         bool $testIfExecutable = true
     ): string {
+        if ($path instanceof \Closure) {
+            try {
+                $path = $path();
+            } catch (\Exception $e) {
+                return 'test_fail:'.$e->getMessage();
+            }
+        }
+
         if (!\is_string($path)) {
             return 'not_found';
         }
