@@ -33,7 +33,7 @@ class BinExt
 
         if ($copy) {
             if (empty($path)) {
-                throw new \Exception('binary path is empty (run occ maintenance:repair)');
+                throw new \Exception('binary path is empty (run occ maintenance:repair or use system perl)');
             }
 
             if (!copy($path, $target)) {

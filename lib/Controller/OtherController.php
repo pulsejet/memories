@@ -264,20 +264,18 @@ class OtherController extends GenericApiController
         bool $testIfFile = true,
         bool $testIfExecutable = true
     ): string {
-        if ($path instanceof \Closure) {
-            try {
-                $path = $path();
-            } catch (\Exception $e) {
-                return 'test_fail:'.$e->getMessage();
+        if ($testIfFile) {
+            if ($path instanceof \Closure) {
+                try {
+                    $path = $path();
+                } catch (\Exception $e) {
+                    return 'test_fail:'.$e->getMessage();
+                }
             }
-        }
 
-        if (!\is_string($path)) {
-            return 'not_found';
-        }
-
-        if ($testIfFile && !is_file($path)) {
-            return 'not_found';
+            if (!\is_string($path) || !is_file($path)) {
+                return 'not_found';
+            }
         }
 
         if ($testIfExecutable && !is_executable($path)) {
