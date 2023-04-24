@@ -5,9 +5,10 @@
 ![GitHub](https://img.shields.io/github/license/pulsejet/memories)
 [![e2e](https://github.com/pulsejet/memories/actions/workflows/e2e.yaml/badge.svg)](https://github.com/pulsejet/memories/actions/workflows/e2e.yaml)
 [![Demo](https://img.shields.io/badge/demo-online-blue)](https://memories-demo.radialapps.com/apps/memories/)
-[![Gitter](https://img.shields.io/gitter/room/pulsejet/memories)](https://gitter.im/pulsejet/memories)
 [![GitHub issues](https://img.shields.io/github/issues/pulsejet/memories)](https://github.com/pulsejet/memories/issues)
 [![GitHub Sponsor](https://img.shields.io/github/sponsors/pulsejet?logo=GitHub)](https://github.com/sponsors/pulsejet)
+
+[![Discord](https://dcbadge.vercel.app/api/server/7Dr9f9vNjJ)](https://discord.gg/7Dr9f9vNjJ)
 
 Memories is a _batteries-included_ photo management solution for Nextcloud with advanced features
 
