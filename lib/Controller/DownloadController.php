@@ -124,9 +124,9 @@ class DownloadController extends GenericApiController
      *
      * @PublicPage
      */
-    public function one(int $fileid, bool $resumable = true, int $numChunks = 0): Http\Response
+    public function one(int $fileid, bool $resumable = true): Http\Response
     {
-        return Util::guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable, $numChunks) {
+        return Util::guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable) {
             $file = $this->fs->getUserFile($fileid);
 
             // check if http_range is sent by browser
@@ -150,26 +150,9 @@ class DownloadController extends GenericApiController
             $seekEnd = (empty($seekEnd)) ? ($size - 1) : min(abs((int) $seekEnd), $size - 1);
             $seekStart = (empty($seekStart) || $seekEnd < abs((int) $seekStart)) ? 0 : max(abs((int) $seekStart), 0);
 
-            // If the client knows about ranges, only send a maximum of X KB
-            // This way we don't read the whole file for no reason
-            if (!empty($range)) {
-                // Default to 64MB
-                $maxLen = 64 * 1024 * 1024;
-
-                // For videos, use a max of 8MB
-                if ('video' === $this->request->getHeader('Sec-Fetch-Dest')) {
-                    $maxLen = 8 * 1024 * 1024;
-                }
-
-                // Check if the client sent a hint for the chunk size
-                if ($numChunks) {
-                    $maxLen = min(ceil($size / $numChunks), $maxLen * 3);
-                }
-
-                // No less than 1MB; this is just wasteful
-                $maxLen = max($maxLen, 1024 * 1024);
-
-                $seekEnd = min($seekEnd, $seekStart + $maxLen);
+            // For videos, use a max of 64MB
+            if (!empty($range) && 'video' === $this->request->getHeader('Sec-Fetch-Dest')) {
+                $seekEnd = min($seekEnd, $seekStart + 64 * 1024 * 1024);
             }
 
             // Only send partial content header if downloading a piece of the file

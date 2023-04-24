@@ -110,9 +110,8 @@ class VideoContentSetup {
   }
 
   getDirectSrc(content: VideoContent) {
-    const numChunks = Math.ceil((content.data.photo?.video_duration || 0) / 3) || undefined;
     return {
-      src: API.Q(content.data.src, { numChunks }),
+      src: content.data.src,
       type: 'video/mp4', // chrome refuses to play video/quicktime, so fool it
     };
   }
