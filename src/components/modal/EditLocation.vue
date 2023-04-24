@@ -74,8 +74,8 @@ import UndoIcon from 'vue-material-design-icons/UndoVariant.vue';
 
 type NLocation = {
   osm_id: number;
-  type: string;
-  icon: string;
+  type?: string;
+  icon?: string;
   display_name: string;
   lat: string;
   lon: string;
@@ -153,6 +153,21 @@ export default defineComponent({
     search() {
       if (this.loading || this.searchBar.length === 0) {
         return;
+      }
+
+      // Check if searchbar is already a coordinate
+      const coords = this.searchBar.split(',');
+      if (coords.length === 2) {
+        const lat = Number(coords[0].trim());
+        const lon = Number(coords[1].trim());
+        if (!isNaN(lat) && !isNaN(lon)) {
+          return this.select({
+            osm_id: 0,
+            display_name: `${lat.toFixed(6)}, ${lon.toFixed(6)}`,
+            lat: lat.toFixed(6),
+            lon: lon.toFixed(6),
+          });
+        }
       }
 
       this.loading = true;
