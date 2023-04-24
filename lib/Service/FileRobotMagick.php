@@ -153,6 +153,9 @@ class FileRobotMagick
             $this->image->transformImageColorspace(\Imagick::COLORSPACE_SRGB);
         }
 
+        // Orient the image
+        $this->image->autoOrient();
+
         $this->applyCrop();
         $this->applyFlipRotation();
         $this->applyResize();
@@ -172,9 +175,6 @@ class FileRobotMagick
             }
             $this->{$method}();
         }
-
-        // Orient the image
-        $this->image->autoOrient();
 
         return $this->image;
     }
