@@ -192,6 +192,9 @@ class TimelineWrite
         ;
         $record = $query->executeQuery()->fetch();
 
+        // Begin transaction
+        $this->connection->beginTransaction();
+
         // Delete all records regardless of existence
         foreach (DELETE_TABLES as $table) {
             $query = $this->connection->getQueryBuilder();
@@ -205,6 +208,9 @@ class TimelineWrite
         if ($record && ($cid = (int) $record['mapcluster']) > 0) {
             $this->mapRemoveFromCluster($cid, (float) $record['lat'], (float) $record['lon']);
         }
+
+        // Commit transaction
+        $this->connection->commit();
     }
 
     /**
