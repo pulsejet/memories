@@ -214,6 +214,31 @@ class TimelineWrite
     }
 
     /**
+     * Clean up the table for entries not present in filecache.
+     */
+    public function cleanupStale(): void
+    {
+        // Begin transaction
+        $this->connection->beginTransaction();
+
+        // Existence clause
+        $clause = 'SELECT 1 FROM *PREFIX*filecache AS f
+                   WHERE f.fileid=m.fileid
+                   AND f.path NOT LIKE "files_trashbin/%"';
+
+        // Delete all stale records
+        foreach (DELETE_TABLES as $table) {
+            // Query builder doesn't add the table to delete from,
+            // so we use need to use raw SQL here :/
+            $sql = "DELETE m FROM *PREFIX*{$table} m WHERE NOT EXISTS ({$clause})";
+            $this->connection->executeStatement($sql);
+        }
+
+        // Commit transaction
+        $this->connection->commit();
+    }
+
+    /**
      * Clear the entire index. Does not need confirmation!
      *
      * @param File $file

@@ -61,6 +61,7 @@ class IndexJob extends TimedJob
         try {
             \OCA\Memories\Exif::ensureStaticExiftoolProc();
             $this->indexAllUsers();
+            $this->service->cleanupStale();
             $this->log('Indexing completed successfully', 'success');
         } catch (Service\ProcessClosedException $e) {
             $this->log('Indexing process stopped before completion. Will continue on next run', 'info');

@@ -124,6 +124,9 @@ class Index extends Command
             // Run the indexer
             $this->runIndex();
 
+            // Clean up the index
+            $this->indexer->cleanupStale();
+
             return 0;
         } catch (\Exception $e) {
             $this->output->writeln("<error>{$e->getMessage()}</error>");

@@ -211,6 +211,15 @@ class Index
     }
 
     /**
+     * Cleanup all stale entries (passthrough to timeline write).
+     */
+    public function cleanupStale(): void
+    {
+        $this->log('Cleaning up stale index entries'.PHP_EOL);
+        $this->timelineWrite->cleanupStale();
+    }
+
+    /**
      * Get total number of files that are indexed.
      */
     public function getIndexedCount()
