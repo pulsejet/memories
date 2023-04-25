@@ -13,6 +13,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import { subscribe, unsubscribe } from '@nextcloud/event-bus';
+
 import UserConfig from '../mixins/UserConfig';
 import TopMatter from './top-matter/TopMatter.vue';
 import ClusterGrid from './ClusterGrid.vue';
@@ -48,6 +50,14 @@ export default defineComponent({
 
   mounted() {
     this.routeChange();
+  },
+
+  created() {
+    subscribe(this.config_eventName, this.routeChange);
+  },
+
+  beforeDestroy() {
+    unsubscribe(this.config_eventName, this.routeChange);
   },
 
   watch: {
