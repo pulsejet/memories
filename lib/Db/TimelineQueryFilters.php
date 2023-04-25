@@ -33,7 +33,7 @@ trait TimelineQueryFilters
 
     public function transformVideoFilter(IQueryBuilder &$query, bool $aggregate)
     {
-        $query->andWhere($query->expr()->eq('m.isvideo', $query->expr()->literal(true, \PDO::PARAM_BOOL)));
+        $query->andWhere($query->expr()->eq('m.isvideo', $query->expr()->literal(1)));
     }
 
     public function transformLimit(IQueryBuilder &$query, bool $aggregate, int $limit)

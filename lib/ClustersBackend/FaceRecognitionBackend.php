@@ -258,7 +258,7 @@ class FaceRecognitionBackend extends Backend
 
         // By default it shows the people who were not hidden
         if (!$show_hidden) {
-            $query->andWhere($query->expr()->eq('frp.is_visible', $query->expr()->literal(true, \PDO::PARAM_BOOL)));
+            $query->andWhere($query->expr()->eq('frp.is_visible', $query->expr()->literal(1)));
         }
 
         // ORDER by number of faces in cluster and id for response stability.

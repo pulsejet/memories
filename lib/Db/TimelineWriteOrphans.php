@@ -80,7 +80,7 @@ trait TimelineWriteOrphans
         $query = $this->connection->getQueryBuilder();
         $query->select(...$fields)
             ->from('memories')
-            ->where($query->expr()->eq('orphan', $query->expr()->literal(true, IQueryBuilder::PARAM_BOOL)))
+            ->where($query->expr()->eq('orphan', $query->expr()->literal(1)))
             ->setMaxResults($count)
         ;
 
