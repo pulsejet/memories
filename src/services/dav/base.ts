@@ -5,6 +5,7 @@ import axios from '@nextcloud/axios';
 
 import { IFileInfo, IPhoto } from '../../types';
 import { genFileInfo } from '../FileUtils';
+import { API } from '../API';
 import { getAlbumFileInfos } from './albums';
 import * as utils from '../Utils';
 import client from '../DavClient';
@@ -167,7 +168,7 @@ async function extendWithLivePhotos(photos: IPhoto[]) {
       photos
         .filter((p) => p.liveid && !p.liveid.startsWith('self__'))
         .map(async (p) => {
-          const url = utils.getLivePhotoVideoUrl(p, false) + '&format=json';
+          const url = API.Q(utils.getLivePhotoVideoUrl(p, false), { format: 'json' });
           try {
             const response = await axios.get(url);
             const data = response.data;

@@ -164,31 +164,22 @@ class VideoController extends GenericApiController
                 // Read file from offset to end
                 $blob = file_get_contents($path, false, null, $offset);
             } else {
-                // Get stored video file (Apple MOV)
-                $lp = $this->timelineQuery->getLivePhoto($fileid);
-                if (!$lp || $lp['liveid'] !== $liveid) {
-                    throw Exceptions::NotFound('live video entry');
-                }
-
-                // Get and return file
-                $liveFileId = (int) $lp['fileid'];
-                $files = $this->rootFolder->getById($liveFileId);
-                if (0 === \count($files)) {
+                $liveFile = $this->getClosestLiveVideo($file);
+                if (null === $liveFile) {
                     throw Exceptions::NotFound('live video file');
                 }
-                $liveFile = $files[0];
 
-                if ($liveFile instanceof File) {
-                    // Requested only JSON info
-                    if ('json' === $format) {
-                        return new JSONResponse($lp);
-                    }
-
-                    $name = $liveFile->getName();
-                    $blob = $liveFile->getContent();
-                    $mime = $liveFile->getMimeType();
-                    $liveVideoPath = $liveFile->getStorage()->getLocalFile($liveFile->getInternalPath());
+                // Requested only JSON info
+                if ('json' === $format) {
+                    return new JSONResponse([
+                        'fileid' => $liveFile->getId(),
+                    ]);
                 }
+
+                $name = $liveFile->getName();
+                $blob = $liveFile->getContent();
+                $mime = $liveFile->getMimeType();
+                $liveVideoPath = $liveFile->getStorage()->getLocalFile($liveFile->getInternalPath());
             }
 
             // Data not found
@@ -346,5 +337,66 @@ class VideoController extends GenericApiController
         }
 
         return json_decode($response, true);
+    }
+
+    /**
+     * Get the closest live video to the given file.
+     */
+    private function getClosestLiveVideo(File $file): ?File
+    {
+        // Get stored video file (Apple MOV)
+        $liveRecords = $this->timelineQuery->getLivePhotos($file->getId());
+
+        // Get file paths for all live photos
+        $liveFiles = array_map(fn ($r) => $this->rootFolder->getById((int) $r['fileid']), $liveRecords);
+        $liveFiles = array_filter($liveFiles, fn ($files) => \count($files) > 0 && $files[0] instanceof File);
+        $liveFiles = array_map(fn ($files) => $files[0], $liveFiles);
+
+        // Should be filtered enough by now
+        if (!\count($liveFiles)) {
+            return null;
+        }
+
+        // All paths including the image and videos need to be processed
+        $paths = array_map(function (File $file) {
+            $path = $file->getPath();
+            $filename = strtolower($file->getName());
+
+            // Remove extension so the filename itself counts in the path
+            if (str_contains($filename, '.')) {
+                $filename = substr($filename, 0, strrpos($filename, '.'));
+            }
+
+            // Get components with the filename as lowercase
+            $components = explode('/', $path);
+            if (($l = \count($components)) > 0) {
+                $components[$l - 1] = $filename;
+            }
+
+            return $components;
+        }, array_merge($liveFiles, [$file]));
+
+        // Find closest path match
+        $imagePath = array_pop($paths);
+        $scores = array_map(function ($path) use ($imagePath) {
+            $score = 0;
+            $length = min(\count($path), \count($imagePath));
+            for ($i = 0; $i < $length; ++$i) {
+                if ($path[$i] === $imagePath[$i]) {
+                    $score += 10000; // Exact match bonus
+                } else {
+                    $score -= \count($path) - $i; // Walk down penalty
+
+                    break;
+                }
+            }
+
+            return $score;
+        }, $paths);
+
+        // Sort by score
+        array_multisort($scores, SORT_ASC, $liveFiles);
+
+        return array_pop($liveFiles);
     }
 }

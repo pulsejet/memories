@@ -6,7 +6,7 @@ namespace OCA\Memories\Db;
 
 trait TimelineQueryLivePhoto
 {
-    public function getLivePhoto(int $fileid)
+    public function getLivePhotos(int $fileid)
     {
         $qb = $this->connection->getQueryBuilder();
         $qb->select('lp.fileid', 'lp.liveid')
@@ -17,6 +17,6 @@ trait TimelineQueryLivePhoto
             ))
         ;
 
-        return $qb->executeQuery()->fetch();
+        return $qb->executeQuery()->fetchAll();
     }
 }
