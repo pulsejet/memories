@@ -88,7 +88,7 @@ OC.L10N.register(
     "Disable background indexing" : "Indexierung im Hintergrund deaktivieren",
     "Indexing path (relative, all users)" : "Indexierungspfad (relativ, alle Benutzer)",
     "For advanced usage, perform a run of indexing by running:" : "Zur Umfassenden Nutzung  einen Indizierungslauf durchführen, indem Sie Folgendes ausführen:",
-    "Run index in parallel with 4 threads:" : "Index parallel mit 4 Threads ausführen:",
+    "Run index in parallel with 4 threads:" : "Indizierung parallel mit 4 Threads ausführen:",
     "Force re-indexing of all files:" : "Neuindizierung aller Dateien erzwingen:",
     "You can limit indexing by user and/or folder:" : "Sie können die Indizierung nach Benutzer und/oder Ordner einschränken:",
     "Clear all existing index tables:" : "Alle vorhandenen Indextabellen löschen:",

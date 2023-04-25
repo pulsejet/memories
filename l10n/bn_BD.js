@@ -12,6 +12,7 @@ OC.L10N.register(
     "Favorite" : "প্রিয়জন",
     "General" : "সাধারণ",
     "Close" : "বন্ধ",
+    "Unknown" : "অজানা",
     "Back" : "পেছনে যাও",
     "Save" : "সংরক্ষণ",
     "Month" : "মাস",
