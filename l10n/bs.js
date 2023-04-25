@@ -10,6 +10,7 @@ OC.L10N.register(
     "Download" : "Preuzmi",
     "Favorite" : "Favorit",
     "Close" : "Zatvori",
+    "Unknown" : "Nepoznato",
     "Save" : "Spremi",
     "Month" : "Mjesec",
     "Day" : "Dan",

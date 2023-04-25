@@ -14,6 +14,7 @@ OC.L10N.register(
     "View in folder" : "Diskwel en teuliad",
     "General" : "Hollek",
     "Close" : "Seriñ",
+    "Unknown" : "Dianv",
     "Copy public link" : "Eilañ al liamm foran",
     "Public link" : "Liamm publik",
     "Back" : "Distro",
