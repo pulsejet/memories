@@ -198,7 +198,7 @@ class AlbumsQuery
             ->innerJoin('pa', $this->collaboratorsTable(), 'pc', $query->expr()->andX(
                 $query->expr()->eq('pc.album_id', 'pa.album_id'),
                 $query->expr()->eq('collaborator_id', $query->createNamedParameter($token)),
-                $query->expr()->eq('collaborator_type', $query->createNamedParameter(3)), // = TYPE_LINK
+                $query->expr()->eq('collaborator_type', $query->expr()->literal(3, \PDO::PARAM_INT)), // = TYPE_LINK
             ))
         ;
 

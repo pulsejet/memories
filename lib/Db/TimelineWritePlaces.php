@@ -158,7 +158,7 @@ trait TimelineWritePlaces
         $query->select('name')
             ->from('memories_planet')
             ->where($query->expr()->in('osm_id', $query->createNamedParameter($osmIds, IQueryBuilder::PARAM_INT_ARRAY)))
-            ->andWhere($query->expr()->eq('admin_level', $query->createNamedParameter(-7, IQueryBuilder::PARAM_INT)))
+            ->andWhere($query->expr()->eq('admin_level', $query->expr()->literal(-7, IQueryBuilder::PARAM_INT)))
         ;
 
         // Get name of timezone

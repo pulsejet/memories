@@ -253,12 +253,12 @@ class FaceRecognitionBackend extends Backend
 
         // By default hides individual faces when they have no name.
         if (!$show_singles) {
-            $query->having($query->expr()->gt($count, $query->createNamedParameter(1)));
+            $query->having($query->expr()->gt($count, $query->expr()->literal(1, \PDO::PARAM_INT)));
         }
 
         // By default it shows the people who were not hidden
         if (!$show_hidden) {
-            $query->andWhere($query->expr()->eq('frp.is_visible', $query->createNamedParameter(true)));
+            $query->andWhere($query->expr()->eq('frp.is_visible', $query->expr()->literal(true, \PDO::PARAM_BOOL)));
         }
 
         // ORDER by number of faces in cluster and id for response stability.

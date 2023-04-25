@@ -72,7 +72,7 @@ class PlacesBackend extends Backend
         $query->select('e.osm_id', $count)->from('memories_planet', 'e');
 
         // WHERE these are not special clusters (e.g. timezone)
-        $query->where($query->expr()->gt('e.admin_level', $query->createNamedParameter(0, \PDO::PARAM_INT)));
+        $query->where($query->expr()->gt('e.admin_level', $query->expr()->literal(0, \PDO::PARAM_INT)));
 
         // WHERE there are items with this osm_id
         $query->innerJoin('e', 'memories_places', 'mp', $query->expr()->eq('mp.osm_id', 'e.osm_id'));

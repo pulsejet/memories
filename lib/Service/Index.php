@@ -155,7 +155,7 @@ class Index
                 $query->leftJoin('f', $table, $alias, $query->expr()->andX(
                     $query->expr()->eq('f.fileid', "{$alias}.fileid"),
                     $query->expr()->eq('f.mtime', "{$alias}.mtime"),
-                    $query->expr()->eq("{$alias}.orphan", $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL))
+                    $query->expr()->eq("{$alias}.orphan", $query->expr()->literal(false, IQueryBuilder::PARAM_BOOL))
                 ));
 
                 $query->andWhere($query->expr()->isNull("{$alias}.fileid"));

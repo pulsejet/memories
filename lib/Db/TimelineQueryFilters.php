@@ -33,7 +33,7 @@ trait TimelineQueryFilters
 
     public function transformVideoFilter(IQueryBuilder &$query, bool $aggregate)
     {
-        $query->andWhere($query->expr()->eq('m.isvideo', $query->createNamedParameter('1')));
+        $query->andWhere($query->expr()->eq('m.isvideo', $query->expr()->literal(true, \PDO::PARAM_BOOL)));
     }
 
     public function transformLimit(IQueryBuilder &$query, bool $aggregate, int $limit)
@@ -59,9 +59,9 @@ trait TimelineQueryFilters
         return $query->createFunction(
             $query->getConnection()->getQueryBuilder()->select('id')->from('vcategory', 'vc')->where(
                 $query->expr()->andX(
-                    $query->expr()->eq('type', $query->createNamedParameter('files')),
+                    $query->expr()->eq('type', $query->expr()->literal('files')),
                     $query->expr()->eq('uid', $query->createNamedParameter(Util::getUID())),
-                    $query->expr()->eq('category', $query->createNamedParameter(ITags::TAG_FAVORITE)),
+                    $query->expr()->eq('category', $query->expr()->literal(ITags::TAG_FAVORITE)),
                 )
             )->getSQL()
         );

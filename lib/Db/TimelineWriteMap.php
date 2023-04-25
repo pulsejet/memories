@@ -122,7 +122,7 @@ trait TimelineWriteMap
         $query = $this->connection->getQueryBuilder();
         $query->insert('memories_mapclusters')
             ->values([
-                'point_count' => $query->createNamedParameter(1, IQueryBuilder::PARAM_INT),
+                'point_count' => $query->expr()->literal(1, IQueryBuilder::PARAM_INT),
                 'lat_sum' => $query->createNamedParameter($lat, IQueryBuilder::PARAM_STR),
                 'lon_sum' => $query->createNamedParameter($lon, IQueryBuilder::PARAM_STR),
             ])

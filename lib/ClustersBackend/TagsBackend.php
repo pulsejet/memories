@@ -61,7 +61,7 @@ class TagsBackend extends Backend
         $tagId = $this->getSystemTagId($query, $tagName);
 
         $query->innerJoin('m', 'systemtag_object_mapping', 'stom', $query->expr()->andX(
-            $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
+            $query->expr()->eq('stom.objecttype', $query->expr()->literal('files')),
             $query->expr()->eq('stom.objectid', 'm.objectid'),
             $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tagId)),
         ));
@@ -74,12 +74,12 @@ class TagsBackend extends Backend
         // SELECT visible tag name and count of photos
         $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
         $query->select('st.id', 'st.name', $count)->from('systemtag', 'st')->where(
-            $query->expr()->eq('visibility', $query->createNamedParameter(1)),
+            $query->expr()->eq('visibility', $query->expr()->literal(1, \PDO::PARAM_INT)),
         );
 
         // WHERE there are items with this tag
         $query->innerJoin('st', 'systemtag_object_mapping', 'stom', $query->expr()->andX(
-            $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
+            $query->expr()->eq('stom.objecttype', $query->expr()->literal('files')),
             $query->expr()->eq('stom.systemtagid', 'st.id'),
         ));
 
@@ -121,7 +121,7 @@ class TagsBackend extends Backend
             'systemtag_object_mapping',
             'stom'
         )->where(
-            $query->expr()->eq('stom.objecttype', $query->createNamedParameter('files')),
+            $query->expr()->eq('stom.objecttype', $query->expr()->literal('files')),
             $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tagId)),
         );
 
@@ -147,7 +147,7 @@ class TagsBackend extends Backend
         $res = $sqb->select('id')->from('systemtag')->where(
             $sqb->expr()->andX(
                 $sqb->expr()->eq('name', $sqb->createNamedParameter($tagName)),
-                $sqb->expr()->eq('visibility', $sqb->createNamedParameter(1)),
+                $sqb->expr()->eq('visibility', $sqb->expr()->literal(1, \PDO::PARAM_INT)),
             )
         )->executeQuery()->fetchOne();
 
