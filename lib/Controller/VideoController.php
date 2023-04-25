@@ -196,6 +196,11 @@ class VideoController extends GenericApiController
                 throw Exceptions::NotFound('live video data');
             }
 
+            // Cannot return JSON if it is not a file
+            if ('json' === $format) {
+                throw Exceptions::BadRequest('Invalid format');
+            }
+
             // Transcode video if allowed
             if ($transcode && !$this->config->getSystemValue('memories.vod.disable', true)) {
                 // If video path not given, write to temp file
