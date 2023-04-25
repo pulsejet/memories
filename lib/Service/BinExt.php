@@ -131,11 +131,10 @@ class BinExt
             // get target file path
             $path = realpath(__DIR__."/../../exiftool-bin/exiftool-{$arch}-{$libc}");
 
-            // Set config
-            Util::setSystemConfig('memories.exiftool', $path);
-
             // make sure it exists
-            if (file_exists($path)) {
+            if ($path && file_exists($path)) {
+                Util::setSystemConfig('memories.exiftool', $path);
+
                 return $path;
             }
         }
