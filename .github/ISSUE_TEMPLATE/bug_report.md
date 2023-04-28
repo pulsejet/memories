@@ -8,12 +8,12 @@ assignees: ''
 
 **🛑 READ THE FOLLOWING BEFORE YOU CONTINUE! 🛑**
 
-All bugs must follow the issue template below, or they will be closed without triage.  
+All bugs _must_ follow the issue template below, or they will be closed without triage.  
 If it is a help request, you might want to try the [Discord community](https://discord.gg/7Dr9f9vNjJ) first.  
 Make the following items are true before filing a bug:
 
 - You are using the latest version of the app.
-- You tried and can replicate the bug consistently.
+- You tried and can replicate the bug.
 - The problem persists after clearing browser cache.
 - You have followed the [configuration steps](https://github.com/pulsejet/memories/wiki/Configuration).
 - You have searched the [open issues](https://github.com/pulsejet/memories/issues)
@@ -32,11 +32,13 @@ Steps to reproduce the behavior:
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Platform (please complete the following information):**
+**Platform:**
 
 - OS: [e.g. iOS]
-- Browser [e.g. chrome, safari]
-- Version [e.g. 4.1.0]
+- Browser: [e.g. Chrome, Safari]
+- Memories Version: [e.g. 4.1.0]
+- Nextcloud Version: [e.g. 25.0.6]
+- PHP Version: [e.g. 8.1]
 
 **Additional context**
 Add any other context about the problem here.
