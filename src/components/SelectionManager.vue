@@ -203,14 +203,13 @@ export default defineComponent({
     ];
   },
 
+  beforeDestroy() {
+    this.setHasTopBar(false);
+  },
+
   watch: {
-    show() {
-      const klass = 'has-top-bar';
-      if (this.show) {
-        document.body.classList.add(klass);
-      } else {
-        document.body.classList.remove(klass);
-      }
+    show(value: boolean) {
+      this.setHasTopBar(value);
     },
   },
 
@@ -267,6 +266,11 @@ export default defineComponent({
     selectionChanged() {
       this.show = this.selection.size > 0;
       this.size = this.selection.size;
+    },
+
+    /** Set the has-top-bar class on the body */
+    setHasTopBar(has: boolean) {
+      document.body.classList.toggle('has-top-bar', has);
     },
 
     /** Is this fileid (or anything if not specified) selected */
