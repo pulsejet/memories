@@ -1,9 +1,6 @@
 <template>
-  <div class="top-matter-container" v-if="type">
-    <FolderTopMatter v-if="type === 1" />
-    <ClusterTopMatter v-else-if="type === 2" />
-    <FaceTopMatter v-else-if="type === 3" />
-    <AlbumTopMatter v-else-if="type === 4" />
+  <div class="top-matter-container" v-if="currentmatter">
+    <component :is="currentmatter" />
   </div>
 </template>
 
@@ -38,6 +35,23 @@ export default defineComponent({
 
   mounted() {
     this.setTopMatter();
+  },
+
+  computed: {
+    currentmatter() {
+      switch (this.type) {
+        case TopMatterType.FOLDER:
+          return FolderTopMatter;
+        case TopMatterType.ALBUM:
+          return AlbumTopMatter;
+        case TopMatterType.CLUSTER:
+          return ClusterTopMatter;
+        case TopMatterType.FACE:
+          return FaceTopMatter;
+        default:
+          return null;
+      }
+    },
   },
 
   methods: {
