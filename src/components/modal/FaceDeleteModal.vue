@@ -77,9 +77,9 @@ export default defineComponent({
     async save() {
       try {
         if (this.$route.name === 'recognize') {
-          await client.deleteFile(`/recognize/${this.user}/faces/${this.name}`);
+          await dav.recognizeDeleteFace(this.user, this.name);
         } else {
-          await dav.setVisibilityPeopleFaceRecognition(this.name, false);
+          await dav.faceRecognitionSetPersonVisibility(this.name, false);
         }
         this.$router.push({ name: this.$route.name as string });
         this.close();

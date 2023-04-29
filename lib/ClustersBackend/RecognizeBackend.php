@@ -57,9 +57,13 @@ class RecognizeBackend extends Backend
 
     public function transformDayQuery(&$query, bool $aggregate): void
     {
-        $faceStr = (string) $this->request->getParam('recognize');
+        // Check if Recognize is enabled
+        if (!$this->isEnabled()) {
+            throw \OCA\Memories\Exceptions::NotEnabled('Recognize');
+        }
 
         // Get name and uid of face user
+        $faceStr = (string) $this->request->getParam('recognize');
         $faceNames = explode('/', $faceStr);
         if (2 !== \count($faceNames)) {
             throw new \Exception('Invalid face query');

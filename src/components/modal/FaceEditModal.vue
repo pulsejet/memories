@@ -89,12 +89,9 @@ export default defineComponent({
     async save() {
       try {
         if (this.$route.name === 'recognize') {
-          await client.moveFile(
-            `/recognize/${this.user}/faces/${this.oldName}`,
-            `/recognize/${this.user}/faces/${this.name}`
-          );
+          await dav.recognizeRenameFace(this.user, this.oldName, this.name);
         } else {
-          await dav.renamePeopleFaceRecognition(this.oldName, this.name);
+          await dav.faceRecognitionRenamePerson(this.oldName, this.name);
         }
         this.$router.push({
           name: this.$route.name as string,

@@ -801,17 +801,23 @@ export default defineComponent({
 
       // Check photo ownership
       if (this.$route.params.user !== getCurrentUser()?.uid) {
-        showError(
-          this.t('memories', 'Only user "{user}" can update this person', {
-            user,
-          })
-        );
+        showError(this.t('memories', 'Only user "{user}" can update this person', { user }));
         return;
       }
 
-      // Run query
-      for await (let delIds of dav.removeFaceImages(<string>user, <string>name, Array.from(selection.values()))) {
-        this.deleteSelectedPhotosById(delIds, selection);
+      // Make map to get back photo from faceid
+      const map = new Map<number, IPhoto>();
+      for (const photo of selection.values()) {
+        if (photo.faceid) {
+          map.set(photo.faceid, photo);
+        }
+      }
+      const photos = Array.from(map.values());
+
+      // Run WebDAV query
+      for await (let delIds of dav.recognizeDeleteFaceImages(user, name, photos)) {
+        const fileIds = delIds.map((id) => map.get(id)?.fileid ?? 0).filter((id) => id);
+        this.deleteSelectedPhotosById(fileIds, selection);
       }
     },
 

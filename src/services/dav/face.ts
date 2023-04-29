@@ -11,7 +11,12 @@ export async function getFaceList(app: 'recognize' | 'facerecognition') {
   return (await axios.get<IFace[]>(API.FACE_LIST(app))).data;
 }
 
-export async function updatePeopleFaceRecognition(name: string, params: object) {
+/**
+ * Update a person or cluster in face recognition
+ * @param name Name of face (or ID)
+ * @param params Parameters to update
+ */
+export async function faceRecognitionUpdatePerson(name: string, params: object) {
   if (Number.isInteger(Number(name))) {
     return await axios.put(generateUrl(`/apps/facerecognition/api/2.0/cluster/${name}`), params);
   } else {
@@ -19,16 +24,22 @@ export async function updatePeopleFaceRecognition(name: string, params: object) 
   }
 }
 
-export async function renamePeopleFaceRecognition(name: string, newName: string) {
-  return await updatePeopleFaceRecognition(name, {
-    name: newName,
-  });
+/**
+ * Rename a face in face recognition
+ * @param name Name of face (or ID)
+ * @param target Target name of face
+ */
+export async function faceRecognitionRenamePerson(name: string, target: string) {
+  return await faceRecognitionUpdatePerson(name, { name: target });
 }
 
-export async function setVisibilityPeopleFaceRecognition(name: string, visibility: boolean) {
-  return await updatePeopleFaceRecognition(name, {
-    visible: visibility,
-  });
+/**
+ * Set visibility of a face
+ * @param name Name of face (or ID)
+ * @param visible Visibility of face
+ */
+export async function faceRecognitionSetPersonVisibility(name: string, visible: boolean) {
+  return await faceRecognitionUpdatePerson(name, { visible });
 }
 
 /**
@@ -37,19 +48,19 @@ export async function setVisibilityPeopleFaceRecognition(name: string, visibilit
  * @param user User ID of face
  * @param name Name of face (or ID)
  * @param photos List of photos to remove
- * @returns Generator
+ * @returns Generator for face IDs
  */
-export async function* removeFaceImages(user: string, name: string, photos: IPhoto[]) {
+export async function* recognizeDeleteFaceImages(user: string, name: string, photos: IPhoto[]) {
   // Remove each file
-  const calls = photos.map((f) => async () => {
+  const calls = photos.map((p) => async () => {
     try {
-      await client.deleteFile(`/recognize/${user}/faces/${name}/${f.fileid}-${f.basename}`);
-      return f.fileid;
+      await client.deleteFile(`/recognize/${user}/faces/${name}/${p.faceid}-${p.basename}`);
+      return p.faceid!;
     } catch (e) {
       console.error(e);
       showError(
         t('memories', 'Failed to remove {filename} from face.', {
-          filename: f.basename ?? f.fileid,
+          filename: p.basename ?? p.fileid,
         })
       );
       return 0;
@@ -57,4 +68,57 @@ export async function* removeFaceImages(user: string, name: string, photos: IPho
   });
 
   yield* base.runInParallel(calls, 10);
+}
+
+/**
+ * Move faces from one face to another
+ *
+ * @param user User ID of face
+ * @param face Name of face (or ID)
+ * @param target Name of target face (or ID)
+ * @param photos List of photos to move
+ * @returns Generator for face IDs
+ */
+export async function* recognizeMoveFaceImages(user: string, face: string, target: string, photos: IPhoto[]) {
+  // Remove each file
+  const calls = photos.map((p) => async () => {
+    try {
+      await client.moveFile(
+        `/recognize/${user}/faces/${face}/${p.faceid}-${p.basename}`,
+        `/recognize/${user}/faces/${target}/${p.faceid}-${p.basename}`
+      );
+      return p.faceid!;
+    } catch (e) {
+      console.error(e);
+      showError(
+        t('memories', 'Failed to move {filename} from face.', {
+          filename: p.basename ?? p.fileid,
+        })
+      );
+      return 0;
+    }
+  });
+
+  yield* base.runInParallel(calls, 10);
+}
+
+/**
+ * Remove a face entirely
+ *
+ * @param user User ID of face
+ * @param name Name of face (or ID)
+ */
+export async function recognizeDeleteFace(user: string, name: string) {
+  return await client.deleteFile(`/recognize/${user}/faces/${name}`);
+}
+
+/**
+ * Rename a face in recognize
+ *
+ * @param user User ID of face
+ * @param name Name of face (or ID)
+ * @param target Target name of face
+ */
+export async function recognizeRenameFace(user: string, name: string, target: string) {
+  await client.moveFile(`/recognize/${user}/faces/${name}`, `/recognize/${user}/faces/${target}`);
 }

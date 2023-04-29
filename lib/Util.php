@@ -92,7 +92,7 @@ class Util
         }
 
         $v = $appManager->getAppVersion('recognize');
-        if (!version_compare($v, '3.0.0-alpha', '>=')) {
+        if (!version_compare($v, '3.8.0', '>=')) {
             return false;
         }
 

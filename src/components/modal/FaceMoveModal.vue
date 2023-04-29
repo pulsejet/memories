@@ -89,14 +89,13 @@ export default defineComponent({
     async clickFace(face: IFace) {
       const user = this.$route.params.user || '';
       const name = this.$route.params.name || '';
-
-      const newName = String(face.name || face.cluster_id);
+      const target = String(face.name || face.cluster_id);
 
       if (
         !confirm(
-          this.t('memories', 'Are you sure you want to move the selected photos from {name} to {newName}?', {
+          this.t('memories', 'Are you sure you want to move the selected photos from {name} to {target}?', {
             name,
-            newName,
+            target,
           })
         )
       ) {
@@ -108,31 +107,19 @@ export default defineComponent({
         this.updateLoading(1);
 
         // Create map to return IPhoto later
-        let photoMap = new Map<number, IPhoto>();
-        for (const photo of this.photos) {
-          photoMap.set(photo.fileid, photo);
+        const map = new Map<number, IPhoto>();
+        for (const photo of this.photos.filter((p) => p.faceid)) {
+          map.set(photo.faceid!, photo);
         }
 
-        // Create move calls
-        const calls = this.photos.map((p) => async () => {
-          try {
-            await client.moveFile(
-              `/recognize/${user}/faces/${name}/${p.fileid}-${p.basename}`,
-              `/recognize/${face.user_id}/faces/${newName}/${p.fileid}-${p.basename}`
-            );
-            return photoMap.get(p.fileid);
-          } catch (e) {
-            console.error(e);
-            showError(this.t('memories', 'Error while moving {basename}', <any>p));
-          }
-        });
-        for await (const resp of dav.runInParallel(calls, 10)) {
-          const valid = resp.filter((r): r is IPhoto => r !== undefined);
-          this.moved(valid);
+        // Run WebDAV query
+        const photos = Array.from(map.values());
+        for await (let delIds of dav.recognizeMoveFaceImages(user, name, target, photos)) {
+          this.moved(delIds.filter((id) => id).map((id) => map.get(id)!));
         }
       } catch (error) {
         console.error(error);
-        showError(this.t('photos', 'Failed to move {name}.', { name }));
+        showError(this.t('photos', 'An error occured while moving photos from {name}.', { name }));
       } finally {
         this.updateLoading(-1);
         this.close();
