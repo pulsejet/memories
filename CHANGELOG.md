@@ -2,6 +2,14 @@
 
 This file is manually updated. Please file an issue if something is missing.
 
+## Unreleased
+
+- **Feature**: Allow creating new cluster in recognize while moving faces.
+- **Feature**: Allow specifying precise coordinates while editing GPS metadata.
+- **Feature**: Whitelist x-msvideo mime type.
+- **Fix**: Improved handling of duplicate Live Photos.
+- **Breaking**: Recognize v3.8 (minimum) is now required.
+
 ## v5.0.0 (2023-04-16)
 
 Note: this is a major release and may introduce breaking changes to your workflow.
