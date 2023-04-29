@@ -113,7 +113,7 @@ OC.L10N.register(
     "Geometry support was not detected in your database" : "Geometrieunterstützung wurde in Ihrer Datenbank nicht erkannt",
     "MySQL-like geometry support was detected " : "MySQL-ähnliche Geometrieunterstützung wurde erkannt",
     "Postgres native geometry support was detected" : "Die native Postgres-Geometrieunterstützung wurde erkannt",
-    "Looks like the database is already setup. Are you sure you want to redownload planet data?" : "Die Datenbank scheint schon eingerichtet zu sein. Wollen Sie wirklich die Planetendaten erneut herunterladen?",
+    "Looks like the database is already setup. Are you sure you want to redownload planet data?" : "Die Datenbank scheint schon eingerichtet zu sein. Wollen Sie die Planetendaten erneut herunterladen?",
     "You are about to download the planet database. This may take a while." : "Sie sind dabei, die Planentendatenbank herunterzuladen. Dies kann etwas dauern.",
     "This may also cause all photos to be re-indexed!" : "Dies kann auch dazu führen, dass alle Fotos erneut indexiert werden!",
     "Video Streaming" : "Video-Streaming",
