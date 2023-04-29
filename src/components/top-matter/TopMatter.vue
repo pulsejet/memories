@@ -110,6 +110,14 @@ export default defineComponent({
       margin-right: 10px;
     }
 
+    /**
+     * Hide the actions when the selection manager is open.
+     * Having two action bars is confusing.
+     */
+    body.has-top-bar & {
+      visibility: hidden;
+    }
+
     span {
       cursor: pointer;
     }
