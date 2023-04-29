@@ -1,8 +1,11 @@
 # Changelog
 
-This file is manually updated. Please file an issue if something is missing.
+All notable changes to this project will be documented in this file.
 
-## Unreleased
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [v5.1.0] - 2023-04-29
 
 - **Feature**: Allow creating new cluster in recognize while moving faces.
 - **Feature**: Allow specifying precise coordinates while editing GPS metadata.
@@ -10,7 +13,7 @@ This file is manually updated. Please file an issue if something is missing.
 - **Fix**: Improved handling of duplicate Live Photos.
 - **Breaking**: Recognize v3.8 (minimum) is now required.
 
-## v5.0.0 (2023-04-16)
+## [v5.0.0] - 2023-04-16
 
 Note: this is a major release and may introduce breaking changes to your workflow.
 
@@ -38,11 +41,11 @@ Note: this is a major release and may introduce breaking changes to your workflo
   - This fixes multiple issues editing images especially in Firefox.
 - **Feature**: Significant performance improvements for the timeline view.
 
-## v4.13.1 (2023-04-03)
+## [v4.13.1] - 2023-04-03
 
 - **Feature**: "Direct" video playback will now fall back to HLS (transcoding) if playback fails (e.g. due to lack of browser support).
 
-## v4.13.0 (2023-04-03)
+## [v4.13.0] - 2023-04-03
 
 - **Feature**: Use GPS location data for timezone calculation.  
   Many cameras do not store the timezone in EXIF data. This feature allows Memories to use the GPS location data to calculate the timezone. To take advantage of this, you will need to run `occ memories:places-setup` followed by `occ memories:index --clear` (or `occ memories:index -f`) to reindex your photos.
@@ -50,19 +53,19 @@ Note: this is a major release and may introduce breaking changes to your workflo
 - **Feature**: The map view now has a much more flexible layout, especially on mobile.
 - **Feature**: Support for Google MVIMG photos ([#468](https://github.com/pulsejet/memories/issues/468))
 
-## v4.12.4 + v4.12.5 (2023-03-23)
+## [v4.12.5] - 2023-03-23
 
 - These releases significantly overhaul the application logic for better maintainability. If you run into any regressions, please [file a bug report](https://github.com/pulsejet/memories/issues).
 
-## v4.12.2 (2023-03-17)
+## [v4.12.2] - 2023-03-17
 
 - **Feature**: Allow migrating Google Takeout metadata to EXIF ([#430](https://github.com/pulsejet/memories/issues/430))
 
-## v4.12.1 (2023-03-15)
+## [v4.12.1] - 2023-03-15
 
 - **Feature**: Load full image on zoom ([#266](https://github.com/pulsejet/memories/issues/266))
 
-## v4.12.0 (2023-03-10)
+## [v4.12.0] - 2023-03-10
 
 **This release drops support for Nextcloud 24.**
 
@@ -85,7 +88,7 @@ You may need to clear browser cache to use location search.
 - **Bugfix**: Sidebar now shows metadata on albums and public shares ([#320](https://github.com/pulsejet/memories/issues/320)).
 - Other fixes and features ([milestone](https://github.com/pulsejet/memories/milestone/9?closed=1))
 
-## v4.11.0, v3.11.0 (2023-02-10)
+## [v4.11.0] - 2023-02-10
 
 - **Feature**: Show map of photos ([#396](https://github.com/pulsejet/memories/pull/396))  
   To index existing images, you must run `occ memories:index -f`
@@ -93,7 +96,7 @@ You may need to clear browser cache to use location search.
   To configure this feature, you need to run `occ memories:places-setup` followed by `occ memories:index -f`
 - Other minor fixes and features ([milestone](https://github.com/pulsejet/memories/milestone/7?closed=1))
 
-## v4.10.0, v3.10.0 (2023-01-17)
+## [v4.10.0] - 2023-01-17
 
 - **Feature**: Allow sharing albums using public links ([#274](https://github.com/pulsejet/memories/issues/274))
 - **Feature**: Allow sharing albums with groups ([#329](https://github.com/pulsejet/memories/issues/329))
@@ -102,7 +105,7 @@ You may need to clear browser cache to use location search.
 - Fix folder share title and remove footer ([#323](https://github.com/pulsejet/memories/issues/323))
 - Other minor fixes ([milestone](https://github.com/pulsejet/memories/milestone/6?closed=1))
 
-## v4.9.0, v3.9.0 (2022-12-08)
+## [v4.9.0] - 2022-12-08
 
 - **Important**: v4.9.0 comes with an optimization that greatly reduces CPU usage for preview serving. However, for best experience, the preview generator app is now **required** to be configured properly. Please install it from the app store.
 - **Feature**: Slideshow for photos and videos ([#217](https://github.com/pulsejet/memories/issues/217))
@@ -115,7 +118,7 @@ You may need to clear browser cache to use location search.
 - Fix native photo sharing ([#254](https://github.com/pulsejet/memories/issues/254), [#263](https://github.com/pulsejet/memories/issues/263))
 - Use larger previews in viewer (please see [these docs](https://github.com/pulsejet/memories/wiki/Configuration#preview-storage-considerations)) ([#226](https://github.com/pulsejet/memories/issues/226))
 
-## v4.8.0, v3.8.0 (2022-11-22)
+## [v4.8.0] - 2022-11-22
 
 - **Feature**: Support for Live Photos ([#124](https://github.com/pulsejet/memories/issues/124))
   - You need to run `occ memories:index --clear` to reindex Live Photos
@@ -127,7 +130,7 @@ You may need to clear browser cache to use location search.
 - Improved caching performance
   - Due to incorrect caching in previous versions, your browser cache may have become very large. You can clear it to save some space.
 
-## v4.7.0, v3.7.0 (2022-11-14)
+## [v4.7.0] - 2022-11-14
 
 - **Note**: you must run `occ memories:index -f` to take advantage of new features.
 - **Massively improved video performance**
@@ -141,7 +144,7 @@ You may need to clear browser cache to use location search.
 - Restore metadata after image edit ([#174](https://github.com/pulsejet/memories/issues/174))
 - Fix loss of resolution after image edit
 
-## v4.6.1, v3.6.1 (2022-11-07)
+## [v4.6.1] - 2022-11-07
 
 - **Feature**: Native sharing from the viewer (images only)
 - **Feature**: Deep linking to photos on opening viewer
@@ -150,49 +153,46 @@ You may need to clear browser cache to use location search.
 - Improvements to viewer UX
 - Restore image editor (see v4.6.0)
 
-## v4.6.0, v3.6.0 (2022-11-06)
+## [v4.6.0] - 2022-11-06
 
 - **Brand new photo viewer** with improved touch interface and UX
 - Improvements from v4.5.4 below
 - Known regressions: Photo Editor and Slideshow are not implemented yet
-
-## v4.5.4, v3.5.4 (skipped)
-
 - New layout for Albums view (date ascending, grouped by month)
 - Re-enable viewer editing and deletion
 
-## v4.5.2, v3.5.2 (2022-10-30)
+## [v4.5.2] - 2022-10-30
 
 - Improved scroller performance
 - Improved support for external storage and FreeBSD
 - Improved selection of photos
 
-## v4.5.0, v3.5.0 (2022-10-28)
+## [v4.5.0] - 2022-10-28
 
 - **Feature**: Album sharing to other Nextcloud users
 - **Feature**: Folder sharing with public link [#74](https://github.com/pulsejet/memories/issues/74)
 - Performance improvements and bug fixes
 
-## v4.4.1, v3.4.1 (2022-10-27)
+## [v4.4.1] - 2022-10-27
 
 - **Feature**: Albums support for Nextcloud 25 (alpha)
 - Performance improvements and bug fixes
 
-## v4.3.8, v3.3.8 (2022-10-26)
+## [v4.3.8] - 2022-10-26
 
 - **Feature**: Full screen viewer on desktop
 - **Feature**: Allow opening people and tags in new tab
 - Bugfix: Fix regression in performance with large number of files
 - Bugfix: Improve image quality on mobile
 
-## v4.3.7, v3.3.7 (2022-10-24)
+## [v4.3.7] - 2022-10-24
 
 - **Feature**: Support for RAW (must run `occ memories:index` after upgrade) with camera raw previews app ([#107](https://github.com/pulsejet/memories/issues/107))
 - **Feature**: Better settings experience.
 - **Feature**: Better first start experience.
 - Bug fixes for postgresql and mysql
 
-## v4.3.0, v3.3.0 (2022-10-22)
+## [v4.3.0] - 2022-10-22
 
 - **Note:** you must run `occ memories:index -f` after updating to take advantage of new features.
 - **Feature**: **Brand new tiled layout for photos**
@@ -206,71 +206,71 @@ You may need to clear browser cache to use location search.
 - Improve scroller performance
 - Improve faces view performance
 
-## v4.2.2, v3.2.2 (2022-10-12)
+## [v4.2.2] - 2022-10-12
 
 - Update to mobile layout with improved performance
 - Show how old photos are in `On this day`
 
-## v4.2.1, v3.2.1 (2022-10-11)
+## [v4.2.1] - 2022-10-11
 
 - Fix incorrect layout of `On this day`
 
-## v4.2.0, v3.2.0 (2022-10-11)
+## [v4.2.0] - 2022-10-11
 
 - Allow renaming and merging recognize faces
 - Bug fixes
 
-## v4.1.0, v3.1.0 (2022-10-08)
+## [v4.1.0] - 2022-10-08
 
 - First release for Nextcloud 25
 
-## v3.0.0 (2022-10-07)
+## [v3.0.0] - 2022-10-07
 
 - People tab with faces from recognize app
 - Tags tab with objects from recognize app
 - On this day tab
 - Bug fixes and performance improvements
 
-## v2.1.3 (2022-09-27)
+## [v2.1.3] - 2022-09-27
 
 - Bug fixes and optimized performance
 
-## v2.1.2 (2022-09-25)
+## [v2.1.2] - 2022-09-25
 
 - Breadcrumb navigation in folder view
 - Edit Exif date feature (use with care)
 - Archive photos function
 - Improved localization and performance
 
-## v2.0.0 (2022-09-23)
+## [v2.0.0] - 2022-09-23
 
 - **Note:** you must re-run `occ memories:index` after updating.
 - Support for external storage and shared folders for timeline.
 - Localization support. Many languages already available.
 - Select and favorite / unfavorite photos
 
-## v1.1.6 (2022-09-15)
+## [v1.1.6] - 2022-09-15
 
 - **New feature:** Select photos from an entire day together
 - **Fix:** Timeline with nested folders
 
-## v1.1.5 (2022-09-15)
+## [v1.1.5] - 2022-09-15
 
 - Fix for postgres
 - Fix for Exiftool crash
 
-## v1.1.1 - v1.1.4 (2022-09-13)
+## [v1.1.4] - 2022-09-13
 
 - PHP 7.4 support
 - Bug fixes
 
-## v1.1.0 (2022-09-13)
+## [v1.1.0] - 2022-09-13
 
 - Support for external storage
 - Favorites and Videos tabs
 - Improved performance
 - Better support for folder shares
 
-## v1.0.1 - v1.1.0 (2022-09-08)
+## [v1.0.1] - 2022-09-08
 
-- Initial releases
+- Initial release
