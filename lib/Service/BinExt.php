@@ -402,20 +402,14 @@ class BinExt
         return $ffmpegPath;
     }
 
-    public static function testFFmpeg(string $path, string $vername)
+    public static function testFFmpeg(string $path, string $name)
     {
         $version = shell_exec("{$path} -version");
-        if (!preg_match("/{$vername} version\\s+([0-9\\.]+)/", $version, $matches)) {
+        if (!preg_match("/{$name} version \\S*/", $version, $matches)) {
             throw new \Exception("failed to detect version, found {$version}");
         }
 
-        $minver = '4.0';
-        $semver = $matches[1];
-        if (!version_compare($semver, $minver, '>=')) {
-            throw new \Exception("version must be >= {$minver}, found {$semver}");
-        }
-
-        return $semver;
+        return explode(' ', $matches[0])[2];
     }
 
     public static function testSystemPerl(string $path): string
