@@ -2,28 +2,35 @@
 
 set -e
 
-exifver="12.58"
+SCRIPT=$(realpath "$0")
+SCRIPT_PATH=$(dirname "$SCRIPT")
+
+binExtVar() {
+    php -r "require '$SCRIPT_PATH/../lib/Service/BinExt.php'; echo \OCA\Memories\Service\BinExt::$1;"
+}
+
+EXIFTOOL_VER=$(binExtVar EXIFTOOL_VER)
+GOVOD_VER=$(binExtVar GOVOD_VER)
 
 rm -rf exiftool-bin
 mkdir -p exiftool-bin
 cd exiftool-bin
-echo "Getting exiftool $exifver"
-wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$exifver/exiftool-amd64-musl"
-wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$exifver/exiftool-amd64-glibc"
-wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$exifver/exiftool-aarch64-musl"
-wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$exifver/exiftool-aarch64-glibc"
+echo "Getting exiftool $EXIFTOOL_VER"
+wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$EXIFTOOL_VER/exiftool-amd64-musl"
+wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$EXIFTOOL_VER/exiftool-amd64-glibc"
+wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$EXIFTOOL_VER/exiftool-aarch64-musl"
+wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$EXIFTOOL_VER/exiftool-aarch64-glibc"
 chmod 755 *
 
-wget -q "https://github.com/exiftool/exiftool/archive/refs/tags/$exifver.zip"
-unzip -qq "$exifver.zip"
-mv "exiftool-$exifver" exiftool
+wget -q "https://github.com/exiftool/exiftool/archive/refs/tags/$EXIFTOOL_VER.zip"
+unzip -qq "$EXIFTOOL_VER.zip"
+mv "exiftool-$EXIFTOOL_VER" exiftool
 rm -rf *.zip exiftool/t exiftool/html exiftool/windows_exiftool
 chmod 755 exiftool/exiftool
 
-govod="0.1.1"
-echo "Getting go-vod $govod"
-wget -q "https://github.com/pulsejet/go-vod/releases/download/$govod/go-vod-amd64"
-wget -q "https://github.com/pulsejet/go-vod/releases/download/$govod/go-vod-aarch64"
+echo "Getting go-vod $GOVOD_VER"
+wget -q "https://github.com/pulsejet/go-vod/releases/download/$GOVOD_VER/go-vod-amd64"
+wget -q "https://github.com/pulsejet/go-vod/releases/download/$GOVOD_VER/go-vod-aarch64"
 chmod 755 go-vod-*
 
 cd ..
