@@ -112,3 +112,9 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+body.has-top-bar .face-top-matter .right-actions {
+  visibility: hidden;
+}
+</style>
