@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Feature**: Allow specifying precise coordinates while editing GPS metadata.
 - **Feature**: Whitelist x-msvideo mime type.
 - **Fix**: Improved handling of duplicate Live Photos.
+- **Fix**: Prevent zombie processes when running in Docker.
 - **Breaking**: Recognize v3.8 (minimum) is now required.
 
 ## [v5.0.0] - 2023-04-16

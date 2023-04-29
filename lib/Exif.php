@@ -27,6 +27,7 @@ class Exif
                 fclose(self::$staticPipes[1]);
                 fclose(self::$staticPipes[2]);
                 proc_terminate(self::$staticProc);
+                proc_close(self::$staticProc);
                 self::$staticProc = null;
                 self::$staticPipes = null;
             }
