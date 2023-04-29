@@ -5,7 +5,7 @@
     </template>
 
     <div class="outer">
-      <FaceList @select="clickFace" />
+      <FaceList :plus="true" @select="clickFace" />
     </div>
 
     <template #buttons>
@@ -29,7 +29,6 @@ import Cluster from '../frame/Cluster.vue';
 import FaceList from './FaceList.vue';
 
 import Modal from './Modal.vue';
-import client from '../../services/DavClient';
 import * as dav from '../../services/DavRequests';
 
 export default defineComponent({

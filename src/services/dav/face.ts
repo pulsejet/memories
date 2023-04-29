@@ -120,5 +120,12 @@ export async function recognizeDeleteFace(user: string, name: string) {
  * @param target Target name of face
  */
 export async function recognizeRenameFace(user: string, name: string, target: string) {
-  await client.moveFile(`/recognize/${user}/faces/${name}`, `/recognize/${user}/faces/${target}`);
+  return await client.moveFile(`/recognize/${user}/faces/${name}`, `/recognize/${user}/faces/${target}`);
+}
+
+/**
+ * Create a new face in recognize.
+ */
+export async function recognizeCreateFace(user: string, name: string) {
+  return await client.createDirectory(`/recognize/${user}/faces/${name}`);
 }

@@ -1,5 +1,9 @@
 <template>
-  <img :alt="alt" :src="dataSrc" @load="load" decoding="async" />
+  <!-- Directly use SVG element if possible -->
+  <div class="svg" v-if="svg" v-html="svg" />
+
+  <!-- Otherwise use img element -->
+  <img v-else :alt="alt" :src="dataSrc" @load="load" decoding="async" />
 </template>
 
 <script lang="ts">
@@ -44,6 +48,15 @@ export default defineComponent({
 
     // Free up the blob if it was locked
     this.freeBlob();
+  },
+
+  computed: {
+    svg() {
+      if (this.dataSrc.startsWith('data:image/svg+xml')) {
+        return window.atob(this.dataSrc.split(',')[1]);
+      }
+      return null;
+    },
   },
 
   methods: {
@@ -94,3 +107,10 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+div.svg > :deep svg {
+  width: 100%;
+  height: 100%;
+}
+</style>

@@ -11,7 +11,15 @@
       </NcTextField>
     </div>
 
-    <ClusterGrid v-if="list" :items="filteredList" :link="false" :maxSize="120" @click="click" />
+    <ClusterGrid
+      v-if="list"
+      :items="filteredList"
+      :maxSize="120"
+      :link="false"
+      :plus="plus"
+      @click="click"
+      @plus="addFace"
+    />
     <div v-else>
       {{ t('memories', 'Loading …') }}
     </div>
@@ -23,6 +31,7 @@ import { defineComponent } from 'vue';
 import { ICluster, IFace } from '../../types';
 import ClusterGrid from '../ClusterGrid.vue';
 
+import { showError } from '@nextcloud/dialogs';
 import NcTextField from '@nextcloud/vue/dist/Components/NcTextField';
 
 import * as dav from '../../services/DavRequests';
@@ -36,6 +45,13 @@ export default defineComponent({
     ClusterGrid,
     NcTextField,
     Magnify,
+  },
+
+  props: {
+    plus: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   data: () => ({
@@ -82,7 +98,37 @@ export default defineComponent({
       this.fuse = new Fuse(this.list, { keys: ['name'] });
     },
 
-    async click(face: IFace) {
+    async addFace() {
+      let name: string = '';
+
+      try {
+        // TODO: use a proper dialog
+        name = window.prompt(this.t('memories', 'Enter name of the new face'), '') ?? '';
+        if (!name) return;
+
+        // Create new directory in WebDAV
+        await dav.recognizeCreateFace(this.user, name);
+
+        return this.selectNew(name);
+      } catch (e) {
+        // Directory already exists
+        if (e.status === 405) return this.selectNew(name);
+
+        showError(this.t('memories', 'Failed to create face'));
+      }
+    },
+
+    selectNew(name: string) {
+      this.$emit('select', {
+        cluster_id: name,
+        cluster_type: 'recognize',
+        count: 0,
+        name: name,
+        user_id: this.user,
+      });
+    },
+
+    click(face: IFace) {
       this.$emit('select', face);
     },
   },

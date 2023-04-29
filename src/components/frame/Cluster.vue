@@ -1,6 +1,6 @@
 <template>
   <router-link draggable="false" class="cluster fill-block" :class="{ error }" :to="target" @click.native="click">
-    <div class="bbl">
+    <div class="bbl" v-if="data.count">
       <NcCounterBubble> {{ data.count }} </NcCounterBubble>
     </div>
     <div class="name">
@@ -9,7 +9,7 @@
     </div>
 
     <div class="previews fill-block" ref="previews">
-      <div class="img-outer">
+      <div class="img-outer" :class="{ plus }">
         <XImg
           draggable="false"
           class="fill-block"
@@ -33,6 +33,7 @@ import NcCounterBubble from '@nextcloud/vue/dist/Components/NcCounterBubble';
 import type { IAlbum, ICluster, IFace, IPhoto } from '../../types';
 import { getPreviewUrl } from '../../services/utils/helpers';
 import errorsvg from '../../assets/error.svg';
+import plussvg from '../../assets/plus.svg';
 
 import { API } from '../../services/API';
 
@@ -58,6 +59,7 @@ export default defineComponent({
   computed: {
     previewUrl() {
       if (this.error) return errorsvg;
+      if (this.plus) return plussvg;
 
       if (this.album) {
         const mock = {
@@ -85,6 +87,10 @@ export default defineComponent({
       }
 
       return '';
+    },
+
+    plus() {
+      return this.data.cluster_type === 'plus';
     },
 
     tag() {
@@ -212,6 +218,11 @@ img {
     overflow: hidden;
     display: inline-block;
     cursor: pointer;
+
+    &.plus {
+      background-color: var(--color-primary-element-light);
+      color: var(--color-primary);
+    }
 
     > img {
       object-fit: cover;

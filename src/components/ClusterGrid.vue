@@ -1,15 +1,16 @@
 <template>
   <RecycleScroller
     ref="recycler"
+    type-field="cluster_type"
+    key-field="cluster_id"
     class="grid-recycler hide-scrollbar-mobile"
     :class="{ empty: !items.length }"
-    :items="items"
+    :items="clusters"
     :skipHover="true"
     :buffer="400"
     :itemSize="itemSize"
     :gridItems="gridItems"
     :updateInterval="100"
-    key-field="cluster_id"
     @resize="resize"
   >
     <template v-slot="{ item }">
@@ -45,6 +46,10 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    plus: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   data: () => ({
@@ -56,9 +61,33 @@ export default defineComponent({
     this.resize();
   },
 
+  computed: {
+    clusters() {
+      const items = [...this.items];
+
+      // Add plus button if required
+      if (this.plus) {
+        items.unshift({
+          cluster_type: 'plus',
+          cluster_id: -1,
+          name: '',
+          count: 0,
+        });
+      }
+
+      return items;
+    },
+  },
+
   methods: {
     click(item: ICluster) {
-      this.$emit('click', item);
+      switch (item.cluster_type) {
+        case 'plus':
+          this.$emit('plus');
+          break;
+        default:
+          this.$emit('click', item);
+      }
     },
 
     resize() {
