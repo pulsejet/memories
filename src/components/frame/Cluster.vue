@@ -1,6 +1,6 @@
 <template>
   <router-link draggable="false" class="cluster fill-block" :class="{ error }" :to="target" @click.native="click">
-    <div class="bbl" v-if="data.count">
+    <div class="count-bubble" v-if="data.count">
       <NcCounterBubble> {{ data.count }} </NcCounterBubble>
     </div>
     <div class="name">
@@ -155,13 +155,12 @@ export default defineComponent({
 <style lang="scss" scoped>
 .cluster,
 .name,
-.bubble,
 img {
   cursor: pointer;
 }
 
 // Get rid of color of the bubble
-.cluster .bbl :deep .counter-bubble__counter {
+.cluster .count-bubble :deep .counter-bubble__counter {
   color: unset !important;
 }
 
@@ -193,7 +192,7 @@ img {
   }
 }
 
-.bbl {
+.count-bubble {
   z-index: 100;
   position: absolute;
   top: 6px;
