@@ -1,0 +1,32 @@
+site_name: Memories
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.tracking
+  palette:
+    primary: blue
+
+nav:
+  - Home: 'index.md'
+  - Configuration:
+      - 'config.md'
+      - 'file-types.md'
+      - 'hw-transcoding.md'
+      - 'system-config.md'
+  - FAQ:
+      - 'faq.md'
+      - 'memories-vs-photos.md'
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - pymdownx.highlight:
+      use_pygments: true
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
