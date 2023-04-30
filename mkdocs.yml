@@ -1,4 +1,6 @@
 site_name: Memories
+repo_url: https://github.com/pulsejet/memories
+
 theme:
   name: material
   features:
