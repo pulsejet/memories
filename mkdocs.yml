@@ -1,5 +1,6 @@
-site_name: Memories
+site_name: Nextcloud Memories
 repo_url: https://github.com/pulsejet/memories
+repo_name: pulsejet/memories
 
 theme:
   name: material
