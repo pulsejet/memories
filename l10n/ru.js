@@ -241,21 +241,6 @@ OC.L10N.register(
     "Failed to favorite files." : "Не удалось добавить файлы в избранное.",
     "Failed to favorite some files." : "Некоторые файлы не удалось добавить в избранное ",
     "Failed to favorite {fileName}." : "Не удалось добавить файл «{fileName}» в избранное.",
-    "Your Timeline" : "Ваша история",
-    "EXIF" : "EXIF",
-    "Edit Date/Time" : "Изменить дату и время",
-    "Edit EXIF Data" : "Редактировать EXIF",
-    "Move to another person" : "Объединить с другой меткой лица",
-    "You will find your friends soon. Please, be patient." : "Скоро вы найдете своих друзей. Пожалуйста, наберитесь терпения.",
-    "Face Recognition is disabled. Enable in settings to find your friends." : "Распознавание лиц отключено. Включите его в настройках для поиска своих друзей.",
-    "Processing … {n}/{m}" : "Обработка... {n}/{m}",
-    "Update Exif" : "Обновить EXIF",
-    "Loading data … {n}/{m}" : "Загрузка данных... {n}/{m}",
-    "Date Taken" : "Дата съемки",
-    "Share Folder" : "Опубликовать папку",
-    "Use the sidebar to share this folder." : "Чтобы опубликовать эту папку, воспользуйтесь боковым меню. ",
-    "Failed to get Exif data. Metadata may be lost!" : "Не удалось получить данные EXIF. Метаданные могут быть утеряны.",
-    "No Exif data found! Continue?" : "Данные EXIF не обнаружены. Продолжить?",
-    "Video sharing not supported yet" : "Публикация видео пока не поддерживается"
+    "Your Timeline" : "Ваша история"
 },
 "nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);");

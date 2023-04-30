@@ -215,12 +215,6 @@ OC.L10N.register(
     "Could not move {fileName}, target exists." : "Datoteke {fileName} ni mogoče premakniti, ker cilj že obstaja.",
     "Failed to move {fileName}." : "Premikanje datoteke {fileName} je spodletelo.",
     "Failed to download files" : "Prejemanje datotek je spodletelo.",
-    "Your Timeline" : "Vaša časovnica",
-    "EXIF" : "EXIF",
-    "Edit Date/Time" : "Uredi datum in čas",
-    "Edit EXIF Data" : "Uredi podatke EXIF",
-    "Update Exif" : "Posodobi EXIF",
-    "Loading data … {n}/{m}" : "Poteka nalaganje podatkov … {n}/{m}",
-    "Date Taken" : "Datum zajema"
+    "Your Timeline" : "Vaša časovnica"
 },
 "nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);");

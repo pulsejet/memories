@@ -145,14 +145,6 @@
     "Failed to delete files." : "Nepavyko ištrinti failų.",
     "Failed to delete {fileName}." : "Nepavyko ištrinti {fileName}.",
     "Failed to download files" : "Nepavyko atsisiųsti failų",
-    "Your Timeline" : "Jūsų laiko juostą",
-    "EXIF" : "EXIF",
-    "Edit Date/Time" : "Taisyti datą/laiką",
-    "Edit EXIF Data" : "Taisyti EXIF duomenis",
-    "Processing … {n}/{m}" : "Apdorojama… {n}/{m}",
-    "Update Exif" : "Atnaujinti EXIF",
-    "Loading data … {n}/{m}" : "Įkeliami duomenys… {n}/{m}",
-    "Share Folder" : "Bendrinti aplanką",
-    "No Exif data found! Continue?" : "Nerasta jokių EXIF duomenų! Tęsti?"
+    "Your Timeline" : "Jūsų laiko juostą"
 },"pluralForm" :"nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);"
 }
