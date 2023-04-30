@@ -8,7 +8,7 @@
           'Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:'
         )
       }}
-      <a target="_blank" href="https://github.com/pulsejet/memories/wiki/HW-Transcoding">
+      <a target="_blank" href="https://pulsejet.github.io/memories/hw-transcoding/">
         {{ t('memories', 'External Link') }}
       </a>
 

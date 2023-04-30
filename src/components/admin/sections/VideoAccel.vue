@@ -19,7 +19,7 @@
         )
       }}
       {{ t('memories', 'For more details on driver installation, check the documentation:') }}
-      <a target="_blank" href="https://github.com/pulsejet/memories/wiki/HW-Transcoding#va-api">
+      <a target="_blank" href="https://pulsejet.github.io/memories/hw-transcoding/#va-api">
         {{ t('memories', 'External Link') }}
       </a>
 

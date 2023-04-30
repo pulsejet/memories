@@ -15,7 +15,7 @@ Make the following items are true before filing a bug:
 - You are using the latest version of the app.
 - You tried and can replicate the bug.
 - The problem persists after clearing browser cache.
-- You have followed the [configuration steps](https://github.com/pulsejet/memories/wiki/Configuration).
+- You have followed the [configuration steps](https://pulsejet.github.io/memories/config/).
 - You have searched the [open issues](https://github.com/pulsejet/memories/issues)
 - You are NOT using `OCCWeb` to run `occ` commands
 

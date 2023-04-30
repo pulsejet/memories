@@ -117,7 +117,7 @@ You may need to clear browser cache to use location search.
 - Fix downloading from albums ([#259](https://github.com/pulsejet/memories/issues/259))
 - Fix support for HEVC Live Photos ([#234](https://github.com/pulsejet/memories/issues/234))
 - Fix native photo sharing ([#254](https://github.com/pulsejet/memories/issues/254), [#263](https://github.com/pulsejet/memories/issues/263))
-- Use larger previews in viewer (please see [these docs](https://github.com/pulsejet/memories/wiki/Configuration#preview-storage-considerations)) ([#226](https://github.com/pulsejet/memories/issues/226))
+- Use larger previews in viewer (please see [these docs](https://pulsejet.github.io/memories/config/#preview-storage)) ([#226](https://github.com/pulsejet/memories/issues/226))
 
 ## [v4.8.0] - 2022-11-22
 
@@ -136,7 +136,7 @@ You may need to clear browser cache to use location search.
 - **Note**: you must run `occ memories:index -f` to take advantage of new features.
 - **Massively improved video performance**
   - Memories now comes with a dedicated transcoding server with HLS support.
-  - Read the documentation [here](https://github.com/pulsejet/memories/wiki/Configuration#video-transcoding) carefully for more details.
+  - Read the documentation [here](https://pulsejet.github.io/memories/config/#transcoding) carefully for more details.
 - **Feature**: Show EXIF metadata in sidebar ([#68](https://github.com/pulsejet/memories/issues/68))
 - **Feature**: Multi-selection with drag (mobile) and shift+click ([#28](https://github.com/pulsejet/memories/issues/28))
 - **Feature**: Show duration on video tiles
