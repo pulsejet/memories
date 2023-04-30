@@ -70,8 +70,6 @@ OC.L10N.register(
     "Fit size" : "Atbilst izmēram",
     "Direct" : "Tieši",
     "Auto" : "Automātiski",
-    "Shared Folder" : "Koplietotā mape",
-    "EXIF" : "EXIF",
-    "Share Folder" : "Kopīgot mapi"
+    "Shared Folder" : "Koplietotā mape"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");

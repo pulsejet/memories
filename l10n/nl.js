@@ -177,15 +177,6 @@ OC.L10N.register(
     "Failed to create {albumName}." : "Het maken van {albumName} is mislukt.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Hernoemen van {currentAlbumName} naar {newAlbumName} mislukt.",
     "Failed to delete {fileName}." : "Verwijderen van {fileName} mislukt.",
-    "Your Timeline" : "Je tijdlijn",
-    "Edit Date/Time" : "Datum/tijd bewerken",
-    "Edit EXIF Data" : "Bewerk EXIF gegevens",
-    "Processing … {n}/{m}" : "Verwerken … {n}/{m}",
-    "Update Exif" : "Exif bijwerken",
-    "Date Taken" : "Datum gemaakt",
-    "Share Folder" : "Map delen",
-    "Use the sidebar to share this folder." : "Gebruik de zijbalk om deze map te delen.",
-    "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Als je een openbare deellink maakt, klik op vernieuwen en een bijbehorende link naar Herinneringen wordt hieronder weergegeven.",
-    "No Exif data found! Continue?" : "Geen Exif gegevens gevonden! Doorgaan?"
+    "Your Timeline" : "Je tijdlijn"
 },
 "nplurals=2; plural=(n != 1);");

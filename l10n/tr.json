@@ -233,7 +233,6 @@
     "Error while moving {basename}" : "{basename} taşınırken sorun çıktı",
     "Failed to move {name}." : "{name} taşınamadı.",
     "Move selected photos to person" : "Seçilmiş fotoğrafları kişiye taşı",
-    "Are you sure you want to move the selected photos from {name} to {newName}?" : "Seçilmiş fotoğrafları {name} kişisinden {newName} kişisine aktarmak istediğinize emin misiniz?",
     "Choose a folder" : "Bir klasör seçin",
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["{n} öge klasöre taşındı","{n} öge klasöre taşındı"],
     "Remove" : "Kaldır",
@@ -409,23 +408,6 @@
     "Tag photos to find them easily" : "Fotoğrafları kolayca bulabilmek için etiketleyin",
     "Recognize is still working on your photos" : "Recognize fotoğraflarınız üzerinde çalışmayı bitirmedi",
     "Places you have been to will appear here" : "Bulunduğunuz yerler burada görüntülenecek",
-    "Your Timeline" : "Zaman tüneliniz",
-    "# Memories: Photo Management for Nextcloud\n\nMemories is a *batteries-included* photo management solution for Nextcloud with advanced features including:\n\n- **📸 Timeline**: Sort photos and videos by date taken, parsed from Exif data.\n- **⏪ Rewind**: Jump to any time in the past instantly and relive your memories.\n- **🤖 AI Tagging**: Group photos by people and objects, powered by [recognize](https://github.com/nextcloud/recognize) and [facerecognition](https://github.com/matiasdelellis/facerecognition).\n- **🖼️ Albums**: Create albums to group photos and videos together. Then share these albums with others.\n- **🫱🏻‍🫲🏻 External Sharing**: Share photos and videos with people outside of your Nextcloud instance.\n- **📱 Mobile Support**: Works on devices of any shape and size through the web app.\n- **✏️ Edit Metadata**: Edit dates on photos quickly and easily.\n- **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.\n- **📹 Video Transcoding**: Memories transcodes videos and uses HLS for maximal performance.\n- **🗺️ Map**: View your photos on a map, tagged with accurate reverse geocoding.\n- **⚡️ Performance**: Memories is very fast.\n\n## 🚀 Installation\n\n1. Install the app from the Nextcloud app store (try a demo [here](https://memories-demo.radialapps.com/apps/memories/)).\n1. Perform the recommended [configuration steps](https://github.com/pulsejet/memories/wiki/Extra-Configuration).\n1. Run `php occ memories:index` to generate metadata indices for existing photos.\n1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos." : "# Anılar: Nextcloud için fotoğraf yönetimi\n\nAnılar, Nextcloud için *pilleriyle birlikte* gelen ve aşağıdaki gibi gelişmiş özellikleri bulunan bir fotoğraf yönetimi uygulamasıdır:\n\n- **📸 Zaman tüneli**: Fotoğrafları ve görüntüleri çekildikleri tarihe göre sıralayabilir, EXIF verilerine göre ayrıştırabilirsiniz.\n- **⏪ Geri sarma**: Geçmişte herhangi bir zamana atlayabilir ve anılarınızı yeniden yaşayabilirsiniz.\n- **🤖 Yapay zeka ile etiketleme**: [recognize](https://github.com/nextcloud/recognize) tarafından desteklenen yapay zeka ile fotoğrafları insanlara ve nesnelere göre gruplayabilirsiniz.\n- **🖼️ Albümler**: Fotoğrafları ve görüntüleri birlikte gruplandırmak için albümler oluşturabilirsiniz. Daha sonra bu albümleri başkalarıyla paylaşabilirsiniz.\n- **🫱🏻‍🫲🏻 Dış paylaşım**: Fotoğrafları ve görüntüleri Nextcloud bulut sunucunuzun dışındaki kişilerle paylaşabilirsiniz.\n- **📱 Mobil desteği**: İnternet uygulaması üzerinden farklı şekil ve boyuttaki aygıtlarda kullanabilirsiniz.\n- **✏️ Üst verileri düzenleme**: Fotoğraflardaki tarihleri ​​hızlı ve kolay bir şekilde düzenleyebilirsiniz.\n- **📦 Arşiv**: Zaman tünelinizde görmek istemediğiniz fotoğrafları ayrı bir klasörde saklayabilirsiniz.\n- **📹 Görüntü dönüştürme**: Anılar görüntüleri dönüştürebilir ve en iyi başarım için HLS kullanır.\n- **🗺️ Harita**: Fotoğraflarınızı harita üzerinde coğrafi kodu ile etiketlenmiş olarak görüntüleyebilirsiniz.\n- **⚡️ Başarım**: Anılar uygulaması çok hızlıdır.\n\n## 🚀 Kurulum\n\n1. Uygulamayı Nextcloud uygulama mağazasından yükleyin ([buradan](https://memories-demo.radialapps.com/apps/memories/) deneyebilirsiniz).\n2. Önerilen [yapılandırma adımlarını](https://github.com/pulsejet/memories/wiki/Configuration) gerçekleştirin.\n3. Var olan fotoğrafların üst veri dizinlerini oluşturmak için `php ./occ memory:index` komutunu yürütün.\n4. Nextcloud üzerinde 📷 Anılar uygulamasını açın ve fotoğraflarınızın bulunduğu klasörü ayarlayın.",
-    "EXIF" : "EXIF",
-    "Edit Date/Time" : "Tarihi/saati düzenle",
-    "Edit EXIF Data" : "EXIF verilerini düzenle",
-    "Move to another person" : "Başka bir kişiye taşı",
-    "You will find your friends soon. Please, be patient." : "Yakında arkadaşlarınızı bulacaksınız. Lütfen sabırlı olun.",
-    "Face Recognition is disabled. Enable in settings to find your friends." : "Yüz tanıma devre dışı bırakıldı. Arkadaşlarınızı bulmak için ayarlar bölümünden etkinleştirin.",
-    "Processing … {n}/{m}" : "İşleniyor… {n}/{m}",
-    "Update Exif" : "EXIF verilerini güncelle",
-    "Loading data … {n}/{m}" : "Veriler yükleniyor… {n}/{m}",
-    "Date Taken" : "Çekildiği tarih",
-    "Share Folder" : "Klasörü paylaş",
-    "Use the sidebar to share this folder." : "Bu klasörü paylaşmak için yan çubuğu kullanın.",
-    "If you create a public link share, click on refresh and a corresponding link to Memories will be shown below." : "Herkese açık bir bağlantı paylaşımı oluşturduktan sonra yenile üzerine tıklayın. Anılar için ilgili bağlantı aşağıda görüntülenir.",
-    "Failed to get Exif data. Metadata may be lost!" : "EXIF verileri alınamadı. Üst veriler kaybolmuş olabilir!",
-    "No Exif data found! Continue?" : "Herhangi bir EXIF verisi bulunamadı. İlerlensin mi?",
-    "Video sharing not supported yet" : "Görüntü paylaşımı henüz desteklenmiyor"
+    "Your Timeline" : "Zaman tüneliniz"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }
