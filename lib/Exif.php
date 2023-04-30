@@ -118,7 +118,15 @@ class Exif
     public static function parseExifDate(array $exif): \DateTime
     {
         // Get date from exif
-        $exifDate = $exif['SubSecDateTimeOriginal'] ?? $exif['DateTimeOriginal'] ?? $exif['CreateDate'] ?? null;
+        $exifDate = $exif['DateTimeOriginal'] ?? $exif['CreateDate'] ?? null;
+
+        // For MOV, the timezone of DateTimeOriginal is wrong because it's a string tag
+        // Note that we're passing "-api QuickTimeUTC=1" to exiftool
+        if ('video/quicktime' === $exif['MIMEType']) {
+            $exifDate = $exif['CreateDate'] ?? $exifDate;
+        }
+
+        // Check if we have a date
         if (null === $exifDate || empty($exifDate) || !\is_string($exifDate)) {
             throw new \Exception('No date found in exif');
         }

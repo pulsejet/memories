@@ -188,6 +188,7 @@ export default defineComponent({
           const date = (<any>this.$refs.editDate)?.result?.(p);
           if (date) {
             raw.DateTimeOriginal = date;
+            raw.CreateDate = date;
           }
 
           // Update EXIF if required
