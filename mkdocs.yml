@@ -7,6 +7,8 @@ theme:
     - navigation.tracking
   palette:
     primary: blue
+  icon:
+    logo: material/camera
 
 nav:
   - Home: 'index.md'
