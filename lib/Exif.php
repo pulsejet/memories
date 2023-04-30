@@ -120,9 +120,8 @@ class Exif
         // Get date from exif
         $exifDate = $exif['DateTimeOriginal'] ?? $exif['CreateDate'] ?? null;
 
-        // For MOV, the timezone of DateTimeOriginal is wrong because it's a string tag
-        // Note that we're passing "-api QuickTimeUTC=1" to exiftool
-        if ('video/quicktime' === $exif['MIMEType']) {
+        // For videos, prefer CreateDate for timezone (QuickTimeUTC=1)
+        if (preg_match('/^video\/\w+/', (string) $exif['MIMEType'])) {
             $exifDate = $exif['CreateDate'] ?? $exifDate;
         }
 
