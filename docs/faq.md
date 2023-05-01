@@ -1,4 +1,4 @@
-# Support and FAQ
+# Help and FAQ
 
 ## Getting Help
 

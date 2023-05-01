@@ -24,8 +24,8 @@ nav:
       - 'hw-transcoding.md'
       - 'system-config.md'
   - Support:
-      - 'changelog.md'
       - 'faq.md'
+      - 'changelog.md'
       - 'memories-vs-photos.md'
 
 markdown_extensions:
