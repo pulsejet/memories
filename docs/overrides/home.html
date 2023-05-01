@@ -19,7 +19,7 @@
     }
 
     .tx-hero {
-        margin: 32px 2.8rem;
+        margin: 8px 2.8rem;
         color: var(--md-primary-bg-color);
         justify-content: center;
     }
@@ -36,9 +36,8 @@
     }
 
     .tx-hero__image {
-        width: 27rem;
+        width: 26rem;
         order: 1;
-        padding-right: 2.5rem;
         max-width: 100%;
     }
 
@@ -69,19 +68,20 @@
     }
 
     .top-hr {
-        margin-top: 42px;
+        margin-top: 12px;
     }
 
     .feature-item {
-        font-family: 'Lato', sans-serif;
-        font-weight: 300;
         box-sizing: border-box;
         padding: 0 15px;
-        word-break: break-word
+        word-break: break-word;
+        margin: 0 auto;
+        margin-bottom: 50px;
+        max-width: 80vw;
+        text-align: center;
     }
 
     .feature-item h2 {
-        color: #333;
         font-weight: 300;
         font-size: 25px;
         white-space: nowrap;
@@ -93,14 +93,38 @@
         font-family: inherit;
     }
 
-    .feature-item p {
+    .feature-item > div {
+        flex: 1;
+    }
+
+    .feature-item > img {
+        max-width: 100%;
+        width: auto;
+        height: 150px;
+        margin-top: 10px;
+        border-radius: 16px;
+    }
+
+    .feature-item > img.bshadow {
+        box-shadow: 3px 3px 3px var(--md-primary-fg-color--dark);
+    }
+
+    .feature-item > img.timeline {
+        border-radius: 50%;
+        box-shadow: 0 0 8px 1px var(--md-primary-fg-color--dark);
+    }
+
+    .feature-item > div > p {
         font-size: 16px;
         line-height: 1.8em;
-        text-rendering: optimizeLegibility;
-        -webkit-font-smoothing: antialiased;
         color: #111;
         margin: 0 0 10px;
         display: block;
+        max-width: 800px;
+    }
+
+    .feature-item a {
+        color: var(--md-primary-fg-color--dark);
     }
 
     @media screen and (max-width:30em) {
@@ -122,11 +146,30 @@
 
         .tx-hero__content {
             max-width: 22rem;
-            margin-top: 3.5rem;
-            margin-bottom: 3.5rem;
+            margin-top: 2.5rem;
+            margin-bottom: 4rem;
             margin-left: 1.0rem;
             margin-right: 3.0rem;
             align-items: center;
+        }
+
+        .top-hr {
+            margin-top: 35px;
+        }
+
+        .feature-item {
+            display: flex;
+            width: 850px;
+        }
+
+        .feature-item {
+            text-align: left;
+        }
+
+        .feature-item > img {
+            margin-left: 40px;
+            margin-top: 0px;
+            transform: translateY(10px);
         }
     }
 
@@ -137,7 +180,6 @@
 
         .top-hr {
             width: 100%;
-            display: flex;
             max-width: 61rem;
             margin-right: auto;
             margin-left: auto;
@@ -152,16 +194,6 @@
             margin-right: auto;
             margin-left: auto;
             padding: 0 .2rem;
-        }
-
-        .feature-item {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .feature-item:hover {
-            background-color: #526cfe47;
-            border-radius: 3px;
         }
     }
 
@@ -178,7 +210,6 @@
         margin-right: auto;
         margin-left: auto;
         margin-top: 15px;
-        font-family: 'Lato', sans-serif;
         font-size: 23px;
         font-weight: 300;
         padding-bottom: 10px;
@@ -216,7 +247,21 @@
     }
 
     img.shadow {
-        filter: drop-shadow(5px 5px 5px #222);
+        filter: drop-shadow(2px 2px 3px #222);
+    }
+
+    /** Scroll bar styling */
+    ::-webkit-scrollbar {
+        width: 4px;
+        background-color: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background-color: var(--md-primary-fg-color);
+    }
+
+    body {
+        scrollbar-color: var(--md-primary-fg-color) transparent;
+        scrollbar-width: thin;
     }
 </style>
 
@@ -225,12 +270,13 @@
     <div class="md-grid md-typeset">
       <div class="tx-hero">
         <div class="tx-hero__image">
-          <img class="shadow" src="assets/mockup.webp" draggable="false">
+          <img class="shadow" src="assets/mockup.webp" draggable="false" alt="">
         </div>
         <div class="tx-hero__content">
-          <img class="memories-title" src="assets/memories-title.svg" draggable="false">
+          <img class="memories-title" src="assets/memories-title.svg" alt="Memories" draggable="false">
 
           <p> Fast, modern and advanced photo management suite. <br/> Free and open source Nextcloud app. </p>
+
           <a href="{{ page.next_page.url | url }}" title="{{ page.next_page.title | striptags }}" class="md-button md-button--primary">
             Install
           </a>
@@ -245,22 +291,134 @@
 <!-- Main site box descriptions -->
 <div class="top-hr">
     <div class="feature-item">
-        <h2>
-            Timeline View
-        </h2>
-        <p>
-            Trying to find something from <i>that day</i>?
-            Memories shows your photos in a familiar timeline view, which lets you quickly
-            jump to any point of time in your photo library.
-        </p>
+        <div>
+            <h2>
+                Privacy First
+            </h2>
+            <p>
+                Your data should be owned by you! Memories is a self-hosted app, which means that
+                your photos are stored on your own Nextcloud instance and not on someone else's
+                servers. You can even encrypt your data with a secret key. And it's completely free
+                and open source!
+            </p>
+        </div>
+        <img class="bshadow" src="assets/nclogo.webp" alt="Nextcloud" draggable="false">
+    </div>
+
+    <div class="feature-item">
+        <div>
+            <h2>
+                Auto Upload
+            </h2>
+            <p>
+                With the offical Nextcloud mobile apps for
+                <a target="_blank" href="https://play.google.com/store/apps/details?id=com.nextcloud.client">Android</a>
+                and
+                <a target="_blank" href="https://itunes.apple.com/us/app/nextcloud/id1125420102">iOS</a>,
+                you can automatically upload photos and videos to your Nextcloud server.
+                Memories will automatically extract EXIF metadata from your photos as they are uploaded.
+            </p>
+        </div>
+    </div>
+
+    <div class="feature-item">
+        <div>
+            <h2>
+                Photo Timeline
+            </h2>
+            <p>
+                Trying to relive memories from your birthday party 10 years ago?
+                Memories shows your photos in a familiar timeline view, which lets you instantly
+                jump to any point of time in your photo library, even if it has hundreds of
+                thousands of photos.
+            </p>
+        </div>
+        <img class="timeline" src="assets/timeline-sample.webp" alt="Timeline" draggable="false">
+    </div>
+
+    <div class="feature-item">
+        <div>
+            <h2>
+                Albums
+            </h2>
+            <p>
+                Create albums to organize your photos. You can also share albums with other
+                users on your Nextcloud server or with anyone on the internet. Multiple users
+                on the same Nextcloud server can also collaborate on albums together.
+            </p>
+        </div>
+    </div>
+
+    <div class="feature-item">
+        <div>
+            <h2>
+                Automatic Tagging
+            </h2>
+            <p>
+                Memories integrates with the
+                <a target="_blank" href="https://github.com/nextcloud/recognize">Recognize</a>
+                and
+                <a target="_blank" href="https://github.com/matiasdelellis/facerecognition">Face Recognition</a>
+                apps to automatically tag your photos with keywords and faces using artificial intelligence.
+                You can also manually curate your library by assigning tags and faces to photos.
+            </p>
+        </div>
+        <img src="assets/ai-sample.webp" alt="Automatic Tagging" draggable="false">
+    </div>
+
+    <div class="feature-item">
+        <div>
+            <h2>
+                Metadata Editing
+            </h2>
+            <p>
+                You can edit the EXIF metadata of your photos, such as the title, description, GPS location,
+                date and time, and tags. You can also edit the metadata of multiple photos at once!
+            </p>
+        </div>
+    </div>
+
+    <div class="feature-item">
+        <div>
+            <h2>
+                Video Transcoding
+            </h2>
+            <p>
+                To support a wide range of video formats and adaptive streaming, Memories is bundled with an
+                on-demand video transcoder. You can also give the transcoding process a boost by using
+                VA-API or NVENC hardware acceleration.
+            </p>
+        </div>
+    </div>
+
+    <div class="feature-item">
+        <div>
+            <h2>
+                Map of Photos
+            </h2>
+            <p>
+                Zoom in on your vacations around the world with the map view. Memories will automatically
+                extract GPS data from your photos and plot them on a map. You can also find all
+                photos at a location with its name with accurate reverse geocoding.
+            </p>
+        </div>
+        <img class="timeline" src="assets/map-sample.webp" alt="Map" draggable="false">
+    </div>
+
+    <div class="feature-item">
+        <div>
+            <h2>
+                Fast &amp; Battle Tested
+            </h2>
+            <p>
+                Memories is built with performance in mind. It is designed and highly optimized for
+                handling large photo libraries even when running on modest hardware such as a Raspberry Pi.
+                It also relies on the battle tested Nextcloud platform as the underlying storage layer,
+                which is used by thousands of organizations around the world.
+            </p>
+        </div>
     </div>
 </div>
-
-<div class="top-hr">
-    <div class="hr">
-    </div>
-</div>
-
 
 {% endblock %}
 {% block content %}{% endblock %}
