@@ -17,7 +17,16 @@ theme:
     - navigation.tabs.sticky
     - navigation.tracking
   palette:
-    primary: blue
+    - scheme: default
+      primary: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
   icon:
     logo: material/camera
   custom_dir: docs/overrides
