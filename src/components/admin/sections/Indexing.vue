@@ -114,7 +114,7 @@
 
     <br />
     {{ t('memories', 'The following MIME types are configured for preview generation correctly. More documentation:') }}
-    <a href="https://pulsejet.github.io/memories/file-types/" target="_blank">
+    <a href="https://memories.gallery/file-types/" target="_blank">
       {{ t('memories', 'External Link') }}
     </a>
     <br />

@@ -30,7 +30,7 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 ## 🚀 Installation
 
 1. Install the app from the Nextcloud app store.
-1. Perform the recommended [configuration steps](https://pulsejet.github.io/memories/config/).
+1. Perform the recommended [configuration steps](https://memories.gallery/config/).
 1. Run `php occ memories:index` to generate metadata indices for existing photos.
 1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos.
 
