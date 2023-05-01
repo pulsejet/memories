@@ -4,7 +4,7 @@
 
 [![Discord](https://dcbadge.vercel.app/api/server/7Dr9f9vNjJ)](https://discord.gg/7Dr9f9vNjJ)
 [![Website](https://img.shields.io/website?down_color=red&down_message=offline&label=website&style=for-the-badge&up_color=brightgreen&up_message=online&url=https%3A%2F%2Fmemories.gallery)](https://memories.gallery)
-[![Demo](https://img.shields.io/website?down_color=red&down_message=offline&label=demo&style=for-the-badge&up_color=brightgreen&up_message=online&url=https%3A%2F%2Fmemories-demo.radialapps.com)](https://memories-demo.radialapps.com/apps/memories/)
+[![Demo](https://img.shields.io/website?down_color=red&down_message=offline&label=demo&style=for-the-badge&up_color=brightgreen&up_message=online&url=https%3A%2F%2Fdemo.memories.gallery)](https://demo.memories.gallery/apps/memories/)
 
 ![GitHub](https://img.shields.io/github/license/pulsejet/memories)
 [![e2e](https://github.com/pulsejet/memories/actions/workflows/e2e.yaml/badge.svg)](https://github.com/pulsejet/memories/actions/workflows/e2e.yaml)
