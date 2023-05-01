@@ -34,7 +34,7 @@ Memories is a *batteries-included* photo management solution for Nextcloud with 
     <author mail="radialapps@gmail.com">Varun Patil</author>
     <namespace>Memories</namespace>
     <category>multimedia</category>
-    <website>https://github.com/pulsejet/memories</website>
+    <website>https://memories.gallery</website>
     <bugs>https://github.com/pulsejet/memories/issues</bugs>
     <repository>https://github.com/pulsejet/memories</repository>
     <screenshot>https://raw.githubusercontent.com/pulsejet/memories/master/appinfo/screenshot.jpg</screenshot>

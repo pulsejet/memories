@@ -4,7 +4,8 @@
 
 ![GitHub](https://img.shields.io/github/license/pulsejet/memories)
 [![e2e](https://github.com/pulsejet/memories/actions/workflows/e2e.yaml/badge.svg)](https://github.com/pulsejet/memories/actions/workflows/e2e.yaml)
-[![Demo](https://img.shields.io/badge/demo-online-blue)](https://memories-demo.radialapps.com/apps/memories/)
+[![Website](https://img.shields.io/badge/website-online-green)](https://memories.gallery)
+[![Demo](https://img.shields.io/website?down_color=red&down_message=offline&label=demo&up_color=green&up_message=online&url=https%3A%2F%2Fmemories-demo.radialapps.com)](https://memories-demo.radialapps.com/apps/memories/)
 [![GitHub issues](https://img.shields.io/github/issues/pulsejet/memories)](https://github.com/pulsejet/memories/issues)
 [![GitHub Sponsor](https://img.shields.io/github/sponsors/pulsejet?logo=GitHub)](https://github.com/sponsors/pulsejet)
 
