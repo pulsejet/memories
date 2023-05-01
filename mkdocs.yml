@@ -1,6 +1,14 @@
 site_name: Memories
 repo_url: https://github.com/pulsejet/memories
 repo_name: pulsejet/memories
+copyright: Copyright &copy; 2022 - 2023 Varun Patil
+
+extra:
+  social:
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/7Dr9f9vNjJ
+    - icon: fontawesome/brands/github
+      link: https://github.com/pulsejet/memories
 
 theme:
   name: material

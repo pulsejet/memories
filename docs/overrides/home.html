@@ -67,17 +67,13 @@
         transform: translateY(10%);
     }
 
-    .top-hr {
-        margin-top: 12px;
-    }
-
     .feature-item {
         box-sizing: border-box;
         padding: 0 15px;
         word-break: break-word;
         margin: 0 auto;
         margin-bottom: 50px;
-        max-width: 80vw;
+        max-width: 90vw;
         text-align: center;
     }
 
@@ -105,11 +101,7 @@
         border-radius: 16px;
     }
 
-    .feature-item > img.bshadow {
-        box-shadow: 3px 3px 3px var(--md-primary-fg-color--dark);
-    }
-
-    .feature-item > img.timeline {
+    .feature-item > img.feat-preview {
         border-radius: 50%;
         box-shadow: 0 0 8px 1px var(--md-primary-fg-color--dark);
     }
@@ -151,10 +143,6 @@
             margin-left: 1.0rem;
             margin-right: 3.0rem;
             align-items: center;
-        }
-
-        .top-hr {
-            margin-top: 35px;
         }
 
         .feature-item {
@@ -287,8 +275,9 @@
       </div>
     </div>
 </section>
+{% endblock %}
 
-<!-- Main site box descriptions -->
+{% block content %}
 <div class="top-hr">
     <div class="feature-item">
         <div>
@@ -302,7 +291,7 @@
                 and open source!
             </p>
         </div>
-        <img class="bshadow" src="assets/nclogo.webp" alt="Nextcloud" draggable="false">
+        <img class="feat-preview" src="assets/nclogo.webp" alt="Nextcloud" draggable="false">
     </div>
 
     <div class="feature-item">
@@ -333,7 +322,7 @@
                 thousands of photos.
             </p>
         </div>
-        <img class="timeline" src="assets/timeline-sample.webp" alt="Timeline" draggable="false">
+        <img class="feat-preview" src="assets/timeline-sample.webp" alt="Timeline" draggable="false">
     </div>
 
     <div class="feature-item">
@@ -402,7 +391,7 @@
                 photos at a location with its name with accurate reverse geocoding.
             </p>
         </div>
-        <img class="timeline" src="assets/map-sample.webp" alt="Map" draggable="false">
+        <img class="feat-preview" src="assets/map-sample.webp" alt="Map" draggable="false">
     </div>
 
     <div class="feature-item">
@@ -419,7 +408,4 @@
         </div>
     </div>
 </div>
-
 {% endblock %}
-{% block content %}{% endblock %}
-{% block footer %}{% endblock %}
