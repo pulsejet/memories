@@ -1,3 +1,7 @@
+---
+description: Steps to configure support for different image and video formats
+---
+
 # File type support
 
 Memories supports the file types supported by the Nextcloud previews app. If you add support for any one of the file types below, you must run `occ memories:index` to index these files.

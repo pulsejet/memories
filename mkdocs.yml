@@ -15,6 +15,10 @@ theme:
     logo: material/camera
   custom_dir: docs/overrides
 
+plugins:
+  - search
+  - social
+
 nav:
   - Home: 'index.md'
   - Getting started:

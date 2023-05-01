@@ -1,3 +1,7 @@
+---
+description: Getting help with Memories
+---
+
 # Help and FAQ
 
 ## Getting Help

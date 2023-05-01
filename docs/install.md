@@ -1,3 +1,7 @@
+---
+description: Setting up Memories and Nextcloud
+---
+
 # Installation
 
 This page describes how to install the latest version of Memories.

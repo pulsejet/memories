@@ -24,6 +24,7 @@ memories.tar.gz
 /test-results/
 /playwright-report/
 /playwright/.cache/
+.cache/
 
 exiftool-bin/
 tools/

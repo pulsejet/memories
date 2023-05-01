@@ -1,3 +1,7 @@
+---
+description: Steps to configure Memories for the best experience and performance
+---
+
 # Configuration
 
 Starting with v5.0.0, you can fully configure memories using the admin panel. With an admin account in Nextcloud, go to `Settings -> Memories`. Memories runs a background indexing job to extract EXIF metadata from photos and videos, as well as immediately on every upload.

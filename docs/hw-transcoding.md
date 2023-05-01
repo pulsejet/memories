@@ -1,3 +1,7 @@
+---
+description: Configuration for hardware acceleration for transcoding with VA-API and NVENC
+---
+
 # Hardware transcoding
 
 Memories supports transcoding acceleration with VA-API and NVENC.
