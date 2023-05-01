@@ -18,6 +18,7 @@ theme:
 nav:
   - Home: 'index.md'
   - Getting started:
+      - 'install.md'
       - 'config.md'
       - 'file-types.md'
       - 'hw-transcoding.md'
