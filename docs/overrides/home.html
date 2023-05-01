@@ -1,0 +1,267 @@
+<!-- Taken fro https://github.com/up42/up42-py/blob/master/docs/theme_override_home/home.html -->
+
+{% extends "main.html" %}
+{% block tabs %}
+{{ super() }}
+<style>
+    .md-main {
+        flex-grow: 0
+    }
+
+    .md-main__inner {
+        display: flex;
+        height: 100%;
+    }
+
+    .tx-container {
+        padding-top: .0rem;
+        background: linear-gradient(to bottom, var(--md-primary-fg-color), var(--md-primary-fg-color--dark) 99%,#fff 99%)
+    }
+
+    .tx-hero {
+        margin: 32px 2.8rem;
+        color: var(--md-primary-bg-color);
+        justify-content: center;
+    }
+
+    .tx-hero h1 {
+        margin-bottom: 1rem;
+        color: currentColor;
+        font-weight: 700
+    }
+
+    .tx-hero__content {
+        padding-bottom: 1rem;
+        margin: 1em auto;
+    }
+
+    .tx-hero__image {
+        width: 27rem;
+        order: 1;
+        padding-right: 2.5rem;
+        max-width: 100%;
+    }
+
+    .tx-hero .md-button {
+        margin-top: .5rem;
+        margin-right: .5rem;
+        color: var(--md-primary-bg-color)
+    }
+
+    .tx-hero .md-button--primary {
+        background-color: var(--md-primary-bg-color);
+        color: hsla(280deg, 37%, 48%, 1);
+        border-color: var(--md-primary-bg-color)
+    }
+
+    .tx-hero .md-button:focus,
+    .tx-hero .md-button:hover {
+        background-color: var(--md-accent-fg-color);
+        color: var(--md-default-bg-color);
+        border-color: var(--md-accent-fg-color)
+    }
+
+    .feature-item h2 svg {
+        height: 30px;
+        float: left;
+        margin-right: 10px;
+        transform: translateY(10%);
+    }
+
+    .top-hr {
+        margin-top: 42px;
+    }
+
+    .feature-item {
+        font-family: 'Lato', sans-serif;
+        font-weight: 300;
+        box-sizing: border-box;
+        padding: 0 15px;
+        word-break: break-word
+    }
+
+    .feature-item h2 {
+        color: #333;
+        font-weight: 300;
+        font-size: 25px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: normal;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-family: inherit;
+    }
+
+    .feature-item p {
+        font-size: 16px;
+        line-height: 1.8em;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        color: #111;
+        margin: 0 0 10px;
+        display: block;
+    }
+
+    @media screen and (max-width:30em) {
+        .tx-hero h1 {
+            font-size: 1.4rem
+        }
+    }
+
+    @media screen and (min-width:60em) {
+        .md-sidebar--secondary {
+            display: none
+        }
+
+        .tx-hero {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tx-hero__content {
+            max-width: 22rem;
+            margin-top: 3.5rem;
+            margin-bottom: 3.5rem;
+            margin-left: 1.0rem;
+            margin-right: 3.0rem;
+            align-items: center;
+        }
+    }
+
+    @media screen and (min-width:76.25em) {
+        .md-sidebar--primary {
+            display: none
+        }
+
+        .top-hr {
+            width: 100%;
+            display: flex;
+            max-width: 61rem;
+            margin-right: auto;
+            margin-left: auto;
+            padding: 0 .2rem;
+        }
+
+        .bottom-hr {
+            margin-top: 10px;
+            width: 100%;
+            display: flex;
+            max-width: 61rem;
+            margin-right: auto;
+            margin-left: auto;
+            padding: 0 .2rem;
+        }
+
+        .feature-item {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .feature-item:hover {
+            background-color: #526cfe47;
+            border-radius: 3px;
+        }
+    }
+
+    .hr {
+        border-bottom: 1px solid #eee;
+        width: 100%;
+        margin: 20px 0;
+    }
+
+    .text-center {
+        text-align: center;
+        padding-right: 15px;
+        padding-left: 15px;
+        margin-right: auto;
+        margin-left: auto;
+        margin-top: 15px;
+        font-family: 'Lato', sans-serif;
+        font-size: 23px;
+        font-weight: 300;
+        padding-bottom: 10px;
+    }
+
+    .logos {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-flow: row wrap;
+        margin: 0 auto;
+    }
+
+    .logos img {
+        flex: 1 1 auto;
+        padding: 25px;
+        max-height: 130px;
+        vertical-align: middle;
+    }
+
+    .hr-logos {
+        margin-top: 0;
+        margin-bottom: 30px;
+    }
+
+    .md-footer-meta__inner {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-top: 1.0rem;
+    }
+
+    .md-footer-social {
+        padding-top: 20px;
+    }
+
+    img.shadow {
+        filter: drop-shadow(5px 5px 5px #222);
+    }
+</style>
+
+<!-- Main site Entry button descriptions -->
+<section class="tx-container">
+    <div class="md-grid md-typeset">
+      <div class="tx-hero">
+        <div class="tx-hero__image">
+          <img class="shadow" src="assets/mockup.webp" draggable="false">
+        </div>
+        <div class="tx-hero__content">
+          <img class="memories-title" src="assets/memories-title.svg" draggable="false">
+
+          <p> Fast, modern and advanced photo management suite. <br/> Free and open source Nextcloud app. </p>
+          <a href="{{ page.next_page.url | url }}" title="{{ page.next_page.title | striptags }}" class="md-button md-button--primary">
+            Install
+          </a>
+          <a href="{{ config.demo_url }}" class="md-button">
+            Demo
+          </a>
+        </div>
+      </div>
+    </div>
+</section>
+
+<!-- Main site box descriptions -->
+<div class="top-hr">
+    <div class="feature-item">
+        <h2>
+            Timeline View
+        </h2>
+        <p>
+            Trying to find something from <i>that day</i>?
+            Memories shows your photos in a familiar timeline view, which lets you quickly
+            jump to any point of time in your photo library.
+        </p>
+    </div>
+</div>
+
+<div class="top-hr">
+    <div class="hr">
+    </div>
+</div>
+
+
+{% endblock %}
+{% block content %}{% endblock %}
+{% block footer %}{% endblock %}

@@ -1,6 +1,7 @@
 site_name: Memories
 repo_url: https://github.com/pulsejet/memories
 repo_name: pulsejet/memories
+demo_url: https://memories-demo.radialapps.com/apps/memories/
 
 theme:
   name: material
@@ -12,15 +13,17 @@ theme:
     primary: blue
   icon:
     logo: material/camera
+  custom_dir: docs/overrides
 
 nav:
   - Home: 'index.md'
-  - Configuration:
+  - Getting started:
       - 'config.md'
       - 'file-types.md'
       - 'hw-transcoding.md'
       - 'system-config.md'
-  - FAQ:
+  - Support:
+      - 'changelog.md'
       - 'faq.md'
       - 'memories-vs-photos.md'
 

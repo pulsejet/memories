@@ -19,5 +19,6 @@ jobs:
         with:
           key: ${{ github.ref }}
           path: .cache
+      - run: cp CHANGELOG.md docs/changelog.md
       - run: pip install mkdocs-material
       - run: mkdocs gh-deploy --force
