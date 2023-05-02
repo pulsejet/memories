@@ -212,30 +212,27 @@ export default defineComponent({
     root.style.setProperty('--plyr-color-main', colorPrimary);
 
     // Register sidebar metadata tab
-    const OCA = globalThis.OCA;
-    if (OCA.Files && OCA.Files.Sidebar) {
-      OCA.Files.Sidebar.registerTab(
-        new OCA.Files.Sidebar.Tab({
-          id: 'memories-metadata',
-          name: this.t('memories', 'Info'),
-          icon: 'icon-details',
+    globalThis.OCA?.Files?.Sidebar?.registerTab(
+      new globalThis.OCA.Files.Sidebar.Tab({
+        id: 'memories-metadata',
+        name: this.t('memories', 'Info'),
+        icon: 'icon-details',
 
-          mount(el, fileInfo, context) {
-            this.metadataComponent?.$destroy?.();
-            this.metadataComponent = new Vue(Metadata as any);
-            this.metadataComponent.$mount(el);
-            this.metadataComponent.update(Number(fileInfo.id));
-          },
-          update(fileInfo) {
-            this.metadataComponent.update(Number(fileInfo.id));
-          },
-          destroy() {
-            this.metadataComponent?.$destroy?.();
-            this.metadataComponent = null;
-          },
-        })
-      );
-    }
+        mount(el, fileInfo, context) {
+          this.metadataComponent?.$destroy?.();
+          this.metadataComponent = new Vue(Metadata as any);
+          this.metadataComponent.$mount(el);
+          this.metadataComponent.update(Number(fileInfo.id));
+        },
+        update(fileInfo) {
+          this.metadataComponent.update(Number(fileInfo.id));
+        },
+        destroy() {
+          this.metadataComponent?.$destroy?.();
+          this.metadataComponent = null;
+        },
+      })
+    );
   },
 
   async beforeMount() {

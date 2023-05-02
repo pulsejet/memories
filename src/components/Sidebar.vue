@@ -51,6 +51,27 @@ export default defineComponent({
     },
   },
 
+  created() {
+    if (globalThis.OCA) {
+      globalThis.OCA.Files ??= {};
+
+      // TODO: remove when we have a proper fileinfo standalone library
+      // original scripts are loaded from
+      // https://github.com/nextcloud/server/blob/5bf3d1bb384da56adbf205752be8f840aac3b0c5/lib/private/legacy/template.php#L120-L122
+      Object.assign(
+        globalThis.OCA.Files,
+        {
+          App: {
+            fileList: {
+              filesClient: (<any>globalThis.OC.Files).getClient(),
+            },
+          },
+        },
+        globalThis.OCA.Files
+      );
+    }
+  },
+
   mounted() {
     subscribe('files:sidebar:opened', this.handleNativeOpen);
     subscribe('files:sidebar:closed', this.handleNativeClose);

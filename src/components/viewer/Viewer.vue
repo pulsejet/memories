@@ -361,7 +361,7 @@ export default defineComponent({
         this.originalTitle = document.title;
       }
       if (photo) {
-        document.title = `${photo.basename} - ${globalThis.OCA.Theming?.name}`;
+        document.title = `${photo.basename} - ${globalThis.OCA?.Theming?.name}`;
       } else {
         document.title = this.originalTitle;
         this.originalTitle = null;
