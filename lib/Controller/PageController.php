@@ -3,7 +3,6 @@
 namespace OCA\Memories\Controller;
 
 use OCA\Files\Event\LoadSidebar;
-use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Util;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\ContentSecurityPolicy;

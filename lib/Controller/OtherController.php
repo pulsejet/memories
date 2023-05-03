@@ -79,23 +79,23 @@ class OtherController extends GenericApiController
             };
 
             return new JSONResponse([
-                "version" => $appManager->getAppInfo('memories')['version'],
-                "vod_disable" => Util::getSystemConfig('memories.vod.disable'),
-                "video_default_quality" => Util::getSystemConfig('memories.video_default_quality'),
-                "places_gis" => Util::getSystemConfig('memories.gis_type'),
+                'version' => $appManager->getAppInfo('memories')['version'],
+                'vod_disable' => Util::getSystemConfig('memories.vod.disable'),
+                'video_default_quality' => Util::getSystemConfig('memories.video_default_quality'),
+                'places_gis' => Util::getSystemConfig('memories.gis_type'),
 
-                "systemtags_enabled" => Util::tagsIsEnabled(),
-                "recognize_enabled" => Util::recognizeIsEnabled(),
-                "albums_enabled" => Util::albumsIsEnabled(),
-                "facerecognition_installed" => Util::facerecognitionIsInstalled(),
-                "facerecognition_enabled" => Util::facerecognitionIsEnabled(),
+                'systemtags_enabled' => Util::tagsIsEnabled(),
+                'recognize_enabled' => Util::recognizeIsEnabled(),
+                'albums_enabled' => Util::albumsIsEnabled(),
+                'facerecognition_installed' => Util::facerecognitionIsInstalled(),
+                'facerecognition_enabled' => Util::facerecognitionIsEnabled(),
 
-                "timeline_path" => $getAppConfig('timelinePath', 'EMPTY'),
-                "folders_path" => $getAppConfig('foldersPath', '/'),
-                "show_hidden_folders" => $getAppConfig('showHidden', false) === "true",
-                "sort_folder_month" => $getAppConfig('sortFolderMonth', false) === "true",
-                "sort_album_month" => $getAppConfig('sortAlbumMonth', "true") === "true",
-                "enable_top_memories" => $getAppConfig('enableTopMemories', 'true') === "true",
+                'timeline_path' => $getAppConfig('timelinePath', 'EMPTY'),
+                'folders_path' => $getAppConfig('foldersPath', '/'),
+                'show_hidden_folders' => 'true' === $getAppConfig('showHidden', false),
+                'sort_folder_month' => 'true' === $getAppConfig('sortFolderMonth', false),
+                'sort_album_month' => 'true' === $getAppConfig('sortAlbumMonth', 'true'),
+                'enable_top_memories' => 'true' === $getAppConfig('enableTopMemories', 'true'),
             ], Http::STATUS_OK);
         });
     }
