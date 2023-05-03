@@ -59,7 +59,7 @@ export default defineComponent({
   z-index: 1000;
   bottom: 0;
   width: 100%;
-  height: 64px;
+  height: 66px;
   text-align: center;
   padding: 8px;
 
@@ -67,8 +67,19 @@ export default defineComponent({
     flex: 1 1 0px;
     opacity: 0.75;
 
+    span.material-design-icon {
+      border-radius: 20px;
+      padding: 4px;
+      max-width: 80px;
+      margin: 0 auto;
+    }
+
     &.router-link-exact-active {
       opacity: 1;
+
+      span.material-design-icon {
+        background: var(--color-primary-element-light);
+      }
     }
   }
 }
