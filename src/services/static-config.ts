@@ -2,13 +2,17 @@ import axios from '@nextcloud/axios';
 import { showInfo } from '@nextcloud/dialogs';
 import { API } from './API';
 import { IConfig } from '../types';
+import { getBuilder } from '@nextcloud/browser-storage';
+import type Storage from '@nextcloud/browser-storage/dist/storage';
 
 class StaticConfig {
   private config: IConfig | null = null;
   private initPromises: Array<() => void> = [];
   private default: IConfig | null = null;
+  private storage: Storage;
 
   public constructor() {
+    this.storage = getBuilder('memories').clearOnLogout().persist().build();
     this.init();
   }
 
@@ -66,7 +70,7 @@ class StaticConfig {
       this.config[key] = value;
     }
 
-    localStorage.setItem(`memories_${key}`, value.toString());
+    this.storage.setItem(`memories_${key}`, value.toString());
   }
 
   public getDefault(): IConfig {
@@ -101,7 +105,7 @@ class StaticConfig {
     };
 
     for (const key in config) {
-      const val = localStorage.getItem(`memories_${key}`);
+      const val = this.storage.getItem(`memories_${key}`);
       if (val !== null) {
         if (typeof config[key] === 'boolean') {
           config[key] = val === 'true';
