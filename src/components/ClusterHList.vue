@@ -7,7 +7,7 @@
       </div>
     </div>
 
-    <div class="hlist">
+    <div class="hlist hide-scrollbar">
       <div class="item" v-for="item of clusters" :key="item.cluster_id">
         <Cluster :data="item" :link="true" />
       </div>
@@ -77,12 +77,6 @@ export default defineComponent({
       aspect-ratio: 1;
       position: relative;
     }
-
-    // Hide scrollbars
-    &::-webkit-scrollbar {
-      display: none;
-    }
-    scrollbar-width: none;
   }
 }
 </style>

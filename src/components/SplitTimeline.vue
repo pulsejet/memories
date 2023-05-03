@@ -177,6 +177,7 @@ export default defineComponent({
   height: 100%;
   display: flex;
   overflow: hidden;
+  position: relative;
 
   > div {
     height: 100%;

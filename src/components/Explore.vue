@@ -1,5 +1,5 @@
 <template>
-  <div class="explore-outer">
+  <div class="explore-outer hide-scrollbar">
     <ClusterHList v-if="recognize.length" :title="t('memories', 'Recognize')" link="/recognize" :clusters="recognize" />
     <ClusterHList
       v-if="facerecognition.length"
@@ -17,6 +17,7 @@
         :ariaLabel="category.name"
         :key="category.name"
         :to="category.link"
+        @click="category.click?.()"
         type="secondary"
       >
         <template #icon>
@@ -40,6 +41,8 @@ import StarIcon from 'vue-material-design-icons/Star.vue';
 import VideoIcon from 'vue-material-design-icons/PlayCircle.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
+import MapIcon from 'vue-material-design-icons/Map.vue';
+import CogIcon from 'vue-material-design-icons/Cog.vue';
 
 import type { ICluster, IConfig } from '../types';
 import { API } from '../services/API';
@@ -76,7 +79,23 @@ export default defineComponent({
         icon: CalendarIcon,
         link: '/thisday',
       },
-    ],
+      {
+        name: t('memories', 'Map'),
+        icon: MapIcon,
+        link: '/map',
+      },
+      {
+        name: t('memories', 'Settings'),
+        icon: CogIcon,
+        link: undefined,
+        click: globalThis.showSettings,
+      },
+    ] as {
+      name: string;
+      icon: any;
+      link?: string;
+      click?: () => void;
+    }[],
   }),
 
   components: {
@@ -131,6 +150,9 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .explore-outer {
+  height: 100%;
+  overflow: auto;
+
   > .link-list {
     padding: 8px 10px;
 

@@ -209,6 +209,9 @@ export default defineComponent({
 
     // Register navigation items on config change
     subscribe(this.configEventName, this.refreshNav);
+
+    // Register global functions
+    globalThis.showSettings = () => this.showSettings();
   },
 
   mounted() {
