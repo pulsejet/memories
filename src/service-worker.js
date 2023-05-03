@@ -28,7 +28,7 @@ const networkOnly = [/^.*\/apps\/memories\/api\/.*/];
 // Cache pages for same-origin requests only
 registerRoute(
   ({ url }) => url.origin === self.location.origin && !networkOnly.some((regex) => regex.test(url.href)),
-  new NetworkFirst({
+  new CacheFirst({
     cacheName: 'pages',
     plugins: [
       new ExpirationPlugin({

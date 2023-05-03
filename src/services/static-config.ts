@@ -1,4 +1,5 @@
 import axios from '@nextcloud/axios';
+import { showInfo } from '@nextcloud/dialogs';
 import { API } from './API';
 import { IConfig } from '../types';
 
@@ -15,12 +16,22 @@ class StaticConfig {
     const res = await axios.get<IConfig>(API.CONFIG_GET());
     this.config = res.data;
 
-    this.getDefault();
+    // Check if version changed
+    const old = this.getDefault();
+    if (old.version !== this.config.version) {
+      if (old.version) {
+        showInfo('Memories has been updated. Please refresh to apply the changes.');
+      }
+      window.caches?.delete('pages');
+    }
+
+    // Assign to existing default
     for (const key in this.config) {
       this.default![key] = this.config[key];
       this.setLs(key as keyof IConfig, this.config[key]);
     }
 
+    // Resolve all promises
     this.initPromises.forEach((resolve) => resolve());
   }
 
