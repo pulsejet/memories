@@ -82,7 +82,7 @@ export default defineComponent({
 .top-matter-container {
   padding-top: 4px;
   @media (max-width: 768px) {
-    padding-left: 40px;
+    padding-left: 10px;
   }
 
   > div {

@@ -38,6 +38,8 @@
       >
         <router-view />
       </div>
+
+      <MobileNav />
     </NcAppContent>
 
     <Settings :open.sync="settingsOpen" />
@@ -71,6 +73,7 @@ import Sidebar from './components/Sidebar.vue';
 import EditMetadataModal from './components/modal/EditMetadataModal.vue';
 import NodeShareModal from './components/modal/NodeShareModal.vue';
 import ShareModal from './components/modal/ShareModal.vue';
+import MobileNav from './components/MobileNav.vue';
 
 import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue';
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
@@ -107,6 +110,7 @@ export default defineComponent({
     EditMetadataModal,
     NodeShareModal,
     ShareModal,
+    MobileNav,
 
     ImageMultiple,
     FolderIcon,

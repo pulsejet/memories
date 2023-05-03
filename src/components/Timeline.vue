@@ -25,7 +25,7 @@
       <template #before>
         <!-- Show dynamic top matter, name of the view -->
         <div class="recycler-before" ref="recyclerBefore">
-          <div class="text" v-show="!$refs.topmatter.type && list.length && viewName">
+          <div class="text" v-show="!$refs.topmatter.type && list.length && viewName && !isMobile()">
             {{ viewName }}
           </div>
 
