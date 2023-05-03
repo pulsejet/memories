@@ -33,6 +33,7 @@
       <div
         :class="{
           outer: true,
+          'router-outlet': true,
           'remove-gap': removeNavGap,
         }"
       >

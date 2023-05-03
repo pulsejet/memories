@@ -36,6 +36,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+:root {
+  --mobile-nav-width: 64px;
+}
+
 // Show correct nav depending on screen size
 #mobile-nav {
   display: none;
@@ -49,19 +53,21 @@ export default defineComponent({
   #mobile-nav {
     display: flex;
   }
+
+  // Make space for the nav
+  #app-content-vue > .router-outlet {
+    height: calc(100% - var(--mobile-nav-width));
+  }
 }
 </style>
 
 <style lang="scss" scoped>
 #mobile-nav {
   background-color: var(--color-main-background);
-  position: fixed;
-  z-index: 1000;
-  bottom: 0;
-  width: 100%;
-  height: 66px;
+  height: var(--mobile-nav-width);
   text-align: center;
   padding: 8px;
+  padding-top: 6px;
 
   :deep a {
     flex: 1 1 0px;
