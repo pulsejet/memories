@@ -30,8 +30,8 @@
           </div>
 
           <OnThisDay
-            v-if="routeIsBase && config_enableTopMemories"
-            :key="config_timelinePath"
+            v-if="routeIsBase && config.enable_top_memories"
+            :key="config.timeline_path"
             :viewer="$refs.viewer"
             @load="scrollerManager.adjust()"
           >
@@ -204,16 +204,17 @@ export default defineComponent({
   },
 
   created() {
-    subscribe(this.config_eventName, this.softRefresh);
+    subscribe(this.configEventName, this.softRefresh);
     subscribe('files:file:created', this.softRefresh);
     subscribe('memories:window:resize', this.handleResizeWithDelay);
   },
 
   beforeDestroy() {
-    unsubscribe(this.config_eventName, this.softRefresh);
+    unsubscribe(this.configEventName, this.softRefresh);
     unsubscribe('files:file:created', this.softRefresh);
     unsubscribe('memories:window:resize', this.handleResizeWithDelay);
     this.resetState();
+    this.state = 0;
   },
 
   computed: {
@@ -234,8 +235,8 @@ export default defineComponent({
 
       return (
         this.$route.query.sort === 'album' ||
-        (this.config_sortAlbumMonth && (this.$route.name === 'albums' || this.$route.name === 'album-share')) ||
-        (this.config_sortFolderMonth && this.$route.name === 'folders')
+        (this.config.sort_album_month && (this.$route.name === 'albums' || this.$route.name === 'album-share')) ||
+        (this.config.sort_folder_month && this.$route.name === 'folders')
       );
     },
 
@@ -316,7 +317,7 @@ export default defineComponent({
     },
 
     allowBreakout() {
-      return globalThis.windowInnerWidth <= 600 && !this.config_squareThumbs;
+      return globalThis.windowInnerWidth <= 600 && !this.config.square_thumbs;
     },
 
     /** Create new state */
@@ -412,7 +413,7 @@ export default defineComponent({
         this.rowHeight = Math.floor(this.rowWidth / this.numCols);
       } else {
         // Desktop
-        if (this.config_squareThumbs) {
+        if (this.config.square_thumbs) {
           this.numCols = Math.max(3, Math.floor(this.rowWidth / DESKTOP_ROW_HEIGHT));
           this.rowHeight = Math.floor(this.rowWidth / this.numCols);
         } else {
@@ -557,7 +558,7 @@ export default defineComponent({
 
       // Folder
       if (this.$route.name === 'folders') {
-        const path = utils.getFolderRoutePath(this.config_foldersPath);
+        const path = utils.getFolderRoutePath(this.config.folders_path);
         API.DAYS_FILTER(query, DaysFilterType.FOLDER, path);
         if (this.$route.query.recursive) {
           API.DAYS_FILTER(query, DaysFilterType.RECURSIVE);
@@ -589,7 +590,7 @@ export default defineComponent({
         API.DAYS_FILTER(query, filter, `${user}/${name}`);
 
         // Face rect
-        if (this.config_showFaceRect) {
+        if (this.config.show_face_rect) {
           API.DAYS_FILTER(query, DaysFilterType.FACE_RECT);
         }
       }
@@ -639,7 +640,7 @@ export default defineComponent({
       }
 
       // Get subfolders URL
-      const folder = utils.getFolderRoutePath(this.config_foldersPath);
+      const folder = utils.getFolderRoutePath(this.config.folders_path);
       const url = API.Q(API.FOLDERS_SUB(), { folder });
 
       // Make API call to get subfolders
@@ -654,7 +655,7 @@ export default defineComponent({
       }
 
       // Filter out hidden folders
-      if (!this.config_showHidden) {
+      if (!this.config.show_hidden_folders) {
         this.folders = this.folders.filter((f) => !f.name.startsWith('.') && f.previews?.length);
       }
     },
@@ -730,6 +731,8 @@ export default defineComponent({
 
     /** Process the data for days call including folders */
     async processDays(data: IDay[]) {
+      if (!data || !this.state) return;
+
       const list: typeof this.list = [];
       const heads: typeof this.heads = {};
 
@@ -941,7 +944,7 @@ export default defineComponent({
      * @param data photos
      */
     processDay(dayId: number, data: IPhoto[]) {
-      if (!data) return;
+      if (!data || !this.state) return;
 
       const head = this.heads[dayId];
       if (!head) return;
@@ -964,7 +967,7 @@ export default defineComponent({
       }
 
       // Force all to square
-      const squareMode = this.isMobileLayout() || this.config_squareThumbs;
+      const squareMode = this.isMobileLayout() || this.config.square_thumbs;
 
       // Create justified layout with correct params
       const justify = getLayout(

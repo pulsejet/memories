@@ -1,17 +1,22 @@
 import { getCurrentUser } from '@nextcloud/auth';
-import { loadState } from '@nextcloud/initial-state';
+import staticConfig from '../static-config';
 
 /** Cache keys */
-const memoriesVersion: string = loadState('memories', 'version', '');
 const uid = getCurrentUser()?.uid || 'guest';
-const cacheName = `memories-${memoriesVersion}-${uid}`;
+
+async function getCacheName() {
+  const memoriesVersion = await staticConfig.get('version');
+  return `memories-${memoriesVersion}-${uid}`;
+}
 
 // Clear all caches except the current one
 (async function clearCaches() {
-  if (!memoriesVersion || uid === 'guest') return;
+  if (uid === 'guest') return;
 
   const keys = await window.caches?.keys();
   if (!keys?.length) return;
+
+  const cacheName = await getCacheName();
 
   for (const key of keys) {
     if (key.startsWith('memories-') && key !== cacheName) {
@@ -23,10 +28,8 @@ const cacheName = `memories-${memoriesVersion}-${uid}`;
 /** Singleton cache instance */
 let staticCache: Cache | null = null;
 export async function openCache() {
-  if (!memoriesVersion) return null;
-
   try {
-    return (staticCache ??= (await window.caches?.open(cacheName)) ?? null);
+    return (staticCache ??= (await window.caches?.open(await getCacheName())) ?? null);
   } catch {
     return null;
   }

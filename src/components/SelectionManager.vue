@@ -254,7 +254,7 @@ export default defineComponent({
 
     /** Is album route */
     routeIsAlbum() {
-      return this.config_albumsEnabled && this.$route.name === 'albums';
+      return this.config.albums_enabled && this.$route.name === 'albums';
     },
 
     /** Public route that can't modify anything */
@@ -786,7 +786,7 @@ export default defineComponent({
      * Move selected photos to another person
      */
     async moveSelectionToPerson(selection: Selection) {
-      if (!this.config_showFaceRect) {
+      if (!this.config.show_face_rect) {
         showError(this.t('memories', 'You must enable "Mark person in preview" to use this feature'));
         return;
       }

@@ -108,7 +108,7 @@ export default defineComponent({
     },
 
     share() {
-      globalThis.shareNodeLink(utils.getFolderRoutePath(this.config_foldersPath));
+      globalThis.shareNodeLink(utils.getFolderRoutePath(this.config.folders_path));
     },
   },
 });

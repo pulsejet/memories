@@ -53,11 +53,11 @@ export default defineComponent({
   },
 
   created() {
-    subscribe(this.config_eventName, this.routeChange);
+    subscribe(this.configEventName, this.routeChange);
   },
 
   beforeDestroy() {
-    unsubscribe(this.config_eventName, this.routeChange);
+    unsubscribe(this.configEventName, this.routeChange);
   },
 
   watch: {
@@ -74,7 +74,7 @@ export default defineComponent({
         this.loading++;
 
         if (route === 'albums') {
-          this.items = await dav.getAlbums(3, this.config_albumListSort);
+          this.items = await dav.getAlbums(3, this.config.album_list_sort);
         } else if (route === 'tags') {
           this.items = await dav.getTags();
         } else if (route === 'recognize' || route === 'facerecognition') {

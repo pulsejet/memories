@@ -59,6 +59,50 @@ class OtherController extends GenericApiController
     /**
      * @NoAdminRequired
      *
+     * @NoCSRFRequired
+     *
+     * @PublicPage
+     */
+    public function getUserConfig(): Http\Response
+    {
+        return Util::guardEx(function () {
+            $appManager = \OC::$server->get(\OCP\App\IAppManager::class);
+
+            try {
+                $uid = Util::getUID();
+            } catch (\Exception $e) {
+                $uid = null;
+            }
+
+            $getAppConfig = function ($key, $default) use ($uid) {
+                return $this->config->getUserValue($uid, Application::APPNAME, $key, $default);
+            };
+
+            return new JSONResponse([
+                "version" => $appManager->getAppInfo('memories')['version'],
+                "vod_disable" => Util::getSystemConfig('memories.vod.disable'),
+                "video_default_quality" => Util::getSystemConfig('memories.video_default_quality'),
+                "places_gis" => Util::getSystemConfig('memories.gis_type'),
+
+                "systemtags_enabled" => Util::tagsIsEnabled(),
+                "recognize_enabled" => Util::recognizeIsEnabled(),
+                "albums_enabled" => Util::albumsIsEnabled(),
+                "facerecognition_installed" => Util::facerecognitionIsInstalled(),
+                "facerecognition_enabled" => Util::facerecognitionIsEnabled(),
+
+                "timeline_path" => $getAppConfig('timelinePath', 'EMPTY'),
+                "folders_path" => $getAppConfig('foldersPath', '/'),
+                "show_hidden_folders" => $getAppConfig('showHidden', false) === "true",
+                "sort_folder_month" => $getAppConfig('sortFolderMonth', false) === "true",
+                "sort_album_month" => $getAppConfig('sortAlbumMonth', "true") === "true",
+                "enable_top_memories" => $getAppConfig('enableTopMemories', 'true') === "true",
+            ], Http::STATUS_OK);
+        });
+    }
+
+    /**
+     * @NoAdminRequired
+     *
      * @PublicPage
      *
      * @NoCSRFRequired

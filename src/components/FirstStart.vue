@@ -118,8 +118,8 @@ export default defineComponent({
     async finish() {
       this.show = false;
       await new Promise((resolve) => setTimeout(resolve, 500));
-      this.config_timelinePath = this.chosenPath;
-      await this.updateSetting('timelinePath');
+      this.config.timeline_path = this.chosenPath;
+      await this.updateSetting('timeline_path', 'timelinePath');
     },
 
     async chooseFolder(title: string, initial: string) {

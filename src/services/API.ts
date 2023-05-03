@@ -185,6 +185,10 @@ export class API {
     return gen(`${BASE}/config/{setting}`, { setting });
   }
 
+  static CONFIG_GET() {
+    return gen(`${BASE}/config`);
+  }
+
   static SYSTEM_CONFIG(setting: string | null) {
     return setting ? gen(`${BASE}/system-config/{setting}`, { setting }) : gen(`${BASE}/system-config`);
   }

@@ -70,7 +70,7 @@ export default defineComponent({
         .slice(2) as string[];
 
       // Remove base path if present
-      const basePath = this.config_foldersPath.split('/').filter((x) => x);
+      const basePath = this.config.folders_path.split('/').filter((x) => x);
       if (path.length >= basePath.length && path.slice(0, basePath.length).every((x, i) => x === basePath[i])) {
         path.splice(0, basePath.length);
       }

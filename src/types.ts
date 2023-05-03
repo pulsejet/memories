@@ -236,3 +236,29 @@ export type ISelectionAction = {
   /** Allow for public routes (default false) */
   allowPublic?: boolean;
 };
+
+export type IConfig = {
+  version: string;
+  vod_disable: boolean;
+  video_default_quality: string;
+  places_gis: number;
+
+  systemtags_enabled: boolean;
+  recognize_enabled: boolean;
+  albums_enabled: boolean;
+  facerecognition_installed: boolean;
+  facerecognition_enabled: boolean;
+
+  timeline_path: string;
+  folders_path: string;
+  show_hidden_folders: boolean;
+  sort_folder_month: boolean;
+  sort_album_month: boolean;
+  enable_top_memories: boolean;
+
+  square_thumbs: boolean;
+  full_res_on_zoom: boolean;
+  full_res_always: boolean;
+  show_face_rect: boolean;
+  album_list_sort: 1 | 2;
+};

@@ -770,7 +770,7 @@ export default defineComponent({
 
       // Get full image URL
       const fullUrl = isvideo ? null : API.IMAGE_DECODABLE(photo.fileid, photo.etag);
-      const fullLoadCond = this.config_fullResAlways ? 'always' : this.config_fullResOnZoom ? 'zoom' : 'never';
+      const fullLoadCond = this.config.full_res_always ? 'always' : this.config.full_res_on_zoom ? 'zoom' : 'never';
 
       return {
         src: previewUrl,

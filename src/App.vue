@@ -59,7 +59,7 @@ const NcAppNavigationItem = () => import('@nextcloud/vue/dist/Components/NcAppNa
 
 import { generateUrl } from '@nextcloud/router';
 import { translate as t } from '@nextcloud/l10n';
-import { emit } from '@nextcloud/event-bus';
+import { emit, subscribe } from '@nextcloud/event-bus';
 
 import * as utils from './services/Utils';
 import UserConfig from './mixins/UserConfig';
@@ -137,11 +137,11 @@ export default defineComponent({
     },
 
     recognize(): string | false {
-      if (!this.config_recognizeEnabled) {
+      if (!this.config.recognize_enabled) {
         return false;
       }
 
-      if (this.config_facerecognitionInstalled) {
+      if (this.config.facerecognition_enabled) {
         return t('memories', 'People (Recognize)');
       }
 
@@ -149,11 +149,11 @@ export default defineComponent({
     },
 
     facerecognition(): string | false {
-      if (!this.config_facerecognitionInstalled) {
+      if (!this.config.facerecognition_installed) {
         return false;
       }
 
-      if (this.config_recognizeEnabled) {
+      if (this.config.recognize_enabled) {
         return t('memories', 'People (Face Recognition)');
       }
 
@@ -161,11 +161,15 @@ export default defineComponent({
     },
 
     isFirstStart(): boolean {
-      return this.config_timelinePath === 'EMPTY';
+      return (
+        this.config.timeline_path === 'EMPTY' &&
+        this.$route.name !== 'folder-share' &&
+        this.$route.name !== 'album-share'
+      );
     },
 
     showAlbums(): boolean {
-      return this.config_albumsEnabled;
+      return this.config.albums_enabled;
     },
 
     removeOuterGap(): boolean {
@@ -197,13 +201,14 @@ export default defineComponent({
     window.addEventListener('resize', () => {
       utils.setRenewingTimeout(this, 'resizeTimer', onResize, 100);
     });
+
+    // Register navigation items on config change
+    subscribe(this.configEventName, this.refreshNav);
   },
 
   mounted() {
     this.doRouteChecks();
-
-    // Populate navigation
-    this.navItems = this.navItemsAll().filter((item) => typeof item.if === 'undefined' || Boolean(item.if));
+    this.refreshNav();
 
     // Store CSS variables modified
     const root = document.documentElement;
@@ -255,8 +260,8 @@ export default defineComponent({
   },
 
   methods: {
-    navItemsAll(): NavItem[] {
-      return [
+    refreshNav() {
+      const navItems = [
         {
           name: 'timeline',
           icon: ImageMultiple,
@@ -309,7 +314,7 @@ export default defineComponent({
           name: 'places',
           icon: MarkerIcon,
           title: t('memories', 'Places'),
-          if: this.config_placesGis > 0,
+          if: this.config.places_gis > 0,
         },
         {
           name: 'map',
@@ -320,9 +325,11 @@ export default defineComponent({
           name: 'tags',
           icon: TagsIcon,
           title: t('memories', 'Tags'),
-          if: this.config_tagsEnabled,
+          if: this.config.systemtags_enabled,
         },
       ];
+
+      this.navItems = navItems.filter((item) => typeof item.if === 'undefined' || Boolean(item.if));
     },
 
     linkClick() {

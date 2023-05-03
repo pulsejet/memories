@@ -25,7 +25,7 @@
         </NcActionButton>
         <NcActionCheckbox
           :aria-label="t('memories', 'Mark person in preview')"
-          :checked.sync="config_showFaceRect"
+          :checked.sync="config.show_face_rect"
           @change="changeShowFaceRect"
         >
           {{ t('memories', 'Mark person in preview') }}
@@ -104,10 +104,8 @@ export default defineComponent({
     },
 
     changeShowFaceRect() {
-      localStorage.setItem('memories_showFaceRect', this.config_showFaceRect ? '1' : '0');
-      setTimeout(() => {
-        this.$router.go(0); // refresh page
-      }, 500);
+      this.updateSetting('show_face_rect');
+      setTimeout(() => this.$router.go(0), 100); // refresh page
     },
   },
 });

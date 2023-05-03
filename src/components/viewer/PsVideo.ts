@@ -1,5 +1,5 @@
 import PhotoSwipe from 'photoswipe';
-import { loadState } from '@nextcloud/initial-state';
+import staticConfig from '../../services/static-config';
 import { showError } from '@nextcloud/dialogs';
 import { translate as t } from '@nextcloud/l10n';
 import { getCurrentUser } from '@nextcloud/auth';
@@ -24,10 +24,6 @@ type VideoContent = PsContent & {
 type PsVideoEvent = PsEvent & {
   content: VideoContent;
 };
-
-const config_vodDisable = loadState('memories', 'vod_disable', true);
-
-const config_video_default_quality = Number(loadState('memories', 'video_default_quality', <string>'0') as string);
 
 /**
  * Check if slide has video content
@@ -155,7 +151,7 @@ class VideoContentSetup {
       type: string;
     }[] = [];
 
-    if (!config_vodDisable) {
+    if (!staticConfig.getSync('vod_disable')) {
       sources.push(this.getHLSsrc(content));
     }
 
@@ -205,7 +201,7 @@ class VideoContentSetup {
         directFailed = true;
         console.warn('PsVideo: Direct video stream could not be opened.');
 
-        if (!hlsFailed && !config_vodDisable) {
+        if (!hlsFailed && !staticConfig.getSync('vod_disable')) {
           console.warn('PsVideo: Trying HLS stream');
           vjs.src(this.getHLSsrc(content));
         }
@@ -336,7 +332,7 @@ class VideoContentSetup {
     // Add quality options
     if (qualityNums) {
       opts.quality = {
-        default: config_video_default_quality,
+        default: Number(staticConfig.getSync('video_default_quality')),
         options: qualityNums,
         forced: true,
         onChange: (quality: number) => {

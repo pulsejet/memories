@@ -58,35 +58,6 @@ class PageController extends Controller
         OCPUtil::addScript($this->appName, 'memories-main');
         $this->eventDispatcher->dispatchTyped(new LoadSidebar());
 
-        // Configuration
-        $uid = $user->getUID();
-        $pi = function ($key, $default) use ($uid) {
-            $this->initialState->provideInitialState($key, $this->config->getUserValue(
-                $uid,
-                Application::APPNAME,
-                $key,
-                $default
-            ));
-        };
-
-        // User configuration
-        $pi('timelinePath', 'EMPTY');
-        $pi('foldersPath', '/');
-        $pi('showHidden', false);
-        $pi('sortFolderMonth', false);
-        $pi('sortAlbumMonth', 'true');
-        $pi('enableTopMemories', 'true');
-
-        // Apps enabled
-        $this->initialState->provideInitialState('systemtags', Util::tagsIsEnabled());
-        $this->initialState->provideInitialState('recognize', Util::recognizeIsEnabled());
-        $this->initialState->provideInitialState('facerecognitionInstalled', Util::facerecognitionIsInstalled());
-        $this->initialState->provideInitialState('facerecognitionEnabled', Util::facerecognitionIsEnabled());
-        $this->initialState->provideInitialState('albums', Util::albumsIsEnabled());
-
-        // Common state
-        self::provideCommonInitialState($this->initialState);
-
         // Extra translations
         if (Util::recognizeIsEnabled()) {
             // Auto translation for tags
@@ -136,22 +107,6 @@ class PageController extends Controller
         $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
 
         return $policy;
-    }
-
-    /** Provide initial state for all pages */
-    public static function provideCommonInitialState(IInitialState &$initialState)
-    {
-        $appManager = \OC::$server->get(\OCP\App\IAppManager::class);
-
-        // App version
-        $initialState->provideInitialState('version', $appManager->getAppInfo('memories')['version']);
-
-        // Video configuration
-        $initialState->provideInitialState('vod_disable', Util::getSystemConfig('memories.vod.disable'));
-        $initialState->provideInitialState('video_default_quality', Util::getSystemConfig('memories.video_default_quality'));
-
-        // Geo configuration
-        $initialState->provideInitialState('places_gis', Util::getSystemConfig('memories.gis_type'));
     }
 
     /**

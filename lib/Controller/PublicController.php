@@ -111,7 +111,6 @@ class PublicController extends AuthPublicShareController
 
         // Scripts
         \OCP\Util::addScript($this->appName, 'memories-main');
-        PageController::provideCommonInitialState($this->initialState);
 
         // Share info
         $this->initialState->provideInitialState('no_download', $share->getHideDownload());

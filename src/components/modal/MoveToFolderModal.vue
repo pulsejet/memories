@@ -71,7 +71,7 @@ export default defineComponent({
     },
 
     async chooseFolderPath() {
-      let destination = await this.chooseFolderModal(this.t('memories', 'Choose a folder'), this.config_foldersPath);
+      let destination = await this.chooseFolderModal(this.t('memories', 'Choose a folder'), this.config.folders_path);
       // Fails if the target exists, same behavior with Nextcloud files implementation.
       const gen = dav.movePhotos(this.photos, destination, false);
       this.processing = true;

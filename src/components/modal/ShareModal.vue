@@ -71,12 +71,12 @@
 import { defineComponent } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
-import { loadState } from '@nextcloud/initial-state';
 import axios from '@nextcloud/axios';
 
 import NcListItem from '@nextcloud/vue/dist/Components/NcListItem';
 import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
 import Modal from './Modal.vue';
+import UserConfig from '../../mixins/UserConfig';
 
 import { IPhoto } from '../../types';
 import { API } from '../../services/API';
@@ -87,9 +87,6 @@ import PhotoIcon from 'vue-material-design-icons/Image.vue';
 import LargePhotoIcon from 'vue-material-design-icons/ImageArea.vue';
 import LinkIcon from 'vue-material-design-icons/LinkVariant.vue';
 import FileIcon from 'vue-material-design-icons/File.vue';
-
-// Is video transcoding enabled?
-const config_vodDisable = loadState('memories', 'vod_disable', true);
 
 export default defineComponent({
   name: 'ShareModal',
@@ -104,6 +101,8 @@ export default defineComponent({
     LinkIcon,
     FileIcon,
   },
+
+  mixins: [UserConfig],
 
   data: () => {
     return {
@@ -128,7 +127,7 @@ export default defineComponent({
     },
 
     canShareHighRes() {
-      return !this.isVideo || !config_vodDisable;
+      return !this.isVideo || !this.config.vod_disable;
     },
 
     canShareLink() {

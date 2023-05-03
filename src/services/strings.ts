@@ -1,7 +1,5 @@
-import { loadState } from '@nextcloud/initial-state';
+import staticConfig from './static-config';
 import { translate as t } from '@nextcloud/l10n';
-
-const config_facerecognitionEnabled = Boolean(loadState('memories', 'facerecognitionEnabled', <string>''));
 
 type RouteNameType = string | null | undefined;
 
@@ -14,7 +12,7 @@ export function emptyDescription(routeName: RouteNameType): string {
     case 'thisday':
       return t('memories', 'Memories from past years will appear here');
     case 'facerecognition':
-      return config_facerecognitionEnabled
+      return staticConfig.getSync('facerecognition_enabled')
         ? t('memories', 'You will find your friends soon. Please be patient')
         : t('memories', 'Face Recognition is disabled. Enable in settings to find your friends');
     case 'videos':
