@@ -82,12 +82,14 @@ return [
         ['name' => 'Share#createNode', 'url' => '/api/share/node', 'verb' => 'POST'],
         ['name' => 'Share#deleteShare', 'url' => '/api/share/delete', 'verb' => 'POST'],
 
-        // Config API
+        // Config
         ['name' => 'Other#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],
-        ['name' => 'Other#getSystemStatus', 'url' => '/api/system-status', 'verb' => 'GET'],
-        ['name' => 'Other#getSystemConfig', 'url' => '/api/system-config', 'verb' => 'GET'],
-        ['name' => 'Other#setSystemConfig', 'url' => '/api/system-config/{key}', 'verb' => 'PUT'],
-        ['name' => 'Other#placesSetup', 'url' => '/api/occ/places-setup', 'verb' => 'POST'],
+
+        // Admin
+        ['name' => 'Admin#getSystemStatus', 'url' => '/api/system-status', 'verb' => 'GET'],
+        ['name' => 'Admin#getSystemConfig', 'url' => '/api/system-config', 'verb' => 'GET'],
+        ['name' => 'Admin#setSystemConfig', 'url' => '/api/system-config/{key}', 'verb' => 'PUT'],
+        ['name' => 'Admin#placesSetup', 'url' => '/api/occ/places-setup', 'verb' => 'POST'],
 
         // Service worker
         ['name' => 'Other#serviceWorker', 'url' => '/service-worker.js', 'verb' => 'GET'],
