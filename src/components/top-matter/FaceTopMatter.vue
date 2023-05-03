@@ -100,7 +100,7 @@ export default defineComponent({
     },
 
     back() {
-      this.$router.push({ name: this.$route.name as string });
+      this.$router.go(-1);
     },
 
     changeShowFaceRect() {

@@ -177,7 +177,7 @@ export default defineComponent({
     },
 
     back() {
-      this.$router.push({ name: 'albums' });
+      this.$router.go(-1);
     },
 
     async downloadAlbum() {

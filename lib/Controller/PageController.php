@@ -214,4 +214,14 @@ class PageController extends Controller
     {
         return $this->main();
     }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     */
+    public function explore()
+    {
+        return $this->main();
+    }
 }

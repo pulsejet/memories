@@ -3,6 +3,7 @@ import { translate as t } from '@nextcloud/l10n';
 import Router from 'vue-router';
 import Vue from 'vue';
 import Timeline from './components/Timeline.vue';
+import Explore from './components/Explore.vue';
 import SplitTimeline from './components/SplitTimeline.vue';
 import ClusterView from './components/ClusterView.vue';
 
@@ -147,6 +148,15 @@ export default new Router({
       name: 'map',
       props: (route) => ({
         rootTitle: t('memories', 'Map'),
+      }),
+    },
+
+    {
+      path: '/explore',
+      component: Explore,
+      name: 'explore',
+      props: (route) => ({
+        rootTitle: t('memories', 'Explore'),
       }),
     },
   ],
