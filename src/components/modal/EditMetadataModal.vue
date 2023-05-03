@@ -18,7 +18,7 @@
         <EditDate ref="editDate" :photos="photos" />
       </div>
 
-      <div v-if="config_tagsEnabled && sections.includes(2)">
+      <div v-if="config.systemtags_enabled && sections.includes(2)">
         <div class="title-text">
           {{ t('memories', 'Collaborative Tags') }}
         </div>

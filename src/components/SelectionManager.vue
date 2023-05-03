@@ -186,7 +186,7 @@ export default defineComponent({
         name: t('memories', 'Add to album'),
         icon: AlbumsIcon,
         callback: this.addToAlbum.bind(this),
-        if: (self: any) => self.config_albumsEnabled && !self.routeIsAlbum(),
+        if: (self: any) => self.config.albums_enabled && !self.routeIsAlbum(),
       },
       {
         name: t('memories', 'Move to person'),
