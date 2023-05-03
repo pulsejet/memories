@@ -1,30 +1,39 @@
 <template>
   <div class="explore-outer hide-scrollbar">
-    <ClusterHList v-if="recognize.length" :title="t('memories', 'Recognize')" link="/recognize" :clusters="recognize" />
-    <ClusterHList
-      v-if="facerecognition.length"
-      :title="t('memories', 'Face Recognition')"
-      link="/facerecognition"
-      :clusters="facerecognition"
-    />
-    <ClusterHList v-if="places.length" :title="t('memories', 'Places')" link="/places" :clusters="places" />
-    <ClusterHList v-if="tags.length" :title="t('memories', 'Tags')" link="/tags" :clusters="tags" />
+    <XLoadingIcon v-if="loading" class="fill-block" />
 
-    <div class="link-list">
-      <NcButton
-        class="link"
-        v-for="category of categories"
-        :ariaLabel="category.name"
-        :key="category.name"
-        :to="category.link"
-        @click="category.click?.()"
-        type="secondary"
-      >
-        <template #icon>
-          <component :is="category.icon" />
-        </template>
-        <template>{{ category.name }}</template>
-      </NcButton>
+    <div v-else>
+      <ClusterHList
+        v-if="recognize.length"
+        :title="t('memories', 'Recognize')"
+        link="/recognize"
+        :clusters="recognize"
+      />
+      <ClusterHList
+        v-if="facerecognition.length"
+        :title="t('memories', 'Face Recognition')"
+        link="/facerecognition"
+        :clusters="facerecognition"
+      />
+      <ClusterHList v-if="places.length" :title="t('memories', 'Places')" link="/places" :clusters="places" />
+      <ClusterHList v-if="tags.length" :title="t('memories', 'Tags')" link="/tags" :clusters="tags" />
+
+      <div class="link-list">
+        <NcButton
+          class="link"
+          v-for="category of categories"
+          :ariaLabel="category.name"
+          :key="category.name"
+          :to="category.link"
+          @click="category.click?.()"
+          type="secondary"
+        >
+          <template #icon>
+            <component :is="category.icon" />
+          </template>
+          <template>{{ category.name }}</template>
+        </NcButton>
+      </div>
     </div>
   </div>
 </template>
@@ -52,6 +61,8 @@ export default defineComponent({
   name: 'Explore',
 
   data: () => ({
+    loading: 0,
+
     config: {} as IConfig,
     recognize: [] as ICluster[],
     facerecognition: [] as ICluster[],
@@ -105,26 +116,39 @@ export default defineComponent({
   },
 
   async mounted() {
-    this.config = await config.getAll();
+    const res: IConfig | undefined = await this.load(config.getAll.bind(config));
+    if (!res) return;
+    this.config = res;
 
     if (this.config.recognize_enabled) {
-      this.getRecognize();
+      this.load(this.getRecognize);
     }
 
     if (this.config.facerecognition_enabled) {
-      this.getFaceRecognition();
+      this.load(this.getFaceRecognition);
     }
 
     if (this.config.places_gis > 0) {
-      this.getPlaces();
+      this.load(this.getPlaces);
     }
 
     if (this.config.systemtags_enabled) {
-      this.getTags();
+      this.load(this.getTags);
     }
   },
 
   methods: {
+    async load<T>(fun: () => Promise<T>) {
+      try {
+        this.loading++;
+        return await fun();
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.loading--;
+      }
+    },
+
     async getRecognize() {
       const res = await axios.get<ICluster[]>(API.FACE_LIST('recognize'));
       this.recognize = res.data.slice(0, 10);
@@ -153,7 +177,7 @@ export default defineComponent({
   height: 100%;
   overflow: auto;
 
-  > .link-list {
+  .link-list {
     padding: 8px 10px;
 
     > .link {
