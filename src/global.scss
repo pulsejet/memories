@@ -1,5 +1,10 @@
 body {
   overflow: hidden;
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
 }
 
 // Native app styles

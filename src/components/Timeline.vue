@@ -1233,11 +1233,6 @@ export default defineComponent({
   overflow: hidden;
   user-select: none;
   position: relative;
-
-  * {
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-  }
 }
 
 .recycler {
