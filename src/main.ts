@@ -12,6 +12,7 @@ import { getRequestToken } from '@nextcloud/auth';
 
 import type { Route } from 'vue-router';
 import type { IPhoto } from './types';
+import type { NativeX } from './types-native';
 import type PlyrType from 'plyr';
 import type videojsType from 'video.js';
 
@@ -48,6 +49,8 @@ declare global {
   var Plyr: typeof PlyrType;
   var videoClientId: string;
   var videoClientIdPersistent: string;
+
+  var nativex: NativeX | undefined;
 }
 
 // Allow global access to the router

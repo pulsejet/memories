@@ -238,6 +238,11 @@ export default defineComponent({
         },
       })
     );
+
+    // Check for native interface
+    if (window.nativex?.isNative()) {
+      document.body.classList.add('native');
+    }
   },
 
   async beforeMount() {
