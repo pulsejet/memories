@@ -5,7 +5,6 @@ namespace OCA\Memories\Controller;
 use OCA\Files\Event\LoadSidebar;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Util;
-use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -21,7 +20,6 @@ class PageController extends Controller
     protected $userId;
     protected $appName;
     protected IEventDispatcher $eventDispatcher;
-    private IAppManager $appManager;
     private IInitialState $initialState;
     private IUserSession $userSession;
     private IConfig $config;
@@ -30,7 +28,6 @@ class PageController extends Controller
         string $AppName,
         IRequest $request,
         $UserId,
-        IAppManager $appManager,
         IEventDispatcher $eventDispatcher,
         IInitialState $initialState,
         IUserSession $userSession,
@@ -39,7 +36,6 @@ class PageController extends Controller
         parent::__construct($AppName, $request);
         $this->userId = $UserId;
         $this->appName = $AppName;
-        $this->appManager = $appManager;
         $this->eventDispatcher = $eventDispatcher;
         $this->initialState = $initialState;
         $this->userSession = $userSession;
