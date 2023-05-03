@@ -7,9 +7,7 @@ use OCA\Memories\Util;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\TemplateResponse;
-use OCP\AppFramework\Services\IInitialState;
 use OCP\EventDispatcher\IEventDispatcher;
-use OCP\IConfig;
 use OCP\IRequest;
 use OCP\IUserSession;
 use OCP\Util as OCPUtil;
@@ -19,26 +17,20 @@ class PageController extends Controller
     protected $userId;
     protected $appName;
     protected IEventDispatcher $eventDispatcher;
-    private IInitialState $initialState;
     private IUserSession $userSession;
-    private IConfig $config;
 
     public function __construct(
         string $AppName,
         IRequest $request,
         $UserId,
         IEventDispatcher $eventDispatcher,
-        IInitialState $initialState,
-        IUserSession $userSession,
-        IConfig $config
+        IUserSession $userSession
     ) {
         parent::__construct($AppName, $request);
         $this->userId = $UserId;
         $this->appName = $AppName;
         $this->eventDispatcher = $eventDispatcher;
-        $this->initialState = $initialState;
         $this->userSession = $userSession;
-        $this->config = $config;
     }
 
     /**
@@ -68,9 +60,7 @@ class PageController extends Controller
 
         // Check if requested from native app
         $userAgent = $this->request->getHeader('User-Agent');
-        if (strpos($userAgent, 'memories-native') !== false) {
-            $response->renderAs(TemplateResponse::RENDER_AS_BASE);
-        } else {
+        if (false === strpos($userAgent, 'memories-native')) {
             $this->eventDispatcher->dispatchTyped(new LoadSidebar());
         }
 
