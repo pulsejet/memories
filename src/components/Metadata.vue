@@ -41,7 +41,7 @@
   </div>
 
   <div class="loading-icon fill-block" v-else>
-    <NcLoadingIcon />
+    <XLoadingIcon />
   </div>
 </template>
 
@@ -50,7 +50,6 @@ import { defineComponent } from 'vue';
 
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
 
 import axios from '@nextcloud/axios';
 import { subscribe, unsubscribe } from '@nextcloud/event-bus';
@@ -84,7 +83,6 @@ export default defineComponent({
   components: {
     NcActions,
     NcActionButton,
-    NcLoadingIcon,
     EditIcon,
   },
 
@@ -358,10 +356,6 @@ export default defineComponent({
 
 .loading-icon {
   height: 75%;
-  :deep svg {
-    width: 60px;
-    height: 60px;
-  }
 }
 
 .map {

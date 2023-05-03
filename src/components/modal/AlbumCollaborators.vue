@@ -20,7 +20,7 @@
           >
             <Magnify :size="16" />
           </NcTextField>
-          <NcLoadingIcon v-if="loadingCollaborators" />
+          <XLoadingIcon v-if="loadingCollaborators" />
         </label>
 
         <ul
@@ -109,7 +109,7 @@
             :disabled="publicLink.id === ''"
             @click="deletePublicLink"
           >
-            <NcLoadingIcon v-if="publicLink.id === ''" slot="icon" />
+            <XLoadingIcon v-if="publicLink.id === ''" slot="icon" />
             <Close v-else slot="icon" />
           </NcButton>
         </template>
@@ -143,7 +143,6 @@ import { getCurrentUser } from '@nextcloud/auth';
 import { generateOcsUrl, generateUrl } from '@nextcloud/router';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
 import NcPopover from '@nextcloud/vue/dist/Components/NcPopover';
 import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
@@ -166,7 +165,6 @@ export default defineComponent({
     ContentCopy,
     Check,
     Earth,
-    NcLoadingIcon,
     NcButton,
     NcListItemIcon,
     NcTextField,

@@ -5,7 +5,7 @@
     </template>
 
     <div class="loading-icon fill-block" v-if="loading > 0">
-      <NcLoadingIcon />
+      <XLoadingIcon />
     </div>
 
     <ul class="options" v-else>
@@ -74,7 +74,6 @@ import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
 import NcListItem from '@nextcloud/vue/dist/Components/NcListItem';
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
 import Modal from './Modal.vue';
 import UserConfig from '../../mixins/UserConfig';
 
@@ -93,7 +92,6 @@ export default defineComponent({
 
   components: {
     NcListItem,
-    NcLoadingIcon,
     Modal,
 
     PhotoIcon,
@@ -229,10 +227,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 .loading-icon {
   min-height: 240px;
-  :deep svg {
-    width: 60px;
-    height: 60px;
-  }
 }
 
 ul.options {

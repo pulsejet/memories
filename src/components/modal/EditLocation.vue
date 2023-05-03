@@ -39,7 +39,7 @@
       contributors
     </div>
 
-    <NcLoadingIcon class="loading-spinner" v-if="loading" />
+    <XLoadingIcon class="loading-spinner" v-if="loading" />
 
     <ul v-if="options.length > 0">
       <li
@@ -66,7 +66,6 @@ import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
 
 import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';
 import CloseIcon from 'vue-material-design-icons/Close.vue';
@@ -87,7 +86,6 @@ export default defineComponent({
     NcActionButton,
     NcTextField,
     NcListItem,
-    NcLoadingIcon,
     MagnifyIcon,
     CloseIcon,
     UndoIcon,

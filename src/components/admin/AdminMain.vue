@@ -1,6 +1,6 @@
 <template>
   <div class="outer" v-if="loaded">
-    <NcLoadingIcon class="loading-icon" v-show="loading" />
+    <XLoadingIcon class="loading-icon" v-show="loading" />
 
     <component v-for="c in components" :key="c.__name" :is="c" :status="status" :config="config" @update="update" />
   </div>
@@ -25,13 +25,8 @@ import VideoAccel from './sections/VideoAccel.vue';
 
 import { ISystemConfig, ISystemStatus } from './AdminTypes';
 
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
-
 export default defineComponent({
   name: 'Admin',
-  components: {
-    NcLoadingIcon,
-  },
 
   data: () => ({
     loaded: false,

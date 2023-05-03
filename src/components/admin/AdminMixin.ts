@@ -5,7 +5,6 @@ import axios from '@nextcloud/axios';
 const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch');
 const NcNoteCard = () => import('@nextcloud/vue/dist/Components/NcNoteCard');
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 
 export default defineComponent({
@@ -15,7 +14,6 @@ export default defineComponent({
     NcCheckboxRadioSwitch,
     NcNoteCard,
     NcTextField,
-    NcLoadingIcon,
     NcButton,
   },
 

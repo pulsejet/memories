@@ -3,6 +3,7 @@ import Vue from 'vue';
 import VueVirtualScroller from 'vue-virtual-scroller';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 import XImg from './components/frame/XImg.vue';
+import XLoadingIcon from './components/XLoadingIcon.vue';
 import GlobalMixin from './mixins/GlobalMixin';
 
 import App from './App.vue';
@@ -79,6 +80,7 @@ localStorage.setItem('videoClientIdPersistent', globalThis.videoClientIdPersiste
 Vue.mixin(GlobalMixin as any);
 Vue.use(VueVirtualScroller);
 Vue.component('XImg', XImg);
+Vue.component('XLoadingIcon', XLoadingIcon);
 
 let app = null;
 

@@ -19,7 +19,7 @@
         @click="handleSetCollaborators(collaborators)"
       >
         <template #icon>
-          <NcLoadingIcon v-if="loadingAddCollaborators" />
+          <XLoadingIcon v-if="loadingAddCollaborators" />
         </template>
         {{ t('photos', 'Save') }}
       </NcButton>
@@ -31,7 +31,6 @@
 import { defineComponent } from 'vue';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
 
 import * as dav from '../../services/DavRequests';
 
@@ -42,7 +41,6 @@ export default defineComponent({
   name: 'AlbumShareModal',
   components: {
     NcButton,
-    NcLoadingIcon,
     Modal,
     AlbumCollaborators,
   },

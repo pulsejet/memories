@@ -1,5 +1,7 @@
 <template>
-  <div v-if="noParams" class="container" :class="{ 'icon-loading': loading }">
+  <div v-if="noParams" class="container">
+    <XLoadingIcon class="loading-icon centered" v-if="loading" />
+
     <TopMatter />
 
     <EmptyContent v-if="!items.length && !loading" />
@@ -96,5 +98,6 @@ export default defineComponent({
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 </style>

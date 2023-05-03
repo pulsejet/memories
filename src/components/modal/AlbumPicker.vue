@@ -1,6 +1,6 @@
 <template>
   <div v-if="!showAlbumCreationForm" class="album-picker">
-    <NcLoadingIcon v-if="loadingAlbums" class="loading-icon" />
+    <XLoadingIcon v-if="loadingAlbums" class="loading-icon" />
 
     <ul class="albums-container">
       <NcListItem
@@ -62,7 +62,6 @@ import Plus from 'vue-material-design-icons/Plus.vue';
 import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
 
 import { getPreviewUrl } from '../../services/utils/helpers';
@@ -78,7 +77,6 @@ export default defineComponent({
     ImageMultiple,
     NcButton,
     NcListItem,
-    NcLoadingIcon,
   },
 
   data: () => ({

@@ -45,7 +45,7 @@
       </ul>
     </div>
 
-    <NcLoadingIcon v-if="loading" />
+    <XLoadingIcon v-if="loading" />
 
     <template #buttons>
       <NcButton class="primary" :disabled="loading" @click="createLink">
@@ -66,7 +66,6 @@ import { showSuccess } from '@nextcloud/dialogs';
 
 import UserConfig from '../../mixins/UserConfig';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
@@ -93,7 +92,6 @@ export default defineComponent({
   components: {
     Modal,
     NcButton,
-    NcLoadingIcon,
     NcListItem,
     NcActionButton,
 

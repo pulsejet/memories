@@ -45,7 +45,7 @@
         </NcButton>
         <NcButton :aria-label="saveText" type="primary" :disabled="albumName === '' || loading" @click="submit()">
           <template #icon>
-            <NcLoadingIcon v-if="loading" />
+            <XLoadingIcon v-if="loading" />
             <Send v-else />
           </template>
           {{ saveText }}
@@ -77,7 +77,7 @@
         @click="submit(collaborators)"
       >
         <template #icon>
-          <NcLoadingIcon v-if="loading" />
+          <XLoadingIcon v-if="loading" />
           <Send v-else />
         </template>
         {{ saveText }}
@@ -92,7 +92,6 @@ import { defineComponent, PropType } from 'vue';
 import { getCurrentUser } from '@nextcloud/auth';
 import { showError } from '@nextcloud/dialogs';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
 import moment from 'moment';
@@ -107,7 +106,6 @@ export default defineComponent({
   name: 'AlbumForm',
   components: {
     NcButton,
-    NcLoadingIcon,
     NcTextField,
     AlbumCollaborators,
 

@@ -1,5 +1,8 @@
 <template>
-  <div class="container" ref="container" :class="{ 'icon-loading': loading }">
+  <div class="container" ref="container">
+    <!-- Loading indicator -->
+    <XLoadingIcon class="loading-icon centered" v-if="loading" />
+
     <!-- Static top matter -->
     <TopMatter ref="topmatter" />
 
