@@ -55,7 +55,6 @@ class PageController extends Controller
 
         // Scripts
         OCPUtil::addScript($this->appName, 'memories-main');
-        $this->eventDispatcher->dispatchTyped(new LoadSidebar());
 
         // Extra translations
         if (Util::recognizeIsEnabled()) {
@@ -66,6 +65,14 @@ class PageController extends Controller
         $response = new TemplateResponse($this->appName, 'main');
         $response->setContentSecurityPolicy(self::getCSP());
         $response->cacheFor(0);
+
+        // Check if requested from native app
+        $userAgent = $this->request->getHeader('User-Agent');
+        if (strpos($userAgent, 'memories-native') !== false) {
+            $response->renderAs(TemplateResponse::RENDER_AS_BASE);
+        } else {
+            $this->eventDispatcher->dispatchTyped(new LoadSidebar());
+        }
 
         return $response;
     }
