@@ -23,7 +23,15 @@ registerRoute(
 // strip certain headers such as HTTP-Range, which is required
 // for proper playback of videos.
 
-const networkOnly = [/^.*\/apps\/memories\/api\/.*/];
+const networkOnly = [/^.*\/api\/.*/];
+
+// Use network-first for memories page for initial state such as theming
+registerRoute(
+  ({ url }) => url.origin === self.location.origin && url.pathname.endsWith('/apps/memories/'),
+  new NetworkFirst({
+    cacheName: 'pages',
+  })
+);
 
 // Cache pages for same-origin requests only
 registerRoute(
