@@ -9,6 +9,7 @@ export const constants = {
     FLAG_IS_FAVORITE: 1 << 3,
     FLAG_SELECTED: 1 << 4,
     FLAG_LEAVING: 1 << 5,
+    FLAG_IS_LOCAL: 1 << 6,
   },
 };
 
@@ -29,5 +30,9 @@ export function convertFlags(photo: IPhoto) {
   if (photo.isfavorite) {
     photo.flag |= constants.c.FLAG_IS_FAVORITE;
     delete photo.isfavorite;
+  }
+  if (photo.islocal) {
+    photo.flag |= constants.c.FLAG_IS_LOCAL;
+    delete photo.islocal;
   }
 }

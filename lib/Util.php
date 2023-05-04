@@ -447,6 +447,17 @@ class Util
     }
 
     /**
+     * Checks if the API call was made from a native interface.
+     */
+    public static function callerIsNative(): bool
+    {
+        $request = \OC::$server->get(\OCP\IRequest::class);
+        $userAgent = $request->getHeader('User-Agent');
+
+        return false !== strpos($userAgent, 'memories-native');
+    }
+
+    /**
      * Kill all instances of a process by name.
      * Similar to pkill, which may not be available on all systems.
      */

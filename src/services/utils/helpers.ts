@@ -1,8 +1,15 @@
 import { IImageInfo, IPhoto } from '../../types';
 import { API } from '../API';
+import { constants } from './const';
+import * as nativex from '../../native';
 
 /** Get preview URL from photo object */
 export function getPreviewUrl(photo: IPhoto, square: boolean, size: number | [number, number] | 'screen') {
+  // Native preview
+  if (photo.flag & constants.c.FLAG_IS_LOCAL) {
+    return nativex.NATIVE_URL_PREVIEW(photo.fileid);
+  }
+
   // Screen-appropriate size
   if (size === 'screen') {
     const sw = Math.floor(screen.width * devicePixelRatio);

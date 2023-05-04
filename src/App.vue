@@ -65,6 +65,7 @@ import { translate as t } from '@nextcloud/l10n';
 import { emit, subscribe } from '@nextcloud/event-bus';
 
 import * as utils from './services/Utils';
+import * as nativex from './native';
 import UserConfig from './mixins/UserConfig';
 import Timeline from './components/Timeline.vue';
 import Settings from './components/Settings.vue';
@@ -248,7 +249,7 @@ export default defineComponent({
     );
 
     // Check for native interface
-    if (window.nativex?.isNative()) {
+    if (nativex?.has()) {
       document.body.classList.add('native');
     }
   },

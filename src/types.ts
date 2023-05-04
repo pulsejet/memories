@@ -71,6 +71,8 @@ export type IPhoto = {
   video_duration?: number;
   /** Favorite flag from server */
   isfavorite?: boolean;
+  /** Local file from native */
+  islocal?: boolean;
   /** Optional datetaken epoch */
   datetaken?: number;
 };

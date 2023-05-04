@@ -176,6 +176,13 @@ class DaysController extends GenericApiController
      */
     private function preloadDays(array &$days)
     {
+        // Do not preload anything for native clients.
+        // Since the contents of preloads are trusted, clients will not load locals.
+        if (Util::callerIsNative()) {
+            return;
+        }
+
+        // Build identical transforms for sub queries
         $transforms = $this->getTransformations(false);
         $preloaded = 0;
         $preloadDayIds = [];

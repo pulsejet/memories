@@ -59,8 +59,7 @@ class PageController extends Controller
         $response->cacheFor(0);
 
         // Check if requested from native app
-        $userAgent = $this->request->getHeader('User-Agent');
-        if (false === strpos($userAgent, 'memories-native')) {
+        if (!Util::callerIsNative()) {
             $this->eventDispatcher->dispatchTyped(new LoadSidebar());
         }
 

@@ -123,6 +123,7 @@ import TopMatter from './top-matter/TopMatter.vue';
 import * as dav from '../services/DavRequests';
 import * as utils from '../services/Utils';
 import * as strings from '../services/strings';
+import * as nativex from '../native';
 
 import { API, DaysFilterType } from '../services/API';
 
@@ -906,6 +907,16 @@ export default defineComponent({
         for (const photo of data) {
           if (!dayMap.has(photo.dayid)) dayMap.set(photo.dayid, []);
           dayMap.get(photo.dayid)!.push(photo);
+        }
+
+        // Get local images if we are running in native environment.
+        // Get them all together for each day here.
+        if (nativex.has()) {
+          const promises: Promise<void>[] = [];
+          for (const [dayId, photos] of dayMap) {
+            promises.push(nativex.extendDayWithLocal(dayId, photos));
+          }
+          await Promise.all(promises);
         }
 
         // Store cache asynchronously

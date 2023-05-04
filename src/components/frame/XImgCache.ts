@@ -1,5 +1,6 @@
 import { API } from '../../services/API';
 import { workerImporter } from '../../worker';
+import * as nativex from '../../native';
 import type * as w from './XImgWorker';
 
 // Global web worker to fetch images
@@ -64,6 +65,13 @@ export async function fetchImage(url: string) {
   // Check memcache entry
   let entry = BLOB_CACHE.get(url);
   if (entry) return entry[1];
+
+  // Check if native image
+  if (nativex.IS_NATIVE_URL(url)) {
+    const dataUri = await nativex.getJpegDataUri(url);
+    BLOB_CACHE.set(url, [60, dataUri]);
+    return dataUri;
+  }
 
   // Fetch image
   const blobUrl = await importer<typeof w.fetchImageSrc>('fetchImageSrc')(url);
