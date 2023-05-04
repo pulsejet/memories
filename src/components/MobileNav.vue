@@ -55,7 +55,7 @@ export default defineComponent({
   }
 
   // Make space for the nav
-  #app-content-vue > .router-outlet {
+  #app-content-vue > .router-outlet.has-nav {
     height: calc(100% - var(--mobile-nav-width));
   }
 }

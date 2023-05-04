@@ -35,12 +35,13 @@
           outer: true,
           'router-outlet': true,
           'remove-gap': removeNavGap,
+          'has-nav': showNavigation,
         }"
       >
         <router-view />
       </div>
 
-      <MobileNav />
+      <MobileNav v-if="showNavigation" />
     </NcAppContent>
 
     <Settings :open.sync="settingsOpen" />
