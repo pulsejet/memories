@@ -37,7 +37,7 @@ export default defineComponent({
 
 <style lang="scss">
 :root {
-  --mobile-nav-width: 62px;
+  --mobile-nav-width: 58px;
 }
 
 // Show correct nav depending on screen size
@@ -67,7 +67,7 @@ export default defineComponent({
   height: var(--mobile-nav-width);
   text-align: center;
   padding: 8px;
-  padding-top: 4px;
+  padding-top: 2px;
   font-size: 0.9em;
 
   :deep a {
