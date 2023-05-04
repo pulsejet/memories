@@ -142,3 +142,13 @@ export function IS_NATIVE_URL(url: string) {
 export function NATIVE_URL_PREVIEW(fileid: number) {
   return `nativex://preview/${fileid}`;
 }
+
+/**
+ * Get a full sized URL for a native file ID.
+ *
+ * @param fileid Local file ID returned by native interface
+ * @returns native URI
+ */
+export function NATIVE_URL_FULL(fileid: number) {
+  return `nativex://full/${fileid}`;
+}

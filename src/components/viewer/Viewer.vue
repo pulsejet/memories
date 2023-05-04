@@ -168,6 +168,7 @@ import { getDownloadLink } from '../../services/DavRequests';
 import { API } from '../../services/API';
 import * as dav from '../../services/DavRequests';
 import * as utils from '../../services/Utils';
+import * as nativex from '../../native';
 
 import ImageEditor from './ImageEditor.vue';
 import PhotoSwipe, { PhotoSwipeOptions } from 'photoswipe';
@@ -769,7 +770,11 @@ export default defineComponent({
       }
 
       // Get full image URL
-      const fullUrl = isvideo ? null : API.IMAGE_DECODABLE(photo.fileid, photo.etag);
+      const fullUrl = isvideo
+        ? null
+        : photo.flag & this.c.FLAG_IS_LOCAL
+        ? nativex.NATIVE_URL_FULL(photo.fileid)
+        : API.IMAGE_DECODABLE(photo.fileid, photo.etag);
       const fullLoadCond = this.config.full_res_always ? 'always' : this.config.full_res_on_zoom ? 'zoom' : 'never';
 
       return {
