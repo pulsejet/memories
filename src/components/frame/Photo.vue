@@ -9,20 +9,21 @@
         error: data.flag & c.FLAG_LOAD_FAIL,
       }"
     >
-      <CheckCircle v-once :size="18" class="select" @click="toggleSelect" />
+      <CheckCircleIcon v-once :size="18" class="select" @click="toggleSelect" />
 
       <div class="video" v-if="data.flag & c.FLAG_IS_VIDEO">
         <span v-if="data.video_duration" class="time">
           {{ videoDuration }}
         </span>
-        <Video :size="22" />
+        <VideoIcon :size="22" />
       </div>
 
       <div class="livephoto" @mouseenter.passive="playVideo" @mouseleave.passive="stopVideo">
-        <LivePhoto :size="22" v-if="data.liveid" />
+        <LivePhotoIcon :size="22" v-if="data.liveid" />
       </div>
 
-      <Star :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
+      <StarIcon class="bottom-left-flag" :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
+      <LocalIcon class="bottom-left-flag" :size="22" v-if="data.flag & c.FLAG_IS_LOCAL" />
 
       <div
         class="img-outer fill-block"
@@ -60,18 +61,20 @@ import { IDay, IPhoto } from '../../types';
 import * as utils from '../../services/Utils';
 
 import errorsvg from '../../assets/error.svg';
-import CheckCircle from 'vue-material-design-icons/CheckCircle.vue';
-import Star from 'vue-material-design-icons/Star.vue';
-import Video from 'vue-material-design-icons/PlayCircleOutline.vue';
-import LivePhoto from 'vue-material-design-icons/MotionPlayOutline.vue';
+import CheckCircleIcon from 'vue-material-design-icons/CheckCircle.vue';
+import StarIcon from 'vue-material-design-icons/Star.vue';
+import VideoIcon from 'vue-material-design-icons/PlayCircleOutline.vue';
+import LivePhotoIcon from 'vue-material-design-icons/MotionPlayOutline.vue';
+import LocalIcon from 'vue-material-design-icons/CloudOff.vue';
 
 export default defineComponent({
   name: 'Photo',
   components: {
-    CheckCircle,
-    Video,
-    Star,
-    LivePhoto,
+    CheckCircleIcon,
+    VideoIcon,
+    StarIcon,
+    LivePhotoIcon,
+    LocalIcon,
   },
 
   props: {
@@ -323,7 +326,7 @@ $icon-size: $icon-half-size * 2;
   }
 }
 .video,
-.star-icon,
+.bottom-left-flag,
 .livephoto {
   position: absolute;
   z-index: 100;
@@ -353,7 +356,7 @@ $icon-size: $icon-half-size * 2;
 .livephoto {
   pointer-events: auto;
 }
-.star-icon {
+.bottom-left-flag {
   bottom: var(--icon-dist);
   left: var(--icon-dist);
   .p-outer.selected > & {
