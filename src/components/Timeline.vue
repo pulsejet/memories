@@ -384,8 +384,7 @@ export default defineComponent({
       this.containerSize = [width, height];
 
       // Scroller spans the container height
-      // Compensate for the size of the scroller thumb
-      this.scrollerHeight = height - (this.isMobile() ? 40 : 20);
+      this.scrollerHeight = height;
 
       // Static top matter to exclude from recycler height
       const topmatter = this.$refs.topmatter as any;
