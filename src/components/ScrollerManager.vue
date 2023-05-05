@@ -288,7 +288,7 @@ export default defineComponent({
       const extraY = this.recyclerBefore?.clientHeight ?? 0;
 
       // Exclude hover cursor height
-      this.topPadding = (<HTMLSpanElement>this.$refs.hoverCursor)?.clientHeight ?? 0;
+      this.topPadding = (<HTMLSpanElement>this.$refs.hoverCursor)?.offsetHeight ?? 0;
 
       // Start with the first tick. Walk over all rows counting the
       // y position. When you hit a row with the tick, update y and
