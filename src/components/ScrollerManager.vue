@@ -20,8 +20,9 @@
     <span class="cursor st" ref="cursorSt" :style="{ transform: `translateY(${cursorY}px)` }"> </span>
 
     <span
+      ref="hoverCursor"
       class="cursor hv"
-      :style="{ transform: `translateY(${hoverCursorY}px)` }"
+      :style="{ transform: `translateY(calc(${hoverCursorY}px - 100%))` }"
       @touchmove.prevent="touchmove"
       @touchstart.passive="interactstart"
       @touchend.passive="interactend"
@@ -66,7 +67,7 @@ export default defineComponent({
       required: true,
     },
     /** Total height */
-    height: {
+    fullHeight: {
       type: Number,
       required: true,
     },
@@ -87,6 +88,8 @@ export default defineComponent({
     lastAdjustHeight: 0,
     /** Height of the entire photo view */
     recyclerHeight: 100,
+    /** Space to leave at the top (for the hover cursor) */
+    topPadding: 0,
     /** Rect of scroller */
     scrollerRect: null as DOMRect | null,
     /** Computed ticks */
@@ -131,6 +134,11 @@ export default defineComponent({
           }
           return tick;
         });
+    },
+
+    /** Height of usable area */
+    height(): number {
+      return this.fullHeight - this.topPadding;
     },
   },
 
@@ -188,7 +196,7 @@ export default defineComponent({
 
       // Move hover cursor to same position unless hovering
       // Regardless, we need this call because the internal mapping might have changed
-      if ((<HTMLElement>this.$refs.scroller).matches(':hover')) {
+      if (!utils.isMobile() && (<HTMLElement>this.$refs.scroller).matches(':hover')) {
         this.moveHoverCursor(this.hoverCursorY);
       } else {
         this.moveHoverCursor(rtop);
@@ -279,6 +287,9 @@ export default defineComponent({
       this.recyclerHeight = this.recycler?.$refs.wrapper.clientHeight ?? 0;
       const extraY = this.recyclerBefore?.clientHeight ?? 0;
 
+      // Exclude hover cursor height
+      this.topPadding = (<HTMLSpanElement>this.$refs.hoverCursor)?.clientHeight ?? 0;
+
       // Start with the first tick. Walk over all rows counting the
       // y position. When you hit a row with the tick, update y and
       // top values and move to the next tick.
@@ -343,7 +354,9 @@ export default defineComponent({
         if (!tick.isMonth) continue;
 
         // You can't see these anyway, why bother?
-        if (tick.top < minGap || tick.top > this.height - minGap) continue;
+        const minTop = this.topPadding + minGap;
+        const maxTop = this.fullHeight - minGap;
+        if (tick.top < minTop || tick.top > maxTop) continue;
 
         // Will overlap with the previous tick. Skip anyway.
         if (tick.top - prevShow < minGap) continue;
@@ -380,12 +393,14 @@ export default defineComponent({
     },
 
     setTicksTop(total: number) {
-      const isMobile = globalThis.windowInnerWidth <= 768;
-      const padding = isMobile ? 20 : 0;
+      // On mobile, move the ticks up by half the height of the cursor
+      // so that the cursor is centered on the tick instead (on desktop, it's at the bottom)
+      const displayPadding = utils.isMobile() ? -20 : 0;
 
+      // Set topF (float) and top (rounded) values
       for (const tick of this.ticks) {
-        tick.topF = this.height * (tick.count / total);
-        tick.top = utils.roundHalf(tick.topF) + padding;
+        tick.topF = this.topPadding + this.height * (tick.count / total);
+        tick.top = utils.roundHalf(tick.topF) + displayPadding;
       }
     },
 
@@ -432,7 +447,6 @@ export default defineComponent({
 
     /** Binary search and get coords surrounding position */
     getCoords(y: number, field: 'topF' | 'y') {
-      // Top of first and second ticks
       let top1 = 0,
         top2 = 0,
         y1 = 0,
@@ -441,7 +455,7 @@ export default defineComponent({
       // Get index of previous tick
       let idx = utils.binarySearch(this.ticks, y, field);
       if (idx <= 0) {
-        top1 = 0;
+        top1 = this.topPadding;
         top2 = this.ticks[0].topF;
         y1 = 0;
         y2 = this.ticks[0].y;
@@ -492,7 +506,7 @@ export default defineComponent({
     touchmove(event: any) {
       if (!this.scrollerRect) return;
       let y = event.targetTouches[0].pageY - this.scrollerRect.top;
-      y = Math.max(0, y - 20); // middle of touch finger
+      y = Math.max(this.topPadding, y + 20); // middle of touch finger
       this.moveto(y, true);
     },
 
@@ -594,14 +608,15 @@ export default defineComponent({
 
     &.hv {
       background-color: var(--color-main-background);
-      padding: 2px 5px;
-      border-top: 2px solid var(--color-primary);
+      padding: 1px 5px;
+      border-bottom: 2px solid var(--color-primary);
       border-radius: 2px;
       width: auto;
       white-space: nowrap;
       z-index: 100;
       font-size: 0.95em;
       font-weight: 600;
+      height: calc(1.2em + 10px);
 
       > .icon {
         display: none;

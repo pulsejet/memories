@@ -77,7 +77,7 @@
     <ScrollerManager
       ref="scrollerManager"
       :rows="list"
-      :height="scrollerHeight"
+      :fullHeight="scrollerHeight"
       :recycler="$refs.recycler"
       :recyclerBefore="$refs.recyclerBefore"
       @interactend="loadScrollView()"

@@ -3,6 +3,13 @@ import { API } from '../API';
 import { constants } from './const';
 import * as nativex from '../../native';
 
+/**
+ * Check if width <= 768px
+ */
+export function isMobile() {
+  return globalThis.windowInnerWidth <= 768;
+}
+
 /** Get preview URL from photo object */
 export function getPreviewUrl(photo: IPhoto, square: boolean, size: number | [number, number] | 'screen') {
   // Native preview
