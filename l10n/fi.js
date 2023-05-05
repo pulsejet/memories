@@ -180,6 +180,7 @@ OC.L10N.register(
     "Show original image" : "Näytä alkuperäinen kuva",
     "Zoom in" : "Lähennä",
     "Zoom out" : "Loitonna",
+    "Toggle zoom menu" : "Näytä/piilota suurennusvalikko",
     "Adjust" : "Säädä",
     "Fine-tune" : "Hienosäädä",
     "Filters" : "Suodattimet",
