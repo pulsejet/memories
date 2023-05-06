@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const webpackConfig = require('@nextcloud/webpack-vue-config');
 const WorkboxPlugin = require('workbox-webpack-plugin');
 const path = require('path');
@@ -43,6 +44,14 @@ webpackConfig.optimization.minimizer[0] = new TerserPlugin({
 
 // Disable source maps in production
 webpackConfig.devtool = isDev ? 'cheap-source-map' : false;
+
+// Configure source map public path
+webpackConfig.plugins.push(
+  new webpack.SourceMapDevToolPlugin({
+    filename: '[file].map',
+    publicPath: path.join('/apps/', process.env.npm_package_name, '/js/'),
+  })
+);
 
 // Enable caching
 webpackConfig.cache = true;
