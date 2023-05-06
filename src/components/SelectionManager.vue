@@ -74,6 +74,17 @@ import FolderMoveIcon from 'vue-material-design-icons/FolderMove.vue';
 
 type Selection = Map<number, IPhoto>;
 
+/**
+ * The distance for which the touch selection is clamped.
+ * The x value is absolute from the top, y value is absolute from the bottom.
+ */
+const TOUCH_SELECT_CLAMP = {
+  top: 110, // min top for scrolling
+  bottom: 110, // min bottom for scrolling
+  maxDelta: 15, // max speed of touch scroll
+  bufferPx: 5, // number of pixels to clamp inside recycler area
+};
+
 export default defineComponent({
   name: 'SelectionManager',
   components: {
@@ -408,13 +419,16 @@ export default defineComponent({
       this.prevTouch = touch;
 
       // Scroll if at top or bottom
-      const scrollUp = touch.clientY > 50 && touch.clientY < 110; // 50 topbar
-      const scrollDown = touch.clientY > globalThis.windowInnerHeight - 60;
+      const scrollUp = touch.clientY < TOUCH_SELECT_CLAMP.top;
+      const scrollDown = touch.clientY > globalThis.windowInnerHeight - TOUCH_SELECT_CLAMP.bottom;
       if (scrollUp || scrollDown) {
         if (scrollUp) {
-          this.touchScrollDelta = (-1 * (110 - touch.clientY)) / 3;
+          this.touchScrollDelta = Math.max((touch.clientY - TOUCH_SELECT_CLAMP.top) / 3, -TOUCH_SELECT_CLAMP.maxDelta);
         } else {
-          this.touchScrollDelta = (touch.clientY - globalThis.windowInnerHeight + 60) / 3;
+          this.touchScrollDelta = Math.min(
+            (touch.clientY - globalThis.windowInnerHeight + TOUCH_SELECT_CLAMP.bottom) / 3,
+            TOUCH_SELECT_CLAMP.maxDelta
+          );
         }
 
         if (this.touchAnchor && !this.touchScrollInterval) {
@@ -448,8 +462,15 @@ export default defineComponent({
       // Assertions
       if (!this.touchAnchor) return;
 
+      // Clamp the Y value to lie inside the recycler area
+      const recyclerRect = this.recycler?.getBoundingClientRect();
+      const clampedY = Math.max(
+        (recyclerRect?.top ?? 0) + TOUCH_SELECT_CLAMP.bufferPx,
+        Math.min((recyclerRect?.bottom ?? 0) - TOUCH_SELECT_CLAMP.bufferPx, touch.clientY)
+      );
+
       // Which photo is the cursor over, if any
-      const elem: any = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.p-outer-super');
+      const elem: any = document.elementFromPoint(touch.clientX, clampedY)?.closest('.p-outer-super');
       let overPhoto: IPhoto | null = elem?.__vue__?.data;
       if (overPhoto && overPhoto.flag & this.c.FLAG_PLACEHOLDER) overPhoto = null;
 
