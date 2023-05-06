@@ -98,12 +98,12 @@ class Places
 
         $filename = sys_get_temp_dir().'/planet_coarse_boundaries.zip';
         if (file_exists($filename) && !unlink($filename)) {
-            throw new \Exception("Failed to delete old planet zip file: $filename");
+            throw new \Exception("Failed to delete old planet zip file: {$filename}");
         }
 
         $txtfile = sys_get_temp_dir().'/planet_coarse_boundaries.txt';
         if (file_exists($txtfile) && !unlink($txtfile)) {
-            throw new \Exception("Failed to delete old planet data file: $txtfile");
+            throw new \Exception("Failed to delete old planet data file: {$txtfile}");
         }
 
         $fp = fopen($filename, 'w+');
