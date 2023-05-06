@@ -14,10 +14,6 @@ webpackConfig.module.rules.push({
     appendTsSuffixTo: [/\.vue$/],
   },
 });
-webpackConfig.resolve.extensions.push('.ts');
-webpackConfig.resolve.alias = {
-  vue$: 'vue/dist/vue.esm.js',
-};
 webpackConfig.entry.main = path.resolve(path.join('src', 'main'));
 
 webpackConfig.watchOptions = {
