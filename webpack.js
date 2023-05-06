@@ -44,4 +44,7 @@ webpackConfig.optimization.minimizer[0] = new TerserPlugin({
 // Disable source maps in production
 webpackConfig.devtool = isDev ? 'cheap-source-map' : false;
 
+// Enable caching
+webpackConfig.cache = true;
+
 module.exports = webpackConfig;
