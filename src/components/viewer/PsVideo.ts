@@ -459,11 +459,16 @@ class VideoContentSetup {
       const hasRotation = rotation === 90 || rotation === 270;
 
       if (hasRotation) {
-        content.videoElement.style.width = content.element!.style.height;
-        content.videoElement.style.height = content.element!.style.width;
+        const vw = (content.videoElement.style.width = content.element!.style.height);
+        const vh = (content.videoElement.style.height = content.element!.style.width);
 
-        transform = `translateY(-${content.element!.style.width}) ${transform}`;
-        content.videoElement.style.transformOrigin = 'bottom left';
+        if (rotation === 90) {
+          transform = `translateY(-${vh}) ${transform}`;
+          content.videoElement.style.transformOrigin = 'bottom left';
+        } else if (rotation === 270) {
+          transform = `translateX(-${vw}) ${transform}`;
+          content.videoElement.style.transformOrigin = 'top right';
+        }
       }
 
       content.videoElement.style.transform = transform;
