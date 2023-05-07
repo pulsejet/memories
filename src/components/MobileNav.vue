@@ -1,17 +1,17 @@
 <template>
   <div id="mobile-nav">
     <router-link to="/">
-      <ImageMultipleIcon size="22" />
+      <ImageMultipleIcon :size="22" />
       {{ t('memories', 'Photos') }}
     </router-link>
 
     <router-link to="/explore">
-      <SearchIcon size="22" />
+      <SearchIcon :size="22" />
       {{ t('memories', 'Explore') }}
     </router-link>
 
     <router-link to="/albums">
-      <AlbumIcon size="22" />
+      <AlbumIcon :size="22" />
       {{ t('memories', 'Albums') }}
     </router-link>
   </div>
