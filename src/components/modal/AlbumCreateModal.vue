@@ -66,7 +66,13 @@ export default defineComponent({
       if (!this.album || album.basename !== this.album.basename) {
         const user = album.filename.split('/')[2];
         const name = album.basename;
-        this.$router.push({ name: 'albums', params: { user, name } });
+        const route = { name: 'albums', params: { user, name } };
+
+        if (!this.album) {
+          this.$router.push(route);
+        } else {
+          this.$router.replace(route);
+        }
       }
       this.close();
     },

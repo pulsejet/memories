@@ -93,7 +93,7 @@ export default defineComponent({
         } else {
           await dav.faceRecognitionRenamePerson(this.oldName, this.name);
         }
-        this.$router.push({
+        this.$router.replace({
           name: this.$route.name as string,
           params: { user: this.user, name: this.name },
         });
