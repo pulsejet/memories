@@ -299,7 +299,7 @@ class Util
      */
     public static function sanitizePath(string $path)
     {
-        $path = mb_ereg_replace('([^\\w\\s\\d\\-_~,;:!@#$&*{}\[\]\'\\[\\]\\(\\).\\\/])', '', $path);
+        $path = str_replace("\0", '', $path); // remove null characters
 
         return mb_ereg_replace('\/\/+', '/', $path); // remove extra slashes
     }
