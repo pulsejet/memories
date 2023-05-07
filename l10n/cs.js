@@ -199,6 +199,7 @@ OC.L10N.register(
     "Failed to rename {oldName} to {name}." : "Nepodařilo se přejmenovat {oldName} na {name}.",
     "Search" : "Hledat",
     "Loading …" : "Načítání…",
+    "Enter name of the new face" : "Zadejte název nové tváře",
     "Merge {name} with person" : "Sloučit {name} s osobou",
     "Are you sure you want to merge {name} with {newName}?" : "Opravdu chcete sloučit {name} s {newName}?",
     "Too many failures, aborting" : "Příliš mnoho nezdarů – přerušuje se",
