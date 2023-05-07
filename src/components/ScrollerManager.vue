@@ -51,8 +51,9 @@ import ScrollIcon from 'vue-material-design-icons/UnfoldMoreHorizontal.vue';
 
 import * as utils from '../services/Utils';
 
-// Pixels to snap at
-const SNAP_OFFSET = -35;
+const SNAP_OFFSET = -5; // Pixels to snap at
+const SNAP_MIN_ROWS = 1000; // Minimum rows to snap at
+const MOBILE_CURSOR_HH = 22; // Half height of the mobile cursor (CSS)
 
 export default defineComponent({
   name: 'ScrollerManager',
@@ -395,7 +396,7 @@ export default defineComponent({
     setTicksTop(total: number) {
       // On mobile, move the ticks up by half the height of the cursor
       // so that the cursor is centered on the tick instead (on desktop, it's at the bottom)
-      const displayPadding = utils.isMobile() ? -20 : 0;
+      const displayPadding = utils.isMobile() ? -MOBILE_CURSOR_HH : 0;
 
       // Set topF (float) and top (rounded) values
       for (const tick of this.ticks) {
@@ -506,8 +507,11 @@ export default defineComponent({
     touchmove(event: any) {
       if (!this.scrollerRect) return;
       let y = event.targetTouches[0].pageY - this.scrollerRect.top;
-      y = Math.max(this.topPadding, y + 20); // middle of touch finger
-      this.moveto(y, true);
+      y = Math.max(this.topPadding, y + MOBILE_CURSOR_HH); // middle of touch finger
+
+      // Snap to nearest tick if there are a lot of rows
+      const snap = this.rows.length > SNAP_MIN_ROWS;
+      this.moveto(y, snap);
     },
 
     interactstart() {
@@ -620,7 +624,7 @@ export default defineComponent({
 
       > .icon {
         display: none;
-        transform: translate(-16px, 6px);
+        transform: translate(-2px, 10px);
       }
     }
   }
@@ -654,10 +658,10 @@ export default defineComponent({
     .cursor.hv {
       left: 5px;
       border: none;
-      box-shadow: 0 0 5px -3px #000;
-      height: 40px;
-      width: 70px;
-      border-radius: 20px;
+      box-shadow: -1px 2px 11px -5px #000;
+      height: 44px;
+      width: 44px;
+      border-radius: 22px;
       > .text {
         display: none;
       }
