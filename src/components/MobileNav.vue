@@ -67,9 +67,8 @@ export default defineComponent({
   height: var(--mobile-nav-width);
   text-align: center;
   padding: 8px;
-  padding-top: 4px;
+  padding-top: 3px;
   font-size: 0.9em;
-  line-height: 1.5em;
 
   :deep a {
     flex: 1 1 0px;
