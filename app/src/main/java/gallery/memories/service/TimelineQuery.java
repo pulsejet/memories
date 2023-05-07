@@ -2,6 +2,7 @@ package gallery.memories.service;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -14,11 +15,15 @@ import java.util.ArrayList;
 import java.util.TimeZone;
 
 public class TimelineQuery {
-    final static String TAG = "QueryService";
+    final static String TAG = "TimelineQuery";
     Context mCtx;
+    SQLiteDatabase mDb;
 
     public TimelineQuery(Context context) {
         mCtx = context;
+        mDb = new DbService(context).getWritableDatabase();
+
+        fullSyncDb();
     }
 
     public JSONArray getByDayId(final long dayId) {
@@ -94,5 +99,62 @@ public class TimelineQuery {
 
         // Return JSON string of files
         return new JSONArray(files);
+    }
+
+    protected void fullSyncDb() {
+        Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
+        // Flag all images for removal
+        mDb.execSQL("UPDATE images SET flag = 1");
+
+        // Same fields as server response
+        String[] projection = new String[] {
+                MediaStore.Images.Media._ID,
+                MediaStore.Images.Media.DISPLAY_NAME,
+                MediaStore.Images.Media.DATE_TAKEN,
+                MediaStore.Images.Media.DATE_MODIFIED,
+        };
+
+        try (Cursor cursor = mCtx.getContentResolver().query(
+                collection,
+                projection,
+                null,
+                null,
+                null
+        )) {
+            int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
+            int nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
+            int dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN);
+            int mtimeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_MODIFIED);
+
+            while (cursor.moveToNext()) {
+                long id = cursor.getLong(idColumn);
+                String name = cursor.getString(nameColumn);
+                long dateTaken = cursor.getLong(dateColumn);
+                long mtime = cursor.getLong(mtimeColumn);
+
+                // Check if file with local_id and mtime already exists
+                try (Cursor c = mDb.rawQuery("SELECT id FROM images WHERE local_id = ?",
+                        new String[]{Long.toString(id)})) {
+                    if (c.getCount() > 0) {
+                        // File already exists, remove flag
+                        mDb.execSQL("UPDATE images SET flag = 0 WHERE local_id = ?", new Object[]{id});
+
+                        Log.v(TAG, "File already exists: " + id + " / " + name);
+                        continue;
+                    }
+                }
+
+                // Delete file with same local_id and insert new one
+                mDb.beginTransaction();
+                mDb.execSQL("DELETE FROM images WHERE local_id = ?", new Object[] { id });
+                mDb.execSQL("INSERT OR IGNORE INTO images (local_id, mtime, basename, dayid) VALUES (?, ?, ?, ?)",
+                        new Object[] { id, mtime, name, (dateTaken / 86400000) });
+                mDb.setTransactionSuccessful();
+                mDb.endTransaction();
+
+                Log.v(TAG, "Inserted file to local DB: " + id + " / " + name);
+            }
+        }
     }
 }

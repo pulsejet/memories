@@ -24,11 +24,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         mNativeX = new NativeX(this, binding.webview);
-        initWebview();
+        initializeWebView();
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    protected void initWebview() {
+    protected void initializeWebView() {
         binding.webview.setWebViewClient(new WebViewClient() {
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 view.loadUrl(request.getUrl().toString());
