@@ -1,17 +1,17 @@
 <template>
   <div id="mobile-nav">
     <router-link to="/">
-      <ImageMultipleIcon />
+      <ImageMultipleIcon size="22" />
       {{ t('memories', 'Photos') }}
     </router-link>
 
     <router-link to="/explore">
-      <SearchIcon />
+      <SearchIcon size="22" />
       {{ t('memories', 'Explore') }}
     </router-link>
 
     <router-link to="/albums">
-      <AlbumIcon />
+      <AlbumIcon size="22" />
       {{ t('memories', 'Albums') }}
     </router-link>
   </div>
@@ -67,8 +67,9 @@ export default defineComponent({
   height: var(--mobile-nav-width);
   text-align: center;
   padding: 8px;
-  padding-top: 2px;
+  padding-top: 4px;
   font-size: 0.9em;
+  line-height: 1.5em;
 
   :deep a {
     flex: 1 1 0px;
