@@ -55,7 +55,7 @@
             <template #icon> <LivePhotoIcon :size="24" /> </template>
           </NcActionButton>
           <NcActionButton
-            v-if="!routeIsPublic"
+            v-if="!routeIsPublic && !isLocal"
             :aria-label="t('memories', 'Favorite')"
             @click="favoriteCurrent"
             :close-after-click="true"
@@ -87,7 +87,7 @@
             :aria-label="t('memories', 'Download')"
             @click="downloadCurrent"
             :close-after-click="true"
-            v-if="!this.state_noDownload"
+            v-if="!this.state_noDownload && !isLocal"
           >
             {{ t('memories', 'Download') }}
             <template #icon>
@@ -106,7 +106,7 @@
             </template>
           </NcActionButton>
           <NcActionButton
-            v-if="!routeIsPublic && !routeIsAlbum"
+            v-if="!routeIsPublic && !routeIsAlbum && !isLocal"
             :aria-label="t('memories', 'View in folder')"
             @click="viewInFolder"
             :close-after-click="true"
@@ -308,6 +308,11 @@ export default defineComponent({
     /** Is the current slide a live photo */
     isLivePhoto(): boolean {
       return Boolean(this.currentPhoto?.liveid);
+    },
+
+    /** Is the current slide a local photo */
+    isLocal(): boolean {
+      return Boolean((this.currentPhoto?.flag ?? 0) & this.c.FLAG_IS_LOCAL);
     },
 
     /** Show bottom bar info such as date taken */
@@ -774,7 +779,7 @@ export default defineComponent({
       // Get full image URL
       const fullUrl = isvideo
         ? null
-        : photo.flag & this.c.FLAG_IS_LOCAL
+        : this.isLocal
         ? nativex.API.IMAGE_FULL(photo.fileid)
         : API.IMAGE_DECODABLE(photo.fileid, photo.etag);
       const fullLoadCond = this.config.full_res_always ? 'always' : this.config.full_res_on_zoom ? 'zoom' : 'never';
@@ -962,7 +967,7 @@ export default defineComponent({
       globalThis.mSidebar.setTab('memories-metadata');
       photo ??= this.currentPhoto!;
 
-      if (this.routeIsPublic || Boolean(photo.flag & this.c.FLAG_IS_LOCAL)) {
+      if (this.routeIsPublic || this.isLocal) {
         globalThis.mSidebar.open(photo);
       } else {
         const fileInfo = (await dav.getFiles([photo]))[0];
