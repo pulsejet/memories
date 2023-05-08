@@ -28,6 +28,11 @@ public class NativeX {
     }
 
     @JavascriptInterface
+    public void getLocalDays(final String call, final long _ignore) {
+        mJsService.runAsync(call, () -> mQuery.getDays().toString().getBytes());
+    }
+
+    @JavascriptInterface
     public void getLocalByDayId(final String call, final long dayId) {
         mJsService.runAsync(call, () -> mQuery.getByDayId(dayId).toString().getBytes());
     }

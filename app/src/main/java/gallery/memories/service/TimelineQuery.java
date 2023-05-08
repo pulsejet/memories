@@ -128,9 +128,27 @@ public class TimelineQuery {
         return new JSONArray(files);
     }
 
-//    public JSONArray getDays(final long dayId) {
-//
-//    }
+    public JSONArray getDays() {
+        try (Cursor cursor = mDb.rawQuery(
+            "SELECT dayid, COUNT(local_id) FROM images GROUP BY dayid",
+            null
+        )) {
+            JSONArray days = new JSONArray();
+            while (cursor.moveToNext()) {
+                long id = cursor.getLong(0);
+                long count = cursor.getLong(1);
+                days.put(new JSONObject()
+                    .put("dayid", id)
+                    .put("count", count)
+                );
+            }
+
+            return days;
+        } catch (JSONException e) {
+            Log.e(TAG, "JSON error");
+            return new JSONArray();
+        }
+    }
 
     protected void fullSyncDb() {
         Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
