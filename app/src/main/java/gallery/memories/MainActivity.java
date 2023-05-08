@@ -31,8 +31,8 @@ public class MainActivity extends AppCompatActivity {
     protected void initializeWebView() {
         binding.webview.setWebViewClient(new WebViewClient() {
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-            view.loadUrl(request.getUrl().toString());
-            return false;
+                view.loadUrl(request.getUrl().toString());
+                return false;
             }
         });
 
