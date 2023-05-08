@@ -1,6 +1,12 @@
 package gallery.memories;
 
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
+
 import android.app.Activity;
+import android.graphics.Color;
+import android.os.Build;
+import android.view.View;
+import android.view.Window;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
@@ -25,6 +31,23 @@ public class NativeX {
     @JavascriptInterface
     public boolean isNative() {
         return true;
+    }
+
+    @JavascriptInterface
+    public void setThemeColor(final String color, final boolean isDark) {
+        Window window = mActivity.getWindow();
+
+        mActivity.setTheme(isDark
+            ? android.R.style.Theme_Black
+            : android.R.style.Theme_Light);
+        window.setNavigationBarColor(Color.parseColor(color));
+        window.setStatusBarColor(Color.parseColor(color));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.getInsetsController().setSystemBarsAppearance(isDark ? 0 : APPEARANCE_LIGHT_STATUS_BARS, APPEARANCE_LIGHT_STATUS_BARS);
+        } else {
+            window.getDecorView().setSystemUiVisibility(isDark ? 0 : View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        }
     }
 
     @JavascriptInterface
