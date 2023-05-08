@@ -31,8 +31,8 @@ public class MainActivity extends AppCompatActivity {
     protected void initializeWebView() {
         binding.webview.setWebViewClient(new WebViewClient() {
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                view.loadUrl(request.getUrl().toString());
-                return false;
+            view.loadUrl(request.getUrl().toString());
+            return false;
             }
         });
 
@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setDatabaseEnabled(true);
         webSettings.setUserAgentString("memories-native-android/0.0");
 
+        binding.webview.clearCache(true);
         binding.webview.addJavascriptInterface(mNativeX, "nativex");
         binding.webview.loadUrl("http://10.0.2.2:8035/index.php/apps/memories/");
     }
