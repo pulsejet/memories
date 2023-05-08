@@ -66,13 +66,6 @@ export async function fetchImage(url: string) {
   let entry = BLOB_CACHE.get(url);
   if (entry) return entry[1];
 
-  // Check if native image
-  if (nativex.IS_NATIVE_URL(url)) {
-    const dataUri = await nativex.getJpegDataUri(url);
-    BLOB_CACHE.set(url, [60, dataUri]);
-    return dataUri;
-  }
-
   // Fetch image
   const blobUrl = await importer<typeof w.fetchImageSrc>('fetchImageSrc')(url);
 

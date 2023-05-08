@@ -14,7 +14,7 @@ export function isMobile() {
 export function getPreviewUrl(photo: IPhoto, square: boolean, size: number | [number, number] | 'screen') {
   // Native preview
   if (photo.flag & constants.c.FLAG_IS_LOCAL) {
-    return nativex.NATIVE_URL_PREVIEW(photo.fileid);
+    return nativex.API.IMAGE_PREVIEW(photo.fileid);
   }
 
   // Screen-appropriate size

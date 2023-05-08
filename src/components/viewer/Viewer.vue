@@ -775,7 +775,7 @@ export default defineComponent({
       const fullUrl = isvideo
         ? null
         : photo.flag & this.c.FLAG_IS_LOCAL
-        ? nativex.NATIVE_URL_FULL(photo.fileid)
+        ? nativex.API.IMAGE_FULL(photo.fileid)
         : API.IMAGE_DECODABLE(photo.fileid, photo.etag);
       const fullLoadCond = this.config.full_res_always ? 'always' : this.config.full_res_on_zoom ? 'zoom' : 'never';
 

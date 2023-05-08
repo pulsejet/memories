@@ -98,6 +98,9 @@ class PageController extends Controller
         $addImageDomain('https://*.tile.openstreetmap.org');
         $addImageDomain('https://*.a.ssl.fastly.net');
 
+        // Native communication
+        $addImageDomain('http://127.0.0.1');
+
         // Allow Nominatim
         $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
 
