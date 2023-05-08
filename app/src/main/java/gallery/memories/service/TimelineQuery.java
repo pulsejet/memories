@@ -4,11 +4,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.icu.text.SimpleDateFormat;
-import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.collection.ArraySet;
+import androidx.exifinterface.media.ExifInterface;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,6 +21,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class TimelineQuery {
     final static String TAG = "TimelineQuery";
@@ -34,7 +37,7 @@ public class TimelineQuery {
 
     public JSONArray getByDayId(final long dayId) {
         // Get list of images from DB
-        final ArrayList<Long> imageIds = new ArrayList();
+        final Set<Long> imageIds = new ArraySet<>();
         final Map<Long, Long> datesTaken = new HashMap<>();
         try (Cursor cursor = mDb.rawQuery(
             "SELECT local_id, date_taken FROM images WHERE dayid = ?",
@@ -96,6 +99,9 @@ public class TimelineQuery {
                 long size = cursor.getLong(sizeColumn);
                 long dateTaken = datesTaken.get(id);
 
+                // Remove from list of ids
+                imageIds.remove(id);
+
                 try {
                     JSONObject file = new JSONObject()
                         .put("fileid", id)
@@ -113,9 +119,18 @@ public class TimelineQuery {
             }
         }
 
+        // Remove files that were not found
+        if (imageIds.size() > 0) {
+            mDb.execSQL("DELETE FROM images WHERE local_id IN (" + TextUtils.join(",", imageIds) + ")");
+        }
+
         // Return JSON string of files
         return new JSONArray(files);
     }
+
+//    public JSONArray getDays(final long dayId) {
+//
+//    }
 
     protected void fullSyncDb() {
         Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
