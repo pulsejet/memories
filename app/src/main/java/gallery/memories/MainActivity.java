@@ -3,6 +3,7 @@ package gallery.memories;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -33,6 +34,14 @@ public class MainActivity extends AppCompatActivity {
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 view.loadUrl(request.getUrl().toString());
                 return false;
+            }
+
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                if (request.getUrl().getHost().equals("127.0.0.1")) {
+                    return mNativeX.handleRequest(request.getUrl().getPath());
+                }
+                return null;
             }
         });
 
