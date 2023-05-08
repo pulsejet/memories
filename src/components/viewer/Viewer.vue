@@ -935,19 +935,12 @@ export default defineComponent({
       try {
         this.updateLoading(1);
         for await (const p of dav.favoritePhotos([photo], val)) {
-          if (!p[0]) return;
-          this.$forceUpdate();
+          // Do nothing
         }
       } finally {
         this.updateLoading(-1);
       }
-
-      // Set flag on success
-      if (val) {
-        photo.flag |= this.c.FLAG_IS_FAVORITE;
-      } else {
-        photo.flag &= ~this.c.FLAG_IS_FAVORITE;
-      }
+      this.$forceUpdate();
     },
 
     /** Download the current photo */
