@@ -4,9 +4,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.icu.text.SimpleDateFormat;
-import android.media.ExifInterface;
+import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -16,7 +17,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.TimeZone;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TimelineQuery {
     final static String TAG = "TimelineQuery";
@@ -31,47 +33,56 @@ public class TimelineQuery {
     }
 
     public JSONArray getByDayId(final long dayId) {
-        Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        // Get list of images from DB
+        final ArrayList<Long> imageIds = new ArrayList();
+        final Map<Long, Long> datesTaken = new HashMap<>();
+        try (Cursor cursor = mDb.rawQuery(
+            "SELECT local_id, date_taken FROM images WHERE dayid = ?",
+            new String[] { Long.toString(dayId) }
+        )) {
+            while (cursor.moveToNext()) {
+                final long localId = cursor.getLong(0);
+                final long dateTaken = cursor.getLong(1);
+                imageIds.add(localId);
+                datesTaken.put(localId, dateTaken);
+            }
+        }
 
-        // Offset of current timezone from UTC
-        long utcOffset = TimeZone.getDefault().getOffset(System.currentTimeMillis());
+        // Nothing to do
+        if (imageIds.size() == 0) {
+            return new JSONArray();
+        }
+
+        // All external storage images
+        Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
         // Same fields as server response
         String[] projection = new String[] {
-                MediaStore.Images.Media._ID,
-                MediaStore.Images.Media.DISPLAY_NAME,
-                MediaStore.Images.Media.MIME_TYPE,
-                MediaStore.Images.Media.DATE_TAKEN,
-                MediaStore.Images.Media.HEIGHT,
-                MediaStore.Images.Media.WIDTH,
-                MediaStore.Images.Media.SIZE,
+            MediaStore.Images.Media._ID,
+            MediaStore.Images.Media.DISPLAY_NAME,
+            MediaStore.Images.Media.MIME_TYPE,
+            MediaStore.Images.Media.HEIGHT,
+            MediaStore.Images.Media.WIDTH,
+            MediaStore.Images.Media.SIZE,
         };
 
         // Filter for given day
-        String selection = MediaStore.Images.Media.DATE_TAKEN + " >= ? AND "
-                + MediaStore.Images.Media.DATE_TAKEN + " <= ?";
-        String[] selectionArgs = new String[] {
-                Long.toString(dayId * 86400000L - utcOffset),
-                Long.toString(((dayId+1) * 86400000L - utcOffset)),
-        };
-
-        // Sort by name? TODO: fix this
-        String sortOrder = MediaStore.Images.Media.DISPLAY_NAME + " ASC";
+        String selection = MediaStore.Images.Media._ID
+                + " IN (" + TextUtils.join(",", imageIds) + ")";
 
         // Make list of files
         ArrayList<JSONObject> files = new ArrayList<>();
 
         try (Cursor cursor = mCtx.getContentResolver().query(
-                collection,
-                projection,
-                selection,
-                selectionArgs,
-                sortOrder
+            collection,
+            projection,
+            selection,
+            null,
+            null
         )) {
             int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
             int nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
             int mimeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE);
-            int dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN);
             int heightColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT);
             int widthColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH);
             int sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE);
@@ -80,20 +91,21 @@ public class TimelineQuery {
                 long id = cursor.getLong(idColumn);
                 String name = cursor.getString(nameColumn);
                 String mime = cursor.getString(mimeColumn);
-                long dateTaken = cursor.getLong(dateColumn);
                 long height = cursor.getLong(heightColumn);
                 long width = cursor.getLong(widthColumn);
                 long size = cursor.getLong(sizeColumn);
+                long dateTaken = datesTaken.get(id);
 
                 try {
                     JSONObject file = new JSONObject()
-                            .put("fileid", id)
-                            .put("basename", name)
-                            .put("mimetype", mime)
-                            .put("dayid", (dateTaken / 86400000))
-                            .put("h", height)
-                            .put("w", width)
-                            .put("size", size);
+                        .put("fileid", id)
+                        .put("basename", name)
+                        .put("mimetype", mime)
+                        .put("dayid", dayId)
+                        .put("datetaken", dateTaken)
+                        .put("h", height)
+                        .put("w", width)
+                        .put("size", size);
                     files.add(file);
                 } catch (JSONException e) {
                     Log.e(TAG, "JSON error");
@@ -113,19 +125,19 @@ public class TimelineQuery {
 
         // Same fields as server response
         String[] projection = new String[] {
-                MediaStore.Images.Media._ID,
-                MediaStore.Images.Media.DATA,
-                MediaStore.Images.Media.DISPLAY_NAME,
-                MediaStore.Images.Media.DATE_TAKEN,
-                MediaStore.Images.Media.DATE_MODIFIED,
+            MediaStore.Images.Media._ID,
+            MediaStore.Images.Media.DATA,
+            MediaStore.Images.Media.DISPLAY_NAME,
+            MediaStore.Images.Media.DATE_TAKEN,
+            MediaStore.Images.Media.DATE_MODIFIED,
         };
 
         try (Cursor cursor = mCtx.getContentResolver().query(
-                collection,
-                projection,
-                null,
-                null,
-                null
+            collection,
+            projection,
+            null,
+            null,
+            null
         )) {
             int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
             int uriColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
