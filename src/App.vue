@@ -226,6 +226,12 @@ export default defineComponent({
     root.style.setProperty('--color-primary-select-light', `${colorPrimary}40`);
     root.style.setProperty('--plyr-color-main', colorPrimary);
 
+    // Set theme color for native part
+    nativex.setThemeColor?.(
+      getComputedStyle(document.body).getPropertyValue('--color-main-background'),
+      document.body.hasAttribute('data-theme-dark')
+    );
+
     // Register sidebar metadata tab
     globalThis.OCA?.Files?.Sidebar?.registerTab(
       new globalThis.OCA.Files.Sidebar.Tab({

@@ -10,6 +10,7 @@ type NativePromise<T> = (call: string, arg: T) => void;
  */
 export type NativeX = {
   isNative: () => boolean;
+  setThemeColor: (color: string, isDark: boolean) => void;
   getLocalDays: NativePromise<string>;
   getLocalByDayId: NativePromise<string>;
   getJpeg: NativePromise<string>;
@@ -79,6 +80,11 @@ globalThis.nativexr = (call: string, resolve?: string, reject?: string) => {
  * @returns Whether the native interface is available.
  */
 export const has = () => !!nativex;
+
+/**
+ * Change the theme color of the app.
+ */
+export const setThemeColor: typeof nativex.setThemeColor = nativex?.setThemeColor.bind(nativex);
 
 /**
  * Gets the local days array.
