@@ -36,6 +36,21 @@ export function getPreviewUrl(photo: IPhoto, square: boolean, size: number | [nu
 }
 
 /**
+ * Get the URL for the imageInfo of a photo
+ *
+ * @param photo Photo object or fileid (remote only)
+ */
+export function getImageInfoUrl(photo: IPhoto | number) {
+  const fileid = typeof photo === 'object' ? photo.fileid : photo;
+
+  if (typeof photo === 'object' && photo.flag & constants.c.FLAG_IS_LOCAL) {
+    return nativex.API.IMAGE_INFO(fileid);
+  }
+
+  return API.IMAGE_INFO(fileid);
+}
+
+/**
  * Update photo object using imageInfo.
  */
 export function updatePhotoFromImageInfo(photo: IPhoto, imageInfo: IImageInfo) {

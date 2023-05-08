@@ -760,7 +760,7 @@ export default defineComponent({
 
       // Lazy load the rest of EXIF data
       if (!photo.imageInfo) {
-        axios.get<IImageInfo>(API.IMAGE_INFO(photo.fileid)).then((res) => {
+        axios.get<IImageInfo>(utils.getImageInfoUrl(photo)).then((res) => {
           photo.imageInfo = res.data;
 
           // Update params in photo object
@@ -969,12 +969,12 @@ export default defineComponent({
       globalThis.mSidebar.setTab('memories-metadata');
       photo ??= this.currentPhoto!;
 
-      if (this.routeIsPublic) {
-        globalThis.mSidebar.open(photo.fileid);
+      if (this.routeIsPublic || Boolean(photo.flag & this.c.FLAG_IS_LOCAL)) {
+        globalThis.mSidebar.open(photo);
       } else {
         const fileInfo = (await dav.getFiles([photo]))[0];
         const forceNative = fileInfo?.originalFilename?.startsWith('/files/');
-        globalThis.mSidebar.open(photo.fileid, fileInfo?.filename, forceNative);
+        globalThis.mSidebar.open(photo, fileInfo?.filename, forceNative);
       }
     },
 

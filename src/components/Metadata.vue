@@ -68,7 +68,7 @@ import InfoIcon from 'vue-material-design-icons/InformationOutline.vue';
 import LocationIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagIcon from 'vue-material-design-icons/Tag.vue';
 import { API } from '../services/API';
-import type { IImageInfo } from '../types';
+import type { IImageInfo, IPhoto } from '../types';
 
 interface TopField {
   title: string;
@@ -150,13 +150,15 @@ export default defineComponent({
         });
       }
 
-      list.push({
-        title: this.address || this.t('memories', 'No coordinates'),
-        subtitle: this.address ? [] : [this.t('memories', 'Click edit to set location')],
-        icon: LocationIcon,
-        href: this.address ? this.mapFullUrl : undefined,
-        edit: () => globalThis.editMetadata([globalThis.currentViewerPhoto], [4]),
-      });
+      if (this.address || this.canEdit) {
+        list.push({
+          title: this.address || this.t('memories', 'No coordinates'),
+          subtitle: this.address ? [] : [this.t('memories', 'Click edit to set location')],
+          icon: LocationIcon,
+          href: this.address ? this.mapFullUrl : undefined,
+          edit: () => globalThis.editMetadata([globalThis.currentViewerPhoto], [4]),
+        });
+      }
 
       return list;
     },
@@ -296,17 +298,17 @@ export default defineComponent({
   },
 
   methods: {
-    async update(fileid: number): Promise<IImageInfo> {
+    async update(photo: number | IPhoto): Promise<IImageInfo> {
       this.state = Math.random();
       this.fileid = null;
       this.exif = {};
 
       const state = this.state;
-      const url = API.Q(API.IMAGE_INFO(fileid), { tags: 1 });
-      const res = await axios.get<any>(url);
+      const url = API.Q(utils.getImageInfoUrl(photo), { tags: 1 });
+      const res = await axios.get<IImageInfo>(url);
       if (state !== this.state) return res.data;
 
-      this.fileid = fileid;
+      this.fileid = res.data.fileid;
       this.exif = res.data.exif || {};
       this.baseInfo = res.data;
       return this.baseInfo;

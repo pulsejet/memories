@@ -32,7 +32,7 @@ declare global {
   var showSettings: () => void;
 
   var mSidebar: {
-    open: (fileid: number, filename?: string, forceNative?: boolean) => void;
+    open: (photo: IPhoto | number, filename?: string, forceNative?: boolean) => void;
     close: () => void;
     setTab: (tab: string) => void;
     getWidth: () => number;

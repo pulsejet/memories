@@ -23,7 +23,7 @@ import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
 import Metadata from './Metadata.vue';
-import { IImageInfo } from '../types';
+import { IImageInfo, IPhoto } from '../types';
 
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 
@@ -90,8 +90,8 @@ export default defineComponent({
   },
 
   methods: {
-    async open(fileid: number, filename?: string, forceNative = false) {
-      if (!this.reducedOpen && this.native && (!fileid || forceNative)) {
+    async open(photo: IPhoto | number, filename?: string, forceNative = false) {
+      if (!this.reducedOpen && this.native && (!photo || forceNative)) {
         // Open native sidebar
         this.native?.setFullScreenMode?.(true);
         this.native?.open(filename);
@@ -102,7 +102,7 @@ export default defineComponent({
 
         // Update metadata compoenent
         const m = <any>this.$refs.metadata;
-        const info: IImageInfo = await m?.update(fileid);
+        const info: IImageInfo = await m?.update(photo);
         this.basename = info.basename;
         this.handleOpen();
       }

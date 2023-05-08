@@ -5,8 +5,10 @@ const BASE_URL = 'http://127.0.0.1';
 export const API = {
   DAYS: () => `${BASE_URL}/api/days`,
   DAY: (dayId: number) => `${BASE_URL}/api/days/${dayId}`,
+
   IMAGE_PREVIEW: (fileId: number) => `${BASE_URL}/image/preview/${fileId}`,
   IMAGE_FULL: (fileId: number) => `${BASE_URL}/image/full/${fileId}`,
+  IMAGE_INFO: (fileId: number) => `${BASE_URL}/image/info/${fileId}`,
 };
 
 /**
