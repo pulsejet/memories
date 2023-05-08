@@ -1,4 +1,4 @@
-import type { IPhoto } from './types';
+import type { IDay, IPhoto } from './types';
 
 /**
  * Type of a native promise (this will be the exact type in Java).
@@ -10,6 +10,7 @@ type NativePromise<T> = (call: string, arg: T) => void;
  */
 export type NativeX = {
   isNative: () => boolean;
+  getLocalDays: NativePromise<string>;
   getLocalByDayId: NativePromise<string>;
   getJpeg: NativePromise<string>;
 };
@@ -80,6 +81,13 @@ globalThis.nativexr = (call: string, resolve?: string, reject?: string) => {
 export const has = () => !!nativex;
 
 /**
+ * Gets the local days array.
+ *
+ * @returns List of local days (JSON string)
+ */
+const getLocalDays = nativePromisify<number, string>(nativex?.getLocalDays.bind(nativex));
+
+/**
  * Gets the local photos for a day with a dayId.
  *
  * @param dayId Day ID to get photos for
@@ -94,6 +102,32 @@ const getLocalByDayId = nativePromisify<number, string>(nativex?.getLocalByDayId
  * @returns JPEG data (base64 string)
  */
 const getJpeg = nativePromisify<string, string>(nativex?.getJpeg.bind(nativex), true);
+
+/**
+ * Extend a list of days with local days.
+ * Fetches the local days from the native interface.
+ */
+export async function extendDaysWithLocal(days: IDay[]) {
+  if (!has()) return;
+
+  // Query native part
+  const local: IDay[] = JSON.parse(await getLocalDays(0));
+  const remoteMap = new Map(days.map((d) => [d.dayid, d]));
+
+  // Merge local days into remote days
+  for (const day of local) {
+    const remote = remoteMap.get(day.dayid);
+    if (remote) {
+      remote.count = Math.max(remote.count, day.count);
+    } else {
+      days.push(day);
+    }
+  }
+
+  // TODO: sort depends on view
+  // (but we show it for only timeline anyway for now)
+  days.sort((a, b) => b.dayid - a.dayid);
+}
 
 /**
  * Extend a list of photos with local photos.

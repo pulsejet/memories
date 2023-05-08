@@ -227,6 +227,9 @@ export default defineComponent({
     routeIsFolders(): boolean {
       return this.$route.name === 'folders';
     },
+    routeHasNative(): boolean {
+      return this.routeIsBase && nativex.has();
+    },
     isMonthView(): boolean {
       if (this.$route.query.sort === 'timeline') return false;
 
@@ -705,6 +708,10 @@ export default defineComponent({
           if (!noCache) {
             try {
               if ((cache = await utils.getCachedData(cacheUrl))) {
+                if (this.routeHasNative) {
+                  await nativex.extendDaysWithLocal(cache);
+                }
+
                 await this.processDays(cache);
                 this.loading--;
               }
@@ -722,6 +729,11 @@ export default defineComponent({
 
         // Put back into cache
         utils.cacheData(cacheUrl, data);
+
+        // Extend with native days
+        if (this.routeHasNative) {
+          await nativex.extendDaysWithLocal(data);
+        }
 
         // Make sure we're still on the same page
         if (this.state !== startState) return;
@@ -862,7 +874,15 @@ export default defineComponent({
       const cacheUrl = this.getDayUrl(dayId);
       try {
         const cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
-        if (cache) this.processDay(dayId, cache);
+        if (cache) {
+          // Cache only contains remote images; update from local too
+          if (this.routeHasNative) {
+            await nativex.extendDayWithLocal(dayId, cache);
+          }
+
+          // Process the cache
+          this.processDay(dayId, cache);
+        }
       } catch {
         console.warn(`Failed to process day cache: ${cacheUrl}`);
       }
@@ -887,8 +907,13 @@ export default defineComponent({
     async fetchDayExpire() {
       if (this.fetchDayQueue.length === 0) return;
 
+      // Map of dayId to photos
+      const dayIds = this.fetchDayQueue;
+      const dayMap = new Map<number, IPhoto[]>();
+      for (const dayId of dayIds) dayMap.set(dayId, []);
+
       // Construct URL
-      const dayStr = this.fetchDayQueue.join(',');
+      const dayStr = dayIds.join(',');
       const url = this.getDayUrl(dayStr);
       this.fetchDayQueue = [];
 
@@ -905,20 +930,8 @@ export default defineComponent({
 
         // Bin the data into separate days
         // It is already sorted in dayid DESC
-        const dayMap = new Map<number, IPhoto[]>();
         for (const photo of data) {
-          if (!dayMap.has(photo.dayid)) dayMap.set(photo.dayid, []);
-          dayMap.get(photo.dayid)!.push(photo);
-        }
-
-        // Get local images if we are running in native environment.
-        // Get them all together for each day here.
-        if (nativex.has()) {
-          const promises: Promise<void>[] = [];
-          for (const [dayId, photos] of dayMap) {
-            promises.push(nativex.extendDayWithLocal(dayId, photos));
-          }
-          await Promise.all(promises);
+          dayMap.get(photo.dayid)?.push(photo);
         }
 
         // Store cache asynchronously
@@ -928,7 +941,18 @@ export default defineComponent({
         // These loops cannot be combined because processDay
         // creates circular references which cannot be stringified
         for (const [dayId, photos] of dayMap) {
+          if (photos.length === 0) continue;
           utils.cacheData(this.getDayUrl(dayId), photos);
+        }
+
+        // Get local images if we are running in native environment.
+        // Get them all together for each day here.
+        if (this.routeHasNative) {
+          await Promise.all(
+            Array.from(dayMap.entries()).map(([dayId, photos]) => {
+              return nativex.extendDayWithLocal(dayId, photos);
+            })
+          );
         }
 
         // Process each day as needed
