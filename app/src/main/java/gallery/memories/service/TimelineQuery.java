@@ -175,6 +175,7 @@ public class TimelineQuery {
                 MediaStore.Images.Media.HEIGHT,
                 MediaStore.Images.Media.WIDTH,
                 MediaStore.Images.Media.SIZE,
+                MediaStore.Images.Media.DATA,
             };
 
             // Filter for given day
@@ -194,6 +195,7 @@ public class TimelineQuery {
                 int heightColumn = cursor2.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT);
                 int widthColumn = cursor2.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH);
                 int sizeColumn = cursor2.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE);
+                int dataColumn = cursor2.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
 
                 if (!cursor2.moveToNext()) {
                     throw new Exception("Image not found");
@@ -205,8 +207,9 @@ public class TimelineQuery {
                 long height = cursor2.getLong(heightColumn);
                 long width = cursor2.getLong(widthColumn);
                 long size = cursor2.getLong(sizeColumn);
+                String data = cursor2.getString(dataColumn);
 
-                return new JSONObject()
+                JSONObject obj = new JSONObject()
                     .put("fileid", id2)
                     .put("basename", name)
                     .put("mimetype", mime)
@@ -216,6 +219,36 @@ public class TimelineQuery {
                     .put("w", width)
                     .put("size", size)
                     .put("permissions", "D");
+
+                // Get EXIF data
+                try {
+                    ExifInterface exif = new ExifInterface(data);
+                    JSONObject exifObj = new JSONObject();
+                    exifObj.put("Aperture", exif.getAttribute(ExifInterface.TAG_APERTURE_VALUE));
+                    exifObj.put("FocalLength", exif.getAttribute(ExifInterface.TAG_FOCAL_LENGTH));
+                    exifObj.put("FNumber", exif.getAttribute(ExifInterface.TAG_F_NUMBER));
+                    exifObj.put("ShutterSpeed", exif.getAttribute(ExifInterface.TAG_SHUTTER_SPEED_VALUE));
+                    exifObj.put("ExposureTime", exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME));
+                    exifObj.put("ISO", exif.getAttribute(ExifInterface.TAG_ISO_SPEED));
+
+                    exifObj.put("DateTimeOriginal", exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL));
+                    exifObj.put("OffsetTimeOriginal", exif.getAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL));
+                    exifObj.put("GPSLatitude", exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
+                    exifObj.put("GPSLongitude", exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE));
+                    exifObj.put("GPSAltitude", exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE));
+
+                    exifObj.put("Make", exif.getAttribute(ExifInterface.TAG_MAKE));
+                    exifObj.put("Model", exif.getAttribute(ExifInterface.TAG_MODEL));
+
+                    exifObj.put("Orientation", exif.getAttribute(ExifInterface.TAG_ORIENTATION));
+                    exifObj.put("Description", exif.getAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION));
+
+                    obj.put("exif", exifObj);
+                } catch (IOException e) {
+                    Log.e(TAG, "Error reading EXIF data for " + data);
+                }
+
+                return obj;
             }
         }
     }
