@@ -496,6 +496,7 @@ export default defineComponent({
         if (this.sidebarOpen) {
           this.openSidebar();
         }
+        nativex.setTheme('#000000', true); // viewer is always dark
       });
       this.photoswipe.on('openingAnimationEnd', () => {
         this.fullyOpened = true;
@@ -507,6 +508,7 @@ export default defineComponent({
         this.hideSidebar();
         this.setRouteHash(undefined);
         this.updateTitle(undefined);
+        nativex.setTheme(); // reset
       });
       this.photoswipe.on('destroy', () => {
         document.body.classList.remove(klass);

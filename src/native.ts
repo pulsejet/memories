@@ -82,9 +82,18 @@ globalThis.nativexr = (call: string, resolve?: string, reject?: string) => {
 export const has = () => !!nativex;
 
 /**
- * Change the theme color of the app.
+ * Change the theme color of the app to default.
  */
-export const setThemeColor: typeof nativex.setThemeColor = nativex?.setThemeColor.bind(nativex);
+export const setTheme = (color?: string, dark?: boolean) => {
+  if (!has()) return;
+
+  color ??= getComputedStyle(document.body).getPropertyValue('--color-main-background');
+  dark ??=
+    window.matchMedia('(prefers-color-scheme: dark)').matches ||
+    document.body.hasAttribute('data-theme-dark') ||
+    document.body.hasAttribute('data-theme-dark-highcontrast');
+  nativex?.setThemeColor?.(color, dark);
+};
 
 /**
  * Gets the local days array.
