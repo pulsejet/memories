@@ -229,7 +229,7 @@ export default defineComponent({
     // Set theme color for native part
     nativex.setThemeColor?.(
       getComputedStyle(document.body).getPropertyValue('--color-main-background'),
-      document.body.hasAttribute('data-theme-dark')
+      document.body.hasAttribute('data-theme-dark') || document.body.hasAttribute('data-theme-dark-highcontrast')
     );
 
     // Register sidebar metadata tab
