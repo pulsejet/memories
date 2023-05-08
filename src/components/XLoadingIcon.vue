@@ -30,6 +30,8 @@ export default defineComponent({
 // https://codepen.io/nzbin/pen/GGrXbp
 
 .loading-icon {
+  z-index: 100000;
+
   .higher {
     position: relative;
     height: 100%;
