@@ -3,6 +3,8 @@ package gallery.memories.service;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.icu.text.SimpleDateFormat;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -11,6 +13,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.TimeZone;
 
@@ -110,6 +114,7 @@ public class TimelineQuery {
         // Same fields as server response
         String[] projection = new String[] {
                 MediaStore.Images.Media._ID,
+                MediaStore.Images.Media.DATA,
                 MediaStore.Images.Media.DISPLAY_NAME,
                 MediaStore.Images.Media.DATE_TAKEN,
                 MediaStore.Images.Media.DATE_MODIFIED,
@@ -123,6 +128,7 @@ public class TimelineQuery {
                 null
         )) {
             int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
+            int uriColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
             int nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
             int dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN);
             int mtimeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_MODIFIED);
@@ -145,15 +151,32 @@ public class TimelineQuery {
                     }
                 }
 
+                // Get EXIF date using ExifInterface
+                String uri = cursor.getString(uriColumn);
+                try {
+                    ExifInterface exif = new ExifInterface(uri);
+                    String exifDate = exif.getAttribute(ExifInterface.TAG_DATETIME);
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+                    sdf.setTimeZone(android.icu.util.TimeZone.GMT_ZONE);
+                    dateTaken = sdf.parse(exifDate).getTime();
+                } catch (IOException e) {
+                    Log.e(TAG, "Failed to read EXIF data: " + e.getMessage());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                // This will use whatever is available
+                final long dayId = dateTaken / 86400000;
+
                 // Delete file with same local_id and insert new one
                 mDb.beginTransaction();
                 mDb.execSQL("DELETE FROM images WHERE local_id = ?", new Object[] { id });
                 mDb.execSQL("INSERT OR IGNORE INTO images (local_id, mtime, basename, dayid) VALUES (?, ?, ?, ?)",
-                        new Object[] { id, mtime, name, (dateTaken / 86400000) });
+                    new Object[] { id, mtime, name, dayId });
                 mDb.setTransactionSuccessful();
                 mDb.endTransaction();
 
-                Log.v(TAG, "Inserted file to local DB: " + id + " / " + name);
+                Log.v(TAG, "Inserted file to local DB: " + id + " / " + name + " / " + dayId);
             }
         }
     }
