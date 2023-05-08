@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DbService extends SQLiteOpenHelper {
     public DbService(Context context) {
-        super(context, "memories", null, 11);
+        super(context, "memories", null, 16);
     }
 
     public void onCreate(SQLiteDatabase db) {

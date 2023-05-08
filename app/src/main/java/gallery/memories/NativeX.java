@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 
@@ -33,47 +34,27 @@ public class NativeX {
         mQuery = new TimelineQuery(activity);
     }
 
-    public WebResourceResponse handleRequest(final String path) {
-        byte[] bytes = null;
-        String mimeType = "application/json";
+    public WebResourceResponse handleRequest(final WebResourceRequest request) {
+        final String path = request.getUrl().getPath();
 
+        WebResourceResponse response;
         try {
-            // Match the path using regex
-            String[] parts = path.split("/");
-
-            if (path.matches("^/image/preview/\\d+$")) {
-                // Preview Image
-                bytes = mImageService.getPreview(Long.parseLong(parts[3]));
-                mimeType = "image/jpeg";
-            } else if (path.matches("^/image/full/\\d+$")) {
-                // Full sized image
-                bytes = mImageService.getFull(Long.parseLong(parts[3]));
-                mimeType = "image/jpeg";
-            } else if (path.matches("^/api/days$")) {
-                // Days list
-                bytes = mQuery.getDays().toString().getBytes();
-            } else if (path.matches("/api/days/\\d+$")) {
-                // Single day photos
-                bytes = mQuery.getByDayId(Long.parseLong(parts[3])).toString().getBytes();
+            if (request.getMethod().equals("GET")) {
+                response = routerGet(path);
+            } else if (request.getMethod().equals("OPTIONS")) {
+                response = new WebResourceResponse("text/plain", "UTF-8", new ByteArrayInputStream("".getBytes()));
             } else {
-                Log.e(TAG, "handleRequest: Unknown path: " + path);
+                throw new Exception("Method Not Allowed");
             }
         } catch (Exception e) {
             Log.e(TAG, "handleRequest: ", e);
-        }
-
-        // Construct the response
-        WebResourceResponse response;
-        if (bytes != null) {
-            response = new WebResourceResponse(mimeType, "UTF-8", new ByteArrayInputStream(bytes));
-        } else {
-            response = new WebResourceResponse(mimeType, "UTF-8", new ByteArrayInputStream("{}".getBytes()));
-            response.setStatusCodeAndReasonPhrase(500, "Internal Server Error");
+            response = makeErrorResponse();
         }
 
         // Allow CORS from all origins
         Map<String, String> headers = new ArrayMap<>();
         headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Access-Control-Allow-Headers", "*");
         response.setResponseHeaders(headers);
 
         return response;
@@ -99,5 +80,41 @@ public class NativeX {
         } else {
             window.getDecorView().setSystemUiVisibility(isDark ? 0 : View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         }
+    }
+
+    protected WebResourceResponse routerGet(final String path) throws Exception {
+        String[] parts = path.split("/");
+
+        if (path.matches("^/image/preview/\\d+$")) {
+            return makeResponse(mImageService.getPreview(Long.parseLong(parts[3])), "image/jpeg");
+        } else if (path.matches("^/image/full/\\d+$")) {
+            return makeResponse(mImageService.getFull(Long.parseLong(parts[3])), "image/jpeg");
+        }  else if (path.matches("^/image/info/\\d+$")) {
+            return makeResponse(mQuery.getImageInfo(Long.parseLong(parts[3])));
+        } else if (path.matches("^/api/days$")) {
+            return makeResponse(mQuery.getDays());
+        } else if (path.matches("/api/days/\\d+$")) {
+            return makeResponse(mQuery.getByDayId(Long.parseLong(parts[3])));
+        }
+
+        throw new Exception("Not Found");
+    }
+
+    protected WebResourceResponse makeResponse(byte[] bytes, String mimeType) {
+        if (bytes != null) {
+            return new WebResourceResponse(mimeType, "UTF-8", new ByteArrayInputStream(bytes));
+        }
+
+        return makeErrorResponse();
+    }
+
+    protected WebResourceResponse makeResponse(Object json) {
+        return makeResponse(json.toString().getBytes(), "application/json");
+    }
+
+    protected WebResourceResponse makeErrorResponse() {
+        WebResourceResponse response = new WebResourceResponse("application/json", "UTF-8", new ByteArrayInputStream("{}".getBytes()));
+        response.setStatusCodeAndReasonPhrase(500, "Internal Server Error");
+        return response;
     }
 }

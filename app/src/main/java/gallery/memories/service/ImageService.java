@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.provider.MediaStore;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 public class ImageService {
     Context mCtx;

@@ -150,6 +150,76 @@ public class TimelineQuery {
         }
     }
 
+    public JSONObject getImageInfo(final long id) throws Exception {
+        // Get image info from DB
+        try (Cursor cursor = mDb.rawQuery(
+            "SELECT local_id, date_taken, dayid FROM images WHERE local_id = ?",
+            new String[] { Long.toString(id) }
+        )) {
+            if (!cursor.moveToNext()) {
+                throw new Exception("Image not found");
+            }
+
+            final long localId = cursor.getLong(0);
+            final long dateTaken = cursor.getLong(1);
+            final long dayid = cursor.getLong(2);
+
+            // All external storage images
+            Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
+            // Same fields as server response
+            String[] projection = new String[] {
+                MediaStore.Images.Media._ID,
+                MediaStore.Images.Media.DISPLAY_NAME,
+                MediaStore.Images.Media.MIME_TYPE,
+                MediaStore.Images.Media.HEIGHT,
+                MediaStore.Images.Media.WIDTH,
+                MediaStore.Images.Media.SIZE,
+            };
+
+            // Filter for given day
+            String selection = MediaStore.Images.Media._ID
+                    + " = " + localId;
+
+            try (Cursor cursor2 = mCtx.getContentResolver().query(
+                collection,
+                projection,
+                selection,
+                null,
+                null
+            )) {
+                int idColumn = cursor2.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
+                int nameColumn = cursor2.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
+                int mimeColumn = cursor2.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE);
+                int heightColumn = cursor2.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT);
+                int widthColumn = cursor2.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH);
+                int sizeColumn = cursor2.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE);
+
+                if (!cursor2.moveToNext()) {
+                    throw new Exception("Image not found");
+                }
+
+                long id2 = cursor2.getLong(idColumn);
+                String name = cursor2.getString(nameColumn);
+                String mime = cursor2.getString(mimeColumn);
+                long height = cursor2.getLong(heightColumn);
+                long width = cursor2.getLong(widthColumn);
+                long size = cursor2.getLong(sizeColumn);
+
+                return new JSONObject()
+                    .put("fileid", id2)
+                    .put("basename", name)
+                    .put("mimetype", mime)
+                    .put("dayid", dayid)
+                    .put("datetaken", dateTaken)
+                    .put("h", height)
+                    .put("w", width)
+                    .put("size", size)
+                    .put("permissions", "D");
+            }
+        }
+    }
+
     protected void fullSyncDb() {
         Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
@@ -211,13 +281,14 @@ public class TimelineQuery {
                 }
 
                 // This will use whatever is available
-                final long dayId = dateTaken / 86400000;
+                dateTaken /= 1000;
+                final long dayId = dateTaken / 86400;
 
                 // Delete file with same local_id and insert new one
                 mDb.beginTransaction();
                 mDb.execSQL("DELETE FROM images WHERE local_id = ?", new Object[] { id });
-                mDb.execSQL("INSERT OR IGNORE INTO images (local_id, mtime, basename, dayid) VALUES (?, ?, ?, ?)",
-                    new Object[] { id, mtime, name, dayId });
+                mDb.execSQL("INSERT OR IGNORE INTO images (local_id, mtime, basename, date_taken, dayid) VALUES (?, ?, ?, ?, ?)",
+                    new Object[] { id, mtime, name, dateTaken, dayId });
                 mDb.setTransactionSuccessful();
                 mDb.endTransaction();
 

@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 if (request.getUrl().getHost().equals("127.0.0.1")) {
-                    return mNativeX.handleRequest(request.getUrl().getPath());
+                    return mNativeX.handleRequest(request);
                 }
                 return null;
             }
