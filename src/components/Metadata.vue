@@ -270,11 +270,11 @@ export default defineComponent({
     },
 
     lat(): number {
-      return this.exif['GPSLatitude'];
+      return Number(this.exif['GPSLatitude']);
     },
 
     lon(): number {
-      return this.exif['GPSLongitude'];
+      return Number(this.exif['GPSLongitude']);
     },
 
     tagNames(): string[] {
