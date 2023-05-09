@@ -7,8 +7,8 @@ import { IFileInfo, IPhoto } from '../../types';
 import { genFileInfo } from '../FileUtils';
 import { API } from '../API';
 import { getAlbumFileInfos } from './albums';
-import * as utils from '../Utils';
 import client from '../DavClient';
+import * as utils from '../Utils';
 
 export const props = `
     <oc:fileid />
@@ -52,6 +52,9 @@ export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
 
   // Get file infos
   let fileInfos: IFileInfo[] = [];
+
+  // Remove any local photos
+  photos = photos.filter((photo) => !(photo.flag & utils.constants.c.FLAG_IS_LOCAL));
 
   // Get file IDs array
   const fileIds = photos.map((photo) => photo.fileid);
