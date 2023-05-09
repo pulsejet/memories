@@ -11,6 +11,8 @@ OC.L10N.register(
     "Archive" : "بایگانی",
     "Tags" : "برچسب ها",
     "Edit" : "ویرایش",
+    "Photos" : "عکس ها",
+    "Explore" : "کاوش",
     "Cancel" : "لغو",
     "Delete" : "حذف",
     "Download" : "بارگیری",

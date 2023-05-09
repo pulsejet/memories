@@ -9,6 +9,8 @@ OC.L10N.register(
     "Archive" : "არქივი",
     "Tags" : "ტეგები",
     "Edit" : "შეცვლა",
+    "Photos" : "სურათები",
+    "Explore" : "მიმოხილვა",
     "Cancel" : "უარყოფა",
     "Delete" : "წაშლა",
     "Download" : "ჩამოტვირთვა",

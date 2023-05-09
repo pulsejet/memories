@@ -12,6 +12,8 @@ OC.L10N.register(
     "Archive" : "Cartella",
     "Tags" : "Etichetas",
     "Edit" : "Modìfica",
+    "Photos" : "Fotos",
+    "Explore" : "Esplorare",
     "Cancel" : "Annulla",
     "Delete" : "Cantzella",
     "Download" : "Iscàrriga",

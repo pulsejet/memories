@@ -12,6 +12,7 @@ OC.L10N.register(
     "On this day" : "בתאריך זה",
     "Tags" : "תגיות",
     "Edit" : "עריכה",
+    "Explore" : "דפדוף",
     "Cancel" : "ביטול",
     "Delete" : "מחיקה",
     "Download" : "הורדה",

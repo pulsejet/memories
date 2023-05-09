@@ -8,6 +8,7 @@ OC.L10N.register(
     "Archive" : "Archif",
     "Tags" : "Tagiau",
     "Edit" : "Golygu",
+    "Photos" : "Lluniau",
     "Cancel" : "Diddymu",
     "Delete" : "Dileu",
     "Download" : "Llwytho i lawr",

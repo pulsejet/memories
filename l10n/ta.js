@@ -6,6 +6,7 @@ OC.L10N.register(
     "Favorites" : "விருப்பங்கள்",
     "Tags" : "சீட்டுகள்",
     "Edit" : "தொகுக்க",
+    "Photos" : "Photos",
     "Cancel" : "இரத்து செய்க",
     "Delete" : "நீக்குக",
     "Download" : "பதிவிறக்குக",

@@ -7,6 +7,7 @@ OC.L10N.register(
     "Videos" : "Video",
     "Tags" : "Oznake",
     "Edit" : "Izmeni",
+    "Photos" : "Slike",
     "Cancel" : "Otkaži",
     "Delete" : "Obriši",
     "Download" : "Preuzmi",

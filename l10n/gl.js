@@ -15,6 +15,7 @@ OC.L10N.register(
     "Map" : "Mapa",
     "Tags" : "Etiquetas",
     "Edit" : "Editar",
+    "Explore" : "Examinar",
     "Cancel" : "Cancelar",
     "Delete" : "Eliminar",
     "Download" : "Descargar",

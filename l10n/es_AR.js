@@ -10,6 +10,8 @@ OC.L10N.register(
     "On this day" : "En este día",
     "Tags" : "Etiquetas",
     "Edit" : "Editar",
+    "Photos" : "Fotos",
+    "Explore" : "Explorar",
     "Cancel" : "Cancelar",
     "Delete" : "Eliminar",
     "Download" : "Descargar",

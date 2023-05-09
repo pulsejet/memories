@@ -10,6 +10,7 @@ OC.L10N.register(
     "Archive" : "الأرشيف",
     "Tags" : "الوسوم",
     "Edit" : "تعديل",
+    "Photos" : "الصور",
     "Cancel" : "إلغاء",
     "Delete" : "إزالة",
     "Download" : "تنزيل",

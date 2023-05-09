@@ -11,6 +11,8 @@ OC.L10N.register(
     "Archive" : "Arhiva",
     "Tags" : "Oznake",
     "Edit" : "Uredi",
+    "Photos" : "Fotografije",
+    "Explore" : "Istraži",
     "Cancel" : "Odustani",
     "Delete" : "Izbriši",
     "Download" : "Preuzmi",

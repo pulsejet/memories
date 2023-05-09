@@ -6,6 +6,7 @@ OC.L10N.register(
     "Favorites" : "Favoritos",
     "Tags" : "Etiquettas",
     "Edit" : "Modificar",
+    "Explore" : "Explorar",
     "Cancel" : "Cancellar",
     "Delete" : "Deler",
     "Download" : "Discargar",

@@ -10,6 +10,8 @@ OC.L10N.register(
     "Archive" : "보관",
     "Tags" : "태그",
     "Edit" : "편집",
+    "Photos" : "사진",
+    "Explore" : "탐색",
     "Cancel" : "취소",
     "Delete" : "삭제",
     "Download" : "다운로드",

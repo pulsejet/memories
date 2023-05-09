@@ -9,6 +9,7 @@ OC.L10N.register(
     "Archive" : "Lưu trữ",
     "Tags" : "Nhãn",
     "Edit" : "Chỉnh sửa",
+    "Photos" : "Ảnh",
     "Cancel" : "Hủy",
     "Delete" : "Xóa",
     "Download" : "Tải xuống",

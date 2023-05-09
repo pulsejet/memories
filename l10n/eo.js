@@ -10,6 +10,7 @@ OC.L10N.register(
     "Archive" : "Arĥivujo",
     "Tags" : "Etikedoj",
     "Edit" : "Modifi",
+    "Photos" : "Fotoj",
     "Cancel" : "Nuligi",
     "Delete" : "Forigi",
     "Download" : "Elŝuti",

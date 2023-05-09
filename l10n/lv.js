@@ -10,6 +10,7 @@ OC.L10N.register(
     "Archive" : "Arhīvi",
     "Tags" : "Birkas",
     "Edit" : "Rediģēt",
+    "Photos" : "Bildes",
     "Cancel" : "Atcelt",
     "Delete" : "Dzēst",
     "Download" : "Lejupielādēt",

@@ -16,6 +16,8 @@ OC.L10N.register(
     "If you just installed Memories, run:" : "Jei ką tik įdiegėte Prisiminimus, paleiskite:",
     "Click here to start" : "Spustelėkite čia, norėdami pradėti",
     "Edit" : "Taisyti",
+    "Photos" : "Nuotraukos",
+    "Explore" : "Išvalgyti",
     "Cancel" : "Atsisakyti",
     "Delete" : "Ištrinti",
     "Remove from album" : "Šalinti iš albumo",

@@ -6,6 +6,7 @@ OC.L10N.register(
     "Videos" : "Wideo",
     "Tags" : "Bellikler",
     "Edit" : "Redaktirläň",
+    "Photos" : "Suratlar",
     "Cancel" : "ýatyrmak",
     "Delete" : "Pozmak",
     "Download" : "Göçürip almak",

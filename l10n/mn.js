@@ -9,6 +9,8 @@ OC.L10N.register(
     "Archive" : "архив",
     "Tags" : "Tag-үүд",
     "Edit" : "засварлах",
+    "Photos" : "Зурагнууд",
+    "Explore" : "Хайх",
     "Cancel" : "болиулах",
     "Delete" : "Устгах",
     "Download" : "Татах",

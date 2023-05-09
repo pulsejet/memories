@@ -16,6 +16,7 @@ OC.L10N.register(
     "Map" : "Karta",
     "Tags" : "Taggar",
     "Edit" : "Ändra",
+    "Explore" : "Utforska",
     "Cancel" : "Avbryt",
     "Delete" : "Radera",
     "Download" : "Ladda ner",
