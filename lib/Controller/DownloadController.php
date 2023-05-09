@@ -93,7 +93,7 @@ class DownloadController extends GenericApiController
             $session->remove($key);
 
             if (null === $info) {
-                return Exceptions::NotFound('handle');
+                throw Exceptions::NotFound('handle');
             }
 
             $name = $info[0].'-'.date('YmdHis');
@@ -104,7 +104,7 @@ class DownloadController extends GenericApiController
 
             // Check if we have any valid ids
             if (0 === \count($fileIds)) {
-                return Exceptions::NotFound('file IDs');
+                throw Exceptions::NotFound('file IDs');
             }
 
             // Download single file
