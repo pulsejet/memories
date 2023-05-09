@@ -184,7 +184,9 @@ class DownloadController extends GenericApiController
             $out->setHeader('X-Accel-Buffering: no');
 
             // Quit if HEAD request
-            if ('HEAD' === $this->request->getMethod()) return;
+            if ('HEAD' === $this->request->getMethod()) {
+                return;
+            }
 
             // Open file to send
             $res = $file->fopen('rb');
@@ -264,7 +266,9 @@ class DownloadController extends GenericApiController
             $streamer->sendHeaders($name);
 
             // Quit if HEAD request
-            if ('HEAD' === $this->request->getMethod()) return;
+            if ('HEAD' === $this->request->getMethod()) {
+                return;
+            }
 
             // Multiple files might have the same name
             // So we need to add a number to the end of the name
