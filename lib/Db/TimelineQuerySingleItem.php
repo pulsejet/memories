@@ -56,16 +56,8 @@ trait TimelineQuerySingleItem
             'dayid' => (int) $row['dayid'],
             'w' => (int) $row['w'],
             'h' => (int) $row['h'],
-            'datetaken' => (int) $row['datetaken'],
+            'datetaken' => Util::sqlUtcToTimestamp($row['datetaken']),
         ];
-
-        // Attempt to get the date in the correct timezone
-        try {
-            $utcDate = new \DateTime($row['datetaken'], new \DateTimeZone('UTC'));
-            $info['datetaken'] = $utcDate->getTimestamp();
-        } catch (\Throwable $e) {
-            // Ignore
-        }
 
         // Return if only basic info is needed
         if ($basic) {

@@ -112,14 +112,7 @@ export default defineComponent({
         try {
           const url = API.Q(API.IMAGE_INFO(p.fileid), { tags: 1 });
           const res = await axios.get<any>(url);
-
-          // Validate response
-          p.imageInfo = null;
-          if (typeof res.data.datetaken !== 'number') {
-            console.error('Invalid date for', p.fileid);
-            return;
-          }
-          p.datetaken = res.data.datetaken * 1000;
+          p.datetaken = res.data.datetaken;
           p.imageInfo = res.data;
         } catch (error) {
           console.error('Failed to get date info for', p.fileid, error);

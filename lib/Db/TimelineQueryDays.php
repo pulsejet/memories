@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCA\Memories\ClustersBackend;
+use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -222,8 +223,12 @@ trait TimelineQueryDays
         // All cluster transformations
         ClustersBackend\Manager::applyDayPostTransforms($this->request, $row);
 
-        // We don't need these fields
-        unset($row['datetaken']);
+        // Remove datetaken unless native (for sorting)
+        if (Util::callerIsNative()) {
+            $row['datetaken'] = Util::sqlUtcToTimestamp($row['datetaken']);
+        } else {
+            unset($row['datetaken']);
+        }
     }
 
     /**

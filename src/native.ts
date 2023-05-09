@@ -108,4 +108,7 @@ export async function extendDayWithLocal(dayId: number, photos: IPhoto[]) {
   const localOnly = localPhotos.filter((p) => !photosSet.has(p.basename));
   localOnly.forEach((p) => (p.islocal = true));
   photos.push(...localOnly);
+
+  // Sort by datetaken
+  photos.sort((a, b) => (b.datetaken ?? 0) - (a.datetaken ?? 0));
 }

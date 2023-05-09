@@ -173,11 +173,11 @@ export default defineComponent({
     },
 
     origDateNewest() {
-      return new Date(this.sortedPhotos[0].datetaken!);
+      return new Date(this.sortedPhotos[0].datetaken! * 1000);
     },
 
     origDateOldest() {
-      return new Date(this.sortedPhotos[this.sortedPhotos.length - 1].datetaken!);
+      return new Date(this.sortedPhotos[this.sortedPhotos.length - 1].datetaken! * 1000);
     },
 
     origDateDiff() {
@@ -206,7 +206,7 @@ export default defineComponent({
       photos.sort((a, b) => b.datetaken! - a.datetaken!);
 
       // Get date of newest photo
-      let date = new Date(photos[0].datetaken!);
+      let date = new Date(photos[0].datetaken! * 1000);
       this.year = date.getUTCFullYear().toString();
       this.month = (date.getUTCMonth() + 1).toString();
       this.day = date.getUTCDate().toString();
@@ -216,7 +216,7 @@ export default defineComponent({
 
       // Get date of oldest photo
       if (photos.length > 1) {
-        date = new Date(photos[photos.length - 1].datetaken!);
+        date = new Date(photos[photos.length - 1].datetaken! * 1000);
         this.yearLast = date.getUTCFullYear().toString();
         this.monthLast = (date.getUTCMonth() + 1).toString();
         this.dayLast = date.getUTCDate().toString();
@@ -259,7 +259,7 @@ export default defineComponent({
       // Interpolate date
       const dT = this.date.getTime();
       const doT = this.origDateNewest.getTime();
-      const offset = (photo.datetaken || doT) - doT;
+      const offset = ((photo.datetaken ?? 0) * 1000 || doT) - doT;
       return this.getExifFormat(new Date(dT + offset * this.scaleFactor));
     },
 

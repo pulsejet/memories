@@ -305,6 +305,20 @@ class Util
     }
 
     /**
+     * Convert SQL UTC date to timestamp.
+     *
+     * @param mixed $sqlDate
+     */
+    public static function sqlUtcToTimestamp($sqlDate): int
+    {
+        try {
+            return (new \DateTime($sqlDate, new \DateTimeZone('UTC')))->getTimestamp();
+        } catch (\Throwable $e) {
+            return 0;
+        }
+    }
+
+    /**
      * Explode a string into fixed number of components.
      *
      * @param string $delimiter Delimiter
