@@ -158,11 +158,15 @@ class DownloadController extends GenericApiController
             // Only send partial content header if downloading a piece of the file
             if ($seekStart > 0 || $seekEnd < ($size - 1)) {
                 $out->setHeader('HTTP/1.1 206 Partial Content');
+                $out->setHeader("Content-Range: bytes {$seekStart}-{$seekEnd}/{$size}");
+            }
+
+            // Accept ranges only if resumable
+            if ($resumable) {
+                $out->setHeader('Accept-Ranges: bytes');
             }
 
             // Set headers
-            $out->setHeader('Accept-Ranges: bytes');
-            $out->setHeader("Content-Range: bytes {$seekStart}-{$seekEnd}/{$size}");
             $out->setHeader('Content-Length: '.($seekEnd - $seekStart + 1));
             $out->setHeader('Content-Type: '.$file->getMimeType());
 
