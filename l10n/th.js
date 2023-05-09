@@ -12,6 +12,8 @@ OC.L10N.register(
     "On this day" : "วันนี้ในอดีต",
     "Tags" : "แท็ก",
     "Edit" : "แก้ไข",
+    "Photos" : "รูปภาพ",
+    "Explore" : "สำรวจ",
     "Cancel" : "ยกเลิก",
     "Delete" : "ลบ",
     "Download" : "ดาวน์โหลด",

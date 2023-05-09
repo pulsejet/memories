@@ -1,0 +1,26 @@
+OC.L10N.register(
+    "memories",
+    {
+    "Settings" : "Sozlamalar",
+    "Favorites" : "Favorites",
+    "Videos" : "Videos",
+    "Tags" : "Tags",
+    "Photos" : "Photos",
+    "Cancel" : "Cancel",
+    "Delete" : "Delete",
+    "Download" : "Download",
+    "Favorite" : "Favorite",
+    "General" : "General",
+    "Close" : "Close",
+    "Save" : "Save",
+    "Name" : "Name",
+    "Update" : "Update",
+    "Search" : "Search",
+    "Remove" : "Remove",
+    "Share link" : "Share link",
+    "Refresh" : "Refresh",
+    "Read only" : "Read only",
+    "Continue" : "Continue",
+    "Size" : "Size"
+},
+"nplurals=1; plural=0;");

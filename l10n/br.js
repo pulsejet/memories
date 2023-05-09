@@ -7,6 +7,7 @@ OC.L10N.register(
     "Videos" : "Videoioù",
     "Tags" : "Klavioù",
     "Edit" : "Cheñch",
+    "Photos" : "Fotoioù",
     "Cancel" : "Arrest",
     "Delete" : "Lemel",
     "Download" : "Pellgargañ",

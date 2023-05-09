@@ -14,6 +14,8 @@ OC.L10N.register(
     "On this day" : "På denne dag",
     "Tags" : "Mærker",
     "Edit" : "Redigér",
+    "Photos" : "Billeder",
+    "Explore" : "Udforsk",
     "Cancel" : "Annuller",
     "Delete" : "Slet",
     "Download" : "Download",

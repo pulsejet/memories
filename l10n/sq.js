@@ -9,6 +9,8 @@ OC.L10N.register(
     "Archive" : "Arkiva",
     "Tags" : "Etiketat",
     "Edit" : "Përpuno",
+    "Photos" : "Fotot",
+    "Explore" : "Eksploroni",
     "Cancel" : "Anullo",
     "Delete" : "Fshi",
     "Download" : "Shkarko",

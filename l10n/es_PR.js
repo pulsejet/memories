@@ -9,6 +9,7 @@ OC.L10N.register(
     "Archive" : "Archivar",
     "Tags" : "Etiquetas",
     "Edit" : "Editar",
+    "Explore" : "Explorar",
     "Cancel" : "Cancelar",
     "Delete" : "Borrar",
     "Download" : "Descargar",

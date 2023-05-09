@@ -22,6 +22,8 @@ OC.L10N.register(
     "Edit" : "Uredi",
     "No title" : "Ni naslova",
     "No description" : "Ni opisa",
+    "Photos" : "Fotografije",
+    "Explore" : "Razišči",
     "Cancel" : "Prekliči",
     "Delete" : "Izbriši",
     "Remove from album" : "Odstrani iz albuma",

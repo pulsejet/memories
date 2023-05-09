@@ -15,6 +15,8 @@ OC.L10N.register(
     "Map" : "Peta",
     "Tags" : "Tag",
     "Edit" : "Sunting",
+    "Photos" : "Foto",
+    "Explore" : "Jelajah",
     "Cancel" : "Membatalkan",
     "Delete" : "Hapus",
     "Download" : "Unduh",

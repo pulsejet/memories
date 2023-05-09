@@ -9,6 +9,7 @@ OC.L10N.register(
     "Archive" : "Argief",
     "Tags" : "Etikette",
     "Edit" : "Wysig",
+    "Explore" : "Ontdek",
     "Cancel" : "Kanselleer",
     "Delete" : "Skrap",
     "Download" : "Laai af",

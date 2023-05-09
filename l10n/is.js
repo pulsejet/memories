@@ -12,6 +12,8 @@ OC.L10N.register(
     "On this day" : "Á þessum degi",
     "Tags" : "Merki",
     "Edit" : "Breyta",
+    "Photos" : "Ljósmyndir",
+    "Explore" : "Skoða",
     "Cancel" : "Hætta við",
     "Delete" : "Eyða",
     "Download" : "Sækja",

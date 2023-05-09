@@ -6,6 +6,7 @@ OC.L10N.register(
     "Favorites" : "Favoriten",
     "Tags" : "Tags",
     "Edit" : "Änneren",
+    "Explore" : "Erfuerschen",
     "Cancel" : "Ofbriechen",
     "Delete" : "Läschen",
     "Download" : "Eroflueden",

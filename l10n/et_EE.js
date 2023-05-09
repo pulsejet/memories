@@ -9,6 +9,8 @@ OC.L10N.register(
     "Archive" : "Arhiiv",
     "Tags" : "Sildid",
     "Edit" : "Redigeeri",
+    "Photos" : "Fotod",
+    "Explore" : "Sirvi",
     "Cancel" : "Loobu",
     "Delete" : "Kustuta",
     "Download" : "Lae alla",

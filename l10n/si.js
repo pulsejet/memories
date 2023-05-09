@@ -6,6 +6,7 @@ OC.L10N.register(
     "Favorites" : "ප්‍රියතම",
     "Archive" : "සංරක්ෂණය",
     "Edit" : "සංස්කරණය",
+    "Photos" : "ඡායාරූප",
     "Cancel" : "අවලංගු කරන්න",
     "Download" : "බාගන්න",
     "Favorite" : "ප්‍රියතම",

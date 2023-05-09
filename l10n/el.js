@@ -13,6 +13,7 @@ OC.L10N.register(
     "On this day" : "Αυτή τη μέρα",
     "Tags" : "Ετικέτες",
     "Edit" : "Επεξεργασία",
+    "Explore" : "Εξερεύνηση",
     "Cancel" : "Ακύρωση",
     "Delete" : "Διαγραφή",
     "Download" : "Λήψη",

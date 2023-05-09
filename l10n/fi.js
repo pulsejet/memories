@@ -31,6 +31,7 @@ OC.L10N.register(
     "No description" : "Ei kuvausta",
     "No coordinates" : "Ei koordinaatteja",
     "Click edit to set location" : "Napsauta muokataksesi sijaintia",
+    "Explore" : "Löydä uusia",
     "Cancel" : "Peruuta",
     "Delete" : "Poista",
     "Remove from album" : "Poista albumista",

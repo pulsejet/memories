@@ -5,6 +5,7 @@ OC.L10N.register(
     "Info" : "Info",
     "Favorites" : "Սիրվածներ",
     "Edit" : "մշակել",
+    "Photos" : "Նկարներ",
     "Cancel" : "ընդհատել",
     "Delete" : "հեռացնել",
     "Download" : "Ներբեռնել",

@@ -9,6 +9,8 @@ OC.L10N.register(
     "Archive" : "Arhivă",
     "Tags" : "Etichete",
     "Edit" : "Editează",
+    "Photos" : "Poze",
+    "Explore" : "Explorează",
     "Cancel" : "Anulare",
     "Delete" : "Șterge",
     "Download" : "Descărcare",

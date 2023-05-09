@@ -26,6 +26,7 @@ OC.L10N.register(
     "Edit" : "Bewerk",
     "No title" : "Geen titel",
     "No description" : "Geen beschrijving",
+    "Explore" : "Verkennen",
     "Cancel" : "Annuleren",
     "Delete" : "Verwijder",
     "Remove from album" : "Verwijderen uit album",

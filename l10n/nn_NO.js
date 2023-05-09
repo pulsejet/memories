@@ -7,6 +7,7 @@ OC.L10N.register(
     "Videos" : "Video",
     "Tags" : "Emneord",
     "Edit" : "Rediger",
+    "Photos" : "Foto",
     "Cancel" : "Avbryt",
     "Delete" : "Slett",
     "Download" : "Last ned",
