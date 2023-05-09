@@ -88,7 +88,7 @@ public class NativeX {
     }
 
     @JavascriptInterface
-    public void downloadFromUrl(final String url) {
+    public void downloadFromUrl(final String url, final String filename) {
         Uri uri = Uri.parse(url);
         DownloadManager manager = (DownloadManager) mActivity.getSystemService(Context.DOWNLOAD_SERVICE);
         DownloadManager.Request request = new DownloadManager.Request(uri);
@@ -97,6 +97,9 @@ public class NativeX {
         // Copy all cookies from the webview to the download request
         String cookies = android.webkit.CookieManager.getInstance().getCookie(url);
         request.addRequestHeader("cookie", cookies);
+
+        // Save the file to external storage
+        request.setDestinationInExternalPublicDir(android.os.Environment.DIRECTORY_DOWNLOADS, "memories/" + filename);
 
         // Start the download
         manager.enqueue(request);
