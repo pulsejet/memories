@@ -3,7 +3,10 @@ package gallery.memories;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 
 import android.app.Activity;
+import android.app.DownloadManager;
+import android.content.Context;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
@@ -24,12 +27,14 @@ import gallery.memories.service.TimelineQuery;
 public class NativeX {
     public static final String TAG = "NativeX";
     Activity mActivity;
+    WebView mWebView;
 
     protected ImageService mImageService;
     protected TimelineQuery mQuery;
 
     public NativeX(Activity activity, WebView webView) {
         mActivity = activity;
+        mWebView = webView;
         mImageService = new ImageService(activity);
         mQuery = new TimelineQuery(activity);
     }
@@ -80,6 +85,21 @@ public class NativeX {
         } else {
             window.getDecorView().setSystemUiVisibility(isDark ? 0 : View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         }
+    }
+
+    @JavascriptInterface
+    public void downloadFromUrl(final String url) {
+        Uri uri = Uri.parse(url);
+        DownloadManager manager = (DownloadManager) mActivity.getSystemService(Context.DOWNLOAD_SERVICE);
+        DownloadManager.Request request = new DownloadManager.Request(uri);
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+
+        // Copy all cookies from the webview to the download request
+        String cookies = android.webkit.CookieManager.getInstance().getCookie(url);
+        request.addRequestHeader("cookie", cookies);
+
+        // Start the download
+        manager.enqueue(request);
     }
 
     protected WebResourceResponse routerGet(final String path) throws Exception {
