@@ -3,6 +3,7 @@ import { showError } from '@nextcloud/dialogs';
 import { translate as t } from '@nextcloud/l10n';
 import { IPhoto } from '../../types';
 import { API } from '../API';
+import * as nativex from '../../native';
 
 /**
  * Download files
@@ -24,15 +25,13 @@ export async function downloadFiles(fileIds: number[]) {
  * @param handle Download handle
  */
 export function downloadWithHandle(handle: string) {
-  window.location.href = API.DOWNLOAD_FILE(handle);
-}
+  const url = API.DOWNLOAD_FILE(handle);
 
-/**
- * Download public photo
- * @param photo - The photo to download
- */
-export async function downloadPublicPhoto(photo: IPhoto) {
-  window.location.href = getDownloadLink(photo);
+  // Hand off to download manager (absolute URL)
+  if (nativex.has()) return nativex.downloadFromUrl(window.location.origin + url);
+
+  // Fallback to browser download
+  window.location.href = url;
 }
 
 /**

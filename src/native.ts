@@ -17,6 +17,7 @@ export const API = {
 export type NativeX = {
   isNative: () => boolean;
   setThemeColor: (color: string, isDark: boolean) => void;
+  downloadFromUrl: (url: string) => void;
 };
 
 /** The native interface is a global object that is injected by the native app. */
@@ -40,6 +41,11 @@ export const setTheme = (color?: string, dark?: boolean) => {
     document.body.hasAttribute('data-theme-dark-highcontrast');
   nativex?.setThemeColor?.(color, dark);
 };
+
+/**
+ * Download a file from the given URL.
+ */
+export const downloadFromUrl = (url: string) => nativex?.downloadFromUrl?.(url);
 
 /**
  * Extend a list of days with local days.
