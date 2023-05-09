@@ -1,3 +1,4 @@
+import axios from '@nextcloud/axios';
 import type { IDay, IPhoto } from './types';
 
 const BASE_URL = 'http://127.0.0.1';
@@ -17,7 +18,7 @@ export const API = {
 export type NativeX = {
   isNative: () => boolean;
   setThemeColor: (color: string, isDark: boolean) => void;
-  downloadFromUrl: (url: string) => void;
+  downloadFromUrl: (url: string, filename: string) => void;
 };
 
 /** The native interface is a global object that is injected by the native app. */
@@ -45,7 +46,18 @@ export const setTheme = (color?: string, dark?: boolean) => {
 /**
  * Download a file from the given URL.
  */
-export const downloadFromUrl = (url: string) => nativex?.downloadFromUrl?.(url);
+export const downloadFromUrl = async (url: string) => {
+  // Make HEAD request to get filename
+  const res = await axios.head(url);
+  let filename = res.headers['content-disposition'];
+  if (res.status !== 200 || !filename) return;
+
+  // Extract filename from header without quotes
+  filename = filename.split('filename="')[1].slice(0, -1);
+
+  // Hand off to download manager
+  nativex?.downloadFromUrl?.(url, filename);
+};
 
 /**
  * Extend a list of days with local days.

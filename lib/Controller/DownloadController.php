@@ -90,7 +90,11 @@ class DownloadController extends GenericApiController
             $session = \OC::$server->get(ISession::class);
             $key = "memories_download_{$handle}";
             $info = $session->get($key);
-            $session->remove($key);
+
+            // Remove handle from session unless HEAD request
+            if ('HEAD' !== $this->request->getMethod()) {
+                $session->remove($key);
+            }
 
             if (null === $info) {
                 throw Exceptions::NotFound('handle');
@@ -171,12 +175,16 @@ class DownloadController extends GenericApiController
             $out->setHeader('Content-Type: '.$file->getMimeType());
 
             // Make sure the browser downloads the file
-            $out->setHeader('Content-Disposition: attachment; filename="'.$file->getName().'"');
+            $filename = str_replace('"', '\\"', $file->getName());
+            $out->setHeader('Content-Disposition: attachment; filename="'.$filename.'"');
 
             // Prevent output from being buffered
             $out->setHeader('Content-Encoding: none');
             $out->setHeader('X-Content-Encoded-By: none');
             $out->setHeader('X-Accel-Buffering: no');
+
+            // Quit if HEAD request
+            if ('HEAD' === $this->request->getMethod()) return;
 
             // Open file to send
             $res = $file->fopen('rb');
@@ -254,6 +262,9 @@ class DownloadController extends GenericApiController
 
             // Create a zip file
             $streamer->sendHeaders($name);
+
+            // Quit if HEAD request
+            if ('HEAD' === $this->request->getMethod()) return;
 
             // Multiple files might have the same name
             // So we need to add a number to the end of the name
