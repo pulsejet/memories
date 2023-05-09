@@ -67,6 +67,7 @@ public class TimelineQuery {
             MediaStore.Images.Media.HEIGHT,
             MediaStore.Images.Media.WIDTH,
             MediaStore.Images.Media.SIZE,
+            MediaStore.Images.Media.DATE_MODIFIED,
         };
 
         // Filter for given day
@@ -89,6 +90,7 @@ public class TimelineQuery {
             int heightColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT);
             int widthColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH);
             int sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE);
+            int dateModifiedColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_MODIFIED);
 
             while (cursor.moveToNext()) {
                 long id = cursor.getLong(idColumn);
@@ -98,6 +100,7 @@ public class TimelineQuery {
                 long width = cursor.getLong(widthColumn);
                 long size = cursor.getLong(sizeColumn);
                 long dateTaken = datesTaken.get(id);
+                Long dateModified = cursor.getLong(dateModifiedColumn);
 
                 // Remove from list of ids
                 imageIds.remove(id);
@@ -111,7 +114,8 @@ public class TimelineQuery {
                         .put("datetaken", dateTaken)
                         .put("h", height)
                         .put("w", width)
-                        .put("size", size);
+                        .put("size", size)
+                        .put("etag", dateModified.toString());
                     files.add(file);
                 } catch (JSONException e) {
                     Log.e(TAG, "JSON error");
