@@ -281,7 +281,7 @@ OC.L10N.register(
     "Image saved successfully" : "Image enregistrée avec succès",
     "Error saving image" : "Erreur lors de l'enregistrement de l'image",
     "Unsaved changes" : "Modifications non enregistrées",
-    "Drop changes" : "Abandonner les changements",
+    "Drop changes" : "Abandonner les modifications",
     "Share" : "Partage",
     "Play Live Photo" : "Lire la photo en direct",
     "Sidebar" : "Panneau latéral",
