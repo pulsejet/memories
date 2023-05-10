@@ -32,7 +32,7 @@
             <NcListItemIcon
               :id="availableCollaborators[collaboratorKey].id"
               class="manage-collaborators__form__list__result"
-              :title="availableCollaborators[collaboratorKey].id"
+              :title="availableCollaborators[collaboratorKey].label"
               :search="searchText"
               :user="availableCollaborators[collaboratorKey].id"
               :display-name="availableCollaborators[collaboratorKey].label"
@@ -65,7 +65,7 @@
         <NcListItemIcon
           :id="availableCollaborators[collaboratorKey].id"
           :display-name="availableCollaborators[collaboratorKey].label"
-          :title="availableCollaborators[collaboratorKey].id"
+          :title="availableCollaborators[collaboratorKey].label"
           :user="availableCollaborators[collaboratorKey].id"
         >
           <NcButton
