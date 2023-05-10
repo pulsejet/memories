@@ -27,8 +27,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -277,7 +277,7 @@ public class TimelineQuery {
         }
     }
 
-    public JSONObject delete(long id) throws Exception {
+    public JSONObject delete(List<Long> ids) throws Exception {
         synchronized (this) {
             if (deleting) {
                 throw new Exception("Already deleting another set of images");
@@ -286,12 +286,16 @@ public class TimelineQuery {
         }
 
         try {
+            // List of URIs
+            List<Uri> uris = new ArrayList<>();
+            for (long id : ids) {
+                uris.add(ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id));
+            }
+
             // Delete file with media store
             Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                // Delete with media store
-                Uri uri = ContentUris.withAppendedId(collection, id);
-                PendingIntent intent = MediaStore.createTrashRequest(mCtx.getContentResolver(), Collections.singletonList(uri), true);
+                PendingIntent intent = MediaStore.createTrashRequest(mCtx.getContentResolver(), uris, true);
                 deleteIntentLauncher.launch(new IntentSenderRequest.Builder(intent.getIntentSender()).build());
 
                 // Wait for response
@@ -304,9 +308,9 @@ public class TimelineQuery {
                     throw new Exception("Delete canceled or failed");
                 }
             } else {
-                // Delete with media store
-                Uri uri = ContentUris.withAppendedId(collection, id);
-                mCtx.getContentResolver().delete(uri, null, null);
+                for (Uri uri : uris) {
+                    mCtx.getContentResolver().delete(uri, null, null);
+                }
             }
 
             return new JSONObject().put("message", "ok");

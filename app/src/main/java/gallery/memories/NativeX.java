@@ -19,6 +19,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.collection.ArrayMap;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import gallery.memories.service.ImageService;
@@ -114,8 +116,8 @@ public class NativeX {
             return makeResponse(mImageService.getFull(Long.parseLong(parts[3])), "image/jpeg");
         } else if (path.matches("^/api/image/info/\\d+$")) {
             return makeResponse(mQuery.getImageInfo(Long.parseLong(parts[4])));
-        } else if (path.matches("^/api/image/delete/\\d+$")) {
-            return makeResponse(mQuery.delete(Long.parseLong(parts[4])));
+        } else if (path.matches("^/api/image/delete/\\d+(,\\d+)*$")) {
+            return makeResponse(mQuery.delete(parseIds(parts[4])));
         } else if (path.matches("^/api/days$")) {
             return makeResponse(mQuery.getDays());
         } else if (path.matches("/api/days/\\d+$")) {
@@ -141,5 +143,13 @@ public class NativeX {
         WebResourceResponse response = new WebResourceResponse("application/json", "UTF-8", new ByteArrayInputStream("{}".getBytes()));
         response.setStatusCodeAndReasonPhrase(500, "Internal Server Error");
         return response;
+    }
+
+    protected static List<Long> parseIds(String ids) {
+        List<Long> result = new ArrayList<>();
+        for (String id : ids.split(",")) {
+            result.add(Long.parseLong(id));
+        }
+        return result;
     }
 }
