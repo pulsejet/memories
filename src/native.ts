@@ -1,15 +1,17 @@
 import axios from '@nextcloud/axios';
 import type { IDay, IPhoto } from './types';
+import { constants } from './services/Utils';
 
 const BASE_URL = 'http://127.0.0.1';
 
 export const API = {
   DAYS: () => `${BASE_URL}/api/days`,
   DAY: (dayId: number) => `${BASE_URL}/api/days/${dayId}`,
+  IMAGE_INFO: (fileId: number) => `${BASE_URL}/api/image/info/${fileId}`,
+  IMAGE_DELETE: (fileIds: number[]) => `${BASE_URL}/api/image/delete/${fileIds.join(',')}`,
 
   IMAGE_PREVIEW: (fileId: number) => `${BASE_URL}/image/preview/${fileId}`,
   IMAGE_FULL: (fileId: number) => `${BASE_URL}/image/full/${fileId}`,
-  IMAGE_INFO: (fileId: number) => `${BASE_URL}/image/info/${fileId}`,
 };
 
 /**
@@ -111,4 +113,22 @@ export async function extendDayWithLocal(dayId: number, photos: IPhoto[]) {
 
   // Sort by datetaken
   photos.sort((a, b) => (b.datetaken ?? 0) - (a.datetaken ?? 0));
+}
+
+/**
+ * Request deletion of local photos wherever available.
+ * @param photos List of photos to delete
+ * @returns List of photos that were deleted
+ * @throws If the request fails
+ */
+export async function deleteLocalPhotos(photos: IPhoto[]): Promise<IPhoto[]> {
+  if (!has()) return [];
+
+  const localPhotos = photos.filter((p) => p.flag & constants.c.FLAG_IS_LOCAL);
+  if (localPhotos.length > 0) {
+    const fileids = localPhotos.map((p) => p.fileid);
+    await axios.get(API.IMAGE_DELETE(fileids));
+  }
+
+  return localPhotos;
 }

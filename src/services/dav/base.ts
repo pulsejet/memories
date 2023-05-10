@@ -9,6 +9,7 @@ import { API } from '../API';
 import { getAlbumFileInfos } from './albums';
 import client from '../DavClient';
 import * as utils from '../Utils';
+import * as nativex from '../../native';
 
 export const props = `
     <oc:fileid />
@@ -196,9 +197,7 @@ async function extendWithLivePhotos(photos: IPhoto[]) {
  * @returns list of file ids that were deleted
  */
 export async function* deletePhotos(photos: IPhoto[]) {
-  if (photos.length === 0) {
-    return;
-  }
+  if (photos.length === 0) return;
 
   // Extend with Live Photos unless this is an album
   if (window.vueroute().name !== 'albums') {
@@ -206,20 +205,40 @@ export async function* deletePhotos(photos: IPhoto[]) {
   }
 
   // Get set of unique file ids
-  const fileIdsSet = new Set(photos.map((p) => p.fileid));
+  let fileIdsSet = new Set(photos.map((p) => p.fileid));
 
   // Get files data
   let fileInfos: IFileInfo[] = [];
   try {
     fileInfos = await getFiles(photos);
+
+    // Take intersection of fileIds and fileInfos
+    fileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid));
+    fileIdsSet = new Set(fileInfos.map((f) => f.fileid));
   } catch (e) {
     console.error('Failed to get file info for files to delete', photos, e);
     showError(t('memories', 'Failed to delete files.'));
     return;
   }
 
+  // Check for local photos
+  try {
+    let deleted = await nativex.deleteLocalPhotos(photos);
+
+    // Don't remove remote files just yet
+    deleted = deleted.filter((f) => !fileIdsSet.has(f.fileid));
+
+    // Yield for the fully local files
+    if (deleted.length > 0) {
+      yield deleted.map((f) => f.fileid);
+    }
+  } catch (e) {
+    console.error(e);
+    showError(t('memories', 'Failed to delete local files.'));
+    return;
+  }
+
   // Delete each file
-  fileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid));
   const calls = fileInfos.map((fileInfo) => async () => {
     try {
       await client.deleteFile(fileInfo.originalFilename);
