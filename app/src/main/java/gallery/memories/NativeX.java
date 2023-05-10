@@ -2,7 +2,6 @@ package gallery.memories;
 
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 
-import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.graphics.Color;
@@ -16,6 +15,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.collection.ArrayMap;
 
 import java.io.ByteArrayInputStream;
@@ -26,13 +26,13 @@ import gallery.memories.service.TimelineQuery;
 
 public class NativeX {
     public static final String TAG = "NativeX";
-    Activity mActivity;
+    AppCompatActivity mActivity;
     WebView mWebView;
 
     protected ImageService mImageService;
     protected TimelineQuery mQuery;
 
-    public NativeX(Activity activity, WebView webView) {
+    public NativeX(AppCompatActivity activity, WebView webView) {
         mActivity = activity;
         mWebView = webView;
         mImageService = new ImageService(activity);
@@ -112,8 +112,10 @@ public class NativeX {
             return makeResponse(mImageService.getPreview(Long.parseLong(parts[3])), "image/jpeg");
         } else if (path.matches("^/image/full/\\d+$")) {
             return makeResponse(mImageService.getFull(Long.parseLong(parts[3])), "image/jpeg");
-        }  else if (path.matches("^/image/info/\\d+$")) {
-            return makeResponse(mQuery.getImageInfo(Long.parseLong(parts[3])));
+        } else if (path.matches("^/api/image/info/\\d+$")) {
+            return makeResponse(mQuery.getImageInfo(Long.parseLong(parts[4])));
+        } else if (path.matches("^/api/image/delete/\\d+$")) {
+            return makeResponse(mQuery.delete(Long.parseLong(parts[4])));
         } else if (path.matches("^/api/days$")) {
             return makeResponse(mQuery.getDays());
         } else if (path.matches("/api/days/\\d+$")) {

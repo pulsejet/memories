@@ -1,14 +1,22 @@
 package gallery.memories.service;
 
-import android.content.Context;
+import android.app.Activity;
+import android.app.PendingIntent;
+import android.content.ContentUris;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.IntentSenderRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.collection.ArraySet;
 import androidx.exifinterface.media.ExifInterface;
 
@@ -19,18 +27,30 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class TimelineQuery {
     final static String TAG = "TimelineQuery";
-    Context mCtx;
+    AppCompatActivity mCtx;
     SQLiteDatabase mDb;
 
-    public TimelineQuery(Context context) {
+    boolean deleting = false;
+    ActivityResultLauncher<IntentSenderRequest> deleteIntentLauncher;
+    ActivityResult deleteResult;
+
+    public TimelineQuery(AppCompatActivity context) {
         mCtx = context;
         mDb = new DbService(context).getWritableDatabase();
+
+        deleteIntentLauncher = mCtx.registerForActivityResult(new ActivityResultContracts.StartIntentSenderForResult(), result -> {
+            synchronized (deleteIntentLauncher) {
+                deleteResult = result;
+                deleteIntentLauncher.notify();
+            }
+        });
 
         fullSyncDb();
     }
@@ -257,6 +277,46 @@ public class TimelineQuery {
         }
     }
 
+    public JSONObject delete(long id) throws Exception {
+        synchronized (this) {
+            if (deleting) {
+                throw new Exception("Already deleting another set of images");
+            }
+            deleting = true;
+        }
+
+        try {
+            // Delete file with media store
+            Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                // Delete with media store
+                Uri uri = ContentUris.withAppendedId(collection, id);
+                PendingIntent intent = MediaStore.createTrashRequest(mCtx.getContentResolver(), Collections.singletonList(uri), true);
+                deleteIntentLauncher.launch(new IntentSenderRequest.Builder(intent.getIntentSender()).build());
+
+                // Wait for response
+                synchronized (deleteIntentLauncher) {
+                    deleteIntentLauncher.wait();
+                }
+
+                // Throw if canceled or failed
+                if (deleteResult.getResultCode() != Activity.RESULT_OK) {
+                    throw new Exception("Delete canceled or failed");
+                }
+            } else {
+                // Delete with media store
+                Uri uri = ContentUris.withAppendedId(collection, id);
+                mCtx.getContentResolver().delete(uri, null, null);
+            }
+
+            return new JSONObject().put("message", "ok");
+        } finally {
+            synchronized (this) {
+                deleting = false;
+            }
+        }
+    }
+
     protected void fullSyncDb() {
         Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
@@ -332,5 +392,8 @@ public class TimelineQuery {
                 Log.v(TAG, "Inserted file to local DB: " + id + " / " + name + " / " + dayId);
             }
         }
+
+        // Clean up stale files
+        mDb.execSQL("DELETE FROM images WHERE flag = 1");
     }
 }
