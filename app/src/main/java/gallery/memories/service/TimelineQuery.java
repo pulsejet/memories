@@ -293,7 +293,6 @@ public class TimelineQuery {
             }
 
             // Delete file with media store
-            Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 PendingIntent intent = MediaStore.createTrashRequest(mCtx.getContentResolver(), uris, true);
                 deleteIntentLauncher.launch(new IntentSenderRequest.Builder(intent.getIntentSender()).build());
@@ -312,6 +311,9 @@ public class TimelineQuery {
                     mCtx.getContentResolver().delete(uri, null, null);
                 }
             }
+
+            // Delete from images table
+            mDb.execSQL("DELETE FROM images WHERE local_id IN (" + TextUtils.join(",", ids) + ")");
 
             return new JSONObject().put("message", "ok");
         } finally {
