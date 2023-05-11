@@ -390,6 +390,7 @@ div.img-outer {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     user-select: none;
+    -webkit-user-select: none;
     pointer-events: none;
     transition: border-radius 0.1s ease-in, transform 0.3s ease-in-out;
 

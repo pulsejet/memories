@@ -335,6 +335,7 @@ export default defineComponent({
   .field {
     width: 4.1em;
     display: inline-block;
+    max-width: calc(20% - 4px);
   }
 
   :deep label {

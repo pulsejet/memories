@@ -75,6 +75,11 @@ globalThis.videoClientId = getClientId();
 globalThis.videoClientIdPersistent = localStorage.getItem('videoClientIdPersistent') ?? getClientId();
 localStorage.setItem('videoClientIdPersistent', globalThis.videoClientIdPersistent);
 
+// Turn on virtual keyboard support
+if ('virtualKeyboard' in navigator) {
+  (<any>navigator.virtualKeyboard).overlaysContent = true;
+}
+
 Vue.mixin(GlobalMixin as any);
 Vue.use(VueVirtualScroller);
 Vue.component('XImg', XImg);

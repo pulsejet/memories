@@ -53,12 +53,13 @@ export default defineComponent({
     display: flex;
 
     > .name {
-      font-size: 18px;
+      font-size: 1.1em;
       flex-grow: 1;
     }
 
     > .action {
       :deep a {
+        font-size: 0.9em;
         color: var(--color-primary);
       }
     }

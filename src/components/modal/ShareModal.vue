@@ -252,5 +252,9 @@ ul.options {
   :deep .avatar {
     padding: 0 0.5em;
   }
+
+  @media (max-width: 512px) {
+    font-size: 0.9em;
+  }
 }
 </style>

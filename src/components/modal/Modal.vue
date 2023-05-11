@@ -141,11 +141,25 @@ export default defineComponent({
 }
 
 @media (max-width: 512px) {
-  .memories-modal:deep .modal-wrapper > .modal-container {
-    max-height: calc(100% - var(--header-height));
-    height: unset;
-    top: unset;
-    bottom: 0;
+  .memories-modal:deep {
+    .modal-header {
+      display: none !important;
+    }
+
+    .modal-wrapper > .modal-container {
+      max-height: calc(99% - env(keyboard-inset-height, 0px));
+      height: unset;
+      top: unset;
+      bottom: env(keyboard-inset-height, 0px);
+
+      // Hide scrollbar
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      &::-webkit-scrollbar {
+        display: none;
+        width: 0 !important;
+      }
+    }
   }
 }
 </style>

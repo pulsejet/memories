@@ -1272,6 +1272,7 @@ export default defineComponent({
   width: 100%;
   overflow: hidden;
   user-select: none;
+  -webkit-user-select: none; // iOS Safari is a horrible browser
   position: relative;
 }
 

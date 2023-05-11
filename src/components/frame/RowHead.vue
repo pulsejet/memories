@@ -74,6 +74,8 @@ export default defineComponent({
   padding-top: 10px;
   padding-left: 3px;
   font-size: 0.9em;
+  user-select: none;
+  -webkit-user-select: none;
 
   > div {
     position: relative;

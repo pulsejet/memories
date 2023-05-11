@@ -176,6 +176,7 @@ export default defineComponent({
 .explore-outer {
   height: 100%;
   overflow: auto;
+  padding-top: 8px;
 
   .link-list {
     padding: 8px 10px;
