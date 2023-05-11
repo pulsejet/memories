@@ -1,5 +1,6 @@
 <template>
   <NcModal
+    class="memories-modal"
     :size="size"
     :outTransition="true"
     :style="{ width: isSidebarShown ? `calc(100% - ${sidebarWidth}px)` : null }"
@@ -138,16 +139,13 @@ export default defineComponent({
     }
   }
 }
-</style>
 
-<style lang="scss">
-// Patch the NcModal to have dynamic height on mobile
 @media (max-width: 512px) {
-  .modal-wrapper .modal-container {
-    max-height: calc(100% - var(--header-height)) !important;
-    height: unset !important;
-    top: unset !important;
-    bottom: 0 !important;
+  .memories-modal:deep .modal-wrapper > .modal-container {
+    max-height: calc(100% - var(--header-height));
+    height: unset;
+    top: unset;
+    bottom: 0;
   }
 }
 </style>
