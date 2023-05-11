@@ -17,6 +17,7 @@ export const API = {
 
   SHARE_URL: (url: string) => `${BASE_URL}/api/share/url/${euc(euc(url))}`,
   SHARE_BLOB: (url: string) => `${BASE_URL}/api/share/blob/${euc(euc(url))}`,
+  SHARE_LOCAL: (fileId: number) => `${BASE_URL}/api/share/local/${fileId}`,
 };
 
 /**
@@ -79,7 +80,17 @@ export async function shareUrl(url: string) {
  * Download a blob from the given URL and share it.
  */
 export async function shareBlobFromUrl(url: string) {
+  if (url.startsWith(BASE_URL)) {
+    throw new Error('Cannot share localhost URL');
+  }
   await axios.get(API.SHARE_BLOB(addOrigin(url)));
+}
+
+/**
+ * Share a local file with native page.
+ */
+export async function shareLocal(fileId: number) {
+  await axios.get(API.SHARE_LOCAL(fileId));
 }
 
 /**

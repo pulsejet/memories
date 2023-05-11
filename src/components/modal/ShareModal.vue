@@ -10,7 +10,7 @@
 
     <ul class="options" v-else>
       <NcListItem
-        v-if="canShareNative && !isVideo"
+        v-if="canShareNative && !isVideo && !isLocal"
         :title="t('memories', 'Reduced Size')"
         :bold="false"
         @click.prevent="sharePreview()"
@@ -127,11 +127,15 @@ export default defineComponent({
     },
 
     canShareHighRes() {
-      return !this.isVideo || !this.config.vod_disable;
+      return !this.isLocal && (!this.isVideo || !this.config.vod_disable);
     },
 
     canShareLink() {
       return this.photo?.imageInfo?.permissions?.includes('S');
+    },
+
+    isLocal() {
+      return Boolean((this.photo?.flag ?? 0) & this.c.FLAG_IS_LOCAL);
     },
   },
 
@@ -161,6 +165,9 @@ export default defineComponent({
     },
 
     async shareOriginal() {
+      if (this.isLocal) {
+        return this.l(async () => await nativex.shareLocal(this.photo!.fileid));
+      }
       this.shareWithHref(dav.getDownloadLink(this.photo!));
     },
 
