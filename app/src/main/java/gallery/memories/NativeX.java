@@ -2,10 +2,7 @@ package gallery.memories;
 
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 
-import android.app.DownloadManager;
-import android.content.Context;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
@@ -19,26 +16,30 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.collection.ArrayMap;
 
 import java.io.ByteArrayInputStream;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import gallery.memories.service.DownloadService;
 import gallery.memories.service.ImageService;
 import gallery.memories.service.TimelineQuery;
 
 public class NativeX {
     public static final String TAG = "NativeX";
-    AppCompatActivity mActivity;
-    WebView mWebView;
+    protected final AppCompatActivity mActivity;
+    protected final WebView mWebView;
 
-    protected ImageService mImageService;
-    protected TimelineQuery mQuery;
+    protected final ImageService mImageService;
+    protected final TimelineQuery mQuery;
+    public static DownloadService mDlService;
 
     public NativeX(AppCompatActivity activity, WebView webView) {
         mActivity = activity;
         mWebView = webView;
         mImageService = new ImageService(activity);
         mQuery = new TimelineQuery(activity);
+        mDlService = new DownloadService(activity);
     }
 
     public WebResourceResponse handleRequest(final WebResourceRequest request) {
@@ -91,20 +92,7 @@ public class NativeX {
 
     @JavascriptInterface
     public void downloadFromUrl(final String url, final String filename) {
-        Uri uri = Uri.parse(url);
-        DownloadManager manager = (DownloadManager) mActivity.getSystemService(Context.DOWNLOAD_SERVICE);
-        DownloadManager.Request request = new DownloadManager.Request(uri);
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
-
-        // Copy all cookies from the webview to the download request
-        String cookies = android.webkit.CookieManager.getInstance().getCookie(url);
-        request.addRequestHeader("cookie", cookies);
-
-        // Save the file to external storage
-        request.setDestinationInExternalPublicDir(android.os.Environment.DIRECTORY_DOWNLOADS, "memories/" + filename);
-
-        // Start the download
-        manager.enqueue(request);
+        mDlService.queue(url, filename);
     }
 
     protected WebResourceResponse routerGet(final String path) throws Exception {
@@ -122,6 +110,10 @@ public class NativeX {
             return makeResponse(mQuery.getDays());
         } else if (path.matches("/api/days/\\d+$")) {
             return makeResponse(mQuery.getByDayId(Long.parseLong(parts[3])));
+        } else if (path.matches("/api/share/url/.+$")) {
+            return makeResponse(mDlService.shareUrl(URLDecoder.decode(parts[4], "UTF-8")));
+        } else if (path.matches("/api/share/blob/.+$")) {
+            return makeResponse(mDlService.shareBlobFromUrl(URLDecoder.decode(parts[4], "UTF-8")));
         }
 
         throw new Exception("Not Found");
