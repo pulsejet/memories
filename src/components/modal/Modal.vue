@@ -139,3 +139,15 @@ export default defineComponent({
   }
 }
 </style>
+
+<style lang="scss">
+// Patch the NcModal to have dynamic height on mobile
+@media (max-width: 512px) {
+  .modal-wrapper .modal-container {
+    max-height: calc(100% - var(--header-height)) !important;
+    height: unset !important;
+    top: unset !important;
+    bottom: 0 !important;
+  }
+}
+</style>
