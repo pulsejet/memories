@@ -1,6 +1,5 @@
 import { API } from '../../services/API';
 import { workerImporter } from '../../worker';
-import * as nativex from '../../native';
 import type * as w from './XImgWorker';
 
 // Global web worker to fetch images
