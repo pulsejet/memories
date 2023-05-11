@@ -28,7 +28,7 @@ export function downloadWithHandle(handle: string) {
   const url = API.DOWNLOAD_FILE(handle);
 
   // Hand off to download manager (absolute URL)
-  if (nativex.has()) return nativex.downloadFromUrl(window.location.origin + url);
+  if (nativex.has()) return nativex.downloadFromUrl(url);
 
   // Fallback to browser download
   window.location.href = url;

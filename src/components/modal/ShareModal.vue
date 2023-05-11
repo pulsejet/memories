@@ -81,6 +81,7 @@ import { IPhoto } from '../../types';
 import { API } from '../../services/API';
 import * as dav from '../../services/DavRequests';
 import * as utils from '../../services/Utils';
+import * as nativex from '../../native';
 
 import PhotoIcon from 'vue-material-design-icons/Image.vue';
 import LargePhotoIcon from 'vue-material-design-icons/ImageArea.vue';
@@ -121,7 +122,7 @@ export default defineComponent({
     },
 
     canShareNative() {
-      return 'share' in navigator;
+      return 'share' in navigator || nativex.has();
     },
 
     canShareHighRes() {
@@ -170,7 +171,14 @@ export default defineComponent({
       this.close();
     },
 
+    /**
+     * Download a file and then share the blob.
+     */
     async shareWithHref(href: string, replaceExt = false) {
+      if (nativex.has()) {
+        return await this.l(async () => nativex.shareBlobFromUrl(href));
+      }
+
       let blob: Blob | undefined;
       await this.l(async () => {
         const res = await axios.get(href, { responseType: 'blob' });

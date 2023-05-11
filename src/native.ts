@@ -4,6 +4,8 @@ import { constants } from './services/Utils';
 
 const BASE_URL = 'http://127.0.0.1';
 
+const euc = encodeURIComponent;
+
 export const API = {
   DAYS: () => `${BASE_URL}/api/days`,
   DAY: (dayId: number) => `${BASE_URL}/api/days/${dayId}`,
@@ -12,6 +14,9 @@ export const API = {
 
   IMAGE_PREVIEW: (fileId: number) => `${BASE_URL}/image/preview/${fileId}`,
   IMAGE_FULL: (fileId: number) => `${BASE_URL}/image/full/${fileId}`,
+
+  SHARE_URL: (url: string) => `${BASE_URL}/api/share/url/${euc(euc(url))}`,
+  SHARE_BLOB: (url: string) => `${BASE_URL}/api/share/blob/${euc(euc(url))}`,
 };
 
 /**
@@ -29,12 +34,14 @@ const nativex: NativeX = globalThis.nativex;
 /**
  * @returns Whether the native interface is available.
  */
-export const has = () => !!nativex;
+export function has() {
+  return !!nativex;
+}
 
 /**
  * Change the theme color of the app to default.
  */
-export const setTheme = (color?: string, dark?: boolean) => {
+export async function setTheme(color?: string, dark?: boolean) {
   if (!has()) return;
 
   color ??= getComputedStyle(document.body).getPropertyValue('--color-main-background');
@@ -43,12 +50,12 @@ export const setTheme = (color?: string, dark?: boolean) => {
     document.body.hasAttribute('data-theme-dark') ||
     document.body.hasAttribute('data-theme-dark-highcontrast');
   nativex?.setThemeColor?.(color, dark);
-};
+}
 
 /**
  * Download a file from the given URL.
  */
-export const downloadFromUrl = async (url: string) => {
+export async function downloadFromUrl(url: string) {
   // Make HEAD request to get filename
   const res = await axios.head(url);
   let filename = res.headers['content-disposition'];
@@ -58,8 +65,22 @@ export const downloadFromUrl = async (url: string) => {
   filename = filename.split('filename="')[1].slice(0, -1);
 
   // Hand off to download manager
-  nativex?.downloadFromUrl?.(url, filename);
-};
+  nativex?.downloadFromUrl?.(addOrigin(url), filename);
+}
+
+/**
+ * Share a URL with native page.
+ */
+export async function shareUrl(url: string) {
+  await axios.get(API.SHARE_URL(addOrigin(url)));
+}
+
+/**
+ * Download a blob from the given URL and share it.
+ */
+export async function shareBlobFromUrl(url: string) {
+  await axios.get(API.SHARE_BLOB(addOrigin(url)));
+}
 
 /**
  * Extend a list of days with local days.
@@ -131,4 +152,15 @@ export async function deleteLocalPhotos(photos: IPhoto[]): Promise<IPhoto[]> {
   }
 
   return localPhotos;
+}
+
+/**
+ * Add current origin to URL if doesn't have any protocol or origin.
+ */
+function addOrigin(url: string) {
+  return url.match(/^(https?:)?\/\//)
+    ? url
+    : url.startsWith('/')
+    ? `${location.origin}${url}`
+    : `${location.origin}/${url}`;
 }

@@ -69,10 +69,11 @@ import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
-import * as utils from '../../services/Utils';
 import Modal from './Modal.vue';
 
 import { API } from '../../services/API';
+import * as utils from '../../services/Utils';
+import * as nativex from '../../native';
 
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 import LinkIcon from 'vue-material-design-icons/LinkVariant.vue';
@@ -140,7 +141,9 @@ export default defineComponent({
           this.shares.find((s) => !s.hasPassword) || (this.shares.length === 0 ? await this.createLink(false) : null);
 
         if (share) {
-          if ('share' in window.navigator) {
+          if (nativex.has()) {
+            nativex.shareUrl(share.url);
+          } else if ('share' in window.navigator) {
             window.navigator.share({
               title: this.filename,
               url: share.url,
