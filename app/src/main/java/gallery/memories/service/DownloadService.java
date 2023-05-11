@@ -1,7 +1,6 @@
 package gallery.memories.service;
 
 import android.app.DownloadManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -99,9 +98,6 @@ public class DownloadService {
             throw new Exception("Failed to download file");
         }
         Uri uri = Uri.parse(sUri);
-
-        // Get MIME type
-        ContentResolver cR = mActivity.getContentResolver();
 
         // Create sharing intent
         Intent intent = new Intent(Intent.ACTION_SEND);
