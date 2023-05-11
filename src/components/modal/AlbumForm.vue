@@ -268,6 +268,7 @@ export default defineComponent({
   .form-buttons {
     display: flex;
     justify-content: space-between;
+    flex-direction: column;
     .left-buttons,
     .right-buttons {
       display: flex;
