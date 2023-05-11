@@ -523,6 +523,7 @@ export default defineComponent({
         this.show = false;
         this.isOpen = false;
         this.fullyOpened = false;
+        this.editorOpen = false;
         this.photoswipe = null;
         this.list = [];
         this.days.clear();
