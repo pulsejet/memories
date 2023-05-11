@@ -113,6 +113,7 @@ export default defineComponent({
   created() {
     globalThis.sharePhoto = (photo: IPhoto) => {
       this.photo = photo;
+      this.loading = 0;
     };
   },
 
