@@ -114,6 +114,8 @@ public class NativeX {
             return makeResponse(mDlService.shareUrl(URLDecoder.decode(parts[4], "UTF-8")));
         } else if (path.matches("/api/share/blob/.+$")) {
             return makeResponse(mDlService.shareBlobFromUrl(URLDecoder.decode(parts[4], "UTF-8")));
+        } else if (path.matches("/api/share/local/\\d+$")) {
+            return makeResponse(mDlService.shareLocal(Long.parseLong(parts[4])));
         }
 
         throw new Exception("Not Found");
