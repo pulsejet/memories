@@ -24,6 +24,8 @@
         {{ t('photos', 'Save') }}
       </NcButton>
     </AlbumCollaborators>
+
+    <XLoadingIcon class="album-share fill-block" v-else />
   </Modal>
 </template>
 
@@ -85,3 +87,9 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.album-share.loading-icon {
+  height: 350px;
+}
+</style>
