@@ -6,6 +6,7 @@ import android.content.ContentUris;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.icu.text.SimpleDateFormat;
+import android.icu.util.TimeZone;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
@@ -27,6 +28,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +57,7 @@ public class TimelineQuery {
         fullSyncDb();
     }
 
-    public JSONArray getByDayId(final long dayId) {
+    public JSONArray getByDayId(final long dayId) throws JSONException {
         // Get list of images from DB
         final Set<Long> imageIds = new ArraySet<>();
         final Map<Long, Long> datesTaken = new HashMap<>();
@@ -76,20 +78,6 @@ public class TimelineQuery {
             return new JSONArray();
         }
 
-        // All external storage images
-        Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-
-        // Same fields as server response
-        String[] projection = new String[] {
-            MediaStore.Images.Media._ID,
-            MediaStore.Images.Media.DISPLAY_NAME,
-            MediaStore.Images.Media.MIME_TYPE,
-            MediaStore.Images.Media.HEIGHT,
-            MediaStore.Images.Media.WIDTH,
-            MediaStore.Images.Media.SIZE,
-            MediaStore.Images.Media.DATE_MODIFIED,
-        };
-
         // Filter for given day
         String selection = MediaStore.Images.Media._ID
                 + " IN (" + TextUtils.join(",", imageIds) + ")";
@@ -97,49 +85,73 @@ public class TimelineQuery {
         // Make list of files
         ArrayList<JSONObject> files = new ArrayList<>();
 
+        // Add all images
         try (Cursor cursor = mCtx.getContentResolver().query(
-            collection,
-            projection,
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            new String[] {
+                MediaStore.Images.Media._ID,
+                MediaStore.Images.Media.DISPLAY_NAME,
+                MediaStore.Images.Media.MIME_TYPE,
+                MediaStore.Images.Media.HEIGHT,
+                MediaStore.Images.Media.WIDTH,
+                MediaStore.Images.Media.SIZE,
+                MediaStore.Images.Media.DATE_MODIFIED,
+            },
             selection,
             null,
             null
         )) {
-            int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
-            int nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
-            int mimeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE);
-            int heightColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT);
-            int widthColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH);
-            int sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE);
-            int dateModifiedColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_MODIFIED);
-
             while (cursor.moveToNext()) {
-                long id = cursor.getLong(idColumn);
-                String name = cursor.getString(nameColumn);
-                String mime = cursor.getString(mimeColumn);
-                long height = cursor.getLong(heightColumn);
-                long width = cursor.getLong(widthColumn);
-                long size = cursor.getLong(sizeColumn);
-                long dateTaken = datesTaken.get(id);
-                Long dateModified = cursor.getLong(dateModifiedColumn);
+                long fileId = cursor.getLong(0);
+                imageIds.remove(fileId);
 
+                files.add(new JSONObject()
+                    .put(Fields.Photo.FILEID, fileId)
+                    .put(Fields.Photo.BASENAME, cursor.getString(1))
+                    .put(Fields.Photo.MIMETYPE, cursor.getString(2))
+                    .put(Fields.Photo.HEIGHT, cursor.getLong(3))
+                    .put(Fields.Photo.WIDTH, cursor.getLong(4))
+                    .put(Fields.Photo.SIZE, cursor.getLong(5))
+                    .put(Fields.Photo.ETAG, Long.toString(cursor.getLong(6)))
+                    .put(Fields.Photo.DATETAKEN, datesTaken.get(fileId))
+                    .put(Fields.Photo.DAYID, dayId));
+            }
+        }
+
+        // Add all videos
+        try (Cursor cursor = mCtx.getContentResolver().query(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            new String[] {
+                MediaStore.Video.Media._ID,
+                MediaStore.Video.Media.DISPLAY_NAME,
+                MediaStore.Video.Media.MIME_TYPE,
+                MediaStore.Video.Media.HEIGHT,
+                MediaStore.Video.Media.WIDTH,
+                MediaStore.Video.Media.SIZE,
+                MediaStore.Video.Media.DATE_MODIFIED,
+                MediaStore.Video.Media.DURATION,
+            },
+            selection,
+            null,
+            null
+        )) {
+            while (cursor.moveToNext()) {
                 // Remove from list of ids
-                imageIds.remove(id);
+                long fileId = cursor.getLong(0);
+                imageIds.remove(fileId);
 
-                try {
-                    JSONObject file = new JSONObject()
-                        .put("fileid", id)
-                        .put("basename", name)
-                        .put("mimetype", mime)
-                        .put("dayid", dayId)
-                        .put("datetaken", dateTaken)
-                        .put("h", height)
-                        .put("w", width)
-                        .put("size", size)
-                        .put("etag", dateModified.toString());
-                    files.add(file);
-                } catch (JSONException e) {
-                    Log.e(TAG, "JSON error");
-                }
+                files.add(new JSONObject()
+                    .put(Fields.Photo.FILEID, fileId)
+                    .put(Fields.Photo.BASENAME, cursor.getString(1))
+                    .put(Fields.Photo.MIMETYPE, cursor.getString(2))
+                    .put(Fields.Photo.HEIGHT, cursor.getLong(3))
+                    .put(Fields.Photo.WIDTH, cursor.getLong(4))
+                    .put(Fields.Photo.SIZE, cursor.getLong(5))
+                    .put(Fields.Photo.ETAG, Long.toString(cursor.getLong(6)))
+                    .put(Fields.Photo.DATETAKEN, datesTaken.get(fileId))
+                    .put(Fields.Photo.DAYID, dayId)
+                    .put(Fields.Photo.ISVIDEO, 1)
+                    .put(Fields.Photo.VIDEO_DURATION, cursor.getLong(7) / 1000));
             }
         }
 
@@ -175,10 +187,9 @@ public class TimelineQuery {
     }
 
     public JSONObject getImageInfo(final long id) throws Exception {
-        // Get image info from DB
         try (Cursor cursor = mDb.rawQuery(
-            "SELECT local_id, date_taken, dayid FROM images WHERE local_id = ?",
-            new String[] { Long.toString(id) }
+                "SELECT local_id, date_taken, dayid FROM images WHERE local_id = ?",
+                new String[] { Long.toString(id) }
         )) {
             if (!cursor.moveToNext()) {
                 throw new Exception("Image not found");
@@ -186,13 +197,36 @@ public class TimelineQuery {
 
             final long localId = cursor.getLong(0);
             final long dateTaken = cursor.getLong(1);
-            final long dayid = cursor.getLong(2);
+            final long dayId = cursor.getLong(2);
 
-            // All external storage images
-            Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            try {
+                return _getImageInfoForCollection(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        localId, dateTaken, dayId
+                );
+            } catch (Exception e) {/* Ignore */}
 
-            // Same fields as server response
-            String[] projection = new String[] {
+            try {
+                return _getImageInfoForCollection(
+                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                        localId, dateTaken, dayId
+                );
+            } catch (Exception e) {/* Ignore */}
+        }
+
+        throw new Exception("File not found in any collection");
+    }
+
+    public JSONObject _getImageInfoForCollection(
+        final Uri collection,
+        final long localId,
+        final long dateTaken,
+        final long dayId
+    ) throws Exception {
+        String selection = MediaStore.Images.Media._ID + " = " + localId;
+        try (Cursor cursor = mCtx.getContentResolver().query(
+            collection,
+            new String[] {
                 MediaStore.Images.Media._ID,
                 MediaStore.Images.Media.DISPLAY_NAME,
                 MediaStore.Images.Media.MIME_TYPE,
@@ -200,80 +234,57 @@ public class TimelineQuery {
                 MediaStore.Images.Media.WIDTH,
                 MediaStore.Images.Media.SIZE,
                 MediaStore.Images.Media.DATA,
-            };
-
-            // Filter for given day
-            String selection = MediaStore.Images.Media._ID
-                    + " = " + localId;
-
-            try (Cursor cursor2 = mCtx.getContentResolver().query(
-                collection,
-                projection,
-                selection,
-                null,
-                null
-            )) {
-                int idColumn = cursor2.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
-                int nameColumn = cursor2.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
-                int mimeColumn = cursor2.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE);
-                int heightColumn = cursor2.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT);
-                int widthColumn = cursor2.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH);
-                int sizeColumn = cursor2.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE);
-                int dataColumn = cursor2.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-
-                if (!cursor2.moveToNext()) {
-                    throw new Exception("Image not found");
-                }
-
-                long id2 = cursor2.getLong(idColumn);
-                String name = cursor2.getString(nameColumn);
-                String mime = cursor2.getString(mimeColumn);
-                long height = cursor2.getLong(heightColumn);
-                long width = cursor2.getLong(widthColumn);
-                long size = cursor2.getLong(sizeColumn);
-                String data = cursor2.getString(dataColumn);
-
-                JSONObject obj = new JSONObject()
-                    .put("fileid", id2)
-                    .put("basename", name)
-                    .put("mimetype", mime)
-                    .put("dayid", dayid)
-                    .put("datetaken", dateTaken)
-                    .put("h", height)
-                    .put("w", width)
-                    .put("size", size)
-                    .put("permissions", "D");
-
-                // Get EXIF data
-                try {
-                    ExifInterface exif = new ExifInterface(data);
-                    JSONObject exifObj = new JSONObject();
-                    exifObj.put("Aperture", exif.getAttribute(ExifInterface.TAG_APERTURE_VALUE));
-                    exifObj.put("FocalLength", exif.getAttribute(ExifInterface.TAG_FOCAL_LENGTH));
-                    exifObj.put("FNumber", exif.getAttribute(ExifInterface.TAG_F_NUMBER));
-                    exifObj.put("ShutterSpeed", exif.getAttribute(ExifInterface.TAG_SHUTTER_SPEED_VALUE));
-                    exifObj.put("ExposureTime", exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME));
-                    exifObj.put("ISO", exif.getAttribute(ExifInterface.TAG_ISO_SPEED));
-
-                    exifObj.put("DateTimeOriginal", exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL));
-                    exifObj.put("OffsetTimeOriginal", exif.getAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL));
-                    exifObj.put("GPSLatitude", exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
-                    exifObj.put("GPSLongitude", exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE));
-                    exifObj.put("GPSAltitude", exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE));
-
-                    exifObj.put("Make", exif.getAttribute(ExifInterface.TAG_MAKE));
-                    exifObj.put("Model", exif.getAttribute(ExifInterface.TAG_MODEL));
-
-                    exifObj.put("Orientation", exif.getAttribute(ExifInterface.TAG_ORIENTATION));
-                    exifObj.put("Description", exif.getAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION));
-
-                    obj.put("exif", exifObj);
-                } catch (IOException e) {
-                    Log.e(TAG, "Error reading EXIF data for " + data);
-                }
-
-                return obj;
+            },
+            selection,
+            null,
+            null
+        )) {
+            if (!cursor.moveToNext()) {
+                throw new Exception("Image not found");
             }
+
+            JSONObject obj = new JSONObject()
+                .put(Fields.Photo.FILEID, cursor.getLong(0))
+                .put(Fields.Photo.BASENAME, cursor.getString(1))
+                .put(Fields.Photo.MIMETYPE, cursor.getString(2))
+                .put(Fields.Photo.DAYID, dayId)
+                .put(Fields.Photo.DATETAKEN, dateTaken)
+                .put(Fields.Photo.HEIGHT, cursor.getLong(3))
+                .put(Fields.Photo.WIDTH, cursor.getLong(4))
+                .put(Fields.Photo.SIZE, cursor.getLong(5))
+                .put(Fields.Photo.PERMISSIONS, Fields.Perm.DELETE);
+
+            String uri = cursor.getString(6);
+
+            // Get EXIF data
+            try {
+                ExifInterface exif = new ExifInterface(uri);
+                JSONObject exifObj = new JSONObject();
+                exifObj.put("Aperture", exif.getAttribute(ExifInterface.TAG_APERTURE_VALUE));
+                exifObj.put("FocalLength", exif.getAttribute(ExifInterface.TAG_FOCAL_LENGTH));
+                exifObj.put("FNumber", exif.getAttribute(ExifInterface.TAG_F_NUMBER));
+                exifObj.put("ShutterSpeed", exif.getAttribute(ExifInterface.TAG_SHUTTER_SPEED_VALUE));
+                exifObj.put("ExposureTime", exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME));
+                exifObj.put("ISO", exif.getAttribute(ExifInterface.TAG_ISO_SPEED));
+
+                exifObj.put("DateTimeOriginal", exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL));
+                exifObj.put("OffsetTimeOriginal", exif.getAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL));
+                exifObj.put("GPSLatitude", exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
+                exifObj.put("GPSLongitude", exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE));
+                exifObj.put("GPSAltitude", exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE));
+
+                exifObj.put("Make", exif.getAttribute(ExifInterface.TAG_MAKE));
+                exifObj.put("Model", exif.getAttribute(ExifInterface.TAG_MODEL));
+
+                exifObj.put("Orientation", exif.getAttribute(ExifInterface.TAG_ORIENTATION));
+                exifObj.put("Description", exif.getAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION));
+
+                obj.put(Fields.Photo.EXIF, exifObj);
+            } catch (IOException e) {
+                Log.e(TAG, "Error reading EXIF data for " + uri);
+            }
+
+            return obj;
         }
     }
 
@@ -324,82 +335,117 @@ public class TimelineQuery {
     }
 
     protected void fullSyncDb() {
-        Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-
         // Flag all images for removal
         mDb.execSQL("UPDATE images SET flag = 1");
 
-        // Same fields as server response
-        String[] projection = new String[] {
-            MediaStore.Images.Media._ID,
-            MediaStore.Images.Media.DATA,
-            MediaStore.Images.Media.DISPLAY_NAME,
-            MediaStore.Images.Media.DATE_TAKEN,
-            MediaStore.Images.Media.DATE_MODIFIED,
-        };
-
+        // Add all images
         try (Cursor cursor = mCtx.getContentResolver().query(
-            collection,
-            projection,
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            new String[] {
+                MediaStore.Images.Media._ID,
+                MediaStore.Images.Media.DISPLAY_NAME,
+                MediaStore.Images.Media.DATE_TAKEN,
+                MediaStore.Images.Media.DATE_MODIFIED,
+                MediaStore.Images.Media.DATA,
+            },
             null,
             null,
             null
         )) {
-            int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
-            int uriColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            int nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
-            int dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN);
-            int mtimeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_MODIFIED);
-
             while (cursor.moveToNext()) {
-                long id = cursor.getLong(idColumn);
-                String name = cursor.getString(nameColumn);
-                long dateTaken = cursor.getLong(dateColumn);
-                long mtime = cursor.getLong(mtimeColumn);
-
-                // Check if file with local_id and mtime already exists
-                try (Cursor c = mDb.rawQuery("SELECT id FROM images WHERE local_id = ?",
-                        new String[]{Long.toString(id)})) {
-                    if (c.getCount() > 0) {
-                        // File already exists, remove flag
-                        mDb.execSQL("UPDATE images SET flag = 0 WHERE local_id = ?", new Object[]{id});
-
-                        Log.v(TAG, "File already exists: " + id + " / " + name);
-                        continue;
-                    }
-                }
-
-                // Get EXIF date using ExifInterface
-                String uri = cursor.getString(uriColumn);
-                try {
-                    ExifInterface exif = new ExifInterface(uri);
-                    String exifDate = exif.getAttribute(ExifInterface.TAG_DATETIME);
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
-                    sdf.setTimeZone(android.icu.util.TimeZone.GMT_ZONE);
-                    dateTaken = sdf.parse(exifDate).getTime();
-                } catch (IOException e) {
-                    Log.e(TAG, "Failed to read EXIF data: " + e.getMessage());
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-
-                // This will use whatever is available
-                dateTaken /= 1000;
-                final long dayId = dateTaken / 86400;
-
-                // Delete file with same local_id and insert new one
-                mDb.beginTransaction();
-                mDb.execSQL("DELETE FROM images WHERE local_id = ?", new Object[] { id });
-                mDb.execSQL("INSERT OR IGNORE INTO images (local_id, mtime, basename, date_taken, dayid) VALUES (?, ?, ?, ?, ?)",
-                    new Object[] { id, mtime, name, dateTaken, dayId });
-                mDb.setTransactionSuccessful();
-                mDb.endTransaction();
-
-                Log.v(TAG, "Inserted file to local DB: " + id + " / " + name + " / " + dayId);
+                insertItemDb(
+                    cursor.getLong(0),
+                    cursor.getString(1),
+                    cursor.getLong(2),
+                    cursor.getLong(3),
+                    cursor.getString(4),
+                    false
+                );
             }
         }
 
+        // Add all videos
+        try (Cursor cursor = mCtx.getContentResolver().query(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            new String[] {
+                MediaStore.Video.Media._ID,
+                MediaStore.Video.Media.DISPLAY_NAME,
+                MediaStore.Video.Media.DATE_TAKEN,
+                MediaStore.Video.Media.DATE_MODIFIED,
+                MediaStore.Video.Media.DATA,
+            },
+            null,
+            null,
+            null
+        )) {
+            while (cursor.moveToNext()) {
+                insertItemDb(
+                    cursor.getLong(0),
+                    cursor.getString(1),
+                    cursor.getLong(2),
+                    cursor.getLong(3),
+                    cursor.getString(4),
+                    true
+                );
+            }
+        }
+
+
         // Clean up stale files
         mDb.execSQL("DELETE FROM images WHERE flag = 1");
+    }
+
+    protected void insertItemDb(long id, String name, long dateTaken, long mtime, String uri, boolean isVideo) {
+        // Check if file with local_id and mtime already exists
+        try (Cursor c = mDb.rawQuery("SELECT id FROM images WHERE local_id = ?",
+                new String[]{Long.toString(id)})) {
+            if (c.getCount() > 0) {
+                // File already exists, remove flag
+                mDb.execSQL("UPDATE images SET flag = 0 WHERE local_id = ?", new Object[]{id});
+
+                Log.v(TAG, "File already exists: " + id + " / " + name);
+                return;
+            }
+        }
+
+        // Get EXIF date using ExifInterface if image
+        if (!isVideo) {
+            try {
+                ExifInterface exif = new ExifInterface(uri);
+                String exifDate = exif.getAttribute(ExifInterface.TAG_DATETIME);
+                if (exifDate == null) {
+                    throw new IOException();
+                }
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+                sdf.setTimeZone(android.icu.util.TimeZone.GMT_ZONE);
+                Date date = sdf.parse(exifDate);
+                if (date != null) {
+                    dateTaken = date.getTime();
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Failed to read EXIF data: " + e.getMessage());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (isVideo) {
+            // No way to get the actual local date, so just assume current timezone
+            dateTaken += TimeZone.getDefault().getOffset(dateTaken);
+        }
+
+        // This will use whatever is available
+        dateTaken /= 1000;
+        final long dayId = dateTaken / 86400;
+
+        // Delete file with same local_id and insert new one
+        mDb.beginTransaction();
+        mDb.execSQL("DELETE FROM images WHERE local_id = ?", new Object[] { id });
+        mDb.execSQL("INSERT OR IGNORE INTO images (local_id, mtime, basename, date_taken, dayid) VALUES (?, ?, ?, ?, ?)",
+                new Object[] { id, mtime, name, dateTaken, dayId });
+        mDb.setTransactionSuccessful();
+        mDb.endTransaction();
+
+        Log.v(TAG, "Inserted file to local DB: " + id + " / " + name + " / " + dayId);
     }
 }

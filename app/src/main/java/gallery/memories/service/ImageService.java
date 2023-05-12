@@ -16,7 +16,12 @@ public class ImageService {
 
     public byte[] getPreview(final long id) throws Exception {
         Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(
-            mCtx.getContentResolver(), id, MediaStore.Images.Thumbnails.MINI_KIND, null);
+            mCtx.getContentResolver(), id, MediaStore.Images.Thumbnails.FULL_SCREEN_KIND, null);
+
+        if (bitmap == null) {
+            bitmap = MediaStore.Video.Thumbnails.getThumbnail(
+                mCtx.getContentResolver(), id, MediaStore.Video.Thumbnails.FULL_SCREEN_KIND, null);
+        }
 
         if (bitmap == null) {
             throw new Exception("Thumbnail not found");
