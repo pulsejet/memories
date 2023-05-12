@@ -1,0 +1,35 @@
+package gallery.memories.service
+
+import android.content.ContentUris
+import android.content.Context
+import android.graphics.Bitmap
+import android.provider.MediaStore
+import java.io.ByteArrayOutputStream
+
+class ImageService(private val mCtx: Context) {
+    @Throws(Exception::class)
+    fun getPreview(id: Long): ByteArray {
+        val bitmap =
+            MediaStore.Images.Thumbnails.getThumbnail(
+                mCtx.contentResolver, id, MediaStore.Images.Thumbnails.FULL_SCREEN_KIND, null)
+            ?: MediaStore.Video.Thumbnails.getThumbnail(
+                mCtx.contentResolver, id, MediaStore.Video.Thumbnails.FULL_SCREEN_KIND, null)
+            ?: throw Exception("Thumbnail not found")
+
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+        return stream.toByteArray()
+    }
+
+    @Throws(Exception::class)
+    fun getFull(id: Long): ByteArray {
+        val bitmap = MediaStore.Images.Media.getBitmap(
+                mCtx.contentResolver, ContentUris.withAppendedId(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id))
+                ?: throw Exception("Image not found")
+
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+        return stream.toByteArray()
+    }
+}

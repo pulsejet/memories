@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.ArrayMap
 import java.util.concurrent.CountDownLatch
 
-class DownloadService(val mActivity: AppCompatActivity) {
+class DownloadService(private val mActivity: AppCompatActivity) {
     private val mDownloads: MutableMap<Long, () -> Unit> = ArrayMap()
 
     fun runDownloadCallback(intent: Intent) {
