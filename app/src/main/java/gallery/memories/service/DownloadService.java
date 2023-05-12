@@ -111,7 +111,7 @@ public class DownloadService {
     }
 
     public Boolean shareLocal(final long id) throws Exception {
-        Uri uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+        Uri uri = ContentUris.withAppendedId(MediaStore.Files.getContentUri("external"), id);
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.setType(mActivity.getContentResolver().getType(uri));
