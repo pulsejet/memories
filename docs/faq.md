@@ -56,6 +56,11 @@ UX and performance. The devil is in the details.
 
 Make sure you follow the [configuration steps](../config). Unless you have hundreds of thousands of photos on a Raspberry Pi, Memories should be very fast. File an issue otherwise.
 
+**It says "nothing to show here" on startup?**
+
+Indexing is performed in the background, and can take a while depending on the number of photos. Follow
+the [configuration steps](../config) and be patient.
+
 **Will it run on my system?**
 
 In general, if you can run Nextcloud, you should be able to run Memories. File an issue if you run into problems.
