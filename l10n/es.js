@@ -399,6 +399,7 @@ OC.L10N.register(
     "General Failure" : "Fallo general",
     "Error: {msg}" : "Error: {msg}",
     "Failed to delete files." : "Fallo al eliminar archivos.",
+    "Failed to delete local files." : "Fallo al eliminar los archivos locales.",
     "Failed to delete {fileName}." : "Fallo al eliminar {fileName}.",
     "Failed to move files." : "Error al mover archivos.",
     "Could not move {fileName}, target exists." : "No fue posible mover {fileName}, el destino existe.",
