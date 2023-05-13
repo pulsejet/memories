@@ -399,6 +399,7 @@ OC.L10N.register(
     "General Failure" : "Општа грешка",
     "Error: {msg}" : "Грешка: {msg}",
     "Failed to delete files." : "Фајлови нису могли да се обришу.",
+    "Failed to delete local files." : "Није успело брисање локалних фајлова.",
     "Failed to delete {fileName}." : "Није успело брисање {fileName}.",
     "Failed to move files." : "Фајло ви нису могли да се преместе.",
     "Could not move {fileName}, target exists." : "Не може да се премести {fileName}, циљ већ постоји.",
