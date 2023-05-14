@@ -266,6 +266,11 @@ class VideoContentSetup {
 
   destroyVideo(content: VideoContent) {
     if (isVideoContent(content)) {
+      // Destroy exoplayer
+      if (nativex.has()) {
+        nativex.destroyVideo(content.data.photo.fileid);
+      }
+
       // Destroy videojs
       content.videojs?.pause?.();
       content.videojs?.dispose?.();

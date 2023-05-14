@@ -28,6 +28,7 @@ export type NativeX = {
   setThemeColor: (color: string, isDark: boolean) => void;
   downloadFromUrl: (url: string, filename: string) => void;
   playVideoLocal: (fileid: string) => void;
+  destroyVideo: (fileid: string) => void;
 };
 
 /** The native interface is a global object that is injected by the native app. */
@@ -75,6 +76,13 @@ export async function downloadFromUrl(url: string) {
  */
 export async function playVideoLocal(fileId: number) {
   nativex?.playVideoLocal?.(fileId.toString());
+}
+
+/**
+ * Destroy the video player.
+ */
+export async function destroyVideo(fileId: number) {
+  nativex?.destroyVideo?.(fileId.toString());
 }
 
 /**
