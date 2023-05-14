@@ -275,7 +275,11 @@ class VideoContentSetup {
     if (isVideoContent(content)) {
       // Destroy exoplayer
       if (nativex.has()) {
-        nativex.destroyVideo(content.data.photo.fileid);
+        // Add a timeout in case another video initializes
+        // immediately after this one is destroyed
+        setTimeout(() => {
+          nativex.destroyVideo(content.data.photo.fileid);
+        }, 500);
       }
 
       // Destroy videojs

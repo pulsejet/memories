@@ -196,6 +196,7 @@ import LivePhotoIcon from 'vue-material-design-icons/MotionPlayOutline.vue';
 const SLIDESHOW_MS = 5000;
 const BODY_HAS_VIEWER = 'has-viewer';
 const BODY_VIEWER_VIDEO = 'viewer-video';
+const BODY_VIEWER_FULLY_OPENED = 'viewer-fully-opened';
 
 export default defineComponent({
   name: 'Viewer',
@@ -359,6 +360,12 @@ export default defineComponent({
     /** Show share button */
     canShare(): boolean {
       return Boolean(this.currentPhoto);
+    },
+  },
+
+  watch: {
+    fullyOpened(val) {
+      document.body.classList.toggle(BODY_VIEWER_FULLY_OPENED, val);
     },
   },
 

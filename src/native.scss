@@ -17,7 +17,7 @@ html.native {
     background: transparent !important;
   }
 
-  body.has-viewer.viewer-video {
+  body.viewer-fully-opened.viewer-video {
     // Hide main content
     #app-content-vue {
       visibility: hidden;
