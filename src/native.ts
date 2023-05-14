@@ -27,6 +27,7 @@ export type NativeX = {
   isNative: () => boolean;
   setThemeColor: (color: string, isDark: boolean) => void;
   downloadFromUrl: (url: string, filename: string) => void;
+  playVideoLocal: (fileid: string) => void;
 };
 
 /** The native interface is a global object that is injected by the native app. */
@@ -67,6 +68,13 @@ export async function downloadFromUrl(url: string) {
 
   // Hand off to download manager
   nativex?.downloadFromUrl?.(addOrigin(url), filename);
+}
+
+/**
+ * Play a video from the given file ID (local file).
+ */
+export async function playVideoLocal(fileId: number) {
+  nativex?.playVideoLocal?.(fileId.toString());
 }
 
 /**

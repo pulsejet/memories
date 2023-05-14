@@ -7,18 +7,6 @@ body {
   }
 }
 
-// Native app styles
-html.native {
-  #content-vue {
-    margin-top: 0 !important;
-    height: 100vh !important;
-  }
-
-  #header {
-    display: none !important;
-  }
-}
-
 // Nextcloud 25+: get rid of gap and border radius at right
 #content-vue.remove-gap {
   // was var(--body-container-radius)

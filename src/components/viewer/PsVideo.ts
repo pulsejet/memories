@@ -1,5 +1,8 @@
 import PhotoSwipe from 'photoswipe';
 import staticConfig from '../../services/static-config';
+import * as nativex from '../../native';
+import * as utils from '../../services/Utils';
+
 import { showError } from '@nextcloud/dialogs';
 import { translate as t } from '@nextcloud/l10n';
 import { getCurrentUser } from '@nextcloud/auth';
@@ -124,6 +127,14 @@ class VideoContentSetup {
   async initVideo(content: VideoContent) {
     if (!isVideoContent(content) || content.videojs) {
       return;
+    }
+
+    // Hand off to native player if available
+    if (nativex.has()) {
+      if (content.data.photo.flag & utils.constants.c.FLAG_IS_LOCAL) {
+        nativex.playVideoLocal(content.data.photo.fileid);
+        return;
+      }
     }
 
     // Prevent double loading

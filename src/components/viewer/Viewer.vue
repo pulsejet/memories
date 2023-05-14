@@ -194,6 +194,8 @@ import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
 import LivePhotoIcon from 'vue-material-design-icons/MotionPlayOutline.vue';
 
 const SLIDESHOW_MS = 5000;
+const BODY_HAS_VIEWER = 'has-viewer';
+const BODY_VIEWER_VIDEO = 'viewer-video';
 
 export default defineComponent({
   name: 'Viewer',
@@ -502,9 +504,8 @@ export default defineComponent({
 
       // Put viewer over everything else
       const navElem = document.getElementById('app-navigation-vue');
-      const klass = 'has-viewer';
       this.photoswipe.on('beforeOpen', () => {
-        document.body.classList.add(klass);
+        document.body.classList.add(BODY_HAS_VIEWER);
         if (navElem) navElem.style.zIndex = '0';
       });
       this.photoswipe.on('openingAnimationStart', () => {
@@ -526,9 +527,10 @@ export default defineComponent({
         this.setRouteHash(undefined);
         this.updateTitle(undefined);
         nativex.setTheme(); // reset
+        document.body.classList.remove(BODY_VIEWER_VIDEO);
       });
       this.photoswipe.on('destroy', () => {
-        document.body.classList.remove(klass);
+        document.body.classList.remove(BODY_HAS_VIEWER);
         if (navElem) navElem.style.zIndex = '';
 
         // reset everything
@@ -726,6 +728,9 @@ export default defineComponent({
         // Remove active class from others and add to this one
         photoswipe.element?.querySelectorAll('.pswp__item').forEach((el) => el.classList.remove('active'));
         e.slide.holderElement?.classList.add('active');
+
+        // Add type class to body
+        document.body.classList.toggle(BODY_VIEWER_VIDEO, !!(e.slide.data?.photo?.flag & this.c.FLAG_IS_VIDEO));
       });
 
       photoswipe.init();

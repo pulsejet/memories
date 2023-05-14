@@ -1,0 +1,36 @@
+// Native app styles
+html.native {
+  // Fill up space
+  #content-vue {
+    margin-top: 0 !important;
+    height: 100vh !important;
+  }
+
+  // Native app has no header
+  #header {
+    display: none !important;
+  }
+
+  // Pass through to the element below
+  &,
+  body {
+    background: transparent !important;
+  }
+
+  body.has-viewer.viewer-video {
+    // Hide main content
+    #app-content-vue {
+      visibility: hidden;
+    }
+
+    // Hide the background to be transparent for ExoPlayer
+    .pswp__bg {
+      display: none;
+    }
+
+    // Hide the active slide
+    .pswp__item.active {
+      display: none !important;
+    }
+  }
+}

@@ -17,6 +17,7 @@ import type PlyrType from 'plyr';
 import type videojsType from 'video.js';
 
 import './global.scss';
+import './native.scss';
 
 // Global exposed variables
 declare global {
