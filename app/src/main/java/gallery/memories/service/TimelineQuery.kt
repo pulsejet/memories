@@ -47,7 +47,7 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
     @Throws(JSONException::class)
     fun getByDayId(dayId: Long): JSONArray {
         // Get list of images from DB
-        val imageIds: MutableSet<Long?> = ArraySet()
+        val imageIds: MutableSet<Long> = ArraySet()
         val datesTaken: MutableMap<Long, Long> = HashMap()
         val sql = "SELECT local_id, date_taken FROM images WHERE dayid = ?"
         mDb.rawQuery(sql, arrayOf(dayId.toString())).use { cursor ->
@@ -62,75 +62,26 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
         if (imageIds.size == 0) return JSONArray()
 
         // Filter for given day
-        val idColName = MediaStore.Images.Media._ID
-        val imageIdsSl = TextUtils.join(",", imageIds)
-        val selection = "$idColName IN ($imageIdsSl)"
+        val photos = JSONArray()
+        SystemImage.getByIds(mCtx, imageIds.toMutableList()).forEach { image ->
+            val obj = JSONObject()
+                .put(Fields.Photo.FILEID, image.fileId)
+                .put(Fields.Photo.BASENAME, image.baseName)
+                .put(Fields.Photo.MIMETYPE, image.mimeType)
+                .put(Fields.Photo.HEIGHT, image.height)
+                .put(Fields.Photo.WIDTH, image.width)
+                .put(Fields.Photo.SIZE, image.size)
+                .put(Fields.Photo.ETAG, image.mtime.toString())
+                .put(Fields.Photo.DATETAKEN, datesTaken[image.fileId])
+                .put(Fields.Photo.DAYID, dayId)
 
-        // Make list of files
-        val files = ArrayList<JSONObject?>()
-        mCtx.contentResolver.query(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            arrayOf(
-                MediaStore.Images.Media._ID,
-                MediaStore.Images.Media.DISPLAY_NAME,
-                MediaStore.Images.Media.MIME_TYPE,
-                MediaStore.Images.Media.HEIGHT,
-                MediaStore.Images.Media.WIDTH,
-                MediaStore.Images.Media.SIZE,
-                MediaStore.Images.Media.DATE_MODIFIED
-            ),
-            selection,
-            null,
-            null
-        ).use { cursor ->
-            while (cursor?.moveToNext() == true) {
-                val fileId = cursor.getLong(0)
-                imageIds.remove(fileId)
-                files.add(JSONObject()
-                    .put(Fields.Photo.FILEID, fileId)
-                    .put(Fields.Photo.BASENAME, cursor.getString(1))
-                    .put(Fields.Photo.MIMETYPE, cursor.getString(2))
-                    .put(Fields.Photo.HEIGHT, cursor.getLong(3))
-                    .put(Fields.Photo.WIDTH, cursor.getLong(4))
-                    .put(Fields.Photo.SIZE, cursor.getLong(5))
-                    .put(Fields.Photo.ETAG, java.lang.Long.toString(cursor.getLong(6)))
-                    .put(Fields.Photo.DATETAKEN, datesTaken[fileId])
-                    .put(Fields.Photo.DAYID, dayId))
+            if (image.isVideo) {
+                obj.put(Fields.Photo.ISVIDEO, 1)
+                    .put(Fields.Photo.VIDEO_DURATION, image.videoDuration / 1000)
             }
-        }
-        mCtx.contentResolver.query(
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-            arrayOf(
-                MediaStore.Video.Media._ID,
-                MediaStore.Video.Media.DISPLAY_NAME,
-                MediaStore.Video.Media.MIME_TYPE,
-                MediaStore.Video.Media.HEIGHT,
-                MediaStore.Video.Media.WIDTH,
-                MediaStore.Video.Media.SIZE,
-                MediaStore.Video.Media.DATE_MODIFIED,
-                MediaStore.Video.Media.DURATION
-            ),
-            selection,
-            null,
-            null
-        ).use { cursor ->
-            while (cursor?.moveToNext() == true) {
-                // Remove from list of ids
-                val fileId = cursor.getLong(0)
-                imageIds.remove(fileId)
-                files.add(JSONObject()
-                    .put(Fields.Photo.FILEID, fileId)
-                    .put(Fields.Photo.BASENAME, cursor.getString(1))
-                    .put(Fields.Photo.MIMETYPE, cursor.getString(2))
-                    .put(Fields.Photo.HEIGHT, cursor.getLong(3))
-                    .put(Fields.Photo.WIDTH, cursor.getLong(4))
-                    .put(Fields.Photo.SIZE, cursor.getLong(5))
-                    .put(Fields.Photo.ETAG, java.lang.Long.toString(cursor.getLong(6)))
-                    .put(Fields.Photo.DATETAKEN, datesTaken[fileId])
-                    .put(Fields.Photo.DAYID, dayId)
-                    .put(Fields.Photo.ISVIDEO, 1)
-                    .put(Fields.Photo.VIDEO_DURATION, cursor.getLong(7) / 1000))
-            }
+
+            photos.put(obj)
+            imageIds.remove(image.fileId)
         }
 
         // Remove files that were not found
@@ -139,8 +90,7 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
             mDb.execSQL("DELETE FROM images WHERE local_id IN ($delIds)")
         }
 
-        // Return JSON string of files
-        return JSONArray(files)
+        return photos
     }
 
     @Throws(JSONException::class)
@@ -151,11 +101,9 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
         ).use { cursor ->
             val days = JSONArray()
             while (cursor.moveToNext()) {
-                val id = cursor.getLong(0)
-                val count = cursor.getLong(1)
                 days.put(JSONObject()
-                    .put("dayid", id)
-                    .put("count", count)
+                    .put(Fields.Day.DAYID, cursor.getLong(0))
+                    .put(Fields.Day.COUNT, cursor.getLong(1))
                 )
             }
             return days
@@ -269,69 +217,22 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
     private fun fullSyncDb() {
         // Flag all images for removal
         mDb.execSQL("UPDATE images SET flag = 1")
-        mCtx.contentResolver.query(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            arrayOf(
-                MediaStore.Images.Media._ID,
-                MediaStore.Images.Media.DISPLAY_NAME,
-                MediaStore.Images.Media.DATE_TAKEN,
-                MediaStore.Images.Media.DATE_MODIFIED,
-                MediaStore.Images.Media.DATA
-            ),
-            null,
-            null,
-            null
-        ).use { cursor ->
-            while (cursor!!.moveToNext()) {
-                insertItemDb(
-                    cursor.getLong(0),
-                    cursor.getString(1),
-                    cursor.getLong(2),
-                    cursor.getLong(3),
-                    cursor.getString(4),
-                    false
-                )
-            }
-        }
-        mCtx.contentResolver.query(
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-            arrayOf(
-                MediaStore.Video.Media._ID,
-                MediaStore.Video.Media.DISPLAY_NAME,
-                MediaStore.Video.Media.DATE_TAKEN,
-                MediaStore.Video.Media.DATE_MODIFIED,
-                MediaStore.Video.Media.DATA
-            ),
-            null,
-            null,
-            null
-        ).use { cursor ->
-            while (cursor!!.moveToNext()) {
-                insertItemDb(
-                    cursor.getLong(0),
-                    cursor.getString(1),
-                    cursor.getLong(2),
-                    cursor.getLong(3),
-                    cursor.getString(4),
-                    true
-                )
-            }
-        }
+
+        // Iterate all images and videos from system store
+        val files =
+            SystemImage.query(mCtx, SystemImage.IMAGE_URI, null, null, null) +
+            SystemImage.query(mCtx, SystemImage.VIDEO_URI, null, null, null)
+        files.forEach { insertItemDb(it) }
 
         // Clean up stale files
         mDb.execSQL("DELETE FROM images WHERE flag = 1")
     }
 
     @SuppressLint("SimpleDateFormat")
-    private fun insertItemDb(
-            id: Long,
-            name: String,
-            dateTaken: Long,
-            mtime: Long,
-            uri: String,
-            isVideo: Boolean,
-    ) {
-        var dateTaken = dateTaken
+    private fun insertItemDb(image: SystemImage) {
+        var dateTaken = image.dateTaken
+        val id = image.fileId
+        val name = image.baseName
 
         // Check if file with local_id and mtime already exists
         mDb.rawQuery("SELECT id FROM images WHERE local_id = ?", arrayOf(id.toString())).use { c ->
@@ -344,9 +245,9 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
         }
 
         // Get EXIF date using ExifInterface if image
-        if (!isVideo) {
+        if (!image.isVideo) {
             try {
-                val exif = ExifInterface(uri)
+                val exif = ExifInterface(image.dataPath)
                 val exifDate = exif.getAttribute(ExifInterface.TAG_DATETIME)
                     ?: throw IOException()
                 val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
@@ -361,7 +262,7 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
         }
 
         // No way to get the actual local date, so just assume current timezone
-        if (isVideo) {
+        else { // !isVideo
             dateTaken += TimeZone.getDefault().getOffset(dateTaken).toLong()
         }
 
@@ -372,7 +273,9 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
         // Delete file with same local_id and insert new one
         mDb.beginTransaction()
         mDb.execSQL("DELETE FROM images WHERE local_id = ?", arrayOf(id))
-        mDb.execSQL("INSERT OR IGNORE INTO images (local_id, mtime, basename, date_taken, dayid) VALUES (?, ?, ?, ?, ?)", arrayOf(id, mtime, name, dateTaken, dayId))
+        mDb.execSQL("INSERT OR IGNORE INTO images (local_id, mtime, basename, date_taken, dayid) VALUES (?, ?, ?, ?, ?)", arrayOf(
+            id, image.mtime, name, dateTaken, dayId
+        ))
         mDb.setTransactionSuccessful()
         mDb.endTransaction()
         Log.v(TAG, "Inserted file to local DB: $id / $name / $dayId")

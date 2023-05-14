@@ -1,6 +1,11 @@
 package gallery.memories.service
 
 class Fields {
+    object Day {
+        const val DAYID = Photo.DAYID
+        const val COUNT = "count"
+    }
+
     object Photo {
         const val FILEID = "fileid"
         const val BASENAME = "basename"

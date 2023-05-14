@@ -4,7 +4,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteOpenHelper
 import android.database.sqlite.SQLiteDatabase
 
-class DbService(context: Context) : SQLiteOpenHelper(context, "memories", null, 25) {
+class DbService(context: Context) : SQLiteOpenHelper(context, "memories", null, 26) {
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("""
             CREATE TABLE images (
