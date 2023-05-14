@@ -1,4 +1,4 @@
-package gallery.memories.service
+package gallery.memories.mapper
 
 class Fields {
     object Day {

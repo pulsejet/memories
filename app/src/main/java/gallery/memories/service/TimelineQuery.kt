@@ -16,6 +16,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.ArraySet
 import androidx.exifinterface.media.ExifInterface
+import gallery.memories.mapper.Fields
 import gallery.memories.mapper.SystemImage
 import org.json.JSONArray
 import org.json.JSONException
@@ -142,7 +143,8 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
 
             try {
                 val exif = ExifInterface(image.dataPath)
-                obj.put(Fields.Photo.EXIF, JSONObject()
+                obj.put(
+                    Fields.Photo.EXIF, JSONObject()
                     .put("Aperture", exif.getAttribute(ExifInterface.TAG_APERTURE_VALUE))
                     .put("FocalLength", exif.getAttribute(ExifInterface.TAG_FOCAL_LENGTH))
                     .put("FNumber", exif.getAttribute(ExifInterface.TAG_F_NUMBER))

@@ -42,9 +42,6 @@ class NativeX(private val mActivity: AppCompatActivity) {
 
     companion object {
         lateinit var mDlService: DownloadService
-        fun getDlService(): DownloadService {
-            return mDlService;
-        }
     }
 
     fun handleRequest(request: WebResourceRequest): WebResourceResponse {
