@@ -2,11 +2,9 @@ package gallery.memories.service
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ContentUris
 import android.database.sqlite.SQLiteDatabase
 import android.icu.text.SimpleDateFormat
 import android.icu.util.TimeZone
-import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.text.TextUtils
@@ -18,6 +16,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.ArraySet
 import androidx.exifinterface.media.ExifInterface
+import gallery.memories.mapper.SystemImage
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -165,68 +164,36 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
 
     @Throws(Exception::class)
     fun getImageInfo(id: Long): JSONObject {
-        val sql = "SELECT local_id, date_taken, dayid FROM images WHERE local_id = ?"
+        val sql = "SELECT dayid, date_taken FROM images WHERE local_id = ?"
         mDb.rawQuery(sql, arrayOf(id.toString())).use { cursor ->
             if (!cursor.moveToNext()) {
                 throw Exception("Image not found")
             }
 
-            val localId = cursor.getLong(0)
-            val dateTaken = cursor.getLong(1)
-            val dayId = cursor.getLong(2)
-
-            return getImageInfoForCollection(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                localId, dateTaken, dayId)
-            ?: return getImageInfoForCollection(
-                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                localId, dateTaken, dayId)
-            ?: throw Exception("File not found in any collection")
-        }
-    }
-
-    private fun getImageInfoForCollection(
-            collection: Uri,
-            localId: Long,
-            dateTaken: Long,
-            dayId: Long
-    ): JSONObject? {
-        val selection = MediaStore.Images.Media._ID + " = " + localId
-        mCtx.contentResolver.query(
-            collection,
-            arrayOf(
-                MediaStore.Images.Media._ID,
-                MediaStore.Images.Media.DISPLAY_NAME,
-                MediaStore.Images.Media.MIME_TYPE,
-                MediaStore.Images.Media.HEIGHT,
-                MediaStore.Images.Media.WIDTH,
-                MediaStore.Images.Media.SIZE,
-                MediaStore.Images.Media.DATA
-            ),
-            selection,
-            null,
-            null
-        ).use { cursor ->
-            if (!cursor!!.moveToNext()) {
-                throw Exception("Image not found")
+            // Get image from system table
+            val imageList = SystemImage.getByIds(mCtx, arrayListOf(id))
+            if (imageList.isEmpty()) {
+                throw Exception("File not found in any collection")
             }
 
-            // Create basic info
+            // Add EXIF to json object
+            val image = imageList[0];
+            val dayId = cursor.getLong(0)
+            val dateTaken = cursor.getLong(1)
+
             val obj = JSONObject()
-                .put(Fields.Photo.FILEID, cursor.getLong(0))
-                .put(Fields.Photo.BASENAME, cursor.getString(1))
-                .put(Fields.Photo.MIMETYPE, cursor.getString(2))
+                .put(Fields.Photo.FILEID, image.fileId)
+                .put(Fields.Photo.BASENAME, image.baseName)
+                .put(Fields.Photo.MIMETYPE, image.mimeType)
                 .put(Fields.Photo.DAYID, dayId)
                 .put(Fields.Photo.DATETAKEN, dateTaken)
-                .put(Fields.Photo.HEIGHT, cursor.getLong(3))
-                .put(Fields.Photo.WIDTH, cursor.getLong(4))
-                .put(Fields.Photo.SIZE, cursor.getLong(5))
+                .put(Fields.Photo.HEIGHT, image.height)
+                .put(Fields.Photo.WIDTH, image.width)
+                .put(Fields.Photo.SIZE, image.size)
                 .put(Fields.Photo.PERMISSIONS, Fields.Perm.DELETE)
-            val uri = cursor.getString(6)
 
-            // Get EXIF data
             try {
-                val exif = ExifInterface(uri)
+                val exif = ExifInterface(image.dataPath)
                 obj.put(Fields.Photo.EXIF, JSONObject()
                     .put("Aperture", exif.getAttribute(ExifInterface.TAG_APERTURE_VALUE))
                     .put("FocalLength", exif.getAttribute(ExifInterface.TAG_FOCAL_LENGTH))
@@ -245,7 +212,7 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
                     .put("Description", exif.getAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION))
                 )
             } catch (e: IOException) {
-                Log.e(TAG, "Error reading EXIF data for $uri")
+                Log.e(TAG, "Error reading EXIF data for $id")
             }
 
             return obj
@@ -263,9 +230,7 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
 
         return try {
             // List of URIs
-            val uris = ids.map {
-                ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, it)
-            }
+            val uris = SystemImage.getByIds(mCtx, ids).map { it.uri }
 
             // Delete file with media store
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -301,7 +266,7 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
         }
     }
 
-    protected fun fullSyncDb() {
+    private fun fullSyncDb() {
         // Flag all images for removal
         mDb.execSQL("UPDATE images SET flag = 1")
         mCtx.contentResolver.query(
@@ -381,7 +346,7 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
         // Get EXIF date using ExifInterface if image
         if (!isVideo) {
             try {
-                val exif = ExifInterface(uri!!)
+                val exif = ExifInterface(uri)
                 val exifDate = exif.getAttribute(ExifInterface.TAG_DATETIME)
                     ?: throw IOException()
                 val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss")

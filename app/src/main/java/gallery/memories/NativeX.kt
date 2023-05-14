@@ -48,14 +48,19 @@ class NativeX(private val mActivity: AppCompatActivity) {
     }
 
     fun handleRequest(request: WebResourceRequest): WebResourceResponse {
-        val path = request.url.path
-        val response: WebResourceResponse = try {
-            if (request.method == "GET") {
-                routerGet(path)
-            } else if (request.method == "OPTIONS") {
-                WebResourceResponse("text/plain", "UTF-8", ByteArrayInputStream("".toByteArray()))
-            } else {
-                throw Exception("Method Not Allowed")
+        val path = request.url.path ?: return makeErrorResponse()
+
+        val response = try {
+            when (request.method) {
+                "GET" -> {
+                    routerGet(path)
+                }
+                "OPTIONS" -> {
+                    WebResourceResponse("text/plain", "UTF-8", ByteArrayInputStream("".toByteArray()))
+                }
+                else -> {
+                    throw Exception("Method Not Allowed")
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "handleRequest: ", e)
@@ -89,12 +94,13 @@ class NativeX(private val mActivity: AppCompatActivity) {
 
     @JavascriptInterface
     fun downloadFromUrl(url: String?, filename: String?) {
-        mDlService.queue(url!!, filename!!)
+        if (url == null || filename == null) return;
+        mDlService.queue(url, filename)
     }
 
     @Throws(Exception::class)
-    private fun routerGet(path: String?): WebResourceResponse {
-        val parts = path!!.split("/").toTypedArray()
+    private fun routerGet(path: String): WebResourceResponse {
+        val parts = path.split("/").toTypedArray()
         if (path.matches(API.IMAGE_PREVIEW)) {
             return makeResponse(mImageService.getPreview(parts[3].toLong()), "image/jpeg")
         } else if (path.matches(API.IMAGE_FULL)) {
