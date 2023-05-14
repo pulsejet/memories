@@ -47,6 +47,7 @@ class SystemImage {
                 MediaStore.Images.Media.HEIGHT,
                 MediaStore.Images.Media.WIDTH,
                 MediaStore.Images.Media.SIZE,
+                MediaStore.Images.Media.ORIENTATION,
                 MediaStore.Images.Media.DATE_TAKEN,
                 MediaStore.Images.Media.DATE_MODIFIED,
                 MediaStore.Images.Media.DATA
@@ -56,6 +57,18 @@ class SystemImage {
             if (collection == VIDEO_URI) {
                 projection.add(MediaStore.Video.Media.DURATION)
             }
+
+            // Get column indices
+            val idColumn = projection.indexOf(MediaStore.Images.Media._ID)
+            val nameColumn = projection.indexOf(MediaStore.Images.Media.DISPLAY_NAME)
+            val mimeColumn = projection.indexOf(MediaStore.Images.Media.MIME_TYPE)
+            val heightColumn = projection.indexOf(MediaStore.Images.Media.HEIGHT)
+            val widthColumn = projection.indexOf(MediaStore.Images.Media.WIDTH)
+            val sizeColumn = projection.indexOf(MediaStore.Images.Media.SIZE)
+            val orientationColumn = projection.indexOf(MediaStore.Images.Media.ORIENTATION)
+            val dateTakenColumn = projection.indexOf(MediaStore.Images.Media.DATE_TAKEN)
+            val dateModifiedColumn = projection.indexOf(MediaStore.Images.Media.DATE_MODIFIED)
+            val dataColumn = projection.indexOf(MediaStore.Images.Media.DATA)
 
             // Query content resolver
             ctx.contentResolver.query(
@@ -69,21 +82,28 @@ class SystemImage {
                     val image = SystemImage()
 
                     // Common fields
-                    image.fileId = cursor.getLong(0)
-                    image.baseName = cursor.getString(1)
-                    image.mimeType = cursor.getString(2)
-                    image.height = cursor.getLong(3)
-                    image.width = cursor.getLong(4)
-                    image.size = cursor.getLong(5)
-                    image.dateTaken = cursor.getLong(6)
-                    image.mtime = cursor.getLong(7)
-                    image.dataPath = cursor.getString(8)
+                    image.fileId = cursor.getLong(idColumn)
+                    image.baseName = cursor.getString(nameColumn)
+                    image.mimeType = cursor.getString(mimeColumn)
+                    image.height = cursor.getLong(heightColumn)
+                    image.width = cursor.getLong(widthColumn)
+                    image.size = cursor.getLong(sizeColumn)
+                    image.dateTaken = cursor.getLong(dateTakenColumn)
+                    image.mtime = cursor.getLong(dateModifiedColumn)
+                    image.dataPath = cursor.getString(dataColumn)
                     image.mCollection = collection
+
+                    // Swap width/height if orientation is 90 or 270
+                    val orientation = cursor.getInt(orientationColumn)
+                    if (orientation == 90 || orientation == 270) {
+                        image.width = image.height.also { image.height = image.width }
+                    }
 
                     // Video specific fields
                     image.isVideo = collection == VIDEO_URI
                     if (image.isVideo) {
-                        image.videoDuration = cursor.getLong(9)
+                        val durationColumn = projection.indexOf(MediaStore.Video.Media.DURATION)
+                        image.videoDuration = cursor.getLong(durationColumn)
                     }
 
                     // Add to main list

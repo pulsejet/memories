@@ -84,14 +84,17 @@ import java.net.URLDecoder
 
     @JavascriptInterface
     fun setThemeColor(color: String?, isDark: Boolean) {
-        val window = mActivity.window
-        mActivity.setTheme(if (isDark) R.style.Theme_Black else R.style.Theme_Light)
-        window.navigationBarColor = Color.parseColor(color)
-        window.statusBarColor = Color.parseColor(color)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.insetsController?.setSystemBarsAppearance(if (isDark) 0 else WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS, WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS)
-        } else {
-            window.decorView.systemUiVisibility = if (isDark) 0 else View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        mActivity.runOnUiThread {
+            val window = mActivity.window
+            mActivity.setTheme(if (isDark) R.style.Theme_Black else R.style.Theme_Light)
+            window.navigationBarColor = Color.parseColor(color)
+            window.statusBarColor = Color.parseColor(color)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val appearance = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+                window.insetsController?.setSystemBarsAppearance(if (isDark) 0 else appearance, appearance)
+            } else {
+                window.decorView.systemUiVisibility = if (isDark) 0 else View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            }
         }
     }
 

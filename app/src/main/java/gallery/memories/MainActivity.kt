@@ -1,6 +1,7 @@
 package gallery.memories
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -38,6 +39,11 @@ import gallery.memories.databinding.ActivityMainBinding
 
         // Load JavaScript
         initializeWebView()
+
+        // Destroy video after 1 seconds (workaround for video not showing on first load)
+        binding.videoView.postDelayed({
+            binding.videoView.visibility = View.GONE
+        }, 1000)
     }
 
     override fun onDestroy() {
@@ -99,8 +105,10 @@ import gallery.memories.databinding.ActivityMainBinding
         webSettings.userAgentString = "memories-native-android/0.0"
         binding.webview.clearCache(true)
         binding.webview.addJavascriptInterface(mNativeX, "nativex")
-        binding.webview.loadUrl("http://10.0.2.2:8035/index.php/apps/memories/")
-        binding.webview.setBackgroundColor(0x00000000)
+//        binding.webview.loadUrl("http://10.0.2.2:8035/index.php/apps/memories/")
+        binding.webview.loadUrl("https://uncanny-subdue.loca.lt/index.php/apps/memories/")
+        binding.webview.setBackgroundColor(Color.TRANSPARENT)
+        WebView.setWebContentsDebuggingEnabled(true);
     }
 
     fun initializePlayer(uri: Uri, uid: String) {
@@ -129,15 +137,19 @@ import gallery.memories.databinding.ActivityMainBinding
         player = ExoPlayer.Builder(this)
             .build()
             .also { exoPlayer ->
+                // Bind to player view
                 binding.videoView.player = exoPlayer
                 binding.videoView.visibility = View.VISIBLE
 
-                val hlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(mediaItem);
-                exoPlayer.addMediaSource(hlsMediaSource)
+                // Check if HLS source from URI (contains .m3u8 anywhere)
+                if (uri.toString().contains(".m3u8")) {
+                    exoPlayer.addMediaSource(HlsMediaSource.Factory(dataSourceFactory)
+                            .createMediaSource(mediaItem))
+                } else {
+                    exoPlayer.setMediaItems(listOf(mediaItem), mediaItemIndex, playbackPosition)
+                }
 
-//                val mediaItem = MediaItem.fromUri(uri)
-//                exoPlayer.setMediaItems(listOf(mediaItem), mediaItemIndex, playbackPosition)
+                // Start the player
                 exoPlayer.playWhenReady = playWhenReady
                 exoPlayer.prepare()
             }
