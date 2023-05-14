@@ -9,14 +9,15 @@ import android.view.WindowInsetsController
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
-import androidx.appcompat.app.AppCompatActivity
+import androidx.media3.common.util.UnstableApi
+import gallery.memories.mapper.SystemImage
 import gallery.memories.service.DownloadService
 import gallery.memories.service.ImageService
 import gallery.memories.service.TimelineQuery
 import java.io.ByteArrayInputStream
 import java.net.URLDecoder
 
-class NativeX(private val mActivity: AppCompatActivity) {
+@UnstableApi class NativeX(private val mActivity: MainActivity) {
     val TAG = "NativeX"
 
     private val mImageService: ImageService = ImageService(mActivity)
@@ -97,6 +98,31 @@ class NativeX(private val mActivity: AppCompatActivity) {
     fun downloadFromUrl(url: String?, filename: String?) {
         if (url == null || filename == null) return;
         mDlService!!.queue(url, filename)
+    }
+
+    @JavascriptInterface
+    fun playVideoLocal(fileId: String?) {
+        if (fileId == null) return;
+
+        Thread {
+            // Get URI of local video
+            val videos = SystemImage.getByIds(mActivity, arrayListOf(fileId.toLong()))
+            if (videos.isEmpty()) return@Thread
+            val video = videos[0]
+
+            // Play with exoplayer
+            mActivity.runOnUiThread {
+                mActivity.initializePlayer(video.uri, fileId)
+            }
+        }.start()
+    }
+
+    @JavascriptInterface
+    fun destroyVideo(fileId: String?) {
+        if (fileId == null) return;
+        mActivity.runOnUiThread {
+            mActivity.destroyPlayer(fileId)
+        }
     }
 
     @Throws(Exception::class)

@@ -1,21 +1,36 @@
 package gallery.memories
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
+import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.common.util.Util
+import androidx.media3.exoplayer.ExoPlayer
 import gallery.memories.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMainBinding
+@UnstableApi class MainActivity : AppCompatActivity() {
+    private val binding by lazy(LazyThreadSafetyMode.NONE) {
+        ActivityMainBinding.inflate(layoutInflater)
+    }
+
     private lateinit var mNativeX: NativeX
+
+    private var player: ExoPlayer? = null
+    private var playerUri: Uri? = null
+    private var playerUid: String? = null
+    private var playWhenReady = true
+    private var mediaItemIndex = 0
+    private var playbackPosition = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // Initialize services
@@ -25,8 +40,35 @@ class MainActivity : AppCompatActivity() {
         initializeWebView()
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
+    override fun onDestroy() {
+        super.onDestroy()
+        mNativeX.destroy()
+    }
+
+    public override fun onResume() {
+        super.onResume()
+        if (playerUri != null && (Util.SDK_INT <= 23 || player == null)) {
+            initializePlayer(playerUri!!, playerUid!!)
+        }
+    }
+
+    public override fun onPause() {
+        super.onPause()
+        if (Util.SDK_INT <= 23) {
+            releasePlayer()
+        }
+    }
+
+    public override fun onStop() {
+        super.onStop()
+        if (Util.SDK_INT > 23) {
+            releasePlayer()
+        }
+    }
+
+    @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
     private fun initializeWebView() {
+        // Intercept local APIs
         binding.webview.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 view.loadUrl(request.url.toString())
@@ -39,6 +81,15 @@ class MainActivity : AppCompatActivity() {
                 } else null
             }
         }
+
+        // Pass through touch events
+        binding.webview.setOnTouchListener { _, event ->
+            if (player != null) {
+                binding.videoView.dispatchTouchEvent(event)
+            }
+            false
+        }
+
         val webSettings = binding.webview.settings
         webSettings.javaScriptEnabled = true
         webSettings.javaScriptCanOpenWindowsAutomatically = true
@@ -49,11 +100,52 @@ class MainActivity : AppCompatActivity() {
         binding.webview.clearCache(true)
         binding.webview.addJavascriptInterface(mNativeX, "nativex")
         binding.webview.loadUrl("http://10.0.2.2:8035/index.php/apps/memories/")
+        binding.webview.setBackgroundColor(0x00000000)
     }
 
-    // Cleanup
-    override fun onDestroy() {
-        super.onDestroy()
-        mNativeX.destroy()
+    fun initializePlayer(uri: Uri, uid: String) {
+        if (player != null) {
+            if (playerUid.equals(uid)) return
+            player?.release()
+            player = null
+        }
+
+        playerUri = uri
+        playerUid = uid
+
+        player = ExoPlayer.Builder(this)
+            .build()
+            .also { exoPlayer ->
+                binding.videoView.player = exoPlayer
+                binding.videoView.visibility = View.VISIBLE
+                val mediaItem = MediaItem.fromUri(uri)
+                exoPlayer.setMediaItems(listOf(mediaItem), mediaItemIndex, playbackPosition)
+                exoPlayer.playWhenReady = playWhenReady
+                exoPlayer.prepare()
+            }
+    }
+
+    fun destroyPlayer(uid: String) {
+        if (playerUid.equals(uid)) {
+            releasePlayer()
+
+            // Reset vars
+            playWhenReady = true
+            mediaItemIndex = 0
+            playbackPosition = 0L
+            playerUri = null
+            playerUid = null
+        }
+    }
+
+    private fun releasePlayer() {
+        player?.let { exoPlayer ->
+            playbackPosition = exoPlayer.currentPosition
+            mediaItemIndex = exoPlayer.currentMediaItemIndex
+            playWhenReady = exoPlayer.playWhenReady
+            exoPlayer.release()
+        }
+        player = null
+        binding.videoView.visibility = View.GONE
     }
 }
