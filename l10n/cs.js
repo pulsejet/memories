@@ -366,6 +366,7 @@ OC.L10N.register(
     "General Failure" : "Obecný nezdar",
     "Error: {msg}" : "Chyba: {msg}",
     "Failed to delete files." : "Nepodařilo se smazat soubory.",
+    "Failed to delete local files." : "Nepodařilo se smazat místní soubory.",
     "Failed to delete {fileName}." : "Nepodařilo se smazat {fileName}.",
     "Failed to move files." : "Nepodařilo se přesunout soubory.",
     "Could not move {fileName}, target exists." : "Nepodařilo se přesunout {fileName} – v cíli už takto nazvaný existuje.",
