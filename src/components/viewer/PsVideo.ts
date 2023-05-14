@@ -131,10 +131,17 @@ class VideoContentSetup {
 
     // Hand off to native player if available
     if (nativex.has()) {
+      const fileid = content.data.photo.fileid;
+
+      // Local videos are played back directly
       if (content.data.photo.flag & utils.constants.c.FLAG_IS_LOCAL) {
-        nativex.playVideoLocal(content.data.photo.fileid);
+        nativex.playVideoLocal(fileid);
         return;
       }
+
+      // Default to HLS for remote videos
+      nativex.playVideoHls(fileid, this.getHLSsrc(content).src);
+      return;
     }
 
     // Prevent double loading

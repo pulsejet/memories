@@ -27,7 +27,9 @@ export type NativeX = {
   isNative: () => boolean;
   setThemeColor: (color: string, isDark: boolean) => void;
   downloadFromUrl: (url: string, filename: string) => void;
+
   playVideoLocal: (fileid: string) => void;
+  playVideoHls: (fileid: string, url: string) => void;
   destroyVideo: (fileid: string) => void;
 };
 
@@ -74,8 +76,15 @@ export async function downloadFromUrl(url: string) {
 /**
  * Play a video from the given file ID (local file).
  */
-export async function playVideoLocal(fileId: number) {
-  nativex?.playVideoLocal?.(fileId.toString());
+export async function playVideoLocal(fileid: number) {
+  nativex?.playVideoLocal?.(fileid.toString());
+}
+
+/**
+ * Play a video from the given URL (HLS stream).
+ */
+export async function playVideoHls(fileid: number, url: string) {
+  nativex?.playVideoHls?.(fileid.toString(), addOrigin(url));
 }
 
 /**
