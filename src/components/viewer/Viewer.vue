@@ -9,6 +9,9 @@
   >
     <ImageEditor v-if="editorOpen" :photo="currentPhoto" @close="editorOpen = false" />
 
+    <!-- Loading indicator -->
+    <XLoadingIcon class="loading-icon centered" v-if="loading" />
+
     <div
       class="inner"
       ref="inner"
@@ -160,7 +163,7 @@ import { PsSlide } from './types';
 import UserConfig from '../../mixins/UserConfig';
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
-import { subscribe, unsubscribe } from '@nextcloud/event-bus';
+import { subscribe, unsubscribe, emit } from '@nextcloud/event-bus';
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
@@ -215,6 +218,7 @@ export default defineComponent({
   mixins: [UserConfig],
 
   data: () => ({
+    loading: 0,
     isOpen: false,
     originalTitle: null as string | null,
     editorOpen: false,
@@ -254,6 +258,14 @@ export default defineComponent({
     subscribe('files:file:created', this.handleFileUpdated);
     subscribe('files:file:updated', this.handleFileUpdated);
     subscribe('memories:window:resize', this.handleWindowResize);
+
+    // The viewer is a singleton
+    globalThis.mViewer = {
+      open: this.open.bind(this) as typeof this.open,
+      openStatic: this.openStatic.bind(this) as typeof this.openStatic,
+      close: this.close.bind(this) as typeof this.close,
+      isOpen: () => this.isOpen,
+    };
   },
 
   beforeDestroy() {
@@ -350,15 +362,15 @@ export default defineComponent({
 
   methods: {
     deleted(photos: IPhoto[]) {
-      this.$emit('deleted', photos);
+      emit('memories:viewer:deleted', photos);
     },
 
     fetchDay(dayId: number) {
-      this.$emit('fetchDay', dayId);
+      emit('memories:viewer:fetch-day', dayId as any);
     },
 
     updateLoading(delta: number) {
-      this.$emit('updateLoading', delta);
+      this.loading += delta;
     },
 
     /** Update the document title */
@@ -1111,7 +1123,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .outer {
-  z-index: 3000;
+  z-index: 2020;
   width: 100vw;
   height: 100vh;
   position: fixed;
@@ -1119,6 +1131,10 @@ export default defineComponent({
   left: 0;
   overflow: hidden;
   color: white;
+
+  > .loading-icon {
+    z-index: 1000000;
+  }
 }
 
 .top-bar {

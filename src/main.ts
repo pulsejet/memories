@@ -12,7 +12,7 @@ import { generateFilePath } from '@nextcloud/router';
 import { getRequestToken } from '@nextcloud/auth';
 
 import type { Route } from 'vue-router';
-import type { IPhoto } from './types';
+import type { IPhoto, IRow } from './types';
 import type PlyrType from 'plyr';
 import type videojsType from 'video.js';
 
@@ -36,6 +36,13 @@ declare global {
     close: () => void;
     setTab: (tab: string) => void;
     getWidth: () => number;
+  };
+
+  var mViewer: {
+    open: (anchorPhoto: IPhoto, rows: IRow[]) => Promise<void>;
+    openStatic(photo: IPhoto, list: IPhoto[], thumbSize?: number): Promise<void>;
+    close: () => void;
+    isOpen: () => boolean;
   };
 
   var currentViewerPhoto: IPhoto;

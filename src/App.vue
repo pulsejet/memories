@@ -46,6 +46,7 @@
 
     <Settings :open.sync="settingsOpen" />
 
+    <Viewer />
     <Sidebar />
     <EditMetadataModal />
     <NodeShareModal />
@@ -71,6 +72,7 @@ import UserConfig from './mixins/UserConfig';
 import Timeline from './components/Timeline.vue';
 import Settings from './components/Settings.vue';
 import FirstStart from './components/FirstStart.vue';
+import Viewer from './components/viewer/Viewer.vue';
 import Metadata from './components/Metadata.vue';
 import Sidebar from './components/Sidebar.vue';
 import EditMetadataModal from './components/modal/EditMetadataModal.vue';
@@ -109,6 +111,7 @@ export default defineComponent({
     Timeline,
     Settings,
     FirstStart,
+    Viewer,
     Sidebar,
     EditMetadataModal,
     NodeShareModal,
@@ -254,7 +257,7 @@ export default defineComponent({
 
     // Check for native interface
     if (nativex?.has()) {
-      document.body.classList.add('native');
+      document.documentElement.classList.add('native');
     }
   },
 

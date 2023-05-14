@@ -59,13 +59,6 @@ export default defineComponent({
     RightMoveIcon,
   },
 
-  props: {
-    viewer: {
-      type: Object,
-      required: false,
-    },
-  },
-
   data: () => ({
     years: [] as IYear[],
     hasRight: false,
@@ -193,7 +186,7 @@ export default defineComponent({
 
     click(year: IYear) {
       const allPhotos = this.years.flatMap((y) => y.photos);
-      this.viewer?.openStatic(year.preview, allPhotos, 512);
+      globalThis.mViewer.openStatic(year.preview, allPhotos, 512);
     },
   },
 });

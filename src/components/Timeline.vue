@@ -35,7 +35,6 @@
           <OnThisDay
             v-if="routeIsBase && config.enable_top_memories"
             :key="config.timeline_path"
-            :viewer="$refs.viewer"
             @load="scrollerManager().adjust()"
           >
           </OnThisDay>
@@ -93,8 +92,6 @@
       @delete="deleteFromViewWithAnimation"
       @updateLoading="updateLoading"
     />
-
-    <Viewer ref="viewer" @deleted="deleteFromViewWithAnimation" @fetchDay="fetchDay" @updateLoading="updateLoading" />
   </div>
 </template>
 
@@ -204,12 +201,16 @@ export default defineComponent({
     subscribe(this.configEventName, this.softRefresh);
     subscribe('files:file:created', this.softRefresh);
     subscribe('memories:window:resize', this.handleResizeWithDelay);
+    subscribe('memories:viewer:deleted', this.deleteFromViewWithAnimation);
+    subscribe('memories:viewer:fetch-day', this.fetchDay);
   },
 
   beforeDestroy() {
     unsubscribe(this.configEventName, this.softRefresh);
     unsubscribe('files:file:created', this.softRefresh);
     unsubscribe('memories:window:resize', this.handleResizeWithDelay);
+    unsubscribe('memories:viewer:deleted', this.deleteFromViewWithAnimation);
+    unsubscribe('memories:viewer:fetch-day', this.fetchDay);
     this.resetState();
     this.state = 0;
   },
@@ -267,7 +268,7 @@ export default defineComponent({
       await this.$nextTick();
 
       // Check if hash has changed
-      const viewerIsOpen = (this.$refs.viewer as any)?.isOpen;
+      const viewerIsOpen = globalThis.mViewer.isOpen();
       if (from?.hash !== to.hash && to.hash?.startsWith('#v') && !viewerIsOpen) {
         // Open viewer
         const parts = to.hash.split('/');
@@ -298,10 +299,10 @@ export default defineComponent({
           }
         }
 
-        (this.$refs.viewer as any).open(photo, this.list);
+        globalThis.mViewer.open(photo, this.list);
       } else if (from?.hash?.startsWith('#v') && !to.hash?.startsWith('#v') && viewerIsOpen) {
         // Close viewer
-        (this.$refs.viewer as any).close();
+        globalThis.mViewer.close();
       }
     },
 
