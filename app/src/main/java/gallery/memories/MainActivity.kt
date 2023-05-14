@@ -4,15 +4,15 @@ import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.webkit.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.hls.HlsMediaSource
 import gallery.memories.databinding.ActivityMainBinding
 
 @UnstableApi class MainActivity : AppCompatActivity() {
@@ -110,16 +110,34 @@ import gallery.memories.databinding.ActivityMainBinding
             player = null
         }
 
+        // Prevent re-creating
         playerUri = uri
         playerUid = uid
 
+        // Add cookies from webview to data source
+        val cookies = CookieManager.getInstance().getCookie(uri.toString())
+        val httpDataSourceFactory =
+            DefaultHttpDataSource.Factory()
+                .setDefaultRequestProperties(mapOf("cookie" to cookies))
+                .setAllowCrossProtocolRedirects(true)
+        val dataSourceFactory = DefaultDataSource.Factory(this, httpDataSourceFactory)
+
+        // Create media item from local or remote uri
+        val mediaItem = MediaItem.fromUri(uri)
+
+        // Build exoplayer
         player = ExoPlayer.Builder(this)
             .build()
             .also { exoPlayer ->
                 binding.videoView.player = exoPlayer
                 binding.videoView.visibility = View.VISIBLE
-                val mediaItem = MediaItem.fromUri(uri)
-                exoPlayer.setMediaItems(listOf(mediaItem), mediaItemIndex, playbackPosition)
+
+                val hlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(mediaItem);
+                exoPlayer.addMediaSource(hlsMediaSource)
+
+//                val mediaItem = MediaItem.fromUri(uri)
+//                exoPlayer.setMediaItems(listOf(mediaItem), mediaItemIndex, playbackPosition)
                 exoPlayer.playWhenReady = playWhenReady
                 exoPlayer.prepare()
             }

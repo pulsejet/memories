@@ -2,6 +2,7 @@ package gallery.memories
 
 import android.R
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import android.view.View
@@ -115,6 +116,14 @@ import java.net.URLDecoder
                 mActivity.initializePlayer(video.uri, fileId)
             }
         }.start()
+    }
+
+    @JavascriptInterface
+    fun playVideoHls(fileId: String?, url: String?) {
+        if (fileId == null || url == null) return
+        mActivity.runOnUiThread {
+            mActivity.initializePlayer(Uri.parse(url), fileId)
+        }
     }
 
     @JavascriptInterface
