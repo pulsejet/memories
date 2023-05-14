@@ -399,6 +399,7 @@ OC.L10N.register(
     "General Failure" : "Genel sorun",
     "Error: {msg}" : "Hata: {msg}",
     "Failed to delete files." : "Dosyalar silinemedi.",
+    "Failed to delete local files." : "Yerel dosyalar silinemedi",
     "Failed to delete {fileName}." : "{fileName} silinemedi.",
     "Failed to move files." : "Dosyalar taşınamadı.",
     "Could not move {fileName}, target exists." : "{fileName} taşınamadı. Hedef zaten var.",
