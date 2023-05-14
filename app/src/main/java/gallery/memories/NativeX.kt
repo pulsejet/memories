@@ -41,7 +41,11 @@ class NativeX(private val mActivity: AppCompatActivity) {
     }
 
     companion object {
-        lateinit var mDlService: DownloadService
+        var mDlService: DownloadService? = null
+    }
+
+    fun destroy() {
+        mDlService = null
     }
 
     fun handleRequest(request: WebResourceRequest): WebResourceResponse {
@@ -92,7 +96,7 @@ class NativeX(private val mActivity: AppCompatActivity) {
     @JavascriptInterface
     fun downloadFromUrl(url: String?, filename: String?) {
         if (url == null || filename == null) return;
-        mDlService.queue(url, filename)
+        mDlService!!.queue(url, filename)
     }
 
     @Throws(Exception::class)
@@ -111,11 +115,11 @@ class NativeX(private val mActivity: AppCompatActivity) {
         } else if (path.matches(API.DAY)) {
             return makeResponse(mQuery.getByDayId(parts[3].toLong()))
         } else if (path.matches(API.SHARE_URL)) {
-            return makeResponse(mDlService.shareUrl(URLDecoder.decode(parts[4], "UTF-8")))
+            return makeResponse(mDlService!!.shareUrl(URLDecoder.decode(parts[4], "UTF-8")))
         } else if (path.matches(API.SHARE_BLOB)) {
-            return makeResponse(mDlService.shareBlobFromUrl(URLDecoder.decode(parts[4], "UTF-8")))
+            return makeResponse(mDlService!!.shareBlobFromUrl(URLDecoder.decode(parts[4], "UTF-8")))
         } else if (path.matches(API.SHARE_LOCAL)) {
-            return makeResponse(mDlService.shareLocal(parts[4].toLong()))
+            return makeResponse(mDlService!!.shareLocal(parts[4].toLong()))
         } else {
             throw Exception("Not Found")
         }

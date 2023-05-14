@@ -50,4 +50,10 @@ class MainActivity : AppCompatActivity() {
         binding.webview.addJavascriptInterface(mNativeX, "nativex")
         binding.webview.loadUrl("http://10.0.2.2:8035/index.php/apps/memories/")
     }
+
+    // Cleanup
+    override fun onDestroy() {
+        super.onDestroy()
+        mNativeX.destroy()
+    }
 }
