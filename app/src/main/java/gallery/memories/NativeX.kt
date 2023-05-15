@@ -72,10 +72,16 @@ import java.net.URLDecoder
         }
 
         // Allow CORS from all origins
-        response.responseHeaders = mapOf(
+        response.responseHeaders = mutableMapOf(
             "Access-Control-Allow-Origin" to "*",
             "Access-Control-Allow-Headers" to "*"
         )
+
+        // Cache image responses for 7 days
+        if (path.matches(API.IMAGE_PREVIEW) || path.matches(API.IMAGE_FULL)) {
+            response.responseHeaders["Cache-Control"] = "max-age=604800"
+        }
+
         return response
     }
 
