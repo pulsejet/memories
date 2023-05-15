@@ -12,6 +12,7 @@
         android:layout_height="match_parent"
         android:background="@android:color/black"
         app:show_buffering="always"
+        android:alpha="0.0"
     />
 
     <WebView

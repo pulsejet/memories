@@ -1,13 +1,8 @@
 package gallery.memories
 
-import android.R
-import android.graphics.Color
 import android.net.Uri
-import android.os.Build
 import android.util.Log
 import android.view.SoundEffectConstants
-import android.view.View
-import android.view.WindowInsetsController
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -24,6 +19,7 @@ import java.net.URLDecoder
 
     private val mImageService: ImageService = ImageService(mActivity)
     private val mQuery: TimelineQuery = TimelineQuery(mActivity)
+    private var themeStored = false
 
     object API {
         val DAYS = Regex("^/api/days$")
@@ -91,17 +87,15 @@ import java.net.URLDecoder
 
     @JavascriptInterface
     fun setThemeColor(color: String?, isDark: Boolean) {
+        // Save for getting it back on next start
+        if (!themeStored) {
+            themeStored = true
+            mActivity.storeTheme(color, isDark);
+        }
+
+        // Apply the theme
         mActivity.runOnUiThread {
-            val window = mActivity.window
-            mActivity.setTheme(if (isDark) R.style.Theme_Black else R.style.Theme_Light)
-            window.navigationBarColor = Color.parseColor(color)
-            window.statusBarColor = Color.parseColor(color)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                val appearance = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
-                window.insetsController?.setSystemBarsAppearance(if (isDark) 0 else appearance, appearance)
-            } else {
-                window.decorView.systemUiVisibility = if (isDark) 0 else View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-            }
+            mActivity.applyTheme(color, isDark)
         }
     }
 

@@ -4,9 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
+import android.view.WindowInsetsController
 import android.webkit.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.MediaItem
@@ -38,6 +40,9 @@ import gallery.memories.databinding.ActivityMainBinding
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        // Restore last known look
+        restoreTheme()
+
         // Initialize services
         mNativeX = NativeX(this)
 
@@ -47,6 +52,7 @@ import gallery.memories.databinding.ActivityMainBinding
         // Destroy video after 1 seconds (workaround for video not showing on first load)
         binding.videoView.postDelayed({
             binding.videoView.visibility = View.GONE
+            binding.videoView.alpha = 1.0f
         }, 1000)
     }
 
@@ -206,5 +212,33 @@ import gallery.memories.databinding.ActivityMainBinding
         }
         player = null
         binding.videoView.visibility = View.GONE
+    }
+
+    fun storeTheme(color: String?, isDark: Boolean) {
+        if (color == null) return
+        getSharedPreferences(getString(R.string.preferences_key), 0).edit()
+            .putString("themeColor", color)
+            .putBoolean("themeDark", isDark)
+            .apply()
+    }
+
+    fun restoreTheme() {
+        val preferences = getSharedPreferences(getString(R.string.preferences_key), 0)
+        val color = preferences.getString("themeColor", null)
+        val isDark = preferences.getBoolean("themeDark", false)
+        applyTheme(color, isDark)
+    }
+
+    fun applyTheme(color: String?, isDark: Boolean) {
+        if (color == null) return
+        setTheme(if (isDark) android.R.style.Theme_Black else android.R.style.Theme_Light)
+        window.navigationBarColor = Color.parseColor(color)
+        window.statusBarColor = Color.parseColor(color)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val appearance = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+            window.insetsController?.setSystemBarsAppearance(if (isDark) 0 else appearance, appearance)
+        } else {
+            window.decorView.systemUiVisibility = if (isDark) 0 else View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        }
     }
 }
