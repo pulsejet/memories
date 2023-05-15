@@ -1,9 +1,11 @@
 package gallery.memories
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
 import android.webkit.*
 import androidx.appcompat.app.AppCompatActivity
@@ -29,6 +31,8 @@ import gallery.memories.databinding.ActivityMainBinding
     private var playWhenReady = true
     private var mediaItemIndex = 0
     private var playbackPosition = 0L
+
+    private val memoriesRegex = Regex("/apps/memories/.*$")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,13 +76,36 @@ import gallery.memories.databinding.ActivityMainBinding
         }
     }
 
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            when (keyCode) {
+                KeyEvent.KEYCODE_BACK -> {
+                    if (binding.webview.canGoBack()) {
+                        binding.webview.goBack()
+                    } else {
+                        finish()
+                    }
+                    return true
+                }
+            }
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
     @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
     private fun initializeWebView() {
         // Intercept local APIs
         binding.webview.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-                view.loadUrl(request.url.toString())
-                return false
+                // TODO: check host as well
+                if (request.url.path?.matches(memoriesRegex) == true) {
+                    return false
+                }
+
+                // Open external links in browser
+                Intent(Intent.ACTION_VIEW, request.url).apply { startActivity(this) }
+
+                return true
             }
 
             override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
