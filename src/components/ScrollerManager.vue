@@ -22,7 +22,7 @@
     <span
       ref="hoverCursor"
       class="cursor hv"
-      :style="{ transform: `translateY(calc(${hoverCursorY}px - 100%))` }"
+      :style="{ transform: `translateY(max(calc(${hoverCursorY}px - 100%), 0px))` }"
       @touchmove.prevent="touchmove"
       @touchstart.passive="interactstart"
       @touchend.passive="interactend"
