@@ -194,7 +194,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 $height: 200px;
-$mobHeight: 150px;
+$mobHeight: 165px;
 
 .outer {
   width: calc(100% - 50px);
