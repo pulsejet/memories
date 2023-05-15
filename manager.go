@@ -40,6 +40,7 @@ type ProbeVideoData struct {
 	FrameRate int
 	CodecName string
 	BitRate   int
+	Rotation  int
 }
 
 func NewManager(c *Config, path string, id string, close chan string) (*Manager, error) {
@@ -236,6 +237,7 @@ func (m *Manager) ffprobe() error {
 		// video
 		"-show_entries", "format=duration",
 		"-show_entries", "stream=duration,width,height,avg_frame_rate,codec_name,bit_rate",
+		"-show_entries", "stream_tags=rotate",
 		"-select_streams", "v", // Video stream only, we're not interested in audio
 
 		"-of", "json",
@@ -263,6 +265,9 @@ func (m *Manager) ffprobe() error {
 			FrameRate string `json:"avg_frame_rate"`
 			CodecName string `json:"codec_name"`
 			BitRate   string `json:"bit_rate"`
+			Tags      struct {
+				Rotate string `json:"rotate"`
+			} `json:"tags"`
 		} `json:"streams"`
 		Format struct {
 			Duration string `json:"duration"`
@@ -310,6 +315,12 @@ func (m *Manager) ffprobe() error {
 		bitRate = 5000000
 	}
 
+	// Rotation is a string
+	rotation, err := strconv.Atoi(out.Streams[0].Tags.Rotate)
+	if err != nil {
+		rotation = 0
+	}
+
 	m.probe = &ProbeVideoData{
 		Width:     out.Streams[0].Width,
 		Height:    out.Streams[0].Height,
@@ -317,6 +328,7 @@ func (m *Manager) ffprobe() error {
 		FrameRate: int(frameRate),
 		CodecName: out.Streams[0].CodecName,
 		BitRate:   bitRate,
+		Rotation:  rotation,
 	}
 
 	return nil

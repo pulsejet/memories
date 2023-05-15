@@ -377,8 +377,8 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 
 	// Input specs
 	args = append(args, []string{
-		"-autorotate", "0", // consistent behavior
-		"-i", s.m.path, // Input file
+		"-noautorotate", // Rotate manually
+		"-i", s.m.path,  // Input file
 		"-copyts", // So the "-to" refers to the original TS
 	}...)
 
@@ -407,6 +407,22 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 	// Apply filter
 	if CV != ENCODER_COPY {
 		filter := fmt.Sprintf("%s,%s=%s", format, scaler, strings.Join(scalerArgs, ":"))
+
+		// Add transpose filter if needed
+		transposer := "transpose"
+		if CV == ENCODER_VAAPI {
+			transposer = "transpose_vaapi"
+		} else if CV == ENCODER_NVENC {
+			transposer = "transpose_npp"
+		}
+		if s.m.probe.Rotation == 90 {
+			filter = fmt.Sprintf("%s,%s=1", filter, transposer)
+		} else if s.m.probe.Rotation == 270 {
+			filter = fmt.Sprintf("%s,%s=2", filter, transposer)
+		} else if s.m.probe.Rotation == 180 {
+			filter = fmt.Sprintf("%s,%s=1,%s=1", filter, transposer, transposer)
+		}
+
 		args = append(args, []string{"-vf", filter}...)
 		args = append(args, []string{"-profile:v", "main"}...)
 	}
