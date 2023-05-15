@@ -918,6 +918,9 @@ export default defineComponent({
         for await (const p of dav.deletePhotos([photo])) {
           if (!p[0]) return;
         }
+      } catch {
+        showError(this.t('memories', 'Failed to delete photo'));
+        return;
       } finally {
         this.updateLoading(-1);
       }

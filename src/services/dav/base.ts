@@ -208,34 +208,19 @@ export async function* deletePhotos(photos: IPhoto[]) {
   let fileIdsSet = new Set(photos.map((p) => p.fileid));
 
   // Get files data
-  let fileInfos: IFileInfo[] = [];
-  try {
-    fileInfos = await getFiles(photos);
+  const fileInfos = (await getFiles(photos)).filter((f) => fileIdsSet.has(f.fileid));
 
-    // Take intersection of fileIds and fileInfos
-    fileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid));
-    fileIdsSet = new Set(fileInfos.map((f) => f.fileid));
-  } catch (e) {
-    console.error('Failed to get file info for files to delete', photos, e);
-    showError(t('memories', 'Failed to delete files.'));
-    return;
-  }
+  // Take intersection of fileIds and fileInfos
+  fileIdsSet = new Set(fileInfos.map((f) => f.fileid));
 
   // Check for local photos
-  try {
-    let deleted = await nativex.deleteLocalPhotos(photos);
-
-    // Don't remove remote files just yet
-    deleted = deleted.filter((f) => !fileIdsSet.has(f.fileid));
+  if (nativex.has()) {
+    const deleted = (await nativex.deleteLocalPhotos(photos)).filter((f) => !fileIdsSet.has(f.fileid));
 
     // Yield for the fully local files
     if (deleted.length > 0) {
       yield deleted.map((f) => f.fileid);
     }
-  } catch (e) {
-    console.error(e);
-    showError(t('memories', 'Failed to delete local files.'));
-    return;
   }
 
   // Delete each file

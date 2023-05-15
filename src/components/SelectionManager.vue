@@ -754,8 +754,13 @@ export default defineComponent({
         }
       }
 
-      for await (const delIds of dav.deletePhotos(Array.from(selection.values()))) {
-        this.deleteSelectedPhotosById(delIds, selection);
+      try {
+        for await (const delIds of dav.deletePhotos(Array.from(selection.values()))) {
+          this.deleteSelectedPhotosById(delIds, selection);
+        }
+      } catch (e) {
+        console.error(e);
+        showError(this.t('memories', 'Failed to delete files'));
       }
     },
 
