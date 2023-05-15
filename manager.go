@@ -234,10 +234,8 @@ func (m *Manager) ffprobe() error {
 		// Hide debug information
 		"-v", "error",
 
-		// video
-		"-show_entries", "format=duration",
-		"-show_entries", "stream=duration,width,height,avg_frame_rate,codec_name,bit_rate",
-		"-show_entries", "stream_tags=rotate",
+		// Show everything
+		"-show_entries", "stream",
 		"-select_streams", "v", // Video stream only, we're not interested in audio
 
 		"-of", "json",
@@ -259,22 +257,26 @@ func (m *Manager) ffprobe() error {
 
 	out := struct {
 		Streams []struct {
-			Width     int    `json:"width"`
-			Height    int    `json:"height"`
-			Duration  string `json:"duration"`
-			FrameRate string `json:"avg_frame_rate"`
-			CodecName string `json:"codec_name"`
-			BitRate   string `json:"bit_rate"`
-			Tags      struct {
-				Rotate string `json:"rotate"`
-			} `json:"tags"`
+			Width        int    `json:"width"`
+			Height       int    `json:"height"`
+			Duration     string `json:"duration"`
+			FrameRate    string `json:"avg_frame_rate"`
+			CodecName    string `json:"codec_name"`
+			BitRate      string `json:"bit_rate"`
+			SideDataList []struct {
+				SideDataType string `json:"side_data_type"`
+				Rotation     int    `json:"rotation"`
+			} `json:"side_data_list"`
 		} `json:"streams"`
 		Format struct {
 			Duration string `json:"duration"`
 		} `json:"format"`
 	}{}
 
-	if err := json.Unmarshal(stdout.Bytes(), &out); err != nil {
+	byts := stdout.Bytes()
+	log.Println(string(byts))
+
+	if err := json.Unmarshal(byts, &out); err != nil {
 		return err
 	}
 
@@ -315,10 +317,12 @@ func (m *Manager) ffprobe() error {
 		bitRate = 5000000
 	}
 
-	// Rotation is a string
-	rotation, err := strconv.Atoi(out.Streams[0].Tags.Rotate)
-	if err != nil {
-		rotation = 0
+	// Get rotation from side data
+	rotation := 0
+	for _, sideData := range out.Streams[0].SideDataList {
+		if sideData.SideDataType == "Display Matrix" {
+			rotation = sideData.Rotation
+		}
 	}
 
 	m.probe = &ProbeVideoData{

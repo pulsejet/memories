@@ -415,11 +415,11 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 		} else if CV == ENCODER_NVENC {
 			transposer = "transpose_npp"
 		}
-		if s.m.probe.Rotation == 90 {
+		if s.m.probe.Rotation == -90 {
 			filter = fmt.Sprintf("%s,%s=1", filter, transposer)
-		} else if s.m.probe.Rotation == 270 {
+		} else if s.m.probe.Rotation == 90 {
 			filter = fmt.Sprintf("%s,%s=2", filter, transposer)
-		} else if s.m.probe.Rotation == 180 {
+		} else if s.m.probe.Rotation == 180 || s.m.probe.Rotation == -180 {
 			filter = fmt.Sprintf("%s,%s=1,%s=1", filter, transposer, transposer)
 		}
 
