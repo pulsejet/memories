@@ -86,7 +86,7 @@ export default defineComponent({
     }
     &.main {
       display: inline-block;
-      font-weight: 600;
+      font-weight: 500;
     }
   }
 
