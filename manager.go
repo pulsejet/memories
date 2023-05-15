@@ -273,10 +273,7 @@ func (m *Manager) ffprobe() error {
 		} `json:"format"`
 	}{}
 
-	byts := stdout.Bytes()
-	log.Println(string(byts))
-
-	if err := json.Unmarshal(byts, &out); err != nil {
+	if err := json.Unmarshal(stdout.Bytes(), &out); err != nil {
 		return err
 	}
 
