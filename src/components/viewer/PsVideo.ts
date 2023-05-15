@@ -213,7 +213,6 @@ class VideoContentSetup {
         if (!directFailed) {
           console.warn('PsVideo: Trying direct video stream');
           vjs.src(this.getDirectSrc(content));
-          this.updateRotation(content, 0);
         }
       } else {
         directFailed = true;
@@ -233,7 +232,7 @@ class VideoContentSetup {
     let canPlay = false;
     content.videojs.on('canplay', () => {
       canPlay = true;
-      this.updateRotation(content); // also gets the correct video elem as a side effect
+      content.videoElement = content.videojs?.el()?.querySelector('video') ?? null;
 
       // Initialize the player UI
       window.setTimeout(() => this.initPlyr(content), 0);
@@ -255,20 +254,6 @@ class VideoContentSetup {
       // Fallback
       window.setTimeout(() => this.initPlyr(content), 0);
     });
-
-    // Get correct orientation
-    if (!content.data.photo.imageInfo) {
-      const url = API.IMAGE_INFO(content.data.photo.fileid);
-      axios.get<any>(url).then((response) => {
-        content.data.photo.imageInfo = response.data;
-
-        // Update only after video is ready
-        // Otherwise the poster image is rotated
-        if (canPlay) this.updateRotation(content);
-      });
-    } else {
-      if (canPlay) this.updateRotation(content);
-    }
   }
 
   destroyVideo(content: VideoContent) {
@@ -437,14 +422,12 @@ class VideoContentSetup {
 
       // Lock orientation when entering fullscreen
       plyr.on('enterfullscreen', async (event) => {
-        const rotation = this.updateRotation(content);
-        const exif = content.data.photo.imageInfo?.exif;
-        const h = Number(exif?.ImageHeight || 0);
-        const w = Number(exif?.ImageWidth || 1);
+        const h = content.data.photo.h;
+        const w = content.data.photo.w;
 
         if (h && w) {
           previousOrientation ||= screen.orientation.type;
-          const orientation = h < w && !rotation ? 'landscape' : 'portrait';
+          const orientation = h < w ? 'landscape' : 'portrait';
 
           try {
             await screen.orientation.lock(orientation);
@@ -468,46 +451,6 @@ class VideoContentSetup {
         }
       });
     }
-  }
-
-  updateRotation(content: VideoContent, val?: number): boolean {
-    if (!content.videojs) return false;
-
-    content.videoElement = content.videojs.el()?.querySelector('video');
-    if (!content.videoElement) return false;
-
-    const photo = content.data.photo;
-    const exif = photo.imageInfo?.exif;
-    const rotation = val ?? Number(exif?.Rotation || 0);
-    const shouldRotate = content.videojs?.src(undefined)?.includes('m3u8');
-
-    if (rotation && shouldRotate) {
-      let transform = `rotate(${rotation}deg)`;
-      const hasRotation = rotation === 90 || rotation === 270;
-
-      if (hasRotation) {
-        const vw = (content.videoElement.style.width = content.element!.style.height);
-        const vh = (content.videoElement.style.height = content.element!.style.width);
-
-        if (rotation === 90) {
-          transform = `translateY(-${vh}) ${transform}`;
-          content.videoElement.style.transformOrigin = 'bottom left';
-        } else if (rotation === 270) {
-          transform = `translateX(-${vw}) ${transform}`;
-          content.videoElement.style.transformOrigin = 'top right';
-        }
-      }
-
-      content.videoElement.style.transform = transform;
-
-      return hasRotation;
-    } else {
-      content.videoElement.style.transform = 'none';
-      content.videoElement.style.width = '100%';
-      content.videoElement.style.height = '100%';
-    }
-
-    return false;
   }
 
   onContentDestroy({ content }: PsVideoEvent) {
@@ -534,8 +477,6 @@ class VideoContentSetup {
         placeholderElStyle.width = width + 'px';
         placeholderElStyle.height = height + 'px';
       }
-
-      this.updateRotation(content);
     }
   }
 
