@@ -17,7 +17,7 @@ import androidx.media3.exoplayer.hls.HlsMediaSource
 import gallery.memories.databinding.ActivityMainBinding
 
 @UnstableApi class MainActivity : AppCompatActivity() {
-    private val binding by lazy(LazyThreadSafetyMode.NONE) {
+    val binding by lazy(LazyThreadSafetyMode.NONE) {
         ActivityMainBinding.inflate(layoutInflater)
     }
 

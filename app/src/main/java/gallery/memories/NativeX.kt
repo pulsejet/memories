@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import android.view.SoundEffectConstants
 import android.view.View
 import android.view.WindowInsetsController
 import android.webkit.JavascriptInterface
@@ -102,6 +103,13 @@ import java.net.URLDecoder
     fun downloadFromUrl(url: String?, filename: String?) {
         if (url == null || filename == null) return;
         mDlService!!.queue(url, filename)
+    }
+
+    @JavascriptInterface
+    fun playTouchSound() {
+        mActivity.runOnUiThread {
+            mActivity.binding.webview.playSoundEffect(SoundEffectConstants.CLICK)
+        }
     }
 
     @JavascriptInterface
