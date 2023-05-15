@@ -59,8 +59,6 @@ class OtherController extends GenericApiController
     /**
      * @NoAdminRequired
      *
-     * @NoCSRFRequired
-     *
      * @PublicPage
      */
     public function getUserConfig(): Http\Response

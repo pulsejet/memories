@@ -34,8 +34,6 @@ class AdminController extends GenericApiController
 {
     /**
      * @AdminRequired
-     *
-     * @NoCSRFRequired
      */
     public function getSystemConfig(): Http\Response
     {
@@ -80,8 +78,6 @@ class AdminController extends GenericApiController
 
     /**
      * @AdminRequired
-     *
-     * @NoCSRFRequired
      *
      * @UseSession
      */
