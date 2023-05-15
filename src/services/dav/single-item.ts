@@ -13,16 +13,18 @@ export function isSingleItem(): boolean {
 }
 
 export async function getSingleItemData(): Promise<IDay[]> {
-  if (!singleItem?.fileid) {
-    return [];
-  }
+  if (!singleItem?.fileid) return [];
 
+  // Make days array
   singleItem.key = singleItem.fileid;
-  return [
+  const days = [
     {
       dayid: singleItem.dayid,
       count: 1,
       detail: [singleItem],
     },
-  ] as any[];
+  ];
+
+  // Return copy to prevent circular reference
+  return JSON.parse(JSON.stringify(days));
 }
