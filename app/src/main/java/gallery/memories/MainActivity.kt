@@ -51,8 +51,8 @@ import gallery.memories.databinding.ActivityMainBinding
 
         // Destroy video after 1 seconds (workaround for video not showing on first load)
         binding.videoView.postDelayed({
-            binding.videoView.visibility = View.GONE
             binding.videoView.alpha = 1.0f
+            binding.videoView.visibility = View.GONE
         }, 1000)
     }
 
