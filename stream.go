@@ -181,7 +181,7 @@ func (s *Stream) ServeChunk(w http.ResponseWriter, id int) error {
 }
 
 func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
-	args := s.transcodeArgs(0)
+	args := s.transcodeArgs(0, false)
 
 	if s.m.probe.CodecName == CODEC_H264 && s.quality == QUALITY_MAX {
 		// try to just send the original file
@@ -191,7 +191,8 @@ func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
 
 	// Output mov
 	args = append(args, []string{
-		"-movflags", "frag_keyframe+empty_moov+faststart", "-f", "mov", "pipe:1",
+		"-movflags", "frag_keyframe+empty_moov+faststart",
+		"-f", "mov", "pipe:1",
 	}...)
 
 	coder := exec.Command(s.c.FFmpeg, args...)
@@ -350,7 +351,7 @@ func (s *Stream) restartAtChunk(w http.ResponseWriter, id int) {
 }
 
 // Get arguments to ffmpeg
-func (s *Stream) transcodeArgs(startAt float64) []string {
+func (s *Stream) transcodeArgs(startAt float64, rotate bool) []string {
 	args := []string{
 		"-loglevel", "warning",
 	}
@@ -375,10 +376,16 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 		args = append(args, strings.Split(extra, " ")...)
 	}
 
+	// Manual rotation: disable autorotate
+	if rotate {
+		args = append(args, []string{
+			"-noautorotate", // Rotate manually
+		}...)
+	}
+
 	// Input specs
 	args = append(args, []string{
-		"-noautorotate", // Rotate manually
-		"-i", s.m.path,  // Input file
+		"-i", s.m.path, // Input file
 		"-copyts", // So the "-to" refers to the original TS
 	}...)
 
@@ -409,18 +416,20 @@ func (s *Stream) transcodeArgs(startAt float64) []string {
 		filter := fmt.Sprintf("%s,%s=%s", format, scaler, strings.Join(scalerArgs, ":"))
 
 		// Add transpose filter if needed
-		transposer := "transpose"
-		if CV == ENCODER_VAAPI {
-			transposer = "transpose_vaapi"
-		} else if CV == ENCODER_NVENC {
-			transposer = "transpose_npp"
-		}
-		if s.m.probe.Rotation == -90 {
-			filter = fmt.Sprintf("%s,%s=1", filter, transposer)
-		} else if s.m.probe.Rotation == 90 {
-			filter = fmt.Sprintf("%s,%s=2", filter, transposer)
-		} else if s.m.probe.Rotation == 180 || s.m.probe.Rotation == -180 {
-			filter = fmt.Sprintf("%s,%s=1,%s=1", filter, transposer, transposer)
+		if rotate {
+			transposer := "transpose"
+			if CV == ENCODER_VAAPI {
+				transposer = "transpose_vaapi"
+			} else if CV == ENCODER_NVENC {
+				transposer = "transpose_npp"
+			}
+			if s.m.probe.Rotation == -90 {
+				filter = fmt.Sprintf("%s,%s=1", filter, transposer)
+			} else if s.m.probe.Rotation == 90 {
+				filter = fmt.Sprintf("%s,%s=2", filter, transposer)
+			} else if s.m.probe.Rotation == 180 || s.m.probe.Rotation == -180 {
+				filter = fmt.Sprintf("%s,%s=1,%s=1", filter, transposer, transposer)
+			}
 		}
 
 		args = append(args, []string{"-vf", filter}...)
@@ -485,7 +494,7 @@ func (s *Stream) transcode(startId int) {
 	}
 	startAt := float64(startId * s.c.ChunkSize)
 
-	args := s.transcodeArgs(startAt)
+	args := s.transcodeArgs(startAt, true)
 
 	// Segmenting specs
 	args = append(args, []string{
