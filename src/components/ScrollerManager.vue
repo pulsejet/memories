@@ -171,7 +171,11 @@ export default defineComponent({
       if (this.scrollingRecyclerUpdateTimer) return;
       this.scrollingRecyclerUpdateTimer = window.setTimeout(() => {
         this.scrollingRecyclerUpdateTimer = 0;
-        this.updateFromRecyclerScroll();
+
+        // Run the actual update during animation frame
+        window.requestAnimationFrame(() => {
+          this.updateFromRecyclerScroll();
+        });
       }, 100);
 
       // Update that we're scrolling with the recycler
