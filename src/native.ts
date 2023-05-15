@@ -27,6 +27,7 @@ export type NativeX = {
   isNative: () => boolean;
   setThemeColor: (color: string, isDark: boolean) => void;
   downloadFromUrl: (url: string, filename: string) => void;
+  playTouchSound: () => void;
 
   playVideoLocal: (fileid: string) => void;
   playVideoHls: (fileid: string, url: string) => void;
@@ -71,6 +72,13 @@ export async function downloadFromUrl(url: string) {
 
   // Hand off to download manager
   nativex?.downloadFromUrl?.(addOrigin(url), filename);
+}
+
+/**
+ * Play touch sound.
+ */
+export async function playTouchSound() {
+  nativex?.playTouchSound?.();
 }
 
 /**

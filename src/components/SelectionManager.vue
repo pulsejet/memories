@@ -54,6 +54,7 @@ import { getCurrentUser } from '@nextcloud/auth';
 
 import * as dav from '../services/DavRequests';
 import * as utils from '../services/Utils';
+import * as nativex from '../native';
 
 import FaceMoveModal from './modal/FaceMoveModal.vue';
 import AddToAlbumModal from './modal/AddToAlbumModal.vue';
@@ -848,6 +849,7 @@ export default defineComponent({
 
     /** Open viewer with given photo */
     openViewer(photo: IPhoto) {
+      nativex.playTouchSound();
       this.$router.push(utils.getViewerRoute(photo));
     },
   },
