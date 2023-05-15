@@ -47,6 +47,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { IRow, IRowType, ITick } from '../types';
+import { emit } from '@nextcloud/event-bus';
 import ScrollIcon from 'vue-material-design-icons/UnfoldMoreHorizontal.vue';
 
 import * as utils from '../services/Utils';
@@ -117,6 +118,8 @@ export default defineComponent({
     adjustRequest: false,
     /** Scroller is being moved with interaction */
     interacting: false,
+    /** Last known scroll position of the recycler */
+    lastKnownRecyclerScroll: 0,
     /** Track the last requested y position when interacting */
     lastRequestedRecyclerY: 0,
   }),
@@ -171,11 +174,7 @@ export default defineComponent({
       if (this.scrollingRecyclerUpdateTimer) return;
       this.scrollingRecyclerUpdateTimer = window.setTimeout(() => {
         this.scrollingRecyclerUpdateTimer = 0;
-
-        // Run the actual update during animation frame
-        window.requestAnimationFrame(() => {
-          this.updateFromRecyclerScroll();
-        });
+        this.updateFromRecyclerScroll();
       }, 100);
 
       // Update that we're scrolling with the recycler
@@ -190,6 +189,13 @@ export default defineComponent({
 
       // Get the scroll position
       const scroll = this.recycler?.$el?.scrollTop || 0;
+
+      // Emit scroll event
+      emit('memories.recycler.scroll', {
+        current: scroll,
+        previous: this.lastKnownRecyclerScroll,
+      });
+      this.lastKnownRecyclerScroll = scroll;
 
       // Get cursor px position
       const { top1, top2, y1, y2 } = this.getCoords(scroll, 'y');

@@ -32,6 +32,10 @@
             {{ viewName }}
           </div>
 
+          <!-- Gap for mobile header -->
+          <div class="mobile-header-top-gap"></div>
+
+          <!-- Horizontal scrollable OTD -->
           <OnThisDay
             v-if="routeIsBase && config.enable_top_memories"
             :key="config.timeline_path"

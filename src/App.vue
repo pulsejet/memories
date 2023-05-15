@@ -36,11 +36,14 @@
           'router-outlet': true,
           'remove-gap': removeNavGap,
           'has-nav': showNavigation,
+          'has-mobile-header': hasMobileHeader,
+          'is-native': native,
         }"
       >
         <router-view />
       </div>
 
+      <MobileHeader v-if="hasMobileHeader" />
       <MobileNav v-if="showNavigation" />
     </NcAppContent>
 
@@ -79,6 +82,7 @@ import EditMetadataModal from './components/modal/EditMetadataModal.vue';
 import NodeShareModal from './components/modal/NodeShareModal.vue';
 import ShareModal from './components/modal/ShareModal.vue';
 import MobileNav from './components/MobileNav.vue';
+import MobileHeader from './components/MobileHeader.vue';
 
 import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue';
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
@@ -117,6 +121,7 @@ export default defineComponent({
     NodeShareModal,
     ShareModal,
     MobileNav,
+    MobileHeader,
 
     ImageMultiple,
     FolderIcon,
@@ -144,6 +149,10 @@ export default defineComponent({
     ncVersion(): number {
       const version = (<any>window.OC).config.version.split('.');
       return Number(version[0]);
+    },
+
+    native(): boolean {
+      return nativex.has();
     },
 
     recognize(): string | false {
@@ -187,7 +196,15 @@ export default defineComponent({
     },
 
     showNavigation(): boolean {
+      if (this.native) {
+        return ['timeline', 'explore', 'albums'].includes(this.$route.name ?? '');
+      }
+
       return !this.$route.name?.endsWith('-share');
+    },
+
+    hasMobileHeader(): boolean {
+      return this.native && this.showNavigation && this.$route.name === 'timeline';
     },
 
     removeNavGap(): boolean {
@@ -256,7 +273,7 @@ export default defineComponent({
     );
 
     // Check for native interface
-    if (nativex?.has()) {
+    if (this.native) {
       document.documentElement.classList.add('native');
     }
   },
