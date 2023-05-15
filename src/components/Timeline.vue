@@ -265,7 +265,7 @@ export default defineComponent({
 
       // Do a soft refresh if the query changes
       else if (JSON.stringify(from.query) !== JSON.stringify(to.query)) {
-        await this.softRefresh();
+        await this.softRefreshInternal(true);
       }
 
       // The viewer might change the route immediately again
@@ -373,11 +373,29 @@ export default defineComponent({
       await this.createState();
     },
 
-    /** Re-process days */
+    /**
+     * Fetch and re-process days (debounced call)
+     * Debouncing is necessary due to a large number of calls, e.g.
+     * when changing the configuration
+     */
     async softRefresh() {
+      this.softRefreshInternal(false);
+    },
+
+    /**
+     * Fetch and re-process days (can be awaited).
+     * Do not pass this function as a callback directly.
+     */
+    async softRefreshInternal(sync: boolean) {
       this.selectionManager().clearSelection();
       this.fetchDayQueue = []; // reset queue
-      await this.fetchDays(true);
+
+      // Fetch days
+      if (sync) {
+        await this.fetchDays(true);
+      } else {
+        utils.setRenewingTimeout(this, '_softRefreshInternalTimer', () => this.fetchDays(true), 30);
+      }
     },
 
     /** Do resize after some time */
