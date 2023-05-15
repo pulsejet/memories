@@ -167,6 +167,8 @@ import gallery.memories.databinding.ActivityMainBinding
                 // Bind to player view
                 binding.videoView.player = exoPlayer
                 binding.videoView.visibility = View.VISIBLE
+                binding.videoView.setShowNextButton(false)
+                binding.videoView.setShowPreviousButton(false)
 
                 // Check if HLS source from URI (contains .m3u8 anywhere)
                 if (uri.toString().contains(".m3u8")) {
