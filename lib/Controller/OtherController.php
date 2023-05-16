@@ -105,6 +105,31 @@ class OtherController extends GenericApiController
      *
      * @NoCSRFRequired
      */
+    public function describeApi(): JSONResponse
+    {
+        return Util::guardEx(function () {
+            $appManager = \OC::$server->get(\OCP\App\IAppManager::class);
+            $urlGenerator = \OC::$server->get(\OCP\IURLGenerator::class);
+
+            $res = new JSONResponse([
+                'version' => $appManager->getAppInfo('memories')['version'],
+                'baseUrl' => $urlGenerator->linkToRouteAbsolute('memories.Page.main'),
+            ]);
+
+            // This is public information
+            $res->addHeader('Access-Control-Allow-Origin', '*');
+
+            return $res;
+        });
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @PublicPage
+     *
+     * @NoCSRFRequired
+     */
     public function serviceWorker(): StreamResponse
     {
         $response = new StreamResponse(__DIR__.'/../../js/memories-service-worker.js');

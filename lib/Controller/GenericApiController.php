@@ -27,7 +27,7 @@ use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\FsManager;
 use OCA\Memories\Db\TimelineQuery;
 use OCP\App\IAppManager;
-use OCP\AppFramework\Controller;
+use OCP\AppFramework\ApiController;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IDBConnection;
@@ -35,7 +35,7 @@ use OCP\IRequest;
 use OCP\IUserSession;
 use Psr\Log\LoggerInterface;
 
-abstract class GenericApiController extends Controller
+abstract class GenericApiController extends ApiController
 {
     protected IConfig $config;
     protected IUserSession $userSession;
