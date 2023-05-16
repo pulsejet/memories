@@ -172,7 +172,6 @@ OC.L10N.register(
     "Auto" : "Auto",
     "Failed to create {albumName}." : "Lyckades inte skapa {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Lyckades inte döpa om {currentAlbumName} till {newAlbumName}.",
-    "Failed to delete files." : "Misslyckades att radera filer.",
     "Failed to delete {fileName}." : "Misslyckades att radera {fileName}.",
     "Failed to favorite files." : "Misslyckades att favorisera filer.",
     "Failed to favorite {fileName}." : "Misslyckades att favorisera {fileName}."

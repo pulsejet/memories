@@ -117,7 +117,6 @@ OC.L10N.register(
     "Auto" : "自动",
     "Failed to create {albumName}." : "创建 {albumName} 失败",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "重命名 {currentAlbumName} 为 {newAlbumName} 的操作失败",
-    "Failed to delete files." : "文件删除失败。",
     "Failed to delete {fileName}." : "删除 {fileName} 失败"
 },
 "nplurals=1; plural=0;");

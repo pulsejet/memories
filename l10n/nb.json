@@ -253,7 +253,6 @@
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Kunne ikke endre navn på {currentAlbumName} til {newAlbumName}.",
     "General Failure" : "Generell feil",
     "Error: {msg}" : "Feil: {msg}",
-    "Failed to delete files." : "Kunne ikke slette filer.",
     "Failed to delete {fileName}." : "Kunne ikke slette {fileName}.",
     "Failed to move files." : "Kunne ikke flytte filer.",
     "Could not move {fileName}, target exists." : "Kunne ikke flytte {fileName}, målet finnes.",

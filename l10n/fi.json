@@ -254,7 +254,6 @@
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Albumin {currentAlbumName} nimen muuttaminen muotoon {newAlbumName} epäonnistui.",
     "General Failure" : "Yleinen virhe",
     "Error: {msg}" : "Virhe: {msg}",
-    "Failed to delete files." : "Tiedostojen poisto epäonnistui.",
     "Failed to delete {fileName}." : "Tiedoston {fileName} poisto epäonnistui.",
     "Failed to move files." : "Tiedostojen siirtäminen epäonnistui.",
     "Could not move {fileName}, target exists." : "Tiedostoa {fileName} ei voitu siirtää, kohde on jo olemassa.",

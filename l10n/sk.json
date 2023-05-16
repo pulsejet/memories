@@ -200,7 +200,6 @@
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Chyba pri premenovávaní {currentAlbumName} na {newAlbumName}.",
     "General Failure" : "Všeobecné zlyhanie",
     "Error: {msg}" : "Chyba: {msg}",
-    "Failed to delete files." : "Nepodarilo sa zmazať súbory.",
     "Failed to delete {fileName}." : "Nepodarilo sa zmazať {fileName}.",
     "Failed to favorite files." : "Nepodarilo sa pridať súbory medzi obľúbené.",
     "Failed to favorite {fileName}." : "Nepodarilo sa pridať súbor {fileName} medzi obľúbené.",

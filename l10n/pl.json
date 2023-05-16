@@ -194,7 +194,6 @@
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Nie udało się zmienić nazwy {currentAlbumName} na {newAlbumName}.",
     "General Failure" : "Ogólna awaria",
     "Error: {msg}" : "Błąd: {msg}",
-    "Failed to delete files." : "Nie udało się usunąć plików.",
     "Failed to delete {fileName}." : "Nie udało się usunąć {fileName}.",
     "Failed to favorite files." : "Nie udało się znaleźć ulubionych plików.",
     "Failed to favorite {fileName}." : "Nie udało się dodać do ulubionych {fileName}."
