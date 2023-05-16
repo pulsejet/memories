@@ -25,6 +25,14 @@ p {
     margin-bottom: 30px;
 }
 
+p.error {
+    display: none;
+    color: red;
+    font-weight: 500;
+    word-wrap: break-word;
+    user-select: text;
+}
+
 .logo {
     margin-bottom: 30px;
     width: 60vw;
@@ -60,6 +68,11 @@ input.m-input:focus {
     border-radius: 20px;
     cursor: pointer;
     transition: background-color 0.3s ease-in-out;
+}
+
+.m-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
 }
 
 .m-button.link {

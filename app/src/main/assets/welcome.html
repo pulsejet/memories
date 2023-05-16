@@ -6,23 +6,100 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="container">
-    <img src="memories.svg" alt="Memories Logo" class="logo">
-    <p>
-        Start organizing and sharing your precious moments.<br/>
-        To begin, enter the URL of your Nextcloud server below.
-    </p>
+    <div class="container">
+        <img src="memories.svg" alt="Memories Logo" class="logo">
+        <p>
+            Start organizing and sharing your precious moments.<br/>
+            To begin, enter the URL of your Nextcloud server below.
+        </p>
 
-    <input type="url" id="server-name" class="m-input"
-           placeholder="e.g. https://nextcloud.home.server">
+        <input type="url" id="server-url" class="m-input"
+            placeholder="e.g. https://nextcloud.home.server"
+            value="http://10.0.2.2:8035/"
+        />
 
-    <button class="m-button login-button">
-        Continue to Login
-    </button>
+        <button class="m-button login-button" id="login">
+            Continue to Login
+        </button>
 
-    <a class="m-button link" href="https://memories.gallery/install/">
-        I don't have a server
-    </a>
-</div>
+        <p id="conn-error" class="error"></p>
+
+        <a class="m-button link" href="https://memories.gallery/install/">
+            I don't have a server
+        </a>
+    </div>
+
+    <script>
+        const urlBox = document.getElementById('server-url');
+        const loginButton = document.getElementById('login');
+        const connError = document.getElementById('conn-error');
+
+        function validateUrl(url) {
+            try {
+                url = new URL(url);
+                const protoOk = url.protocol === 'http:' || url.protocol === 'https:';
+                const hostOk = url.hostname.length > 0;
+                return protoOk && hostOk;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function updateLoginEnabled() {
+            loginButton.disabled = !validateUrl(urlBox.value);
+        }
+
+        function getMemoriesUrl() {
+            const url = new URL(urlBox.value);
+
+            // Add index.php to the path if it's not there already
+            if (!url.pathname.includes('/index.php')) {
+                url.pathname += '/index.php/';
+            }
+
+            // Add path to memories
+            url.pathname += 'apps/memories/';
+
+            return url;
+        }
+
+        // Update login button enabled state when the URL changes
+        urlBox.addEventListener('input', updateLoginEnabled);
+        updateLoginEnabled();
+
+        // Login button click handler
+        loginButton.addEventListener('click', async () => {
+            const url = getMemoriesUrl();
+            url.pathname += 'api/describe';
+            const urlStr = url.toString();
+
+            try {
+                urlBox.disabled = true;
+                loginButton.disabled = true;
+
+                // Abort request after 5 seconds
+                const controller = new AbortController()
+                const timeoutId = setTimeout(() => controller.abort(), 5000)
+
+                // Get API description
+                const res = await fetch(urlStr, {
+                    method: 'GET',
+                    signal: controller.signal,
+                });
+                const data = await res.json();
+
+                // API is fine, redirect to login page
+                clearTimeout(timeoutId);
+                window.nativex.login(data?.baseUrl || getMemoriesUrl().toString());
+            } catch (e) {
+                // CORS request, we know nothing about the server
+                connError.innerText = `Failed to fetch server info.\nIs Memories installed and enabled?\n${urlStr}`;
+                connError.style.display = 'block';
+            } finally {
+                urlBox.disabled = false;
+                loginButton.disabled = false;
+            }
+        });
+    </script>
 </body>
 </html>

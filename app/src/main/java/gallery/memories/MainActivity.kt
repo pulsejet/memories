@@ -138,8 +138,7 @@ import gallery.memories.databinding.ActivityMainBinding
         webSettings.userAgentString = "memories-native-android/0.0"
         binding.webview.clearCache(true)
         binding.webview.addJavascriptInterface(mNativeX, "nativex")
-//        binding.webview.loadUrl("http://10.0.2.2:8035/index.php/apps/memories/")
-        binding.webview.loadUrl("https://uncanny-subdue.loca.lt/index.php/apps/memories/")
+        binding.webview.loadUrl("file:///android_asset/welcome.html");
         binding.webview.setBackgroundColor(Color.TRANSPARENT)
         WebView.setWebContentsDebuggingEnabled(true);
     }

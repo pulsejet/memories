@@ -6,6 +6,7 @@ import android.view.SoundEffectConstants
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
+import android.widget.Toast
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.mapper.SystemImage
 import gallery.memories.service.DownloadService
@@ -87,6 +88,15 @@ import java.net.URLDecoder
     @get:JavascriptInterface
     val isNative: Boolean
         get() = true
+
+    @JavascriptInterface
+    fun login(server: String?) {
+        if (server == null) return;
+
+        mActivity.runOnUiThread {
+            Toast.makeText(mActivity, server, Toast.LENGTH_LONG).show()
+        }
+    }
 
     @JavascriptInterface
     fun setThemeColor(color: String?, isDark: Boolean) {
