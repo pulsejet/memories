@@ -16,12 +16,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.ArraySet
 import androidx.exifinterface.media.ExifInterface
+import gallery.memories.R
 import gallery.memories.mapper.Fields
 import gallery.memories.mapper.SystemImage
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
+import java.time.Instant
 import java.util.concurrent.CountDownLatch
 
 class TimelineQuery(private val mCtx: AppCompatActivity) {
@@ -40,9 +42,6 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
                 deleteCallback?.let { it(result) }
             }
         }
-
-        // TODO: remove this in favor of a selective sync
-        fullSyncDb()
     }
 
     @Throws(JSONException::class)
@@ -216,15 +215,45 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
         }
     }
 
-    private fun fullSyncDb() {
-        // Flag all images for removal
-        mDb.execSQL("UPDATE images SET flag = 1")
+    private fun syncDb(startTime: Long) {
+        // Date modified is in seconds, not millis
+        val syncTime = Instant.now().toEpochMilli() / 1000;
+
+        // SystemImage query
+        var selection: String? = null
+        var selectionArgs: Array<String>? = null
+
+        // Query everything modified after startTime
+        if (startTime != 0L) {
+            selection = MediaStore.Images.Media.DATE_MODIFIED + " > ?"
+            selectionArgs = arrayOf(startTime.toString())
+        }
 
         // Iterate all images and videos from system store
         val files =
-            SystemImage.query(mCtx, SystemImage.IMAGE_URI, null, null, null) +
-            SystemImage.query(mCtx, SystemImage.VIDEO_URI, null, null, null)
+            SystemImage.query(mCtx, SystemImage.IMAGE_URI, selection, selectionArgs, null) +
+            SystemImage.query(mCtx, SystemImage.VIDEO_URI, selection, selectionArgs, null)
         files.forEach { insertItemDb(it) }
+
+        // Store last sync time
+        mCtx.getSharedPreferences(mCtx.getString(R.string.preferences_key), 0).edit()
+            .putLong(mCtx.getString(R.string.preferences_last_sync_time), syncTime)
+            .apply()
+    }
+
+    fun syncDeltaDb() {
+        // Get last sync time
+        val syncTime = mCtx.getSharedPreferences(mCtx.getString(R.string.preferences_key), 0)
+            .getLong(mCtx.getString(R.string.preferences_last_sync_time), 0L)
+        syncDb(syncTime)
+    }
+
+    fun syncFullDb() {
+        // Flag all images for removal
+        mDb.execSQL("UPDATE images SET flag = 1")
+
+        // Sync all files, marking them in the process
+        syncDb(0L)
 
         // Clean up stale files
         mDb.execSQL("DELETE FROM images WHERE flag = 1")

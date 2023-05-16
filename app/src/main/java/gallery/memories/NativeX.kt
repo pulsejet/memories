@@ -37,6 +37,9 @@ import java.net.URLDecoder
 
     init {
         mDlService = DownloadService(mActivity)
+
+        // Synchronize the database
+        mQuery.syncDeltaDb()
     }
 
     companion object {

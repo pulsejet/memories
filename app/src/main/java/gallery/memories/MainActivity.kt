@@ -217,15 +217,15 @@ import gallery.memories.databinding.ActivityMainBinding
     fun storeTheme(color: String?, isDark: Boolean) {
         if (color == null) return
         getSharedPreferences(getString(R.string.preferences_key), 0).edit()
-            .putString("themeColor", color)
-            .putBoolean("themeDark", isDark)
+            .putString(getString(R.string.preferences_theme_color), color)
+            .putBoolean(getString(R.string.preferences_theme_dark), isDark)
             .apply()
     }
 
     fun restoreTheme() {
         val preferences = getSharedPreferences(getString(R.string.preferences_key), 0)
-        val color = preferences.getString("themeColor", null)
-        val isDark = preferences.getBoolean("themeDark", false)
+        val color = preferences.getString(getString(R.string.preferences_theme_color), null)
+        val isDark = preferences.getBoolean(getString(R.string.preferences_theme_dark), false)
         applyTheme(color, isDark)
     }
 
