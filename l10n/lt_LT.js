@@ -146,7 +146,6 @@ OC.L10N.register(
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Nepavyko pervadinti {currentAlbumName} į {newAlbumName}.",
     "General Failure" : "Bendrinė nesėkmė",
     "Error: {msg}" : "Klaida: {msg}",
-    "Failed to delete files." : "Nepavyko ištrinti failų.",
     "Failed to delete {fileName}." : "Nepavyko ištrinti {fileName}.",
     "Failed to download files" : "Nepavyko atsisiųsti failų",
     "Your Timeline" : "Jūsų laiko juostą"

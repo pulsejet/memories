@@ -396,7 +396,6 @@
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "重新命名 {currentAlbumName} 為 {newAlbumName} 失敗。",
     "General Failure" : "一般故障",
     "Error: {msg}" : "錯誤：{msg}",
-    "Failed to delete files." : "刪除檔案失敗。",
     "Failed to delete {fileName}." : "刪除 {fileName} 失敗。",
     "Failed to move files." : "移動檔案失敗。",
     "Could not move {fileName}, target exists." : "無法移動「{fileName}」，目標已經存在。",

@@ -363,7 +363,6 @@ OC.L10N.register(
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Ezin izan da {currentAlbumName} berrizendatu {newAlbumName} gisa.",
     "General Failure" : "Hutsegite orokorra",
     "Error: {msg}" : "Errorea: {msg}",
-    "Failed to delete files." : "Fitxategiak ezabatzeak huts egin du.",
     "Failed to delete {fileName}." : "{fileName} ezabatzeak huts egin du.",
     "Failed to move files." : "Fitxategiak lekuz aldatzeak huts egin du.",
     "Could not move {fileName}, target exists." : "Ezin izan da {fileName} lekuz aldatu, helburua existitzen da jadanik.",

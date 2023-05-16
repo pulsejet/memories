@@ -398,8 +398,6 @@ OC.L10N.register(
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Failed to rename {currentAlbumName} to {newAlbumName}.",
     "General Failure" : "General Failure",
     "Error: {msg}" : "Error: {msg}",
-    "Failed to delete files." : "Failed to delete files.",
-    "Failed to delete local files." : "Failed to delete local files.",
     "Failed to delete {fileName}." : "Failed to delete {fileName}.",
     "Failed to move files." : "Failed to move files.",
     "Could not move {fileName}, target exists." : "Could not move {fileName}, target exists.",

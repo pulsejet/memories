@@ -186,7 +186,6 @@ OC.L10N.register(
     "Auto" : "Автоматично",
     "Failed to create {albumName}." : "Не вдалося створити {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Не вдалося перейменувати {currentAlbumName} на {newAlbumName}.",
-    "Failed to delete files." : "Не вдалося вилучити файли.",
     "Failed to delete {fileName}." : "Не вдалося вилучити {fileName}.",
     "Failed to favorite files." : "Не вдалося додати файли до вибраного.",
     "Failed to favorite {fileName}." : "Не вдалося додати {fileName} до вибраного.",

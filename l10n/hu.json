@@ -396,8 +396,6 @@
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "A(z) {currentAlbumName} átnevezése a következőre sikertelen: {newAlbumName}.",
     "General Failure" : "Általános hiba",
     "Error: {msg}" : "Hiba: {msg}",
-    "Failed to delete files." : "A fájlok törlése sikertelen.",
-    "Failed to delete local files." : "A helyi fájlok törlése sikertelen.",
     "Failed to delete {fileName}." : "A(z) {fileName} törlése sikertelen.",
     "Failed to move files." : "Sikertelen a fájlok áthelyezése.",
     "Could not move {fileName}, target exists." : "Nem sikerült áthelyezni a(z) {fileName}, a cél létezik.",

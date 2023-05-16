@@ -390,7 +390,6 @@ OC.L10N.register(
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Неуспешно преименуване от {currentAlbumName} на {newAlbumName}.",
     "General Failure" : "Грешка от общ характер",
     "Error: {msg}" : "Грешка: {msg}",
-    "Failed to delete files." : "Неуспешно изтриване на файлове.",
     "Failed to delete {fileName}." : "Неуспешно изтриване на {fileName}.",
     "Failed to move files." : "Неуспешно преместване на файлове.",
     "Could not move {fileName}, target exists." : "Файлът {fileName} не може да бъде преместен, дестинацията съществува.",

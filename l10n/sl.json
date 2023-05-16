@@ -209,7 +209,6 @@
     "Failed to create {albumName}." : "Ustvarjanje albuma {albumName} je spodletelo.",
     "General Failure" : "Splošna napaka",
     "Error: {msg}" : "Napaka: {msg}",
-    "Failed to delete files." : "Brisanje datotek je spodletelo.",
     "Failed to delete {fileName}." : "Brisanje datoteke {fileName} je spodletelo.",
     "Failed to move files." : "Premikanje datotek je spodletelo.",
     "Could not move {fileName}, target exists." : "Datoteke {fileName} ni mogoče premakniti, ker cilj že obstaja.",

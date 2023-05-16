@@ -391,7 +391,6 @@ OC.L10N.register(
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "{currentAlbumName} konnte nicht in {newAlbumName} umbenannt werden.",
     "General Failure" : "Allgemeiner Fehler",
     "Error: {msg}" : "Fehler: {msg}",
-    "Failed to delete files." : "Löschen der Dateien fehlgeschlagen",
     "Failed to delete {fileName}." : "{fileName} konnte nicht gelöscht werden.",
     "Failed to move files." : "Dateien konnten nicht verschoben werden.",
     "Could not move {fileName}, target exists." : "{fileName} konnte nicht verschoben werden, Zieldatei existiert bereits.",
