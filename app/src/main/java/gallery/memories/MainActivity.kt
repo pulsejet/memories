@@ -25,6 +25,11 @@ import gallery.memories.databinding.ActivityMainBinding
         ActivityMainBinding.inflate(layoutInflater)
     }
 
+    companion object {
+        // replicate chrome: https://www.whatismybrowser.com/guides/the-latest-user-agent/chrome
+        val USER_AGENT = "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.76 Mobile Safari/537.36 Memories/0.0"
+    }
+
     private lateinit var mNativeX: NativeX
 
     private var player: ExoPlayer? = null
@@ -135,12 +140,23 @@ import gallery.memories.databinding.ActivityMainBinding
         webSettings.allowContentAccess = true
         webSettings.domStorageEnabled = true
         webSettings.databaseEnabled = true
-        webSettings.userAgentString = "memories-native-android/0.0"
+        webSettings.userAgentString = USER_AGENT
         binding.webview.clearCache(true)
         binding.webview.addJavascriptInterface(mNativeX, "nativex")
-        binding.webview.loadUrl("file:///android_asset/welcome.html");
         binding.webview.setBackgroundColor(Color.TRANSPARENT)
         WebView.setWebContentsDebuggingEnabled(true);
+
+        // Load accounts
+        mNativeX.mAccountService.refreshAuthHeader()
+        val authHeader = mNativeX.mAccountService.authHeader
+        val memoriesUrl = mNativeX.mAccountService.memoriesUrl
+        if (authHeader != null && memoriesUrl != null) {
+            binding.webview.loadUrl(memoriesUrl, mapOf(
+                "Authorization" to authHeader
+            ))
+        } else {
+            binding.webview.loadUrl("file:///android_asset/welcome.html");
+        }
     }
 
     fun initializePlayer(uri: Uri, uid: String) {

@@ -1,6 +1,5 @@
 package gallery.memories
 
-import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.view.SoundEffectConstants
@@ -10,23 +9,20 @@ import android.webkit.WebResourceResponse
 import android.widget.Toast
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.mapper.SystemImage
+import gallery.memories.service.AccountService
 import gallery.memories.service.DownloadService
 import gallery.memories.service.ImageService
 import gallery.memories.service.TimelineQuery
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONObject
 import java.io.ByteArrayInputStream
 import java.net.URLDecoder
 
 @UnstableApi class NativeX(private val mActivity: MainActivity) {
     val TAG = "NativeX"
 
-    private val mImageService: ImageService = ImageService(mActivity)
-    private val mQuery: TimelineQuery = TimelineQuery(mActivity)
     private var themeStored = false
+    private val mImageService = ImageService(mActivity)
+    private val mQuery = TimelineQuery(mActivity)
+    val mAccountService = AccountService(mActivity)
 
     object API {
         val DAYS = Regex("^/api/days$")
@@ -105,34 +101,7 @@ import java.net.URLDecoder
     @JavascriptInterface
     fun login(baseUrl: String?, loginFlowUrl: String?) {
         if (baseUrl == null || loginFlowUrl == null) return;
-
-        // Make POST request to login flow URL
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url(loginFlowUrl)
-            .post("".toRequestBody("application/json".toMediaTypeOrNull()))
-            .build()
-        val response = client.newCall(request).execute()
-
-        // Read response body
-        val body = response.body?.string()
-        if (body == null) {
-            toast("Failed to get login flow response")
-            return
-        }
-
-        // Parse response body as JSON
-        val json = JSONObject(body)
-        try {
-            val loginUrl = json.getString("login")
-            toast("Opening login page...")
-
-            // Open login page in browser
-            mActivity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(loginUrl)))
-        } catch (e: Exception) {
-            Log.e(TAG, "login: ", e)
-            toast("Failed to parse login flow response")
-        }
+        mAccountService.login(baseUrl, loginFlowUrl)
     }
 
     @JavascriptInterface
