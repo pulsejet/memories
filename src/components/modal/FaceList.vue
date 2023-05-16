@@ -32,7 +32,7 @@ import { ICluster, IFace } from '../../types';
 import ClusterGrid from '../ClusterGrid.vue';
 
 import { showError } from '@nextcloud/dialogs';
-import NcTextField from '@nextcloud/vue/dist/Components/NcTextField';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
 import * as dav from '../../services/DavRequests';
 import Fuse from 'fuse.js';
