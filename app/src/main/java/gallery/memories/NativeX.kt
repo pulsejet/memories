@@ -1,5 +1,6 @@
 package gallery.memories
 
+import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.view.SoundEffectConstants
@@ -12,6 +13,11 @@ import gallery.memories.mapper.SystemImage
 import gallery.memories.service.DownloadService
 import gallery.memories.service.ImageService
 import gallery.memories.service.TimelineQuery
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 import java.io.ByteArrayInputStream
 import java.net.URLDecoder
 
@@ -90,11 +96,42 @@ import java.net.URLDecoder
         get() = true
 
     @JavascriptInterface
-    fun login(server: String?) {
-        if (server == null) return;
-
+    fun toast(message: String) {
         mActivity.runOnUiThread {
-            Toast.makeText(mActivity, server, Toast.LENGTH_LONG).show()
+            Toast.makeText(mActivity, message, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    @JavascriptInterface
+    fun login(baseUrl: String?, loginFlowUrl: String?) {
+        if (baseUrl == null || loginFlowUrl == null) return;
+
+        // Make POST request to login flow URL
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url(loginFlowUrl)
+            .post("".toRequestBody("application/json".toMediaTypeOrNull()))
+            .build()
+        val response = client.newCall(request).execute()
+
+        // Read response body
+        val body = response.body?.string()
+        if (body == null) {
+            toast("Failed to get login flow response")
+            return
+        }
+
+        // Parse response body as JSON
+        val json = JSONObject(body)
+        try {
+            val loginUrl = json.getString("login")
+            toast("Opening login page...")
+
+            // Open login page in browser
+            mActivity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(loginUrl)))
+        } catch (e: Exception) {
+            Log.e(TAG, "login: ", e)
+            toast("Failed to parse login flow response")
         }
     }
 

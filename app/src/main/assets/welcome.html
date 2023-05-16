@@ -90,7 +90,7 @@
 
                 // API is fine, redirect to login page
                 clearTimeout(timeoutId);
-                window.nativex.login(data?.baseUrl || getMemoriesUrl().toString());
+                window.nativex.login(data.baseUrl, data.loginFlowUrl);
             } catch (e) {
                 // CORS request, we know nothing about the server
                 connError.innerText = `Failed to fetch server info.\nIs Memories installed and enabled?\n${urlStr}`;
