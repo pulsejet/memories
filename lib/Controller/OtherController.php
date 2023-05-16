@@ -114,6 +114,7 @@ class OtherController extends GenericApiController
             $res = new JSONResponse([
                 'version' => $appManager->getAppInfo('memories')['version'],
                 'baseUrl' => $urlGenerator->linkToRouteAbsolute('memories.Page.main'),
+                'loginFlowUrl' => $urlGenerator->linkToRouteAbsolute('core.ClientFlowLoginV2.init'),
             ]);
 
             // This is public information
