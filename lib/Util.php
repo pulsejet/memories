@@ -468,7 +468,7 @@ class Util
         $request = \OC::$server->get(\OCP\IRequest::class);
         $userAgent = $request->getHeader('User-Agent');
 
-        return false !== strpos($userAgent, 'memories-native');
+        return false !== strpos($userAgent, 'MemoriesNative');
     }
 
     /**
