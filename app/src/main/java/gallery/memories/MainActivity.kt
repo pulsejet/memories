@@ -27,7 +27,7 @@ import gallery.memories.databinding.ActivityMainBinding
 
     companion object {
         // replicate chrome: https://www.whatismybrowser.com/guides/the-latest-user-agent/chrome
-        val USER_AGENT = "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.76 Mobile Safari/537.36 Memories/0.0"
+        val USER_AGENT = "MemoriesNative/0.0 Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.76 Mobile Safari/537.36"
     }
 
     private lateinit var mNativeX: NativeX
