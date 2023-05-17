@@ -179,7 +179,9 @@ trait TimelineWritePlaces
         $lon = \array_key_exists(LON_KEY, $exif) ? round((float) $exif[LON_KEY], 6) : null;
 
         // Make sure we have valid coordinates
-        if (null === $lat || null === $lon || abs($lat) > 90 || abs($lon) > 180 || ($lat < 0.00001 && $lon < 0.00001)) {
+        if (null === $lat || null === $lon
+        || abs($lat) > 90 || abs($lon) > 180
+        || (abs($lat) < 0.00001 && abs($lon) < 0.00001)) {
             $lat = $lon = null;
         }
 
