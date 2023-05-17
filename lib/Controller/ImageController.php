@@ -276,7 +276,8 @@ class ImageController extends GenericApiController
             $blob = $file->getContent();
 
             // Convert image to JPEG if required
-            if (!\in_array($mimetype, ['image/png', 'image/webp', 'image/jpeg', 'image/gif'], true)) {
+            $format = $this->config->getSystemValueString('memories.preview.format', 'false');
+            if (!\in_array($mimetype, ['image/png', 'image/webp', 'image/jpeg', 'image/gif'], true) || $format != 'false') {
                 [$blob, $mimetype] = $this->getImageJPEG($blob, $mimetype);
             }
 
@@ -377,14 +378,77 @@ class ImageController extends GenericApiController
         } catch (\ImagickException $e) {
             throw Exceptions::Forbidden('Imagick failed to read image: '.$e->getMessage());
         }
-
         // Convert to JPEG
         try {
             $image->autoOrient();
-            $image->setImageFormat('jpeg');
-            $image->setImageCompressionQuality(95);
+            $format = $this->config->getSystemValueString('memories.preview.format', 'jpeg');
+            switch ($format) {
+              case 'jpeg':
+                $format = 'jpeg';
+                break;
+              case 'webp':
+                $format = 'webp';
+                break;
+              case 'avif':
+                $format = 'avif';
+                break;
+              default:
+                $format = 'jpeg';
+            }
+            $image->setImageFormat($format);
+
+            $quality = (int)$this->config->getSystemValue('memories.preview.quality', '95');
+            if ($quality < 0 || $quality > 100) {
+                //throw Exceptions::Forbidden('Warning: You have set an invalid quality value for image conversion');
+            }
+            $image->setImageCompressionQuality($quality);
+
+            // Set maximum width and height
+            $maxWidth = (int)$this->config->getSystemValue('memories.preview.x', '0');
+            $maxHeight = (int)$this->config->getSystemValue('memories.preview.y', '0');
+
+            // Get current dimensions
+            $width = (int)$image->getImageWidth();
+            $height = (int)$image->getImageHeight();
+
+            // Calculate new dimensions while maintaining aspect ratio
+            if($maxWidth != 0 && $maxHeight != 0) {
+              if ($width > $maxWidth || $height > $maxHeight) {
+                $aspectRatio = $width / $height;
+                if ($width > $height) {
+                    $newWidth = $maxWidth;
+                    $newHeight = $maxWidth / $aspectRatio;
+                } else {
+                    $newHeight = $maxHeight;
+                    $newWidth = $maxHeight * $aspectRatio;
+                }
+                  // Resize the image
+                  $image->scaleImage((int)$newWidth, (int)$newHeight);
+              }
+            }
+
             $blob = $image->getImageBlob();
             $mimetype = $image->getImageMimeType();
+
+            //getImageMimeType() dont work for webp you can use pathinfo() and strtolower() but i make it shorter
+            $extension = pathinfo("file.".$format, PATHINFO_EXTENSION);
+            $extension = strtolower($extension);
+
+            $mimeTypes = [
+                'jpeg' => 'image/jpeg',
+                'jpg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'webp' => 'image/webp',
+                'avif' => 'image/avif',
+            ];
+
+            if (isset($mimeTypes[$extension])) {
+                $mimetype = $mimeTypes[$extension];
+            }
+
+            //$mimetype = 'image/'.$format;
+
         } catch (\ImagickException $e) {
             throw Exceptions::Forbidden('Imagick failed to convert image: '.$e->getMessage());
         }
