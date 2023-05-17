@@ -8,7 +8,7 @@
       'remove-gap': removeOuterGap,
     }"
   >
-    <NcAppNavigation v-if="showNavigation" ref="nav">
+    <NcAppNavigation v-if="showNavigation">
       <template #list>
         <NcAppNavigationItem
           v-for="item in navItems"
@@ -371,8 +371,9 @@ export default defineComponent({
     },
 
     linkClick() {
-      const nav: any = this.$refs.nav;
-      if (globalThis.windowInnerWidth <= 1024) nav?.toggleNavigation(false);
+      if (globalThis.windowInnerWidth <= 1024) {
+        emit('toggle-navigation', { open: false });
+      }
     },
 
     doRouteChecks() {
