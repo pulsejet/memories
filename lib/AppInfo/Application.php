@@ -26,6 +26,7 @@ namespace OCA\Memories\AppInfo;
 use OCA\Memories\ClustersBackend;
 use OCA\Memories\Listeners\PostDeleteListener;
 use OCA\Memories\Listeners\PostWriteListener;
+use OCA\Memories\Util;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
@@ -33,6 +34,8 @@ use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\Files\Events\Node\NodeDeletedEvent;
 use OCP\Files\Events\Node\NodeTouchedEvent;
 use OCP\Files\Events\Node\NodeWrittenEvent;
+
+const AUTH_HEADER = 'HTTP_AUTHORIZATION';
 
 class Application extends App implements IBootstrap
 {
@@ -80,6 +83,14 @@ class Application extends App implements IBootstrap
         ClustersBackend\PlacesBackend::register();
         ClustersBackend\RecognizeBackend::register();
         ClustersBackend\FaceRecognitionBackend::register();
+
+        // Extra hooks for native extension calls
+        if (Util::callerIsNative()) {
+            // Android webview sends an empty Authorization header which screws up DAV
+            if (isset($_SERVER[AUTH_HEADER]) && empty($_SERVER[AUTH_HEADER])) {
+                unset($_SERVER[AUTH_HEADER]);
+            }
+        }
     }
 
     public function boot(IBootContext $context): void
