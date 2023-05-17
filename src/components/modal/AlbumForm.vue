@@ -94,7 +94,7 @@ import { showError } from '@nextcloud/dialogs';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
-import moment from 'moment';
+import { DateTime } from 'luxon';
 import * as dav from '../../services/DavRequests';
 
 import AlbumCollaborators from './AlbumCollaborators.vue';
@@ -190,7 +190,7 @@ export default defineComponent({
           nbItems: 0,
           location: this.albumLocation,
           lastPhoto: -1,
-          date: moment().format('MMMM YYYY'),
+          date: DateTime.now().toFormat('MMMM YYYY'),
           collaborators,
         };
         await dav.createAlbum(album.basename);

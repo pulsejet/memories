@@ -1,5 +1,5 @@
 import { getCanonicalLocale } from '@nextcloud/l10n';
-import moment from 'moment';
+import { DateTime } from 'luxon';
 
 // Memoize the result of short date conversions
 // These operations are surprisingly expensive
@@ -57,7 +57,10 @@ export function getMonthDateStr(date: Date) {
 /** Get text like "5 years ago" from a date */
 export function getFromNowStr(date: Date) {
   // Get fromNow in correct locale
-  const text = moment(date).locale(getCanonicalLocale()).fromNow();
+  const text =
+    DateTime.fromJSDate(date).toRelative({
+      locale: getCanonicalLocale(),
+    }) ?? 'Unknown';
 
   // Title case
   return text.charAt(0).toUpperCase() + text.slice(1);

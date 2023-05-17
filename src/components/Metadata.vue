@@ -54,9 +54,7 @@ import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 import axios from '@nextcloud/axios';
 import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 import { getCanonicalLocale } from '@nextcloud/l10n';
-
-import moment from 'moment';
-import 'moment-timezone';
+import { DateTime } from 'luxon';
 
 import * as utils from '../services/Utils';
 
@@ -168,26 +166,30 @@ export default defineComponent({
     },
 
     /** Date taken info */
-    dateOriginal(): moment.Moment | null {
+    dateOriginal(): DateTime | null {
       const epoch = this.exif.DateTimeEpoch || this.baseInfo.datetaken;
-      const m = moment.utc(epoch * 1000);
-      if (!m.isValid()) return null;
-      m.locale(getCanonicalLocale());
+      let date = DateTime.fromSeconds(epoch);
+      if (!epoch || !date.isValid) return null;
 
       // The fallback to datetaken can be eventually removed
       // and then this can be discarded
       if (this.exif.DateTimeEpoch) {
-        const tzOffset = this.exif['OffsetTimeOriginal'] || this.exif['OffsetTime'];
-        const tzId = this.exif['LocationTZID'];
+        const tzOffset: string = this.exif['OffsetTimeOriginal'] || this.exif['OffsetTime']; // e.g. -05:00
+        const tzId: string = this.exif['LocationTZID']; // e.g. America/New_York
 
-        if (tzOffset) {
-          m.utcOffset(tzOffset);
-        } else if (tzId) {
-          m.tz(tzId);
+        // Use timezone offset if available, otherwise use tzId
+        let dateWithTz = date.setZone('UTC' + tzOffset);
+        if (!dateWithTz.isValid) {
+          dateWithTz = date.setZone(tzId); // Fall back to tzId
+        }
+
+        // Use the timezone only if the date is valid
+        if (dateWithTz.isValid) {
+          date = dateWithTz;
         }
       }
 
-      return m;
+      return date;
     },
 
     dateOriginalStr(): string | null {
@@ -197,13 +199,13 @@ export default defineComponent({
     dateOriginalTime(): string[] | null {
       if (!this.dateOriginal) return null;
 
-      let format = 'h:mm A';
+      let format = 'h:mm a';
       const fields = ['OffsetTimeOriginal', 'OffsetTime', 'LocationTZID'];
       if (fields.some((key) => this.exif[key])) {
-        format += ' Z';
+        format += ' ZZ';
       }
 
-      return [this.dateOriginal.format(format)];
+      return [this.dateOriginal.toFormat(format, { locale: getCanonicalLocale() })];
     },
 
     /** Camera make and model info */
