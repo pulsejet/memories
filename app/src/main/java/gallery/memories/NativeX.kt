@@ -20,8 +20,8 @@ import java.net.URLDecoder
     val TAG = "NativeX"
 
     private var themeStored = false
-    private val mImageService = ImageService(mActivity)
-    private val mQuery = TimelineQuery(mActivity)
+    val mImageService = ImageService(mActivity)
+    val mQuery = TimelineQuery(mActivity)
     val mAccountService = AccountService(mActivity)
 
     object API {
@@ -41,8 +41,10 @@ import java.net.URLDecoder
     init {
         mDlService = DownloadService(mActivity)
 
-        // Synchronize the database
-        mQuery.syncDeltaDb()
+        // Synchronize the database if possible
+        if (mActivity.hasMediaPermission()) {
+            mQuery.syncDeltaDb()
+        }
     }
 
     companion object {

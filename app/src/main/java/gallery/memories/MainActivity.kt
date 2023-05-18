@@ -10,6 +10,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.WindowInsetsController
 import android.webkit.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
@@ -45,6 +46,9 @@ import gallery.memories.databinding.ActivityMainBinding
 
         // Initialize services
         mNativeX = NativeX(this)
+
+        // Ensure storage permissions
+        ensureStoragePermissions()
 
         // Load JavaScript
         initializeWebView()
@@ -160,15 +164,31 @@ import gallery.memories.databinding.ActivityMainBinding
         // Load accounts
         val authHeader = mNativeX.mAccountService.authHeader
         val memoriesUrl = mNativeX.mAccountService.memoriesUrl
+
+        // Load app interface if authenticated
         if (authHeader != null && memoriesUrl != null) {
             binding.webview.loadUrl(memoriesUrl, mapOf(
                 "Authorization" to authHeader
             ))
             return true
-        } else {
-            binding.webview.loadUrl("file:///android_asset/welcome.html");
-            return false
         }
+
+        // Load welcome page
+        binding.webview.loadUrl("file:///android_asset/welcome.html");
+        return false
+    }
+
+    fun ensureStoragePermissions() {
+        val requestPermissionLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted: Boolean ->
+                if (isGranted && !hasMediaPermission()) {
+                    mNativeX.mQuery.syncFullDb()
+                }
+                setHasMediaPermission(isGranted)
+            }
+        requestPermissionLauncher.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     }
 
     fun initializePlayer(uri: Uri, uid: String) {
@@ -267,5 +287,16 @@ import gallery.memories.databinding.ActivityMainBinding
         } else {
             window.decorView.systemUiVisibility = if (isDark) 0 else View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         }
+    }
+
+    fun hasMediaPermission(): Boolean {
+        return getSharedPreferences(getString(R.string.preferences_key), 0)
+            .getBoolean(getString(R.string.preferences_has_media_permission), false)
+    }
+
+    private fun setHasMediaPermission(v: Boolean) {
+        getSharedPreferences(getString(R.string.preferences_key), 0).edit()
+            .putBoolean(getString(R.string.preferences_has_media_permission), v)
+            .apply()
     }
 }
