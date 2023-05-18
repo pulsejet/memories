@@ -1,9 +1,13 @@
 <resources>
     <string name="app_name">Memories</string>
-    <string name="action_settings">Settings</string>
+    <string name="min_server_version">5.1.0</string>
 
     <string name="preferences_key">memories</string>
     <string name="preferences_theme_color">themeColor</string>
     <string name="preferences_theme_dark">themeDark</string>
     <string name="preferences_last_sync_time">lastDbSyncTime</string>
+
+    <string name="err_no_ver">Your server does not have the minimum required version of Memories</string>
+    <string name="err_logged_out">Logged out from server</string>
+    <string name="err_no_describe">Failed to connect to server. Reset app data if this persists.</string>
 </resources>

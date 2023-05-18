@@ -7,6 +7,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
+import gallery.memories.R
+import io.github.g00fy2.versioncompare.Version
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -138,9 +140,14 @@ import org.json.JSONObject
                 return loggedOut()
             }
 
+            // Could not connect to memories
+            if (response.code == 404) {
+                return toast(mActivity.getString(R.string.err_no_ver))
+            }
+
             // Check body
             if (body == null || response.code != 200) {
-                toast("Failed to connect to server. Reset app data if this persists.")
+                toast(mActivity.getString(R.string.err_no_describe))
                 return
             }
 
@@ -148,16 +155,20 @@ import org.json.JSONObject
             val version = json.getString("version")
             val uid = json.get("uid")
 
-            // TODO: check version
-
+            // Check UID exists
             if (uid.equals(null) && authHeader != null) {
                 return loggedOut()
+            }
+
+            // Check minimum version
+            if (Version(version) < Version(mActivity.getString(R.string.min_server_version))) {
+                return toast(mActivity.getString(R.string.err_no_ver))
             }
         }
     }
 
     fun loggedOut() {
-        toast("Logged out from server")
+        toast(mActivity.getString(R.string.err_logged_out))
         deleteCredentials()
         mActivity.runOnUiThread {
             mActivity.loadDefaultUrl()
