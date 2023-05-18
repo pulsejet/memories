@@ -404,10 +404,24 @@ class Util
      */
     public static function callerIsNative(): bool
     {
-        $request = \OC::$server->get(\OCP\IRequest::class);
-        $userAgent = $request->getHeader('User-Agent');
+        $userAgent = \OC::$server->get(\OCP\IRequest::class)->getHeader('User-Agent');
 
         return false !== strpos($userAgent, 'MemoriesNative');
+    }
+
+    /**
+     * Get the version of the native caller.
+     */
+    public static function callerNativeVersion(): ?string
+    {
+        $userAgent = \OC::$server->get(\OCP\IRequest::class)->getHeader('User-Agent');
+
+        $matches = [];
+        if (preg_match('/MemoriesNative\/([0-9.]+)/', $userAgent, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 
     /**

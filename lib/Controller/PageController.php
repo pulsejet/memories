@@ -3,9 +3,11 @@
 namespace OCA\Memories\Controller;
 
 use OCA\Files\Event\LoadSidebar;
+use OCA\Memories\Service\BinExt;
 use OCA\Memories\Util;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IRequest;
@@ -40,9 +42,10 @@ class PageController extends Controller
      */
     public function main()
     {
-        $user = $this->userSession->getUser();
-        if (null === $user) {
-            return null;
+        // Check native version if available
+        $nativeVer = Util::callerNativeVersion();
+        if (null !== $nativeVer && version_compare($nativeVer, BinExt::NX_VER_MIN, '<')) {
+            return new PublicTemplateResponse($this->appName, 'native-old');
         }
 
         // Scripts

@@ -10,6 +10,7 @@ class BinExt
 {
     public const EXIFTOOL_VER = '12.60';
     public const GOVOD_VER = '0.1.5';
+    public const NX_VER_MIN = '1.0';
 
     /** Copy a binary to temp dir for execution */
     public static function getTempBin(string $path, string $name, bool $copy = true): string
