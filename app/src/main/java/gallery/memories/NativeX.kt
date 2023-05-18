@@ -107,6 +107,11 @@ import java.net.URLDecoder
     }
 
     @JavascriptInterface
+    fun logout() {
+        mAccountService.loggedOut()
+    }
+
+    @JavascriptInterface
     fun setThemeColor(color: String?, isDark: Boolean) {
         // Save for getting it back on next start
         if (!themeStored) {
