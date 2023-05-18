@@ -276,8 +276,8 @@ class ImageController extends GenericApiController
             $blob = $file->getContent();
 
             // Convert image to JPEG if required
-            $format = $this->config->getSystemValueString('memories.preview.format', 'false');
-            if (!\in_array($mimetype, ['image/png', 'image/webp', 'image/jpeg', 'image/gif'], true) || $format != 'false') {
+            $highres_enabled = $this->config->getSystemValueString('memories.image.highres_convert_all_images_formarts_enabled', 'false');
+            if (!\in_array($mimetype, ['image/png', 'image/webp', 'image/jpeg', 'image/gif'], true) || $highres_enabled == 'true') {
                 [$blob, $mimetype] = $this->getImageJPEG($blob, $mimetype);
             }
 
@@ -381,7 +381,7 @@ class ImageController extends GenericApiController
         // Convert to JPEG
         try {
             $image->autoOrient();
-            $format = $this->config->getSystemValueString('memories.preview.format', 'jpeg');
+            $format = $this->config->getSystemValueString('memories.highres_format', 'jpeg');
             switch ($format) {
               case 'jpeg':
                 $format = 'jpeg';
@@ -389,30 +389,30 @@ class ImageController extends GenericApiController
               case 'webp':
                 $format = 'webp';
                 break;
-              case 'avif':
-                $format = 'avif';
-                break;
+              /*case 'avif': //CPU Benchmark
+                //$format = 'avif';
+                break*/
               default:
                 $format = 'jpeg';
             }
             $image->setImageFormat($format);
 
-            $quality = (int)$this->config->getSystemValue('memories.preview.quality', '95');
+            $quality = (int)$this->config->getSystemValue('memories.image.highres_quality', '95');
             if ($quality < 0 || $quality > 100) {
                 //throw Exceptions::Forbidden('Warning: You have set an invalid quality value for image conversion');
             }
             $image->setImageCompressionQuality($quality);
 
             // Set maximum width and height
-            $maxWidth = (int)$this->config->getSystemValue('memories.preview.x', '0');
-            $maxHeight = (int)$this->config->getSystemValue('memories.preview.y', '0');
+            $maxWidth = (int)$this->config->getSystemValue('memories.image.highres_max_x', '0');
+            $maxHeight = (int)$this->config->getSystemValue('memories.image.highres_max_y', '0');
 
             // Get current dimensions
             $width = (int)$image->getImageWidth();
             $height = (int)$image->getImageHeight();
 
             // Calculate new dimensions while maintaining aspect ratio
-            if($maxWidth != 0 && $maxHeight != 0) {
+            if ($maxWidth > 0 && $maxHeight > 0) {
               if ($width > $maxWidth || $height > $maxHeight) {
                 $aspectRatio = $width / $height;
                 if ($width > $height) {
@@ -437,8 +437,6 @@ class ImageController extends GenericApiController
             $mimeTypes = [
                 'jpeg' => 'image/jpeg',
                 'jpg' => 'image/jpeg',
-                'png' => 'image/png',
-                'gif' => 'image/gif',
                 'webp' => 'image/webp',
                 'avif' => 'image/avif',
             ];
