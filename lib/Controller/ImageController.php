@@ -276,9 +276,29 @@ class ImageController extends GenericApiController
             $blob = $file->getContent();
 
             // Convert image to JPEG if required
-            $highres_enabled = $this->config->getSystemValueString('memories.image.highres_convert_all_images_formarts_enabled', 'false');
-            if (!\in_array($mimetype, ['image/png', 'image/webp', 'image/jpeg', 'image/gif'], true) || $highres_enabled == 'true') {
+            //You might want to lower the maximum execution time here.
+            //And increase again, to the default value, when the image is finished.
+            //And set a maximum number of concurrent executions, which might prevent thrashing.
+            //JSON(tmp) Database where you just save the entries as a number and delete them when they are done or the entries are 5 minutes old.
+            $highres_enabled = $this->config->getSystemValueString('memories.image.highres.convert_all_images_formarts_enabled', 'false');
+            $format = $this->config->getSystemValueString('memories.image.highres.format', 'jpeg');
+            if ($highres_enabled == 'true') {
+              switch ($format) {
+                case 'jpeg':
+                  if (!\in_array($mimetype, ['image/png', 'image/gif'], true)) {
+                      [$blob, $mimetype] = $this->getImageJPEG($blob, $mimetype);
+                  }
+                  break;
+                case 'webp':
+                  if (!\in_array($mimetype, ['image/gif'], true)) {
+                      [$blob, $mimetype] = $this->getImageJPEG($blob, $mimetype);
+                  }
+                  break;
+              }
+            } else {
+              if (!\in_array($mimetype, ['image/png', 'image/webp', 'image/jpeg', 'image/gif'], true)) {
                 [$blob, $mimetype] = $this->getImageJPEG($blob, $mimetype);
+              }
             }
 
             // Return the image
@@ -381,71 +401,29 @@ class ImageController extends GenericApiController
         // Convert to JPEG
         try {
             $image->autoOrient();
-            $format = $this->config->getSystemValueString('memories.highres_format', 'jpeg');
-            switch ($format) {
-              case 'jpeg':
-                $format = 'jpeg';
-                break;
-              case 'webp':
-                $format = 'webp';
-                break;
-              /*case 'avif': //CPU Benchmark
-                //$format = 'avif';
-                break*/
-              default:
-                $format = 'jpeg';
-            }
+            $format = $this->config->getSystemValueString('memories.image.highres.format', 'jpeg');
             $image->setImageFormat($format);
 
-            $quality = (int)$this->config->getSystemValue('memories.image.highres_quality', '95');
-            if ($quality < 0 || $quality > 100) {
-                //throw Exceptions::Forbidden('Warning: You have set an invalid quality value for image conversion');
-            }
+            $quality = (int)$this->config->getSystemValue('memories.image.highres.quality', '95');
             $image->setImageCompressionQuality($quality);
 
             // Set maximum width and height
             $maxWidth = (int)$this->config->getSystemValue('memories.image.highres_max_x', '0');
             $maxHeight = (int)$this->config->getSystemValue('memories.image.highres_max_y', '0');
 
-            // Get current dimensions
+            // Check if the image exceeds the maximum resolution
             $width = (int)$image->getImageWidth();
             $height = (int)$image->getImageHeight();
 
-            // Calculate new dimensions while maintaining aspect ratio
             if ($maxWidth > 0 && $maxHeight > 0) {
               if ($width > $maxWidth || $height > $maxHeight) {
-                $aspectRatio = $width / $height;
-                if ($width > $height) {
-                    $newWidth = $maxWidth;
-                    $newHeight = $maxWidth / $aspectRatio;
-                } else {
-                    $newHeight = $maxHeight;
-                    $newWidth = $maxHeight * $aspectRatio;
-                }
                   // Resize the image
-                  $image->scaleImage((int)$newWidth, (int)$newHeight);
+                  $image->scaleImage((int)$maxWidth, (int)$maxHeight, true);
               }
             }
 
             $blob = $image->getImageBlob();
             $mimetype = $image->getImageMimeType();
-
-            //getImageMimeType() dont work for webp you can use pathinfo() and strtolower() but i make it shorter
-            $extension = pathinfo("file.".$format, PATHINFO_EXTENSION);
-            $extension = strtolower($extension);
-
-            $mimeTypes = [
-                'jpeg' => 'image/jpeg',
-                'jpg' => 'image/jpeg',
-                'webp' => 'image/webp',
-                'avif' => 'image/avif',
-            ];
-
-            if (isset($mimeTypes[$extension])) {
-                $mimetype = $mimeTypes[$extension];
-            }
-
-            //$mimetype = 'image/'.$format;
 
         } catch (\ImagickException $e) {
             throw Exceptions::Forbidden('Imagick failed to convert image: '.$e->getMessage());
