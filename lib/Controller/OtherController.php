@@ -111,13 +111,20 @@ class OtherController extends GenericApiController
             $appManager = \OC::$server->get(\OCP\App\IAppManager::class);
             $urlGenerator = \OC::$server->get(\OCP\IURLGenerator::class);
 
-            $res = new JSONResponse([
+            $info = [
                 'version' => $appManager->getAppInfo('memories')['version'],
                 'baseUrl' => $urlGenerator->linkToRouteAbsolute('memories.Page.main'),
                 'loginFlowUrl' => $urlGenerator->linkToRouteAbsolute('core.ClientFlowLoginV2.init'),
-            ]);
+            ];
+
+            try {
+                $info['uid'] = Util::getUID();
+            } catch (\Exception $e) {
+                $info['uid'] = null;
+            }
 
             // This is public information
+            $res = new JSONResponse($info);
             $res->addHeader('Access-Control-Allow-Origin', '*');
 
             return $res;
