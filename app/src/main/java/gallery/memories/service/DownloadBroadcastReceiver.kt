@@ -7,6 +7,6 @@ import gallery.memories.NativeX
 
 class DownloadBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        NativeX.mDlService?.runDownloadCallback(intent)
+        NativeX.dlService?.runDownloadCallback(intent)
     }
 }

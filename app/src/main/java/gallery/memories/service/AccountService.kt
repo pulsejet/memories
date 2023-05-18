@@ -15,7 +15,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 
-@UnstableApi class AccountService(private val mActivity: MainActivity) {
+@UnstableApi class AccountService(private val mCtx: MainActivity) {
     companion object {
         val TAG = "AccountService"
     }
@@ -24,8 +24,8 @@ import org.json.JSONObject
     var memoriesUrl: String? = null
 
     private fun toast(message: String) {
-        mActivity.runOnUiThread {
-            Toast.makeText(mActivity, message, Toast.LENGTH_LONG).show()
+        mCtx.runOnUiThread {
+            Toast.makeText(mCtx, message, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -61,7 +61,7 @@ import org.json.JSONObject
             toast("Opening login page...")
 
             // Open login page in browser
-            mActivity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(loginUrl)))
+            mCtx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(loginUrl)))
         } catch (e: Exception) {
             Log.e(TAG, "login: ", e)
             toast("Failed to parse login flow response")
@@ -75,8 +75,8 @@ import org.json.JSONObject
     }
 
     private fun pollLogin(pollUrl: String, pollToken: String, baseUrl: String) {
-        mActivity.binding.webview.post {
-            mActivity.binding.webview.loadUrl("file:///android_asset/waiting.html")
+        mCtx.binding.webview.post {
+            mCtx.binding.webview.loadUrl("file:///android_asset/waiting.html")
         }
 
         val client = OkHttpClient()
@@ -111,11 +111,11 @@ import org.json.JSONObject
             val loginName = json.getString("loginName")
             val appPassword = json.getString("appPassword")
 
-            mActivity.runOnUiThread {
+            mCtx.runOnUiThread {
                 // Save login info (also updates header)
                 storeCredentials(baseUrl, loginName, appPassword)
-                mActivity.runOnUiThread {
-                    mActivity.loadDefaultUrl()
+                mCtx.runOnUiThread {
+                    mCtx.loadDefaultUrl()
                 }
             }
 
@@ -142,12 +142,12 @@ import org.json.JSONObject
 
             // Could not connect to memories
             if (response.code == 404) {
-                return toast(mActivity.getString(R.string.err_no_ver))
+                return toast(mCtx.getString(R.string.err_no_ver))
             }
 
             // Check body
             if (body == null || response.code != 200) {
-                toast(mActivity.getString(R.string.err_no_describe))
+                toast(mCtx.getString(R.string.err_no_describe))
                 return
             }
 
@@ -161,22 +161,22 @@ import org.json.JSONObject
             }
 
             // Check minimum version
-            if (Version(version) < Version(mActivity.getString(R.string.min_server_version))) {
-                return toast(mActivity.getString(R.string.err_no_ver))
+            if (Version(version) < Version(mCtx.getString(R.string.min_server_version))) {
+                return toast(mCtx.getString(R.string.err_no_ver))
             }
         }
     }
 
     fun loggedOut() {
-        toast(mActivity.getString(R.string.err_logged_out))
+        toast(mCtx.getString(R.string.err_logged_out))
         deleteCredentials()
-        mActivity.runOnUiThread {
-            mActivity.loadDefaultUrl()
+        mCtx.runOnUiThread {
+            mCtx.loadDefaultUrl()
         }
     }
 
     fun storeCredentials(url: String, user: String, password: String) {
-        mActivity.getSharedPreferences("credentials", 0).edit()
+        mCtx.getSharedPreferences("credentials", 0).edit()
             .putString("memoriesUrl", url)
             .putString("user", user)
             .putString("password", password)
@@ -186,7 +186,7 @@ import org.json.JSONObject
     }
 
     fun getCredentials(): Pair<String, String>? {
-        val prefs = mActivity.getSharedPreferences("credentials", 0)
+        val prefs = mCtx.getSharedPreferences("credentials", 0)
         memoriesUrl = prefs.getString("memoriesUrl", null)
         val user = prefs.getString("user", null)
         val password = prefs.getString("password", null)
@@ -197,7 +197,7 @@ import org.json.JSONObject
     fun deleteCredentials() {
         authHeader = null
         memoriesUrl = null
-        mActivity.getSharedPreferences("credentials", 0).edit()
+        mCtx.getSharedPreferences("credentials", 0).edit()
             .remove("memoriesUrl")
             .remove("user")
             .remove("password")

@@ -16,13 +16,13 @@ import gallery.memories.service.TimelineQuery
 import java.io.ByteArrayInputStream
 import java.net.URLDecoder
 
-@UnstableApi class NativeX(private val mActivity: MainActivity) {
+@UnstableApi class NativeX(private val mCtx: MainActivity) {
     val TAG = "NativeX"
 
     private var themeStored = false
-    val mImageService = ImageService(mActivity)
-    val mQuery = TimelineQuery(mActivity)
-    val mAccountService = AccountService(mActivity)
+    val image = ImageService(mCtx)
+    val query = TimelineQuery(mCtx)
+    val account = AccountService(mCtx)
 
     object API {
         val DAYS = Regex("^/api/days$")
@@ -39,20 +39,20 @@ import java.net.URLDecoder
     }
 
     init {
-        mDlService = DownloadService(mActivity)
+        dlService = DownloadService(mCtx)
 
         // Synchronize the database if possible
-        if (mActivity.hasMediaPermission()) {
-            mQuery.syncDeltaDb()
+        if (mCtx.hasMediaPermission()) {
+            query.syncDeltaDb()
         }
     }
 
     companion object {
-        var mDlService: DownloadService? = null
+        var dlService: DownloadService? = null
     }
 
     fun destroy() {
-        mDlService = null
+        dlService = null
     }
 
     fun handleRequest(request: WebResourceRequest): WebResourceResponse {
@@ -95,20 +95,20 @@ import java.net.URLDecoder
 
     @JavascriptInterface
     fun toast(message: String) {
-        mActivity.runOnUiThread {
-            Toast.makeText(mActivity, message, Toast.LENGTH_LONG).show()
+        mCtx.runOnUiThread {
+            Toast.makeText(mCtx, message, Toast.LENGTH_LONG).show()
         }
     }
 
     @JavascriptInterface
     fun login(baseUrl: String?, loginFlowUrl: String?) {
         if (baseUrl == null || loginFlowUrl == null) return;
-        mAccountService.login(baseUrl, loginFlowUrl)
+        account.login(baseUrl, loginFlowUrl)
     }
 
     @JavascriptInterface
     fun logout() {
-        mAccountService.loggedOut()
+        account.loggedOut()
     }
 
     @JavascriptInterface
@@ -116,25 +116,25 @@ import java.net.URLDecoder
         // Save for getting it back on next start
         if (!themeStored) {
             themeStored = true
-            mActivity.storeTheme(color, isDark);
+            mCtx.storeTheme(color, isDark);
         }
 
         // Apply the theme
-        mActivity.runOnUiThread {
-            mActivity.applyTheme(color, isDark)
+        mCtx.runOnUiThread {
+            mCtx.applyTheme(color, isDark)
         }
     }
 
     @JavascriptInterface
     fun downloadFromUrl(url: String?, filename: String?) {
         if (url == null || filename == null) return;
-        mDlService!!.queue(url, filename)
+        dlService!!.queue(url, filename)
     }
 
     @JavascriptInterface
     fun playTouchSound() {
-        mActivity.runOnUiThread {
-            mActivity.binding.webview.playSoundEffect(SoundEffectConstants.CLICK)
+        mCtx.runOnUiThread {
+            mCtx.binding.webview.playSoundEffect(SoundEffectConstants.CLICK)
         }
     }
 
@@ -144,13 +144,13 @@ import java.net.URLDecoder
 
         Thread {
             // Get URI of local video
-            val videos = SystemImage.getByIds(mActivity, arrayListOf(fileId.toLong()))
+            val videos = SystemImage.getByIds(mCtx, arrayListOf(fileId.toLong()))
             if (videos.isEmpty()) return@Thread
             val video = videos[0]
 
             // Play with exoplayer
-            mActivity.runOnUiThread {
-                mActivity.initializePlayer(video.uri, fileId)
+            mCtx.runOnUiThread {
+                mCtx.initializePlayer(video.uri, fileId)
             }
         }.start()
     }
@@ -158,16 +158,16 @@ import java.net.URLDecoder
     @JavascriptInterface
     fun playVideoHls(fileId: String?, url: String?) {
         if (fileId == null || url == null) return
-        mActivity.runOnUiThread {
-            mActivity.initializePlayer(Uri.parse(url), fileId)
+        mCtx.runOnUiThread {
+            mCtx.initializePlayer(Uri.parse(url), fileId)
         }
     }
 
     @JavascriptInterface
     fun destroyVideo(fileId: String?) {
         if (fileId == null) return;
-        mActivity.runOnUiThread {
-            mActivity.destroyPlayer(fileId)
+        mCtx.runOnUiThread {
+            mCtx.destroyPlayer(fileId)
         }
     }
 
@@ -175,23 +175,23 @@ import java.net.URLDecoder
     private fun routerGet(path: String): WebResourceResponse {
         val parts = path.split("/").toTypedArray()
         if (path.matches(API.IMAGE_PREVIEW)) {
-            return makeResponse(mImageService.getPreview(parts[3].toLong()), "image/jpeg")
+            return makeResponse(image.getPreview(parts[3].toLong()), "image/jpeg")
         } else if (path.matches(API.IMAGE_FULL)) {
-            return makeResponse(mImageService.getFull(parts[3].toLong()), "image/jpeg")
+            return makeResponse(image.getFull(parts[3].toLong()), "image/jpeg")
         } else if (path.matches(API.IMAGE_INFO)) {
-            return makeResponse(mQuery.getImageInfo(parts[4].toLong()))
+            return makeResponse(query.getImageInfo(parts[4].toLong()))
         } else if (path.matches(API.IMAGE_DELETE)) {
-            return makeResponse(mQuery.delete(parseIds(parts[4])))
+            return makeResponse(query.delete(parseIds(parts[4])))
         } else if (path.matches(API.DAYS)) {
-            return makeResponse(mQuery.getDays())
+            return makeResponse(query.getDays())
         } else if (path.matches(API.DAY)) {
-            return makeResponse(mQuery.getByDayId(parts[3].toLong()))
+            return makeResponse(query.getByDayId(parts[3].toLong()))
         } else if (path.matches(API.SHARE_URL)) {
-            return makeResponse(mDlService!!.shareUrl(URLDecoder.decode(parts[4], "UTF-8")))
+            return makeResponse(dlService!!.shareUrl(URLDecoder.decode(parts[4], "UTF-8")))
         } else if (path.matches(API.SHARE_BLOB)) {
-            return makeResponse(mDlService!!.shareBlobFromUrl(URLDecoder.decode(parts[4], "UTF-8")))
+            return makeResponse(dlService!!.shareBlobFromUrl(URLDecoder.decode(parts[4], "UTF-8")))
         } else if (path.matches(API.SHARE_LOCAL)) {
-            return makeResponse(mDlService!!.shareLocal(parts[4].toLong()))
+            return makeResponse(dlService!!.shareLocal(parts[4].toLong()))
         } else {
             throw Exception("Not Found")
         }

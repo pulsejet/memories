@@ -26,7 +26,7 @@ import gallery.memories.databinding.ActivityMainBinding
         ActivityMainBinding.inflate(layoutInflater)
     }
 
-    private lateinit var mNativeX: NativeX
+    private lateinit var nativex: NativeX
 
     private var player: ExoPlayer? = null
     private var playerUri: Uri? = null
@@ -45,7 +45,7 @@ import gallery.memories.databinding.ActivityMainBinding
         restoreTheme()
 
         // Initialize services
-        mNativeX = NativeX(this)
+        nativex = NativeX(this)
 
         // Ensure storage permissions
         ensureStoragePermissions()
@@ -62,7 +62,7 @@ import gallery.memories.databinding.ActivityMainBinding
 
     override fun onDestroy() {
         super.onDestroy()
-        mNativeX.destroy()
+        nativex.destroy()
     }
 
     public override fun onResume() {
@@ -120,7 +120,7 @@ import gallery.memories.databinding.ActivityMainBinding
 
             override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
                 return if (request.url.host == "127.0.0.1") {
-                    mNativeX.handleRequest(request)
+                    nativex.handleRequest(request)
                 } else null
             }
         }
@@ -144,26 +144,26 @@ import gallery.memories.databinding.ActivityMainBinding
         webSettings.databaseEnabled = true
         webSettings.userAgentString = userAgent
         binding.webview.clearCache(true)
-        binding.webview.addJavascriptInterface(mNativeX, "nativex")
+        binding.webview.addJavascriptInterface(nativex, "nativex")
         binding.webview.setBackgroundColor(Color.TRANSPARENT)
         WebView.setWebContentsDebuggingEnabled(true);
 
         // Welcome page or actual app
-        mNativeX.mAccountService.refreshAuthHeader()
+        nativex.account.refreshAuthHeader()
         val isApp = loadDefaultUrl()
 
         // Start version check if loaded account
         if (isApp) {
             Thread {
-                mNativeX.mAccountService.checkCredentialsAndVersion()
+                nativex.account.checkCredentialsAndVersion()
             }.start()
         }
     }
 
     fun loadDefaultUrl(): Boolean {
         // Load accounts
-        val authHeader = mNativeX.mAccountService.authHeader
-        val memoriesUrl = mNativeX.mAccountService.memoriesUrl
+        val authHeader = nativex.account.authHeader
+        val memoriesUrl = nativex.account.memoriesUrl
 
         // Load app interface if authenticated
         if (authHeader != null && memoriesUrl != null) {
@@ -184,7 +184,7 @@ import gallery.memories.databinding.ActivityMainBinding
                 ActivityResultContracts.RequestPermission()
             ) { isGranted: Boolean ->
                 if (isGranted && !hasMediaPermission()) {
-                    mNativeX.mQuery.syncFullDb()
+                    nativex.query.syncFullDb()
                 }
                 setHasMediaPermission(isGranted)
             }
