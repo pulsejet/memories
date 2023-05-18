@@ -146,16 +146,30 @@ import gallery.memories.databinding.ActivityMainBinding
         binding.webview.setBackgroundColor(Color.TRANSPARENT)
         WebView.setWebContentsDebuggingEnabled(true);
 
-        // Load accounts
+        // Welcome page or actual app
         mNativeX.mAccountService.refreshAuthHeader()
+        val isApp = loadDefaultUrl()
+
+        // Start version check if loaded account
+        if (isApp) {
+            Thread {
+                mNativeX.mAccountService.checkCredentialsAndVersion()
+            }.start()
+        }
+    }
+
+    fun loadDefaultUrl(): Boolean {
+        // Load accounts
         val authHeader = mNativeX.mAccountService.authHeader
         val memoriesUrl = mNativeX.mAccountService.memoriesUrl
         if (authHeader != null && memoriesUrl != null) {
             binding.webview.loadUrl(memoriesUrl, mapOf(
                 "Authorization" to authHeader
             ))
+            return true
         } else {
             binding.webview.loadUrl("file:///android_asset/welcome.html");
+            return false
         }
     }
 

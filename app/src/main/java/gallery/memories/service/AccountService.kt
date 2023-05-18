@@ -5,6 +5,7 @@ import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import android.widget.Toast
+import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -12,7 +13,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 
-class AccountService(private val mActivity: MainActivity) {
+@UnstableApi class AccountService(private val mActivity: MainActivity) {
     companion object {
         val TAG = "AccountService"
     }
@@ -111,14 +112,55 @@ class AccountService(private val mActivity: MainActivity) {
             mActivity.runOnUiThread {
                 // Save login info (also updates header)
                 storeCredentials(baseUrl, loginName, appPassword)
-
-                // Load main view
-                mActivity.binding.webview.loadUrl(baseUrl, mapOf(
-                    "Authorization" to authHeader
-                ))
+                mActivity.runOnUiThread {
+                    mActivity.loadDefaultUrl()
+                }
             }
 
             return;
+        }
+    }
+
+    fun checkCredentialsAndVersion() {
+        memoriesUrl.let { base ->
+            val request = Request.Builder()
+                .url(base + "api/describe")
+                .get()
+                .header("Authorization", authHeader ?: "")
+                .build()
+
+            val response = OkHttpClient().newCall(request).execute()
+            val body = response.body?.string()
+            response.body?.close()
+
+            // Check status code
+            if (response.code == 401) {
+                return loggedOut()
+            }
+
+            // Check body
+            if (body == null || response.code != 200) {
+                toast("Failed to connect to server. Reset app data if this persists.")
+                return
+            }
+
+            val json = JSONObject(body)
+            val version = json.getString("version")
+            val uid = json.get("uid")
+
+            // TODO: check version
+
+            if (uid.equals(null) && authHeader != null) {
+                return loggedOut()
+            }
+        }
+    }
+
+    fun loggedOut() {
+        toast("Logged out from server")
+        deleteCredentials()
+        mActivity.runOnUiThread {
+            mActivity.loadDefaultUrl()
         }
     }
 
@@ -128,6 +170,7 @@ class AccountService(private val mActivity: MainActivity) {
             .putString("user", user)
             .putString("password", password)
             .apply()
+        memoriesUrl = url
         setAuthHeader(Pair(user, password))
     }
 
@@ -138,6 +181,16 @@ class AccountService(private val mActivity: MainActivity) {
         val password = prefs.getString("password", null)
         if (user == null || password == null) return null
         return Pair(user, password)
+    }
+
+    fun deleteCredentials() {
+        authHeader = null
+        memoriesUrl = null
+        mActivity.getSharedPreferences("credentials", 0).edit()
+            .remove("memoriesUrl")
+            .remove("user")
+            .remove("password")
+            .apply()
     }
 
     fun refreshAuthHeader() {
