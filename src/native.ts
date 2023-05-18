@@ -1,6 +1,7 @@
 import axios from '@nextcloud/axios';
 import type { IDay, IPhoto } from './types';
 import { constants } from './services/Utils';
+import { generateUrl } from '@nextcloud/router';
 
 const BASE_URL = 'http://127.0.0.1';
 
@@ -32,6 +33,8 @@ export type NativeX = {
   playVideoLocal: (fileid: string) => void;
   playVideoHls: (fileid: string, url: string) => void;
   destroyVideo: (fileid: string) => void;
+
+  logout: () => void;
 };
 
 /** The native interface is a global object that is injected by the native app. */
@@ -196,6 +199,15 @@ export async function deleteLocalPhotos(photos: IPhoto[]): Promise<IPhoto[]> {
   }
 
   return localPhotos;
+}
+
+/**
+ * Log out from Nextcloud and pass ahead.
+ */
+export async function logout() {
+  await axios.get(generateUrl('logout'));
+  if (!has()) window.location.reload();
+  nativex?.logout();
 }
 
 /**

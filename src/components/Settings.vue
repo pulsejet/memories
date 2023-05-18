@@ -61,6 +61,13 @@
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
+      <NcAppSettingsSection id="account-settings" :title="t('memories', 'Account')" v-if="hasLogout">
+        Logged in as {{ user }}
+        <NcButton @click="logout" id="sign-out">
+          {{ t('memories', 'Sign out') }}
+        </NcButton>
+      </NcAppSettingsSection>
+
       <NcAppSettingsSection id="folders-settings" :title="t('memories', 'Folders')">
         <label for="folders-path">{{ t('memories', 'Folders Path') }}</label>
         <input id="folders-path" @click="chooseFoldersPath" v-model="config.folders_path" type="text" />
@@ -107,8 +114,12 @@ input[type='text'] {
 import { defineComponent } from 'vue';
 
 import { getFilePickerBuilder } from '@nextcloud/dialogs';
+import { getCurrentUser } from '@nextcloud/auth';
 
 import UserConfig from '../mixins/UserConfig';
+import * as nativex from '../native';
+
+import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcAppSettingsDialog = () => import('@nextcloud/vue/dist/Components/NcAppSettingsDialog');
 const NcAppSettingsSection = () => import('@nextcloud/vue/dist/Components/NcAppSettingsSection');
 const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch');
@@ -119,6 +130,7 @@ export default defineComponent({
   name: 'Settings',
 
   components: {
+    NcButton,
     NcAppSettingsDialog,
     NcAppSettingsSection,
     NcCheckboxRadioSwitch,
@@ -138,11 +150,23 @@ export default defineComponent({
     pathSelTitle(): string {
       return this.t('memories', 'Choose Timeline Paths');
     },
+
+    hasLogout(): boolean {
+      return nativex.has();
+    },
+
+    user(): string {
+      return getCurrentUser()?.uid.toString() ?? '';
+    },
   },
 
   methods: {
     onClose() {
       this.$emit('update:open', false);
+    },
+
+    logout() {
+      nativex.logout();
     },
 
     async chooseFolder(title: string, initial: string) {
@@ -214,3 +238,13 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.app-settings-section {
+  margin-bottom: 20px !important;
+}
+
+#sign-out {
+  margin-top: 10px;
+}
+</style>
