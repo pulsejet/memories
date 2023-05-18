@@ -25,11 +25,6 @@ import gallery.memories.databinding.ActivityMainBinding
         ActivityMainBinding.inflate(layoutInflater)
     }
 
-    companion object {
-        // replicate chrome: https://www.whatismybrowser.com/guides/the-latest-user-agent/chrome
-        val USER_AGENT = "MemoriesNative/0.0 Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.76 Mobile Safari/537.36"
-    }
-
     private lateinit var mNativeX: NativeX
 
     private var player: ExoPlayer? = null
@@ -134,13 +129,16 @@ import gallery.memories.databinding.ActivityMainBinding
             false
         }
 
+        val userAgent =
+            getString(R.string.ua_app_prefix) + BuildConfig.VERSION_NAME + " " + getString(R.string.ua_chrome)
+
         val webSettings = binding.webview.settings
         webSettings.javaScriptEnabled = true
         webSettings.javaScriptCanOpenWindowsAutomatically = true
         webSettings.allowContentAccess = true
         webSettings.domStorageEnabled = true
         webSettings.databaseEnabled = true
-        webSettings.userAgentString = USER_AGENT
+        webSettings.userAgentString = userAgent
         binding.webview.clearCache(true)
         binding.webview.addJavascriptInterface(mNativeX, "nativex")
         binding.webview.setBackgroundColor(Color.TRANSPARENT)

@@ -7,6 +7,10 @@
     <string name="preferences_theme_dark">themeDark</string>
     <string name="preferences_last_sync_time">lastDbSyncTime</string>
 
+    <!-- https://www.whatismybrowser.com/guides/the-latest-user-agent/chrome -->
+    <string name="ua_chrome">"Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.76 Mobile Safari/537.36"</string>
+    <string name="ua_app_prefix">MemoriesNative/</string>
+
     <string name="err_no_ver">Your server does not have the minimum required version of Memories</string>
     <string name="err_logged_out">Logged out from server</string>
     <string name="err_no_describe">Failed to connect to server. Reset app data if this persists.</string>
