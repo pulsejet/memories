@@ -382,7 +382,7 @@ class ImageController extends GenericApiController
         try {
             $image->autoOrient();
             $image->setImageFormat('jpeg');
-            $image->setImageCompressionQuality(95);
+            $image->setImageCompressionQuality(85);
             $blob = $image->getImageBlob();
             $mimetype = $image->getImageMimeType();
         } catch (\ImagickException $e) {
