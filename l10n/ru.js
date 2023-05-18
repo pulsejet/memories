@@ -42,6 +42,7 @@ OC.L10N.register(
     "General" : "Основные",
     "Timeline Path" : "Расположение",
     "Square grid mode" : "Квадратные миниатюры",
+    "Account" : "Учётная запись",
     "Folders Path" : "Верхний уровень для папок",
     "Show hidden folders" : "Показывать скрытые файлы",
     "Choose Timeline Paths" : "Расположение для истории",

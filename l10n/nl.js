@@ -37,6 +37,7 @@ OC.L10N.register(
     "Move to folder" : "Verplaatsen naar map",
     "Add to album" : "Toevoegen aan album",
     "General" : "Algemeen",
+    "Account" : "Account",
     "Close" : "Sluit",
     "Performance" : "Prestaties",
     "Unknown" : "Onbekend",

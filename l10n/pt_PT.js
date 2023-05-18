@@ -23,6 +23,7 @@ OC.L10N.register(
     "You are about to delete a large number of files. Are you sure?" : "Estás prestes a eliminar um grande número de ficheiros. Tem a certeza?",
     "General" : "Geral",
     "Timeline Path" : "Caminho da Cronologia",
+    "Account" : "Conta",
     "Show hidden folders" : "Mostrar pastas ocultas",
     "Close" : "Fechar",
     "Failed to load some photos" : "Não foi possível carregar algumas fotografias",

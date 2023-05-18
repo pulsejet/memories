@@ -21,6 +21,7 @@ OC.L10N.register(
     "Unarchive" : "Taka úr geymslu",
     "View in folder" : "Skoða í möppu",
     "General" : "Almennt",
+    "Account" : "Aðgangur",
     "Close" : "Loka",
     "Performance" : "Afköst",
     "Unknown" : "Óþekkt",

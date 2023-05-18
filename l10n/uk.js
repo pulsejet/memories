@@ -31,6 +31,7 @@ OC.L10N.register(
     "You are about to delete a large number of files. Are you sure?" : "Ви збираєтеся вилучити велику кількість файлів. Чи ви впевнені?",
     "General" : "Загальне",
     "Timeline Path" : "Шлях шкали часу",
+    "Account" : "Обліковий запис",
     "Show hidden folders" : "Показати приховані каталоги",
     "Close" : "Закрити",
     "Failed to load some photos" : "Не вдалося завантажити деякі фотографії",

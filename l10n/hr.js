@@ -20,6 +20,7 @@ OC.L10N.register(
     "Unarchive" : "Dearhiviraj",
     "View in folder" : "Prikaži u mapi",
     "General" : "Općenito",
+    "Account" : "Račun",
     "Close" : "Zatvori",
     "Performance" : "Učinkovitost",
     "Unknown" : "Nepoznata pogreška",

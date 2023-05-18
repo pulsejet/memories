@@ -28,6 +28,7 @@ OC.L10N.register(
     "You are about to delete a large number of files. Are you sure?" : "Du kommer att ta bort ett stort antal filer. Är du säker?",
     "General" : "Allmänt",
     "Timeline Path" : "Tidslinjesökväg",
+    "Account" : "Konto",
     "Show hidden folders" : "Visa dolda filer",
     "Close" : "Stäng",
     "Failed to load some photos" : "Misslyckades att läsa in vissa foton",

@@ -17,6 +17,7 @@ OC.L10N.register(
     "Favorite" : "Favorīts",
     "View in folder" : "Skatīt mapē",
     "General" : "Vispārīgs",
+    "Account" : "Konts",
     "Close" : "Aizvērt",
     "Unknown" : "Nezināms",
     "Copy the public link" : "Kopējiet publisko saiti",

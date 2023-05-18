@@ -30,6 +30,7 @@ OC.L10N.register(
     "_{n} selected_::_{n} selected_" : ["{n} vybraté","{n} vybraté","{n} vybratých","{n} vybraté"],
     "General" : "Všeobecné",
     "Timeline Path" : "Popis umiestnenia časovej osi",
+    "Account" : "Účet",
     "Show hidden folders" : "Zobraziť skryté priečinky",
     "Close" : "Zatvoriť",
     "Failed to load some photos" : "Načítanie akýchkoľvek fotiek zlyhalo",

@@ -65,6 +65,7 @@ OC.L10N.register(
     "Show past photos on top of timeline" : "Vergangene Fotos oben auf der Zeitleiste anzeigen",
     "Load full size image on zoom" : "Bild in voller Größe beim Zoomen laden",
     "Always load full size image (not recommended)" : "Bild immer in voller Größe laden (nicht empfohlen)",
+    "Account" : "Konto",
     "Folders Path" : "Ordnerpfad",
     "Show hidden folders" : "Zeige versteckte Ordner",
     "Sort folders oldest-first" : "Ordner sortieren, älteste zuerst",

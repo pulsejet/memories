@@ -18,6 +18,7 @@ OC.L10N.register(
     "Favorite" : "Favorit",
     "View in folder" : "Veire dins lo dossièr",
     "General" : "Generals",
+    "Account" : "Compte",
     "Close" : "Tampar",
     "Unknown" : "Desconegut",
     "Copy public link" : "Copiar lo ligam public",

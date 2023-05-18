@@ -19,6 +19,7 @@ OC.L10N.register(
     "Favorite" : "مورد‌ ‌علاقه‌",
     "View in folder" : "مشاهده در پوشه",
     "General" : "عمومی",
+    "Account" : "حساب",
     "Close" : "بسته",
     "Performance" : "کارایی",
     "Unknown" : "ناشناخته",

@@ -18,6 +18,7 @@ OC.L10N.register(
     "Unarchive" : "Hiq nga arkivi",
     "View in folder" : "Shikoje në dosje",
     "General" : "Të përgjithshme",
+    "Account" : "Llogari",
     "Close" : "Mbylleni",
     "Unknown" : "I panjohur",
     "Back" : "Prapa",

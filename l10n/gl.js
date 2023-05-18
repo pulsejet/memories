@@ -24,6 +24,7 @@ OC.L10N.register(
     "View in folder" : "Ver no cartafol",
     "Add to album" : "Engadir ao álbum",
     "General" : "Xeral",
+    "Account" : "Conta",
     "Close" : "Pechar",
     "Performance" : "Rendemento",
     "Unknown" : "Descoñecido",

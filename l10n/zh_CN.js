@@ -24,6 +24,7 @@ OC.L10N.register(
     "View in folder" : "在文件夹中查看",
     "Add to album" : "添加至相册",
     "General" : "常规",
+    "Account" : "账户",
     "Close" : "关闭",
     "Performance" : "性能",
     "Unknown" : "未知",

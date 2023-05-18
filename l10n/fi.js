@@ -50,6 +50,7 @@ OC.L10N.register(
     "General" : "Yleiset",
     "Timeline Path" : "Aikajanan polku",
     "Square grid mode" : "Ristikkonäkymä",
+    "Account" : "Tili",
     "Folders Path" : "Kansioiden polku",
     "Show hidden folders" : "Näytä piilotetut kansiot",
     "Choose Timeline Paths" : "Valitse aikajanan polut",

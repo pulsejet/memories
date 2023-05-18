@@ -20,6 +20,7 @@ OC.L10N.register(
     "Unarchive" : "アーカイブを解除",
     "View in folder" : "フォルダー内で表示",
     "General" : "一般",
+    "Account" : "アカウント",
     "Close" : "閉じる",
     "Performance" : "パフォーマンス",
     "Unknown" : "不明",

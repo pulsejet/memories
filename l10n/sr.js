@@ -65,6 +65,7 @@ OC.L10N.register(
     "Show past photos on top of timeline" : "Прикажи фотографије из прошлости на врху временске линије",
     "Load full size image on zoom" : "Учитај слику пуне величине код увећавања",
     "Always load full size image (not recommended)" : "Увек учитај слику пуне величине (не препоручује се)",
+    "Account" : "Налог",
     "Folders Path" : "Путања до фолдера",
     "Show hidden folders" : "Прикажи скривене фолдере",
     "Sort folders oldest-first" : "Поређај фолдере најстарији прво",
