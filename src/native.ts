@@ -55,7 +55,7 @@ export async function setTheme(color?: string, dark?: boolean) {
 
   color ??= getComputedStyle(document.body).getPropertyValue('--color-main-background');
   dark ??=
-    window.matchMedia('(prefers-color-scheme: dark)').matches ||
+    (document.body.hasAttribute('data-theme-default') && window.matchMedia('(prefers-color-scheme: dark)').matches) ||
     document.body.hasAttribute('data-theme-dark') ||
     document.body.hasAttribute('data-theme-dark-highcontrast');
   nativex?.setThemeColor?.(color, dark);
