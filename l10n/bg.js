@@ -60,6 +60,7 @@ OC.L10N.register(
     "Show past photos on top of timeline" : "Показване на последните снимки в горната част на времевата линия",
     "Load full size image on zoom" : "Зареждане на изображение в пълен размер при увеличаване на мащаба",
     "Always load full size image (not recommended)" : "Винаги да се зарежда изображение в пълен размер (не се препоръчва)",
+    "Account" : "Профил",
     "Folders Path" : "Път на папките",
     "Show hidden folders" : "Показване на скрити папки",
     "Sort folders oldest-first" : "Сортиране на папки, първо най-старите",

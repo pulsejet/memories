@@ -64,6 +64,7 @@
     "Load full size image on zoom" : "在縮放時載入全尺寸的圖片",
     "Always load full size image (not recommended)" : "一律載入全尺寸的圖片（不建議）",
     "Account" : "帳號",
+    "Sign out" : "登出",
     "Folders Path" : "資料夾路徑",
     "Show hidden folders" : "顯示隱藏的資料夾",
     "Sort folders oldest-first" : "將資料夾從最舊開始排序",
