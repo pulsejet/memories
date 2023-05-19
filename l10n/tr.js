@@ -64,6 +64,7 @@ OC.L10N.register(
     "Show past photos on top of timeline" : "Geçmiş fotoğraflar zaman akışının üzerinde görüntülensin",
     "Load full size image on zoom" : "Yakınlaştırıldığında tam boyutlu görsel yüklensin",
     "Always load full size image (not recommended)" : "Her zaman tam boyutlu görsel yüklensin (önerilmez)",
+    "Account" : "Hesap",
     "Folders Path" : "Klasörlerin yolu",
     "Show hidden folders" : "Gizli klasörleri görüntüle",
     "Sort folders oldest-first" : "Klasörleri eskiden yeniye sırala",

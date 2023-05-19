@@ -23,6 +23,7 @@ OC.L10N.register(
     "Unarchive" : "Togli dall'archivio",
     "View in folder" : "Visualizza nella cartella",
     "General" : "Generale",
+    "Account" : "Account",
     "Close" : "Chiudi",
     "Performance" : "Prestazioni",
     "Unknown" : "Sconosciuto",

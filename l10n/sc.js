@@ -20,6 +20,7 @@ OC.L10N.register(
     "Favorite" : "Preferidu",
     "View in folder" : "Càstia in sa cartella",
     "General" : "Generale",
+    "Account" : "Contu",
     "Close" : "Serra",
     "Performance" : "Atuatzione",
     "Unknown" : "Disconnotu",

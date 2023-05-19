@@ -22,6 +22,7 @@ OC.L10N.register(
     "View in folder" : "Προβολή στον φάκελο",
     "Add to album" : "Προσθήκη στο άλμπουμ",
     "General" : "Γενικά",
+    "Account" : "Λογαριασμός",
     "Close" : "Κλείσιμο",
     "Performance" : "Απόδοση",
     "Unknown" : "Άγνωστο",

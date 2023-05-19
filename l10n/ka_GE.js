@@ -18,6 +18,7 @@ OC.L10N.register(
     "Unarchive" : "ამოღება",
     "View in folder" : "ჩვენება დირექტორიაში",
     "General" : "ზოგადი",
+    "Account" : "ანგარიში",
     "Close" : "დახურვა",
     "Unknown" : "უცნობია",
     "Back" : "უკან",

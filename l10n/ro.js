@@ -17,6 +17,7 @@ OC.L10N.register(
     "Favorite" : "Favorite",
     "View in folder" : "Vizualizează în director",
     "General" : "General",
+    "Account" : "Cont",
     "Close" : "Închide",
     "Unknown" : "Necunoscut",
     "Copy public link" : "Copiză link-ul public",

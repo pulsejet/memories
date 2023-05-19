@@ -18,6 +18,7 @@ OC.L10N.register(
     "Unarchive" : "Desarchivar",
     "View in folder" : "Ver en la carpeta",
     "General" : "General",
+    "Account" : "Cuenta",
     "Close" : "Cerrar",
     "Unknown" : "Desconocido",
     "Back" : "Atrás",

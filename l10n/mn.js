@@ -18,6 +18,7 @@ OC.L10N.register(
     "Unarchive" : "Архиваас гаргах",
     "View in folder" : "Хавтасыг нээх",
     "General" : "Ерөнхий",
+    "Account" : "аккаунт",
     "Close" : "Хаах",
     "Unknown" : "Үл танигдах зүйл",
     "Back" : "буцах",

@@ -35,6 +35,7 @@ OC.L10N.register(
     "Add to album" : "Dodaj album",
     "General" : "Splošno",
     "Square grid mode" : "Način kvadratne mreže",
+    "Account" : "Račun",
     "Folders Path" : "Pot map",
     "Show hidden folders" : "Pokaži skrite mape",
     "Close" : "Zapri",

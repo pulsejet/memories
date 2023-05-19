@@ -24,6 +24,7 @@ OC.L10N.register(
     "View in folder" : "Lihat dalam folder",
     "Add to album" : "Tambahkan album",
     "General" : "Umum",
+    "Account" : "Akun",
     "Close" : "Tutup",
     "Performance" : "Performa",
     "Unknown" : "Tidak diketahui",

@@ -31,6 +31,7 @@ OC.L10N.register(
     "_{n} selected_::_{n} selected_" : ["{n} wybrana","{n} wybrane","{n} wybranych","{n} wybranych"],
     "General" : "Ogólne",
     "Timeline Path" : "Ścieżka osi czasu",
+    "Account" : "Konto",
     "Show hidden folders" : "Pokaż ukryte katalogi",
     "Close" : "Zamknij",
     "Failed to load some photos" : "Nie udało się załadować niektórych zdjęć",

@@ -17,6 +17,7 @@ OC.L10N.register(
     "Favorite" : "Lemmik",
     "View in folder" : "Vaata kaustas",
     "General" : "Üldine",
+    "Account" : "Konto",
     "Close" : "Sulge",
     "Unknown" : "Teadmata",
     "Copy public link" : "Kopeeri avalik link",

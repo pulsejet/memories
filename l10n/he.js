@@ -20,6 +20,7 @@ OC.L10N.register(
     "Unarchive" : "הוצאה מהארכיון",
     "View in folder" : "הצג בתיקייה",
     "General" : "כללי",
+    "Account" : "חשבון",
     "Close" : "סגירה",
     "Performance" : "ביצועים",
     "Unknown" : "לא ידוע",

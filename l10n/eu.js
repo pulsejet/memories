@@ -59,6 +59,7 @@ OC.L10N.register(
     "Show past photos on top of timeline" : "Erakutsi iraganeko argazkiak denbora-lerroaren gainean",
     "Load full size image on zoom" : "Kargatu tamaina osoko irudia zoom-en",
     "Always load full size image (not recommended)" : "Kargatu beti tamaina osoko irudia (ez da gomendagarria)",
+    "Account" : "Kontua",
     "Folders Path" : "Karpeten bide-izena",
     "Show hidden folders" : "Erakutsi ezkutuko karpetak",
     "Sort folders oldest-first" : "Ordenatu karpetak zaharrenetik berrienera",

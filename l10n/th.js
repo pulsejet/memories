@@ -20,6 +20,7 @@ OC.L10N.register(
     "Favorite" : "รายการโปรด",
     "View in folder" : "ดูในโฟลเดอร์",
     "General" : "ทั่วไป",
+    "Account" : "บัญชี",
     "Close" : "ปิด",
     "Unknown" : "ไม่ทราบ",
     "Public link" : "ลิงก์สาธารณะ",

@@ -64,6 +64,7 @@ OC.L10N.register(
     "Show past photos on top of timeline" : "在時間軸頂部顯示過去的照片",
     "Load full size image on zoom" : "在縮放時加載全尺寸圖像",
     "Always load full size image (not recommended)" : "一律加載全尺寸圖像（不推薦）",
+    "Account" : "賬戶",
     "Folders Path" : "資料夾路徑",
     "Show hidden folders" : "顯示隱藏資料夾",
     "Sort folders oldest-first" : "將資料夾從最舊開始排序",

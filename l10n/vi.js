@@ -17,6 +17,7 @@ OC.L10N.register(
     "Unarchive" : "Bỏ lưu trữ",
     "View in folder" : "Xem trong thư mục",
     "General" : "Cài đặt chung",
+    "Account" : "Tài khoản",
     "Close" : "Đóng",
     "Unknown" : "Không xác định",
     "Copy public link" : "Sao chép liên kết công khai",
