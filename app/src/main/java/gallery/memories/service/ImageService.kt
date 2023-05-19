@@ -14,7 +14,7 @@ class ImageService(private val mCtx: Context) {
         val bitmap =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 mCtx.contentResolver.loadThumbnail(
-                    ContentUris.withAppendedId(MediaStore.Files.getContentUri("external"), id),
+                    ContentUris.withAppendedId(MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL), id),
                     android.util.Size(2048, 2048),
                     null
                 )

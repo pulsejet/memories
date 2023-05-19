@@ -13,7 +13,9 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import org.json.JSONObject
+import java.net.SocketTimeoutException
 
 @UnstableApi class AccountService(private val mCtx: MainActivity) {
     companion object {
@@ -37,7 +39,14 @@ import org.json.JSONObject
             .header("User-Agent", "Memories")
             .post("".toRequestBody("application/json".toMediaTypeOrNull()))
             .build()
-        val response = client.newCall(request).execute()
+
+        val response: Response
+        try {
+            response = client.newCall(request).execute()
+        } catch (e: SocketTimeoutException) {
+            toast("Failed to connect to login flow URL")
+            return
+        }
 
         // Read response body
         val body = response.body?.string()
@@ -95,7 +104,14 @@ import org.json.JSONObject
                 .url(pollUrl)
                 .post(rbody)
                 .build()
-            val response = client.newCall(request).execute()
+
+            val response: Response
+            try {
+                response = client.newCall(request).execute()
+            } catch (e: SocketTimeoutException) {
+                continue
+            }
+
             Log.v(TAG, "pollLogin: Got status code ${response.code}")
 
             // Check status code
@@ -131,7 +147,13 @@ import org.json.JSONObject
                 .header("Authorization", authHeader ?: "")
                 .build()
 
-            val response = OkHttpClient().newCall(request).execute()
+            val response: Response
+            try {
+                response = OkHttpClient().newCall(request).execute()
+            } catch (e: SocketTimeoutException) {
+                return
+            }
+
             val body = response.body?.string()
             response.body?.close()
 

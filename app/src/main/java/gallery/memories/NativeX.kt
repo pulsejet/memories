@@ -114,7 +114,7 @@ import java.net.URLDecoder
     @JavascriptInterface
     fun setThemeColor(color: String?, isDark: Boolean) {
         // Save for getting it back on next start
-        if (!themeStored) {
+        if (!themeStored && account.authHeader != null) {
             themeStored = true
             mCtx.storeTheme(color, isDark);
         }

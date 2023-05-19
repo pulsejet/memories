@@ -1,8 +1,15 @@
+:root {
+    --theme-color: #2b94f0;
+    --fg-color: white;
+}
+
 body {
     margin: 0;
     padding: 0;
-    --theme-color: #2b94f0;
+    background-color: var(--theme-color);
+    color: var(--fg-color);
     overflow: hidden;
+    font-family: sans-serif;
 }
 
 * {
@@ -20,9 +27,9 @@ body {
 }
 
 p {
-    color: #666;
-    font-size: 14px;
+    color: white;
     margin-bottom: 30px;
+    line-height: 1.5em;;
 }
 
 p.error {
@@ -31,9 +38,13 @@ p.error {
     font-weight: 500;
     word-wrap: break-word;
     user-select: text;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
 }
 
 .logo {
+    color: var(--fg-color);
     margin-bottom: 30px;
     width: 60vw;
     max-width: 400px;
@@ -62,8 +73,8 @@ input.m-input:focus {
     padding: 10px 20px;
     font-size: 16px;
     font-weight: bold;
-    color: #fff;
-    background-color: var(--theme-color);
+    color: var(--theme-color);
+    background-color: var(--fg-color);
     border: none;
     border-radius: 20px;
     cursor: pointer;
@@ -71,13 +82,14 @@ input.m-input:focus {
 }
 
 .m-button:disabled {
-    background-color: #ccc;
+    background-color: #eee;
+    color: #aaa;
     cursor: not-allowed;
 }
 
 .m-button.link {
     background-color: unset;
-    color: var(--theme-color);
+    color: var(--fg-color);
     text-decoration: none;
 }
 

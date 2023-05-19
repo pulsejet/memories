@@ -4,18 +4,18 @@
     <meta charset="UTF-8">
     <title>Memories</title>
     <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
     <div class="container">
         <img src="memories.svg" alt="Memories Logo" class="logo">
         <p>
-            Start organizing and sharing your precious moments.<br/>
-            To begin, enter the URL of your Nextcloud server below.
+            Start organizing and sharing your precious moments.
+            Enter the address of your Nextcloud server to begin.
         </p>
 
         <input type="url" id="server-url" class="m-input"
-            placeholder="e.g. https://nextcloud.home.server"
-            value="http://10.0.2.2:8035/"
+            placeholder="https://nextcloud.example.com"
         />
 
         <button class="m-button login-button" id="login">
@@ -52,9 +52,14 @@
         function getMemoriesUrl() {
             const url = new URL(urlBox.value);
 
+            // Add trailing slash to the path if it's not there already
+            if (!url.pathname.endsWith('/')) {
+                url.pathname += '/';
+            }
+
             // Add index.php to the path if it's not there already
-            if (!url.pathname.includes('/index.php')) {
-                url.pathname += '/index.php/';
+            if (!url.pathname.includes('index.php')) {
+                url.pathname += 'index.php/';
             }
 
             // Add path to memories
@@ -100,6 +105,10 @@
                 loginButton.disabled = false;
             }
         });
+
+        // Set action bar color
+        const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-color');
+        globalThis.nativex.setThemeColor(themeColor, true);
     </script>
 </body>
 </html>
