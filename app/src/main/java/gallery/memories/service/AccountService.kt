@@ -85,7 +85,7 @@ import java.net.SocketTimeoutException
 
     private fun pollLogin(pollUrl: String, pollToken: String, baseUrl: String) {
         mCtx.binding.webview.post {
-            mCtx.binding.webview.loadUrl("file:///android_asset/waiting.html")
+            mCtx.binding.webview.loadUrl("file:///android_asset/sync.html")
         }
 
         val client = OkHttpClient()
@@ -130,9 +130,9 @@ import java.net.SocketTimeoutException
             mCtx.runOnUiThread {
                 // Save login info (also updates header)
                 storeCredentials(baseUrl, loginName, appPassword)
-                mCtx.runOnUiThread {
-                    mCtx.loadDefaultUrl()
-                }
+
+                // Go to next screen
+                mCtx.binding.webview.evaluateJavascript("window.loggedIn()", {})
             }
 
             return;

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Memories</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div id="main" class="container animatable">
+        <img src="memories.svg" alt="Memories Logo" class="logo">
+        <p id="waiting" class="animatable">
+            Waiting for login to complete <br/>
+            Keep this page open in the background
+        </p>
+
+        <div id="sync" class="p animatable invisible">
+            You are now logged in to the server!
+            <br/><br/>
+            You can set up automatic uploads from this device using the
+            Nextcloud mobile app. Click the button below to download the app,
+            or skip this step and continue.
+            <br/>
+
+            <a class="m-button login-button" href="https://play.google.com/store/apps/details?id=com.nextcloud.client">
+                Set up automatic upload
+            </a>
+            <br/>
+
+            <p id="conn-error" class="error"></p>
+
+            <button class="m-button link" onclick="start()">
+                Continue
+            </button>
+        </div>
+    </div>
+
+    <script>
+        window.loggedIn = async () =>  {
+            const waiting = document.getElementById('waiting');
+            waiting.classList.add('invisible');
+            await new Promise(resolve => setTimeout(resolve, 700));
+            waiting.remove();
+            document.getElementById('sync').classList.remove('invisible');
+        }
+
+        async function start() {
+            const sync = document.getElementById('main');
+            sync.classList.add('invisible');
+            await new Promise(resolve => setTimeout(resolve, 700));
+            window.nativex?.reload();
+        }
+    </script>
+</body>
+</html>

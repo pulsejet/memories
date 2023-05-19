@@ -101,6 +101,13 @@ import java.net.URLDecoder
     }
 
     @JavascriptInterface
+    fun reload() {
+        mCtx.runOnUiThread {
+            mCtx.loadDefaultUrl()
+        }
+    }
+
+    @JavascriptInterface
     fun login(baseUrl: String?, loginFlowUrl: String?) {
         if (baseUrl == null || loginFlowUrl == null) return;
         account.login(baseUrl, loginFlowUrl)

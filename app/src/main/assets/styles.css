@@ -26,7 +26,15 @@ body {
     text-align: center;
 }
 
-p {
+.animatable {
+    transition: opacity 0.7s ease-in-out, transform 0.7s ease-in-out;
+}
+.invisible {
+    transform: translateY(10px);
+    opacity: 0;
+}
+
+p, div.p {
     color: white;
     margin-bottom: 30px;
     line-height: 1.5em;;
@@ -78,6 +86,7 @@ input.m-input:focus {
     border: none;
     border-radius: 20px;
     cursor: pointer;
+    text-decoration: none;
     transition: background-color 0.3s ease-in-out;
 }
 
@@ -90,7 +99,6 @@ input.m-input:focus {
 .m-button.link {
     background-color: unset;
     color: var(--fg-color);
-    text-decoration: none;
 }
 
 .login-button {

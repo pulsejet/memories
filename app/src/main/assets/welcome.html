@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-    <div class="container">
+    <div id="main" class="container animatable invisible">
         <img src="memories.svg" alt="Memories Logo" class="logo">
         <p>
             Start organizing and sharing your precious moments.
@@ -21,6 +21,7 @@
         <button class="m-button login-button" id="login">
             Continue to Login
         </button>
+        <br/>
 
         <p id="conn-error" class="error"></p>
 
@@ -108,7 +109,10 @@
 
         // Set action bar color
         const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-color');
-        globalThis.nativex.setThemeColor(themeColor, true);
+        globalThis.nativex?.setThemeColor(themeColor, true);
+
+        // Make container visible
+        document.getElementById('main').classList.remove('invisible');
     </script>
 </body>
 </html>
