@@ -18,6 +18,7 @@ OC.L10N.register(
     "View in folder" : "Vaata kaustas",
     "General" : "Üldine",
     "Account" : "Konto",
+    "Sign out" : "Logi välja",
     "Close" : "Sulge",
     "Unknown" : "Teadmata",
     "Copy public link" : "Kopeeri avalik link",
