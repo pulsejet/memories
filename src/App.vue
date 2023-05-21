@@ -71,6 +71,7 @@ import { emit, subscribe } from '@nextcloud/event-bus';
 
 import * as utils from './services/Utils';
 import * as nativex from './native';
+import staticConfig from './services/static-config';
 import UserConfig from './mixins/UserConfig';
 import Timeline from './components/Timeline.vue';
 import Settings from './components/Settings.vue';
@@ -280,6 +281,9 @@ export default defineComponent({
 
   async beforeMount() {
     if ('serviceWorker' in navigator) {
+      // Get the config before loading
+      const previousVersion = staticConfig.getSync('version');
+
       // Use the window load event to keep the page load performant
       window.addEventListener('load', async () => {
         try {
@@ -288,6 +292,12 @@ export default defineComponent({
             scope: generateUrl('/apps/memories'),
           });
           console.log('SW registered: ', registration);
+
+          // Check for updates
+          const currentVersion = await staticConfig.get('version');
+          if (previousVersion !== currentVersion) {
+            registration.update();
+          }
         } catch (error) {
           console.error('SW registration failed: ', error);
         }

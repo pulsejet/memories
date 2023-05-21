@@ -36,19 +36,15 @@ class StaticConfig {
     const old = this.getDefault();
     if (old.version !== this.config.version) {
       if (old.version) {
-        showInfo(t('memories', 'Memories has been updated. Please reload to get the new version.'));
+        showInfo(
+          t('memories', 'Memories has been updated to {version}. Reload to get the new version.', {
+            version: this.config.version,
+          })
+        );
       }
 
       // Clear page cache, keep other caches
       window.caches?.delete('pages');
-
-      // Update service worker if present
-      navigator.serviceWorker
-        ?.getRegistration()
-        .then((reg) => {
-          reg?.update();
-        })
-        .catch(() => {});
     }
 
     // Assign to existing default
