@@ -1,8 +1,11 @@
 import axios from '@nextcloud/axios';
-import { showInfo } from '@nextcloud/dialogs';
+import { showInfo, showError } from '@nextcloud/dialogs';
 import { API } from './API';
 import { IConfig } from '../types';
 import { getBuilder } from '@nextcloud/browser-storage';
+import { translate as t } from '@nextcloud/l10n';
+import * as utils from './Utils';
+
 import type Storage from '@nextcloud/browser-storage/dist/storage';
 
 class StaticConfig {
@@ -17,16 +20,35 @@ class StaticConfig {
   }
 
   private async init() {
-    const res = await axios.get<IConfig>(API.CONFIG_GET());
-    this.config = res.data;
+    try {
+      const res = await axios.get<IConfig>(API.CONFIG_GET());
+      this.config = res.data as IConfig;
+    } catch (e) {
+      if (!utils.isNetworkError(e)) {
+        showError('Failed to load configuration');
+      }
+
+      // Offline or fail, continue with default configuration
+      this.config = this.getDefault();
+    }
 
     // Check if version changed
     const old = this.getDefault();
     if (old.version !== this.config.version) {
       if (old.version) {
-        showInfo('Memories has been updated. Please refresh to apply the changes.');
+        showInfo(t('memories', 'Memories has been updated. Please reload to get the new version.'));
       }
+
+      // Clear page cache, keep other caches
       window.caches?.delete('pages');
+
+      // Update service worker if present
+      navigator.serviceWorker
+        ?.getRegistration()
+        .then((reg) => {
+          reg?.update();
+        })
+        .catch(() => {});
     }
 
     // Assign to existing default

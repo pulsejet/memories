@@ -1,9 +1,10 @@
-import { precacheAndRoute } from 'workbox-precaching';
+import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
 import { NetworkFirst, CacheFirst } from 'workbox-strategies';
 import { registerRoute } from 'workbox-routing';
 import { ExpirationPlugin } from 'workbox-expiration';
 
 precacheAndRoute(self.__WB_MANIFEST);
+cleanupOutdatedCaches();
 
 registerRoute(
   /^.*\/apps\/memories\/api\/video\/livephoto\/.*/,

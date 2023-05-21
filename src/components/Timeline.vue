@@ -761,9 +761,11 @@ export default defineComponent({
         // Make sure we're still on the same page
         if (this.state !== startState) return;
         await this.processDays(data);
-      } catch (err) {
-        console.error(err);
-        showError(err?.response?.data?.message || err.message);
+      } catch (e) {
+        if (!utils.isNetworkError(e)) {
+          showError(e?.response?.data?.message ?? e.message);
+          console.error(e);
+        }
       } finally {
         // If cache is set here, loading was already decremented
         if (!cache) this.loading--;
@@ -995,8 +997,10 @@ export default defineComponent({
           this.processDay(dayId, photos);
         }
       } catch (e) {
-        showError(this.t('memories', 'Failed to load some photos'));
-        console.error(e);
+        if (!utils.isNetworkError(e)) {
+          showError(this.t('memories', 'Failed to load some photos'));
+          console.error(e);
+        }
       }
     },
 
