@@ -64,6 +64,7 @@ OC.L10N.register(
     "Load full size image on zoom" : "Charger l'image en taille réelle lors du zoom",
     "Always load full size image (not recommended)" : "Toujours charger l'image en taille réelle (non recommandé)",
     "Account" : "Compte",
+    "Sign out" : "Se déconnecter",
     "Folders Path" : "Chemin du dossier",
     "Show hidden folders" : "Afficher les dossiers cachés",
     "Sort folders oldest-first" : "Classer les dossiers les plus anciens en premier",

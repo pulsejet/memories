@@ -66,6 +66,7 @@ OC.L10N.register(
     "Load full size image on zoom" : "Учитај слику пуне величине код увећавања",
     "Always load full size image (not recommended)" : "Увек учитај слику пуне величине (не препоручује се)",
     "Account" : "Налог",
+    "Sign out" : "Одјави се",
     "Folders Path" : "Путања до фолдера",
     "Show hidden folders" : "Прикажи скривене фолдере",
     "Sort folders oldest-first" : "Поређај фолдере најстарији прво",
