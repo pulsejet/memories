@@ -86,7 +86,7 @@ class PublicAlbumController extends Controller
         // Scripts
         Util::addScript($this->appName, 'memories-main');
 
-        $response = new PublicTemplateResponse($this->appName, 'main');
+        $response = new PublicTemplateResponse($this->appName, 'main', PageController::getMainParams());
         $response->setHeaderTitle($album['name']);
         $response->setFooterVisible(false); // wth is that anyway?
         $response->setContentSecurityPolicy(PageController::getCSP());

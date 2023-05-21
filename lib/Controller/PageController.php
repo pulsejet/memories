@@ -57,7 +57,7 @@ class PageController extends Controller
             OCPUtil::addTranslations('recognize');
         }
 
-        $response = new TemplateResponse($this->appName, 'main');
+        $response = new TemplateResponse($this->appName, 'main', self::getMainParams());
         $response->setContentSecurityPolicy(self::getCSP());
         $response->cacheFor(0);
 
@@ -108,6 +108,16 @@ class PageController extends Controller
         $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
 
         return $policy;
+    }
+
+    /**
+     * Get params for main.php template.
+     */
+    public static function getMainParams()
+    {
+        return [
+            'native' => Util::callerIsNative(),
+        ];
     }
 
     /**
