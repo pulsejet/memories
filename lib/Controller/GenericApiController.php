@@ -27,7 +27,9 @@ use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\FsManager;
 use OCA\Memories\Db\TimelineQuery;
 use OCP\App\IAppManager;
-use OCP\AppFramework\ApiController;
+use OCP\AppFramework\Http\DataResponse;
+use OCP\AppFramework\Http\JSONResponse;
+use OCP\AppFramework\OCSController;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IDBConnection;
@@ -35,7 +37,7 @@ use OCP\IRequest;
 use OCP\IUserSession;
 use Psr\Log\LoggerInterface;
 
-abstract class GenericApiController extends ApiController
+abstract class GenericApiController extends OCSController
 {
     protected IConfig $config;
     protected IUserSession $userSession;
@@ -67,5 +69,23 @@ abstract class GenericApiController extends ApiController
         $this->logger = $logger;
         $this->timelineQuery = $timelineQuery;
         $this->fs = $fs;
+    }
+
+    /**
+     * We need to extend OCSController instead of ApiController because
+     * these are external APIs and should be accessible without CSRF
+     * tokens. The OCS response, unfortunately, nukes status codes so
+     * we need to override the buildResponse method to force it back.
+     *
+     * @param mixed $response Response that cannot be rendered directly
+     * @param mixed $format   Format of the response
+     */
+    public function buildResponse($response, $format = 'json')
+    {
+        if ($response instanceof DataResponse) {
+            return new JSONResponse($response->getData(), $response->getStatus());
+        }
+
+        return new JSONResponse($response);
     }
 }
