@@ -183,8 +183,8 @@ export default defineComponent({
 
     > .link {
       display: inline-block;
-      width: calc(50% - 4px);
-      margin: 3px 2px;
+      width: calc(50% - 6px);
+      margin: 3px;
       border-radius: 10px;
     }
   }
