@@ -1,5 +1,5 @@
 <template>
-  <div class="top-matter-container" v-if="currentmatter">
+  <div class="top-matter-container timeline-scroller-gap" v-if="currentmatter">
     <component :is="currentmatter" />
   </div>
 </template>

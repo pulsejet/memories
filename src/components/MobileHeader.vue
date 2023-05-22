@@ -1,6 +1,7 @@
 <template>
   <div
     id="mobile-header"
+    class="timeline-scroller-gap"
     :class="{
       visible: !isScrollDown,
     }"

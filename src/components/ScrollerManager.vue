@@ -299,7 +299,13 @@ export default defineComponent({
       const extraY = this.recyclerBefore?.clientHeight ?? 0;
 
       // Exclude hover cursor height
-      this.topPadding = (<HTMLSpanElement>this.$refs.hoverCursor)?.offsetHeight ?? 0;
+      const hoverCursor = <HTMLSpanElement>this.$refs.hoverCursor;
+      this.topPadding = hoverCursor?.offsetHeight ?? 0;
+
+      // Add extra padding for any top elements
+      document.querySelectorAll('.timeline-scroller-gap').forEach((el) => {
+        this.topPadding += el.clientHeight;
+      });
 
       // Start with the first tick. Walk over all rows counting the
       // y position. When you hit a row with the tick, update y and
