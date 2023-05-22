@@ -15,6 +15,8 @@ class SystemImage {
     var size = 0L
     var mtime = 0L
     var dataPath = ""
+    var bucketId = 0L
+    var bucketName = ""
 
     var isVideo = false
     var videoDuration = 0L
@@ -50,7 +52,9 @@ class SystemImage {
                 MediaStore.Images.Media.ORIENTATION,
                 MediaStore.Images.Media.DATE_TAKEN,
                 MediaStore.Images.Media.DATE_MODIFIED,
-                MediaStore.Images.Media.DATA
+                MediaStore.Images.Media.DATA,
+                MediaStore.Images.Media.BUCKET_ID,
+                MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
             )
 
             // Add video-specific fields
@@ -69,6 +73,8 @@ class SystemImage {
             val dateTakenColumn = projection.indexOf(MediaStore.Images.Media.DATE_TAKEN)
             val dateModifiedColumn = projection.indexOf(MediaStore.Images.Media.DATE_MODIFIED)
             val dataColumn = projection.indexOf(MediaStore.Images.Media.DATA)
+            val bucketIdColumn = projection.indexOf(MediaStore.Images.Media.BUCKET_ID)
+            val bucketNameColumn = projection.indexOf(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)
 
             // Query content resolver
             ctx.contentResolver.query(
@@ -91,6 +97,8 @@ class SystemImage {
                     image.dateTaken = cursor.getLong(dateTakenColumn)
                     image.mtime = cursor.getLong(dateModifiedColumn)
                     image.dataPath = cursor.getString(dataColumn)
+                    image.bucketId = cursor.getLong(bucketIdColumn)
+                    image.bucketName = cursor.getString(bucketNameColumn)
                     image.mCollection = collection
 
                     // Swap width/height if orientation is 90 or 270

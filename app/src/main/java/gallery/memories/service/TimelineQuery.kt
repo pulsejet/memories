@@ -35,6 +35,9 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
     var deleteIntentLauncher: ActivityResultLauncher<IntentSenderRequest>
     var deleteCallback: ((ActivityResult?) -> Unit)? = null
 
+    // Caches
+    var mEnabledBuckets: Set<String>? = null
+
     init {
         // Register intent launcher for callback
         deleteIntentLauncher = mCtx.registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result: ActivityResult? ->
@@ -46,11 +49,17 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
 
     @Throws(JSONException::class)
     fun getByDayId(dayId: Long): JSONArray {
+        // Filter for enabled buckets
+        val enabledBuckets = getEnabledBucketIds().joinToString(",")
+
         // Get list of images from DB
         val imageIds: MutableSet<Long> = ArraySet()
         val datesTaken: MutableMap<Long, Long> = HashMap()
-        val sql = "SELECT local_id, date_taken FROM images WHERE dayid = ?"
-        mDb.rawQuery(sql, arrayOf(dayId.toString())).use { cursor ->
+        mDb.rawQuery("""
+            SELECT local_id, date_taken FROM images
+            WHERE dayid = ?
+                AND bucket_id IN ($enabledBuckets)
+        """, arrayOf(dayId.toString())).use { cursor ->
             while (cursor.moveToNext()) {
                 val localId = cursor.getLong(0)
                 datesTaken[localId] = cursor.getLong(1)
@@ -95,8 +104,14 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
 
     @Throws(JSONException::class)
     fun getDays(): JSONArray {
-        mDb.rawQuery(
-            "SELECT dayid, COUNT(local_id) FROM images GROUP BY dayid",
+        // Filter for enabled buckets
+        val enabledBuckets = getEnabledBucketIds().joinToString(",")
+
+        // Get this day's images
+        mDb.rawQuery("""
+            SELECT dayid, COUNT(local_id) FROM images
+            WHERE bucket_id IN ($enabledBuckets)
+            GROUP BY dayid""",
             null
         ).use { cursor ->
             val days = JSONArray()
@@ -304,11 +319,62 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
         // Delete file with same local_id and insert new one
         mDb.beginTransaction()
         mDb.execSQL("DELETE FROM images WHERE local_id = ?", arrayOf(id))
-        mDb.execSQL("INSERT OR IGNORE INTO images (local_id, mtime, basename, date_taken, dayid) VALUES (?, ?, ?, ?, ?)", arrayOf(
-            id, image.mtime, name, dateTaken, dayId
+        mDb.execSQL("""
+            INSERT OR IGNORE INTO images
+            (local_id, mtime, basename, date_taken, dayid, bucket_id, bucket_name)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, arrayOf(
+            image.fileId,
+            image.mtime,
+            image.baseName,
+            dateTaken,
+            dayId,
+            image.bucketId,
+            image.bucketName
         ))
         mDb.setTransactionSuccessful()
         mDb.endTransaction()
         Log.v(TAG, "Inserted file to local DB: $id / $name / $dayId")
+    }
+
+    fun getEnabledBucketIds(): Set<String> {
+        if (mEnabledBuckets != null) return mEnabledBuckets!!
+        mEnabledBuckets = mCtx.getSharedPreferences(mCtx.getString(R.string.preferences_key), 0)
+            .getStringSet(mCtx.getString(R.string.preferences_enabled_local_folders), null) ?: setOf()
+        return mEnabledBuckets!!
+    }
+
+    fun getLocalFoldersConfig(): JSONArray {
+        val array = JSONArray()
+        val enabledSet = getEnabledBucketIds()
+
+        val sql = "SELECT bucket_id, bucket_name FROM images GROUP BY bucket_id"
+        mDb.rawQuery(sql, emptyArray()).use { cursor ->
+            while (cursor.moveToNext()) {
+                val obj = JSONObject()
+                val id = cursor.getLong(0)
+                obj.put("id", id)
+                obj.put("name", cursor.getString(1))
+                obj.put("enabled", enabledSet.contains(id.toString()))
+                array.put(obj)
+            }
+        }
+
+        return array
+    }
+
+    fun configSetLocalFolders(json: String) {
+        val enabledSet = mutableSetOf<String>()
+        val array = JSONArray(json)
+        for (i in 0 until array.length()) {
+            val obj = array.getJSONObject(i)
+            if (obj.getBoolean("enabled")) {
+                enabledSet.add(obj.getLong("id").toString())
+            }
+        }
+        mEnabledBuckets = enabledSet
+        mCtx.getSharedPreferences(mCtx.getString(R.string.preferences_key), 0).edit()
+            .putStringSet(mCtx.getString(R.string.preferences_enabled_local_folders), enabledSet)
+            .apply()
     }
 }

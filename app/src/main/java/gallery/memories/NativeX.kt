@@ -33,9 +33,11 @@ import java.net.URLDecoder
         val IMAGE_PREVIEW = Regex("^/image/preview/\\d+$")
         val IMAGE_FULL = Regex("^/image/full/\\d+$")
 
-        val SHARE_URL = Regex("/api/share/url/.+$")
-        val SHARE_BLOB = Regex("/api/share/blob/.+$")
-        val SHARE_LOCAL = Regex("/api/share/local/\\d+$")
+        val SHARE_URL = Regex("^/api/share/url/.+$")
+        val SHARE_BLOB = Regex("^/api/share/blob/.+$")
+        val SHARE_LOCAL = Regex("^/api/share/local/\\d+$")
+
+        val CONFIG_LOCAL_FOLDES = Regex("^/api/config/local-folders$")
     }
 
     init {
@@ -178,6 +180,12 @@ import java.net.URLDecoder
         }
     }
 
+    @JavascriptInterface
+    fun configSetLocalFolders(json: String?) {
+        if (json == null) return;
+        query.configSetLocalFolders(json)
+    }
+
     @Throws(Exception::class)
     private fun routerGet(path: String): WebResourceResponse {
         val parts = path.split("/").toTypedArray()
@@ -199,6 +207,8 @@ import java.net.URLDecoder
             return makeResponse(dlService!!.shareBlobFromUrl(URLDecoder.decode(parts[4], "UTF-8")))
         } else if (path.matches(API.SHARE_LOCAL)) {
             return makeResponse(dlService!!.shareLocal(parts[4].toLong()))
+        } else if (path.matches(API.CONFIG_LOCAL_FOLDES)) {
+            return makeResponse(query.getLocalFoldersConfig())
         } else {
             throw Exception("Not Found")
         }

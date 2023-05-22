@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.database.sqlite.SQLiteDatabase
 import gallery.memories.R
 
-class DbService(val context: Context) : SQLiteOpenHelper(context, "memories", null, 31) {
+class DbService(val context: Context) : SQLiteOpenHelper(context, "memories", null, 34) {
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("""
             CREATE TABLE images (
@@ -16,6 +16,8 @@ class DbService(val context: Context) : SQLiteOpenHelper(context, "memories", nu
                 dayid INTEGER,
                 exif_uid TEXT,
                 basename TEXT,
+                bucket_id INTEGER,
+                bucket_name TEXT,
                 flag INTEGER
             )
         """)
@@ -24,6 +26,7 @@ class DbService(val context: Context) : SQLiteOpenHelper(context, "memories", nu
         db.execSQL("CREATE INDEX images_local_id ON images (local_id)")
         db.execSQL("CREATE INDEX images_dayid ON images (dayid)")
         db.execSQL("CREATE INDEX images_flag ON images (flag)")
+        db.execSQL("CREATE INDEX images_bucket ON images (bucket_id)")
     }
 
     override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {

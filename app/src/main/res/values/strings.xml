@@ -7,6 +7,7 @@
     <string name="preferences_theme_dark">themeDark</string>
     <string name="preferences_last_sync_time">lastDbSyncTime</string>
     <string name="preferences_has_media_permission">hasMediaPermission</string>
+    <string name="preferences_enabled_local_folders">enabledLocalFolders</string>
 
     <!-- https://www.whatismybrowser.com/guides/the-latest-user-agent/chrome -->
     <string name="ua_chrome">"Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.76 Mobile Safari/537.36"</string>
