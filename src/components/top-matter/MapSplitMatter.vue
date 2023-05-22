@@ -397,7 +397,7 @@ export default defineComponent({
     },
 
     handleContainerResize() {
-      (<any>this.$refs.map)?.mapObject?.invalidateSize();
+      (<any>this.$refs.map)?.mapObject?.invalidateSize(true);
     },
   },
 });
