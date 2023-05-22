@@ -36,8 +36,6 @@ export function emptyDescription(routeName: RouteNameType): string {
 
 export function viewName(routeName: RouteNameType): string {
   switch (routeName) {
-    case 'timeline':
-      return t('memories', 'Your Timeline');
     case 'favorites':
       return t('memories', 'Favorites');
     case 'recognize':
