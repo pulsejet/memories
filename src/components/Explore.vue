@@ -46,6 +46,8 @@ import axios from '@nextcloud/axios';
 import ClusterHList from './ClusterHList.vue';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+
+import FolderIcon from 'vue-material-design-icons/Folder.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import VideoIcon from 'vue-material-design-icons/PlayCircle.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
@@ -70,6 +72,11 @@ export default defineComponent({
     tags: [] as ICluster[],
 
     categories: [
+      {
+        name: t('memories', 'Folders'),
+        icon: FolderIcon,
+        link: '/folders',
+      },
       {
         name: t('memories', 'Favorites'),
         icon: StarIcon,
