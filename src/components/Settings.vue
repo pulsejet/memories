@@ -23,6 +23,7 @@
 <template>
   <div>
     <NcAppSettingsDialog
+      id="memories-settings"
       :open="open"
       :show-navigation="true"
       :title="t('memories', 'Memories Settings')"
@@ -272,11 +273,18 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.app-settings-section {
-  margin-bottom: 20px !important;
-}
+#memories-settings:deep {
+  .app-settings__content {
+    // Fix weirdness when focusing on toggle input on mobile
+    position: relative;
+  }
 
-#sign-out {
-  margin-top: 10px;
+  .app-settings-section {
+    margin-bottom: 20px !important;
+  }
+
+  #sign-out {
+    margin-top: 10px;
+  }
 }
 </style>
