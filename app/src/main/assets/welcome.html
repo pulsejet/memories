@@ -1,118 +1,123 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Memories</title>
-    <link rel="stylesheet" href="styles.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
     <div id="main" class="container animatable invisible">
-        <img src="memories.svg" alt="Memories Logo" class="logo">
-        <p>
-            Start organizing and sharing your precious moments.
-            Enter the address of your Nextcloud server to begin.
-        </p>
+      <img src="memories.svg" alt="Memories Logo" class="logo" />
+      <p>
+        Start organizing and sharing your precious moments. Enter the address of
+        your Nextcloud server to begin.
+      </p>
 
-        <input type="url" id="server-url" class="m-input"
-            placeholder="https://nextcloud.example.com"
-        />
+      <input
+        type="url"
+        id="server-url"
+        class="m-input"
+        placeholder="https://nextcloud.example.com"
+      />
 
-        <button class="m-button login-button" id="login">
-            Continue to Login
-        </button>
-        <br/>
+      <button class="m-button login-button" id="login">
+        Continue to Login
+      </button>
+      <br />
 
-        <p id="conn-error" class="error"></p>
+      <p id="conn-error" class="error"></p>
 
-        <a class="m-button link" href="https://memories.gallery/install/">
-            I don't have a server
-        </a>
+      <a class="m-button link" href="https://memories.gallery/install/">
+        I don't have a server
+      </a>
     </div>
 
     <script>
-        const urlBox = document.getElementById('server-url');
-        const loginButton = document.getElementById('login');
-        const connError = document.getElementById('conn-error');
+      const urlBox = document.getElementById("server-url");
+      const loginButton = document.getElementById("login");
+      const connError = document.getElementById("conn-error");
 
-        function validateUrl(url) {
-            try {
-                url = new URL(url);
-                const protoOk = url.protocol === 'http:' || url.protocol === 'https:';
-                const hostOk = url.hostname.length > 0;
-                return protoOk && hostOk;
-            } catch (e) {
-                return false;
-            }
+      function validateUrl(url) {
+        try {
+          url = new URL(url);
+          const protoOk = url.protocol === "http:" || url.protocol === "https:";
+          const hostOk = url.hostname.length > 0;
+          return protoOk && hostOk;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function updateLoginEnabled() {
+        loginButton.disabled = !validateUrl(urlBox.value);
+      }
+
+      function getMemoriesUrl() {
+        const url = new URL(urlBox.value);
+
+        // Add trailing slash to the path if it's not there already
+        if (!url.pathname.endsWith("/")) {
+          url.pathname += "/";
         }
 
-        function updateLoginEnabled() {
-            loginButton.disabled = !validateUrl(urlBox.value);
+        // Add index.php to the path if it's not there already
+        if (!url.pathname.includes("index.php")) {
+          url.pathname += "index.php/";
         }
 
-        function getMemoriesUrl() {
-            const url = new URL(urlBox.value);
+        // Add path to memories
+        url.pathname += "apps/memories/";
 
-            // Add trailing slash to the path if it's not there already
-            if (!url.pathname.endsWith('/')) {
-                url.pathname += '/';
-            }
+        return url;
+      }
 
-            // Add index.php to the path if it's not there already
-            if (!url.pathname.includes('index.php')) {
-                url.pathname += 'index.php/';
-            }
+      // Update login button enabled state when the URL changes
+      urlBox.addEventListener("input", updateLoginEnabled);
+      updateLoginEnabled();
 
-            // Add path to memories
-            url.pathname += 'apps/memories/';
+      // Login button click handler
+      loginButton.addEventListener("click", async () => {
+        const url = getMemoriesUrl();
+        url.pathname += "api/describe";
+        const urlStr = url.toString();
 
-            return url;
+        try {
+          urlBox.disabled = true;
+          loginButton.disabled = true;
+
+          // Abort request after 5 seconds
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+          // Get API description
+          const res = await fetch(urlStr, {
+            method: "GET",
+            signal: controller.signal,
+          });
+          const data = await res.json();
+
+          // API is fine, redirect to login page
+          clearTimeout(timeoutId);
+          window.nativex.login(data.baseUrl, data.loginFlowUrl);
+        } catch (e) {
+          // CORS request, we know nothing about the server
+          connError.innerText = `Failed to fetch server info.\nIs Memories installed and enabled?\n${urlStr}`;
+          connError.style.display = "block";
+        } finally {
+          urlBox.disabled = false;
+          loginButton.disabled = false;
         }
+      });
 
-        // Update login button enabled state when the URL changes
-        urlBox.addEventListener('input', updateLoginEnabled);
-        updateLoginEnabled();
+      // Set action bar color
+      const themeColor = getComputedStyle(
+        document.documentElement
+      ).getPropertyValue("--theme-color");
+      globalThis.nativex?.setThemeColor(themeColor, true);
 
-        // Login button click handler
-        loginButton.addEventListener('click', async () => {
-            const url = getMemoriesUrl();
-            url.pathname += 'api/describe';
-            const urlStr = url.toString();
-
-            try {
-                urlBox.disabled = true;
-                loginButton.disabled = true;
-
-                // Abort request after 5 seconds
-                const controller = new AbortController()
-                const timeoutId = setTimeout(() => controller.abort(), 5000)
-
-                // Get API description
-                const res = await fetch(urlStr, {
-                    method: 'GET',
-                    signal: controller.signal,
-                });
-                const data = await res.json();
-
-                // API is fine, redirect to login page
-                clearTimeout(timeoutId);
-                window.nativex.login(data.baseUrl, data.loginFlowUrl);
-            } catch (e) {
-                // CORS request, we know nothing about the server
-                connError.innerText = `Failed to fetch server info.\nIs Memories installed and enabled?\n${urlStr}`;
-                connError.style.display = 'block';
-            } finally {
-                urlBox.disabled = false;
-                loginButton.disabled = false;
-            }
-        });
-
-        // Set action bar color
-        const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-color');
-        globalThis.nativex?.setThemeColor(themeColor, true);
-
-        // Make container visible
-        document.getElementById('main').classList.remove('invisible');
+      // Make container visible
+      document.getElementById("main").classList.remove("invisible");
     </script>
-</body>
+  </body>
 </html>

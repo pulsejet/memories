@@ -1,55 +1,114 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Memories</title>
-    <link rel="stylesheet" href="styles.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
     <div id="main" class="container animatable">
-        <img src="memories.svg" alt="Memories Logo" class="logo">
-        <p id="waiting" class="animatable">
-            Waiting for login to complete <br/>
-            Keep this page open in the background
-        </p>
+      <img src="memories.svg" alt="Memories Logo" class="logo" />
+      <p id="waiting" class="animatable">
+        Waiting for login to complete <br />
+        Keep this page open in the background
+      </p>
 
-        <div id="sync" class="p animatable invisible">
-            You are now logged in to the server!
-            <br/><br/>
-            You can set up automatic uploads from this device using the
-            Nextcloud mobile app. Click the button below to download the app,
-            or skip this step and continue.
-            <br/>
+      <div id="sync" class="p animatable invisible">
+        You are now logged in to the server!
+        <br /><br />
+        You can set up automatic uploads from this device using the Nextcloud
+        mobile app. Click the button below to download the app, or skip this
+        step and continue.
+        <br />
 
-            <a class="m-button login-button" href="https://play.google.com/store/apps/details?id=com.nextcloud.client">
-                Set up automatic upload
-            </a>
-            <br/>
+        <a
+          class="m-button login-button"
+          href="https://play.google.com/store/apps/details?id=com.nextcloud.client"
+        >
+          Set up automatic upload
+        </a>
+        <br />
 
-            <p id="conn-error" class="error"></p>
+        <p id="conn-error" class="error"></p>
 
-            <button class="m-button link" onclick="start()">
-                Continue
-            </button>
-        </div>
+        <button class="m-button link" onclick="openLocal()">Continue</button>
+      </div>
+
+      <div id="local-folders" class="p animatable invisible">
+        Choose the folders on this device to show on the timeline. If no folders
+        are visible here, you may need to grant the app storage permissions or
+        wait for the app to index your files.
+        <br />
+        <div id="folder-list"></div>
+
+        <button class="m-button" onclick="start()">Continue</button>
+      </div>
     </div>
 
     <script>
-        window.loggedIn = async () =>  {
-            const waiting = document.getElementById('waiting');
-            waiting.classList.add('invisible');
-            await new Promise(resolve => setTimeout(resolve, 700));
-            waiting.remove();
-            document.getElementById('sync').classList.remove('invisible');
+      const main = document.getElementById("main");
+      const waiting = document.getElementById("waiting");
+      const sync = document.getElementById("sync");
+      const localFolders = document.getElementById("local-folders");
+
+      // Waiting page => sync page
+      window.loggedIn = async () => {
+        waiting.classList.add("invisible");
+        await new Promise((resolve) => setTimeout(resolve, 700));
+        waiting.remove();
+        sync.classList.remove("invisible");
+      };
+      loggedIn();
+
+      // Local list of folders
+      let localList = null;
+      async function openLocal() {
+        // Get the list of local folders for next screen
+        (async () => {
+          const res = await fetch("http://127.0.0.1/api/config/local-folders");
+          localList = await res.json();
+
+          // Add HTML for folders list
+          document.getElementById("folder-list").innerHTML = localList
+            .map(
+              (folder) => `
+                    <div class="folder-choose">
+                        <input type="checkbox" id="folder-${folder.id}" ${
+                folder.enabled ? "checked" : ""
+              }>
+                        <label for="${folder.id}">${folder.name}</label>
+                    </div>
+                `
+            )
+            .join("");
+        })();
+
+        // Show the folders list
+        sync.classList.add("invisible");
+        await new Promise((resolve) => setTimeout(resolve, 700));
+        sync.remove();
+        localFolders.classList.remove("invisible");
+      }
+
+      // Open main app
+      async function start() {
+        // Mark all checked as enabled
+        if (localList) {
+          localList.forEach(
+            (folder) =>
+              (folder.enabled = document.getElementById(
+                `folder-${folder.id}`
+              ).checked)
+          );
+          window.nativex?.configSetLocalFolders(JSON.stringify(localList));
         }
 
-        async function start() {
-            const sync = document.getElementById('main');
-            sync.classList.add('invisible');
-            await new Promise(resolve => setTimeout(resolve, 700));
-            window.nativex?.reload();
-        }
+        // Start the app
+        main.classList.add("invisible");
+        await new Promise((resolve) => setTimeout(resolve, 700));
+        window.nativex?.reload();
+      }
     </script>
-</body>
+  </body>
 </html>
