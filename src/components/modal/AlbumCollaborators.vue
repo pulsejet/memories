@@ -137,7 +137,6 @@ import AccountGroup from 'vue-material-design-icons/AccountGroup.vue';
 import Earth from 'vue-material-design-icons/Earth.vue';
 
 import axios from '@nextcloud/axios';
-import * as dav from '../../services/DavRequests';
 import { showError } from '@nextcloud/dialogs';
 import { getCurrentUser } from '@nextcloud/auth';
 import { generateOcsUrl, generateUrl } from '@nextcloud/router';
@@ -147,6 +146,9 @@ import NcPopover from '@nextcloud/vue/dist/Components/NcPopover';
 import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 const NcListItemIcon = () => import('@nextcloud/vue/dist/Components/NcListItemIcon');
+
+import * as dav from '../../services/DavRequests';
+import * as nativex from '../../native';
 
 import { Type } from '@nextcloud/sharing';
 
@@ -335,6 +337,9 @@ export default defineComponent({
         if (!uid) return;
         const album = await dav.getAlbum(uid, this.albumName);
         this.populateCollaborators(album.collaborators);
+
+        // Direct share if native share is available
+        if (nativex.has()) this.copyPublicLink();
       } catch (error) {
         if (error.response?.status === 404) {
           this.errorFetchingAlbum = 404;
@@ -378,9 +383,13 @@ export default defineComponent({
     },
 
     async copyPublicLink() {
-      await navigator.clipboard.writeText(
-        `${window.location.protocol}//${window.location.host}${generateUrl(`apps/memories/a/${this.publicLink.id}`)}`
-      );
+      const url = generateUrl(`apps/memories/a/${this.publicLink.id}`);
+      const link = `${location.origin}${url}`;
+      if (nativex.has()) {
+        return await nativex.shareUrl(link);
+      }
+
+      await navigator.clipboard.writeText(link);
       this.publicLinkCopied = true;
       setTimeout(() => {
         this.publicLinkCopied = false;
