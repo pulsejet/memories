@@ -261,7 +261,6 @@
     "Failed to download files" : "Kunne ikke laste ned filer",
     "Failed to favorite files." : "Kunne ikke velge favorittfiler.",
     "Failed to favorite some files." : "Kunne ikke favoritt noen filer.",
-    "Failed to favorite {fileName}." : "Kunne ikke favoritt {fileName}.",
-    "Your Timeline" : "Din tidslinje"
+    "Failed to favorite {fileName}." : "Kunne ikke favoritt {fileName}."
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

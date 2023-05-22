@@ -421,7 +421,6 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "封存您不想要在時間軸中看到的照片",
     "Tag photos to find them easily" : "為照片加上標籤以輕鬆地找到它們",
     "Recognize is still working on your photos" : "Recognize 仍在處理您的照片",
-    "Places you have been to will appear here" : "您去過的地方會出現在此處",
-    "Your Timeline" : "您的時間線"
+    "Places you have been to will appear here" : "您去過的地方會出現在此處"
 },
 "nplurals=1; plural=0;");

@@ -178,7 +178,6 @@ OC.L10N.register(
     "Auto" : "Automatisch",
     "Failed to create {albumName}." : "Het maken van {albumName} is mislukt.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Hernoemen van {currentAlbumName} naar {newAlbumName} mislukt.",
-    "Failed to delete {fileName}." : "Verwijderen van {fileName} mislukt.",
-    "Your Timeline" : "Je tijdlijn"
+    "Failed to delete {fileName}." : "Verwijderen van {fileName} mislukt."
 },
 "nplurals=2; plural=(n != 1);");

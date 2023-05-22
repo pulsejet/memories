@@ -26,6 +26,7 @@ OC.L10N.register(
     "View in folder" : "Visualitza-ho a la carpeta",
     "Add to album" : "Afegeix a l'àlbum",
     "General" : "General",
+    "Account" : "Compte",
     "Close" : "Tanca",
     "Performance" : "Rendiment",
     "Unknown" : "Desconegut",

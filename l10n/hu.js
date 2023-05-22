@@ -418,7 +418,6 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "Archiválja azokat a fényképeket, melyeket nem akar az idővonalán látni",
     "Tag photos to find them easily" : "Címkézze a fényképeket, hogy könnyen megtalálja őket",
     "Recognize is still working on your photos" : "A felismerés még mindig dolgozik a fényképein",
-    "Places you have been to will appear here" : "A helyek, ahol volt, itt fognak megjelenni",
-    "Your Timeline" : "Saját idővonal"
+    "Places you have been to will appear here" : "A helyek, ahol volt, itt fognak megjelenni"
 },
 "nplurals=2; plural=(n != 1);");

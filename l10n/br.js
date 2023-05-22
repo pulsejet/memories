@@ -14,6 +14,7 @@ OC.L10N.register(
     "Favorite" : "Pennrollañ",
     "View in folder" : "Diskwel en teuliad",
     "General" : "Hollek",
+    "Account" : "Kont",
     "Close" : "Seriñ",
     "Unknown" : "Dianv",
     "Copy public link" : "Eilañ al liamm foran",

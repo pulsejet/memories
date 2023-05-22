@@ -205,7 +205,6 @@ OC.L10N.register(
     "Error: {msg}" : "Chyba: {msg}",
     "Failed to delete {fileName}." : "Nepodarilo sa zmazať {fileName}.",
     "Failed to favorite files." : "Nepodarilo sa pridať súbory medzi obľúbené.",
-    "Failed to favorite {fileName}." : "Nepodarilo sa pridať súbor {fileName} medzi obľúbené.",
-    "Your Timeline" : "Vaša časová os"
+    "Failed to favorite {fileName}." : "Nepodarilo sa pridať súbor {fileName} medzi obľúbené."
 },
 "nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);");

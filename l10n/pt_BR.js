@@ -413,7 +413,6 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "Arquive as fotos que você não quer ver na sua linha do tempo",
     "Tag photos to find them easily" : "Marque fotos para encontrá-las facilmente",
     "Recognize is still working on your photos" : "O reconhecimento ainda está trabalhando em suas fotos",
-    "Places you have been to will appear here" : "Os lugares que você visitou aparecerão aqui",
-    "Your Timeline" : "Sua Linha-do-Tempo"
+    "Places you have been to will appear here" : "Os lugares que você visitou aparecerão aqui"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

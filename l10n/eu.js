@@ -383,7 +383,6 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "Artxibatu zure denbora-lerroan ikusi nahi ez dituzun argazkiak",
     "Tag photos to find them easily" : "Etiketatu argazkiak modu errazean aurkitzeko",
     "Recognize is still working on your photos" : "Hautematea zure argazkietan lanean ari da oraindik",
-    "Places you have been to will appear here" : "Hemen egon zaren tokiak agertuko dira",
-    "Your Timeline" : "Zure denbora-lerroa"
+    "Places you have been to will appear here" : "Hemen egon zaren tokiak agertuko dira"
 },
 "nplurals=2; plural=(n != 1);");
