@@ -207,6 +207,7 @@ export default defineComponent({
     subscribe('memories:window:resize', this.handleResizeWithDelay);
     subscribe('memories:viewer:deleted', this.deleteFromViewWithAnimation);
     subscribe('memories:viewer:fetch-day', this.fetchDay);
+    subscribe('memories:timeline:hard-refresh', this.refresh);
   },
 
   beforeDestroy() {
@@ -215,6 +216,7 @@ export default defineComponent({
     unsubscribe('memories:window:resize', this.handleResizeWithDelay);
     unsubscribe('memories:viewer:deleted', this.deleteFromViewWithAnimation);
     unsubscribe('memories:viewer:fetch-day', this.fetchDay);
+    unsubscribe('memories:timeline:hard-refresh', this.refresh);
     this.resetState();
     this.state = 0;
   },

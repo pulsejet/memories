@@ -55,6 +55,8 @@ import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox';
 
+import { emit } from '@nextcloud/event-bus';
+
 import FaceEditModal from '../modal/FaceEditModal.vue';
 import FaceDeleteModal from '../modal/FaceDeleteModal.vue';
 import FaceMergeModal from '../modal/FaceMergeModal.vue';
@@ -105,7 +107,7 @@ export default defineComponent({
 
     changeShowFaceRect() {
       this.updateSetting('show_face_rect');
-      setTimeout(() => this.$router.go(0), 100); // refresh page
+      emit('memories:timeline:hard-refresh', {});
     },
   },
 });
