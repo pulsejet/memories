@@ -189,10 +189,6 @@ export default defineComponent({
       this.$emit('update:open', false);
     },
 
-    logout() {
-      nativex.logout();
-    },
-
     async chooseFolder(title: string, initial: string) {
       const picker = getFilePickerBuilder(title)
         .setMultiSelect(false)
@@ -267,6 +263,22 @@ export default defineComponent({
 
     async updateDeviceFolders() {
       await nativex.setLocalFolders(this.localFolders);
+    },
+
+    logout() {
+      (<any>OC.dialogs).confirmDestructive(
+        this.t('memories', 'Are you sure you want to log out {user}?', { user: this.user }),
+        this.t('memories', 'Sign out'),
+        {
+          type: (<any>OC.dialogs).YES_NO_BUTTONS,
+          confirm: this.t('memories', 'Sign out'),
+          confirmClasses: 'error',
+          cancel: this.t('memories', 'Cancel'),
+        },
+        (decision) => {
+          if (decision) nativex.logout();
+        }
+      );
     },
   },
 });
