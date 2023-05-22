@@ -30,7 +30,7 @@
     >
       <NcAppSettingsSection id="general-settings" :title="t('memories', 'General')">
         <label for="timeline-path">{{ t('memories', 'Timeline Path') }}</label>
-        <input id="timeline-path" @click="chooseTimelinePath" v-model="config.timeline_path" type="text" />
+        <input id="timeline-path" @click="chooseTimelinePath" v-model="config.timeline_path" type="text" readonly />
 
         <NcCheckboxRadioSwitch :checked.sync="config.square_thumbs" @update:checked="updateSquareThumbs" type="switch">
           {{ t('memories', 'Square grid mode') }}
