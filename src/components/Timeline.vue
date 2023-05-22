@@ -1301,6 +1301,13 @@ export default defineComponent({
   user-select: none;
   -webkit-user-select: none; // iOS Safari is a horrible browser
   position: relative;
+
+  @media (max-width: 768px) {
+    // Get rid of padding on img-outer (1px on mobile)
+    // Also need to make sure we don't end up with a scrollbar -- see below
+    margin-left: -1px;
+    width: calc(100% + 2px);
+  }
 }
 
 .recycler {

@@ -179,12 +179,12 @@ export default defineComponent({
   padding-top: 8px;
 
   .link-list {
-    padding: 8px 10px;
+    padding: 6px 7px;
 
     > .link {
       display: inline-block;
-      width: calc(50% - 5px);
-      margin: 0 5px 8px 0;
+      width: calc(50% - 4px);
+      margin: 3px 2px;
       border-radius: 10px;
     }
   }

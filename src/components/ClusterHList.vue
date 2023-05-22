@@ -49,7 +49,7 @@ export default defineComponent({
   width: 100%;
 
   > .title {
-    padding: 4px 18px 8px 16px;
+    padding: 4px 16px 8px 14px;
     display: flex;
 
     > .name {
@@ -69,7 +69,7 @@ export default defineComponent({
     width: 100%;
     overflow-x: auto;
     white-space: nowrap;
-    padding: 0 8px;
+    padding: 0 6px;
 
     > .item {
       display: inline-block;
