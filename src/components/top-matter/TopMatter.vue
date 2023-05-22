@@ -80,9 +80,14 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .top-matter-container {
-  padding-top: 4px;
+  position: relative;
+  z-index: 500;
+  padding: 2px 0;
+  background-color: var(--color-main-background);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+
   @media (max-width: 768px) {
-    padding-left: 10px;
+    padding-left: 10px; // extra space visual
   }
 
   > div {
@@ -104,7 +109,7 @@ export default defineComponent({
   }
 
   :deep .right-actions {
-    margin-right: 40px;
+    margin-right: 12px;
     z-index: 50;
     @media (max-width: 768px) {
       margin-right: 10px;

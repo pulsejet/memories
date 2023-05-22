@@ -118,6 +118,7 @@ export default defineComponent({
 .top-matter {
   .breadcrumb {
     min-width: 0;
+    height: unset;
   }
 }
 </style>

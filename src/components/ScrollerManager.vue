@@ -22,7 +22,7 @@
     <span
       ref="hoverCursor"
       class="cursor hv"
-      :style="{ transform: `translateY(max(calc(${hoverCursorY}px - 100%), 0px))` }"
+      :style="{ transform: hoverCursorTransform }"
       @touchmove.prevent="touchmove"
       @touchstart.passive="interactstart"
       @touchend.passive="interactend"
@@ -143,6 +143,15 @@ export default defineComponent({
     /** Height of usable area */
     height(): number {
       return this.fullHeight - this.topPadding;
+    },
+
+    /** Position of hover cursor */
+    hoverCursorTransform(): string {
+      const m = utils.isMobile();
+      const min = m ? '2px' : '0px'; // padding for curvature
+      const max = `calc(${this.fullHeight - (m ? 6 : 0)}px - 100%)`; // padding for shadow
+      const val = `calc(${this.hoverCursorY}px - 100%)`;
+      return `translateY(clamp(${min}, ${val}, ${max}))`;
     },
   },
 
@@ -304,7 +313,7 @@ export default defineComponent({
 
       // Add extra padding for any top elements
       document.querySelectorAll('.timeline-scroller-gap').forEach((el) => {
-        this.topPadding += el.clientHeight;
+        this.topPadding += el.clientHeight + 1;
       });
 
       // Start with the first tick. Walk over all rows counting the

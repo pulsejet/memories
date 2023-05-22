@@ -29,6 +29,11 @@ body {
   #app-navigation-vue {
     border-top-left-radius: var(--body-container-radius);
     border-bottom-left-radius: var(--body-container-radius);
+
+    .app-navigation-toggle {
+      // Move up to align with back button of top matter
+      top: 2px;
+    }
   }
 }
 
