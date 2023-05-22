@@ -36,79 +36,20 @@
       </div>
 
       <div id="local-folders" class="p animatable invisible">
-        Choose the folders on this device to show on the timeline. If no folders
-        are visible here, you may need to grant the app storage permissions or
+        Choose the folders on this device to show on your timeline. If no folders
+        are visible here, you may need to grant the app storage permissions, or
         wait for the app to index your files.
+        <br /><br />
+        You can always change this in settings. Note that this does not affect
+        automatic uploads.
         <br />
+
         <div id="folder-list"></div>
 
         <button class="m-button" onclick="start()">Continue</button>
       </div>
     </div>
 
-    <script>
-      const main = document.getElementById("main");
-      const waiting = document.getElementById("waiting");
-      const sync = document.getElementById("sync");
-      const localFolders = document.getElementById("local-folders");
-
-      // Waiting page => sync page
-      window.loggedIn = async () => {
-        waiting.classList.add("invisible");
-        await new Promise((resolve) => setTimeout(resolve, 700));
-        waiting.remove();
-        sync.classList.remove("invisible");
-      };
-      loggedIn();
-
-      // Local list of folders
-      let localList = null;
-      async function openLocal() {
-        // Get the list of local folders for next screen
-        (async () => {
-          const res = await fetch("http://127.0.0.1/api/config/local-folders");
-          localList = await res.json();
-
-          // Add HTML for folders list
-          document.getElementById("folder-list").innerHTML = localList
-            .map(
-              (folder) => `
-                    <div class="folder-choose">
-                        <input type="checkbox" id="folder-${folder.id}" ${
-                folder.enabled ? "checked" : ""
-              }>
-                        <label for="${folder.id}">${folder.name}</label>
-                    </div>
-                `
-            )
-            .join("");
-        })();
-
-        // Show the folders list
-        sync.classList.add("invisible");
-        await new Promise((resolve) => setTimeout(resolve, 700));
-        sync.remove();
-        localFolders.classList.remove("invisible");
-      }
-
-      // Open main app
-      async function start() {
-        // Mark all checked as enabled
-        if (localList) {
-          localList.forEach(
-            (folder) =>
-              (folder.enabled = document.getElementById(
-                `folder-${folder.id}`
-              ).checked)
-          );
-          window.nativex?.configSetLocalFolders(JSON.stringify(localList));
-        }
-
-        // Start the app
-        main.classList.add("invisible");
-        await new Promise((resolve) => setTimeout(resolve, 700));
-        window.nativex?.reload();
-      }
-    </script>
+    <script src="sync.js"></script>
   </body>
 </html>
