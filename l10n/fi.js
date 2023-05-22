@@ -264,7 +264,6 @@ OC.L10N.register(
     "Failed to download files" : "Tiedostojen lataus epäonnistui",
     "Failed to favorite files." : "Tiedostojen asettaminen suosikeiksi epäonnistui.",
     "Failed to favorite some files." : "Joidenkin tiedostojen määrittäminen suosikiksi epäonnistui.",
-    "Failed to favorite {fileName}." : "Tiedoston {fileName} asettaminen suosikiksi epäonnistui.",
-    "Your Timeline" : "Aikajanasi"
+    "Failed to favorite {fileName}." : "Tiedoston {fileName} asettaminen suosikiksi epäonnistui."
 },
 "nplurals=2; plural=(n != 1);");

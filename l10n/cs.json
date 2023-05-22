@@ -416,7 +416,6 @@
     "Archive photos you don't want to see in your timeline" : "Fotky, které nechcete vidět na časové ose zaarchivujte",
     "Tag photos to find them easily" : "Abyste je snadno našli, opatřujte fotky štítky",
     "Recognize is still working on your photos" : "Stále ještě probíhá rozpoznávání vašich fotek",
-    "Places you have been to will appear here" : "Objeví se zde místa, na kterých jste byli",
-    "Your Timeline" : "Vaše časová osa"
+    "Places you have been to will appear here" : "Objeví se zde místa, na kterých jste byli"
 },"pluralForm" :"nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;"
 }

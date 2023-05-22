@@ -421,7 +421,6 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "Archive photos you don't want to see in your timeline",
     "Tag photos to find them easily" : "Tag photos to find them easily",
     "Recognize is still working on your photos" : "Recognize is still working on your photos",
-    "Places you have been to will appear here" : "Places you have been to will appear here",
-    "Your Timeline" : "Your Timeline"
+    "Places you have been to will appear here" : "Places you have been to will appear here"
 },
 "nplurals=2; plural=(n != 1);");

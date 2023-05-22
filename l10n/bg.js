@@ -410,7 +410,6 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "Архивиране на снимки, които не искате да виждате в своята времева линия /хронология/",
     "Tag photos to find them easily" : "Поставете етикет на снимките, за да ги намирате лесно",
     "Recognize is still working on your photos" : "Разпознаването все още работи по снимките ви",
-    "Places you have been to will appear here" : "Местата, на които сте били, ще се появят тук",
-    "Your Timeline" : "Вашата времева линия"
+    "Places you have been to will appear here" : "Местата, на които сте били, ще се появят тук"
 },
 "nplurals=2; plural=(n != 1);");

@@ -14,6 +14,7 @@ OC.L10N.register(
     "Download" : "Llwytho i lawr",
     "Favorite" : "Ffefryn",
     "General" : "Cyffredinol",
+    "Account" : "Cyfrif",
     "Close" : "Cau",
     "Unknown" : "Anhysbys",
     "Copy public link" : "Copïo dolen gyhoeddus",

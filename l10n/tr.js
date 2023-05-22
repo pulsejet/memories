@@ -421,7 +421,6 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "Zaman tünelinizde görmek istemediğiniz fotoğrafları arşivleyin",
     "Tag photos to find them easily" : "Fotoğrafları kolayca bulabilmek için etiketleyin",
     "Recognize is still working on your photos" : "Recognize fotoğraflarınız üzerinde çalışmayı bitirmedi",
-    "Places you have been to will appear here" : "Bulunduğunuz yerler burada görüntülenecek",
-    "Your Timeline" : "Zaman tüneliniz"
+    "Places you have been to will appear here" : "Bulunduğunuz yerler burada görüntülenecek"
 },
 "nplurals=2; plural=(n > 1);");

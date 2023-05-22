@@ -421,7 +421,6 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "Архивирајте фотографије које не желите да се виде у вашој временској линији",
     "Tag photos to find them easily" : "Означите фотографије да бисте их лакше пронашли",
     "Recognize is still working on your photos" : "Препознавање се још увек обавља над вашим фотографијама",
-    "Places you have been to will appear here" : "Овде ће се појавити места која сте посетили",
-    "Your Timeline" : "Ваша временска линија"
+    "Places you have been to will appear here" : "Овде ће се појавити места која сте посетили"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);");
