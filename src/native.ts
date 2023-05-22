@@ -1,12 +1,13 @@
 import axios from '@nextcloud/axios';
-import type { IDay, IPhoto } from './types';
 import { constants } from './services/Utils';
 import { generateUrl } from '@nextcloud/router';
-
-const BASE_URL = 'http://127.0.0.1';
-
+import type { IDay, IPhoto } from './types';
 const euc = encodeURIComponent;
 
+/** Access NativeX over localhost */
+const BASE_URL = 'http://127.0.0.1';
+
+/** NativeX API implemented by the native code */
 export const API = {
   DAYS: () => `${BASE_URL}/api/days`,
   DAY: (dayId: number) => `${BASE_URL}/api/days/${dayId}`,
@@ -19,11 +20,11 @@ export const API = {
   SHARE_URL: (url: string) => `${BASE_URL}/api/share/url/${euc(euc(url))}`,
   SHARE_BLOB: (url: string) => `${BASE_URL}/api/share/blob/${euc(euc(url))}`,
   SHARE_LOCAL: (fileId: number) => `${BASE_URL}/api/share/local/${fileId}`,
+
+  CONFIG_LOCAL_FOLDERS: () => `${BASE_URL}/api/config/local-folders`,
 };
 
-/**
- * Native interface for the Android app.
- */
+/** The global NativeX interface. */
 export type NativeX = {
   isNative: () => boolean;
   setThemeColor: (color: string, isDark: boolean) => void;
@@ -34,7 +35,16 @@ export type NativeX = {
   playVideoHls: (fileid: string, url: string) => void;
   destroyVideo: (fileid: string) => void;
 
+  configSetLocalFolders: (json: string) => void;
+
   logout: () => void;
+};
+
+/** Setting of whether a local folder is enabled */
+export type LocalFolderConfig = {
+  id: string;
+  name: string;
+  enabled: boolean;
 };
 
 /** The native interface is a global object that is injected by the native app. */
@@ -199,6 +209,21 @@ export async function deleteLocalPhotos(photos: IPhoto[]): Promise<IPhoto[]> {
   }
 
   return localPhotos;
+}
+
+/**
+ * Get list of local folders configuration.
+ * Should be called only if NativeX is available.
+ */
+export async function getLocalFolders() {
+  return (await axios.get<LocalFolderConfig[]>(API.CONFIG_LOCAL_FOLDERS())).data;
+}
+
+/**
+ * Set list of local folders configuration.
+ */
+export async function setLocalFolders(config: LocalFolderConfig[]) {
+  nativex?.configSetLocalFolders(JSON.stringify(config));
 }
 
 /**

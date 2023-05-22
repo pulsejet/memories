@@ -61,11 +61,24 @@
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection id="account-settings" :title="t('memories', 'Account')" v-if="hasLogout">
-        Logged in as {{ user }}
+      <NcAppSettingsSection id="account-settings" :title="t('memories', 'Account')" v-if="isNative">
+        {{ t('memories', 'Logged in as {user}', { user }) }}
         <NcButton @click="logout" id="sign-out">
           {{ t('memories', 'Sign out') }}
         </NcButton>
+      </NcAppSettingsSection>
+
+      <NcAppSettingsSection id="device-settings" :title="t('memories', 'Device Folders')" v-if="isNative">
+        {{ t('memories', 'Local folders to include in the timeline view') }}
+        <NcCheckboxRadioSwitch
+          v-for="folder in localFolders"
+          :key="folder.id"
+          :checked.sync="folder.enabled"
+          @update:checked="updateDeviceFolders"
+          type="switch"
+        >
+          {{ folder.name }}
+        </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
       <NcAppSettingsSection id="folders-settings" :title="t('memories', 'Folders')">
@@ -139,6 +152,10 @@ export default defineComponent({
 
   mixins: [UserConfig],
 
+  data: () => ({
+    localFolders: [] as nativex.LocalFolderConfig[],
+  }),
+
   props: {
     open: {
       type: Boolean,
@@ -151,13 +168,19 @@ export default defineComponent({
       return this.t('memories', 'Choose Timeline Paths');
     },
 
-    hasLogout(): boolean {
+    isNative(): boolean {
       return nativex.has();
     },
 
     user(): string {
       return getCurrentUser()?.uid.toString() ?? '';
     },
+  },
+
+  mounted() {
+    if (this.isNative) {
+      this.refreshNativeConfig();
+    }
   },
 
   methods: {
@@ -234,6 +257,15 @@ export default defineComponent({
 
     async updateSortAlbumMonth() {
       await this.updateSetting('sort_album_month', 'sortAlbumMonth');
+    },
+
+    // --------------- Native APIs start -----------------------------
+    async refreshNativeConfig() {
+      this.localFolders = await nativex.getLocalFolders();
+    },
+
+    async updateDeviceFolders() {
+      await nativex.setLocalFolders(this.localFolders);
     },
   },
 });
