@@ -42,11 +42,10 @@ class DownloadController extends GenericApiController
      *
      * Request to download one or more files
      */
-    public function request(): Http\Response
+    public function request($files): Http\Response
     {
-        return Util::guardEx(function () {
+        return Util::guardEx(function () use ($files) {
             // Get ids from body
-            $files = $this->request->getParam('files');
             if (null === $files || !\is_array($files)) {
                 throw Exceptions::MissingParameter('files');
             }
