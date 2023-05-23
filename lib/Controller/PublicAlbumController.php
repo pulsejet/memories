@@ -6,12 +6,14 @@ use OCA\Memories\Db\AlbumsQuery;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\RedirectResponse;
+use OCP\AppFramework\Http\Template\LinkMenuAction;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
+use OCP\IL10N;
 use OCP\IURLGenerator;
 use OCP\IUserSession;
 use OCP\Util;
@@ -27,6 +29,7 @@ class PublicAlbumController extends Controller
     protected IRootFolder $rootFolder;
     protected IURLGenerator $urlGenerator;
     protected AlbumsQuery $albumsQuery;
+    protected IL10N $l10n;
 
     public function __construct(
         string $appName,
@@ -37,7 +40,8 @@ class PublicAlbumController extends Controller
         IUserSession $userSession,
         IRootFolder $rootFolder,
         IURLGenerator $urlGenerator,
-        AlbumsQuery $albumsQuery
+        AlbumsQuery $albumsQuery,
+        IL10N $l10n
     ) {
         $this->appName = $appName;
         $this->eventDispatcher = $eventDispatcher;
@@ -48,6 +52,7 @@ class PublicAlbumController extends Controller
         $this->rootFolder = $rootFolder;
         $this->urlGenerator = $urlGenerator;
         $this->albumsQuery = $albumsQuery;
+        $this->l10n = $l10n;
     }
 
     /**
@@ -86,12 +91,46 @@ class PublicAlbumController extends Controller
         // Scripts
         Util::addScript($this->appName, 'memories-main');
 
+        // Render main template
         $response = new PublicTemplateResponse($this->appName, 'main', PageController::getMainParams());
         $response->setHeaderTitle($album['name']);
         $response->setFooterVisible(false); // wth is that anyway?
         $response->setContentSecurityPolicy(PageController::getCSP());
 
+        // Add download link
+        $dlUrl = $this->urlGenerator->linkToRoute('memories.PublicAlbum.download', [
+            'token' => $token, // share identification
+            'albums' => 1, // identify backend for share
+        ]);
+        $dlAction = new LinkMenuAction($this->l10n->t('Download'), 'icon-download', $dlUrl);
+        $response->setHeaderActions([$dlAction]);
+
         return $response;
+    }
+
+    /**
+     * @PublicPage
+     *
+     * @NoCSRFRequired
+     */
+    public function download(string $token)
+    {
+        $album = $this->albumsQuery->getAlbumByLink($token);
+        if (!$album) {
+            return new TemplateResponse('core', '404', [], 'guest');
+        }
+
+        // Get list of files
+        $albumId = (int) $album['album_id'];
+        $files = $this->albumsQuery->getAlbumPhotos($albumId, null) ?? [];
+        $fileIds = array_map(fn ($file) => (int) $file['file_id'], $files);
+
+        // Get download handle
+        $downloadController = \OC::$server->get(\OCA\Memories\Controller\DownloadController::class);
+        $handle = $downloadController::createHandle($album['name'], $fileIds);
+
+        // Start download
+        return $downloadController->file($handle);
     }
 
     private function addOgMetadata(array $album, string $token)
