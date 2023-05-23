@@ -127,10 +127,10 @@ input[type='text'] {
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { getFilePickerBuilder } from '@nextcloud/dialogs';
 import { getCurrentUser } from '@nextcloud/auth';
 
 import UserConfig from '../mixins/UserConfig';
+import * as utils from '../services/Utils';
 import * as nativex from '../native';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
@@ -189,19 +189,6 @@ export default defineComponent({
       this.$emit('update:open', false);
     },
 
-    async chooseFolder(title: string, initial: string) {
-      const picker = getFilePickerBuilder(title)
-        .setMultiSelect(false)
-        .setModal(true)
-        .setType(1)
-        .addMimeTypeFilter('httpd/unix-directory')
-        .allowDirectories()
-        .startAt(initial)
-        .build();
-
-      return await picker.pick();
-    },
-
     async chooseTimelinePath() {
       (<any>this.$refs.multiPathModal).open(this.config.timeline_path.split(';'));
     },
@@ -217,11 +204,11 @@ export default defineComponent({
     },
 
     async chooseFoldersPath() {
-      let newPath = await this.chooseFolder(
+      const newPath = await utils.chooseNcFolder(
         this.t('memories', 'Choose the root for the folders view'),
         this.config.folders_path
       );
-      if (newPath === '') newPath = '/';
+
       if (newPath !== this.config.folders_path) {
         this.config.folders_path = newPath;
         await this.updateSetting('folders_path', 'foldersPath');

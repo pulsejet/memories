@@ -33,7 +33,8 @@ import { defineComponent } from 'vue';
 
 import Modal from './Modal.vue';
 
-import { getFilePickerBuilder } from '@nextcloud/dialogs';
+import * as utils from '../../services/Utils';
+
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
@@ -77,23 +78,8 @@ export default defineComponent({
       this.close(this.paths);
     },
 
-    async chooseFolder(title: string, initial: string) {
-      const picker = getFilePickerBuilder(title)
-        .setMultiSelect(false)
-        .setModal(true)
-        .setType(1)
-        .addMimeTypeFilter('httpd/unix-directory')
-        .allowDirectories()
-        .startAt(initial)
-        .build();
-
-      return await picker.pick();
-    },
-
     async add() {
-      let newPath = await this.chooseFolder(this.t('memories', 'Add a root to your timeline'), '/');
-      if (newPath === '') newPath = '/';
-      this.paths.push(newPath);
+      this.paths.push(await utils.chooseNcFolder(this.t('memories', 'Add a root to your timeline')));
     },
 
     remove(index: number) {

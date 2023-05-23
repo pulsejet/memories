@@ -51,13 +51,13 @@ import NcContent from '@nextcloud/vue/dist/Components/NcContent';
 import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 
-import { getFilePickerBuilder } from '@nextcloud/dialogs';
 import { getCurrentUser } from '@nextcloud/auth';
 import axios from '@nextcloud/axios';
 
 import banner from '../assets/banner.svg';
 import type { IDay } from '../types';
 import { API } from '../services/API';
+import * as utils from '../services/Utils';
 
 export default defineComponent({
   name: 'FirstStart',
@@ -91,10 +91,7 @@ export default defineComponent({
 
   methods: {
     async begin() {
-      let path = await this.chooseFolder(this.t('memories', 'Choose the root of your timeline'), '/');
-
-      // Remove duplicate slashes
-      path = path.replace(/\/+/g, '/');
+      const path = await utils.chooseNcFolder(this.t('memories', 'Choose the root of your timeline'));
 
       // Get folder days
       this.error = '';
@@ -136,19 +133,6 @@ export default defineComponent({
       await new Promise((resolve) => setTimeout(resolve, 500));
       this.config.timeline_path = this.chosenPath;
       await this.updateSetting('timeline_path', 'timelinePath');
-    },
-
-    async chooseFolder(title: string, initial: string) {
-      const picker = getFilePickerBuilder(title)
-        .setMultiSelect(false)
-        .setModal(true)
-        .setType(1)
-        .addMimeTypeFilter('httpd/unix-directory')
-        .allowDirectories()
-        .startAt(initial)
-        .build();
-
-      return await picker.pick();
     },
   },
 });

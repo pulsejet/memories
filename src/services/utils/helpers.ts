@@ -1,6 +1,7 @@
 import { IImageInfo, IPhoto } from '../../types';
 import { API } from '../API';
 import { constants } from './const';
+import { FilePickerType, getFilePickerBuilder } from '@nextcloud/dialogs';
 import * as nativex from '../../native';
 
 /**
@@ -122,6 +123,36 @@ export function getViewerRoute(photo: IPhoto) {
     query: $route.query,
     hash: getViewerHash(photo),
   };
+}
+
+/**
+ * Choose a folder using the NC file picker
+ *
+ * @param title Title of the file picker
+ * @param initial Initial path
+ * @param type Type of the file picker
+ *
+ * @returns The path of the chosen folder
+ */
+export async function chooseNcFolder(
+  title: string,
+  initial: string = '/',
+  type: FilePickerType = FilePickerType.Choose
+) {
+  const picker = getFilePickerBuilder(title)
+    .setMultiSelect(false)
+    .setModal(true)
+    .setType(type)
+    .addMimeTypeFilter('httpd/unix-directory')
+    .allowDirectories()
+    .startAt(initial)
+    .build();
+
+  // Choose a folder
+  const folder = (await picker.pick()) || '/';
+
+  // Remove double slashes
+  return folder.replace(/\/+/g, '/');
 }
 
 /**
