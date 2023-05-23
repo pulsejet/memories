@@ -13,6 +13,13 @@ body {
   // now set on #app-navigation-vue
   border-radius: 0;
   width: calc(100% - var(--body-container-margin) * 1); // was *2
+  margin-right: 0;
+
+  // If no navigation remove both margins
+  &:not(.has-nav) {
+    width: calc(100%);
+    margin-left: 0;
+  }
 
   // Reduce size of navigation. NC <25 doesn't like this on mobile.
   #app-navigation-vue {

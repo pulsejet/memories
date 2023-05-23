@@ -6,6 +6,7 @@
     v-else
     :class="{
       'remove-gap': removeOuterGap,
+      'has-nav': showNavigation,
     }"
   >
     <NcAppNavigation v-if="showNavigation">
