@@ -67,7 +67,7 @@ class AlbumsBackend extends Backend
 
     public function transformDayQuery(&$query, bool $aggregate): void
     {
-        $albumId = (string) $this->request->getParam('albums');
+        $albumId = (string) $this->request->getParam(self::clusterType());
 
         // Get album object
         $album = $this->albumsQuery->getIfAllowed($this->getUID(), $albumId);
