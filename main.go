@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	VERSION = "0.1.1"
+	VERSION = "0.1.6"
 )
 
 type Handler struct {
