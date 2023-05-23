@@ -24,6 +24,10 @@ export type ISystemConfig = {
   'memories.vod.nvenc.scale': string;
 
   enabledPreviewProviders: string[];
+  preview_max_x: number;
+  preview_max_y: number;
+  preview_max_memory: number;
+  preview_max_filesize_image: number;
 };
 
 export type IBinaryStatus = 'ok' | 'not_found' | 'not_executable' | 'test_ok' | string;

@@ -25,6 +25,43 @@
     <code v-if="status"
       ><template v-for="mime in status.mimes">{{ mime }}<br :key="mime" /></template
     ></code>
+
+    <br />
+
+    {{ t('memories', 'Max preview size (trade-off between quality and storage requirements).') }}
+    <a href="https://memories.gallery/config/#preview-storage" target="_blank">
+      {{ t('memories', 'Documentation.') }}
+    </a>
+    <br />
+    <NcCheckboxRadioSwitch
+      class="preview-box"
+      v-for="size in previewSizes"
+      :key="size"
+      :checked="config['preview_max_x']"
+      :value="size"
+      name="previewsize_radio"
+      type="radio"
+      @update:checked="updatePreviewSize(size)"
+      >{{ size }}px
+    </NcCheckboxRadioSwitch>
+
+    <NcTextField
+      type="number"
+      placeholder="1024"
+      :label="t('memories', 'Max memory for preview generation (MB)')"
+      :label-visible="true"
+      :value="config['preview_max_memory']"
+      @change="update('preview_max_memory', Number($event.target.value))"
+    />
+
+    <NcTextField
+      type="number"
+      placeholder="50"
+      :label="t('memories', 'Max size of preview files (MB)')"
+      :label-visible="true"
+      :value="config['preview_max_filesize_image']"
+      @change="update('preview_max_filesize_image', Number($event.target.value))"
+    />
   </div>
 </template>
 
@@ -54,6 +91,8 @@ export default defineComponent({
         name: t('memories', 'Videos (ffmpeg)'),
       },
     },
+
+    previewSizes: [512, 1024, 2048, 4096, 8192],
   }),
 
   methods: {
@@ -76,6 +115,19 @@ export default defineComponent({
 
       this.update('enabledPreviewProviders');
     },
+
+    async updatePreviewSize(size: number) {
+      this.update('preview_max_x', size);
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Hack to prevent config race
+      this.update('preview_max_y', size);
+    },
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.preview-box {
+  display: inline-block !important;
+  margin: 0 10px;
+}
+</style>

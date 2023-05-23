@@ -370,6 +370,9 @@ class Util
             throw new \InvalidArgumentException("Invalid system config key: {$key}");
         }
 
+        // Key belongs to memories namespace
+        $isAppKey = str_starts_with($key, Application::APPNAME.'.');
+
         // Check if the value has the correct type
         if (null !== $value && \gettype($value) !== \gettype($defaults[$key])) {
             $expected = \gettype($defaults[$key]);
@@ -378,7 +381,12 @@ class Util
             throw new \InvalidArgumentException("Invalid type for system config {$key}, expected {$expected}, got {$got}");
         }
 
-        if ($value === $defaults[$key] || null === $value) {
+        // Do not allow null for non-app keys
+        if (!$isAppKey && null === $value) {
+            throw new \InvalidArgumentException("Invalid value for system config {$key}, null is not allowed");
+        }
+
+        if ($isAppKey && ($value === $defaults[$key] || null === $value)) {
             $config->deleteSystemValue($key);
         } else {
             $config->setSystemValue($key, $value);

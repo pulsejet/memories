@@ -62,7 +62,11 @@ return [
     // 1080 => 1080p (and so on)
     'memories.video_default_quality' => '0',
 
-    // Preview providers for Nextcloud
     // Memories only provides an admin interface for these
+    // https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/config_sample_php_parameters.html#previews
     'enabledPreviewProviders' => [],
+    'preview_max_x' => 4096,
+    'preview_max_y' => 4096,
+    'preview_max_memory' => 128,
+    'preview_max_filesize_image' => 50,
 ];
