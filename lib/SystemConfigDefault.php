@@ -61,4 +61,8 @@ return [
     //   -2 => Direct (disable transcoding)
     // 1080 => 1080p (and so on)
     'memories.video_default_quality' => '0',
+
+    // Preview providers for Nextcloud
+    // Memories only provides an admin interface for these
+    'enabledPreviewProviders' => [],
 ];

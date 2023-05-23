@@ -17,6 +17,7 @@ import * as utils from '../../services/Utils';
 
 import Exif from './sections/Exif.vue';
 import Indexing from './sections/Indexing.vue';
+import FileSupport from './sections/FileSupport.vue';
 import Performance from './sections/Performance.vue';
 import Places from './sections/Places.vue';
 import Video from './sections/Video.vue';
@@ -35,7 +36,7 @@ export default defineComponent({
     status: null as ISystemStatus | null,
     config: null as ISystemConfig | null,
 
-    components: [Exif, Indexing, Performance, Places, Video, VideoTranscoder, VideoAccel],
+    components: [Exif, Indexing, FileSupport, Performance, Places, Video, VideoTranscoder, VideoAccel],
   }),
 
   mounted() {

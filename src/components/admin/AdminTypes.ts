@@ -22,6 +22,8 @@ export type ISystemConfig = {
   'memories.vod.nvenc': boolean;
   'memories.vod.nvenc.temporal_aq': boolean;
   'memories.vod.nvenc.scale': string;
+
+  enabledPreviewProviders: string[];
 };
 
 export type IBinaryStatus = 'ok' | 'not_found' | 'not_executable' | 'test_ok' | string;

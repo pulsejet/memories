@@ -110,17 +110,6 @@
     {{ t('memories', 'Clear all existing index tables:') }}
     <br />
     <code>occ memories:index --clear</code>
-    <br />
-
-    <br />
-    {{ t('memories', 'The following MIME types are configured for preview generation correctly. More documentation:') }}
-    <a href="https://memories.gallery/file-types/" target="_blank">
-      {{ t('memories', 'External Link') }}
-    </a>
-    <br />
-    <code v-if="status"
-      ><template v-for="mime in status.mimes">{{ mime }}<br :key="mime" /></template
-    ></code>
   </div>
 </template>
 

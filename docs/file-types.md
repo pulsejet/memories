@@ -11,7 +11,6 @@ Memories supports the file types supported by the Nextcloud previews app. If you
 ```
 PNG (image/png)
 JPEG (image/jpeg)
-PNG (image/png)
 GIF (image/gif)
 BMP (image/bmp)
 ```
@@ -47,9 +46,6 @@ You need to install `ffmpeg` and add the video config to `config.php`
 'enabledPreviewProviders' =>
 array (
   'OC\\Preview\\Movie',
-  'OC\\Preview\\MKV',
-  'OC\\Preview\\MP4',
-  'OC\\Preview\\AVI',
 ),
 ```
 
