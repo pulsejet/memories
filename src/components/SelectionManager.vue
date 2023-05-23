@@ -875,7 +875,7 @@ export default defineComponent({
   opacity: 0.97;
   display: flex;
   vertical-align: middle;
-  z-index: 100;
+  z-index: 300; // above top-matter and scroller
 
   > .text {
     flex-grow: 1;

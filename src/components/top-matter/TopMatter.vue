@@ -81,7 +81,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .top-matter-container {
   position: relative;
-  z-index: 500;
+  z-index: 200; // above scroller, below top-bar
   padding: 2px 0;
   background-color: var(--color-main-background);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
