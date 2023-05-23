@@ -11,12 +11,6 @@
           {{ t('memories', 'Choose the root folder of your timeline to begin') }}
         </div>
 
-        <div class="admin-text" v-if="isAdmin">
-          {{ t('memories', 'If you just installed Memories, run:') }}
-          <br />
-          <code>occ memories:index</code>
-        </div>
-
         <div class="error" v-if="error">
           {{ error }}
         </div>
@@ -38,6 +32,11 @@
 
         <div class="footer">
           {{ t('memories', 'You can always change this later in settings') }}
+
+          <span class="admin-text" v-if="isAdmin">
+            <br />
+            {{ t('memories', 'If you just installed Memories, visit the admin panel first.') }}
+          </span>
         </div>
       </div>
     </NcAppContent>
@@ -162,10 +161,6 @@ export default defineComponent({
     > img {
       max-width: calc(100vw - 40px);
     }
-  }
-
-  .admin-text {
-    margin-top: 10px;
   }
 
   .error {
