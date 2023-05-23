@@ -42,11 +42,6 @@ import java.net.URLDecoder
 
     init {
         dlService = DownloadService(mCtx)
-
-        // Synchronize the database if possible
-        if (mCtx.hasMediaPermission()) {
-            query.syncDeltaDb()
-        }
     }
 
     companion object {
@@ -55,6 +50,7 @@ import java.net.URLDecoder
 
     fun destroy() {
         dlService = null
+        query.destroy()
     }
 
     fun handleRequest(request: WebResourceRequest): WebResourceResponse {

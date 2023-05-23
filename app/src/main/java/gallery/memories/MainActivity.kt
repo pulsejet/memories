@@ -12,6 +12,7 @@ import android.view.WindowInsetsController
 import android.webkit.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
@@ -34,6 +35,8 @@ import gallery.memories.databinding.ActivityMainBinding
     private var playWhenReady = true
     private var mediaItemIndex = 0
     private var playbackPosition = 0L
+
+    private var mNeedRefresh = false
 
     private val memoriesRegex = Regex("/apps/memories/.*$")
 
@@ -71,6 +74,9 @@ import gallery.memories.databinding.ActivityMainBinding
         super.onResume()
         if (playerUri != null && (Util.SDK_INT <= 23 || player == null)) {
             initializePlayer(playerUri!!, playerUid!!)
+        }
+        if (mNeedRefresh) {
+            refreshTimeline(true)
         }
     }
 
@@ -181,15 +187,28 @@ import gallery.memories.databinding.ActivityMainBinding
     }
 
     fun ensureStoragePermissions() {
-        val requestPermissionLauncher =
-            registerForActivityResult(
-                ActivityResultContracts.RequestPermission()
-            ) { isGranted: Boolean ->
-                if (isGranted && !hasMediaPermission()) {
-                    nativex.query.syncFullDb()
-                }
-                setHasMediaPermission(isGranted)
+        val requestPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                val needFullSync = !hasMediaPermission()
+
+                // Run DB operations in separate thread
+                Thread {
+                    // Full sync if this is the first time permission was granted
+                    if (needFullSync) {
+                        nativex.query.syncFullDb()
+                    }
+
+                    // Run delta sync and register hooks
+                    nativex.query.initialize()
+                }.start()
             }
+
+            // Persist that we have it now
+            setHasMediaPermission(isGranted)
+        }
+
+        // Request media read permission
         requestPermissionLauncher.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     }
 
@@ -300,5 +319,20 @@ import gallery.memories.databinding.ActivityMainBinding
         getSharedPreferences(getString(R.string.preferences_key), 0).edit()
             .putBoolean(getString(R.string.preferences_has_media_permission), v)
             .apply()
+    }
+
+    fun refreshTimeline(force: Boolean = false) {
+        runOnUiThread {
+            // Check webview is loaded
+            if (binding?.webview?.url == null) return@runOnUiThread
+
+            // Schedule for resume if not active
+            if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) || force) {
+                    mNeedRefresh = false
+                    binding.webview.evaluateJavascript("window._nc_event_bus?.emit('files:file:created')", null)
+            } else {
+                mNeedRefresh = true
+            }
+        }
     }
 }

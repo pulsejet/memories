@@ -2,9 +2,11 @@ package gallery.memories.service
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.database.ContentObserver
 import android.database.sqlite.SQLiteDatabase
 import android.icu.text.SimpleDateFormat
 import android.icu.util.TimeZone
+import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.text.TextUtils
@@ -13,9 +15,10 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.ArraySet
 import androidx.exifinterface.media.ExifInterface
+import androidx.media3.common.util.UnstableApi
+import gallery.memories.MainActivity
 import gallery.memories.R
 import gallery.memories.mapper.Fields
 import gallery.memories.mapper.SystemImage
@@ -26,7 +29,7 @@ import java.io.IOException
 import java.time.Instant
 import java.util.concurrent.CountDownLatch
 
-class TimelineQuery(private val mCtx: AppCompatActivity) {
+@UnstableApi class TimelineQuery(private val mCtx: MainActivity) {
     private val mDb: SQLiteDatabase = DbService(mCtx).writableDatabase
     private val TAG = "TimelineQuery"
 
@@ -38,6 +41,11 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
     // Caches
     var mEnabledBuckets: Set<String>? = null
 
+    // Observers
+    var imageObserver: ContentObserver? = null
+    var videoObserver: ContentObserver? = null
+    var refreshPending: Boolean = false
+
     init {
         // Register intent launcher for callback
         deleteIntentLauncher = mCtx.registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result: ActivityResult? ->
@@ -45,6 +53,57 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
                 deleteCallback?.let { it(result) }
             }
         }
+    }
+
+    fun initialize() {
+        if (syncDeltaDb() > 0) {
+            mCtx.refreshTimeline()
+        }
+        registerHooks()
+    }
+
+    fun destroy() {
+        if (imageObserver != null) {
+            mCtx.contentResolver.unregisterContentObserver(imageObserver!!)
+        }
+        if (videoObserver != null) {
+            mCtx.contentResolver.unregisterContentObserver(videoObserver!!)
+        }
+    }
+
+    fun registerHooks() {
+        imageObserver = registerContentObserver(SystemImage.IMAGE_URI)
+        videoObserver = registerContentObserver(SystemImage.VIDEO_URI)
+    }
+
+    private fun registerContentObserver(uri: Uri): ContentObserver {
+        val observer = @UnstableApi object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                super.onChange(selfChange)
+
+                // Debounce refreshes
+                synchronized(this@TimelineQuery) {
+                    if (refreshPending) return
+                    refreshPending = true
+                }
+
+                // Refresh after 750ms
+                Thread {
+                    Thread.sleep(750)
+                    synchronized(this@TimelineQuery) {
+                        refreshPending = false
+                    }
+
+                    // Check if anything to update
+                    if (syncDeltaDb() == 0 || mCtx.isDestroyed || mCtx.isFinishing) return@Thread
+
+                    mCtx.refreshTimeline()
+                }.start()
+            }
+        }
+
+        mCtx.contentResolver.registerContentObserver(uri, true, observer)
+        return observer
     }
 
     @Throws(JSONException::class)
@@ -230,7 +289,7 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
         }
     }
 
-    private fun syncDb(startTime: Long) {
+    private fun syncDb(startTime: Long): Int {
         // Date modified is in seconds, not millis
         val syncTime = Instant.now().toEpochMilli() / 1000;
 
@@ -254,13 +313,16 @@ class TimelineQuery(private val mCtx: AppCompatActivity) {
         mCtx.getSharedPreferences(mCtx.getString(R.string.preferences_key), 0).edit()
             .putLong(mCtx.getString(R.string.preferences_last_sync_time), syncTime)
             .apply()
+
+        // Number of updated files
+        return files.size
     }
 
-    fun syncDeltaDb() {
+    fun syncDeltaDb(): Int {
         // Get last sync time
         val syncTime = mCtx.getSharedPreferences(mCtx.getString(R.string.preferences_key), 0)
             .getLong(mCtx.getString(R.string.preferences_last_sync_time), 0L)
-        syncDb(syncTime)
+        return syncDb(syncTime)
     }
 
     fun syncFullDb() {
