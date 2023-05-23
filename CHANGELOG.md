@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [v5.1.1] - Unreleased
 
+- New project home page: https://memories.gallery
 - **Feature**: Layout improvements especially for mobile.
 
 ## [v5.1.0] - 2023-04-29
