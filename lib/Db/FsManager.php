@@ -71,7 +71,7 @@ class FsManager
         $user = $this->userSession->getUser();
 
         // Albums have no folder
-        if ($this->request->getParam('albums') && Util::albumsIsEnabled()) {
+        if ($this->hasAlbumToken() && Util::albumsIsEnabled()) {
             if (null !== $user) {
                 return $root;
             }
@@ -243,7 +243,7 @@ class FsManager
     {
         try {
             // Album share
-            if ($this->request->getParam('albums')) {
+            if ($this->hasAlbumToken()) {
                 $album = $this->albumsQuery->getAlbumByLink($this->getShareToken());
                 if (null === $album) {
                     return null;
@@ -392,6 +392,11 @@ class FsManager
         }
 
         return $file;
+    }
+
+    private function hasAlbumToken(): bool
+    {
+        return null !== $this->request->getParam(\OCA\Memories\ClustersBackend\AlbumsBackend::clusterType(), null);
     }
 
     private function getShareToken()

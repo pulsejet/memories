@@ -41,6 +41,8 @@ class DownloadController extends GenericApiController
      * @UseSession
      *
      * Request to download one or more files
+     *
+     * @param mixed $files
      */
     public function request($files): Http\Response
     {
