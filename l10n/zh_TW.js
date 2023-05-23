@@ -410,6 +410,7 @@ OC.L10N.register(
     "Failed to favorite files." : "加入最愛檔案失敗。",
     "Failed to favorite some files." : "將部份檔案加入最愛失敗。",
     "Failed to favorite {fileName}." : "將 {fileName} 加入最愛失敗。",
+    "Memories has been updated to {version}. Reload to get the new version." : "Memories 已更新至 {version}。重新整理以取得新版本。",
     "Upload some photos and make sure the timeline path is configured" : "上傳一些照片並確保已設定時間軸路徑",
     "Mark photos as favorite to find them easily" : "將照片標記為最愛以輕鬆找到它們",
     "Memories from past years will appear here" : "往年的回憶會出現在這裡",

@@ -410,6 +410,7 @@ OC.L10N.register(
     "Failed to favorite files." : "Favorisieren von Dateien fehlgeschlagen.",
     "Failed to favorite some files." : "Einige Dateien konnten nicht zu den Favoriten hinzugefügt werden.",
     "Failed to favorite {fileName}." : "{fileName} konnte nicht zu den Favoriten hinzugefügt werden.",
+    "Memories has been updated to {version}. Reload to get the new version." : "Erinnerungen (Memories) wurden auf {version} aktualisiert. Neuladen, um die neue Version zu erhalten.",
     "Upload some photos and make sure the timeline path is configured" : "Laden Sie einige Fotos hoch und stellen Sie sicher, dass der Timeline-Pfad konfiguriert ist",
     "Mark photos as favorite to find them easily" : "Markieren Sie Fotos als Favoriten, um sie leicht zu finden",
     "Memories from past years will appear here" : "Erinnerungen aus vergangenen Jahren werden hier erscheinen",
