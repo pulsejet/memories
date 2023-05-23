@@ -3,7 +3,7 @@
     <NcAppContent>
       <div class="outer fill-block" :class="{ show }">
         <div class="title">
-          <img :src="banner" />
+          <XImg class="img" :src="banner" />
         </div>
 
         <div class="text">
@@ -91,7 +91,10 @@ export default defineComponent({
 
   methods: {
     async begin() {
-      const path = await this.chooseFolder(this.t('memories', 'Choose the root of your timeline'), '/');
+      let path = await this.chooseFolder(this.t('memories', 'Choose the root of your timeline'), '/');
+
+      // Remove duplicate slashes
+      path = path.replace(/\/+/g, '/');
 
       // Get folder days
       this.error = '';
@@ -112,6 +115,20 @@ export default defineComponent({
         path,
       });
       this.chosenPath = path;
+
+      // Check if nothing was found
+      if (n === 0) {
+        this.error =
+          this.t('memories', 'No photos were found in the selected folder.') +
+          '\n' +
+          this.t('memories', 'This can happen because your media is still indexing.');
+
+        if (this.isAdmin) {
+          this.error +=
+            '\n\n' + this.t('memories', 'Visit the admin panel to make sure Memories is configured correctly.');
+        }
+        return;
+      }
     },
 
     async finish() {
@@ -139,6 +156,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .outer {
+  max-width: 450px;
+  margin: 0 auto;
   padding: 20px;
   text-align: center;
 
@@ -149,6 +168,7 @@ export default defineComponent({
   }
 
   .title {
+    color: var(--color-primary);
     font-size: 2.8em;
     line-height: 1.1em;
     font-family: cursive;
@@ -156,15 +176,21 @@ export default defineComponent({
     margin-top: 10px;
     margin-bottom: 20px;
     width: 100%;
-    filter: var(--background-invert-if-dark);
 
-    > img {
-      max-width: calc(100vw - 40px);
+    > .img {
+      margin: 0 auto;
+      width: 60vw;
+      max-width: 400px;
     }
   }
 
   .error {
     color: red;
+    margin-top: 7px;
+    font-size: 0.8em;
+    line-height: 1.2em;
+    font-weight: 500;
+    white-space: pre-line;
   }
 
   .info {
@@ -174,7 +200,7 @@ export default defineComponent({
 
   .button {
     display: inline-block;
-    margin: 15px;
+    margin: 8px;
   }
 
   .footer {
