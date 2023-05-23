@@ -10,7 +10,6 @@
     :buffer="400"
     :itemSize="itemSize"
     :gridItems="gridItems"
-    :updateInterval="100"
     @resize="resize"
   >
     <template v-slot="{ item }">
@@ -101,6 +100,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .grid-recycler {
+  will-change: scroll-position;
   flex: 1;
   max-height: 100%;
   overflow-y: scroll !important;
