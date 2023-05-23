@@ -410,6 +410,7 @@ OC.L10N.register(
     "Failed to favorite files." : "Фајлови нису могли да се означе као омиљени.",
     "Failed to favorite some files." : "Неки фајлови нису могли да се означе као омиљени.",
     "Failed to favorite {fileName}." : "{fileName}  не може да се означи као омиљени.",
+    "Memories has been updated to {version}. Reload to get the new version." : "Успомене су ажуриране на {version}. Поново покрените апликацију да бисте почели да користите нову верзију.",
     "Upload some photos and make sure the timeline path is configured" : "Отпремите неколико фотографија и обезбедите да је подешена путања временске линије",
     "Mark photos as favorite to find them easily" : "Означите фотографије као омиљене да бисте их лакше пронашли",
     "Memories from past years will appear here" : "Овде ће се појавити успомене из претходних година",
