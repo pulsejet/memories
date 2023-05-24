@@ -113,7 +113,7 @@ export default defineComponent({
 
     /** Target URL to navigate to */
     target() {
-      if (!this.link) return {};
+      if (!this.link || this.plus) return {};
 
       if (this.album) {
         const user = this.album.user;
