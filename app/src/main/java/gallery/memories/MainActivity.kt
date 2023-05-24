@@ -70,6 +70,7 @@ import gallery.memories.databinding.ActivityMainBinding
     override fun onDestroy() {
         super.onDestroy()
         binding.webview.removeAllViews();
+        binding.coordinator.removeAllViews()
         binding.webview.destroy();
         nativex.destroy()
     }
