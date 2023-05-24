@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Luchdaich a-nuas",
     "Settings" : "Roghainnean",
     "Favorites" : "Annsachdan",
     "Videos" : "Videothan",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "Edit" : "Deasaich",
     "Cancel" : "Sguir dheth",
     "Delete" : "Sguab às",
-    "Download" : "Luchdaich a-nuas",
     "Favorite" : "Annsachd",
     "General" : "Coitcheann",
     "Close" : "Dùin",

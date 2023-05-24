@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Download",
     "Memories" : "Herinneringen",
     "Fast, modern and advanced photo management suite" : "Snelle, moderne en geavanceerde suite voor fotobeheer",
     "Settings" : "Instellingen",
@@ -16,7 +17,6 @@ OC.L10N.register(
     "Tags" : "Tags",
     "A better photos experience awaits you" : "Een betere foto-ervaring wacht op je",
     "Choose the root folder of your timeline to begin" : "Kies de hoofdmap van je tijdlijn om te beginnen",
-    "If you just installed Memories, run:" : "Als je Herinneringen net hebt geïnstalleerd, voer je het volgende uit:",
     "Continue to Memories" : "Doorgaan naar Herinneringen",
     "Choose again" : "Opnieuw kiezen",
     "Click here to start" : "Klik hier om te beginnen",
@@ -30,7 +30,6 @@ OC.L10N.register(
     "Cancel" : "Annuleren",
     "Delete" : "Verwijder",
     "Remove from album" : "Verwijderen uit album",
-    "Download" : "Download",
     "Favorite" : "Favoriet",
     "Unarchive" : "Terugzetten uit archief",
     "View in folder" : "Bekijken in map",

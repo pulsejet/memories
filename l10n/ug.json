@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "چۈشۈر",
     "Settings" : "تەڭشەكلەر",
     "Info" : "Info",
     "Favorites" : "يىغقۇچ",
@@ -6,7 +7,6 @@
     "Edit" : "تەھرىر",
     "Cancel" : "ۋاز كەچ",
     "Delete" : "ئۆچۈر",
-    "Download" : "چۈشۈر",
     "Favorite" : "يىغقۇچ",
     "General" : "ئادەتتىكى",
     "Close" : "ياپ",

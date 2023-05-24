@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Ladda ner",
     "Memories" : "Memories",
     "Settings" : "Inställningar",
     "People" : "Personer",
@@ -19,7 +20,6 @@ OC.L10N.register(
     "Explore" : "Utforska",
     "Cancel" : "Avbryt",
     "Delete" : "Radera",
-    "Download" : "Ladda ner",
     "Favorite" : "Favorit",
     "Unarchive" : "Ta bort ur arkivet",
     "View in folder" : "Utforska i mapp",

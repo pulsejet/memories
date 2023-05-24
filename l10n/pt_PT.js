@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Transferir",
     "Memories" : "Memories",
     "Settings" : "Definições",
     "Info" : "Informação",
@@ -16,7 +17,6 @@ OC.L10N.register(
     "Explore" : "Explorar",
     "Cancel" : "Cancelar",
     "Delete" : "Eliminar",
-    "Download" : "Transferir",
     "Favorite" : "Favorito",
     "View in folder" : "Ver na pasta",
     "You are about to download a large number of files. Are you sure?" : "Estás prestes a transferir um grande número de ficheiros. Tem a certeza?",

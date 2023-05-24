@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Звантажити",
     "Memories" : "Спогади",
     "Settings" : "Налаштування",
     "People" : "Люди",
@@ -20,7 +21,6 @@
     "Explore" : "Дослідити",
     "Cancel" : "Скасувати",
     "Delete" : "Вилучити",
-    "Download" : "Звантажити",
     "Favorite" : "Вподобати",
     "Unarchive" : "Розархівувати",
     "View in folder" : "Переглянути у каталозі",

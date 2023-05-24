@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Λήψη",
     "Settings" : "Ρυθμίσεις",
     "People" : "Άτομα",
     "Info" : "Πληροφόρηση",
@@ -16,7 +17,6 @@ OC.L10N.register(
     "Explore" : "Εξερεύνηση",
     "Cancel" : "Ακύρωση",
     "Delete" : "Διαγραφή",
-    "Download" : "Λήψη",
     "Favorite" : "Αγαπημένο",
     "Unarchive" : "Αναίρεση αρχειοθέτησης",
     "View in folder" : "Προβολή στον φάκελο",

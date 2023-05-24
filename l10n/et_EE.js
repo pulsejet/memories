@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Lae alla",
     "Settings" : "Seaded",
     "Info" : "Info",
     "Folders" : "Kaustad",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "Explore" : "Sirvi",
     "Cancel" : "Loobu",
     "Delete" : "Kustuta",
-    "Download" : "Lae alla",
     "Favorite" : "Lemmik",
     "View in folder" : "Vaata kaustas",
     "General" : "Üldine",

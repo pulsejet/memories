@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "ດາວໂຫລດ",
     "Settings" : "ການຕັ້ງຄ່າ",
     "Info" : "ຂໍ້ມຸນ",
     "Favorites" : "ລາຍການທີ່ມັກ",
@@ -9,7 +10,6 @@ OC.L10N.register(
     "Edit" : "ແກ້ໄຂ",
     "Cancel" : "ຍົກເລີກ",
     "Delete" : "ລຶບ",
-    "Download" : "ດາວໂຫລດ",
     "Favorite" : "ລາຍການທີ່ມັກ",
     "View in folder" : "ເບິ່ງໃນໂຟນເດີ",
     "General" : "ທົ່ວໄປ",

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Sťahovanie",
     "Memories" : "Spomienky",
     "Settings" : "Nastavenia",
     "People" : "Ľudia",
@@ -18,7 +19,6 @@ OC.L10N.register(
     "Explore" : "Preskúmať",
     "Cancel" : "Zrušiť",
     "Delete" : "Vymazať",
-    "Download" : "Sťahovanie",
     "Favorite" : "Obľúbené",
     "Unarchive" : "Vybrať z archívu",
     "View in folder" : "Zobraziť v priečinku",

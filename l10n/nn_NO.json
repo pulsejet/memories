@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Last ned",
     "Settings" : "Innstillingar",
     "Info" : "Info",
     "Favorites" : "Favorittar",
@@ -8,7 +9,6 @@
     "Photos" : "Foto",
     "Cancel" : "Avbryt",
     "Delete" : "Slett",
-    "Download" : "Last ned",
     "Favorite" : "Favoritt",
     "General" : "Generelt",
     "Close" : "Lat att",

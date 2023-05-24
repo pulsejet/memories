@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Yüklə",
     "Settings" : "Quraşdırmalar",
     "Info" : "Info",
     "Favorites" : "Sevimlilər",
@@ -9,7 +10,6 @@ OC.L10N.register(
     "Edit" : "Dəyişiklik et",
     "Cancel" : "Dayandır",
     "Delete" : "Sil",
-    "Download" : "Yüklə",
     "Favorite" : "İstəkli",
     "General" : "Ümumi",
     "Close" : "Bağla",

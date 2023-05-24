@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Sækja",
     "Settings" : "Stillingar",
     "People" : "Fólk",
     "Info" : "Upplýsingar",
@@ -16,7 +17,6 @@ OC.L10N.register(
     "Explore" : "Skoða",
     "Cancel" : "Hætta við",
     "Delete" : "Eyða",
-    "Download" : "Sækja",
     "Favorite" : "Eftirlæti",
     "Unarchive" : "Taka úr geymslu",
     "View in folder" : "Skoða í möppu",

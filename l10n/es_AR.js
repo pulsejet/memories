@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Descargar",
     "Settings" : "Ajustes",
     "Info" : "Info",
     "Folders" : "Carpetas",
@@ -14,7 +15,6 @@ OC.L10N.register(
     "Explore" : "Explorar",
     "Cancel" : "Cancelar",
     "Delete" : "Eliminar",
-    "Download" : "Descargar",
     "Favorite" : "Favorito",
     "Unarchive" : "Desarchivar",
     "View in folder" : "Ver en la carpeta",

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Eroflueden",
     "Settings" : "Astellungen",
     "Info" : "Info",
     "Favorites" : "Favoriten",
@@ -9,7 +10,6 @@ OC.L10N.register(
     "Explore" : "Erfuerschen",
     "Cancel" : "Ofbriechen",
     "Delete" : "Läschen",
-    "Download" : "Eroflueden",
     "Favorite" : "Favorit",
     "View in folder" : "Kuk am Dossier ",
     "General" : "Allgemeng",

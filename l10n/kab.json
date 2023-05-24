@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Sider",
     "Settings" : "Iɣewwaṛen",
     "Favorites" : "Imenyafen",
     "Videos" : "Tividyutin",
@@ -6,7 +7,6 @@
     "Edit" : "Ẓreg",
     "Cancel" : "Sefsex",
     "Delete" : "Kkes",
-    "Download" : "Sider",
     "Favorite" : "Menyif",
     "General" : "Amatu",
     "Close" : "Mdel",

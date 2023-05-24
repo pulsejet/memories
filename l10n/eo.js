@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Elŝuti",
     "Settings" : "Agordoj",
     "Info" : "Info",
     "Timeline" : "Kronologio",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "Photos" : "Fotoj",
     "Cancel" : "Nuligi",
     "Delete" : "Forigi",
-    "Download" : "Elŝuti",
     "Favorite" : "Pliŝatati",
     "View in folder" : "Vidi en dosierujo",
     "General" : "Ĝenerala",

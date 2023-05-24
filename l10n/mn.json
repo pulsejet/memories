@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Татах",
     "Settings" : "Тохиргоо",
     "Info" : "Info",
     "Folders" : "Хавтсууд",
@@ -11,7 +12,6 @@
     "Explore" : "Хайх",
     "Cancel" : "болиулах",
     "Delete" : "Устгах",
-    "Download" : "Татах",
     "Favorite" : "Дуртай",
     "Unarchive" : "Архиваас гаргах",
     "View in folder" : "Хавтасыг нээх",

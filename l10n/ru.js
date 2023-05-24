@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Скачать",
     "Memories" : "Воспоминания",
     "Settings" : "Настройки",
     "People" : "Люди",
@@ -17,7 +18,6 @@ OC.L10N.register(
     "Tags" : "Метки",
     "Recognize" : "Распознавание",
     "Choose the root folder of your timeline to begin" : "Для начала выберите корневую папку",
-    "If you just installed Memories, run:" : "Если вы в первый раз используете приложение «Воспоминания»:",
     "Click here to start" : "Нажмите здесь чтобы начать",
     "You can always change this later in settings" : "Эти параметры могут быть позднее изменены в разделе «Настройки»",
     "Edit" : "Редактировать",
@@ -28,7 +28,6 @@ OC.L10N.register(
     "Cancel" : "Отменить",
     "Delete" : "Удалить",
     "Remove from album" : "Удалить из альбома",
-    "Download" : "Скачать",
     "Favorite" : "В избранное",
     "Unarchive" : "Восстановить из архива",
     "View in folder" : "Посмотреть в каталоге",

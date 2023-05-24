@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Descargar",
     "Settings" : "Axustes",
     "People" : "Xente",
     "Info" : "Información",
@@ -16,7 +17,6 @@
     "Explore" : "Examinar",
     "Cancel" : "Cancelar",
     "Delete" : "Eliminar",
-    "Download" : "Descargar",
     "Favorite" : "Favorito",
     "Unarchive" : "Desarquivar",
     "View in folder" : "Ver no cartafol",

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "بارگیری",
     "Settings" : "تنظیمات",
     "People" : "مردم",
     "Info" : "اطلاعات",
@@ -15,7 +16,6 @@ OC.L10N.register(
     "Explore" : "کاوش",
     "Cancel" : "لغو",
     "Delete" : "حذف",
-    "Download" : "بارگیری",
     "Favorite" : "مورد‌ ‌علاقه‌",
     "View in folder" : "مشاهده در پوشه",
     "General" : "عمومی",

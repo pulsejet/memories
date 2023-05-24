@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "بارگیری",
     "Settings" : "تنظیمات",
     "People" : "مردم",
     "Info" : "اطلاعات",
@@ -13,7 +14,6 @@
     "Explore" : "کاوش",
     "Cancel" : "لغو",
     "Delete" : "حذف",
-    "Download" : "بارگیری",
     "Favorite" : "مورد‌ ‌علاقه‌",
     "View in folder" : "مشاهده در پوشه",
     "General" : "عمومی",

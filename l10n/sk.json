@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Sťahovanie",
     "Memories" : "Spomienky",
     "Settings" : "Nastavenia",
     "People" : "Ľudia",
@@ -16,7 +17,6 @@
     "Explore" : "Preskúmať",
     "Cancel" : "Zrušiť",
     "Delete" : "Vymazať",
-    "Download" : "Sťahovanie",
     "Favorite" : "Obľúbené",
     "Unarchive" : "Vybrať z archívu",
     "View in folder" : "Zobraziť v priečinku",

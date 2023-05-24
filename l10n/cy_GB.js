@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Llwytho i lawr",
     "Settings" : "Gosodiadau",
     "Info" : "Info",
     "Favorites" : "Ffefrynnau",
@@ -11,7 +12,6 @@ OC.L10N.register(
     "Photos" : "Lluniau",
     "Cancel" : "Diddymu",
     "Delete" : "Dileu",
-    "Download" : "Llwytho i lawr",
     "Favorite" : "Ffefryn",
     "General" : "Cyffredinol",
     "Account" : "Cyfrif",

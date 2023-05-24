@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "ダウンロード",
     "Settings" : "設定",
     "Info" : "情報",
     "Timeline" : "タイムライン",
@@ -15,7 +16,6 @@ OC.L10N.register(
     "Explore" : "探索",
     "Cancel" : "キャンセル",
     "Delete" : "削除",
-    "Download" : "ダウンロード",
     "Favorite" : "お気に入り",
     "Unarchive" : "アーカイブを解除",
     "View in folder" : "フォルダー内で表示",

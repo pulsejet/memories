@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Llwytho i lawr",
     "Settings" : "Gosodiadau",
     "Info" : "Info",
     "Favorites" : "Ffefrynnau",
@@ -9,7 +10,6 @@
     "Photos" : "Lluniau",
     "Cancel" : "Diddymu",
     "Delete" : "Dileu",
-    "Download" : "Llwytho i lawr",
     "Favorite" : "Ffefryn",
     "General" : "Cyffredinol",
     "Account" : "Cyfrif",

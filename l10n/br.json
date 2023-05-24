@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Pellgargañ",
     "Settings" : "Arventennoù",
     "Info" : "Titouroù",
     "Favorites" : "Pennrolloù",
@@ -8,7 +9,6 @@
     "Photos" : "Fotoioù",
     "Cancel" : "Arrest",
     "Delete" : "Lemel",
-    "Download" : "Pellgargañ",
     "Favorite" : "Pennrollañ",
     "View in folder" : "Diskwel en teuliad",
     "General" : "Hollek",

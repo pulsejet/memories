@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Ladda ner",
     "Memories" : "Memories",
     "Settings" : "Inställningar",
     "People" : "Personer",
@@ -17,7 +18,6 @@
     "Explore" : "Utforska",
     "Cancel" : "Avbryt",
     "Delete" : "Radera",
-    "Download" : "Ladda ner",
     "Favorite" : "Favorit",
     "Unarchive" : "Ta bort ur arkivet",
     "View in folder" : "Utforska i mapp",

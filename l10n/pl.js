@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Pobierz",
     "Memories" : "Wspomnienia",
     "Settings" : "Ustawienia",
     "People" : "Osoby",
@@ -20,7 +21,6 @@ OC.L10N.register(
     "Explore" : "Przeglądaj",
     "Cancel" : "Anuluj",
     "Delete" : "Usuń",
-    "Download" : "Pobierz",
     "Favorite" : "Ulubiony",
     "Unarchive" : "Nie archiwizuj",
     "View in folder" : "Zobacz w katalogu",

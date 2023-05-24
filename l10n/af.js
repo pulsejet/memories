@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Laai af",
     "Settings" : "Instellings",
     "Info" : "Inligting",
     "Folders" : "Vouers",
@@ -12,7 +13,6 @@ OC.L10N.register(
     "Explore" : "Ontdek",
     "Cancel" : "Kanselleer",
     "Delete" : "Skrap",
-    "Download" : "Laai af",
     "Favorite" : "Gunsteling",
     "View in folder" : "Vertoon in gids",
     "General" : "Algemeen",

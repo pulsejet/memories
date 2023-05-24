@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Descărcare",
     "Settings" : "Setări",
     "Info" : "Info",
     "Folders" : "Director",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "Explore" : "Explorează",
     "Cancel" : "Anulare",
     "Delete" : "Șterge",
-    "Download" : "Descărcare",
     "Favorite" : "Favorite",
     "View in folder" : "Vizualizează în director",
     "General" : "General",

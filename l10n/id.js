@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Unduh",
     "Settings" : "Setelan",
     "People" : "Orang",
     "Info" : "Info",
@@ -19,7 +20,6 @@ OC.L10N.register(
     "Explore" : "Jelajah",
     "Cancel" : "Membatalkan",
     "Delete" : "Hapus",
-    "Download" : "Unduh",
     "Favorite" : "Favorit",
     "View in folder" : "Lihat dalam folder",
     "Add to album" : "Tambahkan album",

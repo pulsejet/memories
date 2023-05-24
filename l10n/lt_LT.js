@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Atsisiųsti",
     "Memories" : "Prisiminimai",
     "Settings" : "Nustatymai",
     "People" : "Žmonės",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "Archive" : "Archyvuoti",
     "On this day" : "Šią dieną",
     "Tags" : "Žymės",
-    "If you just installed Memories, run:" : "Jei ką tik įdiegėte Prisiminimus, paleiskite:",
     "Click here to start" : "Spustelėkite čia, norėdami pradėti",
     "Edit" : "Taisyti",
     "Photos" : "Nuotraukos",
@@ -21,7 +21,6 @@ OC.L10N.register(
     "Cancel" : "Atsisakyti",
     "Delete" : "Ištrinti",
     "Remove from album" : "Šalinti iš albumo",
-    "Download" : "Atsisiųsti",
     "Favorite" : "Mėgstamas",
     "Unarchive" : "Išskleisti",
     "View in folder" : "Rodyti aplanke",

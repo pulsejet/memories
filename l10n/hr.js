@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Preuzmi",
     "Settings" : "Postavke",
     "People" : "Ljudi",
     "Info" : "Informacije",
@@ -15,7 +16,6 @@ OC.L10N.register(
     "Explore" : "Istraži",
     "Cancel" : "Odustani",
     "Delete" : "Izbriši",
-    "Download" : "Preuzmi",
     "Favorite" : "Favorit",
     "Unarchive" : "Dearhiviraj",
     "View in folder" : "Prikaži u mapi",

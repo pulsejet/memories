@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Татах",
     "Settings" : "Тохиргоо",
     "Info" : "Info",
     "Folders" : "Хавтсууд",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "Explore" : "Хайх",
     "Cancel" : "болиулах",
     "Delete" : "Устгах",
-    "Download" : "Татах",
     "Favorite" : "Дуртай",
     "Unarchive" : "Архиваас гаргах",
     "View in folder" : "Хавтасыг нээх",

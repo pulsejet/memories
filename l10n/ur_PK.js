@@ -1,13 +1,13 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "ڈاؤن لوڈ",
     "Settings" : "سیٹینگز",
     "Info" : "Info",
     "Favorites" : "Favorites",
     "Edit" : "تدوین کریں",
     "Cancel" : "منسوخ کریں",
     "Delete" : "حذف کریں",
-    "Download" : "ڈاؤن لوڈ",
     "Close" : "بند ",
     "Save" : "حفظ",
     "Month" : "ماہ",

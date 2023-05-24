@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Prejmi",
     "Memories" : "Spomini",
     "Fast, modern and advanced photo management suite" : "Hiter, sodoben in zmogljiv urejevalnik fotografij",
     "Settings" : "Nastavitve",
@@ -27,7 +28,6 @@ OC.L10N.register(
     "Cancel" : "Prekliči",
     "Delete" : "Izbriši",
     "Remove from album" : "Odstrani iz albuma",
-    "Download" : "Prejmi",
     "Favorite" : "Priljubljeno",
     "Unarchive" : "Odpri iz arhiva",
     "View in folder" : "Pokaži v mapi",
