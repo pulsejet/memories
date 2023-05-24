@@ -6,7 +6,6 @@ import * as utils from '../../services/Utils';
 import { showError } from '@nextcloud/dialogs';
 import { translate as t } from '@nextcloud/l10n';
 import { getCurrentUser } from '@nextcloud/auth';
-import axios from '@nextcloud/axios';
 
 import { API } from '../../services/API';
 import type { PsContent, PsEvent } from './types';
@@ -129,6 +128,15 @@ class VideoContentSetup {
       return;
     }
 
+    // Sources list
+    const sources: { src: string; type: string }[] = [];
+
+    // Add HLS source if enabled
+    if (!staticConfig.getSync('vod_disable')) {
+      sources.push(this.getHLSsrc(content));
+    }
+    sources.push(this.getDirectSrc(content)); // direct source
+
     // Hand off to native player if available
     if (nativex.has()) {
       const fileid = content.data.photo.fileid;
@@ -139,8 +147,9 @@ class VideoContentSetup {
         return;
       }
 
-      // Default to HLS for remote videos
-      nativex.playVideoHls(fileid, this.getHLSsrc(content).src);
+      // Use both remote sources
+      const urls = sources.map((s) => s.src);
+      nativex.playVideoRemote(fileid, urls);
       return;
     }
 
@@ -162,18 +171,6 @@ class VideoContentSetup {
 
     // Add the video element to the actual container
     content.element?.appendChild(content.videoElement);
-
-    // Create hls sources if enabled
-    const sources: {
-      src: string;
-      type: string;
-    }[] = [];
-
-    if (!staticConfig.getSync('vod_disable')) {
-      sources.push(this.getHLSsrc(content));
-    }
-
-    sources.push(this.getDirectSrc(content));
 
     const overrideNative = !vidjs.browser.IS_SAFARI;
     const vjs = (content.videojs = vidjs(content.videoElement, {

@@ -32,7 +32,7 @@ export type NativeX = {
   playTouchSound: () => void;
 
   playVideoLocal: (fileid: string) => void;
-  playVideoHls: (fileid: string, url: string) => void;
+  playVideoRemote: (fileid: string, urlArray: string) => void;
   destroyVideo: (fileid: string) => void;
 
   configSetLocalFolders: (json: string) => void;
@@ -102,10 +102,10 @@ export async function playVideoLocal(fileid: number) {
 }
 
 /**
- * Play a video from the given URL (HLS stream).
+ * Play a video from the given URL.
  */
-export async function playVideoHls(fileid: number, url: string) {
-  nativex?.playVideoHls?.(fileid.toString(), addOrigin(url));
+export async function playVideoRemote(fileid: number, urls: string[]) {
+  nativex?.playVideoRemote?.(fileid.toString(), JSON.stringify(urls.map(addOrigin)));
 }
 
 /**
