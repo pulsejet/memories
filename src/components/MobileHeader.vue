@@ -7,7 +7,9 @@
     }"
   >
     <div class="logo">
-      <XImg :src="nextcloudsvg" />
+      <a :href="homeUrl">
+        <XImg :src="nextcloudsvg" />
+      </a>
     </div>
   </div>
 </template>
@@ -15,6 +17,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { subscribe, unsubscribe } from '@nextcloud/event-bus';
+import { generateUrl } from '@nextcloud/router';
 import nextcloudsvg from '../assets/nextcloud.svg';
 
 export default defineComponent({
@@ -24,6 +27,12 @@ export default defineComponent({
     isScrollDown: false,
     nextcloudsvg,
   }),
+
+  computed: {
+    homeUrl(): string {
+      return generateUrl('/');
+    },
+  },
 
   mounted() {
     subscribe('memories.recycler.scroll', this.onScroll);
@@ -62,7 +71,6 @@ export default defineComponent({
   transform: translateY(-55px);
   transition: transform 0.3s ease-in-out;
   background-color: var(--color-main-background);
-  color: var(--color-primary);
 
   &.visible {
     transform: translateY(0);
@@ -74,6 +82,10 @@ export default defineComponent({
     top: 60%;
     left: 50%;
     transform: translate(-50%, -50%);
+
+    > a {
+      color: var(--color-primary);
+    }
   }
 }
 </style>
