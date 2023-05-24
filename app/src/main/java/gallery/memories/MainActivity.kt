@@ -42,6 +42,7 @@ import gallery.memories.databinding.ActivityMainBinding
     private var mNeedRefresh = false
 
     private val memoriesRegex = Regex("/apps/memories/.*$")
+    private var host: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -118,8 +119,9 @@ import gallery.memories.databinding.ActivityMainBinding
         // Intercept local APIs
         binding.webview.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-                // TODO: check host as well
-                if (request.url.path?.matches(memoriesRegex) == true) {
+                val pathMatches = request.url.path?.matches(memoriesRegex) == true
+                val hostMatches = request.url.host.equals(host)
+                if (pathMatches && hostMatches) {
                     return false
                 }
 
@@ -178,6 +180,10 @@ import gallery.memories.databinding.ActivityMainBinding
 
         // Load app interface if authenticated
         if (authHeader != null && memoriesUrl != null) {
+            // Get host name
+            host = Uri.parse(memoriesUrl).host
+
+            // Set authorization header
             binding.webview.loadUrl(memoriesUrl, mapOf(
                 "Authorization" to authHeader
             ))
