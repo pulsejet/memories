@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "ჩამოტვირთვა",
     "Settings" : "პარამეტრები",
     "Info" : "ინფორმაცია",
     "Folders" : "დირექტორიები",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "Explore" : "მიმოხილვა",
     "Cancel" : "უარყოფა",
     "Delete" : "წაშლა",
-    "Download" : "ჩამოტვირთვა",
     "Favorite" : "რჩეული",
     "Unarchive" : "ამოღება",
     "View in folder" : "ჩვენება დირექტორიაში",

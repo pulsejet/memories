@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Last ned",
     "Settings" : "Innstillingar",
     "Info" : "Info",
     "Favorites" : "Favorittar",
@@ -10,7 +11,6 @@ OC.L10N.register(
     "Photos" : "Foto",
     "Cancel" : "Avbryt",
     "Delete" : "Slett",
-    "Download" : "Last ned",
     "Favorite" : "Favoritt",
     "General" : "Generelt",
     "Close" : "Lat att",

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "ดาวน์โหลด",
     "Settings" : "การตั้งค่า",
     "People" : "ผู้คน",
     "Info" : "ข้อมูล",
@@ -16,7 +17,6 @@ OC.L10N.register(
     "Explore" : "สำรวจ",
     "Cancel" : "ยกเลิก",
     "Delete" : "ลบ",
-    "Download" : "ดาวน์โหลด",
     "Favorite" : "รายการโปรด",
     "View in folder" : "ดูในโฟลเดอร์",
     "General" : "ทั่วไป",

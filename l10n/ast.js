@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Baxar",
     "Settings" : "Configuración",
     "Info" : "Información",
     "Folders" : "Carpetes",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "Tags" : "Etiquetes",
     "Photos" : "Semeyes",
     "Delete" : "Desaniciar",
-    "Download" : "Baxar",
     "External Link" : "Enllaz esternu",
     "Public link" : "Enllaz públicu",
     "Year" : "Añu",

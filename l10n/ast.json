@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Baxar",
     "Settings" : "Configuración",
     "Info" : "Información",
     "Folders" : "Carpetes",
@@ -6,7 +7,6 @@
     "Tags" : "Etiquetes",
     "Photos" : "Semeyes",
     "Delete" : "Desaniciar",
-    "Download" : "Baxar",
     "External Link" : "Enllaz esternu",
     "Public link" : "Enllaz públicu",
     "Year" : "Añu",

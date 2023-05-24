@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "چۈشۈر",
     "Settings" : "تەڭشەكلەر",
     "Info" : "Info",
     "Favorites" : "يىغقۇچ",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "Edit" : "تەھرىر",
     "Cancel" : "ۋاز كەچ",
     "Delete" : "ئۆچۈر",
-    "Download" : "چۈشۈر",
     "Favorite" : "يىغقۇچ",
     "General" : "ئادەتتىكى",
     "Close" : "ياپ",

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Göçürip almak",
     "Settings" : "Sazlamalar",
     "Favorites" : "Halanýanlar",
     "Videos" : "Wideo",
@@ -9,7 +10,6 @@ OC.L10N.register(
     "Photos" : "Suratlar",
     "Cancel" : "ýatyrmak",
     "Delete" : "Pozmak",
-    "Download" : "Göçürip almak",
     "Favorite" : "Halaýan",
     "General" : "Esasy",
     "Close" : "Ýap",

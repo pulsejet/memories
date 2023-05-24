@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Unduh",
     "Settings" : "Setelan",
     "People" : "Orang",
     "Info" : "Info",
@@ -17,7 +18,6 @@
     "Explore" : "Jelajah",
     "Cancel" : "Membatalkan",
     "Delete" : "Hapus",
-    "Download" : "Unduh",
     "Favorite" : "Favorit",
     "View in folder" : "Lihat dalam folder",
     "Add to album" : "Tambahkan album",

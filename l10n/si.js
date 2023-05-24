@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "බාගන්න",
     "Settings" : "සැකසුම්",
     "Info" : "තොරතුරු",
     "Favorites" : "ප්‍රියතම",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "Edit" : "සංස්කරණය",
     "Photos" : "ඡායාරූප",
     "Cancel" : "අවලංගු කරන්න",
-    "Download" : "බාගන්න",
     "Favorite" : "ප්‍රියතම",
     "View in folder" : "බහාලුමේ බලන්න",
     "General" : "සමාන්‍යය",

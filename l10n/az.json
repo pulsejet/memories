@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Yüklə",
     "Settings" : "Quraşdırmalar",
     "Info" : "Info",
     "Favorites" : "Sevimlilər",
@@ -7,7 +8,6 @@
     "Edit" : "Dəyişiklik et",
     "Cancel" : "Dayandır",
     "Delete" : "Sil",
-    "Download" : "Yüklə",
     "Favorite" : "İstəkli",
     "General" : "Ümumi",
     "Close" : "Bağla",

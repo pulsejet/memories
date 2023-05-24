@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Baixa",
     "Settings" : "Paràmetres",
     "People" : "Gent",
     "Info" : "Informació",
@@ -20,7 +21,6 @@ OC.L10N.register(
     "Explore" : "Explora",
     "Cancel" : "Cancel·la",
     "Delete" : "Suprimeix",
-    "Download" : "Baixa",
     "Favorite" : "Preferit",
     "Unarchive" : "Desbloquejar",
     "View in folder" : "Visualitza-ho a la carpeta",

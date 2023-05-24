@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Tải xuống",
     "Settings" : "Cài đặt",
     "Info" : "Thông tin",
     "Folders" : "Thư mục",
@@ -12,7 +13,6 @@ OC.L10N.register(
     "Photos" : "Ảnh",
     "Cancel" : "Hủy",
     "Delete" : "Xóa",
-    "Download" : "Tải xuống",
     "Favorite" : "Ưa thích",
     "Unarchive" : "Bỏ lưu trữ",
     "View in folder" : "Xem trong thư mục",

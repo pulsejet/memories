@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Преземи",
     "Settings" : "Параметри",
     "People" : "Луѓе",
     "Info" : "Инфо",
@@ -19,7 +20,6 @@ OC.L10N.register(
     "Photos" : "Фотографии",
     "Cancel" : "Откажи",
     "Delete" : "Избриши",
-    "Download" : "Преземи",
     "Favorite" : "Омилен",
     "View in folder" : "Погледни во папката",
     "Add to album" : "Додади во албум",

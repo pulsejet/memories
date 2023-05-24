@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Last ned",
     "Memories" : "Minner",
     "Fast, modern and advanced photo management suite" : "Rask, moderne og avansert bildebehandlingspakke",
     "Settings" : "Innstillinger",
@@ -21,7 +22,6 @@ OC.L10N.register(
     "Recognize" : "Gjenkjenn",
     "A better photos experience awaits you" : "En bedre bildeopplevelse venter på deg",
     "Choose the root folder of your timeline to begin" : "Velg rotmappen til tidslinjen for å begynne",
-    "If you just installed Memories, run:" : "Hvis du nettopp har installert Minner, kjør:",
     "Continue to Memories" : "Fortsett til Minner",
     "Choose again" : "Velg igjen",
     "Click here to start" : "Klikk her for å starte",
@@ -36,7 +36,6 @@ OC.L10N.register(
     "Cancel" : "Avbryt",
     "Delete" : "Slett",
     "Remove from album" : "Fjern fra album",
-    "Download" : "Last ned",
     "Favorite" : "Favoritt",
     "Unarchive" : "Dearkivere",
     "View in folder" : "Vis i mappe",

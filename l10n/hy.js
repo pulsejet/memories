@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Ներբեռնել",
     "Settings" : "կարգավորումներ",
     "Info" : "Info",
     "Favorites" : "Սիրվածներ",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "Photos" : "Նկարներ",
     "Cancel" : "ընդհատել",
     "Delete" : "հեռացնել",
-    "Download" : "Ներբեռնել",
     "General" : "Ընդհանուր",
     "Close" : "Փակել",
     "Unknown" : "Անհայտ",

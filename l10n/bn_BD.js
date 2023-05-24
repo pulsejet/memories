@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "ডাউনলোড",
     "Settings" : "সেটিংস",
     "Info" : "Info",
     "Favorites" : "প্রিয়জন",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "Edit" : "সম্পাদনা",
     "Cancel" : "বাতির",
     "Delete" : "মুছে",
-    "Download" : "ডাউনলোড",
     "Favorite" : "প্রিয়জন",
     "General" : "সাধারণ",
     "Close" : "বন্ধ",

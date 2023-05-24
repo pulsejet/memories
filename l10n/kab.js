@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Sider",
     "Settings" : "Iɣewwaṛen",
     "Favorites" : "Imenyafen",
     "Videos" : "Tividyutin",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "Edit" : "Ẓreg",
     "Cancel" : "Sefsex",
     "Delete" : "Kkes",
-    "Download" : "Sider",
     "Favorite" : "Menyif",
     "General" : "Amatu",
     "Close" : "Mdel",

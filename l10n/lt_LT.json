@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Atsisiųsti",
     "Memories" : "Prisiminimai",
     "Settings" : "Nustatymai",
     "People" : "Žmonės",
@@ -11,7 +12,6 @@
     "Archive" : "Archyvuoti",
     "On this day" : "Šią dieną",
     "Tags" : "Žymės",
-    "If you just installed Memories, run:" : "Jei ką tik įdiegėte Prisiminimus, paleiskite:",
     "Click here to start" : "Spustelėkite čia, norėdami pradėti",
     "Edit" : "Taisyti",
     "Photos" : "Nuotraukos",
@@ -19,7 +19,6 @@
     "Cancel" : "Atsisakyti",
     "Delete" : "Ištrinti",
     "Remove from album" : "Šalinti iš albumo",
-    "Download" : "Atsisiųsti",
     "Favorite" : "Mėgstamas",
     "Unarchive" : "Išskleisti",
     "View in folder" : "Rodyti aplanke",

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "下载",
     "Memories" : "记忆",
     "Settings" : "设置",
     "People" : "人物",
@@ -18,7 +19,6 @@ OC.L10N.register(
     "Explore" : "探索",
     "Cancel" : "取消",
     "Delete" : "删除",
-    "Download" : "下载",
     "Favorite" : "收藏",
     "Unarchive" : "取消归档",
     "View in folder" : "在文件夹中查看",

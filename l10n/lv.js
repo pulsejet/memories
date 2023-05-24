@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Lejupielādēt",
     "Settings" : "Iestatījumi",
     "Info" : "Info",
     "Folders" : "Mapes",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "Photos" : "Bildes",
     "Cancel" : "Atcelt",
     "Delete" : "Dzēst",
-    "Download" : "Lejupielādēt",
     "Favorite" : "Favorīts",
     "View in folder" : "Skatīt mapē",
     "General" : "Vispārīgs",

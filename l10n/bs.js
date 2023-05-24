@@ -1,13 +1,13 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Preuzmi",
     "Settings" : "Podešavanje",
     "Info" : "Info",
     "Favorites" : "Favoriti",
     "Edit" : "Izmjeni",
     "Cancel" : "Otkaži",
     "Delete" : "Obriši",
-    "Download" : "Preuzmi",
     "Favorite" : "Favorit",
     "Close" : "Zatvori",
     "Unknown" : "Nepoznato",

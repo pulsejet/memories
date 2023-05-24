@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Shkarko",
     "Settings" : "Rregullimet",
     "Info" : "Info",
     "Folders" : "Dosjet",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "Explore" : "Eksploroni",
     "Cancel" : "Anullo",
     "Delete" : "Fshi",
-    "Download" : "Shkarko",
     "Favorite" : "I/E Preferuar",
     "Unarchive" : "Hiq nga arkivi",
     "View in folder" : "Shikoje në dosje",

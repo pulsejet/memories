@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Baixa",
     "Settings" : "Paràmetres",
     "People" : "Gent",
     "Info" : "Informació",
@@ -18,7 +19,6 @@
     "Explore" : "Explora",
     "Cancel" : "Cancel·la",
     "Delete" : "Suprimeix",
-    "Download" : "Baixa",
     "Favorite" : "Preferit",
     "Unarchive" : "Desbloquejar",
     "View in folder" : "Visualitza-ho a la carpeta",

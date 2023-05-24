@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Descargar",
     "Settings" : "Ajustes",
     "Info" : "Info",
     "Folders" : "Carpetas",
@@ -12,7 +13,6 @@
     "Explore" : "Explorar",
     "Cancel" : "Cancelar",
     "Delete" : "Eliminar",
-    "Download" : "Descargar",
     "Favorite" : "Favorito",
     "Unarchive" : "Desarchivar",
     "View in folder" : "Ver en la carpeta",

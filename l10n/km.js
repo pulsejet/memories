@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "ទាញយក",
     "Settings" : "ការកំណត់",
     "Info" : "Info",
     "Favorites" : "Favorites",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "Edit" : "កែប្រែ",
     "Cancel" : "បោះបង់",
     "Delete" : "លុប",
-    "Download" : "ទាញយក",
     "General" : "ទូទៅ",
     "Close" : "បិទ",
     "Back" : "ត្រឡប់ក្រោយ",

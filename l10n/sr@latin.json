@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Preuzmi",
     "Settings" : "Поставке",
     "Info" : "Info",
     "Favorites" : "Omiljene",
@@ -8,7 +9,6 @@
     "Photos" : "Slike",
     "Cancel" : "Otkaži",
     "Delete" : "Obriši",
-    "Download" : "Preuzmi",
     "Favorite" : "Omiljene",
     "General" : "Opšte",
     "Close" : "Zatvori",

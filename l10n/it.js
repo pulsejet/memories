@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Scarica",
     "Fast, modern and advanced photo management suite" : "Soluzione efficiente, moderna e avanzata per la gestione delle foto",
     "Settings" : "Impostazioni",
     "People" : "Persone",
@@ -18,7 +19,6 @@ OC.L10N.register(
     "Explore" : "Esplora",
     "Cancel" : "Annulla",
     "Delete" : "Elimina",
-    "Download" : "Scarica",
     "Favorite" : "Preferito",
     "Unarchive" : "Togli dall'archivio",
     "View in folder" : "Visualizza nella cartella",

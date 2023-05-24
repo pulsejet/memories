@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Pellgargañ",
     "Settings" : "Arventennoù",
     "Info" : "Titouroù",
     "Favorites" : "Pennrolloù",
@@ -10,7 +11,6 @@ OC.L10N.register(
     "Photos" : "Fotoioù",
     "Cancel" : "Arrest",
     "Delete" : "Lemel",
-    "Download" : "Pellgargañ",
     "Favorite" : "Pennrollañ",
     "View in folder" : "Diskwel en teuliad",
     "General" : "Hollek",

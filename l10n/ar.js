@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "تنزيل",
     "Settings" : "الإعدادات",
     "Info" : "معلومات",
     "Timeline" : "الجدول الزمني",
@@ -13,7 +14,6 @@ OC.L10N.register(
     "Photos" : "الصور",
     "Cancel" : "إلغاء",
     "Delete" : "إزالة",
-    "Download" : "تنزيل",
     "Favorite" : "المفضلة",
     "View in folder" : "اعرض في المجلد",
     "General" : "العامة",

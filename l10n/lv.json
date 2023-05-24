@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Lejupielādēt",
     "Settings" : "Iestatījumi",
     "Info" : "Info",
     "Folders" : "Mapes",
@@ -11,7 +12,6 @@
     "Photos" : "Bildes",
     "Cancel" : "Atcelt",
     "Delete" : "Dzēst",
-    "Download" : "Lejupielādēt",
     "Favorite" : "Favorīts",
     "View in folder" : "Skatīt mapē",
     "General" : "Vispārīgs",

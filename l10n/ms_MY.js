@@ -1,13 +1,13 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Muat turun",
     "Settings" : "Tetapan",
     "Info" : "Info",
     "Favorites" : "Favorites",
     "Edit" : "Sunting",
     "Cancel" : "Batal",
     "Delete" : "Padam",
-    "Download" : "Muat turun",
     "General" : "Umum",
     "Close" : "Tutup",
     "Back" : "Kembali",
