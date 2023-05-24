@@ -69,8 +69,8 @@
               <StarOutlineIcon v-else :size="24" />
             </template>
           </NcActionButton>
-          <NcActionButton :aria-label="t('memories', 'Sidebar')" @click="toggleSidebar" :close-after-click="true">
-            {{ t('memories', 'Sidebar') }}
+          <NcActionButton :aria-label="t('memories', 'Info')" @click="toggleSidebar" :close-after-click="true">
+            {{ t('memories', 'Info') }}
             <template #icon>
               <InfoIcon :size="24" />
             </template>
