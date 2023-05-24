@@ -5,7 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [v5.1.1] - Unreleased
 
 - New project home page: https://memories.gallery
+- New Discord community: https://discord.gg/7Dr9f9vNjJ
 - **Feature**: Layout improvements especially for mobile.
+- **Feature**: Allow downloading entire publicly shared albums.
+- **Feature**: Basic preview generation configuration in admin interface.
 
 ## [v5.1.0] - 2023-04-29
 
