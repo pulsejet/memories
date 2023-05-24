@@ -29,7 +29,10 @@
       @touchcancel.passive="interactend"
     >
       <div class="text">{{ hoverCursorText }}</div>
-      <div class="icon"><ScrollIcon v-once :size="22" /></div>
+      <div class="icon">
+        <ScrollUpIcon v-once :size="22" />
+        <ScrollDownIcon v-once :size="22" />
+      </div>
     </span>
 
     <div
@@ -48,7 +51,9 @@
 import { defineComponent, PropType } from 'vue';
 import { IRow, IRowType, ITick } from '../types';
 import { emit } from '@nextcloud/event-bus';
-import ScrollIcon from 'vue-material-design-icons/UnfoldMoreHorizontal.vue';
+
+import ScrollUpIcon from 'vue-material-design-icons/MenuUp.vue';
+import ScrollDownIcon from 'vue-material-design-icons/MenuDown.vue';
 
 import * as utils from '../services/Utils';
 
@@ -59,7 +64,8 @@ const MOBILE_CURSOR_HH = 22; // Half height of the mobile cursor (CSS)
 export default defineComponent({
   name: 'ScrollerManager',
   components: {
-    ScrollIcon,
+    ScrollUpIcon,
+    ScrollDownIcon,
   },
 
   props: {
@@ -649,7 +655,16 @@ export default defineComponent({
 
       > .icon {
         display: none;
-        transform: translate(-2px, 10px);
+        transform: translate(-3px, -1px);
+        color: var(--color-main-text);
+        opacity: 0.75;
+
+        :deep > .menu-up-icon {
+          transform: translateY(5px);
+        }
+        :deep > .menu-down-icon {
+          transform: translateY(-5px);
+        }
       }
     }
   }
@@ -681,7 +696,7 @@ export default defineComponent({
     }
 
     .cursor.hv {
-      left: 5px;
+      left: 6px;
       border: none;
       box-shadow: -1px 2px 11px -5px #000;
       height: 44px;
