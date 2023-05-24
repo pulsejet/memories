@@ -13,6 +13,7 @@ import gallery.memories.service.AccountService
 import gallery.memories.service.DownloadService
 import gallery.memories.service.ImageService
 import gallery.memories.service.TimelineQuery
+import org.json.JSONArray
 import java.io.ByteArrayInputStream
 import java.net.URLDecoder
 
@@ -155,16 +156,21 @@ import java.net.URLDecoder
 
             // Play with exoplayer
             mCtx.runOnUiThread {
-                mCtx.initializePlayer(video.uri, fileId)
+                mCtx.initializePlayer(arrayOf(video.uri), fileId)
             }
         }.start()
     }
 
     @JavascriptInterface
-    fun playVideoHls(fileId: String?, url: String?) {
-        if (fileId == null || url == null) return
+    fun playVideoRemote(fileId: String?, urlsArray: String?) {
+        if (fileId == null || urlsArray == null) return
+        val urls = JSONArray(urlsArray)
+        val list = Array(urls.length()) {
+            Uri.parse(urls.getString(it))
+        }
+
         mCtx.runOnUiThread {
-            mCtx.initializePlayer(Uri.parse(url), fileId)
+            mCtx.initializePlayer(list, fileId)
         }
     }
 

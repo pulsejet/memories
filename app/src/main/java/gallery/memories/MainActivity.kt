@@ -14,12 +14,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import gallery.memories.databinding.ActivityMainBinding
 
 @UnstableApi class MainActivity : AppCompatActivity() {
@@ -30,7 +33,7 @@ import gallery.memories.databinding.ActivityMainBinding
     private lateinit var nativex: NativeX
 
     private var player: ExoPlayer? = null
-    private var playerUri: Uri? = null
+    private var playerUris: Array<Uri>? = null
     private var playerUid: String? = null
     private var playWhenReady = true
     private var mediaItemIndex = 0
@@ -72,8 +75,8 @@ import gallery.memories.databinding.ActivityMainBinding
 
     public override fun onResume() {
         super.onResume()
-        if (playerUri != null && (Util.SDK_INT <= 23 || player == null)) {
-            initializePlayer(playerUri!!, playerUid!!)
+        if (playerUris != null && (Util.SDK_INT <= 23 || player == null)) {
+            initializePlayer(playerUris!!, playerUid!!)
         }
         if (mNeedRefresh) {
             refreshTimeline(true)
@@ -212,7 +215,7 @@ import gallery.memories.databinding.ActivityMainBinding
         requestPermissionLauncher.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     }
 
-    fun initializePlayer(uri: Uri, uid: String) {
+    fun initializePlayer(uris: Array<Uri>, uid: String) {
         if (player != null) {
             if (playerUid.equals(uid)) return
             player?.release()
@@ -220,19 +223,8 @@ import gallery.memories.databinding.ActivityMainBinding
         }
 
         // Prevent re-creating
-        playerUri = uri
+        playerUris = uris
         playerUid = uid
-
-        // Add cookies from webview to data source
-        val cookies = CookieManager.getInstance().getCookie(uri.toString())
-        val httpDataSourceFactory =
-            DefaultHttpDataSource.Factory()
-                .setDefaultRequestProperties(mapOf("cookie" to cookies))
-                .setAllowCrossProtocolRedirects(true)
-        val dataSourceFactory = DefaultDataSource.Factory(this, httpDataSourceFactory)
-
-        // Create media item from local or remote uri
-        val mediaItem = MediaItem.fromUri(uri)
 
         // Build exoplayer
         player = ExoPlayer.Builder(this)
@@ -244,13 +236,43 @@ import gallery.memories.databinding.ActivityMainBinding
                 binding.videoView.setShowNextButton(false)
                 binding.videoView.setShowPreviousButton(false)
 
-                // Check if HLS source from URI (contains .m3u8 anywhere)
-                if (uri.toString().contains(".m3u8")) {
-                    exoPlayer.addMediaSource(HlsMediaSource.Factory(dataSourceFactory)
-                            .createMediaSource(mediaItem))
-                } else {
-                    exoPlayer.setMediaItems(listOf(mediaItem), mediaItemIndex, playbackPosition)
+                for (uri in uris) {
+                    // Create media item from URI
+                    val mediaItem = MediaItem.fromUri(uri)
+
+                    // Check if remote or local URI
+                    if (uri.toString().contains("http")) {
+                        // Add cookies from webview to data source
+                        val cookies = CookieManager.getInstance().getCookie(uri.toString())
+                        val httpDataSourceFactory =
+                            DefaultHttpDataSource.Factory()
+                                .setDefaultRequestProperties(mapOf("cookie" to cookies))
+                                .setAllowCrossProtocolRedirects(true)
+                        val dataSourceFactory = DefaultDataSource.Factory(this, httpDataSourceFactory)
+
+                        // Check if HLS source from URI (contains .m3u8 anywhere)
+                        exoPlayer.addMediaSource(
+                            if (uri.toString().contains(".m3u8")) {
+                                HlsMediaSource.Factory(dataSourceFactory)
+                                    .createMediaSource(mediaItem)
+                            } else {
+                                ProgressiveMediaSource.Factory(dataSourceFactory)
+                                    .createMediaSource(mediaItem)
+                            }
+                        )
+                    } else {
+                        exoPlayer.setMediaItems(listOf(mediaItem), mediaItemIndex, playbackPosition)
+                    }
                 }
+
+                // Catch errors and fall back to other sources
+                exoPlayer.addListener(object : Player.Listener {
+                    override fun onPlayerError(error: PlaybackException) {
+                        exoPlayer.seekToNext()
+                        exoPlayer.playWhenReady = true
+                        exoPlayer.play()
+                    }
+                })
 
                 // Start the player
                 exoPlayer.playWhenReady = playWhenReady
@@ -266,7 +288,7 @@ import gallery.memories.databinding.ActivityMainBinding
             playWhenReady = true
             mediaItemIndex = 0
             playbackPosition = 0L
-            playerUri = null
+            playerUris = null
             playerUid = null
         }
     }
