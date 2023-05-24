@@ -41,6 +41,10 @@ export default defineComponent({
       type: Number,
       default: 180,
     },
+    minCols: {
+      type: Number,
+      default: 3,
+    },
     link: {
       type: Boolean,
       default: true,
@@ -90,8 +94,9 @@ export default defineComponent({
     },
 
     resize() {
+      // Restrict the number of columns between minCols and the size cap
       const w = (<any>this.$refs.recycler).$el.clientWidth;
-      this.gridItems = Math.max(Math.floor(w / this.maxSize), 3);
+      this.gridItems = Math.max(Math.floor(w / this.maxSize), this.minCols);
       this.itemSize = Math.floor(w / this.gridItems);
     },
   },

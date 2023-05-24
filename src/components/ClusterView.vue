@@ -6,7 +6,7 @@
 
     <EmptyContent v-if="!items.length && !loading" />
 
-    <ClusterGrid :items="items" />
+    <ClusterGrid :items="items" :minCols="minCols" />
   </div>
 
   <Timeline v-else />
@@ -47,6 +47,10 @@ export default defineComponent({
   computed: {
     noParams() {
       return !this.$route.params.name && !this.$route.params.user;
+    },
+
+    minCols() {
+      return this.$route.name === 'albums' ? 2 : 3;
     },
   },
 
