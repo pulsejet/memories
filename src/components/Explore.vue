@@ -168,12 +168,14 @@ export default defineComponent({
 
     async getPlaces() {
       const res = await axios.get<ICluster[]>(API.PLACE_LIST());
-      this.places = res.data.slice(0, 10);
+      const places = res.data.sort((a, b) => b.count - a.count); // FIXME
+      this.places = places.slice(0, 10);
     },
 
     async getTags() {
       const res = await axios.get<ICluster[]>(API.TAG_LIST());
-      this.tags = res.data.slice(0, 10);
+      const tags = res.data.sort((a, b) => b.count - a.count); // FIXME
+      this.tags = tags.slice(0, 10);
     },
   },
 });
