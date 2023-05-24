@@ -655,15 +655,14 @@ export default defineComponent({
 
       > .icon {
         display: none;
-        transform: translate(-3px, -1px);
         color: var(--color-main-text);
         opacity: 0.75;
 
         :deep > .menu-up-icon {
-          transform: translateY(5px);
+          transform: translate(-3px, 4px);
         }
         :deep > .menu-down-icon {
-          transform: translateY(-5px);
+          transform: translate(-3px, -6px);
         }
       }
     }
