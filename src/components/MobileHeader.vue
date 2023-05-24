@@ -62,6 +62,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 #mobile-header {
+  contain: strict;
   position: fixed;
   top: 0;
   left: 0;

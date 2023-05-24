@@ -50,6 +50,7 @@ export default defineComponent({
 
 // Show correct nav depending on screen size
 #mobile-nav {
+  contain: strict;
   display: none;
 }
 
