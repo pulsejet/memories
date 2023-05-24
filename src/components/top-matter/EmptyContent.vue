@@ -3,6 +3,7 @@
     <template #icon>
       <PeopleIcon v-if="routeIsPeople" />
       <ArchiveIcon v-else-if="routeIsArchive" />
+      <AlbumIcon v-else-if="routeIsAlbums" />
       <ImageMultipleIcon v-else />
     </template>
   </NcEmptyContent>
@@ -16,6 +17,7 @@ import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent';
 import PeopleIcon from 'vue-material-design-icons/AccountMultiple.vue';
 import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
+import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
 
 import * as strings from '../../services/strings';
 
@@ -28,6 +30,7 @@ export default defineComponent({
     PeopleIcon,
     ArchiveIcon,
     ImageMultipleIcon,
+    AlbumIcon,
   },
 
   computed: {
@@ -41,6 +44,10 @@ export default defineComponent({
 
     routeIsArchive(): boolean {
       return this.$route.name === 'archive';
+    },
+
+    routeIsAlbums(): boolean {
+      return this.$route.name === 'albums';
     },
   },
 });
