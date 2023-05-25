@@ -165,16 +165,19 @@ img {
 }
 
 .name {
-  z-index: 100;
   position: absolute;
-  bottom: 7%;
+  bottom: 2%;
+  z-index: 100;
   width: 100%;
+  max-height: 75%;
+  padding: 5%;
+
   color: white;
-  padding: 0 5%;
+  word-wrap: break-word;
+  white-space: normal;
+  text-overflow: ellipsis;
   text-align: center;
   font-size: 1em;
-  word-wrap: break-word;
-  text-overflow: ellipsis;
   line-height: 1.1em;
 
   > .subtitle {
