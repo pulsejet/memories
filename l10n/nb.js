@@ -159,7 +159,6 @@ OC.L10N.register(
     "Unsaved changes" : "Ulagrede endringer",
     "Drop changes" : "Slipp endringer",
     "Share" : "Del",
-    "Sidebar" : "Sidefelt",
     "Download Video" : "Last ned video",
     "Slideshow" : "Lysbildefremvisning",
     "Previous" : "Forrige",

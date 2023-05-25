@@ -292,7 +292,6 @@ OC.L10N.register(
     "Drop changes" : "Abandonner les modifications",
     "Share" : "Partage",
     "Play Live Photo" : "Lire la photo en direct",
-    "Sidebar" : "Panneau latéral",
     "Download Video" : "Télécharger la vidéo",
     "Slideshow" : "Diaporama",
     "Previous" : "Précédente",

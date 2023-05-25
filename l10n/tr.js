@@ -294,7 +294,6 @@ OC.L10N.register(
     "Drop changes" : "Değişiklikleri yok say",
     "Share" : "Paylaş",
     "Play Live Photo" : "Live Photo oynat",
-    "Sidebar" : "Yan çubuk",
     "Download Video" : "Görüntüyü indir",
     "Slideshow" : "Slayt sunumu",
     "Previous" : "Önceki",

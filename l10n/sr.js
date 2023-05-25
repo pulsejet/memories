@@ -298,7 +298,6 @@ OC.L10N.register(
     "Drop changes" : "Откажи измене",
     "Share" : "Подели",
     "Play Live Photo" : "Прикажи Live Photo",
-    "Sidebar" : "Бочна трака",
     "Download Video" : "Преузми видео",
     "Slideshow" : "Пројектор слајдова",
     "Previous" : "Претходно",

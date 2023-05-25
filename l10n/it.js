@@ -82,7 +82,6 @@ OC.L10N.register(
     "Share folder" : "Condividi cartella",
     "Unsaved changes" : "Modifiche non salvate",
     "Share" : "Condividi",
-    "Sidebar" : "Barra laterale",
     "Previous" : "Precedente",
     "Next" : "Successivo",
     "Are you sure you want to delete?" : "Sei sicuro di voler eliminare?",

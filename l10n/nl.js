@@ -116,7 +116,6 @@ OC.L10N.register(
     "Share folder" : "Map delen",
     "Unsaved changes" : "Niet opgeslagen veranderingen",
     "Share" : "Delen",
-    "Sidebar" : "Zijbalk",
     "Slideshow" : "Diavoorstelling",
     "Previous" : "Vorige",
     "Next" : "Volgende",

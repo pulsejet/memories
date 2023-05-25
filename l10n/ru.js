@@ -138,7 +138,6 @@ OC.L10N.register(
     "Unsaved changes" : "Несохранённые изменения",
     "Drop changes" : "Отменить изменения",
     "Share" : "Поделиться",
-    "Sidebar" : "Боковая панель",
     "Download Video" : "Скачать видео",
     "Slideshow" : "Слайд шоу",
     "Previous" : "Назад",

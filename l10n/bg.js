@@ -284,7 +284,6 @@ OC.L10N.register(
     "Drop changes" : "Игнориране на промените",
     "Share" : "Споделяне",
     "Play Live Photo" : "Възпроизвеждане на Live Photo/жива снимка/",
-    "Sidebar" : "Странична лента",
     "Download Video" : "Изтегляне на видео",
     "Slideshow" : "Слайдшоу",
     "Previous" : "Предишно",

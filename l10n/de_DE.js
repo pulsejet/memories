@@ -298,7 +298,6 @@ OC.L10N.register(
     "Drop changes" : "Änderungen verwerfen",
     "Share" : "Teilen",
     "Play Live Photo" : "Live-Foto abspielen",
-    "Sidebar" : "Seitenleiste",
     "Download Video" : "Video herunterladen",
     "Slideshow" : "Diashow",
     "Previous" : "Zurück",

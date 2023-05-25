@@ -86,7 +86,6 @@ OC.L10N.register(
     "Share folder" : "Сподели папка",
     "Unsaved changes" : "Незачувани промени",
     "Share" : "Сподели",
-    "Sidebar" : "Странична лента",
     "Previous" : "Предходна",
     "Next" : "Следна",
     "Save as" : "Зачувај како",

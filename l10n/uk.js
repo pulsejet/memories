@@ -98,7 +98,6 @@ OC.L10N.register(
     "Unsaved changes" : "Незбережені зміни",
     "Drop changes" : "Відкинути зміни",
     "Share" : "Спільний доступ",
-    "Sidebar" : "Бокове меню",
     "Previous" : "Назад",
     "Next" : "Далі",
     "Save as" : "Зберегти як",

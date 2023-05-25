@@ -263,7 +263,6 @@ OC.L10N.register(
     "Drop changes" : "Jaregin aldaketak",
     "Share" : "Partekatu",
     "Play Live Photo" : "Erreproduzitu zuzeneko argazkia",
-    "Sidebar" : "Alboko barra",
     "Download Video" : "Deskargatu bideoa",
     "Slideshow" : "Diapositiba-aurkezpena",
     "Previous" : "Aurrekoa",
