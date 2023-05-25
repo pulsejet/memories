@@ -52,7 +52,6 @@ OC.L10N.register(
     "Sort by date" : "Kārtot pēc datuma",
     "Sort by name" : "Kārtot pēc nosaukuma",
     "Share" : "Koplietot",
-    "Sidebar" : "Sānjosla",
     "Previous" : "Iepriekšējā",
     "Next" : "Nākamā",
     "Save as" : "Saglabāt kā",

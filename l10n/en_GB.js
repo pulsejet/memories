@@ -294,7 +294,6 @@ OC.L10N.register(
     "Drop changes" : "Drop changes",
     "Share" : "Share",
     "Play Live Photo" : "Play Live Photo",
-    "Sidebar" : "Sidebar",
     "Download Video" : "Download Video",
     "Slideshow" : "Slideshow",
     "Previous" : "Previous",

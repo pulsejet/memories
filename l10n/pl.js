@@ -104,7 +104,6 @@ OC.L10N.register(
     "Unsaved changes" : "Niezapisane zmiany",
     "Drop changes" : "Odrzuć zmiany",
     "Share" : "Udostępnij",
-    "Sidebar" : "Pasek boczny",
     "Previous" : "Poprzednie",
     "Next" : "Następna",
     "Are you sure you want to delete?" : "Czy na pewno chcesz usunąć?",

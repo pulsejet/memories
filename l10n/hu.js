@@ -292,7 +292,6 @@ OC.L10N.register(
     "Drop changes" : "Változtatások elvetése",
     "Share" : "Megosztás",
     "Play Live Photo" : "Élő fénykép lejátszása",
-    "Sidebar" : "Oldalsáv",
     "Download Video" : "Videó letöltése",
     "Slideshow" : "Diavetítés",
     "Previous" : "Előző",

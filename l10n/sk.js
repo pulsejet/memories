@@ -110,7 +110,6 @@ OC.L10N.register(
     "Unsaved changes" : "Neuložené zmeny",
     "Drop changes" : "Zrušiť zmeny",
     "Share" : "Zdieľať",
-    "Sidebar" : "Bočný panel",
     "Previous" : "Predchádzajúce",
     "Next" : "Ďalšie",
     "Are you sure you want to delete?" : "Naozaj chcete vymazať?",

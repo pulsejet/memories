@@ -112,7 +112,6 @@ OC.L10N.register(
     "Unsaved changes" : "Neįrašyti pakeitimai",
     "Drop changes" : "Atmesti pakeitimus",
     "Share" : "Bendrinti",
-    "Sidebar" : "Šoninė juosta",
     "Slideshow" : "Skaidrių rodymas",
     "Previous" : "Ankstesnis",
     "Next" : "Kitas",

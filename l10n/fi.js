@@ -166,7 +166,6 @@ OC.L10N.register(
     "Unsaved changes" : "Tallentamattomia muutoksia",
     "Drop changes" : "Hylkää muutokset",
     "Share" : "Jaa",
-    "Sidebar" : "Sivupalkki",
     "Download Video" : "Lataa video",
     "Slideshow" : "Diaesitys",
     "Previous" : "Edellinen",
