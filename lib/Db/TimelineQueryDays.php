@@ -57,12 +57,10 @@ trait TimelineQueryDays
     /**
      * Get the day response from the database for the timeline.
      *
-     * @param string $uid             The user id
-     * @param int[]  $day_ids         The day ids to fetch
-     * @param bool   $recursive       If the query should be recursive
-     * @param bool   $archive         If the query should include only the archive folder
-     * @param array  $queryTransforms The query transformations to apply
-     * @param mixed  $day_ids
+     * @param int[] $day_ids         The day ids to fetch
+     * @param bool  $recursive       If the query should be recursive
+     * @param bool  $archive         If the query should include only the archive folder
+     * @param array $queryTransforms The query transformations to apply
      *
      * @return array An array of day responses
      */

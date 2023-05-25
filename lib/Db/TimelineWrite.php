@@ -245,8 +245,6 @@ class TimelineWrite
 
     /**
      * Clear the entire index. Does not need confirmation!
-     *
-     * @param File $file
      */
     public function clear()
     {
