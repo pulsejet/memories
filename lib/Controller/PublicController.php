@@ -119,6 +119,10 @@ class PublicController extends AuthPublicShareController
         $node = $share->getNode();
         if ($node instanceof \OCP\Files\File) {
             $this->initialState->provideInitialState('single_item', $this->getSingleItemInitialState($node));
+        } else if ($node instanceof \OCP\Files\Folder) {
+            $this->initialState->provideInitialState('share_title', $node->getName());
+        } else {
+            throw new NotFoundException();
         }
 
         // Add OG metadata

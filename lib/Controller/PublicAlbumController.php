@@ -91,6 +91,9 @@ class PublicAlbumController extends Controller
         // Scripts
         Util::addScript($this->appName, 'memories-main');
 
+        // Share info
+        $this->initialState->provideInitialState('share_title', $album['name']);
+
         // Render main template
         $response = new PublicTemplateResponse($this->appName, 'main', PageController::getMainParams());
         $response->setHeaderTitle($album['name']);

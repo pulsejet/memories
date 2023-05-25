@@ -157,7 +157,8 @@ export default defineComponent({
     },
 
     name(): string {
-      return <string>this.$route.params.name || this.t('memories', 'Albums');
+      // Album name is displayed in the dynamic top matter (timeline)
+      return this.$route.params.name ? '' : this.t('memories', 'Albums');
     },
   },
 

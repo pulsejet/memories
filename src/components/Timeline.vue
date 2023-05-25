@@ -32,7 +32,7 @@
           <div class="mobile-header-top-gap"></div>
 
           <!-- Header -->
-          <div class="dynamic-top-matter" v-show="!$refs.topmatter.type && list.length && viewName">
+          <div class="dynamic-top-matter" v-show="list.length && viewName">
             <div class="text">{{ viewName }}</div>
           </div>
 
@@ -106,6 +106,7 @@ import { defineComponent } from 'vue';
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 import { subscribe, unsubscribe } from '@nextcloud/event-bus';
+import { loadState } from '@nextcloud/initial-state';
 
 import { getLayout } from '../services/Layout';
 import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from '../types';
@@ -122,6 +123,7 @@ import EmptyContent from './top-matter/EmptyContent.vue';
 import OnThisDay from './top-matter/OnThisDay.vue';
 import TopMatter from './top-matter/TopMatter.vue';
 
+import * as PublicShareHeader from './top-matter/PublicShareHeader';
 import * as dav from '../services/DavRequests';
 import * as utils from '../services/Utils';
 import * as strings from '../services/strings';
@@ -238,6 +240,21 @@ export default defineComponent({
 
     /** Get view name for dynamic top matter */
     viewName(): string {
+      // Show album name for album view
+      if (this.routeIsAlbums) {
+        return this.$route.params.name || '';
+      }
+
+      // Show share name for public shares
+      if (this.routeIsPublic) {
+        return PublicShareHeader.title;
+      }
+
+      // Only static top matter for these routes
+      if (this.routeIsTags || this.routeIsPeople || this.routeIsPlaces) {
+        return '';
+      }
+
       return strings.viewName(this.$route.name);
     },
 
@@ -1347,7 +1364,7 @@ export default defineComponent({
       padding: 25px 10px 10px 10px;
       position: relative;
       display: block;
-      line-height: 1.1em;
+      line-height: 1.2em;
 
       @media (max-width: 768px) {
         font-size: 1.8em;

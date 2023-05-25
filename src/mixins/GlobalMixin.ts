@@ -16,17 +16,23 @@ export default defineComponent({
     routeIsBase(): boolean {
       return this.$route.name === 'timeline';
     },
+    routeIsFolders(): boolean {
+      return this.$route.name === 'folders';
+    },
+    routeIsAlbums(): boolean {
+      return this.$route.name === 'albums';
+    },
     routeIsPeople(): boolean {
       return ['recognize', 'facerecognition'].includes(<string>this.$route.name);
     },
     routeIsArchive(): boolean {
       return this.$route.name === 'archive';
     },
-    routeIsFolders(): boolean {
-      return this.$route.name === 'folders';
+    routeIsPlaces(): boolean {
+      return this.$route.name === 'places';
     },
-    routeIsAlbums(): boolean {
-      return this.$route.name === 'albums';
+    routeIsTags(): boolean {
+      return this.$route.name === 'tags';
     },
     routeIsPublic(): boolean {
       return this.$route.name?.endsWith('-share') ?? false;

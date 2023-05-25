@@ -12,10 +12,12 @@ declare module 'vue' {
     state_noDownload: boolean;
 
     routeIsBase: boolean;
-    routeIsPeople: boolean;
-    routeIsArchive: boolean;
     routeIsFolders: boolean;
     routeIsAlbums: boolean;
+    routeIsPeople: boolean;
+    routeIsArchive: boolean;
+    routeIsPlaces: boolean;
+    routeIsTags: boolean;
     routeIsPublic: boolean;
   }
 }
