@@ -147,10 +147,6 @@ export default defineComponent({
 
   mixins: [UserConfig],
 
-  data: () => ({
-    name: '',
-  }),
-
   computed: {
     isAlbumList(): boolean {
       return !Boolean(this.$route.params.name);
@@ -159,23 +155,13 @@ export default defineComponent({
     canEditAlbum(): boolean {
       return !this.isAlbumList && this.$route.params.user === getCurrentUser()?.uid;
     },
-  },
 
-  watch: {
-    $route: async function (from: any, to: any) {
-      this.createMatter();
+    name(): string {
+      return <string>this.$route.params.name || this.t('memories', 'Albums');
     },
-  },
-
-  mounted() {
-    this.createMatter();
   },
 
   methods: {
-    createMatter() {
-      this.name = <string>this.$route.params.name || this.t('memories', 'Albums');
-    },
-
     back() {
       this.$router.go(-1);
     },
