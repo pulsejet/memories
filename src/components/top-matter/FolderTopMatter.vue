@@ -16,13 +16,13 @@
 
     <div class="right-actions">
       <NcActions :inline="2">
-        <NcActionRouter :to="{ query: recursive ? {} : { recursive: '1' } }" close-after-click>
+        <NcActionButton @click="toggleRecursive" close-after-click>
           {{ recursive ? t('memories', 'Folder View') : t('memories', 'Timeline View') }}
           <template #icon>
             <FoldersIcon v-if="recursive" :size="20" />
             <TimelineIcon v-else :size="20" />
           </template>
-        </NcActionRouter>
+        </NcActionButton>
         <NcActionButton :aria-label="t('memories', 'Share folder')" @click="share()" close-after-click>
           {{ t('memories', 'Share folder') }}
           <template #icon> <ShareIcon :size="20" /> </template>
@@ -41,7 +41,6 @@ const NcBreadcrumbs = () => import('@nextcloud/vue/dist/Components/NcBreadcrumbs
 const NcBreadcrumb = () => import('@nextcloud/vue/dist/Components/NcBreadcrumb');
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
-import NcActionRouter from '@nextcloud/vue/dist/Components/NcActionRouter';
 
 import * as utils from '../../services/Utils';
 
@@ -57,7 +56,6 @@ export default defineComponent({
     NcBreadcrumb,
     NcActions,
     NcActionButton,
-    NcActionRouter,
     HomeIcon,
     ShareIcon,
     TimelineIcon,
@@ -109,6 +107,10 @@ export default defineComponent({
 
     share() {
       globalThis.shareNodeLink(utils.getFolderRoutePath(this.config.folders_path));
+    },
+
+    toggleRecursive() {
+      this.$router.replace({ query: this.recursive ? {} : { recursive: '1' } });
     },
   },
 });
