@@ -10,9 +10,8 @@ if (title) {
   let isHidden = false; // cache state to avoid unnecessary DOM updates
 
   // Hide header when recycler is scrolled down
-  subscribe('memories.recycler.scroll', ({ current }: { current: number }) => {
-    const hidden = current < 80;
-    if (hidden === isHidden) return;
-    header.classList.toggle('hidden', (isHidden = hidden));
+  subscribe('memories.recycler.scroll', ({ dynTopMatterVisible }: { dynTopMatterVisible: boolean }) => {
+    if (dynTopMatterVisible === isHidden) return;
+    header.classList.toggle('hidden', (isHidden = dynTopMatterVisible));
   });
 }

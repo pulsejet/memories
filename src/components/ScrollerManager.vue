@@ -96,6 +96,8 @@ export default defineComponent({
     lastAdjustHeight: 0,
     /** Height of the entire photo view */
     recyclerHeight: 100,
+    /** Height of the dynamic top matter */
+    dynTopMatterHeight: 0,
     /** Space to leave at the top (for the hover cursor) */
     topPadding: 0,
     /** Rect of scroller */
@@ -209,6 +211,7 @@ export default defineComponent({
       emit('memories.recycler.scroll', {
         current: scroll,
         previous: this.lastKnownRecyclerScroll,
+        dynTopMatterVisible: scroll < this.dynTopMatterHeight,
       });
       this.lastKnownRecyclerScroll = scroll;
 
@@ -311,7 +314,7 @@ export default defineComponent({
     adjustNow() {
       // Refresh height of recycler
       this.recyclerHeight = this.recycler?.$refs.wrapper.clientHeight ?? 0;
-      const extraY = this.recyclerBefore?.clientHeight ?? 0;
+      this.dynTopMatterHeight = this.recyclerBefore?.clientHeight ?? 0;
 
       // Exclude hover cursor height
       const hoverCursor = <HTMLSpanElement>this.$refs.hoverCursor;
@@ -326,7 +329,7 @@ export default defineComponent({
       // y position. When you hit a row with the tick, update y and
       // top values and move to the next tick.
       let tickId = 0;
-      let y = extraY;
+      let y = this.dynTopMatterHeight;
       let count = 0;
 
       // We only need to recompute top and visible ticks if count
