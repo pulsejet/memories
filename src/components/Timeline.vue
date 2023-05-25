@@ -106,7 +106,6 @@ import { defineComponent } from 'vue';
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 import { subscribe, unsubscribe } from '@nextcloud/event-bus';
-import { loadState } from '@nextcloud/initial-state';
 
 import { getLayout } from '../services/Layout';
 import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from '../types';
