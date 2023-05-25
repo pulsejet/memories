@@ -59,6 +59,14 @@ body.has-viewer header {
   z-index: 0 !important;
 }
 
+// Allow hiding app name (PublicShareHeader)
+header#header .header-appname {
+  transition: opacity 0.2s ease-in-out;
+  &.hidden {
+    opacity: 0 !important;
+  }
+}
+
 // Hide horizontal scrollbar on mobile
 // For the padding removal above
 #app-content-vue {
