@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 - New project home page: https://memories.gallery
 - New Discord community: https://discord.gg/7Dr9f9vNjJ
+- Nextcloud 27 compatibility
 - **Feature**: Layout improvements especially for mobile.
 - **Feature**: Allow downloading entire publicly shared albums.
 - **Feature**: Basic preview generation configuration in admin interface.
