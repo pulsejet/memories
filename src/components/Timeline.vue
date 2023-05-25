@@ -33,9 +33,7 @@
 
           <!-- Header -->
           <div class="dynamic-top-matter" v-show="!$refs.topmatter.type && list.length && viewName">
-            <div class="text">
-              {{ viewName }}
-            </div>
+            <div class="text">{{ viewName }}</div>
           </div>
 
           <!-- Horizontal scrollable OTD -->
@@ -225,18 +223,6 @@ export default defineComponent({
   },
 
   computed: {
-    routeIsBase(): boolean {
-      return this.$route.name === 'timeline';
-    },
-    routeIsPeople(): boolean {
-      return ['recognize', 'facerecognition'].includes(<string>this.$route.name);
-    },
-    routeIsArchive(): boolean {
-      return this.$route.name === 'archive';
-    },
-    routeIsFolders(): boolean {
-      return this.$route.name === 'folders';
-    },
     routeHasNative(): boolean {
       return this.routeIsBase && nativex.has();
     },

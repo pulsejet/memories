@@ -31,7 +31,7 @@
             <template #icon> <ShareIcon :size="24" /> </template>
           </NcActionButton>
           <NcActionButton
-            v-if="!routeIsAlbum && canDelete"
+            v-if="!routeIsAlbums && canDelete"
             :aria-label="t('memories', 'Delete')"
             @click="deleteCurrent"
             :close-after-click="true"
@@ -40,7 +40,7 @@
             <template #icon> <DeleteIcon :size="24" /> </template>
           </NcActionButton>
           <NcActionButton
-            v-if="routeIsAlbum"
+            v-if="routeIsAlbums"
             :aria-label="t('memories', 'Remove from album')"
             @click="deleteCurrent"
             :close-after-click="true"
@@ -109,7 +109,7 @@
             </template>
           </NcActionButton>
           <NcActionButton
-            v-if="!routeIsPublic && !routeIsAlbum && !isLocal"
+            v-if="!routeIsPublic && !routeIsAlbums && !isLocal"
             :aria-label="t('memories', 'View in folder')"
             @click="viewInFolder"
             :close-after-click="true"
@@ -291,16 +291,6 @@ export default defineComponent({
       } else {
         return Math.min(base, 5);
       }
-    },
-
-    /** Route is public */
-    routeIsPublic(): boolean {
-      return this.$route.name?.endsWith('-share') ?? false;
-    },
-
-    /** Route is album */
-    routeIsAlbum(): boolean {
-      return this.$route.name === 'albums';
     },
 
     /** Get the currently open photo */

@@ -37,18 +37,6 @@ export default defineComponent({
     emptyViewDescription(): string {
       return strings.emptyDescription(this.$route.name);
     },
-
-    routeIsPeople(): boolean {
-      return this.$route.name === 'recognize' || this.$route.name === 'facerecognition';
-    },
-
-    routeIsArchive(): boolean {
-      return this.$route.name === 'archive';
-    },
-
-    routeIsAlbums(): boolean {
-      return this.$route.name === 'albums';
-    },
   },
 });
 </script>

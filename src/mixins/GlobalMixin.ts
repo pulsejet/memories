@@ -12,6 +12,27 @@ export default defineComponent({
     state_noDownload: loadState('memories', 'no_download', false) !== false,
   }),
 
+  computed: {
+    routeIsBase(): boolean {
+      return this.$route.name === 'timeline';
+    },
+    routeIsPeople(): boolean {
+      return ['recognize', 'facerecognition'].includes(<string>this.$route.name);
+    },
+    routeIsArchive(): boolean {
+      return this.$route.name === 'archive';
+    },
+    routeIsFolders(): boolean {
+      return this.$route.name === 'folders';
+    },
+    routeIsAlbums(): boolean {
+      return this.$route.name === 'albums';
+    },
+    routeIsPublic(): boolean {
+      return this.$route.name?.endsWith('-share') ?? false;
+    },
+  },
+
   methods: {
     t,
     n,

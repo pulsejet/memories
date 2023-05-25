@@ -145,13 +145,13 @@ export default defineComponent({
         name: t('memories', 'Delete'),
         icon: DeleteIcon,
         callback: this.deleteSelection.bind(this),
-        if: () => !this.routeIsAlbum(),
+        if: () => !this.routeIsAlbums,
       },
       {
         name: t('memories', 'Remove from album'),
         icon: AlbumRemoveIcon,
         callback: this.deleteSelection.bind(this),
-        if: () => this.routeIsAlbum(),
+        if: () => this.routeIsAlbums,
       },
       {
         name: t('memories', 'Download'),
@@ -169,13 +169,13 @@ export default defineComponent({
         name: t('memories', 'Archive'),
         icon: ArchiveIcon,
         callback: this.archiveSelection.bind(this),
-        if: () => !this.routeIsArchive() && !this.routeIsAlbum(),
+        if: () => !this.routeIsArchiveFolder() && !this.routeIsAlbums,
       },
       {
         name: t('memories', 'Unarchive'),
         icon: UnarchiveIcon,
         callback: this.archiveSelection.bind(this),
-        if: () => this.routeIsArchive(),
+        if: () => this.routeIsArchiveFolder(),
       },
       {
         name: t('memories', 'Edit metadata'),
@@ -186,19 +186,19 @@ export default defineComponent({
         name: t('memories', 'View in folder'),
         icon: OpenInNewIcon,
         callback: this.viewInFolder.bind(this),
-        if: () => this.selection.size === 1 && !this.routeIsAlbum(),
+        if: () => this.selection.size === 1 && !this.routeIsAlbums,
       },
       {
         name: t('memories', 'Move to folder'),
         icon: FolderMoveIcon,
         callback: this.moveToFolder.bind(this),
-        if: () => !this.routeIsAlbum() && !this.routeIsArchive(),
+        if: () => !this.routeIsAlbums && !this.routeIsArchiveFolder(),
       },
       {
         name: t('memories', 'Add to album'),
         icon: AlbumsIcon,
         callback: this.addToAlbum.bind(this),
-        if: (self: any) => self.config.albums_enabled && !self.routeIsAlbum(),
+        if: (self: any) => self.config.albums_enabled && !self.routeIsAlbums,
       },
       {
         name: t('memories', 'Move to person'),
@@ -248,30 +248,18 @@ export default defineComponent({
     },
 
     /** Is archive route */
-    routeIsArchive() {
+    routeIsArchiveFolder() {
       // Check if the route itself is archive
-      if (this.$route.name === 'archive') {
-        return true;
-      }
+      if (this.routeIsArchive) return true;
 
       // Check if route is folder and the path contains .archive
-      if (this.$route.name === 'folders') {
+      if (this.routeIsFolders) {
         let path = this.$route.params.path || '';
         if (Array.isArray(path)) path = path.join('/');
         return ('/' + path + '/').includes('/.archive/');
       }
 
       return false;
-    },
-
-    /** Is album route */
-    routeIsAlbum() {
-      return this.config.albums_enabled && this.$route.name === 'albums';
-    },
-
-    /** Public route that can't modify anything */
-    routeIsPublic() {
-      return this.$route.name?.endsWith('-share');
     },
 
     /** Trigger to update props from selection set */
@@ -295,9 +283,7 @@ export default defineComponent({
 
     /** Get the actions list */
     getActions(): ISelectionAction[] {
-      return (
-        this.defaultActions?.filter((a) => (!a.if || a.if(this)) && (!this.routeIsPublic() || a.allowPublic)) || []
-      );
+      return this.defaultActions?.filter((a) => (!a.if || a.if(this)) && (!this.routeIsPublic || a.allowPublic)) || [];
     },
 
     /** Click on an action */
@@ -790,7 +776,7 @@ export default defineComponent({
         }
       }
 
-      for await (let delIds of dav.archiveFilesByIds(Array.from(selection.keys()), !this.routeIsArchive())) {
+      for await (let delIds of dav.archiveFilesByIds(Array.from(selection.keys()), !this.routeIsArchive)) {
         this.deleteSelectedPhotosById(delIds, selection);
       }
     },

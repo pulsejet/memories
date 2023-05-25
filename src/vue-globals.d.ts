@@ -10,6 +10,13 @@ declare module 'vue' {
     c: typeof constants.c;
 
     state_noDownload: boolean;
+
+    routeIsBase: boolean;
+    routeIsPeople: boolean;
+    routeIsArchive: boolean;
+    routeIsFolders: boolean;
+    routeIsAlbums: boolean;
+    routeIsPublic: boolean;
   }
 }
 
