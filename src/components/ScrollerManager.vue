@@ -320,7 +320,7 @@ export default defineComponent({
       const hoverCursor = <HTMLSpanElement>this.$refs.hoverCursor;
       this.topPadding = hoverCursor?.offsetHeight ?? 0;
 
-      // Add extra padding for any top elements
+      // Add extra padding for any top elements (top matter, mobile header)
       document.querySelectorAll('.timeline-scroller-gap').forEach((el) => {
         this.topPadding += el.clientHeight + 1;
       });
