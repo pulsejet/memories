@@ -41,6 +41,10 @@ docker exec -it my_nc_container php occ memories:index
 #           ^^^  <-- this is required
 ```
 
+!!! warning "OCCWeb"
+
+    The OCCWeb app is deprecated, and will not work with Memories. You must use the `occ` command line.
+
 ### Usage of tmpfs
 
 If you are using `tmpfs` (e.g. for the Recognize app), make sure the temp directory is set to executable. With Docker compose, your `docker-compose.yml` should look like this:
