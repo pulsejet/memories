@@ -96,12 +96,15 @@ export default defineComponent({
   }
 
   :deep .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 10px;
     font-size: 1.3em;
     font-weight: 400;
     line-height: 42px;
+    white-space: nowrap;
     vertical-align: top;
     flex-grow: 1;
-    padding-left: 10px;
   }
 
   :deep button + .name {
