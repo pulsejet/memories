@@ -34,6 +34,9 @@ export default defineComponent({
     routeIsTags(): boolean {
       return this.$route.name === 'tags';
     },
+    routeIsExplore(): boolean {
+      return this.$route.name === 'explore';
+    },
     routeIsPublic(): boolean {
       return this.$route.name?.endsWith('-share') ?? false;
     },

@@ -18,6 +18,7 @@ declare module 'vue' {
     routeIsArchive: boolean;
     routeIsPlaces: boolean;
     routeIsTags: boolean;
+    routeIsExplore: boolean;
     routeIsPublic: boolean;
   }
 }

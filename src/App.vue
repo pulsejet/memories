@@ -199,10 +199,10 @@ export default defineComponent({
 
     showNavigation(): boolean {
       if (this.native) {
-        return ['timeline', 'explore', 'albums'].includes(this.$route.name ?? '');
+        return this.routeIsBase || this.routeIsExplore || (this.routeIsAlbums && !this.$route.params.name);
       }
 
-      return !this.$route.name?.endsWith('-share');
+      return !this.routeIsPublic;
     },
 
     hasMobileHeader(): boolean {
