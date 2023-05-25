@@ -40,6 +40,11 @@ body {
     .app-navigation-toggle {
       // Move up to align with back button of top matter
       top: 2px;
+      transition: opacity 0.1s ease-in-out;
+      opacity: 0.2; // It's ugly
+      &:hover {
+        opacity: 1;
+      }
     }
   }
 }

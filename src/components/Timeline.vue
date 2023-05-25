@@ -26,14 +26,17 @@
       @resize="handleResizeWithDelay"
     >
       <template #before>
-        <!-- Show dynamic top matter, name of the view -->
+        <!-- Dynamic top matter, e.g. album or view name -->
         <div class="recycler-before" ref="recyclerBefore">
-          <div class="text" v-show="!$refs.topmatter.type && list.length && viewName && !isMobile()">
-            {{ viewName }}
-          </div>
-
           <!-- Gap for mobile header -->
           <div class="mobile-header-top-gap"></div>
+
+          <!-- Header -->
+          <div class="dynamic-top-matter" v-show="!$refs.topmatter.type && list.length && viewName">
+            <div class="text">
+              {{ viewName }}
+            </div>
+          </div>
 
           <!-- Horizontal scrollable OTD -->
           <OnThisDay
@@ -1352,12 +1355,21 @@ export default defineComponent({
 /** Dynamic top matter */
 .recycler-before {
   width: 100%;
-  > .text {
-    font-size: 1.2em;
-    padding-top: 13px;
-    padding-left: 8px;
-    @media (max-width: 768px) {
-      padding-left: 48px;
+  > .dynamic-top-matter {
+    > .text {
+      font-size: 2.5em;
+      padding: 25px 10px 10px 10px;
+      position: relative;
+      display: block;
+      line-height: 1.1em;
+
+      @media (max-width: 768px) {
+        font-size: 1.8em;
+        padding: 15px 12px 7px 12px;
+        html.native & {
+          padding: 25px 18px 7px 18px;
+        }
+      }
     }
   }
 }
