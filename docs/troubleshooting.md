@@ -1,0 +1,74 @@
+---
+description: Solutions to common problems
+---
+
+# Troubleshooting
+
+This page contains solutions to common problems. If you are facing any issues, please refer to this page before opening an issue.
+
+## Performance
+
+Memories is very fast, but its performance largely depends on how well the Nextcloud instance is tuned. Make sure to follow the following steps:
+
+- Make sure you are running the latest stable version of Nextcloud and Memories.
+- Follow the steps in the [server tuning](https://docs.nextcloud.com/server/latest/admin_manual/installation/server_tuning.html) documentation.
+- Follow all configuration steps in the [configuration](../config) documentation.
+
+      - Disable video transcoding if your server is not powerful enough.
+      - Reduce the maximum size of previews to be generated.
+
+- Make sure you are running HTTPS (very important).
+- Enable HTTP/2 or HTTP/3 on your server.
+- Enable and configure PHP Opcache and JIT.
+- Enable and configure the APCu cache.
+- Enable and configure Redis for transactional file locking.
+- Enable gzip compression on your HTTP server for static assets (CSS/JS).
+
+## No photos are shown
+
+This means that Memories is unable to find any indexed photos in your Nextcloud instance. Make sure you have followed the [configuration steps](../config). Note that Memories indexes photos in the background, so it may take a while for the photos to show up. Ensure that Nextcloud's cron system is properly configured and running.
+
+## Issues with Docker
+
+Note: Using the official Nextcloud Docker image is the recommended way of running Memories. If you are using a different image, you may run into issues.
+
+### OCC commands fail
+
+The most common reason for this is a missing interactive TTY. Make sure you run the commands with `-it`:
+
+```bash
+docker exec -it my_nc_container php occ memories:index
+#           ^^^  <-- this is required
+```
+
+### Usage of tmpfs
+
+If you are using `tmpfs` (e.g. for the Recognize app), make sure the temp directory is set to executable. With Docker compose, your `docker-compose.yml` should look like this:
+
+```yaml
+app:
+    ...
+    tmpfs:
+    - /tmp:exec
+```
+
+## Reset
+
+If you want to completely reset Memories (e.g. for database trouble), uninstall it from the app store, then run the following SQL on your database to clean up any data.
+
+```sql
+DROP TABLE IF EXISTS oc_memories;
+DROP TABLE IF EXISTS oc_memories_livephoto;
+DROP TABLE IF EXISTS oc_memories_mapclusters;
+DROP TABLE IF EXISTS oc_memories_places;
+DROP TABLE IF EXISTS oc_memories_planet;
+DROP TABLE IF EXISTS memories_planet_geometry;
+DROP INDEX IF EXISTS memories_parent_mimetype ON oc_filecache; /* MySQL */
+DELETE FROM oc_migrations WHERE app='memories';
+```
+
+On Postgres, the syntax for dropping the index is:
+
+```sql
+DROP INDEX IF EXISTS memories_parent_mimetype;
+```

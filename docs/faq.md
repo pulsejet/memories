@@ -54,7 +54,7 @@ UX and performance. The devil is in the details.
 
 **It's slow or doesn't work**
 
-Make sure you follow the [configuration steps](../config). Unless you have hundreds of thousands of photos on a Raspberry Pi, Memories should be very fast. File an issue otherwise.
+Make sure you follow the [troubleshooting steps](../troubleshooting/#performance). Unless you have hundreds of thousands of photos on a Raspberry Pi, Memories should be very fast. File an issue otherwise.
 
 **It says "nothing to show here" on startup?**
 
@@ -64,24 +64,3 @@ the [configuration steps](../config) and be patient.
 **Will it run on my system?**
 
 In general, if you can run Nextcloud, you should be able to run Memories. File an issue if you run into problems.
-
-**How to completely remove Memories? Maybe to reinstall after errors?**
-
-Uninstall Memories from the app store, then run the following SQL on your database.
-
-```sql
-DROP TABLE IF EXISTS oc_memories;
-DROP TABLE IF EXISTS oc_memories_livephoto;
-DROP TABLE IF EXISTS oc_memories_mapclusters;
-DROP TABLE IF EXISTS oc_memories_places;
-DROP TABLE IF EXISTS oc_memories_planet;
-DROP TABLE IF EXISTS memories_planet_geometry;
-DROP INDEX IF EXISTS memories_parent_mimetype ON oc_filecache;
-DELETE FROM oc_migrations WHERE app='memories';
-```
-
-On Postgres, the syntax for dropping the index is:
-
-```sql
-DROP INDEX IF EXISTS memories_parent_mimetype;
-```

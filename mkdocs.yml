@@ -42,6 +42,7 @@ nav:
       - 'config.md'
       - 'file-types.md'
       - 'hw-transcoding.md'
+      - 'troubleshooting.md'
       - 'system-config.md'
   - Support:
       - 'faq.md'
