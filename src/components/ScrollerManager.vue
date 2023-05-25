@@ -260,6 +260,7 @@ export default defineComponent({
     recreate() {
       // Clear and override any adjust timer
       this.ticks = [];
+      this.lastAdjustHeight = 0;
 
       // Ticks
       let prevYear = 9999;
