@@ -1361,16 +1361,19 @@ export default defineComponent({
   > .dynamic-top-matter {
     > .text {
       font-size: 2.5em;
-      padding: 25px 10px 10px 10px;
       position: relative;
       display: block;
       line-height: 1.2em;
 
+      // more padding on right for scroller thumb
+      padding: 25px 60px 10px 10px;
+
       @media (max-width: 768px) {
         font-size: 1.8em;
-        padding: 15px 12px 7px 12px;
+        padding: 15px 30px 7px 12px;
         html.native & {
-          padding: 25px 18px 7px 18px;
+          // header is empty, more top padding
+          padding: 25px 30px 7px 18px;
         }
       }
     }
