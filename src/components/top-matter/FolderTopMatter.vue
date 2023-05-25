@@ -1,13 +1,13 @@
 <template>
   <div class="top-matter">
-    <NcBreadcrumbs v-if="topMatter">
+    <NcBreadcrumbs>
       <NcBreadcrumb title="Home" :to="{ name: 'folders' }">
         <template #icon>
           <HomeIcon :size="20" />
         </template>
       </NcBreadcrumb>
       <NcBreadcrumb
-        v-for="folder in topMatter.list"
+        v-for="folder in list"
         :key="folder.path"
         :title="folder.text"
         :to="{ name: 'folders', params: { path: folder.path } }"
@@ -34,7 +34,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { TopMatterFolder, TopMatterType } from '../../types';
 
 import UserConfig from '../../mixins/UserConfig';
 const NcBreadcrumbs = () => import('@nextcloud/vue/dist/Components/NcBreadcrumbs');
@@ -51,6 +50,7 @@ import FoldersIcon from 'vue-material-design-icons/FolderMultiple.vue';
 
 export default defineComponent({
   name: 'FolderTopMatter',
+
   components: {
     NcBreadcrumbs,
     NcBreadcrumb,
@@ -64,47 +64,32 @@ export default defineComponent({
 
   mixins: [UserConfig],
 
-  data: () => ({
-    topMatter: null as TopMatterFolder | null,
-    recursive: false,
-  }),
+  computed: {
+    list(): {
+      text: string;
+      path: string;
+    }[] {
+      let path: string[] | string = this.$route.params.path || '';
+      if (typeof path === 'string') {
+        path = path.split('/');
+      }
 
-  watch: {
-    $route: function (from: any, to: any) {
-      this.createMatter();
+      return path
+        .filter((x) => x)
+        .map((x, idx, arr) => {
+          return {
+            text: x,
+            path: arr.slice(0, idx + 1).join('/'),
+          };
+        });
     },
-  },
 
-  mounted() {
-    this.createMatter();
+    recursive(): boolean {
+      return this.$route.query.recursive === '1';
+    },
   },
 
   methods: {
-    createMatter() {
-      if (this.$route.name === 'folders') {
-        let path: any = this.$route.params.path || '';
-        if (typeof path === 'string') {
-          path = path.split('/');
-        }
-
-        this.topMatter = {
-          type: TopMatterType.FOLDER,
-          list: path
-            .filter((x) => x)
-            .map((x, idx, arr) => {
-              return {
-                text: x,
-                path: arr.slice(0, idx + 1).join('/'),
-              };
-            }),
-        };
-        this.recursive = this.$route.query.recursive === '1';
-      } else {
-        this.topMatter = null;
-        this.recursive = false;
-      }
-    },
-
     share() {
       globalThis.shareNodeLink(utils.getFolderRoutePath(this.config.folders_path));
     },

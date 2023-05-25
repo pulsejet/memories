@@ -218,13 +218,6 @@ export enum TopMatterType {
   FACE = 3,
   ALBUM = 4,
 }
-export type TopMatterFolder = TopMatter & {
-  type: TopMatterType.FOLDER;
-  list: {
-    text: string;
-    path: string;
-  }[];
-};
 
 export type ISelectionAction = {
   /** Display text */

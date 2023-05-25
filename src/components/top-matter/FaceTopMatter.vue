@@ -82,25 +82,13 @@ export default defineComponent({
 
   mixins: [UserConfig],
 
-  data: () => ({
-    name: '',
-  }),
-
-  watch: {
-    $route: function (from: any, to: any) {
-      this.createMatter();
+  computed: {
+    name() {
+      return this.$route.params.name || '';
     },
-  },
-
-  mounted() {
-    this.createMatter();
   },
 
   methods: {
-    createMatter() {
-      this.name = <string>this.$route.params.name || '';
-    },
-
     back() {
       this.$router.go(-1);
     },
