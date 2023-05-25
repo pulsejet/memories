@@ -280,6 +280,7 @@ class Exif
         fclose($pipes[1]);
         fclose($pipes[2]);
         proc_terminate($proc);
+        proc_close($proc);
         if (false !== strpos($stdout, 'error')) {
             error_log("Exiftool error: {$stdout}");
 
@@ -323,6 +324,7 @@ class Exif
             fclose($pipes[1]);
             fclose($pipes[2]);
             proc_terminate($proc);
+            proc_close($proc);
         }
     }
 
@@ -421,6 +423,7 @@ class Exif
             fclose($pipes[1]);
             fclose($pipes[2]);
             proc_terminate($proc);
+            proc_close($proc);
         }
     }
 
