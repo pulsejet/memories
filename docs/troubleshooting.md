@@ -56,6 +56,22 @@ app:
     - /tmp:exec
 ```
 
+## Reverse Geocoding (Places)
+
+You need to have a MySQL / MariaDB / Postgres database for reverse geocoding to work. SQLite is not supported.
+
+### Planet DB download fails
+
+If the planet DB download does not complete via the admin interface, you need to use the OCC command line, or increase the connection timeout values for your PHP/HTTP servers.
+
+```bash
+occ memories:places-setup
+```
+
+### Error: Incorrect string value
+
+If you get this error, it is likely that your database is not using the `utf8mb4` character set. Since the reverse geocoding database contains characters in various languages, it is necessary to use `utf8mb4` to store them. To fix this, you need to convert your database to use `utf8mb4`.
+
 ## Reset
 
 If you want to completely reset Memories (e.g. for database trouble), uninstall it from the app store, then run the following SQL on your database to clean up any data.
