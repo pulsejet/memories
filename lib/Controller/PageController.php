@@ -11,28 +11,23 @@ use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IRequest;
-use OCP\IUserSession;
-use OCP\Util as OCPUtil;
 
 class PageController extends Controller
 {
     protected $userId;
     protected $appName;
     protected IEventDispatcher $eventDispatcher;
-    private IUserSession $userSession;
 
     public function __construct(
         string $AppName,
         IRequest $request,
         $UserId,
-        IEventDispatcher $eventDispatcher,
-        IUserSession $userSession
+        IEventDispatcher $eventDispatcher
     ) {
         parent::__construct($AppName, $request);
         $this->userId = $UserId;
         $this->appName = $AppName;
         $this->eventDispatcher = $eventDispatcher;
-        $this->userSession = $userSession;
     }
 
     /**
@@ -49,12 +44,12 @@ class PageController extends Controller
         }
 
         // Scripts
-        OCPUtil::addScript($this->appName, 'memories-main');
+        \OCP\Util::addScript($this->appName, 'memories-main');
 
         // Extra translations
         if (Util::recognizeIsEnabled()) {
             // Auto translation for tags
-            OCPUtil::addTranslations('recognize');
+            \OCP\Util::addTranslations('recognize');
         }
 
         $response = new TemplateResponse($this->appName, 'main', self::getMainParams());
