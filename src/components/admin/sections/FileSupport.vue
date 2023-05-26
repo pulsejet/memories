@@ -37,8 +37,8 @@
       class="preview-box"
       v-for="size in previewSizes"
       :key="size"
-      :checked="config['preview_max_x']"
-      :value="size"
+      :checked="String(config['preview_max_x'])"
+      :value="String(size)"
       name="previewsize_radio"
       type="radio"
       @update:checked="updatePreviewSize(size)"
@@ -50,7 +50,7 @@
       placeholder="1024"
       :label="t('memories', 'Max memory for preview generation (MB)')"
       :label-visible="true"
-      :value="config['preview_max_memory']"
+      :value="String(config['preview_max_memory'])"
       @change="update('preview_max_memory', Number($event.target.value))"
     />
 
@@ -59,7 +59,7 @@
       placeholder="50"
       :label="t('memories', 'Max size of preview files (MB)')"
       :label-visible="true"
-      :value="config['preview_max_filesize_image']"
+      :value="String(config['preview_max_filesize_image'])"
       @change="update('preview_max_filesize_image', Number($event.target.value))"
     />
   </div>
@@ -116,10 +116,10 @@ export default defineComponent({
       this.update('enabledPreviewProviders');
     },
 
-    async updatePreviewSize(size: number) {
-      this.update('preview_max_x', size);
+    async updatePreviewSize(size: number | string) {
+      this.update('preview_max_x', Number(size));
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Hack to prevent config race
-      this.update('preview_max_y', size);
+      this.update('preview_max_y', Number(size));
     },
   },
 });
