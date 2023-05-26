@@ -22,12 +22,13 @@ const pendingUrls = new Map<string, BlobCallback[]>();
 // Cache for preview images
 const cacheName = 'images';
 let imageCache: Cache;
-self.caches
-  ?.open(cacheName)
-  .then((c) => (imageCache = c))
-  .catch((e) => {
-    console.warn('Failed to open cache in worker', e);
-  });
+(async function openCache() {
+  try {
+    imageCache = await self.caches?.open(cacheName);
+  } catch {
+    console.warn('Failed to open cache in worker');
+  }
+})();
 
 // Expiration for cache
 const expirationManager = new CacheExpiration(cacheName, {
