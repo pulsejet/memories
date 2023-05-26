@@ -9,7 +9,7 @@ cleanupOutdatedCaches();
 registerRoute(
   /^.*\/apps\/memories\/api\/video\/livephoto\/.*/,
   new CacheFirst({
-    cacheName: 'livephotos',
+    cacheName: 'memories-livephotos',
     plugins: [
       new ExpirationPlugin({
         maxAgeSeconds: 3600 * 24 * 7, // days
@@ -30,7 +30,7 @@ const networkOnly = [/^.*\/api\/.*/];
 registerRoute(
   ({ url }) => url.origin === self.location.origin && url.pathname.endsWith('/apps/memories/'),
   new NetworkFirst({
-    cacheName: 'pages',
+    cacheName: 'memories-pages',
   })
 );
 
@@ -38,7 +38,7 @@ registerRoute(
 registerRoute(
   ({ url }) => url.origin === self.location.origin && !networkOnly.some((regex) => regex.test(url.href)),
   new CacheFirst({
-    cacheName: 'pages',
+    cacheName: 'memories-pages',
     plugins: [
       new ExpirationPlugin({
         maxAgeSeconds: 3600 * 24 * 7, // days

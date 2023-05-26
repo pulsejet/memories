@@ -20,7 +20,7 @@ let fetchPreviewQueue: FetchPreviewObject[] = [];
 const pendingUrls = new Map<string, BlobCallback[]>();
 
 // Cache for preview images
-const cacheName = 'images';
+const cacheName = 'memories-images';
 let imageCache: Cache;
 (async function openCache() {
   try {

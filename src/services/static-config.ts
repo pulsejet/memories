@@ -44,7 +44,7 @@ class StaticConfig {
       }
 
       // Clear page cache, keep other caches
-      window.caches?.delete('pages');
+      window.caches?.delete('memories-pages');
     }
 
     // Assign to existing default

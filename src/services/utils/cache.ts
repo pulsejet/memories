@@ -6,7 +6,7 @@ const uid = getCurrentUser()?.uid || 'guest';
 
 async function getCacheName() {
   const ver = await config.get('version');
-  return `memories-${ver}-${uid}`;
+  return `memories-data-${ver}-${uid}`;
 }
 
 // Clear all caches except the current one
@@ -19,7 +19,7 @@ async function getCacheName() {
   const cacheName = await getCacheName();
 
   for (const key of keys) {
-    if (key.startsWith('memories-') && key !== cacheName) {
+    if (key.match(/^memories-data-/) && key !== cacheName) {
       window.caches.delete(key);
     }
   }
