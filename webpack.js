@@ -11,6 +11,7 @@ const isDev = buildMode === 'development';
 webpackConfig.entry = {
   main: path.resolve(path.join('src', 'main')),
   admin: path.resolve(path.join('src', 'admin')),
+  'hooks-clear-cache': path.resolve(path.join('src', 'hooks', 'clear-cache')),
 };
 
 // Enable TypeScript
