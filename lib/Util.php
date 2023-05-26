@@ -412,9 +412,8 @@ class Util
      */
     public static function callerIsNative(): bool
     {
-        $userAgent = \OC::$server->get(\OCP\IRequest::class)->getHeader('User-Agent');
-
-        return false !== strpos($userAgent, 'MemoriesNative');
+        // Should not use IRequest here since this method is called during registration
+        return false !== strpos($_SERVER['HTTP_USER_AGENT'] ?? '', 'MemoriesNative');
     }
 
     /**
