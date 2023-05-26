@@ -1,1 +1,0 @@
-<div id="memories-admin-content"></div>

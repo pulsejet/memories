@@ -28,12 +28,9 @@ class Admin implements ISettings
      */
     public function getForm()
     {
-        $parameters = [
-        ];
+        \OCP\Util::addScript('memories', 'memories-admin');
 
-        \OCP\Util::addScript('memories', 'memories-main');
-
-        return new TemplateResponse('memories', 'admin', $parameters);
+        return new TemplateResponse('memories', 'main', []);
     }
 
     public function getSection()
