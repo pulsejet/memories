@@ -66,6 +66,7 @@
     "@nextcloud/webpack-vue-config": "^5.5.1",
     "@playwright/test": "^1.33.0",
     "@types/hammerjs": "^2.0.41",
+    "@types/luxon": "^3.3.0",
     "@types/url-parse": "^1.4.8",
     "@types/videojs-contrib-quality-levels": "^2.0.1",
     "playwright": "^1.33.0",

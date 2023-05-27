@@ -174,17 +174,23 @@ export default defineComponent({
       // The fallback to datetaken can be eventually removed
       // and then this can be discarded
       if (this.exif.DateTimeEpoch) {
-        const tzOffset: string = this.exif['OffsetTimeOriginal'] || this.exif['OffsetTime']; // e.g. -05:00
-        const tzId: string = this.exif['LocationTZID']; // e.g. America/New_York
+        const tzOffset: string = this.exif.OffsetTimeOriginal || this.exif.OffsetTime; // e.g. -05:00
+        const tzId: string = this.exif.LocationTZID; // e.g. America/New_York
 
-        // Use timezone offset if available, otherwise use tzId
-        let dateWithTz = date.setZone('UTC' + tzOffset);
-        if (!dateWithTz.isValid) {
-          dateWithTz = date.setZone(tzId); // Fall back to tzId
+        let dateWithTz: DateTime | undefined = undefined;
+
+        // Use timezone offset if available
+        if (tzOffset) {
+          dateWithTz = date.setZone('UTC' + tzOffset);
+        }
+
+        // Fall back to tzId
+        if (!dateWithTz?.isValid && tzId) {
+          dateWithTz = date.setZone(tzId);
         }
 
         // Use the timezone only if the date is valid
-        if (dateWithTz.isValid) {
+        if (dateWithTz?.isValid) {
           date = dateWithTz;
         }
       }
