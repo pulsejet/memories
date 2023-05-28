@@ -141,7 +141,7 @@ class AdminController extends GenericApiController
             // Check go-vod binary
             $extGoVod = Util::getSystemConfig('memories.vod.external');
             $status['govod'] = $this->getExecutableStatus(
-                Util::getSystemConfig('memories.vod.path'),
+                fn () => BinExt::getGoVodBin(),
                 fn ($p) => BinExt::testStartGoVod(),
                 !$extGoVod,
                 !$extGoVod,
