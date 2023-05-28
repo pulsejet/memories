@@ -296,7 +296,7 @@ class ImageController extends GenericApiController
         string $name,
         int $width,
         int $height,
-        float $quality,
+        ?float $quality,
         string $extension,
         array $state
     ): Http\Response {
@@ -334,9 +334,15 @@ class ImageController extends GenericApiController
                 $image->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1, true);
             }
 
-            // Save the image
+            // Set image format
             $image->setImageFormat($extension);
-            $image->setImageCompressionQuality((int) round(100 * $quality));
+
+            // Set quality if specified
+            if (null !== $quality && $quality >= 0 && $quality <= 1) {
+                $image->setImageCompressionQuality((int) round(100 * $quality));
+            }
+
+            // Save the image
             $blob = $image->getImageBlob();
 
             // Save the file
