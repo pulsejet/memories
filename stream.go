@@ -181,7 +181,7 @@ func (s *Stream) ServeChunk(w http.ResponseWriter, id int) error {
 }
 
 func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
-	args := s.transcodeArgs(0, false)
+	args := s.transcodeArgs(0)
 
 	if s.m.probe.CodecName == CODEC_H264 && s.quality == QUALITY_MAX {
 		// try to just send the original file
@@ -351,7 +351,7 @@ func (s *Stream) restartAtChunk(w http.ResponseWriter, id int) {
 }
 
 // Get arguments to ffmpeg
-func (s *Stream) transcodeArgs(startAt float64, rotate bool) []string {
+func (s *Stream) transcodeArgs(startAt float64) []string {
 	args := []string{
 		"-loglevel", "warning",
 	}
@@ -374,13 +374,6 @@ func (s *Stream) transcodeArgs(startAt float64, rotate bool) []string {
 		CV = ENCODER_NVENC
 		extra := "-hwaccel cuda"
 		args = append(args, strings.Split(extra, " ")...)
-	}
-
-	// Manual rotation: disable autorotate
-	if rotate {
-		args = append(args, []string{
-			"-noautorotate", // Rotate manually
-		}...)
 	}
 
 	// Input specs
@@ -415,8 +408,12 @@ func (s *Stream) transcodeArgs(startAt float64, rotate bool) []string {
 	if CV != ENCODER_COPY {
 		filter := fmt.Sprintf("%s,%s=%s", format, scaler, strings.Join(scalerArgs, ":"))
 
-		// Add transpose filter if needed
-		if rotate {
+		// Rotation is a mess: https://trac.ffmpeg.org/ticket/8329
+		//   1/ autorotate=1 is needed, otherwise the sidecar metadata gets copied to the output
+		//   2/ But autorotation doesn't seem to work with HW (at least not with VAAPI)
+		// So keep autorotation enabled, but manually rotate for HW anyway.
+		// Also, the sidecar metadata only exists for MOV/MP4, so it's not a problem for TS.
+		if CV == ENCODER_VAAPI || CV == ENCODER_NVENC {
 			transposer := "transpose"
 			if CV == ENCODER_VAAPI {
 				transposer = "transpose_vaapi"
@@ -494,7 +491,7 @@ func (s *Stream) transcode(startId int) {
 	}
 	startAt := float64(startId * s.c.ChunkSize)
 
-	args := s.transcodeArgs(startAt, true)
+	args := s.transcodeArgs(startAt)
 
 	// Segmenting specs
 	args = append(args, []string{
