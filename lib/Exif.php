@@ -202,14 +202,15 @@ class Exif
         }
 
         // Fall back to modification time
-        try {
-            $parseTz = new \DateTimeZone(getenv('TZ')); // debian
-        } catch (\Error $e) {
-            $parseTz = new \DateTimeZone('UTC');
-        }
+        $dt = new \DateTime('@'.$file->getMtime());
 
-        $dt = new \DateTime('@'.$file->getMtime(), $parseTz);
-        $dt->setTimezone($parseTz);
+        // Set timezone to system timezone
+        $tz = getenv('TZ') ?: date_default_timezone_get();
+        try {
+            $dt->setTimezone(new \DateTimeZone($tz));
+        } catch (\Exception $e) {
+            throw new \Error("FATAL: system timezone is invalid (TZ): $tz");
+        }
 
         return self::forgetTimezone($dt);
     }

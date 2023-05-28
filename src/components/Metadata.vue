@@ -179,8 +179,14 @@ export default defineComponent({
 
         let dateWithTz: DateTime | undefined = undefined;
 
+        // If no timezone info is available, we will show the local time only
+        // In this case, everything happens in UTC
+        if (!tzOffset && !tzId) {
+          dateWithTz = date.setZone('UTC');
+        }
+
         // Use timezone offset if available
-        if (tzOffset) {
+        if (!dateWithTz?.isValid && tzOffset) {
           dateWithTz = date.setZone('UTC' + tzOffset);
         }
 
