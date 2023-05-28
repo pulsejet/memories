@@ -206,10 +206,11 @@ class Exif
 
         // Set timezone to system timezone
         $tz = getenv('TZ') ?: date_default_timezone_get();
+
         try {
             $dt->setTimezone(new \DateTimeZone($tz));
         } catch (\Exception $e) {
-            throw new \Error("FATAL: system timezone is invalid (TZ): $tz");
+            throw new \Error("FATAL: system timezone is invalid (TZ): {$tz}");
         }
 
         return self::forgetTimezone($dt);
