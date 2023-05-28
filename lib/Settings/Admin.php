@@ -2,6 +2,7 @@
 
 namespace OCA\Memories\Settings;
 
+use OCA\Memories\Controller\PageController;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\Settings\ISettings;
 
@@ -21,7 +22,7 @@ class Admin implements ISettings
     {
         \OCP\Util::addScript($this->appName, 'memories-admin');
 
-        return new TemplateResponse('memories', 'main', []);
+        return new TemplateResponse('memories', 'main', PageController::getMainParams());
     }
 
     public function getSection()
