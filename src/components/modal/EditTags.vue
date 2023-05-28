@@ -1,6 +1,12 @@
 <template>
   <div class="outer">
-    <NcSelectTags class="nc-comp" v-model="tagSelection" :limit="null" :options-filter="tagFilter" />
+    <NcSelectTags
+      class="nc-comp"
+      v-model="tagSelection"
+      :limit="null"
+      :options-filter="tagFilter"
+      :get-option-label="tagLabel"
+    />
   </div>
 </template>
 
@@ -57,6 +63,10 @@ export default defineComponent({
         element.userAssignable &&
         element.userVisible
       );
+    },
+
+    tagLabel({ displayName }: { displayName: string }) {
+      return this.t('recognize', displayName);
     },
 
     result() {
