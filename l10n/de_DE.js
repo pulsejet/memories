@@ -91,6 +91,7 @@ OC.L10N.register(
     "File Support" : "Dateiunterstützung",
     "You can configure the enabled Nextcloud preview providers below." : "Sie können die aktiven Nextcloud-Vorschauanbieter unten einrichten.",
     "If you are using Imaginary for preview generation, you can ignore this section." : "Wenn Sie Imaginary zur Vorschauerstellung verwenden, können Sie diesen Abschnitt überspringen.",
+    "To enable RAW support, install the Camera RAW Previews app." : "Um die RAW-Unterstützung zu aktivieren, installieren Sie die Camera RAW Vorschau-App.",
     "Documentation." : "Dokumentation.",
     "The following MIME types are configured for preview generation." : "Die folgenden MIME-Typen sind für die Erstellung der Vorschau eingerichtet.",
     "Max preview size (trade-off between quality and storage requirements)." : "Maximale Vorschaugröße (Kompromiss zwischen Qualität und Speicherbedarf).",
