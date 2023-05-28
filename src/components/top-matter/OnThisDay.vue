@@ -1,6 +1,6 @@
 <template>
   <div class="outer" v-show="years.length > 0">
-    <div class="inner" ref="inner">
+    <div class="inner hide-scrollbar" ref="inner">
       <div v-for="year of years" class="group" :key="year.year" @click="click(year)">
         <XImg class="fill-block" :src="year.url" />
 
@@ -208,9 +208,10 @@ $mobHeight: 165px;
   margin-top: 10px;
 
   .inner {
-    height: calc(100% + 20px);
+    height: 100%;
     white-space: nowrap;
     overflow-x: scroll;
+    overflow-y: hidden;
     scroll-behavior: smooth;
     border-radius: 10px;
   }
@@ -236,10 +237,11 @@ $mobHeight: 165px;
   }
 
   @media (max-width: 768px) {
-    width: 98%;
+    width: 100%;
     padding: 0;
     .inner {
       padding: 0 8px;
+      border-radius: 0;
     }
     .dir-btn {
       display: none;
