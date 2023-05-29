@@ -3,7 +3,7 @@
     <NcAppContent>
       <div class="outer fill-block" :class="{ show }">
         <div class="title">
-          <XImg class="img" :src="banner" />
+          <XImg class="img" :src="banner" :svg-tag="true" />
         </div>
 
         <div class="text">

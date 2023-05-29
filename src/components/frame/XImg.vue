@@ -23,6 +23,10 @@ export default defineComponent({
       type: String,
       default: '',
     },
+    svgTag: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   data: () => {
@@ -52,7 +56,7 @@ export default defineComponent({
 
   computed: {
     svg() {
-      if (this.dataSrc.startsWith('data:image/svg+xml')) {
+      if (this.svgTag && this.dataSrc.startsWith('data:image/svg+xml')) {
         return window.atob(this.dataSrc.split(',')[1]);
       }
       return null;

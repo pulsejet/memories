@@ -16,6 +16,7 @@
           :class="{ error }"
           :key="data.cluster_id"
           :src="previewUrl"
+          :svg-tag="plus"
           @error="failed"
         />
         <div v-if="title || subtitle" class="overlay fill-block" />

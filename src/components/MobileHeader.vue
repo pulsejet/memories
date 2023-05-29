@@ -8,7 +8,7 @@
   >
     <div class="logo">
       <a :href="homeUrl">
-        <XImg :src="nextcloudsvg" />
+        <XImg :src="nextcloudsvg" :svg-tag="true" />
       </a>
     </div>
   </div>
