@@ -1,5 +1,5 @@
 <template>
-  <div class="head-row" :class="{ selected: item.selected }" :style="{ height: `${item.size}px` }">
+  <div class="head-row no-user-select" :class="{ selected: item.selected }" :style="{ height: `${item.size}px` }">
     <div class="super" v-if="item.super !== undefined">
       {{ item.super }}
     </div>
@@ -74,8 +74,6 @@ export default defineComponent({
   padding-top: 10px;
   padding-left: 3px;
   font-size: 0.9em;
-  user-select: none;
-  -webkit-user-select: none;
 
   > div {
     position: relative;

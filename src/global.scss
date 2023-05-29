@@ -140,6 +140,12 @@ header#header .header-appname {
   }
 }
 
+// Disable user selection
+.no-user-select {
+  user-select: none;
+  -webkit-user-select: none; // iOS Safari is a horrible browser
+}
+
 // Make metadata tab scrollbar thin
 #tab-memories-metadata {
   scrollbar-width: thin;

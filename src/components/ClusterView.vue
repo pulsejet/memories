@@ -1,5 +1,5 @@
 <template>
-  <div v-if="noParams" class="container">
+  <div v-if="noParams" class="container no-user-select">
     <XLoadingIcon class="loading-icon centered" v-if="loading" />
 
     <TopMatter />

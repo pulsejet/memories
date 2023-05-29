@@ -41,7 +41,8 @@
           v-if="src"
           ref="ximg"
           draggable="false"
-          :class="['ximg', 'fill-block', `memories-thumb-${data.key}`]"
+          class="ximg fill-block no-user-select"
+          :class="[`memories-thumb-${data.key}`]"
           :src="src"
           :key="data.fileid"
           @load="load"
@@ -389,8 +390,6 @@ div.img-outer {
 
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
-    user-select: none;
-    -webkit-user-select: none;
     pointer-events: none;
     transition: border-radius 0.1s ease-in, transform 0.3s ease-in-out;
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="container" ref="container">
+  <div class="container no-user-select" ref="container">
     <!-- Loading indicator -->
     <XLoadingIcon class="loading-icon centered" v-if="loading" />
 
@@ -1305,8 +1305,6 @@ export default defineComponent({
   height: 100%;
   width: 100%;
   overflow: hidden;
-  user-select: none;
-  -webkit-user-select: none; // iOS Safari is a horrible browser
   position: relative;
 
   @media (max-width: 768px) {
