@@ -302,7 +302,7 @@ export default defineComponent({
     clickPhoto(photo: IPhoto, event: PointerEvent, rowIdx: number) {
       if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
       if (event.pointerType === 'touch') return; // let touch events handle this
-      if (event.button !== 0) return; // only left click
+      if (event.pointerType === 'mouse' && event.button !== 0) return; // only left click for mouse
 
       if (this.has()) {
         if (event.shiftKey) {
