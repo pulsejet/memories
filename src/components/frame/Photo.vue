@@ -381,7 +381,7 @@ div.img-outer {
     background-clip: content-box, padding-box;
   }
 
-  > img {
+  > .ximg {
     background-clip: content-box;
     object-fit: cover;
     z-index: 1;
