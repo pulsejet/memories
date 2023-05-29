@@ -84,9 +84,7 @@ async function flushPreviewQueue() {
   // Make a single-file request
   const fetchOneSafe = async (p: FetchPreviewObject) => {
     try {
-      const res = await fetchOneImage(p.origUrl);
-      if (res.status !== 200 || !res.body) throw new Error('Error fetching single preview');
-      await resolve(p.origUrl, res);
+      await resolve(p.origUrl, await fetchOneImage(p.origUrl));
     } catch (e) {
       reject(p.origUrl, e);
     }
@@ -291,7 +289,12 @@ function getResponse(blob: Blob, type: string | null, headers: any = {}) {
 
 /** Fetch single image with axios */
 async function fetchOneImage(url: string) {
-  return await fetch(url);
+  const res = await fetch(url);
+  if (res.status !== 200 || !res.body) {
+    const text = res.body ? await res.text() : 'unknown';
+    throw new Error(`Error fetching single preview: ${text}`);
+  }
+  return res;
 }
 
 /** Fetch multipreview with axios */

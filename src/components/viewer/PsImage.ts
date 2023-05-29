@@ -71,7 +71,10 @@ export default class ImageContentSetup {
     // Fetch with Axios
     fetchImage(content.data.src)
       .then(src)
-      .catch(() => src(errorsvg));
+      .catch((e) => {
+        src(errorsvg);
+        console.error('Error loading PsImage:', e);
+      });
 
     return img;
   }
