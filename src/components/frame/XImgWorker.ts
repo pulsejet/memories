@@ -84,7 +84,9 @@ async function flushPreviewQueue() {
   // Make a single-file request
   const fetchOneSafe = async (p: FetchPreviewObject) => {
     try {
-      await resolve(p.origUrl, await fetchOneImage(p.origUrl));
+      const res = await fetchOneImage(p.origUrl);
+      if (res.status !== 200 || !res.body) throw new Error('Error fetching single preview');
+      await resolve(p.origUrl, res);
     } catch (e) {
       reject(p.origUrl, e);
     }
