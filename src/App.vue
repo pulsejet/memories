@@ -281,7 +281,7 @@ export default defineComponent({
   },
 
   async beforeMount() {
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator && false) {
       // Get the config before loading
       const previousVersion = staticConfig.getSync('version');
 
