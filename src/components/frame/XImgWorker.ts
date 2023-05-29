@@ -214,9 +214,8 @@ async function fetchImage(url: string): Promise<Blob> {
   const cache = await imageCache?.match(url);
   if (cache) return await cache.blob();
 
-  // Get file id from URL
+  // Parse URL
   const urlObj = new URL(url, self.location.origin);
-  const fileid = Number(urlObj.pathname.split('/').pop());
 
   // Just fetch if not a preview
   const regex = /^.*\/apps\/memories\/api\/image\/preview\/.*/;
@@ -226,6 +225,9 @@ async function fetchImage(url: string): Promise<Blob> {
     cacheResponse(url, res);
     return await res.blob();
   }
+
+  // Get file id from URL
+  const fileid = Number(urlObj.pathname.split('/').pop());
 
   return await new Promise((resolve, reject) => {
     if (pendingUrls.has(url)) {
