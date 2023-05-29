@@ -40,8 +40,8 @@
         <XImg
           v-if="src"
           ref="ximg"
-          :class="['ximg', 'fill-block', `memories-thumb-${data.key}`]"
           draggable="false"
+          :class="['ximg', 'fill-block', `memories-thumb-${data.key}`]"
           :src="src"
           :key="data.fileid"
           @load="load"
