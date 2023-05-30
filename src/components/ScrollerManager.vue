@@ -155,11 +155,12 @@ export default defineComponent({
 
     /** Position of hover cursor */
     hoverCursorTransform(): string {
-      const m = utils.isMobile();
-      const min = m ? '2px' : '0px'; // padding for curvature
-      const max = `calc(${this.fullHeight - (m ? 6 : 0)}px - 100%)`; // padding for shadow
-      const val = `calc(${this.hoverCursorY}px - 100%)`;
-      return `translateY(clamp(${min}, ${val}, ${max}))`;
+      const mob = utils.isMobile();
+      const min = this.topPadding + (mob ? 2 : 0); // padding for curvature
+      const max = this.fullHeight - (mob ? 6 : 0); // padding for shadow
+      const val = this.hoverCursorY;
+      const clamp = Math.max(min, Math.min(max, val)); // clamp(min, val, max)
+      return `translateY(calc(${clamp}px - 100%))`;
     },
   },
 
