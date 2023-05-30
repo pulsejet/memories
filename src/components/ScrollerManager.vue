@@ -498,7 +498,7 @@ export default defineComponent({
       } else if (idx >= this.ticks.length) {
         const t = this.ticks[this.ticks.length - 1];
         top1 = t.topF;
-        top2 = this.height;
+        top2 = this.fullHeight;
         y1 = t.y;
         y2 = this.recyclerHeight;
       } else {
