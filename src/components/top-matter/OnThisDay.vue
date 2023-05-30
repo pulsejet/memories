@@ -76,7 +76,7 @@ export default defineComponent({
     this.resizeObserver = new ResizeObserver(this.onScroll.bind(this));
     this.resizeObserver.observe(inner);
 
-    this.refresh();
+    this.refreshNow();
   },
 
   beforeDestroy() {
@@ -88,7 +88,7 @@ export default defineComponent({
       this.$emit('load');
     },
 
-    async refresh() {
+    async refreshNow() {
       // Look for cache
       const dayIdToday = utils.dateToDayId(new Date());
       const cacheUrl = `/onthisday/${dayIdToday}`;
