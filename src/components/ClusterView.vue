@@ -8,7 +8,7 @@
 
     <ClusterGrid :items="items" :minCols="minCols" ref="denali">
       <template #before>
-        <DynamicTopMatter ref="dtm" />
+        <DynamicTopMatter class="cv-dtm" ref="dtm" />
       </template>
     </ClusterGrid>
   </div>
@@ -113,5 +113,9 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   position: relative;
+
+  .cv-dtm {
+    margin-bottom: 5px;
+  }
 }
 </style>
