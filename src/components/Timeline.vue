@@ -36,15 +36,8 @@
             <div class="text">{{ viewName }}</div>
           </div>
 
-          <!-- Horizontal scrollable OTD -->
-          <OnThisDay
-            v-if="routeIsBase && config.enable_top_memories"
-            :key="config.timeline_path"
-            @load="scrollerManager().adjust()"
-          >
-          </OnThisDay>
-
-          <FolderGrid v-if="folders.length" :items="folders" />
+          <!-- Route-specific top matter -->
+          <DynamicTopMatter ref="dtm" @load="scrollerManager().adjust()" />
         </div>
       </template>
 
@@ -108,10 +101,9 @@ import { showError } from '@nextcloud/dialogs';
 import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 
 import { getLayout } from '../services/Layout';
-import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from '../types';
+import { IDay, IHeadRow, IPhoto, IRow, IRowType } from '../types';
 
 import UserConfig from '../mixins/UserConfig';
-import FolderGrid from './FolderGrid.vue';
 import RowHead from './frame/RowHead.vue';
 import Photo from './frame/Photo.vue';
 import ScrollerManager from './ScrollerManager.vue';
@@ -119,8 +111,8 @@ import SelectionManager from './SelectionManager.vue';
 import Viewer from './viewer/Viewer.vue';
 
 import EmptyContent from './top-matter/EmptyContent.vue';
-import OnThisDay from './top-matter/OnThisDay.vue';
 import TopMatter from './top-matter/TopMatter.vue';
+import DynamicTopMatter from './top-matter/DynamicTopMatter.vue';
 
 import * as PublicShareHeader from './top-matter/PublicShareHeader';
 import * as dav from '../services/DavRequests';
@@ -139,12 +131,11 @@ export default defineComponent({
   name: 'Timeline',
 
   components: {
-    FolderGrid,
     RowHead,
     Photo,
     EmptyContent,
-    OnThisDay,
     TopMatter,
+    DynamicTopMatter,
     SelectionManager,
     ScrollerManager,
     Viewer,
@@ -157,8 +148,8 @@ export default defineComponent({
     loading: 0,
     /** Main list of rows */
     list: [] as IRow[],
-    /** List of top folders */
-    folders: [] as IFolder[],
+    /** Dynamic top matter has standalone content */
+    dtmContent: false,
     /** Computed number of columns */
     numCols: 0,
     /** Header rows for dayId key */
@@ -259,7 +250,7 @@ export default defineComponent({
 
     /** Nothing to show here */
     empty(): boolean {
-      return !this.list.length && !this.folders.length;
+      return !this.list.length && !this.dtmContent;
     },
   },
 
@@ -362,7 +353,7 @@ export default defineComponent({
       this.scrollerManager().reset();
       this.loading = 0;
       this.list = [];
-      this.folders = [];
+      this.dtmContent = false;
       this.heads = {};
       this.currentStart = 0;
       this.currentEnd = 0;
@@ -671,39 +662,20 @@ export default defineComponent({
       return query;
     },
 
-    /** Fetch folders */
-    async fetchFolders() {
-      if (!this.routeIsFolders || this.$route.query.recursive) {
-        this.folders = [];
-        return;
-      }
-
-      // Get subfolders URL
-      const folder = utils.getFolderRoutePath(this.config.folders_path);
-      const url = API.Q(API.FOLDERS_SUB(), { folder });
-
-      // Make API call to get subfolders
-      try {
-        this.loading++;
-        const state = this.state;
-        const res = await axios.get<IFolder[]>(url);
-        if (state !== this.state) return;
-        this.folders = res.data;
-      } finally {
-        this.loading--;
-      }
-
-      // Filter out hidden folders
-      if (!this.config.show_hidden_folders) {
-        this.folders = this.folders.filter((f) => !f.name.startsWith('.') && f.previews?.length);
-      }
-    },
-
     /** Fetch timeline main call */
     async fetchDays(noCache = false) {
       // Awaiting this is important because the folders must render
       // before the timeline to prevent glitches
-      await this.fetchFolders();
+      try {
+        this.loading++;
+        const state = this.state;
+        // @ts-ignore
+        const res = await this.$refs.dtm.refresh();
+        if (this.state !== state) return;
+        this.dtmContent = res;
+      } finally {
+        this.loading--;
+      }
 
       // Get URL an cache identifier
       let url: string;
