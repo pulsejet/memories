@@ -102,7 +102,7 @@ class PlacesBackend extends Backend
         }
 
         // Else if we are looking for countries
-        elseif ($inside === -1) {
+        elseif (-1 === $inside) {
             $query->where($query->expr()->eq('e.admin_level', $query->expr()->literal(2, \PDO::PARAM_INT)));
         }
 
