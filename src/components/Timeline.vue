@@ -31,11 +31,6 @@
           <!-- Gap for mobile header -->
           <div class="mobile-header-top-gap"></div>
 
-          <!-- Header -->
-          <div class="dynamic-top-matter" v-show="list.length && viewName">
-            <div class="text">{{ viewName }}</div>
-          </div>
-
           <!-- Route-specific top matter -->
           <DynamicTopMatter ref="dtm" @load="scrollerManager().adjust()" />
         </div>
@@ -114,10 +109,8 @@ import EmptyContent from './top-matter/EmptyContent.vue';
 import TopMatter from './top-matter/TopMatter.vue';
 import DynamicTopMatter from './top-matter/DynamicTopMatter.vue';
 
-import * as PublicShareHeader from './top-matter/PublicShareHeader';
 import * as dav from '../services/DavRequests';
 import * as utils from '../services/Utils';
-import * as strings from '../services/strings';
 import * as nativex from '../native';
 
 import { API, DaysFilterType } from '../services/API';
@@ -226,26 +219,6 @@ export default defineComponent({
         (this.config.sort_album_month && (this.$route.name === 'albums' || this.$route.name === 'album-share')) ||
         (this.config.sort_folder_month && this.$route.name === 'folders')
       );
-    },
-
-    /** Get view name for dynamic top matter */
-    viewName(): string {
-      // Show album name for album view
-      if (this.routeIsAlbums) {
-        return this.$route.params.name || '';
-      }
-
-      // Show share name for public shares
-      if (this.routeIsPublic) {
-        return PublicShareHeader.title;
-      }
-
-      // Only static top matter for these routes
-      if (this.routeIsTags || this.routeIsPeople || this.routeIsPlaces) {
-        return '';
-      }
-
-      return strings.viewName(this.$route.name);
     },
 
     /** Nothing to show here */
@@ -1327,25 +1300,5 @@ export default defineComponent({
 /** Dynamic top matter */
 .recycler-before {
   width: 100%;
-  > .dynamic-top-matter {
-    > .text {
-      font-size: 2.5em;
-      position: relative;
-      display: block;
-      line-height: 1.2em;
-
-      // more padding on right for scroller thumb
-      padding: 25px 60px 10px 10px;
-
-      @media (max-width: 768px) {
-        font-size: 1.8em;
-        padding: 15px 30px 7px 12px;
-        html.native & {
-          // header is empty, more top padding
-          padding: 25px 30px 7px 18px;
-        }
-      }
-    }
-  }
 }
 </style>
