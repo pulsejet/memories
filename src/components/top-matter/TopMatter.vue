@@ -32,7 +32,7 @@ export default defineComponent({
   },
 
   data: () => ({
-    dynamicVisible: false,
+    dynamicVisible: true,
   }),
 
   mounted() {
