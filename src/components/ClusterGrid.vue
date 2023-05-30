@@ -12,6 +12,10 @@
     :gridItems="gridItems"
     @resize="resize"
   >
+    <template #before>
+      <slot name="before" />
+    </template>
+
     <template v-slot="{ item }">
       <div class="grid-item fill-block">
         <Cluster :data="item" @click="click(item)" :link="link" />

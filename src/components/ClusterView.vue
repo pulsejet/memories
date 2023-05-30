@@ -1,12 +1,16 @@
 <template>
-  <div v-if="noParams" class="container no-user-select">
+  <div v-if="noParams" class="container no-user-select cluster-view">
     <XLoadingIcon class="loading-icon centered" v-if="loading" />
 
     <TopMatter />
 
     <EmptyContent v-if="!items.length && !loading" />
 
-    <ClusterGrid :items="items" :minCols="minCols" />
+    <ClusterGrid :items="items" :minCols="minCols" ref="denali">
+      <template #before>
+        <DynamicTopMatter ref="dtm" />
+      </template>
+    </ClusterGrid>
   </div>
 
   <Timeline v-else />
@@ -22,6 +26,7 @@ import TopMatter from './top-matter/TopMatter.vue';
 import ClusterGrid from './ClusterGrid.vue';
 import Timeline from './Timeline.vue';
 import EmptyContent from './top-matter/EmptyContent.vue';
+import DynamicTopMatter from './top-matter/DynamicTopMatter.vue';
 
 import * as dav from '../services/DavRequests';
 
@@ -35,6 +40,7 @@ export default defineComponent({
     ClusterGrid,
     Timeline,
     EmptyContent,
+    DynamicTopMatter,
   },
 
   mixins: [UserConfig],
@@ -78,6 +84,10 @@ export default defineComponent({
         const route = this.$route.name;
         this.items = [];
         this.loading++;
+
+        await this.$nextTick();
+        // @ts-ignore
+        await this.$refs.dtm?.refresh?.();
 
         if (route === 'albums') {
           this.items = await dav.getAlbums(3, this.config.album_list_sort);

@@ -4,9 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [v5.1.1] - Unreleased
 
+**Note:** You will need to run `occ memories:places-setup --recalculate` to re-index places (or reindex everything)
+
 - New project home page: https://memories.gallery
 - New Discord community: https://discord.gg/7Dr9f9vNjJ
 - Nextcloud 27 compatibility
+- **Feature**: Hierarchical places view
 - **Feature**: Layout improvements especially for mobile.
 - **Feature**: Allow downloading entire publicly shared albums.
 - **Feature**: Basic preview generation configuration in admin interface.

@@ -97,6 +97,11 @@ export default defineComponent({
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
   }
 
+  // Hide shadow if inside cluster view
+  .cluster-view & {
+    box-shadow: none;
+  }
+
   @media (max-width: 768px) {
     padding-left: 10px; // extra space visual
   }

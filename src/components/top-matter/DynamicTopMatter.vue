@@ -11,6 +11,7 @@ import { defineComponent } from 'vue';
 import UserMixin from '../../mixins/UserConfig';
 
 import FolderDynamicTopMatter from './FolderDynamicTopMatter.vue';
+import PlacesDynamicTopMatterVue from './PlacesDynamicTopMatter.vue';
 import OnThisDay from './OnThisDay.vue';
 
 import * as PublicShareHeader from './PublicShareHeader';
@@ -25,6 +26,8 @@ export default defineComponent({
     currentmatter(): any {
       if (this.routeIsFolders) {
         return FolderDynamicTopMatter;
+      } else if (this.routeIsPlaces) {
+        return PlacesDynamicTopMatterVue;
       } else if (this.routeIsBase && this.config.enable_top_memories) {
         return OnThisDay;
       }

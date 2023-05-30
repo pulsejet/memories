@@ -65,6 +65,9 @@ class PlacesBackend extends Backend
 
     public function getClusters(): array
     {
+        $inside = (int) $this->request->getParam('inside', 0);
+        $marked = (int) $this->request->getParam('mark', 1);
+
         $query = $this->tq->getBuilder();
 
         // SELECT location name and count of photos
@@ -75,7 +78,41 @@ class PlacesBackend extends Backend
         $query->where($query->expr()->gt('e.admin_level', $query->expr()->literal(0, \PDO::PARAM_INT)));
 
         // WHERE there are items with this osm_id
-        $query->innerJoin('e', 'memories_places', 'mp', $query->expr()->eq('mp.osm_id', 'e.osm_id'));
+        $mpJoinOn = [$query->expr()->eq('mp.osm_id', 'e.osm_id')];
+
+        // AND these items are inside the requested place
+        if ($inside > 0) {
+            $sub = $this->tq->getBuilder();
+            $sub->select($query->expr()->literal(1))->from('memories_places', 'mp_sq')
+                ->where($sub->expr()->eq('mp_sq.osm_id', $query->createNamedParameter($inside, \PDO::PARAM_INT)))
+                ->andWhere($sub->expr()->eq('mp_sq.fileid', 'mp.fileid'))
+            ;
+            $mpJoinOn[] = $query->createFunction("EXISTS ({$sub->getSQL()})");
+
+            // Add WHERE clauses to main query to filter out admin_levels
+            $sub = $this->tq->getBuilder();
+            $sub->select('e_sq.admin_level')
+                ->from('memories_planet', 'e_sq')
+                ->where($sub->expr()->eq('e_sq.osm_id', $query->createNamedParameter($inside, \PDO::PARAM_INT)))
+            ;
+            $adminSql = "({$sub->getSQL()})";
+            $query->andWhere($query->expr()->gt('e.admin_level', $query->createFunction($adminSql)))
+                ->andWhere($query->expr()->lte('e.admin_level', $query->createFunction("{$adminSql} + 3")))
+            ;
+        }
+
+        // Else if we are looking for countries
+        elseif ($inside === -1) {
+            $query->where($query->expr()->eq('e.admin_level', $query->expr()->literal(2, \PDO::PARAM_INT)));
+        }
+
+        // AND these items are marked (only if not inside)
+        elseif ($marked > 0) {
+            $mpJoinOn[] = $query->expr()->eq('mp.mark', $query->expr()->literal(1, \PDO::PARAM_INT));
+        }
+
+        // JOIN on memories_places
+        $query->innerJoin('e', 'memories_places', 'mp', $query->expr()->andX(...$mpJoinOn));
 
         // WHERE these items are memories indexed photos
         $query->innerJoin('mp', 'memories', 'm', $query->expr()->eq('m.fileid', 'mp.fileid'));
@@ -104,8 +141,14 @@ class PlacesBackend extends Backend
         // INNER JOIN back on the planet table to get the names
         $query->innerJoin('sub', 'memories_planet', 'e', $query->expr()->eq('e.osm_id', 'sub.osm_id'));
 
+        // WHERE at least 3 photos if want marked clusters
+        if ($marked) {
+            $query->andWhere($query->expr()->gte('sub.count', $query->expr()->literal(3, \PDO::PARAM_INT)));
+        }
+
         // ORDER BY name and osm_id
-        $query->orderBy($query->createFunction('LOWER(e.name)'), 'ASC');
+        $query->orderBy($query->createFunction('sub.count'), 'DESC');
+        $query->addOrderBy('e.name');
         $query->addOrderBy('e.osm_id'); // tie-breaker
 
         // FETCH all tags
@@ -115,7 +158,7 @@ class PlacesBackend extends Backend
         $lang = Util::getUserLang();
         foreach ($places as &$row) {
             $row['osm_id'] = (int) $row['osm_id'];
-            $row['count'] = (int) $row['count'];
+            $row['count'] = $marked ? 0 : (int) $row['count']; // the count is incorrect
             self::choosePlaceLang($row, $lang);
         }
 
