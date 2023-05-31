@@ -7,7 +7,7 @@ FROM ubuntu:22.04
 WORKDIR /app
 ENV DEBIAN_FRONTEND=noninteractive
 COPY ./build-ffmpeg.sh .
-RUN ./build-ffmpeg.sh
+RUN bash ./build-ffmpeg.sh
 
 COPY --from=builder /app/go-vod .
 EXPOSE 47788
