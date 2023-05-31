@@ -797,7 +797,10 @@ export default defineComponent({
         : photo.flag & this.c.FLAG_IS_LOCAL
         ? nativex.API.IMAGE_FULL(photo.fileid)
         : API.IMAGE_DECODABLE(photo.fileid, photo.etag);
-      const fullLoadCond = this.config.full_res_always ? 'always' : this.config.full_res_on_zoom ? 'zoom' : 'never';
+
+      const fullResOnZoom = this.routeIsPublic ? this.config.public_full_res_on_zoom : this.config.full_res_on_zoom;
+      const fullResAlways = this.routeIsPublic ? this.config.public_full_res_always : this.config.full_res_always;
+      const fullLoadCond = fullResAlways ? 'always' : fullResOnZoom ? 'zoom' : 'never';
 
       return {
         src: previewUrl,

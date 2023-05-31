@@ -1,12 +1,13 @@
-import axios from '@nextcloud/axios';
-import { showInfo, showError } from '@nextcloud/dialogs';
-import { API } from './API';
-import { IConfig } from '../types';
-import { getBuilder } from '@nextcloud/browser-storage';
-import { translate as t } from '@nextcloud/l10n';
 import * as utils from './Utils';
 
+import { showError, showInfo } from '@nextcloud/dialogs';
+
+import { API } from './API';
+import { IConfig } from '../types';
 import type Storage from '@nextcloud/browser-storage/dist/storage';
+import axios from '@nextcloud/axios';
+import { getBuilder } from '@nextcloud/browser-storage';
+import { translate as t } from '@nextcloud/l10n';
 
 class StaticConfig {
   private config: IConfig | null = null;
@@ -120,6 +121,9 @@ class StaticConfig {
       full_res_always: false,
       show_face_rect: false,
       album_list_sort: 1,
+
+      public_full_res_on_zoom: true,
+      public_full_res_always: false,
     };
 
     for (const key in config) {

@@ -69,4 +69,7 @@ return [
     'preview_max_y' => 4096,
     'preview_max_memory' => 128,
     'preview_max_filesize_image' => 50,
+
+    'memories.public_full_res_on_zoom' => true,
+    'memories.public_full_res_always' => false,
 ];

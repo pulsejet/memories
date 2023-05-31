@@ -62,6 +62,27 @@
       :value="String(config['preview_max_filesize_image'])"
       @change="update('preview_max_filesize_image', Number($event.target.value))"
     />
+
+    <br />
+    {{ t('memories', 'You can set the image viewer to always request a full size image when an image is opened for public folders (there is seperate user setting for logged in users).') }}
+    {{ t('memories', 'This is not recommended if the images require transcoding (i.e. heic images) because it will cause a large amount of CPU usage.') }}
+    <br />
+
+    <NcCheckboxRadioSwitch
+      :checked.sync="config['memories.public_full_res_on_zoom']"
+      @update:checked="update('memories.public_full_res_on_zoom',)"
+      type="switch"
+    >
+      {{ t('memories', 'Load full size image on zoom for public folders') }}
+    </NcCheckboxRadioSwitch>
+
+    <NcCheckboxRadioSwitch
+      :checked.sync="config['memories.public_full_res_always']"
+      @update:checked="update('memories.public_full_res_always',)"
+      type="switch"
+    >
+      {{ t('memories', 'Always load full size image for public folders') }}
+    </NcCheckboxRadioSwitch>
   </div>
 </template>
 

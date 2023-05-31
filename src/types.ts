@@ -254,6 +254,8 @@ export type IConfig = {
   square_thumbs: boolean;
   full_res_on_zoom: boolean;
   full_res_always: boolean;
+  public_full_res_on_zoom: boolean;
+  public_full_res_always: boolean;
   show_face_rect: boolean;
   album_list_sort: 1 | 2;
 };
