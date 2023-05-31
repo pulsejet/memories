@@ -267,7 +267,7 @@ class Exif
     public static function setExif(string $path, array $data)
     {
         $data['SourceFile'] = $path;
-        $raw = json_encode([$data]);
+        $raw = json_encode([$data], JSON_UNESCAPED_UNICODE);
         $cmd = array_merge(self::getExiftool(), ['-json=-', $path]);
         $proc = proc_open($cmd, [
             0 => ['pipe', 'r'],
