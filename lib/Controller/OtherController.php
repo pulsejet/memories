@@ -95,8 +95,8 @@ class OtherController extends GenericApiController
                 'sort_album_month' => 'true' === $getAppConfig('sortAlbumMonth', 'true'),
                 'enable_top_memories' => 'true' === $getAppConfig('enableTopMemories', 'true'),
 
-                'public_full_res_on_zoom' => Util::getSystemConfig('memories.public_full_res_on_zoom'),
-                'public_full_res_always' => Util::getSystemConfig('memories.public_full_res_always'),
+                'global_full_res_on_zoom' => Util::getSystemConfig('memories.global_full_res_on_zoom'),
+                'global_full_res_always' => Util::getSystemConfig('memories.global_full_res_always'),
             ], Http::STATUS_OK);
         });
     }

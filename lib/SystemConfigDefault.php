@@ -70,6 +70,6 @@ return [
     'preview_max_memory' => 128,
     'preview_max_filesize_image' => 50,
 
-    'memories.public_full_res_on_zoom' => true,
-    'memories.public_full_res_always' => false,
+    'memories.global_full_res_on_zoom' => true,
+    'memories.global_full_res_always' => false,
 ];

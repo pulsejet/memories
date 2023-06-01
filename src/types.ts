@@ -252,10 +252,11 @@ export type IConfig = {
   enable_top_memories: boolean;
 
   square_thumbs: boolean;
+  override_global_full_res: boolean;
   full_res_on_zoom: boolean;
   full_res_always: boolean;
-  public_full_res_on_zoom: boolean;
-  public_full_res_always: boolean;
+  global_full_res_on_zoom: boolean;
+  global_full_res_always: boolean;
   show_face_rect: boolean;
   album_list_sort: 1 | 2;
 };

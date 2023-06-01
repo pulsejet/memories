@@ -117,13 +117,14 @@ class StaticConfig {
       enable_top_memories: true,
 
       square_thumbs: false,
+      override_global_full_res: false,
       full_res_on_zoom: true,
       full_res_always: false,
       show_face_rect: false,
       album_list_sort: 1,
 
-      public_full_res_on_zoom: true,
-      public_full_res_always: false,
+      global_full_res_on_zoom: true,
+      global_full_res_always: false,
     };
 
     for (const key in config) {

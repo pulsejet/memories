@@ -44,11 +44,22 @@
         >
           {{ t('memories', 'Show past photos on top of timeline') }}
         </NcCheckboxRadioSwitch>
+      </NcAppSettingsSection>
+
+      <NcAppSettingsSection id="preview-settings" :title="t('memories', 'Previews')">
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.override_global_full_res"
+          @update:checked="updateOverrideGlobalFullRes"
+          type="switch"
+        >
+          {{ t('memories', 'Override the global settings for loading full size images') }}
+        </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
           :checked.sync="config.full_res_on_zoom"
           @update:checked="updateFullResOnZoom"
           type="switch"
+          :disabled="!config.override_global_full_res"
         >
           {{ t('memories', 'Load full size image on zoom') }}
         </NcCheckboxRadioSwitch>
@@ -56,6 +67,7 @@
         <NcCheckboxRadioSwitch
           :checked.sync="config.full_res_always"
           @update:checked="updateFullResAlways"
+          :disabled="!config.override_global_full_res"
           type="switch"
         >
           {{ t('memories', 'Always load full size image (not recommended)') }}
@@ -217,6 +229,10 @@ export default defineComponent({
 
     async updateSquareThumbs() {
       await this.updateSetting('square_thumbs');
+    },
+
+    async updateOverrideGlobalFullRes() {
+      await this.updateSetting('override_global_full_res');
     },
 
     async updateFullResOnZoom() {

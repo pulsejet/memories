@@ -1,13 +1,15 @@
-import axios from '@nextcloud/axios';
 import { emit, subscribe, unsubscribe } from '@nextcloud/event-bus';
+
 import { API } from '../services/API';
-import { defineComponent } from 'vue';
 import { IConfig } from '../types';
+import axios from '@nextcloud/axios';
+import { defineComponent } from 'vue';
 import staticConfig from '../services/static-config';
 
 const eventName = 'memories:user-config-changed';
 const localSettings: (keyof IConfig)[] = [
   'square_thumbs',
+  'override_global_full_res',
   'full_res_on_zoom',
   'full_res_always',
   'show_face_rect',

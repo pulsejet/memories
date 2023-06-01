@@ -798,8 +798,12 @@ export default defineComponent({
         ? nativex.API.IMAGE_FULL(photo.fileid)
         : API.IMAGE_DECODABLE(photo.fileid, photo.etag);
 
-      const fullResOnZoom = this.routeIsPublic ? this.config.public_full_res_on_zoom : this.config.full_res_on_zoom;
-      const fullResAlways = this.routeIsPublic ? this.config.public_full_res_always : this.config.full_res_always;
+      const fullResOnZoom = this.config.override_global_full_res
+        ? this.config.full_res_on_zoom
+        : this.config.global_full_res_on_zoom;
+      const fullResAlways = this.config.override_global_full_res
+        ? this.config.full_res_always
+        : this.config.global_full_res_always;
       const fullLoadCond = fullResAlways ? 'always' : fullResOnZoom ? 'zoom' : 'never';
 
       return {

@@ -29,8 +29,8 @@ export type ISystemConfig = {
   preview_max_memory: number;
   preview_max_filesize_image: number;
 
-  'memories.public_full_res_on_zoom': boolean;
-  'memories.public_full_res_always': boolean;
+  'memories.global_full_res_on_zoom': boolean;
+  'memories.global_full_res_always': boolean;
 };
 
 export type IBinaryStatus = 'ok' | 'not_found' | 'not_executable' | 'test_ok' | string;
