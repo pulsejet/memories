@@ -82,7 +82,7 @@ type Selection = Map<number, IPhoto>;
 const TOUCH_SELECT_CLAMP = {
   top: 110, // min top for scrolling
   bottom: 110, // min bottom for scrolling
-  maxDelta: 15, // max speed of touch scroll
+  maxDelta: 10, // max speed of touch scroll
   bufferPx: 5, // number of pixels to clamp inside recycler area
 };
 
