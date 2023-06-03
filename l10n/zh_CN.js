@@ -16,6 +16,7 @@ OC.L10N.register(
     "Tags" : "标签",
     "Recognize" : "识别",
     "Edit" : "编辑",
+    "No description" : "没有描述",
     "Explore" : "探索",
     "Cancel" : "取消",
     "Delete" : "删除",
