@@ -440,10 +440,10 @@ export default defineComponent({
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 5px;
   position: relative;
-  transition: transform 0.2s;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
 
   &:hover {
-    transform: scale(1.8);
+    box-shadow: 0 0 3px var(--color-primary);
   }
 
   img {
