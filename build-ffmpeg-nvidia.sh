@@ -2,8 +2,9 @@
 
 set -e
 
+# apt-get remove -y libva ffmpeg # not needed for Docker
+
 apt-get update
-apt-get remove -y libva ffmpeg
 apt-get install -y \
     sudo curl wget \
     autoconf libtool libdrm-dev xorg xorg-dev openbox \
