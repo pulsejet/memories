@@ -82,6 +82,8 @@ OC.L10N.register(
     "Path to packaged exiftool binary" : "Chemin vers l'exécutable exiftool livré",
     "You need perl only if the packaged exiftool binary does not work for some reason." : "Vous n'avez besoin que de Perl si le paquet binaire exiftool ne fonctionne pas.",
     "Use system perl (only if exiftool binary does not work)" : "Utilisez le système Perl (seulement si le binaire exiftool ne fonctionne pas)",
+    "Max memory for preview generation (MB)" : "Mémoire maximale pour la génération d'un aperçu (Mo)",
+    "Max size of preview files (MB)" : "Taille maximale des fichiers de prévisualisation (Mo)",
     "Media Indexing" : "Indexation des médias",
     "{n} media files have been indexed" : "{n} fichiers multimédias ont été indexés",
     "Automatic Indexing status: {status}" : "État de l'indexation automatique : {status}",
