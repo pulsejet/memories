@@ -68,7 +68,7 @@ export default defineComponent({
           etag: this.album.album_id,
           flag: 0,
         } as unknown as IPhoto;
-        return getPreviewUrl(mock, true, 512);
+        return getPreviewUrl({ photo: mock, sqsize: 512 });
       }
 
       return API.CLUSTER_PREVIEW(this.data.cluster_type, this.data.cluster_id);

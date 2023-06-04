@@ -154,7 +154,10 @@ export default defineComponent({
     },
 
     async sharePreview() {
-      const src = utils.getPreviewUrl(this.photo!, false, 2048);
+      const src = utils.getPreviewUrl({
+        photo: this.photo!,
+        size: 2048,
+      });
       this.shareWithHref(src, true);
     },
 

@@ -11,8 +11,48 @@ export function isMobile() {
   return globalThis.windowInnerWidth <= 768;
 }
 
-/** Get preview URL from photo object */
-export function getPreviewUrl(photo: IPhoto, square: boolean, size: number | [number, number] | 'screen') {
+/** Preview generation options */
+type PreviewOpts = {
+  /** Photo object to create preview for */
+  photo: IPhoto;
+};
+type PreviewOptsSize = PreviewOpts & {
+  /**
+   * Directly specify the size of the preview.
+   * If you already know the size of the photo, use msize instead,
+   * so that caching can be utilized best. A size of 256 is not allowed
+   * here size the thumbnails are not pre-generated.
+   */
+  size: 512 | 1024 | 2048 | [number, number] | 'screen';
+};
+type PreviewOptsMsize = PreviewOpts & {
+  /**
+   * Size of minimum edge of the preview (recommended).
+   * This can only be used if the photo object has width and height.
+   */
+  msize: 256 | 512 | 1024 | 2048;
+};
+type PreviewOptsSquare = PreviewOpts & {
+  /**
+   * Size of the square preview.
+   * Note that these will still be cached and requested with XImg multipreview.
+   */
+  sqsize: 256 | 512 | 1024;
+};
+
+/**
+ * Get preview URL from photo object
+ *
+ * @param opts Preview options
+ */
+export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | PreviewOptsSquare) {
+  // Destructure does not work with union types
+  let { photo, size, msize, sqsize } = opts as PreviewOptsSize & PreviewOptsMsize & PreviewOptsSquare;
+
+  // Square size is just size
+  const square = sqsize !== undefined;
+  if (square) size = sqsize as any;
+
   // Native preview
   if (photo.flag & constants.c.FLAG_IS_LOCAL) {
     return API.Q(nativex.API.IMAGE_PREVIEW(photo.fileid), { c: photo.etag });
@@ -25,8 +65,18 @@ export function getPreviewUrl(photo: IPhoto, square: boolean, size: number | [nu
     size = [sw, sh];
   }
 
+  // Base size conversion
+  if (msize !== undefined) {
+    if (photo.w && photo.h) {
+      size = (Math.floor((msize * Math.max(photo.w, photo.h)) / Math.min(photo.w, photo.h)) - 1) as any;
+    } else {
+      console.warn('Photo has no width or height but using msize');
+      size = msize === 256 ? 512 : msize;
+    }
+  }
+
   // Convert to array
-  const [x, y] = typeof size === 'number' ? [size, size] : size;
+  const [x, y] = typeof size === 'number' ? [size, size] : size!;
 
   return API.Q(API.IMAGE_PREVIEW(photo.fileid), {
     c: photo.etag,

@@ -694,7 +694,8 @@ export default defineComponent({
         preload(dayIdx + 3);
 
         // Get thumb image
-        const thumbSrc: string = this.thumbElem(photo)?.getAttribute('src') || utils.getPreviewUrl(photo, false, 256);
+        const thumbSrc: string =
+          this.thumbElem(photo)?.getAttribute('src') || utils.getPreviewUrl({ photo, msize: 256 });
 
         // Get full image
         return {
@@ -739,7 +740,7 @@ export default defineComponent({
     },
 
     /** Open with a static list of photos */
-    async openStatic(photo: IPhoto, list: IPhoto[], thumbSize?: number) {
+    async openStatic(photo: IPhoto, list: IPhoto[], thumbSize?: 256 | 512) {
       this.list = list;
       const photoswipe = await this.createBase({
         index: list.findIndex((p) => p.fileid === photo.fileid),
@@ -750,7 +751,7 @@ export default defineComponent({
 
       photoswipe.addFilter('itemData', (itemData, index) => ({
         ...this.getItemData(this.list[index]),
-        msrc: thumbSize ? utils.getPreviewUrl(photo, false, thumbSize) : undefined,
+        msrc: thumbSize ? utils.getPreviewUrl({ photo, msize: thumbSize }) : undefined,
       }));
 
       this.isOpen = true;
@@ -759,7 +760,7 @@ export default defineComponent({
 
     /** Get base data object */
     getItemData(photo: IPhoto) {
-      let previewUrl = utils.getPreviewUrl(photo, false, 'screen');
+      let previewUrl = utils.getPreviewUrl({ photo, size: 'screen' });
       const isvideo = photo.flag & this.c.FLAG_IS_VIDEO;
 
       // Preview aren't animated

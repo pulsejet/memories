@@ -17,7 +17,7 @@
     <div class="previews fill-block">
       <div class="preview-container fill-block">
         <div class="img-outer" v-for="info of previews" :key="info.fileid">
-          <XImg class="ximg fill-block" :src="getPreviewUrl(info, true, 256)" />
+          <XImg class="ximg fill-block" :src="previewUrl(info)" />
         </div>
       </div>
     </div>
@@ -28,7 +28,7 @@
 import { defineComponent, PropType } from 'vue';
 import { IFolder, IPhoto } from '../../types';
 
-import { getPreviewUrl } from '../../services/utils/helpers';
+import * as utils from '../../services/utils/helpers';
 
 import UserConfig from '../../mixins/UserConfig';
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
@@ -53,8 +53,6 @@ export default defineComponent({
     previews: [] as IPhoto[],
     // Error occured fetching thumbs
     error: false,
-    // Passthrough
-    getPreviewUrl,
   }),
 
   computed: {
@@ -106,6 +104,14 @@ export default defineComponent({
           this.previews = previews.slice(0, 4);
         }
       }
+    },
+
+    /** Get preview url */
+    previewUrl(info: IPhoto) {
+      return utils.getPreviewUrl({
+        photo: info,
+        sqsize: 256,
+      });
     },
   },
 });

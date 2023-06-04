@@ -281,7 +281,10 @@ export default defineComponent({
     },
 
     clusterPreviewUrl(cluster: IMarkerCluster) {
-      return utils.getPreviewUrl(cluster.preview, false, 256);
+      return utils.getPreviewUrl({
+        photo: cluster.preview,
+        msize: 256,
+      });
     },
 
     clusterIconClass(cluster: IMarkerCluster) {

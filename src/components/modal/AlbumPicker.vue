@@ -91,13 +91,12 @@ export default defineComponent({
 
   methods: {
     toCoverUrl(fileId: string | number) {
-      return getPreviewUrl(
-        {
+      return getPreviewUrl({
+        photo: {
           fileid: Number(fileId),
         } as IPhoto,
-        true,
-        256
-      );
+        sqsize: 256,
+      });
     },
 
     albumCreatedHandler() {

@@ -151,7 +151,10 @@ export default defineComponent({
 
         // Get random photo
         year.preview ||= utils.randomChoice(year.photos);
-        year.url = utils.getPreviewUrl(year.preview, false, 512);
+        year.url = utils.getPreviewUrl({
+          photo: year.preview,
+          msize: 512,
+        });
       }
 
       await this.$nextTick();

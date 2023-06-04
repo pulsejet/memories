@@ -48,7 +48,7 @@ declare global {
 
   var mViewer: {
     open: (anchorPhoto: IPhoto, rows: IRow[]) => Promise<void>;
-    openStatic(photo: IPhoto, list: IPhoto[], thumbSize?: number): Promise<void>;
+    openStatic(photo: IPhoto, list: IPhoto[], thumbSize?: 256 | 512): Promise<void>;
     close: () => void;
     isOpen: () => boolean;
   };

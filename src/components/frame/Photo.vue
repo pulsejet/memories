@@ -160,7 +160,7 @@ export default defineComponent({
 
     /** Get url of the photo */
     url() {
-      let base = 256;
+      let base: 256 | 512 = 256;
 
       // Check if displayed size is larger than the image
       if (this.data.dispH! > base * 0.9 && this.data.dispW! > base * 0.9) {
@@ -172,13 +172,10 @@ export default defineComponent({
         base = 512;
       }
 
-      // Make the shorter dimension equal to base
-      let size = base;
-      if (this.data.w && this.data.h) {
-        size = Math.floor((base * Math.max(this.data.w, this.data.h)) / Math.min(this.data.w, this.data.h)) - 1;
-      }
-
-      return utils.getPreviewUrl(this.data, false, size);
+      return utils.getPreviewUrl({
+        photo: this.data,
+        msize: base,
+      });
     },
 
     /** Set src with overlay face rect */

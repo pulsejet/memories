@@ -49,7 +49,7 @@ export default defineComponent({
       return {
         source:
           this.photo.h && this.photo.w
-            ? utils.getPreviewUrl(this.photo, false, 'screen')
+            ? utils.getPreviewUrl({ photo: this.photo, size: 'screen' })
             : API.IMAGE_DECODABLE(this.photo.fileid, this.photo.etag),
 
         defaultSavedImageName: this.defaultSavedImageName,
