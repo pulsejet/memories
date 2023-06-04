@@ -4,6 +4,7 @@
       <PeopleIcon v-if="routeIsPeople" />
       <ArchiveIcon v-else-if="routeIsArchive" />
       <AlbumIcon v-else-if="routeIsAlbums" />
+      <MapIcon v-else-if="routeIsMap" />
       <ImageMultipleIcon v-else />
     </template>
   </NcEmptyContent>
@@ -18,6 +19,7 @@ import PeopleIcon from 'vue-material-design-icons/AccountMultiple.vue';
 import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
+import MapIcon from 'vue-material-design-icons/Map.vue';
 
 import * as strings from '../../services/strings';
 
@@ -31,6 +33,7 @@ export default defineComponent({
     ArchiveIcon,
     ImageMultipleIcon,
     AlbumIcon,
+    MapIcon,
   },
 
   computed: {

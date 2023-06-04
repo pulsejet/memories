@@ -17,6 +17,7 @@ declare module 'vue' {
     routeIsPeople: boolean;
     routeIsArchive: boolean;
     routeIsPlaces: boolean;
+    routeIsMap: boolean;
     routeIsTags: boolean;
     routeIsExplore: boolean;
     routeIsPublic: boolean;

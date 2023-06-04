@@ -31,6 +31,9 @@ export default defineComponent({
     routeIsPlaces(): boolean {
       return this.$route.name === 'places';
     },
+    routeIsMap(): boolean {
+      return this.$route.name === 'map';
+    },
     routeIsTags(): boolean {
       return this.$route.name === 'tags';
     },
