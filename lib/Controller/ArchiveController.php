@@ -164,7 +164,7 @@ class ArchiveController extends GenericApiController
             return new JSONResponse([], Http::STATUS_OK);
         });
     }
-    public static function moveFileAndRetryIfLocked($file, $folder, int $maxRetries = 5, int $sleep = 1) {
+    public static function createFolder($file, $folder, int $maxRetries = 5, int $sleep = 1) {
         for ($try = 1; $try <= $maxRetries; $try++) {
             try {
                 return $folder->newFolder($folderName);
