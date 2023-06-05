@@ -151,7 +151,7 @@ class ArchiveController extends GenericApiController
                     $folder = $existingFolder;
                 } catch (\OCP\Files\NotFoundException $e) {
                     try {
-                        $folder = $folder->newFolder($folderName);
+                        $folder = $this->createFolder($folder, $folderName);
                     } catch (\OCP\Files\NotPermittedException $e) {
                         throw Exceptions::ForbiddenFileUpdate($folder->getPath().' [create]');
                     }
@@ -159,7 +159,7 @@ class ArchiveController extends GenericApiController
             }
 
             // Move file to archive folder
-            $this->moveFileAndRetryIfLocked($file, $folder);
+            $file->move($folder->getPath().'/'.$file->getName());
 
             return new JSONResponse([], Http::STATUS_OK);
         });
@@ -167,7 +167,7 @@ class ArchiveController extends GenericApiController
     public static function moveFileAndRetryIfLocked($file, $folder, int $maxRetries = 5, int $sleep = 1) {
         for ($try = 1; $try <= $maxRetries; $try++) {
             try {
-                return $file->move($folder->getPath().'/'.$file->getName());;
+                return $folder->newFolder($folderName);
             } catch (\OCP\Lock\LockedException $e) {
                 if ($try >= $maxRetries) {
                     throw $e;
