@@ -159,9 +159,21 @@ class ArchiveController extends GenericApiController
             }
 
             // Move file to archive folder
-            $file->move($folder->getPath().'/'.$file->getName());
+            $this->moveFileAndRetryIfLocked($file, $folder);
 
             return new JSONResponse([], Http::STATUS_OK);
         });
+    }
+    public static function moveFileAndRetryIfLocked($file, $folder, int $maxRetries = 5, int $sleep = 1) {
+        for ($try = 1; $try <= $maxRetries; $try++) {
+            try {
+                return $file->move($folder->getPath().'/'.$file->getName());;
+            } catch (\OCP\Lock\LockedException $e) {
+                if ($try >= $maxRetries) {
+                    throw $e;
+                }
+                sleep($sleep);
+            }
+        }
     }
 }
