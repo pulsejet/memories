@@ -151,7 +151,7 @@ class ArchiveController extends GenericApiController
                     $folder = $existingFolder;
                 } catch (\OCP\Files\NotFoundException $e) {
                     try {
-                        $folder = $this->createFolder($folder, $folderName);
+                        $folder = $this->createArchiveFolder($folder, $folderName);
                     } catch (\OCP\Files\NotPermittedException $e) {
                         throw Exceptions::ForbiddenFileUpdate($folder->getPath().' [create]');
                     }
@@ -164,7 +164,7 @@ class ArchiveController extends GenericApiController
             return new JSONResponse([], Http::STATUS_OK);
         });
     }
-    public static function createFolder($file, $folder, int $maxRetries = 5, int $sleep = 1) {
+    public function createArchiveFolder($file, $folder, int $maxRetries = 5, int $sleep = 1) {
         for ($try = 1; $try <= $maxRetries; $try++) {
             try {
                 return $folder->newFolder($folderName);
