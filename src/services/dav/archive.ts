@@ -10,8 +10,8 @@ import { API } from '../API';
  * @param fileid File id
  * @param archive Archive or unarchive
  */
-export async function archiveFile(fileid: number, archive: boolean) {
-  return await axios.patch(API.ARCHIVE(fileid), { archive });
+export async function archiveFile(fileIds: number[], archive: boolean) {
+  return await axios.patch(API.ARCHIVE(), { archive, fileIds });
 }
 
 /**
@@ -25,19 +25,14 @@ export async function* archiveFilesByIds(fileIds: number[], archive: boolean) {
   if (fileIds.length === 0) {
     return;
   }
-
   // Archive each file
-  const calls = fileIds.map((id) => async () => {
-    try {
-      await archiveFile(id, archive);
-      return id as number;
-    } catch (error) {
-      console.error('Failed to (un)archive', id, error);
-      const msg = error?.response?.data?.message || t('memories', 'General Failure');
-      showError(t('memories', 'Error: {msg}', { msg }));
-      return 0;
-    }
-  });
-
-  yield* base.runInParallel(calls, 10);
+  try {
+    await archiveFile(fileIds, archive);
+    yield fileIds;
+  } catch (error) {
+    console.error('Failed to (un)archive', fileIds, error);
+    const msg = error?.response?.data?.message || t('memories', 'General Failure');
+    showError(t('memories', 'Error: {msg}', { msg }));
+    return 0;
+  }
 }

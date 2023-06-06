@@ -115,8 +115,8 @@ export class API {
     return API.Q(gen(`${BASE}/clusters/${backend}/preview`), { name });
   }
 
-  static ARCHIVE(fileid: number) {
-    return gen(`${BASE}/archive/{fileid}`, { fileid });
+  static ARCHIVE() {
+    return gen(`${BASE}/archive`);
   }
 
   static IMAGE_PREVIEW(fileid: number) {

@@ -36,135 +36,142 @@ class ArchiveController extends GenericApiController
      *
      * Move one file to the archive folder
      *
-     * @param string fileid
+     * @param array fileid
      */
-    public function archive(string $id): Http\Response
+    public function archive(): Http\Response
     {
-        return Util::guardEx(function () use ($id) {
-            $userFolder = Util::getUserFolder();
+        $body = $this->request->getParams();
+        $fileids = isset($body['fileIds']) ? $body['fileIds'] : array();
+        return Util::guardEx(function () use ($fileids) {
 
-            // Check for permissions and get numeric Id
-            $file = $userFolder->getById((int) $id);
-            if (0 === \count($file)) {
-                throw Exceptions::NotFound("file id {$id}");
-            }
-            $file = $file[0];
+            foreach ($fileids as $id) {
+                $userFolder = Util::getUserFolder();
 
-            // Check if user has permissions
-            if (!$file->isUpdateable()) {
-                throw Exceptions::ForbiddenFileUpdate($file->getName());
-            }
-
-            // Create archive folder in the root of the user's configured timeline
-            $configPaths = Util::getTimelinePaths(Util::getUID());
-            $timelineFolders = [];
-            $timelinePaths = [];
-
-            // Get all timeline paths
-            foreach ($configPaths as $path) {
-                try {
-                    $f = $userFolder->get($path);
-                    $timelineFolders[] = $f;
-                    $timelinePaths[] = $f->getPath();
-                } catch (\OCP\Files\NotFoundException $e) {
-                    throw Exceptions::NotFound("timeline folder {$path}");
+                // Check for permissions and get numeric Id
+                $file = $userFolder->getById((int) $id);
+                if (0 === \count($file)) {
+                    throw Exceptions::NotFound("file id {$id}");
                 }
-            }
+                $file = $file[0];
 
-            // Bubble up from file until we reach the correct folder
-            $fileStorageId = $file->getStorage()->getId();
-            $parent = $file->getParent();
-            $isArchived = false;
-            while (true) {
-                if (null === $parent) {
-                    throw new \Exception('Cannot get correct parent of file');
+
+                // Check if user has permissions
+                if (!$file->isUpdateable()) {
+                    throw Exceptions::ForbiddenFileUpdate($file->getName());
                 }
 
-                // Hit a timeline folder
-                if (\in_array($parent->getPath(), $timelinePaths, true)) {
-                    break;
+                // Create archive folder in the root of the user's configured timeline
+                $configPaths = Util::getTimelinePaths(Util::getUID());
+                $timelineFolders = [];
+                $timelinePaths = [];
+
+                // Get all timeline paths
+                foreach ($configPaths as $path) {
+                    try {
+                        $f = $userFolder->get($path);
+                        $timelineFolders[] = $f;
+                        $timelinePaths[] = $f->getPath();
+                    } catch (\OCP\Files\NotFoundException $e) {
+                        throw Exceptions::NotFound("timeline folder {$path}");
+                    }
                 }
 
-                // Hit the user's root folder
-                if ($parent->getPath() === $userFolder->getPath()) {
-                    break;
-                }
+                // Bubble up from file until we reach the correct folder
+                $fileStorageId = $file->getStorage()->getId();
+                $parent = $file->getParent();
+                $isArchived = false;
+                while (true) {
+                    if (null === $parent) {
+                        throw new \Exception('Cannot get correct parent of file');
+                    }
 
-                // Hit a storage root
-                try {
-                    if ($parent->getParent()->getStorage()->getId() !== $fileStorageId) {
+                    // Hit a timeline folder
+                    if (\in_array($parent->getPath(), $timelinePaths, true)) {
                         break;
                     }
-                } catch (\OCP\Files\NotFoundException $e) {
-                    break;
-                }
 
-                // Hit an archive folder root
-                if ($parent->getName() === \OCA\Memories\Util::$ARCHIVE_FOLDER) {
-                    $isArchived = true;
-
-                    break;
-                }
-
-                $parent = $parent->getParent();
-            }
-
-            // Get path of current file relative to the parent folder
-            $relativeFilePath = $parent->getRelativePath($file->getPath());
-
-            // Check if we want to archive or unarchive
-            $body = $this->request->getParams();
-            $unarchive = isset($body['archive']) && false === $body['archive'];
-            if ($isArchived && !$unarchive) {
-                throw Exceptions::BadRequest('File already archived');
-            }
-            if (!$isArchived && $unarchive) {
-                throw Exceptions::BadRequest('File not archived');
-            }
-
-            // Final path of the file including the file name
-            $destinationPath = '';
-
-            // Get if the file is already in the archive (relativePath starts with archive)
-            if ($isArchived) {
-                // file already in archive, remove it
-                $destinationPath = $relativeFilePath;
-                $parent = $parent->getParent();
-            } else {
-                // file not in archive, put it in there
-                $af = \OCA\Memories\Util::$ARCHIVE_FOLDER;
-                $destinationPath = Util::sanitizePath($af.$relativeFilePath);
-            }
-
-            // Remove the filename
-            $destinationFolders = array_filter(explode('/', $destinationPath));
-            array_pop($destinationFolders);
-
-            // Create folder tree
-            $folder = $parent;
-            foreach ($destinationFolders as $folderName) {
-                try {
-                    $existingFolder = $folder->get($folderName.'/');
-                    if (!$existingFolder instanceof Folder) {
-                        throw Exceptions::NotFound('Not a folder: '.$existingFolder->getPath());
+                    // Hit the user's root folder
+                    if ($parent->getPath() === $userFolder->getPath()) {
+                        break;
                     }
-                    $folder = $existingFolder;
-                } catch (\OCP\Files\NotFoundException $e) {
+
+                    // Hit a storage root
                     try {
-                        $folder = $this->createArchiveFolder($folder, $folderName);
-                    } catch (\OCP\Files\NotPermittedException $e) {
-                        throw Exceptions::ForbiddenFileUpdate($folder->getPath().' [create]');
+                        if ($parent->getParent()->getStorage()->getId() !== $fileStorageId) {
+                            break;
+                        }
+                    } catch (\OCP\Files\NotFoundException $e) {
+                        break;
+                    }
+
+                    // Hit an archive folder root
+                    if ($parent->getName() === \OCA\Memories\Util::$ARCHIVE_FOLDER) {
+                        $isArchived = true;
+
+                        break;
+                    }
+
+                    $parent = $parent->getParent();
+                }
+
+                // Get path of current file relative to the parent folder
+                $relativeFilePath = $parent->getRelativePath($file->getPath());
+
+                // Check if we want to archive or unarchive
+                $body = $this->request->getParams();
+                $unarchive = isset($body['archive']) && false === $body['archive'];
+                if ($isArchived && !$unarchive) {
+                    throw Exceptions::BadRequest('File already archived');
+                }
+                if (!$isArchived && $unarchive) {
+                    throw Exceptions::BadRequest('File not archived');
+                }
+
+                // Final path of the file including the file name
+                $destinationPath = '';
+
+                // Get if the file is already in the archive (relativePath starts with archive)
+                if ($isArchived) {
+                    // file already in archive, remove it
+                    $destinationPath = $relativeFilePath;
+                    $parent = $parent->getParent();
+                } else {
+                    // file not in archive, put it in there
+                    $af = \OCA\Memories\Util::$ARCHIVE_FOLDER;
+                    $destinationPath = Util::sanitizePath($af . $relativeFilePath);
+                }
+
+                // Remove the filename
+                $destinationFolders = array_filter(explode('/', $destinationPath));
+                array_pop($destinationFolders);
+
+                // Create folder tree
+                $folder = $parent;
+                foreach ($destinationFolders as $folderName) {
+                    try {
+                        $existingFolder = $folder->get($folderName . '/');
+                        if (!$existingFolder instanceof Folder) {
+                            throw Exceptions::NotFound('Not a folder: ' . $existingFolder->getPath());
+                        }
+                        $folder = $existingFolder;
+                    } catch (\OCP\Files\NotFoundException $e) {
+                        try {
+                            $folder = $this->createArchiveFolder($folder, $folderName);
+                        } catch (\OCP\Files\NotPermittedException $e) {
+                            throw Exceptions::ForbiddenFileUpdate($folder->getPath() . ' [create]');
+                        }
                     }
                 }
+
+                // Move file to archive folder
+                $file->move($folder->getPath() . '/' . $file->getName());
+
             }
-
-            // Move file to archive folder
-            $file->move($folder->getPath().'/'.$file->getName());
-
             return new JSONResponse([], Http::STATUS_OK);
         });
     }
-    public function createArchiveFolder($folder, $folderName, int $maxRetries = 5, int $sleep = 1) {
+    public function createArchiveFolder($folder, $folderName, int $maxRetries = 5, int $sleep = 1)
+    {
         for ($try = 1; $try <= $maxRetries; $try++) {
             try {
                 return $folder->newFolder($folderName);

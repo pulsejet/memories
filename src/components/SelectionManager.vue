@@ -4,7 +4,9 @@
       <NcActions :inline="1">
         <NcActionButton :aria-label="t('memories', 'Cancel')" @click="clearSelection()">
           {{ t('memories', 'Cancel') }}
-          <template #icon> <CloseIcon :size="20" /> </template>
+          <template #icon>
+            <CloseIcon :size="20" />
+          </template>
         </NcActionButton>
       </NcActions>
 
@@ -17,13 +19,8 @@
       </div>
 
       <NcActions :inline="1">
-        <NcActionButton
-          v-for="action of getActions()"
-          :key="action.name"
-          :aria-label="action.name"
-          close-after-click
-          @click="click(action)"
-        >
+        <NcActionButton v-for="action of getActions()" :key="action.name" :aria-label="action.name" close-after-click
+          @click="click(action)">
           {{ action.name }}
           <template #icon>
             <component :is="action.icon" :size="20" />
@@ -778,7 +775,9 @@ export default defineComponent({
       }
 
       for await (let delIds of dav.archiveFilesByIds(Array.from(selection.keys()), !this.routeIsArchive)) {
-        this.deleteSelectedPhotosById(delIds, selection);
+        const fileIds = Array.from(selection.keys());
+        console.log(fileIds);
+        this.deleteSelectedPhotosById(fileIds, selection);
       }
     },
 
@@ -864,7 +863,7 @@ export default defineComponent({
   vertical-align: middle;
   z-index: 300; // above top-matter and scroller
 
-  > .text {
+  >.text {
     flex-grow: 1;
     line-height: 42px;
     padding-left: 8px;
