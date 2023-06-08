@@ -44,7 +44,7 @@ OC.L10N.register(
     "Remove" : "حذف",
     "Share link" : "هم‌رسانی پیوند",
     "Refresh" : "تازه‌سازی",
-    "Password protected" : "نگهداری از رمز عبور",
+    "Password protected" : "محافظت‌شده با گذرواژه",
     "Expires" : "منقضی می شود",
     "Read only" : "فقط خواندنی",
     "Link copied to clipboard" : "پیوند در حافظه موقت کپی شده",

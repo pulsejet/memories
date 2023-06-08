@@ -242,7 +242,6 @@ OC.L10N.register(
     "Failed to move {name}." : "A(z) {name} áthelyezése sikertelen.",
     "Move selected photos to person" : "A kiválasztott fényképek áthelyezése egy személyhez",
     "Are you sure you want to move the selected photos from {name} to {target}?" : "Biztos, hogy áthelyezi a kiválasztott fényképeket a következőtől: {name}, a következőhöz: {target}?",
-    "An error occured while moving photos from {name}." : "Hiba történt a fényképek a következőből történő áthelyezése során: {name}.",
     "Choose a folder" : "Válasszon mappát",
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["{n} elem áthelyezve a mappába","{n} elem áthelyezve a mappába"],
     "Remove" : "Eltávolítás",

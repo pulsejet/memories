@@ -265,7 +265,6 @@ OC.L10N.register(
     "Failed to move {name}." : "Failed to move {name}.",
     "Move selected photos to person" : "Move selected photos to person",
     "Are you sure you want to move the selected photos from {name} to {target}?" : "Are you sure you want to move the selected photos from {name} to {target}?",
-    "An error occured while moving photos from {name}." : "An error occurred while moving photos from {name}.",
     "Choose a folder" : "Choose a folder",
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["{n} item moved to folder","{n} items moved to folder"],
     "Remove" : "Remove",

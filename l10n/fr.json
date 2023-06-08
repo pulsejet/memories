@@ -246,7 +246,6 @@
     "Failed to move {name}." : "Impossible de déplacer {name}.",
     "Move selected photos to person" : "Déplacer les photos sélectionnées vers la personne",
     "Are you sure you want to move the selected photos from {name} to {target}?" : "Êtes-vous sûr de vouloir déplacer les photos sélectionnées de {name} vers {target} ?",
-    "An error occured while moving photos from {name}." : "Une erreur s'est produite lors du déplacement des photos provenant de {name}.",
     "Choose a folder" : "Choisir un dossier",
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["{n} élément déplacé vers le dossier","{n} éléments déplacés vers le dossier","{n} éléments déplacés vers le dossier"],
     "Remove" : "Retirer",

@@ -231,7 +231,6 @@ OC.L10N.register(
     "Failed to move {name}." : "Kohteen {name} siirtäminen epäonnistui.",
     "Move selected photos to person" : "Siirrä valitut kuvat henkilölle",
     "Are you sure you want to move the selected photos from {name} to {target}?" : "Haluatko varmasti siirtää kuvat kohteesta {name} kohteeseen {target}?",
-    "An error occured while moving photos from {name}." : "Virhe kuvien siirrossa kohteesta {name}.",
     "Choose a folder" : "Valitse kansio",
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["{n} kohde siirretty kansioon","{n} kohdetta siirretty kansioon"],
     "Remove" : "Poista",
