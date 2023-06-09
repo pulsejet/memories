@@ -265,6 +265,7 @@ OC.L10N.register(
     "Failed to move {name}." : "Није успело премештање {name}.",
     "Move selected photos to person" : "Премести изабране фотографије у особу",
     "Are you sure you want to move the selected photos from {name} to {target}?" : "Да ли сте сигурни да желите да преместите изабране фотографије са {name} у {target}?",
+    "An error occurred while moving photos from {name}." : "Дошло је до грешке током премештања слика из {name}.",
     "Choose a folder" : "Изаберите фолдер",
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["{n} ставка је премештена у фолдер","{n} ставке су премештене у фолдер","{n} ставки је премештено у фолдер"],
     "Remove" : "Уклони",

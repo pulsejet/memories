@@ -265,6 +265,7 @@ OC.L10N.register(
     "Failed to move {name}." : "移動 {name} 失敗。",
     "Move selected photos to person" : "移動選定的照片到人",
     "Are you sure you want to move the selected photos from {name} to {target}?" : "您確定您想要從 {name} 移動選定的照片到 {target} 嗎？",
+    "An error occurred while moving photos from {name}." : "從 {name} 移動照片時發生錯誤。",
     "Choose a folder" : "選擇資料夾",
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["已移動 {n} 個項目至資料夾"],
     "Remove" : "移除",
