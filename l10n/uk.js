@@ -23,7 +23,7 @@ OC.L10N.register(
     "Explore" : "Дослідити",
     "Cancel" : "Скасувати",
     "Delete" : "Вилучити",
-    "Favorite" : "Вподобати",
+    "Favorite" : "Додати зірочку",
     "Unarchive" : "Розархівувати",
     "View in folder" : "Переглянути у каталозі",
     "Add to album" : "Додати в альбом",
