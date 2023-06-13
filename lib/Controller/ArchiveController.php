@@ -139,7 +139,7 @@ class ArchiveController extends GenericApiController
             // Remove the filename
             $destinationFolders = array_filter(explode('/', $destinationPath));
             array_pop($destinationFolders);
-            return new JSONResponse(['folderPath' => $sourcePath, 'destinationPath' => $destinationPath, 'destinationFolders' => array_values($destinationFolders)], Http::STATUS_OK);
+            return new JSONResponse(['sourcePath' => $sourcePath, 'destinationPath' => $destinationPath, 'destinationFolders' => array_values($destinationFolders)], Http::STATUS_OK);
         });
     }
 }

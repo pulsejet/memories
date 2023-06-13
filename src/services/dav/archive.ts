@@ -32,7 +32,7 @@ export async function archiveFile(fileid: number, archive: boolean) {
       }
     }     
   }
-  const response = await client.moveFile(`/files/${getCurrentUser()?.uid}/${folderData.folderPath}`, `/files/${getCurrentUser()?.uid}/${folderData.destinationPath}`) 
+  const response = await client.moveFile(`/files/${getCurrentUser()?.uid}/${folderData.sourcePath}`, `/files/${getCurrentUser()?.uid}/${folderData.destinationPath}`) 
   return fileid;
 }
 /**
