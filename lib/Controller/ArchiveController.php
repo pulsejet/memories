@@ -124,44 +124,22 @@ class ArchiveController extends GenericApiController
 
             // Final path of the file including the file name
             $destinationPath = '';
-
+            $af = \OCA\Memories\Util::$ARCHIVE_FOLDER;
             // Get if the file is already in the archive (relativePath starts with archive)
             if ($isArchived) {
                 // file already in archive, remove it
                 $destinationPath = $relativeFilePath;
-                $parent = $parent->getParent();
+                $sourcePath = Util::sanitizePath($af.$relativeFilePath);
             } else {
                 // file not in archive, put it in there
-                $af = \OCA\Memories\Util::$ARCHIVE_FOLDER;
                 $destinationPath = Util::sanitizePath($af.$relativeFilePath);
+                $sourcePath = $relativeFilePath;
             }
 
             // Remove the filename
             $destinationFolders = array_filter(explode('/', $destinationPath));
             array_pop($destinationFolders);
-
-            // Create folder tree
-            $folder = $parent;
-            foreach ($destinationFolders as $folderName) {
-                try {
-                    $existingFolder = $folder->get($folderName.'/');
-                    if (!$existingFolder instanceof Folder) {
-                        throw Exceptions::NotFound('Not a folder: '.$existingFolder->getPath());
-                    }
-                    $folder = $existingFolder;
-                } catch (\OCP\Files\NotFoundException $e) {
-                    try {
-                        $folder = $folder->newFolder($folderName);
-                    } catch (\OCP\Files\NotPermittedException $e) {
-                        throw Exceptions::ForbiddenFileUpdate($folder->getPath().' [create]');
-                    }
-                }
-            }
-
-            // Move file to archive folder
-            $file->move($folder->getPath().'/'.$file->getName());
-
-            return new JSONResponse([], Http::STATUS_OK);
+            return new JSONResponse(['folderPath' => $sourcePath, 'destinationPath' => $destinationPath, 'destinationFolders' => array_values($destinationFolders)], Http::STATUS_OK);
         });
     }
 }

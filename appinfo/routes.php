@@ -64,7 +64,7 @@ return [
         ['name' => 'Map#clusters', 'url' => '/api/map/clusters', 'verb' => 'GET'],
         ['name' => 'Map#init', 'url' => '/api/map/init', 'verb' => 'GET'],
 
-        ['name' => 'Archive#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
+        ['name' => 'Archive#archive', 'url' => '/api/archive/{id}', 'verb' => 'POST'],
 
         ['name' => 'Image#preview', 'url' => '/api/image/preview/{id}', 'verb' => 'GET'],
         ['name' => 'Image#multipreview', 'url' => '/api/image/multipreview', 'verb' => 'POST'],

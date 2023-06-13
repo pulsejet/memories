@@ -3,6 +3,11 @@ import { showError } from '@nextcloud/dialogs';
 import { translate as t, translatePlural as n } from '@nextcloud/l10n';
 import axios from '@nextcloud/axios';
 import { API } from '../API';
+import { createClient } from 'webdav'
+import { generateRemoteUrl } from '@nextcloud/router'
+import { getCurrentUser } from '@nextcloud/auth'
+const client = createClient(generateRemoteUrl('dav'))
+
 
 /**
  * Archive or unarchive a single file
@@ -11,9 +16,25 @@ import { API } from '../API';
  * @param archive Archive or unarchive
  */
 export async function archiveFile(fileid: number, archive: boolean) {
-  return await axios.patch(API.ARCHIVE(fileid), { archive });
+  const result = await axios.post(API.ARCHIVE(fileid), { archive });
+  var folderData = result.data;
+  var folder = '';
+  for (let index = 0; index < folderData.destinationFolders.length; index++) {
+    folder += '/' + folderData.destinationFolders[index];
+    const folderExists = await client.exists(`/files/${getCurrentUser()?.uid}${folder}`)
+    if(!folderExists){
+      try {
+        await client.createDirectory(`/files/${getCurrentUser()?.uid}${folder}`);
+      } catch (error) {
+        
+        console.error(error);
+        showError(t('photos', 'Failed to create album'));
+      }
+    }     
+  }
+  const response = await client.moveFile(`/files/${getCurrentUser()?.uid}/${folderData.folderPath}`, `/files/${getCurrentUser()?.uid}/${folderData.destinationPath}`) 
+  return fileid;
 }
-
 /**
  * Archive all files in a given list of Ids
  *
