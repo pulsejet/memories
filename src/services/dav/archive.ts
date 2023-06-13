@@ -27,7 +27,6 @@ export async function archiveFile(fileid: number, archive: boolean) {
         await client.createDirectory(`/files/${getCurrentUser()?.uid}${folder}`);
       } catch (error) {
         console.error(error);
-        showError(t('photos', 'Failed to create album'));
       }
     }
   }
