@@ -32,7 +32,7 @@ OC.L10N.register(
     "Search for collaborators" : "Buscar colaboradores",
     "Search people or groups" : "Buscar persoas ou grupos",
     "Add {collaboratorLabel} to the collaborators list" : "Engade {collaboratorLabel} á lista de colaboradores",
-    "No collaborators available" : "Non hai colaboradores dispoñibles",
+    "No collaborators available" : "Non hai colaboradores dispoñíbeis",
     "Remove {collaboratorLabel} from the collaborators list" : "Elimina {collaboratorLabel} da lista de colaboradores",
     "Copy the public link" : "Copiar a ligazón pública",
     "Public link copied!" : "Enlace público copiado!",
