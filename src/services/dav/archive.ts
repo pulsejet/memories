@@ -22,17 +22,16 @@ export async function archiveFile(fileid: number, archive: boolean) {
   for (let index = 0; index < folderData.destinationFolders.length; index++) {
     folder += '/' + folderData.destinationFolders[index];
     const folderExists = await client.exists(`/files/${getCurrentUser()?.uid}${folder}`)
-    if(!folderExists){
+    if (!folderExists) {
       try {
         await client.createDirectory(`/files/${getCurrentUser()?.uid}${folder}`);
       } catch (error) {
-        
         console.error(error);
         showError(t('photos', 'Failed to create album'));
       }
-    }     
+    }
   }
-  const response = await client.moveFile(`/files/${getCurrentUser()?.uid}/${folderData.sourcePath}`, `/files/${getCurrentUser()?.uid}/${folderData.destinationPath}`) 
+  await client.moveFile(`/files/${getCurrentUser()?.uid}/${folderData.sourcePath}`, `/files/${getCurrentUser()?.uid}/${folderData.destinationPath}`)
   return fileid;
 }
 /**

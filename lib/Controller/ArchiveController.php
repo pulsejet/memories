@@ -129,10 +129,10 @@ class ArchiveController extends GenericApiController
             if ($isArchived) {
                 // file already in archive, remove it
                 $destinationPath = $relativeFilePath;
-                $sourcePath = Util::sanitizePath($af.$relativeFilePath);
+                $sourcePath = Util::sanitizePath($af . $relativeFilePath);
             } else {
                 // file not in archive, put it in there
-                $destinationPath = Util::sanitizePath($af.$relativeFilePath);
+                $destinationPath = Util::sanitizePath($af . $relativeFilePath);
                 $sourcePath = $relativeFilePath;
             }
 
