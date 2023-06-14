@@ -71,7 +71,7 @@ OC.L10N.register(
     "Copyright" : "Copyright",
     "Empty" : "Baleiro",
     "Reset" : "Restabelecer",
-    "Remove person" : "Eliminar persoa",
+    "Remove person" : "Retirar persoa",
     "Rename person" : "Cambiar o nome da persoa",
     "Name" : "Nome",
     "Update" : "Actualizar",

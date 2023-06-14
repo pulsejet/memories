@@ -20,6 +20,7 @@ OC.L10N.register(
     "Account" : "الحساب",
     "Close" : "إغلاق",
     "Unknown" : "غير معروف",
+    "Public link copied!" : "تم نسخ الرابط العام",
     "Copy public link" : "نسخ الرابط العام",
     "Back" : "العودة",
     "Save" : "Save",
