@@ -149,7 +149,7 @@ OC.L10N.register(
     "Width in pixels" : "Ancho en píxeles",
     "Height in pixels" : "Altura en píxeles",
     "Toggle ratio lock" : "Activar/desactivar o bloqueo da proporción",
-    "Reset to original image size" : "Restablece o tamaño da imaxe orixinal",
+    "Reset to original image size" : "Restabelecer o tamaño da imaxe orixinal",
     "Rotate" : "Xirar",
     "Text" : "Texto",
     "Text spacing" : "Espazamento do texto",

@@ -262,6 +262,7 @@
     "Failed to move {name}." : "Nepodařilo se přesunout {name}.",
     "Move selected photos to person" : "Přesunout označené fotky k osobě",
     "Are you sure you want to move the selected photos from {name} to {target}?" : "Opravdu chcete přesunout označené fotky z {name} do {target}?",
+    "An error occurred while moving photos from {name}." : "Došlo k chybě při přesouvání fotek z {name}.",
     "Choose a folder" : "Zvolit složku",
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["{n} položka přesunuto do složky","{n} položky přesunuty do složky","{n} položek přesunuto do složky","{n} položky přesunuty do složky"],
     "Remove" : "Odebrat",
