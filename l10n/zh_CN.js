@@ -13,6 +13,8 @@ OC.L10N.register(
     "Albums" : "专辑",
     "Archive" : "归档",
     "On this day" : "当年今日",
+    "Places" : "地点",
+    "Map" : "地图",
     "Tags" : "标签",
     "Recognize" : "识别",
     "Edit" : "编辑",
