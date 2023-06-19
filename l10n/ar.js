@@ -44,6 +44,7 @@ OC.L10N.register(
     "Read only" : "القراءة فقط",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
+    "Share folder" : "مشاركة مُجلّد",
     "Share" : "مشاركة",
     "Previous" : "السابق",
     "Next" : "التالي",
