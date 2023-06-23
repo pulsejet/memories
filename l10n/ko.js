@@ -50,6 +50,7 @@ OC.L10N.register(
     "Read only" : "읽기 전용",
     "Sort by date" : "날짜순 정렬",
     "Sort by name" : "이름순 정렬",
+    "Share folder" : "폴더 공유",
     "Unsaved changes" : "저장하지 않은 변경 사항",
     "Share" : "공유",
     "Previous" : "이전",
