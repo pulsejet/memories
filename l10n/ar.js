@@ -22,6 +22,7 @@ OC.L10N.register(
     "Unknown" : "غير معروف",
     "Public link copied!" : "تم نسخ الرابط العام",
     "Copy public link" : "نسخ الرابط العام",
+    "Public link" : "رابط عمومي",
     "Back" : "العودة",
     "Save" : "Save",
     "Month" : "شهر",

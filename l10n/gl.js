@@ -28,6 +28,7 @@ OC.L10N.register(
     "Account" : "Conta",
     "Logged in as {user}" : "Accedeu como {user}",
     "Close" : "Pechar",
+    "Index all media automatically (recommended)" : " Indexar todos los medios automáticamente (recomendado)",
     "Performance" : "Rendemento",
     "Unknown" : "Descoñecido",
     "Add people or groups who can edit your album" : "Engadir persoas ou grupos que poidan editar o seu álbum",
