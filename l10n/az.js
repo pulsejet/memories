@@ -26,6 +26,7 @@ OC.L10N.register(
     "Remove" : "Sil",
     "Share link" : "Linki yayımla",
     "Refresh" : "Yenilə",
+    "Read only" : "Oxumaq üçün",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Share" : "Paylaş",

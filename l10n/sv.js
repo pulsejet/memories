@@ -58,6 +58,7 @@ OC.L10N.register(
     "Back" : "Tillbaka",
     "Go to the add collaborators view." : "Gå till vyn lägg till medlemmar.",
     "Add collaborators" : "Lägg till medlemmar",
+    "Back to the new album form." : "Tillbaka till nytt album formuläret.",
     "Save" : "Spara",
     "Create album" : "Skapa album",
     "Add selection to album {albumName}" : "Lägg till urval för {albumName}",
