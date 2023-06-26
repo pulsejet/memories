@@ -268,7 +268,7 @@ class Exif
     {
         $data['SourceFile'] = $path;
         $raw = json_encode([$data], JSON_UNESCAPED_UNICODE);
-        $cmd = array_merge(self::getExiftool(), ['-json=-', $path]);
+        $cmd = array_merge(self::getExiftool(), ['-overwrite_original', '-json=-', $path]);
         $proc = proc_open($cmd, [
             0 => ['pipe', 'r'],
             1 => ['pipe', 'w'],
