@@ -206,11 +206,11 @@ export default defineComponent({
     },
 
     hasMobileHeader(): boolean {
-      return this.native && this.showNavigation && this.$route.name === 'timeline';
+      return this.native && this.showNavigation && this.routeIsBase;
     },
 
     removeNavGap(): boolean {
-      return this.$route.name === 'map';
+      return this.routeIsMap;
     },
   },
 
@@ -277,6 +277,12 @@ export default defineComponent({
     // Check for native interface
     if (this.native) {
       document.documentElement.classList.add('native');
+    }
+
+    // Close navigation by default if init is disabled
+    // This is the case for public folder/album shares
+    if (this.$route.query.noinit) {
+      emit('toggle-navigation', { open: false });
     }
   },
 
