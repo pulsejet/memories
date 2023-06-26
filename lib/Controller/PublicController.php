@@ -209,7 +209,10 @@ class PublicController extends AuthPublicShareController
         $relPath = substr($relPath, \strlen($foldersPath));
 
         // Redirect to the local path
-        $url = $this->urlGenerator->linkToRouteAbsolute('memories.Page.folder', ['path' => $relPath]);
+        $url = $this->urlGenerator->linkToRouteAbsolute('memories.Page.folder', [
+            'path' => $relPath, // path to folder
+            'noinit' => 1, // prevent showing first-start page
+        ]);
 
         // Cannot send a redirect response here because the return
         // type is a template response for the base class

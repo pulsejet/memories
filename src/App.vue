@@ -184,8 +184,8 @@ export default defineComponent({
     isFirstStart(): boolean {
       return (
         this.config.timeline_path === 'EMPTY' &&
-        this.$route.name !== 'folder-share' &&
-        this.$route.name !== 'album-share'
+        !this.routeIsPublic &&
+        !this.$route.query.noinit
       );
     },
 

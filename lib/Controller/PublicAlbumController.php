@@ -76,7 +76,10 @@ class PublicAlbumController extends Controller
 
             if ($uid === $album['user'] || $this->albumsQuery->userIsCollaborator($uid, $albumId)) {
                 $idStr = $album['user'].'/'.$album['name'];
-                $url = $this->urlGenerator->linkToRoute('memories.Page.albums', ['id' => $idStr]);
+                $url = $this->urlGenerator->linkToRoute('memories.Page.albums', [
+                    'id' => $idStr, // id of album
+                    'noinit' => 1, // prevent showing first-start page
+                ]);
 
                 return new RedirectResponse($url);
             }
