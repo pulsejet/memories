@@ -211,11 +211,10 @@ export default defineComponent({
     dateOriginalTime(): string[] | null {
       if (!this.dateOriginal) return null;
 
-      let format = 'h:mm a';
       const fields = ['OffsetTimeOriginal', 'OffsetTime', 'LocationTZID'];
-      if (fields.some((key) => this.exif[key])) {
-        format += ' ZZ';
-      }
+      const hasTz = fields.some((key) => this.exif[key]);
+
+      const format = 't' + (hasTz ? ' ZZ' : '');
 
       return [this.dateOriginal.toFormat(format, { locale: getCanonicalLocale() })];
     },
