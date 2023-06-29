@@ -13,7 +13,7 @@ trait TimelineQuerySingleItem
 {
     protected IDBConnection $connection;
 
-    public function getSingleItem(int $fileId)
+    public function getSingleItem(int $fileId): ?array
     {
         $query = $this->connection->getQueryBuilder();
         $query->select('m.fileid', ...TimelineQuery::TIMELINE_SELECT)
@@ -29,6 +29,11 @@ trait TimelineQuerySingleItem
 
         // FETCH the photo
         $photo = $query->executeQuery()->fetch();
+
+        // Check if photo was found
+        if (false === $photo) {
+            return null;
+        }
 
         // Post process the record
         $this->processDayPhoto($photo);

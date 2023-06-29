@@ -222,9 +222,18 @@ class PublicController extends AuthPublicShareController
         exit; // no other way to do this due to typing of super class
     }
 
-    /** Get initial state of single item */
+    /**
+     * Get initial state of single item.
+     *
+     * @throws NotFoundException if file not found in index
+     */
     private function getSingleItemInitialState(\OCP\Files\File $file): array
     {
-        return $this->timelineQuery->getSingleItem($file->getId());
+        $data = $this->timelineQuery->getSingleItem($file->getId());
+        if (null === $data) {
+            throw new NotFoundException();
+        }
+
+        return $data;
     }
 }
