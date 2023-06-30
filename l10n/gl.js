@@ -77,6 +77,7 @@ OC.L10N.register(
     "Empty" : "Baleiro",
     "Reset" : "Restabelecer",
     "Search location / landmark" : "Buscar localización / lugar emblemático",
+    "Collaborative Tags" : "Etiquetas colaborativas",
     "Remove person" : "Retirar persoa",
     "Only user \"{user}\" can delete this person" : "Só o usuario «{user}» pode eliminar esta persoa",
     "Rename person" : "Cambiar o nome da persoa",
