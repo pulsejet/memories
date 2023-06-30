@@ -79,6 +79,7 @@ OC.L10N.register(
     "Reset" : "Återställ",
     "Search location / landmark" : "Sök plats / landmärke",
     "Failed to search for location with Nominatim." : "Det gick inte att söka efter plats med Nominatim.",
+    "Collaborative Tags" : "Samarbetstaggar",
     "Remove person" : "Ta bort person",
     "Rename person" : "Byt namn på person",
     "Name" : "Namn",
