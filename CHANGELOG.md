@@ -13,6 +13,9 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Layout improvements especially for mobile.
 - **Feature**: Allow downloading entire publicly shared albums.
 - **Feature**: Basic preview generation configuration in admin interface.
+- **Bugfix**: Prevent keeping original file on metadata edit.
+- **Bugfix**: Use correct locale for time in metadata view.
+- **Bugfix**: Allow editing metadata on large video files.
 
 ## [v5.1.0] - 2023-04-29
 
