@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v5.1.1] - Unreleased
+## [v5.2.0] - 2023-06-30
 
 **Note:** You will need to run `occ memories:places-setup --recalculate` to re-index places (or reindex everything)
 
