@@ -58,6 +58,7 @@ OC.L10N.register(
     "Description" : "الوصف",
     "Label" : "تسمية",
     "Copyright" : "حقوق التأليف",
+    "Empty" : "فارغ",
     "Reset" : "إعادة الضبط",
     "Collaborative Tags" : "وسوم تشاركية",
     "Name" : "الاسم",
