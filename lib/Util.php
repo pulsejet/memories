@@ -438,6 +438,8 @@ class Util
     /**
      * Kill all instances of a process by name.
      * Similar to pkill, which may not be available on all systems.
+     *
+     * @param string $name Process name (only the first 12 characters are used)
      */
     public static function pkill(string $name): void
     {
@@ -446,8 +448,21 @@ class Util
             return;
         }
 
+        // only use the first 12 characters
+        $name = substr($name, 0, 12);
+
+        // check if ps or busybox is available
+        $ps = 'ps';
+        if (!shell_exec('which ps')) {
+            if (!shell_exec('which busybox')) {
+                return;
+            }
+
+            $ps = 'busybox ps';
+        }
+
         // get pids using ps as array
-        $pids = shell_exec("ps -ef | grep {$name} | grep -v grep | awk '{print $2}'");
+        $pids = shell_exec("{$ps} -eao pid,comm | grep {$name} | awk '{print $1}'");
         if (null === $pids || empty($pids)) {
             return;
         }
