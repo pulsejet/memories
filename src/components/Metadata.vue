@@ -279,7 +279,15 @@ export default defineComponent({
     },
 
     address(): string | undefined {
-      return this.baseInfo.address;
+      if (this.baseInfo.address) {
+        return this.baseInfo.address;
+      }
+
+      if (this.lat && this.lon) {
+        return `${this.lat.toFixed(6)}, ${this.lon.toFixed(6)}`;
+      }
+
+      return undefined;
     },
 
     lat(): number {
