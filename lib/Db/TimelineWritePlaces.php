@@ -50,7 +50,8 @@ trait TimelineWritePlaces
         $rows = \OC::$server->get(\OCA\Memories\Service\Places::class)->queryPoint($lat, $lon);
 
         // Get last ID, i.e. the ID with highest admin_level but <= 8
-        $markRow = array_pop(array_filter($rows, fn ($row) => $row['admin_level'] <= 8));
+        $crows = array_filter($rows, fn ($row) => $row['admin_level'] <= 8);
+        $markRow = array_pop($crows);
 
         // Insert records in transaction
         $this->connection->beginTransaction();
