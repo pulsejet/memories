@@ -90,6 +90,7 @@ OC.L10N.register(
     "Sort by date" : "Ordena per data",
     "Sort by name" : "Ordena per nom",
     "Delete album" : "Suprimeix l'àlbum",
+    "Unassigned faces" : "Cares sense assignar",
     "Merge with different person" : "Fusiona amb una persona diferent",
     "Share folder" : "Comparteix la carpeta",
     "Error saving image" : "S'ha produït un error en desar la imatge",
