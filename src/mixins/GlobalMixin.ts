@@ -25,6 +25,12 @@ export default defineComponent({
     routeIsPeople(): boolean {
       return ['recognize', 'facerecognition'].includes(<string>this.$route.name);
     },
+    routeIsRecognize(): boolean {
+      return this.$route.name === 'recognize';
+    },
+    routeIsRecognizeUnassigned(): boolean {
+      return this.routeIsRecognize && this.$route.params.name === constants.FACE_NULL;
+    },
     routeIsArchive(): boolean {
       return this.$route.name === 'archive';
     },

@@ -15,6 +15,8 @@ declare module 'vue' {
     routeIsFolders: boolean;
     routeIsAlbums: boolean;
     routeIsPeople: boolean;
+    routeIsRecognize: boolean;
+    routeIsRecognizeUnassigned: boolean;
     routeIsArchive: boolean;
     routeIsPlaces: boolean;
     routeIsMap: boolean;

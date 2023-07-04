@@ -593,7 +593,7 @@ export default defineComponent({
         API.DAYS_FILTER(query, filter, `${user}/${name}`);
 
         // Face rect
-        if (this.config.show_face_rect) {
+        if (this.config.show_face_rect || this.routeIsRecognizeUnassigned) {
           API.DAYS_FILTER(query, DaysFilterType.FACE_RECT);
         }
       }

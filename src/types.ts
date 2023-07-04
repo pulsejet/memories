@@ -208,18 +208,9 @@ export type ITick = {
   key?: number;
 };
 
-export type TopMatter = {
-  type: TopMatterType;
-};
-export enum TopMatterType {
-  NONE = 0,
-  FOLDER = 1,
-  CLUSTER = 2,
-  FACE = 3,
-  ALBUM = 4,
-}
-
 export type ISelectionAction = {
+  /** Identifier (optional) */
+  id?: string;
   /** Display text */
   name: string;
   /** Icon component */

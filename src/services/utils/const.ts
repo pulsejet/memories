@@ -11,6 +11,8 @@ export const constants = {
     FLAG_LEAVING: 1 << 5,
     FLAG_IS_LOCAL: 1 << 6,
   },
+
+  FACE_NULL: 'NULL',
 };
 
 /**

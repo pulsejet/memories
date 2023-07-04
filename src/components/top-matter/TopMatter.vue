@@ -20,8 +20,6 @@ import ClusterTopMatter from './ClusterTopMatter.vue';
 import FaceTopMatter from './FaceTopMatter.vue';
 import AlbumTopMatter from './AlbumTopMatter.vue';
 
-import { TopMatterType } from '../../types';
-
 export default defineComponent({
   name: 'TopMatter',
   components: {
@@ -44,32 +42,17 @@ export default defineComponent({
   },
 
   computed: {
-    type() {
+    currentmatter() {
       switch (this.$route.name) {
         case 'folders':
-          return TopMatterType.FOLDER;
+          return FolderTopMatter;
         case 'albums':
-          return TopMatterType.ALBUM;
+          return AlbumTopMatter;
         case 'tags':
         case 'places':
-          return TopMatterType.CLUSTER;
+          return ClusterTopMatter;
         case 'recognize':
         case 'facerecognition':
-          return this.$route.params.name ? TopMatterType.FACE : TopMatterType.CLUSTER;
-        default:
-          return TopMatterType.NONE;
-      }
-    },
-
-    currentmatter() {
-      switch (this.type) {
-        case TopMatterType.FOLDER:
-          return FolderTopMatter;
-        case TopMatterType.ALBUM:
-          return AlbumTopMatter;
-        case TopMatterType.CLUSTER:
-          return ClusterTopMatter;
-        case TopMatterType.FACE:
           return FaceTopMatter;
         default:
           return null;

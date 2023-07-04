@@ -201,18 +201,25 @@ export default defineComponent({
         if: (self: any) => self.config.albums_enabled && !self.routeIsAlbums,
       },
       {
+        id: 'face-move',
         name: t('memories', 'Move to person'),
         icon: MoveIcon,
         callback: this.moveSelectionToPerson.bind(this),
-        if: () => this.$route.name === 'recognize',
+        if: () => this.routeIsRecognize,
       },
       {
         name: t('memories', 'Remove from person'),
         icon: CloseIcon,
         callback: this.removeSelectionFromPerson.bind(this),
-        if: () => this.$route.name === 'recognize',
+        if: () => this.routeIsRecognize && !this.routeIsRecognizeUnassigned,
       },
     ];
+
+    // Move face-move to start if unassigned faces
+    if (this.routeIsRecognizeUnassigned) {
+      const i = this.defaultActions.findIndex((a) => a.id === 'face-move');
+      this.defaultActions.unshift(this.defaultActions.splice(i, 1)[0]);
+    }
   },
 
   beforeDestroy() {
@@ -800,7 +807,7 @@ export default defineComponent({
      * Move selected photos to another person
      */
     async moveSelectionToPerson(selection: Selection) {
-      if (!this.config.show_face_rect) {
+      if (!this.config.show_face_rect && !this.routeIsRecognizeUnassigned) {
         showError(this.t('memories', 'You must enable "Mark person in preview" to use this feature'));
         return;
       }

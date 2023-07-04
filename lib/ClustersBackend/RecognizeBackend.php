@@ -94,7 +94,7 @@ class RecognizeBackend extends Backend
         // Join with cluster
         $clusterQuery = null;
         if ('NULL' === $faceName) {
-            $clusterQuery = $query->expr()->isNull('rfd.cluster_id');
+            $clusterQuery = $query->expr()->eq('rfd.cluster_id', $query->expr()->literal(-1));
         } else {
             $nameField = is_numeric($faceName) ? 'rfc.id' : 'rfc.title';
             $query->innerJoin('m', 'recognize_face_clusters', 'rfc', $query->expr()->andX(

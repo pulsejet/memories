@@ -90,16 +90,7 @@ export default defineComponent({
       const name = this.$route.params.name || '';
       const target = String(face.name || face.cluster_id);
 
-      if (
-        !confirm(
-          this.t('memories', 'Are you sure you want to move the selected photos from {name} to {target}?', {
-            name,
-            target,
-          })
-        )
-      ) {
-        return;
-      }
+      if (!confirm(this.t('memories', 'Move the selected photos to {target}?', { target }))) return;
 
       try {
         this.show = false;
