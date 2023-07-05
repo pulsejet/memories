@@ -85,6 +85,7 @@ OC.L10N.register(
     "Update" : "Actualizar",
     "Search" : "Buscar",
     "Loading …" : "Cargando…",
+    "Move the selected photos to {target}?" : "Quere mover as fotos seleccionadas a {target}?",
     "Remove" : "Retirar",
     "Share link" : "Compartir ligazón",
     "Refresh" : "Actualizar",

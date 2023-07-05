@@ -264,6 +264,7 @@ OC.L10N.register(
     "Error while moving {basename}" : "{basename} taşınırken sorun çıktı",
     "Failed to move {name}." : "{name} taşınamadı.",
     "Move selected photos to person" : "Seçilmiş fotoğrafları kişiye taşı",
+    "Move the selected photos to {target}?" : "Seçilmiş fotoğraflar {target} üzerine taşınsın mı?",
     "An error occurred while moving photos from {name}." : "Fotoğraflar {name} üzerinden taşınırken bir sorun çıktı.",
     "Choose a folder" : "Bir klasör seçin",
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["{n} öge klasöre taşındı","{n} öge klasöre taşındı"],

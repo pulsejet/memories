@@ -264,6 +264,7 @@ OC.L10N.register(
     "Error while moving {basename}" : "Fehler beim Verschieben von {basename}",
     "Failed to move {name}." : "{name} konnte nicht verschoben werden.",
     "Move selected photos to person" : "Ausgewählte Fotos zu einer Person verschieben",
+    "Move the selected photos to {target}?" : "Ausgewählte Fotos nach {target} verschieben?",
     "An error occurred while moving photos from {name}." : "Beim Verschieben der Fotos von {name} ist ein Fehler aufgetreten.",
     "Choose a folder" : "Ordner auswählen",
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["{n} Element in den Ordner verschoben","{n} Elementen in den Ordner verschoben"],

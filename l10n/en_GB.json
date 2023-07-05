@@ -262,6 +262,7 @@
     "Error while moving {basename}" : "Error while moving {basename}",
     "Failed to move {name}." : "Failed to move {name}.",
     "Move selected photos to person" : "Move selected photos to person",
+    "Move the selected photos to {target}?" : "Move the selected photos to {target}?",
     "An error occurred while moving photos from {name}." : "An error occurred while moving photos from {name}.",
     "Choose a folder" : "Choose a folder",
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["{n} item moved to folder","{n} items moved to folder"],
