@@ -256,7 +256,6 @@
     "Error while moving {basename}" : "{basename} 이동 중 실패",
     "Failed to move {name}." : "{name}(을)를 이동하지 못했습니다.",
     "Move selected photos to person" : "선택한 사진을 사람으로 이동",
-    "Are you sure you want to move the selected photos from {name} to {target}?" : "선택한 사진을 {name}에서 {target}(으)로 이동하시겠습니까?",
     "An error occurred while moving photos from {name}." : "{name}에서 사진을 이동하는 중 오류가 발생했습니다.",
     "Choose a folder" : "폴더 선택",
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["{n}개 항목이 폴더로 이동함"],

@@ -97,6 +97,7 @@ OC.L10N.register(
     "Sort by date" : "Sortera efter datum",
     "Sort by name" : "Sortera efter namn",
     "Delete album" : "Radera album",
+    "Unassigned faces" : "Ej tilldelade ansikten",
     "Merge with different person" : "Slå ihop med en annan person",
     "Share folder" : "Dela mapp",
     "Error saving image" : "Det gick inte att spara bilden",
