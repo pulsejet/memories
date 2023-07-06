@@ -5,33 +5,31 @@
     <ul class="albums-container">
       <NcListItem
         v-for="album in albums"
-        :key="album.album_id"
         class="album"
-        :title="getAlbumName(album)"
+        :key="album.album_id"
+        :title="album.name"
         :aria-label="
-          t('photos', 'Add selection to album {albumName}', {
-            albumName: getAlbumName(album),
+          t('memories', 'Add selection to album {albumName}', {
+            albumName: album.name,
           })
         "
         @click="pickAlbum(album)"
       >
-        <template v-slot:icon="{}">
+        <template #icon>
           <XImg v-if="album.last_added_photo !== -1" class="album__image" :src="toCoverUrl(album.last_added_photo)" />
           <div v-else class="album__image album__image--placeholder">
             <ImageMultiple :size="32" />
           </div>
         </template>
 
-        <template v-slot:subtitle="{}">
-          {{ n('photos', '%n item', '%n items', album.count) }}
-          <!-- TODO: finish collaboration -->
-          <!--⸱ {{ n('photos', 'Share with %n user', 'Share with %n users', album.isShared) }}-->
+        <template #subtitle>
+          {{ getSubtitle(album) }}
         </template>
       </NcListItem>
     </ul>
 
     <NcButton
-      :aria-label="t('photos', 'Create a new album.')"
+      :aria-label="t('memories', 'Create a new album.')"
       class="new-album-button"
       type="tertiary"
       @click="showAlbumCreationForm = true"
@@ -39,14 +37,14 @@
       <template #icon>
         <Plus />
       </template>
-      {{ t('photos', 'Create new album') }}
+      {{ t('memories', 'Create new album') }}
     </NcButton>
   </div>
 
   <AlbumForm
     v-else
     :display-back-button="true"
-    :title="t('photos', 'New album')"
+    :title="t('memories', 'New album')"
     @back="showAlbumCreationForm = false"
     @done="albumCreatedHandler"
   />
@@ -61,12 +59,13 @@ import AlbumForm from './AlbumForm.vue';
 import Plus from 'vue-material-design-icons/Plus.vue';
 import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue';
 
+import axios from '@nextcloud/axios';
+
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
 
 import { getPreviewUrl } from '../../services/utils/helpers';
 import { IAlbum, IPhoto } from '../../types';
-import axios from '@nextcloud/axios';
 import { API } from '../../services/API';
 
 export default defineComponent({
@@ -104,11 +103,18 @@ export default defineComponent({
       this.loadAlbums();
     },
 
-    getAlbumName(album: IAlbum) {
-      if (album.user === getCurrentUser()?.uid) {
-        return album.name;
+    getSubtitle(album: IAlbum) {
+      let text = this.n('memories', '%n item', '%n items', album.count);
+
+      if (album.user !== getCurrentUser()?.uid) {
+        text +=
+          ' / ' +
+          this.t('memories', 'shared by {owner}', {
+            owner: album.user_display || album.user,
+          });
       }
-      return `${album.name} (${album.user})`;
+
+      return text;
     },
 
     async loadAlbums() {

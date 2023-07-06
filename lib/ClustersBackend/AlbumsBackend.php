@@ -113,6 +113,13 @@ class AlbumsBackend extends Backend
             return true;
         });
 
+        // Add display names for users
+        $userManager = \OC::$server->get(\OCP\IUserManager::class);
+        array_walk($list, function (&$item) use ($userManager) {
+            $user = $userManager->get($item['user']);
+            $item['user_display'] = $user ? $user->getDisplayName() : null;
+        });
+
         // Convert $list to sequential array
         return array_values($list);
     }

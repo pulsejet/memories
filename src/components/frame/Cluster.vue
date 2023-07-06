@@ -84,7 +84,7 @@ export default defineComponent({
 
     subtitle() {
       if (this.album && this.album.user !== getCurrentUser()?.uid) {
-        return `(${this.album.user})`;
+        return `(${this.album.user_display || this.album.user})`;
       }
 
       return '';

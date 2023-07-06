@@ -132,6 +132,8 @@ export interface IAlbum extends ICluster {
   album_id: number;
   /** Owner of album */
   user: string;
+  /** Display name of album owner */
+  user_display?: string;
   /** Created timestamp */
   created: number;
   /** Location string */
