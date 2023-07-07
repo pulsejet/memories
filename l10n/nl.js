@@ -74,7 +74,6 @@ OC.L10N.register(
     "Create album" : "Maak album",
     "Add selection to album {albumName}" : "Selectie toevoegen aan album {albumName}",
     "Create a new album." : "Maak een nieuw album.",
-    "_Share with %n user_::_Share with %n users_" : ["Delen met %n gebruiker","Delen met %n gebruikers"],
     "Save collaborators for this album." : "Bewaar bijdragers voor dit album.",
     "Year" : "Jaar",
     "Month" : "Maand",

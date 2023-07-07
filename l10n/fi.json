@@ -180,7 +180,6 @@
     "Add selection to album {albumName}" : "Lisää valinta albumiin {albumName}",
     "Create a new album." : "Luo uusi albumi.",
     "_%n item_::_%n items_" : ["%n kohde","%n kohdetta"],
-    "_Share with %n user_::_Share with %n users_" : ["Jaa %n käyttäjän kanssa","Jaa %n käyttäjän kanssa"],
     "Share Album" : "Jaa albumi",
     "Save collaborators for this album." : "Tallenna albumin osanottajat.",
     "Newest" : "Uusimmat",

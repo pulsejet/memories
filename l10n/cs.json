@@ -212,7 +212,6 @@
     "Add selection to album {albumName}" : "Přidat výběr do alba {albumName}",
     "Create a new album." : "Vytvořit nové album.",
     "_%n item_::_%n items_" : ["%n položka","%n položky","%n položek","%n položky"],
-    "_Share with %n user_::_Share with %n users_" : ["Nasdílet %n uživateli","Nasdílet %n uživatelům","Nasdílet %n uživatelům","Nasdílet %n uživatelům"],
     "Share Album" : "Nasdílet album",
     "Save collaborators for this album." : "Uložit spolupracující pro toto album.",
     "Newest" : "Nejnovější",

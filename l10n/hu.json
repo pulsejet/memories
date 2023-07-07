@@ -213,7 +213,6 @@
     "Add selection to album {albumName}" : "Kiválasztás hozzáadása a(z) {albumName} albumhoz",
     "Create a new album." : "Új album létrehozása.",
     "_%n item_::_%n items_" : ["%n elem","%n elem"],
-    "_Share with %n user_::_Share with %n users_" : ["Megosztás %n felhasználóval","Megosztás %n felhasználóval"],
     "Share Album" : "Album megosztása",
     "Save collaborators for this album." : "Közreműködők mentése ehhez az albumhoz.",
     "Newest" : "Legújabb",

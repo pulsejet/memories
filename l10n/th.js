@@ -32,7 +32,6 @@ OC.L10N.register(
     "Save" : "บันทึก",
     "Create album" : "สร้างอัลบั้ม",
     "Add selection to album {albumName}" : "เพิ่มรายการที่เลือกไปยังอัลบั้ม {albumName}",
-    "_Share with %n user_::_Share with %n users_" : ["แชร์กับผู้ใช้ %n คน"],
     "Month" : "เดือน",
     "Day" : "วัน",
     "Time" : "เวลา",

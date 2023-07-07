@@ -215,7 +215,6 @@ OC.L10N.register(
     "Add selection to album {albumName}" : "Seçilmişleri {albumName} albümüne ekle",
     "Create a new album." : "Yeni bir albüm ekler.",
     "_%n item_::_%n items_" : ["%n öge","%n öge"],
-    "_Share with %n user_::_Share with %n users_" : ["%n kullanıcı ile paylaş","%n kullanıcı ile paylaş"],
     "Share Album" : "Albümü paylaş",
     "Save collaborators for this album." : "Bu albümün katılımcılarını kaydet.",
     "Newest" : "En yeni",

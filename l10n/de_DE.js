@@ -215,7 +215,6 @@ OC.L10N.register(
     "Add selection to album {albumName}" : "Auswahl zum Album {albumName} hinzufügen",
     "Create a new album." : "Ein neues Album erstellen.",
     "_%n item_::_%n items_" : ["%n Element","%n Elemente"],
-    "_Share with %n user_::_Share with %n users_" : ["Mit %n Benutzer teilen","Mit %n Benutzern teilen"],
     "Share Album" : "Album teilen",
     "Save collaborators for this album." : "Mitbearbeitende für dieses Album speichern.",
     "Newest" : "Neueste",

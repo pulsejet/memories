@@ -61,7 +61,6 @@
     "Create album" : "Skapa album",
     "Add selection to album {albumName}" : "Lägg till urval för {albumName}",
     "Create a new album." : "Skapa ett nytt album.",
-    "_Share with %n user_::_Share with %n users_" : ["Dela med en användare","Dela med %n användare"],
     "Save collaborators for this album." : "Spara medlemmar för det här albumet.",
     "Year" : "År",
     "Month" : "Månad",

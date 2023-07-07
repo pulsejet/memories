@@ -54,7 +54,6 @@
     "Create album" : "Креирај албум",
     "Add selection to album {albumName}" : "Додади ги избраните во албумот {albumName}",
     "Create a new album." : "Креирај нов албум.",
-    "_Share with %n user_::_Share with %n users_" : ["Споделено со 1 корисник","Споделено со %n корисници"],
     "Save collaborators for this album." : "Зачувај соработници за овој албум.",
     "Year" : "Година",
     "Month" : "Месец",

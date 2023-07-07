@@ -215,7 +215,6 @@ OC.L10N.register(
     "Add selection to album {albumName}" : "Додај изабрано у албум {albumName}",
     "Create a new album." : "Креирање новог албума.",
     "_%n item_::_%n items_" : ["%n ставка","%n ставке","%n ставки"],
-    "_Share with %n user_::_Share with %n users_" : ["Подели са %n корисником","Подели са %n корисника","Подели са %n корисника"],
     "Share Album" : "Дели албум",
     "Save collaborators for this album." : "Сачувај сараднике на овом албуму",
     "Newest" : "Најновије",

@@ -62,7 +62,6 @@ OC.L10N.register(
     "Create album" : "Crear álbum.",
     "Add selection to album {albumName}" : "Engadir a selección ao álbum {albumName}",
     "Create a new album." : "Crear un novo álbum.",
-    "_Share with %n user_::_Share with %n users_" : ["Compartir con %n usuario","Compartir con %n usuarios"],
     "Save collaborators for this album." : "Gardar os colaboradores para este álbum.",
     "Year" : "Ano",
     "Month" : "Mes",

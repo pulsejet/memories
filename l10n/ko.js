@@ -210,7 +210,6 @@ OC.L10N.register(
     "Add selection to album {albumName}" : "{albumName} 앨범을 선택하기",
     "Create a new album." : "새 앨범 만들기",
     "_%n item_::_%n items_" : ["%n개 항목"],
-    "_Share with %n user_::_Share with %n users_" : ["%n명의 사용자와 공유"],
     "Share Album" : "앨범 공유",
     "Save collaborators for this album." : "이 앨범의 공동 작업자를 저장",
     "Newest" : "최신순",

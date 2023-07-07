@@ -213,7 +213,6 @@
     "Add selection to album {albumName}" : "Add selection to album {albumName}",
     "Create a new album." : "Create a new album.",
     "_%n item_::_%n items_" : ["%n item","%n items"],
-    "_Share with %n user_::_Share with %n users_" : ["Share with %n user","Share with %n users"],
     "Share Album" : "Share Album",
     "Save collaborators for this album." : "Save collaborators for this album.",
     "Newest" : "Newest",

@@ -188,7 +188,6 @@ OC.L10N.register(
     "Add selection to album {albumName}" : "Добавяне на селекция към албум {ablumName}",
     "Create a new album." : "Създаване на нов албум.",
     "_%n item_::_%n items_" : ["%nелементи ","%n елементи"],
-    "_Share with %n user_::_Share with %n users_" : ["Споделяне с %n потребители","Споделяне с %n потребители"],
     "Share Album" : "Споделяне на Албум",
     "Save collaborators for this album." : "Запис на сътрудници за този албум.",
     "Newest" : "Най-новият",
