@@ -213,6 +213,7 @@ OC.L10N.register(
     "Invalid album name; should not contain any slashes." : "Neplatný název alba: nemůže obsahovat lomítka.",
     "Add selection to album {albumName}" : "Přidat výběr do alba {albumName}",
     "Create a new album." : "Vytvořit nové album.",
+    "shared by {owner}" : "nasdíleno uživatelem {owner}",
     "_%n item_::_%n items_" : ["%n položka","%n položky","%n položek","%n položky"],
     "Share Album" : "Nasdílet album",
     "Save collaborators for this album." : "Uložit spolupracující pro toto album.",

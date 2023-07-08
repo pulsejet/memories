@@ -214,6 +214,7 @@ OC.L10N.register(
     "Invalid album name; should not contain any slashes." : "Ungültiger Albumname; darf keine Schrägstriche enthalten.",
     "Add selection to album {albumName}" : "Auswahl zum Album {albumName} hinzufügen",
     "Create a new album." : "Ein neues Album erstellen.",
+    "shared by {owner}" : "Geteilt von {owner}",
     "_%n item_::_%n items_" : ["%n Element","%n Elemente"],
     "Share Album" : "Album teilen",
     "Save collaborators for this album." : "Mitbearbeitende für dieses Album speichern.",

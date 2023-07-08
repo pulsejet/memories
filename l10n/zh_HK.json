@@ -212,6 +212,7 @@
     "Invalid album name; should not contain any slashes." : "相簿名稱無效； 不應包含任何斜線。",
     "Add selection to album {albumName}" : "將選擇添加至相簿 {albumName}",
     "Create a new album." : "創建新相簿。",
+    "shared by {owner}" : "由 {owner} 分享",
     "_%n item_::_%n items_" : ["%n 個項目"],
     "Share Album" : "分享相簿",
     "Save collaborators for this album." : "保存此相簿的協作者。",

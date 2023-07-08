@@ -214,6 +214,7 @@ OC.L10N.register(
     "Invalid album name; should not contain any slashes." : "Неисправно име албума; не сме да садржи косе црте.",
     "Add selection to album {albumName}" : "Додај изабрано у албум {albumName}",
     "Create a new album." : "Креирање новог албума.",
+    "shared by {owner}" : "дели {owner}",
     "_%n item_::_%n items_" : ["%n ставка","%n ставке","%n ставки"],
     "Share Album" : "Дели албум",
     "Save collaborators for this album." : "Сачувај сараднике на овом албуму",
