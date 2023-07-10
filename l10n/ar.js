@@ -119,6 +119,7 @@ OC.L10N.register(
     "Share" : "مشاركة",
     "Previous" : "السابق",
     "Next" : "التالي",
+    "Are you sure you want to delete?" : "هل أنت متأكد أنك تريد الحذف؟",
     "Save as" : "حفظ كـ",
     "All changes will be lost." : "ستفقد كل التغييرات.",
     "Are you sure you want to continue?" : "هل أنت متأكد أنك ترغب بالاستمرار؟",

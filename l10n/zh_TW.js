@@ -214,6 +214,7 @@ OC.L10N.register(
     "Invalid album name; should not contain any slashes." : "無效的相簿名稱；不應包含任何斜線。",
     "Add selection to album {albumName}" : "新增選取範圍至相簿 {albumName}",
     "Create a new album." : "建立新相簿。",
+    "shared by {owner}" : "由 {owner} 分享",
     "_%n item_::_%n items_" : ["%n 個項目"],
     "Share Album" : "分享相簿",
     "Save collaborators for this album." : "儲存此相簿的協作者。",
