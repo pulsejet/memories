@@ -214,6 +214,7 @@ OC.L10N.register(
     "Invalid album name; should not contain any slashes." : "Albüm adı geçersiz. Albüm adında bölü (/) karakteri bulunamaz.",
     "Add selection to album {albumName}" : "Seçilmişleri {albumName} albümüne ekle",
     "Create a new album." : "Yeni bir albüm ekler.",
+    "shared by {owner}" : "{owner} tarafından paylaşıldı",
     "_%n item_::_%n items_" : ["%n öge","%n öge"],
     "Share Album" : "Albümü paylaş",
     "Save collaborators for this album." : "Bu albümün katılımcılarını kaydet.",
