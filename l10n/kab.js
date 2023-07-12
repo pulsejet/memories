@@ -19,6 +19,7 @@ OC.L10N.register(
     "Title" : "Azwel",
     "Name" : "Nom",
     "Search" : "Nadi",
+    "Loading …" : "Asali ...",
     "Remove" : "Kkes",
     "Share link" : "Fren aseɣwen",
     "Refresh" : "Sismeḍ",

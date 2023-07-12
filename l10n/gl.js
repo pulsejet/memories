@@ -44,7 +44,7 @@ OC.L10N.register(
     "Copy public link" : "Copiar a ligazón pública",
     "Delete the public link" : "Eliminar a ligazón pública",
     "Share via public link" : "Compartir mediante ligazón pública",
-    "Failed to fetch collaborators list." : "Produciuse un erro ao obter a lista de colaboradores.",
+    "Failed to fetch collaborators list." : "Produciuse un erro ao recuperar a lista de colaboradores.",
     "Public link" : "Ligazón pública",
     "Failed to fetch album." : "Produciuse un erro ao recuperar o álbum.",
     "Failed to update album." : "Produciuse un erro ao actualizar o álbum.",
