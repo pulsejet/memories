@@ -165,6 +165,7 @@
     "Invalid album name; should not contain any slashes." : "Albumaren izen baliogabea; ez luke barrarik eduki behar.",
     "Add selection to album {albumName}" : "Gehitu hautapena {albumName} albumera",
     "Create a new album." : "Sortu album berria.",
+    "shared by {owner}" : "{owner}(e)k partekatuta",
     "_%n item_::_%n items_" : ["elementu %n","%n elementu"],
     "Share Album" : "Partekatu albuma",
     "Save collaborators for this album." : "Gorde album honen kolaboratzaileak.",

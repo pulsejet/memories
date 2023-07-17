@@ -129,7 +129,7 @@
     "Geometry table has not been created." : "Geometri tablosu oluşturulmamış.",
     "Looks like the planet data is incomplete." : "Gezegen verileri eksik gibi görünüyor.",
     "Reverse geocoding has not been configured ({status})." : "Ters coğrafi kodlama yapılandırılmamış ({status}).",
-    "Memories supports offline reverse geocoding using the OpenStreetMaps data on MySQL and Postgres." : "Anılar, MySQL ya da Postgres üzerinde OpenStreetMaps verilerini kullanarak çevrimdışı ters coğrafi kodlamayı destekler.",
+    "Memories supports offline reverse geocoding using the OpenStreetMaps data on MySQL and Postgres." : "Anılar, MySQL ya da Postgres üzerinde OpenStreetMaps verilerini kullanarak çevrim dışı ters coğrafi kodlamayı destekler.",
     "You need to download the planet data into your database. This is highly recommended and has low overhead." : "Gezegen verilerini veri tabanınıza indirmeniz gerekiyor. Bunu yapmanız önemle önerilir ve oluşturacağı yük küçüktür.",
     "If the button below does not work for importing the planet data, use the following command:" : "Gezegen verilerini içe aktarmak için aşağıdaki düğme çalışmıyorsa, şu komutu kullanın:",
     "Note: the geometry data is stored in the memories_planet_geometry table, with no prefix." : "Not: Geometri verileri, herhangi bir ön ek olmadan, memory_planet_geometry tablosunda tutulur.",
