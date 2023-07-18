@@ -24,6 +24,7 @@ OC.L10N.register(
     "Public link" : "Liga pública",
     "Back" : "Atrás",
     "Save" : "Guardar",
+    "Year" : "Año",
     "Month" : "Mes",
     "Day" : "Día",
     "Time" : "Hora",
@@ -54,8 +55,10 @@ OC.L10N.register(
     "Undo" : "Deshacer",
     "Custom" : "Personalizado",
     "Value" : "Valor",
+    "Line" : "Línea",
     "Text" : "Texto",
     "Size" : "Tamaño",
-    "Position" : "Posición"
+    "Position" : "Posición",
+    "Name is required." : "Se requiere el nombre."
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
