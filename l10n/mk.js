@@ -25,6 +25,7 @@ OC.L10N.register(
     "Add to album" : "Додади во албум",
     "General" : "Општо",
     "Account" : "Сметка",
+    "Logged in as {user}" : "Најавени сте како {user}",
     "Close" : "Затвори",
     "Unknown" : "Непознат",
     "Add people or groups who can edit your album" : "Додади корисник кој ќе може да го ажурира твојот албум",
