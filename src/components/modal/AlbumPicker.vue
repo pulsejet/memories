@@ -16,6 +16,7 @@
         @click="pickAlbum(album)"
       >
         <template #icon>
+          <div v-if="photoId === album.last_added_photo">OK</div>
           <XImg v-if="album.last_added_photo !== -1" class="album__image" :src="toCoverUrl(album.last_added_photo)" />
           <div v-else class="album__image album__image--placeholder">
             <ImageMultiple :size="32" />
@@ -67,9 +68,17 @@ const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
 import { getPreviewUrl } from '../../services/utils/helpers';
 import { IAlbum, IPhoto } from '../../types';
 import { API } from '../../services/API';
+import { PropType } from 'vue';
 
 export default defineComponent({
   name: 'AlbumPicker',
+  props: {
+    /** List of pictures that are selected */
+    photos: {
+      type: Array as PropType<IPhoto[]>,
+      required: true,
+    },
+  },
   components: {
     AlbumForm,
     Plus,
@@ -82,10 +91,15 @@ export default defineComponent({
     showAlbumCreationForm: false,
     albums: [] as IAlbum[],
     loadingAlbums: true,
+    photoId: -1,
   }),
 
   mounted() {
     this.loadAlbums();
+    if (this.photos.length === 1) {
+      // this only makes sense when we try to add single photo to albums
+      this.photoId = this.photos[0].fileid;
+    }
   },
 
   methods: {

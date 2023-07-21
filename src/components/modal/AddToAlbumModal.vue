@@ -5,7 +5,7 @@
     </template>
 
     <div class="outer">
-      <AlbumPicker @select="selectAlbum" />
+      <AlbumPicker @select="selectAlbum" :photos="photos" />
 
       <div v-if="processing">
         <NcProgressBar :value="Math.round((photosDone * 100) / photos.length)" :error="true" />
