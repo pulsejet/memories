@@ -141,10 +141,15 @@ export default defineComponent({
   async mounted() {
     await loadFilerobot();
 
-    globalThis._fileRobotOverrideImage = await this.getImage();
-
     const div = <HTMLElement>this.$refs.editor;
-    this.imageEditor = new FilerobotImageEditor(div, this.config);
+
+    // Directly use an HTML element to make sure the resolution
+    // in the editor matches the original file, but we can work
+    // with a preview instead
+    const source = await this.getImage();
+    const config = { ...this.config, source };
+
+    this.imageEditor = new FilerobotImageEditor(div, config);
     this.imageEditor.render();
 
     // Handle keyboard
@@ -155,7 +160,6 @@ export default defineComponent({
     if (this.imageEditor) {
       this.imageEditor.terminate();
     }
-    globalThis._fileRobotOverrideImage = undefined;
     window.removeEventListener('keydown', this.handleKeydown, true);
   },
 
