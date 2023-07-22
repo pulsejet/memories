@@ -94,7 +94,6 @@ OC.L10N.register(
     "Add selection to album {albumName}" : "Legg til utvalg i albumet {albumName}",
     "Create a new album." : "Opprett et nytt album.",
     "_%n item_::_%n items_" : ["%n element","%nelementer"],
-    "_Share with %n user_::_Share with %n users_" : ["Del med %n bruker","Del med %n brukere"],
     "Share Album" : "Del album",
     "Save collaborators for this album." : "Lagre samarbeidspartnere for dette albumet.",
     "Newest" : "Nyeste",

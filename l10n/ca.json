@@ -57,7 +57,6 @@
     "Create album" : "Crea un àlbum",
     "Add selection to album {albumName}" : "Afegeix una selecció a l'àlbum {albumName}",
     "Create a new album." : "Crea un àlbum nou.",
-    "_Share with %n user_::_Share with %n users_" : ["Comparteix amb l'usuari %n","Comparteix amb %n usuaris"],
     "Save collaborators for this album." : "Desa els col·laboradors per a aquest àlbum.",
     "Year" : "Any",
     "Month" : "Mes",

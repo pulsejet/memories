@@ -196,7 +196,6 @@
     "Add selection to album {albumName}" : "Ajouter la sélection à l'album {albumName}",
     "Create a new album." : "Créer un nouvel album",
     "_%n item_::_%n items_" : ["%n élément ","%n éléments","%n éléments"],
-    "_Share with %n user_::_Share with %n users_" : ["Partager avec %n utilisateur","Partager avec %n utilisateurs","Partager avec %n utilisateurs"],
     "Share Album" : "Partager l'album",
     "Save collaborators for this album." : "Enregistrer les collaborateurs pour cet album.",
     "Newest" : "Plus récent",

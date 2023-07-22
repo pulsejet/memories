@@ -56,7 +56,6 @@ OC.L10N.register(
     "Create album" : "Loo album",
     "Add selection to album {albumName}" : "Lisa valitud albumisse {albumName}",
     "Create a new album." : "Loo uus album.",
-    "_Share with %n user_::_Share with %n users_" : ["Jaga %n kasutajaga","Jaga %n kasutajaga"],
     "Save collaborators for this album." : "Salvesta selle albumi kaastöölised.",
     "Month" : "Kuu",
     "Day" : "Päev",

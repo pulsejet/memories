@@ -215,7 +215,6 @@ OC.L10N.register(
     "Add selection to album {albumName}" : "将所选项加入相册 {ablumName}",
     "Create a new album." : "创建新相册。",
     "_%n item_::_%n items_" : ["%n 个项目"],
-    "_Share with %n user_::_Share with %n users_" : ["与%n个用户分享"],
     "Share Album" : "分享相册",
     "Save collaborators for this album." : "保存此相册的协作者。",
     "Newest" : "最新",
