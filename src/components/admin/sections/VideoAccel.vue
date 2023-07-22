@@ -93,7 +93,7 @@
         type="radio"
         class="m-radio"
         @update:checked="update('memories.vod.nvenc.scale')"
-        >{{ t('memories', 'CUDA scaler') }}
+        >{{ t('memories', 'CUDA scaler') }} ({{ t('memories', 'not recommended') }})
       </NcCheckboxRadioSwitch>
     </p>
   </div>
