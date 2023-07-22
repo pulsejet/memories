@@ -422,14 +422,17 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 			if CV == ENCODER_VAAPI {
 				transposer = "transpose_vaapi"
 			} else if CV == ENCODER_NVENC {
-				transposer = "transpose_npp"
+				transposer = fmt.Sprintf("transpose_%s", s.c.NVENCScale)
 			}
-			if s.m.probe.Rotation == -90 {
-				filter = fmt.Sprintf("%s,%s=1", filter, transposer)
-			} else if s.m.probe.Rotation == 90 {
-				filter = fmt.Sprintf("%s,%s=2", filter, transposer)
-			} else if s.m.probe.Rotation == 180 || s.m.probe.Rotation == -180 {
-				filter = fmt.Sprintf("%s,%s=1,%s=1", filter, transposer, transposer)
+
+			if transposer != "transpose_cuda" { // does not exist
+				if s.m.probe.Rotation == -90 {
+					filter = fmt.Sprintf("%s,%s=1", filter, transposer)
+				} else if s.m.probe.Rotation == 90 {
+					filter = fmt.Sprintf("%s,%s=2", filter, transposer)
+				} else if s.m.probe.Rotation == 180 || s.m.probe.Rotation == -180 {
+					filter = fmt.Sprintf("%s,%s=1,%s=1", filter, transposer, transposer)
+				}
 			}
 		}
 
