@@ -312,13 +312,18 @@ export default defineComponent({
       if (event.pointerType === 'mouse' && event.button !== 0) return; // only left click for mouse
 
       if (this.has()) {
-        if (event.shiftKey) {
-          this.selectMulti(photo, this.rows, rowIdx);
-        } else {
-          this.selectPhoto(photo);
-        }
+        this.clickSelectionIcon(photo, event, rowIdx);
       } else {
         this.openViewer(photo);
+      }
+    },
+
+    /** Clicking on checkmark icon */
+    clickSelectionIcon(photo: IPhoto, event: PointerEvent, rowIdx: number) {
+      if (event.shiftKey) {
+        this.selectMulti(photo, this.rows, rowIdx);
+      } else {
+        this.selectPhoto(photo);
       }
     },
 
