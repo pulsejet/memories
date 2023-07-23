@@ -106,8 +106,7 @@ export default defineComponent({
     font-size: 1.075em;
   }
 
-  :hover,
-  &.selected {
+  @mixin visible {
     .select {
       display: flex;
       opacity: 0.7;
@@ -116,9 +115,21 @@ export default defineComponent({
       transform: translateX(24px);
     }
   }
-  &.selected .select {
-    opacity: 1;
-    color: var(--color-primary);
+
+  // Show the icon (gray) when hovering or selected
+  @media (hover: hover) {
+    &:hover {
+      @include visible;
+    }
+  }
+
+  // Show the icon (blue) when selected
+  &.selected {
+    @include visible;
+    .select {
+      opacity: 1;
+      color: var(--color-primary);
+    }
   }
 
   @media (max-width: 768px) {
