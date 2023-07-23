@@ -311,7 +311,7 @@ export default defineComponent({
       if (event.pointerType === 'touch') return; // let touch events handle this
       if (event.pointerType === 'mouse' && event.button !== 0) return; // only left click for mouse
 
-      if (this.has()) {
+      if (this.has() || event.ctrlKey || event.shiftKey) {
         this.clickSelectionIcon(photo, event, rowIdx);
       } else {
         this.openViewer(photo);
@@ -320,7 +320,7 @@ export default defineComponent({
 
     /** Clicking on checkmark icon */
     clickSelectionIcon(photo: IPhoto, event: PointerEvent, rowIdx: number) {
-      if (event.shiftKey) {
+      if (this.has() && event.shiftKey) {
         this.selectMulti(photo, this.rows, rowIdx);
       } else {
         this.selectPhoto(photo);
