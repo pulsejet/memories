@@ -393,6 +393,8 @@ class ImageController extends GenericApiController
             $mimetype = $image->getImageMimeType();
         } catch (\ImagickException $e) {
             throw Exceptions::Forbidden('Imagick failed to convert image: '.$e->getMessage());
+        } finally {
+            $image->clear();
         }
 
         return [$blob, $mimetype];
