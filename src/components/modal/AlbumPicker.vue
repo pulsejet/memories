@@ -3,20 +3,11 @@
     <XLoadingIcon v-if="loadingAlbums" class="loading-icon" />
 
     <ul class="albums-container">
-      <NcListItem
-        v-for="album in albums"
-        class="album"
-        :key="album.album_id"
-        :title="album.name"
-        :aria-label="
-          t('memories', 'Add selection to album {albumName}', {
-            albumName: album.name,
-          })
-        "
-        @click="pickAlbum(album)"
-      >
+      <NcListItem v-for="album in albums" class="album" :key="album.album_id" :title="album.name" :aria-label="t('memories', 'Add selection to album {albumName}', {
+        albumName: album.name,
+      })
+        " @click="pickAlbum(album)">
         <template #icon>
-          <div v-if="photoId === album.last_added_photo">OK</div>
           <XImg v-if="album.last_added_photo !== -1" class="album__image" :src="toCoverUrl(album.last_added_photo)" />
           <div v-else class="album__image album__image--placeholder">
             <ImageMultiple :size="32" />
@@ -26,15 +17,18 @@
         <template #subtitle>
           {{ getSubtitle(album) }}
         </template>
+
+        <template #extra>
+          <div v-if="album.has_file" class="check-circle-icon">
+            <XImg :src="checkmarkIcon" />
+          </div>
+        </template>
+
       </NcListItem>
     </ul>
 
-    <NcButton
-      :aria-label="t('memories', 'Create a new album.')"
-      class="new-album-button"
-      type="tertiary"
-      @click="showAlbumCreationForm = true"
-    >
+    <NcButton :aria-label="t('memories', 'Create a new album.')" class="new-album-button" type="tertiary"
+      @click="showAlbumCreationForm = true">
       <template #icon>
         <Plus />
       </template>
@@ -42,13 +36,8 @@
     </NcButton>
   </div>
 
-  <AlbumForm
-    v-else
-    :display-back-button="true"
-    :title="t('memories', 'New album')"
-    @back="showAlbumCreationForm = false"
-    @done="albumCreatedHandler"
-  />
+  <AlbumForm v-else :display-back-button="true" :title="t('memories', 'New album')" @back="showAlbumCreationForm = false"
+    @done="albumCreatedHandler" />
 </template>
 
 <script lang="ts">
@@ -59,6 +48,7 @@ import { getCurrentUser } from '@nextcloud/auth';
 import AlbumForm from './AlbumForm.vue';
 import Plus from 'vue-material-design-icons/Plus.vue';
 import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue';
+import checkmarkIcon from '../../assets/checkmark.svg';
 
 import axios from '@nextcloud/axios';
 
@@ -92,14 +82,15 @@ export default defineComponent({
     albums: [] as IAlbum[],
     loadingAlbums: true,
     photoId: -1,
+    checkmarkIcon,
   }),
 
   mounted() {
-    this.loadAlbums();
     if (this.photos.length === 1) {
       // this only makes sense when we try to add single photo to albums
       this.photoId = this.photos[0].fileid;
     }
+    this.loadAlbums();
   },
 
   methods: {
@@ -133,7 +124,7 @@ export default defineComponent({
 
     async loadAlbums() {
       try {
-        const res = await axios.get<IAlbum[]>(API.ALBUM_LIST());
+        const res = await axios.get<IAlbum[]>(API.ALBUM_LIST(3, this.photoId));
         this.albums = res.data;
       } catch (e) {
         console.error(e);
@@ -170,6 +161,11 @@ export default defineComponent({
     .album {
       :deep .list-item {
         box-sizing: border-box;
+        display: flex;
+      }
+
+      :deep .list-item-content__wrapper {
+        flex-grow: 1;
       }
 
       :deep .line-one__title {
@@ -196,6 +192,21 @@ export default defineComponent({
             }
           }
         }
+      }
+    }
+
+    .check-circle-icon {
+      border-radius: 50%;
+      background-color: rgba(0, 255, 0, 0.1882352941);
+      height: 34px;
+      width: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      & img {
+        width: 50%;
+        height: 50%;
       }
     }
   }

@@ -95,11 +95,12 @@ class AlbumsBackend extends Backend
         // Run actual query
         $list = [];
         $t = (int) $request->getParam('t', 0);
+        $fileid = (int) $request->getParam('fid', -1);
         if ($t & 1) { // personal
-            $list = array_merge($list, $this->albumsQuery->getList(Util::getUID()));
+            $list = array_merge($list, $this->albumsQuery->getList(Util::getUID(), $fileid));
         }
         if ($t & 2) { // shared
-            $list = array_merge($list, $this->albumsQuery->getList(Util::getUID(), true));
+            $list = array_merge($list, $this->albumsQuery->getList(Util::getUID(), $fileid, true));
         }
 
         // Remove elements with duplicate album_id

@@ -17,11 +17,16 @@ class AlbumsQuery
     }
 
     /** Get list of albums */
-    public function getList(string $uid, bool $shared = false)
+    public function getList(string $uid, int $fileId, bool $shared = false)
     {
         $query = $this->connection->getQueryBuilder();
+        $allPhotosQuery = $this->connection->getQueryBuilder();
 
         // SELECT everything from albums
+        $allPhotosQuery->select('album_id')->from('photos_albums_files');
+        $allPhotosQuery->where(
+            $allPhotosQuery->expr()->eq('file_id', $allPhotosQuery->createNamedParameter($fileId, IQueryBuilder::PARAM_INT))
+        );
         $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
         $query->select(
             'pa.album_id',
@@ -64,13 +69,21 @@ class AlbumsQuery
 
         // FETCH all albums
         $albums = $query->executeQuery()->fetchAll();
+        $allPhotos = $allPhotosQuery->executeQuery()->fetchAll();
+        $albumIds = array();
+
+        foreach ($allPhotos as &$album) {
+            $albumIds[$album['album_id']] = true;
+        }
 
         // Post process
         foreach ($albums as &$row) {
+            $albumId = (int) $row['album_id'];
             $row['cluster_id'] = $row['user'].'/'.$row['name'];
-            $row['album_id'] = (int) $row['album_id'];
+            $row['album_id'] = $albumId;
             $row['created'] = (int) $row['created'];
             $row['last_added_photo'] = (int) $row['last_added_photo'];
+            $row['has_file'] = !!$albumIds[$albumId];
         }
 
         return $albums;
