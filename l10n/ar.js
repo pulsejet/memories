@@ -168,6 +168,7 @@ OC.L10N.register(
     "Enable NVENC Temporal AQ" : "تمكين التكمية التكيفية المؤقتة لمرمز NVENC",
     "NPP scaler" : "معداد NPP",
     "CUDA scaler" : "معدّاد CUDA ",
+    "not recommended" : "لا يُوصى به",
     "VA-API device ({dev}) is readable" : "جهاز VA-API ({dev}) قابل للقراءة",
     "VA-API device ({dev}) not found" : "لم يتم العثور علي جهاز VA-API ({dev})",
     "VA-API device ({dev}) has incorrect permissions" : "جهاز VA-API ({dev}) لديه أذونات غير صحيحة",
