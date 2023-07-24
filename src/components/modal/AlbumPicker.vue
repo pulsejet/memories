@@ -3,10 +3,18 @@
     <XLoadingIcon v-if="loadingAlbums" class="loading-icon" />
 
     <ul class="albums-container">
-      <NcListItem v-for="album in albums" class="album" :key="album.album_id" :title="album.name" :aria-label="t('memories', 'Add selection to album {albumName}', {
-        albumName: album.name,
-      })
-        " @click="pickAlbum(album)">
+      <NcListItem
+        v-for="album in albums"
+        class="album"
+        :key="album.album_id"
+        :title="album.name"
+        :aria-label="
+          t('memories', 'Add selection to album {albumName}', {
+            albumName: album.name,
+          })
+        "
+        @click="pickAlbum(album)"
+      >
         <template #icon>
           <XImg v-if="album.last_added_photo !== -1" class="album__image" :src="toCoverUrl(album.last_added_photo)" />
           <div v-else class="album__image album__image--placeholder">
@@ -23,12 +31,16 @@
             <XImg :src="checkmarkIcon" />
           </div>
         </template>
-
+        
       </NcListItem>
     </ul>
 
-    <NcButton :aria-label="t('memories', 'Create a new album.')" class="new-album-button" type="tertiary"
-      @click="showAlbumCreationForm = true">
+    <NcButton
+      :aria-label="t('memories', 'Create a new album.')"
+      class="new-album-button"
+      type="tertiary"
+      @click="showAlbumCreationForm = true"
+    >
       <template #icon>
         <Plus />
       </template>
@@ -36,8 +48,13 @@
     </NcButton>
   </div>
 
-  <AlbumForm v-else :display-back-button="true" :title="t('memories', 'New album')" @back="showAlbumCreationForm = false"
-    @done="albumCreatedHandler" />
+  <AlbumForm
+    v-else
+    :display-back-button="true"
+    :title="t('memories', 'New album')"
+    @back="showAlbumCreationForm = false"
+    @done="albumCreatedHandler"
+  />
 </template>
 
 <script lang="ts">
