@@ -9,7 +9,14 @@
         error: data.flag & c.FLAG_LOAD_FAIL,
       }"
     >
-      <CheckCircleIcon v-once :size="18" class="select" @click="toggleSelect" />
+      <div
+        class="select"
+        v-once
+        v-if="!(data.flag & c.FLAG_PLACEHOLDER)"
+        @pointerdown.passive="$emit('select', $event)"
+      >
+        <CheckCircleIcon :size="18" />
+      </div>
 
       <div class="video" v-if="data.flag & c.FLAG_IS_VIDEO">
         <span v-if="data.video_duration" class="time">
@@ -154,10 +161,6 @@ export default defineComponent({
   },
 
   methods: {
-    emitSelect(data: IPhoto) {
-      this.$emit('select', data);
-    },
-
     /** Get url of the photo */
     url() {
       let base: 256 | 512 = 256;
@@ -227,11 +230,6 @@ export default defineComponent({
       this.data.flag |= this.c.FLAG_LOAD_FAIL;
     },
 
-    toggleSelect() {
-      if (this.data.flag & this.c.FLAG_PLACEHOLDER) return;
-      this.emitSelect(this.data);
-    },
-
     contextmenu(e: Event) {
       e.preventDefault();
       e.stopPropagation();
@@ -288,41 +286,45 @@ $icon-half-size: 6px;
 $icon-size: $icon-half-size * 2;
 
 /* Extra icons */
-.check-circle-icon.select {
+.select {
   position: absolute;
   top: calc(var(--icon-dist) + 2px);
   left: calc(var(--icon-dist) + 2px);
   z-index: 100;
   border-radius: 50%;
-  cursor: pointer;
-
   display: none;
-  @media (hover: hover) {
-    .p-outer:hover > & {
-      display: flex;
-    }
-  }
-
   opacity: 0.7;
-  &:hover,
-  .p-outer.selected & {
+
+  @mixin visible {
+    display: flex;
     opacity: 1;
   }
 
-  // Extremely ugly way to fill up the space
-  // If this isn't done, bg has a border
-  :deep path {
-    transform: scale(1.2) translate(-2px, -2px);
+  @media (hover: hover) {
+    .p-outer:hover > & {
+      @include visible;
+    }
   }
 
   filter: invert(1) brightness(100);
   .p-outer.selected > & {
-    display: flex;
+    @include visible;
     filter: invert(0);
     background-color: white;
     color: var(--color-primary);
   }
+
+  .check-circle-icon {
+    cursor: pointer;
+
+    // Extremely ugly way to fill up the space
+    // If this isn't done, bg has a border
+    :deep path {
+      transform: scale(1.2) translate(-2px, -2px);
+    }
+  }
 }
+
 .video,
 .bottom-left-flag,
 .livephoto {

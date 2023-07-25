@@ -166,6 +166,7 @@
     "Enable NVENC Temporal AQ" : "NVENC Temporal AQ kullanılsın",
     "NPP scaler" : "NPP ölçekleyici",
     "CUDA scaler" : "CUDA ölçekleyici",
+    "not recommended" : "önerilmez",
     "VA-API device ({dev}) is readable" : "VA-API aygıtı ({dev}) okunabilir",
     "VA-API device ({dev}) not found" : "VA-API aygıtı ({dev}) bulunamadı",
     "VA-API device ({dev}) has incorrect permissions" : "VA-API aygıtının ({dev}) izinleri doğru değil",

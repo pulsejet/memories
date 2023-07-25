@@ -8,7 +8,7 @@
       </NcBreadcrumb>
       <NcBreadcrumb
         v-for="folder in list"
-        :key="folder.path"
+        :key="folder.idx"
         :title="folder.text"
         :to="{ name: 'folders', params: { path: folder.path } }"
       />
@@ -67,7 +67,8 @@ export default defineComponent({
   computed: {
     list(): {
       text: string;
-      path: string;
+      path: string[];
+      idx: number;
     }[] {
       let path: string[] | string = this.$route.params.path || '';
       if (typeof path === 'string') {
@@ -76,11 +77,9 @@ export default defineComponent({
 
       return path
         .filter((x) => x)
-        .map((x, idx, arr) => {
-          return {
-            text: x,
-            path: arr.slice(0, idx + 1).join('/'),
-          };
+        .map((text, idx, arr) => {
+          const path = arr.slice(0, idx + 1);
+          return { text, path, idx };
         });
     },
 

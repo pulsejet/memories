@@ -56,7 +56,7 @@
           }"
           :data="photo"
           :day="item.day"
-          @select="selectionManager().selectPhoto($event)"
+          @select="selectionManager().clickSelectionIcon(photo, $event, index)"
           @pointerdown="selectionManager().clickPhoto(photo, $event, index)"
           @touchstart="selectionManager().touchstartPhoto(photo, $event, index)"
           @touchend="selectionManager().touchendPhoto(photo, $event, index)"

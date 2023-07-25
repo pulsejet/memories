@@ -31,7 +31,6 @@ build-js-production:
 patch-external:
 	patch -p1 -N < patches/scroller-perf.patch || true
 	patch -p1 -N < patches/scroller-sticky.patch || true
-	bash ./patches/filerobot-patch.sh
 
 watch-js:
 	npm run watch

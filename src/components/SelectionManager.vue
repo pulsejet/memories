@@ -311,14 +311,19 @@ export default defineComponent({
       if (event.pointerType === 'touch') return; // let touch events handle this
       if (event.pointerType === 'mouse' && event.button !== 0) return; // only left click for mouse
 
-      if (this.has()) {
-        if (event.shiftKey) {
-          this.selectMulti(photo, this.rows, rowIdx);
-        } else {
-          this.selectPhoto(photo);
-        }
+      if (this.has() || event.ctrlKey || event.shiftKey) {
+        this.clickSelectionIcon(photo, event, rowIdx);
       } else {
         this.openViewer(photo);
+      }
+    },
+
+    /** Clicking on checkmark icon */
+    clickSelectionIcon(photo: IPhoto, event: PointerEvent, rowIdx: number) {
+      if (this.has() && event.shiftKey) {
+        this.selectMulti(photo, this.rows, rowIdx);
+      } else {
+        this.selectPhoto(photo);
       }
     },
 

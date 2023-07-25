@@ -167,6 +167,7 @@ OC.L10N.register(
     "Enable NVENC Temporal AQ" : "Zapnout NVENC Temporal AQ",
     "NPP scaler" : "NPP škálování",
     "CUDA scaler" : "CUDA škálování",
+    "not recommended" : "nedoporučeno",
     "VA-API device ({dev}) is readable" : "VA-API zařízení ({dev}) není přístupné pro čtení",
     "VA-API device ({dev}) not found" : "VA-API zařízení ({dev}) nenalezeno",
     "VA-API device ({dev}) has incorrect permissions" : "Na VA-API zařízení ({dev}) nejsou správně nastavená práva",
