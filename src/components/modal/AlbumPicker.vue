@@ -13,7 +13,7 @@
             albumName: album.name,
           })
         "
-        @click="pickAlbum(album)"
+        @click.prevent="pickAlbum(album)"
       >
         <template #icon>
           <XImg v-if="album.last_added_photo !== -1" class="album__image" :src="toCoverUrl(album.last_added_photo)" />
@@ -27,7 +27,7 @@
         </template>
 
         <template #extra>
-          <div v-if="album.has_file" class="check-circle-icon">
+          <div v-if="selectedAlbums.has(album)" class="check-circle-icon">
             <XImg :src="checkmarkIcon" />
           </div>
         </template>
@@ -35,17 +35,35 @@
       </NcListItem>
     </ul>
 
-    <NcButton
-      :aria-label="t('memories', 'Create a new album.')"
-      class="new-album-button"
-      type="tertiary"
-      @click="showAlbumCreationForm = true"
-    >
-      <template #icon>
-        <Plus />
-      </template>
-      {{ t('memories', 'Create new album') }}
-    </NcButton>
+    <div class="actions">
+      <NcButton
+        :aria-label="t('memories', 'Create a new album.')"
+        class="new-album-button"
+        type="tertiary"
+        @click="showAlbumCreationForm = true"
+      >
+        <template #icon>
+          <Plus />
+        </template>
+        {{ t('memories', 'Create new album') }}
+      </NcButton>
+
+      <div class="submit-btn-wrapper">
+        <NcButton
+          :aria-label="t('memories', `Add to ${selectedCount} albums.`)"
+          class="new-album-button"
+          type="primary"
+          @click="submit"
+        >
+          {{ t('memories', 'Add to albums') }}
+        </NcButton>
+        <span class="remove-notice" v-if="unselectedCount > 0">
+          {{ t('memories', 'And remove from') }} {{ n('memories', '{n} album', '{n} albums', unselectedCount , {
+            n: unselectedCount,
+          })}}
+        </span>
+      </div>
+    </div>
   </div>
 
   <AlbumForm
@@ -100,6 +118,10 @@ export default defineComponent({
     loadingAlbums: true,
     photoId: -1,
     checkmarkIcon,
+    selectedAlbums: new Set<IAlbum>(),
+    unselectedAlbums: new Set<IAlbum>(),
+    selectedCount: 0,
+    unselectedCount: 0,
   }),
 
   mounted() {
@@ -143,6 +165,9 @@ export default defineComponent({
       try {
         const res = await axios.get<IAlbum[]>(API.ALBUM_LIST(3, this.photoId));
         this.albums = res.data;
+        this.selectedAlbums = new Set(this.albums.filter(album => album.has_file));
+        this.unselectedAlbums = new Set();
+        this.unselectedCount = 0;
       } catch (e) {
         console.error(e);
       } finally {
@@ -151,8 +176,28 @@ export default defineComponent({
     },
 
     pickAlbum(album: IAlbum) {
-      this.$emit('select', album);
+      if (this.selectedAlbums.has(album)) {
+        this.selectedAlbums.delete(album);
+        this.unselectedAlbums.add(album)
+      } else if (this.unselectedAlbums.has(album)) {
+        this.selectedAlbums.add(album)
+        this.unselectedAlbums.delete(album);
+      } else {
+        this.selectedAlbums.add(album)
+      }
+      
+      this.unselectedCount = this.albums.reduce((acc, album) => {
+        if (album.has_file && this.unselectedAlbums.has(album)) {
+          acc += 1;
+        }
+        return acc;
+      }, 0); this.selectedAlbums.size;
+      this.selectedCount = this.selectedAlbums.size;
     },
+    
+    submit() {
+      this.$emit('select', Array.from(this.selectedAlbums));
+    }
   },
 });
 </script>
@@ -230,6 +275,22 @@ export default defineComponent({
 
   .new-album-button {
     margin-top: 32px;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .submit-btn-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .remove-notice {
+    font-size: small;
   }
 }
 </style>

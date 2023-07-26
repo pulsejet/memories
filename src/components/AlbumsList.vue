@@ -33,7 +33,7 @@
         </template>
         {{ t('memories', 'Add to album') }}
       </NcButton>
-      <AddToAlbumModal ref="addToAlbumModal" @added="update" />
+      <AddToAlbumModal ref="addToAlbumModal" @added="loadAlbums" />
     </div>
   </template>
   

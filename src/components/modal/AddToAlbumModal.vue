@@ -5,7 +5,7 @@
     </template>
 
     <div class="outer">
-      <AlbumPicker @select="selectAlbum" :photos="photos" />
+      <AlbumPicker @select="selectAlbums" :photos="photos" />
 
       <div v-if="processing">
         <NcProgressBar :value="Math.round((photosDone * 100) / photos.length)" :error="true" />
@@ -60,19 +60,32 @@ export default defineComponent({
       this.$emit('close');
     },
 
-    async selectAlbum(album: IAlbum) {
+    async selectAlbums(albums: IAlbum[]) {
       if (this.processing) return;
+      const processed = new Set<IPhoto>();
+      const photosDone = new Set<number>();
 
-      const name = album.name || album.album_id.toString();
-      const gen = dav.addToAlbum(album.user, name, this.photos);
-      this.processing = true;
-
-      for await (const fids of gen) {
-        this.photosDone += fids.filter((f) => f).length;
-        this.added(this.photos.filter((p) => fids.includes(p.fileid)));
-      }
-
+      await Promise.all(albums.map(async (album) => { 
+        const name = album.name || album.album_id.toString();
+        const gen = dav.addToAlbum(album.user, name, this.photos);
+        this.processing = true;
+        
+        for await (const fids of gen) {
+          fids.forEach((f) => {
+            if (f) {
+              photosDone.add(f);
+            }
+          });
+          this.photos.forEach((p) => {
+            if (fids.includes(p.fileid)) {
+              processed.add(p);
+            }
+          });
+        }
+        this.photosDone = photosDone.size;
+      }));
       const n = this.photosDone;
+      this.added(Array.from(processed));
       showInfo(this.n('memories', '{n} item added to album', '{n} items added to album', n, { n }));
       this.close();
     },
