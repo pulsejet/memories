@@ -286,10 +286,10 @@ export default defineComponent({
           this.albumsListComponent?.$destroy?.();
           this.albumsListComponent = new Vue(AlbumsList as any);
           this.albumsListComponent.$mount(el);
-          this.albumsListComponent.update(Number(fileInfo.id));
+          this.albumsListComponent.update(fileInfo);
         },
         update(fileInfo) {
-          this.albumsListComponent.update(Number(fileInfo.id));
+          this.albumsListComponent.update(fileInfo);
         },
         destroy() {
           this.albumsListComponent?.$destroy?.();

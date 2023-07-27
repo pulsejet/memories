@@ -5,10 +5,10 @@
     </template>
 
     <div class="outer">
-      <AlbumPicker @select="selectAlbums" :photos="photos" />
+      <AlbumPicker @select="updateAlbums" :photos="photos" />
 
       <div v-if="processing">
-        <NcProgressBar :value="Math.round((photosDone * 100) / photos.length)" :error="true" />
+        <NcProgressBar :value="progress" :error="true" />
       </div>
     </div>
   </Modal>
@@ -37,13 +37,16 @@ export default defineComponent({
   data: () => ({
     show: false,
     photos: [] as IPhoto[],
-    photosDone: 0,
+    progress: 0,
     processing: false,
+    processed: new Set<IPhoto>(),
+    photosDone: 0,
+    totalOperations: 0,
   }),
 
   methods: {
     open(photos: IPhoto[]) {
-      this.photosDone = 0;
+      this.progress = 0;
       this.processing = false;
       this.show = true;
       this.photos = photos;
@@ -60,33 +63,34 @@ export default defineComponent({
       this.$emit('close');
     },
 
-    async selectAlbums(albums: IAlbum[]) {
-      if (this.processing) return;
-      const processed = new Set<IPhoto>();
-      const photosDone = new Set<number>();
+    async processAlbum(album: IAlbum, action: 'add' | 'remove') {
+      const name = album.name || album.album_id.toString();
+      const gen = action === 'add'
+        ? dav.addToAlbum(album.user, name, this.photos)
+        : dav.removeFromAlbum(album.user, name, this.photos);
+      
+      for await (const fids of gen) {
+        this.photosDone += fids.length;
+        this.photos.forEach((p) => {
+          if (fids.includes(p.fileid)) {
+            this.processed.add(p);
+          }
+        });
+      }
+      this.progress = Math.round((this.photosDone * 100) / this.totalOperations);
+    },
 
-      await Promise.all(albums.map(async (album) => { 
-        const name = album.name || album.album_id.toString();
-        const gen = dav.addToAlbum(album.user, name, this.photos);
-        this.processing = true;
-        
-        for await (const fids of gen) {
-          fids.forEach((f) => {
-            if (f) {
-              photosDone.add(f);
-            }
-          });
-          this.photos.forEach((p) => {
-            if (fids.includes(p.fileid)) {
-              processed.add(p);
-            }
-          });
-        }
-        this.photosDone = photosDone.size;
-      }));
-      const n = this.photosDone;
-      this.added(Array.from(processed));
-      showInfo(this.n('memories', '{n} item added to album', '{n} items added to album', n, { n }));
+    async updateAlbums(albumsToAddTo: IAlbum[], albumsToRemoveFrom: IAlbum[] = []) {
+      if (this.processing) return;
+      this.processing = true;
+      this.processed = new Set<IPhoto>();
+      this.totalOperations = this.photos.length * (albumsToAddTo.length + albumsToRemoveFrom.length);
+
+      await Promise.all(albumsToAddTo.map((album) => this.processAlbum(album, 'add')));
+      await Promise.all(albumsToRemoveFrom.map((album) => this.processAlbum(album, 'remove')));
+      const n = this.processed.size;
+      this.added(Array.from(this.processed));
+      showInfo(this.n('memories', '{n} processed', '{n} processed', n, { n }));
       this.close();
     },
   },

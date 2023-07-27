@@ -64,6 +64,7 @@
   
     data: () => ({
       fileid: -1,
+      photo: {} as { id: number, name: string },
       albums: [] as IAlbum[],
       loadingAlbums: false,
     }),
@@ -77,15 +78,15 @@
     },
   
     methods: {
-      update(photoId: number){
-        this.fileid = photoId;
+      update(photo: { id: number, name: string }){
+        this.photo = photo;
         this.loadAlbums();
       },
 
       async loadAlbums() {
         try {
           this.loadingAlbums = true;
-          const res = await axios.get<IAlbum[]>(API.ALBUM_LIST(3, this.fileid));
+          const res = await axios.get<IAlbum[]>(API.ALBUM_LIST(3, this.photo.id));
           this.albums = res.data.filter(album => album.has_file);
         } catch (e) {
           console.error(e);
@@ -95,8 +96,8 @@
       },
   
       handleFileUpdated({ fileid }: { fileid: number }) {
-        if (fileid && this.fileid === fileid) {
-          this.update(this.fileid);
+        if (fileid && this.photo.id === fileid) {
+          this.update(this.photo);
         }
       },
 
@@ -129,7 +130,8 @@
 
       async addToAlbum() {
         (<any>this.$refs.addToAlbumModal).open([{
-          fileid: this.fileid,
+          fileid: this.photo.id,
+          basename: this.photo.name,
         }]);
       },
     },

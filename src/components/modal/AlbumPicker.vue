@@ -196,7 +196,7 @@ export default defineComponent({
     },
     
     submit() {
-      this.$emit('select', Array.from(this.selectedAlbums));
+      this.$emit('select', Array.from(this.selectedAlbums), Array.from(this.unselectedAlbums));
     }
   },
 });
