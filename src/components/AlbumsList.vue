@@ -128,7 +128,7 @@
         e.preventDefault();
       },
 
-      async addToAlbum() {
+      addToAlbum() {
         (<any>this.$refs.addToAlbumModal).open([{
           fileid: this.photo.id,
           basename: this.photo.name,
