@@ -23,16 +23,6 @@ These are enabled by inclusion of the following values in `config.php`'s `enable
   'OC\Preview\Image',
 ```
 
-... or...
-
-```php
-  'OC\Preview\PNG',
-  'OC\Preview\JPEG',
-  'OC\Preview\GIF',
-  'OC\Preview\BMP',
-  'OC\Preview\XBitmap',
-```
-
 ## HEIC and TIFF
 
 These are enabled by inclusion of the following values in `config.php`'s `enabledPreviewProviders` array:
