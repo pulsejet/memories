@@ -81,7 +81,6 @@ export default defineComponent({
   methods: {
     async routeChange() {
       try {
-        const route = this.$route.name;
         this.items = [];
         this.loading++;
 
@@ -89,13 +88,13 @@ export default defineComponent({
         // @ts-ignore
         await this.$refs.dtm?.refresh?.();
 
-        if (route === 'albums') {
+        if (this.routeIsAlbums) {
           this.items = await dav.getAlbums(3, this.config.album_list_sort);
-        } else if (route === 'tags') {
+        } else if (this.routeIsTags) {
           this.items = await dav.getTags();
-        } else if (route === 'recognize' || route === 'facerecognition') {
-          this.items = await dav.getFaceList(route);
-        } else if (route === 'places') {
+        } else if (this.routeIsPeople) {
+          this.items = await dav.getFaceList(<any>this.$route.name);
+        } else if (this.routeIsPlaces) {
           this.items = await dav.getPlaces();
         }
       } finally {
