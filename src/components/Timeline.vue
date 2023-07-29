@@ -214,10 +214,10 @@ export default defineComponent({
 
     isMonthView(): boolean {
       if (this.$route.query.sort === 'timeline') return false;
+      if (this.$route.query.sort === 'album') return true;
       return (
-        this.$route.query.sort === 'album' ||
-        (this.config.sort_album_month && (this.$route.name === 'albums' || this.$route.name === 'album-share')) ||
-        (this.config.sort_folder_month && this.$route.name === 'folders')
+        (this.config.sort_album_month && (this.routeIsAlbums || this.routeIsAlbumShare)) ||
+        (this.config.sort_folder_month && this.routeIsFolders)
       );
     },
 
