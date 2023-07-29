@@ -211,9 +211,9 @@ export default defineComponent({
     routeHasNative(): boolean {
       return this.routeIsBase && nativex.has();
     },
+
     isMonthView(): boolean {
       if (this.$route.query.sort === 'timeline') return false;
-
       return (
         this.$route.query.sort === 'album' ||
         (this.config.sort_album_month && (this.$route.name === 'albums' || this.$route.name === 'album-share')) ||
