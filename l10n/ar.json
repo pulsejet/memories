@@ -2,7 +2,7 @@
     "Download" : "تنزيل",
     "Memories" : "ذكريات Memories",
     "Fast, modern and advanced photo management suite" : "حزمة إدارة صور سريعة وحديثة ومتقدمة",
-    "# Memories: Photo Management for Nextcloud\n\nMemories is a *batteries-included* photo management solution for Nextcloud with advanced features including:\n\n- **📸 Timeline**: Sort photos and videos by date taken, parsed from Exif data.\n- **⏪ Rewind**: Jump to any time in the past instantly and relive your memories.\n- **🤖 AI Tagging**: Group photos by people and objects, powered by [recognize](https://github.com/nextcloud/recognize) and [facerecognition](https://github.com/matiasdelellis/facerecognition).\n- **🖼️ Albums**: Create albums to group photos and videos together. Then share these albums with others.\n- **🫱🏻‍🫲🏻 External Sharing**: Share photos and videos with people outside of your Nextcloud instance.\n- **📱 Mobile Support**: Work from any device, of any shape and size through the web app.\n- **✏️ Edit Metadata**: Edit dates and other metadata on photos quickly and in bulk.\n- **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.\n- **📹 Video Transcoding**: Transcode videos and use HLS for maximal performance.\n- **🗺️ Map**: View your photos on a map, tagged with accurate reverse geocoding.\n- **📦 Migration**: Migrate easily from Nextcloud Photos and Google Takeout.\n- **⚡️ Performance**: Do all this very fast.\n\n## 🚀 Installation\n\n1. Install the app from the Nextcloud app store (try a demo [here](https://demo.memories.gallery/apps/memories/)).\n1. Perform the recommended [configuration steps](https://memories.gallery/config/).\n1. Run `php occ memories:index` to generate metadata indices for existing photos.\n1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos." : "# تطبيق Memories: تطبيق إدارة الصور بنكست كلود\n\nتطبيق Memories هو حل إدارة الصور * مع مجموعة عناصر مدمجة * بنكست كلود مع ميزات متقدمة تشمل:\n\n- ** 📸 التسلسل الزمني **: ترتيب الصور ومقاطع الفيديو حسب تاريخ الالتقاط ، وتحليلها بواسطة بيانات Exif.\n- ** ⏪ الرجوع للخلف**: انتقل إلى أي وقت في الماضي على الفور واسترجع ذكرياتك.\n- ** 🤖 الوسم بالذكاء الأصطناعي **: جمع الصور جماعية الأشخاص والأشياء، مدعومة من قبل [recognize] (https://github.com/nextcloud/recognize) و [facerecognition] (https://github.com/matiasdelellis/facerecognition ).\n- ** 🖼️ الألبومات **: أنشئ ألبومات لتجميع الصور ومقاطع الفيديو معًا. ثم شارك هذه الألبومات مع الآخرين.\n- ** 🫱🏻‍🫲🏻 المشاركة الخارجية **: شارك الصور ومقاطع الفيديو مع أشخاص خارج مثيل نكست كلود الخاص بك.\n- ** 📱 دعم الهاتف **: العمل من أي جهاز، من أي شكل وحجم من خلال تطبيق الويب.\n- ** ✏️ تحرير البيانات الوصفية **: تحرير التواريخ والبيانات الوصفية الأخرى على الصور بسرعة وبشكل مجمّع.\n- ** 📦 الأرشفة **: قم بتخزين الصور التي لا تريد أن تراها في تسلسلك الزمني في مجلد منفصل.\n- ** 📹 تحويل ترميز الفيديو **: تحويل مقاطع الفيديو واستخدام HLS لتحقيق أقصى أداء.\n- ** 🗺️ الخريطة **: اعرض صورك على الخريطة، مع تمييزها بترميز جغرافي عكسي دقيق.\n- ** 📦 الانتقال**: الانتقال بسهولة من Nextcloud Photos و Google Takeout.\n- ** ⚡️ الأداء **: قم بفعل كل هذا بسرعة كبيرة.\n\n## 🚀 التثبيت\n\n1. قم بتثبيت التطبيق من متجر تطبيقات نكست كلود(جرب نسخة تجريبية[هنا] (https://demo.memories.gallery/apps/memories/)).\n1. نفذ [خطوات التكوين] الموصى بها (https://memories.gallery/config/).\n1. قم بتشغيل \"php occ memories:index\" لإنشاء فهارس بيانات وصفية للصور الموجودة.\n1. افتح 📷 تطبيق Memories في نكست كلاود وقم بتعيين الدليل الذي يحتوي على صورك.",
+    "# Memories: Photo Management for Nextcloud\n\nMemories is a *batteries-included* photo management solution for Nextcloud with advanced features including:\n\n- **📸 Timeline**: Sort photos and videos by date taken, parsed from Exif data.\n- **⏪ Rewind**: Jump to any time in the past instantly and relive your memories.\n- **🤖 AI Tagging**: Group photos by people and objects, powered by [recognize](https://github.com/nextcloud/recognize) and [facerecognition](https://github.com/matiasdelellis/facerecognition).\n- **🖼️ Albums**: Create albums to group photos and videos together. Then share these albums with others.\n- **🫱🏻‍🫲🏻 External Sharing**: Share photos and videos with people outside of your Nextcloud instance.\n- **📱 Mobile Support**: Work from any device, of any shape and size through the web app.\n- **✏️ Edit Metadata**: Edit dates and other metadata on photos quickly and in bulk.\n- **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.\n- **📹 Video Transcoding**: Transcode videos and use HLS for maximal performance.\n- **🗺️ Map**: View your photos on a map, tagged with accurate reverse geocoding.\n- **📦 Migration**: Migrate easily from Nextcloud Photos and Google Takeout.\n- **⚡️ Performance**: Do all this very fast.\n\n## 🚀 Installation\n\n1. Install the app from the Nextcloud app store (try a demo [here](https://demo.memories.gallery/apps/memories/)).\n1. Perform the recommended [configuration steps](https://memories.gallery/config/).\n1. Run `php occ memories:index` to generate metadata indices for existing photos.\n1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos." : "# تطبيق Memories: تطبيق إدارة الصور بنكست كلود\n\nتطبيق Memories هو حل إدارة الصور * مع مجموعة عناصر مدمجة * بنكست كلود مع ميزات متقدمة تشمل:\n\n- ** 📸 التسلسل الزمني **: ترتيب الصور ومقاطع الفيديو حسب تاريخ الالتقاط ، وتحليلها بواسطة بيانات Exif.\n- ** ⏪ الرجوع للخلف**: انتقل إلى أي وقت في الماضي على الفور واسترجع ذكرياتك.\n- ** 🤖 الوسم بالذكاء الأصطناعي **: جمع الصور جماعية الأشخاص والأشياء، مدعومة من قبل [recognize] (https://github.com/nextcloud/recognize) و [facerecognition] (https://github.com/matiasdelellis/facerecognition ).\n- ** 🖼️ الألبومات **: أنشئ ألبومات لتجميع الصور ومقاطع الفيديو معًا. ثم شارك هذه الألبومات مع الآخرين.\n- ** 🫱🏻‍🫲🏻 المشاركة الخارجية **: شارك الصور ومقاطع الفيديو مع أشخاص خارج مثيل نكست كلود الخاص بك.\n- ** 📱 دعم الهاتف **: العمل من أي جهاز، من أي شكل وحجم من خلال تطبيق الويب.\n- ** ✏️ تحرير البيانات الوصفية **: تحرير التواريخ والبيانات الوصفية الأخرى على الصور بسرعة وبشكل مجمّع.\n- ** 📦 الأرشفة **: قم بتخزين الصور التي لا تريد أن تراها في تسلسلك الزمني في مجلد منفصل.\n- ** 📹 تحويل ترميز الفيديو **: تحويل مقاطع الفيديو واستخدام بروتوكول HLS لتحقيق أقصى أداء.\n- ** 🗺️ الخريطة **: اعرض صورك على الخريطة، مع تمييزها بترميز جغرافي عكسي دقيق.\n- ** 📦 الانتقال**: الانتقال بسهولة من Nextcloud Photos و Google Takeout.\n- ** ⚡️ الأداء **: قم بفعل كل هذا بسرعة كبيرة.\n\n## 🚀 التثبيت\n\n1. قم بتثبيت التطبيق من متجر تطبيقات نكست كلود(جرب نسخة تجريبية[هنا] (https://demo.memories.gallery/apps/memories/)).\n1. نفذ [خطوات التكوين] الموصى بها (https://memories.gallery/config/).\n1. قم بتشغيل \"php occ memories:index\" لإنشاء فهارس بيانات وصفية للصور الموجودة.\n1. افتح 📷 تطبيق Memories في نكست كلاود وقم بتعيين الدليل الذي يحتوي على صورك.",
     "Settings" : "الإعدادات",
     "People (Recognize)" : "الأشخاص (التعرف)",
     "People" : "الناس",
@@ -23,11 +23,11 @@
     "Face Recognition" : "التعرُّف علي الوجوه",
     "A better photos experience awaits you" : "تجربة صور أفضل في انتظارك",
     "Choose the root folder of your timeline to begin" : "اختر مجلد جذر لبدء تسلسلك الزمني",
-    "Continue to Memories" : "تابع إلى ميموريز \"Memories\"",
+    "Continue to Memories" : "تابع إلى Memories",
     "Choose again" : "اختر مرة أخرى",
     "Click here to start" : "اضغط هنا للبدأ",
     "You can always change this later in settings" : "يمكنك دائمًا تغيير هذا لاحقًا من الإعدادات",
-    "If you just installed Memories, visit the admin panel first." : "إذا كنت علي وشك القيام بتثبيت الذكريات \"Memories\"، فقم بالرجوع إلي لوحة المسئول أولاً.",
+    "If you just installed Memories, visit the admin panel first." : "إذا كنت علي وشك القيام بتثبيت تطبيق Memories، فقم بالرجوع إلي لوحة المسئول أولاً.",
     "Choose the root of your timeline" : "إختَر الدليل الأساسي لتسلسلك الزمني ",
     "The selected folder does not seem to be valid. Try again." : "يبدو أن المجلد المحدد غير صالح. حاول ثانية.",
     "No photos were found in the selected folder." : "لم يتم إيجاد صور فى المجلد المختار.",
@@ -76,8 +76,8 @@
     "Sort folders oldest-first" : "رتّب المجلدات من الأقدم للأحدث",
     "Sort albums oldest-first" : "رتِّب الألبومات من الأقدم إلى الأحدث",
     "Choose Timeline Paths" : "اختر مسارات التسلسل الزمني",
-    "Choose the root for the folders view" : "إختَر الجذر الدليل الأساسي لعرض المجلدات",
-    "Are you sure you want to log out {user}?" : "هل أنت متأكد من أنك تريد تسجيل الخروج {المستخدم}؟",
+    "Choose the root for the folders view" : "إختَر الدليل الأساسي لعرض المجلدات",
+    "Are you sure you want to log out {user}?" : "هل أنت متأكد من أنك تريد تسجيل الخروج {user}؟",
     "Close" : "إغلاق",
     "{photoCount} photos" : "{photoCount} صور",
     "Failed to load some photos" : "تعذّر تحميل بعض الصِّور",
@@ -88,16 +88,16 @@
     "Use system perl (only if exiftool binary does not work)" : "استخدام نظام perl (فقط إذا لم تعمل حزمة exiftool الثنائية)",
     "File Support" : "دعم الملف",
     "You can configure the enabled Nextcloud preview providers below." : "يمكنك ضبط مزودي معاينة نكست كلود الممكّنة أدناه.",
-    "If you are using Imaginary for preview generation, you can ignore this section." : "إذا كنت تستخدم تطبيق أمجينري \"Imaginary\" لإنشاء المعاينة فيمكنك تجاهل هذا الجزء.",
-    "To enable RAW support, install the Camera RAW Previews app." : "لتمكين دعم تنسيق ملف الصورة الأولية \"RAW\"، قم بتثبيت تطبيق Camera RAW Previews.",
+    "If you are using Imaginary for preview generation, you can ignore this section." : "إذا كنت تستخدم تطبيق Imaginary لإنشاء المعاينة فيمكنك تجاهل هذا الجزء.",
+    "To enable RAW support, install the Camera RAW Previews app." : "لتمكين دعم تنسيق RAW، قم بتثبيت تطبيق Camera RAW Previews.",
     "Documentation." : "التوثيق.",
-    "The following MIME types are configured for preview generation." : "تم إعداد أنواع تنسيقات امتدادات بريد الإنترنت متعددة الأغراض \"MIME\" التالية لإنشاء المعاينة.",
+    "The following MIME types are configured for preview generation." : "تم إعداد أنواع تنسيقات MIME التالية لإنشاء المعاينة.",
     "Max preview size (trade-off between quality and storage requirements)." : "أقصى حجم للمعاينة (الأولوية النسبية بين متطلبات الجودة والتخزين).",
     "Max memory for preview generation (MB)" : "الحد الأقصى للذاكرة لإنشاء المعاينة (ميغا بايت)",
     "Max size of preview files (MB)" : "الحجم الأقصى لملفات المعاينة (ميغا بايت)",
     "Images (JPEG, PNG, GIF, BMP)" : "الصور (تسيق JPEG, PNG, GIF, BMP)",
-    "HEIC (Imagick)" : "تنسيق ملف الصور عالي الكفاءة \"HEIC\" (إيماج ماجيك/ Imagick) ",
-    "TIFF (Imagick)" : "تنسيق ملف الصور الموسومة \"TIFF\" (إيماج ماجيك/ Imagick) ",
+    "HEIC (Imagick)" : "تنسيق الصور HEIC (Imagick) ",
+    "TIFF (Imagick)" : "تنسيق ملف الصور TIFF ( Imagick) ",
     "Videos (ffmpeg)" : "فيديوهات (ffmpeg)",
     "Media Indexing" : "فهرسة الوسائط",
     "{n} media files have been indexed" : "تمّت فهرسة {n} ملفات وسائط",
@@ -129,7 +129,7 @@
     "Geometry table has not been created." : "لم يتم إنشاء جدول الهندسة.",
     "Looks like the planet data is incomplete." : "يبدو أن بيانات الكوكب غير كاملة.",
     "Reverse geocoding has not been configured ({status})." : "لم يتم تكوين الترميز الجغرافي العكسي ({status}).",
-    "Memories supports offline reverse geocoding using the OpenStreetMaps data on MySQL and Postgres." : "يدعم تطبيق ميموريز Memories الترميز الجغرافي العكسي في وضع عدم الاتصال باستخدام بيانات من تطبيق خرائط OpenStreetMaps على MySQL و Postgres",
+    "Memories supports offline reverse geocoding using the OpenStreetMaps data on MySQL and Postgres." : "يدعم تطبيق Memories الترميز الجغرافي العكسي في وضع عدم الاتصال باستخدام بيانات من تطبيق خرائط OpenStreetMaps على MySQL و Postgres",
     "You need to download the planet data into your database. This is highly recommended and has low overhead." : "تحتاج إلى تنزيل بيانات الكوكب في قاعدة البيانات الخاصة بك. هذا موصى به للغاية حيث أنها منخفضة العبء ",
     "If the button below does not work for importing the planet data, use the following command:" : "إذا كان الزر أدناه لا يعمل لاستيراد بيانات الكوكب، فاستخدم الأمر التالي:",
     "Note: the geometry data is stored in the memories_planet_geometry table, with no prefix." : "ملاحظة: يتم تخزين البيانات الهندسية في جدول memories_planet_geometry، بدون بادئة.",
@@ -141,8 +141,8 @@
     "You are about to download the planet database. This may take a while." : "أنت على وشك تنزيل قاعدة بيانات الكوكب. هذا قد يستغرق بعض الوقت.",
     "This may also cause all photos to be re-indexed!" : "قد يتسبب هذا أيضًا في إعادة فهرسة جميع الصور!",
     "Video Streaming" : "بث الفيديو ",
-    "Live transcoding provides for adaptive streaming of videos using HLS." : "يوفر تحويل الترميز المباشر دفقًا متكيفًا لمقاطع الفيديو باستخدام بروتوكول بث النص الفائق المباشر\"HLS\".",
-    "Note that this may be very CPU intensive without hardware acceleration, and transcoding will not be used for external storage." : "لاحظ أن هذا قد يكون بالغ الحدة علي وحدة المعالجة المركزية دون تسريع الأجهزة ، ولن يتم استخدام تحويل الترميز للتخزين الخارجي.",
+    "Live transcoding provides for adaptive streaming of videos using HLS." : "يوفر تحويل الترميز المباشر دفقًا متكيفًا لمقاطع الفيديو باستخدام بروتوكول HLS.",
+    "Note that this may be very CPU intensive without hardware acceleration, and transcoding will not be used for external storage." : "لاحظ أن هذا قد يكون بالغ الحدة علي وحدة المعالجة المركزية دون تسريع الأجهزة، ولن يتم استخدام تحويل الترميز للتخزين الخارجي.",
     "Enable Transcoding" : "تمكين تحويل الترميز",
     "ffmpeg path" : "مسار ffmpeg",
     "ffprobe path" : "مسار ffprobe",
@@ -166,6 +166,7 @@
     "Enable NVENC Temporal AQ" : "تمكين التكمية التكيفية المؤقتة لمرمز NVENC",
     "NPP scaler" : "معداد NPP",
     "CUDA scaler" : "معدّاد CUDA ",
+    "not recommended" : "لا يُوصى به",
     "VA-API device ({dev}) is readable" : "جهاز VA-API ({dev}) قابل للقراءة",
     "VA-API device ({dev}) not found" : "لم يتم العثور علي جهاز VA-API ({dev})",
     "VA-API device ({dev}) has incorrect permissions" : "جهاز VA-API ({dev}) لديه أذونات غير صحيحة",
@@ -261,9 +262,9 @@
     "Too many failures, aborting" : "إخفاقات كثيرة، سيتم الخروج",
     "Error while moving {basename}" : "خطأٌ أثناء نقل {basename}",
     "Failed to move {name}." : "فشل في نقل {name}.",
-    "Move selected photos to person" : "نقُل الصور المحددة إلى شخص",
+    "Move selected photos to person" : "نقُل الصور المحددة إلى فئة شخص",
     "Move the selected photos to {target}?" : "نقل الصور المحددة إلى {target}؟",
-    "An error occurred while moving photos from {name}." : "حدث خطأ أثناء نقل الصور من {الاسم}.",
+    "An error occurred while moving photos from {name}." : "حدث خطأ أثناء نقل الصور من {name}.",
     "Choose a folder" : "اختر مجلدًا",
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["تم نقل {n} عناصر إلى المجلد","تم نقل {n} عنصر إلى المجلد","تم نقل {n} عناصر إلى المجلد","تم نقل {n} عناصر إلى المجلد","تم نقل {n} عناصر إلى المجلد","تم نقل {n} عناصر إلى المجلد"],
     "Remove" : "حذف",
@@ -313,12 +314,12 @@
     "Unsaved changes" : "تغييرات لم يتم حفظها",
     "Drop changes" : "إسقاط التغييرات",
     "Share" : "مشاركة",
-    "Play Live Photo" : "تشغيل الصور الحية Live Photo",
+    "Play Live Photo" : "تشغيل صور Live Photo",
     "Download Video" : "تنزيل الفيديو",
     "Slideshow" : "عرض الشرائح",
     "Previous" : "السابق",
     "Next" : "التالي",
-    "Editing is currently disabled for Live Photos" : "التحرير معطل حاليّاً بالنسبة للصور الحية Live Photos",
+    "Editing is currently disabled for Live Photos" : "التحرير معطل حاليّاً بالنسبة لصور Live Photos",
     "Are you sure you want to delete?" : "هل أنت متأكد أنك تريد الحذف؟",
     "Failed to delete photo" : "فشل في حذف الصورة",
     "{name} binary exists and is executable." : "الملف الثنائي {name} موجود وقابل للتنفيذ.",

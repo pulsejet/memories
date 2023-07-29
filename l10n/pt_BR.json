@@ -166,6 +166,7 @@
     "Enable NVENC Temporal AQ" : "Habilitar NVENC Temporal AQ",
     "NPP scaler" : "Escalador NPP",
     "CUDA scaler" : "Escalador CUDA",
+    "not recommended" : "não recomendado",
     "VA-API device ({dev}) is readable" : "O dispositivo VA-API ({dev}) é legível",
     "VA-API device ({dev}) not found" : "Dispositivo VA-API ({dev}) não encontrado",
     "VA-API device ({dev}) has incorrect permissions" : "O dispositivo VA-API ({dev}) tem permissões incorretas",
