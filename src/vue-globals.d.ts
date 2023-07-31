@@ -22,6 +22,7 @@ declare module 'vue' {
     routeIsMap: boolean;
     routeIsTags: boolean;
     routeIsExplore: boolean;
+    routeIsAlbumShare: boolean;
     routeIsPublic: boolean;
   }
 }

@@ -46,6 +46,9 @@ export default defineComponent({
     routeIsExplore(): boolean {
       return this.$route.name === 'explore';
     },
+    routeIsAlbumShare(): boolean {
+      return this.$route.name === 'album-share';
+    },
     routeIsPublic(): boolean {
       return this.$route.name?.endsWith('-share') ?? false;
     },

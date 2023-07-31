@@ -28,9 +28,13 @@ export function getAlbumPath(user: string, name: string) {
 export async function getAlbums(type: 1 | 2 | 3, sortOrder: 1 | 2) {
   const data = (await axios.get<IAlbum[]>(API.ALBUM_LIST(type))).data;
 
-  // Response is already sorted by date, sort otherwise
-  if (sortOrder === 2) {
-    data.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+  // Sort the response
+  switch (sortOrder) {
+    case 2:
+      data.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+      break;
+    default:
+      data.sort((a, b) => b.last_added_photo - a.last_added_photo);
   }
 
   return data;
