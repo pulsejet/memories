@@ -79,7 +79,6 @@ import Settings from './components/Settings.vue';
 import FirstStart from './components/FirstStart.vue';
 import Viewer from './components/viewer/Viewer.vue';
 import Metadata from './components/Metadata.vue';
-import AlbumsList from './components/AlbumsList.vue';
 import Sidebar from './components/Sidebar.vue';
 import EditMetadataModal from './components/modal/EditMetadataModal.vue';
 import NodeShareModal from './components/modal/NodeShareModal.vue';
@@ -145,7 +144,6 @@ export default defineComponent({
   data: () => ({
     navItems: [] as NavItem[],
     metadataComponent: null as any,
-    albumsListComponent: null as any,
     settingsOpen: false,
   }),
 
@@ -272,28 +270,6 @@ export default defineComponent({
         destroy() {
           this.metadataComponent?.$destroy?.();
           this.metadataComponent = null;
-        },
-      })
-    );
-    // Register sidebar albums tab
-    globalThis.OCA?.Files?.Sidebar?.registerTab(
-      new globalThis.OCA.Files.Sidebar.Tab({
-        id: 'memories-albums',
-        name: this.t('memories', 'Albums'),
-        icon: 'icon-details',
-
-        mount(el, fileInfo, context) {
-          this.albumsListComponent?.$destroy?.();
-          this.albumsListComponent = new Vue(AlbumsList as any);
-          this.albumsListComponent.$mount(el);
-          this.albumsListComponent.update(fileInfo);
-        },
-        update(fileInfo) {
-          this.albumsListComponent.update(fileInfo);
-        },
-        destroy() {
-          this.albumsListComponent?.$destroy?.();
-          this.albumsListComponent = null;
         },
       })
     );

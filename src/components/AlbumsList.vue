@@ -3,6 +3,17 @@
       <div class="loading-icon fill-block" v-if="loadingAlbums">
         <XLoadingIcon />
       </div>
+      <NcButton
+        :aria-label="t('memories', 'Add to album.')"
+        class="new-album-button"
+        type="tertiary"
+        @click="addToAlbum"
+      >
+        <template #icon>
+          <Plus />
+        </template>
+        {{ t('memories', 'Add to album') }}
+      </NcButton>
       <span class="empty-state" v-if="albums.length === 0">{{ t('memories', 'No albums') }}</span>
       <ul v-else class="albums-container">
         <NcListItem
@@ -22,17 +33,6 @@
           
         </NcListItem>
       </ul>
-      <NcButton
-        :aria-label="t('memories', 'Add to album.')"
-        class="new-album-button"
-        type="tertiary"
-        @click="addToAlbum"
-      >
-        <template #icon>
-          <Plus />
-        </template>
-        {{ t('memories', 'Add to album') }}
-      </NcButton>
       <AddToAlbumModal ref="addToAlbumModal" @added="loadAlbums" />
     </div>
   </template>
@@ -61,9 +61,19 @@
       Plus,
       AddToAlbumModal,
     },
+
+    props: {
+      fileid: {
+        type: Number,
+        required: true,
+      },
+      filename: {
+        type: String,
+        required: true,
+      },
+    },
   
     data: () => ({
-      fileid: -1,
       photo: {} as { id: number, name: string },
       albums: [] as IAlbum[],
       loadingAlbums: false,
@@ -71,12 +81,13 @@
   
     mounted() {
       subscribe('files:file:updated', this.handleFileUpdated);
+      this.update({ id: this.$props.fileid, name: this.$props.filename });
     },
   
     beforeDestroy() {
       unsubscribe('files:file:updated', this.handleFileUpdated);
     },
-  
+
     methods: {
       update(photo: { id: number, name: string }){
         this.photo = photo;
@@ -183,6 +194,10 @@
       align-items: center;
       justify-content: center;
       display: flex;
+    }
+
+    .new-album-button {
+      margin: auto;
     }
   
   </style>

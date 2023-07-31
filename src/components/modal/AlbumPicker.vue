@@ -13,7 +13,7 @@
             albumName: album.name,
           })
         "
-        @click.prevent="pickAlbum(album)"
+        @click.prevent="() => {}"
       >
         <template #icon>
           <XImg v-if="album.last_added_photo !== -1" class="album__image" :src="toCoverUrl(album.last_added_photo)" />
@@ -23,11 +23,24 @@
         </template>
 
         <template #subtitle>
-          {{ getSubtitle(album) }}
+          <div @click.prevent="pickAlbum(album)">
+            {{ getSubtitle(album) }}
+          </div>
         </template>
 
         <template #extra>
-          <div v-if="selectedAlbums.has(album)" class="check-circle-icon">
+          <div
+            v-if="!selectedAlbums.has(album)"
+            class="check-circle-icon check-circle-icon--inactive"
+            @click.prevent="toggleAlbumSelection(album)"
+          >
+            <XImg :src="checkmarkIcon" />
+          </div>
+          <div
+            v-if="selectedAlbums.has(album)"
+            class="check-circle-icon"
+            @click.prevent="toggleAlbumSelection(album)"
+          >
             <XImg :src="checkmarkIcon" />
           </div>
         </template>
@@ -175,7 +188,7 @@ export default defineComponent({
       }
     },
 
-    pickAlbum(album: IAlbum) {
+    toggleAlbumSelection(album: IAlbum) {
       if (this.selectedAlbums.has(album)) {
         this.selectedAlbums.delete(album);
         this.unselectedAlbums.add(album)
@@ -193,6 +206,10 @@ export default defineComponent({
         return acc;
       }, 0); this.selectedAlbums.size;
       this.selectedCount = this.selectedAlbums.size;
+    },
+
+    pickAlbum(album: IAlbum) {
+      this.$emit('select', [album], []);
     },
     
     submit() {
@@ -259,12 +276,18 @@ export default defineComponent({
 
     .check-circle-icon {
       border-radius: 50%;
+      border: 1px solid rgba(0, 255, 0, 0.1882352941);
       background-color: rgba(0, 255, 0, 0.1882352941);
       height: 34px;
       width: 34px;
       display: flex;
       align-items: center;
       justify-content: center;
+
+      &--inactive {
+        border: 1px solid rgba($color: black, $alpha: 0.1);
+        background-color: transparent;
+      }
 
       & img {
         width: 50%;
