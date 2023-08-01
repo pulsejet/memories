@@ -168,6 +168,7 @@ OC.L10N.register(
     "Enable NVENC Temporal AQ" : "Уљкучи NVENC Темпорални AQ",
     "NPP scaler" : "NPP скалер",
     "CUDA scaler" : "CUDA скалер",
+    "not recommended" : "не препоручује се",
     "VA-API device ({dev}) is readable" : "VA-API уређај ({dev}) може да се чита",
     "VA-API device ({dev}) not found" : "VA-API уређај ({dev}) није пронађен",
     "VA-API device ({dev}) has incorrect permissions" : "VA-API уређај ({dev}) нема исправне дозволе",

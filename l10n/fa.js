@@ -9,6 +9,7 @@ OC.L10N.register(
     "Folders" : "پوشه ها",
     "Favorites" : "مورد علاقه‌ها",
     "Videos" : "فیلم ها ",
+    "Albums" : "آلبوم ها",
     "Archive" : "بایگانی",
     "Tags" : "برچسب ها",
     "Edit" : "ویرایش",
