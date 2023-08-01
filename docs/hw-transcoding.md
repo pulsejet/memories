@@ -86,11 +86,12 @@ If you use Docker, you need to:
 1. Make sure the right drivers are installed. This can be done using a custom Dockerfile, for example
 
    ```Dockerfile
-   FROM nextcloud:25
+   FROM nextcloud:latest
 
    RUN apt-get update && \
-       apt-get install -y software-properties-common && \
-       apt-add-repository -y non-free && \
+       apt-get install -y lsb-release && \
+       echo "deb http://ftp.debian.org/debian $(lsb_release -cs) non-free" >> \
+          /etc/apt/sources.list.d/intel-graphics.list && \
        apt-get update && \
        apt-get install -y intel-media-va-driver-non-free ffmpeg && \
        rm -rf /var/lib/apt/lists/*
