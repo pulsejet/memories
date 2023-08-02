@@ -84,8 +84,8 @@ export class API {
     return tok(gen(`${BASE}/folders/sub`));
   }
 
-  static ALBUM_LIST(t: 1 | 2 | 3 = 3) {
-    return gen(`${BASE}/clusters/albums?t=${t}`);
+  static ALBUM_LIST(t: 1 | 2 | 3 = 3, photoId: number = -1) {
+    return gen(`${BASE}/clusters/albums?t=${t}&fid=${photoId}`);
   }
 
   static ALBUM_DOWNLOAD(user: string, name: string) {

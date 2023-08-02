@@ -13,7 +13,7 @@
             albumName: album.name,
           })
         "
-        @click="pickAlbum(album)"
+        @click.prevent="() => {}"
       >
         <template #icon>
           <XImg v-if="album.last_added_photo !== -1" class="album__image" :src="toCoverUrl(album.last_added_photo)" />
@@ -23,22 +23,60 @@
         </template>
 
         <template #subtitle>
-          {{ getSubtitle(album) }}
+          <div @click.prevent="pickAlbum(album)">
+            {{ getSubtitle(album) }}
+          </div>
         </template>
+
+        <template #extra>
+          <div
+            v-if="!selectedAlbums.has(album)"
+            class="check-circle-icon check-circle-icon--inactive"
+            @click.prevent="toggleAlbumSelection(album)"
+          >
+            <XImg :src="checkmarkIcon" />
+          </div>
+          <div
+            v-if="selectedAlbums.has(album)"
+            class="check-circle-icon"
+            @click.prevent="toggleAlbumSelection(album)"
+          >
+            <XImg :src="checkmarkIcon" />
+          </div>
+        </template>
+        
       </NcListItem>
     </ul>
 
-    <NcButton
-      :aria-label="t('memories', 'Create a new album.')"
-      class="new-album-button"
-      type="tertiary"
-      @click="showAlbumCreationForm = true"
-    >
-      <template #icon>
-        <Plus />
-      </template>
-      {{ t('memories', 'Create new album') }}
-    </NcButton>
+    <div class="actions">
+      <NcButton
+        :aria-label="t('memories', 'Create a new album.')"
+        class="new-album-button"
+        type="tertiary"
+        @click="showAlbumCreationForm = true"
+      >
+        <template #icon>
+          <Plus />
+        </template>
+        {{ t('memories', 'Create new album') }}
+      </NcButton>
+
+      <div class="submit-btn-wrapper">
+        <NcButton
+          :aria-label="t('memories', `Add to ${selectedCount} albums.`)"
+          class="new-album-button"
+          type="primary"
+          @click="submit"
+        >
+          {{ t('memories', 'Add to albums') }}
+        </NcButton>
+        <span class="remove-notice" v-if="unselectedCount > 0">
+          {{ t('memories', 'And remove from') }} {{ n('memories', '{n} album', '{n} albums', unselectedCount , {
+            n: unselectedCount,
+          })}}
+        </span>
+      </div>
+    </div>
   </div>
 
   <AlbumForm
@@ -58,6 +96,7 @@ import { getCurrentUser } from '@nextcloud/auth';
 import AlbumForm from './AlbumForm.vue';
 import Plus from 'vue-material-design-icons/Plus.vue';
 import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue';
+import checkmarkIcon from '../../assets/checkmark.svg';
 
 import axios from '@nextcloud/axios';
 
@@ -67,9 +106,17 @@ const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
 import { getPreviewUrl } from '../../services/utils/helpers';
 import { IAlbum, IPhoto } from '../../types';
 import { API } from '../../services/API';
+import { PropType } from 'vue';
 
 export default defineComponent({
   name: 'AlbumPicker',
+  props: {
+    /** List of pictures that are selected */
+    photos: {
+      type: Array as PropType<IPhoto[]>,
+      required: true,
+    },
+  },
   components: {
     AlbumForm,
     Plus,
@@ -82,9 +129,19 @@ export default defineComponent({
     showAlbumCreationForm: false,
     albums: [] as IAlbum[],
     loadingAlbums: true,
+    photoId: -1,
+    checkmarkIcon,
+    selectedAlbums: new Set<IAlbum>(),
+    unselectedAlbums: new Set<IAlbum>(),
+    selectedCount: 0,
+    unselectedCount: 0,
   }),
 
   mounted() {
+    if (this.photos.length === 1) {
+      // this only makes sense when we try to add single photo to albums
+      this.photoId = this.photos[0].fileid;
+    }
     this.loadAlbums();
   },
 
@@ -119,8 +176,11 @@ export default defineComponent({
 
     async loadAlbums() {
       try {
-        const res = await axios.get<IAlbum[]>(API.ALBUM_LIST());
+        const res = await axios.get<IAlbum[]>(API.ALBUM_LIST(3, this.photoId));
         this.albums = res.data;
+        this.selectedAlbums = new Set(this.albums.filter(album => album.has_file));
+        this.unselectedAlbums = new Set();
+        this.unselectedCount = 0;
       } catch (e) {
         console.error(e);
       } finally {
@@ -128,9 +188,33 @@ export default defineComponent({
       }
     },
 
-    pickAlbum(album: IAlbum) {
-      this.$emit('select', album);
+    toggleAlbumSelection(album: IAlbum) {
+      if (this.selectedAlbums.has(album)) {
+        this.selectedAlbums.delete(album);
+        this.unselectedAlbums.add(album)
+      } else if (this.unselectedAlbums.has(album)) {
+        this.selectedAlbums.add(album)
+        this.unselectedAlbums.delete(album);
+      } else {
+        this.selectedAlbums.add(album)
+      }
+      
+      this.unselectedCount = this.albums.reduce((acc, album) => {
+        if (album.has_file && this.unselectedAlbums.has(album)) {
+          acc += 1;
+        }
+        return acc;
+      }, 0); this.selectedAlbums.size;
+      this.selectedCount = this.selectedAlbums.size;
     },
+
+    pickAlbum(album: IAlbum) {
+      this.$emit('select', [album], []);
+    },
+    
+    submit() {
+      this.$emit('select', Array.from(this.selectedAlbums), Array.from(this.unselectedAlbums));
+    }
   },
 });
 </script>
@@ -156,6 +240,11 @@ export default defineComponent({
     .album {
       :deep .list-item {
         box-sizing: border-box;
+        display: flex;
+      }
+
+      :deep .list-item-content__wrapper {
+        flex-grow: 1;
       }
 
       :deep .line-one__title {
@@ -184,10 +273,47 @@ export default defineComponent({
         }
       }
     }
+
+    .check-circle-icon {
+      border-radius: 50%;
+      border: 1px solid rgba(0, 255, 0, 0.1882352941);
+      background-color: rgba(0, 255, 0, 0.1882352941);
+      height: 34px;
+      width: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &--inactive {
+        border: 1px solid rgba($color: black, $alpha: 0.1);
+        background-color: transparent;
+      }
+
+      & img {
+        width: 50%;
+        height: 50%;
+      }
+    }
   }
 
   .new-album-button {
     margin-top: 32px;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .submit-btn-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .remove-notice {
+    font-size: small;
   }
 }
 </style>

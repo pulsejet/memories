@@ -38,6 +38,8 @@
     <div v-if="lat && lon" class="map">
       <iframe class="fill-block" :src="mapUrl" />
     </div>
+
+    <AlbumsList :fileid="fileid" :filename="filename" />
   </div>
 
   <div class="loading-icon fill-block" v-else>
@@ -65,6 +67,7 @@ import ImageIcon from 'vue-material-design-icons/Image.vue';
 import InfoIcon from 'vue-material-design-icons/InformationOutline.vue';
 import LocationIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagIcon from 'vue-material-design-icons/Tag.vue';
+import AlbumsList from './AlbumsList.vue';
 import { API } from '../services/API';
 import type { IImageInfo, IPhoto } from '../types';
 
@@ -82,10 +85,12 @@ export default defineComponent({
     NcActions,
     NcActionButton,
     EditIcon,
+    AlbumsList,
   },
 
   data: () => ({
     fileid: null as number | null,
+    filename: '',
     exif: {} as { [prop: string]: any },
     baseInfo: {} as IImageInfo,
     state: 0,
@@ -330,6 +335,7 @@ export default defineComponent({
       if (state !== this.state) return res.data;
 
       this.fileid = res.data.fileid;
+      this.filename = res.data.basename;
       this.exif = res.data.exif || {};
       this.baseInfo = res.data;
       return this.baseInfo;
