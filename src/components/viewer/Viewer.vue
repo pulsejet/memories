@@ -138,7 +138,7 @@
           </NcActionButton>
           <NcActionButton
             :aria-label="t('memories', 'Add to album')"
-            v-if="canShare"
+            v-if="config.albums_enabled && canShare"
             @click="updateAlbums"
             :close-after-click="true"
           >

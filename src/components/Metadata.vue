@@ -62,6 +62,7 @@ import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 import { getCanonicalLocale } from '@nextcloud/l10n';
 import { DateTime } from 'luxon';
 
+import UserConfig from '../mixins/UserConfig';
 import AlbumsList from './modal/AlbumsList.vue';
 
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
@@ -94,6 +95,8 @@ export default defineComponent({
     EditIcon,
     AlbumsList,
   },
+
+  mixins: [UserConfig],
 
   data: () => ({
     fileid: null as number | null,
@@ -357,6 +360,8 @@ export default defineComponent({
     },
 
     async refreshAlbums(): Promise<IAlbum[]> {
+      if (!this.config.albums_enabled) return [];
+
       const state = this.state;
 
       let list: IAlbum[] = [];
