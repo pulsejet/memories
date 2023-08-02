@@ -89,9 +89,8 @@ export class API {
   }
 
   static ALBUM_DOWNLOAD(user: string, name: string) {
-    return gen(`${BASE}/clusters/albums/download?name={user}/{name}`, {
-      user,
-      name,
+    return API.Q(gen(`${BASE}/clusters/albums/download`), {
+      name: `${user}/${name}`,
     });
   }
 
