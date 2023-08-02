@@ -127,10 +127,10 @@ export default defineComponent({
     async loadAlbums() {
       try {
         // this only makes sense when we try to add single photo to albums
-        const photoId = this.photos.length === 1 ? this.photos[0].fileid : -1;
+        const fileid = this.photos.length === 1 ? this.photos[0].fileid : -1;
 
         // get albums, possibly for one photo
-        const res = await axios.get<IAlbum[]>(API.ALBUM_LIST(3, photoId));
+        const res = await axios.get<IAlbum[]>(API.ALBUM_LIST(3, fileid));
         this.albums = res.data;
         this.selection = new Set(this.albums.filter((album) => album.has_file));
         this.deselection = new Set();
@@ -180,6 +180,9 @@ export default defineComponent({
   }
 
   .albums-container {
+    min-height: 150px;
+    max-height: 350px;
+
     .check-circle-icon {
       border-radius: 50%;
       border: 1px solid rgba($color: black, $alpha: 0.1);

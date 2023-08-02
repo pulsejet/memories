@@ -86,9 +86,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .albums-container {
-  min-height: 150px;
-  max-height: 350px;
-  overflow-x: scroll;
+  overflow-x: hidden;
   padding: 2px;
 
   .album {

@@ -1,5 +1,11 @@
 <template>
   <div class="outer" v-if="fileid">
+    <div v-if="albums.length" class="albums">
+      <div class="section-title">{{ t('memories', 'Albums') }}</div>
+      <AlbumsList :albums="albums" />
+    </div>
+
+    <div class="section-title">{{ t('memories', 'Metadata') }}</div>
     <div class="top-field" v-for="field of topFields" :key="field.title">
       <div class="icon">
         <component :is="field.icon" :size="24" />
@@ -38,8 +44,6 @@
     <div v-if="lat && lon" class="map">
       <iframe class="fill-block" :src="mapUrl" />
     </div>
-
-    <AlbumsList :fileid="fileid" :filename="filename" />
   </div>
 
   <div class="loading-icon fill-block" v-else>
@@ -58,7 +62,7 @@ import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 import { getCanonicalLocale } from '@nextcloud/l10n';
 import { DateTime } from 'luxon';
 
-import * as utils from '../services/Utils';
+import AlbumsList from './modal/AlbumsList.vue';
 
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
@@ -67,9 +71,11 @@ import ImageIcon from 'vue-material-design-icons/Image.vue';
 import InfoIcon from 'vue-material-design-icons/InformationOutline.vue';
 import LocationIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagIcon from 'vue-material-design-icons/Tag.vue';
-import AlbumsList from './modal/AlbumsList.vue';
+
+import * as utils from '../services/Utils';
 import { API } from '../services/API';
-import type { IImageInfo, IPhoto } from '../types';
+
+import type { IAlbum, IImageInfo, IPhoto } from '../types';
 
 interface TopField {
   title: string;
@@ -93,15 +99,18 @@ export default defineComponent({
     filename: '',
     exif: {} as { [prop: string]: any },
     baseInfo: {} as IImageInfo,
+    albums: [] as IAlbum[],
     state: 0,
   }),
 
   mounted() {
     subscribe('files:file:updated', this.handleFileUpdated);
+    subscribe('memories:albums:update', this.refreshAlbums);
   },
 
   beforeDestroy() {
     unsubscribe('files:file:updated', this.handleFileUpdated);
+    unsubscribe('memories:albums:update', this.refreshAlbums);
   },
 
   computed: {
@@ -328,6 +337,7 @@ export default defineComponent({
       this.state = Math.random();
       this.fileid = null;
       this.exif = {};
+      this.albums = [];
 
       const state = this.state;
       const url = API.Q(utils.getImageInfoUrl(photo), { tags: 1 });
@@ -338,7 +348,29 @@ export default defineComponent({
       this.filename = res.data.basename;
       this.exif = res.data.exif || {};
       this.baseInfo = res.data;
+
+      // trigger other refreshes
+      this.refreshAlbums();
+
       return this.baseInfo;
+    },
+
+    async refreshAlbums(): Promise<IAlbum[]> {
+      const state = this.state;
+
+      // get album list
+      let list: IAlbum[] = [];
+      try {
+        list = (await axios.get<IAlbum[]>(API.ALBUM_LIST(3, this.fileid!))).data;
+      } catch (e) {
+        console.error('metadata: failed to load albums', e);
+      }
+
+      // filter albums containing this file
+      list = list.filter((a) => a.has_file);
+
+      if (state !== this.state) return list;
+      return (this.albums = list);
     },
 
     handleFileUpdated({ fileid }: { fileid: number }) {
@@ -351,6 +383,18 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.section-title {
+  font-variant: all-small-caps;
+  padding: 0px 10px;
+}
+
+.albums {
+  font-size: 0.96em;
+  :deep .line-one__title {
+    font-weight: 400 !important; // no bold title
+  }
+}
+
 .top-field {
   margin: 10px;
   margin-bottom: 25px;
