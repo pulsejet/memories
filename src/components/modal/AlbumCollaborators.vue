@@ -159,7 +159,7 @@ type Collaborator = {
 };
 
 export default defineComponent({
-  name: 'AddToAlbumModal',
+  name: 'AlbumCollaborators',
   components: {
     Magnify,
     Close,

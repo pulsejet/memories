@@ -43,7 +43,8 @@
 
     <div class="actions">
       <NcButton
-        :aria-label="t('memories', 'Create a new album.')"
+        :aria-label="t('memories', 'Create new album.')"
+        :disabled="disabled"
         class="new-album-button"
         type="tertiary"
         @click="showAlbumCreationForm = true"
@@ -55,7 +56,13 @@
       </NcButton>
 
       <div class="submit-btn-wrapper">
-        <NcButton :aria-label="t('memories', 'Save')" class="new-album-button" type="primary" @click="submit">
+        <NcButton
+          class="new-album-button"
+          type="primary"
+          :aria-label="t('memories', 'Save changes')"
+          :disabled="disabled"
+          @click="submit"
+        >
           {{ t('memories', 'Save changes') }}
         </NcButton>
         <span class="remove-notice" v-if="deselection.size > 0">
@@ -106,6 +113,12 @@ export default defineComponent({
     photos: {
       type: Array as PropType<IPhoto[]>,
       required: true,
+    },
+
+    /** Disable controls */
+    disabled: {
+      type: Boolean,
+      default: false,
     },
   },
   components: {
@@ -180,6 +193,8 @@ export default defineComponent({
     },
 
     toggleAlbumSelection(album: IAlbum) {
+      if (this.disabled) return;
+
       if (this.selection.has(album)) {
         this.selection.delete(album);
 

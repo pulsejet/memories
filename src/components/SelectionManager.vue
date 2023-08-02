@@ -34,7 +34,7 @@
 
     <!-- Selection Modals -->
     <FaceMoveModal ref="faceMoveModal" @moved="deletePhotos" :updateLoading="updateLoading" />
-    <AddToAlbumModal ref="addToAlbumModal" @added="clearSelection" />
+    <AddToAlbumModal ref="addToAlbumModal" @change="clearSelection" />
     <MoveToFolderModal ref="moveToFolderModal" @moved="refresh" />
   </div>
 </template>

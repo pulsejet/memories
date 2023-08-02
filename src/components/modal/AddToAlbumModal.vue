@@ -5,9 +5,9 @@
     </template>
 
     <div class="outer">
-      <AlbumPicker @select="updateAlbums" :photos="photos" />
+      <AlbumPicker @select="update" :photos="photos" :disabled="!!opsTotal" />
 
-      <div v-if="processing">
+      <div class="progress-bar" v-if="opsTotal">
         <NcProgressBar :value="progress" :error="true" />
       </div>
     </div>
@@ -37,60 +37,54 @@ export default defineComponent({
   data: () => ({
     show: false,
     photos: [] as IPhoto[],
-    progress: 0,
-    processing: false,
-    processed: new Set<IPhoto>(),
-    photosDone: 0,
-    totalOperations: 0,
+    opsDone: 0,
+    opsTotal: 0,
   }),
+
+  computed: {
+    progress(): number {
+      return Math.min(this.opsTotal ? Math.round((this.opsDone * 100) / this.opsTotal) : 100, 100);
+    },
+  },
 
   methods: {
     open(photos: IPhoto[]) {
-      this.progress = 0;
-      this.processing = false;
-      this.show = true;
       this.photos = photos;
-    },
-
-    added(photos: IPhoto[]) {
-      this.$emit('added', photos);
+      this.show = true;
+      this.opsTotal = 0;
     },
 
     close() {
-      this.photos = [];
-      this.processing = false;
       this.show = false;
+      this.photos = [];
+      this.opsTotal = 0;
       this.$emit('close');
     },
 
-    async processAlbum(album: IAlbum, action: 'add' | 'remove') {
-      const name = album.name || album.album_id.toString();
-      const gen = action === 'add'
-        ? dav.addToAlbum(album.user, name, this.photos)
-        : dav.removeFromAlbum(album.user, name, this.photos);
-      
-      for await (const fids of gen) {
-        this.photosDone += fids.length;
-        this.photos.forEach((p) => {
-          if (fids.includes(p.fileid)) {
-            this.processed.add(p);
-          }
-        });
+    async update(selection: IAlbum[], deselection: IAlbum[]) {
+      if (this.opsTotal) return;
+
+      // Total number of DAV calls (ugh DAV)
+      this.opsTotal = this.photos.length * (selection.length + deselection.length);
+
+      // Add the photos to the selected albums
+      for (const album of selection) {
+        for await (const fids of dav.addToAlbum(album.user, album.name, this.photos)) {
+          this.opsDone += fids.filter((f) => f).length;
+        }
       }
-      this.progress = Math.round((this.photosDone * 100) / this.totalOperations);
-    },
 
-    async updateAlbums(albumsToAddTo: IAlbum[], albumsToRemoveFrom: IAlbum[] = []) {
-      if (this.processing) return;
-      this.processing = true;
-      this.processed = new Set<IPhoto>();
-      this.totalOperations = this.photos.length * (albumsToAddTo.length + albumsToRemoveFrom.length);
+      // Remove the photos from the deselected albums
+      for (const album of deselection) {
+        for await (const fids of dav.removeFromAlbum(album.user, album.name, this.photos)) {
+          this.opsDone += fids.filter((f) => f).length;
+        }
+      }
 
-      await Promise.all(albumsToAddTo.map((album) => this.processAlbum(album, 'add')));
-      await Promise.all(albumsToRemoveFrom.map((album) => this.processAlbum(album, 'remove')));
-      const n = this.processed.size;
-      this.added(Array.from(this.processed));
-      showInfo(this.n('memories', '{n} processed', '{n} processed', n, { n }));
+      const n = this.photos.length;
+      showInfo(this.n('memories', '{n} photo updated', '{n} photos updated', n, { n }));
+
+      this.$emit('change');
       this.close();
     },
   },
@@ -100,5 +94,9 @@ export default defineComponent({
 <style lang="scss" scoped>
 .outer {
   margin-top: 15px;
+}
+
+.progress-bar {
+  margin-top: 10px;
 }
 </style>
