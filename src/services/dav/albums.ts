@@ -51,7 +51,6 @@ export async function getAlbums(sort: 1 | 2 = 1, fileid?: number) {
 export async function* addToAlbum(user: string, name: string, photos: IPhoto[]) {
   // Get files data
   let fileInfos = await base.getFiles(photos);
-
   const albumPath = getAlbumPath(user, name);
 
   // Add each file
@@ -88,10 +87,14 @@ export async function* addToAlbum(user: string, name: string, photos: IPhoto[]) 
  * @returns Generator
  */
 export async function* removeFromAlbum(user: string, name: string, photos: IPhoto[]) {
-  // Add each file
-  const calls = photos.map((f) => async () => {
+  // Get files data
+  let fileInfos = await base.getFiles(photos);
+  const albumPath = getAlbumPath(user, name);
+
+  // Remove each file
+  const calls = fileInfos.map((f) => async () => {
     try {
-      await client.deleteFile(`/photos/${user}/albums/${name}/${f.fileid}-${f.basename}`);
+      await client.deleteFile(`${albumPath}/${f.fileid}-${f.basename}`);
       return f.fileid;
     } catch (e) {
       showError(
