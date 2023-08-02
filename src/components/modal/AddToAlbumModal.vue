@@ -72,28 +72,56 @@ export default defineComponent({
     async update(selection: IAlbum[], deselection: IAlbum[]) {
       if (this.opsTotal) return;
 
+      // For now, updats is relevant only for multiple photos
+      // and multiple photos do not support deselection anyway.
+      // So it is good enough to only emit either op here.
+      const processedIds = new Set<number>();
+
       // Total number of DAV calls (ugh DAV)
       this.opsTotal = this.photos.length * (selection.length + deselection.length);
+      this.opsDone = 0;
+      let opsSuccess = 0;
+
+      // Process file ids returned from generator
+      const processFileIds = (fileIds: number[]) => {
+        const successIds = fileIds.filter((f) => f);
+        successIds.forEach((f) => processedIds.add(f));
+        this.opsDone += fileIds.length;
+        opsSuccess += successIds.length;
+      };
 
       // Add the photos to the selected albums
       for (const album of selection) {
-        for await (const fids of dav.addToAlbum(album.user, album.name, this.photos)) {
-          this.opsDone += fids.filter((f) => f).length;
+        for await (const fileIds of dav.addToAlbum(album.user, album.name, this.photos)) {
+          processFileIds(fileIds);
         }
       }
 
       // Remove the photos from the deselected albums
       for (const album of deselection) {
         for await (const fids of dav.removeFromAlbum(album.user, album.name, this.photos)) {
-          this.opsDone += fids.filter((f) => f).length;
+          processFileIds(fids);
         }
       }
 
-      const n = this.photos.length;
+      const n = processedIds.size;
       showInfo(this.n('memories', '{n} photo updated', '{n} photos updated', n, { n }));
 
-      emit('memories:albums:update', this.photos);
-      this.close();
+      // emit only the successfully processed photos here
+      // so that only these are deselected by the manager
+      const processedPhotos = this.photos.filter((p) => processedIds.has(p.fileid));
+      emit('memories:albums:update', processedPhotos);
+
+      // close the modal only if all ops are successful
+      if (opsSuccess === this.opsTotal) {
+        this.close();
+      } else {
+        this.opsTotal = 0;
+
+        // remove the photos that were processed successfully
+        // so that the user can try again with the remaining ones
+        this.photos = this.photos.filter((p) => !processedIds.has(p.fileid));
+      }
     },
   },
 });
