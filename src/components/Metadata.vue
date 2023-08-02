@@ -1,8 +1,8 @@
 <template>
   <div class="outer" v-if="fileid">
-    <div v-if="albums.length" class="albums">
+    <div v-if="albums.length">
       <div class="section-title">{{ t('memories', 'Albums') }}</div>
-      <AlbumsList :albums="albums" />
+      <AlbumsList class="albums" :albums="albums" />
     </div>
 
     <div class="section-title">{{ t('memories', 'Metadata') }}</div>
