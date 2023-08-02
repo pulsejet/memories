@@ -73,6 +73,7 @@ import { emit, subscribe } from '@nextcloud/event-bus';
 
 import * as utils from './services/Utils';
 import * as nativex from './native';
+import router from './router';
 import staticConfig from './services/static-config';
 import UserConfig from './mixins/UserConfig';
 import Timeline from './components/Timeline.vue';
@@ -259,12 +260,15 @@ export default defineComponent({
 
         mount(el, fileInfo, context) {
           this.metadataComponent?.$destroy?.();
-          this.metadataComponent = new Vue(Metadata as any);
+          this.metadataComponent = new Vue({
+            render: (h) => h(Metadata),
+            router,
+          });
           this.metadataComponent.$mount(el);
-          this.metadataComponent.update(Number(fileInfo.id));
+          this.metadataComponent.$children[0].update(Number(fileInfo.id));
         },
         update(fileInfo) {
-          this.metadataComponent.update(Number(fileInfo.id));
+          this.metadataComponent.$children[0].update(Number(fileInfo.id));
         },
         destroy() {
           this.metadataComponent?.$destroy?.();

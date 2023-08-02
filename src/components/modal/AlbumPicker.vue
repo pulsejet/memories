@@ -3,7 +3,7 @@
     <XLoadingIcon v-if="loadingAlbums" class="loading-icon centered" />
 
     <ul class="albums-container">
-      <AlbumsList ref="albumsList" :albums="albums" @click="toggleAlbumSelection">
+      <AlbumsList ref="albumsList" :albums="albums" :link="false" @click="toggleAlbumSelection">
         <template #extra="{ album }">
           <div
             class="check-circle-icon"

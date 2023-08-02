@@ -6,7 +6,8 @@
       :key="album.album_id"
       :title="album.name"
       :aria-label="album.name"
-      @click.prevent="$emit('click', album)"
+      :to="link ? linkTarget(album) : null"
+      @click="click($event, album)"
     >
       <template #icon>
         <XImg v-if="album.last_added_photo !== -1" class="album__image" :src="toCoverUrl(album.last_added_photo)" />
@@ -55,9 +56,30 @@ export default defineComponent({
       type: Array as PropType<IAlbum[]>,
       required: true,
     },
+    link: {
+      type: Boolean,
+      default: true,
+    },
   },
 
   methods: {
+    click($event: any, album: IAlbum) {
+      if (!this.link) {
+        $event.preventDefault();
+      }
+      this.$emit('click', album);
+    },
+
+    linkTarget(album: IAlbum) {
+      return {
+        name: 'albums',
+        params: {
+          name: album.name,
+          user: album.user,
+        },
+      };
+    },
+
     toCoverUrl(fileId: string | number) {
       return getPreviewUrl({
         photo: {
