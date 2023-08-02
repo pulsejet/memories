@@ -2,7 +2,7 @@
   <div class="outer" v-if="fileid">
     <div v-if="albums.length" class="albums">
       <div class="section-title">{{ t('memories', 'Albums') }}</div>
-      <AlbumsList :albums="albums" />
+      <AlbumsList :albums="albums" @click="openAlbum" />
     </div>
 
     <div class="section-title">{{ t('memories', 'Metadata') }}</div>
@@ -74,6 +74,7 @@ import TagIcon from 'vue-material-design-icons/Tag.vue';
 
 import * as utils from '../services/Utils';
 import { API } from '../services/API';
+import router from '../router';
 
 import type { IAlbum, IImageInfo, IPhoto } from '../types';
 
@@ -371,6 +372,16 @@ export default defineComponent({
 
       if (state !== this.state) return list;
       return (this.albums = list);
+    },
+
+    openAlbum(album: IAlbum) {
+      router.push({
+        name: 'albums',
+        params: {
+          name: album.name,
+          user: album.user,
+        },
+      });
     },
 
     handleFileUpdated({ fileid }: { fileid: number }) {

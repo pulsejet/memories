@@ -1,6 +1,6 @@
 <template>
   <div v-if="!showAlbumCreationForm" class="album-picker">
-    <XLoadingIcon v-if="loadingAlbums" class="loading-icon" />
+    <XLoadingIcon v-if="loadingAlbums" class="loading-icon centered" />
 
     <ul class="albums-container">
       <AlbumsList ref="albumsList" :albums="albums" @click="toggleAlbumSelection">
@@ -126,6 +126,8 @@ export default defineComponent({
 
     async loadAlbums() {
       try {
+        this.loadingAlbums = true;
+
         // this only makes sense when we try to add single photo to albums
         const fileid = this.photos.length === 1 ? this.photos[0].fileid : -1;
 

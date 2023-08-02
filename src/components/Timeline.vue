@@ -275,7 +275,7 @@ export default defineComponent({
         }
 
         globalThis.mViewer.open(photo, this.list);
-      } else if (from?.hash?.startsWith('#v') && !to.hash?.startsWith('#v') && viewerIsOpen) {
+      } else if (!to.hash?.startsWith('#v') && viewerIsOpen) {
         // Close viewer
         globalThis.mViewer.close();
       }
