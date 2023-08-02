@@ -24,9 +24,11 @@
       </template>
 
       <template #footer>
-        <NcAppNavigationItem :name="t('memories', 'Settings')" @click="showSettings">
-          <CogIcon slot="icon" :size="20" />
-        </NcAppNavigationItem>
+        <ul class="app-navigation__settings">
+          <NcAppNavigationItem :name="t('memories', 'Settings')" @click="showSettings">
+            <CogIcon slot="icon" :size="20" />
+          </NcAppNavigationItem>
+        </ul>
       </template>
     </NcAppNavigation>
 
@@ -440,5 +442,12 @@ export default defineComponent({
   .outer {
     padding: 0px;
   }
+}
+
+ul.app-navigation__settings {
+  height: auto !important;
+  overflow: hidden !important;
+  padding-top: 0 !important;
+  flex: 0 0 auto;
 }
 </style>
