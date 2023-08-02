@@ -1,5 +1,5 @@
 <template>
-  <aside id="app-sidebar-vue" class="app-sidebar" v-if="reducedOpen">
+  <aside id="app-sidebar-vue" class="app-sidebar reduced hide-scrollbar" v-if="reducedOpen">
     <div class="title">
       <h2>{{ basename }}</h2>
 
@@ -197,6 +197,10 @@ export default defineComponent({
 #app-sidebar-vue {
   max-width: 360px !important;
   position: fixed !important;
+
+  &.reduced {
+    overflow-y: auto;
+  }
 
   @media (max-width: 512px) {
     max-width: unset !important;
