@@ -86,9 +86,8 @@ class AlbumsQuery
 
         // Post process
         foreach ($albums as &$row) {
-            $albumId = (int) $row['album_id'];
             $row['cluster_id'] = $row['user'].'/'.$row['name'];
-            $row['album_id'] = $albumId;
+            $row['album_id'] = (int) $row['album_id'];
             $row['created'] = (int) $row['created'];
             $row['last_added_photo'] = (int) $row['last_added_photo'];
         }
