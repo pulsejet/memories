@@ -18,7 +18,10 @@
 import { defineComponent } from 'vue';
 
 import * as dav from '../../services/DavRequests';
+
 import { showInfo } from '@nextcloud/dialogs';
+import { emit } from '@nextcloud/event-bus';
+
 import { IAlbum, IPhoto } from '../../types';
 
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
@@ -45,6 +48,11 @@ export default defineComponent({
     progress(): number {
       return Math.min(this.opsTotal ? Math.round((this.opsDone * 100) / this.opsTotal) : 100, 100);
     },
+  },
+
+  mounted() {
+    console.assert(!globalThis.updateAlbums, 'AddToAlbumModal mounted twice');
+    globalThis.updateAlbums = this.open;
   },
 
   methods: {
@@ -84,7 +92,7 @@ export default defineComponent({
       const n = this.photos.length;
       showInfo(this.n('memories', '{n} photo updated', '{n} photos updated', n, { n }));
 
-      this.$emit('change');
+      emit('memories:albums:update', this.photos);
       this.close();
     },
   },

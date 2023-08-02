@@ -67,7 +67,7 @@ import ImageIcon from 'vue-material-design-icons/Image.vue';
 import InfoIcon from 'vue-material-design-icons/InformationOutline.vue';
 import LocationIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagIcon from 'vue-material-design-icons/Tag.vue';
-import AlbumsList from './AlbumsList.vue';
+import AlbumsList from './modal/AlbumsList.vue';
 import { API } from '../services/API';
 import type { IImageInfo, IPhoto } from '../types';
 

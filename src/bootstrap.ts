@@ -35,6 +35,7 @@ declare global {
   var OCP: Nextcloud.v24.OCP;
 
   var editMetadata: (photos: IPhoto[], sections?: number[]) => void;
+  var updateAlbums: (photos: IPhoto[]) => void;
   var sharePhoto: (photo: IPhoto) => void;
   var shareNodeLink: (path: string, immediate?: boolean) => Promise<void>;
   var showSettings: () => void;

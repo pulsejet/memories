@@ -53,6 +53,7 @@
     <Viewer />
     <Sidebar />
     <EditMetadataModal />
+    <AddToAlbumModal />
     <NodeShareModal />
     <ShareModal />
   </NcContent>
@@ -81,6 +82,7 @@ import Viewer from './components/viewer/Viewer.vue';
 import Metadata from './components/Metadata.vue';
 import Sidebar from './components/Sidebar.vue';
 import EditMetadataModal from './components/modal/EditMetadataModal.vue';
+import AddToAlbumModal from './components/modal/AddToAlbumModal.vue';
 import NodeShareModal from './components/modal/NodeShareModal.vue';
 import ShareModal from './components/modal/ShareModal.vue';
 import MobileNav from './components/MobileNav.vue';
@@ -120,6 +122,7 @@ export default defineComponent({
     Viewer,
     Sidebar,
     EditMetadataModal,
+    AddToAlbumModal,
     NodeShareModal,
     ShareModal,
     MobileNav,
@@ -182,11 +185,7 @@ export default defineComponent({
     },
 
     isFirstStart(): boolean {
-      return (
-        this.config.timeline_path === 'EMPTY' &&
-        !this.routeIsPublic &&
-        !this.$route.query.noinit
-      );
+      return this.config.timeline_path === 'EMPTY' && !this.routeIsPublic && !this.$route.query.noinit;
     },
 
     showAlbums(): boolean {

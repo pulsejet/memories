@@ -34,7 +34,6 @@
 
     <!-- Selection Modals -->
     <FaceMoveModal ref="faceMoveModal" @moved="deletePhotos" :updateLoading="updateLoading" />
-    <AddToAlbumModal ref="addToAlbumModal" @change="clearSelection" />
     <MoveToFolderModal ref="moveToFolderModal" @moved="refresh" />
   </div>
 </template>
@@ -49,7 +48,7 @@ import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
 import { translate as t, translatePlural as n } from '@nextcloud/l10n';
-import { IDay, IHeadRow, IPhoto, IRow, IRowType, ISelectionAction } from '../types';
+import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 import { getCurrentUser } from '@nextcloud/auth';
 
 import * as dav from '../services/DavRequests';
@@ -57,7 +56,6 @@ import * as utils from '../services/Utils';
 import * as nativex from '../native';
 
 import FaceMoveModal from './modal/FaceMoveModal.vue';
-import AddToAlbumModal from './modal/AddToAlbumModal.vue';
 import MoveToFolderModal from './modal/MoveToFolderModal.vue';
 
 import StarIcon from 'vue-material-design-icons/Star.vue';
@@ -72,6 +70,8 @@ import MoveIcon from 'vue-material-design-icons/ImageMove.vue';
 import AlbumsIcon from 'vue-material-design-icons/ImageAlbum.vue';
 import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
 import FolderMoveIcon from 'vue-material-design-icons/FolderMove.vue';
+
+import { IDay, IHeadRow, IPhoto, IRow, IRowType, ISelectionAction } from '../types';
 
 type Selection = Map<number, IPhoto>;
 
@@ -92,7 +92,6 @@ export default defineComponent({
     NcActions,
     NcActionButton,
     FaceMoveModal,
-    AddToAlbumModal,
     MoveToFolderModal,
 
     CloseIcon,
@@ -220,10 +219,16 @@ export default defineComponent({
       const i = this.defaultActions.findIndex((a) => a.id === 'face-move');
       this.defaultActions.unshift(this.defaultActions.splice(i, 1)[0]);
     }
+
+    // Subscribe to global events
+    subscribe('memories:albums:update', this.clearSelection);
   },
 
   beforeDestroy() {
     this.setHasTopBar(false);
+
+    // Unsubscribe from global events
+    unsubscribe('memories:albums:update', this.clearSelection);
   },
 
   watch: {
@@ -798,7 +803,7 @@ export default defineComponent({
      * Move selected photos to album
      */
     async addToAlbum(selection: Selection) {
-      (<any>this.$refs.addToAlbumModal).open(Array.from(selection.values()));
+      globalThis.updateAlbums(Array.from(selection.values()));
     },
 
     /**

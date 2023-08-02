@@ -138,8 +138,8 @@
           </NcActionButton>
           <NcActionButton
             :aria-label="t('memories', 'Add to album')"
-            v-if="canEdit"
-            @click="addToAlbum"
+            v-if="canShare"
+            @click="updateAlbums"
             :close-after-click="true"
           >
             {{ t('memories', 'Add to album') }}
@@ -162,7 +162,6 @@
         </div>
       </div>
     </div>
-    <AddToAlbumModal ref="addToAlbumModal" />
   </div>
 </template>
 
@@ -191,7 +190,6 @@ import 'photoswipe/style.css';
 import PsImage from './PsImage';
 import PsVideo from './PsVideo';
 import PsLivePhoto from './PsLivePhoto';
-import AddToAlbumModal from '../modal/AddToAlbumModal.vue';
 
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import DeleteIcon from 'vue-material-design-icons/TrashCanOutline.vue';
@@ -231,7 +229,6 @@ export default defineComponent({
     AlbumRemoveIcon,
     LivePhotoIcon,
     AlbumIcon,
-    AddToAlbumModal,
   },
 
   mixins: [UserConfig],
@@ -1140,11 +1137,12 @@ export default defineComponent({
       globalThis.editMetadata([globalThis.currentViewerPhoto]);
     },
 
-    addToAlbum() {
-        if (this.currentPhoto) {
-          (<any>this.$refs.addToAlbumModal).open([this.currentPhoto]);
-        }
-      },
+    /**
+     * Update album selection for current photo
+     */
+    updateAlbums() {
+      globalThis.updateAlbums([this.currentPhoto!]);
+    },
   },
 });
 </script>
