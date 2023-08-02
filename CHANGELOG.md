@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- **Feature**: Allow adding photos to multiple albums together ([#752](https://github.com/pulsejet/memories/pull/752))
+- **Feature**: Show albums of photo in metadata ([#752](https://github.com/pulsejet/memories/pull/752))
+
 ## [v5.2.1] - 2023-07-03
 
 - **Feature**: Allow moving unclustered faces to a cluster with Recognize (v4.2.0+)
