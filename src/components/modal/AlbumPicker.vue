@@ -67,13 +67,11 @@ import { defineComponent, PropType } from 'vue';
 import AlbumForm from './AlbumForm.vue';
 import AlbumsList from './AlbumsList.vue';
 
-import axios from '@nextcloud/axios';
-
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
 
+import * as dav from '../../services/DavRequests';
 import { IAlbum, IPhoto } from '../../types';
-import { API } from '../../services/API';
 
 import PlusIcon from 'vue-material-design-icons/Plus.vue';
 import CheckIcon from 'vue-material-design-icons/Check.vue';
@@ -108,9 +106,11 @@ export default defineComponent({
     loadingAlbums: true,
     /** List of all albums */
     albums: [] as IAlbum[],
-    /** All selected albums */
+    /** Initial selection */
+    initSelection: new Set<IAlbum>(),
+    /** Selected albums */
     selection: new Set<IAlbum>(),
-    /** Deselected albums that were previously selected */
+    /** Deselected albums that were initially selected */
     deselection: new Set<IAlbum>(),
   }),
 
@@ -128,14 +128,21 @@ export default defineComponent({
       try {
         this.loadingAlbums = true;
 
-        // this only makes sense when we try to add single photo to albums
-        const fileid = this.photos.length === 1 ? this.photos[0].fileid : -1;
+        // get all albums
+        this.albums = await dav.getAlbums();
 
-        // get albums, possibly for one photo
-        const res = await axios.get<IAlbum[]>(API.ALBUM_LIST(3, fileid));
-        this.albums = res.data;
-        this.selection = new Set(this.albums.filter((album) => album.has_file));
+        // reset selection
+        this.initSelection = new Set();
+        this.selection = new Set();
         this.deselection = new Set();
+
+        // if only one photo is selected, get the albums of that photo
+        const fileid = this.photos.length === 1 ? this.photos[0].fileid : 0;
+        if (fileid) {
+          const selIds = new Set((await dav.getAlbums(1, fileid)).map((a) => a.album_id));
+          this.initSelection = new Set(this.albums.filter((a) => selIds.has(a.album_id)));
+          this.selection = new Set(this.initSelection);
+        }
       } catch (e) {
         console.error(e);
       } finally {
@@ -150,7 +157,7 @@ export default defineComponent({
         this.selection.delete(album);
 
         // deselection only if originally selected
-        if (album.has_file) {
+        if (this.initSelection.has(album)) {
           this.deselection.add(album);
         }
       } else {

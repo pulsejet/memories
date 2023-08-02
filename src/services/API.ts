@@ -37,7 +37,7 @@ export enum DaysFilterType {
 }
 
 export class API {
-  static Q(url: string, query: string | URLSearchParams | Object | undefined | null) {
+  static Q(url: string, query: string | URLSearchParams | Object | undefined | null): string {
     if (!query) return url;
 
     if (typeof query === 'object') {
@@ -84,8 +84,8 @@ export class API {
     return tok(gen(`${BASE}/folders/sub`));
   }
 
-  static ALBUM_LIST(t: 1 | 2 | 3 = 3, photoId: number = -1) {
-    return gen(`${BASE}/clusters/albums?t=${t}&fid=${photoId}`);
+  static ALBUM_LIST(fileid?: number) {
+    return API.Q(gen(`${BASE}/clusters/albums`), { fileid });
   }
 
   static ALBUM_DOWNLOAD(user: string, name: string) {

@@ -73,8 +73,8 @@ import LocationIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagIcon from 'vue-material-design-icons/Tag.vue';
 
 import * as utils from '../services/Utils';
+import * as dav from '../services/DavRequests';
 import { API } from '../services/API';
-import router from '../router';
 
 import type { IAlbum, IImageInfo, IPhoto } from '../types';
 
@@ -359,16 +359,12 @@ export default defineComponent({
     async refreshAlbums(): Promise<IAlbum[]> {
       const state = this.state;
 
-      // get album list
       let list: IAlbum[] = [];
       try {
-        list = (await axios.get<IAlbum[]>(API.ALBUM_LIST(3, this.fileid!))).data;
+        list = await dav.getAlbums(1, this.fileid!);
       } catch (e) {
         console.error('metadata: failed to load albums', e);
       }
-
-      // filter albums containing this file
-      list = list.filter((a) => a.has_file);
 
       if (state !== this.state) return list;
       return (this.albums = list);

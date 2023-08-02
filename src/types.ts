@@ -140,8 +140,6 @@ export interface IAlbum extends ICluster {
   location: string;
   /** File ID of last added photo */
   last_added_photo: number;
-  /** Whether an album contains the file */
-  has_file: boolean;
 }
 
 export interface IFace extends ICluster {

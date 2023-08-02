@@ -22,14 +22,14 @@ export function getAlbumPath(user: string, name: string) {
 
 /**
  * Get list of albums.
- * @param type Type of albums to get; 1 = personal, 2 = shared, 3 = all
- * @param sortOrder Sort order; 1 = by date, 2 = by name
+ * @param sort Sort order; 1 = by date, 2 = by name
+ * @param fileid Optional file ID to get albums for
  */
-export async function getAlbums(type: 1 | 2 | 3, sortOrder: 1 | 2) {
-  const data = (await axios.get<IAlbum[]>(API.ALBUM_LIST(type))).data;
+export async function getAlbums(sort: 1 | 2 = 1, fileid?: number) {
+  const data = (await axios.get<IAlbum[]>(API.ALBUM_LIST(fileid))).data;
 
   // Sort the response
-  switch (sortOrder) {
+  switch (sort) {
     case 2:
       data.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
       break;

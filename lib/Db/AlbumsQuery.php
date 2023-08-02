@@ -16,17 +16,17 @@ class AlbumsQuery
         $this->connection = $connection;
     }
 
-    /** Get list of albums */
-    public function getList(string $uid, int $fileId, bool $shared = false)
+    /**
+     * Get list of albums.
+     *
+     * @param bool $shared Whether to get shared albums
+     * @param int  $fileid File to filter by
+     */
+    public function getList(string $uid, bool $shared = false, int $fileid = -1)
     {
         $query = $this->connection->getQueryBuilder();
-        $allPhotosQuery = $this->connection->getQueryBuilder();
 
         // SELECT everything from albums
-        $allPhotosQuery->select('album_id')->from('photos_albums_files');
-        $allPhotosQuery->where(
-            $allPhotosQuery->expr()->eq('file_id', $allPhotosQuery->createNamedParameter($fileId, IQueryBuilder::PARAM_INT))
-        );
         $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
         $query->select(
             'pa.album_id',
@@ -67,14 +67,22 @@ class AlbumsQuery
         $query->orderBy('pa.created', 'DESC');
         $query->addOrderBy('pa.album_id', 'DESC'); // tie-breaker
 
+        // WHERE these albums contain fileid if specified
+        if ($fileid > 0) {
+            $fSq = $this->connection->getQueryBuilder()
+                ->select('paf.file_id')
+                ->from('photos_albums_files', 'paf')
+                ->where($query->expr()->andX(
+                    $query->expr()->eq('paf.album_id', 'pa.album_id'),
+                    $query->expr()->eq('paf.file_id', $query->createNamedParameter($fileid, IQueryBuilder::PARAM_INT)),
+                ))
+                ->getSQL()
+            ;
+            $query->andWhere($query->createFunction("EXISTS ({$fSq})"));
+        }
+
         // FETCH all albums
         $albums = $query->executeQuery()->fetchAll();
-        $allPhotos = $allPhotosQuery->executeQuery()->fetchAll();
-        $albumIds = array();
-
-        foreach ($allPhotos as &$album) {
-            $albumIds[$album['album_id']] = true;
-        }
 
         // Post process
         foreach ($albums as &$row) {
@@ -83,7 +91,6 @@ class AlbumsQuery
             $row['album_id'] = $albumId;
             $row['created'] = (int) $row['created'];
             $row['last_added_photo'] = (int) $row['last_added_photo'];
-            $row['has_file'] = !!$albumIds[$albumId];
         }
 
         return $albums;
