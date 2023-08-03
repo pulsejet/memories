@@ -423,8 +423,12 @@ export default defineComponent({
     aspect-ratio: 1;
     position: relative;
     display: inline-block;
-    font-size: 0.8em;
     vertical-align: top;
+    font-size: 0.85em;
+
+    @media (max-width: 768px) {
+      font-size: 0.95em;
+    }
   }
 }
 
