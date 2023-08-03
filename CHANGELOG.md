@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Allow adding photos to multiple albums together ([#752](https://github.com/pulsejet/memories/pull/752))
 - **Feature**: Show albums of photo in metadata ([#752](https://github.com/pulsejet/memories/pull/752))
 - **Feature**: Show faces in photo in sidebar metadata
+- **Feature**: Allow creation of new tags when editing metadata ([#487](https://github.com/pulsejet/memories/issues/487))
 - **Feature**: Improvements in admin interface
 - **Bugfix**: You can now configure the transpose strategy of the transcoder (required for QSV)
 
