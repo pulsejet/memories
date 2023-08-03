@@ -4,7 +4,11 @@ description: Steps to configure support for different image and video formats
 
 # File type support
 
-Memories supports the file types supported by the Nextcloud previews app. File type support is determined in part by the values listed in the `enabledPreviewProviders` configuration parameter in your configuration file. If your `config.php` does not contain an `enabledPreviewProviders` array, this means you are using Nextcloud's defaults. Copy the array over from `config.sample.php` before adding any of the values below, or else you will effectively disable all of the defaults.
+!!! danger "Use the admin interface"
+
+    It is **strongly recommended** that you use the Memories admin interface to configure file type support. This will ensure that your configuration is valid and that you do not accidentally disable support for any file types.
+
+Memories supports the file types supported by Nextcloud. File type support is determined in part by the values listed in the `enabledPreviewProviders` configuration parameter in your configuration file. If your `config.php` does not contain an `enabledPreviewProviders` array, this means you are using Nextcloud's defaults. Copy the array over from `config.sample.php` before adding any of the values below, or else you will effectively disable all of the defaults.
 
 If you add support for any one of the file types below, you must run `occ memories:index` to index these files.
 
