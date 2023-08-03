@@ -25,7 +25,12 @@ export type IDay = {
 export type IPhoto = {
   /** Nextcloud ID of file */
   fileid: number;
-  /** Vue key if duplicates present (otherwise use fileid) */
+  /**
+   * Vue key unique to this object.
+   * 1/ File ID by default.
+   * 2/ Indexed if duplicates present.
+   * 3/ Face ID for people views.
+   */
   key?: string;
   /** Etag from server */
   etag?: string;
