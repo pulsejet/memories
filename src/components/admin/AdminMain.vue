@@ -30,6 +30,7 @@ import { API } from '../../services/API';
 import * as utils from '../../services/Utils';
 import staticConfig from '../../services/static-config';
 
+import Help from './sections/Help.vue';
 import Exif from './sections/Exif.vue';
 import Indexing from './sections/Indexing.vue';
 import FileSupport from './sections/FileSupport.vue';
@@ -53,7 +54,7 @@ export default defineComponent({
     config: null as ISystemConfig | null,
     sconfig: null as IConfig | null,
 
-    components: [Exif, Indexing, FileSupport, Performance, Apps, Places, Video, VideoTranscoder, VideoAccel],
+    components: [Help, Exif, Indexing, FileSupport, Performance, Apps, Places, Video, VideoTranscoder, VideoAccel],
   }),
 
   mounted() {
