@@ -138,6 +138,16 @@ class Util
     }
 
     /**
+     * Check if preview generator is installed.
+     */
+    public static function previewGeneratorIsEnabled(): bool
+    {
+        $appManager = \OC::$server->get(IAppManager::class);
+
+        return $appManager->isEnabledForUser('previewgenerator');
+    }
+
+    /**
      * Check if link sharing is allowed.
      */
     public static function isLinkSharingEnabled(): bool

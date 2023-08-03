@@ -87,6 +87,7 @@ class OtherController extends GenericApiController
                 'albums_enabled' => Util::albumsIsEnabled(),
                 'facerecognition_installed' => Util::facerecognitionIsInstalled(),
                 'facerecognition_enabled' => Util::facerecognitionIsEnabled(),
+                'preview_generator_enabled' => Util::previewGeneratorIsEnabled(),
 
                 'timeline_path' => $getAppConfig('timelinePath', 'EMPTY'),
                 'folders_path' => $getAppConfig('foldersPath', '/'),

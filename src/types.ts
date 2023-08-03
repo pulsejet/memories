@@ -241,6 +241,7 @@ export type IConfig = {
   albums_enabled: boolean;
   facerecognition_installed: boolean;
   facerecognition_enabled: boolean;
+  preview_generator_enabled: boolean;
 
   timeline_path: string;
   folders_path: string;

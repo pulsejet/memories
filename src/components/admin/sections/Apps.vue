@@ -23,6 +23,14 @@
     <NcNoteCard v-if="sconfig.facerecognition_installed" type="success">
       {{ t('memories', 'Face Recognition is installed and enabled') }}
     </NcNoteCard>
+
+    <NcNoteCard :type="sconfig.preview_generator_enabled ? 'success' : 'error'">
+      {{
+        sconfig.preview_generator_enabled
+          ? t('memories', 'Preview generator is installed and enabled. Additional configuration may still be required.')
+          : t('memories', 'Preview generator is not installed and configured. This may make Memories very slow.')
+      }}
+    </NcNoteCard>
   </div>
 </template>
 

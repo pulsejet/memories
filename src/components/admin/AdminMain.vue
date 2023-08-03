@@ -1,5 +1,5 @@
 <template>
-  <div class="outer" v-if="loaded">
+  <div class="outer" v-if="config && sconfig">
     <XLoadingIcon class="loading-icon" v-show="loading" />
 
     <component
@@ -41,7 +41,6 @@ export default defineComponent({
   name: 'Admin',
 
   data: () => ({
-    loaded: false,
     loading: 0,
 
     status: null as ISystemStatus | null,
@@ -63,7 +62,6 @@ export default defineComponent({
         this.loading++;
         const res = await axios.get<ISystemConfig>(API.SYSTEM_CONFIG(null));
         this.config = res.data;
-        this.loaded = true;
       } catch (e) {
         showError(JSON.stringify(e));
       } finally {

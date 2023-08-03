@@ -107,6 +107,7 @@ class StaticConfig {
       albums_enabled: false,
       facerecognition_installed: false,
       facerecognition_enabled: false,
+      preview_generator_enabled: false,
 
       timeline_path: '',
       folders_path: '',
