@@ -38,4 +38,7 @@ type Config struct {
 	NVENC           bool   `json:"nvenc"`
 	NVENCTemporalAQ bool   `json:"nvencTemporalAQ"`
 	NVENCScale      string `json:"nvencScale"` // cuda, npp
+
+	// Use transpose for streaming
+	UseTranspose bool `json:"useTranspose"`
 }

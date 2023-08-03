@@ -376,8 +376,10 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 		args = append(args, strings.Split(extra, " ")...)
 	}
 
-	// Disable autorotation
-	args = append(args, []string{"-noautorotate"}...)
+	// Disable autorotation (see transpose comments below)
+	if isHls && s.c.UseTranspose {
+		args = append(args, []string{"-noautorotate"}...)
+	}
 
 	// Input specs
 	args = append(args, []string{
@@ -413,11 +415,11 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 
 		// Rotation is a mess: https://trac.ffmpeg.org/ticket/8329
 		//   1/ -noautorotate copies the sidecar metadata to the output
-		//   2/ autorotation doesn't seem to work with HW anyway (at least not with VAAPI)
+		//   2/ autorotation doesn't seem to work with some types of HW (at least not with VAAPI)
 		//   3/ autorotation doesn't work with HLS streams
-		// So keep autorotation enabled, but manually rotate for HW anyway.
-		// Also, the sidecar metadata only exists for MOV/MP4, so it's not a problem for TS.
-		if isHls {
+		//   4/ VAAPI cannot transport on AMD GPUs
+		// So: give the user to disable autorotation for HLS and use a manual transpose
+		if isHls && s.c.UseTranspose {
 			transposer := "transpose"
 			if CV == ENCODER_VAAPI {
 				transposer = "transpose_vaapi"
