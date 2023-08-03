@@ -1,6 +1,6 @@
 <template>
   <router-link draggable="false" class="cluster fill-block" :class="{ error }" :to="target" @click.native="click">
-    <div class="count-bubble" v-if="data.count">
+    <div class="count-bubble" v-if="counters && data.count">
       <NcCounterBubble> {{ data.count }} </NcCounterBubble>
     </div>
     <div class="name">
@@ -52,6 +52,10 @@ export default defineComponent({
       required: true,
     },
     link: {
+      type: Boolean,
+      default: true,
+    },
+    counters: {
       type: Boolean,
       default: true,
     },

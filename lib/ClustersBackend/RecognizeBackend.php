@@ -131,6 +131,10 @@ class RecognizeBackend extends Backend
 
     public function getClusters(): array
     {
+        /** @var \OCP\IRequest $request */
+        $request = \OC::$server->get(\OCP\IRequest::class);
+        $fileid = (int) $request->getParam('fileid', -1);
+
         $query = $this->tq->getBuilder();
 
         // SELECT all face clusters
@@ -148,6 +152,20 @@ class RecognizeBackend extends Backend
 
         // WHERE this cluster belongs to the user
         $query->where($query->expr()->eq('rfc.user_id', $query->createNamedParameter(Util::getUID())));
+
+        // WHERE these clusters contain fileid if specified
+        if ($fileid > 0) {
+            $fSq = $this->tq->getBuilder()
+                ->select('rfd.file_id')
+                ->from('recognize_face_detections', 'rfd')
+                ->where($query->expr()->andX(
+                    $query->expr()->eq('rfd.cluster_id', 'rfc.id'),
+                    $query->expr()->eq('rfd.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)),
+                ))
+                ->getSQL()
+            ;
+            $query->andWhere($query->createFunction("EXISTS ({$fSq})"));
+        }
 
         // GROUP by ID of face cluster
         $query->groupBy('rfc.id');

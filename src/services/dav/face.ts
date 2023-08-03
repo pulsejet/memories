@@ -8,8 +8,13 @@ import client from '../DavClient';
 import * as utils from '../Utils';
 import * as base from './base';
 
-export async function getFaceList(app: 'recognize' | 'facerecognition') {
-  return (await axios.get<IFace[]>(API.FACE_LIST(app))).data;
+/**
+ * Get list of faces
+ * @param app Backend app to use
+ * @param fileid File to filter by (optional)
+ */
+export async function getFaceList(app: 'recognize' | 'facerecognition', fileid?: number) {
+  return (await axios.get<IFace[]>(API.FACE_LIST(app, fileid))).data;
 }
 
 /**

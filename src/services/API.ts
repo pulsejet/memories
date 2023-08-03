@@ -106,8 +106,8 @@ export class API {
     return gen(`${BASE}/tags/set/{fileid}`, { fileid });
   }
 
-  static FACE_LIST(app: 'recognize' | 'facerecognition') {
-    return gen(`${BASE}/clusters/${app}`);
+  static FACE_LIST(app: 'recognize' | 'facerecognition', fileid?: number) {
+    return API.Q(gen(`${BASE}/clusters/${app}`), { fileid });
   }
 
   static CLUSTER_PREVIEW(backend: ClusterTypes, name: string | number) {

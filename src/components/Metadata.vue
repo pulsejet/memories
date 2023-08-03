@@ -1,5 +1,12 @@
 <template>
   <div class="outer" v-if="fileid">
+    <div v-if="people.length" class="people">
+      <div class="section-title">{{ t('memories', 'People') }}</div>
+      <div class="container" v-for="face of people" :key="face.cluster_id">
+        <Cluster :data="face" :counters="false"> </Cluster>
+      </div>
+    </div>
+
     <div v-if="albums.length">
       <div class="section-title">{{ t('memories', 'Albums') }}</div>
       <AlbumsList class="albums" :albums="albums" />
@@ -64,6 +71,7 @@ import { DateTime } from 'luxon';
 
 import UserConfig from '../mixins/UserConfig';
 import AlbumsList from './modal/AlbumsList.vue';
+import Cluster from './frame/Cluster.vue';
 
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
@@ -77,7 +85,7 @@ import * as utils from '../services/Utils';
 import * as dav from '../services/DavRequests';
 import { API } from '../services/API';
 
-import type { IAlbum, IImageInfo, IPhoto } from '../types';
+import type { IAlbum, IFace, IImageInfo, IPhoto } from '../types';
 
 interface TopField {
   title: string;
@@ -92,18 +100,24 @@ export default defineComponent({
   components: {
     NcActions,
     NcActionButton,
-    EditIcon,
     AlbumsList,
+    Cluster,
+    EditIcon,
   },
 
   mixins: [UserConfig],
 
   data: () => ({
+    // Basic info and metadata
     fileid: null as number | null,
     filename: '',
     exif: {} as { [prop: string]: any },
     baseInfo: {} as IImageInfo,
+
+    // Cluster lists
     albums: [] as IAlbum[],
+    people: [] as IFace[],
+
     state: 0,
   }),
 
@@ -342,6 +356,7 @@ export default defineComponent({
       this.fileid = null;
       this.exif = {};
       this.albums = [];
+      this.people = [];
 
       const state = this.state;
       const url = API.Q(utils.getImageInfoUrl(photo), { tags: 1 });
@@ -355,24 +370,26 @@ export default defineComponent({
 
       // trigger other refreshes
       this.refreshAlbums();
+      this.refreshPeople();
 
       return this.baseInfo;
     },
 
-    async refreshAlbums(): Promise<IAlbum[]> {
-      if (!this.config.albums_enabled) return [];
+    async refreshAlbums(): Promise<void> {
+      if (!this.config.albums_enabled) return;
+      this.albums = await this.guardState(dav.getAlbums(1, this.fileid!));
+    },
 
+    async refreshPeople(): Promise<void> {
+      if (!this.config.recognize_enabled) return;
+      this.people = await this.guardState(dav.getFaceList('recognize', this.fileid!));
+    },
+
+    async guardState<T>(promise: Promise<T>): Promise<T> {
       const state = this.state;
-
-      let list: IAlbum[] = [];
-      try {
-        list = await dav.getAlbums(1, this.fileid!);
-      } catch (e) {
-        console.error('metadata: failed to load albums', e);
-      }
-
-      if (state !== this.state) return list;
-      return (this.albums = list);
+      const res = await promise;
+      if (state === this.state) return res;
+      throw new Error('state changed');
     },
 
     handleFileUpdated({ fileid }: { fileid: number }) {
@@ -394,6 +411,19 @@ export default defineComponent({
   font-size: 0.96em;
   :deep .line-one__title {
     font-weight: 400 !important; // no bold title
+  }
+}
+
+.people {
+  > .section-title {
+    margin-bottom: 4px;
+  }
+  > .container {
+    width: calc(100% / 3);
+    aspect-ratio: 1;
+    position: relative;
+    display: inline-block;
+    font-size: 0.8em;
   }
 }
 
