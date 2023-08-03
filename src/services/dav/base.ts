@@ -55,7 +55,7 @@ export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
   let fileInfos: IFileInfo[] = [];
 
   // Remove any local photos
-  photos = photos.filter((photo) => !(photo.flag & utils.constants.c.FLAG_IS_LOCAL));
+  photos = photos.filter((photo) => !utils.isLocalPhoto(photo));
 
   // Get file IDs array
   const fileIds = photos.map((photo) => photo.fileid);

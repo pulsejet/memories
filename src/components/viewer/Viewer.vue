@@ -330,7 +330,7 @@ export default defineComponent({
 
     /** Is the current slide a local photo */
     isLocal(): boolean {
-      return Boolean((this.currentPhoto?.flag ?? 0) & this.c.FLAG_IS_LOCAL);
+      return utils.isLocalPhoto(this.currentPhoto);
     },
 
     /** Show bottom bar info such as date taken */
@@ -808,7 +808,7 @@ export default defineComponent({
       // Get full image URL
       const fullUrl = isvideo
         ? null
-        : photo.flag & this.c.FLAG_IS_LOCAL
+        : utils.isLocalPhoto(photo)
         ? nativex.API.IMAGE_FULL(photo.fileid)
         : API.IMAGE_DECODABLE(photo.fileid, photo.etag);
       const fullLoadCond = this.config.full_res_always ? 'always' : this.config.full_res_on_zoom ? 'zoom' : 'never';

@@ -54,7 +54,7 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
   if (square) size = sqsize as any;
 
   // Native preview
-  if (photo.flag & constants.c.FLAG_IS_LOCAL) {
+  if (isLocalPhoto(photo)) {
     return API.Q(nativex.API.IMAGE_PREVIEW(photo.fileid), { c: photo.etag });
   }
 
@@ -87,14 +87,22 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
 }
 
 /**
+ * Check if the object is a local photo
+ * @param photo Photo object
+ */
+export function isLocalPhoto(photo: any): boolean {
+  return typeof photo === 'object' && photo?.fileid && Boolean((photo?.flag ?? 0) & constants.c.FLAG_IS_LOCAL);
+}
+
+/**
  * Get the URL for the imageInfo of a photo
  *
  * @param photo Photo object or fileid (remote only)
  */
-export function getImageInfoUrl(photo: IPhoto | number) {
-  const fileid = typeof photo === 'object' ? photo.fileid : photo;
+export function getImageInfoUrl(photo: IPhoto | number): string {
+  const fileid = typeof photo === 'number' ? photo : photo.fileid;
 
-  if (typeof photo === 'object' && photo.flag & constants.c.FLAG_IS_LOCAL) {
+  if (isLocalPhoto(photo)) {
     return nativex.API.IMAGE_INFO(fileid);
   }
 

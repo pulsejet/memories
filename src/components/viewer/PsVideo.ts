@@ -142,7 +142,7 @@ class VideoContentSetup {
       const fileid = content.data.photo.fileid;
 
       // Local videos are played back directly
-      if (content.data.photo.flag & utils.constants.c.FLAG_IS_LOCAL) {
+      if (utils.isLocalPhoto(content.data.photo)) {
         nativex.playVideoLocal(fileid);
         return;
       }

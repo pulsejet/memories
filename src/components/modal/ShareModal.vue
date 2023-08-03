@@ -118,24 +118,24 @@ export default defineComponent({
   },
 
   computed: {
-    isVideo() {
-      return this.photo && (this.photo.mimetype?.startsWith('video/') || this.photo.flag & this.c.FLAG_IS_VIDEO);
+    isVideo(): boolean {
+      return !!this.photo && (this.photo.mimetype?.startsWith('video/') || !!(this.photo.flag & this.c.FLAG_IS_VIDEO));
     },
 
-    canShareNative() {
+    canShareNative(): boolean {
       return 'share' in navigator || nativex.has();
     },
 
-    canShareHighRes() {
+    canShareHighRes(): boolean {
       return !this.isLocal && (!this.isVideo || !this.config.vod_disable);
     },
 
-    canShareLink() {
-      return this.photo?.imageInfo?.permissions?.includes('S');
+    canShareLink(): boolean {
+      return !!this.photo?.imageInfo?.permissions?.includes('S');
     },
 
-    isLocal() {
-      return Boolean((this.photo?.flag ?? 0) & this.c.FLAG_IS_LOCAL);
+    isLocal(): boolean {
+      return utils.isLocalPhoto(this.photo);
     },
   },
 
