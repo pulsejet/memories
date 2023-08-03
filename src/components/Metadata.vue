@@ -415,6 +415,7 @@ export default defineComponent({
 }
 
 .people {
+  margin-bottom: 6px;
   > .section-title {
     margin-bottom: 4px;
   }
