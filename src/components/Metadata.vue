@@ -369,8 +369,10 @@ export default defineComponent({
       this.baseInfo = res.data;
 
       // trigger other refreshes
-      this.refreshAlbums();
-      this.refreshPeople();
+      if (!utils.isLocalPhoto(photo)) {
+        this.refreshAlbums();
+        this.refreshPeople();
+      }
 
       return this.baseInfo;
     },
