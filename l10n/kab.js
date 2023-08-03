@@ -15,6 +15,7 @@ OC.L10N.register(
     "Unknown" : "Arussin",
     "Back" : "Retour",
     "Save" : "Sekles",
+    "Save changes" : "Sekles asnifel",
     "Hour" : "Asrag",
     "Title" : "Azwel",
     "Name" : "Nom",

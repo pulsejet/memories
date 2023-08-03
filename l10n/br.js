@@ -21,6 +21,7 @@ OC.L10N.register(
     "Public link" : "Liamm publik",
     "Back" : "Distro",
     "Save" : "Enrollañ",
+    "Save changes" : "Enrollañ ar cheñchamantoù",
     "Month" : "Miz",
     "Day" : "Deiz",
     "Title" : "Titl",

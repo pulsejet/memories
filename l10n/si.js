@@ -16,6 +16,7 @@ OC.L10N.register(
     "Close" : "වසන්න",
     "Back" : "ආපසු",
     "Save" : "සුරකින්න",
+    "Save changes" : "වෙනස්කම් සුරකින්න",
     "Year" : "වර්ෂය",
     "Month" : "මාසය",
     "Day" : "දිනය",

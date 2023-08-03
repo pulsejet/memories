@@ -23,6 +23,7 @@ OC.L10N.register(
     "Unknown" : "უცნობია",
     "Back" : "უკან",
     "Save" : "შენახვა",
+    "Save changes" : "ცვილებების შენახვა",
     "Month" : "თვე",
     "Day" : "დღე",
     "Time" : "დრო",

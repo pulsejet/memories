@@ -17,6 +17,7 @@ OC.L10N.register(
     "Unknown" : "Onbekannt",
     "Back" : "Zeréck",
     "Save" : "Späicheren",
+    "Save changes" : "Ännerunge späicheren",
     "Month" : "Mount",
     "Day" : "Dag",
     "Time" : "Zäit",

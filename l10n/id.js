@@ -55,8 +55,6 @@ OC.L10N.register(
     "Back to the new album form." : "Kembali ke formulir album baru.",
     "Save" : "Simpan",
     "Create album" : "Buat album",
-    "Add selection to album {albumName}" : "Tambahkan pilihan ke album {albumName}",
-    "Create a new album." : "Buat sebuah album baru.",
     "Save collaborators for this album." : "Simpan kolaborator untuk album ini",
     "Month" : "Bulan",
     "Day" : "Hari",

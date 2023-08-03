@@ -10,6 +10,7 @@ OC.L10N.register(
     "Albums" : "Albumi",
     "Archive" : "Arhīvi",
     "Tags" : "Birkas",
+    "Metadata" : "Metadati",
     "Edit" : "Rediģēt",
     "Photos" : "Bildes",
     "Cancel" : "Atcelt",

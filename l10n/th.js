@@ -31,7 +31,7 @@ OC.L10N.register(
     "Back to the new album form." : "กลับไปยังแบบฟอร์มอัลบั้มใหม่",
     "Save" : "บันทึก",
     "Create album" : "สร้างอัลบั้ม",
-    "Add selection to album {albumName}" : "เพิ่มรายการที่เลือกไปยังอัลบั้ม {albumName}",
+    "Save changes" : "บันทึกการเปลี่ยนแปลง",
     "Month" : "เดือน",
     "Day" : "วัน",
     "Time" : "เวลา",

@@ -22,6 +22,7 @@ OC.L10N.register(
     "Close" : "Cerrar",
     "Back" : "Atrás",
     "Save" : "Guardar",
+    "Save changes" : "Guardar cambios",
     "Month" : "Mes",
     "Day" : "Día",
     "Time" : "Hora",

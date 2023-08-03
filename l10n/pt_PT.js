@@ -12,6 +12,7 @@ OC.L10N.register(
     "Archive" : "Arquivar",
     "Tags" : "Etiquetas",
     "Recognize" : "Reconhecer",
+    "Metadata" : "Metadados",
     "Edit" : "Editar",
     "Photos" : "Fotos",
     "Explore" : "Explorar",
