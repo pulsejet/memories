@@ -5,7 +5,7 @@
     <NcNoteCard :type="sconfig.albums_enabled ? 'success' : 'warning'">
       {{
         sconfig.albums_enabled
-          ? t('memories', 'Albums support is enabled.')
+          ? t('memories', 'Albums support is enabled through the Photos app.')
           : t('memories', 'Albums are disabled because the Photos app is not available.')
       }}
     </NcNoteCard>
