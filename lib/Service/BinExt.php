@@ -9,7 +9,7 @@ use OCA\Memories\Util;
 class BinExt
 {
     public const EXIFTOOL_VER = '12.60';
-    public const GOVOD_VER = '0.1.8';
+    public const GOVOD_VER = '0.1.9';
     public const NX_VER_MIN = '1.0';
 
     /** Copy a binary to temp dir for execution */
@@ -168,6 +168,8 @@ class BinExt
             'nvenc' => Util::getSystemConfig('memories.vod.nvenc', false),
             'nvencTemporalAQ' => Util::getSystemConfig('memories.vod.nvenc.temporal_aq'),
             'nvencScale' => Util::getSystemConfig('memories.vod.nvenc.scale'),
+
+            'useTranspose' => Util::getSystemConfig('memories.vod.use_transpose'),
         ];
 
         if (!$local) {

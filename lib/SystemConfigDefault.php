@@ -33,6 +33,9 @@ return [
     'memories.vod.nvenc.temporal_aq' => false,
     'memories.vod.nvenc.scale' => 'npp', // npp or cuda
 
+    // Extra streaming configuration
+    'memories.vod.use_transpose' => false,
+
     // Paths to ffmpeg and ffprobe binaries
     'memories.vod.ffmpeg' => '',
     'memories.vod.ffprobe' => '',

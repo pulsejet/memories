@@ -23,6 +23,8 @@ export type ISystemConfig = {
   'memories.vod.nvenc.temporal_aq': boolean;
   'memories.vod.nvenc.scale': string;
 
+  'memories.vod.use_transpose': boolean;
+
   enabledPreviewProviders: string[];
   preview_max_x: number;
   preview_max_y: number;

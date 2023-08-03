@@ -160,8 +160,46 @@ export default defineComponent({
     }
   }
 
-  .admin-section {
+  :deep a {
+    color: var(--color-primary-element);
+  }
+
+  :deep .admin-section {
     margin-top: 20px;
+
+    form {
+      margin-top: 1em;
+    }
+
+    .checkbox-radio-switch {
+      margin: 2px 16px;
+    }
+
+    .m-radio {
+      display: inline-block;
+    }
+
+    h2 {
+      font-size: 1.6em;
+      font-weight: 500;
+      margin-top: 40px;
+    }
+
+    h3 {
+      font-size: 1.2em;
+      font-weight: 500;
+      margin-top: 20px;
+    }
+
+    code {
+      padding-left: 10px;
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+    }
+
+    b {
+      font-weight: 500;
+    }
   }
 
   .loading-icon {
@@ -175,40 +213,6 @@ export default defineComponent({
       width: 100%;
       height: 100%;
     }
-  }
-
-  form {
-    margin-top: 1em;
-  }
-
-  .checkbox-radio-switch {
-    margin: 2px 8px;
-  }
-
-  .m-radio {
-    display: inline-block;
-  }
-
-  :deep h2 {
-    font-size: 1.6em;
-    font-weight: 500;
-    margin-top: 40px;
-  }
-
-  :deep h3 {
-    font-size: 1.2em;
-    font-weight: 500;
-    margin-top: 20px;
-  }
-
-  :deep a {
-    color: var(--color-primary-element);
-  }
-
-  :deep code {
-    padding-left: 10px;
-    -webkit-box-decoration-break: clone;
-    box-decoration-break: clone;
   }
 }
 </style>
