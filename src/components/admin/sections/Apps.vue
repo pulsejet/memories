@@ -1,0 +1,38 @@
+<template>
+  <div class="admin-section">
+    <h2>{{ t('memories', 'Recommended Apps') }}</h2>
+
+    <NcNoteCard :type="sconfig.albums_enabled ? 'success' : 'warning'">
+      {{
+        sconfig.albums_enabled
+          ? t('memories', 'Albums support is enabled.')
+          : t('memories', 'Albums are disabled because the Photos app is not available.')
+      }}
+    </NcNoteCard>
+
+    <NcNoteCard :type="sconfig.recognize_enabled ? 'success' : 'warning'">
+      {{
+        sconfig.recognize_enabled
+          ? t('memories', 'Recognize is installed and enabled.')
+          : t(
+              'memories',
+              'Recognize is not installed. Some features like face recognition and object tagging may be unavailable.'
+            )
+      }}
+    </NcNoteCard>
+    <NcNoteCard v-if="sconfig.facerecognition_installed" type="success">
+      {{ t('memories', 'Face Recognition is installed and enabled') }}
+    </NcNoteCard>
+  </div>
+</template>
+
+<script lang="ts">
+import { defineComponent } from 'vue';
+
+import AdminMixin from '../AdminMixin';
+
+export default defineComponent({
+  name: 'Apps',
+  mixins: [AdminMixin],
+});
+</script>

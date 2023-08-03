@@ -1,5 +1,6 @@
 import { defineComponent, PropType } from 'vue';
-import { ISystemStatus, ISystemConfig, IBinaryStatus } from './AdminTypes';
+import type { ISystemStatus, ISystemConfig, IBinaryStatus } from './AdminTypes';
+import type { IConfig } from '../../types';
 import axios from '@nextcloud/axios';
 
 const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch');
@@ -24,6 +25,10 @@ export default defineComponent({
     },
     config: {
       type: Object as PropType<ISystemConfig>,
+      required: true,
+    },
+    sconfig: {
+      type: Object as PropType<IConfig>,
       required: true,
     },
   },

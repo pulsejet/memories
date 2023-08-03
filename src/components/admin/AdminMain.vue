@@ -2,7 +2,15 @@
   <div class="outer" v-if="loaded">
     <XLoadingIcon class="loading-icon" v-show="loading" />
 
-    <component v-for="c in components" :key="c.__name" :is="c" :status="status" :config="config" @update="update" />
+    <component
+      v-for="c in components"
+      :key="c.__name"
+      :is="c"
+      :status="status"
+      :config="config"
+      :sconfig="sconfig"
+      @update="update"
+    />
   </div>
 </template>
 
@@ -14,17 +22,20 @@ import { showError } from '@nextcloud/dialogs';
 
 import { API } from '../../services/API';
 import * as utils from '../../services/Utils';
+import staticConfig from '../../services/static-config';
 
 import Exif from './sections/Exif.vue';
 import Indexing from './sections/Indexing.vue';
 import FileSupport from './sections/FileSupport.vue';
 import Performance from './sections/Performance.vue';
+import Apps from './sections/Apps.vue';
 import Places from './sections/Places.vue';
 import Video from './sections/Video.vue';
 import VideoTranscoder from './sections/VideoTranscoder.vue';
 import VideoAccel from './sections/VideoAccel.vue';
 
-import { ISystemConfig, ISystemStatus } from './AdminTypes';
+import type { ISystemConfig, ISystemStatus } from './AdminTypes';
+import type { IConfig } from '../../types';
 
 export default defineComponent({
   name: 'Admin',
@@ -35,13 +46,15 @@ export default defineComponent({
 
     status: null as ISystemStatus | null,
     config: null as ISystemConfig | null,
+    sconfig: null as IConfig | null,
 
-    components: [Exif, Indexing, FileSupport, Performance, Places, Video, VideoTranscoder, VideoAccel],
+    components: [Exif, Indexing, FileSupport, Performance, Apps, Places, Video, VideoTranscoder, VideoAccel],
   }),
 
   mounted() {
     this.refreshSystemConfig();
     this.refreshStatus();
+    this.refreshStaticConfig();
   },
 
   methods: {
@@ -63,6 +76,17 @@ export default defineComponent({
         this.loading++;
         const res = await axios.get<ISystemStatus>(API.SYSTEM_STATUS());
         this.status = res.data;
+      } catch (e) {
+        showError(JSON.stringify(e));
+      } finally {
+        this.loading--;
+      }
+    },
+
+    async refreshStaticConfig() {
+      try {
+        this.loading++;
+        this.sconfig = await staticConfig.getAll();
       } catch (e) {
         showError(JSON.stringify(e));
       } finally {
