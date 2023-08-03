@@ -1,11 +1,15 @@
 <template>
   <div class="outer">
     <NcSelectTags
+      ref="selectTags"
       class="nc-comp"
       v-model="tagSelection"
       :limit="null"
       :options-filter="tagFilter"
       :get-option-label="tagLabel"
+      :create-option="createOption"
+      :taggable="true"
+      @option:created="handleCreate"
     />
   </div>
 </template>
@@ -13,6 +17,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { IPhoto } from '../../types';
+import * as dav from '../../services/DavRequests';
 
 const NcSelectTags = () => import('@nextcloud/vue/dist/Components/NcSelectTags');
 
@@ -32,6 +37,7 @@ export default defineComponent({
   data: () => ({
     origIds: new Set<number>(),
     tagSelection: [] as number[],
+    newTags: new Map<number, dav.ITag>(),
   }),
 
   mounted() {
@@ -55,7 +61,7 @@ export default defineComponent({
       this.origIds = new Set(this.tagSelection);
     },
 
-    tagFilter(element, index) {
+    tagFilter(element: dav.ITag, index: number) {
       return (
         element.id >= 2 &&
         element.displayName !== '' &&
@@ -65,16 +71,62 @@ export default defineComponent({
       );
     },
 
-    tagLabel({ displayName }: { displayName: string }) {
+    tagLabel({ displayName }: dav.ITag) {
       return this.t('recognize', displayName);
     },
 
-    result() {
+    createOption(newDisplayName: string): dav.ITag {
+      // do not create tags that already exist
+      const existing = this.getAvailable().find((x) => x.displayName === newDisplayName && this.tagFilter(x, 0));
+      if (existing) {
+        return existing;
+      }
+
+      // placeholder tag
+      return {
+        userVisible: true,
+        userAssignable: true,
+        canAssign: true,
+        displayName: newDisplayName,
+        id: Math.random(),
+      };
+    },
+
+    getAvailable(): dav.ITag[] {
+      // FIXME: this is extremely fragile
+      return (<any>this.$refs.selectTags).availableTags;
+    },
+
+    handleCreate(newTag: dav.ITag) {
+      this.getAvailable().push(newTag);
+
+      // Keep the new tags around, but only create them when the user clicks save
+      // This way we don't create tags that are never used
+      this.newTags.set(newTag.id, newTag);
+    },
+
+    async result() {
       const add = this.tagSelection.filter((x) => !this.origIds.has(x));
       const remove = [...this.origIds].filter((x) => !this.tagSelection.includes(x));
 
+      // Return null here so there is no useless query
       if (add.length === 0 && remove.length === 0) {
         return null;
+      }
+
+      // Create new tags if necessary
+      const tagsToAdd = add.map((x) => this.newTags.get(x)).filter((x) => x) as dav.ITag[];
+      if (tagsToAdd.length > 0) {
+        await Promise.all(
+          tagsToAdd.map(async (x: dav.ITag) => {
+            // create the actual tag to get the final ID
+            const tag = await dav.createTag(x);
+
+            // replace the temporary tag ID with the real one
+            const i = add.findIndex((y) => y === x.id);
+            add[i] = tag.id;
+          })
+        );
       }
 
       return { add, remove };
