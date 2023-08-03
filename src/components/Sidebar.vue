@@ -103,6 +103,7 @@ export default defineComponent({
         // Update metadata compoenent
         const m = <any>this.$refs.metadata;
         const info: IImageInfo = await m?.update(photo);
+        if (!info) return; // failure or state change
         this.basename = info.basename;
         this.handleOpen();
       }

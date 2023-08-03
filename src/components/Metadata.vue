@@ -1,5 +1,8 @@
 <template>
-  <div class="outer" v-if="fileid">
+  <div class="loading-icon fill-block" v-if="loading">
+    <XLoadingIcon />
+  </div>
+  <div class="outer" v-else-if="fileid">
     <div v-if="people.length" class="people">
       <div class="section-title">{{ t('memories', 'People') }}</div>
       <div class="container" v-for="face of people" :key="face.cluster_id">
@@ -52,9 +55,8 @@
       <iframe class="fill-block" :src="mapUrl" />
     </div>
   </div>
-
-  <div class="loading-icon fill-block" v-else>
-    <XLoadingIcon />
+  <div v-else>
+    {{ t('memries', 'Failed to load metadata') }}
   </div>
 </template>
 
@@ -118,6 +120,7 @@ export default defineComponent({
     albums: [] as IAlbum[],
     people: [] as IFace[],
 
+    loading: 0,
     state: 0,
   }),
 
@@ -351,17 +354,17 @@ export default defineComponent({
   },
 
   methods: {
-    async update(photo: number | IPhoto): Promise<IImageInfo> {
+    async update(photo: number | IPhoto): Promise<IImageInfo | null> {
       this.state = Math.random();
+      this.loading = 0;
       this.fileid = null;
       this.exif = {};
       this.albums = [];
       this.people = [];
 
-      const state = this.state;
       const url = API.Q(utils.getImageInfoUrl(photo), { tags: 1 });
-      const res = await axios.get<IImageInfo>(url);
-      if (state !== this.state) return res.data;
+      const res = await this.guardState(axios.get<IImageInfo>(url));
+      if (!res) return null;
 
       this.fileid = res.data.fileid;
       this.filename = res.data.basename;
@@ -379,19 +382,26 @@ export default defineComponent({
 
     async refreshAlbums(): Promise<void> {
       if (!this.config.albums_enabled) return;
-      this.albums = await this.guardState(dav.getAlbums(1, this.fileid!));
+      this.albums = (await this.guardState(dav.getAlbums(1, this.fileid!))) ?? this.albums;
     },
 
     async refreshPeople(): Promise<void> {
       if (!this.config.recognize_enabled) return;
-      this.people = await this.guardState(dav.getFaceList('recognize', this.fileid!));
+      this.people = (await this.guardState(dav.getFaceList('recognize', this.fileid!))) ?? this.people;
     },
 
-    async guardState<T>(promise: Promise<T>): Promise<T> {
+    async guardState<T>(promise: Promise<T>): Promise<T | null> {
       const state = this.state;
-      const res = await promise;
-      if (state === this.state) return res;
-      throw new Error('state changed');
+      try {
+        this.loading++;
+        const res = await promise;
+        if (state === this.state) return res;
+        return null;
+      } catch (err) {
+        throw err;
+      } finally {
+        if (state === this.state) this.loading--;
+      }
     },
 
     handleFileUpdated({ fileid }: { fileid: number }) {
