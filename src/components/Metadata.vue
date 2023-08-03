@@ -424,6 +424,7 @@ export default defineComponent({
     position: relative;
     display: inline-block;
     font-size: 0.8em;
+    vertical-align: top;
   }
 }
 
