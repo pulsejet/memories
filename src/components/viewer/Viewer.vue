@@ -1269,6 +1269,7 @@ export default defineComponent({
       cursor: pointer;
     }
   }
+
   .pswp__icn-shadow {
     display: none;
   }
@@ -1277,6 +1278,14 @@ export default defineComponent({
   @media (max-width: 768px) {
     .pswp__button--arrow {
       opacity: 0 !important;
+    }
+  }
+
+  // Prevent the popper from overlapping with the sidebar
+  > div > .v-popper__wrapper {
+    overflow: visible !important;
+    > .v-popper__inner {
+      transform: translateX(-20px);
     }
   }
 }
