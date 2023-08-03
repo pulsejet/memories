@@ -22,6 +22,7 @@ OC.L10N.register(
     "Unknown" : "Desconocido",
     "Back" : "Atrás",
     "Save" : "Guardar",
+    "Save changes" : "Guardar cambios",
     "Month" : "Mes",
     "Day" : "Día",
     "Time" : "Hora",

@@ -24,6 +24,7 @@ OC.L10N.register(
     "Public link" : "Liga pública",
     "Back" : "Atrás",
     "Save" : "Guardar",
+    "Save changes" : "Guardar cambios",
     "Month" : "Mes",
     "Day" : "Día",
     "Time" : "Hora",

@@ -54,8 +54,6 @@ OC.L10N.register(
     "Back to the new album form." : "Tagasi uue albumi vormile.",
     "Save" : "Salvesta",
     "Create album" : "Loo album",
-    "Add selection to album {albumName}" : "Lisa valitud albumisse {albumName}",
-    "Create a new album." : "Loo uus album.",
     "Save collaborators for this album." : "Salvesta selle albumi kaastöölised.",
     "Month" : "Kuu",
     "Day" : "Päev",

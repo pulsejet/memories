@@ -23,6 +23,7 @@ OC.L10N.register(
     "Copy public link" : "Sao chép liên kết công khai",
     "Back" : "Quay lại",
     "Save" : "Lưu",
+    "Save changes" : "Lưu thay đổi",
     "Year" : "Năm",
     "Month" : "Tháng",
     "Day" : "Ngày",

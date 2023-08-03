@@ -24,6 +24,7 @@ OC.L10N.register(
     "Public link" : "Publika ligilo",
     "Back" : "Antaŭen",
     "Save" : "Konservi",
+    "Save changes" : "Konservi ŝanĝojn",
     "Month" : "Monato",
     "Day" : "Tago",
     "Time" : "Dato",

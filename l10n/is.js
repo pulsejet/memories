@@ -12,6 +12,7 @@ OC.L10N.register(
     "Archive" : "Safn",
     "On this day" : "Á þessum degi",
     "Tags" : "Merki",
+    "Metadata" : "Lýsigögn",
     "Edit" : "Breyta",
     "Photos" : "Ljósmyndir",
     "Explore" : "Skoða",
