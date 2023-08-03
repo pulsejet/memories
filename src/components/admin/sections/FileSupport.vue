@@ -74,6 +74,7 @@ import AdminMixin from '../AdminMixin';
 
 export default defineComponent({
   name: 'FileSupport',
+  title: t('memories', 'File Support'),
   mixins: [AdminMixin],
 
   data: () => ({

@@ -116,10 +116,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import { translate as t } from '@nextcloud/l10n';
+
 import AdminMixin from '../AdminMixin';
 
 export default defineComponent({
   name: 'Indexing',
+  title: t('memories', 'Media Indexing'),
   mixins: [AdminMixin],
 });
 </script>

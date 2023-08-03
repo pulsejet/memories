@@ -71,10 +71,13 @@
 import { defineComponent } from 'vue';
 import { API } from '../../../services/API';
 
+import { translate as t } from '@nextcloud/l10n';
+
 import AdminMixin from '../AdminMixin';
 
 export default defineComponent({
   name: 'Places',
+  title: t('memories', 'Reverse Geocoding'),
   mixins: [AdminMixin],
 
   computed: {

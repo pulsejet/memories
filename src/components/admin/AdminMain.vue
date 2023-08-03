@@ -2,15 +2,21 @@
   <div class="outer" v-if="config && sconfig">
     <XLoadingIcon class="loading-icon" v-show="loading" />
 
-    <component
-      v-for="c in components"
-      :key="c.__name"
-      :is="c"
-      :status="status"
-      :config="config"
-      :sconfig="sconfig"
-      @update="update"
-    />
+    <div class="left-pane">
+      <component
+        v-for="c in components"
+        :id="c.name"
+        :key="c.name"
+        :is="c"
+        :status="status"
+        :config="config"
+        :sconfig="sconfig"
+        @update="update"
+      />
+    </div>
+    <div class="right-pane">
+      <a class="sec-link" v-for="c in components" :key="c.name" :href="`#${c.name}`">{{ c.title ?? c.name }}</a>
+    </div>
   </div>
 </template>
 
@@ -58,6 +64,7 @@ export default defineComponent({
 
   methods: {
     async refreshSystemConfig() {
+      console.log(this.components);
       try {
         this.loading++;
         const res = await axios.get<ISystemConfig>(API.SYSTEM_CONFIG(null));
@@ -124,6 +131,33 @@ export default defineComponent({
 .outer {
   padding: 20px;
   padding-top: 0px;
+  overflow-x: hidden;
+
+  > .right-pane {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+
+    > .left-pane {
+      flex: 1;
+      padding-right: 10px;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    > .right-pane {
+      display: block;
+      padding: 10px;
+      line-height: 2em;
+      > a.sec-link {
+        display: block;
+      }
+    }
+  }
 
   .admin-section {
     margin-top: 20px;
@@ -155,9 +189,9 @@ export default defineComponent({
   }
 
   :deep h2 {
-    font-size: 1.5em;
-    font-weight: bold;
-    margin-top: 25px;
+    font-size: 1.6em;
+    font-weight: 500;
+    margin-top: 40px;
   }
 
   :deep h3 {
