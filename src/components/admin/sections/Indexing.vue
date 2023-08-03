@@ -31,6 +31,14 @@
             : t('memories', 'It is still running or was interrupted.')
         }}
       </NcNoteCard>
+      <NcNoteCard v-if="status.last_index_job_start > 3600" type="error">
+        {{
+          t(
+            'memories',
+            'Looks like it has been more than an hour since the last index job was run. Make sure Nextcloud cron is configured correctly.'
+          )
+        }}
+      </NcNoteCard>
       <NcNoteCard type="error" v-if="status.bad_encryption">
         {{
           t(
