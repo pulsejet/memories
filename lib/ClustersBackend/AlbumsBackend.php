@@ -91,14 +91,14 @@ class AlbumsBackend extends Backend
     {
         /** @var \OCP\IRequest $request */
         $request = \OC::$server->get(\OCP\IRequest::class);
-
-        // Run actual query
-        $list = [];
         $fileid = (int) $request->getParam('fileid', -1);
 
-        // personal albums
+        // Run actual queries
+        $list = [];
+
+        // Personal albums
         $list = array_merge($list, $this->albumsQuery->getList(Util::getUID(), false, $fileid));
-        // shared albums
+        // Shared albums
         $list = array_merge($list, $this->albumsQuery->getList(Util::getUID(), true, $fileid));
 
         // Remove elements with duplicate album_id
