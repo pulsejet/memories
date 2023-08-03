@@ -138,7 +138,7 @@
           </NcActionButton>
           <NcActionButton
             :aria-label="t('memories', 'Add to album')"
-            v-if="config.albums_enabled && canShare"
+            v-if="config.albums_enabled && !isLocal && canShare"
             @click="updateAlbums"
             :close-after-click="true"
           >
@@ -360,7 +360,7 @@ export default defineComponent({
       return this.currentPhoto?.imageInfo?.permissions?.includes('D') ?? false;
     },
 
-    /** Show share button */
+    /** Show share button and add to album button */
     canShare(): boolean {
       return Boolean(this.currentPhoto);
     },
