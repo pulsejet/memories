@@ -96,8 +96,12 @@ export default defineComponent({
       position: relative;
 
       &.cluster--circle {
-        height: 150px;
+        height: 156px;
         aspect-ratio: unset;
+
+        @media (max-width: 768px) {
+          height: 152px; // font-size: 0.9em;
+        }
       }
     }
   }

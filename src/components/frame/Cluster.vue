@@ -181,19 +181,32 @@ img {
 
 .name {
   position: absolute;
-  bottom: 2%;
+  bottom: 0;
   z-index: 100;
-  width: 100%;
-  max-height: 75%;
-  padding: 5%;
+  width: 90%;
+  margin: 5%;
+
+  // 2px padding prevents the bottom of the text from being cut off
+  padding-bottom: 2px;
 
   color: white;
   word-wrap: break-word;
   white-space: normal;
-  text-overflow: ellipsis;
   text-align: center;
   font-size: 1em;
   line-height: 1.1em;
+
+  // multiline ellipsis
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  .cluster--circle & {
+    -webkit-line-clamp: 2;
+    margin: 0 5%;
+    min-height: 26px; // alignment
+  }
 
   > .subtitle {
     font-size: 0.7em;
