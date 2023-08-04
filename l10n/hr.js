@@ -25,6 +25,7 @@ OC.L10N.register(
     "Close" : "Zatvori",
     "Performance" : "Učinkovitost",
     "Unknown" : "Nepoznata pogreška",
+    "Template" : "Predložak",
     "Copy public link" : "Kopiraj javnu poveznicu",
     "Public link" : "Javna poveznica",
     "Back" : "Natrag",

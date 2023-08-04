@@ -25,6 +25,7 @@ OC.L10N.register(
     "Close" : "סגירה",
     "Performance" : "ביצועים",
     "Unknown" : "לא ידוע",
+    "Template" : "תבנית",
     "Add {collaboratorLabel} to the collaborators list" : "הוסף {collaboratorLabel} לרשימת השותפים",
     "Copy public link" : "העתקת הקישור הציבורי",
     "Public link" : "קישור ציבורי",

@@ -25,6 +25,7 @@ OC.L10N.register(
     "Close" : "Serra",
     "Performance" : "Atuatzione",
     "Unknown" : "Disconnotu",
+    "Template" : "Modellu",
     "Copy public link" : "Còpia ligòngiu pùblicu",
     "Public link" : "Ligòngiu pùblicu",
     "Back" : "In segus",

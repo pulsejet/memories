@@ -25,6 +25,7 @@ OC.L10N.register(
     "Close" : "閉じる",
     "Performance" : "パフォーマンス",
     "Unknown" : "不明",
+    "Template" : "テンプレート",
     "Copy public link" : "公開リンクをコピー",
     "Public link" : "公開リンク",
     "Create new album" : "新しいアルバムを作成",

@@ -7,6 +7,7 @@ OC.L10N.register(
     "Folders" : "Carpetes",
     "Albums" : "Álbumes",
     "Tags" : "Etiquetes",
+    "Metadata" : "Metadatos",
     "Photos" : "Semeyes",
     "Delete" : "Desaniciar",
     "External Link" : "Enllaz esternu",

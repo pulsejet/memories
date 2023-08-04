@@ -33,6 +33,7 @@ OC.L10N.register(
     "Failed to load some photos" : "Kunne ikke indlæse nogle billeder",
     "Performance" : "Ydelse",
     "Unknown" : "Ukendt",
+    "Template" : "Skabelon",
     "Public link copied!" : "Offentlig link kopieret!",
     "Copy public link" : "Kopier offentligt link",
     "Public link" : "Offentligt link",

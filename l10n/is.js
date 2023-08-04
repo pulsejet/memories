@@ -26,6 +26,7 @@ OC.L10N.register(
     "Close" : "Loka",
     "Performance" : "Afköst",
     "Unknown" : "Óþekkt",
+    "Template" : "Sniðmát",
     "Copy public link" : "Afrita opinberan tengil",
     "Public link" : "Opinber tengill",
     "Back" : "Til baka",

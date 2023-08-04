@@ -42,6 +42,7 @@ OC.L10N.register(
     "Close" : "Sluit",
     "Performance" : "Prestaties",
     "Unknown" : "Onbekend",
+    "Template" : "Sjabloon",
     "Add people or groups who can edit your album" : "Voeg mensen of groepen toe die je album kunnen bewerken",
     "Search for collaborators" : "Zoeken naar bijdragers",
     "Search people or groups" : "Zoek mensen of groepen",

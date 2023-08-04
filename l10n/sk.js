@@ -37,6 +37,7 @@ OC.L10N.register(
     "Failed to load some photos" : "Načítanie akýchkoľvek fotiek zlyhalo",
     "Performance" : "Výkon",
     "Unknown" : "Neznámy",
+    "Template" : "Šablóny",
     "Add people or groups who can edit your album" : "Pridať užívateľov alebo skupiny ktoré môžu upravovať váš album",
     "Search for collaborators" : "Vyhľadať spolupracovníkov",
     "Search people or groups" : "Vyhľadať užívateľov alebo skupiny",
