@@ -405,8 +405,13 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 
 	// Scale height and width if not max quality
 	if s.quality != QUALITY_MAX {
-		scalerArgs = append(scalerArgs, fmt.Sprintf("w=%d", s.width))
-		scalerArgs = append(scalerArgs, fmt.Sprintf("h=%d", s.height))
+		maxDim := s.height
+		if s.width > s.height {
+			maxDim = s.width
+		}
+
+		scalerArgs = append(scalerArgs, fmt.Sprintf("w=%d", maxDim))
+		scalerArgs = append(scalerArgs, fmt.Sprintf("h=%d", maxDim))
 	}
 
 	// Apply filter
