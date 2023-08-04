@@ -129,12 +129,8 @@ class RecognizeBackend extends Backend
         unset($row['face_w'], $row['face_h'], $row['face_x'], $row['face_y']);
     }
 
-    public function getClusters(): array
+    public function getClusters(int $fileid = 0): array
     {
-        /** @var \OCP\IRequest $request */
-        $request = \OC::$server->get(\OCP\IRequest::class);
-        $fileid = (int) $request->getParam('fileid', -1);
-
         $query = $this->tq->getBuilder();
 
         // SELECT all face clusters

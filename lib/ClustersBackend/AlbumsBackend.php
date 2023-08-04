@@ -87,12 +87,8 @@ class AlbumsBackend extends Backend
         $this->tq->allowEmptyRoot();
     }
 
-    public function getClusters(): array
+    public function getClusters(int $fileid = 0): array
     {
-        /** @var \OCP\IRequest $request */
-        $request = \OC::$server->get(\OCP\IRequest::class);
-        $fileid = (int) $request->getParam('fileid', -1);
-
         // Run actual queries
         $list = [];
 

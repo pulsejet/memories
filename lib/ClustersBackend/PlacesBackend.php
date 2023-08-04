@@ -63,8 +63,12 @@ class PlacesBackend extends Backend
         ));
     }
 
-    public function getClusters(): array
+    public function getClusters(int $fileid = 0): array
     {
+        if ($fileid) {
+            throw new \Exception('PlacesBackend: fileid filter not implemented');
+        }
+
         $inside = (int) $this->request->getParam('inside', 0);
         $marked = (int) $this->request->getParam('mark', 1);
 

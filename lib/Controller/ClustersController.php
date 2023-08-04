@@ -40,12 +40,12 @@ class ClustersController extends GenericApiController
      *
      * Get list of clusters
      */
-    public function list(string $backend): Http\Response
+    public function list(string $backend, int $fileid = 0): Http\Response
     {
-        return Util::guardEx(function () use ($backend) {
+        return Util::guardEx(function () use ($backend, $fileid) {
             $this->init($backend);
 
-            $list = $this->backend->getClusters();
+            $list = $this->backend->getClusters($fileid);
 
             // Set cluster_id and cluster_type for each cluster
             foreach ($list as &$cluster) {

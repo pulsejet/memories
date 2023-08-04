@@ -67,8 +67,12 @@ class TagsBackend extends Backend
         ));
     }
 
-    public function getClusters(): array
+    public function getClusters(int $fileid = 0): array
     {
+        if ($fileid) {
+            throw new \Exception('TagsBackend: fileid filter not implemented');
+        }
+
         $query = $this->tq->getBuilder();
 
         // SELECT visible tag name and count of photos

@@ -22,7 +22,7 @@ class AlbumsQuery
      * @param bool $shared Whether to get shared albums
      * @param int  $fileid File to filter by
      */
-    public function getList(string $uid, bool $shared = false, int $fileid = -1)
+    public function getList(string $uid, bool $shared = false, int $fileid = 0)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -68,7 +68,7 @@ class AlbumsQuery
         $query->addOrderBy('pa.album_id', 'DESC'); // tie-breaker
 
         // WHERE these albums contain fileid if specified
-        if ($fileid > 0) {
+        if ($fileid) {
             $fSq = $this->connection->getQueryBuilder()
                 ->select('paf.file_id')
                 ->from('photos_albums_files', 'paf')

@@ -60,8 +60,10 @@ abstract class Backend
 
     /**
      * Get the cluster list for the current user.
+     *
+     * @param int $fileid Filter clusters by file ID (optional)
      */
-    abstract public function getClusters(): array;
+    abstract public function getClusters(int $fileid = 0): array;
 
     /**
      * Get a cluster ID for the given cluster.
