@@ -66,7 +66,7 @@ abstract class Backend
      *
      * @param int $fileid Filter clusters by file ID (optional)
      */
-    abstract protected function getClustersI(int $fileid = 0): array;
+    abstract public function getClustersInternal(int $fileid = 0): array;
 
     /**
      * Get a cluster ID for the given cluster.
@@ -134,8 +134,9 @@ abstract class Backend
      *
      * @param int $fileid Filter clusters by file ID (optional)
      */
-    public final function getClusters(int $fileid): array {
-        $list = $this->getClustersI($fileid);
+    final public function getClusters(int $fileid): array
+    {
+        $list = $this->getClustersInternal($fileid);
 
         foreach ($list as &$cluster) {
             $cluster['cluster_id'] = $this->getClusterId($cluster);
@@ -148,7 +149,7 @@ abstract class Backend
     /**
      * Register the backend. Do not override.
      */
-    public static final function register(): void
+    final public static function register(): void
     {
         Manager::register(static::clusterType(), static::class);
     }

@@ -123,7 +123,7 @@ class FaceRecognitionBackend extends Backend
         unset($row['face_x'], $row['face_y'], $row['face_w'], $row['face_h'], $row['image_height'], $row['image_width']);
     }
 
-    protected function getClustersI(int $fileid = 0): array
+    public function getClustersInternal(int $fileid = 0): array
     {
         if ($fileid) {
             throw new \Exception('FaceRecognitionBackend: fileid filter not implemented');

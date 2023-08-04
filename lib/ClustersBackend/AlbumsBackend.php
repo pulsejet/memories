@@ -87,7 +87,7 @@ class AlbumsBackend extends Backend
         $this->tq->allowEmptyRoot();
     }
 
-    protected function getClustersI(int $fileid = 0): array
+    public function getClustersInternal(int $fileid = 0): array
     {
         // Run actual queries
         $list = [];

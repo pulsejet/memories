@@ -67,7 +67,7 @@ class TagsBackend extends Backend
         ));
     }
 
-    protected function getClustersI(int $fileid = 0): array
+    public function getClustersInternal(int $fileid = 0): array
     {
         if ($fileid) {
             throw new \Exception('TagsBackend: fileid filter not implemented');
