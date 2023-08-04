@@ -182,13 +182,13 @@ export default defineComponent({
     h2 {
       font-size: 1.6em;
       font-weight: 500;
-      margin-top: 40px;
+      padding-top: 20px;
     }
 
     h3 {
       font-size: 1.2em;
       font-weight: 500;
-      margin-top: 20px;
+      padding-top: 10px;
     }
 
     code {
