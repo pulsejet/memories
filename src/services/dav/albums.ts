@@ -36,7 +36,7 @@ export async function getAlbums(sort: 1 | 2 = 1, fileid?: number) {
       data.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
       break;
     default:
-      data.sort((a, b) => b.last_added_photo - a.last_added_photo);
+      data.sort((a, b) => b.created - a.created);
   }
 
   return data;
