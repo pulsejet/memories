@@ -7,6 +7,7 @@
       :title="album.name"
       :aria-label="album.name"
       :to="link ? linkTarget(album) : null"
+      :exact="true"
       @click="click($event, album)"
     >
       <template #icon>
