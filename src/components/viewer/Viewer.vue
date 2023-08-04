@@ -119,7 +119,12 @@
               <OpenInNewIcon :size="24" />
             </template>
           </NcActionButton>
-          <NcActionButton :aria-label="t('memories', 'Slideshow')" @click="startSlideshow" :close-after-click="true">
+          <NcActionButton
+            :aria-label="t('memories', 'Slideshow')"
+            v-if="globalCount > 1"
+            @click="startSlideshow"
+            :close-after-click="true"
+          >
             {{ t('memories', 'Slideshow') }}
             <template #icon>
               <SlideshowIcon :size="24" />
