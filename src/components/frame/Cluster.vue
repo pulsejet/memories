@@ -179,12 +179,13 @@ img {
   }
 }
 
+$namemargin: 7px;
 .name {
   position: absolute;
   bottom: 0;
   z-index: 100;
-  width: 90%;
-  margin: 5%;
+  width: calc(100% - 2 * #{$namemargin});
+  margin: $namemargin;
 
   // 2px padding prevents the bottom of the text from being cut off
   padding-bottom: 2px;
@@ -204,7 +205,7 @@ img {
 
   .cluster--circle & {
     -webkit-line-clamp: 2;
-    margin: 0 5%;
+    margin: 0 $namemargin;
     min-height: 26px; // alignment
   }
 
