@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section">
-    <h2>{{ t('memories', 'Video Streaming') }}</h2>
+    <h2>{{ $options.title }}</h2>
 
     <p>
       {{ t('memories', 'Live transcoding provides for adaptive streaming of videos using HLS.') }}

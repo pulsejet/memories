@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section">
-    <h2>{{ t('memories', 'File Support') }}</h2>
+    <h2>{{ $options.title }}</h2>
 
     {{ t('memories', 'You can configure the enabled Nextcloud preview providers below.') }}
     {{ t('memories', 'If you are using Imaginary for preview generation, you can ignore this section.') }}

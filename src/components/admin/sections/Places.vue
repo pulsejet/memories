@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section">
-    <h2>{{ t('memories', 'Reverse Geocoding') }}</h2>
+    <h2>{{ $options.title }}</h2>
 
     <p>
       <template v-if="status">

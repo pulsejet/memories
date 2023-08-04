@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section">
-    <h3>{{ t('memories', 'Hardware Acceleration') }}</h3>
+    <h3>{{ $options.title }}</h3>
 
     <p>
       {{ t('memories', 'You must first make sure the correct drivers are installed before configuring acceleration.') }}

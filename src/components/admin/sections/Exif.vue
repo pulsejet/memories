@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section">
-    <h2>{{ t('memories', 'EXIF Extraction') }}</h2>
+    <h2>{{ $options.title }}</h2>
 
     <template v-if="status">
       <NcNoteCard :type="binaryStatusType(status.exiftool)">

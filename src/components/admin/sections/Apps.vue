@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section">
-    <h2>{{ t('memories', 'Recommended Apps') }}</h2>
+    <h2>{{ $options.title }}</h2>
 
     <NcNoteCard :type="sconfig.albums_enabled ? 'success' : 'warning'">
       {{

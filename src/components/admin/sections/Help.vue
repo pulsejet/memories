@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section admin-help">
-    <h2>{{ t('memories', 'Help & Support') }}</h2>
+    <h2>{{ $options.title }}</h2>
 
     <span class="thanks">
       {{ t('memories', 'Thank you for choosing Nextcloud and Memories to store your precious data!') }}

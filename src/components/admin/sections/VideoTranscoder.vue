@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section">
-    <h3>{{ t('memories', 'Transcoder configuration') }}</h3>
+    <h3>{{ $options.title }}</h3>
     <p>
       {{
         t(
@@ -63,7 +63,7 @@ import AdminMixin from '../AdminMixin';
 
 export default defineComponent({
   name: 'VideoTranscoder',
-  title: t('memories', 'Transcoding'),
+  title: t('memories', 'Transcoder'),
   mixins: [AdminMixin],
 });
 </script>

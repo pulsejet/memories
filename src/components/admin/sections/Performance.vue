@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section">
-    <h2>{{ t('memories', 'Performance') }}</h2>
+    <h2>{{ $options.title }}</h2>
 
     <p>
       <NcNoteCard :type="isHttps ? 'success' : 'warning'">

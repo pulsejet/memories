@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section">
-    <h2>{{ t('memories', 'Media Indexing') }}</h2>
+    <h2>{{ $options.title }}</h2>
 
     <template v-if="status">
       <NcNoteCard :type="status.indexed_count > 0 ? 'success' : 'warning'">
