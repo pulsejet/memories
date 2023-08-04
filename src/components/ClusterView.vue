@@ -6,7 +6,7 @@
 
     <EmptyContent v-if="!items.length && !loading" />
 
-    <ClusterGrid :items="items" :minCols="minCols" ref="denali">
+    <ClusterGrid :items="items" :minCols="minCols">
       <template #before>
         <DynamicTopMatter class="cv-dtm" ref="dtm" />
       </template>
