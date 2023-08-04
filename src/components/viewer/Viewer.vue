@@ -206,6 +206,7 @@ import LivePhotoIcon from 'vue-material-design-icons/MotionPlayOutline.vue';
 import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
 
 const SLIDESHOW_MS = 5000;
+const SIDEBAR_DEBOUNCE_MS = 500;
 const BODY_HAS_VIEWER = 'has-viewer';
 const BODY_VIEWER_VIDEO = 'viewer-video';
 const BODY_VIEWER_FULLY_OPENED = 'viewer-fully-opened';
@@ -266,6 +267,8 @@ export default defineComponent({
 
     /** Timer to move to next photo */
     slideshowTimer: 0,
+    /** Timer to debounce changes to sidebar */
+    sidebarUpdateTimer: 0,
   }),
 
   mounted() {
@@ -994,18 +997,41 @@ export default defineComponent({
       window.location.href = utils.getLivePhotoVideoUrl(photo, false);
     },
 
-    /** Open the sidebar */
-    async openSidebar(photo?: IPhoto) {
-      globalThis.mSidebar.setTab('memories-metadata');
-      photo ??= this.currentPhoto!;
+    /**
+     * Open the sidebar.
+     *
+     * Calls to this function are debounced to prevent too many updates
+     * to the sidebar while the user is scrolling through photos.
+     */
+    async openSidebar() {
+      const photo = this.currentPhoto!;
 
-      if (this.routeIsPublic || this.isLocal) {
-        globalThis.mSidebar.open(photo);
-      } else {
-        const fileInfo = (await dav.getFiles([photo]))[0];
-        const forceNative = fileInfo?.originalFilename?.startsWith('/files/');
-        globalThis.mSidebar.open(photo, fileInfo?.filename, forceNative);
+      // Update the sidebar
+      const update = async () => {
+        const abort = () => !this.isOpen || photo !== this.currentPhoto;
+        if (abort()) return;
+
+        globalThis.mSidebar.setTab('memories-metadata');
+        if (this.routeIsPublic || this.isLocal) {
+          globalThis.mSidebar.open(photo);
+        } else {
+          const fileInfo = (await dav.getFiles([photo]))[0];
+          if (abort()) return;
+
+          const forceNative = fileInfo?.originalFilename?.startsWith('/files/');
+          globalThis.mSidebar.open(photo, fileInfo?.filename, forceNative);
+        }
+      };
+
+      // Do not debounce the first call
+      let callback = update;
+      if (!this.sidebarUpdateTimer) {
+        callback();
+        callback = async () => {};
       }
+
+      // Debounce the rest
+      utils.setRenewingTimeout(this, 'sidebarUpdateTimer', callback, SIDEBAR_DEBOUNCE_MS);
     },
 
     handleAppSidebarOpen() {
