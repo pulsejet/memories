@@ -6,7 +6,7 @@
     <div v-if="people.length" class="people">
       <div class="section-title">{{ t('memories', 'People') }}</div>
       <div class="container" v-for="face of people" :key="face.cluster_id">
-        <Cluster :data="face" :counters="false"> </Cluster>
+        <Cluster class="cluster--rounded" :data="face" :counters="false"> </Cluster>
       </div>
     </div>
 

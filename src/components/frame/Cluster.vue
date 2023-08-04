@@ -164,9 +164,19 @@ img {
   cursor: pointer;
 }
 
-// Get rid of color of the bubble
-.cluster .count-bubble :deep .counter-bubble__counter {
-  color: unset !important;
+.cluster {
+  // to use this option, the height must be set to a bit more
+  // than the width for the text; the image will then be forced
+  // to be square and the label will be outside.
+  &--circle {
+    height: unset; // from .fill-block
+    aspect-ratio: 1;
+  }
+
+  // Get rid of color of the bubble
+  .count-bubble :deep .counter-bubble__counter {
+    color: unset !important;
+  }
 }
 
 .name {
@@ -191,7 +201,8 @@ img {
     display: block;
   }
 
-  .cluster.error > & {
+  .cluster.error > &,
+  .cluster--circle & {
     color: unset;
   }
 
@@ -217,7 +228,6 @@ img {
   > .img-outer {
     position: relative;
     background-color: var(--color-background-dark);
-    border-radius: 10px;
     padding: 0;
     margin: 0;
     width: 100%;
@@ -225,6 +235,16 @@ img {
     overflow: hidden;
     display: inline-block;
     cursor: pointer;
+
+    .cluster--rounded & {
+      border-radius: 12px; // rounded corners
+    }
+    .cluster--circle & {
+      // circle image
+      border-radius: 50%;
+      height: unset;
+      aspect-ratio: 1;
+    }
 
     &.plus {
       background-color: var(--color-primary-element-light);
@@ -244,7 +264,8 @@ img {
       left: 0;
       background: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 10%, transparent 35%);
 
-      .cluster.error & {
+      .cluster.error &,
+      .cluster--circle & {
         display: none;
       }
     }

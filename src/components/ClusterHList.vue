@@ -8,8 +8,13 @@
     </div>
 
     <div class="hlist hide-scrollbar">
-      <div class="item" v-for="item of clusters" :key="item.cluster_id">
-        <Cluster :data="item" :link="true" />
+      <div
+        class="item cluster--rounded"
+        :class="{ 'cluster--circle': circle(item) }"
+        :key="item.cluster_id"
+        v-for="item of clusters"
+      >
+        <Cluster :data="item" :link="true" :counters="!routeIsExplore" />
       </div>
     </div>
   </div>
@@ -39,6 +44,18 @@ export default defineComponent({
     link: {
       type: String,
       required: false,
+    },
+  },
+
+  methods: {
+    circle(cluster: ICluster): boolean {
+      switch (cluster.cluster_type) {
+        case 'recognize':
+        case 'facerecognition':
+          return true;
+        default:
+          return false;
+      }
     },
   },
 });
@@ -74,9 +91,14 @@ export default defineComponent({
     > .item {
       display: inline-block;
       margin: 0 2px;
-      height: 120px;
+      width: 120px;
       aspect-ratio: 1;
       position: relative;
+
+      &.cluster--circle {
+        height: 150px;
+        aspect-ratio: unset;
+      }
     }
   }
 }
