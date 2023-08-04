@@ -38,7 +38,7 @@
         </NcActionRadio>
       </NcActions>
 
-      <NcActions :inline="1">
+      <NcActions :inline="isMobile ? 1 : 3">
         <NcActionButton
           :aria-label="t('memories', 'Create new album')"
           @click="$refs.createModal.open(false)"
@@ -121,6 +121,7 @@ import SortIcon from 'vue-material-design-icons/SortVariant.vue';
 import SlotAlphabeticalIcon from 'vue-material-design-icons/SortAlphabeticalAscending.vue';
 import SortDateIcon from 'vue-material-design-icons/SortCalendarDescending.vue';
 import { API } from '../../services/API';
+import * as utils from '../../services/Utils';
 
 export default defineComponent({
   name: 'AlbumTopMatter',
@@ -159,6 +160,10 @@ export default defineComponent({
     name(): string {
       // Album name is displayed in the dynamic top matter (timeline)
       return this.$route.params.name ? '' : this.t('memories', 'Albums');
+    },
+
+    isMobile(): boolean {
+      return utils.isMobile();
     },
   },
 
