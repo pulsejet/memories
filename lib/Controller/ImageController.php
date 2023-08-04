@@ -235,13 +235,13 @@ class ImageController extends GenericApiController
      *
      * Set the exif data for a file.
      *
-     * @param string fileid
+     * @param int fileid
      * @param array  raw exif data
      */
-    public function setExif(string $id, array $raw): Http\Response
+    public function setExif(int $id, array $raw): Http\Response
     {
         return Util::guardEx(function () use ($id, $raw) {
-            $file = $this->fs->getUserFile((int) $id);
+            $file = $this->fs->getUserFile($id);
 
             // Check if user has permissions
             if (!$file->isUpdateable() || Util::isEncryptionEnabled()) {
