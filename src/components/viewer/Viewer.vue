@@ -274,6 +274,9 @@ export default defineComponent({
     slideshowTimer: 0,
     /** Timer to debounce changes to sidebar */
     sidebarUpdateTimer: 0,
+
+    /** Photo keys for which an imageInfo request is currently ongoing */
+    imageInfoLoading: new Set<string>(),
   }),
 
   mounted() {
@@ -801,17 +804,7 @@ export default defineComponent({
       }
 
       // Lazy load the rest of EXIF data
-      if (!photo.imageInfo) {
-        axios.get<IImageInfo>(utils.getImageInfoUrl(photo)).then((res) => {
-          photo.imageInfo = res.data;
-
-          // Update params in photo object
-          photo.w = res.data.w;
-          photo.h = res.data.h;
-          photo.basename = res.data.basename;
-          photo.mimetype = res.data.mimetype;
-        });
-      }
+      this.loadMetadata(photo);
 
       // Get full image URL
       const fullUrl = isvideo
@@ -885,6 +878,35 @@ export default defineComponent({
         } else {
           this.$router.push(route);
         }
+      }
+    },
+
+    /**
+     * Load the metadata (image info) for a photo asynchronously
+     */
+    async loadMetadata(photo: IPhoto) {
+      // Check if already loaded
+      if (photo.imageInfo) return;
+
+      // Check if already loading
+      const key = photo.key ?? photo.fileid.toString();
+      if (this.imageInfoLoading.has(key)) return;
+
+      // Mark as loading
+      this.imageInfoLoading.add(key);
+
+      try {
+        const res = await axios.get<IImageInfo>(utils.getImageInfoUrl(photo));
+        photo.imageInfo = res.data;
+
+        // Update params in photo object
+        photo.w = res.data.w;
+        photo.h = res.data.h;
+        photo.basename = res.data.basename;
+        photo.mimetype = res.data.mimetype;
+      } finally {
+        // Allow another chance in case this failed
+        this.imageInfoLoading.delete(key);
       }
     },
 
