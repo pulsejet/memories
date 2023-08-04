@@ -61,9 +61,12 @@ abstract class Backend
     /**
      * Get the cluster list for the current user.
      *
+     * If the signature of this function changes, the
+     * getClusters function must be updated to match.
+     *
      * @param int $fileid Filter clusters by file ID (optional)
      */
-    abstract public function getClusters(int $fileid = 0): array;
+    abstract protected function getClustersI(int $fileid = 0): array;
 
     /**
      * Get a cluster ID for the given cluster.
@@ -126,9 +129,26 @@ abstract class Backend
     }
 
     /**
+     * Calls the getClusters implementation and appends the
+     * result with the cluster_id and cluster_type values.
+     *
+     * @param int $fileid Filter clusters by file ID (optional)
+     */
+    public final function getClusters(int $fileid): array {
+        $list = $this->getClustersI($fileid);
+
+        foreach ($list as &$cluster) {
+            $cluster['cluster_id'] = $this->getClusterId($cluster);
+            $cluster['cluster_type'] = $this->clusterType();
+        }
+
+        return $list;
+    }
+
+    /**
      * Register the backend. Do not override.
      */
-    public static function register(): void
+    public static final function register(): void
     {
         Manager::register(static::clusterType(), static::class);
     }

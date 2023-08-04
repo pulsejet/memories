@@ -129,7 +129,7 @@ class RecognizeBackend extends Backend
         unset($row['face_w'], $row['face_h'], $row['face_x'], $row['face_y']);
     }
 
-    public function getClusters(int $fileid = 0): array
+    protected function getClustersI(int $fileid = 0): array
     {
         $query = $this->tq->getBuilder();
 

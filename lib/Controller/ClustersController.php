@@ -47,12 +47,6 @@ class ClustersController extends GenericApiController
 
             $list = $this->backend->getClusters($fileid);
 
-            // Set cluster_id and cluster_type for each cluster
-            foreach ($list as &$cluster) {
-                $cluster['cluster_id'] = $this->backend->getClusterId($cluster);
-                $cluster['cluster_type'] = $this->backend->clusterType();
-            }
-
             return new JSONResponse($list, Http::STATUS_OK);
         });
     }

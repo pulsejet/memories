@@ -84,8 +84,8 @@ export class API {
     return tok(gen(`${BASE}/folders/sub`));
   }
 
-  static ALBUM_LIST(fileid?: number) {
-    return API.Q(gen(`${BASE}/clusters/albums`), { fileid });
+  static ALBUM_LIST() {
+    return gen(`${BASE}/clusters/albums`);
   }
 
   static ALBUM_DOWNLOAD(user: string, name: string) {
@@ -106,8 +106,8 @@ export class API {
     return gen(`${BASE}/tags/set/{fileid}`, { fileid });
   }
 
-  static FACE_LIST(app: 'recognize' | 'facerecognition', fileid?: number) {
-    return API.Q(gen(`${BASE}/clusters/${app}`), { fileid });
+  static FACE_LIST(app: 'recognize' | 'facerecognition') {
+    return gen(`${BASE}/clusters/${app}`);
   }
 
   static CLUSTER_PREVIEW(backend: ClusterTypes, name: string | number) {

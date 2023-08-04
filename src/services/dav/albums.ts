@@ -26,7 +26,9 @@ export function getAlbumPath(user: string, name: string) {
  * @param fileid Optional file ID to get albums for
  */
 export async function getAlbums(sort: 1 | 2 = 1, fileid?: number) {
-  const data = (await axios.get<IAlbum[]>(API.ALBUM_LIST(fileid))).data;
+  const url = API.Q(API.ALBUM_LIST(), { fileid });
+  const res = await axios.get<IAlbum[]>(url);
+  const data = res.data;
 
   // Sort the response
   switch (sort) {

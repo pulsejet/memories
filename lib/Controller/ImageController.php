@@ -180,30 +180,18 @@ class ImageController extends GenericApiController
         int $id,
         bool $basic = false,
         bool $current = false,
-        bool $tags = false
+        bool $tags = false,
+        string $clusters = ''
     ): Http\Response {
-        return Util::guardEx(function () use ($id, $basic, $current, $tags) {
+        return Util::guardEx(function () use ($id, $basic, $current, $tags, $clusters) {
             $file = $this->fs->getUserFile($id);
 
             // Get the image info
-            $info = $this->timelineQuery->getInfoById($file->getId(), $basic);
+            $info = $this->timelineQuery->getInfoById($id, $basic);
 
             // Add fileid and etag
             $info['fileid'] = $file->getId();
             $info['etag'] = $file->getEtag();
-
-            // Allow these ony for logged in users
-            if (null !== $this->userSession->getUser()) {
-                // Get list of tags for this file
-                if ($tags) {
-                    $info['tags'] = $this->getTags($file->getId());
-                }
-
-                // Get latest exif data if requested
-                if ($current) {
-                    $info['current'] = Exif::getExifFromFile($file);
-                }
-            }
 
             // Inject permissions and convert to string
             $info['permissions'] = \OCA\Memories\Util::permissionsToStr($file->getPermissions());
@@ -212,6 +200,31 @@ class ImageController extends GenericApiController
             $info['mimetype'] = $file->getMimeType();
             $info['size'] = $file->getSize();
             $info['basename'] = $file->getName();
+
+            // Allow these ony for logged in users
+            if (null !== $this->userSession->getUser()) {
+                // Get list of tags for this file
+                if ($tags) {
+                    $info['tags'] = $this->getTags($id);
+                }
+
+                // Get latest exif data if requested
+                if ($current) {
+                    $info['current'] = Exif::getExifFromFile($file);
+                }
+
+                // Get clusters for this file
+                if ($clusters) {
+                    $clist = [];
+                    foreach (explode(',', $clusters) as $type) {
+                        $backend = \OC::$server->get(\OCA\Memories\ClustersBackend\Manager::class)->get($type);
+                        if ($backend->isEnabled()) {
+                            $clist[$type] = $backend->getClusters($id);
+                        }
+                    }
+                    $info['clusters'] = $clist;
+                }
+            }
 
             return new JSONResponse($info, Http::STATUS_OK);
         });

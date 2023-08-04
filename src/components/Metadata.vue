@@ -110,15 +110,10 @@ export default defineComponent({
   mixins: [UserConfig],
 
   data: () => ({
-    // Basic info and metadata
     fileid: null as number | null,
     filename: '',
     exif: {} as { [prop: string]: any },
     baseInfo: {} as IImageInfo,
-
-    // Cluster lists
-    albums: [] as IAlbum[],
-    people: [] as IFace[],
 
     loading: 0,
     state: 0,
@@ -126,12 +121,12 @@ export default defineComponent({
 
   mounted() {
     subscribe('files:file:updated', this.handleFileUpdated);
-    subscribe('memories:albums:update', this.refreshAlbums);
+    subscribe('memories:albums:update', this.refresh);
   },
 
   beforeDestroy() {
     unsubscribe('files:file:updated', this.handleFileUpdated);
-    unsubscribe('memories:albums:update', this.refreshAlbums);
+    unsubscribe('memories:albums:update', this.refresh);
   },
 
   computed: {
@@ -351,6 +346,14 @@ export default defineComponent({
     mapFullUrl(): string {
       return `https://www.openstreetmap.org/?mlat=${this.lat}&mlon=${this.lon}#map=18/${this.lat}/${this.lon}`;
     },
+
+    albums(): IAlbum[] {
+      return this.baseInfo?.clusters?.albums ?? [];
+    },
+
+    people(): IFace[] {
+      return this.baseInfo?.clusters?.recognize ?? [];
+    },
   },
 
   methods: {
@@ -359,35 +362,34 @@ export default defineComponent({
       this.loading = 0;
       this.fileid = null;
       this.exif = {};
-      this.albums = [];
-      this.people = [];
 
-      const url = API.Q(utils.getImageInfoUrl(photo), { tags: 1 });
+      // which clusters to get
+      const clusters = [
+        this.config.albums_enabled ? 'albums' : null,
+        this.config.recognize_enabled ? 'recognize' : null,
+      ]
+        .filter((c) => c)
+        .join(',');
+
+      // get tags if enabled
+      const tags = this.config.systemtags_enabled ? 1 : 0;
+
+      // get image info
+      const url = API.Q(utils.getImageInfoUrl(photo), { tags, clusters });
       const res = await this.guardState(axios.get<IImageInfo>(url));
       if (!res) return null;
 
+      // unwrap basic info
       this.fileid = res.data.fileid;
       this.filename = res.data.basename;
       this.exif = res.data.exif || {};
       this.baseInfo = res.data;
 
-      // trigger other refreshes
-      if (!utils.isLocalPhoto(photo)) {
-        this.refreshAlbums();
-        this.refreshPeople();
-      }
-
       return this.baseInfo;
     },
 
-    async refreshAlbums(): Promise<void> {
-      if (!this.config.albums_enabled) return;
-      this.albums = (await this.guardState(dav.getAlbums(1, this.fileid!))) ?? this.albums;
-    },
-
-    async refreshPeople(): Promise<void> {
-      if (!this.config.recognize_enabled) return;
-      this.people = (await this.guardState(dav.getFaceList('recognize', this.fileid!))) ?? this.people;
+    async refresh() {
+      if (this.fileid) await this.update(this.fileid);
     },
 
     async guardState<T>(promise: Promise<T>): Promise<T | null> {
@@ -406,7 +408,7 @@ export default defineComponent({
 
     handleFileUpdated({ fileid }: { fileid: number }) {
       if (fileid && this.fileid === fileid) {
-        this.update(this.fileid);
+        this.refresh();
       }
     },
   },

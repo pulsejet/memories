@@ -105,6 +105,11 @@ export interface IImageInfo {
     Description?: string;
     [other: string]: unknown;
   };
+
+  clusters?: {
+    albums?: IAlbum[];
+    recognize?: IFace[];
+  };
 }
 
 export interface IFolder extends IPhoto {
