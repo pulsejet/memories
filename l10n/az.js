@@ -14,6 +14,7 @@ OC.L10N.register(
     "General" : "Ümumi",
     "Close" : "Bağla",
     "Save" : "Saxla",
+    "Save changes" : "Dəyişiklikləri yaddaşa ver",
     "Month" : "Ay",
     "Day" : "Gün",
     "Time" : "Vaxt",

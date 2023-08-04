@@ -32,6 +32,7 @@ OC.L10N.register(
     "Performance" : "Prestazioni",
     "Unknown" : "Sconosciuto",
     "You must first make sure the correct drivers are installed before configuring acceleration." : "Assicurati di avere installato i driver appropriati, prima di configurare l'accelerazione.",
+    "Template" : "Modello",
     "Add people or groups who can edit your album" : "Aggiungi persone o gruppi che possono modificare il tuo album",
     "Search for collaborators" : "Cerca collaboratori",
     "Search people or groups" : "Cerca persone o gruppi",

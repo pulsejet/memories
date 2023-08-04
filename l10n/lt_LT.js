@@ -39,6 +39,7 @@ OC.L10N.register(
     "Failed to load some photos" : "Nepavyko įkelti kai kurių nuotraukų",
     "Performance" : "Našumas",
     "Unknown" : "Nežinoma",
+    "Template" : "Šablonas",
     "Add people or groups who can edit your album" : "Pridėti žmonių ar grupių, kurie galėtų taisyti jūsų albumą",
     "Search people or groups" : "Ieškoti žmonių ar grupių",
     "Copy the public link" : "Kopijuoti viešąją nuorodą",

@@ -27,6 +27,7 @@ OC.L10N.register(
     "Close" : "Κλείσιμο",
     "Performance" : "Απόδοση",
     "Unknown" : "Άγνωστο",
+    "Template" : "Πρότυπο",
     "No collaborators available" : "Δεν υπάρχουν διαθέσιμοι συνεργάτες",
     "Copy public link" : "Αντιγραφή δημόσιου συνδέσμου",
     "Public link" : "Δημόσιος σύνδεσμος",

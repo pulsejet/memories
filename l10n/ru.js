@@ -57,6 +57,7 @@ OC.L10N.register(
     "Failed to load some photos" : "Не удалось загрузить некоторые фотографии",
     "Performance" : "Производительность",
     "Unknown" : "Неизвестно",
+    "Template" : "Шаблон",
     "Add people or groups who can edit your album" : "Добавьте пользователей или группы, которые могут редактировать альбом",
     "Search for collaborators" : "Поиск людей и групп для добавления в соавторы",
     "Search people or groups" : "Введите имя пользователя или название группы…",

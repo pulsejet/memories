@@ -35,6 +35,7 @@ OC.L10N.register(
     "Failed to load some photos" : "Misslyckades att läsa in vissa foton",
     "Performance" : "Prestanda",
     "Unknown" : "Okänd",
+    "Template" : "Mall",
     "Add people or groups who can edit your album" : "Lägg till användare eller grupper som kan redigera ditt album",
     "Search for collaborators" : "Sök efter medarbetare",
     "Search people or groups" : "Sök personer eller grupper",

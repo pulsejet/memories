@@ -31,6 +31,7 @@ OC.L10N.register(
     "Close" : "Tanca",
     "Performance" : "Rendiment",
     "Unknown" : "Desconegut",
+    "Template" : "Plantilla",
     "Add people or groups who can edit your album" : "Afegeix persones o grups que puguin editar el teu àlbum",
     "Search for collaborators" : "Cerca de col·laboradors",
     "Search people or groups" : "Cerca persones o grups",

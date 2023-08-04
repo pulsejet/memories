@@ -93,6 +93,7 @@ OC.L10N.register(
     "HTTPS is enabled" : "HTTPS włączone",
     "HTTP/2 or HTTP/3 is enabled" : "HTTP/2 albo HTTP/3 włączone",
     "Unknown" : "Nieznany",
+    "Template" : "Szablon",
     "Add people or groups who can edit your album" : "Dodaj osoby lub grupy, które mogą edytować Twój album",
     "Search for collaborators" : "Szukaj współpracowników",
     "Search people or groups" : "Wyszukaj osoby lub grupy",
