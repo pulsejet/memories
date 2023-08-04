@@ -177,13 +177,13 @@ class ImageController extends GenericApiController
      * @param string fileid
      */
     public function info(
-        string $id,
+        int $id,
         bool $basic = false,
         bool $current = false,
         bool $tags = false
     ): Http\Response {
         return Util::guardEx(function () use ($id, $basic, $current, $tags) {
-            $file = $this->fs->getUserFile((int) $id);
+            $file = $this->fs->getUserFile($id);
 
             // Get the image info
             $info = $this->timelineQuery->getInfoById($file->getId(), $basic);
@@ -355,7 +355,7 @@ class ImageController extends GenericApiController
             // Make sure the preview is updated
             \OC::$server->get(\OCP\IPreview::class)->getPreview($file);
 
-            return $this->info((string) $file->getId(), true);
+            return $this->info($file->getId(), true);
         });
     }
 
