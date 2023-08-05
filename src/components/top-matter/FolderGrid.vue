@@ -35,11 +35,14 @@ export default defineComponent({
 <style lang="scss" scoped>
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100% / 3, 180px), 1fr));
+  padding: 0 5px;
+  grid-gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(calc(min(50%, 210px) - 5px), 1fr));
 
   width: calc(100% - 40px); // leave space for scroller
   @media (max-width: 768px) {
     width: calc(100% - 2px); // compensation for negative margin
+    grid-gap: 5px;
   }
 
   > .item {

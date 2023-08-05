@@ -194,7 +194,6 @@ export default defineComponent({
   z-index: 3;
   line-height: 0;
   position: absolute;
-  padding: 2px;
   box-sizing: border-box;
 
   .preview-container {
