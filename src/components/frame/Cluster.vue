@@ -186,7 +186,7 @@ img {
   }
 }
 
-$namemargin: 7px;
+$namemargin: 10px;
 .name {
   position: absolute;
   bottom: 0;
