@@ -4,7 +4,7 @@
     type-field="cluster_type"
     key-field="cluster_id"
     class="grid-recycler hide-scrollbar-mobile"
-    :class="{ empty: !items.length }"
+    :class="classList"
     :items="clusters"
     :skipHover="true"
     :buffer="400"
@@ -19,7 +19,7 @@
 
     <template v-slot="{ item }">
       <div class="grid-item fill-block">
-        <Cluster :data="item" :link="link" :class="clusterClasses" :counters="counters" @click="click(item)" />
+        <Cluster :data="item" :link="link" :counters="counters" @click="click(item)" />
       </div>
     </template>
   </RecycleScroller>
@@ -29,6 +29,7 @@
 import { defineComponent } from 'vue';
 import Cluster from './frame/Cluster.vue';
 import type { ICluster } from '../types';
+import * as utils from '../services/Utils';
 
 export default defineComponent({
   name: 'ClusterGrid',
@@ -73,7 +74,8 @@ export default defineComponent({
     height() {
       if (this.routeIsAlbums) {
         // album view: add gap for text below album
-        return this.width + 42;
+        // 4px extra on mobile for mark#2147915
+        return this.width + (utils.isMobile() ? 46 : 42);
       }
 
       return this.width;
@@ -90,9 +92,10 @@ export default defineComponent({
       return Math.max(Math.floor(this.recyclerWidth / this.maxSize), this.minCols);
     },
 
-    /** Classes list on cluster object */
-    clusterClasses() {
+    /** Classes list on object */
+    classList() {
       return {
+        empty: !this.items.length,
         'cluster--album': this.routeIsAlbums,
       };
     },
@@ -144,12 +147,17 @@ export default defineComponent({
   flex: 1;
   max-height: 100%;
   overflow-y: scroll !important;
-  margin: 1px;
   &.empty {
     visibility: hidden;
   }
-}
-.grid-item {
-  position: relative;
+
+  margin: 1px;
+  @media (max-width: 768px) {
+    margin: 6px; // mark#2147915
+  }
+
+  .grid-item {
+    position: relative;
+  }
 }
 </style>

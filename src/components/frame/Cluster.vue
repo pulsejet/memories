@@ -233,7 +233,12 @@ $namemargin: 7px;
     text-align: start;
     margin: 0;
     padding: 0 12px;
-    min-height: 50px;
+
+    min-height: 50px; // align to top of space
+    @media (max-width: 768px) {
+      min-height: 54px; // mark#2147915
+      padding: 0 6px;
+    }
 
     > .title {
       font-weight: 500;
@@ -273,6 +278,15 @@ $namemargin: 7px;
 
   .cluster--album & {
     padding: 12px;
+
+    @media (max-width: 768px) {
+      /**
+      * This is incredibly hacky: mark#2147915
+      * We want to reduce the padding on mobile. By reducing the vertical padding
+      * by double the amount, the size compensates and it looks the same.
+      */
+      padding: 0 6px;
+    }
   }
 
   > .img-outer {
