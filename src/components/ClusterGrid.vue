@@ -153,7 +153,9 @@ export default defineComponent({
 
   margin: 1px;
   @media (max-width: 768px) {
-    margin: 6px; // mark#2147915
+    &.cluster--album {
+      margin: 6px; // mark#2147915
+    }
   }
 
   .grid-item {
