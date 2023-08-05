@@ -235,9 +235,12 @@ $namemargin: 7px;
     padding: 0 12px;
     min-height: 50px;
 
+    > .title {
+      font-weight: 500;
+    }
+
     > .subtitle {
       color: var(--color-text-lighter);
-      font-size: 0.87em;
     }
   }
 
@@ -250,6 +253,7 @@ $namemargin: 7px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: 0.87em;
   }
 }
 
