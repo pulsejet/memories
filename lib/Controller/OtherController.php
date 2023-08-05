@@ -95,6 +95,7 @@ class OtherController extends GenericApiController
                 'sort_folder_month' => 'true' === $getAppConfig('sortFolderMonth', false),
                 'sort_album_month' => 'true' === $getAppConfig('sortAlbumMonth', 'true'),
                 'enable_top_memories' => 'true' === $getAppConfig('enableTopMemories', 'true'),
+                'livephoto_autoplay' => 'true' === $getAppConfig('livephotoAutoplay', 'true'),
             ], Http::STATUS_OK);
         });
     }

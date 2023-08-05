@@ -115,6 +115,7 @@ class StaticConfig {
       sort_folder_month: false,
       sort_album_month: true,
       enable_top_memories: true,
+      livephoto_autoplay: true,
 
       square_thumbs: false,
       full_res_on_zoom: true,

@@ -46,6 +46,14 @@
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
+          :checked.sync="config.livephoto_autoplay"
+          @update:checked="updateLivephotoAutoplay"
+          type="switch"
+        >
+          {{ t('memories', 'Autoplay Live Photos') }}
+        </NcCheckboxRadioSwitch>
+
+        <NcCheckboxRadioSwitch
           :checked.sync="config.full_res_on_zoom"
           @update:checked="updateFullResOnZoom"
           type="switch"
@@ -229,6 +237,10 @@ export default defineComponent({
 
     async updateEnableTopMemories() {
       await this.updateSetting('enable_top_memories', 'enableTopMemories');
+    },
+
+    async updateLivephotoAutoplay() {
+      await this.updateSetting('livephoto_autoplay', 'livephotoAutoplay');
     },
 
     async updateShowHidden() {

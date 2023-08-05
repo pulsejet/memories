@@ -174,7 +174,7 @@
 import { defineComponent } from 'vue';
 
 import { IDay, IImageInfo, IPhoto, IRow, IRowType } from '../../types';
-import { PsSlide } from './types';
+import type { PsContent } from './types';
 
 import UserConfig from '../../mixins/UserConfig';
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
@@ -985,7 +985,7 @@ export default defineComponent({
 
     /** Play the current live photo */
     playLivePhoto() {
-      this.psLivePhoto?.onContentActivate(this.photoswipe!.currSlide as PsSlide);
+      this.psLivePhoto?.play(this.photoswipe!.currSlide!.content as PsContent);
     },
 
     /** Is the current photo a favorite */

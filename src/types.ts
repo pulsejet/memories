@@ -254,6 +254,7 @@ export type IConfig = {
   sort_folder_month: boolean;
   sort_album_month: boolean;
   enable_top_memories: boolean;
+  livephoto_autoplay: boolean;
 
   square_thumbs: boolean;
   full_res_on_zoom: boolean;

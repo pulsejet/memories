@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Show albums of photo in metadata ([#752](https://github.com/pulsejet/memories/pull/752))
 - **Feature**: Show faces in photo in sidebar metadata
 - **Feature**: Allow creation of new tags when editing metadata ([#487](https://github.com/pulsejet/memories/issues/487))
+- **Feature**: Allow disabling autoplay of live photo ([#591](https://github.com/pulsejet/memories/issues/591))
 - **Feature**: Improved layout for albums list view
 - **Feature**: Improvements in admin interface
 - **Bugfix**: You can now configure the transpose strategy of the transcoder (required for QSV)
