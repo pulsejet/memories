@@ -22,7 +22,7 @@
       size-field="size"
       type-field="type"
       :updateInterval="100"
-      @update="scrollChange"
+      @update="scrollChangeRecycler"
       @resize="handleResizeWithDelay"
     >
       <template #before>
@@ -448,9 +448,14 @@ export default defineComponent({
       this.scrollerManager().recyclerScrolled(event);
     },
 
-    /** Trigger when recycler view changes */
-    scrollChange(startIndex: number, endIndex: number) {
-      if (startIndex === this.currentStart && endIndex === this.currentEnd) {
+    /** Trigger when recycler view changes (for callback) */
+    scrollChangeRecycler(startIndex: number, endIndex: number) {
+      return this.scrollChange(startIndex, endIndex);
+    },
+
+    /** Trigger when recycler view changes to refresh view */
+    scrollChange(startIndex: number, endIndex: number, force = false) {
+      if (startIndex === this.currentStart && endIndex === this.currentEnd && !force) {
         return;
       }
 
@@ -484,9 +489,6 @@ export default defineComponent({
         // No need for the fake count regardless of what happened above
         delete row.pct;
       }
-
-      // Check if this was requested by a refresh
-      const force = this.currentEnd === -1;
 
       // We only need to debounce loads if the user is dragging the scrollbar
       const scrolling = this.scrollerManager().interacting;
@@ -665,9 +667,6 @@ export default defineComponent({
       // Try cache first
       let cache: IDay[] | null = null;
 
-      // Make sure to refresh scroll later
-      this.currentEnd = -1;
-
       try {
         this.loading++;
         const startState = this.state;
@@ -831,6 +830,9 @@ export default defineComponent({
       // Fix view height variable
       await this.scrollerManager().reflow();
       this.scrollPositionChange();
+
+      // Trigger a view refresh. This will load any new placeholders too.
+      this.scrollChange(this.currentStart, this.currentEnd, true);
     },
 
     /** API url for Day call */
