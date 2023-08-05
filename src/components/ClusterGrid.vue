@@ -83,12 +83,12 @@ export default defineComponent({
 
     /** Width of the cluster */
     width() {
-      // Restrict the number of columns between minCols and the size cap
-      return Math.floor(this.recyclerWidth / this.gridItems);
+      return utils.round(this.recyclerWidth / this.gridItems, 2);
     },
 
     /** Number of items horizontally */
     gridItems() {
+      // Restrict the number of columns between minCols and the size cap
       return Math.max(Math.floor(this.recyclerWidth / this.maxSize), this.minCols);
     },
 
