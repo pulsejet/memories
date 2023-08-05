@@ -8,7 +8,8 @@
     :items="clusters"
     :skipHover="true"
     :buffer="400"
-    :itemSize="itemSize"
+    :itemSize="height"
+    :itemSecondarySize="width"
     :gridItems="gridItems"
     @resize="resize"
   >
@@ -18,7 +19,7 @@
 
     <template v-slot="{ item }">
       <div class="grid-item fill-block">
-        <Cluster :data="item" @click="click(item)" :link="link" />
+        <Cluster :data="item" :link="link" :class="clusterClasses" :counters="counters" @click="click(item)" />
       </div>
     </template>
   </RecycleScroller>
@@ -60,8 +61,7 @@ export default defineComponent({
   },
 
   data: () => ({
-    itemSize: 200,
-    gridItems: 5,
+    recyclerWidth: 300,
   }),
 
   mounted() {
@@ -69,6 +69,40 @@ export default defineComponent({
   },
 
   computed: {
+    /** Height of the cluster */
+    height() {
+      if (this.routeIsAlbums) {
+        // album view: add gap for text below album
+        return this.width + 42;
+      }
+
+      return this.width;
+    },
+
+    /** Width of the cluster */
+    width() {
+      // Restrict the number of columns between minCols and the size cap
+      return Math.floor(this.recyclerWidth / this.gridItems);
+    },
+
+    /** Number of items horizontally */
+    gridItems() {
+      return Math.max(Math.floor(this.recyclerWidth / this.maxSize), this.minCols);
+    },
+
+    /** Classes list on cluster object */
+    clusterClasses() {
+      return {
+        'cluster--album': this.routeIsAlbums,
+      };
+    },
+
+    /** Whether the clusters should show counters */
+    counters() {
+      return !this.routeIsAlbums;
+    },
+
+    /** List of clusters to display */
     clusters() {
       const items = [...this.items];
 
@@ -98,10 +132,7 @@ export default defineComponent({
     },
 
     resize() {
-      // Restrict the number of columns between minCols and the size cap
-      const w = (<any>this.$refs.recycler).$el.clientWidth;
-      this.gridItems = Math.max(Math.floor(w / this.maxSize), this.minCols);
-      this.itemSize = Math.floor(w / this.gridItems);
+      this.recyclerWidth = (<any>this.$refs.recycler).$el.clientWidth;
     },
   },
 });

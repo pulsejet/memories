@@ -6,7 +6,7 @@
 
     <EmptyContent v-if="!items.length && !loading" />
 
-    <ClusterGrid :items="items" :minCols="minCols">
+    <ClusterGrid :items="items" :minCols="minCols" :maxSize="maxSize">
       <template #before>
         <DynamicTopMatter class="cv-dtm" ref="dtm" />
       </template>
@@ -56,7 +56,11 @@ export default defineComponent({
     },
 
     minCols() {
-      return this.$route.name === 'albums' ? 2 : 3;
+      return this.routeIsAlbums ? 2 : 3;
+    },
+
+    maxSize() {
+      return this.routeIsAlbums ? 250 : 180;
     },
   },
 

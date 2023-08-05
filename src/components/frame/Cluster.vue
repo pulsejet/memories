@@ -4,8 +4,8 @@
       <NcCounterBubble> {{ data.count }} </NcCounterBubble>
     </div>
     <div class="name">
-      {{ title }}
-      <span class="subtitle" v-if="subtitle"> {{ subtitle }} </span>
+      <div class="title">{{ title }}</div>
+      <div class="subtitle" v-if="subtitle">{{ subtitle }}</div>
     </div>
 
     <div class="previews fill-block" ref="previews">
@@ -87,8 +87,23 @@ export default defineComponent({
     },
 
     subtitle() {
-      if (this.album && this.album.user !== getCurrentUser()?.uid) {
-        return `(${this.album.user_display || this.album.user})`;
+      if (this.album) {
+        let text: string;
+        if (this.album.count === 0) {
+          text = this.t('memories', 'No items');
+        } else {
+          text = this.n('memories', '{n} item', '{n} items', this.album.count, { n: this.album.count });
+        }
+
+        if (this.album.user !== getCurrentUser()?.uid) {
+          text +=
+            ' / ' +
+            this.t('memories', 'Shared by {user}', {
+              user: this.album.user_display || this.album.user,
+            });
+        }
+
+        return text;
       }
 
       return '';
@@ -165,14 +180,6 @@ img {
 }
 
 .cluster {
-  // to use this option, the height must be set to a bit more
-  // than the width for the text; the image will then be forced
-  // to be square and the label will be outside.
-  &--circle {
-    height: unset; // from .fill-block
-    aspect-ratio: 1;
-  }
-
   // Get rid of color of the bubble
   .count-bubble :deep .counter-bubble__counter {
     color: unset !important;
@@ -187,9 +194,6 @@ $namemargin: 7px;
   width: calc(100% - 2 * #{$namemargin});
   margin: $namemargin;
 
-  // 2px padding prevents the bottom of the text from being cut off
-  padding-bottom: 2px;
-
   color: white;
   word-wrap: break-word;
   white-space: normal;
@@ -198,30 +202,54 @@ $namemargin: 7px;
   line-height: 1.1em;
 
   // multiline ellipsis
-  display: -webkit-box;
-  -webkit-line-clamp: 5;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  > .title {
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 
+    // 2px padding prevents the bottom of the text from being cut off
+    padding-bottom: 2px;
+  }
+
+  // name is below the image
   .cluster--circle & {
-    -webkit-line-clamp: 2;
     margin: 0 $namemargin;
     min-height: 26px; // alignment
-  }
-
-  > .subtitle {
-    font-size: 0.7em;
-    margin-top: 2px;
-    display: block;
-  }
-
-  .cluster.error > &,
-  .cluster--circle & {
     color: unset;
+  }
+
+  .cluster--circle &,
+  .cluster--album &,
+  .cluster.error & {
+    color: unset;
+
+    > .title {
+      -webkit-line-clamp: 2;
+    }
+  }
+
+  .cluster--album & {
+    text-align: start;
+    margin: 0;
+    padding: 0 12px;
+    min-height: 50px;
+
+    > .subtitle {
+      color: var(--color-text-lighter);
+      font-size: 0.87em;
+    }
   }
 
   @media (max-width: 768px) {
     font-size: 0.9em;
+  }
+
+  > .subtitle {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -239,6 +267,10 @@ $namemargin: 7px;
   padding: 2px;
   box-sizing: border-box;
 
+  .cluster--album & {
+    padding: 12px;
+  }
+
   > .img-outer {
     position: relative;
     background-color: var(--color-background-dark);
@@ -250,14 +282,17 @@ $namemargin: 7px;
     display: inline-block;
     cursor: pointer;
 
-    .cluster--rounded & {
+    .cluster--rounded &,
+    .cluster--album & {
       border-radius: 12px; // rounded corners
     }
+    .cluster--album &,
     .cluster--circle & {
-      // circle image
-      border-radius: 50%;
       height: unset;
-      aspect-ratio: 1;
+      aspect-ratio: 1; // force square
+    }
+    .cluster--circle & {
+      border-radius: 50%; // circle image
     }
 
     &.plus {
