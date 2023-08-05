@@ -329,10 +329,11 @@ $namemargin: 10px;
       position: absolute;
       top: 0;
       left: 0;
-      background: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 10%, transparent 35%);
+      background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 10%, transparent 40%);
 
       .cluster.error &,
-      .cluster--circle & {
+      .cluster--circle &,
+      .cluster--album & {
         display: none;
       }
     }
