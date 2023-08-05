@@ -23,6 +23,7 @@ OC.L10N.register(
     "Account" : "บัญชี",
     "Close" : "ปิด",
     "Unknown" : "ไม่ทราบ",
+    "No items" : "ไม่มีรายการ",
     "Public link" : "ลิงก์สาธารณะ",
     "Name of the album" : "ชื่อของอัลบั้ม",
     "Location of the album" : "ตำแหน่งของอัลบั้ม",

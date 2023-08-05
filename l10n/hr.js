@@ -26,6 +26,7 @@ OC.L10N.register(
     "Performance" : "Učinkovitost",
     "Unknown" : "Nepoznata pogreška",
     "Template" : "Predložak",
+    "Shared by {user}" : "Dijeli {user}",
     "Copy public link" : "Kopiraj javnu poveznicu",
     "Public link" : "Javna poveznica",
     "Back" : "Natrag",

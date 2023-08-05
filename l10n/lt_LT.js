@@ -40,6 +40,7 @@ OC.L10N.register(
     "Performance" : "Našumas",
     "Unknown" : "Nežinoma",
     "Template" : "Šablonas",
+    "Shared by {user}" : "Bendrina {user}",
     "Add people or groups who can edit your album" : "Pridėti žmonių ar grupių, kurie galėtų taisyti jūsų albumą",
     "Search people or groups" : "Ieškoti žmonių ar grupių",
     "Copy the public link" : "Kopijuoti viešąją nuorodą",

@@ -28,6 +28,8 @@ OC.L10N.register(
     "Performance" : "Απόδοση",
     "Unknown" : "Άγνωστο",
     "Template" : "Πρότυπο",
+    "No items" : "Κανένα στοιχείο",
+    "Shared by {user}" : "Διαμοιράστηκε από {user}",
     "No collaborators available" : "Δεν υπάρχουν διαθέσιμοι συνεργάτες",
     "Copy public link" : "Αντιγραφή δημόσιου συνδέσμου",
     "Public link" : "Δημόσιος σύνδεσμος",

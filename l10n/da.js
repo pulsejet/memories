@@ -34,6 +34,8 @@ OC.L10N.register(
     "Performance" : "Ydelse",
     "Unknown" : "Ukendt",
     "Template" : "Skabelon",
+    "No items" : "Ingen elementer",
+    "Shared by {user}" : "Delt af {user}",
     "Public link copied!" : "Offentlig link kopieret!",
     "Copy public link" : "Kopier offentligt link",
     "Public link" : "Offentligt link",

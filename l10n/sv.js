@@ -36,6 +36,8 @@ OC.L10N.register(
     "Performance" : "Prestanda",
     "Unknown" : "Okänd",
     "Template" : "Mall",
+    "No items" : "Inga poster",
+    "Shared by {user}" : "Delad av {user}",
     "Add people or groups who can edit your album" : "Lägg till användare eller grupper som kan redigera ditt album",
     "Search for collaborators" : "Sök efter medarbetare",
     "Search people or groups" : "Sök personer eller grupper",

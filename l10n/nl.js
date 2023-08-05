@@ -43,6 +43,8 @@ OC.L10N.register(
     "Performance" : "Prestaties",
     "Unknown" : "Onbekend",
     "Template" : "Sjabloon",
+    "No items" : "Geen items",
+    "Shared by {user}" : "Gedeeld door {user}",
     "Add people or groups who can edit your album" : "Voeg mensen of groepen toe die je album kunnen bewerken",
     "Search for collaborators" : "Zoeken naar bijdragers",
     "Search people or groups" : "Zoek mensen of groepen",

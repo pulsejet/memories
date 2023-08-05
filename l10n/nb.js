@@ -61,6 +61,7 @@ OC.L10N.register(
     "Failed to load some photos" : "Kunne ikke laste inn noen bilder",
     "Performance" : "Ytelse",
     "Unknown" : "Ukjent",
+    "No items" : "Ingen gjenstander",
     "Add people or groups who can edit your album" : "Legg til personer eller grupper som kan redigere albumet ditt",
     "Search for collaborators" : "Søk etter samarbeidspartnere",
     "Search people or groups" : "Søk etter personer eller grupper",

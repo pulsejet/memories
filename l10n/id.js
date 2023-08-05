@@ -28,6 +28,8 @@ OC.L10N.register(
     "Close" : "Tutup",
     "Performance" : "Performa",
     "Unknown" : "Tidak diketahui",
+    "No items" : "Tak ada item",
+    "Shared by {user}" : "Dibagikan oleh {user}",
     "Add people or groups who can edit your album" : "Tambahkan orang atau grup yang dapat menyunting album Anda",
     "Search for collaborators" : "Cari kolaborator",
     "Search people or groups" : "Cari orang atau grup",
