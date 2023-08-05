@@ -216,7 +216,7 @@ $namemargin: 7px;
   .cluster--circle & {
     margin: 0 $namemargin;
     min-height: 26px; // alignment
-    color: unset;
+    font-weight: 500;
   }
 
   .cluster--circle &,
