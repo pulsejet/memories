@@ -69,11 +69,19 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 
 	// Possible streams
 	m.streams["360p"] = &Stream{c: c, m: m, quality: "360p", height: 360, width: 640, bitrate: 500000}
-	m.streams["480p"] = &Stream{c: c, m: m, quality: "480p", height: 480, width: 640, bitrate: 1200000}
+	m.streams["480p"] = &Stream{c: c, m: m, quality: "480p", height: 480, width: 854, bitrate: 1200000}
 	m.streams["720p"] = &Stream{c: c, m: m, quality: "720p", height: 720, width: 1280, bitrate: 2200000}
 	m.streams["1080p"] = &Stream{c: c, m: m, quality: "1080p", height: 1080, width: 1920, bitrate: 3600000}
 	m.streams["1440p"] = &Stream{c: c, m: m, quality: "1440p", height: 1440, width: 2560, bitrate: 6000000}
 	m.streams["2160p"] = &Stream{c: c, m: m, quality: "2160p", height: 2160, width: 3840, bitrate: 10000000}
+
+	// height is our primary dimension for scaling
+	// using the probed size, we adjust the width of the stream
+	// the smaller dimemension of the output should match the height here
+	smDim, lgDim := m.probe.Height, m.probe.Width
+	if m.probe.Height > m.probe.Width {
+		smDim, lgDim = lgDim, smDim
+	}
 
 	// Only keep streams that are smaller than the video
 	for k, stream := range m.streams {
@@ -82,9 +90,17 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 		// scale bitrate by frame rate with reference 30
 		stream.bitrate = int(float64(stream.bitrate) * float64(m.probe.FrameRate) / 30.0)
 
-		// these streams are pointless
-		if stream.height > m.probe.Height || stream.width > m.probe.Width || float64(stream.bitrate) > float64(m.probe.BitRate)*0.8 {
+		// now store the width of the stream as the larger dimension
+		stream.width = int(math.Ceil(float64(lgDim) * float64(stream.height) / float64(smDim)))
+
+		// remove invalid streams
+		if (stream.height > smDim || stream.width > lgDim) || // no upscaling; we're not AI
+			(float64(stream.bitrate) > float64(m.probe.BitRate)*0.8) || // no more than 80% of original bitrate
+			(stream.height%2 != 0 || stream.width%2 != 0) { // no odd dimensions
+
+			// remove stream
 			delete(m.streams, k)
+			continue
 		}
 	}
 
