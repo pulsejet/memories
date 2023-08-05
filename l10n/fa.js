@@ -25,6 +25,7 @@ OC.L10N.register(
     "Close" : "بسته",
     "Performance" : "کارایی",
     "Unknown" : "ناشناخته",
+    "No items" : "هیچ موردی وجود ندارد.",
     "Copy public link" : "پیوند عمومی را کپی کنید",
     "Public link" : "پیوند عمومی",
     "Back" : "بازگشت",

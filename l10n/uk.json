@@ -36,6 +36,8 @@
     "Failed to load some photos" : "Не вдалося завантажити деякі фотографії",
     "Unknown" : "Невідомо",
     "Template" : "Шаблон",
+    "No items" : "Відсутні елементи",
+    "Shared by {user}" : "{user} надав(-ла) доступ",
     "Add people or groups who can edit your album" : "Додайте людей або групи, які можуть редагувати ваш альбом",
     "Search for collaborators" : "Пошук співавторів",
     "Search people or groups" : "Пошук людей або груп",

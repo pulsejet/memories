@@ -26,6 +26,7 @@ OC.L10N.register(
     "Performance" : "パフォーマンス",
     "Unknown" : "不明",
     "Template" : "テンプレート",
+    "Shared by {user}" : "{user} から共有されました",
     "Copy public link" : "公開リンクをコピー",
     "Public link" : "公開リンク",
     "Create new album" : "新しいアルバムを作成",

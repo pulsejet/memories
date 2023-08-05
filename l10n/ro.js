@@ -20,6 +20,7 @@ OC.L10N.register(
     "Account" : "Cont",
     "Close" : "Închide",
     "Unknown" : "Necunoscut",
+    "No items" : "Nu există elemente",
     "Copy public link" : "Copiză link-ul public",
     "Public link" : "Link public",
     "Back" : "Înapoi",

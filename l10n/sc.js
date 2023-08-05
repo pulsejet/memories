@@ -26,6 +26,7 @@ OC.L10N.register(
     "Performance" : "Atuatzione",
     "Unknown" : "Disconnotu",
     "Template" : "Modellu",
+    "Shared by {user}" : "Cumpartzidu dae {user}",
     "Copy public link" : "Còpia ligòngiu pùblicu",
     "Public link" : "Ligòngiu pùblicu",
     "Back" : "In segus",

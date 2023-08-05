@@ -58,6 +58,8 @@ OC.L10N.register(
     "Performance" : "Производительность",
     "Unknown" : "Неизвестно",
     "Template" : "Шаблон",
+    "No items" : "Нет выбранных",
+    "Shared by {user}" : "Опубликовано пользователем {user} ",
     "Add people or groups who can edit your album" : "Добавьте пользователей или группы, которые могут редактировать альбом",
     "Search for collaborators" : "Поиск людей и групп для добавления в соавторы",
     "Search people or groups" : "Введите имя пользователя или название группы…",

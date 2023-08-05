@@ -11,6 +11,7 @@ OC.L10N.register(
     "Photos" : "Semeyes",
     "Delete" : "Desaniciar",
     "External Link" : "Enllaz esternu",
+    "Template" : "Plantía",
     "Public link" : "Enllaz públicu",
     "Year" : "Añu",
     "Hour" : "Hora",

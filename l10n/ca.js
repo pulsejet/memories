@@ -32,6 +32,8 @@ OC.L10N.register(
     "Performance" : "Rendiment",
     "Unknown" : "Desconegut",
     "Template" : "Plantilla",
+    "No items" : "No hi ha cap element",
+    "Shared by {user}" : "Compartit per {user}",
     "Add people or groups who can edit your album" : "Afegeix persones o grups que puguin editar el teu àlbum",
     "Search for collaborators" : "Cerca de col·laboradors",
     "Search people or groups" : "Cerca persones o grups",

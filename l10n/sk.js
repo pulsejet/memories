@@ -38,6 +38,8 @@ OC.L10N.register(
     "Performance" : "Výkon",
     "Unknown" : "Neznámy",
     "Template" : "Šablóny",
+    "No items" : "Žiadne položky",
+    "Shared by {user}" : "Zdieľa {user}",
     "Add people or groups who can edit your album" : "Pridať užívateľov alebo skupiny ktoré môžu upravovať váš album",
     "Search for collaborators" : "Vyhľadať spolupracovníkov",
     "Search people or groups" : "Vyhľadať užívateľov alebo skupiny",

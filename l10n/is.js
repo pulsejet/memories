@@ -27,6 +27,7 @@ OC.L10N.register(
     "Performance" : "Afköst",
     "Unknown" : "Óþekkt",
     "Template" : "Sniðmát",
+    "Shared by {user}" : "Deilt af {user}",
     "Copy public link" : "Afrita opinberan tengil",
     "Public link" : "Opinber tengill",
     "Back" : "Til baka",
