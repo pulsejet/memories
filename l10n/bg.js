@@ -150,6 +150,8 @@ OC.L10N.register(
     "Bind address (local only)" : "Обвързващ адрес (само локален)",
     "Connection address (same as bind if local)" : "Адрес на връзката (същият като адреса на обвързване ако е локален)",
     "Template" : "Шаблон",
+    "No items" : "Без/няма елементи",
+    "Shared by {user}" : "Споделен от {user}",
     "Add people or groups who can edit your album" : "Добавяне на хора или групи, които могат да редактират вашият албум",
     "Search for collaborators" : "Търсене на сътрудници",
     "Search people or groups" : "Търсене на хора или групи",
