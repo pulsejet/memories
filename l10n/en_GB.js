@@ -68,6 +68,7 @@ OC.L10N.register(
     "Timeline Path" : "Timeline Path",
     "Square grid mode" : "Square grid mode",
     "Show past photos on top of timeline" : "Show past photos on top of timeline",
+    "Autoplay Live Photos" : "Autoplay Live Photos",
     "Load full size image on zoom" : "Load full size image on zoom",
     "Always load full size image (not recommended)" : "Always load full size image (not recommended)",
     "Account" : "Account",

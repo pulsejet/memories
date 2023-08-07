@@ -61,6 +61,7 @@ OC.L10N.register(
     "Copyright" : "Ophavsret",
     "Empty" : "Tom",
     "Reset" : "Nulstil",
+    "Collaborative Tags" : "Samarbejds Tags",
     "Name" : "Navn",
     "Update" : "Opdater",
     "Search" : "Søg",
