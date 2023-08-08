@@ -109,6 +109,7 @@ export interface IImageInfo {
   clusters?: {
     albums?: IAlbum[];
     recognize?: IFace[];
+    facerecognition?: IFace[];
   };
 }
 

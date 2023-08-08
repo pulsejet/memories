@@ -17,6 +17,7 @@ declare module 'vue' {
     routeIsPeople: boolean;
     routeIsRecognize: boolean;
     routeIsRecognizeUnassigned: boolean;
+    routeIsFaceRecognition: boolean;
     routeIsArchive: boolean;
     routeIsPlaces: boolean;
     routeIsMap: boolean;
