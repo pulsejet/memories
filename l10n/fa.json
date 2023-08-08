@@ -63,6 +63,7 @@
     "Text" : "متن",
     "Size" : "اندازه",
     "Extension" : "گسترش",
+    "Name is required." : "نام الزامی است",
     "Direct" : "مستقیم",
     "Auto" : "خودکار"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"

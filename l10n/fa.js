@@ -65,6 +65,7 @@ OC.L10N.register(
     "Text" : "متن",
     "Size" : "اندازه",
     "Extension" : "گسترش",
+    "Name is required." : "نام الزامی است",
     "Direct" : "مستقیم",
     "Auto" : "خودکار"
 },
