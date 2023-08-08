@@ -120,7 +120,7 @@ class FaceRecognitionBackend extends Backend
             'y' => (float) $row['face_y'] / $row['image_height'],
         ];
 
-        unset($row['face_x'], $row['face_y'], $row['face_w'], $row['face_h'], $row['image_height'], $row['image_width']);
+        unset($row['face_x'], $row['face_y'], $row['face_width'], $row['face_height'], $row['image_height'], $row['image_width']);
     }
 
     public function getClustersInternal(int $fileid = 0): array
@@ -157,7 +157,6 @@ class FaceRecognitionBackend extends Backend
             'frf.height',
             'm.w as image_width',       // Scoring
             'm.h as image_height',
-            'frf.confidence',
             'm.fileid',
             'm.datetaken',              // Just in case, for postgres
         )->from('facerecog_faces', 'frf');
