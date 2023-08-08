@@ -125,13 +125,9 @@ class FaceRecognitionBackend extends Backend
 
     public function getClustersInternal(int $fileid = 0): array
     {
-        if ($fileid) {
-            throw new \Exception('FaceRecognitionBackend: fileid filter not implemented');
-        }
-
         $faces = array_merge(
-            $this->getFaceRecognitionPersons(),
-            $this->getFaceRecognitionClusters()
+            $this->getFaceRecognitionPersons($fileid),
+            $this->getFaceRecognitionClusters($fileid)
         );
 
         // Post process
@@ -225,7 +221,7 @@ class FaceRecognitionBackend extends Backend
         return (int) $this->config->getAppValue('facerecognition', 'model', -1);
     }
 
-    private function getFaceRecognitionClusters(bool $show_singles = false, bool $show_hidden = false)
+    private function getFaceRecognitionClusters(int $fileid = 0, bool $show_singles = false, bool $show_hidden = false)
     {
         $query = $this->tq->getBuilder();
 
@@ -255,13 +251,18 @@ class FaceRecognitionBackend extends Backend
         $query->addGroupBy('frp.user');
         $query->where($query->expr()->isNull('frp.name'));
 
+        // WHERE these clusters contain fileid if specified
+        if ($fileid > 0) {
+            $query->andWhere($query->expr()->eq('fri.file', $query->createNamedParameter($fileid)));
+        }
+
         // By default hides individual faces when they have no name.
-        if (!$show_singles) {
+        if (!$show_singles && !$fileid) {
             $query->having($query->expr()->gt($count, $query->expr()->literal(1, \PDO::PARAM_INT)));
         }
 
         // By default it shows the people who were not hidden
-        if (!$show_hidden) {
+        if (!$show_hidden && !$fileid) {
             $query->andWhere($query->expr()->eq('frp.is_visible', $query->expr()->literal(1)));
         }
 
@@ -276,7 +277,7 @@ class FaceRecognitionBackend extends Backend
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
-    private function getFaceRecognitionPersons()
+    private function getFaceRecognitionPersons(int $fileid = 0)
     {
         $query = $this->tq->getBuilder();
 
@@ -303,6 +304,12 @@ class FaceRecognitionBackend extends Backend
 
         // GROUP by name of face clusters
         $query->where($query->expr()->isNotNull('frp.name'));
+
+        // WHERE these clusters contain fileid if specified
+        if ($fileid > 0) {
+            $query->andWhere($query->expr()->eq('fri.file', $query->createNamedParameter($fileid)));
+        }
+
         $query->groupBy('frp.user');
         $query->addGroupBy('frp.name');
 
