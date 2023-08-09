@@ -151,7 +151,7 @@ OC.L10N.register(
     "Bind address (local only)" : "Bind-Adresse (nur lokal)",
     "Connection address (same as bind if local)" : "Verbindungsadresse (dasselbe wie bind, wenn lokal)",
     "Template" : "Vorlage",
-    "No items" : "Benötigt keine Übersetzung. Hier wird nur die formelle Übersetzung verwendet (de_DE).",
+    "No items" : "Keine Elemente",
     "Shared by {user}" : "Geteilt von {user}",
     "Add people or groups who can edit your album" : "Personen oder Gruppen hinzufügen, die dein Album bearbeiten können",
     "Search for collaborators" : "Suche nach Mitbearbeitenden",
