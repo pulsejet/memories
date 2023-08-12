@@ -75,6 +75,7 @@ OC.L10N.register(
     "Copyright" : "Copyright",
     "Empty" : "Buit",
     "Reset" : "Restableix",
+    "Collaborative Tags" : "Etiquetes col·laboratives",
     "Remove person" : "Esborra la persona",
     "Rename person" : "Reanomena la persona",
     "Name" : "Cognom",
