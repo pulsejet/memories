@@ -151,7 +151,7 @@
     "Memories supports offline reverse geocoding using the OpenStreetMaps data on MySQL and Postgres." : "Lembranzas admite a xeocodificación inversa sen conexión usando os datos de OpenStreetMaps en MySQL e Postgres.",
     "You need to download the planet data into your database. This is highly recommended and has low overhead." : "Ten que descargar os datos do planeta na súa base de datos. Isto é moi recomendábel e ten unha sobrecarga baixa.",
     "If the button below does not work for importing the planet data, use the following command:" : "Se o botón de embaixo non funciona para importar os datos do planeta, use a seguinte orde:",
-    "Note: the geometry data is stored in the memories_planet_geometry table, with no prefix." : "Nota: os datos de xeometría gárdanse na táboa memories_planet_geometry, sen prefixo.",
+    "Note: the geometry data is stored in the memories_planet_geometry table, with no prefix." : "Nota: Os datos de xeometría gárdanse na táboa memories_planet_geometry, sen prefixo.",
     "Download planet database" : "Descargar a base de datos de planeta",
     "Reverse Geocoding" : "Xeocodificación inversa",
     "Geometry support was not detected in your database" : "Non se detectou compatibilidade con xeometría na súa base de datos",
