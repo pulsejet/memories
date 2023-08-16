@@ -201,6 +201,7 @@ OC.L10N.register(
     "Template" : "Šablona",
     "No items" : "Žádné položky",
     "Shared by {user}" : "Sdílí {user}",
+    "_{n} item_::_{n} items_" : ["{n} položka","{n} položky","{n} položek","{n} položky"],
     "_{n} photo updated_::_{n} photos updated_" : ["{n} fotka zaktualizována","{n} fotky zaktualizovány","{n} fotek zaktualizováno","{n} fotky zaktualizovány"],
     "Add people or groups who can edit your album" : "Přidejte uživatele či skupiny, kteří mohou album upravovat",
     "Search for collaborators" : "Vyhledat spolupracující",
