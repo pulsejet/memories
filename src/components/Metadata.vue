@@ -352,10 +352,14 @@ export default defineComponent({
     },
 
     people(): IFace[] {
-      if (this.routeIsFaceRecognition)
-        return this.baseInfo?.clusters?.facerecognition ?? [];
-      else
-        return this.baseInfo?.clusters?.recognize ?? [];
+      const clusters = this.baseInfo?.clusters;
+
+      // force face-recognition on its own route, or if recognize is disabled
+      if (this.routeIsFaceRecognition || !this.config.recognize_enabled) {
+        return clusters?.facerecognition ?? [];
+      }
+
+      return clusters?.recognize ?? [];
     },
   },
 
