@@ -68,7 +68,9 @@ class ClustersController extends GenericApiController
 
             // If no photos found then return 404
             if (0 === \count($photos)) {
-                return new JSONResponse([], Http::STATUS_NOT_FOUND);
+                return new JSONResponse([
+                    'message' => 'No photos found in this cluster',
+                ], Http::STATUS_NOT_FOUND);
             }
 
             // Put the photos in the correct order
