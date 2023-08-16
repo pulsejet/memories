@@ -31,6 +31,9 @@ export default defineComponent({
     routeIsRecognizeUnassigned(): boolean {
       return this.routeIsRecognize && this.$route.params.name === constants.FACE_NULL;
     },
+    routeIsFaceRecognition(): boolean {
+      return this.$route.name === 'facerecognition';
+    },
     routeIsArchive(): boolean {
       return this.$route.name === 'archive';
     },

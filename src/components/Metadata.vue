@@ -352,7 +352,10 @@ export default defineComponent({
     },
 
     people(): IFace[] {
-      return this.baseInfo?.clusters?.recognize ?? [];
+      if (this.routeIsFaceRecognition)
+        return this.baseInfo?.clusters?.facerecognition ?? [];
+      else
+        return this.baseInfo?.clusters?.recognize ?? [];
     },
   },
 
@@ -367,6 +370,7 @@ export default defineComponent({
       const clusters = [
         this.config.albums_enabled ? 'albums' : null,
         this.config.recognize_enabled ? 'recognize' : null,
+        this.config.facerecognition_enabled ? 'facerecognition' : null,
       ]
         .filter((c) => c)
         .join(',');
