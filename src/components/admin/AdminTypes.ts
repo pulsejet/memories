@@ -43,10 +43,12 @@ export type ISystemStatus = {
   bad_encryption: boolean;
   indexed_count: number;
   mimes: string[];
+  imagick: string | false;
   gis_type: number;
   gis_count?: number;
   exiftool: IBinaryStatus;
   perl: IBinaryStatus;
+  ffmpeg_preview: IBinaryStatus;
   ffmpeg: IBinaryStatus;
   ffprobe: IBinaryStatus;
   govod: IBinaryStatus;

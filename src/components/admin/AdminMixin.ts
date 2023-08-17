@@ -83,14 +83,18 @@ export default defineComponent({
       }
     },
 
-    binaryStatusType(status: IBinaryStatus, critical = true): string {
-      if (status === 'ok' || status.startsWith('test_ok')) {
+    binaryStatusType(status: IBinaryStatus, critical = true): 'success' | 'warning' | 'error' {
+      if (this.binaryStatusOk(status)) {
         return 'success';
       } else if (status === 'not_found' || status === 'not_executable' || status.startsWith('test_fail')) {
         return critical ? 'error' : 'warning';
       } else {
         return 'warning';
       }
+    },
+
+    binaryStatusOk(status: IBinaryStatus): boolean {
+      return status === 'ok' || status.startsWith('test_ok');
     },
   },
 

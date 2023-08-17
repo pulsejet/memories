@@ -10,6 +10,26 @@
     </a>
     <br />
 
+    <template v-if="status">
+      <NcNoteCard v-if="status.imagick" type="success">
+        {{ t('memories', 'PHP-Imagick is available [{version}].', { version: status.imagick }) }}
+      </NcNoteCard>
+      <NcNoteCard v-else type="error">
+        {{ t('memories', 'PHP-Imagick is not available.') }}
+        {{ t('memories', 'Image editing will not work correctly.') }}
+        {{ t('memories', 'Thumbnail generation may not work for some formats (HEIC, TIFF).') }}
+      </NcNoteCard>
+
+      <NcNoteCard :type="binaryStatusType(status.ffmpeg_preview)">
+        {{ binaryStatus('ffmpeg preview', status.ffmpeg_preview) }}
+        {{
+          binaryStatusOk(status.ffmpeg_preview)
+            ? t('memories', 'Thumbnails for videos will be generated with this binary.')
+            : t('memories', 'Thumbnail generation may not work for videos.')
+        }}
+      </NcNoteCard>
+    </template>
+
     <NcCheckboxRadioSwitch
       type="switch"
       v-for="(provider, klass) in knownPreviewProviders"
