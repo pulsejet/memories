@@ -78,16 +78,15 @@ class RecognizeBackend extends Backend
 
         if (!$aggregate) {
             // Multiple detections for the same image
-            $query->addSelect('rfd.id AS faceid');
+            $query->selectAlias('rfd.id', 'faceid');
 
             // Face Rect
             if ($this->request->getParam('facerect')) {
-                $query->addSelect(
-                    'rfd.width AS face_w',
-                    'rfd.height AS face_h',
-                    'rfd.x AS face_x',
-                    'rfd.y AS face_y',
-                );
+                $query->selectAlias('rfd.width', 'face_w')
+                    ->selectAlias('rfd.height', 'face_h')
+                    ->selectAlias('rfd.x', 'face_x')
+                    ->selectAlias('rfd.y', 'face_y')
+                ;
             }
         }
 

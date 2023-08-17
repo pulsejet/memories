@@ -94,14 +94,13 @@ class FaceRecognitionBackend extends Backend
 
         // Add face rect
         if (!$aggregate && $this->request->getParam('facerect')) {
-            $query->addSelect(
-                'frf.x AS face_x',
-                'frf.y AS face_y',
-                'frf.width AS face_width',
-                'frf.height AS face_height',
-                'm.w AS image_width',
-                'm.h AS image_height',
-            );
+            $query->selectAlias('frf.x', 'face_x')
+                ->selectAlias('frf.y', 'face_y')
+                ->selectAlias('frf.width', 'face_width')
+                ->selectAlias('frf.height', 'face_height')
+                ->selectAlias('m.w', 'image_width')
+                ->selectAlias('m.h', 'image_height')
+            ;
         }
     }
 
