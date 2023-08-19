@@ -71,6 +71,25 @@ apk update
 apk add --no-cache bash ffmpeg libva-utils libva-vdpau-driver libva-intel-driver intel-media-driver mesa-va-gallium
 ```
 
+In some cases, along with adding `www-data` to the appropriate groups, you may also need to set the permissions of the device manually:
+
+```bash
+sudo chmod 666 /dev/dri/renderD128
+```
+
+You can run a test using a sample video file to check if VA-API is working correctly for the `www-data` user:
+
+```bash
+# download sample or or use any other video file
+wget https://github.com/pulsejet/memories-assets/raw/main/sample.mp4
+
+# check if VA-API is working
+sudo -u www-data \
+  ffmpeg -hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format vaapi \
+  -i 'sample.mp4' -vcodec h264_vaapi \
+  output-www-data.mp4
+```
+
 ### Docker installations
 
 If you use Docker, you need to:
