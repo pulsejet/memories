@@ -60,11 +60,7 @@ export async function* favoritePhotos(photos: IPhoto[], favoriteState: boolean) 
     try {
       await favoriteFile(fileInfo.originalFilename, favoriteState);
       const photo = photos.find((p) => p.fileid === fileInfo.fileid)!;
-      if (favoriteState) {
-        photo.flag |= utils.constants.c.FLAG_IS_FAVORITE;
-      } else {
-        photo.flag &= ~utils.constants.c.FLAG_IS_FAVORITE;
-      }
+      favoriteSetFlag(photo, favoriteState);
       return fileInfo.fileid as number;
     } catch (error) {
       console.error('Failed to favorite', fileInfo, error);
@@ -78,4 +74,17 @@ export async function* favoritePhotos(photos: IPhoto[], favoriteState: boolean) 
   });
 
   yield* base.runInParallel(calls, 10);
+}
+
+/**
+ * Set the favorite flag on a photo
+ * @param photo Photo to set the flag on
+ * @param val New value of the flag
+ */
+export function favoriteSetFlag(photo: IPhoto, val: boolean) {
+  if (val) {
+    photo.flag |= utils.constants.c.FLAG_IS_FAVORITE;
+  } else {
+    photo.flag &= ~utils.constants.c.FLAG_IS_FAVORITE;
+  }
 }
