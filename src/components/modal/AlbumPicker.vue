@@ -119,14 +119,25 @@ export default defineComponent({
   },
 
   methods: {
-    albumCreatedHandler() {
+    async albumCreatedHandler({ album }: { album: { basename: string } }) {
       this.showAlbumCreationForm = false;
-      this.loadAlbums();
+      await this.loadAlbums(true);
+
+      // select the newly created album
+      const newAlbum = this.albums.find((a) => a.name === album.basename);
+      if (newAlbum) {
+        this.selection.add(newAlbum);
+        this.forceUpdate();
+      }
     },
 
-    async loadAlbums() {
+    async loadAlbums(preserveSelection: boolean = false) {
       try {
         this.loadingAlbums = true;
+
+        // FIXME: preserve deselection too; but then this is only
+        // applicable for single photo selection ... at least for now
+        const prevSel = new Set(Array.from(this.selection).map((a) => a.album_id));
 
         // get all albums
         this.albums = await dav.getAlbums();
@@ -143,10 +154,16 @@ export default defineComponent({
           this.initSelection = new Set(this.albums.filter((a) => selIds.has(a.album_id)));
           this.selection = new Set(this.initSelection);
         }
+
+        // restore selection
+        if (preserveSelection) {
+          this.albums.filter((a) => prevSel.has(a.album_id)).forEach(this.selection.add, this.selection);
+        }
       } catch (e) {
         console.error(e);
       } finally {
         this.loadingAlbums = false;
+        this.forceUpdate();
       }
     },
 
@@ -165,12 +182,16 @@ export default defineComponent({
         this.deselection.delete(album);
       }
 
-      this.$forceUpdate(); // sets do not trigger reactivity
-      (<any>this.$refs.albumsList)?.$forceUpdate();
+      this.forceUpdate();
     },
 
     submit() {
       this.$emit('select', Array.from(this.selection), Array.from(this.deselection));
+    },
+
+    forceUpdate() {
+      this.$forceUpdate(); // sets do not trigger reactivity
+      (<any>this.$refs.albumsList)?.$forceUpdate();
     },
   },
 });
