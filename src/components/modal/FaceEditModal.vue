@@ -17,7 +17,7 @@
     </div>
 
     <template #buttons>
-      <NcButton @click="save" class="button" type="primary">
+      <NcButton class="button" type="primary" :disabled="!canSave" @click="save">
         {{ t('memories', 'Update') }}
       </NcButton>
     </template>
@@ -33,7 +33,6 @@ const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 import { showError } from '@nextcloud/dialogs';
 import { getCurrentUser } from '@nextcloud/auth';
 import Modal from './Modal.vue';
-import client from '../../services/DavClient';
 import * as dav from '../../services/DavRequests';
 
 export default defineComponent({
@@ -61,6 +60,12 @@ export default defineComponent({
     },
   },
 
+  computed: {
+    canSave() {
+      return this.name !== this.oldName && this.name !== '' && isNaN(Number(this.name));
+    },
+  },
+
   methods: {
     close() {
       this.show = false;
@@ -81,12 +86,19 @@ export default defineComponent({
     },
 
     refreshParams() {
-      this.user = <string>this.$route.params.user || '';
-      this.name = <string>this.$route.params.name || '';
-      this.oldName = <string>this.$route.params.name || '';
+      this.user = String(this.$route.params.user);
+      this.name = String(this.$route.params.name);
+      this.oldName = this.name;
+
+      // if name is number then it is blank
+      if (!isNaN(Number(this.name))) {
+        this.name = String();
+      }
     },
 
     async save() {
+      if (!this.canSave) return;
+
       try {
         if (this.$route.name === 'recognize') {
           await dav.recognizeRenameFace(this.user, this.oldName, this.name);
