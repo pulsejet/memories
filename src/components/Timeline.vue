@@ -281,8 +281,8 @@ export default defineComponent({
       }
     },
 
-    updateLoading(delta: number) {
-      this.loading += delta;
+    updateLoading(delta: number): void {
+      this.loading = Math.max(0, this.loading + delta);
     },
 
     isMobile() {
@@ -642,14 +642,14 @@ export default defineComponent({
       // Awaiting this is important because the folders must render
       // before the timeline to prevent glitches
       try {
-        this.loading++;
+        this.updateLoading(1);
         const state = this.state;
         // @ts-ignore
         const res = await this.$refs.dtm.refresh();
         if (this.state !== state) return;
         this.dtmContent = res;
       } finally {
-        this.loading--;
+        this.updateLoading(-1);
       }
 
       // Get URL an cache identifier
@@ -668,7 +668,7 @@ export default defineComponent({
       let cache: IDay[] | null = null;
 
       try {
-        this.loading++;
+        this.updateLoading(1);
         const startState = this.state;
 
         let data: IDay[] = [];
@@ -687,7 +687,7 @@ export default defineComponent({
                 }
 
                 await this.processDays(cache);
-                this.loading--;
+                this.updateLoading(-1);
               }
             } catch {
               console.warn(`Failed to process days cache: ${cacheUrl}`);
@@ -719,7 +719,7 @@ export default defineComponent({
         }
       } finally {
         // If cache is set here, loading was already decremented
-        if (!cache) this.loading--;
+        if (!cache) this.updateLoading(-1);
       }
     },
 
