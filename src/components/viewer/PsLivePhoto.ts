@@ -41,7 +41,6 @@ class LivePhotoContentSetup {
 
     const video = document.createElement('video');
     video.preload = 'none';
-    video.muted = true;
     video.playsInline = true;
     video.disableRemotePlayback = true;
     video.autoplay = false;
