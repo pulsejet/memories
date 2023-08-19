@@ -21,6 +21,7 @@
           v-for="action of getActions()"
           :key="action.name"
           :aria-label="action.name"
+          :disabled="!!loading"
           close-after-click
           @click="click(action)"
         >
@@ -179,6 +180,7 @@ export default defineComponent({
   data: () => ({
     show: false,
     size: 0,
+    loading: 0,
     selection: new Selection(),
     defaultActions: null! as ISelectionAction[],
 
@@ -306,7 +308,8 @@ export default defineComponent({
     },
 
     updateLoading(delta: number) {
-      this.$emit('updateLoading', delta);
+      this.loading += delta; // local (disable buttons)
+      this.$emit('updateLoading', delta); // timeline (loading icon)
     },
 
     /** Download is not allowed on some public shares */
