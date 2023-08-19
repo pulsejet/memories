@@ -938,13 +938,29 @@ export default defineComponent({
         for (const [dayId, photos] of dayMap) {
           // Check if the response has any delta
           const head = this.heads[dayId];
-          if (head?.day?.detail?.length) {
-            if (
-              head.day.detail.length === photos.length &&
-              head.day.detail.every((p, i) => p.fileid === photos[i].fileid && p.etag === photos[i].etag)
-            ) {
-              continue;
-            }
+          if (head?.day?.detail?.length === photos.length) {
+            // Goes over the day and checks each photo including
+            // the order with the current list. If anything changes,
+            // we reprocess everything; otherwise just copy over
+            // newer props that are reactive.
+            const isSame = head.day.detail.every((curr, i) => {
+              const now = photos[i];
+              if (curr.fileid === now.fileid && curr.etag === now.etag) {
+                // copy over any properties that might have changed
+                // this way we don't need to iterate again for this
+                utils.convertFlags(now);
+
+                // copy over flags
+                utils.copyPhotoFlags(now, curr);
+
+                return true;
+              }
+
+              return false;
+            });
+
+            // Skip this entire day since nothing changed
+            if (isSame) continue;
           }
 
           // Pass ahead

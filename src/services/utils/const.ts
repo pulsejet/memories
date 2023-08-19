@@ -38,3 +38,18 @@ export function convertFlags(photo: IPhoto) {
     delete photo.islocal;
   }
 }
+
+/**
+ * Copy over server flags from one photo object to another.
+ * @param src Source photo
+ * @param dst Destination photo
+ */
+export function copyPhotoFlags(src: IPhoto, dst: IPhoto) {
+  // copy a single flag
+  const copy = (flag: number) => (dst.flag = src.flag & flag ? dst.flag | flag : dst.flag & ~flag);
+
+  // copy all flags
+  copy(constants.c.FLAG_IS_VIDEO);
+  copy(constants.c.FLAG_IS_FAVORITE);
+  copy(constants.c.FLAG_IS_LOCAL);
+}
