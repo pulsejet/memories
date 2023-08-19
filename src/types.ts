@@ -221,21 +221,6 @@ export type ITick = {
   key?: number;
 };
 
-export type ISelectionAction = {
-  /** Identifier (optional) */
-  id?: string;
-  /** Display text */
-  name: string;
-  /** Icon component */
-  icon: any;
-  /** Action to perform */
-  callback: (selection: Map<number, IPhoto>) => Promise<void>;
-  /** Condition to check for including */
-  if?: (self?: any) => boolean;
-  /** Allow for public routes (default false) */
-  allowPublic?: boolean;
-};
-
 export type IConfig = {
   version: string;
   vod_disable: boolean;

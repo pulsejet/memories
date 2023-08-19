@@ -71,9 +71,7 @@ import AlbumsIcon from 'vue-material-design-icons/ImageAlbum.vue';
 import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
 import FolderMoveIcon from 'vue-material-design-icons/FolderMove.vue';
 
-import { IDay, IHeadRow, IPhoto, IRow, IRowType, ISelectionAction } from '../types';
-
-type Selection = Map<number, IPhoto>;
+import { IDay, IHeadRow, IPhoto, IRow, IRowType } from '../types';
 
 /**
  * The distance for which the touch selection is clamped.
@@ -84,6 +82,63 @@ const TOUCH_SELECT_CLAMP = {
   bottom: 110, // min bottom for scrolling
   maxDelta: 10, // max speed of touch scroll
   bufferPx: 5, // number of pixels to clamp inside recycler area
+};
+
+class Selection extends Map<string, IPhoto> {
+  addBy(photo: IPhoto): this {
+    console.assert(photo?.key, 'SelectionManager::addBy encountered a photo without a key');
+    this.set(photo.key!, photo);
+    return this;
+  }
+
+  getBy({ key }: { key?: string }): IPhoto | undefined {
+    console.assert(key, 'SelectionManager::getBy encountered a photo without a key');
+    return this.get(key!);
+  }
+
+  deleteBy({ key }: { key?: string }): boolean {
+    console.assert(key, 'SelectionManager::deleteBy encountered a photo without a key');
+    return this.delete(key!);
+  }
+
+  hasBy({ key }: { key?: string }): boolean {
+    console.assert(key, 'SelectionManager::hasBy encountered a photo without a key');
+    return this.has(key!);
+  }
+
+  fileids(): Set<number> {
+    return new Set(Array.from(this.values()).map((p) => p.fileid));
+  }
+
+  photosNoDupFileId(): IPhoto[] {
+    const fileids = this.fileids();
+    return Array.from(this.values()).filter((p) => fileids.delete(p.fileid));
+  }
+
+  photosFromFileIds(fileIds: number[] | Set<number>): IPhoto[] {
+    const idSet = new Set(fileIds);
+    const photos = Array.from(this.values());
+    return photos.filter((p) => idSet.has(p?.fileid));
+  }
+
+  clone(): Selection {
+    return new Selection(this);
+  }
+}
+
+type ISelectionAction = {
+  /** Identifier (optional) */
+  id?: string;
+  /** Display text */
+  name: string;
+  /** Icon component */
+  icon: any;
+  /** Action to perform */
+  callback: (selection: Selection) => Promise<void>;
+  /** Condition to check for including */
+  if?: (self?: any) => boolean;
+  /** Allow for public routes (default false) */
+  allowPublic?: boolean;
 };
 
 export default defineComponent({
@@ -124,7 +179,7 @@ export default defineComponent({
   data: () => ({
     show: false,
     size: 0,
-    selection: new Map<number, IPhoto>(),
+    selection: new Selection(),
     defaultActions: null! as ISelectionAction[],
 
     touchAnchor: null as IPhoto | null,
@@ -247,7 +302,7 @@ export default defineComponent({
     },
 
     deleteSelectedPhotosById(delIds: number[], selection: Selection) {
-      return this.deletePhotos(delIds.map((id) => selection.get(id)).filter((p): p is IPhoto => p !== undefined));
+      return this.deletePhotos(selection.photosFromFileIds(delIds));
     },
 
     updateLoading(delta: number) {
@@ -285,12 +340,9 @@ export default defineComponent({
       document.body.classList.toggle('has-top-bar', has);
     },
 
-    /** Is this fileid (or anything if not specified) selected */
-    has(fileid?: number) {
-      if (fileid === undefined) {
-        return this.selection.size > 0;
-      }
-      return this.selection.has(fileid);
+    /** Is the selection empty */
+    empty(): boolean {
+      return !this.selection.size;
     },
 
     /** Get the actions list */
@@ -316,7 +368,7 @@ export default defineComponent({
       if (event.pointerType === 'touch') return; // let touch events handle this
       if (event.pointerType === 'mouse' && event.button !== 0) return; // only left click for mouse
 
-      if (this.has() || event.ctrlKey || event.shiftKey) {
+      if (!this.empty() || event.ctrlKey || event.shiftKey) {
         this.clickSelectionIcon(photo, event, rowIdx);
       } else {
         this.openViewer(photo);
@@ -325,7 +377,7 @@ export default defineComponent({
 
     /** Clicking on checkmark icon */
     clickSelectionIcon(photo: IPhoto, event: PointerEvent, rowIdx: number) {
-      if (this.has() && event.shiftKey) {
+      if (!this.empty() && event.shiftKey) {
         this.selectMulti(photo, this.rows, rowIdx);
       } else {
         this.selectPhoto(photo);
@@ -342,7 +394,7 @@ export default defineComponent({
       this.touchAnchor = photo;
       this.prevOver = photo;
       this.prevTouch = event.touches[0];
-      this.touchPrevSel = new Map(this.selection);
+      this.touchPrevSel = this.selection.clone();
       this.touchMoved = false;
       this.touchTimer = window.setTimeout(() => {
         if (this.touchAnchor === photo) {
@@ -499,7 +551,7 @@ export default defineComponent({
           reverse = overPhoto.dayid > this.touchAnchor.dayid != this.isreverse;
         }
 
-        const newSelection = new Map(this.touchPrevSel);
+        const newSelection = this.touchPrevSel!.clone();
         const updatedDays = new Set<number>();
 
         // Walk over rows
@@ -520,31 +572,31 @@ export default defineComponent({
             continue;
           }
 
-          let p = this.rows[i]?.photos?.[j];
-          if (!p) break; // shouldn't happen, ever
+          const photo = this.rows[i]?.photos?.[j];
+          if (!photo) break; // shouldn't happen, ever
 
           // This is there now
-          newSelection.set(p.fileid, p);
+          newSelection.addBy(photo);
 
           // Perf: only update heads if not selected
-          if (!(p.flag & this.c.FLAG_SELECTED)) {
-            this.selectPhoto(p, true, true);
-            updatedDays.add(p.dayid);
+          if (!(photo.flag & this.c.FLAG_SELECTED)) {
+            this.selectPhoto(photo, true, true);
+            updatedDays.add(photo.dayid);
           }
 
           // We're trying to update too much -- something went wrong
           if (newSelection.size - this.selection.size > 50) break;
 
           // Check goal
-          if (p === overPhoto) break;
+          if (photo === overPhoto) break;
           j += reverse ? -1 : 1;
         }
 
         // Remove unselected
-        for (const [fileid, p] of this.selection) {
-          if (!newSelection.has(fileid)) {
-            this.selectPhoto(p, false, true);
-            updatedDays.add(p.dayid);
+        for (const [_, photo] of this.selection) {
+          if (!newSelection.hasBy(photo)) {
+            this.selectPhoto(photo, false, true);
+            updatedDays.add(photo.dayid);
           }
         }
 
@@ -563,21 +615,15 @@ export default defineComponent({
         return; // ignore placeholders
       }
 
-      const nval = val ?? !this.selection.has(photo.fileid);
+      const nval = val ?? !this.selection.hasBy(photo);
       if (nval) {
         photo.flag |= this.c.FLAG_SELECTED;
-        this.selection.set(photo.fileid, photo);
+        this.selection.addBy(photo);
         this.selectionChanged();
       } else {
         photo.flag &= ~this.c.FLAG_SELECTED;
-
-        // Only do this if the photo in the selection set is this one.
-        // The problem arises when there are duplicates (e.g. face rect)
-        // in the list, which creates an inconsistent state if we do this.
-        if (this.selection.get(photo.fileid) === photo) {
-          this.selection.delete(photo.fileid);
-          this.selectionChanged();
-        }
+        this.selection.deleteBy(photo);
+        this.selectionChanged();
       }
 
       if (!noUpdate) {
@@ -679,7 +725,7 @@ export default defineComponent({
       Array.from(toClear).forEach((photo: IPhoto) => {
         photo.flag &= ~this.c.FLAG_SELECTED;
         heads.add(this.heads[photo.dayid]);
-        this.selection.delete(photo.fileid);
+        this.selection.deleteBy(photo);
         this.selectionChanged();
       });
       heads.forEach(this.updateHeadSelected);
@@ -688,31 +734,27 @@ export default defineComponent({
 
     /** Restore selections from new day object */
     restoreDay(day: IDay) {
-      if (!this.has()) {
-        return;
-      }
+      if (this.empty()) return;
 
       // FileID => Photo for new day
-      const dayMap = new Map<number, IPhoto>();
-      day.detail?.forEach((photo) => {
-        dayMap.set(photo.fileid, photo);
-      });
+      const dayMap = new Selection();
+      day.detail?.forEach((photo) => dayMap.addBy(photo));
 
-      this.selection.forEach((photo, fileid) => {
+      this.selection.forEach((photo, key) => {
         // Process this day only
         if (photo.dayid !== day.dayid) {
           return;
         }
 
         // Remove all selections that are not in the new day
-        const newPhoto = dayMap.get(fileid);
+        const newPhoto = dayMap.get(key);
         if (!newPhoto) {
-          this.selection.delete(fileid);
+          this.selection.delete(key);
           return;
         }
 
         // Update the photo object
-        this.selection.set(fileid, newPhoto);
+        this.selection.addBy(newPhoto);
         newPhoto.flag |= this.c.FLAG_SELECTED;
       });
 
@@ -728,7 +770,7 @@ export default defineComponent({
           return;
         }
       }
-      await dav.downloadFilesByPhotos(Array.from(selection.values()));
+      await dav.downloadFilesByPhotos(selection.photosNoDupFileId());
     },
 
     /**
@@ -743,7 +785,8 @@ export default defineComponent({
      */
     async favoriteSelection(selection: Selection) {
       const val = !this.allSelectedFavorites(selection);
-      for await (const favIds of dav.favoritePhotos(Array.from(selection.values()), val)) {
+      for await (const ids of dav.favoritePhotos(selection.photosNoDupFileId(), val)) {
+        selection.photosFromFileIds(ids).forEach((photo) => dav.favoriteSetFlag(photo, val));
       }
       this.clearSelection();
     },
@@ -759,7 +802,7 @@ export default defineComponent({
       }
 
       try {
-        for await (const delIds of dav.deletePhotos(Array.from(selection.values()))) {
+        for await (const delIds of dav.deletePhotos(selection.photosNoDupFileId())) {
           this.deleteSelectedPhotosById(delIds, selection);
         }
       } catch (e) {
@@ -772,7 +815,7 @@ export default defineComponent({
      * Open the edit date dialog
      */
     async editMetadataSelection(selection: Selection, sections?: number[]) {
-      globalThis.editMetadata(Array.from(selection.values()), sections);
+      globalThis.editMetadata(selection.photosNoDupFileId(), sections);
     },
 
     /**
@@ -789,12 +832,12 @@ export default defineComponent({
      */
     async archiveSelection(selection: Selection) {
       if (selection.size >= 100) {
-        if (!confirm(this.t('memories', 'You are about to touch a large number of files. Are you sure?'))) {
+        if (!confirm(this.t('memories', 'You are about to move a large number of files. Are you sure?'))) {
           return;
         }
       }
 
-      for await (let delIds of dav.archiveFilesByIds(Array.from(selection.keys()), !this.routeIsArchive)) {
+      for await (let delIds of dav.archiveFilesByIds(Array.from(selection.fileids()), !this.routeIsArchive)) {
         this.deleteSelectedPhotosById(delIds, selection);
       }
     },
@@ -803,14 +846,14 @@ export default defineComponent({
      * Move selected photos to album
      */
     async addToAlbum(selection: Selection) {
-      globalThis.updateAlbums(Array.from(selection.values()));
+      globalThis.updateAlbums(selection.photosNoDupFileId());
     },
 
     /**
      * Move selected photos to folder
      */
     async moveToFolder(selection: Selection) {
-      (<any>this.$refs.moveToFolderModal).open(Array.from(selection.values()));
+      (<any>this.$refs.moveToFolderModal).open(selection.photosNoDupFileId());
     },
 
     /**
