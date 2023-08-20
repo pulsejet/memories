@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v5.4.1] - 2023-08-20
+
+- Corrects a versioning error. This version is the same as v5.3.0
+
 ## [v5.3.0] - 2023-08-20
 
 - **Feature**: Allow adding photos to multiple albums together ([#752](https://github.com/pulsejet/memories/pull/752))
