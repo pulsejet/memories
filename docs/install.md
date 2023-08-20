@@ -26,7 +26,7 @@ Before installing Memories, make sure that the following requirements are met:
 
 ## Installing Memories
 
-Memories can be installed from the Nextcloud app store page. Alternatively, you can install it manually by following these steps:
+Memories can be installed from the Nextcloud [app store](https://apps.nextcloud.com/apps/memories) page. Alternatively, you can install it manually by following these steps:
 
 1. Download the latest release from the [releases page](https://github.com/pulsejet/memories/releases)
 1. Extract the archive to the `apps` or `custom_apps` directory of your Nextcloud installation.
