@@ -207,7 +207,12 @@ import gallery.memories.databinding.ActivityMainBinding
 
     fun ensureStoragePermissions() {
         val requestPermissionLauncher = registerForActivityResult(
-            ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+
+            // we need all of these
+            val isGranted = permissions.all { it.value }
+
+            // start synchronization if granted
             if (isGranted) {
                 val needFullSync = !hasMediaPermission()
 
@@ -221,6 +226,8 @@ import gallery.memories.databinding.ActivityMainBinding
                     // Run delta sync and register hooks
                     nativex.query.initialize()
                 }.start()
+            } else {
+                Log.w(TAG, "Storage permission not available")
             }
 
             // Persist that we have it now
@@ -228,7 +235,14 @@ import gallery.memories.databinding.ActivityMainBinding
         }
 
         // Request media read permission
-        requestPermissionLauncher.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissionLauncher.launch(arrayOf(
+                android.Manifest.permission.READ_MEDIA_IMAGES,
+                android.Manifest.permission.READ_MEDIA_VIDEO,
+            ))
+        } else {
+            requestPermissionLauncher.launch(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE))
+        }
     }
 
     fun initializePlayer(uris: Array<Uri>, uid: String) {
