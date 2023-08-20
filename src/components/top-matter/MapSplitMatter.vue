@@ -90,7 +90,6 @@ export default defineComponent({
     },
     clusters: [] as IMarkerCluster[],
     animMarkers: false,
-    isDark: false,
   }),
 
   mounted() {
@@ -101,10 +100,6 @@ export default defineComponent({
 
     // Initialize
     this.initialize();
-
-    // If currently dark mode, set isDark
-    const pane = document.querySelector('.leaflet-tile-pane');
-    this.isDark = !pane || window.getComputedStyle(pane)?.['filter']?.includes('invert');
   },
 
   created() {
@@ -479,21 +474,6 @@ export default defineComponent({
 
   &:hover {
     z-index: 100000 !important;
-  }
-}
-
-// Dark mode
-$darkFilter: invert(1) grayscale(1) brightness(1.3) contrast(1.3);
-.leaflet-tile-pane {
-  body[data-theme-dark] &,
-  body[data-theme-dark-highcontrast] & {
-    filter: $darkFilter;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    body[data-theme-default] & {
-      filter: $darkFilter;
-    }
   }
 }
 </style>
