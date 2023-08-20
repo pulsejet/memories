@@ -11,11 +11,13 @@ const BASE_URL = 'http://127.0.0.1';
 export const API = {
   /**
    * Local days API.
+   * @regex ^/api/days$
    * @returns {IDay[]} for all locally available days.
    */
   DAYS: () => `${BASE_URL}/api/days`,
   /**
    * Local photos API.
+   * @regex ^/api/days/\d+$
    * @param dayId Day ID to fetch photos for
    * @returns {IPhoto[]} for all locally available photos for this day.
    */
@@ -23,12 +25,15 @@ export const API = {
 
   /**
    * Local photo metadata API.
+   * @regex ^/api/image/info/\d+$
+   * @param fileId File ID of the photo
    * @returns {IImageInfo} for the given file ID (local).
    */
   IMAGE_INFO: (fileId: number) => `${BASE_URL}/api/image/info/${fileId}`,
 
   /**
    * Delete files using local fileids.
+   * @regex ^/api/image/delete/\d+(,\d+)*$
    * @param fileIds Comma-separated list of file IDs to delete
    * @returns {void}
    */
@@ -36,12 +41,14 @@ export const API = {
 
   /**
    * Local photo preview API.
+   * @regex ^/image/preview/\d+$
    * @param fileId File ID of the photo
    * @returns {Blob} JPEG preview of the photo.
    */
   IMAGE_PREVIEW: (fileId: number) => `${BASE_URL}/image/preview/${fileId}`,
   /**
    * Local photo full API.
+   * @regex ^/image/full/\d+$
    * @param fileId File ID of the photo
    * @returns {Blob} JPEG full image of the photo.
    */
@@ -50,6 +57,7 @@ export const API = {
   /**
    * Share a URL with native page.
    * The native client MUST NOT download the object but share the URL directly.
+   * @regex ^/api/share/url/.+$
    * @param url URL to share (double-encoded)
    * @returns {void}
    */
@@ -59,12 +67,14 @@ export const API = {
    * The native client MUST download the object using a download manager
    * and immediately prompt the user to download it. The asynchronous call
    * must return only after the object has been downloaded.
+   * @regex ^/api/share/blob/.+$
    * @param url URL to share (double-encoded)
    * @returns {void}
    */
   SHARE_BLOB: (url: string) => `${BASE_URL}/api/share/blob/${euc(euc(url))}`,
   /**
    * Share a local file (as blob) with native page.
+   * @regex ^/api/share/local/\d+$
    * @param fileId File ID of the photo
    * @returns {void}
    */
@@ -72,6 +82,7 @@ export const API = {
 
   /**
    * Get list of local folders configuration.
+   * @regex ^/api/config/local-folders$
    * @returns {LocalFolderConfig[]} List of local folders configuration
    */
   CONFIG_LOCAL_FOLDERS: () => `${BASE_URL}/api/config/local-folders`,
