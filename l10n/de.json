@@ -48,7 +48,6 @@
     "Remove from person" : "Von der Person entfernen",
     "You are about to download a large number of files. Are you sure?" : "Du bist dabei, eine große Anzahl von Dateien herunterzuladen. Bist du dir sicher?",
     "You are about to delete a large number of files. Are you sure?" : "Du bist dabei, eine große Anzahl von Dateien zu löschen. Bist du dir sicher?",
-    "You are about to touch a large number of files. Are you sure?" : "Du bist dabei, eine große Anzahl von Dateien zu ändern. Bist du dir sicher?",
     "You must enable \"Mark person in preview\" to use this feature" : "Du musst „Person in Vorschau markieren“ aktivieren, um diese Funktion nutzen zu können",
     "Only user \"{user}\" can update this person" : "Nur der Benutzer \"{user}\" kann diese Person aktualisieren.",
     "_{n} selected_::_{n} selected_" : ["{n} ausgewählt","{n} ausgewählt"],

@@ -49,7 +49,6 @@ OC.L10N.register(
     "Remove from person" : "Премахване от лице",
     "You are about to download a large number of files. Are you sure?" : "Предстои ви да изтеглите голям брой файлове. Сигурни ли сте?",
     "You are about to delete a large number of files. Are you sure?" : "Предстои ви да изтриете голям брой файлове. Сигурни ли сте?",
-    "You are about to touch a large number of files. Are you sure?" : "Вие сте на път да засегнете голям брой файлове. Сигурни ли сте?",
     "You must enable \"Mark person in preview\" to use this feature" : "За да използвате тази функция, трябва да активирате \"Маркиране на лице в предварителен преглед\".",
     "Only user \"{user}\" can update this person" : "Само потребителят \"{user}\" може да актуализира това лице",
     "_{n} selected_::_{n} selected_" : ["{n} избрани","{n} избрани"],

@@ -57,7 +57,6 @@
     "You are about to download a large number of files. Are you sure?" : "Управо ћете да преузмете велики број фајлова. Да ли сте сигурни да то желите?",
     "You are about to delete a large number of files. Are you sure?" : "Управо ћете да обришете велики број фајлова. Да ли сте сигурни да то желите?",
     "Failed to delete files" : "Фајлови нису могли да се обришу",
-    "You are about to touch a large number of files. Are you sure?" : "Управо ћете да приступите великом броју фајлова. Да ли сте сигурни да то желите?",
     "You must enable \"Mark person in preview\" to use this feature" : "Да бисте користили ову могућност, морате да укључите „Означи особу у прегледу”",
     "Only user \"{user}\" can update this person" : "Ову особу може да ажурира само „{user}”",
     "_{n} selected_::_{n} selected_" : ["{n} изабран","{n} изабрана","{n} изабрано"],

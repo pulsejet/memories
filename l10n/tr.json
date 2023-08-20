@@ -57,7 +57,6 @@
     "You are about to download a large number of files. Are you sure?" : "Çok sayıda dosyayı indirmek üzeresiniz. Bunu yapmak istediğinize emin misiniz?",
     "You are about to delete a large number of files. Are you sure?" : "Çok sayıda dosyayı silmek üzeresiniz. Bunu yapmak istediğinize emin misiniz?",
     "Failed to delete files" : "Dosyalar silinemedi",
-    "You are about to touch a large number of files. Are you sure?" : "Çok sayıda dosyayı güncellemek üzeresiniz. Bunu yapmak istediğinize emin misiniz?",
     "You must enable \"Mark person in preview\" to use this feature" : "Bu özelliği kullanabilmek için \"Kişiyi ön izlemede işaretle\" seçeneğini etkinleştirmelisiniz",
     "Only user \"{user}\" can update this person" : "Bu kişiyi yalnızca \"{user}\" kullanıcısı güncelleyebilir",
     "_{n} selected_::_{n} selected_" : ["{n} seçilmiş","{n} seçilmiş"],

@@ -57,7 +57,6 @@
     "You are about to download a large number of files. Are you sure?" : "您即将下载大量文件。你确定吗？",
     "You are about to delete a large number of files. Are you sure?" : "您即将删除大量文件。你确定吗？",
     "Failed to delete files" : "删除文件失败",
-    "You are about to touch a large number of files. Are you sure?" : "您将要处理大量文件。你确定吗？",
     "You must enable \"Mark person in preview\" to use this feature" : "您必须启用“在预览中标记人”才能使用此功能",
     "Only user \"{user}\" can update this person" : "仅用户“{user}”可以更新此人",
     "_{n} selected_::_{n} selected_" : ["已选择 {n} 个"],

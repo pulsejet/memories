@@ -43,7 +43,6 @@
     "Remove from person" : "Fjern fra person",
     "You are about to download a large number of files. Are you sure?" : "Du er i ferd med å laste ned et stort antall filer. Er du sikker?",
     "You are about to delete a large number of files. Are you sure?" : "Du er i ferd med å slette et stort antall filer. Er du sikker?",
-    "You are about to touch a large number of files. Are you sure?" : "Du er i ferd med å berøre et stort antall filer. Er du sikker?",
     "_{n} selected_::_{n} selected_" : ["{n} valgt","{n} valgt"],
     "Memories Settings" : "Minner-innstillinger",
     "General" : "Generell",

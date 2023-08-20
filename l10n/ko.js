@@ -56,7 +56,6 @@ OC.L10N.register(
     "You are about to download a large number of files. Are you sure?" : "많은 파일을 다운로드 하려고 합니다. 확인하셨나요?",
     "You are about to delete a large number of files. Are you sure?" : "많은 파일을 삭제하려고 합니다. 확인하셨나요?",
     "Failed to delete files" : "파일 삭제 실패",
-    "You are about to touch a large number of files. Are you sure?" : "많은 파일의 시간을 수정하려고 합니다. 확인하셨나요?",
     "You must enable \"Mark person in preview\" to use this feature" : "이 기능을 사용하려면 \"미리 보기에 사람 표시\"를 사용해야 합니다.",
     "Only user \"{user}\" can update this person" : "\"{user}\"님만 이 사람을 업데이트할 수 있습니다.",
     "_{n} selected_::_{n} selected_" : ["{n}개 선택됨"],

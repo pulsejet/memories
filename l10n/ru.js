@@ -44,7 +44,6 @@ OC.L10N.register(
     "Remove from person" : "Снять отметку лица",
     "You are about to download a large number of files. Are you sure?" : "Подтвердите скачивание большого количества файлов.",
     "You are about to delete a large number of files. Are you sure?" : "Подтвердите удаление большого количества файлов.",
-    "You are about to touch a large number of files. Are you sure?" : "Подтвердите выполнение действия для большого числа файлов.",
     "_{n} selected_::_{n} selected_" : ["Выбран: {n}","Выбрано: {n}","Выбрано: {n}","Выбрано: {n}"],
     "General" : "Основные",
     "Timeline Path" : "Расположение",

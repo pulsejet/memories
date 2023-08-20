@@ -50,7 +50,6 @@ OC.L10N.register(
     "Remove from person" : "Kendu pertsonatik",
     "You are about to download a large number of files. Are you sure?" : "Fitxategi asko deskargatuko dituzu. Ziur zaude?",
     "You are about to delete a large number of files. Are you sure?" : "Fitxategi asko ezabatuko dituzu. Ziur zaude?",
-    "You are about to touch a large number of files. Are you sure?" : "Fitxategi asko ukituko dituzu. Ziur zaude?",
     "_{n} selected_::_{n} selected_" : ["{n} hautatuta","{n} hautatuta"],
     "Memories Settings" : "Memories-en ezarpenak",
     "General" : "Orokorra",

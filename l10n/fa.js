@@ -59,7 +59,6 @@ OC.L10N.register(
     "You are about to download a large number of files. Are you sure?" : "You are about to download a large number of files. Are you sure?",
     "You are about to delete a large number of files. Are you sure?" : "You are about to delete a large number of files. Are you sure?",
     "Failed to delete files" : "Failed to delete files",
-    "You are about to touch a large number of files. Are you sure?" : "You are about to touch a large number of files. Are you sure?",
     "You must enable \"Mark person in preview\" to use this feature" : "You must enable \"Mark person in preview\" to use this feature",
     "Only user \"{user}\" can update this person" : "Only user \"{user}\" can update this person",
     "_{n} selected_::_{n} selected_" : ["{n} selected","{n} selected"],
