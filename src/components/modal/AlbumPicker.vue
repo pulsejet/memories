@@ -2,8 +2,19 @@
   <div v-if="!showAlbumCreationForm" class="album-picker">
     <XLoadingIcon v-if="loadingAlbums" class="loading-icon centered" />
 
+    <div class="search">
+      <NcTextField
+        :autofocus="true"
+        :value.sync="search"
+        :label="t('memories', 'Search')"
+        :placeholder="t('memories', 'Search')"
+      >
+        <MagnifyIcon :size="16" />
+      </NcTextField>
+    </div>
+
     <ul class="albums-container">
-      <AlbumsList ref="albumsList" :albums="albums" :link="false" @click="toggleAlbumSelection">
+      <AlbumsList ref="albumsList" :albums="filteredList" :link="false" @click="toggleAlbumSelection">
         <template #extra="{ album }">
           <div
             class="check-circle-icon"
@@ -69,12 +80,16 @@ import AlbumsList from './AlbumsList.vue';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
 import * as dav from '../../services/DavRequests';
 import { IAlbum, IPhoto } from '../../types';
 
+import Fuse from 'fuse.js';
+
 import PlusIcon from 'vue-material-design-icons/Plus.vue';
 import CheckIcon from 'vue-material-design-icons/Check.vue';
+import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';
 
 export default defineComponent({
   name: 'AlbumPicker',
@@ -96,9 +111,11 @@ export default defineComponent({
     AlbumsList,
     NcButton,
     NcListItem,
+    NcTextField,
 
     PlusIcon,
     CheckIcon,
+    MagnifyIcon,
   },
 
   data: () => ({
@@ -106,16 +123,27 @@ export default defineComponent({
     loadingAlbums: true,
     /** List of all albums */
     albums: [] as IAlbum[],
+    /** Search provider for list to show */
+    fuse: null as Fuse<IAlbum> | null,
     /** Initial selection */
     initSelection: new Set<IAlbum>(),
     /** Selected albums */
     selection: new Set<IAlbum>(),
     /** Deselected albums that were initially selected */
     deselection: new Set<IAlbum>(),
+    /** Search term */
+    search: String(),
   }),
 
   mounted() {
     this.loadAlbums();
+  },
+
+  computed: {
+    filteredList() {
+      if (!this.albums || !this.search || !this.fuse) return this.albums || [];
+      return this.fuse.search(this.search).map((r) => r.item);
+    },
   },
 
   methods: {
@@ -141,6 +169,9 @@ export default defineComponent({
 
         // get all albums
         this.albums = await dav.getAlbums();
+
+        // create search provider
+        this.fuse = new Fuse(this.albums, { keys: ['name'] });
 
         // reset selection
         this.initSelection = new Set();
@@ -209,9 +240,12 @@ export default defineComponent({
     }
   }
 
+  .search {
+    margin-bottom: 8px;
+  }
+
   .albums-container {
-    min-height: 150px;
-    max-height: 350px;
+    height: 400px;
 
     .check-circle-icon {
       border-radius: 50%;

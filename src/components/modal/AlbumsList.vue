@@ -110,6 +110,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .albums-container {
   overflow-x: hidden;
+  overflow-y: scroll;
   padding: 2px;
 
   .album {
