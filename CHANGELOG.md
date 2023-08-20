@@ -5,11 +5,12 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 - **Feature**: Allow adding photos to multiple albums together ([#752](https://github.com/pulsejet/memories/pull/752))
+- **Feature**: Improved layout for albums list view
+- **Feature**: Search bar for album picker when adding to album.
 - **Feature**: Show albums of photo in metadata ([#752](https://github.com/pulsejet/memories/pull/752))
 - **Feature**: Show faces in photo in sidebar metadata
 - **Feature**: Allow creation of new tags when editing metadata ([#487](https://github.com/pulsejet/memories/issues/487))
 - **Feature**: Allow disabling autoplay of live photo ([#591](https://github.com/pulsejet/memories/issues/591))
-- **Feature**: Improved layout for albums list view
 - **Feature**: Improvements in admin interface
 - **Feature**: A `.nomemories` file will now hide a folder from Memories without affecting other apps ([#777](https://github.com/pulsejet/memories/issues/777))
 - **Bugfix**: You can now configure the transpose strategy of the transcoder (required for QSV)
