@@ -131,6 +131,16 @@ class FsManager
                 $root->addMountPoints();
 
                 // Exclude .nomedia folders
+                //
+                // This is needed to be done despite the exlusion in the CTE to account
+                // for mount points inside folders with a .nomedia file. For example:
+                //  /user/files/timeline-path/
+                //     => subfolder1
+                //        => photo1
+                //     => subfolder2
+                //        => .nomedia
+                //        => external-mount   <-- this is a separate topFolder in the CTE
+                //           => photo2        <-- this should be excluded, but CTE cannot find this
                 $root->excludePaths($this->getNoMediaFolders($userFolder, md5($etag)));
             }
         } catch (\OCP\Files\NotFoundException $e) {
