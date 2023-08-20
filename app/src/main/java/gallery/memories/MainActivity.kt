@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowInsetsController
@@ -26,6 +27,10 @@ import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import gallery.memories.databinding.ActivityMainBinding
 
 @UnstableApi class MainActivity : AppCompatActivity() {
+    companion object {
+        val TAG = "MainActivity"
+    }
+
     val binding by lazy(LazyThreadSafetyMode.NONE) {
         ActivityMainBinding.inflate(layoutInflater)
     }
@@ -157,9 +162,13 @@ import gallery.memories.databinding.ActivityMainBinding
         webSettings.domStorageEnabled = true
         webSettings.databaseEnabled = true
         webSettings.userAgentString = userAgent
-        binding.webview.clearCache(true)
+        webSettings.setSupportZoom(false)
+        webSettings.builtInZoomControls = false
+        webSettings.displayZoomControls = false
         binding.webview.addJavascriptInterface(nativex, "nativex")
+        binding.webview.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         binding.webview.setBackgroundColor(Color.TRANSPARENT)
+        binding.webview.clearCache(true)
         WebView.setWebContentsDebuggingEnabled(true);
 
         // Welcome page or actual app
@@ -328,14 +337,24 @@ import gallery.memories.databinding.ActivityMainBinding
 
     fun applyTheme(color: String?, isDark: Boolean) {
         if (color == null) return
+
+        // Set dark mode
         setTheme(if (isDark) android.R.style.Theme_Black else android.R.style.Theme_Light)
-        window.navigationBarColor = Color.parseColor(color)
-        window.statusBarColor = Color.parseColor(color)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val appearance = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
             window.insetsController?.setSystemBarsAppearance(if (isDark) 0 else appearance, appearance)
         } else {
             window.decorView.systemUiVisibility = if (isDark) 0 else View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        }
+
+        // Set colors
+        try {
+            val parsed = Color.parseColor(color.trim())
+            window.navigationBarColor = parsed
+            window.statusBarColor = parsed
+        } catch (e: Exception) {
+            Log.w(TAG, "Invalid color: $color")
+            return
         }
     }
 
