@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [v5.3.0] - 2023-08-20
 
 - **Feature**: Allow adding photos to multiple albums together ([#752](https://github.com/pulsejet/memories/pull/752))
 - **Feature**: Improved layout for albums list view
