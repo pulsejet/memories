@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Allow disabling autoplay of live photo ([#591](https://github.com/pulsejet/memories/issues/591))
 - **Feature**: Improved layout for albums list view
 - **Feature**: Improvements in admin interface
+- **Feature**: A `.nomemories` file will now hide a folder from Memories without affecting other apps ([#777](https://github.com/pulsejet/memories/issues/777))
 - **Bugfix**: You can now configure the transpose strategy of the transcoder (required for QSV)
 
 ## [v5.2.1] - 2023-07-03

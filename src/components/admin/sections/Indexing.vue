@@ -56,7 +56,7 @@
           'The EXIF indexes are built and checked in a periodic background task. Be careful when selecting anything other than automatic indexing. For example, setting the indexing to only timeline folders may cause delays before media becomes available to users, since the user configures the timeline only after logging in.'
         )
       }}
-      {{ t('memories', 'Folders with a ".nomedia" file are always excluded from indexing.') }}
+      {{ t('memories', 'Folders with a ".nomedia" or a ".nomemories" file are always excluded from indexing.') }}
       <NcCheckboxRadioSwitch
         :checked.sync="config['memories.index.mode']"
         value="1"

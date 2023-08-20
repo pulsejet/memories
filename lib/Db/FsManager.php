@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OC\Files\Search\SearchBinaryOperator;
 use OC\Files\Search\SearchComparison;
 use OC\Files\Search\SearchQuery;
 use OCA\Memories\Exceptions;
@@ -31,6 +32,7 @@ use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
 use OCP\Files\Node;
+use OCP\Files\Search\ISearchBinaryOperator;
 use OCP\Files\Search\ISearchComparison;
 use OCP\ICache;
 use OCP\ICacheFactory;
@@ -152,10 +154,13 @@ class FsManager
             return $paths;
         }
 
-        $comp = new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'name', '.nomedia');
+        $comp = new SearchBinaryOperator(ISearchBinaryOperator::OPERATOR_OR, [
+            new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'name', '.nomedia'),
+            new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'name', '.nomemories'),
+        ]);
         $search = $root->search(new SearchQuery($comp, 0, 0, [], Util::getUser()));
 
-        $paths = array_map(fn (Node $node) => \dirname($node->getPath()), $search);
+        $paths = array_unique(array_map(fn (Node $node) => \dirname($node->getPath()), $search));
         $this->nomediaCache->set($key, $paths, 60 * 60); // 1 hour
 
         return $paths;
