@@ -5,6 +5,7 @@
 [![Discord](https://dcbadge.vercel.app/api/server/7Dr9f9vNjJ)](https://discord.gg/7Dr9f9vNjJ)
 [![Website](https://img.shields.io/website?down_color=red&down_message=offline&label=website&style=for-the-badge&up_color=brightgreen&up_message=online&url=https%3A%2F%2Fmemories.gallery)](https://memories.gallery)
 [![Demo](https://img.shields.io/website?down_color=red&down_message=offline&label=demo&style=for-the-badge&up_color=brightgreen&up_message=online&url=https%3A%2F%2Fdemo.memories.gallery)](https://demo.memories.gallery/apps/memories/)
+[![Nextcloud Store](https://img.shields.io/badge/nextcloud_store-blue?style=for-the-badge)](https://apps.nextcloud.com/apps/memories)
 
 ![GitHub](https://img.shields.io/github/license/pulsejet/memories)
 [![e2e](https://github.com/pulsejet/memories/actions/workflows/e2e.yaml/badge.svg)](https://github.com/pulsejet/memories/actions/workflows/e2e.yaml)
@@ -30,7 +31,7 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 
 ## 🚀 Installation
 
-1. Install the app from the Nextcloud app store.
+1. Install the app from the Nextcloud [app store](https://apps.nextcloud.com/apps/memories).
 1. Perform the recommended [configuration steps](https://memories.gallery/config/).
 1. Run `php occ memories:index` to generate metadata indices for existing photos.
 1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos.
