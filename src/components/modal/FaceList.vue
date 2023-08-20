@@ -7,7 +7,7 @@
         :label="t('memories', 'Search')"
         :placeholder="t('memories', 'Search')"
       >
-        <Magnify :size="16" />
+        <MagnifyIcon :size="16" />
       </NcTextField>
     </div>
 
@@ -37,14 +37,14 @@ const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 import * as dav from '../../services/DavRequests';
 import Fuse from 'fuse.js';
 
-import Magnify from 'vue-material-design-icons/Magnify.vue';
+import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';
 
 export default defineComponent({
   name: 'FaceList',
   components: {
     ClusterGrid,
     NcTextField,
-    Magnify,
+    MagnifyIcon,
   },
 
   props: {
@@ -55,11 +55,11 @@ export default defineComponent({
   },
 
   data: () => ({
-    user: '',
-    name: '',
+    user: String(),
+    name: String(),
     list: null as ICluster[] | null,
     fuse: null as Fuse<ICluster> | null,
-    search: '',
+    search: String(),
   }),
 
   watch: {
@@ -99,11 +99,11 @@ export default defineComponent({
     },
 
     async addFace() {
-      let name: string = '';
+      let name: string = String();
 
       try {
         // TODO: use a proper dialog
-        name = window.prompt(this.t('memories', 'Enter name of the new face'), '') ?? '';
+        name = window.prompt(this.t('memories', 'Enter name of the new face'), String()) ?? String();
         if (!name) return;
 
         // Create new directory in WebDAV
