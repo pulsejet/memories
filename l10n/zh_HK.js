@@ -59,7 +59,6 @@ OC.L10N.register(
     "You are about to download a large number of files. Are you sure?" : "您即將下載大量檔案。你確定嗎？",
     "You are about to delete a large number of files. Are you sure?" : "您即將刪除大量檔案。你確定嗎？",
     "Failed to delete files" : "刪除檔案失敗",
-    "You are about to touch a large number of files. Are you sure?" : "您將要處理大量檔案。你確定嗎？",
     "You must enable \"Mark person in preview\" to use this feature" : "您必須啟用「在預覽中標記人」以使用此功能",
     "Only user \"{user}\" can update this person" : "僅用戶「{user}」可以更新此人",
     "_{n} selected_::_{n} selected_" : ["已選擇 {n} 個"],

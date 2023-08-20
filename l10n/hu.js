@@ -58,7 +58,6 @@ OC.L10N.register(
     "You are about to download a large number of files. Are you sure?" : "Sok fájl letöltésére készül. Biztos benne?",
     "You are about to delete a large number of files. Are you sure?" : "Sok fájl törlésére készül. Biztos benne?",
     "Failed to delete files" : "A fájlok törlése sikertelen",
-    "You are about to touch a large number of files. Are you sure?" : "Sok fájl érintésére készül. Biztos benne?",
     "You must enable \"Mark person in preview\" to use this feature" : "A funkció használatához engedélyeznie kell a „Személy megjelölése az előnézetben” beállítást",
     "Only user \"{user}\" can update this person" : "Csak „{user}” felhasználó frissítheti ezt a személyt",
     "_{n} selected_::_{n} selected_" : ["{n} kiválasztva","{n} kiválasztva"],

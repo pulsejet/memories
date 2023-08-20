@@ -51,7 +51,6 @@
     "You are about to download a large number of files. Are you sure?" : "Zamierzasz pobrać dużą liczbę plików. Jesteś pewny?",
     "You are about to delete a large number of files. Are you sure?" : "Zamierzasz usunąć dużą liczbę plików. Jesteś pewny?",
     "Failed to delete files" : "Nie udało się usunąć plików",
-    "You are about to touch a large number of files. Are you sure?" : "Zamierzasz przeglądać dużą ilość plików. Jesteś pewny?",
     "You must enable \"Mark person in preview\" to use this feature" : "Musisz włączyć \"Zaznacz osobę w podglądzie\" aby skorzystać z tej funkcji",
     "Only user \"{user}\" can update this person" : "Tylko użytkownik \"{user}\" może zaktualizować tą osobę",
     "_{n} selected_::_{n} selected_" : ["{n} wybrana","{n} wybrane","{n} wybranych","{n} wybranych"],

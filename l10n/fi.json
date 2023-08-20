@@ -57,7 +57,6 @@
     "You are about to download a large number of files. Are you sure?" : "Olet lataamassa suurta määrää tiedostoja. Oletko varma?",
     "You are about to delete a large number of files. Are you sure?" : "Olet poistamassa suurta määrää tiedostoja. Oletko varma?",
     "Failed to delete files" : "Tiedostojen poisto epäonnistui",
-    "You are about to touch a large number of files. Are you sure?" : "Olet aikeissa koskettaa suurta määrää tiedostoja. Oletko varma?",
     "Only user \"{user}\" can update this person" : "Vain käyttäjä \"{user}\" voi päivittää tätä henkilöä",
     "_{n} selected_::_{n} selected_" : ["{n} valittu","{n} valittu"],
     "Memories Settings" : "Muistot-sovelluksen asetukset",

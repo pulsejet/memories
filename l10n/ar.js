@@ -59,7 +59,6 @@ OC.L10N.register(
     "You are about to download a large number of files. Are you sure?" : "أنت على وشك تحميل عدد كبير من الملفات. هل أنت متأكد؟",
     "You are about to delete a large number of files. Are you sure?" : "أنت على وشك حذف عدد كبير من الملفات. هل أنت متأكد؟",
     "Failed to delete files" : "فشل في حذف الملفات",
-    "You are about to touch a large number of files. Are you sure?" : "أنت على وشك لمس touch عدد كبير من الملفات. هل أنت متأكد؟",
     "You must enable \"Mark person in preview\" to use this feature" : "يجب عليك تمكين \"تمييز شخص في المعاينة\" لاستخدام هذه الميزة",
     "Only user \"{user}\" can update this person" : "يمكن للمستخدم \"{user}\" فقط تحديث هذا الشخص",
     "_{n} selected_::_{n} selected_" : ["تم تحديد {n}","تم تحديد {n}","تم تحديد {n}","تم تحديد {n}","تم تحديد {n}","تم تحديد {n}"],
