@@ -34,11 +34,11 @@ export const API = {
   /**
    * Delete files using local fileids.
    * @regex ^/api/image/delete/\d+(,\d+)*$
-   * @param fileIds Comma-separated list of file IDs to delete
+   * @param fileIds List of AUIDs to delete
    * @returns {void}
    * @throws Return an error code if the user denies the deletion.
    */
-  IMAGE_DELETE: (fileIds: number[]) => `${BASE_URL}/api/image/delete/${fileIds.join(',')}`,
+  IMAGE_DELETE: (auids: number[]) => `${BASE_URL}/api/image/delete/${auids.join(',')}`,
 
   /**
    * Local photo preview API.
@@ -313,11 +313,8 @@ export async function extendDayWithLocal(dayId: number, photos: IPhoto[]) {
 export async function deleteLocalPhotos(photos: IPhoto[]): Promise<void> {
   if (!has()) return;
 
-  const localPhotos = photos.filter((p) => p.flag & constants.c.FLAG_IS_LOCAL);
-  if (localPhotos.length > 0) {
-    const fileids = localPhotos.map((p) => p.fileid);
-    await axios.get(API.IMAGE_DELETE(fileids));
-  }
+  const auids = photos.map((p) => p.auid).filter((a) => !!a) as number[];
+  await axios.get(API.IMAGE_DELETE(auids));
 }
 
 /**
