@@ -44,6 +44,12 @@ import java.util.concurrent.CountDownLatch
     var videoObserver: ContentObserver? = null
     var refreshPending: Boolean = false
 
+    companion object {
+        val okResponse get(): JSONObject {
+            return JSONObject().put("message", "ok")
+        }
+    }
+
     init {
         // Register intent launcher for callback
         deleteIntentLauncher = mCtx.registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result: ActivityResult? ->
@@ -121,7 +127,7 @@ import java.util.concurrent.CountDownLatch
         }
 
         // Nothing to do
-        if (imageIds.size == 0) return JSONArray()
+        if (imageIds.isEmpty()) return JSONArray()
 
         // Filter for given day
         val photos = JSONArray()
@@ -238,7 +244,7 @@ import java.util.concurrent.CountDownLatch
     }
 
     @Throws(Exception::class)
-    fun delete(ids: List<Long>): JSONObject {
+    fun delete(auids: List<Long>): JSONObject {
         synchronized(this) {
             if (deleting) {
                 throw Exception("Already deleting another set of images")
@@ -246,9 +252,14 @@ import java.util.concurrent.CountDownLatch
             deleting = true
         }
 
-        return try {
+        try {
+            // Get list of file IDs
+            val fileIds = getFileIdsFromAUIDs(auids)
+            if (fileIds.isEmpty()) return okResponse
+
             // List of URIs
-            val uris = SystemImage.getByIds(mCtx, ids).map { it.uri }
+            val uris = SystemImage.getByIds(mCtx, fileIds).map { it.uri }
+            if (uris.isEmpty()) return okResponse
 
             // Delete file with media store
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -276,12 +287,13 @@ import java.util.concurrent.CountDownLatch
             }
 
             // Delete from images table
-            val idsList = TextUtils.join(",", ids)
+            val idsList = TextUtils.join(",", fileIds)
             mDb.execSQL("DELETE FROM images WHERE local_id IN ($idsList)")
-            JSONObject().put("message", "ok")
         } finally {
             synchronized(this) { deleting = false }
         }
+
+        return okResponse
     }
 
     private fun syncDb(startTime: Long): Int {
@@ -413,5 +425,19 @@ import java.util.concurrent.CountDownLatch
         mCtx.getSharedPreferences(mCtx.getString(R.string.preferences_key), 0).edit()
             .putStringSet(mCtx.getString(R.string.preferences_enabled_local_folders), enabledSet)
             .apply()
+    }
+
+    fun getFileIdsFromAUIDs(auids: List<Long>): List<Long> {
+        if (auids.isEmpty()) return emptyList()
+
+        val auidStr = TextUtils.join(",", auids)
+        val ids = mutableListOf<Long>()
+        val sql = "SELECT DISTINCT local_id FROM images WHERE auid IN ($auidStr)"
+        mDb.rawQuery(sql, emptyArray()).use { cursor ->
+            while (cursor.moveToNext()) {
+                ids.add(cursor.getLong(0))
+            }
+        }
+        return ids
     }
 }

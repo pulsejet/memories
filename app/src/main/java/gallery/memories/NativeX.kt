@@ -70,7 +70,7 @@ import java.net.URLDecoder
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "handleRequest: ", e)
+            Log.w(TAG, "handleRequest: ", e)
             makeErrorResponse()
         }
 
