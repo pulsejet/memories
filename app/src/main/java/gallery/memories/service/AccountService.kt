@@ -150,7 +150,8 @@ import java.net.SocketTimeoutException
             val response: Response
             try {
                 response = OkHttpClient().newCall(request).execute()
-            } catch (e: SocketTimeoutException) {
+            } catch (e: Exception) {
+                Log.w(TAG, "checkCredentialsAndVersion: ", e)
                 return
             }
 
