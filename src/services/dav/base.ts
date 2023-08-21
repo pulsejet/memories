@@ -231,7 +231,8 @@ export async function* deletePhotos(photos: IPhoto[]) {
   if (photos.length === 0) return;
 
   // Extend with Live Photos unless this is an album
-  if (window.vueroute().name !== 'albums') {
+  const routeIsAlbums = window.vueroute().name === 'albums';
+  if (!routeIsAlbums) {
     photos = await extendWithLivePhotos(photos);
   }
 
@@ -244,8 +245,9 @@ export async function* deletePhotos(photos: IPhoto[]) {
   // Take intersection of fileIds and fileInfos
   fileIds = new Set(fileInfos.map((f) => f.fileid));
 
-  // Check for local photos
-  if (nativex.has()) {
+  // Check for locally available files and delete them.
+  // For albums, we are not actually deleting.
+  if (nativex.has() && !routeIsAlbums) {
     // Delete local files. This will throw if user cancels.
     await nativex.deleteLocalPhotos(photos);
 
