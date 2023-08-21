@@ -16,6 +16,7 @@ import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import gallery.memories.R
 import gallery.memories.mapper.Fields
+import gallery.memories.mapper.Response
 import gallery.memories.mapper.SystemImage
 import org.json.JSONArray
 import org.json.JSONException
@@ -38,12 +39,6 @@ import java.util.concurrent.CountDownLatch
     var imageObserver: ContentObserver? = null
     var videoObserver: ContentObserver? = null
     var refreshPending: Boolean = false
-
-    companion object {
-        val okResponse get(): JSONObject {
-            return JSONObject().put("message", "ok")
-        }
-    }
 
     init {
         // Register intent launcher for callback
@@ -178,12 +173,12 @@ import java.util.concurrent.CountDownLatch
         try {
             // Get list of file IDs
             val photos = mDbService.getPhotosByAUIDs(auids)
-            if (photos.isEmpty()) return okResponse
+            if (photos.isEmpty()) return Response.OK
             val fileIds = photos.map { it.localId }
 
             // List of URIs
             val uris = SystemImage.getByIds(mCtx, fileIds).map { it.uri }
-            if (uris.isEmpty()) return okResponse
+            if (uris.isEmpty()) return Response.OK
 
             // Delete file with media store
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -216,7 +211,7 @@ import java.util.concurrent.CountDownLatch
             synchronized(this) { deleting = false }
         }
 
-        return okResponse
+        return Response.OK
     }
 
     private fun syncDb(startTime: Long): Int {

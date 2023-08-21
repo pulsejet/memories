@@ -9,9 +9,9 @@ import gallery.memories.mapper.Day
 import gallery.memories.mapper.Photo
 import gallery.memories.mapper.SystemImage
 
-class DbService(val context: Context) : SQLiteOpenHelper(context, "memories", null, 42) {
+class DbService(val context: Context) : SQLiteOpenHelper(context, "memories", null, 45) {
     companion object {
-        val MEMORIES = "images"
+        val MEMORIES = "memories"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
