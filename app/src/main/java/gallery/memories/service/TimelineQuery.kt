@@ -26,15 +26,13 @@ import java.util.concurrent.CountDownLatch
 
 @UnstableApi class TimelineQuery(private val mCtx: MainActivity) {
     private val mDbService = DbService(mCtx).initialize()
+    private val mConfigService = ConfigService(mCtx)
     private val TAG = TimelineQuery::class.java.simpleName
 
     // Photo deletion events
     var deleting = false
     var deleteIntentLauncher: ActivityResultLauncher<IntentSenderRequest>
     var deleteCallback: ((ActivityResult?) -> Unit)? = null
-
-    // Caches
-    var mEnabledBuckets: Set<String>? = null
 
     // Observers
     var imageObserver: ContentObserver? = null
@@ -110,7 +108,7 @@ import java.util.concurrent.CountDownLatch
     @Throws(JSONException::class)
     fun getByDayId(dayId: Long): JSONArray {
         // Get the photos for the day from DB
-        val dbPhotos = mDbService.getPhotosByDay(dayId, getEnabledBucketIds())
+        val dbPhotos = mDbService.getPhotosByDay(dayId, mConfigService.enabledBucketIds)
         val fileIds = dbPhotos.map { it.localId }.toMutableList()
         if (fileIds.isEmpty()) return JSONArray()
 
@@ -131,7 +129,7 @@ import java.util.concurrent.CountDownLatch
 
     @Throws(JSONException::class)
     fun getDays(): JSONArray {
-        return mDbService.getDays(getEnabledBucketIds()).map { day -> day.json }.let { JSONArray(it) }
+        return mDbService.getDays(mConfigService.enabledBucketIds).map { day -> day.json }.let { JSONArray(it) }
     }
 
     @Throws(Exception::class)
@@ -155,23 +153,11 @@ import java.util.concurrent.CountDownLatch
 
         try {
             val exif = ExifInterface(image.dataPath)
-            obj.put(Fields.Photo.EXIF, JSONObject()
-                .put("Aperture", exif.getAttribute(ExifInterface.TAG_APERTURE_VALUE))
-                .put("FocalLength", exif.getAttribute(ExifInterface.TAG_FOCAL_LENGTH))
-                .put("FNumber", exif.getAttribute(ExifInterface.TAG_F_NUMBER))
-                .put("ShutterSpeed", exif.getAttribute(ExifInterface.TAG_SHUTTER_SPEED_VALUE))
-                .put("ExposureTime", exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME))
-                .put("ISO", exif.getAttribute(ExifInterface.TAG_ISO_SPEED))
-                .put("DateTimeOriginal", exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL))
-                .put("OffsetTimeOriginal", exif.getAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL))
-                .put("GPSLatitude", exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE))
-                .put("GPSLongitude", exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE))
-                .put("GPSAltitude", exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE))
-                .put("Make", exif.getAttribute(ExifInterface.TAG_MAKE))
-                .put("Model", exif.getAttribute(ExifInterface.TAG_MODEL))
-                .put("Orientation", exif.getAttribute(ExifInterface.TAG_ORIENTATION))
-                .put("Description", exif.getAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION))
-            )
+            obj.put(Fields.Photo.EXIF, JSONObject().apply {
+                Fields.EXIF.MAP.forEach { (key, field) ->
+                    put(field, exif.getAttribute(key))
+                }
+            })
         } catch (e: IOException) {
             Log.w(TAG, "Error reading EXIF data for $id")
         }
@@ -300,36 +286,24 @@ import java.util.concurrent.CountDownLatch
         Log.v(TAG, "Inserted file to local DB: $fileId / $baseName")
     }
 
-    fun getEnabledBucketIds(): Set<String> {
-        if (mEnabledBuckets != null) return mEnabledBuckets!!
-        mEnabledBuckets = mCtx.getSharedPreferences(mCtx.getString(R.string.preferences_key), 0)
-            .getStringSet(mCtx.getString(R.string.preferences_enabled_local_folders), null) ?: setOf()
-        return mEnabledBuckets!!
-    }
-
-    fun getLocalFoldersConfig(): JSONArray {
-        val enabledSet = getEnabledBucketIds()
-
-        return mDbService.getBuckets().map {
-            JSONObject()
-                .put("id", it.key)
-                .put("name", it.value)
-                .put("enabled", enabledSet.contains(it.key))
-        }.let { JSONArray(it) }
-    }
-
-    fun configSetLocalFolders(json: String) {
-        val enabledSet = mutableSetOf<String>()
-        val array = JSONArray(json)
-        for (i in 0 until array.length()) {
-            val obj = array.getJSONObject(i)
-            if (obj.getBoolean("enabled")) {
-                enabledSet.add(obj.getLong("id").toString())
-            }
+    /** This is in timeline query because it calls the database service */
+    var localFolders: JSONArray
+        get() {
+            return mDbService.getBuckets().map {
+                JSONObject()
+                    .put(Fields.Bucket.ID, it.key)
+                    .put(Fields.Bucket.NAME, it.value)
+                    .put(Fields.Bucket.ENABLED, mConfigService.enabledBucketIds.contains(it.key))
+            }.let { JSONArray(it) }
         }
-        mEnabledBuckets = enabledSet
-        mCtx.getSharedPreferences(mCtx.getString(R.string.preferences_key), 0).edit()
-            .putStringSet(mCtx.getString(R.string.preferences_enabled_local_folders), enabledSet)
-            .apply()
-    }
+        set(value) {
+            val enabledSet = mutableSetOf<String>()
+            for (i in 0 until value.length()) {
+                val obj = value.getJSONObject(i)
+                if (obj.getBoolean(Fields.Bucket.ENABLED)) {
+                    enabledSet.add(obj.getString(Fields.Bucket.ID))
+                }
+            }
+            mConfigService.enabledBucketIds = enabledSet
+        }
 }

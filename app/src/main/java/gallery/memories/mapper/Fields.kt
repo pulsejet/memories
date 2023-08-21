@@ -1,5 +1,7 @@
 package gallery.memories.mapper
 
+import androidx.exifinterface.media.ExifInterface
+
 class Fields {
     object Day {
         const val DAYID = Photo.DAYID
@@ -26,5 +28,31 @@ class Fields {
 
     object Perm {
         const val DELETE = "D"
+    }
+
+    object EXIF {
+        val MAP = mapOf(
+            ExifInterface.TAG_APERTURE_VALUE to "Aperture",
+            ExifInterface.TAG_FOCAL_LENGTH to "FocalLength",
+            ExifInterface.TAG_F_NUMBER to "FNumber",
+            ExifInterface.TAG_SHUTTER_SPEED_VALUE to "ShutterSpeed",
+            ExifInterface.TAG_EXPOSURE_TIME to "ExposureTime",
+            ExifInterface.TAG_ISO_SPEED to "ISO",
+            ExifInterface.TAG_DATETIME_ORIGINAL to "DateTimeOriginal",
+            ExifInterface.TAG_OFFSET_TIME_ORIGINAL to "OffsetTimeOriginal",
+            ExifInterface.TAG_GPS_LATITUDE to "GPSLatitude",
+            ExifInterface.TAG_GPS_LONGITUDE to "GPSLongitude",
+            ExifInterface.TAG_GPS_ALTITUDE to "GPSAltitude",
+            ExifInterface.TAG_MAKE to "Make",
+            ExifInterface.TAG_MODEL to "Model",
+            ExifInterface.TAG_ORIENTATION to "Orientation",
+            ExifInterface.TAG_IMAGE_DESCRIPTION to "Description"
+        )
+    }
+
+    object Bucket {
+        const val ID = "id"
+        const val NAME = "name"
+        const val ENABLED = "enabled"
     }
 }

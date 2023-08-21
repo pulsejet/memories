@@ -185,7 +185,7 @@ import java.net.URLDecoder
     @JavascriptInterface
     fun configSetLocalFolders(json: String?) {
         if (json == null) return;
-        query.configSetLocalFolders(json)
+        query.localFolders = JSONArray(json)
     }
 
     @Throws(Exception::class)
@@ -210,7 +210,7 @@ import java.net.URLDecoder
         } else if (path.matches(API.SHARE_LOCAL)) {
             return makeResponse(dlService!!.shareLocal(parts[4].toLong()))
         } else if (path.matches(API.CONFIG_LOCAL_FOLDES)) {
-            return makeResponse(query.getLocalFoldersConfig())
+            return makeResponse(query.localFolders)
         } else {
             throw Exception("Not Found")
         }
