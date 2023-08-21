@@ -110,6 +110,13 @@ export type NativeX = {
   playTouchSound: () => void;
 
   /**
+   * Make a native toast to the user.
+   * @param message Message to show
+   * @param long Whether the toast should be shown for a long time
+   */
+  toast: (message: string, long?: boolean) => void;
+
+  /**
    * Start downloading a file from a given URL.
    * @param url URL to download from
    * @param filename Filename to save as
@@ -145,9 +152,21 @@ export type NativeX = {
   configSetLocalFolders: (json: string) => void;
 
   /**
+   * Start the login process
+   * @param baseUrl Base URL of the Nextcloud instance
+   * @param loginFlowUrl URL to start the login flow
+   */
+  login: (baseUrl: string, loginFlowUrl: string) => void;
+
+  /**
    * Log out from Nextcloud and delete the tokens.
    */
   logout: () => void;
+
+  /**
+   * Reload the app.
+   */
+  reload: () => void;
 };
 
 /** Setting of whether a local folder is enabled */
