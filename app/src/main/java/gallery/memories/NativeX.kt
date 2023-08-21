@@ -18,7 +18,7 @@ import java.io.ByteArrayInputStream
 import java.net.URLDecoder
 
 @UnstableApi class NativeX(private val mCtx: MainActivity) {
-    val TAG = "NativeX"
+    val TAG = NativeX::class.java.simpleName
 
     private var themeStored = false
     val image = ImageService(mCtx)

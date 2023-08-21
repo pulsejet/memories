@@ -2,8 +2,13 @@ package gallery.memories.mapper
 
 import android.content.ContentUris
 import android.content.Context
+import android.icu.text.SimpleDateFormat
+import android.icu.util.TimeZone
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
+import androidx.exifinterface.media.ExifInterface
+import java.io.IOException
 
 class SystemImage {
     var fileId = 0L;
@@ -29,6 +34,7 @@ class SystemImage {
     private var mCollection: Uri = IMAGE_URI
 
     companion object {
+        val TAG = SystemImage::class.java.simpleName
         val IMAGE_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         val VIDEO_URI = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
 
@@ -128,5 +134,38 @@ class SystemImage {
             if (images.size == ids.size) return images
             return images + query(ctx, VIDEO_URI, selection, null, null)
         }
+    }
+
+    val utcDate get(): Long {
+        // Get EXIF date using ExifInterface if image
+        if (!isVideo) {
+            try {
+                val exif = ExifInterface(dataPath)
+                val exifDate = exif.getAttribute(ExifInterface.TAG_DATETIME)
+                    ?: throw IOException()
+                val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
+                sdf.timeZone = TimeZone.GMT_ZONE
+                sdf.parse(exifDate).let {
+                    return it.time
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to read EXIF data: " + e.message)
+            }
+        }
+
+        // No way to get the actual local date, so just assume current timezone
+        return dateTaken + TimeZone.getDefault().getOffset(dateTaken).toLong()
+    }
+
+    val auid get(): Long {
+        val crc = java.util.zip.CRC32()
+
+        // get date in seconds
+        val date = dateTaken / 1000
+
+        // pass date taken + size as decimal string
+        crc.update((date.toString() + size.toString()).toByteArray())
+
+        return crc.value
     }
 }

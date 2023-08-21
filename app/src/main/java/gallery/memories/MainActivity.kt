@@ -28,7 +28,7 @@ import gallery.memories.databinding.ActivityMainBinding
 
 @UnstableApi class MainActivity : AppCompatActivity() {
     companion object {
-        val TAG = "MainActivity"
+        val TAG = MainActivity::class.java.simpleName
     }
 
     val binding by lazy(LazyThreadSafetyMode.NONE) {

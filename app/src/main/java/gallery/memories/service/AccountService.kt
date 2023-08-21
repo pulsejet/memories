@@ -19,7 +19,7 @@ import java.net.SocketTimeoutException
 
 @UnstableApi class AccountService(private val mCtx: MainActivity) {
     companion object {
-        val TAG = "AccountService"
+        val TAG = AccountService::class.java.simpleName
     }
 
     var authHeader: String? = null

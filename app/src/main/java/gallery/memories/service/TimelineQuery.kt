@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.database.ContentObserver
 import android.database.sqlite.SQLiteDatabase
-import android.icu.text.SimpleDateFormat
-import android.icu.util.TimeZone
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -31,7 +29,7 @@ import java.util.concurrent.CountDownLatch
 
 @UnstableApi class TimelineQuery(private val mCtx: MainActivity) {
     private val mDb: SQLiteDatabase = DbService(mCtx).writableDatabase
-    private val TAG = "TimelineQuery"
+    private val TAG = TimelineQuery::class.java.simpleName
 
     // Photo deletion events
     var deleting = false
@@ -338,57 +336,38 @@ import java.util.concurrent.CountDownLatch
 
     @SuppressLint("SimpleDateFormat")
     private fun insertItemDb(image: SystemImage) {
-        var dateTaken = image.dateTaken
-        val id = image.fileId
-        val name = image.baseName
+        val fileId = image.fileId
+        val baseName = image.baseName
 
         // Check if file with local_id and mtime already exists
-        mDb.rawQuery("SELECT id FROM images WHERE local_id = ?", arrayOf(id.toString())).use { c ->
+        mDb.rawQuery("SELECT id FROM images WHERE local_id = ? AND mtime = ?", arrayOf(
+            fileId.toString(),
+            image.mtime.toString()
+        )).use { c ->
             if (c.count > 0) {
                 // File already exists, remove flag
-                mDb.execSQL("UPDATE images SET flag = 0 WHERE local_id = ?", arrayOf(id))
-                Log.v(TAG, "File already exists: $id / $name")
+                mDb.execSQL("UPDATE images SET flag = 0 WHERE local_id = ?", arrayOf(fileId))
+                Log.v(TAG, "File already exists: $fileId / $baseName")
                 return
             }
         }
 
-        // Get EXIF date using ExifInterface if image
-        if (!image.isVideo) {
-            try {
-                val exif = ExifInterface(image.dataPath)
-                val exifDate = exif.getAttribute(ExifInterface.TAG_DATETIME)
-                    ?: throw IOException()
-                val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
-                sdf.timeZone = TimeZone.GMT_ZONE
-                val date = sdf.parse(exifDate)
-                if (date != null) {
-                    dateTaken = date.time
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to read EXIF data: " + e.message)
-            }
-        }
-
-        // No way to get the actual local date, so just assume current timezone
-        else { // !isVideo
-            dateTaken += TimeZone.getDefault().getOffset(dateTaken).toLong()
-        }
-
-        // This will use whatever is available
-        dateTaken /= 1000
+        val auid = image.auid
+        val dateTaken = image.utcDate / 1000
         val dayId = dateTaken / 86400
 
         // Delete file with same local_id and insert new one
         mDb.beginTransaction()
-        mDb.execSQL("DELETE FROM images WHERE local_id = ?", arrayOf(id))
+        mDb.execSQL("DELETE FROM images WHERE local_id = ?", arrayOf(fileId))
         mDb.execSQL("""
             INSERT OR IGNORE INTO images
-            (local_id, mtime, basename, date_taken, dayid, bucket_id, bucket_name)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            (local_id, mtime, basename, auid, date_taken, dayid, bucket_id, bucket_name)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, arrayOf(
             image.fileId,
             image.mtime,
             image.baseName,
+            auid,
             dateTaken,
             dayId,
             image.bucketId,
@@ -396,7 +375,7 @@ import java.util.concurrent.CountDownLatch
         ))
         mDb.setTransactionSuccessful()
         mDb.endTransaction()
-        Log.v(TAG, "Inserted file to local DB: $id / $name / $dayId")
+        Log.v(TAG, "Inserted file to local DB: $fileId / $baseName / $dayId / $auid")
     }
 
     fun getEnabledBucketIds(): Set<String> {
