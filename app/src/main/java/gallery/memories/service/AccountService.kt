@@ -17,7 +17,8 @@ import okhttp3.Response
 import org.json.JSONObject
 import java.net.SocketTimeoutException
 
-@UnstableApi class AccountService(private val mCtx: MainActivity) {
+@UnstableApi
+class AccountService(private val mCtx: MainActivity) {
     companion object {
         val TAG = AccountService::class.java.simpleName
     }
@@ -89,7 +90,8 @@ import java.net.SocketTimeoutException
         }
 
         val client = OkHttpClient()
-        val rbody = "token=$pollToken".toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull())
+        val rbody =
+            "token=$pollToken".toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull())
         var pollCount = 0
 
         while (true) {

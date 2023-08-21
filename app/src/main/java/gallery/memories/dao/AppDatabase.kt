@@ -15,7 +15,8 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         private val DATABASE_NAME = "memories_room"
-        @Volatile private var INSTANCE: AppDatabase? = null
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
 
         fun get(context: Context): AppDatabase {
             if (INSTANCE == null) {

@@ -44,7 +44,10 @@ class DownloadService(private val mActivity: AppCompatActivity) {
         request.addRequestHeader("cookie", cookies)
         if (filename != "") {
             // Save the file to external storage
-            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "memories/$filename")
+            request.setDestinationInExternalPublicDir(
+                Environment.DIRECTORY_DOWNLOADS,
+                "memories/$filename"
+            )
         }
 
         // Start the download
@@ -92,7 +95,8 @@ class DownloadService(private val mActivity: AppCompatActivity) {
     }
 
     private fun getDownloadedFileURI(downloadId: Long): String? {
-        val downloadManager = mActivity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        val downloadManager =
+            mActivity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val query = DownloadManager.Query()
         query.setFilterById(downloadId)
         val cursor = downloadManager.query(query)

@@ -14,7 +14,10 @@ class ImageService(private val mCtx: Context) {
         val bitmap =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 mCtx.contentResolver.loadThumbnail(
-                    ContentUris.withAppendedId(MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL), id),
+                    ContentUris.withAppendedId(
+                        MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL),
+                        id
+                    ),
                     android.util.Size(2048, 2048),
                     null
                 )
@@ -22,10 +25,10 @@ class ImageService(private val mCtx: Context) {
                 MediaStore.Images.Thumbnails.getThumbnail(
                     mCtx.contentResolver, id, MediaStore.Images.Thumbnails.FULL_SCREEN_KIND, null
                 )
-                ?: MediaStore.Video.Thumbnails.getThumbnail(
-                    mCtx.contentResolver, id, MediaStore.Video.Thumbnails.FULL_SCREEN_KIND, null
-                )
-                ?: throw Exception("Thumbnail not found")
+                    ?: MediaStore.Video.Thumbnails.getThumbnail(
+                        mCtx.contentResolver, id, MediaStore.Video.Thumbnails.FULL_SCREEN_KIND, null
+                    )
+                    ?: throw Exception("Thumbnail not found")
             }
 
         val stream = ByteArrayOutputStream()
@@ -42,7 +45,7 @@ class ImageService(private val mCtx: Context) {
                 ImageDecoder.decodeBitmap(ImageDecoder.createSource(mCtx.contentResolver, uri))
             } else {
                 MediaStore.Images.Media.getBitmap(mCtx.contentResolver, uri)
-                ?: throw Exception("Image not found")
+                    ?: throw Exception("Image not found")
             }
         val stream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)

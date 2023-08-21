@@ -26,7 +26,8 @@ import java.io.IOException
 import java.time.Instant
 import java.util.concurrent.CountDownLatch
 
-@UnstableApi class TimelineQuery(private val mCtx: MainActivity) {
+@UnstableApi
+class TimelineQuery(private val mCtx: MainActivity) {
     private val TAG = TimelineQuery::class.java.simpleName
     private val mConfigService = ConfigService(mCtx)
 
@@ -46,11 +47,12 @@ import java.util.concurrent.CountDownLatch
 
     init {
         // Register intent launcher for callback
-        deleteIntentLauncher = mCtx.registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result: ActivityResult? ->
-            synchronized(this) {
-                deleteCallback?.let { it(result) }
+        deleteIntentLauncher =
+            mCtx.registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result: ActivityResult? ->
+                synchronized(this) {
+                    deleteCallback?.let { it(result) }
+                }
             }
-        }
     }
 
     fun initialize() {
@@ -192,7 +194,9 @@ import java.util.concurrent.CountDownLatch
             // Delete file with media store
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 val intent = MediaStore.createTrashRequest(mCtx.contentResolver, uris, true)
-                deleteIntentLauncher.launch(IntentSenderRequest.Builder(intent.intentSender).build())
+                deleteIntentLauncher.launch(
+                    IntentSenderRequest.Builder(intent.intentSender).build()
+                )
 
                 // Wait for response
                 val latch = CountDownLatch(1)
@@ -240,7 +244,7 @@ import java.util.concurrent.CountDownLatch
         // Iterate all images and videos from system store
         val files =
             SystemImage.query(mCtx, SystemImage.IMAGE_URI, selection, selectionArgs, null) +
-            SystemImage.query(mCtx, SystemImage.VIDEO_URI, selection, selectionArgs, null)
+                    SystemImage.query(mCtx, SystemImage.VIDEO_URI, selection, selectionArgs, null)
         files.forEach { insertItemDb(it) }
 
         // Store last sync time

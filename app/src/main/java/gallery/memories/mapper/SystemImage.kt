@@ -28,9 +28,9 @@ class SystemImage {
     var videoDuration = 0L
 
     val uri: Uri
-    get() {
-        return ContentUris.withAppendedId(mCollection, fileId)
-    }
+        get() {
+            return ContentUris.withAppendedId(mCollection, fileId)
+        }
 
     private var mCollection: Uri = IMAGE_URI
 
@@ -137,72 +137,77 @@ class SystemImage {
         }
     }
 
-    val json get(): JSONObject {
-        val obj = JSONObject()
-            .put(Fields.Photo.FILEID, fileId)
-            .put(Fields.Photo.BASENAME, baseName)
-            .put(Fields.Photo.MIMETYPE, mimeType)
-            .put(Fields.Photo.HEIGHT, height)
-            .put(Fields.Photo.WIDTH, width)
-            .put(Fields.Photo.SIZE, size)
-            .put(Fields.Photo.ETAG, mtime.toString())
-            .put(Fields.Photo.EPOCH, epoch)
-            .put(Fields.Photo.AUID, auid)
+    val json
+        get(): JSONObject {
+            val obj = JSONObject()
+                .put(Fields.Photo.FILEID, fileId)
+                .put(Fields.Photo.BASENAME, baseName)
+                .put(Fields.Photo.MIMETYPE, mimeType)
+                .put(Fields.Photo.HEIGHT, height)
+                .put(Fields.Photo.WIDTH, width)
+                .put(Fields.Photo.SIZE, size)
+                .put(Fields.Photo.ETAG, mtime.toString())
+                .put(Fields.Photo.EPOCH, epoch)
+                .put(Fields.Photo.AUID, auid)
 
-        if (isVideo) {
-            obj.put(Fields.Photo.ISVIDEO, 1)
-                .put(Fields.Photo.VIDEO_DURATION, videoDuration / 1000)
-        }
-
-        return obj
-    }
-
-    val epoch get(): Long {
-        return dateTaken / 1000
-    }
-
-    val utcDate get(): Long {
-        // Get EXIF date using ExifInterface if image
-        if (!isVideo) {
-            try {
-                val exif = ExifInterface(dataPath)
-                val exifDate = exif.getAttribute(ExifInterface.TAG_DATETIME)
-                    ?: throw IOException()
-                val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
-                sdf.timeZone = TimeZone.GMT_ZONE
-                sdf.parse(exifDate).let {
-                    return it.time / 1000
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to read EXIF data: " + e.message)
+            if (isVideo) {
+                obj.put(Fields.Photo.ISVIDEO, 1)
+                    .put(Fields.Photo.VIDEO_DURATION, videoDuration / 1000)
             }
+
+            return obj
         }
 
-        // No way to get the actual local date, so just assume current timezone
-        return (dateTaken + TimeZone.getDefault().getOffset(dateTaken).toLong()) / 1000
-    }
+    val epoch
+        get(): Long {
+            return dateTaken / 1000
+        }
 
-    val auid get(): Long {
-        val crc = java.util.zip.CRC32()
+    val utcDate
+        get(): Long {
+            // Get EXIF date using ExifInterface if image
+            if (!isVideo) {
+                try {
+                    val exif = ExifInterface(dataPath)
+                    val exifDate = exif.getAttribute(ExifInterface.TAG_DATETIME)
+                        ?: throw IOException()
+                    val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
+                    sdf.timeZone = TimeZone.GMT_ZONE
+                    sdf.parse(exifDate).let {
+                        return it.time / 1000
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to read EXIF data: " + e.message)
+                }
+            }
 
-        // pass date taken + size as decimal string
-        crc.update((epoch.toString() + size.toString()).toByteArray())
+            // No way to get the actual local date, so just assume current timezone
+            return (dateTaken + TimeZone.getDefault().getOffset(dateTaken).toLong()) / 1000
+        }
 
-        return crc.value
-    }
+    val auid
+        get(): Long {
+            val crc = java.util.zip.CRC32()
 
-    val photo get(): Photo {
-        val dateCache = utcDate
-        return Photo(
-            localId = fileId,
-            auid = auid,
-            mtime = mtime,
-            dateTaken = dateCache,
-            dayId = dateCache / 86400,
-            baseName = baseName,
-            bucketId = bucketId,
-            bucketName = bucketName,
-            flag = 0,
-        )
-    }
+            // pass date taken + size as decimal string
+            crc.update((epoch.toString() + size.toString()).toByteArray())
+
+            return crc.value
+        }
+
+    val photo
+        get(): Photo {
+            val dateCache = utcDate
+            return Photo(
+                localId = fileId,
+                auid = auid,
+                mtime = mtime,
+                dateTaken = dateCache,
+                dayId = dateCache / 86400,
+                baseName = baseName,
+                bucketId = bucketId,
+                bucketName = bucketName,
+                flag = 0,
+            )
+        }
 }

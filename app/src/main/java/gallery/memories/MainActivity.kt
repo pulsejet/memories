@@ -26,7 +26,8 @@ import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import gallery.memories.databinding.ActivityMainBinding
 
-@UnstableApi class MainActivity : AppCompatActivity() {
+@UnstableApi
+class MainActivity : AppCompatActivity() {
     companion object {
         val TAG = MainActivity::class.java.simpleName
     }
@@ -124,7 +125,10 @@ import gallery.memories.databinding.ActivityMainBinding
     private fun initializeWebView() {
         // Intercept local APIs
         binding.webview.webViewClient = object : WebViewClient() {
-            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+            override fun shouldOverrideUrlLoading(
+                view: WebView,
+                request: WebResourceRequest
+            ): Boolean {
                 val pathMatches = request.url.path?.matches(memoriesRegex) == true
                 val hostMatches = request.url.host.equals(host)
                 if (pathMatches && hostMatches) {
@@ -137,7 +141,10 @@ import gallery.memories.databinding.ActivityMainBinding
                 return true
             }
 
-            override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
+            override fun shouldInterceptRequest(
+                view: WebView,
+                request: WebResourceRequest
+            ): WebResourceResponse? {
                 return if (request.url.host == "127.0.0.1") {
                     nativex.handleRequest(request)
                 } else null
@@ -194,9 +201,11 @@ import gallery.memories.databinding.ActivityMainBinding
             host = Uri.parse(memoriesUrl).host
 
             // Set authorization header
-            binding.webview.loadUrl(memoriesUrl, mapOf(
-                "Authorization" to authHeader
-            ))
+            binding.webview.loadUrl(
+                memoriesUrl, mapOf(
+                    "Authorization" to authHeader
+                )
+            )
             return true
         }
 
@@ -207,7 +216,8 @@ import gallery.memories.databinding.ActivityMainBinding
 
     fun ensureStoragePermissions() {
         val requestPermissionLauncher = registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
 
             // we need all of these
             val isGranted = permissions.all { it.value }
@@ -236,10 +246,12 @@ import gallery.memories.databinding.ActivityMainBinding
 
         // Request media read permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requestPermissionLauncher.launch(arrayOf(
-                android.Manifest.permission.READ_MEDIA_IMAGES,
-                android.Manifest.permission.READ_MEDIA_VIDEO,
-            ))
+            requestPermissionLauncher.launch(
+                arrayOf(
+                    android.Manifest.permission.READ_MEDIA_IMAGES,
+                    android.Manifest.permission.READ_MEDIA_VIDEO,
+                )
+            )
         } else {
             requestPermissionLauncher.launch(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE))
         }
@@ -278,7 +290,8 @@ import gallery.memories.databinding.ActivityMainBinding
                             DefaultHttpDataSource.Factory()
                                 .setDefaultRequestProperties(mapOf("cookie" to cookies))
                                 .setAllowCrossProtocolRedirects(true)
-                        val dataSourceFactory = DefaultDataSource.Factory(this, httpDataSourceFactory)
+                        val dataSourceFactory =
+                            DefaultDataSource.Factory(this, httpDataSourceFactory)
 
                         // Check if HLS source from URI (contains .m3u8 anywhere)
                         exoPlayer.addMediaSource(
@@ -355,10 +368,15 @@ import gallery.memories.databinding.ActivityMainBinding
         // Set dark mode
         setTheme(if (isDark) android.R.style.Theme_Black else android.R.style.Theme_Light)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val appearance = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
-            window.insetsController?.setSystemBarsAppearance(if (isDark) 0 else appearance, appearance)
+            val appearance =
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+            window.insetsController?.setSystemBarsAppearance(
+                if (isDark) 0 else appearance,
+                appearance
+            )
         } else {
-            window.decorView.systemUiVisibility = if (isDark) 0 else View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            window.decorView.systemUiVisibility =
+                if (isDark) 0 else View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         }
 
         // Set colors
@@ -390,8 +408,11 @@ import gallery.memories.databinding.ActivityMainBinding
 
             // Schedule for resume if not active
             if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) || force) {
-                    mNeedRefresh = false
-                    binding.webview.evaluateJavascript("window._nc_event_bus?.emit('files:file:created')", null)
+                mNeedRefresh = false
+                binding.webview.evaluateJavascript(
+                    "window._nc_event_bus?.emit('files:file:created')",
+                    null
+                )
             } else {
                 mNeedRefresh = true
             }
