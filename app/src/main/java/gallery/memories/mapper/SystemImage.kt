@@ -8,6 +8,7 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
 import androidx.exifinterface.media.ExifInterface
+import org.json.JSONObject
 import java.io.IOException
 
 class SystemImage {
@@ -134,6 +135,26 @@ class SystemImage {
             if (images.size == ids.size) return images
             return images + query(ctx, VIDEO_URI, selection, null, null)
         }
+    }
+
+    val json get(): JSONObject {
+        val obj = JSONObject()
+            .put(Fields.Photo.FILEID, fileId)
+            .put(Fields.Photo.BASENAME, baseName)
+            .put(Fields.Photo.MIMETYPE, mimeType)
+            .put(Fields.Photo.HEIGHT, height)
+            .put(Fields.Photo.WIDTH, width)
+            .put(Fields.Photo.SIZE, size)
+            .put(Fields.Photo.ETAG, mtime.toString())
+            .put(Fields.Photo.EPOCH, epoch)
+            .put(Fields.Photo.AUID, auid)
+
+        if (isVideo) {
+            obj.put(Fields.Photo.ISVIDEO, 1)
+                .put(Fields.Photo.VIDEO_DURATION, videoDuration / 1000)
+        }
+
+        return obj
     }
 
     val epoch get(): Long {

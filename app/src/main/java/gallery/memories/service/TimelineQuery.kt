@@ -3,17 +3,14 @@ package gallery.memories.service
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.database.ContentObserver
-import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.text.TextUtils
 import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.collection.ArraySet
 import androidx.exifinterface.media.ExifInterface
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
@@ -28,7 +25,7 @@ import java.time.Instant
 import java.util.concurrent.CountDownLatch
 
 @UnstableApi class TimelineQuery(private val mCtx: MainActivity) {
-    private val mDb: SQLiteDatabase = DbService(mCtx).writableDatabase
+    private val mDbService = DbService(mCtx).initialize()
     private val TAG = TimelineQuery::class.java.simpleName
 
     // Photo deletion events
@@ -112,135 +109,75 @@ import java.util.concurrent.CountDownLatch
 
     @Throws(JSONException::class)
     fun getByDayId(dayId: Long): JSONArray {
-        // Filter for enabled buckets
-        val enabledBuckets = getEnabledBucketIds().joinToString(",")
+        // Get the photos for the day from DB
+        val dbPhotos = mDbService.getPhotosByDay(dayId, getEnabledBucketIds())
+        val fileIds = dbPhotos.map { it.localId }.toMutableList()
+        if (fileIds.isEmpty()) return JSONArray()
 
-        // Get list of image IDs from DB
-        val imageIds: MutableSet<Long> = ArraySet()
-        mDb.rawQuery("""
-            SELECT local_id FROM images
-            WHERE dayid = ? AND bucket_id IN ($enabledBuckets)
-        """, arrayOf(dayId.toString())).use { cursor ->
-            while (cursor.moveToNext()) {
-                imageIds.add(cursor.getLong(0))
-            }
-        }
+        // Get latest metadata from system table
+        val photos = SystemImage.getByIds(mCtx, fileIds).map { image ->
+            // Mark file exists
+            fileIds.remove(image.fileId)
 
-        // Nothing to do
-        if (imageIds.isEmpty()) return JSONArray()
-
-        // Filter for given day
-        val photos = JSONArray()
-        SystemImage.getByIds(mCtx, imageIds.toMutableList()).forEach { image ->
-            val obj = JSONObject()
-                .put(Fields.Photo.FILEID, image.fileId)
-                .put(Fields.Photo.BASENAME, image.baseName)
-                .put(Fields.Photo.MIMETYPE, image.mimeType)
-                .put(Fields.Photo.HEIGHT, image.height)
-                .put(Fields.Photo.WIDTH, image.width)
-                .put(Fields.Photo.SIZE, image.size)
-                .put(Fields.Photo.ETAG, image.mtime.toString())
-                .put(Fields.Photo.EPOCH, image.epoch)
-                .put(Fields.Photo.AUID, image.auid)
-                .put(Fields.Photo.DAYID, dayId)
-
-            if (image.isVideo) {
-                obj.put(Fields.Photo.ISVIDEO, 1)
-                    .put(Fields.Photo.VIDEO_DURATION, image.videoDuration / 1000)
-            }
-
-            photos.put(obj)
-            imageIds.remove(image.fileId)
-        }
+            // Add missing dayId to JSON
+            image.json.put(Fields.Photo.DAYID, dayId)
+        }.let { JSONArray(it) }
 
         // Remove files that were not found
-        if (imageIds.size > 0) {
-            val delIds = TextUtils.join(",", imageIds)
-            mDb.execSQL("DELETE FROM images WHERE local_id IN ($delIds)")
-        }
+        mDbService.deleteFileIds(fileIds)
 
         return photos
     }
 
     @Throws(JSONException::class)
     fun getDays(): JSONArray {
-        // Filter for enabled buckets
-        val enabledBuckets = getEnabledBucketIds().joinToString(",")
-
-        // Get this day's images
-        mDb.rawQuery("""
-            SELECT dayid, COUNT(local_id) FROM images
-            WHERE bucket_id IN ($enabledBuckets)
-            GROUP BY dayid""",
-            null
-        ).use { cursor ->
-            val days = JSONArray()
-            while (cursor.moveToNext()) {
-                days.put(JSONObject()
-                    .put(Fields.Day.DAYID, cursor.getLong(0))
-                    .put(Fields.Day.COUNT, cursor.getLong(1))
-                )
-            }
-            return days
-        }
+        return mDbService.getDays(getEnabledBucketIds()).map { day -> day.json }.let { JSONArray(it) }
     }
 
     @Throws(Exception::class)
     fun getImageInfo(id: Long): JSONObject {
-        val sql = "SELECT dayid, date_taken FROM images WHERE local_id = ?"
-        mDb.rawQuery(sql, arrayOf(id.toString())).use { cursor ->
-            if (!cursor.moveToNext()) {
-                throw Exception("Image not found")
-            }
+        val photos = mDbService.getPhotosByFileIds(listOf(id))
+        if (photos.isEmpty()) throw Exception("File not found in database")
 
-            // Get image from system table
-            val imageList = SystemImage.getByIds(mCtx, arrayListOf(id))
-            if (imageList.isEmpty()) {
-                throw Exception("File not found in any collection")
-            }
+        // Get image from system table
+        val images = SystemImage.getByIds(mCtx, listOf(id))
+        if (images.isEmpty()) throw Exception("File not found in system")
 
-            // Add EXIF to json object
-            val image = imageList[0];
-            val dayId = cursor.getLong(0)
-            val dateTaken = cursor.getLong(1)
+        // Get the photo and image
+        val photo = photos[0]
+        val image = images[0];
 
-            val obj = JSONObject()
-                .put(Fields.Photo.FILEID, image.fileId)
-                .put(Fields.Photo.BASENAME, image.baseName)
-                .put(Fields.Photo.MIMETYPE, image.mimeType)
-                .put(Fields.Photo.DAYID, dayId)
-                .put(Fields.Photo.DATETAKEN, dateTaken)
-                .put(Fields.Photo.HEIGHT, image.height)
-                .put(Fields.Photo.WIDTH, image.width)
-                .put(Fields.Photo.SIZE, image.size)
-                .put(Fields.Photo.PERMISSIONS, Fields.Perm.DELETE)
+        // Augment image JSON with database info
+        val obj = image.json
+            .put(Fields.Photo.DAYID, photo.dayId)
+            .put(Fields.Photo.DATETAKEN, photo.dateTaken)
+            .put(Fields.Photo.PERMISSIONS, Fields.Perm.DELETE)
 
-            try {
-                val exif = ExifInterface(image.dataPath)
-                obj.put(
-                    Fields.Photo.EXIF, JSONObject()
-                    .put("Aperture", exif.getAttribute(ExifInterface.TAG_APERTURE_VALUE))
-                    .put("FocalLength", exif.getAttribute(ExifInterface.TAG_FOCAL_LENGTH))
-                    .put("FNumber", exif.getAttribute(ExifInterface.TAG_F_NUMBER))
-                    .put("ShutterSpeed", exif.getAttribute(ExifInterface.TAG_SHUTTER_SPEED_VALUE))
-                    .put("ExposureTime", exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME))
-                    .put("ISO", exif.getAttribute(ExifInterface.TAG_ISO_SPEED))
-                    .put("DateTimeOriginal", exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL))
-                    .put("OffsetTimeOriginal", exif.getAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL))
-                    .put("GPSLatitude", exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE))
-                    .put("GPSLongitude", exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE))
-                    .put("GPSAltitude", exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE))
-                    .put("Make", exif.getAttribute(ExifInterface.TAG_MAKE))
-                    .put("Model", exif.getAttribute(ExifInterface.TAG_MODEL))
-                    .put("Orientation", exif.getAttribute(ExifInterface.TAG_ORIENTATION))
-                    .put("Description", exif.getAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION))
-                )
-            } catch (e: IOException) {
-                Log.e(TAG, "Error reading EXIF data for $id")
-            }
-
-            return obj
+        try {
+            val exif = ExifInterface(image.dataPath)
+            obj.put(Fields.Photo.EXIF, JSONObject()
+                .put("Aperture", exif.getAttribute(ExifInterface.TAG_APERTURE_VALUE))
+                .put("FocalLength", exif.getAttribute(ExifInterface.TAG_FOCAL_LENGTH))
+                .put("FNumber", exif.getAttribute(ExifInterface.TAG_F_NUMBER))
+                .put("ShutterSpeed", exif.getAttribute(ExifInterface.TAG_SHUTTER_SPEED_VALUE))
+                .put("ExposureTime", exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME))
+                .put("ISO", exif.getAttribute(ExifInterface.TAG_ISO_SPEED))
+                .put("DateTimeOriginal", exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL))
+                .put("OffsetTimeOriginal", exif.getAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL))
+                .put("GPSLatitude", exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE))
+                .put("GPSLongitude", exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE))
+                .put("GPSAltitude", exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE))
+                .put("Make", exif.getAttribute(ExifInterface.TAG_MAKE))
+                .put("Model", exif.getAttribute(ExifInterface.TAG_MODEL))
+                .put("Orientation", exif.getAttribute(ExifInterface.TAG_ORIENTATION))
+                .put("Description", exif.getAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION))
+            )
+        } catch (e: IOException) {
+            Log.w(TAG, "Error reading EXIF data for $id")
         }
+
+        return obj
+
     }
 
     @Throws(Exception::class)
@@ -254,8 +191,9 @@ import java.util.concurrent.CountDownLatch
 
         try {
             // Get list of file IDs
-            val fileIds = getFileIdsFromAUIDs(auids)
-            if (fileIds.isEmpty()) return okResponse
+            val photos = mDbService.getPhotosByAUIDs(auids)
+            if (photos.isEmpty()) return okResponse
+            val fileIds = photos.map { it.localId }
 
             // List of URIs
             val uris = SystemImage.getByIds(mCtx, fileIds).map { it.uri }
@@ -286,9 +224,8 @@ import java.util.concurrent.CountDownLatch
                 }
             }
 
-            // Delete from images table
-            val idsList = TextUtils.join(",", fileIds)
-            mDb.execSQL("DELETE FROM images WHERE local_id IN ($idsList)")
+            // Delete from database
+            mDbService.deleteFileIds(fileIds)
         } finally {
             synchronized(this) { deleting = false }
         }
@@ -334,13 +271,13 @@ import java.util.concurrent.CountDownLatch
 
     fun syncFullDb() {
         // Flag all images for removal
-        mDb.execSQL("UPDATE images SET flag = 1")
+        mDbService.flagAll()
 
         // Sync all files, marking them in the process
         syncDb(0L)
 
         // Clean up stale files
-        mDb.execSQL("DELETE FROM images WHERE flag = 1")
+        mDbService.deleteFlagged()
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -349,41 +286,18 @@ import java.util.concurrent.CountDownLatch
         val baseName = image.baseName
 
         // Check if file with local_id and mtime already exists
-        mDb.rawQuery("SELECT id FROM images WHERE local_id = ? AND mtime = ?", arrayOf(
-            fileId.toString(),
-            image.mtime.toString()
-        )).use { c ->
-            if (c.count > 0) {
-                // File already exists, remove flag
-                mDb.execSQL("UPDATE images SET flag = 0 WHERE local_id = ?", arrayOf(fileId))
-                Log.v(TAG, "File already exists: $fileId / $baseName")
-                return
-            }
+        val l = mDbService.getPhotosByFileIds(listOf(fileId))
+        if (!l.isEmpty() && l[0].mtime == image.mtime) {
+            // File already exists, remove flag
+            mDbService.unflag(fileId)
+            Log.v(TAG, "File already exists: $fileId / $baseName")
+            return
         }
 
-        val dateTaken = image.utcDate
-        val dayId = dateTaken / 86400
-
         // Delete file with same local_id and insert new one
-        mDb.beginTransaction()
-        mDb.execSQL("DELETE FROM images WHERE local_id = ?", arrayOf(fileId))
-        mDb.execSQL("""
-            INSERT OR IGNORE INTO images
-            (local_id, mtime, date_taken, dayid, auid, basename, bucket_id, bucket_name)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, arrayOf(
-            image.fileId,
-            image.mtime,
-            dateTaken,
-            dayId,
-            image.auid,
-            image.baseName,
-            image.bucketId,
-            image.bucketName
-        ))
-        mDb.setTransactionSuccessful()
-        mDb.endTransaction()
-        Log.v(TAG, "Inserted file to local DB: $fileId / $baseName / $dayId")
+        mDbService.deleteFileIds(listOf(fileId))
+        mDbService.insertImage(image)
+        Log.v(TAG, "Inserted file to local DB: $fileId / $baseName")
     }
 
     fun getEnabledBucketIds(): Set<String> {
@@ -394,22 +308,14 @@ import java.util.concurrent.CountDownLatch
     }
 
     fun getLocalFoldersConfig(): JSONArray {
-        val array = JSONArray()
         val enabledSet = getEnabledBucketIds()
 
-        val sql = "SELECT bucket_id, bucket_name FROM images GROUP BY bucket_id"
-        mDb.rawQuery(sql, emptyArray()).use { cursor ->
-            while (cursor.moveToNext()) {
-                val obj = JSONObject()
-                val id = cursor.getLong(0)
-                obj.put("id", id)
-                obj.put("name", cursor.getString(1))
-                obj.put("enabled", enabledSet.contains(id.toString()))
-                array.put(obj)
-            }
-        }
-
-        return array
+        return mDbService.getBuckets().map {
+            JSONObject()
+                .put("id", it.key)
+                .put("name", it.value)
+                .put("enabled", enabledSet.contains(it.key))
+        }.let { JSONArray(it) }
     }
 
     fun configSetLocalFolders(json: String) {
@@ -425,19 +331,5 @@ import java.util.concurrent.CountDownLatch
         mCtx.getSharedPreferences(mCtx.getString(R.string.preferences_key), 0).edit()
             .putStringSet(mCtx.getString(R.string.preferences_enabled_local_folders), enabledSet)
             .apply()
-    }
-
-    fun getFileIdsFromAUIDs(auids: List<Long>): List<Long> {
-        if (auids.isEmpty()) return emptyList()
-
-        val auidStr = TextUtils.join(",", auids)
-        val ids = mutableListOf<Long>()
-        val sql = "SELECT DISTINCT local_id FROM images WHERE auid IN ($auidStr)"
-        mDb.rawQuery(sql, emptyArray()).use { cursor ->
-            while (cursor.moveToNext()) {
-                ids.add(cursor.getLong(0))
-            }
-        }
-        return ids
     }
 }
