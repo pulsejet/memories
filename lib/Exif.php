@@ -249,6 +249,17 @@ class Exif
     }
 
     /**
+     * Get the Approximate Unique ID (AUID) from parameters.
+     *
+     * @param int $epoch the date taken as a unix timestamp (seconds)
+     * @param int $size  the file size in bytes
+     */
+    public static function getAUID(int $epoch, int $size): int
+    {
+        return crc32($epoch.$size);
+    }
+
+    /**
      * Get the list of MIME Types that are allowed to be edited.
      */
     public static function allowedEditMimetypes(): array

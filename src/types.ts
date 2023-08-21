@@ -78,7 +78,15 @@ export type IPhoto = {
   isfavorite?: boolean;
   /** Local file from native */
   islocal?: boolean;
-  /** Optional datetaken epoch */
+
+  /** AUID of file (optional, NativeX) */
+  auid?: number;
+  /** Epoch of file (optional, NativeX) */
+  epoch?: number;
+  /** File size (optional) */
+  size?: number;
+
+  /** Date taken UTC value (lazy fetched) */
   datetaken?: number;
 };
 

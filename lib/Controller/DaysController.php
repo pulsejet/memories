@@ -166,6 +166,11 @@ class DaysController extends GenericApiController
             $transforms[] = [$this->timelineQuery, 'transformLimit', (int) $limit];
         }
 
+        // Add extra fields for native callers
+        if (Util::callerIsNative()) {
+            $transforms[] = [$this->timelineQuery, 'transformNativeQuery'];
+        }
+
         return $transforms;
     }
 

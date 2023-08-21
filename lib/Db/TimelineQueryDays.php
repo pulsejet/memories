@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCA\Memories\ClustersBackend;
-use OCA\Memories\Util;
+use OCA\Memories\Exif;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -221,11 +221,14 @@ trait TimelineQueryDays
         // All cluster transformations
         ClustersBackend\Manager::applyDayPostTransforms($this->request, $row);
 
-        // Remove datetaken unless native (for sorting)
-        if (Util::callerIsNative()) {
-            $row['datetaken'] = Util::sqlUtcToTimestamp($row['datetaken']);
-        } else {
-            unset($row['datetaken']);
+        // This field is only required due to the GROUP BY clause
+        unset($row['datetaken']);
+
+        // Calculate the AUID if we can
+        if (\array_key_exists('epoch', $row) && \array_key_exists('size', $row)
+           && ($epoch = (int) $row['epoch']) && ($size = (int) $row['size'])) {
+            // compute AUID and discard epoch and size
+            $row['auid'] = Exif::getAUID($epoch, $size);
         }
     }
 

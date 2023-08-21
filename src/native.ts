@@ -293,13 +293,15 @@ export async function extendDayWithLocal(dayId: number, photos: IPhoto[]) {
 
   // Merge local photos into remote photos
   const localPhotos: IPhoto[] = await res.json();
-  const photosSet = new Set(photos.map((p) => p.basename));
-  const localOnly = localPhotos.filter((p) => !photosSet.has(p.basename));
+  const serverAUIDs = new Set(photos.map((p) => p.auid));
+
+  // Filter out files that are only available locally
+  const localOnly = localPhotos.filter((p) => !serverAUIDs.has(p.auid));
   localOnly.forEach((p) => (p.islocal = true));
   photos.push(...localOnly);
 
-  // Sort by datetaken
-  photos.sort((a, b) => (b.datetaken ?? 0) - (a.datetaken ?? 0));
+  // Sort by epoch value
+  photos.sort((a, b) => (b.epoch ?? 0) - (a.epoch ?? 0));
 }
 
 /**

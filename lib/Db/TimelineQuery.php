@@ -15,11 +15,15 @@ class TimelineQuery
     use TimelineQueryFolders;
     use TimelineQueryLivePhoto;
     use TimelineQueryMap;
+    use TimelineQueryNativeX;
     use TimelineQuerySingleItem;
 
     public const TIMELINE_SELECT = [
-        'm.isvideo', 'm.video_duration', 'm.datetaken', 'm.dayid', 'm.w', 'm.h', 'm.liveid',
-        'f.etag', 'f.name AS basename', 'mimetypes.mimetype',
+        'm.datetaken', 'm.dayid',
+        'm.w', 'm.h', 'm.liveid',
+        'm.isvideo', 'm.video_duration',
+        'f.etag', 'f.name AS basename',
+        'mimetypes.mimetype',
     ];
 
     protected IDBConnection $connection;
