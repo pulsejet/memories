@@ -12,7 +12,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.exifinterface.media.ExifInterface
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import gallery.memories.R
 import gallery.memories.dao.AppDatabase
@@ -26,7 +25,6 @@ import java.io.IOException
 import java.time.Instant
 import java.util.concurrent.CountDownLatch
 
-@UnstableApi
 class TimelineQuery(private val mCtx: MainActivity) {
     private val TAG = TimelineQuery::class.java.simpleName
     private val mConfigService = ConfigService(mCtx)
@@ -78,7 +76,7 @@ class TimelineQuery(private val mCtx: MainActivity) {
     }
 
     private fun registerContentObserver(uri: Uri): ContentObserver {
-        val observer = @UnstableApi object : ContentObserver(null) {
+        val observer = object : ContentObserver(null) {
             override fun onChange(selfChange: Boolean) {
                 super.onChange(selfChange)
 

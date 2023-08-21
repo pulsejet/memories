@@ -5,7 +5,6 @@ import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import android.widget.Toast
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import gallery.memories.R
 import io.github.g00fy2.versioncompare.Version
@@ -17,7 +16,6 @@ import okhttp3.Response
 import org.json.JSONObject
 import java.net.SocketTimeoutException
 
-@UnstableApi
 class AccountService(private val mCtx: MainActivity) {
     companion object {
         val TAG = AccountService::class.java.simpleName

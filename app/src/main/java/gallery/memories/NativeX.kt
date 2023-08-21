@@ -7,7 +7,6 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.widget.Toast
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.mapper.SystemImage
 import gallery.memories.service.AccountService
 import gallery.memories.service.DownloadService
@@ -17,7 +16,7 @@ import org.json.JSONArray
 import java.io.ByteArrayInputStream
 import java.net.URLDecoder
 
-@UnstableApi class NativeX(private val mCtx: MainActivity) {
+class NativeX(private val mCtx: MainActivity) {
     val TAG = NativeX::class.java.simpleName
 
     private var themeStored = false
