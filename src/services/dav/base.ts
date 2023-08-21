@@ -154,6 +154,8 @@ async function getFilesInternal(fileIds: number[]): Promise<IFileInfo[]> {
  * @returns Generator of lists of results. Each list is of length n.
  */
 export async function* runInParallel<T>(promises: (() => Promise<T>)[], n: number) {
+  if (!promises.length) return;
+
   promises.reverse(); // reverse so we can use pop() efficiently
 
   const results: T[] = [];
