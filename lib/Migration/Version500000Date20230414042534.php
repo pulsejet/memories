@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 /**
- * @copyright Copyright (c) 2023 Your name <your@email.com>
- * @author Your name <your@email.com>
+ * @copyright Copyright (c) 2023 Varun Patil <radialapps@gmail.com>
+ * @author Varun Patil <radialapps@gmail.com>
  * @license GNU AGPL version 3 or any later version
  *
  * This program is free software: you can redistribute it and/or modify
