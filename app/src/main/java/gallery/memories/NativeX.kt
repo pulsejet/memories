@@ -28,6 +28,7 @@ import java.net.URLDecoder
     object API {
         val DAYS = Regex("^/api/days$")
         val DAY = Regex("^/api/days/\\d+$")
+
         val IMAGE_INFO = Regex("^/api/image/info/\\d+$")
         val IMAGE_DELETE = Regex("^/api/image/delete/\\d+(,\\d+)*$")
 
@@ -88,33 +89,9 @@ import java.net.URLDecoder
         return response
     }
 
-    @get:JavascriptInterface
-    val isNative: Boolean
-        get() = true
-
     @JavascriptInterface
-    fun toast(message: String) {
-        mCtx.runOnUiThread {
-            Toast.makeText(mCtx, message, Toast.LENGTH_LONG).show()
-        }
-    }
-
-    @JavascriptInterface
-    fun reload() {
-        mCtx.runOnUiThread {
-            mCtx.loadDefaultUrl()
-        }
-    }
-
-    @JavascriptInterface
-    fun login(baseUrl: String?, loginFlowUrl: String?) {
-        if (baseUrl == null || loginFlowUrl == null) return;
-        account.login(baseUrl, loginFlowUrl)
-    }
-
-    @JavascriptInterface
-    fun logout() {
-        account.loggedOut()
+    fun isNative(): Boolean {
+        return true
     }
 
     @JavascriptInterface
@@ -132,16 +109,24 @@ import java.net.URLDecoder
     }
 
     @JavascriptInterface
-    fun downloadFromUrl(url: String?, filename: String?) {
-        if (url == null || filename == null) return;
-        dlService!!.queue(url, filename)
-    }
-
-    @JavascriptInterface
     fun playTouchSound() {
         mCtx.runOnUiThread {
             mCtx.binding.webview.playSoundEffect(SoundEffectConstants.CLICK)
         }
+    }
+
+    @JavascriptInterface
+    fun toast(message: String, long: Boolean = false) {
+        mCtx.runOnUiThread {
+            val duration = if (long) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
+            Toast.makeText(mCtx, message, duration).show()
+        }
+    }
+
+    @JavascriptInterface
+    fun downloadFromUrl(url: String?, filename: String?) {
+        if (url == null || filename == null) return;
+        dlService!!.queue(url, filename)
     }
 
     @JavascriptInterface
@@ -188,31 +173,49 @@ import java.net.URLDecoder
         query.localFolders = JSONArray(json)
     }
 
+    @JavascriptInterface
+    fun login(baseUrl: String?, loginFlowUrl: String?) {
+        if (baseUrl == null || loginFlowUrl == null) return;
+        account.login(baseUrl, loginFlowUrl)
+    }
+
+    @JavascriptInterface
+    fun logout() {
+        account.loggedOut()
+    }
+
+    @JavascriptInterface
+    fun reload() {
+        mCtx.runOnUiThread {
+            mCtx.loadDefaultUrl()
+        }
+    }
+
     @Throws(Exception::class)
     private fun routerGet(path: String): WebResourceResponse {
         val parts = path.split("/").toTypedArray()
-        if (path.matches(API.IMAGE_PREVIEW)) {
-            return makeResponse(image.getPreview(parts[3].toLong()), "image/jpeg")
-        } else if (path.matches(API.IMAGE_FULL)) {
-            return makeResponse(image.getFull(parts[3].toLong()), "image/jpeg")
-        } else if (path.matches(API.IMAGE_INFO)) {
-            return makeResponse(query.getImageInfo(parts[4].toLong()))
-        } else if (path.matches(API.IMAGE_DELETE)) {
-            return makeResponse(query.delete(parseIds(parts[4])))
-        } else if (path.matches(API.DAYS)) {
-            return makeResponse(query.getDays())
+        return if (path.matches(API.DAYS)) {
+            makeResponse(query.getDays())
         } else if (path.matches(API.DAY)) {
-            return makeResponse(query.getByDayId(parts[3].toLong()))
+            makeResponse(query.getByDayId(parts[3].toLong()))
+        } else if (path.matches(API.IMAGE_INFO)) {
+            makeResponse(query.getImageInfo(parts[4].toLong()))
+        } else if (path.matches(API.IMAGE_DELETE)) {
+            makeResponse(query.delete(parseIds(parts[4])))
+        } else if (path.matches(API.IMAGE_PREVIEW)) {
+            makeResponse(image.getPreview(parts[3].toLong()), "image/jpeg")
+        } else if (path.matches(API.IMAGE_FULL)) {
+            makeResponse(image.getFull(parts[3].toLong()), "image/jpeg")
         } else if (path.matches(API.SHARE_URL)) {
-            return makeResponse(dlService!!.shareUrl(URLDecoder.decode(parts[4], "UTF-8")))
+            makeResponse(dlService!!.shareUrl(URLDecoder.decode(parts[4], "UTF-8")))
         } else if (path.matches(API.SHARE_BLOB)) {
-            return makeResponse(dlService!!.shareBlobFromUrl(URLDecoder.decode(parts[4], "UTF-8")))
+            makeResponse(dlService!!.shareBlobFromUrl(URLDecoder.decode(parts[4], "UTF-8")))
         } else if (path.matches(API.SHARE_LOCAL)) {
-            return makeResponse(dlService!!.shareLocal(parts[4].toLong()))
+            makeResponse(dlService!!.shareLocal(parts[4].toLong()))
         } else if (path.matches(API.CONFIG_LOCAL_FOLDES)) {
-            return makeResponse(query.localFolders)
+            makeResponse(query.localFolders)
         } else {
-            throw Exception("Not Found")
+            throw Exception("Path did not match any known API route: $path")
         }
     }
 
@@ -233,6 +236,6 @@ import java.net.URLDecoder
     }
 
     private fun parseIds(ids: String): List<Long> {
-        return ids.split(",").map { it.toLong() }
+        return ids.trim().split(",").map { it.toLong() }
     }
 }
