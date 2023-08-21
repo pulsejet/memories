@@ -109,18 +109,14 @@ import java.util.concurrent.CountDownLatch
         // Filter for enabled buckets
         val enabledBuckets = getEnabledBucketIds().joinToString(",")
 
-        // Get list of images from DB
+        // Get list of image IDs from DB
         val imageIds: MutableSet<Long> = ArraySet()
-        val datesTaken: MutableMap<Long, Long> = HashMap()
         mDb.rawQuery("""
-            SELECT local_id, date_taken FROM images
-            WHERE dayid = ?
-                AND bucket_id IN ($enabledBuckets)
+            SELECT local_id FROM images
+            WHERE dayid = ? AND bucket_id IN ($enabledBuckets)
         """, arrayOf(dayId.toString())).use { cursor ->
             while (cursor.moveToNext()) {
-                val localId = cursor.getLong(0)
-                datesTaken[localId] = cursor.getLong(1)
-                imageIds.add(localId)
+                imageIds.add(cursor.getLong(0))
             }
         }
 
@@ -138,7 +134,8 @@ import java.util.concurrent.CountDownLatch
                 .put(Fields.Photo.WIDTH, image.width)
                 .put(Fields.Photo.SIZE, image.size)
                 .put(Fields.Photo.ETAG, image.mtime.toString())
-                .put(Fields.Photo.DATETAKEN, datesTaken[image.fileId])
+                .put(Fields.Photo.EPOCH, image.epoch)
+                .put(Fields.Photo.AUID, image.auid)
                 .put(Fields.Photo.DAYID, dayId)
 
             if (image.isVideo) {
@@ -352,8 +349,7 @@ import java.util.concurrent.CountDownLatch
             }
         }
 
-        val auid = image.auid
-        val dateTaken = image.utcDate / 1000
+        val dateTaken = image.utcDate
         val dayId = dateTaken / 86400
 
         // Delete file with same local_id and insert new one
@@ -361,21 +357,21 @@ import java.util.concurrent.CountDownLatch
         mDb.execSQL("DELETE FROM images WHERE local_id = ?", arrayOf(fileId))
         mDb.execSQL("""
             INSERT OR IGNORE INTO images
-            (local_id, mtime, basename, auid, date_taken, dayid, bucket_id, bucket_name)
+            (local_id, mtime, date_taken, dayid, auid, basename, bucket_id, bucket_name)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, arrayOf(
             image.fileId,
             image.mtime,
-            image.baseName,
-            auid,
             dateTaken,
             dayId,
+            image.auid,
+            image.baseName,
             image.bucketId,
             image.bucketName
         ))
         mDb.setTransactionSuccessful()
         mDb.endTransaction()
-        Log.v(TAG, "Inserted file to local DB: $fileId / $baseName / $dayId / $auid")
+        Log.v(TAG, "Inserted file to local DB: $fileId / $baseName / $dayId")
     }
 
     fun getEnabledBucketIds(): Set<String> {

@@ -136,6 +136,10 @@ class SystemImage {
         }
     }
 
+    val epoch get(): Long {
+        return dateTaken / 1000
+    }
+
     val utcDate get(): Long {
         // Get EXIF date using ExifInterface if image
         if (!isVideo) {
@@ -146,7 +150,7 @@ class SystemImage {
                 val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
                 sdf.timeZone = TimeZone.GMT_ZONE
                 sdf.parse(exifDate).let {
-                    return it.time
+                    return it.time / 1000
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to read EXIF data: " + e.message)
@@ -154,17 +158,14 @@ class SystemImage {
         }
 
         // No way to get the actual local date, so just assume current timezone
-        return dateTaken + TimeZone.getDefault().getOffset(dateTaken).toLong()
+        return (dateTaken + TimeZone.getDefault().getOffset(dateTaken).toLong()) / 1000
     }
 
     val auid get(): Long {
         val crc = java.util.zip.CRC32()
 
-        // get date in seconds
-        val date = dateTaken / 1000
-
         // pass date taken + size as decimal string
-        crc.update((date.toString() + size.toString()).toByteArray())
+        crc.update((epoch.toString() + size.toString()).toByteArray())
 
         return crc.value
     }

@@ -15,6 +15,8 @@ class Fields {
         const val SIZE = "size"
         const val ETAG = "etag"
         const val DATETAKEN = "datetaken"
+        const val EPOCH = "epoch"
+        const val AUID = "auid"
         const val DAYID = "dayid"
         const val ISVIDEO = "isvideo"
         const val VIDEO_DURATION = "video_duration"
