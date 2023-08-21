@@ -36,6 +36,7 @@ export const API = {
    * @regex ^/api/image/delete/\d+(,\d+)*$
    * @param fileIds Comma-separated list of file IDs to delete
    * @returns {void}
+   * @throws Return an error code if the user denies the deletion.
    */
   IMAGE_DELETE: (fileIds: number[]) => `${BASE_URL}/api/image/delete/${fileIds.join(',')}`,
 
@@ -307,19 +308,16 @@ export async function extendDayWithLocal(dayId: number, photos: IPhoto[]) {
 /**
  * Request deletion of local photos wherever available.
  * @param photos List of photos to delete
- * @returns List of photos that were deleted
  * @throws If the request fails
  */
-export async function deleteLocalPhotos(photos: IPhoto[]): Promise<IPhoto[]> {
-  if (!has()) return [];
+export async function deleteLocalPhotos(photos: IPhoto[]): Promise<void> {
+  if (!has()) return;
 
   const localPhotos = photos.filter((p) => p.flag & constants.c.FLAG_IS_LOCAL);
   if (localPhotos.length > 0) {
     const fileids = localPhotos.map((p) => p.fileid);
     await axios.get(API.IMAGE_DELETE(fileids));
   }
-
-  return localPhotos;
 }
 
 /**

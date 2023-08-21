@@ -236,17 +236,21 @@ export async function* deletePhotos(photos: IPhoto[]) {
   }
 
   // Get set of unique file ids
-  let fileIdsSet = new Set(photos.map((p) => p.fileid));
+  let fileIds = new Set(photos.map((p) => p.fileid));
 
-  // Get files data
-  const fileInfos = (await getFiles(photos)).filter((f) => fileIdsSet.has(f.fileid));
+  // Get files data. The double filter ensures we never delete something accidentally.
+  const fileInfos = (await getFiles(photos)).filter((f) => fileIds.has(f.fileid));
 
   // Take intersection of fileIds and fileInfos
-  fileIdsSet = new Set(fileInfos.map((f) => f.fileid));
+  fileIds = new Set(fileInfos.map((f) => f.fileid));
 
   // Check for local photos
   if (nativex.has()) {
-    const deleted = (await nativex.deleteLocalPhotos(photos)).filter((f) => !fileIdsSet.has(f.fileid));
+    // Delete local files. This will throw if user cancels.
+    await nativex.deleteLocalPhotos(photos);
+
+    // Remove purely local files
+    const deleted = photos.filter((p) => p.flag & utils.constants.c.FLAG_IS_LOCAL);
 
     // Yield for the fully local files
     if (deleted.length > 0) {
