@@ -21,7 +21,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
-import androidx.media3.common.util.Util
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
@@ -29,6 +29,7 @@ import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import gallery.memories.databinding.ActivityMainBinding
 
+@UnstableApi
 class MainActivity : AppCompatActivity() {
     companion object {
         val TAG = MainActivity::class.java.simpleName
@@ -85,7 +86,7 @@ class MainActivity : AppCompatActivity() {
 
     public override fun onResume() {
         super.onResume()
-        if (playerUris != null && (Util.SDK_INT <= 23 || player == null)) {
+        if (playerUris != null && player == null) {
             initializePlayer(playerUris!!, playerUid!!)
         }
         if (mNeedRefresh) {
@@ -95,16 +96,11 @@ class MainActivity : AppCompatActivity() {
 
     public override fun onPause() {
         super.onPause()
-        if (Util.SDK_INT <= 23) {
-            releasePlayer()
-        }
     }
 
     public override fun onStop() {
         super.onStop()
-        if (Util.SDK_INT > 23) {
-            releasePlayer()
-        }
+        releasePlayer()
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
