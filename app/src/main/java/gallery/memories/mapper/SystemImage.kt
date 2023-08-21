@@ -190,4 +190,19 @@ class SystemImage {
 
         return crc.value
     }
+
+    val photo get(): Photo {
+        val dateCache = utcDate
+        return Photo(
+            localId = fileId,
+            auid = auid,
+            mtime = mtime,
+            dateTaken = dateCache,
+            dayId = dateCache / 86400,
+            baseName = baseName,
+            bucketId = bucketId,
+            bucketName = bucketName,
+            flag = 0,
+        )
+    }
 }

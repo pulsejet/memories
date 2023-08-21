@@ -5,20 +5,21 @@ import gallery.memories.R
 
 class ConfigService(private val mCtx: Context) {
     companion object {
-        private var mEnabledBuckets: Set<String>? = null
+        private var mEnabledBuckets: List<String>? = null
     }
 
-    var enabledBucketIds: Set<String>
+    var enabledBucketIds: List<String>
         get() {
             if (mEnabledBuckets != null) return mEnabledBuckets!!
             mEnabledBuckets = mCtx.getSharedPreferences(mCtx.getString(R.string.preferences_key), 0)
-                .getStringSet(mCtx.getString(R.string.preferences_enabled_local_folders), null) ?: setOf()
+                .getStringSet(mCtx.getString(R.string.preferences_enabled_local_folders), null)?.toList()
+            ?: listOf()
             return mEnabledBuckets!!
         }
         set(value) {
             mEnabledBuckets = value
             mCtx.getSharedPreferences(mCtx.getString(R.string.preferences_key), 0).edit()
-                .putStringSet(mCtx.getString(R.string.preferences_enabled_local_folders), value)
+                .putStringSet(mCtx.getString(R.string.preferences_enabled_local_folders), value.toSet())
                 .apply()
         }
 }

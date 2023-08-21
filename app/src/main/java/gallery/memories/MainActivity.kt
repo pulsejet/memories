@@ -386,7 +386,7 @@ import gallery.memories.databinding.ActivityMainBinding
     fun refreshTimeline(force: Boolean = false) {
         runOnUiThread {
             // Check webview is loaded
-            if (binding?.webview?.url == null) return@runOnUiThread
+            if (binding.webview.url == null) return@runOnUiThread
 
             // Schedule for resume if not active
             if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) || force) {

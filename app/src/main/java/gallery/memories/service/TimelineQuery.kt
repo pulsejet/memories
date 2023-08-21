@@ -15,6 +15,7 @@ import androidx.exifinterface.media.ExifInterface
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import gallery.memories.R
+import gallery.memories.dao.AppDatabase
 import gallery.memories.mapper.Fields
 import gallery.memories.mapper.Response
 import gallery.memories.mapper.SystemImage
@@ -26,9 +27,12 @@ import java.time.Instant
 import java.util.concurrent.CountDownLatch
 
 @UnstableApi class TimelineQuery(private val mCtx: MainActivity) {
-    private val mDbService = DbService(mCtx).initialize()
-    private val mConfigService = ConfigService(mCtx)
     private val TAG = TimelineQuery::class.java.simpleName
+    private val mConfigService = ConfigService(mCtx)
+
+    // Database
+    private val mDb = AppDatabase.get(mCtx)
+    private val mPhotoDao = mDb.photoDao()
 
     // Photo deletion events
     var deleting = false
@@ -50,6 +54,7 @@ import java.util.concurrent.CountDownLatch
     }
 
     fun initialize() {
+        mPhotoDao.ping()
         if (syncDeltaDb() > 0) {
             mCtx.refreshTimeline()
         }
@@ -103,8 +108,8 @@ import java.util.concurrent.CountDownLatch
     @Throws(JSONException::class)
     fun getByDayId(dayId: Long): JSONArray {
         // Get the photos for the day from DB
-        val dbPhotos = mDbService.getPhotosByDay(dayId, mConfigService.enabledBucketIds)
-        val fileIds = dbPhotos.map { it.localId }.toMutableList()
+        val fileIds = mPhotoDao.getPhotosByDay(dayId, mConfigService.enabledBucketIds)
+            .map { it.localId }.toMutableList()
         if (fileIds.isEmpty()) return JSONArray()
 
         // Get latest metadata from system table
@@ -117,19 +122,23 @@ import java.util.concurrent.CountDownLatch
         }.let { JSONArray(it) }
 
         // Remove files that were not found
-        mDbService.deleteFileIds(fileIds)
+        mPhotoDao.deleteFileIds(fileIds)
 
         return photos
     }
 
     @Throws(JSONException::class)
     fun getDays(): JSONArray {
-        return mDbService.getDays(mConfigService.enabledBucketIds).map { day -> day.json }.let { JSONArray(it) }
+        return mPhotoDao.getDays(mConfigService.enabledBucketIds).map {
+            JSONObject()
+                .put(Fields.Day.DAYID, it.dayId)
+                .put(Fields.Day.COUNT, it.count)
+        }.let { JSONArray(it) }
     }
 
     @Throws(Exception::class)
     fun getImageInfo(id: Long): JSONObject {
-        val photos = mDbService.getPhotosByFileIds(listOf(id))
+        val photos = mPhotoDao.getPhotosByFileIds(listOf(id))
         if (photos.isEmpty()) throw Exception("File not found in database")
 
         // Get image from system table
@@ -172,7 +181,7 @@ import java.util.concurrent.CountDownLatch
 
         try {
             // Get list of file IDs
-            val photos = mDbService.getPhotosByAUIDs(auids)
+            val photos = mPhotoDao.getPhotosByAUIDs(auids)
             if (photos.isEmpty()) return Response.OK
             val fileIds = photos.map { it.localId }
 
@@ -206,7 +215,7 @@ import java.util.concurrent.CountDownLatch
             }
 
             // Delete from database
-            mDbService.deleteFileIds(fileIds)
+            mPhotoDao.deleteFileIds(fileIds)
         } finally {
             synchronized(this) { deleting = false }
         }
@@ -252,13 +261,13 @@ import java.util.concurrent.CountDownLatch
 
     fun syncFullDb() {
         // Flag all images for removal
-        mDbService.flagAll()
+        mPhotoDao.flagAll()
 
         // Sync all files, marking them in the process
         syncDb(0L)
 
         // Clean up stale files
-        mDbService.deleteFlagged()
+        mPhotoDao.deleteFlagged()
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -267,38 +276,38 @@ import java.util.concurrent.CountDownLatch
         val baseName = image.baseName
 
         // Check if file with local_id and mtime already exists
-        val l = mDbService.getPhotosByFileIds(listOf(fileId))
+        val l = mPhotoDao.getPhotosByFileIds(listOf(fileId))
         if (!l.isEmpty() && l[0].mtime == image.mtime) {
             // File already exists, remove flag
-            mDbService.unflag(fileId)
+            mPhotoDao.unflag(fileId)
             Log.v(TAG, "File already exists: $fileId / $baseName")
             return
         }
 
         // Delete file with same local_id and insert new one
-        mDbService.deleteFileIds(listOf(fileId))
-        mDbService.insertImage(image)
+        mPhotoDao.deleteFileIds(listOf(fileId))
+        mPhotoDao.insert(image.photo)
         Log.v(TAG, "Inserted file to local DB: $fileId / $baseName")
     }
 
     /** This is in timeline query because it calls the database service */
     var localFolders: JSONArray
         get() {
-            return mDbService.getBuckets().map {
+            return mPhotoDao.getBuckets().map {
                 JSONObject()
-                    .put(Fields.Bucket.ID, it.key)
-                    .put(Fields.Bucket.NAME, it.value)
-                    .put(Fields.Bucket.ENABLED, mConfigService.enabledBucketIds.contains(it.key))
+                    .put(Fields.Bucket.ID, it.id)
+                    .put(Fields.Bucket.NAME, it.name)
+                    .put(Fields.Bucket.ENABLED, mConfigService.enabledBucketIds.contains(it.id))
             }.let { JSONArray(it) }
         }
         set(value) {
-            val enabledSet = mutableSetOf<String>()
+            val enabled = mutableListOf<String>()
             for (i in 0 until value.length()) {
                 val obj = value.getJSONObject(i)
                 if (obj.getBoolean(Fields.Bucket.ENABLED)) {
-                    enabledSet.add(obj.getString(Fields.Bucket.ID))
+                    enabled.add(obj.getString(Fields.Bucket.ID))
                 }
             }
-            mConfigService.enabledBucketIds = enabledSet
+            mConfigService.enabledBucketIds = enabled
         }
 }

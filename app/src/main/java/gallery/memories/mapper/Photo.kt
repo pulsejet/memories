@@ -1,80 +1,19 @@
 package gallery.memories.mapper
 
-import android.database.Cursor
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-class Photo {
-    val id: Long
-    val localId: Long
-    val auid: Long
-    val mtime: Long
-    val dateTaken: Long
-    val dayId: Long
-    val basename: String
-    val bucketId: Long
-    val bucketName: String
-    val flag: Int
-
-    companion object {
-        val FIELD_ID = "id"
-        val FIELD_LOCAL_ID = "local_id"
-        val FIELD_AUID = "auid"
-        val FIELD_MTIME = "mtime"
-        val FIELD_DATE_TAKEN = "date_taken"
-        val FIELD_DAY_ID = "dayid"
-        val FIELD_BASENAME = "basename"
-        val FIELD_BUCKET_ID = "bucket_id"
-        val FIELD_BUCKET_NAME = "bucket_name"
-        val FIELD_FLAG = "flag"
-
-        val FIELDS get(): Array<String> {
-            return arrayOf(
-                FIELD_ID,
-                FIELD_LOCAL_ID,
-                FIELD_AUID,
-                FIELD_MTIME,
-                FIELD_DATE_TAKEN,
-                FIELD_DAY_ID,
-                FIELD_BASENAME,
-                FIELD_BUCKET_ID,
-                FIELD_BUCKET_NAME,
-                FIELD_FLAG
-            )
-        }
-
-        val FIELDS_CREATE get(): String {
-            return """
-                $FIELD_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                $FIELD_LOCAL_ID INTEGER,
-                $FIELD_AUID INTEGER,
-                $FIELD_MTIME INTEGER,
-                $FIELD_DATE_TAKEN INTEGER,
-                $FIELD_DAY_ID INTEGER,
-                $FIELD_BASENAME TEXT,
-                $FIELD_BUCKET_ID INTEGER,
-                $FIELD_BUCKET_NAME TEXT,
-                $FIELD_FLAG INTEGER
-            """.trimIndent()
-        }
-
-        fun unpack(cursor: Cursor): List<Photo> {
-            val photos = mutableListOf<Photo>()
-            while (cursor.moveToNext()) {
-                photos.add(Photo(cursor))
-            }
-            return photos
-        }
-    }
-
-    constructor(cursor: Cursor) {
-        id = cursor.getLong(0)
-        localId = cursor.getLong(1)
-        auid = cursor.getLong(2)
-        mtime = cursor.getLong(3)
-        dateTaken = cursor.getLong(4)
-        dayId = cursor.getLong(5)
-        basename = cursor.getString(6)
-        bucketId = cursor.getLong(7)
-        bucketName = cursor.getString(8)
-        flag = cursor.getInt(9)
-    }
-}
+@Entity(tableName="photos")
+data class Photo (
+    @PrimaryKey(autoGenerate = true) val id: Int? = null,
+    @ColumnInfo(name="local_id") val localId: Long,
+    @ColumnInfo(name="auid") val auid: Long,
+    @ColumnInfo(name="mtime") val mtime: Long,
+    @ColumnInfo(name="date_taken") val dateTaken: Long,
+    @ColumnInfo(name="dayid") val dayId: Long,
+    @ColumnInfo(name="basename") val baseName: String,
+    @ColumnInfo(name="bucket_id") val bucketId: Long,
+    @ColumnInfo(name="bucket_name") val bucketName: String,
+    @ColumnInfo(name="flag") val flag: Int
+)
