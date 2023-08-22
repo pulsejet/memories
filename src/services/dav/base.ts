@@ -4,10 +4,10 @@ import { translate as t } from '@nextcloud/l10n';
 import axios from '@nextcloud/axios';
 
 import { IFileInfo, IPhoto } from '../../types';
-import { genFileInfo } from '../FileUtils';
+import { genFileInfo } from '../file-utils';
 import { API } from '../API';
 import { getAlbumFileInfos } from './albums';
-import client from '../DavClient';
+import client from './client';
 import * as utils from '../utils';
 import * as nativex from '../../native';
 

@@ -4,7 +4,7 @@ import { translate as t } from '@nextcloud/l10n';
 import { generateUrl } from '@nextcloud/router';
 import { IFace, IPhoto } from '../../types';
 import { API } from '../API';
-import client from '../DavClient';
+import client from './client';
 import * as utils from '../utils';
 import * as base from './base';
 

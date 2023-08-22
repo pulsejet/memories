@@ -29,7 +29,7 @@ import Cluster from '../frame/Cluster.vue';
 import FaceList from './FaceList.vue';
 
 import Modal from './Modal.vue';
-import * as dav from '../../services/DavRequests';
+import * as dav from '../../services/dav';
 import * as utils from '../../services/utils';
 
 export default defineComponent({

@@ -24,7 +24,7 @@ const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 import { showError } from '@nextcloud/dialogs';
 import { getCurrentUser } from '@nextcloud/auth';
 import Modal from './Modal.vue';
-import client from '../../services/DavClient';
+import client from '../../services/dav/client';
 
 export default defineComponent({
   name: 'AlbumDeleteModal',

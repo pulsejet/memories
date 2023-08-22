@@ -17,7 +17,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import * as dav from '../../services/DavRequests';
+import * as dav from '../../services/dav';
 
 import { showInfo } from '@nextcloud/dialogs';
 import { emit } from '@nextcloud/event-bus';

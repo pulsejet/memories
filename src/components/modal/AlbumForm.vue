@@ -95,7 +95,7 @@ import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
 import { DateTime } from 'luxon';
-import * as dav from '../../services/DavRequests';
+import * as dav from '../../services/dav';
 
 import AlbumCollaborators from './AlbumCollaborators.vue';
 

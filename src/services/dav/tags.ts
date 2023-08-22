@@ -1,6 +1,6 @@
 import { ICluster } from '../../types';
 import { API } from '../API';
-import client from '../DavClient';
+import client from './client';
 
 import { translate as t } from '@nextcloud/l10n';
 import axios from '@nextcloud/axios';

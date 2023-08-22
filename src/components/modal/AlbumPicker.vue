@@ -82,7 +82,7 @@ import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
-import * as dav from '../../services/DavRequests';
+import * as dav from '../../services/dav';
 import { IAlbum, IPhoto } from '../../types';
 
 import Fuse from 'fuse.js';

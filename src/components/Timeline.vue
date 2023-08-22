@@ -95,7 +95,7 @@ import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 
-import { getLayout } from '../services/Layout';
+import { getLayout } from '../services/layout';
 import { IDay, IHeadRow, IPhoto, IRow, IRowType } from '../types';
 
 import UserConfig from '../mixins/UserConfig';
@@ -109,7 +109,7 @@ import EmptyContent from './top-matter/EmptyContent.vue';
 import TopMatter from './top-matter/TopMatter.vue';
 import DynamicTopMatter from './top-matter/DynamicTopMatter.vue';
 
-import * as dav from '../services/DavRequests';
+import * as dav from '../services/dav';
 import * as utils from '../services/utils';
 import * as nativex from '../native';
 

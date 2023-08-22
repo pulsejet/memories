@@ -5,7 +5,7 @@ import { translate as t } from '@nextcloud/l10n';
 import { IAlbum, IFileInfo, IPhoto } from '../../types';
 import { API } from '../API';
 import axios from '@nextcloud/axios';
-import client from '../DavClient';
+import client from './client';
 
 /**
  * Get DAV path for album

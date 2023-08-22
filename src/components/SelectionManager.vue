@@ -52,7 +52,7 @@ import { translate as t, translatePlural as n } from '@nextcloud/l10n';
 import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 import { getCurrentUser } from '@nextcloud/auth';
 
-import * as dav from '../services/DavRequests';
+import * as dav from '../services/dav';
 import * as utils from '../services/utils';
 import * as nativex from '../native';
 

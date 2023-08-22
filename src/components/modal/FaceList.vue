@@ -34,7 +34,7 @@ import ClusterGrid from '../ClusterGrid.vue';
 import { showError } from '@nextcloud/dialogs';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
-import * as dav from '../../services/DavRequests';
+import * as dav from '../../services/dav';
 import Fuse from 'fuse.js';
 
 import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';

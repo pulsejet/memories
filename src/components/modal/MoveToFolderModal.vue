@@ -16,7 +16,7 @@ import { defineComponent } from 'vue';
 import { FilePickerType } from '@nextcloud/dialogs';
 import { showInfo } from '@nextcloud/dialogs';
 
-import * as dav from '../../services/DavRequests';
+import * as dav from '../../services/dav';
 import * as utils from '../../services/utils';
 
 import type { IPhoto } from '../../types';

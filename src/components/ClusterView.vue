@@ -28,7 +28,7 @@ import Timeline from './Timeline.vue';
 import EmptyContent from './top-matter/EmptyContent.vue';
 import DynamicTopMatter from './top-matter/DynamicTopMatter.vue';
 
-import * as dav from '../services/DavRequests';
+import * as dav from '../services/dav';
 
 import type { ICluster } from '../types';
 

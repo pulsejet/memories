@@ -19,7 +19,7 @@
 import { defineComponent } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
-import * as dav from '../../services/DavRequests';
+import * as dav from '../../services/dav';
 
 import Modal from './Modal.vue';
 import AlbumForm from './AlbumForm.vue';

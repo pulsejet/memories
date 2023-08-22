@@ -66,7 +66,7 @@ import { showError } from '@nextcloud/dialogs';
 import { emit } from '@nextcloud/event-bus';
 import axios from '@nextcloud/axios';
 
-import * as dav from '../../services/DavRequests';
+import * as dav from '../../services/dav';
 import { API } from '../../services/API';
 
 export default defineComponent({

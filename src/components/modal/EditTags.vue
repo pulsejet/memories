@@ -17,7 +17,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { IPhoto } from '../../types';
-import * as dav from '../../services/DavRequests';
+import * as dav from '../../services/dav';
 
 const NcSelectTags = () => import('@nextcloud/vue/dist/Components/NcSelectTags');
 

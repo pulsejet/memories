@@ -79,7 +79,7 @@ import UserConfig from '../../mixins/UserConfig';
 
 import { IPhoto } from '../../types';
 import { API } from '../../services/API';
-import * as dav from '../../services/DavRequests';
+import * as dav from '../../services/dav';
 import * as utils from '../../services/utils';
 import * as nativex from '../../native';
 
