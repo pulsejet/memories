@@ -339,11 +339,23 @@ class ImageController extends GenericApiController
             $image = new \Imagick();
             $image->readImageBlob($file->getContent());
 
+            // Due to a bug in filerobot, the provided width and height may be swapped
+            // 1. If the user does not rotate the image, we're fine
+            // 2. If image is rotated and user doesn't change the save resolution,
+            //    the wxh corresponds to the original image, not the rotated one
+            // 3. If image is rotated and user changes the save resolution,
+            //    the wxh corresponds to the rotated image.
+            $iw = $image->getImageWidth();
+            $ih = $image->getImageHeight();
+            $shouldResize = $width !== $iw || $height !== $ih;
+
             // Apply the edits
             (new Service\FileRobotMagick($image, $state))->apply();
 
             // Resize the image
-            if ($width > 0 && $height > 0 && ($width !== $image->getImageWidth() || $height !== $image->getImageHeight())) {
+            $iw = $image->getImageWidth();
+            $ih = $image->getImageHeight();
+            if ($shouldResize && $width && $height && ($iw !== $width || $ih !== $height)) {
                 $image->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1, true);
             }
 
