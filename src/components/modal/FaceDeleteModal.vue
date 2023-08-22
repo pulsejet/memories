@@ -23,7 +23,6 @@ const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 import { showError } from '@nextcloud/dialogs';
 import { getCurrentUser } from '@nextcloud/auth';
 import Modal from './Modal.vue';
-import client from '../../services/DavClient';
 import * as dav from '../../services/DavRequests';
 
 export default defineComponent({
