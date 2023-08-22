@@ -29,7 +29,7 @@
 import { defineComponent } from 'vue';
 import Cluster from './frame/Cluster.vue';
 import type { ICluster } from '../types';
-import * as utils from '../services/Utils';
+import * as utils from '../services/utils';
 
 export default defineComponent({
   name: 'ClusterGrid',

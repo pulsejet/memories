@@ -121,7 +121,7 @@ import SortIcon from 'vue-material-design-icons/SortVariant.vue';
 import SlotAlphabeticalIcon from 'vue-material-design-icons/SortAlphabeticalAscending.vue';
 import SortDateIcon from 'vue-material-design-icons/SortCalendarDescending.vue';
 import { API } from '../../services/API';
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 
 export default defineComponent({
   name: 'AlbumTopMatter',

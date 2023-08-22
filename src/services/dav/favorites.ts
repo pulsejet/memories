@@ -3,7 +3,7 @@ import { translate as t } from '@nextcloud/l10n';
 import { IFileInfo, IPhoto } from '../../types';
 import client from '../DavClient';
 import * as base from './base';
-import * as utils from '../Utils';
+import * as utils from '../utils';
 
 /**
  * Favorite a file

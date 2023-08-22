@@ -27,7 +27,7 @@ import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 
 import { API } from '../../services/API';
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 import staticConfig from '../../services/static-config';
 
 import Help from './sections/Help.vue';

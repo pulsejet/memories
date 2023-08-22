@@ -44,7 +44,7 @@ import axios from '@nextcloud/axios';
 import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 
 import { API } from '../../services/API';
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-edgebuffer';

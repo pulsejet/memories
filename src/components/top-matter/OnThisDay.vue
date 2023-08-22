@@ -35,7 +35,7 @@ import { defineComponent } from 'vue';
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 import * as dav from '../../services/DavRequests';
 import { IPhoto } from '../../types';
 

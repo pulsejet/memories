@@ -66,7 +66,7 @@
 import { defineComponent, PropType } from 'vue';
 
 import { IDay, IPhoto } from '../../types';
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 
 import errorsvg from '../../assets/error.svg';
 import CheckCircleIcon from 'vue-material-design-icons/CheckCircle.vue';

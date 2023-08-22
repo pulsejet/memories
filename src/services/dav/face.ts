@@ -5,7 +5,7 @@ import { generateUrl } from '@nextcloud/router';
 import { IFace, IPhoto } from '../../types';
 import { API } from '../API';
 import client from '../DavClient';
-import * as utils from '../Utils';
+import * as utils from '../utils';
 import * as base from './base';
 
 /**

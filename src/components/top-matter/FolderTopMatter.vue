@@ -41,7 +41,7 @@ const NcBreadcrumb = () => import('@nextcloud/vue/dist/Components/NcBreadcrumb')
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 
 import HomeIcon from 'vue-material-design-icons/Home.vue';
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';

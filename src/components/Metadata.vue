@@ -83,8 +83,7 @@ import InfoIcon from 'vue-material-design-icons/InformationOutline.vue';
 import LocationIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagIcon from 'vue-material-design-icons/Tag.vue';
 
-import * as utils from '../services/Utils';
-import * as dav from '../services/DavRequests';
+import * as utils from '../services/utils';
 import { API } from '../services/API';
 
 import type { IAlbum, IFace, IImageInfo, IPhoto } from '../types';

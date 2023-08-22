@@ -110,7 +110,7 @@ import TopMatter from './top-matter/TopMatter.vue';
 import DynamicTopMatter from './top-matter/DynamicTopMatter.vue';
 
 import * as dav from '../services/DavRequests';
-import * as utils from '../services/Utils';
+import * as utils from '../services/utils';
 import * as nativex from '../native';
 
 import { API, DaysFilterType } from '../services/API';

@@ -33,7 +33,7 @@ import { defineComponent } from 'vue';
 
 import Modal from './Modal.vue';
 
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';

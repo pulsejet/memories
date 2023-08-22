@@ -8,7 +8,7 @@ import { genFileInfo } from '../FileUtils';
 import { API } from '../API';
 import { getAlbumFileInfos } from './albums';
 import client from '../DavClient';
-import * as utils from '../Utils';
+import * as utils from '../utils';
 import * as nativex from '../../native';
 
 export const props = `

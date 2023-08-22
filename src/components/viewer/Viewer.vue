@@ -186,7 +186,7 @@ import axios from '@nextcloud/axios';
 import { getDownloadLink } from '../../services/DavRequests';
 import { API } from '../../services/API';
 import * as dav from '../../services/DavRequests';
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 import * as nativex from '../../native';
 
 import ImageEditor from './ImageEditor.vue';

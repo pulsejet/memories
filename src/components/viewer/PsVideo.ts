@@ -1,7 +1,7 @@
 import PhotoSwipe from 'photoswipe';
 import staticConfig from '../../services/static-config';
 import * as nativex from '../../native';
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 
 import { showError } from '@nextcloud/dialogs';
 import { translate as t } from '@nextcloud/l10n';

@@ -53,7 +53,7 @@ import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 import { getCurrentUser } from '@nextcloud/auth';
 
 import * as dav from '../services/DavRequests';
-import * as utils from '../services/Utils';
+import * as utils from '../services/utils';
 import * as nativex from '../native';
 
 import FaceMoveModal from './modal/FaceMoveModal.vue';

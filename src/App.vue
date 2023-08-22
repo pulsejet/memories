@@ -73,7 +73,7 @@ import { generateUrl } from '@nextcloud/router';
 import { translate as t } from '@nextcloud/l10n';
 import { emit, subscribe } from '@nextcloud/event-bus';
 
-import * as utils from './services/Utils';
+import * as utils from './services/utils';
 import * as nativex from './native';
 import router from './router';
 import staticConfig from './services/static-config';

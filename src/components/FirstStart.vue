@@ -57,7 +57,7 @@ import axios from '@nextcloud/axios';
 import banner from '../assets/banner.svg';
 import type { IDay } from '../types';
 import { API } from '../services/API';
-import * as utils from '../services/Utils';
+import * as utils from '../services/utils';
 
 export default defineComponent({
   name: 'FirstStart',

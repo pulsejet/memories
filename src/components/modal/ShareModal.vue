@@ -80,7 +80,7 @@ import UserConfig from '../../mixins/UserConfig';
 import { IPhoto } from '../../types';
 import { API } from '../../services/API';
 import * as dav from '../../services/DavRequests';
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 import * as nativex from '../../native';
 
 import PhotoIcon from 'vue-material-design-icons/Image.vue';

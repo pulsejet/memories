@@ -1,5 +1,4 @@
 import axios from '@nextcloud/axios';
-import { constants } from './services/Utils';
 import { generateUrl } from '@nextcloud/router';
 import type { IDay, IPhoto, IImageInfo } from './types';
 const euc = encodeURIComponent;

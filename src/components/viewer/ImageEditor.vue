@@ -15,7 +15,7 @@ import translations from './ImageEditorTranslations';
 
 import { API } from '../../services/API';
 import { IImageInfo, IPhoto } from '../../types';
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 import { fetchImage } from '../frame/XImgCache';
 
 // Crop preset icons

@@ -78,7 +78,7 @@ import DeleteIcon from 'vue-material-design-icons/Close.vue';
 import MergeIcon from 'vue-material-design-icons/Merge.vue';
 import UnassignedIcon from 'vue-material-design-icons/AccountQuestion.vue';
 
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 
 export default defineComponent({
   name: 'FaceTopMatter',

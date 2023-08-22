@@ -36,7 +36,7 @@ import FaceList from './FaceList.vue';
 import Modal from './Modal.vue';
 import client from '../../services/DavClient';
 import * as dav from '../../services/DavRequests';
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 
 export default defineComponent({
   name: 'FaceMergeModal',

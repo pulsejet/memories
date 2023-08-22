@@ -16,7 +16,7 @@ import { IHeadRow } from '../../types';
 
 import CheckCircle from 'vue-material-design-icons/CheckCircle.vue';
 
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 
 export default defineComponent({
   name: 'RowHead',

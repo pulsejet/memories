@@ -138,7 +138,7 @@ import { defineComponent } from 'vue';
 import { getCurrentUser } from '@nextcloud/auth';
 
 import UserConfig from '../mixins/UserConfig';
-import * as utils from '../services/Utils';
+import * as utils from '../services/utils';
 import * as nativex from '../native';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';

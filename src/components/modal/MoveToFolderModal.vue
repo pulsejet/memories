@@ -17,7 +17,7 @@ import { FilePickerType } from '@nextcloud/dialogs';
 import { showInfo } from '@nextcloud/dialogs';
 
 import * as dav from '../../services/DavRequests';
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 
 import type { IPhoto } from '../../types';
 

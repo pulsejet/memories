@@ -1,6 +1,6 @@
 import PhotoSwipe from 'photoswipe';
 import PsImage from './PsImage';
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 import staticConfig from '../../services/static-config';
 import type { PsContent, PsEvent } from './types';
 

@@ -106,7 +106,7 @@ import { IPhoto } from '../../types';
 
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 
 export default defineComponent({
   name: 'EditDate',

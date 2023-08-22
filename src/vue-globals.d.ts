@@ -1,4 +1,4 @@
-import { type constants } from './services/Utils';
+import { type constants } from './services/utils';
 import type { translate, translatePlural } from '@nextcloud/l10n';
 
 declare module 'vue' {

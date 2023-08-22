@@ -10,7 +10,7 @@ import axios from '@nextcloud/axios';
 import FolderGrid from './FolderGrid.vue';
 import UserMixin from '../../mixins/UserConfig';
 
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 import { API } from '../../services/API';
 
 import type { IFolder } from '../../types';

@@ -1,5 +1,5 @@
 import { translate as t, translatePlural as n } from '@nextcloud/l10n';
-import { constants } from '../services/Utils';
+import { constants } from '../services/utils';
 import { loadState } from '@nextcloud/initial-state';
 import { defineComponent } from 'vue';
 
