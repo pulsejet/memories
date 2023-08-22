@@ -6,6 +6,7 @@
     "Edit" : "Sunting",
     "Cancel" : "Batal",
     "Delete" : "Padam",
+    "Move" : "Move",
     "General" : "Umum",
     "Close" : "Tutup",
     "Back" : "Kembali",
@@ -25,6 +26,8 @@
     "Share" : "Kongsi",
     "Previous" : "Sebelum",
     "Next" : "Seterus",
-    "Size" : "Saiz"
+    "Size" : "Saiz",
+    "Yes" : "Ya",
+    "No" : "Tidak"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

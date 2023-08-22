@@ -42,8 +42,8 @@ OC.L10N.register(
     "Move to folder" : "Переместить в папку",
     "Add to album" : "Добавить в альбом",
     "Remove from person" : "Снять отметку лица",
-    "You are about to download a large number of files. Are you sure?" : "Подтвердите скачивание большого количества файлов.",
-    "You are about to delete a large number of files. Are you sure?" : "Подтвердите удаление большого количества файлов.",
+    "Continue" : "Продолжить",
+    "Move" : "Переместить",
     "_{n} selected_::_{n} selected_" : ["Выбран: {n}","Выбрано: {n}","Выбрано: {n}","Выбрано: {n}"],
     "General" : "Основные",
     "Timeline Path" : "Расположение",
@@ -158,7 +158,6 @@ OC.L10N.register(
     "Save as" : "Сохранить как",
     "All changes will be lost." : "Изменения не будут сохранены.",
     "Are you sure you want to continue?" : "Продолжить?",
-    "Continue" : "Продолжить",
     "Undo" : "Отменить",
     "Redo" : "Повторить",
     "Show original image" : "Показать исходное изображение",
@@ -267,6 +266,8 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "Архивируйте фотографии, которые вы не хотите видеть на своей временной шкале",
     "Tag photos to find them easily" : "Помечайте фотографии тегами, чтобы легко их находить",
     "Recognize is still working on your photos" : "Программа распознавания все еще работает с вашими фотографиями",
-    "Places you have been to will appear here" : "Места, где вы побывали, появятся здесь"
+    "Places you have been to will appear here" : "Места, где вы побывали, появятся здесь",
+    "Yes" : "Да",
+    "No" : "Нет"
 },
 "nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);");

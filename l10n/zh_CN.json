@@ -54,9 +54,9 @@
     "Add to album" : "添加至相册",
     "Move to person" : "移动到人",
     "Remove from person" : "从人中移除",
-    "You are about to download a large number of files. Are you sure?" : "您即将下载大量文件。你确定吗？",
-    "You are about to delete a large number of files. Are you sure?" : "您即将删除大量文件。你确定吗？",
+    "Continue" : "继续",
     "Failed to delete files" : "删除文件失败",
+    "Move" : "移动",
     "You must enable \"Mark person in preview\" to use this feature" : "您必须启用“在预览中标记人”才能使用此功能",
     "Only user \"{user}\" can update this person" : "仅用户“{user}”可以更新此人",
     "_{n} selected_::_{n} selected_" : ["已选择 {n} 个"],
@@ -283,7 +283,6 @@
     "Enter name of the new face" : "输入新人脸的名称",
     "Failed to create face" : "创建人脸失败",
     "Merge {name} with person" : "将 {name} 与人合并",
-    "Are you sure you want to merge {name} with {newName}?" : "您确定要将 {name} 与 {newName} 合并吗？",
     "Too many failures, aborting" : "失败次数过多，中止",
     "Error while moving {basename}" : "移动{basename}时出错。",
     "Failed to move {name}." : "移动{name}失败。",
@@ -356,7 +355,6 @@
     "Save as" : "另存为",
     "All changes will be lost." : "所有更改都将丢失。",
     "Are you sure you want to continue?" : "您确定要继续吗？",
-    "Continue" : "继续",
     "Undo" : "撤销操作",
     "Redo" : "恢复上个操作",
     "Show original image" : "显示原始图片",
@@ -468,6 +466,8 @@
     "Archive photos you don't want to see in your timeline" : "归档您不想在时间线中看到的照片",
     "Tag photos to find them easily" : "给照片打上标签以便于查找",
     "Recognize is still working on your photos" : "“识别”仍在处理您的照片",
-    "Places you have been to will appear here" : "您去过的地方会出现在这里"
+    "Places you have been to will appear here" : "您去过的地方会出现在这里",
+    "Yes" : "是",
+    "No" : "否"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

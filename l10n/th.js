@@ -19,6 +19,8 @@ OC.L10N.register(
     "Delete" : "ลบ",
     "Favorite" : "รายการโปรด",
     "View in folder" : "ดูในโฟลเดอร์",
+    "Continue" : "ดำเนินการต่อ",
+    "Move" : "ย้าย",
     "General" : "ทั่วไป",
     "Account" : "บัญชี",
     "Close" : "ปิด",
@@ -54,11 +56,12 @@ OC.L10N.register(
     "Share" : "แชร์",
     "Previous" : "ก่อนหน้า",
     "Next" : "ถัดไป",
-    "Continue" : "ดำเนินการต่อ",
     "Undo" : "เลิกทำ",
     "Custom" : "กำหนดเอง",
     "Text" : "ข้อความ",
     "Size" : "ขนาด",
-    "Position" : "ตำแหน่ง"
+    "Position" : "ตำแหน่ง",
+    "Yes" : "ใช่",
+    "No" : "ไม่ตกลง"
 },
 "nplurals=1; plural=0;");

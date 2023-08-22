@@ -8,6 +8,7 @@
     "Cancel" : "ۋاز كەچ",
     "Delete" : "ئۆچۈر",
     "Favorite" : "يىغقۇچ",
+    "Move" : "Move",
     "General" : "ئادەتتىكى",
     "Close" : "ياپ",
     "Save" : "ساقلا",
@@ -26,6 +27,8 @@
     "Share" : "ھەمبەھىر",
     "Previous" : "ئالدىنقى",
     "Next" : "كېيىنكى",
-    "Size" : "چوڭلۇقى"
+    "Size" : "چوڭلۇقى",
+    "Yes" : "ھەئە",
+    "No" : "ياق"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

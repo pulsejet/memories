@@ -12,6 +12,7 @@ OC.L10N.register(
     "Delete" : "Deler",
     "Favorite" : "Favorite",
     "View in folder" : "Vider in dossier",
+    "Move" : "Mover",
     "General" : "General",
     "Close" : "Clauder",
     "Unknown" : "Incognite",

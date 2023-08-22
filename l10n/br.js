@@ -13,6 +13,7 @@ OC.L10N.register(
     "Delete" : "Lemel",
     "Favorite" : "Pennrollañ",
     "View in folder" : "Diskwel en teuliad",
+    "Continue" : "Kendec'hel",
     "General" : "Hollek",
     "Account" : "Kont",
     "Close" : "Seriñ",
@@ -38,7 +39,6 @@ OC.L10N.register(
     "Unsaved changes" : "Kemmoù n'int ket bet enrollet",
     "Share" : "Rannan",
     "Next" : "Da heul",
-    "Continue" : "Kendec'hel",
     "Original" : "Orin",
     "Size" : "Ment"
 },

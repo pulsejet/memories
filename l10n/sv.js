@@ -25,8 +25,8 @@ OC.L10N.register(
     "Unarchive" : "Ta bort ur arkivet",
     "View in folder" : "Utforska i mapp",
     "Add to album" : "Lägg till i album",
-    "You are about to download a large number of files. Are you sure?" : "Du kommer att ladda ner en stor mängd filer. Är du säker?",
-    "You are about to delete a large number of files. Are you sure?" : "Du kommer att ta bort ett stort antal filer. Är du säker?",
+    "Continue" : "Fortsätt",
+    "Move" : "Flytta",
     "General" : "Allmänt",
     "Timeline Path" : "Tidslinjesökväg",
     "Account" : "Konto",
@@ -111,7 +111,6 @@ OC.L10N.register(
     "Save as" : "Spara som",
     "All changes will be lost." : "Alla ändringar kommer att gå förlorade.",
     "Are you sure you want to continue?" : "Är du säker på att du vill fortsätta?",
-    "Continue" : "Fortsätt",
     "Undo" : "Ångra",
     "Redo" : "Gör om",
     "Show original image" : "Visa originalbilden",
@@ -187,6 +186,8 @@ OC.L10N.register(
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Lyckades inte döpa om {currentAlbumName} till {newAlbumName}.",
     "Failed to delete {fileName}." : "Misslyckades att radera {fileName}.",
     "Failed to favorite files." : "Misslyckades att favorisera filer.",
-    "Failed to favorite {fileName}." : "Misslyckades att favorisera {fileName}."
+    "Failed to favorite {fileName}." : "Misslyckades att favorisera {fileName}.",
+    "Yes" : "Ja",
+    "No" : "Nej"
 },
 "nplurals=2; plural=(n != 1);");

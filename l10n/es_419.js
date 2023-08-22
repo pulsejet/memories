@@ -17,6 +17,8 @@ OC.L10N.register(
     "Favorite" : "Hacer favorito",
     "Unarchive" : "Desarchivar",
     "View in folder" : "Ver en la carpeta",
+    "Continue" : "Continuar",
+    "Move" : "Mover",
     "General" : "General",
     "Account" : "Cuenta",
     "Close" : "Cerrar",
@@ -49,12 +51,12 @@ OC.L10N.register(
     "Share" : "Compartir",
     "Previous" : "Anterior",
     "Next" : "Siguiente",
-    "Continue" : "Continuar",
     "Undo" : "Deshacer",
     "Custom" : "Personalizado",
     "Value" : "Valor",
     "Text" : "Texto",
     "Size" : "Tamaño",
-    "Position" : "Posición"
+    "Position" : "Posición",
+    "Yes" : "Si"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

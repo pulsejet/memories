@@ -20,6 +20,8 @@ OC.L10N.register(
     "Favorite" : "お気に入り",
     "Unarchive" : "アーカイブを解除",
     "View in folder" : "フォルダー内で表示",
+    "Continue" : "続ける",
+    "Move" : "移動",
     "General" : "一般",
     "Account" : "アカウント",
     "Close" : "閉じる",
@@ -71,7 +73,6 @@ OC.L10N.register(
     "Next" : "次へ",
     "All changes will be lost." : "全ての変更がなくなります",
     "Are you sure you want to continue?" : "本当に続けてよろしいですか？",
-    "Continue" : "続ける",
     "Undo" : "元に戻す",
     "Redo" : "やり直し",
     "Show original image" : "オリジナル画像を表示する",
@@ -101,6 +102,8 @@ OC.L10N.register(
     "Name is required." : "名前は必須です。",
     "Quality" : "品質",
     "Direct" : "ダイレクト",
-    "Auto" : "自動"
+    "Auto" : "自動",
+    "Yes" : "はい",
+    "No" : "いいえ"
 },
 "nplurals=1; plural=0;");

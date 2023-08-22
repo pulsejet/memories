@@ -13,6 +13,7 @@ OC.L10N.register(
     "Cancel" : "Diddymu",
     "Delete" : "Dileu",
     "Favorite" : "Ffefryn",
+    "Move" : "Symud",
     "General" : "Cyffredinol",
     "Account" : "Cyfrif",
     "Close" : "Cau",
@@ -42,6 +43,7 @@ OC.L10N.register(
     "Undo" : "Dadwneud",
     "Custom" : "Cyfaddas",
     "Size" : "Maint",
-    "Auto" : "Awto"
+    "Auto" : "Awto",
+    "No" : "Na"
 },
 "nplurals=4; plural=(n==1) ? 0 : (n==2) ? 1 : (n != 8 && n != 11) ? 2 : 3;");

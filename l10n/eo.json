@@ -14,6 +14,8 @@
     "Delete" : "Forigi",
     "Favorite" : "Pliŝatati",
     "View in folder" : "Vidi en dosierujo",
+    "Continue" : "Daŭrigi",
+    "Move" : "Movi",
     "General" : "Ĝenerala",
     "Account" : "Konto",
     "Close" : "Malfermi",
@@ -49,7 +51,6 @@
     "Share" : "Kunhavigi",
     "Previous" : "Antaŭa",
     "Next" : "Sekva",
-    "Continue" : "Daŭrigi",
     "Undo" : "Malfari",
     "Redo" : "Refari",
     "Custom" : "Propra",
@@ -57,6 +58,8 @@
     "Size" : "Grando",
     "Position" : "Loko",
     "Extension" : "Dosiersufikso",
-    "Auto" : "Aŭtomate"
+    "Auto" : "Aŭtomate",
+    "Yes" : "Jes",
+    "No" : "Ne"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

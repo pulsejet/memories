@@ -12,6 +12,7 @@ OC.L10N.register(
     "Cancel" : "Otkaži",
     "Delete" : "Obriši",
     "Favorite" : "Omiljene",
+    "Move" : "Premesti",
     "General" : "Opšte",
     "Close" : "Zatvori",
     "Back" : "Nazad",

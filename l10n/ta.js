@@ -11,6 +11,8 @@ OC.L10N.register(
     "Cancel" : "இரத்து செய்க",
     "Delete" : "நீக்குக",
     "Favorite" : "விருப்பமான",
+    "Continue" : "Continue",
+    "Move" : "Move",
     "General" : "பொதுவான",
     "Close" : "மூடுக",
     "Unknown" : "தெரியாத",
@@ -31,8 +33,9 @@ OC.L10N.register(
     "Share" : "பகிர்வு",
     "Previous" : "முன்தைய",
     "Next" : "அடுத்த",
-    "Continue" : "Continue",
     "Value" : "Value",
-    "Size" : "அளவு"
+    "Size" : "அளவு",
+    "Yes" : "ஆம்",
+    "No" : "இல்லை"
 },
 "nplurals=2; plural=(n != 1);");

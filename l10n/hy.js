@@ -9,6 +9,8 @@ OC.L10N.register(
     "Photos" : "Նկարներ",
     "Cancel" : "ընդհատել",
     "Delete" : "հեռացնել",
+    "Continue" : "Շարունակել",
+    "Move" : "Տեղափոխել",
     "General" : "Ընդհանուր",
     "Close" : "Փակել",
     "Unknown" : "Անհայտ",
@@ -28,7 +30,8 @@ OC.L10N.register(
     "Share" : "Կիսվել",
     "Previous" : "Նախորդ",
     "Next" : "Հաջորդ",
-    "Continue" : "Շարունակել",
-    "Size" : "Չափս"
+    "Size" : "Չափս",
+    "Yes" : "Այո",
+    "No" : "Ոչ"
 },
 "nplurals=2; plural=(n != 1);");

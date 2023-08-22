@@ -22,6 +22,8 @@ OC.L10N.register(
     "Unarchive" : "Αναίρεση αρχειοθέτησης",
     "View in folder" : "Προβολή στον φάκελο",
     "Add to album" : "Προσθήκη στο άλμπουμ",
+    "Continue" : "Συνεχίστε",
+    "Move" : "Μετακίνηση",
     "General" : "Γενικά",
     "Account" : "Λογαριασμός",
     "Close" : "Κλείσιμο",
@@ -73,7 +75,6 @@ OC.L10N.register(
     "Share" : "Διαμοιρασμός",
     "Previous" : "Προηγούμενο",
     "Next" : "Επόμενο",
-    "Continue" : "Συνεχίστε",
     "Undo" : "Ακύρωση ενέργειας",
     "Redo" : "Ξανακάντε",
     "Zoom in" : "Εστίαση",
@@ -92,6 +93,7 @@ OC.L10N.register(
     "Auto" : "Αυτόματα",
     "Failed to create {albumName}." : "Απέτυχε η δημιουργία {albumName}",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Απέτυχε η μετονομασία του {currentAlbumName} σε {newAlbumName}.",
-    "Failed to delete {fileName}." : "Απέτυχε η διαγραφή {fileName}."
+    "Failed to delete {fileName}." : "Απέτυχε η διαγραφή {fileName}.",
+    "No" : "Όχι"
 },
 "nplurals=2; plural=(n != 1);");

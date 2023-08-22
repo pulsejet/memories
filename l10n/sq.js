@@ -17,6 +17,8 @@ OC.L10N.register(
     "Favorite" : "I/E Preferuar",
     "Unarchive" : "Hiq nga arkivi",
     "View in folder" : "Shikoje në dosje",
+    "Continue" : "Vazhdo",
+    "Move" : "Zhvendos",
     "General" : "Të përgjithshme",
     "Account" : "Llogari",
     "Close" : "Mbylleni",
@@ -48,7 +50,6 @@ OC.L10N.register(
     "Share" : "Shpërndaje",
     "Previous" : "I mëparshëm",
     "Next" : "Tjetër",
-    "Continue" : "Vazhdo",
     "Undo" : "Ktheje pas",
     "Redo" : "Ribëj",
     "Custom" : "E përshtatur",
@@ -56,6 +57,7 @@ OC.L10N.register(
     "Text" : "Tekst",
     "Size" : "Madhësi",
     "Position" : "Pozicion",
-    "Name is required." : "Emri është i domosdoshëm"
+    "Name is required." : "Emri është i domosdoshëm",
+    "Yes" : "Po"
 },
 "nplurals=2; plural=(n != 1);");

@@ -46,6 +46,8 @@ OC.L10N.register(
     "Add to album" : "Dodaj album",
     "Move to person" : "Premakni k osebi",
     "Remove from person" : "Odstrani",
+    "Continue" : "Nadaljuj",
+    "Move" : "Premakni",
     "Memories Settings" : "Nastavitve programa",
     "General" : "Splošno",
     "Timeline Path" : "Pot časovnice",
@@ -184,7 +186,6 @@ OC.L10N.register(
     "Save as" : "Shrani kot",
     "All changes will be lost." : "Vse spremembe bodo izgubljene.",
     "Are you sure you want to continue?" : "Ali ste prepričani, da želite nadaljevati?",
-    "Continue" : "Nadaljuj",
     "Undo" : "Razveljavi",
     "Redo" : "Ponovno uveljavi",
     "Show original image" : "Pokaži izvorno sliko",
@@ -274,6 +275,8 @@ OC.L10N.register(
     "Failed to move files." : "Premikanje datotek je spodletelo.",
     "Could not move {fileName}, target exists." : "Datoteke {fileName} ni mogoče premakniti, ker cilj že obstaja.",
     "Failed to move {fileName}." : "Premikanje datoteke {fileName} je spodletelo.",
-    "Failed to download files" : "Prejemanje datotek je spodletelo."
+    "Failed to download files" : "Prejemanje datotek je spodletelo.",
+    "Yes" : "Da",
+    "No" : "Ne"
 },
 "nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);");

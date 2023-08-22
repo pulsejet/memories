@@ -37,6 +37,8 @@ OC.L10N.register(
     "View in folder" : "Bekijken in map",
     "Move to folder" : "Verplaatsen naar map",
     "Add to album" : "Toevoegen aan album",
+    "Continue" : "Doorgaan",
+    "Move" : "Verplaatsen",
     "General" : "Algemeen",
     "Account" : "Account",
     "Close" : "Sluit",
@@ -124,7 +126,6 @@ OC.L10N.register(
     "Are you sure you want to delete?" : "Weet je zeker dat je wilt verwijderen?",
     "All changes will be lost." : "Alle aanpassingen zullen verloren gaan.",
     "Are you sure you want to continue?" : "Weet je zeker dat je wilt doorgaan?",
-    "Continue" : "Doorgaan",
     "Undo" : "Ongedaan maken",
     "Redo" : "Opnieuw doen",
     "Show original image" : "Toon originele afbeelding",
@@ -178,6 +179,8 @@ OC.L10N.register(
     "Auto" : "Automatisch",
     "Failed to create {albumName}." : "Het maken van {albumName} is mislukt.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Hernoemen van {currentAlbumName} naar {newAlbumName} mislukt.",
-    "Failed to delete {fileName}." : "Verwijderen van {fileName} mislukt."
+    "Failed to delete {fileName}." : "Verwijderen van {fileName} mislukt.",
+    "Yes" : "Ja",
+    "No" : "Nee"
 },
 "nplurals=2; plural=(n != 1);");

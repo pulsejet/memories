@@ -23,8 +23,8 @@
     "View in folder" : "Zobraziť v priečinku",
     "Add to album" : "Pridať do albumu",
     "Remove from person" : "Odobrať z osoby",
-    "You are about to download a large number of files. Are you sure?" : "Chystáte sa stiahnuť veľké množstvo súborov. Si si istý?",
-    "You are about to delete a large number of files. Are you sure?" : "Chystáte sa odstrániť veľké množstvo súborov. Si si istý?",
+    "Continue" : "Pokračovať",
+    "Move" : "Presunúť",
     "_{n} selected_::_{n} selected_" : ["{n} vybraté","{n} vybraté","{n} vybratých","{n} vybraté"],
     "General" : "Všeobecné",
     "Timeline Path" : "Popis umiestnenia časovej osi",
@@ -89,7 +89,6 @@
     "Failed to rename {oldName} to {name}." : "Nepodarilo sa premenovať {oldName} na {name}.",
     "Loading …" : "Načítavam …",
     "Merge {name} with person" : "Zlúčiť {name} s osobou",
-    "Are you sure you want to merge {name} with {newName}?" : "Naozaj chcete zlúčiť {name} s {newName}?",
     "Too many failures, aborting" : "Príliš veľa zlyhaní, prerušujem",
     "Error while moving {basename}" : "Chyba pri presúvaní {basename}",
     "Failed to move {name}." : "Nepodarilo sa presunúť {name}.",
@@ -116,7 +115,6 @@
     "Save as" : "Uložiť ako",
     "All changes will be lost." : "Vaše zmeny budú stratené.",
     "Are you sure you want to continue?" : "Naozaj chcete pokračovať?",
-    "Continue" : "Pokračovať",
     "Undo" : "Vrátiť",
     "Redo" : "Vrátiť",
     "Show original image" : "Zobraziť originálny obrázok",
@@ -204,6 +202,8 @@
     "Error: {msg}" : "Chyba: {msg}",
     "Failed to delete {fileName}." : "Nepodarilo sa zmazať {fileName}.",
     "Failed to favorite files." : "Nepodarilo sa pridať súbory medzi obľúbené.",
-    "Failed to favorite {fileName}." : "Nepodarilo sa pridať súbor {fileName} medzi obľúbené."
+    "Failed to favorite {fileName}." : "Nepodarilo sa pridať súbor {fileName} medzi obľúbené.",
+    "Yes" : "Áno",
+    "No" : "Nie"
 },"pluralForm" :"nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);"
 }

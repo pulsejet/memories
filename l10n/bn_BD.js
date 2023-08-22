@@ -10,6 +10,7 @@ OC.L10N.register(
     "Cancel" : "বাতির",
     "Delete" : "মুছে",
     "Favorite" : "প্রিয়জন",
+    "Continue" : "চালিয়ে যাও",
     "General" : "সাধারণ",
     "Close" : "বন্ধ",
     "Unknown" : "অজানা",
@@ -34,7 +35,6 @@ OC.L10N.register(
     "Share" : "ভাগাভাগি কর",
     "Previous" : "পূর্ববর্তী",
     "Next" : "পরবর্তী",
-    "Continue" : "চালিয়ে যাও",
     "Size" : "আকার"
 },
 "nplurals=2; plural=(n != 1);");

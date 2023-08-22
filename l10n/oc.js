@@ -18,6 +18,8 @@ OC.L10N.register(
     "Delete" : "Suprimir",
     "Favorite" : "Favorit",
     "View in folder" : "Veire dins lo dossièr",
+    "Continue" : "Contunhar",
+    "Move" : "Desplaçar",
     "General" : "Generals",
     "Account" : "Compte",
     "Close" : "Tampar",
@@ -52,7 +54,6 @@ OC.L10N.register(
     "Share" : "Partejar",
     "Previous" : "Precedent",
     "Next" : "Seguent",
-    "Continue" : "Contunhar",
     "Undo" : "Desfar",
     "Redo" : "Refar",
     "Custom" : "Personalizar",
@@ -62,6 +63,8 @@ OC.L10N.register(
     "Text" : "Tèxt",
     "Size" : "Talha",
     "Position" : "Posicion",
-    "Extension" : "Extension"
+    "Extension" : "Extension",
+    "Yes" : "Òc",
+    "No" : "Non"
 },
 "nplurals=2; plural=(n > 1);");

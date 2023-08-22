@@ -26,8 +26,8 @@ OC.L10N.register(
     "Unarchive" : "Išskleisti",
     "View in folder" : "Rodyti aplanke",
     "Add to album" : "Pridėti į albumą",
-    "You are about to download a large number of files. Are you sure?" : "Jūs ketinate atsisiųsti didelį failų skaičių. Ar esate tikri?",
-    "You are about to delete a large number of files. Are you sure?" : "Jūs ketinate ištrinti didelį failų skaičių. Ar esate tikri?",
+    "Continue" : "Tęsti",
+    "Move" : "Perkelti",
     "General" : "Bendra",
     "Timeline Path" : "Laiko juostos kelias",
     "Square grid mode" : "Kvadratinio tinklelio veiksena",
@@ -86,7 +86,6 @@ OC.L10N.register(
     "Update" : "Atnaujinti",
     "Failed to rename {oldName} to {name}." : "Nepavyko pervadinti {oldName} į {name}.",
     "Loading …" : "Įkeliama…",
-    "Are you sure you want to merge {name} with {newName}?" : "Ar tikrai norite sulieti {name} su {newName}?",
     "Too many failures, aborting" : "Per daug nesėkmių, nutraukiama",
     "Error while moving {basename}" : "Klaida perkeliant {basename}",
     "Failed to move {name}." : "Nepavyko perkelti {name}.",
@@ -120,7 +119,6 @@ OC.L10N.register(
     "Save as" : "Įrašyti kaip",
     "All changes will be lost." : "Visi pakeitimai bus prarasti.",
     "Are you sure you want to continue?" : "Ar tikrai norite tęsti?",
-    "Continue" : "Tęsti",
     "Undo" : "Atšaukti",
     "Redo" : "Grąžinti",
     "Zoom in" : "Didinti",
@@ -147,6 +145,8 @@ OC.L10N.register(
     "General Failure" : "Bendrinė nesėkmė",
     "Error: {msg}" : "Klaida: {msg}",
     "Failed to delete {fileName}." : "Nepavyko ištrinti {fileName}.",
-    "Failed to download files" : "Nepavyko atsisiųsti failų"
+    "Failed to download files" : "Nepavyko atsisiųsti failų",
+    "Yes" : "Taip",
+    "No" : "Ne"
 },
 "nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);");

@@ -20,6 +20,8 @@ OC.L10N.register(
     "Favorite" : "Favorit",
     "Unarchive" : "Dearhiviraj",
     "View in folder" : "Prikaži u mapi",
+    "Continue" : "Nastavi",
+    "Move" : "Premjesti",
     "General" : "Općenito",
     "Account" : "Račun",
     "Close" : "Zatvori",
@@ -62,7 +64,6 @@ OC.L10N.register(
     "Share" : "Dijeli",
     "Previous" : "Natrag",
     "Next" : "Dalje",
-    "Continue" : "Nastavi",
     "Undo" : "Poništi",
     "Redo" : "Ponovno",
     "Zoom in" : "Uvećaj",
@@ -77,6 +78,8 @@ OC.L10N.register(
     "Name is required." : "Ime je obavezno.",
     "Quality" : "Kvaliteta",
     "Direct" : "Izravno",
-    "Auto" : "Auto"
+    "Auto" : "Auto",
+    "Yes" : "Da",
+    "No" : "Ne"
 },
 "nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;");

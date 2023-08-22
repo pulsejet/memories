@@ -10,6 +10,8 @@
     "Cancel" : "Avbryt",
     "Delete" : "Slett",
     "Favorite" : "Favoritt",
+    "Continue" : "Gå vidare",
+    "Move" : "Move",
     "General" : "Generelt",
     "Close" : "Lat att",
     "Unknown" : "Ukjend",
@@ -34,7 +36,6 @@
     "Share" : "Del",
     "Previous" : "Førre",
     "Next" : "Neste",
-    "Continue" : "Gå vidare",
     "Value" : "Verdi",
     "Size" : "Storleik"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

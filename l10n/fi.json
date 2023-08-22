@@ -54,9 +54,9 @@
     "Add to album" : "Lisää albumiin",
     "Move to person" : "Siirrä henkilölle",
     "Remove from person" : "Poista henkilöltä",
-    "You are about to download a large number of files. Are you sure?" : "Olet lataamassa suurta määrää tiedostoja. Oletko varma?",
-    "You are about to delete a large number of files. Are you sure?" : "Olet poistamassa suurta määrää tiedostoja. Oletko varma?",
+    "Continue" : "Jatka",
     "Failed to delete files" : "Tiedostojen poisto epäonnistui",
+    "Move" : "Siirrä",
     "Only user \"{user}\" can update this person" : "Vain käyttäjä \"{user}\" voi päivittää tätä henkilöä",
     "_{n} selected_::_{n} selected_" : ["{n} valittu","{n} valittu"],
     "Memories Settings" : "Muistot-sovelluksen asetukset",
@@ -226,7 +226,6 @@
     "Enter name of the new face" : "Syötä kasvojen nimi",
     "Failed to create face" : "Kasvojen luonti epäonnistui",
     "Merge {name} with person" : "Yhdistä {name} henkilöön",
-    "Are you sure you want to merge {name} with {newName}?" : "Haluatko varmasti yhdistää kohteen {name} henkilöön {newName}?",
     "Too many failures, aborting" : "Liian monta epäonnistumista, lopetetaan",
     "Error while moving {basename}" : "Virhe siirtäessä kohdetta {basename}",
     "Failed to move {name}." : "Kohteen {name} siirtäminen epäonnistui.",
@@ -296,7 +295,6 @@
     "Save as" : "Tallenna nimellä",
     "All changes will be lost." : "Kaikki muutokset menetetään.",
     "Are you sure you want to continue?" : "Haluatko varmasti jatkaa?",
-    "Continue" : "Jatka",
     "Undo" : "Kumoa",
     "Redo" : "Tee uudelleen",
     "Show original image" : "Näytä alkuperäinen kuva",
@@ -400,6 +398,8 @@
     "Archive photos you don't want to see in your timeline" : "Arkistoi kuvat, joita et halua nähdä aikajanallasi",
     "Tag photos to find them easily" : "Lisää kuviin tunnisteita löytääksesi ne helpommin",
     "Recognize is still working on your photos" : "Recognize käsittelee vielä kuviasi",
-    "Places you have been to will appear here" : "Sijainnit, joissa olet ollut, tulevat tänne näkyviin"
+    "Places you have been to will appear here" : "Sijainnit, joissa olet ollut, tulevat tänne näkyviin",
+    "Yes" : "Kyllä",
+    "No" : "Ei"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

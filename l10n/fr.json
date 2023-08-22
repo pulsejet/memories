@@ -49,9 +49,9 @@
     "Add to album" : "Ajouter à l'album",
     "Move to person" : "Déplacer vers une personne",
     "Remove from person" : "Retirer de la personne",
-    "You are about to download a large number of files. Are you sure?" : "Vous êtes sur le point de télécharger un grand nombre de fichiers. Êtes-vous certain de vouloir le faire ?",
-    "You are about to delete a large number of files. Are you sure?" : "Vous êtes sur le point de supprimer un grand nombre de fichiers. Êtes-vous certain⋅e de vouloir le faire ?",
+    "Continue" : "Continuer",
     "Failed to delete files" : "Échec de la suppression des fichiers",
+    "Move" : "Déplacer",
     "You must enable \"Mark person in preview\" to use this feature" : "Vous devez activer l'option \"Marquer la personne dans l'aperçu\" pour utiliser cette fonctionnalité",
     "Only user \"{user}\" can update this person" : "Seul l'utilisateur·trice \"{user}\" peut mettre à jour cette personne",
     "_{n} selected_::_{n} selected_" : ["{n} sélectionné","{n} sélectionnés","{n} sélectionnés"],
@@ -236,7 +236,6 @@
     "Enter name of the new face" : "Saisir le nom de la nouvelle personne",
     "Failed to create face" : "Échec de la création d'une personne",
     "Merge {name} with person" : "Fusionner {name} avec la personne",
-    "Are you sure you want to merge {name} with {newName}?" : "Êtes-vous sûr de vouloir fusionner {name} avec {newName} ?",
     "Too many failures, aborting" : "Trop d'échecs, abandon",
     "Error while moving {basename}" : "Erreur lors du déplacement de {basename}",
     "Failed to move {name}." : "Impossible de déplacer {name}.",
@@ -307,7 +306,6 @@
     "Save as" : "Enregistrer sous",
     "All changes will be lost." : "Tous les changements seront perdus.",
     "Are you sure you want to continue?" : "Êtes-vous sûr de vouloir continuer ?",
-    "Continue" : "Continuer",
     "Undo" : "Annuler",
     "Redo" : "Rétablir",
     "Show original image" : "Afficher l'image originale",
@@ -416,6 +414,8 @@
     "Archive photos you don't want to see in your timeline" : "Archivez les photos que vous ne souhaitez pas voir dans votre chronologie",
     "Tag photos to find them easily" : "Étiquetez vos photos pour les trouver facilement",
     "Recognize is still working on your photos" : "Recognize travaille encore sur vos photos",
-    "Places you have been to will appear here" : "Les endroits où vous êtes allé apparaîtront ici"
+    "Places you have been to will appear here" : "Les endroits où vous êtes allé apparaîtront ici",
+    "Yes" : "Oui",
+    "No" : "Non"
 },"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }
