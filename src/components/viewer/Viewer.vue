@@ -496,7 +496,10 @@ export default defineComponent({
       // Monkey patch for focus trapping in sidebar
       const _onFocusIn = this.photoswipe.keyboard['_onFocusIn'];
       this.photoswipe.keyboard['_onFocusIn'] = (e: FocusEvent) => {
-        if (e.target instanceof HTMLElement && e.target.closest('#app-sidebar-vue, .v-popper__popper, .modal-mask')) {
+        if (
+          e.target instanceof HTMLElement &&
+          e.target.closest(['#app-sidebar-vue', '.v-popper__popper', '.modal-mask', '.oc-dialog'].join(','))
+        ) {
           return;
         }
         _onFocusIn.call(this.photoswipe!.keyboard, e);
@@ -930,11 +933,13 @@ export default defineComponent({
     },
 
     /** Key press events */
-    keydown(e: KeyboardEvent) {
+    async keydown(e: KeyboardEvent) {
       if (
         e.key === 'Delete' &&
         !this.routeIsPublic &&
-        confirm(this.t('memories', 'Are you sure you want to delete?'))
+        (await utils.confirmDestructive({
+          title: this.t('memories', 'Are you sure you want to delete?'),
+        }))
       ) {
         this.deleteCurrent();
       }
