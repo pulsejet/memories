@@ -147,8 +147,15 @@ header#header .header-appname {
 }
 
 // Make OC dialogs larger to a minimum width
-.oc-dialog[role='dialog'] {
+div.oc-dialog[role='dialog'] {
   min-width: min(400px, 90vw);
+
+  // This close button is annoying since it does
+  // the same thing as the cancel button but needs
+  // two tabs to reach the OK button when visible.
+  button.oc-dialog-close {
+    display: none;
+  }
 }
 
 // Make metadata tab scrollbar thin
