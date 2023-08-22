@@ -23,8 +23,7 @@ import type videojsType from 'video.js';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 
 // Global CSS
-import './global.scss';
-import './native.scss';
+import './styles/global.scss';
 
 // Global exposed variables
 declare global {

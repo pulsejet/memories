@@ -1,0 +1,17 @@
+// Top bar is above everything else on mobile
+body.has-top-bar header {
+  @media (max-width: 1024px) {
+    z-index: 0 !important;
+  }
+}
+body.has-viewer header {
+  z-index: 0 !important;
+}
+
+// Allow hiding app name (PublicShareHeader)
+header#header .header-appname {
+  transition: opacity 0.2s ease-in-out;
+  &.hidden {
+    opacity: 0 !important;
+  }
+}

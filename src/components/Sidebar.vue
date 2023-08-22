@@ -1,5 +1,5 @@
 <template>
-  <aside id="app-sidebar-vue" class="app-sidebar reduced hide-scrollbar" v-if="reducedOpen">
+  <aside id="app-sidebar-vue" class="app-sidebar reduced" v-if="reducedOpen">
     <div class="title">
       <h2>{{ basename }}</h2>
 
@@ -212,5 +212,17 @@ export default defineComponent({
 // sidebar ... this may have unintended side effects
 .vs__dropdown-menu--floating {
   z-index: 2526;
+}
+
+// Make metadata tab scrollbar thin
+#tab-memories-metadata,
+.app-sidebar.reduced {
+  scrollbar-width: thin;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 </style>
