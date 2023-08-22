@@ -16,7 +16,7 @@ In the directory with the `docker-compose.yml` file, run,
 git clone https://github.com/pulsejet/go-vod
 ```
 
-If you are using docker compose, configure a service to start go-vod with the correct devices and filesystem structure. Otherwise, manually start the container with these parameters.
+If you are using docker, configure a service to start go-vod with the correct devices and filesystem structure. Otherwise, manually start the container with these parameters.
 
 ```yaml
 # docker-compose.yml
@@ -39,6 +39,10 @@ services:
      volumes:
       - ncdata:/var/www/html:ro
 ```
+
+Make sure to put the container and the container into the same network so that they can talk to each other! 
+
+With Nextcloud AIO, you will need to put the container into the `nextcloud-aio` network. Also the datadir of AIO needs to be mounted at the same place like in its Netxcloud container into the go-vod container. Usually this would be `nextcloud_aio_nextcloud_data:/mnt/ncdata:ro` or `$NEXTCLOUD_DATADIR:/mnt/ncdata:ro`.
 
 Finally, point Memories to the external go-vod instance. In the admin interface, set go-vod to external and configure the connect URL to `go-vod:47788`. Alternatively, add the following configuration to `config.php`:
 
@@ -132,6 +136,9 @@ If you use Docker, you need to:
    ```
 
 1. Check the output of `/tmp/go-vod/<instance-id>.log` if playback has issues
+
+### Nextcloud AIO
+See https://github.com/nextcloud/all-in-one#how-to-enable-hardware-transcoding-for-nextcloud
 
 ### linuxserver/nextcloud image
 
