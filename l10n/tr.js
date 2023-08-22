@@ -56,9 +56,9 @@ OC.L10N.register(
     "Add to album" : "Albüme ekle",
     "Move to person" : "Kişiye taşı",
     "Remove from person" : "Kişiden kaldır",
-    "You are about to download a large number of files. Are you sure?" : "Çok sayıda dosyayı indirmek üzeresiniz. Bunu yapmak istediğinize emin misiniz?",
-    "You are about to delete a large number of files. Are you sure?" : "Çok sayıda dosyayı silmek üzeresiniz. Bunu yapmak istediğinize emin misiniz?",
+    "Continue" : "Sürdür",
     "Failed to delete files" : "Dosyalar silinemedi",
+    "Move" : "Taşı",
     "You must enable \"Mark person in preview\" to use this feature" : "Bu özelliği kullanabilmek için \"Kişiyi ön izlemede işaretle\" seçeneğini etkinleştirmelisiniz",
     "Only user \"{user}\" can update this person" : "Bu kişiyi yalnızca \"{user}\" kullanıcısı güncelleyebilir",
     "_{n} selected_::_{n} selected_" : ["{n} seçilmiş","{n} seçilmiş"],
@@ -285,7 +285,6 @@ OC.L10N.register(
     "Enter name of the new face" : "Yeni yüz için bir ad yazın",
     "Failed to create face" : "Yüz eklenemedi",
     "Merge {name} with person" : "{name} kişisini kişi ile birleştir",
-    "Are you sure you want to merge {name} with {newName}?" : "{name} kişisini {newName} kişisi ile birleştirmek istediğinize emin misiniz?",
     "Too many failures, aborting" : "Çok sayıda sorun çıktı, vazgeçiliyor",
     "Error while moving {basename}" : "{basename} taşınırken sorun çıktı",
     "Failed to move {name}." : "{name} taşınamadı.",
@@ -358,7 +357,6 @@ OC.L10N.register(
     "Save as" : "Farklı kaydet",
     "All changes will be lost." : "Tüm değişiklikler kaybolacak.",
     "Are you sure you want to continue?" : "İşlemi sürdürmek istediğinize emin misiniz?",
-    "Continue" : "Sürdür",
     "Undo" : "Geri al",
     "Redo" : "Yinele",
     "Show original image" : "Özgün görseli görüntüle",
@@ -470,6 +468,8 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "Zaman tünelinizde görmek istemediğiniz fotoğrafları arşivleyin",
     "Tag photos to find them easily" : "Fotoğrafları kolayca bulabilmek için etiketleyin",
     "Recognize is still working on your photos" : "Recognize fotoğraflarınız üzerinde çalışmayı bitirmedi",
-    "Places you have been to will appear here" : "Bulunduğunuz yerler burada görüntülenecek"
+    "Places you have been to will appear here" : "Bulunduğunuz yerler burada görüntülenecek",
+    "Yes" : "Evet",
+    "No" : "Hayır"
 },
 "nplurals=2; plural=(n > 1);");

@@ -17,6 +17,8 @@ OC.L10N.register(
     "Favorite" : "რჩეული",
     "Unarchive" : "ამოღება",
     "View in folder" : "ჩვენება დირექტორიაში",
+    "Continue" : "გაგრძელება",
+    "Move" : "გადატანა",
     "General" : "ზოგადი",
     "Account" : "ანგარიში",
     "Close" : "დახურვა",
@@ -49,12 +51,12 @@ OC.L10N.register(
     "Share" : "გაზიარება",
     "Previous" : "წინა",
     "Next" : "შემდეგი",
-    "Continue" : "გაგრძელება",
     "Undo" : "დაბრუნება",
     "Custom" : "ინდივიდუალური",
     "Value" : "მნიშვნელობა",
     "Text" : "ტექსტი",
     "Size" : "ზომა",
-    "Position" : "პოზიცია"
+    "Position" : "პოზიცია",
+    "Yes" : "დიახ"
 },
 "nplurals=2; plural=(n!=1);");

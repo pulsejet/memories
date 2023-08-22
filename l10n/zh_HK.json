@@ -54,10 +54,9 @@
     "Add to album" : "添加至相簿",
     "Move to person" : "移動到人",
     "Remove from person" : "從人中刪除",
-    "You are about to download a large number of files. Are you sure?" : "您即將下載大量檔案。你確定嗎？",
-    "You are about to delete a large number of files. Are you sure?" : "您即將刪除大量檔案。你確定嗎？",
+    "Continue" : "繼續",
     "Failed to delete files" : "刪除檔案失敗",
-    "You are about to move a large number of files. Are you sure?" : "您將要移動大量檔案。你確定嗎？",
+    "Move" : "移動",
     "You must enable \"Mark person in preview\" to use this feature" : "您必須啟用「在預覽中標記人」以使用此功能",
     "Only user \"{user}\" can update this person" : "僅用戶「{user}」可以更新此人",
     "_{n} selected_::_{n} selected_" : ["已選擇 {n} 個"],
@@ -132,6 +131,7 @@
     "Looks like it has been more than an hour since the last index job was run. Make sure Nextcloud cron is configured correctly." : "看起來距離上次運行索引作業已經過去一個多小時了。 確保 Nextcloud cron 配置正確。",
     "Only server-side encryption (OC_DEFAULT_MODULE) is supported, but another encryption module is enabled." : "僅支持伺服器端加密（OC_DEFAULT_MODULE），但已啟用另一個加密模塊。",
     "The EXIF indexes are built and checked in a periodic background task. Be careful when selecting anything other than automatic indexing. For example, setting the indexing to only timeline folders may cause delays before media becomes available to users, since the user configures the timeline only after logging in." : "EXIF 索引是在定期後台任務中建立和檢查的。選擇自動索引以外的任何內容時要小心。例如，將索引設置為僅時間線資料夾可能會導致媒體在用戶可用之前出現延遲，因為用戶僅在登錄後配置時間線。",
+    "Folders with a \".nomedia\" or a \".nomemories\" file are always excluded from indexing." : "具有“.nomedia”或“.nomemories”檔案的資料夾始終從索引中排除。",
     "Index all media automatically (recommended)" : "自動索引所有媒體（推薦）",
     "Index per-user timeline folders (not recommended)" : "索引每個用戶的時間線資料夾（不推薦）",
     "Index a fixed relative path" : "索引一個固定的相對途徑",
@@ -290,7 +290,6 @@
     "Enter name of the new face" : "輸入新面孔的名字",
     "Failed to create face" : "創建面孔失敗",
     "Merge {name} with person" : "將 {name} 與人合併",
-    "Are you sure you want to merge {name} with {newName}?" : "您確定要將 {name} 與 {newName} 合併嗎？",
     "Too many failures, aborting" : "失敗次數過多，中止",
     "Error while moving {basename}" : "移動 {basename} 時出錯",
     "Failed to move {name}." : "移動 {name} 失敗。",
@@ -364,7 +363,6 @@
     "Save as" : "另存為",
     "All changes will be lost." : "所有的更改將被掉棄。",
     "Are you sure you want to continue?" : "您確定要繼續嗎？",
-    "Continue" : "繼續",
     "Undo" : "撤消",
     "Redo" : "重作",
     "Show original image" : "顯示原始圖像",
@@ -476,6 +474,8 @@
     "Archive photos you don't want to see in your timeline" : "封存您不想要在時間軸中看到的照片",
     "Tag photos to find them easily" : "為照片加上標籤以輕鬆地找到它們",
     "Recognize is still working on your photos" : "Recognize 仍在處理您的照片",
-    "Places you have been to will appear here" : "您去過的地方會出現在此處"
+    "Places you have been to will appear here" : "您去過的地方會出現在此處",
+    "Yes" : "是",
+    "No" : "否"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

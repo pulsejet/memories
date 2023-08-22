@@ -16,6 +16,8 @@ OC.L10N.register(
     "Delete" : "Șterge",
     "Favorite" : "Favorite",
     "View in folder" : "Vizualizează în director",
+    "Continue" : "Continuă",
+    "Move" : "Mută",
     "General" : "General",
     "Account" : "Cont",
     "Close" : "Închide",
@@ -49,12 +51,12 @@ OC.L10N.register(
     "Share" : "Partajează",
     "Previous" : "Precedentul",
     "Next" : "Următorul",
-    "Continue" : "Continuă",
     "Undo" : "Anulează ultima acțiune",
     "Custom" : "Particularizat",
     "Text" : "Text",
     "Size" : "Mărime",
     "Position" : "Poziție",
-    "Auto" : "Auto"
+    "Auto" : "Auto",
+    "Yes" : "Da"
 },
 "nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));");

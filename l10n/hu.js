@@ -55,9 +55,9 @@ OC.L10N.register(
     "Add to album" : "Hozzáadás az albumhoz",
     "Move to person" : "Áthelyezés egy személyhez",
     "Remove from person" : "Eltávolítás a személytől",
-    "You are about to download a large number of files. Are you sure?" : "Sok fájl letöltésére készül. Biztos benne?",
-    "You are about to delete a large number of files. Are you sure?" : "Sok fájl törlésére készül. Biztos benne?",
+    "Continue" : "Folytatás",
     "Failed to delete files" : "A fájlok törlése sikertelen",
+    "Move" : "Áthelyezés",
     "You must enable \"Mark person in preview\" to use this feature" : "A funkció használatához engedélyeznie kell a „Személy megjelölése az előnézetben” beállítást",
     "Only user \"{user}\" can update this person" : "Csak „{user}” felhasználó frissítheti ezt a személyt",
     "_{n} selected_::_{n} selected_" : ["{n} kiválasztva","{n} kiválasztva"],
@@ -255,7 +255,6 @@ OC.L10N.register(
     "Enter name of the new face" : "Adja meg az új arc nevét",
     "Failed to create face" : "Az arc létrehozása sikertelen",
     "Merge {name} with person" : "{name} összevonása egy másik személlyel",
-    "Are you sure you want to merge {name} with {newName}?" : "Biztos, hogy összevonja a következőket: {name} és {newName}?",
     "Too many failures, aborting" : "Túl sok hiba, megszakítás",
     "Error while moving {basename}" : "Hiba a(z) {basename} áthelyezése során",
     "Failed to move {name}." : "A(z) {name} áthelyezése sikertelen.",
@@ -327,7 +326,6 @@ OC.L10N.register(
     "Save as" : "Mentés másként",
     "All changes will be lost." : "Az összes változtatás elvész.",
     "Are you sure you want to continue?" : "Biztos, hogy folytatja?",
-    "Continue" : "Folytatás",
     "Undo" : "Visszavonás",
     "Redo" : "Újra",
     "Show original image" : "Eredeti kép megjelenítése",
@@ -436,6 +434,8 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "Archiválja azokat a fényképeket, melyeket nem akar az idővonalán látni",
     "Tag photos to find them easily" : "Címkézze a fényképeket, hogy könnyen megtalálja őket",
     "Recognize is still working on your photos" : "A felismerés még mindig dolgozik a fényképein",
-    "Places you have been to will appear here" : "A helyek, ahol volt, itt fognak megjelenni"
+    "Places you have been to will appear here" : "A helyek, ahol volt, itt fognak megjelenni",
+    "Yes" : "Igen",
+    "No" : "Nem"
 },
 "nplurals=2; plural=(n != 1);");

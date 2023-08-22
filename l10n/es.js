@@ -56,9 +56,9 @@ OC.L10N.register(
     "Add to album" : "Añadir al álbum",
     "Move to person" : "Mover a persona",
     "Remove from person" : "Quitar de la persona",
-    "You are about to download a large number of files. Are you sure?" : "Está a punto de descargar un gran número de archivos. ¿Está seguro?",
-    "You are about to delete a large number of files. Are you sure?" : "Está a punto de eliminar un gran número de archivos. ¿Está seguro?",
+    "Continue" : "Continuar",
     "Failed to delete files" : "Fallo al eliminar archivos",
+    "Move" : "Mover",
     "You must enable \"Mark person in preview\" to use this feature" : "Debe habilitar \"Marcar persona en la vista previa\" para utilizar esta característica",
     "Only user \"{user}\" can update this person" : "Solo el usuario \"{user}\" puede actualizar esta persona",
     "_{n} selected_::_{n} selected_" : ["{n} seleccionado","{n} seleccionados","{n} seleccionados"],
@@ -285,7 +285,6 @@ OC.L10N.register(
     "Enter name of the new face" : "Ingrese el nombre de la nueva cara",
     "Failed to create face" : "Fallo al crear la cara",
     "Merge {name} with person" : "Unir {name} con persona",
-    "Are you sure you want to merge {name} with {newName}?" : "¿Está seguro de quiere unir {name} con {newName}?",
     "Too many failures, aborting" : "Demasiados fallos, abortando",
     "Error while moving {basename}" : "Error mientras se movía {basename}",
     "Failed to move {name}." : "Fallo al mover {name}.",
@@ -358,7 +357,6 @@ OC.L10N.register(
     "Save as" : "Guardar como",
     "All changes will be lost." : "Todos los cambios se perderán.",
     "Are you sure you want to continue?" : "¿Está seguro que desea continuar?",
-    "Continue" : "Continuar",
     "Undo" : "Deshacer",
     "Redo" : "Rehacer",
     "Show original image" : "Mostrar imagen original",
@@ -470,6 +468,8 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "Archive las fotos que no quiera ver en su línea de tiempo",
     "Tag photos to find them easily" : "Etiquete las fotos para encontrarlas fácilmente",
     "Recognize is still working on your photos" : "Recognize sigue trabajando en sus fotos",
-    "Places you have been to will appear here" : "Los lugares en los que ha estado aparecerán aquí"
+    "Places you have been to will appear here" : "Los lugares en los que ha estado aparecerán aquí",
+    "Yes" : "Sí",
+    "No" : "No"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

@@ -11,6 +11,7 @@
     "Cancel" : "Diddymu",
     "Delete" : "Dileu",
     "Favorite" : "Ffefryn",
+    "Move" : "Symud",
     "General" : "Cyffredinol",
     "Account" : "Cyfrif",
     "Close" : "Cau",
@@ -40,6 +41,7 @@
     "Undo" : "Dadwneud",
     "Custom" : "Cyfaddas",
     "Size" : "Maint",
-    "Auto" : "Awto"
+    "Auto" : "Awto",
+    "No" : "Na"
 },"pluralForm" :"nplurals=4; plural=(n==1) ? 0 : (n==2) ? 1 : (n != 8 && n != 11) ? 2 : 3;"
 }

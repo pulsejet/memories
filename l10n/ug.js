@@ -10,6 +10,7 @@ OC.L10N.register(
     "Cancel" : "ۋاز كەچ",
     "Delete" : "ئۆچۈر",
     "Favorite" : "يىغقۇچ",
+    "Move" : "Move",
     "General" : "ئادەتتىكى",
     "Close" : "ياپ",
     "Save" : "ساقلا",
@@ -28,6 +29,8 @@ OC.L10N.register(
     "Share" : "ھەمبەھىر",
     "Previous" : "ئالدىنقى",
     "Next" : "كېيىنكى",
-    "Size" : "چوڭلۇقى"
+    "Size" : "چوڭلۇقى",
+    "Yes" : "ھەئە",
+    "No" : "ياق"
 },
 "nplurals=2; plural=(n != 1);");

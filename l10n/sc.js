@@ -20,6 +20,8 @@ OC.L10N.register(
     "Delete" : "Cantzella",
     "Favorite" : "Preferidu",
     "View in folder" : "Càstia in sa cartella",
+    "Continue" : "Sighi",
+    "Move" : "Tràmuda",
     "General" : "Generale",
     "Account" : "Contu",
     "Close" : "Serra",
@@ -61,7 +63,6 @@ OC.L10N.register(
     "Share" : "Cumpartzidura",
     "Previous" : "Pretzedente",
     "Next" : "Imbeniente",
-    "Continue" : "Sighi",
     "Undo" : "Annulla",
     "Redo" : "Torra a fàghere",
     "Zoom in" : "Ammània",
@@ -76,6 +77,8 @@ OC.L10N.register(
     "Name is required." : "Su nùmene est rechertu: ",
     "Quality" : "Calidade",
     "Direct" : "Deretu",
-    "Auto" : "Auto"
+    "Auto" : "Auto",
+    "Yes" : "Si",
+    "No" : "No"
 },
 "nplurals=2; plural=(n != 1);");

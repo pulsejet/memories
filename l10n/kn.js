@@ -9,6 +9,8 @@ OC.L10N.register(
     "Cancel" : "﻿ರದ್ದು",
     "Delete" : "﻿ಅಳಿಸಿ",
     "Favorite" : "ಅಚ್ಚುಮೆಚ್ಚಿನ",
+    "Continue" : "﻿ಮುಂದುವರಿಸಿ",
+    "Move" : "Move",
     "Close" : "ಮುಚ್ಚು",
     "Save" : "﻿ಉಳಿಸಿ",
     "Search" : "Search",
@@ -23,7 +25,8 @@ OC.L10N.register(
     "Sort by name" : "Order by name",
     "Share" : "﻿ಹಂಚಿಕೊಳ್ಳಿ",
     "Next" : "ಮುಂದೆ",
-    "Continue" : "﻿ಮುಂದುವರಿಸಿ",
-    "Size" : "﻿ ಗಾತ್ರ"
+    "Size" : "﻿ ಗಾತ್ರ",
+    "Yes" : "﻿ಹೌದು",
+    "No" : "﻿ಇಲ್ಲ"
 },
 "nplurals=2; plural=(n > 1);");

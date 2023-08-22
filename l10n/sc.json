@@ -18,6 +18,8 @@
     "Delete" : "Cantzella",
     "Favorite" : "Preferidu",
     "View in folder" : "Càstia in sa cartella",
+    "Continue" : "Sighi",
+    "Move" : "Tràmuda",
     "General" : "Generale",
     "Account" : "Contu",
     "Close" : "Serra",
@@ -59,7 +61,6 @@
     "Share" : "Cumpartzidura",
     "Previous" : "Pretzedente",
     "Next" : "Imbeniente",
-    "Continue" : "Sighi",
     "Undo" : "Annulla",
     "Redo" : "Torra a fàghere",
     "Zoom in" : "Ammània",
@@ -74,6 +75,8 @@
     "Name is required." : "Su nùmene est rechertu: ",
     "Quality" : "Calidade",
     "Direct" : "Deretu",
-    "Auto" : "Auto"
+    "Auto" : "Auto",
+    "Yes" : "Si",
+    "No" : "No"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -50,9 +50,9 @@ OC.L10N.register(
     "Add to album" : "Dodaj do albumu",
     "Move to person" : "Przenieś do osoby",
     "Remove from person" : "Usuń z osoby",
-    "You are about to download a large number of files. Are you sure?" : "Zamierzasz pobrać dużą liczbę plików. Jesteś pewny?",
-    "You are about to delete a large number of files. Are you sure?" : "Zamierzasz usunąć dużą liczbę plików. Jesteś pewny?",
+    "Continue" : "Kontynuuj",
     "Failed to delete files" : "Nie udało się usunąć plików",
+    "Move" : "Przenieś",
     "You must enable \"Mark person in preview\" to use this feature" : "Musisz włączyć \"Zaznacz osobę w podglądzie\" aby skorzystać z tej funkcji",
     "Only user \"{user}\" can update this person" : "Tylko użytkownik \"{user}\" może zaktualizować tą osobę",
     "_{n} selected_::_{n} selected_" : ["{n} wybrana","{n} wybrane","{n} wybranych","{n} wybranych"],
@@ -173,7 +173,6 @@ OC.L10N.register(
     "Enter name of the new face" : "Wprowadź nazwę nowej twarzy",
     "Failed to create face" : "Nie udało się utworzyć twarzy",
     "Merge {name} with person" : "Scal {name} z osobą",
-    "Are you sure you want to merge {name} with {newName}?" : "Czy na pewno chcesz scalić  {name} z {newName}?",
     "Too many failures, aborting" : "Zbyt wiele niepowodzeń, przerywanie",
     "Error while moving {basename}" : "Błędy w trakcie przenoszenie {basename}",
     "Failed to move {name}." : "Nie udało się usunąć {name}.",
@@ -240,7 +239,6 @@ OC.L10N.register(
     "Save as" : "Zapisz jako",
     "All changes will be lost." : "Wszystkie zmiany zostaną utracone.",
     "Are you sure you want to continue?" : "Jesteś pewien, że chcesz kontynuować?",
-    "Continue" : "Kontynuuj",
     "Undo" : "Cofnij",
     "Redo" : "Powtórz",
     "Show original image" : "Pokaż oryginalny obraz",
@@ -346,6 +344,8 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "Archiwizuj zdjęcia, których nie chcesz widzieć na swojej osi czasu",
     "Tag photos to find them easily" : "Oznacz zdjęcia, aby łatwo je odnajdywać",
     "Recognize is still working on your photos" : "Aplikacja Rozpoznaj wciąż pracuje nad twoimi zdjęciami",
-    "Places you have been to will appear here" : "Odwiedzone miejsca pokażą się tutaj"
+    "Places you have been to will appear here" : "Odwiedzone miejsca pokażą się tutaj",
+    "Yes" : "Tak",
+    "No" : "Nie"
 },
 "nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);");

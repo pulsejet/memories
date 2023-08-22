@@ -16,6 +16,8 @@ OC.L10N.register(
     "Favorite" : "Ưa thích",
     "Unarchive" : "Bỏ lưu trữ",
     "View in folder" : "Xem trong thư mục",
+    "Continue" : "Tiếp tục",
+    "Move" : "Dịch chuyển",
     "General" : "Cài đặt chung",
     "Account" : "Tài khoản",
     "Close" : "Đóng",
@@ -49,7 +51,6 @@ OC.L10N.register(
     "Share" : "Chia sẻ",
     "Previous" : "Trước",
     "Next" : "Tiếp theo",
-    "Continue" : "Tiếp tục",
     "Undo" : "Hoàn tác",
     "Redo" : "Làm lại",
     "Custom" : "Tùy chỉnh",
@@ -59,6 +60,7 @@ OC.L10N.register(
     "Text" : "Văn bản",
     "Size" : "Kích cỡ",
     "Name is required." : "Tên là bắt buộc.",
-    "Auto" : "Tự động"
+    "Auto" : "Tự động",
+    "Yes" : "Có"
 },
 "nplurals=1; plural=0;");

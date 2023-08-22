@@ -12,6 +12,8 @@ OC.L10N.register(
     "Delete" : "ລຶບ",
     "Favorite" : "ລາຍການທີ່ມັກ",
     "View in folder" : "ເບິ່ງໃນໂຟນເດີ",
+    "Continue" : "ສືບຕໍ່",
+    "Move" : "ຍ້າຍ",
     "General" : "ທົ່ວໄປ",
     "Close" : "ປິດ",
     "Unknown" : "ບໍ່ຮູ້",
@@ -27,8 +29,8 @@ OC.L10N.register(
     "Share" : "ແບ່ງປັນ",
     "Previous" : "ກ່ອນໜ້າ",
     "Next" : "ທັດໄປ",
-    "Continue" : "ສືບຕໍ່",
     "Original" : "ຕົ້ນສະບັບ",
-    "Size" : "ຂະຫນາດ"
+    "Size" : "ຂະຫນາດ",
+    "No" : "ບໍ່"
 },
 "nplurals=1; plural=0;");

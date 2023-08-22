@@ -53,9 +53,9 @@ OC.L10N.register(
     "Add to album" : "앨범에 추가",
     "Move to person" : "사람으로 이동",
     "Remove from person" : "사람에서 제거",
-    "You are about to download a large number of files. Are you sure?" : "많은 파일을 다운로드 하려고 합니다. 확인하셨나요?",
-    "You are about to delete a large number of files. Are you sure?" : "많은 파일을 삭제하려고 합니다. 확인하셨나요?",
+    "Continue" : "계속",
     "Failed to delete files" : "파일 삭제 실패",
+    "Move" : "이동",
     "You must enable \"Mark person in preview\" to use this feature" : "이 기능을 사용하려면 \"미리 보기에 사람 표시\"를 사용해야 합니다.",
     "Only user \"{user}\" can update this person" : "\"{user}\"님만 이 사람을 업데이트할 수 있습니다.",
     "_{n} selected_::_{n} selected_" : ["{n}개 선택됨"],
@@ -248,7 +248,6 @@ OC.L10N.register(
     "Enter name of the new face" : "새 얼굴에 이름을 입력하세요.",
     "Failed to create face" : "얼굴을 만들지 못했습니다.",
     "Merge {name} with person" : "사람에 {name}(을)를 병합",
-    "Are you sure you want to merge {name} with {newName}?" : "{name}에 {newName}(을)를 병합하시겠습니까?",
     "Too many failures, aborting" : "너무 많이 실패하여 취소함",
     "Error while moving {basename}" : "{basename} 이동 중 실패",
     "Failed to move {name}." : "{name}(을)를 이동하지 못했습니다.",
@@ -319,7 +318,6 @@ OC.L10N.register(
     "Save as" : "다른 이름으로 저장",
     "All changes will be lost." : "모든 변경 사항을 잃게 됩니다.",
     "Are you sure you want to continue?" : "계속하시겠습니까?",
-    "Continue" : "계속",
     "Undo" : "실행 취소",
     "Redo" : "다시 실행",
     "Show original image" : "원본 이미지 표시",
@@ -428,6 +426,8 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "타임라인에서 보고 싶지 않은 사진을 보관하세요.",
     "Tag photos to find them easily" : "사진에 태그를 달아 쉽게 찾으세요.",
     "Recognize is still working on your photos" : "사진을 계속 인식하는 중입니다.",
-    "Places you have been to will appear here" : "갔었던 장소가 이곳에 나타납니다."
+    "Places you have been to will appear here" : "갔었던 장소가 이곳에 나타납니다.",
+    "Yes" : "예",
+    "No" : "아니오"
 },
 "nplurals=1; plural=0;");

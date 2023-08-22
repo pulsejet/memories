@@ -10,6 +10,8 @@ OC.L10N.register(
     "Cancel" : "Sefsex",
     "Delete" : "Kkes",
     "Favorite" : "Menyif",
+    "Continue" : "Continuer",
+    "Move" : "Senkez",
     "General" : "Amatu",
     "Close" : "Mdel",
     "Unknown" : "Arussin",
@@ -27,7 +29,8 @@ OC.L10N.register(
     "Share" : "Bḍu",
     "Previous" : "Ɣer deffir",
     "Next" : "Uḍfir",
-    "Continue" : "Continuer",
-    "Size" : "Teɣzi"
+    "Size" : "Teɣzi",
+    "Yes" : "Oui",
+    "No" : "Uhu"
 },
 "nplurals=2; plural=(n != 1);");

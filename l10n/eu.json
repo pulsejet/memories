@@ -46,8 +46,8 @@
     "Add to album" : "Gehitu albumera",
     "Move to person" : "Mugitu pertsonara",
     "Remove from person" : "Kendu pertsonatik",
-    "You are about to download a large number of files. Are you sure?" : "Fitxategi asko deskargatuko dituzu. Ziur zaude?",
-    "You are about to delete a large number of files. Are you sure?" : "Fitxategi asko ezabatuko dituzu. Ziur zaude?",
+    "Continue" : "Jarraitu",
+    "Move" : "Mugitu",
     "_{n} selected_::_{n} selected_" : ["{n} hautatuta","{n} hautatuta"],
     "Memories Settings" : "Memories-en ezarpenak",
     "General" : "Orokorra",
@@ -205,7 +205,6 @@
     "Failed to rename {oldName} to {name}." : "{oldName} {name}(e)ra aldatzeak huts egin du.",
     "Loading …" : "Kargatzen …",
     "Merge {name} with person" : "Batu {izena} pertsonarekin",
-    "Are you sure you want to merge {name} with {newName}?" : "Ziur {name} eta {newName} batu nahi dituzula?",
     "Too many failures, aborting" : "Hutsegite gehiegi, abortatzen",
     "Error while moving {basename}" : "Errorea {basename} mugitzen",
     "Failed to move {name}." : "{name} mugitzeak huts egin du.",
@@ -269,7 +268,6 @@
     "Save as" : "Gorde honela",
     "All changes will be lost." : "Aldaketa guztiak galduko dira.",
     "Are you sure you want to continue?" : "Ziur zaude jarraitu nahi duzula?",
-    "Continue" : "Jarraitu",
     "Undo" : "Desegin",
     "Redo" : "Berregin",
     "Show original image" : "Erakutsi jatorrizko irudia",
@@ -377,6 +375,8 @@
     "Archive photos you don't want to see in your timeline" : "Artxibatu zure denbora-lerroan ikusi nahi ez dituzun argazkiak",
     "Tag photos to find them easily" : "Etiketatu argazkiak modu errazean aurkitzeko",
     "Recognize is still working on your photos" : "Hautematea zure argazkietan lanean ari da oraindik",
-    "Places you have been to will appear here" : "Hemen egon zaren tokiak agertuko dira"
+    "Places you have been to will appear here" : "Hemen egon zaren tokiak agertuko dira",
+    "Yes" : "Bai",
+    "No" : "Ez"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

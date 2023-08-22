@@ -7,6 +7,8 @@
     "Cancel" : "﻿ರದ್ದು",
     "Delete" : "﻿ಅಳಿಸಿ",
     "Favorite" : "ಅಚ್ಚುಮೆಚ್ಚಿನ",
+    "Continue" : "﻿ಮುಂದುವರಿಸಿ",
+    "Move" : "Move",
     "Close" : "ಮುಚ್ಚು",
     "Save" : "﻿ಉಳಿಸಿ",
     "Search" : "Search",
@@ -21,7 +23,8 @@
     "Sort by name" : "Order by name",
     "Share" : "﻿ಹಂಚಿಕೊಳ್ಳಿ",
     "Next" : "ಮುಂದೆ",
-    "Continue" : "﻿ಮುಂದುವರಿಸಿ",
-    "Size" : "﻿ ಗಾತ್ರ"
+    "Size" : "﻿ ಗಾತ್ರ",
+    "Yes" : "﻿ಹೌದು",
+    "No" : "﻿ಇಲ್ಲ"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }

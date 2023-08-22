@@ -34,6 +34,7 @@ OC.L10N.register(
     "Next" : "ඊළඟ",
     "Undo" : "පෙරසේ",
     "Value" : "අගය",
-    "Size" : "ප්‍රමාණය"
+    "Size" : "ප්‍රමාණය",
+    "No" : "නැහැ"
 },
 "nplurals=2; plural=(n != 1);");

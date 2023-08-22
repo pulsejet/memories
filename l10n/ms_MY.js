@@ -8,6 +8,7 @@ OC.L10N.register(
     "Edit" : "Sunting",
     "Cancel" : "Batal",
     "Delete" : "Padam",
+    "Move" : "Move",
     "General" : "Umum",
     "Close" : "Tutup",
     "Back" : "Kembali",
@@ -27,6 +28,8 @@ OC.L10N.register(
     "Share" : "Kongsi",
     "Previous" : "Sebelum",
     "Next" : "Seterus",
-    "Size" : "Saiz"
+    "Size" : "Saiz",
+    "Yes" : "Ya",
+    "No" : "Tidak"
 },
 "nplurals=1; plural=0;");

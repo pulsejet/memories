@@ -12,6 +12,8 @@ OC.L10N.register(
     "Delete" : "Läschen",
     "Favorite" : "Favorit",
     "View in folder" : "Kuk am Dossier ",
+    "Continue" : "Weider",
+    "Move" : "Verschieben",
     "General" : "Allgemeng",
     "Close" : "Zoumaachen",
     "Unknown" : "Onbekannt",
@@ -37,8 +39,9 @@ OC.L10N.register(
     "Share" : "Deelen",
     "Previous" : "Zeréck",
     "Next" : "Weider",
-    "Continue" : "Weider",
     "Custom" : "Individualiséier",
-    "Size" : "Gréisst"
+    "Size" : "Gréisst",
+    "Yes" : "Jo",
+    "No" : "Nee"
 },
 "nplurals=2; plural=(n != 1);");

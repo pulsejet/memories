@@ -15,6 +15,8 @@
     "Favorite" : "I/E Preferuar",
     "Unarchive" : "Hiq nga arkivi",
     "View in folder" : "Shikoje në dosje",
+    "Continue" : "Vazhdo",
+    "Move" : "Zhvendos",
     "General" : "Të përgjithshme",
     "Account" : "Llogari",
     "Close" : "Mbylleni",
@@ -46,7 +48,6 @@
     "Share" : "Shpërndaje",
     "Previous" : "I mëparshëm",
     "Next" : "Tjetër",
-    "Continue" : "Vazhdo",
     "Undo" : "Ktheje pas",
     "Redo" : "Ribëj",
     "Custom" : "E përshtatur",
@@ -54,6 +55,7 @@
     "Text" : "Tekst",
     "Size" : "Madhësi",
     "Position" : "Pozicion",
-    "Name is required." : "Emri është i domosdoshëm"
+    "Name is required." : "Emri është i domosdoshëm",
+    "Yes" : "Po"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

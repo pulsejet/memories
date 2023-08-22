@@ -26,6 +26,8 @@ OC.L10N.register(
     "Unarchive" : "Togli dall'archivio",
     "View in folder" : "Visualizza nella cartella",
     "Add to album" : "Aggiungi all'album",
+    "Continue" : "Continua",
+    "Move" : "Sposta",
     "General" : "Generale",
     "Account" : "Account",
     "Close" : "Chiudi",
@@ -106,7 +108,6 @@ OC.L10N.register(
     "Save as" : "Salva come",
     "All changes will be lost." : "Tutte le modifiche verranno perse.",
     "Are you sure you want to continue?" : "Sei sicuro di voler continuare?",
-    "Continue" : "Continua",
     "Undo" : "Annulla",
     "Redo" : "Rifai",
     "Show original image" : "Mostra immagine originale",
@@ -190,6 +191,8 @@ OC.L10N.register(
     "Auto" : "Automatico",
     "Failed to create {albumName}." : "Creazione di {albumName} non riuscita",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Rinominazione di {currentAlbumName} in {newAlbumName} non riuscita.",
-    "Failed to delete {fileName}." : "Eliminazione di {fileName} non riuscita."
+    "Failed to delete {fileName}." : "Eliminazione di {fileName} non riuscita.",
+    "Yes" : "Si",
+    "No" : "No"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

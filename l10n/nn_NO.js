@@ -12,6 +12,8 @@ OC.L10N.register(
     "Cancel" : "Avbryt",
     "Delete" : "Slett",
     "Favorite" : "Favoritt",
+    "Continue" : "Gå vidare",
+    "Move" : "Move",
     "General" : "Generelt",
     "Close" : "Lat att",
     "Unknown" : "Ukjend",
@@ -36,7 +38,6 @@ OC.L10N.register(
     "Share" : "Del",
     "Previous" : "Førre",
     "Next" : "Neste",
-    "Continue" : "Gå vidare",
     "Value" : "Verdi",
     "Size" : "Storleik"
 },

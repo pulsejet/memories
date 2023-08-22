@@ -16,6 +16,8 @@
     "Delete" : "Suprimir",
     "Favorite" : "Favorit",
     "View in folder" : "Veire dins lo dossièr",
+    "Continue" : "Contunhar",
+    "Move" : "Desplaçar",
     "General" : "Generals",
     "Account" : "Compte",
     "Close" : "Tampar",
@@ -50,7 +52,6 @@
     "Share" : "Partejar",
     "Previous" : "Precedent",
     "Next" : "Seguent",
-    "Continue" : "Contunhar",
     "Undo" : "Desfar",
     "Redo" : "Refar",
     "Custom" : "Personalizar",
@@ -60,6 +61,8 @@
     "Text" : "Tèxt",
     "Size" : "Talha",
     "Position" : "Posicion",
-    "Extension" : "Extension"
+    "Extension" : "Extension",
+    "Yes" : "Òc",
+    "No" : "Non"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }

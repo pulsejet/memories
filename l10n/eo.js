@@ -16,6 +16,8 @@ OC.L10N.register(
     "Delete" : "Forigi",
     "Favorite" : "Pliŝatati",
     "View in folder" : "Vidi en dosierujo",
+    "Continue" : "Daŭrigi",
+    "Move" : "Movi",
     "General" : "Ĝenerala",
     "Account" : "Konto",
     "Close" : "Malfermi",
@@ -51,7 +53,6 @@ OC.L10N.register(
     "Share" : "Kunhavigi",
     "Previous" : "Antaŭa",
     "Next" : "Sekva",
-    "Continue" : "Daŭrigi",
     "Undo" : "Malfari",
     "Redo" : "Refari",
     "Custom" : "Propra",
@@ -59,6 +60,8 @@ OC.L10N.register(
     "Size" : "Grando",
     "Position" : "Loko",
     "Extension" : "Dosiersufikso",
-    "Auto" : "Aŭtomate"
+    "Auto" : "Aŭtomate",
+    "Yes" : "Jes",
+    "No" : "Ne"
 },
 "nplurals=2; plural=(n != 1);");
