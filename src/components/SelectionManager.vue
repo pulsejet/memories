@@ -768,10 +768,16 @@ export default defineComponent({
      * Download the currently selected files
      */
     async downloadSelection(selection: Selection) {
-      if (selection.size >= 100) {
-        if (!confirm(this.t('memories', 'You are about to download a large number of files. Are you sure?'))) {
-          return;
-        }
+      if (
+        selection.size >= 100 &&
+        !(await utils.confirmDestructive({
+          title: this.t('memories', 'Download'),
+          message: this.t('memories', 'You are about to download a large number of files.'),
+          confirm: this.t('memories', 'Continue'),
+          cancel: this.t('memories', 'Cancel'),
+        }))
+      ) {
+        return;
       }
       await dav.downloadFilesByPhotos(selection.photosNoDupFileId());
     },
@@ -798,10 +804,16 @@ export default defineComponent({
      * Delete the currently selected photos
      */
     async deleteSelection(selection: Selection) {
-      if (selection.size >= 100) {
-        if (!confirm(this.t('memories', 'You are about to delete a large number of files. Are you sure?'))) {
-          return;
-        }
+      if (
+        selection.size >= 100 &&
+        !(await utils.confirmDestructive({
+          title: this.t('memories', 'Delete'),
+          message: this.t('memories', 'You are about to delete a large number of files'),
+          confirm: this.t('memories', 'Continue'),
+          cancel: this.t('memories', 'Cancel'),
+        }))
+      ) {
+        return;
       }
 
       try {
@@ -834,10 +846,16 @@ export default defineComponent({
      * Archive the currently selected photos
      */
     async archiveSelection(selection: Selection) {
-      if (selection.size >= 100) {
-        if (!confirm(this.t('memories', 'You are about to move a large number of files. Are you sure?'))) {
-          return;
-        }
+      if (
+        selection.size >= 100 &&
+        !(await utils.confirmDestructive({
+          title: this.t('memories', 'Move'),
+          message: this.t('memories', 'You are about to move a large number of files'),
+          confirm: this.t('memories', 'Continue'),
+          cancel: this.t('memories', 'Cancel'),
+        }))
+      ) {
+        return;
       }
 
       for await (let delIds of dav.archiveFilesByIds(Array.from(selection.fileids()), !this.routeIsArchive)) {
