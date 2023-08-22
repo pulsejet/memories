@@ -90,9 +90,7 @@ export function setRenewingTimeout(ctx: any, name: string, callback: (() => void
 }
 
 /** Checks if a object is numeric */
-export function isNumber(num: any) {
-  if (!num) {
-    return false;
-  }
-  return Number(num).toString() === num.toString();
+export function isNumber(num: any): boolean {
+  const cast = Number(num);
+  return !isNaN(cast) && isFinite(cast);
 }

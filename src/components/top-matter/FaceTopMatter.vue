@@ -112,7 +112,7 @@ export default defineComponent({
         return this.t('memories', 'Unassigned faces');
       } else if (!this.name) {
         return this.t('memories', 'People');
-      } else if (!isNaN(Number(this.name))) {
+      } else if (utils.isNumber(this.name)) {
         return this.t('memories', 'Unnamed person');
       }
       return this.name;
@@ -125,7 +125,7 @@ export default defineComponent({
     },
 
     rename() {
-      if (this.name) (<any>this.$refs.editModal)?.open();
+      if (this.isReal) (<any>this.$refs.editModal)?.open();
     },
 
     openUnassigned() {

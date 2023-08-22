@@ -146,6 +146,11 @@ header#header .header-appname {
   -webkit-user-select: none; // iOS Safari is a horrible browser
 }
 
+// Make OC dialogs larger to a minimum width
+.oc-dialog[role='dialog'] {
+  min-width: min(400px, 90vw);
+}
+
 // Make metadata tab scrollbar thin
 #tab-memories-metadata {
   scrollbar-width: thin;

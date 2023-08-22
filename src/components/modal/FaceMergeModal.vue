@@ -36,6 +36,7 @@ import FaceList from './FaceList.vue';
 import Modal from './Modal.vue';
 import client from '../../services/DavClient';
 import * as dav from '../../services/DavRequests';
+import * as utils from '../../services/Utils';
 
 export default defineComponent({
   name: 'FaceMergeModal',
@@ -78,7 +79,19 @@ export default defineComponent({
       const name = this.$route.params.name || '';
 
       const newName = String(face.name || face.cluster_id);
-      if (!confirm(this.t('memories', 'Are you sure you want to merge {name} with {newName}?', { name, newName }))) {
+
+      if (
+        !(await utils.confirmDestructive({
+          title: this.t('memories', 'Merge faces'),
+          message: this.t('memories', 'Merge {name} with {newName}?', {
+            name: utils.isNumber(name) ? this.t('memories', 'unnamed person') : name,
+            newName: utils.isNumber(newName) ? this.t('memories', 'unnamed person') : newName,
+          }),
+          confirm: this.t('memories', 'Continue'),
+          confirmClasses: 'error',
+          cancel: this.t('memories', 'Cancel'),
+        }))
+      ) {
         return;
       }
 

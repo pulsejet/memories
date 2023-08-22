@@ -30,6 +30,7 @@ import FaceList from './FaceList.vue';
 
 import Modal from './Modal.vue';
 import * as dav from '../../services/DavRequests';
+import * as utils from '../../services/Utils';
 
 export default defineComponent({
   name: 'FaceMoveModal',
@@ -90,7 +91,19 @@ export default defineComponent({
       const name = this.$route.params.name || '';
       const target = String(face.name || face.cluster_id);
 
-      if (!confirm(this.t('memories', 'Move the selected photos to {target}?', { target }))) return;
+      if (
+        !(await utils.confirmDestructive({
+          title: this.t('memories', 'Move to person'),
+          message: this.t('memories', 'Move the selected photos to {target}?', {
+            target: utils.isNumber(target) ? this.t('memories', 'unnamed person') : target,
+          }),
+          confirm: this.t('memories', 'Move'),
+          confirmClasses: 'primary',
+          cancel: this.t('memories', 'Cancel'),
+        }))
+      ) {
+        return;
+      }
 
       try {
         this.show = false;

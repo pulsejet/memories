@@ -288,23 +288,18 @@ export default defineComponent({
     /**
      * Show warning if unsaved changes
      */
-    onExitWithoutSaving() {
-      (<any>OC.dialogs).confirmDestructive(
-        translations.changesLoseConfirmation + '\n\n' + translations.changesLoseConfirmationHint,
-        this.t('memories', 'Unsaved changes'),
-        {
-          type: (<any>OC.dialogs).YES_NO_BUTTONS,
+    async onExitWithoutSaving() {
+      if (
+        await utils.confirmDestructive({
+          title: this.t('memories', 'Unsaved changes'),
+          message: translations.changesLoseConfirmation + '\n\n' + translations.changesLoseConfirmationHint,
           confirm: this.t('memories', 'Drop changes'),
           confirmClasses: 'error',
           cancel: translations.cancel,
-        },
-        (decision) => {
-          if (!decision) {
-            return;
-          }
-          this.onClose('warning-ignored', false);
-        }
-      );
+        })
+      ) {
+        this.onClose('warning-ignored', false);
+      }
     },
 
     // Key Handlers, override default Viewer arrow and escape key

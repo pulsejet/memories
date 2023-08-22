@@ -264,20 +264,18 @@ export default defineComponent({
       await nativex.setLocalFolders(this.localFolders);
     },
 
-    logout() {
-      (<any>OC.dialogs).confirmDestructive(
-        this.t('memories', 'Are you sure you want to log out {user}?', { user: this.user }),
-        this.t('memories', 'Sign out'),
-        {
-          type: (<any>OC.dialogs).YES_NO_BUTTONS,
+    async logout() {
+      if (
+        await utils.confirmDestructive({
+          title: this.t('memories', 'Sign out'),
+          message: this.t('memories', 'Are you sure you want to log out {user}?', { user: this.user }),
           confirm: this.t('memories', 'Sign out'),
           confirmClasses: 'error',
           cancel: this.t('memories', 'Cancel'),
-        },
-        (decision) => {
-          if (decision) nativex.logout();
-        }
-      );
+        })
+      ) {
+        nativex.logout();
+      }
     },
   },
 });
