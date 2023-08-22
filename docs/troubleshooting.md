@@ -8,7 +8,11 @@ This page contains solutions to common problems. If you are facing any issues, p
 
 ## Performance
 
-Memories is very fast, but its performance largely depends on how well the Nextcloud instance is tuned. If you are using Nextcloud AIO, you don't need to read any further as all mentioned things are automatically configured. Otherwise make sure to follow the following steps:
+!!! tip "Nextcloud AIO"
+
+    If you are using [AIO](https://github.com/nextcloud/all-in-one), these options should be configured by default.
+
+Memories is very fast, but its performance largely depends on how well the Nextcloud instance is tuned.
 
 - Make sure you are running the latest stable version of Nextcloud and Memories.
 - Follow the steps in the [server tuning](https://docs.nextcloud.com/server/latest/admin_manual/installation/server_tuning.html) documentation.
@@ -30,7 +34,7 @@ This means that Memories is unable to find any indexed photos in your Nextcloud 
 
 ## Issues with Docker
 
-Note: Using the community Nextcloud Docker image is the recommended way of running Memories. If you are using a different image, you may run into issues. Nextcloud AIO is a good options as well.
+Note: Using the community [Nextcloud Docker](https://hub.docker.com/_/nextcloud/) image or [AIO](https://github.com/nextcloud/all-in-one) are the recommended ways of running Memories. If you are using a different image, you may run into issues. Please file any bugs you find on GitHub.
 
 ### OCC commands fail
 
@@ -41,7 +45,7 @@ docker exec -it my_nc_container php occ memories:index
 #           ^^^  <-- this is required
 ```
 
-With Nextcloud AIO, see https://github.com/nextcloud/all-in-one#how-to-run-occ-commands
+If you are using Nextcloud AIO, see [this documentation](https://github.com/nextcloud/all-in-one#how-to-run-occ-commands).
 
 !!! warning "OCCWeb"
 
@@ -58,7 +62,7 @@ app:
     - /tmp:exec
 ```
 
-TMPFS is automatically configured when using Nextcloud AIO. 
+`tpmfs` is automatically configured when using Nextcloud AIO v7.0.0.
 
 ## Reverse Geocoding (Places)
 

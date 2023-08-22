@@ -11,9 +11,8 @@ This page describes how to install the latest version of Memories.
 Memories is an app for [Nextcloud](https://nextcloud.com/), so you need to install Nextcloud first. You can find the installation instructions [here](https://docs.nextcloud.com/server/latest/admin_manual/installation/).
 
 For the best experience, we recommend to use the latest stable version of Nextcloud and PHP.
-For easy setup and maintenance, you can use the community Nextcloud Docker image, and add extra dependencies
-using a custom Dockerfile.
-Another good option is to use [Nextcloud AIO](https://github.com/nextcloud/all-in-one#how-to-use-this). There you don't need to build your custom Nextcloud container as everything needed is bundled.
+For easy setup and maintenance, you can use the community Nextcloud Docker image, and add extra dependencies using a custom Dockerfile.
+Another option is to use [Nextcloud AIO](https://github.com/nextcloud/all-in-one#how-to-use-this), in which case most dependencies are already installed.
 
 ## Requirements
 
