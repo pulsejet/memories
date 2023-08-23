@@ -57,6 +57,7 @@ OC.L10N.register(
     "Remove from person" : "Odebrat z osoby",
     "Continue" : "Pokračovat",
     "Failed to delete files" : "Nepodařilo se smazat soubory",
+    "Move" : "Přesunout",
     "You must enable \"Mark person in preview\" to use this feature" : "Aby bylo možné používat tuto funkci, je třeba zapnout „Označovat osobu v náhledu",
     "Only user \"{user}\" can update this person" : "Tuto osobu může aktualizovat pouze uživatel „{user}“",
     "_{n} selected_::_{n} selected_" : ["{n} vybráno","{n} vybrány","{n} vybráno","{n} vybrány"],
@@ -474,6 +475,8 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "Fotky, které nechcete vidět na časové ose zaarchivujte",
     "Tag photos to find them easily" : "Abyste je snadno našli, opatřujte fotky štítky",
     "Recognize is still working on your photos" : "Stále ještě probíhá rozpoznávání vašich fotek",
-    "Places you have been to will appear here" : "Objeví se zde místa, na kterých jste byli"
+    "Places you have been to will appear here" : "Objeví se zde místa, na kterých jste byli",
+    "Yes" : "Ano",
+    "No" : "Ne"
 },
 "nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;");

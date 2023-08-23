@@ -10,6 +10,7 @@ OC.L10N.register(
     "Delete" : "Obriši",
     "Favorite" : "Favorit",
     "Continue" : "Nastavi",
+    "Move" : "Move",
     "Close" : "Zatvori",
     "Unknown" : "Nepoznato",
     "Save" : "Spremi",
@@ -27,6 +28,8 @@ OC.L10N.register(
     "Share" : "Podjeli",
     "Previous" : "Prethodno",
     "Next" : "Sljedeće",
-    "Size" : "Veličina"
+    "Size" : "Veličina",
+    "Yes" : "Da",
+    "No" : "Ne"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);");

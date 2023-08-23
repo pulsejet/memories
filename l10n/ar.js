@@ -56,8 +56,12 @@ OC.L10N.register(
     "Add to album" : "إضِف إلى ألبوم",
     "Move to person" : "نقل إلى فئة شخص",
     "Remove from person" : "إزالة من شخصٍ",
+    "You are about to download a large number of files." : "أنت على وشك تنزيل عدد كبير من الملفات.",
     "Continue" : "متابعة",
+    "You are about to delete a large number of files" : "أنت على وشك حذف عدد كبير من الملفات",
     "Failed to delete files" : "فشل في حذف الملفات",
+    "Move" : "نقل",
+    "You are about to move a large number of files" : "أنت على وشك نقل عدد كبير من الملفات",
     "You must enable \"Mark person in preview\" to use this feature" : "يجب عليك تمكين \"تمييز شخص في المعاينة\" لاستخدام هذه الميزة",
     "Only user \"{user}\" can update this person" : "يمكن للمستخدم \"{user}\" فقط تحديث هذا الشخص",
     "_{n} selected_::_{n} selected_" : ["تم تحديد {n}","تم تحديد {n}","تم تحديد {n}","تم تحديد {n}","تم تحديد {n}","تم تحديد {n}"],
@@ -291,6 +295,9 @@ OC.L10N.register(
     "Enter name of the new face" : "أدخل اسم الوجه الجديد",
     "Failed to create face" : "فشل في إنشاء الوجه",
     "Merge {name} with person" : "إدمِج {name}  في شخصٍ",
+    "Merge faces" : "دمج الوجوه",
+    "Merge {name} with {newName}?" : "دمج {name} مع {newName}؟",
+    "unnamed person" : "شخصٌ لم بُعطَ اسمه",
     "Too many failures, aborting" : "إخفاقات كثيرة، سيتم الخروج",
     "Error while moving {basename}" : "خطأٌ أثناء نقل {basename}",
     "Failed to move {name}." : "فشل في نقل {name}.",
@@ -475,6 +482,8 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "أرشفة الصور التي لا ترغب في رؤيتها على تسلسلك الزمني",
     "Tag photos to find them easily" : "وسم الصور للعثور عليها بسهولة",
     "Recognize is still working on your photos" : "لا يزال تطبيق التعرف Recognize يعمل على صورك",
-    "Places you have been to will appear here" : "سوف تظهر الأماكن التي قمت بزيارتها هنا"
+    "Places you have been to will appear here" : "سوف تظهر الأماكن التي قمت بزيارتها هنا",
+    "Yes" : "نعم",
+    "No" : "لا"
 },
 "nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;");

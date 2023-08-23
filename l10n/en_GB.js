@@ -56,9 +56,12 @@ OC.L10N.register(
     "Add to album" : "Add to album",
     "Move to person" : "Move to person",
     "Remove from person" : "Remove from person",
+    "You are about to download a large number of files." : "You are about to download a large number of files.",
     "Continue" : "Continue",
+    "You are about to delete a large number of files" : "You are about to delete a large number of files",
     "Failed to delete files" : "Failed to delete files",
     "Move" : "Move",
+    "You are about to move a large number of files" : "You are about to move a large number of files",
     "You must enable \"Mark person in preview\" to use this feature" : "You must enable \"Mark person in preview\" to use this feature",
     "Only user \"{user}\" can update this person" : "Only user \"{user}\" can update this person",
     "_{n} selected_::_{n} selected_" : ["{n} selected","{n} selected"],
@@ -292,6 +295,9 @@ OC.L10N.register(
     "Enter name of the new face" : "Enter name of the new face",
     "Failed to create face" : "Failed to create face",
     "Merge {name} with person" : "Merge {name} with person",
+    "Merge faces" : "Merge faces",
+    "Merge {name} with {newName}?" : "Merge {name} with {newName}?",
+    "unnamed person" : "unnamed person",
     "Too many failures, aborting" : "Too many failures, aborting",
     "Error while moving {basename}" : "Error while moving {basename}",
     "Failed to move {name}." : "Failed to move {name}.",
@@ -476,6 +482,8 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "Archive photos you don't want to see in your timeline",
     "Tag photos to find them easily" : "Tag photos to find them easily",
     "Recognize is still working on your photos" : "Recognize is still working on your photos",
-    "Places you have been to will appear here" : "Places you have been to will appear here"
+    "Places you have been to will appear here" : "Places you have been to will appear here",
+    "Yes" : "Yes",
+    "No" : "No"
 },
 "nplurals=2; plural=(n != 1);");

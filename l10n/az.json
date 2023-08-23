@@ -9,6 +9,7 @@
     "Cancel" : "Dayandır",
     "Delete" : "Sil",
     "Favorite" : "İstəkli",
+    "Move" : "Move",
     "General" : "Ümumi",
     "Close" : "Bağla",
     "Save" : "Saxla",
@@ -31,6 +32,8 @@
     "Share" : "Paylaş",
     "Previous" : "Əvvələ",
     "Next" : "Növbəti",
-    "Size" : "Həcm"
+    "Size" : "Həcm",
+    "Yes" : "Bəli",
+    "No" : "Xeyir"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

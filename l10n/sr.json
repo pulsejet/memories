@@ -54,9 +54,12 @@
     "Add to album" : "Додај у албум",
     "Move to person" : "Премести у особу",
     "Remove from person" : "Уклони из особе",
+    "You are about to download a large number of files." : "Управо ћете да преузмете велики број фајлова.",
     "Continue" : "Настави",
+    "You are about to delete a large number of files" : "Управо ћете да обришете велики број фајлова",
     "Failed to delete files" : "Фајлови нису могли да се обришу",
     "Move" : "Помери",
+    "You are about to move a large number of files" : "Управо ћете да преместите велики број фајлова",
     "You must enable \"Mark person in preview\" to use this feature" : "Да бисте користили ову могућност, морате да укључите „Означи особу у прегледу”",
     "Only user \"{user}\" can update this person" : "Ову особу може да ажурира само „{user}”",
     "_{n} selected_::_{n} selected_" : ["{n} изабран","{n} изабрана","{n} изабрано"],
@@ -290,6 +293,9 @@
     "Enter name of the new face" : "Унесите име новог лица",
     "Failed to create face" : "Није успело креирање лица",
     "Merge {name} with person" : "Споји {name} са особом",
+    "Merge faces" : "Спајање лица",
+    "Merge {name} with {newName}?" : "Желите ли да се {name} споји са {newName}?",
+    "unnamed person" : "неименована особа",
     "Too many failures, aborting" : "Превише грешака, прекида се",
     "Error while moving {basename}" : "Грешка токома премештања {basename}",
     "Failed to move {name}." : "Није успело премештање {name}.",
@@ -474,6 +480,8 @@
     "Archive photos you don't want to see in your timeline" : "Архивирајте фотографије које не желите да се виде у вашој временској линији",
     "Tag photos to find them easily" : "Означите фотографије да бисте их лакше пронашли",
     "Recognize is still working on your photos" : "Препознавање се још увек обавља над вашим фотографијама",
-    "Places you have been to will appear here" : "Овде ће се појавити места која сте посетили"
+    "Places you have been to will appear here" : "Овде ће се појавити места која сте посетили",
+    "Yes" : "Да",
+    "No" : "Не"
 },"pluralForm" :"nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
 }

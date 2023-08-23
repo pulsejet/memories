@@ -1,0 +1,28 @@
+{ "translations": {
+    "Download" : "Göçürip almak",
+    "Settings" : "Sazlamalar",
+    "Favorites" : "Halanýanlar",
+    "Videos" : "Wideo",
+    "Tags" : "Bellikler",
+    "Edit" : "Redaktirläň",
+    "Photos" : "Suratlar",
+    "Cancel" : "ýatyrmak",
+    "Delete" : "Pozmak",
+    "Favorite" : "Halaýan",
+    "Move" : "Göçüriň",
+    "General" : "Esasy",
+    "Close" : "Ýap",
+    "Unknown" : "Näbelli",
+    "Back" : "Yzyna",
+    "Save" : "Saklamak",
+    "Search" : "Gözlemek",
+    "Name" : "Ady",
+    "Remove" : "Aýyrmak",
+    "Share link" : "Baglanyşyk paýlaş",
+    "Refresh" : "Täzelemek",
+    "Read only" : "Diňe okaň",
+    "Share" : "Paýlaş",
+    "Yes" : "Hawa",
+    "No" : "Ýok"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

@@ -48,6 +48,7 @@ OC.L10N.register(
     "Move to person" : "Преместване към лице",
     "Remove from person" : "Премахване от лице",
     "Continue" : "Продължаване",
+    "Move" : "Преместване",
     "You must enable \"Mark person in preview\" to use this feature" : "За да използвате тази функция, трябва да активирате \"Маркиране на лице в предварителен преглед\".",
     "Only user \"{user}\" can update this person" : "Само потребителят \"{user}\" може да актуализира това лице",
     "_{n} selected_::_{n} selected_" : ["{n} избрани","{n} избрани"],
@@ -400,6 +401,8 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "Архивиране на снимки, които не искате да виждате в своята времева линия /хронология/",
     "Tag photos to find them easily" : "Поставете етикет на снимките, за да ги намирате лесно",
     "Recognize is still working on your photos" : "Разпознаването все още работи по снимките ви",
-    "Places you have been to will appear here" : "Местата, на които сте били, ще се появят тук"
+    "Places you have been to will appear here" : "Местата, на които сте били, ще се появят тук",
+    "Yes" : "Да",
+    "No" : "Не"
 },
 "nplurals=2; plural=(n != 1);");

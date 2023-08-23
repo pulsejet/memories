@@ -11,6 +11,7 @@ OC.L10N.register(
     "Delete" : "মুছে",
     "Favorite" : "প্রিয়জন",
     "Continue" : "চালিয়ে যাও",
+    "Move" : "Move",
     "General" : "সাধারণ",
     "Close" : "বন্ধ",
     "Unknown" : "অজানা",
@@ -35,6 +36,8 @@ OC.L10N.register(
     "Share" : "ভাগাভাগি কর",
     "Previous" : "পূর্ববর্তী",
     "Next" : "পরবর্তী",
-    "Size" : "আকার"
+    "Size" : "আকার",
+    "Yes" : "হ্যাঁ",
+    "No" : "না"
 },
 "nplurals=2; plural=(n != 1);");

@@ -16,6 +16,7 @@ OC.L10N.register(
     "Favorite" : "Gunsteling",
     "View in folder" : "Vertoon in gids",
     "Continue" : "Gaan voort",
+    "Move" : "Skuif",
     "General" : "Algemeen",
     "Account" : "Rekening",
     "Close" : "Sluit",

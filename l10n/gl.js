@@ -56,9 +56,12 @@ OC.L10N.register(
     "Add to album" : "Engadir ao álbum",
     "Move to person" : "Mover a persona",
     "Remove from person" : "Retirar da persoa",
+    "You are about to download a large number of files." : "Está a piques de descargar un gran número de ficheiros.",
     "Continue" : "Continuar",
+    "You are about to delete a large number of files" : "Está a piques de eliminar un gran número de ficheiros.",
     "Failed to delete files" : "Produciuse un fallo ao eliminar os ficheiros",
     "Move" : "Mover",
+    "You are about to move a large number of files" : "Está a piques de mover un gran número de ficheiros.",
     "You must enable \"Mark person in preview\" to use this feature" : "Ten que activar «Marcar persoa na vista previa» para usar esta función",
     "Only user \"{user}\" can update this person" : "Só o usuario «{user}» pode actualizar esta persoa",
     "_{n} selected_::_{n} selected_" : ["{n} seleccionado","{n} seleccionados"],
@@ -292,6 +295,9 @@ OC.L10N.register(
     "Enter name of the new face" : "Introduza o nome da nova cara",
     "Failed to create face" : "Produciuse un fallo ao crear unha cara",
     "Merge {name} with person" : "Combinar {nome} coa persoa",
+    "Merge faces" : "Combinar faciana",
+    "Merge {name} with {newName}?" : "Combinar {nome} con {newName}?",
+    "unnamed person" : "persoa sen nome",
     "Too many failures, aborting" : "Demasiados fallos, interrompendo",
     "Error while moving {basename}" : "Produciuse un erro ao mover {basename}",
     "Failed to move {name}." : "Produciuse un fallo ao mover {name}.",
@@ -476,6 +482,8 @@ OC.L10N.register(
     "Archive photos you don't want to see in your timeline" : "Arquive as fotos que non quere ver na súa cronoloxía",
     "Tag photos to find them easily" : "Etiquete as fotos para atopalas facilmente",
     "Recognize is still working on your photos" : "Recognize segue traballando nas súas fotos",
-    "Places you have been to will appear here" : "Os lugares nos que estivo aparecerán aquí"
+    "Places you have been to will appear here" : "Os lugares nos que estivo aparecerán aquí",
+    "Yes" : "Si",
+    "No" : "Non"
 },
 "nplurals=2; plural=(n != 1);");

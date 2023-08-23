@@ -11,6 +11,7 @@ OC.L10N.register(
     "Cancel" : "Dayandır",
     "Delete" : "Sil",
     "Favorite" : "İstəkli",
+    "Move" : "Move",
     "General" : "Ümumi",
     "Close" : "Bağla",
     "Save" : "Saxla",
@@ -33,6 +34,8 @@ OC.L10N.register(
     "Share" : "Paylaş",
     "Previous" : "Əvvələ",
     "Next" : "Növbəti",
-    "Size" : "Həcm"
+    "Size" : "Həcm",
+    "Yes" : "Bəli",
+    "No" : "Xeyir"
 },
 "nplurals=2; plural=(n != 1);");

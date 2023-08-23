@@ -10,6 +10,7 @@ OC.L10N.register(
     "Metadata" : "Metadatos",
     "Photos" : "Semeyes",
     "Delete" : "Desaniciar",
+    "Move" : "Mover",
     "External Link" : "Enllaz esternu",
     "Template" : "Plantía",
     "Public link" : "Enllaz públicu",
@@ -28,6 +29,8 @@ OC.L10N.register(
     "Size" : "Tamañu",
     "Position" : "Posición",
     "Extension" : "Estensión",
-    "Name is required." : "El nome ye obligatoriu"
+    "Name is required." : "El nome ye obligatoriu",
+    "Yes" : "Sí",
+    "No" : "Non"
 },
 "nplurals=2; plural=(n != 1);");
