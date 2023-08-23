@@ -23,4 +23,6 @@ Nextcloud comes bundled with an official "Photos" app. This page provides a brie
 
 ## Features in Photos missing in Memories
 
-1. Photos supports uploading photos directly, Memories does not support this function.
+1. Photos supports uploading photos directly, Memories does not ([issue](https://github.com/pulsejet/memories/issues/69)).
+1. Photos supports drawing on photos, Memories does not ([issue](https://github.com/pulsejet/memories/issues/785)).
+1. Photos shows which photos have been `Shared with you`. Memories does not ([issue](https://github.com/pulsejet/memories/issues/787)).
