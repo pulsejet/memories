@@ -69,7 +69,7 @@ export default defineComponent({
         path.splice(0, basePath.length);
       }
 
-      return { name: 'folders', params: { path: path as any } };
+      return { name: 'folders', params: { path } };
     },
   },
 

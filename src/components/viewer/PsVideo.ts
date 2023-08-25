@@ -30,8 +30,8 @@ type PsVideoEvent = PsEvent & {
 /**
  * Check if slide has video content
  */
-export function isVideoContent(content: any): content is VideoContent {
-  return content?.data?.type === 'video';
+export function isVideoContent(content: unknown): content is VideoContent {
+  return typeof content === 'object' && content?.['data']?.['type'] === 'video';
 }
 
 class VideoContentSetup {
@@ -86,8 +86,8 @@ class VideoContentSetup {
 
     // do not append video on nearby slides
     pswp.on('appendHeavy', (e) => {
-      if (isVideoContent(e.slide)) {
-        const content = <any>e.slide.content;
+      const content = e.slide.content;
+      if (isVideoContent(content)) {
         if (e.slide.isActive && content.videoElement) {
           this.initVideo(content);
         }

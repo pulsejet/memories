@@ -44,7 +44,7 @@ export default defineComponent({
     },
 
     httpVer(): string {
-      const entry = window.performance?.getEntriesByType?.('navigation')?.[0] as any;
+      const entry = window.performance?.getEntriesByType?.('navigation')?.[0] as PerformanceNavigationTiming;
       return entry?.nextHopProtocol || this.t('memories', 'Unknown');
     },
 

@@ -14,7 +14,7 @@ export function binarySearch<T, K extends keyof T>(arr: T[], elem: T | T[K], key
   let minIndex = 0;
   let maxIndex = arr.length - 1;
   let currentIndex: number;
-  let currentElement: any;
+  let currentElement: T | T[K];
 
   while (minIndex <= maxIndex) {
     currentIndex = ((minIndex + maxIndex) / 2) | 0;

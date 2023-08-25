@@ -54,7 +54,7 @@ export async function prompt(opts: PromptOptions): Promise<string | null> {
     dialogs.prompt(
       opts.message ?? '',
       opts.title ?? '',
-      (success: any, value: string) => resolve(success ? value : null),
+      (success: boolean, value: string) => resolve(success ? value : null),
       opts.modal,
       opts.name,
       opts.password

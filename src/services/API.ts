@@ -37,34 +37,33 @@ export enum DaysFilterType {
 }
 
 export class API {
-  static Q(url: string, query: string | URLSearchParams | Object | undefined | null): string {
+  static Q(url: string, query: Record<string, string | number | undefined | null>): string {
     if (!query) return url;
 
-    if (typeof query === 'object') {
-      // Clean up undefined and null
-      for (const key of Object.keys(query)) {
-        if (query[key] === undefined || query[key] === null) {
-          delete query[key];
-        }
+    // Get everything as strings
+    const records: Record<string, string> = {};
+
+    // Clean up input
+    for (const key of Object.keys(query)) {
+      if (query[key] === undefined || query[key] === null) {
+        continue;
       }
 
-      // Check if nothing in query
-      if (!Object.keys(query).length) return url;
-
-      // Convert to search params
-      query = new URLSearchParams(<any>query);
+      records[key] = String(query[key]);
     }
 
-    if (query instanceof URLSearchParams) {
-      query = query.toString();
-    }
+    // Check if nothing in query
+    if (!Object.keys(records).length) return url;
 
-    if (!query) return url;
+    // Convert to query string
+    const queryString = new URLSearchParams(records).toString();
+    if (!queryString) return url;
 
+    // Check if url already has query string
     if (url.indexOf('?') > -1) {
-      return `${url}&${query}`;
+      return `${url}&${queryString}`;
     } else {
-      return `${url}?${query}`;
+      return `${url}?${queryString}`;
     }
   }
 

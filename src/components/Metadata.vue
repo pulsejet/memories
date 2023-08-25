@@ -378,17 +378,19 @@ export default defineComponent({
       this.exif = {};
 
       // which clusters to get
-      const clusters = [
-        this.config.albums_enabled ? 'albums' : null,
-        this.config.recognize_enabled ? 'recognize' : null,
-        this.config.facerecognition_enabled ? 'facerecognition' : null,
-      ]
-        .filter((c) => c)
-        .join(',');
+      const clusters = this.routeIsPublic
+        ? String()
+        : [
+            this.config.albums_enabled ? 'albums' : null,
+            this.config.recognize_enabled ? 'recognize' : null,
+            this.config.facerecognition_enabled ? 'facerecognition' : null,
+          ]
+            .filter((c) => c)
+            .join(',');
 
       // get tags if enabled
-      const tags = Number(this.config.systemtags_enabled);
-      const filename = Number(this.config.sidebar_filepath);
+      const tags = this.config.systemtags_enabled ? 1 : undefined;
+      const filename = this.config.sidebar_filepath ? 1 : undefined;
 
       // get image info
       const url = API.Q(utils.getImageInfoUrl(photo), { tags, clusters, filename });

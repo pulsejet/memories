@@ -129,7 +129,7 @@ export function updatePhotoFromImageInfo(photo: IPhoto, imageInfo: IImageInfo) {
  * This function does not check if this is the folder route
  */
 export function getFolderRoutePath(basePath: string) {
-  let path: any = vueroute().params.path || '/';
+  let path = (vueroute().params.path || '/') as string | string[];
   path = typeof path === 'string' ? path : path.join('/');
   path = basePath + '/' + path;
   path = path.replace(/\/\/+/, '/'); // Remove double slashes

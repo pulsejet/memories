@@ -143,7 +143,12 @@ export default defineComponent({
 
       // Otherwise, get location from server
       try {
-        const init = await axios.get<any>(API.MAP_INIT());
+        const init = await axios.get<{
+          pos?: {
+            lat?: number;
+            lon?: number;
+          };
+        }>(API.MAP_INIT());
 
         // Init data contains position information
         const map = this.$refs.map as LMap;
@@ -203,7 +208,7 @@ export default defineComponent({
     async fetchClusters() {
       const oldZoom = this.oldZoom;
       const qbounds = this.$route.query.b;
-      const zoom = this.$route.query.z;
+      const zoom = this.$route.query.z as string;
       const paramsChanged = () => this.$route.query.b !== qbounds || this.$route.query.z !== zoom;
 
       let { minLat, maxLat, minLon, maxLon } = this.boundsFromQuery();

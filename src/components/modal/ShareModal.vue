@@ -227,7 +227,7 @@ export default defineComponent({
         ],
       };
 
-      if (!(<any>navigator).canShare(data)) {
+      if (!navigator.canShare(data)) {
         showError(this.t('memories', 'Cannot share this type of data'));
       }
 
