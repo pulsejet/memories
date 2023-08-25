@@ -111,8 +111,17 @@ export interface IImageInfo {
     Orientation?: number;
     ImageWidth?: number;
     ImageHeight?: number;
+
     Title?: string;
     Description?: string;
+    Make?: string;
+    Model?: string;
+
+    DateTimeEpoch?: number;
+    OffsetTimeOriginal?: string;
+    OffsetTime?: string;
+    LocationTZID?: string;
+
     [other: string]: unknown;
   };
 

@@ -12,6 +12,8 @@ declare module 'vue' {
     state_noDownload: boolean;
 
     routeIsBase: boolean;
+    routeIsFavorites: boolean;
+    routeIsVideos: boolean;
     routeIsFolders: boolean;
     routeIsAlbums: boolean;
     routeIsPeople: boolean;

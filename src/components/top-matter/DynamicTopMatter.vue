@@ -7,6 +7,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { Component } from 'vue';
 
 import UserMixin from '../../mixins/UserConfig';
 
@@ -23,7 +24,7 @@ export default defineComponent({
   mixins: [UserMixin],
 
   computed: {
-    currentmatter(): any {
+    currentmatter(): Component | null {
       if (this.routeIsFolders) {
         return FolderDynamicTopMatter;
       } else if (this.routeIsPlaces) {

@@ -64,7 +64,7 @@ export default defineComponent({
   },
 
   methods: {
-    click($event: any, album: IAlbum) {
+    click($event: Event, album: IAlbum) {
       if (!this.link) {
         $event.preventDefault();
       }

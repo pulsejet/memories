@@ -340,7 +340,7 @@ export default defineComponent({
 
     /** Is the current slide a local photo */
     isLocal(): boolean {
-      return utils.isLocalPhoto(this.currentPhoto);
+      return utils.isLocalPhoto(this.currentPhoto!);
     },
 
     /** Show bottom bar info such as date taken */
@@ -418,16 +418,16 @@ export default defineComponent({
     },
 
     /** User interacted with the page with mouse */
-    setUiVisible(evt: any) {
+    setUiVisible(event: PointerEvent | false) {
       clearTimeout(this.activityTimer);
-      if (evt) {
+      if (event) {
         // If directly triggered, always update ui visibility
         // If triggered through a pointer event, only update if this is not
         // a touch event (i.e. a mouse move).
         // On touch devices, tapAction directly handles the ui visibility
         // through Photoswipe.
-        const isPointer = evt instanceof PointerEvent;
-        const isMouse = isPointer && evt.pointerType !== 'touch';
+        const isPointer = event instanceof PointerEvent;
+        const isMouse = isPointer && event.pointerType !== 'touch';
         if (this.isOpen && (!isPointer || isMouse)) {
           this.photoswipe?.template?.classList.add('pswp--ui-visible');
 

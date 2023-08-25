@@ -163,7 +163,7 @@ export default defineComponent({
   },
 
   methods: {
-    submit(collaborators: any = []) {
+    submit(collaborators: any[] = []) {
       if (this.albumName === '' || this.loading) {
         return;
       }
@@ -181,7 +181,7 @@ export default defineComponent({
       }
     },
 
-    async handleCreateAlbum(collaborators = []) {
+    async handleCreateAlbum(collaborators: any[] = []) {
       try {
         this.loading = true;
         let album = {

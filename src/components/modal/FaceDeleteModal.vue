@@ -44,7 +44,7 @@ export default defineComponent({
   },
 
   watch: {
-    $route: async function (from: any, to: any) {
+    $route() {
       this.refreshParams();
     },
   },

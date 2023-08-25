@@ -90,8 +90,8 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
  * Check if the object is a local photo
  * @param photo Photo object
  */
-export function isLocalPhoto(photo: any): boolean {
-  return typeof photo === 'object' && photo?.fileid && Boolean((photo?.flag ?? 0) & constants.c.FLAG_IS_LOCAL);
+export function isLocalPhoto(photo: IPhoto): boolean {
+  return Boolean(photo?.fileid) && Boolean((photo?.flag ?? 0) & constants.c.FLAG_IS_LOCAL);
 }
 
 /**
@@ -102,7 +102,7 @@ export function isLocalPhoto(photo: any): boolean {
 export function getImageInfoUrl(photo: IPhoto | number): string {
   const fileid = typeof photo === 'number' ? photo : photo.fileid;
 
-  if (isLocalPhoto(photo)) {
+  if (typeof photo === 'object' && isLocalPhoto(photo)) {
     return nativex.API.IMAGE_INFO(fileid);
   }
 

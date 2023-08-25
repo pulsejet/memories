@@ -76,10 +76,6 @@ export class API {
     return tok(gen(`${BASE}/days/{id}`, { id }));
   }
 
-  static DAYS_FILTER(query: any, filter: DaysFilterType, value: string = '1') {
-    query[filter] = value;
-  }
-
   static FOLDERS_SUB() {
     return tok(gen(`${BASE}/folders/sub`));
   }

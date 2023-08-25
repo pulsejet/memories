@@ -6,7 +6,7 @@
  * @param elem Element to search for
  * @param key Key to use for comparison
  */
-export function binarySearch(arr: any, elem: any, key?: string) {
+export function binarySearch<T, K extends keyof T>(arr: T[], elem: T | T[K], key?: K): number {
   if (arr.length === 0) return 0;
 
   const desc = key ? arr[0][key] > arr[arr.length - 1][key] : arr[0] > arr[arr.length - 1];
@@ -56,7 +56,7 @@ export function roundHalf(num: number) {
 }
 
 /** Choose a random element from an array */
-export function randomChoice(arr: any[]) {
+export function randomChoice<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
@@ -64,7 +64,7 @@ export function randomChoice(arr: any[]) {
  * Choose a random sub array from an array
  * https://stackoverflow.com/a/11935263/4745239
  */
-export function randomSubarray(arr: any[], size: number) {
+export function randomSubarray<T>(arr: T[], size: number): T[] {
   if (arr.length <= size) return arr;
   var shuffled = arr.slice(0),
     i = arr.length,
@@ -81,7 +81,7 @@ export function randomSubarray(arr: any[], size: number) {
 }
 
 /** Set a timer that renews if existing */
-export function setRenewingTimeout(ctx: any, name: string, callback: (() => void) | null, delay: number) {
+export function setRenewingTimeout<T>(ctx: T, name: string, callback: (() => void) | null, delay: number): void {
   if (ctx[name]) window.clearTimeout(ctx[name]);
   ctx[name] = window.setTimeout(() => {
     ctx[name] = 0;
@@ -90,7 +90,7 @@ export function setRenewingTimeout(ctx: any, name: string, callback: (() => void
 }
 
 /** Checks if a object is numeric */
-export function isNumber(num: any): boolean {
+export function isNumber<T>(num: T): boolean {
   const cast = Number(num);
   return !isNaN(cast) && isFinite(cast);
 }

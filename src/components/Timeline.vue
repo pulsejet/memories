@@ -90,6 +90,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import type { Route } from 'vue-router';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
@@ -182,7 +183,7 @@ export default defineComponent({
   },
 
   watch: {
-    async $route(to: any, from?: any) {
+    async $route(to: Route, from?: Route) {
       await this.routeChange(to, from);
     },
   },
@@ -228,7 +229,7 @@ export default defineComponent({
   },
 
   methods: {
-    async routeChange(to: any, from?: any) {
+    async routeChange(to: Route, from?: Route) {
       // Always do a hard refresh if the path changes
       if (from?.path !== to.path) {
         await this.refresh();
@@ -444,7 +445,7 @@ export default defineComponent({
      * This does NOT indicate the items have changed, only that
      * the pixel position of the recycler has changed.
      */
-    scrollPositionChange(event?: any) {
+    scrollPositionChange(event?: Event) {
       this.scrollerManager().recyclerScrolled(event);
     },
 
@@ -549,40 +550,41 @@ export default defineComponent({
 
     /** Get query string for API calls */
     getQuery() {
-      const query: { [key: string]: string } = {};
+      const query: { [key in DaysFilterType]?: string } = {};
+      const set = (filter: DaysFilterType, value: string = '1') => (query[filter] = value);
 
       // Favorites
-      if (this.$route.name === 'favorites') {
-        API.DAYS_FILTER(query, DaysFilterType.FAVORITES);
+      if (this.routeIsFavorites) {
+        set(DaysFilterType.FAVORITES);
       }
 
       // Videos
-      if (this.$route.name === 'videos') {
-        API.DAYS_FILTER(query, DaysFilterType.VIDEOS);
+      if (this.routeIsVideos) {
+        set(DaysFilterType.VIDEOS);
       }
 
       // Folder
-      if (this.$route.name === 'folders') {
+      if (this.routeIsFolders) {
         const path = utils.getFolderRoutePath(this.config.folders_path);
-        API.DAYS_FILTER(query, DaysFilterType.FOLDER, path);
+        set(DaysFilterType.FOLDER, path);
         if (this.$route.query.recursive) {
-          API.DAYS_FILTER(query, DaysFilterType.RECURSIVE);
+          set(DaysFilterType.RECURSIVE);
         }
       }
 
       // Archive
-      if (this.$route.name === 'archive') {
-        API.DAYS_FILTER(query, DaysFilterType.ARCHIVE);
+      if (this.routeIsArchive) {
+        set(DaysFilterType.ARCHIVE);
       }
 
       // Albums
       const user = <string>this.$route.params.user;
       const name = <string>this.$route.params.name;
-      if (this.$route.name === 'albums') {
+      if (this.routeIsAlbums) {
         if (!user || !name) {
           throw new Error('Invalid album route');
         }
-        API.DAYS_FILTER(query, DaysFilterType.ALBUM, `${user}/${name}`);
+        set(DaysFilterType.ALBUM, `${user}/${name}`);
       }
 
       // People
@@ -591,47 +593,48 @@ export default defineComponent({
           throw new Error('Invalid album route');
         }
 
+        // name is "recognize" or "facerecognition"
         const filter = <DaysFilterType>this.$route.name;
-        API.DAYS_FILTER(query, filter, `${user}/${name}`);
+        set(filter, `${user}/${name}`);
 
         // Face rect
         if (this.config.show_face_rect || this.routeIsRecognizeUnassigned) {
-          API.DAYS_FILTER(query, DaysFilterType.FACE_RECT);
+          set(DaysFilterType.FACE_RECT);
         }
       }
 
       // Places
-      if (this.$route.name === 'places') {
+      if (this.routeIsPlaces) {
         if (!name || !name.includes('-')) {
           throw new Error('Invalid place route');
         }
 
         const id = <string>name.split('-', 1)[0];
-        API.DAYS_FILTER(query, DaysFilterType.PLACE, id);
+        set(DaysFilterType.PLACE, id);
       }
 
       // Tags
-      if (this.$route.name === 'tags') {
+      if (this.routeIsTags) {
         if (!name) {
           throw new Error('Invalid tag route');
         }
-        API.DAYS_FILTER(query, DaysFilterType.TAG, name);
+        set(DaysFilterType.TAG, name);
       }
 
       // Map Bounds
-      if (this.$route.name === 'map') {
+      if (this.routeIsMap) {
         const bounds = <string>this.$route.query.b;
         if (!bounds) {
           throw new Error('Missing map bounds');
         }
 
-        API.DAYS_FILTER(query, DaysFilterType.MAP_BOUNDS, bounds);
+        set(DaysFilterType.MAP_BOUNDS, bounds);
       }
 
       // Month view
       if (this.isMonthView) {
-        API.DAYS_FILTER(query, DaysFilterType.MONTH_VIEW);
-        API.DAYS_FILTER(query, DaysFilterType.REVERSE);
+        set(DaysFilterType.MONTH_VIEW);
+        set(DaysFilterType.REVERSE);
       }
 
       return query;

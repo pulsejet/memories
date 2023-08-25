@@ -16,6 +16,12 @@ export default defineComponent({
     routeIsBase(): boolean {
       return this.$route.name === 'timeline';
     },
+    routeIsFavorites(): boolean {
+      return this.$route.name === 'favorites';
+    },
+    routeIsVideos(): boolean {
+      return this.$route.name === 'videos';
+    },
     routeIsFolders(): boolean {
       return this.$route.name === 'folders';
     },

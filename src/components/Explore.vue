@@ -40,8 +40,10 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import config from '../services/static-config';
+import type { Component } from 'vue';
+
 import axios from '@nextcloud/axios';
+import { translate as t } from '@nextcloud/l10n';
 
 import ClusterHList from './ClusterHList.vue';
 
@@ -55,9 +57,10 @@ import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
 import MapIcon from 'vue-material-design-icons/Map.vue';
 import CogIcon from 'vue-material-design-icons/Cog.vue';
 
-import type { ICluster, IConfig } from '../types';
+import config from '../services/static-config';
 import { API } from '../services/API';
-import { translate as t } from '@nextcloud/l10n';
+
+import type { ICluster, IConfig } from '../types';
 
 export default defineComponent({
   name: 'Explore',
@@ -110,7 +113,7 @@ export default defineComponent({
       },
     ] as {
       name: string;
-      icon: any;
+      icon: Component;
       link?: string;
       click?: () => void;
     }[],

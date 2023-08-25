@@ -62,7 +62,7 @@ export default defineComponent({
       this.$emit('close');
     },
 
-    done({ album }: any) {
+    done({ album }: { album: { basename: string; filename: string } }) {
       if (!this.album || album.basename !== this.album.basename) {
         const user = album.filename.split('/')[2];
         const name = album.basename;

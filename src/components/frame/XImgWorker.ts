@@ -37,7 +37,7 @@ const expirationManager = new CacheExpiration(cacheName, {
 });
 
 // Start fetching with multipreview
-let fetchPreviewTimer: any;
+let fetchPreviewTimer: number;
 
 /** Flushes the queue of preview image requests */
 async function flushPreviewQueue() {

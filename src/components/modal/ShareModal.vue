@@ -135,7 +135,7 @@ export default defineComponent({
     },
 
     isLocal(): boolean {
-      return utils.isLocalPhoto(this.photo);
+      return utils.isLocalPhoto(this.photo!);
     },
   },
 

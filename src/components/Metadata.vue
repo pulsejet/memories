@@ -67,6 +67,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import type { Component } from 'vue';
 
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
@@ -97,7 +98,7 @@ interface TopField {
   id?: string;
   title: string;
   subtitle: string[];
-  icon: any;
+  icon: Component;
   href?: string;
   edit?: () => void;
 }
@@ -117,7 +118,7 @@ export default defineComponent({
   data: () => ({
     fileid: null as number | null,
     filename: '',
-    exif: {} as { [prop: string]: any },
+    exif: {} as NonNullable<IImageInfo['exif']>,
     baseInfo: {} as IImageInfo,
 
     loading: 0,
@@ -210,8 +211,8 @@ export default defineComponent({
       // The fallback to datetaken can be eventually removed
       // and then this can be discarded
       if (this.exif.DateTimeEpoch) {
-        const tzOffset: string = this.exif.OffsetTimeOriginal || this.exif.OffsetTime; // e.g. -05:00
-        const tzId: string = this.exif.LocationTZID; // e.g. America/New_York
+        const tzOffset = this.exif.OffsetTimeOriginal || this.exif.OffsetTime; // e.g. -05:00
+        const tzId = this.exif.LocationTZID; // e.g. America/New_York
 
         let dateWithTz: DateTime | undefined = undefined;
 

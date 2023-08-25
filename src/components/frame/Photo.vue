@@ -226,7 +226,7 @@ export default defineComponent({
     },
 
     /** Error in loading image */
-    error(e: any) {
+    error(e: Event) {
       this.data.flag |= this.c.FLAG_LOAD_FAIL;
     },
 
