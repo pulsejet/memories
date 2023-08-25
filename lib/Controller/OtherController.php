@@ -83,8 +83,9 @@ class OtherController extends GenericApiController
                 'places_gis' => Util::getSystemConfig('memories.gis_type'),
 
                 'systemtags_enabled' => Util::tagsIsEnabled(),
-                'recognize_enabled' => Util::recognizeIsEnabled(),
                 'albums_enabled' => Util::albumsIsEnabled(),
+                'recognize_installed' => Util::recognizeIsInstalled(),
+                'recognize_enabled' => Util::recognizeIsEnabled(),
                 'facerecognition_installed' => Util::facerecognitionIsInstalled(),
                 'facerecognition_enabled' => Util::facerecognitionIsEnabled(),
                 'preview_generator_enabled' => Util::previewGeneratorIsEnabled(),

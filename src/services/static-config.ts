@@ -103,8 +103,9 @@ class StaticConfig {
       places_gis: -1,
 
       systemtags_enabled: false,
-      recognize_enabled: false,
       albums_enabled: false,
+      recognize_installed: false,
+      recognize_enabled: false,
       facerecognition_installed: false,
       facerecognition_enabled: false,
       preview_generator_enabled: false,

@@ -236,8 +236,9 @@ export type IConfig = {
   places_gis: number;
 
   systemtags_enabled: boolean;
-  recognize_enabled: boolean;
   albums_enabled: boolean;
+  recognize_installed: boolean;
+  recognize_enabled: boolean;
   facerecognition_installed: boolean;
   facerecognition_enabled: boolean;
   preview_generator_enabled: boolean;

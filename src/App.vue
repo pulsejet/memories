@@ -168,7 +168,7 @@ export default defineComponent({
         return false;
       }
 
-      if (this.config.facerecognition_enabled) {
+      if (this.config.facerecognition_installed) {
         return t('memories', 'People (Recognize)');
       }
 

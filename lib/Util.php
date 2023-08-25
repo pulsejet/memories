@@ -85,6 +85,23 @@ class Util
      */
     public static function recognizeIsEnabled(): bool
     {
+        if (!self::recognizeIsInstalled()) {
+            return false;
+        }
+
+        $config = \OC::$server->get(IAppConfig::class);
+        if ('true' !== $config->getValue('recognize', 'faces.enabled', 'false')) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if recognize is installed.
+     */
+    public static function recognizeIsInstalled(): bool
+    {
         $appManager = \OC::$server->get(IAppManager::class);
 
         if (!$appManager->isEnabledForUser('recognize')) {
@@ -96,11 +113,6 @@ class Util
             return false;
         }
 
-        $c = \OC::$server->get(IAppConfig::class);
-        if ('true' !== $c->getValue('recognize', 'faces.enabled', 'false')) {
-            return false;
-        }
-
         return true;
     }
 
@@ -109,16 +121,21 @@ class Util
      */
     public static function facerecognitionIsEnabled(): bool
     {
+        if (!self::facerecognitionIsInstalled()) {
+            return false;
+        }
+
         try {
             $uid = self::getUID();
         } catch (\Exception $e) {
             return false;
         }
 
-        $config = \OC::$server->get(IConfig::class);
-        $e = $config->getUserValue($uid, 'facerecognition', 'enabled', 'false');
+        $enabled = \OC::$server->get(IConfig::class)
+            ->getUserValue($uid, 'facerecognition', 'enabled', 'false')
+        ;
 
-        return 'true' === $e;
+        return 'true' === $enabled;
     }
 
     /**
