@@ -180,11 +180,11 @@ class ImageController extends GenericApiController
         int $id,
         bool $basic = false,
         bool $current = false,
-        bool $filepath = false,
+        bool $filename = false,
         bool $tags = false,
         string $clusters = ''
     ): Http\Response {
-        return Util::guardEx(function () use ($id, $basic, $current, $filepath, $tags, $clusters) {
+        return Util::guardEx(function () use ($id, $basic, $current, $filename, $tags, $clusters) {
             $file = $this->fs->getUserFile($id);
 
             // Get the image info
@@ -216,10 +216,10 @@ class ImageController extends GenericApiController
                 }
 
                 // Get the path of the file for the current user
-                if ($filepath) {
+                if ($filename) {
                     $parts = explode('/', $file->getPath());
                     if (\count($parts) > 3 && $parts[1] === $user->getUID()) {
-                        $info['filepath'] = implode('/', \array_slice($parts, 3));
+                        $info['filename'] = '/'.implode('/', \array_slice($parts, 3));
                     }
                 }
 

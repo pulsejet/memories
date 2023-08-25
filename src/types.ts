@@ -96,14 +96,15 @@ export interface IImageInfo {
   h: number;
   w: number;
   datetaken: number;
-  address?: string;
-  tags: { [id: string]: string };
 
   permissions: string;
-  filepath?: string;
   basename: string;
   mimetype: string;
   size: number;
+
+  filename?: string;
+  address?: string;
+  tags?: { [id: string]: string };
 
   exif?: {
     Rotation?: number;

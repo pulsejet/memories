@@ -21,7 +21,7 @@
     </div>
 
     <div class="section-title">{{ t('memories', 'Metadata') }}</div>
-    <div class="top-field" v-for="field of topFields" :key="field.title">
+    <div v-for="field of topFields" :key="field.title" :class="`top-field top-field--${field.id}`">
       <div class="icon">
         <component :is="field.icon" :size="24" />
       </div>
@@ -29,11 +29,11 @@
       <div class="text">
         <template v-if="field.href">
           <a :href="field.href" target="_blank" rel="noopener noreferrer">
-            {{ field.title }}
+            <span class="title">{{ field.title }}</span>
           </a>
         </template>
         <template v-else>
-          {{ field.title }}
+          <span class="title">{{ field.title }}</span>
         </template>
 
         <template v-if="field.subtitle.length">
@@ -88,11 +88,13 @@ import LocationIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagIcon from 'vue-material-design-icons/Tag.vue';
 
 import * as utils from '../services/utils';
+import * as dav from '../services/dav';
 import { API } from '../services/API';
 
 import type { IAlbum, IFace, IImageInfo, IPhoto } from '../types';
 
 interface TopField {
+  id?: string;
   title: string;
   subtitle: string[];
   icon: any;
@@ -153,11 +155,13 @@ export default defineComponent({
         });
       }
 
-      if (this.filepath) {
+      if (this.imageInfoTitle) {
         list.push({
-          title: this.filepath,
+          id: 'image-info', // adds class
+          title: this.imageInfoTitle,
           subtitle: this.imageInfoSub,
           icon: ImageIcon,
+          href: utils.truthy(this.baseInfo, 'filename') ? dav.viewInFolderUrl(this.baseInfo) : undefined,
         });
       }
 
@@ -287,8 +291,8 @@ export default defineComponent({
     },
 
     /** Image info */
-    filepath(): string | null {
-      return this.baseInfo.filepath ?? this.baseInfo.basename;
+    imageInfoTitle(): string | null {
+      return this.baseInfo.filename ?? this.baseInfo.basename;
     },
 
     imageInfoSub(): string[] {
@@ -383,10 +387,10 @@ export default defineComponent({
 
       // get tags if enabled
       const tags = Number(this.config.systemtags_enabled);
-      const filepath = Number(this.config.sidebar_filepath);
+      const filename = Number(this.config.sidebar_filepath);
 
       // get image info
-      const url = API.Q(utils.getImageInfoUrl(photo), { tags, clusters, filepath });
+      const url = API.Q(utils.getImageInfoUrl(photo), { tags, clusters, filename });
       const res = await this.guardState(axios.get<IImageInfo>(url));
       if (!res) return null;
 
@@ -525,6 +529,10 @@ export default defineComponent({
         margin-right: 5px;
       }
     }
+  }
+
+  &--image-info .title {
+    user-select: all; // filename or basename
   }
 }
 

@@ -9,13 +9,19 @@ import { dirname } from 'path';
  */
 export async function viewInFolder(photo: IPhoto) {
   if (!photo) return;
-  const f = await getFiles([photo]);
-  if (f.length === 0) return;
+  const files = await getFiles([photo]);
+  if (files.length === 0) return;
 
-  const file = f[0];
-  const url = generateUrl(`/apps/files/?dir={dirPath}&scrollto={fileid}&openfile={fileid}`, {
+  const url = viewInFolderUrl(files[0]);
+  window.open(url, '_blank');
+}
+
+/**
+ * Gets the view in folder url for the given file.
+ */
+export function viewInFolderUrl(file: { filename: string; fileid: number }) {
+  return generateUrl(`/apps/files/?dir={dirPath}&scrollto={fileid}&openfile={fileid}`, {
     dirPath: dirname(file.filename),
     fileid: file.fileid,
   });
-  window.open(url, '_blank');
 }

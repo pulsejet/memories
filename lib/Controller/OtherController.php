@@ -66,7 +66,8 @@ class OtherController extends GenericApiController
         return Util::guardEx(function () {
             // get memories version
             $version = \OC::$server->get(\OCP\App\IAppManager::class)
-                ->getAppInfo('memories')['version'];
+                ->getAppInfo('memories')['version']
+            ;
 
             // get user if logged in
             try {

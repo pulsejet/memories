@@ -94,3 +94,8 @@ export function isNumber(num: any): boolean {
   const cast = Number(num);
   return !isNaN(cast) && isFinite(cast);
 }
+
+/** Check if a property is truthy */
+export function truthy<T, K extends keyof T>(obj: T, prop: K): obj is T & { [P in K]-?: T[K] } {
+  return !!obj[prop];
+}
