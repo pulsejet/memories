@@ -100,6 +100,7 @@ export interface IImageInfo {
   tags: { [id: string]: string };
 
   permissions: string;
+  filepath?: string;
   basename: string;
   mimetype: string;
   size: number;
@@ -230,11 +231,13 @@ export type ITick = {
 };
 
 export type IConfig = {
+  // general stuff
   version: string;
   vod_disable: boolean;
   video_default_quality: string;
   places_gis: number;
 
+  // enabled apps
   systemtags_enabled: boolean;
   albums_enabled: boolean;
   recognize_installed: boolean;
@@ -243,14 +246,23 @@ export type IConfig = {
   facerecognition_enabled: boolean;
   preview_generator_enabled: boolean;
 
+  // general settings
   timeline_path: string;
+  enable_top_memories: boolean;
+
+  // viewer settings
+  livephoto_autoplay: boolean;
+  sidebar_filepath: boolean;
+
+  // folder settings
   folders_path: string;
   show_hidden_folders: boolean;
   sort_folder_month: boolean;
-  sort_album_month: boolean;
-  enable_top_memories: boolean;
-  livephoto_autoplay: boolean;
 
+  // album settings
+  sort_album_month: boolean;
+
+  // local settings
   square_thumbs: boolean;
   full_res_on_zoom: boolean;
   full_res_always: boolean;

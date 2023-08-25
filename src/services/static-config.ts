@@ -97,11 +97,13 @@ class StaticConfig {
     }
 
     const config: IConfig = {
+      // general stuff
       version: '',
       vod_disable: false,
       video_default_quality: '0',
       places_gis: -1,
 
+      // enabled apps
       systemtags_enabled: false,
       albums_enabled: false,
       recognize_installed: false,
@@ -110,14 +112,23 @@ class StaticConfig {
       facerecognition_enabled: false,
       preview_generator_enabled: false,
 
+      // general settings
       timeline_path: '',
+      enable_top_memories: true,
+
+      // viewer settings
+      livephoto_autoplay: true,
+      sidebar_filepath: false,
+
+      // folder settings
       folders_path: '',
       show_hidden_folders: false,
       sort_folder_month: false,
-      sort_album_month: true,
-      enable_top_memories: true,
-      livephoto_autoplay: true,
 
+      // album settings
+      sort_album_month: true,
+
+      // local settings
       square_thumbs: false,
       full_res_on_zoom: true,
       full_res_always: false,

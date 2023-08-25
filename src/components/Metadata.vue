@@ -153,9 +153,9 @@ export default defineComponent({
         });
       }
 
-      if (this.imageInfo) {
+      if (this.filepath) {
         list.push({
-          title: this.imageInfo,
+          title: this.filepath,
           subtitle: this.imageInfoSub,
           icon: ImageIcon,
         });
@@ -287,8 +287,8 @@ export default defineComponent({
     },
 
     /** Image info */
-    imageInfo(): string | null {
-      return this.baseInfo.basename;
+    filepath(): string | null {
+      return this.baseInfo.filepath ?? this.baseInfo.basename;
     },
 
     imageInfoSub(): string[] {
@@ -382,10 +382,11 @@ export default defineComponent({
         .join(',');
 
       // get tags if enabled
-      const tags = this.config.systemtags_enabled ? 1 : 0;
+      const tags = Number(this.config.systemtags_enabled);
+      const filepath = Number(this.config.sidebar_filepath);
 
       // get image info
-      const url = API.Q(utils.getImageInfoUrl(photo), { tags, clusters });
+      const url = API.Q(utils.getImageInfoUrl(photo), { tags, clusters, filepath });
       const res = await this.guardState(axios.get<IImageInfo>(url));
       if (!res) return null;
 

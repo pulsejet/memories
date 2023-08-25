@@ -44,7 +44,9 @@
         >
           {{ t('memories', 'Show past photos on top of timeline') }}
         </NcCheckboxRadioSwitch>
+      </NcAppSettingsSection>
 
+      <NcAppSettingsSection id="viewer-settings" :title="t('memories', 'Viewer')">
         <NcCheckboxRadioSwitch
           :checked.sync="config.livephoto_autoplay"
           @update:checked="updateLivephotoAutoplay"
@@ -67,6 +69,14 @@
           type="switch"
         >
           {{ t('memories', 'Always load full size image (not recommended)') }}
+        </NcCheckboxRadioSwitch>
+
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.sidebar_filepath"
+          @update:checked="updateSidebarFilepath"
+          type="switch"
+        >
+          {{ t('memories', 'Show full file path in sidebar') }}
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
@@ -197,6 +207,7 @@ export default defineComponent({
       this.$emit('update:open', false);
     },
 
+    // Paths settings
     async chooseTimelinePath() {
       (<any>this.$refs.multiPathModal).open(this.config.timeline_path.split(';'));
     },
@@ -223,10 +234,16 @@ export default defineComponent({
       }
     },
 
+    // General settings
     async updateSquareThumbs() {
       await this.updateSetting('square_thumbs');
     },
 
+    async updateEnableTopMemories() {
+      await this.updateSetting('enable_top_memories', 'enableTopMemories');
+    },
+
+    // Viewer settings
     async updateFullResOnZoom() {
       await this.updateSetting('full_res_on_zoom');
     },
@@ -235,14 +252,15 @@ export default defineComponent({
       await this.updateSetting('full_res_always');
     },
 
-    async updateEnableTopMemories() {
-      await this.updateSetting('enable_top_memories', 'enableTopMemories');
-    },
-
     async updateLivephotoAutoplay() {
       await this.updateSetting('livephoto_autoplay', 'livephotoAutoplay');
     },
 
+    async updateSidebarFilepath() {
+      await this.updateSetting('sidebar_filepath', 'sidebarFilepath');
+    },
+
+    // Folders settings
     async updateShowHidden() {
       await this.updateSetting('show_hidden_folders', 'showHidden');
     },
@@ -251,6 +269,7 @@ export default defineComponent({
       await this.updateSetting('sort_folder_month', 'sortFolderMonth');
     },
 
+    // Albums settings
     async updateSortAlbumMonth() {
       await this.updateSetting('sort_album_month', 'sortAlbumMonth');
     },

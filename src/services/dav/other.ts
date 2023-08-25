@@ -8,6 +8,7 @@ import { dirname } from 'path';
  * Opens a new window.
  */
 export async function viewInFolder(photo: IPhoto) {
+  if (!photo) return;
   const f = await getFiles([photo]);
   if (f.length === 0) return;
 

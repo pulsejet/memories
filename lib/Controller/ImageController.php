@@ -180,10 +180,11 @@ class ImageController extends GenericApiController
         int $id,
         bool $basic = false,
         bool $current = false,
+        bool $filepath = false,
         bool $tags = false,
         string $clusters = ''
     ): Http\Response {
-        return Util::guardEx(function () use ($id, $basic, $current, $tags, $clusters) {
+        return Util::guardEx(function () use ($id, $basic, $current, $filepath, $tags, $clusters) {
             $file = $this->fs->getUserFile($id);
 
             // Get the image info
@@ -202,7 +203,8 @@ class ImageController extends GenericApiController
             $info['basename'] = $file->getName();
 
             // Allow these ony for logged in users
-            if (null !== $this->userSession->getUser()) {
+            $user = $this->userSession->getUser();
+            if (null !== $user) {
                 // Get list of tags for this file
                 if ($tags) {
                     $info['tags'] = $this->getTags($id);
@@ -211,6 +213,14 @@ class ImageController extends GenericApiController
                 // Get latest exif data if requested
                 if ($current) {
                     $info['current'] = Exif::getExifFromFile($file);
+                }
+
+                // Get the path of the file for the current user
+                if ($filepath) {
+                    $parts = explode('/', $file->getPath());
+                    if (\count($parts) > 3 && $parts[1] === $user->getUID()) {
+                        $info['filepath'] = implode('/', \array_slice($parts, 3));
+                    }
                 }
 
                 // Get clusters for this file

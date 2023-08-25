@@ -1108,7 +1108,7 @@ export default defineComponent({
      * Open the files app with the current file.
      */
     async viewInFolder() {
-      if (this.currentPhoto) dav.viewInFolder(this.currentPhoto);
+      dav.viewInFolder(this.currentPhoto!);
     },
 
     /**
