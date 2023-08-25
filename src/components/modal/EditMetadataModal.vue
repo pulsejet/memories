@@ -30,7 +30,7 @@
         <div class="title-text">
           {{ t('memories', 'EXIF Fields') }}
         </div>
-        <EditExif ref="editExif" :photos="photos" />
+        <EditExif ref="editExif" :photos="photos" @save="save" />
       </div>
 
       <div v-if="sections.includes(4)">

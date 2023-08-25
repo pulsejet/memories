@@ -14,6 +14,7 @@
         trailing-button-icon="close"
         :show-trailing-button="dirty[field.field]"
         @trailing-button-click="reset(field)"
+        @keypress.enter="$emit('save')"
       />
     </div>
   </div>
