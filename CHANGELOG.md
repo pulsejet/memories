@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- **Fix**: Support for transcoding MKV files.
+
 ## [v5.4.1] - 2023-08-20
 
 - Corrects a versioning error. This version is the same as v5.3.0
