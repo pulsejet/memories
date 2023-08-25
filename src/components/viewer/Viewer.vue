@@ -1242,7 +1242,7 @@ export default defineComponent({
 
 .bottom-bar {
   background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.3));
-  width: 100%;
+  width: inherit;
   padding: 10px;
   z-index: 100001;
   position: fixed;
@@ -1265,7 +1265,7 @@ export default defineComponent({
       margin-top: -2px;
       margin-bottom: 2px;
       font-size: 0.9em;
-      max-width: 70vw;
+      max-width: 90%;
       word-break: break-word;
       line-height: 1.2em;
     }
