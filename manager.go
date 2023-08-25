@@ -251,7 +251,7 @@ func (m *Manager) ffprobe() error {
 		"-v", "error",
 
 		// Show everything
-		"-show_entries", "stream",
+		"-show_entries", "format:stream",
 		"-select_streams", "v", // Video stream only, we're not interested in audio
 
 		"-of", "json",
@@ -299,16 +299,9 @@ func (m *Manager) ffprobe() error {
 
 	var duration time.Duration
 	if out.Streams[0].Duration != "" {
-		duration, err = time.ParseDuration(out.Streams[0].Duration + "s")
-		if err != nil {
-			return err
-		}
-	}
-	if out.Format.Duration != "" {
-		duration, err = time.ParseDuration(out.Format.Duration + "s")
-		if err != nil {
-			return err
-		}
+		duration, _ = time.ParseDuration(out.Streams[0].Duration + "s")
+	} else if out.Format.Duration != "" {
+		duration, _ = time.ParseDuration(out.Format.Duration + "s")
 	}
 
 	// FrameRate is a fraction string
