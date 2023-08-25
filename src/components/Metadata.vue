@@ -3,6 +3,11 @@
     <XLoadingIcon />
   </div>
   <div class="outer" v-else-if="fileid">
+    <div v-if="title || description" class="exif-head" @click="editEXIF()">
+      <div class="title" v-if="title">{{ title }}</div>
+      <div class="description" v-if="description">{{ description }}</div>
+    </div>
+
     <div v-if="people.length" class="people">
       <div class="section-title">{{ t('memories', 'People') }}</div>
       <div class="container" v-for="face of people" :key="face.cluster_id">
@@ -79,7 +84,6 @@ import EditIcon from 'vue-material-design-icons/Pencil.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
 import CameraIrisIcon from 'vue-material-design-icons/CameraIris.vue';
 import ImageIcon from 'vue-material-design-icons/Image.vue';
-import InfoIcon from 'vue-material-design-icons/InformationOutline.vue';
 import LocationIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagIcon from 'vue-material-design-icons/Tag.vue';
 
@@ -137,7 +141,7 @@ export default defineComponent({
           title: this.dateOriginalStr!,
           subtitle: this.dateOriginalTime!,
           icon: CalendarIcon,
-          edit: () => globalThis.editMetadata([globalThis.currentViewerPhoto], [1]),
+          edit: this.editDate,
         });
       }
 
@@ -157,23 +161,12 @@ export default defineComponent({
         });
       }
 
-      const title = this.exif?.['Title'];
-      const desc = this.exif?.['Description'];
-      if (title || desc) {
-        list.push({
-          title: title || this.t('memories', 'No title'),
-          subtitle: [desc || this.t('memories', 'No description')],
-          icon: InfoIcon,
-          edit: () => globalThis.editMetadata([globalThis.currentViewerPhoto], [3]),
-        });
-      }
-
       if (this.tagNamesStr) {
         list.push({
           title: this.tagNamesStr,
           subtitle: [],
           icon: TagIcon,
-          edit: () => globalThis.editMetadata([globalThis.currentViewerPhoto], [2]),
+          edit: this.editTags,
         });
       }
 
@@ -183,7 +176,7 @@ export default defineComponent({
           subtitle: this.address ? [] : [this.t('memories', 'Click edit to set location')],
           icon: LocationIcon,
           href: this.address ? this.mapFullUrl : undefined,
-          edit: () => globalThis.editMetadata([globalThis.currentViewerPhoto], [4]),
+          edit: this.editGeo,
         });
       }
 
@@ -192,6 +185,16 @@ export default defineComponent({
 
     canEdit(): boolean {
       return this.baseInfo?.permissions?.includes('U');
+    },
+
+    /** Title EXIF value */
+    title(): string | null {
+      return this.exif['Title'] || null;
+    },
+
+    /** Description EXIF value */
+    description(): string | null {
+      return this.exif['Description'] || null;
     },
 
     /** Date taken info */
@@ -395,6 +398,22 @@ export default defineComponent({
       return this.baseInfo;
     },
 
+    editDate() {
+      globalThis.editMetadata([globalThis.currentViewerPhoto], [1]);
+    },
+
+    editTags() {
+      globalThis.editMetadata([globalThis.currentViewerPhoto], [2]);
+    },
+
+    editEXIF() {
+      globalThis.editMetadata([globalThis.currentViewerPhoto], [3]);
+    },
+
+    editGeo() {
+      globalThis.editMetadata([globalThis.currentViewerPhoto], [4]);
+    },
+
     async refresh() {
       if (this.fileid) await this.update(this.fileid);
     },
@@ -425,13 +444,28 @@ export default defineComponent({
 <style lang="scss" scoped>
 .section-title {
   font-variant: all-small-caps;
-  padding: 0px 10px;
+  padding: 0px 6px;
 }
 
-.albums {
-  font-size: 0.96em;
-  :deep .line-one__title {
-    font-weight: 400 !important; // no bold title
+.exif-head {
+  padding: 4px 6px;
+
+  .title {
+    font-weight: 500;
+  }
+
+  .description,
+  .title {
+    font-size: 0.93em;
+    line-height: 1.5em;
+    padding-bottom: 3px;
+
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
+      text-decoration-color: #ddd;
+      text-underline-offset: 4px;
+    }
   }
 }
 
@@ -451,6 +485,13 @@ export default defineComponent({
     @media (max-width: 768px) {
       font-size: 0.95em;
     }
+  }
+}
+
+.albums {
+  font-size: 0.96em;
+  :deep .line-one__title {
+    font-weight: 400 !important; // no bold title
   }
 }
 
