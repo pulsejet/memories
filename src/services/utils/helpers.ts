@@ -2,7 +2,15 @@ import { IImageInfo, IPhoto } from '../../types';
 import { API } from '../API';
 import { constants } from './const';
 import { FilePickerType, getFilePickerBuilder } from '@nextcloud/dialogs';
+import { getCurrentUser } from '@nextcloud/auth';
 import * as nativex from '../../native';
+
+/**
+ * Get the current user UID
+ */
+export function uid() {
+  return String(getCurrentUser()?.uid || String()) || null;
+}
 
 /**
  * Check if width <= 768px

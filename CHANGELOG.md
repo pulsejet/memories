@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 - **Feature**: Support showing full file path in sidebar ([#173](https://github.com/pulsejet/memories/issues/173))
 - **Feature**: View file in folder on clicking name in sidebar
+- **Feature**: User can leave albums that are shared with them
 - **Fix**: Support for transcoding MKV files.
 
 ## [v5.4.1] - 2023-08-20

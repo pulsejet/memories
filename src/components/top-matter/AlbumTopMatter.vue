@@ -76,12 +76,12 @@
           <template #icon> <EditIcon :size="20" /> </template>
         </NcActionButton>
         <NcActionButton
-          :aria-label="t('memories', 'Delete album')"
+          :aria-label="t('memories', 'Remove album')"
           @click="$refs.deleteModal.open()"
           close-after-click
-          v-if="canEditAlbum"
+          v-if="!isAlbumList"
         >
-          {{ t('memories', 'Delete album') }}
+          {{ t('memories', 'Remove album') }}
           <template #icon> <DeleteIcon :size="20" /> </template>
         </NcActionButton>
       </NcActions>
@@ -114,7 +114,7 @@ import { downloadWithHandle } from '../../services/dav/download';
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
-import DeleteIcon from 'vue-material-design-icons/Close.vue';
+import DeleteIcon from 'vue-material-design-icons/TrashCanOutline.vue';
 import PlusIcon from 'vue-material-design-icons/Plus.vue';
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import SortIcon from 'vue-material-design-icons/SortVariant.vue';
