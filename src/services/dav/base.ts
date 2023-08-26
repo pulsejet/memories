@@ -42,7 +42,8 @@ const GET_FILE_CHUNK_SIZE = 50;
 /**
  * Get file infos for list of files given Ids
  * @param photos list of photos
- * @returns list of file infos
+ * @details This tries to use the cached filename in the photo object (imageInfo.filename)
+ * If none was found, then it will fetch the file info from the server.
  */
 export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
   // Check if albums
@@ -51,12 +52,37 @@ export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
     return getAlbumFileInfos(photos, <string>route.params.user, <string>route.params.name);
   }
 
-  // Get file infos
-  let fileInfos: IFileInfo[] = [];
-
   // Remove any local photos
   photos = photos.filter((photo) => !utils.isLocalPhoto(photo));
 
+  // Cache and uncached photos
+  const cache: IFileInfo[] = [];
+  const rest: IPhoto[] = [];
+
+  // Partition photos with and without cache
+  const uid = getCurrentUser()?.uid;
+  if (uid) {
+    for (const photo of photos) {
+      const filename = photo.imageInfo?.filename;
+      if (filename) {
+        cache.push({
+          id: photo.fileid,
+          fileid: photo.fileid,
+          basename: photo.basename ?? filename.split('/').pop() ?? '',
+          originalFilename: `/files/${uid}${filename}`,
+          filename: filename,
+        });
+      } else {
+        rest.push(photo);
+      }
+    }
+  }
+
+  // Get file infos for the rest
+  return cache.concat(await getFilesInternal1(rest));
+}
+
+async function getFilesInternal1(photos: IPhoto[]): Promise<IFileInfo[]> {
   // Get file IDs array
   const fileIds = photos.map((photo) => photo.fileid);
 
@@ -67,18 +93,10 @@ export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
   }
 
   // Get file infos for each chunk
-  const ef = await Promise.all(chunks.map(getFilesInternal));
-  fileInfos = fileInfos.concat(ef.flat());
-
-  return fileInfos;
+  return (await Promise.all(chunks.map(getFilesInternal2))).flat();
 }
 
-/**
- * Get file infos for list of files given Ids
- * @param fileIds list of file ids (smaller than 100)
- * @returns list of file infos
- */
-async function getFilesInternal(fileIds: number[]): Promise<IFileInfo[]> {
+async function getFilesInternal2(fileIds: number[]): Promise<IFileInfo[]> {
   const prefixPath = `/files/${getCurrentUser()?.uid}`;
 
   // IMPORTANT: if this isn't there, then a blank
