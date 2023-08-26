@@ -19,9 +19,15 @@ export async function viewInFolder(photo: IPhoto) {
 /**
  * Gets the view in folder url for the given file.
  */
-export function viewInFolderUrl(file: { filename: string; fileid: number }) {
+export function viewInFolderUrl({ filename, fileid }: { filename: string; fileid: number }) {
+  // ensure dirPath starts with a slash
+  let dirPath = dirname(filename);
+  if (!dirPath.startsWith('/')) {
+    dirPath = `/${dirPath}`;
+  }
+
   return generateUrl(`/apps/files/?dir={dirPath}&scrollto={fileid}&openfile={fileid}`, {
-    dirPath: dirname(file.filename),
-    fileid: file.fileid,
+    fileid,
+    dirPath,
   });
 }

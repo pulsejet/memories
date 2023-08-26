@@ -162,7 +162,12 @@ export default defineComponent({
           title: this.imageInfoTitle,
           subtitle: this.imageInfoSub,
           icon: ImageIcon,
-          href: utils.truthy(this.baseInfo, 'filename') ? dav.viewInFolderUrl(this.baseInfo) : undefined,
+          href: this.filepath
+            ? dav.viewInFolderUrl({
+                fileid: this.fileid!,
+                filename: this.filepath,
+              })
+            : undefined,
         });
       }
 
@@ -293,7 +298,21 @@ export default defineComponent({
 
     /** Image info */
     imageInfoTitle(): string | null {
-      return this.baseInfo.filename ?? this.baseInfo.basename;
+      if (this.config.sidebar_filepath && this.filepath) {
+        return this.filepath;
+      }
+
+      return this.baseInfo.basename;
+    },
+
+    /** Path to file excluding user directory */
+    filepath(): string | null {
+      if (utils.truthy(this.baseInfo, 'filename')) {
+        // "/admin/files/Photos/Camera/20230821_135017.jpg" => "Photos/..."
+        return this.baseInfo.filename.split('/').slice(3).join('/');
+      }
+
+      return null;
     },
 
     imageInfoSub(): string[] {
@@ -390,10 +409,9 @@ export default defineComponent({
 
       // get tags if enabled
       const tags = this.config.systemtags_enabled ? 1 : undefined;
-      const filename = this.config.sidebar_filepath ? 1 : undefined;
 
       // get image info
-      const url = API.Q(utils.getImageInfoUrl(photo), { tags, clusters, filename });
+      const url = API.Q(utils.getImageInfoUrl(photo), { tags, clusters });
       const res = await this.guardState(axios.get<IImageInfo>(url));
       if (!res) return null;
 
