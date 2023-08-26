@@ -299,7 +299,7 @@ export default defineComponent({
     /** Image info */
     imageInfoTitle(): string | null {
       if (this.config.sidebar_filepath && this.filepath) {
-        return this.filepath;
+        return this.filepath.replace(/^\//, ''); // remove leading slash
       }
 
       return this.baseInfo.basename;
@@ -307,12 +307,7 @@ export default defineComponent({
 
     /** Path to file excluding user directory */
     filepath(): string | null {
-      if (utils.truthy(this.baseInfo, 'filename')) {
-        // "/admin/files/Photos/Camera/20230821_135017.jpg" => "Photos/..."
-        return this.baseInfo.filename.split('/').slice(3).join('/');
-      }
-
-      return null;
+      return this.baseInfo?.filename ?? null;
     },
 
     imageInfoSub(): string[] {

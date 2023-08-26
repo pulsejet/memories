@@ -204,12 +204,11 @@ class ImageController extends GenericApiController
             // Allow these ony for logged in users
             $user = $this->userSession->getUser();
             if (null !== $user) {
-                { // Get the path of the file if in current user's files
-                    $path = $file->getPath();
-                    $parts = explode('/', $path);
-                    if (\count($parts) > 3 && $parts[1] === $user->getUID()) {
-                        $info['filename'] = $path;
-                    }
+                // Get the path of the file relative to current user
+                // "/admin/files/Photos/Camera/20230821_135017.jpg" => "/Photos/..."
+                $parts = explode('/', $file->getPath());
+                if (\count($parts) > 3 && 'files' === $parts[2] && $parts[1] === $user->getUID()) {
+                    $info['filename'] = '/'.implode('/', \array_slice($parts, 3));
                 }
 
                 // Get list of tags for this file
