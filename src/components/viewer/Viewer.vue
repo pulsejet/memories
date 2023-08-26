@@ -1046,11 +1046,22 @@ export default defineComponent({
         if (this.routeIsPublic || this.isLocal) {
           globalThis.mSidebar.open(photo);
         } else {
-          const fileInfo = (await dav.getFiles([photo]))[0];
-          if (abort()) return;
+          // check if file path is already loaded with image info
+          let filename = photo.imageInfo?.filename;
+          let useNative = !!filename;
 
-          const forceNative = fileInfo?.originalFilename?.startsWith('/files/');
-          globalThis.mSidebar.open(photo, fileInfo?.filename, forceNative);
+          // get filename from DAV if not already loaded
+          if (!filename) {
+            const fileInfo = (await dav.getFiles([photo]))[0];
+            if (abort()) return;
+
+            // get filename
+            filename = fileInfo?.filename;
+            useNative = fileInfo?.originalFilename?.startsWith('/files/');
+          }
+
+          // open sidebar
+          globalThis.mSidebar.open(photo, filename, useNative);
         }
       };
 

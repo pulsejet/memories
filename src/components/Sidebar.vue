@@ -90,8 +90,8 @@ export default defineComponent({
   },
 
   methods: {
-    async open(photo: IPhoto | number, filename?: string, forceNative = false) {
-      if (!this.reducedOpen && this.native && (!photo || forceNative)) {
+    async open(photo: IPhoto | number, filename?: string, useNative = false) {
+      if (!this.reducedOpen && this.native && (!photo || useNative)) {
         // Open native sidebar
         this.native?.setFullScreenMode?.(true);
         this.native?.open(filename);
