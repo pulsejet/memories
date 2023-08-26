@@ -27,6 +27,7 @@ OC.L10N.register(
     "Continue" : "Продолжи",
     "Move" : "Премести",
     "General" : "Општо",
+    "Viewer" : "Прегледувач",
     "Account" : "Сметка",
     "Logged in as {user}" : "Најавени сте како {user}",
     "Close" : "Затвори",

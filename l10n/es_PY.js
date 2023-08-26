@@ -20,6 +20,7 @@ OC.L10N.register(
     "Continue" : "Continuar",
     "Move" : "Mover",
     "General" : "General",
+    "Viewer" : "Visor",
     "Account" : "Cuenta",
     "Close" : "Cerrar",
     "Back" : "Atrás",

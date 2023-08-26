@@ -23,6 +23,7 @@ OC.L10N.register(
     "Continue" : "続ける",
     "Move" : "移動",
     "General" : "一般",
+    "Viewer" : "ビューア",
     "Account" : "アカウント",
     "Close" : "閉じる",
     "Performance" : "パフォーマンス",

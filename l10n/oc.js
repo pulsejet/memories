@@ -21,6 +21,7 @@ OC.L10N.register(
     "Continue" : "Contunhar",
     "Move" : "Desplaçar",
     "General" : "Generals",
+    "Viewer" : "Visualizaira",
     "Account" : "Compte",
     "Close" : "Tampar",
     "Unknown" : "Desconegut",
