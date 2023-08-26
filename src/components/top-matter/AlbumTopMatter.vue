@@ -102,7 +102,6 @@ import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox';
 import NcActionRadio from '@nextcloud/vue/dist/Components/NcActionRadio';
 
-import { getCurrentUser } from '@nextcloud/auth';
 import axios from '@nextcloud/axios';
 
 import AlbumCreateModal from '../modal/AlbumCreateModal.vue';
@@ -154,7 +153,7 @@ export default defineComponent({
     },
 
     canEditAlbum(): boolean {
-      return !this.isAlbumList && this.$route.params.user === getCurrentUser()?.uid;
+      return !this.isAlbumList && this.$route.params.user === utils.uid;
     },
 
     name(): string {

@@ -145,8 +145,6 @@ input[type='text'] {
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { getCurrentUser } from '@nextcloud/auth';
-
 import UserConfig from '../mixins/UserConfig';
 import * as utils from '../services/utils';
 import * as nativex from '../native';
@@ -192,7 +190,7 @@ export default defineComponent({
     },
 
     user(): string {
-      return getCurrentUser()?.uid.toString() ?? '';
+      return utils.uid ?? String();
     },
   },
 

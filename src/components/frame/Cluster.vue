@@ -28,7 +28,6 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
-import { getCurrentUser } from '@nextcloud/auth';
 import NcCounterBubble from '@nextcloud/vue/dist/Components/NcCounterBubble';
 
 import type { IAlbum, ICluster, IFace, IPhoto } from '../../types';
@@ -36,6 +35,7 @@ import { getPreviewUrl } from '../../services/utils/helpers';
 import errorsvg from '../../assets/error.svg';
 import plussvg from '../../assets/plus.svg';
 
+import * as utils from '../../services/utils';
 import { API } from '../../services/API';
 
 import Vue from 'vue';
@@ -95,7 +95,7 @@ export default defineComponent({
           text = this.n('memories', '{n} item', '{n} items', this.album.count, { n: this.album.count });
         }
 
-        if (this.album.user !== getCurrentUser()?.uid) {
+        if (this.album.user !== utils.uid) {
           text +=
             ' / ' +
             this.t('memories', 'Shared by {user}', {

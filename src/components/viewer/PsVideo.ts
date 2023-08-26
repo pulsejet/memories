@@ -5,7 +5,6 @@ import * as utils from '../../services/utils';
 
 import { showError } from '@nextcloud/dialogs';
 import { translate as t } from '@nextcloud/l10n';
-import { getCurrentUser } from '@nextcloud/auth';
 
 import { API } from '../../services/API';
 import type { PsContent, PsEvent } from './types';
@@ -203,7 +202,7 @@ class VideoContentSetup {
         hlsFailed = true;
         console.warn('PsVideo: HLS stream could not be opened.');
 
-        if (getCurrentUser()?.isAdmin) {
+        if (utils.isAdmin) {
           showError(t('memories', 'Transcoding failed, check Nextcloud logs.'));
         }
 

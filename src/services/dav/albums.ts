@@ -1,22 +1,24 @@
 import * as base from './base';
-import { getCurrentUser } from '@nextcloud/auth';
+
+import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 import { translate as t } from '@nextcloud/l10n';
+
 import { IAlbum, IFileInfo, IPhoto } from '../../types';
+
 import { API } from '../API';
-import axios from '@nextcloud/axios';
 import client from './client';
+import * as utils from '../utils';
 
 /**
  * Get DAV path for album
  */
 export function getAlbumPath(user: string, name: string) {
   // Folder in the dav collection for user
-  const cuid = getCurrentUser()?.uid;
-  if (user === cuid) {
-    return `/photos/${cuid}/albums/${name}`;
+  if (user === utils.uid) {
+    return `/photos/${utils.uid}/albums/${name}`;
   } else {
-    return `/photos/${cuid}/sharedalbums/${name} (${user})`;
+    return `/photos/${utils.uid}/sharedalbums/${name} (${user})`;
   }
 }
 
@@ -116,7 +118,7 @@ export async function* removeFromAlbum(user: string, name: string, photos: IPhot
  */
 export async function createAlbum(albumName: string) {
   try {
-    await client.createDirectory(`/photos/${getCurrentUser()?.uid}/albums/${albumName}`);
+    await client.createDirectory(`/photos/${utils.uid}/albums/${albumName}`);
   } catch (error) {
     console.error(error);
     showError(t('photos', 'Failed to create {albumName}.', { albumName }));
@@ -214,8 +216,8 @@ export async function renameAlbum(album: any, { currentAlbumName, newAlbumName }
   const newAlbum = { ...album, basename: newAlbumName };
   try {
     await client.moveFile(
-      `/photos/${getCurrentUser()?.uid}/albums/${currentAlbumName}`,
-      `/photos/${getCurrentUser()?.uid}/albums/${newAlbumName}`
+      `/photos/${utils.uid}/albums/${currentAlbumName}`,
+      `/photos/${utils.uid}/albums/${newAlbumName}`
     );
     return newAlbum;
   } catch (error) {
@@ -232,11 +234,10 @@ export async function renameAlbum(album: any, { currentAlbumName, newAlbumName }
 
 /** Get fileinfo objects from album photos */
 export function getAlbumFileInfos(photos: IPhoto[], albumUser: string, albumName: string): IFileInfo[] {
-  const uid = getCurrentUser()?.uid;
   const collection =
-    albumUser === uid
-      ? `/photos/${uid}/albums/${albumName}`
-      : `/photos/${uid}/sharedalbums/${albumName} (${albumUser})`;
+    albumUser === utils.uid
+      ? `/photos/${utils.uid}/albums/${albumName}`
+      : `/photos/${utils.uid}/sharedalbums/${albumName} (${albumUser})`;
 
   return photos.map((photo) => {
     const basename = `${photo.fileid}-${photo.basename}`;

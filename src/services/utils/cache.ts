@@ -1,9 +1,7 @@
-import { getCurrentUser } from '@nextcloud/auth';
 import config from '../static-config';
+import { uid } from './helpers';
 
 /** Cache keys */
-const uid = getCurrentUser()?.uid || 'guest';
-
 async function getCacheName() {
   const ver = await config.get('version');
   return `memories-data-${ver}-${uid}`;
@@ -11,7 +9,7 @@ async function getCacheName() {
 
 // Clear all caches except the current one
 (async function clearCaches() {
-  if (uid === 'guest') return;
+  if (!uid) return;
 
   const keys = await window.caches?.keys();
   if (!keys?.length) return;

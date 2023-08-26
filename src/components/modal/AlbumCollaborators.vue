@@ -138,7 +138,6 @@ import Earth from 'vue-material-design-icons/Earth.vue';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
-import { getCurrentUser } from '@nextcloud/auth';
 import { generateOcsUrl, generateUrl } from '@nextcloud/router';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
@@ -148,6 +147,7 @@ const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 const NcListItemIcon = () => import('@nextcloud/vue/dist/Components/NcListItemIcon');
 
 import * as dav from '../../services/dav';
+import * as utils from '../../services/utils';
 import * as nativex from '../../native';
 
 import { Type } from '@nextcloud/sharing';
@@ -208,7 +208,7 @@ export default defineComponent({
   computed: {
     searchResults(): string[] {
       return this.currentSearchResults
-        .filter(({ id }) => id !== getCurrentUser()?.uid)
+        .filter(({ id }) => id !== utils.uid)
         .map(({ type, id }) => `${type}:${id}`)
         .filter((collaboratorKey) => !this.selectedCollaboratorsKeys.includes(collaboratorKey));
     },
@@ -333,9 +333,8 @@ export default defineComponent({
         this.loadingAlbum = true;
         this.errorFetchingAlbum = null;
 
-        const uid = getCurrentUser()?.uid.toString();
-        if (!uid) return;
-        const album = await dav.getAlbum(uid, this.albumName);
+        if (!utils.uid) return;
+        const album = await dav.getAlbum(utils.uid, this.albumName);
         this.populateCollaborators(album.collaborators);
 
         // Direct share if native share is available
@@ -366,9 +365,8 @@ export default defineComponent({
 
     async updateAlbumCollaborators() {
       try {
-        const uid = getCurrentUser()?.uid?.toString();
-        if (!uid) return;
-        const album = await dav.getAlbum(uid, this.albumName);
+        if (!utils.uid) return;
+        const album = await dav.getAlbum(utils.uid, this.albumName);
         await dav.updateAlbum(album, {
           albumName: this.albumName,
           properties: {

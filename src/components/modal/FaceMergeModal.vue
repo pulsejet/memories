@@ -28,7 +28,6 @@ const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
 
 import { showError } from '@nextcloud/dialogs';
-import { getCurrentUser } from '@nextcloud/auth';
 import { IFileInfo, IFace } from '../../types';
 import Cluster from '../frame/Cluster.vue';
 import FaceList from './FaceList.vue';
@@ -63,7 +62,7 @@ export default defineComponent({
 
     open() {
       const user = this.$route.params.user || '';
-      if (this.$route.params.user !== getCurrentUser()?.uid) {
+      if (this.$route.params.user !== utils.uid) {
         showError(
           this.t('memories', 'Only user "{user}" can update this person', {
             user,

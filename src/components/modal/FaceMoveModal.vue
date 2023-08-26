@@ -23,7 +23,6 @@ import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
 import { showError } from '@nextcloud/dialogs';
-import { getCurrentUser } from '@nextcloud/auth';
 import { IPhoto, IFace } from '../../types';
 import Cluster from '../frame/Cluster.vue';
 import FaceList from './FaceList.vue';
@@ -63,7 +62,7 @@ export default defineComponent({
 
       // check ownership
       const user = this.$route.params.user || '';
-      if (this.$route.params.user !== getCurrentUser()?.uid) {
+      if (this.$route.params.user !== utils.uid) {
         showError(
           this.t('memories', 'Only user "{user}" can update this person', {
             user,

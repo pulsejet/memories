@@ -34,10 +34,10 @@
 import { defineComponent, PropType } from 'vue';
 import { getPreviewUrl } from '../../services/utils/helpers';
 
-import { getCurrentUser } from '@nextcloud/auth';
-
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
+
+import * as utils from '../../services/utils';
 
 import type { IAlbum, IPhoto } from '../../types';
 
@@ -93,7 +93,7 @@ export default defineComponent({
     getSubtitle(album: IAlbum) {
       let text = this.n('memories', '%n item', '%n items', album.count);
 
-      if (album.user !== getCurrentUser()?.uid) {
+      if (album.user !== utils.uid) {
         text +=
           ' / ' +
           this.t('memories', 'shared by {owner}', {

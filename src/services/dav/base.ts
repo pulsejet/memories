@@ -1,4 +1,3 @@
-import { getCurrentUser } from '@nextcloud/auth';
 import { showError } from '@nextcloud/dialogs';
 import { translate as t } from '@nextcloud/l10n';
 import axios from '@nextcloud/axios';
@@ -60,8 +59,7 @@ export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
   const rest: IPhoto[] = [];
 
   // Partition photos with and without cache
-  const uid = getCurrentUser()?.uid;
-  if (uid) {
+  if (utils.uid) {
     for (const photo of photos) {
       const filename = photo.imageInfo?.filename;
       if (filename) {
@@ -69,7 +67,7 @@ export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
           id: photo.fileid,
           fileid: photo.fileid,
           basename: photo.basename ?? filename.split('/').pop() ?? '',
-          originalFilename: `/files/${uid}${filename}`,
+          originalFilename: `/files/${utils.uid}${filename}`,
           filename: filename,
         });
       } else {
@@ -97,7 +95,7 @@ async function getFilesInternal1(photos: IPhoto[]): Promise<IFileInfo[]> {
 }
 
 async function getFilesInternal2(fileIds: number[]): Promise<IFileInfo[]> {
-  const prefixPath = `/files/${getCurrentUser()?.uid}`;
+  const prefixPath = `/files/${utils.uid}`;
 
   // IMPORTANT: if this isn't there, then a blank
   // returns EVERYTHING on the server!
@@ -311,7 +309,7 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
   }
 
   // Set absolute target path
-  const prefixPath = `files/${getCurrentUser()?.uid}`;
+  const prefixPath = `files/${utils.uid}`;
   let targetPath = prefixPath + destination;
   if (!targetPath.endsWith('/')) {
     targetPath += '/';

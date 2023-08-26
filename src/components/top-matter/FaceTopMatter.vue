@@ -67,7 +67,6 @@ import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox';
 
 import { emit } from '@nextcloud/event-bus';
-import { getCurrentUser } from '@nextcloud/auth';
 
 import FaceEditModal from '../modal/FaceEditModal.vue';
 import FaceDeleteModal from '../modal/FaceDeleteModal.vue';
@@ -132,7 +131,7 @@ export default defineComponent({
       this.$router.push({
         name: this.$route.name as string,
         params: {
-          user: String(getCurrentUser()?.uid),
+          user: utils.uid as string,
           name: utils.constants.FACE_NULL,
         },
       });

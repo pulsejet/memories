@@ -21,8 +21,10 @@ import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
 import { showError } from '@nextcloud/dialogs';
-import { getCurrentUser } from '@nextcloud/auth';
+
 import Modal from './Modal.vue';
+
+import * as utils from '../../services/utils';
 import * as dav from '../../services/dav';
 
 export default defineComponent({
@@ -57,7 +59,7 @@ export default defineComponent({
 
     open() {
       const user = this.$route.params.user || '';
-      if (this.$route.params.user !== getCurrentUser()?.uid) {
+      if (this.$route.params.user !== utils.uid) {
         showError(
           this.t('memories', 'Only user "{user}" can delete this person', {
             user,

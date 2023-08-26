@@ -8,9 +8,12 @@ import * as nativex from '../../native';
 /**
  * Get the current user UID
  */
-export function uid() {
-  return String(getCurrentUser()?.uid || String()) || null;
-}
+export const uid = String(getCurrentUser()?.uid || String()) || null;
+
+/**
+ * Check if the current user is an admin
+ */
+export const isAdmin = Boolean(getCurrentUser()?.isAdmin);
 
 /**
  * Check if width <= 768px

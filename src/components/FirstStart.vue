@@ -51,7 +51,6 @@ import NcContent from '@nextcloud/vue/dist/Components/NcContent';
 import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 
-import { getCurrentUser } from '@nextcloud/auth';
 import axios from '@nextcloud/axios';
 
 import banner from '../assets/banner.svg';
@@ -85,7 +84,7 @@ export default defineComponent({
 
   computed: {
     isAdmin(): boolean {
-      return Boolean(getCurrentUser()?.isAdmin);
+      return utils.isAdmin;
     },
   },
 

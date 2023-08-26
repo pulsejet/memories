@@ -50,7 +50,6 @@ import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
 import { translate as t, translatePlural as n } from '@nextcloud/l10n';
 import { subscribe, unsubscribe } from '@nextcloud/event-bus';
-import { getCurrentUser } from '@nextcloud/auth';
 
 import * as dav from '../services/dav';
 import * as utils from '../services/utils';
@@ -899,7 +898,7 @@ export default defineComponent({
       }
 
       // Check photo ownership
-      if (this.$route.params.user !== getCurrentUser()?.uid) {
+      if (this.$route.params.user !== utils.uid) {
         showError(this.t('memories', 'Only user "{user}" can update this person', { user }));
         return;
       }

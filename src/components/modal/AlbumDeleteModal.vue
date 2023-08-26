@@ -58,7 +58,7 @@ export default defineComponent({
 
   computed: {
     owned() {
-      return this.user === utils.uid();
+      return this.user === utils.uid;
     },
   },
 
