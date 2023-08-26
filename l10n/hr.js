@@ -23,6 +23,7 @@ OC.L10N.register(
     "Continue" : "Nastavi",
     "Move" : "Premjesti",
     "General" : "Općenito",
+    "Viewer" : "Preglednik",
     "Account" : "Račun",
     "Close" : "Zatvori",
     "Performance" : "Učinkovitost",

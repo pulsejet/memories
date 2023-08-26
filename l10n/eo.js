@@ -19,6 +19,7 @@ OC.L10N.register(
     "Continue" : "Daŭrigi",
     "Move" : "Movi",
     "General" : "Ĝenerala",
+    "Viewer" : "Vidigilo",
     "Account" : "Konto",
     "Close" : "Malfermi",
     "Performance" : "Rendimento",

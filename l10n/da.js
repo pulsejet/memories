@@ -27,6 +27,7 @@ OC.L10N.register(
     "Move" : "Flyt",
     "General" : "Generelt",
     "Timeline Path" : "Tidslinjesti",
+    "Viewer" : "Fremviser",
     "Account" : "Konto",
     "Show hidden folders" : "Vis skjulte mapper",
     "Close" : "Luk",

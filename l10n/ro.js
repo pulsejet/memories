@@ -19,6 +19,7 @@ OC.L10N.register(
     "Continue" : "Continuă",
     "Move" : "Mută",
     "General" : "General",
+    "Viewer" : "Vizualizator",
     "Account" : "Cont",
     "Close" : "Închide",
     "Unknown" : "Necunoscut",

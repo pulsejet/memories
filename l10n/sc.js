@@ -23,6 +23,7 @@ OC.L10N.register(
     "Continue" : "Sighi",
     "Move" : "Tràmuda",
     "General" : "Generale",
+    "Viewer" : "Visualizadore",
     "Account" : "Contu",
     "Close" : "Serra",
     "Performance" : "Atuatzione",

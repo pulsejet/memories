@@ -14,7 +14,9 @@ OC.L10N.register(
     "Favorite" : "Pennrollañ",
     "View in folder" : "Diskwel en teuliad",
     "Continue" : "Kendec'hel",
+    "Move" : "Diplasañ",
     "General" : "Hollek",
+    "Viewer" : "Gweller",
     "Account" : "Kont",
     "Close" : "Seriñ",
     "Unknown" : "Dianv",
@@ -40,6 +42,7 @@ OC.L10N.register(
     "Share" : "Rannan",
     "Next" : "Da heul",
     "Original" : "Orin",
-    "Size" : "Ment"
+    "Size" : "Ment",
+    "No" : "Nann"
 },
 "nplurals=5; plural=((n%10 == 1) && (n%100 != 11) && (n%100 !=71) && (n%100 !=91) ? 0 :(n%10 == 2) && (n%100 != 12) && (n%100 !=72) && (n%100 !=92) ? 1 :(n%10 ==3 || n%10==4 || n%10==9) && (n%100 < 10 || n% 100 > 19) && (n%100 < 70 || n%100 > 79) && (n%100 < 90 || n%100 > 99) ? 2 :(n != 0 && n % 1000000 == 0) ? 3 : 4);");

@@ -31,8 +31,6 @@ OC.L10N.register(
     "_Found {n} item in {path}_::_Found {n} items in {path}_" : ["Намерени са {n} елементa в {path}","Намерени са {n} елемента в {path}"],
     "Metadata" : "Метаданни",
     "Edit" : "Редактиране",
-    "No title" : "Без заглавие",
-    "No description" : "Без описание",
     "No coordinates" : "Няма координати",
     "Click edit to set location" : "Кликване върху редактиране, за задаване на местоположение",
     "Explore" : "Проучи",

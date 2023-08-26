@@ -31,8 +31,6 @@ OC.L10N.register(
     "_Found {n} item in {path}_::_Found {n} items in {path}_" : ["{n} Foto in {path} gefunden","{n} Fotos in {path} gefunden "],
     "Metadata" : "Metadaten",
     "Edit" : "Bearbeiten",
-    "No title" : "Kein Titel",
-    "No description" : "Keine Beschreibung",
     "No coordinates" : "Keine Koordinaten",
     "Click edit to set location" : "Auf Bearbeiten klicken um den Ort festzulegen",
     "Photos" : "Fotos",
@@ -58,6 +56,7 @@ OC.L10N.register(
     "Timeline Path" : "Pfad der Zeitleiste",
     "Square grid mode" : "Quadratischer Gittermodus",
     "Show past photos on top of timeline" : "Vergangene Fotos oben auf der Zeitleiste anzeigen",
+    "Viewer" : "Betrachter",
     "Load full size image on zoom" : "Bild in voller Größe beim Zoomen laden",
     "Always load full size image (not recommended)" : "Bild immer in voller Größe laden (nicht empfohlen)",
     "Account" : "Konto",
@@ -403,6 +402,7 @@ OC.L10N.register(
     "Tag photos to find them easily" : "Markiere Fotos, um sie leicht zu finden",
     "Recognize is still working on your photos" : "Die Erkennung arbeitet noch an deinen Fotos",
     "Places you have been to will appear here" : "Orte, die du besucht hast, werden hier angezeigt",
+    "Yes" : "Ja",
     "No" : "Nein"
 },
 "nplurals=2; plural=(n != 1);");

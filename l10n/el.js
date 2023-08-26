@@ -25,6 +25,7 @@ OC.L10N.register(
     "Continue" : "Συνεχίστε",
     "Move" : "Μετακίνηση",
     "General" : "Γενικά",
+    "Viewer" : "Πρόγραμμα προβολής",
     "Account" : "Λογαριασμός",
     "Close" : "Κλείσιμο",
     "Performance" : "Απόδοση",
@@ -94,6 +95,7 @@ OC.L10N.register(
     "Failed to create {albumName}." : "Απέτυχε η δημιουργία {albumName}",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Απέτυχε η μετονομασία του {currentAlbumName} σε {newAlbumName}.",
     "Failed to delete {fileName}." : "Απέτυχε η διαγραφή {fileName}.",
+    "Yes" : "Ναι",
     "No" : "Όχι"
 },
 "nplurals=2; plural=(n != 1);");
