@@ -276,10 +276,6 @@ class ImageController extends GenericApiController
             $blob = $file->getContent();
 
             // Convert image to JPEG if required
-            //You might want to lower the maximum execution time here.
-            //And increase again, to the default value, when the image is finished.
-            //And set a maximum number of concurrent executions, which might prevent thrashing.
-            //JSON(tmp) Database where you just save the entries as a number and delete them when they are done or the entries are 5 minutes old.
             $highres_enabled = $this->config->getSystemValueString('memories.image.highres.convert_all_images_formarts_enabled', 'false');
             $format = $this->config->getSystemValueString('memories.image.highres.format', 'jpeg');
             if ($highres_enabled == 'true') {
