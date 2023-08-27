@@ -112,7 +112,6 @@ OC.L10N.register(
     "Sort by name" : "Sorteren op naam",
     "Share album" : "Album delen",
     "Download album" : "Album downloaden",
-    "Delete album" : "Album verwijderen",
     "Merge with different person" : "Samenvoegen met ander persoon",
     "Folder View" : "Mapweergave",
     "Timeline View" : "Tijdlijnweergave",

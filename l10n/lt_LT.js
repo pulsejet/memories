@@ -103,7 +103,6 @@ OC.L10N.register(
     "Sort by name" : "Rikiuoti pagal pavadinimą",
     "Share album" : "Bendrinti albumą",
     "Download album" : "Atsisiųsti albumą",
-    "Delete album" : "Ištrinti albumą",
     "Merge with different person" : "Sulieti su kitu žmogumi",
     "Share folder" : "Bendrinti aplanką",
     "Move left" : "Perkelti kairėn",

@@ -18,6 +18,7 @@ OC.L10N.register(
     "Continue" : "Gaan voort",
     "Move" : "Skuif",
     "General" : "Algemeen",
+    "Viewer" : "Bekyker",
     "Account" : "Rekening",
     "Close" : "Sluit",
     "Public link" : "Openbare skakel",

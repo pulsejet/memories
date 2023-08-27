@@ -141,7 +141,6 @@ OC.L10N.register(
     "Sort by name" : "Sorter etter navn",
     "Share album" : "Del album",
     "Download album" : "Last ned album",
-    "Delete album" : "Slett album",
     "Merge with different person" : "Slå sammen med en annen person",
     "Mark person in preview" : "Merk person i forhåndsvisning",
     "Folder View" : "Mappevisning",

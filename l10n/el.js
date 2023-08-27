@@ -70,7 +70,6 @@ OC.L10N.register(
     "Link copied to clipboard" : "Ο σύνδεσμος αντιγράφηκε στο πρόχειρο",
     "Sort by date" : "Ταξινόμηση κατά ημερομηνία",
     "Sort by name" : "Ταξινόμηση κατά όνομα",
-    "Delete album" : "Διαγραφή άλμπουμ",
     "Share folder" : "Διαμοιρασμός φακέλου",
     "Unsaved changes" : "Μη αποθηκευμένες αλλαγές",
     "Share" : "Διαμοιρασμός",

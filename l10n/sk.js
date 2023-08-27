@@ -105,7 +105,6 @@ OC.L10N.register(
     "Link copied to clipboard" : "Odkaz bol skopírovaný do schránky",
     "Sort by date" : "Zoradiť podľa dátumu",
     "Sort by name" : "Zoradiť podľa mena",
-    "Delete album" : "Zmazať album",
     "Merge with different person" : "Spojiť s inou osobou",
     "Share folder" : "Zdieľať priečinok",
     "Error saving image" : "Chyba pri ukladaní obrázku",

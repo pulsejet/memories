@@ -163,7 +163,6 @@ OC.L10N.register(
     "Sort by date" : "Razvrsti po datumu",
     "Sort by name" : "Razvrsti po imenu",
     "Download album" : "Prejmi album",
-    "Delete album" : "Izbriši album",
     "Nothing to show here" : "Ni vsebine za prikaz",
     "Merge with different person" : "Združi z obstoječo osebo",
     "Mark person in preview" : "Označi osebo v predogledu",
