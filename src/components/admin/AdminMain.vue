@@ -1,8 +1,22 @@
 <template>
-  <div class="outer" v-if="loaded">
+  <div class="outer" v-if="config && sconfig">
     <XLoadingIcon class="loading-icon" v-show="loading" />
 
-    <component v-for="c in components" :key="c.__name" :is="c" :status="status" :config="config" @update="update" />
+    <div class="left-pane">
+      <component
+        v-for="c in components"
+        :id="c.name"
+        :key="c.name"
+        :is="c"
+        :status="status"
+        :config="config"
+        :sconfig="sconfig"
+        @update="update"
+      />
+    </div>
+    <div class="right-pane">
+      <a class="sec-link" v-for="c in components" :key="c.name" :href="`#${c.name}`">{{ c.title ?? c.name }}</a>
+    </div>
   </div>
 </template>
 
@@ -13,43 +27,49 @@ import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 
 import { API } from '../../services/API';
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
+import staticConfig from '../../services/static-config';
 
+import Help from './sections/Help.vue';
 import Exif from './sections/Exif.vue';
 import Indexing from './sections/Indexing.vue';
+import FileSupport from './sections/FileSupport.vue';
 import Performance from './sections/Performance.vue';
+import Apps from './sections/Apps.vue';
 import Places from './sections/Places.vue';
 import Video from './sections/Video.vue';
 import VideoTranscoder from './sections/VideoTranscoder.vue';
 import VideoAccel from './sections/VideoAccel.vue';
 
-import { ISystemConfig, ISystemStatus } from './AdminTypes';
+import type { ISystemConfig, ISystemStatus } from './AdminTypes';
+import type { IConfig } from '../../types';
 
 export default defineComponent({
   name: 'Admin',
 
   data: () => ({
-    loaded: false,
     loading: 0,
 
     status: null as ISystemStatus | null,
     config: null as ISystemConfig | null,
+    sconfig: null as IConfig | null,
 
-    components: [Exif, Indexing, Performance, Places, Video, VideoTranscoder, VideoAccel],
+    components: [Help, Exif, Indexing, FileSupport, Performance, Apps, Places, Video, VideoTranscoder, VideoAccel],
   }),
 
   mounted() {
     this.refreshSystemConfig();
     this.refreshStatus();
+    this.refreshStaticConfig();
   },
 
   methods: {
     async refreshSystemConfig() {
+      console.log(this.components);
       try {
         this.loading++;
         const res = await axios.get<ISystemConfig>(API.SYSTEM_CONFIG(null));
         this.config = res.data;
-        this.loaded = true;
       } catch (e) {
         showError(JSON.stringify(e));
       } finally {
@@ -62,6 +82,17 @@ export default defineComponent({
         this.loading++;
         const res = await axios.get<ISystemStatus>(API.SYSTEM_STATUS());
         this.status = res.data;
+      } catch (e) {
+        showError(JSON.stringify(e));
+      } finally {
+        this.loading--;
+      }
+    },
+
+    async refreshStaticConfig() {
+      try {
+        this.loading++;
+        this.sconfig = await staticConfig.getAll();
       } catch (e) {
         showError(JSON.stringify(e));
       } finally {
@@ -101,9 +132,74 @@ export default defineComponent({
 .outer {
   padding: 20px;
   padding-top: 0px;
+  overflow-x: hidden;
 
-  .admin-section {
+  > .right-pane {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+
+    > .left-pane {
+      flex: 1;
+      padding-right: 10px;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    > .right-pane {
+      display: block;
+      padding: 10px;
+      line-height: 2em;
+      > a.sec-link {
+        display: block;
+      }
+    }
+  }
+
+  :deep a {
+    color: var(--color-primary-element);
+  }
+
+  :deep .admin-section {
     margin-top: 20px;
+
+    form {
+      margin-top: 1em;
+    }
+
+    .checkbox-radio-switch {
+      margin: 2px 16px;
+    }
+
+    .m-radio {
+      display: inline-block;
+    }
+
+    h2 {
+      font-size: 1.6em;
+      font-weight: 500;
+      padding-top: 20px;
+    }
+
+    h3 {
+      font-size: 1.2em;
+      font-weight: 500;
+      padding-top: 10px;
+    }
+
+    code {
+      padding-left: 10px;
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+    }
+
+    b {
+      font-weight: 500;
+    }
   }
 
   .loading-icon {
@@ -117,40 +213,6 @@ export default defineComponent({
       width: 100%;
       height: 100%;
     }
-  }
-
-  form {
-    margin-top: 1em;
-  }
-
-  .checkbox-radio-switch {
-    margin: 2px 8px;
-  }
-
-  .m-radio {
-    display: inline-block;
-  }
-
-  :deep h2 {
-    font-size: 1.5em;
-    font-weight: bold;
-    margin-top: 25px;
-  }
-
-  :deep h3 {
-    font-size: 1.2em;
-    font-weight: 500;
-    margin-top: 20px;
-  }
-
-  :deep a {
-    color: var(--color-primary-element);
-  }
-
-  :deep code {
-    padding-left: 10px;
-    -webkit-box-decoration-break: clone;
-    box-decoration-break: clone;
   }
 }
 </style>

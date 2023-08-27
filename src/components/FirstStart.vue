@@ -3,18 +3,12 @@
     <NcAppContent>
       <div class="outer fill-block" :class="{ show }">
         <div class="title">
-          <img :src="banner" />
+          <XImg class="img" :src="banner" :svg-tag="true" />
         </div>
 
         <div class="text">
           {{ t('memories', 'A better photos experience awaits you') }} <br />
           {{ t('memories', 'Choose the root folder of your timeline to begin') }}
-        </div>
-
-        <div class="admin-text" v-if="isAdmin">
-          {{ t('memories', 'If you just installed Memories, run:') }}
-          <br />
-          <code>occ memories:index</code>
         </div>
 
         <div class="error" v-if="error">
@@ -38,6 +32,11 @@
 
         <div class="footer">
           {{ t('memories', 'You can always change this later in settings') }}
+
+          <span class="admin-text" v-if="isAdmin">
+            <br />
+            {{ t('memories', 'If you just installed Memories, visit the admin panel first.') }}
+          </span>
         </div>
       </div>
     </NcAppContent>
@@ -52,13 +51,12 @@ import NcContent from '@nextcloud/vue/dist/Components/NcContent';
 import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 
-import { getFilePickerBuilder } from '@nextcloud/dialogs';
-import { getCurrentUser } from '@nextcloud/auth';
 import axios from '@nextcloud/axios';
 
 import banner from '../assets/banner.svg';
 import type { IDay } from '../types';
 import { API } from '../services/API';
+import * as utils from '../services/utils';
 
 export default defineComponent({
   name: 'FirstStart',
@@ -86,13 +84,13 @@ export default defineComponent({
 
   computed: {
     isAdmin(): boolean {
-      return Boolean(getCurrentUser()?.isAdmin);
+      return utils.isAdmin;
     },
   },
 
   methods: {
     async begin() {
-      const path = await this.chooseFolder(this.t('memories', 'Choose the root of your timeline'), '/');
+      const path = await utils.chooseNcFolder(this.t('memories', 'Choose the root of your timeline'));
 
       // Get folder days
       this.error = '';
@@ -113,6 +111,20 @@ export default defineComponent({
         path,
       });
       this.chosenPath = path;
+
+      // Check if nothing was found
+      if (n === 0) {
+        this.error =
+          this.t('memories', 'No photos were found in the selected folder.') +
+          '\n' +
+          this.t('memories', 'This can happen because your media is still indexing.');
+
+        if (this.isAdmin) {
+          this.error +=
+            '\n\n' + this.t('memories', 'Visit the admin panel to make sure Memories is configured correctly.');
+        }
+        return;
+      }
     },
 
     async finish() {
@@ -121,25 +133,14 @@ export default defineComponent({
       this.config.timeline_path = this.chosenPath;
       await this.updateSetting('timeline_path', 'timelinePath');
     },
-
-    async chooseFolder(title: string, initial: string) {
-      const picker = getFilePickerBuilder(title)
-        .setMultiSelect(false)
-        .setModal(true)
-        .setType(1)
-        .addMimeTypeFilter('httpd/unix-directory')
-        .allowDirectories()
-        .startAt(initial)
-        .build();
-
-      return await picker.pick();
-    },
   },
 });
 </script>
 
 <style lang="scss" scoped>
 .outer {
+  max-width: 450px;
+  margin: 0 auto;
   padding: 20px;
   text-align: center;
 
@@ -150,6 +151,7 @@ export default defineComponent({
   }
 
   .title {
+    color: var(--color-primary);
     font-size: 2.8em;
     line-height: 1.1em;
     font-family: cursive;
@@ -157,19 +159,21 @@ export default defineComponent({
     margin-top: 10px;
     margin-bottom: 20px;
     width: 100%;
-    filter: var(--background-invert-if-dark);
 
-    > img {
-      max-width: calc(100vw - 40px);
+    > .img {
+      margin: 0 auto;
+      width: 60vw;
+      max-width: 400px;
     }
-  }
-
-  .admin-text {
-    margin-top: 10px;
   }
 
   .error {
     color: red;
+    margin-top: 7px;
+    font-size: 0.8em;
+    line-height: 1.2em;
+    font-weight: 500;
+    white-space: pre-line;
   }
 
   .info {
@@ -179,7 +183,7 @@ export default defineComponent({
 
   .button {
     display: inline-block;
-    margin: 15px;
+    margin: 8px;
   }
 
   .footer {

@@ -89,6 +89,50 @@ class Places
     }
 
     /**
+     * Get list of osm IDs for a given point.
+     */
+    public function queryPoint(float $lat, float $lon): array
+    {
+        // Get GIS type
+        $gisType = \OCA\Memories\Util::placesGISType();
+
+        // Construct WHERE clause depending on GIS type
+        $where = null;
+        if (1 === $gisType) {
+            $where = "ST_Contains(geometry, ST_GeomFromText('POINT({$lon} {$lat})'))";
+        } elseif (2 === $gisType) {
+            $where = "POINT('{$lon},{$lat}') <@ geometry";
+        } else {
+            return [];
+        }
+
+        // Make query to memories_planet table
+        $query = $this->connection->getQueryBuilder();
+        $query->select($query->createFunction('DISTINCT(osm_id)'))
+            ->from('memories_planet_geometry')
+            ->where($query->createFunction($where))
+        ;
+
+        // Cancel out inner rings
+        $query->groupBy('poly_id', 'osm_id');
+        $query->having($query->createFunction('SUM(type_id) > 0'));
+
+        // memories_planet_geometry has no *PREFIX*
+        $sql = str_replace('*PREFIX*memories_planet_geometry', 'memories_planet_geometry', $query->getSQL());
+
+        // Use as subquery to get admin level
+        $query = $this->connection->getQueryBuilder();
+        $query->select('sub.osm_id', 'mp.admin_level')
+            ->from($query->createFunction("({$sql})"), 'sub')
+            ->innerJoin('sub', 'memories_planet', 'mp', $query->expr()->eq('sub.osm_id', 'mp.osm_id'))
+            ->orderBy('mp.admin_level', 'ASC')
+        ;
+
+        // Run query
+        return $query->executeQuery()->fetchAll();
+    }
+
+    /**
      * Download planet database file and return path to it.
      */
     public function downloadPlanet(): string

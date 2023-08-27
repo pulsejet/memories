@@ -23,13 +23,13 @@ import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
 import { showError } from '@nextcloud/dialogs';
-import { getCurrentUser } from '@nextcloud/auth';
 import { IPhoto, IFace } from '../../types';
 import Cluster from '../frame/Cluster.vue';
 import FaceList from './FaceList.vue';
 
 import Modal from './Modal.vue';
-import * as dav from '../../services/DavRequests';
+import * as dav from '../../services/dav';
+import * as utils from '../../services/utils';
 
 export default defineComponent({
   name: 'FaceMoveModal',
@@ -62,7 +62,7 @@ export default defineComponent({
 
       // check ownership
       const user = this.$route.params.user || '';
-      if (this.$route.params.user !== getCurrentUser()?.uid) {
+      if (this.$route.params.user !== utils.uid) {
         showError(
           this.t('memories', 'Only user "{user}" can update this person', {
             user,
@@ -91,12 +91,15 @@ export default defineComponent({
       const target = String(face.name || face.cluster_id);
 
       if (
-        !confirm(
-          this.t('memories', 'Are you sure you want to move the selected photos from {name} to {target}?', {
-            name,
-            target,
-          })
-        )
+        !(await utils.confirmDestructive({
+          title: this.t('memories', 'Move to person'),
+          message: this.t('memories', 'Move the selected photos to {target}?', {
+            target: utils.isNumber(target) ? this.t('memories', 'unnamed person') : target,
+          }),
+          confirm: this.t('memories', 'Move'),
+          confirmClasses: 'primary',
+          cancel: this.t('memories', 'Cancel'),
+        }))
       ) {
         return;
       }
@@ -118,7 +121,7 @@ export default defineComponent({
         }
       } catch (error) {
         console.error(error);
-        showError(this.t('photos', 'An error occured while moving photos from {name}.', { name }));
+        showError(this.t('photos', 'An error occurred while moving photos from {name}.', { name }));
       } finally {
         this.updateLoading(-1);
         this.close();

@@ -1,12 +1,10 @@
 import PhotoSwipe from 'photoswipe';
 import staticConfig from '../../services/static-config';
 import * as nativex from '../../native';
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 
 import { showError } from '@nextcloud/dialogs';
 import { translate as t } from '@nextcloud/l10n';
-import { getCurrentUser } from '@nextcloud/auth';
-import axios from '@nextcloud/axios';
 
 import { API } from '../../services/API';
 import type { PsContent, PsEvent } from './types';
@@ -31,8 +29,8 @@ type PsVideoEvent = PsEvent & {
 /**
  * Check if slide has video content
  */
-export function isVideoContent(content: any): content is VideoContent {
-  return content?.data?.type === 'video';
+export function isVideoContent(content: unknown): content is VideoContent {
+  return typeof content === 'object' && content?.['data']?.['type'] === 'video';
 }
 
 class VideoContentSetup {
@@ -87,8 +85,8 @@ class VideoContentSetup {
 
     // do not append video on nearby slides
     pswp.on('appendHeavy', (e) => {
-      if (isVideoContent(e.slide)) {
-        const content = <any>e.slide.content;
+      const content = e.slide.content;
+      if (isVideoContent(content)) {
         if (e.slide.isActive && content.videoElement) {
           this.initVideo(content);
         }
@@ -129,18 +127,28 @@ class VideoContentSetup {
       return;
     }
 
+    // Sources list
+    const sources: { src: string; type: string }[] = [];
+
+    // Add HLS source if enabled
+    if (!staticConfig.getSync('vod_disable')) {
+      sources.push(this.getHLSsrc(content));
+    }
+    sources.push(this.getDirectSrc(content)); // direct source
+
     // Hand off to native player if available
     if (nativex.has()) {
       const fileid = content.data.photo.fileid;
 
       // Local videos are played back directly
-      if (content.data.photo.flag & utils.constants.c.FLAG_IS_LOCAL) {
+      if (utils.isLocalPhoto(content.data.photo)) {
         nativex.playVideoLocal(fileid);
         return;
       }
 
-      // Default to HLS for remote videos
-      nativex.playVideoHls(fileid, this.getHLSsrc(content).src);
+      // Use both remote sources
+      const urls = sources.map((s) => s.src);
+      nativex.playVideoRemote(fileid, urls);
       return;
     }
 
@@ -162,18 +170,6 @@ class VideoContentSetup {
 
     // Add the video element to the actual container
     content.element?.appendChild(content.videoElement);
-
-    // Create hls sources if enabled
-    const sources: {
-      src: string;
-      type: string;
-    }[] = [];
-
-    if (!staticConfig.getSync('vod_disable')) {
-      sources.push(this.getHLSsrc(content));
-    }
-
-    sources.push(this.getDirectSrc(content));
 
     const overrideNative = !vidjs.browser.IS_SAFARI;
     const vjs = (content.videojs = vidjs(content.videoElement, {
@@ -206,7 +202,7 @@ class VideoContentSetup {
         hlsFailed = true;
         console.warn('PsVideo: HLS stream could not be opened.');
 
-        if (getCurrentUser()?.isAdmin) {
+        if (utils.isAdmin) {
           showError(t('memories', 'Transcoding failed, check Nextcloud logs.'));
         }
 

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "ດາວໂຫລດ",
     "Settings" : "ການຕັ້ງຄ່າ",
     "Info" : "ຂໍ້ມຸນ",
     "Favorites" : "ລາຍການທີ່ມັກ",
@@ -9,16 +10,17 @@ OC.L10N.register(
     "Edit" : "ແກ້ໄຂ",
     "Cancel" : "ຍົກເລີກ",
     "Delete" : "ລຶບ",
-    "Download" : "ດາວໂຫລດ",
     "Favorite" : "ລາຍການທີ່ມັກ",
     "View in folder" : "ເບິ່ງໃນໂຟນເດີ",
+    "Continue" : "ສືບຕໍ່",
+    "Move" : "ຍ້າຍ",
     "General" : "ທົ່ວໄປ",
     "Close" : "ປິດ",
     "Unknown" : "ບໍ່ຮູ້",
     "Back" : "ຫຼັງ",
     "Save" : "ບັນທຶກ",
-    "Name" : "ຊື່",
     "Search" : "ຄົ້ນຫາ",
+    "Name" : "ຊື່",
     "Loading …" : "ກຳລັງໂຫຼດ",
     "Remove" : "ຍ້າຍອອກ",
     "Share link" : "ແບ່ງປັນລິງ",
@@ -27,8 +29,8 @@ OC.L10N.register(
     "Share" : "ແບ່ງປັນ",
     "Previous" : "ກ່ອນໜ້າ",
     "Next" : "ທັດໄປ",
-    "Continue" : "ສືບຕໍ່",
     "Original" : "ຕົ້ນສະບັບ",
-    "Size" : "ຂະຫນາດ"
+    "Size" : "ຂະຫນາດ",
+    "No" : "ບໍ່"
 },
 "nplurals=1; plural=0;");

@@ -30,7 +30,7 @@
         <div class="title-text">
           {{ t('memories', 'EXIF Fields') }}
         </div>
-        <EditExif ref="editExif" :photos="photos" />
+        <EditExif ref="editExif" :photos="photos" @save="save" />
       </div>
 
       <div v-if="sections.includes(4)">
@@ -66,7 +66,7 @@ import { showError } from '@nextcloud/dialogs';
 import { emit } from '@nextcloud/event-bus';
 import axios from '@nextcloud/axios';
 
-import * as dav from '../../services/DavRequests';
+import * as dav from '../../services/dav';
 import { API } from '../../services/API';
 
 export default defineComponent({
@@ -156,17 +156,27 @@ export default defineComponent({
         return;
       }
 
+      // Start processing
+      let done = 0;
+      this.progress = 0;
+      this.processing = true;
+
       // Get exif fields diff
       const exifResult = {
         ...((<any>this.$refs.editExif)?.result?.() || {}),
         ...((<any>this.$refs.editLocation)?.result?.() || {}),
       };
-      const tagsResult = (<any>this.$refs.editTags)?.result?.() || null;
 
-      // Start processing
-      let done = 0;
-      this.progress = 0;
-      this.processing = true;
+      // Tags may be created which might throw
+      let tagsResult: number[] | null = null;
+      try {
+        tagsResult = (await (<any>this.$refs.editTags)?.result?.()) || null;
+      } catch (e) {
+        this.processing = false;
+        console.error(e);
+        showError(e);
+        return;
+      }
 
       // Update exif fields
       const calls = this.photos!.map((p) => async () => {

@@ -13,10 +13,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import * as dav from '../../services/DavRequests';
-import { getFilePickerBuilder, FilePickerType } from '@nextcloud/dialogs';
+import { FilePickerType } from '@nextcloud/dialogs';
 import { showInfo } from '@nextcloud/dialogs';
-import { IPhoto } from '../../types';
+
+import * as dav from '../../services/dav';
+import * as utils from '../../services/utils';
+
+import type { IPhoto } from '../../types';
 
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
 
@@ -57,21 +60,12 @@ export default defineComponent({
       this.$emit('close');
     },
 
-    async chooseFolderModal(title: string, initial: string) {
-      const picker = getFilePickerBuilder(title)
-        .setMultiSelect(false)
-        .setModal(false)
-        .setType(FilePickerType.Move)
-        .addMimeTypeFilter('httpd/unix-directory')
-        .allowDirectories()
-        .startAt(initial)
-        .build();
-
-      return await picker.pick();
-    },
-
     async chooseFolderPath() {
-      let destination = await this.chooseFolderModal(this.t('memories', 'Choose a folder'), this.config.folders_path);
+      let destination = await utils.chooseNcFolder(
+        this.t('memories', 'Choose a folder'),
+        this.config.folders_path,
+        FilePickerType.Move
+      );
       // Fails if the target exists, same behavior with Nextcloud files implementation.
       const gen = dav.movePhotos(this.photos, destination, false);
       this.processing = true;

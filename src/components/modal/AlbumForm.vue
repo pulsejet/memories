@@ -89,13 +89,13 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
-import { getCurrentUser } from '@nextcloud/auth';
 import { showError } from '@nextcloud/dialogs';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
 import { DateTime } from 'luxon';
-import * as dav from '../../services/DavRequests';
+import * as utils from '../../services/utils';
+import * as dav from '../../services/dav';
 
 import AlbumCollaborators from './AlbumCollaborators.vue';
 
@@ -163,7 +163,7 @@ export default defineComponent({
   },
 
   methods: {
-    submit(collaborators: any = []) {
+    submit(collaborators: any[] = []) {
       if (this.albumName === '' || this.loading) {
         return;
       }
@@ -181,12 +181,12 @@ export default defineComponent({
       }
     },
 
-    async handleCreateAlbum(collaborators = []) {
+    async handleCreateAlbum(collaborators: any[] = []) {
       try {
         this.loading = true;
         let album = {
           basename: this.albumName,
-          filename: `/photos/${getCurrentUser()?.uid}/albums/${this.albumName}`,
+          filename: `/photos/${utils.uid}/albums/${this.albumName}`,
           nbItems: 0,
           location: this.albumLocation,
           lastPhoto: -1,

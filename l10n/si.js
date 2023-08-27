@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "බාගන්න",
     "Settings" : "සැකසුම්",
     "Info" : "තොරතුරු",
     "Favorites" : "ප්‍රියතම",
@@ -8,13 +9,15 @@ OC.L10N.register(
     "Edit" : "සංස්කරණය",
     "Photos" : "ඡායාරූප",
     "Cancel" : "අවලංගු කරන්න",
-    "Download" : "බාගන්න",
     "Favorite" : "ප්‍රියතම",
     "View in folder" : "බහාලුමේ බලන්න",
     "General" : "සමාන්‍යය",
+    "Account" : "ගිණුම",
     "Close" : "වසන්න",
     "Back" : "ආපසු",
     "Save" : "සුරකින්න",
+    "Search" : "සොයන්න",
+    "Save changes" : "වෙනස්කම් සුරකින්න",
     "Year" : "වර්ෂය",
     "Month" : "මාසය",
     "Day" : "දිනය",
@@ -24,7 +27,6 @@ OC.L10N.register(
     "Empty" : "හිස්",
     "Name" : "නම",
     "Update" : "යාවත්කාල",
-    "Search" : "සොයන්න",
     "Loading …" : "පූරණය වෙමින් …",
     "Remove" : "ඉවත් කරන්න",
     "Share" : "බෙදාගන්න",
@@ -32,6 +34,7 @@ OC.L10N.register(
     "Next" : "ඊළඟ",
     "Undo" : "පෙරසේ",
     "Value" : "අගය",
-    "Size" : "ප්‍රමාණය"
+    "Size" : "ප්‍රමාණය",
+    "No" : "නැහැ"
 },
 "nplurals=2; plural=(n != 1);");

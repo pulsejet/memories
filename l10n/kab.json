@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Sider",
     "Settings" : "Iɣewwaṛen",
     "Favorites" : "Imenyafen",
     "Videos" : "Tividyutin",
@@ -6,24 +7,28 @@
     "Edit" : "Ẓreg",
     "Cancel" : "Sefsex",
     "Delete" : "Kkes",
-    "Download" : "Sider",
     "Favorite" : "Menyif",
+    "Continue" : "Continuer",
+    "Move" : "Senkez",
     "General" : "Amatu",
     "Close" : "Mdel",
     "Unknown" : "Arussin",
     "Back" : "Retour",
     "Save" : "Sekles",
+    "Search" : "Nadi",
+    "Save changes" : "Sekles asnifel",
     "Hour" : "Asrag",
     "Title" : "Azwel",
     "Name" : "Nom",
-    "Search" : "Nadi",
+    "Loading …" : "Asali ...",
     "Remove" : "Kkes",
     "Share link" : "Fren aseɣwen",
     "Refresh" : "Sismeḍ",
     "Share" : "Bḍu",
     "Previous" : "Ɣer deffir",
     "Next" : "Uḍfir",
-    "Continue" : "Continuer",
-    "Size" : "Teɣzi"
+    "Size" : "Teɣzi",
+    "Yes" : "Oui",
+    "No" : "Uhu"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

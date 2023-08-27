@@ -1,8 +1,11 @@
 import axios from '@nextcloud/axios';
-import { showInfo } from '@nextcloud/dialogs';
+import { showInfo, showError } from '@nextcloud/dialogs';
 import { API } from './API';
 import { IConfig } from '../types';
 import { getBuilder } from '@nextcloud/browser-storage';
+import { translate as t } from '@nextcloud/l10n';
+import * as utils from './utils';
+
 import type Storage from '@nextcloud/browser-storage/dist/storage';
 
 class StaticConfig {
@@ -17,16 +20,31 @@ class StaticConfig {
   }
 
   private async init() {
-    const res = await axios.get<IConfig>(API.CONFIG_GET());
-    this.config = res.data;
+    try {
+      const res = await axios.get<IConfig>(API.CONFIG_GET());
+      this.config = res.data as IConfig;
+    } catch (e) {
+      if (!utils.isNetworkError(e)) {
+        showError('Failed to load configuration');
+      }
+
+      // Offline or fail, continue with default configuration
+      this.config = this.getDefault();
+    }
 
     // Check if version changed
     const old = this.getDefault();
     if (old.version !== this.config.version) {
       if (old.version) {
-        showInfo('Memories has been updated. Please refresh to apply the changes.');
+        showInfo(
+          t('memories', 'Memories has been updated to {version}. Reload to get the new version.', {
+            version: this.config.version,
+          })
+        );
       }
-      window.caches?.delete('pages');
+
+      // Clear page cache, keep other caches
+      window.caches?.delete('memories-pages');
     }
 
     // Assign to existing default
@@ -79,24 +97,38 @@ class StaticConfig {
     }
 
     const config: IConfig = {
+      // general stuff
       version: '',
       vod_disable: false,
       video_default_quality: '0',
       places_gis: -1,
 
+      // enabled apps
       systemtags_enabled: false,
-      recognize_enabled: false,
       albums_enabled: false,
+      recognize_installed: false,
+      recognize_enabled: false,
       facerecognition_installed: false,
       facerecognition_enabled: false,
+      preview_generator_enabled: false,
 
+      // general settings
       timeline_path: '',
+      enable_top_memories: true,
+
+      // viewer settings
+      livephoto_autoplay: true,
+      sidebar_filepath: false,
+
+      // folder settings
       folders_path: '',
       show_hidden_folders: false,
       sort_folder_month: false,
-      sort_album_month: true,
-      enable_top_memories: true,
 
+      // album settings
+      sort_album_month: true,
+
+      // local settings
       square_thumbs: false,
       full_res_on_zoom: true,
       full_res_always: false,

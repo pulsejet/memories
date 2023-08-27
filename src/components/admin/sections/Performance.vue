@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section">
-    <h2>{{ t('memories', 'Performance') }}</h2>
+    <h2>{{ $options.title }}</h2>
 
     <p>
       <NcNoteCard :type="isHttps ? 'success' : 'warning'">
@@ -29,10 +29,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import { translate as t } from '@nextcloud/l10n';
+
 import AdminMixin from '../AdminMixin';
 
 export default defineComponent({
   name: 'Performance',
+  title: t('memories', 'Performance'),
   mixins: [AdminMixin],
 
   computed: {
@@ -41,7 +44,7 @@ export default defineComponent({
     },
 
     httpVer(): string {
-      const entry = window.performance?.getEntriesByType?.('navigation')?.[0] as any;
+      const entry = window.performance?.getEntriesByType?.('navigation')?.[0] as PerformanceNavigationTiming;
       return entry?.nextHopProtocol || this.t('memories', 'Unknown');
     },
 

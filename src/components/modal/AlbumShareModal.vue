@@ -34,7 +34,7 @@ import { defineComponent } from 'vue';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 
-import * as dav from '../../services/DavRequests';
+import * as dav from '../../services/dav';
 
 import Modal from './Modal.vue';
 import AlbumCollaborators from './AlbumCollaborators.vue';

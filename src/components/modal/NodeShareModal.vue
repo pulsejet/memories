@@ -72,7 +72,7 @@ import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 import Modal from './Modal.vue';
 
 import { API } from '../../services/API';
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 import * as nativex from '../../native';
 
 import CloseIcon from 'vue-material-design-icons/Close.vue';

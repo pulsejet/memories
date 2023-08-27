@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Ներբեռնել",
     "Settings" : "կարգավորումներ",
     "Info" : "Info",
     "Favorites" : "Սիրվածներ",
@@ -8,11 +9,13 @@ OC.L10N.register(
     "Photos" : "Նկարներ",
     "Cancel" : "ընդհատել",
     "Delete" : "հեռացնել",
-    "Download" : "Ներբեռնել",
+    "Continue" : "Շարունակել",
+    "Move" : "Տեղափոխել",
     "General" : "Ընդհանուր",
     "Close" : "Փակել",
     "Unknown" : "Անհայտ",
     "Save" : "Պահպանել",
+    "Search" : "Search",
     "Month" : "Ամիս",
     "Day" : "Օր",
     "Time" : "Ժամ",
@@ -20,7 +23,6 @@ OC.L10N.register(
     "Description" : "Նկարագրություն",
     "Name" : "Անուն",
     "Update" : "Թարմացնել",
-    "Search" : "Search",
     "Share link" : "Կիսվել հղմամբ",
     "Refresh" : "Թարմացնել",
     "Sort by date" : "Order by date",
@@ -28,7 +30,8 @@ OC.L10N.register(
     "Share" : "Կիսվել",
     "Previous" : "Նախորդ",
     "Next" : "Հաջորդ",
-    "Continue" : "Շարունակել",
-    "Size" : "Չափս"
+    "Size" : "Չափս",
+    "Yes" : "Այո",
+    "No" : "Ոչ"
 },
 "nplurals=2; plural=(n != 1);");

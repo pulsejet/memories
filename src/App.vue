@@ -6,9 +6,10 @@
     v-else
     :class="{
       'remove-gap': removeOuterGap,
+      'has-nav': showNavigation,
     }"
   >
-    <NcAppNavigation v-if="showNavigation" ref="nav">
+    <NcAppNavigation v-if="showNavigation">
       <template #list>
         <NcAppNavigationItem
           v-for="item in navItems"
@@ -23,9 +24,11 @@
       </template>
 
       <template #footer>
-        <NcAppNavigationItem :name="t('memories', 'Settings')" @click="showSettings">
-          <CogIcon slot="icon" :size="20" />
-        </NcAppNavigationItem>
+        <ul class="app-navigation__settings">
+          <NcAppNavigationItem :name="t('memories', 'Settings')" @click="showSettings">
+            <CogIcon slot="icon" :size="20" />
+          </NcAppNavigationItem>
+        </ul>
       </template>
     </NcAppNavigation>
 
@@ -52,6 +55,7 @@
     <Viewer />
     <Sidebar />
     <EditMetadataModal />
+    <AddToAlbumModal />
     <NodeShareModal />
     <ShareModal />
   </NcContent>
@@ -69,8 +73,10 @@ import { generateUrl } from '@nextcloud/router';
 import { translate as t } from '@nextcloud/l10n';
 import { emit, subscribe } from '@nextcloud/event-bus';
 
-import * as utils from './services/Utils';
+import * as utils from './services/utils';
 import * as nativex from './native';
+import router from './router';
+import staticConfig from './services/static-config';
 import UserConfig from './mixins/UserConfig';
 import Timeline from './components/Timeline.vue';
 import Settings from './components/Settings.vue';
@@ -79,6 +85,7 @@ import Viewer from './components/viewer/Viewer.vue';
 import Metadata from './components/Metadata.vue';
 import Sidebar from './components/Sidebar.vue';
 import EditMetadataModal from './components/modal/EditMetadataModal.vue';
+import AddToAlbumModal from './components/modal/AddToAlbumModal.vue';
 import NodeShareModal from './components/modal/NodeShareModal.vue';
 import ShareModal from './components/modal/ShareModal.vue';
 import MobileNav from './components/MobileNav.vue';
@@ -118,6 +125,7 @@ export default defineComponent({
     Viewer,
     Sidebar,
     EditMetadataModal,
+    AddToAlbumModal,
     NodeShareModal,
     ShareModal,
     MobileNav,
@@ -160,7 +168,7 @@ export default defineComponent({
         return false;
       }
 
-      if (this.config.facerecognition_enabled) {
+      if (this.config.facerecognition_installed) {
         return t('memories', 'People (Recognize)');
       }
 
@@ -180,11 +188,7 @@ export default defineComponent({
     },
 
     isFirstStart(): boolean {
-      return (
-        this.config.timeline_path === 'EMPTY' &&
-        this.$route.name !== 'folder-share' &&
-        this.$route.name !== 'album-share'
-      );
+      return this.config.timeline_path === 'EMPTY' && !this.routeIsPublic && !this.$route.query.noinit;
     },
 
     showAlbums(): boolean {
@@ -197,18 +201,18 @@ export default defineComponent({
 
     showNavigation(): boolean {
       if (this.native) {
-        return ['timeline', 'explore', 'albums'].includes(this.$route.name ?? '');
+        return this.routeIsBase || this.routeIsExplore || (this.routeIsAlbums && !this.$route.params.name);
       }
 
-      return !this.$route.name?.endsWith('-share');
+      return !this.routeIsPublic;
     },
 
     hasMobileHeader(): boolean {
-      return this.native && this.showNavigation && this.$route.name === 'timeline';
+      return this.native && this.showNavigation && this.routeIsBase;
     },
 
     removeNavGap(): boolean {
-      return this.$route.name === 'map';
+      return this.routeIsMap;
     },
   },
 
@@ -258,12 +262,15 @@ export default defineComponent({
 
         mount(el, fileInfo, context) {
           this.metadataComponent?.$destroy?.();
-          this.metadataComponent = new Vue(Metadata as any);
+          this.metadataComponent = new Vue({
+            render: (h) => h(Metadata),
+            router,
+          });
           this.metadataComponent.$mount(el);
-          this.metadataComponent.update(Number(fileInfo.id));
+          this.metadataComponent.$children[0].update(Number(fileInfo.id));
         },
         update(fileInfo) {
-          this.metadataComponent.update(Number(fileInfo.id));
+          this.metadataComponent.$children[0].update(Number(fileInfo.id));
         },
         destroy() {
           this.metadataComponent?.$destroy?.();
@@ -276,10 +283,25 @@ export default defineComponent({
     if (this.native) {
       document.documentElement.classList.add('native');
     }
+
+    // Close navigation by default if init is disabled
+    // This is the case for public folder/album shares
+    if (this.$route.query.noinit) {
+      emit('toggle-navigation', { open: false });
+    }
   },
 
   async beforeMount() {
     if ('serviceWorker' in navigator) {
+      // Check if dev instance
+      if (window.location.hostname === 'localhost') {
+        console.warn('Service Worker is not enabled on localhost.');
+        return;
+      }
+
+      // Get the config before loading
+      const previousVersion = staticConfig.getSync('version');
+
       // Use the window load event to keep the page load performant
       window.addEventListener('load', async () => {
         try {
@@ -288,6 +310,12 @@ export default defineComponent({
             scope: generateUrl('/apps/memories'),
           });
           console.log('SW registered: ', registration);
+
+          // Check for updates
+          const currentVersion = await staticConfig.get('version');
+          if (previousVersion !== currentVersion) {
+            registration.update();
+          }
         } catch (error) {
           console.error('SW registration failed: ', error);
         }
@@ -371,8 +399,9 @@ export default defineComponent({
     },
 
     linkClick() {
-      const nav: any = this.$refs.nav;
-      if (globalThis.windowInnerWidth <= 1024) nav?.toggleNavigation(false);
+      if (globalThis.windowInnerWidth <= 1024) {
+        emit('toggle-navigation', { open: false });
+      }
     },
 
     doRouteChecks() {
@@ -418,11 +447,13 @@ export default defineComponent({
 @media (max-width: 768px) {
   .outer {
     padding: 0px;
-
-    // Get rid of padding on img-outer (1px on mobile)
-    // Also need to make sure we don't end up with a scrollbar -- see below
-    margin-left: -1px;
-    width: calc(100% + 3px); // 1px extra here because ... reasons
   }
+}
+
+ul.app-navigation__settings {
+  height: auto !important;
+  overflow: hidden !important;
+  padding-top: 0 !important;
+  flex: 0 0 auto;
 }
 </style>

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "பதிவிறக்குக",
     "Settings" : "அமைப்புகள்",
     "Info" : "Info",
     "Favorites" : "விருப்பங்கள்",
@@ -9,20 +10,21 @@ OC.L10N.register(
     "Photos" : "Photos",
     "Cancel" : "இரத்து செய்க",
     "Delete" : "நீக்குக",
-    "Download" : "பதிவிறக்குக",
     "Favorite" : "விருப்பமான",
+    "Continue" : "Continue",
+    "Move" : "Move",
     "General" : "பொதுவான",
     "Close" : "மூடுக",
     "Unknown" : "தெரியாத",
     "Back" : "பின்னுக்கு",
     "Save" : "சேமிக்க ",
+    "Search" : "Search",
     "Month" : "மாதம்",
     "Title" : "தலைப்பு",
     "Description" : "விவரிப்பு",
     "Label" : "Label",
     "Name" : "பெயர்",
     "Update" : "இற்றைப்படுத்தல்",
-    "Search" : "Search",
     "Remove" : "அகற்றுக",
     "Share link" : "இணைப்பைப் பகிரவும்",
     "Refresh" : "மீள் ஏற்றுக",
@@ -31,8 +33,9 @@ OC.L10N.register(
     "Share" : "பகிர்வு",
     "Previous" : "முன்தைய",
     "Next" : "அடுத்த",
-    "Continue" : "Continue",
     "Value" : "Value",
-    "Size" : "அளவு"
+    "Size" : "அளவு",
+    "Yes" : "ஆம்",
+    "No" : "இல்லை"
 },
 "nplurals=2; plural=(n != 1);");

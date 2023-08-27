@@ -1,12 +1,20 @@
 const webpack = require('webpack');
+const path = require('path');
 const webpackConfig = require('@nextcloud/webpack-vue-config');
 const WorkboxPlugin = require('workbox-webpack-plugin');
-const path = require('path');
 const TerserPlugin = require('terser-webpack-plugin');
 
 const buildMode = process.env.NODE_ENV;
 const isDev = buildMode === 'development';
 
+// Entry points
+webpackConfig.entry = {
+  main: path.resolve(path.join('src', 'main')),
+  admin: path.resolve(path.join('src', 'admin')),
+  'hooks-clear-cache': path.resolve(path.join('src', 'hooks', 'clear-cache')),
+};
+
+// Enable TypeScript
 webpackConfig.module.rules.push({
   test: /\.ts?$/,
   loader: 'ts-loader',
@@ -15,13 +23,14 @@ webpackConfig.module.rules.push({
     appendTsSuffixTo: [/\.vue$/],
   },
 });
-webpackConfig.entry.main = path.resolve(path.join('src', 'main'));
 
+// Exclude node_modules from watch
 webpackConfig.watchOptions = {
   ignored: /node_modules/,
   aggregateTimeout: 300,
 };
 
+// Bundle service worker
 webpackConfig.plugins.push(
   new WorkboxPlugin.InjectManifest({
     swSrc: path.resolve(path.join('src', 'service-worker.js')),

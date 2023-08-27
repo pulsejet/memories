@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section">
-    <h3>{{ t('memories', 'Hardware Acceleration') }}</h3>
+    <h3>{{ $options.title }}</h3>
 
     <p>
       {{ t('memories', 'You must first make sure the correct drivers are installed before configuring acceleration.') }}
@@ -42,8 +42,10 @@
         @update:checked="update('memories.vod.vaapi.low_power')"
         type="switch"
       >
-        {{ t('memories', 'Enable low-power mode (QSV)') }}
+        {{ t('memories', 'Enable low-power mode (QSV only)') }}
       </NcCheckboxRadioSwitch>
+
+      <br />
 
       {{ t('memories', 'NVIDIA GPUs can be used for transcoding using the NVENC encoder with the proper drivers.') }}
       <br />
@@ -93,7 +95,28 @@
         type="radio"
         class="m-radio"
         @update:checked="update('memories.vod.nvenc.scale')"
-        >{{ t('memories', 'CUDA scaler') }}
+        >{{ t('memories', 'CUDA scaler') }} ({{ t('memories', 'not recommended') }})
+      </NcCheckboxRadioSwitch>
+
+      <br />
+      {{
+        t(
+          'memories',
+          'Due to a bug in certain hardware drivers, videos may appear in incorrect orientations when streaming. This can be resolved in some cases by rotating the video on the accelerator.'
+        )
+      }}
+      <br />
+      <b>{{
+        t('memories', 'Enable the following option only if you have incorrectly oriented videos during playback.')
+      }}</b>
+
+      <NcCheckboxRadioSwitch
+        :disabled="!enableTranscoding"
+        :checked.sync="config['memories.vod.use_transpose']"
+        @update:checked="update('memories.vod.use_transpose')"
+        type="switch"
+      >
+        {{ t('memories', 'Enable streaming transpose workaround') }}
       </NcCheckboxRadioSwitch>
     </p>
   </div>
@@ -102,10 +125,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import { translate as t } from '@nextcloud/l10n';
+
 import AdminMixin from '../AdminMixin';
 
 export default defineComponent({
   name: 'VideoAccel',
+  title: t('memories', 'HW Acceleration'),
   mixins: [AdminMixin],
 
   computed: {

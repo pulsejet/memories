@@ -44,7 +44,7 @@ import axios from '@nextcloud/axios';
 import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 
 import { API } from '../../services/API';
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-edgebuffer';
@@ -90,7 +90,6 @@ export default defineComponent({
     },
     clusters: [] as IMarkerCluster[],
     animMarkers: false,
-    isDark: false,
   }),
 
   mounted() {
@@ -101,10 +100,6 @@ export default defineComponent({
 
     // Initialize
     this.initialize();
-
-    // If currently dark mode, set isDark
-    const pane = document.querySelector('.leaflet-tile-pane');
-    this.isDark = !pane || window.getComputedStyle(pane)?.['filter']?.includes('invert');
   },
 
   created() {
@@ -148,7 +143,12 @@ export default defineComponent({
 
       // Otherwise, get location from server
       try {
-        const init = await axios.get<any>(API.MAP_INIT());
+        const init = await axios.get<{
+          pos?: {
+            lat?: number;
+            lon?: number;
+          };
+        }>(API.MAP_INIT());
 
         // Init data contains position information
         const map = this.$refs.map as LMap;
@@ -208,7 +208,7 @@ export default defineComponent({
     async fetchClusters() {
       const oldZoom = this.oldZoom;
       const qbounds = this.$route.query.b;
-      const zoom = this.$route.query.z;
+      const zoom = this.$route.query.z as string;
       const paramsChanged = () => this.$route.query.b !== qbounds || this.$route.query.z !== zoom;
 
       let { minLat, maxLat, minLon, maxLon } = this.boundsFromQuery();
@@ -281,7 +281,10 @@ export default defineComponent({
     },
 
     clusterPreviewUrl(cluster: IMarkerCluster) {
-      return utils.getPreviewUrl(cluster.preview, false, 256);
+      return utils.getPreviewUrl({
+        photo: cluster.preview,
+        msize: 256,
+      });
     },
 
     clusterIconClass(cluster: IMarkerCluster) {
@@ -397,7 +400,7 @@ export default defineComponent({
     },
 
     handleContainerResize() {
-      (<any>this.$refs.map)?.mapObject?.invalidateSize();
+      (<any>this.$refs.map)?.mapObject?.invalidateSize(true);
     },
   },
 });
@@ -437,10 +440,10 @@ export default defineComponent({
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 5px;
   position: relative;
-  transition: transform 0.2s;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
 
   &:hover {
-    transform: scale(1.8);
+    box-shadow: 0 0 3px var(--color-primary);
   }
 
   img {
@@ -476,21 +479,6 @@ export default defineComponent({
 
   &:hover {
     z-index: 100000 !important;
-  }
-}
-
-// Dark mode
-$darkFilter: invert(1) grayscale(1) brightness(1.3) contrast(1.3);
-.leaflet-tile-pane {
-  body[data-theme-dark] &,
-  body[data-theme-dark-highcontrast] & {
-    filter: $darkFilter;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    body[data-theme-default] & {
-      filter: $darkFilter;
-    }
   }
 }
 </style>

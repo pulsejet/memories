@@ -64,36 +64,54 @@ class OtherController extends GenericApiController
     public function getUserConfig(): Http\Response
     {
         return Util::guardEx(function () {
-            $appManager = \OC::$server->get(\OCP\App\IAppManager::class);
+            // get memories version
+            $version = \OC::$server->get(\OCP\App\IAppManager::class)
+                ->getAppInfo('memories')['version']
+            ;
 
+            // get user if logged in
             try {
                 $uid = Util::getUID();
             } catch (\Exception $e) {
                 $uid = null;
             }
 
+            // helper function to get user config values
             $getAppConfig = function ($key, $default) use ($uid) {
                 return $this->config->getUserValue($uid, Application::APPNAME, $key, $default);
             };
 
             return new JSONResponse([
-                'version' => $appManager->getAppInfo('memories')['version'],
+                // general stuff
+                'version' => $version,
                 'vod_disable' => Util::getSystemConfig('memories.vod.disable'),
                 'video_default_quality' => Util::getSystemConfig('memories.video_default_quality'),
                 'places_gis' => Util::getSystemConfig('memories.gis_type'),
 
+                // enabled apps
                 'systemtags_enabled' => Util::tagsIsEnabled(),
-                'recognize_enabled' => Util::recognizeIsEnabled(),
                 'albums_enabled' => Util::albumsIsEnabled(),
+                'recognize_installed' => Util::recognizeIsInstalled(),
+                'recognize_enabled' => Util::recognizeIsEnabled(),
                 'facerecognition_installed' => Util::facerecognitionIsInstalled(),
                 'facerecognition_enabled' => Util::facerecognitionIsEnabled(),
+                'preview_generator_enabled' => Util::previewGeneratorIsEnabled(),
 
+                // general settings
                 'timeline_path' => $getAppConfig('timelinePath', 'EMPTY'),
+                'enable_top_memories' => 'true' === $getAppConfig('enableTopMemories', 'true'),
+
+                // viewer settings
+                'livephoto_autoplay' => 'true' === $getAppConfig('livephotoAutoplay', 'true'),
+                'sidebar_filepath' => 'true' === $getAppConfig('sidebarFilepath', false),
+
+                // folder settings
                 'folders_path' => $getAppConfig('foldersPath', '/'),
                 'show_hidden_folders' => 'true' === $getAppConfig('showHidden', false),
                 'sort_folder_month' => 'true' === $getAppConfig('sortFolderMonth', false),
+
+                // album settings
                 'sort_album_month' => 'true' === $getAppConfig('sortAlbumMonth', 'true'),
-                'enable_top_memories' => 'true' === $getAppConfig('enableTopMemories', 'true'),
             ], Http::STATUS_OK);
         });
     }
@@ -111,13 +129,20 @@ class OtherController extends GenericApiController
             $appManager = \OC::$server->get(\OCP\App\IAppManager::class);
             $urlGenerator = \OC::$server->get(\OCP\IURLGenerator::class);
 
-            $res = new JSONResponse([
+            $info = [
                 'version' => $appManager->getAppInfo('memories')['version'],
                 'baseUrl' => $urlGenerator->linkToRouteAbsolute('memories.Page.main'),
                 'loginFlowUrl' => $urlGenerator->linkToRouteAbsolute('core.ClientFlowLoginV2.init'),
-            ]);
+            ];
+
+            try {
+                $info['uid'] = Util::getUID();
+            } catch (\Exception $e) {
+                $info['uid'] = null;
+            }
 
             // This is public information
+            $res = new JSONResponse($info);
             $res->addHeader('Access-Control-Allow-Origin', '*');
 
             return $res;

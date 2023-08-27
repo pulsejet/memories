@@ -31,7 +31,7 @@
             <template #icon> <ShareIcon :size="24" /> </template>
           </NcActionButton>
           <NcActionButton
-            v-if="!routeIsAlbum && canDelete"
+            v-if="!routeIsAlbums && canDelete"
             :aria-label="t('memories', 'Delete')"
             @click="deleteCurrent"
             :close-after-click="true"
@@ -40,7 +40,7 @@
             <template #icon> <DeleteIcon :size="24" /> </template>
           </NcActionButton>
           <NcActionButton
-            v-if="routeIsAlbum"
+            v-if="routeIsAlbums"
             :aria-label="t('memories', 'Remove from album')"
             @click="deleteCurrent"
             :close-after-click="true"
@@ -69,8 +69,8 @@
               <StarOutlineIcon v-else :size="24" />
             </template>
           </NcActionButton>
-          <NcActionButton :aria-label="t('memories', 'Sidebar')" @click="toggleSidebar" :close-after-click="true">
-            {{ t('memories', 'Sidebar') }}
+          <NcActionButton :aria-label="t('memories', 'Info')" @click="toggleSidebar" :close-after-click="true">
+            {{ t('memories', 'Info') }}
             <template #icon>
               <InfoIcon :size="24" />
             </template>
@@ -109,7 +109,7 @@
             </template>
           </NcActionButton>
           <NcActionButton
-            v-if="!routeIsPublic && !routeIsAlbum && !isLocal"
+            v-if="!routeIsPublic && !routeIsAlbums && !isLocal"
             :aria-label="t('memories', 'View in folder')"
             @click="viewInFolder"
             :close-after-click="true"
@@ -119,7 +119,12 @@
               <OpenInNewIcon :size="24" />
             </template>
           </NcActionButton>
-          <NcActionButton :aria-label="t('memories', 'Slideshow')" @click="startSlideshow" :close-after-click="true">
+          <NcActionButton
+            :aria-label="t('memories', 'Slideshow')"
+            v-if="globalCount > 1"
+            @click="startSlideshow"
+            :close-after-click="true"
+          >
             {{ t('memories', 'Slideshow') }}
             <template #icon>
               <SlideshowIcon :size="24" />
@@ -134,6 +139,17 @@
             {{ t('memories', 'Edit metadata') }}
             <template #icon>
               <EditFileIcon :size="24" />
+            </template>
+          </NcActionButton>
+          <NcActionButton
+            :aria-label="t('memories', 'Add to album')"
+            v-if="config.albums_enabled && !isLocal && !routeIsPublic && canShare"
+            @click="updateAlbums"
+            :close-after-click="true"
+          >
+            {{ t('memories', 'Add to album') }}
+            <template #icon>
+              <AlbumIcon :size="24" />
             </template>
           </NcActionButton>
         </NcActions>
@@ -158,7 +174,7 @@
 import { defineComponent } from 'vue';
 
 import { IDay, IImageInfo, IPhoto, IRow, IRowType } from '../../types';
-import { PsSlide } from './types';
+import type { PsContent } from './types';
 
 import UserConfig from '../../mixins/UserConfig';
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
@@ -167,10 +183,9 @@ import { subscribe, unsubscribe, emit } from '@nextcloud/event-bus';
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
-import { getDownloadLink } from '../../services/DavRequests';
 import { API } from '../../services/API';
-import * as dav from '../../services/DavRequests';
-import * as utils from '../../services/Utils';
+import * as dav from '../../services/dav';
+import * as utils from '../../services/utils';
 import * as nativex from '../../native';
 
 import ImageEditor from './ImageEditor.vue';
@@ -192,8 +207,10 @@ import SlideshowIcon from 'vue-material-design-icons/PlayBox.vue';
 import EditFileIcon from 'vue-material-design-icons/FileEdit.vue';
 import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
 import LivePhotoIcon from 'vue-material-design-icons/MotionPlayOutline.vue';
+import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
 
 const SLIDESHOW_MS = 5000;
+const SIDEBAR_DEBOUNCE_MS = 500;
 const BODY_HAS_VIEWER = 'has-viewer';
 const BODY_VIEWER_VIDEO = 'viewer-video';
 const BODY_VIEWER_FULLY_OPENED = 'viewer-fully-opened';
@@ -216,6 +233,7 @@ export default defineComponent({
     EditFileIcon,
     AlbumRemoveIcon,
     LivePhotoIcon,
+    AlbumIcon,
   },
 
   mixins: [UserConfig],
@@ -253,6 +271,11 @@ export default defineComponent({
 
     /** Timer to move to next photo */
     slideshowTimer: 0,
+    /** Timer to debounce changes to sidebar */
+    sidebarUpdateTimer: 0,
+
+    /** Photo keys for which an imageInfo request is currently ongoing */
+    imageInfoLoading: new Set<string>(),
   }),
 
   mounted() {
@@ -293,16 +316,6 @@ export default defineComponent({
       }
     },
 
-    /** Route is public */
-    routeIsPublic(): boolean {
-      return this.$route.name?.endsWith('-share') ?? false;
-    },
-
-    /** Route is album */
-    routeIsAlbum(): boolean {
-      return this.$route.name === 'albums';
-    },
-
     /** Get the currently open photo */
     currentPhoto(): IPhoto | null {
       if (!this.list.length || !this.photoswipe) {
@@ -327,7 +340,7 @@ export default defineComponent({
 
     /** Is the current slide a local photo */
     isLocal(): boolean {
-      return Boolean((this.currentPhoto?.flag ?? 0) & this.c.FLAG_IS_LOCAL);
+      return utils.isLocalPhoto(this.currentPhoto!);
     },
 
     /** Show bottom bar info such as date taken */
@@ -357,7 +370,7 @@ export default defineComponent({
       return this.currentPhoto?.imageInfo?.permissions?.includes('D') ?? false;
     },
 
-    /** Show share button */
+    /** Show share button and add to album button */
     canShare(): boolean {
       return Boolean(this.currentPhoto);
     },
@@ -405,16 +418,16 @@ export default defineComponent({
     },
 
     /** User interacted with the page with mouse */
-    setUiVisible(evt: any) {
+    setUiVisible(event: PointerEvent | false) {
       clearTimeout(this.activityTimer);
-      if (evt) {
+      if (event) {
         // If directly triggered, always update ui visibility
         // If triggered through a pointer event, only update if this is not
         // a touch event (i.e. a mouse move).
         // On touch devices, tapAction directly handles the ui visibility
         // through Photoswipe.
-        const isPointer = evt instanceof PointerEvent;
-        const isMouse = isPointer && evt.pointerType !== 'touch';
+        const isPointer = event instanceof PointerEvent;
+        const isMouse = isPointer && event.pointerType !== 'touch';
         if (this.isOpen && (!isPointer || isMouse)) {
           this.photoswipe?.template?.classList.add('pswp--ui-visible');
 
@@ -482,7 +495,10 @@ export default defineComponent({
       // Monkey patch for focus trapping in sidebar
       const _onFocusIn = this.photoswipe.keyboard['_onFocusIn'];
       this.photoswipe.keyboard['_onFocusIn'] = (e: FocusEvent) => {
-        if (e.target instanceof HTMLElement && e.target.closest('#app-sidebar-vue, .v-popper__popper, .modal-mask')) {
+        if (
+          e.target instanceof HTMLElement &&
+          e.target.closest(['#app-sidebar-vue', '.v-popper__popper', '.modal-mask', '.oc-dialog'].join(','))
+        ) {
           return;
         }
         _onFocusIn.call(this.photoswipe!.keyboard, e);
@@ -704,7 +720,8 @@ export default defineComponent({
         preload(dayIdx + 3);
 
         // Get thumb image
-        const thumbSrc: string = this.thumbElem(photo)?.getAttribute('src') || utils.getPreviewUrl(photo, false, 256);
+        const thumbSrc: string =
+          this.thumbElem(photo)?.getAttribute('src') || utils.getPreviewUrl({ photo, msize: 256 });
 
         // Get full image
         return {
@@ -749,7 +766,7 @@ export default defineComponent({
     },
 
     /** Open with a static list of photos */
-    async openStatic(photo: IPhoto, list: IPhoto[], thumbSize?: number) {
+    async openStatic(photo: IPhoto, list: IPhoto[], thumbSize?: 256 | 512) {
       this.list = list;
       const photoswipe = await this.createBase({
         index: list.findIndex((p) => p.fileid === photo.fileid),
@@ -760,7 +777,7 @@ export default defineComponent({
 
       photoswipe.addFilter('itemData', (itemData, index) => ({
         ...this.getItemData(this.list[index]),
-        msrc: thumbSize ? utils.getPreviewUrl(photo, false, thumbSize) : undefined,
+        msrc: thumbSize ? utils.getPreviewUrl({ photo, msize: thumbSize }) : undefined,
       }));
 
       this.isOpen = true;
@@ -769,12 +786,12 @@ export default defineComponent({
 
     /** Get base data object */
     getItemData(photo: IPhoto) {
-      let previewUrl = utils.getPreviewUrl(photo, false, 'screen');
+      let previewUrl = utils.getPreviewUrl({ photo, size: 'screen' });
       const isvideo = photo.flag & this.c.FLAG_IS_VIDEO;
 
       // Preview aren't animated
       if (isvideo || photo.mimetype === 'image/gif') {
-        previewUrl = getDownloadLink(photo);
+        previewUrl = dav.getDownloadLink(photo);
       }
 
       // Get height and width
@@ -789,22 +806,12 @@ export default defineComponent({
       }
 
       // Lazy load the rest of EXIF data
-      if (!photo.imageInfo) {
-        axios.get<IImageInfo>(utils.getImageInfoUrl(photo)).then((res) => {
-          photo.imageInfo = res.data;
-
-          // Update params in photo object
-          photo.w = res.data.w;
-          photo.h = res.data.h;
-          photo.basename = res.data.basename;
-          photo.mimetype = res.data.mimetype;
-        });
-      }
+      this.loadMetadata(photo);
 
       // Get full image URL
       const fullUrl = isvideo
         ? null
-        : photo.flag & this.c.FLAG_IS_LOCAL
+        : utils.isLocalPhoto(photo)
         ? nativex.API.IMAGE_FULL(photo.fileid)
         : API.IMAGE_DECODABLE(photo.fileid, photo.etag);
       const fullLoadCond = this.config.full_res_always ? 'always' : this.config.full_res_on_zoom ? 'zoom' : 'never';
@@ -876,6 +883,35 @@ export default defineComponent({
       }
     },
 
+    /**
+     * Load the metadata (image info) for a photo asynchronously
+     */
+    async loadMetadata(photo: IPhoto) {
+      // Check if already loaded
+      if (photo.imageInfo) return;
+
+      // Check if already loading
+      const key = photo.key ?? photo.fileid.toString();
+      if (this.imageInfoLoading.has(key)) return;
+
+      // Mark as loading
+      this.imageInfoLoading.add(key);
+
+      try {
+        const res = await axios.get<IImageInfo>(utils.getImageInfoUrl(photo));
+        photo.imageInfo = res.data;
+
+        // Update params in photo object
+        photo.w = res.data.w;
+        photo.h = res.data.h;
+        photo.basename = res.data.basename;
+        photo.mimetype = res.data.mimetype;
+      } finally {
+        // Allow another chance in case this failed
+        this.imageInfoLoading.delete(key);
+      }
+    },
+
     async openEditor() {
       // Only for JPEG for now
       if (!this.canEdit) return;
@@ -896,11 +932,13 @@ export default defineComponent({
     },
 
     /** Key press events */
-    keydown(e: KeyboardEvent) {
+    async keydown(e: KeyboardEvent) {
       if (
         e.key === 'Delete' &&
         !this.routeIsPublic &&
-        confirm(this.t('memories', 'Are you sure you want to delete?'))
+        (await utils.confirmDestructive({
+          title: this.t('memories', 'Are you sure you want to delete?'),
+        }))
       ) {
         this.deleteCurrent();
       }
@@ -951,7 +989,7 @@ export default defineComponent({
 
     /** Play the current live photo */
     playLivePhoto() {
-      this.psLivePhoto?.onContentActivate(this.photoswipe!.currSlide as PsSlide);
+      this.psLivePhoto?.play(this.photoswipe!.currSlide!.content as PsContent);
     },
 
     /** Is the current photo a favorite */
@@ -990,18 +1028,45 @@ export default defineComponent({
       window.location.href = utils.getLivePhotoVideoUrl(photo, false);
     },
 
-    /** Open the sidebar */
-    async openSidebar(photo?: IPhoto) {
-      globalThis.mSidebar.setTab('memories-metadata');
-      photo ??= this.currentPhoto!;
+    /**
+     * Open the sidebar.
+     *
+     * Calls to this function are debounced to prevent too many updates
+     * to the sidebar while the user is scrolling through photos.
+     */
+    async openSidebar() {
+      const photo = this.currentPhoto!;
 
-      if (this.routeIsPublic || this.isLocal) {
-        globalThis.mSidebar.open(photo);
-      } else {
-        const fileInfo = (await dav.getFiles([photo]))[0];
-        const forceNative = fileInfo?.originalFilename?.startsWith('/files/');
-        globalThis.mSidebar.open(photo, fileInfo?.filename, forceNative);
+      // Update the sidebar
+      const update = async () => {
+        const abort = () => !this.isOpen || photo !== this.currentPhoto;
+        if (abort()) return;
+
+        globalThis.mSidebar.setTab('memories-metadata');
+        if (this.routeIsPublic || this.isLocal) {
+          globalThis.mSidebar.open(photo);
+        } else {
+          const fileInfo = (await dav.getFiles([photo]))[0];
+          if (abort()) return;
+
+          // get attributes
+          const filename = fileInfo?.filename;
+          const useNative = fileInfo?.originalFilename?.startsWith('/files/');
+
+          // open sidebar
+          globalThis.mSidebar.open(photo, filename, useNative);
+        }
+      };
+
+      // Do not debounce the first call
+      let callback = update;
+      if (!this.sidebarUpdateTimer) {
+        callback();
+        callback = async () => {};
       }
+
+      // Debounce the rest
+      utils.setRenewingTimeout(this, 'sidebarUpdateTimer', callback, SIDEBAR_DEBOUNCE_MS);
     },
 
     handleAppSidebarOpen() {
@@ -1047,7 +1112,7 @@ export default defineComponent({
      * Open the files app with the current file.
      */
     async viewInFolder() {
-      if (this.currentPhoto) dav.viewInFolder(this.currentPhoto);
+      dav.viewInFolder(this.currentPhoto!);
     },
 
     /**
@@ -1132,6 +1197,13 @@ export default defineComponent({
     editMetadata() {
       globalThis.editMetadata([globalThis.currentViewerPhoto]);
     },
+
+    /**
+     * Update album selection for current photo
+     */
+    updateAlbums() {
+      globalThis.updateAlbums([this.currentPhoto!]);
+    },
   },
 });
 </script>
@@ -1174,7 +1246,7 @@ export default defineComponent({
 
 .bottom-bar {
   background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.3));
-  width: 100%;
+  width: inherit;
   padding: 10px;
   z-index: 100001;
   position: fixed;
@@ -1197,7 +1269,7 @@ export default defineComponent({
       margin-top: -2px;
       margin-bottom: 2px;
       font-size: 0.9em;
-      max-width: 70vw;
+      max-width: 90%;
       word-break: break-word;
       line-height: 1.2em;
     }
@@ -1258,6 +1330,7 @@ export default defineComponent({
       cursor: pointer;
     }
   }
+
   .pswp__icn-shadow {
     display: none;
   }
@@ -1266,6 +1339,14 @@ export default defineComponent({
   @media (max-width: 768px) {
     .pswp__button--arrow {
       opacity: 0 !important;
+    }
+  }
+
+  // Prevent the popper from overlapping with the sidebar
+  > div > .v-popper__wrapper {
+    overflow: visible !important;
+    > .v-popper__inner {
+      transform: translateX(-20px);
     }
   }
 }

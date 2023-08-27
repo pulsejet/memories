@@ -1,24 +1,25 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Muat turun",
     "Settings" : "Tetapan",
     "Info" : "Info",
     "Favorites" : "Favorites",
     "Edit" : "Sunting",
     "Cancel" : "Batal",
     "Delete" : "Padam",
-    "Download" : "Muat turun",
+    "Move" : "Move",
     "General" : "Umum",
     "Close" : "Tutup",
     "Back" : "Kembali",
     "Save" : "Simpan",
+    "Search" : "Search",
     "Month" : "Bulan",
     "Day" : "Hari",
     "Title" : "Judul",
     "Description" : "Keterangan",
     "Name" : "Nama",
     "Update" : "Kemaskini",
-    "Search" : "Search",
     "Remove" : "Buang",
     "Share link" : "Share link",
     "Refresh" : "Refresh",
@@ -27,6 +28,8 @@ OC.L10N.register(
     "Share" : "Kongsi",
     "Previous" : "Sebelum",
     "Next" : "Seterus",
-    "Size" : "Saiz"
+    "Size" : "Saiz",
+    "Yes" : "Ya",
+    "No" : "Tidak"
 },
 "nplurals=1; plural=0;");

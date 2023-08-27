@@ -67,7 +67,7 @@ class AlbumsBackend extends Backend
 
     public function transformDayQuery(&$query, bool $aggregate): void
     {
-        $albumId = (string) $this->request->getParam('albums');
+        $albumId = (string) $this->request->getParam(self::clusterType());
 
         // Get album object
         $album = $this->albumsQuery->getIfAllowed($this->getUID(), $albumId);
@@ -87,20 +87,15 @@ class AlbumsBackend extends Backend
         $this->tq->allowEmptyRoot();
     }
 
-    public function getClusters(): array
+    public function getClustersInternal(int $fileid = 0): array
     {
-        /** @var \OCP\IRequest $request */
-        $request = \OC::$server->get(\OCP\IRequest::class);
-
-        // Run actual query
+        // Run actual queries
         $list = [];
-        $t = (int) $request->getParam('t', 0);
-        if ($t & 1) { // personal
-            $list = array_merge($list, $this->albumsQuery->getList(Util::getUID()));
-        }
-        if ($t & 2) { // shared
-            $list = array_merge($list, $this->albumsQuery->getList(Util::getUID(), true));
-        }
+
+        // Personal albums
+        $list = array_merge($list, $this->albumsQuery->getList(Util::getUID(), false, $fileid));
+        // Shared albums
+        $list = array_merge($list, $this->albumsQuery->getList(Util::getUID(), true, $fileid));
 
         // Remove elements with duplicate album_id
         $seenIds = [];
@@ -111,6 +106,13 @@ class AlbumsBackend extends Backend
             $seenIds[] = $item['album_id'];
 
             return true;
+        });
+
+        // Add display names for users
+        $userManager = \OC::$server->get(\OCP\IUserManager::class);
+        array_walk($list, function (&$item) use ($userManager) {
+            $user = $userManager->get($item['user']);
+            $item['user_display'] = $user ? $user->getDisplayName() : null;
         });
 
         // Convert $list to sequential array

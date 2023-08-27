@@ -40,12 +40,16 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import config from '../services/static-config';
+import type { Component } from 'vue';
+
 import axios from '@nextcloud/axios';
+import { translate as t } from '@nextcloud/l10n';
 
 import ClusterHList from './ClusterHList.vue';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+
+import FolderIcon from 'vue-material-design-icons/Folder.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import VideoIcon from 'vue-material-design-icons/PlayCircle.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
@@ -53,9 +57,10 @@ import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
 import MapIcon from 'vue-material-design-icons/Map.vue';
 import CogIcon from 'vue-material-design-icons/Cog.vue';
 
-import type { ICluster, IConfig } from '../types';
+import config from '../services/static-config';
 import { API } from '../services/API';
-import { translate as t } from '@nextcloud/l10n';
+
+import type { ICluster, IConfig } from '../types';
 
 export default defineComponent({
   name: 'Explore',
@@ -70,6 +75,11 @@ export default defineComponent({
     tags: [] as ICluster[],
 
     categories: [
+      {
+        name: t('memories', 'Folders'),
+        icon: FolderIcon,
+        link: '/folders',
+      },
       {
         name: t('memories', 'Favorites'),
         icon: StarIcon,
@@ -103,7 +113,7 @@ export default defineComponent({
       },
     ] as {
       name: string;
-      icon: any;
+      icon: Component;
       link?: string;
       click?: () => void;
     }[],
@@ -161,12 +171,14 @@ export default defineComponent({
 
     async getPlaces() {
       const res = await axios.get<ICluster[]>(API.PLACE_LIST());
-      this.places = res.data.slice(0, 10);
+      const places = res.data; // FIXME: performance
+      this.places = places.slice(0, 10);
     },
 
     async getTags() {
       const res = await axios.get<ICluster[]>(API.TAG_LIST());
-      this.tags = res.data.slice(0, 10);
+      const tags = res.data.sort((a, b) => b.count - a.count); // FIXME: performance
+      this.tags = tags.slice(0, 10);
     },
   },
 });
@@ -179,12 +191,12 @@ export default defineComponent({
   padding-top: 8px;
 
   .link-list {
-    padding: 8px 10px;
+    padding: 6px 7px;
 
     > .link {
       display: inline-block;
-      width: calc(50% - 5px);
-      margin: 0 5px 8px 0;
+      width: calc(50% - 6px);
+      margin: 3px;
       border-radius: 10px;
     }
   }

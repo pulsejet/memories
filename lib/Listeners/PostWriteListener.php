@@ -60,7 +60,7 @@ class PostWriteListener implements IEventListener
         try {
             $parent = $node;
             while ($parent = $parent->getParent()) {
-                if ($parent->nodeExists('.nomedia')) {
+                if ($parent->nodeExists('.nomedia') || $parent->nodeExists('.nomemories')) {
                     return;
                 }
             }

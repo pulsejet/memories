@@ -2,9 +2,49 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v5.1.1] - Unreleased
+## [Unreleased]
 
+- **Feature**: Support showing full file path in sidebar ([#173](https://github.com/pulsejet/memories/issues/173))
+- **Feature**: View file in folder on clicking name in sidebar
+- **Feature**: User can leave albums that are shared with them
+- **Fix**: Support for transcoding MKV files.
+
+## [v5.4.1] - 2023-08-20
+
+- Corrects a versioning error. This version is the same as v5.3.0
+
+## [v5.3.0] - 2023-08-20
+
+- **Feature**: Allow adding photos to multiple albums together ([#752](https://github.com/pulsejet/memories/pull/752))
+- **Feature**: Improved layout for albums list view
+- **Feature**: Search bar for album picker when adding to album.
+- **Feature**: Show albums of photo in metadata ([#752](https://github.com/pulsejet/memories/pull/752))
+- **Feature**: Show faces in photo in sidebar metadata
+- **Feature**: Allow creation of new tags when editing metadata ([#487](https://github.com/pulsejet/memories/issues/487))
+- **Feature**: Allow disabling autoplay of live photo ([#591](https://github.com/pulsejet/memories/issues/591))
+- **Feature**: Improvements in admin interface
+- **Feature**: A `.nomemories` file will now hide a folder from Memories without affecting other apps ([#777](https://github.com/pulsejet/memories/issues/777))
+- **Feature**: More crop options for image editor ([#546](https://github.com/pulsejet/memories/issues/546))
+- **Bugfix**: You can now configure the transpose strategy of the transcoder (required for QSV)
+
+## [v5.2.1] - 2023-07-03
+
+- **Feature**: Allow moving unclustered faces to a cluster with Recognize (v4.2.0+)
+
+## [v5.2.0] - 2023-06-30
+
+**Note:** You will need to run `occ memories:places-setup --recalculate` to re-index places (or reindex everything)
+
+- New project home page: https://memories.gallery
+- New Discord community: https://discord.gg/7Dr9f9vNjJ
+- Nextcloud 27 compatibility
+- **Feature**: Hierarchical places view
 - **Feature**: Layout improvements especially for mobile.
+- **Feature**: Allow downloading entire publicly shared albums.
+- **Feature**: Basic preview generation configuration in admin interface.
+- **Bugfix**: Prevent keeping original file on metadata edit.
+- **Bugfix**: Use correct locale for time in metadata view.
+- **Bugfix**: Allow editing metadata on large video files.
 
 ## [v5.1.0] - 2023-04-29
 

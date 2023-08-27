@@ -3,6 +3,8 @@
     <template #icon>
       <PeopleIcon v-if="routeIsPeople" />
       <ArchiveIcon v-else-if="routeIsArchive" />
+      <AlbumIcon v-else-if="routeIsAlbums" />
+      <MapIcon v-else-if="routeIsMap" />
       <ImageMultipleIcon v-else />
     </template>
   </NcEmptyContent>
@@ -16,6 +18,8 @@ import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent';
 import PeopleIcon from 'vue-material-design-icons/AccountMultiple.vue';
 import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
+import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
+import MapIcon from 'vue-material-design-icons/Map.vue';
 
 import * as strings from '../../services/strings';
 
@@ -28,19 +32,13 @@ export default defineComponent({
     PeopleIcon,
     ArchiveIcon,
     ImageMultipleIcon,
+    AlbumIcon,
+    MapIcon,
   },
 
   computed: {
     emptyViewDescription(): string {
       return strings.emptyDescription(this.$route.name);
-    },
-
-    routeIsPeople(): boolean {
-      return this.$route.name === 'recognize' || this.$route.name === 'facerecognition';
-    },
-
-    routeIsArchive(): boolean {
-      return this.$route.name === 'archive';
     },
   },
 });

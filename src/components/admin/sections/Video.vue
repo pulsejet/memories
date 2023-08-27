@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section">
-    <h2>{{ t('memories', 'Video Streaming') }}</h2>
+    <h2>{{ $options.title }}</h2>
 
     <p>
       {{ t('memories', 'Live transcoding provides for adaptive streaming of videos using HLS.') }}
@@ -81,10 +81,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import { translate as t } from '@nextcloud/l10n';
+
 import AdminMixin from '../AdminMixin';
 
 export default defineComponent({
   name: 'Video',
+  title: t('memories', 'Video Streaming'),
   mixins: [AdminMixin],
 });
 </script>

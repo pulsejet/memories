@@ -1,11 +1,15 @@
 <template>
   <Modal @close="close" v-if="show">
     <template #title>
-      {{ t('memories', 'Remove Album') }}
+      {{ owned ? t('memories', 'Remove Album') : t('memories', 'Leave Album') }}
     </template>
 
     <span>
-      {{ t('memories', 'Are you sure you want to permanently remove album "{name}"?', { name }) }}
+      {{
+        owned
+          ? t('memories', 'Are you sure you want to permanently remove album "{name}"?', { name })
+          : t('memories', 'Are you sure you want to leave the shared album "{name}"?', { name })
+      }}
     </span>
 
     <template #buttons>
@@ -22,9 +26,11 @@ import { defineComponent } from 'vue';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 import { showError } from '@nextcloud/dialogs';
-import { getCurrentUser } from '@nextcloud/auth';
 import Modal from './Modal.vue';
-import client from '../../services/DavClient';
+
+import * as utils from '../../services/utils';
+import * as dav from '../../services/dav';
+import client from '../../services/dav/client';
 
 export default defineComponent({
   name: 'AlbumDeleteModal',
@@ -41,13 +47,19 @@ export default defineComponent({
   }),
 
   watch: {
-    $route: async function (from: any, to: any) {
+    $route() {
       this.refreshParams();
     },
   },
 
   mounted() {
     this.refreshParams();
+  },
+
+  computed: {
+    owned() {
+      return this.user === utils.uid;
+    },
   },
 
   methods: {
@@ -57,26 +69,17 @@ export default defineComponent({
     },
 
     open() {
-      const user = this.$route.params.user || '';
-      if (this.$route.params.user !== getCurrentUser()?.uid) {
-        showError(
-          this.t('memories', 'Only user "{user}" can delete this album', {
-            user,
-          })
-        );
-        return;
-      }
       this.show = true;
     },
 
     refreshParams() {
-      this.user = <string>this.$route.params.user || '';
-      this.name = <string>this.$route.params.name || '';
+      this.user = this.$route.params.user ?? String();
+      this.name = this.$route.params.name ?? String();
     },
 
     async save() {
       try {
-        await client.deleteFile(`/photos/${this.user}/albums/${this.name}`);
+        await client.deleteFile(dav.getAlbumPath(this.user, this.name));
         this.$router.push({ name: 'albums' });
         this.close();
       } catch (error) {

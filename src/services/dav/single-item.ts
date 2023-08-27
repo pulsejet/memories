@@ -1,9 +1,9 @@
-import { IDay } from '../../types';
+import { IDay, IPhoto } from '../../types';
 import { loadState } from '@nextcloud/initial-state';
 
-let singleItem: any;
+let singleItem: IPhoto | null = null;
 try {
-  singleItem = loadState('memories', 'single_item', {});
+  singleItem = loadState('memories', 'single_item', null);
 } catch (e) {
   console.error('Could not load single item', e);
 }
@@ -16,7 +16,7 @@ export async function getSingleItemData(): Promise<IDay[]> {
   if (!singleItem?.fileid) return [];
 
   // Make days array
-  singleItem.key = singleItem.fileid;
+  singleItem.key = String(singleItem.fileid);
   const days = [
     {
       dayid: singleItem.dayid,

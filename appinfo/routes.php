@@ -47,6 +47,7 @@ return [
 
         // Public album share
         ['name' => 'PublicAlbum#showShare', 'url' => '/a/{token}', 'verb' => 'GET'],
+        ['name' => 'PublicAlbum#download', 'url' => '/a/{token}/download', 'verb' => 'GET'],
 
         // API Routes
         ['name' => 'Days#days', 'url' => '/api/days', 'verb' => 'GET'],

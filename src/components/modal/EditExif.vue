@@ -14,6 +14,7 @@
         trailing-button-icon="close"
         :show-trailing-button="dirty[field.field]"
         @trailing-button-click="reset(field)"
+        @keypress.enter="$emit('save')"
       />
     </div>
   </div>
@@ -26,6 +27,11 @@ import { IPhoto } from '../../types';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
 import { translate as t } from '@nextcloud/l10n';
+
+interface IField {
+  field: string;
+  label: string;
+}
 
 export default defineComponent({
   components: {
@@ -40,8 +46,8 @@ export default defineComponent({
   },
 
   data: () => ({
-    exif: null as any,
-    dirty: {},
+    exif: null! as Record<string, string>,
+    dirty: {} as Record<string, boolean>,
 
     fields: [
       {
@@ -72,7 +78,7 @@ export default defineComponent({
         field: 'Copyright',
         label: t('memories', 'Copyright'),
       },
-    ],
+    ] as IField[],
   }),
 
   mounted() {
@@ -94,7 +100,7 @@ export default defineComponent({
         if (ePhoto && (eCurr === null || ePhoto === eCurr)) {
           exif[field.field] = String(ePhoto);
         } else {
-          exif[field.field] = '';
+          exif[field.field] = String();
         }
       }
     }
@@ -113,15 +119,15 @@ export default defineComponent({
       return diff;
     },
 
-    label(field: any) {
+    label(field: IField) {
       return field.label + (this.dirty[field.field] ? '*' : '');
     },
 
-    placeholder(field: any) {
+    placeholder(field: IField) {
       return this.dirty[field.field] ? t('memories', 'Empty') : t('memories', 'Unchanged');
     },
 
-    reset(field: any) {
+    reset(field: IField) {
       this.exif[field.field] = '';
       this.dirty[field.field] = false;
     },

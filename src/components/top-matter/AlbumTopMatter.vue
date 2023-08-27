@@ -38,7 +38,7 @@
         </NcActionRadio>
       </NcActions>
 
-      <NcActions :inline="1">
+      <NcActions :inline="isMobile ? 1 : 3">
         <NcActionButton
           :aria-label="t('memories', 'Create new album')"
           @click="$refs.createModal.open(false)"
@@ -76,12 +76,12 @@
           <template #icon> <EditIcon :size="20" /> </template>
         </NcActionButton>
         <NcActionButton
-          :aria-label="t('memories', 'Delete album')"
+          :aria-label="t('memories', 'Remove album')"
           @click="$refs.deleteModal.open()"
           close-after-click
-          v-if="canEditAlbum"
+          v-if="!isAlbumList"
         >
-          {{ t('memories', 'Delete album') }}
+          {{ t('memories', 'Remove album') }}
           <template #icon> <DeleteIcon :size="20" /> </template>
         </NcActionButton>
       </NcActions>
@@ -102,7 +102,6 @@ import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox';
 import NcActionRadio from '@nextcloud/vue/dist/Components/NcActionRadio';
 
-import { getCurrentUser } from '@nextcloud/auth';
 import axios from '@nextcloud/axios';
 
 import AlbumCreateModal from '../modal/AlbumCreateModal.vue';
@@ -114,13 +113,14 @@ import { downloadWithHandle } from '../../services/dav/download';
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
-import DeleteIcon from 'vue-material-design-icons/Close.vue';
+import DeleteIcon from 'vue-material-design-icons/TrashCanOutline.vue';
 import PlusIcon from 'vue-material-design-icons/Plus.vue';
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import SortIcon from 'vue-material-design-icons/SortVariant.vue';
 import SlotAlphabeticalIcon from 'vue-material-design-icons/SortAlphabeticalAscending.vue';
 import SortDateIcon from 'vue-material-design-icons/SortCalendarDescending.vue';
 import { API } from '../../services/API';
+import * as utils from '../../services/utils';
 
 export default defineComponent({
   name: 'AlbumTopMatter',
@@ -147,35 +147,26 @@ export default defineComponent({
 
   mixins: [UserConfig],
 
-  data: () => ({
-    name: '',
-  }),
-
   computed: {
     isAlbumList(): boolean {
       return !Boolean(this.$route.params.name);
     },
 
     canEditAlbum(): boolean {
-      return !this.isAlbumList && this.$route.params.user === getCurrentUser()?.uid;
+      return !this.isAlbumList && this.$route.params.user === utils.uid;
     },
-  },
 
-  watch: {
-    $route: async function (from: any, to: any) {
-      this.createMatter();
+    name(): string {
+      // Album name is displayed in the dynamic top matter (timeline)
+      return this.$route.params.name ? '' : this.t('memories', 'Albums');
     },
-  },
 
-  mounted() {
-    this.createMatter();
+    isMobile(): boolean {
+      return utils.isMobile();
+    },
   },
 
   methods: {
-    createMatter() {
-      this.name = <string>this.$route.params.name || this.t('memories', 'Albums');
-    },
-
     back() {
       this.$router.go(-1);
     },

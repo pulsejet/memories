@@ -1,11 +1,11 @@
 <template>
   <router-link draggable="false" class="cluster fill-block" :class="{ error }" :to="target" @click.native="click">
-    <div class="count-bubble" v-if="data.count">
+    <div class="count-bubble" v-if="counters && data.count">
       <NcCounterBubble> {{ data.count }} </NcCounterBubble>
     </div>
     <div class="name">
-      {{ title }}
-      <span class="subtitle" v-if="subtitle"> {{ subtitle }} </span>
+      <div class="title">{{ title }}</div>
+      <div class="subtitle" v-if="subtitle">{{ subtitle }}</div>
     </div>
 
     <div class="previews fill-block" ref="previews">
@@ -16,6 +16,7 @@
           :class="{ error }"
           :key="data.cluster_id"
           :src="previewUrl"
+          :svg-tag="plus"
           @error="failed"
         />
         <div v-if="title || subtitle" class="overlay fill-block" />
@@ -27,7 +28,6 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
-import { getCurrentUser } from '@nextcloud/auth';
 import NcCounterBubble from '@nextcloud/vue/dist/Components/NcCounterBubble';
 
 import type { IAlbum, ICluster, IFace, IPhoto } from '../../types';
@@ -35,6 +35,7 @@ import { getPreviewUrl } from '../../services/utils/helpers';
 import errorsvg from '../../assets/error.svg';
 import plussvg from '../../assets/plus.svg';
 
+import * as utils from '../../services/utils';
 import { API } from '../../services/API';
 
 import Vue from 'vue';
@@ -54,6 +55,10 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    counters: {
+      type: Boolean,
+      default: true,
+    },
   },
 
   computed: {
@@ -67,7 +72,7 @@ export default defineComponent({
           etag: this.album.album_id,
           flag: 0,
         } as unknown as IPhoto;
-        return getPreviewUrl(mock, true, 512);
+        return getPreviewUrl({ photo: mock, sqsize: 512 });
       }
 
       return API.CLUSTER_PREVIEW(this.data.cluster_type, this.data.cluster_id);
@@ -82,8 +87,23 @@ export default defineComponent({
     },
 
     subtitle() {
-      if (this.album && this.album.user !== getCurrentUser()?.uid) {
-        return `(${this.album.user})`;
+      if (this.album) {
+        let text: string;
+        if (this.album.count === 0) {
+          text = this.t('memories', 'No items');
+        } else {
+          text = this.n('memories', '{n} item', '{n} items', this.album.count, { n: this.album.count });
+        }
+
+        if (this.album.user !== utils.uid) {
+          text +=
+            ' / ' +
+            this.t('memories', 'Shared by {user}', {
+              user: this.album.user_display || this.album.user,
+            });
+        }
+
+        return text;
       }
 
       return '';
@@ -113,7 +133,7 @@ export default defineComponent({
 
     /** Target URL to navigate to */
     target() {
-      if (!this.link) return {};
+      if (!this.link || this.plus) return {};
 
       if (this.album) {
         const user = this.album.user;
@@ -159,36 +179,86 @@ img {
   cursor: pointer;
 }
 
-// Get rid of color of the bubble
-.cluster .count-bubble :deep .counter-bubble__counter {
-  color: unset !important;
+.cluster {
+  // Get rid of color of the bubble
+  .count-bubble :deep .counter-bubble__counter {
+    color: unset !important;
+  }
 }
 
+$namemargin: 10px;
 .name {
-  z-index: 100;
   position: absolute;
-  bottom: 7%;
-  width: 100%;
+  bottom: 0;
+  z-index: 100;
+  width: calc(100% - 2 * #{$namemargin});
+  margin: $namemargin;
+
   color: white;
-  padding: 0 5%;
+  word-wrap: break-word;
+  white-space: normal;
   text-align: center;
   font-size: 1em;
-  word-wrap: break-word;
-  text-overflow: ellipsis;
   line-height: 1.1em;
 
-  > .subtitle {
-    font-size: 0.7em;
-    margin-top: 2px;
-    display: block;
+  // multiline ellipsis
+  > .title {
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    // 2px padding prevents the bottom of the text from being cut off
+    padding-bottom: 2px;
   }
 
-  .cluster.error > & {
+  // name is below the image
+  .cluster--circle & {
+    margin: 0 $namemargin;
+    min-height: 26px; // alignment
+    font-weight: 500;
+  }
+
+  .cluster--circle &,
+  .cluster--album &,
+  .cluster.error & {
     color: unset;
+
+    > .title {
+      -webkit-line-clamp: 2;
+    }
+  }
+
+  .cluster--album & {
+    text-align: start;
+    margin: 0;
+    padding: 0 12px;
+
+    min-height: 50px; // align to top of space
+    @media (max-width: 768px) {
+      min-height: 54px; // mark#2147915
+      padding: 0 6px;
+    }
+
+    > .title {
+      font-weight: 500;
+    }
+
+    > .subtitle {
+      color: var(--color-text-lighter);
+    }
   }
 
   @media (max-width: 768px) {
     font-size: 0.9em;
+  }
+
+  > .subtitle {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.87em;
   }
 }
 
@@ -206,10 +276,22 @@ img {
   padding: 2px;
   box-sizing: border-box;
 
+  .cluster--album & {
+    padding: 12px;
+
+    @media (max-width: 768px) {
+      /**
+      * This is incredibly hacky: mark#2147915
+      * We want to reduce the padding on mobile. By reducing the vertical padding
+      * by double the amount, the size compensates and it looks the same.
+      */
+      padding: 0 6px;
+    }
+  }
+
   > .img-outer {
     position: relative;
     background-color: var(--color-background-dark);
-    border-radius: 10px;
     padding: 0;
     margin: 0;
     width: 100%;
@@ -217,6 +299,19 @@ img {
     overflow: hidden;
     display: inline-block;
     cursor: pointer;
+
+    .cluster--rounded &,
+    .cluster--album & {
+      border-radius: 12px; // rounded corners
+    }
+    .cluster--album &,
+    .cluster--circle & {
+      height: unset;
+      aspect-ratio: 1; // force square
+    }
+    .cluster--circle & {
+      border-radius: 50%; // circle image
+    }
 
     &.plus {
       background-color: var(--color-primary-element-light);
@@ -234,9 +329,11 @@ img {
       position: absolute;
       top: 0;
       left: 0;
-      background: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 10%, transparent 35%);
+      background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 10%, transparent 40%);
 
-      .cluster.error & {
+      .cluster.error &,
+      .cluster--circle &,
+      .cluster--album & {
         display: none;
       }
     }

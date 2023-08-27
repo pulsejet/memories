@@ -37,6 +37,7 @@ trait UtilController
 
             public function __construct(\Closure $closure)
             {
+                parent::__construct();
                 $this->_closure = $closure;
             }
 

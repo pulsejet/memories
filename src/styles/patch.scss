@@ -1,0 +1,29 @@
+// Make popper menus full height
+.v-popper--theme-dropdown .v-popper__inner {
+  max-height: calc(90vh - 16px) !important; // was 50vh
+  margin: 0 10px; // was unset
+}
+
+// Make sure empty content is full width
+[role='note'].empty-content {
+  width: 100%;
+}
+
+// Make NcListItem border-box to prevent overflow
+li.list-item__wrapper {
+  > a.list-item {
+    box-sizing: border-box;
+  }
+}
+
+// Make OC dialogs larger to a minimum width
+div.oc-dialog[role='dialog'] {
+  min-width: min(400px, 90vw);
+
+  // This close button is annoying since it does
+  // the same thing as the cancel button but needs
+  // two tabs to reach the OK button when visible.
+  button.oc-dialog-close {
+    display: none;
+  }
+}

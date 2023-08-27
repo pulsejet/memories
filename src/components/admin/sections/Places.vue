@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section">
-    <h2>{{ t('memories', 'Reverse Geocoding') }}</h2>
+    <h2>{{ $options.title }}</h2>
 
     <p>
       <template v-if="status">
@@ -60,7 +60,7 @@
     <form :action="placesSetupUrl" method="post" @submit="placesSetup" target="_blank">
       <input name="requesttoken" type="hidden" :value="requestToken" />
       <input name="actiontoken" type="hidden" :value="actionToken" />
-      <NcButton nativeType="submit" type="warning">
+      <NcButton nativeType="submit" type="warning" style="margin-top: 8px">
         {{ t('memories', 'Download planet database') }}
       </NcButton>
     </form>
@@ -71,10 +71,14 @@
 import { defineComponent } from 'vue';
 import { API } from '../../../services/API';
 
+import { translate as t } from '@nextcloud/l10n';
+import * as utils from '../../../services/utils';
+
 import AdminMixin from '../AdminMixin';
 
 export default defineComponent({
   name: 'Places',
+  title: t('memories', 'Reverse Geocoding'),
   mixins: [AdminMixin],
 
   computed: {
@@ -104,7 +108,12 @@ export default defineComponent({
   },
 
   methods: {
-    placesSetup(event: Event) {
+    async placesSetup(event: Event) {
+      // prevent the submit event
+      event.preventDefault();
+      event.stopPropagation();
+
+      // construct warning
       const warnSetup = this.t(
         'memories',
         'Looks like the database is already setup. Are you sure you want to redownload planet data?'
@@ -112,10 +121,19 @@ export default defineComponent({
       const warnLong = this.t('memories', 'You are about to download the planet database. This may take a while.');
       const warnReindex = this.t('memories', 'This may also cause all photos to be re-indexed!');
       const msg = (this.status?.gis_count ? warnSetup : warnLong) + ' ' + warnReindex;
-      if (!confirm(msg)) {
-        event.preventDefault();
-        event.stopPropagation();
-        return;
+
+      // ask the user
+      if (
+        await utils.confirmDestructive({
+          title: this.t('memories', 'Download planet database'),
+          message: msg,
+          confirm: this.t('memories', 'Continue'),
+          confirmClasses: 'error',
+          cancel: this.t('memories', 'Cancel'),
+        })
+      ) {
+        // submit the form
+        (event.target as HTMLFormElement).submit();
       }
     },
   },

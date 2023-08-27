@@ -23,6 +23,7 @@
 <template>
   <div>
     <NcAppSettingsDialog
+      id="memories-settings"
       :open="open"
       :show-navigation="true"
       :title="t('memories', 'Memories Settings')"
@@ -30,7 +31,7 @@
     >
       <NcAppSettingsSection id="general-settings" :title="t('memories', 'General')">
         <label for="timeline-path">{{ t('memories', 'Timeline Path') }}</label>
-        <input id="timeline-path" @click="chooseTimelinePath" v-model="config.timeline_path" type="text" />
+        <input id="timeline-path" @click="chooseTimelinePath" v-model="config.timeline_path" type="text" readonly />
 
         <NcCheckboxRadioSwitch :checked.sync="config.square_thumbs" @update:checked="updateSquareThumbs" type="switch">
           {{ t('memories', 'Square grid mode') }}
@@ -42,6 +43,16 @@
           type="switch"
         >
           {{ t('memories', 'Show past photos on top of timeline') }}
+        </NcCheckboxRadioSwitch>
+      </NcAppSettingsSection>
+
+      <NcAppSettingsSection id="viewer-settings" :title="t('memories', 'Viewer')">
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.livephoto_autoplay"
+          @update:checked="updateLivephotoAutoplay"
+          type="switch"
+        >
+          {{ t('memories', 'Autoplay Live Photos') }}
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
@@ -58,6 +69,34 @@
           type="switch"
         >
           {{ t('memories', 'Always load full size image (not recommended)') }}
+        </NcCheckboxRadioSwitch>
+
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.sidebar_filepath"
+          @update:checked="updateSidebarFilepath"
+          type="switch"
+        >
+          {{ t('memories', 'Show full file path in sidebar') }}
+        </NcCheckboxRadioSwitch>
+      </NcAppSettingsSection>
+
+      <NcAppSettingsSection id="account-settings" :title="t('memories', 'Account')" v-if="isNative">
+        {{ t('memories', 'Logged in as {user}', { user }) }}
+        <NcButton @click="logout" id="sign-out">
+          {{ t('memories', 'Sign out') }}
+        </NcButton>
+      </NcAppSettingsSection>
+
+      <NcAppSettingsSection id="device-settings" :title="t('memories', 'Device Folders')" v-if="isNative">
+        {{ t('memories', 'Local folders to include in the timeline view') }}
+        <NcCheckboxRadioSwitch
+          v-for="folder in localFolders"
+          :key="folder.id"
+          :checked.sync="folder.enabled"
+          @update:checked="updateDeviceFolders"
+          type="switch"
+        >
+          {{ folder.name }}
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
@@ -106,9 +145,11 @@ input[type='text'] {
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { getFilePickerBuilder } from '@nextcloud/dialogs';
-
 import UserConfig from '../mixins/UserConfig';
+import * as utils from '../services/utils';
+import * as nativex from '../native';
+
+import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcAppSettingsDialog = () => import('@nextcloud/vue/dist/Components/NcAppSettingsDialog');
 const NcAppSettingsSection = () => import('@nextcloud/vue/dist/Components/NcAppSettingsSection');
 const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch');
@@ -119,6 +160,7 @@ export default defineComponent({
   name: 'Settings',
 
   components: {
+    NcButton,
     NcAppSettingsDialog,
     NcAppSettingsSection,
     NcCheckboxRadioSwitch,
@@ -126,6 +168,10 @@ export default defineComponent({
   },
 
   mixins: [UserConfig],
+
+  data: () => ({
+    localFolders: [] as nativex.LocalFolderConfig[],
+  }),
 
   props: {
     open: {
@@ -138,6 +184,20 @@ export default defineComponent({
     pathSelTitle(): string {
       return this.t('memories', 'Choose Timeline Paths');
     },
+
+    isNative(): boolean {
+      return nativex.has();
+    },
+
+    user(): string {
+      return utils.uid ?? String();
+    },
+  },
+
+  mounted() {
+    if (this.isNative) {
+      this.refreshNativeConfig();
+    }
   },
 
   methods: {
@@ -145,19 +205,7 @@ export default defineComponent({
       this.$emit('update:open', false);
     },
 
-    async chooseFolder(title: string, initial: string) {
-      const picker = getFilePickerBuilder(title)
-        .setMultiSelect(false)
-        .setModal(true)
-        .setType(1)
-        .addMimeTypeFilter('httpd/unix-directory')
-        .allowDirectories()
-        .startAt(initial)
-        .build();
-
-      return await picker.pick();
-    },
-
+    // Paths settings
     async chooseTimelinePath() {
       (<any>this.$refs.multiPathModal).open(this.config.timeline_path.split(';'));
     },
@@ -173,21 +221,27 @@ export default defineComponent({
     },
 
     async chooseFoldersPath() {
-      let newPath = await this.chooseFolder(
+      const newPath = await utils.chooseNcFolder(
         this.t('memories', 'Choose the root for the folders view'),
         this.config.folders_path
       );
-      if (newPath === '') newPath = '/';
+
       if (newPath !== this.config.folders_path) {
         this.config.folders_path = newPath;
         await this.updateSetting('folders_path', 'foldersPath');
       }
     },
 
+    // General settings
     async updateSquareThumbs() {
       await this.updateSetting('square_thumbs');
     },
 
+    async updateEnableTopMemories() {
+      await this.updateSetting('enable_top_memories', 'enableTopMemories');
+    },
+
+    // Viewer settings
     async updateFullResOnZoom() {
       await this.updateSetting('full_res_on_zoom');
     },
@@ -196,10 +250,15 @@ export default defineComponent({
       await this.updateSetting('full_res_always');
     },
 
-    async updateEnableTopMemories() {
-      await this.updateSetting('enable_top_memories', 'enableTopMemories');
+    async updateLivephotoAutoplay() {
+      await this.updateSetting('livephoto_autoplay', 'livephotoAutoplay');
     },
 
+    async updateSidebarFilepath() {
+      await this.updateSetting('sidebar_filepath', 'sidebarFilepath');
+    },
+
+    // Folders settings
     async updateShowHidden() {
       await this.updateSetting('show_hidden_folders', 'showHidden');
     },
@@ -208,9 +267,50 @@ export default defineComponent({
       await this.updateSetting('sort_folder_month', 'sortFolderMonth');
     },
 
+    // Albums settings
     async updateSortAlbumMonth() {
       await this.updateSetting('sort_album_month', 'sortAlbumMonth');
+    },
+
+    // --------------- Native APIs start -----------------------------
+    async refreshNativeConfig() {
+      this.localFolders = await nativex.getLocalFolders();
+    },
+
+    async updateDeviceFolders() {
+      await nativex.setLocalFolders(this.localFolders);
+    },
+
+    async logout() {
+      if (
+        await utils.confirmDestructive({
+          title: this.t('memories', 'Sign out'),
+          message: this.t('memories', 'Are you sure you want to log out {user}?', { user: this.user }),
+          confirm: this.t('memories', 'Sign out'),
+          confirmClasses: 'error',
+          cancel: this.t('memories', 'Cancel'),
+        })
+      ) {
+        nativex.logout();
+      }
     },
   },
 });
 </script>
+
+<style lang="scss" scoped>
+#memories-settings:deep {
+  .app-settings__content {
+    // Fix weirdness when focusing on toggle input on mobile
+    position: relative;
+  }
+
+  .app-settings-section {
+    margin-bottom: 20px !important;
+  }
+
+  #sign-out {
+    margin-top: 10px;
+  }
+}
+</style>

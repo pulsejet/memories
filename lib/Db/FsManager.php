@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OC\Files\Search\SearchBinaryOperator;
 use OC\Files\Search\SearchComparison;
 use OC\Files\Search\SearchQuery;
 use OCA\Memories\Exceptions;
@@ -31,6 +32,7 @@ use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
 use OCP\Files\Node;
+use OCP\Files\Search\ISearchBinaryOperator;
 use OCP\Files\Search\ISearchComparison;
 use OCP\ICache;
 use OCP\ICacheFactory;
@@ -71,7 +73,7 @@ class FsManager
         $user = $this->userSession->getUser();
 
         // Albums have no folder
-        if ($this->request->getParam('albums') && Util::albumsIsEnabled()) {
+        if ($this->hasAlbumToken() && Util::albumsIsEnabled()) {
             if (null !== $user) {
                 return $root;
             }
@@ -129,6 +131,16 @@ class FsManager
                 $root->addMountPoints();
 
                 // Exclude .nomedia folders
+                //
+                // This is needed to be done despite the exlusion in the CTE to account
+                // for mount points inside folders with a .nomedia file. For example:
+                //  /user/files/timeline-path/
+                //     => subfolder1
+                //        => photo1
+                //     => subfolder2
+                //        => .nomedia
+                //        => external-mount   <-- this is a separate topFolder in the CTE
+                //           => photo2        <-- this should be excluded, but CTE cannot find this
                 $root->excludePaths($this->getNoMediaFolders($userFolder, md5($etag)));
             }
         } catch (\OCP\Files\NotFoundException $e) {
@@ -152,10 +164,13 @@ class FsManager
             return $paths;
         }
 
-        $comp = new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'name', '.nomedia');
+        $comp = new SearchBinaryOperator(ISearchBinaryOperator::OPERATOR_OR, [
+            new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'name', '.nomedia'),
+            new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'name', '.nomemories'),
+        ]);
         $search = $root->search(new SearchQuery($comp, 0, 0, [], Util::getUser()));
 
-        $paths = array_map(fn (Node $node) => \dirname($node->getPath()), $search);
+        $paths = array_unique(array_map(fn (Node $node) => \dirname($node->getPath()), $search));
         $this->nomediaCache->set($key, $paths, 60 * 60); // 1 hour
 
         return $paths;
@@ -243,7 +258,7 @@ class FsManager
     {
         try {
             // Album share
-            if ($this->request->getParam('albums')) {
+            if ($this->hasAlbumToken()) {
                 $album = $this->albumsQuery->getAlbumByLink($this->getShareToken());
                 if (null === $album) {
                     return null;
@@ -392,6 +407,11 @@ class FsManager
         }
 
         return $file;
+    }
+
+    private function hasAlbumToken(): bool
+    {
+        return null !== $this->request->getParam(\OCA\Memories\ClustersBackend\AlbumsBackend::clusterType(), null);
     }
 
     private function getShareToken()

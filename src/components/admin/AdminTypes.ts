@@ -22,6 +22,14 @@ export type ISystemConfig = {
   'memories.vod.nvenc': boolean;
   'memories.vod.nvenc.temporal_aq': boolean;
   'memories.vod.nvenc.scale': string;
+
+  'memories.vod.use_transpose': boolean;
+
+  enabledPreviewProviders: string[];
+  preview_max_x: number;
+  preview_max_y: number;
+  preview_max_memory: number;
+  preview_max_filesize_image: number;
 };
 
 export type IBinaryStatus = 'ok' | 'not_found' | 'not_executable' | 'test_ok' | string;
@@ -35,10 +43,12 @@ export type ISystemStatus = {
   bad_encryption: boolean;
   indexed_count: number;
   mimes: string[];
+  imagick: string | false;
   gis_type: number;
   gis_count?: number;
   exiftool: IBinaryStatus;
   perl: IBinaryStatus;
+  ffmpeg_preview: IBinaryStatus;
   ffmpeg: IBinaryStatus;
   ffprobe: IBinaryStatus;
   govod: IBinaryStatus;

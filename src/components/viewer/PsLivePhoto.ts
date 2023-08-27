@@ -1,7 +1,8 @@
 import PhotoSwipe from 'photoswipe';
 import PsImage from './PsImage';
-import * as utils from '../../services/Utils';
-import { PsContent, PsEvent } from './types';
+import * as utils from '../../services/utils';
+import staticConfig from '../../services/static-config';
+import type { PsContent, PsEvent } from './types';
 
 export function isLiveContent(content: PsContent): boolean {
   // Do not play Live Photo if the slideshow is
@@ -21,6 +22,14 @@ class LivePhotoContentSetup {
     lightbox.on('contentDestroy', this.onContentDestroy.bind(this));
   }
 
+  play(content: PsContent) {
+    const video = content.element?.querySelector('video');
+    if (video) {
+      video.currentTime = 0;
+      video.play();
+    }
+  }
+
   onContentLoad(e) {
     const content: PsContent = e.content;
     if (!isLiveContent(content)) return;
@@ -32,7 +41,6 @@ class LivePhotoContentSetup {
 
     const video = document.createElement('video');
     video.preload = 'none';
-    video.muted = true;
     video.playsInline = true;
     video.disableRemotePlayback = true;
     video.autoplay = false;
@@ -52,12 +60,10 @@ class LivePhotoContentSetup {
   }
 
   onContentActivate({ content }: { content: PsContent }) {
-    if (isLiveContent(content)) {
-      const video = content.element?.querySelector('video');
-      if (video) {
-        video.currentTime = 0;
-        video.play();
-      }
+    if (!isLiveContent(content)) return;
+
+    if (staticConfig.getSync('livephoto_autoplay')) {
+      this.play(content);
     }
   }
 

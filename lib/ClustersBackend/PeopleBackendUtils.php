@@ -84,7 +84,7 @@ trait PeopleBackendUtils
      * - height: height of the face in the image (percentage)
      *
      * @param \OCP\Files\SimpleFS\ISimpleFile $file    Actual file containing the image
-     * @param array                           $object  The face object
+     * @param array                           $photo   The face object
      * @param float                           $padding The padding to add around the face
      *
      * @return [Blob, mimetype] of resulting image

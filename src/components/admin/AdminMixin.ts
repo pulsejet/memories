@@ -1,5 +1,6 @@
 import { defineComponent, PropType } from 'vue';
-import { ISystemStatus, ISystemConfig, IBinaryStatus } from './AdminTypes';
+import type { ISystemStatus, ISystemConfig, IBinaryStatus } from './AdminTypes';
+import type { IConfig } from '../../types';
 import axios from '@nextcloud/axios';
 
 const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch');
@@ -24,6 +25,10 @@ export default defineComponent({
     },
     config: {
       type: Object as PropType<ISystemConfig>,
+      required: true,
+    },
+    sconfig: {
+      type: Object as PropType<IConfig>,
       required: true,
     },
   },
@@ -78,14 +83,18 @@ export default defineComponent({
       }
     },
 
-    binaryStatusType(status: IBinaryStatus, critical = true): string {
-      if (status === 'ok' || status.startsWith('test_ok')) {
+    binaryStatusType(status: IBinaryStatus, critical = true): 'success' | 'warning' | 'error' {
+      if (this.binaryStatusOk(status)) {
         return 'success';
       } else if (status === 'not_found' || status === 'not_executable' || status.startsWith('test_fail')) {
         return critical ? 'error' : 'warning';
       } else {
         return 'warning';
       }
+    },
+
+    binaryStatusOk(status: IBinaryStatus): boolean {
+      return status === 'ok' || status.startsWith('test_ok');
     },
   },
 

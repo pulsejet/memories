@@ -202,14 +202,16 @@ class Exif
         }
 
         // Fall back to modification time
-        try {
-            $parseTz = new \DateTimeZone(getenv('TZ')); // debian
-        } catch (\Error $e) {
-            $parseTz = new \DateTimeZone('UTC');
-        }
+        $dt = new \DateTime('@'.$file->getMtime());
 
-        $dt = new \DateTime('@'.$file->getMtime(), $parseTz);
-        $dt->setTimezone($parseTz);
+        // Set timezone to system timezone
+        $tz = getenv('TZ') ?: date_default_timezone_get();
+
+        try {
+            $dt->setTimezone(new \DateTimeZone($tz));
+        } catch (\Exception $e) {
+            throw new \Error("FATAL: system timezone is invalid (TZ): {$tz}");
+        }
 
         return self::forgetTimezone($dt);
     }
@@ -247,6 +249,17 @@ class Exif
     }
 
     /**
+     * Get the Approximate Unique ID (AUID) from parameters.
+     *
+     * @param int $epoch the date taken as a unix timestamp (seconds)
+     * @param int $size  the file size in bytes
+     */
+    public static function getAUID(int $epoch, int $size): int
+    {
+        return crc32($epoch.$size);
+    }
+
+    /**
      * Get the list of MIME Types that are allowed to be edited.
      */
     public static function allowedEditMimetypes(): array
@@ -265,8 +278,12 @@ class Exif
     public static function setExif(string $path, array $data)
     {
         $data['SourceFile'] = $path;
-        $raw = json_encode([$data]);
-        $cmd = array_merge(self::getExiftool(), ['-json=-', $path]);
+        $raw = json_encode([$data], JSON_UNESCAPED_UNICODE);
+        $cmd = array_merge(self::getExiftool(), [
+            '-overwrite_original',
+            '-api', 'LargeFileSupport=1',
+            '-json=-', $path,
+        ]);
         $proc = proc_open($cmd, [
             0 => ['pipe', 'r'],
             1 => ['pipe', 'w'],
@@ -280,6 +297,7 @@ class Exif
         fclose($pipes[1]);
         fclose($pipes[2]);
         proc_terminate($proc);
+        proc_close($proc);
         if (false !== strpos($stdout, 'error')) {
             error_log("Exiftool error: {$stdout}");
 
@@ -323,6 +341,7 @@ class Exif
             fclose($pipes[1]);
             fclose($pipes[2]);
             proc_terminate($proc);
+            proc_close($proc);
         }
     }
 
@@ -421,6 +440,7 @@ class Exif
             fclose($pipes[1]);
             fclose($pipes[2]);
             proc_terminate($proc);
+            proc_close($proc);
         }
     }
 

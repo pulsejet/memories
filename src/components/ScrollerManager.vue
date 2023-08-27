@@ -22,14 +22,17 @@
     <span
       ref="hoverCursor"
       class="cursor hv"
-      :style="{ transform: `translateY(max(calc(${hoverCursorY}px - 100%), 0px))` }"
+      :style="{ transform: hoverCursorTransform }"
       @touchmove.prevent="touchmove"
       @touchstart.passive="interactstart"
       @touchend.passive="interactend"
       @touchcancel.passive="interactend"
     >
       <div class="text">{{ hoverCursorText }}</div>
-      <div class="icon"><ScrollIcon v-once :size="22" /></div>
+      <div class="icon">
+        <ScrollUpIcon v-once :size="22" />
+        <ScrollDownIcon v-once :size="22" />
+      </div>
     </span>
 
     <div
@@ -48,9 +51,11 @@
 import { defineComponent, PropType } from 'vue';
 import { IRow, IRowType, ITick } from '../types';
 import { emit } from '@nextcloud/event-bus';
-import ScrollIcon from 'vue-material-design-icons/UnfoldMoreHorizontal.vue';
 
-import * as utils from '../services/Utils';
+import ScrollUpIcon from 'vue-material-design-icons/MenuUp.vue';
+import ScrollDownIcon from 'vue-material-design-icons/MenuDown.vue';
+
+import * as utils from '../services/utils';
 
 const SNAP_OFFSET = -5; // Pixels to snap at
 const SNAP_MIN_ROWS = 1000; // Minimum rows to snap at
@@ -59,7 +64,8 @@ const MOBILE_CURSOR_HH = 22; // Half height of the mobile cursor (CSS)
 export default defineComponent({
   name: 'ScrollerManager',
   components: {
-    ScrollIcon,
+    ScrollUpIcon,
+    ScrollDownIcon,
   },
 
   props: {
@@ -90,6 +96,8 @@ export default defineComponent({
     lastAdjustHeight: 0,
     /** Height of the entire photo view */
     recyclerHeight: 100,
+    /** Height of the dynamic top matter */
+    dynTopMatterHeight: 0,
     /** Space to leave at the top (for the hover cursor) */
     topPadding: 0,
     /** Rect of scroller */
@@ -144,6 +152,16 @@ export default defineComponent({
     height(): number {
       return this.fullHeight - this.topPadding;
     },
+
+    /** Position of hover cursor */
+    hoverCursorTransform(): string {
+      const mob = utils.isMobile();
+      const min = this.topPadding + (mob ? 2 : 0); // padding for curvature
+      const max = this.fullHeight - (mob ? 6 : 0); // padding for shadow
+      const val = this.hoverCursorY;
+      const clamp = Math.max(min, Math.min(max, val)); // clamp(min, val, max)
+      return `translateY(calc(${clamp}px - 100%))`;
+    },
   },
 
   methods: {
@@ -194,6 +212,7 @@ export default defineComponent({
       emit('memories.recycler.scroll', {
         current: scroll,
         previous: this.lastKnownRecyclerScroll,
+        dynTopMatterVisible: scroll < this.dynTopMatterHeight,
       });
       this.lastKnownRecyclerScroll = scroll;
 
@@ -242,6 +261,7 @@ export default defineComponent({
     recreate() {
       // Clear and override any adjust timer
       this.ticks = [];
+      this.lastAdjustHeight = 0;
 
       // Ticks
       let prevYear = 9999;
@@ -296,16 +316,22 @@ export default defineComponent({
     adjustNow() {
       // Refresh height of recycler
       this.recyclerHeight = this.recycler?.$refs.wrapper.clientHeight ?? 0;
-      const extraY = this.recyclerBefore?.clientHeight ?? 0;
+      this.dynTopMatterHeight = this.recyclerBefore?.clientHeight ?? 0;
 
       // Exclude hover cursor height
-      this.topPadding = (<HTMLSpanElement>this.$refs.hoverCursor)?.offsetHeight ?? 0;
+      const hoverCursor = <HTMLSpanElement>this.$refs.hoverCursor;
+      this.topPadding = hoverCursor?.offsetHeight ?? 0;
+
+      // Add extra padding for any top elements (top matter, mobile header)
+      document.querySelectorAll('.timeline-scroller-gap').forEach((el) => {
+        this.topPadding += el.clientHeight + 1;
+      });
 
       // Start with the first tick. Walk over all rows counting the
       // y position. When you hit a row with the tick, update y and
       // top values and move to the next tick.
       let tickId = 0;
-      let y = extraY;
+      let y = this.dynTopMatterHeight;
       let count = 0;
 
       // We only need to recompute top and visible ticks if count
@@ -473,7 +499,7 @@ export default defineComponent({
       } else if (idx >= this.ticks.length) {
         const t = this.ticks[this.ticks.length - 1];
         top1 = t.topF;
-        top2 = this.height;
+        top2 = this.fullHeight;
         y1 = t.y;
         y2 = this.recyclerHeight;
       } else {
@@ -558,7 +584,7 @@ export default defineComponent({
   width: 36px;
   top: 0;
   right: 0;
-  z-index: 100;
+  z-index: 100; // below top-matter and top-bar
   cursor: ns-resize;
   opacity: 0;
   transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
@@ -634,7 +660,15 @@ export default defineComponent({
 
       > .icon {
         display: none;
-        transform: translate(-2px, 10px);
+        color: var(--color-main-text);
+        opacity: 0.75;
+
+        :deep > .menu-up-icon {
+          transform: translate(-3px, 4px);
+        }
+        :deep > .menu-down-icon {
+          transform: translate(-3px, -6px);
+        }
       }
     }
   }
@@ -666,7 +700,7 @@ export default defineComponent({
     }
 
     .cursor.hv {
-      left: 5px;
+      left: 6px;
       border: none;
       box-shadow: -1px 2px 11px -5px #000;
       height: 44px;

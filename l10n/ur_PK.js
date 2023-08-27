@@ -1,27 +1,30 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "ڈاؤن لوڈ",
     "Settings" : "سیٹینگز",
     "Info" : "Info",
     "Favorites" : "Favorites",
     "Edit" : "تدوین کریں",
     "Cancel" : "منسوخ کریں",
     "Delete" : "حذف کریں",
-    "Download" : "ڈاؤن لوڈ",
+    "Continue" : "جاری",
+    "Move" : "Move",
     "Close" : "بند ",
     "Save" : "حفظ",
+    "Search" : "Search",
     "Month" : "ماہ",
     "Title" : "عنوان",
     "Description" : "تصریح",
     "Reset" : "ری سیٹ",
     "Name" : "اسم",
-    "Search" : "Search",
     "Share link" : "اشتراک لنک",
     "Password protected" : "پاسورڈ سے محفوظ کیا گیا ہے",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Share" : "تقسیم",
     "Next" : "اگلا",
-    "Continue" : "جاری"
+    "Yes" : "ہاں",
+    "No" : "نہیں"
 },
 "nplurals=2; plural=(n != 1);");

@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section">
-    <h3>{{ t('memories', 'Transcoder configuration') }}</h3>
+    <h3>{{ $options.title }}</h3>
     <p>
       {{
         t(
@@ -57,10 +57,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import { translate as t } from '@nextcloud/l10n';
+
 import AdminMixin from '../AdminMixin';
 
 export default defineComponent({
   name: 'VideoTranscoder',
+  title: t('memories', 'Transcoder'),
   mixins: [AdminMixin],
 });
 </script>

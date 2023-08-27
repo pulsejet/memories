@@ -20,8 +20,6 @@
  *
  */
 import camelcase from 'camelcase';
-import { IPhoto } from '../types';
-import { API } from './API';
 import { isNumber } from './utils/algo';
 
 /**

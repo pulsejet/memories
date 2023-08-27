@@ -115,6 +115,9 @@ class AdminController extends GenericApiController
             // Check supported preview mimes
             $status['mimes'] = $index->getPreviewMimes($index->getAllMimes());
 
+            // Check for PHP Imagick
+            $status['imagick'] = class_exists('\Imagick') ? \Imagick::getVersion()['versionString'] : false;
+
             // Check for bad encryption module
             $status['bad_encryption'] = \OCA\Memories\Util::isEncryptionEnabled();
 
@@ -128,7 +131,14 @@ class AdminController extends GenericApiController
                 $status['gis_type'] = $e->getMessage();
             }
 
-            // Check ffmpeg and ffprobe binaries
+            // Check for FFmpeg for preview generation
+            $status['ffmpeg_preview'] = $this->getExecutableStatus(
+                Util::getSystemConfig('preview_ffmpeg_path', null, true)
+                    ?: trim(shell_exec('which ffmpeg') ?: ''),
+                fn ($p) => BinExt::testFFmpeg($p, 'ffmpeg'),
+            );
+
+            // Check ffmpeg and ffprobe binaries for transcoding
             $status['ffmpeg'] = $this->getExecutableStatus(
                 Util::getSystemConfig('memories.vod.ffmpeg'),
                 fn ($p) => BinExt::testFFmpeg($p, 'ffmpeg'),
@@ -141,7 +151,7 @@ class AdminController extends GenericApiController
             // Check go-vod binary
             $extGoVod = Util::getSystemConfig('memories.vod.external');
             $status['govod'] = $this->getExecutableStatus(
-                Util::getSystemConfig('memories.vod.path'),
+                fn () => BinExt::getGoVodBin(),
                 fn ($p) => BinExt::testStartGoVod(),
                 !$extGoVod,
                 !$extGoVod,

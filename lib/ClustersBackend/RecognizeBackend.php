@@ -78,23 +78,25 @@ class RecognizeBackend extends Backend
 
         if (!$aggregate) {
             // Multiple detections for the same image
-            $query->addSelect('rfd.id AS faceid');
+            $query->selectAlias('rfd.id', 'faceid');
 
             // Face Rect
             if ($this->request->getParam('facerect')) {
-                $query->addSelect(
-                    'rfd.width AS face_w',
-                    'rfd.height AS face_h',
-                    'rfd.x AS face_x',
-                    'rfd.y AS face_y',
-                );
+                $query->selectAlias('rfd.width', 'face_w')
+                    ->selectAlias('rfd.height', 'face_h')
+                    ->selectAlias('rfd.x', 'face_x')
+                    ->selectAlias('rfd.y', 'face_y')
+                ;
             }
         }
 
         // Join with cluster
         $clusterQuery = null;
         if ('NULL' === $faceName) {
-            $clusterQuery = $query->expr()->isNull('rfd.cluster_id');
+            $clusterQuery = $query->expr()->andX(
+                $query->expr()->eq('rfd.user_id', $query->createNamedParameter(Util::getUID())),
+                $query->expr()->eq('rfd.cluster_id', $query->expr()->literal(-1))
+            );
         } else {
             $nameField = is_numeric($faceName) ? 'rfc.id' : 'rfc.title';
             $query->innerJoin('m', 'recognize_face_clusters', 'rfc', $query->expr()->andX(
@@ -129,7 +131,7 @@ class RecognizeBackend extends Backend
         unset($row['face_w'], $row['face_h'], $row['face_x'], $row['face_y']);
     }
 
-    public function getClusters(): array
+    public function getClustersInternal(int $fileid = 0): array
     {
         $query = $this->tq->getBuilder();
 
@@ -148,6 +150,20 @@ class RecognizeBackend extends Backend
 
         // WHERE this cluster belongs to the user
         $query->where($query->expr()->eq('rfc.user_id', $query->createNamedParameter(Util::getUID())));
+
+        // WHERE these clusters contain fileid if specified
+        if ($fileid > 0) {
+            $fSq = $this->tq->getBuilder()
+                ->select('rfd.file_id')
+                ->from('recognize_face_detections', 'rfd')
+                ->where($query->expr()->andX(
+                    $query->expr()->eq('rfd.cluster_id', 'rfc.id'),
+                    $query->expr()->eq('rfd.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)),
+                ))
+                ->getSQL()
+            ;
+            $query->andWhere($query->createFunction("EXISTS ({$fSq})"));
+        }
 
         // GROUP by ID of face cluster
         $query->groupBy('rfc.id');

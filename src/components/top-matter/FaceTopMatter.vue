@@ -1,43 +1,54 @@
 <template>
-  <div v-if="name" class="face-top-matter">
-    <NcActions>
+  <div class="face-top-matter">
+    <NcActions v-if="name">
       <NcActionButton :aria-label="t('memories', 'Back')" @click="back()">
         {{ t('memories', 'Back') }}
         <template #icon> <BackIcon :size="20" /> </template>
       </NcActionButton>
     </NcActions>
 
-    <div class="name">{{ name }}</div>
+    <div class="name" :class="{ rename: isReal }" @click="rename">{{ displayName }}</div>
 
     <div class="right-actions">
-      <NcActions :inline="1">
-        <NcActionButton :aria-label="t('memories', 'Rename person')" @click="$refs.editModal?.open()" close-after-click>
-          {{ t('memories', 'Rename person') }}
-          <template #icon> <EditIcon :size="20" /> </template>
-        </NcActionButton>
-        <NcActionButton
-          :aria-label="t('memories', 'Merge with different person')"
-          @click="$refs.mergeModal?.open()"
-          close-after-click
-        >
-          {{ t('memories', 'Merge with different person') }}
-          <template #icon> <MergeIcon :size="20" /> </template>
-        </NcActionButton>
-        <NcActionCheckbox
-          :aria-label="t('memories', 'Mark person in preview')"
-          :checked.sync="config.show_face_rect"
-          @change="changeShowFaceRect"
-        >
-          {{ t('memories', 'Mark person in preview') }}
-        </NcActionCheckbox>
-        <NcActionButton
-          :aria-label="t('memories', 'Remove person')"
-          @click="$refs.deleteModal?.open()"
-          close-after-click
-        >
-          {{ t('memories', 'Remove person') }}
-          <template #icon> <DeleteIcon :size="20" /> </template>
-        </NcActionButton>
+      <NcActions :inline="0">
+        <!-- root view (not cluster or unassigned) -->
+        <template v-if="!name && routeIsRecognize && !routeIsRecognizeUnassigned">
+          <NcActionButton :aria-label="t('memories', 'Unassigned faces')" @click="openUnassigned" close-after-click>
+            {{ t('memories', 'Unassigned faces') }}
+            <template #icon> <UnassignedIcon :size="20" /> </template>
+          </NcActionButton>
+        </template>
+
+        <!-- real cluster -->
+        <template v-if="isReal">
+          <NcActionButton :aria-label="t('memories', 'Rename person')" @click="rename" close-after-click>
+            {{ t('memories', 'Rename person') }}
+            <template #icon> <EditIcon :size="20" /> </template>
+          </NcActionButton>
+          <NcActionButton
+            :aria-label="t('memories', 'Merge with different person')"
+            @click="$refs.mergeModal?.open()"
+            close-after-click
+          >
+            {{ t('memories', 'Merge with different person') }}
+            <template #icon> <MergeIcon :size="20" /> </template>
+          </NcActionButton>
+          <NcActionCheckbox
+            :aria-label="t('memories', 'Mark person in preview')"
+            :checked.sync="config.show_face_rect"
+            @change="changeShowFaceRect"
+          >
+            {{ t('memories', 'Mark person in preview') }}
+          </NcActionCheckbox>
+          <NcActionButton
+            :aria-label="t('memories', 'Remove person')"
+            @click="$refs.deleteModal?.open()"
+            close-after-click
+          >
+            {{ t('memories', 'Remove person') }}
+            <template #icon> <DeleteIcon :size="20" /> </template>
+          </NcActionButton>
+        </template>
       </NcActions>
     </div>
 
@@ -55,6 +66,8 @@ import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox';
 
+import { emit } from '@nextcloud/event-bus';
+
 import FaceEditModal from '../modal/FaceEditModal.vue';
 import FaceDeleteModal from '../modal/FaceDeleteModal.vue';
 import FaceMergeModal from '../modal/FaceMergeModal.vue';
@@ -62,6 +75,9 @@ import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
 import DeleteIcon from 'vue-material-design-icons/Close.vue';
 import MergeIcon from 'vue-material-design-icons/Merge.vue';
+import UnassignedIcon from 'vue-material-design-icons/AccountQuestion.vue';
+
+import * as utils from '../../services/utils';
 
 export default defineComponent({
   name: 'FaceTopMatter',
@@ -76,37 +92,66 @@ export default defineComponent({
     EditIcon,
     DeleteIcon,
     MergeIcon,
+    UnassignedIcon,
   },
 
   mixins: [UserConfig],
 
-  data: () => ({
-    name: '',
-  }),
-
-  watch: {
-    $route: function (from: any, to: any) {
-      this.createMatter();
+  computed: {
+    name() {
+      return this.$route.params.name || '';
     },
-  },
 
-  mounted() {
-    this.createMatter();
+    isReal() {
+      return this.name && this.name !== utils.constants.FACE_NULL;
+    },
+
+    displayName() {
+      if (this.routeIsRecognizeUnassigned) {
+        return this.t('memories', 'Unassigned faces');
+      } else if (!this.name) {
+        return this.t('memories', 'People');
+      } else if (utils.isNumber(this.name)) {
+        return this.t('memories', 'Unnamed person');
+      }
+      return this.name;
+    },
   },
 
   methods: {
-    createMatter() {
-      this.name = <string>this.$route.params.name || '';
-    },
-
     back() {
       this.$router.go(-1);
     },
 
+    rename() {
+      if (this.isReal) (<any>this.$refs.editModal)?.open();
+    },
+
+    openUnassigned() {
+      this.$router.push({
+        name: this.$route.name as string,
+        params: {
+          user: utils.uid as string,
+          name: utils.constants.FACE_NULL,
+        },
+      });
+    },
+
     changeShowFaceRect() {
       this.updateSetting('show_face_rect');
-      setTimeout(() => this.$router.go(0), 100); // refresh page
+      emit('memories:timeline:hard-refresh', {});
     },
   },
 });
 </script>
+
+<style scoped lang="scss">
+.face-top-matter {
+  .name.rename:hover {
+    cursor: text;
+    text-decoration: underline;
+    text-decoration-color: var(--color-placeholder-light);
+    text-underline-offset: 5px;
+  }
+}
+</style>

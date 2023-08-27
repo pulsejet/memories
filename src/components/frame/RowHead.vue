@@ -1,5 +1,5 @@
 <template>
-  <div class="head-row" :class="{ selected: item.selected }" :style="{ height: `${item.size}px` }">
+  <div class="head-row no-user-select" :class="{ selected: item.selected }" :style="{ height: `${item.size}px` }">
     <div class="super" v-if="item.super !== undefined">
       {{ item.super }}
     </div>
@@ -16,7 +16,7 @@ import { IHeadRow } from '../../types';
 
 import CheckCircle from 'vue-material-design-icons/CheckCircle.vue';
 
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 
 export default defineComponent({
   name: 'RowHead',
@@ -74,8 +74,6 @@ export default defineComponent({
   padding-top: 10px;
   padding-left: 3px;
   font-size: 0.9em;
-  user-select: none;
-  -webkit-user-select: none;
 
   > div {
     position: relative;
@@ -108,8 +106,7 @@ export default defineComponent({
     font-size: 1.075em;
   }
 
-  :hover,
-  &.selected {
+  @mixin visible {
     .select {
       display: flex;
       opacity: 0.7;
@@ -118,9 +115,21 @@ export default defineComponent({
       transform: translateX(24px);
     }
   }
-  &.selected .select {
-    opacity: 1;
-    color: var(--color-primary);
+
+  // Show the icon (gray) when hovering or selected
+  @media (hover: hover) {
+    &:hover {
+      @include visible;
+    }
+  }
+
+  // Show the icon (blue) when selected
+  &.selected {
+    @include visible;
+    .select {
+      opacity: 1;
+      color: var(--color-primary);
+    }
   }
 
   @media (max-width: 768px) {

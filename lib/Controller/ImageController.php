@@ -177,33 +177,21 @@ class ImageController extends GenericApiController
      * @param string fileid
      */
     public function info(
-        string $id,
+        int $id,
         bool $basic = false,
         bool $current = false,
-        bool $tags = false
+        bool $tags = false,
+        string $clusters = ''
     ): Http\Response {
-        return Util::guardEx(function () use ($id, $basic, $current, $tags) {
-            $file = $this->fs->getUserFile((int) $id);
+        return Util::guardEx(function () use ($id, $basic, $current, $tags, $clusters) {
+            $file = $this->fs->getUserFile($id);
 
             // Get the image info
-            $info = $this->timelineQuery->getInfoById($file->getId(), $basic);
+            $info = $this->timelineQuery->getInfoById($id, $basic);
 
             // Add fileid and etag
             $info['fileid'] = $file->getId();
             $info['etag'] = $file->getEtag();
-
-            // Allow these ony for logged in users
-            if (null !== $this->userSession->getUser()) {
-                // Get list of tags for this file
-                if ($tags) {
-                    $info['tags'] = $this->getTags($file->getId());
-                }
-
-                // Get latest exif data if requested
-                if ($current) {
-                    $info['current'] = Exif::getExifFromFile($file);
-                }
-            }
 
             // Inject permissions and convert to string
             $info['permissions'] = \OCA\Memories\Util::permissionsToStr($file->getPermissions());
@@ -212,6 +200,39 @@ class ImageController extends GenericApiController
             $info['mimetype'] = $file->getMimeType();
             $info['size'] = $file->getSize();
             $info['basename'] = $file->getName();
+
+            // Allow these ony for logged in users
+            $user = $this->userSession->getUser();
+            if (null !== $user) {
+                // Get the path of the file relative to current user
+                // "/admin/files/Photos/Camera/20230821_135017.jpg" => "/Photos/..."
+                $parts = explode('/', $file->getPath());
+                if (\count($parts) > 3 && 'files' === $parts[2] && $parts[1] === $user->getUID()) {
+                    $info['filename'] = '/'.implode('/', \array_slice($parts, 3));
+                }
+
+                // Get list of tags for this file
+                if ($tags) {
+                    $info['tags'] = $this->getTags($id);
+                }
+
+                // Get latest exif data if requested
+                if ($current) {
+                    $info['current'] = Exif::getExifFromFile($file);
+                }
+
+                // Get clusters for this file
+                if ($clusters) {
+                    $clist = [];
+                    foreach (explode(',', $clusters) as $type) {
+                        $backend = \OC::$server->get(\OCA\Memories\ClustersBackend\Manager::class)->get($type);
+                        if ($backend->isEnabled()) {
+                            $clist[$type] = $backend->getClusters($id);
+                        }
+                    }
+                    $info['clusters'] = $clist;
+                }
+            }
 
             return new JSONResponse($info, Http::STATUS_OK);
         });
@@ -222,13 +243,13 @@ class ImageController extends GenericApiController
      *
      * Set the exif data for a file.
      *
-     * @param string fileid
+     * @param int fileid
      * @param array  raw exif data
      */
-    public function setExif(string $id, array $raw): Http\Response
+    public function setExif(int $id, array $raw): Http\Response
     {
         return Util::guardEx(function () use ($id, $raw) {
-            $file = $this->fs->getUserFile((int) $id);
+            $file = $this->fs->getUserFile($id);
 
             // Check if user has permissions
             if (!$file->isUpdateable() || Util::isEncryptionEnabled()) {
@@ -313,7 +334,7 @@ class ImageController extends GenericApiController
         string $name,
         int $width,
         int $height,
-        float $quality,
+        ?float $quality,
         string $extension,
         array $state
     ): Http\Response {
@@ -343,17 +364,35 @@ class ImageController extends GenericApiController
             $image = new \Imagick();
             $image->readImageBlob($file->getContent());
 
+            // Due to a bug in filerobot, the provided width and height may be swapped
+            // 1. If the user does not rotate the image, we're fine
+            // 2. If image is rotated and user doesn't change the save resolution,
+            //    the wxh corresponds to the original image, not the rotated one
+            // 3. If image is rotated and user changes the save resolution,
+            //    the wxh corresponds to the rotated image.
+            $iw = $image->getImageWidth();
+            $ih = $image->getImageHeight();
+            $shouldResize = $width !== $iw || $height !== $ih;
+
             // Apply the edits
             (new Service\FileRobotMagick($image, $state))->apply();
 
             // Resize the image
-            if ($width > 0 && $height > 0 && ($width !== $image->getImageWidth() || $height !== $image->getImageHeight())) {
+            $iw = $image->getImageWidth();
+            $ih = $image->getImageHeight();
+            if ($shouldResize && $width && $height && ($iw !== $width || $ih !== $height)) {
                 $image->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1, true);
             }
 
-            // Save the image
+            // Set image format
             $image->setImageFormat($extension);
-            $image->setImageCompressionQuality((int) round(100 * $quality));
+
+            // Set quality if specified
+            if (null !== $quality && $quality >= 0 && $quality <= 1) {
+                $image->setImageCompressionQuality((int) round(100 * $quality));
+            }
+
+            // Save the image
             $blob = $image->getImageBlob();
 
             // Save the file
@@ -366,7 +405,7 @@ class ImageController extends GenericApiController
             // Make sure the preview is updated
             \OC::$server->get(\OCP\IPreview::class)->getPreview($file);
 
-            return $this->info((string) $file->getId(), true);
+            return $this->info($file->getId(), true);
         });
     }
 
@@ -397,6 +436,7 @@ class ImageController extends GenericApiController
         // Convert to JPEG
         try {
             $image->autoOrient();
+
             $format = $this->config->getSystemValueString('memories.image.highres.format', 'jpeg');
             $image->setImageFormat($format);
 
@@ -417,12 +457,14 @@ class ImageController extends GenericApiController
                   $image->scaleImage((int)$maxWidth, (int)$maxHeight, true);
               }
             }
-
+          
             $blob = $image->getImageBlob();
             $mimetype = $image->getImageMimeType();
 
         } catch (\ImagickException $e) {
             throw Exceptions::Forbidden('Imagick failed to convert image: '.$e->getMessage());
+        } finally {
+            $image->clear();
         }
 
         return [$blob, $mimetype];

@@ -11,6 +11,8 @@ export const constants = {
     FLAG_LEAVING: 1 << 5,
     FLAG_IS_LOCAL: 1 << 6,
   },
+
+  FACE_NULL: 'NULL',
 };
 
 /**
@@ -35,4 +37,19 @@ export function convertFlags(photo: IPhoto) {
     photo.flag |= constants.c.FLAG_IS_LOCAL;
     delete photo.islocal;
   }
+}
+
+/**
+ * Copy over server flags from one photo object to another.
+ * @param src Source photo
+ * @param dst Destination photo
+ */
+export function copyPhotoFlags(src: IPhoto, dst: IPhoto) {
+  // copy a single flag
+  const copy = (flag: number) => (dst.flag = src.flag & flag ? dst.flag | flag : dst.flag & ~flag);
+
+  // copy all flags
+  copy(constants.c.FLAG_IS_VIDEO);
+  copy(constants.c.FLAG_IS_FAVORITE);
+  copy(constants.c.FLAG_IS_LOCAL);
 }

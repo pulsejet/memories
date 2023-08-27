@@ -3,34 +3,31 @@
 namespace OCA\Memories\Controller;
 
 use OCA\Files\Event\LoadSidebar;
+use OCA\Memories\Service\BinExt;
 use OCA\Memories\Util;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IRequest;
-use OCP\IUserSession;
-use OCP\Util as OCPUtil;
 
 class PageController extends Controller
 {
     protected $userId;
     protected $appName;
     protected IEventDispatcher $eventDispatcher;
-    private IUserSession $userSession;
 
     public function __construct(
         string $AppName,
         IRequest $request,
         $UserId,
-        IEventDispatcher $eventDispatcher,
-        IUserSession $userSession
+        IEventDispatcher $eventDispatcher
     ) {
         parent::__construct($AppName, $request);
         $this->userId = $UserId;
         $this->appName = $AppName;
         $this->eventDispatcher = $eventDispatcher;
-        $this->userSession = $userSession;
     }
 
     /**
@@ -40,21 +37,22 @@ class PageController extends Controller
      */
     public function main()
     {
-        $user = $this->userSession->getUser();
-        if (null === $user) {
-            return null;
+        // Check native version if available
+        $nativeVer = Util::callerNativeVersion();
+        if (null !== $nativeVer && version_compare($nativeVer, BinExt::NX_VER_MIN, '<')) {
+            return new PublicTemplateResponse($this->appName, 'native-old');
         }
 
         // Scripts
-        OCPUtil::addScript($this->appName, 'memories-main');
+        \OCP\Util::addScript($this->appName, 'memories-main');
 
         // Extra translations
         if (Util::recognizeIsEnabled()) {
             // Auto translation for tags
-            OCPUtil::addTranslations('recognize');
+            \OCP\Util::addTranslations('recognize');
         }
 
-        $response = new TemplateResponse($this->appName, 'main');
+        $response = new TemplateResponse($this->appName, 'main', self::getMainParams());
         $response->setContentSecurityPolicy(self::getCSP());
         $response->cacheFor(0);
 
@@ -105,6 +103,16 @@ class PageController extends Controller
         $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
 
         return $policy;
+    }
+
+    /**
+     * Get params for main.php template.
+     */
+    public static function getMainParams()
+    {
+        return [
+            'native' => Util::callerIsNative(),
+        ];
     }
 
     /**

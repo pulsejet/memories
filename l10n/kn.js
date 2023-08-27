@@ -1,21 +1,23 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "ಪ್ರತಿಯನ್ನು ಸ್ಥಳೀಯವಾಗಿ ಉಳಿಸಿಕೊಳ್ಳಿ",
     "Settings" : "ಆಯ್ಕೆ",
     "Info" : "Info",
     "Favorites" : "ಅಚ್ಚುಮೆಚ್ಚಿನ",
     "Edit" : "ಸಂಪಾದಿಸು",
     "Cancel" : "﻿ರದ್ದು",
     "Delete" : "﻿ಅಳಿಸಿ",
-    "Download" : "ಪ್ರತಿಯನ್ನು ಸ್ಥಳೀಯವಾಗಿ ಉಳಿಸಿಕೊಳ್ಳಿ",
     "Favorite" : "ಅಚ್ಚುಮೆಚ್ಚಿನ",
+    "Continue" : "﻿ಮುಂದುವರಿಸಿ",
+    "Move" : "Move",
     "Close" : "ಮುಚ್ಚು",
     "Save" : "﻿ಉಳಿಸಿ",
+    "Search" : "Search",
     "Time" : "ಸಮಯ",
     "Title" : "ಶೀರ್ಷಿಕೆ",
     "Reset" : "ಮರುಹೊಂದಿಸಿ",
     "Name" : "﻿ಹೆಸರು",
-    "Search" : "Search",
     "Remove" : "ತೆಗೆದುಹಾಕಿ",
     "Share link" : "ಸಂಪರ್ಕ ಕೊಂಡಿಯನ್ನು  ﻿ಹಂಚಿಕೊಳ್ಳಬಹುದು",
     "Password protected" : "ಗುಪ್ತಪದದಿಂದ ರಕ್ಷಿಸಲಾಗಿದೆ",
@@ -23,7 +25,8 @@ OC.L10N.register(
     "Sort by name" : "Order by name",
     "Share" : "﻿ಹಂಚಿಕೊಳ್ಳಿ",
     "Next" : "ಮುಂದೆ",
-    "Continue" : "﻿ಮುಂದುವರಿಸಿ",
-    "Size" : "﻿ ಗಾತ್ರ"
+    "Size" : "﻿ ಗಾತ್ರ",
+    "Yes" : "﻿ಹೌದು",
+    "No" : "﻿ಇಲ್ಲ"
 },
 "nplurals=2; plural=(n > 1);");

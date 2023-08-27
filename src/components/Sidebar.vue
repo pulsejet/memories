@@ -1,5 +1,5 @@
 <template>
-  <aside id="app-sidebar-vue" class="app-sidebar" v-if="reducedOpen">
+  <aside id="app-sidebar-vue" class="app-sidebar reduced" v-if="reducedOpen">
     <div class="title">
       <h2>{{ basename }}</h2>
 
@@ -90,8 +90,8 @@ export default defineComponent({
   },
 
   methods: {
-    async open(photo: IPhoto | number, filename?: string, forceNative = false) {
-      if (!this.reducedOpen && this.native && (!photo || forceNative)) {
+    async open(photo: IPhoto | number, filename?: string, useNative = false) {
+      if (!this.reducedOpen && this.native && (!photo || useNative)) {
         // Open native sidebar
         this.native?.setFullScreenMode?.(true);
         this.native?.open(filename);
@@ -103,6 +103,7 @@ export default defineComponent({
         // Update metadata compoenent
         const m = <any>this.$refs.metadata;
         const info: IImageInfo = await m?.update(photo);
+        if (!info) return; // failure or state change
         this.basename = info.basename;
         this.handleOpen();
       }
@@ -198,6 +199,10 @@ export default defineComponent({
   max-width: 360px !important;
   position: fixed !important;
 
+  &.reduced {
+    overflow-y: auto;
+  }
+
   @media (max-width: 512px) {
     max-width: unset !important;
   }
@@ -207,5 +212,17 @@ export default defineComponent({
 // sidebar ... this may have unintended side effects
 .vs__dropdown-menu--floating {
   z-index: 2526;
+}
+
+// Make metadata tab scrollbar thin
+#tab-memories-metadata,
+.app-sidebar.reduced {
+  scrollbar-width: thin;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 </style>

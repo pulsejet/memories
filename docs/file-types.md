@@ -4,54 +4,51 @@ description: Steps to configure support for different image and video formats
 
 # File type support
 
-Memories supports the file types supported by the Nextcloud previews app. If you add support for any one of the file types below, you must run `occ memories:index` to index these files.
+!!! danger "Use the admin interface"
+
+    It is **strongly recommended** that you use the Memories admin interface to configure file type support. This will ensure that your configuration is valid and that you do not accidentally disable support for any file types.
+
+Please note that if Imaginary is configured on your instance like on Nextcloud AIO, you do not need to follow this documentation any further; most file types should work out-of-the-box.
+
+Memories supports the file types supported by Nextcloud. File type support is determined in part by the values listed in the `enabledPreviewProviders` configuration parameter in your configuration file. If your `config.php` does not contain an `enabledPreviewProviders` array, this means you are using Nextcloud's defaults. Copy the array over from `config.sample.php` before adding any of the values below, or else you will effectively disable all of the defaults.
+
+If you add support for any one of the file types below, you must run `occ memories:index` to index these files.
 
 ## Common Formats
 
 ```
 PNG (image/png)
 JPEG (image/jpeg)
-PNG (image/png)
 GIF (image/gif)
 BMP (image/bmp)
 ```
 
-These are enabled by having the following in your `config.php`,
+These are enabled by inclusion of the following values in `config.php`'s `enabledPreviewProviders` array:
 
 ```php
-'enabledPreviewProviders' =>
-array (
-  'OC\\Preview\\Image',
-),
+  'OC\Preview\Image',
 ```
 
 ## HEIC and TIFF
 
-You must enable `HEIC` and `TIFF` in Nextcloud `config.php`, and install Imagemagick (included in the official Nextcloud docker image)
-
-In `config.php`, add,
+These are enabled by inclusion of the following values in `config.php`'s `enabledPreviewProviders` array:
 
 ```php
-'enabledPreviewProviders' =>
-array (
-  'OC\\Preview\\HEIC',
-  'OC\\Preview\\TIFF',
-),
+  'OC\Preview\HEIC',
+  'OC\Preview\TIFF',
 ```
+
+You must also install Imagemagick (included in the official Nextcloud docker image).
 
 ## Videos
 
-You need to install `ffmpeg` and add the video config to `config.php`
+These are enabled by inclusion of the following value in `config.php`'s `enabledPreviewProviders` array:
 
 ```php
-'enabledPreviewProviders' =>
-array (
-  'OC\\Preview\\Movie',
-  'OC\\Preview\\MKV',
-  'OC\\Preview\\MP4',
-  'OC\\Preview\\AVI',
-),
+  'OC\Preview\Movie',
 ```
+
+You must also install `ffmpeg` and add the video config to `config.php`.
 
 ## RAW images
 

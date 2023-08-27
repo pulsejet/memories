@@ -1,6 +1,27 @@
 <template>
-  <div class="outer" v-if="fileid">
-    <div class="top-field" v-for="field of topFields" :key="field.title">
+  <div class="loading-icon fill-block" v-if="loading">
+    <XLoadingIcon />
+  </div>
+  <div class="outer" v-else-if="fileid">
+    <div v-if="title || description" class="exif-head" @click="editEXIF()">
+      <div class="title" v-if="title">{{ title }}</div>
+      <div class="description" v-if="description">{{ description }}</div>
+    </div>
+
+    <div v-if="people.length" class="people">
+      <div class="section-title">{{ t('memories', 'People') }}</div>
+      <div class="container" v-for="face of people" :key="face.cluster_id">
+        <Cluster class="cluster--rounded" :data="face" :counters="false"> </Cluster>
+      </div>
+    </div>
+
+    <div v-if="albums.length">
+      <div class="section-title">{{ t('memories', 'Albums') }}</div>
+      <AlbumsList class="albums" :albums="albums" />
+    </div>
+
+    <div class="section-title">{{ t('memories', 'Metadata') }}</div>
+    <div v-for="field of topFields" :key="field.title" :class="`top-field top-field--${field.id}`">
       <div class="icon">
         <component :is="field.icon" :size="24" />
       </div>
@@ -8,11 +29,11 @@
       <div class="text">
         <template v-if="field.href">
           <a :href="field.href" target="_blank" rel="noopener noreferrer">
-            {{ field.title }}
+            <span class="title">{{ field.title }}</span>
           </a>
         </template>
         <template v-else>
-          {{ field.title }}
+          <span class="title">{{ field.title }}</span>
         </template>
 
         <template v-if="field.subtitle.length">
@@ -39,14 +60,14 @@
       <iframe class="fill-block" :src="mapUrl" />
     </div>
   </div>
-
-  <div class="loading-icon fill-block" v-else>
-    <XLoadingIcon />
+  <div v-else>
+    {{ t('memries', 'Failed to load metadata') }}
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import type { Component } from 'vue';
 
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
@@ -56,22 +77,28 @@ import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 import { getCanonicalLocale } from '@nextcloud/l10n';
 import { DateTime } from 'luxon';
 
-import * as utils from '../services/Utils';
+import UserConfig from '../mixins/UserConfig';
+import AlbumsList from './modal/AlbumsList.vue';
+import Cluster from './frame/Cluster.vue';
 
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
 import CameraIrisIcon from 'vue-material-design-icons/CameraIris.vue';
 import ImageIcon from 'vue-material-design-icons/Image.vue';
-import InfoIcon from 'vue-material-design-icons/InformationOutline.vue';
 import LocationIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagIcon from 'vue-material-design-icons/Tag.vue';
+
+import * as utils from '../services/utils';
+import * as dav from '../services/dav';
 import { API } from '../services/API';
-import type { IImageInfo, IPhoto } from '../types';
+
+import type { IAlbum, IFace, IImageInfo, IPhoto } from '../types';
 
 interface TopField {
+  id?: string;
   title: string;
   subtitle: string[];
-  icon: any;
+  icon: Component;
   href?: string;
   edit?: () => void;
 }
@@ -81,22 +108,31 @@ export default defineComponent({
   components: {
     NcActions,
     NcActionButton,
+    AlbumsList,
+    Cluster,
     EditIcon,
   },
 
+  mixins: [UserConfig],
+
   data: () => ({
     fileid: null as number | null,
-    exif: {} as { [prop: string]: any },
+    filename: '',
+    exif: {} as NonNullable<IImageInfo['exif']>,
     baseInfo: {} as IImageInfo,
+
+    loading: 0,
     state: 0,
   }),
 
   mounted() {
     subscribe('files:file:updated', this.handleFileUpdated);
+    subscribe('memories:albums:update', this.refresh);
   },
 
   beforeDestroy() {
     unsubscribe('files:file:updated', this.handleFileUpdated);
+    unsubscribe('memories:albums:update', this.refresh);
   },
 
   computed: {
@@ -108,7 +144,7 @@ export default defineComponent({
           title: this.dateOriginalStr!,
           subtitle: this.dateOriginalTime!,
           icon: CalendarIcon,
-          edit: () => globalThis.editMetadata([globalThis.currentViewerPhoto], [1]),
+          edit: this.editDate,
         });
       }
 
@@ -120,22 +156,18 @@ export default defineComponent({
         });
       }
 
-      if (this.imageInfo) {
+      if (this.imageInfoTitle) {
         list.push({
-          title: this.imageInfo,
+          id: 'image-info', // adds class
+          title: this.imageInfoTitle,
           subtitle: this.imageInfoSub,
           icon: ImageIcon,
-        });
-      }
-
-      const title = this.exif?.['Title'];
-      const desc = this.exif?.['Description'];
-      if (title || desc) {
-        list.push({
-          title: title || this.t('memories', 'No title'),
-          subtitle: [desc || this.t('memories', 'No description')],
-          icon: InfoIcon,
-          edit: () => globalThis.editMetadata([globalThis.currentViewerPhoto], [3]),
+          href: this.filepath
+            ? dav.viewInFolderUrl({
+                fileid: this.fileid!,
+                filename: this.filepath,
+              })
+            : undefined,
         });
       }
 
@@ -144,7 +176,7 @@ export default defineComponent({
           title: this.tagNamesStr,
           subtitle: [],
           icon: TagIcon,
-          edit: () => globalThis.editMetadata([globalThis.currentViewerPhoto], [2]),
+          edit: this.editTags,
         });
       }
 
@@ -154,7 +186,7 @@ export default defineComponent({
           subtitle: this.address ? [] : [this.t('memories', 'Click edit to set location')],
           icon: LocationIcon,
           href: this.address ? this.mapFullUrl : undefined,
-          edit: () => globalThis.editMetadata([globalThis.currentViewerPhoto], [4]),
+          edit: this.editGeo,
         });
       }
 
@@ -163,6 +195,16 @@ export default defineComponent({
 
     canEdit(): boolean {
       return this.baseInfo?.permissions?.includes('U');
+    },
+
+    /** Title EXIF value */
+    title(): string | null {
+      return this.exif['Title'] || null;
+    },
+
+    /** Description EXIF value */
+    description(): string | null {
+      return this.exif['Description'] || null;
     },
 
     /** Date taken info */
@@ -174,17 +216,29 @@ export default defineComponent({
       // The fallback to datetaken can be eventually removed
       // and then this can be discarded
       if (this.exif.DateTimeEpoch) {
-        const tzOffset: string = this.exif['OffsetTimeOriginal'] || this.exif['OffsetTime']; // e.g. -05:00
-        const tzId: string = this.exif['LocationTZID']; // e.g. America/New_York
+        const tzOffset = this.exif.OffsetTimeOriginal || this.exif.OffsetTime; // e.g. -05:00
+        const tzId = this.exif.LocationTZID; // e.g. America/New_York
 
-        // Use timezone offset if available, otherwise use tzId
-        let dateWithTz = date.setZone('UTC' + tzOffset);
-        if (!dateWithTz.isValid) {
-          dateWithTz = date.setZone(tzId); // Fall back to tzId
+        let dateWithTz: DateTime | undefined = undefined;
+
+        // If no timezone info is available, we will show the local time only
+        // In this case, everything happens in UTC
+        if (!tzOffset && !tzId) {
+          dateWithTz = date.setZone('UTC');
+        }
+
+        // Use timezone offset if available
+        if (!dateWithTz?.isValid && tzOffset) {
+          dateWithTz = date.setZone('UTC' + tzOffset);
+        }
+
+        // Fall back to tzId
+        if (!dateWithTz?.isValid && tzId) {
+          dateWithTz = date.setZone(tzId);
         }
 
         // Use the timezone only if the date is valid
-        if (dateWithTz.isValid) {
+        if (dateWithTz?.isValid) {
           date = dateWithTz;
         }
       }
@@ -199,11 +253,10 @@ export default defineComponent({
     dateOriginalTime(): string[] | null {
       if (!this.dateOriginal) return null;
 
-      let format = 'h:mm a';
       const fields = ['OffsetTimeOriginal', 'OffsetTime', 'LocationTZID'];
-      if (fields.some((key) => this.exif[key])) {
-        format += ' ZZ';
-      }
+      const hasTz = fields.some((key) => this.exif[key]);
+
+      const format = 't' + (hasTz ? ' ZZ' : '');
 
       return [this.dateOriginal.toFormat(format, { locale: getCanonicalLocale() })];
     },
@@ -244,8 +297,17 @@ export default defineComponent({
     },
 
     /** Image info */
-    imageInfo(): string | null {
+    imageInfoTitle(): string | null {
+      if (this.config.sidebar_filepath && this.filepath) {
+        return this.filepath.replace(/^\//, ''); // remove leading slash
+      }
+
       return this.baseInfo.basename;
+    },
+
+    /** Path to file excluding user directory */
+    filepath(): string | null {
+      return this.baseInfo?.filename ?? null;
     },
 
     imageInfoSub(): string[] {
@@ -268,7 +330,15 @@ export default defineComponent({
     },
 
     address(): string | undefined {
-      return this.baseInfo.address;
+      if (this.baseInfo.address) {
+        return this.baseInfo.address;
+      }
+
+      if (this.lat && this.lon) {
+        return `${this.lat.toFixed(6)}, ${this.lon.toFixed(6)}`;
+      }
+
+      return undefined;
     },
 
     lat(): number {
@@ -297,28 +367,95 @@ export default defineComponent({
     mapFullUrl(): string {
       return `https://www.openstreetmap.org/?mlat=${this.lat}&mlon=${this.lon}#map=18/${this.lat}/${this.lon}`;
     },
+
+    albums(): IAlbum[] {
+      return this.baseInfo?.clusters?.albums ?? [];
+    },
+
+    people(): IFace[] {
+      const clusters = this.baseInfo?.clusters;
+
+      // force face-recognition on its own route, or if recognize is disabled
+      if (this.routeIsFaceRecognition || !this.config.recognize_enabled) {
+        return clusters?.facerecognition ?? [];
+      }
+
+      return clusters?.recognize ?? [];
+    },
   },
 
   methods: {
-    async update(photo: number | IPhoto): Promise<IImageInfo> {
+    async update(photo: number | IPhoto): Promise<IImageInfo | null> {
       this.state = Math.random();
+      this.loading = 0;
       this.fileid = null;
       this.exif = {};
 
-      const state = this.state;
-      const url = API.Q(utils.getImageInfoUrl(photo), { tags: 1 });
-      const res = await axios.get<IImageInfo>(url);
-      if (state !== this.state) return res.data;
+      // which clusters to get
+      const clusters = this.routeIsPublic
+        ? String()
+        : [
+            this.config.albums_enabled ? 'albums' : null,
+            this.config.recognize_enabled ? 'recognize' : null,
+            this.config.facerecognition_enabled ? 'facerecognition' : null,
+          ]
+            .filter((c) => c)
+            .join(',');
 
+      // get tags if enabled
+      const tags = this.config.systemtags_enabled ? 1 : undefined;
+
+      // get image info
+      const url = API.Q(utils.getImageInfoUrl(photo), { tags, clusters });
+      const res = await this.guardState(axios.get<IImageInfo>(url));
+      if (!res) return null;
+
+      // unwrap basic info
       this.fileid = res.data.fileid;
+      this.filename = res.data.basename;
       this.exif = res.data.exif || {};
       this.baseInfo = res.data;
+
       return this.baseInfo;
+    },
+
+    editDate() {
+      globalThis.editMetadata([globalThis.currentViewerPhoto], [1]);
+    },
+
+    editTags() {
+      globalThis.editMetadata([globalThis.currentViewerPhoto], [2]);
+    },
+
+    editEXIF() {
+      globalThis.editMetadata([globalThis.currentViewerPhoto], [3]);
+    },
+
+    editGeo() {
+      globalThis.editMetadata([globalThis.currentViewerPhoto], [4]);
+    },
+
+    async refresh() {
+      if (this.fileid) await this.update(this.fileid);
+    },
+
+    async guardState<T>(promise: Promise<T>): Promise<T | null> {
+      const state = this.state;
+      try {
+        this.loading++;
+        const res = await promise;
+        if (state === this.state) return res;
+        return null;
+      } catch (err) {
+        throw err;
+      } finally {
+        if (state === this.state) this.loading--;
+      }
     },
 
     handleFileUpdated({ fileid }: { fileid: number }) {
       if (fileid && this.fileid === fileid) {
-        this.update(this.fileid);
+        this.refresh();
       }
     },
   },
@@ -326,6 +463,59 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.section-title {
+  font-variant: all-small-caps;
+  padding: 0px 6px;
+}
+
+.exif-head {
+  padding: 4px 6px;
+
+  .title {
+    font-weight: 500;
+  }
+
+  .description,
+  .title {
+    font-size: 0.93em;
+    line-height: 1.5em;
+    padding-bottom: 3px;
+
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
+      text-decoration-color: #ddd;
+      text-underline-offset: 4px;
+    }
+  }
+}
+
+.people {
+  margin-bottom: 6px;
+  > .section-title {
+    margin-bottom: 4px;
+  }
+  > .container {
+    width: calc(100% / 3);
+    aspect-ratio: 1;
+    position: relative;
+    display: inline-block;
+    vertical-align: top;
+    font-size: 0.85em;
+
+    @media (max-width: 768px) {
+      font-size: 0.95em;
+    }
+  }
+}
+
+.albums {
+  font-size: 0.96em;
+  :deep .line-one__title {
+    font-weight: 400 !important; // no bold title
+  }
+}
+
 .top-field {
   margin: 10px;
   margin-bottom: 25px;
@@ -355,6 +545,10 @@ export default defineComponent({
         margin-right: 5px;
       }
     }
+  }
+
+  &--image-info .title {
+    user-select: all; // filename or basename
   }
 }
 

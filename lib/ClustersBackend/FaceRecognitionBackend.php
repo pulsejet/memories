@@ -94,14 +94,13 @@ class FaceRecognitionBackend extends Backend
 
         // Add face rect
         if (!$aggregate && $this->request->getParam('facerect')) {
-            $query->addSelect(
-                'frf.x AS face_x',
-                'frf.y AS face_y',
-                'frf.width AS face_width',
-                'frf.height AS face_height',
-                'm.w AS image_width',
-                'm.h AS image_height',
-            );
+            $query->selectAlias('frf.x', 'face_x')
+                ->selectAlias('frf.y', 'face_y')
+                ->selectAlias('frf.width', 'face_width')
+                ->selectAlias('frf.height', 'face_height')
+                ->selectAlias('m.w', 'image_width')
+                ->selectAlias('m.h', 'image_height')
+            ;
         }
     }
 
@@ -120,14 +119,14 @@ class FaceRecognitionBackend extends Backend
             'y' => (float) $row['face_y'] / $row['image_height'],
         ];
 
-        unset($row['face_x'], $row['face_y'], $row['face_w'], $row['face_h'], $row['image_height'], $row['image_width']);
+        unset($row['face_x'], $row['face_y'], $row['face_width'], $row['face_height'], $row['image_height'], $row['image_width']);
     }
 
-    public function getClusters(): array
+    public function getClustersInternal(int $fileid = 0): array
     {
         $faces = array_merge(
-            $this->getFaceRecognitionPersons(),
-            $this->getFaceRecognitionClusters()
+            $this->getFaceRecognitionPersons($fileid),
+            $this->getFaceRecognitionClusters($fileid)
         );
 
         // Post process
@@ -157,7 +156,6 @@ class FaceRecognitionBackend extends Backend
             'frf.height',
             'm.w as image_width',       // Scoring
             'm.h as image_height',
-            'frf.confidence',
             'm.fileid',
             'm.datetaken',              // Just in case, for postgres
         )->from('facerecog_faces', 'frf');
@@ -221,7 +219,12 @@ class FaceRecognitionBackend extends Backend
         return (int) $this->config->getAppValue('facerecognition', 'model', -1);
     }
 
-    private function getFaceRecognitionClusters(bool $show_singles = false, bool $show_hidden = false)
+    private function minFaceInClusters(): int
+    {
+        return (int) $this->config->getAppValue('facerecognition', 'min_faces_in_cluster', 5);
+    }
+
+    private function getFaceRecognitionClusters(int $fileid = 0)
     {
         $query = $this->tq->getBuilder();
 
@@ -251,13 +254,14 @@ class FaceRecognitionBackend extends Backend
         $query->addGroupBy('frp.user');
         $query->where($query->expr()->isNull('frp.name'));
 
-        // By default hides individual faces when they have no name.
-        if (!$show_singles) {
-            $query->having($query->expr()->gt($count, $query->expr()->literal(1, \PDO::PARAM_INT)));
-        }
-
-        // By default it shows the people who were not hidden
-        if (!$show_hidden) {
+        // The query change if we want the people in an fileid, or the unnamed clusters
+        if ($fileid > 0) {
+            // WHERE these clusters contain fileid if specified
+            $query->andWhere($query->expr()->eq('fri.file', $query->createNamedParameter($fileid)));
+        } else {
+            // WHERE these clusters has a minimum number of faces
+            $query->having($query->expr()->gte($count, $query->expr()->literal($this->minFaceInClusters(), \PDO::PARAM_INT)));
+            // WHERE these clusters were not hidden due inconsistencies
             $query->andWhere($query->expr()->eq('frp.is_visible', $query->expr()->literal(1)));
         }
 
@@ -272,7 +276,7 @@ class FaceRecognitionBackend extends Backend
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
-    private function getFaceRecognitionPersons()
+    private function getFaceRecognitionPersons(int $fileid = 0)
     {
         $query = $this->tq->getBuilder();
 
@@ -299,6 +303,12 @@ class FaceRecognitionBackend extends Backend
 
         // GROUP by name of face clusters
         $query->where($query->expr()->isNotNull('frp.name'));
+
+        // WHERE these clusters contain fileid if specified
+        if ($fileid > 0) {
+            $query->andWhere($query->expr()->eq('fri.file', $query->createNamedParameter($fileid)));
+        }
+
         $query->groupBy('frp.user');
         $query->addGroupBy('frp.name');
 

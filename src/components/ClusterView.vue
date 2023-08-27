@@ -1,12 +1,16 @@
 <template>
-  <div v-if="noParams" class="container">
+  <div v-if="noParams" class="container no-user-select cluster-view">
     <XLoadingIcon class="loading-icon centered" v-if="loading" />
 
     <TopMatter />
 
     <EmptyContent v-if="!items.length && !loading" />
 
-    <ClusterGrid :items="items" />
+    <ClusterGrid :items="items" :minCols="minCols" :maxSize="maxSize">
+      <template #before>
+        <DynamicTopMatter class="cv-dtm" ref="dtm" />
+      </template>
+    </ClusterGrid>
   </div>
 
   <Timeline v-else />
@@ -22,8 +26,9 @@ import TopMatter from './top-matter/TopMatter.vue';
 import ClusterGrid from './ClusterGrid.vue';
 import Timeline from './Timeline.vue';
 import EmptyContent from './top-matter/EmptyContent.vue';
+import DynamicTopMatter from './top-matter/DynamicTopMatter.vue';
 
-import * as dav from '../services/DavRequests';
+import * as dav from '../services/dav';
 
 import type { ICluster } from '../types';
 
@@ -35,6 +40,7 @@ export default defineComponent({
     ClusterGrid,
     Timeline,
     EmptyContent,
+    DynamicTopMatter,
   },
 
   mixins: [UserConfig],
@@ -47,6 +53,14 @@ export default defineComponent({
   computed: {
     noParams() {
       return !this.$route.params.name && !this.$route.params.user;
+    },
+
+    minCols() {
+      return this.routeIsAlbums ? 2 : 3;
+    },
+
+    maxSize() {
+      return this.routeIsAlbums ? 250 : 180;
     },
   },
 
@@ -71,17 +85,20 @@ export default defineComponent({
   methods: {
     async routeChange() {
       try {
-        const route = this.$route.name;
         this.items = [];
         this.loading++;
 
-        if (route === 'albums') {
-          this.items = await dav.getAlbums(3, this.config.album_list_sort);
-        } else if (route === 'tags') {
+        await this.$nextTick();
+        // @ts-ignore
+        await this.$refs.dtm?.refresh?.();
+
+        if (this.routeIsAlbums) {
+          this.items = await dav.getAlbums(this.config.album_list_sort);
+        } else if (this.routeIsTags) {
           this.items = await dav.getTags();
-        } else if (route === 'recognize' || route === 'facerecognition') {
-          this.items = await dav.getFaceList(route);
-        } else if (route === 'places') {
+        } else if (this.routeIsPeople) {
+          this.items = await dav.getFaceList(<any>this.$route.name);
+        } else if (this.routeIsPlaces) {
           this.items = await dav.getPlaces();
         }
       } finally {
@@ -99,5 +116,9 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   position: relative;
+
+  .cv-dtm {
+    margin-bottom: 5px;
+  }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="container" ref="container">
+  <div class="container no-user-select" ref="container">
     <!-- Loading indicator -->
     <XLoadingIcon class="loading-icon centered" v-if="loading" />
 
@@ -22,28 +22,17 @@
       size-field="size"
       type-field="type"
       :updateInterval="100"
-      @update="scrollChange"
+      @update="scrollChangeRecycler"
       @resize="handleResizeWithDelay"
     >
       <template #before>
-        <!-- Show dynamic top matter, name of the view -->
+        <!-- Dynamic top matter, e.g. album or view name -->
         <div class="recycler-before" ref="recyclerBefore">
-          <div class="text" v-show="!$refs.topmatter.type && list.length && viewName && !isMobile()">
-            {{ viewName }}
-          </div>
-
           <!-- Gap for mobile header -->
           <div class="mobile-header-top-gap"></div>
 
-          <!-- Horizontal scrollable OTD -->
-          <OnThisDay
-            v-if="routeIsBase && config.enable_top_memories"
-            :key="config.timeline_path"
-            @load="scrollerManager().adjust()"
-          >
-          </OnThisDay>
-
-          <FolderGrid v-if="folders.length" :items="folders" />
+          <!-- Route-specific top matter -->
+          <DynamicTopMatter ref="dtm" @load="scrollerManager().adjust()" />
         </div>
       </template>
 
@@ -67,7 +56,7 @@
           }"
           :data="photo"
           :day="item.day"
-          @select="selectionManager().selectPhoto($event)"
+          @select="selectionManager().clickSelectionIcon(photo, $event, index)"
           @pointerdown="selectionManager().clickPhoto(photo, $event, index)"
           @touchstart="selectionManager().touchstartPhoto(photo, $event, index)"
           @touchend="selectionManager().touchendPhoto(photo, $event, index)"
@@ -101,16 +90,16 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import type { Route } from 'vue-router';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 
-import { getLayout } from '../services/Layout';
-import { IDay, IFolder, IHeadRow, IPhoto, IRow, IRowType } from '../types';
+import { getLayout } from '../services/layout';
+import { IDay, IHeadRow, IPhoto, IRow, IRowType } from '../types';
 
 import UserConfig from '../mixins/UserConfig';
-import FolderGrid from './FolderGrid.vue';
 import RowHead from './frame/RowHead.vue';
 import Photo from './frame/Photo.vue';
 import ScrollerManager from './ScrollerManager.vue';
@@ -118,12 +107,11 @@ import SelectionManager from './SelectionManager.vue';
 import Viewer from './viewer/Viewer.vue';
 
 import EmptyContent from './top-matter/EmptyContent.vue';
-import OnThisDay from './top-matter/OnThisDay.vue';
 import TopMatter from './top-matter/TopMatter.vue';
+import DynamicTopMatter from './top-matter/DynamicTopMatter.vue';
 
-import * as dav from '../services/DavRequests';
-import * as utils from '../services/Utils';
-import * as strings from '../services/strings';
+import * as dav from '../services/dav';
+import * as utils from '../services/utils';
 import * as nativex from '../native';
 
 import { API, DaysFilterType } from '../services/API';
@@ -137,12 +125,11 @@ export default defineComponent({
   name: 'Timeline',
 
   components: {
-    FolderGrid,
     RowHead,
     Photo,
     EmptyContent,
-    OnThisDay,
     TopMatter,
+    DynamicTopMatter,
     SelectionManager,
     ScrollerManager,
     Viewer,
@@ -155,8 +142,8 @@ export default defineComponent({
     loading: 0,
     /** Main list of rows */
     list: [] as IRow[],
-    /** List of top folders */
-    folders: [] as IFolder[],
+    /** Dynamic top matter has standalone content */
+    dtmContent: false,
     /** Computed number of columns */
     numCols: 0,
     /** Header rows for dayId key */
@@ -196,7 +183,7 @@ export default defineComponent({
   },
 
   watch: {
-    async $route(to: any, from?: any) {
+    async $route(to: Route, from?: Route) {
       await this.routeChange(to, from);
     },
   },
@@ -207,6 +194,7 @@ export default defineComponent({
     subscribe('memories:window:resize', this.handleResizeWithDelay);
     subscribe('memories:viewer:deleted', this.deleteFromViewWithAnimation);
     subscribe('memories:viewer:fetch-day', this.fetchDay);
+    subscribe('memories:timeline:hard-refresh', this.refresh);
   },
 
   beforeDestroy() {
@@ -215,49 +203,33 @@ export default defineComponent({
     unsubscribe('memories:window:resize', this.handleResizeWithDelay);
     unsubscribe('memories:viewer:deleted', this.deleteFromViewWithAnimation);
     unsubscribe('memories:viewer:fetch-day', this.fetchDay);
+    unsubscribe('memories:timeline:hard-refresh', this.refresh);
     this.resetState();
     this.state = 0;
   },
 
   computed: {
-    routeIsBase(): boolean {
-      return this.$route.name === 'timeline';
-    },
-    routeIsPeople(): boolean {
-      return ['recognize', 'facerecognition'].includes(<string>this.$route.name);
-    },
-    routeIsArchive(): boolean {
-      return this.$route.name === 'archive';
-    },
-    routeIsFolders(): boolean {
-      return this.$route.name === 'folders';
-    },
     routeHasNative(): boolean {
       return this.routeIsBase && nativex.has();
     },
+
     isMonthView(): boolean {
       if (this.$route.query.sort === 'timeline') return false;
-
+      if (this.$route.query.sort === 'album') return true;
       return (
-        this.$route.query.sort === 'album' ||
-        (this.config.sort_album_month && (this.$route.name === 'albums' || this.$route.name === 'album-share')) ||
-        (this.config.sort_folder_month && this.$route.name === 'folders')
+        (this.config.sort_album_month && (this.routeIsAlbums || this.routeIsAlbumShare)) ||
+        (this.config.sort_folder_month && this.routeIsFolders)
       );
-    },
-
-    /** Get view name for dynamic top matter */
-    viewName(): string {
-      return strings.viewName(this.$route.name);
     },
 
     /** Nothing to show here */
     empty(): boolean {
-      return !this.list.length && !this.folders.length;
+      return !this.list.length && !this.dtmContent;
     },
   },
 
   methods: {
-    async routeChange(to: any, from?: any) {
+    async routeChange(to: Route, from?: Route) {
       // Always do a hard refresh if the path changes
       if (from?.path !== to.path) {
         await this.refresh();
@@ -304,14 +276,14 @@ export default defineComponent({
         }
 
         globalThis.mViewer.open(photo, this.list);
-      } else if (from?.hash?.startsWith('#v') && !to.hash?.startsWith('#v') && viewerIsOpen) {
+      } else if (!to.hash?.startsWith('#v') && viewerIsOpen) {
         // Close viewer
         globalThis.mViewer.close();
       }
     },
 
-    updateLoading(delta: number) {
-      this.loading += delta;
+    updateLoading(delta: number): void {
+      this.loading = Math.max(0, this.loading + delta);
     },
 
     isMobile() {
@@ -355,7 +327,7 @@ export default defineComponent({
       this.scrollerManager().reset();
       this.loading = 0;
       this.list = [];
-      this.folders = [];
+      this.dtmContent = false;
       this.heads = {};
       this.currentStart = 0;
       this.currentEnd = 0;
@@ -473,13 +445,18 @@ export default defineComponent({
      * This does NOT indicate the items have changed, only that
      * the pixel position of the recycler has changed.
      */
-    scrollPositionChange(event?: any) {
+    scrollPositionChange(event?: Event) {
       this.scrollerManager().recyclerScrolled(event);
     },
 
-    /** Trigger when recycler view changes */
-    scrollChange(startIndex: number, endIndex: number) {
-      if (startIndex === this.currentStart && endIndex === this.currentEnd) {
+    /** Trigger when recycler view changes (for callback) */
+    scrollChangeRecycler(startIndex: number, endIndex: number) {
+      return this.scrollChange(startIndex, endIndex);
+    },
+
+    /** Trigger when recycler view changes to refresh view */
+    scrollChange(startIndex: number, endIndex: number, force = false) {
+      if (startIndex === this.currentStart && endIndex === this.currentEnd && !force) {
         return;
       }
 
@@ -513,9 +490,6 @@ export default defineComponent({
         // No need for the fake count regardless of what happened above
         delete row.pct;
       }
-
-      // Check if this was requested by a refresh
-      const force = this.currentEnd === -1;
 
       // We only need to debounce loads if the user is dragging the scrollbar
       const scrolling = this.scrollerManager().interacting;
@@ -576,40 +550,41 @@ export default defineComponent({
 
     /** Get query string for API calls */
     getQuery() {
-      const query: { [key: string]: string } = {};
+      const query: { [key in DaysFilterType]?: string } = {};
+      const set = (filter: DaysFilterType, value: string = '1') => (query[filter] = value);
 
       // Favorites
-      if (this.$route.name === 'favorites') {
-        API.DAYS_FILTER(query, DaysFilterType.FAVORITES);
+      if (this.routeIsFavorites) {
+        set(DaysFilterType.FAVORITES);
       }
 
       // Videos
-      if (this.$route.name === 'videos') {
-        API.DAYS_FILTER(query, DaysFilterType.VIDEOS);
+      if (this.routeIsVideos) {
+        set(DaysFilterType.VIDEOS);
       }
 
       // Folder
-      if (this.$route.name === 'folders') {
+      if (this.routeIsFolders) {
         const path = utils.getFolderRoutePath(this.config.folders_path);
-        API.DAYS_FILTER(query, DaysFilterType.FOLDER, path);
+        set(DaysFilterType.FOLDER, path);
         if (this.$route.query.recursive) {
-          API.DAYS_FILTER(query, DaysFilterType.RECURSIVE);
+          set(DaysFilterType.RECURSIVE);
         }
       }
 
       // Archive
-      if (this.$route.name === 'archive') {
-        API.DAYS_FILTER(query, DaysFilterType.ARCHIVE);
+      if (this.routeIsArchive) {
+        set(DaysFilterType.ARCHIVE);
       }
 
       // Albums
       const user = <string>this.$route.params.user;
       const name = <string>this.$route.params.name;
-      if (this.$route.name === 'albums') {
+      if (this.routeIsAlbums) {
         if (!user || !name) {
           throw new Error('Invalid album route');
         }
-        API.DAYS_FILTER(query, DaysFilterType.ALBUM, `${user}/${name}`);
+        set(DaysFilterType.ALBUM, `${user}/${name}`);
       }
 
       // People
@@ -618,85 +593,67 @@ export default defineComponent({
           throw new Error('Invalid album route');
         }
 
+        // name is "recognize" or "facerecognition"
         const filter = <DaysFilterType>this.$route.name;
-        API.DAYS_FILTER(query, filter, `${user}/${name}`);
+        set(filter, `${user}/${name}`);
 
         // Face rect
-        if (this.config.show_face_rect) {
-          API.DAYS_FILTER(query, DaysFilterType.FACE_RECT);
+        if (this.config.show_face_rect || this.routeIsRecognizeUnassigned) {
+          set(DaysFilterType.FACE_RECT);
         }
       }
 
       // Places
-      if (this.$route.name === 'places') {
+      if (this.routeIsPlaces) {
         if (!name || !name.includes('-')) {
           throw new Error('Invalid place route');
         }
 
         const id = <string>name.split('-', 1)[0];
-        API.DAYS_FILTER(query, DaysFilterType.PLACE, id);
+        set(DaysFilterType.PLACE, id);
       }
 
       // Tags
-      if (this.$route.name === 'tags') {
+      if (this.routeIsTags) {
         if (!name) {
           throw new Error('Invalid tag route');
         }
-        API.DAYS_FILTER(query, DaysFilterType.TAG, name);
+        set(DaysFilterType.TAG, name);
       }
 
       // Map Bounds
-      if (this.$route.name === 'map') {
+      if (this.routeIsMap) {
         const bounds = <string>this.$route.query.b;
         if (!bounds) {
           throw new Error('Missing map bounds');
         }
 
-        API.DAYS_FILTER(query, DaysFilterType.MAP_BOUNDS, bounds);
+        set(DaysFilterType.MAP_BOUNDS, bounds);
       }
 
       // Month view
       if (this.isMonthView) {
-        API.DAYS_FILTER(query, DaysFilterType.MONTH_VIEW);
-        API.DAYS_FILTER(query, DaysFilterType.REVERSE);
+        set(DaysFilterType.MONTH_VIEW);
+        set(DaysFilterType.REVERSE);
       }
 
       return query;
-    },
-
-    /** Fetch folders */
-    async fetchFolders() {
-      if (!this.routeIsFolders || this.$route.query.recursive) {
-        this.folders = [];
-        return;
-      }
-
-      // Get subfolders URL
-      const folder = utils.getFolderRoutePath(this.config.folders_path);
-      const url = API.Q(API.FOLDERS_SUB(), { folder });
-
-      // Make API call to get subfolders
-      try {
-        this.loading++;
-        const state = this.state;
-        const res = await axios.get<IFolder[]>(url);
-        if (state !== this.state) return;
-        this.folders = res.data;
-      } finally {
-        this.loading--;
-      }
-
-      // Filter out hidden folders
-      if (!this.config.show_hidden_folders) {
-        this.folders = this.folders.filter((f) => !f.name.startsWith('.') && f.previews?.length);
-      }
     },
 
     /** Fetch timeline main call */
     async fetchDays(noCache = false) {
       // Awaiting this is important because the folders must render
       // before the timeline to prevent glitches
-      await this.fetchFolders();
+      try {
+        this.updateLoading(1);
+        const state = this.state;
+        // @ts-ignore
+        const res = await this.$refs.dtm.refresh();
+        if (this.state !== state) return;
+        this.dtmContent = res;
+      } finally {
+        this.updateLoading(-1);
+      }
 
       // Get URL an cache identifier
       let url: string;
@@ -713,11 +670,8 @@ export default defineComponent({
       // Try cache first
       let cache: IDay[] | null = null;
 
-      // Make sure to refresh scroll later
-      this.currentEnd = -1;
-
       try {
-        this.loading++;
+        this.updateLoading(1);
         const startState = this.state;
 
         let data: IDay[] = [];
@@ -736,7 +690,7 @@ export default defineComponent({
                 }
 
                 await this.processDays(cache);
-                this.loading--;
+                this.updateLoading(-1);
               }
             } catch {
               console.warn(`Failed to process days cache: ${cacheUrl}`);
@@ -761,12 +715,14 @@ export default defineComponent({
         // Make sure we're still on the same page
         if (this.state !== startState) return;
         await this.processDays(data);
-      } catch (err) {
-        console.error(err);
-        showError(err?.response?.data?.message || err.message);
+      } catch (e) {
+        if (!utils.isNetworkError(e)) {
+          showError(e?.response?.data?.message ?? e.message);
+          console.error(e);
+        }
       } finally {
         // If cache is set here, loading was already decremented
-        if (!cache) this.loading--;
+        if (!cache) this.updateLoading(-1);
       }
     },
 
@@ -877,6 +833,9 @@ export default defineComponent({
       // Fix view height variable
       await this.scrollerManager().reflow();
       this.scrollPositionChange();
+
+      // Trigger a view refresh. This will load any new placeholders too.
+      this.scrollChange(this.currentStart, this.currentEnd, true);
     },
 
     /** API url for Day call */
@@ -982,21 +941,39 @@ export default defineComponent({
         for (const [dayId, photos] of dayMap) {
           // Check if the response has any delta
           const head = this.heads[dayId];
-          if (head?.day?.detail?.length) {
-            if (
-              head.day.detail.length === photos.length &&
-              head.day.detail.every((p, i) => p.fileid === photos[i].fileid && p.etag === photos[i].etag)
-            ) {
-              continue;
-            }
+          if (head?.day?.detail?.length === photos.length) {
+            // Goes over the day and checks each photo including
+            // the order with the current list. If anything changes,
+            // we reprocess everything; otherwise just copy over
+            // newer props that are reactive.
+            const isSame = head.day.detail.every((curr, i) => {
+              const now = photos[i];
+              if (curr.fileid === now.fileid && curr.etag === now.etag) {
+                // copy over any properties that might have changed
+                // this way we don't need to iterate again for this
+                utils.convertFlags(now);
+
+                // copy over flags
+                utils.copyPhotoFlags(now, curr);
+
+                return true;
+              }
+
+              return false;
+            });
+
+            // Skip this entire day since nothing changed
+            if (isSame) continue;
           }
 
           // Pass ahead
           this.processDay(dayId, photos);
         }
       } catch (e) {
-        showError(this.t('memories', 'Failed to load some photos'));
-        console.error(e);
+        if (!utils.isNetworkError(e)) {
+          showError(this.t('memories', 'Failed to load some photos'));
+          console.error(e);
+        }
       }
     },
 
@@ -1294,9 +1271,14 @@ export default defineComponent({
   height: 100%;
   width: 100%;
   overflow: hidden;
-  user-select: none;
-  -webkit-user-select: none; // iOS Safari is a horrible browser
   position: relative;
+
+  @media (max-width: 768px) {
+    // Get rid of padding on img-outer (1px on mobile)
+    // Also need to make sure we don't end up with a scrollbar -- see below
+    margin-left: -1px;
+    width: calc(100% + 3px); // 1px extra here for sub-pixel rounding
+  }
 }
 
 .recycler {
@@ -1339,13 +1321,5 @@ export default defineComponent({
 /** Dynamic top matter */
 .recycler-before {
   width: 100%;
-  > .text {
-    font-size: 1.2em;
-    padding-top: 13px;
-    padding-left: 8px;
-    @media (max-width: 768px) {
-      padding-left: 48px;
-    }
-  }
 }
 </style>

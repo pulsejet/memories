@@ -27,8 +27,8 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
-  icon:
-    logo: material/camera
+  logo: assets/app.svg
+  favicon: assets/favicon.ico
   custom_dir: docs/overrides
 
 plugins:
@@ -42,6 +42,7 @@ nav:
       - 'config.md'
       - 'file-types.md'
       - 'hw-transcoding.md'
+      - 'troubleshooting.md'
       - 'system-config.md'
   - Support:
       - 'faq.md'

@@ -120,8 +120,8 @@ class Index
      */
     public function indexFolder(Folder $folder): void
     {
-        if ($folder->nodeExists('.nomedia')) {
-            $this->log("Skipping folder {$folder->getPath()} due to .nomedia file\n", true);
+        if ($folder->nodeExists('.nomedia') || $folder->nodeExists('.nomemories')) {
+            $this->log("Skipping folder {$folder->getPath()} due to .nomedia or .nomemories file\n", true);
 
             return;
         }

@@ -8,13 +8,26 @@ import { dirname } from 'path';
  * Opens a new window.
  */
 export async function viewInFolder(photo: IPhoto) {
-  const f = await getFiles([photo]);
-  if (f.length === 0) return;
+  if (!photo) return;
+  const files = await getFiles([photo]);
+  if (files.length === 0) return;
 
-  const file = f[0];
-  const url = generateUrl(`/apps/files/?dir={dirPath}&scrollto={fileid}&openfile={fileid}`, {
-    dirPath: dirname(file.filename),
-    fileid: file.fileid,
-  });
+  const url = viewInFolderUrl(files[0]);
   window.open(url, '_blank');
+}
+
+/**
+ * Gets the view in folder url for the given file.
+ */
+export function viewInFolderUrl({ filename, fileid }: { filename: string; fileid: number }) {
+  // ensure dirPath starts with a slash
+  let dirPath = dirname(filename);
+  if (!dirPath.startsWith('/')) {
+    dirPath = `/${dirPath}`;
+  }
+
+  return generateUrl(`/apps/files/?dir={dirPath}&scrollto={fileid}&openfile={fileid}`, {
+    fileid,
+    dirPath,
+  });
 }

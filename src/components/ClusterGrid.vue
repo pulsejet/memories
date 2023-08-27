@@ -4,18 +4,22 @@
     type-field="cluster_type"
     key-field="cluster_id"
     class="grid-recycler hide-scrollbar-mobile"
-    :class="{ empty: !items.length }"
+    :class="classList"
     :items="clusters"
     :skipHover="true"
     :buffer="400"
-    :itemSize="itemSize"
+    :itemSize="height"
+    :itemSecondarySize="width"
     :gridItems="gridItems"
-    :updateInterval="100"
     @resize="resize"
   >
+    <template #before>
+      <slot name="before" />
+    </template>
+
     <template v-slot="{ item }">
       <div class="grid-item fill-block">
-        <Cluster :data="item" @click="click(item)" :link="link" />
+        <Cluster :data="item" :link="link" :counters="counters" @click="click(item)" />
       </div>
     </template>
   </RecycleScroller>
@@ -25,6 +29,7 @@
 import { defineComponent } from 'vue';
 import Cluster from './frame/Cluster.vue';
 import type { ICluster } from '../types';
+import * as utils from '../services/utils';
 
 export default defineComponent({
   name: 'ClusterGrid',
@@ -42,6 +47,10 @@ export default defineComponent({
       type: Number,
       default: 180,
     },
+    minCols: {
+      type: Number,
+      default: 3,
+    },
     link: {
       type: Boolean,
       default: true,
@@ -53,8 +62,7 @@ export default defineComponent({
   },
 
   data: () => ({
-    itemSize: 200,
-    gridItems: 5,
+    recyclerWidth: 300,
   }),
 
   mounted() {
@@ -62,6 +70,42 @@ export default defineComponent({
   },
 
   computed: {
+    /** Height of the cluster */
+    height() {
+      if (this.routeIsAlbums) {
+        // album view: add gap for text below album
+        // 4px extra on mobile for mark#2147915
+        return this.width + (utils.isMobile() ? 46 : 42);
+      }
+
+      return this.width;
+    },
+
+    /** Width of the cluster */
+    width() {
+      return utils.round(this.recyclerWidth / this.gridItems, 2);
+    },
+
+    /** Number of items horizontally */
+    gridItems() {
+      // Restrict the number of columns between minCols and the size cap
+      return Math.max(Math.floor(this.recyclerWidth / this.maxSize), this.minCols);
+    },
+
+    /** Classes list on object */
+    classList() {
+      return {
+        empty: !this.items.length,
+        'cluster--album': this.routeIsAlbums,
+      };
+    },
+
+    /** Whether the clusters should show counters */
+    counters() {
+      return !this.routeIsAlbums;
+    },
+
+    /** List of clusters to display */
     clusters() {
       const items = [...this.items];
 
@@ -91,9 +135,7 @@ export default defineComponent({
     },
 
     resize() {
-      const w = (<any>this.$refs.recycler).$el.clientWidth;
-      this.gridItems = Math.max(Math.floor(w / this.maxSize), 3);
-      this.itemSize = Math.floor(w / this.gridItems);
+      this.recyclerWidth = (<any>this.$refs.recycler).$el.clientWidth;
     },
   },
 });
@@ -101,15 +143,23 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .grid-recycler {
+  will-change: scroll-position;
   flex: 1;
   max-height: 100%;
   overflow-y: scroll !important;
-  margin: 1px;
   &.empty {
     visibility: hidden;
   }
-}
-.grid-item {
-  position: relative;
+
+  margin: 1px;
+  @media (max-width: 768px) {
+    &.cluster--album {
+      margin: 6px; // mark#2147915
+    }
+  }
+
+  .grid-item {
+    position: relative;
+  }
 }
 </style>

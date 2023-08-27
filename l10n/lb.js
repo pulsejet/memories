@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Eroflueden",
     "Settings" : "Astellungen",
     "Info" : "Info",
     "Favorites" : "Favoriten",
@@ -9,14 +10,17 @@ OC.L10N.register(
     "Explore" : "Erfuerschen",
     "Cancel" : "Ofbriechen",
     "Delete" : "Läschen",
-    "Download" : "Eroflueden",
     "Favorite" : "Favorit",
     "View in folder" : "Kuk am Dossier ",
+    "Continue" : "Weider",
+    "Move" : "Verschieben",
     "General" : "Allgemeng",
     "Close" : "Zoumaachen",
     "Unknown" : "Onbekannt",
     "Back" : "Zeréck",
     "Save" : "Späicheren",
+    "Search" : "Search",
+    "Save changes" : "Ännerunge späicheren",
     "Month" : "Mount",
     "Day" : "Dag",
     "Time" : "Zäit",
@@ -26,7 +30,6 @@ OC.L10N.register(
     "Reset" : "Zeréck setzen",
     "Name" : "Numm",
     "Update" : "Update",
-    "Search" : "Search",
     "Remove" : "Läschen",
     "Share link" : "Link deelen",
     "Refresh" : "Opfrëschen",
@@ -36,8 +39,9 @@ OC.L10N.register(
     "Share" : "Deelen",
     "Previous" : "Zeréck",
     "Next" : "Weider",
-    "Continue" : "Weider",
     "Custom" : "Individualiséier",
-    "Size" : "Gréisst"
+    "Size" : "Gréisst",
+    "Yes" : "Jo",
+    "No" : "Nee"
 },
 "nplurals=2; plural=(n != 1);");

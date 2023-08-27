@@ -28,14 +28,14 @@ const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
 
 import { showError } from '@nextcloud/dialogs';
-import { getCurrentUser } from '@nextcloud/auth';
 import { IFileInfo, IFace } from '../../types';
 import Cluster from '../frame/Cluster.vue';
 import FaceList from './FaceList.vue';
 
 import Modal from './Modal.vue';
-import client from '../../services/DavClient';
-import * as dav from '../../services/DavRequests';
+import client from '../../services/dav/client';
+import * as dav from '../../services/dav';
+import * as utils from '../../services/utils';
 
 export default defineComponent({
   name: 'FaceMergeModal',
@@ -62,7 +62,7 @@ export default defineComponent({
 
     open() {
       const user = this.$route.params.user || '';
-      if (this.$route.params.user !== getCurrentUser()?.uid) {
+      if (this.$route.params.user !== utils.uid) {
         showError(
           this.t('memories', 'Only user "{user}" can update this person', {
             user,
@@ -78,7 +78,19 @@ export default defineComponent({
       const name = this.$route.params.name || '';
 
       const newName = String(face.name || face.cluster_id);
-      if (!confirm(this.t('memories', 'Are you sure you want to merge {name} with {newName}?', { name, newName }))) {
+
+      if (
+        !(await utils.confirmDestructive({
+          title: this.t('memories', 'Merge faces'),
+          message: this.t('memories', 'Merge {name} with {newName}?', {
+            name: utils.isNumber(name) ? this.t('memories', 'unnamed person') : name,
+            newName: utils.isNumber(newName) ? this.t('memories', 'unnamed person') : newName,
+          }),
+          confirm: this.t('memories', 'Continue'),
+          confirmClasses: 'error',
+          cancel: this.t('memories', 'Cancel'),
+        }))
+      ) {
         return;
       }
 
@@ -108,7 +120,7 @@ export default defineComponent({
             );
           } catch (e) {
             console.error(e);
-            showError(this.t('memories', 'Error while moving {basename}', <any>p));
+            showError(this.t('memories', 'Error while moving {basename}', p));
             failures++;
           } finally {
             this.processing++;

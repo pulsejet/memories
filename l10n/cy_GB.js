@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Llwytho i lawr",
     "Settings" : "Gosodiadau",
     "Info" : "Info",
     "Favorites" : "Ffefrynnau",
@@ -11,14 +12,16 @@ OC.L10N.register(
     "Photos" : "Lluniau",
     "Cancel" : "Diddymu",
     "Delete" : "Dileu",
-    "Download" : "Llwytho i lawr",
     "Favorite" : "Ffefryn",
+    "Move" : "Symud",
     "General" : "Cyffredinol",
+    "Account" : "Cyfrif",
     "Close" : "Cau",
     "Unknown" : "Anhysbys",
     "Copy public link" : "Copïo dolen gyhoeddus",
     "Back" : "Nôl",
     "Save" : "Cadw",
+    "Search" : "Chwilio",
     "Year" : "Blwyddyn",
     "Month" : "Mis",
     "Day" : "Diwrnod",
@@ -27,7 +30,6 @@ OC.L10N.register(
     "Description" : "Disgrifiad",
     "Name" : "Enw",
     "Update" : "Diweddaru",
-    "Search" : "Chwilio",
     "Loading …" : "Yn llwytho …",
     "Remove" : "Gwaredu",
     "Share link" : "Rhannu dolen",
@@ -41,6 +43,8 @@ OC.L10N.register(
     "Undo" : "Dadwneud",
     "Custom" : "Cyfaddas",
     "Size" : "Maint",
-    "Auto" : "Awto"
+    "Auto" : "Awto",
+    "Yes" : "Ie",
+    "No" : "Na"
 },
 "nplurals=4; plural=(n==1) ? 0 : (n==2) ? 1 : (n != 8 && n != 11) ? 2 : 3;");

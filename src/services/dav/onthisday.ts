@@ -1,6 +1,6 @@
 import { IDay, IPhoto } from '../../types';
 import axios from '@nextcloud/axios';
-import * as utils from '../Utils';
+import * as utils from '../utils';
 import { API } from '../API';
 
 /**

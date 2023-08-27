@@ -5,6 +5,8 @@ import { isLiveContent } from './PsLivePhoto';
 import { fetchImage } from '../frame/XImgCache';
 import { PsContent, PsEvent, PsSlide } from './types';
 
+import errorsvg from '../../assets/error.svg';
+
 export default class ImageContentSetup {
   private loading = 0;
 
@@ -51,20 +53,28 @@ export default class ImageContentSetup {
     img.classList.add('pswp__img', 'ximg');
     img.style.visibility = 'hidden';
 
-    // Fetch with Axios
-    fetchImage(content.data.src).then((blobSrc) => {
-      // Check if destroyed already
-      if (!content.element) return;
+    // Callback on error or load
+    img.onerror = img.onload = () => {
+      img.onerror = img.onload = null;
+      img.style.visibility = 'visible';
+      onLoad();
+      this.slideActivate();
+    };
 
-      // Insert image
-      img.onerror = img.onload = () => {
-        img.onerror = img.onload = null;
-        img.style.visibility = 'visible';
-        onLoad();
-        this.slideActivate();
-      };
-      img.src = blobSrc;
-    });
+    // Set src on element if content is available
+    const src = (url: string) => {
+      if (content.element) {
+        img.src = url;
+      }
+    };
+
+    // Fetch with Axios
+    fetchImage(content.data.src)
+      .then(src)
+      .catch((e) => {
+        src(errorsvg);
+        console.error('Error loading PsImage:', e);
+      });
 
     return img;
   }

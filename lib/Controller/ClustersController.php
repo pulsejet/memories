@@ -40,18 +40,12 @@ class ClustersController extends GenericApiController
      *
      * Get list of clusters
      */
-    public function list(string $backend): Http\Response
+    public function list(string $backend, int $fileid = 0): Http\Response
     {
-        return Util::guardEx(function () use ($backend) {
+        return Util::guardEx(function () use ($backend, $fileid) {
             $this->init($backend);
 
-            $list = $this->backend->getClusters();
-
-            // Set cluster_id and cluster_type for each cluster
-            foreach ($list as &$cluster) {
-                $cluster['cluster_id'] = $this->backend->getClusterId($cluster);
-                $cluster['cluster_type'] = $this->backend->clusterType();
-            }
+            $list = $this->backend->getClusters($fileid);
 
             return new JSONResponse($list, Http::STATUS_OK);
         });
@@ -74,7 +68,9 @@ class ClustersController extends GenericApiController
 
             // If no photos found then return 404
             if (0 === \count($photos)) {
-                return new JSONResponse([], Http::STATUS_NOT_FOUND);
+                return new JSONResponse([
+                    'message' => 'No photos found in this cluster',
+                ], Http::STATUS_NOT_FOUND);
             }
 
             // Put the photos in the correct order

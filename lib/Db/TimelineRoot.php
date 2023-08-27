@@ -64,7 +64,10 @@ class TimelineRoot
     {
         foreach ($paths as $path) {
             foreach ($this->folderPaths as $id => $folderPath) {
-                if (str_starts_with($folderPath, $path)) {
+                // dirname strips the trailing slash, so we can directly add a
+                // trailing slash to folderPath and path to prevent false matches.
+                // https://github.com/pulsejet/memories/issues/668
+                if (str_starts_with($folderPath.'/', $path.'/')) {
                     unset($this->folderPaths[$id], $this->folders[$id]);
                 }
             }

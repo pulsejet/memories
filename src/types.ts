@@ -25,7 +25,12 @@ export type IDay = {
 export type IPhoto = {
   /** Nextcloud ID of file */
   fileid: number;
-  /** Vue key if duplicates present (otherwise use fileid) */
+  /**
+   * Vue key unique to this object.
+   * 1/ File ID by default.
+   * 2/ Indexed if duplicates present.
+   * 3/ Face ID for people views.
+   */
   key?: string;
   /** Etag from server */
   etag?: string;
@@ -73,7 +78,15 @@ export type IPhoto = {
   isfavorite?: boolean;
   /** Local file from native */
   islocal?: boolean;
-  /** Optional datetaken epoch */
+
+  /** AUID of file (optional, NativeX) */
+  auid?: number;
+  /** Epoch of file (optional, NativeX) */
+  epoch?: number;
+  /** File size (optional) */
+  size?: number;
+
+  /** Date taken UTC value (lazy fetched) */
   datetaken?: number;
 };
 
@@ -83,22 +96,39 @@ export interface IImageInfo {
   h: number;
   w: number;
   datetaken: number;
-  address?: string;
-  tags: { [id: string]: string };
 
   permissions: string;
   basename: string;
   mimetype: string;
   size: number;
 
+  filename?: string;
+  address?: string;
+  tags?: { [id: string]: string };
+
   exif?: {
     Rotation?: number;
     Orientation?: number;
     ImageWidth?: number;
     ImageHeight?: number;
+
     Title?: string;
     Description?: string;
+    Make?: string;
+    Model?: string;
+
+    DateTimeEpoch?: number;
+    OffsetTimeOriginal?: string;
+    OffsetTime?: string;
+    LocationTZID?: string;
+
     [other: string]: unknown;
+  };
+
+  clusters?: {
+    albums?: IAlbum[];
+    recognize?: IFace[];
+    facerecognition?: IFace[];
   };
 }
 
@@ -132,6 +162,8 @@ export interface IAlbum extends ICluster {
   album_id: number;
   /** Owner of album */
   user: string;
+  /** Display name of album owner */
+  user_display?: string;
   /** Created timestamp */
   created: number;
   /** Location string */
@@ -208,56 +240,39 @@ export type ITick = {
   key?: number;
 };
 
-export type TopMatter = {
-  type: TopMatterType;
-};
-export enum TopMatterType {
-  NONE = 0,
-  FOLDER = 1,
-  CLUSTER = 2,
-  FACE = 3,
-  ALBUM = 4,
-}
-export type TopMatterFolder = TopMatter & {
-  type: TopMatterType.FOLDER;
-  list: {
-    text: string;
-    path: string;
-  }[];
-};
-
-export type ISelectionAction = {
-  /** Display text */
-  name: string;
-  /** Icon component */
-  icon: any;
-  /** Action to perform */
-  callback: (selection: Map<number, IPhoto>) => Promise<void>;
-  /** Condition to check for including */
-  if?: (self?: any) => boolean;
-  /** Allow for public routes (default false) */
-  allowPublic?: boolean;
-};
-
 export type IConfig = {
+  // general stuff
   version: string;
   vod_disable: boolean;
   video_default_quality: string;
   places_gis: number;
 
+  // enabled apps
   systemtags_enabled: boolean;
-  recognize_enabled: boolean;
   albums_enabled: boolean;
+  recognize_installed: boolean;
+  recognize_enabled: boolean;
   facerecognition_installed: boolean;
   facerecognition_enabled: boolean;
+  preview_generator_enabled: boolean;
 
+  // general settings
   timeline_path: string;
+  enable_top_memories: boolean;
+
+  // viewer settings
+  livephoto_autoplay: boolean;
+  sidebar_filepath: boolean;
+
+  // folder settings
   folders_path: string;
   show_hidden_folders: boolean;
   sort_folder_month: boolean;
-  sort_album_month: boolean;
-  enable_top_memories: boolean;
 
+  // album settings
+  sort_album_month: boolean;
+
+  // local settings
   square_thumbs: boolean;
   full_res_on_zoom: boolean;
   full_res_always: boolean;

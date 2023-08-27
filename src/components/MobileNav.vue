@@ -1,16 +1,16 @@
 <template>
   <div id="mobile-nav">
-    <router-link to="/">
+    <router-link to="/" @click.native="linkClick" replace>
       <ImageMultipleIcon :size="22" />
       {{ t('memories', 'Photos') }}
     </router-link>
 
-    <router-link to="/explore">
+    <router-link to="/explore" @click.native="linkClick" replace>
       <SearchIcon :size="22" />
       {{ t('memories', 'Explore') }}
     </router-link>
 
-    <router-link to="/albums">
+    <router-link to="/albums" @click.native="linkClick" replace>
       <AlbumIcon :size="22" />
       {{ t('memories', 'Albums') }}
     </router-link>
@@ -19,6 +19,8 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+
+import * as nativex from '../native';
 
 import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import SearchIcon from 'vue-material-design-icons/Magnify.vue';
@@ -32,6 +34,12 @@ export default defineComponent({
     SearchIcon,
     AlbumIcon,
   },
+
+  methods: {
+    linkClick() {
+      nativex.playTouchSound();
+    },
+  },
 });
 </script>
 
@@ -42,6 +50,7 @@ export default defineComponent({
 
 // Show correct nav depending on screen size
 #mobile-nav {
+  contain: strict;
   display: none;
 }
 

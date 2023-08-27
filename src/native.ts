@@ -1,37 +1,178 @@
 import axios from '@nextcloud/axios';
-import type { IDay, IPhoto } from './types';
-import { constants } from './services/Utils';
-
-const BASE_URL = 'http://127.0.0.1';
-
+import { generateUrl } from '@nextcloud/router';
+import type { IDay, IPhoto, IImageInfo } from './types';
 const euc = encodeURIComponent;
 
-export const API = {
-  DAYS: () => `${BASE_URL}/api/days`,
-  DAY: (dayId: number) => `${BASE_URL}/api/days/${dayId}`,
-  IMAGE_INFO: (fileId: number) => `${BASE_URL}/api/image/info/${fileId}`,
-  IMAGE_DELETE: (fileIds: number[]) => `${BASE_URL}/api/image/delete/${fileIds.join(',')}`,
+/** Access NativeX over localhost */
+const BASE_URL = 'http://127.0.0.1';
 
+/** NativeX asynchronous API */
+export const API = {
+  /**
+   * Local days API.
+   * @regex ^/api/days$
+   * @returns {IDay[]} for all locally available days.
+   */
+  DAYS: () => `${BASE_URL}/api/days`,
+  /**
+   * Local photos API.
+   * @regex ^/api/days/\d+$
+   * @param dayId Day ID to fetch photos for
+   * @returns {IPhoto[]} for all locally available photos for this day.
+   */
+  DAY: (dayId: number) => `${BASE_URL}/api/days/${dayId}`,
+
+  /**
+   * Local photo metadata API.
+   * @regex ^/api/image/info/\d+$
+   * @param fileId File ID of the photo
+   * @returns {IImageInfo} for the given file ID (local).
+   */
+  IMAGE_INFO: (fileId: number) => `${BASE_URL}/api/image/info/${fileId}`,
+
+  /**
+   * Delete files using local fileids.
+   * @regex ^/api/image/delete/\d+(,\d+)*$
+   * @param fileIds List of AUIDs to delete
+   * @returns {void}
+   * @throws Return an error code if the user denies the deletion.
+   */
+  IMAGE_DELETE: (auids: number[]) => `${BASE_URL}/api/image/delete/${auids.join(',')}`,
+
+  /**
+   * Local photo preview API.
+   * @regex ^/image/preview/\d+$
+   * @param fileId File ID of the photo
+   * @returns {Blob} JPEG preview of the photo.
+   */
   IMAGE_PREVIEW: (fileId: number) => `${BASE_URL}/image/preview/${fileId}`,
+  /**
+   * Local photo full API.
+   * @regex ^/image/full/\d+$
+   * @param fileId File ID of the photo
+   * @returns {Blob} JPEG full image of the photo.
+   */
   IMAGE_FULL: (fileId: number) => `${BASE_URL}/image/full/${fileId}`,
 
+  /**
+   * Share a URL with native page.
+   * The native client MUST NOT download the object but share the URL directly.
+   * @regex ^/api/share/url/.+$
+   * @param url URL to share (double-encoded)
+   * @returns {void}
+   */
   SHARE_URL: (url: string) => `${BASE_URL}/api/share/url/${euc(euc(url))}`,
+  /**
+   * Share an object (as blob) natively using a given URL.
+   * The native client MUST download the object using a download manager
+   * and immediately prompt the user to download it. The asynchronous call
+   * must return only after the object has been downloaded.
+   * @regex ^/api/share/blob/.+$
+   * @param url URL to share (double-encoded)
+   * @returns {void}
+   */
   SHARE_BLOB: (url: string) => `${BASE_URL}/api/share/blob/${euc(euc(url))}`,
+  /**
+   * Share a local file (as blob) with native page.
+   * @regex ^/api/share/local/\d+$
+   * @param fileId File ID of the photo
+   * @returns {void}
+   */
   SHARE_LOCAL: (fileId: number) => `${BASE_URL}/api/share/local/${fileId}`,
+
+  /**
+   * Get list of local folders configuration.
+   * @regex ^/api/config/local-folders$
+   * @returns {LocalFolderConfig[]} List of local folders configuration
+   */
+  CONFIG_LOCAL_FOLDERS: () => `${BASE_URL}/api/config/local-folders`,
 };
 
-/**
- * Native interface for the Android app.
- */
+/** NativeX synchronous API. */
 export type NativeX = {
+  /**
+   * Check if the native interface is available.
+   * @returns Should always return true.
+   */
   isNative: () => boolean;
+
+  /**
+   * Set the theme color of the app.
+   * @param color Color to set
+   * @param isDark Whether the theme is dark (for navigation bar)
+   */
   setThemeColor: (color: string, isDark: boolean) => void;
-  downloadFromUrl: (url: string, filename: string) => void;
+
+  /**
+   * Play a tap sound for UI interaction.
+   */
   playTouchSound: () => void;
 
+  /**
+   * Make a native toast to the user.
+   * @param message Message to show
+   * @param long Whether the toast should be shown for a long time
+   */
+  toast: (message: string, long?: boolean) => void;
+
+  /**
+   * Start downloading a file from a given URL.
+   * @param url URL to download from
+   * @param filename Filename to save as
+   * @details An error must be shown to the user natively if the download fails.
+   */
+  downloadFromUrl: (url: string, filename: string) => void;
+
+  /**
+   * Play a video from the given file ID (local file).
+   * @param fileid File ID of the video
+   */
   playVideoLocal: (fileid: string) => void;
-  playVideoHls: (fileid: string, url: string) => void;
+  /**
+   * Play a video from the given URL(s).
+   * @param fileid Remote file ID of the video (used for play tracking)
+   * @param urlArray JSON-encoded array of URLs to play
+   * @details The URL array may contain multiple URLs, e.g. direct playback
+   * and HLS separately. The native client must try to play the first URL.
+   */
+  playVideoRemote: (fileid: string, urlArray: string) => void;
+  /**
+   * Destroy the video player.
+   * @param fileid File ID of the video
+   * @details The native client must destroy the video player and free up resources.
+   * If the fileid doesn't match the playing video, the call must be ignored.
+   */
   destroyVideo: (fileid: string) => void;
+
+  /**
+   * Set the local folders configuration to show in the timeline.
+   * @param json JSON-encoded array of LocalFolderConfig
+   */
+  configSetLocalFolders: (json: string) => void;
+
+  /**
+   * Start the login process
+   * @param baseUrl Base URL of the Nextcloud instance
+   * @param loginFlowUrl URL to start the login flow
+   */
+  login: (baseUrl: string, loginFlowUrl: string) => void;
+
+  /**
+   * Log out from Nextcloud and delete the tokens.
+   */
+  logout: () => void;
+
+  /**
+   * Reload the app.
+   */
+  reload: () => void;
+};
+
+/** Setting of whether a local folder is enabled */
+export type LocalFolderConfig = {
+  id: string;
+  name: string;
+  enabled: boolean;
 };
 
 /** The native interface is a global object that is injected by the native app. */
@@ -52,7 +193,7 @@ export async function setTheme(color?: string, dark?: boolean) {
 
   color ??= getComputedStyle(document.body).getPropertyValue('--color-main-background');
   dark ??=
-    window.matchMedia('(prefers-color-scheme: dark)').matches ||
+    (document.body.hasAttribute('data-theme-default') && window.matchMedia('(prefers-color-scheme: dark)').matches) ||
     document.body.hasAttribute('data-theme-dark') ||
     document.body.hasAttribute('data-theme-dark-highcontrast');
   nativex?.setThemeColor?.(color, dark);
@@ -89,10 +230,10 @@ export async function playVideoLocal(fileid: number) {
 }
 
 /**
- * Play a video from the given URL (HLS stream).
+ * Play a video from the given URL.
  */
-export async function playVideoHls(fileid: number, url: string) {
-  nativex?.playVideoHls?.(fileid.toString(), addOrigin(url));
+export async function playVideoRemote(fileid: number, urls: string[]) {
+  nativex?.playVideoRemote?.(fileid.toString(), JSON.stringify(urls.map(addOrigin)));
 }
 
 /**
@@ -171,31 +312,51 @@ export async function extendDayWithLocal(dayId: number, photos: IPhoto[]) {
 
   // Merge local photos into remote photos
   const localPhotos: IPhoto[] = await res.json();
-  const photosSet = new Set(photos.map((p) => p.basename));
-  const localOnly = localPhotos.filter((p) => !photosSet.has(p.basename));
+  const serverAUIDs = new Set(photos.map((p) => p.auid));
+
+  // Filter out files that are only available locally
+  const localOnly = localPhotos.filter((p) => !serverAUIDs.has(p.auid));
   localOnly.forEach((p) => (p.islocal = true));
   photos.push(...localOnly);
 
-  // Sort by datetaken
-  photos.sort((a, b) => (b.datetaken ?? 0) - (a.datetaken ?? 0));
+  // Sort by epoch value
+  photos.sort((a, b) => (b.epoch ?? 0) - (a.epoch ?? 0));
 }
 
 /**
  * Request deletion of local photos wherever available.
  * @param photos List of photos to delete
- * @returns List of photos that were deleted
  * @throws If the request fails
  */
-export async function deleteLocalPhotos(photos: IPhoto[]): Promise<IPhoto[]> {
-  if (!has()) return [];
+export async function deleteLocalPhotos(photos: IPhoto[]): Promise<void> {
+  if (!has()) return;
 
-  const localPhotos = photos.filter((p) => p.flag & constants.c.FLAG_IS_LOCAL);
-  if (localPhotos.length > 0) {
-    const fileids = localPhotos.map((p) => p.fileid);
-    await axios.get(API.IMAGE_DELETE(fileids));
-  }
+  const auids = photos.map((p) => p.auid).filter((a) => !!a) as number[];
+  await axios.get(API.IMAGE_DELETE(auids));
+}
 
-  return localPhotos;
+/**
+ * Get list of local folders configuration.
+ * Should be called only if NativeX is available.
+ */
+export async function getLocalFolders() {
+  return (await axios.get<LocalFolderConfig[]>(API.CONFIG_LOCAL_FOLDERS())).data;
+}
+
+/**
+ * Set list of local folders configuration.
+ */
+export async function setLocalFolders(config: LocalFolderConfig[]) {
+  nativex?.configSetLocalFolders(JSON.stringify(config));
+}
+
+/**
+ * Log out from Nextcloud and pass ahead.
+ */
+export async function logout() {
+  await axios.get(generateUrl('logout'));
+  if (!has()) window.location.reload();
+  nativex?.logout();
 }
 
 /**

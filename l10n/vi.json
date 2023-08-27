@@ -1,4 +1,5 @@
 { "translations": {
+    "Download" : "Tải xuống",
     "Settings" : "Cài đặt",
     "Info" : "Thông tin",
     "Folders" : "Thư mục",
@@ -10,16 +11,21 @@
     "Photos" : "Ảnh",
     "Cancel" : "Hủy",
     "Delete" : "Xóa",
-    "Download" : "Tải xuống",
     "Favorite" : "Ưa thích",
     "Unarchive" : "Bỏ lưu trữ",
     "View in folder" : "Xem trong thư mục",
+    "Continue" : "Tiếp tục",
+    "Move" : "Dịch chuyển",
     "General" : "Cài đặt chung",
+    "Viewer" : "Trình xem",
+    "Account" : "Tài khoản",
     "Close" : "Đóng",
     "Unknown" : "Không xác định",
     "Copy public link" : "Sao chép liên kết công khai",
     "Back" : "Quay lại",
     "Save" : "Lưu",
+    "Search" : "Tìm kiếm",
+    "Save changes" : "Lưu thay đổi",
     "Year" : "Năm",
     "Month" : "Tháng",
     "Day" : "Ngày",
@@ -32,7 +38,6 @@
     "Reset" : "Đặt lại",
     "Name" : "Tên",
     "Update" : "Cập nhật",
-    "Search" : "Tìm kiếm",
     "Loading …" : "Đang tải …",
     "Remove" : "Xoá",
     "Share link" : "Chia sẻ liên kết",
@@ -45,7 +50,6 @@
     "Share" : "Chia sẻ",
     "Previous" : "Trước",
     "Next" : "Tiếp theo",
-    "Continue" : "Tiếp tục",
     "Undo" : "Hoàn tác",
     "Redo" : "Làm lại",
     "Custom" : "Tùy chỉnh",
@@ -55,6 +59,7 @@
     "Text" : "Văn bản",
     "Size" : "Kích cỡ",
     "Name is required." : "Tên là bắt buộc.",
-    "Auto" : "Tự động"
+    "Auto" : "Tự động",
+    "Yes" : "Có"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

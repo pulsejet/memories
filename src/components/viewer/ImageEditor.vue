@@ -15,8 +15,13 @@ import translations from './ImageEditorTranslations';
 
 import { API } from '../../services/API';
 import { IImageInfo, IPhoto } from '../../types';
-import * as utils from '../../services/Utils';
+import * as utils from '../../services/utils';
 import { fetchImage } from '../frame/XImgCache';
+
+// Crop preset icons
+import LandscapeIcon from '@scaleflex/icons/landscape';
+import PortraitIcon from '@scaleflex/icons/portrait';
+import SquareIcon from '@scaleflex/icons/square';
 
 let TABS, TOOLS: any;
 type FilerobotImageEditor = import('filerobot-image-editor').default;
@@ -49,7 +54,7 @@ export default defineComponent({
       return {
         source:
           this.photo.h && this.photo.w
-            ? utils.getPreviewUrl(this.photo, false, 'screen')
+            ? utils.getPreviewUrl({ photo: this.photo, size: 'screen' })
             : API.IMAGE_DECODABLE(this.photo.fileid, this.photo.etag),
 
         defaultSavedImageName: this.defaultSavedImageName,
@@ -77,6 +82,29 @@ export default defineComponent({
         Rotate: {
           angle: 90,
           componentType: 'buttons',
+        },
+
+        Crop: {
+          presetsItems: [
+            {
+              titleKey: 'landscape',
+              descriptionKey: '4:3',
+              ratio: 4 / 3,
+              icon: LandscapeIcon,
+            },
+            {
+              titleKey: 'portrait',
+              descriptionKey: '3:4',
+              ratio: 3 / 4,
+              icon: PortraitIcon,
+            },
+            {
+              titleKey: 'square',
+              descriptionKey: '1:1',
+              ratio: 1,
+              icon: SquareIcon,
+            },
+          ],
         },
 
         // Translations
@@ -141,10 +169,15 @@ export default defineComponent({
   async mounted() {
     await loadFilerobot();
 
-    globalThis._fileRobotOverrideImage = await this.getImage();
-
     const div = <HTMLElement>this.$refs.editor;
-    this.imageEditor = new FilerobotImageEditor(div, this.config);
+
+    // Directly use an HTML element to make sure the resolution
+    // in the editor matches the original file, but we can work
+    // with a preview instead
+    const source = await this.getImage();
+    const config = { ...this.config, source };
+
+    this.imageEditor = new FilerobotImageEditor(div, config);
     this.imageEditor.render();
 
     // Handle keyboard
@@ -155,7 +188,6 @@ export default defineComponent({
     if (this.imageEditor) {
       this.imageEditor.terminate();
     }
-    globalThis._fileRobotOverrideImage = undefined;
     window.removeEventListener('keydown', this.handleKeydown, true);
   },
 
@@ -256,23 +288,18 @@ export default defineComponent({
     /**
      * Show warning if unsaved changes
      */
-    onExitWithoutSaving() {
-      (<any>OC.dialogs).confirmDestructive(
-        translations.changesLoseConfirmation + '\n\n' + translations.changesLoseConfirmationHint,
-        this.t('memories', 'Unsaved changes'),
-        {
-          type: (<any>OC.dialogs).YES_NO_BUTTONS,
+    async onExitWithoutSaving() {
+      if (
+        await utils.confirmDestructive({
+          title: this.t('memories', 'Unsaved changes'),
+          message: translations.changesLoseConfirmation + '\n\n' + translations.changesLoseConfirmationHint,
           confirm: this.t('memories', 'Drop changes'),
           confirmClasses: 'error',
           cancel: translations.cancel,
-        },
-        (decision) => {
-          if (!decision) {
-            return;
-          }
-          this.onClose('warning-ignored', false);
-        }
-      );
+        })
+      ) {
+        this.onClose('warning-ignored', false);
+      }
     },
 
     // Key Handlers, override default Viewer arrow and escape key

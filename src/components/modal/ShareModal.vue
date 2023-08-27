@@ -79,8 +79,8 @@ import UserConfig from '../../mixins/UserConfig';
 
 import { IPhoto } from '../../types';
 import { API } from '../../services/API';
-import * as dav from '../../services/DavRequests';
-import * as utils from '../../services/Utils';
+import * as dav from '../../services/dav';
+import * as utils from '../../services/utils';
 import * as nativex from '../../native';
 
 import PhotoIcon from 'vue-material-design-icons/Image.vue';
@@ -118,24 +118,24 @@ export default defineComponent({
   },
 
   computed: {
-    isVideo() {
-      return this.photo && (this.photo.mimetype?.startsWith('video/') || this.photo.flag & this.c.FLAG_IS_VIDEO);
+    isVideo(): boolean {
+      return !!this.photo && (this.photo.mimetype?.startsWith('video/') || !!(this.photo.flag & this.c.FLAG_IS_VIDEO));
     },
 
-    canShareNative() {
+    canShareNative(): boolean {
       return 'share' in navigator || nativex.has();
     },
 
-    canShareHighRes() {
+    canShareHighRes(): boolean {
       return !this.isLocal && (!this.isVideo || !this.config.vod_disable);
     },
 
-    canShareLink() {
-      return this.photo?.imageInfo?.permissions?.includes('S');
+    canShareLink(): boolean {
+      return !!this.photo?.imageInfo?.permissions?.includes('S');
     },
 
-    isLocal() {
-      return Boolean((this.photo?.flag ?? 0) & this.c.FLAG_IS_LOCAL);
+    isLocal(): boolean {
+      return utils.isLocalPhoto(this.photo!);
     },
   },
 
@@ -154,7 +154,10 @@ export default defineComponent({
     },
 
     async sharePreview() {
-      const src = utils.getPreviewUrl(this.photo!, false, 2048);
+      const src = utils.getPreviewUrl({
+        photo: this.photo!,
+        size: 2048,
+      });
       this.shareWithHref(src, true);
     },
 
@@ -224,7 +227,7 @@ export default defineComponent({
         ],
       };
 
-      if (!(<any>navigator).canShare(data)) {
+      if (!navigator.canShare(data)) {
         showError(this.t('memories', 'Cannot share this type of data'));
       }
 

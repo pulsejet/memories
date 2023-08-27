@@ -4,9 +4,14 @@ import { translate as t } from '@nextcloud/l10n';
 import { generateUrl } from '@nextcloud/router';
 import { IFace, IPhoto } from '../../types';
 import { API } from '../API';
-import client from '../DavClient';
+import client from './client';
+import * as utils from '../utils';
 import * as base from './base';
 
+/**
+ * Get list of faces
+ * @param app Backend app to use
+ */
 export async function getFaceList(app: 'recognize' | 'facerecognition') {
   return (await axios.get<IFace[]>(API.FACE_LIST(app))).data;
 }
@@ -83,10 +88,16 @@ export async function* recognizeMoveFaceImages(user: string, face: string, targe
   // Remove each file
   const calls = photos.map((p) => async () => {
     try {
-      await client.moveFile(
-        `/recognize/${user}/faces/${face}/${p.faceid}-${p.basename}`,
-        `/recognize/${user}/faces/${target}/${p.faceid}-${p.basename}`
-      );
+      const dest = `/recognize/${user}/faces/${target}`;
+      const name = `${p.faceid}-${p.basename}`;
+
+      // NULL source needs special handling
+      let source = `/recognize/${user}/faces/${face}`;
+      if (face === utils.constants.FACE_NULL) {
+        source = `/recognize/${user}/unassigned-faces`;
+      }
+
+      await client.moveFile(`${source}/${name}`, `${dest}/${name}`);
       return p.faceid!;
     } catch (e) {
       console.error(e);

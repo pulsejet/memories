@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Yüklə",
     "Settings" : "Quraşdırmalar",
     "Info" : "Info",
     "Favorites" : "Sevimlilər",
@@ -9,11 +10,13 @@ OC.L10N.register(
     "Edit" : "Dəyişiklik et",
     "Cancel" : "Dayandır",
     "Delete" : "Sil",
-    "Download" : "Yüklə",
     "Favorite" : "İstəkli",
+    "Move" : "Move",
     "General" : "Ümumi",
     "Close" : "Bağla",
     "Save" : "Saxla",
+    "Search" : "Axtarış",
+    "Save changes" : "Dəyişiklikləri yaddaşa ver",
     "Month" : "Ay",
     "Day" : "Gün",
     "Time" : "Vaxt",
@@ -22,15 +25,17 @@ OC.L10N.register(
     "Reset" : "Sıfırla",
     "Name" : "Ad",
     "Update" : "Yenilənmə",
-    "Search" : "Axtarış",
     "Remove" : "Sil",
     "Share link" : "Linki yayımla",
     "Refresh" : "Yenilə",
+    "Read only" : "Oxumaq üçün",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Share" : "Paylaş",
     "Previous" : "Əvvələ",
     "Next" : "Növbəti",
-    "Size" : "Həcm"
+    "Size" : "Həcm",
+    "Yes" : "Bəli",
+    "No" : "Xeyir"
 },
 "nplurals=2; plural=(n != 1);");

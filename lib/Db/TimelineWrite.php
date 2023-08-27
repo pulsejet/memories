@@ -122,7 +122,7 @@ class TimelineWrite
         $dateTaken = Exif::getDateTaken($file, $exif);
 
         // Store the acutal epoch with the EXIF data
-        $exif['DateTimeEpoch'] = $dateTaken->getTimestamp();
+        $epoch = $exif['DateTimeEpoch'] = $dateTaken->getTimestamp();
 
         // Store the date taken in the database as UTC (local date) only
         // Basically, assume everything happens in Greenwich
@@ -150,6 +150,7 @@ class TimelineWrite
             'objectid' => $query->createNamedParameter((string) $fileId, IQueryBuilder::PARAM_STR),
             'dayid' => $query->createNamedParameter($dayId, IQueryBuilder::PARAM_INT),
             'datetaken' => $query->createNamedParameter($dateTakenStr, IQueryBuilder::PARAM_STR),
+            'epoch' => $query->createNamedParameter($epoch, IQueryBuilder::PARAM_INT),
             'mtime' => $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT),
             'isvideo' => $query->createNamedParameter($isvideo, IQueryBuilder::PARAM_INT),
             'video_duration' => $query->createNamedParameter($videoDuration, IQueryBuilder::PARAM_INT),
@@ -245,8 +246,6 @@ class TimelineWrite
 
     /**
      * Clear the entire index. Does not need confirmation!
-     *
-     * @param File $file
      */
     public function clear()
     {

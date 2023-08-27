@@ -85,6 +85,23 @@ class Util
      */
     public static function recognizeIsEnabled(): bool
     {
+        if (!self::recognizeIsInstalled()) {
+            return false;
+        }
+
+        $config = \OC::$server->get(IAppConfig::class);
+        if ('true' !== $config->getValue('recognize', 'faces.enabled', 'false')) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if recognize is installed.
+     */
+    public static function recognizeIsInstalled(): bool
+    {
         $appManager = \OC::$server->get(IAppManager::class);
 
         if (!$appManager->isEnabledForUser('recognize')) {
@@ -96,11 +113,6 @@ class Util
             return false;
         }
 
-        $c = \OC::$server->get(IAppConfig::class);
-        if ('true' !== $c->getValue('recognize', 'faces.enabled', 'false')) {
-            return false;
-        }
-
         return true;
     }
 
@@ -109,16 +121,21 @@ class Util
      */
     public static function facerecognitionIsEnabled(): bool
     {
+        if (!self::facerecognitionIsInstalled()) {
+            return false;
+        }
+
         try {
             $uid = self::getUID();
         } catch (\Exception $e) {
             return false;
         }
 
-        $config = \OC::$server->get(IConfig::class);
-        $e = $config->getUserValue($uid, 'facerecognition', 'enabled', 'false');
+        $enabled = \OC::$server->get(IConfig::class)
+            ->getUserValue($uid, 'facerecognition', 'enabled', 'false')
+        ;
 
-        return 'true' === $e;
+        return 'true' === $enabled;
     }
 
     /**
@@ -135,6 +152,16 @@ class Util
         $v = $appManager->getAppInfo('facerecognition')['version'];
 
         return version_compare($v, '0.9.10-beta.2', '>=');
+    }
+
+    /**
+     * Check if preview generator is installed.
+     */
+    public static function previewGeneratorIsEnabled(): bool
+    {
+        $appManager = \OC::$server->get(IAppManager::class);
+
+        return $appManager->isEnabledForUser('previewgenerator');
     }
 
     /**
@@ -370,6 +397,9 @@ class Util
             throw new \InvalidArgumentException("Invalid system config key: {$key}");
         }
 
+        // Key belongs to memories namespace
+        $isAppKey = str_starts_with($key, Application::APPNAME.'.');
+
         // Check if the value has the correct type
         if (null !== $value && \gettype($value) !== \gettype($defaults[$key])) {
             $expected = \gettype($defaults[$key]);
@@ -378,7 +408,12 @@ class Util
             throw new \InvalidArgumentException("Invalid type for system config {$key}, expected {$expected}, got {$got}");
         }
 
-        if ($value === $defaults[$key] || null === $value) {
+        // Do not allow null for non-app keys
+        if (!$isAppKey && null === $value) {
+            throw new \InvalidArgumentException("Invalid value for system config {$key}, null is not allowed");
+        }
+
+        if ($isAppKey && ($value === $defaults[$key] || null === $value)) {
             $config->deleteSystemValue($key);
         } else {
             $config->setSystemValue($key, $value);
@@ -388,68 +423,7 @@ class Util
     /** Get list of defaults for all system config keys. */
     public static function systemConfigDefaults(): array
     {
-        return [
-            // Path to exiftool binary
-            'memories.exiftool' => '',
-
-            // Do not use packaged binaries of exiftool
-            // This requires perl to be available
-            'memories.exiftool_no_local' => false,
-
-            // How to index user directories
-            // 0 = auto-index disabled
-            // 1 = index everything
-            // 2 = index only user timelines
-            // 3 = index only configured path
-            'memories.index.mode' => '1',
-
-            // Path to index (only used if indexing mode is 3)
-            'memories.index.path' => '/',
-
-            // Places database type identifier
-            'memories.gis_type' => -1,
-
-            // Disable transcoding
-            'memories.vod.disable' => true,
-
-            // VA-API configuration options
-            'memories.vod.vaapi' => false,  // Transcode with VA-API
-            'memories.vod.vaapi.low_power' => false, // Use low_power mode for VA-API
-
-            // NVENC configuration options
-            'memories.vod.nvenc' => false,  // Transcode with NVIDIA NVENC
-            'memories.vod.nvenc.temporal_aq' => false,
-            'memories.vod.nvenc.scale' => 'npp', // npp or cuda
-
-            // Paths to ffmpeg and ffprobe binaries
-            'memories.vod.ffmpeg' => '',
-            'memories.vod.ffprobe' => '',
-
-            // Path to go-vod binary
-            'memories.vod.path' => '',
-
-            // Path to use for transcoded files (/tmp/go-vod/instanceid)
-            // Make sure this has plenty of space
-            'memories.vod.tempdir' => '',
-
-            // Bind address to use when starting the transcoding server
-            'memories.vod.bind' => '127.0.0.1:47788',
-
-            // Address used to connect to the transcoding server
-            // If not specified, the bind address above will be used
-            'memories.vod.connect' => '127.0.0.1:47788',
-
-            // Mark go-vod as external. If true, Memories will not attempt to
-            // start go-vod if it is not running already.
-            'memories.vod.external' => false,
-
-            // Set the default video quality for a first time user
-            //    0 => Auto (default)
-            //   -1 => Original (max quality with transcoding)
-            //   -2 => Direct (disable transcoding)
-            // 1080 => 1080p (and so on)
-            'memories.video_default_quality' => '0',
-        ];
+        return require __DIR__.'/SystemConfigDefault.php';
     }
 
     /**
@@ -465,15 +439,34 @@ class Util
      */
     public static function callerIsNative(): bool
     {
-        $request = \OC::$server->get(\OCP\IRequest::class);
-        $userAgent = $request->getHeader('User-Agent');
+        // Should not use IRequest here since this method is called during registration
+        if (\array_key_exists('HTTP_X_REQUESTED_WITH', $_SERVER)) {
+            return 'gallery.memories' === $_SERVER['HTTP_X_REQUESTED_WITH'];
+        }
 
-        return false !== strpos($userAgent, 'MemoriesNative');
+        return false !== strpos($_SERVER['HTTP_USER_AGENT'] ?? '', 'MemoriesNative');
+    }
+
+    /**
+     * Get the version of the native caller.
+     */
+    public static function callerNativeVersion(): ?string
+    {
+        $userAgent = \OC::$server->get(\OCP\IRequest::class)->getHeader('User-Agent');
+
+        $matches = [];
+        if (preg_match('/MemoriesNative\/([0-9.]+)/', $userAgent, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 
     /**
      * Kill all instances of a process by name.
      * Similar to pkill, which may not be available on all systems.
+     *
+     * @param string $name Process name (only the first 12 characters are used)
      */
     public static function pkill(string $name): void
     {
@@ -482,8 +475,21 @@ class Util
             return;
         }
 
+        // only use the first 12 characters
+        $name = substr($name, 0, 12);
+
+        // check if ps or busybox is available
+        $ps = 'ps';
+        if (!shell_exec('which ps')) {
+            if (!shell_exec('which busybox')) {
+                return;
+            }
+
+            $ps = 'busybox ps';
+        }
+
         // get pids using ps as array
-        $pids = shell_exec("ps -ef | grep {$name} | grep -v grep | awk '{print $2}'");
+        $pids = shell_exec("{$ps} -eao pid,comm | grep {$name} | awk '{print $1}'");
         if (null === $pids || empty($pids)) {
             return;
         }

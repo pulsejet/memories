@@ -1,14 +1,13 @@
-import { getCurrentUser } from '@nextcloud/auth';
 import { showError } from '@nextcloud/dialogs';
 import { translate as t } from '@nextcloud/l10n';
 import axios from '@nextcloud/axios';
 
 import { IFileInfo, IPhoto } from '../../types';
-import { genFileInfo } from '../FileUtils';
+import { genFileInfo } from '../file-utils';
 import { API } from '../API';
 import { getAlbumFileInfos } from './albums';
-import client from '../DavClient';
-import * as utils from '../Utils';
+import client from './client';
+import * as utils from '../utils';
 import * as nativex from '../../native';
 
 export const props = `
@@ -42,7 +41,8 @@ const GET_FILE_CHUNK_SIZE = 50;
 /**
  * Get file infos for list of files given Ids
  * @param photos list of photos
- * @returns list of file infos
+ * @details This tries to use the cached filename in the photo object (imageInfo.filename)
+ * If none was found, then it will fetch the file info from the server.
  */
 export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
   // Check if albums
@@ -51,12 +51,36 @@ export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
     return getAlbumFileInfos(photos, <string>route.params.user, <string>route.params.name);
   }
 
-  // Get file infos
-  let fileInfos: IFileInfo[] = [];
-
   // Remove any local photos
-  photos = photos.filter((photo) => !(photo.flag & utils.constants.c.FLAG_IS_LOCAL));
+  photos = photos.filter((photo) => !utils.isLocalPhoto(photo));
 
+  // Cache and uncached photos
+  const cache: IFileInfo[] = [];
+  const rest: IPhoto[] = [];
+
+  // Partition photos with and without cache
+  if (utils.uid) {
+    for (const photo of photos) {
+      const filename = photo.imageInfo?.filename;
+      if (filename) {
+        cache.push({
+          id: photo.fileid,
+          fileid: photo.fileid,
+          basename: photo.basename ?? filename.split('/').pop() ?? '',
+          originalFilename: `/files/${utils.uid}${filename}`,
+          filename: filename,
+        });
+      } else {
+        rest.push(photo);
+      }
+    }
+  }
+
+  // Get file infos for the rest
+  return cache.concat(await getFilesInternal1(rest));
+}
+
+async function getFilesInternal1(photos: IPhoto[]): Promise<IFileInfo[]> {
   // Get file IDs array
   const fileIds = photos.map((photo) => photo.fileid);
 
@@ -67,19 +91,11 @@ export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
   }
 
   // Get file infos for each chunk
-  const ef = await Promise.all(chunks.map(getFilesInternal));
-  fileInfos = fileInfos.concat(ef.flat());
-
-  return fileInfos;
+  return (await Promise.all(chunks.map(getFilesInternal2))).flat();
 }
 
-/**
- * Get file infos for list of files given Ids
- * @param fileIds list of file ids (smaller than 100)
- * @returns list of file infos
- */
-async function getFilesInternal(fileIds: number[]): Promise<IFileInfo[]> {
-  const prefixPath = `/files/${getCurrentUser()?.uid}`;
+async function getFilesInternal2(fileIds: number[]): Promise<IFileInfo[]> {
+  const prefixPath = `/files/${utils.uid}`;
 
   // IMPORTANT: if this isn't there, then a blank
   // returns EVERYTHING on the server!
@@ -150,14 +166,45 @@ async function getFilesInternal(fileIds: number[]): Promise<IFileInfo[]> {
  * Run promises in parallel, but only n at a time
  * @param promises Array of promise generator funnction (async functions)
  * @param n Number of promises to run in parallel
+ * @details Each promise returned MUST resolve and not throw an error
+ * @returns Generator of lists of results. Each list is of length n.
  */
 export async function* runInParallel<T>(promises: (() => Promise<T>)[], n: number) {
-  while (promises.length > 0) {
-    const promisesToRun = promises.splice(0, n);
-    const resultsForThisBatch = await Promise.all(promisesToRun.map((p) => p()));
-    yield resultsForThisBatch;
+  if (!promises.length) return;
+
+  promises.reverse(); // reverse so we can use pop() efficiently
+
+  const results: T[] = [];
+  const running: Promise<void>[] = [];
+
+  while (true) {
+    // add one promise per iteration
+    if (promises.length) {
+      let task!: Promise<void>;
+      running.push(
+        (task = (async () => {
+          // run the promise
+          results.push(await promises.pop()!());
+
+          // remove the promise from the running list
+          running.splice(running.indexOf(task), 1);
+        })())
+      );
+    }
+
+    // wait for one of the promises to finish
+    if (running.length >= n || !promises.length) {
+      await Promise.race(running);
+    }
+
+    // yield the results if the threshold is reached
+    if (results.length >= n || !running.length) {
+      yield results.splice(0, results.length);
+    }
+
+    // stop when all promises are done
+    if (!running.length) break;
   }
-  return;
 }
 
 /**
@@ -200,22 +247,28 @@ export async function* deletePhotos(photos: IPhoto[]) {
   if (photos.length === 0) return;
 
   // Extend with Live Photos unless this is an album
-  if (window.vueroute().name !== 'albums') {
+  const routeIsAlbums = window.vueroute().name === 'albums';
+  if (!routeIsAlbums) {
     photos = await extendWithLivePhotos(photos);
   }
 
   // Get set of unique file ids
-  let fileIdsSet = new Set(photos.map((p) => p.fileid));
+  let fileIds = new Set(photos.map((p) => p.fileid));
 
-  // Get files data
-  const fileInfos = (await getFiles(photos)).filter((f) => fileIdsSet.has(f.fileid));
+  // Get files data. The double filter ensures we never delete something accidentally.
+  const fileInfos = (await getFiles(photos)).filter((f) => fileIds.has(f.fileid));
 
   // Take intersection of fileIds and fileInfos
-  fileIdsSet = new Set(fileInfos.map((f) => f.fileid));
+  fileIds = new Set(fileInfos.map((f) => f.fileid));
 
-  // Check for local photos
-  if (nativex.has()) {
-    const deleted = (await nativex.deleteLocalPhotos(photos)).filter((f) => !fileIdsSet.has(f.fileid));
+  // Check for locally available files and delete them.
+  // For albums, we are not actually deleting.
+  if (nativex.has() && !routeIsAlbums) {
+    // Delete local files. This will throw if user cancels.
+    await nativex.deleteLocalPhotos(photos);
+
+    // Remove purely local files
+    const deleted = photos.filter((p) => p.flag & utils.constants.c.FLAG_IS_LOCAL);
 
     // Yield for the fully local files
     if (deleted.length > 0) {
@@ -256,7 +309,7 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
   }
 
   // Set absolute target path
-  const prefixPath = `files/${getCurrentUser()?.uid}`;
+  const prefixPath = `files/${utils.uid}`;
   let targetPath = prefixPath + destination;
   if (!targetPath.endsWith('/')) {
     targetPath += '/';

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "ডাউনলোড",
     "Settings" : "সেটিংস",
     "Info" : "Info",
     "Favorites" : "প্রিয়জন",
@@ -8,13 +9,15 @@ OC.L10N.register(
     "Edit" : "সম্পাদনা",
     "Cancel" : "বাতির",
     "Delete" : "মুছে",
-    "Download" : "ডাউনলোড",
     "Favorite" : "প্রিয়জন",
+    "Continue" : "চালিয়ে যাও",
+    "Move" : "Move",
     "General" : "সাধারণ",
     "Close" : "বন্ধ",
     "Unknown" : "অজানা",
     "Back" : "পেছনে যাও",
     "Save" : "সংরক্ষণ",
+    "Search" : "Search",
     "Month" : "মাস",
     "Day" : "দিবস",
     "Time" : "সময়",
@@ -24,7 +27,6 @@ OC.L10N.register(
     "Reset" : "পূণঃনির্ধানণ",
     "Name" : "নাম",
     "Update" : "পরিবর্ধন",
-    "Search" : "Search",
     "Remove" : "অপসারণ",
     "Share link" : "লিংক ভাগাভাগি করেন",
     "Refresh" : "নবোদ্যম",
@@ -34,7 +36,8 @@ OC.L10N.register(
     "Share" : "ভাগাভাগি কর",
     "Previous" : "পূর্ববর্তী",
     "Next" : "পরবর্তী",
-    "Continue" : "চালিয়ে যাও",
-    "Size" : "আকার"
+    "Size" : "আকার",
+    "Yes" : "হ্যাঁ",
+    "No" : "না"
 },
 "nplurals=2; plural=(n != 1);");

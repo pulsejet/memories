@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Download" : "Göçürip almak",
     "Settings" : "Sazlamalar",
     "Favorites" : "Halanýanlar",
     "Videos" : "Wideo",
@@ -9,19 +10,21 @@ OC.L10N.register(
     "Photos" : "Suratlar",
     "Cancel" : "ýatyrmak",
     "Delete" : "Pozmak",
-    "Download" : "Göçürip almak",
     "Favorite" : "Halaýan",
+    "Move" : "Göçüriň",
     "General" : "Esasy",
     "Close" : "Ýap",
     "Unknown" : "Näbelli",
     "Back" : "Yzyna",
     "Save" : "Saklamak",
-    "Name" : "Ady",
     "Search" : "Gözlemek",
+    "Name" : "Ady",
     "Remove" : "Aýyrmak",
     "Share link" : "Baglanyşyk paýlaş",
     "Refresh" : "Täzelemek",
     "Read only" : "Diňe okaň",
-    "Share" : "Paýlaş"
+    "Share" : "Paýlaş",
+    "Yes" : "Hawa",
+    "No" : "Ýok"
 },
 "nplurals=2; plural=(n != 1);");

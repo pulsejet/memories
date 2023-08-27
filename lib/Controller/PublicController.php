@@ -119,6 +119,10 @@ class PublicController extends AuthPublicShareController
         $node = $share->getNode();
         if ($node instanceof \OCP\Files\File) {
             $this->initialState->provideInitialState('single_item', $this->getSingleItemInitialState($node));
+        } elseif ($node instanceof \OCP\Files\Folder) {
+            $this->initialState->provideInitialState('share_title', $node->getName());
+        } else {
+            throw new NotFoundException();
         }
 
         // Add OG metadata
@@ -127,7 +131,7 @@ class PublicController extends AuthPublicShareController
         Util::addOgMetadata($node, $node->getName(), $url, $params);
 
         // Render the template
-        $response = new PublicTemplateResponse($this->appName, 'main');
+        $response = new PublicTemplateResponse($this->appName, 'main', PageController::getMainParams());
         $response->setHeaderTitle($node->getName());
         $response->setFooterVisible(false); // wth is that anyway?
         $response->setContentSecurityPolicy(PageController::getCSP());
@@ -205,7 +209,10 @@ class PublicController extends AuthPublicShareController
         $relPath = substr($relPath, \strlen($foldersPath));
 
         // Redirect to the local path
-        $url = $this->urlGenerator->linkToRouteAbsolute('memories.Page.folder', ['path' => $relPath]);
+        $url = $this->urlGenerator->linkToRouteAbsolute('memories.Page.folder', [
+            'path' => $relPath, // path to folder
+            'noinit' => 1, // prevent showing first-start page
+        ]);
 
         // Cannot send a redirect response here because the return
         // type is a template response for the base class
@@ -215,9 +222,18 @@ class PublicController extends AuthPublicShareController
         exit; // no other way to do this due to typing of super class
     }
 
-    /** Get initial state of single item */
+    /**
+     * Get initial state of single item.
+     *
+     * @throws NotFoundException if file not found in index
+     */
     private function getSingleItemInitialState(\OCP\Files\File $file): array
     {
-        return $this->timelineQuery->getSingleItem($file->getId());
+        $data = $this->timelineQuery->getSingleItem($file->getId());
+        if (null === $data) {
+            throw new NotFoundException();
+        }
+
+        return $data;
     }
 }

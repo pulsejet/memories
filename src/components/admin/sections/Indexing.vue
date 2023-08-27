@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section">
-    <h2>{{ t('memories', 'Media Indexing') }}</h2>
+    <h2>{{ $options.title }}</h2>
 
     <template v-if="status">
       <NcNoteCard :type="status.indexed_count > 0 ? 'success' : 'warning'">
@@ -31,6 +31,14 @@
             : t('memories', 'It is still running or was interrupted.')
         }}
       </NcNoteCard>
+      <NcNoteCard v-if="status.last_index_job_start > 3600" type="error">
+        {{
+          t(
+            'memories',
+            'Looks like it has been more than an hour since the last index job was run. Make sure Nextcloud cron is configured correctly.'
+          )
+        }}
+      </NcNoteCard>
       <NcNoteCard type="error" v-if="status.bad_encryption">
         {{
           t(
@@ -48,7 +56,7 @@
           'The EXIF indexes are built and checked in a periodic background task. Be careful when selecting anything other than automatic indexing. For example, setting the indexing to only timeline folders may cause delays before media becomes available to users, since the user configures the timeline only after logging in.'
         )
       }}
-      {{ t('memories', 'Folders with a ".nomedia" file are always excluded from indexing.') }}
+      {{ t('memories', 'Folders with a ".nomedia" or a ".nomemories" file are always excluded from indexing.') }}
       <NcCheckboxRadioSwitch
         :checked.sync="config['memories.index.mode']"
         value="1"
@@ -110,27 +118,19 @@
     {{ t('memories', 'Clear all existing index tables:') }}
     <br />
     <code>occ memories:index --clear</code>
-    <br />
-
-    <br />
-    {{ t('memories', 'The following MIME types are configured for preview generation correctly. More documentation:') }}
-    <a href="https://memories.gallery/file-types/" target="_blank">
-      {{ t('memories', 'External Link') }}
-    </a>
-    <br />
-    <code v-if="status"
-      ><template v-for="mime in status.mimes">{{ mime }}<br :key="mime" /></template
-    ></code>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import { translate as t } from '@nextcloud/l10n';
+
 import AdminMixin from '../AdminMixin';
 
 export default defineComponent({
   name: 'Indexing',
+  title: t('memories', 'Media Indexing'),
   mixins: [AdminMixin],
 });
 </script>

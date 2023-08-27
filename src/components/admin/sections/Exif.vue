@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section">
-    <h2>{{ t('memories', 'EXIF Extraction') }}</h2>
+    <h2>{{ $options.title }}</h2>
 
     <template v-if="status">
       <NcNoteCard :type="binaryStatusType(status.exiftool)">
@@ -36,10 +36,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import { translate as t } from '@nextcloud/l10n';
+
 import AdminMixin from '../AdminMixin';
 
 export default defineComponent({
   name: 'Exif',
+  title: t('memories', 'EXIF Extraction'),
   mixins: [AdminMixin],
 });
 </script>

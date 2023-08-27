@@ -20,14 +20,15 @@ let fetchPreviewQueue: FetchPreviewObject[] = [];
 const pendingUrls = new Map<string, BlobCallback[]>();
 
 // Cache for preview images
-const cacheName = 'images';
+const cacheName = 'memories-images';
 let imageCache: Cache;
-self.caches
-  ?.open(cacheName)
-  .then((c) => (imageCache = c))
-  .catch((e) => {
-    console.warn('Failed to open cache in worker', e);
-  });
+(async function openCache() {
+  try {
+    imageCache = await self.caches?.open(cacheName);
+  } catch {
+    console.warn('Failed to open cache in worker');
+  }
+})();
 
 // Expiration for cache
 const expirationManager = new CacheExpiration(cacheName, {
@@ -36,7 +37,7 @@ const expirationManager = new CacheExpiration(cacheName, {
 });
 
 // Start fetching with multipreview
-let fetchPreviewTimer: any;
+let fetchPreviewTimer: number;
 
 /** Flushes the queue of preview image requests */
 async function flushPreviewQueue() {
@@ -213,18 +214,18 @@ async function fetchImage(url: string): Promise<Blob> {
   const cache = await imageCache?.match(url);
   if (cache) return await cache.blob();
 
-  // Get file id from URL
-  const urlObj = new URL(url, self.location.origin);
-  const fileid = Number(urlObj.pathname.split('/').pop());
-
   // Just fetch if not a preview
-  const regex = /^.*\/apps\/memories\/api\/image\/preview\/.*/;
+  const regex = /\/memories\/api\/image\/preview\/\d+(\?.*)?$/;
 
   if (!regex.test(url)) {
     const res = await fetchOneImage(url);
     cacheResponse(url, res);
     return await res.blob();
   }
+
+  // Get file id from URL
+  const urlObj = new URL(url, self.location.origin);
+  const fileid = Number(urlObj.pathname.split('/').pop());
 
   return await new Promise((resolve, reject) => {
     if (pendingUrls.has(url)) {
@@ -288,7 +289,12 @@ function getResponse(blob: Blob, type: string | null, headers: any = {}) {
 
 /** Fetch single image with axios */
 async function fetchOneImage(url: string) {
-  return await fetch(url);
+  const res = await fetch(url);
+  if (res.status !== 200 || !res.body) {
+    const text = res.body ? await res.text() : 'unknown';
+    throw new Error(`Error fetching single preview: ${text}`);
+  }
+  return res;
 }
 
 /** Fetch multipreview with axios */

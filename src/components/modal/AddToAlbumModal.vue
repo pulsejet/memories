@@ -5,10 +5,10 @@
     </template>
 
     <div class="outer">
-      <AlbumPicker @select="selectAlbum" />
+      <AlbumPicker @select="update" :photos="photos" :disabled="!!opsTotal" />
 
-      <div v-if="processing">
-        <NcProgressBar :value="Math.round((photosDone * 100) / photos.length)" :error="true" />
+      <div class="progress-bar" v-if="opsTotal">
+        <NcProgressBar :value="progress" :error="true" />
       </div>
     </div>
   </Modal>
@@ -17,8 +17,11 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import * as dav from '../../services/DavRequests';
+import * as dav from '../../services/dav';
+
 import { showInfo } from '@nextcloud/dialogs';
+import { emit } from '@nextcloud/event-bus';
+
 import { IAlbum, IPhoto } from '../../types';
 
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
@@ -37,44 +40,88 @@ export default defineComponent({
   data: () => ({
     show: false,
     photos: [] as IPhoto[],
-    photosDone: 0,
-    processing: false,
+    opsDone: 0,
+    opsTotal: 0,
   }),
+
+  computed: {
+    progress(): number {
+      return Math.min(this.opsTotal ? Math.round((this.opsDone * 100) / this.opsTotal) : 100, 100);
+    },
+  },
+
+  mounted() {
+    console.assert(!globalThis.updateAlbums, 'AddToAlbumModal mounted twice');
+    globalThis.updateAlbums = this.open;
+  },
 
   methods: {
     open(photos: IPhoto[]) {
-      this.photosDone = 0;
-      this.processing = false;
-      this.show = true;
       this.photos = photos;
-    },
-
-    added(photos: IPhoto[]) {
-      this.$emit('added', photos);
+      this.show = true;
+      this.opsTotal = 0;
     },
 
     close() {
-      this.photos = [];
-      this.processing = false;
       this.show = false;
+      this.photos = [];
+      this.opsTotal = 0;
       this.$emit('close');
     },
 
-    async selectAlbum(album: IAlbum) {
-      if (this.processing) return;
+    async update(selection: IAlbum[], deselection: IAlbum[]) {
+      if (this.opsTotal) return;
 
-      const name = album.name || album.album_id.toString();
-      const gen = dav.addToAlbum(album.user, name, this.photos);
-      this.processing = true;
+      // For now, updats is relevant only for multiple photos
+      // and multiple photos do not support deselection anyway.
+      // So it is good enough to only emit either op here.
+      const processedIds = new Set<number>();
 
-      for await (const fids of gen) {
-        this.photosDone += fids.filter((f) => f).length;
-        this.added(this.photos.filter((p) => fids.includes(p.fileid)));
+      // Total number of DAV calls (ugh DAV)
+      this.opsTotal = this.photos.length * (selection.length + deselection.length);
+      this.opsDone = 0;
+      let opsSuccess = 0;
+
+      // Process file ids returned from generator
+      const processFileIds = (fileIds: number[]) => {
+        const successIds = fileIds.filter((f) => f);
+        successIds.forEach((f) => processedIds.add(f));
+        this.opsDone += fileIds.length;
+        opsSuccess += successIds.length;
+      };
+
+      // Add the photos to the selected albums
+      for (const album of selection) {
+        for await (const fileIds of dav.addToAlbum(album.user, album.name, this.photos)) {
+          processFileIds(fileIds);
+        }
       }
 
-      const n = this.photosDone;
-      showInfo(this.n('memories', '{n} item added to album', '{n} items added to album', n, { n }));
-      this.close();
+      // Remove the photos from the deselected albums
+      for (const album of deselection) {
+        for await (const fids of dav.removeFromAlbum(album.user, album.name, this.photos)) {
+          processFileIds(fids);
+        }
+      }
+
+      const n = processedIds.size;
+      showInfo(this.n('memories', '{n} photo updated', '{n} photos updated', n, { n }));
+
+      // emit only the successfully processed photos here
+      // so that only these are deselected by the manager
+      const processedPhotos = this.photos.filter((p) => processedIds.has(p.fileid));
+      emit('memories:albums:update', processedPhotos);
+
+      // close the modal only if all ops are successful
+      if (opsSuccess === this.opsTotal) {
+        this.close();
+      } else {
+        this.opsTotal = 0;
+
+        // remove the photos that were processed successfully
+        // so that the user can try again with the remaining ones
+        this.photos = this.photos.filter((p) => !processedIds.has(p.fileid));
+      }
     },
   },
 });
@@ -83,5 +130,9 @@ export default defineComponent({
 <style lang="scss" scoped>
 .outer {
   margin-top: 15px;
+}
+
+.progress-bar {
+  margin-top: 10px;
 }
 </style>

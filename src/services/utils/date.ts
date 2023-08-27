@@ -60,6 +60,7 @@ export function getFromNowStr(date: Date) {
   const text =
     DateTime.fromJSDate(date).toRelative({
       locale: getCanonicalLocale(),
+      padding: 10 * 24 * 60 * 60 * 1000, // 10 days
     }) ?? 'Unknown';
 
   // Title case

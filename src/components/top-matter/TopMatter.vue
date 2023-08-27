@@ -1,5 +1,11 @@
 <template>
-  <div class="top-matter-container" v-if="currentmatter">
+  <div
+    class="top-matter-container timeline-scroller-gap"
+    :class="{
+      'dynamic-visible': dynamicVisible,
+    }"
+    v-if="currentmatter"
+  >
     <component :is="currentmatter" />
   </div>
 </template>
@@ -7,12 +13,12 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import { subscribe, unsubscribe } from '@nextcloud/event-bus';
+
 import FolderTopMatter from './FolderTopMatter.vue';
 import ClusterTopMatter from './ClusterTopMatter.vue';
 import FaceTopMatter from './FaceTopMatter.vue';
 import AlbumTopMatter from './AlbumTopMatter.vue';
-
-import { TopMatterType } from '../../types';
 
 export default defineComponent({
   name: 'TopMatter',
@@ -24,29 +30,29 @@ export default defineComponent({
   },
 
   data: () => ({
-    type: TopMatterType.NONE,
+    dynamicVisible: true,
   }),
 
-  watch: {
-    $route: function (from: any, to: any) {
-      this.setTopMatter();
-    },
+  mounted() {
+    subscribe('memories.recycler.scroll', this.onRecyclerScroll);
   },
 
-  mounted() {
-    this.setTopMatter();
+  beforeUnmount() {
+    unsubscribe('memories.recycler.scroll', this.onRecyclerScroll);
   },
 
   computed: {
     currentmatter() {
-      switch (this.type) {
-        case TopMatterType.FOLDER:
+      switch (this.$route.name) {
+        case 'folders':
           return FolderTopMatter;
-        case TopMatterType.ALBUM:
+        case 'albums':
           return AlbumTopMatter;
-        case TopMatterType.CLUSTER:
+        case 'tags':
+        case 'places':
           return ClusterTopMatter;
-        case TopMatterType.FACE:
+        case 'recognize':
+        case 'facerecognition':
           return FaceTopMatter;
         default:
           return null;
@@ -55,24 +61,8 @@ export default defineComponent({
   },
 
   methods: {
-    /** Create top matter */
-    setTopMatter() {
-      this.type = (() => {
-        switch (this.$route.name) {
-          case 'folders':
-            return TopMatterType.FOLDER;
-          case 'albums':
-            return TopMatterType.ALBUM;
-          case 'tags':
-          case 'places':
-            return TopMatterType.CLUSTER;
-          case 'recognize':
-          case 'facerecognition':
-            return this.$route.params.name ? TopMatterType.FACE : TopMatterType.CLUSTER;
-          default:
-            return TopMatterType.NONE;
-        }
-      })();
+    onRecyclerScroll({ dynTopMatterVisible }: { dynTopMatterVisible: boolean }) {
+      this.dynamicVisible = dynTopMatterVisible;
     },
   },
 });
@@ -80,9 +70,23 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .top-matter-container {
-  padding-top: 4px;
+  position: relative;
+  z-index: 200; // above scroller, below top-bar
+  padding: 2px 0;
+  background-color: var(--color-main-background);
+  transition: box-shadow 0.2s ease-in-out;
+
+  &:not(.dynamic-visible) {
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  }
+
+  // Hide shadow if inside cluster view
+  .cluster-view & {
+    box-shadow: none;
+  }
+
   @media (max-width: 768px) {
-    padding-left: 10px;
+    padding-left: 10px; // extra space visual
   }
 
   > div {
@@ -91,12 +95,15 @@ export default defineComponent({
   }
 
   :deep .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 10px;
     font-size: 1.3em;
     font-weight: 400;
     line-height: 42px;
+    white-space: nowrap;
     vertical-align: top;
     flex-grow: 1;
-    padding-left: 10px;
   }
 
   :deep button + .name {
@@ -104,7 +111,7 @@ export default defineComponent({
   }
 
   :deep .right-actions {
-    margin-right: 40px;
+    margin-right: 12px;
     z-index: 50;
     @media (max-width: 768px) {
       margin-right: 10px;

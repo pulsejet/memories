@@ -26,6 +26,7 @@ namespace OCA\Memories\Command;
 use OCA\Memories\Service\Places;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class PlacesSetup extends Command
@@ -45,12 +46,14 @@ class PlacesSetup extends Command
         $this
             ->setName('memories:places-setup')
             ->setDescription('Setup reverse geocoding')
+            ->addOption('recalculate', 'r', InputOption::VALUE_NONE, 'Only recalculate places for existing files')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->output = $output;
+        $recalculate = $input->getOption('recalculate');
 
         $this->output->writeln('Attempting to set up reverse geocoding');
 
@@ -63,35 +66,18 @@ class PlacesSetup extends Command
         $this->output->writeln('Database support was detected');
 
         // Check if database is already set up
-        if ($this->places->geomCount() > 0) {
-            $this->output->writeln('');
-            $this->output->writeln('<error>Database is already set up</error>');
-            $this->output->writeln('<error>This will drop and re-download the planet database</error>');
-            $this->output->writeln('<error>This is generally not necessary to do frequently </error>');
-
-            // Ask confirmation
-            $this->output->writeln('');
-            $this->output->writeln('Are you sure you want to download the planet database?');
-            $this->output->write('Proceed? [y/N] ');
-            $handle = fopen('php://stdin', 'r');
-            $line = fgets($handle);
-            if (false === $line) {
-                $this->output->writeln('<error>You need an interactive terminal to run this command</error>');
-
-                return 1;
-            }
-            if ('y' !== trim($line)) {
-                $this->output->writeln('Aborting');
-
-                return 1;
-            }
+        if ($this->places->geomCount() > 0 && !$recalculate && !$this->warnDownloaded()) {
+            return 1;
         }
 
-        // Download the planet database
-        $datafile = $this->places->downloadPlanet();
+        // Check if we only need to recalculate
+        if (!$recalculate) {
+            // Download the planet database
+            $datafile = $this->places->downloadPlanet();
 
-        // Import the planet database
-        $this->places->importPlanet($datafile);
+            // Import the planet database
+            $this->places->importPlanet($datafile);
+        }
 
         // Recalculate all places
         $this->places->recalculateAll();
@@ -99,5 +85,32 @@ class PlacesSetup extends Command
         $this->output->writeln('Done');
 
         return 0;
+    }
+
+    protected function warnDownloaded(): bool
+    {
+        $this->output->writeln('');
+        $this->output->writeln('<error>Database is already set up</error>');
+        $this->output->writeln('<error>This will drop and re-download the planet database</error>');
+        $this->output->writeln('<error>This is generally not necessary to do frequently </error>');
+
+        // Ask confirmation
+        $this->output->writeln('');
+        $this->output->writeln('Are you sure you want to download the planet database?');
+        $this->output->write('Proceed? [y/N] ');
+        $handle = fopen('php://stdin', 'r');
+        $line = fgets($handle);
+        if (false === $line) {
+            $this->output->writeln('<error>You need an interactive terminal to run this command</error>');
+
+            return false;
+        }
+        if ('y' !== trim($line)) {
+            $this->output->writeln('Aborting');
+
+            return false;
+        }
+
+        return true;
     }
 }
