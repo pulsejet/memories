@@ -69,6 +69,10 @@ export default defineComponent({
       this.$emit('close');
     },
 
+    routeIsAlbum(album: IAlbum) {
+      return this.routeIsAlbums && this.$route.params.user === album.user && this.$route.params.name === album.name;
+    },
+
     async update(selection: IAlbum[], deselection: IAlbum[]) {
       if (this.opsTotal) return;
 
@@ -101,6 +105,12 @@ export default defineComponent({
       for (const album of deselection) {
         for await (const fids of dav.removeFromAlbum(album.user, album.name, this.photos)) {
           processFileIds(fids);
+
+          // Update current view if required
+          if (this.routeIsAlbum(album)) {
+            const photos = this.photos.filter((p) => fids.includes(p.fileid));
+            utils.bus.emit('memories:timeline:deleted', photos);
+          }
         }
       }
 
