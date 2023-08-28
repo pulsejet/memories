@@ -29,7 +29,7 @@ type BusEvent = {
   /** Delete these photos from the timeline */
   'memories:timeline:deleted': IPhoto[];
   /** Viewer has requested fetching day */
-  'memories:viewer:fetch-day': number;
+  'memories:timeline:fetch-day': number;
   /** Soft-refresh the timeline */
   'memories:timeline:soft-refresh': null;
   /** Hard-refresh the timeline */

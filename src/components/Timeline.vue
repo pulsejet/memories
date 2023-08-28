@@ -189,7 +189,7 @@ export default defineComponent({
     utils.bus.on('memories:user-config-changed', this.softRefresh);
     utils.bus.on('files:file:created', this.softRefresh);
     utils.bus.on('memories:window:resize', this.handleResizeWithDelay);
-    utils.bus.on('memories:viewer:fetch-day', this.fetchDay);
+    utils.bus.on('memories:timeline:fetch-day', this.fetchDay);
     utils.bus.on('memories:timeline:deleted', this.deleteFromViewWithAnimation);
     utils.bus.on('memories:timeline:soft-refresh', this.softRefresh);
     utils.bus.on('memories:timeline:hard-refresh', this.refresh);
@@ -199,7 +199,7 @@ export default defineComponent({
     utils.bus.off('memories:user-config-changed', this.softRefresh);
     utils.bus.off('files:file:created', this.softRefresh);
     utils.bus.off('memories:window:resize', this.handleResizeWithDelay);
-    utils.bus.off('memories:viewer:fetch-day', this.fetchDay);
+    utils.bus.off('memories:timeline:fetch-day', this.fetchDay);
     utils.bus.off('memories:timeline:deleted', this.deleteFromViewWithAnimation);
     utils.bus.off('memories:timeline:soft-refresh', this.softRefresh);
     utils.bus.off('memories:timeline:hard-refresh', this.refresh);

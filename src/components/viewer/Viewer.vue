@@ -383,7 +383,7 @@ export default defineComponent({
 
   methods: {
     fetchDay(dayId: number) {
-      utils.bus.emit('memories:viewer:fetch-day', dayId);
+      utils.bus.emit('memories:timeline:fetch-day', dayId);
     },
 
     updateLoading(delta: number) {
