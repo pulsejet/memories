@@ -116,15 +116,6 @@ export default new Router({
     },
 
     {
-      path: '/maps',
-      name: 'maps',
-      // router-link doesn't support external url, let's force the redirect
-      beforeEnter() {
-        window.open(generateUrl('/apps/maps'), '_blank');
-      },
-    },
-
-    {
       path: '/s/:token',
       component: Timeline,
       name: 'folder-share',
