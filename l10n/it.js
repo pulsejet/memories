@@ -95,7 +95,6 @@ OC.L10N.register(
     "Link copied to clipboard" : "Collegamento copiato negli appunti",
     "Sort by date" : "Ordina per data",
     "Sort by name" : "Ordina per nome",
-    "Delete album" : "Elimina album",
     "Unassigned faces" : "Facce non assegnate",
     "Merge with different person" : "Unisci ad un'altra persona",
     "Share folder" : "Condividi cartella",

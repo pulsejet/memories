@@ -84,7 +84,6 @@ OC.L10N.register(
     "Read only" : "Само читај",
     "Sort by date" : "Подреди по датум",
     "Sort by name" : "Подреди по име",
-    "Delete album" : "Избриши албум",
     "Merge with different person" : "Спој со друга личност",
     "Share folder" : "Сподели папка",
     "Unsaved changes" : "Незачувани промени",

@@ -95,7 +95,6 @@ OC.L10N.register(
     "Read only" : "Тільки читання",
     "Sort by date" : "Впорядкувати за датою",
     "Sort by name" : "Впорядкувати за ім’ям",
-    "Delete album" : "Вилучити альбом",
     "Unassigned faces" : "Неідентифіковані обличчя",
     "Merge with different person" : "Злитися з іншою людиною",
     "Share folder" : "Спільний доступ для каталогу",

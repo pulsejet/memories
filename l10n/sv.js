@@ -99,7 +99,6 @@ OC.L10N.register(
     "Link copied to clipboard" : "Länken kopierad till urklipp",
     "Sort by date" : "Sortera efter datum",
     "Sort by name" : "Sortera efter namn",
-    "Delete album" : "Radera album",
     "Unassigned faces" : "Ej tilldelade ansikten",
     "Merge with different person" : "Slå ihop med en annan person",
     "Share folder" : "Dela mapp",

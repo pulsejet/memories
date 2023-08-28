@@ -80,7 +80,6 @@ OC.L10N.register(
     "Read only" : "Hanya baca",
     "Sort by date" : "Urutkan berdasarkan tanggal",
     "Sort by name" : "Urutkan berdasarkan nama",
-    "Delete album" : "Hapus album",
     "Merge with different person" : "Gabungkan dengan orang yang berbeda",
     "Share" : "Bagikan",
     "Previous" : "Sebelumnya",

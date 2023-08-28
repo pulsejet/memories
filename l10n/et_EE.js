@@ -80,7 +80,6 @@ OC.L10N.register(
     "Read only" : "kirjutuskaitstud",
     "Sort by date" : "Sorteeri kuupäeva järgi",
     "Sort by name" : "Sorteeri nime järgi",
-    "Delete album" : "Kustuta album",
     "Unassigned faces" : "Määramata näod",
     "Merge with different person" : "Ühenda teise isikuga",
     "Unsaved changes" : "Salvestamata muutused",

@@ -244,7 +244,6 @@ OC.L10N.register(
     "Sort by name" : "Ordenatu izenaren arabera",
     "Share album" : "Partekatu albuma",
     "Download album" : "Deskargatu albuma",
-    "Delete album" : "Ezabatu albuma",
     "Nothing to show here" : "Hemen ez dago ezer erakusteko",
     "Unassigned faces" : "Esleitu gabeko aurpegiak",
     "Merge with different person" : "Bateratu beste pertsona batekin",
