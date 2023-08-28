@@ -54,7 +54,7 @@ export async function getAlbums(sort: 1 | 2 = 1, fileid?: number) {
  */
 export async function* addToAlbum(user: string, name: string, photos: IPhoto[]) {
   // Get files data
-  let fileInfos = await base.getFiles(photos);
+  const fileInfos = await base.getFiles(photos, { ignoreRoute: true });
   const albumPath = getAlbumPath(user, name);
 
   // Add each file
@@ -92,7 +92,7 @@ export async function* addToAlbum(user: string, name: string, photos: IPhoto[]) 
  */
 export async function* removeFromAlbum(user: string, name: string, photos: IPhoto[]) {
   // Get files data
-  let fileInfos = await base.getFiles(photos);
+  const fileInfos = await base.getFiles(photos, { ignoreRoute: true });
   const albumPath = getAlbumPath(user, name);
 
   // Remove each file

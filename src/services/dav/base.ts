@@ -38,17 +38,29 @@ export const IMAGE_MIME_TYPES = [
 
 const GET_FILE_CHUNK_SIZE = 50;
 
+type GetFilesOpts = {
+  /** Attempt to use some cached value to get filename (default true) */
+  cache?: boolean;
+  /** Get original route-independent filename for current user only (default false) */
+  ignoreRoute?: boolean;
+};
+
 /**
  * Get file infos for list of files given Ids
  * @param photos list of photos
+ * @param opts options
  * @details This tries to use the cached filename in the photo object (imageInfo.filename)
  * If none was found, then it will fetch the file info from the server.
  */
-export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
-  // Check if albums
-  const route = vueroute();
-  if (route.name === 'albums') {
-    return getAlbumFileInfos(photos, <string>route.params.user, <string>route.params.name);
+export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<IFileInfo[]> {
+  // Some routes may have special handling of filenames
+  if (!opts?.ignoreRoute) {
+    const route = vueroute();
+
+    // Check if albums
+    if (route.name === 'albums') {
+      return getAlbumFileInfos(photos, <string>route.params.user, <string>route.params.name);
+    }
   }
 
   // Remove any local photos
@@ -59,7 +71,7 @@ export async function getFiles(photos: IPhoto[]): Promise<IFileInfo[]> {
   const rest: IPhoto[] = [];
 
   // Partition photos with and without cache
-  if (utils.uid) {
+  if (utils.uid && opts?.cache !== false) {
     for (const photo of photos) {
       const filename = photo.imageInfo?.filename;
       if (filename) {

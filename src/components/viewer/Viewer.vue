@@ -143,7 +143,7 @@
           </NcActionButton>
           <NcActionButton
             :aria-label="t('memories', 'Add to album')"
-            v-if="config.albums_enabled && !isLocal && !routeIsPublic && canShare"
+            v-if="config.albums_enabled && !isLocal && !routeIsPublic && canShare && currentPhoto?.imageInfo?.filename"
             @click="updateAlbums"
             :close-after-click="true"
           >
