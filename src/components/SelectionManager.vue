@@ -49,7 +49,6 @@ import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
 import { translate as t, translatePlural as n } from '@nextcloud/l10n';
-import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 
 import * as dav from '../services/dav';
 import * as utils from '../services/utils';
@@ -277,14 +276,14 @@ export default defineComponent({
     }
 
     // Subscribe to global events
-    subscribe('memories:albums:update', this.clearSelection);
+    utils.bus.on('memories:albums:update', this.clearSelection);
   },
 
   beforeDestroy() {
     this.setHasTopBar(false);
 
     // Unsubscribe from global events
-    unsubscribe('memories:albums:update', this.clearSelection);
+    utils.bus.off('memories:albums:update', this.clearSelection);
   },
 
   watch: {
@@ -295,11 +294,11 @@ export default defineComponent({
 
   methods: {
     refresh() {
-      this.$emit('refresh');
+      utils.bus.emit('memories:timeline:soft-refresh', null);
     },
 
     deletePhotos(photos: IPhoto[]) {
-      this.$emit('delete', photos);
+      utils.bus.emit('memories:timeline:deleted', photos);
     },
 
     deleteSelectedPhotosById(delIds: number[], selection: Selection) {

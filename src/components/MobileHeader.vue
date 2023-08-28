@@ -16,9 +16,10 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 import { generateUrl } from '@nextcloud/router';
 import nextcloudsvg from '../assets/nextcloud.svg';
+
+import * as utils from '../services/utils';
 
 export default defineComponent({
   name: 'MobileHeader',
@@ -35,11 +36,11 @@ export default defineComponent({
   },
 
   mounted() {
-    subscribe('memories.recycler.scroll', this.onScroll);
+    utils.bus.on('memories.recycler.scroll', this.onScroll);
   },
 
   beforeDestroy() {
-    unsubscribe('memories.recycler.scroll', this.onScroll);
+    utils.bus.off('memories.recycler.scroll', this.onScroll);
   },
 
   methods: {

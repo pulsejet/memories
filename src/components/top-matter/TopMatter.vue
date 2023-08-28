@@ -13,12 +13,12 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { subscribe, unsubscribe } from '@nextcloud/event-bus';
-
 import FolderTopMatter from './FolderTopMatter.vue';
 import ClusterTopMatter from './ClusterTopMatter.vue';
 import FaceTopMatter from './FaceTopMatter.vue';
 import AlbumTopMatter from './AlbumTopMatter.vue';
+
+import * as utils from '../../services/utils';
 
 export default defineComponent({
   name: 'TopMatter',
@@ -34,11 +34,11 @@ export default defineComponent({
   }),
 
   mounted() {
-    subscribe('memories.recycler.scroll', this.onRecyclerScroll);
+    utils.bus.on('memories.recycler.scroll', this.onRecyclerScroll);
   },
 
   beforeUnmount() {
-    unsubscribe('memories.recycler.scroll', this.onRecyclerScroll);
+    utils.bus.off('memories.recycler.scroll', this.onRecyclerScroll);
   },
 
   computed: {

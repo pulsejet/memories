@@ -31,8 +31,9 @@
 import { defineComponent } from 'vue';
 import Timeline from './Timeline.vue';
 const MapSplitMatter = () => import('./top-matter/MapSplitMatter.vue');
-import { emit } from '@nextcloud/event-bus';
 import Hammer from 'hammerjs';
+
+import * as utils from '../services/utils';
 
 export default defineComponent({
   name: 'SplitTimeline',
@@ -133,7 +134,7 @@ export default defineComponent({
       this.pointerDown = false;
       document.removeEventListener('pointermove', this.documentPointerMove);
       document.removeEventListener('pointerup', this.pointerUp);
-      emit('memories:window:resize', {});
+      utils.bus.emit('memories:window:resize', null);
     },
 
     setFlexBasis(pos: { clientX: number; clientY: number }) {
@@ -154,7 +155,7 @@ export default defineComponent({
       // so that we can prepare in advance for showing more photos
       // on the timeline
       await this.$nextTick();
-      emit('memories:window:resize', {});
+      utils.bus.emit('memories:window:resize', null);
     },
 
     async mobileSwipeDown() {
@@ -165,7 +166,7 @@ export default defineComponent({
       // ends. Note that this is necesary: the height of the timeline inner
       // div is also animated to the smaller size.
       await new Promise((resolve) => setTimeout(resolve, 300));
-      emit('memories:window:resize', {});
+      utils.bus.emit('memories:window:resize', null);
     },
   },
 });

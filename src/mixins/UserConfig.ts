@@ -1,11 +1,15 @@
-import axios from '@nextcloud/axios';
-import { emit, subscribe, unsubscribe } from '@nextcloud/event-bus';
-import { API } from '../services/API';
 import { defineComponent } from 'vue';
+
+import axios from '@nextcloud/axios';
+
+import { API } from '../services/API';
+import * as utils from '../services/utils';
+
 import { IConfig } from '../types';
 import staticConfig from '../services/static-config';
 
 const eventName = 'memories:user-config-changed';
+
 const localSettings: (keyof IConfig)[] = [
   'square_thumbs',
   'full_res_on_zoom',
@@ -19,16 +23,15 @@ export default defineComponent({
 
   data: () => ({
     config: { ...staticConfig.getDefault() },
-    configEventName: eventName,
   }),
 
   created() {
-    subscribe(eventName, this.updateLocalSetting);
+    utils.bus.on(eventName, this.updateLocalSetting);
     this.refreshFromConfig();
   },
 
   beforeDestroy() {
-    unsubscribe(eventName, this.updateLocalSetting);
+    utils.bus.off(eventName, this.updateLocalSetting);
   },
 
   methods: {
@@ -38,7 +41,7 @@ export default defineComponent({
       if (changed.length === 0) return;
 
       changed.forEach((key) => (this.config[key] = config[key]));
-      emit(eventName, { setting: null, value: null });
+      utils.bus.emit(eventName, null);
     },
 
     updateLocalSetting({ setting, value }) {
@@ -58,7 +61,7 @@ export default defineComponent({
 
       staticConfig.setLs(setting, value);
 
-      emit(eventName, { setting, value });
+      utils.bus.emit(eventName, { setting, value });
     },
   },
 });

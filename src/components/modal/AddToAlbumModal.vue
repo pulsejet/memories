@@ -18,9 +18,9 @@
 import { defineComponent } from 'vue';
 
 import * as dav from '../../services/dav';
+import * as utils from '../../services/utils';
 
 import { showInfo } from '@nextcloud/dialogs';
-import { emit } from '@nextcloud/event-bus';
 
 import { IAlbum, IPhoto } from '../../types';
 
@@ -110,7 +110,7 @@ export default defineComponent({
       // emit only the successfully processed photos here
       // so that only these are deselected by the manager
       const processedPhotos = this.photos.filter((p) => processedIds.has(p.fileid));
-      emit('memories:albums:update', processedPhotos);
+      utils.bus.emit('memories:albums:update', processedPhotos);
 
       // close the modal only if all ops are successful
       if (opsSuccess === this.opsTotal) {

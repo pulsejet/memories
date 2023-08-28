@@ -71,7 +71,6 @@ const NcAppNavigationItem = () => import('@nextcloud/vue/dist/Components/NcAppNa
 
 import { generateUrl } from '@nextcloud/router';
 import { translate as t } from '@nextcloud/l10n';
-import { emit, subscribe } from '@nextcloud/event-bus';
 
 import * as utils from './services/utils';
 import * as nativex from './native';
@@ -227,14 +226,14 @@ export default defineComponent({
     const onResize = () => {
       globalThis.windowInnerWidth = window.innerWidth;
       globalThis.windowInnerHeight = window.innerHeight;
-      emit('memories:window:resize', {});
+      utils.bus.emit('memories:window:resize', null);
     };
     window.addEventListener('resize', () => {
       utils.setRenewingTimeout(this, 'resizeTimer', onResize, 100);
     });
 
     // Register navigation items on config change
-    subscribe(this.configEventName, this.refreshNav);
+    utils.bus.on('memories:user-config-changed', this.refreshNav);
 
     // Register global functions
     globalThis.showSettings = () => this.showSettings();
@@ -287,7 +286,7 @@ export default defineComponent({
     // Close navigation by default if init is disabled
     // This is the case for public folder/album shares
     if (this.$route.query.noinit) {
-      emit('toggle-navigation', { open: false });
+      utils.bus.emit('toggle-navigation', { open: false });
     }
   },
 
@@ -400,7 +399,7 @@ export default defineComponent({
 
     linkClick() {
       if (globalThis.windowInnerWidth <= 1024) {
-        emit('toggle-navigation', { open: false });
+        utils.bus.emit('toggle-navigation', { open: false });
       }
     },
 

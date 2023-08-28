@@ -17,13 +17,14 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { subscribe, unsubscribe, emit } from '@nextcloud/event-bus';
 
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
 import Metadata from './Metadata.vue';
 import { IImageInfo, IPhoto } from '../types';
+
+import * as utils from '../services/utils';
 
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 
@@ -73,8 +74,8 @@ export default defineComponent({
   },
 
   mounted() {
-    subscribe('files:sidebar:opened', this.handleNativeOpen);
-    subscribe('files:sidebar:closed', this.handleNativeClose);
+    utils.bus.on('files:sidebar:opened', this.handleNativeOpen);
+    utils.bus.on('files:sidebar:closed', this.handleNativeClose);
 
     globalThis.mSidebar = {
       open: this.open.bind(this),
@@ -85,8 +86,8 @@ export default defineComponent({
   },
 
   beforeDestroy() {
-    unsubscribe('files:sidebar:opened', this.handleNativeOpen);
-    unsubscribe('files:sidebar:closed', this.handleNativeClose);
+    utils.bus.off('files:sidebar:opened', this.handleNativeOpen);
+    utils.bus.off('files:sidebar:closed', this.handleNativeClose);
   },
 
   methods: {
@@ -132,7 +133,7 @@ export default defineComponent({
     },
 
     handleClose() {
-      emit('memories:sidebar:closed', {});
+      utils.bus.emit('memories:sidebar:closed', null);
     },
 
     handleOpen() {
@@ -142,7 +143,7 @@ export default defineComponent({
         if (e.key.length === 1) e.stopPropagation();
       });
 
-      emit('memories:sidebar:opened', {});
+      utils.bus.emit('memories:sidebar:opened', null);
     },
 
     handleNativeOpen() {

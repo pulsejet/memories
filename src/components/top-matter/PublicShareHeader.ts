@@ -1,5 +1,5 @@
-import { subscribe } from '@nextcloud/event-bus';
 import { loadState } from '@nextcloud/initial-state';
+import * as utils from '../../services/utils';
 
 // Shown in dynamic top matter (Timeline::viewName)
 export const title = loadState('memories', 'share_title', '');
@@ -10,7 +10,7 @@ if (title) {
   let isHidden = false; // cache state to avoid unnecessary DOM updates
 
   // Hide header when recycler is scrolled down
-  subscribe('memories.recycler.scroll', ({ dynTopMatterVisible }: { dynTopMatterVisible: boolean }) => {
+  utils.bus.on('memories.recycler.scroll', ({ dynTopMatterVisible }: { dynTopMatterVisible: boolean }) => {
     if (dynTopMatterVisible === isHidden) return;
     header.classList.toggle('hidden', (isHidden = dynTopMatterVisible));
   });

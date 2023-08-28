@@ -81,8 +81,6 @@
       :rows="list"
       :isreverse="isMonthView"
       :recycler="$refs.recycler?.$el"
-      @refresh="softRefresh"
-      @delete="deleteFromViewWithAnimation"
       @updateLoading="updateLoading"
     />
   </div>
@@ -94,7 +92,6 @@ import type { Route } from 'vue-router';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
-import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 
 import { getLayout } from '../services/layout';
 import { IDay, IHeadRow, IPhoto, IRow, IRowType } from '../types';
@@ -189,21 +186,23 @@ export default defineComponent({
   },
 
   created() {
-    subscribe(this.configEventName, this.softRefresh);
-    subscribe('files:file:created', this.softRefresh);
-    subscribe('memories:window:resize', this.handleResizeWithDelay);
-    subscribe('memories:viewer:deleted', this.deleteFromViewWithAnimation);
-    subscribe('memories:viewer:fetch-day', this.fetchDay);
-    subscribe('memories:timeline:hard-refresh', this.refresh);
+    utils.bus.on('memories:user-config-changed', this.softRefresh);
+    utils.bus.on('files:file:created', this.softRefresh);
+    utils.bus.on('memories:window:resize', this.handleResizeWithDelay);
+    utils.bus.on('memories:viewer:fetch-day', this.fetchDay);
+    utils.bus.on('memories:timeline:deleted', this.deleteFromViewWithAnimation);
+    utils.bus.on('memories:timeline:soft-refresh', this.softRefresh);
+    utils.bus.on('memories:timeline:hard-refresh', this.refresh);
   },
 
   beforeDestroy() {
-    unsubscribe(this.configEventName, this.softRefresh);
-    unsubscribe('files:file:created', this.softRefresh);
-    unsubscribe('memories:window:resize', this.handleResizeWithDelay);
-    unsubscribe('memories:viewer:deleted', this.deleteFromViewWithAnimation);
-    unsubscribe('memories:viewer:fetch-day', this.fetchDay);
-    unsubscribe('memories:timeline:hard-refresh', this.refresh);
+    utils.bus.off('memories:user-config-changed', this.softRefresh);
+    utils.bus.off('files:file:created', this.softRefresh);
+    utils.bus.off('memories:window:resize', this.handleResizeWithDelay);
+    utils.bus.off('memories:viewer:fetch-day', this.fetchDay);
+    utils.bus.off('memories:timeline:deleted', this.deleteFromViewWithAnimation);
+    utils.bus.off('memories:timeline:soft-refresh', this.softRefresh);
+    utils.bus.off('memories:timeline:hard-refresh', this.refresh);
     this.resetState();
     this.state = 0;
   },

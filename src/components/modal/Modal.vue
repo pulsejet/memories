@@ -24,8 +24,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import * as utils from '../../services/utils';
+
 const NcModal = () => import('@nextcloud/vue/dist/Components/NcModal');
-import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 
 export default defineComponent({
   name: 'Modal',
@@ -53,8 +54,8 @@ export default defineComponent({
 
   beforeMount() {
     if (this.sidebar) {
-      subscribe('memories:sidebar:opened', this.handleAppSidebarOpen);
-      subscribe('memories:sidebar:closed', this.handleAppSidebarClose);
+      utils.bus.on('memories:sidebar:opened', this.handleAppSidebarOpen);
+      utils.bus.on('memories:sidebar:closed', this.handleAppSidebarClose);
     }
     this._mutationObserver = new MutationObserver(this.handleBodyMutation);
     this._mutationObserver.observe(document.body, { childList: true });
@@ -62,8 +63,8 @@ export default defineComponent({
 
   beforeDestroy() {
     if (this.sidebar) {
-      unsubscribe('memories:sidebar:opened', this.handleAppSidebarOpen);
-      unsubscribe('memories:sidebar:closed', this.handleAppSidebarClose);
+      utils.bus.off('memories:sidebar:opened', this.handleAppSidebarOpen);
+      utils.bus.off('memories:sidebar:closed', this.handleAppSidebarClose);
       globalThis.mSidebar.close();
     }
     this._mutationObserver.disconnect();

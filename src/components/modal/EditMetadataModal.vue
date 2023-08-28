@@ -63,10 +63,10 @@ import EditExif from './EditExif.vue';
 import EditLocation from './EditLocation.vue';
 
 import { showError } from '@nextcloud/dialogs';
-import { emit } from '@nextcloud/event-bus';
 import axios from '@nextcloud/axios';
 
 import * as dav from '../../services/dav';
+import * as utils from '../../services/utils';
 import { API } from '../../services/API';
 
 export default defineComponent({
@@ -209,7 +209,7 @@ export default defineComponent({
           // Refresh UX
           if (dirty) {
             p.imageInfo = null;
-            emit('files:file:updated', { fileid });
+            utils.bus.emit('files:file:updated', { fileid });
           }
         } catch (e) {
           console.error('Failed to save metadata for', p.fileid, e);
@@ -232,7 +232,7 @@ export default defineComponent({
       this.close();
 
       // Trigger a soft refresh
-      emit('files:file:created', { fileid: 0 });
+      utils.bus.emit('memories:timeline:soft-refresh', null);
     },
 
     filterValid(photos: IPhoto[]) {

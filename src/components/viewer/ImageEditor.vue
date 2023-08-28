@@ -5,7 +5,6 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
-import { emit } from '@nextcloud/event-bus';
 import { showError, showSuccess } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
@@ -273,10 +272,10 @@ export default defineComponent({
         showSuccess(this.t('memories', 'Image saved successfully'));
 
         if (fileid !== this.photo.fileid) {
-          emit('files:file:created', { fileid });
+          utils.bus.emit('files:file:created', { fileid });
         } else {
           utils.updatePhotoFromImageInfo(this.photo, res.data);
-          emit('files:file:updated', { fileid });
+          utils.bus.emit('files:file:updated', { fileid });
         }
         this.onClose(undefined, false);
       } catch (err) {

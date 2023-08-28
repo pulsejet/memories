@@ -19,8 +19,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { subscribe, unsubscribe } from '@nextcloud/event-bus';
-
 import UserConfig from '../mixins/UserConfig';
 import TopMatter from './top-matter/TopMatter.vue';
 import ClusterGrid from './ClusterGrid.vue';
@@ -29,6 +27,7 @@ import EmptyContent from './top-matter/EmptyContent.vue';
 import DynamicTopMatter from './top-matter/DynamicTopMatter.vue';
 
 import * as dav from '../services/dav';
+import * as utils from '../services/utils';
 
 import type { ICluster } from '../types';
 
@@ -69,11 +68,11 @@ export default defineComponent({
   },
 
   created() {
-    subscribe(this.configEventName, this.routeChange);
+    utils.bus.on('memories:user-config-changed', this.routeChange);
   },
 
   beforeDestroy() {
-    unsubscribe(this.configEventName, this.routeChange);
+    utils.bus.off('memories:user-config-changed', this.routeChange);
   },
 
   watch: {

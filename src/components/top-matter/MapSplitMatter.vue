@@ -41,7 +41,6 @@ import { latLngBounds, Icon } from 'leaflet';
 import { IPhoto } from '../../types';
 
 import axios from '@nextcloud/axios';
-import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 
 import { API } from '../../services/API';
 import * as utils from '../../services/utils';
@@ -103,11 +102,11 @@ export default defineComponent({
   },
 
   created() {
-    subscribe('memories:window:resize', this.handleContainerResize);
+    utils.bus.on('memories:window:resize', this.handleContainerResize);
   },
 
   beforeDestroy() {
-    unsubscribe('memories:window:resize', this.handleContainerResize);
+    utils.bus.off('memories:window:resize', this.handleContainerResize);
   },
 
   computed: {

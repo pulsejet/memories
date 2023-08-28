@@ -179,7 +179,6 @@ import type { PsContent } from './types';
 import UserConfig from '../../mixins/UserConfig';
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
-import { subscribe, unsubscribe, emit } from '@nextcloud/event-bus';
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
@@ -279,11 +278,11 @@ export default defineComponent({
   }),
 
   mounted() {
-    subscribe('memories:sidebar:opened', this.handleAppSidebarOpen);
-    subscribe('memories:sidebar:closed', this.handleAppSidebarClose);
-    subscribe('files:file:created', this.handleFileUpdated);
-    subscribe('files:file:updated', this.handleFileUpdated);
-    subscribe('memories:window:resize', this.handleWindowResize);
+    utils.bus.on('memories:sidebar:opened', this.handleAppSidebarOpen);
+    utils.bus.on('memories:sidebar:closed', this.handleAppSidebarClose);
+    utils.bus.on('files:file:created', this.handleFileUpdated);
+    utils.bus.on('files:file:updated', this.handleFileUpdated);
+    utils.bus.on('memories:window:resize', this.handleWindowResize);
 
     // The viewer is a singleton
     globalThis.mViewer = {
@@ -295,11 +294,11 @@ export default defineComponent({
   },
 
   beforeDestroy() {
-    unsubscribe('memories:sidebar:opened', this.handleAppSidebarOpen);
-    unsubscribe('memories:sidebar:closed', this.handleAppSidebarClose);
-    unsubscribe('files:file:created', this.handleFileUpdated);
-    unsubscribe('files:file:updated', this.handleFileUpdated);
-    unsubscribe('memories:window:resize', this.handleWindowResize);
+    utils.bus.off('memories:sidebar:opened', this.handleAppSidebarOpen);
+    utils.bus.off('memories:sidebar:closed', this.handleAppSidebarClose);
+    utils.bus.off('files:file:created', this.handleFileUpdated);
+    utils.bus.off('files:file:updated', this.handleFileUpdated);
+    utils.bus.off('memories:window:resize', this.handleWindowResize);
   },
 
   computed: {
@@ -383,12 +382,8 @@ export default defineComponent({
   },
 
   methods: {
-    deleted(photos: IPhoto[]) {
-      emit('memories:viewer:deleted', photos);
-    },
-
     fetchDay(dayId: number) {
-      emit('memories:viewer:fetch-day', dayId as any);
+      utils.bus.emit('memories:viewer:fetch-day', dayId);
     },
 
     updateLoading(delta: number) {
@@ -964,7 +959,7 @@ export default defineComponent({
       }
 
       // Remove from main view
-      this.deleted([photo]);
+      utils.bus.emit('memories:timeline:deleted', [photo]);
 
       // If this is the only photo, close viewer
       if (this.list.length === 1) {

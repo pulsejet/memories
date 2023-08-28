@@ -50,7 +50,6 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { IRow, IRowType, ITick } from '../types';
-import { emit } from '@nextcloud/event-bus';
 
 import ScrollUpIcon from 'vue-material-design-icons/MenuUp.vue';
 import ScrollDownIcon from 'vue-material-design-icons/MenuDown.vue';
@@ -209,7 +208,7 @@ export default defineComponent({
       const scroll = this.recycler?.$el?.scrollTop || 0;
 
       // Emit scroll event
-      emit('memories.recycler.scroll', {
+      utils.bus.emit('memories.recycler.scroll', {
         current: scroll,
         previous: this.lastKnownRecyclerScroll,
         dynTopMatterVisible: scroll < this.dynTopMatterHeight,

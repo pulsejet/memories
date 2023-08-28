@@ -73,7 +73,6 @@ import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
 import axios from '@nextcloud/axios';
-import { subscribe, unsubscribe } from '@nextcloud/event-bus';
 import { getCanonicalLocale } from '@nextcloud/l10n';
 import { DateTime } from 'luxon';
 
@@ -126,13 +125,13 @@ export default defineComponent({
   }),
 
   mounted() {
-    subscribe('files:file:updated', this.handleFileUpdated);
-    subscribe('memories:albums:update', this.refresh);
+    utils.bus.on('files:file:updated', this.handleFileUpdated);
+    utils.bus.on('memories:albums:update', this.refresh);
   },
 
   beforeDestroy() {
-    unsubscribe('files:file:updated', this.handleFileUpdated);
-    unsubscribe('memories:albums:update', this.refresh);
+    utils.bus.off('files:file:updated', this.handleFileUpdated);
+    utils.bus.off('memories:albums:update', this.refresh);
   },
 
   computed: {
