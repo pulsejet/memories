@@ -61,7 +61,7 @@ export default defineComponent({
   },
 
   methods: {
-    onRecyclerScroll({ dynTopMatterVisible }: { dynTopMatterVisible: boolean }) {
+    onRecyclerScroll({ dynTopMatterVisible }: utils.BusEvent['memories.recycler.scroll']) {
       this.dynamicVisible = dynTopMatterVisible;
     },
   },

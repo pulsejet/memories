@@ -231,13 +231,9 @@ async function extendWithLivePhotos(photos: IPhoto[]) {
       photos
         .filter((p) => p.liveid && !p.liveid.startsWith('self__'))
         .map(async (p) => {
-          const url = API.Q(utils.getLivePhotoVideoUrl(p, false), { format: 'json' });
           try {
-            const response = await axios.get(url);
-            const data = response.data;
-            return {
-              fileid: data.fileid,
-            } as IPhoto;
+            const url = API.Q(utils.getLivePhotoVideoUrl(p, false), { format: 'json' });
+            return (await axios.get<IPhoto>(url)).data;
           } catch (error) {
             console.error(error);
             return null;

@@ -106,30 +106,44 @@ export interface IImageInfo {
   address?: string;
   tags?: { [id: string]: string };
 
-  exif?: {
-    Rotation?: number;
-    Orientation?: number;
-    ImageWidth?: number;
-    ImageHeight?: number;
-
-    Title?: string;
-    Description?: string;
-    Make?: string;
-    Model?: string;
-
-    DateTimeEpoch?: number;
-    OffsetTimeOriginal?: string;
-    OffsetTime?: string;
-    LocationTZID?: string;
-
-    [other: string]: unknown;
-  };
+  exif?: IExif;
 
   clusters?: {
     albums?: IAlbum[];
     recognize?: IFace[];
     facerecognition?: IFace[];
   };
+}
+
+export interface IExif {
+  Rotation?: number;
+  Orientation?: number;
+  ImageWidth?: number;
+  ImageHeight?: number;
+  Megapixels?: number;
+
+  Title?: string;
+  Description?: string;
+  Make?: string;
+  Model?: string;
+
+  DateTimeEpoch?: number;
+  OffsetTimeOriginal?: string;
+  OffsetTime?: string;
+  LocationTZID?: string;
+
+  ExposureTime?: number;
+  ShutterSpeed?: number;
+  ShutterSpeedValue?: number;
+  Aperture?: number;
+  ApertureValue?: number;
+  ISO?: number;
+  FNumber?: number;
+  FocalLength?: number;
+
+  GPSAltitude?: number;
+  GPSLatitude?: number;
+  GPSLongitude?: number;
 }
 
 export interface IFolder extends IPhoto {

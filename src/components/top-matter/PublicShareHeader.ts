@@ -10,7 +10,7 @@ if (title) {
   let isHidden = false; // cache state to avoid unnecessary DOM updates
 
   // Hide header when recycler is scrolled down
-  utils.bus.on('memories.recycler.scroll', ({ dynTopMatterVisible }: { dynTopMatterVisible: boolean }) => {
+  utils.bus.on('memories.recycler.scroll', ({ dynTopMatterVisible }) => {
     if (dynTopMatterVisible === isHidden) return;
     header.classList.toggle('hidden', (isHidden = dynTopMatterVisible));
   });

@@ -149,7 +149,7 @@ export default defineComponent({
 
   computed: {
     isAlbumList(): boolean {
-      return !Boolean(this.$route.params.name);
+      return !this.$route.params.name;
     },
 
     canEditAlbum(): boolean {
@@ -158,7 +158,7 @@ export default defineComponent({
 
     name(): string {
       // Album name is displayed in the dynamic top matter (timeline)
-      return this.$route.params.name ? '' : this.t('memories', 'Albums');
+      return this.isAlbumList ? this.t('memories', 'Albums') : String();
     },
 
     isMobile(): boolean {

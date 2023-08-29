@@ -476,7 +476,7 @@ export default defineComponent({
     },
 
     /** Handle mouse leave */
-    mouseleave() {
+    mouseleave(event: MouseEvent) {
       this.interactend();
       this.moveHoverCursor(this.cursorY);
     },
@@ -539,7 +539,7 @@ export default defineComponent({
     },
 
     /** Handle touch */
-    touchmove(event: any) {
+    touchmove(event: TouchEvent) {
       if (!this.scrollerRect) return;
       let y = event.targetTouches[0].pageY - this.scrollerRect.top;
       y = Math.max(this.topPadding, y + MOBILE_CURSOR_HH); // middle of touch finger

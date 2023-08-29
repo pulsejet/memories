@@ -1,7 +1,7 @@
 import { emit, subscribe, unsubscribe } from '@nextcloud/event-bus';
 import { IConfig, IPhoto } from '../../types';
 
-type BusEvent = {
+export type BusEvent = {
   /** Open/close the navigation drawer */
   'toggle-navigation': { open: boolean };
   /** File was created */
@@ -26,7 +26,10 @@ type BusEvent = {
     value: IConfig[keyof IConfig];
   } | null;
 
-  /** Delete these photos from the timeline */
+  /**
+   * Remove these photos from the timeline.
+   * Each photo object is required to have the `d` (day) property.
+   */
   'memories:timeline:deleted': IPhoto[];
   /** Viewer has requested fetching day */
   'memories:timeline:fetch-day': number;
@@ -46,17 +49,32 @@ type BusEvent = {
 };
 
 /**
- * Emit an event on the Nextcloud event bus.
- * @param name Name of event
- * @param data arguments
+ * Wrapper around Nextcloud's event bus.
  */
 export const bus = {
+  /**
+   * Emit an event on the Nextcloud event bus.
+   * @param name Name of event
+   * @param data arguments
+   */
   emit<T extends keyof BusEvent>(name: T, data: BusEvent[T]): void {
     emit(name, data as any);
   },
+
+  /**
+   * Subscribe to an event on the Nextcloud event bus.
+   * @param name Name of event
+   * @param callback Callback to be called when the event is emitted
+   */
   on<T extends keyof BusEvent>(name: T, callback: (data: BusEvent[T]) => void): void {
     subscribe(name, callback);
   },
+
+  /**
+   * Unsubscribe from an event on the Nextcloud event bus.
+   * @param name Name of event
+   * @param callback Same callback that was passed to `on`
+   */
   off<T extends keyof BusEvent>(name: T, callback: (data: BusEvent[T]) => void): void {
     unsubscribe(name, callback);
   },

@@ -21,7 +21,7 @@ const pendingUrls = new Map<string, BlobCallback[]>();
 
 // Cache for preview images
 const cacheName = 'memories-images';
-let imageCache: Cache;
+let imageCache: Cache | undefined;
 (async function openCache() {
   try {
     imageCache = await self.caches?.open(cacheName);

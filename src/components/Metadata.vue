@@ -91,7 +91,7 @@ import * as utils from '../services/utils';
 import * as dav from '../services/dav';
 import { API } from '../services/API';
 
-import type { IAlbum, IFace, IImageInfo, IPhoto } from '../types';
+import type { IAlbum, IFace, IImageInfo, IPhoto, IExif } from '../types';
 
 interface TopField {
   id?: string;
@@ -117,7 +117,7 @@ export default defineComponent({
   data: () => ({
     fileid: null as number | null,
     filename: '',
-    exif: {} as NonNullable<IImageInfo['exif']>,
+    exif: {} as IExif,
     baseInfo: {} as IImageInfo,
 
     loading: 0,
@@ -198,12 +198,12 @@ export default defineComponent({
 
     /** Title EXIF value */
     title(): string | null {
-      return this.exif['Title'] || null;
+      return this.exif.Title || null;
     },
 
     /** Description EXIF value */
     description(): string | null {
-      return this.exif['Description'] || null;
+      return this.exif.Description || null;
     },
 
     /** Date taken info */
@@ -252,7 +252,7 @@ export default defineComponent({
     dateOriginalTime(): string[] | null {
       if (!this.dateOriginal) return null;
 
-      const fields = ['OffsetTimeOriginal', 'OffsetTime', 'LocationTZID'];
+      const fields: (keyof IExif)[] = ['OffsetTimeOriginal', 'OffsetTime', 'LocationTZID'];
       const hasTz = fields.some((key) => this.exif[key]);
 
       const format = 't' + (hasTz ? ' ZZ' : '');
@@ -262,18 +262,18 @@ export default defineComponent({
 
     /** Camera make and model info */
     camera(): string | null {
-      const make = this.exif['Make'];
-      const model = this.exif['Model'];
+      const make = this.exif.Make;
+      const model = this.exif.Model;
       if (!make || !model) return null;
       if (model.startsWith(make)) return model;
       return `${make} ${model}`;
     },
 
     cameraSub(): string[] {
-      const f = this.exif['FNumber'] || this.exif['Aperture'];
+      const f = this.exif.FNumber || this.exif.Aperture;
       const s = this.shutterSpeed;
-      const len = this.exif['FocalLength'];
-      const iso = this.exif['ISO'];
+      const len = this.exif.FocalLength;
+      const iso = this.exif.ISO;
 
       const parts: string[] = [];
       if (f) parts.push(`f/${f}`);
@@ -285,7 +285,7 @@ export default defineComponent({
 
     /** Convert shutter speed decimal to 1/x format */
     shutterSpeed(): string | null {
-      const speed = Number(this.exif['ShutterSpeedValue'] || this.exif['ShutterSpeed'] || this.exif['ExposureTime']);
+      const speed = Number(this.exif.ShutterSpeedValue || this.exif.ShutterSpeed || this.exif.ExposureTime);
       if (!speed) return null;
 
       if (speed < 1) {
@@ -311,7 +311,7 @@ export default defineComponent({
 
     imageInfoSub(): string[] {
       let parts: string[] = [];
-      let mp = Number(this.exif['Megapixels']);
+      let mp = Number(this.exif.Megapixels);
 
       if (this.baseInfo.w && this.baseInfo.h) {
         parts.push(`${this.baseInfo.w}x${this.baseInfo.h}`);
@@ -341,11 +341,11 @@ export default defineComponent({
     },
 
     lat(): number {
-      return Number(this.exif['GPSLatitude']);
+      return Number(this.exif.GPSLatitude);
     },
 
     lon(): number {
-      return Number(this.exif['GPSLongitude']);
+      return Number(this.exif.GPSLongitude);
     },
 
     tagNames(): string[] {
@@ -452,7 +452,7 @@ export default defineComponent({
       }
     },
 
-    handleFileUpdated({ fileid }: { fileid: number }) {
+    handleFileUpdated({ fileid }: utils.BusEvent['files:file:updated']) {
       if (fileid && this.fileid === fileid) {
         this.refresh();
       }

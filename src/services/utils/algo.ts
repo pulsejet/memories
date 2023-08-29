@@ -66,11 +66,11 @@ export function randomChoice<T>(arr: T[]): T {
  */
 export function randomSubarray<T>(arr: T[], size: number): T[] {
   if (arr.length <= size) return arr;
-  var shuffled = arr.slice(0),
-    i = arr.length,
-    min = i - size,
-    temp,
-    index;
+  let shuffled: T[] = arr.slice(0),
+    i: number = arr.length,
+    min: number = i - size,
+    temp: T,
+    index: number;
   while (i-- > min) {
     index = Math.floor((i + 1) * Math.random());
     temp = shuffled[index];

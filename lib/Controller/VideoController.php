@@ -171,8 +171,12 @@ class VideoController extends GenericApiController
 
                 // Requested only JSON info
                 if ('json' === $format) {
+                    // IPhoto object for the live video
                     return new JSONResponse([
                         'fileid' => $liveFile->getId(),
+                        'etag' => $liveFile->getEtag(),
+                        'basename' => $liveFile->getName(),
+                        'mimetype' => $liveFile->getMimeType(),
                     ]);
                 }
 

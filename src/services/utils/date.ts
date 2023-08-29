@@ -17,7 +17,7 @@ export function dateToDayId(date: Date) {
 }
 
 /** Get month name from number */
-export function getShortDateStr(date: Date) {
+export function getShortDateStr(date: Date): string {
   const dayId = dateToDayId(date);
   if (!shortDateStrMemo.has(dayId)) {
     shortDateStrMemo.set(
@@ -29,7 +29,7 @@ export function getShortDateStr(date: Date) {
       })
     );
   }
-  return shortDateStrMemo.get(dayId);
+  return shortDateStrMemo.get(dayId)!;
 }
 
 /** Get long date string with optional year if same as current */

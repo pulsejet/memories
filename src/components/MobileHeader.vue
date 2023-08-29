@@ -44,7 +44,7 @@ export default defineComponent({
   },
 
   methods: {
-    onScroll({ current, previous }: { current: number; previous: number }) {
+    onScroll({ current, previous }: utils.BusEvent['memories.recycler.scroll']) {
       this.isScrollDown = (this.isScrollDown && previous - current < 40) || current - previous > 40; // momentum scroll
     },
   },

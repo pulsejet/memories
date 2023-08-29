@@ -11,7 +11,7 @@
       @click="click($event, album)"
     >
       <template #icon>
-        <XImg v-if="album.last_added_photo !== -1" class="album__image" :src="toCoverUrl(album.last_added_photo)" />
+        <XImg v-if="album.last_added_photo !== -1" class="album__image" :src="toCoverUrl(album)" />
         <div v-else class="album__image album__image--placeholder">
           <ImageMultipleIcon :size="32" />
         </div>
@@ -81,10 +81,10 @@ export default defineComponent({
       };
     },
 
-    toCoverUrl(fileId: string | number) {
+    toCoverUrl(album: IAlbum) {
       return getPreviewUrl({
         photo: {
-          fileid: Number(fileId),
+          fileid: Number(album.last_added_photo),
         } as IPhoto,
         sqsize: 256,
       });

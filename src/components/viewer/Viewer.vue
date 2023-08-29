@@ -468,9 +468,8 @@ export default defineComponent({
         arrowNextTitle: this.t('memories', 'Next'),
         getViewportSizeFn: () => {
           // Ignore the sidebar if mobile or fullscreen
-          const isMobile = globalThis.windowInnerWidth < 768;
           const isFullscreen = Boolean(document.fullscreenElement);
-          const use = this.sidebarOpen && !isMobile && !isFullscreen;
+          const use = this.sidebarOpen && !utils.isMobile() && !isFullscreen;
 
           // Calculate the sidebar width to use and outer width
           const sidebarWidth = use ? globalThis.mSidebar.getWidth() : 0;
@@ -780,7 +779,7 @@ export default defineComponent({
     },
 
     /** Get base data object */
-    getItemData(photo: IPhoto) {
+    getItemData(photo: IPhoto): PsContent['data'] {
       let previewUrl = utils.getPreviewUrl({ photo, size: 'screen' });
       const isvideo = photo.flag & this.c.FLAG_IS_VIDEO;
 

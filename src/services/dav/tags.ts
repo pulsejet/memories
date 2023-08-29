@@ -67,8 +67,8 @@ function parseIdFromLocation(url: string): number {
     url = url.substring(0, queryPos);
   }
 
-  const parts = url.split('/');
-  let result;
+  const parts: string[] = url.split('/');
+  let result: string | undefined;
   do {
     result = parts[parts.length - 1];
     parts.pop();

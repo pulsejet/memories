@@ -163,7 +163,7 @@ class VideoContentSetup {
     // Create video element
     content.videoElement = document.createElement('video');
     content.videoElement.className = 'video-js';
-    content.videoElement.setAttribute('poster', content.data.msrc);
+    content.videoElement.setAttribute('poster', content.data.msrc!);
     content.videoElement.setAttribute('preload', 'none');
     content.videoElement.setAttribute('controls', '');
     content.videoElement.setAttribute('playsinline', '');

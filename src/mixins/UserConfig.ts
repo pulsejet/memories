@@ -8,7 +8,7 @@ import * as utils from '../services/utils';
 import { IConfig } from '../types';
 import staticConfig from '../services/static-config';
 
-const eventName = 'memories:user-config-changed';
+const eventName: keyof utils.BusEvent = 'memories:user-config-changed';
 
 const localSettings: (keyof IConfig)[] = [
   'square_thumbs',

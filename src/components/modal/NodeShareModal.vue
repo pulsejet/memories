@@ -115,7 +115,7 @@ export default defineComponent({
     },
 
     isMobile(): boolean {
-      return globalThis.windowInnerWidth <= 768;
+      return utils.isMobile();
     },
   },
 
@@ -231,7 +231,7 @@ export default defineComponent({
     },
 
     refreshSidebar() {
-      if (this.isMobile) return;
+      if (utils.isMobile()) return;
       globalThis.mSidebar.close();
       globalThis.mSidebar.open(0, this.filename, true);
     },
