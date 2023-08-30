@@ -421,8 +421,8 @@ class Places
 
             // Create table
             $sql = 'CREATE TABLE memories_planet_geometry (
-                id varchar(255) NOT NULL PRIMARY KEY,
-                poly_id varchar(255) NOT NULL,
+                id varchar(32) NOT NULL PRIMARY KEY,
+                poly_id varchar(32) NOT NULL,
                 type_id int NOT NULL,
                 osm_id int NOT NULL,
                 geometry polygon NOT NULL
