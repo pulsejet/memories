@@ -199,7 +199,7 @@ class PublicController extends AuthPublicShareController
         $foldersPath = $this->config->getUserValue($user->getUID(), Application::APPNAME, 'foldersPath', null) ?: '/';
 
         // Sanitize folders path ensuring leading and trailing slashes
-        $foldersPath = Util::sanitizePath('/' . $foldersPath . '/');
+        $foldersPath = Util::sanitizePath('/'.$foldersPath.'/');
 
         // Check if relPath starts with foldersPath
         if (0 !== strpos($relPath, $foldersPath)) {
