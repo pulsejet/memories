@@ -40,7 +40,7 @@ class FoldersController extends GenericApiController
             $folders = $view->getDirectoryContent($node->getPath(), FileInfo::MIMETYPE_FOLDER, $node);
 
             // Sort by name
-            usort($folders, fn ($a, $b) => strnatcmp($a->getName(), $b->getName()));
+            usort($folders, static fn ($a, $b) => strnatcmp($a->getName(), $b->getName()));
 
             // Process to response type
             $list = array_map(fn ($node) => [

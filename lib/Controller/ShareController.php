@@ -93,7 +93,7 @@ class ShareController extends GenericApiController
      */
     public function deleteShare(string $id): Http\Response
     {
-        return Util::guardEx(function () use ($id) {
+        return Util::guardEx(static function () use ($id) {
             $uid = Util::getUID();
 
             /** @var \OCP\Share\IManager $shareManager */

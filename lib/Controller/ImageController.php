@@ -84,7 +84,7 @@ class ImageController extends GenericApiController
             $files = json_decode($body, true);
 
             // Filter files with valid parameters
-            $files = array_filter($files, function ($file) {
+            $files = array_filter($files, static function ($file) {
                 return isset($file['reqid'], $file['fileid'], $file['x'], $file['y'], $file['a'])
                     && (int) $file['fileid'] > 0
                     && (int) $file['x'] > 0
@@ -92,7 +92,7 @@ class ImageController extends GenericApiController
             });
 
             // Sort files by size, ascending
-            usort($files, function ($a, $b) {
+            usort($files, static function ($a, $b) {
                 $aArea = (int) $a['x'] * (int) $a['y'];
                 $bArea = (int) $b['x'] * (int) $b['y'];
 
@@ -453,9 +453,9 @@ class ImageController extends GenericApiController
         /** @var \OCP\SystemTag\ISystemTag[] */
         $tags = $tagManager->getTagsByIds($tagIds);
 
-        $visible = array_filter($tags, fn ($t) => $t->isUserVisible());
+        $visible = array_filter($tags, static fn ($t) => $t->isUserVisible());
 
         // Get the tag names
-        return array_map(fn ($t) => $t->getName(), $visible);
+        return array_map(static fn ($t) => $t->getName(), $visible);
     }
 }

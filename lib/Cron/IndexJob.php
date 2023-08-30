@@ -52,7 +52,7 @@ class IndexJob extends TimedJob
 
         // Run for a maximum of 5 minutes
         $startTime = microtime(true);
-        $this->service->continueCheck = function () use ($startTime) {
+        $this->service->continueCheck = static function () use ($startTime) {
             return (microtime(true) - $startTime) < MAX_RUN_TIME;
         };
 

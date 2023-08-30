@@ -76,7 +76,7 @@ class DaysController extends GenericApiController
                 $dayIds = null;
             } else {
                 // Split at commas and convert all parts to int
-                $dayIds = array_map(fn ($p) => (int) $p, explode(',', $id));
+                $dayIds = array_map(static fn ($p) => (int) $p, explode(',', $id));
             }
 
             // Check if $dayIds is empty

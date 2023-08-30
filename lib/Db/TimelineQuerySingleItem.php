@@ -92,7 +92,7 @@ trait TimelineQuerySingleItem
             $places = $qb->executeQuery()->fetchAll();
             $lang = Util::getUserLang();
             if (\count($places) > 0) {
-                $places = array_map(fn ($p) => PlacesBackend::choosePlaceLang($p, $lang)['name'], $places);
+                $places = array_map(static fn ($p) => PlacesBackend::choosePlaceLang($p, $lang)['name'], $places);
                 $info['address'] = implode(', ', $places);
             }
         }

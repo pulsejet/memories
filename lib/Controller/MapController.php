@@ -50,7 +50,7 @@ class MapController extends GenericApiController
             $clusters = $this->timelineQuery->getMapClusters($gridLen, $bounds);
 
             // Get previews for each cluster
-            $clusterIds = array_map(fn ($cluster) => (int) $cluster['id'], $clusters);
+            $clusterIds = array_map(static fn ($cluster) => (int) $cluster['id'], $clusters);
             $previews = $this->timelineQuery->getMapClusterPreviews($clusterIds);
 
             // Merge the responses

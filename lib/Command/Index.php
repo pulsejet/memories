@@ -201,7 +201,7 @@ class Index extends Command
                 $this->output->writeln("<error>User {$uid} not found</error>");
             }
         } else {
-            $this->userManager->callForSeenUsers(fn (IUser $user) => $closure($user));
+            $this->userManager->callForSeenUsers(static fn (IUser $user) => $closure($user));
         }
     }
 }

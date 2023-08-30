@@ -125,7 +125,7 @@ class OtherController extends GenericApiController
      */
     public function describeApi(): JSONResponse
     {
-        return Util::guardEx(function () {
+        return Util::guardEx(static function () {
             $appManager = \OC::$server->get(\OCP\App\IAppManager::class);
             $urlGenerator = \OC::$server->get(\OCP\IURLGenerator::class);
 

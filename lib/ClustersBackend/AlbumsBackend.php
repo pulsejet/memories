@@ -99,7 +99,7 @@ class AlbumsBackend extends Backend
 
         // Remove elements with duplicate album_id
         $seenIds = [];
-        $list = array_filter($list, function ($item) use (&$seenIds) {
+        $list = array_filter($list, static function ($item) use (&$seenIds) {
             if (\in_array($item['album_id'], $seenIds, true)) {
                 return false;
             }
@@ -110,7 +110,7 @@ class AlbumsBackend extends Backend
 
         // Add display names for users
         $userManager = \OC::$server->get(\OCP\IUserManager::class);
-        array_walk($list, function (&$item) use ($userManager) {
+        array_walk($list, static function (&$item) use ($userManager) {
             $user = $userManager->get($item['user']);
             $item['user_display'] = $user ? $user->getDisplayName() : null;
         });

@@ -71,7 +71,7 @@ trait PeopleBackendUtils
         }
 
         // Sort previews by score descending
-        usort($list, fn ($a, $b) => $b['score'] <=> $a['score']);
+        usort($list, static fn ($a, $b) => $b['score'] <=> $a['score']);
     }
 
     /**

@@ -243,7 +243,7 @@ class MigrateGoogleTakeout extends Command
 
         // Keep keys that are not in EXIF unless --override is specified
         if (!((bool) $this->input->getOption('override'))) {
-            $txf = array_filter($txf, function ($value, $key) use ($exif) {
+            $txf = array_filter($txf, static function ($value, $key) use ($exif) {
                 return !isset($exif[$key]);
             }, ARRAY_FILTER_USE_BOTH);
 
@@ -297,7 +297,7 @@ class MigrateGoogleTakeout extends Command
     protected function takeoutToExiftoolJson(array $json)
     {
         // Helper to get a value from nested JSON
-        $get = function (string $source) use ($json) {
+        $get = static function (string $source) use ($json) {
             $keys = array_reverse(explode('.', $source));
             while (\count($keys) > 0) {
                 $key = array_pop($keys);
@@ -343,7 +343,7 @@ class MigrateGoogleTakeout extends Command
         $txf['GPSAltitude'] = $get('geoData.altitude');
 
         // Remove all null values
-        return array_filter($txf, function ($value) {
+        return array_filter($txf, static function ($value) {
             return null !== $value;
         });
     }

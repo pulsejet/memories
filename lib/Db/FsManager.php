@@ -170,7 +170,7 @@ class FsManager
         ]);
         $search = $root->search(new SearchQuery($comp, 0, 0, [], Util::getUser()));
 
-        $paths = array_unique(array_map(fn (Node $node) => \dirname($node->getPath()), $search));
+        $paths = array_unique(array_map(static fn (Node $node) => \dirname($node->getPath()), $search));
         $this->nomediaCache->set($key, $paths, 60 * 60); // 1 hour
 
         return $paths;

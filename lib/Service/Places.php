@@ -315,7 +315,7 @@ class Places
                     }
 
                     if (GIS_TYPE_MYSQL === $gis) {
-                        $points = implode(',', array_map(function ($point) {
+                        $points = implode(',', array_map(static function ($point) {
                             $x = $point[0];
                             $y = $point[1];
 
@@ -324,7 +324,7 @@ class Places
 
                         $geometry = "POLYGON(({$points}))";
                     } elseif (GIS_TYPE_POSTGRES === $gis) {
-                        $geometry = implode(',', array_map(function ($point) {
+                        $geometry = implode(',', array_map(static function ($point) {
                             $x = $point[0];
                             $y = $point[1];
 

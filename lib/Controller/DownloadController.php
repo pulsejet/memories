@@ -46,7 +46,7 @@ class DownloadController extends GenericApiController
      */
     public function request($files): Http\Response
     {
-        return Util::guardEx(function () use ($files) {
+        return Util::guardEx(static function () use ($files) {
             // Get ids from body
             if (null === $files || !\is_array($files)) {
                 throw Exceptions::MissingParameter('files');
@@ -105,7 +105,7 @@ class DownloadController extends GenericApiController
             $fileIds = $info[1];
 
             /** @var int[] $fileIds */
-            $fileIds = array_filter(array_map('intval', $fileIds), fn ($id) => $id > 0);
+            $fileIds = array_filter(array_map('intval', $fileIds), static fn ($id) => $id > 0);
 
             // Check if we have any valid ids
             if (0 === \count($fileIds)) {

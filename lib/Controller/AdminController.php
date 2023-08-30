@@ -93,14 +93,14 @@ class AdminController extends GenericApiController
             // Check exiftool version
             $exiftoolNoLocal = Util::getSystemConfig('memories.exiftool_no_local');
             $status['exiftool'] = $this->getExecutableStatus(
-                fn () => BinExt::getExiftoolPBin(),
-                fn ($p) => BinExt::testExiftool(),
+                static fn () => BinExt::getExiftoolPBin(),
+                static fn ($p) => BinExt::testExiftool(),
                 !$exiftoolNoLocal,
                 !$exiftoolNoLocal,
             );
 
             // Check for system perl
-            $status['perl'] = $this->getExecutableStatus(exec('which perl'), fn ($p) => BinExt::testSystemPerl($p));
+            $status['perl'] = $this->getExecutableStatus(exec('which perl'), static fn ($p) => BinExt::testSystemPerl($p));
 
             // Check number of indexed files
             $status['indexed_count'] = $index->getIndexedCount();
@@ -135,24 +135,24 @@ class AdminController extends GenericApiController
             $status['ffmpeg_preview'] = $this->getExecutableStatus(
                 Util::getSystemConfig('preview_ffmpeg_path', null, true)
                     ?: trim(shell_exec('which ffmpeg') ?: ''),
-                fn ($p) => BinExt::testFFmpeg($p, 'ffmpeg'),
+                static fn ($p) => BinExt::testFFmpeg($p, 'ffmpeg'),
             );
 
             // Check ffmpeg and ffprobe binaries for transcoding
             $status['ffmpeg'] = $this->getExecutableStatus(
                 Util::getSystemConfig('memories.vod.ffmpeg'),
-                fn ($p) => BinExt::testFFmpeg($p, 'ffmpeg'),
+                static fn ($p) => BinExt::testFFmpeg($p, 'ffmpeg'),
             );
             $status['ffprobe'] = $this->getExecutableStatus(
                 Util::getSystemConfig('memories.vod.ffprobe'),
-                fn ($p) => BinExt::testFFmpeg($p, 'ffprobe'),
+                static fn ($p) => BinExt::testFFmpeg($p, 'ffprobe'),
             );
 
             // Check go-vod binary
             $extGoVod = Util::getSystemConfig('memories.vod.external');
             $status['govod'] = $this->getExecutableStatus(
-                fn () => BinExt::getGoVodBin(),
-                fn ($p) => BinExt::testStartGoVod(),
+                static fn () => BinExt::getGoVodBin(),
+                static fn ($p) => BinExt::testStartGoVod(),
                 !$extGoVod,
                 !$extGoVod,
             );
@@ -188,7 +188,7 @@ class AdminController extends GenericApiController
         // Reset action token
         $this->actionToken(true);
 
-        return Util::guardExDirect(function (Http\IOutput $out) {
+        return Util::guardExDirect(static function (Http\IOutput $out) {
             try {
                 // Set PHP timeout to infinite
                 set_time_limit(0);

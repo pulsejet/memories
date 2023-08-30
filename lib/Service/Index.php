@@ -131,10 +131,10 @@ class Index
 
         // Filter files that are supported
         $mimes = self::getMimeList();
-        $files = array_filter($nodes, fn ($n) => $n instanceof File && \in_array($n->getMimeType(), $mimes, true));
+        $files = array_filter($nodes, static fn ($n) => $n instanceof File && \in_array($n->getMimeType(), $mimes, true));
 
         // Create an associative array with file ID as key
-        $files = array_combine(array_map(fn ($n) => $n->getId(), $files), $files);
+        $files = array_combine(array_map(static fn ($n) => $n->getId(), $files), $files);
 
         // Chunk array into some files each (DBs have limitations on IN clause)
         $chunks = array_chunk($files, 250, true);
@@ -151,7 +151,7 @@ class Index
             ;
 
             // Filter out files that are already indexed
-            $addFilter = function (string $table, string $alias) use (&$query) {
+            $addFilter = static function (string $table, string $alias) use (&$query) {
                 $query->leftJoin('f', $table, $alias, $query->expr()->andX(
                     $query->expr()->eq('f.fileid', "{$alias}.fileid"),
                     $query->expr()->eq('f.mtime', "{$alias}.mtime"),
@@ -174,7 +174,7 @@ class Index
         }
 
         // All folders
-        $folders = array_filter($nodes, fn ($n) => $n instanceof Folder);
+        $folders = array_filter($nodes, static fn ($n) => $n instanceof Folder);
         foreach ($folders as $folder) {
             $this->ensureContinueOk();
 
@@ -250,7 +250,7 @@ class Index
     {
         $preview = \OC::$server->get(IPreview::class);
 
-        return array_filter($source, fn ($m) => $preview->isMimeSupported($m));
+        return array_filter($source, static fn ($m) => $preview->isMimeSupported($m));
     }
 
     /**

@@ -69,7 +69,7 @@ class PageController extends Controller
     {
         // Image domains MUST be added to the connect domain list
         // because of the service worker fetch() call
-        $addImageDomain = function ($url) use (&$policy) {
+        $addImageDomain = static function ($url) use (&$policy) {
             $policy->addAllowedImageDomain($url);
             $policy->addAllowedConnectDomain($url);
         };

@@ -263,7 +263,7 @@ class VideoController extends GenericApiController
 
         // Stream the response to the browser without reading it into memory
         $headersWritten = false;
-        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($curl, $data) use (&$headersWritten, $profile) {
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, static function ($curl, $data) use (&$headersWritten, $profile) {
             $returnCode = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
             if (200 === $returnCode) {
@@ -353,8 +353,8 @@ class VideoController extends GenericApiController
 
         // Get file paths for all live photos
         $liveFiles = array_map(fn ($r) => $this->rootFolder->getById((int) $r['fileid']), $liveRecords);
-        $liveFiles = array_filter($liveFiles, fn ($files) => \count($files) > 0 && $files[0] instanceof File);
-        $liveFiles = array_map(fn ($files) => $files[0], $liveFiles);
+        $liveFiles = array_filter($liveFiles, static fn ($files) => \count($files) > 0 && $files[0] instanceof File);
+        $liveFiles = array_map(static fn ($files) => $files[0], $liveFiles);
 
         // Should be filtered enough by now
         if (!\count($liveFiles)) {
@@ -362,7 +362,7 @@ class VideoController extends GenericApiController
         }
 
         // All paths including the image and videos need to be processed
-        $paths = array_map(function (File $file) {
+        $paths = array_map(static function (File $file) {
             $path = $file->getPath();
             $filename = strtolower($file->getName());
 
@@ -382,7 +382,7 @@ class VideoController extends GenericApiController
 
         // Find closest path match
         $imagePath = array_pop($paths);
-        $scores = array_map(function ($path) use ($imagePath) {
+        $scores = array_map(static function ($path) use ($imagePath) {
             $score = 0;
             $length = min(\count($path), \count($imagePath));
             for ($i = 0; $i < $length; ++$i) {
