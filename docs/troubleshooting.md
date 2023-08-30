@@ -100,3 +100,15 @@ On Postgres, the syntax for dropping the index is:
 ```sql
 DROP INDEX IF EXISTS memories_parent_mimetype;
 ```
+
+### Moving from x86 to ARM or vice versa
+
+In this case you need to reset the paths to the architecture specific binaries.
+
+```bash
+occ config:system:delete memories.exiftool
+occ config:system:delete memories.vod.path
+occ config:system:delete memories.vod.ffmpeg
+occ config:system:delete memories.vod.ffprobe
+occ maintenance:repair
+```
