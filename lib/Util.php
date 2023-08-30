@@ -324,7 +324,7 @@ class Util
     /**
      * Sanitize a path to keep only ASCII characters and special characters.
      */
-    public static function sanitizePath(string $path)
+    public static function sanitizePath(string $path): string
     {
         $path = str_replace("\0", '', $path); // remove null characters
 

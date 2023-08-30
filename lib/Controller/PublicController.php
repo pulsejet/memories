@@ -196,9 +196,10 @@ class PublicController extends AuthPublicShareController
         $relPath = substr($node->getPath(), \strlen($userFolder->getPath()));
 
         // Get the user's folders path
-        $foldersPath = $this->config->getUserValue($user->getUID(), Application::APPNAME, 'foldersPath', '');
-        $foldersPath = $foldersPath ?: '/';
-        $foldersPath = Util::sanitizePath($foldersPath);
+        $foldersPath = $this->config->getUserValue($user->getUID(), Application::APPNAME, 'foldersPath', null) ?: '/';
+
+        // Sanitize folders path ensuring leading and trailing slashes
+        $foldersPath = Util::sanitizePath('/' . $foldersPath . '/');
 
         // Check if relPath starts with foldersPath
         if (0 !== strpos($relPath, $foldersPath)) {
