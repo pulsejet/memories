@@ -24,73 +24,56 @@ declare(strict_types=1);
 namespace OCA\Memories\Migration;
 
 use OCP\DB\ISchemaWrapper;
-use OCP\DB\Types;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
-/**
- * Auto-generated migration step: Please modify to your needs!
- */
-class Version400800Date20221122105007 extends SimpleMigrationStep
+class Version505002Date20230831201833 extends SimpleMigrationStep
 {
     /**
-     * @param \Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
+     * @param \Closure(): ISchemaWrapper $schemaClosure
      */
     public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void
     {
     }
 
     /**
-     * @param \Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
+     * @param \Closure(): ISchemaWrapper $schemaClosure
      */
     public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper
     {
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
 
-        $table = $schema->getTable('memories');
+        /*/
+         * This migration step resizes VARCHAR columns to be smaller.
+         * The older migrations are already updated to use the new size
+         * for newly created databases.
+         */
 
-        if (!$table->hasColumn('liveid')) {
-            $table->addColumn('liveid', 'string', [
+        if ($schema->hasTable('memories')) {
+            $table = $schema->getTable('memories');
+
+            $table->getColumn('liveid')->setOptions([
                 'notnull' => false,
-                'length' => 128, // Version505002Date20230831201833
+                'length' => 128,
                 'default' => '',
             ]);
         }
 
-        // Live photos table
-        if (!$schema->hasTable('memories_livephoto')) {
-            $table = $schema->createTable('memories_livephoto');
+        if ($schema->hasTable('memories_livephoto')) {
+            $table = $schema->getTable('memories_livephoto');
 
-            $table->addColumn('id', 'integer', [
-                'autoincrement' => true,
+            $table->getColumn('liveid')->setOptions([
                 'notnull' => true,
+                'length' => 128,
             ]);
-
-            $table->addColumn('liveid', 'string', [
-                'notnull' => true,
-                'length' => 128, // Version505002Date20230831201833
-            ]);
-
-            $table->addColumn('fileid', Types::BIGINT, [
-                'notnull' => true,
-                'length' => 20,
-            ]);
-
-            $table->addColumn('mtime', Types::INTEGER, [
-                'notnull' => true,
-            ]);
-
-            $table->setPrimaryKey(['id']);
-            $table->addIndex(['liveid'], 'memories_lp_liveid_index');
-            $table->addUniqueIndex(['fileid'], 'memories_lp_fileid_index');
         }
 
         return $schema;
     }
 
     /**
-     * @param \Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
+     * @param \Closure(): ISchemaWrapper $schemaClosure
      */
     public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void
     {
