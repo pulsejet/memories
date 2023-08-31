@@ -511,11 +511,12 @@ func (s *Stream) transcode(startId int) {
 	args = append(args, []string{
 		"-avoid_negative_ts", "disabled",
 		"-f", "hls",
+		"-hls_flags", "split_by_time",
 		"-hls_time", fmt.Sprintf("%d", s.c.ChunkSize),
-		"-force_key_frames", fmt.Sprintf("expr:gte(t,n_forced*%d)", s.c.ChunkSize),
 		"-hls_segment_type", "mpegts",
-		"-start_number", fmt.Sprintf("%d", startId),
 		"-hls_segment_filename", s.getTsPath(-1),
+		"-force_key_frames", fmt.Sprintf("expr:gte(t,n_forced*%d)", s.c.ChunkSize),
+		"-start_number", fmt.Sprintf("%d", startId),
 		"-",
 	}...)
 
