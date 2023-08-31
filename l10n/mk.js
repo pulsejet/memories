@@ -72,6 +72,7 @@ OC.L10N.register(
     "Copyright" : "Авторско право",
     "Empty" : "Празно",
     "Reset" : "Ресетирање",
+    "Collaborative Tags" : "Колаборативни ознаки",
     "Remove person" : "Отстрани личност",
     "Rename person" : "Преименувај личност",
     "Name" : "Име",
