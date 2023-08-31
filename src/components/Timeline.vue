@@ -7,7 +7,7 @@
     <TopMatter ref="topmatter" />
 
     <!-- No content found and nothing is loading -->
-    <EmptyContent v-if="!loading && empty" />
+    <EmptyContent v-if="showEmpty" />
 
     <!-- Main recycler view for rows -->
     <RecycleScroller
@@ -68,6 +68,7 @@
     <!-- Managers -->
     <ScrollerManager
       ref="scrollerManager"
+      v-show="!showEmpty"
       :rows="list"
       :fullHeight="scrollerHeight"
       :recycler="$refs.recycler"
@@ -224,6 +225,11 @@ export default defineComponent({
     /** Nothing to show here */
     empty(): boolean {
       return !this.list.length && !this.dtmContent;
+    },
+
+    /** Show the empty content box and hide the scrollbar */
+    showEmpty(): boolean {
+      return !this.loading && this.empty;
     },
   },
 
