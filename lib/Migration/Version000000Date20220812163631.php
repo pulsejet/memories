@@ -47,8 +47,9 @@ class Version000000Date20220812163631 extends SimpleMigrationStep
                 'notnull' => true,
             ]);
             $table->addColumn('uid', 'string', [
+                // dropped in Version200000Date20220924015634
                 'notnull' => true,
-                'length' => 200,
+                'length' => 64,
             ]);
             $table->addColumn('datetaken', Types::DATETIME, [
                 'notnull' => false,
