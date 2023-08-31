@@ -201,8 +201,8 @@ export default defineComponent({
 
     /** Update cursor position from recycler scroll position */
     updateFromRecyclerScroll() {
-      // Ignore if not initialized or moving
-      if (!this.ticks.length || this.interacting) return;
+      // Ignore if dragging the scroller
+      if (this.interacting) return;
 
       // Get the scroll position
       const scroll = this.recycler?.$el?.scrollTop || 0;
@@ -247,7 +247,7 @@ export default defineComponent({
       if (!this.recycler?.$refs.wrapper) return;
 
       // Refresh height of recycler
-      this.recyclerHeight = this.recycler.$refs.wrapper.clientHeight;
+      this.recyclerHeight = this.recycler?.$refs.wrapper.clientHeight ?? 0;
 
       // Recreate ticks data
       this.recreate();
@@ -483,34 +483,52 @@ export default defineComponent({
 
     /** Binary search and get coords surrounding position */
     getCoords(y: number, field: 'topF' | 'y') {
-      let top1 = 0,
-        top2 = 0,
-        y1 = 0,
-        y2 = 0;
-
-      // Get index of previous tick
-      let idx = utils.binarySearch(this.ticks, y, field);
-      if (idx <= 0) {
-        top1 = this.topPadding;
-        top2 = this.ticks[0].topF;
-        y1 = 0;
-        y2 = this.ticks[0].y;
-      } else if (idx >= this.ticks.length) {
-        const t = this.ticks[this.ticks.length - 1];
-        top1 = t.topF;
-        top2 = this.fullHeight;
-        y1 = t.y;
-        y2 = this.recyclerHeight;
-      } else {
-        const t1 = this.ticks[idx - 1];
-        const t2 = this.ticks[idx];
-        top1 = t1.topF;
-        top2 = t2.topF;
-        y1 = t1.y;
-        y2 = t2.y;
+      // If no ticks are available, return a linear interpolation
+      if (!this.ticks.length) {
+        // Include the dynamic top matter height here because
+        // this will likely be used when there are zero rows
+        return {
+          top1: this.topPadding,
+          top2: this.fullHeight,
+          y1: 0,
+          y2: this.recyclerHeight + this.dynTopMatterHeight,
+        };
       }
 
-      return { top1, top2, y1, y2 };
+      // Get index of previous tick
+      const idx = utils.binarySearch(this.ticks, y, field);
+
+      // Position is before the first tick; choose first
+      if (idx <= 0) {
+        const tick = this.ticks[0];
+        return {
+          top1: this.topPadding,
+          top2: tick.topF,
+          y1: 0,
+          y2: tick.y,
+        };
+      }
+
+      // Position is after the last tick; choose last
+      if (idx >= this.ticks.length) {
+        const tick = this.ticks[this.ticks.length - 1];
+        return {
+          top1: tick.topF,
+          top2: this.fullHeight,
+          y1: tick.y,
+          y2: this.recyclerHeight,
+        };
+      }
+
+      // Somewhere in the middle
+      const tick1 = this.ticks[idx - 1];
+      const tick2 = this.ticks[idx];
+      return {
+        top1: tick1.topF,
+        top2: tick2.topF,
+        y1: tick1.y,
+        y2: tick2.y,
+      };
     },
 
     /** Move to given scroller Y */
