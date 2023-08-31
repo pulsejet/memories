@@ -400,7 +400,11 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 	} else if CV == ENCODER_NVENC {
 		format = "format=nv12|cuda,hwupload"
 		scaler = fmt.Sprintf("scale_%s", s.c.NVENCScale)
-		scalerArgs = append(scalerArgs, "passthrough=0")
+
+		// workaround to force scale_cuda to examine all input frames
+		if s.c.NVENCScale == "cuda" {
+			scalerArgs = append(scalerArgs, "passthrough=0")
+		}
 	}
 
 	// Scale height and width if not max quality
