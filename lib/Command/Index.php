@@ -29,7 +29,6 @@ use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IGroupManager;
 use OCP\IUser;
-use OCP\IGroup;
 use OCP\IUserManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -215,12 +214,12 @@ class Index extends Command
             }
         } elseif ($gid = $this->opts->group) {
             if ($group = $this->groupManager->get($gid)) {
-                $this->output->writeln("<error>Group {$gid} not found</error>");
-            } else {
                 foreach ($group->getUsers() as $user) {
                     $closure($user);
-                }
-            }
+                }            
+        } else {
+            $this->output->writeln("<error>Group {$gid} not found</error>");
+        }
         } else {
             $this->userManager->callForSeenUsers(static fn (IUser $user) => $closure($user));
         }
