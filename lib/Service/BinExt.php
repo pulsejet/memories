@@ -165,7 +165,7 @@ class BinExt
             'vaapi' => Util::getSystemConfig('memories.vod.vaapi'),
             'vaapiLowPower' => Util::getSystemConfig('memories.vod.vaapi.low_power'),
 
-            'nvenc' => Util::getSystemConfig('memories.vod.nvenc', false),
+            'nvenc' => Util::getSystemConfig('memories.vod.nvenc'),
             'nvencTemporalAQ' => Util::getSystemConfig('memories.vod.nvenc.temporal_aq'),
             'nvencScale' => Util::getSystemConfig('memories.vod.nvenc.scale'),
 

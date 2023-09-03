@@ -133,7 +133,7 @@ class AdminController extends GenericApiController
 
             // Check for FFmpeg for preview generation
             $status['ffmpeg_preview'] = $this->getExecutableStatus(
-                Util::getSystemConfig('preview_ffmpeg_path', null, true)
+                Util::getSystemConfig('preview_ffmpeg_path')
                     ?: trim(shell_exec('which ffmpeg') ?: ''),
                 static fn ($p) => BinExt::testFFmpeg($p, 'ffmpeg'),
             );

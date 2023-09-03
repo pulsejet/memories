@@ -364,17 +364,14 @@ class Util
      *
      * @param string     $key     System config key
      * @param null|mixed $default Default value
-     * @param bool       $force   Do not check if the key is valid
      */
-    public static function getSystemConfig(string $key, $default = null, bool $force = false)
+    public static function getSystemConfig(string $key, $default = null)
     {
         $config = \OC::$server->get(\OCP\IConfig::class);
 
         $defaults = self::systemConfigDefaults();
-        if (!$force) {
-            if (!\array_key_exists($key, $defaults)) {
-                throw new \InvalidArgumentException("Invalid system config key: {$key}");
-            }
+        if (!\array_key_exists($key, $defaults)) {
+            throw new \InvalidArgumentException("Invalid system config key: {$key}");
         }
 
         return $config->getSystemValue($key, $default ?? $defaults[$key]);
@@ -431,7 +428,7 @@ class Util
      */
     public static function getInstanceId(): string
     {
-        return self::getSystemConfig('instanceid', 'default', true);
+        return self::getSystemConfig('instanceid');
     }
 
     /**

@@ -72,4 +72,8 @@ return [
     'preview_max_y' => 4096,
     'preview_max_memory' => 128,
     'preview_max_filesize_image' => 50,
+    'preview_ffmpeg_path' => '',
+
+    // Placeholders only; these are not touched by the app
+    'instanceid' => 'default',
 ];
