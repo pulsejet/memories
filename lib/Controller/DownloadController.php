@@ -155,11 +155,6 @@ class DownloadController extends GenericApiController
             $seekEnd = (empty($seekEnd)) ? ($size - 1) : min(abs((int) $seekEnd), $size - 1);
             $seekStart = (empty($seekStart) || $seekEnd < abs((int) $seekStart)) ? 0 : max(abs((int) $seekStart), 0);
 
-            // For videos, use a max of 64MB
-            if (!empty($range) && 'video' === $this->request->getHeader('Sec-Fetch-Dest')) {
-                $seekEnd = min($seekEnd, $seekStart + 64 * 1024 * 1024);
-            }
-
             // Only send partial content header if downloading a piece of the file
             if ($seekStart > 0 || $seekEnd < ($size - 1)) {
                 $out->setHeader('HTTP/1.1 206 Partial Content');
