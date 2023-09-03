@@ -100,7 +100,10 @@ class AdminController extends GenericApiController
             );
 
             // Check for system perl
-            $status['perl'] = $this->getExecutableStatus(exec('which perl'), static fn ($p) => BinExt::testSystemPerl($p));
+            $status['perl'] = $this->getExecutableStatus(
+                trim(shell_exec('which perl') ?: '/bin/perl'),
+                static fn ($p) => BinExt::testSystemPerl($p)
+            );
 
             // Check number of indexed files
             $status['indexed_count'] = $index->getIndexedCount();
