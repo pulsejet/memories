@@ -30,6 +30,16 @@
           </div>
         </LIcon>
       </LMarker>
+      <LHeatMap v-if="points.length >= 50"
+        ref="heatMap"
+        :initial-points="points"
+        :options="{
+          // minOpacity: null,
+          // maxZoom: null,
+          radius: 15,
+          blur: 10,
+          gradient: { 0.4: 'blue', 0.65: 'lime', 1: 'red' },
+        }" />
     </LMap>
   </div>
 </template>
@@ -37,6 +47,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { LMap, LTileLayer, LMarker, LPopup, LIcon } from 'vue2-leaflet';
+import LHeatMap from './map/LHeatMap.vue';
 import { latLngBounds, Icon } from 'leaflet';
 import { IPhoto } from '../../types';
 
@@ -73,6 +84,7 @@ Icon.Default.mergeOptions({
 export default defineComponent({
   name: 'MapSplitMatter',
   components: {
+    LHeatMap,
     LMap,
     LTileLayer,
     LMarker,
@@ -88,6 +100,7 @@ export default defineComponent({
       maxBoundsViscosity: 0.9,
     },
     clusters: [] as IMarkerCluster[],
+    points: [],
     animMarkers: false,
   }),
 
@@ -137,6 +150,7 @@ export default defineComponent({
         if (!reinit) {
           this.setBoundsFromQuery();
         }
+        await this.fetchPoints();
         return await this.fetchClusters();
       }
 
@@ -243,6 +257,34 @@ export default defineComponent({
 
       // Animate markers
       this.animateMarkers();
+    },
+
+    async fetchPoints() {
+      const zoom = "18";
+      let minLat = -90;
+      let  maxLat = 90;
+      let minLon = -180;
+      let maxLon = 180;
+
+      // Extend bounds by 25% beyond the map
+      const latDiff = Math.abs(maxLat - minLat);
+      const lonDiff = Math.abs(maxLon - minLon);
+      minLat -= latDiff * 0.25;
+      maxLat += latDiff * 0.25;
+      minLon -= lonDiff * 0.25;
+      maxLon += lonDiff * 0.25;
+
+      // Get bounds with expanded margins
+      const bounds = this.boundsToStr({ minLat, maxLat, minLon, maxLon });
+
+      // Make API call
+      const url = API.Q(API.MAP_CLUSTERS(), { bounds, zoom });
+
+      // Params have changed, quit
+      const res = await axios.get(url);
+      this.points = res.data.map((c) => {
+        return [c.center[0], c.center[1], c.count]
+      });
     },
 
     boundsFromQuery() {
