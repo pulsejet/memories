@@ -35,9 +35,9 @@
         :initial-points="points"
         :options="{
           // minOpacity: null,
-          // maxZoom: null,
-          radius: 15,
-          blur: 10,
+          maxZoom: 16,
+          radius: 50,
+          blur: 30,
           gradient: { 0.4: 'blue', 0.65: 'lime', 1: 'red' },
         }" />
     </LMap>
@@ -283,7 +283,7 @@ export default defineComponent({
       // Params have changed, quit
       const res = await axios.get(url);
       this.points = res.data.map((c) => {
-        return [c.center[0], c.center[1], c.count]
+        return [c.center[0], c.center[1], 1]
       });
     },
 
