@@ -27,6 +27,7 @@ use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Service;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
+use OCP\IGroupManager;
 use OCP\IUser;
 use OCP\IUserManager;
 use Symfony\Component\Console\Command\Command;
@@ -40,6 +41,8 @@ class IndexOpts
     public bool $clear = false;
     public ?string $user = null;
     public ?string $folder = null;
+    public ?string $group = null;
+    public bool $skipCleanup = false;
 
     public function __construct(InputInterface $input)
     {
@@ -47,6 +50,8 @@ class IndexOpts
         $this->clear = (bool) $input->getOption('clear');
         $this->user = $input->getOption('user');
         $this->folder = $input->getOption('folder');
+        $this->skipCleanup = $input->getOption('skip-cleanup');
+        $this->group = $input->getOption('group');
     }
 }
 
@@ -56,6 +61,7 @@ class Index extends Command
     protected array $sizes;
 
     protected IUserManager $userManager;
+    protected IGroupManager $groupManager;
     protected IRootFolder $rootFolder;
     protected IConfig $config;
     protected Service\Index $indexer;
@@ -71,6 +77,7 @@ class Index extends Command
     public function __construct(
         IRootFolder $rootFolder,
         IUserManager $userManager,
+        IGroupManager $groupManager,
         IConfig $config,
         Service\Index $indexer,
         TimelineWrite $timelineWrite
@@ -78,6 +85,7 @@ class Index extends Command
         parent::__construct();
 
         $this->userManager = $userManager;
+        $this->groupManager = $groupManager;
         $this->rootFolder = $rootFolder;
         $this->config = $config;
         $this->indexer = $indexer;
@@ -93,6 +101,8 @@ class Index extends Command
             ->addOption('folder', null, InputOption::VALUE_REQUIRED, 'Index only the specified folder (relative to the user\'s root)')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force refresh of existing index entries')
             ->addOption('clear', null, InputOption::VALUE_NONE, 'Clear all existing index entries')
+            ->addOption('skip-cleanup', null, InputOption::VALUE_NONE, 'Skip cleanup step')
+            ->addOption('group', 'g', InputOption::VALUE_REQUIRED, 'Index only specified group')
         ;
     }
 
@@ -125,7 +135,9 @@ class Index extends Command
             $this->runIndex();
 
             // Clean up the index
-            $this->indexer->cleanupStale();
+            if (!$this->opts->skipCleanup) {
+                $this->indexer->cleanupStale();
+            }
 
             return 0;
         } catch (\Exception $e) {
@@ -200,6 +212,14 @@ class Index extends Command
             } else {
                 $this->output->writeln("<error>User {$uid} not found</error>");
             }
+        } elseif ($gid = $this->opts->group) {
+            if ($group = $this->groupManager->get($gid)) {
+                foreach ($group->getUsers() as $user) {
+                    $closure($user);
+                }            
+        } else {
+            $this->output->writeln("<error>Group {$gid} not found</error>");
+        }
         } else {
             $this->userManager->callForSeenUsers(static fn (IUser $user) => $closure($user));
         }
