@@ -229,7 +229,6 @@ class TimelineWrite
                 ->select($query->expr()->literal('1'))
                 ->from('filecache', 'f')
                 ->where($query->expr()->eq('f.fileid', "*PREFIX*{$table}.fileid"))
-                ->andWhere($query->expr()->notLike('f.path', $query->expr()->literal('files_trashbin/%')))
                 ->getSQL()
             ;
 
