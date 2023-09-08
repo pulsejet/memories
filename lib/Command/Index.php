@@ -216,10 +216,10 @@ class Index extends Command
             if ($group = $this->groupManager->get($gid)) {
                 foreach ($group->getUsers() as $user) {
                     $closure($user);
-                }            
-        } else {
-            $this->output->writeln("<error>Group {$gid} not found</error>");
-        }
+                }
+            } else {
+                $this->output->writeln("<error>Group {$gid} not found</error>");
+            }
         } else {
             $this->userManager->callForSeenUsers(static fn (IUser $user) => $closure($user));
         }
