@@ -16,7 +16,7 @@ export default defineComponent({
   name: 'UserConfig',
 
   data: () => ({
-    config: { ...staticConfig.getDefault() },
+    config: { ...staticConfig.getDefault() } as IConfig,
   }),
 
   created() {
@@ -38,9 +38,9 @@ export default defineComponent({
       utils.bus.emit(eventName, null);
     },
 
-    updateLocalSetting({ setting, value }) {
-      if (setting) {
-        this.config[setting] = value;
+    updateLocalSetting(val: { setting: keyof IConfig; value: IConfig[keyof IConfig] }) {
+      if (val?.setting) {
+        (this.config as any)[val.setting] = val.value;
       }
     },
 
