@@ -1,3 +1,5 @@
+import type { IConfig } from '../../types';
+
 /** System configuration */
 export type ISystemConfig = {
   'memories.exiftool': string;
@@ -6,6 +8,8 @@ export type ISystemConfig = {
   'memories.index.path': string;
 
   'memories.gis_type': number;
+
+  'memories.viewer.high_res_cond_default': IConfig['high_res_cond_default'];
 
   'memories.vod.disable': boolean;
   'memories.vod.ffmpeg': string;
@@ -30,9 +34,6 @@ export type ISystemConfig = {
   preview_max_y: number;
   preview_max_memory: number;
   preview_max_filesize_image: number;
-
-  'memories.global_full_res_on_zoom': boolean;
-  'memories.global_full_res_always': boolean;
 };
 
 export type IBinaryStatus = 'ok' | 'not_found' | 'not_executable' | 'test_ok' | string;

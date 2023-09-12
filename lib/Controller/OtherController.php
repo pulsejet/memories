@@ -102,6 +102,7 @@ class OtherController extends GenericApiController
                 'enable_top_memories' => 'true' === $getAppConfig('enableTopMemories', 'true'),
 
                 // viewer settings
+                'high_res_cond_default' => Util::getSystemConfig('memories.viewer.high_res_cond_default'),
                 'livephoto_autoplay' => 'true' === $getAppConfig('livephotoAutoplay', 'true'),
                 'sidebar_filepath' => 'true' === $getAppConfig('sidebarFilepath', false),
 

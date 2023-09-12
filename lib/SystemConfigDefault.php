@@ -23,7 +23,7 @@ return [
 
     // Default viewer high resolution image loading condition
     // Valid values: 'always' | 'zoom' | 'never'
-    'memories.viewer.high_res_cond' => 'zoom',
+    'memories.viewer.high_res_cond_default' => 'zoom',
 
     // Disable transcoding
     'memories.vod.disable' => true,

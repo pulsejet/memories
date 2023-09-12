@@ -34,6 +34,7 @@ import Help from './sections/Help.vue';
 import Exif from './sections/Exif.vue';
 import Indexing from './sections/Indexing.vue';
 import FileSupport from './sections/FileSupport.vue';
+import Viewer from './sections/ViewerAdmin.vue';
 import Performance from './sections/Performance.vue';
 import Apps from './sections/Apps.vue';
 import Places from './sections/Places.vue';
@@ -54,7 +55,19 @@ export default defineComponent({
     config: null as ISystemConfig | null,
     sconfig: null as IConfig | null,
 
-    components: [Help, Exif, Indexing, FileSupport, Performance, Apps, Places, Video, VideoTranscoder, VideoAccel],
+    components: [
+      Help,
+      Exif,
+      Indexing,
+      FileSupport,
+      Viewer,
+      Performance,
+      Apps,
+      Places,
+      Video,
+      VideoTranscoder,
+      VideoAccel,
+    ],
   }),
 
   mounted() {
