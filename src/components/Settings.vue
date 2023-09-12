@@ -59,6 +59,7 @@
           :checked.sync="config.full_res_on_zoom"
           @update:checked="updateFullResOnZoom"
           type="switch"
+          :disabled="!config.override_global_full_res"
         >
           {{ t('memories', 'Load full size image on zoom') }}
         </NcCheckboxRadioSwitch>
@@ -66,6 +67,7 @@
         <NcCheckboxRadioSwitch
           :checked.sync="config.full_res_always"
           @update:checked="updateFullResAlways"
+          :disabled="!config.override_global_full_res"
           type="switch"
         >
           {{ t('memories', 'Always load full size image (not recommended)') }}

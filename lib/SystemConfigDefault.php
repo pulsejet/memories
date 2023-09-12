@@ -21,6 +21,10 @@ return [
     // Places database type identifier
     'memories.gis_type' => -1,
 
+    // Default viewer high resolution image loading condition
+    // Valid values: 'always' | 'zoom' | 'never'
+    'memories.viewer.high_res_cond' => 'zoom',
+
     // Disable transcoding
     'memories.vod.disable' => true,
 
