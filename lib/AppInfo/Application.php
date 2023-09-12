@@ -49,6 +49,8 @@ class Application extends App implements IBootstrap
         'image/png',
         'image/jpeg',
         'image/heic',
+        'image/heif',
+        'image/webp',
         'image/tiff',
         'image/gif',
         'image/bmp',
