@@ -21,21 +21,6 @@ export const props = `
     <oc:favorite />
     <d:resourcetype />`;
 
-export const IMAGE_MIME_TYPES = [
-  'image/png',
-  'image/jpeg',
-  'image/heic',
-  'image/png',
-  'image/tiff',
-  'image/gif',
-  'image/bmp',
-  'video/mpeg',
-  'video/webm',
-  'video/mp4',
-  'video/quicktime',
-  'video/x-matroska',
-];
-
 const GET_FILE_CHUNK_SIZE = 50;
 
 type GetFilesOpts = {
