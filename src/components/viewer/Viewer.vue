@@ -808,7 +808,7 @@ export default defineComponent({
         : utils.isLocalPhoto(photo)
         ? nativex.API.IMAGE_FULL(photo.fileid)
         : API.IMAGE_DECODABLE(photo.fileid, photo.etag);
-      const fullLoadCond = this.config.full_res_always ? 'always' : this.config.full_res_on_zoom ? 'zoom' : 'never';
+      const fullLoadCond = this.config.high_res_cond || this.config.high_res_cond_default || 'zoom';
 
       return {
         src: previewUrl,

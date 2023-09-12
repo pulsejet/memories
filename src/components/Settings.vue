@@ -46,7 +46,7 @@
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection id="viewer-settings" :title="t('memories', 'Viewer')">
+      <NcAppSettingsSection id="viewer-settings" :title="t('memories', 'Photo Viewer')">
         <NcCheckboxRadioSwitch
           :checked.sync="config.livephoto_autoplay"
           @update:checked="updateLivephotoAutoplay"
@@ -56,28 +56,40 @@
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
-          :checked.sync="config.full_res_on_zoom"
-          @update:checked="updateFullResOnZoom"
-          type="switch"
-        >
-          {{ t('memories', 'Load full size image on zoom') }}
-        </NcCheckboxRadioSwitch>
-
-        <NcCheckboxRadioSwitch
-          :checked.sync="config.full_res_always"
-          @update:checked="updateFullResAlways"
-          type="switch"
-        >
-          {{ t('memories', 'Always load full size image (not recommended)') }}
-        </NcCheckboxRadioSwitch>
-
-        <NcCheckboxRadioSwitch
           :checked.sync="config.sidebar_filepath"
           @update:checked="updateSidebarFilepath"
           type="switch"
         >
           {{ t('memories', 'Show full file path in sidebar') }}
         </NcCheckboxRadioSwitch>
+
+        <div class="radio-group">
+          <div class="title">{{ t('memories', 'High resolution image loading behavior') }}</div>
+          <NcCheckboxRadioSwitch
+            :checked="highResCond"
+            value="zoom"
+            name="vhrc_radio"
+            type="radio"
+            @update:checked="updateHighResCond($event)"
+            >{{ t('memories', 'Load high resolution image on zoom') }}
+          </NcCheckboxRadioSwitch>
+          <NcCheckboxRadioSwitch
+            :checked="highResCond"
+            value="always"
+            name="vhrc_radio"
+            type="radio"
+            @update:checked="updateHighResCond($event)"
+            >{{ t('memories', 'Always load high resolution image (not recommended)') }}
+          </NcCheckboxRadioSwitch>
+          <NcCheckboxRadioSwitch
+            :checked="highResCond"
+            value="never"
+            name="vhrc_radio"
+            type="radio"
+            @update:checked="updateHighResCond($event)"
+            >{{ t('memories', 'Never load high resolution image') }}
+          </NcCheckboxRadioSwitch>
+        </div>
       </NcAppSettingsSection>
 
       <NcAppSettingsSection id="account-settings" :title="t('memories', 'Account')" v-if="isNative">
@@ -156,6 +168,8 @@ const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcChe
 
 import MultiPathSelectionModal from './modal/MultiPathSelectionModal.vue';
 
+import type { IConfig } from '../types';
+
 export default defineComponent({
   name: 'Settings',
 
@@ -191,6 +205,10 @@ export default defineComponent({
 
     user(): string {
       return utils.uid ?? String();
+    },
+
+    highResCond(): IConfig['high_res_cond_default'] {
+      return this.config.high_res_cond || this.config.high_res_cond_default || 'zoom';
     },
   },
 
@@ -242,12 +260,9 @@ export default defineComponent({
     },
 
     // Viewer settings
-    async updateFullResOnZoom() {
-      await this.updateSetting('full_res_on_zoom');
-    },
-
-    async updateFullResAlways() {
-      await this.updateSetting('full_res_always');
+    async updateHighResCond(val: IConfig['high_res_cond']) {
+      this.config.high_res_cond = val;
+      await this.updateSetting('high_res_cond');
     },
 
     async updateLivephotoAutoplay() {
@@ -311,6 +326,22 @@ export default defineComponent({
 
   #sign-out {
     margin-top: 10px;
+  }
+
+  .checkbox-radio-switch__label {
+    padding: 1px 14px; // was 4px 14px, make it more compact
+  }
+
+  .radio-group {
+    margin-top: 6px;
+
+    .title {
+      font-weight: 500;
+    }
+
+    .checkbox-radio-switch-radio {
+      margin: 2px 16px; // indent for radio button
+    }
   }
 }
 </style>

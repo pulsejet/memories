@@ -1,3 +1,5 @@
+import type { IConfig } from '../../types';
+
 /** System configuration */
 export type ISystemConfig = {
   'memories.exiftool': string;
@@ -6,6 +8,8 @@ export type ISystemConfig = {
   'memories.index.path': string;
 
   'memories.gis_type': number;
+
+  'memories.viewer.high_res_cond_default': IConfig['high_res_cond_default'];
 
   'memories.vod.disable': boolean;
   'memories.vod.ffmpeg': string;

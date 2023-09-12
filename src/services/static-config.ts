@@ -88,6 +88,11 @@ class StaticConfig {
       this.config[key] = value;
     }
 
+    if (value == null) {
+      this.storage.removeItem(`memories_${key}`);
+      return;
+    }
+
     this.storage.setItem(`memories_${key}`, value.toString());
   }
 
@@ -117,6 +122,7 @@ class StaticConfig {
       enable_top_memories: true,
 
       // viewer settings
+      high_res_cond_default: 'zoom',
       livephoto_autoplay: true,
       sidebar_filepath: false,
 
@@ -130,8 +136,7 @@ class StaticConfig {
 
       // local settings
       square_thumbs: false,
-      full_res_on_zoom: true,
-      full_res_always: false,
+      high_res_cond: null,
       show_face_rect: false,
       album_list_sort: 1,
     };

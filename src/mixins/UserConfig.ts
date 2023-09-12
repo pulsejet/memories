@@ -10,19 +10,13 @@ import staticConfig from '../services/static-config';
 
 const eventName: keyof utils.BusEvent = 'memories:user-config-changed';
 
-const localSettings: (keyof IConfig)[] = [
-  'square_thumbs',
-  'full_res_on_zoom',
-  'full_res_always',
-  'show_face_rect',
-  'album_list_sort',
-];
+const localSettings: (keyof IConfig)[] = ['square_thumbs', 'high_res_cond', 'show_face_rect', 'album_list_sort'];
 
 export default defineComponent({
   name: 'UserConfig',
 
   data: () => ({
-    config: { ...staticConfig.getDefault() },
+    config: { ...staticConfig.getDefault() } as IConfig,
   }),
 
   created() {
@@ -44,9 +38,9 @@ export default defineComponent({
       utils.bus.emit(eventName, null);
     },
 
-    updateLocalSetting({ setting, value }) {
-      if (setting) {
-        this.config[setting] = value;
+    updateLocalSetting(val: { setting: keyof IConfig; value: IConfig[keyof IConfig] }) {
+      if (val?.setting) {
+        (this.config as any)[val.setting] = val.value;
       }
     },
 
@@ -55,7 +49,7 @@ export default defineComponent({
 
       if (!localSettings.includes(setting)) {
         await axios.put(API.CONFIG(remote ?? setting), {
-          value: value.toString(),
+          value: value?.toString() ?? '',
         });
       }
 

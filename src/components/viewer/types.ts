@@ -1,6 +1,6 @@
 import Content from 'photoswipe/dist/types/slide/content';
 import Slide, { _SlideData } from 'photoswipe/dist/types/slide/slide';
-import { IPhoto } from '../../types';
+import type { IPhoto, IConfig } from '../../types';
 
 type PsAugment = {
   data: _SlideData & {
@@ -11,7 +11,7 @@ type PsAugment = {
     /** The source of the high resolution image. */
     highSrc: string | null;
     /** The condition for loading the high resolution image. */
-    highSrcCond: 'always' | 'zoom' | 'never';
+    highSrcCond: IConfig['high_res_cond'];
     /** The type of content. */
     type: 'image' | 'video';
   };
