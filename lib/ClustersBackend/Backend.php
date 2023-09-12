@@ -54,9 +54,7 @@ abstract class Backend
     /**
      * Apply post-query transformations for the given photo object.
      */
-    public function transformDayPost(array &$row): void
-    {
-    }
+    public function transformDayPost(array &$row): void {}
 
     /**
      * Get the cluster list for the current user.

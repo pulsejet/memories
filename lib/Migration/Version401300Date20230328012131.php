@@ -35,9 +35,7 @@ class Version401300Date20230328012131 extends SimpleMigrationStep
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void
-    {
-    }
+    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
 
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
@@ -59,7 +57,5 @@ class Version401300Date20230328012131 extends SimpleMigrationStep
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void
-    {
-    }
+    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
 }
