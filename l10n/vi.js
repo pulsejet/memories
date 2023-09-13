@@ -19,7 +19,6 @@ OC.L10N.register(
     "Continue" : "Tiếp tục",
     "Move" : "Dịch chuyển",
     "General" : "Cài đặt chung",
-    "Viewer" : "Trình xem",
     "Account" : "Tài khoản",
     "Close" : "Đóng",
     "Unknown" : "Không xác định",

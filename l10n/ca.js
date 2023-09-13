@@ -29,7 +29,6 @@ OC.L10N.register(
     "Continue" : "Continua",
     "Move" : "Mou",
     "General" : "General",
-    "Viewer" : "Visor",
     "Account" : "Compte",
     "Close" : "Tanca",
     "Performance" : "Rendiment",

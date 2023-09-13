@@ -51,7 +51,6 @@ OC.L10N.register(
     "Timeline Path" : "Pot časovnice",
     "Square grid mode" : "Način kvadratne mreže",
     "Show past photos on top of timeline" : "Pokaži pretekle fotografije nad časovnico",
-    "Viewer" : "Pregledovalnik",
     "Account" : "Račun",
     "Sign out" : "Odjava",
     "Device Folders" : "Mape naprave",

@@ -29,7 +29,6 @@ OC.L10N.register(
     "Move" : "Flytta",
     "General" : "Allmänt",
     "Timeline Path" : "Tidslinjesökväg",
-    "Viewer" : "Visare",
     "Account" : "Konto",
     "Show hidden folders" : "Visa dolda filer",
     "Close" : "Stäng",

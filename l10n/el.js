@@ -25,7 +25,6 @@ OC.L10N.register(
     "Continue" : "Συνεχίστε",
     "Move" : "Μετακίνηση",
     "General" : "Γενικά",
-    "Viewer" : "Πρόγραμμα προβολής",
     "Account" : "Λογαριασμός",
     "Close" : "Κλείσιμο",
     "Performance" : "Απόδοση",

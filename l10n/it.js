@@ -29,7 +29,6 @@ OC.L10N.register(
     "Continue" : "Continua",
     "Move" : "Sposta",
     "General" : "Generale",
-    "Viewer" : "Visualizzatore",
     "Account" : "Account",
     "Close" : "Chiudi",
     "Performance" : "Prestazioni",

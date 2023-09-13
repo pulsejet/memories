@@ -24,7 +24,6 @@ OC.L10N.register(
     "Continue" : "Halda áfram",
     "Move" : "Færa",
     "General" : "Almennt",
-    "Viewer" : "Skoðari",
     "Account" : "Aðgangur",
     "Close" : "Loka",
     "Performance" : "Afköst",

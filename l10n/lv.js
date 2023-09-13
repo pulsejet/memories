@@ -20,7 +20,6 @@ OC.L10N.register(
     "Continue" : "Turpināt",
     "Move" : "Pārvietot",
     "General" : "Vispārīgs",
-    "Viewer" : "Skatītājs",
     "Account" : "Konts",
     "Close" : "Aizvērt",
     "Unknown" : "Nezināms",
