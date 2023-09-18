@@ -37,6 +37,7 @@ use OCP\ITempManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\ConsoleSectionOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+use ValueError;
 
 class Index
 {
@@ -203,7 +204,7 @@ class Index
             $this->timelineWrite->processFile($file);
         } catch (\OCP\Lock\LockedException $e) {
             $this->log("Skipping file {$path} due to lock", true);
-        } catch (\Exception $e) {
+        } catch (\Exception | \ValueError $e) {
             $this->error("Failed to index file {$path}: {$e->getMessage()}");
         } finally {
             $this->tempManager->clean();
