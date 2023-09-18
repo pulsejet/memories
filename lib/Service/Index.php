@@ -204,7 +204,7 @@ class Index
             $this->timelineWrite->processFile($file);
         } catch (\OCP\Lock\LockedException $e) {
             $this->log("Skipping file {$path} due to lock", true);
-        } catch (\Exception | \ValueError $e) {
+        } catch (\Exception|\ValueError $e) {
             $this->error("Failed to index file {$path}: {$e->getMessage()}");
         } finally {
             $this->tempManager->clean();
