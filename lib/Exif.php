@@ -90,6 +90,7 @@ class Exif
             'TrackModifyDate',
             'MediaCreateDate',
             'MediaModifyDate',
+            'GPSDateTime'
         ];
         foreach ($dateFields as $field) {
             if (\array_key_exists($field, $exif) && \is_string($exif[$field]) && str_starts_with($exif[$field], '0000:00:00')) {
@@ -118,7 +119,7 @@ class Exif
     public static function parseExifDate(array $exif): \DateTime
     {
         // Get date from exif
-        $exifDate = $exif['DateTimeOriginal'] ?? $exif['CreateDate'] ?? null;
+        $exifDate = $exif['DateTimeOriginal'] ?? $exif['CreateDate'] ?? $exif['GPSDateTime'] null;
 
         // For videos, prefer CreateDate for timezone (QuickTimeUTC=1)
         if (preg_match('/^video\/\w+/', (string) $exif['MIMEType'])) {
