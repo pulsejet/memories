@@ -53,6 +53,7 @@ OC.L10N.register(
     "Copyright" : "著作権",
     "Empty" : "空",
     "Reset" : "リセット",
+    "Collaborative Tags" : "コラボタグ",
     "Name" : "名前",
     "Update" : "更新",
     "Loading …" : "読み込み中…",
