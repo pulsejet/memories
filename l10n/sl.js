@@ -66,6 +66,7 @@ OC.L10N.register(
     "TIFF (Imagick)" : "TIFF (Imagick)",
     "Videos (ffmpeg)" : "Video (ffmpeg)",
     "External Link" : "Zunanja povezava",
+    "HTTPS is enabled" : "HTTPS je omogočen",
     "Performance" : "Delovanje",
     "Unknown" : "Neznano",
     "Enable Transcoding" : "Omogoči prehodiranje",
