@@ -82,6 +82,7 @@ class OtherController extends GenericApiController
             };
 
             $defaultTimelinePath = $this->config->getSystemValue('memories.default_timeline_path', 'EMPTY');
+
             return new JSONResponse([
                 // general stuff
                 'version' => $version,
