@@ -69,6 +69,9 @@ return [
     // 1080 => 1080p (and so on)
     'memories.video_default_quality' => '0',
 
+     // Default timeline path for all users; if not set, default is '/Photos'
+    'memories.default_timeline_path' => 'Photos/',
+
     // Memories only provides an admin interface for these
     // https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/config_sample_php_parameters.html#previews
     'enabledPreviewProviders' => [],
