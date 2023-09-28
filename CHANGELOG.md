@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- **Breaking**: Files in hidden folders are now hidden in the timeline ([#825](https://github.com/pulsejet/memories/issues/825))
 - **Feature**: Support showing full file path in sidebar ([#173](https://github.com/pulsejet/memories/issues/173))
 - **Feature**: View file in folder on clicking name in sidebar
 - **Feature**: User can leave albums that are shared with them

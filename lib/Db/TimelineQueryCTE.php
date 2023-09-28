@@ -6,10 +6,17 @@ namespace OCA\Memories\Db;
 
 trait TimelineQueryCTE
 {
-    protected static function CTE_FOLDERS_ALL(bool $notArchive): string
+    /**
+     * CTE to get all files recursively in the given top folders
+     * :topFolderIds - The top folders to get files from
+     *
+     * @param bool $noHidden Whether to filter out files in hidden folders
+     * If the top folder is hidden, the files in it will still be returned
+     */
+    protected static function CTE_FOLDERS_ALL(bool $noHidden): string
     {
         // Whether to filter out the archive folder
-        $CLS_ARCHIVE_JOIN = $notArchive ? "f.name <> '.archive'" : '1 = 1';
+        $CLS_HIDDEN_JOIN = $noHidden ? "f.name NOT LIKE '.%'" : '1 = 1';
 
         // Filter out folder MIME types
         $CLS_MIME_FOLDER = "f.mimetype = (SELECT `id` FROM `*PREFIX*mimetypes` WHERE `mimetype` = 'httpd/unix-directory')";
@@ -43,7 +50,7 @@ trait TimelineQueryCTE
                 ON (
                     f.parent = c.fileid AND
                     {$CLS_MIME_FOLDER} AND
-                    {$CLS_ARCHIVE_JOIN}
+                    {$CLS_HIDDEN_JOIN}
                 )
             WHERE (
                 {$CLS_NOMEDIA}
