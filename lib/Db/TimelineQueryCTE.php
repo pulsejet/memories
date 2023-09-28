@@ -19,7 +19,7 @@ trait TimelineQueryCTE
         $CLS_HIDDEN_JOIN = $noHidden ? "f.name NOT LIKE '.%'" : '1 = 1';
 
         // Filter out folder MIME types
-        $CLS_MIME_FOLDER = "f.mimetype = (SELECT `id` FROM `*PREFIX*mimetypes` WHERE `mimetype` = 'httpd/unix-directory')";
+        $FOLDER_MIME_QUERY = "SELECT MAX(id) FROM *PREFIX*mimetypes WHERE mimetype = 'httpd/unix-directory'";
 
         // Select filecache as f
         $BASE_QUERY = 'SELECT f.fileid, f.name FROM *PREFIX*filecache f';
@@ -49,7 +49,7 @@ trait TimelineQueryCTE
             INNER JOIN *PREFIX*cte_folders_all c
                 ON (
                     f.parent = c.fileid AND
-                    {$CLS_MIME_FOLDER} AND
+                    f.mimetype = ({$FOLDER_MIME_QUERY}) AND
                     {$CLS_HIDDEN_JOIN}
                 )
             WHERE (
