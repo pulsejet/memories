@@ -32,7 +32,6 @@ OC.L10N.register(
     "Move" : "Перемістити",
     "General" : "Загальне",
     "Timeline Path" : "Шлях шкали часу",
-    "Viewer" : "Переглядач",
     "Account" : "Обліковий запис",
     "Show hidden folders" : "Показати приховані каталоги",
     "Close" : "Закрити",

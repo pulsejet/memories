@@ -16,7 +16,6 @@ OC.L10N.register(
     "Continue" : "Kendec'hel",
     "Move" : "Diplasañ",
     "General" : "Hollek",
-    "Viewer" : "Gweller",
     "Account" : "Kont",
     "Close" : "Seriñ",
     "Unknown" : "Dianv",

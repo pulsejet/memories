@@ -24,7 +24,6 @@ OC.L10N.register(
     "Move" : "Mover",
     "General" : "Geral",
     "Timeline Path" : "Caminho da Cronologia",
-    "Viewer" : "Visualizador",
     "Account" : "Conta",
     "Show hidden folders" : "Mostrar pastas ocultas",
     "Close" : "Fechar",

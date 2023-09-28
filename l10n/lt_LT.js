@@ -31,7 +31,6 @@ OC.L10N.register(
     "General" : "Bendra",
     "Timeline Path" : "Laiko juostos kelias",
     "Square grid mode" : "Kvadratinio tinklelio veiksena",
-    "Viewer" : "Žiūryklė",
     "Account" : "Paskyra",
     "Folders Path" : "Aplankų kelias",
     "Show hidden folders" : "Rodyti paslėptus aplankus",

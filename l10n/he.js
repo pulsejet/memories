@@ -23,7 +23,6 @@ OC.L10N.register(
     "Continue" : "להמשך",
     "Move" : "העברה",
     "General" : "כללי",
-    "Viewer" : "מציג",
     "Account" : "חשבון",
     "Close" : "סגירה",
     "Performance" : "ביצועים",

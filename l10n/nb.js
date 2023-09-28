@@ -49,7 +49,6 @@ OC.L10N.register(
     "Timeline Path" : "Tidslinjebane",
     "Square grid mode" : "Firkantet rutenettmodus",
     "Show past photos on top of timeline" : "Vis tidligere bilder øverst på tidslinjen",
-    "Viewer" : "Fremviser",
     "Account" : "Konto",
     "Folders Path" : "Mappebane",
     "Show hidden folders" : "Vis skjulte mapper",

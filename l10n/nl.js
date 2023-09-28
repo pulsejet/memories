@@ -38,7 +38,6 @@ OC.L10N.register(
     "Continue" : "Doorgaan",
     "Move" : "Verplaatsen",
     "General" : "Algemeen",
-    "Viewer" : "Viewer",
     "Account" : "Account",
     "Close" : "Sluit",
     "Performance" : "Prestaties",
