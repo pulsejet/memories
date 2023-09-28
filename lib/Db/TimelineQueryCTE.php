@@ -8,10 +8,10 @@ trait TimelineQueryCTE
 {
     /**
      * CTE to get all files recursively in the given top folders
-     * :topFolderIds - The top folders to get files from
+     * :topFolderIds - The top folders to get files from.
      *
      * @param bool $noHidden Whether to filter out files in hidden folders
-     * If the top folder is hidden, the files in it will still be returned
+     *                       If the top folder is hidden, the files in it will still be returned
      */
     protected static function CTE_FOLDERS_ALL(bool $noHidden): string
     {
