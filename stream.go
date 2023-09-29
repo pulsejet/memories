@@ -200,12 +200,12 @@ func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
 
 	cmdStdOut, err := coder.StdoutPipe()
 	if err != nil {
-		fmt.Printf("FATAL: ffmpeg command stdout failed with %s\n", err)
+		log.Printf("FATAL: ffmpeg command stdout failed with %s\n", err)
 	}
 
 	cmdStdErr, err := coder.StderrPipe()
 	if err != nil {
-		fmt.Printf("FATAL: ffmpeg command stdout failed with %s\n", err)
+		log.Printf("FATAL: ffmpeg command stdout failed with %s\n", err)
 	}
 
 	err = coder.Start()
@@ -529,12 +529,12 @@ func (s *Stream) transcode(startId int) {
 
 	cmdStdOut, err := s.coder.StdoutPipe()
 	if err != nil {
-		fmt.Printf("FATAL: ffmpeg command stdout failed with %s\n", err)
+		log.Printf("FATAL: ffmpeg command stdout failed with %s\n", err)
 	}
 
 	cmdStdErr, err := s.coder.StderrPipe()
 	if err != nil {
-		fmt.Printf("FATAL: ffmpeg command stdout failed with %s\n", err)
+		log.Printf("FATAL: ffmpeg command stdout failed with %s\n", err)
 	}
 
 	err = s.coder.Start()

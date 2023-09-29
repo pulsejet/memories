@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -112,7 +111,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.c.Configured = true
 
 		// Print loaded config
-		fmt.Printf("%+v\n", h.c)
+		log.Printf("%+v\n", h.c)
 		return
 	}
 
@@ -213,12 +212,12 @@ func loadConfig(path string, c *Config) {
 	c.Configured = true
 
 	// Print loaded config
-	fmt.Printf("%+v\n", c)
+	log.Printf("%+v\n", c)
 }
 
 func main() {
 	if len(os.Args) >= 2 && os.Args[1] == "test" {
-		fmt.Println("test successful")
+		log.Println("test successful")
 		return
 	}
 
@@ -259,7 +258,7 @@ func main() {
 	}
 
 	// Print config
-	fmt.Printf("%+v\n", c)
+	log.Printf("%+v\n", c)
 
 	// Start server
 	log.Println("Starting VOD server")
