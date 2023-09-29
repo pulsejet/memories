@@ -170,6 +170,7 @@ class BinExt
             'nvencScale' => Util::getSystemConfig('memories.vod.nvenc.scale'),
 
             'useTranspose' => Util::getSystemConfig('memories.vod.use_transpose'),
+            'useGopSize' => Util::getSystemConfig('memories.vod.use_gop_size'),
         ];
 
         if (!$local) {

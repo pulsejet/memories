@@ -106,9 +106,9 @@
         )
       }}
       <br />
-      <b>{{
-        t('memories', 'Enable the following option only if you have incorrectly oriented videos during playback.')
-      }}</b>
+      <b>
+        {{ t('memories', 'Try this option only if you have incorrectly oriented videos during playback.') }}
+      </b>
 
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding"
@@ -117,6 +117,19 @@
         type="switch"
       >
         {{ t('memories', 'Enable streaming transpose workaround') }}
+      </NcCheckboxRadioSwitch>
+
+      {{ t('memories', 'Some NVENC devices have issues with force_key_frames.') }}
+      <br />
+      <b>{{ t('memories', 'Try this option only if you use NVENC and have issues with video playback.') }}</b>
+
+      <NcCheckboxRadioSwitch
+        :disabled="!enableTranscoding"
+        :checked.sync="config['memories.vod.use_gop_size']"
+        @update:checked="update('memories.vod.use_gop_size')"
+        type="switch"
+      >
+        {{ t('memories', 'Enable streaming GOP size workaround') }}
       </NcCheckboxRadioSwitch>
     </p>
   </div>
