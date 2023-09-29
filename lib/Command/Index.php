@@ -96,13 +96,13 @@ class Index extends Command
     {
         $this
             ->setName('memories:index')
-            ->setDescription('Generate photo entries')
+            ->setDescription('Index the metadata in files')
             ->addOption('user', 'u', InputOption::VALUE_REQUIRED, 'Index only the specified user')
+            ->addOption('group', 'g', InputOption::VALUE_REQUIRED, 'Index only specified group')
             ->addOption('folder', null, InputOption::VALUE_REQUIRED, 'Index only the specified folder (relative to the user\'s root)')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force refresh of existing index entries')
             ->addOption('clear', null, InputOption::VALUE_NONE, 'Clear all existing index entries')
-            ->addOption('skip-cleanup', null, InputOption::VALUE_NONE, 'Skip cleanup step')
-            ->addOption('group', 'g', InputOption::VALUE_REQUIRED, 'Index only specified group')
+            ->addOption('skip-cleanup', null, InputOption::VALUE_NONE, 'Skip cleanup step (removing index entries with missing files)')
         ;
     }
 

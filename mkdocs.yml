@@ -44,6 +44,7 @@ nav:
       - 'hw-transcoding.md'
       - 'troubleshooting.md'
       - 'system-config.md'
+      - 'occ-commands.md'
   - Support:
       - 'faq.md'
       - 'changelog.md'
