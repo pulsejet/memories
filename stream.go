@@ -513,17 +513,33 @@ func (s *Stream) transcode(startId int) {
 
 	// Segmenting specs
 	args = append(args, []string{
+		"-start_number", fmt.Sprintf("%d", startId),
 		"-avoid_negative_ts", "disabled",
 		"-f", "hls",
 		"-hls_flags", "split_by_time",
 		"-hls_time", fmt.Sprintf("%d", s.c.ChunkSize),
 		"-hls_segment_type", "mpegts",
 		"-hls_segment_filename", s.getTsPath(-1),
-		"-force_key_frames", fmt.Sprintf("expr:gte(t,n_forced*%d)", s.c.ChunkSize),
-		"-start_number", fmt.Sprintf("%d", startId),
-		"-",
 	}...)
 
+	// Keyframe specs
+	if s.c.UseGopSize && s.m.probe.FrameRate > 0 {
+		// Fix GOP size
+		args = append(args, []string{
+			"-g", fmt.Sprintf("%d", s.c.ChunkSize*s.m.probe.FrameRate),
+			"-keyint_min", fmt.Sprintf("%d", s.c.ChunkSize*s.m.probe.FrameRate),
+		}...)
+	} else {
+		// Force keyframes every chunk
+		args = append(args, []string{
+			"-force_key_frames", fmt.Sprintf("expr:gte(t,n_forced*%d)", s.c.ChunkSize),
+		}...)
+	}
+
+	// Output to stdout
+	args = append(args, "-")
+
+	// Start the process
 	s.coder = exec.Command(s.c.FFmpeg, args...)
 	log.Printf("%s-%s: %s", s.m.id, s.quality, strings.Join(s.coder.Args[:], " "))
 

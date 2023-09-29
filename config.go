@@ -39,6 +39,9 @@ type Config struct {
 	NVENCTemporalAQ bool   `json:"nvencTemporalAQ"`
 	NVENCScale      string `json:"nvencScale"` // cuda, npp
 
-	// Use transpose for streaming
+	// Use transpose workaround for streaming (VA-API)
 	UseTranspose bool `json:"useTranspose"`
+
+	// Use GOP size workaround for streaming (NVENC)
+	UseGopSize bool `json:"useGopSize"`
 }
