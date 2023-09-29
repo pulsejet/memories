@@ -3,7 +3,7 @@
 
   <NcContent
     app-name="memories"
-    v-else
+    v-else-if="!isConfigUnknown"
     :class="{
       'remove-gap': removeOuterGap,
       'has-nav': showNavigation,
@@ -187,7 +187,11 @@ export default defineComponent({
     },
 
     isFirstStart(): boolean {
-      return this.config.timeline_path === 'EMPTY' && !this.routeIsPublic && !this.$route.query.noinit;
+      return this.config.timeline_path === '_empty_' && !this.routeIsPublic && !this.$route.query.noinit;
+    },
+
+    isConfigUnknown(): boolean {
+      return this.config.timeline_path === '_unknown_';
     },
 
     showAlbums(): boolean {

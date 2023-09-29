@@ -21,6 +21,10 @@ return [
     // Places database type identifier
     'memories.gis_type' => -1,
 
+    // Default timeline path for all users
+    // If set to '_empty_', the user is prompted to select a path on first open (default)
+    'memories.timeline.default_path' => '_empty_',
+
     // Default viewer high resolution image loading condition
     // Valid values: 'always' | 'zoom' | 'never'
     'memories.viewer.high_res_cond_default' => 'zoom',

@@ -98,7 +98,7 @@ class OtherController extends GenericApiController
                 'preview_generator_enabled' => Util::previewGeneratorIsEnabled(),
 
                 // general settings
-                'timeline_path' => $getAppConfig('timelinePath', 'EMPTY'),
+                'timeline_path' => $getAppConfig('timelinePath', Util::getSystemConfig('memories.timeline.default_path')),
                 'enable_top_memories' => 'true' === $getAppConfig('enableTopMemories', 'true'),
 
                 // viewer settings
