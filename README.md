@@ -39,7 +39,7 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 ## 🏗 Development Setup
 
 1. ☁ Clone this into your `custom_apps` folder of your Nextcloud.
-2. 📥 Install [Composer](https://getcomposer.org/) and [Node.js 18](https://nodejs.org)
+1. 📥 Install [Composer](https://getcomposer.org/) and [Node.js 18](https://nodejs.org)
 1. 👩‍💻 In a terminal, run the command `make dev-setup` to install the dependencies.
 1. 🏗 To build/watch the UI, run `make watch-js`. Lint-fix PHP with `make php-lint`.
 1. ✅ Enable the app through the app management of your Nextcloud.
