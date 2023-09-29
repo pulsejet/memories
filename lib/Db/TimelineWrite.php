@@ -91,10 +91,11 @@ class TimelineWrite
         }
 
         // Get exif data
-        try {
-            $exif = Exif::getExifFromFile($file);
-        } catch (\Exception $e) {
-            $exif = [];
+        $exif = Exif::getExifFromFile($file);
+
+        // Check if EXIF is blank, which is probably wrong
+        if (0 === \count($exif)) {
+            throw new \Exception('No EXIF data could be read: '.$file->getPath());
         }
 
         // Hand off if Live Photo video part

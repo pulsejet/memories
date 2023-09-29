@@ -25,6 +25,7 @@ namespace OCA\Memories\Command;
 
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Exif;
+use OCA\Memories\Service;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
@@ -111,6 +112,7 @@ class MigrateGoogleTakeout extends Command
 
         // Start static exif process
         Exif::ensureStaticExiftoolProc();
+        Service\BinExt::testExiftool(); // throws
 
         // Call migration for each user
         if ($input->getOption('user')) {

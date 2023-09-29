@@ -123,9 +123,7 @@ class Index extends Command
         try {
             // Use static exiftool process
             \OCA\Memories\Exif::ensureStaticExiftoolProc();
-            if (!Service\BinExt::testExiftool()) { // throws
-                throw new \Exception('exiftool could not be executed or test failed');
-            }
+            Service\BinExt::testExiftool(); // throws
 
             // Perform steps based on opts
             $this->checkClear();

@@ -59,13 +59,23 @@ class IndexJob extends TimedJob
         // Index with static exiftool process
         // This is sub-optimal: the process may not be required at all.
         try {
+            // Start and make sure exiftool is working
             \OCA\Memories\Exif::ensureStaticExiftoolProc();
+            Service\BinExt::testExiftool(); // throws
+
+            // Run the indexer
             $this->indexAllUsers();
+
+            // Remove stale index entries
             $this->service->cleanupStale();
+
             $this->log('Indexing completed successfully', 'success');
         } catch (Service\ProcessClosedException $e) {
             $this->log('Indexing process stopped before completion. Will continue on next run', 'info');
+        } catch (\Exception $e) {
+            $this->log('Indexing exception: '.$e->getMessage());
         } finally {
+            // Close the static exiftool process
             \OCA\Memories\Exif::closeStaticExiftoolProc();
         }
 
