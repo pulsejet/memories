@@ -377,7 +377,7 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 	}
 
 	// Disable autorotation (see transpose comments below)
-	if isHls && s.c.UseTranspose {
+	if s.c.UseTranspose {
 		args = append(args, []string{"-noautorotate"}...)
 	}
 
