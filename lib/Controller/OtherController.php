@@ -81,8 +81,6 @@ class OtherController extends GenericApiController
                 return $this->config->getUserValue($uid, Application::APPNAME, $key, $default);
             };
 
-            $defaultTimelinePath = $this->config->getSystemValue('memories.default_timeline_path', 'EMPTY');
-
             return new JSONResponse([
                 // general stuff
                 'version' => $version,
@@ -100,7 +98,7 @@ class OtherController extends GenericApiController
                 'preview_generator_enabled' => Util::previewGeneratorIsEnabled(),
 
                 // general settings
-                'timeline_path' => $getAppConfig('timelinePath', $defaultTimelinePath),
+                'timeline_path' => $getAppConfig('timelinePath', Util::getSystemConfig('memories.timeline.default_path')),
                 'enable_top_memories' => 'true' === $getAppConfig('enableTopMemories', 'true'),
 
                 // viewer settings

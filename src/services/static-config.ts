@@ -118,7 +118,7 @@ class StaticConfig {
       preview_generator_enabled: false,
 
       // general settings
-      timeline_path: '',
+      timeline_path: '_unknown_',
       enable_top_memories: true,
 
       // viewer settings

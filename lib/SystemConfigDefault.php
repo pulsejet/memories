@@ -21,6 +21,10 @@ return [
     // Places database type identifier
     'memories.gis_type' => -1,
 
+    // Default timeline path for all users
+    // If set to '_empty_', the user is prompted to select a path on first open (default)
+    'memories.timeline.default_path' => '_empty_',
+
     // Default viewer high resolution image loading condition
     // Valid values: 'always' | 'zoom' | 'never'
     'memories.viewer.high_res_cond_default' => 'zoom',
@@ -69,9 +73,6 @@ return [
     //   -2 => Direct (disable transcoding)
     // 1080 => 1080p (and so on)
     'memories.video_default_quality' => '0',
-
-    // Default timeline path for all users; if not set, default is '/Photos'
-    'memories.default_timeline_path' => 'Photos/',
 
     // Memories only provides an admin interface for these
     // https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/config_sample_php_parameters.html#previews

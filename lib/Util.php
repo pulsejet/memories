@@ -316,8 +316,8 @@ class Util
     public static function getTimelinePaths(string $uid): array
     {
         $config = \OC::$server->get(IConfig::class);
-        $defaultTimelinePath = self::getSystemConfig('memories.default_timeline_path');
-        $paths = $config->getUserValue($uid, Application::APPNAME, 'timelinePath', null) ?? $defaultTimelinePath;
+        $paths = $config->getUserValue($uid, Application::APPNAME, 'timelinePath', null)
+            ?? self::getSystemConfig('memories.timeline.default_path');
 
         return array_map(static fn ($p) => self::sanitizePath(trim($p)), explode(';', $paths));
     }
