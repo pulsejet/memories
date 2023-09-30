@@ -37,8 +37,13 @@ class ImageService(private val mCtx: Context) {
     }
 
     @Throws(Exception::class)
-    fun getFull(id: Long): ByteArray {
-        val uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+    fun getFull(query: TimelineQuery, auid: Long): ByteArray {
+        val sysImgs = query.getSystemImagesByAUIDs(listOf(auid))
+        if (sysImgs.isEmpty()) {
+            throw Exception("Image not found")
+        }
+
+        val uri = sysImgs[0].uri
 
         val bitmap =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

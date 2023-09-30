@@ -219,7 +219,7 @@ import java.net.URLDecoder
         } else if (path.matches(API.IMAGE_PREVIEW)) {
             makeResponse(image.getPreview(parts[3].toLong()), "image/jpeg")
         } else if (path.matches(API.IMAGE_FULL)) {
-            makeResponse(image.getFull(parts[3].toLong()), "image/jpeg")
+            makeResponse(image.getFull(query, parts[3].toLong()), "image/jpeg")
         } else if (path.matches(API.SHARE_URL)) {
             makeResponse(dlService!!.shareUrl(URLDecoder.decode(parts[4], "UTF-8")))
         } else if (path.matches(API.SHARE_BLOB)) {
