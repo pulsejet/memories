@@ -54,10 +54,12 @@
 
     <Viewer />
     <Sidebar />
+
     <EditMetadataModal />
     <AddToAlbumModal />
     <NodeShareModal />
     <ShareModal />
+    <MoveToFolderModal />
   </NcContent>
 </template>
 
@@ -83,12 +85,14 @@ import FirstStart from './components/FirstStart.vue';
 import Viewer from './components/viewer/Viewer.vue';
 import Metadata from './components/Metadata.vue';
 import Sidebar from './components/Sidebar.vue';
+import MobileNav from './components/MobileNav.vue';
+import MobileHeader from './components/MobileHeader.vue';
+
 import EditMetadataModal from './components/modal/EditMetadataModal.vue';
 import AddToAlbumModal from './components/modal/AddToAlbumModal.vue';
 import NodeShareModal from './components/modal/NodeShareModal.vue';
 import ShareModal from './components/modal/ShareModal.vue';
-import MobileNav from './components/MobileNav.vue';
-import MobileHeader from './components/MobileHeader.vue';
+import MoveToFolderModal from './components/modal/MoveToFolderModal.vue';
 
 import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue';
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
@@ -123,12 +127,14 @@ export default defineComponent({
     FirstStart,
     Viewer,
     Sidebar,
+    MobileNav,
+    MobileHeader,
+
     EditMetadataModal,
     AddToAlbumModal,
     NodeShareModal,
     ShareModal,
-    MobileNav,
-    MobileHeader,
+    MoveToFolderModal,
 
     ImageMultiple,
     FolderIcon,

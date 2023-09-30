@@ -35,7 +35,6 @@
 
     <!-- Selection Modals -->
     <FaceMoveModal ref="faceMoveModal" @moved="deletePhotos" :updateLoading="updateLoading" />
-    <MoveToFolderModal ref="moveToFolderModal" @moved="refresh" />
   </div>
 </template>
 
@@ -55,7 +54,6 @@ import * as utils from '../services/utils';
 import * as nativex from '../native';
 
 import FaceMoveModal from './modal/FaceMoveModal.vue';
-import MoveToFolderModal from './modal/MoveToFolderModal.vue';
 
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
@@ -146,7 +144,6 @@ export default defineComponent({
     NcActions,
     NcActionButton,
     FaceMoveModal,
-    MoveToFolderModal,
 
     CloseIcon,
   },
@@ -293,10 +290,6 @@ export default defineComponent({
   },
 
   methods: {
-    refresh() {
-      utils.bus.emit('memories:timeline:soft-refresh', null);
-    },
-
     deletePhotos(photos: IPhoto[]) {
       utils.bus.emit('memories:timeline:deleted', photos);
     },
@@ -842,7 +835,7 @@ export default defineComponent({
      * Move selected photos to folder
      */
     async moveToFolder(selection: Selection) {
-      (<any>this.$refs.moveToFolderModal).open(selection.photosNoDupFileId());
+      globalThis.moveToFolder(selection.photosNoDupFileId());
     },
 
     /**

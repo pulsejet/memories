@@ -41,23 +41,20 @@ export default defineComponent({
     processing: false,
   }),
 
-  methods: {
-    open(photos: IPhoto[]) {
+  created() {
+    globalThis.moveToFolder = (photos: IPhoto[]) => {
       this.photosDone = 0;
       this.processing = false;
       this.photos = photos;
 
       this.chooseFolderPath();
-    },
+    };
+  },
 
-    moved(photos: IPhoto[]) {
-      this.$emit('moved', photos);
-    },
-
+  methods: {
     close() {
       this.photos = [];
       this.processing = false;
-      this.$emit('close');
     },
 
     async chooseFolderPath() {
@@ -72,7 +69,7 @@ export default defineComponent({
 
       for await (const fids of gen) {
         this.photosDone += fids.filter((f) => f).length;
-        this.moved(this.photos.filter((p) => fids.includes(p.fileid)));
+        utils.bus.emit('memories:timeline:soft-refresh', null);
       }
 
       const n = this.photosDone;

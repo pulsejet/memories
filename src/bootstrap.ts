@@ -37,6 +37,7 @@ declare global {
   var updateAlbums: (photos: IPhoto[]) => void;
   var sharePhoto: (photo: IPhoto) => void;
   var shareNodeLink: (path: string, immediate?: boolean) => Promise<void>;
+  var moveToFolder: (photos: IPhoto[]) => void;
   var showSettings: () => void;
 
   var mSidebar: {
