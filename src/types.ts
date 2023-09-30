@@ -167,6 +167,8 @@ export interface ICluster {
   /** Name of cluster */
   name: string;
 
+  /** Display name, e.g. translated */
+  display_name?: string;
   /** Preview loading failed */
   previewError?: boolean;
 }
