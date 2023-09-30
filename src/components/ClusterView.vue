@@ -82,6 +82,18 @@ export default defineComponent({
   },
 
   methods: {
+    translated_tag_name(first_item: ICluster,second_item: ICluster) : number  {
+      const first_item_translated = this.t("recognize", first_item.name) 
+      const second_item_translated = this.t("recognize", second_item.name) 
+      if (first_item_translated < second_item_translated) {
+        return -1;
+      }
+      if (first_item_translated > second_item_translated) {
+        return 1;
+      }  
+      return 0;
+    },
+
     async routeChange() {
       try {
         this.items = [];
@@ -94,7 +106,7 @@ export default defineComponent({
         if (this.routeIsAlbums) {
           this.items = await dav.getAlbums(this.config.album_list_sort);
         } else if (this.routeIsTags) {
-          this.items = await dav.getTags();
+          this.items = (await dav.getTags()).sort(this.translated_tag_name);
         } else if (this.routeIsPeople) {
           this.items = await dav.getFaceList(<any>this.$route.name);
         } else if (this.routeIsPlaces) {
