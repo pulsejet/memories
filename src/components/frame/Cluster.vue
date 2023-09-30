@@ -79,7 +79,7 @@ export default defineComponent({
     },
 
     title() {
-      return this.data.display_name ?? this.data.name;
+      return this.data.display_name || this.data.name;
     },
 
     subtitle() {

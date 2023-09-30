@@ -90,10 +90,8 @@ export default defineComponent({
       this.list = null;
       this.search = '';
 
-      this.list = (await dav.getFaceList(this.$route.name as any)).filter((c: IFace) => {
-        const clusterName = String(c.name || c.cluster_id);
-        return c.user_id === this.user && clusterName !== this.name;
-      });
+      const faces = await dav.getFaceList(this.$route.name as any);
+      this.list = faces.filter((c: IFace) => c.user_id === this.user && String(c.name || c.cluster_id) !== this.name);
 
       this.fuse = new Fuse(this.list, { keys: ['name'] });
     },
