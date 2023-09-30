@@ -35,7 +35,7 @@ export async function getAlbums(sort: 1 | 2 = 1, fileid?: number) {
   // Sort the response
   switch (sort) {
     case 2:
-      data.sort((a, b) => a.name.localeCompare(b.name, getLanguage()));
+      data.sort((a, b) => a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
       break;
     default:
       data.sort((a, b) => b.created - a.created);

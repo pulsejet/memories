@@ -23,7 +23,7 @@ export async function getTags() {
   tags.forEach((tag) => (tag.display_name = t('recognize', tag.name)));
 
   // Sort tags by display name (locale aware)
-  tags.sort((a, b) => a.display_name!.localeCompare(b.display_name!, getLanguage()));
+  tags.sort((a, b) => a.display_name!.localeCompare(b.display_name!, getLanguage(), { numeric: true }));
 
   return tags;
 }
