@@ -101,6 +101,9 @@ export default class ImageContentSetup {
     const img = slide.holderElement?.querySelector('.ximg:not(.ximg--full)') as HTMLImageElement;
     if (!img) return;
 
+    // Don't load again
+    slide.data.highSrcCond = 'never';
+
     // Load full image at secondary zoom level
     img.classList.add('ximg--full');
 
@@ -114,9 +117,6 @@ export default class ImageContentSetup {
 
         // Set src
         img.src = blobSrc;
-
-        // Don't load again
-        slide.data.highSrcCond = 'never';
       })
       .finally(() => {
         this.loading--;
