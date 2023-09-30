@@ -126,18 +126,14 @@ export type NativeX = {
   downloadFromUrl: (url: string, filename: string) => void;
 
   /**
-   * Play a video from the given file ID (local file).
-   * @param fileid File ID of the video
-   */
-  playVideoLocal: (fileid: string) => void;
-  /**
-   * Play a video from the given URL(s).
-   * @param fileid Remote file ID of the video (used for play tracking)
+   * Play a video from the given AUID or URL(s).
+   * @param auid AUID of file (will play local if available)
+   * @param fileid File ID of the video (only used for file tracking)
    * @param urlArray JSON-encoded array of URLs to play
    * @details The URL array may contain multiple URLs, e.g. direct playback
    * and HLS separately. The native client must try to play the first URL.
    */
-  playVideoRemote: (fileid: string, urlArray: string) => void;
+  playVideo: (auid: string, fileid: string, urlArray: string) => void;
   /**
    * Destroy the video player.
    * @param fileid File ID of the video
@@ -225,24 +221,20 @@ export async function playTouchSound() {
 }
 
 /**
- * Play a video from the given file ID (local file).
- */
-export async function playVideoLocal(fileid: number) {
-  nativex?.playVideoLocal?.(fileid.toString());
-}
-
-/**
  * Play a video from the given URL.
+ * @param photo Photo to play
+ * @param urls URLs to play (remote)
  */
-export async function playVideoRemote(fileid: number, urls: string[]) {
-  nativex?.playVideoRemote?.(fileid.toString(), JSON.stringify(urls.map(addOrigin)));
+export async function playVideo(photo: IPhoto, urls: string[]) {
+  const auid = photo.auid ?? photo.fileid;
+  nativex?.playVideo?.(auid.toString(), photo.fileid.toString(), JSON.stringify(urls.map(addOrigin)));
 }
 
 /**
  * Destroy the video player.
  */
-export async function destroyVideo(fileId: number) {
-  nativex?.destroyVideo?.(fileId.toString());
+export async function destroyVideo(photo: IPhoto) {
+  nativex?.destroyVideo?.(photo.fileid.toString());
 }
 
 /**

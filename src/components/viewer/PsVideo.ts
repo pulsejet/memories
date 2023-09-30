@@ -138,17 +138,12 @@ class VideoContentSetup {
 
     // Hand off to native player if available
     if (nativex.has()) {
-      const fileid = content.data.photo.fileid;
-
       // Local videos are played back directly
-      if (utils.isLocalPhoto(content.data.photo)) {
-        nativex.playVideoLocal(fileid);
-        return;
-      }
-
-      // Use both remote sources
-      const urls = sources.map((s) => s.src);
-      nativex.playVideoRemote(fileid, urls);
+      // Remote videos are played back via HLS / Direct
+      nativex.playVideo(
+        content.data.photo,
+        sources.map((s) => s.src)
+      );
       return;
     }
 
@@ -259,7 +254,7 @@ class VideoContentSetup {
         // Add a timeout in case another video initializes
         // immediately after this one is destroyed
         setTimeout(() => {
-          nativex.destroyVideo(content.data.photo.fileid);
+          nativex.destroyVideo(content.data.photo);
         }, 500);
       }
 
