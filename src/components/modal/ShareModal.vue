@@ -10,7 +10,7 @@
 
     <ul class="options" v-else>
       <NcListItem
-        v-if="canShareNative && !isVideo && !isLocal"
+        v-if="canShareNative && canShareTranscode"
         :title="t('memories', 'Reduced Size')"
         :bold="false"
         @click.prevent="sharePreview()"
@@ -19,12 +19,16 @@
           <PhotoIcon class="avatar" :size="24" />
         </template>
         <template #subtitle>
-          {{ t('memories', 'Share a lower resolution image preview') }}
+          {{
+            isVideo
+              ? t('memories', 'Share the video as a low quality MP4')
+              : t('memories', 'Share a lower resolution image preview')
+          }}
         </template>
       </NcListItem>
 
       <NcListItem
-        v-if="canShareNative && canShareHighRes"
+        v-if="canShareNative && canShareTranscode"
         :title="t('memories', 'High Resolution')"
         :bold="false"
         @click.prevent="shareHighRes()"
@@ -35,7 +39,7 @@
         <template #subtitle>
           {{
             isVideo
-              ? t('memories', 'Share the video as a high quality MOV')
+              ? t('memories', 'Share the video as a high quality MP4')
               : t('memories', 'Share the image as a high quality JPEG')
           }}
         </template>
@@ -124,7 +128,7 @@ export default defineComponent({
       return 'share' in navigator || nativex.has();
     },
 
-    canShareHighRes(): boolean {
+    canShareTranscode(): boolean {
       return !this.isLocal && (!this.isVideo || !this.config.vod_disable);
     },
 
@@ -157,16 +161,17 @@ export default defineComponent({
     },
 
     async sharePreview() {
-      const src = utils.getPreviewUrl({
-        photo: this.photo!,
-        size: 2048,
-      });
+      const src = this.isVideo
+        ? API.VIDEO_TRANSCODE(this.photo!.fileid, '480p.mp4')
+        : utils.getPreviewUrl({ photo: this.photo!, size: 2048 });
       this.shareWithHref(src, true);
     },
 
     async shareHighRes() {
       const fileid = this.photo!.fileid;
-      const src = this.isVideo ? API.VIDEO_TRANSCODE(fileid, 'max.mov') : API.IMAGE_DECODABLE(fileid, this.photo!.etag);
+      const src = this.isVideo
+        ? API.VIDEO_TRANSCODE(fileid, '1080p.mp4')
+        : API.IMAGE_DECODABLE(fileid, this.photo!.etag);
       this.shareWithHref(src, !this.isVideo);
     },
 

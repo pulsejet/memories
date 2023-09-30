@@ -206,7 +206,7 @@ class VideoController extends GenericApiController
                 // If this is H.264 it won't get transcoded anyway
                 if ($liveVideoPath) {
                     return Util::guardExDirect(function ($out) use ($transcode, $liveVideoPath) {
-                        $this->getUpstream($transcode, $liveVideoPath, 'max.mov');
+                        $this->getUpstream($transcode, $liveVideoPath, 'max.mp4');
                     });
                 }
             }
