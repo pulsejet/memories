@@ -21,8 +21,8 @@ import java.net.URLDecoder
     val TAG = NativeX::class.java.simpleName
 
     private var themeStored = false
-    val image = ImageService(mCtx)
     val query = TimelineQuery(mCtx)
+    val image = ImageService(mCtx, query)
     val account = AccountService(mCtx)
 
     object API {
@@ -43,7 +43,7 @@ import java.net.URLDecoder
     }
 
     init {
-        dlService = DownloadService(mCtx)
+        dlService = DownloadService(mCtx, query)
     }
 
     companion object {
@@ -219,7 +219,7 @@ import java.net.URLDecoder
         } else if (path.matches(API.IMAGE_PREVIEW)) {
             makeResponse(image.getPreview(parts[3].toLong()), "image/jpeg")
         } else if (path.matches(API.IMAGE_FULL)) {
-            makeResponse(image.getFull(query, parts[3].toLong()), "image/jpeg")
+            makeResponse(image.getFull(parts[3].toLong()), "image/jpeg")
         } else if (path.matches(API.SHARE_URL)) {
             makeResponse(dlService!!.shareUrl(URLDecoder.decode(parts[4], "UTF-8")))
         } else if (path.matches(API.SHARE_BLOB)) {

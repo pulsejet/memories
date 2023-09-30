@@ -1,19 +1,17 @@
 package gallery.memories.service
 
 import android.app.DownloadManager
-import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Environment
-import android.provider.MediaStore
 import android.webkit.CookieManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.ArrayMap
 import java.util.concurrent.CountDownLatch
 
-class DownloadService(private val mActivity: AppCompatActivity) {
+class DownloadService(private val mActivity: AppCompatActivity, private val query: TimelineQuery) {
     private val mDownloads: MutableMap<Long, () -> Unit> = ArrayMap()
 
     fun runDownloadCallback(intent: Intent) {
@@ -84,8 +82,11 @@ class DownloadService(private val mActivity: AppCompatActivity) {
     }
 
     @Throws(Exception::class)
-    fun shareLocal(id: Long): Boolean {
-        val uri = ContentUris.withAppendedId(MediaStore.Files.getContentUri("external"), id)
+    fun shareLocal(auid: Long): Boolean {
+        val sysImgs = query.getSystemImagesByAUIDs(listOf(auid))
+        if (sysImgs.isEmpty()) throw Exception("Image not found locally")
+        val uri = sysImgs[0].uri
+
         val intent = Intent(Intent.ACTION_SEND)
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         intent.type = mActivity.contentResolver.getType(uri)

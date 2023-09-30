@@ -8,7 +8,7 @@ import android.os.Build
 import android.provider.MediaStore
 import java.io.ByteArrayOutputStream
 
-class ImageService(private val mCtx: Context) {
+class ImageService(private val mCtx: Context, private val query: TimelineQuery) {
     @Throws(Exception::class)
     fun getPreview(id: Long): ByteArray {
         val bitmap =
@@ -37,7 +37,7 @@ class ImageService(private val mCtx: Context) {
     }
 
     @Throws(Exception::class)
-    fun getFull(query: TimelineQuery, auid: Long): ByteArray {
+    fun getFull(auid: Long): ByteArray {
         val sysImgs = query.getSystemImagesByAUIDs(listOf(auid))
         if (sysImgs.isEmpty()) {
             throw Exception("Image not found")
