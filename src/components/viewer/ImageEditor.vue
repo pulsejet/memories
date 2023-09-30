@@ -5,8 +5,9 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
-import { showError, showSuccess } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
+import { showError, showSuccess } from '@nextcloud/dialogs';
+import { getLanguage } from '@nextcloud/l10n';
 
 import { FilerobotImageEditorConfig } from 'react-filerobot-image-editor';
 
@@ -71,7 +72,7 @@ export default defineComponent({
         // Displayed tabs, disabling watermark and draw
         tabsIds: Object.values(TABS)
           .filter((tab) => ![TABS.WATERMARK, TABS.ANNOTATE].includes(tab))
-          .sort((a: string, b: string) => a.localeCompare(b)) as any[],
+          .sort((a: string, b: string) => a.localeCompare(b, getLanguage())) as any[],
 
         // onBeforeSave: this.onBeforeSave,
         onClose: this.onClose,

@@ -2,7 +2,7 @@ import { ICluster } from '../../types';
 import { API } from '../API';
 import client from './client';
 
-import { translate as t } from '@nextcloud/l10n';
+import { translate as t, getLanguage } from '@nextcloud/l10n';
 import axios from '@nextcloud/axios';
 
 export interface ITag {
@@ -23,7 +23,7 @@ export async function getTags() {
   tags.forEach((tag) => (tag.display_name = t('recognize', tag.name)));
 
   // Sort tags by display name (locale aware)
-  tags.sort((a, b) => a.display_name!.localeCompare(b.display_name!));
+  tags.sort((a, b) => a.display_name!.localeCompare(b.display_name!, getLanguage()));
 
   return tags;
 }

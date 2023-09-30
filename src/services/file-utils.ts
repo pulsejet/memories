@@ -21,6 +21,7 @@
  */
 import camelcase from 'camelcase';
 import { isNumber } from './utils/algo';
+import { getLanguage } from '@nextcloud/l10n';
 
 /**
  * Get an url encoded path
@@ -90,8 +91,8 @@ const sortCompare = function (fileInfo1, fileInfo2, key, asc = true) {
 
   // finally sort by name
   return asc
-    ? fileInfo1[key]?.toString()?.localeCompare(fileInfo2[key].toString(), globalThis.OC.getLanguage()) || 1
-    : -fileInfo1[key]?.toString()?.localeCompare(fileInfo2[key].toString(), globalThis.OC.getLanguage()) || -1;
+    ? fileInfo1[key]?.toString()?.localeCompare(fileInfo2[key].toString(), getLanguage()) || 1
+    : -fileInfo1[key]?.toString()?.localeCompare(fileInfo2[key].toString(), getLanguage()) || -1;
 };
 
 const genFileInfo = function (obj) {
