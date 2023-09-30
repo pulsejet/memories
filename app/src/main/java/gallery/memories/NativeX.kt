@@ -147,23 +147,35 @@ import java.net.URLDecoder
     }
 
     @JavascriptInterface
-    fun playVideoRemote(fileId: String?, urlsArray: String?) {
-        if (fileId == null || urlsArray == null) return
-        val urls = JSONArray(urlsArray)
-        val list = Array(urls.length()) {
-            Uri.parse(urls.getString(it))
-        }
+    fun playVideo(auid: String?, fileid: String?, urlsArray: String?) {
+        if (auid == null || fileid == null || urlsArray == null) return
 
-        mCtx.runOnUiThread {
-            mCtx.initializePlayer(list, fileId)
-        }
+        Thread {
+            // Get URI of remote videos
+            val urls = JSONArray(urlsArray)
+            val list = Array(urls.length()) {
+                Uri.parse(urls.getString(it))
+            }
+
+            // Get URI of local video
+            val videos = query.getSystemImagesByAUIDs(arrayListOf(auid.toLong()))
+
+            // Play with exoplayer
+            mCtx.runOnUiThread {
+                if (!videos.isEmpty()) {
+                    mCtx.initializePlayer(arrayOf(videos[0].uri), fileid)
+                } else {
+                    mCtx.initializePlayer(list, fileid)
+                }
+            }
+        }.start()
     }
 
     @JavascriptInterface
-    fun destroyVideo(fileId: String?) {
-        if (fileId == null) return;
+    fun destroyVideo(fileid: String?) {
+        if (fileid == null) return;
         mCtx.runOnUiThread {
-            mCtx.destroyPlayer(fileId)
+            mCtx.destroyPlayer(fileid)
         }
     }
 

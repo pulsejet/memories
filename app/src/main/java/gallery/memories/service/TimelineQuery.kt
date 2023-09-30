@@ -105,6 +105,13 @@ class TimelineQuery(private val mCtx: MainActivity) {
         return observer
     }
 
+    fun getSystemImagesByAUIDs(auids: List<Long>): List<SystemImage> {
+        val photos = mPhotoDao.getPhotosByAUIDs(auids)
+        val fileIds = photos.map { it.localId }
+        if (fileIds.isEmpty()) return listOf()
+        return SystemImage.getByIds(mCtx, fileIds)
+    }
+
     @Throws(JSONException::class)
     fun getByDayId(dayId: Long): JSONArray {
         // Get the photos for the day from DB
@@ -183,19 +190,18 @@ class TimelineQuery(private val mCtx: MainActivity) {
 
         try {
             // Get list of file IDs
-            val photos = mPhotoDao.getPhotosByAUIDs(auids)
+            val sysImgs = getSystemImagesByAUIDs(auids)
 
             // Let the UI know how many files we are deleting
-            response.put("count", photos.size)
+            response.put("count", sysImgs.size)
             // Let the UI know if we are going to ask for confirmation
             response.put("confirms", Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
 
-            if (dry || photos.isEmpty()) return response
-
-            val fileIds = photos.map { it.localId }
+            // Exit if dry or nothing to do
+            if (dry || sysImgs.isEmpty()) return response
 
             // List of URIs
-            val uris = SystemImage.getByIds(mCtx, fileIds).map { it.uri }
+            val uris = sysImgs.map { it.uri }
             if (uris.isEmpty()) return Response.OK
 
             // Delete file with media store
@@ -226,7 +232,7 @@ class TimelineQuery(private val mCtx: MainActivity) {
             }
 
             // Delete from database
-            mPhotoDao.deleteFileIds(fileIds)
+            mPhotoDao.deleteFileIds(sysImgs.map { it.fileId})
         } finally {
             synchronized(this) { deleting = false }
         }
