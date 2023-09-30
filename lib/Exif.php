@@ -68,9 +68,15 @@ class Exif
     /**
      * Get exif data as a JSON object from a Nextcloud file.
      */
-    public static function getExifFromFile(File &$file)
+    public static function getExifFromFile(File $file)
     {
-        $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+        try {
+            $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+        } catch (\Throwable $ex) {
+            // https://github.com/pulsejet/memories/issues/820
+            throw new \Exception('Failed to get local file: '.$ex->getMessage());
+        }
+
         if (!\is_string($path)) {
             throw new \Exception('Failed to get local file path');
         }
