@@ -33,6 +33,28 @@ export function confirmDestructive(options: ConfirmOptions): Promise<boolean> {
     options ?? {}
   );
 
+  // Observer to focus the confirm button when the dialog is shown
+  let observer: MutationObserver;
+
+  // In case the dialog did not show for whatever reason, cancel after 5 seconds
+  const timeout = setTimeout(() => observer?.disconnect(), 5000);
+
+  // Look for new dialog to be created
+  observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutationRecord) => {
+      mutationRecord.addedNodes.forEach((node) => {
+        if (node instanceof HTMLDivElement && node.classList.contains('oc-dialog')) {
+          (node.querySelector(`button.${opts.confirmClasses}`) as HTMLElement)?.focus?.();
+          observer.disconnect();
+          clearTimeout(timeout);
+        }
+      });
+    });
+  });
+
+  // Watch changes to body
+  observer.observe(document.body, { childList: true });
+
   return new Promise((resolve) => dialogs.confirmDestructive(opts.message, opts.title, opts, resolve));
 }
 
