@@ -349,7 +349,7 @@ export default defineComponent({
     },
 
     tagNames(): string[] {
-      return Object.values(this.baseInfo?.tags || {});
+      return Object.values(this.baseInfo?.tags || {}).map((tag: string) => this.t('recognize', tag));
     },
 
     tagNamesStr(): string | null {
