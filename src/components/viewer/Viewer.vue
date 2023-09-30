@@ -935,7 +935,6 @@ export default defineComponent({
     /** Delete this photo and refresh */
     async deleteCurrent() {
       if (this.routeIsPublic) return;
-      if (!(await utils.dialogs.moveToTrash(1))) return;
 
       let idx = this.photoswipe!.currIndex - this.globalAnchor;
       const photo = this.list[idx];
@@ -948,7 +947,6 @@ export default defineComponent({
           if (!p[0]) return;
         }
       } catch {
-        showError(this.t('memories', 'Failed to delete photo'));
         return;
       } finally {
         this.updateLoading(-1);

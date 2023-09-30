@@ -1,6 +1,7 @@
 import axios from '@nextcloud/axios';
 import { generateUrl } from '@nextcloud/router';
-import type { IDay, IPhoto, IImageInfo } from './types';
+import type { IDay, IPhoto } from './types';
+import { API as SAPI } from './services/API';
 const euc = encodeURIComponent;
 
 /** Access NativeX over localhost */
@@ -34,6 +35,7 @@ export const API = {
    * Delete files using local fileids.
    * @regex ^/api/image/delete/\d+(,\d+)*$
    * @param fileIds List of AUIDs to delete
+   * @param dry (Query) Only check for confirmation and count of local files
    * @returns {void}
    * @throws Return an error code if the user denies the deletion.
    */
@@ -326,13 +328,15 @@ export async function extendDayWithLocal(dayId: number, photos: IPhoto[]) {
 /**
  * Request deletion of local photos wherever available.
  * @param photos List of photos to delete
+ * @returns The number of photos for which confirmation was received
  * @throws If the request fails
  */
-export async function deleteLocalPhotos(photos: IPhoto[]): Promise<void> {
-  if (!has()) return;
+export async function deleteLocalPhotos(photos: IPhoto[], dry: boolean = false): Promise<number> {
+  if (!has()) return 0;
 
   const auids = photos.map((p) => p.auid).filter((a) => !!a) as number[];
-  await axios.get(API.IMAGE_DELETE(auids));
+  const res = await axios.get(SAPI.Q(API.IMAGE_DELETE(auids), { dry }));
+  return res.data.confirms ? res.data.count : 0;
 }
 
 /**

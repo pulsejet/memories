@@ -187,9 +187,10 @@ async function extendWithLivePhotos(photos: IPhoto[]) {
  * Delete all files in a given list of Ids
  *
  * @param photos list of photos to delete
+ * @param confirm whether to show a confirmation dialog (default true)
  * @returns list of file ids that were deleted
  */
-export async function* deletePhotos(photos: IPhoto[]) {
+export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
   if (photos.length === 0) return;
 
   // Extend with Live Photos unless this is an album
@@ -209,8 +210,21 @@ export async function* deletePhotos(photos: IPhoto[]) {
 
   // Check for locally available files and delete them.
   // For albums, we are not actually deleting.
-  if (nativex.has() && !routeIsAlbums) {
-    // Delete local files. This will throw if user cancels.
+  const hasNative = nativex.has() && !routeIsAlbums;
+
+  // Check if native confirmation is available
+  if (hasNative) {
+    confirm &&= (await nativex.deleteLocalPhotos(photos, true)) !== photos.length;
+  }
+
+  // Show confirmation dialog if required
+  if (confirm && !(await utils.dialogs.moveToTrash(photos.length))) {
+    throw new Error('User cancelled deletion');
+  }
+
+  // Delete local files.
+  if (hasNative) {
+    // Delete local files.
     await nativex.deleteLocalPhotos(photos);
 
     // Remove purely local files

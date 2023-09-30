@@ -774,15 +774,12 @@ export default defineComponent({
      * Delete the currently selected photos
      */
     async deleteSelection(selection: Selection) {
-      if (!(await utils.dialogs.moveToTrash(selection.size))) return;
-
       try {
         for await (const delIds of dav.deletePhotos(selection.photosNoDupFileId())) {
           this.deleteSelectedPhotosById(delIds, selection);
         }
       } catch (e) {
         console.error(e);
-        showError(this.t('memories', 'Failed to delete files'));
       }
     },
 
