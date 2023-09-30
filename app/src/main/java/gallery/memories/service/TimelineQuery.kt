@@ -171,7 +171,7 @@ class TimelineQuery(private val mCtx: MainActivity) {
     }
 
     @Throws(Exception::class)
-    fun delete(auids: List<Long>): JSONObject {
+    fun delete(auids: List<Long>, dry: Boolean): JSONObject {
         synchronized(this) {
             if (deleting) {
                 throw Exception("Already deleting another set of images")
@@ -179,10 +179,19 @@ class TimelineQuery(private val mCtx: MainActivity) {
             deleting = true
         }
 
+        val response = Response.OK
+
         try {
             // Get list of file IDs
             val photos = mPhotoDao.getPhotosByAUIDs(auids)
-            if (photos.isEmpty()) return Response.OK
+
+            // Let the UI know how many files we are deleting
+            response.put("count", photos.size)
+            // Let the UI know if we are going to ask for confirmation
+            response.put("confirms", Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+
+            if (dry || photos.isEmpty()) return response
+
             val fileIds = photos.map { it.localId }
 
             // List of URIs
@@ -222,7 +231,7 @@ class TimelineQuery(private val mCtx: MainActivity) {
             synchronized(this) { deleting = false }
         }
 
-        return Response.OK
+        return response
     }
 
     private fun syncDb(startTime: Long): Int {

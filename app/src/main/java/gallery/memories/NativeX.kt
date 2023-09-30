@@ -7,6 +7,7 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.widget.Toast
+import androidx.media3.common.util.UnstableApi
 import gallery.memories.mapper.SystemImage
 import gallery.memories.service.AccountService
 import gallery.memories.service.DownloadService
@@ -16,7 +17,7 @@ import org.json.JSONArray
 import java.io.ByteArrayInputStream
 import java.net.URLDecoder
 
-class NativeX(private val mCtx: MainActivity) {
+@UnstableApi class NativeX(private val mCtx: MainActivity) {
     val TAG = NativeX::class.java.simpleName
 
     private var themeStored = false
@@ -60,7 +61,7 @@ class NativeX(private val mCtx: MainActivity) {
         val response = try {
             when (request.method) {
                 "GET" -> {
-                    routerGet(path)
+                    routerGet(request)
                 }
                 "OPTIONS" -> {
                     WebResourceResponse("text/plain", "UTF-8", ByteArrayInputStream("".toByteArray()))
@@ -191,7 +192,9 @@ class NativeX(private val mCtx: MainActivity) {
     }
 
     @Throws(Exception::class)
-    private fun routerGet(path: String): WebResourceResponse {
+    private fun routerGet(request: WebResourceRequest): WebResourceResponse {
+        val path = request.url.path ?: return makeErrorResponse()
+
         val parts = path.split("/").toTypedArray()
         return if (path.matches(API.DAYS)) {
             makeResponse(query.getDays())
@@ -200,7 +203,7 @@ class NativeX(private val mCtx: MainActivity) {
         } else if (path.matches(API.IMAGE_INFO)) {
             makeResponse(query.getImageInfo(parts[4].toLong()))
         } else if (path.matches(API.IMAGE_DELETE)) {
-            makeResponse(query.delete(parseIds(parts[4])))
+            makeResponse(query.delete(parseIds(parts[4]), request.url.getBooleanQueryParameter("dry", false)))
         } else if (path.matches(API.IMAGE_PREVIEW)) {
             makeResponse(image.getPreview(parts[3].toLong()), "image/jpeg")
         } else if (path.matches(API.IMAGE_FULL)) {
