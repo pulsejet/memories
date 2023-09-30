@@ -3,23 +3,11 @@ import { translate as t } from '@nextcloud/l10n';
 import axios from '@nextcloud/axios';
 
 import { IFileInfo, IPhoto } from '../../types';
-import { genFileInfo } from '../file-utils';
 import { API } from '../API';
 import { getAlbumFileInfos } from './albums';
 import client from './client';
 import * as utils from '../utils';
 import * as nativex from '../../native';
-
-export const props = `
-    <oc:fileid />
-    <oc:permissions />
-    <d:getlastmodified />
-    <d:getetag />
-    <d:getcontenttype />
-    <d:getcontentlength />
-    <nc:has-preview />
-    <oc:favorite />
-    <d:resourcetype />`;
 
 const GET_FILE_CHUNK_SIZE = 50;
 
@@ -127,7 +115,7 @@ async function getFilesInternal2(fileIds: number[]): Promise<IFileInfo[]> {
                 <d:basicsearch>
                     <d:select>
                         <d:prop>
-                            ${props}
+                          <oc:fileid />
                         </d:prop>
                     </d:select>
                     <d:from>
@@ -148,15 +136,15 @@ async function getFilesInternal2(fileIds: number[]): Promise<IFileInfo[]> {
     responseType: 'text',
   };
 
-  let response: any = await client.getDirectoryContents('', options);
-  return response.data
-    .map((data: any) => genFileInfo(data))
-    .map((data: any) =>
-      Object.assign({}, data, {
-        originalFilename: data.filename,
-        filename: data.filename.replace(prefixPath, ''),
-      })
-    );
+  const response: any = await client.getDirectoryContents('', options);
+
+  return response.data.map((data: any) => ({
+    id: data.props.fileid,
+    fileid: data.props.fileid,
+    basename: data.basename,
+    originalFilename: data.filename,
+    filename: data.filename.replace(prefixPath, ''),
+  }));
 }
 
 /**
