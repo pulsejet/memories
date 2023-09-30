@@ -60,6 +60,7 @@
     <NodeShareModal />
     <ShareModal />
     <MoveToFolderModal />
+    <FaceMoveModal />
   </NcContent>
 </template>
 
@@ -93,6 +94,7 @@ import AddToAlbumModal from './components/modal/AddToAlbumModal.vue';
 import NodeShareModal from './components/modal/NodeShareModal.vue';
 import ShareModal from './components/modal/ShareModal.vue';
 import MoveToFolderModal from './components/modal/MoveToFolderModal.vue';
+import FaceMoveModal from './components/modal/FaceMoveModal.vue';
 
 import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue';
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
@@ -135,6 +137,7 @@ export default defineComponent({
     NodeShareModal,
     ShareModal,
     MoveToFolderModal,
+    FaceMoveModal,
 
     ImageMultiple,
     FolderIcon,

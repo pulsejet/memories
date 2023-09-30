@@ -41,17 +41,14 @@ export default defineComponent({
     FaceList,
   },
 
-  props: {
-    updateLoading: {
-      type: Function,
-      required: true,
-    },
-  },
-
   data: () => ({
     show: false,
     photos: [] as IPhoto[],
   }),
+
+  created() {
+    globalThis.moveToFace = this.open.bind(this);
+  },
 
   methods: {
     open(photos: IPhoto[]) {
@@ -81,8 +78,8 @@ export default defineComponent({
       this.$emit('close');
     },
 
-    moved(list: IPhoto[]) {
-      this.$emit('moved', list);
+    moved(photos: IPhoto[]) {
+      utils.bus.emit('memories:timeline:deleted', photos);
     },
 
     async clickFace(face: IFace) {
@@ -106,7 +103,6 @@ export default defineComponent({
 
       try {
         this.show = false;
-        this.updateLoading(1);
 
         // Create map to return IPhoto later
         const map = new Map<number, IPhoto>();
@@ -123,7 +119,6 @@ export default defineComponent({
         console.error(error);
         showError(this.t('photos', 'An error occurred while moving photos from {name}.', { name }));
       } finally {
-        this.updateLoading(-1);
         this.close();
       }
     },

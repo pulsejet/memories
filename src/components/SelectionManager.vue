@@ -32,9 +32,6 @@
         </NcActionButton>
       </NcActions>
     </div>
-
-    <!-- Selection Modals -->
-    <FaceMoveModal ref="faceMoveModal" @moved="deletePhotos" :updateLoading="updateLoading" />
   </div>
 </template>
 
@@ -47,13 +44,11 @@ import UserConfig from '../mixins/UserConfig';
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
-import { translate as t, translatePlural as n } from '@nextcloud/l10n';
+import { translate as t } from '@nextcloud/l10n';
 
 import * as dav from '../services/dav';
 import * as utils from '../services/utils';
 import * as nativex from '../native';
-
-import FaceMoveModal from './modal/FaceMoveModal.vue';
 
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
@@ -143,8 +138,6 @@ export default defineComponent({
   components: {
     NcActions,
     NcActionButton,
-    FaceMoveModal,
-
     CloseIcon,
   },
 
@@ -290,12 +283,8 @@ export default defineComponent({
   },
 
   methods: {
-    deletePhotos(photos: IPhoto[]) {
-      utils.bus.emit('memories:timeline:deleted', photos);
-    },
-
     deleteSelectedPhotosById(delIds: number[], selection: Selection) {
-      return this.deletePhotos(selection.photosFromFileIds(delIds));
+      utils.bus.emit('memories:timeline:deleted', selection.photosFromFileIds(delIds));
     },
 
     updateLoading(delta: number) {
@@ -846,7 +835,7 @@ export default defineComponent({
         showError(this.t('memories', 'You must enable "Mark person in preview" to use this feature'));
         return;
       }
-      (<any>this.$refs.faceMoveModal).open(Array.from(selection.values()));
+      globalThis.moveToFace(Array.from(selection.values()));
     },
 
     /**
