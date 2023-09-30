@@ -79,7 +79,6 @@ OC.L10N.register(
     "Use system perl (only if exiftool binary does not work)" : "Utilisez le système Perl (seulement si le binaire exiftool ne fonctionne pas)",
     "EXIF Extraction" : "Extraction EXIF",
     "Max memory for preview generation (MB)" : "Mémoire maximale pour la génération d'un aperçu (Mo)",
-    "Max size of preview files (MB)" : "Taille maximale des fichiers de prévisualisation (Mo)",
     "External Link" : "Lien Externe",
     "{n} media files have been indexed" : "{n} fichiers multimédias ont été indexés",
     "Automatic Indexing status: {status}" : "État de l'indexation automatique : {status}",

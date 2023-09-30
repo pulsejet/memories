@@ -100,7 +100,6 @@ OC.L10N.register(
     "The following MIME types are configured for preview generation." : "Seuraavat MIME-tyypit on määritelty esikatselujen generointiin.",
     "Max preview size (trade-off between quality and storage requirements)." : "Suurin esikatselun koko (kompromissi laadun ja tiedostojen koon välillä).",
     "Max memory for preview generation (MB)" : "Esikatselujen generointiin käytettävä muistin määrä enimmillään (MB)",
-    "Max size of preview files (MB)" : "Esikatselukuvien koko enimmillään (MB)",
     "File Support" : "Tiedostojen tuki",
     "Images (JPEG, PNG, GIF, BMP)" : "Kuvat (JPEG, PNG, GIF, BMP)",
     "HEIC (Imagick)" : "HEIC (Imagick)",

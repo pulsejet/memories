@@ -89,7 +89,6 @@ OC.L10N.register(
     "The following MIME types are configured for preview generation." : "다음의 MIME 타입이 미리 보기를 생성하도록 설정되었습니다.",
     "Max preview size (trade-off between quality and storage requirements)." : "최대 미리 보기 크기 (품질과 저장 공간 사이에서 타협하세요.)",
     "Max memory for preview generation (MB)" : "미리 보기 생성에 사용할 최대 메모리 (MB)",
-    "Max size of preview files (MB)" : "미리 보기 파일의 최대 크기 (MB)",
     "File Support" : "지원 요청",
     "Images (JPEG, PNG, GIF, BMP)" : "이미지 (JPEG, PNG, GIF, BMP)",
     "External Link" : "외부 링크",
