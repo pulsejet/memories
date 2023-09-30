@@ -13,7 +13,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { translate as t } from '@nextcloud/l10n';
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 import * as strings from '../../services/strings';
@@ -36,7 +35,7 @@ export default defineComponent({
     name(): string | null {
       switch (this.$route.name) {
         case 'tags':
-          return t('recognize',this.$route.params.name);
+          return this.t('recognize', this.$route.params.name);
         case 'places':
           return this.$route.params.name?.split('-').slice(1).join('-');
         default:
