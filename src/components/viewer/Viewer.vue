@@ -926,20 +926,17 @@ export default defineComponent({
     },
 
     /** Key press events */
-    async keydown(e: KeyboardEvent) {
-      if (
-        e.key === 'Delete' &&
-        !this.routeIsPublic &&
-        (await utils.confirmDestructive({
-          title: this.t('memories', 'Are you sure you want to delete?'),
-        }))
-      ) {
+    keydown(e: KeyboardEvent) {
+      if (e.key === 'Delete') {
         this.deleteCurrent();
       }
     },
 
     /** Delete this photo and refresh */
     async deleteCurrent() {
+      if (this.routeIsPublic) return;
+      if (!(await utils.dialogs.moveToTrash(1))) return;
+
       let idx = this.photoswipe!.currIndex - this.globalAnchor;
       const photo = this.list[idx];
       if (!photo) return;
