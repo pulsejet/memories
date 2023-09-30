@@ -89,7 +89,6 @@
     "The following MIME types are configured for preview generation." : "A következő MIME-típusok esetén van beállítva az előnézetek előállítása.",
     "Max preview size (trade-off between quality and storage requirements)." : "Előnézetek legnagyobb mérete (kompromisszum a minőség és a tárhelyigény között).",
     "Max memory for preview generation (MB)" : "Az előnézetek előállításához használt legtöbb memória (MB)",
-    "Max size of preview files (MB)" : "Az előnézeti fájlok legnagyobb mérete (MB)",
     "File Support" : "Fájltámogatás",
     "Images (JPEG, PNG, GIF, BMP)" : "Képek (JPEG, PNG, GIF, BMP)",
     "HEIC (Imagick)" : "HEIC (Imagick)",

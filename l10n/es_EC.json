@@ -89,7 +89,6 @@
     "The following MIME types are configured for preview generation." : "Los siguientes tipos MIME están configurados para la generación de vistas previas.",
     "Max preview size (trade-off between quality and storage requirements)." : "Tamaño máximo de vista previa (compromiso entre calidad y requisitos de almacenamiento).",
     "Max memory for preview generation (MB)" : "Memoria máxima para la generación de vistas previas (MB)",
-    "Max size of preview files (MB)" : "Tamaño máximo de archivos de vista previa (MB)",
     "File Support" : "Soporte de Archivos",
     "Images (JPEG, PNG, GIF, BMP)" : "Imágenes (JPEG, PNG, GIF, BMP)",
     "HEIC (Imagick)" : "HEIC (Imagick)",
