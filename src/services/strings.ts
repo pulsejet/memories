@@ -19,7 +19,7 @@ export function emptyDescription(routeName: RouteNameType): string {
       return t('memories', 'Your videos will appear here');
     case 'albums':
       return vueroute().params.name
-        ? t('memories', 'No photos in this album yet')
+        ? t('memories', 'Add photos to albums by selecting them on your timeline.')
         : t('memories', 'Create an album to get started');
     case 'archive':
       return t('memories', "Archive photos you don't want to see in your timeline");
