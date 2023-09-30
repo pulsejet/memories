@@ -35,7 +35,7 @@ export default defineComponent({
     name(): string | null {
       switch (this.$route.name) {
         case 'tags':
-          return this.$route.params.name;
+          return this.t('recognize', this.$route.params.name);
         case 'places':
           return this.$route.params.name?.split('-').slice(1).join('-');
         default:
