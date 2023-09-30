@@ -107,7 +107,7 @@ class Exif
     }
 
     /** Get exif data as a JSON object from a local file path */
-    public static function getExifFromLocalPath(string &$path)
+    public static function getExifFromLocalPath(string $path)
     {
         if (null !== self::$staticProc) {
             self::ensureStaticExiftoolProc();
@@ -235,7 +235,7 @@ class Exif
      *
      * @return array [width, height]
      */
-    public static function getDimensions(array &$exif)
+    public static function getDimensions(array $exif)
     {
         $width = $exif['ImageWidth'] ?? 0;
         $height = $exif['ImageHeight'] ?? 0;
@@ -403,7 +403,7 @@ class Exif
         return $buf;
     }
 
-    private static function getExifFromLocalPathWithStaticProc(string &$path)
+    private static function getExifFromLocalPathWithStaticProc(string $path)
     {
         $args = implode("\n", self::EXIFTOOL_ARGS);
         fwrite(self::$staticPipes[0], "{$path}\n{$args}\n-execute\n");
@@ -425,7 +425,7 @@ class Exif
         }
     }
 
-    private static function getExifFromLocalPathWithSeparateProc(string &$path, array $extraArgs = [])
+    private static function getExifFromLocalPathWithSeparateProc(string $path, array $extraArgs = [])
     {
         $pipes = [];
         $proc = proc_open(array_merge(self::getExiftool(), self::EXIFTOOL_ARGS, $extraArgs, [$path]), [
@@ -451,7 +451,7 @@ class Exif
     }
 
     /** Get json array from stdout of exiftool */
-    private static function processStdout(string &$stdout)
+    private static function processStdout(string $stdout)
     {
         $json = json_decode($stdout, true);
         if (!$json) {
