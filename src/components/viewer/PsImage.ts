@@ -80,7 +80,7 @@ export default class ImageContentSetup {
   }
 
   zoomPanUpdate({ slide }: { slide: PsSlide }) {
-    if (!slide.data.highSrc || slide.data.highSrcCond !== 'zoom') return;
+    if (!slide.data.highSrc.length || slide.data.highSrcCond !== 'zoom') return;
 
     if (slide.currZoomLevel >= slide.zoomLevels.secondary) {
       this.loadFullImage(slide);
@@ -94,8 +94,8 @@ export default class ImageContentSetup {
     }
   }
 
-  loadFullImage(slide: PsSlide) {
-    if (!slide.data.highSrc) return;
+  async loadFullImage(slide: PsSlide) {
+    if (!slide.data.highSrc.length) return;
 
     // Get ximg element
     const img = slide.holderElement?.querySelector('.ximg:not(.ximg--full)') as HTMLImageElement;
@@ -110,17 +110,21 @@ export default class ImageContentSetup {
     this.loading++;
     this.lightbox.ui?.updatePreloaderVisibility();
 
-    fetchImage(slide.data.highSrc)
-      .then((blobSrc) => {
+    for (const src of slide.data.highSrc) {
+      try {
+        const blobSrc = await fetchImage(src);
+
         // Check if destroyed already
         if (!slide.content.element) return;
 
-        // Set src
         img.src = blobSrc;
-      })
-      .finally(() => {
-        this.loading--;
-        this.lightbox.ui?.updatePreloaderVisibility();
-      });
+        break; // success
+      } catch {
+        // go on to next image
+      }
+    }
+
+    this.loading--;
+    this.lightbox.ui?.updatePreloaderVisibility();
   }
 }

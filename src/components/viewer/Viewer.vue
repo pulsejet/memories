@@ -803,17 +803,24 @@ export default defineComponent({
       this.loadMetadata(photo);
 
       // Get full image URL
-      const fullUrl = isvideo
-        ? null
-        : utils.isLocalPhoto(photo)
-        ? nativex.API.IMAGE_FULL(photo.fileid)
-        : API.IMAGE_DECODABLE(photo.fileid, photo.etag);
-      const fullLoadCond = this.config.high_res_cond || this.config.high_res_cond_default || 'zoom';
+      const highSrc: string[] = [];
+      if (!isvideo) {
+        // Try local file if NativeX is available
+        if (photo.auid && nativex.has()) {
+          highSrc.push(nativex.API.IMAGE_FULL(photo.auid));
+        }
+
+        // Decodable full resolution image
+        highSrc.push(API.IMAGE_DECODABLE(photo.fileid, photo.etag));
+      }
+
+      // Condition of loading full resolution image
+      const highSrcCond = this.config.high_res_cond || this.config.high_res_cond_default || 'zoom';
 
       return {
         src: previewUrl,
-        highSrc: fullUrl,
-        highSrcCond: fullLoadCond,
+        highSrc: highSrc,
+        highSrcCond: highSrcCond,
         width: w || undefined,
         height: h || undefined,
         thumbCropped: true,

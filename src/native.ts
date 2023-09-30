@@ -51,10 +51,10 @@ export const API = {
   /**
    * Local photo full API.
    * @regex ^/image/full/\d+$
-   * @param fileId File ID of the photo
+   * @param auid AUID of the photo
    * @returns {Blob} JPEG full image of the photo.
    */
-  IMAGE_FULL: (fileId: number) => `${BASE_URL}/image/full/${fileId}`,
+  IMAGE_FULL: (auid: number) => `${BASE_URL}/image/full/${auid}`,
 
   /**
    * Share a URL with native page.
