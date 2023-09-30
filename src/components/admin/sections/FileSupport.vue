@@ -77,7 +77,7 @@
     <NcTextField
       type="number"
       placeholder="50"
-      :label="t('memories', 'Max size of preview files (MB)')"
+      :label="t('memories', 'Max size of file to generate previews for (MB)')"
       :label-visible="true"
       :value="String(config['preview_max_filesize_image'])"
       @change="update('preview_max_filesize_image', Number($event.target.value))"
