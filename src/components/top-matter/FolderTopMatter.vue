@@ -90,7 +90,7 @@ export default defineComponent({
 
   methods: {
     share() {
-      globalThis.shareNodeLink(utils.getFolderRoutePath(this.config.folders_path));
+      mModals.shareNodeLink(utils.getFolderRoutePath(this.config.folders_path));
     },
 
     toggleRecursive() {

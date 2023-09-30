@@ -922,7 +922,7 @@ export default defineComponent({
 
     /** Share the current photo externally */
     async shareCurrent() {
-      globalThis.sharePhoto(this.currentPhoto!);
+      mModals.sharePhoto(this.currentPhoto!);
     },
 
     /** Key press events */
@@ -1186,14 +1186,14 @@ export default defineComponent({
      * Edit metadata for current photo
      */
     editMetadata() {
-      globalThis.editMetadata([globalThis.currentViewerPhoto]);
+      mModals.editMetadata([globalThis.currentViewerPhoto]);
     },
 
     /**
      * Update album selection for current photo
      */
     updateAlbums() {
-      globalThis.updateAlbums([this.currentPhoto!]);
+      mModals.updateAlbums([this.currentPhoto!]);
     },
   },
 });

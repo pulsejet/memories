@@ -93,8 +93,9 @@ export default defineComponent({
     state: 0,
   }),
 
-  mounted() {
-    globalThis.editMetadata = this.open;
+  created() {
+    console.assert(!mModals.editMetadata, 'EditMetadataModal created twice');
+    mModals.editMetadata = this.open;
   },
 
   methods: {

@@ -111,10 +111,8 @@ export default defineComponent({
   },
 
   created() {
-    globalThis.sharePhoto = (photo: IPhoto) => {
-      this.photo = photo;
-      this.loading = 0;
-    };
+    console.assert(!mModals.sharePhoto, 'ShareModal created twice');
+    mModals.sharePhoto = this.open;
   },
 
   computed: {
@@ -140,6 +138,11 @@ export default defineComponent({
   },
 
   methods: {
+    open(photo: IPhoto) {
+      this.photo = photo;
+      this.loading = 0;
+    },
+
     close() {
       this.photo = null;
     },
@@ -177,7 +180,7 @@ export default defineComponent({
     async shareLink() {
       this.l(async () => {
         const fileInfo = (await dav.getFiles([this.photo!]))[0];
-        globalThis.shareNodeLink(fileInfo.filename, true);
+        mModals.shareNodeLink(fileInfo.filename, true);
       });
       this.close();
     },

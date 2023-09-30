@@ -50,9 +50,9 @@ export default defineComponent({
     },
   },
 
-  mounted() {
-    console.assert(!globalThis.updateAlbums, 'AddToAlbumModal mounted twice');
-    globalThis.updateAlbums = this.open;
+  created() {
+    console.assert(!mModals.updateAlbums, 'AddToAlbumModal created twice');
+    mModals.updateAlbums = this.open;
   },
 
   methods: {

@@ -790,7 +790,7 @@ export default defineComponent({
      * Open the edit date dialog
      */
     async editMetadataSelection(selection: Selection, sections?: number[]) {
-      globalThis.editMetadata(selection.photosNoDupFileId(), sections);
+      mModals.editMetadata(selection.photosNoDupFileId(), sections);
     },
 
     /**
@@ -817,14 +817,14 @@ export default defineComponent({
      * Move selected photos to album
      */
     async addToAlbum(selection: Selection) {
-      globalThis.updateAlbums(selection.photosNoDupFileId());
+      mModals.updateAlbums(selection.photosNoDupFileId());
     },
 
     /**
      * Move selected photos to folder
      */
     async moveToFolder(selection: Selection) {
-      globalThis.moveToFolder(selection.photosNoDupFileId());
+      mModals.moveToFolder(selection.photosNoDupFileId());
     },
 
     /**
@@ -835,7 +835,7 @@ export default defineComponent({
         showError(this.t('memories', 'You must enable "Mark person in preview" to use this feature'));
         return;
       }
-      globalThis.moveToFace(Array.from(selection.values()));
+      mModals.moveToFace(Array.from(selection.values()));
     },
 
     /**

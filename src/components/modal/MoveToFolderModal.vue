@@ -42,16 +42,19 @@ export default defineComponent({
   }),
 
   created() {
-    globalThis.moveToFolder = (photos: IPhoto[]) => {
+    console.assert(!mModals.moveToFolder, 'MoveToFolderModal created twice');
+    mModals.moveToFolder = this.open;
+  },
+
+  methods: {
+    open(photos: IPhoto[]) {
       this.photosDone = 0;
       this.processing = false;
       this.photos = photos;
 
       this.chooseFolderPath();
-    };
-  },
+    },
 
-  methods: {
     close() {
       this.photos = [];
       this.processing = false;

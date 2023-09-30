@@ -249,7 +249,7 @@ export default defineComponent({
     utils.bus.on('memories:user-config-changed', this.refreshNav);
 
     // Register global functions
-    globalThis.showSettings = () => this.showSettings();
+    mModals.showSettings = this.showSettings;
   },
 
   mounted() {

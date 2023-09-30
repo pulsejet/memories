@@ -120,7 +120,8 @@ export default defineComponent({
   },
 
   created() {
-    globalThis.shareNodeLink = this.open;
+    console.assert(!mModals.shareNodeLink, 'NodeShareModal created twice');
+    mModals.shareNodeLink = this.open;
   },
 
   methods: {
