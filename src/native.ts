@@ -77,10 +77,10 @@ export const API = {
   /**
    * Share a local file (as blob) with native page.
    * @regex ^/api/share/local/\d+$
-   * @param fileId File ID of the photo
+   * @param auid AUID of the photo
    * @returns {void}
    */
-  SHARE_LOCAL: (fileId: number) => `${BASE_URL}/api/share/local/${fileId}`,
+  SHARE_LOCAL: (auid: number) => `${BASE_URL}/api/share/local/${auid}`,
 
   /**
    * Get list of local folders configuration.
@@ -257,8 +257,9 @@ export async function shareBlobFromUrl(url: string) {
 /**
  * Share a local file with native page.
  */
-export async function shareLocal(fileId: number) {
-  await axios.get(API.SHARE_LOCAL(fileId));
+export async function shareLocal(photo: IPhoto) {
+  if (!photo.auid) throw new Error('Cannot share local file without AUID');
+  await axios.get(API.SHARE_LOCAL(photo.auid));
 }
 
 /**

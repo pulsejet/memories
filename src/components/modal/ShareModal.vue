@@ -176,10 +176,18 @@ export default defineComponent({
     },
 
     async shareOriginal() {
-      if (this.isLocal) {
-        return this.l(async () => await nativex.shareLocal(this.photo!.fileid));
+      if (nativex.has()) {
+        try {
+          return await this.l(async () => await nativex.shareLocal(this.photo!));
+        } catch (e) {
+          // maybe the file doesn't exist locally
+        }
+
+        // if it's purel local, we can't share it
+        if (this.isLocal) return;
       }
-      this.shareWithHref(dav.getDownloadLink(this.photo!));
+
+      await this.shareWithHref(dav.getDownloadLink(this.photo!));
     },
 
     async shareLink() {
