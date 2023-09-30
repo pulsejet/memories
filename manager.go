@@ -210,12 +210,15 @@ func (m *Manager) ServeHTTP(w http.ResponseWriter, r *http.Request, chunk string
 	}
 
 	// Stream full video
-	movSfx := ".mov"
-	if strings.HasSuffix(chunk, movSfx) {
-		quality := strings.TrimSuffix(chunk, movSfx)
+	mp4Sfx := ".mp4"
+	if strings.HasSuffix(chunk, mp4Sfx) {
+		quality := strings.TrimSuffix(chunk, mp4Sfx)
 		if stream, ok := m.streams[quality]; ok {
 			return stream.ServeFullVideo(w, r)
 		}
+
+		// Fall back to original
+		return m.streams[QUALITY_MAX].ServeFullVideo(w, r)
 	}
 
 	w.WriteHeader(http.StatusNotFound)
