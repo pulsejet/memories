@@ -127,6 +127,8 @@ export interface IExif {
   Make?: string;
   Model?: string;
 
+  CreateDate?: string;
+  DateTimeOriginal?: string;
   DateTimeEpoch?: number;
   OffsetTimeOriginal?: string;
   OffsetTime?: string;

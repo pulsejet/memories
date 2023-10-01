@@ -49,7 +49,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { IPhoto } from '../../types';
+import { IExif, IPhoto } from '../../types';
 
 import UserConfig from '../../mixins/UserConfig';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
@@ -186,7 +186,7 @@ export default defineComponent({
           const fileid = p.fileid;
 
           // Basic EXIF fields
-          const raw = JSON.parse(JSON.stringify(exifResult));
+          const raw: IExif = JSON.parse(JSON.stringify(exifResult));
 
           // Date
           const date = (<any>this.$refs.editDate)?.result?.(p);
