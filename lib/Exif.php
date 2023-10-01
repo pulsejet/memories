@@ -219,7 +219,7 @@ class Exif
             throw new \Error("FATAL: system timezone is invalid (TZ): {$tz}");
         }
 
-        return self::forgetTimezone($dt);
+        return $dt;
     }
 
     /**
