@@ -13,6 +13,7 @@
         :label="t('memories', 'Year')"
         :label-visible="true"
         :placeholder="t('memories', 'Year')"
+        :disabled="disabled"
         @input="newestChange()"
       />
       <NcTextField
@@ -21,6 +22,7 @@
         :label="t('memories', 'Month')"
         :label-visible="true"
         :placeholder="t('memories', 'Month')"
+        :disabled="disabled"
         @input="newestChange()"
       />
       <NcTextField
@@ -29,6 +31,7 @@
         :label="t('memories', 'Day')"
         :label-visible="true"
         :placeholder="t('memories', 'Day')"
+        :disabled="disabled"
         @input="newestChange()"
       />
       <NcTextField
@@ -37,6 +40,7 @@
         :label="t('memories', 'Time')"
         :label-visible="true"
         :placeholder="t('memories', 'Hour')"
+        :disabled="disabled"
         @input="newestChange(true)"
       />
       <NcTextField
@@ -44,6 +48,7 @@
         :value.sync="minute"
         :label="t('memories', 'Minute')"
         :placeholder="t('memories', 'Minute')"
+        :disabled="disabled"
         @input="newestChange(true)"
       />
     </div>
@@ -62,6 +67,7 @@
           :label="t('memories', 'Year')"
           :label-visible="true"
           :placeholder="t('memories', 'Year')"
+          :disabled="disabled"
           @input="oldestChange()"
         />
         <NcTextField
@@ -70,6 +76,7 @@
           :label="t('memories', 'Month')"
           :label-visible="true"
           :placeholder="t('memories', 'Month')"
+          :disabled="disabled"
           @input="oldestChange()"
         />
         <NcTextField
@@ -78,6 +85,7 @@
           :label="t('memories', 'Day')"
           :label-visible="true"
           :placeholder="t('memories', 'Day')"
+          :disabled="disabled"
           @input="oldestChange()"
         />
         <NcTextField
@@ -86,6 +94,7 @@
           :label="t('memories', 'Time')"
           :label-visible="true"
           :placeholder="t('memories', 'Hour')"
+          :disabled="disabled"
           @input="oldestChange()"
         />
         <NcTextField
@@ -93,6 +102,7 @@
           :value.sync="minuteLast"
           :label="t('memories', 'Minute')"
           :placeholder="t('memories', 'Minute')"
+          :disabled="disabled"
           @input="oldestChange()"
         />
       </div>
@@ -118,6 +128,10 @@ export default defineComponent({
     photos: {
       type: Array<IPhoto>,
       required: true,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     },
   },
 

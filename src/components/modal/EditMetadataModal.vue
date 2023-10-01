@@ -15,14 +15,14 @@
         <div class="title-text">
           {{ t('memories', 'Date / Time') }}
         </div>
-        <EditDate ref="editDate" :photos="photos" />
+        <EditDate ref="editDate" :photos="photos" :disabled="processing" />
       </div>
 
       <div v-if="config.systemtags_enabled && sections.includes(2)">
         <div class="title-text">
           {{ t('memories', 'Collaborative Tags') }}
         </div>
-        <EditTags ref="editTags" :photos="photos" />
+        <EditTags ref="editTags" :photos="photos" :disabled="processing" />
         <div class="tag-padding" v-if="sections.length === 1"></div>
       </div>
 
@@ -30,14 +30,14 @@
         <div class="title-text">
           {{ t('memories', 'EXIF Fields') }}
         </div>
-        <EditExif ref="editExif" :photos="photos" @save="save" />
+        <EditExif ref="editExif" :photos="photos" :disabled="processing" @save="save" />
       </div>
 
       <div v-if="sections.includes(4)">
         <div class="title-text">
           {{ t('memories', 'Geolocation') }}
         </div>
-        <EditLocation ref="editLocation" :photos="photos" />
+        <EditLocation ref="editLocation" :photos="photos" :disabled="processing" />
       </div>
     </div>
 

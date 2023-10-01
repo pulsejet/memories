@@ -4,6 +4,7 @@
       ref="selectTags"
       class="nc-comp"
       v-model="tagSelection"
+      :disabled="disabled"
       :limit="null"
       :options-filter="tagFilter"
       :get-option-label="tagLabel"
@@ -31,6 +32,10 @@ export default defineComponent({
     photos: {
       type: Array<IPhoto>,
       required: true,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     },
   },
 

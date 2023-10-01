@@ -7,6 +7,7 @@
       <NcTextField
         class="field"
         :id="'exif-field-' + field.field"
+        :disabled="disabled"
         :label-outside="true"
         :value.sync="exif[field.field]"
         :placeholder="placeholder(field)"
@@ -42,6 +43,10 @@ export default defineComponent({
     photos: {
       type: Array<IPhoto>,
       required: true,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     },
   },
 

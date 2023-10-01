@@ -7,12 +7,17 @@
 
       <div class="action">
         <NcActions :inline="2">
-          <NcActionButton v-if="dirty" :aria-label="t('memories', 'Reset')" @click="reset()">
+          <NcActionButton v-if="dirty" :aria-label="t('memories', 'Reset')" @click="reset()" :disabled="disabled">
             {{ t('memories', 'Reset') }}
             <template #icon> <UndoIcon :size="20" /> </template>
           </NcActionButton>
 
-          <NcActionButton v-if="lat && lon" :aria-label="t('memories', 'Remove location')" @click="clear()">
+          <NcActionButton
+            v-if="lat && lon"
+            :aria-label="t('memories', 'Remove location')"
+            @click="clear()"
+            :disabled="disabled"
+          >
             {{ t('memories', 'Remove location') }}
             <template #icon> <CloseIcon :size="20" /> </template>
           </NcActionButton>
@@ -23,6 +28,7 @@
     <NcTextField
       :value.sync="searchBar"
       :placeholder="t('memories', 'Search location / landmark')"
+      :disabled="disabled"
       trailing-button-icon="arrowRight"
       :show-trailing-button="searchBar.length > 0 && !loading"
       @trailing-button-click="search"
@@ -45,6 +51,7 @@
       <li
         v-for="option in options"
         :key="option.osm_id"
+        :disabled="disabled"
         @click="select(option)"
         @keypress.enter="select(option)"
         tabindex="0"
@@ -95,6 +102,10 @@ export default defineComponent({
     photos: {
       type: Array<IPhoto>,
       required: true,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     },
   },
 
