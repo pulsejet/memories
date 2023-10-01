@@ -96,8 +96,8 @@ export default defineComponent({
       if (album.user !== utils.uid) {
         text +=
           ' / ' +
-          this.t('memories', 'shared by {owner}', {
-            owner: album.user_display || album.user,
+          this.t('memories', 'Shared by {user}', {
+            user: album.user_display || album.user,
           });
       }
 

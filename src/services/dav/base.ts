@@ -3,23 +3,11 @@ import { translate as t } from '@nextcloud/l10n';
 import axios from '@nextcloud/axios';
 
 import { IFileInfo, IPhoto } from '../../types';
-import { genFileInfo } from '../file-utils';
 import { API } from '../API';
 import { getAlbumFileInfos } from './albums';
 import client from './client';
 import * as utils from '../utils';
 import * as nativex from '../../native';
-
-export const props = `
-    <oc:fileid />
-    <oc:permissions />
-    <d:getlastmodified />
-    <d:getetag />
-    <d:getcontenttype />
-    <d:getcontentlength />
-    <nc:has-preview />
-    <oc:favorite />
-    <d:resourcetype />`;
 
 const GET_FILE_CHUNK_SIZE = 50;
 
@@ -100,63 +88,28 @@ async function getFilesInternal2(fileIds: number[]): Promise<IFileInfo[]> {
     return [];
   }
 
+  // https://jsonformatter.org/xml-formatter
   const filter = fileIds
-    .map(
-      (fileId) => `
-        <d:eq>
-            <d:prop>
-                <oc:fileid/>
-            </d:prop>
-            <d:literal>${fileId}</d:literal>
-        </d:eq>
-    `
-    )
+    .map((fileId) => `<d:eq><d:prop><oc:fileid/></d:prop><d:literal>${fileId}</d:literal></d:eq>`)
     .join('');
 
   const options = {
     method: 'SEARCH',
-    headers: {
-      'content-Type': 'text/xml',
-    },
-    data: `<?xml version="1.0" encoding="UTF-8"?>
-            <d:searchrequest xmlns:d="DAV:"
-                xmlns:oc="http://owncloud.org/ns"
-                xmlns:nc="http://nextcloud.org/ns"
-                xmlns:ns="https://github.com/icewind1991/SearchDAV/ns"
-                xmlns:ocs="http://open-collaboration-services.org/ns">
-                <d:basicsearch>
-                    <d:select>
-                        <d:prop>
-                            ${props}
-                        </d:prop>
-                    </d:select>
-                    <d:from>
-                        <d:scope>
-                            <d:href>${prefixPath}</d:href>
-                            <d:depth>0</d:depth>
-                        </d:scope>
-                    </d:from>
-                    <d:where>
-                        <d:or>
-                            ${filter}
-                        </d:or>
-                    </d:where>
-                </d:basicsearch>
-            </d:searchrequest>`,
+    headers: { 'content-Type': 'text/xml' },
+    data: `<?xml version="1.0" encoding="UTF-8"?><d:searchrequest xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns" xmlns:ns="https://github.com/icewind1991/SearchDAV/ns" xmlns:ocs="http://open-collaboration-services.org/ns"><d:basicsearch><d:select><d:prop><oc:fileid /></d:prop></d:select><d:from><d:scope><d:href>${prefixPath}</d:href><d:depth>0</d:depth></d:scope></d:from><d:where><d:or>${filter}</d:or></d:where></d:basicsearch></d:searchrequest>`,
     deep: true,
     details: true,
-    responseType: 'text',
   };
 
-  let response: any = await client.getDirectoryContents('', options);
-  return response.data
-    .map((data: any) => genFileInfo(data))
-    .map((data: any) =>
-      Object.assign({}, data, {
-        originalFilename: data.filename,
-        filename: data.filename.replace(prefixPath, ''),
-      })
-    );
+  const response: any = await client.getDirectoryContents('', options);
+
+  return response.data.map((data: any) => ({
+    id: data.props.fileid,
+    fileid: data.props.fileid,
+    basename: data.basename,
+    originalFilename: data.filename,
+    filename: data.filename.replace(prefixPath, ''),
+  }));
 }
 
 /**
@@ -234,9 +187,10 @@ async function extendWithLivePhotos(photos: IPhoto[]) {
  * Delete all files in a given list of Ids
  *
  * @param photos list of photos to delete
+ * @param confirm whether to show a confirmation dialog (default true)
  * @returns list of file ids that were deleted
  */
-export async function* deletePhotos(photos: IPhoto[]) {
+export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
   if (photos.length === 0) return;
 
   // Extend with Live Photos unless this is an album
@@ -256,8 +210,21 @@ export async function* deletePhotos(photos: IPhoto[]) {
 
   // Check for locally available files and delete them.
   // For albums, we are not actually deleting.
-  if (nativex.has() && !routeIsAlbums) {
-    // Delete local files. This will throw if user cancels.
+  const hasNative = nativex.has() && !routeIsAlbums;
+
+  // Check if native confirmation is available
+  if (hasNative) {
+    confirm &&= (await nativex.deleteLocalPhotos(photos, true)) !== photos.length;
+  }
+
+  // Show confirmation dialog if required
+  if (confirm && !(await utils.dialogs.moveToTrash(photos.length))) {
+    throw new Error('User cancelled deletion');
+  }
+
+  // Delete local files.
+  if (hasNative) {
+    // Delete local files.
     await nativex.deleteLocalPhotos(photos);
 
     // Remove purely local files

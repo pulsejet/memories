@@ -32,10 +32,6 @@
         </NcActionButton>
       </NcActions>
     </div>
-
-    <!-- Selection Modals -->
-    <FaceMoveModal ref="faceMoveModal" @moved="deletePhotos" :updateLoading="updateLoading" />
-    <MoveToFolderModal ref="moveToFolderModal" @moved="refresh" />
   </div>
 </template>
 
@@ -48,14 +44,11 @@ import UserConfig from '../mixins/UserConfig';
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
-import { translate as t, translatePlural as n } from '@nextcloud/l10n';
+import { translate as t } from '@nextcloud/l10n';
 
 import * as dav from '../services/dav';
 import * as utils from '../services/utils';
 import * as nativex from '../native';
-
-import FaceMoveModal from './modal/FaceMoveModal.vue';
-import MoveToFolderModal from './modal/MoveToFolderModal.vue';
 
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
@@ -145,9 +138,6 @@ export default defineComponent({
   components: {
     NcActions,
     NcActionButton,
-    FaceMoveModal,
-    MoveToFolderModal,
-
     CloseIcon,
   },
 
@@ -293,16 +283,8 @@ export default defineComponent({
   },
 
   methods: {
-    refresh() {
-      utils.bus.emit('memories:timeline:soft-refresh', null);
-    },
-
-    deletePhotos(photos: IPhoto[]) {
-      utils.bus.emit('memories:timeline:deleted', photos);
-    },
-
     deleteSelectedPhotosById(delIds: number[], selection: Selection) {
-      return this.deletePhotos(selection.photosFromFileIds(delIds));
+      utils.bus.emit('memories:timeline:deleted', selection.photosFromFileIds(delIds));
     },
 
     updateLoading(delta: number) {
@@ -766,17 +748,7 @@ export default defineComponent({
      * Download the currently selected files
      */
     async downloadSelection(selection: Selection) {
-      if (
-        selection.size >= 100 &&
-        !(await utils.confirmDestructive({
-          title: this.t('memories', 'Download'),
-          message: this.t('memories', 'You are about to download a large number of files.'),
-          confirm: this.t('memories', 'Continue'),
-          cancel: this.t('memories', 'Cancel'),
-        }))
-      ) {
-        return;
-      }
+      if (selection.size >= 100 && !(await utils.dialogs.downloadItems(selection.size))) return;
       await dav.downloadFilesByPhotos(selection.photosNoDupFileId());
     },
 
@@ -802,25 +774,12 @@ export default defineComponent({
      * Delete the currently selected photos
      */
     async deleteSelection(selection: Selection) {
-      if (
-        selection.size >= 100 &&
-        !(await utils.confirmDestructive({
-          title: this.t('memories', 'Delete'),
-          message: this.t('memories', 'You are about to delete a large number of files'),
-          confirm: this.t('memories', 'Continue'),
-          cancel: this.t('memories', 'Cancel'),
-        }))
-      ) {
-        return;
-      }
-
       try {
         for await (const delIds of dav.deletePhotos(selection.photosNoDupFileId())) {
           this.deleteSelectedPhotosById(delIds, selection);
         }
       } catch (e) {
         console.error(e);
-        showError(this.t('memories', 'Failed to delete files'));
       }
     },
 
@@ -828,7 +787,7 @@ export default defineComponent({
      * Open the edit date dialog
      */
     async editMetadataSelection(selection: Selection, sections?: number[]) {
-      globalThis.editMetadata(selection.photosNoDupFileId(), sections);
+      mModals.editMetadata(selection.photosNoDupFileId(), sections);
     },
 
     /**
@@ -844,17 +803,7 @@ export default defineComponent({
      * Archive the currently selected photos
      */
     async archiveSelection(selection: Selection) {
-      if (
-        selection.size >= 100 &&
-        !(await utils.confirmDestructive({
-          title: this.t('memories', 'Move'),
-          message: this.t('memories', 'You are about to move a large number of files'),
-          confirm: this.t('memories', 'Continue'),
-          cancel: this.t('memories', 'Cancel'),
-        }))
-      ) {
-        return;
-      }
+      if (selection.size >= 50 && !(await utils.dialogs.moveItems(selection.size))) return;
 
       for await (let delIds of dav.archiveFilesByIds(Array.from(selection.fileids()), !this.routeIsArchive)) {
         this.deleteSelectedPhotosById(delIds, selection);
@@ -865,14 +814,14 @@ export default defineComponent({
      * Move selected photos to album
      */
     async addToAlbum(selection: Selection) {
-      globalThis.updateAlbums(selection.photosNoDupFileId());
+      mModals.updateAlbums(selection.photosNoDupFileId());
     },
 
     /**
      * Move selected photos to folder
      */
     async moveToFolder(selection: Selection) {
-      (<any>this.$refs.moveToFolderModal).open(selection.photosNoDupFileId());
+      mModals.moveToFolder(selection.photosNoDupFileId());
     },
 
     /**
@@ -883,7 +832,7 @@ export default defineComponent({
         showError(this.t('memories', 'You must enable "Mark person in preview" to use this feature'));
         return;
       }
-      (<any>this.$refs.faceMoveModal).open(Array.from(selection.values()));
+      mModals.moveToFace(Array.from(selection.values()));
     },
 
     /**

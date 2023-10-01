@@ -9,7 +9,7 @@ type PsAugment = {
     /** The original photo object. */
     photo: IPhoto;
     /** The source of the high resolution image. */
-    highSrc: string | null;
+    highSrc: string[];
     /** The condition for loading the high resolution image. */
     highSrcCond: IConfig['high_res_cond'];
     /** The type of content. */

@@ -80,7 +80,7 @@ export default class ImageContentSetup {
   }
 
   zoomPanUpdate({ slide }: { slide: PsSlide }) {
-    if (!slide.data.highSrc || slide.data.highSrcCond !== 'zoom') return;
+    if (!slide.data.highSrc.length || slide.data.highSrcCond !== 'zoom') return;
 
     if (slide.currZoomLevel >= slide.zoomLevels.secondary) {
       this.loadFullImage(slide);
@@ -94,12 +94,15 @@ export default class ImageContentSetup {
     }
   }
 
-  loadFullImage(slide: PsSlide) {
-    if (!slide.data.highSrc) return;
+  async loadFullImage(slide: PsSlide) {
+    if (!slide.data.highSrc.length) return;
 
     // Get ximg element
     const img = slide.holderElement?.querySelector('.ximg:not(.ximg--full)') as HTMLImageElement;
     if (!img) return;
+
+    // Don't load again
+    slide.data.highSrcCond = 'never';
 
     // Load full image at secondary zoom level
     img.classList.add('ximg--full');
@@ -107,20 +110,21 @@ export default class ImageContentSetup {
     this.loading++;
     this.lightbox.ui?.updatePreloaderVisibility();
 
-    fetchImage(slide.data.highSrc)
-      .then((blobSrc) => {
+    for (const src of slide.data.highSrc) {
+      try {
+        const blobSrc = await fetchImage(src);
+
         // Check if destroyed already
         if (!slide.content.element) return;
 
-        // Set src
         img.src = blobSrc;
+        break; // success
+      } catch {
+        // go on to next image
+      }
+    }
 
-        // Don't load again
-        slide.data.highSrcCond = 'never';
-      })
-      .finally(() => {
-        this.loading--;
-        this.lightbox.ui?.updatePreloaderVisibility();
-      });
+    this.loading--;
+    this.lightbox.ui?.updatePreloaderVisibility();
   }
 }

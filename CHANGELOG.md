@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file.
 - **Feature**: View file in folder on clicking name in sidebar
 - **Feature**: User can leave albums that are shared with them
 - **Feature**: Admin can now configure default behavior of loading high resolution image in viewer ([#672](https://github.com/pulsejet/memories/pull/672))
+- **Feature**: Shared videos will now be transcoded to be smaller in size
+- **Feature**: Confirmation box on deletion ([#798](https://github.com/pulsejet/memories/issues/798))
 - **Fix**: Support for transcoding MKV files.
 
 ## [v5.4.1] - 2023-08-20

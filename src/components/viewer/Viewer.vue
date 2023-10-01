@@ -803,17 +803,24 @@ export default defineComponent({
       this.loadMetadata(photo);
 
       // Get full image URL
-      const fullUrl = isvideo
-        ? null
-        : utils.isLocalPhoto(photo)
-        ? nativex.API.IMAGE_FULL(photo.fileid)
-        : API.IMAGE_DECODABLE(photo.fileid, photo.etag);
-      const fullLoadCond = this.config.high_res_cond || this.config.high_res_cond_default || 'zoom';
+      const highSrc: string[] = [];
+      if (!isvideo) {
+        // Try local file if NativeX is available
+        if (photo.auid && nativex.has()) {
+          highSrc.push(nativex.API.IMAGE_FULL(photo.auid));
+        }
+
+        // Decodable full resolution image
+        highSrc.push(API.IMAGE_DECODABLE(photo.fileid, photo.etag));
+      }
+
+      // Condition of loading full resolution image
+      const highSrcCond = this.config.high_res_cond || this.config.high_res_cond_default || 'zoom';
 
       return {
         src: previewUrl,
-        highSrc: fullUrl,
-        highSrcCond: fullLoadCond,
+        highSrc: highSrc,
+        highSrcCond: highSrcCond,
         width: w || undefined,
         height: h || undefined,
         thumbCropped: true,
@@ -922,24 +929,20 @@ export default defineComponent({
 
     /** Share the current photo externally */
     async shareCurrent() {
-      globalThis.sharePhoto(this.currentPhoto!);
+      mModals.sharePhoto(this.currentPhoto!);
     },
 
     /** Key press events */
-    async keydown(e: KeyboardEvent) {
-      if (
-        e.key === 'Delete' &&
-        !this.routeIsPublic &&
-        (await utils.confirmDestructive({
-          title: this.t('memories', 'Are you sure you want to delete?'),
-        }))
-      ) {
+    keydown(e: KeyboardEvent) {
+      if (e.key === 'Delete') {
         this.deleteCurrent();
       }
     },
 
     /** Delete this photo and refresh */
     async deleteCurrent() {
+      if (this.routeIsPublic) return;
+
       let idx = this.photoswipe!.currIndex - this.globalAnchor;
       const photo = this.list[idx];
       if (!photo) return;
@@ -951,7 +954,6 @@ export default defineComponent({
           if (!p[0]) return;
         }
       } catch {
-        showError(this.t('memories', 'Failed to delete photo'));
         return;
       } finally {
         this.updateLoading(-1);
@@ -1189,14 +1191,14 @@ export default defineComponent({
      * Edit metadata for current photo
      */
     editMetadata() {
-      globalThis.editMetadata([globalThis.currentViewerPhoto]);
+      mModals.editMetadata([globalThis.currentViewerPhoto]);
     },
 
     /**
      * Update album selection for current photo
      */
     updateAlbums() {
-      globalThis.updateAlbums([this.currentPhoto!]);
+      mModals.updateAlbums([this.currentPhoto!]);
     },
   },
 });

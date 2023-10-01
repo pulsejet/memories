@@ -2,7 +2,7 @@ import * as base from './base';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
-import { translate as t } from '@nextcloud/l10n';
+import { translate as t, getLanguage } from '@nextcloud/l10n';
 
 import { IAlbum, IFileInfo, IPhoto } from '../../types';
 
@@ -35,7 +35,7 @@ export async function getAlbums(sort: 1 | 2 = 1, fileid?: number) {
   // Sort the response
   switch (sort) {
     case 2:
-      data.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+      data.sort((a, b) => a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
       break;
     default:
       data.sort((a, b) => b.created - a.created);

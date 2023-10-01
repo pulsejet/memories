@@ -286,7 +286,7 @@ class Index
         $this->logger->error($message);
 
         if ($this->output) {
-            $this->output->writeln("<error>{$message}</error>");
+            $this->output->writeln("<error>{$message}</error>\n");
         }
     }
 

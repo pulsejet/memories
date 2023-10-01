@@ -79,11 +79,7 @@ export default defineComponent({
     },
 
     title() {
-      if (this.tag) {
-        return this.t('recognize', this.tag.name);
-      }
-
-      return this.data.name;
+      return this.data.display_name || this.data.name;
     },
 
     subtitle() {
@@ -109,26 +105,28 @@ export default defineComponent({
       return '';
     },
 
+    type() {
+      return this.data.cluster_type;
+    },
+
     plus() {
-      return this.data.cluster_type === 'plus';
+      return this.type === 'plus';
     },
 
     tag() {
-      return this.data.cluster_type === 'tags' && this.data;
+      return this.type === 'tags' && this.data;
     },
 
     face() {
-      return (
-        (this.data.cluster_type === 'recognize' || this.data.cluster_type === 'facerecognition') && (this.data as IFace)
-      );
+      return (this.type === 'recognize' || this.type === 'facerecognition') && (this.data as IFace);
     },
 
     place() {
-      return this.data.cluster_type === 'places' && this.data;
+      return this.type === 'places' && this.data;
     },
 
     album() {
-      return this.data.cluster_type === 'albums' && (this.data as IAlbum);
+      return this.type === 'albums' && (this.data as IAlbum);
     },
 
     /** Target URL to navigate to */

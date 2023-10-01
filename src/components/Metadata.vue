@@ -349,7 +349,7 @@ export default defineComponent({
     },
 
     tagNames(): string[] {
-      return Object.values(this.baseInfo?.tags || {});
+      return Object.values(this.baseInfo?.tags || {}).map((tag: string) => this.t('recognize', tag));
     },
 
     tagNamesStr(): string | null {
@@ -419,19 +419,19 @@ export default defineComponent({
     },
 
     editDate() {
-      globalThis.editMetadata([globalThis.currentViewerPhoto], [1]);
+      mModals.editMetadata([globalThis.currentViewerPhoto], [1]);
     },
 
     editTags() {
-      globalThis.editMetadata([globalThis.currentViewerPhoto], [2]);
+      mModals.editMetadata([globalThis.currentViewerPhoto], [2]);
     },
 
     editEXIF() {
-      globalThis.editMetadata([globalThis.currentViewerPhoto], [3]);
+      mModals.editMetadata([globalThis.currentViewerPhoto], [3]);
     },
 
     editGeo() {
-      globalThis.editMetadata([globalThis.currentViewerPhoto], [4]);
+      mModals.editMetadata([globalThis.currentViewerPhoto], [4]);
     },
 
     async refresh() {

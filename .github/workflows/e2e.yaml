@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - pulsejet/*
 
 env:
   APP_NAME: memories
@@ -41,8 +42,8 @@ jobs:
       # do not stop on another job's failure
       fail-fast: false
       matrix:
-        php-versions: ['7.4']
-        server-versions: ['stable25']
+        php-versions: ['8.1']
+        server-versions: ['stable27']
 
     services:
       mysql:
@@ -109,8 +110,8 @@ jobs:
       # do not stop on another job's failure
       fail-fast: false
       matrix:
-        php-versions: ['7.4']
-        server-versions: ['stable25']
+        php-versions: ['8.1']
+        server-versions: ['stable27']
 
     services:
       postgres:
@@ -182,8 +183,8 @@ jobs:
       # do not stop on another job's failure
       fail-fast: false
       matrix:
-        php-versions: ['7.4']
-        server-versions: ['stable25']
+        php-versions: ['8.1']
+        server-versions: ['stable27']
 
     steps:
       - name: Checkout server

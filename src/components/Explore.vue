@@ -59,6 +59,7 @@ import CogIcon from 'vue-material-design-icons/Cog.vue';
 
 import config from '../services/static-config';
 import { API } from '../services/API';
+import * as dav from '../services/dav';
 
 import type { ICluster, IConfig } from '../types';
 
@@ -109,7 +110,7 @@ export default defineComponent({
         name: t('memories', 'Settings'),
         icon: CogIcon,
         link: undefined,
-        click: globalThis.showSettings,
+        click: mModals.showSettings,
       },
     ] as {
       name: string;
@@ -160,25 +161,19 @@ export default defineComponent({
     },
 
     async getRecognize() {
-      const res = await axios.get<ICluster[]>(API.FACE_LIST('recognize'));
-      this.recognize = res.data.slice(0, 10);
+      this.recognize = (await dav.getFaceList('recognize')).slice(0, 10);
     },
 
     async getFaceRecognition() {
-      const res = await axios.get<ICluster[]>(API.FACE_LIST('facerecognition'));
-      this.facerecognition = res.data.slice(0, 10);
+      this.facerecognition = (await dav.getFaceList('facerecognition')).slice(0, 10);
     },
 
     async getPlaces() {
-      const res = await axios.get<ICluster[]>(API.PLACE_LIST());
-      const places = res.data; // FIXME: performance
-      this.places = places.slice(0, 10);
+      this.places = (await dav.getPlaces()).slice(0, 10);
     },
 
     async getTags() {
-      const res = await axios.get<ICluster[]>(API.TAG_LIST());
-      const tags = res.data.sort((a, b) => b.count - a.count); // FIXME: performance
-      this.tags = tags.slice(0, 10);
+      this.tags = (await dav.getTags()).sort((a, b) => b.count - a.count).slice(0, 10);
     },
   },
 });

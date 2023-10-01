@@ -1,6 +1,7 @@
 import axios from '@nextcloud/axios';
 import { generateUrl } from '@nextcloud/router';
-import type { IDay, IPhoto, IImageInfo } from './types';
+import type { IDay, IPhoto } from './types';
+import { API as SAPI } from './services/API';
 const euc = encodeURIComponent;
 
 /** Access NativeX over localhost */
@@ -34,6 +35,7 @@ export const API = {
    * Delete files using local fileids.
    * @regex ^/api/image/delete/\d+(,\d+)*$
    * @param fileIds List of AUIDs to delete
+   * @param dry (Query) Only check for confirmation and count of local files
    * @returns {void}
    * @throws Return an error code if the user denies the deletion.
    */
@@ -49,10 +51,10 @@ export const API = {
   /**
    * Local photo full API.
    * @regex ^/image/full/\d+$
-   * @param fileId File ID of the photo
+   * @param auid AUID of the photo
    * @returns {Blob} JPEG full image of the photo.
    */
-  IMAGE_FULL: (fileId: number) => `${BASE_URL}/image/full/${fileId}`,
+  IMAGE_FULL: (auid: number) => `${BASE_URL}/image/full/${auid}`,
 
   /**
    * Share a URL with native page.
@@ -75,10 +77,10 @@ export const API = {
   /**
    * Share a local file (as blob) with native page.
    * @regex ^/api/share/local/\d+$
-   * @param fileId File ID of the photo
+   * @param auid AUID of the photo
    * @returns {void}
    */
-  SHARE_LOCAL: (fileId: number) => `${BASE_URL}/api/share/local/${fileId}`,
+  SHARE_LOCAL: (auid: number) => `${BASE_URL}/api/share/local/${auid}`,
 
   /**
    * Get list of local folders configuration.
@@ -124,18 +126,14 @@ export type NativeX = {
   downloadFromUrl: (url: string, filename: string) => void;
 
   /**
-   * Play a video from the given file ID (local file).
-   * @param fileid File ID of the video
-   */
-  playVideoLocal: (fileid: string) => void;
-  /**
-   * Play a video from the given URL(s).
-   * @param fileid Remote file ID of the video (used for play tracking)
+   * Play a video from the given AUID or URL(s).
+   * @param auid AUID of file (will play local if available)
+   * @param fileid File ID of the video (only used for file tracking)
    * @param urlArray JSON-encoded array of URLs to play
    * @details The URL array may contain multiple URLs, e.g. direct playback
    * and HLS separately. The native client must try to play the first URL.
    */
-  playVideoRemote: (fileid: string, urlArray: string) => void;
+  playVideo: (auid: string, fileid: string, urlArray: string) => void;
   /**
    * Destroy the video player.
    * @param fileid File ID of the video
@@ -223,24 +221,20 @@ export async function playTouchSound() {
 }
 
 /**
- * Play a video from the given file ID (local file).
- */
-export async function playVideoLocal(fileid: number) {
-  nativex?.playVideoLocal?.(fileid.toString());
-}
-
-/**
  * Play a video from the given URL.
+ * @param photo Photo to play
+ * @param urls URLs to play (remote)
  */
-export async function playVideoRemote(fileid: number, urls: string[]) {
-  nativex?.playVideoRemote?.(fileid.toString(), JSON.stringify(urls.map(addOrigin)));
+export async function playVideo(photo: IPhoto, urls: string[]) {
+  const auid = photo.auid ?? photo.fileid;
+  nativex?.playVideo?.(auid.toString(), photo.fileid.toString(), JSON.stringify(urls.map(addOrigin)));
 }
 
 /**
  * Destroy the video player.
  */
-export async function destroyVideo(fileId: number) {
-  nativex?.destroyVideo?.(fileId.toString());
+export async function destroyVideo(photo: IPhoto) {
+  nativex?.destroyVideo?.(photo.fileid.toString());
 }
 
 /**
@@ -263,8 +257,9 @@ export async function shareBlobFromUrl(url: string) {
 /**
  * Share a local file with native page.
  */
-export async function shareLocal(fileId: number) {
-  await axios.get(API.SHARE_LOCAL(fileId));
+export async function shareLocal(photo: IPhoto) {
+  if (!photo.auid) throw new Error('Cannot share local file without AUID');
+  await axios.get(API.SHARE_LOCAL(photo.auid));
 }
 
 /**
@@ -326,13 +321,15 @@ export async function extendDayWithLocal(dayId: number, photos: IPhoto[]) {
 /**
  * Request deletion of local photos wherever available.
  * @param photos List of photos to delete
+ * @returns The number of photos for which confirmation was received
  * @throws If the request fails
  */
-export async function deleteLocalPhotos(photos: IPhoto[]): Promise<void> {
-  if (!has()) return;
+export async function deleteLocalPhotos(photos: IPhoto[], dry: boolean = false): Promise<number> {
+  if (!has()) return 0;
 
   const auids = photos.map((p) => p.auid).filter((a) => !!a) as number[];
-  await axios.get(API.IMAGE_DELETE(auids));
+  const res = await axios.get(SAPI.Q(API.IMAGE_DELETE(auids), { dry }));
+  return res.data.confirms ? res.data.count : 0;
 }
 
 /**

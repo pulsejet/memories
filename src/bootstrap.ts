@@ -30,14 +30,18 @@ declare global {
   var mode: 'admin' | 'user';
 
   var vueroute: () => Route;
-  var OC: Nextcloud.v24.OC;
-  var OCP: Nextcloud.v24.OCP;
+  var OC: Nextcloud.Common.OC;
+  var OCP: Nextcloud.Common.OCP;
 
-  var editMetadata: (photos: IPhoto[], sections?: number[]) => void;
-  var updateAlbums: (photos: IPhoto[]) => void;
-  var sharePhoto: (photo: IPhoto) => void;
-  var shareNodeLink: (path: string, immediate?: boolean) => Promise<void>;
-  var showSettings: () => void;
+  var mModals: {
+    editMetadata: (photos: IPhoto[], sections?: number[]) => void;
+    updateAlbums: (photos: IPhoto[]) => void;
+    sharePhoto: (photo: IPhoto) => void;
+    shareNodeLink: (path: string, immediate?: boolean) => Promise<void>;
+    moveToFolder: (photos: IPhoto[]) => void;
+    moveToFace: (photos: IPhoto[]) => void;
+    showSettings: () => void;
+  };
 
   var mSidebar: {
     open: (photo: IPhoto | number, filename?: string, forceNative?: boolean) => void;
@@ -69,6 +73,9 @@ declare global {
 
 // Allow global access to the router
 globalThis.vueroute = () => router.currentRoute;
+
+// Initialize blank arrays
+globalThis.mModals = {} as any;
 
 // Cache these for better performance
 globalThis.windowInnerWidth = window.innerWidth;
