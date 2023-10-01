@@ -180,7 +180,7 @@ export default defineComponent({
       }
 
       // EXIF update values
-      const exifUpdates = new Map<number, IExif>();
+      const exifs = new Map<number, IExif>();
       for (const p of this.photos!) {
         // Basic EXIF fields
         const raw: IExif = JSON.parse(JSON.stringify(exifResult));
@@ -192,7 +192,7 @@ export default defineComponent({
           raw.CreateDate = date;
         }
 
-        exifUpdates.set(p.fileid, raw);
+        exifs.set(p.fileid, raw);
       }
 
       // Update exif fields
@@ -202,7 +202,7 @@ export default defineComponent({
 
         try {
           // Update EXIF if required
-          const raw = exifUpdates.get(fileid) ?? {};
+          const raw = exifs.get(fileid) ?? {};
           if (Object.keys(raw).length > 0) {
             await axios.patch<any>(API.IMAGE_SETEXIF(fileid), { raw });
             dirty = true;
