@@ -208,41 +208,40 @@ export default defineComponent({
 
     /** Date taken info */
     dateOriginal(): DateTime | null {
-      const epoch = this.exif.DateTimeEpoch || this.baseInfo.datetaken;
-      let date = DateTime.fromSeconds(epoch);
-      if (!epoch || !date.isValid) return null;
+      // Try to get timezone info
+      let dateWithTz: DateTime | null = null;
+      const valid = () => dateWithTz?.isValid;
 
-      // The fallback to datetaken can be eventually removed
-      // and then this can be discarded
-      if (this.exif.DateTimeEpoch) {
-        const tzOffset = this.exif.OffsetTimeOriginal || this.exif.OffsetTime; // e.g. -05:00
-        const tzId = this.exif.LocationTZID; // e.g. America/New_York
+      // If we have an actual epoch, we can shift the date to the correct timezone
+      if (!valid() && this.exif.DateTimeEpoch) {
+        const date = DateTime.fromSeconds(this.exif.DateTimeEpoch);
+        if (date.isValid) {
+          const tzOffset = this.exif.OffsetTimeOriginal || this.exif.OffsetTime; // e.g. -05:00
+          const tzId = this.exif.LocationTZID; // e.g. America/New_York
 
-        let dateWithTz: DateTime | undefined = undefined;
+          // Use timezone offset if available
+          if (!valid() && tzOffset) {
+            dateWithTz = date.setZone('UTC' + tzOffset);
+          }
 
-        // If no timezone info is available, we will show the local time only
-        // In this case, everything happens in UTC
-        if (!tzOffset && !tzId) {
-          dateWithTz = date.setZone('UTC');
-        }
-
-        // Use timezone offset if available
-        if (!dateWithTz?.isValid && tzOffset) {
-          dateWithTz = date.setZone('UTC' + tzOffset);
-        }
-
-        // Fall back to tzId
-        if (!dateWithTz?.isValid && tzId) {
-          dateWithTz = date.setZone(tzId);
-        }
-
-        // Use the timezone only if the date is valid
-        if (dateWithTz?.isValid) {
-          date = dateWithTz;
+          // Fall back to tzId
+          if (!valid() && tzId) {
+            dateWithTz = date.setZone(tzId);
+          }
         }
       }
 
-      return date;
+      // If tz info is unavailable / wrong, we will show the local time only
+      // In this case, use the datetaken instead, which is guaranteed to be local, shifted to UTC
+      if (!valid() && this.baseInfo.datetaken) {
+        const date = DateTime.fromSeconds(this.baseInfo.datetaken);
+        if (date.isValid) {
+          dateWithTz = date.setZone('UTC');
+        }
+      }
+
+      // Return only if we found a valid date
+      return valid() ? dateWithTz : null;
     },
 
     dateOriginalStr(): string | null {

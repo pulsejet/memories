@@ -54,6 +54,21 @@ export function getMonthDateStr(date: Date) {
   });
 }
 
+/**
+ * Get the EXIF date string from a datetaken object
+ * @param date The datetaken value from photo metadata (UTC relative date)
+ * @returns YYYY:MM:DD HH:MM:SS
+ */
+export function getExifDateStr(date: Date) {
+  const year = date.getUTCFullYear().toString().padStart(4, '0');
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+  const day = date.getUTCDate().toString().padStart(2, '0');
+  const hour = date.getUTCHours().toString().padStart(2, '0');
+  const minute = date.getUTCMinutes().toString().padStart(2, '0');
+  const second = date.getUTCSeconds().toString().padStart(2, '0');
+  return `${year}:${month}:${day} ${hour}:${minute}:${second}`;
+}
+
 /** Get text like "5 years ago" from a date */
 export function getFromNowStr(date: Date) {
   // Get fromNow in correct locale

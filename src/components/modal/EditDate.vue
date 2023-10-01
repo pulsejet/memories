@@ -253,14 +253,14 @@ export default defineComponent({
       }
 
       if (this.sortedPhotos.length === 1) {
-        return this.getExifFormat(this.date);
+        return utils.getExifDateStr(this.date);
       }
 
       // Interpolate date
       const dT = this.date.getTime();
       const doT = this.origDateNewest.getTime();
       const offset = ((photo.datetaken ?? 0) * 1000 || doT) - doT;
-      return this.getExifFormat(new Date(dT + offset * this.scaleFactor));
+      return utils.getExifDateStr(new Date(dT + offset * this.scaleFactor));
     },
 
     newestChange(time = false) {
@@ -290,16 +290,6 @@ export default defineComponent({
 
     oldestChange() {
       this.oldestDirty = true;
-    },
-
-    getExifFormat(date: Date) {
-      const year = date.getUTCFullYear().toString().padStart(4, '0');
-      const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
-      const day = date.getUTCDate().toString().padStart(2, '0');
-      const hour = date.getUTCHours().toString().padStart(2, '0');
-      const minute = date.getUTCMinutes().toString().padStart(2, '0');
-      const second = date.getUTCSeconds().toString().padStart(2, '0');
-      return `${year}:${month}:${day} ${hour}:${minute}:${second}`;
     },
 
     makeDate(yearS: string, monthS: string, dayS: string, hourS: string, minuteS: string, secondS: string) {
