@@ -195,6 +195,35 @@ export default defineComponent({
         exifs.set(p.fileid, raw);
       }
 
+      // If a photo has no EXIF date header then updating the metadata will erase
+      // the date taken. We need to prompt the user to keep the date taken.
+      if (
+        this.photos!.some(
+          (p) =>
+            !p.imageInfo?.exif?.DateTimeOriginal &&
+            !p.imageInfo?.exif?.CreateDate &&
+            !exifs.get(p.fileid)!.DateTimeOriginal
+        ) &&
+        (await utils.confirmDestructive({
+          title: this.t('memories', 'Missing date metadata'),
+          message: this.t(
+            'memories',
+            'Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time.'
+          ),
+        }))
+      ) {
+        for (const p of this.photos!) {
+          // Check if we need / can update the date for this file
+          const raw = exifs.get(p.fileid)!;
+          if (!p.datetaken || raw.DateTimeOriginal) continue;
+
+          // Get the date in EXIF format
+          const dateTaken = utils.getExifDateStr(new Date(p.datetaken * 1000));
+          raw.DateTimeOriginal = dateTaken;
+          raw.CreateDate = dateTaken;
+        }
+      }
+
       // Update exif fields
       const calls = this.photos!.map((p) => async () => {
         let dirty = false;
