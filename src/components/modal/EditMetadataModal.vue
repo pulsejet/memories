@@ -179,23 +179,30 @@ export default defineComponent({
         return;
       }
 
+      // EXIF update values
+      const exifUpdates = new Map<number, IExif>();
+      for (const p of this.photos!) {
+        // Basic EXIF fields
+        const raw: IExif = JSON.parse(JSON.stringify(exifResult));
+
+        // Date header
+        const date = (<any>this.$refs.editDate)?.result?.(p);
+        if (date) {
+          raw.DateTimeOriginal = date;
+          raw.CreateDate = date;
+        }
+
+        exifUpdates.set(p.fileid, raw);
+      }
+
       // Update exif fields
       const calls = this.photos!.map((p) => async () => {
+        let dirty = false;
+        const fileid = p.fileid;
+
         try {
-          let dirty = false;
-          const fileid = p.fileid;
-
-          // Basic EXIF fields
-          const raw: IExif = JSON.parse(JSON.stringify(exifResult));
-
-          // Date
-          const date = (<any>this.$refs.editDate)?.result?.(p);
-          if (date) {
-            raw.DateTimeOriginal = date;
-            raw.CreateDate = date;
-          }
-
           // Update EXIF if required
+          const raw = exifUpdates.get(fileid) ?? {};
           if (Object.keys(raw).length > 0) {
             await axios.patch<any>(API.IMAGE_SETEXIF(fileid), { raw });
             dirty = true;
@@ -206,12 +213,6 @@ export default defineComponent({
             await axios.patch<any>(API.TAG_SET(fileid), tagsResult);
             dirty = true;
           }
-
-          // Refresh UX
-          if (dirty) {
-            p.imageInfo = null;
-            utils.bus.emit('files:file:updated', { fileid });
-          }
         } catch (e) {
           console.error('Failed to save metadata for', p.fileid, e);
           if (e.response?.data?.message) {
@@ -220,6 +221,13 @@ export default defineComponent({
             showError(e);
           }
         } finally {
+          // Refresh UX
+          if (dirty) {
+            p.imageInfo = null;
+            utils.bus.emit('files:file:updated', { fileid });
+          }
+
+          // Update progress
           done++;
           this.progress = Math.round((done * 100) / this.photos!.length);
         }
