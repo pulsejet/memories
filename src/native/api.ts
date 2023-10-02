@@ -77,6 +77,13 @@ export const NAPI = {
    * @returns {void}
    */
   SHARE_LOCAL: (auid: number) => `${BASE_URL}/api/share/local/${auid}`,
+
+  /**
+   * Allow usage of local media (permissions request)
+   * @param val Allow or disallow media
+   * @returns
+   */
+  CONFIG_ALLOW_MEDIA: (val: boolean) => `${BASE_URL}/api/config/allow_media/${val ? '1' : '0'}`,
 };
 
 /** NativeX synchronous API. */
@@ -159,6 +166,18 @@ export type NativeX = {
    * @returns JSON-encoded array of LocalFolderConfig
    */
   configGetLocalFolders: () => string;
+
+  /**
+   * Check if the user has allowed media access.
+   * @returns Whether the user has allowed media access.
+   */
+  configHasMediaPermission: () => boolean;
+
+  /**
+   * Get the current sync status.
+   * @returns number of file synced or -1
+   */
+  getSyncStatus: () => number;
 };
 
 /** The native interface is a global object that is injected by the native app. */

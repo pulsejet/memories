@@ -1,4 +1,3 @@
-import axios from '@nextcloud/axios';
 import { NAPI } from './api';
 import { API } from '../services/API';
 import { has } from './basic';
@@ -70,6 +69,11 @@ export async function deleteLocalPhotos(photos: IPhoto[], dry: boolean = false):
   if (!has()) return 0;
 
   const auids = photos.map((p) => p.auid).filter((a) => !!a) as number[];
-  const res = await axios.get(API.Q(NAPI.IMAGE_DELETE(auids), { dry }));
-  return res.data.confirms ? res.data.count : 0;
+
+  // Delete local photos
+  const res = await fetch(API.Q(NAPI.IMAGE_DELETE(auids), { dry }));
+  if (!res.ok) throw new Error('Failed to delete photos');
+
+  const data = await res.json();
+  return data.confirms ? data.count : 0;
 }

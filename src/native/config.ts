@@ -1,4 +1,4 @@
-import { nativex } from './api';
+import { NAPI, nativex } from './api';
 
 /** Setting of whether a local folder is enabled */
 export type LocalFolderConfig = {
@@ -20,4 +20,18 @@ export function setLocalFolders(config: LocalFolderConfig[]) {
  */
 export function getLocalFolders() {
   return JSON.parse(nativex?.configGetLocalFolders?.() ?? '[]') as LocalFolderConfig[];
+}
+
+/**
+ * Check if the user has allowed media access.
+ */
+export function configHasMediaPermission() {
+  return nativex?.configHasMediaPermission?.() ?? false;
+}
+
+/**
+ * Allow access to media.
+ */
+export async function configAllowMedia(val: boolean = true) {
+  return await fetch(NAPI.CONFIG_ALLOW_MEDIA(val));
 }
