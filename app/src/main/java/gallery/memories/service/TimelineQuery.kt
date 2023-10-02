@@ -45,6 +45,11 @@ class TimelineQuery(private val mCtx: MainActivity) {
     var videoObserver: ContentObserver? = null
     var refreshPending: Boolean = false
 
+    // Status of synchronization process
+    // -1 = not started
+    // >0 = number of files updated
+    var syncStatus = -1
+
     init {
         // Register intent launcher for callback
         deleteIntentLauncher =
@@ -299,34 +304,45 @@ class TimelineQuery(private val mCtx: MainActivity) {
         // Count number of updates
         var updates = 0
 
-        // Iterate all images from system store
-        for (image in SystemImage.cursor(
-            mCtx,
-            SystemImage.IMAGE_URI,
-            selection,
-            selectionArgs,
-            null
-        )) {
-            insertItemDb(image)
-            updates++
+        try {
+            // Iterate all images from system store
+            for (image in SystemImage.cursor(
+                mCtx,
+                SystemImage.IMAGE_URI,
+                selection,
+                selectionArgs,
+                null
+            )) {
+                insertItemDb(image)
+                updates++
+                syncStatus = updates
+            }
+
+            // Iterate all videos from system store
+            for (video in SystemImage.cursor(
+                mCtx,
+                SystemImage.VIDEO_URI,
+                selection,
+                selectionArgs,
+                null
+            )) {
+                insertItemDb(video)
+                updates++
+                syncStatus = updates
+            }
+
+            // Store last sync time
+            mCtx.getSharedPreferences(mCtx.getString(R.string.preferences_key), 0).edit()
+                .putLong(mCtx.getString(R.string.preferences_last_sync_time), syncTime)
+                .apply()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error syncing database", e)
         }
 
-        // Iterate all videos from system store
-        for (video in SystemImage.cursor(
-            mCtx,
-            SystemImage.VIDEO_URI,
-            selection,
-            selectionArgs,
-            null
-        )) {
-            insertItemDb(video)
-            updates++
+        // Reset sync status
+        synchronized(this) {
+            syncStatus = -1
         }
-
-        // Store last sync time
-        mCtx.getSharedPreferences(mCtx.getString(R.string.preferences_key), 0).edit()
-            .putLong(mCtx.getString(R.string.preferences_last_sync_time), syncTime)
-            .apply()
 
         // Number of updated files
         return updates
@@ -337,6 +353,12 @@ class TimelineQuery(private val mCtx: MainActivity) {
      * @return Number of updated files
      */
     fun syncDeltaDb(): Int {
+        // Exit if already running
+        synchronized(this) {
+            if (syncStatus != -1) return 0
+            syncStatus = 0
+        }
+
         // Get last sync time
         val syncTime = mCtx.getSharedPreferences(mCtx.getString(R.string.preferences_key), 0)
             .getLong(mCtx.getString(R.string.preferences_last_sync_time), 0L)
@@ -349,6 +371,12 @@ class TimelineQuery(private val mCtx: MainActivity) {
      * @return Number of updated files
      */
     fun syncFullDb() {
+        // Exit if already running
+        synchronized(this) {
+            if (syncStatus != -1) return
+            syncStatus = 0
+        }
+
         // Flag all images for removal
         mPhotoDao.flagAll()
 

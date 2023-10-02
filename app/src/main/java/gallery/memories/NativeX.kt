@@ -12,6 +12,7 @@ import gallery.memories.service.AccountService
 import gallery.memories.service.DownloadService
 import gallery.memories.service.HttpService
 import gallery.memories.service.ImageService
+import gallery.memories.service.PermissionsService
 import gallery.memories.service.TimelineQuery
 import org.json.JSONArray
 import java.io.ByteArrayInputStream
@@ -26,6 +27,7 @@ class NativeX(private val mCtx: MainActivity) {
     val image = ImageService(mCtx, query)
     val http = HttpService()
     val account = AccountService(mCtx, http)
+    val permissions = PermissionsService(mCtx).register()
 
     init {
         dlService = DownloadService(mCtx, query)
@@ -53,6 +55,8 @@ class NativeX(private val mCtx: MainActivity) {
         val SHARE_URL = Regex("^/api/share/url/.+$")
         val SHARE_BLOB = Regex("^/api/share/blob/.+$")
         val SHARE_LOCAL = Regex("^/api/share/local/\\d+$")
+
+        val CONFIG_ALLOW_MEDIA = Regex("^/api/config/allow_media/\\d+$")
     }
 
     @JavascriptInterface
@@ -157,6 +161,16 @@ class NativeX(private val mCtx: MainActivity) {
         return query.localFolders.toString()
     }
 
+    @JavascriptInterface
+    fun configHasMediaPermission(): Boolean {
+        return permissions.hasAllowMedia() && permissions.hasMediaPermission()
+    }
+
+    @JavascriptInterface
+    fun getSyncStatus(): Int {
+        return query.syncStatus
+    }
+
     fun handleRequest(request: WebResourceRequest): WebResourceResponse {
         val path = request.url.path ?: return makeErrorResponse()
 
@@ -225,6 +239,12 @@ class NativeX(private val mCtx: MainActivity) {
             makeResponse(dlService!!.shareBlobFromUrl(URLDecoder.decode(parts[4], "UTF-8")))
         } else if (path.matches(API.SHARE_LOCAL)) {
             makeResponse(dlService!!.shareLocal(parts[4].toLong()))
+        } else if (path.matches(API.CONFIG_ALLOW_MEDIA)) {
+            permissions.setAllowMedia(true)
+            if (permissions.requestMediaPermissionSync()) {
+                doMediaSync(true) // separate thread
+            }
+            makeResponse("done")
         } else {
             throw Exception("Path did not match any known API route: $path")
         }
@@ -252,5 +272,23 @@ class NativeX(private val mCtx: MainActivity) {
 
     private fun parseIds(ids: String): List<Long> {
         return ids.trim().split(",").map { it.toLong() }
+    }
+
+    fun doMediaSync(forceFull: Boolean) {
+        if (permissions.hasAllowMedia()) {
+            // Full sync if this is the first time permission was granted
+            val fullSync = forceFull || !permissions.hasMediaPermission()
+
+            Thread {
+                // Block for media permission
+                if (!permissions.requestMediaPermissionSync()) return@Thread
+
+                // Full sync requested
+                if (fullSync) query.syncFullDb()
+
+                // Run delta sync and register hooks
+                query.initialize()
+            }.start()
+        }
     }
 }

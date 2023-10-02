@@ -63,6 +63,9 @@ class HttpService {
             // Get host name
             val host = Uri.parse(url).host
 
+            // Clear webview history
+            webView.clearHistory()
+
             // Set authorization header
             webView.loadUrl(url!!, mapOf("Authorization" to authHeader))
 

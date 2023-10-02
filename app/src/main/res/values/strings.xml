@@ -7,6 +7,7 @@
     <string name="preferences_theme_dark">themeDark</string>
     <string name="preferences_last_sync_time">lastDbSyncTime</string>
     <string name="preferences_has_media_permission">hasMediaPermission</string>
+    <string name="preferences_allow_media">allowMedia</string>
     <string name="preferences_enabled_local_folders">enabledLocalFolders</string>
 
     <!-- https://www.whatismybrowser.com/guides/the-latest-user-agent/chrome -->

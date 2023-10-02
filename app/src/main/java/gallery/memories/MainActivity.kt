@@ -15,7 +15,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.media3.common.MediaItem
@@ -63,8 +62,8 @@ class MainActivity : AppCompatActivity() {
         // Initialize services
         nativex = NativeX(this)
 
-        // Ensure storage permissions
-        ensureStoragePermissions()
+        // Sync if permission is available
+        nativex.doMediaSync(false)
 
         // Load JavaScript
         initializeWebView()
@@ -198,49 +197,6 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    fun ensureStoragePermissions() {
-        val requestPermissionLauncher = registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { permissions ->
-
-            // we need all of these
-            val isGranted = permissions.all { it.value }
-
-            // start synchronization if granted
-            if (isGranted) {
-                val needFullSync = !hasMediaPermission()
-
-                // Run DB operations in separate thread
-                Thread {
-                    // Full sync if this is the first time permission was granted
-                    if (needFullSync) {
-                        nativex.query.syncFullDb()
-                    }
-
-                    // Run delta sync and register hooks
-                    nativex.query.initialize()
-                }.start()
-            } else {
-                Log.w(TAG, "Storage permission not available")
-            }
-
-            // Persist that we have it now
-            setHasMediaPermission(isGranted)
-        }
-
-        // Request media read permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requestPermissionLauncher.launch(
-                arrayOf(
-                    android.Manifest.permission.READ_MEDIA_IMAGES,
-                    android.Manifest.permission.READ_MEDIA_VIDEO,
-                )
-            )
-        } else {
-            requestPermissionLauncher.launch(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE))
-        }
-    }
-
     fun initializePlayer(uris: Array<Uri>, uid: String) {
         if (player != null) {
             if (playerUid.equals(uid)) return
@@ -372,17 +328,6 @@ class MainActivity : AppCompatActivity() {
             Log.w(TAG, "Invalid color: $color")
             return
         }
-    }
-
-    fun hasMediaPermission(): Boolean {
-        return getSharedPreferences(getString(R.string.preferences_key), 0)
-            .getBoolean(getString(R.string.preferences_has_media_permission), false)
-    }
-
-    private fun setHasMediaPermission(v: Boolean) {
-        getSharedPreferences(getString(R.string.preferences_key), 0).edit()
-            .putBoolean(getString(R.string.preferences_has_media_permission), v)
-            .apply()
     }
 
     fun refreshTimeline(force: Boolean = false) {
