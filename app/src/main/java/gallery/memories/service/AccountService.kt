@@ -79,6 +79,8 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
                 val loginName = body.getString("loginName")
                 val appPassword = body.getString("appPassword")
 
+                toast("Logged in, waiting for next page ...")
+
                 mCtx.runOnUiThread {
                     // Save login info (also updates header)
                     storeCredentials(baseUrl, loginName, appPassword)
