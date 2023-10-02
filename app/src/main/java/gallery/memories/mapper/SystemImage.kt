@@ -39,6 +39,15 @@ class SystemImage {
         val IMAGE_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         val VIDEO_URI = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
 
+        /**
+         * Iterate over all images/videos in the given collection
+         * @param ctx Context - application context
+         * @param collection Uri - either IMAGE_URI or VIDEO_URI
+         * @param selection String? - selection string
+         * @param selectionArgs Array<String>? - selection arguments
+         * @param sortOrder String? - sort order
+         * @return Sequence<SystemImage>
+         */
         fun cursor(
             ctx: Context,
             collection: Uri,
@@ -125,6 +134,12 @@ class SystemImage {
             }
         }
 
+        /**
+         * Get image or video by a list of IDs
+         * @param ctx Context - application context
+         * @param ids List<Long> - list of IDs
+         * @return List<SystemImage>
+         */
         fun getByIds(ctx: Context, ids: List<Long>): List<SystemImage> {
             val selection = MediaStore.Images.Media._ID + " IN (" + ids.joinToString(",") + ")"
             val images = cursor(ctx, IMAGE_URI, selection, null, null).toList()
@@ -133,6 +148,10 @@ class SystemImage {
         }
     }
 
+    /**
+     * JSON representation of the SystemImage.
+     * This corresponds to IPhoto on the frontend.
+     */
     val json
         get(): JSONObject {
             val obj = JSONObject()
@@ -154,11 +173,13 @@ class SystemImage {
             return obj
         }
 
+    /** The epoch timestamp of the image. */
     val epoch
         get(): Long {
             return dateTaken / 1000
         }
 
+    /** The UTC dateTaken timestamp of the image. */
     val utcDate
         get(): Long {
             // Get EXIF date using ExifInterface if image
@@ -181,6 +202,7 @@ class SystemImage {
             return (dateTaken + TimeZone.getDefault().getOffset(dateTaken).toLong()) / 1000
         }
 
+    /** The auid of the image. */
     val auid
         get(): Long {
             val crc = java.util.zip.CRC32()
@@ -191,6 +213,7 @@ class SystemImage {
             return crc.value
         }
 
+    /** The database Photo object corresponding to the SystemImage. */
     val photo
         get(): Photo {
             val dateCache = utcDate
