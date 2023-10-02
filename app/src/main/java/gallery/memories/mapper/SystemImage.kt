@@ -39,15 +39,13 @@ class SystemImage {
         val IMAGE_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         val VIDEO_URI = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
 
-        fun query(
+        fun cursor(
             ctx: Context,
             collection: Uri,
             selection: String?,
             selectionArgs: Array<String>?,
             sortOrder: String?
-        ): List<SystemImage> {
-            val list = mutableListOf<SystemImage>()
-
+        ) = sequence {
             // Base fields common for videos and images
             val projection = arrayListOf(
                 MediaStore.Images.Media._ID,
@@ -122,18 +120,16 @@ class SystemImage {
                     }
 
                     // Add to main list
-                    list.add(image)
+                    yield(image)
                 }
             }
-
-            return list
         }
 
         fun getByIds(ctx: Context, ids: List<Long>): List<SystemImage> {
             val selection = MediaStore.Images.Media._ID + " IN (" + ids.joinToString(",") + ")"
-            val images = query(ctx, IMAGE_URI, selection, null, null)
+            val images = cursor(ctx, IMAGE_URI, selection, null, null).toList()
             if (images.size == ids.size) return images
-            return images + query(ctx, VIDEO_URI, selection, null, null)
+            return images + cursor(ctx, VIDEO_URI, selection, null, null).toList()
         }
     }
 

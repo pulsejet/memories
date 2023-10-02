@@ -12,6 +12,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.exifinterface.media.ExifInterface
+import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import gallery.memories.R
 import gallery.memories.dao.AppDatabase
@@ -25,7 +26,7 @@ import java.io.IOException
 import java.time.Instant
 import java.util.concurrent.CountDownLatch
 
-class TimelineQuery(private val mCtx: MainActivity) {
+@UnstableApi class TimelineQuery(private val mCtx: MainActivity) {
     private val TAG = TimelineQuery::class.java.simpleName
     private val mConfigService = ConfigService(mCtx)
 
@@ -254,11 +255,20 @@ class TimelineQuery(private val mCtx: MainActivity) {
             selectionArgs = arrayOf(startTime.toString())
         }
 
-        // Iterate all images and videos from system store
-        val files =
-            SystemImage.query(mCtx, SystemImage.IMAGE_URI, selection, selectionArgs, null) +
-                    SystemImage.query(mCtx, SystemImage.VIDEO_URI, selection, selectionArgs, null)
-        files.forEach { insertItemDb(it) }
+        // Count number of updates
+        var updates = 0
+
+        // Iterate all images from system store
+        for (image in SystemImage.cursor(mCtx, SystemImage.IMAGE_URI, selection, selectionArgs, null)) {
+            insertItemDb(image)
+            updates++
+        }
+
+        // Iterate all videos from system store
+        for (video in SystemImage.cursor(mCtx, SystemImage.VIDEO_URI, selection, selectionArgs, null)) {
+            insertItemDb(video)
+            updates++
+        }
 
         // Store last sync time
         mCtx.getSharedPreferences(mCtx.getString(R.string.preferences_key), 0).edit()
@@ -266,7 +276,7 @@ class TimelineQuery(private val mCtx: MainActivity) {
             .apply()
 
         // Number of updated files
-        return files.size
+        return updates
     }
 
     fun syncDeltaDb(): Int {
