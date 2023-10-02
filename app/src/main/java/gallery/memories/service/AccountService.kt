@@ -26,12 +26,11 @@ class AccountService(private val mCtx: MainActivity) {
     var authHeader: String? = null
     var memoriesUrl: String? = null
 
-    private fun toast(message: String) {
-        mCtx.runOnUiThread {
-            Toast.makeText(mCtx, message, Toast.LENGTH_LONG).show()
-        }
-    }
-
+    /**
+     * Login to a server
+     * @param baseUrl The base URL of the server
+     * @param loginFlowUrl The login flow URL
+     */
     fun login(baseUrl: String, loginFlowUrl: String) {
         // Make POST request to login flow URL
         val client = OkHttpClient()
@@ -84,6 +83,12 @@ class AccountService(private val mCtx: MainActivity) {
         }.start()
     }
 
+    /**
+     * Poll the login flow URL until we get a login token
+     * @param pollUrl The login flow URL
+     * @param pollToken The login token
+     * @param baseUrl The base URL of the server
+     */
     private fun pollLogin(pollUrl: String, pollToken: String, baseUrl: String) {
         mCtx.binding.webview.post {
             mCtx.binding.webview.loadUrl("file:///android_asset/sync.html")
@@ -141,6 +146,10 @@ class AccountService(private val mCtx: MainActivity) {
         }
     }
 
+    /**
+     * Check if the credentials are valid and the server version is supported
+     * Makes a toast to the user if something is wrong
+     */
     fun checkCredentialsAndVersion() {
         if (memoriesUrl == null) return
 
@@ -192,6 +201,9 @@ class AccountService(private val mCtx: MainActivity) {
         }
     }
 
+    /**
+     * Handle a logout. Delete the stored credentials and go back to the login screen.
+     */
     fun loggedOut() {
         toast(mCtx.getString(R.string.err_logged_out))
         deleteCredentials()
@@ -200,6 +212,12 @@ class AccountService(private val mCtx: MainActivity) {
         }
     }
 
+    /**
+     * Store the credentials
+     * @param url The URL to store
+     * @param user The username to store
+     * @param password The password to store
+     */
     fun storeCredentials(url: String, user: String, password: String) {
         mCtx.getSharedPreferences("credentials", 0).edit()
             .putString("memoriesUrl", url)
@@ -210,6 +228,10 @@ class AccountService(private val mCtx: MainActivity) {
         setAuthHeader(Pair(user, password))
     }
 
+    /**
+     * Get the stored credentials
+     * @return The stored credentials
+     */
     fun getCredentials(): Pair<String, String>? {
         val prefs = mCtx.getSharedPreferences("credentials", 0)
         memoriesUrl = prefs.getString("memoriesUrl", null)
@@ -219,6 +241,9 @@ class AccountService(private val mCtx: MainActivity) {
         return Pair(user, password)
     }
 
+    /**
+     * Delete the stored credentials
+     */
     fun deleteCredentials() {
         authHeader = null
         memoriesUrl = null
@@ -229,10 +254,17 @@ class AccountService(private val mCtx: MainActivity) {
             .apply()
     }
 
+    /**
+     * Refresh the authorization header
+     */
     fun refreshAuthHeader() {
         setAuthHeader(getCredentials())
     }
 
+    /**
+     * Set the authorization header
+     * @param credentials The credentials to use
+     */
     private fun setAuthHeader(credentials: Pair<String, String>?) {
         if (credentials != null) {
             val auth = "${credentials.first}:${credentials.second}"
@@ -240,5 +272,15 @@ class AccountService(private val mCtx: MainActivity) {
             return
         }
         authHeader = null
+    }
+
+    /**
+     * Show a toast on the UI thread
+     * @param message The message to show
+     */
+    private fun toast(message: String) {
+        mCtx.runOnUiThread {
+            Toast.makeText(mCtx, message, Toast.LENGTH_LONG).show()
+        }
     }
 }

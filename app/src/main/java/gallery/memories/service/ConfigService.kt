@@ -8,6 +8,10 @@ class ConfigService(private val mCtx: Context) {
         private var mEnabledBuckets: List<String>? = null
     }
 
+    /**
+     * Get the list of enabled local folders
+     * @return The list of enabled local folders
+     */
     var enabledBucketIds: List<String>
         get() {
             if (mEnabledBuckets != null) return mEnabledBuckets!!

@@ -105,14 +105,36 @@ class TimelineQuery(private val mCtx: MainActivity) {
         return observer
     }
 
+    /**
+     * Get system images by AUIDs
+     * @param auids List of AUIDs
+     */
     fun getSystemImagesByAUIDs(auids: List<Long>): List<SystemImage> {
         val photos = mPhotoDao.getPhotosByAUIDs(auids)
         if (photos.isEmpty()) return listOf()
         return SystemImage.getByIds(mCtx, photos.map { it.localId })
     }
 
+    /**
+     * Get the days response for local files.
+     * @return JSON response
+     */
     @Throws(JSONException::class)
-    fun getByDayId(dayId: Long): JSONArray {
+    fun getDays(): JSONArray {
+        return mPhotoDao.getDays(mConfigService.enabledBucketIds).map {
+            JSONObject()
+                .put(Fields.Day.DAYID, it.dayId)
+                .put(Fields.Day.COUNT, it.count)
+        }.let { JSONArray(it) }
+    }
+
+    /**
+     * Get the day response for local files.
+     * @param dayId Day ID
+     * @return JSON response
+     */
+    @Throws(JSONException::class)
+    fun getDay(dayId: Long): JSONArray {
         // Get the photos for the day from DB
         val fileIds = mPhotoDao.getPhotosByDay(dayId, mConfigService.enabledBucketIds)
             .map { it.localId }.toMutableList()
@@ -131,15 +153,6 @@ class TimelineQuery(private val mCtx: MainActivity) {
         mPhotoDao.deleteFileIds(fileIds)
 
         return photos
-    }
-
-    @Throws(JSONException::class)
-    fun getDays(): JSONArray {
-        return mPhotoDao.getDays(mConfigService.enabledBucketIds).map {
-            JSONObject()
-                .put(Fields.Day.DAYID, it.dayId)
-                .put(Fields.Day.COUNT, it.count)
-        }.let { JSONArray(it) }
     }
 
     @Throws(Exception::class)
@@ -176,6 +189,12 @@ class TimelineQuery(private val mCtx: MainActivity) {
 
     }
 
+    /**
+     * Delete images from local database and system store.
+     * @param auids List of AUIDs
+     * @param dry Dry run (returns whether confirmation will be needed)
+     * @return JSON response
+     */
     @Throws(Exception::class)
     fun delete(auids: List<Long>, dry: Boolean): JSONObject {
         synchronized(this) {
@@ -237,6 +256,11 @@ class TimelineQuery(private val mCtx: MainActivity) {
         return response
     }
 
+    /**
+     * Sync local database with system store.
+     * @param startTime Only sync files modified after this time
+     * @return Number of updated files
+     */
     private fun syncDb(startTime: Long): Int {
         // Date modified is in seconds, not millis
         val syncTime = Instant.now().toEpochMilli() / 1000;
@@ -287,6 +311,10 @@ class TimelineQuery(private val mCtx: MainActivity) {
         return updates
     }
 
+    /**
+     * Sync local database with system store.
+     * @return Number of updated files
+     */
     fun syncDeltaDb(): Int {
         // Get last sync time
         val syncTime = mCtx.getSharedPreferences(mCtx.getString(R.string.preferences_key), 0)
@@ -294,6 +322,11 @@ class TimelineQuery(private val mCtx: MainActivity) {
         return syncDb(syncTime)
     }
 
+    /**
+     * Sync local database with system store.
+     * Runs a full synchronization pass, flagging all files for removal.
+     * @return Number of updated files
+     */
     fun syncFullDb() {
         // Flag all images for removal
         mPhotoDao.flagAll()
@@ -305,6 +338,10 @@ class TimelineQuery(private val mCtx: MainActivity) {
         mPhotoDao.deleteFlagged()
     }
 
+    /**
+     * Insert item into local database.
+     * @param image SystemImage
+     */
     @SuppressLint("SimpleDateFormat")
     private fun insertItemDb(image: SystemImage) {
         val fileId = image.fileId
@@ -325,7 +362,10 @@ class TimelineQuery(private val mCtx: MainActivity) {
         Log.v(TAG, "Inserted file to local DB: $fileId / $baseName")
     }
 
-    /** This is in timeline query because it calls the database service */
+    /**
+     * Active local folders response.
+     * This is in timeline query because it calls the database service.
+     */
     var localFolders: JSONArray
         get() {
             return mPhotoDao.getBuckets().map {

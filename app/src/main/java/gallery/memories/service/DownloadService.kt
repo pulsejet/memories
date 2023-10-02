@@ -9,11 +9,16 @@ import android.webkit.CookieManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.ArrayMap
+import androidx.media3.common.util.UnstableApi
 import java.util.concurrent.CountDownLatch
 
-class DownloadService(private val mActivity: AppCompatActivity, private val query: TimelineQuery) {
+@UnstableApi class DownloadService(private val mActivity: AppCompatActivity, private val query: TimelineQuery) {
     private val mDownloads: MutableMap<Long, () -> Unit> = ArrayMap()
 
+    /**
+     * Callback when download is complete
+     * @param intent The intent that triggered the callback
+     */
     fun runDownloadCallback(intent: Intent) {
         if (mActivity.isDestroyed) return
 
@@ -31,6 +36,12 @@ class DownloadService(private val mActivity: AppCompatActivity, private val quer
         }
     }
 
+    /**
+     * Queue a download
+     * @param url The URL to download
+     * @param filename The filename to save the download as
+     * @return The download ID
+     */
     fun queue(url: String, filename: String): Long {
         val uri = Uri.parse(url)
         val manager = mActivity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
@@ -52,6 +63,11 @@ class DownloadService(private val mActivity: AppCompatActivity, private val quer
         return manager.enqueue(request)
     }
 
+    /**
+     * Share a URL as a string
+     * @param url The URL to share
+     * @return True if the URL was shared
+     */
     fun shareUrl(url: String): Boolean {
         val intent = Intent(Intent.ACTION_SEND)
         intent.type = "text/plain"
@@ -60,6 +76,11 @@ class DownloadService(private val mActivity: AppCompatActivity, private val quer
         return true
     }
 
+    /**
+     * Share a URL as a blob
+     * @param url The URL to share
+     * @return True if the URL was shared
+     */
     @Throws(Exception::class)
     fun shareBlobFromUrl(url: String): Boolean {
         val id = queue(url, "")
@@ -81,6 +102,11 @@ class DownloadService(private val mActivity: AppCompatActivity, private val quer
         return true
     }
 
+    /**
+     * Share a local image
+     * @param auid The AUID of the image to share
+     * @return True if the image was shared
+     */
     @Throws(Exception::class)
     fun shareLocal(auid: Long): Boolean {
         val sysImgs = query.getSystemImagesByAUIDs(listOf(auid))
@@ -95,6 +121,11 @@ class DownloadService(private val mActivity: AppCompatActivity, private val quer
         return true
     }
 
+    /**
+     * Get the URI of a downloaded file from download ID
+     * @param downloadId The download ID
+     * @return The URI of the downloaded file
+     */
     private fun getDownloadedFileURI(downloadId: Long): String? {
         val downloadManager =
             mActivity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager

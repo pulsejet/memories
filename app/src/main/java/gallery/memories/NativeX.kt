@@ -24,21 +24,6 @@ import java.net.URLDecoder
     val image = ImageService(mCtx, query)
     val account = AccountService(mCtx)
 
-    object API {
-        val DAYS = Regex("^/api/days$")
-        val DAY = Regex("^/api/days/\\d+$")
-
-        val IMAGE_INFO = Regex("^/api/image/info/\\d+$")
-        val IMAGE_DELETE = Regex("^/api/image/delete/\\d+(,\\d+)*$")
-
-        val IMAGE_PREVIEW = Regex("^/image/preview/\\d+$")
-        val IMAGE_FULL = Regex("^/image/full/\\d+$")
-
-        val SHARE_URL = Regex("^/api/share/url/.+$")
-        val SHARE_BLOB = Regex("^/api/share/blob/.+$")
-        val SHARE_LOCAL = Regex("^/api/share/local/\\d+$")
-    }
-
     init {
         dlService = DownloadService(mCtx, query)
     }
@@ -52,38 +37,19 @@ import java.net.URLDecoder
         query.destroy()
     }
 
-    fun handleRequest(request: WebResourceRequest): WebResourceResponse {
-        val path = request.url.path ?: return makeErrorResponse()
+    object API {
+        val DAYS = Regex("^/api/days$")
+        val DAY = Regex("^/api/days/\\d+$")
 
-        val response = try {
-            when (request.method) {
-                "GET" -> {
-                    routerGet(request)
-                }
-                "OPTIONS" -> {
-                    WebResourceResponse("text/plain", "UTF-8", ByteArrayInputStream("".toByteArray()))
-                }
-                else -> {
-                    throw Exception("Method Not Allowed")
-                }
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "handleRequest: ", e)
-            makeErrorResponse()
-        }
+        val IMAGE_INFO = Regex("^/api/image/info/\\d+$")
+        val IMAGE_DELETE = Regex("^/api/image/delete/\\d+(,\\d+)*$")
 
-        // Allow CORS from all origins
-        response.responseHeaders = mutableMapOf(
-            "Access-Control-Allow-Origin" to "*",
-            "Access-Control-Allow-Headers" to "*"
-        )
+        val IMAGE_PREVIEW = Regex("^/image/preview/\\d+$")
+        val IMAGE_FULL = Regex("^/image/full/\\d+$")
 
-        // Cache image responses for 7 days
-        if (path.matches(API.IMAGE_PREVIEW) || path.matches(API.IMAGE_FULL)) {
-            response.responseHeaders["Cache-Control"] = "max-age=604800"
-        }
-
-        return response
+        val SHARE_URL = Regex("^/api/share/url/.+$")
+        val SHARE_BLOB = Regex("^/api/share/blob/.+$")
+        val SHARE_LOCAL = Regex("^/api/share/local/\\d+$")
     }
 
     @JavascriptInterface
@@ -188,6 +154,40 @@ import java.net.URLDecoder
         return query.localFolders.toString()
     }
 
+    fun handleRequest(request: WebResourceRequest): WebResourceResponse {
+        val path = request.url.path ?: return makeErrorResponse()
+
+        val response = try {
+            when (request.method) {
+                "GET" -> {
+                    routerGet(request)
+                }
+                "OPTIONS" -> {
+                    WebResourceResponse("text/plain", "UTF-8", ByteArrayInputStream("".toByteArray()))
+                }
+                else -> {
+                    throw Exception("Method Not Allowed")
+                }
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "handleRequest: ", e)
+            makeErrorResponse()
+        }
+
+        // Allow CORS from all origins
+        response.responseHeaders = mutableMapOf(
+            "Access-Control-Allow-Origin" to "*",
+            "Access-Control-Allow-Headers" to "*"
+        )
+
+        // Cache image responses for 7 days
+        if (path.matches(API.IMAGE_PREVIEW) || path.matches(API.IMAGE_FULL)) {
+            response.responseHeaders["Cache-Control"] = "max-age=604800"
+        }
+
+        return response
+    }
+
     @Throws(Exception::class)
     private fun routerGet(request: WebResourceRequest): WebResourceResponse {
         val path = request.url.path ?: return makeErrorResponse()
@@ -196,7 +196,7 @@ import java.net.URLDecoder
         return if (path.matches(API.DAYS)) {
             makeResponse(query.getDays())
         } else if (path.matches(API.DAY)) {
-            makeResponse(query.getByDayId(parts[3].toLong()))
+            makeResponse(query.getDay(parts[3].toLong()))
         } else if (path.matches(API.IMAGE_INFO)) {
             makeResponse(query.getImageInfo(parts[4].toLong()))
         } else if (path.matches(API.IMAGE_DELETE)) {

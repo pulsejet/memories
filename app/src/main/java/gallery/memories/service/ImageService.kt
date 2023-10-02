@@ -6,9 +6,15 @@ import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.os.Build
 import android.provider.MediaStore
+import androidx.media3.common.util.UnstableApi
 import java.io.ByteArrayOutputStream
 
-class ImageService(private val mCtx: Context, private val query: TimelineQuery) {
+@UnstableApi class ImageService(private val mCtx: Context, private val query: TimelineQuery) {
+    /**
+     * Get a preview image for a given image ID
+     * @param id The image ID
+     * @return The preview image as a JPEG byte array
+     */
     @Throws(Exception::class)
     fun getPreview(id: Long): ByteArray {
         val bitmap =
@@ -36,6 +42,11 @@ class ImageService(private val mCtx: Context, private val query: TimelineQuery) 
         return stream.toByteArray()
     }
 
+    /**
+     * Get a full image for a given image ID
+     * @param id The image ID
+     * @return The full image as a JPEG byte array
+     */
     @Throws(Exception::class)
     fun getFull(auid: Long): ByteArray {
         val sysImgs = query.getSystemImagesByAUIDs(listOf(auid))
