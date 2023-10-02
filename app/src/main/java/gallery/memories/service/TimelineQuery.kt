@@ -63,12 +63,10 @@ import java.util.concurrent.CountDownLatch
     }
 
     fun destroy() {
-        if (imageObserver != null) {
+        if (imageObserver != null)
             mCtx.contentResolver.unregisterContentObserver(imageObserver!!)
-        }
-        if (videoObserver != null) {
+        if (videoObserver != null)
             mCtx.contentResolver.unregisterContentObserver(videoObserver!!)
-        }
     }
 
     fun registerHooks() {
