@@ -105,6 +105,17 @@ export default defineComponent({
     }
   },
 
+  async mounted() {
+    await this.$nextTick();
+
+    // set nativex theme
+    nativex.setTheme(getComputedStyle(document.body).getPropertyValue('--color-background-plain'));
+  },
+
+  beforeDestroy() {
+    nativex.setTheme(); // reset theme
+  },
+
   methods: {
     updateDeviceFolders() {
       nativex.setLocalFolders(this.localFolders);
