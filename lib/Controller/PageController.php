@@ -236,8 +236,6 @@ class PageController extends Controller
     }
 
     /**
-     * @PublicPage
-     *
      * @NoAdminRequired
      *
      * @NoCSRFRequired
