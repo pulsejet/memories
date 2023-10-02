@@ -55,6 +55,10 @@ class TimelineQuery(private val mCtx: MainActivity) {
             }
     }
 
+    /**
+     * Initialize content observers for system store.
+     * Runs the first sync pass.
+     */
     fun initialize() {
         mPhotoDao.ping()
         if (syncDeltaDb() > 0) {
@@ -63,6 +67,9 @@ class TimelineQuery(private val mCtx: MainActivity) {
         registerHooks()
     }
 
+    /**
+     * Destroy content observers for system store.
+     */
     fun destroy() {
         if (imageObserver != null)
             mCtx.contentResolver.unregisterContentObserver(imageObserver!!)
@@ -70,11 +77,19 @@ class TimelineQuery(private val mCtx: MainActivity) {
             mCtx.contentResolver.unregisterContentObserver(videoObserver!!)
     }
 
+    /**
+     * Register content observers for system store.
+     */
     fun registerHooks() {
         imageObserver = registerContentObserver(SystemImage.IMAGE_URI)
         videoObserver = registerContentObserver(SystemImage.VIDEO_URI)
     }
 
+    /**
+     * Register content observer for system store.
+     * @param uri Content URI
+     * @return Content observer
+     */
     private fun registerContentObserver(uri: Uri): ContentObserver {
         val observer = object : ContentObserver(null) {
             override fun onChange(selfChange: Boolean) {
