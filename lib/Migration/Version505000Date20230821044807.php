@@ -71,6 +71,16 @@ class Version505000Date20230821044807 extends SimpleMigrationStep
     {
         // extracts the epoch value from the EXIF json and stores it in the epoch column
         try {
+            // get count of rows to update
+            $query = $this->dbc->getQueryBuilder();
+            $maxCount = $query
+                ->select($query->createFunction('COUNT(m.fileid)'))
+                ->from('memories', 'm')
+                ->executeQuery()
+                ->fetchOne()
+            ;
+            $output->startProgress($maxCount);
+
             // get the required records
             $result = $this->dbc->getQueryBuilder()
                 ->select('m.id', 'm.exif')
@@ -104,6 +114,8 @@ class Version505000Date20230821044807 extends SimpleMigrationStep
                     }
                 } catch (\Exception $e) {
                     continue;
+                } finally {
+                    $output->advance();
                 }
 
                 // commit every 50 rows
@@ -119,8 +131,8 @@ class Version505000Date20230821044807 extends SimpleMigrationStep
             // close the cursor
             $result->closeCursor();
         } catch (\Exception $e) {
-            error_log('Automatic migration failed: '.$e->getMessage());
-            error_log('Please run occ memories:index -f');
+            $output->warning('Automatic migration failed: '.$e->getMessage());
+            $output->warning('Please run occ memories:index -f');
         }
     }
 }
