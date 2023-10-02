@@ -36,7 +36,6 @@
         )
       }}
       <br /><br />
-
       {{
         hasMediaPermission
           ? t('memories', 'Access to media has been granted.')
