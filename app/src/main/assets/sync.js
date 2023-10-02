@@ -15,22 +15,19 @@ window.loggedIn = async () => {
 let localList = null;
 async function openLocal() {
   // Get the list of local folders for next screen
-  (async () => {
-    const res = await fetch("http://127.0.0.1/api/config/local-folders");
-    localList = await res.json();
+  localList = JSON.parse(window.nativex?.configGetLocalFolders());
 
-    // Add HTML for folders list
-    document.getElementById("folder-list").innerHTML = localList
-      .map(
-        (folder) => `
-              <div class="folder-choose">
-                  <input type="checkbox" id="folder-${folder.id}" ${folder.enabled ? "checked" : ""}>
-                  <label for="${folder.id}">${folder.name}</label>
-              </div>
-          `
-      )
-      .join("");
-  })();
+  // Add HTML for folders list
+  document.getElementById("folder-list").innerHTML = localList
+    .map(
+      (folder) => `
+            <div class="folder-choose">
+                <input type="checkbox" id="folder-${folder.id}" ${folder.enabled ? "checked" : ""}>
+                <label for="${folder.id}">${folder.name}</label>
+            </div>
+        `
+    )
+    .join("");
 
   // Show the folders list
   sync.classList.add("invisible");

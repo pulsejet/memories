@@ -189,23 +189,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun loadDefaultUrl(): Boolean {
-        // Load accounts
-        val authHeader = nativex.account.authHeader
-        val memoriesUrl = nativex.account.memoriesUrl
-
         // Load app interface if authenticated
-        if (authHeader != null && memoriesUrl != null) {
-            // Get host name
-            host = Uri.parse(memoriesUrl).host
-
-            // Set authorization header
-            binding.webview.loadUrl(
-                memoriesUrl, mapOf(
-                    "Authorization" to authHeader
-                )
-            )
-            return true
-        }
+        host = nativex.http.loadWebView(binding.webview)
+        if (host != null) return true
 
         // Load welcome page
         binding.webview.loadUrl("file:///android_asset/welcome.html");

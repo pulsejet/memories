@@ -10,19 +10,22 @@ import android.widget.Toast
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.service.AccountService
 import gallery.memories.service.DownloadService
+import gallery.memories.service.HttpService
 import gallery.memories.service.ImageService
 import gallery.memories.service.TimelineQuery
 import org.json.JSONArray
 import java.io.ByteArrayInputStream
 import java.net.URLDecoder
 
-@UnstableApi class NativeX(private val mCtx: MainActivity) {
+@UnstableApi
+class NativeX(private val mCtx: MainActivity) {
     val TAG = NativeX::class.java.simpleName
 
     private var themeStored = false
     val query = TimelineQuery(mCtx)
     val image = ImageService(mCtx, query)
-    val account = AccountService(mCtx)
+    val http = HttpService()
+    val account = AccountService(mCtx, http)
 
     init {
         dlService = DownloadService(mCtx, query)
@@ -60,7 +63,7 @@ import java.net.URLDecoder
     @JavascriptInterface
     fun setThemeColor(color: String?, isDark: Boolean) {
         // Save for getting it back on next start
-        if (!themeStored && account.authHeader != null) {
+        if (!themeStored && http.isLoggedIn()) {
             themeStored = true
             mCtx.storeTheme(color, isDark);
         }
@@ -162,9 +165,15 @@ import java.net.URLDecoder
                 "GET" -> {
                     routerGet(request)
                 }
+
                 "OPTIONS" -> {
-                    WebResourceResponse("text/plain", "UTF-8", ByteArrayInputStream("".toByteArray()))
+                    WebResourceResponse(
+                        "text/plain",
+                        "UTF-8",
+                        ByteArrayInputStream("".toByteArray())
+                    )
                 }
+
                 else -> {
                     throw Exception("Method Not Allowed")
                 }
@@ -200,7 +209,12 @@ import java.net.URLDecoder
         } else if (path.matches(API.IMAGE_INFO)) {
             makeResponse(query.getImageInfo(parts[4].toLong()))
         } else if (path.matches(API.IMAGE_DELETE)) {
-            makeResponse(query.delete(parseIds(parts[4]), request.url.getBooleanQueryParameter("dry", false)))
+            makeResponse(
+                query.delete(
+                    parseIds(parts[4]),
+                    request.url.getBooleanQueryParameter("dry", false)
+                )
+            )
         } else if (path.matches(API.IMAGE_PREVIEW)) {
             makeResponse(image.getPreview(parts[3].toLong()), "image/jpeg")
         } else if (path.matches(API.IMAGE_FULL)) {
@@ -227,7 +241,11 @@ import java.net.URLDecoder
     }
 
     private fun makeErrorResponse(): WebResourceResponse {
-        val response = WebResourceResponse("application/json", "UTF-8", ByteArrayInputStream("{}".toByteArray()))
+        val response = WebResourceResponse(
+            "application/json",
+            "UTF-8",
+            ByteArrayInputStream("{}".toByteArray())
+        )
         response.setStatusCodeAndReasonPhrase(500, "Internal Server Error")
         return response
     }

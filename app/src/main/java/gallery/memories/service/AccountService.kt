@@ -2,7 +2,6 @@ package gallery.memories.service
 
 import android.content.Intent
 import android.net.Uri
-import android.util.Base64
 import android.util.Log
 import android.widget.Toast
 import androidx.media3.common.util.UnstableApi
@@ -18,13 +17,10 @@ import org.json.JSONObject
 import java.net.SocketTimeoutException
 
 @UnstableApi
-class AccountService(private val mCtx: MainActivity) {
+class AccountService(private val mCtx: MainActivity, private val mHttp: HttpService) {
     companion object {
         val TAG = AccountService::class.java.simpleName
     }
-
-    var authHeader: String? = null
-    var memoriesUrl: String? = null
 
     /**
      * Login to a server
@@ -151,53 +147,44 @@ class AccountService(private val mCtx: MainActivity) {
      * Makes a toast to the user if something is wrong
      */
     fun checkCredentialsAndVersion() {
-        if (memoriesUrl == null) return
+        if (mHttp.isLoggedIn()) return
 
-        val request = Request.Builder()
-            .url(memoriesUrl + "api/describe")
-            .get()
-            .header("Authorization", authHeader ?: "")
-            .build()
-
-        val response: Response
         try {
-            response = OkHttpClient().newCall(request).execute()
+            val response = mHttp.getApiDescription()
+            val body = mHttp.bodyJson(response)
+
+            // Check status code
+            if (response.code == 401) {
+                return loggedOut()
+            }
+
+            // Could not connect to memories
+            if (response.code == 404) {
+                return toast(mCtx.getString(R.string.err_no_ver))
+            }
+
+            // Check body
+            if (body == null || response.code != 200) {
+                toast(mCtx.getString(R.string.err_no_describe))
+                return
+            }
+
+            // Get body values
+            val uid = body.get("uid")
+            val version = body.getString("version")
+
+            // Check UID exists
+            if (uid.equals(null)) {
+                return loggedOut()
+            }
+
+            // Check minimum version
+            if (Version(version) < Version(mCtx.getString(R.string.min_server_version))) {
+                return toast(mCtx.getString(R.string.err_no_ver))
+            }
         } catch (e: Exception) {
             Log.w(TAG, "checkCredentialsAndVersion: ", e)
             return
-        }
-
-        val body = response.body?.string()
-        response.body?.close()
-
-        // Check status code
-        if (response.code == 401) {
-            return loggedOut()
-        }
-
-        // Could not connect to memories
-        if (response.code == 404) {
-            return toast(mCtx.getString(R.string.err_no_ver))
-        }
-
-        // Check body
-        if (body == null || response.code != 200) {
-            toast(mCtx.getString(R.string.err_no_describe))
-            return
-        }
-
-        val json = JSONObject(body)
-        val version = json.getString("version")
-        val uid = json.get("uid")
-
-        // Check UID exists
-        if (uid.equals(null) && authHeader != null) {
-            return loggedOut()
-        }
-
-        // Check minimum version
-        if (Version(version) < Version(mCtx.getString(R.string.min_server_version))) {
-            return toast(mCtx.getString(R.string.err_no_ver))
         }
     }
 
@@ -224,8 +211,8 @@ class AccountService(private val mCtx: MainActivity) {
             .putString("user", user)
             .putString("password", password)
             .apply()
-        memoriesUrl = url
-        setAuthHeader(Pair(user, password))
+        mHttp.setBaseUrl(url)
+        mHttp.setAuthHeader(Pair(user, password))
     }
 
     /**
@@ -234,7 +221,7 @@ class AccountService(private val mCtx: MainActivity) {
      */
     fun getCredentials(): Pair<String, String>? {
         val prefs = mCtx.getSharedPreferences("credentials", 0)
-        memoriesUrl = prefs.getString("memoriesUrl", null)
+        mHttp.setBaseUrl(prefs.getString("memoriesUrl", null))
         val user = prefs.getString("user", null)
         val password = prefs.getString("password", null)
         if (user == null || password == null) return null
@@ -245,8 +232,8 @@ class AccountService(private val mCtx: MainActivity) {
      * Delete the stored credentials
      */
     fun deleteCredentials() {
-        authHeader = null
-        memoriesUrl = null
+        mHttp.setAuthHeader(null)
+        mHttp.setBaseUrl(null)
         mCtx.getSharedPreferences("credentials", 0).edit()
             .remove("memoriesUrl")
             .remove("user")
@@ -258,20 +245,7 @@ class AccountService(private val mCtx: MainActivity) {
      * Refresh the authorization header
      */
     fun refreshAuthHeader() {
-        setAuthHeader(getCredentials())
-    }
-
-    /**
-     * Set the authorization header
-     * @param credentials The credentials to use
-     */
-    private fun setAuthHeader(credentials: Pair<String, String>?) {
-        if (credentials != null) {
-            val auth = "${credentials.first}:${credentials.second}"
-            authHeader = "Basic ${Base64.encodeToString(auth.toByteArray(), Base64.NO_WRAP)}"
-            return
-        }
-        authHeader = null
+        mHttp.setAuthHeader(getCredentials())
     }
 
     /**
