@@ -4,59 +4,82 @@ import { has } from './basic';
 import type { IDay, IPhoto } from '../types';
 
 /**
- * Extend a list of days with local days.
- * Fetches the local days from the native interface.
+ * Merge incoming days into current days.
+ * @param current Response to update
+ * @param incoming Incoming response
+ * @return touched or added days
  */
-export async function extendDaysWithLocal(days: IDay[]) {
-  if (!has()) return;
+export function mergeDays(current: IDay[], incoming: IDay[]) {
+  const currentMap = new Map(current.map((d) => [d.dayid, d]));
+  const touched: IDay[] = [];
 
-  // Query native part
-  const res = await fetch(NAPI.DAYS());
-  if (!res.ok) return;
-  const local: IDay[] = await res.json();
-  const remoteMap = new Map(days.map((d) => [d.dayid, d]));
+  for (const day of incoming) {
+    const curr = currentMap.get(day.dayid);
+    if (curr) {
+      curr.count = Math.max(curr.count, day.count);
 
-  // Merge local days into remote days
-  for (const day of local) {
-    const remote = remoteMap.get(day.dayid);
-    if (remote) {
-      remote.count = Math.max(remote.count, day.count);
+      // Copy over some flags
+      curr.haslocal ||= day.haslocal;
     } else {
-      days.push(day);
+      current.push(day);
     }
   }
 
   // TODO: sort depends on view
-  // (but we show it for only timeline anyway for now)
-  days.sort((a, b) => b.dayid - a.dayid);
+  // (but we use this for only timeline anyway for now)
+  current.sort((a, b) => b.dayid - a.dayid);
 }
 
 /**
- * Extend a list of photos with local photos.
- * Fetches the local photos from the native interface and filters out duplicates.
- *
- * @param dayId Day ID to append local photos to
- * @param photos List of photos to append to (duplicates will not be added)
- * @returns
+ * Merge incoming photos into current photos.
+ * @param current Response to update
+ * @param incoming Incoming response
+ * @returns added photos
  */
-export async function extendDayWithLocal(dayId: number, photos: IPhoto[]) {
-  if (!has()) return;
-
-  // Query native part
-  const res = await fetch(NAPI.DAY(dayId));
-  if (!res.ok) return;
-
+export function mergeDay(current: IPhoto[], incoming: IPhoto[]): IPhoto[] {
   // Merge local photos into remote photos
-  const localPhotos: IPhoto[] = await res.json();
-  const serverAUIDs = new Set(photos.map((p) => p.auid));
+  const currentAUIDs = new Set(current.map((p) => p.auid));
 
   // Filter out files that are only available locally
-  const localOnly = localPhotos.filter((p) => !serverAUIDs.has(p.auid));
-  localOnly.forEach((p) => (p.islocal = true));
-  photos.push(...localOnly);
+  const added = incoming.filter((p) => !currentAUIDs.has(p.auid));
+  current.push(...added);
 
   // Sort by epoch value
-  photos.sort((a, b) => (b.epoch ?? 0) - (a.epoch ?? 0));
+  current.sort((a, b) => (b.epoch ?? 0) - (a.epoch ?? 0));
+
+  return added;
+}
+
+/**
+ * Get the local days response
+ */
+export async function getLocalDays(): Promise<IDay[]> {
+  if (!has()) return [];
+
+  const res = await fetch(NAPI.DAYS());
+  if (!res.ok) return [];
+
+  const days: IDay[] = await res.json();
+  days.forEach((d) => (d.haslocal = true));
+
+  return days;
+}
+
+/**
+ * Fetches the local photos from the native interface
+ * @param dayId Day ID to get local photos for
+ * @returns
+ */
+export async function getLocalDay(dayId: number): Promise<IPhoto[]> {
+  if (!has()) return [];
+
+  const res = await fetch(NAPI.DAY(dayId));
+  if (!res.ok) return [];
+
+  const photos: IPhoto[] = await res.json();
+  photos.forEach((p) => (p.islocal = true));
+
+  return photos;
 }
 
 /**

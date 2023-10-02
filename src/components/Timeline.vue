@@ -691,7 +691,7 @@ export default defineComponent({
             try {
               if ((cache = await utils.getCachedData(cacheUrl))) {
                 if (this.routeHasNative) {
-                  await nativex.extendDaysWithLocal(cache);
+                  nativex.mergeDays(cache, await nativex.getLocalDays());
                 }
 
                 await this.processDays(cache);
@@ -714,7 +714,7 @@ export default defineComponent({
 
         // Extend with native days
         if (this.routeHasNative) {
-          await nativex.extendDaysWithLocal(data);
+          nativex.mergeDays(data, await nativex.getLocalDays());
         }
 
         // Make sure we're still on the same page
@@ -863,8 +863,8 @@ export default defineComponent({
         const cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
         if (cache) {
           // Cache only contains remote images; update from local too
-          if (this.routeHasNative) {
-            await nativex.extendDayWithLocal(dayId, cache);
+          if (this.routeHasNative && head.day?.haslocal) {
+            nativex.mergeDay(cache, await nativex.getLocalDay(dayId));
           }
 
           // Process the cache
@@ -936,8 +936,10 @@ export default defineComponent({
         // Get them all together for each day here.
         if (this.routeHasNative) {
           await Promise.all(
-            Array.from(dayMap.entries()).map(([dayId, photos]) => {
-              return nativex.extendDayWithLocal(dayId, photos);
+            Array.from(dayMap.entries()).map(async ([dayId, photos]) => {
+              if (this.heads[dayId]?.day?.haslocal) {
+                nativex.mergeDay(photos, await nativex.getLocalDay(dayId));
+              }
             })
           );
         }

@@ -20,6 +20,8 @@ export type IDay = {
   rows?: IRow[];
   /** List of photos for this day */
   detail?: IPhoto[];
+  /** This day has some local photos */
+  haslocal?: boolean;
 };
 
 export type IPhoto = {
