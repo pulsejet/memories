@@ -123,6 +123,7 @@ class TimelineQuery(private val mCtx: MainActivity) {
     /**
      * Get system images by AUIDs
      * @param auids List of AUIDs
+     * @return List of SystemImage
      */
     fun getSystemImagesByAUIDs(auids: List<Long>): List<SystemImage> {
         val photos = mPhotoDao.getPhotosByAUIDs(auids)
