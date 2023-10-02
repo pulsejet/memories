@@ -8,7 +8,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.widget.Toast
 import androidx.media3.common.util.UnstableApi
-import gallery.memories.mapper.SystemImage
 import gallery.memories.service.AccountService
 import gallery.memories.service.DownloadService
 import gallery.memories.service.ImageService
@@ -38,8 +37,6 @@ import java.net.URLDecoder
         val SHARE_URL = Regex("^/api/share/url/.+$")
         val SHARE_BLOB = Regex("^/api/share/blob/.+$")
         val SHARE_LOCAL = Regex("^/api/share/local/\\d+$")
-
-        val CONFIG_LOCAL_FOLDES = Regex("^/api/config/local-folders$")
     }
 
     init {
@@ -124,6 +121,24 @@ import java.net.URLDecoder
     }
 
     @JavascriptInterface
+    fun login(baseUrl: String?, loginFlowUrl: String?) {
+        if (baseUrl == null || loginFlowUrl == null) return;
+        account.login(baseUrl, loginFlowUrl)
+    }
+
+    @JavascriptInterface
+    fun logout() {
+        account.loggedOut()
+    }
+
+    @JavascriptInterface
+    fun reload() {
+        mCtx.runOnUiThread {
+            mCtx.loadDefaultUrl()
+        }
+    }
+
+    @JavascriptInterface
     fun downloadFromUrl(url: String?, filename: String?) {
         if (url == null || filename == null) return;
         dlService!!.queue(url, filename)
@@ -169,21 +184,8 @@ import java.net.URLDecoder
     }
 
     @JavascriptInterface
-    fun login(baseUrl: String?, loginFlowUrl: String?) {
-        if (baseUrl == null || loginFlowUrl == null) return;
-        account.login(baseUrl, loginFlowUrl)
-    }
-
-    @JavascriptInterface
-    fun logout() {
-        account.loggedOut()
-    }
-
-    @JavascriptInterface
-    fun reload() {
-        mCtx.runOnUiThread {
-            mCtx.loadDefaultUrl()
-        }
+    fun configGetLocalFolders(): String {
+        return query.localFolders.toString()
     }
 
     @Throws(Exception::class)
@@ -209,8 +211,6 @@ import java.net.URLDecoder
             makeResponse(dlService!!.shareBlobFromUrl(URLDecoder.decode(parts[4], "UTF-8")))
         } else if (path.matches(API.SHARE_LOCAL)) {
             makeResponse(dlService!!.shareLocal(parts[4].toLong()))
-        } else if (path.matches(API.CONFIG_LOCAL_FOLDES)) {
-            makeResponse(query.localFolders)
         } else {
             throw Exception("Path did not match any known API route: $path")
         }
