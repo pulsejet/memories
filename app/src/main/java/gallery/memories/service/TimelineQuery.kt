@@ -108,9 +108,8 @@ import java.util.concurrent.CountDownLatch
 
     fun getSystemImagesByAUIDs(auids: List<Long>): List<SystemImage> {
         val photos = mPhotoDao.getPhotosByAUIDs(auids)
-        val fileIds = photos.map { it.localId }
-        if (fileIds.isEmpty()) return listOf()
-        return SystemImage.getByIds(mCtx, fileIds)
+        if (photos.isEmpty()) return listOf()
+        return SystemImage.getByIds(mCtx, photos.map { it.localId })
     }
 
     @Throws(JSONException::class)
@@ -181,9 +180,7 @@ import java.util.concurrent.CountDownLatch
     @Throws(Exception::class)
     fun delete(auids: List<Long>, dry: Boolean): JSONObject {
         synchronized(this) {
-            if (deleting) {
-                throw Exception("Already deleting another set of images")
-            }
+            if (deleting) throw Exception("Already deleting another set of images")
             deleting = true
         }
 
