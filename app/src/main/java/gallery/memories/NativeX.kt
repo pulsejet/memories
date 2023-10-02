@@ -130,23 +130,6 @@ import java.net.URLDecoder
     }
 
     @JavascriptInterface
-    fun playVideoLocal(fileId: String?) {
-        if (fileId == null) return;
-
-        Thread {
-            // Get URI of local video
-            val videos = SystemImage.getByIds(mCtx, arrayListOf(fileId.toLong()))
-            if (videos.isEmpty()) return@Thread
-            val video = videos[0]
-
-            // Play with exoplayer
-            mCtx.runOnUiThread {
-                mCtx.initializePlayer(arrayOf(video.uri), fileId)
-            }
-        }.start()
-    }
-
-    @JavascriptInterface
     fun playVideo(auid: String?, fileid: String?, urlsArray: String?) {
         if (auid == null || fileid == null || urlsArray == null) return
 
