@@ -51,16 +51,20 @@ class HttpService {
     /**
      * Load a webview at the default page
      * @param webView The webview to load
+     * @param subpath The subpath to load
      * @return Host URL if authenticated, null otherwise
      */
-    fun loadWebView(webView: WebView): String? {
+    fun loadWebView(webView: WebView, subpath: String? = null): String? {
         // Load app interface if authenticated
         if (authHeader != null && memoriesUrl != null) {
+            var url = memoriesUrl
+            if (subpath != null) url += subpath
+
             // Get host name
-            val host = Uri.parse(memoriesUrl).host
+            val host = Uri.parse(url).host
 
             // Set authorization header
-            webView.loadUrl(memoriesUrl!!, mapOf("Authorization" to authHeader))
+            webView.loadUrl(url!!, mapOf("Authorization" to authHeader))
 
             return host
         }

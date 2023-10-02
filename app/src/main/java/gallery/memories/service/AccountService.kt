@@ -56,7 +56,7 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
      */
     private fun pollLogin(pollUrl: String, pollToken: String, baseUrl: String) {
         mCtx.binding.webview.post {
-            mCtx.binding.webview.loadUrl("file:///android_asset/sync.html")
+            mCtx.binding.webview.loadUrl("file:///android_asset/waiting.html")
         }
 
         var pollCount = 0
@@ -84,7 +84,7 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
                     storeCredentials(baseUrl, loginName, appPassword)
 
                     // Go to next screen
-                    mCtx.binding.webview.evaluateJavascript("window.loggedIn()", {})
+                    mHttp.loadWebView(mCtx.binding.webview, "nxsetup")
                 }
 
                 return
