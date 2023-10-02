@@ -170,6 +170,11 @@ class TimelineQuery(private val mCtx: MainActivity) {
         return photos
     }
 
+    /**
+     * Get the image EXIF info response for local files.
+     * @param id File ID
+     * @return JSON response
+     */
     @Throws(Exception::class)
     fun getImageInfo(id: Long): JSONObject {
         val photos = mPhotoDao.getPhotosByFileIds(listOf(id))
