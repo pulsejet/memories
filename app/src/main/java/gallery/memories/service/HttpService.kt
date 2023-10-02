@@ -3,8 +3,10 @@ package gallery.memories.service
 import android.net.Uri
 import android.util.Base64
 import android.webkit.WebView
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.json.JSONArray
 import org.json.JSONObject
@@ -88,21 +90,35 @@ class HttpService {
     /** Get the API description request */
     @Throws(Exception::class)
     fun getApiDescription(): Response {
-        return runRequest("api/describe")
+        return runRequest(buildGet("api/describe"))
+    }
+
+    /** Make login flow request */
+    @Throws(Exception::class)
+    fun postLoginFlow(loginFlowUrl: String): Response {
+        return runRequest(Request.Builder()
+            .url(loginFlowUrl)
+            .header("User-Agent", "Memories")
+            .post("".toRequestBody("application/json".toMediaTypeOrNull()))
+            .build())
     }
 
     /** Run a request and get a JSON object */
     @Throws(Exception::class)
-    private fun runRequest(path: String): Response {
-        return OkHttpClient().newCall(buildRequest(path)).execute()
+    private fun runRequest(request: Request): Response {
+        return OkHttpClient().newCall(request).execute()
     }
 
-    /** Build a request */
-    private fun buildRequest(path: String): Request {
-        return Request.Builder()
+    /** Build a GET request */
+    private fun buildGet(path: String, auth: Boolean = true): Request {
+        val builder = Request.Builder()
             .url(memoriesUrl + path)
+            .header("User-Agent", "Memories")
             .get()
-            .header("Authorization", authHeader ?: "")
-            .build()
+
+        if (auth)
+            builder.header("Authorization", authHeader ?: "")
+
+        return builder.build()
     }
 }

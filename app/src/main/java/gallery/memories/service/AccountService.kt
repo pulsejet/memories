@@ -28,55 +28,30 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
      * @param loginFlowUrl The login flow URL
      */
     fun login(baseUrl: String, loginFlowUrl: String) {
-        // Make POST request to login flow URL
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url(loginFlowUrl)
-            .header("User-Agent", "Memories")
-            .post("".toRequestBody("application/json".toMediaTypeOrNull()))
-            .build()
-
-        val response: Response
         try {
-            response = client.newCall(request).execute()
+            val res = mHttp.postLoginFlow(loginFlowUrl)
+            val body = mHttp.bodyJson(res) ?: throw Exception("Failed to parse login flow response")
+
+            // Parse response body as JSON
+            val pollObj = body.getJSONObject("poll")
+            val pollToken = pollObj.getString("token")
+            val pollUrl = pollObj.getString("endpoint")
+            val loginUrl = body.getString("login")
+
+            // Open login page in browser
+            toast("Opening login page ...")
+            mCtx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(loginUrl)))
+
+            // Start polling in background
+            Thread { pollLogin(pollUrl, pollToken, baseUrl) }.start()
         } catch (e: SocketTimeoutException) {
             toast("Failed to connect to login flow URL")
             return
-        }
-
-        // Read response body
-        val body = response.body?.string()
-        response.body?.close()
-        if (body == null) {
-            toast("Failed to get login flow response")
-            return
-        }
-
-        // Parse response body as JSON
-        val json = JSONObject(body)
-        val pollToken: String
-        val pollUrl: String
-        val loginUrl: String
-        try {
-            val pollObj = json.getJSONObject("poll")
-            pollToken = pollObj.getString("token")
-            pollUrl = pollObj.getString("endpoint")
-            loginUrl = json.getString("login")
-
-            toast("Opening login page...")
-
-            // Open login page in browser
-            mCtx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(loginUrl)))
         } catch (e: Exception) {
             Log.e(TAG, "login: ", e)
-            toast("Failed to parse login flow response")
+            toast(e.message ?: "Unknown error")
             return
         }
-
-        // Start polling in background
-        Thread {
-            pollLogin(pollUrl, pollToken, baseUrl)
-        }.start()
     }
 
     /**
