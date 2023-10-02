@@ -5,6 +5,7 @@ import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import android.widget.Toast
+import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import gallery.memories.R
 import io.github.g00fy2.versioncompare.Version
@@ -16,6 +17,7 @@ import okhttp3.Response
 import org.json.JSONObject
 import java.net.SocketTimeoutException
 
+@UnstableApi
 class AccountService(private val mCtx: MainActivity) {
     companion object {
         val TAG = AccountService::class.java.simpleName
@@ -140,53 +142,53 @@ class AccountService(private val mCtx: MainActivity) {
     }
 
     fun checkCredentialsAndVersion() {
-        memoriesUrl.let { base ->
-            val request = Request.Builder()
-                .url(base + "api/describe")
-                .get()
-                .header("Authorization", authHeader ?: "")
-                .build()
+        if (memoriesUrl == null) return
 
-            val response: Response
-            try {
-                response = OkHttpClient().newCall(request).execute()
-            } catch (e: Exception) {
-                Log.w(TAG, "checkCredentialsAndVersion: ", e)
-                return
-            }
+        val request = Request.Builder()
+            .url(memoriesUrl + "api/describe")
+            .get()
+            .header("Authorization", authHeader ?: "")
+            .build()
 
-            val body = response.body?.string()
-            response.body?.close()
+        val response: Response
+        try {
+            response = OkHttpClient().newCall(request).execute()
+        } catch (e: Exception) {
+            Log.w(TAG, "checkCredentialsAndVersion: ", e)
+            return
+        }
 
-            // Check status code
-            if (response.code == 401) {
-                return loggedOut()
-            }
+        val body = response.body?.string()
+        response.body?.close()
 
-            // Could not connect to memories
-            if (response.code == 404) {
-                return toast(mCtx.getString(R.string.err_no_ver))
-            }
+        // Check status code
+        if (response.code == 401) {
+            return loggedOut()
+        }
 
-            // Check body
-            if (body == null || response.code != 200) {
-                toast(mCtx.getString(R.string.err_no_describe))
-                return
-            }
+        // Could not connect to memories
+        if (response.code == 404) {
+            return toast(mCtx.getString(R.string.err_no_ver))
+        }
 
-            val json = JSONObject(body)
-            val version = json.getString("version")
-            val uid = json.get("uid")
+        // Check body
+        if (body == null || response.code != 200) {
+            toast(mCtx.getString(R.string.err_no_describe))
+            return
+        }
 
-            // Check UID exists
-            if (uid.equals(null) && authHeader != null) {
-                return loggedOut()
-            }
+        val json = JSONObject(body)
+        val version = json.getString("version")
+        val uid = json.get("uid")
 
-            // Check minimum version
-            if (Version(version) < Version(mCtx.getString(R.string.min_server_version))) {
-                return toast(mCtx.getString(R.string.err_no_ver))
-            }
+        // Check UID exists
+        if (uid.equals(null) && authHeader != null) {
+            return loggedOut()
+        }
+
+        // Check minimum version
+        if (Version(version) < Version(mCtx.getString(R.string.min_server_version))) {
+            return toast(mCtx.getString(R.string.err_no_ver))
         }
     }
 

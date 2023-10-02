@@ -26,7 +26,8 @@ import java.io.IOException
 import java.time.Instant
 import java.util.concurrent.CountDownLatch
 
-@UnstableApi class TimelineQuery(private val mCtx: MainActivity) {
+@UnstableApi
+class TimelineQuery(private val mCtx: MainActivity) {
     private val TAG = TimelineQuery::class.java.simpleName
     private val mConfigService = ConfigService(mCtx)
 
@@ -228,7 +229,7 @@ import java.util.concurrent.CountDownLatch
             }
 
             // Delete from database
-            mPhotoDao.deleteFileIds(sysImgs.map { it.fileId})
+            mPhotoDao.deleteFileIds(sysImgs.map { it.fileId })
         } finally {
             synchronized(this) { deleting = false }
         }
@@ -254,13 +255,25 @@ import java.util.concurrent.CountDownLatch
         var updates = 0
 
         // Iterate all images from system store
-        for (image in SystemImage.cursor(mCtx, SystemImage.IMAGE_URI, selection, selectionArgs, null)) {
+        for (image in SystemImage.cursor(
+            mCtx,
+            SystemImage.IMAGE_URI,
+            selection,
+            selectionArgs,
+            null
+        )) {
             insertItemDb(image)
             updates++
         }
 
         // Iterate all videos from system store
-        for (video in SystemImage.cursor(mCtx, SystemImage.VIDEO_URI, selection, selectionArgs, null)) {
+        for (video in SystemImage.cursor(
+            mCtx,
+            SystemImage.VIDEO_URI,
+            selection,
+            selectionArgs,
+            null
+        )) {
             insertItemDb(video)
             updates++
         }
