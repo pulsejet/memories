@@ -8,12 +8,6 @@ import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import gallery.memories.R
 import io.github.g00fy2.versioncompare.Version
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
-import org.json.JSONObject
 import java.net.SocketTimeoutException
 
 @UnstableApi
@@ -65,55 +59,38 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
             mCtx.binding.webview.loadUrl("file:///android_asset/sync.html")
         }
 
-        val client = OkHttpClient()
-        val rbody =
-            "token=$pollToken".toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull())
         var pollCount = 0
-
-        while (true) {
+        while (pollCount < 10 * 60) {
             pollCount += 3
-            if (pollCount >= 10 * 60) return
 
             // Sleep for 3s
             Thread.sleep(3000)
 
-            // Poll login flow URL
-            val request = Request.Builder()
-                .url(pollUrl)
-                .post(rbody)
-                .build()
-
-            val response: Response
             try {
-                response = client.newCall(request).execute()
-            } catch (e: SocketTimeoutException) {
+                val response = mHttp.getPollLogin(pollUrl, pollToken)
+                val body = mHttp.bodyJson(response) ?: throw Exception("Failed to parse login flow response")
+                Log.v(TAG, "pollLogin: Got status code ${response.code}")
+
+                // Check status code
+                if (response.code != 200) {
+                    throw Exception("Failed to poll login flow")
+                }
+
+                val loginName = body.getString("loginName")
+                val appPassword = body.getString("appPassword")
+
+                mCtx.runOnUiThread {
+                    // Save login info (also updates header)
+                    storeCredentials(baseUrl, loginName, appPassword)
+
+                    // Go to next screen
+                    mCtx.binding.webview.evaluateJavascript("window.loggedIn()", {})
+                }
+
+                return
+            } catch (e: Exception) {
                 continue
             }
-
-            Log.v(TAG, "pollLogin: Got status code ${response.code}")
-
-            // Check status code
-            if (response.code != 200) {
-                response.body?.close()
-                continue
-            }
-
-            // Read response body
-            val body = response.body!!.string()
-            response.body?.close()
-            val json = JSONObject(body)
-            val loginName = json.getString("loginName")
-            val appPassword = json.getString("appPassword")
-
-            mCtx.runOnUiThread {
-                // Save login info (also updates header)
-                storeCredentials(baseUrl, loginName, appPassword)
-
-                // Go to next screen
-                mCtx.binding.webview.evaluateJavascript("window.loggedIn()", {})
-            }
-
-            return;
         }
     }
 

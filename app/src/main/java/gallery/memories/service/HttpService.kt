@@ -16,6 +16,7 @@ class HttpService {
         val TAG = HttpService::class.java.simpleName
     }
 
+    private val client = OkHttpClient()
     private var authHeader: String? = null
     private var memoriesUrl: String? = null
 
@@ -103,10 +104,19 @@ class HttpService {
             .build())
     }
 
+    /** Make login polling request */
+    @Throws(Exception::class)
+    fun getPollLogin(pollUrl: String, pollToken: String): Response {
+        return runRequest(Request.Builder()
+            .url(pollUrl)
+            .post("token=$pollToken".toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull()))
+            .build())
+    }
+
     /** Run a request and get a JSON object */
     @Throws(Exception::class)
     private fun runRequest(request: Request): Response {
-        return OkHttpClient().newCall(request).execute()
+        return client.newCall(request).execute()
     }
 
     /** Build a GET request */
