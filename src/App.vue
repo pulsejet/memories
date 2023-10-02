@@ -1,5 +1,7 @@
 <template>
-  <FirstStart v-if="isFirstStart" />
+  <router-view v-if="onlyRouterView" />
+
+  <FirstStart v-else-if="isFirstStart" />
 
   <NcContent
     app-name="memories"
@@ -193,6 +195,10 @@ export default defineComponent({
       }
 
       return t('memories', 'People');
+    },
+
+    onlyRouterView(): boolean {
+      return ['nxsetup'].includes(this.$route.name ?? '');
     },
 
     isFirstStart(): boolean {

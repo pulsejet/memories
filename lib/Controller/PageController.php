@@ -234,4 +234,16 @@ class PageController extends Controller
     {
         return $this->main();
     }
+
+    /**
+     * @PublicPage
+     *
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     */
+    public function nxsetup()
+    {
+        return $this->main();
+    }
 }
