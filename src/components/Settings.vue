@@ -288,12 +288,12 @@ export default defineComponent({
     },
 
     // --------------- Native APIs start -----------------------------
-    async refreshNativeConfig() {
-      this.localFolders = await nativex.getLocalFolders();
+    refreshNativeConfig() {
+      this.localFolders = nativex.getLocalFolders();
     },
 
-    async updateDeviceFolders() {
-      await nativex.setLocalFolders(this.localFolders);
+    updateDeviceFolders() {
+      nativex.setLocalFolders(this.localFolders);
     },
 
     async logout() {

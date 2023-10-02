@@ -66,7 +66,7 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
 
   // Native preview
   if (isLocalPhoto(photo)) {
-    return API.Q(nativex.API.IMAGE_PREVIEW(photo.fileid), { c: photo.etag });
+    return API.Q(nativex.NAPI.IMAGE_PREVIEW(photo.fileid), { c: photo.etag });
   }
 
   // Screen-appropriate size
@@ -114,7 +114,7 @@ export function getImageInfoUrl(photo: IPhoto | number): string {
   const fileid = typeof photo === 'number' ? photo : photo.fileid;
 
   if (typeof photo === 'object' && isLocalPhoto(photo)) {
-    return nativex.API.IMAGE_INFO(fileid);
+    return nativex.NAPI.IMAGE_INFO(fileid);
   }
 
   return API.IMAGE_INFO(fileid);
