@@ -844,8 +844,16 @@ export default defineComponent({
     },
 
     /** API url for Day call */
-    getDayUrl(dayId: number | string) {
-      return API.Q(API.DAY(dayId), this.getQuery());
+    getDayUrl(dayIds: number[]) {
+      const query = this.getQuery();
+
+      // If any day in the fetch list has local images we need to fetch
+      // the remote hidden images for the merging to happen correctly
+      if (this.routeHasNative && dayIds.some((id) => this.heads[id]?.day?.haslocal)) {
+        query[DaysFilterType.HIDDEN] = '1';
+      }
+
+      return API.Q(API.DAY(dayIds.join(',')), query);
     },
 
     /** Fetch image data for one dayId */
@@ -858,7 +866,7 @@ export default defineComponent({
       this.sizedDays.add(dayId);
 
       // Look for cache
-      const cacheUrl = this.getDayUrl(dayId);
+      const cacheUrl = this.getDayUrl([dayId]);
       try {
         const cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
         if (cache) {
@@ -868,6 +876,7 @@ export default defineComponent({
           }
 
           // Process the cache
+          utils.removeHiddenPhotos(cache);
           this.processDay(dayId, cache);
         }
       } catch {
@@ -900,8 +909,7 @@ export default defineComponent({
       for (const dayId of dayIds) dayMap.set(dayId, []);
 
       // Construct URL
-      const dayStr = dayIds.join(',');
-      const url = this.getDayUrl(dayStr);
+      const url = this.getDayUrl(dayIds);
       this.fetchDayQueue = [];
 
       try {
@@ -911,7 +919,7 @@ export default defineComponent({
         const data = res.data;
 
         // Check if the state has changed
-        if (this.state !== startState || this.getDayUrl(dayStr) !== url) {
+        if (this.state !== startState || this.getDayUrl(dayIds) !== url) {
           return;
         }
 
@@ -929,7 +937,7 @@ export default defineComponent({
         // creates circular references which cannot be stringified
         for (const [dayId, photos] of dayMap) {
           if (photos.length === 0) continue;
-          utils.cacheData(this.getDayUrl(dayId), photos);
+          utils.cacheData(this.getDayUrl([dayId]), photos);
         }
 
         // Get local images if we are running in native environment.
@@ -946,6 +954,9 @@ export default defineComponent({
 
         // Process each day as needed
         for (const [dayId, photos] of dayMap) {
+          // Remove hidden photos
+          utils.removeHiddenPhotos(photos);
+
           // Check if the response has any delta
           const head = this.heads[dayId];
           if (head?.day?.detail?.length === photos.length) {

@@ -227,6 +227,12 @@ trait TimelineQueryDays
         }
         unset($row['categoryid']);
 
+        // Get hidden field if present
+        if (\array_key_exists('hidden', $row) && $row['hidden']) {
+            $row['ishidden'] = 1;
+        }
+        unset($row['hidden']);
+
         // All cluster transformations
         ClustersBackend\Manager::applyDayPostTransforms($this->request, $row);
 
@@ -238,11 +244,6 @@ trait TimelineQueryDays
            && ($epoch = (int) $row['epoch']) && ($size = (int) $row['size'])) {
             // compute AUID and discard epoch and size
             $row['auid'] = Exif::getAUID($epoch, $size);
-        }
-
-        // Get hidden field if present
-        if (\array_key_exists('hidden', $row)) {
-            $row['hidden'] = (bool) $row['hidden'];
         }
     }
 
