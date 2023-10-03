@@ -1,7 +1,19 @@
 import { NAPI, nativex } from './api';
 import { API } from '../services/API';
 import { has } from './basic';
+import * as utils from '../services/utils';
 import type { IDay, IPhoto } from '../types';
+
+/** Memcache for <dayId, Photos> */
+const daysCache = new Map<number, IPhoto[]>();
+
+// Clear the cache whenever the timeline is refreshed
+if (has()) {
+  document.addEventListener('DOMContentLoaded', () => {
+    utils.bus.on('memories:timeline:soft-refresh', () => daysCache.clear());
+    utils.bus.on('memories:timeline:hard-refresh', () => daysCache.clear());
+  });
+}
 
 /**
  * Merge incoming days into current days.
@@ -105,11 +117,17 @@ export async function getLocalDays(): Promise<IDay[]> {
 export async function getLocalDay(dayId: number): Promise<IPhoto[]> {
   if (!has()) return [];
 
+  // Check cache
+  if (daysCache.has(dayId)) return daysCache.get(dayId)!;
+
   const res = await fetch(NAPI.DAY(dayId));
   if (!res.ok) return [];
 
   const photos: IPhoto[] = await res.json();
   photos.forEach((p) => (p.islocal = true));
+
+  // Cache the response
+  daysCache.set(dayId, photos);
 
   return photos;
 }
