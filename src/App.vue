@@ -310,13 +310,10 @@ export default defineComponent({
   },
 
   async beforeMount() {
-    if ('serviceWorker' in navigator) {
-      // Check if dev instance
-      if (window.location.hostname === 'localhost') {
-        console.warn('Service Worker is not enabled on localhost.');
-        return;
-      }
-
+    if (window.location.hostname === 'localhost') {
+      // Disable on dev instances
+      console.warn('Service Worker is not enabled on localhost.');
+    } else if ('serviceWorker' in navigator) {
       // Get the config before loading
       const previousVersion = staticConfig.getSync('version');
 
