@@ -42,7 +42,6 @@
 import { defineComponent } from 'vue';
 import type { Component } from 'vue';
 
-import axios from '@nextcloud/axios';
 import { translate as t } from '@nextcloud/l10n';
 
 import ClusterHList from './ClusterHList.vue';
@@ -58,7 +57,6 @@ import MapIcon from 'vue-material-design-icons/Map.vue';
 import CogIcon from 'vue-material-design-icons/Cog.vue';
 
 import config from '../services/static-config';
-import { API } from '../services/API';
 import * as dav from '../services/dav';
 
 import type { ICluster, IConfig } from '../types';

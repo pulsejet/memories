@@ -60,6 +60,7 @@ trait TimelineQueryDays
      * @param int[] $day_ids         The day ids to fetch
      * @param bool  $recursive       If the query should be recursive
      * @param bool  $archive         If the query should include only the archive folder
+     * @param bool  $hidden          If the query should include hidden files
      * @param array $queryTransforms The query transformations to apply
      *
      * @return array An array of day responses
@@ -68,6 +69,7 @@ trait TimelineQueryDays
         ?array $day_ids,
         bool $recursive,
         bool $archive,
+        bool $hidden,
         array $queryTransforms = []
     ): array {
         $query = $this->connection->getQueryBuilder();
@@ -81,6 +83,11 @@ trait TimelineQueryDays
         $query->select($fileid, ...TimelineQuery::TIMELINE_SELECT)
             ->from('memories', 'm')
         ;
+
+        // Add hidden field
+        if ($hidden) {
+            $query->addSelect('cte_f.hidden');
+        }
 
         // JOIN with mimetypes to get the mimetype
         $query->join('f', 'mimetypes', 'mimetypes', $query->expr()->eq('f.mimetype', 'mimetypes.id'));
@@ -104,7 +111,7 @@ trait TimelineQueryDays
         $this->applyAllTransforms($queryTransforms, $query, false);
 
         // JOIN with filecache for existing files
-        $query = $this->joinFilecache($query, null, $recursive, $archive);
+        $query = $this->joinFilecache($query, null, $recursive, $archive, $hidden);
 
         // FETCH all photos in this day
         $day = $this->executeQueryWithCTEs($query)->fetchAll();
@@ -124,9 +131,9 @@ trait TimelineQueryDays
         $types = $query->getParameterTypes();
 
         // Get SQL
-        $CTE_SQL = \array_key_exists('cteFoldersArchive', $params) && $params['cteFoldersArchive']
+        $CTE_SQL = \array_key_exists('cteFoldersArchive', $params)
             ? self::CTE_FOLDERS_ARCHIVE()
-            : self::CTE_FOLDERS();
+            : self::CTE_FOLDERS(\array_key_exists('cteIncludeHidden', $params));
 
         // Add WITH clause if needed
         if (false !== strpos($sql, 'cte_folders')) {
@@ -143,12 +150,14 @@ trait TimelineQueryDays
      * @param TimelineRoot  $root      Either the top folder or null for all
      * @param bool          $recursive Whether to get the days recursively
      * @param bool          $archive   Whether to get the days only from the archive folder
+     * @param bool          $hidden    Whether to include hidden files
      */
     public function joinFilecache(
         IQueryBuilder $query,
         ?TimelineRoot $root = null,
         bool $recursive = true,
-        bool $archive = false
+        bool $archive = false,
+        bool $hidden = false
     ): IQueryBuilder {
         // This will throw if the root is illegally empty
         $root = $this->root($root);
@@ -163,7 +172,7 @@ trait TimelineQueryDays
         $pathOp = null;
         if ($recursive) {
             // Join with folders CTE
-            $this->addSubfolderJoinParams($query, $root, $archive);
+            $this->addSubfolderJoinParams($query, $root, $archive, $hidden);
             $query->innerJoin('f', 'cte_folders', 'cte_f', $query->expr()->eq('f.parent', 'cte_f.fileid'));
         } else {
             // If getting non-recursively folder only check for parent
@@ -218,6 +227,12 @@ trait TimelineQueryDays
         }
         unset($row['categoryid']);
 
+        // Get hidden field if present
+        if (\array_key_exists('hidden', $row) && $row['hidden']) {
+            $row['ishidden'] = 1;
+        }
+        unset($row['hidden']);
+
         // All cluster transformations
         ClustersBackend\Manager::applyDayPostTransforms($this->request, $row);
 
@@ -238,10 +253,18 @@ trait TimelineQueryDays
     private function addSubfolderJoinParams(
         IQueryBuilder &$query,
         TimelineRoot &$root,
-        bool $archive
+        bool $archive,
+        bool $hidden
     ) {
         // Add query parameters
         $query->setParameter('topFolderIds', $root->getIds(), IQueryBuilder::PARAM_INT_ARRAY);
-        $query->setParameter('cteFoldersArchive', $archive, IQueryBuilder::PARAM_BOOL);
+
+        if ($archive) {
+            $query->setParameter('cteFoldersArchive', true, IQueryBuilder::PARAM_BOOL);
+        }
+
+        if ($hidden) {
+            $query->setParameter('cteIncludeHidden', true, IQueryBuilder::PARAM_BOOL);
+        }
     }
 }

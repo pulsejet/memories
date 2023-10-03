@@ -807,7 +807,7 @@ export default defineComponent({
       if (!isvideo) {
         // Try local file if NativeX is available
         if (photo.auid && nativex.has()) {
-          highSrc.push(nativex.API.IMAGE_FULL(photo.auid));
+          highSrc.push(nativex.NAPI.IMAGE_FULL(photo.auid));
         }
 
         // Decodable full resolution image

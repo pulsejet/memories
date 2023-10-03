@@ -94,6 +94,7 @@ class DaysController extends GenericApiController
                 $dayIds,
                 $this->isRecursive(),
                 $this->isArchive(),
+                $this->isHidden(),
                 $this->getTransformations(),
             );
 
@@ -183,7 +184,7 @@ class DaysController extends GenericApiController
     {
         // Do not preload anything for native clients.
         // Since the contents of preloads are trusted, clients will not load locals.
-        if (Util::callerIsNative()) {
+        if (Util::callerIsNative() || $this->noPreload()) {
             return;
         }
 
@@ -211,6 +212,7 @@ class DaysController extends GenericApiController
                 $preloadDayIds,
                 $this->isRecursive(),
                 $this->isArchive(),
+                $this->isHidden(),
                 $transforms,
             );
 
@@ -274,6 +276,16 @@ class DaysController extends GenericApiController
     private function isArchive()
     {
         return null !== $this->request->getParam('archive');
+    }
+
+    private function isHidden()
+    {
+        return null !== $this->request->getParam('hidden');
+    }
+
+    private function noPreload()
+    {
+        return null !== $this->request->getParam('nopreload');
     }
 
     private function isMonthView()

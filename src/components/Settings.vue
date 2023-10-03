@@ -110,6 +110,10 @@
         >
           {{ folder.name }}
         </NcCheckboxRadioSwitch>
+
+        <NcButton @click="runNxSetup()" type="secondary">
+          {{ t('memories', 'Run initial device setup') }}
+        </NcButton>
       </NcAppSettingsSection>
 
       <NcAppSettingsSection id="folders-settings" :title="t('memories', 'Folders')">
@@ -288,12 +292,16 @@ export default defineComponent({
     },
 
     // --------------- Native APIs start -----------------------------
-    async refreshNativeConfig() {
-      this.localFolders = await nativex.getLocalFolders();
+    refreshNativeConfig() {
+      this.localFolders = nativex.getLocalFolders();
     },
 
-    async updateDeviceFolders() {
-      await nativex.setLocalFolders(this.localFolders);
+    updateDeviceFolders() {
+      nativex.setLocalFolders(this.localFolders);
+    },
+
+    runNxSetup() {
+      this.$router.replace('/nxsetup');
     },
 
     async logout() {

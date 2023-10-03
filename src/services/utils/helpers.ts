@@ -66,7 +66,7 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
 
   // Native preview
   if (isLocalPhoto(photo)) {
-    return API.Q(nativex.API.IMAGE_PREVIEW(photo.fileid), { c: photo.etag });
+    return API.Q(nativex.NAPI.IMAGE_PREVIEW(photo.fileid), { c: photo.etag });
   }
 
   // Screen-appropriate size
@@ -114,7 +114,7 @@ export function getImageInfoUrl(photo: IPhoto | number): string {
   const fileid = typeof photo === 'number' ? photo : photo.fileid;
 
   if (typeof photo === 'object' && isLocalPhoto(photo)) {
-    return nativex.API.IMAGE_INFO(fileid);
+    return nativex.NAPI.IMAGE_INFO(fileid);
   }
 
   return API.IMAGE_INFO(fileid);
@@ -133,6 +133,18 @@ export function updatePhotoFromImageInfo(photo: IPhoto, imageInfo: IImageInfo) {
     ...photo.imageInfo,
     ...imageInfo,
   };
+}
+
+/**
+ * Remove hidden photos from the list in place
+ * @param photos List of photos
+ */
+export function removeHiddenPhotos(photos: IPhoto[]) {
+  for (let i = photos.length - 1; i >= 0; i--) {
+    if (photos[i].ishidden) {
+      photos.splice(i, 1);
+    }
+  }
 }
 
 /**

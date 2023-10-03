@@ -146,6 +146,8 @@ export default defineComponent({
     numCols: 0,
     /** Header rows for dayId key */
     heads: {} as { [dayid: number]: IHeadRow },
+    /** Current list (days response) was loaded from cache */
+    daysIsCache: false,
 
     /** Size of outer container [w, h] */
     containerSize: [0, 0] as [number, number],
@@ -691,10 +693,10 @@ export default defineComponent({
             try {
               if ((cache = await utils.getCachedData(cacheUrl))) {
                 if (this.routeHasNative) {
-                  await nativex.extendDaysWithLocal(cache);
+                  cache = nativex.mergeDays(cache, await nativex.getLocalDays());
                 }
 
-                await this.processDays(cache);
+                await this.processDays(cache, true);
                 this.updateLoading(-1);
               }
             } catch {
@@ -714,12 +716,12 @@ export default defineComponent({
 
         // Extend with native days
         if (this.routeHasNative) {
-          await nativex.extendDaysWithLocal(data);
+          data = nativex.mergeDays(data, await nativex.getLocalDays());
         }
 
         // Make sure we're still on the same page
         if (this.state !== startState) return;
-        await this.processDays(data);
+        await this.processDays(data, false);
       } catch (e) {
         if (!utils.isNetworkError(e)) {
           showError(e?.response?.data?.message ?? e.message);
@@ -731,8 +733,12 @@ export default defineComponent({
       }
     },
 
-    /** Process the data for days call including folders */
-    async processDays(data: IDay[]) {
+    /**
+     * Process the data for days call including folders
+     * @param data Days data
+     * @param cache Whether the data was from cache
+     */
+    async processDays(data: IDay[], cache: boolean) {
       if (!data || !this.state) return;
 
       const list: typeof this.list = [];
@@ -824,6 +830,9 @@ export default defineComponent({
       this.loadedDays.clear();
       this.sizedDays.clear();
 
+      // Mark if the data was from cache
+      this.daysIsCache = cache;
+
       // Iterate the preload map
       // Now the inner detail objects are reactive
       for (const dayId in preloads) {
@@ -844,8 +853,16 @@ export default defineComponent({
     },
 
     /** API url for Day call */
-    getDayUrl(dayId: number | string) {
-      return API.Q(API.DAY(dayId), this.getQuery());
+    getDayUrl(dayIds: number[]) {
+      const query = this.getQuery();
+
+      // If any day in the fetch list has local images we need to fetch
+      // the remote hidden images for the merging to happen correctly
+      if (this.routeHasNative && dayIds.some((id) => this.heads[id]?.day?.haslocal)) {
+        query[DaysFilterType.HIDDEN] = '1';
+      }
+
+      return API.Q(API.DAY(dayIds.join(',')), query);
     },
 
     /** Fetch image data for one dayId */
@@ -858,20 +875,31 @@ export default defineComponent({
       this.sizedDays.add(dayId);
 
       // Look for cache
-      const cacheUrl = this.getDayUrl(dayId);
+      const cacheUrl = this.getDayUrl([dayId]);
       try {
         const cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
         if (cache) {
           // Cache only contains remote images; update from local too
-          if (this.routeHasNative) {
-            await nativex.extendDayWithLocal(dayId, cache);
+          if (this.routeHasNative && head.day?.haslocal) {
+            nativex.mergeDay(cache, await nativex.getLocalDay(dayId));
           }
 
           // Process the cache
+          utils.removeHiddenPhotos(cache);
+
+          // If this is a cached response and the list is not, then we don't
+          // want to take any destructive actions like removing a day.
+          //  1. If a day is removed then it will not be fetched again
+          //  2. But it probably does exist on the server
+          //  3. Since days could be fetched, the user probably is connected
+          if (!this.daysIsCache && !cache.length) {
+            throw new Error('Skipping empty cache because view is fresh');
+          }
+
           this.processDay(dayId, cache);
         }
-      } catch {
-        console.warn(`Failed to process day cache: ${cacheUrl}`);
+      } catch (e) {
+        console.warn(`Failed or skipped processing day cache: ${cacheUrl}`, e);
       }
 
       // Aggregate fetch requests
@@ -900,8 +928,7 @@ export default defineComponent({
       for (const dayId of dayIds) dayMap.set(dayId, []);
 
       // Construct URL
-      const dayStr = dayIds.join(',');
-      const url = this.getDayUrl(dayStr);
+      const url = this.getDayUrl(dayIds);
       this.fetchDayQueue = [];
 
       try {
@@ -911,7 +938,7 @@ export default defineComponent({
         const data = res.data;
 
         // Check if the state has changed
-        if (this.state !== startState || this.getDayUrl(dayStr) !== url) {
+        if (this.state !== startState || this.getDayUrl(dayIds) !== url) {
           return;
         }
 
@@ -929,21 +956,28 @@ export default defineComponent({
         // creates circular references which cannot be stringified
         for (const [dayId, photos] of dayMap) {
           if (photos.length === 0) continue;
-          utils.cacheData(this.getDayUrl(dayId), photos);
+          utils.cacheData(this.getDayUrl([dayId]), photos);
         }
 
         // Get local images if we are running in native environment.
         // Get them all together for each day here.
         if (this.routeHasNative) {
-          await Promise.all(
-            Array.from(dayMap.entries()).map(([dayId, photos]) => {
-              return nativex.extendDayWithLocal(dayId, photos);
+          const promises = Array.from(dayMap.entries())
+            .filter(([dayId, photos]) => {
+              return this.heads[dayId]?.day?.haslocal;
             })
-          );
+            .map(async ([dayId, photos]) => {
+              nativex.processFreshServerDay(dayId, photos);
+              nativex.mergeDay(photos, await nativex.getLocalDay(dayId));
+            });
+          if (promises.length) await Promise.all(promises);
         }
 
         // Process each day as needed
         for (const [dayId, photos] of dayMap) {
+          // Remove hidden photos
+          utils.removeHiddenPhotos(photos);
+
           // Check if the response has any delta
           const head = this.heads[dayId];
           if (head?.day?.detail?.length === photos.length) {

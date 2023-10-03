@@ -1,5 +1,7 @@
 <template>
-  <FirstStart v-if="isFirstStart" />
+  <router-view v-if="onlyRouterView" />
+
+  <FirstStart v-else-if="isFirstStart" />
 
   <NcContent
     app-name="memories"
@@ -195,6 +197,10 @@ export default defineComponent({
       return t('memories', 'People');
     },
 
+    onlyRouterView(): boolean {
+      return ['nxsetup'].includes(this.$route.name ?? '');
+    },
+
     isFirstStart(): boolean {
       return this.config.timeline_path === '_empty_' && !this.routeIsPublic && !this.$route.query.noinit;
     },
@@ -304,13 +310,10 @@ export default defineComponent({
   },
 
   async beforeMount() {
-    if ('serviceWorker' in navigator) {
-      // Check if dev instance
-      if (window.location.hostname === 'localhost') {
-        console.warn('Service Worker is not enabled on localhost.');
-        return;
-      }
-
+    if (window.location.hostname === 'localhost') {
+      // Disable on dev instances
+      console.warn('Service Worker is not enabled on localhost.');
+    } else if ('serviceWorker' in navigator) {
       // Get the config before loading
       const previousVersion = staticConfig.getSync('version');
 

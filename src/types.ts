@@ -20,6 +20,8 @@ export type IDay = {
   rows?: IRow[];
   /** List of photos for this day */
   detail?: IPhoto[];
+  /** This day has some local photos */
+  haslocal?: boolean;
 };
 
 export type IPhoto = {
@@ -78,6 +80,11 @@ export type IPhoto = {
   isfavorite?: boolean;
   /** Local file from native */
   islocal?: boolean;
+  /**
+   * Photo is hidden from timeline; discard immediately.
+   * This field exists so that we can merge with locals.
+   */
+  ishidden?: boolean;
 
   /** AUID of file (optional, NativeX) */
   auid?: number;

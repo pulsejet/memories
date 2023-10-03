@@ -6,6 +6,7 @@ import Timeline from './components/Timeline.vue';
 import Explore from './components/Explore.vue';
 import SplitTimeline from './components/SplitTimeline.vue';
 import ClusterView from './components/ClusterView.vue';
+import NativeXSetup from './native/Setup.vue';
 
 Vue.use(Router);
 
@@ -148,6 +149,15 @@ export default new Router({
       name: 'explore',
       props: (route) => ({
         rootTitle: t('memories', 'Explore'),
+      }),
+    },
+
+    {
+      path: '/nxsetup',
+      component: NativeXSetup,
+      name: 'nxsetup',
+      props: (route) => ({
+        rootTitle: t('memories', 'Setup'),
       }),
     },
   ],

@@ -34,6 +34,8 @@ export enum DaysFilterType {
   RECURSIVE = 'recursive',
   MONTH_VIEW = 'monthView',
   REVERSE = 'reverse',
+  HIDDEN = 'hidden',
+  NO_PRELOAD = 'nopreload',
 }
 
 export class API {
