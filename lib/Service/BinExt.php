@@ -12,6 +12,11 @@ class BinExt
     public const GOVOD_VER = '0.1.16';
     public const NX_VER_MIN = '1.0';
 
+    /** Get the path to the temp directory */
+    public static function getTmpPath(): string {
+        return Util::getSystemConfig('memories.exiftool.tmp') ?: sys_get_temp_dir();
+    }
+
     /** Copy a binary to temp dir for execution */
     public static function getTempBin(string $path, string $name, bool $copy = true): string
     {
@@ -19,7 +24,7 @@ class BinExt
         $suffix = hash('crc32', $path);
 
         // Check target temp file
-        $target = sys_get_temp_dir().'/'.$name.'-'.$suffix;
+        $target = self::getTmpPath().'/'.$name.'-'.$suffix;
         if (file_exists($target)) {
             if (!is_writable($target)) {
                 throw new \Exception("{$name} temp binary path is not writable: {$target}");

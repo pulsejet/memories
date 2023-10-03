@@ -8,6 +8,12 @@ return [
     // This requires perl to be available
     'memories.exiftool_no_local' => false,
 
+    // Temporary directory for non-php binaries. The directory must be writable
+    // and the webserver user should be able to create executable binaries in it.
+    // Note that go-vod temp files are separately configured (see memories.vod.tempdir)
+    // Defaults to system temp directory if blank
+    'memories.exiftool.tmp' => '',
+
     // How to index user directories
     // 0 = auto-index disabled
     // 1 = index everything

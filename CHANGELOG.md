@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Shared videos will now be transcoded to be smaller in size
 - **Feature**: Confirmation box on deletion ([#798](https://github.com/pulsejet/memories/issues/798))
 - **Feature**: Prompt on editing metadata if date will be lost
+- **Feature**: Allow changing binary temp directory ([#821](https://github.com/pulsejet/memories/issues/821))
 - **Fix**: Support for transcoding MKV files.
 
 ## [v5.4.1] - 2023-08-20

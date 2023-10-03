@@ -140,12 +140,12 @@ class Places
         echo "Download planet data to temporary file...\n";
         flush();
 
-        $filename = sys_get_temp_dir().'/planet_coarse_boundaries.zip';
+        $filename = BinExt::getTmpPath().'/planet_coarse_boundaries.zip';
         if (file_exists($filename) && !unlink($filename)) {
             throw new \Exception("Failed to delete old planet zip file: {$filename}");
         }
 
-        $txtfile = sys_get_temp_dir().'/planet_coarse_boundaries.txt';
+        $txtfile = BinExt::getTmpPath().'/planet_coarse_boundaries.txt';
         if (file_exists($txtfile) && !unlink($txtfile)) {
             throw new \Exception("Failed to delete old planet data file: {$txtfile}");
         }
@@ -166,7 +166,7 @@ class Places
         $zip = new \ZipArchive();
         $res = $zip->open($filename);
         if (true === $res) {
-            $zip->extractTo(sys_get_temp_dir());
+            $zip->extractTo(BinExt::getTmpPath());
             $zip->close();
         } else {
             throw new \Exception('Failed to unzip planet data file');
