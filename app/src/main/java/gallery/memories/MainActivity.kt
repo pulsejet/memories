@@ -181,9 +181,7 @@ class MainActivity : AppCompatActivity() {
 
         // Start version check if loaded account
         if (isApp) {
-            Thread {
-                nativex.account.checkCredentialsAndVersion()
-            }.start()
+            Thread { nativex.account.checkCredentialsAndVersion() }.start()
         }
     }
 

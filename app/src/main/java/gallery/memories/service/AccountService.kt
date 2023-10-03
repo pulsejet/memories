@@ -104,7 +104,7 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
      * Makes a toast to the user if something is wrong
      */
     fun checkCredentialsAndVersion() {
-        if (mHttp.isLoggedIn()) return
+        if (!mHttp.isLoggedIn()) return
 
         try {
             val response = mHttp.getApiDescription()
