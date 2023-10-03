@@ -962,14 +962,15 @@ export default defineComponent({
         // Get local images if we are running in native environment.
         // Get them all together for each day here.
         if (this.routeHasNative) {
-          await Promise.all(
-            Array.from(dayMap.entries()).map(async ([dayId, photos]) => {
-              if (this.heads[dayId]?.day?.haslocal) {
-                nativex.processFreshServerDay(dayId, photos);
-                nativex.mergeDay(photos, await nativex.getLocalDay(dayId));
-              }
+          const promises = Array.from(dayMap.entries())
+            .filter(([dayId, photos]) => {
+              return this.heads[dayId]?.day?.haslocal;
             })
-          );
+            .map(async ([dayId, photos]) => {
+              nativex.processFreshServerDay(dayId, photos);
+              nativex.mergeDay(photos, await nativex.getLocalDay(dayId));
+            });
+          if (promises.length) await Promise.all(promises);
         }
 
         // Process each day as needed
