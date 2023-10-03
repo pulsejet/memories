@@ -412,12 +412,12 @@ class TimelineQuery(private val mCtx: MainActivity) {
     }
 
     /**
-     * Set server ID for local file.
-     * @param auid AUID
-     * @param serverId Server ID
+     * Set has_remote for list of AUIDs
+     * @param auids List of AUIDs
+     * @param value Value to set
      */
-    fun setServerId(auid: Long, serverId: Long) {
-        mPhotoDao.setServerId(auid, serverId)
+    fun setHasRemote(auids: List<Long>, value: Boolean) {
+        mPhotoDao.setHasRemote(auids, value)
     }
 
     /**

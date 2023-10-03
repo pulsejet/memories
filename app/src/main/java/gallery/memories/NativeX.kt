@@ -172,8 +172,12 @@ class NativeX(private val mCtx: MainActivity) {
     }
 
     @JavascriptInterface
-    fun setServerId(auid: Long, serverId: Long) {
-        Thread { query.setServerId(auid, serverId) }.start()
+    fun setHasRemote(auids: String, value: Boolean) {
+        Thread {
+            val parsed = JSONArray(auids)
+            val list = List(parsed.length()) { parsed.getLong(it) }
+            query.setHasRemote(list, value)
+        }.start()
     }
 
     fun handleRequest(request: WebResourceRequest): WebResourceResponse {

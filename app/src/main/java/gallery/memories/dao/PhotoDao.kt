@@ -12,10 +12,10 @@ interface PhotoDao {
     @Query("SELECT 1")
     fun ping(): Int
 
-    @Query("SELECT dayid, COUNT(local_id) AS count FROM photos WHERE bucket_id IN (:bucketIds) AND server_id = 0 GROUP BY dayid ORDER BY dayid DESC")
+    @Query("SELECT dayid, COUNT(local_id) AS count FROM photos WHERE bucket_id IN (:bucketIds) AND has_remote = 0 GROUP BY dayid ORDER BY dayid DESC")
     fun getDays(bucketIds: List<String>): List<Day>
 
-    @Query("SELECT * FROM photos WHERE dayid=:dayId AND bucket_id IN (:buckets) AND server_id = 0 ORDER BY date_taken DESC")
+    @Query("SELECT * FROM photos WHERE dayid=:dayId AND bucket_id IN (:buckets) AND has_remote = 0 ORDER BY date_taken DESC")
     fun getPhotosByDay(dayId: Long, buckets: List<String>): List<Photo>
 
     @Query("DELETE FROM photos WHERE local_id IN (:fileIds)")
@@ -42,6 +42,6 @@ interface PhotoDao {
     @Query("SELECT bucket_id, bucket_name FROM photos GROUP BY bucket_id")
     fun getBuckets(): List<Bucket>
 
-    @Query("UPDATE photos SET server_id=:serverId WHERE auid=:auid")
-    fun setServerId(auid: Long, serverId: Long)
+    @Query("UPDATE photos SET has_remote=:v WHERE auid IN (:auids)")
+    fun setHasRemote(auids: List<Long>, v: Boolean)
 }
