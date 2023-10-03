@@ -172,8 +172,8 @@ class MainActivity : AppCompatActivity() {
         binding.webview.addJavascriptInterface(nativex, "nativex")
         binding.webview.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         binding.webview.setBackgroundColor(Color.TRANSPARENT)
-        binding.webview.clearCache(true)
-        WebView.setWebContentsDebuggingEnabled(true);
+//        binding.webview.clearCache(true)
+//        WebView.setWebContentsDebuggingEnabled(true);
 
         // Welcome page or actual app
         nativex.account.refreshAuthHeader()
