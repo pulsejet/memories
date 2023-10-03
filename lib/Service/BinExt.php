@@ -13,7 +13,8 @@ class BinExt
     public const NX_VER_MIN = '1.0';
 
     /** Get the path to the temp directory */
-    public static function getTmpPath(): string {
+    public static function getTmpPath(): string
+    {
         return Util::getSystemConfig('memories.exiftool.tmp') ?: sys_get_temp_dir();
     }
 
