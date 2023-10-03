@@ -180,9 +180,11 @@ export type NativeX = {
   getSyncStatus: () => number;
 
   /**
-   * Set the server ID for a given AUID.
+   * Set if the given files have remote copies.
+   * @param auid List of AUIDs to set the server ID for (JSON-encoded)
+   * @param value Value of remote
    */
-  setServerId: (auid: number, serverId: number) => void;
+  setHasRemote: (auids: string, value: boolean) => void;
 };
 
 /** The native interface is a global object that is injected by the native app. */

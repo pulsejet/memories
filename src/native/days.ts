@@ -67,31 +67,34 @@ export function mergeDays(current: IDay[], incoming: IDay[]): IDay[] {
  * Merge incoming photos into current photos.
  * @param current Response to update
  * @param incoming Incoming response
- * @returns added photos
  */
-export function mergeDay(current: IPhoto[], incoming: IPhoto[]): IPhoto[] {
+export function mergeDay(current: IPhoto[], incoming: IPhoto[]): void {
   // Merge local photos into remote photos
-  const currentAUIDs = new Map<number, IPhoto>();
+  const currentAUIDs = new Set<number>();
   for (const photo of current) {
-    currentAUIDs.set(photo.auid!, photo);
+    currentAUIDs.add(photo.auid!);
   }
 
   // Filter out files that are only available locally
-  const added: IPhoto[] = [];
   for (const photo of incoming) {
-    const serverPhoto = currentAUIDs.get(photo.auid!);
-    if (serverPhoto) {
-      nativex.setServerId(photo.auid!, serverPhoto.fileid);
+    if (!currentAUIDs.has(photo.auid!)) {
+      current.push(photo);
     }
-
-    current.push(photo);
-    added.push(photo);
   }
 
   // Sort by epoch value
   current.sort((a, b) => (b.epoch ?? 0) - (a.epoch ?? 0));
+}
 
-  return added;
+/**
+ * Run internal hooks on fresh day received from server
+ * Does not update the passed objects in any way
+ * @param current Photos from day response
+ */
+export function processFreshServerDay(dayId: number, photos: IPhoto[]): void {
+  const auids = photos.map((p) => p.auid).filter((a) => !!a) as number[];
+  if (!auids.length) return;
+  nativex.setHasRemote(JSON.stringify(auids), true);
 }
 
 /**

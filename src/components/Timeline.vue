@@ -965,6 +965,7 @@ export default defineComponent({
           await Promise.all(
             Array.from(dayMap.entries()).map(async ([dayId, photos]) => {
               if (this.heads[dayId]?.day?.haslocal) {
+                nativex.processFreshServerDay(dayId, photos);
                 nativex.mergeDay(photos, await nativex.getLocalDay(dayId));
               }
             })
