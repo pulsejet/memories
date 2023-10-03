@@ -412,6 +412,15 @@ class TimelineQuery(private val mCtx: MainActivity) {
     }
 
     /**
+     * Set server ID for local file.
+     * @param auid AUID
+     * @param serverId Server ID
+     */
+    fun setServerId(auid: Long, serverId: Long) {
+        mPhotoDao.setServerId(auid, serverId)
+    }
+
+    /**
      * Active local folders response.
      * This is in timeline query because it calls the database service.
      */

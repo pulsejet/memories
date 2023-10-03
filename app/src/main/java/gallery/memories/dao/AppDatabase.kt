@@ -9,7 +9,7 @@ import gallery.memories.R
 import gallery.memories.mapper.Photo
 
 
-@Database(entities = [Photo::class], version = 9)
+@Database(entities = [Photo::class], version = 10)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun photoDao(): PhotoDao
 

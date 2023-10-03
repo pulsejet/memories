@@ -227,6 +227,7 @@ class SystemImage {
                 bucketId = bucketId,
                 bucketName = bucketName,
                 flag = 0,
+                serverId = 0
             )
         }
 }

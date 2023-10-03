@@ -171,6 +171,11 @@ class NativeX(private val mCtx: MainActivity) {
         return query.syncStatus
     }
 
+    @JavascriptInterface
+    fun setServerId(auid: Long, serverId: Long) {
+        Thread { query.setServerId(auid, serverId) }.start()
+    }
+
     fun handleRequest(request: WebResourceRequest): WebResourceResponse {
         val path = request.url.path ?: return makeErrorResponse()
 

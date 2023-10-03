@@ -12,12 +12,13 @@ import androidx.room.PrimaryKey
         Index(value = ["dayid"]),
         Index(value = ["flag"]),
         Index(value = ["bucket_id"]),
-        Index(value = ["bucket_id", "dayid"])
+        Index(value = ["bucket_id", "dayid", "server_id"])
     ]
 )
 data class Photo(
     @PrimaryKey(autoGenerate = true) val id: Int? = null,
     @ColumnInfo(name = "local_id") val localId: Long,
+    @ColumnInfo(name = "server_id") val serverId: Long,
     @ColumnInfo(name = "auid") val auid: Long,
     @ColumnInfo(name = "mtime") val mtime: Long,
     @ColumnInfo(name = "date_taken") val dateTaken: Long,
