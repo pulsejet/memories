@@ -189,6 +189,7 @@ export default defineComponent({
 .nxsetup-outer {
   width: 100%;
   height: 100%;
+  overflow-y: auto;
   background-color: var(--color-background-plain);
   color: var(--color-primary-text);
   text-align: center;
