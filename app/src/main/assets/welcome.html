@@ -49,12 +49,20 @@
         }
       }
 
+      function getUrl() {
+          const url = urlBox.value.toLowerCase();
+          if (!url.startsWith("http://") && !url.startsWith("https://")) {
+              return "https://" + url;
+          }
+          return url;
+      }
+
       function updateLoginEnabled() {
-        loginButton.disabled = !validateUrl(urlBox.value);
+        loginButton.disabled = !validateUrl(getUrl());
       }
 
       function getMemoriesUrl() {
-        const url = new URL(urlBox.value);
+        const url = new URL(getUrl());
 
         // Add trailing slash to the path if it's not there already
         if (!url.pathname.endsWith("/")) {
