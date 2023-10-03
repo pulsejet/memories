@@ -146,6 +146,8 @@ export default defineComponent({
     numCols: 0,
     /** Header rows for dayId key */
     heads: {} as { [dayid: number]: IHeadRow },
+    /** Current list (days response) was loaded from cache */
+    daysIsCache: false,
 
     /** Size of outer container [w, h] */
     containerSize: [0, 0] as [number, number],
@@ -694,7 +696,7 @@ export default defineComponent({
                   cache = nativex.mergeDays(cache, await nativex.getLocalDays());
                 }
 
-                await this.processDays(cache);
+                await this.processDays(cache, true);
                 this.updateLoading(-1);
               }
             } catch {
@@ -719,7 +721,7 @@ export default defineComponent({
 
         // Make sure we're still on the same page
         if (this.state !== startState) return;
-        await this.processDays(data);
+        await this.processDays(data, false);
       } catch (e) {
         if (!utils.isNetworkError(e)) {
           showError(e?.response?.data?.message ?? e.message);
@@ -731,8 +733,12 @@ export default defineComponent({
       }
     },
 
-    /** Process the data for days call including folders */
-    async processDays(data: IDay[]) {
+    /**
+     * Process the data for days call including folders
+     * @param data Days data
+     * @param cache Whether the data was from cache
+     */
+    async processDays(data: IDay[], cache: boolean) {
       if (!data || !this.state) return;
 
       const list: typeof this.list = [];
@@ -824,6 +830,9 @@ export default defineComponent({
       this.loadedDays.clear();
       this.sizedDays.clear();
 
+      // Mark if the data was from cache
+      this.daysIsCache = cache;
+
       // Iterate the preload map
       // Now the inner detail objects are reactive
       for (const dayId in preloads) {
@@ -877,10 +886,20 @@ export default defineComponent({
 
           // Process the cache
           utils.removeHiddenPhotos(cache);
+
+          // If this is a cached response and the list is not, then we don't
+          // want to take any destructive actions like removing a day.
+          //  1. If a day is removed then it will not be fetched again
+          //  2. But it probably does exist on the server
+          //  3. Since days could be fetched, the user probably is connected
+          if (!this.daysIsCache && !cache.length) {
+            throw new Error('Skipping empty cache because view is fresh');
+          }
+
           this.processDay(dayId, cache);
         }
-      } catch {
-        console.warn(`Failed to process day cache: ${cacheUrl}`);
+      } catch (e) {
+        console.warn(`Failed or skipped processing day cache: ${cacheUrl}`, e);
       }
 
       // Aggregate fetch requests
