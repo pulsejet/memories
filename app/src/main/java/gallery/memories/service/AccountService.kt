@@ -1,5 +1,6 @@
 package gallery.memories.service
 
+import SecureStorage
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -15,6 +16,8 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
     companion object {
         val TAG = AccountService::class.java.simpleName
     }
+
+    private val store = SecureStorage(mCtx)
 
     /**
      * Login to a server
@@ -160,11 +163,7 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
      * @param password The password to store
      */
     fun storeCredentials(url: String, user: String, password: String) {
-        mCtx.getSharedPreferences("credentials", 0).edit()
-            .putString("memoriesUrl", url)
-            .putString("user", user)
-            .putString("password", password)
-            .apply()
+        store.saveCredentials(url, user, password)
         mHttp.setBaseUrl(url)
         mHttp.setAuthHeader(Pair(user, password))
     }
@@ -174,12 +173,10 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
      * @return The stored credentials
      */
     fun getCredentials(): Pair<String, String>? {
-        val prefs = mCtx.getSharedPreferences("credentials", 0)
-        mHttp.setBaseUrl(prefs.getString("memoriesUrl", null))
-        val user = prefs.getString("user", null)
-        val password = prefs.getString("password", null)
-        if (user == null || password == null) return null
-        return Pair(user, password)
+        val saved = store.getCredentials()
+        if (saved == null) return null
+        mHttp.setBaseUrl(saved.first)
+        return Pair(saved.second, saved.third)
     }
 
     /**
@@ -188,11 +185,7 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
     fun deleteCredentials() {
         mHttp.setAuthHeader(null)
         mHttp.setBaseUrl(null)
-        mCtx.getSharedPreferences("credentials", 0).edit()
-            .remove("memoriesUrl")
-            .remove("user")
-            .remove("password")
-            .apply()
+        store.deleteCredentials()
     }
 
     /**
