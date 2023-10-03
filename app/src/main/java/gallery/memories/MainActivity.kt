@@ -303,8 +303,7 @@ class MainActivity : AppCompatActivity() {
     fun applyTheme(color: String?, isDark: Boolean) {
         if (color == null) return
 
-        // Set dark mode
-        setTheme(if (isDark) android.R.style.Theme_Black else android.R.style.Theme_Light)
+        // Set system bars
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val appearance =
                 WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
