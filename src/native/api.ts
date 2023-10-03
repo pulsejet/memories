@@ -178,6 +178,11 @@ export type NativeX = {
    * @returns number of file synced or -1
    */
   getSyncStatus: () => number;
+
+  /**
+   * Set the server ID for a given AUID.
+   */
+  setServerId: (auid: number, serverId: number) => void;
 };
 
 /** The native interface is a global object that is injected by the native app. */

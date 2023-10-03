@@ -1,4 +1,4 @@
-import { NAPI } from './api';
+import { NAPI, nativex } from './api';
 import { API } from '../services/API';
 import { has } from './basic';
 import type { IDay, IPhoto } from '../types';
@@ -11,7 +11,6 @@ import type { IDay, IPhoto } from '../types';
  */
 export function mergeDays(current: IDay[], incoming: IDay[]) {
   const currentMap = new Map(current.map((d) => [d.dayid, d]));
-  const touched: IDay[] = [];
 
   for (const day of incoming) {
     const curr = currentMap.get(day.dayid);
@@ -38,11 +37,22 @@ export function mergeDays(current: IDay[], incoming: IDay[]) {
  */
 export function mergeDay(current: IPhoto[], incoming: IPhoto[]): IPhoto[] {
   // Merge local photos into remote photos
-  const currentAUIDs = new Set(current.map((p) => p.auid));
+  const currentAUIDs = new Map<number, IPhoto>();
+  for (const photo of current) {
+    currentAUIDs.set(photo.auid!, photo);
+  }
 
   // Filter out files that are only available locally
-  const added = incoming.filter((p) => !currentAUIDs.has(p.auid));
-  current.push(...added);
+  const added: IPhoto[] = [];
+  for (const photo of incoming) {
+    const serverPhoto = currentAUIDs.get(photo.auid!);
+    if (serverPhoto) {
+      nativex.setServerId(photo.auid!, serverPhoto.fileid);
+    }
+
+    current.push(photo);
+    added.push(photo);
+  }
 
   // Sort by epoch value
   current.sort((a, b) => (b.epoch ?? 0) - (a.epoch ?? 0));
