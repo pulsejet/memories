@@ -162,7 +162,7 @@ class PlacesBackend extends Backend
         $lang = Util::getUserLang();
         foreach ($places as &$row) {
             $row['osm_id'] = (int) $row['osm_id'];
-            $row['count'] = $marked ? 0 : (int) $row['count']; // the count is incorrect
+            $row['count'] = (int) $row['count'];
             self::choosePlaceLang($row, $lang);
         }
 
