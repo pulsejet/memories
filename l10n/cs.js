@@ -286,6 +286,8 @@ OC.L10N.register(
     "Collaborative Tags" : "Štítky pro spolupráci",
     "EXIF Fields" : "Kolonky EXIF",
     "Geolocation" : "Geolokace",
+    "Missing date metadata" : "Chybí metadata k datům",
+    "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "Některým položkám mohou chybět metadata k datům. Chcete se pokusit zkopírovat stávající známé časové razítko do metadat (doporučeno)? Pokud ne, může se stát, že časové razítko bude resetováno na stávající čas.",
     "Failed to load metadata for {n} photos." : "Nepodařilo se načíst metadata pro {n} fotek.",
     "{n} photos cannot be edited (permissions error)." : "{n} fotek není možné upravit (permissions error).",
     "Remove person" : "Odebrat osobu",

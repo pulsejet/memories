@@ -285,6 +285,8 @@
     "Collaborative Tags" : "وسوم تشاركية",
     "EXIF Fields" : "حقول EXIF",
     "Geolocation" : "الموقع الجغرافي",
+    "Missing date metadata" : "البيانات الوصفية للتاريخ metadata ناقصة",
+    "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "قد تفتقد بعض العناصر للبيانات الوصفية للتاريخ date metadata. هل ترغب في محاولة نسخ الختم الزمني timestamp المعروف حاليًا إلى البيانات الوصفية (مستحسن)؟ بخلاف ذلك، قد تتم إعادة ضبط الختم الزمني على الوقت الحالي.",
     "Failed to load metadata for {n} photos." : "تعذّر تحميل البيانات الوصفية لـ {n} صور.",
     "{n} photos cannot be edited (permissions error)." : "{n} صور لا يمكن تحريرها (حطأ في الأذونات).",
     "Remove person" : "حذف شخص",

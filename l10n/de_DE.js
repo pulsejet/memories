@@ -287,6 +287,8 @@ OC.L10N.register(
     "Collaborative Tags" : "Kollaborative Schlagworte",
     "EXIF Fields" : "EXIF-Felder",
     "Geolocation" : "Geolokalisierung",
+    "Missing date metadata" : "Fehlende Datumsmetadaten",
+    "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "Bei einigen Elementen fehlen möglicherweise die Datumsmetadaten. Möchten Sie versuchen, den aktuell bekannten Zeitstempel in die Metadaten zu kopieren (empfohlen)? Andernfalls wird der Zeitstempel möglicherweise auf die aktuelle Zeit zurückgesetzt.",
     "Failed to load metadata for {n} photos." : "Fehler beim Laden der Metadaten für {n} Fotos.",
     "{n} photos cannot be edited (permissions error)." : "{n} Fotos können nicht bearbeitet werden (Berechtigungsfehler).",
     "Remove person" : "Person entfernen",
