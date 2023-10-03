@@ -126,7 +126,7 @@ trait TimelineQueryDays
         // Get SQL
         $CTE_SQL = \array_key_exists('cteFoldersArchive', $params) && $params['cteFoldersArchive']
             ? self::CTE_FOLDERS_ARCHIVE()
-            : self::CTE_FOLDERS();
+            : self::CTE_FOLDERS(false);
 
         // Add WITH clause if needed
         if (false !== strpos($sql, 'cte_folders')) {
