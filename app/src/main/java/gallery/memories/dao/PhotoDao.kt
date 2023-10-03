@@ -12,20 +12,20 @@ interface PhotoDao {
     @Query("SELECT 1")
     fun ping(): Int
 
-    @Query("SELECT * FROM photos WHERE dayid=:dayId AND bucket_id IN (:buckets) AND server_id = 0")
+    @Query("SELECT dayid, COUNT(local_id) AS count FROM photos WHERE bucket_id IN (:bucketIds) AND server_id = 0 GROUP BY dayid ORDER BY dayid DESC")
+    fun getDays(bucketIds: List<String>): List<Day>
+
+    @Query("SELECT * FROM photos WHERE dayid=:dayId AND bucket_id IN (:buckets) AND server_id = 0 ORDER BY date_taken DESC")
     fun getPhotosByDay(dayId: Long, buckets: List<String>): List<Photo>
+
+    @Query("DELETE FROM photos WHERE local_id IN (:fileIds)")
+    fun deleteFileIds(fileIds: List<Long>)
 
     @Query("SELECT * FROM photos WHERE local_id IN (:fileIds)")
     fun getPhotosByFileIds(fileIds: List<Long>): List<Photo>
 
     @Query("SELECT * FROM photos WHERE auid IN (:auids)")
     fun getPhotosByAUIDs(auids: List<Long>): List<Photo>
-
-    @Query("SELECT dayid, COUNT(local_id) AS count FROM photos WHERE bucket_id IN (:bucketIds) AND server_id = 0 GROUP BY dayid")
-    fun getDays(bucketIds: List<String>): List<Day>
-
-    @Query("DELETE FROM photos WHERE local_id IN (:fileIds)")
-    fun deleteFileIds(fileIds: List<Long>)
 
     @Query("UPDATE photos SET flag=1")
     fun flagAll()
