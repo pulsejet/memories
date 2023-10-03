@@ -691,7 +691,7 @@ export default defineComponent({
             try {
               if ((cache = await utils.getCachedData(cacheUrl))) {
                 if (this.routeHasNative) {
-                  nativex.mergeDays(cache, await nativex.getLocalDays());
+                  cache = nativex.mergeDays(cache, await nativex.getLocalDays());
                 }
 
                 await this.processDays(cache);
@@ -714,7 +714,7 @@ export default defineComponent({
 
         // Extend with native days
         if (this.routeHasNative) {
-          nativex.mergeDays(data, await nativex.getLocalDays());
+          data = nativex.mergeDays(data, await nativex.getLocalDays());
         }
 
         // Make sure we're still on the same page

@@ -5,28 +5,50 @@ import type { IDay, IPhoto } from '../types';
 
 /**
  * Merge incoming days into current days.
+ * Both arrays MUST be sorted by dayid descending.
  * @param current Response to update
  * @param incoming Incoming response
- * @return touched or added days
+ * @return merged days
  */
-export function mergeDays(current: IDay[], incoming: IDay[]) {
-  const currentMap = new Map(current.map((d) => [d.dayid, d]));
+export function mergeDays(current: IDay[], incoming: IDay[]): IDay[] {
+  // Do a two pointer merge keeping the days sorted in O(n) time
+  // If a day is missing from current, add it
+  // If a day already exists in current, update haslocal on it
+  let i = 0;
+  let j = 0;
 
-  for (const day of incoming) {
-    const curr = currentMap.get(day.dayid);
-    if (curr) {
-      curr.count = Math.max(curr.count, day.count);
-
-      // Copy over some flags
-      curr.haslocal ||= day.haslocal;
+  // Merge local photos into remote photos
+  const merged: IDay[] = [];
+  while (i < current.length && j < incoming.length) {
+    const curr = current[i];
+    const inc = incoming[j];
+    if (curr.dayid === inc.dayid) {
+      curr.haslocal ||= inc.haslocal;
+      merged.push(curr);
+      i++;
+      j++;
+    } else if (curr.dayid > inc.dayid) {
+      merged.push(curr);
+      i++;
     } else {
-      current.push(day);
+      merged.push(inc);
+      j++;
     }
   }
 
-  // TODO: sort depends on view
-  // (but we use this for only timeline anyway for now)
-  current.sort((a, b) => b.dayid - a.dayid);
+  // Add remaining current days
+  while (i < current.length) {
+    merged.push(current[i]);
+    i++;
+  }
+
+  // Add remaining incoming days
+  while (j < incoming.length) {
+    merged.push(incoming[j]);
+    j++;
+  }
+
+  return merged;
 }
 
 /**
