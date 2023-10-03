@@ -285,6 +285,8 @@
     "Collaborative Tags" : "İş birlikli etiketler",
     "EXIF Fields" : "EXIF alanları",
     "Geolocation" : "Coğrafi konum",
+    "Missing date metadata" : "Tarih üst verileri eksik",
+    "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "Bazı ögelerin tarih üst verileri eksik olabilir. Şu anda bilinen zaman damgasını üst verilere kopyalamayı denemek ister misiniz (önerilir)? Yoksa zaman damgası geçerli zamana sıfırlanabilir.",
     "Failed to load metadata for {n} photos." : "{n} fotoğrafın üst verileri yüklenemedi.",
     "{n} photos cannot be edited (permissions error)." : "{n} fotoğraf düzenlenemedi (izin sorunu).",
     "Remove person" : "Kişiyi sil",
@@ -328,8 +330,10 @@
     "Link copied to clipboard" : "Bağlantı panoya kopyalandı",
     "Share File" : "Dosyayı paylaş",
     "Reduced Size" : "Boyutu küçültülmüş",
+    "Share the video as a low quality MP4" : "Görüntüyü düşük kaliteli MP4 olarak paylaş",
     "Share a lower resolution image preview" : "Görselin daha düşük çözünürlüklü bir ön izlemesini paylaş",
     "High Resolution" : "Yüksek çözünürlüklü",
+    "Share the video as a high quality MP4" : "Görüntüyü yüksek kaliteli MP4 olarak paylaş",
     "Share the image as a high quality JPEG" : "Görseli yüksek kaliteli JPEG olarak paylaş",
     "Original File" : "Özgün dosya",
     "Share the original image / video file" : "Özgün görsel / görüntü dosyasını paylaş",
@@ -478,12 +482,17 @@
     "You will find your friends soon. Please be patient" : "Yakında arkadaşlarınızı bulacaksınız. Lütfen sabırlı olun",
     "Face Recognition is disabled. Enable in settings to find your friends" : "Yüz tanıma devre dışı bırakılmış. Arkadaşlarınızı bulmak için ayarlar bölümünden etkinleştirin",
     "Your videos will appear here" : "Görüntüleriniz burada görüntülenecek",
+    "Add photos to albums by selecting them on your timeline." : "Fotoğrafları zaman çizelgenizden seçerek albümlere ekleyin.",
     "Create an album to get started" : "Başlamak için bir albüm oluşturun",
     "Archive photos you don't want to see in your timeline" : "Zaman tünelinizde görmek istemediğiniz fotoğrafları arşivleyin",
     "Tag photos to find them easily" : "Fotoğrafları kolayca bulabilmek için etiketleyin",
     "Recognize is still working on your photos" : "Recognize fotoğraflarınız üzerinde çalışmayı bitirmedi",
     "Places you have been to will appear here" : "Bulunduğunuz yerler burada görüntülenecek",
     "Yes" : "Evet",
-    "No" : "Hayır"
+    "No" : "Hayır",
+    "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["{count} öge çöpe atılsın mı?","{count} öge çöpe atılsın mı?"],
+    "Files in trash may be automatically deleted after a fixed period of time." : "Çöp kutusundaki dosyalar belirli bir süre sonunda otomatik olarak silinebilir.",
+    "You are about to download {count} items." : "{count} ögeyi indirmek üzeresiniz.",
+    "You are about to move {count} items." : "{count} ögeyi taşımak üzeresiniz."
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }
