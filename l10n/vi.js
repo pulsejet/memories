@@ -61,6 +61,7 @@ OC.L10N.register(
     "Size" : "Kích cỡ",
     "Name is required." : "Tên là bắt buộc.",
     "Auto" : "Tự động",
+    "Setup" : "Cài đặt",
     "Yes" : "Có"
 },
 "nplurals=1; plural=0;");

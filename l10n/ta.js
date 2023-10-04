@@ -35,6 +35,7 @@ OC.L10N.register(
     "Next" : "அடுத்த",
     "Value" : "Value",
     "Size" : "அளவு",
+    "Setup" : "அமைப்பு",
     "Yes" : "ஆம்",
     "No" : "இல்லை"
 },

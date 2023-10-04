@@ -57,6 +57,7 @@ OC.L10N.register(
     "Share" : "Koplietot",
     "Previous" : "Iepriekšējā",
     "Next" : "Nākamā",
+    "Finish" : "Pabeigt",
     "Save as" : "Saglabāt kā",
     "Undo" : "Atsaukt",
     "Redo" : "Atcelt atsaukšanu",
@@ -73,6 +74,7 @@ OC.L10N.register(
     "Fit size" : "Atbilst izmēram",
     "Direct" : "Tieši",
     "Auto" : "Automātiski",
-    "Shared Folder" : "Koplietotā mape"
+    "Shared Folder" : "Koplietotā mape",
+    "Setup" : "Iestatīt"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");

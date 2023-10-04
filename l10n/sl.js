@@ -265,6 +265,7 @@ OC.L10N.register(
     "Direct" : "Neposredno",
     "Auto" : "Samodejno",
     "Shared Folder" : "Mapa v souporabi",
+    "Setup" : "Nastavi",
     "Failed to create {albumName}." : "Ustvarjanje albuma {albumName} je spodletelo.",
     "General Failure" : "Splošna napaka",
     "Error: {msg}" : "Napaka: {msg}",

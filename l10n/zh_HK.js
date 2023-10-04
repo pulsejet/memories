@@ -462,6 +462,7 @@ OC.L10N.register(
     "Auto" : "自動",
     "Shared Folder" : "分享資料夾",
     "Shared Album" : "已分享了的相簿",
+    "Setup" : "設定",
     "Failed to remove {filename}." : "移除 {fileName} 失敗。",
     "Failed to create {albumName}." : "創建 {albumName} 失敗。",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "重新命名 {currentAlbumName} 為 {newAlbumName} 失敗。",

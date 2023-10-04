@@ -69,6 +69,7 @@ OC.L10N.register(
     "Share" : "שתף",
     "Previous" : "הקודם",
     "Next" : "הבא",
+    "Finish" : "סיים",
     "Undo" : "ביטול",
     "Redo" : "שחזור",
     "Zoom in" : "התקרבות",
@@ -82,6 +83,7 @@ OC.L10N.register(
     "Name is required." : "נדרש שם.",
     "Quality" : "איכות",
     "Direct" : "ישיר",
-    "Auto" : "אוטומטי"
+    "Auto" : "אוטומטי",
+    "Setup" : "הגדרות"
 },
 "nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: (n % 10 == 0 && n % 1 == 0 && n > 10) ? 2 : 3;");

@@ -78,6 +78,7 @@ OC.L10N.register(
     "Quality" : "Calidade",
     "Direct" : "Deretu",
     "Auto" : "Auto",
+    "Setup" : "Cunfigura",
     "Yes" : "Si",
     "No" : "No"
 },

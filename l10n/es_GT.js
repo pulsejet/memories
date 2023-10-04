@@ -51,12 +51,14 @@ OC.L10N.register(
     "Share" : "Compartir",
     "Previous" : "Previo",
     "Next" : "Siguiente",
+    "Finish" : "Terminar",
     "Undo" : "Deshacer",
     "Custom" : "Personalizado",
     "Value" : "Valor",
     "Text" : "Texto",
     "Size" : "Tamaño",
     "Position" : "Posición",
-    "Auto" : "Auto"
+    "Auto" : "Auto",
+    "Setup" : "Ajustes"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

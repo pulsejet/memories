@@ -81,6 +81,7 @@ OC.L10N.register(
     "Share" : "Del",
     "Previous" : "Tidligere",
     "Next" : "Næste",
+    "Finish" : "Færdigør",
     "Undo" : "Fortryd",
     "Redo" : "Annullér fortryd",
     "Zoom in" : "Zoom ind",

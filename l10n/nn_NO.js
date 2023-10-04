@@ -39,6 +39,7 @@ OC.L10N.register(
     "Previous" : "Førre",
     "Next" : "Neste",
     "Value" : "Verdi",
-    "Size" : "Storleik"
+    "Size" : "Storleik",
+    "Setup" : "Oppsett"
 },
 "nplurals=2; plural=(n != 1);");

@@ -41,6 +41,7 @@ OC.L10N.register(
     "Next" : "Weider",
     "Custom" : "Individualiséier",
     "Size" : "Gréisst",
+    "Setup" : "Setup",
     "Yes" : "Jo",
     "No" : "Nee"
 },

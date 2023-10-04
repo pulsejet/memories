@@ -24,6 +24,7 @@ OC.L10N.register(
     "Refresh" : "Täzelemek",
     "Read only" : "Diňe okaň",
     "Share" : "Paýlaş",
+    "Setup" : "Gurmak",
     "Yes" : "Hawa",
     "No" : "Ýok"
 },

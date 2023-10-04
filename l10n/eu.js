@@ -346,6 +346,7 @@ OC.L10N.register(
     "Auto" : "Auto",
     "Shared Folder" : "Partekatutako karpeta",
     "Shared Album" : "Partekatutako albuma",
+    "Setup" : "Konfigurazioa",
     "Failed to create {albumName}." : "Ezin izan da {albumName} sortu.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Ezin izan da {currentAlbumName} berrizendatu {newAlbumName} gisa.",
     "General Failure" : "Hutsegite orokorra",

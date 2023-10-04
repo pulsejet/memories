@@ -59,6 +59,7 @@
     "Text" : "ข้อความ",
     "Size" : "ขนาด",
     "Position" : "ตำแหน่ง",
+    "Setup" : "ตั้งค่า",
     "Yes" : "ใช่",
     "No" : "ไม่ตกลง"
 },"pluralForm" :"nplurals=1; plural=0;"

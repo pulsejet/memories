@@ -103,6 +103,7 @@ OC.L10N.register(
     "Share" : "Compartir",
     "Previous" : "Anterior",
     "Next" : "Següent",
+    "Finish" : "Acabeu",
     "Save as" : "Anomena i desa",
     "All changes will be lost." : "Tots els canvis es perdran.",
     "Are you sure you want to continue?" : "Esteu segur que voleu continuar?",

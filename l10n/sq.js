@@ -50,6 +50,7 @@ OC.L10N.register(
     "Share" : "Shpërndaje",
     "Previous" : "I mëparshëm",
     "Next" : "Tjetër",
+    "Finish" : "Përfundo",
     "Undo" : "Ktheje pas",
     "Redo" : "Ribëj",
     "Custom" : "E përshtatur",
@@ -58,6 +59,7 @@ OC.L10N.register(
     "Size" : "Madhësi",
     "Position" : "Pozicion",
     "Name is required." : "Emri është i domosdoshëm",
+    "Setup" : "Rregullim",
     "Yes" : "Po"
 },
 "nplurals=2; plural=(n != 1);");

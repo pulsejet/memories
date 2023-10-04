@@ -61,6 +61,7 @@
     "Share" : "Deila",
     "Previous" : "Fyrra",
     "Next" : "Næsta",
+    "Finish" : "Ljúka",
     "Undo" : "Undo",
     "Redo" : "Redo",
     "Zoom in" : "Renna að",
@@ -75,6 +76,7 @@
     "Name is required." : "Nafn er nauðsynlegt.",
     "Quality" : "Quality",
     "Direct" : "Beint",
-    "Auto" : "Sjálfvirkt"
+    "Auto" : "Sjálfvirkt",
+    "Setup" : "Uppsetning"
 },"pluralForm" :"nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);"
 }

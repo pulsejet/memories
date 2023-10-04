@@ -54,6 +54,7 @@ OC.L10N.register(
     "Share" : "Compartir",
     "Previous" : "Previo",
     "Next" : "Siguiente",
+    "Finish" : "Terminar",
     "Undo" : "Deshacer",
     "Redo" : "Rehacer",
     "Custom" : "Personalizado",
@@ -62,6 +63,7 @@ OC.L10N.register(
     "Size" : "Tamaño",
     "Position" : "Posición",
     "Name is required." : "Nombre es requerido.",
-    "Quality" : "Calidad"
+    "Quality" : "Calidad",
+    "Setup" : "Ajustes"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

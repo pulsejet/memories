@@ -79,6 +79,7 @@ OC.L10N.register(
     "Quality" : "Kvaliteta",
     "Direct" : "Izravno",
     "Auto" : "Auto",
+    "Setup" : "Podesi",
     "Yes" : "Da",
     "No" : "Ne"
 },

@@ -399,6 +399,7 @@ OC.L10N.register(
     "Auto" : "Automático",
     "Shared Folder" : "Carpeta Compartida",
     "Shared Album" : "Álbum Compartido",
+    "Setup" : "Ajustes",
     "Failed to create {albumName}." : "Error al crear {nombreÁlbum}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Error al cambiar el nombre de {nombreÁlbumActual} a {nombreÁlbumNuevo}.",
     "General Failure" : "Falla General",
