@@ -121,7 +121,7 @@ class NativeX(private val mCtx: MainActivity) {
     fun playVideo(auid: String?, fileid: String?, urlsArray: String?) {
         if (auid == null || fileid == null || urlsArray == null) return
 
-        Thread {
+        mCtx.threadPool.submit {
             // Get URI of remote videos
             val urls = JSONArray(urlsArray)
             val list = Array(urls.length()) {
@@ -139,7 +139,7 @@ class NativeX(private val mCtx: MainActivity) {
                     mCtx.initializePlayer(list, fileid)
                 }
             }
-        }.start()
+        }
     }
 
     @JavascriptInterface
@@ -173,11 +173,11 @@ class NativeX(private val mCtx: MainActivity) {
 
     @JavascriptInterface
     fun setHasRemote(auids: String, value: Boolean) {
-        Thread {
+        mCtx.threadPool.submit {
             val parsed = JSONArray(auids)
             val list = List(parsed.length()) { parsed.getLong(it) }
             query.setHasRemote(list, value)
-        }.start()
+        }
     }
 
     fun handleRequest(request: WebResourceRequest): WebResourceResponse {
@@ -289,16 +289,16 @@ class NativeX(private val mCtx: MainActivity) {
             // Full sync if this is the first time permission was granted
             val fullSync = forceFull || !permissions.hasMediaPermission()
 
-            Thread {
+            mCtx.threadPool.submit {
                 // Block for media permission
-                if (!permissions.requestMediaPermissionSync()) return@Thread
+                if (!permissions.requestMediaPermissionSync()) return@submit
 
                 // Full sync requested
                 if (fullSync) query.syncFullDb()
 
                 // Run delta sync and register hooks
                 query.initialize()
-            }.start()
+            }
         }
     }
 }

@@ -27,6 +27,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import gallery.memories.databinding.ActivityMainBinding
+import java.util.concurrent.Executors
 
 @UnstableApi
 class MainActivity : AppCompatActivity() {
@@ -37,6 +38,8 @@ class MainActivity : AppCompatActivity() {
     val binding by lazy(LazyThreadSafetyMode.NONE) {
         ActivityMainBinding.inflate(layoutInflater)
     }
+
+    val threadPool = Executors.newFixedThreadPool(4)
 
     private lateinit var nativex: NativeX
 
@@ -172,8 +175,8 @@ class MainActivity : AppCompatActivity() {
         binding.webview.addJavascriptInterface(nativex, "nativex")
         binding.webview.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         binding.webview.setBackgroundColor(Color.TRANSPARENT)
-//        binding.webview.clearCache(true)
-//        WebView.setWebContentsDebuggingEnabled(true);
+        // binding.webview.clearCache(true)
+        // WebView.setWebContentsDebuggingEnabled(true);
 
         // Welcome page or actual app
         nativex.account.refreshAuthHeader()
@@ -181,6 +184,7 @@ class MainActivity : AppCompatActivity() {
 
         // Start version check if loaded account
         if (isApp) {
+            // Do not use the threadPool here since this might block indefinitely
             Thread { nativex.account.checkCredentialsAndVersion() }.start()
         }
     }
