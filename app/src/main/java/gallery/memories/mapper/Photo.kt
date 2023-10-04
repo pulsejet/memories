@@ -9,6 +9,7 @@ import androidx.room.PrimaryKey
     tableName = "photos", indices = [
         Index(value = ["local_id"]),
         Index(value = ["auid"]),
+        Index(value = ["buid"]),
         Index(value = ["dayid"]),
         Index(value = ["flag"]),
         Index(value = ["bucket_id"]),
@@ -18,7 +19,8 @@ import androidx.room.PrimaryKey
 data class Photo(
     @PrimaryKey(autoGenerate = true) val id: Int? = null,
     @ColumnInfo(name = "local_id") val localId: Long,
-    @ColumnInfo(name = "auid") val auid: Long,
+    @ColumnInfo(name = "auid") val auid: String,
+    @ColumnInfo(name = "buid") val buid: String,
     @ColumnInfo(name = "mtime") val mtime: Long,
     @ColumnInfo(name = "date_taken") val dateTaken: Long,
     @ColumnInfo(name = "dayid") val dayId: Long,

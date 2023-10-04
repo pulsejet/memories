@@ -48,7 +48,7 @@ import java.io.ByteArrayOutputStream
      * @return The full image as a JPEG byte array
      */
     @Throws(Exception::class)
-    fun getFull(auid: Long): ByteArray {
+    fun getFull(auid: String): ByteArray {
         val sysImgs = query.getSystemImagesByAUIDs(listOf(auid))
         if (sysImgs.isEmpty()) {
             throw Exception("Image not found")

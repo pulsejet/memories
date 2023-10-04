@@ -130,7 +130,7 @@ class TimelineQuery(private val mCtx: MainActivity) {
      * @param auids List of AUIDs
      * @return List of SystemImage
      */
-    fun getSystemImagesByAUIDs(auids: List<Long>): List<SystemImage> {
+    fun getSystemImagesByAUIDs(auids: List<String>): List<SystemImage> {
         val photos = mPhotoDao.getPhotosByAUIDs(auids)
         if (photos.isEmpty()) return listOf()
         return SystemImage.getByIds(mCtx, photos.map { it.localId })
@@ -157,23 +157,32 @@ class TimelineQuery(private val mCtx: MainActivity) {
     @Throws(JSONException::class)
     fun getDay(dayId: Long): JSONArray {
         // Get the photos for the day from DB
-        val fileIds = mPhotoDao.getPhotosByDay(dayId, mConfigService.enabledBucketIds)
-            .map { it.localId }.toMutableList()
-        if (fileIds.isEmpty()) return JSONArray()
+        val photos = mPhotoDao.getPhotosByDay(dayId, mConfigService.enabledBucketIds)
+            .map { it.localId to it }.toMap()
+
+        if (photos.isEmpty()) return JSONArray()
+        val fileIds = photos.keys.toMutableList()
 
         // Get latest metadata from system table
-        val photos = SystemImage.getByIds(mCtx, fileIds).map { image ->
+        val response = SystemImage.getByIds(mCtx, fileIds).map { image ->
             // Mark file exists
             fileIds.remove(image.fileId)
 
-            // Add missing dayId to JSON
-            image.json.put(Fields.Photo.DAYID, dayId)
+            // Add missing fields to JSON
+            val json = image.json
+            photos[image.fileId]?.let { photo ->
+                json.put(Fields.Photo.AUID, photo.auid)
+                    .put(Fields.Photo.BUID, photo.buid)
+                    .put(Fields.Photo.DAYID, dayId)
+            }
+
+            json
         }.let { JSONArray(it) }
 
         // Remove files that were not found
         mPhotoDao.deleteFileIds(fileIds)
 
-        return photos
+        return response
     }
 
     /**
@@ -222,7 +231,7 @@ class TimelineQuery(private val mCtx: MainActivity) {
      * @return JSON response
      */
     @Throws(Exception::class)
-    fun delete(auids: List<Long>, dry: Boolean): JSONObject {
+    fun delete(auids: List<String>, dry: Boolean): JSONObject {
         synchronized(this) {
             if (deleting) throw Exception("Already deleting another set of images")
             deleting = true
@@ -405,10 +414,13 @@ class TimelineQuery(private val mCtx: MainActivity) {
             return
         }
 
+        // Convert to photo
+        val photo = image.photo
+
         // Delete file with same local_id and insert new one
         mPhotoDao.deleteFileIds(listOf(fileId))
-        mPhotoDao.insert(image.photo)
-        Log.v(TAG, "Inserted file to local DB: $fileId / $baseName")
+        mPhotoDao.insert(photo)
+        Log.v(TAG, "Inserted file to local DB: $fileId / $baseName / $photo")
     }
 
     /**
@@ -416,8 +428,8 @@ class TimelineQuery(private val mCtx: MainActivity) {
      * @param auids List of AUIDs
      * @param value Value to set
      */
-    fun setHasRemote(auids: List<Long>, value: Boolean) {
-        mPhotoDao.setHasRemote(auids, value)
+    fun setHasRemote(auids: List<String>, buids: List<String>, value: Boolean) {
+        mPhotoDao.setHasRemote(auids, buids, value)
     }
 
     /**

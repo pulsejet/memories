@@ -108,7 +108,7 @@ import java.util.concurrent.CountDownLatch
      * @return True if the image was shared
      */
     @Throws(Exception::class)
-    fun shareLocal(auid: Long): Boolean {
+    fun shareLocal(auid: String): Boolean {
         val sysImgs = query.getSystemImagesByAUIDs(listOf(auid))
         if (sysImgs.isEmpty()) throw Exception("Image not found locally")
         val uri = sysImgs[0].uri

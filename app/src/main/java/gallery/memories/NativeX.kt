@@ -47,14 +47,14 @@ class NativeX(private val mCtx: MainActivity) {
         val DAY = Regex("^/api/days/\\d+$")
 
         val IMAGE_INFO = Regex("^/api/image/info/\\d+$")
-        val IMAGE_DELETE = Regex("^/api/image/delete/\\d+(,\\d+)*$")
+        val IMAGE_DELETE = Regex("^/api/image/delete/[0-9a-f]+(,[0-9a-f]+)*$")
 
         val IMAGE_PREVIEW = Regex("^/image/preview/\\d+$")
-        val IMAGE_FULL = Regex("^/image/full/\\d+$")
+        val IMAGE_FULL = Regex("^/image/full/[0-9a-f]+$")
 
         val SHARE_URL = Regex("^/api/share/url/.+$")
         val SHARE_BLOB = Regex("^/api/share/blob/.+$")
-        val SHARE_LOCAL = Regex("^/api/share/local/\\d+$")
+        val SHARE_LOCAL = Regex("^/api/share/local/[0-9a-f]+$")
 
         val CONFIG_ALLOW_MEDIA = Regex("^/api/config/allow_media/\\d+$")
     }
@@ -118,7 +118,7 @@ class NativeX(private val mCtx: MainActivity) {
     }
 
     @JavascriptInterface
-    fun playVideo(auid: Long, fileid: Long, urlsArray: String) {
+    fun playVideo(auid: String, fileid: Long, urlsArray: String) {
         mCtx.threadPool.submit {
             // Get URI of remote videos
             val urls = JSONArray(urlsArray)
@@ -169,11 +169,16 @@ class NativeX(private val mCtx: MainActivity) {
     }
 
     @JavascriptInterface
-    fun setHasRemote(auids: String, value: Boolean) {
+    fun setHasRemote(auids: String, buids: String, value: Boolean) {
+        Log.v(TAG, "setHasRemote: auids=$auids, buids=$buids, value=$value")
         mCtx.threadPool.submit {
-            val parsed = JSONArray(auids)
-            val list = List(parsed.length()) { parsed.getLong(it) }
-            query.setHasRemote(list, value)
+            val auidArray = JSONArray(auids)
+            val buidArray = JSONArray(buids)
+            query.setHasRemote(
+                List(auidArray.length()) { auidArray.getString(it) },
+                List(buidArray.length()) { buidArray.getString(it) },
+                value
+            )
         }
     }
 
@@ -199,7 +204,7 @@ class NativeX(private val mCtx: MainActivity) {
                 }
             }
         } catch (e: Exception) {
-            Log.w(TAG, "handleRequest: ", e)
+            Log.w(TAG, "handleRequest: " + e.message)
             makeErrorResponse()
         }
 
@@ -238,13 +243,13 @@ class NativeX(private val mCtx: MainActivity) {
         } else if (path.matches(API.IMAGE_PREVIEW)) {
             makeResponse(image.getPreview(parts[3].toLong()), "image/jpeg")
         } else if (path.matches(API.IMAGE_FULL)) {
-            makeResponse(image.getFull(parts[3].toLong()), "image/jpeg")
+            makeResponse(image.getFull(parts[3]), "image/jpeg")
         } else if (path.matches(API.SHARE_URL)) {
             makeResponse(dlService!!.shareUrl(URLDecoder.decode(parts[4], "UTF-8")))
         } else if (path.matches(API.SHARE_BLOB)) {
             makeResponse(dlService!!.shareBlobFromUrl(URLDecoder.decode(parts[4], "UTF-8")))
         } else if (path.matches(API.SHARE_LOCAL)) {
-            makeResponse(dlService!!.shareLocal(parts[4].toLong()))
+            makeResponse(dlService!!.shareLocal(parts[4]))
         } else if (path.matches(API.CONFIG_ALLOW_MEDIA)) {
             permissions.setAllowMedia(true)
             if (permissions.requestMediaPermissionSync()) {
@@ -276,8 +281,8 @@ class NativeX(private val mCtx: MainActivity) {
         return response
     }
 
-    private fun parseIds(ids: String): List<Long> {
-        return ids.trim().split(",").map { it.toLong() }
+    private fun parseIds(ids: String): List<String> {
+        return ids.trim().split(",")
     }
 
     fun doMediaSync(forceFull: Boolean) {

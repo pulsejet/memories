@@ -10,9 +10,11 @@ import android.util.Log
 import androidx.exifinterface.media.ExifInterface
 import org.json.JSONObject
 import java.io.IOException
+import java.math.BigInteger
+import java.security.MessageDigest
 
 class SystemImage {
-    var fileId = 0L;
+    var fileId = 0L
     var baseName = ""
     var mimeType = ""
     var dateTaken = 0L
@@ -163,7 +165,6 @@ class SystemImage {
                 .put(Fields.Photo.SIZE, size)
                 .put(Fields.Photo.ETAG, mtime.toString())
                 .put(Fields.Photo.EPOCH, epoch)
-                .put(Fields.Photo.AUID, auid)
 
             if (isVideo) {
                 obj.put(Fields.Photo.ISVIDEO, 1)
@@ -179,47 +180,70 @@ class SystemImage {
             return dateTaken / 1000
         }
 
-    /** The UTC dateTaken timestamp of the image. */
-    val utcDate
-        get(): Long {
-            // Get EXIF date using ExifInterface if image
-            if (!isVideo) {
-                try {
-                    val exif = ExifInterface(dataPath)
-                    val exifDate = exif.getAttribute(ExifInterface.TAG_DATETIME)
-                        ?: throw IOException()
-                    val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
-                    sdf.timeZone = TimeZone.GMT_ZONE
-                    sdf.parse(exifDate).let {
-                        return it.time / 1000
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to read EXIF data: " + e.message)
-                }
+    val exifInterface
+        get() : ExifInterface? {
+            if (isVideo) return null
+            try {
+                return ExifInterface(dataPath)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to read EXIF daddta: " + e.message)
+                return null
             }
-
-            // No way to get the actual local date, so just assume current timezone
-            return (dateTaken + TimeZone.getDefault().getOffset(dateTaken).toLong()) / 1000
         }
 
-    /** The auid of the image. */
-    val auid
-        get(): Long {
-            val crc = java.util.zip.CRC32()
-
-            // pass date taken + size as decimal string
-            crc.update((epoch.toString() + size.toString()).toByteArray())
-
-            return crc.value
+    /** The UTC dateTaken timestamp of the image. */
+    fun utcDate(exif: ExifInterface?): Long {
+        // Get EXIF date using ExifInterface if image
+        if (exif != null) {
+            try {
+                val exifDate = exif.getAttribute(ExifInterface.TAG_DATETIME)
+                    ?: throw IOException()
+                val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
+                sdf.timeZone = TimeZone.GMT_ZONE
+                sdf.parse(exifDate).let {
+                    return it.time / 1000
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to read EXIF datetime: " + e.message)
+            }
         }
 
-    /** The database Photo object corresponding to the SystemImage. */
+        // No way to get the actual local date, so just assume current timezone
+        return (dateTaken + TimeZone.getDefault().getOffset(dateTaken).toLong()) / 1000
+    }
+
+    fun auid(): String {
+        return md5("$epoch$size")
+    }
+
+    fun buid(exif: ExifInterface?): String {
+        var imageUniqueId = "size=$size"
+        if (exif != null) {
+            try {
+                val iuid = exif.getAttribute(ExifInterface.TAG_IMAGE_UNIQUE_ID)
+                    ?: throw IOException()
+                imageUniqueId = "iuid=$iuid"
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to read EXIF unique ID ($baseName): " + e.message)
+            }
+        }
+
+        return md5("$baseName$imageUniqueId");
+    }
+
+    /**
+     * The database Photo object corresponding to the SystemImage.
+     * This should ONLY be used for insertion into the database.
+     */
     val photo
         get(): Photo {
-            val dateCache = utcDate
+            val exif = exifInterface
+            val dateCache = utcDate(exif)
+
             return Photo(
                 localId = fileId,
-                auid = auid,
+                auid = auid(),
+                buid = buid(exif),
                 mtime = mtime,
                 dateTaken = dateCache,
                 dayId = dateCache / 86400,
@@ -230,4 +254,9 @@ class SystemImage {
                 hasRemote = false
             )
         }
+
+    private fun md5(input: String): String {
+        val md = MessageDigest.getInstance("MD5")
+        return BigInteger(1, md.digest(input.toByteArray())).toString(16).padStart(32, '0')
+    }
 }

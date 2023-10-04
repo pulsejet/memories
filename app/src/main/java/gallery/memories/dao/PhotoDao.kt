@@ -25,7 +25,7 @@ interface PhotoDao {
     fun getPhotosByFileIds(fileIds: List<Long>): List<Photo>
 
     @Query("SELECT * FROM photos WHERE auid IN (:auids)")
-    fun getPhotosByAUIDs(auids: List<Long>): List<Photo>
+    fun getPhotosByAUIDs(auids: List<String>): List<Photo>
 
     @Query("UPDATE photos SET flag=1")
     fun flagAll()
@@ -42,6 +42,6 @@ interface PhotoDao {
     @Query("SELECT bucket_id, bucket_name FROM photos GROUP BY bucket_id")
     fun getBuckets(): List<Bucket>
 
-    @Query("UPDATE photos SET has_remote=:v WHERE auid IN (:auids)")
-    fun setHasRemote(auids: List<Long>, v: Boolean)
+    @Query("UPDATE photos SET has_remote=:v WHERE auid IN (:auids) OR buid IN (:buids)")
+    fun setHasRemote(auids: List<String>, buids: List<String>, v: Boolean)
 }
