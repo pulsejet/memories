@@ -218,8 +218,16 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
   }
 
   // Show confirmation dialog if required
-  if (confirm && !(await utils.dialogs.moveToTrash(photos.length))) {
-    throw new Error('User cancelled deletion');
+  if (confirm) {
+    if (routeIsAlbums) {
+      if (!(await utils.dialogs.removeFromAlbum(photos.length))) {
+        throw new Error('User cancelled removal');
+      }
+    } else {
+      if (!(await utils.dialogs.moveToTrash(photos.length))) {
+        throw new Error('User cancelled deletion');
+      }
+    }
   }
 
   // Delete local files.

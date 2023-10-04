@@ -92,6 +92,14 @@ export const dialogs = {
       message: t('memories', 'Files in trash may be automatically deleted after a fixed period of time.'),
     }),
 
+  removeFromAlbum: (count: number) =>
+    confirmDestructive({
+      title: n('memories', 'Remove {count} item from album?', 'Remove {count} items from album?', count, {
+        count,
+      }),
+      message: t('memories', 'This will not delete your original files.'),
+    }),
+
   downloadItems: (count: number) =>
     confirmDestructive({
       title: t('memories', 'Download'),
