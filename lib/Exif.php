@@ -274,12 +274,12 @@ class Exif
      */
     public static function getBUID(string $basename, $imageUniqueID, int $size): string
     {
-        $imageUniqueID = "size={$size}";
-        if (null === $imageUniqueID || \strlen((string) $imageUniqueID) < 4) {
-            $imageUniqueID = "iuid={$imageUniqueID}";
+        $sfx = "size={$size}";
+        if (null !== $imageUniqueID && \strlen((string) $imageUniqueID) >= 4) {
+            $sfx = "iuid={$imageUniqueID}";
         }
 
-        return md5($basename.$imageUniqueID);
+        return md5($basename.$sfx);
     }
 
     /**
