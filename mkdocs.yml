@@ -49,6 +49,7 @@ nav:
       - 'faq.md'
       - 'changelog.md'
       - 'memories-vs-photos.md'
+      - 'privacy.md'
 
 markdown_extensions:
   - admonition
