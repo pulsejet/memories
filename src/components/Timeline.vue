@@ -858,8 +858,10 @@ export default defineComponent({
 
       // If any day in the fetch list has local images we need to fetch
       // the remote hidden images for the merging to happen correctly
-      if (this.routeHasNative && dayIds.some((id) => this.heads[id]?.day?.haslocal)) {
-        query[DaysFilterType.HIDDEN] = '1';
+      if (this.routeHasNative) {
+        if (dayIds.some((id) => this.heads[id]?.day?.haslocal)) {
+          query[DaysFilterType.HIDDEN] = '1';
+        }
       }
 
       return API.Q(API.DAY(dayIds.join(',')), query);
@@ -964,10 +966,14 @@ export default defineComponent({
         if (this.routeHasNative) {
           const promises = Array.from(dayMap.entries())
             .filter(([dayId, photos]) => {
+              // Extra hooks for each day
+              // Well this doesn't really belong here ...
+              nativex.processFreshServerDay(dayId, photos);
+
+              // Only process days that have local images further
               return this.heads[dayId]?.day?.haslocal;
             })
             .map(async ([dayId, photos]) => {
-              nativex.processFreshServerDay(dayId, photos);
               nativex.mergeDay(photos, await nativex.getLocalDay(dayId));
             });
           if (promises.length) await Promise.all(promises);
@@ -975,7 +981,7 @@ export default defineComponent({
 
         // Process each day as needed
         for (const [dayId, photos] of dayMap) {
-          // Remove hidden photos
+          // Remove files marked as hidden
           utils.removeHiddenPhotos(photos);
 
           // Check if the response has any delta

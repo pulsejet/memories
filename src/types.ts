@@ -87,7 +87,9 @@ export type IPhoto = {
   ishidden?: boolean;
 
   /** AUID of file (optional, NativeX) */
-  auid?: number;
+  auid?: string;
+  /** BUID of file (optional, NativeX) */
+  buid?: string;
   /** Epoch of file (optional, NativeX) */
   epoch?: number;
 

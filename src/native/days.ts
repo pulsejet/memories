@@ -7,6 +7,9 @@ import type { IDay, IPhoto } from '../types';
 /** Memcache for <dayId, Photos> */
 const daysCache = new Map<number, IPhoto[]>();
 
+/** Set of all seen AUIDs and BUIDs */
+const seenABUIDs = new Set<string>();
+
 // Clear the cache whenever the timeline is refreshed
 if (has()) {
   document.addEventListener('DOMContentLoaded', () => {
@@ -69,15 +72,17 @@ export function mergeDays(current: IDay[], incoming: IDay[]): IDay[] {
  * @param incoming Incoming response
  */
 export function mergeDay(current: IPhoto[], incoming: IPhoto[]): void {
-  // Merge local photos into remote photos
-  const currentAUIDs = new Set<number>();
+  // Create sets of current AUIDs and BUIDs
+  const auids = new Set<string>();
+  const buids = new Set<string>();
   for (const photo of current) {
-    currentAUIDs.add(photo.auid!);
+    if (photo.auid) auids.add(photo.auid);
+    if (photo.buid) buids.add(photo.buid);
   }
 
   // Filter out files that are only available locally
   for (const photo of incoming) {
-    if (!currentAUIDs.has(photo.auid!)) {
+    if (!auids.has(photo.auid!) && !buids.has(photo.buid!)) {
       current.push(photo);
     }
   }
@@ -92,11 +97,13 @@ export function mergeDay(current: IPhoto[], incoming: IPhoto[]): void {
  * @param current Photos from day response
  */
 export function processFreshServerDay(this: any, dayId: number, photos: IPhoto[]): void {
-  const queue: Set<number> = (this.pfsdq ??= new Set<number>());
+  const auids: Set<string> = (this.pfsdaq ??= new Set<string>());
+  const buids: Set<string> = (this.pfsdbq ??= new Set<string>());
 
   // Add to queue
   for (const photo of photos) {
-    if (photo.auid) queue.add(photo.auid);
+    if (photo.auid) auids.add(photo.auid);
+    if (photo.buid) buids.add(photo.buid);
   }
 
   // Debounce
@@ -104,9 +111,31 @@ export function processFreshServerDay(this: any, dayId: number, photos: IPhoto[]
     this,
     'pfsdq_timer',
     () => {
-      if (!queue.size) return;
-      nativex.setHasRemote(JSON.stringify(Array.from(queue)), true);
-      queue.clear();
+      const auidsa: string[] = [],
+        buidsa: string[] = [];
+
+      // Only keep the seen AUIDs and BUIDs
+      for (const auid of auids) {
+        if (seenABUIDs.has(auid)) {
+          auidsa.push(auid);
+          seenABUIDs.delete(auid);
+        }
+      }
+      for (const buid of buids) {
+        if (seenABUIDs.has(buid)) {
+          buidsa.push(buid);
+          seenABUIDs.delete(buid);
+        }
+      }
+
+      // Nothing to do?
+      if (auidsa.length || buidsa.length) {
+        nativex.setHasRemote(JSON.stringify(auidsa), JSON.stringify(buidsa), true);
+      }
+
+      // Done
+      auids.clear();
+      buids.clear();
     },
     1000
   );
@@ -142,7 +171,11 @@ export async function getLocalDay(dayId: number): Promise<IPhoto[]> {
   if (!res.ok) return [];
 
   const photos: IPhoto[] = await res.json();
-  photos.forEach((p) => (p.islocal = true));
+  photos.forEach((p) => {
+    if (p.auid) seenABUIDs.add(p.auid);
+    if (p.buid) seenABUIDs.add(p.buid);
+    p.islocal = true;
+  });
 
   // Cache the response
   daysCache.set(dayId, photos);
@@ -159,7 +192,7 @@ export async function getLocalDay(dayId: number): Promise<IPhoto[]> {
 export async function deleteLocalPhotos(photos: IPhoto[], dry: boolean = false): Promise<number> {
   if (!has()) return 0;
 
-  const auids = photos.map((p) => p.auid).filter((a) => !!a) as number[];
+  const auids = photos.map((p) => p.auid).filter((a) => !!a) as string[];
 
   // Delete local photos
   const res = await fetch(API.Q(NAPI.IMAGE_DELETE(auids), { dry }));

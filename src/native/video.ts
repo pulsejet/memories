@@ -8,7 +8,7 @@ import type { IPhoto } from '../types';
  * @param urls URLs to play (remote)
  */
 export async function playVideo(photo: IPhoto, urls: string[]) {
-  nativex?.playVideo?.(photo.auid ?? 0, photo.fileid, JSON.stringify(urls.map(addOrigin)));
+  nativex?.playVideo?.(photo.auid ?? String(), photo.fileid, JSON.stringify(urls.map(addOrigin)));
 }
 
 /**

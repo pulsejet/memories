@@ -260,9 +260,26 @@ class Exif
      * @param int $epoch the date taken as a unix timestamp (seconds)
      * @param int $size  the file size in bytes
      */
-    public static function getAUID(int $epoch, int $size): int
+    public static function getAUID(int $epoch, int $size): string
     {
-        return crc32($epoch.$size);
+        return md5($epoch.$size);
+    }
+
+    /**
+     * Get the Basename approximate Unique ID (BUID) from parameters.
+     *
+     * @param string $basename      the basename of the file
+     * @param mixed  $imageUniqueID EXIF field
+     * @param int    $size          the file size in bytes (fallback)
+     */
+    public static function getBUID(string $basename, $imageUniqueID, int $size): string
+    {
+        $imageUniqueID = "size={$size}";
+        if (null === $imageUniqueID || \strlen((string) $imageUniqueID) < 4) {
+            $imageUniqueID = "iuid={$imageUniqueID}";
+        }
+
+        return md5($basename.$imageUniqueID);
     }
 
     /**

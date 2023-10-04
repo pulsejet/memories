@@ -141,6 +141,13 @@ class TimelineWrite
         // Get live photo ID of video part
         $liveid = $this->livePhoto->getLivePhotoId($file, $exif);
 
+        // Get BUID from ImageUniqueId if not present
+        $buid = $prevRow['buid'];
+        if (empty($buid)) {
+            $imageUniqueId = \array_key_exists('ImageUniqueID', $exif) ? $exif['ImageUniqueID'] : null;
+            $buid = Exif::getBUID($file->getName(), $imageUniqueId, $file->getSize());
+        }
+
         // Get exif json
         $exifJson = $this->getExifJson($exif);
 
@@ -163,6 +170,7 @@ class TimelineWrite
             'lon' => $query->createNamedParameter($lon, IQueryBuilder::PARAM_STR),
             'mapcluster' => $query->createNamedParameter($mapCluster, IQueryBuilder::PARAM_INT),
             'orphan' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
+            'buid' => $query->createNamedParameter($buid, IQueryBuilder::PARAM_STR),
         ];
 
         // There is no easy way to UPSERT in standard SQL

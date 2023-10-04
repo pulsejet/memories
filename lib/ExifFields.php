@@ -36,6 +36,7 @@ const EXIF_FIELDS_LIST = [
     'HDREffect' => true,
     'ColorSpace' => true,
     'Aperture' => true,
+    'ImageUniqueID' => true,
 
     // GPS info
     'GPSLatitude' => true,

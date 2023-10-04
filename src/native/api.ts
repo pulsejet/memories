@@ -35,12 +35,12 @@ export const NAPI = {
    * @returns {void}
    * @throws Return an error code if the user denies the deletion.
    */
-  IMAGE_DELETE: (auids: number[]) => `${BASE_URL}/api/image/delete/${auids.join(',')}`,
+  IMAGE_DELETE: (auids: string[]) => `${BASE_URL}/api/image/delete/${auids.join(',')}`,
 
   /**
    * Local photo preview API.
    * @regex ^/image/preview/\d+$
-   * @param fileId File ID of the photo
+   * @param auid AUID of the photo
    * @returns {Blob} JPEG preview of the photo.
    */
   IMAGE_PREVIEW: (fileId: number) => `${BASE_URL}/image/preview/${fileId}`,
@@ -50,7 +50,7 @@ export const NAPI = {
    * @param auid AUID of the photo
    * @returns {Blob} JPEG full image of the photo.
    */
-  IMAGE_FULL: (auid: number) => `${BASE_URL}/image/full/${auid}`,
+  IMAGE_FULL: (auid: string) => `${BASE_URL}/image/full/${auid}`,
 
   /**
    * Share a URL with native page.
@@ -76,7 +76,7 @@ export const NAPI = {
    * @param auid AUID of the photo
    * @returns {void}
    */
-  SHARE_LOCAL: (auid: number) => `${BASE_URL}/api/share/local/${auid}`,
+  SHARE_LOCAL: (auid: string) => `${BASE_URL}/api/share/local/${auid}`,
 
   /**
    * Allow usage of local media (permissions request)
@@ -146,7 +146,8 @@ export type NativeX = {
    * @details The URL array may contain multiple URLs, e.g. direct playback
    * and HLS separately. The native client must try to play the first URL.
    */
-  playVideo: (auid: number, fileid: number, urlArray: string) => void;
+  playVideo: (auid: string, fileid: number, urlArray: string) => void;
+
   /**
    * Destroy the video player.
    * @param fileid File ID of the video
@@ -182,9 +183,10 @@ export type NativeX = {
   /**
    * Set if the given files have remote copies.
    * @param auid List of AUIDs to set the server ID for (JSON-encoded)
+   * @param auid List of BUIDs to set the server ID for (JSON-encoded)
    * @param value Value of remote
    */
-  setHasRemote: (auids: string, value: boolean) => void;
+  setHasRemote: (auids: string, buids: string, value: boolean) => void;
 };
 
 /** The native interface is a global object that is injected by the native app. */
