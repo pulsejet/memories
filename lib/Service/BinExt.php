@@ -10,7 +10,7 @@ class BinExt
 {
     public const EXIFTOOL_VER = '12.60';
     public const GOVOD_VER = '0.1.16';
-    public const NX_VER_MIN = '1.0';
+    public const NX_VER_MIN = '1.1';
 
     /** Get the path to the temp directory */
     public static function getTmpPath(): string
