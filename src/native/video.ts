@@ -8,13 +8,12 @@ import type { IPhoto } from '../types';
  * @param urls URLs to play (remote)
  */
 export async function playVideo(photo: IPhoto, urls: string[]) {
-  const auid = photo.auid ?? 0;
-  nativex?.playVideo?.(auid.toString(), photo.fileid.toString(), JSON.stringify(urls.map(addOrigin)));
+  nativex?.playVideo?.(photo.auid ?? 0, photo.fileid, JSON.stringify(urls.map(addOrigin)));
 }
 
 /**
  * Destroy the video player.
  */
 export async function destroyVideo(photo: IPhoto) {
-  nativex?.destroyVideo?.(photo.fileid.toString());
+  nativex?.destroyVideo?.(photo.fileid);
 }

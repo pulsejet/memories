@@ -146,14 +146,14 @@ export type NativeX = {
    * @details The URL array may contain multiple URLs, e.g. direct playback
    * and HLS separately. The native client must try to play the first URL.
    */
-  playVideo: (auid: string, fileid: string, urlArray: string) => void;
+  playVideo: (auid: number, fileid: number, urlArray: string) => void;
   /**
    * Destroy the video player.
    * @param fileid File ID of the video
    * @details The native client must destroy the video player and free up resources.
    * If the fileid doesn't match the playing video, the call must be ignored.
    */
-  destroyVideo: (fileid: string) => void;
+  destroyVideo: (fileid: number) => void;
 
   /**
    * Set the local folders configuration to show in the timeline.
