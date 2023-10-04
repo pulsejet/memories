@@ -46,6 +46,9 @@ export type BusEvent = {
 
   /** Albums were updated for these photos */
   'memories:albums:update': IPhoto[];
+
+  /** NativeX database was updated */
+  'nativex:db:updated': null;
 };
 
 /**

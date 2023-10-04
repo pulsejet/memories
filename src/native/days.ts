@@ -13,8 +13,7 @@ const seenABUIDs = new Set<string>();
 // Clear the cache whenever the timeline is refreshed
 if (has()) {
   document.addEventListener('DOMContentLoaded', () => {
-    utils.bus.on('memories:timeline:soft-refresh', () => daysCache.clear());
-    utils.bus.on('memories:timeline:hard-refresh', () => daysCache.clear());
+    utils.bus.on('nativex:db:updated', () => daysCache.clear());
   });
 }
 
