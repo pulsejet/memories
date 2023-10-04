@@ -284,6 +284,9 @@ class TimelineQuery(private val mCtx: MainActivity) {
 
             // Delete from database
             mPhotoDao.deleteFileIds(sysImgs.map { it.fileId })
+
+            // Clear UI cache
+            mCtx.busEmit("nativex:db:updated")
         } finally {
             synchronized(this) { deleting = false }
         }
@@ -420,7 +423,7 @@ class TimelineQuery(private val mCtx: MainActivity) {
         // Delete file with same local_id and insert new one
         mPhotoDao.deleteFileIds(listOf(fileId))
         mPhotoDao.insert(photo)
-        Log.v(TAG, "Inserted file to local DB: $fileId / $baseName / $photo")
+        Log.v(TAG, "Inserted file to local DB: $photo")
     }
 
     /**

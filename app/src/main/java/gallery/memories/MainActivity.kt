@@ -339,13 +339,25 @@ class MainActivity : AppCompatActivity() {
             // Schedule for resume if not active
             if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) || force) {
                 mNeedRefresh = false
-                binding.webview.evaluateJavascript(
-                    "window._nc_event_bus?.emit('files:file:created')",
-                    null
-                )
+                busEmit("nativex:db:updated")
+                busEmit("memories:timeline:soft-refresh")
             } else {
                 mNeedRefresh = true
             }
+        }
+    }
+
+    /**
+     * Emit an event to the nextcloud event bus
+     */
+    fun busEmit(event: String, data: String = "null") {
+        runOnUiThread {
+            if (binding.webview.url == null) return@runOnUiThread
+
+            binding.webview.evaluateJavascript(
+                "window._nc_event_bus?.emit('$event', $data)",
+                null
+            )
         }
     }
 }
