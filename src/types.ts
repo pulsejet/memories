@@ -90,8 +90,6 @@ export type IPhoto = {
   auid?: number;
   /** Epoch of file (optional, NativeX) */
   epoch?: number;
-  /** File size (optional) */
-  size?: number;
 
   /** Date taken UTC value (lazy fetched) */
   datetaken?: number;

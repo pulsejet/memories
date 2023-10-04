@@ -242,8 +242,10 @@ trait TimelineQueryDays
         // Calculate the AUID if we can
         if (\array_key_exists('epoch', $row) && \array_key_exists('size', $row)
            && ($epoch = (int) $row['epoch']) && ($size = (int) $row['size'])) {
-            // compute AUID and discard epoch and size
+            // compute AUID and discard size
+            // epoch is used for ordering, so we keep it
             $row['auid'] = Exif::getAUID($epoch, $size);
+            unset($row['size']);
         }
     }
 
