@@ -181,7 +181,6 @@ class NativeX(private val mCtx: MainActivity) {
     }
 
     fun handleRequest(request: WebResourceRequest): WebResourceResponse {
-        Log.v(TAG, "handleRequest: ${request.url}")
         val path = request.url.path ?: return makeErrorResponse()
 
         val response = try {
