@@ -186,7 +186,7 @@ class SystemImage {
             try {
                 return ExifInterface(dataPath)
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to read EXIF daddta: " + e.message)
+                Log.w(TAG, "Failed to read EXIF data: " + e.message)
                 return null
             }
         }
@@ -204,7 +204,7 @@ class SystemImage {
                     return it.time / 1000
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to read EXIF datetime: " + e.message)
+                Log.w(TAG, "Failed to read EXIF datetime: " + e.message)
             }
         }
 
@@ -217,18 +217,18 @@ class SystemImage {
     }
 
     fun buid(exif: ExifInterface?): String {
-        var imageUniqueId = "size=$size"
+        var sfx = "size=$size"
         if (exif != null) {
             try {
                 val iuid = exif.getAttribute(ExifInterface.TAG_IMAGE_UNIQUE_ID)
                     ?: throw IOException()
-                imageUniqueId = "iuid=$iuid"
+                sfx = "iuid=$iuid"
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to read EXIF unique ID ($baseName): " + e.message)
+                Log.w(TAG, "Failed to read EXIF unique ID ($baseName): " + e.message)
             }
         }
 
-        return md5("$baseName$imageUniqueId");
+        return md5("$baseName$sfx");
     }
 
     /**
