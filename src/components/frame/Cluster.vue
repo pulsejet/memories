@@ -8,7 +8,7 @@
       <div class="subtitle" v-if="subtitle">{{ subtitle }}</div>
     </div>
 
-    <div class="previews fill-block" ref="previews">
+    <div class="previews fill-block" ref="previews" @click="clickPreview">
       <div class="img-outer" :class="{ plus }">
         <XImg
           draggable="false"
@@ -36,6 +36,7 @@ import errorsvg from '../../assets/error.svg';
 import plussvg from '../../assets/plus.svg';
 
 import * as utils from '../../services/utils';
+import * as nativex from '../../native';
 import { API } from '../../services/API';
 
 import Vue from 'vue';
@@ -159,12 +160,18 @@ export default defineComponent({
       return Boolean(this.data.previewError) || Boolean(this.album && this.album.last_added_photo <= 0);
     },
   },
+
   methods: {
     failed() {
       Vue.set(this.data, 'previewError', true);
     },
+
     click() {
       this.$emit('click', this.data);
+    },
+
+    clickPreview() {
+      nativex.playTouchSound();
     },
   },
 });
@@ -191,6 +198,7 @@ $namemargin: 10px;
   z-index: 100;
   width: calc(100% - 2 * #{$namemargin});
   margin: $namemargin;
+  pointer-events: none;
 
   color: white;
   word-wrap: break-word;
@@ -265,6 +273,7 @@ $namemargin: 10px;
   position: absolute;
   top: 6px;
   right: 6px;
+  pointer-events: none;
 }
 
 .previews {
