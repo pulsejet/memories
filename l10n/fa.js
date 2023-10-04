@@ -426,6 +426,7 @@ OC.L10N.register(
     "Auto" : "خودکار",
     "Shared Folder" : "Shared Folder",
     "Shared Album" : "Shared Album",
+    "Setup" : "نصب",
     "Failed to remove {filename}." : "Failed to remove {filename}.",
     "Failed to create {albumName}." : "ایجاد {albumName} ناموفق بود.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "تغییر نام {currentAlbumName} به {newAlbumName} انجام نشد.",

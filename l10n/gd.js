@@ -24,6 +24,7 @@ OC.L10N.register(
     "Read only" : "Ri leughadh a-mhàin",
     "Share" : "Co-roinn",
     "Undo" : "Neo-dhèan",
+    "Setup" : "Suidhich",
     "Yes" : "Tha",
     "No" : "Chan eil"
 },

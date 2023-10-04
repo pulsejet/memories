@@ -31,6 +31,7 @@ OC.L10N.register(
     "Next" : "ທັດໄປ",
     "Original" : "ຕົ້ນສະບັບ",
     "Size" : "ຂະຫນາດ",
+    "Setup" : "ການຕັ້ງຄ່າ",
     "No" : "ບໍ່"
 },
 "nplurals=1; plural=0;");

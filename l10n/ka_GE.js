@@ -51,12 +51,14 @@ OC.L10N.register(
     "Share" : "გაზიარება",
     "Previous" : "წინა",
     "Next" : "შემდეგი",
+    "Finish" : "დასრულება",
     "Undo" : "დაბრუნება",
     "Custom" : "ინდივიდუალური",
     "Value" : "მნიშვნელობა",
     "Text" : "ტექსტი",
     "Size" : "ზომა",
     "Position" : "პოზიცია",
+    "Setup" : "დაყენება",
     "Yes" : "დიახ"
 },
 "nplurals=2; plural=(n!=1);");

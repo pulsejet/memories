@@ -51,12 +51,14 @@ OC.L10N.register(
     "Share" : "Partajează",
     "Previous" : "Precedentul",
     "Next" : "Următorul",
+    "Finish" : "Finalizare",
     "Undo" : "Anulează ultima acțiune",
     "Custom" : "Particularizat",
     "Text" : "Text",
     "Size" : "Mărime",
     "Position" : "Poziție",
     "Auto" : "Auto",
+    "Setup" : "Configurare",
     "Yes" : "Da"
 },
 "nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));");

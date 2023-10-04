@@ -278,6 +278,7 @@ OC.L10N.register(
     "Previous" : "Vorherige",
     "Next" : "Nächste",
     "Editing is currently disabled for Live Photos" : "Bearbeitung ist derzeit für Live-Fotos deaktiviert",
+    "Finish" : "Beenden",
     "{name} binary exists and is executable." : "{name}-Binärdatei existiert und ist ausführbar.",
     "{name} binary not found." : "{name}-Binärdatei nicht gefunden.",
     "{name} binary is not executable." : "{name}-Binärdatei ist nicht ausführbar.",

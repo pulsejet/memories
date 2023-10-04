@@ -186,6 +186,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Фактичний розмір (100%)",
     "Fit size" : "Підходить за розміром",
     "Auto" : "Автоматично",
+    "Setup" : "Налаштування",
     "Failed to create {albumName}." : "Не вдалося створити {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Не вдалося перейменувати {currentAlbumName} на {newAlbumName}.",
     "Failed to delete {fileName}." : "Не вдалося вилучити {fileName}.",

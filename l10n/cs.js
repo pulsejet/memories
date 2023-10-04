@@ -368,6 +368,7 @@ OC.L10N.register(
     "Previous" : "Předchozí",
     "Next" : "Další",
     "Editing is currently disabled for Live Photos" : "Pro živé fotky je upravování v tuto chvíli vypnuté",
+    "Finish" : "Dokončit",
     "{name} binary exists and is executable." : "spustitelný soubor {name} existuje a má práva nastavená pro spouštění.",
     "{name} binary not found." : "{name} spustitelný soubor nenalezen.",
     "{name} binary is not executable." : "spustitelný soubor {name} nemá práva nastavená pro spouštění.",

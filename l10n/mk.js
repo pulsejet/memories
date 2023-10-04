@@ -135,6 +135,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Актуелна големина (100%)",
     "Fit size" : "Соодветна големина",
     "Auto" : "Автоматски",
+    "Setup" : "Нагодување",
     "Failed to create {albumName}." : "Неуспешно креирање {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Неуспешно преименување на {currentAlbumName} во {newAlbumName}.",
     "Failed to delete {fileName}." : "Неуспешно бришење на {fileName}.",

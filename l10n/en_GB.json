@@ -367,6 +367,7 @@
     "Previous" : "Previous",
     "Next" : "Next",
     "Editing is currently disabled for Live Photos" : "Editing is currently disabled for Live Photos",
+    "Finish" : "Finish",
     "{name} binary exists and is executable." : "{name} binary exists and is executable.",
     "{name} binary not found." : "{name} binary not found.",
     "{name} binary is not executable." : "{name} binary is not executable.",

@@ -84,9 +84,11 @@ OC.L10N.register(
     "Share" : "Bagikan",
     "Previous" : "Sebelumnya",
     "Next" : "Berikutnya",
+    "Finish" : "Selesai",
     "Undo" : "Undo",
     "Value" : "Nilari",
     "Size" : "Ukuran",
+    "Setup" : "Pengaturan",
     "Failed to create {albumName}." : "Gagal membuat {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Gagal mengubah nama {currentAlbumName} to {newAlbumName}.",
     "Failed to delete {fileName}." : "Gagal menghapus {fileName}."

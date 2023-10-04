@@ -47,10 +47,12 @@ OC.L10N.register(
     "Share" : "Түгээх",
     "Previous" : "өмнөх",
     "Next" : "дараагийх",
+    "Finish" : "Бариа",
     "Undo" : "буцах",
     "Custom" : "Дурын",
     "Value" : "Үнийн дүн",
     "Size" : "Хэмжээ",
-    "Position" : "Байр"
+    "Position" : "Байр",
+    "Setup" : "Тохируулах"
 },
 "nplurals=2; plural=(n != 1);");

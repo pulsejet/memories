@@ -37,6 +37,7 @@
     "Previous" : "Førre",
     "Next" : "Neste",
     "Value" : "Verdi",
-    "Size" : "Storleik"
+    "Size" : "Storleik",
+    "Setup" : "Oppsett"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -64,6 +64,7 @@ OC.L10N.register(
     "Size" : "Talha",
     "Position" : "Posicion",
     "Extension" : "Extension",
+    "Setup" : "Configuracion",
     "Yes" : "Òc",
     "No" : "Non"
 },

@@ -30,6 +30,7 @@ OC.L10N.register(
     "Previous" : "Ɣer deffir",
     "Next" : "Uḍfir",
     "Size" : "Teɣzi",
+    "Setup" : "Sbadu",
     "Yes" : "Oui",
     "No" : "Uhu"
 },

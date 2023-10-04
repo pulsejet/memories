@@ -90,6 +90,7 @@ OC.L10N.register(
     "Custom" : "Kohandatud",
     "Size" : "Suurus",
     "Position" : "Asukoht",
+    "Setup" : "Seadista",
     "Failed to create {albumName}." : "Albumi {albumName} loomine ebaõnnestus.",
     "Failed to delete {fileName}." : "{fileName} kustutamine ebaõnnestus."
 },

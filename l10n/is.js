@@ -63,6 +63,7 @@ OC.L10N.register(
     "Share" : "Deila",
     "Previous" : "Fyrra",
     "Next" : "Næsta",
+    "Finish" : "Ljúka",
     "Undo" : "Undo",
     "Redo" : "Redo",
     "Zoom in" : "Renna að",
@@ -77,6 +78,7 @@ OC.L10N.register(
     "Name is required." : "Nafn er nauðsynlegt.",
     "Quality" : "Quality",
     "Direct" : "Beint",
-    "Auto" : "Sjálfvirkt"
+    "Auto" : "Sjálfvirkt",
+    "Setup" : "Uppsetning"
 },
 "nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);");

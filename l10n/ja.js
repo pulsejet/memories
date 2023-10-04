@@ -72,6 +72,7 @@ OC.L10N.register(
     "Share" : "共有",
     "Previous" : "前へ",
     "Next" : "次へ",
+    "Finish" : "完了",
     "All changes will be lost." : "全ての変更がなくなります",
     "Are you sure you want to continue?" : "本当に続けてよろしいですか？",
     "Undo" : "元に戻す",
@@ -104,6 +105,7 @@ OC.L10N.register(
     "Quality" : "品質",
     "Direct" : "ダイレクト",
     "Auto" : "自動",
+    "Setup" : "設定",
     "Yes" : "はい",
     "No" : "いいえ"
 },

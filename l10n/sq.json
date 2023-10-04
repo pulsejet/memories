@@ -48,6 +48,7 @@
     "Share" : "Shpërndaje",
     "Previous" : "I mëparshëm",
     "Next" : "Tjetër",
+    "Finish" : "Përfundo",
     "Undo" : "Ktheje pas",
     "Redo" : "Ribëj",
     "Custom" : "E përshtatur",
@@ -56,6 +57,7 @@
     "Size" : "Madhësi",
     "Position" : "Pozicion",
     "Name is required." : "Emri është i domosdoshëm",
+    "Setup" : "Rregullim",
     "Yes" : "Po"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
