@@ -118,9 +118,7 @@ class NativeX(private val mCtx: MainActivity) {
     }
 
     @JavascriptInterface
-    fun playVideo(auid: String?, fileid: String?, urlsArray: String?) {
-        if (auid == null || fileid == null || urlsArray == null) return
-
+    fun playVideo(auid: Long, fileid: Long, urlsArray: String) {
         mCtx.threadPool.submit {
             // Get URI of remote videos
             val urls = JSONArray(urlsArray)
@@ -129,7 +127,7 @@ class NativeX(private val mCtx: MainActivity) {
             }
 
             // Get URI of local video
-            val videos = query.getSystemImagesByAUIDs(arrayListOf(auid.toLong()))
+            val videos = query.getSystemImagesByAUIDs(arrayListOf(auid))
 
             // Play with exoplayer
             mCtx.runOnUiThread {
@@ -143,8 +141,7 @@ class NativeX(private val mCtx: MainActivity) {
     }
 
     @JavascriptInterface
-    fun destroyVideo(fileid: String?) {
-        if (fileid == null) return;
+    fun destroyVideo(fileid: Long) {
         mCtx.runOnUiThread {
             mCtx.destroyPlayer(fileid)
         }

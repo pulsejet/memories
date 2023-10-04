@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
 
     private var player: ExoPlayer? = null
     private var playerUris: Array<Uri>? = null
-    private var playerUid: String? = null
+    private var playerUid: Long? = null
     private var playWhenReady = true
     private var mediaItemIndex = 0
     private var playbackPosition = 0L
@@ -199,9 +199,9 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    fun initializePlayer(uris: Array<Uri>, uid: String) {
+    fun initializePlayer(uris: Array<Uri>, uid: Long) {
         if (player != null) {
-            if (playerUid.equals(uid)) return
+            if (playerUid == uid) return
             player?.release()
             player = null
         }
@@ -265,8 +265,8 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-    fun destroyPlayer(uid: String) {
-        if (playerUid.equals(uid)) {
+    fun destroyPlayer(uid: Long) {
+        if (playerUid == uid) {
             releasePlayer()
 
             // Reset vars
