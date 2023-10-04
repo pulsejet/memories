@@ -91,10 +91,25 @@ export function mergeDay(current: IPhoto[], incoming: IPhoto[]): void {
  * Does not update the passed objects in any way
  * @param current Photos from day response
  */
-export function processFreshServerDay(dayId: number, photos: IPhoto[]): void {
-  const auids = photos.map((p) => p.auid).filter((a) => !!a) as number[];
-  if (!auids.length) return;
-  nativex.setHasRemote(JSON.stringify(auids), true);
+export function processFreshServerDay(this: any, dayId: number, photos: IPhoto[]): void {
+  const queue: Set<number> = (this.pfsdq ??= new Set<number>());
+
+  // Add to queue
+  for (const photo of photos) {
+    if (photo.auid) queue.add(photo.auid);
+  }
+
+  // Debounce
+  utils.setRenewingTimeout(
+    this,
+    'pfsdq_timer',
+    () => {
+      if (!queue.size) return;
+      nativex.setHasRemote(JSON.stringify(Array.from(queue)), true);
+      queue.clear();
+    },
+    1000
+  );
 }
 
 /**
