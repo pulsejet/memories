@@ -1,13 +1,15 @@
 <?php
 
+/**
+ * This is the list of fields that will be STORED in the databse as JSON.
+ * This is mostly only used for the metadata view.
+ */
 const EXIF_FIELDS_LIST = [
     // Date/Time
     'DateTimeOriginal' => true,
-    'SubSecDateTimeOriginal' => true,
     'CreateDate' => true,
     'OffsetTimeOriginal' => true,
     'OffsetTime' => true,
-    'ModifyDate' => true,
 
     // Generated date fields
     'DateTimeEpoch' => true,
@@ -46,14 +48,6 @@ const EXIF_FIELDS_LIST = [
     'GPSStatus' => true,
 
     // Size / rotation info
-    'ImageSize' => true,
-    'ExifImageWidth' => true,
-    'ExifImageHeight' => true,
-    'ImageWidth' => true,
-    'ImageHeight' => true,
-    'XResolution' => true,
-    'YResolution' => true,
-    'ResolutionUnit' => true,
     'Megapixels' => true,
     'Rotation' => true,
     'Orientation' => true,
@@ -65,46 +59,21 @@ const EXIF_FIELDS_LIST = [
     'Artist' => true,
     'Copyright' => true,
 
-    // Live Photo
-    'ContentIdentifier' => true,
-    'MediaGroupUUID' => true,
-    'EmbeddedVideoType' => true,
-    'MotionPhoto' => true,
-
     // Other image info
     'Rating' => true,
     'NumberOfImages' => true,
-    'ExposureMode' => true,
-    'SceneCaptureType' => true,
-    'YCbCrPositioning' => true,
-    'DriveMode' => true,
     'FlashType' => true,
-    'ShootingMode' => true,
     'RedEyeReduction' => true,
     'CircleOfConfusion' => true,
     'DOF' => true,
     'FOV' => true,
 
     // Currently unused fields
-    'SensitivityType' => true,
-    'RecommendedExposureIndex' => true,
     'ExifVersion' => true,
-    'ExposureProgram' => true,
-    'ExifByteOrder' => true,
-    'Quality' => true,
-    'FocusMode' => true,
-    'RecordMode' => true,
 
     // Video info
     'Duration' => true,
     'FrameRate' => true,
     'TrackDuration' => true,
     'VideoCodec' => true,
-
-    // File Info
-    'SourceFile' => true,
-    'FileName' => true,
-    'FileSize' => true,
-    'FileType' => true,
-    'MIMEType' => true,
 ];
