@@ -92,7 +92,7 @@ class LivePhoto
                 return 'self__trailer';
             }
 
-            else if ('image/heic' === $exif['MIMEType']) {
+            if ('image/heic' === $exif['MIMEType']) {
                 // Samsung HEIC -- no way to get this out yet (DirectoryItemLength is senseless)
                 // The reason this is above the MotionPhotoVideo check is because extracting binary
                 // EXIF fields on the fly is extremely expensive compared to trailer extraction.
