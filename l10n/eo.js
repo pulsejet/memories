@@ -61,6 +61,7 @@ OC.L10N.register(
     "Position" : "Loko",
     "Extension" : "Dosiersufikso",
     "Auto" : "Aŭtomate",
+    "Setup" : "Agordi",
     "Yes" : "Jes",
     "No" : "Ne"
 },

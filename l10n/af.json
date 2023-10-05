@@ -47,6 +47,7 @@
     "Text" : "Teks",
     "Size" : "Grootte",
     "Position" : "Posisie",
-    "Quality" : "Kwaliteit"
+    "Quality" : "Kwaliteit",
+    "Setup" : "Opstelling"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

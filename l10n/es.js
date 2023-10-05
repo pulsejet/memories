@@ -454,6 +454,7 @@ OC.L10N.register(
     "Auto" : "Auto",
     "Shared Folder" : "Carpeta compartida",
     "Shared Album" : "Álbum compartido",
+    "Setup" : "Configuración",
     "Failed to remove {filename}." : "Fallo al quitar {filename}.",
     "Failed to create {albumName}." : "Fallo al crear {albumName}",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Fallo al renombrar {currentAlbumName} a {newAlbumName}.",

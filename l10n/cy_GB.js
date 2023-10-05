@@ -44,6 +44,7 @@ OC.L10N.register(
     "Custom" : "Cyfaddas",
     "Size" : "Maint",
     "Auto" : "Awto",
+    "Setup" : "Gosod",
     "Yes" : "Ie",
     "No" : "Na"
 },

@@ -137,6 +137,7 @@ OC.L10N.register(
     "Fit size" : "Προσαρμογή στο μέγεθος",
     "Direct" : "Άμεσα",
     "Auto" : "Αυτόματα",
+    "Setup" : "Ρύθμιση",
     "Failed to create {albumName}." : "Απέτυχε η δημιουργία {albumName}",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Απέτυχε η μετονομασία του {currentAlbumName} σε {newAlbumName}.",
     "Error: {msg}" : "Σφάλμα: {msg}",
