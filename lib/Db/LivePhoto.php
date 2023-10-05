@@ -56,7 +56,7 @@ class LivePhoto
             return "self__traileroffset={$videoOffset}";
         }
 
-        // Google JPEG and Samsung HEIC (Apple?)
+        // Google JPEG and Samsung HEIC / JPEG (Apple?)
         if (\array_key_exists('MotionPhoto', $exif)) {
             if ('image/jpeg' === $exif['MIMEType']) {
                 // Google Motion Photo JPEG
@@ -91,10 +91,18 @@ class LivePhoto
                 // Fallback: video should hopefully be in trailer
                 return 'self__trailer';
             }
-            if ('image/heic' === $exif['MIMEType']) {
-                // Samsung HEIC -- no way to get this out yet
-                return '';
+
+            else if ('image/heic' === $exif['MIMEType']) {
+                // Samsung HEIC -- no way to get this out yet (DirectoryItemLength is senseless)
+                // The reason this is above the MotionPhotoVideo check is because extracting binary
+                // EXIF fields on the fly is extremely expensive compared to trailer extraction.
             }
+        }
+
+        // Samsung HEIC (at least S21)
+        if (\array_key_exists('MotionPhotoVideo', $exif) && !empty($exif['MotionPhotoVideo'])) {
+            // It's a binary exif field, decode when the user requests it
+            return 'self__exifbin=MotionPhotoVideo';
         }
 
         return '';

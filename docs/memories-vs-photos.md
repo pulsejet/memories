@@ -15,7 +15,7 @@ Nextcloud comes bundled with an official "Photos" app. This page provides a brie
 1. **Archive**: Allows separating photos to a different folder quickly. Photos has no equivalent function.
 1. **External Folder Sharing**: Allows sharing a folder to non-Nextcloud users. Photos has no equivalent function ([issue](https://github.com/nextcloud/photos/issues/236)).
 1. **EXIF Data Editing**: Memories allows basic editing of EXIF data including fields such as date taken, title, description etc. Photos has no equivalent function.
-1. **Support for iOS and Google Live Photos**: Memories supports live photos, Photos does not. ([issue](https://github.com/nextcloud/photos/issues/344), [issue](https://github.com/nextcloud/photos/issues/365))
+1. **Support for iOS / Google / Samsung Live Photos**: Memories supports live photos, Photos does not. ([issue](https://github.com/nextcloud/photos/issues/344), [issue](https://github.com/nextcloud/photos/issues/365))
 1. **Advanced Multi-Selection**: Memories supports all multi-selection methods including selecting a day, selecting with Shift+Click and with Touch+Drag. Photos does not support these ([issue](https://github.com/nextcloud/photos/issues/1154), [issue](https://github.com/nextcloud/photos/issues/83))
 1. **Viewer Gestures**: Memories provides a superior photo viewer experience, including gestures such as zoom in and out using touch.
 1. **Preview pipelining**: For maximum performance, Memories highly optimizes loading thumbnails, whereas Photos loads them one by one.

@@ -148,11 +148,18 @@ class VideoController extends GenericApiController
                 } catch (\Exception $e) {
                     throw Exceptions::NotFound('file trailer');
                 }
-            } elseif ('self__embeddedvideo' === $liveid) {
+            } elseif (str_starts_with($liveid, 'self__exifbin=')) {
+                $field = substr($liveid, \strlen('self__exifbin='));
+
+                // Need explicit whitelisting here because this is user input
+                if (!\in_array($field, ['EmbeddedVideoFile', 'MotionPhotoVideo'], true)) {
+                    throw Exceptions::BadRequest('Invalid binary EXIF field');
+                }
+
                 try { // Get embedded video file
-                    $blob = Exif::getBinaryExifProp($path, '-EmbeddedVideoFile');
+                    $blob = Exif::getBinaryExifProp($path, "-{$field}");
                 } catch (\Exception $e) {
-                    throw Exceptions::NotFound('embedded video');
+                    throw Exceptions::NotFound('Could not read binary EXIF field');
                 }
             } elseif (str_starts_with($liveid, 'self__traileroffset=')) {
                 // Remove prefix
