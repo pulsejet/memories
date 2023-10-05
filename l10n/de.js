@@ -372,6 +372,7 @@ OC.L10N.register(
     "Auto" : "Automatisch",
     "Shared Folder" : "Geteilter Ordner",
     "Shared Album" : "Geteiltes Album",
+    "Setup" : "Benötigt keine Übersetzung. Hier wird nur die formelle Übersetzung verwendet (de_DE).",
     "Failed to create {albumName}." : "{albumName} konnte nicht erstellt werden.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "{currentAlbumName} konnte nicht in {newAlbumName} umbenannt werden.",
     "General Failure" : "Allgemeiner Fehler",

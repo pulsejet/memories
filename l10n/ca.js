@@ -188,6 +188,7 @@ OC.L10N.register(
     "Fit size" : "Talla ajustada",
     "Direct" : "Dirrecte",
     "Auto" : "Automàtic",
+    "Setup" : "Configuració",
     "Failed to create {albumName}." : "No s'ha pogut crear {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "No s'ha pogut reanomenar {currentAlbumName} a {newAlbumName}.",
     "Failed to delete {fileName}." : "No s'ha pogut suprimir {fileName}."

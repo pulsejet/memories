@@ -35,6 +35,7 @@ OC.L10N.register(
     "Previous" : "Əvvələ",
     "Next" : "Növbəti",
     "Size" : "Həcm",
+    "Setup" : "Qurulum",
     "Yes" : "Bəli",
     "No" : "Xeyir"
 },

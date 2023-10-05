@@ -25,11 +25,13 @@ OC.L10N.register(
     "High Resolution" : "Resolución alta",
     "Original File" : "FIcheru orixinal",
     "Public Link" : "Enllaz públicu",
+    "Finish" : "Finar",
     "Value" : "Valor",
     "Size" : "Tamañu",
     "Position" : "Posición",
     "Extension" : "Estensión",
     "Name is required." : "El nome ye obligatoriu",
+    "Setup" : "Configuración",
     "Yes" : "Sí",
     "No" : "Non"
 },

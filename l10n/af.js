@@ -49,6 +49,7 @@ OC.L10N.register(
     "Text" : "Teks",
     "Size" : "Grootte",
     "Position" : "Posisie",
-    "Quality" : "Kwaliteit"
+    "Quality" : "Kwaliteit",
+    "Setup" : "Opstelling"
 },
 "nplurals=2; plural=(n != 1);");
