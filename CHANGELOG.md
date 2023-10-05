@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - **Important**: This update runs some slow database migrations. It is recommended to upgrade using the CLI (`occ upgrade`) instead of the web interface.
 - **Important**: This version corrects some errors in indexing and indexes some new EXIF fields. It is recommended to run `occ memories:index -f` after upgrading.
 - **Breaking**: Files in hidden folders are now hidden in the timeline ([#825](https://github.com/pulsejet/memories/issues/825))
+- **Feature**: An Android app is now available with early access (https://play.google.com/store/apps/details?id=gallery.memories). Memories v5.5+ is required.
 - **Feature**: Support showing full file path in sidebar ([#173](https://github.com/pulsejet/memories/issues/173))
 - **Feature**: View file in folder on clicking name in sidebar
 - **Feature**: User can leave albums that are shared with them
