@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [v5.5.0] - 2023-10-06
 
 - **Important**: This update runs some slow database migrations. It is recommended to upgrade using the CLI (`occ upgrade`) instead of the web interface.
 - **Important**: This version corrects some errors in indexing and indexes some new EXIF fields. It is recommended to run `occ memories:index -f` after upgrading.
