@@ -44,7 +44,9 @@ class Version505003Date20230930155856 extends SimpleMigrationStep
 
         $table = $schema->getTable('memories');
 
-        $table->addIndex(['isvideo'], 'memories_isvideo_idx');
+        if (!$table->hasIndex('memories_isvideo_idx')) {
+            $table->addIndex(['isvideo'], 'memories_isvideo_idx');
+        }
 
         return $schema;
     }
