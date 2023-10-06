@@ -238,10 +238,10 @@ class Util
     /**
      * Add OG metadata to a page for a node.
      *
-     * @param mixed $node        Node to get metadata from
-     * @param mixed $title       Title of the page
-     * @param mixed $url         URL of the page
-     * @param mixed $previewArgs Preview arguments (e.g. token)
+     * @param $node        Node to get metadata from
+     * @param $title       Title of the page
+     * @param $url         URL of the page
+     * @param $previewArgs Preview arguments (e.g. token)
      */
     public static function addOgMetadata(Node $node, string $title, string $url, array $previewArgs)
     {
@@ -250,16 +250,9 @@ class Util
 
         // Get first node if folder
         if ($node instanceof \OCP\Files\Folder) {
-            $query = new SearchBinaryOperator(ISearchBinaryOperator::OPERATOR_OR, [
-                new SearchComparison(ISearchComparison::COMPARE_LIKE, 'mimetype', 'image/%'),
-                new SearchComparison(ISearchComparison::COMPARE_LIKE, 'mimetype', 'video/%'),
-            ]);
-            $query = new SearchQuery($query, 1, 0, [], null);
-            $nodes = $node->search($query);
-            if (0 === \count($nodes)) {
-                return;
+            if (null === ($node = self::getAnyMedia($node))) {
+                return; // no media in folder
             }
-            $node = $nodes[0];
         }
 
         // Add file type
@@ -284,6 +277,26 @@ class Util
             'a' => true,
         ]));
         \OCP\Util::addHeader('meta', ['property' => 'og:image', 'content' => $preview]);
+    }
+
+    /**
+     * Get a random image or video from a given folder.
+     *
+     * @param $folder Folder to search
+     */
+    public static function getAnyMedia(\OCP\Files\Folder $folder): Node
+    {
+        $query = new SearchQuery(new SearchBinaryOperator(ISearchBinaryOperator::OPERATOR_OR, [
+            new SearchComparison(ISearchComparison::COMPARE_LIKE, 'mimetype', 'image/%'),
+            new SearchComparison(ISearchComparison::COMPARE_LIKE, 'mimetype', 'video/%'),
+        ]), 1, 0, [], null);
+
+        $nodes = $folder->search($query);
+        if (0 === \count($nodes)) {
+            return null;
+        }
+
+        return $nodes[0];
     }
 
     /**
