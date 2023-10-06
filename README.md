@@ -36,6 +36,14 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 1. Run `php occ memories:index` to generate metadata indices for existing photos.
 1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos.
 
+## 📱 Mobile Apps
+
+- An Android app for Memories is available in early access.
+
+  <a href='https://play.google.com/store/apps/details?id=gallery.memories&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>
+  <img width=170 alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/>
+  </a>
+
 ## 🏗 Development Setup
 
 1. ☁ Clone this into your `custom_apps` folder of your Nextcloud.
