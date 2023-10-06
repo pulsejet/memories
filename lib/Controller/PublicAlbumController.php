@@ -156,6 +156,6 @@ class PublicAlbumController extends Controller
 
         $params = ['token' => $token];
         $url = $this->urlGenerator->linkToRouteAbsolute('memories.PublicAlbum.showShare', $params);
-        \OCA\Memories\Util::addOGMetadata($node, $album['name'], $url, array_merge($params, ['album' => true]));
+        \OCA\Memories\Util::addOGMetadata($node, $album['name'], $url, array_merge($params, ['albums' => true]));
     }
 }
