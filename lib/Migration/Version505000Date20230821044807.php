@@ -56,10 +56,12 @@ class Version505000Date20230821044807 extends SimpleMigrationStep
         $schema = $schemaClosure();
 
         $table = $schema->getTable('memories');
-        $table->addColumn('epoch', Types::BIGINT, [
-            'notnull' => true,
-            'default' => 0,
-        ]);
+        if (!$table->hasColumn('epoch')) {
+            $table->addColumn('epoch', Types::BIGINT, [
+                'notnull' => true,
+                'default' => 0,
+            ]);
+        }
 
         return $schema;
     }

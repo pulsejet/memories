@@ -44,11 +44,13 @@ class Version505004Date20231004200012 extends SimpleMigrationStep
         $schema = $schemaClosure();
 
         $table = $schema->getTable('memories');
-        $table->addColumn('buid', Types::STRING, [
-            'notnull' => false,
-            'length' => 32,
-            'default' => '',
-        ]);
+        if (!$table->hasColumn('buid')) {
+            $table->addColumn('buid', Types::STRING, [
+                'notnull' => false,
+                'length' => 32,
+                'default' => '',
+            ]);
+        }
 
         return $schema;
     }
