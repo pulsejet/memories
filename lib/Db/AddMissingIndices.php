@@ -17,6 +17,16 @@ class AddMissingIndices
         // Should migrate at end
         $shouldMigrate = false;
 
+        // Speed up CTE lookup for subdirectories
+        if ($schema->hasTable('filecache')) {
+            $table = $schema->getTable('filecache');
+
+            if (!$table->hasIndex('memories_parent_mimetype')) {
+                $table->addIndex(['parent', 'mimetype'], 'memories_parent_mimetype');
+                $shouldMigrate = true;
+            }
+        }
+
         // Add index on systemtag_object_mapping to speed up the query
         if ($schema->hasTable('systemtag_object_mapping')) {
             $table = $schema->getTable('systemtag_object_mapping');

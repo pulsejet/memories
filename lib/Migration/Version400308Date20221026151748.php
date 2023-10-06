@@ -42,15 +42,9 @@ class Version400308Date20221026151748 extends SimpleMigrationStep
      */
     public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper
     {
-        /** @var ISchemaWrapper $schema */
-        $schema = $schemaClosure();
-
-        // Speed up CTE lookup for subdirectories
-        $fileCacheTable = $schema->getTable('filecache');
-        $fileCacheTable->addIndex(['parent', 'mimetype'], 'memories_parent_mimetype');
-
-        // Add other indices
-        return $schema;
+        // Addition of memories_parent_mimetype moved to AddMissingIndices
+        // since this is on an external table (filecache)
+        return null;
     }
 
     /**
