@@ -3,19 +3,20 @@
 namespace OCA\Memories\Db;
 
 use OC\DB\SchemaWrapper;
+use OCP\Migration\IOutput;
 
 class AddMissingIndices
 {
     /**
      * Add missing indices to the database schema.
      */
-    public static function run()
+    public static function run(IOutput $output)
     {
         $connection = \OC::$server->get(\OC\DB\Connection::class);
         $schema = new SchemaWrapper($connection);
 
         // Should migrate at end
-        $shouldMigrate = false;
+        $ops = [];
 
         // Speed up CTE lookup for subdirectories
         if ($schema->hasTable('filecache')) {
@@ -23,7 +24,7 @@ class AddMissingIndices
 
             if (!$table->hasIndex('memories_parent_mimetype')) {
                 $table->addIndex(['parent', 'mimetype'], 'memories_parent_mimetype');
-                $shouldMigrate = true;
+                $ops[] = 'filecache::memories_parent_mimetype';
             }
         }
 
@@ -33,7 +34,7 @@ class AddMissingIndices
 
             if (!$table->hasIndex('memories_type_tagid')) {
                 $table->addIndex(['objecttype', 'systemtagid'], 'memories_type_tagid');
-                $shouldMigrate = true;
+                $ops[] = 'systemtag_object_mapping::memories_type_tagid';
             }
         }
 
@@ -41,15 +42,30 @@ class AddMissingIndices
         if ($schema->hasTable('recognize_face_detections')) {
             $table = $schema->getTable('recognize_face_detections');
 
-            if (!$table->hasIndex('memories_file_id')) {
+            // Starting at some version, recognize ships an index on file_id
+            // In that case, we *remove* the memories index if it exists
+            $hasOwn = $table->hasIndex('recognize_facedet_file');
+            $hasOur = $table->hasIndex('memories_file_id');
+
+            if (!$hasOwn && !$hasOur) {
+                // Add our index because none exists
                 $table->addIndex(['file_id'], 'memories_file_id');
-                $shouldMigrate = true;
+                $ops[] = 'recognize_face_detections::memories_file_id';
+            } elseif ($hasOwn && $hasOur) {
+                // Remove our index because recognize has one
+                $table->dropIndex('memories_file_id');
+                $ops[] = '-recognize_face_detections::memories_file_id';
             }
         }
 
         // Migrate
-        if ($shouldMigrate && null !== $connection) {
+        if (\count($ops) > 0 && null !== $connection) {
+            $output->info('Updating external table schema: '.implode(', ', $ops));
             $connection->migrateToSchema($schema->getWrappedSchema());
+        } elseif (null === $connection) {
+            $output->warning('No database connection, skipping external table schema update');
+        } else {
+            $output->info('External table schema seem up to date');
         }
 
         return $schema;
