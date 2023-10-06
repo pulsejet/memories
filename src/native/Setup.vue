@@ -142,7 +142,7 @@ export default defineComponent({
 
   beforeMount() {
     if (!nativex.has() || !this.step) {
-      this.$router.push('/');
+      this.$router.replace('/');
     }
   },
 
