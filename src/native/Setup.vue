@@ -50,7 +50,11 @@
           {{ t('memories', 'Grant permissions') }}
         </NcButton>
 
-        <NcButton type="primary" class="button" @click="step += hasMediaPermission ? 1 : 2">
+        <NcButton
+          :type="hasMediaPermission ? 'secondary' : 'primary'"
+          class="button"
+          @click="step += hasMediaPermission ? 1 : 2"
+        >
           {{ hasMediaPermission ? t('memories', 'Continue') : t('memories', 'Skip this step') }}
         </NcButton>
       </div>
