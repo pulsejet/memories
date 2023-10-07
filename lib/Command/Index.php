@@ -157,6 +157,9 @@ class Index extends Command
         }
 
         if ($this->input->isInteractive()) {
+            $this->output->writeln('<error>Clearing the index can have unintended consequences like');
+            $this->output->writeln('duplicates for some files appearing on the mobile app.');
+            $this->output->writeln('Using --force instead of --clear is recommended in most cases.</error>');
             $this->output->write('Are you sure you want to clear the existing index? (y/N): ');
             if ('y' !== trim(fgets(STDIN))) {
                 throw new \Exception('Aborting');

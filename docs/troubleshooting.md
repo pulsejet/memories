@@ -83,6 +83,7 @@ If you get this error, it is likely that your database is not using the `utf8mb4
 ## Reset
 
 If you want to completely reset Memories (e.g. for database trouble), uninstall it from the app store, then run the following SQL on your database to clean up any data.
+Note that this can have unintended consequences such as some files appearing as duplicates in the mobile app when you reinstall Memories.
 
 ```sql
 DROP TABLE IF EXISTS oc_memories;
