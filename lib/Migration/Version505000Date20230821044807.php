@@ -95,6 +95,11 @@ class Version505000Date20230821044807 extends SimpleMigrationStep
             $this->dbc->beginTransaction();
             while ($row = $result->fetch()) {
                 try {
+                    // try to get the exif string
+                    if (!\is_array($row) || !\array_key_exists('exif', $row) || !\is_string($row['exif'])) {
+                        continue;
+                    }
+
                     // get the epoch from the exif data
                     $exif = json_decode($row['exif'], true);
                     if (!\is_array($exif) || !\array_key_exists('DateTimeEpoch', $exif)) {
