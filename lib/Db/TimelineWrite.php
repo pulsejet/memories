@@ -142,7 +142,7 @@ class TimelineWrite
         $liveid = $this->livePhoto->getLivePhotoId($file, $exif);
 
         // Get BUID from ImageUniqueId if not present
-        $buid = $prevRow['buid'];
+        $buid = $prevRow ? $prevRow['buid'] : '';
         if (empty($buid)) {
             $imageUniqueId = \array_key_exists('ImageUniqueID', $exif) ? $exif['ImageUniqueID'] : null;
             $buid = Exif::getBUID($file->getName(), $imageUniqueId, $file->getSize());
