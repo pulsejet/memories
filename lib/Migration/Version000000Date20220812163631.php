@@ -46,11 +46,13 @@ class Version000000Date20220812163631 extends SimpleMigrationStep
                 'autoincrement' => true,
                 'notnull' => true,
             ]);
-            $table->addColumn('uid', 'string', [
-                // dropped in Version200000Date20220924015634
-                'notnull' => true,
-                'length' => 64,
-            ]);
+
+            // dropped in Version200000Date20220924015634
+            // $table->addColumn('uid', 'string', [
+            //     'notnull' => true,
+            //     'length' => 64,
+            // ]);
+
             $table->addColumn('datetaken', Types::DATETIME, [
                 'notnull' => false,
             ]);
@@ -65,14 +67,19 @@ class Version000000Date20220812163631 extends SimpleMigrationStep
                 'notnull' => false,
                 'default' => false,
             ]);
-            $table->addColumn('mtime', Types::INTEGER, [
+
+            // Version505001Date20230828155021
+            $table->addColumn('mtime', Types::BIGINT, [
                 'notnull' => true,
+                'length' => 20,
             ]);
 
             $table->setPrimaryKey(['id']);
-            $table->addIndex(['uid'], 'memories_uid_index');
-            $table->addIndex(['uid', 'dayid'], 'memories_ud_index');
-            $table->addUniqueIndex(['uid', 'fileid'], 'memories_day_uf_ui');
+
+            // All these indices are dropped in Version200000Date20220924015634
+            // $table->addIndex(['uid'], 'memories_uid_index');
+            // $table->addIndex(['uid', 'dayid'], 'memories_ud_index');
+            // $table->addUniqueIndex(['uid', 'fileid'], 'memories_day_uf_ui');
         }
 
         return $schema;

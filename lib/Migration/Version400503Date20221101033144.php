@@ -60,14 +60,17 @@ class Version400503Date20221101033144 extends SimpleMigrationStep
         // The problem is objectid in systemtags is VARCHAR(64) while fileid in
         // filecache and memories is BIGINT(20), so a join is extremely slow,
         // because the entire tags table must be scanned for the conversion.
+        if (!$table->hasColumn('objectid')) {
+            $table->addColumn('objectid', 'string', [
+                'notnull' => true,
+                'length' => 64,
+                'default' => '0', // set to real value in postSchemaChange
+            ]);
+        }
 
-        $table->addColumn('objectid', 'string', [
-            'notnull' => true,
-            'length' => 64,
-            'default' => '0', // set to real value in postSchemaChange
-        ]);
-
-        $table->addIndex(['objectid'], 'memories_objectid_index');
+        if (!$table->hasIndex('memories_objectid_index')) {
+            $table->addIndex(['objectid'], 'memories_objectid_index');
+        }
 
         return $schema;
     }

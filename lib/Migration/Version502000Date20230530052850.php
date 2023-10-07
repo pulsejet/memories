@@ -45,12 +45,17 @@ class Version502000Date20230530052850 extends SimpleMigrationStep
         $schema = $schemaClosure();
 
         $table = $schema->getTable('memories_places');
-        $table->addColumn('mark', Types::BOOLEAN, [
-            'notnull' => false,
-            'default' => false,
-        ]);
 
-        $table->addIndex(['osm_id', 'mark'], 'memories_places_id_mk_idx');
+        if (!$table->hasColumn('mark')) {
+            $table->addColumn('mark', Types::BOOLEAN, [
+                'notnull' => false,
+                'default' => false,
+            ]);
+        }
+
+        if (!$table->hasIndex('memories_places_id_mk_idx')) {
+            $table->addIndex(['osm_id', 'mark'], 'memories_places_id_mk_idx');
+        }
 
         return $schema;
     }

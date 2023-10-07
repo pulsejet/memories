@@ -70,13 +70,31 @@ class Version200000Date20220924015634 extends SimpleMigrationStep
         }
 
         $table = $schema->getTable('memories');
+
+        // Drop all indicies with UID
         if ($table->hasIndex('memories_uid_index')) {
             $table->dropIndex('memories_uid_index');
-            $table->dropIndex('memories_ud_index');
-            $table->dropIndex('memories_day_uf_ui');
-            $table->dropColumn('uid');
+        }
 
+        if ($table->hasIndex('memories_ud_index')) {
+            $table->dropIndex('memories_ud_index');
+        }
+
+        if ($table->hasIndex('memories_day_uf_ui')) {
+            $table->dropIndex('memories_day_uf_ui');
+        }
+
+        // Drop UID column
+        if ($table->hasColumn('uid')) {
+            $table->dropColumn('uid');
+        }
+
+        // Add new indicies
+        if (!$table->hasIndex('memories_dayid_index')) {
             $table->addIndex(['dayid'], 'memories_dayid_index');
+        }
+
+        if (!$table->hasIndex('memories_fileid_index')) {
             $table->addUniqueIndex(['fileid'], 'memories_fileid_index');
         }
 

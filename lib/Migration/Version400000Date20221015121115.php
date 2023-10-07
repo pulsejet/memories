@@ -52,14 +52,19 @@ class Version400000Date20221015121115 extends SimpleMigrationStep
 
         $table = $schema->getTable('memories');
 
-        $table->addColumn('w', Types::INTEGER, [
-            'notnull' => true,
-            'default' => 0,
-        ]);
-        $table->addColumn('h', Types::INTEGER, [
-            'notnull' => true,
-            'default' => 0,
-        ]);
+        if (!$table->hasColumn('w')) {
+            $table->addColumn('w', Types::INTEGER, [
+                'notnull' => true,
+                'default' => 0,
+            ]);
+        }
+
+        if (!$table->hasColumn('h')) {
+            $table->addColumn('h', Types::INTEGER, [
+                'notnull' => true,
+                'default' => 0,
+            ]);
+        }
 
         return $schema;
     }

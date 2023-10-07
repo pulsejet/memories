@@ -47,11 +47,13 @@ class Version400604Date20221107205439 extends SimpleMigrationStep
 
         $table = $schema->getTable('memories');
 
-        $table->addColumn('exif', 'text', [
-            'notnull' => false,
-            'length' => 65535,
-            'default' => '',
-        ]);
+        if (!$table->hasColumn('exif')) {
+            $table->addColumn('exif', 'text', [
+                'notnull' => false,
+                'length' => 65535,
+                'default' => '',
+            ]);
+        }
 
         return $schema;
     }

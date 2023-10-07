@@ -48,10 +48,12 @@ class Version400700Date20221110030909 extends SimpleMigrationStep
 
         $table = $schema->getTable('memories');
 
-        $table->addColumn('video_duration', Types::INTEGER, [
-            'notnull' => true,
-            'default' => 0,
-        ]);
+        if (!$table->hasColumn('video_duration')) {
+            $table->addColumn('video_duration', Types::INTEGER, [
+                'notnull' => true,
+                'default' => 0,
+            ]);
+        }
 
         return $schema;
     }

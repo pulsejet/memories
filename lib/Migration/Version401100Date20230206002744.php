@@ -46,6 +46,7 @@ class Version401100Date20230206002744 extends SimpleMigrationStep
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
 
+        // Create places table
         if (!$schema->hasTable('memories_places')) {
             $table = $schema->createTable('memories_places');
             $table->addColumn('id', 'integer', [
@@ -65,6 +66,7 @@ class Version401100Date20230206002744 extends SimpleMigrationStep
             $table->addIndex(['osm_id'], 'memories_places_osm_id_index');
         }
 
+        // Create planet table
         if (!$schema->hasTable('memories_planet')) {
             $table = $schema->createTable('memories_planet');
             $table->addColumn('id', 'integer', [

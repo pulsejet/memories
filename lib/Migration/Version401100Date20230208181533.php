@@ -46,28 +46,42 @@ class Version401100Date20230208181533 extends SimpleMigrationStep
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
 
-        // Add lat lon to memories
-        $table = $schema->getTable('memories');
-        if (!$table->hasColumn('lat')) {
-            $table->addColumn('lat', Types::DECIMAL, [
-                'notnull' => false,
-                'default' => null,
-                'precision' => 8,
-                'scale' => 6,
-            ]);
-            $table->addColumn('lon', Types::DECIMAL, [
-                'notnull' => false,
-                'default' => null,
-                'precision' => 9,
-                'scale' => 6,
-            ]);
-            $table->addIndex(['lat', 'lon'], 'memories_lat_lon_index');
+        // Add lat lon and cluster to memories
+        if ($schema->hasTable('memories')) {
+            $table = $schema->getTable('memories');
 
-            $table->addColumn('mapcluster', Types::INTEGER, [
-                'notnull' => false,
-                'default' => null,
-            ]);
-            $table->addIndex(['mapcluster'], 'memories_mapcluster_index');
+            if (!$table->hasColumn('lat')) {
+                $table->addColumn('lat', Types::DECIMAL, [
+                    'notnull' => false,
+                    'default' => null,
+                    'precision' => 8,
+                    'scale' => 6,
+                ]);
+            }
+
+            if (!$table->hasColumn('lon')) {
+                $table->addColumn('lon', Types::DECIMAL, [
+                    'notnull' => false,
+                    'default' => null,
+                    'precision' => 9,
+                    'scale' => 6,
+                ]);
+            }
+
+            if (!$table->hasColumn('mapcluster')) {
+                $table->addColumn('mapcluster', Types::INTEGER, [
+                    'notnull' => false,
+                    'default' => null,
+                ]);
+            }
+
+            if (!$table->hasIndex('memories_lat_lon_index')) {
+                $table->addIndex(['lat', 'lon'], 'memories_lat_lon_index');
+            }
+
+            if (!$table->hasIndex('memories_mapcluster_index')) {
+                $table->addIndex(['mapcluster'], 'memories_mapcluster_index');
+            }
         }
 
         // Add clusters table

@@ -45,11 +45,14 @@ class Version401300Date20230328012131 extends SimpleMigrationStep
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
 
-        // Add lat lon to memories
+        // Add other_names to planet database
         $table = $schema->getTable('memories_planet');
-        $table->addColumn('other_names', 'text', [
-            'notnull' => false,
-        ]);
+
+        if (!$table->hasColumn('other_names')) {
+            $table->addColumn('other_names', 'text', [
+                'notnull' => false,
+            ]);
+        }
 
         return $schema;
     }
