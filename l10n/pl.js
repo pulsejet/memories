@@ -470,7 +470,7 @@ OC.L10N.register(
     "Failed to favorite {fileName}." : "Nie udało się dodać do ulubionych {fileName}.",
     "No content-location header found" : "Nie znaleziono nagłówka content-location",
     "Failed to create tag {name}: {error}" : "Nie udało się utworzyć tagu {name}: {error}",
-    "Memories has been updated to {version}. Reload to get the new version." : "Wspomnienia zostały zaktualizowane do {wersja}. Przeładuj, aby uzyskać nową wersję.",
+    "Memories has been updated to {version}. Reload to get the new version." : "Wspomnienia zostały zaktualizowane do {version}. Przeładuj, aby uzyskać nową wersję.",
     "Upload some photos and make sure the timeline path is configured" : "Wgraj kilka zdjęć i upewnij się, że ścieżka osi czasu jest ustawiona",
     "Mark photos as favorite to find them easily" : "Oznacz zdjęcia jako ulubione, aby łatwo je znaleźć",
     "Memories from past years will appear here" : "Wspomnienia z przeszłych lat pojawią się tutaj",
