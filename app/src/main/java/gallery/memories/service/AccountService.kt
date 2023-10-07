@@ -43,7 +43,6 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
             val loginUrl = body.getString("login")
 
             // Open login page in browser
-            toast("Opening login page ...")
             mCtx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(loginUrl)))
 
             // Start polling in background
