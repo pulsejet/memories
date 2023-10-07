@@ -27,6 +27,13 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
     fun login(baseUrl: String, loginFlowUrl: String) {
         try {
             val res = mHttp.postLoginFlow(loginFlowUrl)
+
+            // Check if 200 was received
+            if (res.code != 200) {
+                throw Exception("Server returned a ${res.code} status code. Please check your reverse proxy configuration and overwriteprotocol is correct.")
+            }
+
+            // Get body as JSON
             val body = mHttp.bodyJson(res) ?: throw Exception("Failed to parse login flow response")
 
             // Parse response body as JSON
