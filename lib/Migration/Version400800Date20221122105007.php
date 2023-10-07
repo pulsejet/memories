@@ -75,8 +75,10 @@ class Version400800Date20221122105007 extends SimpleMigrationStep
                 'length' => 20,
             ]);
 
-            $table->addColumn('mtime', Types::INTEGER, [
+            // Version505005Date20231007154645
+            $table->addColumn('mtime', Types::BIGINT, [
                 'notnull' => true,
+                'length' => 20,
             ]);
 
             $table->setPrimaryKey(['id']);
