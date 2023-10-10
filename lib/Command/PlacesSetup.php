@@ -82,7 +82,7 @@ class PlacesSetup extends Command
         // Recalculate all places
         $this->places->recalculateAll();
 
-        $this->output->writeln('Done');
+        $this->output->writeln('Places set up successfully');
 
         return 0;
     }

@@ -208,7 +208,7 @@ class AdminController extends GenericApiController
                 $places->importPlanet($datafile);
                 $places->recalculateAll();
 
-                $out->setOutput("Done.\n");
+                $out->setOutput("Places set up successfully.\n");
             } catch (\Exception $e) {
                 $out->setOutput('Failed: '.$e->getMessage()."\n");
             }
