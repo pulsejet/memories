@@ -10,6 +10,7 @@ const GIS_TYPE_NONE = 0;
 const GIS_TYPE_MYSQL = 1;
 const GIS_TYPE_POSTGRES = 2;
 const APPROX_PLACES = 635189;
+const DB_TRANSACTION_SIZE = 50;
 
 const PLANET_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-0.0.3/planet_coarse_boundaries.zip';
 
@@ -199,16 +200,11 @@ class Places
             throw new \Exception('No GIS support detected');
         }
 
-        // Drop the table if it exists
-        $p = $this->connection->getDatabasePlatform();
-        if ($this->geomCount() > 0) {
-            $this->connection->executeStatement($p->getDropTableSQL('memories_planet_geometry'));
-        }
-
         // Setup the database
-        $this->setupDatabase();
+        $this->setupDatabase($gis);
 
         // Truncate tables
+        $p = $this->connection->getDatabasePlatform();
         $this->connection->executeStatement($p->getTruncateTableSQL('*PREFIX*memories_planet', false));
         $this->connection->executeStatement($p->getTruncateTableSQL('memories_planet_geometry', false));
 
@@ -247,6 +243,18 @@ class Places
         // The number of places in the current transaction
         $txnCount = 0;
 
+        // Function to commit the current transaction
+        $transact = function () use (&$txnCount) {
+            if (++$txnCount >= DB_TRANSACTION_SIZE) {
+                $this->connection->commit();
+                $this->connection->beginTransaction();
+                $txnCount = 0;
+            }
+        };
+
+        // Start the first transaction
+        $this->connection->beginTransaction();
+
         // Iterate over the data file
         $handle = fopen($datafile, 'r');
         if ($handle) {
@@ -257,10 +265,6 @@ class Places
                     continue;
                 }
 
-                // Begin transaction
-                if (0 === $txnCount++) {
-                    $this->connection->beginTransaction();
-                }
                 ++$count;
 
                 // Decode JSON
@@ -292,6 +296,7 @@ class Places
                 $insertPlace->bindValue('name', $name);
                 $insertPlace->bindValue('other_names', $otherNames);
                 $insertPlace->execute();
+                $transact();
 
                 // Insert polygons into database
                 $idx = 0;
@@ -339,6 +344,7 @@ class Places
                         $insertGeometry->bindValue('osm_id', $osmId);
                         $insertGeometry->bindValue('geometry', $geometry);
                         $insertGeometry->execute();
+                        $transact();
                     } catch (\Exception $e) {
                         echo "ERROR: Failed to insert polygon {$polyid} ({$e->getMessage()} \n";
 
@@ -346,17 +352,10 @@ class Places
                     }
                 }
 
-                // Commit transaction every once in a while
-                if (0 === $count % 100) {
-                    $this->connection->commit();
-                    $txnCount = 0;
-
+                if (0 === $count % 500) {
                     // Print progress
                     $total = APPROX_PLACES;
                     $pct = round($count / $total * 100, 1);
-                }
-
-                if (0 === $count % 500) {
                     echo "Inserted {$count} / {$total} places ({$pct}%), Last: {$name}\n";
                     flush();
                 }
@@ -366,9 +365,7 @@ class Places
         }
 
         // Commit final transaction
-        if ($txnCount > 0) {
-            $this->connection->commit();
-        }
+        $this->connection->commit();
 
         // Mark success
         echo "Planet database imported successfully!\n";
@@ -413,11 +410,11 @@ class Places
     /**
      * Create database tables and indices.
      */
-    protected function setupDatabase(): void
+    protected function setupDatabase(int $gis): void
     {
         try {
-            // Get Gis type
-            $gis = $this->detectGisType();
+            // Drop the table if it exists
+            $this->connection->executeStatement('DROP TABLE IF EXISTS memories_planet_geometry');
 
             // Create table
             $sql = 'CREATE TABLE memories_planet_geometry (
