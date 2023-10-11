@@ -40,6 +40,7 @@
     "justified-layout": "^4.1.0",
     "leaflet": "^1.9.4",
     "leaflet-edgebuffer": "^1.0.6",
+    "leaflet.heat": "^0.2.0",
     "luxon": "^3.3.0",
     "path-posix": "^1.0.0",
     "photoswipe": "^5.3.8",
