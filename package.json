@@ -63,14 +63,13 @@
   },
   "devDependencies": {
     "@nextcloud/browserslist-config": "^3.0.0",
-    "@nextcloud/webpack-vue-config": "^5.5.1",
+    "@nextcloud/webpack-vue-config": "^6.0.0",
     "@playwright/test": "^1.39.0",
     "@types/hammerjs": "^2.0.42",
     "@types/luxon": "^3.3.2",
     "@types/url-parse": "^1.4.9",
     "@types/videojs-contrib-quality-levels": "^2.0.2",
     "playwright": "^1.39.0",
-    "ts-loader": "^9.5.0",
     "typescript": "^5.2.2",
     "workbox-webpack-plugin": "^7.0.0"
   }

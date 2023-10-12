@@ -14,15 +14,18 @@ webpackConfig.entry = {
   'hooks-clear-cache': path.resolve(path.join('src', 'hooks', 'clear-cache')),
 };
 
-// Enable TypeScript
-webpackConfig.module.rules.push({
-  test: /\.ts?$/,
-  loader: 'ts-loader',
-  exclude: /node_modules/,
-  options: {
-    appendTsSuffixTo: [/\.vue$/],
+// Enable TypeScript for Vue
+const tsRule = webpackConfig.module.rules.find((rule) => rule.use?.includes('ts-loader'));
+console.assert(tsRule, 'Could not find ts-loader rule');
+tsRule.use = [
+  { loader: 'babel-loader' },
+  {
+    loader: 'ts-loader',
+    options: {
+      appendTsSuffixTo: [/\.vue$/],
+    },
   },
-});
+];
 
 // Exclude node_modules from watch
 webpackConfig.watchOptions = {
