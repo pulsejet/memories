@@ -28,7 +28,7 @@ import { generateRemoteUrl } from '@nextcloud/router';
 // Monkey business
 import * as rq from 'webdav/dist/node/request';
 const prepareRequestOptionsOld = rq.prepareRequestOptions.bind(rq);
-(<any>rq).prepareRequestOptions = (requestOptions, context, userOptions) => {
+(<any>rq).prepareRequestOptions = (requestOptions: any, context: any, userOptions: any) => {
   requestOptions.method = userOptions.method || requestOptions.method;
   return prepareRequestOptionsOld(requestOptions, context, userOptions);
 };

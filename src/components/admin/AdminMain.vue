@@ -113,7 +113,7 @@ export default defineComponent({
       }
     },
 
-    async update(key: keyof ISystemConfig, value: any = null) {
+    async update<K extends keyof ISystemConfig>(key: K, value: ISystemConfig[K] | null = null) {
       if (!this.config?.hasOwnProperty(key)) {
         console.error('Unknown setting', key);
         return;
@@ -121,7 +121,7 @@ export default defineComponent({
 
       // Get final value
       value ??= this.config[key];
-      this.config[key as string] = value;
+      this.config[key] = value;
 
       try {
         this.loading++;

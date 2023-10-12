@@ -30,7 +30,7 @@ type PsVideoEvent = PsEvent & {
  * Check if slide has video content
  */
 export function isVideoContent(content: unknown): content is VideoContent {
-  return typeof content === 'object' && content?.['data']?.['type'] === 'video';
+  return typeof content === 'object' && (<any>content)?.['data']?.['type'] === 'video';
 }
 
 class VideoContentSetup {
@@ -235,7 +235,7 @@ class VideoContentSetup {
       playWithDelay();
     });
 
-    content.videojs.qualityLevels?.()?.on('addqualitylevel', (e) => {
+    content.videojs.qualityLevels?.()?.on('addqualitylevel', (e: any) => {
       if (e.qualityLevel?.label?.includes('max.m3u8')) {
         // This is the highest quality level
         // and guaranteed to be the last one
@@ -448,7 +448,7 @@ class VideoContentSetup {
     this.destroyVideo(content);
   }
 
-  onContentResize(e) {
+  onContentResize(e: PsVideoEvent & { width: number; height: number }) {
     if (isVideoContent(e.content)) {
       e.preventDefault();
 
@@ -461,12 +461,12 @@ class VideoContentSetup {
         content.element.style.height = height + 'px';
       }
 
-      if (content.slide && content.slide.placeholder) {
-        // override placeholder size, so it more accurately matches the video
-        const placeholderElStyle = content.slide.placeholder.element.style;
-        placeholderElStyle.transform = 'none';
-        placeholderElStyle.width = width + 'px';
-        placeholderElStyle.height = height + 'px';
+      // override placeholder size, so it more accurately matches the video
+      const phStyle = content.placeholder?.element?.style;
+      if (phStyle) {
+        phStyle.transform = 'none';
+        phStyle.width = width + 'px';
+        phStyle.height = height + 'px';
       }
     }
   }

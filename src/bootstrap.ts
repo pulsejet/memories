@@ -27,11 +27,24 @@ import './styles/global.scss';
 
 // Global exposed variables
 declare global {
-  var mode: 'admin' | 'user';
+  var __webpack_nonce__: string;
+  var __webpack_public_path__: string;
 
-  var vueroute: () => Route;
   var OC: Nextcloud.Common.OC;
   var OCP: Nextcloud.Common.OCP;
+  var OCA: {
+    Files?: {
+      Sidebar?: any;
+      App?: any;
+    };
+    Theming?: {
+      name: string;
+      enabledThemes: any[];
+    };
+  };
+
+  var mode: 'admin' | 'user';
+  var vueroute: () => Route;
 
   var mModals: {
     editMetadata: (photos: IPhoto[], sections?: number[]) => void;
@@ -62,13 +75,12 @@ declare global {
   var windowInnerWidth: number; // cache
   var windowInnerHeight: number; // cache
 
-  var __webpack_nonce__: string;
-  var __webpack_public_path__: string;
-
   var vidjs: typeof videojsType;
   var Plyr: typeof PlyrType;
   var videoClientId: string;
   var videoClientIdPersistent: string;
+
+  var photoswipe: unknown;
 }
 
 // Allow global access to the router

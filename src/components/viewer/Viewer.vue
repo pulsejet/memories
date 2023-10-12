@@ -487,8 +487,10 @@ export default defineComponent({
       globalThis.photoswipe = this.photoswipe;
 
       // Monkey patch for focus trapping in sidebar
-      const _onFocusIn = this.photoswipe.keyboard['_onFocusIn'];
-      this.photoswipe.keyboard['_onFocusIn'] = (e: FocusEvent) => {
+      const psKeyboard = this.photoswipe.keyboard as any;
+      const _onFocusIn = psKeyboard['_onFocusIn'];
+      console.assert(_onFocusIn, 'Missing _onFocusIn for monkey patch');
+      psKeyboard['_onFocusIn'] = (e: FocusEvent) => {
         if (
           e.target instanceof HTMLElement &&
           e.target.closest(['#app-sidebar-vue', '.v-popper__popper', '.modal-mask', '.oc-dialog'].join(','))

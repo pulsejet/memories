@@ -23,14 +23,14 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { IPhoto } from '../../types';
+import { IExif, IPhoto } from '../../types';
 
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
 import { translate as t } from '@nextcloud/l10n';
 
 interface IField {
-  field: string;
+  field: keyof IExif;
   label: string;
 }
 
@@ -51,8 +51,8 @@ export default defineComponent({
   },
 
   data: () => ({
-    exif: null! as Record<string, string>,
-    dirty: {} as Record<string, boolean>,
+    exif: null as Record<keyof IExif, string> | null,
+    dirty: {} as Record<keyof IExif, boolean>,
 
     fields: [
       {
@@ -87,26 +87,17 @@ export default defineComponent({
   }),
 
   mounted() {
-    let exif = {};
+    const exif = {} as NonNullable<typeof this.exif>;
+
     for (const field of this.fields) {
-      exif[field.field] = null;
       this.dirty[field.field] = false;
-    }
 
-    const photos = this.photos as IPhoto[];
-    for (const photo of photos) {
-      if (!photo.imageInfo?.exif) {
-        continue;
-      }
-
-      for (const field of this.fields) {
-        const ePhoto = photo.imageInfo?.exif[field.field];
-        const eCurr = exif[field.field];
-        if (ePhoto && (eCurr === null || ePhoto === eCurr)) {
-          exif[field.field] = String(ePhoto);
-        } else {
-          exif[field.field] = String();
-        }
+      // Check if all photos have the same value for this field
+      const first = this.photos[0]?.imageInfo?.exif?.[field.field];
+      if (this.photos.every((p) => p.imageInfo?.exif?.[field.field] === first)) {
+        exif[field.field] = String(first ?? String());
+      } else {
+        exif[field.field] = String();
       }
     }
 
@@ -115,10 +106,10 @@ export default defineComponent({
 
   methods: {
     result() {
-      const diff = {};
+      const diff = {} as Record<keyof IExif, string>;
       for (const field of this.fields) {
         if (this.dirty[field.field]) {
-          diff[field.field] = this.exif[field.field];
+          diff[field.field] = this.exif![field.field];
         }
       }
       return diff;
@@ -133,7 +124,7 @@ export default defineComponent({
     },
 
     reset(field: IField) {
-      this.exif[field.field] = '';
+      this.exif![field.field] = '';
       this.dirty[field.field] = false;
     },
   },

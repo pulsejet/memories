@@ -278,7 +278,7 @@ export default defineComponent({
         name: this.t('memories', 'Info'),
         icon: 'icon-details',
 
-        mount(el, fileInfo, context) {
+        mount(el: HTMLElement, fileInfo: { id: string | number }, context: any) {
           this.metadataComponent?.$destroy?.();
           this.metadataComponent = new Vue({
             render: (h) => h(Metadata),
@@ -287,7 +287,7 @@ export default defineComponent({
           this.metadataComponent.$mount(el);
           this.metadataComponent.$children[0].update(Number(fileInfo.id));
         },
-        update(fileInfo) {
+        update(fileInfo: { id: string | number }) {
           this.metadataComponent.$children[0].update(Number(fileInfo.id));
         },
         destroy() {

@@ -81,7 +81,7 @@ export function randomSubarray<T>(arr: T[], size: number): T[] {
 }
 
 /** Set a timer that renews if existing */
-export function setRenewingTimeout<T>(ctx: T, name: string, callback: (() => void) | null, delay: number): void {
+export function setRenewingTimeout(ctx: any, name: string, callback: (() => void) | null, delay: number): void {
   if (ctx[name]) window.clearTimeout(ctx[name]);
   ctx[name] = window.setTimeout(() => {
     ctx[name] = 0;

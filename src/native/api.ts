@@ -190,4 +190,4 @@ export type NativeX = {
 };
 
 /** The native interface is a global object that is injected by the native app. */
-export const nativex: NativeX = globalThis.nativex;
+export const nativex: NativeX = (<any>globalThis).nativex;

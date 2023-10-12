@@ -265,7 +265,7 @@ export default defineComponent({
           },
         });
 
-        this.currentSearchResults = response.data.ocs.data.map((collaborator) => {
+        this.currentSearchResults = response.data.ocs.data.map((collaborator: any) => {
           switch (collaborator.source) {
             case 'users':
               return {
@@ -394,7 +394,7 @@ export default defineComponent({
       }, 10000);
     },
 
-    selectEntity(collaboratorKey) {
+    selectEntity(collaboratorKey: string) {
       if (this.selectedCollaboratorsKeys.includes(collaboratorKey)) {
         return;
       }
@@ -403,7 +403,7 @@ export default defineComponent({
       this.selectedCollaboratorsKeys.push(collaboratorKey);
     },
 
-    unselectEntity(collaboratorKey) {
+    unselectEntity(collaboratorKey: string) {
       const index = this.selectedCollaboratorsKeys.indexOf(collaboratorKey);
 
       if (index === -1) {

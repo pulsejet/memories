@@ -216,10 +216,7 @@ export default defineComponent({
         this.loading = true;
         let album = { ...this.album };
         if (this.album.basename !== this.albumName) {
-          album = await dav.renameAlbum(this.album, {
-            currentAlbumName: this.album.basename,
-            newAlbumName: this.albumName,
-          });
+          album = await dav.renameAlbum(this.album, this.album.basename, this.albumName);
         }
         if (this.album.location !== this.albumLocation) {
           album.location = await dav.updateAlbum(this.album, {

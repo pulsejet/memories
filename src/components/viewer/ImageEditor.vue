@@ -23,7 +23,7 @@ import LandscapeIcon from '@scaleflex/icons/landscape';
 import PortraitIcon from '@scaleflex/icons/portrait';
 import SquareIcon from '@scaleflex/icons/square';
 
-let TABS, TOOLS: any;
+let TABS: any, TOOLS: any;
 type FilerobotImageEditor = import('filerobot-image-editor').default;
 let FilerobotImageEditor: typeof import('filerobot-image-editor').default;
 
@@ -151,7 +151,7 @@ export default defineComponent({
 
     hasHighContrastEnabled(): boolean {
       const themes = globalThis.OCA?.Theming?.enabledThemes || [];
-      return themes.find((theme) => theme.indexOf('highcontrast') !== -1);
+      return themes.find((theme: any) => theme.indexOf('highcontrast') !== -1);
     },
 
     themeDataAttr(): Record<string, boolean> {
@@ -209,7 +209,7 @@ export default defineComponent({
       return img;
     },
 
-    onClose(closingReason, haveNotSavedChanges) {
+    onClose(closingReason: any, haveNotSavedChanges: boolean) {
       if (haveNotSavedChanges) {
         this.onExitWithoutSaving();
         return;
@@ -303,7 +303,7 @@ export default defineComponent({
     },
 
     // Key Handlers, override default Viewer arrow and escape key
-    handleKeydown(event) {
+    handleKeydown(event: KeyboardEvent) {
       event.stopImmediatePropagation();
       // escape key
       if (event.key === 'Escape') {

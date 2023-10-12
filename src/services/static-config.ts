@@ -48,9 +48,9 @@ class StaticConfig {
     }
 
     // Assign to existing default
-    for (const key in this.config) {
-      this.default![key] = this.config[key];
-      this.setLs(key as keyof IConfig, this.config[key]);
+    for (const k in this.config) {
+      const key = k as keyof IConfig;
+      this.setLs(key, this.config[key]);
     }
 
     // Resolve all promises
@@ -141,17 +141,20 @@ class StaticConfig {
       album_list_sort: 1,
     };
 
-    for (const key in config) {
-      const val = this.storage.getItem(`memories_${key}`);
-      if (val !== null) {
-        if (typeof config[key] === 'boolean') {
-          config[key] = val === 'true';
-        } else if (typeof config[key] === 'number') {
-          config[key] = Number(val);
-        } else {
-          config[key] = val;
-        }
+    const set = <K extends keyof IConfig, V extends IConfig[K]>(key: K, value: string | null) => {
+      if (value == null) return;
+
+      if (typeof config[key] === 'boolean') {
+        config[key] = (value === 'true') as V;
+      } else if (typeof config[key] === 'number') {
+        config[key] = Number(value) as V;
+      } else {
+        config[key] = value as V;
       }
+    };
+
+    for (const key in config) {
+      set(key as keyof IConfig, this.storage.getItem(`memories_${key}`));
     }
 
     this.default = config;

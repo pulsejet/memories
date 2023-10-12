@@ -30,7 +30,7 @@ class LivePhotoContentSetup {
     }
   }
 
-  onContentLoad(e) {
+  onContentLoad(e: PsEvent) {
     const content: PsContent = e.content;
     if (!isLiveContent(content)) return;
 

@@ -31,10 +31,10 @@ export default defineComponent({
   methods: {
     async refreshFromConfig() {
       const config = await staticConfig.getAll();
-      const changed = Object.keys(config).filter((key) => config[key] !== this.config[key]);
+      const changed = Object.keys(config).filter(<K extends keyof IConfig>(key: K) => config[key] !== this.config[key]);
       if (changed.length === 0) return;
 
-      changed.forEach((key) => (this.config[key] = config[key]));
+      changed.forEach(<K extends keyof IConfig>(key: K) => (this.config[key] = config[key]));
       utils.bus.emit(eventName, null);
     },
 
