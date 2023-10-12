@@ -405,11 +405,11 @@ class VideoContentSetup {
     content.slide?.holderElement?.appendChild(container);
 
     // Add fullscreen orientation hooks
-    if (screen.orientation?.lock) {
+    if ((screen.orientation as any)?.lock) {
       // Store the previous orientation
       // This is because unlocking (at least on Chrome) does
       // not restore the previous orientation
-      let previousOrientation: OrientationLockType | undefined;
+      let previousOrientation: OrientationType | undefined;
 
       // Lock orientation when entering fullscreen
       plyr.on('enterfullscreen', async (event) => {
@@ -421,7 +421,7 @@ class VideoContentSetup {
           const orientation = h < w ? 'landscape' : 'portrait';
 
           try {
-            await screen.orientation.lock(orientation);
+            await (screen.orientation as any).lock(orientation);
           } catch (e) {
             previousOrientation = undefined;
           }
@@ -432,7 +432,7 @@ class VideoContentSetup {
       plyr.on('exitfullscreen', async (event) => {
         try {
           if (previousOrientation) {
-            await screen.orientation.lock(previousOrientation);
+            await (screen.orientation as any).lock(previousOrientation);
             previousOrientation = undefined;
           }
         } catch (e) {
