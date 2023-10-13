@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# Build vue
+# Install dependencies
 cd apps/memories
-npm i
+npm ci
+npx playwright install
 cp ../../vue.zip .
 unzip -qq vue.zip
 cd ../..
@@ -50,6 +51,5 @@ php occ user:setting admin memories timelinePath "/Photos"
 
 # Run e2e tests
 cd apps/memories
-sudo npx playwright install-deps chromium
 npm run e2e
 cd ../..
