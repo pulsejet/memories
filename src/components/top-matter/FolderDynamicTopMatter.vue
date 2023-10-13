@@ -20,6 +20,7 @@ export default defineComponent({
 
   data: () => ({
     folders: [] as IFolder[],
+    currentFolder: '<none>',
   }),
 
   components: {
@@ -30,11 +31,15 @@ export default defineComponent({
 
   methods: {
     async refresh(): Promise<boolean> {
-      // Clear folders
-      this.folders = [];
+      const folder = utils.getFolderRoutePath(this.config.folders_path);
+
+      // Clear folders if switching to a different folder, otherwise just refresh
+      if (this.currentFolder === folder) {
+        this.currentFolder = folder;
+        this.folders = [];
+      }
 
       // Get subfolders URL
-      const folder = utils.getFolderRoutePath(this.config.folders_path);
       const url = API.Q(API.FOLDERS_SUB(), { folder });
 
       // Make API call to get subfolders

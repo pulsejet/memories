@@ -84,7 +84,7 @@ export default defineComponent({
     },
 
     recursive(): boolean {
-      return this.$route.query.recursive === '1';
+      return !!this.$route.query.recursive;
     },
   },
 
@@ -94,7 +94,12 @@ export default defineComponent({
     },
 
     toggleRecursive() {
-      this.$router.replace({ query: this.recursive ? {} : { recursive: '1' } });
+      this.$router.replace({
+        query: {
+          ...this.$router.currentRoute.query,
+          recursive: this.recursive ? undefined : String(1),
+        },
+      });
     },
   },
 });
