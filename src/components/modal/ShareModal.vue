@@ -115,8 +115,8 @@ export default defineComponent({
   },
 
   created() {
-    console.assert(!mModals.sharePhoto, 'ShareModal created twice');
-    mModals.sharePhoto = this.open;
+    console.assert(!_m.modals.sharePhoto, 'ShareModal created twice');
+    _m.modals.sharePhoto = this.open;
   },
 
   computed: {
@@ -193,7 +193,7 @@ export default defineComponent({
     async shareLink() {
       this.l(async () => {
         const fileInfo = (await dav.getFiles([this.photo!]))[0];
-        mModals.shareNodeLink(fileInfo.filename, true);
+        _m.modals.shareNodeLink(fileInfo.filename, true);
       });
       this.close();
     },

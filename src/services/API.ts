@@ -7,13 +7,12 @@ const gen = generateUrl;
 
 /** Add auth token to this URL */
 function tok(url: string) {
-  const route = vueroute();
-  if (route.name === 'folder-share') {
-    const token = <string>route.params.token;
-    url = API.Q(url, { token });
-  } else if (route.name === 'album-share') {
-    const token = <string>route.params.token;
-    url = API.Q(url, { token, albums: token });
+  const token = <string>_m.route.params.token;
+  switch (_m.route.name) {
+    case 'folder-share':
+      return API.Q(url, { token });
+    case 'album-share':
+      return API.Q(url, { token, albums: token });
   }
   return url;
 }
@@ -147,8 +146,8 @@ export class API {
 
   static VIDEO_TRANSCODE(fileid: number, file = 'index.m3u8') {
     return tok(
-      gen(`${BASE}/video/transcode/{videoClientId}/{fileid}/{file}`, {
-        videoClientId,
+      gen(`${BASE}/video/transcode/{client}/{fileid}/{file}`, {
+        client: _m.video.clientId,
         fileid,
         file,
       })

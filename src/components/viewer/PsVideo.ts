@@ -151,7 +151,7 @@ class VideoContentSetup {
     content.videojs = {} as any;
 
     // Load videojs scripts
-    if (!globalThis.vidjs) {
+    if (!_m.video.videojs) {
       await import('../../services/videojs');
     }
 
@@ -166,8 +166,8 @@ class VideoContentSetup {
     // Add the video element to the actual container
     content.element?.appendChild(content.videoElement);
 
-    const overrideNative = !vidjs.browser.IS_SAFARI;
-    const vjs = (content.videojs = vidjs(content.videoElement, {
+    const overrideNative = !_m.video.videojs.browser.IS_SAFARI;
+    const vjs = (content.videojs = _m.video.videojs(content.videoElement, {
       fill: true,
       autoplay: true,
       controls: false,
@@ -377,7 +377,7 @@ class VideoContentSetup {
     }
 
     // Initialize Plyr and custom CSS
-    const plyr = new Plyr(content.videoElement, opts);
+    const plyr = new _m.video.Plyr(content.videoElement, opts);
     const container = plyr.elements.container!;
 
     container.style.height = '100%';

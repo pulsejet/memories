@@ -251,8 +251,7 @@ export default defineComponent({
       await this.$nextTick();
 
       // Check if hash has changed
-      const viewerIsOpen = globalThis.mViewer.isOpen();
-      if (from?.hash !== to.hash && to.hash?.startsWith('#v') && !viewerIsOpen) {
+      if (from?.hash !== to.hash && to.hash?.startsWith('#v') && !_m.viewer.isOpen) {
         // Open viewer
         const parts = to.hash.split('/');
         if (parts.length !== 3) return;
@@ -282,10 +281,10 @@ export default defineComponent({
           }
         }
 
-        globalThis.mViewer.open(photo, this.list);
-      } else if (!to.hash?.startsWith('#v') && viewerIsOpen) {
+        _m.viewer.open(photo, this.list);
+      } else if (!to.hash?.startsWith('#v') && _m.viewer.isOpen) {
         // Close viewer
-        globalThis.mViewer.close();
+        _m.viewer.close();
       }
     },
 
@@ -302,7 +301,7 @@ export default defineComponent({
     },
 
     allowBreakout() {
-      return globalThis.windowInnerWidth <= 600 && !this.config.square_thumbs;
+      return _m.window.innerWidth <= 600 && !this.config.square_thumbs;
     },
 
     selectionManager() {

@@ -285,11 +285,17 @@ export default defineComponent({
     utils.bus.on('memories:window:resize', this.handleWindowResize);
 
     // The viewer is a singleton
-    globalThis.mViewer = {
+    const self = this;
+    _m.viewer = {
       open: this.open.bind(this) as typeof this.open,
       openStatic: this.openStatic.bind(this) as typeof this.openStatic,
       close: this.close.bind(this) as typeof this.close,
-      isOpen: () => this.isOpen,
+      get isOpen() {
+        return self.isOpen;
+      },
+      get currentPhoto() {
+        return self.currentPhoto;
+      },
     };
   },
 
@@ -308,7 +314,7 @@ export default defineComponent({
       if (this.canShare) base++;
       if (this.canEdit) base++;
 
-      if (globalThis.windowInnerWidth < 768) {
+      if (_m.window.innerWidth < 768) {
         return Math.min(base, 3);
       } else {
         return Math.min(base, 5);
@@ -472,19 +478,19 @@ export default defineComponent({
           const use = this.sidebarOpen && !utils.isMobile() && !isFullscreen;
 
           // Calculate the sidebar width to use and outer width
-          const sidebarWidth = use ? globalThis.mSidebar.getWidth() : 0;
+          const sidebarWidth = use ? _m.sidebar.getWidth() : 0;
           this.outerWidth = `calc(100vw - ${sidebarWidth}px)`;
 
           return {
-            x: globalThis.windowInnerWidth - sidebarWidth,
-            y: globalThis.windowInnerHeight,
+            x: _m.window.innerWidth - sidebarWidth,
+            y: _m.window.innerHeight,
           };
         },
         ...args,
       });
 
       // Debugging only
-      globalThis.photoswipe = this.photoswipe;
+      _m.photoswipe = this.photoswipe;
 
       // Monkey patch for focus trapping in sidebar
       const psKeyboard = this.photoswipe.keyboard as any;
@@ -573,7 +579,6 @@ export default defineComponent({
         const photo = e.slide?.data?.photo;
         this.setRouteHash(photo);
         this.updateTitle(photo);
-        globalThis.currentViewerPhoto = photo;
       });
 
       // Show and hide controls
@@ -738,7 +743,7 @@ export default defineComponent({
         const thumb = this.thumbElem(e.slide.data?.photo);
         if (thumb && this.fullyOpened) {
           const rect = thumb.getBoundingClientRect();
-          if (rect.bottom < 50 || rect.top > globalThis.windowInnerHeight - 50) {
+          if (rect.bottom < 50 || rect.top > _m.window.innerHeight - 50) {
             thumb.scrollIntoView({
               block: 'center',
             });
@@ -931,7 +936,7 @@ export default defineComponent({
 
     /** Share the current photo externally */
     async shareCurrent() {
-      mModals.sharePhoto(this.currentPhoto!);
+      _m.modals.sharePhoto(this.currentPhoto!);
     },
 
     /** Key press events */
@@ -1040,9 +1045,9 @@ export default defineComponent({
         const abort = () => !this.isOpen || photo !== this.currentPhoto;
         if (abort()) return;
 
-        globalThis.mSidebar.setTab('memories-metadata');
+        _m.sidebar.setTab('memories-metadata');
         if (this.routeIsPublic || this.isLocal) {
-          globalThis.mSidebar.open(photo);
+          _m.sidebar.open(photo);
         } else {
           const fileInfo = (await dav.getFiles([photo]))[0];
           if (abort()) return;
@@ -1052,7 +1057,7 @@ export default defineComponent({
           const useNative = fileInfo?.originalFilename?.startsWith('/files/');
 
           // open sidebar
-          globalThis.mSidebar.open(photo, filename, useNative);
+          _m.sidebar.open(photo, filename, useNative);
         }
       };
 
@@ -1087,7 +1092,7 @@ export default defineComponent({
 
     /** Hide the sidebar, without marking it as closed */
     hideSidebar() {
-      globalThis.mSidebar.close();
+      _m.sidebar.close();
     },
 
     /** Close the sidebar */
@@ -1193,14 +1198,14 @@ export default defineComponent({
      * Edit metadata for current photo
      */
     editMetadata() {
-      mModals.editMetadata([globalThis.currentViewerPhoto]);
+      _m.modals.editMetadata([this.currentPhoto!]);
     },
 
     /**
      * Update album selection for current photo
      */
     updateAlbums() {
-      mModals.updateAlbums([this.currentPhoto!]);
+      _m.modals.updateAlbums([this.currentPhoto!]);
     },
   },
 });

@@ -460,13 +460,13 @@ export default defineComponent({
 
       // Scroll if at top or bottom
       const scrollUp = touch.clientY < TOUCH_SELECT_CLAMP.top;
-      const scrollDown = touch.clientY > globalThis.windowInnerHeight - TOUCH_SELECT_CLAMP.bottom;
+      const scrollDown = touch.clientY > _m.window.innerHeight - TOUCH_SELECT_CLAMP.bottom;
       if (scrollUp || scrollDown) {
         if (scrollUp) {
           this.touchScrollDelta = Math.max((touch.clientY - TOUCH_SELECT_CLAMP.top) / 3, -TOUCH_SELECT_CLAMP.maxDelta);
         } else {
           this.touchScrollDelta = Math.min(
-            (touch.clientY - globalThis.windowInnerHeight + TOUCH_SELECT_CLAMP.bottom) / 3,
+            (touch.clientY - _m.window.innerHeight + TOUCH_SELECT_CLAMP.bottom) / 3,
             TOUCH_SELECT_CLAMP.maxDelta
           );
         }
@@ -787,7 +787,7 @@ export default defineComponent({
      * Open the edit date dialog
      */
     async editMetadataSelection(selection: Selection, sections?: number[]) {
-      mModals.editMetadata(selection.photosNoDupFileId(), sections);
+      _m.modals.editMetadata(selection.photosNoDupFileId(), sections);
     },
 
     /**
@@ -814,14 +814,14 @@ export default defineComponent({
      * Move selected photos to album
      */
     async addToAlbum(selection: Selection) {
-      mModals.updateAlbums(selection.photosNoDupFileId());
+      _m.modals.updateAlbums(selection.photosNoDupFileId());
     },
 
     /**
      * Move selected photos to folder
      */
     async moveToFolder(selection: Selection) {
-      mModals.moveToFolder(selection.photosNoDupFileId());
+      _m.modals.moveToFolder(selection.photosNoDupFileId());
     },
 
     /**
@@ -832,7 +832,7 @@ export default defineComponent({
         showError(this.t('memories', 'You must enable "Mark person in preview" to use this feature'));
         return;
       }
-      mModals.moveToFace(Array.from(selection.values()));
+      _m.modals.moveToFace(Array.from(selection.values()));
     },
 
     /**

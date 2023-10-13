@@ -144,7 +144,7 @@ export default defineComponent({
       // Choose preview photo
       for (const year of this.years) {
         // Try to prioritize landscape photos on desktop
-        if (globalThis.windowInnerWidth <= 600) {
+        if (_m.window.innerWidth <= 600) {
           const landscape = year.photos.filter((p) => (p.w ?? 0) > (p.h ?? 0));
           year.preview = utils.randomChoice(landscape);
         }
@@ -189,7 +189,7 @@ export default defineComponent({
 
     click(year: IYear) {
       const allPhotos = this.years.flatMap((y) => y.photos);
-      globalThis.mViewer.openStatic(year.preview, allPhotos, 512);
+      _m.viewer.openStatic(year.preview, allPhotos, 512);
     },
   },
 });

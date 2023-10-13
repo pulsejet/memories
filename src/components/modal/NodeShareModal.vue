@@ -120,8 +120,8 @@ export default defineComponent({
   },
 
   created() {
-    console.assert(!mModals.shareNodeLink, 'NodeShareModal created twice');
-    mModals.shareNodeLink = this.open;
+    console.assert(!_m.modals.shareNodeLink, 'NodeShareModal created twice');
+    _m.modals.shareNodeLink = this.open;
   },
 
   methods: {
@@ -129,7 +129,7 @@ export default defineComponent({
       this.filename = path;
       this.show = true;
       this.shares = [];
-      globalThis.mSidebar.setTab('sharing');
+      _m.sidebar.setTab('sharing');
 
       // Get current shares
       await this.refreshUrls();
@@ -233,8 +233,8 @@ export default defineComponent({
 
     refreshSidebar() {
       if (utils.isMobile()) return;
-      globalThis.mSidebar.close();
-      globalThis.mSidebar.open(0, this.filename, true);
+      _m.sidebar.close();
+      _m.sidebar.open(0, this.filename, true);
     },
   },
 });

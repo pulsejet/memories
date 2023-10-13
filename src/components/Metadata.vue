@@ -418,19 +418,19 @@ export default defineComponent({
     },
 
     editDate() {
-      mModals.editMetadata([globalThis.currentViewerPhoto], [1]);
+      _m.modals.editMetadata([_m.viewer.currentPhoto!], [1]);
     },
 
     editTags() {
-      mModals.editMetadata([globalThis.currentViewerPhoto], [2]);
+      _m.modals.editMetadata([_m.viewer.currentPhoto!], [2]);
     },
 
     editEXIF() {
-      mModals.editMetadata([globalThis.currentViewerPhoto], [3]);
+      _m.modals.editMetadata([_m.viewer.currentPhoto!], [3]);
     },
 
     editGeo() {
-      mModals.editMetadata([globalThis.currentViewerPhoto], [4]);
+      _m.modals.editMetadata([_m.viewer.currentPhoto!], [4]);
     },
 
     async refresh() {

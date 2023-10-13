@@ -51,8 +51,8 @@ export default defineComponent({
   },
 
   created() {
-    console.assert(!mModals.updateAlbums, 'AddToAlbumModal created twice');
-    mModals.updateAlbums = this.open;
+    console.assert(!_m.modals.updateAlbums, 'AddToAlbumModal created twice');
+    _m.modals.updateAlbums = this.open;
   },
 
   methods: {

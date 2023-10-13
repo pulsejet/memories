@@ -94,8 +94,8 @@ export default defineComponent({
   }),
 
   created() {
-    console.assert(!mModals.editMetadata, 'EditMetadataModal created twice');
-    mModals.editMetadata = this.open;
+    console.assert(!_m.modals.editMetadata, 'EditMetadataModal created twice');
+    _m.modals.editMetadata = this.open;
   },
 
   methods: {

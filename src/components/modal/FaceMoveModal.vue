@@ -47,8 +47,8 @@ export default defineComponent({
   }),
 
   created() {
-    console.assert(!mModals.moveToFace, 'FaceMoveModal created twice');
-    mModals.moveToFace = this.open;
+    console.assert(!_m.modals.moveToFace, 'FaceMoveModal created twice');
+    _m.modals.moveToFace = this.open;
   },
 
   methods: {

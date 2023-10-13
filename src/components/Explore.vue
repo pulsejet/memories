@@ -108,7 +108,7 @@ export default defineComponent({
         name: t('memories', 'Settings'),
         icon: CogIcon,
         link: undefined,
-        click: mModals.showSettings,
+        click: _m.modals.showSettings,
       },
     ] as {
       name: string;

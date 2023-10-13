@@ -4,7 +4,7 @@ import Vue from 'vue';
 import App from './App.vue';
 import router from './router';
 
-globalThis.mode = 'user';
+_m.mode = 'user';
 
 export default new Vue({
   el: '#content',

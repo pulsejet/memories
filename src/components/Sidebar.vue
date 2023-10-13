@@ -77,7 +77,7 @@ export default defineComponent({
     utils.bus.on('files:sidebar:opened', this.handleNativeOpen);
     utils.bus.on('files:sidebar:closed', this.handleNativeClose);
 
-    globalThis.mSidebar = {
+    _m.sidebar = {
       open: this.open.bind(this),
       close: this.close.bind(this),
       setTab: this.setTab.bind(this),

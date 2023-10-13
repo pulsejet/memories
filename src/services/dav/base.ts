@@ -28,11 +28,8 @@ type GetFilesOpts = {
 export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<IFileInfo[]> {
   // Some routes may have special handling of filenames
   if (!opts?.ignoreRoute) {
-    const route = vueroute();
-
-    // Check if albums
-    if (route.name === 'albums') {
-      return getAlbumFileInfos(photos, <string>route.params.user, <string>route.params.name);
+    if (_m.route.name === 'albums') {
+      return getAlbumFileInfos(photos, <string>_m.route.params.user, <string>_m.route.params.name);
     }
   }
 
@@ -194,7 +191,7 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
   if (photos.length === 0) return;
 
   // Extend with Live Photos unless this is an album
-  const routeIsAlbums = window.vueroute().name === 'albums';
+  const routeIsAlbums = _m.route.name === 'albums';
   if (!routeIsAlbums) {
     photos = await extendWithLivePhotos(photos);
   }

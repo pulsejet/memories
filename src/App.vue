@@ -243,8 +243,8 @@ export default defineComponent({
   created() {
     // No real need to unbind these, as the app is never destroyed
     const onResize = () => {
-      globalThis.windowInnerWidth = window.innerWidth;
-      globalThis.windowInnerHeight = window.innerHeight;
+      _m.window.innerWidth = window.innerWidth;
+      _m.window.innerHeight = window.innerHeight;
       utils.bus.emit('memories:window:resize', null);
     };
     window.addEventListener('resize', () => {
@@ -255,7 +255,7 @@ export default defineComponent({
     utils.bus.on('memories:user-config-changed', this.refreshNav);
 
     // Register global functions
-    mModals.showSettings = this.showSettings;
+    _m.modals.showSettings = this.showSettings;
   },
 
   mounted() {
@@ -414,7 +414,7 @@ export default defineComponent({
     },
 
     linkClick() {
-      if (globalThis.windowInnerWidth <= 1024) {
+      if (_m.window.innerWidth <= 1024) {
         utils.bus.emit('toggle-navigation', { open: false });
       }
     },

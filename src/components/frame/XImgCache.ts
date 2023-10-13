@@ -12,7 +12,7 @@ const BLOB_STICKY = new Map<string, number>();
 
 // Start and configure the worker
 function startWorker() {
-  if (worker || globalThis.mode !== 'user') return;
+  if (worker || _m.mode !== 'user') return;
 
   // Start worker
   worker = new Worker(new URL('./XImgWorkerStub.ts', import.meta.url));
@@ -26,7 +26,7 @@ function startWorker() {
 
 // Configure worker on startup
 document.addEventListener('DOMContentLoaded', () => {
-  if (globalThis.mode !== 'user') return;
+  if (_m.mode !== 'user') return;
 
   // Periodic blob cache cleaner
   window.setInterval(() => {

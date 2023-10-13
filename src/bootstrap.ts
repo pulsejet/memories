@@ -43,55 +43,69 @@ declare global {
     };
   };
 
-  var mode: 'admin' | 'user';
-  var vueroute: () => Route;
+  var _m: {
+    mode: 'admin' | 'user';
+    route: Route;
 
-  var mModals: {
-    editMetadata: (photos: IPhoto[], sections?: number[]) => void;
-    updateAlbums: (photos: IPhoto[]) => void;
-    sharePhoto: (photo: IPhoto) => void;
-    shareNodeLink: (path: string, immediate?: boolean) => Promise<void>;
-    moveToFolder: (photos: IPhoto[]) => void;
-    moveToFace: (photos: IPhoto[]) => void;
-    showSettings: () => void;
+    modals: {
+      editMetadata: (photos: IPhoto[], sections?: number[]) => void;
+      updateAlbums: (photos: IPhoto[]) => void;
+      sharePhoto: (photo: IPhoto) => void;
+      shareNodeLink: (path: string, immediate?: boolean) => Promise<void>;
+      moveToFolder: (photos: IPhoto[]) => void;
+      moveToFace: (photos: IPhoto[]) => void;
+      showSettings: () => void;
+    };
+
+    sidebar: {
+      open: (photo: IPhoto | number, filename?: string, forceNative?: boolean) => void;
+      close: () => void;
+      setTab: (tab: string) => void;
+      getWidth: () => number;
+    };
+
+    viewer: {
+      open: (anchorPhoto: IPhoto, rows: IRow[]) => Promise<void>;
+      openStatic(photo: IPhoto, list: IPhoto[], thumbSize?: 256 | 512): Promise<void>;
+      close: () => void;
+      isOpen: boolean;
+      currentPhoto: IPhoto | null;
+    };
+
+    video: {
+      videojs: typeof videojsType;
+      Plyr: typeof PlyrType;
+      clientId: string;
+      clientIdPersistent: string;
+    };
+
+    window: {
+      innerWidth: number; // cache
+      innerHeight: number; // cache
+    };
+
+    photoswipe?: unknown; // debugging only
   };
-
-  var mSidebar: {
-    open: (photo: IPhoto | number, filename?: string, forceNative?: boolean) => void;
-    close: () => void;
-    setTab: (tab: string) => void;
-    getWidth: () => number;
-  };
-
-  var mViewer: {
-    open: (anchorPhoto: IPhoto, rows: IRow[]) => Promise<void>;
-    openStatic(photo: IPhoto, list: IPhoto[], thumbSize?: 256 | 512): Promise<void>;
-    close: () => void;
-    isOpen: () => boolean;
-  };
-
-  var currentViewerPhoto: IPhoto;
-
-  var windowInnerWidth: number; // cache
-  var windowInnerHeight: number; // cache
-
-  var vidjs: typeof videojsType;
-  var Plyr: typeof PlyrType;
-  var videoClientId: string;
-  var videoClientIdPersistent: string;
-
-  var photoswipe: unknown;
 }
 
-// Allow global access to the router
-globalThis.vueroute = () => router.currentRoute;
+// Initialize global memories object
+globalThis._m = {
+  mode: 'user',
 
-// Initialize blank arrays
-globalThis.mModals = {} as any;
+  get route() {
+    return router.currentRoute;
+  },
 
-// Cache these for better performance
-globalThis.windowInnerWidth = window.innerWidth;
-globalThis.windowInnerHeight = window.innerHeight;
+  modals: {} as any,
+  sidebar: {} as any,
+  viewer: {} as any,
+  video: {} as any,
+
+  window: {
+    innerWidth: window.innerWidth,
+    innerHeight: window.innerHeight,
+  },
+};
 
 // CSP config for webpack dynamic chunk loading
 __webpack_nonce__ = window.btoa(getRequestToken() ?? '');
@@ -105,9 +119,9 @@ __webpack_public_path__ = generateFilePath('memories', '', 'js/');
 // Generate client id for this instance
 // Does not need to be cryptographically secure
 const getClientId = (): string => Math.random().toString(36).substring(2, 15).padEnd(12, '0');
-globalThis.videoClientId = getClientId();
-globalThis.videoClientIdPersistent = localStorage.getItem('videoClientIdPersistent') ?? getClientId();
-localStorage.setItem('videoClientIdPersistent', globalThis.videoClientIdPersistent);
+_m.video.clientId = getClientId();
+_m.video.clientIdPersistent = localStorage.getItem('videoClientIdPersistent') ?? getClientId();
+localStorage.setItem('videoClientIdPersistent', _m.video.clientIdPersistent);
 
 // Turn on virtual keyboard support
 if ('virtualKeyboard' in navigator) {

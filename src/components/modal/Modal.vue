@@ -65,14 +65,14 @@ export default defineComponent({
     if (this.sidebar) {
       utils.bus.off('memories:sidebar:opened', this.handleAppSidebarOpen);
       utils.bus.off('memories:sidebar:closed', this.handleAppSidebarClose);
-      globalThis.mSidebar.close();
+      _m.sidebar.close();
     }
     this._mutationObserver.disconnect();
   },
 
   mounted() {
     if (this.sidebar) {
-      globalThis.mSidebar.open(0, this.sidebar, true);
+      _m.sidebar.open(0, this.sidebar, true);
 
       // Adjust width anyway in case the sidebar is already open
       this.handleAppSidebarOpen();

@@ -380,7 +380,7 @@ export default defineComponent({
       // This is not as bad as it looks, it's actually 12*O(n)
       // because there are only 12 months in a year
       const fontSizePx = parseFloat(getComputedStyle(this.$refs.cursorSt as any).fontSize);
-      const minGap = fontSizePx + (globalThis.windowInnerWidth <= 768 ? 5 : 2);
+      const minGap = fontSizePx + (_m.window.innerWidth <= 768 ? 5 : 2);
       let prevShow = -9999;
       for (const [idx, tick] of this.ticks.entries()) {
         // Conservative

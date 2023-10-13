@@ -19,7 +19,7 @@ export const isAdmin = Boolean(getCurrentUser()?.isAdmin);
  * Check if width <= 768px
  */
 export function isMobile() {
-  return globalThis.windowInnerWidth <= 768;
+  return _m.window.innerWidth <= 768;
 }
 
 /** Preview generation options */
@@ -152,7 +152,7 @@ export function removeHiddenPhotos(photos: IPhoto[]) {
  * This function does not check if this is the folder route
  */
 export function getFolderRoutePath(basePath: string) {
-  let path = (vueroute().params.path || '/') as string | string[];
+  let path = (_m.route.params.path || '/') as string | string[];
   path = typeof path === 'string' ? path : path.join('/');
   path = basePath + '/' + path;
   path = path.replace(/\/\/+/, '/'); // Remove double slashes
@@ -166,7 +166,7 @@ export function getLivePhotoVideoUrl(p: IPhoto, transcode: boolean) {
   return API.Q(API.VIDEO_LIVEPHOTO(p.fileid), {
     etag: p.etag,
     liveid: p.liveid,
-    transcode: transcode ? videoClientIdPersistent : undefined,
+    transcode: transcode ? _m.video.clientIdPersistent : undefined,
   });
 }
 
@@ -198,10 +198,9 @@ export function getViewerHash(photo: IPhoto) {
  * Get route for viewer for photo
  */
 export function getViewerRoute(photo: IPhoto) {
-  const $route = globalThis.vueroute();
   return {
-    path: $route.path,
-    query: $route.query,
+    path: _m.route.path,
+    query: _m.route.query,
     hash: getViewerHash(photo),
   };
 }

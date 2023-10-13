@@ -42,8 +42,8 @@ export default defineComponent({
   }),
 
   created() {
-    console.assert(!mModals.moveToFolder, 'MoveToFolderModal created twice');
-    mModals.moveToFolder = this.open;
+    console.assert(!_m.modals.moveToFolder, 'MoveToFolderModal created twice');
+    _m.modals.moveToFolder = this.open;
   },
 
   methods: {
