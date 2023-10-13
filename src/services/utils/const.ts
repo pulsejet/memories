@@ -2,7 +2,7 @@ import { IPhoto } from '../../types';
 import { loadState } from '@nextcloud/initial-state';
 
 /** Global constants */
-export const c = {
+export const c = Object.freeze({
   // Flags for photos
   FLAG_PLACEHOLDER: 1 << 0,
   FLAG_LOAD_FAIL: 1 << 1,
@@ -14,16 +14,16 @@ export const c = {
 
   // Special strings
   FACE_NULL: 'NULL',
-};
+});
 
 /**
  * Initial state pulled from Nextcloud's HTML page
  */
-export const initState = {
+export const initState = Object.freeze({
   noDownload: loadState('memories', 'no_download', false) !== false,
   shareTitle: loadState('memories', 'share_title', '') as string,
   singleItem: loadState('memories', 'single_item', null) as IPhoto | null,
-};
+});
 
 /**
  * Convert server-side flags to bitmask
