@@ -26,6 +26,7 @@ namespace OCA\Memories\Db;
 use OC\Files\Search\SearchBinaryOperator;
 use OC\Files\Search\SearchComparison;
 use OC\Files\Search\SearchQuery;
+use OCA\Memories\ClustersBackend;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
 use OCP\Files\File;
@@ -68,7 +69,7 @@ class FsManager
     }
 
     /** Get the TimelineRoot object relevant to the request */
-    public function populateRoot(TimelineRoot &$root)
+    public function populateRoot(TimelineRoot &$root, bool $recursive)
     {
         $user = $this->userSession->getUser();
 
@@ -97,56 +98,54 @@ class FsManager
         if (null === $user) {
             throw Exceptions::NotLoggedIn();
         }
-        $uid = $user->getUID();
 
-        $folder = null;
-        $folderPath = $this->request->getParam('folder');
+        // Get UID and user's folder
+        $uid = $user->getUID();
         $userFolder = $this->rootFolder->getUserFolder($uid);
 
+        /** @var string[] $paths List of paths to add to root */
+        $paths = [];
+        if ($path = $this->getRequestFolder()) {
+            $paths = [$path];
+        } else {
+            $paths = Util::getTimelinePaths($uid);
+        }
+
+        // Combined etag, for cache invalidation.
+        // This is cheaper and more sensible than the root etag.
+        // The only time this breaks down is if the user places a .nomedia
+        // outside the timeline path; rely on expiration for that.
+        $etag = $uid;
+
         try {
-            if (null !== $folderPath) {
-                $folder = $userFolder->get(Util::sanitizePath($folderPath));
-                $root->addFolder($folder);
-            } else {
-                // Get timeline paths
-                $paths = Util::getTimelinePaths($uid);
-                if ($path = $this->request->getParam('timelinePath', null)) {
-                    $paths = [Util::sanitizePath($path)];
-                }
-
-                // Combined etag, for cache invalidation.
-                // This is cheaper and more sensible than the root etag.
-                // The only time this breaks down is if the user places a .nomedia
-                // outside the timeline path; rely on expiration for that.
-                $etag = $uid;
-
-                // Multiple timeline path support
-                foreach ($paths as $path) {
-                    $node = $userFolder->get($path);
-                    $root->addFolder($node);
-                    $etag .= $node->getEtag();
-                }
-
-                // Add shares or external stores inside the current folders
-                $root->addMountPoints();
-
-                // Exclude .nomedia folders
-                //
-                // This is needed to be done despite the exlusion in the CTE to account
-                // for mount points inside folders with a .nomedia file. For example:
-                //  /user/files/timeline-path/
-                //     => subfolder1
-                //        => photo1
-                //     => subfolder2
-                //        => .nomedia
-                //        => external-mount   <-- this is a separate topFolder in the CTE
-                //           => photo2        <-- this should be excluded, but CTE cannot find this
-                $root->excludePaths($this->getNoMediaFolders($userFolder, md5($etag)));
+            foreach ($paths as $path) {
+                $node = $userFolder->get(Util::sanitizePath($path));
+                $root->addFolder($node);
+                $etag .= $node->getEtag();
             }
         } catch (\OCP\Files\NotFoundException $e) {
             $msg = $e->getMessage();
 
             throw new \Exception("Folder not found: {$msg}");
+        }
+
+        // Add shares or external stores inside the current folders
+        // if this is a recursive query (e.g. timeline)
+        if ($recursive) {
+            $root->addMountPoints();
+
+            // Exclude .nomedia folders
+            //
+            // This is needed to be done despite the exlusion in the CTE to account
+            // for mount points inside folders with a .nomedia file. For example:
+            //  /user/files/timeline-path/
+            //     => subfolder1
+            //        => photo1
+            //     => subfolder2
+            //        => .nomedia
+            //        => external-mount   <-- this is a separate topFolder in the CTE
+            //           => photo2        <-- this should be excluded, but CTE cannot find this
+            $root->excludePaths($this->getNoMediaFolders($userFolder, md5($etag)));
         }
 
         return $root;
@@ -258,7 +257,7 @@ class FsManager
     {
         try {
             // Album share
-            if ($this->hasAlbumToken()) {
+            if ($this->hasAlbumToken() && $this->getShareToken()) {
                 $album = $this->albumsQuery->getAlbumByLink($this->getShareToken());
                 if (null === $album) {
                     return null;
@@ -411,11 +410,16 @@ class FsManager
 
     private function hasAlbumToken(): bool
     {
-        return null !== $this->request->getParam(\OCA\Memories\ClustersBackend\AlbumsBackend::clusterType(), null);
+        return null !== $this->request->getParam(ClustersBackend\AlbumsBackend::clusterType(), null);
     }
 
-    private function getShareToken()
+    private function getShareToken(): ?string
     {
-        return $this->request->getParam('token');
+        return $this->request->getParam('token', null);
+    }
+
+    private function getRequestFolder(): ?string
+    {
+        return $this->request->getParam('folder', null);
     }
 }

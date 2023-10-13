@@ -95,7 +95,7 @@ export default defineComponent({
       // Get folder days
       this.error = '';
       this.info = '';
-      let url = API.Q(API.DAYS(), { timelinePath: path });
+      const url = API.Q(API.DAYS(), { folder: path, recursive: 1 });
       const res = await axios.get<IDay[]>(url);
 
       // Check response
