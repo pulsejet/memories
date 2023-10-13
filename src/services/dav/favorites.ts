@@ -83,8 +83,8 @@ export async function* favoritePhotos(photos: IPhoto[], favoriteState: boolean) 
  */
 export function favoriteSetFlag(photo: IPhoto, val: boolean) {
   if (val) {
-    photo.flag |= utils.constants.c.FLAG_IS_FAVORITE;
+    photo.flag |= utils.c.FLAG_IS_FAVORITE;
   } else {
-    photo.flag &= ~utils.constants.c.FLAG_IS_FAVORITE;
+    photo.flag &= ~utils.c.FLAG_IS_FAVORITE;
   }
 }

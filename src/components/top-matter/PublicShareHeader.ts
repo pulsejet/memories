@@ -1,8 +1,7 @@
-import { loadState } from '@nextcloud/initial-state';
 import * as utils from '../../services/utils';
 
 // Shown in dynamic top matter (Timeline::viewName)
-export const title = loadState('memories', 'share_title', '');
+export const title = utils.initState.shareTitle;
 
 // Set up hook to monitor recycler scroll to show/hide header
 if (title) {

@@ -1,12 +1,7 @@
-import { IDay, IPhoto } from '../../types';
-import { loadState } from '@nextcloud/initial-state';
+import { IDay } from '../../types';
+import * as utils from '../utils';
 
-let singleItem: IPhoto | null = null;
-try {
-  singleItem = loadState('memories', 'single_item', null);
-} catch (e) {
-  console.error('Could not load single item', e);
-}
+const { singleItem } = utils.initState;
 
 export function isSingleItem(): boolean {
   return Boolean(singleItem?.fileid);

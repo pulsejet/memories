@@ -101,7 +101,7 @@ export default defineComponent({
     },
 
     isReal() {
-      return this.name && this.name !== utils.constants.FACE_NULL;
+      return this.name && this.name !== utils.c.FACE_NULL;
     },
 
     displayName() {
@@ -130,7 +130,7 @@ export default defineComponent({
         name: this.$route.name as string,
         params: {
           user: utils.uid as string,
-          name: utils.constants.FACE_NULL,
+          name: utils.c.FACE_NULL,
         },
       });
     },

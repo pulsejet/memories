@@ -202,7 +202,7 @@ export default defineComponent({
         icon: DownloadIcon,
         callback: this.downloadSelection.bind(this),
         allowPublic: true,
-        if: () => !this.allowDownload(),
+        if: () => !this.initState.noDownload,
       },
       {
         name: t('memories', 'Favorite'),
@@ -290,11 +290,6 @@ export default defineComponent({
     updateLoading(delta: number) {
       this.loading += delta; // local (disable buttons)
       this.$emit('updateLoading', delta); // timeline (loading icon)
-    },
-
-    /** Download is not allowed on some public shares */
-    allowDownload(): boolean {
-      return this.state_noDownload;
     },
 
     /** Is archive route */

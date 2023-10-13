@@ -1,15 +1,13 @@
 import { translate as t, translatePlural as n } from '@nextcloud/l10n';
-import { constants } from '../services/utils';
-import { loadState } from '@nextcloud/initial-state';
+import { c, initState } from '../services/utils';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'GlobalMixin',
 
   data: () => ({
-    ...constants,
-
-    state_noDownload: loadState('memories', 'no_download', false) !== false,
+    c,
+    initState,
   }),
 
   computed: {
@@ -35,7 +33,7 @@ export default defineComponent({
       return this.$route.name === 'recognize';
     },
     routeIsRecognizeUnassigned(): boolean {
-      return this.routeIsRecognize && this.$route.params.name === constants.FACE_NULL;
+      return this.routeIsRecognize && this.$route.params.name === c.FACE_NULL;
     },
     routeIsFaceRecognition(): boolean {
       return this.$route.name === 'facerecognition';

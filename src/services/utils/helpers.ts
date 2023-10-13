@@ -1,6 +1,6 @@
 import { IImageInfo, IPhoto } from '../../types';
 import { API } from '../API';
-import { constants } from './const';
+import { c } from './const';
 import { FilePickerType, getFilePickerBuilder } from '@nextcloud/dialogs';
 import { getCurrentUser } from '@nextcloud/auth';
 import * as nativex from '../../native';
@@ -102,7 +102,7 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
  * @param photo Photo object
  */
 export function isLocalPhoto(photo: IPhoto): boolean {
-  return Boolean(photo?.fileid) && Boolean((photo?.flag ?? 0) & constants.c.FLAG_IS_LOCAL);
+  return Boolean(photo?.fileid) && Boolean((photo?.flag ?? 0) & c.FLAG_IS_LOCAL);
 }
 
 /**

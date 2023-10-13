@@ -93,7 +93,7 @@ export async function* recognizeMoveFaceImages(user: string, face: string, targe
 
       // NULL source needs special handling
       let source = `/recognize/${user}/faces/${face}`;
-      if (face === utils.constants.FACE_NULL) {
+      if (face === utils.c.FACE_NULL) {
         source = `/recognize/${user}/unassigned-faces`;
       }
 

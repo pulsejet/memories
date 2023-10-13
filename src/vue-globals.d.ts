@@ -1,4 +1,4 @@
-import { type constants } from './services/utils';
+import type { c, initState } from './services/utils';
 import type { translate, translatePlural } from '@nextcloud/l10n';
 
 declare module 'vue' {
@@ -7,9 +7,8 @@ declare module 'vue' {
     t: typeof translate;
     n: typeof translatePlural;
 
-    c: typeof constants.c;
-
-    state_noDownload: boolean;
+    c: typeof c;
+    initState: typeof initState;
 
     routeIsBase: boolean;
     routeIsFavorites: boolean;
