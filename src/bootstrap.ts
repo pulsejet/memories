@@ -13,80 +13,11 @@ import VueVirtualScroller from 'vue-virtual-scroller';
 // Locals
 import router from './router';
 
-// Types
-import type { Route } from 'vue-router';
-import type { IPhoto, IRow } from './types';
-import type PlyrType from 'plyr';
-import type videojsType from 'video.js';
-
 // CSS for components
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 
 // Global CSS
 import './styles/global.scss';
-
-// Global exposed variables
-declare global {
-  var __webpack_nonce__: string;
-  var __webpack_public_path__: string;
-
-  var OC: Nextcloud.Common.OC;
-  var OCP: Nextcloud.Common.OCP;
-  var OCA: {
-    Files?: {
-      Sidebar?: any;
-      App?: any;
-    };
-    Theming?: {
-      name: string;
-      enabledThemes: any[];
-    };
-  };
-
-  var _m: {
-    mode: 'admin' | 'user';
-    route: Route;
-
-    modals: {
-      editMetadata: (photos: IPhoto[], sections?: number[]) => void;
-      updateAlbums: (photos: IPhoto[]) => void;
-      sharePhoto: (photo: IPhoto) => void;
-      shareNodeLink: (path: string, immediate?: boolean) => Promise<void>;
-      moveToFolder: (photos: IPhoto[]) => void;
-      moveToFace: (photos: IPhoto[]) => void;
-      showSettings: () => void;
-    };
-
-    sidebar: {
-      open: (photo: IPhoto | number, filename?: string, forceNative?: boolean) => void;
-      close: () => void;
-      setTab: (tab: string) => void;
-      getWidth: () => number;
-    };
-
-    viewer: {
-      open: (anchorPhoto: IPhoto, rows: IRow[]) => Promise<void>;
-      openStatic(photo: IPhoto, list: IPhoto[], thumbSize?: 256 | 512): Promise<void>;
-      close: () => void;
-      isOpen: boolean;
-      currentPhoto: IPhoto | null;
-    };
-
-    video: {
-      videojs: typeof videojsType;
-      Plyr: typeof PlyrType;
-      clientId: string;
-      clientIdPersistent: string;
-    };
-
-    window: {
-      innerWidth: number; // cache
-      innerHeight: number; // cache
-    };
-
-    photoswipe?: unknown; // debugging only
-  };
-}
 
 // Initialize global memories object
 globalThis._m = {

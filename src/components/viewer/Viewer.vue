@@ -490,7 +490,7 @@ export default defineComponent({
       });
 
       // Debugging only
-      _m.photoswipe = this.photoswipe;
+      _m.viewer.photoswipe = this.photoswipe;
 
       // Monkey patch for focus trapping in sidebar
       const psKeyboard = this.photoswipe.keyboard as any;
