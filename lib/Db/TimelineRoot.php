@@ -19,14 +19,6 @@ class TimelineRoot
     }
 
     /**
-     * Populate the root with the current user's folders.
-     */
-    public function populate()
-    {
-        \OC::$server->get(FsManager::class)->populateRoot($this);
-    }
-
-    /**
      * Add a folder to the root.
      *
      * @throws \Exception if node is not valid readable folder
@@ -50,14 +42,13 @@ class TimelineRoot
     // Add mountpoints recursively
     public function addMountPoints()
     {
-        $folders = [];
+        $manager = \OC\Files\Filesystem::getMountManager();
         foreach ($this->folderPaths as $id => $folderPath) {
-            $mounts = \OC\Files\Filesystem::getMountManager()->findIn($folderPath);
+            $mounts = $manager->findIn($folderPath);
             foreach ($mounts as $mount) {
                 $this->setFolder($mount->getStorageRootId(), null, $mount->getMountPoint());
             }
         }
-        $this->folderPaths += $folders;
     }
 
     public function excludePaths(array $paths)

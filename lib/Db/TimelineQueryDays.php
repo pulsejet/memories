@@ -159,8 +159,29 @@ trait TimelineQueryDays
         bool $archive = false,
         bool $hidden = false
     ): IQueryBuilder {
-        // This will throw if the root is illegally empty
-        $root = $this->root($root);
+        // Get the timeline root object
+        if (null == $root) {
+            // Cache the root object. This is fast when there are
+            // multiple queries such as days-day preloading BUT that
+            // means that any subsequent requests that don't match the
+            // same root MUST specify a separate root this function
+            if (null === $this->_root) {
+                $this->_root = new TimelineRoot();
+
+                // Populate the root using parameters from the request
+                $fs = \OC::$server->get(FsManager::class);
+                $fs->populateRoot($this->_root);
+            }
+
+            // Use the cached / newly populated root
+            $root = $this->_root;
+        }
+
+        // Check if the root is empty. This is illegal in most cases
+        // except for albums, which don't have a folder associated.
+        if (!$this->_rootEmptyAllowed && $root->isEmpty()) {
+            throw new \Exception('No valid root folder found (.nomedia?)');
+        }
 
         // Join with memories
         $baseOp = $query->expr()->eq('f.fileid', 'm.fileid');
