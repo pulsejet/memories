@@ -2,7 +2,7 @@
 
 namespace OCA\Memories\Controller;
 
-use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
@@ -11,8 +11,6 @@ use OCP\Files\Folder;
 
 class FoldersController extends GenericApiController
 {
-    protected TimelineQuery $timelineQuery;
-
     /**
      * @NoAdminRequired
      */
@@ -42,13 +40,23 @@ class FoldersController extends GenericApiController
             // Sort by name
             usort($folders, static fn ($a, $b) => strnatcmp($a->getName(), $b->getName()));
 
+            // Construct root for the base folder. This way we can reuse the
+            // root by filtering out the subfolders we don't want.
+            $root = new TimelineRoot();
+            $this->fs->populateRoot($root);
+
             // Process to response type
-            $list = array_map(fn ($node) => [
-                'fileid' => $node->getId(),
-                'name' => $node->getName(),
-                'path' => $node->getPath(),
-                'previews' => $this->timelineQuery->getFolderPreviews($node),
-            ], $folders);
+            $list = array_map(function ($node) use ($root) {
+                $root->addFolder($node);
+                $root->baseChange($node->getPath());
+
+                return [
+                    'fileid' => $node->getId(),
+                    'name' => $node->getName(),
+                    'path' => $node->getPath(),
+                    'previews' => $this->timelineQuery->getRootPreviews($root),
+                ];
+            }, $folders);
 
             return new Http\JSONResponse($list, Http::STATUS_OK);
         });

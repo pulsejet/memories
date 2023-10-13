@@ -68,8 +68,13 @@ class FsManager
         $this->nomediaCache = $cacheFactory->createLocal('memories:nomedia');
     }
 
-    /** Get the TimelineRoot object relevant to the request */
-    public function populateRoot(TimelineRoot &$root, bool $recursive)
+    /**
+     * Populate TimelineRoot object relevant to the request.
+     *
+     * @param TimelineRoot $root      Root object to populate (by reference)
+     * @param bool         $recursive Whether to get the folders recursively
+     */
+    public function populateRoot(TimelineRoot &$root, bool $recursive = true)
     {
         $user = $this->userSession->getUser();
 

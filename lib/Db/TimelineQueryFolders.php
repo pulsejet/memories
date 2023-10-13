@@ -4,14 +4,20 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCP\Files\FileInfo;
 use OCP\IDBConnection;
 
 trait TimelineQueryFolders
 {
     protected IDBConnection $connection;
 
-    public function getFolderPreviews(FileInfo $folder)
+    /**
+     * Get the previews inside a given TimelineRoot.
+     * The root folder passed to this function must already be populated
+     * with the mount points recursively, if this is desired.
+     *
+     * @param TimelineRoot $root The root to use for the query
+     */
+    public function getRootPreviews(TimelineRoot $root)
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -19,8 +25,6 @@ trait TimelineQueryFolders
         $query->select('f.fileid', 'f.etag')->from('memories', 'm');
 
         // WHERE these photos are in the user's requested folder recursively
-        $root = new TimelineRoot();
-        $root->addFolder($folder);
         $query = $this->joinFilecache($query, $root, true, false);
 
         // ORDER descending by fileid

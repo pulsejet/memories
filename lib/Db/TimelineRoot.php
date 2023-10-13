@@ -39,7 +39,9 @@ class TimelineRoot
         $this->setFolder($info->getId(), $info, $path);
     }
 
-    // Add mountpoints recursively
+    /**
+     * Add mountpoints recursively.
+     */
     public function addMountPoints()
     {
         $manager = \OC\Files\Filesystem::getMountManager();
@@ -51,6 +53,11 @@ class TimelineRoot
         }
     }
 
+    /**
+     * Exclude all folders that are in the given paths.
+     *
+     * @param string[] $paths The paths to exclude
+     */
     public function excludePaths(array $paths)
     {
         foreach ($paths as $path) {
@@ -61,6 +68,21 @@ class TimelineRoot
                 if (str_starts_with($folderPath.'/', $path.'/')) {
                     unset($this->folderPaths[$id], $this->folders[$id]);
                 }
+            }
+        }
+    }
+
+    /**
+     * Change the base folder to a different one.
+     * This excludes all folders not prefixed with the new base path.
+     *
+     * @param string $path The new base path
+     */
+    public function baseChange(string $path)
+    {
+        foreach ($this->folderPaths as $id => $folderPath) {
+            if (!str_starts_with($folderPath.'/', $path.'/')) {
+                unset($this->folderPaths[$id], $this->folders[$id]);
             }
         }
     }
