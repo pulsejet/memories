@@ -305,11 +305,11 @@ export default defineComponent({
     },
 
     selectionManager() {
-      return <any>this.$refs.selectionManager;
+      return this.$refs.selectionManager as InstanceType<typeof SelectionManager>;
     },
 
     scrollerManager() {
-      return <any>this.$refs.scrollerManager;
+      return this.$refs.scrollerManager as InstanceType<typeof ScrollerManager>;
     },
 
     /** Create new state */
@@ -452,7 +452,7 @@ export default defineComponent({
      * the pixel position of the recycler has changed.
      */
     scrollPositionChange(event?: Event) {
-      this.scrollerManager().recyclerScrolled(event);
+      this.scrollerManager().recyclerScrolled(event ?? null);
     },
 
     /** Trigger when recycler view changes (for callback) */

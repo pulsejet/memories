@@ -3,11 +3,7 @@ declare module '*.svg' {
   export default content;
 }
 
-declare module '*.vue' {
-  import type { defineComponent } from 'vue';
-  const Component: ReturnType<typeof defineComponent>;
-  export default Component;
-}
+declare module '*.vue';
 
 // External components cannot be imported with .vue extension
 declare module '@nextcloud/vue/dist/Components/*' {
