@@ -61,16 +61,16 @@ class TimelineQuery
     public static function replaceQueryParams(IQueryBuilder &$query, string $sql)
     {
         $params = $query->getParameters();
+        $platform = $query->getConnection()->getDatabasePlatform();
         foreach ($params as $key => $value) {
             if (\is_array($value)) {
-                $value = implode(',', $value);
+                $value = implode(',', array_map(static fn ($v) => $platform->quoteStringLiteral($v), $value));
             } elseif (\is_bool($value)) {
-                $value = $value ? '1' : '0';
+                $value = $platform->quoteStringLiteral($value ? '1' : '0');
             } elseif (null === $value) {
-                $value = 'NULL';
+                $value = $platform->quoteStringLiteral('NULL');
             }
 
-            $value = $query->getConnection()->getDatabasePlatform()->quoteStringLiteral($value);
             $sql = str_replace(':'.$key, $value, $sql);
         }
 
