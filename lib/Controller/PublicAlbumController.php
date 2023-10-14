@@ -139,7 +139,7 @@ class PublicAlbumController extends Controller
         return $downloadController->file($handle);
     }
 
-    private function addOgMetadata(array $album, string $token)
+    private function addOgMetadata(array $album, string $token): void
     {
         $fileId = (int) $album['last_added_photo'];
         $albumId = (int) $album['album_id'];

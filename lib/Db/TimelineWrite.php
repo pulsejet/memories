@@ -192,7 +192,7 @@ class TimelineWrite
     /**
      * Remove a file from the exif database.
      */
-    public function deleteFile(File &$file)
+    public function deleteFile(File &$file): void
     {
         // Get full record
         $query = $this->connection->getQueryBuilder();
@@ -255,7 +255,7 @@ class TimelineWrite
     /**
      * Clear the entire index. Does not need confirmation!
      */
-    public function clear()
+    public function clear(): void
     {
         $p = $this->connection->getDatabasePlatform();
         foreach (array_merge(DELETE_TABLES, TRUNCATE_TABLES) as $table) {

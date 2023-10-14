@@ -111,7 +111,7 @@ class ShareController extends GenericApiController
         });
     }
 
-    private function getNodeByIdOrPath($id, $path)
+    private function getNodeByIdOrPath($id, $path): \OCP\Files\Node
     {
         $uid = Util::getUID();
 
@@ -133,7 +133,7 @@ class ShareController extends GenericApiController
         return $file;
     }
 
-    private function makeShareResponse(\OCP\Share\IShare $share)
+    private function makeShareResponse(\OCP\Share\IShare $share): array
     {
         /** @var \OCP\IURLGenerator $urlGenerator */
         $urlGenerator = \OC::$server->get(\OCP\IURLGenerator::class);

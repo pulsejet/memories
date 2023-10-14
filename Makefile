@@ -1,17 +1,20 @@
 all: dev-setup lint build-js-production test
 
 # Dev env management
-dev-setup: clean clean-dev npm-init exiftool php-cs-fixer
+dev-setup: clean clean-dev npm-init exiftool install-tools
 
 exiftool:
 	sh scripts/get-exiftool.sh
 
-php-cs-fixer:
-	mkdir -p tools/php-cs-fixer
-	composer require --dev --working-dir=tools/php-cs-fixer friendsofphp/php-cs-fixer
+install-tools:
+	mkdir -p tools
+	composer require --dev --working-dir=tools friendsofphp/php-cs-fixer vimeo/psalm
 
 php-lint:
-	tools/php-cs-fixer/vendor/bin/php-cs-fixer fix lib
+	tools/vendor/bin/php-cs-fixer fix lib
+
+psalm:
+	tools/vendor/bin/psalm
 
 npm-init:
 	npm ci
@@ -19,7 +22,7 @@ npm-init:
 npm-update:
 	npm update
 
-.PHONY: dev-setup exiftool php-cs-fixer php-lint npm-init npm-update
+.PHONY: dev-setup exiftool install-tools php-lint psalm npm-init npm-update
 
 # Building
 build-js:

@@ -69,7 +69,7 @@ class PageController extends Controller
     {
         // Image domains MUST be added to the connect domain list
         // because of the service worker fetch() call
-        $addImageDomain = static function ($url) use (&$policy) {
+        $addImageDomain = static function ($url) use (&$policy): void {
             $policy->addAllowedImageDomain($url);
             $policy->addAllowedConnectDomain($url);
         };
@@ -108,7 +108,7 @@ class PageController extends Controller
     /**
      * Get params for main.php template.
      */
-    public static function getMainParams()
+    public static function getMainParams(): array
     {
         return [
             'native' => Util::callerIsNative(),

@@ -23,7 +23,7 @@ class TimelineRoot
      *
      * @throws \Exception if node is not valid readable folder
      */
-    public function addFolder(FileInfo $info)
+    public function addFolder(FileInfo $info): void
     {
         $path = $info->getPath();
 
@@ -42,7 +42,7 @@ class TimelineRoot
     /**
      * Add mountpoints recursively.
      */
-    public function addMountPoints()
+    public function addMountPoints(): void
     {
         $manager = \OC\Files\Filesystem::getMountManager();
         foreach ($this->folderPaths as $id => $folderPath) {
@@ -67,7 +67,7 @@ class TimelineRoot
      *
      * @param string[] $paths The paths to exclude
      */
-    public function excludePaths(array $paths)
+    public function excludePaths(array $paths): void
     {
         foreach ($paths as $path) {
             foreach ($this->folderPaths as $id => $folderPath) {
@@ -87,7 +87,7 @@ class TimelineRoot
      *
      * @param string $path The new base path
      */
-    public function baseChange(string $path)
+    public function baseChange(string $path): void
     {
         foreach ($this->folderPaths as $id => $folderPath) {
             if (!str_starts_with($folderPath.'/', $path.'/')) {
@@ -101,11 +101,17 @@ class TimelineRoot
         return $this->folderPaths[$id];
     }
 
-    public function getIds()
+    /**
+     * @return int[]
+     */
+    public function getIds(): array
     {
         return array_keys($this->folderPaths);
     }
 
+    /**
+     * @return null|int
+     */
     public function getOneId()
     {
         return array_key_first($this->folders);
@@ -116,12 +122,12 @@ class TimelineRoot
         return $this->folders[$id];
     }
 
-    public function isEmpty()
+    public function isEmpty(): bool
     {
         return empty($this->folderPaths);
     }
 
-    private function setFolder(int $id, ?FileInfo $fileInfo, ?string $path)
+    private function setFolder(int $id, ?FileInfo $fileInfo, ?string $path): void
     {
         if (null !== $path) {
             $this->folderPaths[$id] = $path;

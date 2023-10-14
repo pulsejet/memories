@@ -10,7 +10,7 @@ use OCP\ITags;
 
 trait TimelineQueryFilters
 {
-    public function transformFavoriteFilter(IQueryBuilder &$query, bool $aggregate)
+    public function transformFavoriteFilter(IQueryBuilder &$query, bool $aggregate): void
     {
         if (Util::isLoggedIn()) {
             $query->innerJoin('m', 'vcategory_to_object', 'vcoi', $query->expr()->andX(
@@ -20,7 +20,7 @@ trait TimelineQueryFilters
         }
     }
 
-    public function addFavoriteTag(IQueryBuilder &$query)
+    public function addFavoriteTag(IQueryBuilder &$query): void
     {
         if (Util::isLoggedIn()) {
             $query->leftJoin('m', 'vcategory_to_object', 'vco', $query->expr()->andX(
@@ -31,12 +31,12 @@ trait TimelineQueryFilters
         }
     }
 
-    public function transformVideoFilter(IQueryBuilder &$query, bool $aggregate)
+    public function transformVideoFilter(IQueryBuilder &$query, bool $aggregate): void
     {
         $query->andWhere($query->expr()->eq('m.isvideo', $query->expr()->literal(1)));
     }
 
-    public function transformLimit(IQueryBuilder &$query, bool $aggregate, int $limit)
+    public function transformLimit(IQueryBuilder &$query, bool $aggregate, int $limit): void
     {
         if ($limit >= 1 || $limit <= 100) {
             $query->setMaxResults($limit);

@@ -39,7 +39,7 @@ class IndexJob extends TimedJob
         $this->setInterval(INTERVAL);
     }
 
-    protected function run($arguments)
+    protected function run($argument)
     {
         // Check if indexing is enabled
         if ('0' === Util::getSystemConfig('memories.index.mode')) {
@@ -47,12 +47,12 @@ class IndexJob extends TimedJob
         }
 
         // Store the last run time
-        $this->config->setAppValue(Application::APPNAME, 'last_index_job_start', time());
-        $this->config->setAppValue(Application::APPNAME, 'last_index_job_duration', 0);
+        $this->config->setAppValue(Application::APPNAME, 'last_index_job_start', (string) time());
+        $this->config->setAppValue(Application::APPNAME, 'last_index_job_duration', (string) 0);
 
         // Run for a maximum of 5 minutes
         $startTime = microtime(true);
-        $this->service->continueCheck = static function () use ($startTime) {
+        $this->service->continueCheck = static function () use ($startTime): bool {
             return (microtime(true) - $startTime) < MAX_RUN_TIME;
         };
 
@@ -81,7 +81,7 @@ class IndexJob extends TimedJob
 
         // Store the last run duration
         $duration = round(microtime(true) - $startTime, 2);
-        $this->config->setAppValue(Application::APPNAME, 'last_index_job_duration', $duration);
+        $this->config->setAppValue(Application::APPNAME, 'last_index_job_duration', (string) $duration);
     }
 
     /**

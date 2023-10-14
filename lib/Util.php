@@ -12,7 +12,6 @@ use OCP\App\IAppManager;
 use OCP\Files\Node;
 use OCP\Files\Search\ISearchBinaryOperator;
 use OCP\Files\Search\ISearchComparison;
-use OCP\IAppConfig;
 use OCP\IConfig;
 
 class Util
@@ -23,8 +22,10 @@ class Util
 
     /**
      * Get host CPU architecture (amd64 or aarch64).
+     *
+     * @psalm-return 'aarch64'|'amd64'|null
      */
-    public static function getArch()
+    public static function getArch(): ?string
     {
         $uname = php_uname('m');
         if (false !== stripos($uname, 'aarch64') || false !== stripos($uname, 'arm64')) {
@@ -39,8 +40,10 @@ class Util
 
     /**
      * Get the libc type for host (glibc or musl).
+     *
+     * @psalm-return 'glibc'|'musl'|null
      */
-    public static function getLibc()
+    public static function getLibc(): ?string
     {
         if ($ldd = shell_exec('ldd --version 2>&1')) {
             if (false !== stripos($ldd, 'musl')) {
@@ -89,8 +92,8 @@ class Util
             return false;
         }
 
-        $config = \OC::$server->get(IAppConfig::class);
-        if ('true' !== $config->getValue('recognize', 'faces.enabled', 'false')) {
+        $config = \OC::$server->get(IConfig::class);
+        if ('true' !== $config->getAppValue('recognize', 'faces.enabled', 'false')) {
             return false;
         }
 
@@ -192,10 +195,12 @@ class Util
      * @param mixed $key   Key to set
      * @param mixed $value Value to set
      */
-    public static function forceFileInfo(Node &$node, $key, $value)
+    public static function forceFileInfo(Node &$node, $key, $value): void
     {
         /** @var \OC\Files\Node\Node */
         $node = $node;
+
+        /** @psalm-suppress UndefinedInterfaceMethod */
         $node->getFileInfo()[$key] = $value;
     }
 
@@ -205,7 +210,7 @@ class Util
      * @param mixed $node        File to patch
      * @param mixed $permissions Permissions to set
      */
-    public static function forcePermissions(Node &$node, int $permissions)
+    public static function forcePermissions(Node &$node, int $permissions): void
     {
         self::forceFileInfo($node, 'permissions', $permissions);
     }
@@ -284,7 +289,7 @@ class Util
      *
      * @param $folder Folder to search
      */
-    public static function getAnyMedia(\OCP\Files\Folder $folder): Node
+    public static function getAnyMedia(\OCP\Files\Folder $folder): ?Node
     {
         $query = new SearchQuery(new SearchBinaryOperator(ISearchBinaryOperator::OPERATOR_OR, [
             new SearchComparison(ISearchComparison::COMPARE_LIKE, 'mimetype', 'image/%'),
@@ -338,11 +343,11 @@ class Util
     /**
      * Sanitize a path to keep only ASCII characters and special characters.
      */
-    public static function sanitizePath(string $path): string
+    public static function sanitizePath(string $path): ?string
     {
         $path = str_replace("\0", '', $path); // remove null characters
 
-        return mb_ereg_replace('\/\/+', '/', $path); // remove extra slashes
+        return mb_ereg_replace('\/\/+', '/', $path) ?: null; // remove extra slashes
     }
 
     /**

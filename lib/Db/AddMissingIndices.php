@@ -10,7 +10,7 @@ class AddMissingIndices
     /**
      * Add missing indices to the database schema.
      */
-    public static function run(IOutput $output)
+    public static function run(IOutput $output): SchemaWrapper
     {
         $connection = \OC::$server->get(\OC\DB\Connection::class);
         $schema = new SchemaWrapper($connection);

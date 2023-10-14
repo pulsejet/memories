@@ -22,7 +22,7 @@ class AlbumsQuery
      * @param bool $shared Whether to get shared albums
      * @param int  $fileid File to filter by
      */
-    public function getList(string $uid, bool $shared = false, int $fileid = 0)
+    public function getList(string $uid, bool $shared = false, int $fileid = 0): array
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -234,7 +234,7 @@ class AlbumsQuery
     /**
      * Get list of photos in album.
      */
-    public function getAlbumPhotos(int $albumId, ?int $limit)
+    public function getAlbumPhotos(int $albumId, ?int $limit): array
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -283,8 +283,10 @@ class AlbumsQuery
         return $groups;
     }
 
-    /** Get the name of the collaborators table */
-    private function collaboratorsTable()
+    /**
+     * Get the name of the collaborators table.
+     */
+    private function collaboratorsTable(): string
     {
         // https://github.com/nextcloud/photos/commit/20e3e61ad577014e5f092a292c90a8476f630355
         $appManager = \OC::$server->get(\OCP\App\IAppManager::class);

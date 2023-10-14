@@ -60,7 +60,7 @@ class AlbumsBackend extends Backend
         return Util::albumsIsEnabled();
     }
 
-    public function clusterName(string $name)
+    public function clusterName(string $name): string
     {
         return explode('/', $name)[1];
     }
@@ -138,7 +138,7 @@ class AlbumsBackend extends Backend
         return $this->albumsQuery->getAlbumPhotos($id, $limit) ?? [];
     }
 
-    public function sortPhotosForPreview(array &$photos)
+    public function sortPhotosForPreview(array &$photos): void
     {
         // Do nothing, the photos are already sorted by added date desc
     }

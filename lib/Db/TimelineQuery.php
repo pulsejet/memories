@@ -37,16 +37,19 @@ class TimelineQuery
         $this->request = $request;
     }
 
-    public function allowEmptyRoot(bool $value = true)
+    public function allowEmptyRoot(bool $value = true): void
     {
         $this->_rootEmptyAllowed = $value;
     }
 
-    public function getBuilder()
+    public function getBuilder(): IQueryBuilder
     {
         return $this->connection->getQueryBuilder();
     }
 
+    /**
+     * @return never
+     */
     public static function debugQuery(IQueryBuilder &$query, string $sql = '')
     {
         // Print the query and exit
@@ -58,7 +61,7 @@ class TimelineQuery
         exit; // only for debugging, so this is okay
     }
 
-    public static function replaceQueryParams(IQueryBuilder &$query, string $sql)
+    public static function replaceQueryParams(IQueryBuilder &$query, string $sql): string
     {
         $params = $query->getParameters();
         $platform = $query->getConnection()->getDatabasePlatform();

@@ -26,6 +26,9 @@ use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\ISession;
 
+/**
+ * @template-implements IEventListener<Event>
+ */
 class BeforeTemplateListener implements IEventListener
 {
     private ISession $session;

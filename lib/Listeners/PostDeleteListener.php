@@ -27,6 +27,9 @@ use OCP\EventDispatcher\IEventListener;
 use OCP\Files\Events\Node\NodeDeletedEvent;
 use OCP\Files\Folder;
 
+/**
+ * @template-implements IEventListener<Event>
+ */
 class PostDeleteListener implements IEventListener
 {
     private TimelineWrite $util;

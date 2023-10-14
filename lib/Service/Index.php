@@ -153,7 +153,7 @@ class Index
             ;
 
             // Filter out files that are already indexed
-            $addFilter = static function (string $table, string $alias) use (&$query) {
+            $addFilter = static function (string $table, string $alias) use (&$query): void {
                 $query->leftJoin('f', $table, $alias, $query->expr()->andX(
                     $query->expr()->eq('f.fileid', "{$alias}.fileid"),
                     $query->expr()->eq('f.mtime', "{$alias}.mtime"),
@@ -224,7 +224,7 @@ class Index
     /**
      * Get total number of files that are indexed.
      */
-    public function getIndexedCount()
+    public function getIndexedCount(): int
     {
         $query = $this->db->getQueryBuilder();
         $query->select($query->createFunction('COUNT(DISTINCT fileid)'))
@@ -282,8 +282,10 @@ class Index
         return \in_array($file->getMimeType(), Application::VIDEO_MIMES, true);
     }
 
-    /** Log to console if CLI or logger */
-    private function error(string $message)
+    /**
+     * Log error to console if CLI or logger.
+     */
+    private function error(string $message): void
     {
         $this->logger->error($message);
 
@@ -292,8 +294,10 @@ class Index
         }
     }
 
-    /** Log to console if CLI */
-    private function log(string $message, bool $overwrite = false)
+    /**
+     * Log to console if CLI.
+     */
+    private function log(string $message, bool $overwrite = false): void
     {
         if ($this->output) {
             if ($overwrite) {

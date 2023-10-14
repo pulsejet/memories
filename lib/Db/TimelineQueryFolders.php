@@ -17,7 +17,7 @@ trait TimelineQueryFolders
      *
      * @param TimelineRoot $root The root to use for the query
      */
-    public function getRootPreviews(TimelineRoot $root)
+    public function getRootPreviews(TimelineRoot $root): array
     {
         $query = $this->connection->getQueryBuilder();
 

@@ -22,7 +22,7 @@ trait TimelineWriteOrphans
      */
     public function orphanAll(bool $value = true, ?array $fileIds = null, bool $onlyMain = false): int
     {
-        $do = function (string $table) use ($value, $fileIds) {
+        $do = function (string $table) use ($value, $fileIds): int {
             $query = $this->connection->getQueryBuilder();
             $query->update($table)
                 ->set('orphan', $query->createNamedParameter($value, IQueryBuilder::PARAM_BOOL))
@@ -51,7 +51,7 @@ trait TimelineWriteOrphans
      * @param int      $txnSize  number of rows to process in a single transaction
      * @param \Closure $callback will be passed each row
      */
-    public function orphanAndRun(array $fields, int $txnSize, \Closure $callback)
+    public function orphanAndRun(array $fields, int $txnSize, \Closure $callback): void
     {
         // Orphan all files. This means if we are interrupted,
         // it will lead to a re-index of the whole library!

@@ -57,11 +57,11 @@ trait TimelineQueryDays
     /**
      * Get the day response from the database for the timeline.
      *
-     * @param int[] $day_ids         The day ids to fetch
-     * @param bool  $recursive       If the query should be recursive
-     * @param bool  $archive         If the query should include only the archive folder
-     * @param bool  $hidden          If the query should include hidden files
-     * @param array $queryTransforms The query transformations to apply
+     * @param ?int[] $day_ids         The day ids to fetch
+     * @param bool   $recursive       If the query should be recursive
+     * @param bool   $archive         If the query should include only the archive folder
+     * @param bool   $hidden          If the query should include hidden files
+     * @param array  $queryTransforms The query transformations to apply
      *
      * @return array An array of day responses
      */
@@ -124,7 +124,7 @@ trait TimelineQueryDays
         return $day;
     }
 
-    public function executeQueryWithCTEs(IQueryBuilder $query, string $psql = '')
+    public function executeQueryWithCTEs(IQueryBuilder $query, string $psql = ''): \OCP\DB\IResult
     {
         $sql = empty($psql) ? $query->getSQL() : $psql;
         $params = $query->getParameters();
@@ -211,7 +211,7 @@ trait TimelineQueryDays
      *
      * @param array $days
      */
-    private function processDays($days)
+    private function processDays($days): array
     {
         foreach ($days as &$row) {
             $row['dayid'] = (int) $row['dayid'];
@@ -224,7 +224,7 @@ trait TimelineQueryDays
     /**
      * Process the single day response.
      */
-    private function processDayPhoto(array &$row)
+    private function processDayPhoto(array &$row): void
     {
         // Convert field types
         $row['fileid'] = (int) $row['fileid'];
@@ -278,7 +278,7 @@ trait TimelineQueryDays
         TimelineRoot &$root,
         bool $archive,
         bool $hidden
-    ) {
+    ): void {
         // Add query parameters
         $query->setParameter('topFolderIds', $root->getIds(), IQueryBuilder::PARAM_INT_ARRAY);
 

@@ -34,8 +34,10 @@ class Places
 
     /**
      * Make SQL query to detect GIS type.
+     *
+     * @psalm-return 0|1|2
      */
-    public function detectGisType()
+    public function detectGisType(): int
     {
         // Make sure database prefix is set
         $prefix = $this->config->getSystemValue('dbtableprefix', '') ?: '';
@@ -83,7 +85,7 @@ class Places
     public function geomCount(): int
     {
         try {
-            return $this->connection->executeQuery('SELECT COUNT(osm_id) as c FROM memories_planet_geometry')->fetchOne();
+            return (int) $this->connection->executeQuery('SELECT COUNT(osm_id) as c FROM memories_planet_geometry')->fetchOne();
         } catch (\Exception $e) {
             return 0;
         }
@@ -244,7 +246,7 @@ class Places
         $txnCount = 0;
 
         // Function to commit the current transaction
-        $transact = function () use (&$txnCount) {
+        $transact = function () use (&$txnCount): void {
             if (++$txnCount >= DB_TRANSACTION_SIZE) {
                 $this->connection->commit();
                 $this->connection->beginTransaction();
@@ -379,7 +381,7 @@ class Places
     /**
      * Recalculate all places for all users.
      */
-    public function recalculateAll()
+    public function recalculateAll(): void
     {
         echo "Recalculating places for all files (do not interrupt this process)...\n";
         flush();

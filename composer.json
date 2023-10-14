@@ -1,6 +1,6 @@
 {
-    "name": "Memories",
-    "description": "p",
+    "name": "radialapps/memories",
+    "description": "Fast and advanced photo management for Nextcloud",
     "type": "project",
     "license": "AGPL",
     "authors": [
@@ -9,7 +9,5 @@
         }
     ],
     "require": {},
-    "require-dev": {
-        "phpunit/phpunit": "^5.4"
-    }
+    "require-dev": {}
 }

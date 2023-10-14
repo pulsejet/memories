@@ -191,7 +191,7 @@ class FaceRecognitionBackend extends Backend
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
-    public function sortPhotosForPreview(array &$photos)
+    public function sortPhotosForPreview(array &$photos): void
     {
         // Convert to recognize format (percentage position-size)
         foreach ($photos as &$p) {
@@ -216,15 +216,15 @@ class FaceRecognitionBackend extends Backend
 
     private function model(): int
     {
-        return (int) $this->config->getAppValue('facerecognition', 'model', -1);
+        return (int) $this->config->getAppValue('facerecognition', 'model', (string) -1);
     }
 
     private function minFaceInClusters(): int
     {
-        return (int) $this->config->getAppValue('facerecognition', 'min_faces_in_cluster', 5);
+        return (int) $this->config->getAppValue('facerecognition', 'min_faces_in_cluster', (string) 5);
     }
 
-    private function getFaceRecognitionClusters(int $fileid = 0)
+    private function getFaceRecognitionClusters(int $fileid = 0): array
     {
         $query = $this->tq->getBuilder();
 
@@ -276,7 +276,7 @@ class FaceRecognitionBackend extends Backend
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
-    private function getFaceRecognitionPersons(int $fileid = 0)
+    private function getFaceRecognitionPersons(int $fileid = 0): array
     {
         $query = $this->tq->getBuilder();
 

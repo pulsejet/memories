@@ -134,7 +134,7 @@ class DaysController extends GenericApiController
     /**
      * Get transformations depending on the request.
      */
-    private function getTransformations()
+    private function getTransformations(): array
     {
         $transforms = [];
 
@@ -180,7 +180,7 @@ class DaysController extends GenericApiController
      *
      * @param array $days the days array
      */
-    private function preloadDays(array &$days)
+    private function preloadDays(array &$days): void
     {
         // Do not preload anything for native clients.
         // Since the contents of preloads are trusted, clients will not load locals.
@@ -234,7 +234,7 @@ class DaysController extends GenericApiController
      * Convert days response to months response.
      * The dayId is used to group the days into months.
      */
-    private function daysToMonths(array $days)
+    private function daysToMonths(array $days): array
     {
         $months = [];
         foreach ($days as $day) {
@@ -255,45 +255,49 @@ class DaysController extends GenericApiController
         return $months;
     }
 
-    /** Convert list of month IDs to list of dayIds */
-    private function monthIdToDayIds(int $monthId)
+    /**
+     * Convert list of month IDs to list of dayIds.
+     *
+     * @return int[] The list of dayIds
+     */
+    private function monthIdToDayIds(int $monthId): array
     {
         $dayIds = [];
         $firstDay = (int) $monthId;
         $lastDay = strtotime(date('Ymt', $firstDay * 86400)) / 86400;
         for ($i = $firstDay; $i <= $lastDay; ++$i) {
-            $dayIds[] = (string) $i;
+            $dayIds[] = $i;
         }
 
         return $dayIds;
     }
 
-    private function isRecursive()
+    private function isRecursive(): bool
     {
         return null === $this->request->getParam('folder') || $this->request->getParam('recursive');
     }
 
-    private function isArchive()
+    private function isArchive(): bool
     {
         return null !== $this->request->getParam('archive');
     }
 
-    private function isHidden()
+    private function isHidden(): bool
     {
         return null !== $this->request->getParam('hidden');
     }
 
-    private function noPreload()
+    private function noPreload(): bool
     {
         return null !== $this->request->getParam('nopreload');
     }
 
-    private function isMonthView()
+    private function isMonthView(): bool
     {
         return null !== $this->request->getParam('monthView');
     }
 
-    private function isReverse()
+    private function isReverse(): bool
     {
         return null !== $this->request->getParam('reverse');
     }

@@ -282,7 +282,7 @@ class DownloadController extends GenericApiController
                 /** @var bool|resource */
                 $handle = false;
 
-                /** @var ?File */
+                /** @var ?\OCP\Files\File */
                 $file = null;
 
                 /** @var ?string */

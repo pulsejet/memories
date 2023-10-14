@@ -29,6 +29,9 @@ use OCP\Files\Events\Node\NodeTouchedEvent;
 use OCP\Files\Events\Node\NodeWrittenEvent;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @template-implements IEventListener<Event>
+ */
 class PostWriteListener implements IEventListener
 {
     private TimelineWrite $timelineWrite;

@@ -203,7 +203,7 @@ class Index extends Command
      *
      * @param mixed $closure
      */
-    private function runForUsers($closure)
+    private function runForUsers($closure): void
     {
         if ($uid = $this->opts->user) {
             if ($user = $this->userManager->get($uid)) {

@@ -50,7 +50,7 @@ class ImageController extends GenericApiController
         int $y = 32,
         bool $a = false,
         string $mode = 'fill'
-    ) {
+    ): Http\Response {
         return Util::guardEx(function () use ($id, $x, $y, $a, $mode) {
             if (-1 === $id || 0 === $x || 0 === $y) {
                 throw Exceptions::MissingParameter('id, x, y');

@@ -19,7 +19,7 @@ class Exif
     private static $staticPipes;
     private static $noStaticProc = false;
 
-    public static function closeStaticExiftoolProc()
+    public static function closeStaticExiftoolProc(): void
     {
         try {
             if (self::$staticProc) {
@@ -35,13 +35,13 @@ class Exif
         }
     }
 
-    public static function restartStaticExiftoolProc()
+    public static function restartStaticExiftoolProc(): void
     {
         self::closeStaticExiftoolProc();
         self::ensureStaticExiftoolProc();
     }
 
-    public static function ensureStaticExiftoolProc()
+    public static function ensureStaticExiftoolProc(): void
     {
         if (self::$noStaticProc) {
             return;
@@ -68,7 +68,7 @@ class Exif
     /**
      * Get exif data as a JSON object from a Nextcloud file.
      */
-    public static function getExifFromFile(File $file)
+    public static function getExifFromFile(File $file): array
     {
         try {
             $path = $file->getStorage()->getLocalFile($file->getInternalPath());
@@ -106,8 +106,10 @@ class Exif
         return $exif;
     }
 
-    /** Get exif data as a JSON object from a local file path */
-    public static function getExifFromLocalPath(string $path)
+    /**
+     * Get exif data as a JSON object from a local file path.
+     */
+    public static function getExifFromLocalPath(string $path): array
     {
         if (null !== self::$staticProc) {
             self::ensureStaticExiftoolProc();
@@ -298,7 +300,7 @@ class Exif
      *
      * @throws \Exception on failure
      */
-    public static function setExif(string $path, array $data)
+    public static function setExif(string $path, array $data): void
     {
         $data['SourceFile'] = $path;
         $raw = json_encode([$data], JSON_UNESCAPED_UNICODE);
@@ -328,7 +330,7 @@ class Exif
         }
     }
 
-    public static function setFileExif(File $file, array $data)
+    public static function setFileExif(File $file, array $data): void
     {
         // Get path to local file so we can skip reading
         $path = $file->getStorage()->getLocalFile($file->getInternalPath());
@@ -345,7 +347,7 @@ class Exif
         $file->touch();
     }
 
-    public static function getBinaryExifProp(string $path, string $prop)
+    public static function getBinaryExifProp(string $path, string $prop): string
     {
         $pipes = [];
         $proc = proc_open(array_merge(self::getExiftool(), [$prop, '-n', '-b', $path]), [
@@ -368,7 +370,7 @@ class Exif
         }
     }
 
-    public static function getExifWithDuplicates(string $path)
+    public static function getExifWithDuplicates(string $path): array
     {
         return self::getExifFromLocalPathWithSeparateProc($path, ['-U', '-G4']);
     }
@@ -378,8 +380,10 @@ class Exif
         return BinExt::getExiftool();
     }
 
-    /** Initialize static exiftool process for local reads */
-    private static function initializeStaticExiftoolProc()
+    /**
+     * Initialize static exiftool process for local reads.
+     */
+    private static function initializeStaticExiftoolProc(): void
     {
         self::closeStaticExiftoolProc();
         self::$staticProc = proc_open(array_merge(self::getExiftool(), ['-stay_open', 'true', '-@', '-']), [
@@ -397,7 +401,7 @@ class Exif
      * @param int      $timeout   milliseconds
      * @param string   $delimiter null for eof
      */
-    private static function readOrTimeout($handle, int $timeout, ?string $delimiter = null)
+    private static function readOrTimeout($handle, int $timeout, ?string $delimiter = null): string
     {
         $buf = '';
         $waitedMs = 0;
@@ -420,7 +424,7 @@ class Exif
         return $buf;
     }
 
-    private static function getExifFromLocalPathWithStaticProc(string $path)
+    private static function getExifFromLocalPathWithStaticProc(string $path): array
     {
         $args = implode("\n", self::EXIFTOOL_ARGS);
         fwrite(self::$staticPipes[0], "{$path}\n{$args}\n-execute\n");
@@ -442,7 +446,7 @@ class Exif
         }
     }
 
-    private static function getExifFromLocalPathWithSeparateProc(string $path, array $extraArgs = [])
+    private static function getExifFromLocalPathWithSeparateProc(string $path, array $extraArgs = []): array
     {
         $pipes = [];
         $proc = proc_open(array_merge(self::getExiftool(), self::EXIFTOOL_ARGS, $extraArgs, [$path]), [
@@ -468,7 +472,7 @@ class Exif
     }
 
     /** Get json array from stdout of exiftool */
-    private static function processStdout(string $stdout)
+    private static function processStdout(string $stdout): array
     {
         $json = json_decode($stdout, true);
         if (!$json) {

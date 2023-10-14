@@ -156,8 +156,12 @@ trait TimelineWritePlaces
      * Read coordinates from array and round to 6 decimal places.
      *
      * Modifies the array to remove invalid coordinates.
+     *
+     * @return (null|float)[]
+     *
+     * @psalm-return list{float|null, float|null}
      */
-    private static function readCoord(array &$exif)
+    private static function readCoord(array &$exif): array
     {
         $lat = \array_key_exists(LAT_KEY, $exif) ? round((float) $exif[LAT_KEY], 6) : null;
         $lon = \array_key_exists(LON_KEY, $exif) ? round((float) $exif[LON_KEY], 6) : null;

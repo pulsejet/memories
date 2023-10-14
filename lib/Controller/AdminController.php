@@ -109,9 +109,9 @@ class AdminController extends GenericApiController
             $status['indexed_count'] = $index->getIndexedCount();
 
             // Automatic indexing stats
-            $jobStart = $config->getAppValue(Application::APPNAME, 'last_index_job_start', 0);
+            $jobStart = (int) $config->getAppValue(Application::APPNAME, 'last_index_job_start', (string) 0);
             $status['last_index_job_start'] = $jobStart ? time() - $jobStart : 0; // Seconds ago
-            $status['last_index_job_duration'] = $config->getAppValue(Application::APPNAME, 'last_index_job_duration', 0);
+            $status['last_index_job_duration'] = (float) $config->getAppValue(Application::APPNAME, 'last_index_job_duration', (string) 0);
             $status['last_index_job_status'] = $config->getAppValue(Application::APPNAME, 'last_index_job_status', 'Indexing has not been run yet');
             $status['last_index_job_status_type'] = $config->getAppValue(Application::APPNAME, 'last_index_job_status_type', 'warning');
 

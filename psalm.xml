@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<psalm
+    totallyTyped="true"
+    errorLevel="5"
+    resolveFromConfigFile="true"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+>
+    <projectFiles>
+        <directory name="lib" />
+        <ignoreFiles>
+            <directory name="tools" />
+            <directory name="vendor" />
+        </ignoreFiles>
+    </projectFiles>
+    <extraFiles>
+        <directory name="../../lib" />
+
+        <directory name="../../3rdparty/doctrine" />
+        <directory name="../../3rdparty/psr" />
+        <directory name="../../3rdparty/guzzlehttp" />
+        <directory name="../../3rdparty/doctrine" />
+
+        <directory name="../../apps/files/lib/Event" />
+    </extraFiles>
+    <issueHandlers>
+        <UndefinedDocblockClass>
+            <errorLevel type="suppress">
+                <referencedClass name="Doctrine\DBAL\Schema\Schema" />
+                <referencedClass name="Doctrine\DBAL\Schema\SchemaException" />
+                <referencedClass name="Doctrine\DBAL\Driver\Statement" />
+                <referencedClass name="Doctrine\DBAL\Schema\Table" />
+                <referencedClass name="Doctrine\DBAL\Platforms\AbstractPlatform" />
+            </errorLevel>
+        </UndefinedDocblockClass>
+    </issueHandlers>
+</psalm>

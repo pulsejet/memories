@@ -25,6 +25,9 @@ use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\ISession;
 
+/**
+ * @template-implements IEventListener<Event>
+ */
 class PostLogoutListener implements IEventListener
 {
     public const CLEAR_CACHE_KEY = 'memories_clear_cache';

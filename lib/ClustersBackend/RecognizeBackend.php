@@ -231,7 +231,7 @@ class RecognizeBackend extends Backend
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
-    public function sortPhotosForPreview(array &$photos)
+    public function sortPhotosForPreview(array &$photos): void
     {
         $this->sortByScores($photos);
     }

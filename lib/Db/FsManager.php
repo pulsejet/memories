@@ -74,7 +74,7 @@ class FsManager
      * @param TimelineRoot $root      Root object to populate (by reference)
      * @param bool         $recursive Whether to get the folders recursively
      */
-    public function populateRoot(TimelineRoot &$root, bool $recursive = true)
+    public function populateRoot(TimelineRoot &$root, bool $recursive = true): TimelineRoot
     {
         $user = $this->userSession->getUser();
 
@@ -183,7 +183,7 @@ class FsManager
     /**
      * Get a file with ID for the current user.
      *
-     * @throws Exceptions\NotFoundFile
+     * @throws \OCA\Memories\HttpResponseException
      */
     public function getUserFile(int $fileId): File
     {
@@ -298,7 +298,7 @@ class FsManager
         return null;
     }
 
-    public function getShareObject()
+    public function getShareObject(): ?IShare
     {
         // Get token from request
         $token = $this->getShareToken();

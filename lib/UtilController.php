@@ -32,6 +32,7 @@ trait UtilController
      */
     public static function guardExDirect(\Closure $closure): Http\Response
     {
+        /** @psalm-suppress MissingTemplateParam */
         return new class($closure) extends Http\Response implements Http\ICallbackResponse {
             private \Closure $_closure;
 

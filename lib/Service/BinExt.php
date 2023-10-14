@@ -164,7 +164,7 @@ class BinExt
         return "http://{$connect}/{$client}{$path}/{$profile}";
     }
 
-    public static function getGoVodConfig($local = false)
+    public static function getGoVodConfig(bool $local = false): array
     {
         // Get config from system values
         $env = [
@@ -205,7 +205,7 @@ class BinExt
     /**
      * Get temp binary for go-vod.
      */
-    public static function getGoVodBin()
+    public static function getGoVodBin(): string
     {
         $path = Util::getSystemConfig('memories.vod.path');
 
@@ -332,8 +332,10 @@ class BinExt
         return $version;
     }
 
-    /** POST a new configuration to go-vod */
-    public static function configureGoVod()
+    /**
+     * POST a new configuration to go-vod.
+     */
+    public static function configureGoVod(): bool
     {
         // Get config
         $config = self::getGoVodConfig();
@@ -412,7 +414,7 @@ class BinExt
         return $ffmpegPath;
     }
 
-    public static function testFFmpeg(string $path, string $name)
+    public static function testFFmpeg(string $path, string $name): string
     {
         $version = shell_exec("{$path} -version");
         if (!preg_match("/{$name} version \\S*/", $version, $matches)) {
@@ -422,12 +424,12 @@ class BinExt
         return explode(' ', $matches[0])[2];
     }
 
-    public static function testSystemPerl(string $path): string
+    public static function testSystemPerl(string $path): ?string
     {
         if (($out = shell_exec("{$path} -e 'print \"OK\";'")) !== 'OK') {
             throw new \Exception('Failed to run test perl script: '.$out);
         }
 
-        return shell_exec("{$path} -e 'print $^V;'");
+        return shell_exec("{$path} -e 'print $^V;'") ?: null;
     }
 }

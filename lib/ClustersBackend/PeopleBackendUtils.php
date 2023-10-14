@@ -87,11 +87,13 @@ trait PeopleBackendUtils
      * @param array                           $photo   The face object
      * @param float                           $padding The padding to add around the face
      *
-     * @return [Blob, mimetype] of resulting image
+     * @return string[] [Blob, mimetype] of resulting image
      *
      * @throws \Exception if file could not be used
+     *
+     * @psalm-return list{string, string}
      */
-    private function cropFace($file, array $photo, float $padding)
+    private function cropFace($file, array $photo, float $padding): array
     {
         $img = new \OCP\Image();
         $img->loadFromData($file->getContent());
@@ -121,6 +123,13 @@ trait PeopleBackendUtils
         // Max 512x512
         $img->scaleDownToFit(512, 512);
 
-        return [$img->data(), $img->mimeType()];
+        // Get blob and mimetype
+        $data = $img->data();
+        $mime = $img->mimeType();
+        if (null === $data || null === $mime) {
+            throw new \Exception('Could not get image data');
+        }
+
+        return [$data, $mime];
     }
 }

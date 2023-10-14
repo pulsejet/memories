@@ -118,7 +118,7 @@ class VideoController extends GenericApiController
         string $liveid = '',
         string $format = '',
         string $transcode = ''
-    ) {
+    ): Http\Response {
         return Util::guardEx(function () use ($fileid, $liveid, $format, $transcode) {
             $file = $this->fs->getUserFile($fileid);
 
@@ -230,7 +230,7 @@ class VideoController extends GenericApiController
         });
     }
 
-    private function getUpstream(string $client, string $path, string $profile)
+    private function getUpstream(string $client, string $path, string $profile): int
     {
         $returnCode = $this->getUpstreamInternal($client, $path, $profile);
 
@@ -251,7 +251,7 @@ class VideoController extends GenericApiController
         return $returnCode;
     }
 
-    private function getUpstreamInternal(string $client, string $path, string $profile)
+    private function getUpstreamInternal(string $client, string $path, string $profile): int
     {
         // Make sure query params are repeated
         // For example, in folder sharing, we need the params on every request

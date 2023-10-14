@@ -123,7 +123,7 @@ class FileRobotImageState
         }
     }
 
-    private function _set(array $parent, string $key, string $ckey = null)
+    private function _set(array $parent, string $key, string $ckey = null): void
     {
         $ckey ??= $key;
         if (\array_key_exists($key, $parent)) {
@@ -146,7 +146,7 @@ class FileRobotMagick
         $this->state = new FileRobotImageState($state);
     }
 
-    public function apply()
+    public function apply(): \Imagick
     {
         // Ensure the image is in the correct colorspace
         if (\Imagick::COLORSPACE_SRGB !== $this->image->getColorspace()) {
@@ -179,7 +179,7 @@ class FileRobotMagick
         return $this->image;
     }
 
-    protected function applyCrop()
+    protected function applyCrop(): void
     {
         if ($this->state->cropX || $this->state->cropY || $this->state->cropWidth || $this->state->cropHeight) {
             $iw = $this->image->getImageWidth();
@@ -193,7 +193,7 @@ class FileRobotMagick
         }
     }
 
-    protected function applyFlipRotation()
+    protected function applyFlipRotation(): void
     {
         if ($this->state->isFlippedX) {
             $this->image->flopImage();
@@ -206,7 +206,7 @@ class FileRobotMagick
         }
     }
 
-    protected function applyResize()
+    protected function applyResize(): void
     {
         if ($this->state->resizeWidth || $this->state->resizeHeight) {
             $this->image->resizeImage(
@@ -218,7 +218,7 @@ class FileRobotMagick
         }
     }
 
-    protected function applyBrighten(?float $value = null)
+    protected function applyBrighten(?float $value = null): void
     {
         $brightness = $value ?? $this->state->brightness ?? 0;
         if (0 === $brightness) {
@@ -229,7 +229,7 @@ class FileRobotMagick
         $this->image->evaluateImage(\Imagick::EVALUATE_ADD, $brightness * 255 * 255, \Imagick::CHANNEL_ALL);
     }
 
-    protected function applyContrast(?float $value = null)
+    protected function applyContrast(?float $value = null): void
     {
         $contrast = $value ?? $this->state->contrast ?? 0;
         if (0 === $contrast) {
@@ -246,7 +246,7 @@ class FileRobotMagick
         $this->image->functionImage(\Imagick::FUNCTION_POLYNOMIAL, [$m, $c], \Imagick::CHANNEL_ALL);
     }
 
-    protected function applyHSV(?float $hue = null, ?float $saturation = null, ?float $value = null)
+    protected function applyHSV(?float $hue = null, ?float $saturation = null, ?float $value = null): void
     {
         $hue ??= $this->state->hue ?? 0;
         $saturation ??= $this->state->saturation ?? 0;
@@ -274,18 +274,17 @@ class FileRobotMagick
         $bg = 0.587 * $v - 0.586 * $vsu - 1.05 * $vsw;
         $bb = 0.114 * $v + 0.886 * $vsu - 0.2 * $vsw;
 
-        $colorMatrix = [
+        /** @psalm-suppress InvalidArgument */
+        $this->image->colorMatrixImage([
             $rr, $rg, $rb, 0, 0,
             $gr, $gg, $gb, 0, 0,
             $br, $bg, $bb, 0, 0,
             0, 0, 0, 1, 0,
             0, 0, 0, 0, 1,
-        ];
-
-        $this->image->colorMatrixImage($colorMatrix);
+        ]);
     }
 
-    protected function applyBlur()
+    protected function applyBlur(): void
     {
         if ($this->state->blurRadius <= 0) {
             return;
@@ -296,7 +295,7 @@ class FileRobotMagick
         $this->image->blurImage(0, $sigma);
     }
 
-    protected function applyWarmth()
+    protected function applyWarmth(): void
     {
         // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/finetunes/Warmth.js#L17-L28
         $warmth = ($this->state->warmth ?? 0);
@@ -310,20 +309,21 @@ class FileRobotMagick
     }
 
     // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/components/tools/Filters/Filters.constants.js#L8
-    protected function applyFilterInvert()
+    protected function applyFilterInvert(): void
     {
         $this->image->negateImage(false);
     }
 
-    protected function applyFilterBlackAndWhite()
+    protected function applyFilterBlackAndWhite(): void
     {
         // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/BlackAndWhite.js
         $this->image->thresholdImage(100 * 255);
     }
 
-    protected function applyFilterSepia()
+    protected function applyFilterSepia(): void
     {
         // https://github.com/konvajs/konva/blob/master/src/filters/Sepia.ts
+        /** @psalm-suppress InvalidArgument */
         $this->image->colorMatrixImage([
             0.393, 0.769, 0.189, 0, 0,
             0.349, 0.686, 0.168, 0, 0,
@@ -333,267 +333,267 @@ class FileRobotMagick
         ]);
     }
 
-    protected function applyFilterSolarize()
+    protected function applyFilterSolarize(): void
     {
         // https://github.com/konvajs/konva/blob/master/src/filters/Solarize.ts
         $this->image->solarizeImage(128 * 255);
     }
 
-    protected function applyFilterClarendon()
+    protected function applyFilterClarendon(): void
     {
         $this->applyBaseFilterBrightness(0.1);
         $this->applyBaseFilterContrast(0.1);
         $this->applyBaseFilterSaturation(0.15);
     }
 
-    protected function applyFilterGingham()
+    protected function applyFilterGingham(): void
     {
         $this->applyBaseFilterSepia(0.04);
         $this->applyBaseFilterContrast(-0.15);
     }
 
-    protected function applyFilterMoon()
+    protected function applyFilterMoon(): void
     {
         $this->applyBaseFilterGrayscale();
         $this->applyBaseFilterBrightness(0.1);
     }
 
-    protected function applyFilterLark()
+    protected function applyFilterLark(): void
     {
         $this->applyBaseFilterBrightness(0.08);
         $this->applyBaseFilterAdjustRGB(1, 1.03, 1.05);
         $this->applyBaseFilterSaturation(0.12);
     }
 
-    protected function applyFilterReyes()
+    protected function applyFilterReyes(): void
     {
         $this->applyBaseFilterSepia(0.4);
         $this->applyBaseFilterBrightness(0.13);
         $this->applyBaseFilterContrast(-0.05);
     }
 
-    protected function applyFilterJuno()
+    protected function applyFilterJuno(): void
     {
         $this->applyBaseFilterAdjustRGB(1.01, 1.04, 1);
         $this->applyBaseFilterSaturation(0.3);
     }
 
-    protected function applyFilterSlumber()
+    protected function applyFilterSlumber(): void
     {
         $this->applyBaseFilterBrightness(0.1);
         $this->applyBaseFilterSaturation(-0.5);
     }
 
-    protected function applyFilterCrema()
+    protected function applyFilterCrema(): void
     {
         $this->applyBaseFilterAdjustRGB(1.04, 1, 1.02);
         $this->applyBaseFilterSaturation(-0.05);
     }
 
-    protected function applyFilterLudwig()
+    protected function applyFilterLudwig(): void
     {
         $this->applyBaseFilterBrightness(0.05);
         $this->applyBaseFilterSaturation(-0.03);
     }
 
-    protected function applyFilterAden()
+    protected function applyFilterAden(): void
     {
         $this->applyBaseFilterColorFilter(228, 130, 225, 0.13);
         $this->applyBaseFilterSaturation(-0.2);
     }
 
-    protected function applyFilterPerpetua()
+    protected function applyFilterPerpetua(): void
     {
         $this->applyBaseFilterAdjustRGB(1.05, 1.1, 1);
     }
 
-    protected function applyFilterAmaro()
+    protected function applyFilterAmaro(): void
     {
         $this->applyBaseFilterSaturation(0.3);
         $this->applyBaseFilterBrightness(0.15);
     }
 
-    protected function applyFilterMayfair()
+    protected function applyFilterMayfair(): void
     {
         $this->applyBaseFilterColorFilter(230, 115, 108, 0.05);
         $this->applyBaseFilterSaturation(0.15);
     }
 
-    protected function applyFilterRise()
+    protected function applyFilterRise(): void
     {
         $this->applyBaseFilterColorFilter(255, 170, 0, 0.1);
         $this->applyBaseFilterBrightness(0.09);
         $this->applyBaseFilterSaturation(0.1);
     }
 
-    protected function applyFilterHudson()
+    protected function applyFilterHudson(): void
     {
         $this->applyBaseFilterAdjustRGB(1, 1, 1.25);
         $this->applyBaseFilterContrast(0.1);
         $this->applyBaseFilterBrightness(0.15);
     }
 
-    protected function applyFilterValencia()
+    protected function applyFilterValencia(): void
     {
         $this->applyBaseFilterColorFilter(255, 225, 80, 0.08);
         $this->applyBaseFilterSaturation(0.1);
         $this->applyBaseFilterContrast(0.05);
     }
 
-    protected function applyFilterXpro2()
+    protected function applyFilterXpro2(): void
     {
         $this->applyBaseFilterColorFilter(255, 255, 0, 0.07);
         $this->applyBaseFilterSaturation(0.2);
         $this->applyBaseFilterContrast(0.15);
     }
 
-    protected function applyFilterSierra()
+    protected function applyFilterSierra(): void
     {
         $this->applyBaseFilterContrast(-0.15);
         $this->applyBaseFilterSaturation(0.1);
     }
 
-    protected function applyFilterWillow()
+    protected function applyFilterWillow(): void
     {
         $this->applyBaseFilterGrayscale();
         $this->applyBaseFilterColorFilter(100, 28, 210, 0.03);
         $this->applyBaseFilterBrightness(0.1);
     }
 
-    protected function applyFilterLoFi()
+    protected function applyFilterLoFi(): void
     {
         $this->applyBaseFilterContrast(0.15);
         $this->applyBaseFilterSaturation(0.2);
     }
 
-    protected function applyFilterInkwell()
+    protected function applyFilterInkwell(): void
     {
         $this->applyBaseFilterGrayscale();
     }
 
-    protected function applyFilterHefe()
+    protected function applyFilterHefe(): void
     {
         $this->applyBaseFilterContrast(0.1);
         $this->applyBaseFilterSaturation(0.15);
     }
 
-    protected function applyFilterNashville()
+    protected function applyFilterNashville(): void
     {
         $this->applyBaseFilterColorFilter(220, 115, 188, 0.12);
         $this->applyBaseFilterContrast(-0.05);
     }
 
-    protected function applyFilterStinson()
+    protected function applyFilterStinson(): void
     {
         $this->applyBaseFilterBrightness(0.1);
         $this->applyBaseFilterSepia(0.3);
     }
 
-    protected function applyFilterVesper()
+    protected function applyFilterVesper(): void
     {
         $this->applyBaseFilterColorFilter(255, 225, 0, 0.05);
         $this->applyBaseFilterBrightness(0.06);
         $this->applyBaseFilterContrast(0.06);
     }
 
-    protected function applyFilterEarlybird()
+    protected function applyFilterEarlybird(): void
     {
         $this->applyBaseFilterColorFilter(255, 165, 40, 0.2);
     }
 
-    protected function applyFilterBrannan()
+    protected function applyFilterBrannan(): void
     {
         $this->applyBaseFilterContrast(0.2);
         $this->applyBaseFilterColorFilter(140, 10, 185, 0.1);
     }
 
-    protected function applyFilterSutro()
+    protected function applyFilterSutro(): void
     {
         $this->applyBaseFilterBrightness(-0.1);
         $this->applyBaseFilterContrast(-0.1);
     }
 
-    protected function applyFilterToaster()
+    protected function applyFilterToaster(): void
     {
         $this->applyBaseFilterSepia(0.1);
         $this->applyBaseFilterColorFilter(255, 145, 0, 0.2);
     }
 
-    protected function applyFilterWalden()
+    protected function applyFilterWalden(): void
     {
         $this->applyBaseFilterBrightness(0.1);
         $this->applyBaseFilterColorFilter(255, 255, 0, 0.2);
     }
 
-    protected function applyFilterNinteenSeventySeven()
+    protected function applyFilterNinteenSeventySeven(): void
     {
         $this->applyBaseFilterColorFilter(255, 25, 0, 0.15);
         $this->applyBaseFilterBrightness(0.1);
     }
 
-    protected function applyFilterKelvin()
+    protected function applyFilterKelvin(): void
     {
         $this->applyBaseFilterColorFilter(255, 140, 0, 0.1);
         $this->applyBaseFilterAdjustRGB(1.15, 1.05, 1);
         $this->applyBaseFilterSaturation(0.35);
     }
 
-    protected function applyFilterMaven()
+    protected function applyFilterMaven(): void
     {
         $this->applyBaseFilterColorFilter(225, 240, 0, 0.1);
         $this->applyBaseFilterSaturation(0.25);
         $this->applyBaseFilterContrast(0.05);
     }
 
-    protected function applyFilterGinza()
+    protected function applyFilterGinza(): void
     {
         $this->applyBaseFilterSepia(0.06);
         $this->applyBaseFilterBrightness(0.1);
     }
 
-    protected function applyFilterSkyline()
+    protected function applyFilterSkyline(): void
     {
         $this->applyBaseFilterSaturation(0.35);
         $this->applyBaseFilterBrightness(0.1);
     }
 
-    protected function applyFilterDogpatch()
+    protected function applyFilterDogpatch(): void
     {
         $this->applyBaseFilterContrast(0.15);
         $this->applyBaseFilterBrightness(0.1);
     }
 
-    protected function applyFilterBrooklyn()
+    protected function applyFilterBrooklyn(): void
     {
         $this->applyBaseFilterColorFilter(25, 240, 252, 0.05);
         $this->applyBaseFilterSepia(0.3);
     }
 
-    protected function applyFilterHelena()
+    protected function applyFilterHelena(): void
     {
         $this->applyBaseFilterColorFilter(208, 208, 86, 0.2);
         $this->applyBaseFilterContrast(0.15);
     }
 
-    protected function applyFilterAshby()
+    protected function applyFilterAshby(): void
     {
         $this->applyBaseFilterColorFilter(255, 160, 25, 0.1);
         $this->applyBaseFilterBrightness(0.1);
     }
 
-    protected function applyFilterCharmes()
+    protected function applyFilterCharmes(): void
     {
         $this->applyBaseFilterColorFilter(255, 50, 80, 0.12);
         $this->applyBaseFilterContrast(0.05);
     }
 
-    protected function applyBaseFilterBrightness(float $value)
+    protected function applyBaseFilterBrightness(float $value): void
     {
         // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/BaseFilters.js#L2
         $this->applyBrighten($value);
     }
 
-    protected function applyBaseFilterContrast(float $value)
+    protected function applyBaseFilterContrast(float $value): void
     {
         // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/BaseFilters.js#L14
         $value *= 255;
@@ -606,16 +606,17 @@ class FileRobotMagick
         $this->image->functionImage(\Imagick::FUNCTION_POLYNOMIAL, [$m, $c], \Imagick::CHANNEL_ALL);
     }
 
-    protected function applyBaseFilterSaturation(float $value)
+    protected function applyBaseFilterSaturation(float $value): void
     {
         // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/BaseFilters.js#L24
         $this->applyHSV(0, $value, 0); // lazy
     }
 
-    protected function applyBaseFilterGrayscale()
+    protected function applyBaseFilterGrayscale(): void
     {
         // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/BaseFilters.js#L38
         //  y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        /** @psalm-suppress InvalidArgument */
         $this->image->colorMatrixImage([
             0.2126, 0.7152, 0.0722, 0, 0,
             0.2126, 0.7152, 0.0722, 0, 0,
@@ -625,9 +626,10 @@ class FileRobotMagick
         ]);
     }
 
-    protected function applyBaseFilterSepia(float $value)
+    protected function applyBaseFilterSepia(float $value): void
     {
         // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/BaseFilters.js#L46
+        /** @psalm-suppress InvalidArgument */
         $this->image->colorMatrixImage([
             1 - 0.607 * $value, 0.769 * $value, 0.189 * $value, 0, 0,
             0.349 * $value, 1 - 0.314 * $value, 0.168 * $value, 0, 0,
@@ -637,9 +639,10 @@ class FileRobotMagick
         ]);
     }
 
-    protected function applyBaseFilterAdjustRGB(float $r, float $g, float $b)
+    protected function applyBaseFilterAdjustRGB(float $r, float $g, float $b): void
     {
         // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/BaseFilters.js#L57
+        /** @psalm-suppress InvalidArgument */
         $this->image->colorMatrixImage([
             $r, 0, 0, 0, 0,
             0, $g, 0, 0, 0,
@@ -649,7 +652,7 @@ class FileRobotMagick
         ]);
     }
 
-    protected function applyBaseFilterColorFilter(float $r, float $g, float $b, float $v)
+    protected function applyBaseFilterColorFilter(float $r, float $g, float $b, float $v): void
     {
         // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/BaseFilters.js#L63
         // y = x - (x - k) * v = (1 - v) * x + k * v

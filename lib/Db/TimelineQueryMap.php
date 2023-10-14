@@ -13,7 +13,7 @@ trait TimelineQueryMap
 
     protected IDBConnection $connection;
 
-    public function transformMapBoundsFilter(IQueryBuilder &$query, bool $aggregate, string $bounds, string $table = 'm')
+    public function transformMapBoundsFilter(IQueryBuilder &$query, bool $aggregate, string $bounds, string $table = 'm'): void
     {
         $bounds = explode(',', $bounds);
         $bounds = array_map('floatval', $bounds);
@@ -84,7 +84,7 @@ trait TimelineQueryMap
         return $clusters;
     }
 
-    public function getMapClusterPreviews(array $clusterIds)
+    public function getMapClusterPreviews(array $clusterIds): array
     {
         $query = $this->connection->getQueryBuilder();
 

@@ -83,7 +83,7 @@ abstract class Backend
     /**
      * Human readable name for the cluster.
      */
-    public function clusterName(string $name)
+    public function clusterName(string $name): string
     {
         return $name;
     }
@@ -92,7 +92,7 @@ abstract class Backend
      * Put the photo objects in priority list.
      * Works on the array in place.
      */
-    public function sortPhotosForPreview(array &$photos)
+    public function sortPhotosForPreview(array &$photos): void
     {
         shuffle($photos);
     }

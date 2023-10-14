@@ -296,7 +296,12 @@ class MigrateGoogleTakeout extends Command
         ++$this->nProcessed;
     }
 
-    protected function takeoutToExiftoolJson(array $json)
+    /**
+     * @return (float|mixed|string)[]
+     *
+     * @psalm-return array<string, float|mixed|string>
+     */
+    protected function takeoutToExiftoolJson(array $json): array
     {
         // Helper to get a value from nested JSON
         $get = static function (string $source) use ($json) {
