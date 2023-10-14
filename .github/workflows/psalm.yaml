@@ -33,4 +33,4 @@ jobs:
         run: |
           cd apps/memories
           make install-tools
-          make psalm
+          tools/vendor/bin/psalm --output-format=github --no-cache --shepherd --stats --threads=4
