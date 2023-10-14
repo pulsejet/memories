@@ -18,8 +18,19 @@
         type="url"
         id="server-url"
         class="m-input"
-        placeholder="https://nextcloud.example.com"
+        placeholder="nextcloud.example.com"
       />
+
+      <div class="trust">
+        <label for="trust-all">
+          <input
+            type="checkbox"
+            id="trust-all"
+            class="m-checkbox"
+          />
+          Disable certificate verification (unsafe)
+        </label>
+      </div>
 
       <button class="m-button login-button" id="login">
         Continue to Login
@@ -93,7 +104,11 @@
 
           // Login signal
           const encUrl = encodeURIComponent(encodeURIComponent(getMemoriesUrl().toString()));
-          await fetch(`http://127.0.0.1/api/login/${encUrl}`, {
+
+          // Trust all certificates
+          const trustAll = document.getElementById("trust-all").checked ? "1" : "0";
+
+          await fetch(`http://127.0.0.1/api/login/${encUrl}?trustAll=${trustAll}`, {
             method: "GET",
             signal: controller.signal,
           });

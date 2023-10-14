@@ -224,7 +224,12 @@ class NativeX(private val mCtx: MainActivity) {
 
         val parts = path.split("/").toTypedArray()
         return if (path.matches(API.LOGIN)) {
-            makeResponse(account.login(URLDecoder.decode(parts[3], "UTF-8")))
+            makeResponse(
+                account.login(
+                    URLDecoder.decode(parts[3], "UTF-8"),
+                    request.url.getBooleanQueryParameter("trustAll", false)
+                )
+            )
         } else if (path.matches(API.DAYS)) {
             makeResponse(query.getDays())
         } else if (path.matches(API.DAY)) {

@@ -5,6 +5,7 @@ import android.security.keystore.KeyProperties.KEY_ALGORITHM_AES
 import android.security.keystore.KeyProperties.PURPOSE_DECRYPT
 import android.security.keystore.KeyProperties.PURPOSE_ENCRYPT
 import android.util.Base64
+import gallery.memories.service.Credential
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -23,34 +24,35 @@ class SecureStorage(private val context: Context) {
         }
     }
 
-    fun saveCredentials(url: String, username: String, token: String) {
+    fun saveCredentials(cred: Credential) {
         val cipher = getCipher()
         cipher.init(Cipher.ENCRYPT_MODE, getSecretKey())
-        val encryptedToken = cipher.doFinal(token.toByteArray())
+        val encryptedToken = cipher.doFinal(cred.token.toByteArray())
 
         context.getSharedPreferences("credentials", Context.MODE_PRIVATE).edit()
-            .putString("url", url)
-            .putString("username", username)
+            .putString("url", cred.url)
+            .putBoolean("trustAll", cred.trustAll)
+            .putString("username", cred.username)
             .putString("encryptedToken", Base64.encodeToString(encryptedToken, Base64.DEFAULT))
             .putString("iv", Base64.encodeToString(cipher.iv, Base64.DEFAULT))
             .apply()
     }
 
-    fun getCredentials(): Triple<String, String, String>? {
+    fun getCredentials(): Credential? {
         val sharedPreferences = context.getSharedPreferences("credentials", Context.MODE_PRIVATE)
+
         val url = sharedPreferences.getString("url", null)
+        val trustAll = sharedPreferences.getBoolean("trustAll", false)
         val username = sharedPreferences.getString("username", null)
         val encryptedToken = sharedPreferences.getString("encryptedToken", null)
         val ivStr = sharedPreferences.getString("iv", null)
 
         if (url != null && username != null && encryptedToken != null && ivStr != null) {
-            val iv = Base64.decode(ivStr, Base64.DEFAULT)
-
             val cipher = getCipher()
+            val iv = Base64.decode(ivStr, Base64.DEFAULT)
             cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), IvParameterSpec(iv))
-
             val token = String(cipher.doFinal(Base64.decode(encryptedToken, Base64.DEFAULT)))
-            return Triple(url, username, token)
+            return Credential(url, trustAll, username, token)
         }
 
         return null
@@ -59,6 +61,7 @@ class SecureStorage(private val context: Context) {
     fun deleteCredentials() {
         context.getSharedPreferences("credentials", Context.MODE_PRIVATE).edit()
             .remove("url")
+            .remove("trustAll")
             .remove("encryptedUsername")
             .remove("encryptedToken")
             .remove("iv")

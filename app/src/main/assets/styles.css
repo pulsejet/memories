@@ -93,5 +93,15 @@ input.m-input:focus {
 
 .login-button {
   margin: 10px;
-  margin-top: 20px;
+  margin-top: 12px;
+}
+
+div.trust {
+  margin-top: 10px;
+}
+
+input[type="checkbox"] {
+  width: 1.5em;
+  height: 1.5em;
+  vertical-align: -3px;
 }

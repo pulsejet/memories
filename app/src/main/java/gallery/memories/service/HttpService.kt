@@ -10,15 +10,22 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.json.JSONArray
 import org.json.JSONObject
+import java.security.SecureRandom
+import java.security.cert.CertificateException
+import java.security.cert.X509Certificate
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
+
 
 class HttpService {
     companion object {
         val TAG = HttpService::class.java.simpleName
     }
 
-    private val client = OkHttpClient()
+    private var client = OkHttpClient()
     private var authHeader: String? = null
-    private var memoriesUrl: String? = null
+    private var baseUrl: String? = null
 
     /**
      * Check if the HTTP service is logged in
@@ -28,11 +35,45 @@ class HttpService {
     }
 
     /**
-     * Set the Memories URL
+     * Build the HTTP client
      * @param url The URL to use
+     * @param trustAll Whether to trust all certificates
      */
-    fun setBaseUrl(url: String?) {
-        memoriesUrl = url
+    fun build(url: String?, trustAll: Boolean) {
+        baseUrl = url
+        client = if (trustAll) {
+            val trustAllCerts = arrayOf<TrustManager>(
+                object : X509TrustManager {
+                    @Throws(CertificateException::class)
+                    override fun checkClientTrusted(
+                        chain: Array<X509Certificate>,
+                        authType: String
+                    ) {
+                    }
+
+                    @Throws(CertificateException::class)
+                    override fun checkServerTrusted(
+                        chain: Array<X509Certificate>,
+                        authType: String
+                    ) {
+                    }
+
+                    override fun getAcceptedIssuers(): Array<X509Certificate> {
+                        return arrayOf()
+                    }
+                }
+            )
+
+            val sslContext = SSLContext.getInstance("SSL")
+            sslContext.init(null, trustAllCerts, SecureRandom())
+
+            OkHttpClient.Builder()
+                .sslSocketFactory(sslContext.socketFactory, trustAllCerts[0] as X509TrustManager)
+                .hostnameVerifier({ hostname, session -> true })
+                .build()
+        } else {
+            OkHttpClient()
+        }
     }
 
     /**
@@ -56,8 +97,8 @@ class HttpService {
      */
     fun loadWebView(webView: WebView, subpath: String? = null): String? {
         // Load app interface if authenticated
-        if (authHeader != null && memoriesUrl != null) {
-            var url = memoriesUrl
+        if (authHeader != null && baseUrl != null) {
+            var url = baseUrl
             if (subpath != null) url += subpath
 
             // Get host name
@@ -104,20 +145,24 @@ class HttpService {
     /** Make login flow request */
     @Throws(Exception::class)
     fun postLoginFlow(loginFlowUrl: String): Response {
-        return runRequest(Request.Builder()
-            .url(loginFlowUrl)
-            .header("User-Agent", "Memories")
-            .post("".toRequestBody("application/json".toMediaTypeOrNull()))
-            .build())
+        return runRequest(
+            Request.Builder()
+                .url(loginFlowUrl)
+                .header("User-Agent", "Memories")
+                .post("".toRequestBody("application/json".toMediaTypeOrNull()))
+                .build()
+        )
     }
 
     /** Make login polling request */
     @Throws(Exception::class)
     fun getPollLogin(pollUrl: String, pollToken: String): Response {
-        return runRequest(Request.Builder()
-            .url(pollUrl)
-            .post("token=$pollToken".toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull()))
-            .build())
+        return runRequest(
+            Request.Builder()
+                .url(pollUrl)
+                .post("token=$pollToken".toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull()))
+                .build()
+        )
     }
 
     /** Run a request and get a JSON object */
@@ -129,7 +174,7 @@ class HttpService {
     /** Build a GET request */
     private fun buildGet(path: String, auth: Boolean = true): Request {
         val builder = Request.Builder()
-            .url(memoriesUrl + path)
+            .url(baseUrl + path)
             .header("User-Agent", "Memories")
             .get()
 

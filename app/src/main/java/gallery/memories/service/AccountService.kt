@@ -17,17 +17,19 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
     }
 
     private val store = SecureStorage(mCtx)
+    private var mTrustAll = false
 
     /**
      * Make the first request to log in
      * @param url The URL of the Nextcloud server
+     * @param trustAll Whether to trust all certificates
      */
-    fun login(url: String) {
+    fun login(url: String, trustAll: Boolean) {
         try {
-            Log.v(TAG, "login: Connecting to ${url}api/describe")
-            mHttp.setBaseUrl(url)
-            val res = mHttp.getApiDescription()
+            mTrustAll = trustAll
+            mHttp.build(url, trustAll)
 
+            val res = mHttp.getApiDescription()
             if (res.code != 200) {
                 throw Exception("${url}api/describe (status ${res.code})")
             }
@@ -185,36 +187,31 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
      * @param password The password to store
      */
     fun storeCredentials(url: String, user: String, password: String) {
-        store.saveCredentials(url, user, password)
-        mHttp.setBaseUrl(url)
-        mHttp.setAuthHeader(Pair(user, password))
-    }
-
-    /**
-     * Get the stored credentials
-     * @return The stored credentials
-     */
-    fun getCredentials(): Pair<String, String>? {
-        val saved = store.getCredentials()
-        if (saved == null) return null
-        mHttp.setBaseUrl(saved.first)
-        return Pair(saved.second, saved.third)
+        store.saveCredentials(Credential(
+            url = url,
+            trustAll = mTrustAll,
+            username = user,
+            token = password,
+        ))
+        refreshCredentials()
     }
 
     /**
      * Delete the stored credentials
      */
     fun deleteCredentials() {
-        mHttp.setAuthHeader(null)
-        mHttp.setBaseUrl(null)
         store.deleteCredentials()
+        mHttp.setAuthHeader(null)
+        mHttp.build(null, false)
     }
 
     /**
      * Refresh the authorization header
      */
-    fun refreshAuthHeader() {
-        mHttp.setAuthHeader(getCredentials())
+    fun refreshCredentials() {
+        val cred = store.getCredentials() ?: return
+        mHttp.build(cred.url, cred.trustAll)
+        mHttp.setAuthHeader(Pair(cred.username, cred.token))
     }
 
     /**

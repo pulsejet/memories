@@ -179,7 +179,7 @@ class MainActivity : AppCompatActivity() {
         // WebView.setWebContentsDebuggingEnabled(true);
 
         // Welcome page or actual app
-        nativex.account.refreshAuthHeader()
+        nativex.account.refreshCredentials()
         val isApp = loadDefaultUrl()
 
         // Start version check if loaded account
