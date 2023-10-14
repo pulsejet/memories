@@ -54,7 +54,7 @@ class FoldersController extends GenericApiController
                     'fileid' => $node->getId(),
                     'name' => $node->getName(),
                     'path' => $node->getPath(),
-                    'previews' => $this->timelineQuery->getRootPreviews($root),
+                    'previews' => $this->tq->getRootPreviews($root),
                 ];
             }, $folders);
 

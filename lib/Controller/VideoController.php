@@ -356,7 +356,7 @@ class VideoController extends GenericApiController
     private function getClosestLiveVideo(File $file): ?File
     {
         // Get stored video file (Apple MOV)
-        $liveRecords = $this->timelineQuery->getLivePhotos($file->getId());
+        $liveRecords = $this->tq->getLivePhotos($file->getId());
 
         // Get file paths for all live photos
         $liveFiles = array_map(fn ($r) => $this->rootFolder->getById((int) $r['fileid']), $liveRecords);

@@ -187,7 +187,7 @@ class ImageController extends GenericApiController
             $file = $this->fs->getUserFile($id);
 
             // Get the image info
-            $info = $this->timelineQuery->getInfoById($id, $basic);
+            $info = $this->tq->getInfoById($id, $basic);
 
             // Add fileid and etag
             $info['fileid'] = $file->getId();

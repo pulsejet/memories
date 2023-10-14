@@ -47,11 +47,11 @@ class MapController extends GenericApiController
             $clusterDensity = 1;
             $gridLen = 180.0 / (2 ** $zoom * $clusterDensity);
 
-            $clusters = $this->timelineQuery->getMapClusters($gridLen, $bounds);
+            $clusters = $this->tq->getMapClusters($gridLen, $bounds);
 
             // Get previews for each cluster
             $clusterIds = array_map(static fn ($cluster) => (int) $cluster['id'], $clusters);
-            $previews = $this->timelineQuery->getMapClusterPreviews($clusterIds);
+            $previews = $this->tq->getMapClusterPreviews($clusterIds);
 
             // Merge the responses
             $fileMap = [];
@@ -73,7 +73,7 @@ class MapController extends GenericApiController
     {
         return Util::guardEx(function () {
             return new JSONResponse([
-                'pos' => $this->timelineQuery->getMapInitialPosition(),
+                'pos' => $this->tq->getMapInitialPosition(),
             ]);
         });
     }

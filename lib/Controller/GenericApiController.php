@@ -43,7 +43,7 @@ abstract class GenericApiController extends ApiController
     protected IAppManager $appManager;
     protected IDBConnection $connection;
     protected LoggerInterface $logger;
-    protected TimelineQuery $timelineQuery;
+    protected TimelineQuery $tq;
     protected FsManager $fs;
 
     public function __construct(
@@ -54,7 +54,7 @@ abstract class GenericApiController extends ApiController
         IRootFolder $rootFolder,
         IAppManager $appManager,
         LoggerInterface $logger,
-        TimelineQuery $timelineQuery,
+        TimelineQuery $tq,
         FsManager $fs
     ) {
         parent::__construct(Application::APPNAME, $request);
@@ -65,7 +65,7 @@ abstract class GenericApiController extends ApiController
         $this->rootFolder = $rootFolder;
         $this->appManager = $appManager;
         $this->logger = $logger;
-        $this->timelineQuery = $timelineQuery;
+        $this->tq = $tq;
         $this->fs = $fs;
     }
 }

@@ -39,7 +39,7 @@ class DaysController extends GenericApiController
     public function days(): Http\Response
     {
         return Util::guardEx(function () {
-            $list = $this->timelineQuery->getDays(
+            $list = $this->tq->getDays(
                 $this->isRecursive(),
                 $this->isArchive(),
                 $this->getTransformations(),
@@ -90,7 +90,7 @@ class DaysController extends GenericApiController
             }
 
             // Run actual query
-            $list = $this->timelineQuery->getDay(
+            $list = $this->tq->getDay(
                 $dayIds,
                 $this->isRecursive(),
                 $this->isArchive(),
@@ -149,27 +149,27 @@ class DaysController extends GenericApiController
 
         // Filter only favorites
         if ($this->request->getParam('fav')) {
-            $transforms[] = [$this->timelineQuery, 'transformFavoriteFilter'];
+            $transforms[] = [$this->tq, 'transformFavoriteFilter'];
         }
 
         // Filter only videos
         if ($this->request->getParam('vid')) {
-            $transforms[] = [$this->timelineQuery, 'transformVideoFilter'];
+            $transforms[] = [$this->tq, 'transformVideoFilter'];
         }
 
         // Filter geological bounds
         if ($bounds = $this->request->getParam('mapbounds')) {
-            $transforms[] = [$this->timelineQuery, 'transformMapBoundsFilter', $bounds];
+            $transforms[] = [$this->tq, 'transformMapBoundsFilter', $bounds];
         }
 
         // Limit number of responses for day query
         if ($limit = $this->request->getParam('limit')) {
-            $transforms[] = [$this->timelineQuery, 'transformLimit', (int) $limit];
+            $transforms[] = [$this->tq, 'transformLimit', (int) $limit];
         }
 
         // Add extra fields for native callers
         if (Util::callerIsNative()) {
-            $transforms[] = [$this->timelineQuery, 'transformNativeQuery'];
+            $transforms[] = [$this->tq, 'transformNativeQuery'];
         }
 
         return $transforms;
@@ -208,7 +208,7 @@ class DaysController extends GenericApiController
         }
 
         if (\count($preloadDayIds) > 0) {
-            $allDetails = $this->timelineQuery->getDay(
+            $allDetails = $this->tq->getDay(
                 $preloadDayIds,
                 $this->isRecursive(),
                 $this->isArchive(),

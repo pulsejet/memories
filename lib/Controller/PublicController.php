@@ -30,7 +30,7 @@ class PublicController extends AuthPublicShareController
     protected IRootFolder $rootFolder;
     protected IShareManager $shareManager;
     protected IConfig $config;
-    protected TimelineQuery $timelineQuery;
+    protected TimelineQuery $tq;
 
     protected IShare $share;
 
@@ -45,7 +45,7 @@ class PublicController extends AuthPublicShareController
         IRootFolder $rootFolder,
         IShareManager $shareManager,
         IConfig $config,
-        TimelineQuery $timelineQuery
+        TimelineQuery $tq
     ) {
         parent::__construct($AppName, $request, $session, $urlGenerator);
         $this->eventDispatcher = $eventDispatcher;
@@ -54,7 +54,7 @@ class PublicController extends AuthPublicShareController
         $this->rootFolder = $rootFolder;
         $this->shareManager = $shareManager;
         $this->config = $config;
-        $this->timelineQuery = $timelineQuery;
+        $this->tq = $tq;
     }
 
     /**
@@ -230,7 +230,7 @@ class PublicController extends AuthPublicShareController
      */
     private function getSingleItemInitialState(\OCP\Files\File $file): array
     {
-        $data = $this->timelineQuery->getSingleItem($file->getId());
+        $data = $this->tq->getSingleItem($file->getId());
         if (null === $data) {
             throw new NotFoundException();
         }
