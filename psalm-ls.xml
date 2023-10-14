@@ -8,23 +8,24 @@
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
     cacheDirectory=".cache/psalm"
 >
-    <!-- The language server works slightly differently and has a different file -->
+    <!--
+        Duplication is due to differences in language server and CLI
+        The CLI needs the files in extraFiles since we specify lib as
+        the scan directory. The language server needs the files in
+        projectFiles since it doesn't seem to support extraFiles.
+    -->
     <projectFiles>
         <directory name="lib" />
-        <ignoreFiles>
-            <directory name="vendor" />
-            <directory name="../../lib" />
-            <directory name="../../apps/files" />
-            <directory name="../../3rdparty" />
-        </ignoreFiles>
-    </projectFiles>
-    <extraFiles>
         <directory name="../../lib" />
         <directory name="../../apps/files/lib/Event" />
         <directory name="../../3rdparty/doctrine" />
         <directory name="../../3rdparty/psr" />
         <directory name="../../3rdparty/guzzlehttp" />
-    </extraFiles>
+
+        <ignoreFiles>
+            <directory name="vendor" />
+        </ignoreFiles>
+    </projectFiles>
     <issueHandlers>
         <UndefinedDocblockClass>
             <errorLevel type="suppress">
