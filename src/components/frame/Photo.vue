@@ -207,7 +207,7 @@ export default defineComponent({
         this.data.facerect.x * img.naturalWidth,
         this.data.facerect.y * img.naturalHeight,
         this.data.facerect.w * img.naturalWidth,
-        this.data.facerect.h * img.naturalHeight
+        this.data.facerect.h * img.naturalHeight,
       );
 
       canvas.toBlob(
@@ -216,7 +216,7 @@ export default defineComponent({
           this.faceSrc = URL.createObjectURL(blob);
         },
         'image/jpeg',
-        0.95
+        0.95,
       );
     },
 
@@ -263,7 +263,10 @@ export default defineComponent({
     padding: 1px;
   }
 
-  transition: background-color 0.15s ease, opacity 0.2s ease-in, transform 0.2s ease-in;
+  transition:
+    background-color 0.15s ease,
+    opacity 0.2s ease-in,
+    transform 0.2s ease-in;
 
   &.leaving {
     transform: scale(0.9);
@@ -390,7 +393,9 @@ div.img-outer {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     pointer-events: none;
-    transition: border-radius 0.1s ease-in, transform 0.3s ease-in-out;
+    transition:
+      border-radius 0.1s ease-in,
+      transform 0.3s ease-in-out;
 
     .p-outer.placeholder > & {
       display: none;

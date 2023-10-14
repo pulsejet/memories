@@ -130,7 +130,7 @@ export default defineComponent({
             // replace the temporary tag ID with the real one
             const i = add.findIndex((y) => y === x.id);
             add[i] = tag.id;
-          })
+          }),
         );
       }
 

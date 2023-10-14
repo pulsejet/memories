@@ -63,7 +63,7 @@ export default defineComponent({
         showError(
           this.t('memories', 'Only user "{user}" can delete this person', {
             user,
-          })
+          }),
         );
         return;
       }
@@ -89,7 +89,7 @@ export default defineComponent({
         showError(
           this.t('photos', 'Failed to delete {name}.', {
             name: this.name,
-          })
+          }),
         );
       }
     },

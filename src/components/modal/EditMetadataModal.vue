@@ -202,13 +202,13 @@ export default defineComponent({
           (p) =>
             !p.imageInfo?.exif?.DateTimeOriginal &&
             !p.imageInfo?.exif?.CreateDate &&
-            !exifs.get(p.fileid)!.DateTimeOriginal
+            !exifs.get(p.fileid)!.DateTimeOriginal,
         ) &&
         (await utils.confirmDestructive({
           title: this.t('memories', 'Missing date metadata'),
           message: this.t(
             'memories',
-            'Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time.'
+            'Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time.',
           ),
         }))
       ) {
@@ -280,7 +280,7 @@ export default defineComponent({
         showError(
           this.t('memories', 'Failed to load metadata for {n} photos.', {
             n: photos.length - valid.length,
-          })
+          }),
         );
       }
 
@@ -290,7 +290,7 @@ export default defineComponent({
         showError(
           this.t('memories', '{n} photos cannot be edited (permissions error).', {
             n: valid.length - updatable.length,
-          })
+          }),
         );
       }
 

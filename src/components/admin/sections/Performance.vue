@@ -9,7 +9,7 @@
             ? t('memories', 'HTTPS is enabled')
             : t(
                 'memories',
-                'You are accessing this page over an insecure context. Several browser APIs are not available, which will make Memories very slow. Enable HTTPS on your server to improve performance.'
+                'You are accessing this page over an insecure context. Several browser APIs are not available, which will make Memories very slow. Enable HTTPS on your server to improve performance.',
               )
         }}
       </NcNoteCard>

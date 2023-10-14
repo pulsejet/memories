@@ -71,6 +71,7 @@
     "@types/url-parse": "^1.4.9",
     "@types/videojs-contrib-quality-levels": "^2.0.2",
     "playwright": "^1.39.0",
+    "prettier": "^3.0.3",
     "typescript": "^5.2.2",
     "workbox-webpack-plugin": "^7.0.0"
   }

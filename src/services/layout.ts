@@ -19,7 +19,7 @@ export function getLayout(
     numCols: number;
     allowBreakout: boolean;
     seed: number;
-  }
+  },
 ): {
   top: number;
   left: number;

@@ -245,7 +245,7 @@ export default defineComponent({
     async chooseFoldersPath() {
       const newPath = await utils.chooseNcFolder(
         this.t('memories', 'Choose the root for the folders view'),
-        this.config.folders_path
+        this.config.folders_path,
       );
 
       if (newPath !== this.config.folders_path) {

@@ -604,7 +604,9 @@ export default defineComponent({
   z-index: 100; // below top-matter and top-bar
   cursor: ns-resize;
   opacity: 0;
-  transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+  transition:
+    opacity 0.2s ease-in-out,
+    visibility 0.2s ease-in-out;
 
   // Show on hover or scroll of main window
   &:hover,

@@ -67,7 +67,7 @@ export async function* favoritePhotos(photos: IPhoto[], favoriteState: boolean) 
       showError(
         t('memories', 'Failed to favorite {fileName}.', {
           fileName: fileInfo.originalFilename,
-        })
+        }),
       );
       return 0;
     }

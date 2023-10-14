@@ -215,7 +215,7 @@ export default defineComponent({
 
     listableSelectedCollaboratorsKeys(): string[] {
       return this.selectedCollaboratorsKeys.filter(
-        (collaboratorKey) => this.availableCollaborators[collaboratorKey].type !== Type.SHARE_TYPE_LINK
+        (collaboratorKey) => this.availableCollaborators[collaboratorKey].type !== Type.SHARE_TYPE_LINK,
       );
     },
 

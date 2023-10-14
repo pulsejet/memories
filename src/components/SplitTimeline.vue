@@ -233,7 +233,9 @@ export default defineComponent({
     opacity: 0.1;
     cursor: col-resize;
     margin: 0 0 0 auto;
-    transition: opacity 0.4s ease-out, background-color 0.4s ease-out;
+    transition:
+      opacity 0.4s ease-out,
+      background-color 0.4s ease-out;
   }
 
   > .separator:hover {
@@ -273,7 +275,9 @@ export default defineComponent({
 
       // Note: you can't use transforms to animate the top
       // because it causes the viewer to be rendered incorrectly
-      transition: top 0.2s ease, height 0.2s ease;
+      transition:
+        top 0.2s ease,
+        height 0.2s ease;
 
       > .timeline-header {
         height: 58px;

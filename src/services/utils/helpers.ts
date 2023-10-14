@@ -217,7 +217,7 @@ export function getViewerRoute(photo: IPhoto) {
 export async function chooseNcFolder(
   title: string,
   initial: string = '/',
-  type: FilePickerType = FilePickerType.Choose
+  type: FilePickerType = FilePickerType.Choose,
 ) {
   const picker = getFilePickerBuilder(title)
     .setMultiSelect(false)

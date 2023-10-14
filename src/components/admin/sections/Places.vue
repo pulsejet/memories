@@ -39,14 +39,14 @@
       {{
         t(
           'memories',
-          'Memories supports offline reverse geocoding using the OpenStreetMaps data on MySQL and Postgres.'
+          'Memories supports offline reverse geocoding using the OpenStreetMaps data on MySQL and Postgres.',
         )
       }}
       <br />
       {{
         t(
           'memories',
-          'You need to download the planet data into your database. This is highly recommended and has low overhead.'
+          'You need to download the planet data into your database. This is highly recommended and has low overhead.',
         )
       }}
       <br />
@@ -116,7 +116,7 @@ export default defineComponent({
       // construct warning
       const warnSetup = this.t(
         'memories',
-        'Looks like the database is already setup. Are you sure you want to redownload planet data?'
+        'Looks like the database is already setup. Are you sure you want to redownload planet data?',
       );
       const warnLong = this.t('memories', 'You are about to download the planet database. This may take a while.');
       const warnReindex = this.t('memories', 'This may also cause all photos to be re-indexed!');

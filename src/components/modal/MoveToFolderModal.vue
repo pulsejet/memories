@@ -64,7 +64,7 @@ export default defineComponent({
       let destination = await utils.chooseNcFolder(
         this.t('memories', 'Choose a folder'),
         this.config.folders_path,
-        FilePickerType.Move
+        FilePickerType.Move,
       );
       // Fails if the target exists, same behavior with Nextcloud files implementation.
       const gen = dav.movePhotos(this.photos, destination, false);

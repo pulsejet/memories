@@ -294,7 +294,7 @@ export default defineComponent({
           this.metadataComponent?.$destroy?.();
           this.metadataComponent = null;
         },
-      })
+      }),
     );
 
     // Check for native interface

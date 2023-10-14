@@ -35,7 +35,7 @@
         {{
           t(
             'memories',
-            'Looks like it has been more than an hour since the last index job was run. Make sure Nextcloud cron is configured correctly.'
+            'Looks like it has been more than an hour since the last index job was run. Make sure Nextcloud cron is configured correctly.',
           )
         }}
       </NcNoteCard>
@@ -43,7 +43,7 @@
         {{
           t(
             'memories',
-            'Only server-side encryption (OC_DEFAULT_MODULE) is supported, but another encryption module is enabled.'
+            'Only server-side encryption (OC_DEFAULT_MODULE) is supported, but another encryption module is enabled.',
           )
         }}
       </NcNoteCard>
@@ -53,7 +53,7 @@
       {{
         t(
           'memories',
-          'The EXIF indexes are built and checked in a periodic background task. Be careful when selecting anything other than automatic indexing. For example, setting the indexing to only timeline folders may cause delays before media becomes available to users, since the user configures the timeline only after logging in.'
+          'The EXIF indexes are built and checked in a periodic background task. Be careful when selecting anything other than automatic indexing. For example, setting the indexing to only timeline folders may cause delays before media becomes available to users, since the user configures the timeline only after logging in.',
         )
       }}
       {{ t('memories', 'Folders with a ".nomedia" or a ".nomemories" file are always excluded from indexing.') }}

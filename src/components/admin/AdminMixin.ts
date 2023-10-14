@@ -62,7 +62,7 @@ export default defineComponent({
             info: status.substring(10),
           },
           0,
-          noescape
+          noescape,
         );
       } else if (status.startsWith('test_ok')) {
         return this.t(
@@ -73,7 +73,7 @@ export default defineComponent({
             info: status.substring(8),
           },
           0,
-          noescape
+          noescape,
         );
       } else {
         return this.t('memories', '{name} binary status: {status}.', {

@@ -16,7 +16,7 @@ registerRoute(
         maxEntries: 1000, // 1k videos
       }),
     ],
-  })
+  }),
 );
 
 // Important: Using the NetworkOnly strategy and not registering
@@ -31,7 +31,7 @@ registerRoute(
   ({ url }) => url.origin === self.location.origin && url.pathname.endsWith('/apps/memories/'),
   new NetworkFirst({
     cacheName: 'memories-pages',
-  })
+  }),
 );
 
 // Cache pages for same-origin requests only
@@ -45,7 +45,7 @@ registerRoute(
         maxEntries: 2000, // assets
       }),
     ],
-  })
+  }),
 );
 
 self.addEventListener('activate', (event) => {

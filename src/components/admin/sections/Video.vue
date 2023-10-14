@@ -8,7 +8,7 @@
       {{
         t(
           'memories',
-          'Note that this may be very CPU intensive without hardware acceleration, and transcoding will not be used for external storage.'
+          'Note that this may be very CPU intensive without hardware acceleration, and transcoding will not be used for external storage.',
         )
       }}
 

@@ -233,7 +233,7 @@ export default defineComponent({
         fullName?: string;
         imageBase64?: string;
       },
-      state: any
+      state: any,
     ): Promise<void> {
       // Copy state
       state = JSON.parse(JSON.stringify(state));

@@ -462,7 +462,7 @@ export default defineComponent({
         } else {
           this.touchScrollDelta = Math.min(
             (touch.clientY - _m.window.innerHeight + TOUCH_SELECT_CLAMP.bottom) / 3,
-            TOUCH_SELECT_CLAMP.maxDelta
+            TOUCH_SELECT_CLAMP.maxDelta,
           );
         }
 
@@ -501,7 +501,7 @@ export default defineComponent({
       const recyclerRect = this.recycler?.getBoundingClientRect();
       const clampedY = Math.max(
         (recyclerRect?.top ?? 0) + TOUCH_SELECT_CLAMP.bufferPx,
-        Math.min((recyclerRect?.bottom ?? 0) - TOUCH_SELECT_CLAMP.bufferPx, touch.clientY)
+        Math.min((recyclerRect?.bottom ?? 0) - TOUCH_SELECT_CLAMP.bufferPx, touch.clientY),
       );
 
       // Which photo is the cursor over, if any

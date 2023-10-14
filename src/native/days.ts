@@ -136,7 +136,7 @@ export function processFreshServerDay(this: any, dayId: number, photos: IPhoto[]
       auids.clear();
       buids.clear();
     },
-    1000
+    1000,
   );
 }
 
