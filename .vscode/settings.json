@@ -1,5 +1,4 @@
 {
-  "intelephense.environment.phpVersion": "7.4.0",
   "intelephense.stubs": [
     "apache",
     "bcmath",
@@ -75,8 +74,19 @@
     "zlib",
     "imagick"
   ],
+  "intelephense.environment.phpVersion": "8.0.0",
+  "intelephense.environment.documentRoot": "${workspaceFolder}/../../",
+  "php-cs-fixer.allow-risky": true,
+  "psalm.disableAutoComplete": true,
   "[php]": {
-    "editor.formatOnSave": false
+    "editor.defaultFormatter": "muuvmuuv.vscode-just-php-cs-fixer"
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "vetur.experimental.templateInterpolationService": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[markdown]": {
     "files.trimTrailingWhitespace": false
@@ -87,6 +97,5 @@
     "**/patches": true
   },
   "git.alwaysSignOff": true,
-  "intelephense.environment.documentRoot": "/var/www/html",
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
 }

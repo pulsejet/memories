@@ -43,4 +43,4 @@ jobs:
         run: |
           cd apps/memories
           make install-tools
-          vendor/bin/psalm --no-cache --shepherd --stats --threads=4
+          vendor/bin/psalm --no-cache --shepherd --stats --threads=4 lib

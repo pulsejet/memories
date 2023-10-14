@@ -10,10 +10,10 @@ install-tools:
 	composer install
 
 php-lint:
-	vendor/bin/php-cs-fixer fix lib
+	vendor/bin/php-cs-fixer fix
 
 psalm:
-	vendor/bin/psalm
+	vendor/bin/psalm lib
 
 npm-init:
 	npm ci

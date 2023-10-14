@@ -6,14 +6,25 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+    cacheDirectory=".cache/psalm"
 >
     <projectFiles>
         <directory name="lib" />
+
+        <!--
+            Duplication is due to differences in language server and CLI
+            The CLI needs the files in extraFiles since we specify lib as
+            the scan directory. The language server needs the files in
+            projectFiles since it doesn't seem to support extraFiles.
+        -->
+        <directory name="../../lib" />
+        <directory name="../../apps/files/lib/Event" />
+        <directory name="../../3rdparty/doctrine" />
+        <directory name="../../3rdparty/psr" />
+        <directory name="../../3rdparty/guzzlehttp" />
+
         <ignoreFiles>
-            <!-- Careful to not exclude ourselves! -->
-            <directory name="../../lib" />
-            <directory name="../../apps/files" />
-            <directory name="../../3rdparty" />
+            <directory name="vendor" />
         </ignoreFiles>
     </projectFiles>
     <extraFiles>
@@ -22,7 +33,6 @@
         <directory name="../../3rdparty/doctrine" />
         <directory name="../../3rdparty/psr" />
         <directory name="../../3rdparty/guzzlehttp" />
-        <directory name="../../3rdparty/doctrine" />
     </extraFiles>
     <issueHandlers>
         <UndefinedDocblockClass>
