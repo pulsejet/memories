@@ -48,7 +48,16 @@ class TimelineRoot
         foreach ($this->folderPaths as $id => $folderPath) {
             $mounts = $manager->findIn($folderPath);
             foreach ($mounts as $mount) {
-                $this->setFolder($mount->getStorageRootId(), null, $mount->getMountPoint());
+                $id = $mount->getStorageRootId();
+                $path = $mount->getMountPoint();
+
+                // Ignore hidden mounts or any mounts in hidden folders
+                // (any edge cases/exceptions here?)
+                if (str_contains($path, '/.')) {
+                    continue;
+                }
+
+                $this->setFolder($id, null, $path);
             }
         }
     }
