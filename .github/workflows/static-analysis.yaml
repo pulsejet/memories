@@ -6,7 +6,7 @@ on:
 
 jobs:
   php-cs-fixer:
-    name: PHP-CS-Fixer
+    name: PHP Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -44,3 +44,16 @@ jobs:
           cd apps/memories
           make install-tools
           vendor/bin/psalm --no-cache --shepherd --stats --threads=4 lib
+
+  prettier:
+    name: Vue/Typescript Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the app
+        uses: actions/checkout@v3
+
+      - name: Install Pretter
+        run: npm install -g prettier
+
+      - name: Run Prettier
+        run: npx prettier src --check
