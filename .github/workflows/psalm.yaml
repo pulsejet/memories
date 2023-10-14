@@ -1,0 +1,36 @@
+name: pslam
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  pslam:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout server
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          repository: nextcloud/server
+          ref: stable27
+
+      - name: Checkout the app
+        uses: actions/checkout@v3
+        with:
+          path: apps/memories
+
+      - name: Set up php ${{ matrix.php-versions }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          tools: phpunit
+          extensions: mbstring, iconv, fileinfo, intl
+          coverage: none
+
+      - name: Run tests
+        run: |
+          cd apps/memories
+          make install-tools
+          make psalm

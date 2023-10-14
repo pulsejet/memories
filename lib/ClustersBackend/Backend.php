@@ -69,7 +69,7 @@ abstract class Backend
     /**
      * Get a cluster ID for the given cluster.
      *
-     * @return string|int
+     * @return int|string
      */
     abstract public static function getClusterId(array $cluster);
 
