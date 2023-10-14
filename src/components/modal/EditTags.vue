@@ -67,13 +67,7 @@ export default defineComponent({
     },
 
     tagFilter(element: dav.ITag, index: number) {
-      return (
-        element.id >= 2 &&
-        element.displayName !== '' &&
-        element.canAssign &&
-        element.userAssignable &&
-        element.userVisible
-      );
+      return element.displayName !== '' && element.canAssign && element.userAssignable && element.userVisible;
     },
 
     tagLabel({ displayName }: dav.ITag) {
@@ -82,7 +76,7 @@ export default defineComponent({
 
     createOption(newDisplayName: string): dav.ITag {
       // do not create tags that already exist
-      const existing = this.getAvailable().find((x) => x.displayName === newDisplayName && this.tagFilter(x, 0));
+      const existing = this.getAvailable().find((x) => x.displayName === newDisplayName);
       if (existing) {
         return existing;
       }

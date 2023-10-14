@@ -38,6 +38,7 @@ export async function createTag(tag: ITag): Promise<ITag> {
   const postData = {
     ...tag,
     name: tag.displayName, // weird
+    id: undefined,
   };
 
   try {
@@ -56,6 +57,13 @@ export async function createTag(tag: ITag): Promise<ITag> {
 
     throw new Error(t('memories', 'No content-location header found'));
   } catch (error) {
+    if (error?.status === 409) {
+      // Tag already exists. Now this may happen e.g. if the tag isn't
+      // assignable or visible to the user and cause problems later.
+      // But that's not our problem here.
+      return tag;
+    }
+
     throw new Error(
       t('memories', 'Failed to create tag {name}: {error}', {
         name: tag.displayName,

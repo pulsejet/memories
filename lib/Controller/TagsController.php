@@ -33,6 +33,10 @@ class TagsController extends GenericApiController
     /**
      * @NoAdminRequired
      *
+     * @param int   $id     File ID
+     * @param int[] $add    Tags to add
+     * @param int[] $remove Tags to remove
+     *
      * Set tags for a file
      */
     public function set(int $id, array $add, array $remove): Http\Response
