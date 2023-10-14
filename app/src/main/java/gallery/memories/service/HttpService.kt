@@ -25,7 +25,14 @@ class HttpService {
 
     private var client = OkHttpClient()
     private var authHeader: String? = null
-    private var baseUrl: String? = null
+    private var mBaseUrl: String? = null
+    private var mTrustAll = false
+
+    /**
+     * Check if all certificates are trusted
+     */
+    val isTrustingAllCertificates: Boolean
+        get() = mTrustAll
 
     /**
      * Check if the HTTP service is logged in
@@ -40,7 +47,8 @@ class HttpService {
      * @param trustAll Whether to trust all certificates
      */
     fun build(url: String?, trustAll: Boolean) {
-        baseUrl = url
+        mBaseUrl = url
+        mTrustAll = trustAll
         client = if (trustAll) {
             val trustAllCerts = arrayOf<TrustManager>(
                 object : X509TrustManager {
@@ -97,8 +105,8 @@ class HttpService {
      */
     fun loadWebView(webView: WebView, subpath: String? = null): String? {
         // Load app interface if authenticated
-        if (authHeader != null && baseUrl != null) {
-            var url = baseUrl
+        if (authHeader != null && mBaseUrl != null) {
+            var url = mBaseUrl
             if (subpath != null) url += subpath
 
             // Get host name
@@ -174,7 +182,7 @@ class HttpService {
     /** Build a GET request */
     private fun buildGet(path: String, auth: Boolean = true): Request {
         val builder = Request.Builder()
-            .url(baseUrl + path)
+            .url(mBaseUrl + path)
             .header("User-Agent", "Memories")
             .get()
 

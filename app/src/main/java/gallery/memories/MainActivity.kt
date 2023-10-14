@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -11,6 +12,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.WindowInsetsController
 import android.webkit.CookieManager
+import android.webkit.SslErrorHandler
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -28,6 +30,7 @@ import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import gallery.memories.databinding.ActivityMainBinding
 import java.util.concurrent.Executors
+
 
 @UnstableApi
 class MainActivity : AppCompatActivity() {
@@ -148,6 +151,19 @@ class MainActivity : AppCompatActivity() {
                 return if (request.url.host == "127.0.0.1") {
                     nativex.handleRequest(request)
                 } else null
+            }
+
+            override fun onReceivedSslError(
+                view: WebView?,
+                handler: SslErrorHandler?,
+                error: SslError?
+            ) {
+                if (nativex.http.isTrustingAllCertificates) {
+                    handler?.proceed()
+                } else {
+                    nativex.toast("Failed to load due to SSL error: ${error?.primaryError}", true)
+                    super.onReceivedSslError(view, handler, error)
+                }
             }
         }
 

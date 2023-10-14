@@ -17,7 +17,6 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
     }
 
     private val store = SecureStorage(mCtx)
-    private var mTrustAll = false
 
     /**
      * Make the first request to log in
@@ -26,7 +25,6 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
      */
     fun login(url: String, trustAll: Boolean) {
         try {
-            mTrustAll = trustAll
             mHttp.build(url, trustAll)
 
             val res = mHttp.getApiDescription()
@@ -189,7 +187,7 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
     fun storeCredentials(url: String, user: String, password: String) {
         store.saveCredentials(Credential(
             url = url,
-            trustAll = mTrustAll,
+            trustAll = mHttp.isTrustingAllCertificates,
             username = user,
             token = password,
         ))
