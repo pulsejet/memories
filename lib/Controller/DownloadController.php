@@ -186,6 +186,9 @@ class DownloadController extends GenericApiController
 
             // Open file to send
             $res = $file->fopen('rb');
+            if (false === $res) {
+                throw new \Exception('Failed to open file on disk');
+            }
 
             // Seek to start if not zero
             if ($seekStart > 0) {

@@ -299,7 +299,7 @@ class Index
      */
     private function log(string $message, bool $overwrite = false): void
     {
-        if ($this->output) {
+        if ($this->section) {
             if ($overwrite) {
                 $this->section->clear(1);
             }

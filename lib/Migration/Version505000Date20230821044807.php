@@ -81,7 +81,7 @@ class Version505000Date20230821044807 extends SimpleMigrationStep
                 ->executeQuery()
                 ->fetchOne()
             ;
-            $output->startProgress($maxCount);
+            $output->startProgress((int) $maxCount);
 
             // get the required records
             $result = $this->dbc->getQueryBuilder()

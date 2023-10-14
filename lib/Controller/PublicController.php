@@ -162,11 +162,11 @@ class PublicController extends AuthPublicShareController
         return null !== $this->share->getPassword();
     }
 
-    protected function redirectIfOwned(IShare $share)
+    protected function redirectIfOwned(IShare $share): void
     {
         $user = $this->userSession->getUser();
         if (!$user) {
-            return null;
+            return;
         }
 
         /** @var \OCP\Files\Node */
@@ -180,16 +180,16 @@ class PublicController extends AuthPublicShareController
             $userFolder = $this->rootFolder->getUserFolder($user->getUID());
             $nodes = $userFolder->getById($share->getNodeId());
             if (0 === \count($nodes)) {
-                return null;
+                return;
             }
             $node = $nodes[0];
         } catch (NotFoundException $e) {
-            return null;
+            return;
         }
 
         // Check if node is a folder
         if (!$node instanceof \OCP\Files\Folder) {
-            return null;
+            return;
         }
 
         // Remove user folder path from start of node path
@@ -203,7 +203,7 @@ class PublicController extends AuthPublicShareController
 
         // Check if relPath starts with foldersPath
         if (0 !== strpos($relPath, $foldersPath)) {
-            return null;
+            return;
         }
 
         // Remove foldersPath from start of relPath

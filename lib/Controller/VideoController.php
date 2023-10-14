@@ -162,6 +162,11 @@ class VideoController extends GenericApiController
                     throw Exceptions::NotFound('Could not read binary EXIF field');
                 }
             } elseif (str_starts_with($liveid, 'self__traileroffset=')) {
+                // Make sure we have a path
+                if (!$path) {
+                    throw Exceptions::BadRequest('File path missing for self__traileroffset');
+                }
+
                 // Remove prefix
                 $offset = (int) substr($liveid, \strlen('self__traileroffset='));
                 if ($offset <= 0) {

@@ -17,7 +17,7 @@ class Exif
     /** Opened instance of exiftool when running in command mode */
     private static $staticProc;
     private static $staticPipes;
-    private static $noStaticProc = false;
+    private static bool $noStaticProc = false;
 
     public static function closeStaticExiftoolProc(): void
     {
@@ -334,6 +334,9 @@ class Exif
     {
         // Get path to local file so we can skip reading
         $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+        if (!$path) {
+            throw new \Exception('Failed to get local file path');
+        }
 
         // Set exif data
         self::setExif($path, $data);

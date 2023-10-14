@@ -99,7 +99,7 @@ class DaysController extends GenericApiController
             );
 
             // Force month id for dayId for month view
-            if ($this->isMonthView()) {
+            if ($this->isMonthView() && $dayIds) {
                 foreach ($list as &$photo) {
                     $photo['dayid'] = (int) $dayIds[0];
                 }
@@ -189,7 +189,7 @@ class DaysController extends GenericApiController
         }
 
         // Build identical transforms for sub queries
-        $transforms = $this->getTransformations(false);
+        $transforms = $this->getTransformations();
         $preloaded = 0;
         $preloadDayIds = [];
         $preloadDays = [];

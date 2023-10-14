@@ -29,11 +29,11 @@ class LivePhoto
     }
 
     /** Get liveid from photo part */
-    public function getLivePhotoId(File $file, array $exif)
+    public function getLivePhotoId(File $file, array $exif): string
     {
         // Apple JPEG (MOV has ContentIdentifier)
         if (\array_key_exists('MediaGroupUUID', $exif)) {
-            return $exif['MediaGroupUUID'];
+            return (string) $exif['MediaGroupUUID'];
         }
 
         // Google MVIMG and Samsung JPEG

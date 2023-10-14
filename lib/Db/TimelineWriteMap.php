@@ -17,15 +17,15 @@ trait TimelineWriteMap
      * Get the cluster ID for a given point.
      * If the cluster ID changes, update the old cluster and the new cluster.
      *
-     * @param int        $prevCluster The current cluster ID of the point
-     * @param null|float $lat         The latitude of the point
-     * @param null|float $lon         The longitude of the point
-     * @param null|float $oldLat      The old latitude of the point
-     * @param null|float $oldLon      The old longitude of the point
+     * @param int    $prevCluster The current cluster ID of the point
+     * @param ?float $lat         The latitude of the point
+     * @param ?float $lon         The longitude of the point
+     * @param ?float $oldLat      The old latitude of the point
+     * @param ?float $oldLon      The old longitude of the point
      *
      * @return int The new cluster ID
      */
-    protected function mapGetCluster(int $prevCluster, $lat, $lon, $oldLat, $oldLon): int
+    protected function mapGetCluster(int $prevCluster, ?float $lat, ?float $lon, ?float $oldLat, ?float $oldLon): int
     {
         // Just remove from old cluster if the point is no longer valid
         if (null === $lat || null === $lon) {
@@ -140,11 +140,11 @@ trait TimelineWriteMap
     /**
      * Remove a point from a cluster.
      *
-     * @param int   $clusterId The ID of the cluster
-     * @param float $lat       The latitude of the point
-     * @param float $lon       The longitude of the point
+     * @param int    $clusterId The ID of the cluster
+     * @param ?float $lat       The latitude of the point
+     * @param ?float $lon       The longitude of the point
      */
-    private function mapRemoveFromCluster(int $clusterId, $lat, $lon): void
+    private function mapRemoveFromCluster(int $clusterId, ?float $lat, ?float $lon): void
     {
         if ($clusterId <= 0 || null === $lat || null === $lon) {
             return;

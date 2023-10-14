@@ -229,18 +229,20 @@ class AdminController extends GenericApiController
         bool $testIfFile = true,
         bool $testIfExecutable = true
     ): string {
-        if ($testIfFile) {
-            if ($path instanceof \Closure) {
-                try {
-                    $path = $path();
-                } catch (\Exception $e) {
-                    return 'test_fail:'.$e->getMessage();
-                }
+        if ($path instanceof \Closure) {
+            try {
+                $path = $path();
+            } catch (\Exception $e) {
+                return 'test_fail:'.$e->getMessage();
             }
+        }
 
-            if (!\is_string($path) || !is_file($path)) {
-                return 'not_found';
-            }
+        if (!\is_string($path)) {
+            return 'not_found';
+        }
+
+        if ($testIfFile && !is_file($path)) {
+            return 'not_found';
         }
 
         if ($testIfExecutable && !is_executable($path)) {
@@ -268,6 +270,6 @@ class AdminController extends GenericApiController
         $token = bin2hex(random_bytes(32));
         $session->set('memories_action_token', $token);
 
-        return $token ?? '';
+        return $token;
     }
 }

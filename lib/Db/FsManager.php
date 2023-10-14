@@ -262,8 +262,8 @@ class FsManager
     {
         try {
             // Album share
-            if ($this->hasAlbumToken() && $this->getShareToken()) {
-                $album = $this->albumsQuery->getAlbumByLink($this->getShareToken());
+            if ($this->hasAlbumToken() && ($token = $this->getShareToken())) {
+                $album = $this->albumsQuery->getAlbumByLink($token);
                 if (null === $album) {
                     return null;
                 }

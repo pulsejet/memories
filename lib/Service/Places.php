@@ -16,8 +16,6 @@ const PLANET_URL = 'https://github.com/pulsejet/memories-assets/releases/downloa
 
 class Places
 {
-    protected IDBConnection $db;
-
     protected IConfig $config;
     protected IDBConnection $connection;
     protected TimelineWrite $timelineWrite;
@@ -322,7 +320,7 @@ class Places
                     }
 
                     if (GIS_TYPE_MYSQL === $gis) {
-                        $points = implode(',', array_map(static function ($point) {
+                        $points = implode(',', array_map(static function (array $point) {
                             $x = $point[0];
                             $y = $point[1];
 
@@ -331,7 +329,7 @@ class Places
 
                         $geometry = "POLYGON(({$points}))";
                     } elseif (GIS_TYPE_POSTGRES === $gis) {
-                        $geometry = implode(',', array_map(static function ($point) {
+                        $geometry = implode(',', array_map(static function (array $point) {
                             $x = $point[0];
                             $y = $point[1];
 

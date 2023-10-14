@@ -83,13 +83,13 @@ trait TimelineWritePlaces
      * Also update the exif data with the tzid from location (LocationTZID)
      * Performs an in-place update of the exif data.
      *
-     * @param int        $fileId  The file ID
-     * @param array      $exif    The exif data (will change)
-     * @param array|bool $prevRow The previous row of data
+     * @param int    $fileId  The file ID
+     * @param array  $exif    The exif data (will change)
+     * @param ?array $prevRow The previous row of data
      *
      * @return array Update values
      */
-    protected function processExifLocation(int $fileId, array &$exif, $prevRow): array
+    protected function processExifLocation(int $fileId, array &$exif, ?array $prevRow): array
     {
         // Store location data
         [$lat, $lon] = self::readCoord($exif);

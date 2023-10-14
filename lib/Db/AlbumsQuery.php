@@ -217,7 +217,7 @@ class AlbumsQuery
      * Get album object by token.
      * Returns false if album link does not exist.
      */
-    public function getAlbumByLink(string $token)
+    public function getAlbumByLink(string $token): ?array
     {
         $query = $this->connection->getQueryBuilder();
         $query->select('*')->from('photos_albums', 'pa')

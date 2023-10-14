@@ -77,7 +77,7 @@ class OtherController extends GenericApiController
             }
 
             // helper function to get user config values
-            $getAppConfig = function ($key, $default) use ($uid): string {
+            $getAppConfig = function ($key, $default) use ($uid) {
                 return $this->config->getUserValue($uid, Application::APPNAME, $key, $default);
             };
 

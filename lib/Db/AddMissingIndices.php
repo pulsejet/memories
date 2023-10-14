@@ -59,7 +59,7 @@ class AddMissingIndices
         }
 
         // Migrate
-        if (\count($ops) > 0 && null !== $connection) {
+        if (\count($ops) > 0) {
             $output->info('Updating external table schema: '.implode(', ', $ops));
             $connection->migrateToSchema($schema->getWrappedSchema());
         } elseif (null === $connection) {

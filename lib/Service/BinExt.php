@@ -108,7 +108,11 @@ class BinExt
         return self::getTempBin($path, self::getName('exiftool', self::EXIFTOOL_VER));
     }
 
-    /** Get path to exiftool binary for proc_open */
+    /**
+     * Get path to exiftool binary for proc_open.
+     *
+     * @return string[]
+     */
     public static function getExiftool(): array
     {
         if (Util::getSystemConfig('memories.exiftool_no_local')) {
@@ -118,7 +122,11 @@ class BinExt
         return [self::getExiftoolPBin()];
     }
 
-    /** Detect the exiftool binary to use */
+    /**
+     * Detect the exiftool binary to use.
+     *
+     * @return false|string
+     */
     public static function detectExiftool()
     {
         if (!empty($path = Util::getSystemConfig('memories.exiftool'))) {
@@ -216,21 +224,21 @@ class BinExt
      * If local, restart the go-vod instance.
      * If external, configure the go-vod instance.
      */
-    public static function startGoVod()
+    public static function startGoVod(): ?string
     {
         // Check if disabled
         if (Util::getSystemConfig('memories.vod.disable')) {
             // Make sure it's dead, in case the user just disabled it
             Util::pkill(self::getName('go-vod'));
 
-            return;
+            return null;
         }
 
         // Check if external
         if (Util::getSystemConfig('memories.vod.external')) {
             self::configureGoVod();
 
-            return;
+            return null;
         }
 
         // Get transcoder path
@@ -357,7 +365,11 @@ class BinExt
         return true;
     }
 
-    /** Detect the go-vod binary to use */
+    /**
+     * Detect the go-vod binary to use.
+     *
+     * @return false|string
+     */
     public static function detectGoVod()
     {
         $goVodPath = Util::getSystemConfig('memories.vod.path');
@@ -416,7 +428,7 @@ class BinExt
 
     public static function testFFmpeg(string $path, string $name): string
     {
-        $version = shell_exec("{$path} -version");
+        $version = shell_exec("{$path} -version") ?: '';
         if (!preg_match("/{$name} version \\S*/", $version, $matches)) {
             throw new \Exception("failed to detect version, found {$version}");
         }

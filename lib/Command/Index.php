@@ -57,9 +57,6 @@ class IndexOpts
 
 class Index extends Command
 {
-    /** @var int[][] */
-    protected array $sizes;
-
     protected IUserManager $userManager;
     protected IGroupManager $groupManager;
     protected IRootFolder $rootFolder;

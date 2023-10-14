@@ -18,7 +18,7 @@ class Util
 {
     use UtilController;
 
-    public static $ARCHIVE_FOLDER = '.archive';
+    public static string $ARCHIVE_FOLDER = '.archive';
 
     /**
      * Get host CPU architecture (amd64 or aarch64).
@@ -248,7 +248,7 @@ class Util
      * @param $url         URL of the page
      * @param $previewArgs Preview arguments (e.g. token)
      */
-    public static function addOgMetadata(Node $node, string $title, string $url, array $previewArgs)
+    public static function addOgMetadata(Node $node, string $title, string $url, array $previewArgs): void
     {
         // Add title
         \OCP\Util::addHeader('meta', ['property' => 'og:title', 'content' => $title]);
