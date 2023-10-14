@@ -12,7 +12,11 @@
         <ignoreFiles>
             <directory name="tools" />
             <directory name="vendor" />
-            <directory name="../.." />
+
+            <!-- Careful to not exclude ourselves! -->
+            <directory name="../../lib" />
+            <directory name="../../apps/files" />
+            <directory name="../../3rdparty" />
         </ignoreFiles>
     </projectFiles>
     <extraFiles>
