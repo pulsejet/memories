@@ -98,4 +98,7 @@
   },
   "git.alwaysSignOff": true,
   "editor.formatOnSave": true,
+  "psalm.configPaths": [
+    "psalm-ls.xml"
+  ],
 }

@@ -15,7 +15,7 @@
       {{
         t(
           'memories',
-          'Intel processors supporting QuickSync Video (QSV) as well as some AMD GPUs can be used for transcoding using VA-API acceleration.'
+          'Intel processors supporting QuickSync Video (QSV) as well as some AMD GPUs can be used for transcoding using VA-API acceleration.',
         )
       }}
       {{ t('memories', 'For more details on driver installation, check the documentation:') }}
@@ -52,7 +52,7 @@
       {{
         t(
           'memories',
-          'Depending on the versions of the installed SDK and ffmpeg, you need to specify the scaler to use'
+          'Depending on the versions of the installed SDK and ffmpeg, you need to specify the scaler to use',
         )
       }}
 
@@ -102,7 +102,7 @@
       {{
         t(
           'memories',
-          'Due to a bug in certain hardware drivers, videos may appear in incorrect orientations when streaming. This can be resolved in some cases by rotating the video on the accelerator.'
+          'Due to a bug in certain hardware drivers, videos may appear in incorrect orientations when streaming. This can be resolved in some cases by rotating the video on the accelerator.',
         )
       }}
       <br />

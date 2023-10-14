@@ -53,7 +53,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install Pretter
-        run: npm install -g prettier
+        run: npm install --no-save "prettier@$(cat ./package.json | jq -r '.devDependencies["prettier"]')"
 
       - name: Run Prettier
         run: npx prettier src --check

@@ -38,7 +38,7 @@ class VideoContentSetup {
     lightbox: PhotoSwipe,
     private options: {
       preventDragOffset: number;
-    }
+    },
   ) {
     this.initLightboxEvents(lightbox);
     lightbox.on('init', () => {
@@ -142,7 +142,7 @@ class VideoContentSetup {
       // Remote videos are played back via HLS / Direct
       nativex.playVideo(
         content.data.photo,
-        sources.map((s) => s.src)
+        sources.map((s) => s.src),
       );
       return;
     }

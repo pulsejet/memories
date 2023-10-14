@@ -30,7 +30,7 @@ export function confirmDestructive(options: ConfirmOptions): Promise<boolean> {
       confirmClasses: 'error',
       cancel: t('memories', 'No'),
     },
-    options ?? {}
+    options ?? {},
   );
 
   // Observer to focus the confirm button when the dialog is shown
@@ -79,7 +79,7 @@ export async function prompt(opts: PromptOptions): Promise<string | null> {
       (success: boolean, value: string) => resolve(success ? value : null),
       opts.modal,
       opts.name,
-      opts.password
+      opts.password,
     );
   });
 }

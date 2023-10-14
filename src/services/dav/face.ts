@@ -66,7 +66,7 @@ export async function* recognizeDeleteFaceImages(user: string, name: string, pho
       showError(
         t('memories', 'Failed to remove {filename} from face.', {
           filename: p.basename ?? p.fileid,
-        })
+        }),
       );
       return 0;
     }
@@ -104,7 +104,7 @@ export async function* recognizeMoveFaceImages(user: string, face: string, targe
       showError(
         t('memories', 'Failed to move {filename} from face.', {
           filename: p.basename ?? p.fileid,
-        })
+        }),
       );
       return 0;
     }

@@ -15,7 +15,10 @@ export function isLiveContent(content: PsContent): boolean {
 }
 
 class LivePhotoContentSetup {
-  constructor(lightbox: PhotoSwipe, private psImage: PsImage) {
+  constructor(
+    lightbox: PhotoSwipe,
+    private psImage: PsImage,
+  ) {
     lightbox.on('contentLoad', this.onContentLoad.bind(this));
     lightbox.on('contentActivate', this.onContentActivate.bind(this));
     lightbox.on('contentDeactivate', this.onContentDeactivate.bind(this));

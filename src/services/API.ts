@@ -150,7 +150,7 @@ export class API {
         client: _m.video.clientId,
         fileid,
         file,
-      })
+      }),
     );
   }
 

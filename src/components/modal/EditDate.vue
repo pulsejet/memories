@@ -178,7 +178,7 @@ export default defineComponent({
         this.dayLast,
         this.hourLast,
         this.minuteLast,
-        this.secondLast
+        this.secondLast,
       );
     },
 

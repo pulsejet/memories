@@ -26,7 +26,7 @@ export function getShortDateStr(date: Date): string {
         month: 'short',
         year: 'numeric',
         timeZone: 'UTC',
-      })
+      }),
     );
   }
   return shortDateStrMemo.get(dayId)!;

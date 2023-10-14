@@ -60,7 +60,7 @@ export async function createTag(tag: ITag): Promise<ITag> {
       t('memories', 'Failed to create tag {name}: {error}', {
         name: tag.displayName,
         error: error.message,
-      })
+      }),
     );
   }
 }

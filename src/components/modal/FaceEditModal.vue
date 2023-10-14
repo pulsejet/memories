@@ -80,7 +80,7 @@ export default defineComponent({
         showError(
           this.t('memories', 'Only user "{user}" can update this person', {
             user,
-          })
+          }),
         );
         return;
       }
@@ -118,7 +118,7 @@ export default defineComponent({
           this.t('photos', 'Failed to rename {oldName} to {name}.', {
             oldName: this.oldName,
             name: this.name,
-          })
+          }),
         );
       }
     },

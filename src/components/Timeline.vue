@@ -1069,7 +1069,7 @@ export default defineComponent({
           numCols: this.numCols,
           allowBreakout: this.allowBreakout(),
           seed: dayId,
-        }
+        },
       );
 
       // Check if some rows were added
@@ -1359,7 +1359,10 @@ export default defineComponent({
   left: 0;
   cursor: pointer;
   height: 100%;
-  transition: width 0.2s ease-in-out, height 0.2s ease-in-out, transform 0.2s ease-in-out; // reflow
+  transition:
+    width 0.2s ease-in-out,
+    height 0.2s ease-in-out,
+    transform 0.2s ease-in-out; // reflow
 }
 
 /** Dynamic top matter */

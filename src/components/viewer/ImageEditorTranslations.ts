@@ -101,7 +101,7 @@ export default {
   imageDimensionsHoverTitle: t('memories', 'Saved image size (width x height)'),
   cropSizeLowerThanResizedWarning: t(
     'memories',
-    'Note that the selected crop area is lower than the applied resize which might cause quality decrease'
+    'Note that the selected crop area is lower than the applied resize which might cause quality decrease',
   ),
   actualSize: t('memories', 'Actual size (100%)'),
   fitSize: t('memories', 'Fit size'),

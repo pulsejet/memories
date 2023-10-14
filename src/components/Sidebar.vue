@@ -68,7 +68,7 @@ export default defineComponent({
             },
           },
         },
-        globalThis.OCA.Files
+        globalThis.OCA.Files,
       );
     }
   },

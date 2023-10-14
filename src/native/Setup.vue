@@ -8,7 +8,7 @@
       {{
         t(
           'memories',
-          'You can set up automatic uploads from this device using the Nextcloud mobile app. Click the button below to download the app, or skip this step and continue.'
+          'You can set up automatic uploads from this device using the Nextcloud mobile app. Click the button below to download the app, or skip this step and continue.',
         )
       }}
       <br />
@@ -32,7 +32,7 @@
       {{
         t(
           'memories',
-          'Memories can show local media on your device alongside the media on your server. This requires access to the media on this device.'
+          'Memories can show local media on your device alongside the media on your server. This requires access to the media on this device.',
         )
       }}
       <br /><br />
@@ -41,7 +41,7 @@
           ? t('memories', 'Access to media has been granted.')
           : t(
               'memories',
-              'Access to media is not available yet. If the button below does not work, grant the permission through settings.'
+              'Access to media is not available yet. If the button below does not work, grant the permission through settings.',
             )
       }}
 
@@ -65,7 +65,7 @@
       {{
         t(
           'memories',
-          'If no folders are visible here, you may need to grant the app storage permissions, or wait for the app to index your files.'
+          'If no folders are visible here, you may need to grant the app storage permissions, or wait for the app to index your files.',
         )
       }}
       <br /><br />

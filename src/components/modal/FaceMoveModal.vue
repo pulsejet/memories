@@ -64,7 +64,7 @@ export default defineComponent({
         showError(
           this.t('memories', 'Only user "{user}" can update this person', {
             user,
-          })
+          }),
         );
         return;
       }

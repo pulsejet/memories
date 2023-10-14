@@ -135,7 +135,7 @@ export async function* runInParallel<T>(promises: (() => Promise<T>)[], n: numbe
 
           // remove the promise from the running list
           running.splice(running.indexOf(task), 1);
-        })())
+        })()),
       );
     }
 
@@ -173,7 +173,7 @@ async function extendWithLivePhotos(photos: IPhoto[]) {
             console.error(error);
             return null;
           }
-        })
+        }),
     )
   ).filter((p) => p !== null) as IPhoto[];
 
@@ -251,7 +251,7 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
       showError(
         t('memories', 'Failed to delete {fileName}.', {
           fileName: fileInfo.filename,
-        })
+        }),
       );
       return 0;
     }
@@ -302,7 +302,7 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
         fileInfo.originalFilename,
         targetPath + fileInfo.basename,
         // @ts-ignore - https://github.com/perry-mitchell/webdav-client/issues/329
-        { headers: { Overwrite: overwrite ? 'T' : 'F' } }
+        { headers: { Overwrite: overwrite ? 'T' : 'F' } },
       );
       return fileInfo.fileid;
     } catch (error) {
@@ -312,7 +312,7 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
         showError(
           t('memories', 'Could not move {fileName}, target exists.', {
             fileName: fileInfo.filename,
-          })
+          }),
         );
         return 0;
       }
@@ -320,7 +320,7 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
       showError(
         t('memories', 'Failed to move {fileName}.', {
           fileName: fileInfo.filename,
-        })
+        }),
       );
       return 0;
     }

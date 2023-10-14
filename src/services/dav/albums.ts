@@ -71,7 +71,7 @@ export async function* addToAlbum(user: string, name: string, photos: IPhoto[]) 
       showError(
         t('memories', 'Failed to add {filename} to album.', {
           filename: f.filename,
-        })
+        }),
       );
 
       console.error('DAV COPY error', e.response?.data);
@@ -104,7 +104,7 @@ export async function* removeFromAlbum(user: string, name: string, photos: IPhot
       showError(
         t('memories', 'Failed to remove {filename}.', {
           filename: f.basename ?? f.fileid,
-        })
+        }),
       );
       return 0;
     }
@@ -170,7 +170,7 @@ export async function updateAlbum(album: any, { albumName, properties }: any) {
       t('photos', 'Failed to update properties of {albumName} with {properties}.', {
         albumName,
         properties: JSON.stringify(properties),
-      })
+      }),
     );
     return album;
   }
@@ -217,7 +217,7 @@ export async function renameAlbum(album: any, currentAlbumName: string, newAlbum
   try {
     await client.moveFile(
       `/photos/${utils.uid}/albums/${currentAlbumName}`,
-      `/photos/${utils.uid}/albums/${newAlbumName}`
+      `/photos/${utils.uid}/albums/${newAlbumName}`,
     );
     return newAlbum;
   } catch (error) {
@@ -226,7 +226,7 @@ export async function renameAlbum(album: any, currentAlbumName: string, newAlbum
       t('photos', 'Failed to rename {currentAlbumName} to {newAlbumName}.', {
         currentAlbumName,
         newAlbumName,
-      })
+      }),
     );
     return album;
   }

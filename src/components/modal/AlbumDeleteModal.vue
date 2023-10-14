@@ -87,7 +87,7 @@ export default defineComponent({
         showError(
           this.t('photos', 'Failed to delete {name}.', {
             name: this.name,
-          })
+          }),
         );
       }
     },

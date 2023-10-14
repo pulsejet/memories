@@ -66,7 +66,7 @@ export default defineComponent({
         showError(
           this.t('memories', 'Only user "{user}" can update this person', {
             user,
-          })
+          }),
         );
         return;
       }
@@ -116,7 +116,7 @@ export default defineComponent({
           try {
             await client.moveFile(
               `/recognize/${user}/faces/${name}/${p.basename}`,
-              `/recognize/${face.user_id}/faces/${newName}/${p.basename}`
+              `/recognize/${face.user_id}/faces/${newName}/${p.basename}`,
             );
           } catch (e) {
             console.error(e);
