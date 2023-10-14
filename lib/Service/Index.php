@@ -76,6 +76,8 @@ class Index
      */
     public function indexUser(string $uid, ?string $folder = null): void
     {
+        $this->log("<info>Indexing user {$uid}</info>".PHP_EOL);
+
         \OC_Util::tearDownFS();
         \OC_Util::setupFS($uid);
 
@@ -121,7 +123,7 @@ class Index
     public function indexFolder(Folder $folder): void
     {
         if ($folder->nodeExists('.nomedia') || $folder->nodeExists('.nomemories')) {
-            $this->log("Skipping folder {$folder->getPath()} due to .nomedia or .nomemories file\n", true);
+            $this->log("Skipping folder {$folder->getPath()} (.nomedia / .nomemories)\n", true);
 
             return;
         }
@@ -215,7 +217,7 @@ class Index
      */
     public function cleanupStale(): void
     {
-        $this->log('Cleaning up stale index entries'.PHP_EOL);
+        $this->log('<info>Cleaning up stale index entries</info>'.PHP_EOL);
         $this->timelineWrite->cleanupStale();
     }
 

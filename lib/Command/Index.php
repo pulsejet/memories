@@ -167,7 +167,7 @@ class Index extends Command
         }
 
         $this->timelineWrite->clear();
-        $this->output->writeln('Cleared existing index');
+        $this->output->writeln('<info>Cleared existing index</info>');
     }
 
     /**
@@ -191,9 +191,7 @@ class Index extends Command
     {
         $this->runForUsers(function (IUser $user) {
             try {
-                $uid = $user->getUID();
-                $this->output->writeln("Indexing user {$uid}");
-                $this->indexer->indexUser($uid, $this->opts->folder);
+                $this->indexer->indexUser($user->getUID(), $this->opts->folder);
             } catch (\Exception $e) {
                 $this->output->writeln("<error>{$e->getMessage()}</error>\n");
             }
