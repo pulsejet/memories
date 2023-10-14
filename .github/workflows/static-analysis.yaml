@@ -1,13 +1,23 @@
-name: pslam
-
+---
+name: static analysis
 on:
   - push
   - pull_request
 
 jobs:
-  pslam:
+  php-cs-fixer:
+    name: PHP-CS-Fixer
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: PHP-CS-Fixer
+        uses: docker://oskarstark/php-cs-fixer-ga
+        with:
+          args: --dry-run --diff lib
 
+  pslam:
+    name: Psalm
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout server
         uses: actions/checkout@v3
@@ -29,7 +39,7 @@ jobs:
           extensions: mbstring, iconv, fileinfo, intl
           coverage: none
 
-      - name: Run tests
+      - name: Run Psalm
         run: |
           cd apps/memories
           make install-tools
