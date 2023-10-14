@@ -57,16 +57,16 @@ trait TimelineQueryDays
     /**
      * Get the day response from the database for the timeline.
      *
-     * @param ?int[] $day_ids         The day ids to fetch
-     * @param bool   $recursive       If the query should be recursive
-     * @param bool   $archive         If the query should include only the archive folder
-     * @param bool   $hidden          If the query should include hidden files
-     * @param array  $queryTransforms The query transformations to apply
+     * @param int[] $day_ids         The day ids to fetch
+     * @param bool  $recursive       If the query should be recursive
+     * @param bool  $archive         If the query should include only the archive folder
+     * @param bool  $hidden          If the query should include hidden files
+     * @param array $queryTransforms The query transformations to apply
      *
      * @return array An array of day responses
      */
     public function getDay(
-        ?array $day_ids,
+        array $day_ids,
         bool $recursive,
         bool $archive,
         bool $hidden,
@@ -92,13 +92,8 @@ trait TimelineQueryDays
         // JOIN with mimetypes to get the mimetype
         $query->join('f', 'mimetypes', 'mimetypes', $query->expr()->eq('f.mimetype', 'mimetypes.id'));
 
-        // Filter by dayid unless wildcard
-        if (null !== $day_ids) {
-            $query->andWhere($query->expr()->in('m.dayid', $query->createNamedParameter($day_ids, IQueryBuilder::PARAM_INT_ARRAY)));
-        } else {
-            // Limit wildcard to 100 results
-            $query->setMaxResults(100);
-        }
+        // Filter by dayid
+        $query->andWhere($query->expr()->in('m.dayid', $query->createNamedParameter($day_ids, IQueryBuilder::PARAM_INT_ARRAY)));
 
         // Add favorite field
         $this->addFavoriteTag($query);

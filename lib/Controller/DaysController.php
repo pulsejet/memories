@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\ClustersBackend;
-use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
@@ -70,23 +69,18 @@ class DaysController extends GenericApiController
     public function day(string $id): Http\Response
     {
         return Util::guardEx(function () use ($id) {
-            // Check for wildcard
-            $dayIds = [];
-            if ('*' === $id) {
-                $dayIds = null;
-            } else {
-                // Split at commas and convert all parts to int
-                $dayIds = array_map(static fn ($p) => (int) $p, explode(',', $id));
-            }
+            // Split at commas and convert all parts to int
+            /** @var int[] */
+            $dayIds = array_map(static fn ($p) => (int) $p, explode(',', $id));
 
             // Check if $dayIds is empty
-            if (null !== $dayIds && 0 === \count($dayIds)) {
+            if (empty($dayIds)) {
                 return new JSONResponse([], Http::STATUS_OK);
             }
 
             // Convert to actual dayIds if month view
             if ($this->isMonthView()) {
-                $dayIds = $this->monthIdToDayIds((int) $dayIds[0]);
+                $dayIds = $this->monthIdToDayIds($dayIds[0]);
             }
 
             // Run actual query
@@ -99,9 +93,9 @@ class DaysController extends GenericApiController
             );
 
             // Force month id for dayId for month view
-            if ($this->isMonthView() && $dayIds) {
+            if ($this->isMonthView()) {
                 foreach ($list as &$photo) {
-                    $photo['dayid'] = (int) $dayIds[0];
+                    $photo['dayid'] = $dayIds[0];
                 }
             }
 
@@ -118,17 +112,12 @@ class DaysController extends GenericApiController
      * @NoAdminRequired
      *
      * @PublicPage
+     *
+     * @param int[] $dayIds
      */
-    public function dayPost(): Http\Response
+    public function dayPost(array $dayIds): Http\Response
     {
-        return Util::guardEx(function () {
-            $id = $this->request->getParam('body_ids');
-            if (null === $id) {
-                throw Exceptions::MissingParameter('body_ids');
-            }
-
-            return $this->day($id);
-        });
+        return $this->day(implode(',', $dayIds));
     }
 
     /**

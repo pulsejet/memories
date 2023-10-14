@@ -23,9 +23,7 @@ export async function getOnThisDayRaw() {
     }
   }
 
-  const res = await axios.post<IPhoto[]>(API.DAYS(), {
-    body_ids: dayIds.join(','),
-  });
+  const res = await axios.post<IPhoto[]>(API.DAYS(), { dayIds });
 
   res.data.forEach(utils.convertFlags);
   return res.data;

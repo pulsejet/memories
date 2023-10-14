@@ -4,7 +4,7 @@ function getWildcard($param)
 {
     return [
         'requirements' => [$param => '.*'],
-        'defaults' => [$param => '']
+        'defaults' => [$param => ''],
     ];
 }
 
@@ -98,5 +98,5 @@ return [
 
         // Service worker
         ['name' => 'Other#serviceWorker', 'url' => '/service-worker.js', 'verb' => 'GET'],
-    ]
+    ],
 ];
