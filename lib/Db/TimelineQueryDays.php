@@ -57,21 +57,29 @@ trait TimelineQueryDays
     /**
      * Get the day response from the database for the timeline.
      *
-     * @param int[] $day_ids         The day ids to fetch
+     * @param int[] $dayIds          The day ids to fetch
      * @param bool  $recursive       If the query should be recursive
      * @param bool  $archive         If the query should include only the archive folder
      * @param bool  $hidden          If the query should include hidden files
+     * @param bool  $monthView       If the query should be in month view (dayIds are monthIds)
      * @param array $queryTransforms The query transformations to apply
      *
      * @return array An array of day responses
      */
     public function getDay(
-        array $day_ids,
+        array $dayIds,
         bool $recursive,
         bool $archive,
         bool $hidden,
+        bool $monthView,
         array $queryTransforms = []
     ): array {
+        // Check if we have any dayIds
+        if (empty($dayIds)) {
+            return [];
+        }
+
+        // Make new query
         $query = $this->connection->getQueryBuilder();
 
         // Get all entries also present in filecache
@@ -92,8 +100,16 @@ trait TimelineQueryDays
         // JOIN with mimetypes to get the mimetype
         $query->join('f', 'mimetypes', 'mimetypes', $query->expr()->eq('f.mimetype', 'mimetypes.id'));
 
-        // Filter by dayid
-        $query->andWhere($query->expr()->in('m.dayid', $query->createNamedParameter($day_ids, IQueryBuilder::PARAM_INT_ARRAY)));
+        if ($monthView) {
+            // Convert monthIds to dayIds
+            $query->andWhere($query->expr()->orX(...array_map(fn ($monthId) => $query->expr()->andX(
+                $query->expr()->gte('m.dayid', $query->createNamedParameter($monthId, IQueryBuilder::PARAM_INT)),
+                $query->expr()->lte('m.dayid', $query->createNamedParameter($this->monthEndDayId($monthId), IQueryBuilder::PARAM_INT))
+            ), $dayIds)));
+        } else {
+            // Filter by list of dayIds
+            $query->andWhere($query->expr()->in('m.dayid', $query->createNamedParameter($dayIds, IQueryBuilder::PARAM_INT_ARRAY)));
+        }
 
         // Add favorite field
         $this->addFavoriteTag($query);
@@ -113,7 +129,7 @@ trait TimelineQueryDays
 
         // Post process the day in-place
         foreach ($day as &$photo) {
-            $this->processDayPhoto($photo);
+            $this->processDayPhoto($photo, $monthView);
         }
 
         return $day;
@@ -218,8 +234,11 @@ trait TimelineQueryDays
 
     /**
      * Process the single day response.
+     *
+     * @param array $row       The day response
+     * @param bool  $monthView Whether the response is in month view
      */
-    private function processDayPhoto(array &$row): void
+    private function processDayPhoto(array &$row, bool $monthView = false): void
     {
         // Convert field types
         $row['fileid'] = (int) $row['fileid'];
@@ -263,6 +282,11 @@ trait TimelineQueryDays
             $row['auid'] = Exif::getAUID($epoch, $size);
             unset($row['size']);
         }
+
+        // Convert dayId to monthId if needed
+        if ($monthView) {
+            $row['dayid'] = $this->dayIdToMonthId($row['dayid']);
+        }
     }
 
     /**
@@ -284,5 +308,20 @@ trait TimelineQueryDays
         if ($hidden) {
             $query->setParameter('cteIncludeHidden', true, IQueryBuilder::PARAM_BOOL);
         }
+    }
+
+    private function monthEndDayId(int $monthId): int
+    {
+        return (int) (strtotime(date('Ymt', $monthId * 86400)) / 86400);
+    }
+
+    private function dayIdToMonthId(int $dayId): int
+    {
+        static $memoize = [];
+        if (\array_key_exists($dayId, $memoize)) {
+            return $memoize[$dayId];
+        }
+
+        return $memoize[$dayId] = strtotime(date('Ym', $dayId * 86400).'01') / 86400;
     }
 }

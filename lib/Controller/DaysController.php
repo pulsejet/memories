@@ -70,18 +70,7 @@ class DaysController extends GenericApiController
     {
         return Util::guardEx(function () use ($id) {
             // Split at commas and convert all parts to int
-            /** @var int[] */
             $dayIds = array_map(static fn ($p) => (int) $p, explode(',', $id));
-
-            // Check if $dayIds is empty
-            if (empty($dayIds)) {
-                return new JSONResponse([], Http::STATUS_OK);
-            }
-
-            // Convert to actual dayIds if month view
-            if ($this->isMonthView()) {
-                $dayIds = $this->monthIdToDayIds($dayIds[0]);
-            }
 
             // Run actual query
             $list = $this->tq->getDay(
@@ -89,15 +78,9 @@ class DaysController extends GenericApiController
                 $this->isRecursive(),
                 $this->isArchive(),
                 $this->isHidden(),
+                $this->isMonthView(),
                 $this->getTransformations(),
             );
-
-            // Force month id for dayId for month view
-            if ($this->isMonthView()) {
-                foreach ($list as &$photo) {
-                    $photo['dayid'] = $dayIds[0];
-                }
-            }
 
             // Reverse response if requested.
             if ($this->isReverse()) {
@@ -203,6 +186,7 @@ class DaysController extends GenericApiController
             $this->isRecursive(),
             $this->isArchive(),
             $this->isHidden(),
+            $this->isMonthView(),
             $this->getTransformations(),
         );
 
