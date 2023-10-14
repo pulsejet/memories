@@ -13,7 +13,7 @@ php-lint:
 	vendor/bin/php-cs-fixer fix
 
 psalm:
-	vendor/bin/psalm lib
+	vendor/bin/psalm
 
 npm-init:
 	npm ci
