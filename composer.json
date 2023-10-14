@@ -8,6 +8,8 @@
             "name": "Varun Patil"
         }
     ],
-    "require": {},
-    "require-dev": {}
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.35",
+        "vimeo/psalm": "^5.15"
+    }
 }

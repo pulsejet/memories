@@ -10,9 +10,6 @@
     <projectFiles>
         <directory name="lib" />
         <ignoreFiles>
-            <directory name="tools" />
-            <directory name="vendor" />
-
             <!-- Careful to not exclude ourselves! -->
             <directory name="../../lib" />
             <directory name="../../apps/files" />

@@ -7,15 +7,13 @@ exiftool:
 	sh scripts/get-exiftool.sh
 
 install-tools:
-	mkdir -p tools
-	composer require --dev --working-dir=tools friendsofphp/php-cs-fixer vimeo/psalm
 	composer install
 
 php-lint:
-	tools/vendor/bin/php-cs-fixer fix lib
+	vendor/bin/php-cs-fixer fix lib
 
 psalm:
-	tools/vendor/bin/psalm
+	vendor/bin/psalm
 
 npm-init:
 	npm ci
