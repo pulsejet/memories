@@ -138,7 +138,7 @@ export default defineComponent({
           this.localFolders = nativex.getLocalFolders();
           break;
         case 4:
-          this.$router.push('/');
+          this.$router.replace('/');
           break;
       }
     },
