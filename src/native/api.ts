@@ -6,11 +6,19 @@ export const BASE_URL = 'http://127.0.0.1';
 /** NativeX asynchronous API */
 export const NAPI = {
   /**
+   * Login to Nextcloud server.
+   * @regex ^/api/login/.+$
+   * @param url URL to Nextcloud server
+   */
+  LOGIN: (url: string) => `${BASE_URL}/api/login/${euc(euc(url))}`,
+
+  /**
    * Local days API.
    * @regex ^/api/days$
    * @returns {IDay[]} for all locally available days.
    */
   DAYS: () => `${BASE_URL}/api/days`,
+
   /**
    * Local photos API.
    * @regex ^/api/days/\d+$
@@ -112,13 +120,6 @@ export type NativeX = {
    * @param long Whether the toast should be shown for a long time
    */
   toast: (message: string, long?: boolean) => void;
-
-  /**
-   * Start the login process
-   * @param baseUrl Base URL of the Nextcloud instance
-   * @param loginFlowUrl URL to start the login flow
-   */
-  login: (baseUrl: string, loginFlowUrl: string) => void;
 
   /**
    * Log out from Nextcloud and delete the tokens.
