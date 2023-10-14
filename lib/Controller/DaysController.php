@@ -178,7 +178,7 @@ class DaysController extends GenericApiController
     /**
      * Preload a few "day" at the start of "days" response.
      *
-     * @param array $days the days array
+     * @param array $days the days array (modified in place)
      */
     private function preloadDays(array &$days): void
     {
@@ -188,45 +188,47 @@ class DaysController extends GenericApiController
             return;
         }
 
-        // Build identical transforms for sub queries
-        $transforms = $this->getTransformations();
-        $preloaded = 0;
-        $preloadDayIds = [];
-        $preloadDays = [];
+        // Construct map of dayid-day
+        $totalCount = 0;
+        $drefMap = [];
         foreach ($days as &$day) {
-            if ($day['count'] <= 0) {
-                continue;
+            if ($count = (int) $day['count']) {
+                $totalCount += max($count, 10); // max 5 days
             }
 
-            $preloaded += $day['count'];
-            $preloadDayIds[] = $day['dayid'];
-            $preloadDays[] = &$day;
+            $dayId = (int) $day['dayid'];
+            $drefMap[$dayId] = &$day;
 
-            if ($preloaded >= 50 || \count($preloadDayIds) > 5) { // should be enough
+            if ($totalCount >= 50) { // should be enough
                 break;
             }
         }
 
-        if (\count($preloadDayIds) > 0) {
-            $allDetails = $this->tq->getDay(
-                $preloadDayIds,
-                $this->isRecursive(),
-                $this->isArchive(),
-                $this->isHidden(),
-                $transforms,
-            );
+        if (!$totalCount) {
+            return;
+        }
 
-            // Group into dayid
-            $detailMap = [];
-            foreach ($allDetails as &$detail) {
-                $detailMap[$detail['dayid']][] = &$detail;
+        // Preload photos for these days
+        $details = $this->tq->getDay(
+            array_keys($drefMap),
+            $this->isRecursive(),
+            $this->isArchive(),
+            $this->isHidden(),
+            $this->getTransformations(),
+        );
+
+        // Load details into map byref
+        foreach ($details as $photo) {
+            $dayId = (int) $photo['dayid'];
+            if (!\array_key_exists($dayId, $drefMap)) {
+                continue;
             }
-            foreach ($preloadDays as &$day) {
-                $m = $detailMap[$day['dayid']];
-                if (isset($m) && null !== $m && \count($m) > 0) {
-                    $day['detail'] = $m;
-                }
+
+            if (!\array_key_exists('detail', $drefMap[$dayId])) {
+                $drefMap[$dayId]['detail'] = [];
             }
+
+            $drefMap[$dayId]['detail'][] = $photo;
         }
     }
 
