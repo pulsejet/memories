@@ -63,7 +63,7 @@ class PlacesSetup extends Command
 
             return 1;
         }
-        $this->output->writeln('Database support was detected');
+        $this->output->writeln('<info>Database support was detected</info>');
 
         // Check if database is already set up
         if ($this->places->geomCount() > 0 && !$recalculate && !$this->warnDownloaded()) {
@@ -82,7 +82,7 @@ class PlacesSetup extends Command
         // Recalculate all places
         $this->places->recalculateAll();
 
-        $this->output->writeln('Places set up successfully');
+        $this->output->writeln('<info>Places set up successfully</info>');
 
         return 0;
     }
