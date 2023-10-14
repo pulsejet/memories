@@ -116,7 +116,7 @@ class RecognizeBackend extends Backend
     public function transformDayPost(array &$row): void
     {
         // Differentiate Recognize queries from Face Recognition
-        if (!isset($row) || !isset($row['face_w'])) {
+        if (!isset($row['face_w'])) {
             return;
         }
 

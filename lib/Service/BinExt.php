@@ -65,6 +65,8 @@ class BinExt
     public static function testExiftool(): string
     {
         $cmd = implode(' ', array_merge(self::getExiftool(), ['-ver']));
+
+        /** @psalm-suppress ForbiddenCode */
         $out = shell_exec($cmd);
         if (!$out) {
             throw new \Exception("failed to run exiftool: {$cmd}");
@@ -252,6 +254,7 @@ class BinExt
         $tmpPath = $env['tempdir'];
 
         // (Re-)create temp dir
+        /** @psalm-suppress ForbiddenCode */
         shell_exec("rm -rf '{$tmpPath}' && mkdir -p '{$tmpPath}' && chmod 755 '{$tmpPath}'");
 
         // Check temp directory exists
@@ -273,6 +276,7 @@ class BinExt
         Util::pkill(self::getName('go-vod'));
 
         // Start transcoder
+        /** @psalm-suppress ForbiddenCode */
         shell_exec("nohup {$transcoder} {$configFile} >> '{$logFile}' 2>&1 & > /dev/null");
 
         // wait for 500ms
@@ -396,17 +400,21 @@ class BinExt
         return $goVodPath;
     }
 
-    public static function detectFFmpeg()
+    public static function detectFFmpeg(): ?string
     {
         $ffmpegPath = Util::getSystemConfig('memories.vod.ffmpeg');
         $ffprobePath = Util::getSystemConfig('memories.vod.ffprobe');
 
         if (empty($ffmpegPath) || !file_exists($ffmpegPath) || empty($ffprobePath) || !file_exists($ffprobePath)) {
-            // Use PATH
+            // Use PATH environment variable to find ffmpeg
+
+            /** @psalm-suppress ForbiddenCode */
             $ffmpegPath = shell_exec('which ffmpeg');
+
+            /** @psalm-suppress ForbiddenCode */
             $ffprobePath = shell_exec('which ffprobe');
             if (!$ffmpegPath || !$ffprobePath) {
-                return false;
+                return null;
             }
 
             // Trim
@@ -420,7 +428,7 @@ class BinExt
 
         // Check if executable
         if (!is_executable($ffmpegPath) || !is_executable($ffprobePath)) {
-            return false;
+            return null;
         }
 
         return $ffmpegPath;
@@ -428,6 +436,7 @@ class BinExt
 
     public static function testFFmpeg(string $path, string $name): string
     {
+        /** @psalm-suppress ForbiddenCode */
         $version = shell_exec("{$path} -version") ?: '';
         if (!preg_match("/{$name} version \\S*/", $version, $matches)) {
             throw new \Exception("failed to detect version, found {$version}");
@@ -438,10 +447,12 @@ class BinExt
 
     public static function testSystemPerl(string $path): ?string
     {
+        /** @psalm-suppress ForbiddenCode */
         if (($out = shell_exec("{$path} -e 'print \"OK\";'")) !== 'OK') {
-            throw new \Exception('Failed to run test perl script: '.$out);
+            throw new \Exception('Failed to run test perl script: '.(string) $out);
         }
 
+        /** @psalm-suppress ForbiddenCode */
         return shell_exec("{$path} -e 'print $^V;'") ?: null;
     }
 }

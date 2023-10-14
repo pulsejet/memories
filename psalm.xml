@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <psalm
     totallyTyped="true"
-    errorLevel="5"
+    errorLevel="4"
     resolveFromConfigFile="true"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
@@ -36,4 +36,9 @@
             </errorLevel>
         </UndefinedDocblockClass>
     </issueHandlers>
+    <forbiddenFunctions>
+            <function name="var_dump" />
+            <function name="print" />
+            <function name="print_r" />
+    </forbiddenFunctions>
 </psalm>

@@ -45,6 +45,7 @@ class Util
      */
     public static function getLibc(): ?string
     {
+        /** @psalm-suppress ForbiddenCode */
         if ($ldd = shell_exec('ldd --version 2>&1')) {
             if (false !== stripos($ldd, 'musl')) {
                 return 'musl';
@@ -496,6 +497,8 @@ class Util
 
         // check if ps or busybox is available
         $ps = 'ps';
+
+        /** @psalm-suppress ForbiddenCode */
         if (!shell_exec('which ps')) {
             if (!shell_exec('which busybox')) {
                 return;
@@ -505,6 +508,7 @@ class Util
         }
 
         // get pids using ps as array
+        /** @psalm-suppress ForbiddenCode */
         $pids = shell_exec("{$ps} -eao pid,comm | grep {$name} | awk '{print $1}'");
         if (null === $pids || empty($pids)) {
             return;

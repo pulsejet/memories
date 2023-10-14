@@ -6,6 +6,7 @@ use OCA\Memories\Db\AlbumsQuery;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\RedirectResponse;
+use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\Template\LinkMenuAction;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -119,7 +120,7 @@ class PublicAlbumController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function download(string $token)
+    public function download(string $token): Response
     {
         $album = $this->albumsQuery->getAlbumByLink($token);
         if (!$album) {
@@ -128,7 +129,7 @@ class PublicAlbumController extends Controller
 
         // Get list of files
         $albumId = (int) $album['album_id'];
-        $files = $this->albumsQuery->getAlbumPhotos($albumId, null) ?? [];
+        $files = $this->albumsQuery->getAlbumPhotos($albumId, null);
         $fileIds = array_map(static fn ($file) => (int) $file['file_id'], $files);
 
         // Get download handle

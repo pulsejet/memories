@@ -222,7 +222,7 @@ class Places
 
         // Create geometry insertion statement
         $query = $this->connection->getQueryBuilder();
-        $geomParam = $query->createParameter('geometry');
+        $geomParam = (string) $query->createParameter('geometry');
         if (GIS_TYPE_MYSQL === $gis) {
             $geomParam = "ST_GeomFromText({$geomParam})";
         } elseif (GIS_TYPE_POSTGRES === $gis) {

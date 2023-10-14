@@ -38,6 +38,7 @@ trait TimelineQueryFilters
 
     public function transformLimit(IQueryBuilder &$query, bool $aggregate, int $limit): void
     {
+        /** @psalm-suppress RedundantCondition */
         if ($limit >= 1 || $limit <= 100) {
             $query->setMaxResults($limit);
         }

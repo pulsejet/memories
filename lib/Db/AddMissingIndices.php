@@ -62,8 +62,6 @@ class AddMissingIndices
         if (\count($ops) > 0) {
             $output->info('Updating external table schema: '.implode(', ', $ops));
             $connection->migrateToSchema($schema->getWrappedSchema());
-        } elseif (null === $connection) {
-            $output->warning('No database connection, skipping external table schema update');
         } else {
             $output->info('External table schema seem up to date');
         }

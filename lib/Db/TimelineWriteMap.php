@@ -129,7 +129,7 @@ trait TimelineWriteMap
         ;
         $query->executeStatement();
 
-        $clusterId = (int) $query->getLastInsertId();
+        $clusterId = $query->getLastInsertId();
         $this->mapUpdateAggregates($clusterId);
 
         $this->connection->commit();

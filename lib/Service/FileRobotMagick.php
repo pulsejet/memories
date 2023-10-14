@@ -256,9 +256,9 @@ class FileRobotMagick
             return;
         }
 
-        $h = abs(($hue ?? 0) + 360) % 360;
-        $s = 2 ** ($saturation ?? 0);
-        $v = 2 ** ($value ?? 0);
+        $h = abs($hue + 360) % 360;
+        $s = 2 ** $saturation;
+        $v = 2 ** $value;
 
         // https://github.com/konvajs/konva/blob/f0e18b09079175404a1026363689f8f89eae0749/src/filters/HSV.ts#L17-L63
         $vsu = $v * $s * cos(($h * M_PI) / 180);

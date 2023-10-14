@@ -135,7 +135,7 @@ class AlbumsBackend extends Backend
         // Get files
         $id = (int) $album['album_id'];
 
-        return $this->albumsQuery->getAlbumPhotos($id, $limit) ?? [];
+        return $this->albumsQuery->getAlbumPhotos($id, $limit);
     }
 
     public function sortPhotosForPreview(array &$photos): void
