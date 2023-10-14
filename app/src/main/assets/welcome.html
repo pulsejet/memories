@@ -26,8 +26,6 @@
       </button>
       <br />
 
-      <p id="conn-error" class="error"></p>
-
       <a class="m-button link" href="https://memories.gallery/install/">
         I don't have a server
       </a>
@@ -36,7 +34,6 @@
     <script>
       const urlBox = document.getElementById("server-url");
       const loginButton = document.getElementById("login");
-      const connError = document.getElementById("conn-error");
 
       function validateUrl(url) {
         try {
@@ -86,10 +83,6 @@
 
       // Login button click handler
       loginButton.addEventListener("click", async () => {
-        const url = getMemoriesUrl();
-        url.pathname += "api/describe";
-        const urlStr = url.toString();
-
         try {
           urlBox.disabled = true;
           loginButton.disabled = true;
@@ -98,20 +91,17 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-          // Get API description
-          const res = await fetch(urlStr, {
+          // Login signal
+          const encUrl = encodeURIComponent(encodeURIComponent(getMemoriesUrl().toString()));
+          await fetch(`http://127.0.0.1/api/login/${encUrl}`, {
             method: "GET",
             signal: controller.signal,
           });
-          const data = await res.json();
 
           // API is fine, redirect to login page
           clearTimeout(timeoutId);
-          window.nativex.login(data.baseUrl, data.loginFlowUrl);
         } catch (e) {
-          // CORS request, we know nothing about the server
-          connError.innerText = `Failed to fetch server info.\nIs Memories installed and enabled?\n${urlStr}`;
-          connError.style.display = "block";
+          // unreachable?
         } finally {
           urlBox.disabled = false;
           loginButton.disabled = false;

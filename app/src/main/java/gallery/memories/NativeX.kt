@@ -43,6 +43,8 @@ class NativeX(private val mCtx: MainActivity) {
     }
 
     object API {
+        val LOGIN = Regex("^/api/login/.+$")
+
         val DAYS = Regex("^/api/days$")
         val DAY = Regex("^/api/days/\\d+$")
 
@@ -91,12 +93,6 @@ class NativeX(private val mCtx: MainActivity) {
             val duration = if (long) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
             Toast.makeText(mCtx, message, duration).show()
         }
-    }
-
-    @JavascriptInterface
-    fun login(baseUrl: String?, loginFlowUrl: String?) {
-        if (baseUrl == null || loginFlowUrl == null) return;
-        account.login(baseUrl, loginFlowUrl)
     }
 
     @JavascriptInterface
@@ -227,7 +223,9 @@ class NativeX(private val mCtx: MainActivity) {
         val path = request.url.path ?: return makeErrorResponse()
 
         val parts = path.split("/").toTypedArray()
-        return if (path.matches(API.DAYS)) {
+        return if (path.matches(API.LOGIN)) {
+            makeResponse(account.login(URLDecoder.decode(parts[3], "UTF-8")))
+        } else if (path.matches(API.DAYS)) {
             makeResponse(query.getDays())
         } else if (path.matches(API.DAY)) {
             makeResponse(query.getDay(parts[3].toLong()))

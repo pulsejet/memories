@@ -9,7 +9,6 @@ import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import gallery.memories.R
 import io.github.g00fy2.versioncompare.Version
-import java.net.SocketTimeoutException
 
 @UnstableApi
 class AccountService(private val mCtx: MainActivity, private val mHttp: HttpService) {
@@ -20,41 +19,58 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
     private val store = SecureStorage(mCtx)
 
     /**
+     * Make the first request to log in
+     * @param url The URL of the Nextcloud server
+     */
+    fun login(url: String) {
+        try {
+            Log.v(TAG, "login: Connecting to ${url}api/describe")
+            mHttp.setBaseUrl(url)
+            val res = mHttp.getApiDescription()
+
+            if (res.code != 200) {
+                throw Exception("${url}api/describe (status ${res.code})")
+            }
+
+            val body = mHttp.bodyJson(res) ?: throw Exception("Failed to parse API description")
+
+            val baseUrl = body.getString("baseUrl")
+            val loginFlowUrl = body.getString("loginFlowUrl")
+            loginFlow(baseUrl, loginFlowUrl)
+        } catch (e: Exception) {
+            toast("Error: ${e.message}")
+            throw Exception("Failed to connect to server: ${e.message}")
+        }
+    }
+
+    /**
      * Login to a server
      * @param baseUrl The base URL of the server
      * @param loginFlowUrl The login flow URL
+     * @throws Exception If the login flow failed
      */
-    fun login(baseUrl: String, loginFlowUrl: String) {
-        try {
-            val res = mHttp.postLoginFlow(loginFlowUrl)
+    fun loginFlow(baseUrl: String, loginFlowUrl: String) {
+        val res = mHttp.postLoginFlow(loginFlowUrl)
 
-            // Check if 200 was received
-            if (res.code != 200) {
-                throw Exception("Server returned a ${res.code} status code. Please check your reverse proxy configuration and overwriteprotocol is correct.")
-            }
-
-            // Get body as JSON
-            val body = mHttp.bodyJson(res) ?: throw Exception("Failed to parse login flow response")
-
-            // Parse response body as JSON
-            val pollObj = body.getJSONObject("poll")
-            val pollToken = pollObj.getString("token")
-            val pollUrl = pollObj.getString("endpoint")
-            val loginUrl = body.getString("login")
-
-            // Open login page in browser
-            mCtx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(loginUrl)))
-
-            // Start polling in background
-            Thread { pollLogin(pollUrl, pollToken, baseUrl) }.start()
-        } catch (e: SocketTimeoutException) {
-            toast("Failed to connect to login flow URL")
-            return
-        } catch (e: Exception) {
-            Log.e(TAG, "login: ", e)
-            toast(e.message ?: "Unknown error")
-            return
+        // Check if 200 was received
+        if (res.code != 200) {
+            throw Exception("Login flow returned a ${res.code} status code. Check your reverse proxy configuration and overwriteprotocol is correct.")
         }
+
+        // Get body as JSON
+        val body = mHttp.bodyJson(res) ?: throw Exception("Failed to parse login flow response")
+
+        // Parse response body as JSON
+        val pollObj = body.getJSONObject("poll")
+        val pollToken = pollObj.getString("token")
+        val pollUrl = pollObj.getString("endpoint")
+        val loginUrl = body.getString("login")
+
+        // Open login page in browser
+        mCtx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(loginUrl)))
+
+        // Start polling in background
+        Thread { pollLogin(pollUrl, pollToken, baseUrl) }.start()
     }
 
     /**

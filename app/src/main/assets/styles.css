@@ -41,17 +41,6 @@ div.p {
   line-height: 1.5em;
 }
 
-p.error {
-  display: none;
-  color: red;
-  font-weight: 500;
-  word-wrap: break-word;
-  user-select: text;
-  background: white;
-  padding: 10px;
-  border-radius: 10px;
-}
-
 .logo {
   color: var(--fg-color);
   margin-bottom: 30px;
@@ -105,23 +94,4 @@ input.m-input:focus {
 .login-button {
   margin: 10px;
   margin-top: 20px;
-}
-
-#folder-list {
-  margin: 15px;
-  text-align: left;
-}
-
-.folder-choose {
-  font-size: 1.1em;
-  margin-top: 4px;
-  display: grid;
-  grid-template-columns: 1em auto;
-  gap: 1.2em;
-  line-height: 1.8em;
-}
-
-input[type="checkbox"] {
-  width: 2em;
-  height: 2em;
 }
