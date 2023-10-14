@@ -12,17 +12,16 @@
         <ignoreFiles>
             <directory name="tools" />
             <directory name="vendor" />
+            <directory name="../.." />
         </ignoreFiles>
     </projectFiles>
     <extraFiles>
         <directory name="../../lib" />
-
+        <directory name="../../apps/files/lib/Event" />
         <directory name="../../3rdparty/doctrine" />
         <directory name="../../3rdparty/psr" />
         <directory name="../../3rdparty/guzzlehttp" />
         <directory name="../../3rdparty/doctrine" />
-
-        <directory name="../../apps/files/lib/Event" />
     </extraFiles>
     <issueHandlers>
         <UndefinedDocblockClass>
