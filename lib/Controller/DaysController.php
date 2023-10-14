@@ -262,14 +262,7 @@ class DaysController extends GenericApiController
      */
     private function monthIdToDayIds(int $monthId): array
     {
-        $dayIds = [];
-        $firstDay = (int) $monthId;
-        $lastDay = strtotime(date('Ymt', $firstDay * 86400)) / 86400;
-        for ($i = $firstDay; $i <= $lastDay; ++$i) {
-            $dayIds[] = $i;
-        }
-
-        return $dayIds;
+        return range($monthId, (int) (strtotime(date('Ymt', $monthId * 86400)) / 86400));
     }
 
     private function isRecursive(): bool
