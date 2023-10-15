@@ -7,6 +7,8 @@
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
     cacheDirectory=".cache/psalm-ls"
+    findUnusedBaselineEntry="true"
+    findUnusedCode="false"
 >
     <!--
         Duplication is due to differences in language server and CLI
@@ -36,6 +38,11 @@
                 <referencedClass name="Doctrine\DBAL\Platforms\AbstractPlatform" />
             </errorLevel>
         </UndefinedDocblockClass>
+        <PossiblyUnusedMethod>
+            <errorLevel type="suppress">
+                <file name="lib/Service/FileRobotMagick.php" />
+            </errorLevel>
+        </PossiblyUnusedMethod>
     </issueHandlers>
     <forbiddenFunctions>
         <function name="var_dump" />

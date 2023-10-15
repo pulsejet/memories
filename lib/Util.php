@@ -170,6 +170,10 @@ class Util
 
     /**
      * Check if link sharing is allowed.
+     *
+     * @todo Check if link sharing is enabled to show the button
+     *
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public static function isLinkSharingEnabled(): bool
     {

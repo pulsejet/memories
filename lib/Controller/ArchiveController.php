@@ -57,15 +57,12 @@ class ArchiveController extends GenericApiController
 
             // Create archive folder in the root of the user's configured timeline
             $configPaths = Util::getTimelinePaths(Util::getUID());
-            $timelineFolders = [];
             $timelinePaths = [];
 
             // Get all timeline paths
             foreach ($configPaths as $path) {
                 try {
-                    $f = $userFolder->get($path);
-                    $timelineFolders[] = $f;
-                    $timelinePaths[] = $f->getPath();
+                    $timelinePaths[] = $userFolder->get($path)->getPath();
                 } catch (\OCP\Files\NotFoundException $e) {
                     throw Exceptions::NotFound("timeline folder {$path}");
                 }

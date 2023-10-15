@@ -70,10 +70,8 @@ class ShareController extends GenericApiController
         return Util::guardEx(function () use ($id, $path) {
             $file = $this->getNodeByIdOrPath($id, $path);
 
-            /** @var \OCP\Share\IManager $shareManager */
             $shareManager = \OC::$server->get(\OCP\Share\IManager::class);
 
-            /** @var \OCP\Share\IShare $share */
             $share = $shareManager->newShare();
             $share->setNode($file);
             $share->setShareType(\OCP\Share\IShare::TYPE_LINK);
