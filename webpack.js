@@ -38,21 +38,21 @@ webpackConfig.plugins.push(
   new WorkboxPlugin.InjectManifest({
     swSrc: path.resolve(path.join('src', 'service-worker.js')),
     swDest: 'memories-service-worker.js',
-  })
+  }),
 );
 
-// Exclusions from minification
-const minifyExclude = [/filerobot-image-editor/];
-
-webpackConfig.optimization.minimizer[0] = new TerserPlugin({
-  exclude: minifyExclude,
-  terserOptions: {
-    output: {
-      comments: false,
+// Minification
+webpackConfig.optimization.minimizer = [
+  new TerserPlugin({
+    exclude: [/filerobot-image-editor/],
+    terserOptions: {
+      output: {
+        comments: false,
+      },
     },
-  },
-  extractComments: true,
-});
+    extractComments: true,
+  }),
+];
 
 // Disable source maps in production
 webpackConfig.devtool = isDev ? 'cheap-source-map' : false;
@@ -62,7 +62,7 @@ webpackConfig.plugins.push(
   new webpack.SourceMapDevToolPlugin({
     filename: '[file].map',
     publicPath: path.join('/apps/', process.env.npm_package_name, '/js/'),
-  })
+  }),
 );
 
 // Enable caching
