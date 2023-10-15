@@ -45,10 +45,8 @@ class DaysController extends GenericApiController
                 $this->getTransformations(),
             );
 
-            if (!$this->isMonthView()) {
-                // Preload some day responses
-                $this->preloadDays($list);
-            }
+            // Preload some day responses
+            $this->preloadDays($list);
 
             // Reverse response if requested.
             if ($this->isReverse()) {

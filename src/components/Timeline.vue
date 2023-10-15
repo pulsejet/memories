@@ -906,8 +906,13 @@ export default defineComponent({
       // Aggregate fetch requests
       this.fetchDayQueue.push(dayId);
 
-      // Only single queries allowed for month vie
-      if (now || this.isMonthView) {
+      // If the queue has gotten large enough, just expire immediately
+      // This is to prevent a large number of requests from being queued
+      now ||= this.fetchDayQueue.length >= 16;
+      now ||= this.fetchDayQueue.reduce((sum, dayId) => sum + this.heads[dayId]?.day?.count ?? 0, 0) > 256;
+
+      // Process immediately
+      if (now) {
         return this.fetchDayExpire();
       }
 
