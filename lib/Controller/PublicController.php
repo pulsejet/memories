@@ -25,6 +25,7 @@ use OCP\Share\IShare;
 
 class PublicController extends AuthPublicShareController
 {
+    /** @psalm-suppress PropertyNotSetInConstructor */
     protected IShare $share;
 
     public function __construct(
@@ -65,7 +66,7 @@ class PublicController extends AuthPublicShareController
             $this->share = $this->shareManager->getShareByToken($this->getToken());
 
             return true;
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return false;
         }
     }
@@ -80,7 +81,7 @@ class PublicController extends AuthPublicShareController
         // Check whether share exists
         try {
             $share = $this->shareManager->getShareByToken($this->getToken());
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             throw new NotFoundException();
         }
 
@@ -144,6 +145,7 @@ class PublicController extends AuthPublicShareController
 
     protected function isPasswordProtected(): bool
     {
+        /** @psalm-suppress RedundantConditionGivenDocblockType */
         return null !== $this->share->getPassword();
     }
 
@@ -215,11 +217,7 @@ class PublicController extends AuthPublicShareController
      */
     private function getSingleItemInitialState(\OCP\Files\File $file): array
     {
-        $data = $this->tq->getSingleItem($file->getId());
-        if (null === $data) {
-            throw new NotFoundException();
-        }
-
-        return $data;
+        return $this->tq->getSingleItem($file->getId())
+            ?? throw new NotFoundException();
     }
 }

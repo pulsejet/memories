@@ -50,7 +50,7 @@ class TagsBackend extends Backend
         return Util::tagsIsEnabled();
     }
 
-    public function transformDayQuery(&$query, bool $aggregate): void
+    public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void
     {
         $tagName = (string) $this->request->getParam('tags');
 

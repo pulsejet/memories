@@ -44,7 +44,7 @@ class Exceptions
         ], Http::STATUS_NOT_FOUND));
     }
 
-    public static function NotFoundFile($identifier): HttpResponseException
+    public static function NotFoundFile(null|int|string $identifier): HttpResponseException
     {
         return new HttpResponseException(new DataResponse([
             'message' => "File not found ({$identifier})",

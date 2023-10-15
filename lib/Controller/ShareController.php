@@ -27,6 +27,8 @@ use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\Share\IManager;
+use OCP\Share\IShare;
 
 class ShareController extends GenericApiController
 {
@@ -34,19 +36,16 @@ class ShareController extends GenericApiController
      * @NoAdminRequired
      *
      * Get the tokens of a node shared using an external link
-     *
-     * @param mixed $id
-     * @param mixed $path
      */
-    public function links($id, $path): Http\Response
+    public function links(?int $id, ?string $path): Http\Response
     {
         return Util::guardEx(function () use ($id, $path) {
             $file = $this->getNodeByIdOrPath($id, $path);
 
-            /** @var \OCP\Share\IManager $shareManager */
-            $shareManager = \OC::$server->get(\OCP\Share\IManager::class);
+            $shares = \OC::$server->get(IManager::class)
+                ->getSharesBy(Util::getUID(), IShare::TYPE_LINK, $file, true, 50, 0)
+            ;
 
-            $shares = $shareManager->getSharesBy(Util::getUID(), \OCP\Share\IShare::TYPE_LINK, $file, true, 50, 0);
             if (empty($shares)) {
                 throw Exceptions::NotFound('external links');
             }
@@ -61,24 +60,21 @@ class ShareController extends GenericApiController
      * @NoAdminRequired
      *
      * Share a node using an external link
-     *
-     * @param mixed $id
-     * @param mixed $path
      */
-    public function createNode($id, $path): Http\Response
+    public function createNode(?int $id, ?string $path): Http\Response
     {
         return Util::guardEx(function () use ($id, $path) {
             $file = $this->getNodeByIdOrPath($id, $path);
 
-            $shareManager = \OC::$server->get(\OCP\Share\IManager::class);
+            $manager = \OC::$server->get(IManager::class);
 
-            $share = $shareManager->newShare();
-            $share->setNode($file);
-            $share->setShareType(\OCP\Share\IShare::TYPE_LINK);
-            $share->setSharedBy($this->userSession->getUser()->getUID());
-            $share->setPermissions(\OCP\Constants::PERMISSION_READ);
-
-            $share = $shareManager->createShare($share);
+            $share = $manager->createShare(
+                $manager->newShare()
+                    ->setNode($file)
+                    ->setShareType(\OCP\Share\IShare::TYPE_LINK)
+                    ->setSharedBy(Util::getUID())
+                    ->setPermissions(\OCP\Constants::PERMISSION_READ),
+            );
 
             return new JSONResponse($this->makeShareResponse($share), Http::STATUS_OK);
         });
@@ -94,22 +90,21 @@ class ShareController extends GenericApiController
         return Util::guardEx(static function () use ($id) {
             $uid = Util::getUID();
 
-            /** @var \OCP\Share\IManager $shareManager */
-            $shareManager = \OC::$server->get(\OCP\Share\IManager::class);
+            $manager = \OC::$server->get(\OCP\Share\IManager::class);
 
-            $share = $shareManager->getShareById($id);
+            $share = $manager->getShareById($id);
 
             if ($share->getSharedBy() !== $uid) {
                 throw Exceptions::Forbidden('You are not the owner of this share');
             }
 
-            $shareManager->deleteShare($share);
+            $manager->deleteShare($share);
 
             return new JSONResponse([], Http::STATUS_OK);
         });
     }
 
-    private function getNodeByIdOrPath($id, $path): \OCP\Files\Node
+    private function getNodeByIdOrPath(?int $id, ?string $path): \OCP\Files\Node
     {
         $uid = Util::getUID();
 
@@ -120,7 +115,7 @@ class ShareController extends GenericApiController
             } elseif ($path) {
                 $file = Util::getUserFolder($uid)->get($path);
             }
-        } catch (\OCP\Files\NotFoundException $e) {
+        } catch (\OCP\Files\NotFoundException) {
             throw Exceptions::NotFoundFile($path ?? $id);
         }
 
@@ -131,24 +126,26 @@ class ShareController extends GenericApiController
         return $file;
     }
 
-    private function makeShareResponse(\OCP\Share\IShare $share): array
+    private function makeShareResponse(IShare $share): array
     {
-        /** @var \OCP\IURLGenerator $urlGenerator */
-        $urlGenerator = \OC::$server->get(\OCP\IURLGenerator::class);
+        $token = $share->getToken();
+        $url = \OC::$server->get(\OCP\IURLGenerator::class)
+            ->linkToRouteAbsolute('memories.Public.showShare', ['token' => $token])
+        ;
 
-        $tok = $share->getToken();
-        $exp = $share->getExpirationDate();
-        $url = $urlGenerator->linkToRouteAbsolute('memories.Public.showShare', [
-            'token' => $tok,
-        ]);
+        /**
+         * @psalm-suppress RedundantConditionGivenDocblockType
+         * @psalm-suppress DocblockTypeContradiction
+         */
+        $expiration = $share->getExpirationDate()?->getTimestamp();
 
         return [
             'id' => $share->getFullId(),
             'label' => $share->getLabel(),
-            'token' => $tok,
+            'token' => $token,
             'url' => $url,
             'hasPassword' => $share->getPassword() ? true : false,
-            'expiration' => $exp ? $exp->getTimestamp() : null,
+            'expiration' => $expiration,
             'editable' => $share->getPermissions() & \OCP\Constants::PERMISSION_UPDATE,
         ];
     }

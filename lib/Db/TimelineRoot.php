@@ -8,7 +8,10 @@ use OCP\Files\FileInfo;
 
 class TimelineRoot
 {
+    /** @var array<int, \OCP\Files\FileInfo> */
     protected array $folders = [];
+
+    /** @var array<int, string> */
     protected array $folderPaths = [];
 
     /**
@@ -29,7 +32,7 @@ class TimelineRoot
         }
 
         // Add top level folder
-        $this->setFolder($info->getId(), $info, $path);
+        $this->setFolder($info->getId() ?? 0, $info, $path);
     }
 
     /**
@@ -89,28 +92,18 @@ class TimelineRoot
         }
     }
 
-    public function getFolderPath(int $id)
-    {
-        return $this->folderPaths[$id];
-    }
-
-    /**
-     * @return int[]
-     */
+    /** @return int[] */
     public function getIds(): array
     {
         return array_keys($this->folderPaths);
     }
 
-    /**
-     * @return null|int
-     */
-    public function getOneId()
+    public function getOneId(): ?int
     {
         return array_key_first($this->folders);
     }
 
-    public function getFolder(int $id)
+    public function getFolder(int $id): ?FileInfo
     {
         return $this->folders[$id];
     }

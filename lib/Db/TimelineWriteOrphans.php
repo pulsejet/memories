@@ -47,9 +47,9 @@ trait TimelineWriteOrphans
     /**
      * Orphan and run an update on all files.
      *
-     * @param array    $fields   list of fields to select
-     * @param int      $txnSize  number of rows to process in a single transaction
-     * @param \Closure $callback will be passed each row
+     * @param array                 $fields   list of fields to select
+     * @param int                   $txnSize  number of rows to process in a single transaction
+     * @param \Closure(array): void $callback will be passed each row
      */
     public function orphanAndRun(array $fields, int $txnSize, \Closure $callback): void
     {
@@ -74,6 +74,9 @@ trait TimelineWriteOrphans
 
     /**
      * Get a list of orphaned files.
+     *
+     * @param int      $count  max number of rows to return
+     * @param string[] $fields list of fields to select
      */
     protected function getSomeOrphans(int $count, array $fields): array
     {

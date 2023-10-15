@@ -91,9 +91,9 @@ class AlbumsQuery
     /**
      * Check if an album has a file.
      *
-     * @return ?string owner of file
+     * @return false|string owner of file if found
      */
-    public function hasFile(int $albumId, int $fileId): ?string
+    public function hasFile(int $albumId, int $fileId): false|string
     {
         $query = $this->connection->getQueryBuilder();
         $query->select('owner')->from('photos_albums_files')->where(
@@ -103,15 +103,15 @@ class AlbumsQuery
             ),
         );
 
-        return $query->executeQuery()->fetchOne() ?: null;
+        return $query->executeQuery()->fetchOne();
     }
 
     /**
      * Check if a file belongs to a user through an album.
      *
-     * @return bool|string owner of file
+     * @return false|string owner of file if found
      */
-    public function userHasFile(string $uid, int $fileId)
+    public function userHasFile(string $uid, int $fileId): false|string
     {
         $query = $this->connection->getQueryBuilder();
         $query->select('paf.owner')->from('photos_albums_files', 'paf')->where(
@@ -173,6 +173,7 @@ class AlbumsQuery
         }
 
         // Check if user is owner
+        /** @psalm-suppress PossiblyUndefinedVariable */
         if ($albumUid === $uid) {
             return $album;
         }
@@ -264,15 +265,21 @@ class AlbumsQuery
         return $result;
     }
 
-    /** Get list of collaborator ids including user id and groups */
+    /**
+     * Get the various collaborator IDs that a user has.
+     * This includes the groups the user is in and the user itself.
+     *
+     * @return string[] List of collaborator IDs
+     */
     private function getSelfCollaborators(string $uid)
     {
+        // Get the user in question
+        $user = \OC::$server->get(\OCP\IUserManager::class)->get($uid)
+            ?: throw new \Exception('User not found');
         // Get groups for the user
-        $groupManager = \OC::$server->get(\OCP\IGroupManager::class);
-        $user = \OC::$server->get(\OCP\IUserManager::class)->get($uid);
-        $groups = $groupManager->getUserGroupIds($user);
+        $groups = \OC::$server->get(\OCP\IGroupManager::class)->getUserGroupIds($user);
 
-        // And albums shared with user
+        // Add the user itself as a collaborator
         $groups[] = $uid;
 
         return $groups;
@@ -284,8 +291,7 @@ class AlbumsQuery
     private function collaboratorsTable(): string
     {
         // https://github.com/nextcloud/photos/commit/20e3e61ad577014e5f092a292c90a8476f630355
-        $appManager = \OC::$server->get(\OCP\App\IAppManager::class);
-        $photosVersion = $appManager->getAppVersion('photos');
+        $photosVersion = \OC::$server->get(\OCP\App\IAppManager::class)->getAppVersion('photos');
         if (version_compare($photosVersion, '2.0.1', '>=')) {
             return 'photos_albums_collabs';
         }

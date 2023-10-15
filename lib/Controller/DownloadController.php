@@ -42,17 +42,11 @@ class DownloadController extends GenericApiController
      *
      * Request to download one or more files
      *
-     * @param mixed $files
+     * @param int[] $files List of file IDs
      */
-    public function request($files): Http\Response
+    public function request(array $files): Http\Response
     {
         return Util::guardEx(static function () use ($files) {
-            // Get ids from body
-            if (null === $files || !\is_array($files)) {
-                throw Exceptions::MissingParameter('files');
-            }
-
-            // Return id
             $handle = self::createHandle('memories', $files);
 
             return new JSONResponse(['handle' => $handle]);
@@ -65,7 +59,7 @@ class DownloadController extends GenericApiController
      * The calling controller must have the UseSession annotation.
      *
      * @param string $name  Name of zip file
-     * @param int[]  $files
+     * @param int[]  $files List of file IDs
      */
     public static function createHandle(string $name, array $files): string
     {
@@ -282,7 +276,7 @@ class DownloadController extends GenericApiController
                     break;
                 }
 
-                /** @var bool|resource */
+                /** @var false|resource */
                 $handle = false;
 
                 /** @var ?\OCP\Files\File */

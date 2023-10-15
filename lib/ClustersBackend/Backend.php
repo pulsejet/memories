@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\ClustersBackend;
 
 use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\Files\SimpleFS\ISimpleFile;
 
 abstract class Backend
 {
@@ -49,7 +50,7 @@ abstract class Backend
      * @param IQueryBuilder $query     Query builder
      * @param bool          $aggregate Whether this is an aggregate query
      */
-    abstract public function transformDayQuery(&$query, bool $aggregate): void;
+    abstract public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void;
 
     /**
      * Apply post-query transformations for the given photo object.
@@ -110,12 +111,12 @@ abstract class Backend
     /**
      * Perform any post processing and get the blob from the preview file.
      *
-     * @param \OCP\Files\SimpleFS\ISimpleFile $file  Preview file
-     * @param array                           $photo Photo object
+     * @param ISimpleFile $file  Preview file
+     * @param array       $photo Photo object
      *
      * @return array [Blob, mimetype] of data
      */
-    public function getPreviewBlob($file, $photo): array
+    public function getPreviewBlob(ISimpleFile $file, array $photo): array
     {
         return [$file->getContent(), $file->getMimeType()];
     }

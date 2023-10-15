@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
+use OCP\Files\SimpleFS\ISimpleFile;
+
 trait PeopleBackendUtils
 {
     /**
@@ -83,9 +85,9 @@ trait PeopleBackendUtils
      * - width: width of the face in the image (percentage)
      * - height: height of the face in the image (percentage)
      *
-     * @param \OCP\Files\SimpleFS\ISimpleFile $file    Actual file containing the image
-     * @param array                           $photo   The face object
-     * @param float                           $padding The padding to add around the face
+     * @param ISimpleFile $file    Actual file containing the image
+     * @param array       $photo   The face object
+     * @param float       $padding The padding to add around the face
      *
      * @return string[] [Blob, mimetype] of resulting image
      *
@@ -93,7 +95,7 @@ trait PeopleBackendUtils
      *
      * @psalm-return list{string, string}
      */
-    private function cropFace($file, array $photo, float $padding): array
+    private function cropFace(ISimpleFile $file, array $photo, float $padding): array
     {
         $img = new \OCP\Image();
         $img->loadFromData($file->getContent());
@@ -124,11 +126,8 @@ trait PeopleBackendUtils
         $img->scaleDownToFit(512, 512);
 
         // Get blob and mimetype
-        $data = $img->data();
-        $mime = $img->mimeType();
-        if (null === $data || null === $mime) {
-            throw new \Exception('Could not get image data');
-        }
+        $data = $img->data() ?: throw new \Exception('Could not get image data');
+        $mime = $img->mimeType() ?: throw new \Exception('Could not get image mimetype');
 
         return [$data, $mime];
     }

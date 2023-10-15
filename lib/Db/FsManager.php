@@ -151,6 +151,8 @@ class FsManager
      *
      * @param Folder $root root folder
      * @param string $key  cache key
+     *
+     * @return string[] List of paths
      */
     public function getNoMediaFolders(Folder $root, string $key): array
     {
@@ -303,7 +305,7 @@ class FsManager
         }
 
         // Check if share is password protected
-        if (($password = $share->getPassword()) !== null) {
+        if (!empty($password = $share->getPassword())) {
             $session = \OC::$server->get(\OCP\ISession::class);
 
             // https://github.com/nextcloud/server/blob/0447b53bda9fe95ea0cbed765aa332584605d652/lib/public/AppFramework/PublicShareController.php#L119
@@ -318,7 +320,7 @@ class FsManager
         return $share;
     }
 
-    public function getShareNode()
+    public function getShareNode(): ?Node
     {
         $share = $this->getShareObject();
         if (null === $share) {
@@ -400,6 +402,7 @@ class FsManager
             Util::forcePermissions($file, $perm);
         }
 
+        /** @var File */
         return $file;
     }
 

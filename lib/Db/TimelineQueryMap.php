@@ -33,10 +33,8 @@ trait TimelineQueryMap
         );
     }
 
-    public function getMapClusters(
-        float $gridLen,
-        string $bounds,
-    ): array {
+    public function getMapClusters(float $gridLen, string $bounds): array
+    {
         $query = $this->connection->getQueryBuilder();
 
         // Get the average location of each cluster
@@ -84,6 +82,11 @@ trait TimelineQueryMap
         return $clusters;
     }
 
+    /**
+     * Gets previews for a list of map clusters.
+     *
+     * @param int[] $clusterIds
+     */
     public function getMapClusterPreviews(array $clusterIds): array
     {
         $query = $this->connection->getQueryBuilder();
@@ -131,6 +134,8 @@ trait TimelineQueryMap
     /**
      * Gets the suggested initial coordinates for the map.
      * Uses the coordinates of the newest photo (by date).
+     *
+     * @psalm-return array{lat: float, lon: float}|null
      */
     public function getMapInitialPosition(): ?array
     {

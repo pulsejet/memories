@@ -57,11 +57,13 @@ class IndexOpts
 
 class Index extends Command
 {
-    // IO
+    /** @psalm-suppress PropertyNotSetInConstructor */
     private InputInterface $input;
+
+    /** @psalm-suppress PropertyNotSetInConstructor */
     private OutputInterface $output;
 
-    // Command options
+    /** @psalm-suppress PropertyNotSetInConstructor */
     private IndexOpts $opts;
 
     public function __construct(
@@ -184,9 +186,9 @@ class Index extends Command
     /**
      * Run function for all users (or selected user if set).
      *
-     * @param mixed $closure
+     * @param \Closure(IUser $user): void $closure
      */
-    private function runForUsers($closure): void
+    private function runForUsers(\Closure $closure): void
     {
         if ($uid = $this->opts->user) {
             if ($user = $this->userManager->get($uid)) {
@@ -203,7 +205,7 @@ class Index extends Command
                 $this->output->writeln("<error>Group {$gid} not found</error>\n");
             }
         } else {
-            $this->userManager->callForSeenUsers(static fn (IUser $user) => $closure($user));
+            $this->userManager->callForSeenUsers($closure);
         }
     }
 }

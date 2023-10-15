@@ -25,6 +25,7 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
 
 class PlacesBackend extends Backend
@@ -49,7 +50,7 @@ class PlacesBackend extends Backend
         return Util::placesGISType() > 0;
     }
 
-    public function transformDayQuery(&$query, bool $aggregate): void
+    public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void
     {
         $locationId = (int) $this->request->getParam('places');
 

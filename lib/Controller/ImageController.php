@@ -81,10 +81,12 @@ class ImageController extends GenericApiController
         return Util::guardExDirect(function (Http\IOutput $out) {
             // read body to array
             $body = file_get_contents('php://input');
+
+            /** @var array<array> */
             $files = json_decode($body, true);
 
             // Filter files with valid parameters
-            $files = array_filter($files, static function ($file) {
+            $files = array_filter($files, static function (array $file) {
                 return isset($file['reqid'], $file['fileid'], $file['x'], $file['y'], $file['a'])
                     && (int) $file['fileid'] > 0
                     && (int) $file['x'] > 0
@@ -92,14 +94,14 @@ class ImageController extends GenericApiController
             });
 
             // Sort files by size, ascending
-            usort($files, static function ($a, $b) {
+            usort($files, static function (array $a, array $b) {
                 $aArea = (int) $a['x'] * (int) $a['y'];
                 $bArea = (int) $b['x'] * (int) $b['y'];
 
                 return $aArea <=> $bArea;
             });
 
-            /** @var \OCP\IPreview $previewManager */
+            /** @var \OCP\IPreview */
             $previewManager = \OC::$server->get(\OCP\IPreview::class);
 
             // For checking max previews
@@ -202,8 +204,7 @@ class ImageController extends GenericApiController
             $info['basename'] = $file->getName();
 
             // Allow these ony for logged in users
-            $user = $this->userSession->getUser();
-            if (null !== $user) {
+            if ($user = $this->userSession->getUser()) {
                 // Get the path of the file relative to current user
                 // "/admin/files/Photos/Camera/20230821_135017.jpg" => "/Photos/..."
                 $parts = explode('/', $file->getPath());
@@ -242,9 +243,6 @@ class ImageController extends GenericApiController
      * @NoAdminRequired
      *
      * Set the exif data for a file.
-     *
-     * @param int fileid
-     * @param array  raw exif data
      */
     public function setExif(int $id, array $raw): Http\Response
     {
@@ -398,7 +396,9 @@ class ImageController extends GenericApiController
      * @param string $blob     Blob of image data in any format
      * @param string $mimetype Mimetype of image data
      *
-     * @return array [blob, mimetype]
+     * @return string[] [blob, mimetype]
+     *
+     * @psalm-return list{string, string}
      */
     private function getImageJPEG($blob, $mimetype): array
     {
@@ -435,6 +435,8 @@ class ImageController extends GenericApiController
 
     /**
      * Get the tags for a file.
+     *
+     * @return string[]
      */
     private function getTags(int $fileId): array
     {
@@ -447,12 +449,10 @@ class ImageController extends GenericApiController
         $objectMapper = \OC::$server->get(\OCP\SystemTag\ISystemTagObjectMapper::class);
         $tagIds = $objectMapper->getTagIdsForObjects([$fileId], 'files')[(string) $fileId];
 
-        // Get the tag names and filter out the ones that are not user visible
-        $tagManager = \OC::$server->get(\OCP\SystemTag\ISystemTagManager::class);
+        // Get all matching tag objects
+        $tags = \OC::$server->get(\OCP\SystemTag\ISystemTagManager::class)->getTagsByIds($tagIds);
 
-        /** @var \OCP\SystemTag\ISystemTag[] */
-        $tags = $tagManager->getTagsByIds($tagIds);
-
+        // Filter out the tags that are not user visible
         $visible = array_filter($tags, static fn ($t) => $t->isUserVisible());
 
         // Get the tag names

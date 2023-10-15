@@ -18,13 +18,13 @@ trait TimelineWritePlaces
     /**
      * Add places data for a file.
      *
-     * @param int        $fileId The file ID
-     * @param null|float $lat    The latitude of the file
-     * @param null|float $lon    The longitude of the file
+     * @param int    $fileId The file ID
+     * @param ?float $lat    The latitude of the file
+     * @param ?float $lon    The longitude of the file
      *
-     * @return array The list of osm_id of the places
+     * @return int[] The list of osm_id of the places
      */
-    public function updatePlacesData(int $fileId, $lat, $lon): array
+    public function updatePlacesData(int $fileId, ?float $lat, ?float $lon): array
     {
         // Get GIS type
         $gisType = \OCA\Memories\Util::placesGISType();
@@ -74,7 +74,7 @@ trait TimelineWritePlaces
         $this->connection->commit();
 
         // Return list of osm_id
-        return array_map(static fn ($row) => $row['osm_id'], $rows);
+        return array_map(static fn ($row) => (int) $row['osm_id'], $rows);
     }
 
     /**
@@ -155,7 +155,7 @@ trait TimelineWritePlaces
     /**
      * Read coordinates from array and round to 6 decimal places.
      *
-     * Modifies the array to remove invalid coordinates.
+     * Modifies the EXIF array to remove invalid coordinates.
      *
      * @return (null|float)[]
      *

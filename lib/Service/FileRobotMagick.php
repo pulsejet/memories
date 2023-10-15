@@ -49,7 +49,7 @@ class FileRobotImageState
     /** 0 to 200 */
     public ?float $warmth = null;
 
-    /** Order of filters */
+    /** @var string[] Order of filters */
     public array $finetuneOrder = [];
 
     /** Crop X coordinate */

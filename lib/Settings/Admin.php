@@ -23,11 +23,17 @@ class Admin implements ISettings
         return new TemplateResponse('memories', 'main', PageController::getMainParams());
     }
 
+    /**
+     * @return string
+     */
     public function getSection()
     {
         return Application::APPNAME;
     }
 
+    /**
+     * @return int
+     */
     public function getPriority()
     {
         return 50;

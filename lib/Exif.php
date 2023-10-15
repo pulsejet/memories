@@ -15,21 +15,31 @@ class Exif
     private const EXIFTOOL_ARGS = ['-api', 'QuickTimeUTC=1', '-n', '-json'];
 
     /** Opened instance of exiftool when running in command mode */
+    /** @var null|resource */
     private static $staticProc;
+
+    /** @var null|resource[] */
     private static $staticPipes;
+
+    /** Disable uisage of static process */
     private static bool $noStaticProc = false;
 
     public static function closeStaticExiftoolProc(): void
     {
         try {
-            if (self::$staticProc) {
+            // Close I/O pipes
+            if (self::$staticPipes) {
                 fclose(self::$staticPipes[0]);
                 fclose(self::$staticPipes[1]);
                 fclose(self::$staticPipes[2]);
+                self::$staticPipes = null;
+            }
+
+            // Close process
+            if (self::$staticProc) {
                 proc_terminate(self::$staticProc);
                 proc_close(self::$staticProc);
                 self::$staticProc = null;
-                self::$staticPipes = null;
             }
         } catch (\Exception $ex) {
         }
@@ -50,10 +60,13 @@ class Exif
         if (!self::$staticProc) {
             self::initializeStaticExiftoolProc();
             usleep(500000); // wait if error
+
+            /** @psalm-suppress NullArgument */
             if (!proc_get_status(self::$staticProc)['running']) {
                 error_log('WARN: Failed to create stay_open exiftool process');
                 self::$noStaticProc = true;
                 self::$staticProc = null;
+                self::$staticPipes = null;
             }
 
             return;
@@ -61,12 +74,15 @@ class Exif
 
         if (!proc_get_status(self::$staticProc)['running']) {
             self::$staticProc = null;
+            self::$staticPipes = null;
             self::ensureStaticExiftoolProc();
         }
     }
 
     /**
      * Get exif data as a JSON object from a Nextcloud file.
+     *
+     * @return array<string, mixed>
      */
     public static function getExifFromFile(File $file): array
     {
@@ -108,6 +124,8 @@ class Exif
 
     /**
      * Get exif data as a JSON object from a local file path.
+     *
+     * @return array<string, mixed>
      */
     public static function getExifFromLocalPath(string $path): array
     {
@@ -122,6 +140,8 @@ class Exif
 
     /**
      * Parse date from exif format and throw error if invalid.
+     *
+     * @param array<string, mixed> $exif
      */
     public static function parseExifDate(array $exif): \DateTime
     {
@@ -140,9 +160,12 @@ class Exif
 
         // Get timezone from exif
         try {
-            $exifTz = $exif['OffsetTimeOriginal'] ?? $exif['OffsetTime'] ?? $exif['LocationTZID'] ?? null;
-            $exifTz = new \DateTimeZone($exifTz);
-        } catch (\Error $e) {
+            $tzStr = $exif['OffsetTimeOriginal']
+                ?: $exif['OffsetTime']
+                ?: $exif['LocationTZID']
+                ?: throw new \Exception();
+            $exifTz = new \DateTimeZone((string) $tzStr);
+        } catch (\Exception) {
             $exifTz = null;
         }
 
@@ -200,13 +223,15 @@ class Exif
 
     /**
      * Get the date taken from either the file or exif data if available.
+     *
+     * @param array<string, mixed> $exif
      */
     public static function getDateTaken(File $file, array $exif): \DateTime
     {
         try {
             return self::parseExifDate($exif);
-        } catch (\Exception $ex) {
-        } catch (\ValueError $ex) {
+        } catch (\Exception) {
+        } catch (\ValueError) {
         }
 
         // Fall back to modification time
@@ -217,7 +242,7 @@ class Exif
 
         try {
             $dt->setTimezone(new \DateTimeZone($tz));
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             throw new \Error("FATAL: system timezone is invalid (TZ): {$tz}");
         }
 
@@ -235,9 +260,13 @@ class Exif
     /**
      * Get image dimensions from Exif data.
      *
-     * @return array [width, height]
+     * @param array<string, mixed> $exif
+     *
+     * @return int[]
+     *
+     * @psalm-return list{int, int}
      */
-    public static function getDimensions(array $exif)
+    public static function getDimensions(array $exif): array
     {
         $width = $exif['ImageWidth'] ?? 0;
         $height = $exif['ImageHeight'] ?? 0;
@@ -274,7 +303,7 @@ class Exif
      * @param mixed  $imageUniqueID EXIF field
      * @param int    $size          the file size in bytes (fallback)
      */
-    public static function getBUID(string $basename, $imageUniqueID, int $size): string
+    public static function getBUID(string $basename, mixed $imageUniqueID, int $size): string
     {
         $sfx = "size={$size}";
         if (null !== $imageUniqueID && \strlen((string) $imageUniqueID) >= 4) {
@@ -295,8 +324,8 @@ class Exif
     /**
      * Set exif data using raw json.
      *
-     * @param string $path to local file
-     * @param array  $data exif data
+     * @param string               $path to local file
+     * @param array<string, mixed> $data exif data
      *
      * @throws \Exception on failure
      */
@@ -330,6 +359,11 @@ class Exif
         }
     }
 
+    /**
+     * Set exif data using a raw array.
+     *
+     * @param array<string, mixed> $data exif data
+     */
     public static function setFileExif(File $file, array $data): void
     {
         // Get path to local file so we can skip reading
@@ -389,6 +423,7 @@ class Exif
     private static function initializeStaticExiftoolProc(): void
     {
         self::closeStaticExiftoolProc();
+        self::$staticPipes = [];
         self::$staticProc = proc_open(array_merge(self::getExiftool(), ['-stay_open', 'true', '-@', '-']), [
             0 => ['pipe', 'r'],
             1 => ['pipe', 'w'],
@@ -429,19 +464,34 @@ class Exif
 
     private static function getExifFromLocalPathWithStaticProc(string $path): array
     {
+        // This function should not be called if there is no static process
+        if (!self::$staticPipes) {
+            throw new \Error('[BUG] No static pipes found');
+        }
+
+        // Create arguments for exiftool
         $args = implode("\n", self::EXIFTOOL_ARGS);
         fwrite(self::$staticPipes[0], "{$path}\n{$args}\n-execute\n");
         fflush(self::$staticPipes[0]);
 
+        // The output of exiftool's stay_open process ends with this token
         $readyToken = "\n{ready}\n";
 
         try {
             $buf = self::readOrTimeout(self::$staticPipes[1], self::EXIFTOOL_TIMEOUT, $readyToken);
+
+            // The output buffer should always contain the ready token
+            // (this is the point of readOrTimeout)
             $tokPos = strrpos($buf, $readyToken);
+            if (false === $tokPos) {
+                throw new \Error('[BUG] No ready token found in output buffer');
+            }
+
+            // Slice everything before the ready token
             $buf = substr($buf, 0, $tokPos);
 
             return self::processStdout($buf);
-        } catch (\Exception $ex) {
+        } catch (\Exception) {
             error_log("ERROR: Exiftool may have crashed, restarting process [{$path}]");
             self::restartStaticExiftoolProc();
 

@@ -32,7 +32,11 @@ use OCP\AppFramework\Http\JSONResponse;
 
 class ClustersController extends GenericApiController
 {
-    /** Current backend for this instance */
+    /**
+     * Current backend for this instance.
+     *
+     * @psalm-suppress PropertyNotSetInConstructor
+     */
     protected ClustersBackend\Backend $backend;
 
     /**

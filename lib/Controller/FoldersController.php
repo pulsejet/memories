@@ -21,7 +21,7 @@ class FoldersController extends GenericApiController
         return Util::guardEx(function () use ($folder) {
             try {
                 $node = Util::getUserFolder()->get($folder);
-            } catch (\OCP\Files\NotFoundException $e) {
+            } catch (\OCP\Files\NotFoundException) {
                 throw Exceptions::NotFound('Folder not found');
             }
 

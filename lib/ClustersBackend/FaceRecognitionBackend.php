@@ -25,6 +25,8 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
+use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\Files\SimpleFS\ISimpleFile;
 use OCP\IConfig;
 use OCP\IRequest;
 
@@ -54,7 +56,7 @@ class FaceRecognitionBackend extends Backend
                && Util::facerecognitionIsEnabled();
     }
 
-    public function transformDayQuery(&$query, bool $aggregate): void
+    public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void
     {
         $personStr = (string) $this->request->getParam('facerecognition');
 
@@ -196,7 +198,7 @@ class FaceRecognitionBackend extends Backend
         $this->sortByScores($photos);
     }
 
-    public function getPreviewBlob($file, $photo): array
+    public function getPreviewBlob(ISimpleFile $file, array $photo): array
     {
         return $this->cropFace($file, $photo, 1.8);
     }

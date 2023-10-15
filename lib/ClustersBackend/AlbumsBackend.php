@@ -27,6 +27,7 @@ use OCA\Memories\Db\AlbumsQuery;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
 
 class AlbumsBackend extends Backend
@@ -57,7 +58,7 @@ class AlbumsBackend extends Backend
         return explode('/', $name)[1];
     }
 
-    public function transformDayQuery(&$query, bool $aggregate): void
+    public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void
     {
         $albumId = (string) $this->request->getParam(self::clusterType());
 
@@ -102,7 +103,7 @@ class AlbumsBackend extends Backend
 
         // Add display names for users
         $userManager = \OC::$server->get(\OCP\IUserManager::class);
-        array_walk($list, static function (&$item) use ($userManager) {
+        array_walk($list, static function (array &$item) use ($userManager) {
             $user = $userManager->get($item['user']);
             $item['user_display'] = $user ? $user->getDisplayName() : null;
         });

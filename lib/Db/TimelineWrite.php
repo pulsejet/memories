@@ -138,7 +138,7 @@ class TimelineWrite
         $buid = $prevRow ? $prevRow['buid'] : '';
         if (empty($buid)) {
             $imageUniqueId = \array_key_exists('ImageUniqueID', $exif) ? $exif['ImageUniqueID'] : null;
-            $buid = Exif::getBUID($file->getName(), $imageUniqueId, $file->getSize());
+            $buid = Exif::getBUID($file->getName(), $imageUniqueId, (int) $file->getSize());
         }
 
         // Get exif json
@@ -185,7 +185,7 @@ class TimelineWrite
     /**
      * Remove a file from the exif database.
      */
-    public function deleteFile(File &$file): void
+    public function deleteFile(File $file): void
     {
         // Get full record
         $query = $this->connection->getQueryBuilder();
@@ -261,7 +261,7 @@ class TimelineWrite
      */
     private function getCurrentRow(int $fileId): ?array
     {
-        $fetch = function (string $table) use ($fileId) {
+        $fetch = function (string $table) use ($fileId): false|null|array {
             $query = $this->connection->getQueryBuilder();
 
             return $query->select('*')
@@ -277,6 +277,8 @@ class TimelineWrite
 
     /**
      * Convert EXIF data to filtered JSON string.
+     *
+     * @param array<string, mixed> $exif EXIF data
      */
     private function getExifJson(array $exif): string
     {

@@ -25,6 +25,8 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
+use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\Files\SimpleFS\ISimpleFile;
 use OCP\IRequest;
 
 class RecognizeBackend extends Backend
@@ -51,7 +53,7 @@ class RecognizeBackend extends Backend
         return Util::recognizeIsEnabled();
     }
 
-    public function transformDayQuery(&$query, bool $aggregate): void
+    public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void
     {
         // Check if Recognize is enabled
         if (!$this->isEnabled()) {
@@ -232,7 +234,7 @@ class RecognizeBackend extends Backend
         $this->sortByScores($photos);
     }
 
-    public function getPreviewBlob($file, $photo): array
+    public function getPreviewBlob(ISimpleFile $file, array $photo): array
     {
         return $this->cropFace($file, $photo, 1.5);
     }

@@ -46,9 +46,12 @@ class Index
     /**
      * Callback to check if the process should continue.
      * This is called before every file is indexed.
+     *
+     * @var null|\Closure(): bool
      */
     public ?\Closure $continueCheck = null;
 
+    /** @var string[] */
     private static ?array $mimeList = null;
 
     public function __construct(

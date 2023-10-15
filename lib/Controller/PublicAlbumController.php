@@ -45,7 +45,7 @@ class PublicAlbumController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function showShare(string $token)
+    public function showShare(string $token): Response
     {
         // Validate token exists
         $album = $this->albumsQuery->getAlbumByLink($token);

@@ -21,27 +21,36 @@ class AdminSection implements IIconSection
      */
     public function getForm()
     {
-        $parameters = [
-        ];
-
-        return new TemplateResponse('memories', 'admin', $parameters);
+        return new TemplateResponse('memories', 'admin', []);
     }
 
+    /**
+     * @return string
+     */
     public function getID()
     {
         return 'memories';
     }
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return $this->l->t('Memories');
     }
 
+    /**
+     * @return int
+     */
     public function getPriority()
     {
         return 75;
     }
 
+    /**
+     * @return string
+     */
     public function getIcon()
     {
         return $this->urlGenerator->imagePath('memories', 'app-dark.svg');

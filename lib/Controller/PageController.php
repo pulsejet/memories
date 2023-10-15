@@ -10,6 +10,7 @@ use OCA\Memories\Service\BinExt;
 use OCA\Memories\Util;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\EventDispatcher\IEventDispatcher;
@@ -29,7 +30,7 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function main()
+    public function main(): Response
     {
         // Check native version if available
         $nativeVer = Util::callerNativeVersion();
@@ -59,11 +60,11 @@ class PageController extends Controller
     }
 
     /** Get the common content security policy */
-    public static function getCSP()
+    public static function getCSP(): ContentSecurityPolicy
     {
         // Image domains MUST be added to the connect domain list
         // because of the service worker fetch() call
-        $addImageDomain = static function ($url) use (&$policy): void {
+        $addImageDomain = static function (string $url) use (&$policy): void {
             $policy->addAllowedImageDomain($url);
             $policy->addAllowedConnectDomain($url);
         };
@@ -114,7 +115,7 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function folder()
+    public function folder(): Response
     {
         return $this->main();
     }
@@ -124,7 +125,7 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function favorites()
+    public function favorites(): Response
     {
         return $this->main();
     }
@@ -134,7 +135,7 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function albums()
+    public function albums(): Response
     {
         return $this->main();
     }
@@ -144,7 +145,7 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function videos()
+    public function videos(): Response
     {
         return $this->main();
     }
@@ -154,7 +155,7 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function archive()
+    public function archive(): Response
     {
         return $this->main();
     }
@@ -164,7 +165,7 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function thisday()
+    public function thisday(): Response
     {
         return $this->main();
     }
@@ -174,7 +175,7 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function recognize()
+    public function recognize(): Response
     {
         return $this->main();
     }
@@ -184,7 +185,7 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function facerecognition()
+    public function facerecognition(): Response
     {
         return $this->main();
     }
@@ -194,7 +195,7 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function places()
+    public function places(): Response
     {
         return $this->main();
     }
@@ -204,7 +205,7 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function tags()
+    public function tags(): Response
     {
         return $this->main();
     }
@@ -214,7 +215,7 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function map()
+    public function map(): Response
     {
         return $this->main();
     }
@@ -224,7 +225,7 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function explore()
+    public function explore(): Response
     {
         return $this->main();
     }
@@ -234,7 +235,7 @@ class PageController extends Controller
      *
      * @NoCSRFRequired
      */
-    public function nxsetup()
+    public function nxsetup(): Response
     {
         return $this->main();
     }

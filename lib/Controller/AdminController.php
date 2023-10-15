@@ -49,10 +49,8 @@ class AdminController extends GenericApiController
 
     /**
      * @AdminRequired
-     *
-     * @param mixed $value
      */
-    public function setSystemConfig(string $key, $value): Http\Response
+    public function setSystemConfig(string $key, mixed $value): Http\Response
     {
         return Util::guardEx(function () use ($key, $value) {
             // Make sure not running in read-only mode
@@ -94,7 +92,7 @@ class AdminController extends GenericApiController
             $exiftoolNoLocal = Util::getSystemConfig('memories.exiftool_no_local');
             $status['exiftool'] = $this->getExecutableStatus(
                 static fn () => BinExt::getExiftoolPBin(),
-                static fn ($p) => BinExt::testExiftool(),
+                static fn () => BinExt::testExiftool(),
                 !$exiftoolNoLocal,
                 !$exiftoolNoLocal,
             );
@@ -103,7 +101,7 @@ class AdminController extends GenericApiController
             /** @psalm-suppress ForbiddenCode */
             $status['perl'] = $this->getExecutableStatus(
                 trim(shell_exec('which perl') ?: '/bin/perl'),
-                static fn ($p) => BinExt::testSystemPerl($p),
+                static fn (string $p) => BinExt::testSystemPerl($p),
             );
 
             // Check number of indexed files
@@ -220,14 +218,14 @@ class AdminController extends GenericApiController
     /**
      * Get the status of an executable.
      *
-     * @param \Closure|string $path             Path to the executable
-     * @param ?\Closure       $testFunction     Function to test the executable
-     * @param bool            $testIfFile       Test if the path is a file
-     * @param bool            $testIfExecutable Test if the path is executable
+     * @param (\Closure():string)|string     $path             Path to the executable
+     * @param null|(\Closure(string):string) $testFunction     Function to test the executable
+     * @param bool                           $testIfFile       Test if the path is a file
+     * @param bool                           $testIfExecutable Test if the path is executable
      */
     private function getExecutableStatus(
-        $path,
-        ?\Closure $testFunction = null,
+        \Closure|string $path,
+        null|\Closure $testFunction = null,
         bool $testIfFile = true,
         bool $testIfExecutable = true,
     ): string {
@@ -237,10 +235,6 @@ class AdminController extends GenericApiController
             } catch (\Exception $e) {
                 return 'test_fail:'.$e->getMessage();
             }
-        }
-
-        if (!\is_string($path)) {
-            return 'not_found';
         }
 
         if ($testIfFile && !is_file($path)) {

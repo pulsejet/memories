@@ -78,7 +78,9 @@ trait TimelineQueryCTE
         return self::bundleCTEs([self::CTE_FOLDERS_ALL($hidden), $cte]);
     }
 
-    /** CTE to get all archive folders recursively in the given top folders */
+    /**
+     * CTE to get all archive folders recursively in the given top folders.
+     */
     protected static function CTE_FOLDERS_ARCHIVE(): string
     {
         $cte = "*PREFIX*cte_folders(fileid) AS (
@@ -102,6 +104,9 @@ trait TimelineQueryCTE
         return self::bundleCTEs([self::CTE_FOLDERS_ALL(true), $cte]);
     }
 
+    /**
+     * @param string[] $ctes The CTEs to bundle
+     */
     protected static function bundleCTEs(array $ctes): string
     {
         return 'WITH RECURSIVE '.implode(',', $ctes);

@@ -126,10 +126,8 @@ class BinExt
 
     /**
      * Detect the exiftool binary to use.
-     *
-     * @return false|string
      */
-    public static function detectExiftool()
+    public static function detectExiftool(): false|string
     {
         if (!empty($path = Util::getSystemConfig('memories.exiftool'))) {
             return $path;
@@ -371,10 +369,8 @@ class BinExt
 
     /**
      * Detect the go-vod binary to use.
-     *
-     * @return false|string
      */
-    public static function detectGoVod()
+    public static function detectGoVod(): false|string
     {
         $goVodPath = Util::getSystemConfig('memories.vod.path');
 
@@ -445,7 +441,7 @@ class BinExt
         return explode(' ', $matches[0])[2];
     }
 
-    public static function testSystemPerl(string $path): ?string
+    public static function testSystemPerl(string $path): string
     {
         /** @psalm-suppress ForbiddenCode */
         if (($out = shell_exec("{$path} -e 'print \"OK\";'")) !== 'OK') {
@@ -453,6 +449,6 @@ class BinExt
         }
 
         /** @psalm-suppress ForbiddenCode */
-        return shell_exec("{$path} -e 'print $^V;'") ?: null;
+        return shell_exec("{$path} -e 'print $^V;'") ?: 'unknown version';
     }
 }

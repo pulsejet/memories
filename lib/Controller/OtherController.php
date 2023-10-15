@@ -40,7 +40,7 @@ class OtherController extends GenericApiController
      * @param string key the identifier to change
      * @param string value the value to set
      *
-     * @return JSONResponse an empty JSONResponse with respective http status code
+     * @return Http\Response empty JSONResponse with respective http status code
      */
     public function setUserConfig(string $key, string $value): Http\Response
     {
@@ -77,7 +77,7 @@ class OtherController extends GenericApiController
             }
 
             // helper function to get user config values
-            $getAppConfig = function ($key, $default) use ($uid) {
+            $getAppConfig = function (string $key, mixed $default) use ($uid): mixed {
                 return $this->config->getUserValue($uid, Application::APPNAME, $key, $default);
             };
 
@@ -124,7 +124,7 @@ class OtherController extends GenericApiController
      *
      * @NoCSRFRequired
      */
-    public function describeApi(): JSONResponse
+    public function describeApi(): Http\Response
     {
         return Util::guardEx(static function () {
             $appManager = \OC::$server->get(\OCP\App\IAppManager::class);
@@ -138,7 +138,7 @@ class OtherController extends GenericApiController
 
             try {
                 $info['uid'] = Util::getUID();
-            } catch (\Exception $e) {
+            } catch (\Exception) {
                 $info['uid'] = null;
             }
 

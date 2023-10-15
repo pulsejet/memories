@@ -27,11 +27,11 @@ class Util
      */
     public static function getArch(): ?string
     {
-        $uname = php_uname('m');
-        if (false !== stripos($uname, 'aarch64') || false !== stripos($uname, 'arm64')) {
+        $uname = strtolower(php_uname('m') ?: 'unknown');
+        if (str_contains($uname, 'aarch64') || str_contains($uname, 'arm64')) {
             return 'aarch64';
         }
-        if (false !== stripos($uname, 'x86_64') || false !== stripos($uname, 'amd64')) {
+        if (str_contains($uname, 'x86_64') || str_contains($uname, 'amd64')) {
             return 'amd64';
         }
 
@@ -46,13 +46,12 @@ class Util
     public static function getLibc(): ?string
     {
         /** @psalm-suppress ForbiddenCode */
-        if ($ldd = shell_exec('ldd --version 2>&1')) {
-            if (false !== stripos($ldd, 'musl')) {
-                return 'musl';
-            }
-            if (false !== stripos($ldd, 'glibc')) {
-                return 'glibc';
-            }
+        $ldd = strtolower(shell_exec('ldd --version 2>&1') ?: 'unknown');
+        if (str_contains($ldd, 'musl')) {
+            return 'musl';
+        }
+        if (str_contains($ldd, 'glibc')) {
+            return 'glibc';
         }
 
         return null;
@@ -79,9 +78,7 @@ class Util
      */
     public static function tagsIsEnabled(): bool
     {
-        $appManager = \OC::$server->get(IAppManager::class);
-
-        return $appManager->isEnabledForUser('systemtags');
+        return \OC::$server->get(IAppManager::class)->isEnabledForUser('systemtags');
     }
 
     /**
@@ -130,16 +127,14 @@ class Util
         }
 
         try {
-            $uid = self::getUID();
-        } catch (\Exception $e) {
-            return false;
+            return 'true' === \OC::$server->get(IConfig::class)
+                ->getUserValue(self::getUID(), 'facerecognition', 'enabled', 'false')
+            ;
+        } catch (\Exception) {
+            // not logged in
         }
 
-        $enabled = \OC::$server->get(IConfig::class)
-            ->getUserValue($uid, 'facerecognition', 'enabled', 'false')
-        ;
-
-        return 'true' === $enabled;
+        return false;
     }
 
     /**
@@ -163,9 +158,7 @@ class Util
      */
     public static function previewGeneratorIsEnabled(): bool
     {
-        $appManager = \OC::$server->get(IAppManager::class);
-
-        return $appManager->isEnabledForUser('previewgenerator');
+        return \OC::$server->get(IAppManager::class)->isEnabledForUser('previewgenerator');
     }
 
     /**
@@ -196,11 +189,11 @@ class Util
      * Force a fileinfo value on a node.
      * This is a hack to avoid subclassing everything.
      *
-     * @param mixed $node  File to patch
-     * @param mixed $key   Key to set
-     * @param mixed $value Value to set
+     * @param Node   $node  File to patch
+     * @param string $key   Key to set
+     * @param mixed  $value Value to set
      */
-    public static function forceFileInfo(Node &$node, $key, $value): void
+    public static function forceFileInfo(Node &$node, string $key, mixed $value): void
     {
         /** @var \OC\Files\Node\Node */
         $node = $node;
@@ -212,8 +205,8 @@ class Util
     /**
      * Force permissions on a node.
      *
-     * @param mixed $node        File to patch
-     * @param mixed $permissions Permissions to set
+     * @param Node $node        File to patch
+     * @param int  $permissions Permissions to set
      */
     public static function forcePermissions(Node &$node, int $permissions): void
     {
@@ -248,10 +241,10 @@ class Util
     /**
      * Add OG metadata to a page for a node.
      *
-     * @param $node        Node to get metadata from
-     * @param $title       Title of the page
-     * @param $url         URL of the page
-     * @param $previewArgs Preview arguments (e.g. token)
+     * @param Node   $node        Node to get metadata from
+     * @param string $title       Title of the page
+     * @param string $url         URL of the page
+     * @param array  $previewArgs Preview arguments (e.g. token)
      */
     public static function addOgMetadata(Node $node, string $title, string $url, array $previewArgs): void
     {
@@ -291,8 +284,6 @@ class Util
 
     /**
      * Get a random image or video from a given folder.
-     *
-     * @param $folder Folder to search
      */
     public static function getAnyMedia(\OCP\Files\Folder $folder): ?Node
     {
@@ -335,36 +326,40 @@ class Util
 
     /**
      * Get list of timeline paths as array.
+     *
+     * @return string[] List of paths
      */
     public static function getTimelinePaths(string $uid): array
     {
-        $config = \OC::$server->get(IConfig::class);
-        $paths = $config->getUserValue($uid, Application::APPNAME, 'timelinePath', null)
-            ?? self::getSystemConfig('memories.timeline.default_path');
+        $paths = \OC::$server->get(IConfig::class)
+            ->getUserValue($uid, Application::APPNAME, 'timelinePath', null)
+                ?: self::getSystemConfig('memories.timeline.default_path');
 
-        return array_map(static fn ($p) => self::sanitizePath(trim($p)), explode(';', $paths));
+        return array_map(
+            static fn ($p) => self::sanitizePath(trim($p)),
+            explode(';', $paths),
+        );
     }
 
     /**
      * Sanitize a path to keep only ASCII characters and special characters.
+     * Blank will be returned on error.
      */
-    public static function sanitizePath(string $path): ?string
+    public static function sanitizePath(string $path): string
     {
         $path = str_replace("\0", '', $path); // remove null characters
 
-        return mb_ereg_replace('\/\/+', '/', $path) ?: null; // remove extra slashes
+        return mb_ereg_replace('\/\/+', '/', $path) ?: ''; // remove extra slashes
     }
 
     /**
      * Convert SQL UTC date to timestamp.
-     *
-     * @param mixed $sqlDate
      */
-    public static function sqlUtcToTimestamp($sqlDate): int
+    public static function sqlUtcToTimestamp(string $sqlDate): int
     {
         try {
             return (new \DateTime($sqlDate, new \DateTimeZone('UTC')))->getTimestamp();
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return 0;
         }
     }
@@ -372,9 +367,9 @@ class Util
     /**
      * Explode a string into fixed number of components.
      *
-     * @param string $delimiter Delimiter
-     * @param string $string    String to explode
-     * @param int    $count     Number of components
+     * @param non-empty-string $delimiter Delimiter
+     * @param string           $string    String to explode
+     * @param int              $count     Number of components
      *
      * @return string[] Array of components
      */
@@ -386,10 +381,10 @@ class Util
     /**
      * Get a system config key with the correct default.
      *
-     * @param string     $key     System config key
-     * @param null|mixed $default Default value
+     * @param string $key     System config key
+     * @param mixed  $default Default value
      */
-    public static function getSystemConfig(string $key, $default = null)
+    public static function getSystemConfig(string $key, mixed $default = null): mixed
     {
         $config = \OC::$server->get(\OCP\IConfig::class);
 
@@ -404,11 +399,9 @@ class Util
     /**
      * Set a system config key.
      *
-     * @param mixed $value
-     *
      * @throws \InvalidArgumentException
      */
-    public static function setSystemConfig(string $key, $value): void
+    public static function setSystemConfig(string $key, mixed $value): void
     {
         $config = \OC::$server->get(\OCP\IConfig::class);
 

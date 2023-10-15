@@ -78,7 +78,7 @@ class VideoController extends GenericApiController
             }
 
             // Request and check data was received
-            return Util::guardExDirect(function ($out) use ($client, $path, $profile) {
+            return Util::guardExDirect(function (Http\IOutput $out) use ($client, $path, $profile) {
                 try {
                     $status = $this->getUpstream($client, $path, $profile);
                     if (409 === $status || -1 === $status) {
@@ -261,7 +261,7 @@ class VideoController extends GenericApiController
         // Make sure query params are repeated
         // For example, in folder sharing, we need the params on every request
         $url = BinExt::getGoVodUrl($client, $path, $profile);
-        if ($params = $_SERVER['QUERY_STRING']) {
+        if (\array_key_exists('QUERY_STRING', $_SERVER) && !empty($params = $_SERVER['QUERY_STRING'])) {
             $url .= "?{$params}";
         }
 
@@ -275,7 +275,7 @@ class VideoController extends GenericApiController
 
         // Stream the response to the browser without reading it into memory
         $headersWritten = false;
-        curl_setopt($ch, CURLOPT_WRITEFUNCTION, static function ($curl, $data) use (&$headersWritten, $profile) {
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, static function (mixed $curl, mixed $data) use (&$headersWritten, $profile) {
             $returnCode = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
             if (200 === $returnCode) {
@@ -318,9 +318,9 @@ class VideoController extends GenericApiController
     /**
      * POST to go-vod to create a temporary file.
      *
-     * @param mixed $blob
+     * @return mixed The response from upstream
      */
-    private static function postFile(string $client, $blob)
+    private static function postFile(string $client, mixed $blob): mixed
     {
         try {
             return self::postFileInternal($client, $blob);
@@ -333,7 +333,7 @@ class VideoController extends GenericApiController
         }
     }
 
-    private static function postFileInternal(string $client, $blob)
+    private static function postFileInternal(string $client, mixed $blob): mixed
     {
         $url = BinExt::getGoVodUrl($client, '/create', 'ignore');
 
@@ -352,7 +352,7 @@ class VideoController extends GenericApiController
             throw new \Exception("Could not create temporary file ({$returnCode})");
         }
 
-        return json_decode($response, true);
+        return json_decode((string) $response, true);
     }
 
     /**
@@ -366,6 +366,8 @@ class VideoController extends GenericApiController
         // Get file paths for all live photos
         $liveFiles = array_map(fn ($r) => $this->rootFolder->getById((int) $r['fileid']), $liveRecords);
         $liveFiles = array_filter($liveFiles, static fn ($files) => \count($files) > 0 && $files[0] instanceof File);
+
+        /** @var File[] (checked above) */
         $liveFiles = array_map(static fn ($files) => $files[0], $liveFiles);
 
         // Should be filtered enough by now
@@ -380,7 +382,7 @@ class VideoController extends GenericApiController
 
             // Remove extension so the filename itself counts in the path
             if (str_contains($filename, '.')) {
-                $filename = substr($filename, 0, strrpos($filename, '.'));
+                $filename = substr($filename, 0, strrpos($filename, '.') ?: null);
             }
 
             // Get components with the filename as lowercase

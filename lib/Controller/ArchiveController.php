@@ -36,7 +36,7 @@ class ArchiveController extends GenericApiController
      *
      * Move one file to the archive folder
      *
-     * @param string fileid
+     * @param string $id File ID to archive / unarchive
      */
     public function archive(string $id): Http\Response
     {
@@ -73,6 +73,7 @@ class ArchiveController extends GenericApiController
             $parent = $file->getParent();
             $isArchived = false;
             while (true) {
+                /** @psalm-suppress DocblockTypeContradiction */
                 if (null === $parent) {
                     throw new \Exception('Cannot get correct parent of file');
                 }
@@ -108,6 +109,9 @@ class ArchiveController extends GenericApiController
 
             // Get path of current file relative to the parent folder
             $relativeFilePath = $parent->getRelativePath($file->getPath());
+            if (!$relativeFilePath) {
+                throw new \Exception('Cannot get relative path of file');
+            }
 
             // Check if we want to archive or unarchive
             $body = $this->request->getParams();

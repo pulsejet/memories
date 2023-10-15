@@ -44,7 +44,10 @@ class MigrateGoogleTakeout extends Command
     protected const MIGRATOR_VERSION = 1;
     protected const MIGRATED_KEY = 'memoriesMigratorVersion';
 
+    /** @psalm-suppress PropertyNotSetInConstructor */
     protected OutputInterface $output;
+
+    /** @psalm-suppress PropertyNotSetInConstructor */
     protected InputInterface $input;
 
     // Stats
@@ -124,18 +127,22 @@ class MigrateGoogleTakeout extends Command
 
     protected function migrateUser(IUser $user): void
     {
-        $this->output->writeln("Migrating user {$user->getUID()}");
+        $uid = $user->getUID();
+        $this->output->writeln("Migrating user {$uid}");
 
         // Get user's root folder
         \OC_Util::tearDownFS();
-        \OC_Util::setupFS($user->getUID());
-        $folder = $this->rootFolder->getUserFolder($user->getUID());
+        \OC_Util::setupFS($uid);
+        $folder = $this->rootFolder->getUserFolder($uid);
 
         // Check if we need to migrate a specific folder
         if ($path = $this->input->getOption('folder')) {
             try {
                 $folder = $folder->get($path);
-            } catch (\Exception $e) {
+                if (!$folder instanceof Folder) {
+                    throw new \Exception();
+                }
+            } catch (\Exception) {
                 $this->output->writeln("<error>Folder {$path} does not exist</error>");
 
                 return;
@@ -282,15 +289,10 @@ class MigrateGoogleTakeout extends Command
         ++$this->nProcessed;
     }
 
-    /**
-     * @return (float|mixed|string)[]
-     *
-     * @psalm-return array<string, float|mixed|string>
-     */
     protected function takeoutToExiftoolJson(array $json): array
     {
         // Helper to get a value from nested JSON
-        $get = static function (string $source) use ($json) {
+        $get = static function (string $source) use ($json): mixed {
             $keys = array_reverse(explode('.', $source));
             while (\count($keys) > 0) {
                 $key = array_pop($keys);
@@ -336,8 +338,6 @@ class MigrateGoogleTakeout extends Command
         $txf['GPSAltitude'] = $get('geoData.altitude');
 
         // Remove all null values
-        return array_filter($txf, static function ($value) {
-            return null !== $value;
-        });
+        return array_filter($txf, static fn (mixed $value) => null !== $value);
     }
 }

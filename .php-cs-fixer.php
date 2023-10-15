@@ -26,7 +26,7 @@ $config
         '@PhpCsFixer' => true,
         '@PhpCsFixer:risky' => true,
         'general_phpdoc_annotation_remove' => ['annotations' => ['expectedDeprecation']], // one should use PHPUnit built-in method instead
-        'phpdoc_to_comment' => ['ignored_tags' => ['psalm-suppress', 'template-implements']],
+        'phpdoc_to_comment' => ['ignored_tags' => ['psalm-suppress', 'template-implements', 'var']],
         'trailing_comma_in_multiline' => ['elements' => ['arrays', 'parameters', 'arguments']],
         'modernize_strpos' => true,
         'no_alias_functions' => true,
