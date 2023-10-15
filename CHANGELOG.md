@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- **Breaking**: Nextcloud 26+ and PHP 8 are now required.
+
 ## [v5.5.0] - 2023-10-06
 
 - **Important**: This update runs some slow database migrations. It is recommended to upgrade using the CLI (`occ upgrade`) instead of the web interface.
