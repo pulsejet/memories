@@ -68,4 +68,7 @@ webpackConfig.plugins.push(
 // Enable caching
 webpackConfig.cache = true;
 
+// Bundle analyzer (npm i --no-save webpack-bundle-analyzer)
+// webpackConfig.plugins.push(new (require('webpack-bundle-analyzer').BundleAnalyzerPlugin)());
+
 module.exports = webpackConfig;
