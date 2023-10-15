@@ -69,10 +69,8 @@ abstract class Backend
 
     /**
      * Get a cluster ID for the given cluster.
-     *
-     * @return int|string
      */
-    abstract public static function getClusterId(array $cluster);
+    abstract public static function getClusterId(array $cluster): int|string;
 
     /**
      * Get a list of photos with any extra parameters for the given cluster

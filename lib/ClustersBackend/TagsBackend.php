@@ -106,7 +106,7 @@ class TagsBackend extends Backend
         return $tags;
     }
 
-    public static function getClusterId(array $cluster)
+    public static function getClusterId(array $cluster): int|string
     {
         return $cluster['name'];
     }

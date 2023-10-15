@@ -112,7 +112,7 @@ class AlbumsBackend extends Backend
         return array_values($list);
     }
 
-    public static function getClusterId(array $cluster)
+    public static function getClusterId(array $cluster): int|string
     {
         return $cluster['cluster_id'];
     }

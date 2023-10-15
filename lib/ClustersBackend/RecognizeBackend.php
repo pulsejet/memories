@@ -185,7 +185,7 @@ class RecognizeBackend extends Backend
         return $faces;
     }
 
-    public static function getClusterId(array $cluster)
+    public static function getClusterId(array $cluster): int|string
     {
         return $cluster['id'];
     }

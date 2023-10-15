@@ -168,7 +168,7 @@ class PlacesBackend extends Backend
         return $places;
     }
 
-    public static function getClusterId(array $cluster)
+    public static function getClusterId(array $cluster): int|string
     {
         return $cluster['osm_id'];
     }
