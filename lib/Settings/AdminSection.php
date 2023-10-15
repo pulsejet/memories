@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OCA\Memories\Settings;
 
 use OCP\AppFramework\Http\TemplateResponse;

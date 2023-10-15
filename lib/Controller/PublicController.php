@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
@@ -185,7 +187,7 @@ class PublicController extends AuthPublicShareController
         $foldersPath = Util::sanitizePath('/'.$foldersPath.'/');
 
         // Check if relPath starts with foldersPath
-        if (0 !== strpos($relPath, $foldersPath)) {
+        if (!str_starts_with($relPath, $foldersPath)) {
             return;
         }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * This is the list of fields that will be STORED in the databse as JSON.
  * This is mostly only used for the metadata view.

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OCA\Memories\Db;
 
 use OC\DB\SchemaWrapper;

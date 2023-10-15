@@ -150,7 +150,7 @@ trait TimelineQueryDays
             : self::CTE_FOLDERS(\array_key_exists('cteIncludeHidden', $params));
 
         // Add WITH clause if needed
-        if (false !== strpos($sql, 'cte_folders')) {
+        if (str_contains($sql, 'cte_folders')) {
             $sql = $CTE_SQL.' '.$sql;
         }
 

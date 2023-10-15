@@ -465,7 +465,7 @@ class Util
             return 'gallery.memories' === $_SERVER['HTTP_X_REQUESTED_WITH'];
         }
 
-        return false !== strpos($_SERVER['HTTP_USER_AGENT'] ?? '', 'MemoriesNative');
+        return str_contains($_SERVER['HTTP_USER_AGENT'] ?? '', 'MemoriesNative');
     }
 
     /**

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OCA\Memories\Service;
 
 use OCA\Memories\Db\TimelineWrite;
@@ -36,7 +38,7 @@ class Places
         }
 
         // Detect database type
-        $platform = strtolower(\get_class($this->connection->getDatabasePlatform()));
+        $platform = strtolower($this->connection->getDatabasePlatform()::class);
 
         // Test MySQL-like support in databse
         if (str_contains($platform, 'mysql') || str_contains($platform, 'mariadb')) {

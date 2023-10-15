@@ -25,10 +25,17 @@ $config
     ->setRules([
         '@PhpCsFixer' => true,
         '@PhpCsFixer:risky' => true,
-        'trailing_comma_in_multiline' => ['elements' => ['arrays', 'parameters', 'arguments']],
         'general_phpdoc_annotation_remove' => ['annotations' => ['expectedDeprecation']], // one should use PHPUnit built-in method instead
-        'modernize_strpos' => false, // needs PHP 8+ or polyfill
         'phpdoc_to_comment' => ['ignored_tags' => ['psalm-suppress', 'template-implements']],
+        'trailing_comma_in_multiline' => ['elements' => ['arrays', 'parameters', 'arguments']],
+        'modernize_strpos' => true,
+        'no_alias_functions' => true,
+        'array_syntax' => ['syntax' => 'short'],
+        'ternary_to_elvis_operator' => true,
+        'ternary_to_null_coalescing' => true,
+        'return_assignment' => true,
+        'declare_strict_types' => true,
+        'strict_param' => true,
     ])
     ->setFinder($finder)
 ;

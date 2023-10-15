@@ -73,7 +73,7 @@ class VideoController extends GenericApiController
 
             // Check if file starts with temp dir
             $tmpDir = sys_get_temp_dir();
-            if (0 === strpos($path, $tmpDir)) {
+            if (str_starts_with($path, $tmpDir)) {
                 throw Exceptions::Forbidden('files in temp directory not supported');
             }
 

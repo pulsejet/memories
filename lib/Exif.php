@@ -323,7 +323,7 @@ class Exif
         fclose($pipes[2]);
         proc_terminate($proc);
         proc_close($proc);
-        if (false !== strpos($stdout, 'error')) {
+        if (str_contains($stdout, 'error')) {
             error_log("Exiftool error: {$stdout}");
 
             throw new \Exception('Could not set exif data: '.$stdout);

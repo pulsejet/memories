@@ -64,7 +64,7 @@ class AdminController extends GenericApiController
             Util::setSystemConfig($key, $value);
 
             // If changing vod settings, kill any running go-vod instances
-            if (0 === strpos($key, 'memories.vod.')) {
+            if (str_starts_with($key, 'memories.vod.')) {
                 try {
                     BinExt::startGoVod();
                 } catch (\Exception $e) {
