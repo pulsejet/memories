@@ -55,10 +55,10 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 1. 🏗 To build/watch the UI, run `make watch-js`.
 1. ✅ Enable the app through the app management of your Nextcloud.
 1. ⚒️ (Strongly recommended) use VS Code for development and install these extensions.
-   - [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode): For autoformatting Vue and Typescript
    - [PHP Intelephense](https://marketplace.visualstudio.com/items?itemName=bmewburn.vscode-intelephense-client): For PHP intellisense and static analysis
    - [PHP-CS-Fixer](https://marketplace.visualstudio.com/items?itemName=muuvmuuv.vscode-just-php-cs-fixer): For PHP formatting (alternatively, `make php-cs-fixer`)
    - [Psalm](https://marketplace.visualstudio.com/items?itemName=getpsalm.psalm-vscode-plugin): For PHP static analysis (alternatively, `make psalm`)
+   - [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode): For autoformatting Vue and Typescript
    - [Vetur](https://marketplace.visualstudio.com/items?itemName=octref.vetur): For Vue intellisense and static analysis
 
 ## 🤝 Support the project
@@ -82,4 +82,4 @@ For the full changelog, see [CHANGELOG.md](CHANGELOG.md).
 
 ## 🙏 Special Thanks
 
-Nextcloud team. A lot of this work is based on [Photos](https://github.com/nextcloud/photos).
+To the great folks building Nextcloud, PHP, Vue and all the other dependencies that make this project possible.
