@@ -165,6 +165,10 @@ export default defineComponent({
     },
   },
 
+  emits: {
+    updateLoading: (delta: number) => true,
+  },
+
   data: () => ({
     show: false,
     size: 0,

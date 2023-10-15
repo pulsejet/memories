@@ -54,6 +54,10 @@ export default defineComponent({
     },
   },
 
+  emits: {
+    select: (face: IFace) => true,
+  },
+
   data: () => ({
     user: String(),
     name: String(),
@@ -80,10 +84,6 @@ export default defineComponent({
   },
 
   methods: {
-    close() {
-      this.$emit('close');
-    },
-
     async refreshParams() {
       this.user = <string>this.$route.params.user || '';
       this.name = <string>this.$route.params.name || '';

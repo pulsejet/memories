@@ -33,6 +33,10 @@ export default defineComponent({
     },
   },
 
+  emits: {
+    update: (key: keyof ISystemConfig, value: any) => true,
+  },
+
   methods: {
     update(key: keyof ISystemConfig, value: any = null) {
       this.$emit('update', key, value);

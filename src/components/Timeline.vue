@@ -44,24 +44,25 @@
           @click="selectionManager().selectHead(item)"
         />
 
-        <Photo
-          class="photo"
-          v-else
-          v-for="photo of item.photos"
-          :key="photo.key"
-          :style="{
-            height: `${photo.dispH}px`,
-            width: `${photo.dispW}px`,
-            transform: `translate(${photo.dispX}px, ${photo.dispY}px)`,
-          }"
-          :data="photo"
-          :day="item.day"
-          @select="selectionManager().clickSelectionIcon(photo, $event, index)"
-          @pointerdown="selectionManager().clickPhoto(photo, $event, index)"
-          @touchstart="selectionManager().touchstartPhoto(photo, $event, index)"
-          @touchend="selectionManager().touchendPhoto(photo, $event, index)"
-          @touchmove="selectionManager().touchmovePhoto(photo, $event, index)"
-        />
+        <template v-else>
+          <Photo
+            class="photo"
+            v-for="photo of item.photos"
+            :key="photo.key"
+            :style="{
+              height: `${photo.dispH}px`,
+              width: `${photo.dispW}px`,
+              transform: `translate(${photo.dispX}px, ${photo.dispY}px)`,
+            }"
+            :data="photo"
+            :day="item.day"
+            @select="selectionManager().clickSelectionIcon(photo, $event, index)"
+            @pointerdown="selectionManager().clickPhoto(photo, $event, index)"
+            @touchstart="selectionManager().touchstartPhoto(photo, $event, index)"
+            @touchend="selectionManager().touchendPhoto(photo, $event, index)"
+            @touchmove="selectionManager().touchmovePhoto(photo, $event, index)"
+          />
+        </template>
       </template>
     </RecycleScroller>
 
@@ -134,6 +135,10 @@ export default defineComponent({
   },
 
   mixins: [UserConfig],
+
+  emits: {
+    daysLoaded: (stats: { count: number }) => true,
+  },
 
   data: () => ({
     /** Loading days response */

@@ -44,6 +44,10 @@ export default defineComponent({
     },
   },
 
+  emits: {
+    close: () => true,
+  },
+
   data: () => ({
     exif: null as Object | null,
     imageEditor: null as FilerobotImageEditor | null,

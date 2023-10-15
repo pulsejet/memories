@@ -59,6 +59,10 @@ export default defineComponent({
     RightMoveIcon,
   },
 
+  emits: {
+    load: () => true,
+  },
+
   data: () => ({
     years: [] as IYear[],
     hasRight: false,

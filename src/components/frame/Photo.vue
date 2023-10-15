@@ -96,6 +96,14 @@ export default defineComponent({
     },
   },
 
+  emits: {
+    select: (e: PointerEvent) => true,
+    pointerdown: (e: PointerEvent) => true,
+    touchstart: (e: TouchEvent) => true,
+    touchmove: (e: TouchEvent) => true,
+    touchend: (e: TouchEvent) => true,
+  },
+
   data: () => ({
     touchTimer: 0,
     faceSrc: null as string | null,

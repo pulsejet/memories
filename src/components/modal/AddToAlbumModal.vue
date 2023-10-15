@@ -37,6 +37,8 @@ export default defineComponent({
     AlbumPicker,
   },
 
+  emits: [],
+
   data: () => ({
     show: false,
     photos: [] as IPhoto[],
@@ -66,7 +68,6 @@ export default defineComponent({
       this.show = false;
       this.photos = [];
       this.opsTotal = 0;
-      this.$emit('close');
     },
 
     routeIsAlbum(album: IAlbum) {

@@ -90,6 +90,10 @@ export default defineComponent({
     },
   },
 
+  emits: {
+    interactend: () => true,
+  },
+
   data: () => ({
     /** Last known height at adjustment */
     lastAdjustHeight: 0,

@@ -187,6 +187,10 @@ export default defineComponent({
 
   mixins: [UserConfig],
 
+  emits: {
+    'update:open': (open: boolean) => true,
+  },
+
   data: () => ({
     localFolders: [] as nativex.LocalFolderConfig[],
   }),

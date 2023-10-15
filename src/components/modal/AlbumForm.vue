@@ -124,6 +124,11 @@ export default defineComponent({
     },
   },
 
+  emits: {
+    done: (album: any) => true,
+    back: () => true,
+  },
+
   data: () => ({
     collaborators: [],
     showCollaboratorView: false,

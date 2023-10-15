@@ -41,6 +41,8 @@ export default defineComponent({
     FaceList,
   },
 
+  emits: [],
+
   data: () => ({
     show: false,
     photos: [] as IPhoto[],
@@ -76,7 +78,6 @@ export default defineComponent({
     close() {
       this.photos = [];
       this.show = false;
-      this.$emit('close');
     },
 
     moved(photos: IPhoto[]) {

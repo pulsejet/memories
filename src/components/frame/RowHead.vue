@@ -36,6 +36,10 @@ export default defineComponent({
     },
   },
 
+  emits: {
+    click: (item: IHeadRow) => true,
+  },
+
   computed: {
     name() {
       // Check cache

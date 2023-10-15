@@ -26,6 +26,8 @@ import { defineComponent } from 'vue';
 
 import * as utils from '../../services/utils';
 
+import type { PropType } from 'vue';
+
 const NcModal = () => import('@nextcloud/vue/dist/Components/NcModal');
 
 export default defineComponent({
@@ -40,7 +42,7 @@ export default defineComponent({
       default: 'small',
     },
     sidebar: {
-      type: String,
+      type: String as PropType<string | null>,
       default: null,
     },
   },

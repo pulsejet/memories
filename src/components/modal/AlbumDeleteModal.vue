@@ -40,6 +40,8 @@ export default defineComponent({
     Modal,
   },
 
+  emits: [],
+
   data: () => ({
     show: false,
     user: '',
@@ -65,7 +67,6 @@ export default defineComponent({
   methods: {
     close() {
       this.show = false;
-      this.$emit('close');
     },
 
     open() {

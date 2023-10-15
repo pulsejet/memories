@@ -55,7 +55,7 @@
         <span class="remove-notice" v-if="deselection.size > 0">
           {{
             n('memories', 'Removed from {n} album', 'Removed from {n} albums', deselection.size, {
-              n: this.deselection.size,
+              n: deselection.size,
             })
           }}
         </span>
@@ -106,6 +106,11 @@ export default defineComponent({
       default: false,
     },
   },
+
+  emits: {
+    select: (selection: IAlbum[], deselection: IAlbum[]) => true,
+  },
+
   components: {
     AlbumForm,
     AlbumsList,

@@ -62,6 +62,10 @@ export default defineComponent({
     },
   },
 
+  emits: {
+    click: (item: ICluster) => true,
+  },
+
   computed: {
     previewUrl() {
       if (this.error) return errorsvg;

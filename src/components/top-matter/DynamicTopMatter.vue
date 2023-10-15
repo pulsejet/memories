@@ -23,6 +23,10 @@ export default defineComponent({
 
   mixins: [UserMixin],
 
+  emits: {
+    load: () => true,
+  },
+
   computed: {
     currentmatter(): Component | null {
       if (this.routeIsFolders) {

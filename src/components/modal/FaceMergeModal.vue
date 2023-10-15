@@ -48,6 +48,8 @@ export default defineComponent({
     FaceList,
   },
 
+  emits: [],
+
   data: () => ({
     processing: 0,
     processingTotal: 0,
@@ -57,7 +59,6 @@ export default defineComponent({
   methods: {
     close() {
       this.show = false;
-      this.$emit('close');
     },
 
     open() {

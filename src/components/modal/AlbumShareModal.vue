@@ -47,6 +47,8 @@ export default defineComponent({
     AlbumCollaborators,
   },
 
+  emits: [],
+
   data: () => ({
     album: null as any,
     show: false,
@@ -58,7 +60,6 @@ export default defineComponent({
     close() {
       this.show = false;
       this.album = null;
-      this.$emit('close');
     },
 
     async open() {

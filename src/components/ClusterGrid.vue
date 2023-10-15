@@ -61,6 +61,11 @@ export default defineComponent({
     },
   },
 
+  emits: {
+    click: (item: ICluster) => true,
+    plus: () => true,
+  },
+
   data: () => ({
     recyclerWidth: 300,
   }),

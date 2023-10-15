@@ -63,6 +63,10 @@ export default defineComponent({
     },
   },
 
+  emits: {
+    click: (item: IAlbum) => true,
+  },
+
   methods: {
     click($event: Event, album: IAlbum) {
       if (!this.link) {

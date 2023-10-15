@@ -29,6 +29,11 @@ export default defineComponent({
     },
   },
 
+  emits: {
+    load: (src: string) => true,
+    error: (error: Error) => true,
+  },
+
   data: () => {
     return {
       dataSrc: BLANK_IMG,

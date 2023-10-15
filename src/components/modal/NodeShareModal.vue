@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="close" size="normal" v-if="show" :sidebar="!isRoot && !isMobile ? this.filename : null">
+  <Modal @close="close" size="normal" v-if="show" :sidebar="!isRoot && !isMobile ? filename : null">
     <template #title>
       {{ t('memories', 'Link Sharing') }}
     </template>
@@ -102,6 +102,8 @@ export default defineComponent({
 
   mixins: [UserConfig],
 
+  emits: [],
+
   data: () => ({
     show: false,
     filename: '',
@@ -158,7 +160,6 @@ export default defineComponent({
 
     close() {
       this.show = false;
-      this.$emit('close');
     },
 
     async refreshUrls() {

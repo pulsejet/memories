@@ -50,6 +50,10 @@ export default defineComponent({
     },
   },
 
+  emits: {
+    save: () => true,
+  },
+
   data: () => ({
     exif: null as Record<keyof IExif, string> | null,
     dirty: {} as Record<keyof IExif, boolean>,

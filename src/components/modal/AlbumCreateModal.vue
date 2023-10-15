@@ -31,6 +31,8 @@ export default defineComponent({
     AlbumForm,
   },
 
+  emits: [],
+
   data: () => ({
     show: false,
     album: null as any,
@@ -59,7 +61,6 @@ export default defineComponent({
 
     close() {
       this.show = false;
-      this.$emit('close');
     },
 
     done({ album }: { album: { basename: string; filename: string } }) {

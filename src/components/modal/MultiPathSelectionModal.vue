@@ -58,6 +58,10 @@ export default defineComponent({
     },
   },
 
+  emits: {
+    close: (list: string[]) => true,
+  },
+
   data: () => ({
     show: false,
     paths: [] as string[],
