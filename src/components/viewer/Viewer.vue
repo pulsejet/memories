@@ -7,7 +7,7 @@
     @fullscreenchange="fullscreenChange"
     @keydown="keydown"
   >
-    <ImageEditor v-if="editorOpen" :photo="currentPhoto" @close="editorOpen = false" />
+    <ImageEditor v-if="editorOpen && currentPhoto" :photo="currentPhoto" @close="editorOpen = false" />
 
     <!-- Loading indicator -->
     <XLoadingIcon class="loading-icon centered" v-if="loading" />
@@ -90,7 +90,7 @@
             :aria-label="t('memories', 'Download')"
             @click="downloadCurrent"
             :close-after-click="true"
-            v-if="!this.initState.noDownload && !isLocal"
+            v-if="!initState.noDownload && !isLocal"
           >
             {{ t('memories', 'Download') }}
             <template #icon>
@@ -98,7 +98,7 @@
             </template>
           </NcActionButton>
           <NcActionButton
-            v-if="!this.initState.noDownload && currentPhoto?.liveid"
+            v-if="!initState.noDownload && currentPhoto?.liveid"
             :aria-label="t('memories', 'Download Video')"
             @click="downloadCurrentLiveVideo"
             :close-after-click="true"

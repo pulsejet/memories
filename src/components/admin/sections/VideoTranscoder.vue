@@ -16,16 +16,16 @@
         <NcNoteCard :type="binaryStatusType(status.govod)">
           {{ binaryStatus('go-vod', status.govod) }}
         </NcNoteCard>
-      </template>
 
-      <NcCheckboxRadioSwitch
-        :disabled="!enableTranscoding"
-        :checked.sync="config['memories.vod.external']"
-        @update:checked="update('memories.vod.external')"
-        type="switch"
-      >
-        {{ t('memories', 'Enable external transcoder (go-vod {version})', { version: status?.govod_want }) }}
-      </NcCheckboxRadioSwitch>
+        <NcCheckboxRadioSwitch
+          :disabled="!enableTranscoding"
+          :checked.sync="config['memories.vod.external']"
+          @update:checked="update('memories.vod.external')"
+          type="switch"
+        >
+          {{ t('memories', 'Enable external transcoder (go-vod {version})', { version: status.govod_want }) }}
+        </NcCheckboxRadioSwitch>
+      </template>
 
       <NcTextField
         :disabled="!enableTranscoding"

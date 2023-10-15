@@ -20,7 +20,8 @@ export default defineComponent({
 
   props: {
     status: {
-      type: Object as PropType<ISystemStatus>,
+      type: Object as PropType<ISystemStatus | null>,
+      default: null,
       required: false,
     },
     config: {

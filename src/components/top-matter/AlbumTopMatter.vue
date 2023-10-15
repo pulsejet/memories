@@ -41,7 +41,7 @@
       <NcActions :inline="isMobile ? 1 : 3">
         <NcActionButton
           :aria-label="t('memories', 'Create new album')"
-          @click="$refs.createModal.open(false)"
+          @click="$refs.createModal?.open(false)"
           close-after-click
           v-if="isAlbumList"
         >
@@ -50,7 +50,7 @@
         </NcActionButton>
         <NcActionButton
           :aria-label="t('memories', 'Share album')"
-          @click="$refs.shareModal.open(false)"
+          @click="$refs.shareModal?.open(false)"
           close-after-click
           v-if="canEditAlbum"
         >
@@ -68,7 +68,7 @@
         </NcActionButton>
         <NcActionButton
           :aria-label="t('memories', 'Edit album details')"
-          @click="$refs.createModal.open(true)"
+          @click="$refs.createModal?.open(true)"
           close-after-click
           v-if="canEditAlbum"
         >
@@ -77,7 +77,7 @@
         </NcActionButton>
         <NcActionButton
           :aria-label="t('memories', 'Remove album')"
-          @click="$refs.deleteModal.open()"
+          @click="$refs.deleteModal?.open()"
           close-after-click
           v-if="!isAlbumList"
         >

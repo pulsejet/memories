@@ -59,7 +59,8 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
    - [PHP-CS-Fixer](https://marketplace.visualstudio.com/items?itemName=muuvmuuv.vscode-just-php-cs-fixer): For PHP formatting (alternatively, `make php-cs-fixer`)
    - [Psalm](https://marketplace.visualstudio.com/items?itemName=getpsalm.psalm-vscode-plugin): For PHP static analysis (alternatively, `make psalm`)
    - [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode): For autoformatting Vue and Typescript
-   - [Vetur](https://marketplace.visualstudio.com/items?itemName=octref.vetur): For Vue intellisense and static analysis
+   - [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar): For Vue intellisense and static analysis
+   - [Volar Typescript](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin): For Vue Typescript support
 
 ## 🤝 Support the project
 
