@@ -1,9 +1,12 @@
-import { IImageInfo, IPhoto } from '../../types';
-import { API } from '../API';
-import { c } from './const';
 import { FilePickerType, getFilePickerBuilder } from '@nextcloud/dialogs';
 import { getCurrentUser } from '@nextcloud/auth';
+import { showError } from '@nextcloud/dialogs';
+import { translate as t } from '@nextcloud/l10n';
+
+import { API } from '../API';
+import { c } from './const';
 import * as nativex from '../../native';
+import type { IImageInfo, IPhoto } from '../../types';
 
 /**
  * Get the current user UID
@@ -229,10 +232,23 @@ export async function chooseNcFolder(
     .build();
 
   // Choose a folder
-  const folder = (await picker.pick()) || '/';
+  let folder = (await picker.pick()) || '/';
 
   // Remove double slashes
-  return folder.replace(/\/+/g, '/');
+  folder = folder.replace(/\/+/g, '/');
+
+  // Look for any trailing or leading whitespace
+  if (folder.trim() !== folder) {
+    showError(
+      t(
+        'memories',
+        'The folder name "{folder}" has a leading or trailing whitespace. This may lead to errors and should be corrected.',
+        { folder },
+      ),
+    );
+  }
+
+  return folder;
 }
 
 /**
