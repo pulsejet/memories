@@ -42,7 +42,7 @@ class Version200000Date20220924015634 extends SimpleMigrationStep
     }
 
     /**
-     * @param \Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
+     * @param \Closure(): ISchemaWrapper $schemaClosure
      */
     public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void
     {
@@ -58,7 +58,7 @@ class Version200000Date20220924015634 extends SimpleMigrationStep
     }
 
     /**
-     * @param \Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
+     * @param \Closure(): ISchemaWrapper $schemaClosure
      */
     public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper
     {
@@ -102,7 +102,7 @@ class Version200000Date20220924015634 extends SimpleMigrationStep
     }
 
     /**
-     * @param \Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
+     * @param \Closure(): ISchemaWrapper $schemaClosure
      */
     public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
 }

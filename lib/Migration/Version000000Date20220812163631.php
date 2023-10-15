@@ -31,11 +31,14 @@ use OCP\Migration\SimpleMigrationStep;
 class Version000000Date20220812163631 extends SimpleMigrationStep
 {
     /**
-     * @param \Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
-     *
-     * @return null|ISchemaWrapper
+     * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options)
+    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
+
+    /**
+     * @param \Closure(): ISchemaWrapper $schemaClosure
+     */
+    public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper
     {
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
@@ -46,13 +49,6 @@ class Version000000Date20220812163631 extends SimpleMigrationStep
                 'autoincrement' => true,
                 'notnull' => true,
             ]);
-
-            // dropped in Version200000Date20220924015634
-            // $table->addColumn('uid', 'string', [
-            //     'notnull' => true,
-            //     'length' => 64,
-            // ]);
-
             $table->addColumn('datetaken', Types::DATETIME, [
                 'notnull' => false,
             ]);
@@ -76,7 +72,13 @@ class Version000000Date20220812163631 extends SimpleMigrationStep
 
             $table->setPrimaryKey(['id']);
 
-            // All these indices are dropped in Version200000Date20220924015634
+            // All these are dropped in Version200000Date20220924015634
+            //
+            // $table->addColumn('uid', 'string', [
+            //     'notnull' => true,
+            //     'length' => 64,
+            // ]);
+            //
             // $table->addIndex(['uid'], 'memories_uid_index');
             // $table->addIndex(['uid', 'dayid'], 'memories_ud_index');
             // $table->addUniqueIndex(['uid', 'fileid'], 'memories_day_uf_ui');
@@ -84,4 +86,9 @@ class Version000000Date20220812163631 extends SimpleMigrationStep
 
         return $schema;
     }
+
+    /**
+     * @param \Closure(): ISchemaWrapper $schemaClosure
+     */
+    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
 }
