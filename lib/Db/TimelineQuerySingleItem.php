@@ -36,7 +36,7 @@ trait TimelineQuerySingleItem
         }
 
         // Post process the record
-        $this->processDayPhoto($photo);
+        $this->postProcessDayPhoto($photo);
 
         return $photo;
     }

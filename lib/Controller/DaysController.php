@@ -41,18 +41,16 @@ class DaysController extends GenericApiController
             $list = $this->tq->getDays(
                 $this->isRecursive(),
                 $this->isArchive(),
+                $this->isMonthView(),
                 $this->getTransformations(),
             );
 
-            if ($this->isMonthView()) {
-                // Group days together into months
-                $list = $this->daysToMonths($list);
-            } else {
+            if (!$this->isMonthView()) {
                 // Preload some day responses
                 $this->preloadDays($list);
             }
 
-            // Reverse response if requested. Folders still stay at top.
+            // Reverse response if requested.
             if ($this->isReverse()) {
                 $list = array_reverse($list);
             }
@@ -203,41 +201,6 @@ class DaysController extends GenericApiController
 
             $drefMap[$dayId]['detail'][] = $photo;
         }
-    }
-
-    /**
-     * Convert days response to months response.
-     * The dayId is used to group the days into months.
-     */
-    private function daysToMonths(array $days): array
-    {
-        $months = [];
-        foreach ($days as $day) {
-            $dayId = $day['dayid'];
-            $time = $dayId * 86400;
-            $monthid = strtotime(date('Ym', $time).'01') / 86400;
-
-            if (empty($months) || $months[\count($months) - 1]['dayid'] !== $monthid) {
-                $months[] = [
-                    'dayid' => $monthid,
-                    'count' => 0,
-                ];
-            }
-
-            $months[\count($months) - 1]['count'] += $day['count'];
-        }
-
-        return $months;
-    }
-
-    /**
-     * Convert list of month IDs to list of dayIds.
-     *
-     * @return int[] The list of dayIds
-     */
-    private function monthIdToDayIds(int $monthId): array
-    {
-        return range($monthId, (int) (strtotime(date('Ymt', $monthId * 86400)) / 86400));
     }
 
     private function isRecursive(): bool

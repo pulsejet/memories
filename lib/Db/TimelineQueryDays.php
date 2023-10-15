@@ -20,6 +20,7 @@ trait TimelineQueryDays
      *
      * @param bool  $recursive       Whether to get the days recursively
      * @param bool  $archive         Whether to get the days only from the archive folder
+     * @param bool  $monthView       Whether the response should be in month view
      * @param array $queryTransforms An array of query transforms to apply to the query
      *
      * @return array The days response
@@ -27,6 +28,7 @@ trait TimelineQueryDays
     public function getDays(
         bool $recursive,
         bool $archive,
+        bool $monthView,
         array $queryTransforms = []
     ): array {
         $query = $this->connection->getQueryBuilder();
@@ -51,7 +53,8 @@ trait TimelineQueryDays
         // FETCH all days
         $rows = $this->executeQueryWithCTEs($query)->fetchAll();
 
-        return $this->processDays($rows);
+        // Post process the days
+        return $this->postProcessDays($rows, $monthView);
     }
 
     /**
@@ -104,7 +107,7 @@ trait TimelineQueryDays
             // Convert monthIds to dayIds
             $query->andWhere($query->expr()->orX(...array_map(fn ($monthId) => $query->expr()->andX(
                 $query->expr()->gte('m.dayid', $query->createNamedParameter($monthId, IQueryBuilder::PARAM_INT)),
-                $query->expr()->lte('m.dayid', $query->createNamedParameter($this->monthEndDayId($monthId), IQueryBuilder::PARAM_INT))
+                $query->expr()->lte('m.dayid', $query->createNamedParameter($this->dayIdMonthEnd($monthId), IQueryBuilder::PARAM_INT))
             ), $dayIds)));
         } else {
             // Filter by list of dayIds
@@ -129,7 +132,7 @@ trait TimelineQueryDays
 
         // Post process the day in-place
         foreach ($day as &$photo) {
-            $this->processDayPhoto($photo, $monthView);
+            $this->postProcessDayPhoto($photo, $monthView);
         }
 
         return $day;
@@ -220,25 +223,41 @@ trait TimelineQueryDays
     /**
      * Process the days response.
      *
-     * @param array $days
+     * @param array $rows      the days response
+     * @param bool  $monthView Whether the response is in month view
      */
-    private function processDays($days): array
+    private function postProcessDays(array $rows, bool $monthView): array
     {
-        foreach ($days as &$row) {
+        foreach ($rows as &$row) {
             $row['dayid'] = (int) $row['dayid'];
             $row['count'] = (int) $row['count'];
         }
 
-        return $days;
+        // Convert to months if needed
+        if ($monthView) {
+            return array_values(array_reduce($rows, function ($carry, $item) {
+                $monthId = $this->dayIdToMonthId($item['dayid']);
+
+                if (!\array_key_exists($monthId, $carry)) {
+                    $carry[$monthId] = ['dayid' => $monthId, 'count' => 0];
+                }
+
+                $carry[$monthId]['count'] += $item['count'];
+
+                return $carry;
+            }, []));
+        }
+
+        return $rows;
     }
 
     /**
      * Process the single day response.
      *
-     * @param array $row       The day response
+     * @param array $row       A photo in the day response
      * @param bool  $monthView Whether the response is in month view
      */
-    private function processDayPhoto(array &$row, bool $monthView = false): void
+    private function postProcessDayPhoto(array &$row, bool $monthView = false): void
     {
         // Convert field types
         $row['fileid'] = (int) $row['fileid'];
@@ -310,7 +329,7 @@ trait TimelineQueryDays
         }
     }
 
-    private function monthEndDayId(int $monthId): int
+    private function dayIdMonthEnd(int $monthId): int
     {
         return (int) (strtotime(date('Ymt', $monthId * 86400)) / 86400);
     }
