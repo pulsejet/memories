@@ -24,7 +24,7 @@
         @update:checked="update('memories.vod.external')"
         type="switch"
       >
-        {{ t('memories', 'Enable external transcoder (go-vod)') }}
+        {{ t('memories', 'Enable external transcoder (go-vod {version})', { version: status?.govod_want }) }}
       </NcCheckboxRadioSwitch>
 
       <NcTextField

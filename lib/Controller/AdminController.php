@@ -155,10 +155,11 @@ class AdminController extends GenericApiController
             $extGoVod = Util::getSystemConfig('memories.vod.external');
             $status['govod'] = $this->getExecutableStatus(
                 static fn () => BinExt::getGoVodBin(),
-                static fn ($p) => BinExt::testStartGoVod(),
+                static fn () => BinExt::testStartGoVod(),
                 !$extGoVod,
                 !$extGoVod,
             );
+            $status['govod_want'] = BinExt::GOVOD_VER;
 
             // Check for VA-API device
             $devPath = '/dev/dri/renderD128';

@@ -57,6 +57,7 @@ export type ISystemStatus = {
   ffmpeg: IBinaryStatus;
   ffprobe: IBinaryStatus;
   govod: IBinaryStatus;
+  govod_want: string;
   vaapi_dev: 'ok' | 'not_found' | 'not_readable';
 
   action_token: string;
