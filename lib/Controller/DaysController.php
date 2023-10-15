@@ -61,13 +61,12 @@ class DaysController extends GenericApiController
      * @NoAdminRequired
      *
      * @PublicPage
+     *
+     * @param int[] $dayIds
      */
-    public function day(string $id): Http\Response
+    public function day(array $dayIds): Http\Response
     {
-        return Util::guardEx(function () use ($id) {
-            // Split at commas and convert all parts to int
-            $dayIds = array_map(static fn ($p) => (int) $p, explode(',', $id));
-
+        return Util::guardEx(function () use ($dayIds) {
             // Run actual query
             $list = $this->tq->getDay(
                 $dayIds,
@@ -91,12 +90,11 @@ class DaysController extends GenericApiController
      * @NoAdminRequired
      *
      * @PublicPage
-     *
-     * @param int[] $dayIds
      */
-    public function dayPost(array $dayIds): Http\Response
+    public function dayGet(string $id): Http\Response
     {
-        return $this->day(implode(',', $dayIds));
+        // Split at commas and convert all parts to int
+        return $this->day(array_map(static fn ($p) => (int) $p, explode(',', $id)));
     }
 
     /**

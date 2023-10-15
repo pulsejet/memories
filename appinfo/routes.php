@@ -52,8 +52,8 @@ return [
 
         // API Routes
         ['name' => 'Days#days', 'url' => '/api/days', 'verb' => 'GET'],
-        ['name' => 'Days#day', 'url' => '/api/days/{id}', 'verb' => 'GET'],
-        ['name' => 'Days#dayPost', 'url' => '/api/days', 'verb' => 'POST'],
+        ['name' => 'Days#day', 'url' => '/api/days', 'verb' => 'POST'],
+        ['name' => 'Days#dayGet', 'url' => '/api/days/{id}', 'verb' => 'GET'],
         ['name' => 'Folders#sub', 'url' => '/api/folders/sub', 'verb' => 'GET'],
 
         ['name' => 'Clusters#list', 'url' => '/api/clusters/{backend}', 'verb' => 'GET'],
