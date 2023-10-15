@@ -2,32 +2,28 @@
 
 namespace OCA\Memories\Settings;
 
+use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Controller\PageController;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\Settings\ISettings;
 
 class Admin implements ISettings
 {
-    protected $appName;
-
-    public function __construct(string $AppName)
-    {
-        $this->appName = $AppName;
-    }
+    public function __construct() {}
 
     /**
      * @return TemplateResponse
      */
     public function getForm()
     {
-        \OCP\Util::addScript($this->appName, 'memories-admin');
+        \OCP\Util::addScript(Application::APPNAME, 'memories-admin');
 
         return new TemplateResponse('memories', 'main', PageController::getMainParams());
     }
 
     public function getSection()
     {
-        return $this->appName;
+        return Application::APPNAME;
     }
 
     public function getPriority()

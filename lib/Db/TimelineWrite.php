@@ -21,19 +21,12 @@ class TimelineWrite
     use TimelineWriteMap;
     use TimelineWriteOrphans;
     use TimelineWritePlaces;
-    protected IDBConnection $connection;
-    protected LivePhoto $livePhoto;
-    protected ILockingProvider $lockingProvider;
 
     public function __construct(
-        IDBConnection $connection,
-        LivePhoto $livePhoto,
-        ILockingProvider $lockingProvider
-    ) {
-        $this->connection = $connection;
-        $this->livePhoto = $livePhoto;
-        $this->lockingProvider = $lockingProvider;
-    }
+        protected IDBConnection $connection,
+        protected LivePhoto $livePhoto,
+        protected ILockingProvider $lockingProvider,
+    ) {}
 
     /**
      * Process a file to insert Exif data into the database.

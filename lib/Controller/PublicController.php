@@ -23,38 +23,21 @@ use OCP\Share\IShare;
 
 class PublicController extends AuthPublicShareController
 {
-    protected $appName;
-    protected IEventDispatcher $eventDispatcher;
-    protected IInitialState $initialState;
-    protected IUserSession $userSession;
-    protected IRootFolder $rootFolder;
-    protected IShareManager $shareManager;
-    protected IConfig $config;
-    protected TimelineQuery $tq;
-
     protected IShare $share;
 
     public function __construct(
-        string $AppName,
         IRequest $request,
         ISession $session,
         IURLGenerator $urlGenerator,
-        IEventDispatcher $eventDispatcher,
-        IInitialState $initialState,
-        IUserSession $userSession,
-        IRootFolder $rootFolder,
-        IShareManager $shareManager,
-        IConfig $config,
-        TimelineQuery $tq
+        protected IEventDispatcher $eventDispatcher,
+        protected IInitialState $initialState,
+        protected IUserSession $userSession,
+        protected IRootFolder $rootFolder,
+        protected IShareManager $shareManager,
+        protected IConfig $config,
+        protected TimelineQuery $tq
     ) {
-        parent::__construct($AppName, $request, $session, $urlGenerator);
-        $this->eventDispatcher = $eventDispatcher;
-        $this->initialState = $initialState;
-        $this->userSession = $userSession;
-        $this->rootFolder = $rootFolder;
-        $this->shareManager = $shareManager;
-        $this->config = $config;
-        $this->tq = $tq;
+        parent::__construct(Application::APPNAME, $request, $session, $urlGenerator);
     }
 
     /**
@@ -110,7 +93,7 @@ class PublicController extends AuthPublicShareController
         \OC_User::setIncognitoMode(true);
 
         // Scripts
-        \OCP\Util::addScript($this->appName, 'memories-main');
+        \OCP\Util::addScript(Application::APPNAME, 'memories-main');
 
         // Share info
         $this->initialState->provideInitialState('no_download', $share->getHideDownload());

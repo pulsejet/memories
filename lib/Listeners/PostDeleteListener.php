@@ -25,19 +25,14 @@ use OCA\Memories\Db\TimelineWrite;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Files\Events\Node\NodeDeletedEvent;
-use OCP\Files\Folder;
+use OCP\Files\File;
 
 /**
  * @template-implements IEventListener<Event>
  */
 class PostDeleteListener implements IEventListener
 {
-    private TimelineWrite $util;
-
-    public function __construct(TimelineWrite $util)
-    {
-        $this->util = $util;
-    }
+    public function __construct(private TimelineWrite $tw) {}
 
     public function handle(Event $event): void
     {
@@ -46,10 +41,10 @@ class PostDeleteListener implements IEventListener
         }
 
         $node = $event->getNode();
-        if ($node instanceof Folder) {
+        if (!$node instanceof File) {
             return;
         }
 
-        $this->util->deleteFile($node);
+        $this->tw->deleteFile($node);
     }
 }

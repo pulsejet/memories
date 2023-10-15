@@ -31,12 +31,7 @@ use OCP\ISession;
  */
 class BeforeTemplateListener implements IEventListener
 {
-    private ISession $session;
-
-    public function __construct(ISession $session)
-    {
-        $this->session = $session;
-    }
+    public function __construct(private ISession $session) {}
 
     public function handle(Event $event): void
     {

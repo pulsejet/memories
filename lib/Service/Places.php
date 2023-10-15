@@ -16,19 +16,11 @@ const PLANET_URL = 'https://github.com/pulsejet/memories-assets/releases/downloa
 
 class Places
 {
-    protected IConfig $config;
-    protected IDBConnection $connection;
-    protected TimelineWrite $timelineWrite;
-
     public function __construct(
-        IConfig $config,
-        IDBConnection $connection,
-        TimelineWrite $timelineWrite
-    ) {
-        $this->config = $config;
-        $this->connection = $connection;
-        $this->timelineWrite = $timelineWrite;
-    }
+        protected IConfig $config,
+        protected IDBConnection $connection,
+        protected TimelineWrite $tw
+    ) {}
 
     /**
      * Make SQL query to detect GIS type.
@@ -385,7 +377,7 @@ class Places
         flush();
 
         $count = 0;
-        $this->timelineWrite->orphanAndRun(['fileid', 'lat', 'lon'], 20, function (array $row) use (&$count) {
+        $this->tw->orphanAndRun(['fileid', 'lat', 'lon'], 20, function (array $row) use (&$count) {
             ++$count;
 
             // Only proceed if we have a valid location
@@ -395,7 +387,7 @@ class Places
 
             // Update places
             if ($lat || $lon) {
-                $this->timelineWrite->updatePlacesData($fileid, $lat, $lon);
+                $this->tw->updatePlacesData($fileid, $lat, $lon);
             }
 
             // Print every 500 files

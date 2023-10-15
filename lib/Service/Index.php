@@ -49,27 +49,15 @@ class Index
      */
     public ?\Closure $continueCheck = null;
 
-    protected IRootFolder $rootFolder;
-    protected TimelineWrite $timelineWrite;
-    protected IDBConnection $db;
-    protected ITempManager $tempManager;
-    protected LoggerInterface $logger;
-
     private static ?array $mimeList = null;
 
     public function __construct(
-        IRootFolder $rootFolder,
-        TimelineWrite $timelineWrite,
-        IDBConnection $db,
-        ITempManager $tempManager,
-        LoggerInterface $logger
-    ) {
-        $this->rootFolder = $rootFolder;
-        $this->timelineWrite = $timelineWrite;
-        $this->db = $db;
-        $this->tempManager = $tempManager;
-        $this->logger = $logger;
-    }
+        protected IRootFolder $rootFolder,
+        protected TimelineWrite $tw,
+        protected IDBConnection $db,
+        protected ITempManager $tempManager,
+        protected LoggerInterface $logger
+    ) {}
 
     /**
      * Index all files for a user.
@@ -202,7 +190,7 @@ class Index
 
         try {
             $this->log("Indexing file {$path}", true);
-            $this->timelineWrite->processFile($file);
+            $this->tw->processFile($file);
         } catch (\OCP\Lock\LockedException $e) {
             $this->log("Skipping file {$path} due to lock", true);
         } catch (\Exception $e) {
@@ -218,7 +206,7 @@ class Index
     public function cleanupStale(): void
     {
         $this->log('<info>Cleaning up stale index entries</info>'.PHP_EOL);
-        $this->timelineWrite->cleanupStale();
+        $this->tw->cleanupStale();
     }
 
     /**

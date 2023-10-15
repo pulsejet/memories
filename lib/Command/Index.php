@@ -57,13 +57,6 @@ class IndexOpts
 
 class Index extends Command
 {
-    protected IUserManager $userManager;
-    protected IGroupManager $groupManager;
-    protected IRootFolder $rootFolder;
-    protected IConfig $config;
-    protected Service\Index $indexer;
-    protected TimelineWrite $timelineWrite;
-
     // IO
     private InputInterface $input;
     private OutputInterface $output;
@@ -72,21 +65,14 @@ class Index extends Command
     private IndexOpts $opts;
 
     public function __construct(
-        IRootFolder $rootFolder,
-        IUserManager $userManager,
-        IGroupManager $groupManager,
-        IConfig $config,
-        Service\Index $indexer,
-        TimelineWrite $timelineWrite
+        protected IRootFolder $rootFolder,
+        protected IUserManager $userManager,
+        protected IGroupManager $groupManager,
+        protected IConfig $config,
+        protected Service\Index $indexer,
+        protected TimelineWrite $tw,
     ) {
         parent::__construct();
-
-        $this->userManager = $userManager;
-        $this->groupManager = $groupManager;
-        $this->rootFolder = $rootFolder;
-        $this->config = $config;
-        $this->indexer = $indexer;
-        $this->timelineWrite = $timelineWrite;
     }
 
     protected function configure(): void
@@ -163,7 +149,7 @@ class Index extends Command
             }
         }
 
-        $this->timelineWrite->clear();
+        $this->tw->clear();
         $this->output->writeln('<info>Cleared existing index</info>');
     }
 
@@ -178,7 +164,7 @@ class Index extends Command
 
         $this->output->writeln('Forcing refresh of existing index entries');
 
-        $this->timelineWrite->orphanAll();
+        $this->tw->orphanAll();
     }
 
     /**

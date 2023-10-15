@@ -31,19 +31,11 @@ use OCP\IRequest;
 
 class AlbumsBackend extends Backend
 {
-    protected AlbumsQuery $albumsQuery;
-    protected IRequest $request;
-    protected TimelineQuery $tq;
-
     public function __construct(
-        AlbumsQuery $albumsQuery,
-        IRequest $request,
-        TimelineQuery $tq
-    ) {
-        $this->albumsQuery = $albumsQuery;
-        $this->request = $request;
-        $this->tq = $tq;
-    }
+        protected AlbumsQuery $albumsQuery,
+        protected IRequest $request,
+        protected TimelineQuery $tq,
+    ) {}
 
     public static function appName(): string
     {

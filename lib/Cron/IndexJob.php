@@ -16,29 +16,25 @@ const INTERVAL = 900; // seconds (don't set this too low)
 
 class IndexJob extends TimedJob
 {
-    private Service\Index $service;
-    private IUserManager $userManager;
-    private LoggerInterface $logger;
-    private IConfig $config;
-
     private bool $_hasError = false;
 
     public function __construct(
         ITimeFactory $time,
-        Service\Index $service,
-        IUserManager $userManager,
-        LoggerInterface $logger,
-        IConfig $config
+        private Service\Index $service,
+        private IUserManager $userManager,
+        private LoggerInterface $logger,
+        private IConfig $config
     ) {
         parent::__construct($time);
-        $this->service = $service;
-        $this->userManager = $userManager;
-        $this->logger = $logger;
-        $this->config = $config;
 
         $this->setInterval(INTERVAL);
     }
 
+    /**
+     * Run the background indexing job.
+     *
+     * @param mixed $argument
+     */
     protected function run($argument)
     {
         // Check if indexing is enabled

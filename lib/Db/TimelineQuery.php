@@ -26,16 +26,13 @@ class TimelineQuery
         'mimetypes.mimetype',
     ];
 
-    protected IDBConnection $connection;
-    protected IRequest $request;
     protected ?TimelineRoot $_root = null; // cache
     protected bool $_rootEmptyAllowed = false;
 
-    public function __construct(IDBConnection $connection, IRequest $request)
-    {
-        $this->connection = $connection;
-        $this->request = $request;
-    }
+    public function __construct(
+        protected IDBConnection $connection,
+        protected IRequest $request,
+    ) {}
 
     public function allowEmptyRoot(bool $value = true): void
     {

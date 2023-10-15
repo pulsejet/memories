@@ -11,12 +11,7 @@ use OCP\IDBConnection;
 
 class LivePhoto
 {
-    protected IDBConnection $connection;
-
-    public function __construct(IDBConnection $connection)
-    {
-        $this->connection = $connection;
-    }
+    public function __construct(private IDBConnection $connection) {}
 
     /**
      * Check if a given Exif data is the video part of a Live Photo.

@@ -31,14 +31,10 @@ class RecognizeBackend extends Backend
 {
     use PeopleBackendUtils;
 
-    protected TimelineQuery $tq;
-    protected IRequest $request;
-
-    public function __construct(TimelineQuery $tq, IRequest $request)
-    {
-        $this->tq = $tq;
-        $this->request = $request;
-    }
+    public function __construct(
+        protected TimelineQuery $tq,
+        protected IRequest $request,
+    ) {}
 
     public static function appName(): string
     {

@@ -47,34 +47,20 @@ class MigrateGoogleTakeout extends Command
     protected OutputInterface $output;
     protected InputInterface $input;
 
-    protected IUserManager $userManager;
-    protected IRootFolder $rootFolder;
-    protected IConfig $config;
-    protected IDBConnection $connection;
-    protected TimelineWrite $timelineWrite;
-    protected ITempManager $tempManager;
-
     // Stats
     private int $nProcessed = 0;
 
     private array $mimeTypes = [];
 
     public function __construct(
-        IRootFolder $rootFolder,
-        IUserManager $userManager,
-        IConfig $config,
-        IDBConnection $connection,
-        ITempManager $tempManager,
-        TimelineWrite $timelineWrite
+        protected IRootFolder $rootFolder,
+        protected IUserManager $userManager,
+        protected IConfig $config,
+        protected IDBConnection $connection,
+        protected ITempManager $tempManager,
+        protected TimelineWrite $timelineWrite
     ) {
         parent::__construct();
-
-        $this->userManager = $userManager;
-        $this->rootFolder = $rootFolder;
-        $this->config = $config;
-        $this->connection = $connection;
-        $this->tempManager = $tempManager;
-        $this->timelineWrite = $timelineWrite;
     }
 
     protected function configure(): void

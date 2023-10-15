@@ -9,12 +9,7 @@ use OCP\IDBConnection;
 
 class AlbumsQuery
 {
-    protected IDBConnection $connection;
-
-    public function __construct(IDBConnection $connection)
-    {
-        $this->connection = $connection;
-    }
+    public function __construct(private IDBConnection $connection) {}
 
     /**
      * Get list of albums.
@@ -96,9 +91,9 @@ class AlbumsQuery
     /**
      * Check if an album has a file.
      *
-     * @return bool|string owner of file
+     * @return ?string owner of file
      */
-    public function hasFile(int $albumId, int $fileId)
+    public function hasFile(int $albumId, int $fileId): ?string
     {
         $query = $this->connection->getQueryBuilder();
         $query->select('owner')->from('photos_albums_files')->where(
@@ -108,7 +103,7 @@ class AlbumsQuery
             )
         );
 
-        return $query->executeQuery()->fetchOne();
+        return $query->executeQuery()->fetchOne() ?: null;
     }
 
     /**

@@ -37,35 +37,17 @@ use Psr\Log\LoggerInterface;
 
 abstract class GenericApiController extends ApiController
 {
-    protected IConfig $config;
-    protected IUserSession $userSession;
-    protected IRootFolder $rootFolder;
-    protected IAppManager $appManager;
-    protected IDBConnection $connection;
-    protected LoggerInterface $logger;
-    protected TimelineQuery $tq;
-    protected FsManager $fs;
-
     public function __construct(
         IRequest $request,
-        IConfig $config,
-        IUserSession $userSession,
-        IDBConnection $connection,
-        IRootFolder $rootFolder,
-        IAppManager $appManager,
-        LoggerInterface $logger,
-        TimelineQuery $tq,
-        FsManager $fs
+        protected IConfig $config,
+        protected IUserSession $userSession,
+        protected IDBConnection $connection,
+        protected IRootFolder $rootFolder,
+        protected IAppManager $appManager,
+        protected LoggerInterface $logger,
+        protected TimelineQuery $tq,
+        protected FsManager $fs
     ) {
         parent::__construct(Application::APPNAME, $request);
-
-        $this->config = $config;
-        $this->userSession = $userSession;
-        $this->connection = $connection;
-        $this->rootFolder = $rootFolder;
-        $this->appManager = $appManager;
-        $this->logger = $logger;
-        $this->tq = $tq;
-        $this->fs = $fs;
     }
 }

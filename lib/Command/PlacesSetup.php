@@ -32,13 +32,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 class PlacesSetup extends Command
 {
     protected OutputInterface $output;
-    protected Places $places;
 
-    public function __construct(
-        Places $places
-    ) {
+    public function __construct(protected Places $places)
+    {
         parent::__construct();
-        $this->places = $places;
     }
 
     protected function configure(): void

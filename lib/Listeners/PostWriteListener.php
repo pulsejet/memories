@@ -27,6 +27,7 @@ use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Files\Events\Node\NodeTouchedEvent;
 use OCP\Files\Events\Node\NodeWrittenEvent;
+use OCP\Files\File;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -34,16 +35,10 @@ use Psr\Log\LoggerInterface;
  */
 class PostWriteListener implements IEventListener
 {
-    private TimelineWrite $timelineWrite;
-    private LoggerInterface $logger;
-
     public function __construct(
-        TimelineWrite $timelineWrite,
-        LoggerInterface $logger
-    ) {
-        $this->timelineWrite = $timelineWrite;
-        $this->logger = $logger;
-    }
+        private TimelineWrite $tw,
+        private LoggerInterface $logger
+    ) {}
 
     public function handle(Event $event): void
     {
@@ -55,7 +50,7 @@ class PostWriteListener implements IEventListener
         $node = $event->getNode();
 
         // Check the mime type first
-        if (!Index::isSupported($node)) {
+        if (!($node instanceof File) || !Index::isSupported($node)) {
             return;
         }
 
@@ -73,7 +68,7 @@ class PostWriteListener implements IEventListener
         }
 
         try {
-            $this->timelineWrite->processFile($node);
+            $this->tw->processFile($node);
         } catch (\Exception $e) {
             $this->logger->error('Memories failed to process file: {message}', [
                 'message' => $e->getMessage(),

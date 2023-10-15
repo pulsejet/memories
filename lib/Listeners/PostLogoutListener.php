@@ -32,12 +32,7 @@ class PostLogoutListener implements IEventListener
 {
     public const CLEAR_CACHE_KEY = 'memories_clear_cache';
 
-    private ISession $session;
-
-    public function __construct(ISession $session)
-    {
-        $this->session = $session;
-    }
+    public function __construct(private ISession $session) {}
 
     public function handle(Event $event): void
     {

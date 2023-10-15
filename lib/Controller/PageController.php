@@ -3,6 +3,7 @@
 namespace OCA\Memories\Controller;
 
 use OCA\Files\Event\LoadSidebar;
+use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Service\BinExt;
 use OCA\Memories\Util;
 use OCP\AppFramework\Controller;
@@ -14,17 +15,11 @@ use OCP\IRequest;
 
 class PageController extends Controller
 {
-    protected $appName;
-    protected IEventDispatcher $eventDispatcher;
-
     public function __construct(
-        string $AppName,
         IRequest $request,
-        IEventDispatcher $eventDispatcher
+        protected IEventDispatcher $eventDispatcher
     ) {
-        parent::__construct($AppName, $request);
-        $this->appName = $AppName;
-        $this->eventDispatcher = $eventDispatcher;
+        parent::__construct(Application::APPNAME, $request);
     }
 
     /**
@@ -37,11 +32,11 @@ class PageController extends Controller
         // Check native version if available
         $nativeVer = Util::callerNativeVersion();
         if (null !== $nativeVer && version_compare($nativeVer, BinExt::NX_VER_MIN, '<')) {
-            return new PublicTemplateResponse($this->appName, 'native-old');
+            return new PublicTemplateResponse(Application::APPNAME, 'native-old');
         }
 
         // Scripts
-        \OCP\Util::addScript($this->appName, 'memories-main');
+        \OCP\Util::addScript(Application::APPNAME, 'memories-main');
 
         // Extra translations
         if (Util::recognizeIsEnabled()) {
@@ -49,7 +44,7 @@ class PageController extends Controller
             \OCP\Util::addTranslations('recognize');
         }
 
-        $response = new TemplateResponse($this->appName, 'main', self::getMainParams());
+        $response = new TemplateResponse(Application::APPNAME, 'main', self::getMainParams());
         $response->setContentSecurityPolicy(self::getCSP());
         $response->cacheFor(0);
 

@@ -32,19 +32,11 @@ class FaceRecognitionBackend extends Backend
 {
     use PeopleBackendUtils;
 
-    protected IRequest $request;
-    protected TimelineQuery $tq;
-    protected IConfig $config;
-
     public function __construct(
-        IRequest $request,
-        TimelineQuery $tq,
-        IConfig $config
-    ) {
-        $this->request = $request;
-        $this->tq = $tq;
-        $this->config = $config;
-    }
+        protected IRequest $request,
+        protected TimelineQuery $tq,
+        protected IConfig $config,
+    ) {}
 
     public static function appName(): string
     {

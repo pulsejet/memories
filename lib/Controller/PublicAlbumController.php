@@ -2,6 +2,7 @@
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\AlbumsQuery;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
@@ -15,45 +16,26 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IL10N;
+use OCP\IRequest;
 use OCP\IURLGenerator;
 use OCP\IUserSession;
 use OCP\Util;
 
 class PublicAlbumController extends Controller
 {
-    protected $appName;
-    protected IEventDispatcher $eventDispatcher;
-    protected IInitialState $initialState;
-    protected IAppManager $appManager;
-    protected IConfig $config;
-    protected IUserSession $userSession;
-    protected IRootFolder $rootFolder;
-    protected IURLGenerator $urlGenerator;
-    protected AlbumsQuery $albumsQuery;
-    protected IL10N $l10n;
-
     public function __construct(
-        string $appName,
-        IEventDispatcher $eventDispatcher,
-        IInitialState $initialState,
-        IAppManager $appManager,
-        IConfig $config,
-        IUserSession $userSession,
-        IRootFolder $rootFolder,
-        IURLGenerator $urlGenerator,
-        AlbumsQuery $albumsQuery,
-        IL10N $l10n
+        IRequest $request,
+        protected IEventDispatcher $eventDispatcher,
+        protected IInitialState $initialState,
+        protected IAppManager $appManager,
+        protected IConfig $config,
+        protected IUserSession $userSession,
+        protected IRootFolder $rootFolder,
+        protected IURLGenerator $urlGenerator,
+        protected AlbumsQuery $albumsQuery,
+        protected IL10N $l10n
     ) {
-        $this->appName = $appName;
-        $this->eventDispatcher = $eventDispatcher;
-        $this->initialState = $initialState;
-        $this->appManager = $appManager;
-        $this->config = $config;
-        $this->userSession = $userSession;
-        $this->rootFolder = $rootFolder;
-        $this->urlGenerator = $urlGenerator;
-        $this->albumsQuery = $albumsQuery;
-        $this->l10n = $l10n;
+        parent::__construct(Application::APPNAME, $request);
     }
 
     /**
@@ -93,13 +75,13 @@ class PublicAlbumController extends Controller
         $this->addOgMetadata($album, $token);
 
         // Scripts
-        Util::addScript($this->appName, 'memories-main');
+        Util::addScript(Application::APPNAME, 'memories-main');
 
         // Share info
         $this->initialState->provideInitialState('share_title', $album['name']);
 
         // Render main template
-        $response = new PublicTemplateResponse($this->appName, 'main', PageController::getMainParams());
+        $response = new PublicTemplateResponse(Application::APPNAME, 'main', PageController::getMainParams());
         $response->setHeaderTitle($album['name']);
         $response->setFooterVisible(false); // wth is that anyway?
         $response->setContentSecurityPolicy(PageController::getCSP());

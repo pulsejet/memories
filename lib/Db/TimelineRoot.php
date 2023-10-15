@@ -8,15 +8,8 @@ use OCP\Files\FileInfo;
 
 class TimelineRoot
 {
-    protected array $folders;
-    protected array $folderPaths;
-
-    /** Initialize */
-    public function __construct()
-    {
-        $this->folders = [];
-        $this->folderPaths = [];
-    }
+    protected array $folders = [];
+    protected array $folderPaths = [];
 
     /**
      * Add a folder to the root.

@@ -45,26 +45,16 @@ use OCP\Share\IShare;
 
 class FsManager
 {
-    protected IConfig $config;
-    protected IUserSession $userSession;
-    protected IRootFolder $rootFolder;
-    protected AlbumsQuery $albumsQuery;
-    protected IRequest $request;
-    protected ICache $nomediaCache;
+    private ICache $nomediaCache;
 
     public function __construct(
-        IConfig $config,
-        IUserSession $userSession,
-        IRootFolder $rootFolder,
-        AlbumsQuery $albumsQuery,
-        IRequest $request,
+        private IConfig $config,
+        private IUserSession $userSession,
+        private IRootFolder $rootFolder,
+        private AlbumsQuery $albumsQuery,
+        private IRequest $request,
         ICacheFactory $cacheFactory
     ) {
-        $this->config = $config;
-        $this->userSession = $userSession;
-        $this->rootFolder = $rootFolder;
-        $this->albumsQuery = $albumsQuery;
-        $this->request = $request;
         $this->nomediaCache = $cacheFactory->createLocal('memories:nomedia');
     }
 
