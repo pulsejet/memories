@@ -57,6 +57,8 @@ class PostWriteListener implements IEventListener
         // Check if a directory at a higher level contains a .nomedia file
         try {
             $parent = $node;
+
+            /** @psalm-suppress RedundantConditionGivenDocblockType */
             while ($parent = $parent->getParent()) {
                 if ($parent->nodeExists('.nomedia') || $parent->nodeExists('.nomemories')) {
                     return;

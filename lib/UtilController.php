@@ -44,7 +44,7 @@ trait UtilController
                 parent::__construct();
             }
 
-            public function callback(Http\IOutput $output)
+            public function callback(Http\IOutput $output): void
             {
                 try {
                     ($this->closure)($output);

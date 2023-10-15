@@ -69,7 +69,8 @@ class LivePhoto
                 //
                 // The video is then located at the end of the file, so we can get the offset.
                 // Match each DirectoryItemSemantic to find MotionPhoto, then get the length.
-                $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+                $path = $file->getStorage()->getLocalFile($file->getInternalPath())
+                    ?: throw new \Exception('[BUG][LivePhoto] Failed to get local file path');
                 $extExif = Exif::getExifWithDuplicates($path);
 
                 foreach ($extExif as $key => $value) {

@@ -134,9 +134,10 @@ class VideoController extends GenericApiController
             $liveVideoPath = null;
 
             // Video is inside the file
-            $path = null;
+            $path = '<>';
             if (str_starts_with($liveid, 'self__')) {
-                $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+                $path = $file->getStorage()->getLocalFile($file->getInternalPath())
+                    ?: throw Exceptions::BadRequest('[Video] File path missing (self__*)');
                 $mime = 'video/mp4';
                 $name = $file->getName().'.mp4';
             }
@@ -145,7 +146,7 @@ class VideoController extends GenericApiController
             if ('self__trailer' === $liveid) {
                 try { // Get trailer
                     $blob = Exif::getBinaryExifProp($path, '-trailer');
-                } catch (\Exception $e) {
+                } catch (\Exception) {
                     throw Exceptions::NotFound('file trailer');
                 }
             } elseif (str_starts_with($liveid, 'self__exifbin=')) {
@@ -158,15 +159,10 @@ class VideoController extends GenericApiController
 
                 try { // Get embedded video file
                     $blob = Exif::getBinaryExifProp($path, "-{$field}");
-                } catch (\Exception $e) {
+                } catch (\Exception) {
                     throw Exceptions::NotFound('Could not read binary EXIF field');
                 }
             } elseif (str_starts_with($liveid, 'self__traileroffset=')) {
-                // Make sure we have a path
-                if (!$path) {
-                    throw Exceptions::BadRequest('File path missing for self__traileroffset');
-                }
-
                 // Remove prefix
                 $offset = (int) substr($liveid, \strlen('self__traileroffset='));
                 if ($offset <= 0) {
@@ -320,7 +316,7 @@ class VideoController extends GenericApiController
      *
      * @return mixed The response from upstream
      */
-    private static function postFile(string $client, mixed $blob): mixed
+    private static function postFile(string $client, string $blob): mixed
     {
         try {
             return self::postFileInternal($client, $blob);

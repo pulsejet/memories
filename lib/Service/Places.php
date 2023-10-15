@@ -27,7 +27,7 @@ class Places
     /**
      * Make SQL query to detect GIS type.
      *
-     * @psalm-return 0|1|2
+     * @psalm-return 0|1|2|3
      */
     public function detectGisType(): int
     {

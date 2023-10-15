@@ -6,6 +6,7 @@ namespace OCA\Memories\Db;
 
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\DB\QueryBuilder\IQueryFunction;
 use OCP\ITags;
 
 trait TimelineQueryFilters
@@ -55,7 +56,7 @@ trait TimelineQueryFilters
         }
     }
 
-    private function getFavoriteVCategoryFun(IQueryBuilder &$query)
+    private function getFavoriteVCategoryFun(IQueryBuilder &$query): IQueryFunction
     {
         return $query->createFunction(
             $query->getConnection()->getQueryBuilder()->select('id')->from('vcategory', 'vc')->where(

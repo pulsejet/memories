@@ -80,20 +80,30 @@ trait TimelineQuerySingleItem
 
         // Get address from places
         if (Util::placesGISType() > 0) {
+            // Get names of places for this file
             $qb = $this->connection->getQueryBuilder();
-            $qb->select('e.name', 'e.other_names')
+            $places = $qb->select('e.name', 'e.other_names')
                 ->from('memories_places', 'mp')
                 ->innerJoin('mp', 'memories_planet', 'e', $qb->expr()->eq('mp.osm_id', 'e.osm_id'))
                 ->where($qb->expr()->eq('mp.fileid', $qb->createNamedParameter($id, \PDO::PARAM_INT)))
                 ->andWhere($qb->expr()->gt('e.admin_level', $qb->expr()->literal(0, \PDO::PARAM_INT)))
                 ->orderBy('e.admin_level', 'DESC')
+                ->executeQuery()->fetchAll()
             ;
 
-            $places = $qb->executeQuery()->fetchAll();
-            $lang = Util::getUserLang();
-            if (\count($places) > 0) {
-                $places = array_map(static fn ($p) => PlacesBackend::choosePlaceLang($p, $lang)['name'], $places);
-                $info['address'] = implode(', ', $places);
+            if (\count($places)) {
+                // Get user language
+                $lang = Util::getUserLang();
+
+                // Get translated address
+                $info['address'] = implode(', ', array_map(
+                    static fn ($p): string => PlacesBackend::translateName(
+                        $lang,
+                        $p['name'],
+                        $p['other_names'],
+                    ),
+                    $places,
+                ));
             }
         }
 

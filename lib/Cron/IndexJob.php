@@ -34,10 +34,8 @@ class IndexJob extends TimedJob
 
     /**
      * Run the background indexing job.
-     *
-     * @param mixed $argument
      */
-    protected function run($argument)
+    protected function run(mixed $argument): void
     {
         // Check if indexing is enabled
         if ('0' === Util::getSystemConfig('memories.index.mode')) {

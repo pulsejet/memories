@@ -160,7 +160,9 @@ class PlacesBackend extends Backend
         foreach ($places as &$row) {
             $row['osm_id'] = (int) $row['osm_id'];
             $row['count'] = (int) $row['count'];
-            self::choosePlaceLang($row, $lang);
+
+            $row['name'] = self::translateName($lang, $row['name'], $row['other_names']);
+            unset($row['other_names']);
         }
 
         return $places;
@@ -198,19 +200,24 @@ class PlacesBackend extends Backend
     /**
      * Choose the best name for the place.
      */
-    public static function choosePlaceLang(array &$place, string $lang): array
+    public static function translateName(string $lang, string $name, ?string $otherNames): string
     {
-        try {
-            $otherNames = json_decode($place['other_names'], true);
-            if (isset($otherNames[$lang])) {
-                $place['name'] = $otherNames[$lang];
-            }
-        } catch (\Error $e) {
-            // Ignore
-        } finally {
-            unset($place['other_names']);
+        if (empty($otherNames)) {
+            return $name;
         }
 
-        return $place;
+        try {
+            // Decode the other names
+            $json = json_decode($otherNames, true);
+
+            // Check if the language is available
+            if (\array_key_exists($lang, $json) && \is_string($json[$lang])) {
+                return $json[$lang];
+            }
+        } catch (\Error) {
+            // Ignore errors, just use original name
+        }
+
+        return $name;
     }
 }

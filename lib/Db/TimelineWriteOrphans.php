@@ -65,7 +65,7 @@ trait TimelineWriteOrphans
             }
 
             // Mark all files as not orphaned.
-            $fileIds = array_map(static fn ($row) => $row['fileid'], $orphans);
+            $fileIds = array_map(static fn ($row): int => (int) $row['fileid'], $orphans);
             $this->orphanAll(false, $fileIds, true);
 
             $this->connection->commit();
