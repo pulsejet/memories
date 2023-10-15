@@ -14,18 +14,15 @@ use OCP\IRequest;
 
 class PageController extends Controller
 {
-    protected $userId;
     protected $appName;
     protected IEventDispatcher $eventDispatcher;
 
     public function __construct(
         string $AppName,
         IRequest $request,
-        $UserId,
         IEventDispatcher $eventDispatcher
     ) {
         parent::__construct($AppName, $request);
-        $this->userId = $UserId;
         $this->appName = $AppName;
         $this->eventDispatcher = $eventDispatcher;
     }
