@@ -10,11 +10,15 @@ Memories supports transcoding acceleration with VA-API and NVENC.
 
 If you plan to use hardware transcoding, it may be easier to run the transcoder (go-vod) in a separate docker image containing ffmpeg and hardware acceleration dependencies. For this, you need to clone the [go-vod](https://github.com/pulsejet/go-vod) repository and build the docker image. Then you need to change the vod connect address and mark go-vod as external. The important requirement for running go-vod externally is that the file structure must be exactly same for the target video files.
 
-In the directory with the `docker-compose.yml` file, run,
+In the directory with the `docker-compose.yml` file, run the following replacing `<tag>` with the correct tag for the version of Memories you use (can be found in the admin panel).
 
 ```bash
-git clone https://github.com/pulsejet/go-vod
+git clone -b <tag> https://github.com/pulsejet/go-vod
 ```
+
+!!! warning "go-vod version"
+
+    Make sure you always use the correct version of go-vod corresponding to your Memories installation. If you use a different version, the admin panel will show a warning and transcoding may not work properly.
 
 If you are using docker, configure a service to start go-vod with the correct devices and filesystem structure. Otherwise, manually start the container with these parameters.
 
@@ -40,7 +44,7 @@ services:
       - ncdata:/var/www/html:ro
 ```
 
-Make sure to put the container and the container into the same network so that they can talk to each other! 
+Make sure to put the container and the container into the same network so that they can talk to each other!
 
 With Nextcloud AIO, you will need to put the container into the `nextcloud-aio` network. Also the datadir of AIO needs to be mounted at the same place like in its Netxcloud container into the go-vod container. Usually this would be `nextcloud_aio_nextcloud_data:/mnt/ncdata:ro` or `$NEXTCLOUD_DATADIR:/mnt/ncdata:ro`.
 
@@ -138,6 +142,7 @@ If you use Docker, you need to:
 1. Check the output of `/tmp/go-vod/<instance-id>.log` if playback has issues
 
 ### Nextcloud AIO
+
 See https://github.com/nextcloud/all-in-one#how-to-enable-hardware-transcoding-for-nextcloud
 
 ### linuxserver/nextcloud image
