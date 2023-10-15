@@ -29,7 +29,7 @@ trait TimelineQueryDays
         bool $recursive,
         bool $archive,
         bool $monthView,
-        array $queryTransforms = []
+        array $queryTransforms = [],
     ): array {
         $query = $this->connection->getQueryBuilder();
 
@@ -75,7 +75,7 @@ trait TimelineQueryDays
         bool $archive,
         bool $hidden,
         bool $monthView,
-        array $queryTransforms = []
+        array $queryTransforms = [],
     ): array {
         // Check if we have any dayIds
         if (empty($dayIds)) {
@@ -107,7 +107,7 @@ trait TimelineQueryDays
             // Convert monthIds to dayIds
             $query->andWhere($query->expr()->orX(...array_map(fn ($monthId) => $query->expr()->andX(
                 $query->expr()->gte('m.dayid', $query->createNamedParameter($monthId, IQueryBuilder::PARAM_INT)),
-                $query->expr()->lte('m.dayid', $query->createNamedParameter($this->dayIdMonthEnd($monthId), IQueryBuilder::PARAM_INT))
+                $query->expr()->lte('m.dayid', $query->createNamedParameter($this->dayIdMonthEnd($monthId), IQueryBuilder::PARAM_INT)),
             ), $dayIds)));
         } else {
             // Filter by list of dayIds
@@ -171,7 +171,7 @@ trait TimelineQueryDays
         ?TimelineRoot $root = null,
         bool $recursive = true,
         bool $archive = false,
-        bool $hidden = false
+        bool $hidden = false,
     ): IQueryBuilder {
         // Get the timeline root object
         if (null === $root) {
@@ -315,7 +315,7 @@ trait TimelineQueryDays
         IQueryBuilder &$query,
         TimelineRoot &$root,
         bool $archive,
-        bool $hidden
+        bool $hidden,
     ): void {
         // Add query parameters
         $query->setParameter('topFolderIds', $root->getIds(), IQueryBuilder::PARAM_INT_ARRAY);

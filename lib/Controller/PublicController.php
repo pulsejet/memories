@@ -35,7 +35,7 @@ class PublicController extends AuthPublicShareController
         protected IRootFolder $rootFolder,
         protected IShareManager $shareManager,
         protected IConfig $config,
-        protected TimelineQuery $tq
+        protected TimelineQuery $tq,
     ) {
         parent::__construct(Application::APPNAME, $request, $session, $urlGenerator);
     }

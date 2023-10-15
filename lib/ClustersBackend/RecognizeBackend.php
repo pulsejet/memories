@@ -91,7 +91,7 @@ class RecognizeBackend extends Backend
         if ('NULL' === $faceName) {
             $clusterQuery = $query->expr()->andX(
                 $query->expr()->eq('rfd.user_id', $query->createNamedParameter(Util::getUID())),
-                $query->expr()->eq('rfd.cluster_id', $query->expr()->literal(-1))
+                $query->expr()->eq('rfd.cluster_id', $query->expr()->literal(-1)),
             );
         } else {
             $nameField = is_numeric($faceName) ? 'rfc.id' : 'rfc.title';

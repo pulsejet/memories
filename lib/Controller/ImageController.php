@@ -49,7 +49,7 @@ class ImageController extends GenericApiController
         int $x = 32,
         int $y = 32,
         bool $a = false,
-        string $mode = 'fill'
+        string $mode = 'fill',
     ): Http\Response {
         return Util::guardEx(function () use ($id, $x, $y, $a, $mode) {
             if (-1 === $id || 0 === $x || 0 === $y) {
@@ -181,7 +181,7 @@ class ImageController extends GenericApiController
         bool $basic = false,
         bool $current = false,
         bool $tags = false,
-        string $clusters = ''
+        string $clusters = '',
     ): Http\Response {
         return Util::guardEx(function () use ($id, $basic, $current, $tags, $clusters) {
             $file = $this->fs->getUserFile($id);
@@ -319,7 +319,7 @@ class ImageController extends GenericApiController
         int $height,
         ?float $quality,
         string $extension,
-        array $state
+        array $state,
     ): Http\Response {
         return Util::guardEx(function () use ($id, $name, $width, $height, $quality, $extension, $state) {
             // Get the file

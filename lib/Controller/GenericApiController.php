@@ -46,7 +46,7 @@ abstract class GenericApiController extends ApiController
         protected IAppManager $appManager,
         protected LoggerInterface $logger,
         protected TimelineQuery $tq,
-        protected FsManager $fs
+        protected FsManager $fs,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }

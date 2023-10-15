@@ -63,8 +63,8 @@ trait TimelineQueryFilters
                     $query->expr()->eq('type', $query->expr()->literal('files')),
                     $query->expr()->eq('uid', $query->createNamedParameter(Util::getUID())),
                     $query->expr()->eq('category', $query->expr()->literal(ITags::TAG_FAVORITE)),
-                )
-            )->getSQL()
+                ),
+            )->getSQL(),
         );
     }
 }

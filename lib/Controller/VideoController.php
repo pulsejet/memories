@@ -117,7 +117,7 @@ class VideoController extends GenericApiController
         int $fileid,
         string $liveid = '',
         string $format = '',
-        string $transcode = ''
+        string $transcode = '',
     ): Http\Response {
         return Util::guardEx(function () use ($fileid, $liveid, $format, $transcode) {
             $file = $this->fs->getUserFile($fileid);

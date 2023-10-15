@@ -19,7 +19,7 @@ class Places
     public function __construct(
         protected IConfig $config,
         protected IDBConnection $connection,
-        protected TimelineWrite $tw
+        protected TimelineWrite $tw,
     ) {}
 
     /**

@@ -103,7 +103,7 @@ class AdminController extends GenericApiController
             /** @psalm-suppress ForbiddenCode */
             $status['perl'] = $this->getExecutableStatus(
                 trim(shell_exec('which perl') ?: '/bin/perl'),
-                static fn ($p) => BinExt::testSystemPerl($p)
+                static fn ($p) => BinExt::testSystemPerl($p),
             );
 
             // Check number of indexed files
@@ -229,7 +229,7 @@ class AdminController extends GenericApiController
         $path,
         ?\Closure $testFunction = null,
         bool $testIfFile = true,
-        bool $testIfExecutable = true
+        bool $testIfExecutable = true,
     ): string {
         if ($path instanceof \Closure) {
             try {

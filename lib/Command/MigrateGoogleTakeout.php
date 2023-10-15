@@ -58,7 +58,7 @@ class MigrateGoogleTakeout extends Command
         protected IConfig $config,
         protected IDBConnection $connection,
         protected ITempManager $tempManager,
-        protected TimelineWrite $timelineWrite
+        protected TimelineWrite $timelineWrite,
     ) {
         parent::__construct();
     }

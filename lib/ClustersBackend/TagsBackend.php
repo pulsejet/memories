@@ -119,7 +119,7 @@ class TagsBackend extends Backend
         // SELECT all photos with this tag
         $query->select('f.fileid', 'f.etag', 'stom.systemtagid')->from(
             'systemtag_object_mapping',
-            'stom'
+            'stom',
         )->where(
             $query->expr()->eq('stom.objecttype', $query->expr()->literal('files')),
             $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tagId)),
@@ -148,7 +148,7 @@ class TagsBackend extends Backend
             $sqb->expr()->andX(
                 $sqb->expr()->eq('name', $sqb->createNamedParameter($tagName)),
                 $sqb->expr()->eq('visibility', $sqb->expr()->literal(1, \PDO::PARAM_INT)),
-            )
+            ),
         )->executeQuery()->fetchOne();
 
         if (false === $res) {

@@ -53,7 +53,7 @@ class FsManager
         private IRootFolder $rootFolder,
         private AlbumsQuery $albumsQuery,
         private IRequest $request,
-        ICacheFactory $cacheFactory
+        ICacheFactory $cacheFactory,
     ) {
         $this->nomediaCache = $cacheFactory->createLocal('memories:nomedia');
     }

@@ -11,7 +11,7 @@ class AdminSection implements IIconSection
 {
     public function __construct(
         private IL10N $l,
-        private IURLGenerator $urlGenerator
+        private IURLGenerator $urlGenerator,
     ) {}
 
     /**

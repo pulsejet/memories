@@ -28,14 +28,14 @@ trait TimelineQueryMap
                 $query->expr()->gte($latCol, $query->createNamedParameter($bounds[0], IQueryBuilder::PARAM_STR)),
                 $query->expr()->lte($latCol, $query->createNamedParameter($bounds[1], IQueryBuilder::PARAM_STR)),
                 $query->expr()->gte($lonCol, $query->createNamedParameter($bounds[2], IQueryBuilder::PARAM_STR)),
-                $query->expr()->lte($lonCol, $query->createNamedParameter($bounds[3], IQueryBuilder::PARAM_STR))
-            )
+                $query->expr()->lte($lonCol, $query->createNamedParameter($bounds[3], IQueryBuilder::PARAM_STR)),
+            ),
         );
     }
 
     public function getMapClusters(
         float $gridLen,
-        string $bounds
+        string $bounds,
     ): array {
         $query = $this->connection->getQueryBuilder();
 
@@ -93,7 +93,7 @@ trait TimelineQueryMap
             ->from('memories', 'm')
             ->where($query->expr()->in('m.mapcluster', $query->createNamedParameter(
                 $clusterIds,
-                IQueryBuilder::PARAM_INT_ARRAY
+                IQueryBuilder::PARAM_INT_ARRAY,
             )))
         ;
 
@@ -145,7 +145,7 @@ trait TimelineQueryMap
         // WHERE this photo has coordinates
         $query->where($query->expr()->andX(
             $query->expr()->isNotNull('m.lat'),
-            $query->expr()->isNotNull('m.lon')
+            $query->expr()->isNotNull('m.lon'),
         ));
 
         // ORDER BY datetaken DESC

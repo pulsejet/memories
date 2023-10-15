@@ -117,7 +117,7 @@ trait PeopleBackendUtils
             (int) ($dcx * $iw - $faceDim / 2),
             (int) ($dcy * $ih - $faceDim / 2),
             (int) $faceDim,
-            (int) $faceDim
+            (int) $faceDim,
         );
 
         // Max 512x512

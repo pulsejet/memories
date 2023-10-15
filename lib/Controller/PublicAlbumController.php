@@ -33,7 +33,7 @@ class PublicAlbumController extends Controller
         protected IRootFolder $rootFolder,
         protected IURLGenerator $urlGenerator,
         protected AlbumsQuery $albumsQuery,
-        protected IL10N $l10n
+        protected IL10N $l10n,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }

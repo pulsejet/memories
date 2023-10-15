@@ -23,7 +23,7 @@ class IndexJob extends TimedJob
         private Service\Index $service,
         private IUserManager $userManager,
         private LoggerInterface $logger,
-        private IConfig $config
+        private IConfig $config,
     ) {
         parent::__construct($time);
 

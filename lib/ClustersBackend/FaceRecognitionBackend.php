@@ -118,7 +118,7 @@ class FaceRecognitionBackend extends Backend
     {
         $faces = array_merge(
             $this->getFaceRecognitionPersons($fileid),
-            $this->getFaceRecognitionClusters($fileid)
+            $this->getFaceRecognitionClusters($fileid),
         );
 
         // Post process

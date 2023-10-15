@@ -43,7 +43,7 @@ class TimelineWrite
     public function processFile(
         File $file,
         bool $lock = true,
-        bool $force = false
+        bool $force = false,
     ): bool {
         // Check if we want to process this file
         if (!Index::isSupported($file)) {

@@ -17,7 +17,7 @@ class PageController extends Controller
 {
     public function __construct(
         IRequest $request,
-        protected IEventDispatcher $eventDispatcher
+        protected IEventDispatcher $eventDispatcher,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }

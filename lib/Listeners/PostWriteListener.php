@@ -37,7 +37,7 @@ class PostWriteListener implements IEventListener
 {
     public function __construct(
         private TimelineWrite $tw,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
     ) {}
 
     public function handle(Event $event): void

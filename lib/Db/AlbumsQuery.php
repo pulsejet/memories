@@ -31,7 +31,7 @@ class AlbumsQuery
             'pa.created',
             'pa.location',
             'pa.last_added_photo',
-            $count
+            $count,
         )->from('photos_albums', 'pa');
 
         if ($shared) {
@@ -100,7 +100,7 @@ class AlbumsQuery
             $query->expr()->andX(
                 $query->expr()->eq('file_id', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)),
                 $query->expr()->eq('album_id', $query->createNamedParameter($albumId, IQueryBuilder::PARAM_INT)),
-            )
+            ),
         );
 
         return $query->executeQuery()->fetchOne() ?: null;
@@ -121,7 +121,7 @@ class AlbumsQuery
                     $query->expr()->eq('pa.album_id', 'paf.album_id'),
                     $query->expr()->eq('pc.album_id', 'paf.album_id'),
                 ),
-            )
+            ),
         );
 
         // Check if user-owned album or shared album
@@ -162,7 +162,7 @@ class AlbumsQuery
                 $query->expr()->andX(
                     $query->expr()->eq('name', $query->createNamedParameter($albumName)),
                     $query->expr()->eq('user', $query->createNamedParameter($albumUid)),
-                )
+                ),
             );
             $album = $query->executeQuery()->fetch();
         }
@@ -202,7 +202,7 @@ class AlbumsQuery
             $query->expr()->andX(
                 $query->expr()->eq('album_id', $query->createNamedParameter($albumId, IQueryBuilder::PARAM_INT)),
                 $query->expr()->in('collaborator_id', $query->createNamedParameter($ids, IQueryBuilder::PARAM_STR_ARRAY)),
-            )
+            ),
         );
 
         return false !== $query->executeQuery()->fetchOne();

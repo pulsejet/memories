@@ -188,7 +188,7 @@ class FileRobotMagick
                 (int) (($this->state->cropWidth ?? 1) * $iw),
                 (int) (($this->state->cropHeight ?? 1) * $ih),
                 (int) (($this->state->cropX ?? 0) * $iw),
-                (int) (($this->state->cropY ?? 0) * $ih)
+                (int) (($this->state->cropY ?? 0) * $ih),
             );
         }
     }
@@ -213,7 +213,7 @@ class FileRobotMagick
                 $this->state->resizeWidth ?? 0,
                 $this->state->resizeHeight ?? 0,
                 \Imagick::FILTER_LANCZOS,
-                1
+                1,
             );
         }
     }
