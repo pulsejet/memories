@@ -72,6 +72,8 @@ class TimelineQuery
                 $value = $platform->quoteStringLiteral($value ? '1' : '0');
             } elseif (null === $value) {
                 $value = $platform->quoteStringLiteral('NULL');
+            } else {
+                $value = $platform->quoteStringLiteral((string) $value);
             }
 
             $sql = str_replace(':'.$key, $value, $sql);
