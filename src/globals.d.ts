@@ -95,7 +95,7 @@ declare global {
   };
 }
 
-// GlobalMixin.ts types, present on all components
+// types present on all components (bootstrap.ts, router.ts)
 declare module 'vue' {
   interface ComponentCustomProperties extends GlobalRouteCheckers {
     t: typeof translate;

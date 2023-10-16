@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 - **Breaking**: Nextcloud 26+ and PHP 8 are now required.
+- Significant improvements to code quality and maintainability.
 
 ## [v5.5.0] - 2023-10-06
 

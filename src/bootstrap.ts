@@ -1,17 +1,19 @@
 // Library imports
 import 'reflect-metadata';
 import Vue from 'vue';
+
 import { generateFilePath } from '@nextcloud/router';
 import { getRequestToken } from '@nextcloud/auth';
+import { translate, translatePlural } from '@nextcloud/l10n';
 
 // Global components
 import XImg from './components/frame/XImg.vue';
 import XLoadingIcon from './components/XLoadingIcon.vue';
-import GlobalMixin from './mixins/GlobalMixin';
 import VueVirtualScroller from 'vue-virtual-scroller';
 
 // Locals
 import router from './router';
+import { c, initState } from './services/utils';
 
 // CSS for components
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
@@ -59,7 +61,13 @@ if ('virtualKeyboard' in navigator) {
   (<any>navigator.virtualKeyboard).overlaysContent = true;
 }
 
-Vue.mixin(GlobalMixin as any);
+// Register global components and plugins
 Vue.use(VueVirtualScroller);
 Vue.component('XImg', XImg);
 Vue.component('XLoadingIcon', XLoadingIcon);
+
+// Register global constants and functions
+Vue.prototype.c = c;
+Vue.prototype.initState = initState;
+Vue.prototype.t = translate;
+Vue.prototype.n = translatePlural;
