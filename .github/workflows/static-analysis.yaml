@@ -45,28 +45,18 @@ jobs:
           make install-tools
           vendor/bin/psalm --no-cache --shepherd --stats --threads=4 lib
 
-  prettier:
-    name: Prettier
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout the app
-        uses: actions/checkout@v3
-
-      - name: Install Pretter
-        run: npm install --no-save "prettier@$(cat ./package.json | jq -r '.devDependencies["prettier"]')"
-
-      - name: Run Prettier
-        run: npx prettier src --check
-
-  vue-tsc:
-    name: Vue Type Checking
+  vue-tsc-prettier:
+    name: Vue Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the app
         uses: actions/checkout@v3
 
       - name: Install vue-tsc
-        run: npm install --no-save "vue-tsc@$(cat ./package.json | jq -r '.devDependencies["vue-tsc"]')"
+        run: npm ci
 
       - name: Run vue-tsc
         run: npx vue-tsc --noEmit --skipLibCheck
+
+      - name: Run Prettier
+        run: npx prettier src --check
