@@ -143,7 +143,6 @@ OC.L10N.register(
     "VA-API device ({dev}) has incorrect permissions" : "VA-API laitteella ({dev}) on virheelliset käyttöoikeudet",
     "VA-API device status: {status}" : "VA-API-laitteen tila: {status}",
     "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:" : "Muistot-sovellus käyttää go-vod-transkooderia. Go-vodi voidaan ajaa ulkoisesti (esim. erillisessä Docker-säilössä laitekiihdytyksellä) tai käyttää sisäänrakennettua transkooderia. Seuraa dokumentaation ohjeistusta:",
-    "Enable external transcoder (go-vod)" : "Ota käyttöön ulkoinen transkooderi (go-vod)",
     "Binary path (local only)" : "Binäärin polku (vain paikallinen)",
     "Template" : "Malli",
     "No items" : "Ei kohteita",

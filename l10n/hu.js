@@ -163,7 +163,6 @@ OC.L10N.register(
     "VA-API device ({dev}) has incorrect permissions" : "A VA-API eszköznek ({dev}) helytelenek a jogosultságai",
     "VA-API device status: {status}" : "A VA-API eszköz állapota: {status}",
     "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:" : "Az Emlékek a go-vod átkódolót használja. Futtathatja a go-vodot külsőleg (például külön Docker konténerben a hardveres gyorsításhoz), vagy használhatja a beépített átkódolót. Külső átkódoló használatához engedélyezze a következő beállítást, és kövesse az utasításokat a dokumentációban:",
-    "Enable external transcoder (go-vod)" : "Külső átkódoló engedélyezése (go-vod)",
     "Binary path (local only)" : "Bináris útvonala (csak helyi esetén)",
     "Bind address (local only)" : "Kötési cím (csak helyi esetén)",
     "Connection address (same as bind if local)" : "Kapcsolati cím (helyi esetén megegyezik a kötéssel)",

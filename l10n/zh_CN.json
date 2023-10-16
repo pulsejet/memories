@@ -182,7 +182,6 @@
     "VA-API device ({dev}) has incorrect permissions" : "VA-API设备（{dev}）权限不正确",
     "VA-API device status: {status}" : "VA-API设备状态：{status}",
     "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:" : "“记忆”使用go-vod转码器。你可以在外部运行go-vod（例如，在一个独立的Docker容器中进行硬件加速）或使用内置的转码器。要使用外部转码器，请启用以下选项并按照文档中的说明操作：",
-    "Enable external transcoder (go-vod)" : "启用外部转码器（go-vod）",
     "Binary path (local only)" : "Binary路径（仅本地）",
     "Bind address (local only)" : "绑定地址（仅本地）",
     "Connection address (same as bind if local)" : "连接地址(如果是本地，则与绑定地址相同)",

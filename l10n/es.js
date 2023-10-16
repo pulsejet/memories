@@ -206,7 +206,6 @@ OC.L10N.register(
     "VA-API device ({dev}) has incorrect permissions" : "el dispositivo VA-API ({dev}) tiene permisos incorrectos",
     "VA-API device status: {status}" : "estado del dispositivo VA-API: {status}",
     "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:" : "Memories utiliza el transcodificador go-vod. Puede ejecutarlo externamente (p.ej. en un contenedor Docker separado para aceleración por hardware) o, utilizar el transcodificador incluído. Para utilizar un transcodificador externo, habilite la siguiente opción y siga las instrucciones en la documentación:",
-    "Enable external transcoder (go-vod)" : "Habilitar el transcodificador externo (go-vod)",
     "Binary path (local only)" : "Ruta binaria (sólo local)",
     "Bind address (local only)" : "Dirección de asociación (sólo local)",
     "Connection address (same as bind if local)" : "Dirección de conexión (igual a la de asociación si es local)",
