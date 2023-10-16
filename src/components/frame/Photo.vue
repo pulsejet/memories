@@ -124,7 +124,7 @@ export default defineComponent({
     this.faceSrc = null;
 
     // Setup video hooks
-    const video = this.refs().video;
+    const video = this.refs.video;
     if (video) {
       utils.setupLivePhotoHooks(video);
     }
@@ -141,6 +141,13 @@ export default defineComponent({
   },
 
   computed: {
+    refs() {
+      return this.$refs as {
+        ximg?: InstanceType<typeof XImg> & { $el: HTMLImageElement };
+        video?: HTMLVideoElement;
+      };
+    },
+
     videoDuration(): string | null {
       if (this.data.video_duration) {
         return utils.getDurationStr(this.data.video_duration);
@@ -171,13 +178,6 @@ export default defineComponent({
   },
 
   methods: {
-    refs() {
-      return this.$refs as {
-        ximg?: InstanceType<typeof XImg> & { $el: HTMLImageElement };
-        video?: HTMLVideoElement;
-      };
-    },
-
     /** Get url of the photo */
     url() {
       let base: 256 | 512 = 256;
@@ -202,7 +202,7 @@ export default defineComponent({
     async addFaceRect() {
       if (!this.data.facerect || this.faceSrc) return;
 
-      const img = this.refs().ximg?.$el;
+      const img = this.refs.ximg?.$el;
       if (!img) return;
 
       // This is a hack to check if img is actually loaded.
@@ -255,7 +255,7 @@ export default defineComponent({
 
     /** Start preview video */
     playVideo() {
-      const video = this.refs().video;
+      const video = this.refs.video;
       if (video && !(this.data.flag & this.c.FLAG_SELECTED)) {
         video.currentTime = 0;
         video.play();
@@ -264,7 +264,7 @@ export default defineComponent({
 
     /** Stop preview video */
     stopVideo() {
-      this.refs().video?.pause();
+      this.refs.video?.pause();
     },
   },
 });

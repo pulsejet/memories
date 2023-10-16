@@ -75,6 +75,12 @@ export default defineComponent({
   },
 
   computed: {
+    refs() {
+      return this.$refs as {
+        recycler: VueRecyclerType;
+      };
+    },
+
     /** Height of the cluster */
     height() {
       if (this.routeIsAlbums) {
@@ -129,12 +135,6 @@ export default defineComponent({
   },
 
   methods: {
-    refs() {
-      return this.$refs as {
-        recycler: VueRecyclerType;
-      };
-    },
-
     click(item: ICluster) {
       switch (item.cluster_type) {
         case 'plus':
@@ -146,7 +146,7 @@ export default defineComponent({
     },
 
     resize() {
-      this.recyclerWidth = this.refs().recycler?.$el.clientWidth;
+      this.recyclerWidth = this.refs.recycler?.$el.clientWidth;
     },
   },
 });

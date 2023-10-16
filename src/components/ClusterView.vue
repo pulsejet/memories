@@ -50,6 +50,12 @@ export default defineComponent({
   }),
 
   computed: {
+    refs() {
+      return this.$refs as {
+        dtm?: InstanceType<typeof DynamicTopMatter>;
+      };
+    },
+
     noParams() {
       return !this.$route.params.name && !this.$route.params.user;
     },
@@ -82,19 +88,13 @@ export default defineComponent({
   },
 
   methods: {
-    refs() {
-      return this.$refs as {
-        dtm?: InstanceType<typeof DynamicTopMatter>;
-      };
-    },
-
     async routeChange() {
       try {
         this.items = [];
         this.loading++;
 
         await this.$nextTick();
-        await this.refs().dtm?.refresh?.();
+        await this.refs.dtm?.refresh?.();
 
         if (this.routeIsAlbums) {
           this.items = await dav.getAlbums(this.config.album_list_sort);

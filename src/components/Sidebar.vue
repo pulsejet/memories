@@ -47,6 +47,12 @@ export default defineComponent({
   },
 
   computed: {
+    refs() {
+      return this.$refs as {
+        metadata?: InstanceType<typeof Metadata>;
+      };
+    },
+
     native() {
       return globalThis.OCA?.Files?.Sidebar;
     },
@@ -91,12 +97,6 @@ export default defineComponent({
   },
 
   methods: {
-    refs() {
-      return this.$refs as {
-        metadata?: InstanceType<typeof Metadata>;
-      };
-    },
-
     async open(photo: IPhoto | number, filename?: string, useNative = false) {
       if (!this.reducedOpen && this.native && (!photo || useNative)) {
         // Open native sidebar
@@ -108,7 +108,7 @@ export default defineComponent({
         await this.$nextTick();
 
         // Update metadata compoenent
-        const info = await this.refs().metadata?.update(photo);
+        const info = await this.refs.metadata?.update(photo);
         if (!info) return; // failure or state change
         this.basename = info.basename;
         this.handleOpen();

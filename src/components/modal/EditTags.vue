@@ -45,17 +45,19 @@ export default defineComponent({
     newTags: new Map<number, dav.ITag>(),
   }),
 
-  mounted() {
-    this.init();
-  },
-
-  methods: {
+  computed: {
     refs() {
       return this.$refs as {
         selectTags: VueNcSelectTags;
       };
     },
+  },
 
+  mounted() {
+    this.init();
+  },
+
+  methods: {
     init() {
       let tagIds: number[] | null = null;
 
@@ -99,7 +101,7 @@ export default defineComponent({
 
     getAvailable(): dav.ITag[] {
       // FIXME: this is extremely fragile
-      return this.refs().selectTags.availableTags;
+      return this.refs.selectTags.availableTags;
     },
 
     handleCreate(newTag: dav.ITag) {

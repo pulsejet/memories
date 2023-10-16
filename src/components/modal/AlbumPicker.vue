@@ -145,6 +145,12 @@ export default defineComponent({
   },
 
   computed: {
+    refs() {
+      return this.$refs as {
+        albumsList?: VueHTMLComponent;
+      };
+    },
+
     filteredList() {
       if (!this.albums || !this.search || !this.fuse) return this.albums || [];
       return this.fuse.search(this.search).map((r) => r.item);
@@ -152,12 +158,6 @@ export default defineComponent({
   },
 
   methods: {
-    refs() {
-      return this.$refs as {
-        albumsList?: VueHTMLComponent;
-      };
-    },
-
     async albumCreatedHandler({ album }: { album: { basename: string } }) {
       this.showAlbumCreationForm = false;
       await this.loadAlbums(true);
@@ -233,7 +233,7 @@ export default defineComponent({
 
     forceUpdate() {
       this.$forceUpdate(); // sets do not trigger reactivity
-      this.refs().albumsList?.$forceUpdate();
+      this.refs.albumsList?.$forceUpdate();
     },
   },
 });

@@ -136,6 +136,14 @@ export default defineComponent({
   }),
 
   computed: {
+    refs() {
+      return this.$refs as {
+        scroller?: HTMLDivElement;
+        cursorSt?: HTMLSpanElement;
+        hoverCursor?: HTMLSpanElement;
+      };
+    },
+
     /** Get the visible ticks */
     visibleTicks(): ITick[] {
       let key = 9999999900;
@@ -168,14 +176,6 @@ export default defineComponent({
   },
 
   methods: {
-    refs() {
-      return this.$refs as {
-        scroller?: HTMLDivElement;
-        cursorSt?: HTMLSpanElement;
-        hoverCursor?: HTMLSpanElement;
-      };
-    },
-
     /** Reset state */
     reset() {
       this.ticks = [];
@@ -237,7 +237,7 @@ export default defineComponent({
 
       // Move hover cursor to same position unless hovering
       // Regardless, we need this call because the internal mapping might have changed
-      if (!utils.isMobile() && this.refs().scroller?.matches(':hover')) {
+      if (!utils.isMobile() && this.refs.scroller?.matches(':hover')) {
         this.moveHoverCursor(this.hoverCursorY);
       } else {
         this.moveHoverCursor(rtop);
@@ -330,7 +330,7 @@ export default defineComponent({
       this.dynTopMatterHeight = this.recyclerBefore?.clientHeight ?? 0;
 
       // Exclude hover cursor height
-      const hoverCursor = this.refs().hoverCursor;
+      const hoverCursor = this.refs.hoverCursor;
       this.topPadding = hoverCursor?.offsetHeight ?? 0;
 
       // Add extra padding for any top elements (top matter, mobile header)
@@ -386,12 +386,12 @@ export default defineComponent({
     /** Mark ticks as visible or invisible */
     computeVisibleTicks() {
       // Kind of unrelated here, but refresh rect
-      this.scrollerRect = this.refs().scroller!.getBoundingClientRect();
+      this.scrollerRect = this.refs.scroller!.getBoundingClientRect();
 
       // Do another pass to figure out which points are visible
       // This is not as bad as it looks, it's actually 12*O(n)
       // because there are only 12 months in a year
-      const fontSizePx = parseFloat(getComputedStyle(this.refs().cursorSt!).fontSize);
+      const fontSizePx = parseFloat(getComputedStyle(this.refs.cursorSt!).fontSize);
       const minGap = fontSizePx + (_m.window.innerWidth <= 768 ? 5 : 2);
       let prevShow = -9999;
       for (const [idx, tick] of this.ticks.entries()) {

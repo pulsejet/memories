@@ -54,6 +54,12 @@ export default defineComponent({
   }),
 
   computed: {
+    refs() {
+      return this.$refs as {
+        editor?: HTMLDivElement;
+      };
+    },
+
     config(): FilerobotImageEditorConfig & { theme: any } {
       return {
         source:
@@ -173,7 +179,7 @@ export default defineComponent({
   async mounted() {
     await loadFilerobot();
 
-    const div = this.refs().editor!;
+    const div = this.refs.editor!;
     console.assert(div, 'ImageEditor container not found');
 
     // Directly use an HTML element to make sure the resolution
@@ -197,12 +203,6 @@ export default defineComponent({
   },
 
   methods: {
-    refs() {
-      return this.$refs as {
-        editor?: HTMLDivElement;
-      };
-    },
-
     async getImage(): Promise<HTMLImageElement> {
       const img = new Image();
       img.name = this.defaultSavedImageName;

@@ -206,6 +206,12 @@ export default defineComponent({
   }),
 
   computed: {
+    refs() {
+      return this.$refs as {
+        popover?: VueNcPopover;
+      };
+    },
+
     searchResults(): string[] {
       return this.currentSearchResults
         .filter(({ id }) => id !== utils.uid)
@@ -243,18 +249,12 @@ export default defineComponent({
   },
 
   methods: {
-    refs() {
-      return this.$refs as {
-        popover?: VueNcPopover;
-      };
-    },
-
     /**
      * Fetch possible collaborators.
      */
     async searchCollaborators() {
       if (this.searchText.length >= 1) {
-        this.refs().popover?.$refs.popover.show();
+        this.refs.popover?.$refs.popover.show();
       }
 
       try {
@@ -405,7 +405,7 @@ export default defineComponent({
         return;
       }
 
-      this.refs().popover?.$refs.popover.hide();
+      this.refs.popover?.$refs.popover.hide();
       this.selectedCollaboratorsKeys.push(collaboratorKey);
     },
 

@@ -28,6 +28,12 @@ export default defineComponent({
   },
 
   computed: {
+    refs() {
+      return this.$refs as {
+        child?: { refresh?(): Promise<boolean> };
+      };
+    },
+
     currentmatter(): Component | null {
       if (this.routeIsFolders) {
         return FolderDynamicTopMatter;
@@ -62,16 +68,10 @@ export default defineComponent({
   },
 
   methods: {
-    refs() {
-      return this.$refs as {
-        child?: { refresh?(): Promise<boolean> };
-      };
-    },
-
     async refresh(): Promise<boolean> {
       if (this.currentmatter) {
         await this.$nextTick();
-        return (await this.refs().child?.refresh?.()) ?? false;
+        return (await this.refs.child?.refresh?.()) ?? false;
       }
 
       return false;

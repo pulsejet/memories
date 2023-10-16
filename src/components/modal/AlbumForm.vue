@@ -139,6 +139,12 @@ export default defineComponent({
   }),
 
   computed: {
+    refs() {
+      return this.$refs as {
+        nameInput?: VueHTMLComponent;
+      };
+    },
+
     /**
      * @return Whether sharing is enabled.
      */
@@ -164,17 +170,11 @@ export default defineComponent({
       this.albumLocation = this.album.location;
     }
     this.$nextTick(() => {
-      this.refs().nameInput?.$el.getElementsByTagName('input')[0].focus();
+      this.refs.nameInput?.$el.getElementsByTagName('input')[0].focus();
     });
   },
 
   methods: {
-    refs() {
-      return this.$refs as {
-        nameInput?: VueHTMLComponent;
-      };
-    },
-
     submit(collaborators: any[] = []) {
       if (this.albumName === '' || this.loading) {
         return;

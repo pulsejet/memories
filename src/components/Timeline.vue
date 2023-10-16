@@ -32,7 +32,7 @@
           <div class="mobile-header-top-gap"></div>
 
           <!-- Route-specific top matter -->
-          <DynamicTopMatter ref="dtm" @load="refs().scrollerManager.adjust()" />
+          <DynamicTopMatter ref="dtm" @load="refs.scrollerManager.adjust()" />
         </div>
       </template>
 
@@ -41,7 +41,7 @@
           v-if="item.type === 0"
           :item="item"
           :monthView="isMonthView"
-          @click="refs().selectionManager.selectHead(item)"
+          @click="refs.selectionManager.selectHead(item)"
         />
 
         <template v-else>
@@ -56,11 +56,11 @@
             }"
             :data="photo"
             :day="item.day"
-            @select="refs().selectionManager.clickSelectionIcon(photo, $event, index)"
-            @pointerdown="refs().selectionManager.clickPhoto(photo, $event, index)"
-            @touchstart="refs().selectionManager.touchstartPhoto(photo, $event, index)"
-            @touchend="refs().selectionManager.touchendPhoto(photo, $event, index)"
-            @touchmove="refs().selectionManager.touchmovePhoto(photo, $event, index)"
+            @select="refs.selectionManager.clickSelectionIcon(photo, $event, index)"
+            @pointerdown="refs.selectionManager.clickPhoto(photo, $event, index)"
+            @touchstart="refs.selectionManager.touchstartPhoto(photo, $event, index)"
+            @touchend="refs.selectionManager.touchendPhoto(photo, $event, index)"
+            @touchmove="refs.selectionManager.touchmovePhoto(photo, $event, index)"
           />
         </template>
       </template>
@@ -72,8 +72,8 @@
       v-show="!showEmpty"
       :rows="list"
       :fullHeight="scrollerHeight"
-      :recycler="refs().recycler"
-      :recyclerBefore="refs().recyclerBefore"
+      :recycler="refs.recycler"
+      :recyclerBefore="refs.recyclerBefore"
       @interactend="loadScrollView()"
     />
 
@@ -82,7 +82,7 @@
       :heads="heads"
       :rows="list"
       :isreverse="isMonthView"
-      :recycler="refs().recycler?.$el"
+      :recycler="refs.recycler?.$el"
       @updateLoading="updateLoading"
     />
   </div>
@@ -217,6 +217,18 @@ export default defineComponent({
   },
 
   computed: {
+    refs() {
+      return this.$refs as {
+        container?: HTMLDivElement;
+        topmatter?: InstanceType<typeof TopMatter>;
+        dtm?: InstanceType<typeof DynamicTopMatter>;
+        recycler?: VueRecyclerType;
+        recyclerBefore?: HTMLDivElement;
+        selectionManager: InstanceType<typeof SelectionManager>;
+        scrollerManager: InstanceType<typeof ScrollerManager>;
+      };
+    },
+
     routeHasNative(): boolean {
       return this.routeIsBase && nativex.has();
     },
@@ -242,18 +254,6 @@ export default defineComponent({
   },
 
   methods: {
-    refs() {
-      return this.$refs as {
-        container?: HTMLDivElement;
-        topmatter?: InstanceType<typeof TopMatter>;
-        dtm?: InstanceType<typeof DynamicTopMatter>;
-        recycler?: VueRecyclerType;
-        recyclerBefore?: HTMLDivElement;
-        selectionManager: InstanceType<typeof SelectionManager>;
-        scrollerManager: InstanceType<typeof ScrollerManager>;
-      };
-    },
-
     async routeChange(to: Route, from?: Route) {
       // Always do a hard refresh if the path changes
       if (from?.path !== to.path) {
@@ -295,7 +295,7 @@ export default defineComponent({
         if (!from) {
           const index = this.list.findIndex((r) => r.day.dayid === dayid && r.photos?.includes(photo));
           if (index !== -1) {
-            this.refs().recycler?.scrollToItem(index);
+            this.refs.recycler?.scrollToItem(index);
           }
         }
 
@@ -331,7 +331,7 @@ export default defineComponent({
       this.recomputeSizes();
 
       // Timeline recycler init
-      this.refs().recycler?.$el.addEventListener('scroll', this.scrollPositionChange, { passive: true });
+      this.refs.recycler?.$el.addEventListener('scroll', this.scrollPositionChange, { passive: true });
 
       // Get data
       await this.fetchDays();
@@ -339,8 +339,8 @@ export default defineComponent({
 
     /** Reset all state */
     async resetState() {
-      this.refs().selectionManager.clearSelection();
-      this.refs().scrollerManager.reset();
+      this.refs.selectionManager.clearSelection();
+      this.refs.scrollerManager.reset();
       this.loading = 0;
       this.list = [];
       this.dtmContent = false;
@@ -375,7 +375,7 @@ export default defineComponent({
      * Do not pass this function as a callback directly.
      */
     async softRefreshInternal(sync: boolean) {
-      this.refs().selectionManager.clearSelection();
+      this.refs.selectionManager.clearSelection();
       this.fetchDayQueue = []; // reset queue
 
       // Fetch days
@@ -394,7 +394,7 @@ export default defineComponent({
     /** Recompute static sizes of containers */
     recomputeSizes() {
       // Size of outer container
-      const e = this.refs().container!;
+      const e = this.refs.container!;
       const height = e.clientHeight;
       const width = e.clientWidth;
       this.containerSize = [width, height];
@@ -403,11 +403,11 @@ export default defineComponent({
       this.scrollerHeight = height;
 
       // Static top matter to exclude from recycler height
-      const topmatter = this.refs().topmatter;
+      const topmatter = this.refs.topmatter;
       const tmHeight = topmatter?.$el?.clientHeight || 0;
 
       // Recycler height
-      const recycler = this.refs().recycler!;
+      const recycler = this.refs.recycler!;
       const targetHeight = height - tmHeight - 4;
       const targetWidth = this.isMobile() ? width : width - 40;
       const heightChanged = recycler.$el.clientHeight !== targetHeight;
@@ -449,7 +449,7 @@ export default defineComponent({
         // At this point we're sure the size has changed, so we need
         // to invalidate everything related to sizes
         this.sizedDays.clear();
-        this.refs().scrollerManager.adjust();
+        this.refs.scrollerManager.adjust();
 
         // Explicitly request a scroll event
         this.loadScrollView();
@@ -462,7 +462,7 @@ export default defineComponent({
      * the pixel position of the recycler has changed.
      */
     scrollPositionChange(event?: Event) {
-      this.refs().scrollerManager.recyclerScrolled(event ?? null);
+      this.refs.scrollerManager.recyclerScrolled(event ?? null);
     },
 
     /** Trigger when recycler view changes (for callback) */
@@ -508,7 +508,7 @@ export default defineComponent({
       }
 
       // We only need to debounce loads if the user is dragging the scrollbar
-      const scrolling = this.refs().scrollerManager.interacting;
+      const scrolling = this.refs.scrollerManager.interacting;
 
       // Make sure we don't do this too often
       this.currentStart = startIndex;
@@ -663,7 +663,7 @@ export default defineComponent({
       try {
         this.updateLoading(1);
         const state = this.state;
-        const res = await this.refs().dtm?.refresh();
+        const res = await this.refs.dtm?.refresh();
         if (this.state !== state) return;
         this.dtmContent = res ?? false;
       } finally {
@@ -853,7 +853,7 @@ export default defineComponent({
       });
 
       // Fix view height variable
-      await this.refs().scrollerManager.reflow();
+      await this.refs.scrollerManager.reflow();
       this.scrollPositionChange();
 
       // Trigger a view refresh. This will load any new placeholders too.
@@ -1090,7 +1090,7 @@ export default defineComponent({
       let addedRows: IRow[] = [];
 
       // Recycler scroll top
-      let scrollTop = this.refs().recycler!.$el.scrollTop;
+      let scrollTop = this.refs.recycler!.$el.scrollTop;
       let needAdjust = false;
 
       // Get index and Y position of header in O(n)
@@ -1209,7 +1209,7 @@ export default defineComponent({
       }
 
       // Restore selection day
-      this.refs().selectionManager.restoreDay(day);
+      this.refs.selectionManager.restoreDay(day);
 
       // Rows that were removed
       const removedRows: IRow[] = [];
@@ -1251,14 +1251,14 @@ export default defineComponent({
         if (headRemoved) {
           // If the head was removed, we need a reflow,
           // or adjust isn't going to work right
-          this.refs().scrollerManager.reflow();
+          this.refs.scrollerManager.reflow();
         } else {
           // Otherwise just adjust the ticks
-          this.refs().scrollerManager.adjust();
+          this.refs.scrollerManager.adjust();
         }
 
         // Scroll to new position
-        this.refs().recycler!.$el.scrollTop = scrollTop;
+        this.refs.recycler!.$el.scrollTop = scrollTop;
       }
     },
 
@@ -1311,7 +1311,7 @@ export default defineComponent({
       await new Promise((resolve) => setTimeout(resolve, 200));
 
       // clear selection at this point
-      this.refs().selectionManager.clearSelection(delPhotos);
+      this.refs.selectionManager.clearSelection(delPhotos);
 
       // Reflow all touched days
       for (const day of updatedDays) {

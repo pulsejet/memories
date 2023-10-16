@@ -308,6 +308,12 @@ export default defineComponent({
   },
 
   computed: {
+    refs() {
+      return this.$refs as {
+        inner: HTMLDivElement;
+      };
+    },
+
     /** Number of buttons to show inline */
     numInlineActions(): number {
       let base = 3;
@@ -388,12 +394,6 @@ export default defineComponent({
   },
 
   methods: {
-    refs() {
-      return this.$refs as {
-        inner: HTMLDivElement;
-      };
-    },
-
     fetchDay(dayId: number) {
       utils.bus.emit('memories:timeline:fetch-day', dayId);
     },
@@ -462,7 +462,7 @@ export default defineComponent({
         loop: false,
         wheelToZoom: true,
         bgOpacity: 1,
-        appendToEl: this.refs().inner!,
+        appendToEl: this.refs.inner!,
         preload: [2, 2],
         bgClickAction: 'toggle-controls',
 
