@@ -7,7 +7,6 @@
     app-name="memories"
     v-else-if="!isConfigUnknown"
     :class="{
-      'remove-gap': removeOuterGap,
       'has-nav': showNavigation,
     }"
   >
@@ -164,11 +163,6 @@ export default defineComponent({
   }),
 
   computed: {
-    ncVersion(): number {
-      const version = (<any>window.OC).config.version.split('.');
-      return Number(version[0]);
-    },
-
     native(): boolean {
       return nativex.has();
     },
@@ -211,10 +205,6 @@ export default defineComponent({
 
     showAlbums(): boolean {
       return this.config.albums_enabled;
-    },
-
-    removeOuterGap(): boolean {
-      return this.ncVersion >= 25;
     },
 
     showNavigation(): boolean {

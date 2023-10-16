@@ -8,7 +8,7 @@ body {
 }
 
 // Nextcloud 25+: get rid of gap and border radius at right
-#content-vue.remove-gap {
+#content-vue {
   // was var(--body-container-radius)
   // now set on #app-navigation-vue
   border-radius: 0;
