@@ -30,7 +30,7 @@ type PsVideoEvent = PsEvent & {
  * Check if slide has video content
  */
 export function isVideoContent(content: unknown): content is VideoContent {
-  return typeof content === 'object' && (<any>content)?.['data']?.['type'] === 'video';
+  return typeof content === 'object' && (<VideoContent>content)?.data?.type === 'video';
 }
 
 class VideoContentSetup {

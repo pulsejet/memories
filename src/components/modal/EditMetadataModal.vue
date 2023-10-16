@@ -49,7 +49,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { IExif, IPhoto } from '../../types';
+import { IExif, IImageInfo, IPhoto } from '../../types';
 
 import UserConfig from '../../mixins/UserConfig';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
@@ -123,7 +123,7 @@ export default defineComponent({
       const calls = photos.map((p) => async () => {
         try {
           const url = API.Q(API.IMAGE_INFO(p.fileid), { tags: 1 });
-          const res = await axios.get<any>(url);
+          const res = await axios.get<IImageInfo>(url);
           p.datetaken = res.data.datetaken;
           p.imageInfo = res.data;
         } catch (error) {
@@ -244,13 +244,13 @@ export default defineComponent({
           // Update EXIF if required
           const raw = exifs.get(fileid) ?? {};
           if (Object.keys(raw).length > 0) {
-            await axios.patch<any>(API.IMAGE_SETEXIF(fileid), { raw });
+            await axios.patch<null>(API.IMAGE_SETEXIF(fileid), { raw });
             dirty = true;
           }
 
           // Update tags if required
           if (tagsResult) {
-            await axios.patch<any>(API.TAG_SET(fileid), tagsResult);
+            await axios.patch<null>(API.TAG_SET(fileid), tagsResult);
             dirty = true;
           }
         } catch (e) {
