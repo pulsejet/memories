@@ -5,18 +5,8 @@ on:
   - pull_request
 
 jobs:
-  php-cs-fixer:
-    name: PHP-CS-Fixer
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: PHP-CS-Fixer
-        uses: docker://oskarstark/php-cs-fixer-ga
-        with:
-          args: --dry-run --diff lib
-
-  pslam:
-    name: Psalm
+  php-lint:
+    name: PHP Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout server
@@ -39,13 +29,22 @@ jobs:
           extensions: mbstring, iconv, fileinfo, intl
           coverage: none
 
-      - name: Run Psalm
+      - name: Install dependencies
+        working-directory: apps/memories
         run: |
-          cd apps/memories
           make install-tools
+
+      - name: Run Psalm
+        working-directory: apps/memories
+        run: |
           vendor/bin/psalm --no-cache --shepherd --stats --threads=4 lib
 
-  vue-tsc-prettier:
+      - name: Run PHP-CS-Fixer
+        working-directory: apps/memories
+        run: |
+          vendor/bin/php-cs-fixer fix --dry-run --diff lib
+
+  vue-lint:
     name: Vue Lint
     runs-on: ubuntu-latest
     steps:
