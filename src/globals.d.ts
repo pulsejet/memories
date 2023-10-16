@@ -8,6 +8,7 @@ import type videojsType from 'video.js';
 
 import type { IPhoto, IRow } from './types';
 import type { c, initState } from './services/utils';
+import type { GlobalRouteCheckers } from './router';
 
 // Global exposed variables
 declare global {
@@ -96,29 +97,12 @@ declare global {
 
 // GlobalMixin.ts types, present on all components
 declare module 'vue' {
-  interface ComponentCustomProperties {
+  interface ComponentCustomProperties extends GlobalRouteCheckers {
     t: typeof translate;
     n: typeof translatePlural;
 
     c: typeof c;
     initState: typeof initState;
-
-    routeIsBase: boolean;
-    routeIsFavorites: boolean;
-    routeIsVideos: boolean;
-    routeIsFolders: boolean;
-    routeIsAlbums: boolean;
-    routeIsPeople: boolean;
-    routeIsRecognize: boolean;
-    routeIsRecognizeUnassigned: boolean;
-    routeIsFaceRecognition: boolean;
-    routeIsArchive: boolean;
-    routeIsPlaces: boolean;
-    routeIsMap: boolean;
-    routeIsTags: boolean;
-    routeIsExplore: boolean;
-    routeIsAlbumShare: boolean;
-    routeIsPublic: boolean;
   }
 }
 

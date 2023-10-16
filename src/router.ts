@@ -1,12 +1,149 @@
+import Router, { Route, RouteConfig } from 'vue-router';
+import Vue from 'vue';
+
 import { generateUrl } from '@nextcloud/router';
 import { translate as t } from '@nextcloud/l10n';
-import Router from 'vue-router';
-import Vue from 'vue';
+
 import Timeline from './components/Timeline.vue';
 import Explore from './components/Explore.vue';
 import SplitTimeline from './components/SplitTimeline.vue';
 import ClusterView from './components/ClusterView.vue';
 import NativeXSetup from './native/Setup.vue';
+
+import { c } from './services/utils';
+
+// Routes are defined here
+export type RouteId =
+  | 'Base'
+  | 'Folders'
+  | 'Favorites'
+  | 'Videos'
+  | 'Albums'
+  | 'Archive'
+  | 'ThisDay'
+  | 'Recognize'
+  | 'FaceRecognition'
+  | 'Places'
+  | 'Tags'
+  | 'FolderShare'
+  | 'AlbumShare'
+  | 'Map'
+  | 'Explore'
+  | 'NxSetup';
+
+const routes: { [key in RouteId]: RouteConfig } = {
+  Base: {
+    path: '/',
+    component: Timeline,
+    name: 'timeline',
+    props: (route: Route) => ({ rootTitle: t('memories', 'Timeline') }),
+  },
+
+  Folders: {
+    path: '/folders/:path*',
+    component: Timeline,
+    name: 'folders',
+    props: (route: Route) => ({ rootTitle: t('memories', 'Folders') }),
+  },
+
+  Favorites: {
+    path: '/favorites',
+    component: Timeline,
+    name: 'favorites',
+    props: (route: Route) => ({ rootTitle: t('memories', 'Favorites') }),
+  },
+
+  Videos: {
+    path: '/videos',
+    component: Timeline,
+    name: 'videos',
+    props: (route: Route) => ({ rootTitle: t('memories', 'Videos') }),
+  },
+
+  Albums: {
+    path: '/albums/:user?/:name?',
+    component: ClusterView,
+    name: 'albums',
+    props: (route: Route) => ({ rootTitle: t('memories', 'Albums') }),
+  },
+
+  Archive: {
+    path: '/archive',
+    component: Timeline,
+    name: 'archive',
+    props: (route: Route) => ({ rootTitle: t('memories', 'Archive') }),
+  },
+
+  ThisDay: {
+    path: '/thisday',
+    component: Timeline,
+    name: 'thisday',
+    props: (route: Route) => ({ rootTitle: t('memories', 'On this day') }),
+  },
+
+  Recognize: {
+    path: '/recognize/:user?/:name?',
+    component: ClusterView,
+    name: 'recognize',
+    props: (route: Route) => ({ rootTitle: t('memories', 'People') }),
+  },
+
+  FaceRecognition: {
+    path: '/facerecognition/:user?/:name?',
+    component: ClusterView,
+    name: 'facerecognition',
+    props: (route: Route) => ({ rootTitle: t('memories', 'People') }),
+  },
+
+  Places: {
+    path: '/places/:name*',
+    component: ClusterView,
+    name: 'places',
+    props: (route: Route) => ({ rootTitle: t('memories', 'Places') }),
+  },
+
+  Tags: {
+    path: '/tags/:name*',
+    component: ClusterView,
+    name: 'tags',
+    props: (route: Route) => ({ rootTitle: t('memories', 'Tags') }),
+  },
+
+  FolderShare: {
+    path: '/s/:token',
+    component: Timeline,
+    name: 'folder-share',
+    props: (route: Route) => ({ rootTitle: t('memories', 'Shared Folder') }),
+  },
+
+  AlbumShare: {
+    path: '/a/:token',
+    component: Timeline,
+    name: 'album-share',
+    props: (route: Route) => ({ rootTitle: t('memories', 'Shared Album') }),
+  },
+
+  Map: {
+    path: '/map',
+    component: SplitTimeline,
+    name: 'map',
+    props: (route: Route) => ({ rootTitle: t('memories', 'Map') }),
+  },
+
+  Explore: {
+    path: '/explore',
+    component: Explore,
+    name: 'explore',
+    props: (route: Route) => ({ rootTitle: t('memories', 'Explore') }),
+  },
+
+  NxSetup: {
+    path: '/nxsetup',
+    component: NativeXSetup,
+    name: 'nxsetup',
+    props: (route: Route) => ({ rootTitle: t('memories', 'Setup') }),
+  },
+};
 
 Vue.use(Router);
 
@@ -16,149 +153,38 @@ export default new Router({
   // let's keep using index.php in the url
   base: generateUrl('/apps/memories'),
   linkActiveClass: 'active',
-  routes: [
-    {
-      path: '/',
-      component: Timeline,
-      name: 'timeline',
-      props: (route) => ({
-        rootTitle: t('memories', 'Timeline'),
-      }),
-    },
-
-    {
-      path: '/folders/:path*',
-      component: Timeline,
-      name: 'folders',
-      props: (route) => ({
-        rootTitle: t('memories', 'Folders'),
-      }),
-    },
-
-    {
-      path: '/favorites',
-      component: Timeline,
-      name: 'favorites',
-      props: (route) => ({
-        rootTitle: t('memories', 'Favorites'),
-      }),
-    },
-
-    {
-      path: '/videos',
-      component: Timeline,
-      name: 'videos',
-      props: (route) => ({
-        rootTitle: t('memories', 'Videos'),
-      }),
-    },
-
-    {
-      path: '/albums/:user?/:name?',
-      component: ClusterView,
-      name: 'albums',
-      props: (route) => ({
-        rootTitle: t('memories', 'Albums'),
-      }),
-    },
-
-    {
-      path: '/archive',
-      component: Timeline,
-      name: 'archive',
-      props: (route) => ({
-        rootTitle: t('memories', 'Archive'),
-      }),
-    },
-
-    {
-      path: '/thisday',
-      component: Timeline,
-      name: 'thisday',
-      props: (route) => ({
-        rootTitle: t('memories', 'On this day'),
-      }),
-    },
-
-    {
-      path: '/recognize/:user?/:name?',
-      component: ClusterView,
-      name: 'recognize',
-      props: (route) => ({
-        rootTitle: t('memories', 'People'),
-      }),
-    },
-
-    {
-      path: '/facerecognition/:user?/:name?',
-      component: ClusterView,
-      name: 'facerecognition',
-      props: (route) => ({
-        rootTitle: t('memories', 'People'),
-      }),
-    },
-
-    {
-      path: '/places/:name*',
-      component: ClusterView,
-      name: 'places',
-      props: (route) => ({
-        rootTitle: t('memories', 'Places'),
-      }),
-    },
-
-    {
-      path: '/tags/:name*',
-      component: ClusterView,
-      name: 'tags',
-      props: (route) => ({
-        rootTitle: t('memories', 'Tags'),
-      }),
-    },
-
-    {
-      path: '/s/:token',
-      component: Timeline,
-      name: 'folder-share',
-      props: (route) => ({
-        rootTitle: t('memories', 'Shared Folder'),
-      }),
-    },
-
-    {
-      path: '/a/:token',
-      component: Timeline,
-      name: 'album-share',
-      props: (route) => ({
-        rootTitle: t('memories', 'Shared Album'),
-      }),
-    },
-
-    {
-      path: '/map',
-      component: SplitTimeline,
-      name: 'map',
-      props: (route) => ({
-        rootTitle: t('memories', 'Map'),
-      }),
-    },
-
-    {
-      path: '/explore',
-      component: Explore,
-      name: 'explore',
-      props: (route) => ({
-        rootTitle: t('memories', 'Explore'),
-      }),
-    },
-
-    {
-      path: '/nxsetup',
-      component: NativeXSetup,
-      name: 'nxsetup',
-      props: (route) => ({
-        rootTitle: t('memories', 'Setup'),
-      }),
-    },
-  ],
+  routes: Object.values(routes),
 });
+
+// Define global route checkers
+// Injected through globals.d.ts
+export type GlobalRouteCheckers = {
+  [key in `routeIs${RouteId}`]: boolean;
+} & {
+  // Extra, special route checkers
+  routeIsPublic: boolean;
+  routeIsPeople: boolean;
+  routeIsRecognizeUnassigned: boolean;
+};
+
+// Implement getters for route checkers
+function defineRouteChecker(key: keyof GlobalRouteCheckers, condition: (route?: Route) => boolean) {
+  Object.defineProperty(Vue.prototype, key, {
+    get() {
+      return condition(this.$route);
+    },
+  });
+}
+
+// Defined routes
+for (const [key, value] of Object.entries(routes)) {
+  defineRouteChecker(`routeIs${<keyof typeof routes>key}`, (route) => route?.name === value.name);
+}
+
+// Extra route checkers
+defineRouteChecker('routeIsPublic', (route) => route?.name?.endsWith('-share') ?? false);
+defineRouteChecker('routeIsPeople', (route) => ['recognize', 'facerecognition'].includes(route?.name ?? ''));
+defineRouteChecker(
+  'routeIsRecognizeUnassigned',
+  (route) => route?.name === 'recognize' && route.params.name === c.FACE_NULL,
+);
