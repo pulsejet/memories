@@ -243,12 +243,18 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        popover?: VueNcPopover;
+      };
+    },
+
     /**
      * Fetch possible collaborators.
      */
     async searchCollaborators() {
       if (this.searchText.length >= 1) {
-        (<any>this.$refs.popover).$refs.popover.show();
+        this.refs().popover?.$refs.popover.show();
       }
 
       try {
@@ -399,7 +405,7 @@ export default defineComponent({
         return;
       }
 
-      (<any>this.$refs.popover).$refs.popover.hide();
+      this.refs().popover?.$refs.popover.hide();
       this.selectedCollaboratorsKeys.push(collaboratorKey);
     },
 

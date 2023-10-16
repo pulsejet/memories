@@ -173,7 +173,8 @@ export default defineComponent({
   async mounted() {
     await loadFilerobot();
 
-    const div = <HTMLElement>this.$refs.editor;
+    const div = this.refs().editor!;
+    console.assert(div, 'ImageEditor container not found');
 
     // Directly use an HTML element to make sure the resolution
     // in the editor matches the original file, but we can work
@@ -196,6 +197,12 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        editor?: HTMLDivElement;
+      };
+    },
+
     async getImage(): Promise<HTMLImageElement> {
       const img = new Image();
       img.name = this.defaultSavedImageName;

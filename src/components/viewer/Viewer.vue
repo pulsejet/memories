@@ -388,6 +388,12 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        inner: HTMLDivElement;
+      };
+    },
+
     fetchDay(dayId: number) {
       utils.bus.emit('memories:timeline:fetch-day', dayId);
     },
@@ -456,7 +462,7 @@ export default defineComponent({
         loop: false,
         wheelToZoom: true,
         bgOpacity: 1,
-        appendToEl: this.$refs.inner as HTMLElement,
+        appendToEl: this.refs().inner!,
         preload: [2, 2],
         bgClickAction: 'toggle-controls',
 

@@ -92,10 +92,8 @@ export default defineComponent({
   }),
 
   mounted() {
-    const map = this.$refs.map as LMap;
-
     // Make sure the zoom control doesn't overlap with the navbar
-    map.mapObject.zoomControl.setPosition('topright');
+    this.refs().map.mapObject.zoomControl.setPosition('topright');
 
     // Initialize
     this.initialize();
@@ -127,6 +125,12 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        map: LMap;
+      };
+    },
+
     /**
      * Get initial coordinates for display and set them.
      * Then fetch clusters.
@@ -150,7 +154,7 @@ export default defineComponent({
         }>(API.MAP_INIT());
 
         // Init data contains position information
-        const map = this.$refs.map as LMap;
+        const map = this.refs().map;
         const pos = init?.data?.pos;
         if (!pos?.lat || !pos?.lon) {
           throw new Error('No position data');
@@ -170,7 +174,7 @@ export default defineComponent({
     },
 
     async refresh() {
-      const map = this.$refs.map as LMap;
+      const map = this.refs().map;
       if (!map || !map.mapObject) return;
 
       // Get boundaries of the map
@@ -271,7 +275,7 @@ export default defineComponent({
     },
 
     setBoundsFromQuery() {
-      const map = this.$refs.map as LMap;
+      const map = this.refs().map;
       const { minLat, maxLat, minLon, maxLon } = this.boundsFromQuery();
       map.mapObject.fitBounds([
         [minLat, minLon],
@@ -299,7 +303,7 @@ export default defineComponent({
       }
 
       // Zoom in
-      const map = this.$refs.map as LMap;
+      const map = this.refs().map;
       const factor = globalThis.innerWidth >= 768 ? 2 : 1;
       const zoom = map.mapObject.getZoom() + factor;
       map.mapObject.setView(cluster.center, zoom, { animate: true });
@@ -399,7 +403,7 @@ export default defineComponent({
     },
 
     handleContainerResize() {
-      (<any>this.$refs.map)?.mapObject?.invalidateSize(true);
+      this.refs().map?.mapObject?.invalidateSize(true);
     },
   },
 });

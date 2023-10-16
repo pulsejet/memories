@@ -50,6 +50,12 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        selectTags: VueNcSelectTags;
+      };
+    },
+
     init() {
       let tagIds: number[] | null = null;
 
@@ -93,7 +99,7 @@ export default defineComponent({
 
     getAvailable(): dav.ITag[] {
       // FIXME: this is extremely fragile
-      return (<any>this.$refs.selectTags).availableTags;
+      return this.refs().selectTags.availableTags;
     },
 
     handleCreate(newTag: dav.ITag) {

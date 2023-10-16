@@ -91,6 +91,12 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        metadata?: InstanceType<typeof Metadata>;
+      };
+    },
+
     async open(photo: IPhoto | number, filename?: string, useNative = false) {
       if (!this.reducedOpen && this.native && (!photo || useNative)) {
         // Open native sidebar
@@ -102,8 +108,7 @@ export default defineComponent({
         await this.$nextTick();
 
         // Update metadata compoenent
-        const m = <any>this.$refs.metadata;
-        const info: IImageInfo = await m?.update(photo);
+        const info = await this.refs().metadata?.update(photo);
         if (!info) return; // failure or state change
         this.basename = info.basename;
         this.handleOpen();

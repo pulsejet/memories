@@ -1,5 +1,8 @@
 import type { Route } from 'vue-router';
+import type { ComponentPublicInstance } from 'vue';
+
 import type { translate, translatePlural } from '@nextcloud/l10n';
+
 import type PlyrType from 'plyr';
 import type videojsType from 'video.js';
 
@@ -66,6 +69,28 @@ declare global {
       innerWidth: number; // cache
       innerHeight: number; // cache
     };
+  };
+
+  // Typings for external libraries below
+  type VueRecyclerType = ComponentPublicInstance & {
+    $el: HTMLDivElement;
+    $refs: {
+      wrapper: HTMLDivElement;
+    };
+    scrollToPosition: (position: number) => void;
+    scrollToItem: (index: number) => void;
+  };
+
+  type VueNcPopover = ComponentPublicInstance & {
+    $refs: { popover: { show(): void; hide(): void } };
+  };
+
+  type VueNcSelectTags = ComponentPublicInstance & {
+    availableTags: any[];
+  };
+
+  type VueHTMLComponent = ComponentPublicInstance & {
+    $el: HTMLElement;
   };
 }
 

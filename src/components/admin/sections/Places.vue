@@ -108,7 +108,7 @@ export default defineComponent({
   },
 
   methods: {
-    async placesSetup(event: Event) {
+    async placesSetup(event: React.FormEvent<HTMLFormElement>) {
       // prevent the submit event
       event.preventDefault();
       event.stopPropagation();

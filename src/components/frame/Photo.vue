@@ -75,6 +75,8 @@ import VideoIcon from 'vue-material-design-icons/PlayCircleOutline.vue';
 import LivePhotoIcon from 'vue-material-design-icons/MotionPlayOutline.vue';
 import LocalIcon from 'vue-material-design-icons/CloudOff.vue';
 
+import type XImg from './XImg.vue';
+
 export default defineComponent({
   name: 'Photo',
   components: {
@@ -122,7 +124,7 @@ export default defineComponent({
     this.faceSrc = null;
 
     // Setup video hooks
-    const video = this.$refs.video as HTMLVideoElement;
+    const video = this.refs().video;
     if (video) {
       utils.setupLivePhotoHooks(video);
     }
@@ -169,6 +171,13 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        ximg?: InstanceType<typeof XImg> & { $el: HTMLImageElement };
+        video?: HTMLVideoElement;
+      };
+    },
+
     /** Get url of the photo */
     url() {
       let base: 256 | 512 = 256;
@@ -193,7 +202,8 @@ export default defineComponent({
     async addFaceRect() {
       if (!this.data.facerect || this.faceSrc) return;
 
-      const img = (this.$refs.ximg as any).$el as HTMLImageElement;
+      const img = this.refs().ximg?.$el;
+      if (!img) return;
 
       // This is a hack to check if img is actually loaded.
       //   XImg loads an empty image, which may sometimes show up here
@@ -245,8 +255,8 @@ export default defineComponent({
 
     /** Start preview video */
     playVideo() {
-      if (this.$refs.video && !(this.data.flag & this.c.FLAG_SELECTED)) {
-        const video = this.$refs.video as HTMLVideoElement;
+      const video = this.refs().video;
+      if (video && !(this.data.flag & this.c.FLAG_SELECTED)) {
         video.currentTime = 0;
         video.play();
       }
@@ -254,10 +264,7 @@ export default defineComponent({
 
     /** Stop preview video */
     stopVideo() {
-      if (this.$refs.video) {
-        const video = this.$refs.video as HTMLVideoElement;
-        video.pause();
-      }
+      this.refs().video?.pause();
     },
   },
 });

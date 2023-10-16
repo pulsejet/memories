@@ -99,6 +99,15 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        editDate?: InstanceType<typeof EditDate>;
+        editTags?: InstanceType<typeof EditTags>;
+        editExif?: InstanceType<typeof EditExif>;
+        editLocation?: InstanceType<typeof EditLocation>;
+      };
+    },
+
     async open(photos: IPhoto[], sections: number[] = [1, 2, 3, 4]) {
       const state = (this.state = Math.random());
       this.show = true;
@@ -150,7 +159,7 @@ export default defineComponent({
     async save() {
       // Perform validation
       try {
-        (<any>this.$refs.editDate)?.validate?.();
+        this.refs().editDate?.validate?.();
       } catch (e) {
         console.error(e);
         showError(e);
@@ -164,14 +173,14 @@ export default defineComponent({
 
       // Get exif fields diff
       const exifResult = {
-        ...((<any>this.$refs.editExif)?.result?.() || {}),
-        ...((<any>this.$refs.editLocation)?.result?.() || {}),
+        ...(this.refs().editExif?.result?.() || {}),
+        ...(this.refs().editLocation?.result?.() || {}),
       };
 
       // Tags may be created which might throw
-      let tagsResult: number[] | null = null;
+      let tagsResult: { add: number[]; remove: number[] } | null = null;
       try {
-        tagsResult = (await (<any>this.$refs.editTags)?.result?.()) || null;
+        tagsResult = (await this.refs().editTags?.result?.()) ?? null;
       } catch (e) {
         this.processing = false;
         console.error(e);
@@ -186,7 +195,7 @@ export default defineComponent({
         const raw: IExif = JSON.parse(JSON.stringify(exifResult));
 
         // Date header
-        const date = (<any>this.$refs.editDate)?.result?.(p);
+        const date = this.refs().editDate?.result?.(p);
         if (date) {
           raw.DateTimeOriginal = date;
           raw.CreateDate = date;

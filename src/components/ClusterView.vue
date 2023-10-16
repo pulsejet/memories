@@ -82,14 +82,19 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        dtm?: InstanceType<typeof DynamicTopMatter>;
+      };
+    },
+
     async routeChange() {
       try {
         this.items = [];
         this.loading++;
 
         await this.$nextTick();
-        // @ts-ignore
-        await this.$refs.dtm?.refresh?.();
+        await this.refs().dtm?.refresh?.();
 
         if (this.routeIsAlbums) {
           this.items = await dav.getAlbums(this.config.album_list_sort);

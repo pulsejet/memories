@@ -227,13 +227,19 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        multiPathModal: InstanceType<typeof MultiPathSelectionModal>;
+      };
+    },
+
     onClose() {
       this.$emit('update:open', false);
     },
 
     // Paths settings
     async chooseTimelinePath() {
-      (<any>this.$refs.multiPathModal).open(this.config.timeline_path.split(';'));
+      this.refs().multiPathModal.open(this.config.timeline_path.split(';'));
     },
 
     async saveTimelinePath(paths: string[]) {

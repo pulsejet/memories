@@ -152,6 +152,12 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        albumsList?: VueHTMLComponent;
+      };
+    },
+
     async albumCreatedHandler({ album }: { album: { basename: string } }) {
       this.showAlbumCreationForm = false;
       await this.loadAlbums(true);
@@ -227,7 +233,7 @@ export default defineComponent({
 
     forceUpdate() {
       this.$forceUpdate(); // sets do not trigger reactivity
-      (<any>this.$refs.albumsList)?.$forceUpdate();
+      this.refs().albumsList?.$forceUpdate();
     },
   },
 });

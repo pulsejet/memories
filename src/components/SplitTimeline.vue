@@ -75,7 +75,7 @@ export default defineComponent({
 
   mounted() {
     // Set up hammerjs hooks
-    this.hammer = new Hammer(this.$refs.timelineHeader as HTMLElement);
+    this.hammer = new Hammer(this.refs().timelineHeader!);
     this.hammer.get('swipe').set({
       direction: Hammer.DIRECTION_VERTICAL,
       threshold: 3,
@@ -90,6 +90,15 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        container?: HTMLDivElement;
+        primary?: HTMLDivElement;
+        separator?: HTMLDivElement;
+        timelineHeader?: HTMLDivElement;
+      };
+    },
+
     isVertical() {
       return false; // for future
     },
@@ -98,13 +107,11 @@ export default defineComponent({
       this.pointerDown = true;
 
       // Get position of primary element
-      const primary = <HTMLDivElement>this.$refs.primary;
-      const rect = primary.getBoundingClientRect();
+      const rect = this.refs().primary!.getBoundingClientRect();
       this.primaryPos = this.isVertical() ? rect.top : rect.left;
 
       // Get size of container element
-      const container = <HTMLDivElement>this.$refs.container;
-      const cRect = container.getBoundingClientRect();
+      const cRect = this.refs().container!.getBoundingClientRect();
       this.containerSize = this.isVertical() ? cRect.height : cRect.width;
 
       // Let touch handle itself
@@ -141,7 +148,7 @@ export default defineComponent({
       const ref = this.isVertical() ? pos.clientY : pos.clientX;
       const newSize = Math.max(ref - this.primaryPos, 50);
       const pctSize = (newSize / this.containerSize) * 100;
-      (<HTMLDivElement>this.$refs.primary).style.flexBasis = `${pctSize}%`;
+      this.refs().primary!.style.flexBasis = `${pctSize}%`;
     },
 
     daysLoaded({ count }: { count: number }) {

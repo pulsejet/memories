@@ -72,7 +72,8 @@ export default defineComponent({
   }),
 
   mounted() {
-    const inner = this.$refs.inner as HTMLElement;
+    const inner = this.refs().inner!;
+
     inner.addEventListener('scroll', this.onScroll.bind(this), {
       passive: true,
     });
@@ -88,6 +89,12 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        inner?: HTMLDivElement;
+      };
+    },
+
     onload() {
       this.$emit('load');
     },
@@ -167,12 +174,12 @@ export default defineComponent({
     },
 
     moveLeft() {
-      const inner = this.$refs.inner as HTMLElement;
+      const inner = this.refs().inner!;
       inner.scrollBy(-(this.scrollStack.pop() || inner.clientWidth), 0);
     },
 
     moveRight() {
-      const inner = this.$refs.inner as HTMLElement;
+      const inner = this.refs().inner!;
       const innerRect = inner.getBoundingClientRect();
       const nextChild = Array.from(inner.children)
         .map((c) => c.getBoundingClientRect())
@@ -185,7 +192,7 @@ export default defineComponent({
     },
 
     onScroll() {
-      const inner = this.$refs.inner as HTMLElement;
+      const inner = this.refs().inner;
       if (!inner) return;
       this.hasLeft = inner.scrollLeft > 0;
       this.hasRight = inner.clientWidth + inner.scrollLeft < inner.scrollWidth - 20;

@@ -129,6 +129,12 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        recycler: VueRecyclerType;
+      };
+    },
+
     click(item: ICluster) {
       switch (item.cluster_type) {
         case 'plus':
@@ -140,7 +146,7 @@ export default defineComponent({
     },
 
     resize() {
-      this.recyclerWidth = (<any>this.$refs.recycler).$el.clientWidth;
+      this.recyclerWidth = this.refs().recycler?.$el.clientWidth;
     },
   },
 });

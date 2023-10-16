@@ -27,7 +27,7 @@
           </NcActionButton>
           <NcActionButton
             :aria-label="t('memories', 'Merge with different person')"
-            @click="$refs.mergeModal?.open()"
+            @click="refs().mergeModal.open()"
             close-after-click
           >
             {{ t('memories', 'Merge with different person') }}
@@ -42,7 +42,7 @@
           </NcActionCheckbox>
           <NcActionButton
             :aria-label="t('memories', 'Remove person')"
-            @click="$refs.deleteModal?.open()"
+            @click="refs().deleteModal.open()"
             close-after-click
           >
             {{ t('memories', 'Remove person') }}
@@ -117,12 +117,20 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        editModal: InstanceType<typeof FaceEditModal>;
+        deleteModal: InstanceType<typeof FaceDeleteModal>;
+        mergeModal: InstanceType<typeof FaceMergeModal>;
+      };
+    },
+
     back() {
       this.$router.go(-1);
     },
 
     rename() {
-      if (this.isReal) (<any>this.$refs.editModal)?.open();
+      if (this.isReal) this.refs().editModal.open();
     },
 
     openUnassigned() {

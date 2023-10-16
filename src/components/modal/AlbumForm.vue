@@ -1,5 +1,5 @@
 <template>
-  <form v-if="!showCollaboratorView" class="album-form" @submit.prevent="submit">
+  <form v-if="!showCollaboratorView" class="album-form" @submit.prevent>
     <div class="form-inputs">
       <NcTextField
         ref="nameInput"
@@ -53,6 +53,7 @@
       </span>
     </div>
   </form>
+
   <AlbumCollaborators
     v-else
     :album-name="albumName"
@@ -163,11 +164,17 @@ export default defineComponent({
       this.albumLocation = this.album.location;
     }
     this.$nextTick(() => {
-      (<any>this.$refs.nameInput)?.$el.getElementsByTagName('input')[0].focus();
+      this.refs().nameInput?.$el.getElementsByTagName('input')[0].focus();
     });
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        nameInput?: VueHTMLComponent;
+      };
+    },
+
     submit(collaborators: any[] = []) {
       if (this.albumName === '' || this.loading) {
         return;
