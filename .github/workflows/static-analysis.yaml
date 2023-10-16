@@ -37,12 +37,12 @@ jobs:
       - name: Run Psalm
         working-directory: apps/memories
         run: |
-          vendor/bin/psalm --no-cache --shepherd --stats --threads=4 lib
+          vendor/bin/psalm --no-cache --shepherd --stats --threads=max lib
 
       - name: Run PHP-CS-Fixer
         working-directory: apps/memories
         run: |
-          vendor/bin/php-cs-fixer fix --dry-run --diff lib
+          vendor/bin/php-cs-fixer fix --dry-run --diff
 
   vue-lint:
     name: Vue Lint
