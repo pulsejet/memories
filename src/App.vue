@@ -445,6 +445,7 @@ export default defineComponent({
   width: 100%;
 
   &.remove-gap {
+    // Fill up the whole space, e.g. on map
     padding: 0;
   }
 }
