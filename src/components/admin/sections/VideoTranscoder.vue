@@ -17,15 +17,19 @@
           {{ binaryStatus('go-vod', status.govod) }}
         </NcNoteCard>
 
-        <NcCheckboxRadioSwitch
-          :disabled="!enableTranscoding"
-          :checked.sync="config['memories.vod.external']"
-          @update:checked="update('memories.vod.external')"
-          type="switch"
-        >
-          {{ t('memories', 'Enable external transcoder (go-vod {version})', { version: status.govod_want }) }}
-        </NcCheckboxRadioSwitch>
+        {{ t('memories', 'If you want to use an external go-vod, make sure you have the correct tag.') }}
+        <br />
+        <code>git clone -b {{ status.govod_want }} https://github.com/pulsejet/go-vod</code>
       </template>
+
+      <NcCheckboxRadioSwitch
+        :disabled="!enableTranscoding"
+        :checked.sync="config['memories.vod.external']"
+        @update:checked="update('memories.vod.external')"
+        type="switch"
+      >
+        {{ t('memories', 'Enable external transcoder') }}
+      </NcCheckboxRadioSwitch>
 
       <NcTextField
         :disabled="!enableTranscoding"
