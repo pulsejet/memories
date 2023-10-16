@@ -156,7 +156,6 @@
     "VA-API device ({dev}) has incorrect permissions" : "VA-API 장치 ({dev})의 권한이 잘못됨",
     "VA-API device status: {status}" : "VA-API 장치 상태: {status}",
     "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:" : "Memories는 go-vod 트랜스코더를 사용합니다. 외부에서 go-vod를 실행(예: 하드웨어 가속을 위한 별도의 Docker 컨테이너에서)하거나 내장 트랜스코더를 사용할 수 있습니다. 외부 트랜스코더를 사용하려면 다음 옵션을 활성화하고 설명서의 지침을 따르십시오:",
-    "Enable external transcoder (go-vod)" : "외장 트랜스코더 활성화 (go-vod)",
     "Binary path (local only)" : "바이너리 경로 (로컬 전용)",
     "Bind address (local only)" : "바인드 주소 (로컬 전용)",
     "Connection address (same as bind if local)" : "연결 주소 (로컬이라면 바인드와 같게)",

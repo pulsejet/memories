@@ -206,7 +206,6 @@ OC.L10N.register(
     "VA-API device ({dev}) has incorrect permissions" : "VA-API 裝置（{dev}）權限不正確",
     "VA-API device status: {status}" : "VA-API 裝置狀態：{status}",
     "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:" : "Memories 使用 go-vod 轉碼器。您可以在外部執行 go-vod（例如，在單獨的 Docker 容器中進行硬體加速）或使用內建的轉碼器。要使用外部轉碼器，請啟用以下選項並按照文件中的說明進行操作：",
-    "Enable external transcoder (go-vod)" : "啟用外部轉碼器 (go-vod)",
     "Binary path (local only)" : "二進位檔路徑（僅本機）",
     "Bind address (local only)" : "綁定地址（僅本機）",
     "Connection address (same as bind if local)" : "連線地址（若為本機的話，則與綁定相同）",
