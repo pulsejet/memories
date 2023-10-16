@@ -57,3 +57,16 @@ jobs:
 
       - name: Run Prettier
         run: npx prettier src --check
+
+  vue-tsc:
+    name: Vue Type Checking
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the app
+        uses: actions/checkout@v3
+
+      - name: Install vue-tsc
+        run: npm install --no-save "vue-tsc@$(cat ./package.json | jq -r '.devDependencies["vue-tsc"]')"
+
+      - name: Run vue-tsc
+        run: npx vue-tsc --noEmit --skipLibCheck
