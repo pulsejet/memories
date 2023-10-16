@@ -1,7 +1,7 @@
 import { IDay } from '../../types';
-import * as utils from '../utils';
+import { initstate } from '../utils';
 
-const { singleItem } = utils.initState;
+const { singleItem } = initstate;
 
 export function isSingleItem(): boolean {
   return Boolean(singleItem?.fileid);

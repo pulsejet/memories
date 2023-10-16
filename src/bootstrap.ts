@@ -13,7 +13,7 @@ import VueVirtualScroller from 'vue-virtual-scroller';
 
 // Locals
 import router from './router';
-import { c, initState } from './services/utils';
+import { constants, initstate } from './services/utils';
 
 // CSS for components
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
@@ -67,7 +67,7 @@ Vue.component('XImg', XImg);
 Vue.component('XLoadingIcon', XLoadingIcon);
 
 // Register global constants and functions
-Vue.prototype.c = c;
-Vue.prototype.initState = initState;
+Vue.prototype.c = constants;
+Vue.prototype.initstate = initstate;
 Vue.prototype.t = translate;
 Vue.prototype.n = translatePlural;

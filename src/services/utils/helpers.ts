@@ -4,7 +4,7 @@ import { showError } from '@nextcloud/dialogs';
 import { translate as t } from '@nextcloud/l10n';
 
 import { API } from '../API';
-import { c } from './const';
+import { constants as c } from './const';
 import * as nativex from '../../native';
 import type { IImageInfo, IPhoto } from '../../types';
 

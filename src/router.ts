@@ -10,7 +10,7 @@ import SplitTimeline from './components/SplitTimeline.vue';
 import ClusterView from './components/ClusterView.vue';
 import NativeXSetup from './native/Setup.vue';
 
-import { c } from './services/utils';
+import { constants as c } from './services/utils';
 
 // Routes are defined here
 export type RouteId =

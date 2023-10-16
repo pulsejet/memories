@@ -7,7 +7,7 @@ import type PlyrType from 'plyr';
 import type videojsType from 'video.js';
 
 import type { IPhoto, IRow } from './types';
-import type { c, initState } from './services/utils';
+import type { constants, initstate } from './services/utils';
 import type { GlobalRouteCheckers } from './router';
 
 // Global exposed variables
@@ -101,8 +101,8 @@ declare module 'vue' {
     t: typeof translate;
     n: typeof translatePlural;
 
-    c: typeof c;
-    initState: typeof initState;
+    c: typeof constants;
+    initstate: typeof initstate;
   }
 }
 

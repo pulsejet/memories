@@ -1,7 +1,7 @@
 import * as utils from '../../services/utils';
 
 // Shown in dynamic top matter (Timeline::viewName)
-export const title = utils.initState.shareTitle;
+export const title = utils.initstate.shareTitle;
 
 // Set up hook to monitor recycler scroll to show/hide header
 if (title) {

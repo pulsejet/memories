@@ -2,7 +2,7 @@ import { IPhoto } from '../../types';
 import { loadState } from '@nextcloud/initial-state';
 
 /** Global constants */
-export const c = Object.freeze({
+export const constants = Object.freeze({
   // Flags for photos
   FLAG_PLACEHOLDER: 1 << 0,
   FLAG_LOAD_FAIL: 1 << 1,
@@ -19,7 +19,7 @@ export const c = Object.freeze({
 /**
  * Initial state pulled from Nextcloud's HTML page
  */
-export const initState = Object.freeze({
+export const initstate = Object.freeze({
   noDownload: loadState('memories', 'no_download', false) !== false,
   shareTitle: loadState('memories', 'share_title', '') as string,
   singleItem: loadState('memories', 'single_item', null) as IPhoto | null,
@@ -36,15 +36,15 @@ export function convertFlags(photo: IPhoto) {
   }
 
   if (photo.isvideo) {
-    photo.flag |= c.FLAG_IS_VIDEO;
+    photo.flag |= constants.FLAG_IS_VIDEO;
     delete photo.isvideo;
   }
   if (photo.isfavorite) {
-    photo.flag |= c.FLAG_IS_FAVORITE;
+    photo.flag |= constants.FLAG_IS_FAVORITE;
     delete photo.isfavorite;
   }
   if (photo.islocal) {
-    photo.flag |= c.FLAG_IS_LOCAL;
+    photo.flag |= constants.FLAG_IS_LOCAL;
     delete photo.islocal;
   }
 }
@@ -59,7 +59,7 @@ export function copyPhotoFlags(src: IPhoto, dst: IPhoto) {
   const copy = (flag: number) => (dst.flag = src.flag & flag ? dst.flag | flag : dst.flag & ~flag);
 
   // copy all flags
-  copy(c.FLAG_IS_VIDEO);
-  copy(c.FLAG_IS_FAVORITE);
-  copy(c.FLAG_IS_LOCAL);
+  copy(constants.FLAG_IS_VIDEO);
+  copy(constants.FLAG_IS_FAVORITE);
+  copy(constants.FLAG_IS_LOCAL);
 }

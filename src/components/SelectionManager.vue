@@ -206,7 +206,7 @@ export default defineComponent({
         icon: DownloadIcon,
         callback: this.downloadSelection.bind(this),
         allowPublic: true,
-        if: () => !this.initState.noDownload,
+        if: () => !this.initstate.noDownload,
       },
       {
         name: t('memories', 'Favorite'),

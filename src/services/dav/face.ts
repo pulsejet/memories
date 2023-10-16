@@ -5,7 +5,7 @@ import { generateUrl } from '@nextcloud/router';
 import { IFace, IPhoto } from '../../types';
 import { API } from '../API';
 import client from './client';
-import * as utils from '../utils';
+import { constants as c } from '../utils';
 import * as base from './base';
 
 /**
@@ -93,7 +93,7 @@ export async function* recognizeMoveFaceImages(user: string, face: string, targe
 
       // NULL source needs special handling
       let source = `/recognize/${user}/faces/${face}`;
-      if (face === utils.c.FACE_NULL) {
+      if (face === c.FACE_NULL) {
         source = `/recognize/${user}/unassigned-faces`;
       }
 

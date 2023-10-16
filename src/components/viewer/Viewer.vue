@@ -90,7 +90,7 @@
             :aria-label="t('memories', 'Download')"
             @click="downloadCurrent"
             :close-after-click="true"
-            v-if="!initState.noDownload && !isLocal"
+            v-if="!initstate.noDownload && !isLocal"
           >
             {{ t('memories', 'Download') }}
             <template #icon>
@@ -98,7 +98,7 @@
             </template>
           </NcActionButton>
           <NcActionButton
-            v-if="!initState.noDownload && currentPhoto?.liveid"
+            v-if="!initstate.noDownload && currentPhoto?.liveid"
             :aria-label="t('memories', 'Download Video')"
             @click="downloadCurrentLiveVideo"
             :close-after-click="true"

@@ -3,7 +3,7 @@ import { translate as t } from '@nextcloud/l10n';
 import { IFileInfo, IPhoto } from '../../types';
 import client from './client';
 import * as base from './base';
-import * as utils from '../utils';
+import { constants as c } from '../utils';
 
 /**
  * Favorite a file
@@ -83,8 +83,8 @@ export async function* favoritePhotos(photos: IPhoto[], favoriteState: boolean) 
  */
 export function favoriteSetFlag(photo: IPhoto, val: boolean) {
   if (val) {
-    photo.flag |= utils.c.FLAG_IS_FAVORITE;
+    photo.flag |= c.FLAG_IS_FAVORITE;
   } else {
-    photo.flag &= ~utils.c.FLAG_IS_FAVORITE;
+    photo.flag &= ~c.FLAG_IS_FAVORITE;
   }
 }
