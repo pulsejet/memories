@@ -125,6 +125,25 @@ If you are migrating from Google Takeout, you may run the following command to m
 occ memories:migrate-google-takeout
 ```
 
+## Customization
+
+### Header Logo
+
+Nextcloud supports customizing the logo for your instance. To properly theme the logo to match the user's theme, the logo you use in `Admninistration => Theming` must follow the following criteria:
+
+- It must be an SVG file.
+- The `viewBox` attribute on the `<svg>` element must be set appropriately.
+- All paths that correspond to white areas must have the `fill` attribute set to `currentColor`. These areas will then automatically be colored according to the user's theme.
+- Since Nextcloud doesn't support `currentColor`, you must set the default value for the color (e.g. `white`) as an inline style on the `<svg>` element (`<svg style="color:white">`).
+
+A sample SVG that follows these criteria is shown below (from [here](https://github.com/pulsejet/memories/blob/master/src/assets/nextcloud.svg)):
+
+```xml
+--8<-- "src/assets/nextcloud.svg"
+```
+
+Note that you may skip these steps and also use a PNG file, but the logo will not be colored according to the user's theme. This can be especially troublesome since Nextcloud mostly shows the logo on a dark background while Memories uses both light and dark backgrounds.
+
 ## Other notes
 
 - For optimal performance, enable HTTP/2 on your reverse proxy (nginx/apache)

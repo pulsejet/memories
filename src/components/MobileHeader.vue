@@ -8,7 +8,7 @@
   >
     <div class="logo">
       <a :href="homeUrl">
-        <XImg :src="nextcloudsvg" :svg-tag="true" />
+        <XImg v-if="logo" :src="logo" :svg-tag="true" />
       </a>
     </div>
   </div>
@@ -17,6 +17,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { generateUrl } from '@nextcloud/router';
+import axios from '@nextcloud/axios';
 import nextcloudsvg from '../assets/nextcloud.svg';
 
 import * as utils from '../services/utils';
@@ -26,7 +27,7 @@ export default defineComponent({
 
   data: () => ({
     isScrollDown: false,
-    nextcloudsvg,
+    logo: null as string | null,
   }),
 
   computed: {
@@ -37,6 +38,7 @@ export default defineComponent({
 
   mounted() {
     utils.bus.on('memories.recycler.scroll', this.onScroll);
+    this.getLogo();
   },
 
   beforeDestroy() {
@@ -46,6 +48,40 @@ export default defineComponent({
   methods: {
     onScroll({ current, previous }: utils.BusEvent['memories.recycler.scroll']) {
       this.isScrollDown = (this.isScrollDown && previous - current < 40) || current - previous > 40; // momentum scroll
+    },
+
+    async getLogo() {
+      // try to get the logo
+      try {
+        const style = getComputedStyle(document.body);
+        const override = style.getPropertyValue('--image-logoheader') || style.getPropertyValue('--image-logo');
+        if (override) {
+          // Extract URL from CSS url
+          const url = override.match(/url\(["']?([^"']*)["']?\)/i)?.[1];
+          if (!url) throw new Error('No URL found');
+
+          // Fetch image
+          const blob = (await axios.get(url, { responseType: 'blob' })).data;
+          console.log('Loaded logo', blob);
+
+          // Convert to data URI and pass to logo
+          const reader = new FileReader();
+          reader.readAsDataURL(blob);
+          this.logo = await new Promise<string>((resolve, reject) => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.onabort = reject;
+          });
+
+          return;
+        }
+      } catch (e) {
+        // Go to fallback
+        console.warn('Could not load logo', e);
+      }
+
+      // Fallback to default
+      this.logo = nextcloudsvg;
     },
   },
 });
@@ -80,13 +116,22 @@ export default defineComponent({
 
   .logo {
     width: 62px;
+    height: 90%;
     position: absolute;
-    top: 60%;
+    top: 10%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
 
     > a {
-      color: var(--color-primary);
+      :deep svg {
+        color: var(--color-primary) !important;
+      }
+
+      > * {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
     }
   }
 }
