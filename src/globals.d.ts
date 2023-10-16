@@ -8,7 +8,7 @@ import type videojsType from 'video.js';
 
 import type { IPhoto, IRow } from './types';
 import type { constants, initstate } from './services/utils';
-import type { GlobalRouteCheckers } from './router';
+import type { GlobalRouteCheckers, routes } from './router';
 
 // Global exposed variables
 declare global {
@@ -32,6 +32,7 @@ declare global {
   var _m: {
     mode: 'admin' | 'user';
     route: Route;
+    routes: typeof routes;
 
     modals: {
       editMetadata: (photos: IPhoto[], sections?: number[]) => void;

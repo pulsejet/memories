@@ -7,11 +7,11 @@ const gen = generateUrl;
 
 /** Add auth token to this URL */
 function tok(url: string) {
-  const token = <string>_m.route.params.token;
+  const { token } = _m.route.params;
   switch (_m.route.name) {
-    case 'folder-share':
+    case _m.routes.FolderShare.name:
       return API.Q(url, { token });
-    case 'album-share':
+    case _m.routes.AlbumShare.name:
       return API.Q(url, { token, albums: token });
   }
   return url;

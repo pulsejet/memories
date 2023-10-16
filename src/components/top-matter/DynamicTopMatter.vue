@@ -63,7 +63,7 @@ export default defineComponent({
         return '';
       }
 
-      return strings.viewName(this.$route.name);
+      return strings.viewName(this.$route.name!);
     },
   },
 

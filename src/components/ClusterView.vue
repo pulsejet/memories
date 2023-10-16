@@ -100,8 +100,10 @@ export default defineComponent({
           this.items = await dav.getAlbums(this.config.album_list_sort);
         } else if (this.routeIsTags) {
           this.items = await dav.getTags();
-        } else if (this.routeIsPeople) {
-          this.items = await dav.getFaceList(<any>this.$route.name);
+        } else if (this.routeIsRecognize) {
+          this.items = await dav.getFaceList('recognize');
+        } else if (this.routeIsFaceRecognition) {
+          this.items = await dav.getFaceList('facerecognition');
         } else if (this.routeIsPlaces) {
           this.items = await dav.getPlaces();
         }

@@ -594,8 +594,7 @@ export default defineComponent({
       }
 
       // Albums
-      const user = <string>this.$route.params.user;
-      const name = <string>this.$route.params.name;
+      const { user, name } = this.$route.params;
       if (this.routeIsAlbums) {
         if (!user || !name) {
           throw new Error('Invalid album route');
@@ -606,7 +605,7 @@ export default defineComponent({
       // People
       if (this.routeIsPeople) {
         if (!user || !name) {
-          throw new Error('Invalid album route');
+          throw new Error('Invalid face route');
         }
 
         // name is "recognize" or "facerecognition"
@@ -625,7 +624,7 @@ export default defineComponent({
           throw new Error('Invalid place route');
         }
 
-        const id = <string>name.split('-', 1)[0];
+        const id = name.split('-', 1)[0];
         set(DaysFilterType.PLACE, id);
       }
 
@@ -690,7 +689,7 @@ export default defineComponent({
         const startState = this.state;
 
         let data: IDay[] = [];
-        if (this.$route.name === 'thisday') {
+        if (this.routeIsThisDay) {
           data = await dav.getOnThisDayData();
         } else if (dav.isSingleItem()) {
           data = await dav.getSingleItemData();
@@ -793,7 +792,7 @@ export default defineComponent({
         };
 
         // Special headers
-        if (this.$route.name === 'thisday' && (!prevDay || Math.abs(prevDay.dayid - day.dayid) > 30)) {
+        if (this.routeIsThisDay && (!prevDay || Math.abs(prevDay.dayid - day.dayid) > 30)) {
           // thisday view with new year title
           head.size = 67;
           head.super = utils.getFromNowStr(utils.dayIdToDate(day.dayid));

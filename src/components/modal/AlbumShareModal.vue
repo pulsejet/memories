@@ -65,8 +65,7 @@ export default defineComponent({
     async open() {
       this.show = true;
       this.loadingAddCollaborators = true;
-      const user = <string>this.$route.params.user || '';
-      const name = <string>this.$route.params.name || '';
+      const { user, name } = this.$route.params;
       this.album = await dav.getAlbum(user, name);
       this.loadingAddCollaborators = false;
     },

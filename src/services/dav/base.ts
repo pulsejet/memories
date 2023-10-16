@@ -29,8 +29,8 @@ type GetFilesOpts = {
 export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<IFileInfo[]> {
   // Some routes may have special handling of filenames
   if (!opts?.ignoreRoute) {
-    if (_m.route.name === 'albums') {
-      return getAlbumFileInfos(photos, <string>_m.route.params.user, <string>_m.route.params.name);
+    if (_m.route.name === _m.routes.Albums.name) {
+      return getAlbumFileInfos(photos, _m.route.params.user, _m.route.params.name);
     }
   }
 
@@ -192,7 +192,7 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
   if (photos.length === 0) return;
 
   // Extend with Live Photos unless this is an album
-  const routeIsAlbums = _m.route.name === 'albums';
+  const routeIsAlbums = _m.route.name === _m.routes.Albums.name;
   if (!routeIsAlbums) {
     photos = await extendWithLivePhotos(photos);
   }

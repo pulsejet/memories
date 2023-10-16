@@ -12,7 +12,7 @@ import XLoadingIcon from './components/XLoadingIcon.vue';
 import VueVirtualScroller from 'vue-virtual-scroller';
 
 // Locals
-import router from './router';
+import router, { routes } from './router';
 import { constants, initstate } from './services/utils';
 
 // CSS for components
@@ -28,6 +28,7 @@ globalThis._m = {
   get route() {
     return router.currentRoute;
   },
+  routes: routes,
 
   modals: {} as any,
   sidebar: {} as any,

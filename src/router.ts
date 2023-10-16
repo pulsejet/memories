@@ -31,7 +31,7 @@ export type RouteId =
   | 'Explore'
   | 'NxSetup';
 
-const routes: { [key in RouteId]: RouteConfig } = {
+export const routes: { [key in RouteId]: RouteConfig } = {
   Base: {
     path: '/',
     component: Timeline,
@@ -176,15 +176,17 @@ function defineRouteChecker(key: keyof GlobalRouteCheckers, condition: (route?: 
   });
 }
 
-// Defined routes
+// Build basic route checkers
 for (const [key, value] of Object.entries(routes)) {
   defineRouteChecker(`routeIs${<keyof typeof routes>key}`, (route) => route?.name === value.name);
 }
 
 // Extra route checkers
 defineRouteChecker('routeIsPublic', (route) => route?.name?.endsWith('-share') ?? false);
-defineRouteChecker('routeIsPeople', (route) => ['recognize', 'facerecognition'].includes(route?.name ?? ''));
+defineRouteChecker('routeIsPeople', (route) =>
+  [routes.Recognize.name, routes.FaceRecognition.name].includes(route?.name ?? ''),
+);
 defineRouteChecker(
   'routeIsRecognizeUnassigned',
-  (route) => route?.name === 'recognize' && route.params.name === c.FACE_NULL,
+  (route) => route?.name === routes.Recognize.name && route!.params.name === c.FACE_NULL,
 );

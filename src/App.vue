@@ -192,7 +192,7 @@ export default defineComponent({
     },
 
     onlyRouterView(): boolean {
-      return ['nxsetup'].includes(this.$route.name ?? '');
+      return this.routeIsNxSetup;
     },
 
     isFirstStart(): boolean {
@@ -224,12 +224,6 @@ export default defineComponent({
     },
   },
 
-  watch: {
-    route() {
-      this.doRouteChecks();
-    },
-  },
-
   created() {
     // No real need to unbind these, as the app is never destroyed
     const onResize = () => {
@@ -249,7 +243,6 @@ export default defineComponent({
   },
 
   mounted() {
-    this.doRouteChecks();
     this.refreshNav();
 
     // Store CSS variables modified
@@ -407,28 +400,6 @@ export default defineComponent({
       if (_m.window.innerWidth <= 1024) {
         utils.bus.emit('toggle-navigation', { open: false });
       }
-    },
-
-    doRouteChecks() {
-      if (this.$route.name?.endsWith('-share')) {
-        this.putShareToken(<string>this.$route.params.token);
-      }
-    },
-
-    putShareToken(token: string) {
-      // Viewer looks for an input with ID sharingToken with the value as the token
-      // Create this element or update it otherwise files not gonna open
-      // https://github.com/nextcloud/viewer/blob/a8c46050fb687dcbb48a022a15a5d1275bf54a8e/src/utils/davUtils.js#L61
-      let tokenInput = document.getElementById('sharingToken') as HTMLInputElement;
-      if (!tokenInput) {
-        tokenInput = document.createElement('input');
-        tokenInput.id = 'sharingToken';
-        tokenInput.type = 'hidden';
-        tokenInput.style.display = 'none';
-        document.body.appendChild(tokenInput);
-      }
-
-      tokenInput.value = token;
     },
 
     showSettings() {

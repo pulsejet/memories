@@ -103,7 +103,7 @@ export default defineComponent({
       if (!this.canSave) return;
 
       try {
-        if (this.$route.name === 'recognize') {
+        if (this.routeIsRecognize) {
           await dav.recognizeRenameFace(this.user, this.oldName, this.name);
         } else {
           await dav.faceRecognitionRenamePerson(this.oldName, this.name);

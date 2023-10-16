@@ -38,7 +38,7 @@ export default defineComponent({
 
   computed: {
     emptyViewDescription(): string {
-      return strings.emptyDescription(this.$route.name);
+      return strings.emptyDescription(this.$route.name!);
     },
   },
 });

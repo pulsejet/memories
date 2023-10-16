@@ -72,13 +72,13 @@ export default defineComponent({
     },
 
     refreshParams() {
-      this.user = <string>this.$route.params.user || '';
-      this.name = <string>this.$route.params.name || '';
+      this.user = this.$route.params.user;
+      this.name = this.$route.params.name;
     },
 
     async save() {
       try {
-        if (this.$route.name === 'recognize') {
+        if (this.routeIsRecognize) {
           await dav.recognizeDeleteFace(this.user, this.name);
         } else {
           await dav.faceRecognitionSetPersonVisibility(this.name, false);

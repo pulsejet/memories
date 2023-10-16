@@ -1,59 +1,57 @@
 import staticConfig from './static-config';
 import { translate as t } from '@nextcloud/l10n';
 
-type RouteNameType = string | null | undefined;
-
-export function emptyDescription(routeName: RouteNameType): string {
+export function emptyDescription(routeName: string): string {
   switch (routeName) {
-    case 'timeline':
+    case _m.routes.Base.name:
       return t('memories', 'Upload some photos and make sure the timeline path is configured');
-    case 'favorites':
+    case _m.routes.Favorites.name:
       return t('memories', 'Mark photos as favorite to find them easily');
-    case 'thisday':
+    case _m.routes.ThisDay.name:
       return t('memories', 'Memories from past years will appear here');
-    case 'facerecognition':
+    case _m.routes.Recognize.name:
+      return t('memories', 'Recognize is still working on your photos');
+    case _m.routes.FaceRecognition.name:
       return staticConfig.getSync('facerecognition_enabled')
         ? t('memories', 'You will find your friends soon. Please be patient')
         : t('memories', 'Face Recognition is disabled. Enable in settings to find your friends');
-    case 'videos':
+    case _m.routes.Videos.name:
       return t('memories', 'Your videos will appear here');
-    case 'albums':
+    case _m.routes.Albums.name:
       return _m.route.params.name
         ? t('memories', 'Add photos to albums by selecting them on your timeline.')
         : t('memories', 'Create an album to get started');
-    case 'archive':
+    case _m.routes.Archive.name:
       return t('memories', "Archive photos you don't want to see in your timeline");
-    case 'tags':
+    case _m.routes.Tags.name:
       return t('memories', 'Tag photos to find them easily');
-    case 'recognize':
-      return t('memories', 'Recognize is still working on your photos');
-    case 'places':
+    case _m.routes.Places.name:
       return t('memories', 'Places you have been to will appear here');
     default:
-      return '';
+      return String();
   }
 }
 
-export function viewName(routeName: RouteNameType): string {
+export function viewName(routeName: string): string {
   switch (routeName) {
-    case 'favorites':
+    case _m.routes.Favorites.name:
       return t('memories', 'Favorites');
-    case 'recognize':
-    case 'facerecognition':
+    case _m.routes.Recognize.name:
+    case _m.routes.FaceRecognition.name:
       return t('memories', 'People');
-    case 'videos':
+    case _m.routes.Videos.name:
       return t('memories', 'Videos');
-    case 'albums':
+    case _m.routes.Albums.name:
       return t('memories', 'Albums');
-    case 'archive':
+    case _m.routes.Archive.name:
       return t('memories', 'Archive');
-    case 'thisday':
+    case _m.routes.ThisDay.name:
       return t('memories', 'On this day');
-    case 'tags':
+    case _m.routes.Tags.name:
       return t('memories', 'Tags');
-    case 'places':
+    case _m.routes.Places.name:
       return t('memories', 'Places');
     default:
-      return '';
+      return String();
   }
 }

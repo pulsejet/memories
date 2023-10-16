@@ -46,7 +46,7 @@ export default defineComponent({
     async open(edit: boolean) {
       if (edit) {
         try {
-          this.album = await dav.getAlbum(<string>this.$route.params.user, <string>this.$route.params.name);
+          this.album = await dav.getAlbum(this.$route.params.user, this.$route.params.name);
         } catch (e) {
           console.error(e);
           showError(this.t('photos', 'Could not load the selected album'));

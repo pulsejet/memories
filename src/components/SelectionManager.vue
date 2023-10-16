@@ -840,9 +840,7 @@ export default defineComponent({
     async removeSelectionFromPerson(selection: Selection) {
       // Make sure route is valid
       const { user, name } = this.$route.params;
-      if (this.$route.name !== 'recognize' || !user || !name) {
-        return;
-      }
+      if (!this.routeIsRecognize || !user || !name) return;
 
       // Check photo ownership
       if (this.$route.params.user !== utils.uid) {

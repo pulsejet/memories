@@ -29,14 +29,14 @@ export default defineComponent({
 
   computed: {
     viewname(): string {
-      return strings.viewName(this.$route.name);
+      return strings.viewName(this.$route.name!);
     },
 
     name(): string | null {
       switch (this.$route.name) {
-        case 'tags':
+        case _m.routes.Tags.name:
           return this.t('recognize', this.$route.params.name);
-        case 'places':
+        case _m.routes.Places.name:
           return this.$route.params.name?.split('-').slice(1).join('-');
         default:
           return null;

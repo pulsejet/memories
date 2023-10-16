@@ -63,10 +63,10 @@ export default defineComponent({
 
     primary() {
       switch (this.$route.name) {
-        case 'map':
+        case _m.routes.Map.name:
           return MapSplitMatter;
         default:
-          return 'None';
+          return null;
       }
     },
 

@@ -85,12 +85,15 @@ export default defineComponent({
 
   methods: {
     async refreshParams() {
-      this.user = <string>this.$route.params.user || '';
-      this.name = <string>this.$route.params.name || '';
+      this.user = this.$route.params.user;
+      this.name = this.$route.params.name;
       this.list = null;
       this.search = '';
 
-      const faces = await dav.getFaceList(this.$route.name as any);
+      const backend = this.routeIsRecognize ? 'recognize' : this.routeIsFaceRecognition ? 'facerecognition' : null;
+      console.assert(backend, '[BUG] Invalid route for FaceList');
+
+      const faces = await dav.getFaceList(backend!);
       this.list = faces.filter((c: IFace) => c.user_id === this.user && String(c.name || c.cluster_id) !== this.name);
 
       this.fuse = new Fuse(this.list, { keys: ['name'] });

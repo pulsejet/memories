@@ -44,15 +44,15 @@ export default defineComponent({
   computed: {
     currentmatter() {
       switch (this.$route.name) {
-        case 'folders':
+        case _m.routes.Folders.name:
           return FolderTopMatter;
-        case 'albums':
+        case _m.routes.Albums.name:
           return AlbumTopMatter;
-        case 'tags':
-        case 'places':
+        case _m.routes.Tags.name:
+        case _m.routes.Places.name:
           return ClusterTopMatter;
-        case 'recognize':
-        case 'facerecognition':
+        case _m.routes.Recognize.name:
+        case _m.routes.FaceRecognition.name:
           return FaceTopMatter;
         default:
           return null;
