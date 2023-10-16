@@ -10,7 +10,7 @@ Memories supports transcoding acceleration with VA-API and NVENC.
 
 If you plan to use hardware transcoding, it may be easier to run the transcoder (go-vod) in a separate docker image containing ffmpeg and hardware acceleration dependencies. For this, you need to clone the [go-vod](https://github.com/pulsejet/go-vod) repository and build the docker image. Then you need to change the vod connect address and mark go-vod as external. The important requirement for running go-vod externally is that the file structure must be exactly same for the target video files.
 
-In the directory with the `docker-compose.yml` file, run the following replacing `<tag>` with the correct tag for the version of Memories you use (can be found in the admin panel).
+In the directory with the `docker-compose.yml` file, run the following replacing `<tag>` with the correct tag, which can be found in the admin panel (note that this is _not_ the same as the version of Memories you run).
 
 ```bash
 git clone -b <tag> https://github.com/pulsejet/go-vod
