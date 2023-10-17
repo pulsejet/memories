@@ -64,6 +64,14 @@ app:
 
 `tpmfs` is automatically configured when using Nextcloud AIO v7.0.0.
 
+!!! tip "Changing the binary temp directory"
+    
+    Alternatively, you may change the temp directory used for binary files to a different directory that is not mounted as `tmpfs`, and allows the executable bit to be set. Use this option with caution.
+
+    ```bash
+    occ config:system:set memories.exiftool.tmp --value /path/to/temp/dir
+    ```
+
 ## Reverse Geocoding (Places)
 
 You need to have a MySQL / MariaDB / Postgres database for reverse geocoding to work. SQLite is not supported.
