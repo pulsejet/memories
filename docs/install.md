@@ -18,7 +18,7 @@ Another option is to use [Nextcloud AIO](https://github.com/nextcloud/all-in-one
 
 Before installing Memories, make sure that the following requirements are met:
 
-1. Nextcloud 25 or later.
+1. Nextcloud 26 or later.
 1. PHP 8.0 or later.
 1. MySQL, MariaDB, or PostgreSQL database.
 1. [Imagick](https://www.php.net/manual/en/book.imagick.php) PHP extension.
