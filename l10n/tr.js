@@ -496,6 +496,7 @@ OC.L10N.register(
     "Upload some photos and make sure the timeline path is configured" : "Bazı fotoğraflar yükleyin ve zaman tüneli yolunun yapılandırılmış olduğundan emin olun",
     "Mark photos as favorite to find them easily" : "Fotoğrafları kolayca bulabilmek için beğenilen olarak işaretleyin",
     "Memories from past years will appear here" : "Geçmiş yılların anıları burada görüntülenir",
+    "Recognize is still working on your photos" : "Recognize fotoğraflarınız üzerinde çalışmayı bitirmedi",
     "You will find your friends soon. Please be patient" : "Yakında arkadaşlarınızı bulacaksınız. Lütfen sabırlı olun",
     "Face Recognition is disabled. Enable in settings to find your friends" : "Yüz tanıma devre dışı bırakılmış. Arkadaşlarınızı bulmak için ayarlar bölümünden etkinleştirin",
     "Your videos will appear here" : "Görüntüleriniz burada görüntülenecek",
@@ -503,7 +504,6 @@ OC.L10N.register(
     "Create an album to get started" : "Başlamak için bir albüm oluşturun",
     "Archive photos you don't want to see in your timeline" : "Zaman tünelinizde görmek istemediğiniz fotoğrafları arşivleyin",
     "Tag photos to find them easily" : "Fotoğrafları kolayca bulabilmek için etiketleyin",
-    "Recognize is still working on your photos" : "Recognize fotoğraflarınız üzerinde çalışmayı bitirmedi",
     "Places you have been to will appear here" : "Bulunduğunuz yerler burada görüntülenecek",
     "Yes" : "Evet",
     "No" : "Hayır",
@@ -512,6 +512,7 @@ OC.L10N.register(
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["{count} öge albümden kaldırılsın mı?","{count} öge albümden kaldırılsın mı?"],
     "This will not delete your original files." : "Bu işlem özgün dosyalarınızı silmez.",
     "You are about to download {count} items." : "{count} ögeyi indirmek üzeresiniz.",
-    "You are about to move {count} items." : "{count} ögeyi taşımak üzeresiniz."
+    "You are about to move {count} items." : "{count} ögeyi taşımak üzeresiniz.",
+    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "\"{folder}\" klasör adının başında veya sonunda boşluk var. Bu durum soruna yol açabileceğinden düzeltilmeli."
 },
 "nplurals=2; plural=(n > 1);");

@@ -496,6 +496,7 @@ OC.L10N.register(
     "Upload some photos and make sure the timeline path is configured" : "رفع بعض الصور والتأكد من تهيئة مسار التسلسل الزمني",
     "Mark photos as favorite to find them easily" : "ضع علامة مفضلة على الصور للعثور عليها بسهولة",
     "Memories from past years will appear here" : "سوف تظهر هنا الذكريات من السنوات الماضية",
+    "Recognize is still working on your photos" : "لا يزال تطبيق التعرف Recognize يعمل على صورك",
     "You will find your friends soon. Please be patient" : "سوف تجد أصدقاءك قريباً. يرجي الانتظار",
     "Face Recognition is disabled. Enable in settings to find your friends" : "تم تعطيل التعرُّف على الوجوه. قم بتمكينه من الإعدادات حتي تستطيع العثور على أصدقائك",
     "Your videos will appear here" : "فيديوهاتك ستظهر هنا",
@@ -503,7 +504,6 @@ OC.L10N.register(
     "Create an album to get started" : "إنشاء ألبوم للبدء",
     "Archive photos you don't want to see in your timeline" : "أرشفة الصور التي لا ترغب في رؤيتها على تسلسلك الزمني",
     "Tag photos to find them easily" : "وسم الصور للعثور عليها بسهولة",
-    "Recognize is still working on your photos" : "لا يزال تطبيق التعرف Recognize يعمل على صورك",
     "Places you have been to will appear here" : "سوف تظهر الأماكن التي قمت بزيارتها هنا",
     "Yes" : "نعم",
     "No" : "لا",
@@ -512,6 +512,7 @@ OC.L10N.register(
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["هل ترغب في حذف {count} عنصر من الألبوم؟","هل ترغب في حذف {count} عنصر من الألبوم؟","هل ترغب في حذف {count} عنصرين من الألبوم؟","هل ترغب في حذف {count} عنصر من الألبوم؟","هل ترغب في حذف {count} عناصر من الألبوم؟","هل ترغب في حذف {count} عناصر من الألبوم؟"],
     "This will not delete your original files." : "سوف لن يؤدّي هذا إلى حذف ملفاتك الأصلية.",
     "You are about to download {count} items." : "أنت على وشك تنزيل {count} عنصر.",
-    "You are about to move {count} items." : "أنت على وشك نقل {count} عنصر."
+    "You are about to move {count} items." : "أنت على وشك نقل {count} عنصر.",
+    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "اسم المجلد \"{folder}\" يحوي مسافات بيضاء في بدايته أو في نهايته. هذا يمكن أن يؤدي إلى أخطاء و يتوجب تصحيحه."
 },
 "nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;");

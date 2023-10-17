@@ -496,6 +496,7 @@ OC.L10N.register(
     "Upload some photos and make sure the timeline path is configured" : "上傳一些照片並確保已設定時間軸路徑",
     "Mark photos as favorite to find them easily" : "將照片標記為最愛以輕鬆找到它們",
     "Memories from past years will appear here" : "往年的照片會出現在這裡",
+    "Recognize is still working on your photos" : "Recognize 仍在處理您的照片",
     "You will find your friends soon. Please be patient" : "你很快就會找到你的朋友。請耐心等待。",
     "Face Recognition is disabled. Enable in settings to find your friends" : "Face Recognition 已禁用。 在設定中啟用以尋找您的朋友",
     "Your videos will appear here" : "您的視像將會出現在此處",
@@ -503,7 +504,6 @@ OC.L10N.register(
     "Create an album to get started" : "建立相簿以開始使用",
     "Archive photos you don't want to see in your timeline" : "封存您不想要在時間軸中看到的照片",
     "Tag photos to find them easily" : "為照片加上標籤以輕鬆地找到它們",
-    "Recognize is still working on your photos" : "Recognize 仍在處理您的照片",
     "Places you have been to will appear here" : "您去過的地方會出現在此處",
     "Yes" : "是",
     "No" : "否",
@@ -512,6 +512,7 @@ OC.L10N.register(
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["從相簿中刪除 {count} 個項目？"],
     "This will not delete your original files." : "這不會刪除您原先的檔案。",
     "You are about to download {count} items." : "您即將下載 {count} 項。",
-    "You are about to move {count} items." : "您即將移動 {count} 項。"
+    "You are about to move {count} items." : "您即將移動 {count} 項。",
+    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "資料夾名稱「{folder}」具有前導或尾隨空格。這可能會導致錯誤，應該予以糾正。"
 },
 "nplurals=1; plural=0;");

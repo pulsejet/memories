@@ -496,6 +496,7 @@ OC.L10N.register(
     "Upload some photos and make sure the timeline path is configured" : "Laden Sie einige Fotos hoch und stellen Sie sicher, dass der Timeline-Pfad konfiguriert ist",
     "Mark photos as favorite to find them easily" : "Markieren Sie Fotos als Favoriten, um sie leicht zu finden",
     "Memories from past years will appear here" : "Erinnerungen aus vergangenen Jahren werden hier erscheinen",
+    "Recognize is still working on your photos" : "Die Erkennung arbeitet noch an Ihren Fotos",
     "You will find your friends soon. Please be patient" : "Sie werden Ihre Freunde bald finden. Bitte haben Sie Geduld",
     "Face Recognition is disabled. Enable in settings to find your friends" : "Die Gesichtserkennung ist deaktiviert. Aktivieren Sie sie in den Einstellungen, um Ihre Freunde zu finden",
     "Your videos will appear here" : "Ihre Videos werden hier angezeigt",
@@ -503,7 +504,6 @@ OC.L10N.register(
     "Create an album to get started" : "Erstellen Sie ein Album, um loszulegen",
     "Archive photos you don't want to see in your timeline" : "Archivieren Sie Fotos, die Sie nicht in Ihrer Chronik sehen möchten",
     "Tag photos to find them easily" : "Markieren Sie Fotos, um sie leicht zu finden",
-    "Recognize is still working on your photos" : "Die Erkennung arbeitet noch an Ihren Fotos",
     "Places you have been to will appear here" : "Orte, die Sie besucht haben, werden hier angezeigt",
     "Yes" : "Ja",
     "No" : "Nein",
@@ -512,6 +512,7 @@ OC.L10N.register(
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["{count} Element aus Album entfernen?","{count} Elemente aus Album entfernen?"],
     "This will not delete your original files." : "Dies wird ihre Originaldateien nicht löschen.",
     "You are about to download {count} items." : "Sie sind dabei, {count} Elemente herunterzuladen.",
-    "You are about to move {count} items." : "Sie sind dabei, {count} Elemente zu verschieben."
+    "You are about to move {count} items." : "Sie sind dabei, {count} Elemente zu verschieben.",
+    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "Der Ordnername \"{folder}“ enthält ein führendes oder nachfolgendes Leerzeichen. Dies kann zu Fehlern führen und sollte korrigiert werden."
 },
 "nplurals=2; plural=(n != 1);");

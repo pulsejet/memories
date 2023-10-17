@@ -496,6 +496,7 @@ OC.L10N.register(
     "Upload some photos and make sure the timeline path is configured" : "Cargue algunas fotos y asegúrese que la ruta a la línea de tiempo está configurada",
     "Mark photos as favorite to find them easily" : "Marque fotos como favoritas para encontrarlas fácilmente",
     "Memories from past years will appear here" : "Las memorias de años pasados aparecerán aquí",
+    "Recognize is still working on your photos" : "Recognize sigue trabajando en sus fotos",
     "You will find your friends soon. Please be patient" : "Conseguirá a sus amigos en breve. Por favor, tenga paciencia.",
     "Face Recognition is disabled. Enable in settings to find your friends" : "El reconocimiento facial está deshabilitado. Habilítelo en la configuración para conseguir a sus amigos",
     "Your videos will appear here" : "Sus videos aparecerán aquí",
@@ -503,7 +504,6 @@ OC.L10N.register(
     "Create an album to get started" : "Cree un álbum para comenzar",
     "Archive photos you don't want to see in your timeline" : "Archive las fotos que no quiera ver en su línea de tiempo",
     "Tag photos to find them easily" : "Etiquete las fotos para encontrarlas fácilmente",
-    "Recognize is still working on your photos" : "Recognize sigue trabajando en sus fotos",
     "Places you have been to will appear here" : "Los lugares en los que ha estado aparecerán aquí",
     "Yes" : "Sí",
     "No" : "No",
@@ -512,6 +512,7 @@ OC.L10N.register(
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["¿Eliminar {count} ítem del álbum?","¿Eliminar {count} ítems del álbum?","¿Eliminar {count} ítems del álbum?"],
     "This will not delete your original files." : "Esto no eliminará sus archivos originales.",
     "You are about to download {count} items." : "Está a punto de descargar {count} ítems.",
-    "You are about to move {count} items." : "Está a punto de mover {count} ítems."
+    "You are about to move {count} items." : "Está a punto de mover {count} ítems.",
+    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "El nombre de la carpeta \"{folder}\" tiene un espacio en blanco al principio o al final. Esto puede causar errores y debería ser corregido."
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
