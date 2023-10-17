@@ -10,6 +10,7 @@ If you have any questions, feel free to reach out at
 
 - [Discord community](https://discord.gg/7Dr9f9vNjJ) (any questions, feedback, suggestions, etc.)
 - [GitHub issues](https://github.com/pulsejet/memories/issues) (bugs and feature requests)
+- [Nextcloud forums](https://help.nextcloud.com/) (questions about Nextcloud not specific to Memories)
 
 ## FAQ
 
