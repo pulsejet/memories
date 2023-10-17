@@ -4,7 +4,7 @@ description: Comparison of Memories and Nextcloud Photos
 
 # Memories vs Photos
 
-Nextcloud comes bundled with an official "Photos" app. This page provides a brief feature comparison between Memories and Photos, and links some relevant issues in the Photos repository.
+Nextcloud comes bundled with an official [Photos](https://github.com/nextcloud/photos) app. This page provides a brief feature comparison between Memories and Photos, and links some relevant issues in the Photos repository.
 
 ## Features in Memories missing in Photos
 
