@@ -415,13 +415,13 @@ OC.L10N.register(
     "Upload some photos and make sure the timeline path is configured" : "Sube algunas fotos y asegúrate de que la ruta de la línea de tiempo esté configurada",
     "Mark photos as favorite to find them easily" : "Marca las fotos como favoritas para encontrarlas fácilmente",
     "Memories from past years will appear here" : "Aquí aparecerán los recuerdos de años anteriores",
+    "Recognize is still working on your photos" : "Reconoce todavía está trabajando en tus fotos",
     "You will find your friends soon. Please be patient" : "Encontrarás a tus amigos pronto. Por favor, ten paciencia",
     "Face Recognition is disabled. Enable in settings to find your friends" : "El Reconocimiento Facial está desactivado. Actívalo en la configuración para encontrar a tus amigos",
     "Your videos will appear here" : "Aquí aparecerán tus videos",
     "Create an album to get started" : "Crea un álbum para empezar",
     "Archive photos you don't want to see in your timeline" : "Archiva las fotos que no desees ver en tu línea de tiempo",
     "Tag photos to find them easily" : "Etiqueta las fotos para encontrarlas fácilmente",
-    "Recognize is still working on your photos" : "Reconoce todavía está trabajando en tus fotos",
     "Places you have been to will appear here" : "Aquí aparecerán los lugares que has visitado"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
