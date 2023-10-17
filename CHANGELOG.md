@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 - **Breaking**: Nextcloud 26+ and PHP 8 are now required.
 - Significant improvements to code quality and maintainability.
+- Improvements to the [documentation](https://memories.gallery/install/).
 
 ## [v5.5.0] - 2023-10-06
 

@@ -14,6 +14,10 @@ For the best experience, we recommend to use the latest stable version of Nextcl
 For easy setup and maintenance, you can use the community Nextcloud Docker image, and add extra dependencies using a custom Dockerfile.
 Another option is to use [Nextcloud AIO](https://github.com/nextcloud/all-in-one#how-to-use-this), in which case most dependencies are already installed.
 
+!!! success "Recommmended Configuration"
+
+    If you plan to use hardware transcoding, using **Docker Compose** or **Nextcloud AIO** is recommended.
+
 ## Requirements
 
 Before installing Memories, make sure that the following requirements are met:
@@ -42,3 +46,9 @@ To build the app from source, you need to have [node.js](https://nodejs.org/) in
 1. Run `make patch-external` to apply patches to external dependencies.
 1. Run `make build-js-production` to build the JavaScript files.
 1. Enable the app in the Nextcloud app settings page.
+
+## Mobile Apps
+
+An Android client for Memories is available in early access on [Google Play](https://play.google.com/store/apps/details?id=gallery.memories).
+
+For automatic uploads, you can use the official Nextcloud mobile apps. These are available for [Android](https://play.google.com/store/apps/details?id=com.nextcloud.client) ([F-Droid](https://f-droid.org/en/packages/com.nextcloud.client/)) and [iOS](https://apps.apple.com/us/app/nextcloud/id1125420102).

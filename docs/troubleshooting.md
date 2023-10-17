@@ -53,7 +53,7 @@ If you are using Nextcloud AIO, see [this documentation](https://github.com/next
 
 ### Usage of tmpfs
 
-If you are using `tmpfs` (e.g. for the Recognize app), make sure the temp directory is set to executable. With Docker compose, your `docker-compose.yml` should look like this:
+If you are using `tmpfs` (e.g. for the Recognize app), make sure the temp directory is set to executable. With Docker Compose, your `docker-compose.yml` should look like this:
 
 ```yaml
 app:
@@ -113,6 +113,10 @@ On Postgres, the syntax for dropping the index is:
 ```sql
 DROP INDEX IF EXISTS memories_parent_mimetype;
 ```
+
+!!! warning "Reinstallation"
+
+    The reset will clean up all data associated with Memories. While this is safe and will not delete your files, it can sometimes have unintended side effects, such as some files appearing as duplicates in the mobile apps when you reinstall. Try running `occ memories:index --force` before attempting a reset.
 
 ### Moving from x86 to ARM or vice versa
 

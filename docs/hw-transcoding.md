@@ -2,7 +2,7 @@
 description: Configuration for hardware acceleration for transcoding with VA-API and NVENC
 ---
 
-# Hardware transcoding
+# Hardware Transcoding
 
 This document describes setting up transcoding in Memories, specifically using hardware acceleration. Hardware acceleration can significantly improve transcoding performance, especially for high resolution videos. Memories supports transcoding using **CPU**, **VA-API** and **NVENC**.
 
@@ -26,7 +26,7 @@ NVIDIA GPUs support hardware transcoding using NVENC.
 
 ## External Transcoder
 
-!!! success "Recommmended configuration"
+!!! success "Recommmended Configuration"
 
     The easiest and recommended way to use hardware transcoding is to use an external transcoder.
     This setup utilizes a separate docker container that contains the hardware drivers and ffmpeg.
@@ -79,7 +79,7 @@ Your external transcoder should now be functional. You can check the transcoding
     With Nextcloud AIO, you will need to put the container into the `nextcloud-aio` network. Also the datadir of AIO needs to be mounted at the same place like in its Netxcloud container into the go-vod container. Usually this would be `nextcloud_aio_nextcloud_data:/mnt/ncdata:ro` or `$NEXTCLOUD_DATADIR:/mnt/ncdata:ro`.
     See the instructions [here](https://github.com/nextcloud/all-in-one#how-to-enable-hardware-transcoding-for-nextcloud).
 
-!!! info "Usage without docker-compose"
+!!! info "Usage without Docker Compose"
 
     You can run a similar setup without `docker-compose` by building the go-vod container manually. Make sure that the Nextcloud and go-vod containers are in the same network and that the Nextcloud data directories are mounted at the same locations in both containers.
 

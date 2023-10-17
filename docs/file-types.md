@@ -2,7 +2,7 @@
 description: Steps to configure support for different image and video formats
 ---
 
-# File type support
+# File Type Support
 
 !!! danger "Use the admin interface"
 
