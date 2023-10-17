@@ -133,7 +133,7 @@ export default defineComponent({
     },
 
     canShareLink(): boolean {
-      return !!this.photo?.imageInfo?.permissions?.includes('S');
+      return !!this.photo?.imageInfo?.permissions?.includes('S') && !this.routeIsAlbums;
     },
 
     isLocal(): boolean {
