@@ -88,6 +88,10 @@ occ memories:places-setup
 
 If you get this error, it is likely that your database is not using the `utf8mb4` character set. Since the reverse geocoding database contains characters in various languages, it is necessary to use `utf8mb4` to store them. To fix this, you need to convert your database to use `utf8mb4`.
 
+## Transcoding
+
+Memories transcodes videos on the fly per-user. This saves space, but requires reasonably good hardware, preferably with hardware acceleration. Check the troubleshooting section [here](/hw-transcoding/#troubleshooting).
+
 ## Reset
 
 If you want to completely reset Memories (e.g. for database trouble), uninstall it from the app store, then run the following SQL on your database to clean up any data.

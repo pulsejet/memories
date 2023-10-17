@@ -97,15 +97,6 @@ You can specify the image to build in the `docker-compose.yml` file.
   ...
 ```
 
-### Logging
-
-When running an external transcoder, the logs go to the container logs. You can view them using 
-
-```bash
-docker compose logs -f go-vod     # for docker-compose
-docker logs -f <container-name>   # if not using docker-compose
-```
-
 ## Internal Transcoder
 
 Memories ships with an internal transcoder binary that you can directly use. In this case, you must install the drivers and ffmpeg on the same host as Nextcloud, and Memories will automatically handling starting and communicating with go-vod. This is also the default setup when you enable transcoding without hardware acceleration.
@@ -213,9 +204,30 @@ environment:
   - INSTALL_PACKAGES=libva|libva-intel-driver|intel-media-driver|mesa-va-gallium
 ```
 
+## Troubleshooting
+
+### Basic Steps
+
+If you have trouble with trancoding, try the following steps:
+
+1. Check the admin panel for any errors. It may be possible that Memories cannot connect to the transcoder or you have a go-vod version mismatch.
+
+1. Check the JS console and the logs of the transcoder. See [below](#logging) for instructions.
+
+1. The admin panel lists a few options that work around driver bugs. For instance, if your portrait videos are rotated on VA-API or your NVENC stream hangs, try enabling these workarounds.
+
+1. If you are using the internal transcoder, make sure you are running a new enough version of ffmpeg (shown in the admin panel). Generally you would need at least ffmpeg v5.x for most modern hardware but many operating systems ship with v4.x. One troubleshooting step is to build ffmpeg and the hardware drivers from source.
+
 ### Logging
 
-When using the internal transcoder, the logs go to `/tmp/go-vod/<instance-id>.log`, where `<instance-id` is a unique ID for your Nextcloud instance that can be found in `config.php`. You can view them as illustrated below.
+When running an **external transcoder**, the logs go to the container's stdout. You can view them using 
+
+```bash
+docker compose logs -f go-vod     # for docker-compose
+docker logs -f <container-name>   # if not using docker-compose
+```
+
+When using the **internal transcoder**, the logs go to `/tmp/go-vod/<instance-id>.log`, where `<instance-id` is a unique ID for your Nextcloud instance that can be found in `config.php`. You can view them as illustrated below.
 
 ```bash
 tail -f /tmp/go-vod/<instance-id>.log # bare metal
