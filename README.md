@@ -2,7 +2,13 @@
 
 Extremely minimal on-demand video transcoding server in go. Used by the FOSS photos app, [Memories](https://github.com/pulsejet/memories).
 
+## Filing Issues
+
+Please file issues at the [Memories](https://github.com/pulsejet/memories) repository.
+
 ## Usage
+
+Note: this package provides bespoke functionality for Memories. As such it is not intended to be used as a library.
 
 You need go and ffmpeg/ffprobe installed
 
