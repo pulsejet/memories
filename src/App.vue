@@ -66,7 +66,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent } from 'vue';
+import { defineComponent } from 'vue';
 
 import NcContent from '@nextcloud/vue/dist/Components/NcContent';
 import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent';
@@ -78,14 +78,12 @@ import { translate as t } from '@nextcloud/l10n';
 
 import * as utils from './services/utils';
 import * as nativex from './native';
-import router from './router';
 import staticConfig from './services/static-config';
 import UserConfig from './mixins/UserConfig';
 import Timeline from './components/Timeline.vue';
 import Settings from './components/Settings.vue';
 import FirstStart from './components/FirstStart.vue';
 import Viewer from './components/viewer/Viewer.vue';
-import Metadata from './components/Metadata.vue';
 import Sidebar from './components/Sidebar.vue';
 import MobileNav from './components/MobileNav.vue';
 import MobileHeader from './components/MobileHeader.vue';
@@ -158,7 +156,6 @@ export default defineComponent({
 
   data: () => ({
     navItems: [] as NavItem[],
-    metadataComponent: null as any,
     settingsOpen: false,
   }),
 
@@ -253,32 +250,6 @@ export default defineComponent({
 
     // Set theme color to default
     nativex.setTheme();
-
-    // Register sidebar metadata tab
-    globalThis.OCA?.Files?.Sidebar?.registerTab(
-      new globalThis.OCA.Files.Sidebar.Tab({
-        id: 'memories-metadata',
-        name: this.t('memories', 'Info'),
-        icon: 'icon-details',
-
-        mount(el: HTMLElement, fileInfo: { id: string | number }, context: any) {
-          this.metadataComponent?.$destroy?.();
-          this.metadataComponent = new Vue({
-            render: (h) => h(Metadata),
-            router,
-          });
-          this.metadataComponent.$mount(el);
-          this.metadataComponent.$children[0].update(Number(fileInfo.id));
-        },
-        update(fileInfo: { id: string | number }) {
-          this.metadataComponent.$children[0].update(Number(fileInfo.id));
-        },
-        destroy() {
-          this.metadataComponent?.$destroy?.();
-          this.metadataComponent = null;
-        },
-      }),
-    );
 
     // Check for native interface
     if (this.native) {

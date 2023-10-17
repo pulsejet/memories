@@ -16,17 +16,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import Vue, { defineComponent } from 'vue';
 
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
 import Metadata from './Metadata.vue';
-import { IImageInfo, IPhoto } from '../types';
+import { IPhoto } from '../types';
 
 import * as utils from '../services/utils';
 
 import CloseIcon from 'vue-material-design-icons/Close.vue';
+import InfoSvg from '../assets/info.svg';
 
 export default defineComponent({
   name: 'Sidebar',
@@ -89,6 +90,13 @@ export default defineComponent({
       setTab: this.setTab.bind(this),
       getWidth: this.getWidth.bind(this),
     };
+
+    // Register native tab after DOMContentLoaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', this.registerNative.bind(this)); // wait for it
+    } else {
+      this.registerNative(); // already fired
+    }
   },
 
   beforeDestroy() {
@@ -160,6 +168,44 @@ export default defineComponent({
       this.nativeOpen = false;
       this.native?.setFullScreenMode?.(false);
       this.handleClose();
+    },
+
+    /** Register the Nextcloud Sidebar component */
+    async registerNative() {
+      // Wait just in case the sidebar isn't avaialble yet
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Pass router to the component
+      const router = this.$router;
+
+      // Component instance
+      let component: (Vue & { $children: readonly [InstanceType<typeof Metadata>] }) | null;
+
+      // Register sidebar tab
+      globalThis.OCA?.Files?.Sidebar?.registerTab(
+        new globalThis.OCA.Files.Sidebar.Tab({
+          id: 'memories-metadata',
+          name: this.t('memories', 'Info'),
+          icon: 'icon-details',
+          iconSvg: window.atob(InfoSvg.split(',')[1]), // base64 to svg
+
+          mount(el: HTMLElement, fileInfo: { id: string | number }, context: any) {
+            component?.$destroy?.();
+            component = new Vue({ render: (h) => h(Metadata), router });
+            component.$mount(el);
+            component.$children[0].update(Number(fileInfo.id));
+          },
+
+          update(fileInfo: { id: string | number }) {
+            component?.$children[0].update(Number(fileInfo.id));
+          },
+
+          destroy() {
+            component?.$destroy?.();
+            component = null;
+          },
+        }),
+      );
     },
   },
 });
