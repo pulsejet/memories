@@ -100,6 +100,10 @@ sudo -u www-data \
 
 ### Docker installations
 
+!!! danger "Use an en external transcoder"
+
+    If you need hardware transcoding and use Docker, it can be significantly easier to use an external transcoder. See [above](#external-transcoder) for instructions.
+
 If you use Docker, you need to:
 
 1. Pass the `/dev/dri` device to the container. In `docker-compose.yml`:
@@ -113,7 +117,7 @@ If you use Docker, you need to:
 1. Make sure the right drivers are installed. This can be done using a custom Dockerfile, for example
 
    ```Dockerfile
-   FROM nextcloud:latest
+   FROM nextcloud:stable-fpm
 
    RUN apt-get update && \
        apt-get install -y lsb-release && \
@@ -143,11 +147,11 @@ If you use Docker, you need to:
 
 ### Nextcloud AIO
 
-See https://github.com/nextcloud/all-in-one#how-to-enable-hardware-transcoding-for-nextcloud
+See the instructions [here](https://github.com/nextcloud/all-in-one#how-to-enable-hardware-transcoding-for-nextcloud).
 
-### linuxserver/nextcloud image
+### Linuxserver Nextcloud image
 
-You can add the following to the `docker-compose.yml` file to install the drivers:
+This image is based on Alpine. You can add the following to the `docker-compose.yml` file to install the drivers.
 
 ```yaml
 devices:
