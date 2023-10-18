@@ -46,7 +46,7 @@
     "plyr": "^3.7.8",
     "react-filerobot-image-editor": "^4.5.2",
     "reflect-metadata": "^0.1.13",
-    "video.js": "^8.5.2",
+    "video.js": "^8.6.0",
     "vue": "^2.7.14",
     "vue-material-design-icons": "^5.2.0",
     "vue-router": "^3.6.5",
@@ -54,26 +54,31 @@
     "vue2-leaflet": "^2.7.1",
     "webdav": "^4.11.2"
   },
-  "browserslist": [
-    "extends @nextcloud/browserslist-config"
-  ],
   "engines": {
     "node": ">=18.2.0",
     "npm": ">=8.0.0"
   },
   "devDependencies": {
-    "@nextcloud/browserslist-config": "^3.0.0",
-    "@nextcloud/webpack-vue-config": "^6.0.0",
     "@playwright/test": "^1.39.0",
-    "@types/hammerjs": "^2.0.42",
-    "@types/justified-layout": "^4.1.1",
-    "@types/luxon": "^3.3.2",
-    "@types/url-parse": "^1.4.9",
-    "@types/videojs-contrib-quality-levels": "^2.0.2",
+    "@types/hammerjs": "^2.0.43",
+    "@types/justified-layout": "^4.1.2",
+    "@types/luxon": "^3.3.3",
+    "@types/url-parse": "^1.4.10",
+    "@types/videojs-contrib-quality-levels": "^2.0.3",
+    "css-loader": "^6.8.1",
+    "node-polyfill-webpack-plugin": "2.0.1",
     "playwright": "^1.39.0",
     "prettier": "^3.0.3",
+    "sass": "^1.69.4",
+    "sass-loader": "^13.3.2",
+    "style-loader": "^3.3.3",
+    "ts-loader": "^9.5.0",
     "typescript": "^5.2.2",
+    "vue-loader": "^15.11.1",
+    "vue-template-compiler": "^2.7.14",
     "vue-tsc": "^1.8.19",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4",
     "workbox-webpack-plugin": "^7.0.0"
   }
 }
