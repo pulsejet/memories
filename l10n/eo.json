@@ -1,7 +1,6 @@
 { "translations": {
     "Download" : "Elŝuti",
     "Settings" : "Agordoj",
-    "Info" : "Info",
     "Timeline" : "Kronologio",
     "Folders" : "Dosierujoj",
     "Favorites" : "Plej ŝatataj",
@@ -17,6 +16,7 @@
     "General" : "Ĝenerala",
     "Account" : "Konto",
     "Close" : "Malfermi",
+    "Info" : "Info",
     "Performance" : "Rendimento",
     "Unknown" : "Nekonata",
     "Continue" : "Daŭrigi",

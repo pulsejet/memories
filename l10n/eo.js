@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "Elŝuti",
     "Settings" : "Agordoj",
-    "Info" : "Info",
     "Timeline" : "Kronologio",
     "Folders" : "Dosierujoj",
     "Favorites" : "Plej ŝatataj",
@@ -19,6 +18,7 @@ OC.L10N.register(
     "General" : "Ĝenerala",
     "Account" : "Konto",
     "Close" : "Malfermi",
+    "Info" : "Info",
     "Performance" : "Rendimento",
     "Unknown" : "Nekonata",
     "Continue" : "Daŭrigi",

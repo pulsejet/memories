@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "பதிவிறக்குக",
     "Settings" : "அமைப்புகள்",
-    "Info" : "Info",
     "Favorites" : "விருப்பங்கள்",
     "Tags" : "சீட்டுகள்",
     "Edit" : "தொகுக்க",
@@ -13,6 +12,7 @@ OC.L10N.register(
     "Favorite" : "விருப்பமான",
     "General" : "பொதுவான",
     "Close" : "மூடுக",
+    "Info" : "Info",
     "Unknown" : "தெரியாத",
     "Continue" : "Continue",
     "Back" : "பின்னுக்கு",

@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "Llwytho i lawr",
     "Settings" : "Gosodiadau",
-    "Info" : "Info",
     "Favorites" : "Ffefrynnau",
     "Videos" : "Fideos",
     "Archive" : "Archif",
@@ -16,6 +15,7 @@ OC.L10N.register(
     "General" : "Cyffredinol",
     "Account" : "Cyfrif",
     "Close" : "Cau",
+    "Info" : "Info",
     "Unknown" : "Anhysbys",
     "Copy public link" : "Copïo dolen gyhoeddus",
     "Back" : "Nôl",

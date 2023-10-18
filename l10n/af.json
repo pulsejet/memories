@@ -1,7 +1,6 @@
 { "translations": {
     "Download" : "Laai af",
     "Settings" : "Instellings",
-    "Info" : "Inligting",
     "Folders" : "Vouers",
     "Favorites" : "Gunstelinge",
     "Videos" : "Video's ",
@@ -16,6 +15,7 @@
     "General" : "Algemeen",
     "Account" : "Rekening",
     "Close" : "Sluit",
+    "Info" : "Inligting",
     "Continue" : "Gaan voort",
     "Public link" : "Openbare skakel",
     "Back" : "Terug",

@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "Eroflueden",
     "Settings" : "Astellungen",
-    "Info" : "Info",
     "Favorites" : "Favoriten",
     "Tags" : "Tags",
     "Edit" : "Änneren",
@@ -14,6 +13,7 @@ OC.L10N.register(
     "View in folder" : "Kuk am Dossier ",
     "General" : "Allgemeng",
     "Close" : "Zoumaachen",
+    "Info" : "Info",
     "Unknown" : "Onbekannt",
     "Continue" : "Weider",
     "Back" : "Zeréck",

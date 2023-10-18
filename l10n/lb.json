@@ -1,7 +1,6 @@
 { "translations": {
     "Download" : "Eroflueden",
     "Settings" : "Astellungen",
-    "Info" : "Info",
     "Favorites" : "Favoriten",
     "Tags" : "Tags",
     "Edit" : "Änneren",
@@ -12,6 +11,7 @@
     "View in folder" : "Kuk am Dossier ",
     "General" : "Allgemeng",
     "Close" : "Zoumaachen",
+    "Info" : "Info",
     "Unknown" : "Onbekannt",
     "Continue" : "Weider",
     "Back" : "Zeréck",

@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "Descargar",
     "Settings" : "Configuraciones ",
-    "Info" : "Info",
     "Folders" : "Carpetas",
     "Favorites" : "Favoritos",
     "Videos" : "Videos",
@@ -20,6 +19,7 @@ OC.L10N.register(
     "General" : "General",
     "Account" : "Cuenta",
     "Close" : "Cerrar",
+    "Info" : "Info",
     "Unknown" : "Desconocido",
     "Continue" : "Continuar",
     "Public link" : "Liga pública",

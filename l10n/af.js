@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "Laai af",
     "Settings" : "Instellings",
-    "Info" : "Inligting",
     "Folders" : "Vouers",
     "Favorites" : "Gunstelinge",
     "Videos" : "Video's ",
@@ -18,6 +17,7 @@ OC.L10N.register(
     "General" : "Algemeen",
     "Account" : "Rekening",
     "Close" : "Sluit",
+    "Info" : "Inligting",
     "Continue" : "Gaan voort",
     "Public link" : "Openbare skakel",
     "Back" : "Terug",

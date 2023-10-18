@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "Pellgargañ",
     "Settings" : "Arventennoù",
-    "Info" : "Titouroù",
     "Favorites" : "Pennrolloù",
     "Videos" : "Videoioù",
     "Tags" : "Klavioù",
@@ -16,6 +15,7 @@ OC.L10N.register(
     "General" : "Hollek",
     "Account" : "Kont",
     "Close" : "Seriñ",
+    "Info" : "Titouroù",
     "Unknown" : "Dianv",
     "Continue" : "Kendec'hel",
     "Copy public link" : "Eilañ al liamm foran",

@@ -8,7 +8,6 @@ OC.L10N.register(
     "People (Recognize)" : "Lidé (rozpoznání)",
     "People" : "Lidé",
     "People (Face Recognition)" : "Lidé (rozpoznání obličejů)",
-    "Info" : "Informace",
     "Timeline" : "Časová osa",
     "Folders" : "Složky",
     "Favorites" : "Oblíbené",
@@ -82,6 +81,7 @@ OC.L10N.register(
     "Choose the root for the folders view" : "Zvolte kořen pro zobrazení složek",
     "Are you sure you want to log out {user}?" : "Opravdu chcete {user} odhlásit?",
     "Close" : "Zavřít",
+    "Info" : "Informace",
     "{photoCount} photos" : "{photoCount} fotek",
     "Failed to load some photos" : "Některé fotky se nepodařilo načíst",
     "Failed to update setting" : "Nastavení se nepodařilo zaktualizovat",
@@ -205,6 +205,8 @@ OC.L10N.register(
     "VA-API device ({dev}) has incorrect permissions" : "Na VA-API zařízení ({dev}) nejsou správně nastavená práva",
     "VA-API device status: {status}" : "Stav VA-API zařízení: {status}",
     "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:" : "Vzpomínky používají pro překódovávání nástroj go-vod. Ten je možné spouštět externě (např. ve zvlášť Docker containeru kvůli hardwarové akceleraci) nebo použít jeho vestavěnou podobu. Pokud chcete použít externí podobu, zapněte následující předvolby a postupujte podle pokynů v dokumentaci:",
+    "If you want to use an external go-vod, make sure you have the correct tag." : "Pokud chcete použít externí go-vod, zajistěte, že máte správný štítek.",
+    "Enable external transcoder" : "Zapnout externí nástroj pro překódování",
     "Binary path (local only)" : "Popis umístění spustitelného souboru (pouze lokální)",
     "Bind address (local only)" : "Adresa, na kterou navázat (pouze místní)",
     "Connection address (same as bind if local)" : "Adresa pro připojení (pokud lokální, stejná jako ta pro navázání na)",
@@ -511,6 +513,7 @@ OC.L10N.register(
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Odebrat {count} položku z alba?","Odebrat {count} položky z alba?","Odebrat {count} položek z alba?","Odebrat {count} položky z alba?"],
     "This will not delete your original files." : "Toto nesmaže vaše původní soubory.",
     "You are about to download {count} items." : "Chystáte se stáhnout si {count} položek.",
-    "You are about to move {count} items." : "Chystáte se přesunout {count} položek."
+    "You are about to move {count} items." : "Chystáte se přesunout {count} položek.",
+    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "Na začátku či konci názvu složky „{folder}“ se nachází prázdný znak. To může vést k chybám a měli byste napravit."
 },
 "nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;");

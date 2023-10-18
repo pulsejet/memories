@@ -1,7 +1,6 @@
 { "translations": {
     "Download" : "Ներբեռնել",
     "Settings" : "կարգավորումներ",
-    "Info" : "Info",
     "Favorites" : "Սիրվածներ",
     "Edit" : "մշակել",
     "Photos" : "Նկարներ",
@@ -9,6 +8,7 @@
     "Delete" : "հեռացնել",
     "General" : "Ընդհանուր",
     "Close" : "Փակել",
+    "Info" : "Info",
     "Unknown" : "Անհայտ",
     "Continue" : "Շարունակել",
     "Save" : "Պահպանել",

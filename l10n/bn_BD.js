@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "ডাউনলোড",
     "Settings" : "সেটিংস",
-    "Info" : "Info",
     "Favorites" : "প্রিয়জন",
     "Tags" : "ট্যাগ",
     "Edit" : "সম্পাদনা",
@@ -12,6 +11,7 @@ OC.L10N.register(
     "Favorite" : "প্রিয়জন",
     "General" : "সাধারণ",
     "Close" : "বন্ধ",
+    "Info" : "Info",
     "Unknown" : "অজানা",
     "Continue" : "চালিয়ে যাও",
     "Back" : "পেছনে যাও",

@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "Discargar",
     "Settings" : "Configurationes",
-    "Info" : "Info",
     "Favorites" : "Favoritos",
     "Tags" : "Etiquettas",
     "Edit" : "Modificar",
@@ -14,6 +13,7 @@ OC.L10N.register(
     "View in folder" : "Vider in dossier",
     "General" : "General",
     "Close" : "Clauder",
+    "Info" : "Info",
     "Unknown" : "Incognite",
     "Back" : "Retro",
     "Save" : "Salveguardar",

@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "چۈشۈر",
     "Settings" : "تەڭشەكلەر",
-    "Info" : "Info",
     "Favorites" : "يىغقۇچ",
     "Tags" : "بەلگەلەر",
     "Edit" : "تەھرىر",
@@ -12,6 +11,7 @@ OC.L10N.register(
     "Favorite" : "يىغقۇچ",
     "General" : "ئادەتتىكى",
     "Close" : "ياپ",
+    "Info" : "Info",
     "Save" : "ساقلا",
     "Search" : "Search",
     "Month" : "ئاي",

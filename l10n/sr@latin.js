@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "Preuzmi",
     "Settings" : "Поставке",
-    "Info" : "Info",
     "Favorites" : "Omiljene",
     "Videos" : "Video",
     "Tags" : "Oznake",
@@ -14,6 +13,7 @@ OC.L10N.register(
     "Favorite" : "Omiljene",
     "General" : "Opšte",
     "Close" : "Zatvori",
+    "Info" : "Info",
     "Back" : "Nazad",
     "Save" : "Sačuvaj",
     "Search" : "Traži",

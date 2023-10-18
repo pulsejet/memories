@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "Ներբեռնել",
     "Settings" : "կարգավորումներ",
-    "Info" : "Info",
     "Favorites" : "Սիրվածներ",
     "Edit" : "մշակել",
     "Photos" : "Նկարներ",
@@ -11,6 +10,7 @@ OC.L10N.register(
     "Delete" : "հեռացնել",
     "General" : "Ընդհանուր",
     "Close" : "Փակել",
+    "Info" : "Info",
     "Unknown" : "Անհայտ",
     "Continue" : "Շարունակել",
     "Save" : "Պահպանել",

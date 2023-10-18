@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "Shkarko",
     "Settings" : "Rregullimet",
-    "Info" : "Info",
     "Folders" : "Dosjet",
     "Favorites" : "Favorites",
     "Videos" : "Videot",
@@ -20,6 +19,7 @@ OC.L10N.register(
     "General" : "Të përgjithshme",
     "Account" : "Llogari",
     "Close" : "Mbylleni",
+    "Info" : "Info",
     "Unknown" : "I panjohur",
     "Continue" : "Vazhdo",
     "Back" : "Prapa",

@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "Last ned",
     "Settings" : "Innstillingar",
-    "Info" : "Info",
     "Favorites" : "Favorittar",
     "Videos" : "Video",
     "Tags" : "Emneord",
@@ -14,6 +13,7 @@ OC.L10N.register(
     "Favorite" : "Favoritt",
     "General" : "Generelt",
     "Close" : "Lat att",
+    "Info" : "Info",
     "Unknown" : "Ukjend",
     "Continue" : "Gå vidare",
     "Back" : "Tilbake",
