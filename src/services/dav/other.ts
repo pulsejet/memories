@@ -1,7 +1,7 @@
 import { getFiles } from './base';
 import { generateUrl } from '@nextcloud/router';
 import { IPhoto } from '../../types';
-import { dirname } from 'path';
+import { API } from '../API';
 
 /**
  * Open the files app with the given photo
@@ -21,13 +21,15 @@ export async function viewInFolder(photo: IPhoto) {
  */
 export function viewInFolderUrl({ filename, fileid }: { filename: string; fileid: number }) {
   // ensure dirPath starts with a slash
-  let dirPath = dirname(filename);
+  let dirPath = filename.substring(0, filename.lastIndexOf('/'));
   if (!dirPath.startsWith('/')) {
     dirPath = `/${dirPath}`;
   }
 
-  return generateUrl(`/apps/files/?dir={dirPath}&scrollto={fileid}&openfile={fileid}`, {
-    fileid,
-    dirPath,
+  /** @todo Doesn't seem to work on Nextcloud 28 */
+  return API.Q(generateUrl('/apps/files/'), {
+    dir: dirPath,
+    scrollto: fileid,
+    openfile: fileid,
   });
 }
