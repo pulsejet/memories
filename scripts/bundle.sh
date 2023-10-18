@@ -7,7 +7,6 @@ mkdir -p /tmp/memories
 cp -R appinfo l10n img js lib templates COPYING README.md CHANGELOG.md exiftest* composer* /tmp/memories
 
 cd /tmp
-rm -f memories/appinfo/screencap* memories/js/*.map
 rm -rf memories.tar.gz
 
 cd memories

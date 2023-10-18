@@ -15,7 +15,7 @@ console.info('Building', appName, appVersion, '\n');
 module.exports = {
   target: 'web',
   mode: buildMode,
-  devtool: isDev ? 'cheap-source-map' : false,
+  devtool: 'source-map',
   cache: isDev,
 
   entry: {
@@ -105,12 +105,6 @@ module.exports = {
     // https://webpack.js.org/blog/2020-10-10-webpack-5-release/#automatic-nodejs-polyfills-removed
     new NodePolyfillPlugin({
       includeAliases: ['stream', 'process'], // webdav
-    }),
-
-    // Configure source map public path
-    new webpack.SourceMapDevToolPlugin({
-      filename: '[file].map',
-      publicPath: path.join('/apps/', process.env.npm_package_name, '/js/'),
     }),
 
     // Bundle service worker
