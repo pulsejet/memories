@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "ទាញយក",
     "Settings" : "ការកំណត់",
-    "Info" : "Info",
     "Favorites" : "Favorites",
     "Tags" : "ស្លាក",
     "Edit" : "កែប្រែ",
@@ -11,6 +10,7 @@ OC.L10N.register(
     "Delete" : "លុប",
     "General" : "ទូទៅ",
     "Close" : "បិទ",
+    "Info" : "Info",
     "Continue" : "បន្ត",
     "Back" : "ត្រឡប់ក្រោយ",
     "Save" : "រក្សាទុក",

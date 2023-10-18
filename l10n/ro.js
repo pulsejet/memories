@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "Descărcare",
     "Settings" : "Setări",
-    "Info" : "Info",
     "Folders" : "Director",
     "Favorites" : "Favorite",
     "Videos" : "Fișiere video",
@@ -19,6 +18,7 @@ OC.L10N.register(
     "General" : "General",
     "Account" : "Cont",
     "Close" : "Închide",
+    "Info" : "Info",
     "Unknown" : "Necunoscut",
     "Continue" : "Continuă",
     "No items" : "Nu există elemente",

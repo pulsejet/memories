@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "Lejupielādēt",
     "Settings" : "Iestatījumi",
-    "Info" : "Info",
     "Folders" : "Mapes",
     "Favorites" : "Favorīti",
     "Videos" : "Video",
@@ -20,6 +19,7 @@ OC.L10N.register(
     "General" : "Vispārīgs",
     "Account" : "Konts",
     "Close" : "Aizvērt",
+    "Info" : "Info",
     "Unknown" : "Nezināms",
     "Continue" : "Turpināt",
     "Copy the public link" : "Kopējiet publisko saiti",

@@ -1,7 +1,6 @@
 { "translations": {
     "Download" : "Descargar",
     "Settings" : "Ajustes",
-    "Info" : "Info",
     "Folders" : "Carpetas",
     "Favorites" : "Favoritos",
     "Videos" : "Videos",
@@ -19,6 +18,7 @@
     "General" : "General",
     "Account" : "Cuenta",
     "Close" : "Cerrar",
+    "Info" : "Info",
     "Unknown" : "Desconocido",
     "Continue" : "Continuar",
     "No items" : "No hay elementos",

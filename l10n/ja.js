@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "ダウンロード",
     "Settings" : "設定",
-    "Info" : "情報",
     "Timeline" : "タイムライン",
     "Folders" : "フォルダー",
     "Favorites" : "お気に入り",
@@ -23,6 +22,7 @@ OC.L10N.register(
     "General" : "一般",
     "Account" : "アカウント",
     "Close" : "閉じる",
+    "Info" : "情報",
     "Performance" : "パフォーマンス",
     "Unknown" : "不明",
     "Continue" : "続ける",

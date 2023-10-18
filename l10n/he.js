@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "הורדה",
     "Settings" : "הגדרות",
-    "Info" : "פרטים",
     "Timeline" : "ציר זמן",
     "Folders" : "תיקייה",
     "Favorites" : "מועדפים",
@@ -23,6 +22,7 @@ OC.L10N.register(
     "General" : "כללי",
     "Account" : "חשבון",
     "Close" : "סגירה",
+    "Info" : "פרטים",
     "Performance" : "ביצועים",
     "Unknown" : "לא ידוע",
     "Continue" : "להמשך",

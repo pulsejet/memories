@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "ດາວໂຫລດ",
     "Settings" : "ການຕັ້ງຄ່າ",
-    "Info" : "ຂໍ້ມຸນ",
     "Favorites" : "ລາຍການທີ່ມັກ",
     "Videos" : "ວິດີໂອ",
     "Tags" : "ປ້າຍກຳກັບ",
@@ -14,6 +13,7 @@ OC.L10N.register(
     "View in folder" : "ເບິ່ງໃນໂຟນເດີ",
     "General" : "ທົ່ວໄປ",
     "Close" : "ປິດ",
+    "Info" : "ຂໍ້ມຸນ",
     "Unknown" : "ບໍ່ຮູ້",
     "Continue" : "ສືບຕໍ່",
     "Back" : "ຫຼັງ",

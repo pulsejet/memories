@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "ჩამოტვირთვა",
     "Settings" : "პარამეტრები",
-    "Info" : "ინფორმაცია",
     "Folders" : "დირექტორიები",
     "Favorites" : "რჩეულები",
     "Videos" : "ვიდეოები",
@@ -20,6 +19,7 @@ OC.L10N.register(
     "General" : "ზოგადი",
     "Account" : "ანგარიში",
     "Close" : "დახურვა",
+    "Info" : "ინფორმაცია",
     "Unknown" : "უცნობია",
     "Continue" : "გაგრძელება",
     "Back" : "უკან",

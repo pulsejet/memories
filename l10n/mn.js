@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "Татах",
     "Settings" : "Тохиргоо",
-    "Info" : "Info",
     "Folders" : "Хавтсууд",
     "Favorites" : "Онцолсон",
     "Videos" : "Бичлэгүүд",
@@ -20,6 +19,7 @@ OC.L10N.register(
     "General" : "Ерөнхий",
     "Account" : "аккаунт",
     "Close" : "Хаах",
+    "Info" : "Info",
     "Unknown" : "Үл танигдах зүйл",
     "Continue" : "үргэлжлүүлэх",
     "Back" : "буцах",

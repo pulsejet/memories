@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "Yüklə",
     "Settings" : "Quraşdırmalar",
-    "Info" : "Info",
     "Favorites" : "Sevimlilər",
     "Archive" : "Arxiv",
     "Tags" : "Işarələr",
@@ -13,6 +12,7 @@ OC.L10N.register(
     "Favorite" : "İstəkli",
     "General" : "Ümumi",
     "Close" : "Bağla",
+    "Info" : "Info",
     "Save" : "Saxla",
     "Search" : "Axtarış",
     "Save changes" : "Dəyişiklikləri yaddaşa ver",

@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "Tải xuống",
     "Settings" : "Cài đặt",
-    "Info" : "Thông tin",
     "Folders" : "Thư mục",
     "Favorites" : "Ưa thích",
     "Videos" : "Phim",
@@ -19,6 +18,7 @@ OC.L10N.register(
     "General" : "Cài đặt chung",
     "Account" : "Tài khoản",
     "Close" : "Đóng",
+    "Info" : "Thông tin",
     "Unknown" : "Không xác định",
     "Continue" : "Tiếp tục",
     "Copy public link" : "Sao chép liên kết công khai",

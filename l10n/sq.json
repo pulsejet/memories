@@ -1,7 +1,6 @@
 { "translations": {
     "Download" : "Shkarko",
     "Settings" : "Rregullimet",
-    "Info" : "Info",
     "Folders" : "Dosjet",
     "Favorites" : "Favorites",
     "Videos" : "Videot",
@@ -18,6 +17,7 @@
     "General" : "Të përgjithshme",
     "Account" : "Llogari",
     "Close" : "Mbylleni",
+    "Info" : "Info",
     "Unknown" : "I panjohur",
     "Continue" : "Vazhdo",
     "Back" : "Prapa",

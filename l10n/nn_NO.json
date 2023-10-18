@@ -1,7 +1,6 @@
 { "translations": {
     "Download" : "Last ned",
     "Settings" : "Innstillingar",
-    "Info" : "Info",
     "Favorites" : "Favorittar",
     "Videos" : "Video",
     "Tags" : "Emneord",
@@ -12,6 +11,7 @@
     "Favorite" : "Favoritt",
     "General" : "Generelt",
     "Close" : "Lat att",
+    "Info" : "Info",
     "Unknown" : "Ukjend",
     "Continue" : "Gå vidare",
     "Back" : "Tilbake",

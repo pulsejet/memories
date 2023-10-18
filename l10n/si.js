@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Download" : "බාගන්න",
     "Settings" : "සැකසුම්",
-    "Info" : "තොරතුරු",
     "Favorites" : "ප්‍රියතම",
     "Archive" : "සංරක්ෂණය",
     "Edit" : "සංස්කරණය",
@@ -14,6 +13,7 @@ OC.L10N.register(
     "General" : "සමාන්‍යය",
     "Account" : "ගිණුම",
     "Close" : "වසන්න",
+    "Info" : "තොරතුරු",
     "Back" : "ආපසු",
     "Save" : "සුරකින්න",
     "Search" : "සොයන්න",
