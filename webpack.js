@@ -117,6 +117,7 @@ module.exports = {
     new WorkboxPlugin.InjectManifest({
       swSrc: path.resolve(path.join('src', 'service-worker.js')),
       swDest: 'memories-service-worker.js',
+      maximumFileSizeToCacheInBytes: (isDev ? 10 : 4) * 1024 * 1024,
     }),
 
     // Make appName & appVersion available as a constant
