@@ -52,9 +52,8 @@ __webpack_public_path__ = generateFilePath('memories', '', 'js/');
 
 // Generate client id for this instance
 // Does not need to be cryptographically secure
-const getClientId = (): string => Math.random().toString(36).substring(2, 15).padEnd(12, '0');
-_m.video.clientId = getClientId();
-_m.video.clientIdPersistent = localStorage.getItem('videoClientIdPersistent') ?? getClientId();
+_m.video.clientId = Math.random().toString(36).substring(2, 15).padEnd(12, '0');
+_m.video.clientIdPersistent = localStorage.getItem('videoClientIdPersistent') ?? _m.video.clientId;
 localStorage.setItem('videoClientIdPersistent', _m.video.clientIdPersistent);
 
 // Turn on virtual keyboard support
