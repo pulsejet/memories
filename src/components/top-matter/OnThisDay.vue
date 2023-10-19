@@ -230,6 +230,7 @@ $mobHeight: 165px;
     overflow-y: hidden;
     scroll-behavior: smooth;
     border-radius: 10px;
+    will-change: scroll-position;
   }
 
   :deep .dir-btn button {

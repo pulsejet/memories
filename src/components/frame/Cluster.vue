@@ -337,6 +337,7 @@ $namemargin: 10px;
 
     > .overlay {
       pointer-events: none;
+      overflow: hidden;
       position: absolute;
       top: 0;
       left: 0;
