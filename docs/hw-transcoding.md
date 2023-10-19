@@ -12,7 +12,7 @@ Newer Intel processors come with a feature called QuickSync that can significant
 
 Note: VA-API acceleration may also work with some AMD GPUs.
 
-To configure VAAPI, you need to have `/dev/dri` available to the Nextcloud instance with the `www-data` in the group owning the drivers. You also need the correct drivers and a compatible version of ffmpeg installed.
+To configure VAAPI, you need to have `/dev/dri` available to the Nextcloud instance with the `www-data` in the group owning the drivers. You also need the correct drivers and a compatible version of ffmpeg installed (some older versions of ffmpeg are not compatible with modern hardware).
 
 NVIDIA GPUs support hardware transcoding using NVENC.
 
@@ -28,7 +28,7 @@ NVIDIA GPUs support hardware transcoding using NVENC.
 
 !!! success "Recommmended Configuration"
 
-    The easiest and recommended way to use hardware transcoding is to use an external transcoder.
+    The easiest and recommended way to use hardware transcoding in a docker environment is to use an external transcoder.
     This setup utilizes a separate docker container that contains the hardware drivers and ffmpeg.
     If you cannot use an external docker container, other installation methods are also possible (see below).
 
@@ -99,7 +99,7 @@ You can specify the image to build in the `docker-compose.yml` file.
 
 ## Internal Transcoder
 
-Memories ships with an internal transcoder binary that you can directly use. In this case, you must install the drivers and ffmpeg on the same host as Nextcloud, and Memories will automatically handling starting and communicating with go-vod. This is also the default setup when you enable transcoding without hardware acceleration.
+Memories ships with an internal transcoder binary that you can directly use. In this case, you must install the drivers and ffmpeg on the same host as Nextcloud, and Memories will automatically handle starting and communicating with go-vod. This is also the default setup when you enable transcoding without hardware acceleration.
 
 !!! danger "Advanced usage only"
 
@@ -113,7 +113,9 @@ Memories ships with an internal transcoder binary that you can directly use. In 
 
 ### Bare Metal
 
-If you are running Nextcloud on bare metal, you can install the drivers and ffmpeg directly on the host. You need to make sure that the `www-data` user has access to the drivers. You can do this by adding the `www-data` user to the appropriate groups.
+If you are running Nextcloud on bare metal, you can install the drivers and ffmpeg directly on the host. If you are running nextcloud in a Virtual Magine or LXC container configuration, you will also need to pass through the hardware resource to the nextcloud machine. Some guides that may help with this: [Proxmox VM](https://pve.proxmox.com/wiki/PCI_Passthrough) / [LXC Container](https://gist.github.com/packerdl/a4887c30c38a0225204f451103d82ac5?permalink_comment_id=4471564). 
+
+On the nextcloud machine, you need to make sure that the `www-data` user has access to the drivers. You can do this by adding the `www-data` user to the appropriate groups.
 
 ```bash
 ## Ubuntu
@@ -133,6 +135,7 @@ sudo chmod 666 /dev/dri/renderD128
 ```
 
 You can run a test using a sample video file to check if VA-API is working correctly for the `www-data` user:
+Note: It may be best to run the following test from within your nextcloud data directory (often located at `/mnt/ncdata/<user>/files/)
 
 ```bash
 # download sample or or use any other video file
@@ -146,7 +149,9 @@ sudo -u www-data \
   output-www-data.mp4
 ```
 
-In some cases, you may need to build the drivers and `ffmpeg` from source. For example, the available version of the media driver for the current debian image used by Nextcloud only supports upto Ice Lake CPUs. [This script](https://github.com/pulsejet/go-vod/blob/master/build-ffmpeg.sh) for VA-API or [this one](https://github.com/pulsejet/go-vod/blob/master/build-ffmpeg-nvidia.sh) for NVENC might be useful.
+!!! tip "Beware of old FFMPEG and driver versions"
+
+In some cases, package repositories may distribute old ffmpeg versions that do not support some modern hardware (For example, the available version of the media driver for the current debian image used by Nextcloud only supports up to the 10th generation Intel Ice Lake CPUs). To ensure you have a compatible version, you may want to remove your existing ffmpeg version and build the drivers and `ffmpeg` from source.  [This script](https://github.com/pulsejet/go-vod/blob/master/build-ffmpeg.sh) for VA-API or [this one](https://github.com/pulsejet/go-vod/blob/master/build-ffmpeg-nvidia.sh) for NVENC might be useful.
 
 ### Docker
 
