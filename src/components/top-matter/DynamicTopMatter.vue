@@ -35,7 +35,7 @@ export default defineComponent({
     },
 
     currentmatter(): Component | null {
-      if (this.routeIsFolders) {
+      if (this.routeIsFolders || this.routeIsFolderShare) {
         return FolderDynamicTopMatter;
       } else if (this.routeIsPlaces) {
         return PlacesDynamicTopMatterVue;
@@ -53,8 +53,8 @@ export default defineComponent({
         return this.$route.params.name || '';
       }
 
-      // Show share name for public shares
-      if (this.routeIsPublic) {
+      // Show share name for public shares, except for folder share, because the name is already present in the breadcrumbs
+      if (this.routeIsPublic && !this.routeIsFolderShare) {
         return PublicShareHeader.title;
       }
 

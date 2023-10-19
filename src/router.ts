@@ -110,7 +110,7 @@ export const routes: { [key in RouteId]: RouteConfig } = {
   },
 
   FolderShare: {
-    path: '/s/:token',
+    path: '/s/:token/:path*',
     component: Timeline,
     name: 'folder-share',
     props: (route: Route) => ({ rootTitle: t('memories', 'Shared Folder') }),

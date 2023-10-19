@@ -58,18 +58,17 @@ export default defineComponent({
   computed: {
     /** Open folder */
     target() {
-      const path = this.data.path
-        .split('/')
-        .filter((x) => x)
-        .slice(2) as string[];
-
-      // Remove base path if present
-      const basePath = this.config.folders_path.split('/').filter((x) => x);
-      if (path.length >= basePath.length && path.slice(0, basePath.length).every((x, i) => x === basePath[i])) {
-        path.splice(0, basePath.length);
+      let currentPath: string[] | string = this.$route.params.path || [];
+      if (typeof currentPath === 'string') {
+        currentPath = currentPath.split('/');
       }
 
-      return { name: 'folders', params: { path } };
+      return {
+        name: this.$route.name,
+        params: {
+          path: [...currentPath, this.data.name],
+        },
+      };
     },
   },
 
@@ -88,12 +87,6 @@ export default defineComponent({
     refreshPreviews() {
       // Reset state
       this.error = false;
-
-      // Check if valid path present
-      if (!this.data.path) {
-        this.error = true;
-        return;
-      }
 
       // Get preview infos
       const previews = this.data.previews;

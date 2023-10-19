@@ -84,7 +84,16 @@ class FsManager
                 throw new \Exception('Share is not a folder');
             }
 
-            $root->addFolder($share);
+            if ($path = $this->getRequestFolder()) {
+                try {
+                    $node = $share->get(Util::sanitizePath($path));
+                } catch (\OCP\Files\NotFoundException $e) {
+                    throw new \Exception("Folder not found: {$e->getMessage()}");
+                }
+                $root->addFolder($node);
+            } else {
+                $root->addFolder($share);
+            }
 
             return $root;
         }

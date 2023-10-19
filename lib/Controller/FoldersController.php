@@ -15,12 +15,15 @@ class FoldersController extends GenericApiController
 {
     /**
      * @NoAdminRequired
+     *
+     * @PublicPage
      */
     public function sub(string $folder): Http\Response
     {
         return Util::guardEx(function () use ($folder) {
             try {
-                $node = Util::getUserFolder()->get($folder);
+                $rootNode = $this->fs->getShareNode() ?? Util::getUserFolder();
+                $node = $rootNode->get($folder);
             } catch (\OCP\Files\NotFoundException) {
                 throw Exceptions::NotFound('Folder not found');
             }
@@ -60,7 +63,6 @@ class FoldersController extends GenericApiController
                 return [
                     'fileid' => $node->getId(),
                     'name' => $node->getName(),
-                    'path' => $node->getPath(),
                     'previews' => $this->tq->getRootPreviews($root),
                 ];
             }, $folders);
