@@ -731,7 +731,7 @@ export default defineComponent({
       right: 40px;
     }
     &:not(.scrolling) {
-      > .ticks-container > .tick {
+      > .ticks-container {
         display: none;
       }
     }
