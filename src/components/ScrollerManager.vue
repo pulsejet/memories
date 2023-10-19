@@ -35,14 +35,16 @@
       </div>
     </span>
 
-    <div
-      v-for="tick of visibleTicks"
-      :key="tick.key"
-      class="tick"
-      :class="{ dash: !tick.text }"
-      :style="{ transform: `translateY(calc(${tick.top}px - 50%))` }"
-    >
-      <span v-if="tick.text">{{ tick.text }}</span>
+    <div class="ticks-container fill-block">
+      <div
+        v-for="tick of visibleTicks"
+        :key="tick.key"
+        class="tick"
+        :class="{ dash: !tick.text }"
+        :style="{ transform: `translateY(calc(${tick.top}px - 50%))` }"
+      >
+        <span v-if="tick.text">{{ tick.text }}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -632,7 +634,14 @@ export default defineComponent({
     visibility: hidden;
   }
 
-  > .tick {
+  > .ticks-container {
+    top: 0;
+    left: 0;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  > .ticks-container > .tick {
     pointer-events: none;
     position: absolute;
     font-size: 0.75em;
@@ -721,11 +730,11 @@ export default defineComponent({
       pointer-events: all;
     }
 
-    > .tick {
+    > .ticks-container > .tick {
       right: 40px;
     }
     &:not(.scrolling) {
-      > .tick {
+      > .ticks-container > .tick {
         display: none;
       }
     }
