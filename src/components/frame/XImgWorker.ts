@@ -1,3 +1,5 @@
+/// <reference path='../../../node_modules/typescript/lib/lib.webworker.d.ts' />
+
 import { CacheExpiration } from 'workbox-expiration';
 import { workerExport } from '../../worker';
 

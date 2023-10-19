@@ -1,3 +1,5 @@
+/// <reference path='../../../node_modules/typescript/lib/lib.webworker.d.ts' />
+
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
 import { NetworkFirst, CacheFirst } from 'workbox-strategies';
 import { registerRoute } from 'workbox-routing';
