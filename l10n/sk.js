@@ -106,6 +106,7 @@ OC.L10N.register(
     "Refresh" : "Obnoviť",
     "Password protected" : "Chránené heslom",
     "Expires" : "Vyprší",
+    "Editable" : "Upraviteľné",
     "Read only" : "Iba na čítanie",
     "Link copied to clipboard" : "Odkaz bol skopírovaný do schránky",
     "Share File" : "Zdieľať súbor",

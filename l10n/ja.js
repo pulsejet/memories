@@ -27,6 +27,7 @@ OC.L10N.register(
     "Unknown" : "不明",
     "Continue" : "続ける",
     "Template" : "テンプレート",
+    "No items" : "アイテムがありません",
     "Shared by {user}" : "{user} から共有されました",
     "Copy public link" : "公開リンクをコピー",
     "Public link" : "公開リンク",
