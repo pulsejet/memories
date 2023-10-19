@@ -21,8 +21,14 @@ class FoldersController extends GenericApiController
     public function sub(string $folder): Http\Response
     {
         return Util::guardEx(function () use ($folder) {
+            $share = $this->fs->getShareNode();
+            if ($share instanceof Folder) {
+                $rootNode = $share;
+            } else {
+                $rootNode = Util::getUserFolder();
+            }
+
             try {
-                $rootNode = $this->fs->getShareNode() ?? Util::getUserFolder();
                 $node = $rootNode->get($folder);
             } catch (\OCP\Files\NotFoundException) {
                 throw Exceptions::NotFound('Folder not found');
