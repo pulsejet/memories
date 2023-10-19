@@ -1,6 +1,8 @@
 import { CacheExpiration } from 'workbox-expiration';
 import { workerExport } from '../../worker';
 
+declare var self: ServiceWorkerGlobalScope;
+
 interface BlobCallback {
   resolve: (blob: Blob) => void;
   reject: (err: Error) => void;

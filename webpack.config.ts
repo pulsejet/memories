@@ -109,7 +109,7 @@ module.exports = {
 
     // Bundle service worker
     new WorkboxPlugin.InjectManifest({
-      swSrc: path.resolve(path.join('src', 'service-worker.js')),
+      swSrc: path.resolve(path.join('src', 'service-worker.ts')),
       swDest: 'memories-service-worker.js',
       maximumFileSizeToCacheInBytes: (isDev ? 10 : 4) * 1024 * 1024,
     }),

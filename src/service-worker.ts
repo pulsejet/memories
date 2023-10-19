@@ -3,6 +3,8 @@ import { NetworkFirst, CacheFirst } from 'workbox-strategies';
 import { registerRoute } from 'workbox-routing';
 import { ExpirationPlugin } from 'workbox-expiration';
 
+declare var self: ServiceWorkerGlobalScope;
+
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 
