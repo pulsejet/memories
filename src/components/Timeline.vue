@@ -46,7 +46,7 @@
 
         <template v-else>
           <Photo
-            class="photo"
+            class="photo top-left"
             v-for="photo of item.photos"
             :key="photo.key"
             :style="{
@@ -1367,9 +1367,6 @@ export default defineComponent({
 .recycler .photo {
   contain: strict;
   display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
   cursor: pointer;
   height: 100%;
   transition:

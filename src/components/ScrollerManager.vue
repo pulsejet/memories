@@ -35,7 +35,7 @@
       </div>
     </span>
 
-    <div class="ticks-container fill-block">
+    <div class="ticks-container top-left fill-block">
       <div
         v-for="tick of visibleTicks"
         :key="tick.key"
@@ -635,9 +635,6 @@ export default defineComponent({
   }
 
   > .ticks-container {
-    top: 0;
-    left: 0;
-    position: absolute;
     pointer-events: none;
   }
 

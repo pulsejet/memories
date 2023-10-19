@@ -19,7 +19,7 @@
       <LMarker v-for="cluster of clusters" :key="cluster.id" :lat-lng="cluster.center" @click="zoomTo(cluster)">
         <LIcon :icon-anchor="[24, 24]" :className="clusterIconClass(cluster)">
           <div class="preview">
-            <div class="count" v-if="cluster.count > 1">
+            <div class="count top-left" v-if="cluster.count > 1">
               {{ cluster.count }}
             </div>
             <XImg
@@ -458,9 +458,6 @@ export default defineComponent({
   }
 
   .count {
-    position: absolute;
-    top: 0;
-    right: 0;
     background-color: var(--color-primary);
     color: var(--color-primary-text);
     padding: 0 4px;

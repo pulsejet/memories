@@ -1,5 +1,10 @@
 <template>
-  <div v-bind="themeDataAttr" ref="editor" class="viewer__image-editor" :class="{ loading: !imageEditor }" />
+  <div
+    v-bind="themeDataAttr"
+    ref="editor"
+    class="viewer__image-editor top-left fill-block"
+    :class="{ loading: !imageEditor }"
+  />
 </template>
 
 <script lang="ts">
@@ -343,12 +348,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 // Take full screen size ()
 .viewer__image-editor {
-  position: absolute;
   z-index: 10100;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
   background-color: black;
 }
 </style>

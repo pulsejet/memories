@@ -9,7 +9,7 @@
     }"
     :to="target"
   >
-    <div class="big-icon fill-block">
+    <div class="big-icon top-left fill-block">
       <FolderIcon class="icon" />
       <div class="name">{{ data.name }}</div>
     </div>
@@ -125,9 +125,6 @@ export default defineComponent({
 .big-icon {
   cursor: pointer;
   z-index: 100;
-  position: absolute;
-  top: 0;
-  left: 0;
   transition: opacity 0.2s ease-in-out;
 
   :deep .material-design-icon__svg {

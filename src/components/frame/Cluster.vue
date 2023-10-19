@@ -19,7 +19,7 @@
           :svg-tag="plus"
           @error="failed"
         />
-        <div v-if="title || subtitle" class="overlay fill-block" />
+        <div v-if="title || subtitle" class="overlay top-left fill-block" />
       </div>
     </div>
   </router-link>
@@ -338,9 +338,6 @@ $namemargin: 10px;
     > .overlay {
       pointer-events: none;
       overflow: hidden;
-      position: absolute;
-      top: 0;
-      left: 0;
       background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 10%, transparent 40%);
 
       .cluster.error &,

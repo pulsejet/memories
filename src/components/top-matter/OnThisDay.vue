@@ -4,7 +4,7 @@
       <div v-for="year of years" class="group" :key="year.year" @click="click(year)">
         <XImg class="fill-block" :src="year.url" />
 
-        <div class="overlay">
+        <div class="overlay top-left fill-block">
           {{ year.text }}
         </div>
       </div>
@@ -289,11 +289,6 @@ $mobHeight: 165px;
   }
 
   .overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
     background-color: rgba(0, 0, 0, 0.2);
     border-radius: 10px;
     display: flex;

@@ -5,6 +5,13 @@
   display: block;
 }
 
+// Go to top left corner with absolute positioning
+.top-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 // Hide scrollbar
 @mixin hide-scrollbar {
   scrollbar-width: none;

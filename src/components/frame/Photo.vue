@@ -56,7 +56,7 @@
           @error="error"
         />
         <video ref="video" v-if="videoUrl" :src="videoUrl" preload="none" muted playsinline disableRemotePlayback />
-        <div class="overlay fill-block" />
+        <div class="overlay top-left fill-block" />
       </div>
     </div>
   </div>
@@ -428,9 +428,6 @@ div.img-outer {
 
   > .overlay {
     pointer-events: none;
-    position: absolute;
-    top: 0;
-    left: 0;
     z-index: 3;
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, transparent 30%);
 
