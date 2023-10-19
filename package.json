@@ -23,10 +23,10 @@
   "license": "agpl",
   "private": true,
   "scripts": {
-    "build": "webpack --node-env production --progress --config webpack.js",
-    "dev": "webpack --node-env development --progress --config webpack.js",
-    "watch": "webpack --node-env development --progress --watch --config webpack.js",
-    "serve": "webpack serve --node-env development --progress --config webpack.js",
+    "build": "webpack --node-env production --progress",
+    "dev": "webpack --node-env development --progress",
+    "watch": "webpack --node-env development --progress --watch",
+    "serve": "webpack serve --node-env development --progress",
     "e2e": "playwright test"
   },
   "dependencies": {

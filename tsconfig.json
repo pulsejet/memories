@@ -9,7 +9,6 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
-    "jsx": "preserve",
     "useDefineForClassFields": true,
     "noImplicitThis": true,
     "noImplicitAny": true,
@@ -18,5 +17,10 @@
   },
   "vueCompilerOptions": {
     "target": 2.7
-  }
+  },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS",
+    }
+  },
 }
