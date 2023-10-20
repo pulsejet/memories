@@ -1,5 +1,5 @@
 <template>
-  <FolderGrid v-if="folders.length && !$route.query.recursive" :items="folders" />
+  <FolderGrid v-if="show" :items="folders" />
 </template>
 
 <script lang="ts">
@@ -28,6 +28,12 @@ export default defineComponent({
   },
 
   mixins: [UserMixin],
+
+  computed: {
+    show() {
+      return this.folders.length && !this.$route.query.recursive;
+    },
+  },
 
   methods: {
     async refresh(): Promise<boolean> {
