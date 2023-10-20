@@ -3,6 +3,10 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'docs/**'
+      - 'CHANGELOG.md'
+      - 'mkdocs.yml'
 
 permissions:
   contents: write
