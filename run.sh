@@ -33,8 +33,9 @@ function fetch_binary {
             echo "Fetched $URL successfully!"
             break
         fi
-        echo "Failed to fetch $URL, retrying in 10 seconds"
+        echo "Failed to fetch $URL"
         echo "Are you sure the host is reachable and running Memories v6+?"
+        echo "Retrying in 10 seconds..."
         sleep 10
     done
 }
