@@ -27,7 +27,7 @@ URL="$HOST/index.php/apps/memories/static/go-vod?arch=$ARCH"
 function fetch_binary {
     while true; do
         rm -f go-vod
-        curl -m 10 -s -o go-vod $URL
+        curl -L -k -f -m 10 -s -o go-vod $URL
         if [[ $? == 0 ]]; then
             chmod +x go-vod
             echo "Fetched $URL successfully!"
