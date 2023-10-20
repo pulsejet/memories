@@ -60,5 +60,3 @@ cd ..
 
 cd ..
 rm -rf qsvbuild
-
-rm -rf /var/lib/apt/lists/*

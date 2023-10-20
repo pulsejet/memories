@@ -37,5 +37,3 @@ make -j"$(nproc)"
 sudo make install
 sudo ldconfig
 cd ..
-
-rm -rf /var/lib/apt/lists/*
