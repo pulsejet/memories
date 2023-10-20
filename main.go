@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 )
 
 const (
-	VERSION = "0.1.17"
+	VERSION = "0.1.18"
 )
 
 type Handler struct {
@@ -250,9 +251,8 @@ func main() {
 	for _, arg := range os.Args[1:] {
 		if arg == "-version-monitor" {
 			c.VersionMonitor = true
-		} else if arg == "-test" {
-			// Just run the binary for test
-			log.Println("go-vod " + VERSION)
+		} else if arg == "-version" {
+			fmt.Print("go-vod " + VERSION)
 			return
 		} else {
 			// Config file
