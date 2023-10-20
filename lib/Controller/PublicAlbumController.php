@@ -81,6 +81,7 @@ class PublicAlbumController extends Controller
 
         // Share info
         $this->initialState->provideInitialState('share_title', $album['name']);
+        $this->initialState->provideInitialState('share_type', 'album');
 
         // Render main template
         $response = new PublicTemplateResponse(Application::APPNAME, 'main', PageController::getMainParams());

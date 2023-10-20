@@ -1,10 +1,13 @@
 import * as utils from '../../services/utils';
 
 // Shown in dynamic top matter (Timeline::viewName)
-export const title = utils.initstate.shareTitle;
+const title = utils.initstate.shareTitle;
+
+// Hide on album shares only
+const hide = utils.initstate.shareType === 'album';
 
 // Set up hook to monitor recycler scroll to show/hide header
-if (title) {
+if (title && hide) {
   const header = document.querySelector('header#header .header-appname') as HTMLElement;
   let isHidden = false; // cache state to avoid unnecessary DOM updates
 

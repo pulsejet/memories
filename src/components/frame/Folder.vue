@@ -58,15 +58,15 @@ export default defineComponent({
   computed: {
     /** Open folder */
     target() {
-      let currentPath: string[] | string = this.$route.params.path || [];
-      if (typeof currentPath === 'string') {
-        currentPath = currentPath.split('/');
+      let path: string[] | string = this.$route.params.path || [];
+      if (typeof path === 'string') {
+        path = path.split('/');
       }
 
       return {
         name: this.$route.name,
         params: {
-          path: [...currentPath, this.data.name],
+          path: [...path, this.data.name],
         },
       };
     },

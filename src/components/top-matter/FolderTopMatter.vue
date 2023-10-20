@@ -2,9 +2,14 @@
   <div class="top-matter">
     <NcBreadcrumbs>
       <NcBreadcrumb :title="rootFolderName" :to="{ name: $route.name }">
-        <template v-if="routeIsPublic" #icon>
-          <ShareIcon :size="20" />
-          <span class="share-name">{{ rootFolderName }}</span>
+        <template #icon>
+          <template v-if="routeIsPublic">
+            <ShareIcon :size="20" />
+            <span class="share-name">{{ rootFolderName }}</span>
+          </template>
+          <template v-else>
+            <HomeIcon :size="20" />
+          </template>
         </template>
       </NcBreadcrumb>
       <NcBreadcrumb
@@ -48,8 +53,8 @@ import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
 import * as utils from '../../services/utils';
-import * as PublicShareHeader from './PublicShareHeader';
 
+import HomeIcon from 'vue-material-design-icons/Home.vue';
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import TimelineIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import FoldersIcon from 'vue-material-design-icons/FolderMultiple.vue';
@@ -62,6 +67,7 @@ export default defineComponent({
     NcBreadcrumb,
     NcActions,
     NcActionButton,
+    HomeIcon,
     ShareIcon,
     TimelineIcon,
     FoldersIcon,
@@ -93,7 +99,7 @@ export default defineComponent({
     },
 
     rootFolderName(): string {
-      return this.routeIsPublic ? PublicShareHeader.title : 'Home';
+      return this.routeIsPublic ? this.initstate.shareTitle : this.t('memories', 'Home');
     },
   },
 
@@ -120,7 +126,7 @@ export default defineComponent({
     min-width: 0;
     height: unset;
     .share-name {
-      margin-left: 1em;
+      margin-left: 0.75em;
     }
   }
 }

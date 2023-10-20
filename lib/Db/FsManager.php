@@ -84,16 +84,23 @@ class FsManager
                 throw new \Exception('Share is not a folder');
             }
 
+            // Folder inside shared folder
             if ($path = $this->getRequestFolder()) {
+                $sanitized = Util::sanitizePath($path);
+                if (null === $sanitized) {
+                    throw new \Exception("Invalid parameter path: {$path}");
+                }
+
+                // Get subnode from share
                 try {
-                    $node = $share->get(Util::sanitizePath($path));
+                    $share = $share->get($sanitized);
                 } catch (\OCP\Files\NotFoundException $e) {
                     throw new \Exception("Folder not found: {$e->getMessage()}");
                 }
-                $root->addFolder($node);
-            } else {
-                $root->addFolder($share);
             }
+
+            // This internally checks if the node is a folder
+            $root->addFolder($share);
 
             return $root;
         }
@@ -331,6 +338,9 @@ class FsManager
         return $share;
     }
 
+    /**
+     * Get the share node from the request.
+     */
     public function getShareNode(): ?Node
     {
         $share = $this->getShareObject();
