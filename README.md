@@ -41,9 +41,10 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 
 ## 📱 Mobile Apps
 
-An Android client for Memories is available in early access on [Google Play](https://play.google.com/store/apps/details?id=gallery.memories).
-
-For automatic uploads, you can use the official Nextcloud mobile apps. These are available for [Android](https://play.google.com/store/apps/details?id=com.nextcloud.client) ([F-Droid](https://f-droid.org/en/packages/com.nextcloud.client/)) and [iOS](https://apps.apple.com/us/app/nextcloud/id1125420102).
+- An Android client for Memories is available in early access on [Google Play](https://play.google.com/store/apps/details?id=gallery.memories).
+- For automatic uploads, you can use the official Nextcloud mobile apps. 
+   - Android: [Google Play](https://play.google.com/store/apps/details?id=com.nextcloud.client), [F-Droid](https://f-droid.org/en/packages/com.nextcloud.client/)
+   - iOS: [App Store](https://apps.apple.com/us/app/nextcloud/id1125420102).
 
 ## 🏗 Development Setup
 
