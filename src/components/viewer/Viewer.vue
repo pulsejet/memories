@@ -404,11 +404,9 @@ export default defineComponent({
 
     /** Update the document title */
     updateTitle(photo: IPhoto | undefined) {
-      if (!this.originalTitle) {
-        this.originalTitle = document.title;
-      }
+      this.originalTitle ||= document.title;
       if (photo) {
-        document.title = `${photo.basename} - ${globalThis.OCA?.Theming?.name}`;
+        document.title = `${photo.basename} - ${this.originalTitle}`;
       } else {
         document.title = this.originalTitle;
         this.originalTitle = null;
