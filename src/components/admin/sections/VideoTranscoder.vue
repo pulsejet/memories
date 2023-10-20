@@ -16,10 +16,6 @@
         <NcNoteCard :type="binaryStatusType(status.govod)">
           {{ binaryStatus('go-vod', status.govod) }}
         </NcNoteCard>
-
-        {{ t('memories', 'If you want to use an external go-vod, make sure you have the correct tag.') }}
-        <br />
-        <code>git clone -b {{ status.govod_want }} https://github.com/pulsejet/go-vod</code>
       </template>
 
       <NcCheckboxRadioSwitch

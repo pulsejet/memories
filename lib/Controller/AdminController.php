@@ -159,7 +159,6 @@ class AdminController extends GenericApiController
                 !$extGoVod,
                 !$extGoVod,
             );
-            $status['govod_want'] = BinExt::GOVOD_VER;
 
             // Check for VA-API device
             $devPath = '/dev/dri/renderD128';
