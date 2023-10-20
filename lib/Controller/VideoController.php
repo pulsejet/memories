@@ -261,10 +261,14 @@ class VideoController extends GenericApiController
             $url .= "?{$params}";
         }
 
+        // Initialize request
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($ch, CURLOPT_HEADER, 0);
+
+        // Add header for expected go-vod version
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['X-Go-Vod-Version: '.BinExt::GOVOD_VER]);
 
         // Catch connection abort here
         ignore_user_abort(true);

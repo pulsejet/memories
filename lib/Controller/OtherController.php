@@ -29,6 +29,7 @@ use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\StreamResponse;
+use OCP\IRequest;
 
 class OtherController extends GenericApiController
 {
@@ -169,8 +170,20 @@ class OtherController extends GenericApiController
 
                     break;
 
+                case 'go-vod':
+                    switch (\OC::$server->get(IRequest::class)->getParam('arch')) {
+                        case 'x86_64':
+                        case 'amd64':
+                            return new StreamResponse(__DIR__.'/../../bin-ext/go-vod-amd64');
+
+                        case 'aarch64':
+                        case 'arm64':
+                            return new StreamResponse(__DIR__.'/../../bin-ext/go-vod-aarch64');
+                    }
+
+                    // no break
                 default:
-                    throw new \Exception('Unknown static file');
+                    throw Exceptions::NotFound("File not found: {$name}");
             }
 
             /** @var Http\Response $response */
