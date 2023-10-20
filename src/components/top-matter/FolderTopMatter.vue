@@ -1,16 +1,17 @@
 <template>
   <div class="top-matter">
     <NcBreadcrumbs>
-      <NcBreadcrumb title="Home" :to="{ name: 'folders' }">
-        <template #icon>
-          <HomeIcon :size="20" />
+      <NcBreadcrumb :title="rootFolderName" :to="{ name: $route.name }">
+        <template v-if="routeIsPublic" #icon>
+          <ShareIcon :size="20" />
+          <span class="share-name">{{ rootFolderName }}</span>
         </template>
       </NcBreadcrumb>
       <NcBreadcrumb
         v-for="folder in list"
         :key="folder.idx"
         :title="folder.text"
-        :to="{ name: 'folders', params: { path: folder.path } }"
+        :to="{ name: $route.name, params: { path: folder.path } }"
       />
     </NcBreadcrumbs>
 
@@ -23,7 +24,12 @@
             <TimelineIcon v-else :size="20" />
           </template>
         </NcActionButton>
-        <NcActionButton :aria-label="t('memories', 'Share folder')" @click="share()" close-after-click>
+        <NcActionButton
+          v-if="!routeIsPublic"
+          :aria-label="t('memories', 'Share folder')"
+          @click="share()"
+          close-after-click
+        >
           {{ t('memories', 'Share folder') }}
           <template #icon> <ShareIcon :size="20" /> </template>
         </NcActionButton>
@@ -42,8 +48,8 @@ import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
 import * as utils from '../../services/utils';
+import * as PublicShareHeader from './PublicShareHeader';
 
-import HomeIcon from 'vue-material-design-icons/Home.vue';
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import TimelineIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import FoldersIcon from 'vue-material-design-icons/FolderMultiple.vue';
@@ -56,7 +62,6 @@ export default defineComponent({
     NcBreadcrumb,
     NcActions,
     NcActionButton,
-    HomeIcon,
     ShareIcon,
     TimelineIcon,
     FoldersIcon,
@@ -86,6 +91,10 @@ export default defineComponent({
     recursive(): boolean {
       return !!this.$route.query.recursive;
     },
+
+    rootFolderName(): string {
+      return this.routeIsPublic ? PublicShareHeader.title : 'Home';
+    },
   },
 
   methods: {
@@ -110,6 +119,9 @@ export default defineComponent({
   .breadcrumb {
     min-width: 0;
     height: unset;
+    .share-name {
+      margin-left: 1em;
+    }
   }
 }
 </style>

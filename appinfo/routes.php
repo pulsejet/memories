@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 function getWildcard($param)
 {
     return [
@@ -34,7 +36,6 @@ return [
         w(['name' => 'Page#tags', 'url' => '/tags/{name}', 'verb' => 'GET'], 'name'),
 
         // Public folder share
-        ['name' => 'Public#showShare', 'url' => '/s/{token}', 'verb' => 'GET'],
         [
             'name' => 'Public#showAuthenticate',
             'url' => '/s/{token}/authenticate/{redirect}',
@@ -45,6 +46,7 @@ return [
             'url' => '/s/{token}/authenticate/{redirect}',
             'verb' => 'POST',
         ],
+        w(['name' => 'Public#showShare', 'url' => '/s/{token}/{path}', 'verb' => 'GET'], 'path'),
 
         // Public album share
         ['name' => 'PublicAlbum#showShare', 'url' => '/a/{token}', 'verb' => 'GET'],

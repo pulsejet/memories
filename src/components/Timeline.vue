@@ -580,7 +580,7 @@ export default defineComponent({
       }
 
       // Folder
-      if (this.routeIsFolders) {
+      if (this.routeIsFolders || this.routeIsFolderShare) {
         const path = utils.getFolderRoutePath(this.config.folders_path);
         set(DaysFilterType.FOLDER, path);
         if (this.$route.query.recursive) {
