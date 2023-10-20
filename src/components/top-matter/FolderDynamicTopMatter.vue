@@ -1,5 +1,5 @@
 <template>
-  <FolderGrid v-if="folders.length" :items="folders" />
+  <FolderGrid v-if="folders.length && !$route.query.recursive" :items="folders" />
 </template>
 
 <script lang="ts">
