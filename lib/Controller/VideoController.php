@@ -281,7 +281,7 @@ class VideoController extends GenericApiController
                     $contentType = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
                     header("Content-Type: {$contentType}");
 
-                    if (str_ends_with($profile, 'mov')) {
+                    if (str_ends_with($profile, 'mp4')) {
                         // cache full video 24 hours
                         header('Cache-Control: max-age=86400, public');
                     } else {
