@@ -2,7 +2,8 @@
   "compilerOptions": {
     "lib": [
       "DOM",
-      "ES2017"
+      "ES2017",
+      "WebWorker"
     ],
     "target": "ES2017",
     "module": "ES2020",
