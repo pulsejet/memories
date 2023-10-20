@@ -19,10 +19,15 @@ class FoldersController extends GenericApiController
     public function sub(string $folder): Http\Response
     {
         return Util::guardEx(function () use ($folder) {
+            $folder = Util::sanitizePath($folder);
+            if (null === $folder) {
+                throw Exceptions::BadRequest('Invalid parameter folder');
+            }
+
             try {
                 $node = Util::getUserFolder()->get($folder);
             } catch (\OCP\Files\NotFoundException) {
-                throw Exceptions::NotFound('Folder not found');
+                throw Exceptions::NotFound("Folder not found: {$folder}");
             }
 
             if (!$node instanceof Folder) {
