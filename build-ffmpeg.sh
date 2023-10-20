@@ -1,8 +1,11 @@
 #!/bin/bash
 
+# This script is intended for bare-metal installations.
+# It builds ffmpeg and VA-API drivers from source.
+
 set -e
 
-# apt-get remove -y libva ffmpeg # not needed for Docker
+apt-get remove -y libva ffmpeg
 
 apt-get update
 apt-get install -y \

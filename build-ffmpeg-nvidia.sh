@@ -2,7 +2,10 @@
 
 set -e
 
-# apt-get remove -y libva ffmpeg # not needed for Docker
+# This script is intended for bare-metal installations.
+# It builds ffmpeg and NVENC drivers from source.
+
+apt-get remove -y ffmpeg
 
 apt-get update
 apt-get install -y \
