@@ -37,7 +37,7 @@ export default defineComponent({
     },
 
     currentmatter(): Component | null {
-      if (this.routeIsFolders || this.routeIsFolderShare) {
+      if (this.routeIsFolders || (this.routeIsFolderShare && this.initstate.shareType === 'folder')) {
         return FolderDynamicTopMatter;
       } else if (this.routeIsPlaces) {
         return PlacesDynamicTopMatterVue;
