@@ -45,6 +45,7 @@ export default defineComponent({
     currentmatter() {
       switch (this.$route.name) {
         case _m.routes.Folders.name:
+        case _m.routes.FolderShare.name:
           return FolderTopMatter;
         case _m.routes.Albums.name:
           return AlbumTopMatter;

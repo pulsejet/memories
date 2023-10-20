@@ -156,8 +156,6 @@ export interface IExif {
 }
 
 export interface IFolder extends IPhoto {
-  /** Path to folder */
-  path: string;
   /** Photos for preview images */
   previews?: IPhoto[];
   /** Name of folder */

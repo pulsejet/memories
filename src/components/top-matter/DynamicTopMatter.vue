@@ -15,8 +15,10 @@ import FolderDynamicTopMatter from './FolderDynamicTopMatter.vue';
 import PlacesDynamicTopMatterVue from './PlacesDynamicTopMatter.vue';
 import OnThisDay from './OnThisDay.vue';
 
-import * as PublicShareHeader from './PublicShareHeader';
 import * as strings from '../../services/strings';
+
+// Auto-hide top header on public shares if redundant
+import './PublicShareHeader';
 
 export default defineComponent({
   name: 'DynamicTopMatter',
@@ -35,7 +37,7 @@ export default defineComponent({
     },
 
     currentmatter(): Component | null {
-      if (this.routeIsFolders) {
+      if (this.routeIsFolders || this.routeIsFolderShare) {
         return FolderDynamicTopMatter;
       } else if (this.routeIsPlaces) {
         return PlacesDynamicTopMatterVue;
@@ -50,17 +52,18 @@ export default defineComponent({
     viewName(): string {
       // Show album name for album view
       if (this.routeIsAlbums) {
-        return this.$route.params.name || '';
+        return this.$route.params.name || String();
       }
 
-      // Show share name for public shares
-      if (this.routeIsPublic) {
-        return PublicShareHeader.title;
+      // Show share name for public shares, except for folder share,
+      // because the name is already present in the breadcrumbs
+      if (this.routeIsPublic && !this.routeIsFolderShare) {
+        return this.initstate.shareTitle;
       }
 
       // Only static top matter for these routes
       if (this.routeIsTags || this.routeIsPeople || this.routeIsPlaces) {
-        return '';
+        return String();
       }
 
       return strings.viewName(this.$route.name!);

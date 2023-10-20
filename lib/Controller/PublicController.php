@@ -98,15 +98,18 @@ class PublicController extends AuthPublicShareController
         // Scripts
         \OCP\Util::addScript(Application::APPNAME, 'memories-main');
 
+        // Get share node
+        $node = $share->getNode();
+
         // Share info
         $this->initialState->provideInitialState('no_download', $share->getHideDownload());
+        $this->initialState->provideInitialState('share_title', $node->getName());
 
-        // Share file id only if not a folder
-        $node = $share->getNode();
         if ($node instanceof \OCP\Files\File) {
             $this->initialState->provideInitialState('single_item', $this->getSingleItemInitialState($node));
+            $this->initialState->provideInitialState('share_type', 'file');
         } elseif ($node instanceof \OCP\Files\Folder) {
-            $this->initialState->provideInitialState('share_title', $node->getName());
+            $this->initialState->provideInitialState('share_type', 'folder');
         } else {
             throw new NotFoundException();
         }

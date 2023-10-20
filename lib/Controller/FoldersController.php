@@ -15,6 +15,8 @@ class FoldersController extends GenericApiController
 {
     /**
      * @NoAdminRequired
+     *
+     * @PublicPage
      */
     public function sub(string $folder): Http\Response
     {
@@ -24,14 +26,22 @@ class FoldersController extends GenericApiController
                 throw Exceptions::BadRequest('Invalid parameter folder');
             }
 
+            // Get the root folder (share root or user root)
+            $root = $this->fs->getShareNode() ?? Util::getUserFolder();
+            if (!$root instanceof Folder) {
+                throw Exceptions::BadRequest('Root is not a folder');
+            }
+
+            // Get the inner folder
             try {
-                $node = Util::getUserFolder()->get($folder);
+                $node = $root->get($folder);
             } catch (\OCP\Files\NotFoundException) {
                 throw Exceptions::NotFound("Folder not found: {$folder}");
             }
 
+            // Make sure we have a folder
             if (!$node instanceof Folder) {
-                throw Exceptions::NotFound('Path is not a folder');
+                throw Exceptions::BadRequest('Path is not a folder');
             }
 
             // Ugly: get the view of the folder with reflection
@@ -65,7 +75,6 @@ class FoldersController extends GenericApiController
                 return [
                     'fileid' => $node->getId(),
                     'name' => $node->getName(),
-                    'path' => $node->getPath(),
                     'previews' => $this->tq->getRootPreviews($root),
                 ];
             }, $folders);

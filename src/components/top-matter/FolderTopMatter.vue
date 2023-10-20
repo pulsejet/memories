@@ -1,16 +1,22 @@
 <template>
   <div class="top-matter">
     <NcBreadcrumbs>
-      <NcBreadcrumb title="Home" :to="{ name: 'folders' }">
+      <NcBreadcrumb :title="rootFolderName" :to="{ name: $route.name }">
         <template #icon>
-          <HomeIcon :size="20" />
+          <template v-if="routeIsPublic">
+            <ShareIcon :size="20" />
+            <span class="share-name">{{ rootFolderName }}</span>
+          </template>
+          <template v-else>
+            <HomeIcon :size="20" />
+          </template>
         </template>
       </NcBreadcrumb>
       <NcBreadcrumb
         v-for="folder in list"
         :key="folder.idx"
         :title="folder.text"
-        :to="{ name: 'folders', params: { path: folder.path } }"
+        :to="{ name: $route.name, params: { path: folder.path } }"
       />
     </NcBreadcrumbs>
 
@@ -23,7 +29,12 @@
             <TimelineIcon v-else :size="20" />
           </template>
         </NcActionButton>
-        <NcActionButton :aria-label="t('memories', 'Share folder')" @click="share()" close-after-click>
+        <NcActionButton
+          v-if="!routeIsPublic"
+          :aria-label="t('memories', 'Share folder')"
+          @click="share()"
+          close-after-click
+        >
           {{ t('memories', 'Share folder') }}
           <template #icon> <ShareIcon :size="20" /> </template>
         </NcActionButton>
@@ -86,6 +97,10 @@ export default defineComponent({
     recursive(): boolean {
       return !!this.$route.query.recursive;
     },
+
+    rootFolderName(): string {
+      return this.routeIsPublic ? this.initstate.shareTitle : this.t('memories', 'Home');
+    },
   },
 
   methods: {
@@ -110,6 +125,9 @@ export default defineComponent({
   .breadcrumb {
     min-width: 0;
     height: unset;
+    .share-name {
+      margin-left: 0.75em;
+    }
   }
 }
 </style>
