@@ -20,7 +20,7 @@ php occ app:disable files_sharing
 
 # Setup
 cd apps/memories
-make exiftool
+make bin-ext
 cd ../..
 
 # Enable apps
