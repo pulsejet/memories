@@ -72,6 +72,7 @@ class ArchiveController extends GenericApiController
             $fileStorageId = $file->getStorage()->getId();
             $parent = $file->getParent();
             $isArchived = false;
+            $depth = 0;
             while (true) {
                 /** @psalm-suppress DocblockTypeContradiction */
                 if (null === $parent) {
@@ -98,10 +99,15 @@ class ArchiveController extends GenericApiController
                 }
 
                 // Hit an archive folder root
-                if ($parent->getName() === \OCA\Memories\Util::$ARCHIVE_FOLDER) {
+                if (Util::ARCHIVE_FOLDER === $parent->getName()) {
                     $isArchived = true;
 
                     break;
+                }
+
+                // Too deep
+                if (++$depth > 32) {
+                    throw new \Exception('[Archive] Max recursion depth exceeded');
                 }
 
                 $parent = $parent->getParent();
@@ -133,8 +139,10 @@ class ArchiveController extends GenericApiController
                 $parent = $parent->getParent();
             } else {
                 // file not in archive, put it in there
-                $af = \OCA\Memories\Util::$ARCHIVE_FOLDER;
-                $destinationPath = Util::sanitizePath($af.$relativeFilePath);
+                $destinationPath = Util::sanitizePath(Util::ARCHIVE_FOLDER.$relativeFilePath);
+                if (null === $destinationPath) {
+                    throw Exceptions::BadRequest('Invalid archive destination path');
+                }
             }
 
             // Remove the filename

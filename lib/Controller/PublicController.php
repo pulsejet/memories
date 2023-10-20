@@ -189,10 +189,11 @@ class PublicController extends AuthPublicShareController
         $foldersPath = Util::sanitizePath('/'.$foldersPath.'/');
 
         // Check if relPath starts with foldersPath
-        if (!str_starts_with($relPath, $foldersPath)) {
+        if (empty($foldersPath) || !str_starts_with($relPath, $foldersPath)) {
             return;
         }
 
+        /** @var string $foldersPath */
         // Remove foldersPath from start of relPath
         $relPath = substr($relPath, \strlen($foldersPath));
 

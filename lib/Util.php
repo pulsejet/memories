@@ -18,7 +18,7 @@ class Util
 {
     use UtilController;
 
-    public static string $ARCHIVE_FOLDER = '.archive';
+    public const ARCHIVE_FOLDER = '.archive';
 
     /**
      * Get host CPU architecture (amd64 or aarch64).
@@ -336,20 +336,27 @@ class Util
                 ?: self::getSystemConfig('memories.timeline.default_path');
 
         return array_map(
-            static fn ($p) => self::sanitizePath(trim($p)),
+            static fn ($path) => self::sanitizePath(trim($path))
+                ?? throw new \InvalidArgumentException("Invalid timeline path: {$path}"),
             explode(';', $paths),
         );
     }
 
     /**
      * Sanitize a path to keep only ASCII characters and special characters.
-     * Blank will be returned on error.
+     * Null will be returned on error.
      */
-    public static function sanitizePath(string $path): string
+    public static function sanitizePath(string $path): ?string
     {
-        $path = str_replace("\0", '', $path); // remove null characters
+        // remove double slashes and such
+        $normalized = \OC\Files\Filesystem::normalizePath($path, false);
 
-        return mb_ereg_replace('\/\/+', '/', $path) ?: ''; // remove extra slashes
+        // look for invalid characters and pattern
+        if (!\OC\Files\Filesystem::isValidPath($normalized)) {
+            return null;
+        }
+
+        return $normalized;
     }
 
     /**

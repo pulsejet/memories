@@ -114,14 +114,16 @@ class FsManager
 
         try {
             foreach ($paths as $path) {
-                $node = $userFolder->get(Util::sanitizePath($path));
-                $root->addFolder($node);
-                $etag .= $node->getEtag();
+                if ($sanitized = Util::sanitizePath($path)) {
+                    $node = $userFolder->get($sanitized);
+                    $root->addFolder($node);
+                    $etag .= $node->getEtag();
+                } else {
+                    throw new \Exception("invalid path {$path}");
+                }
             }
-        } catch (\OCP\Files\NotFoundException $e) {
-            $msg = $e->getMessage();
-
-            throw new \Exception("Folder not found: {$msg}");
+        } catch (\Exception $e) {
+            throw new \Exception("Folder not found: {$e->getMessage()}");
         }
 
         // Add shares or external stores inside the current folders
