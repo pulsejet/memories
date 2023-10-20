@@ -1,13 +1,13 @@
-import webpack from 'webpack';
-import path from 'path';
+const webpack = require('webpack');
+const path = require('path');
 
-import WorkboxPlugin from 'workbox-webpack-plugin';
-import TerserPlugin from 'terser-webpack-plugin';
-import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
-import { VueLoaderPlugin } from 'vue-loader';
+const WorkboxPlugin = require('workbox-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+const { VueLoaderPlugin } = require('vue-loader');
 
-const appName = process.env.npm_package_name!;
-const appVersion = process.env.npm_package_version!;
+const appName = process.env.npm_package_name;
+const appVersion = process.env.npm_package_version;
 const buildMode = process.env.NODE_ENV;
 const isDev = buildMode === 'development';
 console.info('Building', appName, appVersion, '\n');
@@ -38,7 +38,7 @@ module.exports = {
     // Make sure sourcemaps have a proper path and do not
     // leak local paths https://github.com/webpack/webpack/issues/3603
     devtoolNamespace: appName,
-    devtoolModuleFilenameTemplate(info: any) {
+    devtoolModuleFilenameTemplate(info) {
       const rootDir = process.cwd();
       const rel = path.relative(rootDir, info.absoluteResourcePath);
       return `webpack:///${appName}/${rel}`;
