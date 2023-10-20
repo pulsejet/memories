@@ -118,7 +118,7 @@ class BinExt
     public static function getExiftool(): array
     {
         if (Util::getSystemConfig('memories.exiftool_no_local')) {
-            return ['perl', realpath(__DIR__.'/../../exiftool-bin/exiftool/exiftool')];
+            return ['perl', realpath(__DIR__.'/../../bin-ext/exiftool/exiftool')];
         }
 
         return [self::getExiftoolPBin()];
@@ -129,7 +129,7 @@ class BinExt
      */
     public static function detectExiftool(): false|string
     {
-        if (!empty($path = Util::getSystemConfig('memories.exiftool'))) {
+        if (!empty($path = Util::getSystemConfig('memories.exiftool')) && file_exists($path)) {
             return $path;
         }
 
@@ -144,7 +144,7 @@ class BinExt
         // Get static binary if available
         if ($arch && $libc) {
             // get target file path
-            $path = realpath(__DIR__."/../../exiftool-bin/exiftool-{$arch}-{$libc}");
+            $path = realpath(__DIR__."/../../bin-ext/exiftool-{$arch}-{$libc}");
 
             // make sure it exists
             if ($path && file_exists($path)) {
@@ -377,7 +377,7 @@ class BinExt
         if (empty($goVodPath) || !file_exists($goVodPath)) {
             // Detect architecture
             $arch = \OCA\Memories\Util::getArch();
-            $path = __DIR__."/../../exiftool-bin/go-vod-{$arch}";
+            $path = __DIR__."/../../bin-ext/go-vod-{$arch}";
             $goVodPath = realpath($path);
 
             if (!$goVodPath) {

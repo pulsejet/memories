@@ -1,6 +1,6 @@
 #!/bin/bash
 
-od=`pwd`
+src=`pwd`
 
 rm -rf /tmp/memories
 mkdir -p /tmp/memories
@@ -10,11 +10,11 @@ cd /tmp
 rm -rf memories.tar.gz
 
 cd memories
-sh "$od/scripts/get-exiftool.sh"
+sh "$src/scripts/get-bin-ext.sh"
 cd ..
 
 tar --no-same-owner -p -zcf memories.tar.gz memories/
 rm -rf memories
 
-cd $od
+cd $src
 mv /tmp/memories.tar.gz .

@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 - **Breaking**: Nextcloud 26+ and PHP 8.0 are now required.
+- **Breaking**: The directory containing the `exiftool` and `go-vod` binaries was renamed from `exiftool-bin` to `bin-ext`
 - **Feature**: Folders view in shares ([#880](https://github.com/pulsejet/memories/pull/880))
 - Significant improvements to code quality and maintainability.
 - Improvements to the [documentation](https://memories.gallery/install/).

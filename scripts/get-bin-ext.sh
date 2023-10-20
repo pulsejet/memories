@@ -12,9 +12,9 @@ binExtVar() {
 EXIFTOOL_VER=$(binExtVar EXIFTOOL_VER)
 GOVOD_VER=$(binExtVar GOVOD_VER)
 
-rm -rf exiftool-bin
-mkdir -p exiftool-bin
-cd exiftool-bin
+rm -rf bin-ext
+mkdir -p bin-ext
+cd bin-ext
 echo "Getting exiftool $EXIFTOOL_VER"
 wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$EXIFTOOL_VER/exiftool-amd64-musl"
 wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$EXIFTOOL_VER/exiftool-amd64-glibc"

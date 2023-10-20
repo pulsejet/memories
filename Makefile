@@ -1,10 +1,10 @@
 all: dev-setup lint build-js-production test
 
 # Dev env management
-dev-setup: clean clean-dev npm-init exiftool install-tools
+dev-setup: clean clean-dev npm-init bin-ext install-tools
 
-exiftool:
-	sh scripts/get-exiftool.sh
+bin-ext:
+	sh scripts/get-bin-ext.sh
 
 install-tools:
 	composer install
@@ -21,7 +21,7 @@ npm-init:
 npm-update:
 	npm update
 
-.PHONY: dev-setup exiftool install-tools php-lint psalm npm-init npm-update
+.PHONY: dev-setup bin-ext install-tools php-lint psalm npm-init npm-update
 
 # Building
 build-js:
