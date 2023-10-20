@@ -157,15 +157,26 @@ class OtherController extends GenericApiController
      *
      * @NoCSRFRequired
      */
-    public function serviceWorker(): StreamResponse
+    public function static(string $name): Http\Response
     {
-        $response = new StreamResponse(__DIR__.'/../../js/memories-service-worker.js');
-        $response->setHeaders([
-            'Content-Type' => 'application/javascript',
-            'Service-Worker-Allowed' => '/',
-        ]);
-        $response->setContentSecurityPolicy(PageController::getCSP());
+        return Util::guardEx(static function () use ($name) {
+            switch ($name) {
+                case 'service-worker.js':
+                    $response = (new StreamResponse(__DIR__.'/../../js/memories-service-worker.js'))->setHeaders([
+                        'Content-Type' => 'application/javascript',
+                        'Service-Worker-Allowed' => '/',
+                    ]);
 
-        return $response;
+                    break;
+
+                default:
+                    throw new \Exception('Unknown static file');
+            }
+
+            /** @var Http\Response $response */
+            $response->setContentSecurityPolicy(PageController::getCSP());
+
+            return $response;
+        });
     }
 }

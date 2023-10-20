@@ -274,11 +274,11 @@ export default defineComponent({
       // Use the window load event to keep the page load performant
       window.addEventListener('load', async () => {
         try {
-          const url = generateUrl('/apps/memories/service-worker.js');
+          const url = generateUrl('/apps/memories/static/service-worker.js');
           const registration = await navigator.serviceWorker.register(url, {
             scope: generateUrl('/apps/memories'),
           });
-          console.log('SW registered: ', registration);
+          console.info('SW registered: ', registration);
 
           // Check for updates
           const currentVersion = await staticConfig.get('version');

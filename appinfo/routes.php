@@ -98,7 +98,7 @@ return [
         ['name' => 'Admin#setSystemConfig', 'url' => '/api/system-config/{key}', 'verb' => 'PUT'],
         ['name' => 'Admin#placesSetup', 'url' => '/api/occ/places-setup', 'verb' => 'POST'],
 
-        // Service worker
-        ['name' => 'Other#serviceWorker', 'url' => '/service-worker.js', 'verb' => 'GET'],
+        // Service worker and assets
+        ['name' => 'Other#static', 'url' => '/static/{name}', 'verb' => 'GET'],
     ],
 ];
