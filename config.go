@@ -4,6 +4,9 @@ type Config struct {
 	// Is this server configured?
 	Configured bool
 
+	// Restart the server if incorrect version detected
+	VersionMonitor bool
+
 	// Bind address
 	Bind string `json:"bind"`
 

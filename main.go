@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	VERSION = "0.1.16"
+	VERSION = "0.1.17"
 )
 
 type Handler struct {
@@ -20,6 +20,8 @@ type Handler struct {
 	managers map[string]*Manager
 	mutex    sync.RWMutex
 	close    chan string
+	server   *http.Server
+	exitCode int
 }
 
 func NewHandler(c *Config) *Handler {
@@ -27,13 +29,13 @@ func NewHandler(c *Config) *Handler {
 		c:        c,
 		managers: make(map[string]*Manager),
 		close:    make(chan string),
+		exitCode: 0,
 	}
 
 	// Recreate tempdir
 	os.RemoveAll(c.TempDir)
 	os.MkdirAll(c.TempDir, 0755)
 
-	go h.watchClose()
 	return h
 }
 
@@ -42,6 +44,22 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	parts := make([]string, 0)
 
 	// log.Println("Serving", url)
+
+	// Check version if monitoring is enabled
+	if h.c.VersionMonitor {
+		expected := r.Header.Get("X-Go-Vod-Version")
+		if len(expected) > 0 && expected != VERSION {
+			log.Println("Version mismatch", expected, VERSION)
+
+			// Try again in some time
+			w.WriteHeader(http.StatusServiceUnavailable)
+
+			// Exit with status code 65
+			h.exitCode = 12
+			h.Close()
+			return
+		}
+	}
 
 	// Break url into parts
 	for _, part := range strings.Split(url, "/") {
@@ -216,12 +234,9 @@ func loadConfig(path string, c *Config) {
 }
 
 func main() {
-	if len(os.Args) >= 2 && os.Args[1] == "test" {
-		log.Println("test successful")
-		return
-	}
-
+	// Build initial configuration
 	c := &Config{
+		VersionMonitor:  false,
 		Bind:            ":47788",
 		ChunkSize:       3,
 		LookBehind:      3,
@@ -231,9 +246,18 @@ func main() {
 		ManagerIdleTime: 60,
 	}
 
-	// Load config file from second argument
-	if len(os.Args) >= 2 {
-		loadConfig(os.Args[1], c)
+	// Parse arguments
+	for _, arg := range os.Args[1:] {
+		if arg == "-version-monitor" {
+			c.VersionMonitor = true
+		} else if arg == "-test" {
+			// Just run the binary for test
+			log.Println("go-vod " + VERSION)
+			return
+		} else {
+			// Config file
+			loadConfig(arg, c)
+		}
 	}
 
 	// Auto-detect ffmpeg and ffprobe paths
@@ -261,15 +285,23 @@ func main() {
 	log.Printf("%+v\n", c)
 
 	// Start server
-	log.Println("Starting VOD server")
+	log.Println("Starting go-vod " + VERSION + " on " + c.Bind)
+	handler := NewHandler(c)
+	server := &http.Server{Addr: c.Bind, Handler: handler}
+	handler.server = server
 
-	h := NewHandler(c)
-	http.Handle("/", h)
-	err := http.ListenAndServe(c.Bind, nil)
-	if err != nil {
-		log.Fatal("Error starting server", err)
-	}
+	// Start listening on different thread
+	go func() {
+		err := server.ListenAndServe()
+		if err != nil {
+			log.Fatal("Error starting server", err)
+		}
+	}()
 
+	// Wait for handler exit
+	handler.watchClose()
 	log.Println("Exiting VOD server")
-	h.Close()
+
+	// Exit with status code
+	os.Exit(handler.exitCode)
 }
