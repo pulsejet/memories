@@ -229,7 +229,7 @@ class BinExt
         // Check if disabled
         if (Util::getSystemConfig('memories.vod.disable')) {
             // Make sure it's dead, in case the user just disabled it
-            Util::pkill(self::getName('go-vod'));
+            self::pkill(self::getName('go-vod'));
 
             return null;
         }
@@ -271,7 +271,7 @@ class BinExt
         file_put_contents($configFile, json_encode($env, JSON_PRETTY_PRINT));
 
         // Kill the transcoder in case it's running
-        Util::pkill(self::getName('go-vod'));
+        self::pkill(self::getName('go-vod'));
 
         // Start transcoder
         /** @psalm-suppress ForbiddenCode */
@@ -450,5 +450,47 @@ class BinExt
 
         /** @psalm-suppress ForbiddenCode */
         return shell_exec("{$path} -e 'print $^V;'") ?: 'unknown version';
+    }
+
+    /**
+     * Kill all instances of a process by name.
+     * Similar to pkill, which may not be available on all systems.
+     *
+     * @param string $name Process name (only the first 12 characters are used)
+     */
+    public static function pkill(string $name): void
+    {
+        // don't kill everything
+        if (empty($name)) {
+            return;
+        }
+
+        // only use the first 12 characters
+        $name = substr($name, 0, 12);
+
+        // check if ps or busybox is available
+        $ps = 'ps';
+
+        /** @psalm-suppress ForbiddenCode */
+        if (!shell_exec('which ps')) {
+            if (!shell_exec('which busybox')) {
+                return;
+            }
+
+            $ps = 'busybox ps';
+        }
+
+        // get pids using ps as array
+        /** @psalm-suppress ForbiddenCode */
+        $pids = shell_exec("{$ps} -eao pid,comm | grep {$name} | awk '{print $1}'");
+        if (null === $pids || empty($pids)) {
+            return;
+        }
+        $pids = array_filter(explode("\n", $pids));
+
+        // kill all pids
+        foreach ($pids as $pid) {
+            posix_kill((int) $pid, 9); // SIGKILL
+        }
     }
 }

@@ -6,7 +6,6 @@ namespace OCA\Memories\Migration;
 
 use OCA\Memories\Db\AddMissingIndices;
 use OCA\Memories\Service\BinExt;
-use OCA\Memories\Util;
 use OCP\IConfig;
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
@@ -26,8 +25,8 @@ class Repair implements IRepairStep
         AddMissingIndices::run($output);
 
         // kill any instances of go-vod and exiftool
-        Util::pkill(BinExt::getName('go-vod'));
-        Util::pkill(BinExt::getName('exiftool'));
+        BinExt::pkill(BinExt::getName('go-vod'));
+        BinExt::pkill(BinExt::getName('exiftool'));
 
         // detect exiftool
         if ($path = BinExt::detectExiftool()) {

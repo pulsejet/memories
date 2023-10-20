@@ -482,46 +482,4 @@ class Util
 
         return null;
     }
-
-    /**
-     * Kill all instances of a process by name.
-     * Similar to pkill, which may not be available on all systems.
-     *
-     * @param string $name Process name (only the first 12 characters are used)
-     */
-    public static function pkill(string $name): void
-    {
-        // don't kill everything
-        if (empty($name)) {
-            return;
-        }
-
-        // only use the first 12 characters
-        $name = substr($name, 0, 12);
-
-        // check if ps or busybox is available
-        $ps = 'ps';
-
-        /** @psalm-suppress ForbiddenCode */
-        if (!shell_exec('which ps')) {
-            if (!shell_exec('which busybox')) {
-                return;
-            }
-
-            $ps = 'busybox ps';
-        }
-
-        // get pids using ps as array
-        /** @psalm-suppress ForbiddenCode */
-        $pids = shell_exec("{$ps} -eao pid,comm | grep {$name} | awk '{print $1}'");
-        if (null === $pids || empty($pids)) {
-            return;
-        }
-        $pids = array_filter(explode("\n", $pids));
-
-        // kill all pids
-        foreach ($pids as $pid) {
-            posix_kill((int) $pid, 9); // SIGKILL
-        }
-    }
 }
