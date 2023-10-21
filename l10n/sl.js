@@ -169,6 +169,7 @@ OC.L10N.register(
     "Folder View" : "Pogled mape",
     "Timeline View" : "Pogled časovnice",
     "Share folder" : "Omogoči souporabo mape",
+    "Home" : "Začetna stran",
     "Move left" : "Premakni levo",
     "Move right" : "Premakni desno",
     "Image saved successfully" : "Slika je uspešno shranjena",

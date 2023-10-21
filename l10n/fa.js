@@ -319,6 +319,7 @@ OC.L10N.register(
     "Folder View" : "Folder View",
     "Timeline View" : "Timeline View",
     "Share folder" : "اشتراک‌گذاری پوشه",
+    "Home" : "خانه",
     "Move left" : "Move left",
     "Move right" : "Move right",
     "Image saved successfully" : "Image saved successfully",

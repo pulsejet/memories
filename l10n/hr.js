@@ -60,6 +60,7 @@ OC.L10N.register(
     "Sort by date" : "Razvrstaj po datumu",
     "Sort by name" : "Razvrstaj po imenu",
     "Share folder" : "Dijeli mapu",
+    "Home" : "Doma",
     "Unsaved changes" : "Nespremljene promjene",
     "Share" : "Dijeli",
     "Previous" : "Natrag",

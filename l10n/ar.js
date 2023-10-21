@@ -206,7 +206,6 @@ OC.L10N.register(
     "VA-API device ({dev}) has incorrect permissions" : "جهاز VA-API ({dev}) لديه أذونات غير صحيحة",
     "VA-API device status: {status}" : "حالة جهاز VA-API: {status}",
     "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:" : "يستخدم تطبيق Memories محول الترميز transcoder ـ go-vod. ويمكنك تشغيل محول الترميز go-vod خارجيًا (على سبيل المثال في حاوية دوكر Docker منفصلة لتسريع الأجهزة) أو استخدام محول الترميز المدمج. لاستخدام محول ترميز خارجي، قم بتمكين الخيار التالي واتبع التعليمات الواردة في الوثائق:",
-    "If you want to use an external go-vod, make sure you have the correct tag." : "إذا كنت ترغب في استعمال خادوم خارجي لتحويل الفيديو go-vod، فيجب أن تكون لديك السِّمَة tag الصحيحة.",
     "Enable external transcoder" : "تمكين مُحوِّل خارجي ",
     "Binary path (local only)" : "المسار الثنائي (محلي فقط)",
     "Bind address (local only)" : "عنوان الاقتران/ الربط (محلي فقط)",

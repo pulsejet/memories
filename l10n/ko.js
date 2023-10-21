@@ -284,6 +284,7 @@ OC.L10N.register(
     "Folder View" : "폴더 보기",
     "Timeline View" : "타임라인 보기",
     "Share folder" : "폴더 공유",
+    "Home" : "집",
     "Move left" : "왼쪽으로 이동",
     "Move right" : "오른쪽으로 이동",
     "Image saved successfully" : "이미지를 성공적으로 저장했습니다.",

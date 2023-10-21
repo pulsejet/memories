@@ -97,6 +97,7 @@ OC.L10N.register(
     "Unassigned faces" : "Неідентифіковані обличчя",
     "Merge with different person" : "Злитися з іншою людиною",
     "Share folder" : "Спільний доступ для каталогу",
+    "Home" : "Домівка",
     "Error saving image" : "Помилка збереження зображення",
     "Unsaved changes" : "Незбережені зміни",
     "Drop changes" : "Відкинути зміни",

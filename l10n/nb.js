@@ -145,6 +145,7 @@ OC.L10N.register(
     "Folder View" : "Mappevisning",
     "Timeline View" : "Tidslinjevisning",
     "Share folder" : "Del mappe",
+    "Home" : "Hjem",
     "Move left" : "Flytt til venstre",
     "Move right" : "Flytt til høyre",
     "Image saved successfully" : "Bildet er lagret",

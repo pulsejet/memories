@@ -25,6 +25,7 @@ OC.L10N.register(
     "Refresh" : "Refresh",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
+    "Home" : "Rumah",
     "Share" : "Kongsi",
     "Previous" : "Sebelum",
     "Next" : "Seterus",

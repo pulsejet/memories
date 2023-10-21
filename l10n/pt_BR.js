@@ -346,6 +346,7 @@ OC.L10N.register(
     "Folder View" : "Folder View",
     "Timeline View" : "Visualização da linha do tempo",
     "Share folder" : "Compartilhar pasta",
+    "Home" : "Início",
     "Move left" : "Mover para a esquerda",
     "Move right" : "Mover para a direita",
     "Image saved successfully" : "Imagem salva com sucesso",

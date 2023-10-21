@@ -29,6 +29,7 @@ OC.L10N.register(
     "Update" : "යාවත්කාල",
     "Loading …" : "පූරණය වෙමින් …",
     "Remove" : "ඉවත් කරන්න",
+    "Home" : "මුල් පිටුව",
     "Share" : "බෙදාගන්න",
     "Previous" : "පෙර",
     "Next" : "ඊළඟ",

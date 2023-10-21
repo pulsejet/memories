@@ -59,6 +59,7 @@ OC.L10N.register(
     "Sort by date" : "Assenta pro data",
     "Sort by name" : "Assenta pro nùmene",
     "Share folder" : "Cumpartzi cartella",
+    "Home" : "Pàgina printzipale",
     "Unsaved changes" : "Mudas non sarvadas",
     "Share" : "Cumpartzidura",
     "Previous" : "Pretzedente",

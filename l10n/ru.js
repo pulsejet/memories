@@ -290,6 +290,7 @@ OC.L10N.register(
     "Folder View" : "Просмотр в виде папок",
     "Timeline View" : "Просмотр в виде шкалы времени",
     "Share folder" : "Поделиться папкой",
+    "Home" : "Главная страница",
     "Move left" : "Переместить влево",
     "Move right" : "Переместить вправо",
     "Image saved successfully" : "Изображение сохранено",

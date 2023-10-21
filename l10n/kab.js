@@ -26,6 +26,7 @@ OC.L10N.register(
     "Remove" : "Kkes",
     "Share link" : "Fren aseɣwen",
     "Refresh" : "Sismeḍ",
+    "Home" : "Asnubeg",
     "Share" : "Bḍu",
     "Previous" : "Ɣer deffir",
     "Next" : "Uḍfir",

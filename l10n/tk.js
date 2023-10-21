@@ -23,6 +23,7 @@ OC.L10N.register(
     "Share link" : "Baglanyşyk paýlaş",
     "Refresh" : "Täzelemek",
     "Read only" : "Diňe okaň",
+    "Home" : "Baş sahypa",
     "Share" : "Paýlaş",
     "Setup" : "Gurmak",
     "Yes" : "Hawa",

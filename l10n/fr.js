@@ -277,6 +277,7 @@ OC.L10N.register(
     "Folder View" : "Vue Dossier",
     "Timeline View" : "Vue Chronologie",
     "Share folder" : "Partager le dossier",
+    "Home" : "Personnel",
     "Move left" : "Vers la gauche",
     "Move right" : "Vers la droite",
     "Image saved successfully" : "Image enregistrée avec succès",

@@ -245,6 +245,7 @@ OC.L10N.register(
     "Folder View" : "Karpeten ikuspegia",
     "Timeline View" : "Denbora-lerro ikuspegia",
     "Share folder" : "Partekatu karpeta",
+    "Home" : "Etxea",
     "Move left" : "Mugitu ezkerrera",
     "Move right" : "Mugitu eskuinera",
     "Image saved successfully" : "Irudia ondo gorde da",

@@ -35,6 +35,7 @@ OC.L10N.register(
     "Password protected" : "Passordverna",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
+    "Home" : "Heim",
     "Share" : "Del",
     "Previous" : "Førre",
     "Next" : "Neste",

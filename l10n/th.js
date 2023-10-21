@@ -53,6 +53,7 @@ OC.L10N.register(
     "Sort by date" : "เรียงตามวันที่",
     "Sort by name" : "เรียงตามชื่อ",
     "Share folder" : "แชร์โฟลเดอร์",
+    "Home" : "หน้าหลัก",
     "Share" : "แชร์",
     "Previous" : "ก่อนหน้า",
     "Next" : "ถัดไป",

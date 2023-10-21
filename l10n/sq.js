@@ -46,6 +46,7 @@ OC.L10N.register(
     "Read only" : "Vetëm i lexueshëm",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
+    "Home" : "Kryefaqja",
     "Unsaved changes" : "Ndryshime të paruajtura",
     "Share" : "Shpërndaje",
     "Previous" : "I mëparshëm",

@@ -22,6 +22,7 @@ OC.L10N.register(
     "Share link" : "Ceangal co-roinnidh",
     "Refresh" : "Ath-nuadhaich",
     "Read only" : "Ri leughadh a-mhàin",
+    "Home" : "Dachaigh",
     "Share" : "Co-roinn",
     "Undo" : "Neo-dhèan",
     "Setup" : "Suidhich",

@@ -115,6 +115,7 @@ OC.L10N.register(
     "Folder View" : "Mapweergave",
     "Timeline View" : "Tijdlijnweergave",
     "Share folder" : "Map delen",
+    "Home" : "Startpagina",
     "Unsaved changes" : "Niet opgeslagen veranderingen",
     "Share" : "Delen",
     "Slideshow" : "Diavoorstelling",
