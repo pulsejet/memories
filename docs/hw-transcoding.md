@@ -53,7 +53,8 @@ NVIDIA GPUs support hardware transcoding using NVENC.
         depends_on:
           - server
         environment:
-          - NEXTCLOUD_HOST=server
+          - NEXTCLOUD_HOST=https://your-nextcloud-host
+          # - NEXTCLOUD_ALLOW_INSECURE=1 # (uncomment if using http or self-signed certs)
           - NVIDIA_VISIBLE_DEVICES=all
         devices:
           - /dev/dri:/dev/dri # VA-API device (omit for NVENC)
@@ -67,6 +68,9 @@ NVIDIA GPUs support hardware transcoding using NVENC.
 
     !!! tip "NVENC"
         If you want to use NVENC instead of VA-API, uncomment the `runtime` line and remove the `devices` section above. You will need to install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) on your host.
+
+    !!! tip "Nextcloud host"
+        The `NEXTCLOUD_HOST` environment variable must be set to the URL of your Nextcloud instance. If you are using a reverse proxy, you must set this to the URL of the reverse proxy. If you are using a self-signed certificate or http, you must also set `NEXTCLOUD_ALLOW_INSECURE=1`. Note that you may directly use the name of the Nextcloud container if you are using Docker Compose, but you will need to add the domain to `trusted_domains` in `config.php`.
 
 1. You can now configure the go-vod connect address in the Memories admin panel to point to the external container. go-vod uses port `47788` by default, so in our example the **connection address** would be set to **`go-vod:47788`**.
 
