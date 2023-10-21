@@ -38,5 +38,5 @@ jobs:
           context: './'
           no-cache: true
           file: 'Dockerfile'
-          tags: radialapps/go-vod:${{ github.event.inputs.tagName }}
+          tags: radialapps/go-vod:${{ github.event.inputs.tagName }} , radialapps/go-vod:latest
           provenance: false
