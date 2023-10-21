@@ -6,7 +6,9 @@
 
 # This script is intended to be run by systemd if running on bare metal.
 
-HOST=$NEXTCLOUD_HOST # passed as environment variable
+# Environment variables
+HOST=$NEXTCLOUD_HOST
+ALLOW_INSECURE=$NEXTCLOUD_ALLOW_INSECURE
 
 # check if host is set
 if [[ -z $HOST ]]; then
@@ -14,20 +16,33 @@ if [[ -z $HOST ]]; then
     exit 1
 fi
 
-# add http:// if not present
+# check if scheme is set
 if [[ ! $HOST == http://* ]] && [[ ! $HOST == https://* ]]; then
-    HOST="http://$HOST"
+    echo "fatal: NEXTCLOUD_HOST must start with http:// or https://"
+    exit 1
+fi
+
+# check if scheme is http and allow_insecure is not set
+if [[ $HOST == http://* ]] && [[ -z $ALLOW_INSECURE ]]; then
+    echo "fatal: NEXTCLOUD_HOST is set to http:// but NEXTCLOUD_ALLOW_INSECURE is not set"
+    exit 1
 fi
 
 # build URL to fetch binary from Nextcloud
 ARCH=$(uname -m)
 URL="$HOST/index.php/apps/memories/static/go-vod?arch=$ARCH"
 
+# set the -k option in curl if allow_insecure is set
+EXTRA_CURL_ARGS=""
+if [[ $ALLOW_INSECURE == true ]]; then
+    EXTRA_CURL_ARGS="$EXTRA_CURL_ARGS -k"
+fi
+
 # fetch binary, sleeping 10 seconds between retries
 function fetch_binary {
     while true; do
         rm -f go-vod
-        curl -L -k -f -m 10 -s -o go-vod $URL
+        curl $EXTRA_CURL_ARGS -L -f -m 10 -s -o go-vod $URL
         if [[ $? == 0 ]]; then
             chmod +x go-vod
             echo "Fetched $URL successfully!"
