@@ -49,6 +49,7 @@ OC.L10N.register(
     "Link copied to clipboard" : "Ligilo kopiita al tondujo",
     "Sort by date" : "Ordigi laŭ dato",
     "Sort by name" : "Ordigi laŭ nomo",
+    "Home" : "Hejmo",
     "Unsaved changes" : "Nekonservitaj ŝanĝoj",
     "Share" : "Kunhavigi",
     "Previous" : "Antaŭa",

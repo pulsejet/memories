@@ -47,6 +47,7 @@ OC.L10N.register(
     "Read only" : "მხოლოდ-კითხვადი",
     "Sort by date" : "დალაგება თარიღის მიხედვით",
     "Sort by name" : "დალაგება სახელის მიხედვით",
+    "Home" : "სახლი",
     "Unsaved changes" : "შეუნახავი ცვლილებები",
     "Share" : "გაზიარება",
     "Previous" : "წინა",

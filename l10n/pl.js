@@ -346,6 +346,7 @@ OC.L10N.register(
     "Folder View" : "Widok katalogu",
     "Timeline View" : "Widok osi czasu",
     "Share folder" : "Udostępnij katalog",
+    "Home" : "Strona główna",
     "Move left" : "Przenieś w lewo",
     "Move right" : "Przenieś w prawo",
     "Image saved successfully" : "Obraz zapisany pomyślnie",

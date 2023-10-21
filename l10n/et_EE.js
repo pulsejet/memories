@@ -82,6 +82,7 @@ OC.L10N.register(
     "Sort by name" : "Sorteeri nime järgi",
     "Unassigned faces" : "Määramata näod",
     "Merge with different person" : "Ühenda teise isikuga",
+    "Home" : "Avaleht",
     "Unsaved changes" : "Salvestamata muutused",
     "Share" : "Jaga",
     "Previous" : "Eelmine",

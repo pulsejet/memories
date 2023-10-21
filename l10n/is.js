@@ -59,6 +59,7 @@ OC.L10N.register(
     "Link copied to clipboard" : "Tengill afritaður á klippispjald",
     "Sort by date" : "Raða eftir dagsetningu",
     "Sort by name" : "Raða eftir heiti",
+    "Home" : "Heim",
     "Unsaved changes" : "Óvistaðar breytingar",
     "Share" : "Deila",
     "Previous" : "Fyrra",

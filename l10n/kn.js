@@ -23,6 +23,7 @@ OC.L10N.register(
     "Password protected" : "ಗುಪ್ತಪದದಿಂದ ರಕ್ಷಿಸಲಾಗಿದೆ",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
+    "Home" : "﻿ಮುಖಪುಟ",
     "Share" : "﻿ಹಂಚಿಕೊಳ್ಳಿ",
     "Next" : "ಮುಂದೆ",
     "Size" : "﻿ ಗಾತ್ರ",

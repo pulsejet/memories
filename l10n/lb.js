@@ -36,6 +36,7 @@ OC.L10N.register(
     "Password protected" : "Passwuertgeschützt",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
+    "Home" : "Doheem",
     "Share" : "Deelen",
     "Previous" : "Zeréck",
     "Next" : "Weider",

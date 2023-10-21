@@ -54,6 +54,7 @@ OC.L10N.register(
     "Read only" : "Tikai lasāms",
     "Sort by date" : "Kārtot pēc datuma",
     "Sort by name" : "Kārtot pēc nosaukuma",
+    "Home" : "Sākums",
     "Share" : "Koplietot",
     "Previous" : "Iepriekšējā",
     "Next" : "Nākamā",

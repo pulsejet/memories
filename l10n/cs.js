@@ -205,7 +205,6 @@ OC.L10N.register(
     "VA-API device ({dev}) has incorrect permissions" : "Na VA-API zařízení ({dev}) nejsou správně nastavená práva",
     "VA-API device status: {status}" : "Stav VA-API zařízení: {status}",
     "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:" : "Vzpomínky používají pro překódovávání nástroj go-vod. Ten je možné spouštět externě (např. ve zvlášť Docker containeru kvůli hardwarové akceleraci) nebo použít jeho vestavěnou podobu. Pokud chcete použít externí podobu, zapněte následující předvolby a postupujte podle pokynů v dokumentaci:",
-    "If you want to use an external go-vod, make sure you have the correct tag." : "Pokud chcete použít externí go-vod, zajistěte, že máte správný štítek.",
     "Enable external transcoder" : "Zapnout externí nástroj pro překódování",
     "Binary path (local only)" : "Popis umístění spustitelného souboru (pouze lokální)",
     "Bind address (local only)" : "Adresa, na kterou navázat (pouze místní)",

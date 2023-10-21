@@ -81,6 +81,7 @@ OC.L10N.register(
     "Sort by date" : "Urutkan berdasarkan tanggal",
     "Sort by name" : "Urutkan berdasarkan nama",
     "Merge with different person" : "Gabungkan dengan orang yang berbeda",
+    "Home" : "Beranda",
     "Share" : "Bagikan",
     "Previous" : "Sebelumnya",
     "Next" : "Berikutnya",

@@ -44,6 +44,7 @@ OC.L10N.register(
     "Read only" : "Зөвхөн унших",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
+    "Home" : "Нүүр",
     "Share" : "Түгээх",
     "Previous" : "өмнөх",
     "Next" : "дараагийх",

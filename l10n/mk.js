@@ -86,6 +86,7 @@ OC.L10N.register(
     "Sort by name" : "Подреди по име",
     "Merge with different person" : "Спој со друга личност",
     "Share folder" : "Сподели папка",
+    "Home" : "Дома",
     "Unsaved changes" : "Незачувани промени",
     "Share" : "Сподели",
     "Previous" : "Предходна",

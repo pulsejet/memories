@@ -292,6 +292,7 @@ OC.L10N.register(
     "Folder View" : "Vista de Carpeta",
     "Timeline View" : "Vista de Línea de Tiempo",
     "Share folder" : "Compartir carpeta",
+    "Home" : "Inicio",
     "Move left" : "Mover a la izquierda",
     "Move right" : "Mover a la derecha",
     "Image saved successfully" : "Imagen guardada exitosamente",

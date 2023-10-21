@@ -97,6 +97,7 @@ OC.L10N.register(
     "Unassigned faces" : "Facce non assegnate",
     "Merge with different person" : "Unisci ad un'altra persona",
     "Share folder" : "Condividi cartella",
+    "Home" : "Home",
     "Error saving image" : "Errore durante il salvataggio dell'immagine",
     "Unsaved changes" : "Modifiche non salvate",
     "Drop changes" : "Scarta le modifiche",

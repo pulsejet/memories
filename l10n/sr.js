@@ -356,6 +356,7 @@ OC.L10N.register(
     "Folder View" : "Поглед на фолдере",
     "Timeline View" : "Поглед на временску линију",
     "Share folder" : "Дели фолдер",
+    "Home" : "Почетна",
     "Move left" : "Помери улево",
     "Move right" : "Помери удесно",
     "Image saved successfully" : "Слика је успешно сачувана",

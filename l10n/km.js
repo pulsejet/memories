@@ -30,6 +30,7 @@ OC.L10N.register(
     "Password protected" : "បាន​ការ​ពារ​ដោយ​ពាក្យ​សម្ងាត់",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
+    "Home" : "ទំព័រដើម",
     "Share" : "ចែក​រំលែក",
     "Previous" : "មុន",
     "Next" : "បន្ទាប់",

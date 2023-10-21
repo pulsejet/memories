@@ -26,6 +26,7 @@ OC.L10N.register(
     "Share link" : "ແບ່ງປັນລິງ",
     "Refresh" : "Refresh",
     "Read only" : "ອ່ານຢ່າງດຽວ",
+    "Home" : "ໜ້າຫຼັກ",
     "Share" : "ແບ່ງປັນ",
     "Previous" : "ກ່ອນໜ້າ",
     "Next" : "ທັດໄປ",

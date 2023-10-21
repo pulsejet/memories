@@ -47,6 +47,7 @@ OC.L10N.register(
     "Read only" : "Chỉ xem",
     "Sort by date" : "Xếp theo ngày",
     "Sort by name" : "Xếp theo tên",
+    "Home" : "Trang chủ",
     "Unsaved changes" : "Thay đổi chưa được lưu",
     "Share" : "Chia sẻ",
     "Previous" : "Trước",

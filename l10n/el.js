@@ -88,6 +88,7 @@ OC.L10N.register(
     "Download album" : "Λήψη άλμπουμ",
     "Remove album" : "Αφαίρεση άλμπουμ",
     "Share folder" : "Διαμοιρασμός φακέλου",
+    "Home" : "Σπίτι",
     "Move left" : "Μετακίνηση προς τα αριστερά",
     "Move right" : "Μετακίνηση προς τα δεξιά",
     "Unsaved changes" : "Μη αποθηκευμένες αλλαγές",

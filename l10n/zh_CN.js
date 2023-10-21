@@ -319,6 +319,7 @@ OC.L10N.register(
     "Folder View" : "文件夹视图",
     "Timeline View" : "时间线视图",
     "Share folder" : "共享文件夹",
+    "Home" : "家",
     "Move left" : "向左移动",
     "Move right" : "向右移动",
     "Image saved successfully" : "图片保存成功",

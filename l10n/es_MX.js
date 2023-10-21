@@ -50,6 +50,7 @@ OC.L10N.register(
     "Read only" : "Sólo lectura",
     "Sort by date" : "Ordenar por fecha",
     "Sort by name" : "Ordenar por nombre",
+    "Home" : "Inicio",
     "Unsaved changes" : "Cambios no guardados",
     "Share" : "Compartir",
     "Previous" : "Previo",

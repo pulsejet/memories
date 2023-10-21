@@ -59,6 +59,7 @@ OC.L10N.register(
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Share folder" : "Partilhar pasta",
+    "Home" : "Início",
     "Unsaved changes" : "Modificações não guardadas",
     "Share" : "Partilhar",
     "Previous" : "Anterior",

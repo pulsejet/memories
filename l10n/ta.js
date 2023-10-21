@@ -30,6 +30,7 @@ OC.L10N.register(
     "Refresh" : "மீள் ஏற்றுக",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
+    "Home" : "அகம்",
     "Share" : "பகிர்வு",
     "Previous" : "முன்தைய",
     "Next" : "அடுத்த",

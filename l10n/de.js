@@ -264,6 +264,7 @@ OC.L10N.register(
     "Folder View" : "Ordneransicht",
     "Timeline View" : "Zeitleistenansicht",
     "Share folder" : "Ordner teilen",
+    "Home" : "Startseite",
     "Move left" : "Nach links verschieben",
     "Move right" : "Nach rechts verschieben",
     "Image saved successfully" : "Bild erfolgreich gespeichert",

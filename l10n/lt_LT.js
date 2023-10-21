@@ -115,6 +115,7 @@ OC.L10N.register(
     "Download album" : "Atsisiųsti albumą",
     "Merge with different person" : "Sulieti su kitu žmogumi",
     "Share folder" : "Bendrinti aplanką",
+    "Home" : "Namai",
     "Move left" : "Perkelti kairėn",
     "Move right" : "Perkelti dešinėn",
     "Image saved successfully" : "Paveikslas sėkmingai įrašytas",

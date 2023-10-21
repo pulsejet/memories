@@ -37,6 +37,7 @@ OC.L10N.register(
     "Password protected" : "Diogelwyd â chyfrinair",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
+    "Home" : "Cartref",
     "Share" : "Rhannu",
     "Previous" : "Blaenorol",
     "Next" : "Nesaf",

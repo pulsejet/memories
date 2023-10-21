@@ -33,6 +33,7 @@ OC.L10N.register(
     "Password protected" : "Protegite per contrasigno",
     "Sort by date" : "Ordinar per data",
     "Sort by name" : "Ordinar per nomine",
+    "Home" : "Initio",
     "Share" : "Compartir",
     "Previous" : "Previe",
     "Next" : "Sequente",
