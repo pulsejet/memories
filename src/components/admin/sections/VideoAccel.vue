@@ -18,12 +18,13 @@
           'Intel processors supporting QuickSync Video (QSV) as well as some AMD GPUs can be used for transcoding using VA-API acceleration.',
         )
       }}
+      <br />
       {{ t('memories', 'For more details on driver installation, check the documentation:') }}
       <a target="_blank" href="https://memories.gallery/hw-transcoding/#va-api">
         {{ t('memories', 'External Link') }}
       </a>
 
-      <NcNoteCard :type="vaapiStatusType" v-if="status">
+      <NcNoteCard :type="vaapiStatusType" v-if="status && !config['memories.vod.external']">
         {{ vaapiStatusText }}
       </NcNoteCard>
 
