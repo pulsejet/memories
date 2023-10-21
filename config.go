@@ -1,5 +1,13 @@
 package main
 
+import (
+	"encoding/json"
+	"io/ioutil"
+	"log"
+	"os"
+	"os/exec"
+)
+
 type Config struct {
 	// Is this server configured?
 	Configured bool
@@ -47,4 +55,51 @@ type Config struct {
 
 	// Use GOP size workaround for streaming (NVENC)
 	UseGopSize bool `json:"useGopSize"`
+}
+
+func (c *Config) FromFile(path string) {
+	// load json config
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatal("Error when opening file: ", err)
+	}
+
+	err = json.Unmarshal(content, &c)
+	if err != nil {
+		log.Fatal("Error loading config file", err)
+	}
+
+	// Set config as loaded
+	c.Configured = true
+	c.Print()
+}
+
+func (c *Config) AutoDetect() {
+	// Auto-detect ffmpeg and ffprobe paths
+	if c.FFmpeg == "" || c.FFprobe == "" {
+		ffmpeg, err := exec.LookPath("ffmpeg")
+		if err != nil {
+			log.Fatal("Could not find ffmpeg")
+		}
+
+		ffprobe, err := exec.LookPath("ffprobe")
+		if err != nil {
+			log.Fatal("Could not find ffprobe")
+		}
+
+		c.FFmpeg = ffmpeg
+		c.FFprobe = ffprobe
+	}
+
+	// Auto-choose tempdir
+	if c.TempDir == "" {
+		c.TempDir = os.TempDir() + "/go-vod"
+	}
+
+	// Print updated config
+	c.Print()
+}
+
+func (c *Config) Print() {
+	log.Printf("%+v\n", c)
 }
