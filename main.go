@@ -40,6 +40,9 @@ func main() {
 	c.AutoDetect()
 
 	// Start server
-	log.Println("Starting go-vod " + VERSION + " on " + c.Bind)
-	go_vod.NewHandler(c).Start()
+	code := go_vod.NewHandler(c).Start()
+
+	// Exit
+	log.Println("Exiting go-vod with status code", code)
+	os.Exit(code)
 }

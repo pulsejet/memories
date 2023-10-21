@@ -1,6 +1,7 @@
 package go_vod
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 )
 
 type Handler struct {
@@ -201,13 +203,16 @@ func (h *Handler) removeManager(streamid string) {
 	delete(h.managers, streamid)
 }
 
-func (h *Handler) Start() {
+func (h *Handler) Start() int {
+	log.Println("Starting go-vod " + h.c.Version + " on " + h.c.Bind)
 	h.server = &http.Server{Addr: h.c.Bind, Handler: h}
 
 	go func() {
 		err := h.server.ListenAndServe()
-		if err != nil {
-			log.Fatal("Error starting server", err)
+		if err == http.ErrServerClosed {
+			log.Println("HTTP server closed")
+		} else if err != nil {
+			log.Fatal("Error starting server: ", err)
 		}
 	}()
 
@@ -220,11 +225,13 @@ func (h *Handler) Start() {
 	}
 
 	// Stop server
-	log.Println("Exiting VOD server")
-	h.server.Close()
+	log.Println("Shutting down HTTP server")
+	ctx, cancel := context.WithDeadline(context.TODO(), time.Now().Add(5*time.Second))
+	defer cancel()
+	h.server.Shutdown(ctx)
 
-	// Exit with correct status code
-	os.Exit(h.exitCode)
+	// Return status code
+	return h.exitCode
 }
 
 func (h *Handler) Close() {
