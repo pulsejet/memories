@@ -4,11 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- This release focuses on improvements in code quality, maintainability and [documentation](https://memories.gallery/install/).
+    - New CI/CD [jobs](https://github.com/pulsejet/memories/actions/workflows/static-analysis.yaml) for type checking with [Psalm](https://psalm.dev/) and [vue-tsc](https://www.npmjs.com/package/vue-tsc)
+    - Vue templates are now checked and largely type-safe
+    - The backend now has native type coverage with PHP 8 type hints. This unearthed multiple bugs that are now fixed.
+    - [Developing](https://github.com/pulsejet/memories/#-development-setup) is now easier for new contributors
 - **Breaking**: Nextcloud 26+ and PHP 8.0 are now required.
 - **Breaking**: The directory containing the `exiftool` and `go-vod` binaries was renamed from `exiftool-bin` to `bin-ext`
+- **Feature**: External transcoders are much easier to set up now. See [docs](https://memories.gallery/hw-transcoding) for details.
 - **Feature**: Folders view in shares ([#880](https://github.com/pulsejet/memories/pull/880))
-- Significant improvements to code quality and maintainability.
-- Improvements to the [documentation](https://memories.gallery/install/).
 
 ## [v5.5.0] - 2023-10-06
 

@@ -32,6 +32,63 @@ NVIDIA GPUs support hardware transcoding using NVENC.
     This setup utilizes a separate docker container that contains the hardware drivers and ffmpeg.
     If you cannot do this, other installation methods are also possible (see below).
 
+!!! warning "Memories v6+"
+
+    This method is only supported in Memories v6 and newer. For older versions, see [below](#external-transcoder-v5).
+
+[go-vod](https://github.com/pulsejet/go-vod), the transcoder of Memories, comes with a pre-built Docker image based on `linuxserver/ffmpeg`. The docker image connects to your Nextcloud instance and pulls the go-vod binary on startup. To set up an external transcoder, follow these steps.
+
+1. Use a `docker-compose.yml` that runs the go-vod container and mounts the Nextcloud data directories to it. You must specify `NEXTCLOUD_HOST` to match the name of your Nextcloud container.
+
+    ```yaml
+    services:
+      server:
+        image: nextcloud
+        volumes:
+          - ncdata:/var/www/html
+
+      go-vod:
+        image: radialapps/go-vod
+        restart: always
+        depends_on:
+          - server
+        environment:
+          - NEXTCLOUD_HOST=server
+          - NVIDIA_VISIBLE_DEVICES=all
+        devices:
+          - /dev/dri:/dev/dri # VA-API device (omit for NVENC)
+        volumes:
+          - ncdata:/var/www/html:ro
+        # runtime: nvidia # (uncomment for NVENC)
+    ```
+
+    !!! note "Devices and volumes"
+        In this example, the VA-API devices in `/dev/dri` are passed to the container, along with the Nextcloud data directory (as readonly). All volumes must be mounted at the same location as the Nextcloud container.
+
+    !!! tip "NVENC"
+        If you want to use NVENC instead of VA-API, uncomment the `runtime` line and remove the `devices` section above. You will need to install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) on your host.
+
+1. You can now configure the go-vod connect address in the Memories admin panel to point to the external container. go-vod uses port `47788` by default, so in our example the **connection address** would be set to **`go-vod:47788`**.
+
+1. Finally, turn on **enable external transcoder** in the admin panel. This will initiate a test of the transcoder and show the result.
+
+Your external transcoder should now be functional. You can check the transcoding logs by running `docker compose logs -f go-vod`.
+
+!!! info "Usage with Nextcloud AIO"
+
+    With Nextcloud AIO, you will need to put the container into the `nextcloud-aio` network. Also the datadir of AIO needs to be mounted at the same place like in its Netxcloud container into the go-vod container. Usually this would be `nextcloud_aio_nextcloud_data:/mnt/ncdata:ro` or `$NEXTCLOUD_DATADIR:/mnt/ncdata:ro`.
+    See the instructions [here](https://github.com/nextcloud/all-in-one#how-to-enable-hardware-transcoding-for-nextcloud).
+
+!!! info "Usage without Docker Compose"
+
+    You can run a similar setup without `docker-compose`. Make sure that the Nextcloud and go-vod containers are in the same network and that the Nextcloud data directories are mounted at the same locations in both containers.
+
+## External Transcoder (v5)
+
+!!! danger "Deprecated"
+
+    Use this method if you're running a version of Memories v5 or older. For newer versions, see [above](#external-transcoder).
+
 [go-vod](https://github.com/pulsejet/go-vod), the transcoder of Memories, ships with a Dockerfile that already includes the latest ffmpeg and VA-API drivers. To set up an external transcoder, follow these steps.
 
 1. Clone the go-vod repository. Make sure you use the correct tag, which can be found in the admin panel. Note that this is **not** the same as the version of Memories you run.
@@ -47,12 +104,8 @@ NVIDIA GPUs support hardware transcoding using NVENC.
    # docker-compose.yml
 
    services:
-     nc:
+     server:
        image: nextcloud
-       restart: always
-       depends_on:
-         - db
-         - redis
        volumes:
          - ncdata:/var/www/html
 
@@ -64,38 +117,6 @@ NVIDIA GPUs support hardware transcoding using NVENC.
        volumes:
          - ncdata:/var/www/html:ro
    ```
-
-    !!! tip "Devices and volumes"
-        In this example, the VA-API device `/dev/dri/renderD128` is passed to the container, along with the Nextcloud data directory (as readonly). All volumnes must be mounted at the same location as the Nextcloud container.
-
-1. You can now configure the go-vod connect address in the Memories admin panel to point to the external container. go-vod uses port `47788` by default, so in our example the **connection address** would be set to **`go-vod:47788`**.
-
-1. Finally, turn on **enable external transcoder** in the admin panel. This will initiate a test of the transcoder and show the result.
-
-Your external transcoder should now be functional. You can check the transcoding logs by running `docker compose logs -f go-vod`.
-
-!!! info "Usage with Nextcloud AIO"
-
-    With Nextcloud AIO, you will need to put the container into the `nextcloud-aio` network. Also the datadir of AIO needs to be mounted at the same place like in its Netxcloud container into the go-vod container. Usually this would be `nextcloud_aio_nextcloud_data:/mnt/ncdata:ro` or `$NEXTCLOUD_DATADIR:/mnt/ncdata:ro`.
-    See the instructions [here](https://github.com/nextcloud/all-in-one#how-to-enable-hardware-transcoding-for-nextcloud).
-
-!!! info "Usage without Docker Compose"
-
-    You can run a similar setup without `docker-compose` by building the go-vod container manually. Make sure that the Nextcloud and go-vod containers are in the same network and that the Nextcloud data directories are mounted at the same locations in both containers.
-
-### NVENC
-
-If you want to use NVENC instead of VA-API, the steps are similar. In this case, you need to build the image from `Dockerfile.nvidia` instead.
-You can specify the image to build in the `docker-compose.yml` file.
-
-```yaml
-  ...
-  go-vod:
-    build:
-      context: ./go-vod
-      dockerfile: Dockerfile.nvidia
-  ...
-```
 
 ## Internal Transcoder
 
@@ -199,9 +220,7 @@ If you use Docker and want to use the internal transcoder, you need to:
    php-fpm
    ```
 
-### Linuxserver Image
-
-The `linuxserver/nextcloud` image is based on Alpine. You can add the following to the `docker-compose.yml` file to install the VA-API drivers and use the internal transcoder directly.
+If you're using the `linuxserver/nextcloud` image, based on Alpine, you can add the following to the `docker-compose.yml` file to install the VA-API drivers and use the internal transcoder directly.
 
 ```yaml
 devices:
