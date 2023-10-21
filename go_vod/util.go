@@ -1,4 +1,4 @@
-package main
+package go_vod
 
 import "net/http"
 

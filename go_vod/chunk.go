@@ -1,4 +1,4 @@
-package main
+package go_vod
 
 type Chunk struct {
 	id     int

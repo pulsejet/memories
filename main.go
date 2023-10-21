@@ -3,16 +3,18 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
+
+	"github.com/pulsejet/go-vod/go_vod"
 )
 
 const VERSION = "0.1.19"
 
 func main() {
 	// Build initial configuration
-	c := &Config{
+	c := &go_vod.Config{
 		VersionMonitor:  false,
+		Version:         VERSION,
 		Bind:            ":47788",
 		ChunkSize:       3,
 		LookBehind:      3,
@@ -37,15 +39,7 @@ func main() {
 	// Auto detect ffmpeg and ffprobe
 	c.AutoDetect()
 
-	// Build HTTP server
+	// Start server
 	log.Println("Starting go-vod " + VERSION + " on " + c.Bind)
-	handler := NewHandler(c)
-	handler.server = &http.Server{Addr: c.Bind, Handler: handler}
-
-	// Start server and wait for handler exit
-	handler.Start()
-	log.Println("Exiting VOD server")
-
-	// Exit with status code
-	os.Exit(handler.exitCode)
+	go_vod.NewHandler(c).Start()
 }

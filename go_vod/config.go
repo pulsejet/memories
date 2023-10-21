@@ -1,4 +1,4 @@
-package main
+package go_vod
 
 import (
 	"encoding/json"
@@ -9,6 +9,9 @@ import (
 )
 
 type Config struct {
+	// Current version of go-vod
+	Version string
+
 	// Is this server configured?
 	Configured bool
 

@@ -1,4 +1,4 @@
-package main
+package go_vod
 
 import (
 	"encoding/json"
@@ -85,7 +85,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"version": VERSION,
+			"version": h.c.Version,
 			"size":    size,
 		})
 		return
@@ -149,8 +149,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) versionOk(w http.ResponseWriter, r *http.Request) bool {
 	expected := r.Header.Get("X-Go-Vod-Version")
-	if len(expected) > 0 && expected != VERSION {
-		log.Println("Version mismatch", expected, VERSION)
+	if len(expected) > 0 && expected != h.c.Version {
+		log.Println("Version mismatch", expected, h.c.Version)
 
 		// Try again in some time
 		w.WriteHeader(http.StatusServiceUnavailable)
@@ -202,6 +202,8 @@ func (h *Handler) removeManager(streamid string) {
 }
 
 func (h *Handler) Start() {
+	h.server = &http.Server{Addr: h.c.Bind, Handler: h}
+
 	go func() {
 		err := h.server.ListenAndServe()
 		if err != nil {
@@ -212,10 +214,17 @@ func (h *Handler) Start() {
 	for {
 		id := <-h.close
 		if id == "" {
-			return
+			break
 		}
 		h.removeManager(id)
 	}
+
+	// Stop server
+	log.Println("Exiting VOD server")
+	h.server.Close()
+
+	// Exit with correct status code
+	os.Exit(h.exitCode)
 }
 
 func (h *Handler) Close() {

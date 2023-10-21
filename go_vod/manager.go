@@ -1,4 +1,4 @@
-package main
+package go_vod
 
 import (
 	"bytes"
@@ -261,7 +261,8 @@ func (m *Manager) ffprobe() error {
 		m.path,
 	}
 
-	ctx, _ := context.WithDeadline(context.TODO(), time.Now().Add(5*time.Second))
+	ctx, cancel := context.WithDeadline(context.TODO(), time.Now().Add(5*time.Second))
+	defer cancel()
 	cmd := exec.CommandContext(ctx, m.c.FFprobe, args...)
 
 	var stdout, stderr bytes.Buffer
