@@ -12,7 +12,7 @@
         {{ t('memories', 'External Link') }}
       </a>
 
-      <template v-if="status">
+      <template v-if="status && enableTranscoding">
         <NcNoteCard :type="binaryStatusType(status.govod)">
           {{ binaryStatus('go-vod', status.govod) }}
         </NcNoteCard>

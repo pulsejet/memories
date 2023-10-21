@@ -24,7 +24,10 @@
         {{ t('memories', 'External Link') }}
       </a>
 
-      <NcNoteCard :type="vaapiStatusType" v-if="status && !config['memories.vod.external']">
+      <NcNoteCard
+        :type="vaapiStatusType"
+        v-if="status && enableTranscoding && !config['memories.vod.external'] && config['memories.vod.vaapi']"
+      >
         {{ vaapiStatusText }}
       </NcNoteCard>
 
@@ -57,7 +60,10 @@
         )
       }}
 
-      <NcNoteCard type="warning">
+      <NcNoteCard
+        type="warning"
+        v-if="status && enableTranscoding && !config['memories.vod.external'] && config['memories.vod.nvenc']"
+      >
         {{ t('memories', 'No automated tests are available for NVIDIA acceleration.') }}
       </NcNoteCard>
 
