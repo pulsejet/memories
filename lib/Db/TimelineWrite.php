@@ -193,11 +193,12 @@ class TimelineWrite
     {
         // Get full record
         $query = $this->connection->getQueryBuilder();
-        $query->select('*')
+        $record = $query->select('*')
             ->from('memories')
             ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
+            ->executeQuery()
+            ->fetch()
         ;
-        $record = $query->executeQuery()->fetch();
 
         // Begin transaction
         $this->connection->beginTransaction();
@@ -207,8 +208,8 @@ class TimelineWrite
             $query = $this->connection->getQueryBuilder();
             $query->delete($table)
                 ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
+                ->executeStatement()
             ;
-            $query->executeStatement();
         }
 
         // Delete from map cluster
