@@ -43,6 +43,11 @@
                 <file name="lib/Service/FileRobotMagick.php" />
             </errorLevel>
         </PossiblyUnusedMethod>
+        <PropertyNotSetInConstructor>
+            <errorLevel type="suppress">
+                <directory name="lib/Command" />
+            </errorLevel>
+        </PropertyNotSetInConstructor>
     </issueHandlers>
     <forbiddenFunctions>
         <function name="var_dump" />
