@@ -187,23 +187,6 @@ class Util
     }
 
     /**
-     * Force a fileinfo value on a node.
-     * This is a hack to avoid subclassing everything.
-     *
-     * @param Node   $node  File to patch
-     * @param string $key   Key to set
-     * @param mixed  $value Value to set
-     */
-    public static function forceFileInfo(Node &$node, string $key, mixed $value): void
-    {
-        /** @var \OC\Files\Node\Node */
-        $node = $node;
-
-        /** @psalm-suppress UndefinedInterfaceMethod */
-        $node->getFileInfo()[$key] = $value;
-    }
-
-    /**
      * Force permissions on a node.
      *
      * @param Node $node        File to patch
@@ -211,7 +194,11 @@ class Util
      */
     public static function forcePermissions(Node &$node, int $permissions): void
     {
-        self::forceFileInfo($node, 'permissions', $permissions);
+        /** @var \OC\Files\Node\Node $node */
+        $fileInfo = $node->getFileInfo();
+
+        /** @var \OC\Files\FileInfo $fileInfo */
+        $fileInfo['permissions'] = $permissions;
     }
 
     /**

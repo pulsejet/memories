@@ -196,7 +196,7 @@ class ImageController extends GenericApiController
             $info['etag'] = $file->getEtag();
 
             // Inject permissions and convert to string
-            $info['permissions'] = \OCA\Memories\Util::permissionsToStr($file->getPermissions());
+            $info['permissions'] = Util::permissionsToStr($file->getPermissions());
 
             // Inject other file parameters that are cheap to get now
             $info['mimetype'] = $file->getMimeType();
