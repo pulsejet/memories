@@ -226,9 +226,6 @@ class TimelineWrite
      */
     public function cleanupStale(): void
     {
-        // Begin transaction
-        $this->connection->beginTransaction();
-
         // Delete all stale records
         foreach (DELETE_TABLES as $table) {
             $query = $this->connection->getQueryBuilder();
@@ -245,9 +242,6 @@ class TimelineWrite
                 ->executeStatement()
             ;
         }
-
-        // Commit transaction
-        $this->connection->commit();
     }
 
     /**
