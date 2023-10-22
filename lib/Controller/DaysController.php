@@ -187,11 +187,11 @@ class DaysController extends GenericApiController
         // Load details into map byref
         foreach ($details as $photo) {
             $dayId = (int) $photo['dayid'];
-            if (!\array_key_exists($dayId, $drefMap)) {
+            if (!($drefMap[$dayId] ?? null)) {
                 continue;
             }
 
-            if (!\array_key_exists('detail', $drefMap[$dayId])) {
+            if (!($drefMap[$dayId]['detail'] ?? null)) {
                 $drefMap[$dayId]['detail'] = [];
             }
 

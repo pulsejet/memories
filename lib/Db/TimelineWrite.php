@@ -137,8 +137,7 @@ class TimelineWrite
         // Get BUID from ImageUniqueId if not present
         $buid = $prevRow ? $prevRow['buid'] : '';
         if (empty($buid)) {
-            $imageUniqueId = \array_key_exists('ImageUniqueID', $exif) ? $exif['ImageUniqueID'] : null;
-            $buid = Exif::getBUID($file->getName(), $imageUniqueId, (int) $file->getSize());
+            $buid = Exif::getBUID($file->getName(), $exif['ImageUniqueID'] ?? null, (int) $file->getSize());
         }
 
         // Get exif json

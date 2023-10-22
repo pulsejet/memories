@@ -276,13 +276,13 @@ trait TimelineQueryDays
         }
 
         // Favorite field, may not be present
-        if (\array_key_exists('categoryid', $row) && $row['categoryid']) {
+        if ($row['categoryid'] ?? null) {
             $row['isfavorite'] = 1;
         }
         unset($row['categoryid']);
 
         // Get hidden field if present
-        if (\array_key_exists('hidden', $row) && $row['hidden']) {
+        if ($row['hidden'] ?? null) {
             $row['ishidden'] = 1;
         }
         unset($row['hidden']);
@@ -294,11 +294,10 @@ trait TimelineQueryDays
         unset($row['datetaken']);
 
         // Calculate the AUID if we can
-        if (\array_key_exists('epoch', $row) && \array_key_exists('size', $row)
-           && ($epoch = (int) $row['epoch']) && ($size = (int) $row['size'])) {
+        if (($epoch = $row['epoch'] ?? null) && ($size = $row['size'] ?? null)) {
             // compute AUID and discard size
             // epoch is used for ordering, so we keep it
-            $row['auid'] = Exif::getAUID($epoch, $size);
+            $row['auid'] = Exif::getAUID((int) $epoch, (int) $size);
             unset($row['size']);
         }
 
@@ -337,8 +336,8 @@ trait TimelineQueryDays
     private function dayIdToMonthId(int $dayId): int
     {
         static $memoize = [];
-        if (\array_key_exists($dayId, $memoize)) {
-            return $memoize[$dayId];
+        if ($cache = $memoize[$dayId] ?? null) {
+            return $cache;
         }
 
         return $memoize[$dayId] = strtotime(date('Ym', $dayId * 86400).'01') / 86400;

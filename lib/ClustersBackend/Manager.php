@@ -27,7 +27,11 @@ use OCP\IRequest;
 
 class Manager
 {
-    /** Mapping of backend name to className */
+    /**
+     * Mapping of backend name to className.
+     *
+     * @var array<string, class-string>
+     */
     public static array $backends = [];
 
     /**
@@ -39,20 +43,20 @@ class Manager
      */
     public static function get(string $name): Backend
     {
-        if (!\array_key_exists($name, self::$backends)) {
-            throw new \Exception("Invalid clusters backend '{$name}'");
+        if ($className = self::$backends[$name] ?? null) {
+            /** @var Backend */
+            return \OC::$server->get($className);
         }
 
-        return \OC::$server->get(self::$backends[$name]);
+        throw new \Exception("Invalid clusters backend '{$name}'");
     }
 
     /**
      * Register a new backend.
      *
-     * @param mixed $name
-     * @param mixed $className
+     * @param class-string $className
      */
-    public static function register($name, $className): void
+    public static function register(string $name, string $className): void
     {
         self::$backends[$name] = $className;
     }

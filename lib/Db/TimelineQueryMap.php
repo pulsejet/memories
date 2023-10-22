@@ -64,22 +64,14 @@ trait TimelineQueryMap
         $res = $this->executeQueryWithCTEs($query)->fetchAll();
 
         // Post-process results
-        $clusters = [];
-        foreach ($res as &$cluster) {
-            $c = [
-                'center' => [
-                    (float) $cluster['lat'],
-                    (float) $cluster['lon'],
-                ],
-                'count' => (float) $cluster['count'],
-            ];
-            if (\array_key_exists('id', $cluster)) {
-                $c['id'] = (int) $cluster['id'];
-            }
-            $clusters[] = $c;
-        }
-
-        return $clusters;
+        return array_map(static fn ($row) => [
+            'id' => (int) $row['id'],
+            'center' => [
+                (float) $row['lat'],
+                (float) $row['lon'],
+            ],
+            'count' => (float) $row['count'],
+        ], $res);
     }
 
     /**

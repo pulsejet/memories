@@ -211,8 +211,8 @@ class PlacesBackend extends Backend
             $json = json_decode($otherNames, true);
 
             // Check if the language is available
-            if (\array_key_exists($lang, $json) && \is_string($json[$lang])) {
-                return $json[$lang];
+            if ($translated = ($json[$lang] ?? null)) {
+                return (string) $translated;
             }
         } catch (\Error) {
             // Ignore errors, just use original name

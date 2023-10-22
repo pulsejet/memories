@@ -161,9 +161,9 @@ class Exif
         // Get timezone from exif
         try {
             $tzStr = $exif['OffsetTimeOriginal']
-                ?: $exif['OffsetTime']
-                ?: $exif['LocationTZID']
-                ?: throw new \Exception();
+                ?? $exif['OffsetTime']
+                ?? $exif['LocationTZID']
+                ?? throw new \Exception();
             $exifTz = new \DateTimeZone((string) $tzStr);
         } catch (\Exception) {
             $exifTz = null;

@@ -18,21 +18,20 @@ class LivePhoto
      */
     public function isVideoPart(array $exif): bool
     {
-        return \array_key_exists('MIMEType', $exif)
-               && 'video/quicktime' === $exif['MIMEType']
-               && \array_key_exists('ContentIdentifier', $exif);
+        return 'video/quicktime' === ($exif['MIMEType'] ?? null)
+               && !empty($exif['ContentIdentifier'] ?? null);
     }
 
     /** Get liveid from photo part */
     public function getLivePhotoId(File $file, array $exif): string
     {
         // Apple JPEG (MOV has ContentIdentifier)
-        if (\array_key_exists('MediaGroupUUID', $exif)) {
-            return (string) $exif['MediaGroupUUID'];
+        if ($uuid = ($exif['MediaGroupUUID'] ?? null)) {
+            return (string) $uuid;
         }
 
         // Google MVIMG and Samsung JPEG
-        if (\array_key_exists('MicroVideoOffset', $exif) && ($videoLength = $exif['MicroVideoOffset']) > 0) {
+        if (($offset = ($exif['MicroVideoOffset'] ?? null)) && ($offset > 0)) {
             // As explained in the following issue,
             // https://github.com/pulsejet/memories/issues/468
             //
@@ -48,14 +47,14 @@ class LivePhoto
             // and subsequently extract the video file using the
             // EmbeddedVideoFile binary prop, but setting the offset
             // is faster for the same reason mentioned above.
-            $videoOffset = $file->getSize() - $videoLength;
+            $videoOffset = $file->getSize() - $offset;
 
             return "self__traileroffset={$videoOffset}";
         }
 
         // Google JPEG and Samsung HEIC / JPEG (Apple?)
-        if (\array_key_exists('MotionPhoto', $exif)) {
-            if ('image/jpeg' === $exif['MIMEType']) {
+        if ($exif['MotionPhoto'] ?? null) {
+            if ('image/jpeg' === ($exif['MIMEType'] ?? null)) {
                 // Google Motion Photo JPEG
 
                 // We need to read the DirectoryItemLength key to get the length of the video
@@ -90,7 +89,7 @@ class LivePhoto
                 return 'self__trailer';
             }
 
-            if ('image/heic' === $exif['MIMEType']) {
+            if ('image/heic' === ($exif['MIMEType'] ?? null)) {
                 // Samsung HEIC -- no way to get this out yet (DirectoryItemLength is senseless)
                 // The reason this is above the MotionPhotoVideo check is because extracting binary
                 // EXIF fields on the fly is extremely expensive compared to trailer extraction.
@@ -98,7 +97,7 @@ class LivePhoto
         }
 
         // Samsung HEIC (at least S21)
-        if (\array_key_exists('MotionPhotoVideo', $exif) && !empty($exif['MotionPhotoVideo'])) {
+        if (!empty($exif['MotionPhotoVideo'] ?? null)) {
             // It's a binary exif field, decode when the user requests it
             return 'self__exifbin=MotionPhotoVideo';
         }
