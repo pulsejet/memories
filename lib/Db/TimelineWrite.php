@@ -52,7 +52,7 @@ class TimelineWrite
 
         // Check if we need to lock the file
         if ($lock) {
-            $lockKey = '/memories/'.$file->getId();
+            $lockKey = 'memories/'.$file->getId();
             $lockType = ILockingProvider::LOCK_EXCLUSIVE;
 
             // Throw directly to caller if we can't get the lock
