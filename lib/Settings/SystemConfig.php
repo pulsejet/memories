@@ -8,6 +8,8 @@ use OCA\Memories\AppInfo\Application;
 
 class SystemConfig
 {
+    // Do not change the next line, it's used by the docs
+    // to generate the default config page
     public const DEFAULTS = [
         // Path to exiftool binary
         'memories.exiftool' => '',
@@ -18,7 +20,7 @@ class SystemConfig
 
         // Temporary directory for non-php binaries. The directory must be writable
         // and the webserver user should be able to create executable binaries in it.
-        // Note that go-vod temp files are separately configured (see memories.vod.tempdir)
+        // go-vod temp files are separately configured (memories.vod.tempdir)
         // Defaults to system temp directory if blank
         'memories.exiftool.tmp' => '',
 
@@ -36,7 +38,7 @@ class SystemConfig
         'memories.gis_type' => -1,
 
         // Default timeline path for all users
-        // If set to '_empty_', the user is prompted to select a path on first open (default)
+        // If set to '_empty_', the user is prompted to select a path
         'memories.timeline.default_path' => '_empty_',
 
         // Default viewer high resolution image loading condition
@@ -89,7 +91,6 @@ class SystemConfig
         'memories.video_default_quality' => '0',
 
         // Memories only provides an admin interface for these
-        // https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/config_sample_php_parameters.html#previews
         'enabledPreviewProviders' => [],
         'preview_max_x' => 4096,
         'preview_max_y' => 4096,

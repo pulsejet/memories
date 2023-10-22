@@ -7,5 +7,7 @@ description: Documentation for config.php options that Memories uses
 This is a list of all options in `config.php` that memories uses
 
 ```php
---8<-- "lib/SystemConfigDefault.php"
+<?php
+
+--8<-- "docs/system-config.php"
 ```

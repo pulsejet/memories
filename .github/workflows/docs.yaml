@@ -16,13 +16,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-python@v4
         with:
           python-version: 3.x
+
       - uses: actions/cache@v2
         with:
           key: ${{ github.ref }}
           path: .cache
-      - run: cp CHANGELOG.md docs/changelog.md
-      - run: pip install mkdocs-material pillow cairosvg
-      - run: mkdocs gh-deploy --force
+
+      - name: Build documentation
+        run: |
+          cp CHANGELOG.md docs/changelog.md
+          sed -n '/DEFAULTS = \[/,/];/p' lib/Settings/SystemConfig.php | sed 's/^    //' > docs/system-config.php
+          pip install mkdocs-material pillow cairosvg
+          mkdocs gh-deploy --force
