@@ -37,6 +37,7 @@ OC.L10N.register(
     "Share link" : "Lodañ al liamm",
     "Refresh" : "Freskaat",
     "Read only" : "Da lenn nemetken",
+    "Home" : "Degemer",
     "Unsaved changes" : "Kemmoù n'int ket bet enrollet",
     "Share" : "Rannan",
     "Next" : "Da heul",

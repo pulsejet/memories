@@ -33,6 +33,7 @@ OC.L10N.register(
     "Password protected" : "কূটশব্দদ্বারা সুরক্ষিত",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
+    "Home" : "বাড়ি",
     "Share" : "ভাগাভাগি কর",
     "Previous" : "পূর্ববর্তী",
     "Next" : "পরবর্তী",

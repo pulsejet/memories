@@ -97,6 +97,7 @@ OC.L10N.register(
     "Unassigned faces" : "Cares sense assignar",
     "Merge with different person" : "Fusiona amb una persona diferent",
     "Share folder" : "Comparteix la carpeta",
+    "Home" : "Casa",
     "Error saving image" : "S'ha produït un error en desar la imatge",
     "Unsaved changes" : "Canvis sense desar",
     "Drop changes" : "Elimina els canvis",
