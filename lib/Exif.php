@@ -149,7 +149,7 @@ class Exif
         $exifDate = $exif['DateTimeOriginal'] ?? $exif['CreateDate'] ?? null;
 
         // For videos, prefer CreateDate for timezone (QuickTimeUTC=1)
-        if (preg_match('/^video\/\w+/', (string) $exif['MIMEType'])) {
+        if (preg_match('/^video\/\w+/', (string) ($exif['MIMEType'] ?? null))) {
             $exifDate = $exif['CreateDate'] ?? $exifDate;
         }
 

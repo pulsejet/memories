@@ -91,6 +91,11 @@ class TimelineWrite
             throw new \Exception('No EXIF data could be read: '.$file->getPath());
         }
 
+        // Check if MIMEType was not detected
+        if (empty($exif['MIMEType'] ?? null)) {
+            throw new \Exception('No MIMEType in EXIF data: '.$file->getPath());
+        }
+
         // Hand off if Live Photo video part
         if ($isvideo && $this->livePhoto->isVideoPart($exif)) {
             $this->livePhoto->processVideoPart($file, $exif);
