@@ -357,6 +357,7 @@ OC.L10N.register(
     "Folder View" : "عرض المجلد",
     "Timeline View" : "عرض التسلسل الزمني",
     "Share folder" : "مشاركة مُجلّد",
+    "Home" : "الرئيسية",
     "Move left" : "نقُل لجهة اليسار",
     "Move right" : "نقل لجهة اليمين",
     "Image saved successfully" : "تم حفظ الصورة بنجاح",

@@ -25,6 +25,7 @@ OC.L10N.register(
     "Password protected" : "Zaštićeno lozinkom",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
+    "Home" : "Početna stranica",
     "Share" : "Podjeli",
     "Previous" : "Prethodno",
     "Next" : "Sljedeće",

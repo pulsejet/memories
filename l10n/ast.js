@@ -30,6 +30,7 @@ OC.L10N.register(
     "High Resolution" : "Resolución alta",
     "Original File" : "FIcheru orixinal",
     "Public Link" : "Enllaz públicu",
+    "Home" : "Aniciu",
     "Finish" : "Finar",
     "Filters" : "Filtros",
     "Watermark" : "Marca d'agua",

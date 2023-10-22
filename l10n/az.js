@@ -31,6 +31,7 @@ OC.L10N.register(
     "Read only" : "Oxumaq üçün",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
+    "Home" : "Ev",
     "Share" : "Paylaş",
     "Previous" : "Əvvələ",
     "Next" : "Növbəti",
