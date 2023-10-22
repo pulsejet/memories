@@ -11,8 +11,6 @@ use OCP\Files\File;
 use OCP\IDBConnection;
 use OCP\Lock\ILockingProvider;
 
-require_once __DIR__.'/../ExifFields.php';
-
 const DELETE_TABLES = ['memories', 'memories_livephoto', 'memories_places'];
 const TRUNCATE_TABLES = ['memories_mapclusters'];
 
@@ -290,7 +288,7 @@ class TimelineWrite
             }
 
             // Only keep fields in the whitelist
-            if (\array_key_exists($key, EXIF_FIELDS_LIST)) {
+            if (\array_key_exists($key, ExifFields::EXIF_FIELDS_LIST)) {
                 $filteredExif[$key] = $value;
             }
         }
