@@ -112,18 +112,22 @@ class LivePhoto
     {
         $fileId = $file->getId();
         $mtime = $file->getMTime();
-        $liveid = $exif['ContentIdentifier'];
+        $liveid = $exif['ContentIdentifier'] ?? null;
         if (empty($liveid)) {
             return false;
         }
 
+        // Check if entry already exists
         $query = $this->connection->getQueryBuilder();
-        $query->select('fileid')
+        $exists = $query->select('fileid')
             ->from('memories_livephoto')
             ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
+            ->executeQuery()
+            ->fetch()
         ;
-        $prevRow = $query->executeQuery()->fetch();
 
+        // Construct query parameters
+        $query = $this->connection->getQueryBuilder();
         $params = [
             'liveid' => $query->createNamedParameter($liveid, IQueryBuilder::PARAM_STR),
             'mtime' => $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT),
@@ -131,7 +135,8 @@ class LivePhoto
             'orphan' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
         ];
 
-        if ($prevRow) {
+        // Insert or update
+        if ($exists) {
             $query->update('memories_livephoto')
                 ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
             ;
