@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Service;
 
 use OCA\Memories\Db\TimelineWrite;
+use OCA\Memories\Settings\SystemConfig;
 use OCP\IConfig;
 use OCP\IDBConnection;
 
@@ -89,7 +90,7 @@ class Places
     public function queryPoint(float $lat, float $lon): array
     {
         // Get GIS type
-        $gisType = \OCA\Memories\Util::placesGISType();
+        $gisType = SystemConfig::gisType();
 
         // Construct WHERE clause depending on GIS type
         $where = null;

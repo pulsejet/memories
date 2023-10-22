@@ -157,4 +157,13 @@ class SystemConfig
             $config->setSystemValue($key, $value);
         }
     }
+
+    /**
+     * Check if geolocation (places) is enabled and available.
+     * Returns the type of the GIS.
+     */
+    public static function gisType(): int
+    {
+        return self::get('memories.gis_type');
+    }
 }

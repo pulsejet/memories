@@ -317,15 +317,6 @@ class Util
     }
 
     /**
-     * Check if geolocation (places) is enabled and available.
-     * Returns the type of the GIS.
-     */
-    public static function placesGISType(): int
-    {
-        return SystemConfig::get('memories.gis_type');
-    }
-
-    /**
      * Get list of timeline paths as array.
      *
      * @return string[] List of paths

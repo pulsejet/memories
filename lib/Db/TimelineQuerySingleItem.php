@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCA\Memories\ClustersBackend\PlacesBackend;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
@@ -79,7 +80,7 @@ trait TimelineQuerySingleItem
         }
 
         // Get address from places
-        if (Util::placesGISType() > 0) {
+        if (SystemConfig::gisType() > 0) {
             // Get names of places for this file
             $qb = $this->connection->getQueryBuilder();
             $places = $qb->select('e.name', 'e.other_names')
