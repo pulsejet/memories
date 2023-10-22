@@ -176,7 +176,8 @@ class Index
             } catch (ProcessClosedException $e) {
                 throw $e;
             } catch (\Exception $e) {
-                $this->logger->error('Failed to index folder {folder}: {error}', [
+                $this->logger->error('Failed to index folder', [
+                    'app' => 'memories',
                     'folder' => $folder->getPath(),
                     'error' => $e->getMessage(),
                 ]);
@@ -278,7 +279,7 @@ class Index
      */
     private function error(string $message): void
     {
-        $this->logger->error($message);
+        $this->logger->error($message, ['app' => 'memories']);
 
         if ($this->output) {
             $this->output->writeln("<error>{$message}</error>\n");

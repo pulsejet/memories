@@ -104,7 +104,7 @@ class IndexJob extends TimedJob
     {
         if ('success' === $type || 'info' === $type) {
             // If this is just an informational message, we log it with level info
-            $this->logger->info('Memories: '.$msg);
+            $this->logger->info($msg, ['app' => Application::APPNAME]);
         }
 
         if ($this->_hasError && 'success' === $type) {
@@ -116,10 +116,10 @@ class IndexJob extends TimedJob
         $this->config->setAppValue(Application::APPNAME, 'last_index_job_status_type', $type);
 
         if ('warning' === $type) {
-            $this->logger->warning('Memories: '.$msg);
+            $this->logger->warning($msg, ['app' => Application::APPNAME]);
         } elseif ('error' === $type) {
             $this->_hasError = true;
-            $this->logger->error('Memories: '.$msg);
+            $this->logger->error($msg, ['app' => Application::APPNAME]);
         }
     }
 }
