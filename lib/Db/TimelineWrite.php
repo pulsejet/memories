@@ -98,12 +98,12 @@ class TimelineWrite
 
         // Hand off if Live Photo video part
         if ($isvideo && $this->livePhoto->isVideoPart($exif)) {
-            $this->livePhoto->processVideoPart($file, $exif);
-
-            return true;
+            return $this->livePhoto->processVideoPart($file, $exif);
         }
 
-        // Delete video part if it is no longer valid
+        // If control reaches here, it's not a Live Photo video part
+        // But if prevRow exists and mapcluster is not set, it *was* a live video part
+        // In this case delete that entry (very rare edge case)
         if ($prevRow && !\array_key_exists('mapcluster', $prevRow)) {
             $this->livePhoto->deleteVideoPart($file);
             $prevRow = null;
