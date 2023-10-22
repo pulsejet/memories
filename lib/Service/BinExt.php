@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Service;
 
-use OCA\Memories\Util;
+use OCA\Memories\Settings\SystemConfig;
 
 class BinExt
 {
@@ -15,7 +15,7 @@ class BinExt
     /** Get the path to the temp directory */
     public static function getTmpPath(): string
     {
-        return Util::getSystemConfig('memories.exiftool.tmp') ?: sys_get_temp_dir();
+        return SystemConfig::get('memories.exiftool.tmp') ?: sys_get_temp_dir();
     }
 
     /** Copy a binary to temp dir for execution */
@@ -56,7 +56,7 @@ class BinExt
     /** Get the name for a binary */
     public static function getName(string $name, string $version = ''): string
     {
-        $id = Util::getInstanceId();
+        $id = SystemConfig::get('instanceid');
 
         return empty($version) ? "{$name}-{$id}" : "{$name}-{$id}-{$version}";
     }
@@ -105,7 +105,7 @@ class BinExt
     /** Get path to exiftool binary */
     public static function getExiftoolPBin(): string
     {
-        $path = Util::getSystemConfig('memories.exiftool');
+        $path = SystemConfig::get('memories.exiftool');
 
         return self::getTempBin($path, self::getName('exiftool', self::EXIFTOOL_VER));
     }
@@ -117,7 +117,7 @@ class BinExt
      */
     public static function getExiftool(): array
     {
-        if (Util::getSystemConfig('memories.exiftool_no_local')) {
+        if (SystemConfig::get('memories.exiftool_no_local')) {
             return ['perl', realpath(__DIR__.'/../../bin-ext/exiftool/exiftool')];
         }
 
@@ -129,11 +129,11 @@ class BinExt
      */
     public static function detectExiftool(): false|string
     {
-        if (!empty($path = Util::getSystemConfig('memories.exiftool')) && file_exists($path)) {
+        if (!empty($path = SystemConfig::get('memories.exiftool')) && file_exists($path)) {
             return $path;
         }
 
-        if (Util::getSystemConfig('memories.exiftool_no_local')) {
+        if (SystemConfig::get('memories.exiftool_no_local')) {
             return implode(' ', self::getExiftool());
         }
 
@@ -148,13 +148,13 @@ class BinExt
 
             // make sure it exists
             if ($path && file_exists($path)) {
-                Util::setSystemConfig('memories.exiftool', $path);
+                SystemConfig::set('memories.exiftool', $path);
 
                 return $path;
             }
         }
 
-        Util::setSystemConfig('memories.exiftool_no_local', true);
+        SystemConfig::set('memories.exiftool_no_local', true);
 
         return false;
     }
@@ -166,8 +166,8 @@ class BinExt
     {
         $path = rawurlencode($path);
 
-        $bind = Util::getSystemConfig('memories.vod.bind');
-        $connect = Util::getSystemConfig('memories.vod.connect', $bind);
+        $bind = SystemConfig::get('memories.vod.bind');
+        $connect = SystemConfig::get('memories.vod.connect', $bind);
 
         return "http://{$connect}/{$client}{$path}/{$profile}";
     }
@@ -176,15 +176,15 @@ class BinExt
     {
         // Get config from system values
         $env = [
-            'vaapi' => Util::getSystemConfig('memories.vod.vaapi'),
-            'vaapiLowPower' => Util::getSystemConfig('memories.vod.vaapi.low_power'),
+            'vaapi' => SystemConfig::get('memories.vod.vaapi'),
+            'vaapiLowPower' => SystemConfig::get('memories.vod.vaapi.low_power'),
 
-            'nvenc' => Util::getSystemConfig('memories.vod.nvenc'),
-            'nvencTemporalAQ' => Util::getSystemConfig('memories.vod.nvenc.temporal_aq'),
-            'nvencScale' => Util::getSystemConfig('memories.vod.nvenc.scale'),
+            'nvenc' => SystemConfig::get('memories.vod.nvenc'),
+            'nvencTemporalAQ' => SystemConfig::get('memories.vod.nvenc.temporal_aq'),
+            'nvencScale' => SystemConfig::get('memories.vod.nvenc.scale'),
 
-            'useTranspose' => Util::getSystemConfig('memories.vod.use_transpose'),
-            'useGopSize' => Util::getSystemConfig('memories.vod.use_gop_size'),
+            'useTranspose' => SystemConfig::get('memories.vod.use_transpose'),
+            'useGopSize' => SystemConfig::get('memories.vod.use_gop_size'),
         ];
 
         if (!$local) {
@@ -192,7 +192,7 @@ class BinExt
         }
 
         // Get temp directory
-        $tmpPath = Util::getSystemConfig('memories.vod.tempdir', sys_get_temp_dir().'/go-vod/');
+        $tmpPath = SystemConfig::get('memories.vod.tempdir', sys_get_temp_dir().'/go-vod/');
 
         // Make sure path ends with slash
         if ('/' !== substr($tmpPath, -1)) {
@@ -200,12 +200,12 @@ class BinExt
         }
 
         // Add instance ID to path
-        $tmpPath .= Util::getInstanceId();
+        $tmpPath .= SystemConfig::get('instanceid');
 
         return array_merge($env, [
-            'bind' => Util::getSystemConfig('memories.vod.bind'),
-            'ffmpeg' => Util::getSystemConfig('memories.vod.ffmpeg'),
-            'ffprobe' => Util::getSystemConfig('memories.vod.ffprobe'),
+            'bind' => SystemConfig::get('memories.vod.bind'),
+            'ffmpeg' => SystemConfig::get('memories.vod.ffmpeg'),
+            'ffprobe' => SystemConfig::get('memories.vod.ffprobe'),
             'tempdir' => $tmpPath,
         ]);
     }
@@ -215,7 +215,7 @@ class BinExt
      */
     public static function getGoVodBin(): string
     {
-        $path = Util::getSystemConfig('memories.vod.path');
+        $path = SystemConfig::get('memories.vod.path');
 
         return self::getTempBin($path, self::getName('go-vod', self::GOVOD_VER));
     }
@@ -227,7 +227,7 @@ class BinExt
     public static function startGoVod(): ?string
     {
         // Check if disabled
-        if (Util::getSystemConfig('memories.vod.disable')) {
+        if (SystemConfig::get('memories.vod.disable')) {
             // Make sure it's dead, in case the user just disabled it
             self::pkill(self::getName('go-vod'));
 
@@ -235,7 +235,7 @@ class BinExt
         }
 
         // Check if external
-        if (Util::getSystemConfig('memories.vod.external')) {
+        if (SystemConfig::get('memories.vod.external')) {
             self::configureGoVod();
 
             return null;
@@ -306,7 +306,7 @@ class BinExt
     public static function testGoVod(): string
     {
         // Check if disabled
-        if (Util::getSystemConfig('memories.vod.disable')) {
+        if (SystemConfig::get('memories.vod.disable')) {
             throw new \Exception('Transcoding is disabled');
         }
 
@@ -372,7 +372,7 @@ class BinExt
      */
     public static function detectGoVod(): false|string
     {
-        $goVodPath = Util::getSystemConfig('memories.vod.path');
+        $goVodPath = SystemConfig::get('memories.vod.path');
 
         if (empty($goVodPath) || !file_exists($goVodPath)) {
             // Detect architecture
@@ -385,7 +385,7 @@ class BinExt
             }
 
             // Set config
-            Util::setSystemConfig('memories.vod.path', $goVodPath);
+            SystemConfig::set('memories.vod.path', $goVodPath);
 
             // Make executable
             if (!is_executable($goVodPath)) {
@@ -398,8 +398,8 @@ class BinExt
 
     public static function detectFFmpeg(): ?string
     {
-        $ffmpegPath = Util::getSystemConfig('memories.vod.ffmpeg');
-        $ffprobePath = Util::getSystemConfig('memories.vod.ffprobe');
+        $ffmpegPath = SystemConfig::get('memories.vod.ffmpeg');
+        $ffprobePath = SystemConfig::get('memories.vod.ffprobe');
 
         if (empty($ffmpegPath) || !file_exists($ffmpegPath) || empty($ffprobePath) || !file_exists($ffprobePath)) {
             // Use PATH environment variable to find ffmpeg
@@ -418,8 +418,8 @@ class BinExt
             $ffprobePath = trim($ffprobePath);
 
             // Set config
-            Util::setSystemConfig('memories.vod.ffmpeg', $ffmpegPath);
-            Util::setSystemConfig('memories.vod.ffprobe', $ffprobePath);
+            SystemConfig::set('memories.vod.ffmpeg', $ffmpegPath);
+            SystemConfig::set('memories.vod.ffprobe', $ffprobePath);
         }
 
         // Check if executable

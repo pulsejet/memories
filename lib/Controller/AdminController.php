@@ -26,6 +26,7 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Service\BinExt;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
@@ -39,7 +40,7 @@ class AdminController extends GenericApiController
     {
         return Util::guardEx(function () {
             $config = [];
-            foreach (Util::systemConfigDefaults() as $key => $default) {
+            foreach (SystemConfig::DEFAULTS as $key => $default) {
                 $config[$key] = $this->config->getSystemValue($key, $default);
             }
 
@@ -59,7 +60,7 @@ class AdminController extends GenericApiController
             }
 
             // Assign config with type checking
-            Util::setSystemConfig($key, $value);
+            SystemConfig::set($key, $value);
 
             // If changing vod settings, kill any running go-vod instances
             if (str_starts_with($key, 'memories.vod.')) {
@@ -89,7 +90,7 @@ class AdminController extends GenericApiController
             $status = [];
 
             // Check exiftool version
-            $exiftoolNoLocal = Util::getSystemConfig('memories.exiftool_no_local');
+            $exiftoolNoLocal = SystemConfig::get('memories.exiftool_no_local');
             $status['exiftool'] = $this->getExecutableStatus(
                 static fn () => BinExt::getExiftoolPBin(),
                 static fn () => BinExt::testExiftool(),
@@ -136,23 +137,23 @@ class AdminController extends GenericApiController
             // Check for FFmpeg for preview generation
             /** @psalm-suppress ForbiddenCode */
             $status['ffmpeg_preview'] = $this->getExecutableStatus(
-                Util::getSystemConfig('preview_ffmpeg_path')
+                SystemConfig::get('preview_ffmpeg_path')
                     ?: trim(shell_exec('which ffmpeg') ?: ''),
                 static fn ($p) => BinExt::testFFmpeg($p, 'ffmpeg'),
             );
 
             // Check ffmpeg and ffprobe binaries for transcoding
             $status['ffmpeg'] = $this->getExecutableStatus(
-                Util::getSystemConfig('memories.vod.ffmpeg'),
+                SystemConfig::get('memories.vod.ffmpeg'),
                 static fn ($p) => BinExt::testFFmpeg($p, 'ffmpeg'),
             );
             $status['ffprobe'] = $this->getExecutableStatus(
-                Util::getSystemConfig('memories.vod.ffprobe'),
+                SystemConfig::get('memories.vod.ffprobe'),
                 static fn ($p) => BinExt::testFFmpeg($p, 'ffprobe'),
             );
 
             // Check go-vod binary
-            $extGoVod = Util::getSystemConfig('memories.vod.external');
+            $extGoVod = SystemConfig::get('memories.vod.external');
             $status['govod'] = $this->getExecutableStatus(
                 static fn () => BinExt::getGoVodBin(),
                 static fn () => BinExt::testStartGoVod(),

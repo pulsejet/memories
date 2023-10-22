@@ -25,6 +25,7 @@ namespace OCA\Memories\Service;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineWrite;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
@@ -76,7 +77,7 @@ class Index
         $root = $this->rootFolder->getUserFolder($uid);
 
         // Get paths of folders to index
-        $mode = Util::getSystemConfig('memories.index.mode');
+        $mode = SystemConfig::get('memories.index.mode');
         if (null !== $folder) {
             $paths = [$folder];
         } elseif ('1' === $mode || '0' === $mode) { // everything (or nothing)
@@ -84,7 +85,7 @@ class Index
         } elseif ('2' === $mode) { // timeline
             $paths = Util::getTimelinePaths($uid);
         } elseif ('3' === $mode) { // custom
-            $paths = [Util::getSystemConfig('memories.index.path')];
+            $paths = [SystemConfig::get('memories.index.path')];
         } else {
             throw new \Exception('Invalid index mode');
         }

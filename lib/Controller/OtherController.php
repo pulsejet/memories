@@ -25,6 +25,7 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Exceptions;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
@@ -85,9 +86,9 @@ class OtherController extends GenericApiController
             return new JSONResponse([
                 // general stuff
                 'version' => $version,
-                'vod_disable' => Util::getSystemConfig('memories.vod.disable'),
-                'video_default_quality' => Util::getSystemConfig('memories.video_default_quality'),
-                'places_gis' => Util::getSystemConfig('memories.gis_type'),
+                'vod_disable' => SystemConfig::get('memories.vod.disable'),
+                'video_default_quality' => SystemConfig::get('memories.video_default_quality'),
+                'places_gis' => SystemConfig::get('memories.gis_type'),
 
                 // enabled apps
                 'systemtags_enabled' => Util::tagsIsEnabled(),
@@ -99,11 +100,11 @@ class OtherController extends GenericApiController
                 'preview_generator_enabled' => Util::previewGeneratorIsEnabled(),
 
                 // general settings
-                'timeline_path' => $getAppConfig('timelinePath', Util::getSystemConfig('memories.timeline.default_path')),
+                'timeline_path' => $getAppConfig('timelinePath', SystemConfig::get('memories.timeline.default_path')),
                 'enable_top_memories' => 'true' === $getAppConfig('enableTopMemories', 'true'),
 
                 // viewer settings
-                'high_res_cond_default' => Util::getSystemConfig('memories.viewer.high_res_cond_default'),
+                'high_res_cond_default' => SystemConfig::get('memories.viewer.high_res_cond_default'),
                 'livephoto_autoplay' => 'true' === $getAppConfig('livephotoAutoplay', 'true'),
                 'sidebar_filepath' => 'true' === $getAppConfig('sidebarFilepath', false),
 

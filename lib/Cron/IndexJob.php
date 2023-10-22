@@ -6,7 +6,7 @@ namespace OCA\Memories\Cron;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Service;
-use OCA\Memories\Util;
+use OCA\Memories\Settings\SystemConfig;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
 use OCP\IConfig;
@@ -38,7 +38,7 @@ class IndexJob extends TimedJob
     protected function run(mixed $argument): void
     {
         // Check if indexing is enabled
-        if ('0' === Util::getSystemConfig('memories.index.mode')) {
+        if ('0' === SystemConfig::get('memories.index.mode')) {
             return;
         }
 

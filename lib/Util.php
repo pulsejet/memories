@@ -8,6 +8,7 @@ use OC\Files\Search\SearchBinaryOperator;
 use OC\Files\Search\SearchComparison;
 use OC\Files\Search\SearchQuery;
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Settings\SystemConfig;
 use OCP\App\IAppManager;
 use OCP\Files\Node;
 use OCP\Files\Search\ISearchBinaryOperator;
@@ -321,7 +322,7 @@ class Util
      */
     public static function placesGISType(): int
     {
-        return self::getSystemConfig('memories.gis_type');
+        return SystemConfig::get('memories.gis_type');
     }
 
     /**
@@ -333,7 +334,7 @@ class Util
     {
         $paths = \OC::$server->get(IConfig::class)
             ->getUserValue($uid, Application::APPNAME, 'timelinePath', null)
-                ?: self::getSystemConfig('memories.timeline.default_path');
+                ?: SystemConfig::get('memories.timeline.default_path');
 
         return array_map(
             static fn ($path) => self::sanitizePath(trim($path))
@@ -383,76 +384,6 @@ class Util
     public static function explode_exact(string $delimiter, string $string, int $count): array
     {
         return array_pad(explode($delimiter, $string, $count), $count, '');
-    }
-
-    /**
-     * Get a system config key with the correct default.
-     *
-     * @param string $key     System config key
-     * @param mixed  $default Default value
-     */
-    public static function getSystemConfig(string $key, mixed $default = null): mixed
-    {
-        $config = \OC::$server->get(\OCP\IConfig::class);
-
-        $defaults = self::systemConfigDefaults();
-        if (!\array_key_exists($key, $defaults)) {
-            throw new \InvalidArgumentException("Invalid system config key: {$key}");
-        }
-
-        return $config->getSystemValue($key, $default ?? $defaults[$key]);
-    }
-
-    /**
-     * Set a system config key.
-     *
-     * @throws \InvalidArgumentException
-     */
-    public static function setSystemConfig(string $key, mixed $value): void
-    {
-        $config = \OC::$server->get(\OCP\IConfig::class);
-
-        // Check if the key is valid
-        $defaults = self::systemConfigDefaults();
-        if (!\array_key_exists($key, $defaults)) {
-            throw new \InvalidArgumentException("Invalid system config key: {$key}");
-        }
-
-        // Key belongs to memories namespace
-        $isAppKey = str_starts_with($key, Application::APPNAME.'.');
-
-        // Check if the value has the correct type
-        if (null !== $value && \gettype($value) !== \gettype($defaults[$key])) {
-            $expected = \gettype($defaults[$key]);
-            $got = \gettype($value);
-
-            throw new \InvalidArgumentException("Invalid type for system config {$key}, expected {$expected}, got {$got}");
-        }
-
-        // Do not allow null for non-app keys
-        if (!$isAppKey && null === $value) {
-            throw new \InvalidArgumentException("Invalid value for system config {$key}, null is not allowed");
-        }
-
-        if ($isAppKey && ($value === $defaults[$key] || null === $value)) {
-            $config->deleteSystemValue($key);
-        } else {
-            $config->setSystemValue($key, $value);
-        }
-    }
-
-    /** Get list of defaults for all system config keys. */
-    public static function systemConfigDefaults(): array
-    {
-        return require __DIR__.'/SystemConfigDefault.php';
-    }
-
-    /**
-     * Get the instance ID for this instance.
-     */
-    public static function getInstanceId(): string
-    {
-        return self::getSystemConfig('instanceid');
     }
 
     /**
