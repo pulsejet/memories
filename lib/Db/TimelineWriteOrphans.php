@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -14,15 +15,14 @@ trait TimelineWriteOrphans
     /**
      * Mark all or some files in the table as (un)orphaned.
      *
-     * @param bool  $value    True to mark as orphaned, false to mark as un-orphaned
-     * @param int[] $fileIds  List of file IDs to mark, or empty to mark all files
-     * @param bool  $onlyMain Only mark the main file, not the live photo
-     *
-     * @return int Number of rows affected
+     * @param bool  $value     True to mark as orphaned, false to mark as un-orphaned
+     * @param int[] $fileIds   List of file IDs to mark, or empty to mark all files
+     * @param bool  $livephoto Also include live photos in the update
      */
-    public function orphanAll(bool $value = true, ?array $fileIds = null, bool $onlyMain = false): int
+    public function orphanAll(bool $value = true, ?array $fileIds = null, bool $livephoto = true): void
     {
-        $do = function (string $table) use ($value, $fileIds): int {
+        // Helper function to update a table.
+        $update = function (string $table) use ($value, $fileIds): int {
             $query = $this->connection->getQueryBuilder();
             $query->update($table)
                 ->set('orphan', $query->createNamedParameter($value, IQueryBuilder::PARAM_BOOL))
@@ -35,13 +35,26 @@ trait TimelineWriteOrphans
             return $query->executeStatement();
         };
 
-        $count = $do('memories');
+        // Mark all files as orphaned.
+        $update('memories');
 
-        if ($onlyMain) {
-            return $count;
+        // Mark all live photos as orphaned.
+        if ($livephoto) {
+            $update('memories_livephoto');
         }
 
-        return $count + $do('memories_livephoto');
+        // Unorphan all files on abort if we can
+        if ($value) {
+            Util::registerInterruptHandler('orphanAll', function () {
+                // If we are in a transaction, abort it.
+                if ($this->connection->inTransaction()) {
+                    $this->connection->rollBack();
+                }
+
+                // Unorphan all files.
+                $this->orphanAll(false);
+            });
+        }
     }
 
     /**
@@ -55,7 +68,7 @@ trait TimelineWriteOrphans
     {
         // Orphan all files. This means if we are interrupted,
         // it will lead to a re-index of the whole library!
-        $this->orphanAll(true, null, true);
+        $this->orphanAll(true, null, false);
 
         while (\count($orphans = $this->getSomeOrphans($txnSize, $fields))) {
             $this->connection->beginTransaction();
@@ -66,7 +79,7 @@ trait TimelineWriteOrphans
 
             // Mark all files as not orphaned.
             $fileIds = array_map(static fn ($row): int => (int) $row['fileid'], $orphans);
-            $this->orphanAll(false, $fileIds, true);
+            $this->orphanAll(false, $fileIds, false);
 
             $this->connection->commit();
         }
@@ -78,7 +91,7 @@ trait TimelineWriteOrphans
      * @param int      $count  max number of rows to return
      * @param string[] $fields list of fields to select
      */
-    protected function getSomeOrphans(int $count, array $fields): array
+    private function getSomeOrphans(int $count, array $fields): array
     {
         $query = $this->connection->getQueryBuilder();
 

@@ -391,4 +391,41 @@ class Util
 
         return null;
     }
+
+    /**
+     * Register a signal handler with pcntl for SIGINT.
+     */
+    public static function registerInterruptHandler(string $name, callable $callback): void
+    {
+        // Only register signal handlers in CLI mode
+        if (!\OC::$CLI || !\extension_loaded('pcntl')) {
+            return;
+        }
+
+        // Register handler only once
+        static $handlers = [];
+        if ($handlers[$name] ?? null) {
+            return;
+        }
+
+        // Check if this is the first handler
+        $registered = \count($handlers) > 0;
+
+        // Register handler
+        $handlers[$name] = $callback;
+
+        // pcntl_signal is already registered
+        if ($registered) {
+            return;
+        }
+
+        // Register handler
+        pcntl_signal(SIGINT, static function () use ($handlers): void {
+            foreach ($handlers as $handler) {
+                $handler();
+            }
+
+            exit(1);
+        });
+    }
 }
