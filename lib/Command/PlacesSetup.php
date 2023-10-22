@@ -31,7 +31,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class PlacesSetup extends Command
 {
-    /** @psalm-suppress PropertyNotSetInConstructor */
     protected OutputInterface $output;
 
     public function __construct(protected Places $places)

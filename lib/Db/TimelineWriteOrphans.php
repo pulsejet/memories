@@ -81,12 +81,13 @@ trait TimelineWriteOrphans
     protected function getSomeOrphans(int $count, array $fields): array
     {
         $query = $this->connection->getQueryBuilder();
-        $query->select(...$fields)
+
+        return $query->select(...$fields)
             ->from('memories')
             ->where($query->expr()->eq('orphan', $query->expr()->literal(1)))
             ->setMaxResults($count)
+            ->executeQuery()
+            ->fetchAll()
         ;
-
-        return $query->executeQuery()->fetchAll();
     }
 }

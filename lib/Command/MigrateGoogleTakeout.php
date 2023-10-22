@@ -44,10 +44,7 @@ class MigrateGoogleTakeout extends Command
     protected const MIGRATOR_VERSION = 1;
     protected const MIGRATED_KEY = 'memoriesMigratorVersion';
 
-    /** @psalm-suppress PropertyNotSetInConstructor */
     protected OutputInterface $output;
-
-    /** @psalm-suppress PropertyNotSetInConstructor */
     protected InputInterface $input;
 
     // Stats

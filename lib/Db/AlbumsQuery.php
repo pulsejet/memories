@@ -149,6 +149,7 @@ class AlbumsQuery
     public function getIfAllowed(string $uid, string $albumId): ?array
     {
         $album = null;
+        $albumUid = null;
 
         // Split name and uid
         $parts = explode('/', $albumId);
@@ -173,7 +174,6 @@ class AlbumsQuery
         }
 
         // Check if user is owner
-        /** @psalm-suppress PossiblyUndefinedVariable */
         if ($albumUid === $uid) {
             return $album;
         }

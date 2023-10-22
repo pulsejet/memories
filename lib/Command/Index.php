@@ -57,13 +57,8 @@ class IndexOpts
 
 class Index extends Command
 {
-    /** @psalm-suppress PropertyNotSetInConstructor */
     private InputInterface $input;
-
-    /** @psalm-suppress PropertyNotSetInConstructor */
     private OutputInterface $output;
-
-    /** @psalm-suppress PropertyNotSetInConstructor */
     private IndexOpts $opts;
 
     public function __construct(
