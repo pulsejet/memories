@@ -107,8 +107,6 @@ export default defineComponent({
       }
 
       try {
-        this.show = false;
-
         // Create map to return IPhoto later
         const map = new Map<number, IPhoto>();
         for (const photo of this.photos.filter((p) => p.faceid)) {
