@@ -44,21 +44,17 @@ export default defineComponent({
 
   data: () => ({
     show: false,
-    user: '',
-    name: '',
   }),
 
-  watch: {
-    $route() {
-      this.refreshParams();
-    },
-  },
-
-  mounted() {
-    this.refreshParams();
-  },
-
   computed: {
+    user() {
+      return this.$route.params.user;
+    },
+
+    name() {
+      return this.$route.params.name;
+    },
+
     owned() {
       return this.user === utils.uid;
     },
@@ -73,11 +69,6 @@ export default defineComponent({
       this.show = true;
     },
 
-    refreshParams() {
-      this.user = this.$route.params.user ?? String();
-      this.name = this.$route.params.name ?? String();
-    },
-
     async save() {
       try {
         await client.deleteFile(dav.getAlbumPath(this.user, this.name));
@@ -85,11 +76,7 @@ export default defineComponent({
         this.close();
       } catch (error) {
         console.log(error);
-        showError(
-          this.t('photos', 'Failed to delete {name}.', {
-            name: this.name,
-          }),
-        );
+        showError(this.t('photos', 'Failed to delete {name}.', { name: this.name }));
       }
     },
   },
