@@ -1,5 +1,5 @@
 <template>
-  <Modal ref="modal" @close="cleanup" size="normal" v-if="processing">
+  <Modal ref="modal" @close="cleanup" size="normal" v-if="show">
     <template #title>
       {{ t('memories', 'Move to folder') }}
     </template>
@@ -39,7 +39,6 @@ export default defineComponent({
   data: () => ({
     photos: [] as IPhoto[],
     photosDone: 0,
-    processing: false,
   }),
 
   created() {
@@ -50,13 +49,13 @@ export default defineComponent({
   methods: {
     open(photos: IPhoto[]) {
       this.photosDone = 0;
-      this.processing = false;
+      this.show = false;
       this.photos = photos;
       this.chooseFolderPath();
     },
 
     cleanup() {
-      this.processing = false;
+      this.show = false;
       this.photos = [];
     },
 
@@ -68,7 +67,7 @@ export default defineComponent({
       );
       // Fails if the target exists, same behavior with Nextcloud files implementation.
       const gen = dav.movePhotos(this.photos, destination, false);
-      this.processing = true;
+      this.show = true;
 
       for await (const fids of gen) {
         this.photosDone += fids.filter((f) => f).length;
