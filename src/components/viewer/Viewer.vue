@@ -287,7 +287,8 @@ export default defineComponent({
     // The viewer is a singleton
     const self = this;
     _m.viewer = {
-      open: this.open.bind(this) as typeof this.open,
+      open: this.setFragment.bind(this) as typeof this.setFragment,
+      openDynamic: this.openDynamic.bind(this) as typeof this.openDynamic,
       openStatic: this.openStatic.bind(this) as typeof this.openStatic,
       close: this.close.bind(this) as typeof this.close,
       get isOpen() {
@@ -553,7 +554,7 @@ export default defineComponent({
         this.fullyOpened = false;
         this.setUiVisible(false);
         this.hideSidebar();
-        this.setRouteHash(undefined);
+        this.setFragment(null);
         this.updateTitle(undefined);
         nativex.setTheme(); // reset
         document.body.classList.remove(BODY_VIEWER_VIDEO);
@@ -581,7 +582,7 @@ export default defineComponent({
       this.photoswipe.on('slideActivate', (e) => {
         this.currIndex = this.photoswipe!.currIndex;
         const photo = e.slide?.data?.photo;
-        this.setRouteHash(photo);
+        this.setFragment(photo);
         this.updateTitle(photo);
       });
 
@@ -636,7 +637,7 @@ export default defineComponent({
     },
 
     /** Open using start photo and rows list */
-    async open(anchorPhoto: IPhoto, rows: IRow[]) {
+    async openDynamic(anchorPhoto: IPhoto, rows: IRow[]) {
       const detail = anchorPhoto.d?.detail;
       if (!detail) {
         console.error('Attempted to open viewer with no detail list!');
@@ -865,33 +866,16 @@ export default defineComponent({
     },
 
     /** Set the route hash to the given photo */
-    setRouteHash(photo: IPhoto | undefined) {
-      if (!photo) {
-        if (!this.isOpen && this.$route.hash?.startsWith('#v')) {
-          this.$router.back();
-
-          // Ensure this does not have the hash, otherwise replace it
-          if (this.$route.hash?.startsWith('#v')) {
-            this.$router.replace({
-              hash: '',
-              query: this.$route.query,
-            });
-          }
-        }
-        return;
+    setFragment(photo: IPhoto | null) {
+      if (photo) {
+        const frag = utils.fragment.viewer;
+        frag.dayid = photo.dayid;
+        frag.key = photo.key!;
+        return utils.fragment.push(frag);
       }
-      const hash = photo ? utils.getViewerHash(photo) : '';
-      const route = {
-        path: this.$route.path,
-        query: this.$route.query,
-        hash,
-      };
-      if (hash !== this.$route.hash) {
-        if (this.$route.hash) {
-          this.$router.replace(route);
-        } else {
-          this.$router.push(route);
-        }
+
+      if (!this.isOpen) {
+        return utils.fragment.pop('v');
       }
     },
 

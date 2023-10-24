@@ -867,7 +867,7 @@ export default defineComponent({
     /** Open viewer with given photo */
     openViewer(photo: IPhoto) {
       nativex.playTouchSound();
-      this.$router.push(utils.getViewerRoute(photo));
+      _m.viewer.open(photo);
     },
   },
 });

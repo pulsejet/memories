@@ -1,4 +1,4 @@
-import type { Route } from 'vue-router';
+import Router, { Route } from 'vue-router';
 import type { ComponentPublicInstance } from 'vue';
 
 import type { translate, translatePlural } from '@nextcloud/l10n';
@@ -32,6 +32,7 @@ declare global {
   var _m: {
     mode: 'admin' | 'user';
     route: Route;
+    router: Router;
     routes: typeof routes;
 
     modals: {
@@ -52,7 +53,8 @@ declare global {
     };
 
     viewer: {
-      open: (anchorPhoto: IPhoto, rows: IRow[]) => Promise<void>;
+      open: (photo: IPhoto) => void;
+      openDynamic: (anchorPhoto: IPhoto, rows: IRow[]) => Promise<void>;
       openStatic(photo: IPhoto, list: IPhoto[], thumbSize?: 256 | 512): Promise<void>;
       close: () => void;
       isOpen: boolean;

@@ -298,7 +298,7 @@ export default defineComponent({
       // At high zoom levels, open the photo
       if (this.zoom >= 12 && cluster.preview) {
         cluster.preview.key = cluster.preview.fileid.toString();
-        this.$router.push(utils.getViewerRoute(cluster.preview));
+        _m.viewer.open(cluster.preview);
         return;
       }
 

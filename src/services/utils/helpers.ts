@@ -191,24 +191,6 @@ export function setupLivePhotoHooks(video: HTMLVideoElement) {
 }
 
 /**
- * Get route hash for viewer for photo
- */
-export function getViewerHash(photo: IPhoto) {
-  return `#v/${photo.dayid}/${photo.key}`;
-}
-
-/**
- * Get route for viewer for photo
- */
-export function getViewerRoute(photo: IPhoto) {
-  return {
-    path: _m.route.path,
-    query: _m.route.query,
-    hash: getViewerHash(photo),
-  };
-}
-
-/**
  * Choose a folder using the NC file picker
  *
  * @param title Title of the file picker

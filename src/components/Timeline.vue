@@ -269,14 +269,9 @@ export default defineComponent({
       await this.$nextTick();
 
       // Check if hash has changed
-      if (from?.hash !== to.hash && to.hash?.startsWith('#v') && !_m.viewer.isOpen) {
+      if (from?.hash !== to.hash && !_m.viewer.isOpen && utils.fragment.viewer.open) {
         // Open viewer
-        const parts = to.hash.split('/');
-        if (parts.length !== 3) return;
-
-        // Get params
-        const dayid = parseInt(parts[1]);
-        const key = parts[2];
+        const { dayid, key } = utils.fragment.viewer;
         if (isNaN(dayid) || !key) return;
 
         // Get day
@@ -299,9 +294,9 @@ export default defineComponent({
           }
         }
 
-        _m.viewer.open(photo, this.list);
-      } else if (!to.hash?.startsWith('#v') && _m.viewer.isOpen) {
-        // Close viewer
+        _m.viewer.openDynamic(photo, this.list);
+      } else if (!utils.fragment.viewer.open && _m.viewer.isOpen) {
+        // No viewer fragment but viewer is open
         _m.viewer.close();
       }
     },
@@ -693,7 +688,7 @@ export default defineComponent({
           data = await dav.getOnThisDayData();
         } else if (dav.isSingleItem()) {
           data = await dav.getSingleItemData();
-          this.$router.replace(utils.getViewerRoute(data[0]!.detail![0]));
+          _m.viewer.open(data[0]!.detail![0]);
         } else {
           // Try the cache
           if (!noCache) {
