@@ -318,7 +318,7 @@ $icon-size: $icon-half-size * 2;
     opacity: 1;
   }
 
-  @media (hover: hover) {
+  @media (hover: hover) and (pointer: fine) {
     .p-outer:hover > & {
       @include visible;
     }
@@ -433,7 +433,7 @@ div.img-outer {
 
     display: none;
     transition: border-radius 0.1s ease-in;
-    @media (hover: hover) {
+    @media (hover: hover) and (pointer: fine) {
       .p-outer:not(.selected):hover > & {
         display: block;
       }

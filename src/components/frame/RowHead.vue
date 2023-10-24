@@ -121,7 +121,7 @@ export default defineComponent({
   }
 
   // Show the icon (gray) when hovering or selected
-  @media (hover: hover) {
+  @media (hover: hover) and (pointer: fine) {
     &:hover {
       @include visible;
     }
