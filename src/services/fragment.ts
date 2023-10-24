@@ -53,6 +53,9 @@ const cache = {
 };
 
 export default {
+  /**
+   * List of all fragment types.
+   */
   types: FragmentType,
 
   /**
@@ -148,6 +151,11 @@ export default {
     return this.get(FragmentType.viewer);
   },
 
+  /**
+   * Trigger when route changes. Only called by App.vue as a router hook.
+   * @param to Switching to this route
+   * @param from Switching from this route
+   */
   changeTrigger(to: Route, from: Route) {
     const toF = decodeFragment(to.hash);
     const fromF = decodeFragment(from.hash);

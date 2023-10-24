@@ -639,6 +639,22 @@ export default defineComponent({
       return this.photoswipe;
     },
 
+    /** Set the route hash to the given photo */
+    setFragment(photo: IPhoto | null) {
+      // Add or update fragment
+      if (photo) {
+        return fragment.push({
+          type: fragment.types.viewer,
+          args: [String(photo.dayid), photo.key!],
+        });
+      }
+
+      // Remove fragment if closed
+      if (!this.isOpen) {
+        return fragment.pop(fragment.types.viewer);
+      }
+    },
+
     /** Open using start photo and rows list */
     async openDynamic(anchorPhoto: IPhoto, rows: IRow[]) {
       const detail = anchorPhoto.d?.detail;
@@ -867,22 +883,6 @@ export default defineComponent({
       });
 
       return elem;
-    },
-
-    /** Set the route hash to the given photo */
-    setFragment(photo: IPhoto | null) {
-      // Add or update fragment
-      if (photo) {
-        return fragment.push({
-          type: fragment.types.viewer,
-          args: [String(photo.dayid), photo.key!],
-        });
-      }
-
-      // Remove fragment if closed
-      if (!this.isOpen) {
-        return fragment.pop(fragment.types.viewer);
-      }
     },
 
     /**
