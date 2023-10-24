@@ -1,5 +1,5 @@
 <template>
-  <Modal ref="modal" @close="cleanup" size="normal" v-if="show" :sidebar="!isRoot && !isMobile ? filename : null">
+  <Modal ref="modal" @close="cleanup" size="normal" v-if="show" :sidebar="sidebar">
     <template #title>
       {{ t('memories', 'Link Sharing') }}
     </template>
@@ -116,8 +116,8 @@ export default defineComponent({
       return this.filename === '/' || this.filename === '';
     },
 
-    isMobile(): boolean {
-      return utils.isMobile();
+    sidebar() {
+      return !this.isRoot && !utils.isMobile() ? this.filename : null;
     },
   },
 
