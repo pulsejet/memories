@@ -1,5 +1,12 @@
 <template>
-  <router-link draggable="false" class="cluster fill-block" :class="{ error }" :to="target" @click.native="click">
+  <component
+    :is="link ? 'router-link' : 'div'"
+    draggable="false"
+    class="cluster fill-block"
+    :class="{ error }"
+    :to="target"
+    @click="click"
+  >
     <div class="count-bubble" v-if="counters && data.count">
       <NcCounterBubble> {{ data.count }} </NcCounterBubble>
     </div>
@@ -22,7 +29,7 @@
         <div v-if="title || subtitle" class="overlay top-left fill-block" />
       </div>
     </div>
-  </router-link>
+  </component>
 </template>
 
 <script lang="ts">
