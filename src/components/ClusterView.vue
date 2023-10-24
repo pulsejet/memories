@@ -18,6 +18,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import type { Route } from 'vue-router';
 
 import UserConfig from '../mixins/UserConfig';
 import TopMatter from './top-matter/TopMatter.vue';
@@ -82,7 +83,8 @@ export default defineComponent({
   },
 
   watch: {
-    async $route() {
+    async $route(to: Route, from: Route) {
+      if (to.path === from.path) return;
       this.refresh();
     },
   },
