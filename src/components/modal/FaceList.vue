@@ -59,24 +59,28 @@ export default defineComponent({
   },
 
   data: () => ({
-    user: String(),
-    name: String(),
     list: null as ICluster[] | null,
     fuse: null as Fuse<ICluster> | null,
     search: String(),
   }),
 
-  watch: {
-    $route() {
-      this.refreshParams();
-    },
-  },
-
   mounted() {
-    this.refreshParams();
+    this.refresh();
   },
 
   computed: {
+    user() {
+      return this.$route.params.user;
+    },
+
+    name() {
+      return this.$route.params.name;
+    },
+
+    backend() {
+      return this.$route.name as 'recognize' | 'facerecognition';
+    },
+
     filteredList() {
       if (!this.list || !this.search || !this.fuse) return this.list || [];
       return this.fuse.search(this.search).map((r) => r.item);
@@ -84,23 +88,20 @@ export default defineComponent({
   },
 
   methods: {
-    async refreshParams() {
-      this.user = this.$route.params.user;
-      this.name = this.$route.params.name;
-      this.list = null;
-      this.search = '';
-
-      const backend = this.routeIsRecognize ? 'recognize' : this.routeIsFaceRecognition ? 'facerecognition' : null;
-      console.assert(backend, '[BUG] Invalid route for FaceList');
-
-      const faces = await dav.getFaceList(backend!);
-      this.list = faces.filter((c: IFace) => c.user_id === this.user && String(c.name || c.cluster_id) !== this.name);
-
-      this.fuse = new Fuse(this.list, { keys: ['name'] });
+    async refresh() {
+      try {
+        this.list = null;
+        const faces = await dav.getFaceList(this.backend);
+        this.list = faces.filter((c: IFace) => c.user_id === this.user && String(c.name || c.cluster_id) !== this.name);
+        this.fuse = new Fuse(this.list, { keys: ['name'] });
+      } catch (e) {
+        showError(this.t('memories', 'Failed to load faces'));
+        console.error(e);
+      }
     },
 
     async addFace() {
-      let name: string = String();
+      let name = String();
 
       try {
         // TODO: use a proper dialog

@@ -39,17 +39,15 @@ export default defineComponent({
 
   data: () => ({
     show: false,
-    user: '',
-    name: '',
   }),
 
-  mounted() {
-    this.refreshParams();
-  },
+  computed: {
+    name() {
+      return this.$route.params.name;
+    },
 
-  watch: {
-    $route() {
-      this.refreshParams();
+    user() {
+      return this.$route.params.user;
     },
   },
 
@@ -59,21 +57,12 @@ export default defineComponent({
     },
 
     open() {
-      const user = this.$route.params.user || '';
-      if (this.$route.params.user !== utils.uid) {
-        showError(
-          this.t('memories', 'Only user "{user}" can delete this person', {
-            user,
-          }),
-        );
+      if (this.user !== utils.uid) {
+        showError(this.t('memories', 'Only user "{user}" can delete this person', { user: this.user }));
         return;
       }
-      this.show = true;
-    },
 
-    refreshParams() {
-      this.user = this.$route.params.user;
-      this.name = this.$route.params.name;
+      this.show = true;
     },
 
     async save() {
@@ -83,15 +72,11 @@ export default defineComponent({
         } else {
           await dav.faceRecognitionSetPersonVisibility(this.name, false);
         }
-        this.$router.push({ name: this.$route.name as string });
+        this.$router.push({ name: this.$route.name as string }); // "recognize" or "facerecognition"
         this.close();
       } catch (error) {
         console.log(error);
-        showError(
-          this.t('photos', 'Failed to delete {name}.', {
-            name: this.name,
-          }),
-        );
+        showError(this.t('photos', 'Failed to delete {name}.', { name: this.name }));
       }
     },
   },

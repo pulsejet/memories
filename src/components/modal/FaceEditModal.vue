@@ -8,7 +8,7 @@
       <NcTextField
         class="field"
         :autofocus="true"
-        :value.sync="name"
+        :value.sync="input"
         :label="t('memories', 'Name')"
         :label-visible="false"
         :placeholder="t('memories', 'Name')"
@@ -49,24 +49,20 @@ export default defineComponent({
 
   data: () => ({
     show: false,
-    user: '',
-    name: '',
-    oldName: '',
+    input: '',
   }),
 
-  mounted() {
-    this.refreshParams();
-  },
-
-  watch: {
-    $route() {
-      this.refreshParams();
-    },
-  },
-
   computed: {
+    name() {
+      return this.$route.params.name;
+    },
+
+    user() {
+      return this.$route.params.user;
+    },
+
     canSave() {
-      return this.name !== this.oldName && this.name !== '' && isNaN(Number(this.name));
+      return this.input && this.name !== this.input && isNaN(Number(this.input));
     },
   },
 
@@ -76,27 +72,13 @@ export default defineComponent({
     },
 
     open() {
-      const user = this.$route.params.user || '';
-      if (this.$route.params.user !== utils.uid) {
-        showError(
-          this.t('memories', 'Only user "{user}" can update this person', {
-            user,
-          }),
-        );
+      if (this.user !== utils.uid) {
+        showError(this.t('memories', 'Only user "{user}" can update this person', { user: this.user }));
         return;
       }
+
+      this.input = isNaN(Number(this.name)) ? this.name : String();
       this.show = true;
-    },
-
-    refreshParams() {
-      this.user = String(this.$route.params.user);
-      this.name = String(this.$route.params.name);
-      this.oldName = this.name;
-
-      // if name is number then it is blank
-      if (!isNaN(Number(this.name))) {
-        this.name = String();
-      }
     },
 
     async save() {
@@ -104,21 +86,23 @@ export default defineComponent({
 
       try {
         if (this.routeIsRecognize) {
-          await dav.recognizeRenameFace(this.user, this.oldName, this.name);
+          await dav.recognizeRenameFace(this.user, this.name, this.input);
         } else {
-          await dav.faceRecognitionRenamePerson(this.oldName, this.name);
+          await dav.faceRecognitionRenamePerson(this.name, this.input);
         }
+
         this.$router.replace({
           name: this.$route.name as string,
-          params: { user: this.user, name: this.name },
+          params: { user: this.user, name: this.input },
         });
+
         this.close();
       } catch (error) {
         console.log(error);
         showError(
           this.t('photos', 'Failed to rename {oldName} to {name}.', {
-            oldName: this.oldName,
-            name: this.name,
+            oldName: this.name,
+            name: this.input,
           }),
         );
       }

@@ -70,25 +70,25 @@ export default defineComponent({
   },
 
   mounted() {
-    this.routeChange();
+    this.refresh();
   },
 
   created() {
-    utils.bus.on('memories:user-config-changed', this.routeChange);
+    utils.bus.on('memories:user-config-changed', this.refresh);
   },
 
   beforeDestroy() {
-    utils.bus.off('memories:user-config-changed', this.routeChange);
+    utils.bus.off('memories:user-config-changed', this.refresh);
   },
 
   watch: {
     async $route() {
-      this.routeChange();
+      this.refresh();
     },
   },
 
   methods: {
-    async routeChange() {
+    async refresh() {
       try {
         this.items = [];
         this.loading++;

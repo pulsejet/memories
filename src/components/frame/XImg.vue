@@ -43,7 +43,7 @@ export default defineComponent({
   },
 
   watch: {
-    src(newSrc, oldSrc) {
+    src() {
       this.loadImage();
     },
   },
