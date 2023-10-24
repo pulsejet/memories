@@ -83,6 +83,7 @@ export default defineComponent({
   mounted() {
     utils.bus.on('files:sidebar:opened', this.handleNativeOpen);
     utils.bus.on('files:sidebar:closed', this.handleNativeClose);
+    utils.bus.on('memories:fragment:pop:sidebar', this.close);
 
     _m.sidebar = {
       open: this.open.bind(this),
@@ -102,6 +103,7 @@ export default defineComponent({
   beforeDestroy() {
     utils.bus.off('files:sidebar:opened', this.handleNativeOpen);
     utils.bus.off('files:sidebar:closed', this.handleNativeClose);
+    utils.bus.off('memories:fragment:pop:sidebar', this.close);
   },
 
   methods: {
@@ -147,6 +149,7 @@ export default defineComponent({
 
     handleClose() {
       utils.bus.emit('memories:sidebar:closed', null);
+      utils.fragment.pop(utils.fragment.types.sidebar);
     },
 
     handleOpen() {
@@ -156,7 +159,13 @@ export default defineComponent({
         if (e.key.length === 1) e.stopPropagation();
       });
 
+      // Emit event
       utils.bus.emit('memories:sidebar:opened', null);
+
+      // Use fragment navigation only on mobile
+      if (utils.isMobile()) {
+        utils.fragment.push(utils.fragment.types.sidebar);
+      }
     },
 
     handleNativeOpen() {

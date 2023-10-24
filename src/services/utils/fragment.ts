@@ -5,6 +5,7 @@ enum FragmentType {
   viewer = 'v',
   selection = 's',
   modal = 'm',
+  sidebar = 'i',
 }
 
 /** Names of fragments */
