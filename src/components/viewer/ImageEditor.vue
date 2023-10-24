@@ -325,6 +325,9 @@ export default defineComponent({
         })
       ) {
         this.onClose('warning-ignored', false);
+      } else {
+        // User cancelled, put the fragment back
+        utils.fragment.push(utils.fragment.types.editor);
       }
     },
 
