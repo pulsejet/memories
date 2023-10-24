@@ -226,10 +226,23 @@ export default defineComponent({
     },
   },
 
+  watch: {
+    open(value: boolean) {
+      utils.fragment.if(value, utils.fragment.types.settings);
+    },
+  },
+
   mounted() {
     if (this.isNative) {
       this.refreshNativeConfig();
     }
+
+    // Fragment navigation
+    utils.bus.on('memories:fragment:pop:settings', this.onClose);
+  },
+
+  beforeDestroy() {
+    utils.bus.off('memories:fragment:pop:settings', this.onClose);
   },
 
   methods: {

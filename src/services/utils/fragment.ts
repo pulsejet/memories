@@ -7,6 +7,7 @@ enum FragmentType {
   modal = 'm',
   sidebar = 'i',
   editor = 'e',
+  settings = 'ss',
 }
 
 /** Names of fragments */

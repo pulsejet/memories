@@ -26,7 +26,7 @@
 
       <template #footer>
         <ul class="app-navigation__settings">
-          <NcAppNavigationItem :name="t('memories', 'Settings')" @click="showSettings">
+          <NcAppNavigationItem :name="t('memories', 'Settings')" @click="showSettings" href="#ss">
             <CogIcon slot="icon" :size="20" />
           </NcAppNavigationItem>
         </ul>
