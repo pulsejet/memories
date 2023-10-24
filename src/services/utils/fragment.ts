@@ -190,6 +190,16 @@ export const fragment = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Only contextual fragments should be present on page load
+  if (fragment.list.length) {
+    const contextual = fragment.list.filter((frag) => frag.type === FragmentType.viewer);
+    _m.router.replace({
+      path: _m.route.path,
+      query: _m.route.query,
+      hash: encodeFragment(contextual),
+    });
+  }
+
   /**
    * Trigger when route changes; notify listeners of popped fragments.
    * @param to Switching to this route
