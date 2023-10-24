@@ -4,7 +4,7 @@
     ref="editor"
     class="viewer__image-editor top-left fill-block"
     :class="{ loading: !imageEditor }"
-  />
+  ></div>
 </template>
 
 <script lang="ts">
@@ -193,18 +193,28 @@ export default defineComponent({
     const source = await this.getImage();
     const config = { ...this.config, source };
 
+    // Create the editor
     this.imageEditor = new FilerobotImageEditor(div, config);
     this.imageEditor.render();
 
     // Handle keyboard
     window.addEventListener('keydown', this.handleKeydown, true);
+
+    // Fragment navigation
+    utils.fragment.push(utils.fragment.types.editor);
+    utils.bus.on('memories:fragment:pop:editor', this.close);
   },
 
   beforeDestroy() {
-    if (this.imageEditor) {
-      this.imageEditor.terminate();
-    }
+    // Cleanup
+    this.imageEditor?.terminate();
+
+    // Remove keyboard handler
     window.removeEventListener('keydown', this.handleKeydown, true);
+
+    // Fragment navigation
+    utils.fragment.pop(utils.fragment.types.editor);
+    utils.bus.off('memories:fragment:pop:editor', this.close);
   },
 
   methods: {
@@ -323,10 +333,8 @@ export default defineComponent({
       event.stopImmediatePropagation();
       // escape key
       if (event.key === 'Escape') {
-        // Since we cannot call the closeMethod and know if there
-        // are unsaved changes, let's fake a close button trigger.
         event.preventDefault();
-        (document.querySelector('.FIE_topbar-close-button') as HTMLElement).click();
+        this.close();
       }
 
       // ctrl + S = save
@@ -340,6 +348,12 @@ export default defineComponent({
         event.preventDefault();
         (document.querySelector('.FIE_topbar-undo-button') as HTMLElement).click();
       }
+    },
+
+    close() {
+      // Since we cannot call the closeMethod and know if there
+      // are unsaved changes, let's fake a close button trigger.
+      (document.querySelector('.FIE_topbar-close-button') as HTMLElement).click();
     },
   },
 });
