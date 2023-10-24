@@ -1,4 +1,4 @@
-import Router, { Route } from 'vue-router';
+import Router, { type Route } from 'vue-router';
 import type { ComponentPublicInstance } from 'vue';
 
 import type { translate, translatePlural } from '@nextcloud/l10n';

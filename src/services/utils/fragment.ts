@@ -1,4 +1,3 @@
-import type { Route } from 'vue-router';
 import { bus } from './event-bus';
 
 /** Mapping of route name to key type */
@@ -161,13 +160,15 @@ export const fragment = {
   get viewer() {
     return this.get(FragmentType.viewer);
   },
+};
 
+document.addEventListener('DOMContentLoaded', () => {
   /**
-   * Trigger when route changes. Only called by App.vue as a router hook.
+   * Trigger when route changes; notify listeners of popped fragments.
    * @param to Switching to this route
    * @param from Switching from this route
    */
-  changeTrigger(to: Route, from: Route) {
+  _m.router.afterEach((to, from) => {
     const toF = decodeFragment(to.hash);
     const fromF = decodeFragment(from.hash);
 
@@ -183,5 +184,5 @@ export const fragment = {
           }
         }
       });
-  },
-};
+  });
+});

@@ -67,7 +67,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import type { Route } from 'vue-router';
 
 import NcContent from '@nextcloud/vue/dist/Components/NcContent';
 import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent';
@@ -159,12 +158,6 @@ export default defineComponent({
     navItems: [] as NavItem[],
     settingsOpen: false,
   }),
-
-  watch: {
-    async $route(to: Route, from: Route) {
-      utils.fragment.changeTrigger(to, from);
-    },
-  },
 
   computed: {
     native(): boolean {
