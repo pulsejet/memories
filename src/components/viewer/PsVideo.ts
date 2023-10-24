@@ -341,38 +341,45 @@ class VideoContentSetup {
         options: qualityNums,
         forced: true,
         onChange: (quality: number) => {
-          qualityList = content.videojs?.qualityLevels?.();
-          if (!qualityList || !content.videojs) return;
+          // Changing the quality sometimes throws strange
+          // DOMExceptions; don't let this stop Plyr from being
+          // constructed altogether.
+          try {
+            qualityList = content.videojs?.qualityLevels?.();
+            if (!qualityList || !content.videojs) return;
 
-          const isHLS = content.videojs.src(undefined)?.includes('m3u8');
+            const isHLS = content.videojs.src(undefined)?.includes('m3u8');
 
-          if (quality === -2) {
-            // Direct playback
-            // Prevent any useless transcodes
+            if (quality === -2) {
+              // Direct playback
+              // Prevent any useless transcodes
+              for (let i = 0; i < qualityList.length; ++i) {
+                qualityList[i].enabled = false;
+              }
+
+              // Set the source to the original video
+              if (isHLS) {
+                content.videojs.src(this.getDirectSrc(content));
+              }
+              return;
+            } else {
+              // Set source to HLS
+              if (!isHLS) {
+                content.videojs.src(this.getHLSsrc(content));
+              }
+            }
+
+            // Enable only the selected quality
             for (let i = 0; i < qualityList.length; ++i) {
-              qualityList[i].enabled = false;
+              const { width, height, label } = qualityList[i];
+              const pixels = Math.min(width!, height!);
+              qualityList[i].enabled =
+                !quality || // auto
+                pixels === quality || // exact match
+                (label?.includes('max.m3u8') && quality === -1); // max
             }
-
-            // Set the source to the original video
-            if (isHLS) {
-              content.videojs.src(this.getDirectSrc(content));
-            }
-            return;
-          } else {
-            // Set source to HLS
-            if (!isHLS) {
-              content.videojs.src(this.getHLSsrc(content));
-            }
-          }
-
-          // Enable only the selected quality
-          for (let i = 0; i < qualityList.length; ++i) {
-            const { width, height, label } = qualityList[i];
-            const pixels = Math.min(width!, height!);
-            qualityList[i].enabled =
-              !quality || // auto
-              pixels === quality || // exact match
-              (label?.includes('max.m3u8') && quality === -1); // max
+          } catch (e) {
+            console.error('Error changing quality', e);
           }
         },
       };
