@@ -5,7 +5,6 @@
     :class="{
       hasPreview: previews.length > 0,
       onePreview: previews.length === 1,
-      hasError: error,
     }"
     :to="target"
   >
@@ -48,13 +47,6 @@ export default defineComponent({
     },
   },
 
-  data: () => ({
-    // Separate property because the one on data isn't reactive
-    previews: [] as IPhoto[],
-    // Error occured fetching thumbs
-    error: false,
-  }),
-
   computed: {
     /** Open folder */
     target() {
@@ -70,35 +62,22 @@ export default defineComponent({
         },
       };
     },
-  },
 
-  mounted() {
-    this.refreshPreviews();
-  },
+    previews(): IPhoto[] {
+      const previews = this.data.previews;
+      if (!previews?.length) {
+        return [];
+      }
 
-  watch: {
-    data() {
-      this.refreshPreviews();
+      if (previews.length > 0 && previews.length < 4) {
+        return [previews[0]];
+      } else {
+        return previews.slice(0, 4);
+      }
     },
   },
 
   methods: {
-    /** Refresh previews */
-    refreshPreviews() {
-      // Reset state
-      this.error = false;
-
-      // Get preview infos
-      const previews = this.data.previews;
-      if (previews) {
-        if (previews.length > 0 && previews.length < 4) {
-          this.previews = [previews[0]];
-        } else {
-          this.previews = previews.slice(0, 4);
-        }
-      }
-    },
-
     /** Get preview url */
     previewUrl(info: IPhoto) {
       return utils.getPreviewUrl({
@@ -160,16 +139,6 @@ export default defineComponent({
   }
   .folder.hasPreview:hover > & {
     opacity: 0;
-  }
-
-  // Make it red if has an error
-  .folder.hasError > & {
-    .folder-icon {
-      filter: invert(12%) sepia(62%) saturate(5862%) hue-rotate(8deg) brightness(103%) contrast(128%);
-    }
-    .name {
-      color: #bb0000;
-    }
   }
 
   > .folder-icon {
