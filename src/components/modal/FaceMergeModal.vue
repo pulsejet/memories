@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="close" size="large" v-if="show">
+  <Modal ref="modal" @close="cleanup" size="large" v-if="show">
     <template #title>
       {{ t('memories', 'Merge {name} with person', { name: $route.params.name }) }}
     </template>
@@ -33,6 +33,8 @@ import Cluster from '../frame/Cluster.vue';
 import FaceList from './FaceList.vue';
 
 import Modal from './Modal.vue';
+import ModalMixin from './ModalMixin';
+
 import client from '../../services/dav/client';
 import * as dav from '../../services/dav';
 import * as utils from '../../services/utils';
@@ -48,19 +50,16 @@ export default defineComponent({
     FaceList,
   },
 
+  mixins: [ModalMixin],
+
   emits: [],
 
   data: () => ({
     processing: 0,
     processingTotal: 0,
-    show: false,
   }),
 
   methods: {
-    close() {
-      this.show = false;
-    },
-
     open() {
       const user = this.$route.params.user || '';
       if (this.$route.params.user !== utils.uid) {
@@ -72,6 +71,10 @@ export default defineComponent({
         return;
       }
       this.show = true;
+    },
+
+    cleanup() {
+      this.show = false;
     },
 
     async clickFace(face: IFace) {

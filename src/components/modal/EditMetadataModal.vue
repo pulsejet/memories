@@ -1,5 +1,5 @@
 <template>
-  <Modal v-if="show" @close="close">
+  <Modal ref="modal" @close="cleanup" v-if="show">
     <template #title>
       {{ t('memories', 'Edit metadata') }}
     </template>
@@ -51,11 +51,13 @@
 import { defineComponent } from 'vue';
 import { IExif, IImageInfo, IPhoto } from '../../types';
 
-import UserConfig from '../../mixins/UserConfig';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
+
 import Modal from './Modal.vue';
+import UserConfig from '../../mixins/UserConfig';
+import ModalMixin from './ModalMixin';
 
 import EditDate from './EditDate.vue';
 import EditTags from './EditTags.vue';
@@ -82,12 +84,11 @@ export default defineComponent({
     EditLocation,
   },
 
-  mixins: [UserConfig],
+  mixins: [UserConfig, ModalMixin],
 
   data: () => ({
     photos: null as IPhoto[] | null,
     sections: [] as number[],
-    show: false,
     processing: false,
     progress: 0,
     state: 0,
@@ -152,9 +153,9 @@ export default defineComponent({
       this.processing = false;
     },
 
-    close() {
-      this.photos = null;
+    cleanup() {
       this.show = false;
+      this.photos = null;
       this.processing = false;
     },
 

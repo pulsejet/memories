@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="close" v-if="show">
+  <Modal ref="modal" @close="cleanup" v-if="show">
     <template #title>
       {{ owned ? t('memories', 'Remove Album') : t('memories', 'Leave Album') }}
     </template>
@@ -27,6 +27,7 @@ import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 import { showError } from '@nextcloud/dialogs';
 import Modal from './Modal.vue';
+import ModalMixin from './ModalMixin';
 
 import * as utils from '../../services/utils';
 import * as dav from '../../services/dav';
@@ -40,11 +41,9 @@ export default defineComponent({
     Modal,
   },
 
-  emits: [],
+  mixins: [ModalMixin],
 
-  data: () => ({
-    show: false,
-  }),
+  emits: [],
 
   computed: {
     user() {
@@ -61,12 +60,12 @@ export default defineComponent({
   },
 
   methods: {
-    close() {
-      this.show = false;
-    },
-
     open() {
       this.show = true;
+    },
+
+    cleanup() {
+      this.show = false;
     },
 
     async save() {

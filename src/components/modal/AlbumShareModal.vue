@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="close" v-if="show">
+  <Modal ref="modal" @close="cleanup" v-if="show">
     <template #title>
       {{ t('memories', 'Share Album') }}
     </template>
@@ -34,10 +34,11 @@ import { defineComponent } from 'vue';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 
-import * as dav from '../../services/dav';
-
 import Modal from './Modal.vue';
+import ModalMixin from './ModalMixin';
 import AlbumCollaborators from './AlbumCollaborators.vue';
+
+import * as dav from '../../services/dav';
 
 export default defineComponent({
   name: 'AlbumShareModal',
@@ -47,27 +48,28 @@ export default defineComponent({
     AlbumCollaborators,
   },
 
+  mixins: [ModalMixin],
+
   emits: [],
 
   data: () => ({
     album: null as any,
-    show: false,
     loadingAddCollaborators: false,
     collaborators: [] as any[],
   }),
 
   methods: {
-    close() {
-      this.show = false;
-      this.album = null;
-    },
-
     async open() {
       this.show = true;
       this.loadingAddCollaborators = true;
       const { user, name } = this.$route.params;
       this.album = await dav.getAlbum(user, name);
       this.loadingAddCollaborators = false;
+    },
+
+    cleanup() {
+      this.show = false;
+      this.album = null;
     },
 
     async handleSetCollaborators(collaborators: any[]) {

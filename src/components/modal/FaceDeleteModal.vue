@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="close" v-if="show">
+  <Modal ref="modal" @close="cleanup" v-if="show">
     <template #title>
       {{ t('memories', 'Remove person') }}
     </template>
@@ -23,6 +23,7 @@ const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 import { showError } from '@nextcloud/dialogs';
 
 import Modal from './Modal.vue';
+import ModalMixin from './ModalMixin';
 
 import * as utils from '../../services/utils';
 import * as dav from '../../services/dav';
@@ -35,11 +36,9 @@ export default defineComponent({
     Modal,
   },
 
-  emits: [],
+  mixins: [ModalMixin],
 
-  data: () => ({
-    show: false,
-  }),
+  emits: [],
 
   computed: {
     name() {
@@ -52,10 +51,6 @@ export default defineComponent({
   },
 
   methods: {
-    close() {
-      this.show = false;
-    },
-
     open() {
       if (this.user !== utils.uid) {
         showError(this.t('memories', 'Only user "{user}" can delete this person', { user: this.user }));
@@ -63,6 +58,10 @@ export default defineComponent({
       }
 
       this.show = true;
+    },
+
+    cleanup() {
+      this.show = false;
     },
 
     async save() {

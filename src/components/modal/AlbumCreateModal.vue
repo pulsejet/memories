@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="close" size="normal" v-if="show">
+  <Modal ref="modal" @close="cleanup" size="normal" v-if="show">
     <template #title>
       <template v-if="!album">
         {{ t('memories', 'Create new album') }}
@@ -22,6 +22,7 @@ import { showError } from '@nextcloud/dialogs';
 import * as dav from '../../services/dav';
 
 import Modal from './Modal.vue';
+import ModalMixin from './ModalMixin';
 import AlbumForm from './AlbumForm.vue';
 
 export default defineComponent({
@@ -31,10 +32,11 @@ export default defineComponent({
     AlbumForm,
   },
 
+  mixins: [ModalMixin],
+
   emits: [],
 
   data: () => ({
-    show: false,
     album: null as any,
   }),
 
@@ -59,7 +61,7 @@ export default defineComponent({
       this.show = true;
     },
 
-    close() {
+    cleanup() {
       this.show = false;
     },
 

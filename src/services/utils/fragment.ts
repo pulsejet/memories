@@ -5,6 +5,7 @@ import { bus } from './event-bus';
 enum FragmentType {
   viewer = 'v',
   selection = 's',
+  modal = 'm',
 }
 
 /** Names of fragments */
@@ -110,10 +111,10 @@ export const fragment = {
       return;
     }
 
-    // If the fragment is already in the list,
-    // we can't touch it. This should never happen.
+    // If the fragment is already in the list, we can't touch it.
     if (list.find((f) => f.type === frag.type)) {
-      console.error('[BUG] Fragment already in route', frag.type);
+      console.debug('Fragment already in route', frag.type);
+      return;
     }
 
     // Add fragment to route

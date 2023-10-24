@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="close" size="normal" v-if="photo">
+  <Modal ref="modal" @close="cleanup" size="normal" v-if="show">
     <template #title>
       {{ t('memories', 'Share File') }}
     </template>
@@ -78,7 +78,9 @@ import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
+
 import Modal from './Modal.vue';
+import ModalMixin from './ModalMixin';
 import UserConfig from '../../mixins/UserConfig';
 
 import { IPhoto } from '../../types';
@@ -105,7 +107,7 @@ export default defineComponent({
     FileIcon,
   },
 
-  mixins: [UserConfig],
+  mixins: [UserConfig, ModalMixin],
 
   data: () => {
     return {
@@ -145,9 +147,11 @@ export default defineComponent({
     open(photo: IPhoto) {
       this.photo = photo;
       this.loading = 0;
+      this.show = true;
     },
 
-    close() {
+    cleanup() {
+      this.show = false;
       this.photo = null;
     },
 

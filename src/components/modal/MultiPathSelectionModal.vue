@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="close" v-if="show" size="small">
+  <Modal ref="modal" @close="cleanup" v-if="show" size="small">
     <template #title>
       {{ title }}
     </template>
@@ -31,13 +31,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import Modal from './Modal.vue';
-
 import * as utils from '../../services/utils';
 
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+
+import Modal from './Modal.vue';
+import ModalMixin from './ModalMixin';
 
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 
@@ -51,6 +52,8 @@ export default defineComponent({
     CloseIcon,
   },
 
+  mixins: [ModalMixin],
+
   props: {
     title: {
       type: String,
@@ -63,23 +66,22 @@ export default defineComponent({
   },
 
   data: () => ({
-    show: false,
     paths: [] as string[],
   }),
 
   methods: {
-    close(list: string[]) {
-      this.show = false;
-      this.$emit('close', list);
-    },
-
     open(paths: string[]) {
       this.paths = paths;
       this.show = true;
     },
 
+    cleanup() {
+      this.show = false;
+      this.$emit('close', this.paths);
+    },
+
     save() {
-      this.close(this.paths);
+      this.close();
     },
 
     async add() {

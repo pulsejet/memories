@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="close" size="normal" v-if="processing">
+  <Modal ref="modal" @close="cleanup" size="normal" v-if="processing">
     <template #title>
       {{ t('memories', 'Move to folder') }}
     </template>
@@ -23,8 +23,9 @@ import type { IPhoto } from '../../types';
 
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
 
-import UserConfig from '../../mixins/UserConfig';
 import Modal from './Modal.vue';
+import UserConfig from '../../mixins/UserConfig';
+import ModalMixin from './ModalMixin';
 
 export default defineComponent({
   name: 'MoveToFolderModal',
@@ -33,7 +34,7 @@ export default defineComponent({
     Modal,
   },
 
-  mixins: [UserConfig],
+  mixins: [UserConfig, ModalMixin],
 
   data: () => ({
     photos: [] as IPhoto[],
@@ -51,13 +52,12 @@ export default defineComponent({
       this.photosDone = 0;
       this.processing = false;
       this.photos = photos;
-
       this.chooseFolderPath();
     },
 
-    close() {
-      this.photos = [];
+    cleanup() {
       this.processing = false;
+      this.photos = [];
     },
 
     async chooseFolderPath() {

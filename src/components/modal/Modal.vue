@@ -1,11 +1,12 @@
 <template>
   <NcModal
     class="memories-modal"
+    ref="modal"
     :size="size"
     :outTransition="true"
     :style="{ width: isSidebarShown ? `calc(100% - ${sidebarWidth}px)` : null }"
     :additionalTrapElements="trapElements"
-    @close="close"
+    @close="cleanup"
   >
     <div class="container" @keydown.stop="0">
       <div class="head">
@@ -83,6 +84,10 @@ export default defineComponent({
 
   methods: {
     close() {
+      (<any>this.$refs.modal).close();
+    },
+
+    cleanup() {
       this.$emit('close');
     },
 

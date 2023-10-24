@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="close" size="normal" v-if="show">
+  <Modal ref="modal" @close="cleanup" size="normal" v-if="show">
     <template #title>
       {{ t('memories', 'Add to album') }}
     </template>
@@ -27,6 +27,7 @@ import { IAlbum, IPhoto } from '../../types';
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
 
 import Modal from './Modal.vue';
+import ModalMixin from './ModalMixin';
 import AlbumPicker from './AlbumPicker.vue';
 
 export default defineComponent({
@@ -37,10 +38,11 @@ export default defineComponent({
     AlbumPicker,
   },
 
+  mixins: [ModalMixin],
+
   emits: [],
 
   data: () => ({
-    show: false,
     photos: [] as IPhoto[],
     opsDone: 0,
     opsTotal: 0,
@@ -60,11 +62,11 @@ export default defineComponent({
   methods: {
     open(photos: IPhoto[]) {
       this.photos = photos;
-      this.show = true;
       this.opsTotal = 0;
+      this.show = true;
     },
 
-    close() {
+    cleanup() {
       this.show = false;
       this.photos = [];
       this.opsTotal = 0;

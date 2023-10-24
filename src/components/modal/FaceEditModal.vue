@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="close" v-if="show">
+  <Modal ref="modal" @close="cleanup" v-if="show">
     <template #title>
       {{ t('memories', 'Rename person') }}
     </template>
@@ -33,6 +33,7 @@ const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 import { showError } from '@nextcloud/dialogs';
 
 import Modal from './Modal.vue';
+import ModalMixin from './ModalMixin';
 
 import * as utils from '../../services/utils';
 import * as dav from '../../services/dav';
@@ -45,11 +46,12 @@ export default defineComponent({
     Modal,
   },
 
+  mixins: [ModalMixin],
+
   emits: [],
 
   data: () => ({
-    show: false,
-    input: '',
+    input: String(),
   }),
 
   computed: {
@@ -67,10 +69,6 @@ export default defineComponent({
   },
 
   methods: {
-    close() {
-      this.show = false;
-    },
-
     open() {
       if (this.user !== utils.uid) {
         showError(this.t('memories', 'Only user "{user}" can update this person', { user: this.user }));
@@ -79,6 +77,10 @@ export default defineComponent({
 
       this.input = isNaN(Number(this.name)) ? this.name : String();
       this.show = true;
+    },
+
+    cleanup() {
+      this.show = false;
     },
 
     async save() {

@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="close" size="large" v-if="show">
+  <Modal ref="modal" @close="cleanup" size="large" v-if="show">
     <template #title>
       {{ t('memories', 'Move selected photos to person') }}
     </template>
@@ -28,6 +28,8 @@ import Cluster from '../frame/Cluster.vue';
 import FaceList from './FaceList.vue';
 
 import Modal from './Modal.vue';
+import ModalMixin from './ModalMixin';
+
 import * as dav from '../../services/dav';
 import * as utils from '../../services/utils';
 
@@ -41,10 +43,11 @@ export default defineComponent({
     FaceList,
   },
 
+  mixins: [ModalMixin],
+
   emits: [],
 
   data: () => ({
-    show: false,
     photos: [] as IPhoto[],
   }),
 
@@ -75,9 +78,9 @@ export default defineComponent({
       this.photos = photos;
     },
 
-    close() {
-      this.photos = [];
+    cleanup() {
       this.show = false;
+      this.photos = [];
     },
 
     moved(photos: IPhoto[]) {

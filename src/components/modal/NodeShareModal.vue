@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="close" size="normal" v-if="show" :sidebar="!isRoot && !isMobile ? filename : null">
+  <Modal ref="modal" @close="cleanup" size="normal" v-if="show" :sidebar="!isRoot && !isMobile ? filename : null">
     <template #title>
       {{ t('memories', 'Link Sharing') }}
     </template>
@@ -70,6 +70,7 @@ const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
 import Modal from './Modal.vue';
+import ModalMixin from './ModalMixin';
 
 import { API } from '../../services/API';
 import * as utils from '../../services/utils';
@@ -100,12 +101,11 @@ export default defineComponent({
     LinkIcon,
   },
 
-  mixins: [UserConfig],
+  mixins: [UserConfig, ModalMixin],
 
   emits: [],
 
   data: () => ({
-    show: false,
     filename: '',
     loading: false,
     shares: [] as IShare[],
@@ -158,7 +158,7 @@ export default defineComponent({
       }
     },
 
-    close() {
+    cleanup() {
       this.show = false;
     },
 
