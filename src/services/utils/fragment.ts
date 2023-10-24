@@ -8,6 +8,7 @@ enum FragmentType {
   sidebar = 'i',
   editor = 'e',
   settings = 'ss',
+  dialog = 'd',
 }
 
 /** Names of fragments */
@@ -158,6 +159,18 @@ export const fragment = {
   async if(condition: boolean, type: FragmentType, ...args: string[]) {
     if (condition) await this.push(type, ...args);
     else await this.pop(type);
+  },
+
+  /**
+   * Wrap a promise as a route fragment.
+   */
+  async wrap<T>(promise: Promise<T>, type: FragmentType, ...args: string[]): Promise<T> {
+    await this.push(type, ...args);
+    try {
+      return await promise;
+    } finally {
+      await this.pop(type);
+    }
   },
 
   get viewer() {

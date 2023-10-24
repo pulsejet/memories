@@ -1,4 +1,8 @@
 import { translate as t, translatePlural as n } from '@nextcloud/l10n';
+import { FilePickerType, getFilePickerBuilder } from '@nextcloud/dialogs';
+import { showError } from '@nextcloud/dialogs';
+import { bus } from './event-bus';
+import { fragment } from './fragment';
 
 // https://github.com/nextcloud/server/blob/4b7ec0a0c18d4e2007565dc28ee214814940161e/core/src/OC/dialogs.js
 const oc_dialogs = (<any>OC).dialogs;
@@ -19,6 +23,12 @@ type ConfirmOptions = {
   /** Whether to show a modal dialog (default true) */
   modal?: boolean;
 };
+
+// Register fragment navigation
+bus.on('memories:fragment:pop:dialog', () => {
+  const selectors = ['button.oc-dialog-close', '[role="dialog"]:last-of-type button.modal-container__close'].join(', ');
+  (document.querySelector(selectors) as HTMLElement)?.click?.();
+});
 
 export function confirmDestructive(options: ConfirmOptions): Promise<boolean> {
   const opts: ConfirmOptions = Object.assign(
@@ -55,7 +65,10 @@ export function confirmDestructive(options: ConfirmOptions): Promise<boolean> {
   // Watch changes to body
   observer.observe(document.body, { childList: true });
 
-  return new Promise((resolve) => oc_dialogs.confirmDestructive(opts.message, opts.title, opts, resolve));
+  return fragment.wrap(
+    new Promise((resolve) => oc_dialogs.confirmDestructive(opts.message, opts.title, opts, resolve)),
+    fragment.types.dialog,
+  );
 }
 
 type PromptOptions = {
@@ -82,6 +95,50 @@ export async function prompt(opts: PromptOptions): Promise<string | null> {
       opts.password,
     );
   });
+}
+
+/**
+ * Choose a folder using the NC file picker
+ *
+ * @param title Title of the file picker
+ * @param initial Initial path
+ * @param type Type of the file picker
+ *
+ * @returns The path of the chosen folder
+ */
+export async function chooseNcFolder(
+  title: string,
+  initial: string = '/',
+  type: FilePickerType = FilePickerType.Choose,
+) {
+  const picker = getFilePickerBuilder(title)
+    .setMultiSelect(false)
+    .setModal(true)
+    .setType(type)
+    .addMimeTypeFilter('httpd/unix-directory')
+    .allowDirectories()
+    .startAt(initial)
+    .build();
+
+  // Choose a folder
+  const promise = fragment.wrap(picker.pick(), fragment.types.dialog);
+  let folder = (await promise) || '/';
+
+  // Remove double slashes
+  folder = folder.replace(/\/+/g, '/');
+
+  // Look for any trailing or leading whitespace
+  if (folder.trim() !== folder) {
+    showError(
+      t(
+        'memories',
+        'The folder name "{folder}" has a leading or trailing whitespace. This may lead to errors and should be corrected.',
+        { folder },
+      ),
+    );
+  }
+
+  return folder;
 }
 
 /** Bespoke confirmation dialogs for re-use */

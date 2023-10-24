@@ -1,7 +1,4 @@
-import { FilePickerType, getFilePickerBuilder } from '@nextcloud/dialogs';
 import { getCurrentUser } from '@nextcloud/auth';
-import { showError } from '@nextcloud/dialogs';
-import { translate as t } from '@nextcloud/l10n';
 
 import { API } from '../API';
 import { constants as c } from './const';
@@ -188,49 +185,6 @@ export function setupLivePhotoHooks(video: HTMLVideoElement) {
   video.onended = video.onpause = () => {
     div.classList.remove('playing');
   };
-}
-
-/**
- * Choose a folder using the NC file picker
- *
- * @param title Title of the file picker
- * @param initial Initial path
- * @param type Type of the file picker
- *
- * @returns The path of the chosen folder
- */
-export async function chooseNcFolder(
-  title: string,
-  initial: string = '/',
-  type: FilePickerType = FilePickerType.Choose,
-) {
-  const picker = getFilePickerBuilder(title)
-    .setMultiSelect(false)
-    .setModal(true)
-    .setType(type)
-    .addMimeTypeFilter('httpd/unix-directory')
-    .allowDirectories()
-    .startAt(initial)
-    .build();
-
-  // Choose a folder
-  let folder = (await picker.pick()) || '/';
-
-  // Remove double slashes
-  folder = folder.replace(/\/+/g, '/');
-
-  // Look for any trailing or leading whitespace
-  if (folder.trim() !== folder) {
-    showError(
-      t(
-        'memories',
-        'The folder name "{folder}" has a leading or trailing whitespace. This may lead to errors and should be corrected.',
-        { folder },
-      ),
-    );
-  }
-
-  return folder;
 }
 
 /**
