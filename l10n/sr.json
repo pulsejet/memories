@@ -204,6 +204,7 @@
     "VA-API device ({dev}) has incorrect permissions" : "VA-API уређај ({dev}) нема исправне дозволе",
     "VA-API device status: {status}" : "Статус VA-API уређаја: {status}",
     "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:" : "Успомене користе go-vod транскодер. go-vod можете да извршавате споља (нпр. у посебном Docker контејнеру за хардверско убрзање) or или да користите уграђени транскодер. Ако желите да користите спољни транскодер, укључите следећу опцију и следите упутства у документацији:",
+    "Enable external transcoder" : "Укључи спољни транскодер",
     "Binary path (local only)" : "Путања до бинарног фајла (само локална)",
     "Bind address (local only)" : "Адреса везивања (само локална)",
     "Connection address (same as bind if local)" : "Адреса везе (иста као везивања, ако је локална)",
@@ -511,6 +512,7 @@
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Желите ли да се {count} ставка уклони из албума?","Желите ли да се {count} ставке уклоне из албума?","Желите ли да се {count} ставки уклони из албума?"],
     "This will not delete your original files." : "Ово неће да обрише ваше оригиналне фајлове.",
     "You are about to download {count} items." : "Управо ћете преузети {count} ставки.",
-    "You are about to move {count} items." : "Управо ћете преместити {count} ставки."
+    "You are about to move {count} items." : "Управо ћете преместити {count} ставки.",
+    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "Име фолдера „{folder}” садржи празан простор на почетку или на крају. То може да изазове грешке и требало би да се исправи."
 },"pluralForm" :"nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
 }
