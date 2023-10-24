@@ -108,6 +108,7 @@ import EmptyContent from './top-matter/EmptyContent.vue';
 import TopMatter from './top-matter/TopMatter.vue';
 import DynamicTopMatter from './top-matter/DynamicTopMatter.vue';
 
+import fragment from '../services/fragment';
 import * as dav from '../services/dav';
 import * as utils from '../services/utils';
 import * as nativex from '../native';
@@ -265,13 +266,11 @@ export default defineComponent({
         await this.softRefreshInternal(true);
       }
 
-      // The viewer might change the route immediately again
-      await this.$nextTick();
-
-      // Check if hash has changed
-      if (from?.hash !== to.hash && !_m.viewer.isOpen && utils.fragment.viewer.open) {
+      // Check if viewer is supposed to be open
+      if (from?.hash !== to.hash && !_m.viewer.isOpen && fragment.viewer) {
         // Open viewer
-        const { dayid, key } = utils.fragment.viewer;
+        const [dayidStr, key] = fragment.viewer.args;
+        const dayid = parseInt(dayidStr);
         if (isNaN(dayid) || !key) return;
 
         // Get day
@@ -295,9 +294,6 @@ export default defineComponent({
         }
 
         _m.viewer.openDynamic(photo, this.list);
-      } else if (!utils.fragment.viewer.open && _m.viewer.isOpen) {
-        // No viewer fragment but viewer is open
-        _m.viewer.close();
       }
     },
 

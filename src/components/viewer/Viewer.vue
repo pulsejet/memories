@@ -183,6 +183,7 @@ import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
 import { API } from '../../services/API';
+import fragment from '../../services/fragment';
 import * as dav from '../../services/dav';
 import * as utils from '../../services/utils';
 import * as nativex from '../../native';
@@ -283,6 +284,7 @@ export default defineComponent({
     utils.bus.on('files:file:created', this.handleFileUpdated);
     utils.bus.on('files:file:updated', this.handleFileUpdated);
     utils.bus.on('memories:window:resize', this.handleWindowResize);
+    utils.bus.on('memories:fragment:pop:viewer', this.close);
 
     // The viewer is a singleton
     const self = this;
@@ -306,6 +308,7 @@ export default defineComponent({
     utils.bus.off('files:file:created', this.handleFileUpdated);
     utils.bus.off('files:file:updated', this.handleFileUpdated);
     utils.bus.off('memories:window:resize', this.handleWindowResize);
+    utils.bus.off('memories:fragment:pop:viewer', this.close);
   },
 
   computed: {
@@ -768,6 +771,7 @@ export default defineComponent({
 
     /** Close the viewer */
     close() {
+      if (!this.isOpen) return;
       this.photoswipe?.close();
     },
 
@@ -867,15 +871,17 @@ export default defineComponent({
 
     /** Set the route hash to the given photo */
     setFragment(photo: IPhoto | null) {
+      // Add or update fragment
       if (photo) {
-        const frag = utils.fragment.viewer;
-        frag.dayid = photo.dayid;
-        frag.key = photo.key!;
-        return utils.fragment.push(frag);
+        return fragment.push({
+          type: fragment.types.viewer,
+          args: [String(photo.dayid), photo.key!],
+        });
       }
 
+      // Remove fragment if closed
       if (!this.isOpen) {
-        return utils.fragment.pop('v');
+        return fragment.pop(fragment.types.viewer);
       }
     },
 

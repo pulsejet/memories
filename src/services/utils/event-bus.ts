@@ -1,5 +1,6 @@
 import { emit, subscribe, unsubscribe } from '@nextcloud/event-bus';
-import { IConfig, IPhoto } from '../../types';
+import type { IConfig, IPhoto } from '../../types';
+import type { FragmentName, Fragment } from '../fragment';
 
 export type BusEvent = {
   /** Open/close the navigation drawer */
@@ -49,6 +50,9 @@ export type BusEvent = {
 
   /** NativeX database was updated */
   'nativex:db:updated': null;
+} & {
+  /** A fragment was removed from the route */
+  [key in `memories:fragment:pop:${FragmentName}`]: Fragment;
 };
 
 /**

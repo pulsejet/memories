@@ -1,23 +1,26 @@
-import type { IPhoto } from '../../types';
+import type { Route } from 'vue-router';
+import * as utils from './utils';
 
-/** Viewer Fragment */
-type FragmentTypeViewer = 'v';
+/** Mapping of route name to key type */
+export enum FragmentType {
+  viewer = 'v',
+}
 
-/** All types of fragmemts */
-type FragmentType = FragmentTypeViewer;
+/** Names of fragments */
+export type FragmentName = keyof typeof FragmentType;
 
 /** Data structure to encode to fragment */
-type FragmentObj = {
+export type Fragment = {
   type: FragmentType;
   args: string[];
-  index: number;
+  index?: number;
 };
 
 /**
  * Decode fragments from string.
  * @param hash Hash string
  */
-function decodeFragment(hash: string): FragmentObj[] {
+function decodeFragment(hash: string): Fragment[] {
   return hash
     .substring(1) // remove # at start
     .split('&') // get all parts
@@ -36,7 +39,7 @@ function decodeFragment(hash: string): FragmentObj[] {
  * Encode fragments to string.
  * @param fragments Fragments to encode
  */
-function encodeFragment(fragments: FragmentObj[]): string {
+function encodeFragment(fragments: Fragment[]): string {
   if (!fragments.length) return '';
   return '#' + fragments.map((frag) => [frag.type, ...frag.args].join('/')).join('&');
 }
@@ -46,21 +49,23 @@ function encodeFragment(fragments: FragmentObj[]): string {
  */
 const cache = {
   hash: String(),
-  list: [] as FragmentObj[],
+  list: [] as Fragment[],
 };
 
-export const fragment = {
+export default {
+  types: FragmentType,
+
   /**
    * Get list of all fragments in route.
    * @returns List of fragments
    */
-  get list(): FragmentObj[] {
+  get list(): Fragment[] {
     if (cache.hash !== _m.route.hash) {
       cache.hash = _m.route.hash;
       cache.list = decodeFragment(cache.hash ?? String());
     }
 
-    return cache.list;
+    return [...cache.list];
   },
 
   /**
@@ -75,11 +80,11 @@ export const fragment = {
    * Add fragment to route.
    * @param frag Fragment to add to route
    */
-  push(frag: FragmentObj) {
+  push(frag: Fragment) {
     const list = this.list;
 
     // Get the top fragment
-    const top = list[list.length - 1];
+    const top = list.length ? list[list.length - 1] : null;
 
     // Check if we are already on this fragment
     if (top?.type === frag.type) {
@@ -125,7 +130,7 @@ export const fragment = {
     if (!frag) return;
 
     // Go back in history
-    _m.router.go(-frag.index - 1);
+    _m.router.go(-frag.index! - 1);
 
     // Check if the fragment still exists
     // In that case, replace the route to remove the fragment
@@ -134,33 +139,30 @@ export const fragment = {
       _m.router.replace({
         path: _m.route.path,
         query: _m.route.query,
-        hash: encodeFragment(this.list.slice(0, -sfrag.index - 1)),
+        hash: encodeFragment(this.list.slice(0, -sfrag.index! - 1)),
       });
     }
   },
 
   get viewer() {
-    const frag = this.get('v');
-    const typed = {
-      open: !!frag,
-      type: frag?.type ?? 'v',
-      args: (frag?.args ?? ['0', '']) as [string, string],
-      index: frag?.index ?? -1,
+    return this.get(FragmentType.viewer);
+  },
 
-      get dayid() {
-        return parseInt(this.args[0]);
-      },
-      set dayid(dayid: number) {
-        this.args[0] = String(dayid);
-      },
+  changeTrigger(to: Route, from: Route) {
+    const toF = decodeFragment(to.hash);
+    const fromF = decodeFragment(from.hash);
 
-      get key() {
-        return this.args[1];
-      },
-      set key(key: string) {
-        this.args[1] = key;
-      },
-    };
-    return typed;
+    // Emit events for popped fragments
+    fromF
+      .filter((frag) => !toF.find((f) => f.type === frag.type))
+      .forEach((frag) => {
+        for (const [key, type] of Object.entries(FragmentType)) {
+          const name = key as FragmentName;
+          if (type === frag.type) {
+            utils.bus.emit(`memories:fragment:pop:${name}`, frag);
+            break;
+          }
+        }
+      });
   },
 };
