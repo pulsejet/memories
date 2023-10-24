@@ -127,6 +127,9 @@ export const fragment = {
       query: _m.route.query,
       hash: encodeFragment(list),
     });
+
+    // wait for the route to change
+    await new Promise((resolve) => setTimeout(resolve, 0));
   },
 
   /**
@@ -151,6 +154,9 @@ export const fragment = {
         hash: encodeFragment(this.list.slice(0, -sfrag.index! - 1)),
       });
     }
+
+    // wait for the route to change
+    await new Promise((resolve) => setTimeout(resolve, 0));
   },
 
   /**
@@ -163,13 +169,18 @@ export const fragment = {
 
   /**
    * Wrap a promise as a route fragment.
+   * Pushes a fragment before running the promise and
+   * pops it *before* the promise resolves.
    */
   async wrap<T>(promise: Promise<T>, type: FragmentType, ...args: string[]): Promise<T> {
     await this.push(type, ...args);
     try {
-      return await promise;
-    } finally {
+      const res = await promise;
       await this.pop(type);
+      return res;
+    } catch (e) {
+      await this.pop(type);
+      throw e;
     }
   },
 
