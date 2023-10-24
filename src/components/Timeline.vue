@@ -108,7 +108,6 @@ import EmptyContent from './top-matter/EmptyContent.vue';
 import TopMatter from './top-matter/TopMatter.vue';
 import DynamicTopMatter from './top-matter/DynamicTopMatter.vue';
 
-import fragment from '../services/fragment';
 import * as dav from '../services/dav';
 import * as utils from '../services/utils';
 import * as nativex from '../native';
@@ -267,9 +266,9 @@ export default defineComponent({
       }
 
       // Check if viewer is supposed to be open
-      if (from?.hash !== to.hash && !_m.viewer.isOpen && fragment.viewer) {
+      if (from?.hash !== to.hash && !_m.viewer.isOpen && utils.fragment.viewer) {
         // Open viewer
-        const [dayidStr, key] = fragment.viewer.args;
+        const [dayidStr, key] = utils.fragment.viewer.args;
         const dayid = parseInt(dayidStr);
         if (isNaN(dayid) || !key) return;
 
@@ -330,7 +329,7 @@ export default defineComponent({
 
     /** Reset all state */
     async resetState() {
-      this.refs.selectionManager.clearSelection();
+      this.refs.selectionManager.clear();
       this.refs.scrollerManager.reset();
       this.loading = 0;
       this.list = [];
@@ -366,7 +365,7 @@ export default defineComponent({
      * Do not pass this function as a callback directly.
      */
     async softRefreshInternal(sync: boolean) {
-      this.refs.selectionManager.clearSelection();
+      this.refs.selectionManager.clear();
       this.fetchDayQueue = []; // reset queue
 
       // Fetch days
@@ -1301,7 +1300,7 @@ export default defineComponent({
       await new Promise((resolve) => setTimeout(resolve, 200));
 
       // clear selection at this point
-      this.refs.selectionManager.clearSelection(delPhotos);
+      this.refs.selectionManager.deselect(delPhotos);
 
       // Reflow all touched days
       for (const day of updatedDays) {

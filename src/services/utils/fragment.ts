@@ -1,9 +1,10 @@
 import type { Route } from 'vue-router';
-import * as utils from './utils';
+import { bus } from './event-bus';
 
 /** Mapping of route name to key type */
-export enum FragmentType {
+enum FragmentType {
   viewer = 'v',
+  selection = 's',
 }
 
 /** Names of fragments */
@@ -52,7 +53,7 @@ const cache = {
   list: [] as Fragment[],
 };
 
-export default {
+export const fragment = {
   /**
    * List of all fragment types.
    */
@@ -83,7 +84,8 @@ export default {
    * Add fragment to route.
    * @param frag Fragment to add to route
    */
-  push(frag: Fragment) {
+  push(type: FragmentType, ...args: string[]) {
+    const frag: Fragment = { type, args };
     const list = this.list;
 
     // Get the top fragment
@@ -147,6 +149,14 @@ export default {
     }
   },
 
+  /**
+   * Sync a fragment with a boolean condition.
+   */
+  if(condition: boolean, type: FragmentType, ...args: string[]) {
+    if (condition) this.push(type, ...args);
+    else this.pop(type);
+  },
+
   get viewer() {
     return this.get(FragmentType.viewer);
   },
@@ -167,7 +177,7 @@ export default {
         for (const [key, type] of Object.entries(FragmentType)) {
           const name = key as FragmentName;
           if (type === frag.type) {
-            utils.bus.emit(`memories:fragment:pop:${name}`, frag);
+            bus.emit(`memories:fragment:pop:${name}`, frag);
             break;
           }
         }

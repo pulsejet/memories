@@ -2,7 +2,7 @@
   <div>
     <div v-if="show" class="top-bar">
       <NcActions :inline="1">
-        <NcActionButton :aria-label="t('memories', 'Cancel')" @click="clearSelection()">
+        <NcActionButton :aria-label="t('memories', 'Cancel')" @click="clear()">
           {{ t('memories', 'Cancel') }}
           <template #icon> <CloseIcon :size="20" /> </template>
         </NcActionButton>
@@ -270,19 +270,22 @@ export default defineComponent({
     }
 
     // Subscribe to global events
-    utils.bus.on('memories:albums:update', this.clearSelection);
+    utils.bus.on('memories:albums:update', this.clear);
+    utils.bus.on('memories:fragment:pop:selection', this.clear);
   },
 
   beforeDestroy() {
     this.setHasTopBar(false);
 
     // Unsubscribe from global events
-    utils.bus.off('memories:albums:update', this.clearSelection);
+    utils.bus.off('memories:albums:update', this.clear);
+    utils.bus.off('memories:fragment:pop:selection', this.clear);
   },
 
   watch: {
-    show(value: boolean) {
+    show(value: boolean, from: boolean) {
       this.setHasTopBar(value);
+      utils.fragment.if(value, utils.fragment.types.selection);
     },
   },
 
@@ -701,10 +704,14 @@ export default defineComponent({
     },
 
     /** Clear all selected photos */
-    clearSelection(only?: IPhoto[]) {
+    clear() {
+      this.deselect(Array.from(this.selection.values()));
+    },
+
+    /** Deslect the given photos */
+    deselect(photos: IPhoto[]) {
       const heads = new Set<IHeadRow>();
-      const toClear = only || this.selection.values();
-      Array.from(toClear).forEach((photo: IPhoto) => {
+      photos.forEach((photo: IPhoto) => {
         photo.flag &= ~this.c.FLAG_SELECTED;
         heads.add(this.heads[photo.dayid]);
         this.selection.deleteBy(photo);
@@ -766,7 +773,7 @@ export default defineComponent({
       for await (const ids of dav.favoritePhotos(selection.photosNoDupFileId(), val)) {
         selection.photosFromFileIds(ids).forEach((photo) => dav.favoriteSetFlag(photo, val));
       }
-      this.clearSelection();
+      this.clear();
     },
 
     /**

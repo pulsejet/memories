@@ -77,7 +77,6 @@ const NcAppNavigationItem = () => import('@nextcloud/vue/dist/Components/NcAppNa
 import { generateUrl } from '@nextcloud/router';
 import { translate as t } from '@nextcloud/l10n';
 
-import fragment from './services/fragment';
 import * as utils from './services/utils';
 import * as nativex from './native';
 import staticConfig from './services/static-config';
@@ -163,8 +162,7 @@ export default defineComponent({
 
   watch: {
     async $route(to: Route, from: Route) {
-      // Global triggers
-      fragment.changeTrigger(to, from);
+      utils.fragment.changeTrigger(to, from);
     },
   },
 

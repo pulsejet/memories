@@ -183,7 +183,6 @@ import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
 import { API } from '../../services/API';
-import fragment from '../../services/fragment';
 import * as dav from '../../services/dav';
 import * as utils from '../../services/utils';
 import * as nativex from '../../native';
@@ -643,15 +642,12 @@ export default defineComponent({
     setFragment(photo: IPhoto | null) {
       // Add or update fragment
       if (photo) {
-        return fragment.push({
-          type: fragment.types.viewer,
-          args: [String(photo.dayid), photo.key!],
-        });
+        return utils.fragment.push(utils.fragment.types.viewer, String(photo.dayid), photo.key!);
       }
 
       // Remove fragment if closed
       if (!this.isOpen) {
-        return fragment.pop(fragment.types.viewer);
+        return utils.fragment.pop(utils.fragment.types.viewer);
       }
     },
 
