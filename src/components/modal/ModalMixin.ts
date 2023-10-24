@@ -7,6 +7,7 @@ export default defineComponent({
 
   data: () => ({
     show: false,
+    _closing: null as null | ((value: unknown) => void),
   }),
 
   mounted() {
@@ -18,15 +19,27 @@ export default defineComponent({
   },
 
   watch: {
-    show(value: boolean, from: boolean) {
+    show(value: boolean) {
       utils.fragment.if(value, utils.fragment.types.modal);
+
+      if (!value) {
+        this._closing?.(null);
+        this._closing = null;
+      }
     },
   },
 
   methods: {
-    close() {
-      if (this.show) {
+    async close() {
+      if (this.show && !this._closing) {
+        // pop the fragment immediately
+        await utils.fragment.pop(utils.fragment.types.modal);
+
+        // close the modal with animation
         (<any>this.$refs.modal)?.close?.();
+
+        // wait for transition to end
+        await new Promise((resolve) => (this._closing = resolve));
       }
     },
   },

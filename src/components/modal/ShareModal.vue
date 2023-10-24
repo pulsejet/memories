@@ -155,10 +155,10 @@ export default defineComponent({
       this.photo = null;
     },
 
-    async l(cb: Function) {
+    async l<T>(cb: () => Promise<T>): Promise<T> {
       try {
         this.loading++;
-        await cb();
+        return await cb();
       } finally {
         this.loading--;
       }
@@ -195,11 +195,9 @@ export default defineComponent({
     },
 
     async shareLink() {
-      this.l(async () => {
-        const fileInfo = (await dav.getFiles([this.photo!]))[0];
-        _m.modals.shareNodeLink(fileInfo.filename, true);
-      });
-      this.close();
+      const fileInfo = await this.l(async () => (await dav.getFiles([this.photo!]))[0]);
+      await this.close(); // wait till transition is done
+      _m.modals.shareNodeLink(fileInfo.filename, true);
     },
 
     /**

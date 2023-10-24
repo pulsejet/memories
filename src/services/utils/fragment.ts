@@ -84,7 +84,7 @@ export const fragment = {
    * Add fragment to route.
    * @param frag Fragment to add to route
    */
-  push(type: FragmentType, ...args: string[]) {
+  async push(type: FragmentType, ...args: string[]) {
     const frag: Fragment = { type, args };
     const list = this.list;
 
@@ -101,7 +101,7 @@ export const fragment = {
       if (hash === _m.route.hash) return;
 
       // Replace the route with the new fragment
-      _m.router.replace({
+      await _m.router.replace({
         path: _m.route.path,
         query: _m.route.query,
         hash: hash,
@@ -118,7 +118,7 @@ export const fragment = {
 
     // Add fragment to route
     list.push(frag);
-    _m.router.push({
+    await _m.router.push({
       path: _m.route.path,
       query: _m.route.query,
       hash: encodeFragment(list),
@@ -129,7 +129,7 @@ export const fragment = {
    * Remove the top fragment from route.
    * @param type Fragment identifier
    */
-  pop(type: FragmentType) {
+  async pop(type: FragmentType) {
     // Get the index of this fragment from the end
     const frag = this.get(type);
     if (!frag) return;
@@ -141,7 +141,7 @@ export const fragment = {
     // In that case, replace the route to remove the fragment
     const sfrag = this.get(type);
     if (sfrag) {
-      _m.router.replace({
+      await _m.router.replace({
         path: _m.route.path,
         query: _m.route.query,
         hash: encodeFragment(this.list.slice(0, -sfrag.index! - 1)),
@@ -152,9 +152,9 @@ export const fragment = {
   /**
    * Sync a fragment with a boolean condition.
    */
-  if(condition: boolean, type: FragmentType, ...args: string[]) {
-    if (condition) this.push(type, ...args);
-    else this.pop(type);
+  async if(condition: boolean, type: FragmentType, ...args: string[]) {
+    if (condition) await this.push(type, ...args);
+    else await this.pop(type);
   },
 
   get viewer() {
