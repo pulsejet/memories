@@ -94,7 +94,7 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 		stream.width = int(math.Ceil(float64(lgDim) * float64(stream.height) / float64(smDim)))
 
 		// remove invalid streams
-		if (stream.height > smDim || stream.width > lgDim) || // no upscaling; we're not AI
+		if (stream.height >= smDim || stream.width >= lgDim) || // no upscaling; we're not AI
 			(float64(stream.bitrate) > float64(m.probe.BitRate)*0.8) || // no more than 80% of original bitrate
 			(stream.height%2 != 0 || stream.width%2 != 0) { // no odd dimensions
 
