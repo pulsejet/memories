@@ -272,6 +272,11 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 /* Container and selection */
+.p-outer-super {
+  // Disable all touch actions except scrolling
+  touch-action: pan-x pan-y;
+}
+
 .p-outer {
   padding: 2px;
   @media (max-width: 768px) {
