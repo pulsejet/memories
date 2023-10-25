@@ -60,20 +60,15 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 		return nil, err
 	}
 
-	// heuristic
-	if m.probe.CodecName != "h264" {
-		m.probe.BitRate *= 2
-	}
-
 	m.numChunks = int(math.Ceil(m.probe.Duration.Seconds() / float64(c.ChunkSize)))
 
 	// Possible streams
-	m.streams["360p"] = &Stream{c: c, m: m, quality: "360p", height: 360, width: 640, bitrate: 500000}
-	m.streams["480p"] = &Stream{c: c, m: m, quality: "480p", height: 480, width: 854, bitrate: 1200000}
-	m.streams["720p"] = &Stream{c: c, m: m, quality: "720p", height: 720, width: 1280, bitrate: 2200000}
-	m.streams["1080p"] = &Stream{c: c, m: m, quality: "1080p", height: 1080, width: 1920, bitrate: 3600000}
-	m.streams["1440p"] = &Stream{c: c, m: m, quality: "1440p", height: 1440, width: 2560, bitrate: 6000000}
-	m.streams["2160p"] = &Stream{c: c, m: m, quality: "2160p", height: 2160, width: 3840, bitrate: 10000000}
+	m.streams["360p"] = &Stream{c: c, m: m, quality: "360p", height: 360, width: 640, bitrate: 300}
+	m.streams["480p"] = &Stream{c: c, m: m, quality: "480p", height: 480, width: 854, bitrate: 400}
+	m.streams["720p"] = &Stream{c: c, m: m, quality: "720p", height: 720, width: 1280, bitrate: 700}
+	m.streams["1080p"] = &Stream{c: c, m: m, quality: "1080p", height: 1080, width: 1920, bitrate: 1000}
+	m.streams["1440p"] = &Stream{c: c, m: m, quality: "1440p", height: 1440, width: 2560, bitrate: 1400}
+	m.streams["2160p"] = &Stream{c: c, m: m, quality: "2160p", height: 2160, width: 3840, bitrate: 3000}
 
 	// height is our primary dimension for scaling
 	// using the probed size, we adjust the width of the stream
@@ -83,12 +78,44 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 		smDim, lgDim = lgDim, smDim
 	}
 
+	// Get the reference bitrate. This is the same as the current bitrate
+	// if the video is H.264, otherwise use double the current bitrate.
+	refBitrate := m.probe.BitRate
+	if m.probe.CodecName != CODEC_H264 {
+		refBitrate *= 2
+	}
+
+	// If bitrate could not be read, use 10Mbps
+	if refBitrate == 0 {
+		refBitrate = 10000000
+	}
+
+	// Get the multiplier for the reference bitrate.
+	// For this get the nearest stream size to the original.
+	origPixels := float64(m.probe.Height * m.probe.Width)
+	nearestPixels := float64(0)
+	nearestStream := ""
+	for key, stream := range m.streams {
+		streamPixels := float64(stream.height * stream.width)
+		if nearestPixels == 0 || math.Abs(origPixels-streamPixels) < math.Abs(origPixels-nearestPixels) {
+			nearestPixels = streamPixels
+			nearestStream = key
+		}
+	}
+
+	// Get the bitrate multiplier. This is the ratio of the reference
+	// bitrate to the nearest stream bitrate, so we can scale all streams.
+	bitrateMultiplier := 1.0
+	if nearestStream != "" {
+		bitrateMultiplier = float64(refBitrate) / float64(m.streams[nearestStream].bitrate)
+	}
+
 	// Only keep streams that are smaller than the video
 	for k, stream := range m.streams {
 		stream.order = 0
 
-		// scale bitrate by frame rate with reference 30
-		stream.bitrate = int(float64(stream.bitrate) * float64(m.probe.FrameRate) / 30.0)
+		// scale bitrate using the multiplier
+		stream.bitrate = int(math.Ceil(float64(stream.bitrate) * bitrateMultiplier))
 
 		// now store the width of the stream as the larger dimension
 		stream.width = int(math.Ceil(float64(lgDim) * float64(stream.height) / float64(smDim)))
@@ -110,7 +137,7 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 		quality: QUALITY_MAX,
 		height:  m.probe.Height,
 		width:   m.probe.Width,
-		bitrate: m.probe.BitRate,
+		bitrate: refBitrate,
 		order:   1,
 	}
 
