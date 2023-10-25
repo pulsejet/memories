@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [v6.0.0] - 2023-10-25
 
 - This release focuses on improvements in code quality, maintainability and [documentation](https://memories.gallery/install/).
     - New CI/CD [jobs](https://github.com/pulsejet/memories/actions/workflows/static-analysis.yaml) for type checking with [Psalm](https://psalm.dev/) and [vue-tsc](https://www.npmjs.com/package/vue-tsc)
