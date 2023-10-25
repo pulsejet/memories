@@ -34,6 +34,9 @@ export function isVideoContent(content: unknown): content is VideoContent {
 }
 
 class VideoContentSetup {
+  /** Last known quality that was set */
+  lastQuality: number | null = null;
+
   constructor(
     lightbox: PhotoSwipe,
     private options: {
@@ -221,19 +224,20 @@ class VideoContentSetup {
     const playWithDelay = () => setTimeout(() => content.videojs?.play(), 100);
     playWithDelay();
 
-    let canPlay = false;
     content.videojs.on('canplay', () => {
-      canPlay = true;
       content.videoElement = content.videojs?.el()?.querySelector('video') ?? null;
 
-      // Initialize the player UI
-      window.setTimeout(() => this.initPlyr(content), 0);
+      // Initialize the player UI if not done by now
+      utils.setRenewingTimeout(this, 'plyrinit', () => this.initPlyr(content), 0);
 
       // Hide the preview image
       content.placeholder?.element?.setAttribute('hidden', 'true');
 
       // Another attempt to play the video
       playWithDelay();
+
+      // Another attempt to set video quality
+      this.changeQuality(content, this.lastQuality);
     });
 
     content.videojs.qualityLevels?.()?.on('addqualitylevel', (e: any) => {
@@ -254,9 +258,7 @@ class VideoContentSetup {
       if (nativex.has()) {
         // Add a timeout in case another video initializes
         // immediately after this one is destroyed
-        setTimeout(() => {
-          nativex.destroyVideo(content.data.photo);
-        }, 500);
+        setTimeout(() => nativex.destroyVideo(content.data.photo), 500);
         return;
       }
 
@@ -310,9 +312,7 @@ class VideoContentSetup {
 
       qualityNums = Array.from(s).sort((a, b) => b - a);
       qualityNums.unshift(0);
-      if (hasMax) {
-        qualityNums.unshift(-1);
-      }
+      if (hasMax) qualityNums.unshift(-1);
       qualityNums.unshift(-2);
     }
 
@@ -340,48 +340,7 @@ class VideoContentSetup {
         default: Number(staticConfig.getSync('video_default_quality')),
         options: qualityNums,
         forced: true,
-        onChange: (quality: number) => {
-          // Changing the quality sometimes throws strange
-          // DOMExceptions; don't let this stop Plyr from being
-          // constructed altogether.
-          try {
-            qualityList = content.videojs?.qualityLevels?.();
-            if (!qualityList || !content.videojs) return;
-
-            const isHLS = content.videojs.src(undefined)?.includes('m3u8');
-
-            if (quality === -2) {
-              // Direct playback
-              // Prevent any useless transcodes
-              for (let i = 0; i < qualityList.length; ++i) {
-                qualityList[i].enabled = false;
-              }
-
-              // Set the source to the original video
-              if (isHLS) {
-                content.videojs.src(this.getDirectSrc(content));
-              }
-              return;
-            } else {
-              // Set source to HLS
-              if (!isHLS) {
-                content.videojs.src(this.getHLSsrc(content));
-              }
-            }
-
-            // Enable only the selected quality
-            for (let i = 0; i < qualityList.length; ++i) {
-              const { width, height, label } = qualityList[i];
-              const pixels = Math.min(width!, height!);
-              qualityList[i].enabled =
-                !quality || // auto
-                pixels === quality || // exact match
-                (label?.includes('max.m3u8') && quality === -1); // max
-            }
-          } catch (e) {
-            console.error('Error changing quality', e);
-          }
-        },
+        onChange: (quality: number) => this.changeQuality(content, quality),
       };
     }
 
@@ -450,6 +409,52 @@ class VideoContentSetup {
           screen.orientation.unlock();
         }
       });
+    }
+  }
+
+  changeQuality(content: VideoContent, quality: number | null) {
+    if (quality === null) return;
+    this.lastQuality = quality;
+
+    // Changing the quality sometimes throws strange
+    // DOMExceptions when initializing; don't let this stop
+    // Plyr from being constructed altogether.
+    try {
+      const qualityList = content.videojs?.qualityLevels?.();
+      if (!qualityList || !content.videojs) return;
+
+      const isHLS = content.videojs.src(undefined)?.includes('m3u8');
+
+      if (quality === -2) {
+        // Direct playback
+        // Prevent any useless transcodes
+        for (let i = 0; i < qualityList.length; ++i) {
+          qualityList[i].enabled = false;
+        }
+
+        // Set the source to the original video
+        if (isHLS) {
+          content.videojs.src(this.getDirectSrc(content));
+        }
+        return;
+      } else {
+        // Set source to HLS
+        if (!isHLS) {
+          content.videojs.src(this.getHLSsrc(content));
+        }
+      }
+
+      // Enable only the selected quality
+      for (let i = 0; i < qualityList.length; ++i) {
+        const { width, height, label } = qualityList[i];
+        const pixels = Math.min(width!, height!);
+        qualityList[i].enabled =
+          !quality || // auto
+          pixels === quality || // exact match
+          (label?.includes('max.m3u8') && quality === -1); // max
+      }
+    } catch (e) {
+      console.warn(e);
     }
   }
 
