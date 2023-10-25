@@ -42,6 +42,9 @@ type Config struct {
 	// Number of seconds to wait before shutting down a client
 	ManagerIdleTime int `json:"managerIdleTime"`
 
+	// Quality Factor (e.g. CRF / global_quality)
+	QF int `json:"qf"`
+
 	// Hardware acceleration configuration
 
 	// VA-API

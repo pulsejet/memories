@@ -451,14 +451,6 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 		args = append(args, []string{"-profile:v", "main"}...)
 	}
 
-	// Apply bitrate cap if not max quality
-	if s.quality != QUALITY_MAX {
-		args = append(args, []string{
-			"-maxrate", fmt.Sprintf("%d", s.bitrate),
-			"-bufsize", fmt.Sprintf("%d", s.bitrate*2),
-		}...)
-	}
-
 	// Output specs for video
 	args = append(args, []string{
 		"-map", "0:v:0",
@@ -467,7 +459,7 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 
 	// Device specific output args
 	if CV == ENCODER_VAAPI {
-		args = append(args, []string{"-global_quality", "25"}...)
+		args = append(args, []string{"-global_quality", fmt.Sprintf("%d", s.c.QF)}...)
 
 		if s.c.VAAPILowPower {
 			args = append(args, []string{"-low_power", "1"}...)
@@ -478,7 +470,7 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 			"-tune", "ll",
 			"-rc", "vbr",
 			"-rc-lookahead", "30",
-			"-cq", "24",
+			"-cq", fmt.Sprintf("%d", s.c.QF),
 		}...)
 
 		if s.c.NVENCTemporalAQ {
@@ -487,7 +479,7 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 	} else if CV == ENCODER_X264 {
 		args = append(args, []string{
 			"-preset", "faster",
-			"-crf", "24",
+			"-crf", fmt.Sprintf("%d", s.c.QF),
 		}...)
 	}
 
