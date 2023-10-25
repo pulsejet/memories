@@ -257,6 +257,7 @@ class VideoContentSetup {
         setTimeout(() => {
           nativex.destroyVideo(content.data.photo);
         }, 500);
+        return;
       }
 
       // Destroy videojs
