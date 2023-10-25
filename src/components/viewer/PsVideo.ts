@@ -244,7 +244,7 @@ class VideoContentSetup {
       }
 
       // Fallback
-      window.setTimeout(() => this.initPlyr(content), 0);
+      utils.setRenewingTimeout(this, 'plyrinit', () => this.initPlyr(content), 0);
     });
   }
 
