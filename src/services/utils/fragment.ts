@@ -193,11 +193,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Only contextual fragments should be present on page load
   if (fragment.list.length) {
     const contextual = fragment.list.filter((frag) => frag.type === FragmentType.viewer);
-    _m.router.replace({
-      path: _m.route.path,
-      query: _m.route.query,
-      hash: encodeFragment(contextual),
-    });
+    const hash = encodeFragment(contextual);
+    if (hash !== _m.route.hash) {
+      _m.router.replace({
+        path: _m.route.path,
+        query: _m.route.query,
+        hash: hash,
+      });
+    }
   }
 
   /**
