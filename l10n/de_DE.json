@@ -507,12 +507,12 @@
     "Places you have been to will appear here" : "Orte, die Sie besucht haben, werden hier angezeigt",
     "Yes" : "Ja",
     "No" : "Nein",
+    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "Der Ordnername \"{folder}“ enthält ein führendes oder nachfolgendes Leerzeichen. Dies kann zu Fehlern führen und sollte korrigiert werden.",
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["{count} Element in den Papierkorb verschieben?","{count} Elemente in den Papierkorb verschieben?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Dateien im Papierkorb können nach einer festgelegten Zeitspanne automatisch gelöscht werden.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["{count} Element aus Album entfernen?","{count} Elemente aus Album entfernen?"],
     "This will not delete your original files." : "Dies wird ihre Originaldateien nicht löschen.",
     "You are about to download {count} items." : "Sie sind dabei, {count} Elemente herunterzuladen.",
-    "You are about to move {count} items." : "Sie sind dabei, {count} Elemente zu verschieben.",
-    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "Der Ordnername \"{folder}“ enthält ein führendes oder nachfolgendes Leerzeichen. Dies kann zu Fehlern führen und sollte korrigiert werden."
+    "You are about to move {count} items." : "Sie sind dabei, {count} Elemente zu verschieben."
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

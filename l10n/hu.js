@@ -361,6 +361,7 @@ OC.L10N.register(
     "Grant permissions" : "Jogosultságok hozzáadása",
     "Skip this step" : "Lépés kihagyása",
     "Synchronizing local files ({n} done)." : "Helyi fájlok szinkronizálása ({n} kész).",
+    "This may take a while. Do not close this window." : "Ez eltarthat egy kis ideig. Ne zárja be ezt az ablakot.",
     "Finish" : "Befejez",
     "{name} binary exists and is executable." : "A(z) {name} bináris létezik és végrehajtható.",
     "{name} binary not found." : "A(z) {name} bináris nem található.",

@@ -506,12 +506,12 @@
     "Places you have been to will appear here" : "Los lugares en los que ha estado aparecerán aquí",
     "Yes" : "Sí",
     "No" : "No",
+    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "El nombre de la carpeta \"{folder}\" tiene un espacio en blanco al principio o al final. Esto puede causar errores y debería ser corregido.",
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["¿Mover {count} ítem a la papelera?","¿Mover {count} ítems a la papelera?","¿Mover {count} ítems a la papelera?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Los archivos en la papelera podrían ser eliminados automáticamente después de un período fijo de tiempo.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["¿Eliminar {count} ítem del álbum?","¿Eliminar {count} ítems del álbum?","¿Eliminar {count} ítems del álbum?"],
     "This will not delete your original files." : "Esto no eliminará sus archivos originales.",
     "You are about to download {count} items." : "Está a punto de descargar {count} ítems.",
-    "You are about to move {count} items." : "Está a punto de mover {count} ítems.",
-    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "El nombre de la carpeta \"{folder}\" tiene un espacio en blanco al principio o al final. Esto puede causar errores y debería ser corregido."
+    "You are about to move {count} items." : "Está a punto de mover {count} ítems."
 },"pluralForm" :"nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }
