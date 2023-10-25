@@ -9,7 +9,7 @@ use OCA\Memories\Settings\SystemConfig;
 class BinExt
 {
     public const EXIFTOOL_VER = '12.60';
-    public const GOVOD_VER = '0.1.23';
+    public const GOVOD_VER = '0.1.24';
     public const NX_VER_MIN = '1.1';
 
     /** Get the path to the temp directory */
