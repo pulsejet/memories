@@ -183,7 +183,6 @@ class VideoContentSetup {
           useNetworkInformationApi: true,
           limitRenditionByPlayerDimensions: false,
           handlePartialData: true,
-          calculateTimestampOffsetForEachSegment: true,
         },
         nativeAudioTracks: !overrideNative,
         nativeVideoTracks: !overrideNative,
