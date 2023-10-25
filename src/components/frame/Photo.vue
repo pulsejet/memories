@@ -25,8 +25,8 @@
         <VideoIcon :size="22" />
       </div>
 
-      <div class="livephoto" @mouseenter.passive="playVideo" @mouseleave.passive="stopVideo">
-        <LivePhotoIcon :size="22" v-if="data.liveid" />
+      <div class="livephoto" v-if="data.liveid" @mouseenter.passive="playVideo" @mouseleave.passive="stopVideo">
+        <LivePhotoIcon :size="22" />
       </div>
 
       <StarIcon class="bottom-left-flag" :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
