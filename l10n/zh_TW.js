@@ -509,12 +509,12 @@ OC.L10N.register(
     "Places you have been to will appear here" : "您去過的地方會出現在此處",
     "Yes" : "是",
     "No" : "否",
+    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "資料夾名稱「{folder}」有前導或尾隨空格。這可能會導致錯誤，應當修正。",
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["將 {count} 個項目移動到回收桶？"],
     "Files in trash may be automatically deleted after a fixed period of time." : "回收桶中的檔案可能會在固定時段後自動刪除。",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["從相簿中移除 {count} 個項目？"],
     "This will not delete your original files." : "這不會刪除您原先的檔案。",
     "You are about to download {count} items." : "您將要下載 {count} 個項目。",
-    "You are about to move {count} items." : "您將要移動 {count} 個項目。",
-    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "資料夾名稱「{folder}」有前導或尾隨空格。這可能會導致錯誤，應當修正。"
+    "You are about to move {count} items." : "您將要移動 {count} 個項目。"
 },
 "nplurals=1; plural=0;");

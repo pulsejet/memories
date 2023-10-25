@@ -509,12 +509,12 @@ OC.L10N.register(
     "Places you have been to will appear here" : "Овде ће се појавити места која сте посетили",
     "Yes" : "Да",
     "No" : "Не",
+    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "Име фолдера „{folder}” садржи празан простор на почетку или на крају. То може да изазове грешке и требало би да се исправи.",
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Желите ли да се {count} ставка премести у отпад?","Желите ли да се {count} ставке преместе у отпад?","Желите ли да се {count} ставки премести у отпад?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Фајлови у отпаду могу аутоматски да се обришу након фиксног временског периода.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Желите ли да се {count} ставка уклони из албума?","Желите ли да се {count} ставке уклоне из албума?","Желите ли да се {count} ставки уклони из албума?"],
     "This will not delete your original files." : "Ово неће да обрише ваше оригиналне фајлове.",
     "You are about to download {count} items." : "Управо ћете преузети {count} ставки.",
-    "You are about to move {count} items." : "Управо ћете преместити {count} ставки.",
-    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "Име фолдера „{folder}” садржи празан простор на почетку или на крају. То може да изазове грешке и требало би да се исправи."
+    "You are about to move {count} items." : "Управо ћете преместити {count} ставки."
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);");

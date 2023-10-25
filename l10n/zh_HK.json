@@ -507,12 +507,12 @@
     "Places you have been to will appear here" : "您去過的地方會出現在此處",
     "Yes" : "是",
     "No" : "否",
+    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "資料夾名稱「{folder}」具有前導或尾隨空格。這可能會導致錯誤，應該予以糾正。",
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["將 {count} 件物品移至垃圾箱？"],
     "Files in trash may be automatically deleted after a fixed period of time." : "垃圾箱中的檔案可能會在固定時段後自動刪除。",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["從相簿中刪除 {count} 個項目？"],
     "This will not delete your original files." : "這不會刪除您原先的檔案。",
     "You are about to download {count} items." : "您即將下載 {count} 項。",
-    "You are about to move {count} items." : "您即將移動 {count} 項。",
-    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "資料夾名稱「{folder}」具有前導或尾隨空格。這可能會導致錯誤，應該予以糾正。"
+    "You are about to move {count} items." : "您即將移動 {count} 項。"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

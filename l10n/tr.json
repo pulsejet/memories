@@ -507,12 +507,12 @@
     "Places you have been to will appear here" : "Bulunduğunuz yerler burada görüntülenecek",
     "Yes" : "Evet",
     "No" : "Hayır",
+    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "\"{folder}\" klasör adının başında veya sonunda boşluk var. Bu durum soruna yol açabileceğinden düzeltilmeli.",
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["{count} öge çöpe atılsın mı?","{count} öge çöpe atılsın mı?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Çöp kutusundaki dosyalar belirli bir süre sonunda otomatik olarak silinebilir.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["{count} öge albümden kaldırılsın mı?","{count} öge albümden kaldırılsın mı?"],
     "This will not delete your original files." : "Bu işlem özgün dosyalarınızı silmez.",
     "You are about to download {count} items." : "{count} ögeyi indirmek üzeresiniz.",
-    "You are about to move {count} items." : "{count} ögeyi taşımak üzeresiniz.",
-    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "\"{folder}\" klasör adının başında veya sonunda boşluk var. Bu durum soruna yol açabileceğinden düzeltilmeli."
+    "You are about to move {count} items." : "{count} ögeyi taşımak üzeresiniz."
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }

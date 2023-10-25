@@ -20,7 +20,7 @@ OC.L10N.register(
     "Photos" : "Фотографии",
     "Cancel" : "Откажи",
     "Delete" : "Избриши",
-    "Favorite" : "Омилен",
+    "Favorite" : "Омилени",
     "View in folder" : "Погледни во папката",
     "Add to album" : "Додади во албум",
     "General" : "Општо",

@@ -509,12 +509,12 @@ OC.L10N.register(
     "Places you have been to will appear here" : "سوف تظهر الأماكن التي قمت بزيارتها هنا",
     "Yes" : "نعم",
     "No" : "لا",
+    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "اسم المجلد \"{folder}\" يحوي مسافات بيضاء في بدايته أو في نهايته. هذا يمكن أن يؤدي إلى أخطاء و يتوجب تصحيحه.",
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["أنقُل {count} عنصر إلى سلة المهملات؟","أنقُل {count} عنصر إلى سلة المهملات؟","أنقُل {count} عنصر إلى سلة المهملات؟","أنقُل {count} عنصر إلى سلة المهملات؟","أنقُل {count} عناصر إلى سلة المهملات؟","أنقُل {count} عنصر إلى سلة المهملات؟"],
     "Files in trash may be automatically deleted after a fixed period of time." : "الملفات في سلة المهملات سيقع حذفها تلقائياً بعد مرور فترة زمنية معينة.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["هل ترغب في حذف {count} عنصر من الألبوم؟","هل ترغب في حذف {count} عنصر من الألبوم؟","هل ترغب في حذف {count} عنصرين من الألبوم؟","هل ترغب في حذف {count} عنصر من الألبوم؟","هل ترغب في حذف {count} عناصر من الألبوم؟","هل ترغب في حذف {count} عناصر من الألبوم؟"],
     "This will not delete your original files." : "سوف لن يؤدّي هذا إلى حذف ملفاتك الأصلية.",
     "You are about to download {count} items." : "أنت على وشك تنزيل {count} عنصر.",
-    "You are about to move {count} items." : "أنت على وشك نقل {count} عنصر.",
-    "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "اسم المجلد \"{folder}\" يحوي مسافات بيضاء في بدايته أو في نهايته. هذا يمكن أن يؤدي إلى أخطاء و يتوجب تصحيحه."
+    "You are about to move {count} items." : "أنت على وشك نقل {count} عنصر."
 },
 "nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;");
