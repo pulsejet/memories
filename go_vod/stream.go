@@ -534,7 +534,18 @@ func (s *Stream) transcode(startId int) {
 
 	// Start the process
 	s.coder = exec.Command(s.c.FFmpeg, args...)
-	log.Printf("%s-%s: %s", s.m.id, s.quality, strings.Join(s.coder.Args[:], " "))
+
+	// Log command, quoting the args as needed
+	quotedArgs := make([]string, len(s.coder.Args))
+	invalidChars := strings.Join([]string{" ", "=", ":", "\"", "\\", "\n", "\t"}, "")
+	for i, arg := range s.coder.Args {
+		if strings.ContainsAny(arg, invalidChars) {
+			quotedArgs[i] = fmt.Sprintf("\"%s\"", arg)
+		} else {
+			quotedArgs[i] = arg
+		}
+	}
+	log.Printf("%s-%s: %s", s.m.id, s.quality, strings.Join(quotedArgs[:], " "))
 
 	cmdStdOut, err := s.coder.StdoutPipe()
 	if err != nil {
