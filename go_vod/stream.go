@@ -385,6 +385,7 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 	args = append(args, []string{
 		"-i", s.m.path, // Input file
 		"-copyts", // So the "-to" refers to the original TS
+		"-fflags", "+genpts",
 	}...)
 
 	// Filters
