@@ -50,6 +50,17 @@
         :value="config['memories.vod.connect']"
         @change="update('memories.vod.connect', $event.target.value)"
       />
+
+      <NcTextField
+        type="number"
+        min="15"
+        max="45"
+        placeholder="25"
+        :label="t('memories', 'Quality Factor (15 - 45) (default 25)')"
+        :label-visible="true"
+        :value="String(config['memories.vod.qf'])"
+        @change="update('memories.vod.qf', Number($event.target.value))"
+      />
     </p>
   </div>
 </template>

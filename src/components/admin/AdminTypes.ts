@@ -18,6 +18,7 @@ export type ISystemConfig = {
   'memories.vod.bind': string;
   'memories.vod.connect': string;
   'memories.vod.external': boolean;
+  'memories.vod.qf': number;
   'memories.video_default_quality': string;
 
   'memories.vod.vaapi': boolean;

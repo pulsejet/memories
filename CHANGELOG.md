@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - **Feature**: External transcoders are much easier to set up now. See [docs](https://memories.gallery/hw-transcoding) for details.
 - **Feature**: Folders view in shares ([#880](https://github.com/pulsejet/memories/pull/880))
 - **Feature**: Improved back button navigation on mobile ([#861](https://github.com/pulsejet/memories/issues/861)).
+- **Feature**: The transcoding quality factor can now be configured from the admin panel.
 
 ## [v5.5.0] - 2023-10-06
 
