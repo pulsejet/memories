@@ -76,7 +76,7 @@ class BinExt
         $version = trim($out);
         $target = self::EXIFTOOL_VER;
         if (!version_compare($version, $target, '=')) {
-            throw new \Exception("version does not match {$version} <==> {$target}");
+            throw new \Exception("exiftool version does not match: expected {$target} but found {$version}");
         }
 
         // Test with actual file
@@ -338,7 +338,7 @@ class BinExt
         $version = $json['version'];
         $target = self::GOVOD_VER;
         if (!version_compare($version, $target, '=')) {
-            throw new \Exception("version does not match {$version} <==> {$target}");
+            throw new \Exception("govod version does not match: expected {$target} but found {$version}");
         }
 
         return $version;
