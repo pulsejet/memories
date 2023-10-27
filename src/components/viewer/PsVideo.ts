@@ -424,6 +424,7 @@ class VideoContentSetup {
     // Changing the quality sometimes throws strange
     // DOMExceptions when initializing; don't let this stop
     // Plyr from being constructed altogether.
+    // https://github.com/videojs/http-streaming/pull/1439
     try {
       const qualityList = content.videojs?.qualityLevels?.();
       if (!qualityList || !content.videojs) return;
