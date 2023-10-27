@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v6.0.1] - 2023-10-27
+
+- Bug fixes in video streaming.
+
 ## [v6.0.0] - 2023-10-25
 
 - This release focuses on improvements in code quality, maintainability and [documentation](https://memories.gallery/install/).
