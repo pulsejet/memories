@@ -449,7 +449,6 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 		}
 
 		args = append(args, []string{"-vf", filter}...)
-		args = append(args, []string{"-profile:v", "main"}...)
 	}
 
 	// Output specs for video
