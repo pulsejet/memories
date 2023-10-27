@@ -79,7 +79,7 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 
 	// Get the reference bitrate. This is the same as the current bitrate
 	// if the video is H.264, otherwise use double the current bitrate.
-	refBitrate := m.probe.BitRate
+	refBitrate := int(float64(m.probe.BitRate) / 2.0)
 	if m.probe.CodecName != CODEC_H264 {
 		refBitrate *= 2
 	}
