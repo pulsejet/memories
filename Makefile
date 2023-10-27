@@ -31,10 +31,7 @@ build-js-production:
 	rm -f js/* && npm run build
 
 patch-external:
-	patch -p1 -N < patches/scroller-perf.patch || true
-	patch -p1 -N < patches/scroller-sticky.patch || true
-	patch -p1 -N < patches/plyr-wrap.patch || true
-	patch -p1 -N < patches/videojs-vhs-1439.patch || true
+	bash scripts/patch-external.sh
 
 watch-js:
 	npm run watch
