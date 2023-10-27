@@ -4,22 +4,23 @@
  const captions = {
    // Setup captions
    setup() {
-+    return; // disable due to bug in insertAftere (no element in wrapper)
++    return; // disable due to bug in insertAfter (no element in wrapper)
 +
      // Requires UI support
      if (!this.supported.ui) {
        return;
-@@ -6224,9 +6226,6 @@
+@@ -6224,8 +6226,8 @@
          class: this.config.classNames.video
        });
 
 -      // Wrap the video in a container
 -      wrap(this.media, this.elements.wrapper);
--
++      // Add wrapper to container
++      this.elements.container.appendChild(this.elements.wrapper);
+
        // Poster image container
        this.elements.poster = createElement('div', {
-         class: this.config.classNames.poster
-@@ -7937,11 +7936,6 @@
+@@ -7937,11 +7939,6 @@
        return;
      }
 
@@ -31,7 +32,7 @@
      // Set media type based on tag or data attribute
      // Supported: video, audio, vimeo, youtube
      const _type = this.media.tagName.toLowerCase();
-@@ -8053,7 +8047,6 @@
+@@ -8053,7 +8050,6 @@
      // Wrap media
      if (!is.element(this.elements.container)) {
        this.elements.container = createElement('div');
