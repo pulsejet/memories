@@ -8,7 +8,7 @@ import (
 	"github.com/pulsejet/go-vod/go_vod"
 )
 
-const VERSION = "0.1.24"
+const VERSION = "0.1.25"
 
 func main() {
 	// Build initial configuration
