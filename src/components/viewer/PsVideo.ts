@@ -434,13 +434,13 @@ class VideoContentSetup {
 
         // Set the source to the original video
         if (isHLS) {
-          content.videojs.src(this.getDirectSrc(content));
+          this.changeSourceKeepTime(content.videojs, this.getDirectSrc(content));
         }
         return;
       } else {
         // Set source to HLS
         if (!isHLS) {
-          content.videojs.src(this.getHLSsrc(content));
+          this.changeSourceKeepTime(content.videojs, this.getHLSsrc(content));
         }
       }
 
@@ -456,6 +456,13 @@ class VideoContentSetup {
     } catch (e) {
       console.warn(e);
     }
+  }
+
+  changeSourceKeepTime(vidjs: Player, src: { src: string; type: string }) {
+    const time = vidjs.currentTime();
+    vidjs.src(src);
+    vidjs.currentTime(time);
+    vidjs.play();
   }
 
   onContentDestroy({ content }: PsVideoEvent) {
