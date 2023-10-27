@@ -368,7 +368,12 @@ class VideoContentSetup {
     }, 250);
 
     // Restore original parent of video element
-    origParent.appendChild(content.videoElement);
+    if (content.videoElement.parentElement !== origParent) {
+      // Shouldn't happen when plyr-wrap.patch is applied
+      console.error('PsVideo: Video element parent was changed. Is plyr-wrap.patch applied?');
+      origParent.appendChild(content.videoElement);
+    }
+
     // Move plyr to the slide container
     content.slide?.holderElement?.appendChild(container);
 

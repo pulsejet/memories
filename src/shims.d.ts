@@ -13,3 +13,5 @@ declare module '@nextcloud/vue/dist/Components/*' {
 }
 
 declare module 'vue-virtual-scroller';
+
+declare module 'plyr/dist/plyr.mjs';

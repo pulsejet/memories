@@ -3,7 +3,7 @@ _m.video.videojs = videojs;
 
 import 'video.js/dist/video-js.min.css';
 
-import Plyr from 'plyr';
+import Plyr from 'plyr/dist/plyr.mjs';
 _m.video.Plyr = Plyr;
 import 'plyr/dist/plyr.css';
 

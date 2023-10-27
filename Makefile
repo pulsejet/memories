@@ -33,6 +33,7 @@ build-js-production:
 patch-external:
 	patch -p1 -N < patches/scroller-perf.patch || true
 	patch -p1 -N < patches/scroller-sticky.patch || true
+	patch -p1 -N < patches/plyr-wrap.patch || true
 
 watch-js:
 	npm run watch

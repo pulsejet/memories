@@ -1,0 +1,41 @@
+--- ./node_modules/plyr/dist/plyr.mjs	2023-10-27 01:22:58.553986870 -0700
++++ ./node_modules/plyr/dist/plyr.mjs	2023-10-27 01:22:47.333523678 -0700
+@@ -3024,6 +3024,8 @@
+ const captions = {
+   // Setup captions
+   setup() {
++    return; // disable due to bug in insertAftere (no element in wrapper)
++
+     // Requires UI support
+     if (!this.supported.ui) {
+       return;
+@@ -6224,9 +6226,6 @@
+         class: this.config.classNames.video
+       });
+
+-      // Wrap the video in a container
+-      wrap(this.media, this.elements.wrapper);
+-
+       // Poster image container
+       this.elements.poster = createElement('div', {
+         class: this.config.classNames.poster
+@@ -7937,11 +7936,6 @@
+       return;
+     }
+
+-    // Cache original element state for .destroy()
+-    const clone = this.media.cloneNode(true);
+-    clone.autoplay = false;
+-    this.elements.original = clone;
+-
+     // Set media type based on tag or data attribute
+     // Supported: video, audio, vimeo, youtube
+     const _type = this.media.tagName.toLowerCase();
+@@ -8053,7 +8047,6 @@
+     // Wrap media
+     if (!is.element(this.elements.container)) {
+       this.elements.container = createElement('div');
+-      wrap(this.media, this.elements.container);
+     }
+
+     // Migrate custom properties from media to container (so they work 😉)
