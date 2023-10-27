@@ -63,7 +63,6 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 	m.numChunks = int(math.Ceil(m.probe.Duration.Seconds() / float64(c.ChunkSize)))
 
 	// Possible streams
-	m.streams["360p"] = &Stream{c: c, m: m, quality: "360p", height: 360, width: 640, bitrate: 300}
 	m.streams["480p"] = &Stream{c: c, m: m, quality: "480p", height: 480, width: 854, bitrate: 400}
 	m.streams["720p"] = &Stream{c: c, m: m, quality: "720p", height: 720, width: 1280, bitrate: 700}
 	m.streams["1080p"] = &Stream{c: c, m: m, quality: "1080p", height: 1080, width: 1920, bitrate: 1000}
