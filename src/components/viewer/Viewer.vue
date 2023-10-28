@@ -834,7 +834,7 @@ export default defineComponent({
       }));
 
       this.isOpen = true;
-      photoswipe!.init();
+      photoswipe.init();
     },
 
     /** Get base data object */
