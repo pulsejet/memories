@@ -34,13 +34,11 @@ export default defineComponent({
     error: (error: Error) => true,
   },
 
-  data: () => {
-    return {
-      dataSrc: BLANK_IMG,
-      _blobLocked: false,
-      _state: 0,
-    };
-  },
+  data: () => ({
+    dataSrc: BLANK_IMG,
+    _blobLocked: false,
+    _state: 0,
+  }),
 
   watch: {
     src() {

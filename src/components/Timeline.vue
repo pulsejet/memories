@@ -1049,13 +1049,11 @@ export default defineComponent({
 
       // Create justified layout with correct params
       const justify = getLayout(
-        day.detail.map((p) => {
-          return {
-            width: p.w || this.rowHeight,
-            height: p.h || this.rowHeight,
-            forceSquare: false,
-          };
-        }),
+        day.detail.map((p) => ({
+          width: p.w || this.rowHeight,
+          height: p.h || this.rowHeight,
+          forceSquare: false,
+        })),
         {
           rowWidth: this.rowWidth,
           rowHeight: this.rowHeight,

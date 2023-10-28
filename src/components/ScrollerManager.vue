@@ -281,18 +281,16 @@ export default defineComponent({
       let prevMonth = 0;
 
       // Get a new tick
-      const getTick = (dayId: number, isMonth = false, text?: string | number): ITick => {
-        return {
-          dayId,
-          isMonth,
-          text,
-          y: 0,
-          count: 0,
-          topF: 0,
-          top: 0,
-          s: false,
-        };
-      };
+      const getTick = (dayId: number, isMonth = false, text?: string | number): ITick => ({
+        dayId,
+        isMonth,
+        text,
+        y: 0,
+        count: 0,
+        topF: 0,
+        top: 0,
+        s: false,
+      });
 
       // Iterate over rows
       for (const row of this.rows) {

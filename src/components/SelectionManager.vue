@@ -660,9 +660,7 @@ export default defineComponent({
 
         // Clear everything else in front
         Array.from(this.selection.values())
-          .filter((p: IPhoto) => {
-            return this.isreverse ? p.dayid > photo.dayid : p.dayid < photo.dayid;
-          })
+          .filter((p: IPhoto) => (this.isreverse ? p.dayid > photo.dayid : p.dayid < photo.dayid))
           .forEach((photo: IPhoto) => {
             this.selectPhoto(photo, false, true);
             updateDaySet.add(photo.dayid);

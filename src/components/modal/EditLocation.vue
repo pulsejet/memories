@@ -182,12 +182,10 @@ export default defineComponent({
       this.loading = true;
       const q = window.encodeURIComponent(this.searchBar);
       axios
-        .get(`https://nominatim.openstreetmap.org/search.php?q=${q}&format=jsonv2`)
+        .get<NLocation[]>(`https://nominatim.openstreetmap.org/search.php?q=${q}&format=jsonv2`)
         .then((response) => {
           this.loading = false;
-          this.options = response.data.filter((x: NLocation) => {
-            return x.lat && x.lon && x.display_name;
-          });
+          this.options = response.data.filter((x) => x.lat && x.lon && x.display_name);
         })
         .catch((error) => {
           this.loading = false;

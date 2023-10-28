@@ -38,14 +38,12 @@ export default defineComponent({
     CloseIcon,
   },
 
-  data: () => {
-    return {
-      nativeOpen: false,
-      reducedOpen: false,
-      basename: '',
-      lastKnownWidth: 0,
-    };
-  },
+  data: () => ({
+    nativeOpen: false,
+    reducedOpen: false,
+    basename: '',
+    lastKnownWidth: 0,
+  }),
 
   computed: {
     refs() {

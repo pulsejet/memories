@@ -109,12 +109,10 @@ export default defineComponent({
 
   mixins: [UserConfig, ModalMixin],
 
-  data: () => {
-    return {
-      photo: null as IPhoto | null,
-      loading: 0,
-    };
-  },
+  data: () => ({
+    photo: null as IPhoto | null,
+    loading: 0,
+  }),
 
   created() {
     console.assert(!_m.modals.sharePhoto, 'ShareModal created twice');
