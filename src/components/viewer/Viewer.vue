@@ -261,8 +261,6 @@ export default defineComponent({
     psLivePhoto: null as PsLivePhoto | null,
 
     list: [] as IPhoto[],
-    dayIds: [] as number[],
-
     globalCount: 0,
     globalAnchor: -1,
     currIndex: -1,
@@ -331,13 +329,11 @@ export default defineComponent({
 
     /** Get the currently open photo */
     currentPhoto(): IPhoto | null {
-      if (!this.list.length || !this.photoswipe) {
-        return null;
-      }
+      if (!this.list.length || !this.photoswipe) return null;
+
       const idx = this.currIndex - this.globalAnchor;
-      if (idx < 0 || idx >= this.list.length) {
-        return null;
-      }
+      if (idx < 0 || idx >= this.list.length) return null;
+
       return this.list[idx];
     },
 
@@ -567,7 +563,6 @@ export default defineComponent({
         this.editorOpen = false;
         this.photoswipe = null;
         this.list = [];
-        this.dayIds = [];
         this.globalCount = 0;
         this.globalAnchor = -1;
         clearTimeout(this.slideshowTimer);
@@ -656,16 +651,13 @@ export default defineComponent({
       this.list = [...detail];
       const startIndex = detail.indexOf(anchorPhoto);
 
-      // Get days list and map
-      for (const r of timeline.list) {
-        if (r.type === IRowType.HEAD) {
-          if (r.day.dayid == anchorPhoto.dayid) {
-            this.globalAnchor = this.globalCount;
-          }
-
-          this.globalCount += r.day.count;
-          this.dayIds.push(r.day.dayid);
+      // Iterate the heads to get the anchor and count.
+      for (const row of timeline.heads.values()) {
+        if (row.day.dayid == anchorPhoto.dayid) {
+          this.globalAnchor = this.globalCount;
         }
+
+        this.globalCount += row.day.count;
       }
 
       // Create basic viewer
@@ -676,17 +668,20 @@ export default defineComponent({
       // Lazy-generate item data.
       // Load the next two days in the timeline.
       photoswipe.addFilter('itemData', (itemData, index) => {
+        // Get list of dayIds from timeline
+        const dayIds = Array.from(timeline.heads.keys()); // is sorted
+
         // Get photo object from list
         let idx = index - this.globalAnchor;
         if (idx < 0) {
           // Load previous day
           const firstDayId = this.list[0].dayid;
-          const firstDayIdx = utils.binarySearch(this.dayIds, firstDayId);
+          const firstDayIdx = utils.binarySearch(dayIds, firstDayId);
           if (firstDayIdx === 0) {
             // No previous day
             return {};
           }
-          const prevDayId = this.dayIds[firstDayIdx - 1];
+          const prevDayId = dayIds[firstDayIdx - 1];
           const prevDay = timeline.heads.get(prevDayId)?.day;
           if (!prevDay?.detail) {
             console.error('[BUG] No detail for previous day');
@@ -697,12 +692,12 @@ export default defineComponent({
         } else if (idx >= this.list.length) {
           // Load next day
           const lastDayId = this.list[this.list.length - 1].dayid;
-          const lastDayIdx = utils.binarySearch(this.dayIds, lastDayId);
-          if (lastDayIdx === this.dayIds.length - 1) {
+          const lastDayIdx = utils.binarySearch(dayIds, lastDayId);
+          if (lastDayIdx === dayIds.length - 1) {
             // No next day
             return {};
           }
-          const nextDayId = this.dayIds[lastDayIdx + 1];
+          const nextDayId = dayIds[lastDayIdx + 1];
           const nextDay = timeline.heads.get(nextDayId)?.day;
           if (!nextDay?.detail) {
             console.error('[BUG] No detail for next day');
@@ -718,28 +713,22 @@ export default defineComponent({
         if (!photo) return {};
 
         // Get index of current day in dayIds lisst
-        const dayIdx = utils.binarySearch(this.dayIds, photo.dayid);
+        const dayIdx = utils.binarySearch(dayIds, photo.dayid);
 
         // Preload next and previous 3 days
         for (let idx = dayIdx - 3; idx <= dayIdx + 3; idx++) {
-          if (idx < 0 || idx >= this.dayIds.length || idx === dayIdx) continue;
+          if (idx < 0 || idx >= dayIds.length || idx === dayIdx) continue;
 
-          const day = timeline.heads.get(this.dayIds[idx])?.day;
+          const day = timeline.heads.get(dayIds[idx])?.day;
           if (day && !day?.detail) {
             // duplicate requests are skipped by Timeline
             utils.bus.emit('memories:timeline:fetch-day', day.dayid);
           }
         }
 
-        // Get thumb image
-        const thumbSrc: string =
-          this.thumbElem(photo)?.getAttribute('src') || utils.getPreviewUrl({ photo, msize: 256 });
-
-        // Get full image
-        return {
-          ...this.getItemData(photo),
-          msrc: thumbSrc,
-        };
+        const data = this.getItemData(photo);
+        data.msrc = this.thumbElem(photo)?.getAttribute('src') ?? utils.getPreviewUrl({ photo, msize: 256 });
+        return data;
       });
 
       // Get the thumbnail image

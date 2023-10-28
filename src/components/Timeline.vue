@@ -150,7 +150,7 @@ export default defineComponent({
     dtmContent: false,
     /** Computed number of columns */
     numCols: 0,
-    /** Header rows for dayId key */
+    /** Ordered header rows for dayId key  */
     heads: new Map<number, IHeadRow>(),
     /** Current list (days response) was loaded from cache */
     daysIsCache: false,
