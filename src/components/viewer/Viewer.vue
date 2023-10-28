@@ -521,9 +521,7 @@ export default defineComponent({
       });
 
       // Total number of photos in this view
-      this.photoswipe.addFilter('numItems', (numItems) => {
-        return this.globalCount;
-      });
+      this.photoswipe.addFilter('numItems', () => this.globalCount);
 
       // Put viewer over everything else
       const navElem = document.getElementById('app-navigation-vue');
@@ -643,33 +641,87 @@ export default defineComponent({
     /** Open using start photo and rows list */
     async openDynamic(anchorPhoto: IPhoto, timeline: TimelineState) {
       const detail = anchorPhoto.d?.detail;
-      if (!detail) {
+      if (!detail?.length) {
         console.error('Attempted to open viewer with no detail list!');
         return;
       }
 
-      this.list = [...detail];
-      const startIndex = detail.indexOf(anchorPhoto);
+      // Helper to compute the global anchor and count
+      // Anchor is the global index of the first list item
+      const computeGlobals = () => {
+        const dayIds = new Array<number>(timeline.heads.size);
+        let count = 0;
+        let anchor = -1;
+        let iter = 0;
 
-      // Iterate the heads to get the anchor and count.
-      for (const row of timeline.heads.values()) {
-        if (row.day.dayid == anchorPhoto.dayid) {
-          this.globalAnchor = this.globalCount;
+        // Iterate the heads to get the anchor and count.
+        const anchorDayId = this.list[0].dayid;
+        for (const row of timeline.heads.values()) {
+          // Compute this hear so we can do single pass
+          dayIds[iter++] = row.day.dayid;
+
+          // Get the global index of the anchor
+          if (row.day.dayid == anchorDayId) {
+            anchor = count;
+          }
+
+          // Add count of this day
+          count += row.day.count;
         }
 
-        this.globalCount += row.day.count;
-      }
+        return { dayIds, anchor, count };
+      };
+
+      // Create initial list
+      this.list = [...detail];
+
+      // Compute globals
+      let globals = computeGlobals();
+      this.globalAnchor = globals.anchor;
+      this.globalCount = globals.count;
 
       // Create basic viewer
+      const startIndex = detail.indexOf(anchorPhoto);
       const photoswipe = await this.createBase({
         index: this.globalAnchor + startIndex,
       });
 
-      // Lazy-generate item data.
-      // Load the next two days in the timeline.
+      // Lazy-generate item data. This is called for each item in the list
       photoswipe.addFilter('itemData', (itemData, index) => {
-        // Get list of dayIds from timeline
-        const dayIds = Array.from(timeline.heads.keys()); // is sorted
+        const { dayIds } = globals;
+
+        // Once every cycle, refresh the globals
+        utils.setRenewingTimeout(
+          this,
+          '_odgt',
+          () => {
+            if (!this.photoswipe) return;
+            globals = computeGlobals();
+            let goTo: null | number = null; // final index of photoswipe
+
+            // If the anchor shifts to the left, we need to shift the index
+            // by the same amount. This happens synchronously, so update first.
+            if (globals.anchor < this.globalAnchor) {
+              goTo = this.photoswipe.currIndex - (this.globalAnchor - globals.anchor);
+            }
+
+            // Update the global anchor and count
+            this.globalCount = globals.count;
+            this.globalAnchor = globals.anchor;
+
+            // Go to the new index if needed
+            if (goTo === null) {
+              // no change
+            } else if (this.photoswipe.currIndex >= this.globalCount) {
+              this.photoswipe.goTo(this.globalCount - 1);
+            } else if (goTo < 0) {
+              this.photoswipe.goTo(0);
+            } else {
+              this.photoswipe.goTo(goTo);
+            }
+          },
+          0,
+        );
 
         // Get photo object from list
         let idx = index - this.globalAnchor;
@@ -710,6 +762,7 @@ export default defineComponent({
         const photo = this.list[idx];
 
         // Something went really wrong
+        console.assert(photo, 'Missing photo for index', index, 'and global anchor', this.globalAnchor);
         if (!photo) return {};
 
         // Get index of current day in dayIds lisst
