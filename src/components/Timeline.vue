@@ -866,6 +866,9 @@ export default defineComponent({
 
     /** Fetch image data for one dayId */
     async fetchDay(dayId: number, now = false) {
+      if (!now && this.loadedDays.has(dayId)) return;
+
+      // Get head to ensure the day exists / is valid
       const head = this.heads[dayId];
       if (!head) return;
 
@@ -910,17 +913,13 @@ export default defineComponent({
       now ||= this.fetchDayQueue.reduce((sum, dayId) => sum + this.heads[dayId]?.day?.count ?? 0, 0) > 256;
 
       // Process immediately
-      if (now) {
-        return this.fetchDayExpire();
-      }
+      if (now) return await this.fetchDayExpire();
 
       // Defer for aggregation
-      if (!this.fetchDayTimer) {
-        this.fetchDayTimer = window.setTimeout(() => {
-          this.fetchDayTimer = null;
-          this.fetchDayExpire();
-        }, 150);
-      }
+      this.fetchDayTimer ??= window.setTimeout(() => {
+        this.fetchDayTimer = null;
+        this.fetchDayExpire();
+      }, 150);
     },
 
     async fetchDayExpire() {
