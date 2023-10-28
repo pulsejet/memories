@@ -397,10 +397,6 @@ export default defineComponent({
   },
 
   methods: {
-    fetchDay(dayId: number) {
-      utils.bus.emit('memories:timeline:fetch-day', dayId);
-    },
-
     updateLoading(delta: number) {
       this.loading += delta;
     },
@@ -722,23 +718,21 @@ export default defineComponent({
         const photo = this.list[idx];
 
         // Something went really wrong
-        if (!photo) {
-          return {};
-        }
+        if (!photo) return {};
+
+        // Get index of current day in dayIds lisst
+        const dayIdx = utils.binarySearch(this.dayIds, photo.dayid);
 
         // Preload next and previous 3 days
-        const dayIdx = utils.binarySearch(this.dayIds, photo.dayid);
-        const preload = (idx: number) => {
-          if (idx > 0 && idx < this.dayIds.length && !this.days.get(this.dayIds[idx])?.detail) {
-            this.fetchDay(this.dayIds[idx]);
+        for (let idx = dayIdx - 3; idx <= dayIdx + 3; idx++) {
+          if (idx < 0 || idx >= this.dayIds.length || idx === dayIdx) continue;
+
+          const day = this.days.get(this.dayIds[idx]);
+          if (day && !day?.detail) {
+            // duplicate requests are skipped by Timeline
+            utils.bus.emit('memories:timeline:fetch-day', day.dayid);
           }
-        };
-        preload(dayIdx - 1);
-        preload(dayIdx - 2);
-        preload(dayIdx - 3);
-        preload(dayIdx + 1);
-        preload(dayIdx + 2);
-        preload(dayIdx + 3);
+        }
 
         // Get thumb image
         const thumbSrc: string =
@@ -764,9 +758,7 @@ export default defineComponent({
         if (thumb && this.fullyOpened) {
           const rect = thumb.getBoundingClientRect();
           if (rect.bottom < 50 || rect.top > _m.window.innerHeight - 50) {
-            thumb.scrollIntoView({
-              block: 'center',
-            });
+            thumb.scrollIntoView({ block: 'center' });
           }
         }
 
