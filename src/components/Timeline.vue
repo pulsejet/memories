@@ -744,12 +744,7 @@ export default defineComponent({
       // Store the preloads in a separate map.
       // This is required since otherwise the inner detail objects
       // do not become reactive (which happens only after assignment).
-      const preloads: {
-        [dayId: number]: {
-          day: IDay;
-          detail: IPhoto[];
-        };
-      } = {};
+      const preloads = new Map<number, IPhoto[]>();
 
       let prevDay: IDay | null = null;
       for (const day of data) {
@@ -763,10 +758,7 @@ export default defineComponent({
 
         // Store the preloads
         if (day.detail) {
-          preloads[day.dayid] = {
-            day: day,
-            detail: day.detail,
-          };
+          preloads.set(day.dayid, day.detail);
           delete day.detail;
         }
 
@@ -832,8 +824,8 @@ export default defineComponent({
 
       // Iterate the preload map
       // Now the inner detail objects are reactive
-      for (const dayId in preloads) {
-        this.processDay(Number(dayId), preloads[dayId].detail);
+      for (const dayId of preloads.keys()) {
+        this.processDay(dayId, preloads.get(dayId)!);
       }
 
       // Notify parent components about stats
