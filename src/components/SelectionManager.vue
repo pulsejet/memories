@@ -145,7 +145,7 @@ export default defineComponent({
 
   props: {
     heads: {
-      type: Object as PropType<{ [dayid: number]: IHeadRow }>,
+      type: Map as PropType<Map<number, IHeadRow>>,
       required: true,
     },
     /** List of rows for multi selection */
@@ -587,7 +587,7 @@ export default defineComponent({
 
         // Update heads
         for (const dayid of updatedDays) {
-          this.updateHeadSelected(this.heads[dayid]);
+          this.updateHeadSelected(this.heads.get(dayid)!);
         }
 
         this.$forceUpdate();
@@ -612,7 +612,7 @@ export default defineComponent({
       }
 
       if (!noUpdate) {
-        this.updateHeadSelected(this.heads[photo.dayid]);
+        this.updateHeadSelected(this.heads.get(photo.dayid)!);
         this.$forceUpdate();
       }
     },
@@ -669,7 +669,7 @@ export default defineComponent({
           });
 
         behind.forEach((p) => this.selectPhoto(p, true, true));
-        updateDaySet.forEach((d) => this.updateHeadSelected(this.heads[d]));
+        updateDaySet.forEach((dayid) => this.updateHeadSelected(this.heads.get(dayid)!));
         this.$forceUpdate();
       }
     },
@@ -713,7 +713,7 @@ export default defineComponent({
       const heads = new Set<IHeadRow>();
       photos.forEach((photo: IPhoto) => {
         photo.flag &= ~this.c.FLAG_SELECTED;
-        heads.add(this.heads[photo.dayid]);
+        heads.add(this.heads.get(photo.dayid)!);
         this.selection.deleteBy(photo);
         this.selectionChanged();
       });

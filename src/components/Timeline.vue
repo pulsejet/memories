@@ -151,7 +151,7 @@ export default defineComponent({
     /** Computed number of columns */
     numCols: 0,
     /** Header rows for dayId key */
-    heads: {} as { [dayid: number]: IHeadRow },
+    heads: new Map<number, IHeadRow>(),
     /** Current list (days response) was loaded from cache */
     daysIsCache: false,
 
@@ -273,7 +273,7 @@ export default defineComponent({
         if (isNaN(dayid) || !key) return;
 
         // Get day
-        const day = this.heads[dayid]?.day;
+        const day = this.heads.get(dayid)?.day;
         if (day && !day.detail) {
           const state = this.state;
           await this.fetchDay(dayid, true);
@@ -334,7 +334,7 @@ export default defineComponent({
       this.loading = 0;
       this.list = [];
       this.dtmContent = false;
-      this.heads = {};
+      this.heads = new Map();
       this.currentStart = 0;
       this.currentEnd = 0;
       this.state = Math.random();
@@ -739,7 +739,7 @@ export default defineComponent({
       if (!data || !this.state) return;
 
       const list: typeof this.list = [];
-      const heads: typeof this.heads = {};
+      const heads: typeof this.heads = new Map();
 
       // Store the preloads in a separate map.
       // This is required since otherwise the inner detail objects
@@ -789,14 +789,14 @@ export default defineComponent({
         }
 
         // Add header to list
-        heads[day.dayid] = head;
+        heads.set(day.dayid, head);
         list.push(head);
 
         // Dummy rows for placeholders
         let nrows = Math.ceil(day.count / this.numCols);
 
         // Check if already loaded - we can learn
-        const prevRows = this.heads[day.dayid]?.day?.rows;
+        const prevRows = this.heads.get(day.dayid)?.day?.rows;
         nrows = prevRows?.length || nrows;
 
         // Add rows
@@ -856,7 +856,7 @@ export default defineComponent({
       // If any day in the fetch list has local images we need to fetch
       // the remote hidden images for the merging to happen correctly
       if (this.routeHasNative) {
-        if (dayIds.some((id) => this.heads[id]?.day?.haslocal)) {
+        if (dayIds.some((id) => this.heads.get(id)?.day?.haslocal)) {
           query[DaysFilterType.HIDDEN] = '1';
         }
       }
@@ -869,7 +869,7 @@ export default defineComponent({
       if (!now && this.loadedDays.has(dayId)) return;
 
       // Get head to ensure the day exists / is valid
-      const head = this.heads[dayId];
+      const head = this.heads.get(dayId);
       if (!head) return;
 
       // Do this in advance to prevent duplicate requests
@@ -910,7 +910,7 @@ export default defineComponent({
       // If the queue has gotten large enough, just expire immediately
       // This is to prevent a large number of requests from being queued
       now ||= this.fetchDayQueue.length >= 16;
-      now ||= this.fetchDayQueue.reduce((sum, dayId) => sum + this.heads[dayId]?.day?.count ?? 0, 0) > 256;
+      now ||= this.fetchDayQueue.reduce((sum, dayId) => sum + (this.heads.get(dayId)?.day?.count ?? 0), 0) > 256;
 
       // Process immediately
       if (now) return await this.fetchDayExpire();
@@ -972,7 +972,7 @@ export default defineComponent({
               nativex.processFreshServerDay(dayId, photos);
 
               // Only process days that have local images further
-              return this.heads[dayId]?.day?.haslocal;
+              return this.heads.get(dayId)?.day?.haslocal;
             })
             .map(async ([dayId, photos]) => {
               nativex.mergeDay(photos, await nativex.getLocalDay(dayId));
@@ -986,7 +986,7 @@ export default defineComponent({
           utils.removeHiddenPhotos(photos);
 
           // Check if the response has any delta
-          const head = this.heads[dayId];
+          const head = this.heads.get(dayId);
           if (head?.day?.detail?.length === photos.length) {
             // Goes over the day and checks each photo including
             // the order with the current list. If anything changes,
@@ -1032,7 +1032,7 @@ export default defineComponent({
     processDay(dayId: number, data: IPhoto[]) {
       if (!data || !this.state) return;
 
-      const head = this.heads[dayId];
+      const head = this.heads.get(dayId);
       if (!head) return;
 
       const day = head.day;
@@ -1208,7 +1208,7 @@ export default defineComponent({
         removedRows.push(...this.list.splice(headIdx, 1));
         rowIdx = headIdx - 1;
         headRemoved = true;
-        delete this.heads[dayId];
+        this.heads.delete(dayId);
       }
 
       // Get rid of any extra rows
