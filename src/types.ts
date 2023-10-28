@@ -302,3 +302,8 @@ export type IConfig = {
   show_face_rect: boolean;
   album_list_sort: 1 | 2;
 };
+
+export interface TimelineState {
+  list: IRow[];
+  heads: Map<number, IHeadRow>;
+}

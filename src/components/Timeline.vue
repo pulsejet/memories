@@ -292,7 +292,7 @@ export default defineComponent({
           }
         }
 
-        _m.viewer.openDynamic(photo, this.list);
+        _m.viewer.openDynamic(photo, this);
       }
     },
 

@@ -6,7 +6,7 @@ import type { translate, translatePlural } from '@nextcloud/l10n';
 import type PlyrType from 'plyr';
 import type videojsType from 'video.js';
 
-import type { IPhoto, IRow } from './types';
+import type { IPhoto, TimelineState } from './types';
 import type { constants, initstate } from './services/utils';
 import type { GlobalRouteCheckers, routes } from './router';
 
@@ -54,7 +54,7 @@ declare global {
 
     viewer: {
       open: (photo: IPhoto) => void;
-      openDynamic: (anchorPhoto: IPhoto, rows: IRow[]) => Promise<void>;
+      openDynamic: (anchorPhoto: IPhoto, timeline: TimelineState) => Promise<void>;
       openStatic(photo: IPhoto, list: IPhoto[], thumbSize?: 256 | 512): Promise<void>;
       close: () => void;
       isOpen: boolean;

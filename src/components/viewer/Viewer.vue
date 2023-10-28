@@ -173,7 +173,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { IDay, IImageInfo, IPhoto, IRow, IRowType } from '../../types';
+import { IImageInfo, IPhoto, IRowType, TimelineState } from '../../types';
 import type { PsContent } from './types';
 
 import UserConfig from '../../mixins/UserConfig';
@@ -261,7 +261,6 @@ export default defineComponent({
     psLivePhoto: null as PsLivePhoto | null,
 
     list: [] as IPhoto[],
-    days: new Map<number, IDay>(),
     dayIds: [] as number[],
 
     globalCount: 0,
@@ -568,7 +567,6 @@ export default defineComponent({
         this.editorOpen = false;
         this.photoswipe = null;
         this.list = [];
-        this.days.clear();
         this.dayIds = [];
         this.globalCount = 0;
         this.globalAnchor = -1;
@@ -648,7 +646,7 @@ export default defineComponent({
     },
 
     /** Open using start photo and rows list */
-    async openDynamic(anchorPhoto: IPhoto, rows: IRow[]) {
+    async openDynamic(anchorPhoto: IPhoto, timeline: TimelineState) {
       const detail = anchorPhoto.d?.detail;
       if (!detail) {
         console.error('Attempted to open viewer with no detail list!');
@@ -659,14 +657,13 @@ export default defineComponent({
       const startIndex = detail.indexOf(anchorPhoto);
 
       // Get days list and map
-      for (const r of rows) {
+      for (const r of timeline.list) {
         if (r.type === IRowType.HEAD) {
           if (r.day.dayid == anchorPhoto.dayid) {
             this.globalAnchor = this.globalCount;
           }
 
           this.globalCount += r.day.count;
-          this.days.set(r.day.dayid, r.day);
           this.dayIds.push(r.day.dayid);
         }
       }
@@ -690,7 +687,7 @@ export default defineComponent({
             return {};
           }
           const prevDayId = this.dayIds[firstDayIdx - 1];
-          const prevDay = this.days.get(prevDayId);
+          const prevDay = timeline.heads.get(prevDayId)?.day;
           if (!prevDay?.detail) {
             console.error('[BUG] No detail for previous day');
             return {};
@@ -706,7 +703,7 @@ export default defineComponent({
             return {};
           }
           const nextDayId = this.dayIds[lastDayIdx + 1];
-          const nextDay = this.days.get(nextDayId);
+          const nextDay = timeline.heads.get(nextDayId)?.day;
           if (!nextDay?.detail) {
             console.error('[BUG] No detail for next day');
             return {};
@@ -727,7 +724,7 @@ export default defineComponent({
         for (let idx = dayIdx - 3; idx <= dayIdx + 3; idx++) {
           if (idx < 0 || idx >= this.dayIds.length || idx === dayIdx) continue;
 
-          const day = this.days.get(this.dayIds[idx]);
+          const day = timeline.heads.get(this.dayIds[idx])?.day;
           if (day && !day?.detail) {
             // duplicate requests are skipped by Timeline
             utils.bus.emit('memories:timeline:fetch-day', day.dayid);
