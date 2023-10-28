@@ -1214,11 +1214,12 @@ export default defineComponent({
 
       // Update size delta for removed rows and remove from day
       for (const row of removedRows) {
+        needAdjust = true;
+
         // Scroll up if if above visible range
         if (rowY < scrollTop) {
           scrollTop -= row.size;
         }
-        needAdjust = true;
 
         // Remove from day
         const idx = day.rows.indexOf(row);
