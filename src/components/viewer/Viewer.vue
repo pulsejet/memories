@@ -656,12 +656,12 @@ export default defineComponent({
 
         // Iterate the heads to get the anchor and count.
         const anchorDayId = this.list[0].dayid;
-        for (const row of timeline.heads.values()) {
+        for (const [dayId, row] of timeline.heads) {
           // Compute this hear so we can do single pass
-          dayIds[iter++] = row.day.dayid;
+          dayIds[iter++] = dayId;
 
           // Get the global index of the anchor
-          if (row.day.dayid == anchorDayId) {
+          if (dayId == anchorDayId) {
             anchor = count;
           }
 
