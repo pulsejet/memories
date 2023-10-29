@@ -1,14 +1,14 @@
 import { showError } from '@nextcloud/dialogs';
-import { translate as t } from '@nextcloud/l10n';
 import axios from '@nextcloud/axios';
 
 import { IFileInfo, IPhoto } from '../../types';
 import { API } from '../API';
 import { getAlbumFileInfos } from './albums';
+
 import client from './client';
 import * as utils from '../utils';
-import { constants as c } from '../utils';
 import * as nativex from '../../native';
+import { translate as t } from 'services/l10n';
 
 const GET_FILE_CHUNK_SIZE = 50;
 
@@ -234,7 +234,7 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
     await nativex.deleteLocalPhotos(photos);
 
     // Remove purely local files
-    const deleted = photos.filter((p) => p.flag & c.FLAG_IS_LOCAL);
+    const deleted = photos.filter((p) => p.flag & utils.constants.FLAG_IS_LOCAL);
 
     // Yield for the fully local files
     if (deleted.length > 0) {

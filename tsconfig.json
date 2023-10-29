@@ -5,6 +5,7 @@
       "ES2017",
       "WebWorker"
     ],
+    "baseUrl": "./src",
     "target": "ES2017",
     "module": "ES2020",
     "moduleResolution": "node",
@@ -21,7 +22,7 @@
   },
   "ts-node": {
     "compilerOptions": {
-      "module": "CommonJS",
+      "module": "CommonJS"
     }
-  },
+  }
 }

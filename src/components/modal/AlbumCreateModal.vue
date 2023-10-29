@@ -10,7 +10,7 @@
     </template>
 
     <div class="outer">
-      <AlbumForm :album="album" :display-back-button="false" :title="t('photos', 'New album')" @done="done" />
+      <AlbumForm :album="album" :display-back-button="false" :title="t('memories', 'New album')" @done="done" />
     </div>
   </Modal>
 </template>
@@ -51,7 +51,7 @@ export default defineComponent({
           this.album = await dav.getAlbum(this.$route.params.user, this.$route.params.name);
         } catch (e) {
           console.error(e);
-          showError(this.t('photos', 'Could not load the selected album'));
+          showError(this.t('memories', 'Could not load the selected album'));
           return;
         }
       } else {

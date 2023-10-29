@@ -1,6 +1,7 @@
-import { translate as t, translatePlural as n } from '@nextcloud/l10n';
 import { FilePickerType, getFilePickerBuilder } from '@nextcloud/dialogs';
 import { showError } from '@nextcloud/dialogs';
+
+import { translate as t, translatePlural as n } from 'services/l10n';
 import { bus } from './event-bus';
 import { fragment } from './fragment';
 

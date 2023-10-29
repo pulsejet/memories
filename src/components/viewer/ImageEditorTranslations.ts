@@ -1,4 +1,4 @@
-import { translate as t } from '@nextcloud/l10n';
+import { translate as t } from 'services/l10n';
 
 /**
  * Translations file from library source

@@ -1,6 +1,7 @@
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
-import { translate as t } from '@nextcloud/l10n';
+
+import { translate as t } from 'services/l10n';
 import { IPhoto } from '../../types';
 import { API } from '../API';
 import * as nativex from '../../native';

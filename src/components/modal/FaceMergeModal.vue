@@ -144,7 +144,7 @@ export default defineComponent({
         }
       } catch (error) {
         console.error(error);
-        showError(this.t('photos', 'Failed to move {name}.', { name }));
+        showError(this.t('memories', 'Failed to move {name}.', { name }));
       }
     },
   },

@@ -74,10 +74,10 @@ import NcAppNavigation from '@nextcloud/vue/dist/Components/NcAppNavigation';
 const NcAppNavigationItem = () => import('@nextcloud/vue/dist/Components/NcAppNavigationItem');
 
 import { generateUrl } from '@nextcloud/router';
-import { translate as t } from '@nextcloud/l10n';
 
 import * as utils from './services/utils';
 import * as nativex from './native';
+import { translate as t } from './services/l10n';
 import staticConfig from './services/static-config';
 import UserConfig from './mixins/UserConfig';
 import Timeline from './components/Timeline.vue';

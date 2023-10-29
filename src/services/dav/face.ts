@@ -1,11 +1,12 @@
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
-import { translate as t } from '@nextcloud/l10n';
 import { generateUrl } from '@nextcloud/router';
+
+import { translate as t } from 'services/l10n';
 import { IFace, IPhoto } from '../../types';
 import { API } from '../API';
-import client from './client';
 import { constants as c } from '../utils';
+import client from './client';
 import * as base from './base';
 
 /**

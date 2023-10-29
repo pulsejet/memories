@@ -102,7 +102,7 @@ export default defineComponent({
       } catch (error) {
         console.log(error);
         showError(
-          this.t('photos', 'Failed to rename {oldName} to {name}.', {
+          this.t('memories', 'Failed to rename {oldName} to {name}.', {
             oldName: this.name,
             name: this.input,
           }),

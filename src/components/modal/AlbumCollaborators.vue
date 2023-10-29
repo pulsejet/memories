@@ -1,7 +1,7 @@
 <template>
   <div class="manage-collaborators">
     <div class="manage-collaborators__subtitle">
-      {{ t('photos', 'Add people or groups who can edit your album') }}
+      {{ t('memories', 'Add people or groups who can edit your album') }}
     </div>
 
     <form class="manage-collaborators__form" @submit.prevent>
@@ -12,10 +12,10 @@
             autocomplete="off"
             type="search"
             name="search"
-            :aria-label="t('photos', 'Search for collaborators')"
+            :aria-label="t('memories', 'Search for collaborators')"
             aria-autocomplete="list"
             :aria-controls="`manage-collaborators__form__selection-${randomId} manage-collaborators__form__list-${randomId}`"
-            :placeholder="t('photos', 'Search people or groups')"
+            :placeholder="t('memories', 'Search people or groups')"
             @input="searchCollaborators"
           >
             <Magnify :size="16" />
@@ -37,7 +37,7 @@
               :user="availableCollaborators[collaboratorKey].id"
               :display-name="availableCollaborators[collaboratorKey].label"
               :aria-label="
-                t('photos', 'Add {collaboratorLabel} to the collaborators list', {
+                t('memories', 'Add {collaboratorLabel} to the collaborators list', {
                   collaboratorLabel: availableCollaborators[collaboratorKey].label,
                 })
               "
@@ -49,7 +49,7 @@
           v-else
           key="emptycontent"
           class="manage-collaborators__form__list--empty"
-          :title="t('photos', 'No collaborators available')"
+          :title="t('memories', 'No collaborators available')"
         >
           <AccountGroup slot="icon" />
         </NcEmptyContent>
@@ -71,7 +71,7 @@
           <NcButton
             type="tertiary"
             :aria-label="
-              t('photos', 'Remove {collaboratorLabel} from the collaborators list', {
+              t('memories', 'Remove {collaboratorLabel} from the collaborators list', {
                 collaboratorLabel: availableCollaborators[collaboratorKey].label,
               })
             "
@@ -88,15 +88,15 @@
         <template v-if="isPublicLinkSelected">
           <NcButton
             class="manage-collaborators__public-link-button"
-            :aria-label="t('photos', 'Copy the public link')"
+            :aria-label="t('memories', 'Copy the public link')"
             :disabled="publicLink.id === ''"
             @click="copyPublicLink"
           >
             <template v-if="publicLinkCopied">
-              {{ t('photos', 'Public link copied!') }}
+              {{ t('memories', 'Public link copied!') }}
             </template>
             <template v-else>
-              {{ t('photos', 'Copy public link') }}
+              {{ t('memories', 'Copy public link') }}
             </template>
             <template #icon>
               <Check v-if="publicLinkCopied" />
@@ -105,7 +105,7 @@
           </NcButton>
           <NcButton
             type="tertiary"
-            :aria-label="t('photos', 'Delete the public link')"
+            :aria-label="t('memories', 'Delete the public link')"
             :disabled="publicLink.id === ''"
             @click="deletePublicLink"
           >
@@ -115,7 +115,7 @@
         </template>
         <NcButton v-else class="manage-collaborators__public-link-button" @click="createPublicLinkForAlbum">
           <Earth slot="icon" />
-          {{ t('photos', 'Share via public link') }}
+          {{ t('memories', 'Share via public link') }}
         </NcButton>
       </div>
 
@@ -296,7 +296,7 @@ export default defineComponent({
         };
       } catch (error) {
         this.errorFetchingCollaborators = error;
-        showError(this.t('photos', 'Failed to fetch collaborators list.'));
+        showError(this.t('memories', 'Failed to fetch collaborators list.'));
       } finally {
         this.loadingCollaborators = false;
       }
@@ -311,7 +311,7 @@ export default defineComponent({
       this.availableCollaborators = {
         3: {
           id: '',
-          label: this.t('photos', 'Public link'),
+          label: this.t('memories', 'Public link'),
           type: Type.SHARE_TYPE_LINK,
         },
         ...this.availableCollaborators,
@@ -352,7 +352,7 @@ export default defineComponent({
           this.errorFetchingAlbum = error;
         }
 
-        showError(this.t('photos', 'Failed to fetch album.'));
+        showError(this.t('memories', 'Failed to fetch album.'));
       } finally {
         this.loadingAlbum = false;
       }
@@ -362,7 +362,7 @@ export default defineComponent({
       this.unselectEntity(`${Type.SHARE_TYPE_LINK}`);
       this.availableCollaborators[3] = {
         id: '',
-        label: this.t('photos', 'Public link'),
+        label: this.t('memories', 'Public link'),
         type: Type.SHARE_TYPE_LINK,
       };
       this.publicLinkCopied = false;
@@ -380,7 +380,7 @@ export default defineComponent({
           },
         });
       } catch (error) {
-        showError(this.t('photos', 'Failed to update album.'));
+        showError(this.t('memories', 'Failed to update album.'));
       } finally {
         this.loadingAlbum = false;
       }

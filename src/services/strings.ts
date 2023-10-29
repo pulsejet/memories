@@ -1,5 +1,5 @@
 import staticConfig from './static-config';
-import { translate as t } from '@nextcloud/l10n';
+import { translate as t } from 'services/l10n';
 
 export function emptyDescription(routeName: string): string {
   switch (routeName) {

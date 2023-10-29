@@ -1,13 +1,12 @@
 import Router, { type Route } from 'vue-router';
 import type { ComponentPublicInstance } from 'vue';
 
-import type { translate, translatePlural } from '@nextcloud/l10n';
-
 import type PlyrType from 'plyr';
 import type videojsType from 'video.js';
 
 import type { IPhoto, TimelineState } from './types';
 import type { constants, initstate } from './services/utils';
+import type { translate, translatePlural } from 'services/l10n';
 import type { GlobalRouteCheckers, routes } from './router';
 
 // Global exposed variables

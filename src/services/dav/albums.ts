@@ -2,9 +2,10 @@ import * as base from './base';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
-import { translate as t, getLanguage } from '@nextcloud/l10n';
+import { getLanguage } from '@nextcloud/l10n';
 
 import { IAlbum, IFileInfo, IPhoto } from '../../types';
+import { translate as t } from 'services/l10n';
 
 import { API } from '../API';
 import client from './client';
@@ -121,7 +122,7 @@ export async function createAlbum(albumName: string) {
     await client.createDirectory(`/photos/${utils.uid}/albums/${albumName}`);
   } catch (error) {
     console.error(error);
-    showError(t('photos', 'Failed to create {albumName}.', { albumName }));
+    showError(t('memories', 'Failed to create {albumName}.', { albumName }));
   }
 }
 
@@ -167,7 +168,7 @@ export async function updateAlbum(album: any, { albumName, properties }: any) {
   } catch (error) {
     console.error(error);
     showError(
-      t('photos', 'Failed to update properties of {albumName} with {properties}.', {
+      t('memories', 'Failed to update properties of {albumName} with {properties}.', {
         albumName,
         properties: JSON.stringify(properties),
       }),
@@ -223,7 +224,7 @@ export async function renameAlbum(album: any, currentAlbumName: string, newAlbum
   } catch (error) {
     console.error(error);
     showError(
-      t('photos', 'Failed to rename {currentAlbumName} to {newAlbumName}.', {
+      t('memories', 'Failed to rename {currentAlbumName} to {newAlbumName}.', {
         currentAlbumName,
         newAlbumName,
       }),

@@ -42,8 +42,6 @@
 import { defineComponent } from 'vue';
 import type { Component } from 'vue';
 
-import { translate as t } from '@nextcloud/l10n';
-
 import ClusterHList from './ClusterHList.vue';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
@@ -56,6 +54,7 @@ import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
 import MapIcon from 'vue-material-design-icons/Map.vue';
 import CogIcon from 'vue-material-design-icons/Cog.vue';
 
+import { translate as t } from 'services/l10n';
 import config from '../services/static-config';
 import * as dav from '../services/dav';
 

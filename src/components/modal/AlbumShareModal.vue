@@ -13,7 +13,7 @@
       v-slot="{ collaborators }"
     >
       <NcButton
-        :aria-label="t('photos', 'Save collaborators for this album.')"
+        :aria-label="t('memories', 'Save collaborators for this album.')"
         type="primary"
         :disabled="loadingAddCollaborators"
         @click="handleSetCollaborators(collaborators)"
@@ -21,7 +21,7 @@
         <template #icon>
           <XLoadingIcon v-if="loadingAddCollaborators" />
         </template>
-        {{ t('photos', 'Save') }}
+        {{ t('memories', 'Save') }}
       </NcButton>
     </AlbumCollaborators>
 

@@ -71,7 +71,7 @@
 import { defineComponent } from 'vue';
 import { API } from '../../../services/API';
 
-import { translate as t } from '@nextcloud/l10n';
+import { translate as t } from 'services/l10n';
 import * as utils from '../../../services/utils';
 
 import AdminMixin from '../AdminMixin';

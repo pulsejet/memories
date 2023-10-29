@@ -3,7 +3,7 @@ import { showInfo, showError } from '@nextcloud/dialogs';
 import { API } from './API';
 import { IConfig } from '../types';
 import { getBuilder } from '@nextcloud/browser-storage';
-import { translate as t } from '@nextcloud/l10n';
+import { translate as t } from 'services/l10n';
 import * as utils from './utils';
 
 import type Storage from '@nextcloud/browser-storage/dist/storage';

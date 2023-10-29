@@ -120,7 +120,7 @@ export default defineComponent({
         }
       } catch (error) {
         console.error(error);
-        showError(this.t('photos', 'An error occurred while moving photos from {name}.', { name }));
+        showError(this.t('memories', 'An error occurred while moving photos from {name}.', { name }));
       } finally {
         this.close();
       }

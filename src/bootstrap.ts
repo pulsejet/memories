@@ -4,7 +4,6 @@ import Vue from 'vue';
 
 import { generateFilePath } from '@nextcloud/router';
 import { getRequestToken } from '@nextcloud/auth';
-import { translate, translatePlural } from '@nextcloud/l10n';
 
 // Global components
 import XImg from './components/frame/XImg.vue';
@@ -14,6 +13,7 @@ import VueVirtualScroller from 'vue-virtual-scroller';
 // Locals
 import router, { routes } from './router';
 import { constants, initstate } from './services/utils';
+import { translate, translatePlural } from 'services/l10n';
 
 // CSS for components
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';

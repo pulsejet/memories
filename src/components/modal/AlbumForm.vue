@@ -8,14 +8,14 @@
         name="name"
         :required="true"
         autofocus="true"
-        :placeholder="t('photos', 'Name of the album')"
+        :placeholder="t('memories', 'Name of the album')"
       />
       <label>
         <NcTextField
           :value.sync="albumLocation"
           name="location"
           type="text"
-          :placeholder="t('photos', 'Location of the album')"
+          :placeholder="t('memories', 'Location of the album')"
         />
       </label>
     </div>
@@ -23,17 +23,17 @@
       <span class="left-buttons">
         <NcButton
           v-if="displayBackButton"
-          :aria-label="t('photos', 'Go back to the previous view.')"
+          :aria-label="t('memories', 'Go back to the previous view.')"
           type="tertiary"
           @click="back"
         >
-          {{ t('photos', 'Back') }}
+          {{ t('memories', 'Back') }}
         </NcButton>
       </span>
       <span class="right-buttons">
         <NcButton
           v-if="sharingEnabled && !editMode"
-          :aria-label="t('photos', 'Go to the add collaborators view.')"
+          :aria-label="t('memories', 'Go to the add collaborators view.')"
           type="secondary"
           :disabled="albumName.trim() === '' || loading"
           @click="showCollaboratorView = true"
@@ -41,7 +41,7 @@
           <template #icon>
             <AccountMultiplePlus />
           </template>
-          {{ t('photos', 'Add collaborators') }}
+          {{ t('memories', 'Add collaborators') }}
         </NcButton>
         <NcButton :aria-label="saveText" type="primary" :disabled="albumName === '' || loading" @click="submit()">
           <template #icon>
@@ -63,11 +63,11 @@
   >
     <span class="left-buttons">
       <NcButton
-        :aria-label="t('photos', 'Back to the new album form.')"
+        :aria-label="t('memories', 'Back to the new album form.')"
         type="tertiary"
         @click="showCollaboratorView = false"
       >
-        {{ t('photos', 'Back') }}
+        {{ t('memories', 'Back') }}
       </NcButton>
     </span>
     <span class="right-buttons">
@@ -153,7 +153,7 @@ export default defineComponent({
     },
 
     saveText(): string {
-      return this.editMode ? this.t('photos', 'Save') : this.t('photos', 'Create album');
+      return this.editMode ? this.t('memories', 'Save') : this.t('memories', 'Create album');
     },
 
     /**

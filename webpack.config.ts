@@ -125,11 +125,15 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.js', '.vue'],
     symlinks: false,
-    // Ensure npm does not duplicate vue dependency, and that npm link works for vue 3
-    // See https://github.com/vuejs/core/issues/1503
-    // See https://github.com/nextcloud/nextcloud-vue/issues/3281
     alias: {
-      vue$: path.resolve('./node_modules/vue'),
+      // Ensure npm does not duplicate vue dependency, and that npm link works for vue 3
+      // See https://github.com/vuejs/core/issues/1503
+      // See https://github.com/nextcloud/nextcloud-vue/issues/3281
+      vue$: path.resolve(__dirname, 'node_modules', 'vue'),
+
+      // We can turn on preferRelative instead but this seems safer to be explicit
+      services: path.resolve(__dirname, 'src', 'services'),
+      utils$: path.resolve(__dirname, 'src', 'utils'),
     },
   },
 };

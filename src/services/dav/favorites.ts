@@ -1,5 +1,6 @@
 import { showError } from '@nextcloud/dialogs';
-import { translate as t } from '@nextcloud/l10n';
+
+import { translate as t } from 'services/l10n';
 import { IFileInfo, IPhoto } from '../../types';
 import client from './client';
 import * as base from './base';

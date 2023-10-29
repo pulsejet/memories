@@ -44,8 +44,7 @@ import UserConfig from '../mixins/UserConfig';
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
-import { translate as t } from '@nextcloud/l10n';
-
+import { translate as t } from 'services/l10n';
 import * as dav from '../services/dav';
 import * as utils from '../services/utils';
 import * as nativex from '../native';

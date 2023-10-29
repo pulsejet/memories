@@ -75,7 +75,7 @@ export default defineComponent({
         this.close();
       } catch (error) {
         console.log(error);
-        showError(this.t('photos', 'Failed to delete {name}.', { name: this.name }));
+        showError(this.t('memories', 'Failed to delete {name}.', { name: this.name }));
       }
     },
   },

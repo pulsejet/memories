@@ -4,7 +4,7 @@ import * as nativex from '../../native';
 import * as utils from '../../services/utils';
 
 import { showError } from '@nextcloud/dialogs';
-import { translate as t } from '@nextcloud/l10n';
+import { translate as t } from 'services/l10n';
 
 import { API } from '../../services/API';
 import type { PsContent, PsEvent } from './types';
