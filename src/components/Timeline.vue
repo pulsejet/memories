@@ -1072,7 +1072,10 @@ export default defineComponent({
           // Get the list of files with the same basename
           const fileList = files.get(basename);
           if (fileList?.length) {
-            // Found main file
+            // Move main file to end (min priority)
+            const main = fileList.shift()!;
+            fileList.push(main);
+
             // Do not add this to result
             continue;
           }
