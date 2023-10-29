@@ -95,6 +95,9 @@ export type IPhoto = {
 
   /** Date taken UTC value (lazy fetched) */
   datetaken?: number;
+
+  /** Stacked RAW photos */
+  stackraw?: IPhoto[];
 };
 
 export interface IImageInfo {

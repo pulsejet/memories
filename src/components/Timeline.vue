@@ -1072,9 +1072,13 @@ export default defineComponent({
           // Get the list of files with the same basename
           const fileList = files.get(basename);
           if (fileList?.length) {
-            // Move main file to end (min priority)
-            const main = fileList.shift()!;
-            fileList.push(main);
+            // Move top file to end (min priority)
+            const top = fileList.shift()!;
+            fileList.push(top);
+
+            // Stack on top file
+            top.stackraw ??= [];
+            top.stackraw.push(photo);
 
             // Do not add this to result
             continue;

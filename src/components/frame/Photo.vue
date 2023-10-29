@@ -9,7 +9,6 @@
         error: data.flag & c.FLAG_LOAD_FAIL,
       }"
     >
-      <!-- Top-Left -->
       <div
         class="select"
         v-once
@@ -19,23 +18,21 @@
         <CheckCircleIcon :size="18" />
       </div>
 
-      <!-- Top-Right -->
-      <div class="flag top-right video" v-if="data.flag & c.FLAG_IS_VIDEO">
-        <span v-if="data.video_duration" class="time">{{ videoDuration }}</span>
-        <VideoIcon :size="22" />
-      </div>
-      <div
-        class="flag top-right livephoto"
-        v-else-if="data.liveid"
-        @mouseenter.passive="playVideo"
-        @mouseleave.passive="stopVideo"
-      >
-        <LivePhotoIcon :size="22" />
+      <div class="flag top-right">
+        <div class="video" v-if="data.flag & c.FLAG_IS_VIDEO">
+          <span class="time" v-if="data.video_duration">{{ videoDuration }}</span>
+          <VideoIcon :size="22" />
+        </div>
+        <div class="livephoto" v-if="data.liveid" @mouseenter.passive="playVideo" @mouseleave.passive="stopVideo">
+          <LivePhotoIcon :size="22" />
+        </div>
+        <RawIcon class="raw" v-if="isRaw" :size="28" />
       </div>
 
-      <!-- Bottom-Left -->
-      <StarIcon class="flag bottom-left" :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
-      <LocalIcon class="flag bottom-left" :size="22" v-else-if="data.flag & c.FLAG_IS_LOCAL" />
+      <div class="flag bottom-left">
+        <StarIcon :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
+        <LocalIcon :size="22" v-if="data.flag & c.FLAG_IS_LOCAL" />
+      </div>
 
       <div
         class="img-outer fill-block"
@@ -59,7 +56,7 @@
           @error="error"
         />
         <video ref="video" v-if="videoUrl" :src="videoUrl" preload="none" muted playsinline disableRemotePlayback />
-        <div class="overlay top-left fill-block" />
+        <div class="overlay top-left fill-block"></div>
       </div>
     </div>
   </div>
@@ -77,6 +74,7 @@ import StarIcon from 'vue-material-design-icons/Star.vue';
 import VideoIcon from 'vue-material-design-icons/PlayCircleOutline.vue';
 import LivePhotoIcon from 'vue-material-design-icons/MotionPlayOutline.vue';
 import LocalIcon from 'vue-material-design-icons/CloudOff.vue';
+import RawIcon from 'vue-material-design-icons/Raw.vue';
 
 import type XImg from './XImg.vue';
 
@@ -88,6 +86,7 @@ export default defineComponent({
     StarIcon,
     LivePhotoIcon,
     LocalIcon,
+    RawIcon,
   },
 
   props: {
@@ -177,6 +176,10 @@ export default defineComponent({
       } else {
         return this.url();
       }
+    },
+
+    isRaw(): boolean {
+      return !!this.data.stackraw || this.data.mimetype === this.c.MIME_RAW;
     },
   },
 
@@ -360,6 +363,7 @@ $icon-size: $icon-half-size * 2;
   pointer-events: none;
   transition: transform 0.15s ease;
   color: white;
+  display: flex;
 
   &.top-right {
     top: var(--icon-dist);
@@ -377,10 +381,9 @@ $icon-size: $icon-half-size * 2;
     }
   }
 
-  &.video {
+  > .video {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    line-height: 22px; // force text height to match
 
     > .time {
       font-size: 0.75em;
@@ -389,9 +392,11 @@ $icon-size: $icon-half-size * 2;
     }
   }
 
-  &.livephoto {
-    // Hover to play livephoto
-    pointer-events: auto;
+  > .livephoto {
+    pointer-events: auto; // hover to play
+  }
+  > .raw {
+    height: 22px; // force height to match
   }
 }
 
