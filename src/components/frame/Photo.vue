@@ -55,7 +55,15 @@
           @load="load"
           @error="error"
         />
-        <video ref="video" v-if="videoUrl" :src="videoUrl" preload="none" muted playsinline disableRemotePlayback />
+        <video
+          ref="video"
+          v-if="videoUrl"
+          :src="videoUrl"
+          preload="none"
+          muted
+          playsinline
+          disableRemotePlayback
+        ></video>
         <div class="overlay top-left fill-block"></div>
       </div>
     </div>
