@@ -42,16 +42,12 @@ class DaysController extends GenericApiController
                 $this->isRecursive(),
                 $this->isArchive(),
                 $this->isMonthView(),
+                $this->isReverse(),
                 $this->getTransformations(),
             );
 
             // Preload some day responses
             $this->preloadDays($list);
-
-            // Reverse response if requested.
-            if ($this->isReverse()) {
-                $list = array_reverse($list);
-            }
 
             return new JSONResponse($list, Http::STATUS_OK);
         });
@@ -74,13 +70,9 @@ class DaysController extends GenericApiController
                 $this->isArchive(),
                 $this->isHidden(),
                 $this->isMonthView(),
+                $this->isReverse(),
                 $this->getTransformations(),
             );
-
-            // Reverse response if requested.
-            if ($this->isReverse()) {
-                $list = array_reverse($list);
-            }
 
             return new JSONResponse($list, Http::STATUS_OK);
         });
@@ -181,6 +173,7 @@ class DaysController extends GenericApiController
             $this->isArchive(),
             $this->isHidden(),
             $this->isMonthView(),
+            $this->isReverse(),
             $this->getTransformations(),
         );
 

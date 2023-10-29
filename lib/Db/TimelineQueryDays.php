@@ -21,6 +21,7 @@ trait TimelineQueryDays
      * @param bool  $recursive       Whether to get the days recursively
      * @param bool  $archive         Whether to get the days only from the archive folder
      * @param bool  $monthView       Whether the response should be in month view
+     * @param bool  $reverse         Whether the response should be in reverse order
      * @param array $queryTransforms An array of query transforms to apply to the query
      *
      * @return array The days response
@@ -29,6 +30,7 @@ trait TimelineQueryDays
         bool $recursive,
         bool $archive,
         bool $monthView,
+        bool $reverse,
         array $queryTransforms = [],
     ): array {
         $query = $this->connection->getQueryBuilder();
@@ -54,7 +56,14 @@ trait TimelineQueryDays
         $rows = $this->executeQueryWithCTEs($query)->fetchAll();
 
         // Post process the days
-        return $this->postProcessDays($rows, $monthView);
+        $rows = $this->postProcessDays($rows, $monthView);
+
+        // Reverse order if needed
+        if ($reverse) {
+            $rows = array_reverse($rows);
+        }
+
+        return $rows;
     }
 
     /**
@@ -65,6 +74,7 @@ trait TimelineQueryDays
      * @param bool  $archive         If the query should include only the archive folder
      * @param bool  $hidden          If the query should include hidden files
      * @param bool  $monthView       If the query should be in month view (dayIds are monthIds)
+     * @param bool  $reverse         If the query should be in reverse order
      * @param array $queryTransforms The query transformations to apply
      *
      * @return array An array of day responses
@@ -75,6 +85,7 @@ trait TimelineQueryDays
         bool $archive,
         bool $hidden,
         bool $monthView,
+        bool $reverse,
         array $queryTransforms = [],
     ): array {
         // Check if we have any dayIds
@@ -133,6 +144,11 @@ trait TimelineQueryDays
         // Post process the day in-place
         foreach ($day as &$photo) {
             $this->postProcessDayPhoto($photo, $monthView);
+        }
+
+        // Reverse order if needed
+        if ($reverse) {
+            $day = array_reverse($day);
         }
 
         return $day;
