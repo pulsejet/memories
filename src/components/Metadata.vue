@@ -1,8 +1,5 @@
 <template>
-  <div class="loading-icon fill-block" v-if="loading">
-    <XLoadingIcon />
-  </div>
-  <div class="outer" v-else-if="fileid">
+  <div class="outer" v-if="fileid">
     <div v-if="title || description" class="exif-head" @click="editEXIF()">
       <div class="title" v-if="title">{{ title }}</div>
       <div class="description" v-if="description">{{ description }}</div>
@@ -59,6 +56,9 @@
     <div v-if="lat && lon" class="map">
       <iframe class="fill-block" :src="mapUrl" />
     </div>
+  </div>
+  <div class="loading-icon fill-block" v-else-if="loading">
+    <XLoadingIcon />
   </div>
   <div v-else>
     {{ t('memries', 'Failed to load metadata') }}
@@ -389,6 +389,17 @@ export default defineComponent({
       this.fileid = null;
       this.exif = {};
 
+      // get photo from id if this is the current viewer photo
+      if (_m.viewer.currentPhoto?.fileid === photo) {
+        photo = _m.viewer.currentPhoto;
+      }
+
+      // try to get as much information as we can from
+      // the image info already loaded
+      if (typeof photo === 'object' && photo.imageInfo) {
+        this.setImageInfo(photo.imageInfo);
+      }
+
       // which clusters to get
       const clusters = this.routeIsPublic
         ? String()
@@ -407,14 +418,13 @@ export default defineComponent({
       const url = API.Q(utils.getImageInfoUrl(photo), { tags, clusters });
       const res = await this.guardState(axios.get<IImageInfo>(url));
       if (!res) return null;
-
-      // unwrap basic info
-      this.fileid = res.data.fileid;
-      this.filename = res.data.basename;
-      this.exif = res.data.exif || {};
-      this.baseInfo = res.data;
+      this.setImageInfo(res.data);
 
       return this.baseInfo;
+    },
+
+    async refresh() {
+      if (this.fileid) await this.update(this.fileid);
     },
 
     editDate() {
@@ -433,8 +443,17 @@ export default defineComponent({
       _m.modals.editMetadata([_m.viewer.currentPhoto!], [4]);
     },
 
-    async refresh() {
-      if (this.fileid) await this.update(this.fileid);
+    setImageInfo(info: IImageInfo) {
+      this.fileid = info.fileid;
+      this.filename = info.basename;
+      this.exif = info.exif ?? {};
+      this.baseInfo = info;
+    },
+
+    handleFileUpdated({ fileid }: utils.BusEvent['files:file:updated']) {
+      if (fileid && this.fileid === fileid) {
+        this.refresh();
+      }
     },
 
     async guardState<T>(promise: Promise<T>): Promise<T | null> {
@@ -448,12 +467,6 @@ export default defineComponent({
         throw err;
       } finally {
         if (state === this.state) this.loading--;
-      }
-    },
-
-    handleFileUpdated({ fileid }: utils.BusEvent['files:file:updated']) {
-      if (fileid && this.fileid === fileid) {
-        this.refresh();
       }
     },
   },
