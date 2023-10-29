@@ -385,11 +385,7 @@ export default defineComponent({
 
   methods: {
     async update(photo: number | IPhoto): Promise<IImageInfo | null> {
-      this.state = Math.random();
-      this.loading = 0;
-      this.error = false;
-      this.fileid = null;
-      this.exif = {};
+      this.invalidate();
 
       // which clusters to get
       const clusters = this.routeIsPublic
@@ -424,7 +420,11 @@ export default defineComponent({
     },
 
     invalidate() {
+      this.state = Math.random();
+      this.loading = 0;
+      this.error = false;
       this.fileid = null;
+      this.exif = {};
     },
 
     editDate() {
