@@ -18,10 +18,12 @@ module.exports = {
   devtool: 'source-map',
   cache: isDev,
 
+  context: path.resolve(__dirname, 'src'),
+
   entry: {
-    main: path.resolve(path.join(__dirname, 'src', 'main')),
-    admin: path.resolve(path.join(__dirname, 'src', 'admin')),
-    'hooks-clear-cache': path.resolve(path.join(__dirname, 'src', 'hooks', 'clear-cache')),
+    main: './main',
+    admin: './admin',
+    'hooks-clear-cache': './hooks/clear-cache',
   },
 
   output: {
