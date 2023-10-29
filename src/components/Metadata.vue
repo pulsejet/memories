@@ -391,17 +391,6 @@ export default defineComponent({
       this.fileid = null;
       this.exif = {};
 
-      // get photo from id if this is the current viewer photo
-      if (_m.viewer.currentPhoto?.fileid === photo) {
-        photo = _m.viewer.currentPhoto;
-      }
-
-      // try to get as much information as we can from
-      // the image info already loaded
-      if (typeof photo === 'object' && photo.imageInfo) {
-        this.setImageInfo(photo.imageInfo);
-      }
-
       // which clusters to get
       const clusters = this.routeIsPublic
         ? String()
@@ -420,7 +409,12 @@ export default defineComponent({
       const url = API.Q(utils.getImageInfoUrl(photo), { tags, clusters });
       const res = await this.guardState(axios.get<IImageInfo>(url));
       if (!res) return null;
-      this.setImageInfo(res.data);
+
+      // set image info
+      this.baseInfo = res.data;
+      this.fileid = this.baseInfo.fileid;
+      this.filename = this.baseInfo.basename;
+      this.exif = this.baseInfo.exif ?? {};
 
       return this.baseInfo;
     },
@@ -447,13 +441,6 @@ export default defineComponent({
 
     editGeo() {
       _m.modals.editMetadata([_m.viewer.currentPhoto!], [4]);
-    },
-
-    setImageInfo(info: IImageInfo) {
-      this.fileid = info.fileid;
-      this.filename = info.basename;
-      this.exif = info.exif ?? {};
-      this.baseInfo = info;
     },
 
     handleFileUpdated({ fileid }: utils.BusEvent['files:file:updated']) {
