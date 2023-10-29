@@ -173,7 +173,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { IImageInfo, IPhoto, IRowType, TimelineState } from '../../types';
+import { IImageInfo, IPhoto, TimelineState } from '../../types';
 import type { PsContent } from './types';
 
 import UserConfig from '../../mixins/UserConfig';
@@ -1062,6 +1062,9 @@ export default defineComponent({
       const photo = this.currentPhoto;
       if (!photo) return;
       const abort = () => !this.isOpen || photo !== this.currentPhoto;
+
+      // Invalidate currently open metadata
+      _m.sidebar.invalidate();
 
       // Update the sidebar, first call immediate
       utils.setRenewingTimeout(

@@ -41,8 +41,9 @@ export default defineComponent({
   data: () => ({
     nativeOpen: false,
     reducedOpen: false,
-    basename: '',
+    basename: String(),
     lastKnownWidth: 0,
+    nativeMetadata: null as null | InstanceType<typeof Metadata>,
   }),
 
   computed: {
@@ -87,6 +88,7 @@ export default defineComponent({
       open: this.open.bind(this),
       close: this.close.bind(this),
       setTab: this.setTab.bind(this),
+      invalidate: this.invalidate.bind(this),
       getWidth: this.getWidth.bind(this),
     };
 
@@ -139,6 +141,11 @@ export default defineComponent({
       this.native?.setActiveTab(tab);
     },
 
+    invalidate() {
+      this.refs.metadata?.invalidate();
+      this.nativeMetadata?.invalidate();
+    },
+
     getWidth() {
       const sidebar = document.getElementById('app-sidebar-vue');
       this.lastKnownWidth = sidebar?.offsetWidth || this.lastKnownWidth;
@@ -186,7 +193,8 @@ export default defineComponent({
       const router = this.$router;
 
       // Component instance
-      let component: (Vue & { $children: readonly [InstanceType<typeof Metadata>] }) | null;
+      let component: any;
+      const self = this;
 
       // Register sidebar tab
       globalThis.OCA?.Files?.Sidebar?.registerTab(
@@ -200,16 +208,19 @@ export default defineComponent({
             component?.$destroy?.();
             component = new Vue({ render: (h) => h(Metadata), router });
             component.$mount(el);
-            component.$children[0].update(Number(fileInfo.id));
+
+            self.nativeMetadata = component.$children[0];
+            self.nativeMetadata?.update(Number(fileInfo.id));
           },
 
           update(fileInfo: { id: string | number }) {
-            component?.$children[0].update(Number(fileInfo.id));
+            self.nativeMetadata?.update(Number(fileInfo.id));
           },
 
           destroy() {
             component?.$destroy?.();
             component = null;
+            self.nativeMetadata = null;
           },
         }),
       );

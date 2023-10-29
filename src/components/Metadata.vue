@@ -54,14 +54,14 @@
     </div>
 
     <div v-if="lat && lon" class="map">
-      <iframe class="fill-block" :src="mapUrl" />
+      <iframe class="fill-block" :src="mapUrl"></iframe>
     </div>
   </div>
   <div class="loading-icon fill-block" v-else-if="loading">
     <XLoadingIcon />
   </div>
-  <div v-else>
-    {{ t('memries', 'Failed to load metadata') }}
+  <div v-else-if="error">
+    {{ t('memories', 'Failed to load metadata') }}
   </div>
 </template>
 
@@ -119,6 +119,7 @@ export default defineComponent({
     filename: '',
     exif: {} as IExif,
     baseInfo: {} as IImageInfo,
+    error: false,
 
     loading: 0,
     state: 0,
@@ -386,6 +387,7 @@ export default defineComponent({
     async update(photo: number | IPhoto): Promise<IImageInfo | null> {
       this.state = Math.random();
       this.loading = 0;
+      this.error = false;
       this.fileid = null;
       this.exif = {};
 
@@ -427,6 +429,10 @@ export default defineComponent({
       if (this.fileid) await this.update(this.fileid);
     },
 
+    invalidate() {
+      this.fileid = null;
+    },
+
     editDate() {
       _m.modals.editMetadata([_m.viewer.currentPhoto!], [1]);
     },
@@ -464,6 +470,7 @@ export default defineComponent({
         if (state === this.state) return res;
         return null;
       } catch (err) {
+        this.error = true;
         throw err;
       } finally {
         if (state === this.state) this.loading--;
