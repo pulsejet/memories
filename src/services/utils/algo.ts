@@ -80,8 +80,29 @@ export function randomSubarray<T>(arr: T[], size: number): T[] {
   return shuffled.slice(min);
 }
 
-/** Set a timer that renews if existing */
-export function setRenewingTimeout(ctx: any, name: string, callback: (() => void) | null, delay: number): void {
+/**
+ * Set a timer that renews if existing .
+ *
+ * @param ctx Context to store the timeout in
+ * @param name Name of the timeout
+ * @param callback Callback to call when the timeout expires
+ * @param delay Delay in milliseconds
+ * @param immediate If true, call the callback immediately if no timeout exists
+ */
+export function setRenewingTimeout(
+  ctx: any,
+  name: string,
+  callback: (() => void) | null,
+  delay: number,
+  immediate?: boolean,
+): void {
+  // Call immediately if no timeout exists
+  if (immediate && !ctx[name]) {
+    callback?.();
+    callback = null;
+  }
+
+  // Clear existing timeout and set a new one
   if (ctx[name]) window.clearTimeout(ctx[name]);
   ctx[name] = window.setTimeout(() => {
     ctx[name] = 0;

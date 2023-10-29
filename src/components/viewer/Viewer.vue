@@ -1059,38 +1059,35 @@ export default defineComponent({
      * to the sidebar while the user is scrolling through photos.
      */
     async openSidebar() {
-      const photo = this.currentPhoto!;
+      const photo = this.currentPhoto;
+      if (!photo) return;
+      const abort = () => !this.isOpen || photo !== this.currentPhoto;
 
-      // Update the sidebar
-      const update = async () => {
-        const abort = () => !this.isOpen || photo !== this.currentPhoto;
-        if (abort()) return;
-
-        _m.sidebar.setTab('memories-metadata');
-        if (this.routeIsPublic || this.isLocal) {
-          _m.sidebar.open(photo);
-        } else {
-          const fileInfo = (await dav.getFiles([photo]))[0];
+      // Update the sidebar, first call immediate
+      utils.setRenewingTimeout(
+        this,
+        '_sidebarUpdateTimer',
+        async () => {
           if (abort()) return;
 
-          // get attributes
-          const filename = fileInfo?.filename;
-          const useNative = fileInfo?.originalFilename?.startsWith('/files/');
+          _m.sidebar.setTab('memories-metadata');
+          if (this.routeIsPublic || this.isLocal) {
+            _m.sidebar.open(photo);
+          } else {
+            const fileInfo = (await dav.getFiles([photo]))[0];
+            if (!fileInfo || abort()) return;
 
-          // open sidebar
-          _m.sidebar.open(photo, filename, useNative);
-        }
-      };
+            // get attributes
+            const filename = fileInfo?.filename;
+            const useNative = fileInfo?.originalFilename?.startsWith('/files/');
 
-      // Do not debounce the first call
-      let callback = update;
-      if (!this.sidebarUpdateTimer) {
-        callback();
-        callback = async () => {};
-      }
-
-      // Debounce the rest
-      utils.setRenewingTimeout(this, 'sidebarUpdateTimer', callback, SIDEBAR_DEBOUNCE_MS);
+            // open sidebar
+            _m.sidebar.open(photo, filename, useNative);
+          }
+        },
+        SIDEBAR_DEBOUNCE_MS,
+        true,
+      );
     },
 
     handleAppSidebarOpen() {
