@@ -824,8 +824,9 @@ export default defineComponent({
 
       // Iterate the preload map
       // Now the inner detail objects are reactive
-      for (const dayId of preloads.keys()) {
-        this.processDay(dayId, preloads.get(dayId)!);
+      for (let [dayId, photos] of preloads) {
+        photos = this.preprocessDay(dayId, photos);
+        this.processDay(dayId, photos);
       }
 
       // Notify parent components about stats
@@ -871,7 +872,7 @@ export default defineComponent({
       // Look for cache
       const cacheUrl = this.getDayUrl([dayId]);
       try {
-        const cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
+        let cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
         if (cache) {
           // Cache only contains remote images; update from local too
           if (this.routeHasNative && head.day?.haslocal) {
@@ -879,7 +880,7 @@ export default defineComponent({
           }
 
           // Process the cache
-          utils.removeHiddenPhotos(cache);
+          cache = this.preprocessDay(dayId, cache);
 
           // If this is a cached response and the list is not, then we don't
           // want to take any destructive actions like removing a day.
@@ -973,9 +974,9 @@ export default defineComponent({
         }
 
         // Process each day as needed
-        for (const [dayId, photos] of dayMap) {
+        for (let [dayId, photos] of dayMap) {
           // Remove files marked as hidden
-          utils.removeHiddenPhotos(photos);
+          photos = this.preprocessDay(dayId, photos);
 
           // Check if the response has any delta
           const head = this.heads.get(dayId);
@@ -1016,10 +1017,75 @@ export default defineComponent({
     },
 
     /**
-     * Process items from day response.
+     * Preprocess items from day response.
+     * This should be called on all responses before doing any checks.
      *
-     * @param dayId id of day
-     * @param data photos
+     * 1. Removes hidden files from the response
+     * 2. Performs stacking, e.g. for JPG+NEF pairs
+     */
+    preprocessDay(dayId: number, data: IPhoto[]): IPhoto[] {
+      if (!data?.length) return [];
+
+      // Set of basenames without extension
+      const res1: IPhoto[] = [];
+      const files = new Map<string, IPhoto[]>();
+      let need2 = false;
+
+      // First pass -- remove hidden and prepare
+      for (const photo of data) {
+        // Skip hidden files
+        if (photo.ishidden) continue;
+
+        // Add to first pass result
+        res1.push(photo);
+
+        // Remove extension
+        const basename = utils.removeExtension(photo.basename ?? String());
+        if (!basename) continue; // huh?
+
+        // Skip for raw files
+        if (photo.mimetype === this.c.MIME_RAW) {
+          need2 = true;
+          continue;
+        }
+
+        // Store file basenames without extension
+        let fileList = files.get(basename);
+        if (!fileList) {
+          fileList = [];
+          files.set(basename, fileList);
+        }
+        fileList.push(photo);
+      }
+
+      // Skip second pass unless needed
+      if (!need2) return res1;
+
+      // Second pass -- stack files
+      const res2: IPhoto[] = [];
+      for (const photo of res1) {
+        // Remove RAW files if they can be stacked
+        if (photo.mimetype === this.c.MIME_RAW) {
+          // Get first matching non-raw file
+          const basename = utils.removeExtension(photo.basename ?? String());
+
+          // Get the list of files with the same basename
+          const fileList = files.get(basename);
+          if (fileList?.length) {
+            // Found main file
+            // Do not add this to result
+            continue;
+          }
+        }
+
+        res2.push(photo);
+      }
+
+      return res2;
+    },
+
+    /**
+     * Process items from day response.
      */
     processDay(dayId: number, data: IPhoto[]) {
       if (!data || !this.state) return;

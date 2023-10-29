@@ -14,6 +14,7 @@ export const constants = Object.freeze({
 
   // Special strings
   FACE_NULL: 'NULL',
+  MIME_RAW: 'image/x-dcraw',
 });
 
 /**

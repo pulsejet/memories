@@ -136,18 +136,6 @@ export function updatePhotoFromImageInfo(photo: IPhoto, imageInfo: IImageInfo) {
 }
 
 /**
- * Remove hidden photos from the list in place
- * @param photos List of photos
- */
-export function removeHiddenPhotos(photos: IPhoto[]) {
-  for (let i = photos.length - 1; i >= 0; i--) {
-    if (photos[i].ishidden) {
-      photos.splice(i, 1);
-    }
-  }
-}
-
-/**
  * Get the path of the folder on folders route
  * This function does not check if this is the folder route
  */
@@ -185,6 +173,13 @@ export function setupLivePhotoHooks(video: HTMLVideoElement) {
   video.onended = video.onpause = () => {
     div.classList.remove('playing');
   };
+}
+
+/**
+ * Remove the extension from a filename
+ */
+export function removeExtension(filename: string) {
+  return filename.replace(/\.[^/.]+$/, '');
 }
 
 /**
