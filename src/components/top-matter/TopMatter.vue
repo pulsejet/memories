@@ -18,7 +18,7 @@ import ClusterTopMatter from './ClusterTopMatter.vue';
 import FaceTopMatter from './FaceTopMatter.vue';
 import AlbumTopMatter from './AlbumTopMatter.vue';
 
-import * as utils from '../../services/utils';
+import * as utils from '@services/utils';
 
 export default defineComponent({
   name: 'TopMatter',

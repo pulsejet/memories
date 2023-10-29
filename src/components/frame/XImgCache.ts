@@ -1,4 +1,4 @@
-import { API } from '../../services/API';
+import { API } from '@services/API';
 import { workerImporter } from '../../worker';
 import type * as w from './XImgWorker';
 

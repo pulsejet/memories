@@ -2,12 +2,14 @@ import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 import { generateUrl } from '@nextcloud/router';
 
-import { translate as t } from 'services/l10n';
-import { IFace, IPhoto } from '../../types';
-import { API } from '../API';
-import { constants as c } from '../utils';
 import client from './client';
 import * as base from './base';
+
+import { translate as t } from '@services/l10n';
+import { constants as c } from '@services/utils';
+import { API } from '@services/API';
+
+import { IFace, IPhoto } from '@types';
 
 /**
  * Get list of faces

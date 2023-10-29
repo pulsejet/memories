@@ -15,7 +15,8 @@ import { defineComponent } from 'vue';
 
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
-import * as strings from '../../services/strings';
+
+import * as strings from '@services/strings';
 
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 

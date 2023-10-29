@@ -5,7 +5,7 @@ import { isLiveContent } from './PsLivePhoto';
 import { fetchImage } from '../frame/XImgCache';
 import { PsContent, PsEvent, PsSlide } from './types';
 
-import errorsvg from '../../assets/error.svg';
+import errorsvg from '@assets/error.svg';
 
 export default class ImageContentSetup {
   private loading = 0;

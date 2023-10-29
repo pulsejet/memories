@@ -1,5 +1,5 @@
 import { generateUrl } from '@nextcloud/router';
-import { ClusterTypes } from '../types';
+import { ClusterTypes } from '@types';
 
 const BASE = '/apps/memories/api';
 

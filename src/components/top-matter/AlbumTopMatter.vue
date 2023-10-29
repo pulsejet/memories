@@ -96,7 +96,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import UserConfig from '../../mixins/UserConfig';
+import UserConfig from '@mixins/UserConfig';
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox';
@@ -104,11 +104,13 @@ import NcActionRadio from '@nextcloud/vue/dist/Components/NcActionRadio';
 
 import axios from '@nextcloud/axios';
 
-import AlbumCreateModal from '../modal/AlbumCreateModal.vue';
-import AlbumDeleteModal from '../modal/AlbumDeleteModal.vue';
-import AlbumShareModal from '../modal/AlbumShareModal.vue';
+import AlbumCreateModal from '@components/modal/AlbumCreateModal.vue';
+import AlbumDeleteModal from '@components/modal/AlbumDeleteModal.vue';
+import AlbumShareModal from '@components/modal/AlbumShareModal.vue';
 
-import { downloadWithHandle } from '../../services/dav/download';
+import { downloadWithHandle } from '@services/dav/download';
+import { API } from '@services/API';
+import * as utils from '@services/utils';
 
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
@@ -119,8 +121,6 @@ import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import SortIcon from 'vue-material-design-icons/SortVariant.vue';
 import SlotAlphabeticalIcon from 'vue-material-design-icons/SortAlphabeticalAscending.vue';
 import SortDateIcon from 'vue-material-design-icons/SortCalendarDescending.vue';
-import { API } from '../../services/API';
-import * as utils from '../../services/utils';
 
 export default defineComponent({
   name: 'AlbumTopMatter',

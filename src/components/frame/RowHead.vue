@@ -12,11 +12,12 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { IHeadRow } from '../../types';
+
+import * as utils from '@services/utils';
+
+import type { IHeadRow } from '@types';
 
 import CheckCircle from 'vue-material-design-icons/CheckCircle.vue';
-
-import * as utils from '../../services/utils';
 
 export default defineComponent({
   name: 'RowHead',

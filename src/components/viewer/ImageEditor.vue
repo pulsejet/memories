@@ -18,10 +18,12 @@ import { FilerobotImageEditorConfig } from 'react-filerobot-image-editor';
 
 import translations from './ImageEditorTranslations';
 
-import { API } from '../../services/API';
-import { IImageInfo, IPhoto } from '../../types';
-import * as utils from '../../services/utils';
-import { fetchImage } from '../frame/XImgCache';
+import { fetchImage } from '@components/frame/XImgCache';
+
+import { API } from '@services/API';
+import * as utils from '@services/utils';
+
+import { IImageInfo, IPhoto } from '@types';
 
 // Crop preset icons
 import LandscapeIcon from '@scaleflex/icons/landscape';

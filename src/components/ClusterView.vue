@@ -20,17 +20,17 @@
 import { defineComponent } from 'vue';
 import type { Route } from 'vue-router';
 
-import UserConfig from '../mixins/UserConfig';
-import TopMatter from './top-matter/TopMatter.vue';
-import ClusterGrid from './ClusterGrid.vue';
-import Timeline from './Timeline.vue';
-import EmptyContent from './top-matter/EmptyContent.vue';
-import DynamicTopMatter from './top-matter/DynamicTopMatter.vue';
+import UserConfig from '@mixins/UserConfig';
+import TopMatter from '@components/top-matter/TopMatter.vue';
+import ClusterGrid from '@components/ClusterGrid.vue';
+import Timeline from '@components/Timeline.vue';
+import EmptyContent from '@components/top-matter/EmptyContent.vue';
+import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
 
-import * as dav from '../services/dav';
-import * as utils from '../services/utils';
+import * as dav from '@services/dav';
+import * as utils from '@services/utils';
 
-import type { ICluster } from '../types';
+import type { ICluster } from '@types';
 
 export default defineComponent({
   name: 'ClusterView',

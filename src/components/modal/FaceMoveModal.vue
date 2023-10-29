@@ -19,19 +19,21 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import { showError } from '@nextcloud/dialogs';
+
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
-import { showError } from '@nextcloud/dialogs';
-import { IPhoto, IFace } from '../../types';
-import Cluster from '../frame/Cluster.vue';
+import Cluster from '@components/frame/Cluster.vue';
 import FaceList from './FaceList.vue';
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
 
-import * as dav from '../../services/dav';
-import * as utils from '../../services/utils';
+import * as dav from '@services/dav';
+import * as utils from '@services/utils';
+
+import type { IPhoto, IFace } from '@types';
 
 export default defineComponent({
   name: 'FaceMoveModal',

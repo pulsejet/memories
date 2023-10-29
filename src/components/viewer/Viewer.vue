@@ -173,19 +173,16 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { IImageInfo, IPhoto, TimelineState } from '../../types';
-import type { PsContent } from './types';
-
-import UserConfig from '../../mixins/UserConfig';
+import UserConfig from '@mixins/UserConfig';
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
-import { API } from '../../services/API';
-import * as dav from '../../services/dav';
-import * as utils from '../../services/utils';
-import * as nativex from '../../native';
+import { API } from '@services/API';
+import * as dav from '@services/dav';
+import * as utils from '@services/utils';
+import * as nativex from '@native';
 
 import ImageEditor from './ImageEditor.vue';
 import PhotoSwipe, { PhotoSwipeOptions } from 'photoswipe';
@@ -193,6 +190,9 @@ import 'photoswipe/style.css';
 import PsImage from './PsImage';
 import PsVideo from './PsVideo';
 import PsLivePhoto from './PsLivePhoto';
+
+import { IImageInfo, IPhoto, TimelineState } from '@types';
+import type { PsContent } from './types';
 
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import DeleteIcon from 'vue-material-design-icons/TrashCanOutline.vue';

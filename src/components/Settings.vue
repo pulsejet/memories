@@ -161,18 +161,18 @@ input[type='text'] {
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import UserConfig from '../mixins/UserConfig';
-import * as utils from '../services/utils';
-import * as nativex from '../native';
+import UserConfig from '@mixins/UserConfig';
+import * as utils from '@services/utils';
+import * as nativex from '@native';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcAppSettingsDialog = () => import('@nextcloud/vue/dist/Components/NcAppSettingsDialog');
 const NcAppSettingsSection = () => import('@nextcloud/vue/dist/Components/NcAppSettingsSection');
 const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch');
 
-import MultiPathSelectionModal from './modal/MultiPathSelectionModal.vue';
+import MultiPathSelectionModal from '@components/modal/MultiPathSelectionModal.vue';
 
-import type { IConfig } from '../types';
+import type { IConfig } from '@types';
 
 export default defineComponent({
   name: 'Settings',

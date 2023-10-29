@@ -1,10 +1,12 @@
 import { showError } from '@nextcloud/dialogs';
 
-import { translate as t } from 'services/l10n';
-import { IFileInfo, IPhoto } from '../../types';
 import client from './client';
 import * as base from './base';
-import { constants as c } from '../utils';
+
+import { translate as t } from '@services/l10n';
+import { constants as c } from '@services/utils';
+
+import type { IFileInfo, IPhoto } from '@types';
 
 /**
  * Favorite a file

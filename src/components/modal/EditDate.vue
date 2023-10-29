@@ -112,11 +112,12 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { IPhoto } from '../../types';
 
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
-import * as utils from '../../services/utils';
+import * as utils from '@services/utils';
+
+import { IPhoto } from '@types';
 
 export default defineComponent({
   name: 'EditDate',

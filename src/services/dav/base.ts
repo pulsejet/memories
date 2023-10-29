@@ -1,14 +1,15 @@
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
-import { IFileInfo, IPhoto } from '../../types';
-import { API } from '../API';
 import { getAlbumFileInfos } from './albums';
-
 import client from './client';
-import * as utils from '../utils';
-import * as nativex from '../../native';
-import { translate as t } from 'services/l10n';
+
+import { API } from '@services/API';
+import { translate as t } from '@services/l10n';
+import * as utils from '@services/utils';
+import * as nativex from '@native';
+
+import { IFileInfo, IPhoto } from '@types';
 
 const GET_FILE_CHUNK_SIZE = 50;
 

@@ -95,26 +95,26 @@ import type { Route } from 'vue-router';
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 
-import { getLayout } from '../services/layout';
+import { getLayout } from '@services/layout';
 
-import UserConfig from '../mixins/UserConfig';
-import RowHead from './frame/RowHead.vue';
-import Photo from './frame/Photo.vue';
-import ScrollerManager from './ScrollerManager.vue';
-import SelectionManager from './SelectionManager.vue';
-import Viewer from './viewer/Viewer.vue';
+import UserConfig from '@mixins/UserConfig';
+import RowHead from '@components/frame/RowHead.vue';
+import Photo from '@components/frame/Photo.vue';
+import ScrollerManager from '@components/ScrollerManager.vue';
+import SelectionManager from '@components/SelectionManager.vue';
+import Viewer from '@components/viewer/Viewer.vue';
 
-import EmptyContent from './top-matter/EmptyContent.vue';
-import TopMatter from './top-matter/TopMatter.vue';
-import DynamicTopMatter from './top-matter/DynamicTopMatter.vue';
+import EmptyContent from '@components/top-matter/EmptyContent.vue';
+import TopMatter from '@components/top-matter/TopMatter.vue';
+import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
 
-import * as dav from '../services/dav';
-import * as utils from '../services/utils';
-import * as nativex from '../native';
+import * as dav from '@services/dav';
+import * as utils from '@services/utils';
+import * as nativex from '@native';
 
-import { API, DaysFilterType } from '../services/API';
+import { API, DaysFilterType } from '@services/API';
 
-import { IDay, IHeadRow, IPhoto, IRow, IRowType } from '../types';
+import { IDay, IHeadRow, IPhoto, IRow, IRowType } from '@types';
 
 const SCROLL_LOAD_DELAY = 100; // Delay in loading data when scrolling
 const DESKTOP_ROW_HEIGHT = 200; // Height of row on desktop

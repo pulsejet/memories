@@ -33,7 +33,7 @@ import Timeline from './Timeline.vue';
 const MapSplitMatter = () => import('./top-matter/MapSplitMatter.vue');
 import Hammer from 'hammerjs';
 
-import * as utils from '../services/utils';
+import * as utils from '@services/utils';
 
 export default defineComponent({
   name: 'SplitTimeline',

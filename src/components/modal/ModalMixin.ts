@@ -1,6 +1,6 @@
 import { defineComponent } from 'vue';
 
-import * as utils from '../../services/utils';
+import * as utils from '@services/utils';
 
 export default defineComponent({
   name: 'ModalMixin',

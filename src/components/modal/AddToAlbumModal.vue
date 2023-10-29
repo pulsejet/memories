@@ -17,18 +17,17 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import * as dav from '../../services/dav';
-import * as utils from '../../services/utils';
-
 import { showInfo } from '@nextcloud/dialogs';
-
-import { IAlbum, IPhoto } from '../../types';
-
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
 import AlbumPicker from './AlbumPicker.vue';
+
+import * as dav from '@services/dav';
+import * as utils from '@services/utils';
+
+import { IAlbum, IPhoto } from '@types';
 
 export default defineComponent({
   name: 'AddToAlbumModal',

@@ -94,11 +94,11 @@ import { showError } from '@nextcloud/dialogs';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
-import { DateTime } from 'luxon';
-import * as utils from '../../services/utils';
-import * as dav from '../../services/dav';
-
 import AlbumCollaborators from './AlbumCollaborators.vue';
+
+import { DateTime } from 'luxon';
+import * as utils from '@services/utils';
+import * as dav from '@services/dav';
 
 import Send from 'vue-material-design-icons/Send.vue';
 import AccountMultiplePlus from 'vue-material-design-icons/AccountMultiplePlus.vue';

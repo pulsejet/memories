@@ -9,13 +9,13 @@
 import { defineComponent } from 'vue';
 import { Component } from 'vue';
 
-import UserMixin from '../../mixins/UserConfig';
+import UserMixin from '@mixins/UserConfig';
 
 import FolderDynamicTopMatter from './FolderDynamicTopMatter.vue';
 import PlacesDynamicTopMatterVue from './PlacesDynamicTopMatter.vue';
 import OnThisDay from './OnThisDay.vue';
 
-import * as strings from '../../services/strings';
+import * as strings from '@services/strings';
 
 // Auto-hide top header on public shares if redundant
 import './PublicShareHeader';

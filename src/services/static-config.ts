@@ -1,12 +1,13 @@
 import axios from '@nextcloud/axios';
 import { showInfo, showError } from '@nextcloud/dialogs';
-import { API } from './API';
-import { IConfig } from '../types';
 import { getBuilder } from '@nextcloud/browser-storage';
-import { translate as t } from 'services/l10n';
-import * as utils from './utils';
+
+import { API } from '@services/API';
+import { translate as t } from '@services/l10n';
+import * as utils from '@services/utils';
 
 import type Storage from '@nextcloud/browser-storage/dist/storage';
+import type { IConfig } from '@types';
 
 class StaticConfig {
   private config: IConfig | null = null;

@@ -1,5 +1,5 @@
-import { IDay } from '../../types';
-import { initstate } from '../utils';
+import { initstate } from '@services/utils';
+import { IDay } from '@types';
 
 const { singleItem } = initstate;
 

@@ -76,9 +76,9 @@ import axios from '@nextcloud/axios';
 import { getCanonicalLocale } from '@nextcloud/l10n';
 import { DateTime } from 'luxon';
 
-import UserConfig from '../mixins/UserConfig';
-import AlbumsList from './modal/AlbumsList.vue';
-import Cluster from './frame/Cluster.vue';
+import UserConfig from '@mixins/UserConfig';
+import Cluster from '@components/frame/Cluster.vue';
+import AlbumsList from '@components/modal/AlbumsList.vue';
 
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
@@ -87,11 +87,11 @@ import ImageIcon from 'vue-material-design-icons/Image.vue';
 import LocationIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagIcon from 'vue-material-design-icons/Tag.vue';
 
-import * as utils from 'services/utils';
-import * as dav from 'services/dav';
-import { API } from 'services/API';
+import * as utils from '@services/utils';
+import * as dav from '@services/dav';
+import { API } from '@services/API';
 
-import type { IAlbum, IFace, IImageInfo, IPhoto, IExif } from '../types';
+import type { IAlbum, IFace, IImageInfo, IPhoto, IExif } from '@types';
 
 interface TopField {
   id?: string;

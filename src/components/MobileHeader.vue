@@ -18,9 +18,10 @@
 import { defineComponent } from 'vue';
 import { generateUrl } from '@nextcloud/router';
 import axios from '@nextcloud/axios';
-import nextcloudsvg from '../assets/nextcloud.svg';
 
-import * as utils from '../services/utils';
+import * as utils from '@services/utils';
+
+import nextcloudsvg from '@assets/nextcloud.svg';
 
 export default defineComponent({
   name: 'MobileHeader',

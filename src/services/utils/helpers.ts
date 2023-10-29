@@ -1,9 +1,10 @@
 import { getCurrentUser } from '@nextcloud/auth';
 
-import { API } from '../API';
 import { constants as c } from './const';
-import * as nativex from '../../native';
-import type { IImageInfo, IPhoto } from '../../types';
+
+import { API } from '@services/API';
+import * as nativex from '@native';
+import type { IImageInfo, IPhoto } from '@types';
 
 /**
  * Get the current user UID

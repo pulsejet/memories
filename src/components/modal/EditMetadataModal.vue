@@ -49,14 +49,14 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { IExif, IImageInfo, IPhoto } from '../../types';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
 
+import UserConfig from '@mixins/UserConfig';
+
 import Modal from './Modal.vue';
-import UserConfig from '../../mixins/UserConfig';
 import ModalMixin from './ModalMixin';
 
 import EditDate from './EditDate.vue';
@@ -67,9 +67,11 @@ import EditLocation from './EditLocation.vue';
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
-import * as dav from '../../services/dav';
-import * as utils from '../../services/utils';
-import { API } from '../../services/API';
+import * as dav from '@services/dav';
+import * as utils from '@services/utils';
+import { API } from '@services/API';
+
+import { IExif, IImageInfo, IPhoto } from '@types';
 
 export default defineComponent({
   components: {

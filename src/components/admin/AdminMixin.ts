@@ -1,12 +1,13 @@
 import { defineComponent, PropType } from 'vue';
-import type { ISystemStatus, ISystemConfig, IBinaryStatus } from './AdminTypes';
-import type { IConfig } from '../../types';
 import axios from '@nextcloud/axios';
 
 const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch');
 const NcNoteCard = () => import('@nextcloud/vue/dist/Components/NcNoteCard');
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+
+import type { ISystemStatus, ISystemConfig, IBinaryStatus } from './AdminTypes';
+import type { IConfig } from '@types';
 
 export default defineComponent({
   name: 'AdminMixin',

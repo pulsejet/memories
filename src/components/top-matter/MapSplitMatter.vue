@@ -38,12 +38,13 @@
 import { defineComponent } from 'vue';
 import { LMap, LTileLayer, LMarker, LPopup, LIcon } from 'vue2-leaflet';
 import { latLngBounds, Icon } from 'leaflet';
-import { IPhoto } from '../../types';
 
 import axios from '@nextcloud/axios';
 
-import { API } from '../../services/API';
-import * as utils from '../../services/utils';
+import { API } from '@services/API';
+import * as utils from '@services/utils';
+
+import type { IPhoto } from '@types';
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-edgebuffer';

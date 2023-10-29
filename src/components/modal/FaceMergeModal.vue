@@ -23,21 +23,22 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import { showError } from '@nextcloud/dialogs';
+
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
 
-import { showError } from '@nextcloud/dialogs';
-import { IFileInfo, IFace } from '../../types';
-import Cluster from '../frame/Cluster.vue';
-import FaceList from './FaceList.vue';
-
+import Cluster from '@components/frame/Cluster.vue';
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
+import FaceList from './FaceList.vue';
 
-import client from '../../services/dav/client';
-import * as dav from '../../services/dav';
-import * as utils from '../../services/utils';
+import client from '@services/dav/client';
+import * as dav from '@services/dav';
+import * as utils from '@services/utils';
+
+import { IFileInfo, IFace } from '@types';
 
 export default defineComponent({
   name: 'FaceMergeModal',

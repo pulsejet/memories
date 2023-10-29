@@ -25,11 +25,13 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { IFolder, IPhoto } from '../../types';
 
-import * as utils from '../../services/utils/helpers';
+import UserConfig from '@mixins/UserConfig';
 
-import UserConfig from '../../mixins/UserConfig';
+import * as utils from '@services/utils/helpers';
+
+import { IFolder, IPhoto } from '@types';
+
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
 
 export default defineComponent({

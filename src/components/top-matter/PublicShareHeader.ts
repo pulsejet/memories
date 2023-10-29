@@ -1,4 +1,4 @@
-import * as utils from '../../services/utils';
+import * as utils from '@services/utils';
 
 // Shown in dynamic top matter (Timeline::viewName)
 const title = utils.initstate.shareTitle;

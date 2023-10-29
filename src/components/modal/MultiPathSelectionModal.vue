@@ -31,14 +31,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import * as utils from '../../services/utils';
-
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
+
+import * as utils from '@services/utils';
 
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 

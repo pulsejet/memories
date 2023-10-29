@@ -6,14 +6,14 @@ import { generateFilePath } from '@nextcloud/router';
 import { getRequestToken } from '@nextcloud/auth';
 
 // Global components
-import XImg from './components/frame/XImg.vue';
-import XLoadingIcon from './components/XLoadingIcon.vue';
+import XImg from '@components/frame/XImg.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 import VueVirtualScroller from 'vue-virtual-scroller';
 
 // Locals
 import router, { routes } from './router';
-import { constants, initstate } from './services/utils';
-import { translate, translatePlural } from 'services/l10n';
+import { constants, initstate } from '@services/utils';
+import { translate, translatePlural } from '@services/l10n';
 
 // CSS for components
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';

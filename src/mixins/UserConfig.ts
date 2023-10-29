@@ -2,11 +2,11 @@ import { defineComponent } from 'vue';
 
 import axios from '@nextcloud/axios';
 
-import { API } from '../services/API';
-import * as utils from '../services/utils';
-
-import { IConfig } from '../types';
+import { API } from '@services/API';
+import * as utils from '@services/utils';
 import staticConfig from '../services/static-config';
+
+import type { IConfig } from '@types';
 
 const eventName: keyof utils.BusEvent = 'memories:user-config-changed';
 

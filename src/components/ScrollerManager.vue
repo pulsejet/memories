@@ -51,12 +51,13 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { IRow, IRowType, ITick } from '../types';
+
+import * as utils from '@services/utils';
+
+import { IRow, IRowType, ITick } from '@types';
 
 import ScrollUpIcon from 'vue-material-design-icons/MenuUp.vue';
 import ScrollDownIcon from 'vue-material-design-icons/MenuDown.vue';
-
-import * as utils from '../services/utils';
 
 const SNAP_OFFSET = -5; // Pixels to snap at
 const SNAP_MIN_ROWS = 1000; // Minimum rows to snap at

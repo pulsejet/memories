@@ -1,10 +1,12 @@
 import { getLanguage } from '@nextcloud/l10n';
 import axios from '@nextcloud/axios';
 
-import { ICluster } from '../../types';
-import { API } from '../API';
 import client from './client';
-import { translate as t } from 'services/l10n';
+
+import { API } from '@services/API';
+import { translate as t } from '@services/l10n';
+
+import { ICluster } from '@types';
 
 export interface ITag {
   id: number;

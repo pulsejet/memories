@@ -40,14 +40,15 @@ import { defineComponent, PropType } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
 
-import UserConfig from '../mixins/UserConfig';
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
-import { translate as t } from 'services/l10n';
-import * as dav from '../services/dav';
-import * as utils from '../services/utils';
-import * as nativex from '../native';
+import UserConfig from '@mixins/UserConfig';
+
+import { translate as t } from '@services/l10n';
+import * as dav from '@services/dav';
+import * as utils from '@services/utils';
+import * as nativex from '@native';
 
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
@@ -62,7 +63,7 @@ import AlbumsIcon from 'vue-material-design-icons/ImageAlbum.vue';
 import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
 import FolderMoveIcon from 'vue-material-design-icons/FolderMove.vue';
 
-import { IDay, IHeadRow, IPhoto, IRow, IRowType } from '../types';
+import { IDay, IHeadRow, IPhoto, IRow, IRowType } from '@types';
 
 /**
  * The distance for which the touch selection is clamped.

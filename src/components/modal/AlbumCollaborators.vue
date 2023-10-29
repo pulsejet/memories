@@ -146,9 +146,9 @@ import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 const NcListItemIcon = () => import('@nextcloud/vue/dist/Components/NcListItemIcon');
 
-import * as dav from '../../services/dav';
-import * as utils from '../../services/utils';
-import * as nativex from '../../native';
+import * as dav from '@services/dav';
+import * as utils from '@services/utils';
+import * as nativex from '@native';
 
 import { Type } from '@nextcloud/sharing';
 

@@ -27,16 +27,16 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import { showError } from '@nextcloud/dialogs';
+
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
-
-import { showError } from '@nextcloud/dialogs';
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
 
-import * as utils from '../../services/utils';
-import * as dav from '../../services/dav';
+import * as utils from '@services/utils';
+import * as dav from '@services/dav';
 
 export default defineComponent({
   name: 'FaceEditModal',

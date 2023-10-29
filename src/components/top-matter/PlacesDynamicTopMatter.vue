@@ -12,9 +12,9 @@ import { defineComponent } from 'vue';
 import axios from '@nextcloud/axios';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 
-import { API } from '../../services/API';
+import { API } from '@services/API';
 
-import type { ICluster } from '../../types';
+import type { ICluster } from '@types';
 
 export default defineComponent({
   name: 'PlacesDynamicTopMatter',

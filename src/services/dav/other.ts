@@ -1,7 +1,9 @@
 import { getFiles } from './base';
 import { generateUrl } from '@nextcloud/router';
-import { IPhoto } from '../../types';
-import { API } from '../API';
+
+import { API } from '@services/API';
+
+import { IPhoto } from '@types';
 
 /**
  * Open the files app with the given photo

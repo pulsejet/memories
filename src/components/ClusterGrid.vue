@@ -27,9 +27,11 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import Cluster from './frame/Cluster.vue';
-import type { ICluster } from '../types';
-import * as utils from '../services/utils';
+
+import Cluster from '@components/frame/Cluster.vue';
+
+import type { ICluster } from '@types';
+import * as utils from '@services/utils';
 
 export default defineComponent({
   name: 'ClusterGrid',

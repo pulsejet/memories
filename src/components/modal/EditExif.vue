@@ -23,11 +23,12 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { IExif, IPhoto } from '../../types';
 
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
-import { translate as t } from 'services/l10n';
+import { translate as t } from '@services/l10n';
+
+import { IExif, IPhoto } from '@types';
 
 interface IField {
   field: keyof IExif;

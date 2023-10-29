@@ -73,10 +73,8 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
-import { IDay, IPhoto } from '../../types';
-import * as utils from '../../services/utils';
+import * as utils from '@services/utils';
 
-import errorsvg from '../../assets/error.svg';
 import CheckCircleIcon from 'vue-material-design-icons/CheckCircle.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import VideoIcon from 'vue-material-design-icons/PlayCircleOutline.vue';
@@ -84,7 +82,10 @@ import LivePhotoIcon from 'vue-material-design-icons/MotionPlayOutline.vue';
 import LocalIcon from 'vue-material-design-icons/CloudOff.vue';
 import RawIcon from 'vue-material-design-icons/Raw.vue';
 
-import type XImg from './XImg.vue';
+import type { IDay, IPhoto } from '@types';
+import type XImg from '@components/XImg.vue';
+
+import errorsvg from '@assets/error.svg';
 
 export default defineComponent({
   name: 'Photo',

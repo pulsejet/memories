@@ -133,9 +133,13 @@ module.exports = {
       // See https://github.com/nextcloud/nextcloud-vue/issues/3281
       vue$: path.resolve(__dirname, 'node_modules', 'vue'),
 
-      // We can turn on preferRelative instead but this seems safer to be explicit
-      services: path.resolve(__dirname, 'src', 'services'),
-      utils$: path.resolve(__dirname, 'src', 'utils'),
+      // You also need to update tsconfig.json
+      '@services': path.resolve(__dirname, 'src', 'services'),
+      '@assets': path.resolve(__dirname, 'src', 'assets'),
+      '@components': path.resolve(__dirname, 'src', 'components'),
+      '@mixins': path.resolve(__dirname, 'src', 'mixins'),
+      '@native': path.resolve(__dirname, 'src', 'native'),
+      '@types$': path.resolve(__dirname, 'src', 'types'),
     },
   },
 };

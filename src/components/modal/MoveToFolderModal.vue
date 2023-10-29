@@ -16,16 +16,17 @@ import { defineComponent } from 'vue';
 import { FilePickerType } from '@nextcloud/dialogs';
 import { showInfo } from '@nextcloud/dialogs';
 
-import * as dav from '../../services/dav';
-import * as utils from '../../services/utils';
-
-import type { IPhoto } from '../../types';
-
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
 
+import UserConfig from '@mixins/UserConfig';
+
 import Modal from './Modal.vue';
-import UserConfig from '../../mixins/UserConfig';
 import ModalMixin from './ModalMixin';
+
+import * as dav from '@services/dav';
+import * as utils from '@services/utils';
+
+import type { IPhoto } from '@types';
 
 export default defineComponent({
   name: 'MoveToFolderModal',

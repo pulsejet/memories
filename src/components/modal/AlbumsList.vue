@@ -32,14 +32,13 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { getPreviewUrl } from '../../services/utils/helpers';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
 
-import * as utils from '../../services/utils';
+import * as utils from '@services/utils';
 
-import type { IAlbum, IPhoto } from '../../types';
+import type { IAlbum, IPhoto } from '@types';
 
 import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
 
@@ -86,7 +85,7 @@ export default defineComponent({
     },
 
     toCoverUrl(album: IAlbum) {
-      return getPreviewUrl({
+      return utils.getPreviewUrl({
         photo: {
           fileid: Number(album.last_added_photo),
         } as IPhoto,

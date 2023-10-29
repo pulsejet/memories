@@ -1,12 +1,13 @@
 import PhotoSwipe from 'photoswipe';
-import staticConfig from '../../services/static-config';
-import * as nativex from '../../native';
-import * as utils from '../../services/utils';
 
 import { showError } from '@nextcloud/dialogs';
-import { translate as t } from 'services/l10n';
 
-import { API } from '../../services/API';
+import { translate as t } from '@services/l10n';
+import staticConfig from '@services/static-config';
+import * as utils from '@services/utils';
+import * as nativex from '@native';
+import { API } from '@services/API';
+
 import type { PsContent, PsEvent } from './types';
 
 import Player from 'video.js/dist/types/player';
@@ -155,7 +156,7 @@ class VideoContentSetup {
 
     // Load videojs scripts
     if (!_m.video.videojs) {
-      await import('../../services/videojs');
+      await import('@services/videojs');
     }
 
     // Create video element

@@ -28,14 +28,17 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { ICluster, IFace } from '../../types';
-import ClusterGrid from '../ClusterGrid.vue';
+import Fuse from 'fuse.js';
 
 import { showError } from '@nextcloud/dialogs';
+
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
-import * as dav from '../../services/dav';
-import Fuse from 'fuse.js';
+import ClusterGrid from '@components/ClusterGrid.vue';
+
+import * as dav from '@services/dav';
+
+import type { ICluster, IFace } from '@types';
 
 import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';
 

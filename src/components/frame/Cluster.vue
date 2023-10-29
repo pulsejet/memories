@@ -37,14 +37,14 @@ import { defineComponent, PropType } from 'vue';
 
 import NcCounterBubble from '@nextcloud/vue/dist/Components/NcCounterBubble';
 
-import type { IAlbum, ICluster, IFace, IPhoto } from '../../types';
-import { getPreviewUrl } from '../../services/utils/helpers';
-import errorsvg from '../../assets/error.svg';
-import plussvg from '../../assets/plus.svg';
+import type { IAlbum, ICluster, IFace, IPhoto } from '@types';
+import { getPreviewUrl } from '@services/utils/helpers';
+import errorsvg from '@assets/error.svg';
+import plussvg from '@assets/plus.svg';
 
-import * as utils from '../../services/utils';
-import * as nativex from '../../native';
-import { API } from '../../services/API';
+import * as nativex from '@native';
+import * as utils from '@services/utils';
+import { API } from '@services/API';
 
 import Vue from 'vue';
 

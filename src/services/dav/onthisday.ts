@@ -1,7 +1,9 @@
-import { IDay, IPhoto } from '../../types';
 import axios from '@nextcloud/axios';
-import * as utils from '../utils';
-import { API } from '../API';
+
+import * as utils from '@services/utils';
+import { API } from '@services/API';
+
+import { IDay, IPhoto } from '@types';
 
 /**
  * Get original onThisDay response.

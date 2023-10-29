@@ -61,21 +61,23 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import UserConfig from '../../mixins/UserConfig';
+import UserConfig from '@mixins/UserConfig';
+
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox';
 
-import FaceEditModal from '../modal/FaceEditModal.vue';
-import FaceDeleteModal from '../modal/FaceDeleteModal.vue';
-import FaceMergeModal from '../modal/FaceMergeModal.vue';
+import FaceEditModal from '@components/modal/FaceEditModal.vue';
+import FaceDeleteModal from '@components/modal/FaceDeleteModal.vue';
+import FaceMergeModal from '@components/modal/FaceMergeModal.vue';
+
+import * as utils from '@services/utils';
+
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
 import DeleteIcon from 'vue-material-design-icons/Close.vue';
 import MergeIcon from 'vue-material-design-icons/Merge.vue';
 import UnassignedIcon from 'vue-material-design-icons/AccountQuestion.vue';
-
-import * as utils from '../../services/utils';
 
 export default defineComponent({
   name: 'FaceTopMatter',

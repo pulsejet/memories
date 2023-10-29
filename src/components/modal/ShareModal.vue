@@ -79,15 +79,17 @@ import axios from '@nextcloud/axios';
 
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
 
+import UserConfig from '@mixins/UserConfig';
+
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
-import UserConfig from '../../mixins/UserConfig';
 
-import { IPhoto } from '../../types';
-import { API } from '../../services/API';
-import * as dav from '../../services/dav';
-import * as utils from '../../services/utils';
-import * as nativex from '../../native';
+import { API } from '@services/API';
+import * as dav from '@services/dav';
+import * as utils from '@services/utils';
+import * as nativex from '@native';
+
+import type { IPhoto } from '@types';
 
 import PhotoIcon from 'vue-material-design-icons/Image.vue';
 import LargePhotoIcon from 'vue-material-design-icons/ImageArea.vue';

@@ -5,7 +5,6 @@
       "ES2017",
       "WebWorker"
     ],
-    "baseUrl": "./src",
     "target": "ES2017",
     "module": "ES2020",
     "moduleResolution": "node",
@@ -15,7 +14,28 @@
     "noImplicitThis": true,
     "noImplicitAny": true,
     "esModuleInterop": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "paths": {
+      "@services/*": [
+        "./src/services/*"
+      ],
+      "@assets": [
+        "./src/assets"
+      ],
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@mixins/*": [
+        "./src/mixins/*"
+      ],
+      "@native": [
+        "./src/native",
+        "./src/native/*"
+      ],
+      "@types": [
+        "./src/types"
+      ]
+    }
   },
   "vueCompilerOptions": {
     "target": 2.7

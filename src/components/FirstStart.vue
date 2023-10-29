@@ -46,17 +46,20 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import UserConfig from '../mixins/UserConfig';
 import NcContent from '@nextcloud/vue/dist/Components/NcContent';
 import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 
+import UserConfig from '@mixins/UserConfig';
+
 import axios from '@nextcloud/axios';
 
-import banner from '../assets/banner.svg';
-import type { IDay } from '../types';
-import { API } from '../services/API';
-import * as utils from '../services/utils';
+import banner from '@assets/banner.svg';
+
+import * as utils from '@services/utils';
+import { API } from '@services/API';
+
+import type { IDay } from '@types';
 
 export default defineComponent({
   name: 'FirstStart',

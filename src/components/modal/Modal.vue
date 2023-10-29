@@ -24,12 +24,11 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-
-import * as utils from '../../services/utils';
-
 import type { PropType } from 'vue';
 
 const NcModal = () => import('@nextcloud/vue/dist/Components/NcModal');
+
+import * as utils from '@services/utils';
 
 export default defineComponent({
   name: 'Modal',

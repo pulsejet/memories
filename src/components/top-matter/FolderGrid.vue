@@ -9,10 +9,10 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import UserConfig from '../../mixins/UserConfig';
-import Folder from '../frame/Folder.vue';
+import UserConfig from '@mixins/UserConfig';
+import Folder from '@components/frame/Folder.vue';
 
-import type { IFolder } from '../../types';
+import type { IFolder } from '@types';
 
 export default defineComponent({
   name: 'ClusterGrid',

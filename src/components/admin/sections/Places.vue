@@ -69,10 +69,10 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { API } from '../../../services/API';
+import { API } from '@services/API';
 
-import { translate as t } from 'services/l10n';
-import * as utils from '../../../services/utils';
+import { translate as t } from '@services/l10n';
+import * as utils from '@services/utils';
 
 import AdminMixin from '../AdminMixin';
 

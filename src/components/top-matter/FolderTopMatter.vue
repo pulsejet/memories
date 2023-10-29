@@ -46,13 +46,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import UserConfig from '../../mixins/UserConfig';
+import UserConfig from '@mixins/UserConfig';
+
 const NcBreadcrumbs = () => import('@nextcloud/vue/dist/Components/NcBreadcrumbs');
 const NcBreadcrumb = () => import('@nextcloud/vue/dist/Components/NcBreadcrumb');
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
-import * as utils from '../../services/utils';
+import * as utils from '@services/utils';
 
 import HomeIcon from 'vue-material-design-icons/Home.vue';
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';

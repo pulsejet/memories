@@ -75,17 +75,18 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
-import AlbumForm from './AlbumForm.vue';
-import AlbumsList from './AlbumsList.vue';
+import Fuse from 'fuse.js';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
-import * as dav from '../../services/dav';
-import { IAlbum, IPhoto } from '../../types';
+import AlbumForm from './AlbumForm.vue';
+import AlbumsList from './AlbumsList.vue';
 
-import Fuse from 'fuse.js';
+import * as dav from '@services/dav';
+
+import type { IAlbum, IPhoto } from '@types';
 
 import PlusIcon from 'vue-material-design-icons/Plus.vue';
 import CheckIcon from 'vue-material-design-icons/Check.vue';

@@ -103,13 +103,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import * as nativex from '../native';
-import * as util from '../services/utils';
-
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch');
 
-import banner from '../assets/banner.svg';
+import * as util from '@services/utils';
+import * as nativex from '@native';
+
+import banner from '@assets/banner.svg';
 
 export default defineComponent({
   name: 'NXSetup',

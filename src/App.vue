@@ -75,25 +75,27 @@ const NcAppNavigationItem = () => import('@nextcloud/vue/dist/Components/NcAppNa
 
 import { generateUrl } from '@nextcloud/router';
 
-import * as utils from './services/utils';
-import * as nativex from './native';
-import { translate as t } from './services/l10n';
-import staticConfig from './services/static-config';
-import UserConfig from './mixins/UserConfig';
-import Timeline from './components/Timeline.vue';
-import Settings from './components/Settings.vue';
-import FirstStart from './components/FirstStart.vue';
-import Viewer from './components/viewer/Viewer.vue';
-import Sidebar from './components/Sidebar.vue';
-import MobileNav from './components/MobileNav.vue';
-import MobileHeader from './components/MobileHeader.vue';
+import UserConfig from '@mixins/UserConfig';
 
-import EditMetadataModal from './components/modal/EditMetadataModal.vue';
-import AddToAlbumModal from './components/modal/AddToAlbumModal.vue';
-import NodeShareModal from './components/modal/NodeShareModal.vue';
-import ShareModal from './components/modal/ShareModal.vue';
-import MoveToFolderModal from './components/modal/MoveToFolderModal.vue';
-import FaceMoveModal from './components/modal/FaceMoveModal.vue';
+import Timeline from '@components/Timeline.vue';
+import Settings from '@components/Settings.vue';
+import FirstStart from '@components/FirstStart.vue';
+import Viewer from '@components/viewer/Viewer.vue';
+import Sidebar from '@components/Sidebar.vue';
+import MobileNav from '@components/MobileNav.vue';
+import MobileHeader from '@components/MobileHeader.vue';
+
+import EditMetadataModal from '@components/modal/EditMetadataModal.vue';
+import AddToAlbumModal from '@components/modal/AddToAlbumModal.vue';
+import NodeShareModal from '@components/modal/NodeShareModal.vue';
+import ShareModal from '@components/modal/ShareModal.vue';
+import MoveToFolderModal from '@components/modal/MoveToFolderModal.vue';
+import FaceMoveModal from '@components/modal/FaceMoveModal.vue';
+
+import * as utils from '@services/utils';
+import * as nativex from '@native';
+import { translate as t } from '@services/l10n';
+import staticConfig from '@services/static-config';
 
 import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue';
 import FolderIcon from 'vue-material-design-icons/Folder.vue';

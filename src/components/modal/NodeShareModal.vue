@@ -64,17 +64,18 @@ import { defineComponent } from 'vue';
 import axios from '@nextcloud/axios';
 import { showSuccess } from '@nextcloud/dialogs';
 
-import UserConfig from '../../mixins/UserConfig';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
+import UserConfig from '@mixins/UserConfig';
+
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
 
-import { API } from '../../services/API';
-import * as utils from '../../services/utils';
-import * as nativex from '../../native';
+import { API } from '@services/API';
+import * as utils from '@services/utils';
+import * as nativex from '@native';
 
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 import LinkIcon from 'vue-material-design-icons/LinkVariant.vue';

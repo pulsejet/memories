@@ -19,11 +19,12 @@
 import { defineComponent } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
-import * as dav from '../../services/dav';
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
 import AlbumForm from './AlbumForm.vue';
+
+import * as dav from '@services/dav';
 
 export default defineComponent({
   name: 'AlbumCreateModal',

@@ -38,7 +38,7 @@ import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
 import AlbumCollaborators from './AlbumCollaborators.vue';
 
-import * as dav from '../../services/dav';
+import * as dav from '@services/dav';
 
 export default defineComponent({
   name: 'AlbumShareModal',

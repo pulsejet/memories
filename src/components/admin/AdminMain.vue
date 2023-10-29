@@ -26,9 +26,9 @@ import { defineComponent } from 'vue';
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 
-import { API } from '../../services/API';
-import * as utils from '../../services/utils';
-import staticConfig from '../../services/static-config';
+import { API } from '@services/API';
+import * as utils from '@services/utils';
+import staticConfig from '@services/static-config';
 
 import Help from './sections/Help.vue';
 import Exif from './sections/Exif.vue';
@@ -43,7 +43,7 @@ import VideoTranscoder from './sections/VideoTranscoder.vue';
 import VideoAccel from './sections/VideoAccel.vue';
 
 import type { ISystemConfig, ISystemStatus } from './AdminTypes';
-import type { IConfig } from '../../types';
+import type { IConfig } from '@types';
 
 export default defineComponent({
   name: 'Admin',

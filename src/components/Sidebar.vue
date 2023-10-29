@@ -21,13 +21,14 @@ import Vue, { defineComponent } from 'vue';
 import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
-import Metadata from './Metadata.vue';
-import { IPhoto } from '../types';
+import Metadata from '@components/Metadata.vue';
 
-import * as utils from '../services/utils';
+import * as utils from '@services/utils';
+
+import { IPhoto } from '@types';
 
 import CloseIcon from 'vue-material-design-icons/Close.vue';
-import InfoSvg from '../assets/info.svg';
+import InfoSvg from '@assets/info.svg';
 
 export default defineComponent({
   name: 'Sidebar',

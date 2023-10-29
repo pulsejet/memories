@@ -20,7 +20,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import * as nativex from '../native';
+import * as nativex from '@native';
 
 import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import SearchIcon from 'vue-material-design-icons/Magnify.vue';

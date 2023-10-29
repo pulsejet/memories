@@ -1,6 +1,6 @@
 import { emit, subscribe, unsubscribe } from '@nextcloud/event-bus';
-import type { IConfig, IPhoto } from '../../types';
 import type { FragmentName, Fragment } from './fragment';
+import type { IConfig, IPhoto } from '@types';
 
 export type BusEvent = {
   /** Open/close the navigation drawer */

@@ -22,8 +22,10 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import type { ICluster } from '../types';
+
 import Cluster from './frame/Cluster.vue';
+
+import type { ICluster } from '@types';
 
 export default defineComponent({
   name: 'ClusterHList',

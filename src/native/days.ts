@@ -1,8 +1,10 @@
 import { NAPI, nativex } from './api';
-import { API } from '../services/API';
 import { has } from './basic';
-import * as utils from '../services/utils';
-import type { IDay, IPhoto } from '../types';
+
+import { API } from '@services/API';
+import * as utils from '@services/utils';
+
+import type { IDay, IPhoto } from '@types';
 
 /** Memcache for <dayId, Photos> */
 const daysCache = new Map<number, IPhoto[]>();

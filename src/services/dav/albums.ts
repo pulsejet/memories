@@ -4,12 +4,12 @@ import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 import { getLanguage } from '@nextcloud/l10n';
 
-import { IAlbum, IFileInfo, IPhoto } from '../../types';
-import { translate as t } from 'services/l10n';
+import { translate as t } from '@services/l10n';
+import { API } from '@services/API';
+import client from '@services/dav/client';
+import * as utils from '@services/utils';
 
-import { API } from '../API';
-import client from './client';
-import * as utils from '../utils';
+import { IAlbum, IFileInfo, IPhoto } from '@types';
 
 /**
  * Get DAV path for album

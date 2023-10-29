@@ -1,7 +1,7 @@
 import axios from '@nextcloud/axios';
 import { BASE_URL, NAPI, nativex } from './api';
 import { addOrigin } from './basic';
-import type { IPhoto } from '../types';
+import type { IPhoto } from '@types';
 
 /**
  * Download a file from the given URL.
