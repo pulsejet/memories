@@ -55,12 +55,8 @@ export default defineComponent({
         path = path.split('/');
       }
 
-      return {
-        name: this.$route.name,
-        params: {
-          path: [...path, this.data.name],
-        },
-      };
+      path = [...path, this.data.name]; // intentional copy
+      return { ...this.$route, params: { path } };
     },
 
     previews(): IPhoto[] {

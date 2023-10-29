@@ -1,7 +1,7 @@
 <template>
   <div class="top-matter">
     <NcBreadcrumbs>
-      <NcBreadcrumb :title="rootFolderName" :to="{ name: $route.name }">
+      <NcBreadcrumb :title="rootFolderName" :to="{ ...$route, params: { path: [] } }">
         <template #icon>
           <template v-if="routeIsPublic">
             <ShareIcon :size="20" />
@@ -16,7 +16,7 @@
         v-for="folder in list"
         :key="folder.idx"
         :title="folder.text"
-        :to="{ name: $route.name, params: { path: folder.path } }"
+        :to="{ ...$route, params: { path: folder.path } }"
       />
     </NcBreadcrumbs>
 
