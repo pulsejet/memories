@@ -209,7 +209,7 @@ import LivePhotoIcon from 'vue-material-design-icons/MotionPlayOutline.vue';
 import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
 
 const SLIDESHOW_MS = 5000;
-const SIDEBAR_DEBOUNCE_MS = 500;
+const SIDEBAR_DEBOUNCE_MS = 350;
 const BODY_HAS_VIEWER = 'has-viewer';
 const BODY_VIEWER_VIDEO = 'viewer-video';
 const BODY_VIEWER_FULLY_OPENED = 'viewer-fully-opened';
