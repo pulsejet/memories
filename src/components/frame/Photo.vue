@@ -9,6 +9,7 @@
         error: data.flag & c.FLAG_LOAD_FAIL,
       }"
     >
+      <!-- Top-Left -->
       <div
         class="select"
         v-once
@@ -18,25 +19,27 @@
         <CheckCircleIcon :size="18" />
       </div>
 
-      <div class="video" v-if="data.flag & c.FLAG_IS_VIDEO">
-        <span v-if="data.video_duration" class="time">
-          {{ videoDuration }}
-        </span>
+      <!-- Top-Right -->
+      <div class="flag top-right video" v-if="data.flag & c.FLAG_IS_VIDEO">
+        <span v-if="data.video_duration" class="time">{{ videoDuration }}</span>
         <VideoIcon :size="22" />
       </div>
-
-      <div class="livephoto" v-if="data.liveid" @mouseenter.passive="playVideo" @mouseleave.passive="stopVideo">
+      <div
+        class="flag top-right livephoto"
+        v-else-if="data.liveid"
+        @mouseenter.passive="playVideo"
+        @mouseleave.passive="stopVideo"
+      >
         <LivePhotoIcon :size="22" />
       </div>
 
-      <StarIcon class="bottom-left-flag" :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
-      <LocalIcon class="bottom-left-flag" :size="22" v-if="data.flag & c.FLAG_IS_LOCAL" />
+      <!-- Bottom-Left -->
+      <StarIcon class="flag bottom-left" :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
+      <LocalIcon class="flag bottom-left" :size="22" v-else-if="data.flag & c.FLAG_IS_LOCAL" />
 
       <div
         class="img-outer fill-block"
-        :class="{
-          'memories-livephoto': data.liveid,
-        }"
+        :class="{ 'memories-livephoto': data.liveid }"
         @contextmenu="contextmenu"
         @pointerdown.passive="$emit('pointerdown', $event)"
         @touchstart.passive="$emit('touchstart', $event)"
@@ -308,7 +311,9 @@ export default defineComponent({
 $icon-half-size: 6px;
 $icon-size: $icon-half-size * 2;
 
-/* Extra icons */
+// Selection icon
+// Not the same as any other flag because it does not
+// translate when selected, and changes color
 .select {
   position: absolute;
   top: calc(var(--icon-dist) + 2px);
@@ -348,46 +353,49 @@ $icon-size: $icon-half-size * 2;
   }
 }
 
-.video,
-.bottom-left-flag,
-.livephoto {
+// Flags to show on timeline
+.flag {
   position: absolute;
   z-index: 100;
   pointer-events: none;
   transition: transform 0.15s ease;
-  filter: invert(1) brightness(100);
-}
-.video,
-.livephoto {
-  position: absolute;
-  top: var(--icon-dist);
-  right: var(--icon-dist);
-  .p-outer.selected > & {
-    transform: translate(-$icon-size, $icon-size);
+  color: white;
+
+  &.top-right {
+    top: var(--icon-dist);
+    right: var(--icon-dist);
+    .p-outer.selected > & {
+      transform: translate(-$icon-size, $icon-size);
+    }
   }
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  &.bottom-left {
+    bottom: var(--icon-dist);
+    left: var(--icon-dist);
+    .p-outer.selected > & {
+      transform: translate($icon-size, -$icon-size);
+    }
+  }
 
-  .time {
-    font-size: 0.75em;
-    font-weight: bold;
-    margin-right: 3px;
+  &.video {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    > .time {
+      font-size: 0.75em;
+      font-weight: bold;
+      margin-right: 3px;
+    }
+  }
+
+  &.livephoto {
+    // Hover to play livephoto
+    pointer-events: auto;
   }
 }
-.livephoto {
-  pointer-events: auto;
-}
-.bottom-left-flag {
-  bottom: var(--icon-dist);
-  left: var(--icon-dist);
-  .p-outer.selected > & {
-    transform: translate($icon-size, -$icon-size);
-  }
-}
 
-/* Actual image */
+// Actual image
 div.img-outer {
   position: relative;
   box-sizing: border-box;
