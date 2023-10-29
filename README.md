@@ -65,6 +65,7 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 
 1. **🌟 Star this repository**: This is the easiest way to support Memories and costs nothing.
 1. **🪲 Report bugs**: Report any bugs you find on the issue tracker.
+1. **📖 Translate**: Help translate Memories into your language on [Transifex](https://www.transifex.com/nextcloud/nextcloud/memories/).
 1. **📝 Contribute**: Read and file or comment on an issue and ask for guidance.
 1. **🪙 Sponsorship**: You can support the project financially at [GitHub Sponsors](https://github.com/sponsors/pulsejet).
 
