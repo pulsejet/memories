@@ -9,8 +9,6 @@
     "module": "ES2020",
     "moduleResolution": "node",
     "sourceMap": true,
-    "allowSyntheticDefaultImports": true,
-    "useDefineForClassFields": true,
     "noImplicitThis": true,
     "noImplicitAny": true,
     "esModuleInterop": true,
@@ -19,6 +17,9 @@
     "incremental": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
+    "types": [
+      "node"
+    ],
     "paths": {
       "@services/*": [
         "./src/services/*"
