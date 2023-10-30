@@ -1,16 +1,16 @@
 <template>
   <div id="mobile-nav">
-    <router-link to="/" @click.native="linkClick" replace>
+    <router-link to="/" @click.native="linkClick" replace exact-path>
       <ImageMultipleIcon :size="22" />
       {{ t('memories', 'Photos') }}
     </router-link>
 
-    <router-link to="/explore" @click.native="linkClick" replace>
+    <router-link to="/explore" @click.native="linkClick" replace exact-path>
       <SearchIcon :size="22" />
       {{ t('memories', 'Explore') }}
     </router-link>
 
-    <router-link to="/albums" @click.native="linkClick" replace>
+    <router-link to="/albums" @click.native="linkClick" replace exact-path>
       <AlbumIcon :size="22" />
       {{ t('memories', 'Albums') }}
     </router-link>
