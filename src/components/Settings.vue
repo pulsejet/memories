@@ -44,6 +44,14 @@
         >
           {{ t('memories', 'Show past photos on top of timeline') }}
         </NcCheckboxRadioSwitch>
+
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.stack_raw_files"
+          @update:checked="updateStackRawFiles"
+          type="switch"
+        >
+          {{ t('memories', 'Stack RAW files with same name') }}
+        </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
       <NcAppSettingsSection id="viewer-settings" :title="t('memories', 'Photo Viewer')">
@@ -284,6 +292,10 @@ export default defineComponent({
 
     async updateEnableTopMemories() {
       await this.updateSetting('enable_top_memories', 'enableTopMemories');
+    },
+
+    async updateStackRawFiles() {
+      await this.updateSetting('stack_raw_files', 'stackRawFiles');
     },
 
     // Viewer settings

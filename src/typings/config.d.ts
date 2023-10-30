@@ -18,6 +18,7 @@ declare module '@typings' {
     // general settings
     timeline_path: string;
     enable_top_memories: boolean;
+    stack_raw_files: boolean;
 
     // viewer settings
     high_res_cond_default: 'always' | 'zoom' | 'never';

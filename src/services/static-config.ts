@@ -121,6 +121,7 @@ class StaticConfig {
       // general settings
       timeline_path: '_unknown_',
       enable_top_memories: true,
+      stack_raw_files: true,
 
       // viewer settings
       high_res_cond_default: 'zoom',

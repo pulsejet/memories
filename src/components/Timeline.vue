@@ -1044,7 +1044,7 @@ export default defineComponent({
         if (!basename) continue; // huh?
 
         // Skip for raw files
-        if (photo.mimetype === this.c.MIME_RAW) {
+        if (this.config.stack_raw_files && photo.mimetype === this.c.MIME_RAW) {
           need2 = true;
           continue;
         }
@@ -1065,7 +1065,7 @@ export default defineComponent({
       const res2: IPhoto[] = [];
       for (const photo of res1) {
         // Remove RAW files if they can be stacked
-        if (photo.mimetype === this.c.MIME_RAW) {
+        if (this.config.stack_raw_files && photo.mimetype === this.c.MIME_RAW) {
           // Get first matching non-raw file
           const basename = utils.removeExtension(photo.basename ?? String());
 
