@@ -165,15 +165,10 @@ export function getLivePhotoVideoUrl(p: IPhoto, transcode: boolean) {
  */
 export function setupLivePhotoHooks(video: HTMLVideoElement) {
   const div = video.closest('.memories-livephoto') as HTMLDivElement;
-  video.onplay = () => {
-    div.classList.add('playing');
-  };
-  video.oncanplay = () => {
-    div.classList.add('canplay');
-  };
-  video.onended = video.onpause = () => {
-    div.classList.remove('playing');
-  };
+  video.addEventListener('play', () => div.classList.add('playing'));
+  video.addEventListener('canplay', () => div.classList.add('canplay'));
+  video.addEventListener('ended', () => div.classList.remove('playing'));
+  video.addEventListener('pause', () => div.classList.remove('playing'));
 }
 
 /**

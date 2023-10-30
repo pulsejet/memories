@@ -24,7 +24,7 @@
           <VideoIcon :size="22" />
         </div>
         <div class="livephoto" v-if="data.liveid" @mouseenter.passive="playVideo" @mouseleave.passive="stopVideo">
-          <LivePhotoIcon :size="22" />
+          <LivePhotoIcon :size="22" :spin="liveWaiting" :playing="livePlaying" />
         </div>
         <RawIcon class="raw" v-if="isRaw" :size="28" />
       </div>
@@ -75,10 +75,10 @@ import { defineComponent, type PropType } from 'vue';
 
 import * as utils from '@services/utils';
 
+import LivePhotoIcon from '@components/icons/LivePhoto.vue';
 import CheckCircleIcon from 'vue-material-design-icons/CheckCircle.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import VideoIcon from 'vue-material-design-icons/PlayCircleOutline.vue';
-import LivePhotoIcon from 'vue-material-design-icons/MotionPlayOutline.vue';
 import LocalIcon from 'vue-material-design-icons/CloudOff.vue';
 import RawIcon from 'vue-material-design-icons/Raw.vue';
 
@@ -90,10 +90,10 @@ import errorsvg from '@assets/error.svg';
 export default defineComponent({
   name: 'Photo',
   components: {
+    LivePhotoIcon,
     CheckCircleIcon,
     VideoIcon,
     StarIcon,
-    LivePhotoIcon,
     LocalIcon,
     RawIcon,
   },
@@ -119,7 +119,9 @@ export default defineComponent({
 
   data: () => ({
     touchTimer: 0,
-    playLiveTimer: 0,
+    livePlayTimer: 0,
+    liveWaiting: false,
+    livePlaying: false,
     faceSrc: null as string | null,
   }),
 
@@ -139,13 +141,16 @@ export default defineComponent({
     const video = this.refs.video;
     if (video) {
       utils.setupLivePhotoHooks(video);
+      video.addEventListener('playing', () => (this.livePlaying = true));
+      video.addEventListener('pause', () => (this.livePlaying = false));
+      video.addEventListener('ended', () => (this.livePlaying = false));
     }
   },
 
   /** Clear timers */
   beforeDestroy() {
     clearTimeout(this.touchTimer);
-    clearTimeout(this.playLiveTimer);
+    clearTimeout(this.livePlayTimer);
 
     // Clean up blob url if face rect was created
     if (this.faceSrc) {
@@ -272,9 +277,11 @@ export default defineComponent({
 
     /** Start preview video */
     playVideo() {
+      this.liveWaiting = true;
+
       utils.setRenewingTimeout(
         this,
-        'playLiveTimer',
+        'livePlayTimer',
         async () => {
           const video = this.refs.video;
           if (!video || this.data.flag & this.c.FLAG_SELECTED) return;
@@ -284,6 +291,8 @@ export default defineComponent({
             await video.play();
           } catch (e) {
             // ignore, pause was probably called too soon
+          } finally {
+            this.liveWaiting = false;
           }
         },
         400,
@@ -292,8 +301,11 @@ export default defineComponent({
 
     /** Stop preview video */
     stopVideo() {
-      window.clearTimeout(this.playLiveTimer);
       this.refs.video?.pause();
+      window.clearTimeout(this.livePlayTimer);
+      this.livePlayTimer = 0;
+      this.liveWaiting = false;
+      this.livePlaying = false;
     },
   },
 });
