@@ -28,6 +28,7 @@ use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\Folder;
+use OCP\Lock\ILockingProvider;
 
 class ArchiveController extends GenericApiController
 {
@@ -152,19 +153,7 @@ class ArchiveController extends GenericApiController
             // Create folder tree
             $folder = $parent;
             foreach ($destinationFolders as $folderName) {
-                try {
-                    $existingFolder = $folder->get($folderName.'/');
-                    if (!$existingFolder instanceof Folder) {
-                        throw Exceptions::NotFound('Not a folder: '.$existingFolder->getPath());
-                    }
-                    $folder = $existingFolder;
-                } catch (\OCP\Files\NotFoundException $e) {
-                    try {
-                        $folder = $folder->newFolder($folderName);
-                    } catch (\OCP\Files\NotPermittedException $e) {
-                        throw Exceptions::ForbiddenFileUpdate($folder->getPath().' [create]');
-                    }
-                }
+                $folder = $this->getOrCreateFolder($folder, $folderName);
             }
 
             // Move file to archive folder
@@ -172,5 +161,66 @@ class ArchiveController extends GenericApiController
 
             return new JSONResponse([], Http::STATUS_OK);
         });
+    }
+
+    /**
+     * Get or create a folder in the given parent folder.
+     *
+     * @param Folder $parent Parent folder
+     * @param string $name   Folder name
+     * @param int    $tries  Number of tries to create the folder
+     *
+     * @throws \OCA\Memories\HttpResponseException
+     */
+    private function getOrCreateFolder(Folder $parent, string $name, int $tries = 3): Folder
+    {
+        // Path of the folder we want to create (for error messages)
+        $finalPath = $parent->getPath().'/'.$name;
+
+        // Attempt to create the folder
+        if (!$parent->nodeExists($name)) {
+            $lockingProvider = \OC::$server->get(ILockingProvider::class);
+            $lockKey = "memories/create/{$finalPath}";
+            $lockType = ILockingProvider::LOCK_EXCLUSIVE;
+            $locked = false;
+
+            try {
+                // Attempt to acquire exclusive lock
+                $lockingProvider->acquireLock($lockKey, $lockType);
+                $locked = true;
+            } catch (\OCP\Lock\LockedException) {
+                // Someone else is creating, wait and try to get the folder
+                usleep(1000000);
+            }
+
+            if ($locked) {
+                // Green light to create the folder
+                try {
+                    return $parent->newFolder($name);
+                } catch (\OCP\Files\NotPermittedException $e) {
+                    // Cannot create folder, throw error
+                    throw Exceptions::ForbiddenFileUpdate("{$finalPath} [create]");
+                } catch (\OCP\Lock\LockedException $e) {
+                    // This is the Files lock ... well
+                    throw Exceptions::ForbiddenFileUpdate("{$finalPath} [locked]");
+                } finally {
+                    // Release our lock
+                    $lockingProvider->releaseLock($lockKey, $lockType);
+                }
+            }
+        }
+
+        // Second check if the folder exists
+        if (!$parent->nodeExists($name)) {
+            throw Exceptions::NotFound("Folder not found: {$finalPath}");
+        }
+
+        // Attempt to get the folder that should already exist
+        $existing = $parent->get($name);
+        if (!$existing instanceof Folder) {
+            throw Exceptions::NotFound("Not a folder: {$existing->getPath()}");
+        }
+
+        return $existing;
     }
 }
