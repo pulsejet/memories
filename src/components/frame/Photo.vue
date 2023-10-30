@@ -119,6 +119,7 @@ export default defineComponent({
 
   data: () => ({
     touchTimer: 0,
+    playLiveTimer: 0,
     faceSrc: null as string | null,
   }),
 
@@ -144,6 +145,7 @@ export default defineComponent({
   /** Clear timers */
   beforeDestroy() {
     clearTimeout(this.touchTimer);
+    clearTimeout(this.playLiveTimer);
 
     // Clean up blob url if face rect was created
     if (this.faceSrc) {
@@ -269,20 +271,28 @@ export default defineComponent({
     },
 
     /** Start preview video */
-    async playVideo() {
-      const video = this.refs.video;
-      if (!video || this.data.flag & this.c.FLAG_SELECTED) return;
+    playVideo() {
+      utils.setRenewingTimeout(
+        this,
+        'playLiveTimer',
+        async () => {
+          const video = this.refs.video;
+          if (!video || this.data.flag & this.c.FLAG_SELECTED) return;
 
-      try {
-        video.currentTime = 0;
-        await video.play();
-      } catch (e) {
-        // ignore, pause was probably called too soon
-      }
+          try {
+            video.currentTime = 0;
+            await video.play();
+          } catch (e) {
+            // ignore, pause was probably called too soon
+          }
+        },
+        400,
+      );
     },
 
     /** Stop preview video */
     stopVideo() {
+      window.clearTimeout(this.playLiveTimer);
       this.refs.video?.pause();
     },
   },
