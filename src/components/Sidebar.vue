@@ -85,11 +85,7 @@ export default defineComponent({
     };
 
     // Register native tab after DOMContentLoaded
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', this.registerNative.bind(this)); // wait for it
-    } else {
-      this.registerNative(); // already fired
-    }
+    utils.onDOMLoaded(this.registerNative.bind(this));
   },
 
   beforeDestroy() {

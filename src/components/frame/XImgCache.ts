@@ -1,4 +1,5 @@
 import { API } from '@services/API';
+import { onDOMLoaded } from '@services/utils';
 import { workerImporter } from '../../worker';
 import type * as w from './XImgWorker';
 
@@ -24,8 +25,8 @@ function startWorker() {
   });
 }
 
-// Configure worker on startup
-document.addEventListener('DOMContentLoaded', () => {
+// Set up garbage collection after DOM is loaded
+onDOMLoaded(() => {
   if (_m.mode !== 'user') return;
 
   // Periodic blob cache cleaner

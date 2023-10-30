@@ -1,4 +1,5 @@
 import { bus } from './event-bus';
+import { onDOMLoaded } from './helpers';
 
 /** Mapping of route name to key type */
 enum FragmentType {
@@ -189,7 +190,7 @@ export const fragment = {
   },
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+onDOMLoaded(() => {
   // Skip unless in user mode
   if (_m.mode !== 'user') return;
 

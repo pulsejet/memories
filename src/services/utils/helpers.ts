@@ -194,3 +194,15 @@ export function removeExtension(filename: string) {
 export function isNetworkError(error: any) {
   return error?.code === 'ERR_NETWORK';
 }
+
+/**
+ * Add event listener to DOMContentLoaded and fire
+ * callback immediately if the event has already fired.
+ */
+export function onDOMLoaded(callback: () => void) {
+  if (document.readyState !== 'complete') {
+    document.addEventListener('DOMContentLoaded', callback);
+  } else {
+    callback();
+  }
+}
