@@ -162,12 +162,17 @@ export async function* runInParallel<T>(promises: (() => Promise<T>)[], n: numbe
 }
 
 /**
- * Extend given list of Ids with extra files for Live Photos.
+ * Extend given list of Ids with extra files for
  *
- * @param photos list of photos to search for Live Photos
- * @returns list of file ids that contains extra file Ids for Live Photos if any
+ * 1. Live Photos.
+ * 2. Stacked RAW files.
+ *
+ * @param photos list of photos to search for
+ *
+ * @returns list of file ids that contains extra file Ids
  */
-async function extendWithLivePhotos(photos: IPhoto[]) {
+async function extendWithStack(photos: IPhoto[]) {
+  // Add Live Photos files
   const livePhotos = (
     await Promise.all(
       photos
@@ -184,7 +189,11 @@ async function extendWithLivePhotos(photos: IPhoto[]) {
     )
   ).filter((p) => p !== null) as IPhoto[];
 
-  return photos.concat(livePhotos);
+  // Add stacked RAW files
+  const stackRaw = photos.map((p) => p.stackraw ?? []).flat();
+
+  // Combine and return
+  return photos.concat(livePhotos, stackRaw);
 }
 
 /**
@@ -200,7 +209,7 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
   // Extend with Live Photos unless this is an album
   const routeIsAlbums = _m.route.name === _m.routes.Albums.name;
   if (!routeIsAlbums) {
-    photos = await extendWithLivePhotos(photos);
+    photos = await extendWithStack(photos);
   }
 
   // Get set of unique file ids
@@ -288,7 +297,7 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
   }
 
   // Also move the Live Photo videos
-  photos = await extendWithLivePhotos(photos);
+  photos = await extendWithStack(photos);
   const fileIdsSet = new Set(photos.map((p) => p.fileid));
 
   // Get files data
