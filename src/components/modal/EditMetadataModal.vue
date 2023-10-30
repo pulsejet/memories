@@ -50,6 +50,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import { showWarning } from '@nextcloud/dialogs';
+
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
@@ -149,6 +151,11 @@ export default defineComponent({
       if (valid.length === 0) {
         this.close();
         return;
+      }
+
+      // Warn user if any raw stacks are present
+      if (valid.some((p) => p.stackraw?.length)) {
+        showWarning(this.t('memories', 'Some selected items have stacked RAW files.\nRAW files will not be edited.'));
       }
 
       this.photos = valid;
