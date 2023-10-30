@@ -345,20 +345,20 @@ export default defineComponent({
       // ctrl + S = save
       if (event.ctrlKey && event.key === 's') {
         event.preventDefault();
-        (document.querySelector('.FIE_topbar-save-button') as HTMLElement).click();
+        (document.querySelector('.FIE_topbar-save-button') as HTMLElement)?.click();
       }
 
       // ctrl + Z = undo
       if (event.ctrlKey && event.key === 'z') {
         event.preventDefault();
-        (document.querySelector('.FIE_topbar-undo-button') as HTMLElement).click();
+        (document.querySelector('.FIE_topbar-undo-button') as HTMLElement)?.click();
       }
     },
 
     close() {
       // Since we cannot call the closeMethod and know if there
       // are unsaved changes, let's fake a close button trigger.
-      (document.querySelector('.FIE_topbar-close-button') as HTMLElement).click();
+      (document.querySelector('.FIE_topbar-close-button') as HTMLElement)?.click();
     },
   },
 });
