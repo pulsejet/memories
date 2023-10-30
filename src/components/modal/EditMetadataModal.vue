@@ -124,6 +124,18 @@ export default defineComponent({
       let done = 0;
       this.progress = 0;
 
+      // Filter out forbidden MIME types
+      photos = photos.filter((p) => {
+        if (this.c.FORBIDDEN_EDIT_MIMES.includes(p.mimetype ?? String())) {
+          showWarning(
+            this.t('memories', 'Cannot edit {name} of type {type}', { name: p.basename!, type: p.mimetype! }),
+          );
+          return false;
+        }
+
+        return true;
+      });
+
       // Load metadata for all photos
       const calls = photos.map((p) => async () => {
         try {

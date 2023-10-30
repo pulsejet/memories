@@ -3,7 +3,6 @@ import type { IPhoto } from '@typings';
 
 /** Global constants */
 export const constants = Object.freeze({
-  // Flags for photos
   FLAG_PLACEHOLDER: 1 << 0,
   FLAG_LOAD_FAIL: 1 << 1,
   FLAG_IS_VIDEO: 1 << 2,
@@ -12,9 +11,10 @@ export const constants = Object.freeze({
   FLAG_LEAVING: 1 << 5,
   FLAG_IS_LOCAL: 1 << 6,
 
-  // Special strings
   FACE_NULL: 'NULL',
+
   MIME_RAW: 'image/x-dcraw',
+  FORBIDDEN_EDIT_MIMES: ['image/bmp', 'image/x-dcraw', 'video/MP2T'], // Exif.php
 });
 
 /**
