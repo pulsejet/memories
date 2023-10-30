@@ -15,6 +15,7 @@
     "noImplicitAny": true,
     "esModuleInterop": true,
     "strictNullChecks": true,
+    "alwaysStrict": true,
     "incremental": true,
     "paths": {
       "@services/*": [
