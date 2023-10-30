@@ -1,5 +1,5 @@
 import { CacheExpiration } from 'workbox-expiration';
-import { workerExport } from '../../worker';
+import { workerExport } from '@services/worker';
 
 declare var self: ServiceWorkerGlobalScope;
 

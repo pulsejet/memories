@@ -1,6 +1,6 @@
 import { API } from '@services/API';
 import { onDOMLoaded } from '@services/utils';
-import { workerImporter } from '../../worker';
+import { workerImporter } from '@services/worker';
 import type * as w from './XImgWorker';
 
 // Global web worker to fetch images
