@@ -27,11 +27,15 @@ class LivePhotoContentSetup {
     lightbox.on('contentDestroy', this.onContentDestroy.bind(this));
   }
 
-  play(content: PsContent) {
+  async play(content: PsContent) {
     const video = content.element?.querySelector('video');
-    if (video) {
+    if (!video) return;
+
+    try {
       video.currentTime = 0;
-      video.play();
+      await video.play();
+    } catch (e) {
+      // ignore, pause was probably called too soon
     }
   }
 

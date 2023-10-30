@@ -222,7 +222,7 @@ class VideoContentSetup {
     });
 
     // Play the video (hopefully)
-    const playWithDelay = () => setTimeout(() => content.videojs?.play(), 100);
+    const playWithDelay = () => setTimeout(() => this.playNoThrow(content.videojs), 100);
     playWithDelay();
 
     content.videojs.on('canplay', () => {
@@ -469,7 +469,15 @@ class VideoContentSetup {
     const time = vidjs.currentTime();
     vidjs.src(src);
     vidjs.currentTime(time);
-    vidjs.play();
+    this.playNoThrow(vidjs);
+  }
+
+  async playNoThrow(vidjs: Player | null) {
+    try {
+      await vidjs?.play();
+    } catch (e) {
+      // Ignore - video destroyed?
+    }
   }
 
   onContentDestroy({ content }: PsVideoEvent) {

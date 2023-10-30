@@ -269,11 +269,15 @@ export default defineComponent({
     },
 
     /** Start preview video */
-    playVideo() {
+    async playVideo() {
       const video = this.refs.video;
-      if (video && !(this.data.flag & this.c.FLAG_SELECTED)) {
+      if (!video || this.data.flag & this.c.FLAG_SELECTED) return;
+
+      try {
         video.currentTime = 0;
-        video.play();
+        await video.play();
+      } catch (e) {
+        // ignore, pause was probably called too soon
       }
     },
 
