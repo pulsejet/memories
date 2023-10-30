@@ -123,6 +123,7 @@ export default defineComponent({
       playTimer: 0,
       playing: false,
       waiting: false,
+      requested: false,
     },
     faceSrc: null as string | null,
   }),
@@ -278,6 +279,8 @@ export default defineComponent({
     playVideo() {
       this.liveState.waiting = true;
 
+      // Quickly moving over the icon causes unnecessary
+      // transcoding requests which are expensive
       utils.setRenewingTimeout(
         this.liveState,
         'playTimer',
@@ -286,6 +289,7 @@ export default defineComponent({
           if (!video || this.data.flag & this.c.FLAG_SELECTED) return;
 
           try {
+            this.liveState.requested = true;
             video.currentTime = 0;
             await video.play();
           } catch (e) {
@@ -294,7 +298,7 @@ export default defineComponent({
             this.liveState.waiting = false;
           }
         },
-        400,
+        this.liveState.requested ? 0 : 300, // delay only the first play
       );
     },
 
