@@ -1,4 +1,6 @@
 declare module '@typings' {
+  type HighResCond = 'always' | 'zoom' | 'never';
+
   export type IConfig = {
     // general stuff
     version: string;
@@ -21,7 +23,7 @@ declare module '@typings' {
     stack_raw_files: boolean;
 
     // viewer settings
-    high_res_cond_default: 'always' | 'zoom' | 'never';
+    high_res_cond_default: HighResCond;
     livephoto_autoplay: boolean;
     sidebar_filepath: boolean;
 
@@ -35,7 +37,7 @@ declare module '@typings' {
 
     // local settings
     square_thumbs: boolean;
-    high_res_cond: IConfig['high_res_cond_default'] | null;
+    high_res_cond: HighResCond | null;
     show_face_rect: boolean;
     album_list_sort: 1 | 2;
   };
