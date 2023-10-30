@@ -20,6 +20,7 @@ class LivePhotoContentSetup {
   constructor(
     lightbox: PhotoSwipe,
     private psImage: PsImage,
+    private liveState: { playing: boolean; waiting: boolean },
   ) {
     lightbox.on('contentLoad', this.onContentLoad.bind(this));
     lightbox.on('contentActivate', this.onContentActivate.bind(this));
@@ -32,10 +33,13 @@ class LivePhotoContentSetup {
     if (!video) return;
 
     try {
+      this.liveState.waiting = true;
       video.currentTime = 0;
       await video.play();
     } catch (e) {
       // ignore, pause was probably called too soon
+    } finally {
+      this.liveState.waiting = false;
     }
   }
 
@@ -60,7 +64,7 @@ class LivePhotoContentSetup {
     div.appendChild(video);
     content.element = div;
 
-    utils.setupLivePhotoHooks(video);
+    utils.setupLivePhotoHooks(video, this.liveState);
 
     const img = this.psImage.getXImgElem(content, () => content.onLoaded());
     div.appendChild(img);

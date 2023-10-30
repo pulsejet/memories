@@ -162,13 +162,23 @@ export function getLivePhotoVideoUrl(p: IPhoto, transcode: boolean) {
 /**
  * Set up hooks to set classes on parent element for Live Photo
  * @param video Video element
+ * @param parent State object to update (reactivity)
  */
-export function setupLivePhotoHooks(video: HTMLVideoElement) {
+export function setupLivePhotoHooks(video: HTMLVideoElement, state: { playing: boolean }) {
   const div = video.closest('.memories-livephoto') as HTMLDivElement;
+
+  // Playing state
+  video.addEventListener('playing', () => (state.playing = true));
   video.addEventListener('play', () => div.classList.add('playing'));
   video.addEventListener('canplay', () => div.classList.add('canplay'));
-  video.addEventListener('ended', () => div.classList.remove('playing'));
-  video.addEventListener('pause', () => div.classList.remove('playing'));
+
+  // Ended or pausing state
+  const ended = () => {
+    state.playing = false;
+    div.classList.remove('playing');
+  };
+  video.addEventListener('ended', ended);
+  video.addEventListener('pause', ended);
 }
 
 /**

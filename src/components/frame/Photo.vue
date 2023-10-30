@@ -24,7 +24,7 @@
           <VideoIcon :size="22" />
         </div>
         <div class="livephoto" v-if="data.liveid" @mouseenter.passive="playVideo" @mouseleave.passive="stopVideo">
-          <LivePhotoIcon :size="22" :spin="liveWaiting" :playing="livePlaying" />
+          <LivePhotoIcon :size="22" :spin="liveState.waiting" :playing="liveState.playing" />
         </div>
         <RawIcon class="raw" v-if="isRaw" :size="28" />
       </div>
@@ -119,9 +119,11 @@ export default defineComponent({
 
   data: () => ({
     touchTimer: 0,
-    livePlayTimer: 0,
-    liveWaiting: false,
-    livePlaying: false,
+    liveState: {
+      playTimer: 0,
+      playing: false,
+      waiting: false,
+    },
     faceSrc: null as string | null,
   }),
 
@@ -140,17 +142,14 @@ export default defineComponent({
     // Setup video hooks
     const video = this.refs.video;
     if (video) {
-      utils.setupLivePhotoHooks(video);
-      video.addEventListener('playing', () => (this.livePlaying = true));
-      video.addEventListener('pause', () => (this.livePlaying = false));
-      video.addEventListener('ended', () => (this.livePlaying = false));
+      utils.setupLivePhotoHooks(video, this.liveState);
     }
   },
 
   /** Clear timers */
   beforeDestroy() {
     clearTimeout(this.touchTimer);
-    clearTimeout(this.livePlayTimer);
+    clearTimeout(this.liveState.playTimer);
 
     // Clean up blob url if face rect was created
     if (this.faceSrc) {
@@ -277,11 +276,11 @@ export default defineComponent({
 
     /** Start preview video */
     playVideo() {
-      this.liveWaiting = true;
+      this.liveState.waiting = true;
 
       utils.setRenewingTimeout(
-        this,
-        'livePlayTimer',
+        this.liveState,
+        'playTimer',
         async () => {
           const video = this.refs.video;
           if (!video || this.data.flag & this.c.FLAG_SELECTED) return;
@@ -292,7 +291,7 @@ export default defineComponent({
           } catch (e) {
             // ignore, pause was probably called too soon
           } finally {
-            this.liveWaiting = false;
+            this.liveState.waiting = false;
           }
         },
         400,
@@ -302,10 +301,9 @@ export default defineComponent({
     /** Stop preview video */
     stopVideo() {
       this.refs.video?.pause();
-      window.clearTimeout(this.livePlayTimer);
-      this.livePlayTimer = 0;
-      this.liveWaiting = false;
-      this.livePlaying = false;
+      window.clearTimeout(this.liveState.playTimer);
+      this.liveState.playTimer = 0;
+      this.liveState.waiting = false;
     },
   },
 });

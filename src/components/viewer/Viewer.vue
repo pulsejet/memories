@@ -55,7 +55,9 @@
             :close-after-click="true"
           >
             {{ t('memories', 'Play Live Photo') }}
-            <template #icon> <LivePhotoIcon :size="24" /> </template>
+            <template #icon>
+              <LivePhotoIcon :size="24" :playing="liveState.playing" :spin="liveState.waiting" />
+            </template>
           </NcActionButton>
           <NcActionButton
             v-if="!routeIsPublic && !isLocal"
@@ -194,6 +196,7 @@ import PsLivePhoto from './PsLivePhoto';
 import type { IImageInfo, IPhoto, TimelineState } from '@typings';
 import type { PsContent } from './types';
 
+import LivePhotoIcon from '@components/icons/LivePhoto.vue';
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import DeleteIcon from 'vue-material-design-icons/TrashCanOutline.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
@@ -205,7 +208,6 @@ import TuneIcon from 'vue-material-design-icons/Tune.vue';
 import SlideshowIcon from 'vue-material-design-icons/PlayBox.vue';
 import EditFileIcon from 'vue-material-design-icons/FileEdit.vue';
 import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
-import LivePhotoIcon from 'vue-material-design-icons/MotionPlayOutline.vue';
 import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
 
 const SLIDESHOW_MS = 5000;
@@ -220,6 +222,7 @@ export default defineComponent({
     NcActions,
     NcActionButton,
     ImageEditor,
+    LivePhotoIcon,
     ShareIcon,
     DeleteIcon,
     StarIcon,
@@ -231,7 +234,6 @@ export default defineComponent({
     SlideshowIcon,
     EditFileIcon,
     AlbumRemoveIcon,
-    LivePhotoIcon,
     AlbumIcon,
   },
 
@@ -260,6 +262,13 @@ export default defineComponent({
     psImage: null as PsImage | null,
     psLivePhoto: null as PsLivePhoto | null,
 
+    /** Live photo state */
+    liveState: {
+      playing: false,
+      waiting: false,
+    },
+
+    /** List globals */
     list: [] as IPhoto[],
     globalCount: 0,
     globalAnchor: -1,
@@ -590,15 +599,15 @@ export default defineComponent({
       });
 
       // Video support
-      this.psVideo = new PsVideo(<PhotoSwipe>this.photoswipe, {
+      this.psVideo = new PsVideo(<any>this.photoswipe, {
         preventDragOffset: 40,
       });
 
       // Image support
-      this.psImage = new PsImage(<PhotoSwipe>this.photoswipe);
+      this.psImage = new PsImage(<any>this.photoswipe);
 
       // Live Photo support
-      this.psLivePhoto = new PsLivePhoto(<PhotoSwipe>this.photoswipe, <PsImage>this.psImage);
+      this.psLivePhoto = new PsLivePhoto(<any>this.photoswipe, <any>this.psImage, this.liveState);
 
       // Patch the close button to stop the slideshow
       const _close = this.photoswipe.close.bind(this.photoswipe);
