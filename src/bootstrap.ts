@@ -1,5 +1,3 @@
-// Library imports
-import 'reflect-metadata';
 import Vue from 'vue';
 
 import { generateFilePath } from '@nextcloud/router';
