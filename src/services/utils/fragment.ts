@@ -190,6 +190,9 @@ export const fragment = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Skip unless in user mode
+  if (_m.mode !== 'user') return;
+
   // Only contextual fragments should be present on page load
   if (fragment.list.length) {
     const contextual = fragment.list.filter((frag) => frag.type === FragmentType.viewer);

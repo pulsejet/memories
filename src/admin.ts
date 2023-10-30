@@ -3,7 +3,9 @@ import './bootstrap';
 import Vue from 'vue';
 import App from '@components/admin/AdminMain.vue';
 
-_m.mode = 'admin';
+globalThis._m = {
+  mode: 'admin',
+} as any;
 
 export default new Vue({
   el: '#vue-content',

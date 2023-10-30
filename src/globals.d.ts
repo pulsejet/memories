@@ -27,7 +27,10 @@ declare global {
     };
   };
 
-  /** Global Memories object. Initialized in src/bootstrap.ts  */
+  /**
+   * Global Memories object. Initialized in main.ts
+   * Most of this is not available for admin.ts.
+   */
   var _m: {
     mode: 'admin' | 'user';
     route: Route;

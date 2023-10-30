@@ -78,7 +78,6 @@ export default defineComponent({
 
   methods: {
     async refreshSystemConfig() {
-      console.log(this.components);
       try {
         this.loading++;
         const res = await axios.get<ISystemConfig>(API.SYSTEM_CONFIG(null));
