@@ -18,6 +18,7 @@
     "alwaysStrict": true,
     "incremental": true,
     "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
     "paths": {
       "@services/*": [
         "./src/services/*"
