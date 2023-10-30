@@ -89,7 +89,7 @@ export default defineComponent({
       open: this.open.bind(this),
       close: this.close.bind(this),
       setTab: this.setTab.bind(this),
-      invalidate: this.invalidate.bind(this),
+      invalidateUnless: this.invalidateUnless.bind(this),
       getWidth: this.getWidth.bind(this),
     };
 
@@ -142,9 +142,9 @@ export default defineComponent({
       this.native?.setActiveTab(tab);
     },
 
-    invalidate() {
-      this.refs.metadata?.invalidate();
-      this.nativeMetadata?.invalidate();
+    invalidateUnless(fileid: number) {
+      this.refs.metadata?.invalidateUnless(fileid);
+      this.nativeMetadata?.invalidateUnless(fileid);
     },
 
     getWidth() {

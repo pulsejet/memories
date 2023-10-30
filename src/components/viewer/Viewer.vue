@@ -1065,7 +1065,7 @@ export default defineComponent({
       const abort = () => !this.isOpen || photo !== this.currentPhoto;
 
       // Invalidate currently open metadata
-      _m.sidebar.invalidate();
+      _m.sidebar.invalidateUnless(photo.fileid);
 
       // Update the sidebar, first call immediate
       utils.setRenewingTimeout(

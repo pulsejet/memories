@@ -385,7 +385,7 @@ export default defineComponent({
 
   methods: {
     async update(photo: number | IPhoto): Promise<IImageInfo | null> {
-      this.invalidate();
+      this.invalidateUnless(0);
 
       // which clusters to get
       const clusters = this.routeIsPublic
@@ -419,7 +419,12 @@ export default defineComponent({
       if (this.fileid) await this.update(this.fileid);
     },
 
-    invalidate() {
+    /**
+     * Invalidate metadata for a future change
+     * @param fileid Invalidate metadata unless this is the current fileid
+     */
+    invalidateUnless(fileid: number) {
+      if (this.fileid === fileid) return;
       this.state = Math.random();
       this.loading = 0;
       this.error = false;
