@@ -688,6 +688,7 @@ export default defineComponent({
 
       // Lazy-generate item data. This is called for each item in the list
       photoswipe.addFilter('itemData', (itemData, index) => {
+        if (!this.list) return {};
         const { dayIds } = globals;
 
         // Once every cycle, refresh the globals
