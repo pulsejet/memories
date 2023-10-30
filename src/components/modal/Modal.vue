@@ -83,7 +83,13 @@ export default defineComponent({
 
   methods: {
     close() {
-      (<any>this.$refs.modal).close();
+      const modal: any = this.$refs.modal;
+      if (modal?.close) {
+        modal.close();
+      } else {
+        // Premature calls, before the modal is mounted
+        this.cleanup();
+      }
     },
 
     cleanup() {
