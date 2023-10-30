@@ -9,6 +9,8 @@ let importer: ReturnType<typeof workerImporter>;
 
 // Memcache for blob URLs
 const BLOB_CACHE = new Map<string, object>() as Map<string, [number, string]>;
+const BLOB_CACHE_GC = 10000;
+const BLOB_CACHE_LIFETIME = 30000;
 const BLOB_STICKY = new Map<string, number>();
 
 // Start and configure the worker
@@ -34,17 +36,17 @@ onDOMLoaded(() => {
     for (const [src, cache] of BLOB_CACHE.entries()) {
       // Skip if sticky
       if (BLOB_STICKY.has(cache[1])) {
-        cache[0] = 30; // reset timer
+        cache[0] = BLOB_CACHE_LIFETIME; // reset timer
         continue;
       }
 
       // Decrement timer and revoke if expired
-      if ((cache[0] -= 3) <= 0) {
+      if ((cache[0] -= BLOB_CACHE_GC) <= 0) {
         URL.revokeObjectURL(cache[1]);
         BLOB_CACHE.delete(src);
       }
     }
-  }, 3000);
+  }, BLOB_CACHE_GC);
 });
 
 /** Change stickiness for a BLOB url */
@@ -76,6 +78,6 @@ export async function fetchImage(url: string) {
   }
 
   // Create new memecache entry
-  BLOB_CACHE.set(url, [30, blobUrl]); // 30s expiration
+  BLOB_CACHE.set(url, [BLOB_CACHE_LIFETIME, blobUrl]); // 30s expiration
   return blobUrl;
 }
