@@ -3,7 +3,6 @@ const path = require('path');
 
 const WorkboxPlugin = require('workbox-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
-const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
 
 const appName = process.env.npm_package_name!;
@@ -102,12 +101,6 @@ module.exports = {
 
   plugins: [
     new VueLoaderPlugin(),
-
-    // Make sure we auto-inject node polyfills on demand
-    // https://webpack.js.org/blog/2020-10-10-webpack-5-release/#automatic-nodejs-polyfills-removed
-    new NodePolyfillPlugin({
-      includeAliases: ['stream', 'process'], // webdav
-    }),
 
     // Bundle service worker
     new WorkboxPlugin.InjectManifest({

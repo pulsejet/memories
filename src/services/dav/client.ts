@@ -20,26 +20,27 @@
  *
  */
 
-import * as webdav from 'webdav';
-import axios from '@nextcloud/axios';
-import parseUrl from 'url-parse';
+import { createClient } from 'webdav';
+import { getRequestToken, onRequestTokenUpdate } from '@nextcloud/auth';
 import { generateRemoteUrl } from '@nextcloud/router';
-
-// Monkey business
-import * as rq from 'webdav/dist/node/request';
-const prepareRequestOptionsOld = rq.prepareRequestOptions.bind(rq);
-(<any>rq).prepareRequestOptions = (requestOptions: any, context: any, userOptions: any) => {
-  requestOptions.method = userOptions.method || requestOptions.method;
-  return prepareRequestOptionsOld(requestOptions, context, userOptions);
-};
-
-// force our axios
-const patcher = webdav.getPatcher();
-patcher.patch('request', axios);
 
 // init webdav client on default dav endpoint
 const remote = generateRemoteUrl('dav');
-const client = webdav.createClient(remote);
+const client = createClient(remote);
 
-export const remotePath = parseUrl(remote).pathname;
+// set CSRF token header
+function setToken(token: string | null) {
+  client.setHeaders({
+    requesttoken: token ?? String(),
+  });
+}
+
+// refresh headers when request token changes
+setToken(getRequestToken());
+onRequestTokenUpdate((t) => setToken(t));
+
+// Filenames start with this path
+export const remotePath = new URL(remote).pathname;
+
+// Get the current client
 export default client;

@@ -50,7 +50,7 @@ export async function createTag(tag: ITag): Promise<ITag> {
       data: postData,
     });
 
-    const contentLocation = headers['content-location'];
+    const contentLocation = headers.get('content-location');
     if (contentLocation) {
       return {
         ...tag,

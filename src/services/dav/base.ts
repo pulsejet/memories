@@ -2,7 +2,7 @@ import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
 import { getAlbumFileInfos } from './albums';
-import client from './client';
+import client, { remotePath } from './client';
 
 import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
@@ -10,6 +10,7 @@ import * as utils from '@services/utils';
 import * as nativex from '@native';
 
 import type { IFileInfo, IPhoto } from '@typings';
+import type { ResponseDataDetailed, SearchResult } from 'webdav';
 
 const GET_FILE_CHUNK_SIZE = 50;
 
@@ -92,23 +93,27 @@ async function getFilesInternal2(fileIds: number[]): Promise<IFileInfo[]> {
     .map((fileId) => `<d:eq><d:prop><oc:fileid/></d:prop><d:literal>${fileId}</d:literal></d:eq>`)
     .join('');
 
-  const options = {
-    method: 'SEARCH',
-    headers: { 'content-Type': 'text/xml' },
-    data: `<?xml version="1.0" encoding="UTF-8"?><d:searchrequest xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns" xmlns:ns="https://github.com/icewind1991/SearchDAV/ns" xmlns:ocs="http://open-collaboration-services.org/ns"><d:basicsearch><d:select><d:prop><oc:fileid /></d:prop></d:select><d:from><d:scope><d:href>${prefixPath}</d:href><d:depth>0</d:depth></d:scope></d:from><d:where><d:or>${filter}</d:or></d:where></d:basicsearch></d:searchrequest>`,
-    deep: true,
-    details: true,
-  };
+  // Make Search request
+  const xml = `<?xml version="1.0" encoding="UTF-8"?><d:searchrequest xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns" xmlns:ns="https://github.com/icewind1991/SearchDAV/ns" xmlns:ocs="http://open-collaboration-services.org/ns"><d:basicsearch><d:select><d:prop><oc:fileid /></d:prop></d:select><d:from><d:scope><d:href>${prefixPath}</d:href><d:depth>0</d:depth></d:scope></d:from><d:where><d:or>${filter}</d:or></d:where></d:basicsearch></d:searchrequest>`;
+  const response = (await client.search('', { data: xml, details: true })) as ResponseDataDetailed<SearchResult>;
 
-  const response: any = await client.getDirectoryContents('', options);
+  return response.data.results
+    .filter((file) => file.props?.fileid)
+    .map((file) => {
+      // remote remotePath from start
+      if (file.filename.startsWith(remotePath)) {
+        file.filename = file.filename.substring(remotePath.length);
+      }
 
-  return response.data.map((data: any) => ({
-    id: data.props.fileid,
-    fileid: data.props.fileid,
-    basename: data.basename,
-    originalFilename: data.filename,
-    filename: data.filename.replace(prefixPath, ''),
-  }));
+      // create IFileInfo
+      return {
+        id: file.props!.fileid as number,
+        fileid: file.props!.fileid as number,
+        basename: file.basename,
+        originalFilename: file.filename,
+        filename: file.filename.replace(prefixPath, ''),
+      };
+    });
 }
 
 /**
