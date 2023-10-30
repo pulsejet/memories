@@ -171,7 +171,7 @@ export async function* runInParallel<T>(promises: (() => Promise<T>)[], n: numbe
  *
  * @returns list of file ids that contains extra file Ids
  */
-async function extendWithStack(photos: IPhoto[]) {
+export async function extendWithStack(photos: IPhoto[]) {
   // Add Live Photos files
   const livePhotos = (
     await Promise.all(
@@ -206,7 +206,7 @@ async function extendWithStack(photos: IPhoto[]) {
 export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
   if (photos.length === 0) return;
 
-  // Extend with Live Photos unless this is an album
+  // Extend with stack unless this is an album
   const routeIsAlbums = _m.route.name === _m.routes.Albums.name;
   if (!routeIsAlbums) {
     photos = await extendWithStack(photos);
@@ -296,7 +296,7 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
     targetPath += '/';
   }
 
-  // Also move the Live Photo videos
+  // Also move the stack files
   photos = await extendWithStack(photos);
   const fileIdsSet = new Set(photos.map((p) => p.fileid));
 

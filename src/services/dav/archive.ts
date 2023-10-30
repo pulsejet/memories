@@ -28,6 +28,9 @@ async function archiveFile(fileid: number, archive: boolean) {
 export async function* archiveFilesByIds(photos: IPhoto[], archive: boolean) {
   if (!photos.length) return;
 
+  // Add stack files
+  photos = await base.extendWithStack(photos);
+
   // Archive each file
   const calls = photos.map((photo) => async () => {
     try {
