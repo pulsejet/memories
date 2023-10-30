@@ -29,15 +29,18 @@ const remote = generateRemoteUrl('dav');
 const client = createClient(remote);
 
 // set CSRF token header
-function setToken(token: string | null) {
+function setHeaders(token: string | null) {
   client.setHeaders({
+    // Add this so the server knows it is an request from the browser
+    'X-Requested-With': 'XMLHttpRequest',
+    // Inject user auth
     requesttoken: token ?? String(),
   });
 }
 
 // refresh headers when request token changes
-setToken(getRequestToken());
-onRequestTokenUpdate((t) => setToken(t));
+setHeaders(getRequestToken());
+onRequestTokenUpdate((t) => setHeaders(t));
 
 // Filenames start with this path
 export const remotePath = new URL(remote).pathname;
