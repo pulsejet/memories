@@ -38,7 +38,7 @@ const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
 
 import * as utils from '@services/utils';
 
-import type { IAlbum, IPhoto } from '@types';
+import type { IAlbum, IPhoto } from '@typings';
 
 import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
 

@@ -3,7 +3,7 @@ import { generateUrl } from '@nextcloud/router';
 
 import { API } from '@services/API';
 
-import { IPhoto } from '@types';
+import type { IPhoto } from '@typings';
 
 /**
  * Open the files app with the given photo

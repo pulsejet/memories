@@ -38,7 +38,7 @@ import ClusterGrid from '@components/ClusterGrid.vue';
 
 import * as dav from '@services/dav';
 
-import type { ICluster, IFace } from '@types';
+import type { ICluster, IFace } from '@typings';
 
 import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';
 

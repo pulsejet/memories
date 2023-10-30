@@ -6,7 +6,7 @@ import client from './client';
 import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
 
-import { ICluster } from '@types';
+import type { ICluster } from '@typings';
 
 export interface ITag {
   id: number;

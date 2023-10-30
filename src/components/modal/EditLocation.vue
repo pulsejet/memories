@@ -73,7 +73,7 @@ import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
 
-import { IPhoto } from '@types';
+import type { IPhoto } from '@typings';
 
 import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';
 import CloseIcon from 'vue-material-design-icons/Close.vue';

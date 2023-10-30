@@ -38,7 +38,7 @@ import client from '@services/dav/client';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 
-import { IFileInfo, IFace } from '@types';
+import type { IFileInfo, IFace } from '@typings';
 
 export default defineComponent({
   name: 'FaceMergeModal',

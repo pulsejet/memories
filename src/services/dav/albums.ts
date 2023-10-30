@@ -9,7 +9,7 @@ import { API } from '@services/API';
 import client from '@services/dav/client';
 import * as utils from '@services/utils';
 
-import { IAlbum, IFileInfo, IPhoto } from '@types';
+import type { IAlbum, IFileInfo, IPhoto } from '@typings';
 
 /**
  * Get DAV path for album

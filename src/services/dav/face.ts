@@ -9,7 +9,7 @@ import { translate as t } from '@services/l10n';
 import { constants as c } from '@services/utils';
 import { API } from '@services/API';
 
-import { IFace, IPhoto } from '@types';
+import type { IFace, IPhoto } from '@typings';
 
 /**
  * Get list of faces

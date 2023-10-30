@@ -27,7 +27,7 @@ import AlbumPicker from './AlbumPicker.vue';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 
-import { IAlbum, IPhoto } from '@types';
+import type { IAlbum, IPhoto } from '@typings';
 
 export default defineComponent({
   name: 'AddToAlbumModal',

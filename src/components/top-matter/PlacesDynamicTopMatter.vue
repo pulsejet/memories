@@ -14,7 +14,7 @@ import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 
 import { API } from '@services/API';
 
-import type { ICluster } from '@types';
+import type { ICluster } from '@typings';
 
 export default defineComponent({
   name: 'PlacesDynamicTopMatter',

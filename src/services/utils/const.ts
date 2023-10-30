@@ -1,5 +1,5 @@
 import { loadState } from '@nextcloud/initial-state';
-import type { IPhoto } from '@types';
+import type { IPhoto } from '@typings';
 
 /** Global constants */
 export const constants = Object.freeze({

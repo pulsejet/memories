@@ -30,7 +30,7 @@ import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 
-import type { ICluster } from '@types';
+import type { ICluster } from '@typings';
 
 export default defineComponent({
   name: 'ClusterView',

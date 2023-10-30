@@ -71,7 +71,7 @@ import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 import { API } from '@services/API';
 
-import { IExif, IImageInfo, IPhoto } from '@types';
+import type { IExif, IImageInfo, IPhoto } from '@typings';
 
 export default defineComponent({
   components: {

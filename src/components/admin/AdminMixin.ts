@@ -7,7 +7,7 @@ const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 
 import type { ISystemStatus, ISystemConfig, IBinaryStatus } from './AdminTypes';
-import type { IConfig } from '@types';
+import type { IConfig } from '@typings';
 
 export default defineComponent({
   name: 'AdminMixin',

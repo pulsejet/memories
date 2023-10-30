@@ -63,7 +63,7 @@ import AlbumsIcon from 'vue-material-design-icons/ImageAlbum.vue';
 import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
 import FolderMoveIcon from 'vue-material-design-icons/FolderMove.vue';
 
-import { IDay, IHeadRow, IPhoto, IRow, IRowType } from '@types';
+import type { IDay, IHeadRow, IPhoto, IRow } from '@typings';
 
 /**
  * The distance for which the touch selection is clamped.
@@ -630,7 +630,7 @@ export default defineComponent({
       // Look behind
       for (let i = rowIdx; i > rowIdx - 100; i--) {
         if (i < 0) break;
-        if (rows[i].type !== IRowType.PHOTOS) continue;
+        if (rows[i].type !== 1) continue;
         if (!rows[i].photos?.length) break;
 
         const sj = i === rowIdx ? pIdx : rows[i].photos!.length - 1;

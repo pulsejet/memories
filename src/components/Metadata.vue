@@ -91,7 +91,7 @@ import * as utils from '@services/utils';
 import * as dav from '@services/dav';
 import { API } from '@services/API';
 
-import type { IAlbum, IFace, IImageInfo, IPhoto, IExif } from '@types';
+import type { IAlbum, IFace, IImageInfo, IPhoto, IExif } from '@typings';
 
 interface TopField {
   id?: string;

@@ -172,7 +172,7 @@ const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcChe
 
 import MultiPathSelectionModal from '@components/modal/MultiPathSelectionModal.vue';
 
-import type { IConfig } from '@types';
+import type { IConfig } from '@typings';
 
 export default defineComponent({
   name: 'Settings',

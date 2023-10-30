@@ -6,7 +6,7 @@ import { API } from '@services/API';
 import * as utils from '@services/utils';
 import staticConfig from '../services/static-config';
 
-import type { IConfig } from '@types';
+import type { IConfig } from '@typings';
 
 const eventName: keyof utils.BusEvent = 'memories:user-config-changed';
 

@@ -22,7 +22,7 @@ const NcSelectTags = () => import('@nextcloud/vue/dist/Components/NcSelectTags')
 
 import * as dav from '@services/dav';
 
-import type { IPhoto } from '@types';
+import type { IPhoto } from '@typings';
 
 export default defineComponent({
   name: 'EditTags',

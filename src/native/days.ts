@@ -4,7 +4,7 @@ import { has } from './basic';
 import { API } from '@services/API';
 import * as utils from '@services/utils';
 
-import type { IDay, IPhoto } from '@types';
+import type { IDay, IPhoto } from '@typings';
 
 /** Memcache for <dayId, Photos> */
 const daysCache = new Map<number, IPhoto[]>();

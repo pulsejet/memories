@@ -89,7 +89,7 @@ import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 
-import type { IPhoto } from '@types';
+import type { IPhoto } from '@typings';
 
 import PhotoIcon from 'vue-material-design-icons/Image.vue';
 import LargePhotoIcon from 'vue-material-design-icons/ImageArea.vue';

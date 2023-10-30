@@ -44,7 +44,7 @@ import axios from '@nextcloud/axios';
 import { API } from '@services/API';
 import * as utils from '@services/utils';
 
-import type { IPhoto } from '@types';
+import type { IPhoto } from '@typings';
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-edgebuffer';

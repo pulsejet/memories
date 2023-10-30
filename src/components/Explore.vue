@@ -58,7 +58,7 @@ import { translate as t } from '@services/l10n';
 import config from '@services/static-config';
 import * as dav from '@services/dav';
 
-import type { ICluster, IConfig } from '@types';
+import type { ICluster, IConfig } from '@typings';
 
 export default defineComponent({
   name: 'Explore',

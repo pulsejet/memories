@@ -25,7 +25,7 @@ import Metadata from '@components/Metadata.vue';
 
 import * as utils from '@services/utils';
 
-import { IPhoto } from '@types';
+import type { IPhoto } from '@typings';
 
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 import InfoSvg from '@assets/info.svg';

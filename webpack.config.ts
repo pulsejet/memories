@@ -139,7 +139,6 @@ module.exports = {
       '@components': path.resolve(__dirname, 'src', 'components'),
       '@mixins': path.resolve(__dirname, 'src', 'mixins'),
       '@native': path.resolve(__dirname, 'src', 'native'),
-      '@types$': path.resolve(__dirname, 'src', 'types'),
     },
   },
 };

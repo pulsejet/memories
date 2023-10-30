@@ -30,7 +30,7 @@ import UserConfig from '@mixins/UserConfig';
 
 import * as utils from '@services/utils/helpers';
 
-import { IFolder, IPhoto } from '@types';
+import type { IFolder, IPhoto } from '@typings';
 
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
 

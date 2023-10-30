@@ -6,7 +6,7 @@ import * as base from './base';
 import { translate as t } from '@services/l10n';
 import { constants as c } from '@services/utils';
 
-import type { IFileInfo, IPhoto } from '@types';
+import type { IFileInfo, IPhoto } from '@typings';
 
 /**
  * Favorite a file

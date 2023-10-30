@@ -1,0 +1,41 @@
+declare module '@typings' {
+  export type IConfig = {
+    // general stuff
+    version: string;
+    vod_disable: boolean;
+    video_default_quality: string;
+    places_gis: number;
+
+    // enabled apps
+    systemtags_enabled: boolean;
+    albums_enabled: boolean;
+    recognize_installed: boolean;
+    recognize_enabled: boolean;
+    facerecognition_installed: boolean;
+    facerecognition_enabled: boolean;
+    preview_generator_enabled: boolean;
+
+    // general settings
+    timeline_path: string;
+    enable_top_memories: boolean;
+
+    // viewer settings
+    high_res_cond_default: 'always' | 'zoom' | 'never';
+    livephoto_autoplay: boolean;
+    sidebar_filepath: boolean;
+
+    // folder settings
+    folders_path: string;
+    show_hidden_folders: boolean;
+    sort_folder_month: boolean;
+
+    // album settings
+    sort_album_month: boolean;
+
+    // local settings
+    square_thumbs: boolean;
+    high_res_cond: IConfig['high_res_cond_default'] | null;
+    show_face_rect: boolean;
+    album_list_sort: 1 | 2;
+  };
+}

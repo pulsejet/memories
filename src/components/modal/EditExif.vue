@@ -28,7 +28,7 @@ const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
 import { translate as t } from '@services/l10n';
 
-import { IExif, IPhoto } from '@types';
+import type { IExif, IPhoto } from '@typings';
 
 interface IField {
   field: keyof IExif;

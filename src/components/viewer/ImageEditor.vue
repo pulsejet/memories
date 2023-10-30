@@ -23,7 +23,7 @@ import { fetchImage } from '@components/frame/XImgCache';
 import { API } from '@services/API';
 import * as utils from '@services/utils';
 
-import { IImageInfo, IPhoto } from '@types';
+import type { IImageInfo, IPhoto } from '@typings';
 
 // Crop preset icons
 import LandscapeIcon from '@scaleflex/icons/landscape';

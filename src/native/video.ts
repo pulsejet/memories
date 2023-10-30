@@ -1,6 +1,6 @@
 import { nativex } from './api';
 import { addOrigin } from './basic';
-import type { IPhoto } from '@types';
+import type { IPhoto } from '@typings';
 
 /**
  * Play a video from the given URL.

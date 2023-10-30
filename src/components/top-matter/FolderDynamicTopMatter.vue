@@ -14,7 +14,7 @@ import FolderGrid from './FolderGrid.vue';
 import * as utils from '@services/utils';
 import { API } from '@services/API';
 
-import type { IFolder } from '@types';
+import type { IFolder } from '@typings';
 
 export default defineComponent({
   name: 'FolderDynamicTopMatter',

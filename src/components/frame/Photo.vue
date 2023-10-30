@@ -82,7 +82,7 @@ import LivePhotoIcon from 'vue-material-design-icons/MotionPlayOutline.vue';
 import LocalIcon from 'vue-material-design-icons/CloudOff.vue';
 import RawIcon from 'vue-material-design-icons/Raw.vue';
 
-import type { IDay, IPhoto } from '@types';
+import type { IDay, IPhoto } from '@typings';
 import type XImg from '@components/XImg.vue';
 
 import errorsvg from '@assets/error.svg';

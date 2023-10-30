@@ -191,7 +191,7 @@ import PsImage from './PsImage';
 import PsVideo from './PsVideo';
 import PsLivePhoto from './PsLivePhoto';
 
-import { IImageInfo, IPhoto, TimelineState } from '@types';
+import type { IImageInfo, IPhoto, TimelineState } from '@typings';
 import type { PsContent } from './types';
 
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';

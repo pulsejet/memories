@@ -15,7 +15,7 @@ import { defineComponent, PropType } from 'vue';
 
 import * as utils from '@services/utils';
 
-import type { IHeadRow } from '@types';
+import type { IHeadRow } from '@typings';
 
 import CheckCircle from 'vue-material-design-icons/CheckCircle.vue';
 

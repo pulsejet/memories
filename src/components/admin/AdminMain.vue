@@ -43,7 +43,7 @@ import VideoTranscoder from './sections/VideoTranscoder.vue';
 import VideoAccel from './sections/VideoAccel.vue';
 
 import type { ISystemConfig, ISystemStatus } from './AdminTypes';
-import type { IConfig } from '@types';
+import type { IConfig } from '@typings';
 
 export default defineComponent({
   name: 'Admin',

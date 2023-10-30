@@ -54,7 +54,7 @@ import { defineComponent, PropType } from 'vue';
 
 import * as utils from '@services/utils';
 
-import { IRow, IRowType, ITick } from '@types';
+import type { IRow, ITick } from '@typings';
 
 import ScrollUpIcon from 'vue-material-design-icons/MenuUp.vue';
 import ScrollDownIcon from 'vue-material-design-icons/MenuDown.vue';
@@ -295,7 +295,7 @@ export default defineComponent({
 
       // Iterate over rows
       for (const row of this.rows) {
-        if (row.type === IRowType.HEAD) {
+        if (row.type === 0) {
           // Make date string
           const dateTaken = utils.dayIdToDate(row.dayId);
 

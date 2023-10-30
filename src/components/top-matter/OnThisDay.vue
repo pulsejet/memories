@@ -37,7 +37,7 @@ import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
-import type { IPhoto } from '@types';
+import type { IPhoto } from '@typings';
 
 import LeftMoveIcon from 'vue-material-design-icons/ChevronLeft.vue';
 import RightMoveIcon from 'vue-material-design-icons/ChevronRight.vue';

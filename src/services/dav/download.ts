@@ -5,7 +5,7 @@ import { translate as t } from '@services/l10n';
 import { API } from '@services/API';
 import * as nativex from '@native';
 
-import type { IPhoto } from '@types';
+import type { IPhoto } from '@typings';
 
 /**
  * Download files

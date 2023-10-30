@@ -4,7 +4,7 @@ import { constants as c } from './const';
 
 import { API } from '@services/API';
 import * as nativex from '@native';
-import type { IImageInfo, IPhoto } from '@types';
+import type { IImageInfo, IPhoto } from '@typings';
 
 /**
  * Get the current user UID

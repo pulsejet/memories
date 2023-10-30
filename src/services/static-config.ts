@@ -7,7 +7,7 @@ import { translate as t } from '@services/l10n';
 import * as utils from '@services/utils';
 
 import type Storage from '@nextcloud/browser-storage/dist/storage';
-import type { IConfig } from '@types';
+import type { IConfig } from '@typings';
 
 class StaticConfig {
   private config: IConfig | null = null;

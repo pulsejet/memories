@@ -9,7 +9,7 @@ import { translate as t } from '@services/l10n';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 
-import { IFileInfo, IPhoto } from '@types';
+import type { IFileInfo, IPhoto } from '@typings';
 
 const GET_FILE_CHUNK_SIZE = 50;
 

@@ -30,7 +30,7 @@ import { defineComponent } from 'vue';
 
 import Cluster from '@components/frame/Cluster.vue';
 
-import type { ICluster } from '@types';
+import type { ICluster } from '@typings';
 import * as utils from '@services/utils';
 
 export default defineComponent({

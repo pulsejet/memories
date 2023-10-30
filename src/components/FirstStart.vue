@@ -59,7 +59,7 @@ import banner from '@assets/banner.svg';
 import * as utils from '@services/utils';
 import { API } from '@services/API';
 
-import type { IDay } from '@types';
+import type { IDay } from '@typings';
 
 export default defineComponent({
   name: 'FirstStart',

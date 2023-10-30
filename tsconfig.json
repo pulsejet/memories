@@ -15,6 +15,7 @@
     "noImplicitAny": true,
     "esModuleInterop": true,
     "strictNullChecks": true,
+    "incremental": true,
     "paths": {
       "@services/*": [
         "./src/services/*"
@@ -31,9 +32,6 @@
       "@native": [
         "./src/native",
         "./src/native/*"
-      ],
-      "@types": [
-        "./src/types"
       ]
     }
   },

@@ -114,7 +114,7 @@ import * as nativex from '@native';
 
 import { API, DaysFilterType } from '@services/API';
 
-import { IDay, IHeadRow, IPhoto, IRow, IRowType } from '@types';
+import type { IDay, IHeadRow, IPhoto, IRow } from '@typings';
 
 const SCROLL_LOAD_DELAY = 100; // Delay in loading data when scrolling
 const DESKTOP_ROW_HEIGHT = 200; // Height of row on desktop
@@ -767,7 +767,7 @@ export default defineComponent({
           id: `${day.dayid}-head`,
           num: -1,
           size: 40,
-          type: IRowType.HEAD,
+          type: 0, // head
           selected: false,
           dayId: day.dayid,
           day: day,
@@ -1165,7 +1165,7 @@ export default defineComponent({
       let dataIdx = 0;
       while (dataIdx < data.length) {
         // Check if we ran out of rows
-        if (rowIdx >= this.list.length || this.list[rowIdx].type === IRowType.HEAD) {
+        if (rowIdx >= this.list.length || this.list[rowIdx].type === 0) {
           const newRow = this.addRow(day);
           addedRows.push(newRow);
           this.list.splice(rowIdx, 0, newRow);
@@ -1276,7 +1276,7 @@ export default defineComponent({
 
       // Get rid of any extra rows
       let spliceCount = 0;
-      for (let i = rowIdx + 1; i < this.list.length && this.list[i].type !== IRowType.HEAD; i++) {
+      for (let i = rowIdx + 1; i < this.list.length && this.list[i].type !== 0; i++) {
         spliceCount++;
       }
       if (spliceCount > 0) {
@@ -1320,11 +1320,11 @@ export default defineComponent({
       day.rows ??= [];
 
       // Create new row
-      const row = {
+      const row: IRow = {
         id: `${day.dayid}-${day.rows.length}`,
         num: day.rows.length,
         photos: [],
-        type: IRowType.PHOTOS,
+        type: 1, // photos
         size: this.rowHeight,
         dayId: day.dayid,
         day: day,
