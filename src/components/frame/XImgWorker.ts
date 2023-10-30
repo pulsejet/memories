@@ -1,5 +1,5 @@
 import { CacheExpiration } from 'workbox-expiration';
-import { workerExport } from '@services/worker';
+import { exportWorker } from '@services/worker';
 
 declare var self: ServiceWorkerGlobalScope;
 
@@ -312,14 +312,14 @@ async function fetchMultipreview(files: any[]) {
 
 /** Will be configured after the worker starts */
 let config: { multiUrl: string };
-export async function configure(_config: typeof config) {
+function configure(_config: typeof config) {
   config = _config;
 }
 
 /** Get BLOB url for image */
-export async function fetchImageSrc(url: string) {
+async function fetchImageSrc(url: string) {
   return URL.createObjectURL(await fetchImage(url));
 }
 
 // Exports to main thread
-workerExport({ fetchImageSrc, configure });
+export default exportWorker({ fetchImageSrc, configure });

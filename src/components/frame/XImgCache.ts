@@ -1,11 +1,10 @@
 import { API } from '@services/API';
 import { onDOMLoaded } from '@services/utils';
-import { workerImporter } from '@services/worker';
-import type * as w from './XImgWorker';
+import { importWorker } from '@services/worker';
+import type XImgWorker from './XImgWorker';
 
 // Global web worker to fetch images
-let worker: Worker;
-let importer: ReturnType<typeof workerImporter>;
+let worker: typeof XImgWorker;
 
 // Memcache for blob URLs
 const BLOB_CACHE = new Map<string, object>() as Map<string, [number, string]>;
@@ -17,12 +16,11 @@ const BLOB_STICKY = new Map<string, number>();
 function startWorker() {
   if (worker || _m.mode !== 'user') return;
 
-  // Start worker
-  worker = new Worker(new URL('./XImgWorkerStub.ts', import.meta.url));
-  importer = workerImporter(worker);
+  // Get typed worker
+  worker = importWorker(new Worker(new URL('./XImgWorkerStub.ts', import.meta.url)));
 
   // Configure worker
-  importer<typeof w.configure>('configure')({
+  worker.configure({
     multiUrl: API.IMAGE_MULTIPREVIEW(),
   });
 }
@@ -69,7 +67,7 @@ export async function fetchImage(url: string) {
   if (entry) return entry[1];
 
   // Fetch image
-  const blobUrl = await importer<typeof w.fetchImageSrc>('fetchImageSrc')(url);
+  const blobUrl = await worker.fetchImageSrc(url);
 
   // Check memcache entry again and revoke if it was added in the meantime
   if ((entry = BLOB_CACHE.get(url))) {
