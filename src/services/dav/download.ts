@@ -36,14 +36,6 @@ export function downloadWithHandle(handle: string) {
   window.location.href = url;
 }
 
-/**
- * Download the files given by the fileIds
- * @param photos list of photos
- */
-export async function downloadFilesByPhotos(photos: IPhoto[]) {
-  await downloadFiles(photos.map((f) => f.fileid));
-}
-
 /** Get URL to download one file (e.g. for video streaming) */
 export function getDownloadLink(photo: IPhoto) {
   return API.STREAM_FILE(photo.fileid);

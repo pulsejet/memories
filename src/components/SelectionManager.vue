@@ -753,7 +753,7 @@ export default defineComponent({
      */
     async downloadSelection(selection: Selection) {
       if (selection.size >= 100 && !(await utils.dialogs.downloadItems(selection.size))) return;
-      await dav.downloadFilesByPhotos(selection.photosNoDupFileId());
+      await dav.downloadFiles(selection.photosNoDupFileId().map((p) => p.fileid));
     },
 
     /**

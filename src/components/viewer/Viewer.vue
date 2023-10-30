@@ -111,6 +111,18 @@
             </template>
           </NcActionButton>
           <NcActionButton
+            v-for="raw of stackedRaw"
+            :aria-label="t('memories', 'Download {ext}', { ext: raw.extension })"
+            @click="downloadByFileId(raw.fileid)"
+            :close-after-click="true"
+            :key="raw.fileid"
+          >
+            {{ t('memories', 'Download {ext}', { ext: raw.extension }) }}
+            <template #icon>
+              <DownloadIcon :size="24" />
+            </template>
+          </NcActionButton>
+          <NcActionButton
             v-if="!routeIsPublic && !routeIsAlbums && !isLocal"
             :aria-label="t('memories', 'View in folder')"
             @click="viewInFolder"
@@ -391,6 +403,17 @@ export default defineComponent({
     /** Show share button and add to album button */
     canShare(): boolean {
       return Boolean(this.currentPhoto);
+    },
+
+    /** Stacked RAW photos */
+    stackedRaw(): { extension: string; fileid: number }[] {
+      const photo = this.currentPhoto;
+      if (!photo || !photo.stackraw?.length) return [];
+
+      return photo.stackraw.map((raw) => ({
+        extension: (raw.basename?.split('.').pop() ?? '?').toUpperCase(),
+        fileid: raw.fileid,
+      }));
     },
   },
 
@@ -1048,11 +1071,16 @@ export default defineComponent({
       this.$forceUpdate();
     },
 
+    /** Download a file by file ID */
+    async downloadByFileId(fileId: number) {
+      dav.downloadFiles([fileId]);
+    },
+
     /** Download the current photo */
     async downloadCurrent() {
       const photo = this.currentPhoto;
       if (!photo) return;
-      dav.downloadFilesByPhotos([photo]);
+      this.downloadByFileId(photo.fileid);
     },
 
     /** Download live part of current video */
