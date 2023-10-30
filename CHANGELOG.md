@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- **Feature**: RAW files are now hidden (stacked) when another file with the same basename exists ([#537](https://github.com/pulsejet/memories/issues/537), [#152](https://github.com/pulsejet/memories/issues/152), [#419](https://github.com/pulsejet/memories/issues/419))
 - **Feature**: Icon animation when playing live photos ([#898](https://github.com/pulsejet/memories/issues/898))
 
 ## [v6.0.1] - 2023-10-27
