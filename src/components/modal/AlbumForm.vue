@@ -88,7 +88,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, type PropType } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';

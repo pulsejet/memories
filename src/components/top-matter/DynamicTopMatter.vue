@@ -6,8 +6,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { Component } from 'vue';
+import { defineComponent, type Component } from 'vue';
 
 import UserMixin from '@mixins/UserConfig';
 

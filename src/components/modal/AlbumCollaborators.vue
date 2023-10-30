@@ -127,7 +127,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, type PropType } from 'vue';
 
 import Magnify from 'vue-material-design-icons/Magnify.vue';
 import Close from 'vue-material-design-icons/Close.vue';

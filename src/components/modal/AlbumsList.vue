@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, type PropType } from 'vue';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');

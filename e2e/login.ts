@@ -1,4 +1,4 @@
-import { expect, PlaywrightTestArgs } from '@playwright/test';
+import { expect, type PlaywrightTestArgs } from '@playwright/test';
 
 export function login(route: string) {
   return async ({ page }: PlaywrightTestArgs) => {

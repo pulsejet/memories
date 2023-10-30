@@ -1,4 +1,4 @@
-import Router, { Route, RouteConfig } from 'vue-router';
+import Router, { type Route, type RouteConfig } from 'vue-router';
 import Vue from 'vue';
 
 import { generateUrl } from '@nextcloud/router';

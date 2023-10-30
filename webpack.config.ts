@@ -1,10 +1,10 @@
-import webpack from 'webpack';
-import path from 'path';
+const webpack = require('webpack');
+const path = require('path');
 
-import WorkboxPlugin from 'workbox-webpack-plugin';
-import TerserPlugin from 'terser-webpack-plugin';
-import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
-import { VueLoaderPlugin } from 'vue-loader';
+const WorkboxPlugin = require('workbox-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+const { VueLoaderPlugin } = require('vue-loader');
 
 const appName = process.env.npm_package_name!;
 const appVersion = process.env.npm_package_version!;

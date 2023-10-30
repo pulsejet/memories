@@ -8,13 +8,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, type PropType } from 'vue';
 
 import axios from '@nextcloud/axios';
 import { showError, showSuccess } from '@nextcloud/dialogs';
 import { getLanguage } from '@nextcloud/l10n';
 
-import { FilerobotImageEditorConfig } from 'react-filerobot-image-editor';
+import type { FilerobotImageEditorConfig } from 'react-filerobot-image-editor';
 
 import translations from './ImageEditorTranslations';
 

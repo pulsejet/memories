@@ -3,7 +3,7 @@ import PhotoSwipe from 'photoswipe';
 import { isVideoContent } from './PsVideo';
 import { isLiveContent } from './PsLivePhoto';
 import { fetchImage } from '../frame/XImgCache';
-import { PsContent, PsEvent, PsSlide } from './types';
+import type { PsContent, PsEvent, PsSlide } from './types';
 
 import errorsvg from '@assets/error.svg';
 

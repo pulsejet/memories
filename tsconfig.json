@@ -17,6 +17,7 @@
     "strictNullChecks": true,
     "alwaysStrict": true,
     "incremental": true,
+    "verbatimModuleSyntax": true,
     "paths": {
       "@services/*": [
         "./src/services/*"

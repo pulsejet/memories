@@ -10,8 +10,8 @@ import { API } from '@services/API';
 
 import type { PsContent, PsEvent } from './types';
 
-import Player from 'video.js/dist/types/player';
-import { QualityLevelList } from 'videojs-contrib-quality-levels';
+import type Player from 'video.js/dist/types/player';
+import type { QualityLevelList } from 'videojs-contrib-quality-levels';
 
 type VideoContent = PsContent & {
   videoElement: HTMLVideoElement | null;

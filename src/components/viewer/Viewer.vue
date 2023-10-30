@@ -185,7 +185,7 @@ import * as utils from '@services/utils';
 import * as nativex from '@native';
 
 import ImageEditor from './ImageEditor.vue';
-import PhotoSwipe, { PhotoSwipeOptions } from 'photoswipe';
+import PhotoSwipe, { type PhotoSwipeOptions } from 'photoswipe';
 import 'photoswipe/style.css';
 import PsImage from './PsImage';
 import PsVideo from './PsVideo';
