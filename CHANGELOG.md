@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- Icon animation when playing live photos ([#898](https://github.com/pulsejet/memories/issues/898))
+- **Feature**: Icon animation when playing live photos ([#898](https://github.com/pulsejet/memories/issues/898))
 
 ## [v6.0.1] - 2023-10-27
 
