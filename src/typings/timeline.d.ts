@@ -39,10 +39,6 @@ declare module '@typings' {
     day: IDay;
     /** Whether this is a head row */
     type: IRowType;
-    /** [Head only] Title of the header */
-    name?: string;
-    /** [Head only] Boolean if the entire day is selected */
-    selected?: boolean;
     /** Main list of photo items */
     photos?: IPhoto[];
 
@@ -55,8 +51,13 @@ declare module '@typings' {
   };
 
   export type IHeadRow = IRow & {
+    /** Type of row */
     type: 0;
+    /** Title of the header */
+    name?: string;
+    /**  Boolean if the entire day is selected */
     selected: boolean;
+    /** Bigger header text */
     super?: string;
   };
 }
