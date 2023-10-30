@@ -809,7 +809,7 @@ export default defineComponent({
     async archiveSelection(selection: Selection) {
       if (selection.size >= 50 && !(await utils.dialogs.moveItems(selection.size))) return;
 
-      for await (let delIds of dav.archiveFilesByIds(Array.from(selection.fileids()), !this.routeIsArchive)) {
+      for await (let delIds of dav.archiveFilesByIds(selection.photosNoDupFileId(), !this.routeIsArchive)) {
         this.deleteSelectedPhotosById(delIds, selection);
       }
     },
