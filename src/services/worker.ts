@@ -17,6 +17,22 @@ type CommResult = {
 };
 
 /**
+ * Map of function names to functions.
+ */
+type FunctionMap = { [name: string]: Function };
+
+/**
+ * Utility type to convert all methods in an object to async.
+ */
+type Async<T extends FunctionMap> = {
+  [K in keyof T]: T[K] extends (...args: infer A) => Promise<infer R>
+    ? (...args: A) => Promise<R>
+    : T[K] extends (...args: infer A) => infer R
+    ? (...args: A) => Promise<R>
+    : T[K];
+};
+
+/**
  * Export methods from a worker to the main thread.
  *
  * @param handlers Object with methods to export
@@ -34,7 +50,7 @@ type CommResult = {
  *  inline: () => 'bar',
  * });
  */
-export function exportWorker<T extends { [name: string]: Function }>(handlers: T): T {
+export function exportWorker<T extends FunctionMap>(handlers: T): Async<T> {
   self.onmessage = async ({ data }: { data: CommRequest }) => {
     try {
       // Get handler from registrations
@@ -55,7 +71,7 @@ export function exportWorker<T extends { [name: string]: Function }>(handlers: T
     }
   };
 
-  return null as unknown as T;
+  return null as unknown as Async<T>;
 }
 
 /**
