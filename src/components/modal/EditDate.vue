@@ -9,6 +9,7 @@
     <div class="fields">
       <NcTextField
         class="field"
+        type="number"
         :value.sync="year"
         :label="t('memories', 'Year')"
         :label-visible="true"
@@ -18,6 +19,7 @@
       />
       <NcTextField
         class="field"
+        type="number"
         :value.sync="month"
         :label="t('memories', 'Month')"
         :label-visible="true"
@@ -27,6 +29,7 @@
       />
       <NcTextField
         class="field"
+        type="number"
         :value.sync="day"
         :label="t('memories', 'Day')"
         :label-visible="true"
@@ -36,6 +39,7 @@
       />
       <NcTextField
         class="field"
+        type="number"
         :value.sync="hour"
         :label="t('memories', 'Time')"
         :label-visible="true"
@@ -45,6 +49,7 @@
       />
       <NcTextField
         class="field"
+        type="number"
         :value.sync="minute"
         :label="t('memories', 'Minute')"
         :placeholder="t('memories', 'Minute')"
@@ -63,6 +68,7 @@
       <div class="fields">
         <NcTextField
           class="field"
+          type="number"
           :value.sync="yearLast"
           :label="t('memories', 'Year')"
           :label-visible="true"
@@ -72,6 +78,7 @@
         />
         <NcTextField
           class="field"
+          type="number"
           :value.sync="monthLast"
           :label="t('memories', 'Month')"
           :label-visible="true"
@@ -81,6 +88,7 @@
         />
         <NcTextField
           class="field"
+          type="number"
           :value.sync="dayLast"
           :label="t('memories', 'Day')"
           :label-visible="true"
@@ -90,6 +98,7 @@
         />
         <NcTextField
           class="field"
+          type="number"
           :value.sync="hourLast"
           :label="t('memories', 'Time')"
           :label-visible="true"
@@ -99,6 +108,7 @@
         />
         <NcTextField
           class="field"
+          type="number"
           :value.sync="minuteLast"
           :label="t('memories', 'Minute')"
           :placeholder="t('memories', 'Minute')"
