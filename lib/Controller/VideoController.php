@@ -273,42 +273,69 @@ class VideoController extends GenericApiController
         // Catch connection abort here
         ignore_user_abort(true);
 
-        // Stream the response to the browser without reading it into memory
-        $headersWritten = false;
-        curl_setopt($ch, CURLOPT_WRITEFUNCTION, static function (mixed $curl, mixed $data) use (&$headersWritten, $profile) {
-            $returnCode = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-            if (200 === $returnCode) {
-                // Write headers if just got the first chunk of data
-                if (!$headersWritten) {
-                    $headersWritten = true;
-                    $contentType = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
-                    header("Content-Type: {$contentType}");
-
-                    if (str_ends_with($profile, 'mp4')) {
-                        // cache full video 24 hours
-                        header('Cache-Control: max-age=86400, public');
-                    } else {
-                        // no caching of segments
-                        header('Cache-Control: no-cache, no-store, must-revalidate');
-                    }
-
-                    http_response_code($returnCode);
-                }
-
-                echo $data;
-                flush();
-
-                if (connection_aborted()) {
-                    return -1; // stop the transfer
-                }
+        $headerswritten = false;
+        $sendheaders = static function (\CurlHandle $curl) use (&$headerswritten, $profile): void {
+            // Write headers if just got the first chunk of data
+            if ($headerswritten) {
+                return;
             }
+            $headerswritten = true;
 
-            return \strlen($data);
-        });
+            // Pass ahead response code
+            http_response_code((int) curl_getinfo($curl, CURLINFO_HTTP_CODE));
+
+            // Pass ahead content type
+            $contentType = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
+            header("Content-Type: {$contentType}");
+
+            // Caching headers
+            if (str_ends_with($profile, 'mp4')) {
+                // cache full video 24 hours
+                header('Cache-Control: max-age=86400, public');
+            } else {
+                // no caching of segments
+                header('Cache-Control: no-cache, no-store, must-revalidate');
+            }
+        };
+
+        // On Safari with MP4, chunked transfer encoding is not supported
+        // So we need to read the whole file into memory and send it
+        $userAgent = $this->request->getHeader('User-Agent');
+        $isSafari = preg_match('/^((?!chrome|android).)*safari/i', $userAgent);
+
+        if (!$isSafari) {
+            // Stream the response to the browser without reading it into memory
+            curl_setopt($ch, CURLOPT_WRITEFUNCTION, static function (\CurlHandle $curl, string $data) use (&$sendheaders) {
+                $code = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+                if (200 === $code) {
+                    // Write headers if not done yet
+                    $sendheaders($curl);
+
+                    // Chunked transfer encoding
+                    echo $data;
+                    flush();
+
+                    // Check if the client is still connected
+                    if (connection_aborted()) {
+                        return -1; // stop the transfer
+                    }
+                }
+
+                return \strlen($data);
+            });
+        }
 
         // Start the request
-        curl_exec($ch);
+        $response = curl_exec($ch);
+
+        // Send the entire response if Safari
+        if ($isSafari && \is_string($response)) {
+            $sendheaders($ch);
+            header('Content-Length: '.\strlen($response)); // critical
+            echo $response;
+        }
+
         $returnCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
