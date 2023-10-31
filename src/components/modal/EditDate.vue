@@ -10,6 +10,8 @@
       <NcTextField
         class="field"
         type="number"
+        min="0"
+        max="5000"
         :value.sync="year"
         :label="t('memories', 'Year')"
         :label-visible="true"
@@ -20,6 +22,8 @@
       <NcTextField
         class="field"
         type="number"
+        min="1"
+        max="12"
         :value.sync="month"
         :label="t('memories', 'Month')"
         :label-visible="true"
@@ -30,6 +34,8 @@
       <NcTextField
         class="field"
         type="number"
+        min="1"
+        max="31"
         :value.sync="day"
         :label="t('memories', 'Day')"
         :label-visible="true"
@@ -40,6 +46,8 @@
       <NcTextField
         class="field"
         type="number"
+        min="0"
+        max="23"
         :value.sync="hour"
         :label="t('memories', 'Time')"
         :label-visible="true"
@@ -50,6 +58,8 @@
       <NcTextField
         class="field"
         type="number"
+        min="0"
+        max="59"
         :value.sync="minute"
         :label="t('memories', 'Minute')"
         :placeholder="t('memories', 'Minute')"
@@ -69,6 +79,8 @@
         <NcTextField
           class="field"
           type="number"
+          min="0"
+          max="5000"
           :value.sync="yearLast"
           :label="t('memories', 'Year')"
           :label-visible="true"
@@ -79,6 +91,8 @@
         <NcTextField
           class="field"
           type="number"
+          min="1"
+          max="12"
           :value.sync="monthLast"
           :label="t('memories', 'Month')"
           :label-visible="true"
@@ -89,6 +103,8 @@
         <NcTextField
           class="field"
           type="number"
+          min="1"
+          max="31"
           :value.sync="dayLast"
           :label="t('memories', 'Day')"
           :label-visible="true"
@@ -99,6 +115,8 @@
         <NcTextField
           class="field"
           type="number"
+          min="0"
+          max="23"
           :value.sync="hourLast"
           :label="t('memories', 'Time')"
           :label-visible="true"
@@ -109,6 +127,8 @@
         <NcTextField
           class="field"
           type="number"
+          min="0"
+          max="59"
           :value.sync="minuteLast"
           :label="t('memories', 'Minute')"
           :placeholder="t('memories', 'Minute')"
@@ -318,13 +338,12 @@ export default defineComponent({
     },
 
     makeDate(yearS: string, monthS: string, dayS: string, hourS: string, minuteS: string, secondS: string) {
-      const date = new Date();
       const year = parseInt(yearS, 10);
       const month = parseInt(monthS, 10) - 1;
       const day = parseInt(dayS, 10);
       const hour = parseInt(hourS, 10);
       const minute = parseInt(minuteS, 10);
-      const second = parseInt(secondS, 10) || 0;
+      let second = parseInt(secondS, 10) || 0; // needs validation
 
       if (isNaN(year)) return null;
       if (isNaN(month)) return null;
@@ -333,13 +352,20 @@ export default defineComponent({
       if (isNaN(minute)) return null;
       if (isNaN(second)) return null;
 
-      date.setUTCFullYear(year);
-      date.setUTCMonth(month);
-      date.setUTCDate(day);
-      date.setUTCHours(hour);
-      date.setUTCMinutes(minute);
-      date.setUTCSeconds(second);
-      return date;
+      // Validate date
+      if (year < 0 || year > 5000) return null;
+      if (month < 0 || month > 11) return null;
+
+      // Number of days in month
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      if (day < 1 || day > daysInMonth) return null;
+
+      // Validate time
+      if (hour < 0 || hour > 23) return null;
+      if (minute < 0 || minute > 59) return null;
+      if (second < 0 || second > 59) second = 0;
+
+      return new Date(Date.UTC(year, month, day, hour, minute, second));
     },
   },
 });
