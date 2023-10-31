@@ -59,19 +59,6 @@ export default defineComponent({
     },
   },
 
-  created() {
-    utils.onDOMLoaded(async () => {
-      if (!globalThis.OCA) globalThis.OCA = {};
-      if (!globalThis.OCA.Files) globalThis.OCA.Files = {};
-
-      // TODO: remove when we have a proper fileinfo standalone library
-      // original scripts are loaded from
-      // https://github.com/nextcloud/server/blob/5bf3d1bb384da56adbf205752be8f840aac3b0c5/lib/private/legacy/template.php#L120-L122
-      const filesClient = (<any>globalThis.OC.Files).getClient();
-      Object.assign(globalThis.OCA.Files, { App: { fileList: { filesClient } } }, globalThis.OCA.Files);
-    });
-  },
-
   mounted() {
     utils.bus.on('files:sidebar:opened', this.handleNativeOpen);
     utils.bus.on('files:sidebar:closed', this.handleNativeClose);
@@ -99,6 +86,7 @@ export default defineComponent({
     async open(photo: IPhoto | number, filename?: string, useNative = false) {
       if (!this.reducedOpen && this.native && (!photo || useNative)) {
         // Open native sidebar
+        this.nativeInit();
         this.native?.setFullScreenMode?.(true);
         this.native?.open(filename);
       } else {
@@ -171,6 +159,21 @@ export default defineComponent({
       this.nativeOpen = false;
       this.native?.setFullScreenMode?.(false);
       this.handleClose();
+    },
+
+    nativeInit() {
+      // Initializations for native sidebar, only if required
+      if (globalThis.OCA?.Files?.App?.fileList?.filesClient) return;
+
+      // Initialize the object
+      globalThis.OCA ??= {};
+      globalThis.OCA.Files ??= {};
+
+      // TODO: remove when we have a proper fileinfo standalone library
+      // original scripts are loaded from
+      // https://github.com/nextcloud/server/blob/5bf3d1bb384da56adbf205752be8f840aac3b0c5/lib/private/legacy/template.php#L120-L122
+      const filesClient = (<any>globalThis.OC.Files).getClient();
+      Object.assign(globalThis.OCA.Files, { App: { fileList: { filesClient } } }, globalThis.OCA.Files);
     },
 
     /** Register the Nextcloud Sidebar component */
