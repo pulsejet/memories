@@ -194,15 +194,25 @@ onDOMLoaded(() => {
   // Skip unless in user mode
   if (_m.mode !== 'user') return;
 
-  // Only contextual fragments should be present on page load
+  // On first load, we must remove any fragments and
+  // push them back in, so that history.back() works.
+  // The back button will still take the user back to
+  // the previous page but this is fine.
   if (fragment.list.length) {
     const contextual = fragment.list.filter((frag) => frag.type === FragmentType.viewer);
-    const hash = encodeFragment(contextual);
-    if (hash !== _m.route.hash) {
-      _m.router.replace({
+
+    // Remove the currently present fragments
+    _m.router.replace({
+      path: _m.route.path,
+      query: _m.route.query,
+    });
+
+    // Only contextual fragments should be present on page load
+    if (contextual.length) {
+      _m.router.push({
         path: _m.route.path,
         query: _m.route.query,
-        hash: hash,
+        hash: encodeFragment(contextual),
       });
     }
   }
