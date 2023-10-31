@@ -72,6 +72,21 @@ app:
     occ config:system:set memories.exiftool.tmp --value /path/to/temp/dir
     ```
 
+## Issues with NixOS
+
+### Background index fails
+
+When using the NixOS modules system for installation the indexer may fail on execution. In case the error is either `perl not found` or `failed to run exiftool: ...` it might be that the created `nextcloud-cron` services does not have access to a perl interpreter.
+
+In that case adding perl to the path of the `nextcloud-cron` service might solve the issue.
+It can be archived by adding the following snippet to the `configuration.nix`
+
+```nix
+systemd.services.nextcloud-cron = {
+  path = [pkgs.perl];
+};
+```
+
 ## Reverse Geocoding (Places)
 
 You need to have a MySQL / MariaDB / Postgres database for reverse geocoding to work. SQLite is not supported.
@@ -118,9 +133,9 @@ DROP INDEX IF EXISTS memories_parent_mimetype;
 
     The reset will clean up all data associated with Memories. While this is safe and will not delete your files, it can sometimes have unintended side effects, such as some files appearing as duplicates in the mobile apps when you reinstall. Try running `occ memories:index --force` before attempting a reset.
 
-### Moving from x86 to ARM or vice versa
+### Instruction set change
 
-In this case you need to reset the paths to the architecture specific binaries.
+If you move from x86 to ARM or vice versa, you need to reset the paths to the architecture specific binaries.
 
 ```bash
 occ config:system:delete memories.exiftool
@@ -128,17 +143,4 @@ occ config:system:delete memories.vod.path
 occ config:system:delete memories.vod.ffmpeg
 occ config:system:delete memories.vod.ffprobe
 occ maintenance:repair
-```
-
-### Getting Memories: Indexing exception: failed to run exiftool on NixOS via automatic indexer
-
-When using the nixos modules system for installation the indexer may fail on execution. In case the error is either `perl not found` or `failed to run exiftool: ...` it might be that the created nextcloud-cron services does not have access to a perl interpreter.
-
-In that case adding perl to the path of the nextcloud-cron service might solve the issue.
-It can be archived by adding the following snippet to the configuration.nix
-
-```nix
-systemd.services.nextcloud-cron = {
-  path = [pkgs.perl];
-};
 ```
