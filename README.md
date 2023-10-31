@@ -84,3 +84,5 @@ For the full changelog, see [CHANGELOG.md](CHANGELOG.md).
 ## 🙏 Special Thanks
 
 To the great folks building Nextcloud, PHP, Vue and all the other dependencies that make this project possible.
+
+Thanks to [GitHub](https://github.com), [CircleCI](https://circleci.com/) and [BrowserStack](https://www.browserstack.com) for sponsorship for Open Source projects for CI / testing on different devices.
