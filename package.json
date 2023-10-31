@@ -51,7 +51,8 @@
     "vue-router": "^3.6.5",
     "vue-virtual-scroller": "1.1.2",
     "vue2-leaflet": "^2.7.1",
-    "webdav": "^5.3.0"
+    "webdav": "^5.3.0",
+    "webworker-typed": "^1.0.4"
   },
   "engines": {
     "node": ">=18.2.0",
