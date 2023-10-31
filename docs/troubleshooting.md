@@ -129,3 +129,16 @@ occ config:system:delete memories.vod.ffmpeg
 occ config:system:delete memories.vod.ffprobe
 occ maintenance:repair
 ```
+
+### Getting Memories: Indexing exception: failed to run exiftool on NixOS via automatic indexer
+
+When using the nixos modules system for installation the indexer may fail on execution. In case the error is either `perl not found` or `failed to run exiftool: ...` it might be that the created nextcloud-cron services does not have access to a perl interpreter.
+
+In that case adding perl to the path of the nextcloud-cron service might solve the issue.
+It can be archived by adding the following snippet to the configuration.nix
+
+```nix
+systemd.services.nextcloud-cron = {
+  path = [pkgs.perl];
+};
+```
