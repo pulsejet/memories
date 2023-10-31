@@ -241,7 +241,7 @@ OC.L10N.register(
     "{n} photos cannot be edited (permissions error)." : "{n} photos ne peuvent pas être modifiées (erreur de permissions)",
     "Remove person" : "Retirer la personne",
     "Are you sure you want to remove {name}?" : "Êtes-vous sûr de vouloir retirer {name} ?",
-    "Only user \"{user}\" can delete this person" : "Seul l'utilisateur·trice \"{user}\" peut supprimer cette personne",
+    "Only user \"{user}\" can delete this person" : "Seul l'utilisateur « {user} » peut supprimer cette personne",
     "Rename person" : "Renommer la personne",
     "Name" : "Nom",
     "Update" : "Mise à jour",
