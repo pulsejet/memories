@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 - **Feature**: RAW files are now hidden (stacked) when another file with the same basename exists ([#537](https://github.com/pulsejet/memories/issues/537), [#152](https://github.com/pulsejet/memories/issues/152), [#419](https://github.com/pulsejet/memories/issues/419))
 - **Feature**: Icon animation when playing live photos ([#898](https://github.com/pulsejet/memories/issues/898))
+- **Bugfix**: Allow switching video to direct on Safari ([#650](https://github.com/pulsejet/memories/issues/650))
+- Many other [bug fixes](https://github.com/pulsejet/memories/milestone/18?closed=1)
 
 ## [v6.0.1] - 2023-10-27
 
