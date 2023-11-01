@@ -135,15 +135,11 @@ export default defineComponent({
 <style lang="scss" scoped>
 .swipe-progress {
   position: absolute;
-  z-index: 100;
+  z-index: 400; // above selection manager
   top: 0;
   width: 100%;
   height: 3px;
   pointer-events: none;
-
-  html.native & {
-    top: 2px;
-  }
 
   &.animate {
     background-position: center;
