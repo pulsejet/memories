@@ -48,7 +48,7 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 
 ## 🏗 Development Setup
 
-1. ☁ Clone this into your `custom_apps` folder of your Nextcloud.
+1. ☁ Clone this monorepo into the `custom_apps` folder of your Nextcloud.
 1. 📥 Install [Composer](https://getcomposer.org/) and [Node.js 18](https://nodejs.org)
 1. 👩‍💻 In a terminal, run the command `make dev-setup` to install the dependencies.
 1. 🏗 To build/watch the UI, run `make watch-js`.
@@ -86,3 +86,7 @@ For the full changelog, see [CHANGELOG.md](CHANGELOG.md).
 To the great folks building Nextcloud, PHP, Vue and all the other dependencies that make this project possible.
 
 Thanks to [GitHub](https://github.com), [CircleCI](https://circleci.com/) and [BrowserStack](https://www.browserstack.com) for sponsorship for Open Source projects for CI / testing on different devices.
+
+## 📄 License
+
+Memories is licensed under the [AGPLv3](LICENSE). Subpackages such as `go-vod` are licensed under their respective licenses. See the directory of the subpackage for more information.

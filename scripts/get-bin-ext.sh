@@ -42,8 +42,8 @@ chmod 755 exiftool/exiftool
 
 # Get go-vod prebuilt binaries
 echo "Getting go-vod $GOVOD_VER"
-wget -q "https://github.com/pulsejet/go-vod/releases/download/$GOVOD_VER/go-vod-amd64"
-wget -q "https://github.com/pulsejet/go-vod/releases/download/$GOVOD_VER/go-vod-aarch64"
+wget -q "https://github.com/pulsejet/memories/releases/download/go-vod/$GOVOD_VER/go-vod-amd64"
+wget -q "https://github.com/pulsejet/memories/releases/download/go-vod/$GOVOD_VER/go-vod-aarch64"
 chmod 755 go-vod-*
 
 # Check the version of go-vod is correct internally

@@ -58,7 +58,7 @@ Memories works out-of-the-box with most Nextcloud setups, including with externa
 
 ## Transcoding
 
-Memories bundles a [transcoding server](https://github.com/pulsejet/go-vod) with HLS capabilites for adaptive streaming. You need to configure transcoding to be able to play any videos. HLS enables the browser to download the video as small chunks and in resolutions adaptive to the connection speed. As a result, this is usually expected to have a major boost in video experience and performance.
+Memories bundles a [transcoding server](https://github.com/pulsejet/memories/tree/master/go-vod) with HLS capabilites for adaptive streaming. You need to configure transcoding to be able to play any videos. HLS enables the browser to download the video as small chunks and in resolutions adaptive to the connection speed. As a result, this is usually expected to have a major boost in video experience and performance.
 
 You can configure transcoding from the admin panel. Make sure to test all settings carefully on different kinds of videos.
 

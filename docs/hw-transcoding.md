@@ -34,9 +34,9 @@ NVIDIA GPUs support hardware transcoding using NVENC.
 
 !!! warning "Memories v6+ required"
 
-    This method is only supported in Memories v6 and newer. For older versions, see [below](#external-transcoder-v5).
+    This method is only supported in Memories v6 and newer. If you're on an old version, see the instructions [here](https://github.com/pulsejet/memories/blob/v5.5.0/docs/hw-transcoding.md#external-transcoder).
 
-[go-vod](https://github.com/pulsejet/go-vod), the transcoder of Memories, comes with a pre-built Docker image based on `linuxserver/ffmpeg`. The docker image connects to your Nextcloud instance and pulls the go-vod binary on startup. To set up an external transcoder, follow these steps.
+[go-vod](https://github.com/pulsejet/memories/tree/master/go-vod), the transcoder of Memories, comes with a pre-built Docker image based on `linuxserver/ffmpeg`. The docker image connects to your Nextcloud instance and pulls the go-vod binary on startup. To set up an external transcoder, follow these steps.
 
 1. Use a `docker-compose.yml` that runs the go-vod container and mounts the Nextcloud data directories to it. You must specify `NEXTCLOUD_HOST` to match the name of your Nextcloud container.
 
@@ -87,41 +87,6 @@ Your external transcoder should now be functional. You can check the transcoding
 
     You can run a similar setup without `docker-compose`. Make sure that the Nextcloud and go-vod containers are in the same network and that the Nextcloud data directories are mounted at the same locations in both containers.
 
-## External Transcoder (v5)
-
-!!! danger "Deprecated"
-
-    Use this method if you're running a version of Memories v5 or older. For newer versions, see [above](#external-transcoder).
-
-[go-vod](https://github.com/pulsejet/go-vod), the transcoder of Memories, ships with a Dockerfile that already includes the latest ffmpeg and VA-API drivers. To set up an external transcoder, follow these steps.
-
-1. Clone the go-vod repository. Make sure you use the correct tag, which can be found in the admin panel. Note that this is **not** the same as the version of Memories you run.
-   ```bash
-   git clone -b <tag> https://github.com/pulsejet/go-vod
-   ```
-
-    !!! tip "go-vod version"
-        Make sure you always use the correct version of go-vod corresponding to your Memories installation. If you use a different version, the admin panel will show a warning and transcoding may not work properly.
-
-1. Use a `docker-compose` file that builds the go-vod container and mounts the Nextcloud data directories to it. The directory containing the `docker-compose.yml` must contain the `go-vod` repository in it. You can then run `docker compose build` to build the image and `docker compose up -d` to start the containers.
-   ```yaml
-   # docker-compose.yml
-
-   services:
-     server:
-       image: nextcloud
-       volumes:
-         - ncdata:/var/www/html
-
-     go-vod:
-       build: ./go-vod
-       restart: always
-       devices:
-         - /dev/dri:/dev/dri
-       volumes:
-         - ncdata:/var/www/html:ro
-   ```
-
 ## Internal Transcoder
 
 Memories ships with an internal transcoder binary that you can directly use. In this case, you must install the drivers and ffmpeg on the same host as Nextcloud, and Memories will automatically handle starting and communicating with go-vod. This is also the default setup when you enable transcoding without hardware acceleration.
@@ -134,7 +99,7 @@ Memories ships with an internal transcoder binary that you can directly use. In 
 !!! tip "NVENC"
 
     These instructions mostly focus on VA-API. For NVENC, you may find further useful
-    pointers in [this](https://github.com/pulsejet/go-vod/blob/master/build-ffmpeg-nvidia.sh) build script.
+    pointers in [this](https://github.com/pulsejet/memories/blob/master/go-vod/build-ffmpeg-nvidia.sh) build script.
 
 ### Bare Metal
 
@@ -178,7 +143,7 @@ sudo -u www-data \
 
 !!! warning "Beware of old ffmpeg and driver versions"
 
-    Some package repositories distribute old ffmpeg versions that do not support some modern hardware. (e.g., the VA-API driver installed by `apt` in the current debian image used by Nextcloud only supports up to 10th generation Intel Ice Lake CPUs). To ensure you have a compatible version, you may want to remove your existing ffmpeg version and build the drivers and ffmpeg from source.  [This script](https://github.com/pulsejet/go-vod/blob/master/build-ffmpeg.sh) for VA-API or [this one](https://github.com/pulsejet/go-vod/blob/master/build-ffmpeg-nvidia.sh) for NVENC might be useful.
+    Some package repositories distribute old ffmpeg versions that do not support some modern hardware. (e.g., the VA-API driver installed by `apt` in the current debian image used by Nextcloud only supports up to 10th generation Intel Ice Lake CPUs). To ensure you have a compatible version, you may want to remove your existing ffmpeg version and build the drivers and ffmpeg from source.  [This script](https://github.com/pulsejet/memories/blob/master/go-vod/build-ffmpeg.sh) for VA-API or [this one](https://github.com/pulsejet/memories/blob/master/go-vod/build-ffmpeg-nvidia.sh) for NVENC might be useful.
 
 ### Docker
 
