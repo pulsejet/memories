@@ -1,3 +1,3 @@
-module github.com/pulsejet/go-vod
+module github.com/pulsejet/memories/go-vod
 
 go 1.16

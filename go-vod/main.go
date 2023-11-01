@@ -5,10 +5,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/pulsejet/go-vod/transcoder"
+	"github.com/pulsejet/memories/go-vod/transcoder"
 )
 
-const VERSION = "0.2.1"
+const VERSION = "0.2.2"
 
 func main() {
 	// Build initial configuration
