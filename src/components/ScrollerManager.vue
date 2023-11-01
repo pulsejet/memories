@@ -95,6 +95,7 @@ export default defineComponent({
 
   emits: {
     interactend: () => true,
+    scroll: (event: { current: number; previous: number }) => true,
   },
 
   data: () => ({
@@ -223,11 +224,13 @@ export default defineComponent({
       const scroll = this.recycler?.$el?.scrollTop || 0;
 
       // Emit scroll event
-      utils.bus.emit('memories.recycler.scroll', {
+      const event = {
         current: scroll,
         previous: this.lastKnownRecyclerScroll,
         dynTopMatterVisible: scroll < this.dynTopMatterHeight,
-      });
+      };
+      utils.bus.emit('memories.recycler.scroll', event);
+      this.$emit('scroll', event);
       this.lastKnownRecyclerScroll = scroll;
 
       // Get cursor px position

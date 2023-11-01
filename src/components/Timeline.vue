@@ -1,5 +1,5 @@
 <template>
-  <div class="container no-user-select" ref="container">
+  <SwipeRefresh class="container no-user-select" ref="container" :allowSwipe="allowSwipe" @refresh="softRefresh">
     <!-- Loading indicator -->
     <XLoadingIcon class="loading-icon centered" v-if="loading" />
 
@@ -74,7 +74,8 @@
       :fullHeight="scrollerHeight"
       :recycler="refs.recycler"
       :recyclerBefore="refs.recyclerBefore"
-      @interactend="loadScrollView()"
+      @interactend="loadScrollView"
+      @scroll="currentScroll = $event.current"
     />
 
     <SelectionManager
@@ -85,7 +86,7 @@
       :recycler="refs.recycler?.$el"
       @updateLoading="updateLoading"
     />
-  </div>
+  </SwipeRefresh>
 </template>
 
 <script lang="ts">
@@ -103,6 +104,7 @@ import Photo from '@components/frame/Photo.vue';
 import ScrollerManager from '@components/ScrollerManager.vue';
 import SelectionManager from '@components/SelectionManager.vue';
 import Viewer from '@components/viewer/Viewer.vue';
+import SwipeRefresh from './SwipeRefresh.vue';
 
 import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import TopMatter from '@components/top-matter/TopMatter.vue';
@@ -133,6 +135,7 @@ export default defineComponent({
     SelectionManager,
     ScrollerManager,
     Viewer,
+    SwipeRefresh,
   },
 
   mixins: [UserConfig],
@@ -166,6 +169,8 @@ export default defineComponent({
     currentStart: 0,
     /** Current end index */
     currentEnd: 0,
+    /** Current physical scroll position */
+    currentScroll: 0,
     /** Resizing timer */
     resizeTimer: null as number | null,
     /** Height of the scroller */
@@ -219,7 +224,7 @@ export default defineComponent({
   computed: {
     refs() {
       return this.$refs as {
-        container?: HTMLDivElement;
+        container?: InstanceType<typeof SwipeRefresh>;
         topmatter?: InstanceType<typeof TopMatter>;
         dtm?: InstanceType<typeof DynamicTopMatter>;
         recycler?: VueRecyclerType;
@@ -250,6 +255,11 @@ export default defineComponent({
     /** Show the empty content box and hide the scrollbar */
     showEmpty(): boolean {
       return !this.loading && this.empty;
+    },
+
+    /** Whether to allow swipe refresh */
+    allowSwipe(): boolean {
+      return !this.loading && this.currentScroll === 0;
     },
   },
 
@@ -384,7 +394,7 @@ export default defineComponent({
     /** Recompute static sizes of containers */
     recomputeSizes() {
       // Size of outer container
-      const e = this.refs.container!;
+      const e = this.refs.container!.$el;
       const height = e.clientHeight;
       const width = e.clientWidth;
       this.containerSize = [width, height];
