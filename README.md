@@ -61,6 +61,12 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
    - [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar): For Vue intellisense and static analysis
    - [Volar Typescript](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin): For Vue Typescript support
 
+This monorepo is organized into the following packages:
+- [lib](lib): Backend and database migrations (PHP).
+- [src](src): Frontend for all platforms (Vue)
+- [go-vod](go-vod): On-demand video transcoder (Go)
+- [l10n](l10n): Translations (Transifex)
+
 ## 🤝 Support the project
 
 1. **🌟 Star this repository**: This is the easiest way to support Memories and costs nothing.
@@ -89,4 +95,4 @@ Thanks to [GitHub](https://github.com), [CircleCI](https://circleci.com/) and [B
 
 ## 📄 License
 
-Memories is licensed under the [AGPLv3](LICENSE). Subpackages such as `go-vod` are licensed under their respective licenses. See the directory of the subpackage for more information.
+Memories is licensed under the [AGPLv3](COPYING). Subpackages such as [go-vod](go-vod) are licensed under their respective licenses. See the directory of the subpackage for more information.
