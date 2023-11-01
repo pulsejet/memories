@@ -65,11 +65,13 @@ This monorepo is organized into the following packages:
 - [lib](lib): Backend and database migrations (PHP).
 - [src](src): Frontend for all platforms (Vue)
 - [go-vod](go-vod): On-demand video transcoder (Go)
+- [android](android): Android implemention of NativeX (Kotlin)
 - [l10n](l10n): Translations (Transifex)
 
 Releases are organized with these tags:
 - `v*`: overall releases (e.g. `v1.0.0` or `v1.0.0-beta.1`)
 - `go-vod/*`: transcoder releases (e.g. `go-vod/1.0.0`)
+- `android/*`: Android releases (e.g. `android/1.0.0`)
 
 ## 🤝 Support the project
 

@@ -5,12 +5,14 @@ on:
     paths-ignore:
       - 'docs/**'
       - 'go-vod/**'
+      - 'android/**'
       - 'mkdocs.yml'
       - '**.md'
   pull_request:
     paths-ignore:
       - 'docs/**'
       - 'go-vod/**'
+      - 'android/**'
       - 'mkdocs.yml'
       - '**.md'
 
