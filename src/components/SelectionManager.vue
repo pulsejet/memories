@@ -526,7 +526,9 @@ export default defineComponent({
       );
 
       // Which photo is the cursor over, if any
-      const elem: any = document.elementFromPoint(touch.clientX, clampedY)?.closest('.p-outer-super');
+      const elem: any = document
+        .elementsFromPoint(touch.clientX, clampedY)
+        .find((e) => e.classList.contains('p-outer-super'));
       let overPhoto: IPhoto | null = elem?.__vue__?.data;
       if (overPhoto && overPhoto.flag & this.c.FLAG_PLACEHOLDER) overPhoto = null;
 
