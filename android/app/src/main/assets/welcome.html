@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Memories</title>
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div id="main" class="container animatable invisible">
+      <img src="memories.svg" alt="Memories Logo" class="logo" />
+      <p>
+        Start organizing and sharing your precious moments. Enter the address of
+        your Nextcloud server to begin.
+      </p>
+
+      <input
+        type="url"
+        id="server-url"
+        class="m-input"
+        placeholder="nextcloud.example.com"
+      />
+
+      <div class="trust">
+        <label for="trust-all">
+          <input
+            type="checkbox"
+            id="trust-all"
+            class="m-checkbox"
+          />
+          Disable certificate verification (unsafe)
+        </label>
+      </div>
+
+      <button class="m-button login-button" id="login">
+        Continue to Login
+      </button>
+      <br />
+
+      <a class="m-button link" href="https://memories.gallery/install/">
+        I don't have a server
+      </a>
+    </div>
+
+    <script>
+      const urlBox = document.getElementById("server-url");
+      const loginButton = document.getElementById("login");
+
+      function validateUrl(url) {
+        try {
+          url = new URL(url);
+          const protoOk = url.protocol === "http:" || url.protocol === "https:";
+          const hostOk = url.hostname.length > 0;
+          return protoOk && hostOk;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function getUrl() {
+          const url = urlBox.value.toLowerCase();
+          if (!url.startsWith("http://") && !url.startsWith("https://")) {
+              return "https://" + url;
+          }
+          return url;
+      }
+
+      function updateLoginEnabled() {
+        loginButton.disabled = !validateUrl(getUrl());
+      }
+
+      function getMemoriesUrl() {
+        const url = new URL(getUrl());
+
+        // Add trailing slash to the path if it's not there already
+        if (!url.pathname.endsWith("/")) {
+          url.pathname += "/";
+        }
+
+        // Add index.php to the path if it's not there already
+        if (!url.pathname.includes("index.php")) {
+          url.pathname += "index.php/";
+        }
+
+        // Add path to memories
+        url.pathname += "apps/memories/";
+
+        return url;
+      }
+
+      // Update login button enabled state when the URL changes
+      urlBox.addEventListener("input", updateLoginEnabled);
+      updateLoginEnabled();
+
+      // Login button click handler
+      loginButton.addEventListener("click", async () => {
+        try {
+          urlBox.disabled = true;
+          loginButton.disabled = true;
+
+          // Abort request after 5 seconds
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+          // Login signal
+          const encUrl = encodeURIComponent(encodeURIComponent(getMemoriesUrl().toString()));
+
+          // Trust all certificates
+          const trustAll = document.getElementById("trust-all").checked ? "1" : "0";
+
+          await fetch(`http://127.0.0.1/api/login/${encUrl}?trustAll=${trustAll}`, {
+            method: "GET",
+            signal: controller.signal,
+          });
+
+          // API is fine, redirect to login page
+          clearTimeout(timeoutId);
+        } catch (e) {
+          // unreachable?
+        } finally {
+          urlBox.disabled = false;
+          loginButton.disabled = false;
+        }
+      });
+
+      // Set action bar color
+      const themeColor = getComputedStyle(
+        document.documentElement
+      ).getPropertyValue("--theme-color");
+      globalThis.nativex?.setThemeColor(themeColor, true);
+
+      // Make container visible
+      document.getElementById("main").classList.remove("invisible");
+    </script>
+  </body>
+</html>
