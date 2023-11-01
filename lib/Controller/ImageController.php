@@ -76,15 +76,9 @@ class ImageController extends GenericApiController
      *
      * Get preview of many images
      */
-    public function multipreview(): Http\Response
+    public function multipreview(array $files): Http\Response
     {
-        return Util::guardExDirect(function (Http\IOutput $out) {
-            // read body to array
-            $body = file_get_contents('php://input');
-
-            /** @var array<array> */
-            $files = json_decode($body, true);
-
+        return Util::guardExDirect(function (Http\IOutput $out) use ($files) {
             // Filter files with valid parameters
             $files = array_filter($files, static function (array $file) {
                 return isset($file['reqid'], $file['fileid'], $file['x'], $file['y'], $file['a'])

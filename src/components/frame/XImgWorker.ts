@@ -303,10 +303,8 @@ async function fetchOneImage(url: string) {
 async function fetchMultipreview(files: any[]) {
   return await fetch(config.multiUrl, {
     method: 'POST',
-    body: JSON.stringify(files),
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    body: JSON.stringify({ files }),
+    headers: { 'Content-Type': 'application/json' },
   });
 }
 
