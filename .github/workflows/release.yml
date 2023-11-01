@@ -7,7 +7,7 @@ on:
 
 jobs:
   binary:
-    name: Binary build
+    name: Binary
     runs-on: ubuntu-latest
 
     container:
@@ -34,7 +34,7 @@ jobs:
   docker:
     runs-on: ubuntu-latest
 
-    name: Docker build
+    name: Docker
 
     steps:
       - name: Check out the repo
