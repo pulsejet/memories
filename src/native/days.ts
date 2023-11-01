@@ -2,7 +2,7 @@ import { NAPI, nativex } from './api';
 import { has } from './basic';
 
 import { API } from '@services/API';
-import * as utils from '@services/utils';
+import { bus, setRenewingTimeout } from '@services/utils';
 
 import type { IDay, IPhoto } from '@typings';
 
@@ -14,7 +14,9 @@ const seenABUIDs = new Set<string>();
 
 // Clear the cache whenever the timeline is refreshed
 if (has()) {
-  utils.onDOMLoaded(() => utils.bus.on('nativex:db:updated', () => daysCache.clear()));
+  document.addEventListener('DOMContentLoaded', () => {
+    bus.on('nativex:db:updated', () => daysCache.clear());
+  });
 }
 
 /**
@@ -106,7 +108,7 @@ export function processFreshServerDay(this: any, dayId: number, photos: IPhoto[]
   }
 
   // Debounce
-  utils.setRenewingTimeout(
+  setRenewingTimeout(
     this,
     'pfsdq_timer',
     () => {

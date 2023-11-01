@@ -3,7 +3,8 @@ import { getCurrentUser } from '@nextcloud/auth';
 import { constants as c } from './const';
 
 import { API } from '@services/API';
-import * as nativex from '@native';
+import { NAPI } from '@native';
+
 import type { IImageInfo, IPhoto } from '@typings';
 
 /**
@@ -67,7 +68,7 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
 
   // Native preview
   if (isLocalPhoto(photo)) {
-    return API.Q(nativex.NAPI.IMAGE_PREVIEW(photo.fileid), { c: photo.etag });
+    return API.Q(NAPI.IMAGE_PREVIEW(photo.fileid), { c: photo.etag });
   }
 
   // Screen-appropriate size
@@ -115,7 +116,7 @@ export function getImageInfoUrl(photo: IPhoto | number): string {
   const fileid = typeof photo === 'number' ? photo : photo.fileid;
 
   if (typeof photo === 'object' && isLocalPhoto(photo)) {
-    return nativex.NAPI.IMAGE_INFO(fileid);
+    return NAPI.IMAGE_INFO(fileid);
   }
 
   return API.IMAGE_INFO(fileid);
