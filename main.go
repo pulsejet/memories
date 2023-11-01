@@ -5,14 +5,14 @@ import (
 	"log"
 	"os"
 
-	"github.com/pulsejet/go-vod/go_vod"
+	"github.com/pulsejet/go-vod/transcoder"
 )
 
 const VERSION = "0.1.28"
 
 func main() {
 	// Build initial configuration
-	c := &go_vod.Config{
+	c := &transcoder.Config{
 		VersionMonitor:  false,
 		Version:         VERSION,
 		Bind:            ":47788",
@@ -40,7 +40,7 @@ func main() {
 	c.AutoDetect()
 
 	// Start server
-	code := go_vod.NewHandler(c).Start()
+	code := transcoder.NewHandler(c).Start()
 
 	// Exit
 	log.Println("Exiting go-vod with status code", code)

@@ -1,4 +1,4 @@
-package go_vod
+package transcoder
 
 type Chunk struct {
 	id     int

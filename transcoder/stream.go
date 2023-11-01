@@ -1,4 +1,4 @@
-package go_vod
+package transcoder
 
 import (
 	"bufio"
