@@ -21,7 +21,7 @@ jobs:
         working-directory: go-vod
         run: |
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -buildvcs=false -ldflags="-s -w" -o go-vod-amd64
-          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -buildvcs=false -ldflags="-s -w" -o go-vod-arm64
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -buildvcs=false -ldflags="-s -w" -o go-vod-aarch64
 
       - name: Upload to releases
         uses: svenstaro/upload-release-action@v2
