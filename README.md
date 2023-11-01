@@ -14,6 +14,7 @@
 [![e2e](https://github.com/pulsejet/memories/actions/workflows/e2e.yaml/badge.svg)](https://github.com/pulsejet/memories/actions/workflows/e2e.yaml)
 [![static analysis](https://github.com/pulsejet/memories/actions/workflows/static-analysis.yaml/badge.svg)](https://github.com/pulsejet/memories/actions/workflows/static-analysis.yaml)
 [![Shepherd](https://shepherd.dev/github/pulsejet/memories/coverage.svg)](https://shepherd.dev/github/pulsejet/memories)
+[![go-vod](https://github.com/pulsejet/memories/actions/workflows/go-vod.yml/badge.svg)](https://github.com/pulsejet/memories/actions/workflows/go-vod.yml)
 
 Memories is a _batteries-included_ photo management solution for Nextcloud with advanced features
 
