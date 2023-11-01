@@ -184,6 +184,7 @@ export default defineComponent({
     prevOver: null as IPhoto | null,
     touchScrollInterval: 0,
     touchScrollDelta: 0,
+    touchMoveSelFrame: 0,
   }),
 
   mounted() {
@@ -455,6 +456,7 @@ export default defineComponent({
 
       // Prevent scrolling
       event.preventDefault();
+      event.stopPropagation();
 
       // This should never happen
       if (!touch) return;
@@ -491,12 +493,20 @@ export default defineComponent({
           };
           this.touchScrollInterval = window.requestAnimationFrame(fun);
         }
-      } else {
+      } else if (this.touchScrollInterval) {
         window.cancelAnimationFrame(this.touchScrollInterval);
         this.touchScrollInterval = 0;
       }
 
-      this.touchMoveSelect(touch, rowIdx);
+      // Trigger multiselection update in next frame
+      // If there's no anchor then this is pointless cause it gets cancelled
+      // If already scrolling up/down then the effect will be called anyway
+      if (this.touchAnchor && !this.touchScrollInterval && !this.touchMoveSelFrame) {
+        this.touchMoveSelFrame = window.requestAnimationFrame(() => {
+          this.touchMoveSelFrame = 0;
+          this.touchMoveSelect(touch, rowIdx);
+        });
+      }
     },
 
     /** Multi-select triggered by touchmove */
