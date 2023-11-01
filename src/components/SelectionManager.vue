@@ -405,13 +405,17 @@ export default defineComponent({
 
     resetTouchParams() {
       this.touchAnchor = null;
-      window.clearTimeout(this.touchTimer);
-      this.touchTimer = 0;
       this.touchMoved = false;
       this.prevOver = null;
 
+      window.clearTimeout(this.touchTimer);
+      this.touchTimer = 0;
+
       window.cancelAnimationFrame(this.touchScrollInterval);
       this.touchScrollInterval = 0;
+
+      window.cancelAnimationFrame(this.touchMoveSelFrame);
+      this.touchMoveSelFrame = 0;
 
       this.prevTouch = null;
     },
