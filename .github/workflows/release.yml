@@ -30,3 +30,39 @@ jobs:
           file_glob: true
           tag: ${{ github.ref }}
           overwrite: true
+
+  docker:
+    runs-on: ubuntu-latest
+
+    name: Build Docker image and push to Docker Hub
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Get image label
+        id: image_label
+        run: echo "label=${GITHUB_REF#refs/tags/}" >> $GITHUB_STATE
+
+      - name: Build container image
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          platforms: linux/amd64,linux/arm64
+          context: './'
+          no-cache: true
+          file: 'Dockerfile'
+          tags: radialapps/go-vod:${{ steps.image_label.outputs.label }} , radialapps/go-vod:latest
+          provenance: false
