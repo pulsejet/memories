@@ -66,9 +66,7 @@ async function flushPreviewQueue() {
     // it came from a multipreview, so that we can try fetching
     // the single image instead
     blob ??= await res.blob();
-    pendingUrls.get(url)?.forEach((cb) => {
-      cb?.resolve?.(blob!);
-    });
+    pendingUrls.get(url)?.forEach((cb) => cb?.resolve?.(blob!));
     pendingUrls.delete(url);
 
     // Cache response
@@ -77,9 +75,7 @@ async function flushPreviewQueue() {
 
   // Throw error on URL
   const reject = (url: string, e: any): void => {
-    pendingUrls.get(url)?.forEach((cb) => {
-      cb?.reject?.(e);
-    });
+    pendingUrls.get(url)?.forEach((cb) => cb?.reject?.(e));
     pendingUrls.delete(url);
   };
 
@@ -218,7 +214,6 @@ async function fetchImage(url: string): Promise<Blob> {
 
   // Just fetch if not a preview
   const regex = /\/memories\/api\/image\/preview\/\d+(\?.*)?$/;
-
   if (!regex.test(url)) {
     const res = await fetchOneImage(url);
     cacheResponse(url, res);
@@ -250,7 +245,7 @@ async function fetchImage(url: string): Promise<Blob> {
         fetchPreviewTimer = self.setTimeout(flushPreviewQueue, 20);
       }
 
-      // If queue has >10 items, flush immediately
+      // If queue has >20 items, flush immediately
       // This will internally clear the timer
       if (fetchPreviewQueue.length >= 20) {
         flushPreviewQueue();
