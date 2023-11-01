@@ -1,6 +1,6 @@
 <template>
   <div @touchstart.passive="touchstart" @touchmove.passive="touchmove" @touchend.passive="touchend">
-    <div v-show="show" class="swipe-progress" :style="{ background: gradient }" :class="{ animate }"></div>
+    <div v-show="show" class="swipe-progress" :style="{ background: gradient }" :class="{ animate, wasSwiped }"></div>
     <slot></slot>
   </div>
 </template>
@@ -36,6 +36,7 @@ export default defineComponent({
     updateFrame: 0,
     progress: 0,
     animate: false,
+    wasSwiped: true,
     firstcycle: 0,
   }),
 
@@ -45,9 +46,19 @@ export default defineComponent({
 
   watch: {
     loading() {
+      this.wasSwiped = this.progress >= 100;
+      if (!this.wasSwiped) {
+        // The loading animation was triggered from elsewhere
+        // let it continue normally
+        this.animate = this.loading;
+        return;
+      }
+
+      // Let the animation run for at least half cycle
+      // if the user pulled down, so we provide good feedback
+      // that something actually happened
       if (this.loading) {
         if (!this.animate) {
-          // Let the animation run for at least half cycle
           this.firstcycle = window.setTimeout(() => {
             this.firstcycle = 0;
             this.animate = this.loading;
@@ -56,7 +67,6 @@ export default defineComponent({
         this.animate = this.loading;
       } else {
         if (!this.firstcycle) {
-          console.log('stop');
           this.animate = this.loading;
         }
       }
@@ -108,8 +118,8 @@ export default defineComponent({
 
         // Execute action on threshold
         if (this.progress >= 100) {
-          this.on = false;
           this.$emit('refresh');
+          this.on = false;
         }
       });
     },
@@ -136,6 +146,7 @@ export default defineComponent({
   }
 
   &.animate {
+    background-position: center;
     $progress-inside: radial-gradient(
       circle at center,
       transparent 0%,
@@ -152,23 +163,25 @@ export default defineComponent({
     );
 
     animation: swipe-loading 1.5s ease infinite;
-    background-position: center;
+    &.wasSwiped {
+      animation-delay: -0.75s;
+    }
 
     @keyframes swipe-loading {
       0% {
-        background-image: $progress-inside;
+        background-image: $progress-outside;
         background-size: 100% 100%;
       }
       49.99% {
-        background-image: $progress-inside;
+        background-image: $progress-outside;
         background-size: 12000% 12000%;
       }
       50% {
-        background-image: $progress-outside;
+        background-image: $progress-inside;
         background-size: 100% 100%;
       }
       100% {
-        background-image: $progress-outside;
+        background-image: $progress-inside;
         background-size: 12000% 12000%;
       }
     }

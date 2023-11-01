@@ -369,7 +369,7 @@ export default defineComponent({
      * Debouncing is necessary due to a large number of calls, e.g.
      * when changing the configuration
      */
-    async softRefresh() {
+    softRefresh() {
       this.softRefreshInternal(false);
     },
 
