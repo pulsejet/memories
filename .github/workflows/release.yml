@@ -54,7 +54,7 @@ jobs:
 
       - name: Get image label
         id: image_label
-        run: echo "label=${GITHUB_REF#refs/tags/}" >> $GITHUB_STATE
+        run: echo "label=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
       - name: Build container image
         uses: docker/build-push-action@v5
