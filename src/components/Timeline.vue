@@ -1,8 +1,11 @@
 <template>
-  <SwipeRefresh class="container no-user-select" ref="container" :allowSwipe="allowSwipe" @refresh="softRefresh">
-    <!-- Loading indicator -->
-    <XLoadingIcon class="loading-icon centered" v-if="loading" />
-
+  <SwipeRefresh
+    class="container no-user-select"
+    ref="container"
+    :allowSwipe="allowSwipe"
+    @refresh="softRefresh"
+    :loading="loading > 0"
+  >
     <!-- Static top matter -->
     <TopMatter ref="topmatter" />
 
@@ -371,18 +374,28 @@ export default defineComponent({
     },
 
     /**
-     * Fetch and re-process days (can be awaited).
+     * Fetch and re-process days (can be awaited if sync).
      * Do not pass this function as a callback directly.
      */
     async softRefreshInternal(sync: boolean) {
       this.refs.selectionManager.clear();
       this.fetchDayQueue = []; // reset queue
 
+      // Fetch days and reset loading
+      this.updateLoading(1);
+      const doFetch = async () => {
+        try {
+          await this.fetchDays(true);
+        } finally {
+          this.updateLoading(-1);
+        }
+      };
+
       // Fetch days
       if (sync) {
-        await this.fetchDays(true);
+        doFetch();
       } else {
-        utils.setRenewingTimeout(this, '_softRefreshInternalTimer', () => this.fetchDays(true), 30);
+        utils.setRenewingTimeout(this, '_softRefreshInternalTimer', doFetch, 30);
       }
     },
 

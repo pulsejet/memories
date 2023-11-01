@@ -1,6 +1,6 @@
 <template>
   <div @touchstart.passive="touchstart" @touchmove.passive="touchmove" @touchend.passive="touchend">
-    <div v-if="on && progress" class="swipe-progress" :style="{ background: gradient }"></div>
+    <div v-show="show" class="swipe-progress" :style="{ background: gradient }" :class="{ animate }"></div>
     <slot></slot>
   </div>
 </template>
@@ -18,6 +18,11 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+
+    loading: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   emits: {
@@ -30,15 +35,50 @@ export default defineComponent({
     end: 0,
     updateFrame: 0,
     progress: 0,
+    animate: false,
+    firstcycle: 0,
   }),
 
+  mounted() {
+    this.animate = this.loading; // start if needed
+  },
+
+  watch: {
+    loading() {
+      if (this.loading) {
+        if (!this.animate) {
+          // Let the animation run for at least half cycle
+          this.firstcycle = window.setTimeout(() => {
+            this.firstcycle = 0;
+            this.animate = this.loading;
+          }, 750);
+        }
+        this.animate = this.loading;
+      } else {
+        if (!this.firstcycle) {
+          console.log('stop');
+          this.animate = this.loading;
+        }
+      }
+    },
+  },
+
   computed: {
+    show() {
+      return (this.on && this.progress) || this.animate;
+    },
+
     gradient() {
-      const start = 50 - this.progress / 2;
-      const end = 50 + this.progress / 2;
-      const out = 'transparent';
-      const progress = 'var(--color-primary)';
-      return `linear-gradient(to right, ${out} ${start}%, ${progress} ${start}%, ${progress} ${end}%, ${out} ${end}%)`;
+      if (this.animate) {
+        // CSS animation below
+        return undefined;
+      }
+
+      // Pull down progress
+      const p = this.progress;
+      const outer = 'transparent';
+      const inner = 'var(--color-primary)';
+      return `radial-gradient(circle at center, ${inner} 0, ${inner} ${p}%, ${outer} ${p}%, ${outer} 100%)`;
     },
   },
 
@@ -89,9 +129,49 @@ export default defineComponent({
   top: 0;
   width: 100%;
   height: 3px;
+  pointer-events: none;
 
   html.native & {
     top: 2px;
+  }
+
+  &.animate {
+    $progress-inside: radial-gradient(
+      circle at center,
+      transparent 0%,
+      transparent 1%,
+      var(--color-primary) 1%,
+      var(--color-primary) 100%
+    );
+    $progress-outside: radial-gradient(
+      circle at center,
+      var(--color-primary) 0%,
+      var(--color-primary) 1%,
+      transparent 1%,
+      transparent 100%
+    );
+
+    animation: swipe-loading 1.5s ease infinite;
+    background-position: center;
+
+    @keyframes swipe-loading {
+      0% {
+        background-image: $progress-inside;
+        background-size: 100% 100%;
+      }
+      49.99% {
+        background-image: $progress-inside;
+        background-size: 12000% 12000%;
+      }
+      50% {
+        background-image: $progress-outside;
+        background-size: 100% 100%;
+      }
+      100% {
+        background-image: $progress-outside;
+        background-size: 12000% 12000%;
+      }
+    }
   }
 }
 </style>
