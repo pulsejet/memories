@@ -1,0 +1,68 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  binary:
+    name: Binary
+    runs-on: ubuntu-latest
+
+    container:
+      image: golang:1.20-bullseye
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -buildvcs=false -ldflags="-s -w" -o go-vod-amd64
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -buildvcs=false -ldflags="-s -w" -o go-vod-arm64
+
+      - name: Upload to releases
+        uses: svenstaro/upload-release-action@v2
+        id: attach_to_release
+        with:
+          file: go-vod-*
+          file_glob: true
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  docker:
+    runs-on: ubuntu-latest
+
+    name: Docker
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Get image label
+        id: image_label
+        run: echo "label=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Build container image
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          platforms: linux/amd64,linux/arm64
+          context: './'
+          no-cache: true
+          file: 'Dockerfile'
+          tags: radialapps/go-vod:${{ steps.image_label.outputs.label }} , radialapps/go-vod:latest
+          provenance: false
