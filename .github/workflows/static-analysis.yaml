@@ -4,11 +4,13 @@ on:
   push:
     paths-ignore:
       - 'docs/**'
+      - 'go-vod/**'
       - 'mkdocs.yml'
       - '**.md'
   pull_request:
     paths-ignore:
       - 'docs/**'
+      - 'go-vod/**'
       - 'mkdocs.yml'
       - '**.md'
 

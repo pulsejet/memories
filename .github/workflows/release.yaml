@@ -9,6 +9,7 @@ env:
 
 jobs:
   publish:
+    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
