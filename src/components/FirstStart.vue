@@ -1,6 +1,6 @@
 <template>
   <NcContent app-name="memories">
-    <NcAppContent>
+    <NcAppContent :allowSwipeNavigation="false">
       <div class="outer fill-block" :class="{ show }">
         <div class="title">
           <XImg class="img" :src="banner" :svg-tag="true" />

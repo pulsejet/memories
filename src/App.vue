@@ -33,7 +33,7 @@
       </template>
     </NcAppNavigation>
 
-    <NcAppContent>
+    <NcAppContent :allowSwipeNavigation="false">
       <div
         :class="{
           outer: true,
