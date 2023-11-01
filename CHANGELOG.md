@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Icon animation when playing live photos ([#898](https://github.com/pulsejet/memories/issues/898))
 - **Bugfix**: Allow switching video to direct on Safari ([#650](https://github.com/pulsejet/memories/issues/650))
 - Many other [bug fixes](https://github.com/pulsejet/memories/milestone/18?closed=1)
+- Android app is now open source ([see](https://github.com/pulsejet/memories/tree/master/android))
 
 ## [v6.0.1] - 2023-10-27
 
