@@ -6,8 +6,8 @@ on:
       - "*"
 
 jobs:
-  build:
-    name: Build
+  binary:
+    name: Binary build
     runs-on: ubuntu-latest
 
     container:
@@ -34,7 +34,7 @@ jobs:
   docker:
     runs-on: ubuntu-latest
 
-    name: Build Docker image and push to Docker Hub
+    name: Docker build
 
     steps:
       - name: Check out the repo
