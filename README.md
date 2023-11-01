@@ -67,6 +67,10 @@ This monorepo is organized into the following packages:
 - [go-vod](go-vod): On-demand video transcoder (Go)
 - [l10n](l10n): Translations (Transifex)
 
+Releases are organized with these tags:
+- `v*`: overall releases (e.g. `v1.0.0` or `v1.0.0-beta.1`)
+- `go-vod/*`: transcoder releases (e.g. `go-vod/1.0.0`)
+
 ## 🤝 Support the project
 
 1. **🌟 Star this repository**: This is the easiest way to support Memories and costs nothing.
