@@ -297,25 +297,25 @@ class VideoContentSetup {
     const origParent = content.videoElement.parentElement!;
 
     // Populate quality list
-    let qualityList = content.videojs?.qualityLevels?.();
-    let qualityNums: number[] | undefined;
-    if (qualityList && qualityList.length >= 1) {
-      const s = new Set<number>();
-      let hasMax = false;
-      for (let i = 0; i < qualityList?.length; i++) {
+    const qualityNums: number[] = [];
+    let hasOriginal = false;
+    const qualityList = content.videojs?.qualityLevels?.();
+    if (qualityList?.length) {
+      for (let i = 0; i < qualityList.length; i++) {
         const { width, height, label } = qualityList[i];
-        s.add(Math.min(width!, height!));
-
-        if (label?.includes('max.m3u8')) {
-          hasMax = true;
-        }
+        qualityNums.push(Math.min(width!, height!));
+        hasOriginal ||= label?.includes('max.m3u8');
       }
-
-      qualityNums = Array.from(s).sort((a, b) => b - a);
-      qualityNums.unshift(0);
-      if (hasMax) qualityNums.unshift(-1);
-      qualityNums.unshift(-2);
     }
+
+    // Sort quality list descending
+    qualityNums.sort((a, b) => b - a);
+
+    // These quality options are always available
+    // E.g. the qualityList is empty on iOS Safari
+    if (!staticConfig.getSync('vod_disable')) qualityNums.unshift(0); // adaptive
+    if (hasOriginal) qualityNums.unshift(-1); // original
+    if (true) qualityNums.unshift(-2); // direct
 
     // Create the plyr instance
     const opts: Plyr.Options = {
