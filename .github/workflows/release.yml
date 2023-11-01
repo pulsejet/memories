@@ -1,4 +1,4 @@
-name: amd64
+name: release
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
       - "*"
 
 jobs:
-  build-amd64:
-    name: amd64
+  build:
+    name: Build
     runs-on: ubuntu-latest
 
     container:
@@ -18,13 +18,15 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build
-        run: CGO_ENABLED=0 go build -buildvcs=false -ldflags="-s -w"
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -buildvcs=false -ldflags="-s -w" -o go-vod-amd64
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -buildvcs=false -ldflags="-s -w" -o go-vod-arm64
 
       - name: Upload to releases
         uses: svenstaro/upload-release-action@v2
         id: attach_to_release
         with:
-          file: go-vod
-          asset_name: go-vod-amd64
+          file: go-vod-*
+          file_glob: true
           tag: ${{ github.ref }}
           overwrite: true
