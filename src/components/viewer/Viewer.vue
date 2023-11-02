@@ -147,7 +147,7 @@
           <NcActionButton
             :aria-label="t('memories', 'Edit metadata')"
             v-if="canEdit"
-            @click="editMetadata"
+            @click="editMetadata()"
             :close-after-click="true"
           >
             {{ t('memories', 'Edit metadata') }}
