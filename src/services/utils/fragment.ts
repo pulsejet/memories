@@ -117,7 +117,6 @@ export const fragment = {
 
     // If the fragment is already in the list, we can't touch it.
     if (list.find((f) => f.type === frag.type)) {
-      console.debug('Fragment already in route', frag.type);
       return;
     }
 
