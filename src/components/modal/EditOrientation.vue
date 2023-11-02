@@ -215,7 +215,8 @@ export default defineComponent({
     grid-gap: 5px;
     grid-template-columns: repeat(auto-fit, 80px);
     justify-content: center;
-    margin: 4px 0;
+    margin: 6px 0;
+    margin-top: 10px;
 
     .sample {
       border-radius: 10px;

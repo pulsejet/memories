@@ -42,7 +42,7 @@
 
       <div v-if="sections.includes(5)">
         <div class="title-text">
-          {{ t('memories', 'Rotation') }}
+          {{ t('memories', 'Orientation (EXIF)') }}
         </div>
         <EditOrientation ref="editOrientation" :photos="photos" :disabled="processing" />
       </div>
