@@ -18,9 +18,15 @@ html.native {
   }
 
   body.viewer-fully-opened.viewer-video {
-    // Hide main content
+    // Hide main content when playing a video,
+    // so we can pass through to the native video player.
+    // The photoswipe element is outside the main content,
+    // so the controls will still be visible.
     #app-content-vue {
+      // scroller cursors have transitions on visibility
+      // so we also need to set opacity to 0
       visibility: hidden;
+      opacity: 0;
     }
 
     // Hide the background to be transparent for ExoPlayer
