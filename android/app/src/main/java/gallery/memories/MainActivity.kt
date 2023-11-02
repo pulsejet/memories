@@ -2,6 +2,7 @@ package gallery.memories
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Color
 import android.net.Uri
 import android.net.http.SslError
@@ -10,7 +11,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
+import android.view.WindowInsets
 import android.view.WindowInsetsController
+import android.view.WindowManager
 import android.webkit.CookieManager
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceRequest
@@ -87,6 +90,13 @@ class MainActivity : AppCompatActivity() {
         binding.coordinator.removeAllViews()
         binding.webview.destroy();
         nativex.destroy()
+    }
+
+    override fun onConfigurationChanged(config: Configuration) {
+        super.onConfigurationChanged(config)
+
+        // Hide the status bar in landscape
+        setFullscreen(config.orientation == Configuration.ORIENTATION_LANDSCAPE)
     }
 
     public override fun onResume() {
@@ -305,6 +315,50 @@ class MainActivity : AppCompatActivity() {
         binding.videoView.visibility = View.GONE
     }
 
+    /**
+     * Make the app fullscreen.
+     */
+    private fun setFullscreen(value: Boolean) {
+        if (value) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                window.attributes.layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.insetsController?.apply {
+                    hide(WindowInsets.Type.statusBars())
+                    systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                }
+            } else {
+                @Suppress("Deprecation")
+                window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
+                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        or View.SYSTEM_UI_FLAG_IMMERSIVE
+                        or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
+            }
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                window.attributes.layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.insetsController?.apply {
+                    show(WindowInsets.Type.statusBars())
+                }
+            } else {
+                @Suppress("Deprecation")
+                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+            }
+        }
+    }
+
+    /**
+     * Store a given theme for restoreTheme.
+     */
     fun storeTheme(color: String?, isDark: Boolean) {
         if (color == null) return
         getSharedPreferences(getString(R.string.preferences_key), 0).edit()
@@ -313,6 +367,9 @@ class MainActivity : AppCompatActivity() {
             .apply()
     }
 
+    /**
+     * Restore the last known theme color.
+     */
     fun restoreTheme() {
         val preferences = getSharedPreferences(getString(R.string.preferences_key), 0)
         val color = preferences.getString(getString(R.string.preferences_theme_color), null)
@@ -320,6 +377,9 @@ class MainActivity : AppCompatActivity() {
         applyTheme(color, isDark)
     }
 
+    /**
+     * Apply a color theme.
+     */
     fun applyTheme(color: String?, isDark: Boolean) {
         if (color == null) return
 
@@ -347,6 +407,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Do a soft refresh on the open timeline
+     */
     fun refreshTimeline(force: Boolean = false) {
         runOnUiThread {
             // Check webview is loaded
