@@ -2,10 +2,13 @@
   <SwipeRefresh
     class="container no-user-select"
     ref="container"
+    :refresh="softRefreshSync"
     :allowSwipe="allowSwipe"
-    @refresh="softRefresh"
-    :loading="loading > 0"
+    :state="state"
   >
+    <!-- Loading indicator -->
+    <XLoadingIcon class="loading-icon centered" v-if="loading" />
+
     <!-- Static top matter -->
     <TopMatter ref="topmatter" />
 
@@ -275,7 +278,7 @@ export default defineComponent({
 
       // Do a soft refresh if the query changes
       else if (JSON.stringify(from.query) !== JSON.stringify(to.query)) {
-        await this.softRefreshInternal(true);
+        await this.softRefreshSync();
       }
 
       // Check if viewer is supposed to be open
@@ -370,14 +373,19 @@ export default defineComponent({
      * when changing the configuration
      */
     softRefresh() {
-      this.softRefreshInternal(false);
+      this._softRefreshInternal(false);
+    },
+
+    /** Fetch and re-process days (sync can be awaited) */
+    async softRefreshSync() {
+      await this._softRefreshInternal(true);
     },
 
     /**
      * Fetch and re-process days (can be awaited if sync).
      * Do not pass this function as a callback directly.
      */
-    async softRefreshInternal(sync: boolean) {
+    async _softRefreshInternal(sync: boolean) {
       this.refs.selectionManager.clear();
       this.fetchDayQueue = []; // reset queue
 

@@ -31,6 +31,7 @@ export default defineComponent({
 
 .loading-icon {
   z-index: 100000; // above everything
+  pointer-events: none;
 
   .higher {
     position: relative;

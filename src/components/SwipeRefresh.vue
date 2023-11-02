@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, type PropType } from 'vue';
 
 const SWIPE_PX = 250;
 
@@ -14,37 +14,56 @@ export default defineComponent({
   name: 'SwipeRefresh',
 
   props: {
+    refresh: {
+      type: Function as PropType<() => Promise<any>>,
+      required: true,
+    },
+
     allowSwipe: {
       type: Boolean,
       default: true,
     },
 
-    loading: {
-      type: Boolean,
-      default: false,
+    state: {
+      type: Number,
+      default: Math.random(),
     },
   },
 
-  emits: {
-    refresh: () => true,
-  },
-
   data: () => ({
+    /** Is active interaction */
     on: false,
+    /** Start touch Y coordinate */
     start: 0,
+    /** End touch Y coordinate */
     end: 0,
-    updateFrame: 0,
+    /** Percentage progress to show in swiping */
     progress: 0,
+    /** Next update frame reference */
+    updateFrame: 0,
+
+    // Loading animation state
+    loading: false,
     animate: false,
     wasSwiped: true,
     firstcycle: 0,
   }),
 
+  emits: [],
+
   mounted() {
     this.animate = this.loading; // start if needed
   },
 
+  beforeDestroy() {
+    this.reset();
+  },
+
   watch: {
+    state() {
+      this.reset();
+    },
+
     loading() {
       this.wasSwiped = this.progress >= 100;
       if (!this.wasSwiped) {
@@ -93,6 +112,21 @@ export default defineComponent({
   },
 
   methods: {
+    reset() {
+      // Clear events
+      window.cancelAnimationFrame(this.updateFrame);
+      window.clearTimeout(this.firstcycle);
+
+      // Reset state
+      this.on = false;
+      this.progress = 0;
+      this.updateFrame = 0;
+      this.loading = false;
+      this.animate = false;
+      this.wasSwiped = true;
+      this.firstcycle = 0;
+    },
+
     /** Start gesture on container (passive) */
     touchstart(event: TouchEvent) {
       if (!this.allowSwipe) return;
@@ -104,12 +138,12 @@ export default defineComponent({
 
     /** Execute gesture on container (passive) */
     touchmove(event: TouchEvent) {
-      if (!this.allowSwipe) return;
+      if (!this.allowSwipe || !this.on) return;
       const touch = event.touches[0];
       this.end = touch.clientY;
 
       // Update progress only once per frame
-      this.updateFrame ||= requestAnimationFrame(() => {
+      this.updateFrame ||= window.requestAnimationFrame(async () => {
         this.updateFrame = 0;
 
         // Compute percentage of swipe
@@ -118,8 +152,16 @@ export default defineComponent({
 
         // Execute action on threshold
         if (this.progress >= 100) {
-          this.$emit('refresh');
           this.on = false;
+          const state = this.state;
+          try {
+            this.loading = true;
+            await this.refresh();
+          } finally {
+            if (this.state === state) {
+              this.loading = false;
+            }
+          }
         }
       });
     },
@@ -170,7 +212,7 @@ export default defineComponent({
       }
       49.99% {
         background-image: $progress-outside;
-        background-size: 12000% 12000%;
+        background-size: 11000% 11000%;
       }
       50% {
         background-image: $progress-inside;
@@ -178,7 +220,7 @@ export default defineComponent({
       }
       100% {
         background-image: $progress-inside;
-        background-size: 12000% 12000%;
+        background-size: 11000% 11000%;
       }
     }
   }
