@@ -1,5 +1,11 @@
 <template>
-  <div class="container no-user-select" ref="container">
+  <SwipeRefresh
+    class="container no-user-select"
+    ref="container"
+    :refresh="softRefreshSync"
+    :allowSwipe="allowSwipe"
+    :state="state"
+  >
     <!-- Loading indicator -->
     <XLoadingIcon class="loading-icon centered" v-if="loading" />
 
@@ -74,7 +80,8 @@
       :fullHeight="scrollerHeight"
       :recycler="refs.recycler"
       :recyclerBefore="refs.recyclerBefore"
-      @interactend="loadScrollView()"
+      @interactend="loadScrollView"
+      @scroll="currentScroll = $event.current"
     />
 
     <SelectionManager
@@ -85,7 +92,7 @@
       :recycler="refs.recycler?.$el"
       @updateLoading="updateLoading"
     />
-  </div>
+  </SwipeRefresh>
 </template>
 
 <script lang="ts">
@@ -103,6 +110,7 @@ import Photo from '@components/frame/Photo.vue';
 import ScrollerManager from '@components/ScrollerManager.vue';
 import SelectionManager from '@components/SelectionManager.vue';
 import Viewer from '@components/viewer/Viewer.vue';
+import SwipeRefresh from './SwipeRefresh.vue';
 
 import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import TopMatter from '@components/top-matter/TopMatter.vue';
@@ -133,6 +141,7 @@ export default defineComponent({
     SelectionManager,
     ScrollerManager,
     Viewer,
+    SwipeRefresh,
   },
 
   mixins: [UserConfig],
@@ -166,6 +175,8 @@ export default defineComponent({
     currentStart: 0,
     /** Current end index */
     currentEnd: 0,
+    /** Current physical scroll position */
+    currentScroll: 0,
     /** Resizing timer */
     resizeTimer: null as number | null,
     /** Height of the scroller */
@@ -219,7 +230,7 @@ export default defineComponent({
   computed: {
     refs() {
       return this.$refs as {
-        container?: HTMLDivElement;
+        container?: InstanceType<typeof SwipeRefresh>;
         topmatter?: InstanceType<typeof TopMatter>;
         dtm?: InstanceType<typeof DynamicTopMatter>;
         recycler?: VueRecyclerType;
@@ -251,6 +262,11 @@ export default defineComponent({
     showEmpty(): boolean {
       return !this.loading && this.empty;
     },
+
+    /** Whether to allow swipe refresh */
+    allowSwipe(): boolean {
+      return !this.loading && this.currentScroll === 0;
+    },
   },
 
   methods: {
@@ -262,7 +278,7 @@ export default defineComponent({
 
       // Do a soft refresh if the query changes
       else if (JSON.stringify(from.query) !== JSON.stringify(to.query)) {
-        await this.softRefreshInternal(true);
+        await this.softRefreshSync();
       }
 
       // Check if viewer is supposed to be open
@@ -356,23 +372,38 @@ export default defineComponent({
      * Debouncing is necessary due to a large number of calls, e.g.
      * when changing the configuration
      */
-    async softRefresh() {
-      this.softRefreshInternal(false);
+    softRefresh() {
+      this._softRefreshInternal(false);
+    },
+
+    /** Fetch and re-process days (sync can be awaited) */
+    async softRefreshSync() {
+      await this._softRefreshInternal(true);
     },
 
     /**
-     * Fetch and re-process days (can be awaited).
+     * Fetch and re-process days (can be awaited if sync).
      * Do not pass this function as a callback directly.
      */
-    async softRefreshInternal(sync: boolean) {
+    async _softRefreshInternal(sync: boolean) {
       this.refs.selectionManager.clear();
       this.fetchDayQueue = []; // reset queue
 
+      // Fetch days and reset loading
+      this.updateLoading(1);
+      const doFetch = async () => {
+        try {
+          await this.fetchDays(true);
+        } finally {
+          this.updateLoading(-1);
+        }
+      };
+
       // Fetch days
       if (sync) {
-        await this.fetchDays(true);
+        doFetch();
       } else {
-        utils.setRenewingTimeout(this, '_softRefreshInternalTimer', () => this.fetchDays(true), 30);
+        utils.setRenewingTimeout(this, '_softRefreshInternalTimer', doFetch, 30);
       }
     },
 
@@ -384,7 +415,7 @@ export default defineComponent({
     /** Recompute static sizes of containers */
     recomputeSizes() {
       // Size of outer container
-      const e = this.refs.container!;
+      const e = this.refs.container!.$el;
       const height = e.clientHeight;
       const width = e.clientWidth;
       this.containerSize = [width, height];

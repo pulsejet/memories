@@ -39,6 +39,13 @@
         </div>
         <EditLocation ref="editLocation" :photos="photos" :disabled="processing" />
       </div>
+
+      <div v-if="sections.includes(5)">
+        <div class="title-text">
+          {{ t('memories', 'Orientation (EXIF)') }}
+        </div>
+        <EditOrientation ref="editOrientation" :photos="photos" :disabled="processing" />
+      </div>
     </div>
 
     <div v-if="processing" class="progressbar">
@@ -49,8 +56,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-
-import { showWarning } from '@nextcloud/dialogs';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
@@ -65,8 +70,9 @@ import EditDate from './EditDate.vue';
 import EditTags from './EditTags.vue';
 import EditExif from './EditExif.vue';
 import EditLocation from './EditLocation.vue';
+import EditOrientation from './EditOrientation.vue';
 
-import { showError } from '@nextcloud/dialogs';
+import { showWarning, showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
 import * as dav from '@services/dav';
@@ -86,6 +92,7 @@ export default defineComponent({
     EditTags,
     EditExif,
     EditLocation,
+    EditOrientation,
   },
 
   mixins: [UserConfig, ModalMixin],
@@ -105,6 +112,7 @@ export default defineComponent({
         editTags?: InstanceType<typeof EditTags>;
         editExif?: InstanceType<typeof EditExif>;
         editLocation?: InstanceType<typeof EditLocation>;
+        editOrientation?: InstanceType<typeof EditOrientation>;
       };
     },
   },
@@ -127,10 +135,24 @@ export default defineComponent({
       // Filter out forbidden MIME types
       photos = photos.filter((p) => {
         if (this.c.FORBIDDEN_EDIT_MIMES.includes(p.mimetype ?? String())) {
-          showWarning(
-            this.t('memories', 'Cannot edit {name} of type {type}', { name: p.basename!, type: p.mimetype! }),
-          );
+          showError(this.t('memories', 'Cannot edit {name} of type {type}', { name: p.basename!, type: p.mimetype! }));
           return false;
+        }
+
+        // Extra filters if orientation is in the sections
+        if (sections.includes(5)) {
+          // Videos might work but we don't want to risk it
+          if (p.mimetype?.startsWith('video/')) {
+            showError(this.t('memories', 'Cannot edit rotation on videos ({name})', { name: p.basename! }));
+            return false;
+          }
+
+          // Live photos cannot be edited because the orientation of the video
+          // will remain the same and look wrong.
+          if (p.liveid) {
+            showError(this.t('memories', 'Cannot edit rotation on Live Photos ({name})', { name: p.basename! }));
+            return false;
+          }
         }
 
         return true;
@@ -225,6 +247,12 @@ export default defineComponent({
           raw.CreateDate = date;
         }
 
+        // Orientation
+        const orientation = this.refs.editOrientation?.result?.(p);
+        if (orientation !== null) {
+          raw.Orientation = orientation;
+        }
+
         exifs.set(p.fileid, raw);
       }
 
@@ -266,8 +294,20 @@ export default defineComponent({
           // Update EXIF if required
           const raw = exifs.get(fileid) ?? {};
           if (Object.keys(raw).length > 0) {
-            await axios.patch<null>(API.IMAGE_SETEXIF(fileid), { raw });
+            const info = await axios.patch<IImageInfo>(API.IMAGE_SETEXIF(fileid), { raw });
             dirty = true;
+
+            // Update image size
+            p.h = info.data?.h ?? p.h;
+            p.w = info.data?.w ?? p.w;
+
+            // If orientation was updated we need to change
+            // the ETag so that the preview is updated.
+            // Deliberately don't change the tag otherwise,
+            // so there's no need to re-download the image.
+            if (raw.Orientation) {
+              p.etag = info.data?.etag ?? p.etag;
+            }
           }
 
           // Update tags if required

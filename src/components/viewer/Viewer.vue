@@ -22,148 +22,15 @@
       <div class="top-bar" v-if="photoswipe" :class="{ showControls }">
         <NcActions :inline="numInlineActions" container=".memories_viewer .pswp">
           <NcActionButton
-            v-if="canShare"
-            :aria-label="t('memories', 'Share')"
-            @click="shareCurrent"
-            :close-after-click="true"
+            v-for="action of actions"
+            :key="action.id"
+            :aria-label="action.name"
+            close-after-click
+            @click="action.callback()"
           >
-            {{ t('memories', 'Share') }}
-            <template #icon> <ShareIcon :size="24" /> </template>
-          </NcActionButton>
-          <NcActionButton
-            v-if="!routeIsAlbums && canDelete"
-            :aria-label="t('memories', 'Delete')"
-            @click="deleteCurrent"
-            :close-after-click="true"
-          >
-            {{ t('memories', 'Delete') }}
-            <template #icon> <DeleteIcon :size="24" /> </template>
-          </NcActionButton>
-          <NcActionButton
-            v-if="routeIsAlbums"
-            :aria-label="t('memories', 'Remove from album')"
-            @click="deleteCurrent"
-            :close-after-click="true"
-          >
-            {{ t('memories', 'Remove from album') }}
-            <template #icon> <AlbumRemoveIcon :size="24" /> </template>
-          </NcActionButton>
-          <NcActionButton
-            v-if="isLivePhoto"
-            :aria-label="t('memories', 'Play Live Photo')"
-            @click="playLivePhoto"
-            :close-after-click="true"
-          >
-            {{ t('memories', 'Play Live Photo') }}
+            {{ action.name }}
             <template #icon>
-              <LivePhotoIcon :size="24" :playing="liveState.playing" :spin="liveState.waiting" />
-            </template>
-          </NcActionButton>
-          <NcActionButton
-            v-if="!routeIsPublic && !isLocal"
-            :aria-label="t('memories', 'Favorite')"
-            @click="favoriteCurrent"
-            :close-after-click="true"
-          >
-            {{ t('memories', 'Favorite') }}
-            <template #icon>
-              <StarIcon v-if="isFavorite()" :size="24" />
-              <StarOutlineIcon v-else :size="24" />
-            </template>
-          </NcActionButton>
-          <NcActionButton :aria-label="t('memories', 'Info')" @click="toggleSidebar" :close-after-click="true">
-            {{ t('memories', 'Info') }}
-            <template #icon>
-              <InfoIcon :size="24" />
-            </template>
-          </NcActionButton>
-          <NcActionButton
-            v-if="canEdit && !isVideo"
-            :aria-label="t('memories', 'Edit')"
-            @click="openEditor"
-            :close-after-click="true"
-          >
-            {{ t('memories', 'Edit') }}
-            <template #icon>
-              <TuneIcon :size="24" />
-            </template>
-          </NcActionButton>
-          <NcActionButton
-            :aria-label="t('memories', 'Download')"
-            @click="downloadCurrent"
-            :close-after-click="true"
-            v-if="!initstate.noDownload && !isLocal"
-          >
-            {{ t('memories', 'Download') }}
-            <template #icon>
-              <DownloadIcon :size="24" />
-            </template>
-          </NcActionButton>
-          <NcActionButton
-            v-if="!initstate.noDownload && currentPhoto?.liveid"
-            :aria-label="t('memories', 'Download Video')"
-            @click="downloadCurrentLiveVideo"
-            :close-after-click="true"
-          >
-            {{ t('memories', 'Download Video') }}
-            <template #icon>
-              <DownloadIcon :size="24" />
-            </template>
-          </NcActionButton>
-          <NcActionButton
-            v-for="raw of stackedRaw"
-            :aria-label="t('memories', 'Download {ext}', { ext: raw.extension })"
-            @click="downloadByFileId(raw.fileid)"
-            :close-after-click="true"
-            :key="raw.fileid"
-          >
-            {{ t('memories', 'Download {ext}', { ext: raw.extension }) }}
-            <template #icon>
-              <DownloadIcon :size="24" />
-            </template>
-          </NcActionButton>
-          <NcActionButton
-            v-if="!routeIsPublic && !routeIsAlbums && !isLocal"
-            :aria-label="t('memories', 'View in folder')"
-            @click="viewInFolder"
-            :close-after-click="true"
-          >
-            {{ t('memories', 'View in folder') }}
-            <template #icon>
-              <OpenInNewIcon :size="24" />
-            </template>
-          </NcActionButton>
-          <NcActionButton
-            :aria-label="t('memories', 'Slideshow')"
-            v-if="globalCount > 1"
-            @click="startSlideshow"
-            :close-after-click="true"
-          >
-            {{ t('memories', 'Slideshow') }}
-            <template #icon>
-              <SlideshowIcon :size="24" />
-            </template>
-          </NcActionButton>
-          <NcActionButton
-            :aria-label="t('memories', 'Edit metadata')"
-            v-if="canEdit"
-            @click="editMetadata"
-            :close-after-click="true"
-          >
-            {{ t('memories', 'Edit metadata') }}
-            <template #icon>
-              <EditFileIcon :size="24" />
-            </template>
-          </NcActionButton>
-          <NcActionButton
-            :aria-label="t('memories', 'Add to album')"
-            v-if="config.albums_enabled && !isLocal && !routeIsPublic && canShare && currentPhoto?.imageInfo?.filename"
-            @click="updateAlbums"
-            :close-after-click="true"
-          >
-            {{ t('memories', 'Add to album') }}
-            <template #icon>
-              <AlbumIcon :size="24" />
+              <component :is="action.icon" :size="24" v-bind="action.iconArgs ?? {}" />
             </template>
           </NcActionButton>
         </NcActions>
@@ -221,6 +88,22 @@ import SlideshowIcon from 'vue-material-design-icons/PlayBox.vue';
 import EditFileIcon from 'vue-material-design-icons/FileEdit.vue';
 import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
 import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
+import RotateLeftIcon from 'vue-material-design-icons/RotateLeft.vue';
+
+type IViewerAction = {
+  /** Identifier (optional) */
+  id: string;
+  /** Display text */
+  name: string;
+  /** Icon component */
+  icon: any;
+  /** Props on icon component */
+  iconArgs?: any;
+  /** Action to perform */
+  callback: () => void;
+  /** Condition to check for including */
+  if: boolean;
+};
 
 const SLIDESHOW_MS = 5000;
 const SIDEBAR_DEBOUNCE_MS = 350;
@@ -234,19 +117,6 @@ export default defineComponent({
     NcActions,
     NcActionButton,
     ImageEditor,
-    LivePhotoIcon,
-    ShareIcon,
-    DeleteIcon,
-    StarIcon,
-    StarOutlineIcon,
-    DownloadIcon,
-    InfoIcon,
-    OpenInNewIcon,
-    TuneIcon,
-    SlideshowIcon,
-    EditFileIcon,
-    AlbumRemoveIcon,
-    AlbumIcon,
   },
 
   mixins: [UserConfig],
@@ -358,6 +228,126 @@ export default defineComponent({
       return this.list[idx];
     },
 
+    /** Get all actions to show */
+    actions(): IViewerAction[] {
+      return [
+        {
+          id: 'share',
+          name: this.t('memories', 'Share'),
+          icon: ShareIcon,
+          callback: this.shareCurrent,
+          if: this.canShare,
+        },
+        {
+          id: 'delete',
+          name: this.t('memories', 'Delete'),
+          icon: DeleteIcon,
+          callback: this.deleteCurrent,
+          if: !this.routeIsAlbums && this.canDelete,
+        },
+        {
+          id: 'remove-from-album',
+          name: this.t('memories', 'Remove from album'),
+          icon: AlbumRemoveIcon,
+          callback: this.deleteCurrent,
+          if: this.routeIsAlbums,
+        },
+        {
+          id: 'play-live-photo',
+          name: this.t('memories', 'Play Live Photo'),
+          icon: LivePhotoIcon,
+          iconArgs: {
+            playing: this.liveState.playing,
+            spin: this.liveState.waiting,
+          },
+          callback: this.playLivePhoto,
+          if: this.isLivePhoto,
+        },
+        {
+          id: 'favorite',
+          name: this.t('memories', 'Favorite'),
+          icon: this.isFavorite ? StarIcon : StarOutlineIcon,
+          callback: this.favoriteCurrent,
+          if: !this.routeIsPublic && !this.isLocal,
+        },
+        {
+          id: 'info',
+          name: this.t('memories', 'Info'),
+          icon: InfoIcon,
+          callback: this.toggleSidebar,
+          if: true,
+        },
+        {
+          id: 'edit',
+          name: this.t('memories', 'Edit'),
+          icon: TuneIcon,
+          callback: this.openEditor,
+          if: this.canEdit && !this.isVideo,
+        },
+        {
+          id: 'download',
+          name: this.t('memories', 'Download'),
+          icon: DownloadIcon,
+          callback: this.downloadCurrent,
+          if: !this.initstate.noDownload && !this.isLocal,
+        },
+        {
+          id: 'download-video',
+          name: this.t('memories', 'Download Video'),
+          icon: DownloadIcon,
+          callback: this.downloadCurrentLiveVideo,
+          if: !this.initstate.noDownload && !!this.currentPhoto?.liveid,
+        },
+        ...this.stackedRaw.map((raw) => ({
+          id: `download-raw-${raw.fileid}`,
+          name: this.t('memories', 'Download {ext}', { ext: raw.extension }),
+          icon: DownloadIcon,
+          callback: () => this.downloadByFileId(raw.fileid),
+          if: true,
+        })),
+        {
+          id: 'view-in-folder',
+          name: this.t('memories', 'View in folder'),
+          icon: OpenInNewIcon,
+          callback: this.viewInFolder,
+          if: !this.routeIsPublic && !this.routeIsAlbums && !this.isLocal,
+        },
+        {
+          id: 'slideshow',
+          name: this.t('memories', 'Slideshow'),
+          icon: SlideshowIcon,
+          callback: this.startSlideshow,
+          if: this.globalCount > 1,
+        },
+        {
+          id: 'edit-metadata',
+          name: this.t('memories', 'Edit metadata'),
+          icon: EditFileIcon,
+          callback: () => this.editMetadata(),
+          if: this.canEdit,
+        },
+        {
+          id: 'rotate-flip',
+          name: this.t('memories', 'Rotate / Flip'),
+          icon: RotateLeftIcon,
+          callback: () => this.editMetadata([5]),
+          if: this.canEdit && !this.isVideo,
+        },
+        {
+          id: 'add-to-album',
+          name: this.t('memories', 'Add to album'),
+          icon: AlbumIcon,
+          callback: this.updateAlbums,
+          if:
+            this.config.albums_enabled &&
+            !this.isLocal &&
+            !this.routeIsPublic &&
+            this.canShare &&
+            !!this.currentPhoto?.imageInfo?.filename,
+        },
+      ].filter((action) => action.if);
+    },
+
     /** Is the current slide a video */
     isVideo(): boolean {
       return Boolean((this.currentPhoto?.flag ?? 0) & this.c.FLAG_IS_VIDEO);
@@ -371,6 +361,13 @@ export default defineComponent({
     /** Is the current slide a local photo */
     isLocal(): boolean {
       return utils.isLocalPhoto(this.currentPhoto!);
+    },
+
+    /** Is the current photo a favorite */
+    isFavorite() {
+      const p = this.currentPhoto;
+      if (!p) return false;
+      return Boolean(p.flag & this.c.FLAG_IS_FAVORITE);
     },
 
     /** Show bottom bar info such as date taken */
@@ -1049,17 +1046,10 @@ export default defineComponent({
       this.psLivePhoto?.play(this.photoswipe!.currSlide!.content as PsContent);
     },
 
-    /** Is the current photo a favorite */
-    isFavorite() {
-      const p = this.currentPhoto;
-      if (!p) return false;
-      return Boolean(p.flag & this.c.FLAG_IS_FAVORITE);
-    },
-
     /** Favorite the current photo */
     async favoriteCurrent() {
       const photo = this.currentPhoto!;
-      const val = !this.isFavorite();
+      const val = !this.isFavorite;
       try {
         this.updateLoading(1);
         for await (const p of dav.favoritePhotos([photo], val)) {
@@ -1256,8 +1246,8 @@ export default defineComponent({
     /**
      * Edit metadata for current photo
      */
-    editMetadata() {
-      _m.modals.editMetadata([this.currentPhoto!]);
+    editMetadata(sections?: number[]) {
+      _m.modals.editMetadata([this.currentPhoto!], sections);
     },
 
     /**

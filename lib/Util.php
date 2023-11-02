@@ -370,11 +370,8 @@ class Util
     public static function callerIsNative(): bool
     {
         // Should not use IRequest here since this method is called during registration
-        if (\array_key_exists('HTTP_X_REQUESTED_WITH', $_SERVER)) {
-            return 'gallery.memories' === $_SERVER['HTTP_X_REQUESTED_WITH'];
-        }
-
-        return str_contains($_SERVER['HTTP_USER_AGENT'] ?? '', 'MemoriesNative');
+        return 'gallery.memories' === ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '')
+        || str_contains($_SERVER['HTTP_USER_AGENT'] ?? '', 'MemoriesNative');
     }
 
     /**
