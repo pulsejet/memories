@@ -62,6 +62,7 @@ import MoveIcon from 'vue-material-design-icons/ImageMove.vue';
 import AlbumsIcon from 'vue-material-design-icons/ImageAlbum.vue';
 import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
 import FolderMoveIcon from 'vue-material-design-icons/FolderMove.vue';
+import RotateLeftIcon from 'vue-material-design-icons/RotateLeft.vue';
 
 import type { IDay, IHeadRow, IPhoto, IRow } from '@typings';
 
@@ -230,6 +231,11 @@ export default defineComponent({
         name: t('memories', 'Edit metadata'),
         icon: EditFileIcon,
         callback: this.editMetadataSelection.bind(this),
+      },
+      {
+        name: t('memories', 'Rotate / Flip'),
+        icon: RotateLeftIcon,
+        callback: () => this.editMetadataSelection(this.selection, [5]),
       },
       {
         name: t('memories', 'View in folder'),

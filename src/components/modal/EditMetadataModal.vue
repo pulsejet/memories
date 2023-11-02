@@ -39,6 +39,13 @@
         </div>
         <EditLocation ref="editLocation" :photos="photos" :disabled="processing" />
       </div>
+
+      <div v-if="sections.includes(5)">
+        <div class="title-text">
+          {{ t('memories', 'Rotation') }}
+        </div>
+        <EditOrientation ref="editOrientation" :photos="photos" :disabled="processing" />
+      </div>
     </div>
 
     <div v-if="processing" class="progressbar">
@@ -65,6 +72,7 @@ import EditDate from './EditDate.vue';
 import EditTags from './EditTags.vue';
 import EditExif from './EditExif.vue';
 import EditLocation from './EditLocation.vue';
+import EditOrientation from './EditOrientation.vue';
 
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
@@ -86,6 +94,7 @@ export default defineComponent({
     EditTags,
     EditExif,
     EditLocation,
+    EditOrientation,
   },
 
   mixins: [UserConfig, ModalMixin],
@@ -105,6 +114,7 @@ export default defineComponent({
         editTags?: InstanceType<typeof EditTags>;
         editExif?: InstanceType<typeof EditExif>;
         editLocation?: InstanceType<typeof EditLocation>;
+        editOrientation?: InstanceType<typeof EditOrientation>;
       };
     },
   },
@@ -225,6 +235,12 @@ export default defineComponent({
           raw.CreateDate = date;
         }
 
+        // Orientation
+        const orientation = this.refs.editOrientation?.result?.(p);
+        if (orientation !== null) {
+          raw.Orientation = orientation;
+        }
+
         exifs.set(p.fileid, raw);
       }
 
@@ -266,8 +282,20 @@ export default defineComponent({
           // Update EXIF if required
           const raw = exifs.get(fileid) ?? {};
           if (Object.keys(raw).length > 0) {
-            await axios.patch<null>(API.IMAGE_SETEXIF(fileid), { raw });
+            const info = await axios.patch<IImageInfo>(API.IMAGE_SETEXIF(fileid), { raw });
             dirty = true;
+
+            // Update image size
+            p.h = info.data?.h ?? p.h;
+            p.w = info.data?.w ?? p.w;
+
+            // If orientation was updated we need to change
+            // the ETag so that the preview is updated.
+            // Deliberately don't change the tag otherwise,
+            // so there's no need to re-download the image.
+            if (raw.Orientation) {
+              p.etag = info.data?.etag ?? p.etag;
+            }
           }
 
           // Update tags if required

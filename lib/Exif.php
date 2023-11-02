@@ -334,7 +334,7 @@ class Exif
         $data['SourceFile'] = $path;
         $raw = json_encode([$data], JSON_UNESCAPED_UNICODE);
         $cmd = array_merge(self::getExiftool(), [
-            '-overwrite_original',
+            '-overwrite_original', '-n',
             '-api', 'LargeFileSupport=1',
             '-json=-', $path,
         ]);

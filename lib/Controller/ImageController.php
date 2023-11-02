@@ -259,7 +259,12 @@ class ImageController extends GenericApiController
             // Set the exif data
             Exif::setFileExif($file, $raw);
 
-            return new JSONResponse([], Http::STATUS_OK);
+            // If rotation changed then update the previews
+            if ($raw['Orientation'] ?? false) {
+                $this->deletePreviews($file);
+            }
+
+            return $this->info($id, true);
         });
     }
 
@@ -451,5 +456,23 @@ class ImageController extends GenericApiController
 
         // Get the tag names
         return array_map(static fn ($t) => $t->getName(), $visible);
+    }
+
+    /**
+     * Invalidate previews for a file.
+     */
+    private function deletePreviews(\OCP\Files\File $file): void
+    {
+        try {
+            $previewRoot = new \OC\Preview\Storage\Root(
+                \OC::$server->get(IRootFolder::class),
+                \OC::$server->get(\OC\SystemConfig::class),
+            );
+
+            $fileId = (string) $file->getId();
+            $previewRoot->getFolder($fileId)->delete();
+        } catch (\Exception $e) {
+            return;
+        }
     }
 }

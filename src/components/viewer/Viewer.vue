@@ -156,6 +156,17 @@
             </template>
           </NcActionButton>
           <NcActionButton
+            :aria-label="t('memories', 'Rotate / Flip')"
+            v-if="canEdit && !isVideo"
+            @click="editMetadata([5])"
+            :close-after-click="true"
+          >
+            {{ t('memories', 'Rotate / Flip') }}
+            <template #icon>
+              <RotateLeftIcon :size="24" />
+            </template>
+          </NcActionButton>
+          <NcActionButton
             :aria-label="t('memories', 'Add to album')"
             v-if="config.albums_enabled && !isLocal && !routeIsPublic && canShare && currentPhoto?.imageInfo?.filename"
             @click="updateAlbums"
@@ -221,6 +232,7 @@ import SlideshowIcon from 'vue-material-design-icons/PlayBox.vue';
 import EditFileIcon from 'vue-material-design-icons/FileEdit.vue';
 import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
 import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
+import RotateLeftIcon from 'vue-material-design-icons/RotateLeft.vue';
 
 const SLIDESHOW_MS = 5000;
 const SIDEBAR_DEBOUNCE_MS = 350;
@@ -247,6 +259,7 @@ export default defineComponent({
     EditFileIcon,
     AlbumRemoveIcon,
     AlbumIcon,
+    RotateLeftIcon,
   },
 
   mixins: [UserConfig],
@@ -1256,8 +1269,8 @@ export default defineComponent({
     /**
      * Edit metadata for current photo
      */
-    editMetadata() {
-      _m.modals.editMetadata([this.currentPhoto!]);
+    editMetadata(sections?: number[]) {
+      _m.modals.editMetadata([this.currentPhoto!], sections);
     },
 
     /**

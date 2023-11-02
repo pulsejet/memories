@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 - **Feature**: RAW files are now hidden (stacked) when another file with the same basename exists ([#537](https://github.com/pulsejet/memories/issues/537), [#152](https://github.com/pulsejet/memories/issues/152), [#419](https://github.com/pulsejet/memories/issues/419))
+- **Feature**: Bulk rotating of images. You can now rotate images losslessly by editing the rotation EXIF metadata. ([#856](https://github.com/pulsejet/memories/issues/856))
 - **Feature**: Icon animation when playing live photos ([#898](https://github.com/pulsejet/memories/issues/898))
 - **Feature**: Swipe to refresh on timeline ([#547](https://github.com/pulsejet/memories/issues/547))
 - **Bugfix**: Allow switching video to direct on Safari ([#650](https://github.com/pulsejet/memories/issues/650))
