@@ -57,8 +57,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { showWarning } from '@nextcloud/dialogs';
-
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
@@ -74,7 +72,7 @@ import EditExif from './EditExif.vue';
 import EditLocation from './EditLocation.vue';
 import EditOrientation from './EditOrientation.vue';
 
-import { showError } from '@nextcloud/dialogs';
+import { showWarning, showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
 import * as dav from '@services/dav';
@@ -137,10 +135,24 @@ export default defineComponent({
       // Filter out forbidden MIME types
       photos = photos.filter((p) => {
         if (this.c.FORBIDDEN_EDIT_MIMES.includes(p.mimetype ?? String())) {
-          showWarning(
-            this.t('memories', 'Cannot edit {name} of type {type}', { name: p.basename!, type: p.mimetype! }),
-          );
+          showError(this.t('memories', 'Cannot edit {name} of type {type}', { name: p.basename!, type: p.mimetype! }));
           return false;
+        }
+
+        // Extra filters if orientation is in the sections
+        if (sections.includes(5)) {
+          // Videos might work but we don't want to risk it
+          if (p.mimetype?.startsWith('video/')) {
+            showError(this.t('memories', 'Cannot edit rotation on videos ({name})', { name: p.basename! }));
+            return false;
+          }
+
+          // Live photos cannot be edited because the orientation of the video
+          // will remain the same and look wrong.
+          if (p.liveid) {
+            showError(this.t('memories', 'Cannot edit rotation on Live Photos ({name})', { name: p.basename! }));
+            return false;
+          }
         }
 
         return true;

@@ -1,5 +1,12 @@
 <template>
   <div class="edit-orientation" v-if="samples.length">
+    {{
+      t(
+        'memories',
+        'This feature rotates images losslessly by updating the EXIF metadata. This approach is known to sometimes not work correctly on certain image types such as HEIC. Make sure you do a test run before using it on multiple images.',
+      )
+    }}
+
     <div class="samples">
       <XImg v-for="src of samples" class="sample" :key="src" :src="src" :style="{ transform }" />
       <div class="sample more" v-if="photos.length > samples.length">
@@ -208,7 +215,6 @@ export default defineComponent({
 <style scoped lang="scss">
 .edit-orientation {
   margin: 4px 0;
-  text-align: center;
 
   .samples {
     display: grid;
