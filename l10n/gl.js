@@ -359,6 +359,8 @@ OC.L10N.register(
     "Previous" : "Anterior",
     "Next" : "Seguinte",
     "Editing is currently disabled for Live Photos" : "Actualmente, está desactivada a edición para Live Photos",
+    "Access to media has been granted." : "Concedeuse acceso aos medios",
+    "Access to media is not available yet. If the button below does not work, grant the permission through settings." : "Aínda non está dispoñíbel o acceso aos medios. Se o botón de embaixo non funciona, conceda o permiso a través dos axustes.",
     "Finish" : "Rematar",
     "{name} binary exists and is executable." : "O binario {name} existe e é executábel.",
     "{name} binary not found." : "Non se atopou o binario {name}.",
