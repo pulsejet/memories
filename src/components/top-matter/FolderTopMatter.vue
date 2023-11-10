@@ -1,7 +1,7 @@
 <template>
   <div class="top-matter">
     <NcBreadcrumbs>
-      <NcBreadcrumb :title="rootFolderName" :to="{ ...$route, params: { path: [] }, hash: undefined }">
+      <NcBreadcrumb :title="rootFolderName" :to="getRoute([])">
         <template #icon>
           <template v-if="routeIsPublic">
             <ShareIcon :size="20" />
@@ -12,12 +12,7 @@
           </template>
         </template>
       </NcBreadcrumb>
-      <NcBreadcrumb
-        v-for="folder in list"
-        :key="folder.idx"
-        :title="folder.text"
-        :to="{ ...$route, params: { path: folder.path }, hash: undefined }"
-      />
+      <NcBreadcrumb v-for="folder in list" :key="folder.idx" :title="folder.text" :to="getRoute(folder.path)" />
     </NcBreadcrumbs>
 
     <div class="right-actions">
@@ -116,6 +111,14 @@ export default defineComponent({
           recursive: this.recursive ? undefined : String(1),
         },
       });
+    },
+
+    getRoute(path: string[]) {
+      return {
+        ...this.$route,
+        params: { path },
+        hash: undefined,
+      };
     },
   },
 });
