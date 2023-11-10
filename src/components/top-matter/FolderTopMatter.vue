@@ -1,7 +1,7 @@
 <template>
   <div class="top-matter">
     <NcBreadcrumbs>
-      <NcBreadcrumb :title="rootFolderName" :to="getRoute([])">
+      <NcBreadcrumb :name="rootFolderName" :to="getRoute([])">
         <template #icon>
           <template v-if="routeIsPublic">
             <ShareIcon :size="20" />
@@ -12,7 +12,7 @@
           </template>
         </template>
       </NcBreadcrumb>
-      <NcBreadcrumb v-for="folder in list" :key="folder.idx" :title="folder.text" :to="getRoute(folder.path)" />
+      <NcBreadcrumb v-for="folder in list" :key="folder.idx" :name="folder.text" :to="getRoute(folder.path)" />
     </NcBreadcrumbs>
 
     <div class="right-actions">
