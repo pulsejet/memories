@@ -24,7 +24,7 @@
           :bold="false"
           :href="share.url"
           :compact="true"
-          @click.prevent="copy(share.url)"
+          @click.prevent="shareOrCopy(share.url)"
         >
           <template #icon>
             <LinkIcon class="avatar" :size="20" />
@@ -141,21 +141,23 @@ export default defineComponent({
       // If an existing share is found, just share it directly if it's
       // not password protected. Otherwise create a new share.
       if (immediate) {
-        let share =
-          this.shares.find((s) => !s.hasPassword) || (this.shares.length === 0 ? await this.createLink(false) : null);
-
-        if (share) {
-          if (nativex.has()) {
-            nativex.shareUrl(share.url);
-          } else if ('share' in window.navigator) {
-            window.navigator.share({
-              title: this.filename,
-              url: share.url,
-            });
-          } else {
-            this.copy(share.url);
-          }
+        // create a new share if none exists
+        if (this.shares.length === 0) {
+          await this.createLink();
+        } else {
+          // find share with no password
+          const share = this.shares.find((s) => !s.hasPassword);
+          if (share) this.shareOrCopy(share.url);
         }
+      }
+    },
+
+    shareOrCopy(url: string) {
+      if (nativex.has()) {
+        nativex.shareUrl(url);
+      } else if ('share' in window.navigator) {
+        window.navigator.share({ title: this.filename, url: url });
+        this.copy(url);
       }
     },
 
@@ -197,7 +199,7 @@ export default defineComponent({
       return this.t('memories', 'Read only');
     },
 
-    async createLink(copy = true): Promise<IShare> {
+    async createLink(): Promise<IShare> {
       this.loading = true;
       try {
         const res = await axios.post<IShare>(API.SHARE_NODE(), {
@@ -206,11 +208,7 @@ export default defineComponent({
         const share = res.data;
         this.shares.push(share);
         this.refreshSidebar();
-
-        if (copy) {
-          this.copy(share.url);
-        }
-
+        this.shareOrCopy(share.url);
         return share;
       } finally {
         this.loading = false;
