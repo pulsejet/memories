@@ -62,7 +62,7 @@
 import { defineComponent } from 'vue';
 
 import axios from '@nextcloud/axios';
-import { showSuccess } from '@nextcloud/dialogs';
+import { showError, showSuccess } from '@nextcloud/dialogs';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
@@ -152,12 +152,12 @@ export default defineComponent({
       }
     },
 
-    shareOrCopy(url: string) {
+    async shareOrCopy(url: string) {
       if (nativex.has()) {
         nativex.shareUrl(url);
       } else if ('share' in window.navigator) {
+        await this.copy(url);
         window.navigator.share({ title: this.filename, url: url });
-        this.copy(url);
       }
     },
 
@@ -226,9 +226,13 @@ export default defineComponent({
       this.refreshSidebar();
     },
 
-    copy(url: string) {
-      window.navigator.clipboard.writeText(url);
-      showSuccess(this.t('memories', 'Link copied to clipboard'));
+    async copy(url: string) {
+      try {
+        await window.navigator.clipboard.writeText(url);
+        showSuccess(this.t('memories', 'Link copied to clipboard'));
+      } catch (e) {
+        showError(this.t('memories', 'Failed to copy link to clipboard'));
+      }
     },
 
     refreshSidebar() {
