@@ -294,8 +294,25 @@ class ImageController extends GenericApiController
             $blob = $file->getContent();
 
             // Convert image to JPEG if required
-            if (!\in_array($mimetype, ['image/png', 'image/webp', 'image/jpeg', 'image/gif'], true)) {
+            $highres_enabled = $this->config->getSystemValueString('memories.image.highres.convert_all_images_formarts_enabled', 'false');
+            $format = $this->config->getSystemValueString('memories.image.highres.format', 'jpeg');
+            if ($highres_enabled == 'true') {
+              switch ($format) {
+                case 'jpeg':
+                  if (!\in_array($mimetype, ['image/png', 'image/gif'], true)) {
+                      [$blob, $mimetype] = $this->getImageJPEG($blob, $mimetype);
+                  }
+                  break;
+                case 'webp':
+                  if (!\in_array($mimetype, ['image/gif'], true)) {
+                      [$blob, $mimetype] = $this->getImageJPEG($blob, $mimetype);
+                  }
+                  break;
+              }
+            } else {
+              if (!\in_array($mimetype, ['image/png', 'image/webp', 'image/jpeg', 'image/gif'], true)) {
                 [$blob, $mimetype] = $this->getImageJPEG($blob, $mimetype);
+              }
             }
 
             // Return the image
@@ -415,14 +432,34 @@ class ImageController extends GenericApiController
         } catch (\ImagickException $e) {
             throw Exceptions::Forbidden('Imagick failed to read image: '.$e->getMessage());
         }
-
         // Convert to JPEG
         try {
             $image->autoOrient();
-            $image->setImageFormat('jpeg');
-            $image->setImageCompressionQuality(85);
+
+            $format = $this->config->getSystemValueString('memories.image.highres.format', 'jpeg');
+            $image->setImageFormat($format);
+
+            $quality = (int)$this->config->getSystemValue('memories.image.highres.quality', '95');
+            $image->setImageCompressionQuality($quality);
+
+            // Set maximum width and height
+            $maxWidth = (int)$this->config->getSystemValue('memories.image.highres_max_x', '0');
+            $maxHeight = (int)$this->config->getSystemValue('memories.image.highres_max_y', '0');
+
+            // Check if the image exceeds the maximum resolution
+            $width = (int)$image->getImageWidth();
+            $height = (int)$image->getImageHeight();
+
+            if ($maxWidth > 0 && $maxHeight > 0) {
+              if ($width > $maxWidth || $height > $maxHeight) {
+                  // Resize the image
+                  $image->scaleImage((int)$maxWidth, (int)$maxHeight, true);
+              }
+            }
+          
             $blob = $image->getImageBlob();
             $mimetype = $image->getImageMimeType();
+
         } catch (\ImagickException $e) {
             throw Exceptions::Forbidden('Imagick failed to convert image: '.$e->getMessage());
         } finally {
