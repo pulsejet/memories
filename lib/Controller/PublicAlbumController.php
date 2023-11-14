@@ -73,25 +73,25 @@ class PublicAlbumController extends Controller
         // Browse anonymously if the album is accessed as a link
         \OC_User::setIncognitoMode(true);
 
+        // Get page title
+        $title = $album['name'];
+        if (str_starts_with($title, '.link-')) {
+            $title = $this->l10n->t('Shared Link');
+        }
+
         // Add OG metadata
-        $this->addOgMetadata($album, $token);
+        $this->addOgMetadata($album, $title, $token);
 
         // Scripts
         Util::addScript(Application::APPNAME, 'memories-main');
 
-        // Get page title
-        $shareTitle = $album['name'];
-        if (str_starts_with($shareTitle, '.link-')) {
-            $shareTitle = $this->l10n->t('Shared Link');
-        }
-
         // Share info
-        $this->initialState->provideInitialState('share_title', $shareTitle);
+        $this->initialState->provideInitialState('share_title', $title);
         $this->initialState->provideInitialState('share_type', 'album');
 
         // Render main template
         $response = new PublicTemplateResponse(Application::APPNAME, 'main', PageController::getMainParams());
-        $response->setHeaderTitle($shareTitle);
+        $response->setHeaderTitle($title);
         $response->setFooterVisible(false); // wth is that anyway?
         $response->setContentSecurityPolicy(PageController::getCSP());
 
@@ -131,7 +131,7 @@ class PublicAlbumController extends Controller
         return $downloadController->file($handle);
     }
 
-    private function addOgMetadata(array $album, string $token): void
+    private function addOgMetadata(array $album, string $title, string $token): void
     {
         $fileId = (int) $album['last_added_photo'];
         $albumId = (int) $album['album_id'];
@@ -148,6 +148,6 @@ class PublicAlbumController extends Controller
 
         $params = ['token' => $token];
         $url = $this->urlGenerator->linkToRouteAbsolute('memories.PublicAlbum.showShare', $params);
-        \OCA\Memories\Util::addOGMetadata($node, $album['name'], $url, array_merge($params, ['albums' => true]));
+        \OCA\Memories\Util::addOGMetadata($node, $title, $url, array_merge($params, ['albums' => true]));
     }
 }
