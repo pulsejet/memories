@@ -365,7 +365,8 @@ export async function fillImageInfo(photos: IPhoto[], query?: { tags?: number },
       p.datetaken = res.data.datetaken;
       p.imageInfo = res.data;
     } catch (error) {
-      console.error('Failed to get image info for', p.fileid, error);
+      console.error('Failed to get image info', p, error);
+      showError(t('memories', 'Failed to load image info: {name}', { name: p.basename ?? p.fileid }));
     } finally {
       done++;
       progress?.(done);

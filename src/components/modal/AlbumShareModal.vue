@@ -4,8 +4,24 @@
       {{ t('memories', 'Share Album') }}
     </template>
 
+    <template v-if="showEditFields">
+      <span class="field-title">
+        {{ t('memories', 'Name of the album') }}
+      </span>
+
+      <NcTextField
+        :value.sync="albumName"
+        type="text"
+        name="name"
+        :required="true"
+        autofocus="true"
+        :placeholder="t('memories', 'Name of the album')"
+      />
+    </template>
+
     <AlbumCollaborators
       v-if="album"
+      ref="collaborators"
       :album-name="album.basename"
       :collaborators="album.collaborators"
       :public-link="album.publicLink"
@@ -16,7 +32,7 @@
         :aria-label="t('memories', 'Save collaborators for this album.')"
         type="primary"
         :disabled="loadingAddCollaborators"
-        @click="handleSetCollaborators(collaborators)"
+        @click="save(collaborators)"
       >
         <template #icon>
           <XLoadingIcon v-if="loadingAddCollaborators" />
@@ -32,7 +48,10 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import { showError } from '@nextcloud/dialogs';
+
 import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
@@ -44,6 +63,7 @@ export default defineComponent({
   name: 'AlbumShareModal',
   components: {
     NcButton,
+    NcTextField,
     Modal,
     AlbumCollaborators,
   },
@@ -54,32 +74,85 @@ export default defineComponent({
 
   data: () => ({
     album: null as any,
+    albumName: String(),
     loadingAddCollaborators: false,
     collaborators: [] as any[],
   }),
 
+  computed: {
+    refs() {
+      return this.$refs as {
+        collaborators?: InstanceType<typeof AlbumCollaborators>;
+      };
+    },
+
+    showEditFields() {
+      return this.album?.basename?.startsWith('.link-');
+    },
+  },
+
+  created() {
+    console.assert(!_m.modals.albumShare, 'AlbumShareModal created twice');
+    _m.modals.albumShare = this.open;
+  },
+
   methods: {
-    async open() {
+    async open(user: string, name: string, link?: boolean) {
       this.show = true;
-      this.loadingAddCollaborators = true;
-      const { user, name } = this.$route.params;
-      this.album = await dav.getAlbum(user, name);
-      this.loadingAddCollaborators = false;
+
+      // Load album info
+      try {
+        this.loadingAddCollaborators = true;
+        this.albumName = name;
+        this.album = await dav.getAlbum(user, name);
+      } catch {
+        showError(this.t('memories', 'Failed to load album info: {name}', { name }));
+      } finally {
+        this.loadingAddCollaborators = false;
+      }
+
+      // Check if we immediately want to share a link
+      if (link) {
+        await this.$nextTick(); // load collaborators component
+        this.refs.collaborators?.createPublicLinkForAlbum();
+      }
     },
 
     cleanup() {
       this.show = false;
       this.album = null;
+      this.albumName = String();
     },
 
-    async handleSetCollaborators(collaborators: any[]) {
+    async save(collaborators: any[]) {
       try {
         this.loadingAddCollaborators = true;
+
+        // Update album collaborators
         await dav.updateAlbum(this.album, {
           albumName: this.album.basename,
           properties: { collaborators },
         });
-        this.close();
+
+        // Update album name if changed
+        if (this.album.basename !== this.albumName) {
+          await dav.renameAlbum(this.album, this.album.basename, this.albumName);
+
+          // Change route to new album name if we're on album page
+          if (this.routeIsAlbums) {
+            // Do not await but proceed to close modal instantly
+            this.$router.replace({
+              name: this.$route.name!,
+              params: {
+                user: this.$route.params.user,
+                name: this.albumName,
+              },
+            });
+          }
+        }
+
+        // Close modal
+        await this.close();
       } catch (error) {
         console.error(error);
       } finally {
@@ -93,5 +166,9 @@ export default defineComponent({
 <style lang="scss" scoped>
 .album-share.loading-icon {
   height: 350px;
+}
+
+span.field-title {
+  color: var(--color-text-lighter);
 }
 </style>

@@ -50,7 +50,7 @@
         </NcActionButton>
         <NcActionButton
           :aria-label="t('memories', 'Share album')"
-          @click="refs.shareModal.open()"
+          @click="openShareModal()"
           close-after-click
           v-if="canEditAlbum"
         >
@@ -89,7 +89,6 @@
 
     <AlbumCreateModal ref="createModal" />
     <AlbumDeleteModal ref="deleteModal" />
-    <AlbumShareModal ref="shareModal" />
   </div>
 </template>
 
@@ -106,7 +105,6 @@ import axios from '@nextcloud/axios';
 
 import AlbumCreateModal from '@components/modal/AlbumCreateModal.vue';
 import AlbumDeleteModal from '@components/modal/AlbumDeleteModal.vue';
-import AlbumShareModal from '@components/modal/AlbumShareModal.vue';
 
 import { downloadWithHandle } from '@services/dav/download';
 import { API } from '@services/API';
@@ -132,7 +130,6 @@ export default defineComponent({
 
     AlbumCreateModal,
     AlbumDeleteModal,
-    AlbumShareModal,
 
     BackIcon,
     DownloadIcon,
@@ -152,7 +149,6 @@ export default defineComponent({
       return this.$refs as {
         createModal: InstanceType<typeof AlbumCreateModal>;
         deleteModal: InstanceType<typeof AlbumDeleteModal>;
-        shareModal: InstanceType<typeof AlbumShareModal>;
       };
     },
 
@@ -177,6 +173,10 @@ export default defineComponent({
   methods: {
     back() {
       this.$router.go(-1);
+    },
+
+    openShareModal() {
+      _m.modals.albumShare(this.$route.params.user, this.$route.params.name);
     },
 
     async downloadAlbum() {

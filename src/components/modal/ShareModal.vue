@@ -119,7 +119,7 @@ export default defineComponent({
     },
 
     hasVideos(): boolean {
-      return !!this.photos?.some(utils.isVideo);
+      return Boolean(this.photos?.some(utils.isVideo));
     },
 
     canShareNative(): boolean {
@@ -137,11 +137,20 @@ export default defineComponent({
     },
 
     canShareLink(): boolean {
-      return !this.routeIsAlbums && !!this.photos?.every((p) => p?.imageInfo?.permissions?.includes('S'));
+      if (this.routeIsAlbums || !this.photos?.length) return false;
+
+      // Check if all imageInfos are loaded (e.g. on viewer)
+      // Then check if all images can be shared
+      if (this.photos.every((p) => !!p.imageInfo)) {
+        return Boolean(this.photos.every((p) => p.imageInfo?.permissions?.includes('S')));
+      }
+
+      // If imageInfos are not loaded, fail later
+      return true;
     },
 
     hasLocal(): boolean {
-      return !!this.photos?.some(utils.isLocalPhoto);
+      return Boolean(this.photos?.some(utils.isLocalPhoto));
     },
   },
 
@@ -198,9 +207,58 @@ export default defineComponent({
     },
 
     async shareLink() {
-      const fileInfo = await this.l(async () => (await dav.getFiles([this.photos![0]]))[0]);
-      await this.close(); // wait till transition is done
-      _m.modals.shareNodeLink(fileInfo.filename, true);
+      // Check if we have photos
+      if (!this.photos) return;
+
+      // Fill in image infos to get permissions and paths
+      await this.l(async () => await dav.fillImageInfo(this.photos!));
+
+      // Check if permissions allow sharing
+      for (const photo of this.photos!) {
+        // Error shown by fillImageInfo
+        if (!photo.imageInfo) return;
+
+        // Check if we can share this file
+        if (!photo.imageInfo.permissions?.includes('S')) {
+          const err = this.t('memories', 'Not allowed to share file: {name}', {
+            name: photo.basename ?? photo.fileid,
+          });
+          showError(err);
+          return;
+        }
+      }
+
+      // Open node share modal if single file
+      if (this.photos.length === 1) {
+        const filename = this.photos[0].imageInfo!.filename;
+        if (!filename) return;
+        await this.close(); // wait till transition is done
+        _m.modals.shareNodeLink(filename, true);
+        return;
+      }
+
+      // Generate random alphanumeric string name for album
+      const name = '.link-' + (Math.random() + 1).toString(36).substring(2);
+
+      // Create hidden album if multiple files are selected
+      await this.l(async () => {
+        // Create album using WebDAV
+        try {
+          await dav.createAlbum(name);
+        } catch (e) {
+          showError(this.t('memories', 'Failed to create album for public link'));
+          return null;
+        }
+
+        // Album is created, now add photos to it
+        for await (const _ of dav.addToAlbum(utils.uid!, name, this.photos!)) {
+          // do nothing
+        }
+
+        // Open album share modal
+        await this.close(); // wait till transition is done
+        await _m.modals.albumShare(utils.uid!, name, true);
+      });
     },
 
     /**

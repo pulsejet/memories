@@ -334,6 +334,12 @@ export default defineComponent({
     },
 
     async createPublicLinkForAlbum() {
+      // Check if link already exists
+      if (this.isPublicLinkSelected) {
+        return await this.copyPublicLink();
+      }
+
+      // Create new link
       this.selectEntity(`${Type.SHARE_TYPE_LINK}`);
       await this.updateAlbumCollaborators();
       try {
@@ -343,9 +349,7 @@ export default defineComponent({
         if (!utils.uid) return;
         const album = await dav.getAlbum(utils.uid, this.albumName);
         this.populateCollaborators(album.collaborators);
-
-        // Direct share if native share is available
-        if (nativex.has()) this.copyPublicLink();
+        await this.copyPublicLink();
       } catch (error) {
         if (error.response?.status === 404) {
           this.errorFetchingAlbum = 404;
@@ -396,16 +400,12 @@ export default defineComponent({
 
       await navigator.clipboard.writeText(link);
       this.publicLinkCopied = true;
-      setTimeout(() => {
-        this.publicLinkCopied = false;
-      }, 10000);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      this.publicLinkCopied = false;
     },
 
     selectEntity(collaboratorKey: string) {
-      if (this.selectedCollaboratorsKeys.includes(collaboratorKey)) {
-        return;
-      }
-
+      if (this.selectedCollaboratorsKeys.includes(collaboratorKey)) return;
       this.refs.popover?.$refs.popover.hide();
       this.selectedCollaboratorsKeys.push(collaboratorKey);
     },

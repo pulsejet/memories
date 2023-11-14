@@ -44,6 +44,7 @@ declare global {
       shareNodeLink: (path: string, immediate?: boolean) => Promise<void>;
       moveToFolder: (photos: IPhoto[]) => void;
       moveToFace: (photos: IPhoto[]) => void;
+      albumShare: (user: string, name: string, link?: boolean) => Promise<void>;
       showSettings: () => void;
     };
 
