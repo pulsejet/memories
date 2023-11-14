@@ -87,7 +87,9 @@ export default defineComponent({
       return `${this.transform1} rotate(${d * 360 * f}deg)`;
     },
 
-    transform1() {
+    transform1(): string | null {
+      if (this.disabled) return null;
+
       /**
        * 1 = Horizontal (normal)
        * 2 = Mirror horizontal
@@ -121,10 +123,18 @@ export default defineComponent({
         case 8:
           return 'rotate(270deg)';
       }
+
+      return null;
     },
   },
 
   methods: {
+    /** Reset state to initial */
+    reset() {
+      this.state = 1;
+      this.spins = 0;
+    },
+
     /**
      * Get target orientation state for a photo.
      * If no change is needed, return null.

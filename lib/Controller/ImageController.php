@@ -271,7 +271,7 @@ class ImageController extends GenericApiController
 
             // If rotation changed then update the previews
             if ($raw['Orientation'] ?? false) {
-                $this->deletePreviews($file);
+                $this->refreshPreviews($file);
             }
 
             return $this->info($id, true);
@@ -474,8 +474,10 @@ class ImageController extends GenericApiController
 
     /**
      * Invalidate previews for a file.
+     *
+     * @param \OCP\Files\File $file File to invalidate previews for
      */
-    private function deletePreviews(\OCP\Files\File $file): void
+    private function refreshPreviews(\OCP\Files\File $file): void
     {
         try {
             $previewRoot = new \OC\Preview\Storage\Root(
@@ -483,8 +485,13 @@ class ImageController extends GenericApiController
                 \OC::$server->get(\OC\SystemConfig::class),
             );
 
+            // Delete the preview folder
             $fileId = (string) $file->getId();
             $previewRoot->getFolder($fileId)->delete();
+
+            // Get the preview to regenerate
+            $previewManager = \OC::$server->get(\OCP\IPreview::class);
+            $previewManager->getPreview($file, 32, 32, true, \OCP\IPreview::MODE_FILL);
         } catch (\Exception $e) {
             return;
         }

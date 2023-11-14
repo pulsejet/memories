@@ -322,6 +322,7 @@ export default defineComponent({
         // nothing to do
       }
 
+      this.refs.editOrientation?.reset();
       this.processing = false;
       this.close();
 
