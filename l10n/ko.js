@@ -56,7 +56,7 @@ OC.L10N.register(
     "Memories Settings" : "Memories 설정",
     "General" : "일반",
     "Timeline Path" : "타임라인 경로",
-    "Square grid mode" : "정사각형 그리드 모드",
+    "Square grid mode" : "정사각형 바둑판식 모드",
     "Show past photos on top of timeline" : "과거 사진을 타임라인의 위쪽에 표시",
     "Account" : "계정",
     "Logged in as {user}" : "{user}(으)로 로그인함",

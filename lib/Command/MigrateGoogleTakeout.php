@@ -41,7 +41,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class MigrateGoogleTakeout extends Command
 {
-    protected const MIGRATOR_VERSION = 1;
+    protected const MIGRATOR_VERSION = 2;
     protected const MIGRATED_KEY = 'memoriesMigratorVersion';
 
     protected OutputInterface $output;
@@ -239,10 +239,10 @@ class MigrateGoogleTakeout extends Command
                 return !isset($exif[$key]);
             }, ARRAY_FILTER_USE_BOTH);
 
-            // Videos may not have DateTimeOriginal but have TrackCreateDate,
-            // in that case do not override it
-            if (isset($exif['TrackCreateDate'])) {
-                unset($txf['DateTimeOriginal']);
+            // The AllDates field does not actually exist but
+            // sets DateTimeOriginal or TrackCreateDate
+            if (isset($exif['TrackCreateDate']) || isset($exif['DateTimeOriginal'])) {
+                unset($txf['AllDates']);
             }
         }
 
@@ -326,7 +326,7 @@ class MigrateGoogleTakeout extends Command
         if (is_numeric($epoch)) {
             $date = new \DateTime();
             $date->setTimestamp((int) $epoch);
-            $txf['DateTimeOriginal'] = $date->format('Y:m:d H:i:s');
+            $txf['AllDates'] = $date->format('Y:m:d H:i:s');
         }
 
         // Location coordinates

@@ -144,6 +144,7 @@ declare module '@typings' {
     OffsetTimeOriginal?: string;
     OffsetTime?: string;
     LocationTZID?: string;
+    AllDates?: string; // only for setting
 
     ExposureTime?: number;
     ShutterSpeed?: number;

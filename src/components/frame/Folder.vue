@@ -58,7 +58,11 @@ export default defineComponent({
       }
 
       path = [...path, this.data.name]; // intentional copy
-      return { ...this.$route, params: { path } };
+      return {
+        ...this.$route,
+        params: { path },
+        hash: undefined,
+      };
     },
 
     previews(): IPhoto[] {

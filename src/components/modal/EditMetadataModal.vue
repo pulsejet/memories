@@ -243,8 +243,7 @@ export default defineComponent({
         // Date header
         const date = this.refs.editDate?.result?.(p);
         if (date) {
-          raw.DateTimeOriginal = date;
-          raw.CreateDate = date;
+          raw.AllDates = date;
         }
 
         // Orientation
