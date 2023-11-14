@@ -137,7 +137,7 @@ export default defineComponent({
     },
 
     canShareLink(): boolean {
-      if (this.routeIsAlbums || !this.photos?.length) return false;
+      if (this.routeIsAlbums || !this.photos?.length || this.hasLocal) return false;
 
       // Check if all imageInfos are loaded (e.g. on viewer)
       // Then check if all images can be shared
