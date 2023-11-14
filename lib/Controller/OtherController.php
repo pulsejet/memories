@@ -166,6 +166,11 @@ class OtherController extends GenericApiController
         return Util::guardEx(static function () use ($name) {
             switch ($name) {
                 case 'service-worker.js':
+                    // Disable service worker if server is in debug mode
+                    if (\OC::$server->get(\OCP\IConfig::class)->getSystemValue('debug', false)) {
+                        throw Exceptions::NotFound('Service worker is disabled in debug mode');
+                    }
+
                     $response = (new StreamResponse(__DIR__.'/../../js/memories-service-worker.js'))->setHeaders([
                         'Content-Type' => 'application/javascript',
                         'Service-Worker-Allowed' => '/',
