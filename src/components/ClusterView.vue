@@ -99,7 +99,7 @@ export default defineComponent({
         await this.refs.dtm?.refresh?.();
 
         if (this.routeIsAlbums) {
-          this.items = await dav.getAlbums(this.config.album_list_sort);
+          this.items = await dav.getAlbums();
         } else if (this.routeIsTags) {
           this.items = await dav.getTags();
         } else if (this.routeIsRecognize) {

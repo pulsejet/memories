@@ -34,6 +34,7 @@ declare module '@typings' {
 
     // album settings
     sort_album_month: boolean;
+    show_hidden_albums: boolean;
 
     // local settings
     square_thumbs: boolean;

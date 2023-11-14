@@ -76,7 +76,7 @@ export default defineComponent({
 
     linkTarget(album: IAlbum) {
       return {
-        name: 'albums',
+        name: _m.routes.Albums.name,
         params: {
           name: album.name,
           user: album.user,

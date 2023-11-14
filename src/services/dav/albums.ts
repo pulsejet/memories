@@ -7,6 +7,7 @@ import { getLanguage } from '@nextcloud/l10n';
 import { translate as t } from '@services/l10n';
 import { API } from '@services/API';
 import client from '@services/dav/client';
+import staticConfig from '@services/static-config';
 import * as utils from '@services/utils';
 
 import type { IAlbum, IFileInfo, IPhoto } from '@typings';
@@ -25,19 +26,24 @@ export function getAlbumPath(user: string, name: string) {
 
 /**
  * Get list of albums.
- * @param sort Sort order; 1 = by date, 2 = by name
  * @param fileid Optional file ID to get albums for
  */
-export async function getAlbums(sort: 1 | 2 = 1, fileid?: number) {
+export async function getAlbums(fileid?: number) {
   const url = API.Q(API.ALBUM_LIST(), { fileid });
   const res = await axios.get<IAlbum[]>(url);
-  const data = res.data;
+  let data = res.data;
+
+  // Remove hidden albums unless specified
+  if (!(await staticConfig.get('show_hidden_albums'))) {
+    data = data.filter((a) => !a.name.startsWith('.'));
+  }
 
   // Sort the response
-  switch (sort) {
+  switch (await staticConfig.get('album_list_sort')) {
     case 2:
       data.sort((a, b) => a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
       break;
+    case 1:
     default:
       data.sort((a, b) => b.created - a.created);
   }

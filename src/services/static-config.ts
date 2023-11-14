@@ -135,6 +135,7 @@ class StaticConfig {
 
       // album settings
       sort_album_month: true,
+      show_hidden_albums: false,
 
       // local settings
       square_thumbs: false,

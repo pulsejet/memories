@@ -153,6 +153,14 @@
         >
           {{ t('memories', 'Sort albums oldest-first') }}
         </NcCheckboxRadioSwitch>
+
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.show_hidden_albums"
+          @update:checked="updateShowHidden"
+          type="switch"
+        >
+          {{ t('memories', 'Show hidden albums') }}
+        </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
     </NcAppSettingsDialog>
 
@@ -315,6 +323,7 @@ export default defineComponent({
     // Folders settings
     async updateShowHidden() {
       await this.updateSetting('show_hidden_folders', 'showHidden');
+      await this.updateSetting('show_hidden_albums', 'showHiddenAlbums');
     },
 
     async updateSortFolderMonth() {

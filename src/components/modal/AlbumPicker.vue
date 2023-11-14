@@ -193,7 +193,7 @@ export default defineComponent({
         // if only one photo is selected, get the albums of that photo
         const fileid = this.photos.length === 1 ? this.photos[0].fileid : 0;
         if (fileid) {
-          const selIds = new Set((await dav.getAlbums(1, fileid)).map((a) => a.album_id));
+          const selIds = new Set((await dav.getAlbums(fileid)).map((a) => a.album_id));
           this.initSelection = new Set(this.albums.filter((a) => selIds.has(a.album_id)));
           this.selection = new Set(this.initSelection);
         }
