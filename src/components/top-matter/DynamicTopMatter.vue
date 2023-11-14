@@ -51,7 +51,7 @@ export default defineComponent({
     viewName(): string {
       // Show album name for album view
       if (this.routeIsAlbums) {
-        return this.$route.params.name || String();
+        return strings.albumDisplayName(this.$route.params.name ?? String());
       }
 
       // Show share name for public shares, except for folder share,

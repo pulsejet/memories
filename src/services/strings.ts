@@ -55,3 +55,10 @@ export function viewName(routeName: string): string {
       return String();
   }
 }
+
+export function albumDisplayName(name: string): string {
+  if (name.startsWith('.link-')) {
+    return t('memories', 'Shared Link');
+  }
+  return name;
+}

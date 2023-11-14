@@ -79,13 +79,19 @@ class PublicAlbumController extends Controller
         // Scripts
         Util::addScript(Application::APPNAME, 'memories-main');
 
+        // Get page title
+        $shareTitle = $album['name'];
+        if (str_starts_with($shareTitle, '.link-')) {
+            $shareTitle = $this->l10n->t('Shared Link');
+        }
+
         // Share info
-        $this->initialState->provideInitialState('share_title', $album['name']);
+        $this->initialState->provideInitialState('share_title', $shareTitle);
         $this->initialState->provideInitialState('share_type', 'album');
 
         // Render main template
         $response = new PublicTemplateResponse(Application::APPNAME, 'main', PageController::getMainParams());
-        $response->setHeaderTitle($album['name']);
+        $response->setHeaderTitle($shareTitle);
         $response->setFooterVisible(false); // wth is that anyway?
         $response->setContentSecurityPolicy(PageController::getCSP());
 
