@@ -6,14 +6,15 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.webkit.CookieManager
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.ArrayMap
 import androidx.media3.common.util.UnstableApi
+import org.json.JSONArray
 import java.util.concurrent.CountDownLatch
 
 @UnstableApi class DownloadService(private val mActivity: AppCompatActivity, private val query: TimelineQuery) {
     private val mDownloads: MutableMap<Long, () -> Unit> = ArrayMap()
+    private var mShareBlobs: JSONArray? = null
 
     /**
      * Callback when download is complete
@@ -31,8 +32,6 @@ import java.util.concurrent.CountDownLatch
                     return
                 }
             }
-
-            Toast.makeText(mActivity, "Download Complete", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -77,48 +76,68 @@ import java.util.concurrent.CountDownLatch
     }
 
     /**
-     * Share a URL as a blob
-     * @param url The URL to share
+     * Share the blobs from URLs already set by setShareBlobs
      * @return True if the URL was shared
      */
     @Throws(Exception::class)
-    fun shareBlobFromUrl(url: String): Boolean {
-        val id = queue(url, "")
-        val latch = CountDownLatch(1)
+    fun shareBlobs(): Boolean {
+        if (mShareBlobs == null) throw Exception("No blobs to share")
+
+        // All URIs to share including remote and local files
+        val uris = ArrayList<Uri>()
+        val dlIds = ArrayList<Long>()
+
+        // Process all objects to share
+        for (i in 0 until mShareBlobs!!.length()) {
+            val obj = mShareBlobs!!.getJSONObject(i)
+
+            // If AUID is found, then look for local file
+            val auid = obj.getString("auid")
+            if (auid != "") {
+                val sysImgs = query.getSystemImagesByAUIDs(listOf(auid))
+                if (sysImgs.isNotEmpty()) {
+                    uris.add(sysImgs[0].uri)
+                    continue
+                }
+            }
+
+            // Queue a download for remote files
+            dlIds.add(queue(obj.getString("href"), ""))
+        }
+
+        // Wait for all downloads to complete
+        val latch = CountDownLatch(dlIds.size)
         synchronized(mDownloads) {
-            mDownloads.put(id, fun() { latch.countDown() })
+            for (dlId in dlIds) {
+                mDownloads.put(dlId, fun() { latch.countDown() })
+            }
         }
         latch.await()
 
         // Get the URI of the downloaded file
-        val sUri = getDownloadedFileURI(id) ?: throw Exception("Failed to download file")
-        val uri = Uri.parse(sUri)
+        for (id in dlIds) {
+            val sUri = getDownloadedFileURI(id) ?: throw Exception("Failed to download file")
+            uris.add(Uri.parse(sUri))
+        }
 
         // Create sharing intent
-        val intent = Intent(Intent.ACTION_SEND)
-        intent.type = mActivity.contentResolver.getType(uri)
-        intent.putExtra(Intent.EXTRA_STREAM, uri)
+        val intent = Intent(Intent.ACTION_SEND_MULTIPLE)
+        intent.type = "*/*"
+        intent.putExtra(Intent.EXTRA_STREAM, uris)
         mActivity.startActivity(Intent.createChooser(intent, null))
+
+        // Reset the blobs
+        mShareBlobs = null
+
         return true
     }
 
     /**
-     * Share a local image
-     * @param auid The AUID of the image to share
-     * @return True if the image was shared
+     * Set the blobs to share
+     * @param objects The blobs to share
      */
-    @Throws(Exception::class)
-    fun shareLocal(auid: String): Boolean {
-        val sysImgs = query.getSystemImagesByAUIDs(listOf(auid))
-        if (sysImgs.isEmpty()) throw Exception("Image not found locally")
-        val uri = sysImgs[0].uri
-
-        val intent = Intent(Intent.ACTION_SEND)
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        intent.type = mActivity.contentResolver.getType(uri)
-        intent.putExtra(Intent.EXTRA_STREAM, uri)
-        mActivity.startActivity(Intent.createChooser(intent, null))
-        return true
+    fun setShareBlobs(objects: JSONArray) {
+        mShareBlobs = objects
     }
 
     /**

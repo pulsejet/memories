@@ -55,8 +55,7 @@ class NativeX(private val mCtx: MainActivity) {
         val IMAGE_FULL = Regex("^/image/full/[0-9a-f]+$")
 
         val SHARE_URL = Regex("^/api/share/url/.+$")
-        val SHARE_BLOB = Regex("^/api/share/blob/.+$")
-        val SHARE_LOCAL = Regex("^/api/share/local/[0-9a-f]+$")
+        val SHARE_BLOB = Regex("^/api/share/blobs$")
 
         val CONFIG_ALLOW_MEDIA = Regex("^/api/config/allow_media/\\d+$")
     }
@@ -111,6 +110,12 @@ class NativeX(private val mCtx: MainActivity) {
     fun downloadFromUrl(url: String?, filename: String?) {
         if (url == null || filename == null) return;
         dlService!!.queue(url, filename)
+    }
+
+    @JavascriptInterface
+    fun setShareBlobs(objects: String?) {
+        if (objects == null) return;
+        dlService!!.setShareBlobs(JSONArray(objects))
     }
 
     @JavascriptInterface
@@ -250,9 +255,7 @@ class NativeX(private val mCtx: MainActivity) {
         } else if (path.matches(API.SHARE_URL)) {
             makeResponse(dlService!!.shareUrl(URLDecoder.decode(parts[4], "UTF-8")))
         } else if (path.matches(API.SHARE_BLOB)) {
-            makeResponse(dlService!!.shareBlobFromUrl(URLDecoder.decode(parts[4], "UTF-8")))
-        } else if (path.matches(API.SHARE_LOCAL)) {
-            makeResponse(dlService!!.shareLocal(parts[4]))
+            makeResponse(dlService!!.shareBlobs())
         } else if (path.matches(API.CONFIG_ALLOW_MEDIA)) {
             permissions.setAllowMedia(true)
             if (permissions.requestMediaPermissionSync()) {
