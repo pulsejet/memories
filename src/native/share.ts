@@ -1,7 +1,6 @@
 import axios from '@nextcloud/axios';
-import { BASE_URL, NAPI, nativex } from './api';
+import { NAPI, nativex } from './api';
 import { addOrigin } from './basic';
-import type { IPhoto } from '@typings';
 
 /**
  * Download a file from the given URL.
@@ -29,17 +28,16 @@ export async function shareUrl(url: string) {
 /**
  * Download a blob from the given URL and share it.
  */
-export async function shareBlobFromUrl(url: string) {
-  if (url.startsWith(BASE_URL)) {
-    throw new Error('Cannot share localhost URL');
-  }
-  await axios.get(NAPI.SHARE_BLOB(addOrigin(url)));
-}
+export async function shareBlobs(
+  objects: {
+    auid: string;
+    href: string;
+  }[],
+) {
+  // Make sure all URLs are absolute
+  objects.forEach((obj) => (obj.href = addOrigin(obj.href)));
 
-/**
- * Share a local file with native page.
- */
-export async function shareLocal(photo: IPhoto) {
-  if (!photo.auid) throw new Error('Cannot share local file without AUID');
-  await axios.get(NAPI.SHARE_LOCAL(photo.auid));
+  // Hand off to native client
+  nativex.setShareBlobs(JSON.stringify(objects));
+  await axios.get(NAPI.SHARE_BLOBS());
 }

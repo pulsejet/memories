@@ -69,22 +69,15 @@ export const NAPI = {
    */
   SHARE_URL: (url: string) => `${BASE_URL}/api/share/url/${euc(euc(url))}`,
   /**
-   * Share an object (as blob) natively using a given URL.
+   * Share an object (as blob) natively.
+   * The list of objects to share is already set using setShareBlobs
    * The native client MUST download the object using a download manager
    * and immediately prompt the user to download it. The asynchronous call
    * must return only after the object has been downloaded.
-   * @regex ^/api/share/blob/.+$
-   * @param url URL to share (double-encoded)
+   * @regex ^/api/share/blobs$
    * @returns {void}
    */
-  SHARE_BLOB: (url: string) => `${BASE_URL}/api/share/blob/${euc(euc(url))}`,
-  /**
-   * Share a local file (as blob) with native page.
-   * @regex ^/api/share/local/\d+$
-   * @param auid AUID of the photo
-   * @returns {void}
-   */
-  SHARE_LOCAL: (auid: string) => `${BASE_URL}/api/share/local/${auid}`,
+  SHARE_BLOBS: () => `${BASE_URL}/api/share/blobs`,
 
   /**
    * Allow usage of local media (permissions request)
@@ -138,6 +131,13 @@ export type NativeX = {
    * @details An error must be shown to the user natively if the download fails.
    */
   downloadFromUrl: (url: string, filename: string) => void;
+
+  /**
+   * Set the list of objects to share with SHARE_BLOB API.
+   * @param objects List of objects to share (JSON-encoded)
+   * @details The SHARE_BLOB API must be called immediately after this call.
+   */
+  setShareBlobs: (objects: string) => void;
 
   /**
    * Play a video from the given AUID or URL(s).

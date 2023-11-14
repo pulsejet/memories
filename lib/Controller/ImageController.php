@@ -29,7 +29,6 @@ use OCA\Memories\Exif;
 use OCA\Memories\Service;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\FileDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\IRootFolder;
 
@@ -56,11 +55,22 @@ class ImageController extends GenericApiController
                 throw Exceptions::MissingParameter('id, x, y');
             }
 
+            // Get preview for this file
             $file = $this->fs->getUserFile($id);
             $preview = \OC::$server->get(\OCP\IPreview::class)->getPreview($file, $x, $y, !$a, $mode);
-            $response = new FileDisplayResponse($preview, Http::STATUS_OK, [
-                'Content-Type' => $preview->getMimeType(),
-            ]);
+
+            // Get the filename. We need to move the extension from
+            // the preview file to the filename's end if it's not there
+            // Do the comparison case-insensitive
+            $filename = $file->getName();
+            if ($ext = pathinfo($preview->getName(), PATHINFO_EXTENSION)) {
+                if (!str_ends_with(strtolower($filename), strtolower('.'.$ext))) {
+                    $filename .= '.'.$ext;
+                }
+            }
+
+            // Generate response with proper content-disposition
+            $response = new Http\DataDownloadResponse($preview->getContent(), $filename, $preview->getMimeType());
             $response->cacheFor(3600 * 24, false, true);
 
             return $response;
@@ -293,13 +303,17 @@ class ImageController extends GenericApiController
             /** @var string Blob of image */
             $blob = $file->getContent();
 
+            /** @var string Name of file */
+            $name = $file->getName();
+
             // Convert image to JPEG if required
             if (!\in_array($mimetype, ['image/png', 'image/webp', 'image/jpeg', 'image/gif'], true)) {
                 [$blob, $mimetype] = $this->getImageJPEG($blob, $mimetype);
+                $name .= '.jpg';
             }
 
             // Return the image
-            $response = new Http\DataDisplayResponse($blob, Http::STATUS_OK, ['Content-Type' => $mimetype]);
+            $response = new Http\DataDownloadResponse($blob, $name, $mimetype);
             $response->cacheFor(3600 * 24, false, false);
 
             return $response;

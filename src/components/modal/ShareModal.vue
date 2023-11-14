@@ -1,7 +1,7 @@
 <template>
   <Modal ref="modal" @close="cleanup" size="normal" v-if="show">
     <template #title>
-      {{ t('memories', 'Share File') }}
+      {{ n('memories', 'Share File', 'Share Files', photos?.length ?? 0) }}
     </template>
 
     <div class="loading-icon fill-block" v-if="loading > 0">
@@ -10,25 +10,21 @@
 
     <ul class="options" v-else>
       <NcListItem
-        v-if="canShareNative && canShareTranscode"
+        v-if="canShareNative && canShareLowRes"
         :title="t('memories', 'Reduced Size')"
         :bold="false"
-        @click.prevent="sharePreview()"
+        @click.prevent="shareLowRes()"
       >
         <template #icon>
           <PhotoIcon class="avatar" :size="24" />
         </template>
         <template #subtitle>
-          {{
-            isVideo
-              ? t('memories', 'Share the video as a low quality MP4')
-              : t('memories', 'Share a lower resolution image preview')
-          }}
+          {{ t('memories', 'Share in lower quality (small file size)') }}
         </template>
       </NcListItem>
 
       <NcListItem
-        v-if="canShareNative && canShareTranscode"
+        v-if="canShareNative && canShareHighRes"
         :title="t('memories', 'High Resolution')"
         :bold="false"
         @click.prevent="shareHighRes()"
@@ -37,11 +33,7 @@
           <LargePhotoIcon class="avatar" :size="24" />
         </template>
         <template #subtitle>
-          {{
-            isVideo
-              ? t('memories', 'Share the video as a high quality MP4')
-              : t('memories', 'Share the image as a high quality JPEG')
-          }}
+          {{ t('memories', 'Share in high quality (large file size)') }}
         </template>
       </NcListItem>
 
@@ -55,7 +47,7 @@
           <FileIcon class="avatar" :size="24" />
         </template>
         <template #subtitle>
-          {{ t('memories', 'Share the original image / video file') }}
+          {{ n('memories', 'Share the original file', 'Share the original files', photos?.length ?? 0) }}
         </template>
       </NcListItem>
 
@@ -112,47 +104,57 @@ export default defineComponent({
   mixins: [UserConfig, ModalMixin],
 
   data: () => ({
-    photo: null as IPhoto | null,
+    photos: null as IPhoto[] | null,
     loading: 0,
   }),
 
   created() {
-    console.assert(!_m.modals.sharePhoto, 'ShareModal created twice');
-    _m.modals.sharePhoto = this.open;
+    console.assert(!_m.modals.sharePhotos, 'ShareModal created twice');
+    _m.modals.sharePhotos = this.open;
   },
 
   computed: {
-    isVideo(): boolean {
-      return !!this.photo && (this.photo.mimetype?.startsWith('video/') || !!(this.photo.flag & this.c.FLAG_IS_VIDEO));
+    isSingle(): boolean {
+      return this.photos?.length === 1 ?? false;
+    },
+
+    hasVideos(): boolean {
+      return !!this.photos?.some(utils.isVideo);
     },
 
     canShareNative(): boolean {
       return 'share' in navigator || nativex.has();
     },
 
-    canShareTranscode(): boolean {
-      return !this.isLocal && (!this.isVideo || !this.config.vod_disable);
+    canShareLowRes(): boolean {
+      // Only allow transcoding videos if a single video is selected
+      return !this.hasLocal && (!this.hasVideos || (!this.config.vod_disable && this.isSingle));
+    },
+
+    canShareHighRes(): boolean {
+      // High-CPU operations only permitted for single node
+      return this.isSingle && this.canShareLowRes;
     },
 
     canShareLink(): boolean {
-      return !!this.photo?.imageInfo?.permissions?.includes('S') && !this.routeIsAlbums;
+      return !this.routeIsAlbums && !!this.photos?.every((p) => p?.imageInfo?.permissions?.includes('S'));
     },
 
-    isLocal(): boolean {
-      return utils.isLocalPhoto(this.photo!);
+    hasLocal(): boolean {
+      return !!this.photos?.some(utils.isLocalPhoto);
     },
   },
 
   methods: {
-    open(photo: IPhoto) {
-      this.photo = photo;
+    open(photos: IPhoto[]) {
+      this.photos = photos;
       this.loading = 0;
       this.show = true;
     },
 
     cleanup() {
       this.show = false;
-      this.photo = null;
+      this.photos = null;
     },
 
     async l<T>(cb: () => Promise<T>): Promise<T> {
@@ -164,93 +166,89 @@ export default defineComponent({
       }
     },
 
-    async sharePreview() {
-      const src = this.isVideo
-        ? API.VIDEO_TRANSCODE(this.photo!.fileid, '480p.mp4')
-        : utils.getPreviewUrl({ photo: this.photo!, size: 2048 });
-      this.shareWithHref(src, true);
+    async shareLowRes() {
+      await this.shareWithHref(
+        this.photos!.map((photo) => ({
+          auid: String(), // no local
+          href: utils.isVideo(photo)
+            ? API.VIDEO_TRANSCODE(photo.fileid, '480p.mp4')
+            : utils.getPreviewUrl({ photo, size: 2048 }),
+        })),
+      );
     },
 
     async shareHighRes() {
-      const fileid = this.photo!.fileid;
-      const src = this.isVideo
-        ? API.VIDEO_TRANSCODE(fileid, '1080p.mp4')
-        : API.IMAGE_DECODABLE(fileid, this.photo!.etag);
-      this.shareWithHref(src, !this.isVideo);
+      await this.shareWithHref(
+        this.photos!.map((photo) => ({
+          auid: String(), // no local
+          href: utils.isVideo(photo)
+            ? API.VIDEO_TRANSCODE(photo.fileid, '1080p.mp4')
+            : API.IMAGE_DECODABLE(photo.fileid, photo.etag),
+        })),
+      );
     },
 
     async shareOriginal() {
-      if (nativex.has()) {
-        try {
-          return await this.l(async () => await nativex.shareLocal(this.photo!));
-        } catch (e) {
-          // maybe the file doesn't exist locally
-        }
-
-        // if it's purel local, we can't share it
-        if (this.isLocal) return;
-      }
-
-      await this.shareWithHref(dav.getDownloadLink(this.photo!));
+      await this.shareWithHref(
+        this.photos!.map((photo) => ({
+          auid: photo.auid ?? String(),
+          href: dav.getDownloadLink(photo),
+        })),
+      );
     },
 
     async shareLink() {
-      const fileInfo = await this.l(async () => (await dav.getFiles([this.photo!]))[0]);
+      const fileInfo = await this.l(async () => (await dav.getFiles([this.photos![0]]))[0]);
       await this.close(); // wait till transition is done
       _m.modals.shareNodeLink(fileInfo.filename, true);
     },
 
     /**
      * Download a file and then share the blob.
+     *
+     * If a download object includes AUID then local download
+     * is allowed when on NativeX.
      */
-    async shareWithHref(href: string, replaceExt = false) {
+    async shareWithHref(
+      objects: {
+        auid: string;
+        href: string;
+      }[],
+    ) {
       if (nativex.has()) {
-        return await this.l(async () => nativex.shareBlobFromUrl(href));
+        return await this.l(async () => nativex.shareBlobs(objects));
       }
 
-      let blob: Blob | undefined;
-      await this.l(async () => {
-        const res = await axios.get(href, { responseType: 'blob' });
-        blob = res.data;
+      // Pull blobs in parallel
+      const calls = objects.map((obj) => async () => {
+        return await this.l(async () => {
+          try {
+            return await axios.get(obj.href, { responseType: 'blob' });
+          } catch (e) {
+            showError(this.t('memories', 'Failed to download file {href}', { href: obj.href }));
+            return null;
+          }
+        });
       });
 
-      if (!blob) {
-        showError(this.t('memories', 'Failed to download file'));
-        return;
-      }
-
-      let basename = this.photo?.basename ?? 'blank';
-
-      if (replaceExt) {
-        // Fix basename extension
-        let targetExts: string[] = [];
-        if (blob.type === 'image/png') {
-          targetExts = ['png'];
-        } else {
-          targetExts = ['jpg', 'jpeg'];
-        }
-
-        // Append extension if not found
-        const baseExt = basename.split('.').pop()?.toLowerCase() ?? '';
-        if (!targetExts.includes(baseExt)) {
-          basename += '.' + targetExts[0];
+      // Get all blobs from parallel calls
+      const files: File[] = [];
+      for await (const responses of dav.runInParallel(calls, 8)) {
+        for (const res of responses.filter(Boolean)) {
+          const filename = res!.headers['content-disposition']?.match(/filename="(.+)"/)?.[1] ?? '';
+          const blob = res!.data;
+          files.push(new File([blob], filename, { type: blob.type }));
         }
       }
+      if (!files.length) return;
 
-      const data = {
-        files: [
-          new File([blob], basename, {
-            type: blob.type,
-          }),
-        ],
-      };
-
-      if (!navigator.canShare(data)) {
+      // Check if we can share this type of data
+      if (!navigator.canShare({ files })) {
         showError(this.t('memories', 'Cannot share this type of data'));
       }
 
       try {
-        await navigator.share(data);
+        await navigator.share({ files });
       } catch (e) {
         // Don't show this error because it's silly stuff
         // like "share canceled"

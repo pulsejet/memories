@@ -986,8 +986,8 @@ export default defineComponent({
     },
 
     /** Share the current photo externally */
-    async shareCurrent() {
-      _m.modals.sharePhoto(this.currentPhoto!);
+    shareCurrent() {
+      _m.modals.sharePhotos([this.currentPhoto!]);
     },
 
     /** Key press events */

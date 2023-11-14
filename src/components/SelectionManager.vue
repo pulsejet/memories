@@ -50,6 +50,7 @@ import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 
+import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
 import DeleteIcon from 'vue-material-design-icons/TrashCanOutline.vue';
@@ -202,6 +203,12 @@ export default defineComponent({
         icon: AlbumRemoveIcon,
         callback: this.deleteSelection.bind(this),
         if: () => this.routeIsAlbums,
+      },
+      {
+        name: t('memories', 'Share'),
+        icon: ShareIcon,
+        callback: this.shareSelection.bind(this),
+        if: () => !this.routeIsAlbums,
       },
       {
         name: t('memories', 'Download'),
@@ -807,6 +814,13 @@ export default defineComponent({
       } catch (e) {
         console.error(e);
       }
+    },
+
+    /**
+     * Share the currently selected photos
+     */
+    shareSelection(selection: Selection) {
+      _m.modals.sharePhotos(selection.photosNoDupFileId());
     },
 
     /**

@@ -108,6 +108,14 @@ export function isLocalPhoto(photo: IPhoto): boolean {
 }
 
 /**
+ * Check if an object is a video
+ * @param photo Photo object
+ */
+export function isVideo(photo: IPhoto): boolean {
+  return !!photo?.mimetype?.startsWith('video/') || !!(photo.flag & c.FLAG_IS_VIDEO);
+}
+
+/**
  * Get the URL for the imageInfo of a photo
  *
  * @param photo Photo object or fileid (remote only)
