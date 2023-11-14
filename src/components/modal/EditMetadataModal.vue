@@ -128,8 +128,6 @@ export default defineComponent({
       this.show = true;
       this.processing = true;
       this.sections = sections;
-
-      let done = 0;
       this.progress = 0;
 
       // Filter out forbidden MIME types
@@ -159,23 +157,9 @@ export default defineComponent({
       });
 
       // Load metadata for all photos
-      const calls = photos.map((p) => async () => {
-        try {
-          const url = API.Q(API.IMAGE_INFO(p.fileid), { tags: 1 });
-          const res = await axios.get<IImageInfo>(url);
-          p.datetaken = res.data.datetaken;
-          p.imageInfo = res.data;
-        } catch (error) {
-          console.error('Failed to get date info for', p.fileid, error);
-        } finally {
-          done++;
-          this.progress = Math.round((done * 100) / photos.length);
-        }
+      await dav.fillImageInfo(photos, { tags: 1 }, (count) => {
+        this.progress = Math.round((count * 100) / photos.length);
       });
-
-      for await (const _ of dav.runInParallel(calls, 8)) {
-        // nothing to do
-      }
 
       // Check if already quit
       if (!this.show || this.state !== state) return;

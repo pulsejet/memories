@@ -9,7 +9,7 @@ import { translate as t } from '@services/l10n';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 
-import type { IFileInfo, IPhoto } from '@typings';
+import type { IFileInfo, IImageInfo, IPhoto } from '@typings';
 import type { ResponseDataDetailed, SearchResult } from 'webdav';
 
 const GET_FILE_CHUNK_SIZE = 50;
@@ -343,4 +343,36 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
   });
 
   yield* runInParallel(calls, 10);
+}
+
+/**
+ * Fill the imageInfo attributes of the given photos
+ *
+ * @param photos list of photos to fill
+ * @param query options
+ * @param query.tags whether to include tags in the response
+ * @param progress callback to report progress
+ */
+export async function fillImageInfo(photos: IPhoto[], query?: { tags?: number }, progress?: (count: number) => void) {
+  // Number of photos done
+  let done = 0;
+
+  // Load metadata for all photos
+  const calls = photos.map((p) => async () => {
+    try {
+      const url = API.Q(API.IMAGE_INFO(p.fileid), query ?? {});
+      const res = await axios.get<IImageInfo>(url);
+      p.datetaken = res.data.datetaken;
+      p.imageInfo = res.data;
+    } catch (error) {
+      console.error('Failed to get image info for', p.fileid, error);
+    } finally {
+      done++;
+      progress?.(done);
+    }
+  });
+
+  for await (const _ of runInParallel(calls, 8)) {
+    // nothing to do
+  }
 }
