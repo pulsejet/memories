@@ -210,16 +210,20 @@ export default defineComponent({
     },
 
     result() {
-      if (!this.dirty) return null;
+      if (!this.dirty || this.lat === null || this.lon === null) return null;
 
-      const lat = (this.lat || 0).toFixed(6);
-      const lon = (this.lon || 0).toFixed(6);
+      const lat = this.lat.toFixed(6);
+      const lon = this.lon.toFixed(6);
 
+      // Exiftool is actually supposed to pick up the reference from
+      // a signed set of coordinates: https://exiftool.org/faq.html#Q14
+      // But it doesn't seem to work for some very specific files, so
+      // we'll just set it manually to N/S and E/W
       return {
         GPSLatitude: lat,
         GPSLongitude: lon,
-        GPSLatitudeRef: lat,
-        GPSLongitudeRef: lon,
+        GPSLatitudeRef: this.lat >= 0 ? 'N' : 'S',
+        GPSLongitudeRef: this.lon >= 0 ? 'E' : 'W',
         GPSCoordinates: `${lat}, ${lon}`,
       };
     },
