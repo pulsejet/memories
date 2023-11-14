@@ -244,9 +244,7 @@ export default defineComponent({
       if (
         this.photos!.some(
           (p) =>
-            !p.imageInfo?.exif?.DateTimeOriginal &&
-            !p.imageInfo?.exif?.CreateDate &&
-            !exifs.get(p.fileid)!.DateTimeOriginal,
+            !p.imageInfo?.exif?.DateTimeOriginal && !p.imageInfo?.exif?.CreateDate && !exifs.get(p.fileid)!.AllDates,
         ) &&
         (await utils.confirmDestructive({
           title: this.t('memories', 'Missing date metadata'),
@@ -259,12 +257,11 @@ export default defineComponent({
         for (const p of this.photos!) {
           // Check if we need / can update the date for this file
           const raw = exifs.get(p.fileid)!;
-          if (!p.datetaken || raw.DateTimeOriginal) continue;
+          if (!p.datetaken || raw.AllDates) continue;
 
           // Get the date in EXIF format
           const dateTaken = utils.getExifDateStr(new Date(p.datetaken * 1000));
-          raw.DateTimeOriginal = dateTaken;
-          raw.CreateDate = dateTaken;
+          raw.AllDates = dateTaken;
         }
       }
 
