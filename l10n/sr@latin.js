@@ -10,6 +10,7 @@ OC.L10N.register(
     "Photos" : "Slike",
     "Cancel" : "Otkaži",
     "Delete" : "Obriši",
+    "Share" : "Podeli",
     "Favorite" : "Omiljene",
     "General" : "Opšte",
     "Close" : "Zatvori",
@@ -29,7 +30,6 @@ OC.L10N.register(
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Home" : "Početak",
-    "Share" : "Podeli",
     "Undo" : "Opozovi",
     "Setup" : "Podesi"
 },

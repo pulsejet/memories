@@ -10,6 +10,7 @@ OC.L10N.register(
     "Photos" : "Suratlar",
     "Cancel" : "ýatyrmak",
     "Delete" : "Pozmak",
+    "Share" : "Paýlaş",
     "Favorite" : "Halaýan",
     "General" : "Esasy",
     "Close" : "Ýap",
@@ -24,7 +25,6 @@ OC.L10N.register(
     "Refresh" : "Täzelemek",
     "Read only" : "Diňe okaň",
     "Home" : "Baş sahypa",
-    "Share" : "Paýlaş",
     "Setup" : "Gurmak",
     "Yes" : "Hawa",
     "No" : "Ýok"
