@@ -5,8 +5,6 @@ on:
       - master
     paths:
       - 'docs/**'
-      - 'go-vod/**'
-      - 'android/**'
       - 'CHANGELOG.md'
       - 'mkdocs.yml'
 
