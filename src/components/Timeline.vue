@@ -389,21 +389,11 @@ export default defineComponent({
       this.refs.selectionManager.clear();
       this.fetchDayQueue = []; // reset queue
 
-      // Fetch days and reset loading
-      this.updateLoading(1);
-      const doFetch = async () => {
-        try {
-          await this.fetchDays(true);
-        } finally {
-          this.updateLoading(-1);
-        }
-      };
-
       // Fetch days
       if (sync) {
-        doFetch();
+        await this.fetchDays(true);
       } else {
-        utils.setRenewingTimeout(this, '_softRefreshInternalTimer', doFetch, 30);
+        utils.setRenewingTimeout(this, '_softRefreshInternalTimer', () => this.fetchDays(true), 30);
       }
     },
 
