@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [v6.1.0] - 2023-11-15
 
 - **Feature**: RAW files are now hidden (stacked) when another file with the same basename exists ([#537](https://github.com/pulsejet/memories/issues/537), [#152](https://github.com/pulsejet/memories/issues/152), [#419](https://github.com/pulsejet/memories/issues/419))
 - **Feature**: Multiple files can be now selected and shared from the timeline ([#472](https://github.com/pulsejet/memories/issues/472), [#901](https://github.com/pulsejet/memories/issues/901))
