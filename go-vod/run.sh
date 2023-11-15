@@ -28,6 +28,13 @@ if [[ $HOST == http://* ]] && [[ -z $ALLOW_INSECURE ]]; then
     exit 1
 fi
 
+# Check if the current working directory is writable
+if [ ! -w "." ]; then
+    echo "Current working directory is not writable."
+    echo "Are you in Docker and non-root (not supported)?"
+    exit 1
+fi
+
 # build URL to fetch binary from Nextcloud
 ARCH=$(uname -m)
 URL="$HOST/index.php/apps/memories/static/go-vod?arch=$ARCH"
