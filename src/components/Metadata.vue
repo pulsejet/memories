@@ -368,7 +368,14 @@ export default defineComponent({
     },
 
     albums(): IAlbum[] {
-      return this.baseInfo?.clusters?.albums ?? [];
+      let albums = this.baseInfo?.clusters?.albums ?? [];
+
+      // Filter out hidden albums
+      if (!this.config.show_hidden_albums) {
+        albums = albums.filter((a) => !a.name.startsWith('.'));
+      }
+
+      return albums;
     },
 
     people(): IFace[] {
