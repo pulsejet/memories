@@ -14,7 +14,7 @@ For the best experience, we recommend to use the latest stable version of Nextcl
 For easy setup and maintenance, you can use the community Nextcloud Docker image, and add extra dependencies using a custom Dockerfile.
 Another option is to use [Nextcloud AIO](https://github.com/nextcloud/all-in-one#how-to-use-this), in which case most dependencies are already installed.
 
-!!! success "Recommmended Configuration"
+!!! success "Recommended Configuration"
 
     If you plan to use hardware transcoding, using **Docker Compose** or **Nextcloud AIO** is recommended.
 

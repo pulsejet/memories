@@ -26,11 +26,11 @@ NVIDIA GPUs support hardware transcoding using NVENC.
 
 ## External Transcoder
 
-!!! success "Recommmended Configuration"
+!!! success "Recommended Configuration"
 
     The easiest and recommended way to use hardware transcoding in a docker environment is to use an external transcoder.
     This setup utilizes a separate docker container that contains the hardware drivers and ffmpeg.
-    If you cannot do this, other installation methods are also possible (see below).
+    If you cannot do this, other installation methods are also possible.
 
 [go-vod](https://github.com/pulsejet/memories/tree/master/go-vod), the transcoder of Memories, comes with a pre-built Docker image based on `linuxserver/ffmpeg`. The docker image connects to your Nextcloud instance and pulls the go-vod binary on startup. To set up an external transcoder, follow these steps.
 
