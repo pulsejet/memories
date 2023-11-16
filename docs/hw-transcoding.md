@@ -32,10 +32,6 @@ NVIDIA GPUs support hardware transcoding using NVENC.
     This setup utilizes a separate docker container that contains the hardware drivers and ffmpeg.
     If you cannot do this, other installation methods are also possible (see below).
 
-!!! warning "Memories v6+ required"
-
-    This method is only supported in Memories v6 and newer. If you're on an old version, see the instructions [here](https://github.com/pulsejet/memories/blob/v5.5.0/docs/hw-transcoding.md#external-transcoder).
-
 [go-vod](https://github.com/pulsejet/memories/tree/master/go-vod), the transcoder of Memories, comes with a pre-built Docker image based on `linuxserver/ffmpeg`. The docker image connects to your Nextcloud instance and pulls the go-vod binary on startup. To set up an external transcoder, follow these steps.
 
 1. Use a `docker-compose.yml` that runs the go-vod container and mounts the Nextcloud data directories to it. You must specify `NEXTCLOUD_HOST` to match the name of your Nextcloud container.
