@@ -99,6 +99,7 @@ class Index extends Command
         // Assign to indexer
         $this->indexer->output = $output;
         $this->indexer->section = $output->section();
+        $this->indexer->verbose = $output->isVerbose();
 
         try {
             // Use static exiftool process

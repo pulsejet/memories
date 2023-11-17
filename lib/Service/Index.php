@@ -43,6 +43,7 @@ class Index
 {
     public ?OutputInterface $output = null;
     public ?ConsoleSectionOutput $section = null;
+    public bool $verbose = false;
 
     /**
      * Callback to check if the process should continue.
@@ -114,8 +115,11 @@ class Index
      */
     public function indexFolder(Folder $folder): void
     {
+        $path = $folder->getPath();
+        $this->log("Indexing folder {$path}", true);
+
         if ($folder->nodeExists('.nomedia') || $folder->nodeExists('.nomemories')) {
-            $this->log("Skipping folder {$folder->getPath()} (.nomedia / .nomemories)\n", true);
+            $this->log("Skipping folder {$path} (.nomedia / .nomemories)\n", true);
 
             return;
         }
@@ -177,11 +181,7 @@ class Index
             } catch (ProcessClosedException $e) {
                 throw $e;
             } catch (\Exception $e) {
-                $this->logger->error('Failed to index folder', [
-                    'app' => 'memories',
-                    'folder' => $folder->getPath(),
-                    'error' => $e->getMessage(),
-                ]);
+                $this->error("Failed to index folder {$folder->getPath()}: {$e->getMessage()}");
             }
         }
     }
@@ -293,7 +293,7 @@ class Index
     private function log(string $message, bool $overwrite = false): void
     {
         if ($this->section) {
-            if ($overwrite) {
+            if ($overwrite && !$this->verbose) {
                 $this->section->clear(1);
             }
             $this->section->write($message);
