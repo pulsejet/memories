@@ -87,22 +87,22 @@
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding || !config['memories.vod.nvenc']"
         :checked.sync="config['memories.vod.nvenc.scale']"
+        value="cuda"
+        name="nvence_scaler_radio"
+        type="radio"
+        class="m-radio"
+        @update:checked="update('memories.vod.nvenc.scale')"
+        >{{ t('memories', 'CUDA scaler') }}
+      </NcCheckboxRadioSwitch>
+      <NcCheckboxRadioSwitch
+        :disabled="!enableTranscoding || !config['memories.vod.nvenc']"
+        :checked.sync="config['memories.vod.nvenc.scale']"
         value="npp"
         name="nvence_scaler_radio"
         type="radio"
         @update:checked="update('memories.vod.nvenc.scale')"
         class="m-radio"
         >{{ t('memories', 'NPP scaler') }}
-      </NcCheckboxRadioSwitch>
-      <NcCheckboxRadioSwitch
-        :disabled="!enableTranscoding || !config['memories.vod.nvenc']"
-        :checked.sync="config['memories.vod.nvenc.scale']"
-        value="cuda"
-        name="nvence_scaler_radio"
-        type="radio"
-        class="m-radio"
-        @update:checked="update('memories.vod.nvenc.scale')"
-        >{{ t('memories', 'CUDA scaler') }} ({{ t('memories', 'not recommended') }})
       </NcCheckboxRadioSwitch>
 
       <br />

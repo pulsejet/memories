@@ -55,7 +55,7 @@ class SystemConfig
         // NVENC configuration options
         'memories.vod.nvenc' => false,  // Transcode with NVIDIA NVENC
         'memories.vod.nvenc.temporal_aq' => false,
-        'memories.vod.nvenc.scale' => 'npp', // npp or cuda
+        'memories.vod.nvenc.scale' => 'cuda', // cuda or npp
 
         // Extra streaming configuration
         'memories.vod.use_transpose' => false,

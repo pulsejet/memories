@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- **Breaking**: The CUDA scaler is now the default for NVENC. You may need to reconfigure your transcoder. (see [#582](https://github.com/pulsejet/memories/issues/582))
+
 ## [v6.1.0] - 2023-11-15
 
 - **Feature**: RAW files are now hidden (stacked) when another file with the same basename exists ([#537](https://github.com/pulsejet/memories/issues/537), [#152](https://github.com/pulsejet/memories/issues/152), [#419](https://github.com/pulsejet/memories/issues/419))
