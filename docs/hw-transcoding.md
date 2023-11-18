@@ -66,7 +66,7 @@ NVIDIA GPUs support hardware transcoding using NVENC.
         The `NEXTCLOUD_HOST` environment variable must be set to the URL of your Nextcloud instance. If you are using a reverse proxy, you must set this to the URL of the reverse proxy. If you are using a self-signed certificate or http, you must also set `NEXTCLOUD_ALLOW_INSECURE=1`. This URL is used to download the transcoder binary and to connect to the Nextcloud instance.
 
     !!! tip "Setup for NVENC"
-        If you want to use NVENC instead of VA-API, uncomment the `runtime` line and remove the `devices` section above. You will need to install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) on your host.
+        If you want to use NVENC instead of VA-API, uncomment the `runtime` line and remove the `devices` section above. You will need to install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) on your host. You may also need to switch to the CUDA scaler in the Memories admin panel.
 
 1. You can now configure the go-vod connect address in the Memories admin panel to point to the external container. go-vod uses port `47788` by default, so in our example the **connection address** would be set to **`go-vod:47788`**.
 
