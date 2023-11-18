@@ -154,11 +154,11 @@ export default defineComponent({
 
     async shareOrCopy(url: string) {
       if (nativex.has()) {
-        await nativex.shareUrl(url);
-      } else if ('share' in window.navigator) {
-        await this.copy(url);
-        await window.navigator.share({ title: this.filename, url: url });
+        return await nativex.shareUrl(url);
       }
+
+      await this.copy(url);
+      await window.navigator?.share?.({ title: this.filename, url: url });
     },
 
     cleanup() {
