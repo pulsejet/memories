@@ -16,7 +16,10 @@ extension SwinjectStoryboard {
         defaultContainer.register(NativeX.self) { _ in NativeX() }
         defaultContainer.register(MainViewModelProtocol.self) { r in
             MainViewModel(
-                authenticationUseCase: r.resolve(AuthenticationUseCase.self)!)
+                authenticationUseCase: r.resolve(AuthenticationUseCase.self)!,
+                loadCredentialsUseCase: r.resolve(LoadCredentialsUseCase.self)!,
+                getWebViewRequestUseCase: r.resolve(GetWebViewRequestUseCase.self)!
+            )
         }
         defaultContainer.register(ApiDescriptionDataSource.self) { r in
             ApiDescriptionDataSource(httpService: r.resolve(HttpService.self)!)
@@ -39,10 +42,10 @@ extension SwinjectStoryboard {
             SecureStorage()
         }
         defaultContainer.register(SetCredentialsUseCase.self) { r in
-            SetCredentialsUseCase(secureStorage: r.resolve(SecureStorage.self)!, refreshCredentialsUseCase: r.resolve(RefereshCredentialsUseCase.self)!)
+            SetCredentialsUseCase(secureStorage: r.resolve(SecureStorage.self)!, refreshCredentialsUseCase: r.resolve(LoadCredentialsUseCase.self)!)
         }
-        defaultContainer.register(RefereshCredentialsUseCase.self) { r in
-            RefereshCredentialsUseCase(httpService: r.resolve(HttpService.self)!, secureStorage: r.resolve(SecureStorage.self)!)
+        defaultContainer.register(LoadCredentialsUseCase.self) { r in
+            LoadCredentialsUseCase(httpService: r.resolve(HttpService.self)!, secureStorage: r.resolve(SecureStorage.self)!)
         }
         defaultContainer.register(GetWebViewRequestUseCase.self) { r in
             GetWebViewRequestUseCase(httpService: r.resolve(HttpService.self)!)

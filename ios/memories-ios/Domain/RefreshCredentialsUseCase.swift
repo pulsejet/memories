@@ -8,7 +8,7 @@
 import Foundation
 
 
-class RefereshCredentialsUseCase {
+class LoadCredentialsUseCase {
     
     let httpService: HttpService
     let secureStorage: SecureStorage

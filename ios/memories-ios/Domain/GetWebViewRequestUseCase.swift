@@ -15,19 +15,31 @@ class GetWebViewRequestUseCase {
         self.httpService = httpService
     }
     
-    func build(subpath: String? = nil) -> URLRequest? {
-        guard var url = httpService.baseUrl else { return nil }
-        guard let authHeader = httpService.authHeader else { return nil }
+    func build(subpath: String? = nil) throws -> URLRequest {
+        guard var url = httpService.baseUrl else {
+            throw WebViewRequestError.missingBaseUrl
+        }
+        guard let authHeader = httpService.authHeader else {
+            throw WebViewRequestError.missingCredential
+        }
         
         if subpath != nil {
             url += subpath!
         }
         
-        guard let urlType = URL(string: url) else { return nil }
+        guard let urlType = URL(string: url) else {
+            throw WebViewRequestError.invalidUrl
+        }
         
         var request = URLRequest(url: urlType)
         request.setValue(authHeader, forHTTPHeaderField: "Authorization")
         
         return request
     }
+}
+
+enum WebViewRequestError : Error {
+    case missingBaseUrl
+    case missingCredential
+    case invalidUrl
 }

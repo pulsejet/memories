@@ -9,11 +9,11 @@ import Foundation
 
 class SetCredentialsUseCase {
     let secureStorage: SecureStorage
-    let refreshCredentialsUseCase: RefereshCredentialsUseCase
+    let loadCredentialsUseCase: LoadCredentialsUseCase
     
-    init(secureStorage: SecureStorage, refreshCredentialsUseCase: RefereshCredentialsUseCase) {
+    init(secureStorage: SecureStorage, refreshCredentialsUseCase: LoadCredentialsUseCase) {
         self.secureStorage = secureStorage
-        self.refreshCredentialsUseCase = refreshCredentialsUseCase
+        self.loadCredentialsUseCase = refreshCredentialsUseCase
     }
     
     func invoke(credential: Credential) throws {
@@ -22,6 +22,6 @@ class SetCredentialsUseCase {
         } catch StorageError.duplicateKey {
             debugPrint("Duplicate Key. Skipping")
         }
-        try refreshCredentialsUseCase.invoke()
+        try loadCredentialsUseCase.invoke()
     }
 }

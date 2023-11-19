@@ -29,23 +29,36 @@ class MainViewModel: MainViewModelProtocol {
     weak var uiDelegate: MainUiDelegate?
     
     let authenticationUseCase: AuthenticationUseCase
+    let loadCredentialsUseCase: LoadCredentialsUseCase
+    let getWebViewRequestUseCase: GetWebViewRequestUseCase
     
-    init(authenticationUseCase: AuthenticationUseCase) {
+    init(authenticationUseCase: AuthenticationUseCase, loadCredentialsUseCase: LoadCredentialsUseCase, getWebViewRequestUseCase: GetWebViewRequestUseCase) {
         self.authenticationUseCase = authenticationUseCase
+        self.loadCredentialsUseCase = loadCredentialsUseCase
+        self.getWebViewRequestUseCase = getWebViewRequestUseCase
     }
     
     func viewDidLoad() {
-        self.uiDelegate?.loadFilePage(url: self.createWelcomePageUrl())
+        Task {
+            do {
+                try loadCredentialsUseCase.invoke()
+                let url = try getWebViewRequestUseCase.build()
+                self.uiDelegate?.loadWebPage(urlRequest: url)
+            } catch(let error) {
+                debugPrint("Default Url Error: ", error)
+                self.uiDelegate?.loadFilePage(url: self.createWelcomePageUrl())
+            }
+        }
     }
     
     func handleScheme(url: URL?) {
-        print("Scheme:" + (url?.absoluteString ?? ""))
-        guard let path = url?.path else { return }
-        guard let baseUrl = path.split(separator: "/")[1].removingPercentEncoding else {
-            return
-        }
-        
         Task {
+            print("Scheme:" + (url?.absoluteString ?? ""))
+            guard let path = url?.path else { return }
+            guard let baseUrl = path.split(separator: "/")[1].removingPercentEncoding else {
+                return
+            }
+            
             guard let trustAll = url?.valueOf("trustAll") else { return }
             
             guard let successLoginPath = try await authenticationUseCase.login(

@@ -11,25 +11,27 @@ import CryptoKit
 
 class SecureStorage {
     private static let key = "gallery.memories"
+    private static let URL_KEY = ".url"
+    private static let TRUST_ALL_KEY = ".trustAll"
+    private static let USERNAME_KEY = ".username"
     
     private static let tokenTag = (key + ".passwords.token").data(using: .utf8)!
     
     
-    let kSecClassValue = NSString(format: kSecClass)
-    let kSecAttrAccountValue = NSString(format: kSecAttrAccount)
-    let kSecValueDataValue = NSString(format: kSecValueData)
-    let kSecClassGenericPasswordValue = NSString(format: kSecClassGenericPassword)
-    let kSecAttrServiceValue = NSString(format: kSecAttrService)
-    let kSecMatchLimitValue = NSString(format: kSecMatchLimit)
-    let kSecReturnDataValue = NSString(format: kSecReturnData)
-    let kSecMatchLimitOneValue = NSString(format: kSecMatchLimitOne)
+    private let kSecClassValue = NSString(format: kSecClass)
+    private let kSecAttrAccountValue = NSString(format: kSecAttrAccount)
+    private let kSecValueDataValue = NSString(format: kSecValueData)
+    private let kSecClassGenericPasswordValue = NSString(format: kSecClassGenericPassword)
+    private let kSecAttrServiceValue = NSString(format: kSecAttrService)
+    private let kSecMatchLimitValue = NSString(format: kSecMatchLimit)
+    private let kSecReturnDataValue = NSString(format: kSecReturnData)
+    private let kSecMatchLimitOneValue = NSString(format: kSecMatchLimitOne)
     
     func saveCredentials(credential: Credential) throws {
-        UserDefaults.standard.register(defaults: [
-            SecureStorage.key + ".url": credential.url,
-            SecureStorage.key + ".trustAll": credential.trustAll,
-            SecureStorage.key + ".username": credential.username
-        ])
+        let defaults = UserDefaults.standard
+        defaults.set(credential.url, forKey: SecureStorage.key + SecureStorage.URL_KEY)
+        defaults.set(credential.trustAll, forKey: SecureStorage.key + SecureStorage.TRUST_ALL_KEY)
+        defaults.set(credential.username, forKey: SecureStorage.key + SecureStorage.USERNAME_KEY)
         
         guard let dataFromString = credential.token.data(using: String.Encoding.utf8, allowLossyConversion: false) else {
             throw StorageError.invalidItemFormat
@@ -53,12 +55,12 @@ class SecureStorage {
     
     func getCredentials() throws -> Credential {
         let defaults = UserDefaults.standard
-        guard let url = defaults.string(forKey: SecureStorage.key + ".url") else {
-            throw StorageError.missingCredential
+        guard let url = defaults.string(forKey: SecureStorage.key + SecureStorage.URL_KEY) else {
+            throw StorageError.missingCredential(key: SecureStorage.URL_KEY)
         }
-        let trustAll = defaults.bool(forKey: SecureStorage.key + ".trustAll")
-        guard let username = defaults.string(forKey: SecureStorage.key + ".username") else {
-            throw StorageError.missingCredential
+        let trustAll = defaults.bool(forKey: SecureStorage.key + SecureStorage.TRUST_ALL_KEY)
+        guard let username = defaults.string(forKey: SecureStorage.key + SecureStorage.USERNAME_KEY) else {
+            throw StorageError.missingCredential(key: SecureStorage.USERNAME_KEY)
         }
         
         
@@ -111,5 +113,5 @@ enum StorageError : Error {
     case unexpectedSaveStatus(status: OSStatus, readable: CFString?)
     case duplicateKey
     case invalidItemFormat
-    case missingCredential
+    case missingCredential(key: String)
 }

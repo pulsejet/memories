@@ -54,7 +54,7 @@ class AuthenticationUseCase {
         }
         debugPrint("Credentials Saved")
         
-        return getWebViewRequestUseCase.build(subpath: "nxsetup")
+        return try getWebViewRequestUseCase.build(subpath: "nxsetup")
     }
 }
 
