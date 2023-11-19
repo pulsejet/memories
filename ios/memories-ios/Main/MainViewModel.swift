@@ -12,6 +12,7 @@ protocol MainViewModelProtocol: AnyObject {
     
     func viewDidLoad()
     func handleScheme(url: URL?)
+    func handleScriptMessage(body: Any) -> Any?
 }
 
 protocol MainUiDelegate: AnyObject {
@@ -26,16 +27,18 @@ protocol MainUiDelegate: AnyObject {
 }
 
 class MainViewModel: MainViewModelProtocol {
-    weak var uiDelegate: MainUiDelegate?
+    weak var uiDelegate: MainUiDelegate? = nil
     
     let authenticationUseCase: AuthenticationUseCase
     let loadCredentialsUseCase: LoadCredentialsUseCase
     let getWebViewRequestUseCase: GetWebViewRequestUseCase
+    let nativeXMessageHandler: NativeXMessageHandler
     
-    init(authenticationUseCase: AuthenticationUseCase, loadCredentialsUseCase: LoadCredentialsUseCase, getWebViewRequestUseCase: GetWebViewRequestUseCase) {
+    init(authenticationUseCase: AuthenticationUseCase, loadCredentialsUseCase: LoadCredentialsUseCase, getWebViewRequestUseCase: GetWebViewRequestUseCase, nativeXMessageHandler: NativeXMessageHandler) {
         self.authenticationUseCase = authenticationUseCase
         self.loadCredentialsUseCase = loadCredentialsUseCase
         self.getWebViewRequestUseCase = getWebViewRequestUseCase
+        self.nativeXMessageHandler = nativeXMessageHandler
     }
     
     func viewDidLoad() {
@@ -84,5 +87,10 @@ class MainViewModel: MainViewModelProtocol {
     
     private func createWaitPageUrl() -> URL {
         return Bundle.main.url(forResource: "waiting", withExtension: "html", subdirectory: "web_asset")!
+    }
+    
+    func handleScriptMessage(body: Any) -> Any? {
+        debugPrint("NativeX Script", body)
+        return nativeXMessageHandler.handleMessage(body: body)
     }
 }

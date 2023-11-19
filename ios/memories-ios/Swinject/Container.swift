@@ -18,7 +18,8 @@ extension SwinjectStoryboard {
             MainViewModel(
                 authenticationUseCase: r.resolve(AuthenticationUseCase.self)!,
                 loadCredentialsUseCase: r.resolve(LoadCredentialsUseCase.self)!,
-                getWebViewRequestUseCase: r.resolve(GetWebViewRequestUseCase.self)!
+                getWebViewRequestUseCase: r.resolve(GetWebViewRequestUseCase.self)!,
+                nativeXMessageHandler: r.resolve(NativeXMessageHandler.self)!
             )
         }
         defaultContainer.register(ApiDescriptionDataSource.self) { r in
@@ -49,6 +50,9 @@ extension SwinjectStoryboard {
         }
         defaultContainer.register(GetWebViewRequestUseCase.self) { r in
             GetWebViewRequestUseCase(httpService: r.resolve(HttpService.self)!)
+        }
+        defaultContainer.register(NativeXMessageHandler.self) { _ in
+            NativeXMessageHandler()
         }
     }
 }

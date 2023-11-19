@@ -30,8 +30,12 @@ class ViewController: UIViewController {
     }
     
     private func initializeWebView() {
+        let nativeXJS = loadJavaScript()
+        let script = WKUserScript(source: nativeXJS, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        
         let contentController = WKUserContentController()
-        contentController.addScriptMessageHandler(self, contentWorld: .page, name: "nativeX")
+        contentController.addScriptMessageHandler(self, contentWorld: .page, name: "nativex")
+        contentController.addUserScript(script)
         
         let webConfiguration = WKWebViewConfiguration()
         webConfiguration.userContentController = contentController
@@ -43,6 +47,20 @@ class ViewController: UIViewController {
         webView.customUserAgent = Constants.USER_AGENT
         
         view = webView
+    }
+    
+    func loadJavaScript() -> String {
+        if let filepath = Bundle.main.path(forResource: "NativeX", ofType: "js", inDirectory: "web_asset") {
+            do {
+                return try String(contentsOfFile: filepath)
+            } catch {
+                debugPrint("Could not parse Javascript")
+                return ""
+            }
+        } else {
+            debugPrint("Could not load Javascript")
+            return ""
+        }
     }
 }
 
@@ -83,9 +101,9 @@ extension ViewController: MainUiDelegate {
 extension ViewController : WKUIDelegate {
     
     func webView(_ webView: WKWebView,
-        runJavaScriptAlertPanelWithMessage message: String,
-        initiatedByFrame frame: WKFrameInfo,
-        completionHandler: @escaping () -> Void) {
+                 runJavaScriptAlertPanelWithMessage message: String,
+                 initiatedByFrame frame: WKFrameInfo,
+                 completionHandler: @escaping () -> Void) {
         
         // Set the message as the UIAlertController message
         let alert = UIAlertController(
@@ -93,7 +111,7 @@ extension ViewController : WKUIDelegate {
             message: message,
             preferredStyle: .alert
         )
-
+        
         // Add a confirmation action “OK”
         let okAction = UIAlertAction(
             title: "OK",
@@ -104,7 +122,7 @@ extension ViewController : WKUIDelegate {
             }
         )
         alert.addAction(okAction)
-
+        
         // Display the NSAlert
         present(alert, animated: true, completion: nil)
     }
@@ -113,12 +131,9 @@ extension ViewController : WKUIDelegate {
 extension ViewController: WKScriptMessageHandlerWithReply {
     
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) async -> (Any?, String?) {
-        
-        if message.name == "isNative" {
-            return (nativeX.isNative(), nil)
-        }
-        
-        return (nil, nil)
+        let result = mainViewModel.handleScriptMessage(body: message.body)
+        debugPrint("Script Message Result", result)
+        return (result, nil)
     }
 }
 
@@ -126,7 +141,7 @@ extension ViewController: WKNavigationDelegate {
     
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
         
-//        let response = nativeX.handleRequest(request: navigationAction.request)
+        //        let response = nativeX.handleRequest(request: navigationAction.request)
         
         print("Request: " + (navigationAction.request.url?.absoluteString ?? ""))
         

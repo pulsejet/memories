@@ -43,6 +43,7 @@
     </div>
 
     <script>
+        
       const urlBox = document.getElementById("server-url");
       const loginButton = document.getElementById("login");
 
@@ -109,7 +110,7 @@
           // Trust all certificates
           const trustAll = document.getElementById("trust-all").checked ? "1" : "0";
 
-          await fetch(`nativex://api/login/${encUrl}?trustAll=${trustAll}`, {
+          await fetch(`nativeX://api/login/${encUrl}?trustAll=${trustAll}`, {
             method: "GET",
             signal: controller.signal,
           });
