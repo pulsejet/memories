@@ -8,7 +8,7 @@ import (
 	"github.com/pulsejet/memories/go-vod/transcoder"
 )
 
-const VERSION = "0.2.3"
+const VERSION = "0.2.4"
 
 func main() {
 	// Build initial configuration
