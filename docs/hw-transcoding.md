@@ -76,9 +76,9 @@ Your external transcoder should now be functional. You can check the transcoding
 
 !!! tip "Usage with Nextcloud AIO"
 
-    With AIO, you will need to put the container into the `nextcloud-aio` network. Also the `datadir` of AIO needs to be mounted at the same place as in its Nextcloud container into the go-vod container. Usually this would be `nextcloud_aio_nextcloud_data:/mnt/ncdata:ro` or `$NEXTCLOUD_DATADIR:/mnt/ncdata:ro`.
+    If you are not using NVENC, you can use the **memories community container**. Relevant documentation can be found [here](https://github.com/nextcloud/all-in-one/tree/main/community-containers/memories), and general directions on using community containers [here](https://github.com/nextcloud/all-in-one/tree/main/community-containers). AIO v7.7.0 or higher is required.
 
-    If you are not using NVENC, you can also skip these steps and use the **memories community container** instead. Relevant documentation can be found [here](https://github.com/nextcloud/all-in-one/tree/main/community-containers/memories), and general directions on using community containers [here](https://github.com/nextcloud/all-in-one/tree/main/community-containers). AIO v7.7.0 or higher is required.
+    Otherwise, if you want to use NVENC with AIO, you will need to put the container into the `nextcloud-aio` network. Also the `datadir` of AIO needs to be mounted at the same place as in its Nextcloud container into the go-vod container. Usually this would be `nextcloud_aio_nextcloud_data:/mnt/ncdata:ro` or `$NEXTCLOUD_DATADIR:/mnt/ncdata:ro`.
 
 !!! info "Usage without Docker Compose"
 
