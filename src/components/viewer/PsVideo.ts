@@ -179,6 +179,7 @@ class VideoContentSetup {
       preload: 'metadata',
       playbackRates: [0.5, 1, 1.5, 2],
       responsive: true,
+      retryOnError: true,
       html5: {
         vhs: {
           overrideNative: overrideNative,
@@ -193,63 +194,60 @@ class VideoContentSetup {
       },
     }));
 
-    // Fallbacks
-    let directFailed = false;
-    let hlsFailed = false;
-
-    vjs.on('error', () => {
-      if (vjs.src(undefined)?.includes('m3u8')) {
-        hlsFailed = true;
-        console.warn('PsVideo: HLS stream could not be opened.');
-
-        if (utils.isAdmin) {
-          showError(t('memories', 'Transcoding failed, check Nextcloud logs.'));
-        }
-
-        if (!directFailed) {
-          console.warn('PsVideo: Trying direct video stream');
-          vjs.src(this.getDirectSrc(content));
-        }
-      } else {
-        directFailed = true;
-        console.warn('PsVideo: Direct video stream could not be opened.');
-
-        if (!hlsFailed && !staticConfig.getSync('vod_disable')) {
-          console.warn('PsVideo: Trying HLS stream');
-          vjs.src(this.getHLSsrc(content));
-        }
-      }
-    });
-
     // Play the video (hopefully)
     const playWithDelay = () => setTimeout(() => this.playNoThrow(content.videojs), 100);
     playWithDelay();
 
-    content.videojs.on('canplay', () => {
+    // Initialize Plyr
+    const initPlyr = () => {
+      if (content.plyr) return;
+
+      // Check if src is set to direct at the time of initialization.
+      // If this is the case then loading the HLS stream failed
+      // and we should warn the admin. We know this since the HLS src
+      // is always the first, and the switch to user preferences is done
+      // only during / after Plyr is initialized.
+      // So any switches to direct till this point are failure fallbacks.
+      if (!staticConfig.getSync('vod_disable')) {
+        if (utils.isAdmin && overrideNative && !vjs.src(undefined)?.endsWith('.m3u8')) {
+          showError(t('memories', 'Transcoding failed, check Nextcloud logs.'));
+        }
+
+        // Register error callback for fallback from direct to HLS.
+        // Fallbacks till this point are handled by videojs natively.
+        vjs.on('error', () => {
+          if (!vjs.src(undefined)?.endsWith('.m3u8')) {
+            console.warn('PsVideo: Direct video stream could not be opened, trying HLS');
+            vjs.src(this.getHLSsrc(content));
+          }
+        });
+      }
+
+      this.initPlyr(content);
+    };
+
+    content.videojs.one('canplay', () => {
       content.videoElement = content.videojs?.el()?.querySelector('video') ?? null;
 
       // Initialize the player UI if not done by now
-      utils.setRenewingTimeout(this, 'plyrinit', () => this.initPlyr(content), 0);
+      utils.setRenewingTimeout(this, 'plyrinit', initPlyr, 0);
 
       // Hide the preview image
       content.placeholder?.element?.setAttribute('hidden', 'true');
 
       // Another attempt to play the video
       playWithDelay();
-
-      // Another attempt to set video quality
-      this.changeQuality(content, this.lastQuality);
     });
 
     content.videojs.qualityLevels?.()?.on('addqualitylevel', (e: any) => {
       if (e.qualityLevel?.label?.includes('max.m3u8')) {
         // This is the highest quality level
         // and guaranteed to be the last one
-        this.initPlyr(content);
+        return initPlyr();
       }
 
       // Fallback
-      utils.setRenewingTimeout(this, 'plyrinit', () => this.initPlyr(content), 0);
+      utils.setRenewingTimeout(this, 'plyrinit', initPlyr, 0);
     });
   }
 
@@ -311,9 +309,11 @@ class VideoContentSetup {
     // Sort quality list descending
     qualityNums.sort((a, b) => b - a);
 
-    // These quality options are always available
-    // E.g. the qualityList is empty on iOS Safari
-    if (!staticConfig.getSync('vod_disable')) qualityNums.unshift(0); // adaptive
+    // The qualityList is empty on iOS Safari
+    if (!staticConfig.getSync('vod_disable') && (qualityNums.length || _m.video.videojs.browser.IS_SAFARI)) {
+      qualityNums.unshift(0); // adaptive
+    }
+
     if (hasOriginal) qualityNums.unshift(-1); // original
     if (true) qualityNums.unshift(-2); // direct
 
