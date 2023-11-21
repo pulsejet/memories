@@ -2,6 +2,8 @@
   <component
     :is="link ? 'router-link' : 'div'"
     draggable="false"
+    tabindex="1"
+    :aria-label="title"
     class="cluster fill-block"
     :class="{ error }"
     :to="target"
@@ -199,6 +201,11 @@ img {
   // Get rid of color of the bubble
   .count-bubble :deep .counter-bubble__counter {
     color: unset !important;
+  }
+
+  // Move focus outline inwards
+  &:focus {
+    outline-offset: -4px;
   }
 }
 
