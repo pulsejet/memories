@@ -205,7 +205,7 @@ img {
 
   // Move focus outline inwards
   &:focus {
-    outline-offset: -4px;
+    outline-offset: -1px;
   }
 }
 
