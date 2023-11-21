@@ -19,6 +19,7 @@
     <RecycleScroller
       ref="recycler"
       class="recycler hide-scrollbar"
+      tabindex="1"
       :class="{ empty }"
       :items="list"
       :emit-update="true"
@@ -274,6 +275,9 @@ export default defineComponent({
       // Always do a hard refresh if the path changes
       if (from?.path !== to.path) {
         await this.refresh();
+
+        // Focus on the recycler (e.g. after navigation click)
+        this.refs.recycler?.$el.focus();
       }
 
       // Do a soft refresh if the query changes
@@ -1435,6 +1439,10 @@ export default defineComponent({
     opacity: 0;
     transition: none;
     width: 0;
+  }
+
+  &:focus {
+    outline: none;
   }
 }
 

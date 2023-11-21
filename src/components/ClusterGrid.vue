@@ -1,6 +1,7 @@
 <template>
   <RecycleScroller
     ref="recycler"
+    tabindex="1"
     type-field="cluster_type"
     key-field="cluster_id"
     class="grid-recycler hide-scrollbar-mobile"
@@ -14,7 +15,7 @@
     @resize="resize"
   >
     <template #before>
-      <slot name="before" />
+      <slot name="before"></slot>
     </template>
 
     <template v-slot="{ item }">
@@ -61,6 +62,10 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    focus: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   emits: {
@@ -74,6 +79,15 @@ export default defineComponent({
 
   mounted() {
     this.resize();
+  },
+
+  watch: {
+    async items() {
+      if (this.focus) {
+        await this.$nextTick();
+        this.refs.recycler?.$el.focus();
+      }
+    },
   },
 
   computed: {
@@ -160,8 +174,13 @@ export default defineComponent({
   flex: 1;
   max-height: 100%;
   overflow-y: scroll !important;
+
   &.empty {
     visibility: hidden;
+  }
+
+  &:focus {
+    outline: none;
   }
 
   margin: 1px;

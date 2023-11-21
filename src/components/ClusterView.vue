@@ -6,7 +6,7 @@
 
     <EmptyContent v-if="!items.length && !loading" />
 
-    <ClusterGrid :items="items" :minCols="minCols" :maxSize="maxSize">
+    <ClusterGrid :items="items" :minCols="minCols" :maxSize="maxSize" :focus="true">
       <template #before>
         <DynamicTopMatter class="cv-dtm" ref="dtm" />
       </template>
@@ -85,7 +85,7 @@ export default defineComponent({
   watch: {
     async $route(to: Route, from: Route) {
       if (to.path === from.path) return;
-      this.refresh();
+      await this.refresh();
     },
   },
 
