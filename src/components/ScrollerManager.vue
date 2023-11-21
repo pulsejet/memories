@@ -591,6 +591,7 @@ export default defineComponent({
       this.interacting = false;
       this.recyclerScrolled(null); // make sure final position is correct
       this.$emit('interactend'); // tell recycler to load stuff
+      this.recycler?.$el.focus(); // give focus back to recycler
     },
 
     /** Update scroller is being used to scroll recycler */
