@@ -26,7 +26,7 @@ class LivePhoto
     public function getLivePhotoId(File $file, array $exif): string
     {
         // Apple JPEG (MOV has ContentIdentifier)
-        if ($uuid = ($exif['MediaGroupUUID'] ?? null)) {
+        if ($uuid = ($exif['ContentIdentifier'] ?? $exif['MediaGroupUUID'] ?? null)) {
             return (string) $uuid;
         }
 
