@@ -1054,8 +1054,7 @@ export default defineComponent({
 
       // Set of basenames without extension
       const res1: IPhoto[] = [];
-      const files = new Map<string, IPhoto[]>();
-      let need2 = false;
+      const toStack = new Map<string, IPhoto[]>();
 
       // First pass -- remove hidden and prepare
       for (const photo of data) {
@@ -1069,50 +1068,44 @@ export default defineComponent({
         const basename = utils.removeExtension(photo.basename ?? String());
         if (!basename) continue; // huh?
 
-        // Skip for raw files
+        // Store RAW files for stacking
         if (this.config.stack_raw_files && photo.mimetype === this.c.MIME_RAW) {
-          need2 = true;
-          continue;
+          const files = toStack.get(basename);
+          if (!files) {
+            toStack.set(basename, [photo]);
+          } else {
+            files.push(photo);
+          }
         }
-
-        // Store file basenames without extension
-        let fileList = files.get(basename);
-        if (!fileList) {
-          fileList = [];
-          files.set(basename, fileList);
-        }
-        fileList.push(photo);
       }
 
       // Skip second pass unless needed
-      if (!need2) return res1;
+      if (!toStack.size) return res1;
+
+      // File IDs that have been stacked
+      const stacked = new Set<IPhoto>();
 
       // Second pass -- stack files
-      const res2: IPhoto[] = [];
       for (const photo of res1) {
-        // Remove RAW files if they can be stacked
-        if (this.config.stack_raw_files && photo.mimetype === this.c.MIME_RAW) {
-          // Get first matching non-raw file
-          const basename = utils.removeExtension(photo.basename ?? String());
-
-          // Get the list of files with the same basename
-          const fileList = files.get(basename);
-          if (fileList?.length) {
-            // Move top file to end (min priority)
-            const top = fileList.shift()!;
-            fileList.push(top);
-
-            // Stack on top file
-            top.stackraw ??= [];
-            top.stackraw.push(photo);
-
-            // Do not add this to result
-            continue;
-          }
+        if (photo.mimetype === this.c.MIME_RAW) {
+          continue; // never stack over RAW
         }
 
-        res2.push(photo);
+        // Check if any RAW files can be stacked
+        const basename = utils.removeExtension(photo.basename ?? String());
+        const files = toStack.get(basename) ?? [];
+
+        if (!files.length) continue;
+
+        // Stack on top of this file
+        photo.stackraw = files;
+
+        // Mark as stacked
+        files.forEach((f) => stacked.add(f));
       }
+
+      // Remove files that were stacked
+      const res2 = res1.filter((p) => !stacked.has(p));
 
       return res2;
     },
