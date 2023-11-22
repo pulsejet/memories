@@ -16,6 +16,9 @@ class NativeXMessageHandler {
         
         switch scriptMessage.method {
         case .isNative: return isNative()
+        case .printLog:
+            debugPrint("JS message: " + (scriptMessage.parameter as! PrintLog).message)
+            return nil
         default: return nil
         }
     }

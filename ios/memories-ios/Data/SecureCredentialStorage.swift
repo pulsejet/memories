@@ -9,7 +9,7 @@ import Foundation
 import CryptoKit
 
 
-class SecureStorage {
+class SecureCredentialStorage {
     private static let key = "gallery.memories"
     private static let URL_KEY = ".url"
     private static let TRUST_ALL_KEY = ".trustAll"
@@ -29,9 +29,9 @@ class SecureStorage {
     
     func saveCredentials(credential: Credential) throws {
         let defaults = UserDefaults.standard
-        defaults.set(credential.url, forKey: SecureStorage.key + SecureStorage.URL_KEY)
-        defaults.set(credential.trustAll, forKey: SecureStorage.key + SecureStorage.TRUST_ALL_KEY)
-        defaults.set(credential.username, forKey: SecureStorage.key + SecureStorage.USERNAME_KEY)
+        defaults.set(credential.url, forKey: SecureCredentialStorage.key + SecureCredentialStorage.URL_KEY)
+        defaults.set(credential.trustAll, forKey: SecureCredentialStorage.key + SecureCredentialStorage.TRUST_ALL_KEY)
+        defaults.set(credential.username, forKey: SecureCredentialStorage.key + SecureCredentialStorage.USERNAME_KEY)
         
         guard let dataFromString = credential.token.data(using: String.Encoding.utf8, allowLossyConversion: false) else {
             throw StorageError.invalidItemFormat
@@ -55,12 +55,12 @@ class SecureStorage {
     
     func getCredentials() throws -> Credential {
         let defaults = UserDefaults.standard
-        guard let url = defaults.string(forKey: SecureStorage.key + SecureStorage.URL_KEY) else {
-            throw StorageError.missingCredential(key: SecureStorage.URL_KEY)
+        guard let url = defaults.string(forKey: SecureCredentialStorage.key + SecureCredentialStorage.URL_KEY) else {
+            throw StorageError.missingCredential(key: SecureCredentialStorage.URL_KEY)
         }
-        let trustAll = defaults.bool(forKey: SecureStorage.key + SecureStorage.TRUST_ALL_KEY)
-        guard let username = defaults.string(forKey: SecureStorage.key + SecureStorage.USERNAME_KEY) else {
-            throw StorageError.missingCredential(key: SecureStorage.USERNAME_KEY)
+        let trustAll = defaults.bool(forKey: SecureCredentialStorage.key + SecureCredentialStorage.TRUST_ALL_KEY)
+        guard let username = defaults.string(forKey: SecureCredentialStorage.key + SecureCredentialStorage.USERNAME_KEY) else {
+            throw StorageError.missingCredential(key: SecureCredentialStorage.USERNAME_KEY)
         }
         
         

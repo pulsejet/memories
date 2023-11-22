@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5000AC802B0AA75B0015CB2E /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 5000AC7F2B0AA75B0015CB2E /* SQLite */; };
+		5000AC822B0AA9360015CB2E /* PhotoDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5000AC812B0AA9360015CB2E /* PhotoDataSource.swift */; };
 		500D1D7C2B0A79740013691E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1D7B2B0A79740013691E /* AppDelegate.swift */; };
 		500D1D7E2B0A79740013691E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1D7D2B0A79740013691E /* SceneDelegate.swift */; };
 		500D1D832B0A79740013691E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 500D1D812B0A79740013691E /* Main.storyboard */; };
@@ -22,20 +24,23 @@
 		500D1DDC2B0A7A820013691E /* Container.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DC82B0A7A820013691E /* Container.swift */; };
 		500D1DDD2B0A7A820013691E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DCA2B0A7A820013691E /* ViewController.swift */; };
 		500D1DDE2B0A7A820013691E /* NativeXMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DCB2B0A7A820013691E /* NativeXMessageHandler.swift */; };
-		500D1DDF2B0A7A820013691E /* NativeX.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DCC2B0A7A820013691E /* NativeX.swift */; };
+		500D1DDF2B0A7A820013691E /* NativeXRequestHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DCC2B0A7A820013691E /* NativeXRequestHandler.swift */; };
 		500D1DE02B0A7A820013691E /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DCD2B0A7A820013691E /* MainViewModel.swift */; };
 		500D1DE12B0A7A820013691E /* ScriptMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DCE2B0A7A820013691E /* ScriptMessage.swift */; };
 		500D1DE22B0A7A820013691E /* ApiDescriptionDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DD02B0A7A820013691E /* ApiDescriptionDataSource.swift */; };
-		500D1DE32B0A7A820013691E /* SecureStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DD12B0A7A820013691E /* SecureStorage.swift */; };
+		500D1DE32B0A7A820013691E /* SecureCredentialStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DD12B0A7A820013691E /* SecureCredentialStorage.swift */; };
 		500D1DE42B0A7A820013691E /* LoginDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DD22B0A7A820013691E /* LoginDataSource.swift */; };
 		500D1DE52B0A7A820013691E /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DD42B0A7A820013691E /* StringExtensions.swift */; };
 		500D1DE62B0A7A820013691E /* UrlExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DD52B0A7A820013691E /* UrlExtensions.swift */; };
 		500D1DE92B0A7B150013691E /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 500D1DE82B0A7B150013691E /* Alamofire */; };
 		500D1DEC2B0A7B280013691E /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = 500D1DEB2B0A7B280013691E /* Swinject */; };
 		500D1DF12B0A7B3A0013691E /* SwinjectStoryboard in Frameworks */ = {isa = PBXBuildFile; productRef = 500D1DF02B0A7B3A0013691E /* SwinjectStoryboard */; };
+		5042EF132B0D502A006C3ABC /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 5042EF122B0D502A006C3ABC /* GRDB */; };
+		5042EF152B0D5046006C3ABC /* DatabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5042EF142B0D5046006C3ABC /* DatabaseService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5000AC812B0AA9360015CB2E /* PhotoDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDataSource.swift; sourceTree = "<group>"; };
 		500D1D782B0A79740013691E /* memories-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "memories-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		500D1D7B2B0A79740013691E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		500D1D7D2B0A79740013691E /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -53,14 +58,15 @@
 		500D1DC82B0A7A820013691E /* Container.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Container.swift; sourceTree = "<group>"; };
 		500D1DCA2B0A7A820013691E /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		500D1DCB2B0A7A820013691E /* NativeXMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NativeXMessageHandler.swift; sourceTree = "<group>"; };
-		500D1DCC2B0A7A820013691E /* NativeX.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NativeX.swift; sourceTree = "<group>"; };
+		500D1DCC2B0A7A820013691E /* NativeXRequestHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NativeXRequestHandler.swift; sourceTree = "<group>"; };
 		500D1DCD2B0A7A820013691E /* MainViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
 		500D1DCE2B0A7A820013691E /* ScriptMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScriptMessage.swift; sourceTree = "<group>"; };
 		500D1DD02B0A7A820013691E /* ApiDescriptionDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApiDescriptionDataSource.swift; sourceTree = "<group>"; };
-		500D1DD12B0A7A820013691E /* SecureStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SecureStorage.swift; sourceTree = "<group>"; };
+		500D1DD12B0A7A820013691E /* SecureCredentialStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SecureCredentialStorage.swift; sourceTree = "<group>"; };
 		500D1DD22B0A7A820013691E /* LoginDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginDataSource.swift; sourceTree = "<group>"; };
 		500D1DD42B0A7A820013691E /* StringExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
 		500D1DD52B0A7A820013691E /* UrlExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UrlExtensions.swift; sourceTree = "<group>"; };
+		5042EF142B0D5046006C3ABC /* DatabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +74,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5000AC802B0AA75B0015CB2E /* SQLite in Frameworks */,
+				5042EF132B0D502A006C3ABC /* GRDB in Frameworks */,
 				500D1DE92B0A7B150013691E /* Alamofire in Frameworks */,
 				500D1DF12B0A7B3A0013691E /* SwinjectStoryboard in Frameworks */,
 				500D1DEC2B0A7B280013691E /* Swinject in Frameworks */,
@@ -96,13 +104,13 @@
 		500D1D7A2B0A79740013691E /* memories-ios */ = {
 			isa = PBXGroup;
 			children = (
+				500D1DBD2B0A7A730013691E /* web_asset */,
+				500D1DC52B0A7A810013691E /* Service */,
 				500D1DCF2B0A7A820013691E /* Data */,
 				500D1DC02B0A7A810013691E /* Domain */,
 				500D1DD32B0A7A820013691E /* Extensions */,
 				500D1DC92B0A7A820013691E /* Main */,
-				500D1DC52B0A7A810013691E /* Service */,
 				500D1DC72B0A7A820013691E /* Swinject */,
-				500D1DBD2B0A7A730013691E /* web_asset */,
 				500D1D7B2B0A79740013691E /* AppDelegate.swift */,
 				500D1D7D2B0A79740013691E /* SceneDelegate.swift */,
 				500D1DBF2B0A7A810013691E /* Constants.swift */,
@@ -129,6 +137,7 @@
 			isa = PBXGroup;
 			children = (
 				500D1DC62B0A7A810013691E /* HttpService.swift */,
+				5042EF142B0D5046006C3ABC /* DatabaseService.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -146,7 +155,7 @@
 			children = (
 				500D1DCA2B0A7A820013691E /* ViewController.swift */,
 				500D1DCB2B0A7A820013691E /* NativeXMessageHandler.swift */,
-				500D1DCC2B0A7A820013691E /* NativeX.swift */,
+				500D1DCC2B0A7A820013691E /* NativeXRequestHandler.swift */,
 				500D1DCD2B0A7A820013691E /* MainViewModel.swift */,
 				500D1DCE2B0A7A820013691E /* ScriptMessage.swift */,
 			);
@@ -157,8 +166,9 @@
 			isa = PBXGroup;
 			children = (
 				500D1DD02B0A7A820013691E /* ApiDescriptionDataSource.swift */,
-				500D1DD12B0A7A820013691E /* SecureStorage.swift */,
+				500D1DD12B0A7A820013691E /* SecureCredentialStorage.swift */,
 				500D1DD22B0A7A820013691E /* LoginDataSource.swift */,
+				5000AC812B0AA9360015CB2E /* PhotoDataSource.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -192,6 +202,8 @@
 				500D1DE82B0A7B150013691E /* Alamofire */,
 				500D1DEB2B0A7B280013691E /* Swinject */,
 				500D1DF02B0A7B3A0013691E /* SwinjectStoryboard */,
+				5000AC7F2B0AA75B0015CB2E /* SQLite */,
+				5042EF122B0D502A006C3ABC /* GRDB */,
 			);
 			productName = "memories-ios";
 			productReference = 500D1D782B0A79740013691E /* memories-ios.app */;
@@ -225,6 +237,8 @@
 				500D1DE72B0A7B150013691E /* XCRemoteSwiftPackageReference "Alamofire" */,
 				500D1DEA2B0A7B280013691E /* XCRemoteSwiftPackageReference "Swinject" */,
 				500D1DEF2B0A7B3A0013691E /* XCRemoteSwiftPackageReference "SwinjectStoryboard" */,
+				5000AC7E2B0AA75B0015CB2E /* XCRemoteSwiftPackageReference "SQLite.swift" */,
+				5042EF112B0D502A006C3ABC /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 			);
 			productRefGroup = 500D1D792B0A79740013691E /* Products */;
 			projectDirPath = "";
@@ -257,7 +271,7 @@
 				500D1DDD2B0A7A820013691E /* ViewController.swift in Sources */,
 				500D1DD72B0A7A820013691E /* RefreshCredentialsUseCase.swift in Sources */,
 				500D1DDE2B0A7A820013691E /* NativeXMessageHandler.swift in Sources */,
-				500D1DDF2B0A7A820013691E /* NativeX.swift in Sources */,
+				500D1DDF2B0A7A820013691E /* NativeXRequestHandler.swift in Sources */,
 				500D1DE12B0A7A820013691E /* ScriptMessage.swift in Sources */,
 				500D1DD82B0A7A820013691E /* GetWebViewRequestUseCase.swift in Sources */,
 				500D1DE02B0A7A820013691E /* MainViewModel.swift in Sources */,
@@ -265,9 +279,11 @@
 				500D1D7C2B0A79740013691E /* AppDelegate.swift in Sources */,
 				500D1DE42B0A7A820013691E /* LoginDataSource.swift in Sources */,
 				500D1DE22B0A7A820013691E /* ApiDescriptionDataSource.swift in Sources */,
-				500D1DE32B0A7A820013691E /* SecureStorage.swift in Sources */,
+				500D1DE32B0A7A820013691E /* SecureCredentialStorage.swift in Sources */,
 				500D1DE52B0A7A820013691E /* StringExtensions.swift in Sources */,
+				5000AC822B0AA9360015CB2E /* PhotoDataSource.swift in Sources */,
 				500D1DD92B0A7A820013691E /* SetCredentialsUseCase.swift in Sources */,
+				5042EF152B0D5046006C3ABC /* DatabaseService.swift in Sources */,
 				500D1DDB2B0A7A820013691E /* HttpService.swift in Sources */,
 				500D1D7E2B0A79740013691E /* SceneDelegate.swift in Sources */,
 				500D1DE62B0A7A820013691E /* UrlExtensions.swift in Sources */,
@@ -492,6 +508,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		5000AC7E2B0AA75B0015CB2E /* XCRemoteSwiftPackageReference "SQLite.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stephencelis/SQLite.swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.2;
+			};
+		};
 		500D1DE72B0A7B150013691E /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
@@ -516,9 +540,22 @@
 				kind = branch;
 			};
 		};
+		5042EF112B0D502A006C3ABC /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		5000AC7F2B0AA75B0015CB2E /* SQLite */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5000AC7E2B0AA75B0015CB2E /* XCRemoteSwiftPackageReference "SQLite.swift" */;
+			productName = SQLite;
+		};
 		500D1DE82B0A7B150013691E /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 500D1DE72B0A7B150013691E /* XCRemoteSwiftPackageReference "Alamofire" */;
@@ -533,6 +570,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 500D1DEF2B0A7B3A0013691E /* XCRemoteSwiftPackageReference "SwinjectStoryboard" */;
 			productName = SwinjectStoryboard;
+		};
+		5042EF122B0D502A006C3ABC /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5042EF112B0D502A006C3ABC /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			productName = GRDB;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

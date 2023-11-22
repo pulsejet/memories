@@ -77,6 +77,12 @@ class NativeX {
         })
     }
 
+    printLog(message) {
+        return this.postMessageBody("printLog", {
+            "message": message
+        })
+    }
+
     postMessageBody(method, parameter) {
         const body = {
             method: method,
@@ -89,3 +95,9 @@ class NativeX {
 }
 
 globalThis.nativex = new NativeX()
+
+const {fetch: origFetch} = window;
+window.fetch = async (...args) => {
+    globalThis.nativex.printLog("Fetch request for: " + args);
+    return await origFetch(...args);
+}

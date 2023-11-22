@@ -8,10 +8,10 @@
 import Foundation
 
 class SetCredentialsUseCase {
-    let secureStorage: SecureStorage
+    let secureStorage: SecureCredentialStorage
     let loadCredentialsUseCase: LoadCredentialsUseCase
     
-    init(secureStorage: SecureStorage, refreshCredentialsUseCase: LoadCredentialsUseCase) {
+    init(secureStorage: SecureCredentialStorage, refreshCredentialsUseCase: LoadCredentialsUseCase) {
         self.secureStorage = secureStorage
         self.loadCredentialsUseCase = refreshCredentialsUseCase
     }

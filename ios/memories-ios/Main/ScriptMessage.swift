@@ -33,6 +33,8 @@ struct ScriptMessage : Decodable {
             parameter = try container.decode(ConfigSetLocalFolders.self, forKey: .parameter)
         case .setHasRemote:
             parameter = try container.decode(SetHasRemote.self, forKey: .parameter)
+        case .printLog:
+            parameter = try container.decode(PrintLog.self, forKey: .parameter)
         default: parameter = nil
         }
     }
@@ -41,7 +43,7 @@ struct ScriptMessage : Decodable {
     let parameter: ScriptParameters?
     
     enum Method : String, Decodable {
-        case isNative, setThemeColor, playTouchSound, toast, logout, reload, downloadFromUrl, playVideo, destroyVideo, configSetLocalFolders, configGetLocalFolders, configHasMediaPermission, getSyncStatus, setHasRemote
+        case isNative, setThemeColor, playTouchSound, toast, logout, reload, downloadFromUrl, playVideo, destroyVideo, configSetLocalFolders, configGetLocalFolders, configHasMediaPermission, getSyncStatus, setHasRemote, printLog
     }
 }
 
@@ -87,4 +89,9 @@ struct SetHasRemote : ScriptParameters {
     let auids: String
     let buids: String
     let value: Bool
+}
+
+struct PrintLog : ScriptParameters {
+    
+    let message: String
 }

@@ -11,9 +11,9 @@ import Foundation
 class LoadCredentialsUseCase {
     
     let httpService: HttpService
-    let secureStorage: SecureStorage
+    let secureStorage: SecureCredentialStorage
     
-    init(httpService: HttpService, secureStorage: SecureStorage) {
+    init(httpService: HttpService, secureStorage: SecureCredentialStorage) {
         self.httpService = httpService
         self.secureStorage = secureStorage
     }

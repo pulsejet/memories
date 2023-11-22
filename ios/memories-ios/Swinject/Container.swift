@@ -10,10 +10,10 @@ import SwinjectStoryboard
 extension SwinjectStoryboard {
     @objc class func setup() {
         defaultContainer.storyboardInitCompleted(ViewController.self) { r, viewController in
-            viewController.nativeX = r.resolve(NativeX.self)
+            viewController.nativeX = r.resolve(NativeXRequestHandler.self)
             viewController.mainViewModel = r.resolve(MainViewModelProtocol.self)
         }
-        defaultContainer.register(NativeX.self) { _ in NativeX() }
+        defaultContainer.register(NativeXRequestHandler.self) { _ in NativeXRequestHandler() }
         defaultContainer.register(MainViewModelProtocol.self) { r in
             MainViewModel(
                 authenticationUseCase: r.resolve(AuthenticationUseCase.self)!,
@@ -39,20 +39,26 @@ extension SwinjectStoryboard {
         defaultContainer.register(LoginDataSource.self) { r in
             LoginDataSource(httpService: r.resolve(HttpService.self)!)
         }
-        defaultContainer.register(SecureStorage.self) { _ in
-            SecureStorage()
+        defaultContainer.register(SecureCredentialStorage.self) { _ in
+            SecureCredentialStorage()
         }
         defaultContainer.register(SetCredentialsUseCase.self) { r in
-            SetCredentialsUseCase(secureStorage: r.resolve(SecureStorage.self)!, refreshCredentialsUseCase: r.resolve(LoadCredentialsUseCase.self)!)
+            SetCredentialsUseCase(secureStorage: r.resolve(SecureCredentialStorage.self)!, refreshCredentialsUseCase: r.resolve(LoadCredentialsUseCase.self)!)
         }
         defaultContainer.register(LoadCredentialsUseCase.self) { r in
-            LoadCredentialsUseCase(httpService: r.resolve(HttpService.self)!, secureStorage: r.resolve(SecureStorage.self)!)
+            LoadCredentialsUseCase(httpService: r.resolve(HttpService.self)!, secureStorage: r.resolve(SecureCredentialStorage.self)!)
         }
         defaultContainer.register(GetWebViewRequestUseCase.self) { r in
             GetWebViewRequestUseCase(httpService: r.resolve(HttpService.self)!)
         }
         defaultContainer.register(NativeXMessageHandler.self) { _ in
             NativeXMessageHandler()
+        }
+        defaultContainer.register(DatabaseService.self) { _ in
+            DatabaseService()
+        }
+        defaultContainer.register(PhotoDataSource.self) { r in
+            PhotoDataSource(databaseService: r.resolve(DatabaseService.self)!)
         }
     }
 }

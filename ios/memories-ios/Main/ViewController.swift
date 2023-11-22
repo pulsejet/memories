@@ -10,7 +10,7 @@ import WebKit
 import AuthenticationServices
 
 class ViewController: UIViewController {
-    var nativeX: NativeX!
+    var nativeX: NativeXRequestHandler!
     var mainViewModel: MainViewModelProtocol!
     
     var webView: WKWebView!
