@@ -10,10 +10,17 @@ import UIKit
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
+    let databaseService: DatabaseService = DatabaseService()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        do {
+            try databaseService.setup()
+            debugPrint("Database Initialized Successfully!")
+        } catch(let error) {
+            debugPrint("Error on Launch", error)
+            return false
+        }
         return true
     }
 

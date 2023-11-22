@@ -37,6 +37,7 @@
 		500D1DF12B0A7B3A0013691E /* SwinjectStoryboard in Frameworks */ = {isa = PBXBuildFile; productRef = 500D1DF02B0A7B3A0013691E /* SwinjectStoryboard */; };
 		5042EF132B0D502A006C3ABC /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 5042EF122B0D502A006C3ABC /* GRDB */; };
 		5042EF152B0D5046006C3ABC /* DatabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5042EF142B0D5046006C3ABC /* DatabaseService.swift */; };
+		50F2E61B2B0EB6650035C014 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F2E61A2B0EB6650035C014 /* Photo.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -67,6 +68,7 @@
 		500D1DD42B0A7A820013691E /* StringExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
 		500D1DD52B0A7A820013691E /* UrlExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UrlExtensions.swift; sourceTree = "<group>"; };
 		5042EF142B0D5046006C3ABC /* DatabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseService.swift; sourceTree = "<group>"; };
+		50F2E61A2B0EB6650035C014 /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -165,6 +167,7 @@
 		500D1DCF2B0A7A820013691E /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				50F2E6192B0EB64A0035C014 /* Models */,
 				500D1DD02B0A7A820013691E /* ApiDescriptionDataSource.swift */,
 				500D1DD12B0A7A820013691E /* SecureCredentialStorage.swift */,
 				500D1DD22B0A7A820013691E /* LoginDataSource.swift */,
@@ -180,6 +183,14 @@
 				500D1DD52B0A7A820013691E /* UrlExtensions.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		50F2E6192B0EB64A0035C014 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				50F2E61A2B0EB6650035C014 /* Photo.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -286,6 +297,7 @@
 				5042EF152B0D5046006C3ABC /* DatabaseService.swift in Sources */,
 				500D1DDB2B0A7A820013691E /* HttpService.swift in Sources */,
 				500D1D7E2B0A79740013691E /* SceneDelegate.swift in Sources */,
+				50F2E61B2B0EB6650035C014 /* Photo.swift in Sources */,
 				500D1DE62B0A7A820013691E /* UrlExtensions.swift in Sources */,
 				500D1DDC2B0A7A820013691E /* Container.swift in Sources */,
 				500D1DD62B0A7A820013691E /* Constants.swift in Sources */,

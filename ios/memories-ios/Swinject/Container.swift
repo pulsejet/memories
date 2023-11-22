@@ -6,9 +6,11 @@
 //
 import Foundation
 import SwinjectStoryboard
+import UIKit
 
 extension SwinjectStoryboard {
     @objc class func setup() {
+        
         defaultContainer.storyboardInitCompleted(ViewController.self) { r, viewController in
             viewController.nativeX = r.resolve(NativeXRequestHandler.self)
             viewController.mainViewModel = r.resolve(MainViewModelProtocol.self)
@@ -55,8 +57,9 @@ extension SwinjectStoryboard {
             NativeXMessageHandler()
         }
         defaultContainer.register(DatabaseService.self) { _ in
-            DatabaseService()
-        }
+            let delegate = UIApplication.shared.delegate as! AppDelegate
+            return delegate.databaseService
+        }.inObjectScope(.container)
         defaultContainer.register(PhotoDataSource.self) { r in
             PhotoDataSource(databaseService: r.resolve(DatabaseService.self)!)
         }

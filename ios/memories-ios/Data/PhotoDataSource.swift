@@ -16,25 +16,6 @@ class PhotoDataSource {
         self.databaseService = databaseService
     }
     
-    func createTable() throws {
-        try databaseService.dbQueue.write { db in
-            try db.create(table: Photo.databaseTableName) { t in
-                t.autoIncrementedPrimaryKey(PhotoColumns.id.rawValue)
-                t.column(PhotoColumns.localId.rawValue, .integer)
-                t.column(PhotoColumns.auid.rawValue, .text)
-                t.column(PhotoColumns.buid.rawValue, .text)
-                t.column(PhotoColumns.mtime.rawValue, .integer)
-                t.column(PhotoColumns.dateTaken.rawValue, .integer)
-                t.column(PhotoColumns.dayId.rawValue, .integer)
-                t.column(PhotoColumns.baseName.rawValue, .text)
-                t.column(PhotoColumns.bucketId.rawValue, .integer)
-                t.column(PhotoColumns.bucketName.rawValue, .text)
-                t.column(PhotoColumns.hasRemote.rawValue, .boolean)
-                t.column(PhotoColumns.flag.rawValue, .integer)
-            }
-        }
-    }
-    
     func getDays(bucketIds: [String]) throws -> [Day] {
         return try databaseService.dbQueue.read { db in
             let statement = try db.makeStatement(sql: "SELECT dayid, COUNT(local_id) AS count FROM photos WHERE bucket_id IN (:bucketIds) AND has_remote = 0 GROUP BY dayid ORDER BY dayid DESC")
@@ -133,91 +114,4 @@ class PhotoDataSource {
             ])
         }
     }
-}
-
-enum PhotoColumns : String, CodingKey, ColumnExpression {
-    case id
-    case localId = "local_id"
-    case auid = "auid"
-    case buid = "buid"
-    case mtime = "mtime"
-    case dateTaken = "date_taken"
-    case dayId = "dayid"
-    case baseName = "basename"
-    case bucketId = "bucket_id"
-    case bucketName = "bucket_name"
-    case hasRemote = "has_remote"
-    case flag = "flag"
-}
-
-struct Photo {
-    
-    let id: Int?
-    let localId: Int64
-    let auid: String
-    let buid: String
-    let mtime: Int64
-    let dateTaken: Int64
-    let dayId: Int64
-    let baseName: String
-    let bucketId: Int64
-    let bucketName: String
-    let hasRemote: Bool
-    let flag: Int
-}
-
-extension Photo: Codable, TableRecord, FetchableRecord, MutablePersistableRecord {
-    
-    static let databaseTableName = "photos"
-    
-    init(row: Row) throws {
-        id = row[PhotoColumns.id]
-        localId = row[PhotoColumns.localId]
-        auid = row[PhotoColumns.auid]
-        buid = row[PhotoColumns.buid]
-        mtime = row[PhotoColumns.mtime]
-        dateTaken = row[PhotoColumns.dateTaken]
-        dayId = row[PhotoColumns.dayId]
-        baseName = row[PhotoColumns.baseName]
-        bucketId = row[PhotoColumns.bucketId]
-        bucketName = row[PhotoColumns.bucketName]
-        hasRemote = row[PhotoColumns.hasRemote]
-        flag = row[PhotoColumns.flag]
-    }
-    
-    func encode(to container: inout PersistenceContainer) throws {
-        container[PhotoColumns.id] = id
-        container[PhotoColumns.localId] = localId
-        container[PhotoColumns.auid] = auid
-        container[PhotoColumns.buid] = buid
-        container[PhotoColumns.mtime] = mtime
-        container[PhotoColumns.dateTaken] = dateTaken
-        container[PhotoColumns.dayId] = dayId
-        container[PhotoColumns.baseName] = baseName
-        container[PhotoColumns.bucketId] = bucketId
-        container[PhotoColumns.bucketName] = bucketName
-        container[PhotoColumns.hasRemote] = hasRemote
-        container[PhotoColumns.flag] = flag
-    }
-}
-
-struct Bucket : Codable, FetchableRecord {
-    init(row: Row) throws {
-        id = row[PhotoColumns.bucketId]
-        name = row[PhotoColumns.bucketName]
-    }
-    
-    let id: String
-    let name: String
-}
-
-
-struct Day : Codable, FetchableRecord {
-    init(row: Row) throws {
-        dayId = row[PhotoColumns.dayId]
-        count = row["count"]
-    }
-    
-    let dayId: Int64
-    let count: Int64
 }
