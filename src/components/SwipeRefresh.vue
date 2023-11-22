@@ -14,19 +14,35 @@ export default defineComponent({
   name: 'SwipeRefresh',
 
   props: {
+    /** Callback to execute when the user swipes down */
     refresh: {
       type: Function as PropType<() => Promise<any>>,
       required: true,
     },
 
+    /** Whether to allow the swipe action */
     allowSwipe: {
       type: Boolean,
       default: true,
     },
 
+    /**
+     * A unique identifier for the swipe action.
+     * If the state changes, the swipe action is reset.
+     */
     state: {
       type: Number,
       default: Math.random(),
+    },
+
+    /**
+     * An ancestor element of the touch action
+     * target must match this query selector to be
+     * eligible for the swipe action.
+     */
+    match: {
+      type: String,
+      default: '',
     },
   },
 
@@ -131,6 +147,11 @@ export default defineComponent({
     touchstart(event: TouchEvent) {
       if (!this.allowSwipe) return;
       const touch = event.touches[0];
+
+      // Check if top element matches selector
+      if (this.match && !(<HTMLElement>touch.target).closest(this.match)) return;
+
+      // Start swipe action
       this.end = this.start = touch.clientY;
       this.progress = 0;
       this.on = true;

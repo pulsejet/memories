@@ -2,6 +2,7 @@
   <SwipeRefresh
     class="container no-user-select"
     ref="container"
+    match=".recycler"
     :refresh="softRefreshSync"
     :allowSwipe="allowSwipe"
     :state="state"
