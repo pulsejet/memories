@@ -1095,6 +1095,13 @@ export default defineComponent({
         const basename = utils.removeExtension(photo.basename ?? String());
         const files = toStack.get(basename) ?? [];
 
+        // Also allow *one* more extension in the filename
+        // https://github.com/pulsejet/memories/issues/927
+        if (basename.includes('.')) {
+          const subname = utils.removeExtension(basename);
+          files.push(...(toStack.get(subname) ?? []));
+        }
+
         if (!files.length) continue;
 
         // Stack on top of this file
