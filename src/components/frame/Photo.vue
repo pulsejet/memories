@@ -19,6 +19,7 @@
       </div>
 
       <div class="flag top-right">
+        <RawIcon class="raw" v-if="isRaw" :size="28" />
         <div class="video" v-if="data.flag & c.FLAG_IS_VIDEO">
           <span class="time" v-if="data.video_duration">{{ videoDuration }}</span>
           <VideoIcon :size="22" />
@@ -26,7 +27,6 @@
         <div class="livephoto" v-if="data.liveid" @mouseenter.passive="playVideo" @mouseleave.passive="stopVideo">
           <LivePhotoIcon :size="22" :spin="liveState.waiting" :playing="liveState.playing" />
         </div>
-        <RawIcon class="raw" v-if="isRaw" :size="28" />
       </div>
 
       <div class="flag bottom-left">
