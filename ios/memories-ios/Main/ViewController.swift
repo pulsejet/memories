@@ -10,7 +10,6 @@ import WebKit
 import AuthenticationServices
 
 class ViewController: UIViewController {
-    var nativeX: NativeXRequestHandler!
     var mainViewModel: MainViewModelProtocol!
     
     var webView: WKWebView!
@@ -132,7 +131,7 @@ extension ViewController: WKScriptMessageHandlerWithReply {
     
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) async -> (Any?, String?) {
         let result = mainViewModel.handleScriptMessage(body: message.body)
-        debugPrint("Script Message Result", result)
+        debugPrint("Script Message Result", result ?? "nil")
         return (result, nil)
     }
 }

@@ -19,4 +19,9 @@ extension String {
     func toBase64() -> String {
         return Data(self.utf8).base64EncodedString()
     }
+    
+    func match(regEx: NSRegularExpression) -> Bool {
+        let range = NSRange(location: 0, length: self.utf16.count)
+        return regEx.firstMatch(in: self, range: range) != nil
+    }
 }

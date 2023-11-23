@@ -11,22 +11,21 @@ import WebKit
 
 class NativeXRequestHandler {
     
-    let LOGIN = "^/api/login/.+$"
-
-    let DAYS = "^/api/days$"
-    let DAY = "^/api/days/\\d+$"
-
-    let IMAGE_INFO = "^/api/image/info/\\d+$"
-    let IMAGE_DELETE = "^/api/image/delete/[0-9a-f]+(,[0-9a-f]+*$"
+    let getDaysUseCase: GetDaysUseCase
     
-    let IMAGE_PREVIEW = try! NSRegularExpression(pattern: "^/image/preview/\\d+$")
-    let IMAGE_FULL = try! NSRegularExpression(pattern: "^/image/full/[0-9a-f]+$")
-
-    let SHARE_URL = "^/api/share/url/.+$"
-    let SHARE_BLOB = "^/api/share/blob/.+$"
-    let SHARE_LOCAL = "^/api/share/local/[0-9a-f]+$"
-
-    let CONFIG_ALLOW_MEDIA = "^/api/config/allow_media/\\d+$"
+    init(getDaysUseCase: GetDaysUseCase) {
+        self.getDaysUseCase = getDaysUseCase
+    }
+    
+    func handleUrlRequest(urlRequest: UrlRequest) -> Any? {
+        
+        if (urlRequest.url.match(regEx: DAYS)) {
+            debugPrint("Match", DAYS)
+            return getDaysUseCase.invoke()
+        }
+        
+        return nil
+    }
     
     
     func handleRequest(request: URLRequest) -> URLRequest? {
@@ -57,4 +56,23 @@ class NativeXRequestHandler {
         
         return nil
     }
+    
+    
+    
+    let LOGIN = try! NSRegularExpression(pattern: "^/api/login/.+$")
+
+    let DAYS = try! NSRegularExpression(pattern: "^/api/days$")
+    let DAY = try! NSRegularExpression(pattern: "^/api/days/\\d+$")
+
+    let IMAGE_INFO = try! NSRegularExpression(pattern: "^/api/image/info/\\d+$")
+    let IMAGE_DELETE = try! NSRegularExpression(pattern: "^/api/image/delete/[0-9a-f]+(,[0-9a-f]+)*$")
+    
+    let IMAGE_PREVIEW = try! NSRegularExpression(pattern: "^/image/preview/\\d+$")
+    let IMAGE_FULL = try! NSRegularExpression(pattern: "^/image/full/[0-9a-f]+$")
+
+    let SHARE_URL = try! NSRegularExpression(pattern: "^/api/share/url/.+$")
+    let SHARE_BLOB = try! NSRegularExpression(pattern: "^/api/share/blob/.+$")
+    let SHARE_LOCAL = try! NSRegularExpression(pattern: "^/api/share/local/[0-9a-f]+$")
+
+    let CONFIG_ALLOW_MEDIA = try! NSRegularExpression(pattern: "^/api/config/allow_media/\\d+$")
 }

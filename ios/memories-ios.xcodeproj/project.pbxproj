@@ -37,6 +37,10 @@
 		500D1DF12B0A7B3A0013691E /* SwinjectStoryboard in Frameworks */ = {isa = PBXBuildFile; productRef = 500D1DF02B0A7B3A0013691E /* SwinjectStoryboard */; };
 		5042EF132B0D502A006C3ABC /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 5042EF122B0D502A006C3ABC /* GRDB */; };
 		5042EF152B0D5046006C3ABC /* DatabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5042EF142B0D5046006C3ABC /* DatabaseService.swift */; };
+		50EAD9292B0FBCF000792149 /* BucketsDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EAD9282B0FBCF000792149 /* BucketsDataSource.swift */; };
+		50EAD92D2B0FBEE300792149 /* GetDaysUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EAD92C2B0FBEE300792149 /* GetDaysUseCase.swift */; };
+		50EAD92F2B0FC29500792149 /* CodableExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EAD92E2B0FC29500792149 /* CodableExtensions.swift */; };
+		50EAD9312B0FCAC500792149 /* GetLocalFoldersUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EAD9302B0FCAC500792149 /* GetLocalFoldersUseCase.swift */; };
 		50F2E61B2B0EB6650035C014 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F2E61A2B0EB6650035C014 /* Photo.swift */; };
 /* End PBXBuildFile section */
 
@@ -68,6 +72,10 @@
 		500D1DD42B0A7A820013691E /* StringExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
 		500D1DD52B0A7A820013691E /* UrlExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UrlExtensions.swift; sourceTree = "<group>"; };
 		5042EF142B0D5046006C3ABC /* DatabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseService.swift; sourceTree = "<group>"; };
+		50EAD9282B0FBCF000792149 /* BucketsDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BucketsDataSource.swift; sourceTree = "<group>"; };
+		50EAD92C2B0FBEE300792149 /* GetDaysUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetDaysUseCase.swift; sourceTree = "<group>"; };
+		50EAD92E2B0FC29500792149 /* CodableExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableExtensions.swift; sourceTree = "<group>"; };
+		50EAD9302B0FCAC500792149 /* GetLocalFoldersUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetLocalFoldersUseCase.swift; sourceTree = "<group>"; };
 		50F2E61A2B0EB6650035C014 /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -127,10 +135,8 @@
 		500D1DC02B0A7A810013691E /* Domain */ = {
 			isa = PBXGroup;
 			children = (
-				500D1DC12B0A7A810013691E /* RefreshCredentialsUseCase.swift */,
-				500D1DC22B0A7A810013691E /* GetWebViewRequestUseCase.swift */,
-				500D1DC32B0A7A810013691E /* SetCredentialsUseCase.swift */,
-				500D1DC42B0A7A810013691E /* AuthenticationUseCase.swift */,
+				50EAD92B2B0FBECF00792149 /* Timeline */,
+				50EAD92A2B0FBEBE00792149 /* Auth */,
 			);
 			path = Domain;
 			sourceTree = "<group>";
@@ -172,6 +178,7 @@
 				500D1DD12B0A7A820013691E /* SecureCredentialStorage.swift */,
 				500D1DD22B0A7A820013691E /* LoginDataSource.swift */,
 				5000AC812B0AA9360015CB2E /* PhotoDataSource.swift */,
+				50EAD9282B0FBCF000792149 /* BucketsDataSource.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -181,8 +188,29 @@
 			children = (
 				500D1DD42B0A7A820013691E /* StringExtensions.swift */,
 				500D1DD52B0A7A820013691E /* UrlExtensions.swift */,
+				50EAD92E2B0FC29500792149 /* CodableExtensions.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		50EAD92A2B0FBEBE00792149 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				500D1DC12B0A7A810013691E /* RefreshCredentialsUseCase.swift */,
+				500D1DC22B0A7A810013691E /* GetWebViewRequestUseCase.swift */,
+				500D1DC32B0A7A810013691E /* SetCredentialsUseCase.swift */,
+				500D1DC42B0A7A810013691E /* AuthenticationUseCase.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		50EAD92B2B0FBECF00792149 /* Timeline */ = {
+			isa = PBXGroup;
+			children = (
+				50EAD92C2B0FBEE300792149 /* GetDaysUseCase.swift */,
+				50EAD9302B0FCAC500792149 /* GetLocalFoldersUseCase.swift */,
+			);
+			path = Timeline;
 			sourceTree = "<group>";
 		};
 		50F2E6192B0EB64A0035C014 /* Models */ = {
@@ -281,6 +309,7 @@
 			files = (
 				500D1DDD2B0A7A820013691E /* ViewController.swift in Sources */,
 				500D1DD72B0A7A820013691E /* RefreshCredentialsUseCase.swift in Sources */,
+				50EAD92F2B0FC29500792149 /* CodableExtensions.swift in Sources */,
 				500D1DDE2B0A7A820013691E /* NativeXMessageHandler.swift in Sources */,
 				500D1DDF2B0A7A820013691E /* NativeXRequestHandler.swift in Sources */,
 				500D1DE12B0A7A820013691E /* ScriptMessage.swift in Sources */,
@@ -288,6 +317,7 @@
 				500D1DE02B0A7A820013691E /* MainViewModel.swift in Sources */,
 				500D1DDA2B0A7A820013691E /* AuthenticationUseCase.swift in Sources */,
 				500D1D7C2B0A79740013691E /* AppDelegate.swift in Sources */,
+				50EAD92D2B0FBEE300792149 /* GetDaysUseCase.swift in Sources */,
 				500D1DE42B0A7A820013691E /* LoginDataSource.swift in Sources */,
 				500D1DE22B0A7A820013691E /* ApiDescriptionDataSource.swift in Sources */,
 				500D1DE32B0A7A820013691E /* SecureCredentialStorage.swift in Sources */,
@@ -295,11 +325,13 @@
 				5000AC822B0AA9360015CB2E /* PhotoDataSource.swift in Sources */,
 				500D1DD92B0A7A820013691E /* SetCredentialsUseCase.swift in Sources */,
 				5042EF152B0D5046006C3ABC /* DatabaseService.swift in Sources */,
+				50EAD9292B0FBCF000792149 /* BucketsDataSource.swift in Sources */,
 				500D1DDB2B0A7A820013691E /* HttpService.swift in Sources */,
 				500D1D7E2B0A79740013691E /* SceneDelegate.swift in Sources */,
 				50F2E61B2B0EB6650035C014 /* Photo.swift in Sources */,
 				500D1DE62B0A7A820013691E /* UrlExtensions.swift in Sources */,
 				500D1DDC2B0A7A820013691E /* Container.swift in Sources */,
+				50EAD9312B0FCAC500792149 /* GetLocalFoldersUseCase.swift in Sources */,
 				500D1DD62B0A7A820013691E /* Constants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

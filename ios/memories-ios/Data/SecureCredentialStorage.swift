@@ -10,7 +10,7 @@ import CryptoKit
 
 
 class SecureCredentialStorage {
-    private static let key = "gallery.memories"
+    private static let key = Storage.DEFAULTS_KEY
     private static let URL_KEY = ".url"
     private static let TRUST_ALL_KEY = ".trustAll"
     private static let USERNAME_KEY = ".username"

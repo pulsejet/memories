@@ -77,10 +77,15 @@ class NativeX {
         })
     }
 
-    printLog(message) {
-        return this.postMessageBody("printLog", {
-            "message": message
-        })
+    async urlRequest(url, ...args) {
+        const body = {
+            method: "urlRequest",
+            parameter: {
+                "url": url,
+                "args": args
+            }
+        }
+        return window.webkit.messageHandlers.nativex.postMessage(body)
     }
 
     postMessageBody(method, parameter) {
@@ -98,6 +103,9 @@ globalThis.nativex = new NativeX()
 
 const {fetch: origFetch} = window;
 window.fetch = async (...args) => {
-    globalThis.nativex.printLog("Fetch request for: " + args);
+    if (args[0].startsWith("http://127.0.0.1/")) {
+        const path = args[0].split("http://127.0.0.1")
+        return await globalThis.nativex.urlRequest(path[1], args);
+    }
     return await origFetch(...args);
 }

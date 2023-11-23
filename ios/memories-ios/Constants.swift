@@ -16,6 +16,7 @@ class Constants {
     static let USER_AGENT = "MemoriesNative/1.4 Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.76 Mobile Safari/537.36"
 }
 
-class Database {
+class Storage {
     static let PHOTO_DATABASE = "photos/db.sqlite3"
+    static let DEFAULTS_KEY = "gallery.memories"
 }

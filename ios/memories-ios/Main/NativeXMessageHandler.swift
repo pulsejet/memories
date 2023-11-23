@@ -9,6 +9,16 @@ import Foundation
 
 class NativeXMessageHandler {
     
+    let photoDataSource: PhotoDataSource
+    let getLocalFolders: GetLocalFoldersUseCase
+    let nativeXRequestHandler: NativeXRequestHandler
+    
+    init(photoDataSource: PhotoDataSource, getLocalFolders: GetLocalFoldersUseCase, nativeXRequestHandler: NativeXRequestHandler) {
+        self.photoDataSource = photoDataSource
+        self.getLocalFolders = getLocalFolders
+        self.nativeXRequestHandler = nativeXRequestHandler
+    }
+    
     func handleMessage(body: Any) -> Any? {
         guard let scriptMessage = decodeMessage(body: body) else {
             return nil
@@ -16,9 +26,11 @@ class NativeXMessageHandler {
         
         switch scriptMessage.method {
         case .isNative: return isNative()
-        case .printLog:
-            debugPrint("JS message: " + (scriptMessage.parameter as! PrintLog).message)
-            return nil
+        case .configGetLocalFolders: return configGetLocalFolders()
+        case .urlRequest:
+            return nativeXRequestHandler.handleUrlRequest(
+                urlRequest: scriptMessage.parameter as! UrlRequest
+            )
         default: return nil
         }
     }
@@ -37,5 +49,14 @@ class NativeXMessageHandler {
     
     func isNative() -> Bool {
         return true
+    }
+    
+    func configGetLocalFolders() -> [[String: Any]] {
+        do {
+            return try getLocalFolders.invoke()
+        } catch(let error) {
+            debugPrint("Error getting Local Folders", error)
+            return [[:]]
+        }
     }
 }

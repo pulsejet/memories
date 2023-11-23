@@ -12,10 +12,13 @@ extension SwinjectStoryboard {
     @objc class func setup() {
         
         defaultContainer.storyboardInitCompleted(ViewController.self) { r, viewController in
-            viewController.nativeX = r.resolve(NativeXRequestHandler.self)
             viewController.mainViewModel = r.resolve(MainViewModelProtocol.self)
         }
-        defaultContainer.register(NativeXRequestHandler.self) { _ in NativeXRequestHandler() }
+        defaultContainer.register(NativeXRequestHandler.self) { r in
+            NativeXRequestHandler(
+                getDaysUseCase: r.resolve(GetDaysUseCase.self)!
+            )
+        }
         defaultContainer.register(MainViewModelProtocol.self) { r in
             MainViewModel(
                 authenticationUseCase: r.resolve(AuthenticationUseCase.self)!,
@@ -53,8 +56,12 @@ extension SwinjectStoryboard {
         defaultContainer.register(GetWebViewRequestUseCase.self) { r in
             GetWebViewRequestUseCase(httpService: r.resolve(HttpService.self)!)
         }
-        defaultContainer.register(NativeXMessageHandler.self) { _ in
-            NativeXMessageHandler()
+        defaultContainer.register(NativeXMessageHandler.self) { r in
+            NativeXMessageHandler(
+                photoDataSource: r.resolve(PhotoDataSource.self)!,
+                getLocalFolders: r.resolve(GetLocalFoldersUseCase.self)!,
+                nativeXRequestHandler: r.resolve(NativeXRequestHandler.self)!
+            )
         }
         defaultContainer.register(DatabaseService.self) { _ in
             let delegate = UIApplication.shared.delegate as! AppDelegate
@@ -62,6 +69,18 @@ extension SwinjectStoryboard {
         }.inObjectScope(.container)
         defaultContainer.register(PhotoDataSource.self) { r in
             PhotoDataSource(databaseService: r.resolve(DatabaseService.self)!)
+        }
+        defaultContainer.register(BucketsDataSource.self) { _ in
+            BucketsDataSource()
+        }
+        defaultContainer.register(GetDaysUseCase.self) { r in
+            GetDaysUseCase(
+                photoDataSource: r.resolve(PhotoDataSource.self)!,
+                bucketsDataSource: r.resolve(BucketsDataSource.self)!
+            )
+        }
+        defaultContainer.register(GetLocalFoldersUseCase.self) { r in
+            GetLocalFoldersUseCase(photosDataSource: r.resolve(PhotoDataSource.self)!)
         }
     }
 }
