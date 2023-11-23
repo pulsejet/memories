@@ -21,6 +21,7 @@ OC.L10N.register(
     "Account" : "Cont",
     "Close" : "Închide",
     "Info" : "Info",
+    "Performance" : "Performanța",
     "Unknown" : "Necunoscut",
     "Continue" : "Continuă",
     "No items" : "Nu există elemente",
