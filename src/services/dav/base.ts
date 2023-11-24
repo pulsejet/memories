@@ -194,10 +194,14 @@ export async function extendWithStack(photos: IPhoto[]) {
   }
 
   // Add stacked RAW files (deduped)
-  const stackRaw = Array.from(new Set(photos.map((p) => p.stackraw ?? []).flat()));
+  const stackRaw = photos.map((p) => p.stackraw ?? []).flat();
 
-  // Combine and return
-  return photos.concat(livePhotos, stackRaw);
+  // Combine all files
+  const combined = photos.concat(livePhotos, stackRaw);
+
+  // De-duplicate
+  const unique = new Map<number, IPhoto>(combined.map((p) => [p.fileid, p]));
+  return Array.from(unique.values());
 }
 
 /**
