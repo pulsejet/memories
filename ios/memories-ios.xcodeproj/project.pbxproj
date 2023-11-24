@@ -35,6 +35,7 @@
 		501773392B10CDFF00BD4B2E /* SwinjectStoryboard in Frameworks */ = {isa = PBXBuildFile; productRef = 501773382B10CDFF00BD4B2E /* SwinjectStoryboard */; };
 		5017733B2B10D28300BD4B2E /* ColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5017733A2B10D28300BD4B2E /* ColorExtension.swift */; };
 		5017733D2B10D98D00BD4B2E /* ThemeStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5017733C2B10D98D00BD4B2E /* ThemeStorage.swift */; };
+		503339132B112F0700755B6B /* PermissionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503339122B112F0600755B6B /* PermissionService.swift */; };
 		5042EF132B0D502A006C3ABC /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 5042EF122B0D502A006C3ABC /* GRDB */; };
 		5042EF152B0D5046006C3ABC /* DatabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5042EF142B0D5046006C3ABC /* DatabaseService.swift */; };
 		50EAD9292B0FBCF000792149 /* BucketsDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EAD9282B0FBCF000792149 /* BucketsDataSource.swift */; };
@@ -74,6 +75,7 @@
 		501773332B10C74200BD4B2E /* MainViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		5017733A2B10D28300BD4B2E /* ColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtension.swift; sourceTree = "<group>"; };
 		5017733C2B10D98D00BD4B2E /* ThemeStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeStorage.swift; sourceTree = "<group>"; };
+		503339122B112F0600755B6B /* PermissionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionService.swift; sourceTree = "<group>"; };
 		5042EF142B0D5046006C3ABC /* DatabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseService.swift; sourceTree = "<group>"; };
 		50EAD9282B0FBCF000792149 /* BucketsDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BucketsDataSource.swift; sourceTree = "<group>"; };
 		50EAD92C2B0FBEE300792149 /* GetDaysUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetDaysUseCase.swift; sourceTree = "<group>"; };
@@ -153,6 +155,7 @@
 			children = (
 				500D1DC62B0A7A810013691E /* HttpService.swift */,
 				5042EF142B0D5046006C3ABC /* DatabaseService.swift */,
+				503339122B112F0600755B6B /* PermissionService.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -329,6 +332,7 @@
 				500D1DE02B0A7A820013691E /* MainViewModel.swift in Sources */,
 				500D1DDA2B0A7A820013691E /* AuthenticationUseCase.swift in Sources */,
 				500D1D7C2B0A79740013691E /* AppDelegate.swift in Sources */,
+				503339132B112F0700755B6B /* PermissionService.swift in Sources */,
 				50EAD92D2B0FBEE300792149 /* GetDaysUseCase.swift in Sources */,
 				50EAD9352B0FCECF00792149 /* BuildWebViewRequestUseCase.swift in Sources */,
 				50EAD9332B0FCE9800792149 /* BuildBusFunctionUseCase.swift in Sources */,

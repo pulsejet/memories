@@ -9,6 +9,7 @@ import UIKit
 import WebKit
 import AuthenticationServices
 import Combine
+import AVFoundation
 
 class MainViewController: UIViewController {
     var mainViewModel: MainViewModelProtocol!
@@ -43,7 +44,9 @@ class MainViewController: UIViewController {
         let webConfiguration = webView.configuration
         webConfiguration.setURLSchemeHandler(self, forURLScheme: Schema.URL_SCHEMA)
         
-        webView.uiDelegate = self
+        let dataStore = WKWebsiteDataStore.default()
+        webConfiguration.websiteDataStore = dataStore
+        
         webView.customUserAgent = Constants.USER_AGENT
         webView.scrollView.contentInsetAdjustmentBehavior = UIScrollView.ContentInsetAdjustmentBehavior.never
     }
@@ -64,6 +67,7 @@ class MainViewController: UIViewController {
 }
 
 extension MainViewController: MainUiDelegate {
+    
     func loadWebPage(urlRequest: URLRequest) {
         DispatchQueue.main.async {
             self.webView.load(urlRequest)
@@ -104,51 +108,50 @@ extension MainViewController: MainUiDelegate {
     }
     
     func applyColorTheme(color: String?) {
-        let uiColor: UIColor!
-        if color != nil {
-            uiColor = UIColor(hex: color!)
-        } else {
-            uiColor = UIColor.white
-        }
-        view.backgroundColor = uiColor
-        webView.backgroundColor = uiColor
-    }
-}
-
-extension MainViewController : WKUIDelegate {
-    
-    func webView(_ webView: WKWebView,
-                 runJavaScriptAlertPanelWithMessage message: String,
-                 initiatedByFrame frame: WKFrameInfo,
-                 completionHandler: @escaping () -> Void) {
-        
-        // Set the message as the UIAlertController message
-        let alert = UIAlertController(
-            title: nil,
-            message: message,
-            preferredStyle: .alert
-        )
-        
-        // Add a confirmation action “OK”
-        let okAction = UIAlertAction(
-            title: "OK",
-            style: .default,
-            handler: { _ in
-                // Call completionHandler
-                completionHandler()
+        DispatchQueue.main.async {
+            let uiColor: UIColor!
+            if color != nil {
+                uiColor = UIColor(hex: color!)
+            } else {
+                uiColor = UIColor.white
             }
-        )
-        alert.addAction(okAction)
-        
-        // Display the NSAlert
-        present(alert, animated: true, completion: nil)
+            self.view.backgroundColor = uiColor
+            self.webView.backgroundColor = uiColor
+        }
+    }
+    
+    func playTouchSound() {
+        DispatchQueue.main.async {
+            AudioServicesPlaySystemSound(SystemSoundID(4095))
+        }
+    }
+    
+    func toast(message: String) {
+        DispatchQueue.main.async {
+            // Set the message as the UIAlertController message
+            let alert = UIAlertController(
+                title: nil,
+                message: message,
+                preferredStyle: .alert
+            )
+            
+            // Add a confirmation action “OK”
+            let okAction = UIAlertAction(
+                title: "OK",
+                style: .default
+            )
+            alert.addAction(okAction)
+            
+            // Display the NSAlert
+            self.present(alert, animated: true, completion: nil)
+        }
     }
 }
 
 extension MainViewController: WKScriptMessageHandlerWithReply {
     
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) async -> (Any?, String?) {
-        let result = mainViewModel.handleScriptMessage(body: message.body)
+        let result = await mainViewModel.handleScriptMessage(body: message.body)
         debugPrint("Script Message Result", result ?? "nil")
         return (result, nil)
     }

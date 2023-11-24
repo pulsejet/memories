@@ -12,7 +12,7 @@ protocol MainViewModelProtocol: AnyObject {
     
     func viewDidLoad()
     func handleScheme(url: URL?)
-    func handleScriptMessage(body: Any) -> Any?
+    func handleScriptMessage(body: Any) async -> Any?
     func refreshTimeline()
 }
 
@@ -29,6 +29,10 @@ protocol MainUiDelegate: AnyObject {
     func evaluateJavascript(javascript: String)
     
     func applyColorTheme(color: String?)
+    
+    func playTouchSound()
+    
+    func toast(message: String)
 }
 
 class MainViewModel: MainViewModelProtocol {
@@ -101,9 +105,17 @@ class MainViewModel: MainViewModelProtocol {
         return Bundle.main.url(forResource: "waiting", withExtension: "html", subdirectory: "web_asset")!
     }
     
-    func handleScriptMessage(body: Any) -> Any? {
+    func handleScriptMessage(body: Any) async -> Any? {
         debugPrint("NativeX Script", body)
-        return nativeXMessageHandler.handleMessage(body: body)
+        let result =  await nativeXMessageHandler.handleMessage(body: body)
+        
+        switch result {
+        case .returnResult(let result): return result
+        case .playTouchSound: self.uiDelegate?.playTouchSound()
+        case .toast(let toast): self.uiDelegate?.toast(message: toast.message)
+        }
+        
+        return nil
     }
     
     func refreshTimeline() {

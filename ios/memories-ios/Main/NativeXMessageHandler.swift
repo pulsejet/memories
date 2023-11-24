@@ -13,31 +13,37 @@ class NativeXMessageHandler {
     let getLocalFolders: GetLocalFoldersUseCase
     let nativeXRequestHandler: NativeXRequestHandler
     let themeStorage: ThemeStorage
+    let permissionService: PermissionService
     
-    init(photoDataSource: PhotoDataSource, getLocalFolders: GetLocalFoldersUseCase, nativeXRequestHandler: NativeXRequestHandler, themeStorage: ThemeStorage) {
+    init(photoDataSource: PhotoDataSource, getLocalFolders: GetLocalFoldersUseCase, nativeXRequestHandler: NativeXRequestHandler, themeStorage: ThemeStorage, permissionService: PermissionService) {
         self.photoDataSource = photoDataSource
         self.getLocalFolders = getLocalFolders
         self.nativeXRequestHandler = nativeXRequestHandler
         self.themeStorage = themeStorage
+        self.permissionService = permissionService
     }
     
-    func handleMessage(body: Any) -> Any? {
+    func handleMessage(body: Any) async -> MessageAction {
         guard let scriptMessage = decodeMessage(body: body) else {
-            return nil
+            return .returnResult(nil)
         }
         
         switch scriptMessage.method {
-        case .isNative: return isNative()
-        case .configGetLocalFolders: return configGetLocalFolders()
+        case .isNative: return .returnResult(isNative())
+        case .configGetLocalFolders: return .returnResult(configGetLocalFolders())
         case .urlRequest:
-            return nativeXRequestHandler.handleUrlRequest(
+            return .returnResult(nativeXRequestHandler.handleUrlRequest(
                 urlRequest: scriptMessage.parameter as! UrlRequest
-            )
-        case .setThemeColor: return themeStorage.setTheme(
-            color: (scriptMessage.parameter as! ThemeColor).color
+            ))
+        case .setThemeColor: setThemeColor(
+            scriptMessage.parameter as! ThemeColor
         )
-        default: return nil
+        case .playTouchSound: return .playTouchSound
+        case .configHasMediaPermission: return .returnResult(await configHasMediaPermission())
+        case .toast: return .toast(toast: scriptMessage.parameter as! Toast)
+        default: return .returnResult(nil)
         }
+        return .returnResult(nil)
     }
     
     private func decodeMessage(body: Any) -> ScriptMessage? {
@@ -64,4 +70,18 @@ class NativeXMessageHandler {
             return [[:]]
         }
     }
+    
+    func setThemeColor(_ themeColor: ThemeColor) {
+        themeStorage.setTheme(color: themeColor.color)
+    }
+    
+    func configHasMediaPermission() async -> Bool {
+        return await permissionService.hasMediaPermission()
+    }
+}
+
+enum MessageAction {
+    case returnResult(_ result: Any?)
+    case playTouchSound
+    case toast(toast: Toast)
 }

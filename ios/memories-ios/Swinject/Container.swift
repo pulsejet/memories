@@ -64,7 +64,8 @@ extension SwinjectStoryboard {
                 photoDataSource: r.resolve(PhotoDataSource.self)!,
                 getLocalFolders: r.resolve(GetLocalFoldersUseCase.self)!,
                 nativeXRequestHandler: r.resolve(NativeXRequestHandler.self)!,
-                themeStorage: r.resolve(ThemeStorage.self)!
+                themeStorage: r.resolve(ThemeStorage.self)!,
+                permissionService: r.resolve(PermissionService.self)!
             )
         }
         defaultContainer.register(DatabaseService.self) { _ in
@@ -92,5 +93,8 @@ extension SwinjectStoryboard {
         defaultContainer.register(ThemeStorage.self) { _ in
             ThemeStorage()
         }.inObjectScope(.container)
+        defaultContainer.register(PermissionService.self) { _ in
+            PermissionService()
+        }
     }
 }
