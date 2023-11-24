@@ -257,7 +257,7 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
     await nativex.deleteLocalPhotos(photos);
 
     // Remove purely local files
-    const deleted = photos.filter((p) => p.flag & utils.constants.FLAG_IS_LOCAL);
+    const deleted = photos.filter(utils.isLocalPhoto);
 
     // Yield for the fully local files
     if (deleted.length > 0) {

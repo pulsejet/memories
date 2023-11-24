@@ -30,7 +30,7 @@ function decodeFragment(hash: string): Fragment[] {
   return hash
     .substring(1) // remove # at start
     .split('&') // get all parts
-    .filter((frag) => frag) // remove empty parts
+    .filter(Boolean) // remove empty parts
     .map((frag, i, arr) => {
       const values = frag?.split('/');
       return {

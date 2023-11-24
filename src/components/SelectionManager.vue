@@ -900,7 +900,7 @@ export default defineComponent({
 
       // Run WebDAV query
       for await (let delIds of dav.recognizeDeleteFaceImages(user, name, photos)) {
-        const fileIds = delIds.map((id) => map.get(id)?.fileid ?? 0).filter((id) => id);
+        const fileIds = delIds.map((id) => map.get(id)?.fileid).filter(utils.truthy);
         this.deleteSelectedPhotosById(fileIds, selection);
       }
     },

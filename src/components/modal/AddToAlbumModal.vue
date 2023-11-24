@@ -90,7 +90,7 @@ export default defineComponent({
 
       // Process file ids returned from generator
       const processFileIds = (fileIds: number[]) => {
-        const successIds = fileIds.filter((f) => f);
+        const successIds = fileIds.filter(Boolean);
         successIds.forEach((f) => processedIds.add(f));
         this.opsDone += fileIds.length;
         opsSuccess += successIds.length;

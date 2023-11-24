@@ -83,7 +83,7 @@ export default defineComponent({
       }
 
       return path
-        .filter((x) => x)
+        .filter(Boolean) // non-empty
         .map((text, idx, arr) => {
           const path = arr.slice(0, idx + 1);
           return { text, path, idx };

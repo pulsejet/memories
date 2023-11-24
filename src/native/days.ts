@@ -2,7 +2,7 @@ import { NAPI, nativex } from './api';
 import { has } from './basic';
 
 import { API } from '@services/API';
-import { bus, setRenewingTimeout } from '@services/utils';
+import { bus, setRenewingTimeout, truthy } from '@services/utils';
 
 import type { IDay, IPhoto } from '@typings';
 
@@ -193,7 +193,7 @@ export async function getLocalDay(dayId: number): Promise<IPhoto[]> {
 export async function deleteLocalPhotos(photos: IPhoto[], dry: boolean = false): Promise<number> {
   if (!has()) return 0;
 
-  const auids = photos.map((p) => p.auid).filter((a) => !!a) as string[];
+  const auids = photos.map((p) => p.auid).filter(truthy);
 
   // Delete local photos
   const res = await fetch(API.Q(NAPI.IMAGE_DELETE(auids), { dry }));

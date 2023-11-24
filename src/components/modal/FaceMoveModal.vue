@@ -118,7 +118,12 @@ export default defineComponent({
         // Run WebDAV query
         const photos = Array.from(map.values());
         for await (let delIds of dav.recognizeMoveFaceImages(user, name, target, photos)) {
-          this.moved(delIds.filter((id) => id).map((id) => map.get(id)!));
+          this.moved(
+            delIds
+              .filter(utils.truthy)
+              .map((id) => map.get(id))
+              .filter(utils.truthy),
+          );
         }
       } catch (error) {
         console.error(error);

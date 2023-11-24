@@ -71,7 +71,7 @@ export default defineComponent({
       this.show = true;
 
       for await (const fids of gen) {
-        this.photosDone += fids.filter((f) => f).length;
+        this.photosDone += fids.filter(Boolean).length;
         utils.bus.emit('memories:timeline:soft-refresh', null);
       }
 
