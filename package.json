@@ -46,7 +46,7 @@
     "plyr": "^3.7.8",
     "react-filerobot-image-editor": "^4.5.2",
     "video.js": "^8.6.1",
-    "vue": "^2.7.14",
+    "vue": "^2.7.15",
     "vue-material-design-icons": "^5.2.0",
     "vue-router": "^3.6.5",
     "vue-virtual-scroller": "1.1.2",
