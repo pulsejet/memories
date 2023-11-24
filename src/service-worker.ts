@@ -5,7 +5,15 @@ import { ExpirationPlugin } from 'workbox-expiration';
 
 declare var self: ServiceWorkerGlobalScope;
 
-precacheAndRoute(self.__WB_MANIFEST);
+type PrecacheEntry = Exclude<(typeof self.__WB_MANIFEST)[number], string>;
+const manifest = self.__WB_MANIFEST as Array<PrecacheEntry>;
+
+// Exclude files that are not needed
+const filteredManifest = manifest.filter((entry) => {
+  return !entry.url?.match(/LICENSE\.txt(\?.*)?$/);
+});
+
+precacheAndRoute(filteredManifest);
 cleanupOutdatedCaches();
 
 registerRoute(
