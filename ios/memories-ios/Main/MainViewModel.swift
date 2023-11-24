@@ -13,6 +13,7 @@ protocol MainViewModelProtocol: AnyObject {
     func viewDidLoad()
     func handleScheme(url: URL?)
     func handleScriptMessage(body: Any) -> Any?
+    func refreshTimeline()
 }
 
 protocol MainUiDelegate: AnyObject {
@@ -24,6 +25,10 @@ protocol MainUiDelegate: AnyObject {
     func loadFilePage(url: URL)
     
     func closeAuthenticationModal()
+    
+    func evaluateJavascript(javascript: String)
+    
+    func applyColorTheme(color: String?)
 }
 
 class MainViewModel: MainViewModelProtocol {
@@ -31,21 +36,28 @@ class MainViewModel: MainViewModelProtocol {
     
     let authenticationUseCase: AuthenticationUseCase
     let loadCredentialsUseCase: LoadCredentialsUseCase
-    let getWebViewRequestUseCase: GetWebViewRequestUseCase
+    let buildWebViewRequestUseCase: BuildWebViewRequestUseCase
     let nativeXMessageHandler: NativeXMessageHandler
+    let buildBusFunctionUseCase: BuildBusFunctionUseCase
+    let themeStorage: ThemeStorage
     
-    init(authenticationUseCase: AuthenticationUseCase, loadCredentialsUseCase: LoadCredentialsUseCase, getWebViewRequestUseCase: GetWebViewRequestUseCase, nativeXMessageHandler: NativeXMessageHandler) {
+    init(authenticationUseCase: AuthenticationUseCase, loadCredentialsUseCase: LoadCredentialsUseCase, buildWebViewRequestUseCase: BuildWebViewRequestUseCase, nativeXMessageHandler: NativeXMessageHandler, buildBusFunctionUseCase: BuildBusFunctionUseCase, themeStorage: ThemeStorage) {
         self.authenticationUseCase = authenticationUseCase
         self.loadCredentialsUseCase = loadCredentialsUseCase
-        self.getWebViewRequestUseCase = getWebViewRequestUseCase
+        self.buildWebViewRequestUseCase = buildWebViewRequestUseCase
         self.nativeXMessageHandler = nativeXMessageHandler
+        self.buildBusFunctionUseCase = buildBusFunctionUseCase
+        self.themeStorage = themeStorage
     }
     
     func viewDidLoad() {
+        themeStorage.observe { theme in
+            self.uiDelegate?.applyColorTheme(color: theme)
+        }
         Task {
             do {
                 try loadCredentialsUseCase.invoke()
-                let url = try getWebViewRequestUseCase.build()
+                let url = try buildWebViewRequestUseCase.build()
                 self.uiDelegate?.loadWebPage(urlRequest: url)
             } catch(let error) {
                 debugPrint("Default Url Error: ", error)
@@ -92,5 +104,14 @@ class MainViewModel: MainViewModelProtocol {
     func handleScriptMessage(body: Any) -> Any? {
         debugPrint("NativeX Script", body)
         return nativeXMessageHandler.handleMessage(body: body)
+    }
+    
+    func refreshTimeline() {
+        self.uiDelegate?.evaluateJavascript(
+            javascript: buildBusFunctionUseCase.invoke(event: "nativex:db:updated")
+        )
+        self.uiDelegate?.evaluateJavascript(
+            javascript: buildBusFunctionUseCase.invoke(event: "memories:timeline:soft-refresh")
+        )
     }
 }

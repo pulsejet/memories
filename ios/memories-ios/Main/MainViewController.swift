@@ -8,18 +8,18 @@
 import UIKit
 import WebKit
 import AuthenticationServices
+import Combine
 
-class ViewController: UIViewController {
+class MainViewController: UIViewController {
     var mainViewModel: MainViewModelProtocol!
     
-    var webView: WKWebView!
+    @IBOutlet weak var webView: WKWebView!
     
     var authSession: ASWebAuthenticationSession? = nil
     
-    
     override func loadView() {
+        super.loadView()
         mainViewModel.uiDelegate = self
-        
         initializeWebView()
     }
     
@@ -28,24 +28,24 @@ class ViewController: UIViewController {
         mainViewModel.viewDidLoad()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        mainViewModel.refreshTimeline()
+    }
+    
     private func initializeWebView() {
         let nativeXJS = loadJavaScript()
         let script = WKUserScript(source: nativeXJS, injectionTime: .atDocumentStart, forMainFrameOnly: false)
         
-        let contentController = WKUserContentController()
+        let contentController = webView.configuration.userContentController
         contentController.addScriptMessageHandler(self, contentWorld: .page, name: "nativex")
         contentController.addUserScript(script)
         
-        let webConfiguration = WKWebViewConfiguration()
-        webConfiguration.userContentController = contentController
+        let webConfiguration = webView.configuration
         webConfiguration.setURLSchemeHandler(self, forURLScheme: Schema.URL_SCHEMA)
         
-        webView = WKWebView(frame: .zero, configuration: webConfiguration)
         webView.uiDelegate = self
-        webView.navigationDelegate = self
         webView.customUserAgent = Constants.USER_AGENT
-        
-        view = webView
+        webView.scrollView.contentInsetAdjustmentBehavior = UIScrollView.ContentInsetAdjustmentBehavior.never
     }
     
     func loadJavaScript() -> String {
@@ -63,7 +63,7 @@ class ViewController: UIViewController {
     }
 }
 
-extension ViewController: MainUiDelegate {
+extension MainViewController: MainUiDelegate {
     func loadWebPage(urlRequest: URLRequest) {
         DispatchQueue.main.async {
             self.webView.load(urlRequest)
@@ -95,9 +95,27 @@ extension ViewController: MainUiDelegate {
             self.authSession = nil
         }
     }
+    
+    func evaluateJavascript(javascript: String) {
+        DispatchQueue.main.async {
+            debugPrint("Evaluate Javascript:", javascript)
+            self.webView.evaluateJavaScript(javascript)
+        }
+    }
+    
+    func applyColorTheme(color: String?) {
+        let uiColor: UIColor!
+        if color != nil {
+            uiColor = UIColor(hex: color!)
+        } else {
+            uiColor = UIColor.white
+        }
+        view.backgroundColor = uiColor
+        webView.backgroundColor = uiColor
+    }
 }
 
-extension ViewController : WKUIDelegate {
+extension MainViewController : WKUIDelegate {
     
     func webView(_ webView: WKWebView,
                  runJavaScriptAlertPanelWithMessage message: String,
@@ -127,7 +145,7 @@ extension ViewController : WKUIDelegate {
     }
 }
 
-extension ViewController: WKScriptMessageHandlerWithReply {
+extension MainViewController: WKScriptMessageHandlerWithReply {
     
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) async -> (Any?, String?) {
         let result = mainViewModel.handleScriptMessage(body: message.body)
@@ -136,21 +154,7 @@ extension ViewController: WKScriptMessageHandlerWithReply {
     }
 }
 
-extension ViewController: WKNavigationDelegate {
-    
-    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
-        
-        //        let response = nativeX.handleRequest(request: navigationAction.request)
-        
-        print("Request: " + (navigationAction.request.url?.absoluteString ?? ""))
-        
-        return WKNavigationActionPolicy.allow
-    }
-}
-
-
-
-extension ViewController: WKURLSchemeHandler {
+extension MainViewController: WKURLSchemeHandler {
     func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
         self.mainViewModel.handleScheme(url: urlSchemeTask.request.url)
     }
@@ -159,7 +163,7 @@ extension ViewController: WKURLSchemeHandler {
     }
 }
 
-extension ViewController: ASWebAuthenticationPresentationContextProviding {
+extension MainViewController: ASWebAuthenticationPresentationContextProviding {
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
         return view.window!
     }

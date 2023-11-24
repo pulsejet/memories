@@ -5,13 +5,14 @@
 //  Created by m-oehme on 12.11.23.
 //
 import Foundation
+import Swinject
 import SwinjectStoryboard
 import UIKit
 
 extension SwinjectStoryboard {
     @objc class func setup() {
-        
-        defaultContainer.storyboardInitCompleted(ViewController.self) { r, viewController in
+
+        defaultContainer.storyboardInitCompleted(MainViewController.self) { r, viewController in
             viewController.mainViewModel = r.resolve(MainViewModelProtocol.self)
         }
         defaultContainer.register(NativeXRequestHandler.self) { r in
@@ -23,8 +24,10 @@ extension SwinjectStoryboard {
             MainViewModel(
                 authenticationUseCase: r.resolve(AuthenticationUseCase.self)!,
                 loadCredentialsUseCase: r.resolve(LoadCredentialsUseCase.self)!,
-                getWebViewRequestUseCase: r.resolve(GetWebViewRequestUseCase.self)!,
-                nativeXMessageHandler: r.resolve(NativeXMessageHandler.self)!
+                buildWebViewRequestUseCase: r.resolve(BuildWebViewRequestUseCase.self)!,
+                nativeXMessageHandler: r.resolve(NativeXMessageHandler.self)!,
+                buildBusFunctionUseCase: r.resolve(BuildBusFunctionUseCase.self)!,
+                themeStorage: r.resolve(ThemeStorage.self)!
             )
         }
         defaultContainer.register(ApiDescriptionDataSource.self) { r in
@@ -35,7 +38,7 @@ extension SwinjectStoryboard {
                 getApiDescriptionUseCase: r.resolve(ApiDescriptionDataSource.self)!,
                 loginDataSource: r.resolve(LoginDataSource.self)!,
                 setCredentialsUseCase: r.resolve(SetCredentialsUseCase.self)!,
-                getWebViewRequestUseCase: r.resolve(GetWebViewRequestUseCase.self)!
+                buildWebViewRequestUseCase: r.resolve(BuildWebViewRequestUseCase.self)!
             )
         }
         defaultContainer.register(HttpService.self) { _ in
@@ -53,14 +56,15 @@ extension SwinjectStoryboard {
         defaultContainer.register(LoadCredentialsUseCase.self) { r in
             LoadCredentialsUseCase(httpService: r.resolve(HttpService.self)!, secureStorage: r.resolve(SecureCredentialStorage.self)!)
         }
-        defaultContainer.register(GetWebViewRequestUseCase.self) { r in
-            GetWebViewRequestUseCase(httpService: r.resolve(HttpService.self)!)
+        defaultContainer.register(BuildWebViewRequestUseCase.self) { r in
+            BuildWebViewRequestUseCase(httpService: r.resolve(HttpService.self)!)
         }
         defaultContainer.register(NativeXMessageHandler.self) { r in
             NativeXMessageHandler(
                 photoDataSource: r.resolve(PhotoDataSource.self)!,
                 getLocalFolders: r.resolve(GetLocalFoldersUseCase.self)!,
-                nativeXRequestHandler: r.resolve(NativeXRequestHandler.self)!
+                nativeXRequestHandler: r.resolve(NativeXRequestHandler.self)!,
+                themeStorage: r.resolve(ThemeStorage.self)!
             )
         }
         defaultContainer.register(DatabaseService.self) { _ in
@@ -82,5 +86,11 @@ extension SwinjectStoryboard {
         defaultContainer.register(GetLocalFoldersUseCase.self) { r in
             GetLocalFoldersUseCase(photosDataSource: r.resolve(PhotoDataSource.self)!)
         }
+        defaultContainer.register(BuildBusFunctionUseCase.self) { _ in
+            BuildBusFunctionUseCase()
+        }
+        defaultContainer.register(ThemeStorage.self) { _ in
+            ThemeStorage()
+        }.inObjectScope(.container)
     }
 }

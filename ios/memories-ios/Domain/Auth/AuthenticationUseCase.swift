@@ -12,14 +12,13 @@ class AuthenticationUseCase {
     let getApiDescriptionUseCase: ApiDescriptionDataSource
     let loginDataSource: LoginDataSource
     let setCredentialsUseCase: SetCredentialsUseCase
-    let getWebViewRequestUseCase: GetWebViewRequestUseCase
+    let buildWebViewRequestUseCase: BuildWebViewRequestUseCase
     
-    
-    init(getApiDescriptionUseCase: ApiDescriptionDataSource, loginDataSource: LoginDataSource, setCredentialsUseCase: SetCredentialsUseCase, getWebViewRequestUseCase: GetWebViewRequestUseCase) {
+    init(getApiDescriptionUseCase: ApiDescriptionDataSource, loginDataSource: LoginDataSource, setCredentialsUseCase: SetCredentialsUseCase, buildWebViewRequestUseCase: BuildWebViewRequestUseCase) {
         self.getApiDescriptionUseCase = getApiDescriptionUseCase
         self.loginDataSource = loginDataSource
         self.setCredentialsUseCase = setCredentialsUseCase
-        self.getWebViewRequestUseCase = getWebViewRequestUseCase
+        self.buildWebViewRequestUseCase = buildWebViewRequestUseCase
     }
     
     func login(
@@ -54,7 +53,7 @@ class AuthenticationUseCase {
         }
         debugPrint("Credentials Saved")
         
-        return try getWebViewRequestUseCase.build(subpath: "nxsetup")
+        return try buildWebViewRequestUseCase.build(subpath: "nxsetup")
     }
 }
 

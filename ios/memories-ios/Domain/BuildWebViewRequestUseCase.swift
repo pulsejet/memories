@@ -7,7 +7,7 @@
 
 import Foundation
 
-class GetWebViewRequestUseCase {
+class BuildWebViewRequestUseCase {
     
     let httpService: HttpService
     

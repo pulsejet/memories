@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5000AC802B0AA75B0015CB2E /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 5000AC7F2B0AA75B0015CB2E /* SQLite */; };
 		5000AC822B0AA9360015CB2E /* PhotoDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5000AC812B0AA9360015CB2E /* PhotoDataSource.swift */; };
 		500D1D7C2B0A79740013691E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1D7B2B0A79740013691E /* AppDelegate.swift */; };
 		500D1D7E2B0A79740013691E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1D7D2B0A79740013691E /* SceneDelegate.swift */; };
@@ -17,12 +16,10 @@
 		500D1DBE2B0A7A730013691E /* web_asset in Resources */ = {isa = PBXBuildFile; fileRef = 500D1DBD2B0A7A730013691E /* web_asset */; };
 		500D1DD62B0A7A820013691E /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DBF2B0A7A810013691E /* Constants.swift */; };
 		500D1DD72B0A7A820013691E /* RefreshCredentialsUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DC12B0A7A810013691E /* RefreshCredentialsUseCase.swift */; };
-		500D1DD82B0A7A820013691E /* GetWebViewRequestUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DC22B0A7A810013691E /* GetWebViewRequestUseCase.swift */; };
 		500D1DD92B0A7A820013691E /* SetCredentialsUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DC32B0A7A810013691E /* SetCredentialsUseCase.swift */; };
 		500D1DDA2B0A7A820013691E /* AuthenticationUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DC42B0A7A810013691E /* AuthenticationUseCase.swift */; };
 		500D1DDB2B0A7A820013691E /* HttpService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DC62B0A7A810013691E /* HttpService.swift */; };
 		500D1DDC2B0A7A820013691E /* Container.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DC82B0A7A820013691E /* Container.swift */; };
-		500D1DDD2B0A7A820013691E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DCA2B0A7A820013691E /* ViewController.swift */; };
 		500D1DDE2B0A7A820013691E /* NativeXMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DCB2B0A7A820013691E /* NativeXMessageHandler.swift */; };
 		500D1DDF2B0A7A820013691E /* NativeXRequestHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DCC2B0A7A820013691E /* NativeXRequestHandler.swift */; };
 		500D1DE02B0A7A820013691E /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DCD2B0A7A820013691E /* MainViewModel.swift */; };
@@ -33,14 +30,19 @@
 		500D1DE52B0A7A820013691E /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DD42B0A7A820013691E /* StringExtensions.swift */; };
 		500D1DE62B0A7A820013691E /* UrlExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500D1DD52B0A7A820013691E /* UrlExtensions.swift */; };
 		500D1DE92B0A7B150013691E /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 500D1DE82B0A7B150013691E /* Alamofire */; };
-		500D1DEC2B0A7B280013691E /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = 500D1DEB2B0A7B280013691E /* Swinject */; };
-		500D1DF12B0A7B3A0013691E /* SwinjectStoryboard in Frameworks */ = {isa = PBXBuildFile; productRef = 500D1DF02B0A7B3A0013691E /* SwinjectStoryboard */; };
+		501773342B10C74300BD4B2E /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501773332B10C74200BD4B2E /* MainViewController.swift */; };
+		501773372B10CDFF00BD4B2E /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = 501773362B10CDFF00BD4B2E /* Swinject */; };
+		501773392B10CDFF00BD4B2E /* SwinjectStoryboard in Frameworks */ = {isa = PBXBuildFile; productRef = 501773382B10CDFF00BD4B2E /* SwinjectStoryboard */; };
+		5017733B2B10D28300BD4B2E /* ColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5017733A2B10D28300BD4B2E /* ColorExtension.swift */; };
+		5017733D2B10D98D00BD4B2E /* ThemeStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5017733C2B10D98D00BD4B2E /* ThemeStorage.swift */; };
 		5042EF132B0D502A006C3ABC /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 5042EF122B0D502A006C3ABC /* GRDB */; };
 		5042EF152B0D5046006C3ABC /* DatabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5042EF142B0D5046006C3ABC /* DatabaseService.swift */; };
 		50EAD9292B0FBCF000792149 /* BucketsDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EAD9282B0FBCF000792149 /* BucketsDataSource.swift */; };
 		50EAD92D2B0FBEE300792149 /* GetDaysUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EAD92C2B0FBEE300792149 /* GetDaysUseCase.swift */; };
 		50EAD92F2B0FC29500792149 /* CodableExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EAD92E2B0FC29500792149 /* CodableExtensions.swift */; };
 		50EAD9312B0FCAC500792149 /* GetLocalFoldersUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EAD9302B0FCAC500792149 /* GetLocalFoldersUseCase.swift */; };
+		50EAD9332B0FCE9800792149 /* BuildBusFunctionUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EAD9322B0FCE9800792149 /* BuildBusFunctionUseCase.swift */; };
+		50EAD9352B0FCECF00792149 /* BuildWebViewRequestUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EAD9342B0FCECE00792149 /* BuildWebViewRequestUseCase.swift */; };
 		50F2E61B2B0EB6650035C014 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F2E61A2B0EB6650035C014 /* Photo.swift */; };
 /* End PBXBuildFile section */
 
@@ -56,12 +58,10 @@
 		500D1DBD2B0A7A730013691E /* web_asset */ = {isa = PBXFileReference; lastKnownFileType = folder; path = web_asset; sourceTree = "<group>"; };
 		500D1DBF2B0A7A810013691E /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		500D1DC12B0A7A810013691E /* RefreshCredentialsUseCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RefreshCredentialsUseCase.swift; sourceTree = "<group>"; };
-		500D1DC22B0A7A810013691E /* GetWebViewRequestUseCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetWebViewRequestUseCase.swift; sourceTree = "<group>"; };
 		500D1DC32B0A7A810013691E /* SetCredentialsUseCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetCredentialsUseCase.swift; sourceTree = "<group>"; };
 		500D1DC42B0A7A810013691E /* AuthenticationUseCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthenticationUseCase.swift; sourceTree = "<group>"; };
 		500D1DC62B0A7A810013691E /* HttpService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HttpService.swift; sourceTree = "<group>"; };
 		500D1DC82B0A7A820013691E /* Container.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Container.swift; sourceTree = "<group>"; };
-		500D1DCA2B0A7A820013691E /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		500D1DCB2B0A7A820013691E /* NativeXMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NativeXMessageHandler.swift; sourceTree = "<group>"; };
 		500D1DCC2B0A7A820013691E /* NativeXRequestHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NativeXRequestHandler.swift; sourceTree = "<group>"; };
 		500D1DCD2B0A7A820013691E /* MainViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
@@ -71,11 +71,16 @@
 		500D1DD22B0A7A820013691E /* LoginDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginDataSource.swift; sourceTree = "<group>"; };
 		500D1DD42B0A7A820013691E /* StringExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
 		500D1DD52B0A7A820013691E /* UrlExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UrlExtensions.swift; sourceTree = "<group>"; };
+		501773332B10C74200BD4B2E /* MainViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		5017733A2B10D28300BD4B2E /* ColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtension.swift; sourceTree = "<group>"; };
+		5017733C2B10D98D00BD4B2E /* ThemeStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeStorage.swift; sourceTree = "<group>"; };
 		5042EF142B0D5046006C3ABC /* DatabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseService.swift; sourceTree = "<group>"; };
 		50EAD9282B0FBCF000792149 /* BucketsDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BucketsDataSource.swift; sourceTree = "<group>"; };
 		50EAD92C2B0FBEE300792149 /* GetDaysUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetDaysUseCase.swift; sourceTree = "<group>"; };
 		50EAD92E2B0FC29500792149 /* CodableExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableExtensions.swift; sourceTree = "<group>"; };
 		50EAD9302B0FCAC500792149 /* GetLocalFoldersUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetLocalFoldersUseCase.swift; sourceTree = "<group>"; };
+		50EAD9322B0FCE9800792149 /* BuildBusFunctionUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildBusFunctionUseCase.swift; sourceTree = "<group>"; };
+		50EAD9342B0FCECE00792149 /* BuildWebViewRequestUseCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BuildWebViewRequestUseCase.swift; sourceTree = "<group>"; };
 		50F2E61A2B0EB6650035C014 /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -84,11 +89,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5000AC802B0AA75B0015CB2E /* SQLite in Frameworks */,
 				5042EF132B0D502A006C3ABC /* GRDB in Frameworks */,
 				500D1DE92B0A7B150013691E /* Alamofire in Frameworks */,
-				500D1DF12B0A7B3A0013691E /* SwinjectStoryboard in Frameworks */,
-				500D1DEC2B0A7B280013691E /* Swinject in Frameworks */,
+				501773392B10CDFF00BD4B2E /* SwinjectStoryboard in Frameworks */,
+				501773372B10CDFF00BD4B2E /* Swinject in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -100,6 +104,7 @@
 			children = (
 				500D1D7A2B0A79740013691E /* memories-ios */,
 				500D1D792B0A79740013691E /* Products */,
+				501773352B10CDFF00BD4B2E /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -137,6 +142,8 @@
 			children = (
 				50EAD92B2B0FBECF00792149 /* Timeline */,
 				50EAD92A2B0FBEBE00792149 /* Auth */,
+				50EAD9322B0FCE9800792149 /* BuildBusFunctionUseCase.swift */,
+				50EAD9342B0FCECE00792149 /* BuildWebViewRequestUseCase.swift */,
 			);
 			path = Domain;
 			sourceTree = "<group>";
@@ -161,10 +168,10 @@
 		500D1DC92B0A7A820013691E /* Main */ = {
 			isa = PBXGroup;
 			children = (
-				500D1DCA2B0A7A820013691E /* ViewController.swift */,
+				501773332B10C74200BD4B2E /* MainViewController.swift */,
+				500D1DCD2B0A7A820013691E /* MainViewModel.swift */,
 				500D1DCB2B0A7A820013691E /* NativeXMessageHandler.swift */,
 				500D1DCC2B0A7A820013691E /* NativeXRequestHandler.swift */,
-				500D1DCD2B0A7A820013691E /* MainViewModel.swift */,
 				500D1DCE2B0A7A820013691E /* ScriptMessage.swift */,
 			);
 			path = Main;
@@ -179,6 +186,7 @@
 				500D1DD22B0A7A820013691E /* LoginDataSource.swift */,
 				5000AC812B0AA9360015CB2E /* PhotoDataSource.swift */,
 				50EAD9282B0FBCF000792149 /* BucketsDataSource.swift */,
+				5017733C2B10D98D00BD4B2E /* ThemeStorage.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -189,15 +197,22 @@
 				500D1DD42B0A7A820013691E /* StringExtensions.swift */,
 				500D1DD52B0A7A820013691E /* UrlExtensions.swift */,
 				50EAD92E2B0FC29500792149 /* CodableExtensions.swift */,
+				5017733A2B10D28300BD4B2E /* ColorExtension.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		501773352B10CDFF00BD4B2E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		50EAD92A2B0FBEBE00792149 /* Auth */ = {
 			isa = PBXGroup;
 			children = (
 				500D1DC12B0A7A810013691E /* RefreshCredentialsUseCase.swift */,
-				500D1DC22B0A7A810013691E /* GetWebViewRequestUseCase.swift */,
 				500D1DC32B0A7A810013691E /* SetCredentialsUseCase.swift */,
 				500D1DC42B0A7A810013691E /* AuthenticationUseCase.swift */,
 			);
@@ -239,10 +254,9 @@
 			name = "memories-ios";
 			packageProductDependencies = (
 				500D1DE82B0A7B150013691E /* Alamofire */,
-				500D1DEB2B0A7B280013691E /* Swinject */,
-				500D1DF02B0A7B3A0013691E /* SwinjectStoryboard */,
-				5000AC7F2B0AA75B0015CB2E /* SQLite */,
 				5042EF122B0D502A006C3ABC /* GRDB */,
+				501773362B10CDFF00BD4B2E /* Swinject */,
+				501773382B10CDFF00BD4B2E /* SwinjectStoryboard */,
 			);
 			productName = "memories-ios";
 			productReference = 500D1D782B0A79740013691E /* memories-ios.app */;
@@ -307,17 +321,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				500D1DDD2B0A7A820013691E /* ViewController.swift in Sources */,
 				500D1DD72B0A7A820013691E /* RefreshCredentialsUseCase.swift in Sources */,
 				50EAD92F2B0FC29500792149 /* CodableExtensions.swift in Sources */,
 				500D1DDE2B0A7A820013691E /* NativeXMessageHandler.swift in Sources */,
 				500D1DDF2B0A7A820013691E /* NativeXRequestHandler.swift in Sources */,
 				500D1DE12B0A7A820013691E /* ScriptMessage.swift in Sources */,
-				500D1DD82B0A7A820013691E /* GetWebViewRequestUseCase.swift in Sources */,
 				500D1DE02B0A7A820013691E /* MainViewModel.swift in Sources */,
 				500D1DDA2B0A7A820013691E /* AuthenticationUseCase.swift in Sources */,
 				500D1D7C2B0A79740013691E /* AppDelegate.swift in Sources */,
 				50EAD92D2B0FBEE300792149 /* GetDaysUseCase.swift in Sources */,
+				50EAD9352B0FCECF00792149 /* BuildWebViewRequestUseCase.swift in Sources */,
+				50EAD9332B0FCE9800792149 /* BuildBusFunctionUseCase.swift in Sources */,
 				500D1DE42B0A7A820013691E /* LoginDataSource.swift in Sources */,
 				500D1DE22B0A7A820013691E /* ApiDescriptionDataSource.swift in Sources */,
 				500D1DE32B0A7A820013691E /* SecureCredentialStorage.swift in Sources */,
@@ -325,9 +339,12 @@
 				5000AC822B0AA9360015CB2E /* PhotoDataSource.swift in Sources */,
 				500D1DD92B0A7A820013691E /* SetCredentialsUseCase.swift in Sources */,
 				5042EF152B0D5046006C3ABC /* DatabaseService.swift in Sources */,
+				5017733D2B10D98D00BD4B2E /* ThemeStorage.swift in Sources */,
 				50EAD9292B0FBCF000792149 /* BucketsDataSource.swift in Sources */,
+				5017733B2B10D28300BD4B2E /* ColorExtension.swift in Sources */,
 				500D1DDB2B0A7A820013691E /* HttpService.swift in Sources */,
 				500D1D7E2B0A79740013691E /* SceneDelegate.swift in Sources */,
+				501773342B10C74300BD4B2E /* MainViewController.swift in Sources */,
 				50F2E61B2B0EB6650035C014 /* Photo.swift in Sources */,
 				500D1DE62B0A7A820013691E /* UrlExtensions.swift in Sources */,
 				500D1DDC2B0A7A820013691E /* Container.swift in Sources */,
@@ -483,7 +500,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "memories-ios/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -511,7 +528,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "memories-ios/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -595,22 +612,17 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		5000AC7F2B0AA75B0015CB2E /* SQLite */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 5000AC7E2B0AA75B0015CB2E /* XCRemoteSwiftPackageReference "SQLite.swift" */;
-			productName = SQLite;
-		};
 		500D1DE82B0A7B150013691E /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 500D1DE72B0A7B150013691E /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
 		};
-		500D1DEB2B0A7B280013691E /* Swinject */ = {
+		501773362B10CDFF00BD4B2E /* Swinject */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 500D1DEA2B0A7B280013691E /* XCRemoteSwiftPackageReference "Swinject" */;
 			productName = Swinject;
 		};
-		500D1DF02B0A7B3A0013691E /* SwinjectStoryboard */ = {
+		501773382B10CDFF00BD4B2E /* SwinjectStoryboard */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 500D1DEF2B0A7B3A0013691E /* XCRemoteSwiftPackageReference "SwinjectStoryboard" */;
 			productName = SwinjectStoryboard;

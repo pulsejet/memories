@@ -12,11 +12,13 @@ class NativeXMessageHandler {
     let photoDataSource: PhotoDataSource
     let getLocalFolders: GetLocalFoldersUseCase
     let nativeXRequestHandler: NativeXRequestHandler
+    let themeStorage: ThemeStorage
     
-    init(photoDataSource: PhotoDataSource, getLocalFolders: GetLocalFoldersUseCase, nativeXRequestHandler: NativeXRequestHandler) {
+    init(photoDataSource: PhotoDataSource, getLocalFolders: GetLocalFoldersUseCase, nativeXRequestHandler: NativeXRequestHandler, themeStorage: ThemeStorage) {
         self.photoDataSource = photoDataSource
         self.getLocalFolders = getLocalFolders
         self.nativeXRequestHandler = nativeXRequestHandler
+        self.themeStorage = themeStorage
     }
     
     func handleMessage(body: Any) -> Any? {
@@ -31,6 +33,9 @@ class NativeXMessageHandler {
             return nativeXRequestHandler.handleUrlRequest(
                 urlRequest: scriptMessage.parameter as! UrlRequest
             )
+        case .setThemeColor: return themeStorage.setTheme(
+            color: (scriptMessage.parameter as! ThemeColor).color
+        )
         default: return nil
         }
     }
