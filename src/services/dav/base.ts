@@ -190,7 +190,7 @@ export async function extendWithStack(photos: IPhoto[]) {
       }),
     10,
   )) {
-    livePhotos.push(...utils.filterTruthy(res));
+    livePhotos.push(...res.filter(utils.truthy));
   }
 
   // Add stacked RAW files (deduped)

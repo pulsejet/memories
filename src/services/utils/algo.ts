@@ -116,12 +116,12 @@ export function isNumber<T>(num: T): boolean {
   return !isNaN(cast) && isFinite(cast);
 }
 
-/** Check if a property is truthy */
-export function truthy<T, K extends keyof T>(obj: T, prop: K): obj is T & { [P in K]-?: T[K] } {
-  return !!obj[prop];
+/** Check if a value is truthy */
+export function truthy<T>(value: T): value is NonNullable<T> {
+  return !!value;
 }
 
-/** Filter truthy values from an array */
-export function filterTruthy<T>(arr: T[]): NonNullable<T>[] {
-  return arr.filter(Boolean) as NonNullable<T>[];
+/** Check if a property is truthy */
+export function truthyProp<T, K extends keyof T>(obj: T, prop: K): obj is T & { [P in K]-?: T[K] } {
+  return truthy(obj[prop]);
 }
