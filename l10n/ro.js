@@ -4,6 +4,7 @@ OC.L10N.register(
     "Download" : "Descărcare",
     "Settings" : "Setări",
     "People" : "Persoane",
+    "Timeline" : "Cronologie",
     "Folders" : "Director",
     "Favorites" : "Favorite",
     "Videos" : "Fișiere video",
