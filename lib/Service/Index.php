@@ -69,7 +69,7 @@ class Index
      */
     public function indexUser(string $uid, ?string $folder = null): void
     {
-        $this->log("<info>Indexing user {$uid}</info>".PHP_EOL);
+        $this->log("<info>Indexing user {$uid}</info>".PHP_EOL, true);
 
         \OC_Util::tearDownFS();
         \OC_Util::setupFS($uid);
@@ -119,7 +119,7 @@ class Index
         $this->log("Indexing folder {$path}", true);
 
         if ($folder->nodeExists('.nomedia') || $folder->nodeExists('.nomemories')) {
-            $this->log("Skipping folder {$path} (.nomedia / .nomemories)\n", true);
+            $this->log("Skipping folder {$path} (.nomedia / .nomemories)".PHP_EOL, true);
 
             return;
         }
@@ -210,7 +210,7 @@ class Index
      */
     public function cleanupStale(): void
     {
-        $this->log('<info>Cleaning up stale index entries</info>'.PHP_EOL);
+        $this->log('<info>Cleaning up stale index entries</info>');
         $this->tw->cleanupStale();
     }
 
@@ -281,10 +281,7 @@ class Index
     private function error(string $message): void
     {
         $this->logger->error($message, ['app' => 'memories']);
-
-        if ($this->output) {
-            $this->output->writeln("<error>{$message}</error>\n");
-        }
+        $this->output?->writeln("<error>{$message}</error>".PHP_EOL);
     }
 
     /**

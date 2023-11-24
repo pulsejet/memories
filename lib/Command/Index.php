@@ -120,7 +120,7 @@ class Index extends Command
 
             return 0;
         } catch (\Exception $e) {
-            $this->output->writeln("<error>{$e->getMessage()}</error>\n");
+            $this->output->writeln("<error>{$e->getMessage()}</error>".PHP_EOL);
 
             return 1;
         } finally {
@@ -174,7 +174,7 @@ class Index extends Command
             try {
                 $this->indexer->indexUser($user->getUID(), $this->opts->folder);
             } catch (\Exception $e) {
-                $this->output->writeln("<error>{$e->getMessage()}</error>\n");
+                $this->output->writeln("<error>{$e->getMessage()}</error>".PHP_EOL);
             }
         });
     }
@@ -190,7 +190,7 @@ class Index extends Command
             if ($user = $this->userManager->get($uid)) {
                 $closure($user);
             } else {
-                $this->output->writeln("<error>User {$uid} not found</error>\n");
+                $this->output->writeln("<error>User {$uid} not found</error>".PHP_EOL);
             }
         } elseif ($gid = $this->opts->group) {
             if ($group = $this->groupManager->get($gid)) {
@@ -198,7 +198,7 @@ class Index extends Command
                     $closure($user);
                 }
             } else {
-                $this->output->writeln("<error>Group {$gid} not found</error>\n");
+                $this->output->writeln("<error>Group {$gid} not found</error>".PHP_EOL);
             }
         } else {
             $this->userManager->callForSeenUsers($closure);
