@@ -146,6 +146,7 @@ class Index
             $query->select('f.fileid')
                 ->from('filecache', 'f')
                 ->where($query->expr()->in('f.fileid', $query->createNamedParameter($fileIds, IQueryBuilder::PARAM_INT_ARRAY)))
+                ->andWhere($query->expr()->gt('f.size', $query->expr()->literal(0)))
             ;
 
             // Filter out files that are already indexed
