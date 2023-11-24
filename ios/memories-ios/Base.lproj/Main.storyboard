@@ -15,28 +15,9 @@
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <wkWebView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0q3-1b-31t">
-                                <rect key="frame" x="0.0" y="48" width="414" height="814"/>
-                                <color key="backgroundColor" name="AccentColor"/>
-                                <wkWebViewConfiguration key="configuration">
-                                    <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
-                                    <wkPreferences key="preferences"/>
-                                </wkWebViewConfiguration>
-                            </wkWebView>
-                        </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="AccentColor"/>
-                        <constraints>
-                            <constraint firstItem="0q3-1b-31t" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="7IO-Bv-bFa"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="0q3-1b-31t" secondAttribute="trailing" id="dIn-PP-GRy"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="0q3-1b-31t" secondAttribute="bottom" id="idq-lx-UAG"/>
-                            <constraint firstItem="0q3-1b-31t" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="z4i-cd-sqI"/>
-                        </constraints>
                     </view>
-                    <connections>
-                        <outlet property="webView" destination="0q3-1b-31t" id="GfJ-PC-X3d"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
@@ -45,7 +26,7 @@
     </scenes>
     <resources>
         <namedColor name="AccentColor">
-            <color red="0.16862745098039217" green="0.58039215686274503" blue="0.94117647058823528" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.16899999976158142" green="0.57999998331069946" blue="0.94099998474121094" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>
 </document>

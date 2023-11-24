@@ -14,7 +14,7 @@ import AVFoundation
 class MainViewController: UIViewController {
     var mainViewModel: MainViewModelProtocol!
     
-    @IBOutlet weak var webView: WKWebView!
+    var webView: WKWebView!
     
     var authSession: ASWebAuthenticationSession? = nil
     
@@ -37,18 +37,31 @@ class MainViewController: UIViewController {
         let nativeXJS = loadJavaScript()
         let script = WKUserScript(source: nativeXJS, injectionTime: .atDocumentStart, forMainFrameOnly: false)
         
-        let contentController = webView.configuration.userContentController
+        let contentController = WKUserContentController()
         contentController.addScriptMessageHandler(self, contentWorld: .page, name: "nativex")
         contentController.addUserScript(script)
         
-        let webConfiguration = webView.configuration
+        let webConfiguration = WKWebViewConfiguration()
+        webConfiguration.userContentController = contentController
         webConfiguration.setURLSchemeHandler(self, forURLScheme: Schema.URL_SCHEMA)
         
         let dataStore = WKWebsiteDataStore.default()
         webConfiguration.websiteDataStore = dataStore
         
+        webView = WKWebView(frame: .zero, configuration: webConfiguration)
+        webView.uiDelegate = self
+        webView.navigationDelegate = self
         webView.customUserAgent = Constants.USER_AGENT
         webView.scrollView.contentInsetAdjustmentBehavior = UIScrollView.ContentInsetAdjustmentBehavior.never
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(webView)
+        
+        NSLayoutConstraint.activate([
+            webView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            webView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            webView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
+        ])
     }
     
     func loadJavaScript() -> String {
@@ -84,8 +97,7 @@ extension MainViewController: MainUiDelegate {
     func openAuthenticationModal(url: String) {
         DispatchQueue.main.async {
             guard let authURL = URL(string: url) else { return }
-            let scheme = Schema.AUTH_RESULT
-            self.authSession = ASWebAuthenticationSession(url: authURL, callbackURLScheme: scheme)
+            self.authSession = ASWebAuthenticationSession(url: authURL, callbackURLScheme: nil)
             { _, _ in }
             
             self.authSession?.presentationContextProvider = self
@@ -148,6 +160,36 @@ extension MainViewController: MainUiDelegate {
     }
 }
 
+extension MainViewController : WKUIDelegate {
+    
+    func webView(_ webView: WKWebView,
+                 runJavaScriptAlertPanelWithMessage message: String,
+                 initiatedByFrame frame: WKFrameInfo,
+                 completionHandler: @escaping () -> Void) {
+        
+        // Set the message as the UIAlertController message
+        let alert = UIAlertController(
+            title: nil,
+            message: message,
+            preferredStyle: .alert
+        )
+        
+        // Add a confirmation action “OK”
+        let okAction = UIAlertAction(
+            title: "OK",
+            style: .default,
+            handler: { _ in
+                // Call completionHandler
+                completionHandler()
+            }
+        )
+        alert.addAction(okAction)
+        
+        // Display the NSAlert
+        present(alert, animated: true, completion: nil)
+    }
+}
+
 extension MainViewController: WKScriptMessageHandlerWithReply {
     
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) async -> (Any?, String?) {
@@ -163,6 +205,12 @@ extension MainViewController: WKURLSchemeHandler {
     }
     
     func webView(_ webView: WKWebView, stop urlSchemeTask: WKURLSchemeTask) {
+    }
+}
+
+extension MainViewController: WKNavigationDelegate {
+    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
+        return .allow
     }
 }
 

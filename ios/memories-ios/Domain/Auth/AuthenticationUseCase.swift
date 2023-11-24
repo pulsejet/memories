@@ -37,8 +37,6 @@ class AuthenticationUseCase {
             throw AuthError.pollingFailed
         }
         
-        debugPrint("PollingResult: ", loginResult)
-        
         do {
             
             try setCredentialsUseCase.invoke(credential: Credential(
@@ -51,7 +49,6 @@ class AuthenticationUseCase {
         } catch (let error) {
             debugPrint("Error: ", error)
         }
-        debugPrint("Credentials Saved")
         
         return try buildWebViewRequestUseCase.build(subpath: "nxsetup")
     }

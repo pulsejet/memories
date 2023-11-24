@@ -110,7 +110,7 @@
           // Trust all certificates
           const trustAll = document.getElementById("trust-all").checked ? "1" : "0";
 
-          await fetch(`nativeX://api/login/${encUrl}?trustAll=${trustAll}`, {
+          await fetch(`nativex://api/login/${encUrl}?trustAll=${trustAll}`, {
             method: "GET",
             signal: controller.signal,
           });

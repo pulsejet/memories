@@ -8,8 +8,7 @@
 import Foundation
 
 class Schema {
-    static let AUTH_RESULT = "nativeXAuth"
-    static let URL_SCHEMA = "nativeX"
+    static let URL_SCHEMA = "nativex"
 }
 
 class Constants {
