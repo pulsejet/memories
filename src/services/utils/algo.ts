@@ -120,3 +120,8 @@ export function isNumber<T>(num: T): boolean {
 export function truthy<T, K extends keyof T>(obj: T, prop: K): obj is T & { [P in K]-?: T[K] } {
   return !!obj[prop];
 }
+
+/** Filter truthy values from an array */
+export function filterTruthy<T>(arr: T[]): NonNullable<T>[] {
+  return arr.filter(Boolean) as NonNullable<T>[];
+}

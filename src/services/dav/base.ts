@@ -173,24 +173,28 @@ export async function* runInParallel<T>(promises: (() => Promise<T>)[], n: numbe
  */
 export async function extendWithStack(photos: IPhoto[]) {
   // Add Live Photos files
-  const livePhotos = (
-    await Promise.all(
-      photos
-        .filter((p) => p.liveid && !p.liveid.startsWith('self__'))
-        .map(async (p) => {
-          try {
-            const url = API.Q(utils.getLivePhotoVideoUrl(p, false), { format: 'json' });
-            return (await axios.get<IPhoto>(url)).data;
-          } catch (error) {
-            console.error(error);
-            return null;
-          }
-        }),
-    )
-  ).filter((p) => p !== null) as IPhoto[];
+  const livePhotos: IPhoto[] = [];
+  for await (const res of runInParallel(
+    photos
+      .filter((p) => p.liveid && !p.liveid.startsWith('self__'))
+      .map((p) => async () => {
+        try {
+          const base = utils.getLivePhotoVideoUrl(p, false);
+          const url = API.Q(base, { format: 'json' });
+          const res = await axios.get<IPhoto>(url);
+          return res.data;
+        } catch (error) {
+          console.error(error);
+          return null;
+        }
+      }),
+    10,
+  )) {
+    livePhotos.push(...utils.filterTruthy(res));
+  }
 
-  // Add stacked RAW files
-  const stackRaw = photos.map((p) => p.stackraw ?? []).flat();
+  // Add stacked RAW files (deduped)
+  const stackRaw = Array.from(new Set(photos.map((p) => p.stackraw ?? []).flat()));
 
   // Combine and return
   return photos.concat(livePhotos, stackRaw);
