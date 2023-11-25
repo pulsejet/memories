@@ -14,6 +14,7 @@ class StaticConfig {
   private initPromises: Array<() => void> = [];
   private default: IConfig | null = null;
   private storage: Storage;
+  private verchange: boolean = false;
 
   public constructor() {
     this.storage = getBuilder('memories').clearOnLogout().persist().build();
@@ -36,6 +37,8 @@ class StaticConfig {
     // Check if version changed
     const old = this.getDefault();
     if (old.version !== this.config.version) {
+      this.verchange = true;
+
       if (old.version) {
         showInfo(
           t('memories', 'Memories has been updated to {version}. Reload to get the new version.', {
@@ -163,6 +166,11 @@ class StaticConfig {
     this.default = config;
 
     return config;
+  }
+
+  public async versionChanged(): Promise<boolean> {
+    await this.getAll();
+    return this.verchange;
   }
 }
 

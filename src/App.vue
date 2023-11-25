@@ -273,9 +273,6 @@ export default defineComponent({
       // Disable on dev instances
       console.warn('Service Worker is not enabled on localhost.');
     } else if ('serviceWorker' in navigator) {
-      // Get the config before loading
-      const previousVersion = staticConfig.getSync('version');
-
       // Use the window load event to keep the page load performant
       window.addEventListener('load', async () => {
         try {
@@ -286,9 +283,8 @@ export default defineComponent({
           console.info('SW registered: ', registration);
 
           // Check for updates
-          const currentVersion = await staticConfig.get('version');
-          if (previousVersion !== currentVersion) {
-            registration.update();
+          if (await staticConfig.versionChanged()) {
+            await registration.update();
           }
         } catch (error) {
           console.error('SW registration failed: ', error);
