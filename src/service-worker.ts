@@ -6,12 +6,12 @@ import { ExpirationPlugin } from 'workbox-expiration';
 declare var self: ServiceWorkerGlobalScope;
 
 type PrecacheEntry = Exclude<(typeof self.__WB_MANIFEST)[number], string>;
+
+// Paths are updated in PHP. See OtherController.php
 const manifest = self.__WB_MANIFEST as Array<PrecacheEntry>;
 
-// Exclude files that are not needed
-const filteredManifest = manifest.filter((entry) => {
-  return !/(LICENSE\.txt|\.map)(\?.*)?$/.test(entry.url ?? String());
-});
+// Only include JS files
+const filteredManifest = manifest.filter((entry) => /\.js(\?.*)?$/.test(entry.url));
 
 precacheAndRoute(filteredManifest);
 cleanupOutdatedCaches();

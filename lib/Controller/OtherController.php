@@ -28,6 +28,7 @@ use OCA\Memories\Exceptions;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\StreamResponse;
 use OCP\IRequest;
@@ -171,7 +172,20 @@ class OtherController extends GenericApiController
                         throw Exceptions::NotFound('Service worker is disabled in global configuration');
                     }
 
-                    $response = (new StreamResponse(__DIR__.'/../../js/memories-service-worker.js'))->setHeaders([
+                    // Get relative URL to JS web root of the app
+                    $prefix = \OC::$server->get(\OCP\IURLGenerator::class)->linkTo('memories', 'js/memories-main.js');
+                    $prefix = preg_replace('/memories-main\.js.*$/', '', $prefix);
+
+                    // Make sure prefix starts and ends with a slash
+                    $prefix = '/'.ltrim($prefix, '/');
+                    $prefix = rtrim($prefix, '/').'/';
+
+                    // Replace relative URLs to have correct prefix
+                    $sw = file_get_contents(__DIR__.'/../../js/memories-service-worker.js');
+                    $sw = str_replace('/apps/memories/js/', $prefix, $sw);
+
+                    // Return processed service worker
+                    $response = (new DataDisplayResponse($sw))->setHeaders([
                         'Content-Type' => 'application/javascript',
                         'Service-Worker-Allowed' => '/',
                     ]);
