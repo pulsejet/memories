@@ -167,7 +167,7 @@ class OtherController extends GenericApiController
             switch ($name) {
                 case 'service-worker.js':
                     // Disable service worker if server is in debug mode
-                    if (\OC::$server->get(\OCP\IConfig::class)->getSystemValue('debug', false)) {
+                    if (!\OC::$server->get(\OCP\IConfig::class)->getSystemValue('memories.sw.enabled', true)) {
                         throw Exceptions::NotFound('Service worker is disabled in debug mode');
                     }
 
