@@ -10,14 +10,14 @@ const manifest = self.__WB_MANIFEST as Array<PrecacheEntry>;
 
 // Exclude files that are not needed
 const filteredManifest = manifest.filter((entry) => {
-  return !entry.url?.match(/LICENSE\.txt(\?.*)?$/);
+  return !/LICENSE\.txt(\?.*)?$/.test(entry.url ?? String());
 });
 
 precacheAndRoute(filteredManifest);
 cleanupOutdatedCaches();
 
 registerRoute(
-  /^.*\/apps\/memories\/api\/video\/livephoto\/.*/,
+  /\/apps\/memories\/api\/video\/livephoto\/.*/,
   new CacheFirst({
     cacheName: 'memories-livephotos',
     plugins: [
@@ -29,24 +29,16 @@ registerRoute(
   }),
 );
 
-// Important: Using the NetworkOnly strategy and not registering
-// a route are NOT equivalent. The NetworkOnly strategy will
-// strip certain headers such as HTTP-Range, which is required
-// for proper playback of videos.
+// Use CacheFirst for static assets
+const cachefirst = [
+  /\.(?:js|css|woff2?|png|jpg|jpeg|gif|svg|ico)$/i, // Static assets
+  /\/apps\/theming\/(icon|favicon|manifest)/i, // Theming
+  /\/avatar/i, // User avatars
+];
 
-const networkOnly = [/^.*\/api\/.*/];
-
-// Use network-first for memories page for initial state such as theming
+// Cache static file assets
 registerRoute(
-  ({ url }) => url.origin === self.location.origin && url.pathname.endsWith('/apps/memories/'),
-  new NetworkFirst({
-    cacheName: 'memories-pages',
-  }),
-);
-
-// Cache pages for same-origin requests only
-registerRoute(
-  ({ url }) => url.origin === self.location.origin && !networkOnly.some((regex) => regex.test(url.href)),
+  ({ url }) => cachefirst.some((regex) => regex.test(url.pathname)),
   new CacheFirst({
     cacheName: 'memories-pages',
     plugins: [
@@ -55,6 +47,23 @@ registerRoute(
         maxEntries: 2000, // assets
       }),
     ],
+  }),
+);
+
+// Important: Using the NetworkOnly strategy and not registering
+// a route are NOT equivalent. The NetworkOnly strategy will
+// strip certain headers such as HTTP-Range, which is required
+// for proper playback of videos.
+const netonly = [
+  /\/(api|ocs)\//i, // API calls
+  /\/csrftoken/i, // CSRF token (https://github.com/pulsejet/memories/issues/835)
+];
+
+// Use NetworkFirst for HTML pages for initial state and CSRF token
+registerRoute(
+  ({ url }) => !netonly.some((regex) => regex.test(url.pathname)),
+  new NetworkFirst({
+    cacheName: 'memories-pages',
   }),
 );
 
