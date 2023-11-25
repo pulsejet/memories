@@ -4,6 +4,7 @@ const path = require('path');
 const WorkboxPlugin = require('workbox-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 const appName = process.env.npm_package_name!;
 const appVersion = process.env.npm_package_version!;
@@ -77,6 +78,10 @@ module.exports = {
         type: 'asset/inline',
       },
       {
+        resourceQuery: /raw/,
+        type: 'asset/source',
+      },
+      {
         test: /\.s?css$/,
         use: ['style-loader', 'css-loader', 'sass-loader'],
       },
@@ -101,6 +106,12 @@ module.exports = {
 
   plugins: [
     new VueLoaderPlugin(),
+
+    // @nextcloud/dialogs depends on path
+    // This is really frustrating, but it's the only way
+    new NodePolyfillPlugin({
+      includeAliases: ['path', 'process'],
+    }),
 
     // Bundle service worker
     new WorkboxPlugin.InjectManifest({

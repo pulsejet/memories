@@ -10,6 +10,7 @@ import VueVirtualScroller from 'vue-virtual-scroller';
 
 // CSS for components
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
+import '@nextcloud/dialogs/style.css';
 
 // Initialize global memories object
 globalThis._m = {

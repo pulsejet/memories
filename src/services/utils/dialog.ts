@@ -111,10 +111,9 @@ export async function chooseNcFolder(
   title: string,
   initial: string = '/',
   type: FilePickerType = FilePickerType.Choose,
-) {
+): Promise<string> {
   const picker = getFilePickerBuilder(title)
     .setMultiSelect(false)
-    .setModal(true)
     .setType(type)
     .addMimeTypeFilter('httpd/unix-directory')
     .allowDirectories()
@@ -122,8 +121,13 @@ export async function chooseNcFolder(
     .build();
 
   // Choose a folder
-  const promise = fragment.wrap(picker.pick(), fragment.types.dialog);
-  let folder = (await promise) || '/';
+  let folder = await fragment.wrap(picker.pick(), fragment.types.dialog);
+  if (typeof folder !== 'string') {
+    throw new Error('File picker did not return a string');
+  }
+
+  // Blank is not a valid folder
+  folder = folder || '/';
 
   // Remove double slashes
   folder = folder.replace(/\/+/g, '/');
