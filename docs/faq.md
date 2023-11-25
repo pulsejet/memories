@@ -47,7 +47,7 @@ Yes. All photos are stored in a folder structure, and only displayed as a flat t
 
 **Does it have a mobile app?**
 
-The Android app is available in early access on [Google Play](https://play.google.com/store/apps/details?id=gallery.memories). The web app is very responsive on mobile and can be used on Android and iOS. You can use the official Nextcloud app to auto-upload photos and videos from your device.
+The Android app is available in early access on [Google Play](https://play.google.com/store/apps/details?id=gallery.memories) or [GitHub Releases](https://github.com/pulsejet/memories/releases?q=android). The web app is very responsive on mobile and can be used on Android and iOS. You can use the official Nextcloud app to auto-upload photos and videos from your device.
 
 **How is it better than the `Y` FOSS photo manager?**
 
