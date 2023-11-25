@@ -3,7 +3,7 @@ site_url: https://memories.gallery
 repo_url: https://github.com/pulsejet/memories
 repo_name: pulsejet/memories
 edit_uri: blob/master/docs/
-copyright: Copyright &copy; 2022 - 2023 Varun Patil
+copyright: Copyright &copy; 2022 - 2023 <a href="https://github.com/pulsejet">Varun Patil</a>
 
 extra:
   social:
