@@ -13,6 +13,8 @@ extra:
       link: https://github.com/pulsejet/memories
     - icon: fontawesome/brands/discourse
       link: https://help.nextcloud.com/c/apps/memories/
+    - icon: fontawesome/brands/google-play
+      link: https://play.google.com/store/apps/details?id=gallery.memories
 
 theme:
   name: material
