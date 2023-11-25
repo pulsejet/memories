@@ -11,6 +11,8 @@ extra:
       link: https://discord.gg/7Dr9f9vNjJ
     - icon: fontawesome/brands/github
       link: https://github.com/pulsejet/memories
+    - icon: fontawesome/brands/discourse
+      link: https://help.nextcloud.com/c/apps/memories/
 
 theme:
   name: material
