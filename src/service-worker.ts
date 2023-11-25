@@ -10,7 +10,7 @@ const manifest = self.__WB_MANIFEST as Array<PrecacheEntry>;
 
 // Exclude files that are not needed
 const filteredManifest = manifest.filter((entry) => {
-  return !/LICENSE\.txt(\?.*)?$/.test(entry.url ?? String());
+  return !/(LICENSE\.txt|\.map)(\?.*)?$/.test(entry.url ?? String());
 });
 
 precacheAndRoute(filteredManifest);
