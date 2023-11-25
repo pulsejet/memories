@@ -2,9 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [v6.1.1] - 2023-11-24
 
+- This is an off-cycle hotfix release for some bugs in v6.1.0 ([see](https://github.com/pulsejet/memories/milestone/19?closed=1)).
 - **Breaking**: The CUDA scaler is now the default for NVENC. You may need to reconfigure your transcoder. (see [#582](https://github.com/pulsejet/memories/issues/582))
+- This release also cuts down a lot of weirdness and improves the usage of dependencies significantly.
 
 ## [v6.1.0] - 2023-11-15
 
