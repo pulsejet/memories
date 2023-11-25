@@ -2,6 +2,7 @@ site_name: Memories
 site_url: https://memories.gallery
 repo_url: https://github.com/pulsejet/memories
 repo_name: pulsejet/memories
+edit_uri: blob/master/docs/
 copyright: Copyright &copy; 2022 - 2023 Varun Patil
 
 extra:
@@ -17,6 +18,7 @@ theme:
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.tracking
+    - content.action.edit
   palette:
     - scheme: default
       primary: blue
