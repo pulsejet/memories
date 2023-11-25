@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v6.1.2] - 2023-11-25
+
+- Hotfix in service worker caching strategy.
+
 ## [v6.1.1] - 2023-11-24
 
 - This is an off-cycle hotfix release for some bugs in v6.1.0 ([see](https://github.com/pulsejet/memories/milestone/19?closed=1)).
