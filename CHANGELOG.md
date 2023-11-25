@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v6.1.4] - 2023-11-25
+## [v6.1.5] - 2023-11-25
 
 - Hotfix in service worker caching strategy.
 
