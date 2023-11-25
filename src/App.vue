@@ -269,10 +269,7 @@ export default defineComponent({
   },
 
   async beforeMount() {
-    if (window.location.hostname === 'localhost') {
-      // Disable on dev instances
-      console.warn('Service Worker is not enabled on localhost.');
-    } else if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator) {
       // Use the window load event to keep the page load performant
       window.addEventListener('load', async () => {
         try {
