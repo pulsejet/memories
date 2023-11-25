@@ -38,7 +38,7 @@ const cachefirst = [
 
 // Cache static file assets
 registerRoute(
-  ({ url }) => cachefirst.some((regex) => regex.test(url.pathname)),
+  ({ url }) => url.origin === self.location.origin && cachefirst.some((regex) => regex.test(url.pathname)),
   new CacheFirst({
     cacheName: 'memories-pages',
     plugins: [
@@ -61,7 +61,7 @@ const netonly = [
 
 // Use NetworkFirst for HTML pages for initial state and CSRF token
 registerRoute(
-  ({ url }) => !netonly.some((regex) => regex.test(url.pathname)),
+  ({ url }) => url.origin === self.location.origin && !netonly.some((regex) => regex.test(url.pathname)),
   new NetworkFirst({
     cacheName: 'memories-pages',
   }),
