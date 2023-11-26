@@ -90,6 +90,7 @@ OC.L10N.register(
     "Undo" : "Undo",
     "Value" : "Nilari",
     "Image" : "Gambar",
+    "Line" : "Garis",
     "Size" : "Ukuran",
     "Setup" : "Pengaturan",
     "Failed to create {albumName}." : "Gagal membuat {albumName}.",
