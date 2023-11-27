@@ -37,7 +37,7 @@ declare module '@typings' {
     dayId: number;
     /** Refrence to day object */
     day: IDay;
-    /** Whether this is a head row */
+    /** Type of row (0 = head, 1 = photos) */
     type: IRowType;
     /** Main list of photo items */
     photos?: IPhoto[];
