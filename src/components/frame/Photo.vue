@@ -277,6 +277,7 @@ export default defineComponent({
 
     /** Start preview video */
     playVideo() {
+      if (this.data.flag & this.c.FLAG_SELECTED) return;
       this.liveState.waiting = true;
 
       // Quickly moving over the icon causes unnecessary
