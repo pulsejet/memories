@@ -187,6 +187,7 @@ export default defineComponent({
     touchScrollInterval: 0,
     touchScrollDelta: 0,
     touchMoveSelFrame: 0,
+    multiSelectDelta: null as 1 | -1 | null,
   }),
 
   mounted() {
@@ -656,14 +657,19 @@ export default defineComponent({
       const touchedDays = new Set<number>();
 
       /**
-       * @brief Look behind for a selected photo.
-       * @returns the list of photos behind the current photo upto
-       * the first selected photo.
-       * @returns null if no selected photo is found.
+       * @brief Look behind/ahead for a selected photo.
+       * @param delta -1 for behind, 1 for ahead
+       * @returns the list of photos behind/ahead the current photo upto
+       * the first selected photo. Null if selected photo not found.
        */
-      const lookBehind = (): IPhoto[] | undefined => {
+      const look = (delta: 1 | -1): IPhoto[] | undefined => {
         const result: IPhoto[] = [];
-        for (let i = rowIdx; i >= Math.max(rowIdx - 1000, 0); i--) {
+
+        // Iterate all rows behind or ahead of this row
+        // A maximum of 1000 rows are checked in either direction
+        const i_s = rowIdx; // i-start
+        const i_e = delta < 0 ? Math.max(rowIdx - 1000, 0) : Math.min(rowIdx + 1000, rows.length); // i-end
+        for (let i = i_s; delta < 0 ? i >= i_e : i < i_e; i += delta) {
           const row = rows[i];
           if (row.type !== 1) continue; // skip non-photo rows
 
@@ -671,8 +677,9 @@ export default defineComponent({
           if (!row.photos?.length) break;
 
           // Iterate photos in this row from the end
-          const sj = i === rowIdx ? pIdx : row.photos.length - 1;
-          for (let j = sj; j >= 0; j--) {
+          const j_s = i === rowIdx ? pIdx : delta < 0 ? row.photos.length - 1 : 0; // j-start
+          const j_e = delta < 0 ? 0 : row.photos.length; // j-end
+          for (let j = j_s; delta < 0 ? j >= j_e : j < j_e; j += delta) {
             const p = row.photos[j];
             if (p.flag & this.c.FLAG_PLACEHOLDER || !p.fileid) continue;
 
@@ -686,7 +693,7 @@ export default defineComponent({
         }
       };
 
-      /** Select or de-select a photo and update touchedDays */
+      /**@brief  Select or de-select a photo and update touchedDays */
       const selfun = (p: IPhoto, val: boolean) => {
         this.selectPhoto(p, val, true);
         touchedDays.add(p.dayid);
@@ -694,40 +701,56 @@ export default defineComponent({
       const select = (p: IPhoto) => selfun(p, true);
       const deselect = (p: IPhoto) => selfun(p, false);
 
-      // Select everything behind if found
-      const behind = lookBehind();
-      if (behind) {
+      /**
+       * @brief Backtrack and select photos behind/ahead.
+       * @param delta -1 for behind, 1 for ahead
+       * @returns true if did some actions
+       */
+      const backtrack = (delta: 1 | -1): boolean => {
+        const list = look(delta);
+        if (!list) return false;
+
         // Clear everything in front in this day
         const detail = photo.d!.detail!;
-        const pdIdx = detail.indexOf(photo);
-        for (let i = pdIdx + 1; i < detail.length; i++) {
+        const i_s = detail.indexOf(photo) - delta; // i-start
+        const i_e = delta < 0 ? detail.length : 0; // i-end
+        for (let i = i_s; delta < 0 ? i < i_e : i >= i_e; i -= delta) {
           if (detail[i].flag & this.c.FLAG_SELECTED) {
             deselect(detail[i]);
           }
         }
 
         // De-select everything else in front (other days)
+        // Note that reverse = ascending dayIds
         for (const [_, p] of this.selection) {
-          if (this.isreverse ? p.dayid > photo.dayid : p.dayid < photo.dayid) {
+          // reverse XNOR behind => direction
+          if (this.isreverse === delta < 0 ? p.dayid > photo.dayid : p.dayid < photo.dayid) {
             deselect(p);
           }
         }
 
         // Select everything behind upto the selected photo
-        for (const p of behind) {
+        for (const p of list) {
           select(p);
         }
-      } else {
-        // Always select the photo that was clicked
-        select(photo);
-      }
+
+        // Do subsequent actions in the same direction
+        this.multiSelectDelta = delta;
+        return true;
+      };
+
+      // Prefer to select photos behind, i.e. moving ahead
+      // If nothing behind is found, try ahead
+      // Fall back to select the photo that was clicked
+      const delta = this.multiSelectDelta ?? -1;
+      backtrack(delta) || backtrack(-delta as typeof delta) || select(photo);
 
       // Force update for all days that were touched
       for (const dayid of touchedDays) {
         this.updateHeadSelected(this.heads.get(dayid)!);
       }
 
-      this.$forceUpdate();
+      this.$forceUpdate(); // set changes
     },
 
     /** Select or deselect all photos in a head */
