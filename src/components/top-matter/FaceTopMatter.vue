@@ -7,7 +7,11 @@
       </NcActionButton>
     </NcActions>
 
-    <div class="name" :class="{ rename: isReal }" @click="rename">{{ displayName }}</div>
+    <div class="name">
+      <div :class="{ rename: isReal }" @click="rename">
+        {{ displayName }}
+      </div>
+    </div>
 
     <div class="right-actions">
       <NcActions :inline="0">
@@ -155,11 +159,15 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .face-top-matter {
-  .name.rename:hover {
+  .name > .rename {
     cursor: text;
-    text-decoration: underline;
-    text-decoration-color: var(--color-placeholder-light);
-    text-underline-offset: 5px;
+    display: inline-block;
+
+    &:hover {
+      text-decoration: underline;
+      text-decoration-color: var(--color-placeholder-light);
+      text-underline-offset: 5px;
+    }
   }
 }
 </style>
