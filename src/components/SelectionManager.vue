@@ -652,53 +652,73 @@ export default defineComponent({
       const pIdx = pRow.photos?.indexOf(photo) ?? -1;
       if (pIdx === -1) return;
 
-      const updateDaySet = new Set<number>();
-      let behind: IPhoto[] = [];
-      let behindFound = false;
+      /**
+       * @brief Look behind for a selected photo.
+       * @returns the list of photos behind the current photo upto
+       * the first selected photo.
+       * @returns null if no selected photo is found.
+       */
+      const lookBehind = (): IPhoto[] | undefined => {
+        const result: IPhoto[] = [];
+        for (let i = rowIdx; i >= Math.max(rowIdx - 1000, 0); i--) {
+          const row = rows[i];
+          if (row.type !== 1) continue; // skip non-photo rows
 
-      // Look behind
-      for (let i = rowIdx; i > rowIdx - 100; i--) {
-        if (i < 0) break;
-        if (rows[i].type !== 1) continue;
-        if (!rows[i].photos?.length) break;
+          // Give up if unloaded rows are found
+          if (!row.photos?.length) break;
 
-        const sj = i === rowIdx ? pIdx : rows[i].photos!.length - 1;
-        for (let j = sj; j >= 0; j--) {
-          const p = rows[i].photos![j];
-          if (p.flag & this.c.FLAG_PLACEHOLDER || !p.fileid) continue;
-          if (p.flag & this.c.FLAG_SELECTED) {
-            behindFound = true;
-            break;
+          // Iterate photos in this row from the end
+          const sj = i === rowIdx ? pIdx : row.photos.length - 1;
+          for (let j = sj; j >= 0; j--) {
+            const p = row.photos[j];
+            if (p.flag & this.c.FLAG_PLACEHOLDER || !p.fileid) continue;
+
+            if (p.flag & this.c.FLAG_SELECTED) {
+              // Found a selected photo, return everything excluding this
+              return result;
+            }
+
+            result.push(p);
           }
-          behind.push(p);
-          updateDaySet.add(p.dayid);
         }
+      };
 
-        if (behindFound) break;
-      }
+      // Set of dayIds to update
+      const touchedDays = new Set<number>();
 
       // Select everything behind
-      if (behindFound) {
-        const detail = photo.d!.detail!;
-
+      const behind = lookBehind();
+      if (behind) {
         // Clear everything in front in this day
+        const detail = photo.d!.detail!;
         const pdIdx = detail.indexOf(photo);
         for (let i = pdIdx + 1; i < detail.length; i++) {
-          if (detail[i].flag & this.c.FLAG_SELECTED) this.selectPhoto(detail[i], false, true);
+          if (detail[i].flag & this.c.FLAG_SELECTED) {
+            this.selectPhoto(detail[i], false, true);
+          }
         }
 
-        // Clear everything else in front
-        Array.from(this.selection.values())
-          .filter((p: IPhoto) => (this.isreverse ? p.dayid > photo.dayid : p.dayid < photo.dayid))
-          .forEach((photo: IPhoto) => {
-            this.selectPhoto(photo, false, true);
-            updateDaySet.add(photo.dayid);
-          });
+        // De-select everything else in front (other days)
+        for (const [_, p] of this.selection) {
+          if (this.isreverse ? p.dayid > photo.dayid : p.dayid < photo.dayid) {
+            this.selectPhoto(p, false, true);
+            touchedDays.add(p.dayid);
+          }
+        }
 
-        behind.forEach((p) => this.selectPhoto(p, true, true));
-        updateDaySet.forEach((dayid) => this.updateHeadSelected(this.heads.get(dayid)!));
-        this.$forceUpdate();
+        // Select everything behind upto the selected photo
+        for (const p of behind) {
+          this.selectPhoto(p, true, true);
+          touchedDays.add(p.dayid);
+        }
       }
+
+      // Force update for all days that were touched
+      for (const dayid of touchedDays) {
+        this.updateHeadSelected(this.heads.get(dayid)!);
+      }
+
+      this.$forceUpdate();
     },
 
     /** Select or deselect all photos in a head */
