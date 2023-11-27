@@ -652,6 +652,9 @@ export default defineComponent({
       const pIdx = pRow.photos?.indexOf(photo) ?? -1;
       if (pIdx === -1) return;
 
+      // Set of dayIds to update at the end of this method
+      const touchedDays = new Set<number>();
+
       /**
        * @brief Look behind for a selected photo.
        * @returns the list of photos behind the current photo upto
@@ -683,10 +686,15 @@ export default defineComponent({
         }
       };
 
-      // Set of dayIds to update
-      const touchedDays = new Set<number>();
+      /** Select or de-select a photo and update touchedDays */
+      const selfun = (p: IPhoto, val: boolean) => {
+        this.selectPhoto(p, val, true);
+        touchedDays.add(p.dayid);
+      };
+      const select = (p: IPhoto) => selfun(p, true);
+      const deselect = (p: IPhoto) => selfun(p, false);
 
-      // Select everything behind
+      // Select everything behind if found
       const behind = lookBehind();
       if (behind) {
         // Clear everything in front in this day
@@ -694,23 +702,24 @@ export default defineComponent({
         const pdIdx = detail.indexOf(photo);
         for (let i = pdIdx + 1; i < detail.length; i++) {
           if (detail[i].flag & this.c.FLAG_SELECTED) {
-            this.selectPhoto(detail[i], false, true);
+            deselect(detail[i]);
           }
         }
 
         // De-select everything else in front (other days)
         for (const [_, p] of this.selection) {
           if (this.isreverse ? p.dayid > photo.dayid : p.dayid < photo.dayid) {
-            this.selectPhoto(p, false, true);
-            touchedDays.add(p.dayid);
+            deselect(p);
           }
         }
 
         // Select everything behind upto the selected photo
         for (const p of behind) {
-          this.selectPhoto(p, true, true);
-          touchedDays.add(p.dayid);
+          select(p);
         }
+      } else {
+        // Always select the photo that was clicked
+        select(photo);
       }
 
       // Force update for all days that were touched
