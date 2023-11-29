@@ -15,8 +15,8 @@
         sconfig.recognize_enabled
           ? t('memories', 'Recognize is installed and enabled for face recognition.')
           : sconfig.recognize_installed
-          ? t('memories', 'Recognize is installed but not enabled for face recognition.')
-          : t('memories', 'Recognize is not installed. Face recognition and object tagging may be unavailable.')
+            ? t('memories', 'Recognize is installed but not enabled for face recognition.')
+            : t('memories', 'Recognize is not installed. Face recognition and object tagging may be unavailable.')
       }}
     </NcNoteCard>
     <NcNoteCard v-if="sconfig.facerecognition_installed" type="success">

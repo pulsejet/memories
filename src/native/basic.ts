@@ -46,6 +46,6 @@ export function addOrigin(url: string) {
   return url.match(/^(https?:)?\/\//)
     ? url
     : url.startsWith('/')
-    ? `${location.origin}${url}`
-    : `${location.origin}/${url}`;
+      ? `${location.origin}${url}`
+      : `${location.origin}/${url}`;
 }
