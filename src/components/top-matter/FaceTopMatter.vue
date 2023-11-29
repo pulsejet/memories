@@ -8,7 +8,7 @@
     </NcActions>
 
     <div class="name">
-      <div :class="{ rename: isReal }" @click="rename">
+      <div :class="{ 'rename-hover': isReal }" @click="rename">
         {{ displayName }}
       </div>
     </div>
@@ -156,18 +156,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped lang="scss">
-.face-top-matter {
-  .name > .rename {
-    cursor: text;
-    display: inline-block;
-
-    &:hover {
-      text-decoration: underline;
-      text-decoration-color: var(--color-placeholder-light);
-      text-underline-offset: 5px;
-    }
-  }
-}
-</style>
