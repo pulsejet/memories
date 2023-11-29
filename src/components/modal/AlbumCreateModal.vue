@@ -66,19 +66,22 @@ export default defineComponent({
       this.show = false;
     },
 
-    done({ album }: { album: { basename: string; filename: string } }) {
+    async done({ album }: { album: { basename: string; filename: string } }) {
+      // close modal first to pop fragments
+      await this.close();
+
+      // navigate to album if name changed
       if (!this.album || album.basename !== this.album.basename) {
         const user = album.filename.split('/')[2];
         const name = album.basename;
         const route = { name: 'albums', params: { user, name } };
 
         if (!this.album) {
-          this.$router.push(route);
+          await this.$router.push(route);
         } else {
-          this.$router.replace(route);
+          await this.$router.replace(route);
         }
       }
-      this.close();
     },
   },
 });
