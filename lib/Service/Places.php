@@ -273,9 +273,22 @@ class Places
                 // Extract data
                 $osmId = $data['osm_id'];
                 $adminLevel = $data['admin_level'];
-                $name = $data['name'];
                 $boundaries = $data['geometry'];
-                $otherNames = json_encode($data['other_names'] ?? []);
+
+                /** @var string $name */
+                $name = $data['name'];
+
+                /** @var array<string, string> $otherNames */
+                $otherNames = $data['other_names'];
+
+                // Explicitly convert all names to UTF-8
+                $name = mb_convert_encoding($name, 'UTF-8');
+
+                $otherNames = [];
+                foreach (($data['other_names'] ?? []) as $lang => $val) {
+                    $otherNames[$lang] = mb_convert_encoding($val, 'UTF-8');
+                }
+                $otherNames = json_encode($otherNames);
 
                 // Skip some places
                 if ($adminLevel > -2 && ($adminLevel <= 1 || $adminLevel >= 10)) {
