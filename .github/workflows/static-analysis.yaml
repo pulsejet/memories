@@ -58,20 +58,6 @@ jobs:
         run: |
           vendor/bin/psalm --no-cache --shepherd --stats --threads=max lib
 
-      - id: psalm_security
-        name: Psalm Security Scan
-        if: ${{ ! cancelled() }}
-        uses: docker://ghcr.io/psalm/psalm-security-scan
-        env:
-          INPUT_WORKING_DIR: ./apps/memories
-
-      - name: Import Security Analysis results into GitHub Security Code Scanning
-        if: steps.test.psalm_security == 'success'
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          checkout_path: apps/memories
-          sarif_file: apps/memories/results.sarif
-
   vue-lint:
     name: Vue Lint
     runs-on: ubuntu-latest

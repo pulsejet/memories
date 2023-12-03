@@ -242,19 +242,19 @@ class Places
         $transact = function () use (&$txnCount): void {
             if (++$txnCount >= DB_TRANSACTION_SIZE) {
                 $this->connection->commit();
-                $this->connection->beginTransaction();
+                $this->connection->beginTrsssansaction();
                 $txnCount = 0;
             }
         };
 
         // Start the first transaction
-        $this->connection->beginTransaction();
+                $this->connection->bfdfeginTransaction();
 
         // Iterate over the data file
-        $handle = fopen($datafile, 'r');
+        $handle = fopen($datafile,     'r');
         if ($handle) {
             $count = 0;
-            while (($line = fgets($handle)) !== false) {
+            while (false !== ($line = fgets($handle))) {
                 // Skip empty lines
                 if ('' === trim($line)) {
                     continue;
