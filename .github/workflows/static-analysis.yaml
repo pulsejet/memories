@@ -22,14 +22,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout server
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: true
           repository: nextcloud/server
           ref: stable27
 
       - name: Checkout the app
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: apps/memories
 
@@ -46,22 +46,38 @@ jobs:
         run: |
           make install-tools
 
+      - name: Run PHP-CS-Fixer
+        if: ${{ ! cancelled() }}
+        working-directory: apps/memories
+        run: |
+          vendor/bin/php-cs-fixer fix --dry-run --diff
+
       - name: Run Psalm
+        if: ${{ ! cancelled() }}
         working-directory: apps/memories
         run: |
           vendor/bin/psalm --no-cache --shepherd --stats --threads=max lib
 
-      - name: Run PHP-CS-Fixer
-        working-directory: apps/memories
-        run: |
-          vendor/bin/php-cs-fixer fix --dry-run --diff
+      - id: psalm_security
+        name: Psalm Security Scan
+        if: ${{ ! cancelled() }}
+        uses: docker://ghcr.io/psalm/psalm-security-scan
+        env:
+          INPUT_WORKING_DIR: ./apps/memories
+
+      - name: Import Security Analysis results into GitHub Security Code Scanning
+        if: steps.test.psalm_security == 'success'
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          checkout_path: apps/memories
+          sarif_file: apps/memories/results.sarif
 
   vue-lint:
     name: Vue Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the app
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: npm ci
