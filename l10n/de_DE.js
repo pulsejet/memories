@@ -1,7 +1,7 @@
 OC.L10N.register(
     "memories",
     {
-    "Shared Link" : "Gelteilter Link",
+    "Shared Link" : "Geteilter Link",
     "Download" : "Herunterladen",
     "Memories" : "Erinnerungen",
     "Fast, modern and advanced photo management suite" : "Schnelle, moderne und fortschrittliche Fotoverwaltungssuite",
@@ -50,7 +50,7 @@ OC.L10N.register(
     "Favorite" : "Favorisieren",
     "Unarchive" : "Dearchivieren",
     "Edit metadata" : "Metadaten bearbeiten",
-    "Rotate / Flip" : "Drehen / umdrehen",
+    "Rotate / Flip" : "Drehen / Spiegeln",
     "View in folder" : "In Ordner anzeigen",
     "Move to folder" : "In Ordner verschieben",
     "Add to album" : "Zum Album hinzufügen",
