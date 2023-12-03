@@ -137,11 +137,11 @@ export default defineComponent({
 
         // Go to new face
         if (failures === 0) {
-          this.$router.replace({
+          await this.close();
+          await this.$router.replace({
             name: 'recognize',
             params: { user: face.user_id, name: newName },
           });
-          this.close();
         }
       } catch (error) {
         console.error(error);
