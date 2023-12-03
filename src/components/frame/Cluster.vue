@@ -341,6 +341,10 @@ $namemargin: 10px;
     &.plus {
       background-color: var(--color-primary-element-light);
       color: var(--color-primary);
+
+      :deep svg {
+        cursor: pointer;
+      }
     }
 
     > img {
