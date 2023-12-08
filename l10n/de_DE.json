@@ -304,7 +304,7 @@
     "This feature rotates images losslessly by updating the EXIF metadata. This approach is known to sometimes not work correctly on certain image types such as HEIC. Make sure you do a test run before using it on multiple images." : "Diese Funktion dreht Bilder verlustfrei, indem die EXIF-Metadaten aktualisiert werden. Dies funktioniert bei bestimmten Bildtypen wie HEIC manchmal nicht richtig. Füren Sie zunächst einen Testlauf durch, bevor Sie diese Funktion für mehrere Bilder verwenden.",
     "Rotate Left" : "Nach links drehen",
     "Rotate Right" : "Nach rechts drehen",
-    "Flip" : "Umdrehen",
+    "Flip" : "Spieglen",
     "Remove person" : "Person entfernen",
     "Are you sure you want to remove {name}?" : "Möchten Sie wirklich {name} entfernen?",
     "Only user \"{user}\" can delete this person" : "Nur der Bunutzer \"{user}\" kann diese Person löschen",
