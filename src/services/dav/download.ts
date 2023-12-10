@@ -22,21 +22,27 @@ export async function downloadFiles(fileIds: number[]) {
   downloadWithHandle(res.data.handle);
 }
 
+/** Get URL to download one file (e.g. for video streaming) */
+export function getDownloadLink(photo: IPhoto) {
+  return API.STREAM_FILE(photo.fileid);
+}
+
 /**
  * Download files with a download handle
  * @param handle Download handle
  */
 export function downloadWithHandle(handle: string) {
-  const url = API.DOWNLOAD_FILE(handle);
+  return downloadFromUrl(API.DOWNLOAD_FILE(handle));
+}
 
+/**
+ * Download files from a URL.
+ * @param url URL to download from
+ */
+export function downloadFromUrl(url: string) {
   // Hand off to download manager (absolute URL)
   if (nativex.has()) return nativex.downloadFromUrl(url);
 
   // Fallback to browser download
   window.location.href = url;
-}
-
-/** Get URL to download one file (e.g. for video streaming) */
-export function getDownloadLink(photo: IPhoto) {
-  return API.STREAM_FILE(photo.fileid);
 }
