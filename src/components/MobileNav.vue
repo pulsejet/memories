@@ -45,7 +45,8 @@ export default defineComponent({
 
 <style lang="scss">
 :root {
-  --mobile-nav-height: 58px;
+  // iOS PWA shenanigans
+  --mobile-nav-height: calc(58px + max(calc(env(safe-area-inset-bottom) - 15px), 0px));
 }
 
 // Show correct nav depending on screen size

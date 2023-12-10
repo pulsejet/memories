@@ -1,5 +1,11 @@
+:root {
+  // https://github.com/nextcloud/server/blob/0cd536786b9df555e2e6110f98b41856f0d51313/core/css/apps.scss#L29
+  --body-height: calc(100% - 50px - var(--body-container-margin));
+}
+
 body {
   overflow: hidden;
+  height: var(--body-height) !important;
 
   * {
     -webkit-tap-highlight-color: transparent;

@@ -252,6 +252,8 @@ export default defineComponent({
 }
 
 @media (max-width: 768px) {
+  $headerHeight: 58px;
+
   /**
    * On mobile the layout works completely differently
    * Both components are full-height, and the separatator
@@ -287,7 +289,7 @@ export default defineComponent({
         height 0.2s ease;
 
       > .timeline-header {
-        height: 58px;
+        height: $headerHeight;
 
         > .swiper {
           display: block;
@@ -315,10 +317,10 @@ export default defineComponent({
     }
 
     &.m-zero > .timeline {
-      top: calc(100% - 58px); // show attribution
+      top: calc(100% - $headerHeight); // show attribution
     }
     &.m-zero > .primary {
-      height: calc(100% - 58px); // show full map
+      height: calc(100% - $headerHeight); // show full map
     }
 
     &.m-one > .timeline {

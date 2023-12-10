@@ -12,7 +12,6 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
-use OCP\AppFramework\Http\TemplateResponse;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IRequest;
 
@@ -47,7 +46,7 @@ class PageController extends Controller
             \OCP\Util::addTranslations('recognize');
         }
 
-        $response = new TemplateResponse(Application::APPNAME, 'main', self::getMainParams());
+        $response = new TemplateResponsePatch(Application::APPNAME, 'main', self::getMainParams());
         $response->setContentSecurityPolicy(self::getCSP());
         $response->cacheFor(0);
 
