@@ -33,6 +33,7 @@ OC.L10N.register(
     "Unknown" : "Óþekkt",
     "Continue" : "Halda áfram",
     "Template" : "Sniðmát",
+    "No items" : "Engin atriði",
     "Shared by {user}" : "Deilt af {user}",
     "Add people or groups who can edit your album" : "Bættu við fólki eða hópum sem geta breytt albúminu þínu",
     "Search for collaborators" : "Leita að samstarfsfólki",
