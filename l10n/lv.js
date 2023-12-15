@@ -33,6 +33,7 @@ OC.L10N.register(
     "Save" : "Saglabāt",
     "Create album" : "Izveidot albumu",
     "Search" : "Meklēt",
+    "Year" : "Gads",
     "Month" : "Mēnesis",
     "Day" : "Diena",
     "Time" : "Laiks",
