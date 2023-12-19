@@ -40,6 +40,6 @@ declare module '@typings' {
     square_thumbs: boolean;
     high_res_cond: HighResCond | null;
     show_face_rect: boolean;
-    album_list_sort: 1 | 2;
+    album_list_sort: 0 | 1 | 2 | 3;
   };
 }
