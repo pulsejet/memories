@@ -10,6 +10,16 @@
     <div class="name">{{ name }}</div>
 
     <div class="right-actions">
+      <!-- Search Bar-->
+      <div v-if="isAlbumList" class="search-bar-container">
+        <NcInputField
+          :value="searchQuery"
+          :placeholder="t('memories', 'Search')"
+          @input="searchQuery = $event.target.value"
+          @keyup.enter="sendSearchQuery(searchQuery)"
+        />
+      </div>
+
       <NcActions :forceMenu="true" v-if="isAlbumList">
         <template #icon>
           <SortIcon :size="20" />
@@ -100,6 +110,7 @@ import NcActions from '@nextcloud/vue/dist/Components/NcActions';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
 import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox';
 import NcActionRadio from '@nextcloud/vue/dist/Components/NcActionRadio';
+import NcInputField from '@nextcloud/vue/dist/Components/NcInputField';
 
 import axios from '@nextcloud/axios';
 
@@ -127,6 +138,7 @@ export default defineComponent({
     NcActionButton,
     NcActionCheckbox,
     NcActionRadio,
+    NcInputField,
 
     AlbumCreateModal,
     AlbumDeleteModal,
@@ -143,6 +155,11 @@ export default defineComponent({
   },
 
   mixins: [UserConfig],
+
+  created() {
+    // Reset the search query when the component is created
+    this.resetSearchQuery();
+  },
 
   computed: {
     refs() {
@@ -186,6 +203,18 @@ export default defineComponent({
       }
     },
 
+    resetSearchQuery() {
+      // Reset the search query to an empty string or default state
+      this.config.album_list_search = '';
+      // Update the setting to ensure consistency
+      this.updateSetting('album_list_search');
+    },
+
+    sendSearchQuery(query: string) {
+      this.config.album_list_search = query;
+      this.updateSetting('album_list_search');
+    },
+
     /**
      * Change the sorting order
      * 1 = date, 2 = name
@@ -197,3 +226,10 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.search-bar-container {
+  // Such that the search bar is placed on the left side of the sort menu
+  display: inline-block;
+}
+</style>
