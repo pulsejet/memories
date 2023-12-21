@@ -9,17 +9,17 @@
 
     <div class="name">{{ name }}</div>
 
-    <div class="right-actions">
-      <!-- Search Bar-->
-      <div v-if="isAlbumList" class="search-bar-container">
-        <NcInputField
-          :value="searchQuery"
-          :placeholder="t('memories', 'Search')"
-          @input="searchQuery = $event.target.value"
-          @keyup.enter="sendSearchQuery(searchQuery)"
-        />
-      </div>
+    <!-- Search Bar-->
+    <div class="search-bar-wrapper">
+      <NcInputField
+        :value="searchQuery"
+        :placeholder="t('memories', 'Search')"
+        @input="searchQuery = $event.target.value"
+        @keyup.enter="sendSearchQuery(searchQuery)"
+      />
+    </div>
 
+    <div class="right-actions">
       <NcActions :forceMenu="true" v-if="isAlbumList">
         <template #icon>
           <SortIcon :size="20" />
@@ -228,8 +228,20 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.search-bar-container {
-  // Such that the search bar is placed on the left side of the sort menu
-  display: inline-block;
+.top-matter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.name,
+.right-actions {
+  flex-shrink: 0;
+}
+
+.search-bar-wrapper {
+  flex-grow: 1;
+  min-width: 50px;
+  max-width: 200px;
 }
 </style>
