@@ -10,7 +10,7 @@
     <div class="name">{{ name }}</div>
 
     <!-- Search Bar-->
-    <div class="search-bar-wrapper">
+    <div v-if="isAlbumList" class="search-bar-wrapper">
       <NcInputField
         :value="searchQuery"
         :placeholder="t('memories', 'Search')"
@@ -241,7 +241,6 @@ export default defineComponent({
 
 .search-bar-wrapper {
   flex-grow: 1;
-  min-width: 50px;
-  max-width: 200px;
+  max-width: 150px;
 }
 </style>
