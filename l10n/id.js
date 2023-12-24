@@ -61,6 +61,7 @@ OC.L10N.register(
     "Create album" : "Buat album",
     "Search" : "Cari",
     "Save collaborators for this album." : "Simpan kolaborator untuk album ini",
+    "Year" : "Tahun",
     "Month" : "Bulan",
     "Day" : "Hari",
     "Time" : "Waktu",
