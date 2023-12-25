@@ -266,7 +266,7 @@ OC.L10N.register(
     "Only user \"{user}\" can delete this person" : "Only user \"{user}\" can delete this person",
     "Rename person" : "تغییر نام شخص",
     "Name" : "نام",
-    "Update" : "یه‌روزرسانی",
+    "Update" : "به‌روزرسانی",
     "Failed to rename {oldName} to {name}." : "Failed to rename {oldName} to {name}.",
     "Loading …" : "بارگذاری …",
     "Enter name of the new face" : "Enter name of the new face",
