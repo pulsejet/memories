@@ -66,12 +66,14 @@ OC.L10N.register(
     "Search" : "Cercar",
     "Save changes" : "Guarda canvis",
     "Save collaborators for this album." : "Desa els col·laboradors per a aquest àlbum.",
+    "Newest" : "Més nou",
     "Year" : "Any",
     "Month" : "Mes",
     "Day" : "Dia",
     "Time" : "Hora",
     "Hour" : "Hora",
     "Minute" : "Minut",
+    "Oldest" : "Més antic",
     "Title" : "Títol",
     "Description" : "Descripció",
     "Label" : "Etiqueta",
@@ -192,6 +194,8 @@ OC.L10N.register(
     "Setup" : "Configuració",
     "Failed to create {albumName}." : "No s'ha pogut crear {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "No s'ha pogut reanomenar {currentAlbumName} a {newAlbumName}.",
-    "Failed to delete {fileName}." : "No s'ha pogut suprimir {fileName}."
+    "Failed to delete {fileName}." : "No s'ha pogut suprimir {fileName}.",
+    "Yes" : "Sí",
+    "No" : "No"
 },
 "nplurals=2; plural=(n != 1);");
