@@ -92,6 +92,7 @@ OC.L10N.register(
     "Value" : "Nilari",
     "Image" : "Gambar",
     "Line" : "Garis",
+    "Text" : "Teks",
     "Size" : "Ukuran",
     "Setup" : "Pengaturan",
     "Failed to create {albumName}." : "Gagal membuat {albumName}.",
