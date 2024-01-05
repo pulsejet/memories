@@ -326,7 +326,7 @@ class MigrateGoogleTakeout extends Command
         if (is_numeric($epoch)) {
             $date = new \DateTime();
             $date->setTimestamp((int) $epoch);
-            $txf['AllDates'] = $date->format('Y:m:d H:i:s');
+            $txf['AllDates'] = $date->format('Y:m:d H:i:sO');
         }
 
         // Location coordinates
