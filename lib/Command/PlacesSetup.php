@@ -44,6 +44,7 @@ class PlacesSetup extends Command
             ->setName('memories:places-setup')
             ->setDescription('Setup reverse geocoding')
             ->addOption('recalculate', 'r', InputOption::VALUE_NONE, 'Only recalculate places for existing files')
+            ->addOption('transaction-size', null, InputOption::VALUE_REQUIRED, 'Reduce this value if your database crashes', 50)
         ;
     }
 
@@ -51,6 +52,12 @@ class PlacesSetup extends Command
     {
         $this->output = $output;
         $recalculate = $input->getOption('recalculate');
+
+        if (($this->places->txnSize = (int) $input->getOption('transaction-size')) < 1) {
+            $this->output->writeln('<error>Transaction size must be at least 1</error>');
+
+            return 1;
+        }
 
         $this->output->writeln('Attempting to set up reverse geocoding');
 

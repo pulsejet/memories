@@ -13,12 +13,16 @@ const GIS_TYPE_NONE = 0;
 const GIS_TYPE_MYSQL = 1;
 const GIS_TYPE_POSTGRES = 2;
 const APPROX_PLACES = 635189;
-const DB_TRANSACTION_SIZE = 50;
 
 const PLANET_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-0.0.3/planet_coarse_boundaries.zip';
 
 class Places
 {
+    /**
+     * Number of places to process in a single transaction.
+     */
+    public int $txnSize = 50;
+
     public function __construct(
         protected IConfig $config,
         protected IDBConnection $connection,
@@ -240,7 +244,7 @@ class Places
 
         // Function to commit the current transaction
         $transact = function () use (&$txnCount): void {
-            if (++$txnCount >= DB_TRANSACTION_SIZE) {
+            if (++$txnCount >= $this->txnSize) {
                 $this->connection->commit();
                 $this->connection->beginTransaction();
                 $txnCount = 0;
