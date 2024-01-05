@@ -41,7 +41,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class MigrateGoogleTakeout extends Command
 {
-    protected const MIGRATOR_VERSION = 2;
+    protected const MIGRATOR_VERSION = 3;
     protected const MIGRATED_KEY = 'memoriesMigratorVersion';
 
     protected OutputInterface $output;
