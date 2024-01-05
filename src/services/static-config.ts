@@ -23,8 +23,7 @@ class StaticConfig {
 
   private async init() {
     try {
-      const res = await axios.get<IConfig>(API.CONFIG_GET());
-      this.config = res.data as IConfig;
+      this.config = (await axios.get<IConfig>(API.CONFIG_GET())).data;
     } catch (e) {
       if (!utils.isNetworkError(e)) {
         showError('Failed to load configuration');
@@ -55,6 +54,13 @@ class StaticConfig {
     for (const k in this.config) {
       const key = k as keyof IConfig;
       this.setLs(key, this.config[key]);
+    }
+
+    // Copy over all missing settings (e.g. local settings)
+    for (const key in old) {
+      if (!this.config.hasOwnProperty(key)) {
+        (this.config as any)[key] = (old as any)[key];
+      }
     }
 
     // Resolve all promises
