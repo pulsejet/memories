@@ -101,7 +101,15 @@ occ memories:places-setup
 
 ### Error: Incorrect string value
 
-If you get this error, it is likely that your database is not using the `utf8mb4` character set. Since the reverse geocoding database contains characters in various languages, it is necessary to use `utf8mb4` to store them. To fix this, you need to convert your database to use `utf8mb4`.
+If you get this error (or an `Incorrect datetime value` error), it is likely that your database is not using the `utf8mb4` character set. Since the reverse geocoding database contains characters in various languages, it is necessary to use `utf8mb4` to store them. To fix this, you need to convert your database to use `utf8mb4`.
+
+You can also try changing `/etc/myt.cnf` in your MySQL/MariaDB server to use `utf8mb4` by default:
+
+```ini
+init_connect='SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci'
+```
+
+Restart your database server after making this change.
 
 ## Transcoding
 
