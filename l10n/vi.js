@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Download" : "Tải xuống",
     "Settings" : "Cài đặt",
+    "Timeline" : "Dòng thời gian",
     "Folders" : "Thư mục",
     "Favorites" : "Ưa thích",
     "Videos" : "Phim",
