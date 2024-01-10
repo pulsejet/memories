@@ -311,7 +311,7 @@ export default defineComponent({
 
           // Update progress
           done++;
-          this.progress = Math.round((done * 100) / this.photos!.length);
+          this.progress = Math.round((done * 100) / (this.photos?.length ?? 100));
         }
       });
 
