@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v6.2.1] - 2024-01-10
+
+- Hotfix for a bug in request pipelining.
+
 ## [v6.2.0] - 2024-01-09
 
 - Nextcloud 28 compatibility
