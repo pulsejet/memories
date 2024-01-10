@@ -232,7 +232,7 @@ export default defineComponent({
 
         // Orientation
         const orientation = this.refs.editOrientation?.result?.(p);
-        if (orientation !== null) {
+        if (orientation !== null && orientation !== undefined) {
           raw.Orientation = orientation;
         }
 
@@ -273,15 +273,6 @@ export default defineComponent({
         try {
           // Update EXIF if required
           const raw = exifs.get(fileid) ?? {};
-
-          // Remove undefined keys
-          for (const key in raw) {
-            if ((raw as any)[key] === undefined) {
-              delete (raw as any)[key];
-            }
-          }
-
-          // Save EXIF if required
           if (Object.keys(raw).length > 0) {
             const info = await axios.patch<IImageInfo>(API.IMAGE_SETEXIF(fileid), { raw });
             dirty = true;
