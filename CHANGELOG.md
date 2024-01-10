@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v6.2.0] - 2024-01-09
+
+- Nextcloud 28 compatibility
+- Various bug fixes
+
 ## [v6.1.5] - 2023-11-25
 
 - Hotfix in service worker caching strategy.
