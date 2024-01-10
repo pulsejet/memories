@@ -130,7 +130,8 @@ trait TimelineQueryDays
 
         // Group and sort by date taken
         $query->orderBy('m.datetaken', 'DESC');
-        $query->addOrderBy('m.fileid', 'DESC'); // tie-breaker
+        $query->addOrderBy('basename', 'DESC'); // https://github.com/pulsejet/memories/issues/985
+        $query->addOrderBy('m.fileid', 'DESC'); // unique tie-breaker
 
         // Apply all transformations
         $this->applyAllTransforms($queryTransforms, $query, false);
