@@ -157,7 +157,7 @@ export async function* runInParallel<T>(promises: (() => Promise<T>)[], n: numbe
     }
 
     // stop when all promises are done
-    if (!running.length) break;
+    if (!running.length && !promises.length) break;
   }
 }
 
