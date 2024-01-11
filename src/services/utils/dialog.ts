@@ -28,7 +28,17 @@ type ConfirmOptions = {
 // Register fragment navigation
 bus.on('memories:fragment:pop:dialog', () => {
   const selectors = ['button.oc-dialog-close', '[role="dialog"]:last-of-type button.modal-container__close'].join(', ');
-  (document.querySelector(selectors) as HTMLElement)?.click?.();
+  const button = document.querySelector(selectors) as HTMLElement;
+  if (!button?.click) return;
+
+  // Some dialogs are simply modals, so we need to make sure that
+  // we don't close the underlying modal when closing the dialog.
+  // This happens if the dialog was actually closed by a button,
+  // and the route was subsequently popped by the fragment service.
+  if (button.closest('.memories-modal')) return;
+
+  // Close the dialog
+  button.click();
 });
 
 export function confirmDestructive(options: ConfirmOptions): Promise<boolean> {
