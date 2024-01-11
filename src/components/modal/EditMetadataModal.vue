@@ -241,11 +241,15 @@ export default defineComponent({
 
       // If a photo has no EXIF date header then updating the metadata will erase
       // the date taken. We need to prompt the user to keep the date taken.
+      const hasNoDate = (p: IPhoto) => {
+        const exif = p.imageInfo?.exif;
+        const hasExifDate = Boolean(exif?.DateTimeOriginal || exif?.CreateDate);
+        const isSettingDate = Boolean(exifs.get(p.fileid)!.AllDates);
+        return !hasExifDate && !isSettingDate;
+      };
+
       if (
-        this.photos!.some(
-          (p) =>
-            !p.imageInfo?.exif?.DateTimeOriginal && !p.imageInfo?.exif?.CreateDate && !exifs.get(p.fileid)!.AllDates,
-        ) &&
+        this.photos!.some(hasNoDate) &&
         (await utils.confirmDestructive({
           title: this.t('memories', 'Missing date metadata'),
           message: this.t(
@@ -255,13 +259,13 @@ export default defineComponent({
         }))
       ) {
         for (const p of this.photos!) {
-          // Check if we need / can update the date for this file
-          const raw = exifs.get(p.fileid)!;
-          if (!p.datetaken || raw.AllDates) continue;
+          // Check if already has the date taken, or it if can't do anything
+          if (!hasNoDate(p) || !p.datetaken) continue;
 
           // Get the date in EXIF format
           const dateTaken = utils.getExifDateStr(new Date(p.datetaken * 1000));
-          raw.AllDates = dateTaken;
+          const raw = exifs.get(p.fileid);
+          raw!.AllDates = dateTaken;
         }
       }
 
