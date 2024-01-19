@@ -40,6 +40,7 @@ OC.L10N.register(
     "Description" : "Descripcion",
     "Copyright" : "Drech d'autor",
     "Reset" : "Reïnicializar",
+    "Rename person" : "Renomenar la persona",
     "Name" : "Nom",
     "Update" : "Actualizar",
     "Loading …" : "Cargament…",
