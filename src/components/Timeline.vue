@@ -1065,11 +1065,20 @@ export default defineComponent({
         res1.push(photo);
 
         // Remove extension
-        const basename = utils.removeExtension(photo.basename ?? String());
+        let basename = utils.removeExtension(photo.basename ?? String());
         if (!basename) continue; // huh?
 
         // Store RAW files for stacking
         if (this.config.stack_raw_files && photo.mimetype === this.c.MIME_RAW) {
+          // Google's RAW naming is inconsistent and retarded.
+          // We will handle this on a case-to-case basis.
+          // https://github.com/pulsejet/memories/issues/1006
+          // https://github.com/pulsejet/memories/issues/927 (handled in the 2nd pass)
+          if (basename.endsWith('.ORIGINAL')) {
+            basename = utils.removeExtension(basename);
+          }
+
+          // Store the RAW file for stacking with the usable basename
           const files = toStack.get(basename);
           if (!files) {
             toStack.set(basename, [photo]);
