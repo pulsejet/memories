@@ -401,7 +401,7 @@ class Places
             ++$count;
 
             // Only proceed if we have a valid location
-            $fileid = $row['fileid'];
+            $fileid = (int) $row['fileid'];
             $lat = (float) $row['lat'];
             $lon = (float) $row['lon'];
 
