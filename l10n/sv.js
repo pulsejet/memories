@@ -171,6 +171,7 @@ OC.L10N.register(
     "Shadow" : "Skugga",
     "Horizontal" : "Horisontell",
     "Vertical" : "Vertikal",
+    "Opacity" : "Opacitet",
     "Position" : "Position",
     "Save image as" : "Spara bild som",
     "Extension" : "Tillägg",
