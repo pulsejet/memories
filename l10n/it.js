@@ -30,7 +30,7 @@ OC.L10N.register(
     "General" : "Generale",
     "Account" : "Account",
     "Close" : "Chiudi",
-    "Info" : "Info",
+    "Info" : "Informazioni",
     "Performance" : "Prestazioni",
     "Unknown" : "Sconosciuto",
     "Continue" : "Continua",
@@ -75,7 +75,7 @@ OC.L10N.register(
     "Time" : "Ora",
     "Hour" : "Ora",
     "Minute" : "Minuto",
-    "Oldest" : "Il più vecchio",
+    "Oldest" : "Il più datato",
     "Title" : "Titolo",
     "Description" : "Descrizione",
     "Label" : "Etichetta",
@@ -197,7 +197,7 @@ OC.L10N.register(
     "Failed to create {albumName}." : "Creazione di {albumName} non riuscita",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Rinominazione di {currentAlbumName} in {newAlbumName} non riuscita.",
     "Failed to delete {fileName}." : "Eliminazione di {fileName} non riuscita.",
-    "Yes" : "Si",
+    "Yes" : "Sì",
     "No" : "No"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
