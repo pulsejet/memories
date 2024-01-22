@@ -118,6 +118,24 @@
     {{ t('memories', 'Clear all existing index tables:') }}
     <br />
     <code>occ memories:index --clear</code>
+
+    <h3>Ignore:</h3>
+    <NcCheckboxRadioSwitch
+      :checked.sync="config['memories.index.ignore_file_with_starting_dot']"
+      @update:checked="update('memories.index.ignore_file_with_starting_dot')"
+      type="switch"
+    >
+    {{ t('memories', `Ignore files and folders starting with "."`) }}
+      
+    </NcCheckboxRadioSwitch>
+    
+    <NcCheckboxRadioSwitch
+      :checked.sync="config['memories.index.ignore_file_with_starting_at']"
+      @update:checked="update('memories.index.ignore_file_with_starting_at')"
+      type="switch"
+    >
+    {{ t('memories', `Ignore files and folders starting with "@"`) }}
+    </NcCheckboxRadioSwitch>
   </div>
 </template>
 

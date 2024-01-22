@@ -33,6 +33,9 @@ class SystemConfig
 
         // Path to index (only used if indexing mode is 3)
         'memories.index.path' => '/',
+        
+        'memories.index.ignore_file_with_starting_dot' => false,
+        'memories.index.ignore_file_with_starting_at' => false,
 
         // Places database type identifier
         'memories.gis_type' => -1,

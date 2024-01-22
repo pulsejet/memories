@@ -6,6 +6,8 @@ export type ISystemConfig = {
   'memories.exiftool_no_local': boolean;
   'memories.index.mode': string;
   'memories.index.path': string;
+  'memories.index.ignore_file_with_starting_dot': boolean;
+  'memories.index.ignore_file_with_starting_at': boolean;
 
   'memories.gis_type': number;
 
