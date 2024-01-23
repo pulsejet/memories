@@ -108,6 +108,31 @@ class Index
         }
     }
 
+    public function resolveValidFiles(array $nodes, array $mimes): array
+    {
+        return array_filter($nodes, static function ($node) use ($mimes) {
+            if (!$node instanceof File) {
+                return false;
+            }
+
+            if (!\in_array($node->getMimeType(), $mimes, true)) {
+                return false;
+            }
+
+            $fistChar = mb_substr($node->getName(), 0, 1);
+
+            if (SystemConfig::get('memories.index.ignore_file_with_starting_dot') && '.' === $fistChar) {
+                return false;
+            }
+
+            if (SystemConfig::get('memories.index.ignore_file_with_starting_at') && '@' === $fistChar) {
+                return false;
+            }
+
+            return true;
+        });
+    }
+
     /**
      * Index all files in a folder.
      *
@@ -129,7 +154,8 @@ class Index
 
         // Filter files that are supported
         $mimes = self::getMimeList();
-        $files = array_filter($nodes, static fn ($n) => $n instanceof File && \in_array($n->getMimeType(), $mimes, true));
+
+        $files = self::resolveValidFiles($nodes, $mimes);
 
         // Create an associative array with file ID as key
         $files = array_combine(array_map(static fn ($n) => $n->getId(), $files), $files);

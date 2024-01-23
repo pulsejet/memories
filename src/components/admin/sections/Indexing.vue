@@ -125,7 +125,7 @@
       @update:checked="update('memories.index.ignore_file_with_starting_dot')"
       type="switch"
     >
-    {{ t('memories', `Ignore files and folders starting with "."`) }}
+    {{ t('memories', `Ignore Hidden files and folders (starting with ".")`) }}
       
     </NcCheckboxRadioSwitch>
     

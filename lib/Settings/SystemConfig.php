@@ -33,8 +33,11 @@ class SystemConfig
 
         // Path to index (only used if indexing mode is 3)
         'memories.index.path' => '/',
-        
-        'memories.index.ignore_file_with_starting_dot' => false,
+
+        // To not index hidden files
+        'memories.index.ignore_file_with_starting_dot' => true,
+
+        // Some NAS use `@Recyle` to store deleted folders and files.
         'memories.index.ignore_file_with_starting_at' => false,
 
         // Places database type identifier
