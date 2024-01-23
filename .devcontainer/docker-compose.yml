@@ -1,6 +1,6 @@
 name: 'nextcloud-with-memories'
 services:
-  nextcloud:
+  nextcloud-server:
     build:
       context: .
       dockerfile: Dockerfile
@@ -15,7 +15,6 @@ services:
       # - theme:/var/www/html/themes/<YOUR_CUSTOM_THEME>
     ports:
       - 9080:80
-    image: nextcloud
 # volumes:
 # nextcloud:
 #   name: nextcloud
