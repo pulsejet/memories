@@ -13,12 +13,20 @@
     <NcAppNavigation v-if="showNavigation">
       <template #list>
         <NcAppNavigationItem
-          v-for="item in navItems"
+          v-for="item in navLinks"
           :key="item.name"
           :to="{ name: item.name }"
           :name="item.title"
           @click="linkClick"
           exact
+        >
+          <component :is="item.icon" slot="icon" :size="20" />
+        </NcAppNavigationItem>
+        <NcAppNavigationItem
+          v-for="item in menuButtons"
+          :key="item.name"
+          :name="item.title"
+          @click="item.onClick"
         >
           <component :is="item.icon" slot="icon" :size="20" />
         </NcAppNavigationItem>
@@ -52,6 +60,7 @@
     </NcAppContent>
 
     <Settings :open.sync="settingsOpen" />
+    <UploadModal :open.sync="uploadOpen" @onClose="hideUploadModal" />
 
     <Viewer />
     <Sidebar />
@@ -93,6 +102,7 @@ import ShareModal from '@components/modal/ShareModal.vue';
 import MoveToFolderModal from '@components/modal/MoveToFolderModal.vue';
 import FaceMoveModal from '@components/modal/FaceMoveModal.vue';
 import AlbumShareModal from '@components/modal/AlbumShareModal.vue';
+import UploadModal from '@components/modal/UploadModal.vue';
 
 import * as utils from '@services/utils';
 import * as nativex from '@native';
@@ -109,6 +119,7 @@ import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
 import PeopleIcon from 'vue-material-design-icons/AccountBoxMultiple.vue';
 import MarkerIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagsIcon from 'vue-material-design-icons/Tag.vue';
+import UploadIcon from 'vue-material-design-icons/Upload.vue';
 import MapIcon from 'vue-material-design-icons/Map.vue';
 import CogIcon from 'vue-material-design-icons/Cog.vue';
 
@@ -117,6 +128,13 @@ type NavItem = {
   title: string;
   icon: any;
   if?: any;
+};
+
+type MenuButton = {
+  name: string;
+  title: string;
+  icon: string;
+  onClick: Function;
 };
 
 export default defineComponent({
@@ -142,6 +160,7 @@ export default defineComponent({
     MoveToFolderModal,
     FaceMoveModal,
     AlbumShareModal,
+    UploadModal,
 
     ImageMultiple,
     FolderIcon,
@@ -153,6 +172,7 @@ export default defineComponent({
     PeopleIcon,
     MarkerIcon,
     TagsIcon,
+    UploadIcon,
     MapIcon,
     CogIcon,
   },
@@ -160,8 +180,10 @@ export default defineComponent({
   mixins: [UserConfig],
 
   data: () => ({
-    navItems: [] as NavItem[],
+    navLinks: [] as NavItem[],
+    menuButtons: [] as MenuButton[],
     settingsOpen: false,
+    uploadOpen: false,
   }),
 
   computed: {
@@ -294,7 +316,7 @@ export default defineComponent({
 
   methods: {
     refreshNav() {
-      const navItems = [
+      const navLinks = [
         {
           name: 'timeline',
           icon: ImageMultiple,
@@ -361,8 +383,16 @@ export default defineComponent({
           if: this.config.systemtags_enabled,
         },
       ];
+      const menuButtons = [{
+          name: 'upload',
+          icon: UploadIcon,
+          title: t('memories', 'Upload'),
+          onClick: this.showUploadModal,
+        },
+      ];
 
-      this.navItems = navItems.filter((item) => typeof item.if === 'undefined' || Boolean(item.if));
+      this.navLinks = navLinks.filter((item) => typeof item.if === 'undefined' || Boolean(item.if));
+      this.menuButtons = menuButtons;
     },
 
     linkClick() {
@@ -373,6 +403,14 @@ export default defineComponent({
 
     showSettings() {
       this.settingsOpen = true;
+    },
+
+    showUploadModal() {
+      this.uploadOpen = true;
+    },
+
+    hideUploadModal() {
+      this.uploadOpen = false;
     },
   },
 });
